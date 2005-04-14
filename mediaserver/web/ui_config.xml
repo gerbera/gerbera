@@ -1,0 +1,21 @@
+<ui>
+  <colors>
+      <color1>408bff</color1>
+      <color2>40a3ff</color2>
+  </colors>
+  <icons cell_height="31" cell_width="31" path="icons">
+      <icon type="dir_up">stock_up-one-dir.png</icon>
+      <icon type="current_container">stock_default-folder.png</icon>
+      <icon type="container">stock_folder.png</icon>
+      <icon type="file">file.png</icon>
+      <icon type="first_page">stock-goto-first.png</icon>
+      <icon type="last_page">stock-goto-last.png</icon>
+      <icon type="previous_page">stock-go-back.png</icon>
+      <icon type="next_page">stock-go-forward.png</icon>
+      <icon type="add">stock-add.png</icon>
+      <icon type="remove">stock-delete.png</icon>
+      <icon type="edit_ui">stock-edit.png</icon>
+      <icon type="new">stock-new.png</icon>
+      <icon type="refresh">stock-refresh.png</icon>
+  </icons>
+</ui>

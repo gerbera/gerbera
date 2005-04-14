@@ -1,0 +1,72 @@
+AC_INIT(mediatomb, 0.7)
+AM_INIT_AUTOMAKE(mediatomb, 0.7)
+
+AC_CONFIG_FILES([
+    Makefile
+    src/Makefile
+    src/mxml/Makefile
+    src/zmm/Makefile
+    src/zmmf/Makefile
+    src/web/Makefile
+    src/storage/Makefile
+    src/storage/sqlite3/Makefile
+    src/storage/fs/Makefile
+    src/uuid/Makefile
+    src/md5/Makefile
+    config/Makefile
+    doc/Makefile
+    scripts/Makefile
+    web/Makefile
+    web/icons/Makefile
+])
+
+AC_PROG_CXX
+AC_PROG_CC
+AC_PROG_RANLIB
+
+AC_CHECK_HEADER(pthread.h,
+    [],
+    [AC_MSG_ERROR(pthread.h not found)],
+    /* checking for pthread.h */
+)
+
+AC_CHECK_HEADER(iconv.h,
+    [],
+    [AC_MSG_ERROR(iconv.h not found)],
+    /* checking for iconv.h */
+)
+
+AC_CHECK_HEADER(upnp/upnp.h,
+    [],
+    [AC_MSG_ERROR(upnp/upnp.h not found, check libupnp installation)],
+    /* checking for upnp/upnp.h */
+)
+
+AC_CHECK_HEADER(upnp/ixml.h,
+    [],
+    [AC_MSG_ERROR(upnp/ixml.h not found, check libupnp installation)],
+    /* checking for upnp/ixml.h */
+)
+
+AC_CHECK_HEADER(upnp/ithread.h,
+    [],
+    [AC_MSG_ERROR(upnp/ithread.h not found, check libupnp installation)],
+    /* checking for upnp/ithread.h */
+)
+
+AC_CHECK_HEADER(magic.h,
+    [],
+    [AC_MSG_ERROR(magic.h not found, check libmagic installation)],
+    /* checking for magic.h */
+)
+
+AC_CHECK_HEADER(sqlite3.h,
+    [],
+    [AC_MSG_ERROR(sqlite3.h not found, check libsqlite3 installation)],
+    /* checking for sqlite3.h */
+)
+
+
+
+AC_OUTPUT
+

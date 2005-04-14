@@ -1,0 +1,95 @@
+/*  upnp_cm_subscriptions.cc - this file is part of MediaTomb.
+                                                                                
+    Copyright (C) 2005 Gena Batyan <bgeradz@deadlock.dhs.org>,
+                       Sergey Bostandzhyan <jin@deadlock.dhs.org>
+                                                                                
+    MediaTomb is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+                                                                                
+    MediaTomb is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+                                                                                
+    You should have received a copy of the GNU General Public License
+    along with MediaTomb; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+
+#include "upnp_cm.h"
+#include "server.h"
+#include "upnp_xml.h"
+#include "upnp/ixml.h"
+#include "storage.h"
+
+using namespace zmm;
+using namespace mxml;
+
+void ConnectionManagerService::process_subscription_request(zmm::Ref<SubscriptionRequest> request)
+{
+    int err;
+    IXML_Document *event = NULL;
+
+    Ref<Element> propset, property;
+
+    printf("CM::process_subscription_request - start\n");
+
+    Ref<Array<StringBase> > mimeTypes = Storage::getInstance()->getMimeTypes();
+    String CSV = mime_types_to_CSV(mimeTypes);
+
+
+    propset = UpnpXML_CreateEventPropertySet();
+    property = propset->getFirstChild();
+    property->appendTextChild("CurrentConnectionIDs", "0");
+    property->appendTextChild("SinkProtocolInfo", "");
+    property->appendTextChild("SourceProtocolInfo", CSV);
+
+    String xml = propset->print();
+    err = ixmlParseBufferEx(xml.c_str(), &event);
+    if (err != IXML_SUCCESS)
+    {
+        throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");
+    }
+
+    UpnpAcceptSubscriptionExt(server->getDeviceHandle(),
+            ConfigManager::getInstance()->getOption("/server/udn").c_str(),
+            serviceID.c_str(), event, request->getSubscriptionID().c_str());
+
+    ixmlDocument_free(event);
+    printf("CM::process_subscription_request - end\n");
+}
+
+void ConnectionManagerService::subscription_update(String sourceProtocol_CSV)
+{
+    int err;
+    IXML_Document *event = NULL;
+
+    Ref<Element> propset, property;
+
+    printf("CM::subscription_update - start\n");
+
+    propset = UpnpXML_CreateEventPropertySet();
+    property = propset->getFirstChild();
+    property->appendTextChild("SourceProtocolInfo", sourceProtocol_CSV);
+
+    String xml = propset->print();
+
+    err = ixmlParseBufferEx(xml.c_str(), &event);
+    if (err != IXML_SUCCESS)
+    {
+        /// \todo add another error code
+        throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");
+
+    }
+
+    UpnpNotifyExt(server->getDeviceHandle(),
+            ConfigManager::getInstance()->getOption("/server/udn").c_str(),
+            serviceID.c_str(), event);
+
+    ixmlDocument_free(event);
+
+    printf("CM::subscription_update - end\n");
+}
+

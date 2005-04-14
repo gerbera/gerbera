@@ -1,0 +1,325 @@
+/*  new_ui.cc - this file is part of MediaTomb.
+                                                                                
+    Copyright (C) 2005 Gena Batyan <bgeradz@deadlock.dhs.org>,
+                       Sergey Bostandzhyan <jin@deadlock.dhs.org>
+                                                                                
+    MediaTomb is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+                                                                                
+    MediaTomb is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+                                                                                
+    You should have received a copy of the GNU General Public License
+    along with MediaTomb; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+
+#include "server.h"
+#include <stdio.h>
+#include "common.h"
+#include "content_manager.h"
+#include "cds_objects.h"
+#include "dictionary.h"
+#include "pages.h"
+#include "session_manager.h"
+
+using namespace zmm;
+using namespace mxml;
+
+web::new_ui::new_ui() : WebRequestHandler()
+{}
+
+static Ref<Element> addOption(String option_name, String option_type, String default_value = nil)
+{
+    Ref<Element> option (new Element("option"));
+    option->addAttribute("name", option_name);
+    option->addAttribute("type", option_type);
+
+    if (default_value != nil)
+        option->addAttribute("default", default_value);
+
+    return option;
+}
+
+void web::new_ui::add_container()
+{
+    Ref<CdsContainer> cont (new CdsContainer());
+    cont->setParentID(param("object_id"));
+    cont->setTitle(param("title"));
+    if (param("location") != nil)
+        cont->setLocation(param("location"));
+    else
+        cont->setLocation("");
+
+    String upnp_class = param("class");
+    if (string_ok(upnp_class))
+        cont->setClass(upnp_class);
+
+    Ref<CdsObject> obj = RefCast(cont, CdsObject);
+    
+    Ref<ContentManager> cm = ContentManager::getInstance();
+
+    cm->addObject(obj);
+}
+
+void web::new_ui::add_item()
+{
+    Ref<CdsItem> item (new CdsItem());
+    
+    item->setParentID(param("object_id"));
+    item->setTitle(param("title"));
+    item->setLocation(param("location"));
+
+    String upnp_class = param("class");
+    if (string_ok(upnp_class))
+        item->setClass(upnp_class);
+
+    String description = param("description");
+    if (string_ok(description))
+        item->setDescription(description);
+
+    /// \todo is there a default setting? autoscan? import settings?
+    String mimetype = param("mime-type");
+    if (string_ok(mimetype))
+        item->setMimeType(mimetype);
+    
+    Ref<CdsObject> obj = RefCast(item, CdsObject);
+    
+    Ref<ContentManager> cm = ContentManager::getInstance();
+
+    cm->addObject(obj);
+
+}
+
+void web::new_ui::add_url()
+{
+    Ref<CdsItemExternalURL> item (new CdsItemExternalURL());
+    
+    item->setParentID(param("object_id"));
+    item->setTitle(param("title"));
+    item->setLocation(param("location"));
+
+    String upnp_class = param("class");
+    if (string_ok(upnp_class))
+        item->setClass(upnp_class);
+
+    String description = param("description");
+    if (string_ok(description))
+        item->setDescription(description);
+
+    /// \todo is there a default setting? autoscan? import settings?
+    String mimetype = param("mime-type");
+    if (string_ok(mimetype))
+        item->setMimeType(mimetype);
+   
+    Ref<CdsObject> obj = RefCast(item, CdsObject);
+    
+    Ref<ContentManager> cm = ContentManager::getInstance();
+
+    cm->addObject(obj);
+
+}
+
+void web::new_ui::add_active_item()
+{
+    Ref<CdsActiveItem> item (new CdsActiveItem());
+    
+    item->setParentID(param("object_id"));
+    item->setTitle(param("title"));
+    item->setLocation(param("location"));
+    item->setAction(param("action"));
+
+    String upnp_class = param("class");
+    if (string_ok(upnp_class))
+        item->setClass(upnp_class);
+
+    String description = param("description");
+    if (string_ok(description))
+        item->setDescription(description);
+
+    /// \todo is there a default setting? autoscan? import settings?
+    String mimetype = param("mime-type");
+    if (string_ok(mimetype))
+        item->setMimeType(mimetype);
+
+    String state = param("state");
+    if (string_ok(state))
+        item->setState(state);
+    
+    Ref<CdsObject> obj = RefCast(item, CdsObject);
+    
+    Ref<ContentManager> cm = ContentManager::getInstance();
+
+    cm->addObject(obj);
+}
+
+void web::new_ui::add_object()
+{
+    String obj_type = param("type");
+    String location = param("location");
+    
+    if (!string_ok(param("title")))
+        throw Exception(String("empty title"));
+
+    switch (obj_type.toInt())
+    {
+        case OBJECT_TYPE_CONTAINER:
+            if ((location != nil) && (location != ""))
+            {
+                if (!check_path(location, true))
+                    throw Exception(String("path not found"));
+            }
+
+            this->add_container();
+            break;
+
+        case OBJECT_TYPE_ITEM:
+            if (!string_ok(location))
+                throw Exception(String("no location given"));
+
+            if (!check_path(location, false))
+                throw Exception(String("file not found"));
+            this->add_item();
+            break;
+        
+        case OBJECT_TYPE_ITEM_EXTERNAL_URL:
+            if (!string_ok(location))
+                throw Exception(String("No URL given"));
+            this->add_url();
+            break;
+ 
+            
+        case OBJECT_TYPE_ACTIVE_ITEM:
+            if (!string_ok(location))
+                throw Exception(String("no location given"));
+
+            if (!check_path(location, false))
+                throw Exception(String("path not found"));
+            this->add_active_item();
+            break;
+
+        default:
+            throw Exception(String("unknown object type"));
+            break;
+    }
+}
+
+// general idea:
+// there will be a special "type" parameter
+// when ommited, we will serve a default interface
+// when when given, we will serve a special inteface to match the object type
+void web::new_ui::process()
+{
+    printf("edit: start\n");
+
+    Ref<Session> session;
+    Ref<Storage> storage; // storage instance, will be chosen depending on the driver
+
+    String TYPE_CONTAINER    = String::from(OBJECT_TYPE_CONTAINER);
+    String TYPE_ITEM         = String::from(OBJECT_TYPE_ITEM);
+    String TYPE_ACTIVE_ITEM  = String::from(OBJECT_TYPE_ACTIVE_ITEM);
+    String TYPE_ITEM_EXTERNAL_URL = String::from(OBJECT_TYPE_ITEM_EXTERNAL_URL);
+
+    session_data_t sd = PRIMARY;
+
+    check_request();
+
+    String object_id = param("object_id");
+    String driver = param("driver");
+    String sid = param("sid");
+    String object_type = param("type");
+
+    if (!string_ok(object_id))
+        throw Exception(String("invalid object id"));
+
+    if (driver == "1")
+    {
+        storage = Storage::getInstance();
+    }
+    else 
+    {
+        throw Exception(String("adding objects to secondary driver not supported"));
+    }
+
+    Ref<Element> root (new Element("root"));
+    root->addAttribute("xmlns:dc", "http://purl.org/dc/elements/1.1/");
+    root->addAttribute("xmlns:upnp", "urn:schemas-upnp-org:metadata-1-0/upnp/");
+
+    String reload = param("reload");
+
+    if (reload == "0")
+    {
+        this->add_object();
+
+        Ref<Dictionary> sub(new Dictionary());
+        sub->put("object_id", object_id);     
+        sub->put("driver", driver);
+        sub->put("sid", sid);
+        *out << subrequest("browse", sub);
+
+    }
+    else
+    {
+        //    Ref <Element> last_browse  (new Element("last_browse"));
+        root->appendTextChild("driver", driver);
+        root->appendTextChild("sid", sid);
+        root->appendTextChild("object_id", object_id);
+
+        //    root->appendChild(last_browse);
+
+        Ref <Element> select (new Element("select"));
+        root->appendChild(select);
+
+        Ref <Element> inputs (new Element("inputs"));
+        root->appendChild(inputs);
+
+        select->appendChild(addOption("Container", TYPE_CONTAINER));
+        select->appendChild(addOption("Item", TYPE_ITEM));
+        select->appendChild(addOption("Active Item", TYPE_ACTIVE_ITEM));
+        select->appendChild(addOption("External Link (URL)", TYPE_ITEM_EXTERNAL_URL));
+        //    select->appendChild(addOption("Dynamic Item", TYPE_DYNAMIC_ITEM));
+
+        inputs->appendChild(addOption("Title: ", "title"));
+
+        if ((object_type == TYPE_ITEM) || (object_type == TYPE_ITEM_EXTERNAL_URL))
+        {
+            select->addAttribute("default", object_type);
+            if (object_type == TYPE_ITEM)
+            {
+                inputs->appendChild(addOption("Location: ", "location"));
+            }
+            else
+            {
+                inputs->appendChild(addOption("URL: ", "location"));
+            }
+            inputs->appendChild(addOption("Class: ", "class", "object.item"));
+            inputs->appendChild(addOption("Description: ", "description"));
+            inputs->appendChild(addOption("Mimetype: ", "mime-type"));
+        }
+        else if (object_type == TYPE_ACTIVE_ITEM)
+        {
+            select->addAttribute("default", TYPE_ACTIVE_ITEM);
+            inputs->appendChild(addOption("Location: ", "location"));
+            inputs->appendChild(addOption("Class: ", "class", "object.item.activeItem"));
+            inputs->appendChild(addOption("Description: ", "description"));
+            inputs->appendChild(addOption("Mimetype: ", "mime-type"));
+            inputs->appendChild(addOption("Action Script: ", "action"));
+            inputs->appendChild(addOption("State: ", "state"));
+
+        }
+        else
+        {
+            select->addAttribute("default", TYPE_CONTAINER);
+            inputs->appendChild(addOption("Class: ", "class", "object.container"));
+        }
+
+        *out << renderXMLHeader("/new.xsl");
+        *out << root->print();
+    }
+    printf("edit: returning\n");
+}
+

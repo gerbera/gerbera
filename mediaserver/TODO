@@ -1,0 +1,41 @@
+CODE
+
+- lost+found (space +): bgeradz [DONE]
+- db lock: bgeradz [DONE]
+- sigterm: bgeradz
+- connection manager
+    * mime types from db: bgeradz [DONE]
+    * upnp action: jin [DONE] (protocol needs to be generealized serer wide)
+    * subscriptions: jin (check event frequency limit)
+
+- XML empty tag <udn />: bgeradz [DONE]
+- update manager
+    * thread sleep: bgeradz
+    * started twice: bgeradz
+
+- login
+    * disable login: jin [DONE]
+    * disable whole UI   [DONE]
+    * fix login password, encrypted pass transmissin: jin [CANCELLED]
+    * secure session id: jin [CANCELLED] (but we have a nicer id now)
+    
+CONFIGURE: bgeradz
+- upnp sdk (--with-upnp-sdk)
+- magic.h
+- sqlite3
+- iconv
+- various system headers
+- adapt source directory in tomb-install.py (DEFAULT_SOURCE)
+
+INSTALL
+- /usr/bin/mediatomb (executable): bgeradz
+- /usr/share/mediatomb/web/*: bgeradz
+- /usr/bin/tomb-install: bgeradz
+- SPEC file, rpm, debuginfo: jin
+- install docs/script examples: ?
+
+HELP/DOCUMENTATION
+- README: jin
+- UI help: jin [DONE]
+- check GNU files: jin/bgeradz
+

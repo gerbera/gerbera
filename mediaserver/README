@@ -1,0 +1,215 @@
+MediaTomb - UPnP AV mediaserver for Linux, distributed under GNU GPL.
+
+Copyright (C) 2005 Gena Batyan <bgeradz@deadlock.dhs.org>, 
+                   Sergey Bostandzhyan <jin@deadlock.dhs.org>
+
+http://mediatomb.sf.net/                   
+
+THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY! USE AT YOUR OWN RISK!
+
+NOTE: by default the server UI is disabled! Check the "SETUP" section to find
+out why and how to enable it.
+
+INSTALLATION
+------------
+
+In order to compile MediaTomb you will have to install the following packages:
+
+- UPnP SDK from http://upnp.sourceforge.net/
+  Note: if you are not using the spec file/rpm that is provided on the SF 
+        page of the UPnP SDK project, beware, that "make install" forgets 
+        to put ixml.h to the right place, so you will have to copy it to 
+        /usr/include/upnp manually.
+        
+- sqlite3 from http://www.sqlite.org/
+- iconv
+- filemagic (at least version 4)
+- various system headers, but nothing really special, just the usual stuff
+
+There is also a setup script that makes necessary installations in your
+home directory, you will need Python to run it.
+
+SETUP
+-----
+
+So you have finally installed MediaTomb and want to check it out. There is
+however one thing that you have to do - before using the server for the
+first time you must run the tomb-install script to perform the setup in
+your home directory.
+
+tomb-install will create a ~/.mediatomb directory in your home. There you will
+find the server configuration file (config.xml), the database and a html
+redirector.
+
+By default the redirector is called mediatomb.html, it is created after
+the first launch of the server. Open a web browser and manually
+add this file as a bookmark. When the server is running, the redirector will
+forward you to the web UI. It is handy, because the server port may change
+upon restarts.
+
+WHY IS THE WEB UI DISABLED BY DEFAULT?
+--------------------------------------
+IMPORTANT!!! Please read this carefully.
+
+The server has a web UI that allows you to browse the contents of your
+harddrive and to easily add media. The problem is, that since it is a 
+web UI running on the server, it can be accessed by anyone on your network,
+meaning that anyone could browse and download your data. This is probably
+a lesser issue in a small home environment (which is actually the intended
+audience) but could easily become an issue on a bigger network.
+
+The irony is, that you can not yet add any media to the server, without 
+the UI :) So if you feel unsecure, you should probably temporarily enable
+the user interface, start the server on 127.0.0.1, add the media that you 
+want to share, disable the UI and restart the server on your normal LAN 
+network interface.
+
+In order to enable the UI simply change <ui enabled="no"/> to 
+<ui enabled="yes"/> in the configuration file. 
+And don't blame us for anything!
+
+CONFIGURATION
+-------------
+
+If you have already performed the setup using tomb-install you will have
+a default configuration file in your ~/.mediatomb directory, it is called
+config.xml
+
+Here is a sample configuration file with description of the various tags.
+- "Required" means that the server will not start if the tag is missing in the
+  configuration.
+
+- "Optional" means that the tag can be left out of the configuration file.
+
+- "Default if missing" means, that the tag can be left out, but will be 
+  filled by some default value upon server startup. 
+
+
+<ui enabled="no"/>
+    Enables or disables the web user interface, change to "yes" in order 
+    to enable it. (Required)
+
+<port>50555<port/>
+    Specifies the port where the server will be listening for HTTP requests.
+    Note, that because of the implementation in the UPnP SDK only ports
+    above 49152 are supported. (Optional parameter)
+
+<ip>192.168.0.23</ip>
+    Specifies the IP address to bind to. (Optional)
+    
+<name>MediaTomb</name>
+    Server friendly name, you will see this on your devices that you use to
+    access the server. (Default if missing: MediaTomb)
+    
+<udn/>
+    Unique Device Name, according to the UPnP spec it must be consistent
+    throughout reboots. You can fill in something yourself, but we suggest
+    that you leave this tag empty - it will be filled out and saved
+    automatically after the first launch of the server. (Required)
+
+<home>/home/your_user_name/.mediatomb</home>
+    Server home - the server will search for the data that it needs relative
+    to this directory (for the media database, for directory holding device and 
+    service description xml files, icons, etc.) (Required)
+    
+<webroot>web</webroot>
+    Root directory for the web server (relative to serer home), this is the 
+    location where device description documents, UI xsl files, etc. are
+    stored. (Required)
+    
+<alive>180</alive>
+    Interval for broadcasting SSDP:alive messages (Default if missing: 180)
+    
+<bookmark>mediatomb.html</bookmark>
+    Bookmark file for fast access to the web UI (Default if missing: 
+    mediatomb.html)
+    
+
+<storage driver="sqlite3">
+    Specifies the default driver, currently only sqlite3 is supported. Future
+    support of other databases (for example MySQL) is possible. (Required)
+
+    <database-file>sqlite3.db</database-file>
+        Database filename. (Required)
+
+  
+<import>
+    Section specifying various import parameters, currently only one is 
+    supported. (Required)
+    
+    <filesystem-charset>ISO-8859-1</filesystem-charset>
+        Defines the charset of the filesystem. For example, if you have 
+        filenames in cyrillic KOI8-R encoding, then you should specify that 
+        here. The server uses UTF-8 for UPnP and for the web UI, this import
+        parameter will help you to correctly import your data. (Default if
+        missing: ISO-8859-1)
+
+
+RUNNING
+-------
+After everything has been set up you can simply run "mediatomb" from the
+console. To shutdown the server cleanly, press Enter.
+
+There is also a small number of command line arguments:
+
+Usage: mediatomb [options]
+                        
+Supported options:
+    --ip or -i         ip address
+    --port or -p       server port (the SDK only permits values => 49152)
+    --config or -c     configuration file to use
+    --help or -h       this help message
+
+If you want to run a second server from the same PC, make sure to use a 
+different configuration file with a different udn and a different database.
+
+After server launch the bookmark file is created in ~/.mediatomb
+You now can manually add the bookmark ~/.mediatomb/mediatomb.html in your 
+browser. This will redirect you to the UI if the server is running.
+
+Assuming that you enabeld the UI, you should now be able to get around
+quite easily.
+
+
+FEATURES
+--------
+
+The first release is very basic, what you can do now is:
+- add/remove/edit/browse media via the web UI
+- browse media via UPnP
+- stream/download media
+- cds container updates
+- adding external URLs
+- ActiveItems (see Help in the UI for details)
+
+Next planned features:
+- virtual containers (configurable virtual folders for organizing media)
+- transcoding
+- UPnP improvements (filter parameter for browse)
+
+ACKNOWLEDGEMENTS
+----------------
+
+We are using the following code in our tree:
+
+- uuid from E2fsprogs 1.35 under GNU GPL, 
+  Copyright (C) 1996, 1997, 1998 Theodore Ts'o. <tytso@mit.edu>
+  
+  Stuff from the UPnP SDK was conflicting with libuuid, so we had to change a
+  name of one function.
+
+- md5 implementation by L. Peter Deutsch <ghost@aladdin.com>,
+  Copyright (C) 1999 Aladdin Enterprises.  All rights reserved. (See source
+  headers for further details)
+
+- md5 java implementation distributed under BSD License,
+  Copyright (C) Paul Johnston 1999 - 2002. http://pajhome.org.uk/crypt/md5 
+
+- all icons for the UI are from the redhat-artwork-0.117 package under GNU GPL, 
+  (I could not find any (C) in the supplied documents)
+ 
+
+--------------------------------------------------------------------------------
+14.04.2005
+
+P.S. this file was written at 4 in the morning... let us know if something is unclear or missing. 

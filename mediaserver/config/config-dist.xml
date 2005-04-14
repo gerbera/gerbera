@@ -1,0 +1,28 @@
+<config>
+  <server>
+    <ip>192.168.0.15</ip>
+    <port>50505</port>
+    <name>Media Tomb</name>
+    <udn />
+    <home>/location/of/the/serverhome</home>
+    <webroot>web</webroot>
+    <alive>180</alive>
+    <storage driver="sqlite3">
+    	<database-file>db/sqlite3.db</database-file>
+    </storage>
+  </server>
+  <import>
+    <filesystem-charset>ISO-8859-1</filesystem-charset>
+    <mime-types>
+      <map ext="mp3" mime-type="audio/mpeg"/>
+      <map ext="mpg" mime-type="video/mpeg"/>
+      <map ext="mpeg" mime-type="video/mpeg"/>
+    </mime-types>
+  </import>
+  <runtime>
+    <mime-types>
+      <replace from="video/x-msvideo" to="video/avi"/>
+      <alias from="video/avi" to="video/x-msvideo"/>
+    </mime-types>
+  </runtime>
+</config>

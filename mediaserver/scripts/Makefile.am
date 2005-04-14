@@ -1,0 +1,18 @@
+bin_SCRIPTS = tomb-install
+CLEANFILES = $(bin_SCRIPTS)
+
+tomb-install: tomb-install-dist.py Makefile
+	sed "s,__DEFAULT_SOURCE__,$(pkgdatadir)/web," \
+		< tomb-install-dist.py > tomb-install
+	chmod +x tomb-install
+
+
+
+
+_DIST_FILES = \
+	demo_toggle.py \
+	tomb-install-dist.py
+
+EXTRA_DIST = $(_DIST_FILES)
+
+
