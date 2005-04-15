@@ -145,8 +145,7 @@ def write_config():
           "    <ui enabled=\"" + DEFAULT_UISTAT + "\"/>" +\
           "  </server>\n" +\
           "  <import>\n" +\
-          "    <filesystem-charset>"+ DEFAULT_FSCSET +\
-          "    </filesystem-charset>\n" +\
+          "    <filesystem-charset>"+ DEFAULT_FSCSET + "</filesystem-charset>\n" +\
           "  </import>\n" +\
           "</config>\n\n"
 
