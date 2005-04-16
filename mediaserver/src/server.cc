@@ -35,6 +35,12 @@ static int static_upnp_callback(Upnp_EventType eventtype, void *event, void *coo
 
 Server::Server() : Object()
 {
+}
+
+/* fwd declaration */
+
+void Server::init()
+{
     virtual_directory            = "content";
 
     cds = ContentDirectoryService::createInstance(DESC_CDS_SERVICE_TYPE,
@@ -42,12 +48,7 @@ Server::Server() : Object()
                                                  
     cmgr = ConnectionManagerService::createInstance(DESC_CM_SERVICE_TYPE,
                                                     DESC_CM_SERVICE_ID);
-}
 
-/* fwd declaration */
-
-void Server::server_init()
-{
     pthread_mutex_init(&upnp_mutex, NULL);
 
     Ref<ConfigManager> config = ConfigManager::getInstance();
@@ -61,8 +62,6 @@ void Server::upnp_init(String ip, unsigned short port)
     int             ret = 0;        // general purpose error code
 
     printf("upnp_init: start\n");
-
-    server_init();
 
     Ref<ConfigManager> config = ConfigManager::getInstance();
 

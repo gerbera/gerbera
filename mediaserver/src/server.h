@@ -36,7 +36,15 @@ class Server : public zmm::Object
 {
 public:
     Server();
+    
     /// \brief Initializes the server.
+    /// 
+    /// This function reads information from the config and initializes
+    /// various variables (like server UDN and so forth).
+    void init();
+
+    
+    /// \brief Initializes UPnP portion.
     /// \param ip IP address to bind to.
     /// \param port Port where the server will be listening for requests.
     ///
@@ -45,6 +53,7 @@ public:
     /// sets up the virutal web server directories and registers
     /// web callbacks. Starts the update manager task.
     void upnp_init(zmm::String ip, unsigned short port);
+    
     /// \brief Cleanup routine to shutdown the server.
     ///
     /// Unregisters the device with the SDK, shuts down the
@@ -153,12 +162,6 @@ protected:
     /// an ActionRequest or a SubscriptionRequest.
     zmm::Ref<ConnectionManagerService> cmgr;
   
-    /// \brief Initializes internal variables.
-    /// 
-    /// This function reads information from the config and initializes
-    /// various variables (like server UDN and so forth).
-    void server_init();
-
     /// \brief Dispatched an ActionRequest between the services.
     /// \param request Incoming ActionRequest.
     ///
