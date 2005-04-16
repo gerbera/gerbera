@@ -73,6 +73,21 @@ public:
     /// \brief Creates a html file that is a redirector to the current server instance
     void writeBookmark(zmm::String ip, zmm::String port);
 
+    /// \brief Checks if the string returned by getOption is valid.
+    /// \param xpath xpath expression to the XML node
+    zmm::String ConfigManager::checkOptionString(zmm::String xpath);
+
+    /// \brief adds path to server home and returns the result.
+    /// \param path path that should be constructed
+    ///
+    /// This function does the following: we have a "server home",
+    /// (usually ~/.mediatomb), this server home has other subdirectories
+    /// or files. The function returns a string similar to "server home"/"path",
+    /// constructing an absolute path.
+    ///
+    /// \return constructed path.
+    zmm::String constructPath(zmm::String path);
+    
     // call this function to initialize global ConfigManager object
     static void init(zmm::String filename, zmm::String userhome);
 
@@ -83,8 +98,6 @@ protected:
     void create();
     void validate();
     void prepare();
-    zmm::String construct_path(zmm::String path);
-    void validate_paths(char **valid, bool isDir);
 };
 
 #endif // __CONFIG_MANAGER_H__

@@ -37,11 +37,27 @@ Server::Server() : Object()
 {
 }
 
-/* fwd declaration */
+void Server::configure()
+{
+    String temp;
+    Ref<ConfigManager> config = ConfigManager::getInstance();
+
+    temp = config->checkOptionString("/server/home");
+    check_path_ex(temp, true);
+
+    config->getOption("/server/ip", nil); 
+    config->getIntOption("/server/port", 0);
+
+    temp = config->checkOptionString("/server/webroot");
+    printf("%s\n", config->constructPath(temp).c_str());
+    check_path_ex(config->constructPath(temp), true);
+
+    config->getIntOption("/server/alive", 180);
+}
 
 void Server::init()
 {
-    virtual_directory            = "content";
+    virtual_directory = "content";
 
     cds = ContentDirectoryService::createInstance(DESC_CDS_SERVICE_TYPE,
                                                   DESC_CDS_SERVICE_ID);
@@ -54,7 +70,7 @@ void Server::init()
     Ref<ConfigManager> config = ConfigManager::getInstance();
 
     serverUDN = config->getOption("/server/udn");
-    alive_advertisement = config->getIntOption("/server/alive", 180);
+    alive_advertisement = config->getIntOption("/server/alive");
 }
 
 void Server::upnp_init(String ip, unsigned short port)
@@ -67,13 +83,13 @@ void Server::upnp_init(String ip, unsigned short port)
 
     if (ip == nil)
     {
-        ip = config->getOption("/server/ip", nil);
+        ip = config->getOption("/server/ip");
         printf("got ip: %s\n", ip.c_str());
     }
 
     if (port == 0)
     {
-        port = config->getIntOption("/server/port", 0);
+        port = config->getIntOption("/server/port");
     }
     
     printf("Initializing with port: %d\n", port);
@@ -88,7 +104,7 @@ void Server::upnp_init(String ip, unsigned short port)
 
     printf("Initialized port: %d\n", port);
 
-    if (ip == nil)
+    if (!string_ok(ip))
     {
         ip = String(UpnpGetServerIpAddress());
     }

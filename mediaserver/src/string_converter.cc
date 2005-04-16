@@ -117,7 +117,7 @@ Ref<StringConverter> StringConverter::i2f()
 {
     Ref<ConfigManager> cm = ConfigManager::getInstance();
     Ref<StringConverter> conv(new StringConverter(
-        DEFAULT_INTERNAL_CHARSET, ConfigManager::getInstance()->getOption("/import/filesystem-charset", DEFAULT_FILESYSTEM_CHARSET)));
+        DEFAULT_INTERNAL_CHARSET, ConfigManager::getInstance()->getOption("/import/filesystem-charset")));
 //        INTERNAL_CHARSET, ConfigManager::getInstance()->getFilesystemCharset()));
     return conv;
 }
@@ -125,7 +125,7 @@ Ref<StringConverter> StringConverter::f2i()
 {
     Ref<ConfigManager> cm = ConfigManager::getInstance();
     Ref<StringConverter> conv(new StringConverter(
-        ConfigManager::getInstance()->getOption("/import/filesystem-charset", DEFAULT_FILESYSTEM_CHARSET), DEFAULT_INTERNAL_CHARSET));
+        ConfigManager::getInstance()->getOption("/import/filesystem-charset"), DEFAULT_INTERNAL_CHARSET));
     return conv;
 }
 

@@ -154,7 +154,7 @@ Ref<Element> UpnpXML_RenderDeviceDescription()
     Ref<Element> device(new Element("device"));
     device->appendTextChild("deviceType", DESC_DEVICE_TYPE);
     device->appendTextChild("presentationURL", "/");
-    device->appendTextChild("friendlyName", config->getOption("/server/name", DESC_FRIENDLY_NAME));
+    device->appendTextChild("friendlyName", config->getOption("/server/name"));
     device->appendTextChild("manufacturer", DESC_MANUFACTURER);
     device->appendTextChild("manufacturerURL", DESC_MANUFACTURER_URL);
     device->appendTextChild("modelDescription", DESC_MODEL_DESCRIPTION);

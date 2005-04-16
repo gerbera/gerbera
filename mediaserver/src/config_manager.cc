@@ -25,6 +25,7 @@
 #include "storage.h"
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <server.h>
 
 using namespace zmm;
 using namespace mxml;
@@ -46,7 +47,7 @@ static void check_path_exs(String path, bool needDir = true)
 }
 
 */
-String ConfigManager::construct_path(String path)
+String ConfigManager::constructPath(String path)
 {
     if (path.charAt(0) == '/')
         return path;
@@ -120,61 +121,6 @@ void ConfigManager::validate()
     if (root->getChild("server") == nil)
         throw Exception("Error in config file: <server> tag not found");
 
-    try
-    {
-        home = getOption("/server/home");
-    }
-    catch (Exception e)
-    {
-        throw Exception("Error in config file: <home> tag not found in <server> section");
-    }
-
-    if (!string_ok(home))
-        throw Exception("Error in config file: <home> tag is empty");
-    
-    check_path_ex(home, true);
-
-    try
-    {
-        temp = getOption("/server/ui/attribute::enabled");
-    }
-    catch (Exception e)
-    {
-        throw Exception("Error in config file: <ui> tag not found in <server> section ");
-    }
-
-    if ((!string_ok(temp)) || ((temp != "yes") && (temp != "no")))
-        throw Exception("Error in config file: incorrect parameter for <ui enabled=\"\" /> attribute");
-
-    try
-    {
-        getOption("/import/filesystem-charset");
-    }
-    catch (Exception e)
-    {
-        printf("Warning: <filesystem-charset> tag not found in <import> section, taking default.");
-    }
-
-    try
-    {
-        temp = getOption("/server/webroot");
-    }
-    catch (Exception e)
-    {
-        throw Exception("Error in config file: <webroot> tag not found in <server> section.");
-    }
-    
-    check_path_ex(construct_path(temp), true);
-
-    try
-    {
-        getOption("/server/udn", "");
-    }
-    catch (Exception e)
-    {
-        throw Exception("Error in config file: <udn> tag not found in <server> section.");
-    }
-
     // validating storage settings and initializing storage
     try 
     {
@@ -203,11 +149,12 @@ void ConfigManager::validate()
 void ConfigManager::prepare()
 {
     bool need_to_save = false;
-    
-    // defining FS charset
-    fs_charset = getOption("/import/filesystem-charset", DEFAULT_FILESYSTEM_CHARSET);
-    printf("Using filesystem charset: %s\n", fs_charset.c_str());
-   
+    String temp;
+
+    home = getOption("/server/home");
+  
+    // first check the UDN, if it is empty we will create a nice one
+    // and save it to configuration
     Ref<Element> element = root->getChild("server")->getChild("udn");
     if (element->getText() == nil || element->getText() == "")
     {
@@ -224,21 +171,24 @@ void ConfigManager::prepare()
         need_to_save = true;
     }
     
-    element = root->getChild("server")->getChild("name");
-    if (element == nil)
-    {
-        Ref<Element> name(new Element("name"));
-        name->setText(DESC_FRIENDLY_NAME);
-        need_to_save = true;
-    } 
-    else if (element->getText() == nil || element->getText() == "")
-    {
-        element->setText(DESC_FRIENDLY_NAME);
-        need_to_save = true;
-    }
-
     if (need_to_save)
         save();
+
+    // well.. for now we will initialize stuff that does not belong to 
+    // one specific module here... 
+    fs_charset = getOption("/import/filesystem-charset", DEFAULT_FILESYSTEM_CHARSET);
+    printf("Using filesystem charset: %s\n", fs_charset.c_str());
+
+    getOption("/server/name", DESC_FRIENDLY_NAME);
+
+    temp = getOption("/server/ui/attribute::enabled", DEFAULT_UI_VALUE);
+    if ((!string_ok(temp)) || ((temp != "yes") && (temp != "no")))
+        throw Exception("Error in config file: incorrect parameter for <ui enabled=\"\" /> attribute");
+
+    // now go through the modules and let them check their options and set
+    // default values
+    Ref<Server> s(new Server());
+    s->configure();
 }
 
 Ref<ConfigManager> ConfigManager::getInstance()
@@ -352,6 +302,7 @@ String ConfigManager::getOption(String xpath)
         return value;
     throw Exception(String("Config: option not found: ") + xpath);
 }
+
 int ConfigManager::getIntOption(String xpath)
 {
     String sVal = getOption(xpath);
@@ -385,7 +336,7 @@ void ConfigManager::writeBookmark(String ip, String port)
     }
 
     filename = getOption("/server/bookmark", "mediatomb.html");
-    path = construct_path(filename);
+    path = constructPath(filename);
     
         
     f = fopen(path.c_str(), "w");
@@ -401,3 +352,13 @@ void ConfigManager::writeBookmark(String ip, String port)
         throw Exception(String("write_Bookmark: failed to write to: ") + path.c_str());
 
 }
+
+String ConfigManager::checkOptionString(String xpath)
+{
+    String temp = getOption(xpath);
+    if (!string_ok(temp))
+        throw Exception(String("Config: value of ") + xpath + " tag is invalid");
+
+    return temp;
+}
+
