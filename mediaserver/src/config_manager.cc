@@ -281,147 +281,89 @@ void ConfigManager::load(String filename)
     root = parser->parseFile(filename);
 }
 
-/*String ConfigManager::getStorageOptions(String &type, Ref<Dictionary> &params)
-{
-    Ref<Element> storage = root->getChild("server")->getChild("storage");
-    type = storage->getAttribute("driver");
-    params = Ref<Dictionary>(new Dictionary());
-    for (int i = 0; i < storage->childCount(); i++)
-    {
-        Ref<Element> child = storage->getChild(i);
-        String key = child->getName();
-        String value = child->getText();
-        params->put(key, value);
-    }
-}
-
-*/
-
-String ConfigManager::getOption(String name, String def)
+String ConfigManager::getOption(String xpath, String def)
 {      
-    Ref<Array<StringBase> >parts = split_string(name, '/');
+    Ref<XPath> rootXPath(new XPath(root));
+    String value = rootXPath->getText(xpath);
+    if (value != nil)
+        return value;
+
+    printf("Config: option not found: %s using default value: %s\n",
+           xpath.c_str(), def.c_str());
+    
+    String pathPart = XPath::getPathPart(xpath);
+    String axisPart = XPath::getAxisPart(xpath);
+
+    Ref<Array<StringBase> >parts = split_string(pathPart, '/');
     
     Ref<Element> cur = root;
     String attr = nil;
     
-    for (int i = 0; i < parts->size(); i++)
+    int i;
+    Ref<Element> child;
+    for (i = 0; i < parts->size(); i++)
     {
         String part = parts->get(i);
-        if (i == parts->size() - 1) // last part
-        {
-            char *pos;
-            if (pos = strstr(part.c_str(), "::")) // xpath axis
-            {
-                String axis = part.substring(0, pos - part.c_str());
-                String spec = part.substring(pos - part.c_str() + 2);
-                if (axis != "attribute")
-                {
-                    throw Exception("Only attribute:: axis supported");
-                }
-                attr = spec;
-                break;
-            }
-        }
-        cur = cur->getChild(part);
-        if (cur == nil)
+        child = cur->getChild(part);
+        if (child == nil)
             break;
+        cur = child;
     }
-    // here cur is set to the relevant element
-    // attr is either nil or is a name of the attribute
-    if (cur == nil)
+    // here cur is the last existing element in the path
+    for (; i < parts->size(); i++)
     {
-        return def;
+        String part = parts->get(i);
+        child = Ref<Element>(new Element(part));
+        cur->appendChild(child);
+        cur = child;
     }
-    if (attr == nil)
+    
+    if (axisPart != nil)
     {
-        String text = cur->getText();
-        if (text == nil)
+        String axis = XPath::getAxis(axisPart);
+        String spec = XPath::getSpec(axisPart);
+        if (axis != "attribute")
         {
-            return def;            
+            throw Exception("ConfigManager::getOption: only attribute:: axis supported");
         }
-        return text;
+        cur->setAttribute(spec, def);
     }
-    else
-    {
-        String text = cur->getAttribute(attr);
-        if (text == nil)
-        {
-            return def;            
-        }
-        return text;
-    }    
+
+    cur->setText(def);
+
+    return def;
 }
 
-int ConfigManager::getIntOption(String name, int def)
+int ConfigManager::getIntOption(String xpath, int def)
 {
     String sDef;
 
     sDef = String::from(def);
     
-    String sVal = getOption(name, sDef);
+    String sVal = getOption(xpath, sDef);
     return sVal.toInt();
 }
 
-String ConfigManager::getOption(String name)
+String ConfigManager::getOption(String xpath)
 {      
-    Ref<Array<StringBase> >parts = split_string(name, '/');
-    
-    Ref<Element> cur = root;
-    String attr = nil;
-    
-    for (int i = 0; i < parts->size(); i++)
-    {
-        String part = parts->get(i);
-        if (i == parts->size() - 1) // last part
-        {
-            char *pos;
-            if (pos = strstr(part.c_str(), "::")) // xpath axis
-            {
-                String axis = part.substring(0, pos - part.c_str());
-                String spec = part.substring(pos - part.c_str() + 2);
-                if (axis != "attribute")
-                {
-                    throw Exception("Only attribute:: axis supported");
-                }
-                attr = spec;
-                break;
-            }
-        }
-        cur = cur->getChild(part);
-        if (cur == nil)
-            break;
-    }
-    // here cur is set to the relevant element
-    // attr is either nil or is a name of the attribute
-    if (cur == nil)
-    {
-        throw Exception(String("option not found: ") + name);
-    }
-    if (attr == nil)
-    {
-        String text = cur->getText();
-        if (text == nil)
-        {
-            throw Exception(String("option not found: ") + name);
-        }
-        return text;
-    }
-    else
-    {
-        String text = cur->getAttribute(attr);
-        if (text == nil)
-        {
-            throw Exception(String("option not found: ") + name);
-        }
-        return text;
-    }    
+    Ref<XPath> rootXPath(new XPath(root));
+    String value = rootXPath->getText(xpath);
+    if (value != nil)
+        return value;
+    throw Exception(String("Config: option not found: ") + xpath);
 }
-
-int ConfigManager::getIntOption(String name)
+int ConfigManager::getIntOption(String xpath)
 {
-    String sVal = getOption(name);
+    String sVal = getOption(xpath);
     int val = sVal.toInt();
     return val;
+}
+
+
+Ref<Element> ConfigManager::getElement(String xpath)
+{      
+    Ref<XPath> rootXPath(new XPath(root));
+    return rootXPath->getElement(xpath);
 }
 
 void ConfigManager::writeBookmark(String ip, String port)

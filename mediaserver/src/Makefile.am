@@ -60,7 +60,9 @@ libmediatomb_a_SOURCES = \
     web_callbacks.h \
     web_callbacks.cc \
     web_request_handler.h \
-    web_request_handler.cc
+    web_request_handler.cc \
+    xpath.h \
+    xpath.cc
 
 
 

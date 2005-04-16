@@ -43,6 +43,7 @@ public:
     zmm::String getAttribute(zmm::String name);
     void addAttribute(zmm::Ref<Attribute> attr);
     void addAttribute(zmm::String name, zmm::String value);
+    void setAttribute(zmm::String name, zmm::String value);
     zmm::String getText();
 
     zmm::String getName();

@@ -23,6 +23,7 @@
 
 #include "common.h"
 #include "dictionary.h"
+#include "xpath.h"
 
 class ConfigManager : public zmm::Object
 {
@@ -38,32 +39,37 @@ public:
     void save();
 
     /// \brief Returns a config option with the given path, if option does not exist a default value is returned.
-    /// \param name option name
+    /// \param xpath option xpath
     /// \param def default value if option not found
     ///
     /// the name parameter has the XPath syntax.
     /// Currently only two xpath constructs are supported:
     /// "/path/to/option" will return the text value of the given "option" element
     /// "/path/to/option/attribute::attr" will return the value of the attribute "attr"
-    zmm::String getOption(zmm::String name, zmm::String def);    
+    zmm::String getOption(zmm::String xpath, zmm::String def);    
     
     /// \brief same as getOption but returns an integer value of the option
-    int getIntOption(zmm::String name, int def);
+    int getIntOption(zmm::String xpath, int def);
     
     /// \brief Returns a config option with the given path, an exception is raised if option does not exist.
-    /// \param name option name
+    /// \param xpath option xpath.
     ///
-    /// the name parameter has the XPath syntax.
+    /// The xpath parameter has XPath syntax.
     /// Currently only two xpath constructs are supported:
     /// "/path/to/option" will return the text value of the given "option" element
     /// "/path/to/option/attribute::attr" will return the value of the attribute "attr"
-    zmm::String getOption(zmm::String name);    
+    zmm::String getOption(zmm::String xpath);
     
     /// \brief same as getOption but returns an integer value of the option
-    int getIntOption(zmm::String name);    
-   
-//    zmm::String getStorageOptions(zmm::String &type, zmm::Ref<Dictionary> &params);
+    int getIntOption(zmm::String xpath);
 
+    /// \brief Returns a config XML element with the given path, an exception is raised if element does not exist.
+    /// \param xpath option xpath.
+    ///
+    /// The xpath parameter has XPath syntax.
+    /// "/path/to/element" will return the text value of the given "element" element
+    zmm::Ref<mxml::Element> getElement(zmm::String xpath);
+            
     /// \brief Creates a html file that is a redirector to the current server instance
     void writeBookmark(zmm::String ip, zmm::String port);
 

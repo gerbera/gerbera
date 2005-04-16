@@ -135,6 +135,8 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     try
     {
         server->upnp_init(ip, port);
+        String dump = ConfigManager::getInstance()->getElement("/")->print();
+        printf("Modified config dump:\n%s\n", dump.c_str());
     }
     catch(UpnpException upnp_e)
     {

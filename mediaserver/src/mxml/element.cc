@@ -60,6 +60,23 @@ void Element::addAttribute(Ref<Attribute> attr)
     attributes->append(attr);
 }
 
+void Element::setAttribute(String name, String value)
+{
+    if (attributes == nil)
+        attributes = Ref<Array<Attribute> >(new Array<Attribute>());
+	int len = attributes->size();
+	for(int i = 0; i < len; i++)
+	{
+		Ref<Attribute> attr = attributes->get(i);
+		if(attr->name == name)
+        {
+			attr->setValue(value);
+            return;
+        }
+	}
+    addAttribute(name, value);
+}
+
 String Element::getText()
 {
     return text;
