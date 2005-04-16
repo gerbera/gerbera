@@ -43,29 +43,6 @@ enum xml_parse_state
     XML_PARSE_TAG_TEXT
 };
 
-static char *state_names[] = 
-{
-    "XML_SKIP",
-	"XML_TAG_NAME",
-	"XML_TAG_SKIP",
-    "XML_TAG_OPEN",
-    "XML_CLOSE_TAG_NAME",
-	"XML_END_SLASH",
-	"XML_ATTR_NAME",
-	"XML_ATTR_QUOTE",
-	"XML_ATTR_VALUE",
-	"XML_TAG_CLOSE",
-    "XML_DECL_TEXT",
-    "XML_DECL_CLOSE",
-    "XML_PARSE_TAG",
-    "XML_PARSE_TAG_TEXT"
-};
-
-static char * getStateName(int state)
-{
-    return state_names[state];
-}
-
 int readChar(Ref<Context> ctx, Ref<Input> input)
 {
 	int res = input->readChar();

@@ -120,14 +120,13 @@ Ref<Array<CdsObject> > Sqlite3Storage::browse(Ref<BrowseParam> param)
 {
     LOCK_METHOD;
 
-    int forceItem = 0;
     String objectID;
     int objectType;
 
     objectID = param->getObjectID();
 
     char *endptr;
-    int obj_id = strtol(objectID.c_str(), &endptr, 10);
+    (void)strtol(objectID.c_str(), &endptr, 10);
     if (*endptr != 0)
         throw Exception(String("Invalid object ID: ") + objectID);
 
@@ -296,7 +295,6 @@ void Sqlite3Storage::updateObject(zmm::Ref<CdsObject> obj)
 
     int objectType = obj->getObjectType();
 
-    char *q;
     Ref<StringBuffer> query(new StringBuffer(256));
     *query << "UPDATE media_files SET id = id";
 

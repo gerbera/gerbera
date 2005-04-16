@@ -260,7 +260,7 @@ void UpdateManager::threadProc()
         if(sleepMillis >= MIN_SLEEP) // sleep for sleepMillis milliseconds
         {
             millisToTimespec(nowMillis + sleepMillis, &timeout);
-            printf("threadProc: sleeping for %d millis\n", sleepMillis);
+            printf("threadProc: sleeping for %d millis\n", (int)sleepMillis);
             ret = pthread_cond_timedwait(&updateCond, &updateMutex, &timeout);
         }
         else // send updates 

@@ -138,7 +138,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     }
 
     info->file_length = statbuf.st_size;
-    printf("FileIOHandler: get_info: file_length: %d\n", statbuf.st_size);
+    printf("FileIOHandler: get_info: file_length: %d\n", (int)statbuf.st_size);
     info->last_modified = statbuf.st_mtime;
     info->is_directory = S_ISDIR(statbuf.st_mode);
 

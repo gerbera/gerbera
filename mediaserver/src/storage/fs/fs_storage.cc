@@ -34,6 +34,7 @@ FsStorage::~FsStorage()
 {
 }
 
+/*
 // should optimize this
 static int get_child_count(String path)
 {
@@ -48,7 +49,7 @@ static int get_child_count(String path)
     }
 
     int count = 0;
-    while (dent = readdir(dir))
+    while ((dent = readdir(dir)) != NULL)
     {
         char *name = dent->d_name;
         if (name[0] == '.')
@@ -68,7 +69,9 @@ static int get_child_count(String path)
     closedir(dir);
     return count;
 }
-            
+*/
+
+
 Ref<Array<CdsObject> > FsStorage::browse(Ref<BrowseParam> param)
 {
     String path = param->getObjectID();
@@ -112,7 +115,7 @@ Ref<Array<CdsObject> > FsStorage::browse(Ref<BrowseParam> param)
                             path + " : " + strerror(errno));
         }
 
-        while (dent = readdir(dir))
+        while ((dent = readdir(dir)) != NULL)
         {
             char *name = dent->d_name;
             if (name[0] == '.')

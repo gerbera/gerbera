@@ -46,8 +46,6 @@ void web::login::process()
 {
     printf("login: start\n");
 
-    int flag;
-   
     // well... at the moment - unsupported
     /*
     String username = param("username");

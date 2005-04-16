@@ -41,34 +41,6 @@ using namespace zmm;
 
 /*********************** utils ***********************/
 
-static void split_path(String path, String &first, String &rest)
-{
-    char *data = path.c_str();
-    bool leadingSlash = false;
-    if (*data == '/')
-    {
-        data++;
-        leadingSlash = true;
-    }
-    char *pos = index(data, '/');
-    if (pos == NULL)
-    {
-        if (leadingSlash)
-            first = String(data);
-        else
-            first = path;
-        rest = nil;
-    }
-    else
-    {
-        first = String(data, pos - data);
-        if (pos[1] == 0)
-            rest = nil;
-        else
-            rest = String(pos + 1);
-    }
-}
-
 static String get_filename(String path)
 {
     if (path.charAt(path.length() - 1) == '/') // cut off trailing slash
@@ -328,7 +300,7 @@ void ContentManager::addRecursive(String path, String parentID)
                         path + " : " + strerror(errno));
     }
     struct dirent *dent;
-    while (dent = readdir(dir))
+    while ((dent = readdir(dir)) != NULL)
     {
         char *name = dent->d_name;
         if (name[0] == '.')

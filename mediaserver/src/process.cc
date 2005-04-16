@@ -63,7 +63,7 @@ String run_process(String prog, String param, String input)
     String command = prog + " " + param + " < " + input_file +
         " > " + output_file;
     fprintf(stderr, "running %s\n", command.c_str());
-    int ret = system(command.c_str());
+    /* int ret = */ (void)system(command.c_str());
 
     /* reading output file */
     file = fopen(output_file, "r");

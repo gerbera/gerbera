@@ -224,8 +224,6 @@ void web::new_ui::process()
     String TYPE_ACTIVE_ITEM  = String::from(OBJECT_TYPE_ACTIVE_ITEM);
     String TYPE_ITEM_EXTERNAL_URL = String::from(OBJECT_TYPE_ITEM_EXTERNAL_URL);
 
-    session_data_t sd = PRIMARY;
-
     check_request();
 
     String object_id = param("object_id");

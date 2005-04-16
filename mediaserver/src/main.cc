@@ -33,8 +33,7 @@ using namespace zmm;
 
 int main(int argc, char **argv, char **envp)
 {
-    int     ret=0;  // general purpose error code
-    char    c;      //
+    char    c;
     int     opt_index = 0;
     int     o;
     char    *ip = NULL;
