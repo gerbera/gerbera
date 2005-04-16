@@ -29,6 +29,7 @@
 #include "tools.h"
 
 #define SERVER_VERSION                  "0.7"
+/// \TODO implement session timeouts!!!
 #define DEFAULT_SESSION_TIMEOUT         123456
 
 // ERROR CODES                                                                                 
@@ -90,6 +91,7 @@
 #define DEFAULT_FILESYSTEM_CHARSET      "ISO-8859-1"
 #define DEFAULT_CONFIG_HOME             ".mediatomb"
 #define DEFAULT_CONFIG_NAME             "config.xml"
+#define DEFAULT_UI_VALUE                "no"
 
 #endif // __COMMON_H__
 
