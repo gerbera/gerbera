@@ -1,7 +1,20 @@
 MediaTomb - UPnP AV Mediaserver for Linux.
 
+v0.7.1  17.04.2005   D-Link DSM-320 fix
+        * Mappings of mime-types to upnp classes are now configurable.
+          Actually this is how we solved the DSM-320 problem - they
+          crashed if upnp class of items was different than what the
+          DSM expected.
+
+        * tomb-install now creates the database and configuration file
+          from templates (was hardcoded); also sets the name of the server
+          individually for each user (host / username)
+
+        * Improved handling of configuration, if non critical options are
+          missing we are now setting default values.
+
 v0.7    14.04.2005   First release
-        * the changelog does not start at day 0, updates will be made
+        * The changelog does not start at day 0, updates will be made
           starting from this release.
         
           
