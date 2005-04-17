@@ -1,5 +1,5 @@
 %define name mediatomb   
-%define version 0.7
+%define version 0.7.1
 %define release 1
 
 Version: %{version}
