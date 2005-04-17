@@ -15,7 +15,7 @@ DEFAULT_FRNAME = "MediaTomb"
 # default webroot directory (shared between users)
 DEFAULT_WBROOT = "web"
 #default file that is holding the database dable
-DEFAULT_DBTABL = "create_db.sql"
+DEFAULT_DBTABL = "sqlite3.sql"
 
 try:
     import os.path
