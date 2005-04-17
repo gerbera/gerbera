@@ -186,12 +186,6 @@ void web::browse::process()
 
     current_browse->appendChild(page);
     
-    // this I am not yet so sure about.. but I did not have better
-    // ideas on solving it.
-//    current_browse->appendChild(ConfigManager::getInstance()->getUIIconsElement());
-
-//    Ref<Dictionary> icons = ConfigManager::getInstance()->getUIIcons();
-
     // all actions that are available will be stored here
     // the actions section has three subsections:
     // - current : actions available for the container that we are now browsing
