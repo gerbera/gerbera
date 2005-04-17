@@ -182,7 +182,7 @@ def install_from(dir):
 # check command line arguments and start installation if appropriate
 def main():
     print
-    print "MediaTomb installer v0.2"
+    print "MediaTomb installer", TOMB_INSTALL_VERSION
     print
     
     src = DEFAULT_SOURCE
