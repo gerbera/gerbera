@@ -91,7 +91,7 @@ void Server::upnp_init(String ip, unsigned short port)
         ip = String(UpnpGetServerIpAddress());
     }
 
-    printf("Server bount to: %s\n", ip.c_str());
+    printf("Server bound to: %s\n", ip.c_str());
 
     virtual_url = String("http://") + ip + ":" + port + "/" + virtual_directory;
 
