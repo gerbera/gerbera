@@ -47,22 +47,24 @@ In order to compile MediaTomb you will have to install the following packages:
   On Debian it's 'libsqlite3' 'libsqlite3-dev' and 'sqlite3'
      (the last package includes command line client which is also required)
 
-- iconv library. As far as I know it's always a part of glibc development
-  package (glibc-devel)
-        
 - filemagic (at least version 4)
   On Fedora Core the package is called 'file'
   On Debian it's libmagic-dev or something similar
   
 - various system headers, but nothing really special, just the usual stuff
 
+- iconv library. As far as I know it's always a part of glibc development
+  package glibc-devel which is almost always installed.
+
 - Python There is also a setup script that makes necessary installations
   in your home directory, you will need Python to run it.
 
 
-If you fail to setup on some system, please write a detailed description
+If you fail to setup on some system please write a detailed description of
 what exactly happened during ./configure or compilation.
 
+If you find some errors or unclarities in the above description, a message
+would be appreciated.
 
 SETUP
 -----
