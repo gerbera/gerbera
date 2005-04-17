@@ -28,7 +28,7 @@
 #include "exceptions.h"
 #include "tools.h"
 
-#define SERVER_VERSION                  "0.7"
+#define SERVER_VERSION                  "0.7.1"
 /// \TODO implement session timeouts!!!
 #define DEFAULT_SESSION_TIMEOUT         123456
 
