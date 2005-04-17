@@ -175,7 +175,7 @@ def install_from(dir):
     print 
     print "Once it is enabled:"
     print "When the server is running you can access the UI by opening"
-    print DEFAULT_SERVER + "/index.html in your web browser."
+    print DEFAULT_SERVER + "/mediatomb.html in your web browser."
     print
 
 
