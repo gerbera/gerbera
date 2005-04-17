@@ -1,5 +1,6 @@
 <config>
     <server>
+        <ui enabled="no"/>
         <name>__DEFAULT_NAME__</name>
         <udn/>
         <home>__DEFAULT_HOME__</home>
