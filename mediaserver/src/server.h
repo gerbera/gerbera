@@ -37,9 +37,6 @@ class Server : public zmm::Object
 public:
     Server();
 
-    /// \brief Checks and prepares configuration required by this class.
-    void configure();
-    
     /// \brief Initializes the server.
     /// 
     /// This function reads information from the config and initializes

@@ -37,24 +37,6 @@ Server::Server() : Object()
 {
 }
 
-void Server::configure()
-{
-    String temp;
-    Ref<ConfigManager> config = ConfigManager::getInstance();
-
-    temp = config->checkOptionString("/server/home");
-    check_path_ex(temp, true);
-
-    config->getOption("/server/ip", nil); 
-    config->getIntOption("/server/port", 0);
-
-    temp = config->checkOptionString("/server/webroot");
-    printf("%s\n", config->constructPath(temp).c_str());
-    check_path_ex(config->constructPath(temp), true);
-
-    config->getIntOption("/server/alive", 180);
-}
-
 void Server::init()
 {
     virtual_directory = "content";
@@ -83,7 +65,8 @@ void Server::upnp_init(String ip, unsigned short port)
 
     if (ip == nil)
     {
-        ip = config->getOption("/server/ip");
+        ip = config->getOption("/server/ip", "");
+        if (ip == "") ip = nil;
         printf("got ip: %s\n", ip.c_str());
     }
 
@@ -92,7 +75,6 @@ void Server::upnp_init(String ip, unsigned short port)
         port = config->getIntOption("/server/port");
     }
     
-    printf("Initializing with port: %d\n", port);
     ret = UpnpInit(ip.c_str(), port);
 
     if (ret != UPNP_E_SUCCESS)
@@ -108,6 +90,8 @@ void Server::upnp_init(String ip, unsigned short port)
     {
         ip = String(UpnpGetServerIpAddress());
     }
+
+    printf("Server bount to: %s\n", ip.c_str());
 
     virtual_url = String("http://") + ip + ":" + port + "/" + virtual_directory;
 
