@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+TOMB_INSTALL_VERSION = "0.2"
 # source location of shared files, accessible by all users
 DEFAULT_SOURCE = "__DEFAULT_SOURCE__" 
 # server configuration directory
@@ -182,7 +182,7 @@ def install_from(dir):
 # check command line arguments and start installation if appropriate
 def main():
     print
-    print "MediaTomb installer v0.1"
+    print "MediaTomb installer v0.2"
     print
     
     src = DEFAULT_SOURCE
