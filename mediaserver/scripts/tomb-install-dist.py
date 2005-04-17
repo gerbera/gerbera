@@ -6,24 +6,25 @@ DEFAULT_SOURCE = "__DEFAULT_SOURCE__"
 DEFAULT_SERVER = "~/.mediatomb"
 # name of the config file
 DEFAULT_CONFIG = "config.xml"
+# name of the distribution config file
+DEFAULT_DISCFG = "config-dist.xml"
 # name of the sqlite3 database
 DEFAULT_DABASE = "sqlite3.db"
-# default charset used by the filesystem
-DEFAULT_FSCSET = "ISO-8859-1"
-# default storage driver
-DEFAULT_DRIVER = "sqlite3"
 # default server friendly name
 DEFAULT_FRNAME = "MediaTomb"
 # default webroot directory (shared between users)
 DEFAULT_WBROOT = "web"
-#default state for the UI is disabled!
-DEFAULT_UISTAT = "no"
+#default file that is holding the database dable
+DEFAULT_DBTABL = "create_db.sql"
+
 try:
     import os.path
     import sys
     import string
     import getopt
     import commands
+    import socket
+    import getpass
 
 # that is very unlikely... but you never know :>
 except ImportError:
@@ -96,32 +97,13 @@ def create_links(dir):
 
 # create sqlite3 database
 def create_database(name):
-    s =  "CREATE TABLE media_files \
-( \
-    id              INTEGER PRIMARY KEY DEFAULT 0, \
-    parent_id       INTEGER NOT NULL, \
-    upnp_class      VARCHAR(80), \
-    dc_title        VARCHAR(256), \
-    dc_description  TEXT, \
-    restricted      INTEGER NOT NULL DEFAULT 0, \
-\
-    update_id       INTEGER NOT NULL DEFAULT 0, \
-    searchable      INTEGER NOT NULL DEFAULT 0, \
-\
-    location        VARCHAR(256), \
-    mime_type       VARCHAR(80), \
-\
-    action          VARCHAR(256), \
-    state           VARCHAR(256), \
-\
-    object_type     INTEGER NOT NULL \
-); \
-\n\
-CREATE INDEX media_files_parent_id ON media_files(parent_id);\n\
-CREATE INDEX media_files_object_type ON media_files(object_type);\n\
-\n\
-INSERT INTO media_files(id, parent_id, object_type, dc_title, upnp_class) \
-    VALUES (0, -1, 1, 'Root', 'object.container');"
+    try:
+        f = open(os.path.join(DEFAULT_SERVER, DEFAULT_DBTAB), 'r')
+        s = f.read()
+        f.close()
+    except IOError, (errno, strerror):
+        message =  "I/O error(%s): %s" % (errno, strerror)
+        raise InstallError(message)
 
     out = commands.getstatusoutput("echo \"" + s + "\" | sqlite3 " +\
           os.path.join(os.path.expanduser(DEFAULT_SERVER), name))
@@ -131,37 +113,31 @@ INSERT INTO media_files(id, parent_id, object_type, dc_title, upnp_class) \
             os.path.join(os.path.expanduser(DEFAULT_SERVER), name) +\
             "\n" + out[1])
 
-# finally create and write the config.xml with default settings
+# finally prepare the config file 
 def write_config():
-    cfg = "<config>\n" +\
-          "  <server>\n" +\
-          "    <name>" + DEFAULT_FRNAME + "</name>\n" +\
-          "    <udn/>\n" +\
-          "    <home>" + os.path.expanduser(DEFAULT_SERVER) + "</home>\n" +\
-          "    <webroot>" + DEFAULT_WBROOT + "</webroot>\n" +\
-          "    <storage driver=\"" + DEFAULT_DRIVER + "\">\n" +\
-          "      <database-file>" + DEFAULT_DABASE + "</database-file>\n" +\
-          "    </storage>\n" +\
-          "    <ui enabled=\"" + DEFAULT_UISTAT + "\"/>" +\
-          "  </server>\n" +\
-          "  <import>\n" +\
-          "    <filesystem-charset>"+ DEFAULT_FSCSET + "</filesystem-charset>\n" +\
-          "  </import>\n" +\
-          "</config>\n\n"
-
     try:
-        f = open(os.path.join(os.path.expanduser(DEFAULT_SERVER),\
+        f_in = open(os.path.join(DEFAULT_SERVER, DEFAULT_CONFIG), 'r');
+        cfg = f_in.read();
+        f_in.close()
+
+        if ((find(cfg, "__DEFAULT_HOME__") == -1) or\
+            (find(cfg, "__DEFAULT_NAME__") == -1)):
+            raise InstallError("Distribution config file corrupted, could not set serverhome or name.")
+
+        cfg = string.replace(cfg, "__DEFAULT_HOME__", os.path.expanduser(DEFAULT_SERVER), 1)
+        cfg = string.replace(cfg, "__DEFAULT_NAME__", DEFAULT_FRNAME +\
+                             " " + socket.gethostname() + " / " + getpass.getuser(), 1)
+
+        f_out = open(os.path.join(os.path.expanduser(DEFAULT_SERVER),\
                     DEFAULT_CONFIG), 'w')
 
 
-        f.write(cfg)
-        f.close()
+        f_out.write(cfg)
+        f_out.close()
 
     except IOError, (errno, strerror):
-        message =  "I/O error(%s): %s" % (errno, strerror)
+        message =  "I/O error(%s): %s when writing configuration file." % (errno, strerror)
         raise InstallError(message)
-#    except:
-#        raise InstallError("\nUnexpected error when writing config file.")
 
 # this function sets up a ~/.mediatomb directory with all necessary
 # components
