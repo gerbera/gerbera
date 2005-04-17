@@ -101,8 +101,8 @@ void ConfigManager::init(String filename, String userhome)
         instance->load(filename);
     }
 
-    instance->validate();
     instance->prepare_udn();    
+    instance->validate();
 }
 
 void ConfigManager::create()
