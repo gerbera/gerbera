@@ -16,10 +16,20 @@ INSTALLATION
 In order to compile MediaTomb you will have to install the following packages:
 
 - UPnP SDK from http://upnp.sourceforge.net/
-  Note: if you are not using the spec file/rpm that is provided on the SF 
-        page of the UPnP SDK project, beware, that "make install" forgets 
-        to put ixml.h to the right place, so you will have to copy it to 
-        /usr/include/upnp manually.
+  Note:  if you are not using the spec file that is provided on the SF 
+         page of the UPnP SDK project, beware, that "make install" forgets 
+         to put ixml.h to the right place, so you will have to copy it to 
+         /usr/include/upnp manually.
+
+  Note2: for optimal performance you should use custom settings in the 
+         libupnp-1.2.1a/upnp/inc/config.h file.
+         I suggest JOBS_PER_THREAD 1, MIN_THREADS 4
+
+         The SDK RPMs that we are offering along with MediaTomb are patched
+         with the above settings.
+        
+  If you are not using the RPM package, proceed as following:
+
   Installation of this package is not straight forward.
     tar zxvf libupnp-1.2.1.tar.gz
     cd libupnp-1.2.1
@@ -39,15 +49,12 @@ In order to compile MediaTomb you will have to install the following packages:
   For whatever reason ixml.h is not being installed and nothing
   using libupnp sdk will compile without that.
 
-  (We are working on an RPM and/or './configure - make - make install'
-   versions of the SDK to make your life easier).
-  
 - sqlite3 from http://www.sqlite.org/
   On Fedora Core it's sqlite3-devel and 'sqlite3' packages.
   On Debian it's 'libsqlite3' 'libsqlite3-dev' and 'sqlite3'
      (the last package includes command line client which is also required)
 
-- filemagic (at least version 4)
+- filemagic (at least version 4), this is the unix file (1) 
   On Fedora Core the package is called 'file'
   On Debian it's libmagic-dev or something similar
   
@@ -56,12 +63,13 @@ In order to compile MediaTomb you will have to install the following packages:
 - iconv library. As far as I know it's always a part of glibc development
   package glibc-devel which is almost always installed.
 
-- Python There is also a setup script that makes necessary installations
+- Python - there is also a setup script that makes necessary installations
   in your home directory, you will need Python to run it.
 
 
-If you fail to setup on some system please write a detailed description of
-what exactly happened during ./configure or compilation.
+If you fail to setup the server on your system please tell us which distro you
+are using and write a detailed description of what exactly happened during 
+./configure or compilation.
 
 If you find some errors or unclarities in the above description, a message
 would be appreciated.
@@ -181,6 +189,19 @@ Here is a sample configuration file with description of the various tags.
         parameter will help you to correctly import your data. (Default if
         missing: ISO-8859-1)
 
+    <mappings>
+        Defines various mapping options for importing media, currently
+        only one subsection is supported.
+
+        <mimetype-upnpclass>
+            This section holds the mimetype to upnp:class mappings. 
+            
+            <map from="audio/*" to="object.item.audioItem"/>
+                Specifies a mapping from a certain mimetype to upnp:class
+                in the Content Directory. The mime type can either be entered 
+                explicitly "audio/mpeg" or using a wildcard after the slash 
+                "audio/*". The values of "from" and "to" attributes are
+                case sensitive.
 
 RUNNING
 -------
