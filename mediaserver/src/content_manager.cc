@@ -38,6 +38,7 @@ extern "C" {
 struct magic_set *ms = NULL;
 
 using namespace zmm;
+using namespace mxml;
 
 /*********************** utils ***********************/
 
@@ -94,6 +95,17 @@ ContentManager::ContentManager() : Object()
         printf("magic_load: %s\n", magic_error(ms));
         magic_close(ms);
         ms = NULL;
+    }
+   
+    Ref<ConfigManager> cm = ConfigManager::getInstance();
+    Ref<Element> mapEl = cm->getElement("/import/mappings/mimetype-upnpclass");
+    if (mapEl == nil)
+    {
+        printf("mimetype-upnpclass mappings not found\n");
+    }
+    else
+    {
+        mimetype_upnpclass_map = cm->createDictionaryFromNodeset(mapEl, "map", "from", "to");
     }
 }
 
@@ -358,12 +370,15 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic)
         obj = RefCast(item, CdsObject);
         item->setLocation(path);
         
-        // TODO: default mime type, mime types for known extensions
         if (magic)
         {
             String mt = get_mime_type(path);
             if (mt != nil)
                 item->setMimeType(mt);
+            String upnp_class = mimetype2upnpclass(mt);
+            printf("%s => %s\n", mt.c_str(), upnp_class.c_str());
+            if (upnp_class != nil)
+                item->setClass(upnp_class);
         }
     }
     else if (S_ISDIR(statbuf.st_mode))
@@ -381,4 +396,20 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic)
     obj->setTitle(f2i->convert(filename));
     return obj;
 }
+
+String ContentManager::mimetype2upnpclass(String mimeType)
+{
+    if (mimetype_upnpclass_map == nil)
+        return nil;
+    String upnpClass = mimetype_upnpclass_map->get(mimeType);
+    if (upnpClass != nil)
+        return upnpClass;
+    // try to match foo/*
+    Ref<Array<StringBase> > parts = split_string(mimeType, '/');
+    if (parts->size() != 2)
+        return nil;
+    return mimetype_upnpclass_map->get((String)parts->get(0) + "/*");
+}
+
+
 
