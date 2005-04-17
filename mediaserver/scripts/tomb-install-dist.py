@@ -134,7 +134,7 @@ def write_config():
 
         cfg = string.replace(cfg, "__DEFAULT_HOME__", os.path.expanduser(DEFAULT_SERVER), 1)
         cfg = string.replace(cfg, "__DEFAULT_NAME__", DEFAULT_FRNAME +\
-                             " " + socket.gethostname() + " / " + getpass.getuser(), 1)
+                             " (" + socket.gethostname() + ") / " + getpass.getuser(), 1)
 
         f_out = open(os.path.join(os.path.expanduser(DEFAULT_SERVER),\
                     DEFAULT_CONFIG), 'w')
