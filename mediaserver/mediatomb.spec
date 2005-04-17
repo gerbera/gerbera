@@ -10,6 +10,7 @@ License: GPL
 Group: Applications/Multimedia
 Source: %{name}-%{version}.tar.gz
 Buildroot: %{_tmppath}/%{name}-%{version}-buildroot 
+BuildRequires: sqlite3-devel libupnp-devel file
 Packager: Sergey Bostandzhyan <jin@deadlock.dhs.org> 
 
 %description
