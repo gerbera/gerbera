@@ -20,14 +20,49 @@ In order to compile MediaTomb you will have to install the following packages:
         page of the UPnP SDK project, beware, that "make install" forgets 
         to put ixml.h to the right place, so you will have to copy it to 
         /usr/include/upnp manually.
-        
+  Installation of this package is not straight forward.
+    tar zxvf libupnp-1.2.1.tar.gz
+    cd libupnp-1.2.1
+    cd upnp
+    make
+    make install
+    cd ../ixml
+    make
+    make install
+    cd ../threadutil
+    make
+    make install
+    cd ..
+    cp upnp/inc/ixml.h /usr/include/
+
+  The last line is vital due to the bug in the SDK's makefiles
+  For whatever reason ixml.h is not being installed and nothing
+  using libupnp sdk will compile without that.
+
+  (We are working on an RPM and/or './configure - make - make install'
+   versions of the SDK to make your life easier).
+  
 - sqlite3 from http://www.sqlite.org/
-- iconv
+  On Fedora Core it's sqlite3-devel and 'sqlite3' packages.
+  On Debian it's 'libsqlite3' 'libsqlite3-dev' and 'sqlite3'
+     (the last package includes command line client which is also required)
+
+- iconv library. As far as I know it's always a part of glibc development
+  package (glibc-devel)
+        
 - filemagic (at least version 4)
+  On Fedora Core the package is called 'file'
+  On Debian it's libmagic-dev or something similar
+  
 - various system headers, but nothing really special, just the usual stuff
 
-There is also a setup script that makes necessary installations in your
-home directory, you will need Python to run it.
+- Python There is also a setup script that makes necessary installations
+  in your home directory, you will need Python to run it.
+
+
+If you fail to setup on some system, please write a detailed description
+what exactly happened during ./configure or compilation.
+
 
 SETUP
 -----
@@ -38,8 +73,8 @@ first time you must run the tomb-install script to perform the setup in
 your home directory.
 
 tomb-install will create a ~/.mediatomb directory in your home. There you will
-find the server configuration file (config.xml), the database and a html
-redirector.
+find the server configuration file (config.xml), the database, the link to
+the web directory and the html redirector.
 
 By default the redirector is called mediatomb.html, it is created after
 the first launch of the server. Open a web browser and manually
@@ -202,7 +237,7 @@ We are using the following code in our tree:
   Copyright (C) 1999 Aladdin Enterprises.  All rights reserved. (See source
   headers for further details)
 
-- md5 java implementation distributed under BSD License,
+- md5 javascript implementation distributed under BSD License,
   Copyright (C) Paul Johnston 1999 - 2002. http://pajhome.org.uk/crypt/md5 
 
 - all icons for the UI are from the redhat-artwork-0.117 package under GNU GPL, 
@@ -210,6 +245,5 @@ We are using the following code in our tree:
  
 
 --------------------------------------------------------------------------------
-14.04.2005
+April 17, 2005
 
-P.S. this file was written at 4 in the morning... let us know if something is unclear or missing. 
