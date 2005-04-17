@@ -1,0 +1,35 @@
+#!/usr/bin/perl
+
+# pipe the text output of  zmm::Exception::printStackTrace()
+# through this script to receive symbolic information about stack trace
+
+# use strict;
+
+my $STRACE_TAG = "_STRACE_";
+
+while(my $line = <STDIN>)
+{
+    if ($line =~ m/^$STRACE_TAG\s*([0-9]+)\s+(\S+)\s+\[(.*)\]\s*$/)
+    {
+        my $pos = $1;
+        my $exe = $2;
+        my $addr = $3;
+
+        if($exe =~ m/^(.*)\(/)
+        {
+            $exe = $1;
+        }
+        my $com = "addr2line --demangle --basenames --functions --exe $exe $addr";
+        my $trace = `$com`;
+        $trace =~ s/\n/ /g;
+        print "$pos $trace\n";
+    }
+    else
+    {
+        print `date`;
+        print $line;
+    }
+}
+
+# addr2line --demangle --basenames --functions --exe mediaserver 0x8057c48
+
