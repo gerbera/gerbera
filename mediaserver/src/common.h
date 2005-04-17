@@ -92,6 +92,8 @@
 #define DEFAULT_CONFIG_HOME             ".mediatomb"
 #define DEFAULT_CONFIG_NAME             "config.xml"
 #define DEFAULT_UI_VALUE                "no"
+#define DEFAULT_ALIVE_INTERVAL          180
+#define DEFAULT_BOOKMARK_FILE           "mediatomb.html"
 
 #endif // __COMMON_H__
 
