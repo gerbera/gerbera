@@ -30,8 +30,7 @@ class ConfigManager : public zmm::Object
 protected:
     zmm::String filename;
     zmm::Ref<mxml::Element> root;
-    zmm::String home;
-    zmm::String fs_charset;
+
 public:
     ConfigManager();
 
@@ -77,27 +76,36 @@ public:
     /// \param xpath xpath expression to the XML node
     zmm::String ConfigManager::checkOptionString(zmm::String xpath);
 
-    /// \brief adds path to server home and returns the result.
-    /// \param path path that should be constructed
+    /// \brief Creates a dictionary from an XML nodeset.
+    /// \param element starting element of the nodeset.
+    /// \param nodeName name of each node in the set
+    /// \param keyAttr attribute name to be used as a key
+    /// \param valAttr attribute name to be used as value
     ///
-    /// This function does the following: we have a "server home",
-    /// (usually ~/.mediatomb), this server home has other subdirectories
-    /// or files. The function returns a string similar to "server home"/"path",
-    /// constructing an absolute path.
-    ///
-    /// \return constructed path.
-    zmm::String constructPath(zmm::String path);
+    /// The basic idea is the following:
+    /// You have a piece of XML that looks like this
+    /// <some-section>
+    ///    <map from="1" to="2"/>
+    ///    <map from="3" to="4"/>
+    /// </some-section>
+    /// 
+    /// This function will create a dictionary with the following
+    /// key:value paris: "1":"2", "3":"4"
+    zmm::Ref<Dictionary> createDictionaryFromNodeset(zmm::Ref<mxml::Element> element, zmm::String nodeName, zmm::String keyAttr, zmm::String valAttr);
     
     // call this function to initialize global ConfigManager object
     static void init(zmm::String filename, zmm::String userhome);
 
     static zmm::Ref<ConfigManager> getInstance();
+
 protected:
     // will be used only internally
     void save(zmm::String filename);
     void create();
     void validate();
-    void prepare();
+    void prepare_udn();
+    zmm::String construct_path(zmm::String path);
+    void validate_paths(char **valid, bool isDir);
 };
 
 #endif // __CONFIG_MANAGER_H__

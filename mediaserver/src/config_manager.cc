@@ -25,7 +25,6 @@
 #include "storage.h"
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <server.h>
 
 using namespace zmm;
 using namespace mxml;
@@ -47,8 +46,9 @@ static void check_path_exs(String path, bool needDir = true)
 }
 
 */
-String ConfigManager::constructPath(String path)
+String ConfigManager::construct_path(String path)
 {
+    String home = getOption("/server/home");
     if (path.charAt(0) == '/')
         return path;
     if (home == "." && path.charAt(0) == '.')
@@ -102,7 +102,7 @@ void ConfigManager::init(String filename, String userhome)
     }
 
     instance->validate();
-    instance->prepare();    
+    instance->prepare_udn();    
 }
 
 void ConfigManager::create()
@@ -114,47 +114,63 @@ void ConfigManager::validate()
     String temp;
 
     printf("Checking configuration...\n");
-    
+   
+    // first check if the config file itself looks ok, it must have a config
+    // and a server tag
     if (root->getName() != "config")
         throw Exception("Error in config file: <config> tag not found");
 
     if (root->getChild("server") == nil)
         throw Exception("Error in config file: <server> tag not found");
 
-    // validating storage settings and initializing storage
-    try 
-    {
-        getOption("/server/storage/attribute::driver");
-    }
-    catch (Exception e)
-    {
-        throw Exception("Error in config file: missing \"driver\" attribute in <storage> element.");
-    }
+    // now go through the mandatory parameters, if something is missing
+    // here we will not start the server
+    temp = checkOptionString("/server/home");
+    check_path_ex(temp, true);
+    
+    temp = checkOptionString("/server/webroot");
+    check_path_ex(construct_path(temp), true);
+    
+    // udn should be already prepared
+    checkOptionString("/server/udn");
 
-    try
-    {
-        temp = getOption("/server/storage/database-file");
-    }
-    catch (Exception e)
-    {
-        throw Exception("Error in config file: <database-file> tag not found in <storage> section.");
-    }
+    checkOptionString("/server/storage/attribute::driver");
+    temp = checkOptionString("/server/storage/database-file");
+    check_path_ex(construct_path(temp));
 
+    // now go through the optional settings and fix them if anything is missing
+   
+    temp = getOption("/server/ui/attribute::enabled", DEFAULT_UI_VALUE);
+    if ((!string_ok(temp)) || ((temp != "yes") && (temp != "no")))
+        throw Exception("Error in config file: incorrect parameter for <ui enabled=\"\" /> attribute");
+
+
+    getOption("/import/filesystem-charset", DEFAULT_FILESYSTEM_CHARSET);
+    printf("checking ip..");
+    getOption("/server/ip", ""); // bind to any IP address
+    getOption("/server/bookmark", DEFAULT_BOOKMARK_FILE);
+    getOption("/server/name", DESC_FRIENDLY_NAME);
+
+    getIntOption("/server/port", 0); // 0 means, that the SDK will any free port itself
+    getIntOption("/server/alive", DEFAULT_ALIVE_INTERVAL);
+
+
+    Ref<Element> el = getElement("/import/mappings/mimetype-upnpclass");
+    if (el != nil)
+    {
+        Ref<Dictionary> dict = createDictionaryFromNodeset(el, "map", "from", "to");
+    }
+    
     Storage::getInstance(PRIMARY_STORAGE);
     Storage::getInstance(FILESYSTEM_STORAGE);
 
     printf("Configuration check succeeded.\n");
 }
 
-void ConfigManager::prepare()
+void ConfigManager::prepare_udn()
 {
     bool need_to_save = false;
-    String temp;
-
-    home = getOption("/server/home");
-  
-    // first check the UDN, if it is empty we will create a nice one
-    // and save it to configuration
+    
     Ref<Element> element = root->getChild("server")->getChild("udn");
     if (element->getText() == nil || element->getText() == "")
     {
@@ -173,22 +189,6 @@ void ConfigManager::prepare()
     
     if (need_to_save)
         save();
-
-    // well.. for now we will initialize stuff that does not belong to 
-    // one specific module here... 
-    fs_charset = getOption("/import/filesystem-charset", DEFAULT_FILESYSTEM_CHARSET);
-    printf("Using filesystem charset: %s\n", fs_charset.c_str());
-
-    getOption("/server/name", DESC_FRIENDLY_NAME);
-
-    temp = getOption("/server/ui/attribute::enabled", DEFAULT_UI_VALUE);
-    if ((!string_ok(temp)) || ((temp != "yes") && (temp != "no")))
-        throw Exception("Error in config file: incorrect parameter for <ui enabled=\"\" /> attribute");
-
-    // now go through the modules and let them check their options and set
-    // default values
-    Ref<Server> s(new Server());
-    s->configure();
 }
 
 Ref<ConfigManager> ConfigManager::getInstance()
@@ -235,7 +235,7 @@ String ConfigManager::getOption(String xpath, String def)
 {      
     Ref<XPath> rootXPath(new XPath(root));
     String value = rootXPath->getText(xpath);
-    if (value != nil)
+    if (string_ok(value))
         return value;
 
     printf("Config: option not found: %s using default value: %s\n",
@@ -277,9 +277,9 @@ String ConfigManager::getOption(String xpath, String def)
             throw Exception("ConfigManager::getOption: only attribute:: axis supported");
         }
         cur->setAttribute(spec, def);
-    }
-
-    cur->setText(def);
+    } 
+    else
+        cur->setText(def);
 
     return def;
 }
@@ -298,7 +298,7 @@ String ConfigManager::getOption(String xpath)
 {      
     Ref<XPath> rootXPath(new XPath(root));
     String value = rootXPath->getText(xpath);
-    if (value != nil)
+    if (string_ok(value))
         return value;
     throw Exception(String("Config: option not found: ") + xpath);
 }
@@ -335,8 +335,8 @@ void ConfigManager::writeBookmark(String ip, String port)
         data = http_redirect_to(ip, port).c_str();
     }
 
-    filename = getOption("/server/bookmark", "mediatomb.html");
-    path = constructPath(filename);
+    filename = getOption("/server/bookmark");
+    path = construct_path(filename);
     
         
     f = fopen(path.c_str(), "w");
@@ -360,5 +360,28 @@ String ConfigManager::checkOptionString(String xpath)
         throw Exception(String("Config: value of ") + xpath + " tag is invalid");
 
     return temp;
+}
+
+Ref<Dictionary> ConfigManager::createDictionaryFromNodeset(Ref<Element> element, String nodeName, String keyAttr, String valAttr)
+{
+    Ref<Dictionary> dict(new Dictionary());
+    String key;
+    String value;
+
+    for (int i = 0; i < element->childCount(); i++)
+    {
+        Ref<Element> child = element->getChild(i);
+        if (child->getName() == nodeName)
+        {
+            key = child->getAttribute(keyAttr);
+            value = child->getAttribute(valAttr);
+
+            if (string_ok(key) && string_ok(value))
+                dict->put(key, value);
+        }
+        
+    }
+
+    return dict;
 }
 
