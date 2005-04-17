@@ -59,10 +59,14 @@ def is_clean():
 def check_source(dir):
     if (not os.path.isdir(dir)):
         raise InstallError("\n\nSource directory " + dir + " does not exist!")
-        
-    if (not os.path.isdir(os.path.join(dir, "icons"))):
+       
+    if (not os.path.isdir(os.path.join(dir, DEFAULT_WBROOT))):
         raise InstallError("\n\nSource directory does not seem to be valid:\n"+\
-                           os.path.join(dir, "icons") + " not found.")
+                           os.path.join(dir, DEFAULT_WBROOT) + " not found.")
+
+    if (not os.path.isdir(os.path.join(os.path.join(dir, DEFAULT_WBROOT), "icons"))):
+        raise InstallError("\n\nSource directory does not seem to be valid:\n"+\
+                           os.path.join(os.path.join(dir, DEFAULT_WBROOT), "icons") + " not found.")
 
 # checks write permission in the users home directory... well, that should
 # always work, but sure is sure...
@@ -79,9 +83,11 @@ def create_dirs():
     try:
         os.makedirs(os.path.expanduser(DEFAULT_SERVER))
     except IOError, (errno, strerror):
-        message =  "I/O error(%s): %s" % (errno, strerror)
+        message =  "Could not create" + os.path.expanduser(DEFAULT_SERVER)  +\
+                   " I/O error(%s): %s" % (errno, strerror)
         raise InstallError(message)
     except: 
+        print "Create dirs failed"
         raise InstallError("\nUnexpected error when creating directory " +\
                            "structure.")
 
@@ -98,11 +104,13 @@ def create_links(dir):
 # create sqlite3 database
 def create_database(name):
     try:
-        f = open(os.path.join(DEFAULT_SERVER, DEFAULT_DBTAB), 'r')
+        f = open(os.path.join(os.path.expanduser(DEFAULT_SOURCE), DEFAULT_DBTABL), 'r')
         s = f.read()
         f.close()
     except IOError, (errno, strerror):
-        message =  "I/O error(%s): %s" % (errno, strerror)
+        message =  "Error opening: " +\
+                    os.path.join(os.path.expanduser(DEFAULT_SOURCE), DEFAULT_DBTABL) +\
+                    " I/O error(%s): %s" % (errno, strerror)
         raise InstallError(message)
 
     out = commands.getstatusoutput("echo \"" + s + "\" | sqlite3 " +\
@@ -116,12 +124,12 @@ def create_database(name):
 # finally prepare the config file 
 def write_config():
     try:
-        f_in = open(os.path.join(DEFAULT_SERVER, DEFAULT_CONFIG), 'r');
+        f_in = open(os.path.join(DEFAULT_SOURCE, DEFAULT_DISCFG), 'r');
         cfg = f_in.read();
         f_in.close()
 
-        if ((find(cfg, "__DEFAULT_HOME__") == -1) or\
-            (find(cfg, "__DEFAULT_NAME__") == -1)):
+        if ((string.find(cfg, "__DEFAULT_HOME__") == -1) or\
+            (string.find(cfg, "__DEFAULT_NAME__") == -1)):
             raise InstallError("Distribution config file corrupted, could not set serverhome or name.")
 
         cfg = string.replace(cfg, "__DEFAULT_HOME__", os.path.expanduser(DEFAULT_SERVER), 1)
@@ -151,7 +159,7 @@ def install_from(dir):
     create_dirs()
     print "ok"
     print "Creating links...",
-    create_links(dir)
+    create_links(os.path.join(dir, DEFAULT_WBROOT))
     print "ok"
     print "Creating database...",
     create_database(DEFAULT_DABASE)
