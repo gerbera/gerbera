@@ -31,7 +31,7 @@ rm -rf $RPM_BUILD_ROOT
 
 make install
 
-sed "s,__DEFAULT_SOURCE__,%{_datadir}/%{name}/web," \
+sed "s,__DEFAULT_SOURCE__,%{_datadir}/%{name}," \
     < scripts/tomb-install-dist.py > scripts/tomb-install
 
 chmod +x scripts/tomb-install
