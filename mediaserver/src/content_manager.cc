@@ -376,7 +376,6 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic)
             if (mt != nil)
                 item->setMimeType(mt);
             String upnp_class = mimetype2upnpclass(mt);
-            printf("%s => %s\n", mt.c_str(), upnp_class.c_str());
             if (upnp_class != nil)
                 item->setClass(upnp_class);
         }
