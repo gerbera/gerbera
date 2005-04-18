@@ -100,14 +100,17 @@ void CdsObject::copyTo(Ref<CdsObject> obj)
 }
 int CdsObject::equals(Ref<CdsObject> obj, bool exactly)
 {
-    return (
+    if (!(
         id == obj->getID() &&
         parentID == obj->getParentID() &&
         restricted == obj->isRestricted() &&
         title == obj->getTitle() &&
-        upnp_class == obj->getClass() &&
-        location == obj->getLocation()
-    );
+        upnp_class == obj->getClass()
+       ))
+        return 0;
+    if (exactly && location != obj->getLocation())
+        return 0;
+    return 1;
 }
 
 void CdsObject::validate()
@@ -158,9 +161,9 @@ void CdsItem::copyTo(Ref<CdsObject> obj)
 int CdsItem::equals(Ref<CdsObject> obj, bool exactly)
 {
     Ref<CdsItem> item = RefCast(obj, CdsItem);
+    if (! CdsObject::equals(obj, exactly))
+        return 0;
     return (
-        CdsObject::equals(obj) &&
-
         description == item->getDescription() &&
         mimeType == item->getMimeType()
     );
@@ -210,7 +213,7 @@ void CdsActiveItem::copyTo(Ref<CdsObject> obj)
 int CdsActiveItem::equals(Ref<CdsObject> obj, bool exactly)
 {
     Ref<CdsActiveItem> item = RefCast(obj, CdsActiveItem);
-    if (! CdsItem::equals(obj))
+    if (! CdsItem::equals(obj, exactly))
         return 0;
     if (exactly &&
        (action != item->getAction() ||
@@ -302,8 +305,7 @@ int CdsContainer::equals(Ref<CdsObject> obj, bool exactly)
 {
     Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
     return (
-        CdsObject::equals(obj) &&
-
+        CdsObject::equals(obj, exactly) &&
         searchable == cont->isSearchable()
     );
 }
@@ -315,4 +317,55 @@ void CdsContainer::validate()
 /*    if (!check_path(this->location, true))
         throw Exception(String("CdsContainer: validation failed")); */
 }
+
+/* CdsVirtualContainer */
+
+CdsVirtualContainer::CdsVirtualContainer() : CdsContainer()
+{
+    objectType |= OBJECT_TYPE_VIRTUAL_CONTAINER;
+}
+
+void CdsVirtualContainer::setFilterScript(zmm::String filterScript)
+{
+    this->filterScript = filterScript;
+}
+String CdsVirtualContainer::getFilterScript()
+{
+    return filterScript;
+}
+
+void CdsVirtualContainer::copyTo(Ref<CdsObject> obj)
+{
+    CdsContainer::copyTo(obj);
+    if (! IS_CDS_VIRTUAL_CONTAINER(obj->getObjectType()))
+        return;
+    Ref<CdsVirtualContainer> vcont = RefCast(obj, CdsVirtualContainer);
+    vcont->setFilterScript(filterScript);
+}
+int CdsVirtualContainer::equals(Ref<CdsObject> obj, bool exactly)
+{
+    Ref<CdsVirtualContainer> vcont = RefCast(obj, CdsVirtualContainer);
+    if (! CdsContainer::equals(obj, exactly))
+        return 0;
+    if (exactly &&
+       (filterScript != vcont->getFilterScript())
+    )
+        return 0;
+    return 1;
+}
+
+void CdsVirtualContainer::validate()
+{
+    CdsContainer::validate();
+    /// \TODO maybe check filter_script for syntax errors
+}
+
+int CdsObjectTitleComparator(void *arg1, void *arg2)
+{
+	// \TODO get rid of getTitle() to avod unnecessary reference counting ops
+	return strcmp(((CdsObject *)arg1)->title.c_str(),
+			      ((CdsObject *)arg2)->title.c_str());
+}
+
+
 

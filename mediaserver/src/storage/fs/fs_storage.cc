@@ -71,7 +71,6 @@ static int get_child_count(String path)
 }
 */
 
-
 Ref<Array<CdsObject> > FsStorage::browse(Ref<BrowseParam> param)
 {
     String path = param->getObjectID();
@@ -189,7 +188,13 @@ Ref<Array<CdsObject> > FsStorage::browse(Ref<BrowseParam> param)
         param->setTotalMatches(1);
         return items;
     }
-    
+
+
+	quicksort((COMPARABLE *)containers->getObjectArray(), containers->size(),
+			  CdsObjectTitleComparator);
+	quicksort((COMPARABLE *)items->getObjectArray(), items->size(),
+			  CdsObjectTitleComparator);
+	
     Ref<Array<CdsObject> > arr(new Array<CdsObject>(10));
 
     // merging containers and items into single array

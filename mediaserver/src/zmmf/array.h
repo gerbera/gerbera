@@ -42,8 +42,9 @@ public:
     int size();
 protected:
     void resize(int requiredSize);
-protected:
+public:
     Object **arr;
+protected:
     int siz;
     int capacity;
 };
@@ -89,6 +90,10 @@ public:
     {
         return base.size();
     }
+	Object **getObjectArray()
+	{
+		return base.arr;
+	}
 };
 
 

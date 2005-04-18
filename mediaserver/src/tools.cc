@@ -261,3 +261,80 @@ String mime_types_to_CSV(Ref<Array<StringBase> > mimeTypes)
 }
 
 
+/* sorting */
+int StringBaseComparator(void *arg1, void *arg2)
+{
+	return strcmp(((StringBase *)arg1)->data, ((StringBase *)arg2)->data); 
+}
+
+static void quicksort_impl(COMPARABLE *a, int lo0, int hi0, COMPARATOR comparator)
+{
+	int lo = lo0;
+	int hi = hi0;
+
+	if (lo >= hi)
+	    return;
+    if( lo == hi - 1 )
+	{
+		// sort a two element list by swapping if necessary 
+		// if (a[lo] > a[hi])
+		if (comparator(a[lo], a[hi]) > 0)
+		{
+			COMPARABLE T = a[lo];
+			a[lo] = a[hi];
+			a[hi] = T;
+		}
+		return;
+	}
+
+	// Pick a pivot and move it out of the way
+	COMPARABLE pivot = a[(lo + hi) / 2];
+	a[(lo + hi) / 2] = a[hi];
+	a[hi] = pivot;
+
+	while( lo < hi )
+	{
+		/* Search forward from a[lo] until an element is found that
+		   is greater than the pivot or lo >= hi */ 
+		// while (a[lo] <= pivot && lo < hi)
+		while (comparator(a[lo], pivot) <= 0 && lo < hi)
+		{
+			lo++;
+		}
+
+		/* Search backward from a[hi] until element is found that
+		   is less than the pivot, or lo >= hi */
+		// while (pivot <= a[hi] && lo < hi )
+		while (comparator(pivot, a[hi]) <= 0 && lo < hi)
+		{
+			hi--;
+	    }
+
+		/* Swap elements a[lo] and a[hi] */
+		if( lo < hi )
+		{
+			COMPARABLE T = a[lo];
+			a[lo] = a[hi];
+			a[hi] = T;
+		}
+	}
+
+	/* Put the median in the "center" of the list */
+	a[hi0] = a[hi];
+	a[hi] = pivot;
+
+	/*
+	 *  Recursive calls, elements a[lo0] to a[lo-1] are less than or
+	 *  equal to pivot, elements a[hi+1] to a[hi0] are greater than
+	 *  pivot.
+	 */
+	quicksort_impl(a, lo0, lo-1, comparator);
+	quicksort_impl(a, hi+1, hi0, comparator);
+}
+
+void quicksort(COMPARABLE *arr, int size, COMPARATOR comparator)
+{
+	quicksort_impl(arr, 0, size - 1, comparator);
+}
+
+

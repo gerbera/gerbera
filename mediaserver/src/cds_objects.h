@@ -29,13 +29,17 @@
 #define OBJECT_TYPE_ITEM 2
 #define OBJECT_TYPE_ACTIVE_ITEM 4
 #define OBJECT_TYPE_ITEM_EXTERNAL_URL 8
+#define OBJECT_TYPE_VIRTUAL_CONTAINER 16
 //#define OBJECT_TYPE_DYNAMIC_ITEM 8
 
 #define IS_CDS_CONTAINER(type) (type & OBJECT_TYPE_CONTAINER)
 #define IS_CDS_ITEM(type) (type & OBJECT_TYPE_ITEM)
 #define IS_CDS_ACTIVE_ITEM(type) (type & OBJECT_TYPE_ACTIVE_ITEM)
 #define IS_CDS_ITEM_EXTERNAL_URL(type) (type & OBJECT_TYPE_ITEM_EXTERNAL_URL)
+#define IS_CDS_VIRTUAL_CONTAINER(type) (type & OBJECT_TYPE_VIRTUAL_CONTAINER)
 //#define IS_CDS_DYNAMIC_ITEM(type) (type & OBJECT_TYPE_DYNAMIC_ITEM)
+
+int CdsObjectTitleComparator(void *arg1, void *arg2);
 
 /// \brief Generic object in the Content Directory.
 class CdsObject : public zmm::Object
@@ -120,6 +124,8 @@ public:
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     virtual void validate();
+	
+	friend int CdsObjectTitleComparator(void *arg1, void *arg2);
 };
 
 /// \brief An Item in the content directory.
@@ -335,6 +341,36 @@ public:
 
     /// \briefe Retrieve number of children
     int getChildCount();
+
+    /// \brief Copies all object properties to another object.
+    /// \param obj target object (clone)
+    virtual void copyTo(zmm::Ref<CdsObject> obj);
+
+    /// \brief Checks if current object is equal to obj.
+    ///
+    /// See description for CdsObject::equals() for details.
+    virtual int equals(zmm::Ref<CdsObject> obj, bool exactly=false);
+
+    /// \brief Checks if the minimum required parameters for the object have been set and are valid.
+    virtual void validate();
+};
+
+/// \brief A virtual container.
+class CdsVirtualContainer : public CdsContainer
+{
+protected:
+    /// \brief searchable flag.
+    zmm::String filterScript;
+
+public:
+    /// \brief Constructor, initializes default values for the flags and sets the object type.
+    CdsVirtualContainer();
+    
+    /// \brief Set the filter script flag.
+    void setFilterScript(zmm::String filterScript);
+
+    /// \brief Query filter script.
+    zmm::String getFilterScript();
 
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)

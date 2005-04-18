@@ -89,5 +89,14 @@ zmm::String url_unescape(zmm::String str);
 /// \return string containing the CSV list
 zmm::String mime_types_to_CSV(zmm::Ref<zmm::Array<zmm::StringBase> > mimeTypes);
 
+
+typedef int (*COMPARATOR) (void *, void *);
+typedef void * COMPARABLE;
+
+int StringBaseComparatorAsc(void *, void *);
+
+void quicksort(COMPARABLE *arr, int size, COMPARATOR comparator);
+
+
 #endif // __TOOLS_H__
 
