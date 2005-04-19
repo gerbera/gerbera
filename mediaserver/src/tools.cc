@@ -260,6 +260,23 @@ String mime_types_to_CSV(Ref<Array<StringBase> > mimeTypes)
     return buf->toString();
 }
 
+String read_text_file(String path)
+{
+	FILE *f = fopen(path.c_str(), "r");
+	if (!f)
+		return nil;
+	Ref<StringBuffer> buf(new StringBuffer()); 
+	char *buffer = (char *)malloc(1024);
+	int bytesRead;	
+	while((bytesRead = fread(buffer, 1, 1024, f)) > 0)
+	{
+		*buf << String(buffer, bytesRead);
+	}
+	fclose(f);
+	free(buffer);
+	return buf->toString();
+}
+
 
 /* sorting */
 int StringBaseComparator(void *arg1, void *arg2)

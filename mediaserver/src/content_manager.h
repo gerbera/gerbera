@@ -26,6 +26,7 @@
 #include "cds_objects.h"
 #include "storage.h"
 #include "dictionary.h"
+#include "scripting/scripting.h"
 
 class ContentManager : public zmm::Object
 {
@@ -65,10 +66,15 @@ public:
     zmm::Ref<CdsObject> convertObject(zmm::Ref<CdsObject> obj, int objectType);
     
 protected:
+	void initScripting();
+	void destroyScripting();
+
     zmm::Ref<Dictionary> mimetype_upnpclass_map;
     /* for recursive addition */
     void addRecursive(zmm::String path, zmm::String parentID);
     zmm::String mimetype2upnpclass(zmm::String mimeType);
+	
+	zmm::Ref<Scripting> scripting;
 };
 
 #endif // __CONTENT_MANAGER_H__

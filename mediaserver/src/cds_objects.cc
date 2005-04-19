@@ -83,6 +83,15 @@ String CdsObject::getLocation(){
     return location;
 }
 
+void CdsObject::setVirtual(int virt)
+{
+    this->virt = virt ? 1 : 0;
+}
+int CdsObject::isVirtual()
+{
+    return virt;
+}
+
 int CdsObject::getObjectType()
 {
     return objectType;
@@ -97,6 +106,7 @@ void CdsObject::copyTo(Ref<CdsObject> obj)
     obj->setTitle(title);
     obj->setClass(upnp_class);
     obj->setLocation(location);
+    obj->setVirtual(virt);
 }
 int CdsObject::equals(Ref<CdsObject> obj, bool exactly)
 {
@@ -108,7 +118,9 @@ int CdsObject::equals(Ref<CdsObject> obj, bool exactly)
         upnp_class == obj->getClass()
        ))
         return 0;
-    if (exactly && location != obj->getLocation())
+    if (exactly && !
+        (location == obj->getLocation() &&
+         virt == obj->isVirtual()))
         return 0;
     return 1;
 }

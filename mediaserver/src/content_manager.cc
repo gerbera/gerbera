@@ -126,6 +126,8 @@ Ref<ContentManager> ContentManager::getInstance()
 
 void ContentManager::addFile(String path, int recursive)
 {
+	initScripting();
+	
     if (path.charAt(path.length() - 1) == '/')
     {
         path = path.substring(0, path.length() - 1);
@@ -153,15 +155,18 @@ void ContentManager::addFile(String path, int recursive)
             obj->setParentID(curParentID);
             storage->addObject(obj);
             um->containerChanged(curParentID);
-
         }
         curParentID = obj->getID();
     }
+	
+	if (IS_CDS_ITEM(obj->getObjectType()))
+		scripting->processCdsObject(obj);
+	
     if (recursive && IS_CDS_CONTAINER(obj->getObjectType()))
     {
         addRecursive(path, curParentID);
     }
-    um->flushUpdates();
+    um->flushUpdates();	
 }
 
 void ContentManager::removeObject(String objectID)
@@ -334,9 +339,13 @@ void ContentManager::addRecursive(String path, String parentID)
             {
                 obj = createObjectFromFile(newPath);
                 obj->setParentID(parentID);
-                storage->addObject(obj);
+                storage->addObject(obj);				
                 um->containerChanged(parentID);
             }
+			if (IS_CDS_ITEM(obj->getObjectType()))
+			{
+				scripting->processCdsObject(obj);
+			}
             if (IS_CDS_CONTAINER(obj->getObjectType()))
             {
                 addRecursive(newPath, obj->getID());
@@ -410,5 +419,25 @@ String ContentManager::mimetype2upnpclass(String mimeType)
     return mimetype_upnpclass_map->get((String)parts->get(0) + "/*");
 }
 
+void ContentManager::initScripting()
+{
+	if (scripting != nil)
+		return;
+	try
+	{
+		scripting = Ref<Scripting>(new Scripting());
+		scripting->init();
+	}
+	catch (Exception e)
+	{
+		scripting = nil;
+		printf("ContentManager SCRIPTING: %s\n", e.getMessage().c_str());
+	}
+	
+}
+void ContentManager::destroyScripting()
+{
+	scripting = nil;
+}
 
 

@@ -1,5 +1,5 @@
 
-SUBDIRS = mxml zmm zmmf storage web uuid md5
+SUBDIRS = mxml zmm zmmf storage web uuid md5 scripting
 
 noinst_LIBRARIES = libmediatomb.a
 
@@ -79,9 +79,10 @@ COMMON_LDADD = \
     zmm/libzmm.a \
     uuid/libuuid.a \
     md5/libmd5.a \
-    -lupnp -lixml -lthreadutil -lsqlite3 -lmagic
+    scripting/libscripting.a \
+    -lupnp -lixml -lthreadutil -lsqlite3 -lmagic -ljs
 
 
 mediatomb_SOURCES = main.cc
 mediatomb_LDADD = $(COMMON_LDADD)
-    
+   

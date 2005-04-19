@@ -222,15 +222,14 @@ void UpdateManager::threadProc()
 
     while(! shutdownFlag)
     {
-        fprintf(stderr, "threadProc: awakened...\n");
+//        fprintf(stderr, "threadProc: awakened...\n"); fflush(stderr);
 
         /* if nothing to do, sleep until awakened */
         if(updates->size() == 0)
         {
 
-            fprintf(stderr, "threadProc: idle sleep ...\n");
+//            fprintf(stderr, "threadProc: idle sleep ...\n"); fflush(stderr);
             ret = pthread_cond_wait(&updateCond, &updateMutex);
-            nowMillis = getMillis();
             lastIdleMillis = nowMillis;
             continue;
         }
@@ -260,8 +259,12 @@ void UpdateManager::threadProc()
         if(sleepMillis >= MIN_SLEEP) // sleep for sleepMillis milliseconds
         {
             millisToTimespec(nowMillis + sleepMillis, &timeout);
-            printf("threadProc: sleeping for %d millis\n", (int)sleepMillis);
+//            fprintf(stderr, "threadProc: sleeping for %d millis\n", (int)sleepMillis); fflush(stderr);
             ret = pthread_cond_timedwait(&updateCond, &updateMutex, &timeout);
+			if (ret)
+			{
+//				fprintf(stderr, "pthread_cont_timedwait(): %s\n", strerror(errno)); fflush(stderr);
+			}
         }
         else // send updates 
         {

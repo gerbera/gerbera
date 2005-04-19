@@ -18,6 +18,7 @@ AC_CONFIG_FILES([
     scripts/Makefile
     web/Makefile
     web/icons/Makefile
+    src/scripting/Makefile
 ])
 
 AC_PROG_CXX
@@ -66,7 +67,12 @@ AC_CHECK_HEADER(sqlite3.h,
     /* checking for sqlite3.h */
 )
 
-
+AC_CHECK_HEADER(jsapi.h,
+    [],
+    [AC_MSG_ERROR(jsapi.h not found, check JavaScript library installation)],
+    /* checking for jsapi.h */
+    #define XP_UNIX 1
+)
 
 AC_OUTPUT
 

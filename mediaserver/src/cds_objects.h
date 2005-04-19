@@ -62,6 +62,9 @@ protected:
 
     /// \brief Physical location of the media.
     zmm::String location;
+
+    /// \brief virtual object flag
+    int virt;
    
     /// \brief type of the object: item, container, etc.
     int objectType;
@@ -105,6 +108,12 @@ public:
 
     /// \brief Retrieve media location.
     zmm::String getLocation();
+
+    /// \brief Set the virtual flag.
+    void setVirtual(int virt);
+
+    /// \brief Query the virtual flag.
+    int isVirtual();
 
     /// \brief Query information on object type: item, container, etc.
     int getObjectType();
