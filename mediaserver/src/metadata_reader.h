@@ -23,6 +23,12 @@
 #ifndef __METADATA_READER_H__
 #define __METADATA_READER_H__
 
+#include <id3/tag.h>
+#include <id3/misc_support.h>
+
+#include "common.h"
+#include "dictionary.h"
+
 /// \brief This class is responsible for providing access to metadata information
 /// of various media. Currently only id3 is supported.
 class MetadataReader : public zmm::Object
@@ -34,9 +40,10 @@ public:
     zmm::Ref<Dictionary> getMetadata(zmm::String filename);
 
 protected:
-    void addField(zmm::String filename, zmm::String name, zmm::String value);
+    void addField(zmm::String name);
     zmm::Ref<Dictionary> data;
-}
+    ID3_Tag tag;
+};
 
 #endif
 

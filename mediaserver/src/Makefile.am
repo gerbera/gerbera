@@ -27,6 +27,8 @@ libmediatomb_a_SOURCES = \
     file_request_handler.cc \
     io_handler.h \
     io_handler.cc \
+    metadata_reader.h \
+    metadata_reader.cc \
     mem_io_handler.h \
     mem_io_handler.cc \
     process.h \
@@ -80,7 +82,7 @@ COMMON_LDADD = \
     uuid/libuuid.a \
     md5/libmd5.a \
     scripting/libscripting.a \
-    -lupnp -lixml -lthreadutil -lsqlite3 -lmagic -ljs
+    -lupnp -lixml -lthreadutil -lsqlite3 -lmagic -ljs -lid3
 
 
 mediatomb_SOURCES = main.cc

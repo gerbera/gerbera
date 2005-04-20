@@ -21,42 +21,46 @@
 /// \file metadata_reader.cc
 /// \brief Implementeation of the MetadataReader class.
 
-#include "common.h"
-#include <id3/tag.h>
+#include "metadata_reader.h"
 
 using namespace zmm;
-using namespace mxml;
 
-    
-MetadataReader()
+MetadataReader::MetadataReader() : Object()
 {
 }
        
-Ref<Dictionary> getMetadata(String filename)
+Ref<Dictionary> MetadataReader::getMetadata(String filename)
 {
+    data = Ref<Dictionary>(new Dictionary());
+    tag.Link(filename.c_str());
+    addField("title");
+    addField("artist");
+    addField("album");
+    addField("year");
+    addField("genre");
+
+    return data;
 }
 
-void addField(String filename, String name, String value)
+void MetadataReader::addField(String name)
 {
-    data(new Dictionary());
+    String value;
+    
+    if (name == "title")
+        value = String(ID3_GetTitle(&tag));
+    else if (name == "artist")
+        value = String(ID3_GetArtist(&tag));
+    else if (name == "album")
+        value = String(ID3_GetAlbum(&tag));
+    else if (name == "year")
+        value = String(ID3_GetYear(&tag));
+    else if (name == "genre")
+        value = String(ID3_GetGenre(&tag));
+    else
+        return;
 
-    ID3_Tag myTag(filename.c_str());
-    ID3_Tag::Iterator* iter = myTag.CreateIterator();
-    ID3_Frame* myFrame = NULL;
-    while (NULL != (myFrame = iter->GetNext()))
-    {
-        ID3_Frame::Iterator* iter = myFrame->CreateIterator();
-        ID3_Field* myField = NULL;
-        while (NULL != (myField = iter->GetNext()))
-        {
-            uchar   data[1024];
-            myField->Get(data, 1024);
-        }
-        delete iter;
-
-    }
-    delete iter;
-
+    if (string_ok(value))
+        data->put(name, value);
 }
 
 
