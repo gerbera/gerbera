@@ -1,18 +1,18 @@
 /*  content_manager.cc - this file is part of MediaTomb.
-                                                                                
+
     Copyright (C) 2005 Gena Batyan <bgeradz@deadlock.dhs.org>,
                        Sergey Bostandzhyan <jin@deadlock.dhs.org>
-                                                                                
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
     (at your option) any later version.
-                                                                                
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-                                                                                
+
     You should have received a copy of the GNU General Public License
     along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -58,7 +58,7 @@ static String get_filename(String path)
 static String get_mime_type(String file)
 {
     if (ms == NULL)
-        return nil; 
+        return nil;
     char *mt = (char *)magic_file(ms, file.c_str());
     if (mt == NULL)
     {
@@ -66,7 +66,7 @@ static String get_mime_type(String file)
         return nil;
     }
     String mime_type(mt);
-    
+
     // cut off everything after first space character
     int pos = mime_type.index(';');
     int pos2 = mime_type.index(' ');
@@ -74,8 +74,8 @@ static String get_mime_type(String file)
         pos = pos2;
     if (pos >= 0)
         mime_type = mime_type.substring(0, pos);
- 
-    return mime_type;    
+
+    return mime_type;
  }
 
 /***************************************************************/
@@ -84,21 +84,31 @@ static Ref<ContentManager> instance;
 
 ContentManager::ContentManager() : Object()
 {
-    ms = magic_open(MAGIC_MIME);
-    if (ms == NULL)
-    {
-	    printf("magic_open failed\n");
-        return;
-    }        
-    if (magic_load(ms, NULL) == -1)
-    {
-        printf("magic_load: %s\n", magic_error(ms));
-        magic_close(ms);
-        ms = NULL;
-    }
-   
+
     Ref<ConfigManager> cm = ConfigManager::getInstance();
-    Ref<Element> mapEl = cm->getElement("/import/mappings/mimetype-upnpclass");
+    Ref<Element> mapEl;
+    
+    // loading extension - mimetype map  
+    mapEl = cm->getElement("/import/mappings/extension-mimetype");
+    if (mapEl == nil)
+    {
+        printf("extension-mimetype mappings not found\n");
+    }
+    else
+    {
+        extension_mimetype_map = cm->createDictionaryFromNodeset(mapEl, "map", "from", "to");
+    }
+
+    ignore_unknown_extensions = 0;
+
+    String optIgnoreUnknown = cm->getOption(
+        "/import/mappings/extension-mimetype/attribute::ignore-unknown");
+    if (optIgnoreUnknown != nil && optIgnoreUnknown == "yes")
+        ignore_unknown_extensions = 1;
+
+    
+    // loading mimetype - upnpclass map
+    mapEl = cm->getElement("/import/mappings/mimetype-upnpclass");
     if (mapEl == nil)
     {
         printf("mimetype-upnpclass mappings not found\n");
@@ -106,6 +116,24 @@ ContentManager::ContentManager() : Object()
     else
     {
         mimetype_upnpclass_map = cm->createDictionaryFromNodeset(mapEl, "map", "from", "to");
+    }
+
+    /* init fielmagic */
+    ms = NULL;
+    if (! ignore_unknown_extensions)
+    {
+        ms = magic_open(MAGIC_MIME);
+        if (ms == NULL)
+        {
+	        printf("magic_open failed\n");
+            return;
+        }
+        if (magic_load(ms, NULL) == -1)
+        {
+            printf("magic_load: %s\n", magic_error(ms));
+            magic_close(ms);
+            ms = NULL;
+        }
     }
 }
 
@@ -127,7 +155,7 @@ Ref<ContentManager> ContentManager::getInstance()
 void ContentManager::addFile(String path, int recursive)
 {
 	initScripting();
-	
+
     if (path.charAt(path.length() - 1) == '/')
     {
         path = path.substring(0, path.length() - 1);
@@ -141,32 +169,37 @@ void ContentManager::addFile(String path, int recursive)
 
     Ref<UpdateManager> um = UpdateManager::getInstance();
     Ref<StringConverter> f2i = StringConverter::f2i();
-    
+
     for (int i = 0; i < parts->size(); i++)
     {
         String part = parts->get(i);
         curPath = curPath + "/" + part;
-        
+
         obj = storage->findObjectByTitle(f2i->convert(part), curParentID);
 
         if (obj == nil) // create object
         {
             obj = createObjectFromFile(curPath);
+            if (obj == nil) // object ignored
+            {
+                printf("file ignored: %s\n", curPath.c_str());
+                return;
+            }
             obj->setParentID(curParentID);
             storage->addObject(obj);
             um->containerChanged(curParentID);
         }
         curParentID = obj->getID();
     }
-	
+
 	if (IS_CDS_ITEM(obj->getObjectType()))
 		scripting->processCdsObject(obj);
-	
+
     if (recursive && IS_CDS_CONTAINER(obj->getObjectType()))
     {
         addRecursive(path, curParentID);
     }
-    um->flushUpdates();	
+    um->flushUpdates();
 }
 
 void ContentManager::removeObject(String objectID)
@@ -187,10 +220,10 @@ void ContentManager::updateObject(String objectID, Ref<Dictionary> parameters)
     String mimetype = parameters->get("mime-type");
     String description = parameters->get("description");
     String location = parameters->get("location");
- 
+
     Ref<Storage> storage = Storage::getInstance();
     Ref<UpdateManager> um = UpdateManager::getInstance();
-    
+
     Ref<CdsObject> obj = storage->loadObject(objectID);
     int objectType = obj->getObjectType();
 
@@ -198,7 +231,7 @@ void ContentManager::updateObject(String objectID, Ref<Dictionary> parameters)
     if (IS_CDS_ITEM(objectType))
     {
         Ref<CdsItem> item = RefCast(obj, CdsItem);
-        Ref<CdsObject> clone = Storage::createObject(objectType);
+        Ref<CdsObject> clone = CdsObject::createObject(objectType);
         item->copyTo(clone);
 
         if (string_ok(title)) clone->setTitle(title);
@@ -206,8 +239,8 @@ void ContentManager::updateObject(String objectID, Ref<Dictionary> parameters)
         if (string_ok(location)) clone->setLocation(location);
 
         Ref<CdsItem> cloned_item = RefCast(clone, CdsItem);
-        
-      
+
+
         // description can be an empty string - if you want to clear it
         if (description != nil) cloned_item->setDescription(description);
         if (string_ok(mimetype)) cloned_item->setMimeType(mimetype);
@@ -223,20 +256,20 @@ void ContentManager::updateObject(String objectID, Ref<Dictionary> parameters)
     {
         String action = parameters->get("action");
         String state = parameters->get("state");
-        
+
         Ref<CdsActiveItem> item = RefCast(obj, CdsActiveItem);
-        Ref<CdsObject> clone = Storage::createObject(objectType);
+        Ref<CdsObject> clone = CdsObject::createObject(objectType);
         item->copyTo(clone);
 
         if (string_ok(title)) clone->setTitle(title);
         if (string_ok(upnp_class)) clone->setClass(upnp_class);
 
         Ref<CdsActiveItem> cloned_item = RefCast(clone, CdsActiveItem);
-       
+
         // state and description can be an empty strings - if you want to clear it
         if (description != nil) cloned_item->setDescription(description);
         if (state != nil) cloned_item->setState(state);
-        
+
         if (string_ok(mimetype)) cloned_item->setMimeType(mimetype);
         if (string_ok(action)) cloned_item->setAction(action);
 
@@ -250,7 +283,7 @@ void ContentManager::updateObject(String objectID, Ref<Dictionary> parameters)
     else if (IS_CDS_CONTAINER(objectType))
     {
         Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
-        Ref<CdsObject> clone = Storage::createObject(objectType);
+        Ref<CdsObject> clone = CdsObject::createObject(objectType);
         cont->copyTo(clone);
 
         if (string_ok(title)) clone->setTitle(title);
@@ -266,7 +299,7 @@ void ContentManager::updateObject(String objectID, Ref<Dictionary> parameters)
 
     um->flushUpdates();
 }
-    
+
 void ContentManager::addObject(zmm::Ref<CdsObject> obj)
 {
     obj->validate();
@@ -281,7 +314,7 @@ void ContentManager::updateObject(Ref<CdsObject> obj)
     obj->validate();
     Ref<Storage> storage = Storage::getInstance();
     Ref<UpdateManager> um = UpdateManager::getInstance();
-    storage->updateObject(obj);       
+    storage->updateObject(obj);
 }
 
 Ref<CdsObject> ContentManager::convertObject(Ref<CdsObject> oldObj, int newType)
@@ -294,9 +327,9 @@ Ref<CdsObject> ContentManager::convertObject(Ref<CdsObject> oldObj, int newType)
         throw Exception(String("Cannot convert object type ") + oldType +
                         " to " + newType);
     }
-    
-    Ref<CdsObject> newObj = Storage::createObject(newType);
-    
+
+    Ref<CdsObject> newObj = CdsObject::createObject(newType);
+
     oldObj->copyTo(newObj);
 
     return newObj;
@@ -307,7 +340,7 @@ Ref<CdsObject> ContentManager::convertObject(Ref<CdsObject> oldObj, int newType)
 void ContentManager::addRecursive(String path, String parentID)
 {
     Ref<StringConverter> f2i = StringConverter::f2i();
-    
+
     Ref<UpdateManager> um = UpdateManager::getInstance();
     Ref<Storage> storage = Storage::getInstance();
     DIR *dir = opendir(path.c_str());
@@ -338,8 +371,13 @@ void ContentManager::addRecursive(String path, String parentID)
             if (obj == nil) // create object
             {
                 obj = createObjectFromFile(newPath);
+                if (obj == nil) // object ignored
+                {
+                    printf("file ignored: %s\n", newPath.c_str());
+                    return;
+                }
                 obj->setParentID(parentID);
-                storage->addObject(obj);				
+                storage->addObject(obj);
                 um->containerChanged(parentID);
             }
 			if (IS_CDS_ITEM(obj->getObjectType()))
@@ -360,9 +398,9 @@ void ContentManager::addRecursive(String path, String parentID)
 }
 
 Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic)
-{    
+{
     String filename = get_filename(path);
-    
+
     struct stat statbuf;
     int ret;
 
@@ -373,21 +411,37 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic)
     }
 
     Ref<CdsObject> obj;
-    if (S_ISREG(statbuf.st_mode))
+    if (S_ISREG(statbuf.st_mode)) // item
     {
+
+        /* retrieve information about item and decide
+           if it should be included */
+        String mimetype;
+        String upnp_class;
+        String extension;
+
+        // get file extension
+        int dotIndex = filename.rindex('.');
+        if (dotIndex > 0)
+            extension = filename.substring(dotIndex + 1);
+        mimetype = extension2mimetype(extension);
+
+        if (mimetype == nil && magic)
+        {
+            if (ignore_unknown_extensions)
+                return nil; // item should be ignored
+            mimetype = get_mime_type(path);
+            if (mimetype != nil)
+                upnp_class = mimetype2upnpclass(mimetype);
+        }
+
         Ref<CdsItem> item(new CdsItem());
         obj = RefCast(item, CdsObject);
         item->setLocation(path);
-        
-        if (magic)
-        {
-            String mt = get_mime_type(path);
-            if (mt != nil)
-                item->setMimeType(mt);
-            String upnp_class = mimetype2upnpclass(mt);
-            if (upnp_class != nil)
-                item->setClass(upnp_class);
-        }
+        if (mimetype != nil)
+            item->setMimeType(mimetype);
+        if (upnp_class != nil)
+            item->setClass(upnp_class);
     }
     else if (S_ISDIR(statbuf.st_mode))
     {
@@ -400,11 +454,17 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic)
         // only regular files and directories are supported
         throw Exception(String("ContentManager: skipping file ") + path.c_str());
     }
-    Ref<StringConverter> f2i = StringConverter::f2i();    
+    Ref<StringConverter> f2i = StringConverter::f2i();
     obj->setTitle(f2i->convert(filename));
     return obj;
 }
 
+String ContentManager::extension2mimetype(String extension)
+{
+    if (extension_mimetype_map == nil)
+        return nil;
+    return extension_mimetype_map->get(extension);
+}
 String ContentManager::mimetype2upnpclass(String mimeType)
 {
     if (mimetype_upnpclass_map == nil)
@@ -433,7 +493,7 @@ void ContentManager::initScripting()
 		scripting = nil;
 		printf("ContentManager SCRIPTING: %s\n", e.getMessage().c_str());
 	}
-	
+
 }
 void ContentManager::destroyScripting()
 {
@@ -441,3 +501,8 @@ void ContentManager::destroyScripting()
 }
 
 
+void ContentManager::reloadScripting()
+{
+	destroyScripting();
+	initScripting();
+}

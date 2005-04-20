@@ -1,18 +1,18 @@
 /*  cds_objects.cc - this file is part of MediaTomb.
-                                                                                
+
     Copyright (C) 2005 Gena Batyan <bgeradz@deadlock.dhs.org>,
                        Sergey Bostandzhyan <jin@deadlock.dhs.org>
-                                                                                
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
     (at your option) any later version.
-                                                                                
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-                                                                                
+
     You should have received a copy of the GNU General Public License
     along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -127,15 +127,44 @@ int CdsObject::equals(Ref<CdsObject> obj, bool exactly)
 
 void CdsObject::validate()
 {
-    if (!string_ok(this->parentID) || 
+    if (!string_ok(this->parentID) ||
             (!string_ok(this->title)) ||
             (!string_ok(this->upnp_class)))
     {
     //    printf("this->parentID %s, this->title %s, this->upnp_class %s, this->location %s\n", this->parentID.c_str(), this->title.c_str(), this->upnp_class.c_str(), this->location.c_str());
         throw Exception(String("CdsObject: validation failed"));
     }
-        
+
 }
+
+Ref<CdsObject> CdsObject::createObject(int objectType)
+{
+    CdsObject *pobj;
+
+    if(IS_CDS_CONTAINER(objectType))
+    {
+        pobj = new CdsContainer();
+    }
+    else if(IS_CDS_ITEM_EXTERNAL_URL(objectType))
+    {
+        pobj = new CdsItemExternalURL();
+    }
+    else if(IS_CDS_ACTIVE_ITEM(objectType))
+    {
+        pobj = new CdsActiveItem();
+    }
+    else if(IS_CDS_ITEM(objectType))
+    {
+        pobj = new CdsItem();
+    }
+    else
+    {
+        throw Exception(String("invalid object type :") + objectType);
+    }
+    return Ref<CdsObject>(pobj);
+}
+
+/* CdsItem */
 
 CdsItem::CdsItem() : CdsObject()
 {
@@ -217,7 +246,7 @@ void CdsActiveItem::copyTo(Ref<CdsObject> obj)
 {
     CdsItem::copyTo(obj);
     if (! IS_CDS_ACTIVE_ITEM(obj->getObjectType()))
-        return;    
+        return;
     Ref<CdsActiveItem> item = RefCast(obj, CdsActiveItem);
     item->setAction(action);
     item->setState(state);
@@ -234,7 +263,7 @@ int CdsActiveItem::equals(Ref<CdsObject> obj, bool exactly)
         return 0;
     return 1;
 }
-   
+
 void CdsActiveItem::validate()
 {
     CdsItem::validate();
@@ -308,7 +337,7 @@ void CdsContainer::copyTo(Ref<CdsObject> obj)
 {
     CdsObject::copyTo(obj);
     if (! IS_CDS_CONTAINER(obj->getObjectType()))
-        return;        
+        return;
     Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
     cont->setUpdateID(updateID);
     cont->setSearchable(searchable);

@@ -64,14 +64,22 @@ public:
     /// Only the returned object should be processed. This method does not save
     /// the returned object in the database. To do so updateObject must be called
     zmm::Ref<CdsObject> convertObject(zmm::Ref<CdsObject> obj, int objectType);
+
+    /// \brief instructs ContentManager to reload scripting environment
+    void reloadScripting();
     
 protected:
 	void initScripting();
 	void destroyScripting();
 
+    int ignore_unknown_extensions;
+    zmm::Ref<Dictionary> extension_mimetype_map;
     zmm::Ref<Dictionary> mimetype_upnpclass_map;
+    
     /* for recursive addition */
     void addRecursive(zmm::String path, zmm::String parentID);
+
+    zmm::String extension2mimetype(zmm::String extension);
     zmm::String mimetype2upnpclass(zmm::String mimeType);
 	
 	zmm::Ref<Scripting> scripting;

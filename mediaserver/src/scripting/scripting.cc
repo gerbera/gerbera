@@ -1,9 +1,4 @@
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <jsapi.h>
-
 #include "scripting.h"
 #include "storage.h"
 #include "content_manager.h"
@@ -22,7 +17,7 @@ static JSClass global_class = {
 };
 */
 
-	
+
 static String js_get_property(JSContext *cx, JSObject *obj, String name)
 {
     jsval val;
@@ -80,7 +75,7 @@ static void js_set_int_property(JSContext *cx, JSObject *obj, char *name, int va
 {
     jsval val;
     if (!JS_NewNumberValue(cx, (jsdouble)value, &val))
-        return;	
+        return;
     if (!JS_SetProperty(cx, obj, name, &val))
         return;
 }
@@ -88,7 +83,7 @@ static void js_set_int_property(JSContext *cx, JSObject *obj, char *name, int va
 static void js_set_object_property(JSContext *cx, JSObject *parent, char *name, JSObject *obj)
 {
     jsval val;
-	val = OBJECT_TO_JSVAL(obj);	
+	val = OBJECT_TO_JSVAL(obj);
     if (!JS_SetProperty(cx, parent, name, &val))
         return;
 }
@@ -106,13 +101,12 @@ static Ref<CdsObject> jsObject2cdsObject(JSContext *cx, JSObject *js)
         printf("scripting: addObject: missing objectType property\n");
         return nil;
     }
-    printf("Scripting got object type: %d\n", objectType);
 
-    Ref<CdsObject> obj = Storage::createObject(objectType);
-    
+    Ref<CdsObject> obj = CdsObject::createObject(objectType);
+
     // CdsObject
     obj->setVirtual(1); // JS creates only virtual objects
-    
+
     val = js_get_property(cx, js, "id");
     if (val != nil)
         obj->setID(val);
@@ -139,7 +133,7 @@ static Ref<CdsObject> jsObject2cdsObject(JSContext *cx, JSObject *js)
         val = js_get_property(cx, js, "description");
         if (val != nil)
             item->setDescription(val);
-    
+
         val = js_get_property(cx, js, "mimetype");
         if (val != nil)
             item->setMimeType(val);
@@ -175,12 +169,12 @@ static void cdsObject2jsObject(JSContext *cx, Ref<CdsObject> obj, JSObject *js)
 {
 	String val;
 	int i;
-	
+
 	int objectType = obj->getObjectType();
-	
+
     // CdsObject
 	js_set_int_property(cx, js, "objectType", objectType);
-	
+
     val = obj->getID();
     if (val != nil)
         js_set_property(cx, js, "id", val);
@@ -232,7 +226,7 @@ static void cdsObject2jsObject(JSContext *cx, Ref<CdsObject> obj, JSObject *js)
 		js_set_int_property(cx, js, "updateID", i);
 
 		i = cont->isSearchable();
-		js_set_int_property(cx, js, "searchable", i);		
+		js_set_int_property(cx, js, "searchable", i);
     }
 }
 
@@ -269,10 +263,30 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
             return JS_FALSE;
         if (!JS_ValueToObject(cx, arg, &js_cds_obj))
             return JS_FALSE;
-           
+
+        String id;
+
         Ref<CdsObject> cds_obj = jsObject2cdsObject(cx, js_cds_obj);
-        ContentManager::getInstance()->addObject(cds_obj);
-    
+
+        Ref<Storage> storage = Storage::getInstance();
+        Ref<CdsObject> db_obj = storage->findObjectByTitle(cds_obj->getTitle(),
+                                                           cds_obj->getParentID());
+        if (db_obj == nil)
+        {
+            ContentManager::getInstance()->addObject(cds_obj);
+            id = cds_obj->getID();
+        }
+        else
+        {
+            id = db_obj->getID();
+        }
+
+        /* setting object ID as return value */
+        JSString *str = JS_NewStringCopyN(cx, id.c_str(), id.length());
+    	if (!str)
+	    	return JS_FALSE;
+    	*rval = STRING_TO_JSVAL(str);
+
         return JS_TRUE;
     }
     catch (Exception e)
@@ -281,7 +295,7 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
     }
     return JS_FALSE;
 }
-  
+
 static void
 js_error_reporter(JSContext *cx, const char *message, JSErrorReport *report)
 {
@@ -309,13 +323,13 @@ js_error_reporter(JSContext *cx, const char *message, JSErrorReport *report)
 
         if (report->filename)
             *prefix_buf << (char *)report->filename << ":";
-    
+
         if (report->lineno)
         {
             *prefix_buf << (int)report->lineno << ": ";
         }
         if (JSREPORT_IS_WARNING(report->flags))
-        { 
+        {
             if (JSREPORT_IS_STRICT(report->flags))
                 *prefix_buf << "(STRICT WARN)";
             else
@@ -324,7 +338,7 @@ js_error_reporter(JSContext *cx, const char *message, JSErrorReport *report)
 
         prefix = prefix_buf->toString();
 
-        // embedded newlines 
+        // embedded newlines
         while ((ctmp = strchr(message, '\n')) != 0)
         {
             ctmp++;
@@ -334,11 +348,11 @@ js_error_reporter(JSContext *cx, const char *message, JSErrorReport *report)
             message = ctmp;
         }
 
-        // If there were no filename or lineno, the prefix might be empty 
+        // If there were no filename or lineno, the prefix might be empty
         if (prefix.length())
             *buf << prefix;
         *buf << (char *)message << "\n";
-        
+
         if (report->linebuf)
         {
             // report->linebuf usually ends with a newline.
@@ -346,7 +360,7 @@ js_error_reporter(JSContext *cx, const char *message, JSErrorReport *report)
             *buf << prefix << (char *)report->linebuf;
             *buf << (char *)((n > 0 && report->linebuf[n-1] == '\n') ? "" : "\n");
             *buf << prefix;
-            /*    
+            /*
             n = PTRDIFF(report->tokenptr, report->linebuf, char);
             for (i = j = 0; i < n; i++)
             {
@@ -393,7 +407,7 @@ Scripting::Scripting() : Object()
 void Scripting::init()
 {
     jsval val;
-        
+
     /* initialize the JS run time, and return result in rt */
     rt = JS_NewRuntime(1L * 1024L * 1024L);
 
@@ -415,8 +429,8 @@ void Scripting::init()
         throw Exception("Scripting: JS_InitStandardClasses failed");
 
     if (!JS_DefineFunctions(cx, glob, global_functions))
-        throw Exception("Scripting: JS_DefineFunctions on global object failed");	
-    
+        throw Exception("Scripting: JS_DefineFunctions on global object failed");
+
     /* initialize contstants */
     js_set_int_property(cx, glob, "OBJECT_TYPE_CONTAINER",
                                    OBJECT_TYPE_CONTAINER);
@@ -429,10 +443,10 @@ void Scripting::init()
     js_set_int_property(cx, glob, "OBJECT_TYPE_VIRTUAL_CONTAINER",
                                    OBJECT_TYPE_VIRTUAL_CONTAINER);
 
-	String scriptPath = "scripts/add.js";	
+	String scriptPath = "scripts/add.js";
 	String scriptText = read_text_file(scriptPath);
 	if (scriptText == nil)
-		printf("UUUUUUUUUUUUUUU: could not read script %s\n", scriptPath.c_str()); 
+		printf("UUUUUUUUUUUUUUU: could not read script %s\n", scriptPath.c_str());
 /*
 	if (!JS_EvaluateScript(cx, glob, script.c_str(), script.length(),
 		scriptPath.c_str(), 0, &ret_val))
@@ -441,7 +455,7 @@ void Scripting::init()
 	}
 */
     JS_SetErrorReporter(cx, js_error_reporter);
-   
+
 	script = JS_CompileScript(cx, glob, scriptText.c_str(), scriptText.length(),
 							  scriptPath.c_str(), 1);
 	if (! script)
@@ -468,7 +482,7 @@ void Scripting::processCdsObject(Ref<CdsObject> obj)
         printf("Scripting environment not initialized\n");
         return;
     }
-        
+
     jsval ret_val;
 
 	JSObject *meta = JS_NewObject(cx, NULL, NULL, glob);
@@ -479,8 +493,8 @@ void Scripting::processCdsObject(Ref<CdsObject> obj)
 		throw Exception("Scripting: failed to execute script");
 	}
 	printf("Script executed successfully\n");
-	
-/*    
+
+/*
 	if (!JS_EvaluateScript(cx, glob, script.c_str(), script.length(),
 		"test-script", 0, &ret_val))
 	{

@@ -1,18 +1,18 @@
 /*  cds_objects.h - this file is part of MediaTomb.
-                                                                                
+
     Copyright (C) 2005 Gena Batyan <bgeradz@deadlock.dhs.org>,
                        Sergey Bostandzhyan <jin@deadlock.dhs.org>
-                                                                                
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
     (at your option) any later version.
-                                                                                
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-                                                                                
+
     You should have received a copy of the GNU General Public License
     along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -65,14 +65,14 @@ protected:
 
     /// \brief virtual object flag
     int virt;
-   
+
     /// \brief type of the object: item, container, etc.
     int objectType;
 
 public:
     /// \brief Constructor, currently only sets the restricted flag to 1
     CdsObject();
-   
+
     /// \brief Set the object ID.
     void setID(zmm::String id);
 
@@ -96,7 +96,7 @@ public:
 
     /// \brief Retrieve the title.
     zmm::String getTitle();
-    
+
     /// \brief set the upnp:class
     void setClass(zmm::String upnp_class);
 
@@ -133,7 +133,9 @@ public:
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     virtual void validate();
-	
+
+    static zmm::Ref<CdsObject> createObject(int objectType);
+
 	friend int CdsObjectTitleComparator(void *arg1, void *arg2);
 };
 
@@ -143,7 +145,7 @@ class CdsItem : public CdsObject
 protected:
     /// \brief mime-type of the media.
     zmm::String mimeType;
-    
+
     /// \brief dc:description
     zmm::String description;
 public:
@@ -169,7 +171,7 @@ public:
     ///
     /// See description for CdsObject::equals() for details.
     virtual int equals(zmm::Ref<CdsObject> obj, bool exactly=false);
-    
+
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     virtual void validate();
 };
@@ -183,14 +185,14 @@ public:
 /// script is executed on the server.
 /// The script gets an XML representation of the item (actually a DIDL-Lite render)
 /// to the standard input, and has to return an appropriate XML to the standard
-/// output. The script may change most of the values of the Item. The only 
-/// protected fields are object ID and parent ID. In case changes have taken 
+/// output. The script may change most of the values of the Item. The only
+/// protected fields are object ID and parent ID. In case changes have taken
 /// place, a container update is issued.
 ///
 /// You could use ActiveItems for a variety of things, implementing
 /// "toggle" items (ones that change between "on" and "off" with each activation)
 /// or just "trigger" items that do not change visible but trigger events on the
-/// server. For example, you could write a script and create an item to 
+/// server. For example, you could write a script and create an item to
 /// shutdown your PC when this item is played.
 ///
 /// We plan to extend the ActiveItem functionality, allowing to control
@@ -201,18 +203,18 @@ class CdsActiveItem : public CdsItem
 protected:
     /// \brief action to be executed (an absolute path to a script that will process the XML)
     zmm::String action;
-    
+
     /// \brief a field where you can save any string you wnat.
     zmm::String state;
 public:
-    
+
     /// \brief Constructor, sets the object type.
     CdsActiveItem();
-    
+
     /// \brief Sets the action for the item.
     /// \param action absolute path to the script that will process the XML data.
     void setAction(zmm::String action);
-    
+
     /// \brief Get the path of the action script.
     zmm::String getAction();
 
@@ -242,14 +244,14 @@ public:
 class CdsItemExternalURL : public CdsItem
 {
 public:
-    
+
     /// \brief Constructor, sets the object type.
     CdsItemExternalURL();
-    
+
     /// \brief Sets the URL for the item.
-    /// \param URL full url to the item: http://somewhere.com/something.mpg 
+    /// \param URL full url to the item: http://somewhere.com/something.mpg
     void setURL(zmm::String URL);
-    
+
     /// \brief Get the path of the action script.
     zmm::String getURL();
     /// \brief Copies all object properties to another object.
@@ -276,18 +278,18 @@ class CdsDynamicItem : public CdsItem
 protected:
     /// \brief action to be executed (an absolute path to a script that will process the XML)
     zmm::String ;
-    
+
     /// \brief a field where you can save any string you wnat.
     zmm::String properties;
 public:
-    
+
     /// \brief Constructor, sets the object type.
     CdsActiveItem();
-    
+
     /// \brief Sets the action for the item.
     /// \param action absolute path to the script that will process the XML data.
     void setAction(zmm::String action);
-    
+
     /// \brief Get the path of the action script.
     zmm::String getAction();
 
@@ -328,11 +330,11 @@ protected:
 
     /// \brief childCount attribute
     int childCount;
-    
+
 public:
     /// \brief Constructor, initializes default values for the flags and sets the object type.
     CdsContainer();
-    
+
     /// \brief Set the searchable flag.
     void setSearchable(int searchable);
 
@@ -374,7 +376,7 @@ protected:
 public:
     /// \brief Constructor, initializes default values for the flags and sets the object type.
     CdsVirtualContainer();
-    
+
     /// \brief Set the filter script flag.
     void setFilterScript(zmm::String filterScript);
 

@@ -1,18 +1,18 @@
 /*  storage.cc - this file is part of MediaTomb.
-                                                                                
+
     Copyright (C) 2005 Gena Batyan <bgeradz@deadlock.dhs.org>,
                        Sergey Bostandzhyan <jin@deadlock.dhs.org>
-                                                                                
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
     (at your option) any later version.
-                                                                                
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-                                                                                
+
     You should have received a copy of the GNU General Public License
     along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -37,26 +37,21 @@ static Ref<Storage> create_primary_inst()
 {
     String type;
     Ref<Storage> storage;
-   
 
-    Ref<Dictionary> params(new Dictionary());
     Ref<ConfigManager> config = ConfigManager::getInstance();
     type = config->getOption("/server/storage/attribute::driver");
+
     if (type == "sqlite3")
     {
-        /// \TODO check if this is the way to go.. should the drivers get their options
-        /// themselves, or should the options be prepared here?
-        /// \TODO who should construct the paths??
-        params->put("database-file", config->getOption("/server/home") + DIR_SEPARATOR + config->getOption("/server/storage/database-file"));
         storage = Ref<Storage>(new Sqlite3Storage());
-        storage->init(params);
-        return storage;        
+        storage->init();
     }
     // other database types...
     else
     {
         throw Exception(String("Unknown storage type: ") + type);
     }
+    return storage;
 }
 
 Ref<Storage> Storage::getInstance(storage_type_t type)
@@ -67,43 +62,16 @@ Ref<Storage> Storage::getInstance(storage_type_t type)
             if(primary_inst == nil)
                 primary_inst = create_primary_inst();
             return primary_inst;
-        case FILESYSTEM_STORAGE:            
+        case FILESYSTEM_STORAGE:
             if(filesystem_inst == nil)
             {
                 filesystem_inst = Ref<Storage>(new FsStorage());
-                filesystem_inst->init(nil);
-            }   
+                filesystem_inst->init();
+            }
             return filesystem_inst;
         default:
             throw Exception(String("Unknown storage type: ") + (int)type);
     }
-}
-
-Ref<CdsObject> Storage::createObject(int objectType)
-{
-    CdsObject *pobj;
-
-    if(IS_CDS_CONTAINER(objectType))
-    {
-        pobj = new CdsContainer();
-    }
-    else if(IS_CDS_ITEM_EXTERNAL_URL(objectType))
-    {
-        pobj = new CdsItemExternalURL();
-    }
-    else if(IS_CDS_ACTIVE_ITEM(objectType))
-    {
-        pobj = new CdsActiveItem();
-    }
-    else if(IS_CDS_ITEM(objectType))
-    {
-        pobj = new CdsItem();
-    }
-    else
-    {
-        throw StorageException(String("invalid object type :") + objectType);
-    }
-    return Ref<CdsObject>(pobj);
 }
 
 Ref<CdsObject> Storage::loadObject(String objectID)
@@ -139,7 +107,7 @@ Ref<Array<CdsContainer> > Storage::getContainerPath(String objectID)
 {
     Ref<Array<CdsContainer> > arr(new Array<CdsContainer>());
     getContainerPath(arr, objectID);
-    return arr;    
+    return arr;
 }
 void Storage::getContainerPath(Ref<Array<CdsContainer> > arr, String objectID)
 {

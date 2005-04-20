@@ -76,6 +76,7 @@ COMMON_LDADD = \
     storage/sqlite3/libsqlite3.a \
     libmediatomb.a \
     storage/fs/libfs.a \
+    storage/libstorage.a \
     mxml/libmxml.a \
     zmmf/libzmmf.a \
     zmm/libzmm.a \

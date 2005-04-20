@@ -1,18 +1,18 @@
 /*  file_request_handler.cc - this file is part of MediaTomb.
-                                                                                
+
     Copyright (C) 2005 Gena Batyan <bgeradz@deadlock.dhs.org>,
                        Sergey Bostandzhyan <jin@deadlock.dhs.org>
-                                                                                
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
     (at your option) any later version.
-                                                                                
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-                                                                                
+
     You should have received a copy of the GNU General Public License
     along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -62,9 +62,9 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
         printf("object_id not found in url\n");
         throw Exception("object_id not found");
     }
-   
-    printf("got ObjectID: [%s]\n", object_id.c_str());        
-    
+
+    printf("got ObjectID: [%s]\n", object_id.c_str());
+
     Ref<Storage> storage = Storage::getInstance();
 
     Ref<CdsObject> obj = storage->loadObject(object_id);
@@ -102,10 +102,10 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
             output = input;
         }
         printf("Script output: %s\n", output.c_str());
-        
-        Ref<CdsObject> clone = Storage::createObject(objectType);
+
+        Ref<CdsObject> clone = CdsObject::createObject(objectType);
         aitem->copyTo(clone);
-    
+
         UpnpXML_DIDLUpdateObject(clone, output);
 
         if (! aitem->equals(clone, true)) // check for all differences
@@ -153,7 +153,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
 
     info->content_type = ixmlCloneDOMString(item->getMimeType().c_str());
 
-    printf("web_get_info: Requested %s, ObjectID: %s, Location: %s\n, MimeType: %s\n", 
+    printf("web_get_info: Requested %s, ObjectID: %s, Location: %s\n, MimeType: %s\n",
            filename, object_id.c_str(), path.c_str(), info->content_type);
 
     printf("web_get_info(): end\n");
@@ -172,7 +172,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, IN enum UpnpOpe
 
     String url_path, parameters;
     split_url(filename, url_path, parameters);
-    
+
     Ref<Dictionary> dict(new Dictionary());
     dict->decode(parameters);
 

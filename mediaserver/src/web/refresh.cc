@@ -63,6 +63,10 @@ void web::refresh::process()
     if ((object_id == nil) || (object_id == "")) 
         throw Exception(String("invalid object id"));
 
+    // Reinitialize scripting
+    ContentManager::getInstance()->reloadScripting();
+
+    
     Ref<Dictionary> sub(new Dictionary());
     sub->put("object_id", object_id);
     sub->put("driver", driver);
