@@ -1,0 +1,71 @@
+/*  sql_storage.h - this file is part of MediaTomb.
+
+    Copyright (C) 2005 Gena Batyan <bgeradz@deadlock.dhs.org>,
+                       Sergey Bostandzhyan <jin@deadlock.dhs.org>
+
+    MediaTomb is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    MediaTomb is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with MediaTomb; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+
+#ifndef __SQL_STORAGE_H__
+#define __SQL_STORAGE_H__
+
+#include "zmmf/zmmf.h"
+#include "cds_objects.h"
+#include "dictionary.h"
+#include "storage.h"
+
+class SQLRow : public zmm::Object
+{
+public:
+    SQLRow();
+    virtual ~SQLRow();
+    virtual zmm::String col(int index) = 0;
+};
+
+class SQLResult : public zmm::Object
+{
+public:
+    SQLResult();
+    virtual ~SQLResult();
+    virtual zmm::Ref<SQLRow> nextRow() = 0;
+};
+
+class SQLStorage : public Storage
+{
+public:
+    SQLStorage();
+    virtual ~SQLStorage();
+
+    /* methods to override in subclasses */
+    virtual zmm::String quote(zmm::String str) = 0;
+    virtual zmm::Ref<SQLResult> select(zmm::String query) = 0;
+    virtual int exec(zmm::String query) = 0;
+    virtual int lastInsertID() = 0;
+
+    virtual void addObject(zmm::Ref<CdsObject> object);
+    virtual void updateObject(zmm::Ref<CdsObject> object);
+    virtual void eraseObject(zmm::Ref<CdsObject> object);
+    virtual zmm::Ref<CdsObject> loadObject(zmm::String objectID);
+
+    virtual zmm::Ref<zmm::Array<CdsObject> > browse(zmm::Ref<BrowseParam> param);
+    virtual zmm::Ref<zmm::Array<zmm::StringBase> > getMimeTypes();
+
+    virtual zmm::Ref<CdsObject> findObjectByTitle(zmm::String title, zmm::String parentID);
+protected:
+    virtual zmm::Ref<CdsObject> createObjectFromRow(zmm::Ref<SQLRow> row);
+};
+
+#endif // __SQL_STORAGE_H__
+
