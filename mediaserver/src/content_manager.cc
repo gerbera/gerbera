@@ -446,6 +446,8 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic)
             item->setMimeType(mimetype);
         if (upnp_class != nil)
             item->setClass(upnp_class);
+        Ref<StringConverter> f2i = StringConverter::f2i();
+        obj->setTitle(f2i->convert(filename));
         Ref<MetadataReader> metadataReader(new MetadataReader());
         metadataReader->getMetadata(item);
     }
