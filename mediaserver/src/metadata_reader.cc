@@ -22,6 +22,7 @@
 /// \brief Implementeation of the MetadataReader class.
 
 #include "metadata_reader.h"
+#include "string_converter.h"
 
 using namespace zmm;
 
@@ -55,13 +56,15 @@ void MetadataReader::getID3(Ref<CdsItem> item)
 void MetadataReader::addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsItem> item)
 {
     String value;
-   
+  
+    Ref<StringConverter> sc = StringConverter::m2i();
+    
     switch (field)
     {
         case M_TITLE:
             value = String(ID3_GetTitle(tag));
             if (string_ok(value))
-                item->setTitle(value);
+                item->setTitle(sc->convert(value));
             break;
         case M_ARTIST:
             value = String(ID3_GetArtist(tag));
@@ -77,11 +80,9 @@ void MetadataReader::addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsI
             break;
         case M_COMMENT:
             value = String(ID3_GetComment(tag));
-            if (string_ok(value))
+            if (string_ok(sc->convert(value)))
                 item->setDescription(value);
             break;
-        default:
-            return;
     }
 }
 
