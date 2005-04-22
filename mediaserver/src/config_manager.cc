@@ -148,6 +148,7 @@ void ConfigManager::validate()
               DEFAULT_IGNORE_UNKNOWN_EXTENSIONS);
 
     getOption("/import/filesystem-charset", DEFAULT_FILESYSTEM_CHARSET);
+    getOption("/import/metadata-charset", DEFAULT_FILESYSTEM_CHARSET);
     printf("checking ip..");
     getOption("/server/ip", ""); // bind to any IP address
     getOption("/server/bookmark", DEFAULT_BOOKMARK_FILE);
