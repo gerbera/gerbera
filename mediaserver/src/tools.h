@@ -52,6 +52,13 @@ void check_path_ex(zmm::String path, bool needDir = false);
 /// Checks if str is nil or ""
 bool string_ok(zmm::String str);
 
+/// \brief Checks if the string contains any data.
+/// \param str String to be checked.
+/// 
+/// Checks if str is nil or "" and throws an exception if that is the case.
+void string_ok_ex(zmm::String str);
+
+
 /// \brief Render HTML that is doing a redirect to the given ip, port and html page.
 /// \param ip IP address as string.
 /// \param port Port as string.

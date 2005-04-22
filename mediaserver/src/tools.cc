@@ -90,9 +90,15 @@ void check_path_ex(String path, bool needDir)
 
 bool string_ok(String str)
 {
-    if ((str == nil) || (str == "")) return false;
+if ((str == nil) || (str == "")) return false;
 
-    return true;
+return true;
+}
+
+void string_ok_ex(String str)
+{
+if ((str == nil) || (str == ""))
+    throw Exception("Empty string");
 }
 
 String http_redirect_to(String ip, String port, String page)

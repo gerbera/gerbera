@@ -28,6 +28,7 @@
 
 #include "common.h"
 #include "dictionary.h"
+#include "cds_objects.h"
 
 /// \brief This class is responsible for providing access to metadata information
 /// of various media. Currently only id3 is supported.
@@ -37,12 +38,21 @@ class MetadataReader : public zmm::Object
 public:
     MetadataReader();
        
-    zmm::Ref<Dictionary> getMetadata(zmm::String filename);
+    void getMetadata(zmm::Ref<CdsItem> item);
 
 protected:
-    void addField(zmm::String name);
-    zmm::Ref<Dictionary> data;
-    ID3_Tag tag;
+typedef enum
+{
+    M_TITLE = 0,
+    M_ARTIST,
+    M_ALBUM,
+    M_YEAR,
+    M_GENRE,
+    M_COMMENT,
+} metadata_fields_t; 
+
+    void getID3(zmm::Ref<CdsItem> item);
+    void addID3Field(metadata_fields_t field, ID3_Tag tag, zmm::Ref<CdsItem> item);
 };
 
 #endif

@@ -29,38 +29,60 @@ MetadataReader::MetadataReader() : Object()
 {
 }
        
-Ref<Dictionary> MetadataReader::getMetadata(String filename)
+void MetadataReader::getMetadata(Ref<CdsItem> item)
 {
-    data = Ref<Dictionary>(new Dictionary());
-    tag.Link(filename.c_str());
-    addField("title");
-    addField("artist");
-    addField("album");
-    addField("year");
-    addField("genre");
+    String location = item->getLocation();
 
-    return data;
+    string_ok_ex(location);
+    check_path_ex(location);
+
+    String mimetype = item->getMimeType();
+
+    if (mimetype == "audio/mpeg")
+        getID3(item);
 }
 
-void MetadataReader::addField(String name)
+void MetadataReader::getID3(Ref<CdsItem> item)
+{
+    ID3_Tag tag;
+
+    tag.Link(item->getLocation().c_str()); // the location has already been checked by the getMetadata function
+
+    for (int i = 0; i <= M_COMMENT; i++)
+        addID3Field((metadata_fields_t) i, tag, item);
+}
+
+void MetadataReader::addID3Field(metadata_fields_t field, ID3_Tag tag, Ref<CdsItem> item)
 {
     String value;
-    
-    if (name == "title")
-        value = String(ID3_GetTitle(&tag));
-    else if (name == "artist")
-        value = String(ID3_GetArtist(&tag));
-    else if (name == "album")
-        value = String(ID3_GetAlbum(&tag));
-    else if (name == "year")
-        value = String(ID3_GetYear(&tag));
-    else if (name == "genre")
-        value = String(ID3_GetGenre(&tag));
-    else
-        return;
-
-    if (string_ok(value))
-        data->put(name, value);
+   
+    switch (field)
+    {
+        case M_TITLE:
+            value = String(ID3_GetTitle(&tag));
+            if (string_ok(value))
+                item->setTitle(value);
+            break;
+        case M_ARTIST:
+            value = String(ID3_GetArtist(&tag));
+            break;
+        case M_ALBUM:
+            value = String(ID3_GetAlbum(&tag));
+            break;
+        case M_YEAR:
+            value = String(ID3_GetYear(&tag));
+            break;
+        case M_GENRE:
+            value = String(ID3_GetGenre(&tag));
+            break;
+        case M_COMMENT:
+            value = String(ID3_GetComment(&tag));
+            if (string_ok(value))
+                item->setDescription(value);
+            break;
+        default:
+            return;
+    }
 }
 
 
