@@ -454,14 +454,16 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic)
         Ref<CdsContainer> cont(new CdsContainer());
         obj = RefCast(cont, CdsObject);
         cont->setLocation(path);
+        Ref<StringConverter> f2i = StringConverter::f2i();
+        obj->setTitle(f2i->convert(filename));
     }
     else
     {
         // only regular files and directories are supported
         throw Exception(String("ContentManager: skipping file ") + path.c_str());
     }
-    Ref<StringConverter> f2i = StringConverter::f2i();
-    obj->setTitle(f2i->convert(filename));
+//    Ref<StringConverter> f2i = StringConverter::f2i();
+//    obj->setTitle(f2i->convert(filename));
     return obj;
 }
 
