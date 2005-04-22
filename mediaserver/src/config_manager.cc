@@ -141,9 +141,11 @@ void ConfigManager::validate()
     // now go through the optional settings and fix them if anything is missing
    
     temp = getOption("/server/ui/attribute::enabled", DEFAULT_UI_VALUE);
-    if ((!string_ok(temp)) || ((temp != "yes") && (temp != "no")))
+    if ((temp != "yes") && (temp != "no"))
         throw Exception("Error in config file: incorrect parameter for <ui enabled=\"\" /> attribute");
 
+    getOption("/import/mappings/extension-mimetype/attribute::ignore-unknown",
+              DEFAULT_IGNORE_UNKNOWN_EXTENSIONS);
 
     getOption("/import/filesystem-charset", DEFAULT_FILESYSTEM_CHARSET);
     printf("checking ip..");

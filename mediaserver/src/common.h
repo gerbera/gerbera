@@ -94,6 +94,7 @@
 #define DEFAULT_UI_VALUE                "no"
 #define DEFAULT_ALIVE_INTERVAL          180
 #define DEFAULT_BOOKMARK_FILE           "mediatomb.html"
+#define DEFAULT_IGNORE_UNKNOWN_EXTENSIONS "no"
 
 #endif // __COMMON_H__
 
