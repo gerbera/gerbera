@@ -37,6 +37,7 @@ public:
     
     static zmm::Ref<StringConverter> i2f();
     static zmm::Ref<StringConverter> f2i();
+    static zmm::Ref<StringConverter> m2i();
 };
 
 #endif // __STRING_CONVERTER_H__

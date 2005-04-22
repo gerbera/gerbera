@@ -128,4 +128,10 @@ Ref<StringConverter> StringConverter::f2i()
         ConfigManager::getInstance()->getOption("/import/filesystem-charset"), DEFAULT_INTERNAL_CHARSET));
     return conv;
 }
-
+Ref<StringConverter> StringConverter::m2i()
+{
+    Ref<ConfigManager> cm = ConfigManager::getInstance();
+    Ref<StringConverter> conv(new StringConverter(
+        ConfigManager::getInstance()->getOption("/import/metadata-charset"), DEFAULT_INTERNAL_CHARSET));
+    return conv;
+}
