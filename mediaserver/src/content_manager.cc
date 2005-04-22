@@ -34,6 +34,7 @@ extern "C" {
 #include "config_manager.h"
 #include "update_manager.h"
 #include "string_converter.h"
+#include "metadata_reader.h"
 
 struct magic_set *ms = NULL;
 
@@ -193,13 +194,76 @@ void ContentManager::addFile(String path, int recursive)
     }
 
 	if (IS_CDS_ITEM(obj->getObjectType()))
+    {
 		scripting->processCdsObject(obj);
+    }
 
     if (recursive && IS_CDS_CONTAINER(obj->getObjectType()))
     {
         addRecursive(path, curParentID);
     }
     um->flushUpdates();
+}
+
+/* scans the given directory and adds everything recursively */
+void ContentManager::addRecursive(String path, String parentID)
+{
+    Ref<StringConverter> f2i = StringConverter::f2i();
+
+    Ref<UpdateManager> um = UpdateManager::getInstance();
+    Ref<Storage> storage = Storage::getInstance();
+    DIR *dir = opendir(path.c_str());
+    if (! dir)
+    {
+        throw Exception(String("could not list directory ")+
+                        path + " : " + strerror(errno));
+    }
+    struct dirent *dent;
+    while ((dent = readdir(dir)) != NULL)
+    {
+        char *name = dent->d_name;
+        if (name[0] == '.')
+        {
+            if (name[1] == 0)
+            {
+                continue;
+            }
+            else if (name[1] == '.' && name[2] == 0)
+            {
+                continue;
+            }
+        }
+        String newPath = path + "/" + name;
+        try
+        {
+            Ref<CdsObject> obj = storage->findObjectByTitle(f2i->convert(name), parentID);
+            if (obj == nil) // create object
+            {
+                obj = createObjectFromFile(newPath);
+                if (obj == nil) // object ignored
+                {
+                    printf("file ignored: %s\n", newPath.c_str());
+                    return;
+                }
+                obj->setParentID(parentID);
+                storage->addObject(obj);
+                um->containerChanged(parentID);
+            }
+			if (IS_CDS_ITEM(obj->getObjectType()))
+			{
+				scripting->processCdsObject(obj);
+			}
+            if (IS_CDS_CONTAINER(obj->getObjectType()))
+            {
+                addRecursive(newPath, obj->getID());
+            }
+        }
+        catch(Exception e)
+        {
+            printf("skipping %s : %s\n", newPath.c_str(), e.getMessage().c_str());
+        }
+    }
+    closedir(dir);
 }
 
 void ContentManager::removeObject(String objectID)
@@ -335,68 +399,6 @@ Ref<CdsObject> ContentManager::convertObject(Ref<CdsObject> oldObj, int newType)
     return newObj;
 }
 
-
-/* scans the given directory and adds everything recursively */
-void ContentManager::addRecursive(String path, String parentID)
-{
-    Ref<StringConverter> f2i = StringConverter::f2i();
-
-    Ref<UpdateManager> um = UpdateManager::getInstance();
-    Ref<Storage> storage = Storage::getInstance();
-    DIR *dir = opendir(path.c_str());
-    if (! dir)
-    {
-        throw Exception(String("could not list directory ")+
-                        path + " : " + strerror(errno));
-    }
-    struct dirent *dent;
-    while ((dent = readdir(dir)) != NULL)
-    {
-        char *name = dent->d_name;
-        if (name[0] == '.')
-        {
-            if (name[1] == 0)
-            {
-                continue;
-            }
-            else if (name[1] == '.' && name[2] == 0)
-            {
-                continue;
-            }
-        }
-        String newPath = path + "/" + name;
-        try
-        {
-            Ref<CdsObject> obj = storage->findObjectByTitle(f2i->convert(name), parentID);
-            if (obj == nil) // create object
-            {
-                obj = createObjectFromFile(newPath);
-                if (obj == nil) // object ignored
-                {
-                    printf("file ignored: %s\n", newPath.c_str());
-                    return;
-                }
-                obj->setParentID(parentID);
-                storage->addObject(obj);
-                um->containerChanged(parentID);
-            }
-			if (IS_CDS_ITEM(obj->getObjectType()))
-			{
-				scripting->processCdsObject(obj);
-			}
-            if (IS_CDS_CONTAINER(obj->getObjectType()))
-            {
-                addRecursive(newPath, obj->getID());
-            }
-        }
-        catch(Exception e)
-        {
-            printf("skipping %s : %s\n", newPath.c_str(), e.getMessage().c_str());
-        }
-    }
-    closedir(dir);
-}
-
 Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic)
 {
     String filename = get_filename(path);
@@ -431,8 +433,10 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic)
             if (ignore_unknown_extensions)
                 return nil; // item should be ignored
             mimetype = get_mime_type(path);
-            if (mimetype != nil)
-                upnp_class = mimetype2upnpclass(mimetype);
+        }
+        if (mimetype != nil)
+        {
+            upnp_class = mimetype2upnpclass(mimetype);
         }
 
         Ref<CdsItem> item(new CdsItem());
@@ -442,6 +446,8 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic)
             item->setMimeType(mimetype);
         if (upnp_class != nil)
             item->setClass(upnp_class);
+        Ref<MetadataReader> metadataReader(new MetadataReader());
+        metadataReader->getMetadata(item);
     }
     else if (S_ISDIR(statbuf.st_mode))
     {
@@ -506,3 +512,134 @@ void ContentManager::reloadScripting()
 	destroyScripting();
 	initScripting();
 }
+
+/* experimental file adding */
+/*
+void ContentManager::addFile2(String path, int recursive)
+{
+	initScripting();
+
+    if (path.charAt(path.length() - 1) == '/')
+    {
+        path = path.substring(0, path.length() - 1);
+    }
+    Ref<Storage> storage = Storage::getInstance();
+
+    Ref<Array<StringBase> > parts = split_string(path, '/');
+    String curParentID = "0";
+    String curPath = "";
+    Ref<CdsObject> obj = storage->loadObject("0"); // root container
+
+    Ref<UpdateManager> um = UpdateManager::getInstance();
+    Ref<StringConverter> f2i = StringConverter::f2i();
+
+    for (int i = 0; i < parts->size(); i++)
+    {
+        String part = parts->get(i);
+        curPath = curPath + "/" + part;
+
+        obj = storage->findObjectByTitle(f2i->convert(part), curParentID);
+
+        if (obj == nil) // create object
+        {
+            obj = createObjectFromFile(curPath);
+            if (obj == nil) // object ignored
+            {
+                printf("file ignored: %s\n", curPath.c_str());
+                return;
+            }
+            obj->setParentID(curParentID);
+            storage->addObject(obj);
+            um->containerChanged(curParentID);
+        }
+        curParentID = obj->getID();
+    }
+
+	if (IS_CDS_ITEM(obj->getObjectType()))
+		scripting->processCdsObject(obj);
+
+    if (recursive && IS_CDS_CONTAINER(obj->getObjectType()))
+    {
+        addRecursive(path, curParentID);
+    }
+    um->flushUpdates();
+}
+*/
+
+/* scans the given directory and adds everything recursively */
+/*
+void ContentManager::addFile2(Ref<DirStack> dirStack, String parentID)
+{
+    Ref<StringConverter> f2i = StringConverter::f2i();
+
+    Ref<UpdateManager> um = UpdateManager::getInstance();
+    Ref<Storage> storage = Storage::getInstance();
+    DIR *dir = opendir(path.c_str());
+    if (! dir)
+    {
+        throw Exception(String("could not list directory ")+
+                        path + " : " + strerror(errno));
+    }
+    struct dirent *dent;
+    while ((dent = readdir(dir)) != NULL)
+    {
+        char *name = dent->d_name;
+        if (name[0] == '.')
+        {
+            if (name[1] == 0)
+            {
+                continue;
+            }
+            else if (name[1] == '.' && name[2] == 0)
+            {
+                continue;
+            }
+        }
+        String newPath = path + "/" + name;
+        try
+        {
+            Ref<CdsObject> obj = storage->findObjectByTitle(f2i->convert(name), parentID);
+            if (obj == nil) // create object
+            {
+                obj = createObjectFromFile(newPath);
+                if (obj == nil) // object ignored
+                {
+                    printf("file ignored: %s\n", newPath.c_str());
+                    return;
+                }
+                obj->setParentID(parentID);
+                storage->addObject(obj);
+                um->containerChanged(parentID);
+            }
+			if (IS_CDS_ITEM(obj->getObjectType()))
+			{
+				scripting->processCdsObject(obj);
+			}
+            if (IS_CDS_CONTAINER(obj->getObjectType()))
+            {
+                addRecursive(newPath, obj->getID());
+            }
+        }
+        catch(Exception e)
+        {
+            printf("skipping %s : %s\n", newPath.c_str(), e.getMessage().c_str());
+        }
+    }
+    closedir(dir);
+}
+*/
+
+/* DirStack object */
+/*
+DirStack::DirStack(String path) : Object()
+{
+    pathbuf = Ref<StringBuffer>(new StringBuffer(path));
+    dirstack = (dirstack_t *)malloc(sizeof(dirstack_t) * 20);
+}
+
+DirStack::init(String path)
+{
+    Ref<Array<StringBase> > parts = split_string(path, '/');
+    
+}
+*/

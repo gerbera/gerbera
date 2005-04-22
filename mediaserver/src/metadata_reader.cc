@@ -49,34 +49,34 @@ void MetadataReader::getID3(Ref<CdsItem> item)
     tag.Link(item->getLocation().c_str()); // the location has already been checked by the getMetadata function
 
     for (int i = 0; i <= M_COMMENT; i++)
-        addID3Field((metadata_fields_t) i, tag, item);
+        addID3Field((metadata_fields_t) i, &tag, item);
 }
 
-void MetadataReader::addID3Field(metadata_fields_t field, ID3_Tag tag, Ref<CdsItem> item)
+void MetadataReader::addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsItem> item)
 {
     String value;
    
     switch (field)
     {
         case M_TITLE:
-            value = String(ID3_GetTitle(&tag));
+            value = String(ID3_GetTitle(tag));
             if (string_ok(value))
                 item->setTitle(value);
             break;
         case M_ARTIST:
-            value = String(ID3_GetArtist(&tag));
+            value = String(ID3_GetArtist(tag));
             break;
         case M_ALBUM:
-            value = String(ID3_GetAlbum(&tag));
+            value = String(ID3_GetAlbum(tag));
             break;
         case M_YEAR:
-            value = String(ID3_GetYear(&tag));
+            value = String(ID3_GetYear(tag));
             break;
         case M_GENRE:
-            value = String(ID3_GetGenre(&tag));
+            value = String(ID3_GetGenre(tag));
             break;
         case M_COMMENT:
-            value = String(ID3_GetComment(&tag));
+            value = String(ID3_GetComment(tag));
             if (string_ok(value))
                 item->setDescription(value);
             break;

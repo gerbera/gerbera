@@ -52,7 +52,7 @@ typedef enum
 } metadata_fields_t; 
 
     void getID3(zmm::Ref<CdsItem> item);
-    void addID3Field(metadata_fields_t field, ID3_Tag tag, zmm::Ref<CdsItem> item);
+    void addID3Field(metadata_fields_t field, ID3_Tag *tag, zmm::Ref<CdsItem> item);
 };
 
 #endif
