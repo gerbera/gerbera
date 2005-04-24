@@ -74,6 +74,11 @@ public:
 
     /// \brief Makes a dictionary out of url encoded data.
     void decode(zmm::String url);
+
+    /// \brief Makes a shallow copy of the dictionary
+    zmm::Ref<Dictionary> clone();
+    bool isSubsetOf(zmm::Ref<Dictionary> other);
+    bool equals(zmm::Ref<Dictionary> other);
 };
 
 #endif // __DICTIONARY_H__

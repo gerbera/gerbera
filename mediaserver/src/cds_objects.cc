@@ -26,9 +26,9 @@ using namespace mxml;
 
 CdsObject::CdsObject() : Object()
 {
+    metadata = Ref<Dictionary>(new Dictionary());
     restricted = 1;
 }
-
 void CdsObject::setID(String id)
 {
     this->id = id;
@@ -107,6 +107,7 @@ void CdsObject::copyTo(Ref<CdsObject> obj)
     obj->setClass(upnp_class);
     obj->setLocation(location);
     obj->setVirtual(virt);
+    obj->setMetadata(metadata->clone());
 }
 int CdsObject::equals(Ref<CdsObject> obj, bool exactly)
 {
@@ -117,6 +118,8 @@ int CdsObject::equals(Ref<CdsObject> obj, bool exactly)
         title == obj->getTitle() &&
         upnp_class == obj->getClass()
        ))
+        return 0;
+    if (! metadata->equals(obj->getMetadata()))
         return 0;
     if (exactly && !
         (location == obj->getLocation() &&
@@ -162,6 +165,24 @@ Ref<CdsObject> CdsObject::createObject(int objectType)
         throw Exception(String("invalid object type :") + objectType);
     }
     return Ref<CdsObject>(pobj);
+}
+
+
+String CdsObject::getMetadata(String key)
+{
+    return metadata->get(key);
+}
+Ref<Dictionary> CdsObject::getMetadata()
+{
+    return metadata;
+}
+void CdsObject::setMetadata(String key, String value)
+{
+    metadata->put(key, value);
+}
+void CdsObject::setMetadata(Ref<Dictionary> metadata)
+{
+    this->metadata = metadata;
 }
 
 /* CdsItem */

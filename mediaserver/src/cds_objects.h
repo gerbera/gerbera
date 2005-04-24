@@ -24,6 +24,7 @@
 #define __CDS_OBJECTS_H__
 
 #include "common.h"
+#include "dictionary.h"
 
 #define OBJECT_TYPE_CONTAINER 1
 #define OBJECT_TYPE_ITEM 2
@@ -68,6 +69,8 @@ protected:
 
     /// \brief type of the object: item, container, etc.
     int objectType;
+
+    zmm::Ref<Dictionary> metadata;
 
 public:
     /// \brief Constructor, currently only sets the restricted flag to 1
@@ -118,6 +121,18 @@ public:
     /// \brief Query information on object type: item, container, etc.
     int getObjectType();
 
+    /// \brief Query single metadata value.
+    zmm::String getMetadata(zmm::String key);
+
+    /// \brief Query entire metadata dictionary.
+    zmm::Ref<Dictionary> getMetadata();
+
+    /// \brief Set a single metadata value.
+    void setMetadata(zmm::String key, zmm::String value);
+
+    /// \brief Set entire metadata dictionary.
+    void setMetadata(zmm::Ref<Dictionary> metadata);
+    
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
     virtual void copyTo(zmm::Ref<CdsObject> obj);

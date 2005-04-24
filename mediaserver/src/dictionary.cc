@@ -130,4 +130,32 @@ void Dictionary::decode(String url)
     }
 }
 
+Ref<Dictionary> Dictionary::clone()
+{
+    Ref<Dictionary> ret(new Dictionary());
+    int len = elements->size();
+    for (int i = 0; i < len; i++)
+    {
+        Ref<DictionaryElement> el = elements->get(i);
+        ret->put(el->getKey(), el->getValue());
+    }
+    return ret;
+}
+
+bool Dictionary::isSubsetOf(Ref<Dictionary> other)
+{
+    int len = elements->size();
+    for (int i = 0; i < len; i++)
+    {
+        Ref<DictionaryElement> el = elements->get(i);
+        if (el->getValue() != other->get(el->getKey()))
+            return 0;
+    }
+    return 1;
+}
+bool Dictionary::equals(Ref<Dictionary> other)
+{
+    return (isSubsetOf(other) && other->isSubsetOf(Ref<Dictionary>(this)));
+}
+
 
