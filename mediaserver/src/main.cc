@@ -25,7 +25,17 @@
 #include "config_manager.h"
 #include "common.h"
 
-#define OPTSTR "i:p:c:h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <unistd.h>
+#include <syslog.h>
+#include <string.h>
+
+#define OPTSTR "i:p:c:hd"
 
 using namespace zmm;
 
@@ -38,11 +48,14 @@ int main(int argc, char **argv, char **envp)
     int     o;
     char    *ip = NULL;
     unsigned short  port = 0;
+    bool    daemon = false;
+
     static struct option long_options[] = {
                    {"ip", 1, 0, 'i'},
                    {"port", 1, 0, 'p'},
                    {"config", 1, 0, 'c'},
                    {"help", 0, 0, 'h'},
+                   {"daemon", 0, 0, 'd'},
                    {0, 0, 0, 0}
                };
 
@@ -74,7 +87,11 @@ int main(int argc, char **argv, char **envp)
                 config_file = optarg;
                     
                 break;
-
+            case 'd':
+                printf("Starting in deamon mode...");
+                daemon = true;
+                break;
+                
             case '?':
                 printf("\n");
             case 'h':
@@ -84,14 +101,12 @@ Supported options:\n\
     --ip or -i         ip address\n\
     --port or -p       server port (the SDK only permits values => 49152)\n\
     --config or -c     configuration file to use\n\
+    --daemon or -d     run server in background\n\
     --help or -h       this help message\n\
 \n\
 For more information visit http://mediatomb.sourceforge.net/\n\n");
 
-                exit(0);
-
-//            case '?':
-//                break;
+                exit(EXIT_FAILURE);
 
             default:
                 break;
@@ -108,7 +123,7 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
         if ((config_file == nil) && (home == nil))
         {
             printf("No configuration specified and no user home directory set.\n");
-            exit(1);
+            exit(EXIT_FAILURE);
         }
 
         ConfigManager::init(config_file, home);
@@ -120,16 +135,70 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
                pe.context->location.c_str(),
                pe.context->line,
                pe.getMessage().c_str());
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     catch (Exception e)
     {
         printf("%s\n", e.getMessage().c_str());
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     server = Ref<Server>(new Server());
 
+    // starting as daemon if applicable
+    if (daemon)
+    {
+        // The daemon startup code was taken from the Linux Daemon Writing HOWTO
+        // written by Devin Watson <dmwatson@comcast.net>
+        // The HOWTO is Copyright by Devin Watson, under the terms of the BSD License.
+        
+        /* Our process ID and Session ID */
+        pid_t pid, sid;
+
+        /* Fork off the parent process */
+        pid = fork();
+        if (pid < 0) {
+            exit(EXIT_FAILURE);
+        }
+        /* If we got a good PID, then
+           we can exit the parent process. */
+        if (pid > 0) {
+            exit(EXIT_SUCCESS);
+        }
+
+        /* Change the file mode mask */
+        umask(0);
+
+        /* Open any logs here */        
+
+        /* Create a new SID for the child process */
+        sid = setsid();
+        if (sid < 0) {
+            /* Log the failure */
+            exit(EXIT_FAILURE);
+        }
+
+
+
+        /* Change the current working directory */
+        if ((chdir("/")) < 0) {
+            /* Log the failure */
+            exit(EXIT_FAILURE);
+        }
+
+        /* Close out the standard file descriptors */
+/*
+        close(STDIN_FILENO);
+        close(STDOUT_FILENO);
+        close(STDERR_FILENO);
+*/
+        /* Daemon-specific initialization goes here */
+
+    }
+
+
+    // prepare to run processes
+    init_process();
     
     try
     {
@@ -150,23 +219,21 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
         {
             e.printStackTrace();
         }
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     catch (Exception e)
     {
         e.printStackTrace();
-        exit(1);
+        exit(EXIT_FAILURE);
+    }
+   
+    // endless sleep
+    while (1)
+    {
+        sleep(3600);
     }
 
-
-    // prepare to run processes
-    init_process();
-    
-    // we are now initialised
-    // any keypress will cause us to quit
-    printf("\nPRESS ANY KEY TO QUIT!\n\n");
-    c = getchar();
-
+    /* RUN THIS UPON SIGTERM */
     try
     {
         server->upnp_cleanup();
@@ -174,15 +241,14 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     catch(UpnpException upnp_e)
     {
         printf("main: upnp error %d\n ", upnp_e.getErrorCode());
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     catch (Exception e)
     {
         e.printStackTrace();
-        exit(1);
+        exit(EXIT_FAILURE);
     }
-   
-    printf("main: end\n");
-
-    return 0;
+    /************************/
+    
+    return EXIT_SUCCESS;
 }
