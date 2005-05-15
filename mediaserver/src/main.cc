@@ -34,12 +34,14 @@
 #include <unistd.h>
 #include <syslog.h>
 #include <string.h>
+#include <signal.h>
 
 #define OPTSTR "i:p:c:hd"
 
 using namespace zmm;
 
-
+int shutdown_flag = 0;
+void signal_handler(int signal);
 
 int main(int argc, char **argv, char **envp)
 {
@@ -204,8 +206,8 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     {
         server->init();
         server->upnp_init(ip, port);
- //       String dump = ConfigManager::getInstance()->getElement("/")->print();
- //       printf("Modified config dump:\n%s\n", dump.c_str());
+//        String dump = ConfigManager::getInstance()->getElement("/")->print();
+//        printf("Modified config dump:\n%s\n", dump.c_str());
     }
     catch(UpnpException upnp_e)
     {
@@ -226,14 +228,17 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
         e.printStackTrace();
         exit(EXIT_FAILURE);
     }
-   
-    // endless sleep
-    while (1)
+
+    signal(SIGINT, signal_handler);
+    signal(SIGTERM, signal_handler);
+    
+    // wait until signalled to terminate
+    while (! shutdown_flag)
     {
         sleep(3600);
     }
-
-    /* RUN THIS UPON SIGTERM */
+   
+    /* shutting down */
     try
     {
         server->upnp_cleanup();
@@ -241,14 +246,19 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     catch(UpnpException upnp_e)
     {
         printf("main: upnp error %d\n ", upnp_e.getErrorCode());
-        exit(EXIT_FAILURE);
+        return EXIT_FAILURE;
     }
     catch (Exception e)
     {
         e.printStackTrace();
-        exit(EXIT_FAILURE);
+        return EXIT_FAILURE;
     }
-    /************************/
-    
+    printf("terminating\n");
     return EXIT_SUCCESS;
 }
+
+void signal_handler(int signal)
+{
+    shutdown_flag = 1;
+}
+
