@@ -26,11 +26,16 @@
 
 using namespace zmm;
 
+#define TOTAL_FIELDS    6
+static char * UPNP_NAMES[] = {"dc:title", "upnp:artist", "upnp:album", "dc:date", "upnp:genre", "dc:description" };
+
+
 MetadataReader::MetadataReader() : Object()
 {
+    total_fields = TOTAL_FIELDS;
 }
        
-void MetadataReader::getMetadata(Ref<CdsItem> item)
+void MetadataReader::setMetadata(Ref<CdsItem> item)
 {
     String location = item->getLocation();
 
@@ -43,14 +48,24 @@ void MetadataReader::getMetadata(Ref<CdsItem> item)
         getID3(item);
 }
 
+String MetadataReader::getFieldName(metadata_fields_t field)
+{
+    return String(UPNP_NAMES[field]);
+}
+
 void MetadataReader::getID3(Ref<CdsItem> item)
 {
     ID3_Tag tag;
 
-    tag.Link(item->getLocation().c_str()); // the location has already been checked by the getMetadata function
+    tag.Link(item->getLocation().c_str()); // the location has already been checked by the setMetadata function
 
-    for (int i = 0; i <= M_COMMENT; i++)
+    for (int i = 0; i < getMaxFields(); i++)
         addID3Field((metadata_fields_t) i, &tag, item);
+}
+
+int MetadataReader::getMaxFields()
+{
+    return total_fields;
 }
 
 void MetadataReader::addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsItem> item)
@@ -63,8 +78,6 @@ void MetadataReader::addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsI
     {
         case M_TITLE:
             value = String(ID3_GetTitle(tag));
-            if (string_ok(value))
-                item->setTitle(sc->convert(value));
             break;
         case M_ARTIST:
             value = String(ID3_GetArtist(tag));
@@ -80,9 +93,15 @@ void MetadataReader::addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsI
             break;
         case M_COMMENT:
             value = String(ID3_GetComment(tag));
-            if (string_ok(sc->convert(value)))
-                item->setDescription(value);
             break;
+        default:
+            return;
+    }
+
+    if (string_ok(value))
+    {
+        item->setMetadata(String("") + field, sc->convert(value));
+        printf("Setting metadata on item: %d, %s\n", field, sc->convert(value).c_str());
     }
 }
 

@@ -23,6 +23,7 @@
 #include "cds_resource_manager.h"
 #include "common.h"
 #include "config_manager.h"
+#include "metadata_reader.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -52,8 +53,21 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions)
         Ref<CdsItem> item = RefCast(obj, CdsItem);
 
         // optional argument
-        if (item->getDescription() != "")
-            result->appendTextChild("dc:description", item->getDescription());
+//        if (item->getDescription() != "")
+//            result->appendTextChild("dc:description", item->getDescription());
+
+        Ref<MetadataReader> mr(new MetadataReader());
+        String meta_value;
+
+        for (int i = 0; i < mr->getMaxFields(); i++)
+        {
+            meta_value = item->getMetadata(String("") + i);
+            if (string_ok(meta_value))
+                result->appendTextChild(mr->getFieldName((metadata_fields_t)i), meta_value);
+        }
+
+        printf("ITEM HAS FOLLOWING METADATA: %s\n", item->getMetadata()->encode().c_str());
+
 
         CdsResourceManager::getInstance()->addResources(item, result);
        
@@ -79,7 +93,7 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions)
         result->appendTextChild("mime-type", aitem->getMimeType());
     }
    
-//    printf("renderen DIDL: %s\n", result->print().c_str());
+    printf("renderen DIDL: %s\n", result->print().c_str());
 
     return result;
 }

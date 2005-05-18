@@ -449,7 +449,7 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic)
         Ref<StringConverter> f2i = StringConverter::f2i();
         obj->setTitle(f2i->convert(filename));
         Ref<MetadataReader> metadataReader(new MetadataReader());
-        metadataReader->getMetadata(item);
+        metadataReader->setMetadata(item);
     }
     else if (S_ISDIR(statbuf.st_mode))
     {

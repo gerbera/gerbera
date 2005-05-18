@@ -30,17 +30,6 @@
 #include "dictionary.h"
 #include "cds_objects.h"
 
-/// \brief This class is responsible for providing access to metadata information
-/// of various media. Currently only id3 is supported.
-class MetadataReader : public zmm::Object
-{
-    
-public:
-    MetadataReader();
-       
-    void getMetadata(zmm::Ref<CdsItem> item);
-
-protected:
 typedef enum
 {
     M_TITLE = 0,
@@ -51,6 +40,22 @@ typedef enum
     M_COMMENT,
 } metadata_fields_t; 
 
+
+/// \brief This class is responsible for providing access to metadata information
+/// of various media. Currently only id3 is supported.
+class MetadataReader : public zmm::Object
+{
+public:
+/// \brief Definition of the supported metadata fields.
+
+    MetadataReader();
+       
+    void setMetadata(zmm::Ref<CdsItem> item);
+    zmm::String getFieldName(metadata_fields_t field);
+    int getMaxFields();
+
+protected:
+    int total_fields;
     void getID3(zmm::Ref<CdsItem> item);
     void addID3Field(metadata_fields_t field, ID3_Tag *tag, zmm::Ref<CdsItem> item);
 };
