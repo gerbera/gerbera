@@ -117,12 +117,8 @@ void Dictionary::decode(String url)
         {
             String key(data, eqPos - data);
             String value(eqPos + 1, ampPos - eqPos - 1);
-            while (value.index('+') > -1)
-            {
-                char *dat = value.c_str();
-                char *plusPos = index(dat, '+');
-                *plusPos = ' ';
-            }
+            key = url_unescape(key);
+            value = url_unescape(value);
 
             put(key, value);
         }
@@ -158,4 +154,8 @@ bool Dictionary::equals(Ref<Dictionary> other)
     return (isSubsetOf(other) && other->isSubsetOf(Ref<Dictionary>(this)));
 }
 
+Ref<Array<DictionaryElement> > Dictionary::getElements()
+{
+    return elements;
+}
 

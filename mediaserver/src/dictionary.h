@@ -77,8 +77,14 @@ public:
 
     /// \brief Makes a shallow copy of the dictionary
     zmm::Ref<Dictionary> clone();
+
+    /// \brief returns true if the dictionary is a subset of another dictionary.#
     bool isSubsetOf(zmm::Ref<Dictionary> other);
+
+    /// \brief checks two dictionaries for equality
     bool equals(zmm::Ref<Dictionary> other);
+
+    zmm::Ref<zmm::Array<DictionaryElement> > getElements();
 };
 
 #endif // __DICTIONARY_H__

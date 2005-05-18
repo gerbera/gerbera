@@ -35,11 +35,20 @@ typedef enum
     M_TITLE = 0,
     M_ARTIST,
     M_ALBUM,
-    M_YEAR,
+    M_DATE,
     M_GENRE,
-    M_COMMENT,
+    M_DESCRIPTION,
+    M_MAX
 } metadata_fields_t; 
 
+typedef struct mt_key mt_key;
+struct mt_key
+{
+    char *sym;
+    char *upnp;
+};
+
+extern mt_key MT_KEYS[];
 
 /// \brief This class is responsible for providing access to metadata information
 /// of various media. Currently only id3 is supported.

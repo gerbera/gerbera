@@ -2,6 +2,7 @@
 #include "scripting.h"
 #include "storage.h"
 #include "content_manager.h"
+#include "metadata_reader.h"
 
 using namespace zmm;
 
@@ -50,7 +51,6 @@ static int js_get_int_property(JSContext *cx, JSObject *obj, String name, int de
     jsval val;
     int intVal;
 
-    JSString *str;
     if (!JS_GetProperty(cx, obj, name.c_str(), &val))
         return def;
     if (val == JSVAL_VOID)
@@ -58,6 +58,20 @@ static int js_get_int_property(JSContext *cx, JSObject *obj, String name, int de
     if (!JS_ValueToInt32(cx, val, &intVal))
         return def;
     return intVal;
+}
+
+static JSObject *js_get_object_property(JSContext *cx, JSObject *obj, String name)
+{
+    jsval val;
+    JSObject *js_obj;
+
+    if (!JS_GetProperty(cx, obj, name.c_str(), &val))
+        return NULL;
+    if (val == JSVAL_VOID)
+        return NULL;
+    if (!JS_ValueToObject(cx, val, &js_obj))
+        return NULL;
+    return js_obj;
 }
 
 static void js_set_property(JSContext *cx, JSObject *obj, char *name, String value)
@@ -126,6 +140,18 @@ static Ref<CdsObject> jsObject2cdsObject(JSContext *cx, JSObject *js)
     if (b >= 0)
         obj->setRestricted(b);
 
+    JSObject *js_meta = js_get_object_property(cx, js, "meta");
+    if (js_meta)
+    {
+        // NOTE: only metadata enumerated in MT_KEYS will be taken
+        for (int i = 0; i < M_MAX; i++)
+        {
+            val = js_get_property(cx, js_meta, MT_KEYS[i].upnp);
+            if (val != nil)
+                obj->setMetadata(MT_KEYS[i].upnp, val);
+        }
+    }
+
     // CdsItem
     if (IS_CDS_ITEM(objectType))
     {
@@ -193,6 +219,18 @@ static void cdsObject2jsObject(JSContext *cx, Ref<CdsObject> obj, JSObject *js)
 	// TODO: boolean type
 	i = obj->isRestricted();
     js_set_int_property(cx, js, "restricted", i);
+   
+    // setting metadata
+	JSObject *meta_js = JS_NewObject(cx, NULL, NULL, js);
+    Ref<Dictionary> meta = obj->getMetadata();
+    Ref<Array<DictionaryElement> > elements = meta->getElements();
+    int len = elements->size();
+    for (int i = 0; i < len; i++)
+    {
+        Ref<DictionaryElement> el = elements->get(i);
+        js_set_property(cx, meta_js, el->getKey().c_str(), el->getValue().c_str());
+    }
+	js_set_object_property(cx, js, "meta", meta_js);
 
     // CdsItem
     if (IS_CDS_ITEM(objectType))
@@ -440,13 +478,16 @@ void Scripting::init()
                                    OBJECT_TYPE_ACTIVE_ITEM);
     js_set_int_property(cx, glob, "OBJECT_TYPE_ITEM_EXTERNAL_URL",
                                    OBJECT_TYPE_ITEM_EXTERNAL_URL);
-    js_set_int_property(cx, glob, "OBJECT_TYPE_VIRTUAL_CONTAINER",
-                                   OBJECT_TYPE_VIRTUAL_CONTAINER);
 
-	String scriptPath = "scripts/add.js";
+    for (int i = 0; i < M_MAX; i++)
+    {
+        js_set_property(cx, glob, MT_KEYS[i].sym, MT_KEYS[i].upnp);
+    }
+    
+	String scriptPath = "scripts/import.js";
 	String scriptText = read_text_file(scriptPath);
 	if (scriptText == nil)
-		printf("UUUUUUUUUUUUUUU: could not read script %s\n", scriptPath.c_str());
+		printf("could not read script %s\n", scriptPath.c_str());
 /*
 	if (!JS_EvaluateScript(cx, glob, script.c_str(), script.length(),
 		scriptPath.c_str(), 0, &ret_val))
@@ -485,9 +526,9 @@ void Scripting::processCdsObject(Ref<CdsObject> obj)
 
     jsval ret_val;
 
-	JSObject *meta = JS_NewObject(cx, NULL, NULL, glob);
-	cdsObject2jsObject(cx, obj, meta);
-	js_set_object_property(cx, glob, "meta", meta);
+	JSObject *orig = JS_NewObject(cx, NULL, NULL, glob);
+	cdsObject2jsObject(cx, obj, orig);
+	js_set_object_property(cx, glob, "orig", orig);
 	if (!JS_ExecuteScript(cx, glob, script, &ret_val))
 	{
 		throw Exception("Scripting: failed to execute script");

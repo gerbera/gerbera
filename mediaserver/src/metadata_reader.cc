@@ -26,13 +26,19 @@
 
 using namespace zmm;
 
-#define TOTAL_FIELDS    6
-static char * UPNP_NAMES[] = {"dc:title", "upnp:artist", "upnp:album", "dc:date", "upnp:genre", "dc:description" };
+mt_key MT_KEYS[] = {
+    { "M_TITLE", "dc:title" },
+    { "M_ARTIST", "upnp:artist" },
+    { "M_ALBUM", "upnp:album" },
+    { "M_DATE", "dc:date" },
+    { "M_GENRE", "upnp:genre" },
+    { "M_DESCRIPTION", "dc:description" }
+};
 
 
 MetadataReader::MetadataReader() : Object()
 {
-    total_fields = TOTAL_FIELDS;
+    total_fields = M_MAX;
 }
        
 void MetadataReader::setMetadata(Ref<CdsItem> item)
@@ -50,7 +56,7 @@ void MetadataReader::setMetadata(Ref<CdsItem> item)
 
 String MetadataReader::getFieldName(metadata_fields_t field)
 {
-    return String(UPNP_NAMES[field]);
+    return String(MT_KEYS[field].upnp);
 }
 
 void MetadataReader::getID3(Ref<CdsItem> item)
@@ -85,13 +91,13 @@ void MetadataReader::addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsI
         case M_ALBUM:
             value = String(ID3_GetAlbum(tag));
             break;
-        case M_YEAR:
+        case M_DATE:
             value = String(ID3_GetYear(tag));
             break;
         case M_GENRE:
             value = String(ID3_GetGenre(tag));
             break;
-        case M_COMMENT:
+        case M_DESCRIPTION:
             value = String(ID3_GetComment(tag));
             break;
         default:
@@ -100,7 +106,7 @@ void MetadataReader::addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsI
 
     if (string_ok(value))
     {
-        item->setMetadata(String("") + field, sc->convert(value));
+        item->setMetadata(String(MT_KEYS[field].upnp), sc->convert(value));
         printf("Setting metadata on item: %d, %s\n", field, sc->convert(value).c_str());
     }
 }

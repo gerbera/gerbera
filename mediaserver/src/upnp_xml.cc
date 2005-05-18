@@ -59,11 +59,13 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions)
         Ref<MetadataReader> mr(new MetadataReader());
         String meta_value;
 
-        for (int i = 0; i < mr->getMaxFields(); i++)
+        Ref<Dictionary> meta = obj->getMetadata();
+        Ref<Array<DictionaryElement> > elements = meta->getElements();
+        int len = elements->size();
+        for (int i = 0; i < len; i++)
         {
-            meta_value = item->getMetadata(String("") + i);
-            if (string_ok(meta_value))
-                result->appendTextChild(mr->getFieldName((metadata_fields_t)i), meta_value);
+            Ref<DictionaryElement> el = elements->get(i);
+            result->appendTextChild(el->getKey(), el->getValue());
         }
 
         printf("ITEM HAS FOLLOWING METADATA: %s\n", item->getMetadata()->encode().c_str());
@@ -93,7 +95,7 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions)
         result->appendTextChild("mime-type", aitem->getMimeType());
     }
    
-    printf("renderen DIDL: %s\n", result->print().c_str());
+//    printf("renderen DIDL: %s\n", result->print().c_str());
 
     return result;
 }

@@ -160,7 +160,7 @@ static UpnpWebFileHandle web_open(IN const char *filename,
     }
 }
 
-                                                                                                                                                                         
+
 /// \brief Reads a previously opened file sequentially.
 /// \param f IOHandler that takes care of this request.
 /// \param buf This buffer will be filled by our read functions.

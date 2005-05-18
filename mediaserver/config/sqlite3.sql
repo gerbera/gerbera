@@ -6,6 +6,7 @@ CREATE TABLE media_files
     dc_title        VARCHAR(256),
     dc_description  TEXT,
     restricted      INTEGER NOT NULL DEFAULT 0,
+    metadata        TEXT,
 
     update_id       INTEGER NOT NULL DEFAULT 0,
     searchable      INTEGER NOT NULL DEFAULT 0,

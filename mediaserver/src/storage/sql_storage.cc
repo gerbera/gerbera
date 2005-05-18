@@ -33,6 +33,7 @@ enum
     _dc_description,
     _restricted,
     _is_virtual,
+    _metadata,
 
     _update_id,
     _searchable,
@@ -54,6 +55,7 @@ static String select_fields = "\
     dc_description, \
     restricted, \
     is_virtual, \
+    metadata, \
     \
     update_id, \
     searchable, \
@@ -108,6 +110,9 @@ void SQLStorage::addObject(Ref<CdsObject> obj)
     *fields << ", is_virtual";
     *values << ", " << obj->isVirtual();
 
+    *fields << ", metadata";
+    *values << ", " << quote(obj->getMetadata()->encode());
+
     if (IS_CDS_CONTAINER(objectType))
     {
         Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
@@ -161,6 +166,7 @@ void SQLStorage::updateObject(zmm::Ref<CdsObject> obj)
     *qb << ", dc_title = " << quote(obj->getTitle());
     *qb << ", restricted = " << obj->isRestricted();
     *qb << ", is_virtual = " << obj->isVirtual();
+    *qb << ", metadata = " << quote(obj->getMetadata()->encode());
 
     if(IS_CDS_CONTAINER(objectType))
     {
@@ -350,6 +356,9 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
     obj->setTitle(row->col(_dc_title));
     obj->setClass(row->col(_upnp_class));
     obj->setVirtual(atoi(row->col(_is_virtual).c_str()));
+    Ref<Dictionary> meta(new Dictionary());
+    meta->decode(row->col(_metadata));
+    obj->setMetadata(meta);
 
     int matched_types = 0;
 
