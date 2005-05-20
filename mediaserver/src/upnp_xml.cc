@@ -68,7 +68,7 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions)
             result->appendTextChild(el->getKey(), el->getValue());
         }
 
-        printf("ITEM HAS FOLLOWING METADATA: %s\n", item->getMetadata()->encode().c_str());
+        //printf("ITEM HAS FOLLOWING METADATA: %s\n", item->getMetadata()->encode().c_str());
 
 
         CdsResourceManager::getInstance()->addResources(item, result);
