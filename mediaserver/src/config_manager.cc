@@ -154,6 +154,22 @@ void ConfigManager::validate()
     getOption("/server/bookmark", DEFAULT_BOOKMARK_FILE);
     getOption("/server/name", DESC_FRIENDLY_NAME);
 
+    try
+    {
+        temp = getOption("/import/script");
+    }
+    catch (Exception ex)
+    {
+        temp = "";
+    }
+
+    if (string_ok(temp))
+            check_path_ex(construct_path(temp));
+
+    Ref<Element> script = getElement("/import/script");
+    if (script != nil)
+            script->setText(construct_path(temp));
+
     getIntOption("/server/port", 0); // 0 means, that the SDK will any free port itself
     getIntOption("/server/alive", DEFAULT_ALIVE_INTERVAL);
 
