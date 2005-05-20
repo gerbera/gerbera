@@ -3,6 +3,7 @@
 #include "storage.h"
 #include "content_manager.h"
 #include "metadata_reader.h"
+#include "config_manager.h"
 
 using namespace zmm;
 
@@ -484,7 +485,7 @@ void Scripting::init()
         js_set_property(cx, glob, MT_KEYS[i].sym, MT_KEYS[i].upnp);
     }
     
-	String scriptPath = "scripts/import.js";
+    String scriptPath = ConfigManager::getInstance()->getOption("/import/script");
 	String scriptText = read_text_file(scriptPath);
 	if (scriptText == nil)
 		printf("could not read script %s\n", scriptPath.c_str());
