@@ -157,16 +157,9 @@ protected:
     /// \brief mime-type of the media.
     zmm::String mimeType;
 
-//    /// \brief dc:description
-//    zmm::String description;
 public:
     /// \brief Constructor, sets the object type and default upnp:class (object.item)
     CdsItem();
-
-//    /// \brief Set object description (dc:description).
-//    void setDescription(zmm::String description);
-//    /// \brief Retrieve object description.
-//    zmm::String getDescription();
 
     /// \brief Set mime-type information of the media.
     void setMimeType(zmm::String mimeType);
