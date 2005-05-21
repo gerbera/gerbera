@@ -83,8 +83,7 @@ COMMON_LDADD = \
     uuid/libuuid.a \
     md5/libmd5.a \
     scripting/libscripting.a \
-    -lupnp -lixml -lthreadutil -lsqlite3 -lmagic -ljs -lid3
-
+    -lupnp -lixml -lthreadutil -lsqlite3 -lmagic -lid3 @sm_lib@
 
 mediatomb_SOURCES = main.cc
 mediatomb_LDADD = $(COMMON_LDADD)

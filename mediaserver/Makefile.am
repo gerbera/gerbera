@@ -1,5 +1,5 @@
 
-SUBDIRS = src scripts web config doc
+SUBDIRS = src scripts web config doc import_scripts
 
 EXTRA_DIST = mediatomb.spec
 

@@ -13,12 +13,13 @@ AC_CONFIG_FILES([
     src/storage/fs/Makefile
     src/uuid/Makefile
     src/md5/Makefile
+    src/scripting/Makefile
     config/Makefile
     doc/Makefile
     scripts/Makefile
     web/Makefile
     web/icons/Makefile
-    src/scripting/Makefile
+    import_scripts/Makefile
 ])
 
 AC_PROG_CXX
@@ -69,10 +70,28 @@ AC_CHECK_HEADER(sqlite3.h,
 
 AC_CHECK_HEADER(jsapi.h,
     [],
-    [AC_MSG_ERROR(jsapi.h not found, check JavaScript library installation)],
+    [
+        AC_MSG_ERROR(jsapi.h not found, check JavaScript library installation)
+        AC_CHECK_HEADER(smjs/jsapi.h,
+            [js_inc=-I/usr/include/smjs],
+            [AC_MSG_ERROR(spidermonkey javascript library not found)],
+        )
+    ],
     /* checking for jsapi.h */
     #define XP_UNIX 1
 )
+
+AC_CHECK_LIB(js, JS_NewObject,
+    [js_lib=-ljs],
+    [
+        AC_MSG_RESULT(not found)
+        AC_CHECK_LIB(smjs, JS_NewObject,
+            [js_lib=-lsmjs],
+            [AC_MSG_ERROR(spidermonkey javascript library not found)],
+        )
+    ]
+)
+AC_SUBST(js_lib)
 
 AC_OUTPUT
 
