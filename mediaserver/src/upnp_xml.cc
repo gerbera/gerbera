@@ -119,11 +119,12 @@ void UpnpXML_DIDLUpdateObject(Ref<CdsObject> obj, String text)
         if (title != nil && title != "")
             aitem->setTitle(title);
 
-        String description = root->getChildText("dc:description");
+        /// \todo description should be taken from the dictionary      
+/*        String description = root->getChildText("dc:description");
         if (description == nil)
             description = "";
         aitem->setDescription(description);
-
+*/
         String location = root->getChildText("location");
         if (location != nil && location != "")
             aitem->setLocation(location);
