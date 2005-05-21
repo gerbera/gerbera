@@ -194,7 +194,7 @@ CdsItem::CdsItem() : CdsObject()
     mimeType = "application/octet-stream";
 }
 
-void CdsItem::setDescription(String description)
+/*void CdsItem::setDescription(String description)
 {
     this->description = description;
 }
@@ -202,6 +202,7 @@ String CdsItem::getDescription()
 {
     return this->description;
 }
+*/
 void CdsItem::setMimeType(String mimeType)
 {
     this->mimeType = mimeType;
@@ -217,7 +218,7 @@ void CdsItem::copyTo(Ref<CdsObject> obj)
     if (! IS_CDS_ITEM(obj->getObjectType()))
         return;
     Ref<CdsItem> item = RefCast(obj, CdsItem);
-    item->setDescription(description);
+//    item->setDescription(description);
     item->setMimeType(mimeType);
 }
 int CdsItem::equals(Ref<CdsObject> obj, bool exactly)
@@ -226,7 +227,7 @@ int CdsItem::equals(Ref<CdsObject> obj, bool exactly)
     if (! CdsObject::equals(obj, exactly))
         return 0;
     return (
-        description == item->getDescription() &&
+//        description == item->getDescription() &&
         mimeType == item->getMimeType()
     );
 }

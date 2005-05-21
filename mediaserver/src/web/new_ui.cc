@@ -78,10 +78,11 @@ void web::new_ui::add_item()
     if (string_ok(upnp_class))
         item->setClass(upnp_class);
 
-    String description = param("description");
+    /// \todo descriptoin should be taken from the dictionary
+/*    String description = param("description");
     if (string_ok(description))
         item->setDescription(description);
-
+*/
     /// \todo is there a default setting? autoscan? import settings?
     String mimetype = param("mime-type");
     if (string_ok(mimetype))
@@ -107,10 +108,10 @@ void web::new_ui::add_url()
     if (string_ok(upnp_class))
         item->setClass(upnp_class);
 
-    String description = param("description");
+/*    String description = param("description");
     if (string_ok(description))
         item->setDescription(description);
-
+*/
     /// \todo is there a default setting? autoscan? import settings?
     String mimetype = param("mime-type");
     if (string_ok(mimetype))
@@ -137,10 +138,10 @@ void web::new_ui::add_active_item()
     if (string_ok(upnp_class))
         item->setClass(upnp_class);
 
-    String description = param("description");
+/*    String description = param("description");
     if (string_ok(description))
         item->setDescription(description);
-
+*/
     /// \todo is there a default setting? autoscan? import settings?
     String mimetype = param("mime-type");
     if (string_ok(mimetype))
@@ -295,7 +296,7 @@ void web::new_ui::process()
                 inputs->appendChild(addOption("URL: ", "location"));
             }
             inputs->appendChild(addOption("Class: ", "class", "object.item"));
-            inputs->appendChild(addOption("Description: ", "description"));
+//            inputs->appendChild(addOption("Description: ", "description"));
             inputs->appendChild(addOption("Mimetype: ", "mime-type"));
         }
         else if (object_type == TYPE_ACTIVE_ITEM)
@@ -303,7 +304,7 @@ void web::new_ui::process()
             select->addAttribute("default", TYPE_ACTIVE_ITEM);
             inputs->appendChild(addOption("Location: ", "location"));
             inputs->appendChild(addOption("Class: ", "class", "object.item.activeItem"));
-            inputs->appendChild(addOption("Description: ", "description"));
+//            inputs->appendChild(addOption("Description: ", "description"));
             inputs->appendChild(addOption("Mimetype: ", "mime-type"));
             inputs->appendChild(addOption("Action Script: ", "action"));
             inputs->appendChild(addOption("State: ", "state"));

@@ -304,10 +304,10 @@ void ContentManager::updateObject(String objectID, Ref<Dictionary> parameters)
         if (string_ok(location)) clone->setLocation(location);
 
         Ref<CdsItem> cloned_item = RefCast(clone, CdsItem);
-
+        /// \todo description should be taken out of the dictionary
 
         // description can be an empty string - if you want to clear it
-        if (description != nil) cloned_item->setDescription(description);
+//        if (description != nil) cloned_item->setDescription(description);
         if (string_ok(mimetype)) cloned_item->setMimeType(mimetype);
 
         if (!item->equals(clone, true))
@@ -332,7 +332,7 @@ void ContentManager::updateObject(String objectID, Ref<Dictionary> parameters)
         Ref<CdsActiveItem> cloned_item = RefCast(clone, CdsActiveItem);
 
         // state and description can be an empty strings - if you want to clear it
-        if (description != nil) cloned_item->setDescription(description);
+//        if (description != nil) cloned_item->setDescription(description);
         if (state != nil) cloned_item->setState(state);
 
         if (string_ok(mimetype)) cloned_item->setMimeType(mimetype);
