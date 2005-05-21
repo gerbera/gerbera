@@ -11,6 +11,7 @@
     </server>
     <import>
         <filesystem-charset>ISO-8859-1</filesystem-charset>
+        <script>import.js</script>
         <mappings>
             <mimetype-upnpclass>
                 <map from="audio/*" to="object.item.audioItem"/>
