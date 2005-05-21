@@ -157,9 +157,6 @@ static Ref<CdsObject> jsObject2cdsObject(JSContext *cx, JSObject *js)
     if (IS_CDS_ITEM(objectType))
     {
         Ref<CdsItem> item = RefCast(obj, CdsItem);
-        val = js_get_property(cx, js, "description");
-        if (val != nil)
-            item->setDescription(val);
 
         val = js_get_property(cx, js, "mimetype");
         if (val != nil)
@@ -237,9 +234,6 @@ static void cdsObject2jsObject(JSContext *cx, Ref<CdsObject> obj, JSObject *js)
     if (IS_CDS_ITEM(objectType))
     {
         Ref<CdsItem> item = RefCast(obj, CdsItem);
-		val = item->getDescription();
-		if (val != nil)
-			js_set_property(cx, js, "description", val);
 		val = item->getMimeType();
 		if (val != nil)
 			js_set_property(cx, js, "mimetype", val);
