@@ -30,7 +30,6 @@ enum
     _parent_id,
     _upnp_class,
     _dc_title,
-    _dc_description,
     _restricted,
     _is_virtual,
     _metadata,
@@ -52,7 +51,6 @@ static String select_fields = "\
     parent_id, \
     upnp_class, \
     dc_title, \
-    dc_description, \
     restricted, \
     is_virtual, \
     metadata, \
@@ -125,9 +123,6 @@ void SQLStorage::addObject(Ref<CdsObject> obj)
     if (IS_CDS_ITEM(objectType))
     {
         Ref<CdsItem> item = RefCast(obj, CdsItem);
-        *fields << ", dc_description";
-        *values << ", " << quote(item->getDescription());
-
         *fields << ", location";
         *values << ", " << quote(item->getLocation());
 
@@ -177,7 +172,6 @@ void SQLStorage::updateObject(zmm::Ref<CdsObject> obj)
     if(IS_CDS_ITEM(objectType))
     {
         Ref<CdsItem> item = RefCast(obj, CdsItem);
-        *qb << ", dc_description = " << quote(item->getDescription());
         *qb << ", location = " << quote(item->getLocation());
         *qb << ", mime_type = " << quote(item->getMimeType());
     }
