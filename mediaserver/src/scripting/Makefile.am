@@ -4,5 +4,5 @@ libscripting_a_SOURCES = \
     scripting.h \
     scripting.cc
 
-INCLUDES = -I.. -I@js_inc@
+INCLUDES = -I.. @common_includes@
 

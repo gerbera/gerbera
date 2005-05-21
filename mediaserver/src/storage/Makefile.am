@@ -7,5 +7,5 @@ libstorage_a_SOURCES = \
     sql_storage.h \
     sql_storage.cc
 
-INCLUDES = -I..
+INCLUDES = -I.. @common_includes@
 
