@@ -367,7 +367,6 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
     if (IS_CDS_ITEM(objectType))
     {
         Ref<CdsItem> item = RefCast(obj, CdsItem);
-        item->setDescription(row->col(_dc_description));
         item->setMimeType(row->col(_mime_type));
         item->setLocation(row->col(_location));
         matched_types++;
