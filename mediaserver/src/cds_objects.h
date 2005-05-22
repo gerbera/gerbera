@@ -45,6 +45,9 @@ protected:
     /// \brief ID of the object in the content directory
     zmm::String id;
 
+    /// \brief ID of the referenced object
+    zmm::String ref_id;
+
     /// \brief ID of the object's parent
     zmm::String parentID;
 
@@ -77,6 +80,12 @@ public:
 
     /// \brief Retrieve the object ID.
     zmm::String getID();
+
+    /// \brief Set the object ID.
+    void setRefID(zmm::String ref_id);
+
+    /// \brief Retrieve the object ID.
+    zmm::String getRefID();
 
     /// \brief Set the parent ID of the object.
     void setParentID(zmm::String parentID);
@@ -356,36 +365,6 @@ public:
 
     /// \briefe Retrieve number of children
     int getChildCount();
-
-    /// \brief Copies all object properties to another object.
-    /// \param obj target object (clone)
-    virtual void copyTo(zmm::Ref<CdsObject> obj);
-
-    /// \brief Checks if current object is equal to obj.
-    ///
-    /// See description for CdsObject::equals() for details.
-    virtual int equals(zmm::Ref<CdsObject> obj, bool exactly=false);
-
-    /// \brief Checks if the minimum required parameters for the object have been set and are valid.
-    virtual void validate();
-};
-
-/// \brief A virtual container.
-class CdsVirtualContainer : public CdsContainer
-{
-protected:
-    /// \brief searchable flag.
-    zmm::String filterScript;
-
-public:
-    /// \brief Constructor, initializes default values for the flags and sets the object type.
-    CdsVirtualContainer();
-
-    /// \brief Set the filter script flag.
-    void setFilterScript(zmm::String filterScript);
-
-    /// \brief Query filter script.
-    zmm::String getFilterScript();
 
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)

@@ -24,18 +24,18 @@ using namespace zmm;
 
 enum
 {
-    _object_type,
-
     _id,
+    _ref_id,
     _parent_id,
+    _object_type,
     _upnp_class,
     _dc_title,
-    _restricted,
+    _is_restricted,
     _is_virtual,
     _metadata,
 
     _update_id,
-    _searchable,
+    _is_searchable,
 
     _location,
     _mime_type,
@@ -44,19 +44,20 @@ enum
     _state
 };
 
-static String select_fields = "\
-    object_type, \
+static char *select_fields = "\
     \
     id, \
+    ref_id, \
     parent_id, \
+    object_type, \
     upnp_class, \
     dc_title, \
-    restricted, \
+    is_restricted, \
     is_virtual, \
     metadata, \
     \
     update_id, \
-    searchable, \
+    is_searchable, \
     \
     location, \
     mime_type, \
@@ -102,7 +103,7 @@ void SQLStorage::addObject(Ref<CdsObject> obj)
     *fields << ", dc_title";
     *values << ", " << quote(obj->getTitle());
 
-    *fields << ", restricted";
+    *fields << ", is_restricted";
     *values << ", " << obj->isRestricted();
 
     *fields << ", is_virtual";
@@ -117,7 +118,7 @@ void SQLStorage::addObject(Ref<CdsObject> obj)
         *fields << ", update_id";
         *values << ", " << cont->getUpdateID();
 
-        *fields << ", searchable";
+        *fields << ", is_searchable";
         *values << ", " << cont->isSearchable();
     }
     if (IS_CDS_ITEM(objectType))
@@ -159,7 +160,7 @@ void SQLStorage::updateObject(zmm::Ref<CdsObject> obj)
 
     *qb << ", upnp_class = " << quote(obj->getClass());
     *qb << ", dc_title = " << quote(obj->getTitle());
-    *qb << ", restricted = " << obj->isRestricted();
+    *qb << ", is_restricted = " << obj->isRestricted();
     *qb << ", is_virtual = " << obj->isVirtual();
     *qb << ", metadata = " << quote(obj->getMetadata()->encode());
 
@@ -167,7 +168,7 @@ void SQLStorage::updateObject(zmm::Ref<CdsObject> obj)
     {
         Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
         *qb << ", update_id = " << cont->getUpdateID();
-        *qb << ", searchable = " << cont->isSearchable();
+        *qb << ", is_searchable = " << cont->isSearchable();
     }
     if(IS_CDS_ITEM(objectType))
     {
@@ -346,7 +347,7 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
     /* set common properties */
     obj->setID(row->col(_id));
     obj->setParentID(row->col(_parent_id));
-    obj->setRestricted(atoi(row->col(_restricted).c_str()));
+    obj->setRestricted(atoi(row->col(_is_restricted).c_str()));
     obj->setTitle(row->col(_dc_title));
     obj->setClass(row->col(_upnp_class));
     obj->setVirtual(atoi(row->col(_is_virtual).c_str()));
@@ -359,7 +360,7 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
     if (IS_CDS_CONTAINER(objectType))
     {
         Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
-        cont->setSearchable(atoi(row->col(_searchable).c_str()));
+        cont->setSearchable(atoi(row->col(_is_searchable).c_str()));
         cont->setUpdateID(atoi(row->col(_update_id).c_str()));
         matched_types++;
     }

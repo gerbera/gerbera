@@ -38,6 +38,15 @@ String CdsObject::getID()
     return id;
 }
 
+void CdsObject::setRefID(String ref_id)
+{
+    this->ref_id = ref_id;
+}
+String CdsObject::getRefID()
+{
+    return ref_id;
+}
+
 void CdsObject::setParentID(String parentID)
 {
     this->parentID = parentID;

@@ -68,15 +68,22 @@ static String get_mime_type(String file)
     }
     String mime_type(mt);
 
-    // cut off everything after first space character
-    int pos = mime_type.index(';');
-    int pos2 = mime_type.index(' ');
-    if (pos2 < pos)
-        pos = pos2;
-    if (pos >= 0)
-        mime_type = mime_type.substring(0, pos);
+    // cut off everything after first space or semicolon character
+    int cut_pos = -1;
 
-    return mime_type;
+    int pos;
+    pos = mime_type.index(';');
+    if (pos > 0)
+        cut_pos = pos;
+
+    pos = mime_type.index(' ');
+    if (pos > 0 && pos < cut_pos)
+        cut_pos = pos;
+
+    if (cut_pos > 0)
+        return mime_type.substring(0, cut_pos);
+    else
+        return mime_type;
  }
 
 /***************************************************************/
