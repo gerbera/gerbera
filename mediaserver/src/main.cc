@@ -35,8 +35,10 @@
 #include <syslog.h>
 #include <string.h>
 #include <signal.h>
+#include <pwd.h>
+#include <grp.h>
 
-#define OPTSTR "i:p:c:hd"
+#define OPTSTR "i:p:c:u:g:hd"
 
 using namespace zmm;
 
@@ -52,17 +54,24 @@ int main(int argc, char **argv, char **envp)
     unsigned short  port = 0;
     bool    daemon = false;
 
+    struct passwd *pwd;
+    struct group  *grp;
+
     static struct option long_options[] = {
                    {"ip", 1, 0, 'i'},
                    {"port", 1, 0, 'p'},
                    {"config", 1, 0, 'c'},
                    {"help", 0, 0, 'h'},
                    {"daemon", 0, 0, 'd'},
+                   {"user", 1, 0, 'u'},
+                   {"group", 1, 0, 'g'},
                    {0, 0, 0, 0}
                };
 
     String config_file;
     String home;
+    String user;
+    String group;
 
     printf("\nMediaTomb UPnP Server version %s\n\n", SERVER_VERSION);
     
@@ -93,6 +102,16 @@ int main(int argc, char **argv, char **envp)
                 printf("Starting in deamon mode...");
                 daemon = true;
                 break;
+
+            case 'u':
+                printf("Running as user: %s\n", optarg);
+                user = optarg;
+                break;
+
+            case 'g':
+                printf("Running as group: %s\n", optarg);
+                group = optarg;
+                break;
                 
             case '?':
                 printf("\n");
@@ -104,6 +123,8 @@ Supported options:\n\
     --port or -p       server port (the SDK only permits values => 49152)\n\
     --config or -c     configuration file to use\n\
     --daemon or -d     run server in background\n\
+    --group or -g      run server unser specified group name\n\
+    --user or -u       run server under specified username\n\
     --help or -h       this help message\n\
 \n\
 For more information visit http://mediatomb.sourceforge.net/\n\n");
@@ -115,6 +136,43 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
          }
     }
 
+
+    // check if user and/or group parameter was specified and try to run the server
+    // under the given user and/or group name
+    if (group != nil)
+    {
+        grp = getgrnam(group.c_str());
+        if (grp == NULL)
+        {
+            printf("Group %s not found!\n", group.c_str());
+            exit(EXIT_FAILURE);
+        }
+
+        if (setgid(grp->gr_gid) < 0)
+        {
+            printf("setgid failed %s\n", strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    if (user != nil)
+    {
+        pwd = getpwnam(user.c_str()); 
+        if (pwd == NULL)
+        {
+            printf("User %s not found!\n", user.c_str());
+            exit(EXIT_FAILURE);
+        }
+
+        if (setuid(pwd->pw_uid) < 0)
+        {
+            printf("setuid failed %s\n", strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+        
+    }
+   
+    
     // TODO: check if -c option is present, if not it is an error NOT to specify config file
     
     try
