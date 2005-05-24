@@ -276,6 +276,8 @@ void ContentManager::addRecursive(String path, String parentID)
 void ContentManager::removeObject(String objectID)
 {
     /// \todo when removing... what about container updates when removing recursively?
+    if (objectID == "0")
+        throw Exception("cannot remove root container");
     Ref<Storage> storage = Storage::getInstance();
     Ref<CdsObject> obj = storage->loadObject(objectID);
     storage->removeObject(objectID);
