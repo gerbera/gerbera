@@ -254,12 +254,12 @@ static void cdsObject2jsObject(JSContext *cx, Ref<CdsObject> obj, JSObject *js)
     if (IS_CDS_CONTAINER(objectType))
     {
         Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
-		// TODO: boolean type, hide updateID
-		i = cont->getUpdateID();
-		js_set_int_property(cx, js, "updateID", i);
-
-		i = cont->isSearchable();
-		js_set_int_property(cx, js, "searchable", i);
+        // TODO: boolean type, hide updateID
+        i = cont->getUpdateID();
+        js_set_int_property(cx, js, "updateID", i);
+        
+        i = cont->isSearchable();
+        js_set_int_property(cx, js, "searchable", i);
     }
 }
 
@@ -487,17 +487,17 @@ void Scripting::init()
 	if (!JS_EvaluateScript(cx, glob, script.c_str(), script.length(),
 		scriptPath.c_str(), 0, &ret_val))
 	{
-		throw Exception("Scripting: failed to evaluate script");
+             throw Exception("Scripting: failed to evaluate script");
 	}
 */
     JS_SetErrorReporter(cx, js_error_reporter);
 
-	script = JS_CompileScript(cx, glob, scriptText.c_str(), scriptText.length(),
-							  scriptPath.c_str(), 1);
-	if (! script)
-	{
-		printf("Scripting: failed to compile script\n");
-	}
+    script = JS_CompileScript(cx, glob, scriptText.c_str(), scriptText.length(),
+                              scriptPath.c_str(), 1);
+    if (! script)
+    {
+        printf("Scripting: failed to compile script\n");
+    }
 }
 Scripting::~Scripting()
 {
@@ -521,17 +521,17 @@ void Scripting::processCdsObject(Ref<CdsObject> obj)
 
     jsval ret_val;
 
-	JSObject *orig = JS_NewObject(cx, NULL, NULL, glob);
-	cdsObject2jsObject(cx, obj, orig);
-	js_set_object_property(cx, glob, "orig", orig);
-	if (!JS_ExecuteScript(cx, glob, script, &ret_val))
-	{
-		throw Exception("Scripting: failed to execute script");
-	}
-	printf("Script executed successfully\n");
+    JSObject *orig = JS_NewObject(cx, NULL, NULL, glob);
+    cdsObject2jsObject(cx, obj, orig);
+    js_set_object_property(cx, glob, "orig", orig);
+    if (!JS_ExecuteScript(cx, glob, script, &ret_val))
+    {
+        throw Exception("Scripting: failed to execute script");
+    }
+    printf("Script executed successfully\n");
 
-/*
-	if (!JS_EvaluateScript(cx, glob, script.c_str(), script.length(),
+    /*
+      if (!JS_EvaluateScript(cx, glob, script.c_str(), script.length(),
 		"test-script", 0, &ret_val))
 	{
 		throw Exception("Scripting: failed to evaluate script");
