@@ -42,6 +42,8 @@ ArrayBase::~ArrayBase()
 		if(obj)
 			obj->release();
 	}
+
+    free(arr);
 }
 int ArrayBase::size()
 {

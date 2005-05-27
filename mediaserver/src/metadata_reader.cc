@@ -67,6 +67,8 @@ void MetadataReader::getID3(Ref<CdsItem> item)
 
     for (int i = 0; i < getMaxFields(); i++)
         addID3Field((metadata_fields_t) i, &tag, item);
+
+    tag.Clear();
 }
 
 int MetadataReader::getMaxFields()
@@ -77,36 +79,46 @@ int MetadataReader::getMaxFields()
 void MetadataReader::addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsItem> item)
 {
     String value;
+    char*  ID3_retval;
   
     Ref<StringConverter> sc = StringConverter::m2i();
     
     switch (field)
     {
         case M_TITLE:
-            value = String(ID3_GetTitle(tag));
+            ID3_retval = ID3_GetTitle(tag);
+            value = String(ID3_retval);
 /*            if (string_ok(value))
                     item->setTitle(sc->convert(value));
             return;
 */
             break;
         case M_ARTIST:
-            value = String(ID3_GetArtist(tag));
+            ID3_retval = ID3_GetArtist(tag);          
+            value = String(ID3_retval);
+
             break;
         case M_ALBUM:
-            value = String(ID3_GetAlbum(tag));
+            ID3_retval = ID3_GetAlbum(tag);
+            value = String(ID3_retval);
             break;
         case M_DATE:
-            value = String(ID3_GetYear(tag));
+            ID3_retval = ID3_GetYear(tag);
+            value = String(ID3_retval);
             break;
         case M_GENRE:
-            value = String(ID3_GetGenre(tag));
+            ID3_retval = ID3_GetGenre(tag);
+            value = String(ID3_retval);
             break;
         case M_DESCRIPTION:
-            value = String(ID3_GetComment(tag));
+            ID3_retval = ID3_GetComment(tag);
+            value = String(ID3_retval);
             break;
         default:
             return;
     }
+
+    if (ID3_retval) delete [] ID3_retval;
 
     if (string_ok(value))
     {

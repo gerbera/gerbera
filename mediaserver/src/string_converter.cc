@@ -104,8 +104,14 @@ zmm::String StringConverter::convert(String str)
 
 //    *output_copy = 0;
 //    printf("iconv: output: %s\n", output);
-    return String(output, output_copy - output);
+
+    String ret_str = String(output, output_copy - output);
+    free(output);
+    
+    //return String(output, output_copy - output);
+    return ret_str;
 }
+
 String StringConverter::validSubstring(String str, String encoding)
 {
     // TODO: validate string

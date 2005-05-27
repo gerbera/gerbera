@@ -35,6 +35,11 @@ FileInput::FileInput(String filename) : Input()
     }
 }
 
+FileInput::~FileInput()
+{
+    if (file) fclose(file);
+}
+
 int FileInput::readChar()
 {
     int ret = fgetc(file);
