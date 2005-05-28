@@ -13,6 +13,9 @@
         <filesystem-charset>ISO-8859-1</filesystem-charset>
         <script>import.js</script>
         <mappings>
+            <extension-mimetype ignore-unknown="no">
+                <map from="mp3" to="audio/mpeg"/>
+            </extension-mimetype>
             <mimetype-upnpclass>
                 <map from="audio/*" to="object.item.audioItem"/>
                 <map from="video/*" to="object.item.videoItem"/>

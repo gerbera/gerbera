@@ -31,4 +31,5 @@ INSERT INTO media_files(id, parent_id, object_type, dc_title, upnp_class)
     VALUES (0, -1, 1, 'Root', 'object.container');
 
 INSERT INTO media_files(id, parent_id, object_type, dc_title, upnp_class) 
-    VALUES (1, 0, 1, 'PC-Directory', 'object.container');
+    VALUES (1, 0, 1, 'PC Directory', 'object.container');
+
