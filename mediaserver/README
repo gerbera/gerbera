@@ -10,6 +10,28 @@ THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY! USE AT YOUR OWN RISK!
 NOTE: by default the server UI is disabled! Check the "SETUP" section to find
 out why and how to enable it.
 
+FEATURES
+--------
+
+The 0.8.x releases will focus on virtual containers. There are a lot of
+things that have to be taken care of, lots of known issues that have to
+be fixed. Here is a list of implemented features:
+- scriptable virtual containers
+- daemon mode
+- configurable filename to mimetype mappings
+- configurable mimetype to upnp:class mappings
+- add/remove/edit/browse media via the web UI
+- browse media via UPnP
+- stream/download media
+- cds container updates
+- adding external URLs
+- ActiveItems (see Help in the UI for details)
+
+Next planned features:
+- improvements for virtual containers 
+- transcoding
+- UPnP improvements (filter parameter for browse)
+
 INSTALLATION
 ------------
 
@@ -27,6 +49,10 @@ In order to compile MediaTomb you will have to install the following packages:
 
          The SDK RPMs that we are offering along with MediaTomb are patched
          with the above settings.
+
+  Note3: DSM-320 users - please read the forums on our SourceForge project
+         page. Some problems regarding the UPnP SDK, MediaTomb and the
+         DSM-320 are discussed there, some solutions are offered.
         
   If you are not using the RPM package, proceed as following:
 
@@ -66,6 +92,10 @@ In order to compile MediaTomb you will have to install the following packages:
 - Python - there is also a setup script that makes necessary installations
   in your home directory, you will need Python to run it.
 
+- SpiderMonkey (JavaScript-C) Engine http://www.mozilla.org/js/spidermonkey/
+  You will find some RPMs here: http://ftp.mozilla.org/pub/mozilla.org/js/
+
+- id3lib http://id3lib.sourceforge.net/ (at least version 3.8.3)
 
 If you fail to setup the server on your system please tell us which distro you
 are using and write a detailed description of what exactly happened during 
@@ -89,8 +119,8 @@ the web directory and the html redirector.
 By default the redirector is called mediatomb.html, it is created after
 the first launch of the server. Open a web browser and manually
 add this file as a bookmark. When the server is running, the redirector will
-forward you to the web UI. It is handy, because the server port may change
-upon restarts.
+forward you to the web UI. It is quite handy, because the server port may 
+change upon restarts.
 
 WHY IS THE WEB UI DISABLED BY DEFAULT?
 --------------------------------------
@@ -111,7 +141,7 @@ network interface.
 
 In order to enable the UI simply change <ui enabled="no"/> to 
 <ui enabled="yes"/> in the configuration file. 
-And don't blame us for anything!
+And don't blame us for anything! ;>
 
 CONFIGURATION
 -------------
@@ -189,9 +219,27 @@ Here is a sample configuration file with description of the various tags.
         parameter will help you to correctly import your data. (Default if
         missing: ISO-8859-1)
 
+    <script>
+        TODO by bgeradz
+
     <mappings>
         Defines various mapping options for importing media, currently
-        only one subsection is supported.
+        two subsections are supported.
+
+        <extension-mimetype ignore-unknown="no">
+            This section holds the filename extension to mimetype mappings.
+            
+            If "ignore-unknown" is set to "yes", then only the extensions 
+            that are listed in this section are imported. (Default if 
+            missing: no)
+
+            <map from="mp3" to="audio/mpeg"/>
+                Specifies a mapping from a certain filename extension
+                (everything after the last dot ".") to mimetype.
+
+                Note, that this improves the import speed, because
+                we then do not have to go through filemagic to 
+                get the mimetype information.
 
         <mimetype-upnpclass>
             This section holds the mimetype to upnp:class mappings. 
@@ -216,6 +264,9 @@ Supported options:
     --ip or -i         ip address
     --port or -p       server port (the SDK only permits values => 49152)
     --config or -c     configuration file to use
+    --daemon or -d     run server in background
+    --group or -g      run server unser specified group
+    --user or -u       run server under specified username
     --help or -h       this help message
 
 If you want to run a second server from the same PC, make sure to use a 
@@ -228,22 +279,10 @@ browser. This will redirect you to the UI if the server is running.
 Assuming that you enabeld the UI, you should now be able to get around
 quite easily.
 
-
-FEATURES
---------
-
-The first release is very basic, what you can do now is:
-- add/remove/edit/browse media via the web UI
-- browse media via UPnP
-- stream/download media
-- cds container updates
-- adding external URLs
-- ActiveItems (see Help in the UI for details)
-
-Next planned features:
-- virtual containers (configurable virtual folders for organizing media)
-- transcoding
-- UPnP improvements (filter parameter for browse)
+We now also support the daemon mode which allows to start the server in
+background, the --user and --group parameters should be used to run 
+the server under an unprivileged account. A script for 
+starting/stopping the server is also provided.
 
 ACKNOWLEDGEMENTS
 ----------------
@@ -266,7 +305,9 @@ We are using the following code in our tree:
 - all icons for the UI are from the redhat-artwork-0.117 package under GNU GPL, 
   (I could not find any (C) in the supplied documents)
  
-
+CONTRIBUTIONS
+-------------
+mediatomb startup script was contributed by 
 --------------------------------------------------------------------------------
 April 17, 2005
 
