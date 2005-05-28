@@ -14,7 +14,7 @@ DEFAULT_DABASE = "sqlite3.db"
 DEFAULT_FRNAME = "MediaTomb"
 # default webroot directory (shared between users)
 DEFAULT_WBROOT = "web"
-#default file that is holding the database dable
+#default file that is holding the database table
 DEFAULT_DBTABL = "sqlite3.sql"
 
 try:
