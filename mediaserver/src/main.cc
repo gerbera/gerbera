@@ -123,7 +123,7 @@ Supported options:\n\
     --port or -p       server port (the SDK only permits values => 49152)\n\
     --config or -c     configuration file to use\n\
     --daemon or -d     run server in background\n\
-    --group or -g      run server unser specified group name\n\
+    --group or -g      run server unser specified group\n\
     --user or -u       run server under specified username\n\
     --help or -h       this help message\n\
 \n\
