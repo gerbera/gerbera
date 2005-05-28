@@ -171,9 +171,10 @@ void ContentManager::addFile(String path, int recursive)
     Ref<Storage> storage = Storage::getInstance();
 
     Ref<Array<StringBase> > parts = split_string(path, '/');
-    String curParentID = "0";
+    String curParentID = "1";
+    /// \todo make PC-Directory id configurable
     String curPath = "";
-    Ref<CdsObject> obj = storage->loadObject("0"); // root container
+    Ref<CdsObject> obj = storage->loadObject(curParentID); // root container
 
     Ref<UpdateManager> um = UpdateManager::getInstance();
     Ref<StringConverter> f2i = StringConverter::f2i();
@@ -278,6 +279,9 @@ void ContentManager::removeObject(String objectID)
     /// \todo when removing... what about container updates when removing recursively?
     if (objectID == "0")
         throw Exception("cannot remove root container");
+    if (objectID == "1")
+        throw Exception("cannot remove PC-Directory container");
+    /// \todo make PC-Directory ID configurable
     Ref<Storage> storage = Storage::getInstance();
     Ref<CdsObject> obj = storage->loadObject(objectID);
     storage->removeObject(objectID);

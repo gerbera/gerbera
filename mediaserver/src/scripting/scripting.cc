@@ -503,10 +503,8 @@ void Scripting::init()
 }
 Scripting::~Scripting()
 {
-/*
-	if (glob)
-		JS_DestroyObject(glob);
-*/
+    if (script)
+        JS_DestroyScript(cx, script);
 	if (cx)
 		JS_DestroyContext(cx);
 	if (rt)
@@ -530,7 +528,7 @@ void Scripting::processCdsObject(Ref<CdsObject> obj)
     {
         throw Exception("Scripting: failed to execute script");
     }
-    printf("Script executed successfully\n");
+//    printf("Script executed successfully\n");
 
     /*
       if (!JS_EvaluateScript(cx, glob, script.c_str(), script.length(),
