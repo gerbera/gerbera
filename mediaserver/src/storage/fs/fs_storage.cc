@@ -180,7 +180,7 @@ Ref<Array<CdsObject> > FsStorage::browse(Ref<BrowseParam> param)
             if (pos <= 0)
                 parent_id = "0";
             else
-                parent_id = hex_encode(path.substring(0, pos).c_str(), path.length());
+                parent_id = hex_encode(path.c_str(), pos);
         }
         obj->setParentID(parent_id);
         obj->setID(id);

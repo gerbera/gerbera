@@ -28,6 +28,7 @@ CdsObject::CdsObject() : Object()
 {
     metadata = Ref<Dictionary>(new Dictionary());
     restricted = 1;
+    virt = 0;
 }
 void CdsObject::setID(String id)
 {

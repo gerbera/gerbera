@@ -38,7 +38,6 @@ mt_key MT_KEYS[] = {
 
 MetadataReader::MetadataReader() : Object()
 {
-    total_fields = M_MAX;
 }
        
 void MetadataReader::setMetadata(Ref<CdsItem> item)
@@ -65,15 +64,10 @@ void MetadataReader::getID3(Ref<CdsItem> item)
 
     tag.Link(item->getLocation().c_str()); // the location has already been checked by the setMetadata function
 
-    for (int i = 0; i < getMaxFields(); i++)
+    for (int i = 0; i < M_MAX; i++)
         addID3Field((metadata_fields_t) i, &tag, item);
 
     tag.Clear();
-}
-
-int MetadataReader::getMaxFields()
-{
-    return total_fields;
 }
 
 void MetadataReader::addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsItem> item)

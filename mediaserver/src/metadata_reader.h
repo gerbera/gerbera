@@ -61,10 +61,8 @@ public:
        
     void setMetadata(zmm::Ref<CdsItem> item);
     zmm::String getFieldName(metadata_fields_t field);
-    int getMaxFields();
 
 protected:
-    int total_fields;
     void getID3(zmm::Ref<CdsItem> item);
     void addID3Field(metadata_fields_t field, ID3_Tag *tag, zmm::Ref<CdsItem> item);
 };
