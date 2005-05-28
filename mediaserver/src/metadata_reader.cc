@@ -87,7 +87,6 @@ void MetadataReader::addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsI
     {
         case M_TITLE:
             ID3_retval = ID3_GetTitle(tag);
-            value = String(ID3_retval);
 /*            if (string_ok(value))
                     item->setTitle(sc->convert(value));
             return;
@@ -95,30 +94,27 @@ void MetadataReader::addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsI
             break;
         case M_ARTIST:
             ID3_retval = ID3_GetArtist(tag);          
-            value = String(ID3_retval);
-
             break;
         case M_ALBUM:
             ID3_retval = ID3_GetAlbum(tag);
-            value = String(ID3_retval);
             break;
         case M_DATE:
             ID3_retval = ID3_GetYear(tag);
-            value = String(ID3_retval);
             break;
         case M_GENRE:
             ID3_retval = ID3_GetGenre(tag);
-            value = String(ID3_retval);
             break;
         case M_DESCRIPTION:
             ID3_retval = ID3_GetComment(tag);
-            value = String(ID3_retval);
             break;
         default:
             return;
     }
 
-    if (ID3_retval) delete [] ID3_retval;
+    value = String(ID3_retval);
+    
+    if (ID3_retval)
+        delete [] ID3_retval;
 
     if (string_ok(value))
     {

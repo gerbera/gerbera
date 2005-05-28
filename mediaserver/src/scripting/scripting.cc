@@ -480,6 +480,8 @@ void Scripting::init()
     }
     
     String scriptPath = ConfigManager::getInstance()->getOption("/import/script");
+    printf("Read import script: %s\n", scriptPath.c_str());
+    
 	String scriptText = read_text_file(scriptPath);
 	if (scriptText == nil)
 		printf("could not read script %s\n", scriptPath.c_str());

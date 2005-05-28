@@ -35,7 +35,7 @@ protected:
     FILE *file;
 public:
     FileInput(zmm::String filename);
-    ~FileInput();
+    virtual ~FileInput();
 	virtual int readChar();
 };
 
