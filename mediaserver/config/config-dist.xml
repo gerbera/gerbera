@@ -4,7 +4,7 @@
         <name>__DEFAULT_NAME__</name>
         <udn/>
         <home>__DEFAULT_HOME__</home>
-        <webroot>web</webroot>
+        <webroot>__DEFAULT_WEBROOT__</webroot>
         <storage driver="sqlite3">
             <database-file>sqlite3.db</database-file>
         </storage>
