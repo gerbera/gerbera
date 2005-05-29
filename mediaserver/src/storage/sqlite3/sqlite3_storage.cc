@@ -59,12 +59,7 @@ void Sqlite3Storage::init()
 {
     Ref<ConfigManager> config = ConfigManager::getInstance();
 
-    String dbFile = config->getOption("/server/storage/database-file");
-    if (dbFile == nil)
-        throw StorageException("Sqlite3Storage: database-file option not found");
-    String dbFilePath = config->getOption("/server/home") + DIR_SEPARATOR + dbFile;
-
-    check_path_ex(dbFilePath, false);
+    String dbFilePath = config->getOption("/server/storage/database-file");
 
     int res = sqlite3_open(dbFilePath.c_str(), &db);
     if(res != SQLITE_OK)
