@@ -205,7 +205,7 @@ Ref<CdsObject> SQLStorage::loadObject(String objectID)
     {
         return createObjectFromRow(row);
     }
-    return nil;
+    throw Exception(String("Object not found: ") + objectID);
 }
 
 Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
