@@ -514,10 +514,7 @@ Scripting::~Scripting()
 void Scripting::processCdsObject(Ref<CdsObject> obj)
 {
     if (! script)
-    {
-        printf("Scripting environment not initialized\n");
         return;
-    }
 
     jsval ret_val;
 
