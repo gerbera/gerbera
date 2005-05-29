@@ -52,10 +52,6 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions)
     {
         Ref<CdsItem> item = RefCast(obj, CdsItem);
 
-        // optional argument
-//        if (item->getDescription() != "")
-//            result->appendTextChild("dc:description", item->getDescription());
-
         Ref<MetadataReader> mr(new MetadataReader());
         String meta_value;
 
@@ -63,14 +59,14 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions)
         Ref<Array<DictionaryElement> > elements = meta->getElements();
         int len = elements->size();
 
-        String check;
+        String key;
             
         for (int i = 0; i < len; i++)
         {
             Ref<DictionaryElement> el = elements->get(i);
-            check = el->getKey();
-            if (check != "dc:title")
-                result->appendTextChild(check, el->getValue());
+            key = el->getKey();
+            if (key != "dc:title")
+                result->appendTextChild(key, el->getValue());
         }
 
         //printf("ITEM HAS FOLLOWING METADATA: %s\n", item->getMetadata()->encode().c_str());
