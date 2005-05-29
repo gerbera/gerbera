@@ -100,7 +100,7 @@ void Server::upnp_init(String ip, unsigned short port)
     
     /// \TODO who should construct absolute paths??? config_manage or the modules?
     // next set webroot directory
-    String web_root =  config->getOption("/server/home") + DIR_SEPARATOR + (config->getOption("/server/webroot"));
+    String web_root = config->getOption("/server/webroot");
 
     if (!string_ok(web_root))
     {

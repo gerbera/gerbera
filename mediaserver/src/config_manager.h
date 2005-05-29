@@ -101,11 +101,10 @@ public:
 protected:
     // will be used only internally
     void save(zmm::String filename);
-    void create();
     void validate();
     void prepare_udn();
     zmm::String construct_path(zmm::String path);
-    void validate_paths(char **valid, bool isDir);
+    void prepare_path(zmm::String path, bool needDir = false);
 };
 
 #endif // __CONFIG_MANAGER_H__

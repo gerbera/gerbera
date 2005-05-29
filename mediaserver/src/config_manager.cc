@@ -105,10 +105,6 @@ void ConfigManager::init(String filename, String userhome)
     instance->validate();
 }
 
-void ConfigManager::create()
-{
-}
-
 void ConfigManager::validate()
 {
     String temp;
@@ -125,18 +121,24 @@ void ConfigManager::validate()
 
     // now go through the mandatory parameters, if something is missing
     // here we will not start the server
-    temp = checkOptionString("/server/home");
-    check_path_ex(temp, true);
+//    temp = checkOptionString("/server/home");
+//    check_path_ex(temp, true);
+
+    prepare_path("/server/home", true);
     
-    temp = checkOptionString("/server/webroot");
-    check_path_ex(construct_path(temp), true);
+//    temp = checkOptionString("/server/webroot");
+//    check_path_ex(construct_path(temp), true);
+
+    prepare_path("/server/webroot", true);
     
     // udn should be already prepared
     checkOptionString("/server/udn");
 
     checkOptionString("/server/storage/attribute::driver");
-    temp = checkOptionString("/server/storage/database-file");
-    check_path_ex(construct_path(temp));
+
+    prepare_path("/server/storage/database-file");
+//    temp = checkOptionString("/server/storage/database-file");
+//    check_path_ex(construct_path(temp));
 
     // now go through the optional settings and fix them if anything is missing
    
@@ -153,7 +155,7 @@ void ConfigManager::validate()
     getOption("/server/ip", ""); // bind to any IP address
     getOption("/server/bookmark", DEFAULT_BOOKMARK_FILE);
     getOption("/server/name", DESC_FRIENDLY_NAME);
-
+/*
     try
     {
         temp = getOption("/import/script");
@@ -169,6 +171,8 @@ void ConfigManager::validate()
     Ref<Element> script = getElement("/import/script");
     if (script != nil)
             script->setText(construct_path(temp));
+*/
+    prepare_path("/import/script");
 
     getIntOption("/server/port", 0); // 0 means, that the SDK will any free port itself
     getIntOption("/server/alive", DEFAULT_ALIVE_INTERVAL);
@@ -208,6 +212,21 @@ void ConfigManager::prepare_udn()
     
     if (need_to_save)
         save();
+}
+
+void ConfigManager::prepare_path(String xpath, bool needDir)
+{
+    String temp;
+
+    temp = checkOptionString(xpath);
+    
+    temp = construct_path(temp);
+
+    check_path_ex(temp, needDir);
+
+    Ref<Element> script = getElement(xpath);
+    if (script != nil)
+        script->setText(temp);
 }
 
 Ref<ConfigManager> ConfigManager::getInstance()
