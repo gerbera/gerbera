@@ -46,17 +46,13 @@ using namespace mxml;
 
 static Ref<RequestHandler> create_request_handler(const char *filename)
 {
-    printf("create_handler: start\n");
-
     String path, parameters;
     RequestHandler::split_url(filename, path, parameters);
 
-    printf("create_handler: got url parameters: [%s]\n", parameters.c_str());
+    //printf("create_handler: got url parameters: [%s]\n", parameters.c_str());
     
     Ref<Dictionary> dict(new Dictionary());
     dict->decode(parameters);
-
-    printf("create_handler: params decoded successfully\n");
 
     char *pos = rindex(path.c_str(), DIR_SEPARATOR);
     if (pos == NULL)
@@ -112,12 +108,12 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
 /// \return -1 Error.
 static int web_get_info(IN const char *filename, OUT struct File_Info *info)
 {
-    printf("web_get_info: start\n");
+    //printf("web_get_info: start\n");
     try
     {
         Ref<RequestHandler> reqHandler = create_request_handler(filename);
         reqHandler->get_info(filename, info);
-        printf("web_get_info: end, returning\n");
+      //  printf("web_get_info: end, returning\n");
     }
     catch(Exception e)
     {
@@ -149,7 +145,7 @@ static UpnpWebFileHandle web_open(IN const char *filename,
         Ref<RequestHandler> reqHandler = create_request_handler(filename);
         Ref<IOHandler> ioHandler = reqHandler->open(filename, mode);
         ioHandler->retain();
-        printf("web_open: end, returning\n");
+        //printf("web_open: end, returning\n");
         return (UpnpWebFileHandle) ioHandler.getPtr();
     }
     catch (Exception ex)

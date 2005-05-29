@@ -109,7 +109,7 @@ void MetadataReader::addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsI
     if (string_ok(value))
     {
         item->setMetadata(String(MT_KEYS[field].upnp), sc->convert(value));
-        printf("Setting metadata on item: %d, %s\n", field, sc->convert(value).c_str());
+//        printf("Setting metadata on item: %d, %s\n", field, sc->convert(value).c_str());
     }
 }
 

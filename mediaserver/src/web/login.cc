@@ -44,8 +44,6 @@ void web::login::get_info(IN const char *filename, OUT struct File_Info *info)
 
 void web::login::process()
 {
-    printf("login: start\n");
-
     // well... at the moment - unsupported
     /*
     String username = param("username");
@@ -79,8 +77,6 @@ void web::login::process()
     *out << "req_type=browse&object_id=0&requested_count=15&driver=1&sid=";
     *out << sid;
     *out << "\"></head></html>";
-    printf("%s\n", out->toString().c_str());
-
-    printf("login: returning\n");
+//    printf("%s\n", out->toString().c_str());
 }
 
