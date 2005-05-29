@@ -64,7 +64,7 @@ void web::refresh::process()
         throw Exception(String("invalid object id"));
 
     // Reinitialize scripting
-    ContentManager::getInstance()->reloadScripting();
+//    ContentManager::getInstance()->reloadScripting(); // DEBUG PURPOSES :>
 
     
     Ref<Dictionary> sub(new Dictionary());
