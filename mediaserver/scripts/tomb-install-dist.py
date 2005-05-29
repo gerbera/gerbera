@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-TOMB_INSTALL_VERSION = "0.2"
+TOMB_INSTALL_VERSION = "0.3"
 # source location of shared files, accessible by all users
 DEFAULT_SOURCE = "__DEFAULT_SOURCE__" 
 # server configuration directory
@@ -95,16 +95,6 @@ def create_dirs():
         raise InstallError("\nUnexpected error when creating directory " +\
                            "structure.")
 
-# create links to the icons, the web ui files and the service description
-# files
-# since I am too lazy to write an own routine that would create links 
-# recursively, I will simply run "ln -s /sourcedir/* ~/.mediatomb"
-#def create_links(dir):
-#    try:
-#        os.symlink(dir, os.path.join(os.path.expanduser(DEFAULT_SERVER), DEFAULT_WBROOT))
-#    except:
-#        raise InstallError("Could not link files!")
-
 # create sqlite3 database
 def create_database(name):
     try:
@@ -126,7 +116,7 @@ def create_database(name):
             "\n" + out[1])
 
 # finally prepare the config file 
-def write_config():
+def write_config(dir):
     try:
         f_in = open(os.path.join(DEFAULT_SOURCE, DEFAULT_DISCFG), 'r');
         cfg = f_in.read();
@@ -137,8 +127,13 @@ def write_config():
             raise InstallError("Distribution config file corrupted, could not set serverhome or name.")
 
         cfg = string.replace(cfg, "__DEFAULT_HOME__", os.path.expanduser(DEFAULT_SERVER), 1)
+        
         cfg = string.replace(cfg, "__DEFAULT_NAME__", DEFAULT_FRNAME +\
                              " (" + socket.gethostname() + ") / " + getpass.getuser(), 1)
+
+        cfg = string.replace(cfg, "__DEFAULT_WEBROOT__", os.path.join(DEFAULT_SOURCE, DEFAULT_WBROOT), 1)
+
+        cfg = string.replace(cfg, "__DEFAULT_SCRIPT__", os.path.join(DEFAULT_SOURCE, os.path.join(DEFAULT_IJSDIR, DEFAULT_ISCRPT)), 1)
 
         f_out = open(os.path.join(os.path.expanduser(DEFAULT_SERVER),\
                     DEFAULT_CONFIG), 'w')
@@ -162,14 +157,11 @@ def install_from(dir):
     print "Creating directories...",
     create_dirs()
     print "ok"
-    print "Creating links...",
-    create_links(os.path.join(dir, DEFAULT_WBROOT))
-    print "ok"
     print "Creating database...",
     create_database(DEFAULT_DABASE)
     print "ok"
     print "Writing configuration...",
-    write_config()
+    write_config(dir)
     print "ok"
     print
     print "All done. You are now ready to launch MediaTomb!"
