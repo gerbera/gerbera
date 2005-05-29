@@ -16,6 +16,10 @@ DEFAULT_FRNAME = "MediaTomb"
 DEFAULT_WBROOT = "web"
 #default file that is holding the database table
 DEFAULT_DBTABL = "sqlite3.sql"
+#default import script
+DEFAULT_ISCRPT = "import.js"
+#default directory for the import scripts
+DEFAULT_IJSDIR = "js"
 
 try:
     import os.path
@@ -95,11 +99,11 @@ def create_dirs():
 # files
 # since I am too lazy to write an own routine that would create links 
 # recursively, I will simply run "ln -s /sourcedir/* ~/.mediatomb"
-def create_links(dir):
-    try:
-        os.symlink(dir, os.path.join(os.path.expanduser(DEFAULT_SERVER), DEFAULT_WBROOT))
-    except:
-        raise InstallError("Could not link files!")
+#def create_links(dir):
+#    try:
+#        os.symlink(dir, os.path.join(os.path.expanduser(DEFAULT_SERVER), DEFAULT_WBROOT))
+#    except:
+#        raise InstallError("Could not link files!")
 
 # create sqlite3 database
 def create_database(name):

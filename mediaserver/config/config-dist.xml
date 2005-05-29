@@ -11,7 +11,7 @@
     </server>
     <import>
         <filesystem-charset>ISO-8859-1</filesystem-charset>
-        <script>import.js</script>
+        <script>__DEFAULT_SCRIPT__</script>
         <mappings>
             <extension-mimetype ignore-unknown="no">
                 <map from="mp3" to="audio/mpeg"/>
