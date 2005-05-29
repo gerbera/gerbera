@@ -307,7 +307,9 @@ We are using the following code in our tree:
  
 CONTRIBUTIONS
 -------------
-mediatomb startup script was contributed by 
+Initial version of the mediatomb startup script was contributed 
+by Iain Lea <iain@bricbrac.de>
+
 --------------------------------------------------------------------------------
 April 17, 2005
 
