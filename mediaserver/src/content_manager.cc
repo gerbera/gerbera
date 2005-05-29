@@ -91,12 +91,17 @@ static String get_mime_type(String file)
 static Ref<ContentManager> instance;
 
 ContentManager::ContentManager() : Object()
-{
+{  
     ignore_unknown_extensions = 0;
     ms = NULL;
 
+    shutdownFlag = false;
+
+    acct = Ref<CMAccounting>(new CMAccounting());    
+    taskQueue = Ref<Array<CMTask> >(new Array<CMTask>());    
+
     Ref<ConfigManager> cm = ConfigManager::getInstance();
-    Ref<Element> mapEl;
+    Ref<Element> mapEl;  
     
     // loading extension - mimetype map  
     mapEl = cm->getElement("/import/mappings/extension-mimetype");
@@ -124,8 +129,8 @@ ContentManager::ContentManager() : Object()
     else
     {
         mimetype_upnpclass_map = cm->createDictionaryFromNodeset(mapEl, "map", "from", "to");
-    }
-
+    }    
+    
     /* init fielmagic */
     if (! ignore_unknown_extensions)
     {
@@ -150,6 +155,40 @@ ContentManager::~ContentManager()
         magic_close(ms);
 }
 
+void ContentManager::init()
+{   
+    int ret;
+    ret = pthread_mutex_init(&taskMutex, NULL);
+    ret = pthread_cond_init(&taskCond, NULL);
+    
+    pthread_attr_t attr;
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    
+    ret = pthread_create(
+        &taskThread,
+        &attr, // attr
+        ContentManager::staticThreadProc,
+        this
+    );
+    
+    pthread_attr_destroy(&attr);
+
+    loadAccounting();
+}
+
+void ContentManager::shutdown()
+{
+    shutdownFlag = true;
+    lock();
+    signal();
+    unlock();
+    pthread_mutex_destroy(&taskMutex);
+// detached
+//    pthread_join(updateThread, NULL);
+}
+
+
 Ref<ContentManager> ContentManager::getInstance()
 {
     if (instance == nil)
@@ -159,7 +198,26 @@ Ref<ContentManager> ContentManager::getInstance()
     return instance;
 }
 
-void ContentManager::addFile(String path, int recursive)
+Ref<CMAccounting> ContentManager::getAccounting()
+{
+    return acct;
+}
+Ref<CMTask> ContentManager::getCurrentTask()
+{
+    Ref<CMTask> task;
+    lock();
+    task = currentTask;
+    unlock();
+    return task;
+}
+
+void ContentManager::_loadAccounting()
+{
+    Ref<Storage> storage = Storage::getInstance();
+    acct->totalFiles = storage->getTotalFiles();
+}
+
+void ContentManager::_addFile(String path, int recursive)
 {
 	initScripting();
 
@@ -194,8 +252,7 @@ void ContentManager::addFile(String path, int recursive)
                 return;
             }
             obj->setParentID(curParentID);
-            storage->addObject(obj);
-            um->containerChanged(curParentID);
+            addObject(obj);
         }
         curParentID = obj->getID();
     }
@@ -253,8 +310,7 @@ void ContentManager::addRecursive(String path, String parentID)
                     return;
                 }
                 obj->setParentID(parentID);
-                storage->addObject(obj);
-                um->containerChanged(parentID);
+                addObject(obj);
             }
 			if (IS_CDS_ITEM(obj->getObjectType()))
 			{
@@ -286,6 +342,10 @@ void ContentManager::removeObject(String objectID)
     storage->removeObject(obj);
     Ref<UpdateManager> um = UpdateManager::getInstance();
     um->containerChanged(obj->getParentID());
+    
+    // reload accounting
+    ContentManager::getInstance()->loadAccounting();
+    
     um->flushUpdates();
 }
 
@@ -384,6 +444,9 @@ void ContentManager::addObject(zmm::Ref<CdsObject> obj)
     Ref<UpdateManager> um = UpdateManager::getInstance();
     storage->addObject(obj);
     um->containerChanged(obj->getParentID());
+    
+    if (! obj->isVirtual() && IS_CDS_ITEM(obj->getObjectType()))
+        ContentManager::getInstance()->getAccounting()->totalFiles++;
 }
 
 void ContentManager::updateObject(Ref<CdsObject> obj)
@@ -566,7 +629,7 @@ void ContentManager::addFile2(String path, int recursive)
                 return;
             }
             obj->setParentID(curParentID);
-            storage->addObject(obj);
+            addObject(obj);
             um->containerChanged(curParentID);
         }
         curParentID = obj->getID();
@@ -625,7 +688,7 @@ void ContentManager::addFile2(Ref<DirStack> dirStack, String parentID)
                     return;
                 }
                 obj->setParentID(parentID);
-                storage->addObject(obj);
+                addObject(obj);
                 um->containerChanged(parentID);
             }
 			if (IS_CDS_ITEM(obj->getObjectType()))
@@ -660,3 +723,123 @@ DirStack::init(String path)
     
 }
 */
+
+void ContentManager::threadProc()
+{
+    Ref<CMTask> task;
+
+    while(! shutdownFlag)
+    {
+        /* if nothing to do, sleep until awakened */        
+        lock();
+        currentTask = nil;
+        if(taskQueue->size() == 0)
+        {
+            pthread_cond_wait(&taskCond, &taskMutex);            
+            unlock();
+            continue;
+        }
+        else
+        {
+            task = taskQueue->get(0);
+            taskQueue->remove(0, 1);
+            currentTask = task; 
+        }
+        unlock();
+
+        printf("Running async task: %s\n", task->getDescription().c_str());
+        task->run();
+    }
+}
+void *ContentManager::staticThreadProc(void *arg)
+{
+    ContentManager *inst = (ContentManager *)arg;
+    inst->threadProc();
+    pthread_exit(NULL);
+    return NULL;
+}
+void ContentManager::lock()
+{
+    pthread_mutex_lock(&taskMutex);
+}
+void ContentManager::unlock()
+{
+    pthread_mutex_unlock(&taskMutex);
+}
+void ContentManager::signal()
+{
+    pthread_cond_signal(&taskCond);
+}
+
+void ContentManager::addTask(zmm::Ref<CMTask> task)
+{
+    lock();
+    taskQueue->append(task);
+    signal();
+    unlock();
+}
+
+/* sync / async methods */
+void ContentManager::addFile(zmm::String path, int recursive, int async)
+{
+    if (async)
+    {
+        Ref<CMTask> task(new CMAddFileTask(path, recursive));
+        task->setDescription(String("Adding ") + path);
+        addTask(task);
+    }
+    else
+    {
+        _addFile(path, recursive);
+    }
+}
+void ContentManager::loadAccounting(int async)
+{
+    if (async)
+    {
+        Ref<CMTask> task(new CMLoadAccountingTask());
+        task->setDescription("Loading info");
+        addTask(task);
+    }
+    else
+    {
+        _loadAccounting();
+    }
+}
+
+
+CMTask::CMTask() : Object()
+{
+    cm = ContentManager::getInstance().getPtr();
+}
+void CMTask::setDescription(String description)
+{
+    this->description = description;
+}
+String CMTask::getDescription()
+{
+    return description;
+}
+
+
+CMAddFileTask::CMAddFileTask(String path, int recursive) : CMTask()
+{
+    this->path = path;
+    this->recursive = recursive;
+}
+void CMAddFileTask::run()
+{
+    cm->_addFile(path, recursive);
+}
+
+CMLoadAccountingTask::CMLoadAccountingTask() : CMTask()
+{}
+void CMLoadAccountingTask::run()
+{
+    cm->_loadAccounting();
+}
+
+CMAccounting::CMAccounting() : Object()
+{
+    totalFiles = 0;
+}

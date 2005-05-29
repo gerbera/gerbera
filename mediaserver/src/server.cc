@@ -20,6 +20,7 @@
 
 #include "server.h"
 #include "web_callbacks.h"
+#include "content_manager.h"
 #include "update_manager.h"
 #include "dictionary.h"
 #include "upnp_xml.h"
@@ -175,6 +176,9 @@ void Server::upnp_init(String ip, unsigned short port)
 
     // initializing UpdateManager
     UpdateManager::getInstance()->init();
+    
+    // initializing ContentManager
+    ContentManager::getInstance()->init();    
    
     config->writeBookmark(ip, String("") + port);
     

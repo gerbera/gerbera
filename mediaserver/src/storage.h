@@ -88,6 +88,9 @@ public:
     virtual void removeObject(zmm::String objectID);
     virtual zmm::Ref<zmm::Array<CdsContainer> > getContainerPath(zmm::String objectID);
 
+    /* accounting methods */
+    virtual int getTotalFiles(){ return 0; }
+    
     /* static methods */
     static zmm::Ref<Storage> getInstance(storage_type_t type = PRIMARY_STORAGE);
 protected:

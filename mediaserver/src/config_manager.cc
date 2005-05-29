@@ -102,7 +102,7 @@ void ConfigManager::init(String filename, String userhome)
     }
 
     instance->prepare_udn();    
-    instance->validate();
+    instance->validate();    
 }
 
 void ConfigManager::validate()

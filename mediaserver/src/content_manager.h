@@ -22,21 +22,74 @@
 #ifndef __CONTENT_MANAGER_H__
 #define __CONTENT_MANAGER_H__
 
+#include <pthread.h>
+
 #include "common.h"
 #include "cds_objects.h"
 #include "storage.h"
 #include "dictionary.h"
 #include "scripting/scripting.h"
 
+class ContentManager;
+
+class CMTask : public zmm::Object
+{
+protected:
+    ContentManager *cm;
+    zmm::String description;
+public:
+    CMTask();
+    virtual void run() = 0;
+    void setDescription(zmm::String description);
+    zmm::String getDescription();
+};
+
+class CMAddFileTask : public CMTask
+{
+protected:
+    zmm::String path;
+    int recursive;
+public:
+    CMAddFileTask(zmm::String path, int recursive=0);
+    virtual void run();
+};
+
+class CMLoadAccountingTask : public CMTask
+{
+public:
+    CMLoadAccountingTask();
+    virtual void run();
+};
+
+class CMAccounting : public zmm::Object
+{
+public:
+    CMAccounting();
+public:
+    int totalFiles;
+};
+
 class ContentManager : public zmm::Object
 {
 public:
     ContentManager();
     virtual ~ContentManager();
+    void init();
+    void shutdown();
 
     static zmm::Ref<ContentManager> getInstance();
+
+    zmm::Ref<CMAccounting> getAccounting();
+    zmm::Ref<CMTask> getCurrentTask();
     
-    void addFile(zmm::String path, int recursive=0);
+    /* sync/async methods */
+    void addFile(zmm::String path, int recursive=0, int async=true);
+    void loadAccounting(int async=true);
+    
+    /* don't use these, use the above methods */
+    void _addFile(zmm::String path, int recursive=0);
+    void _loadAccounting();
+    
     void removeObject(zmm::String objectID);
 
     /// \brief Updates an object in the database using the given parameters.
@@ -71,7 +124,7 @@ public:
 protected:
 	void initScripting();
 	void destroyScripting();
-
+    
     int ignore_unknown_extensions;
     zmm::Ref<Dictionary> extension_mimetype_map;
     zmm::Ref<Dictionary> mimetype_upnpclass_map;
@@ -81,8 +134,28 @@ protected:
 
     zmm::String extension2mimetype(zmm::String extension);
     zmm::String mimetype2upnpclass(zmm::String mimeType);
-	
+	  
 	zmm::Ref<Scripting> scripting;
+
+    void lock();
+    void unlock();
+    void signal();
+    static void *staticThreadProc(void *arg);
+    void threadProc();
+    
+    void addTask(zmm::Ref<CMTask> task);
+
+    zmm::Ref<CMAccounting> acct;
+    
+    pthread_t taskThread;
+    pthread_mutex_t taskMutex;
+    pthread_cond_t taskCond;
+
+    bool shutdownFlag;
+    
+    zmm::Ref<zmm::Array<CMTask> > taskQueue;
+    zmm::Ref<CMTask> currentTask;
+    
 };
 
 #endif // __CONTENT_MANAGER_H__

@@ -105,6 +105,8 @@ if (mime == 'audio')
 	obj.parentID = parentID;
 	var id = addCdsObject(obj);
 
+    // print('Added '+ obj.location);
+
 }
 
 

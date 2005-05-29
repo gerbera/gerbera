@@ -102,6 +102,15 @@ public:
     virtual void process();
 };
 
+/// \brief Show accounting information.
+class acct : public WebRequestHandler
+{
+public:
+    acct();
+    virtual void process();
+    void get_info(IN const char *filename, OUT struct File_Info *info);
+};
+
 /// \brief Display a page with an error message.
 class error : public WebRequestHandler
 {

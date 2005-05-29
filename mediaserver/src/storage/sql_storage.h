@@ -61,6 +61,9 @@ public:
 
     virtual void removeObject(zmm::Ref<CdsObject> object);
 
+    /* accounting methods */
+    virtual int getTotalFiles();   
+    
     virtual zmm::Ref<zmm::Array<CdsObject> > browse(zmm::Ref<BrowseParam> param);
     virtual zmm::Ref<zmm::Array<zmm::StringBase> > getMimeTypes();
 

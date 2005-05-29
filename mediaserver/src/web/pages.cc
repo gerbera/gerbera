@@ -33,6 +33,7 @@ WebRequestHandler *create_web_request_handler(String page)
     if (page == "error") return new web::error();
     if (page == "new") return new web::new_ui();
     if (page == "refresh") return new web::refresh();
+    if (page == "acct") return new web::acct();
     
     // ...
     

@@ -188,7 +188,6 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
 
         ConfigManager::init(config_file, home);
     }
-
     catch (mxml::ParseException pe)
     {
         printf("Error parsing config file: %s line %d:\n%s\n",
@@ -201,8 +200,8 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     {
         printf("%s\n", e.getMessage().c_str());
         exit(EXIT_FAILURE);
-    }
-
+    }    
+    
     server = Ref<Server>(new Server());
 
     // starting as daemon if applicable

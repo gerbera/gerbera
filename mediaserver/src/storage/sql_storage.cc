@@ -430,3 +430,19 @@ void SQLStorage::eraseObject(Ref<CdsObject> object)
 {
     throw Exception("SQLStorage::eraseObject shuold never be called !!!!\n");
 }
+
+int SQLStorage::getTotalFiles()
+{
+    Ref<StringBuffer> query(new StringBuffer());
+    *query << "SELECT COUNT(*) FROM media_files WHERE "
+           << "object_type <> " << OBJECT_TYPE_CONTAINER
+           << " AND is_virtual = 0";
+    Ref<SQLResult> res = select(query->toString());
+    Ref<SQLRow> row;
+    if ((row = res->nextRow()) != nil)
+    {
+        return row->col(0).toInt();
+    }
+    return 0;    
+}
+
