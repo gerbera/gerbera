@@ -503,10 +503,8 @@ void Scripting::init()
 }
 Scripting::~Scripting()
 {
-/*
     if (script)
         JS_DestroyScript(cx, script);
-*/
     if (cx)
 		JS_DestroyContext(cx);
 	if (rt)

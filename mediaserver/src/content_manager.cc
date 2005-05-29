@@ -92,6 +92,8 @@ static Ref<ContentManager> instance;
 
 ContentManager::ContentManager() : Object()
 {
+    ignore_unknown_extensions = 0;
+    ms = NULL;
 
     Ref<ConfigManager> cm = ConfigManager::getInstance();
     Ref<Element> mapEl;
@@ -106,8 +108,6 @@ ContentManager::ContentManager() : Object()
     {
         extension_mimetype_map = cm->createDictionaryFromNodeset(mapEl, "map", "from", "to");
     }
-
-    ignore_unknown_extensions = 0;
 
     String optIgnoreUnknown = cm->getOption(
         "/import/mappings/extension-mimetype/attribute::ignore-unknown");
@@ -127,7 +127,6 @@ ContentManager::ContentManager() : Object()
     }
 
     /* init fielmagic */
-    ms = NULL;
     if (! ignore_unknown_extensions)
     {
         ms = magic_open(MAGIC_MIME);

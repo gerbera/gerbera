@@ -81,10 +81,6 @@ void MetadataReader::addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsI
     {
         case M_TITLE:
             ID3_retval = ID3_GetTitle(tag);
-/*            if (string_ok(value))
-                    item->setTitle(sc->convert(value));
-            return;
-*/
             break;
         case M_ARTIST:
             ID3_retval = ID3_GetArtist(tag);          
