@@ -1,3 +1,5 @@
+SUBDIRS = js
+    
 bin_SCRIPTS = tomb-install
 CLEANFILES = $(bin_SCRIPTS)
 

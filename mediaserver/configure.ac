@@ -4,25 +4,25 @@ AM_INIT_AUTOMAKE(mediatomb, 0.7.1)
 AC_CONFIG_FILES([
     Makefile
 
+    doc/Makefile
+    config/Makefile
+    scripts/Makefile
+    scripts/js/Makefile
+
     src/Makefile
     src/mxml/Makefile
+    src/md5/Makefile
+    src/storage/Makefile
+    src/storage/fs/Makefile
+    src/storage/sqlite3/Makefile
+    src/scripting/Makefile
+    src/uuid/Makefile
+    src/web/Makefile
     src/zmm/Makefile
     src/zmmf/Makefile
-    src/uuid/Makefile
-    src/md5/Makefile
-
-    src/web/Makefile
-    src/storage/Makefile
-    src/storage/sqlite3/Makefile
-    src/storage/fs/Makefile
-    src/scripting/Makefile
     
-    config/Makefile
-    doc/Makefile
-    scripts/Makefile
     web/Makefile
     web/icons/Makefile
-    import_scripts/Makefile
 ])
 
 AC_PROG_CXX
