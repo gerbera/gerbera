@@ -59,7 +59,7 @@ void Server::upnp_init(String ip, unsigned short port)
 {
     int             ret = 0;        // general purpose error code
 
-    printf("upnp_init: start\n");
+//    printf("upnp_init: start\n");
 
     Ref<ConfigManager> config = ConfigManager::getInstance();
 
@@ -178,7 +178,7 @@ void Server::upnp_init(String ip, unsigned short port)
    
     config->writeBookmark(ip, String("") + port);
     
-    printf("upnp_init: end\n");
+//    printf("upnp_init: end\n");
 }
 
 void Server::upnp_cleanup()
@@ -187,7 +187,7 @@ void Server::upnp_cleanup()
 
     UpdateManager::getInstance()->shutdown();
 
-    printf("upnp_cleanup: start\n");
+//    printf("upnp_cleanup: start\n");
 
     // unregister device
     
@@ -196,10 +196,10 @@ void Server::upnp_cleanup()
         throw UpnpException(ret, "upnp_cleanup: UpnpUnRegisterRootDevice failed");
     }
    
-    printf("now calling upnp finish\n");
+//    printf("now calling upnp finish\n");
     UpnpFinish();
 
-    printf("upnp_cleanup: end\n");
+//    printf("upnp_cleanup: end\n");
 
     pthread_mutex_destroy(&upnp_mutex);
 }
@@ -214,7 +214,7 @@ int Server::upnp_callback(Upnp_EventType eventtype, void *event, void *cookie)
 {
     int ret = UPNP_E_SUCCESS; // general purpose return code
 
-    printf("upnp_callback: start\n");
+//    printf("upnp_callback: start\n");
 
     // check parameters
     if (event == NULL) {
@@ -222,18 +222,18 @@ int Server::upnp_callback(Upnp_EventType eventtype, void *event, void *cookie)
         return UPNP_E_BAD_REQUEST;
     }
 
-    printf("event is ok\n");
+//    printf("event is ok\n");
     // get device wide mutex (have to figure out what the hell that is)
     pthread_mutex_lock(&upnp_mutex);
 
-    printf("got device mutex\n");
+//    printf("got device mutex\n");
 
     // dispatch event based on event type
     switch (eventtype) {
 
         case UPNP_CONTROL_ACTION_REQUEST:
             // a CP is invoking an action
-            printf("upnp_callback: UPNP_CONTROL_ACTION_REQUEST\n");
+//            printf("upnp_callback: UPNP_CONTROL_ACTION_REQUEST\n");
             try
             {
                 Ref<ActionRequest> request(new ActionRequest((struct Upnp_Action_Request *)event));
@@ -255,7 +255,7 @@ int Server::upnp_callback(Upnp_EventType eventtype, void *event, void *cookie)
 
         case UPNP_EVENT_SUBSCRIPTION_REQUEST:
             // a cp wants a subscription
-            printf("upnp_callback: UPNP_EVENT_SUBSCRIPTION_REQUEST\n");
+//            printf("upnp_callback: UPNP_EVENT_SUBSCRIPTION_REQUEST\n");
             try
             {
                 Ref<SubscriptionRequest> request(new SubscriptionRequest((struct Upnp_Subscription_Request *)event));
@@ -278,8 +278,8 @@ int Server::upnp_callback(Upnp_EventType eventtype, void *event, void *cookie)
     // release device wide mutex
     pthread_mutex_unlock(&upnp_mutex);
 
-    printf("upnp_callback: returning %d\n", ret);
-    printf("upnp_callback: end\n");
+//    printf("upnp_callback: returning %d\n", ret);
+//    printf("upnp_callback: end\n");
     return ret;
 }
 
@@ -300,7 +300,7 @@ zmm::String Server::getPort()
 
 void Server::upnp_actions(Ref<ActionRequest> request)
 {
-    printf("upnp_actions: start\n");
+//    printf("upnp_actions: start\n");
 
     // make sure the request is for our device
     if (request->getUDN() != serverUDN)
@@ -314,13 +314,13 @@ void Server::upnp_actions(Ref<ActionRequest> request)
     if (request->getServiceID() == DESC_CM_SERVICE_ID)
     {
         // this call is for the lifetime stats service
-        printf("upnp_actions: request for connection manager service\n");
+//        printf("upnp_actions: request for connection manager service\n");
         cmgr->process_action_request(request);
     } 
     else if (request->getServiceID() == DESC_CDS_SERVICE_ID) 
     {
         // this call is for the toaster control service
-        printf("upnp_actions: request for content directory service\n");
+//        printf("upnp_actions: request for content directory service\n");
         cds->process_action_request(request);
     } 
     else 
@@ -339,7 +339,7 @@ void Server::upnp_subscriptions(Ref<SubscriptionRequest> request)
     if (request->getUDN() != serverUDN)
     {
         // not for us
-        printf("upnp_subscriptions: request not for this device\n");
+//        printf("upnp_subscriptions: request not for this device\n");
         throw UpnpException(UPNP_E_BAD_REQUEST,
                             "upnp_actions: request not for this device");
     }
@@ -349,13 +349,13 @@ void Server::upnp_subscriptions(Ref<SubscriptionRequest> request)
     if (request->getServiceID() == DESC_CDS_SERVICE_ID)
     {
         // this call is for the content directory service
-        printf("upnp_subscriptions: request for content directory service\n");
+//        printf("upnp_subscriptions: request for content directory service\n");
         cds->process_subscription_request(request);
     }
     else if (request->getServiceID() == DESC_CM_SERVICE_ID)
     {
         // this call is for the connection manager service
-        printf("upnp_subscriptions: request for connection manager service\n");
+//        printf("upnp_subscriptions: request for connection manager service\n");
         cmgr->process_subscription_request(request);
     } else {
         // cp asks for a nonexistent service or for a service that

@@ -159,7 +159,7 @@ Ref<Element> UpnpXML_CreateEventPropertySet()
 Ref<Element> UpnpXML_RenderDeviceDescription()
 {
 
-    printf("UpnpXML_RenderDeviceDescription(): start\n");
+//    printf("UpnpXML_RenderDeviceDescription(): start\n");
     Ref<ConfigManager> config = ConfigManager::getInstance();
 
     Ref<Element> root(new Element("root")); 
