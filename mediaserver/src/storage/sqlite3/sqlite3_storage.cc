@@ -78,48 +78,6 @@ String Sqlite3Storage::quote(String value)
     return ret;
 }
 
-static char *del_query = "DELETE FROM media_files WHERE id IN (";
-
-/*
-void Sqlite3Storage::removeObject(zmm::Ref<CdsObject> obj)
-{
-    LOCK_METHOD;
-
-    Ref<StringBuffer> query(new StringBuffer());
-    *query << del_query;
-    if(IS_CDS_CONTAINER(obj->getObjectType()))
-        removeChildren(obj, query);
-    *query << obj->getID() << ")";
-    exec(query->toString());
-
-    UNLOCK_METHOD;
-}
-
-void Sqlite3Storage::removeChildren(Ref<CdsObject> obj, Ref<StringBuffer> query)
-{
-    Ref<BrowseParam> param(new BrowseParam(obj->getID(),
-                           BROWSE_DIRECT_CHILDREN));
-    Ref<Array<CdsObject> > arr = browse(param);
-    for (int i = 0; i < arr->size(); i++)
-    {
-        Ref<CdsObject> child = arr->get(i);
-        if (IS_CDS_CONTAINER(child->getObjectType()))
-            removeChildren(child, query);
-        *query << child->getID();
-        if (query->length() > MAX_DELETE_QUERY_LENGTH)
-        {
-            printf("DEL QUERY: %s...\n", query->toString().substring(0, 65).c_str());
-            *query << ")";
-            exec(query->toString());
-            query->clear();
-            *query << del_query;
-        }
-        else
-            *query << ',';
-    }
-}
-*/
-
 void Sqlite3Storage::reportError(String query)
 {
     fprintf(stderr, "SQLITE3: (%d) %s\nQuery:%s\n",

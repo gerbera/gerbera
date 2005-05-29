@@ -22,6 +22,8 @@
 
 using namespace zmm;
 
+#define MAX_DELETE_QUERY_LENGTH 4096
+
 enum
 {
     _id,
@@ -188,10 +190,6 @@ void SQLStorage::updateObject(zmm::Ref<CdsObject> obj)
 //    printf("upd_query: %s\n", query->toString().c_str());
 
     this->exec(qb->toString());
-}
-void SQLStorage::eraseObject(Ref<CdsObject> object)
-{
-    exec(String("DELETE FROM media_files WHERE id = ") + object->getID());
 }
 
 Ref<CdsObject> SQLStorage::loadObject(String objectID)
@@ -388,3 +386,47 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
 }
 
 
+static char *del_query = "DELETE FROM media_files WHERE id IN (";
+
+void SQLStorage::removeObject(zmm::Ref<CdsObject> obj)
+{
+    Ref<StringBuffer> query(new StringBuffer());
+    *query << del_query;
+    if(IS_CDS_CONTAINER(obj->getObjectType()))
+        removeChildren(obj->getID(), query);
+    *query << obj->getID() << ")";
+    exec(query->toString());
+}
+
+void SQLStorage::removeChildren(String id, Ref<StringBuffer> query)
+{
+    String q = String("SELECT id, object_type"
+                      " FROM media_files WHERE parent_id = ") + id;
+    Ref<SQLResult> res = select(q);
+    Ref<SQLRow> row;
+
+    while ((row = res->nextRow()) != nil)
+    {
+        String childID = row->col(0);
+        int childObjectType = row->col(1).toInt();
+        if (IS_CDS_CONTAINER(childObjectType))
+            removeChildren(childID, query);
+
+        *query << childID;
+        if (query->length() > MAX_DELETE_QUERY_LENGTH)
+        {
+            printf("DEL QUERY: %s...\n", query->toString().substring(0, 65).c_str());
+            *query << ")";
+            exec(query->toString());
+            query->clear();
+            *query << del_query;
+        }
+        else
+            *query << ',';
+    }
+}
+
+void SQLStorage::eraseObject(Ref<CdsObject> object)
+{
+    throw Exception("SQLStorage::eraseObject shuold never be called !!!!\n");
+}

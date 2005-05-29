@@ -283,7 +283,7 @@ void ContentManager::removeObject(String objectID)
     /// \todo make PC-Directory ID configurable
     Ref<Storage> storage = Storage::getInstance();
     Ref<CdsObject> obj = storage->loadObject(objectID);
-    storage->removeObject(objectID);
+    storage->removeObject(obj);
     Ref<UpdateManager> um = UpdateManager::getInstance();
     um->containerChanged(obj->getParentID());
     um->flushUpdates();

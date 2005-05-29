@@ -59,12 +59,15 @@ public:
     virtual void eraseObject(zmm::Ref<CdsObject> object);
     virtual zmm::Ref<CdsObject> loadObject(zmm::String objectID);
 
+    virtual void removeObject(zmm::Ref<CdsObject> object);
+
     virtual zmm::Ref<zmm::Array<CdsObject> > browse(zmm::Ref<BrowseParam> param);
     virtual zmm::Ref<zmm::Array<zmm::StringBase> > getMimeTypes();
 
     virtual zmm::Ref<CdsObject> findObjectByTitle(zmm::String title, zmm::String parentID);
 protected:
     virtual zmm::Ref<CdsObject> createObjectFromRow(zmm::Ref<SQLRow> row);
+    void removeChildren(zmm::String id, zmm::Ref<zmm::StringBuffer> query);
 };
 
 #endif // __SQL_STORAGE_H__
