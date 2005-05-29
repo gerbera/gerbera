@@ -43,6 +43,7 @@ class UpdateManager : public zmm::Object
 {
 public:
     UpdateManager();
+    virtual ~UpdateManager();
     void init();
     void shutdown();
 

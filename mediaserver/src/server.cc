@@ -190,6 +190,7 @@ void Server::upnp_cleanup()
     int ret = 0; // return code    
 
     UpdateManager::getInstance()->shutdown();
+    ContentManager::getInstance()->shutdown();
 
 //    printf("upnp_cleanup: start\n");
 

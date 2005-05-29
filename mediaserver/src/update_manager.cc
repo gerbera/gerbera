@@ -68,6 +68,12 @@ UpdateManager::UpdateManager() : Object()
 {
     resetUpdates();
 } 
+UpdateManager::~UpdateManager()
+{
+    pthread_mutex_destroy(&updateMutex);
+    pthread_cond_destroy(&updateCond);
+} 
+
 void UpdateManager::resetUpdates()
 {
     updates = Ref<Array<UpdateInfo> >(new Array<UpdateInfo>(10));
@@ -101,7 +107,6 @@ void UpdateManager::shutdown()
     lock();
     pthread_cond_signal(&updateCond);
     unlock();
-    pthread_mutex_destroy(&updateMutex);
 // detached
 //    pthread_join(updateThread, NULL);
 }

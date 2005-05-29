@@ -153,6 +153,8 @@ ContentManager::~ContentManager()
 {
     if (ms)
         magic_close(ms);
+    pthread_mutex_destroy(&taskMutex);
+    pthread_cond_destroy(&taskCond);
 }
 
 void ContentManager::init()
@@ -183,7 +185,7 @@ void ContentManager::shutdown()
     lock();
     signal();
     unlock();
-    pthread_mutex_destroy(&taskMutex);
+
 // detached
 //    pthread_join(updateThread, NULL);
 }
@@ -747,8 +749,9 @@ void ContentManager::threadProc()
         }
         unlock();
 
-        printf("Running async task: %s\n", task->getDescription().c_str());
+        printf("Running asynchronous task: %s\n", task->getDescription().c_str());
         task->run();
+        printf("Finished asynchronous task\n");
     }
 }
 void *ContentManager::staticThreadProc(void *arg)
