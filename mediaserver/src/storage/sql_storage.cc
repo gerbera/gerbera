@@ -415,7 +415,7 @@ void SQLStorage::removeChildren(String id, Ref<StringBuffer> query)
         *query << childID;
         if (query->length() > MAX_DELETE_QUERY_LENGTH)
         {
-            printf("DEL QUERY: %s...\n", query->toString().substring(0, 65).c_str());
+//            printf("DEL QUERY: %s...\n", query->toString().substring(0, 65).c_str());
             *query << ")";
             exec(query->toString());
             query->clear();
