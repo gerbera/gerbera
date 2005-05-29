@@ -198,7 +198,7 @@ void UpdateManager::sendUpdates()
     
     // skip last comma
     String updateString(buf->c_str(), buf->length() - 1);
-    fprintf(stderr, "threadProc: sending updates: %s\n", updateString.c_str());
+//    fprintf(stderr, "threadProc: sending updates: %s\n", updateString.c_str());
 
     // send update string...
     ContentDirectoryService::getInstance()->subscription_update(updateString);
