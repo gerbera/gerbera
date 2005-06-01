@@ -1,41 +1,37 @@
-CODE
+Known Issues (ordered by importance)
 
-- lost+found (space +): bgeradz [DONE]
-- db lock: bgeradz [DONE]
-- sigterm: bgeradz
-- connection manager
-    * mime types from db: bgeradz [DONE]
-    * upnp action: jin [DONE] (protocol needs to be generealized serer wide)
-    * subscriptions: jin (check event frequency limit)
+- When directories are added recursively all subdirectories traversed
+  are always created in the PC Directory, regardless if any files from
+  those directories are taken to the database. This produces A LOT of
+  garbage in the PC Directory and must be fixed ASAP.
 
-- XML empty tag <udn />: bgeradz [DONE]
-- update manager
-    * thread sleep: bgeradz
-    * started twice: bgeradz
+- Deleting an arbitrary item does not trigger any consistency check.
+  Virtual items do not relate to their referenced items. This must be
+  changed. The item in a PC Directory would be the 'master copy'
+  and once deleted all referring virtual items should be deleted as well.
 
-- login
-    * disable login: jin [DONE]
-    * disable whole UI   [DONE]
-    * fix login password, encrypted pass transmissin: jin [CANCELLED]
-    * secure session id: jin [CANCELLED] (but we have a nicer id now)
-    
-CONFIGURE: bgeradz
-- upnp sdk (--with-upnp-sdk)
-- magic.h
-- sqlite3
-- iconv
-- various system headers
-- adapt source directory in tomb-install.py (DEFAULT_SOURCE)
+- Make all metadata produced by javascript be stored in the database.
+  Instead of iterating through all known metadata keys, should iterate
+  through all meta properties of the object given to addObject().
+  (still don't know how to iterate over properties with spidermonkey)
 
-INSTALL
-- /usr/bin/mediatomb (executable): bgeradz
-- /usr/share/mediatomb/web/*: bgeradz
-- /usr/bin/tomb-install: bgeradz
-- SPEC file, rpm, debuginfo: jin
-- install docs/script examples: ?
 
-HELP/DOCUMENTATION
-- README: jin
-- UI help: jin [DONE]
-- check GNU files: jin/bgeradz
+Planned improvements / features (ordered by importance)
+
+- introduce means to cascade scripts. Probably something like include()
+  function or preprocessor directive.
+
+- on the fly reloading of scripts and immediate automatic recreation
+  of virtual structure. Should be simple - delete all virtual objects and
+  pass every item inside the PC Directory to the script again. This will
+  lighten js development a lot.
+
+- Virtual and corresponding items should share common metadata. Normally
+  almost all metadata will be equal. Currently all data is copied for every
+  created virtual item. Metadata handling functionality should be reviewed
+  once more.
+  
+- include mysql support (already working) into the main branch
+  and write autoconf/automake stuff for conditional compilation of
+  sqlite3 and/or mysql storage. (That's a challenge :)
 
