@@ -47,12 +47,13 @@ def print_usage():
     print "Usage:", a[0].lstrip("./"), "[options]"
     print
     print "Supported options:"
+    print "   --targetdir or -t     Target directory for the installation (default: ~/.mediatomb)"
     print "   --sourcedir or -s     Directory where the original files reside."
     print "   --db-only or -d       Only create the database, must specify name"
     print "   --help or -h          This help text."
     print 
    
-def is_clean():
+def is_clean(DEFAULT_SERVER):
     if os.path.isdir(os.path.expanduser(DEFAULT_SERVER)):
         raise InstallError("\n\nA previous server configuration was found. " +\
                             "If you want to reinstall the server,\nremove "  +\
@@ -83,7 +84,7 @@ def check_permissions(dir):
         raise InstallERror("\nNo read access to source directory " + dir)
    
 # create directory structure        
-def create_dirs():
+def create_dirs(DEFAULT_SERVER):
     try:
         os.makedirs(os.path.expanduser(DEFAULT_SERVER))
     except IOError, (errno, strerror):
@@ -96,7 +97,7 @@ def create_dirs():
                            "structure.")
 
 # create sqlite3 database
-def create_database(name):
+def create_database(name, DEFAULT_SERVER):
     try:
         f = open(os.path.join(os.path.expanduser(DEFAULT_SOURCE), DEFAULT_DBTABL), 'r')
         s = f.read()
@@ -116,7 +117,7 @@ def create_database(name):
             "\n" + out[1])
 
 # finally prepare the config file 
-def write_config(dir):
+def write_config(dir, DEFAULT_SERVER):
     try:
         f_in = open(os.path.join(DEFAULT_SOURCE, DEFAULT_DISCFG), 'r');
         cfg = f_in.read();
@@ -151,17 +152,17 @@ def write_config(dir):
 # the source of the installation is the "dir" parameter
 # the source directory must have a specific strucutre for this function to
 # understand it
-def install_from(dir):
+def install_from(dir, dest):
     check_source(dir)
     check_permissions(dir)
     print "Creating directories...",
-    create_dirs()
+    create_dirs(dest)
     print "ok"
     print "Creating database...",
-    create_database(DEFAULT_DABASE)
+    create_database(DEFAULT_DABASE, dest)
     print "ok"
     print "Writing configuration...",
-    write_config(dir)
+    write_config(dir, dest)
     print "ok"
     print
     print "All done. You are now ready to launch MediaTomb!"
@@ -171,7 +172,7 @@ def install_from(dir):
     print 
     print "Once it is enabled:"
     print "When the server is running you can access the UI by opening"
-    print DEFAULT_SERVER + "/mediatomb.html in your web browser."
+    print dest + "/mediatomb.html in your web browser."
     print
 
 
@@ -182,11 +183,12 @@ def main():
     print
     
     src = DEFAULT_SOURCE
-    db  = "" 
+    db  = ""
+    dest = DEFAULT_SERVER 
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hd:s:", ["help", "db-only=",\
-                                                          "sourcedir="])
+        opts, args = getopt.getopt(sys.argv[1:], "hd:s:t:", ["help", "db-only=",\
+                                                          "sourcedir=", "targetdir="])
 
     except getopt.GetoptError:
         print_usage()
@@ -208,21 +210,24 @@ def main():
                 print
                 sys.exit(1)
 
+        if o in ("-t", "--targetdir"):
+            dest = a.lstrip()
+
     exitval = 0
     
     try:
         if (db == ""):
             print "Proceeding normally"
-            is_clean()
-            install_from(src)
+            is_clean(dest)
+            install_from(src, dest)
         else:
-            if (os.path.exists(os.path.join(os.path.expanduser(DEFAULT_SERVER),\
+            if (os.path.exists(os.path.join(os.path.expanduser(dest),\
                                             db))):
                 raise InstallError("\nWill not overwrite existing database! " +\
-                        os.path.join(os.path.expanduser(DEFAULT_SERVER), db))
+                        os.path.join(os.path.expanduser(dest), db))
 
             print "Creating database:", db, "...",
-            create_database(db)
+            create_database(db, dest)
             print "OK"
             print
             print "Make sure that your config file reflects the database name."

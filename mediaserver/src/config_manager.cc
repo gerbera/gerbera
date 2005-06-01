@@ -31,21 +31,6 @@ using namespace mxml;
 
 static Ref<ConfigManager> instance;
 
-/*
-static void check_path_exs(String path, bool needDir = true)
-{
-    int ret = 0;
-    struct stat statbuf;
-
-    ret = stat(path.c_str(), &statbuf);
-    if (ret != 0)
-        throw Exception(path + " : " + strerror(errno));
-
-    if (needDir && (!S_ISDIR(statbuf.st_mode)))
-        throw Exception(String("Not a directory: ") + path);
-}
-
-*/
 String ConfigManager::construct_path(String path)
 {
     String home = getOption("/server/home");
@@ -68,38 +53,42 @@ void ConfigManager::init(String filename, String userhome)
 {
     instance = Ref<ConfigManager>(new ConfigManager());
 
+    String error_message;
+    bool home_ok = true;
+
     if (filename == nil)
     {
-        try 
+        // we are looking for ~/.mediatomb
+        if (home_ok && (!check_path(userhome + DIR_SEPARATOR + DEFAULT_CONFIG_HOME + DIR_SEPARATOR + DEFAULT_CONFIG_NAME)))
         {
-            // we are looking for ~/.mediatomb
-            check_path_ex(userhome + DIR_SEPARATOR + DEFAULT_CONFIG_HOME, true);
+            home_ok = false;
         }
-        catch (Exception e)
+        else
+            filename = userhome + DIR_SEPARATOR + DEFAULT_CONFIG_HOME + DIR_SEPARATOR + DEFAULT_CONFIG_NAME;
+       
+        if (!home_ok)
         {
-            throw Exception(String("\nThe server has not yet been set up. \n") +
-                                   "Please run the tomb-install script or specify an alternative configuration\n" +
-                                   "file on the command line. For a list of options use: mediatomb -h\n");
+            if (!check_path(String("") + DIR_SEPARATOR + DEFAULT_ETC + DIR_SEPARATOR + DEFAULT_SYSTEM_HOME + DIR_SEPARATOR + DEFAULT_CONFIG_NAME))
+            {
+                throw Exception(String("\nThe server configuration file could not be found in ~/.mediatomb and\n") +
+                                       "/etc/mediatomb. Please run the tomb-install script or specify an alternative\n" +  
+                                       "configuration file on the command line. For a list of options use: mediatomb -h\n");
+            }
+
+            filename = String("") + DIR_SEPARATOR + DEFAULT_ETC + DIR_SEPARATOR + DEFAULT_SYSTEM_HOME + DIR_SEPARATOR + DEFAULT_CONFIG_NAME;
         }
 
-        try
-        {
-            // we are looking for ~/.mediatomb/config.xml
-            check_path_ex(userhome + DIR_SEPARATOR + DEFAULT_CONFIG_HOME + DIR_SEPARATOR + DEFAULT_CONFIG_NAME);
-        }
-        catch (Exception e)
-        {
-            throw Exception(String("\nThe server configuration file is missing. \n") +
-                                   "Please run the tomb-install script or specify an alternative configuration\n" +
-                                   "file on the command line. For a list of options use: mediatomb -h\n");
-        }
+        if (home_ok)
+            printf("Loading configuration from ~/.mediatomb/config.xml\n");
+        else
+            printf("Loading configuration from /etc/mediatomb/config.xml\n");
 
-        instance->load(userhome + DIR_SEPARATOR + DEFAULT_CONFIG_HOME + DIR_SEPARATOR + DEFAULT_CONFIG_NAME);
+//        instance->load(userhome + DIR_SEPARATOR + DEFAULT_CONFIG_HOME + DIR_SEPARATOR + DEFAULT_CONFIG_NAME);
     }
-    else
-    {
-        instance->load(filename);
-    }
+//    else
+
+    printf("Loading configuration from: %s\n", filename.c_str());
+    instance->load(filename);
 
     instance->prepare_udn();    
     instance->validate();    
