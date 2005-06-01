@@ -16,7 +16,7 @@ FEATURES
 The 0.8.x releases will focus on virtual containers. There are a lot of
 things that have to be taken care of, lots of known issues that have to
 be fixed. Here is a list of implemented features:
-- scriptable virtual containers
+- scriptable virtual containers (check doc/scripting-intro.txt for details)
 - daemon mode
 - configurable filename to mimetype mappings
 - configurable mimetype to upnp:class mappings
