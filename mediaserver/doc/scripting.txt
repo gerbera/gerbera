@@ -156,7 +156,7 @@ obj.title      : STRING, REQUIRED This is the dispay title of the object,
 obj.parentID   : STRING, REQUIRED This must be set because the engine must know 
                  which container do you want to place the object to
 /// \TODO  describe the rest of the props
-obj.restricted : BOOLEAN
+obj.restricted : BOOLEAN ...
 obj.torture    : ....
 
 obj.meta       : OBJECT, object storing key => value pairs of metadata, 
