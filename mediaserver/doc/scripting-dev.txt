@@ -1,4 +1,4 @@
-Scripting for Mediatomb - developer's tutorial.
+Mediatomb Scripting - developer's tutorial.
 
 Process flow
 
