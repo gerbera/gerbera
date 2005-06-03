@@ -174,10 +174,11 @@ Metadata keys ---------------
 
 Constant         Value
 
-M_ALBUM          "dc:album"
-M_ARTIST         "dc:artist"
+M_ALBUM          "upnp:album"
+M_ARTIST         "upnp:artist"
 M_DESCRIPTION    "dc:description"
 M_DATE:          "dc:date"
+M_GENRE          "upnp:genre"
 M_TITLE          "dc:title"
 
 
