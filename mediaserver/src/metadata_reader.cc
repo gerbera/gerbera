@@ -73,7 +73,7 @@ void MetadataReader::getID3(Ref<CdsItem> item)
 void MetadataReader::addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsItem> item)
 {
     String value;
-    char*  ID3_retval;
+    char*  ID3_retval = NULL;
   
     Ref<StringConverter> sc = StringConverter::m2i();
     
@@ -92,7 +92,9 @@ void MetadataReader::addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsI
             ID3_retval = ID3_GetYear(tag);
             break;
         case M_GENRE:
-            ID3_retval = ID3_GetGenre(tag);
+            int genre = ID3_GetGenreNum(tag);
+            value = String((char *)(ID3_V1GENRE2DESCRIPTION(genre)));
+            
             break;
         case M_DESCRIPTION:
             ID3_retval = ID3_GetComment(tag);
@@ -101,7 +103,8 @@ void MetadataReader::addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsI
             return;
     }
 
-    value = String(ID3_retval);
+    if (field != M_GENRE)
+        value = String(ID3_retval);
     
     if (ID3_retval)
         delete [] ID3_retval;
