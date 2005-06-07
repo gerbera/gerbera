@@ -32,6 +32,13 @@ Next planned features:
 - transcoding
 - UPnP improvements (filter parameter for browse)
 
+IMPORTANT NOTE:
+With the introduction of new features in the 0.8 release the media import
+became _significantly slower_. There are also numerous other issues you
+should be aware of. For further explanations please read the TODO file.
+The next release will focus mainly on addressing these issues.
+
+
 INSTALLATION
 ------------
 

@@ -1,26 +1,29 @@
 Known Issues (ordered by importance)
 
-- speed of file import. This is one of our biggest concerns currently.
+- speed of media import. This is one of our biggest concerns currently.
   With a big import script adding many entries for a single file, the
   speed becomes really slow! When using sqlite3 database engine our
   machines (which aren't that slow) have an average rate of 1 file
-  added per second, which is extremely slow if you have big collections.
+  added per second, which is not acceptable and far from possible
+  optimum especially if you have big collections.
   The yet to be included in the next release mysql storage option gives
   a significant speedup, at least in comparison. It raises to about 5
   files per second.
   
   Thus, in the configuration with sqlite3 storage engine the bottleneck
   of the system is obviously the sqlite3 engine. But when using mysql - the 
-  bottleneck appears to be in 
+  bottleneck appears to migrate to 
     - libmagic, responsible for figuring out the mimetypes for unknown file
-      extensions 
+      extensions, and 
     - libid3, currently the only component of the metadata detection engine.
     
   The libmagic issue may be solved by mapping all relevant file extensions
   to the mime types directly and disabling parsing of the rest of the files.
-  (May be easily done via configuration file).
+  (These mappings can be easily formulated through the config file)
+  This should actually be the default behaviour and it does not limit the
+  normal use of the server in any way.
   
-  But libid3 may not be disabled, or we'll have no metadata-based virtual
+  libid3 may not be disabled, or we'll have no metadata-based virtual
   items. Unfortunately libid3 leaves rather few space for optimizations.
   In any case, also when further metadata detection libraries will be included
   I assume metadata detection will stay the bottleneck. The rest of the system
@@ -30,7 +33,7 @@ Known Issues (ordered by importance)
   One of them is to have a concurrent metadata detection engine.
   I hope parsing files in parallel would bring some speedup.
   Currently we are elaborating this approach, but this won't be a
-  revolution, I'm not even sure if it will give any speedup at all -
+  revolution, I'm not even sure if it will yield any speedup at all -
   metadata parsing has apparently much more to do with hard drive IO 
   activity then with computational activity. We all know, how slow
   it is having several programs wigh frequent hard drive access to 
@@ -44,7 +47,7 @@ Known Issues (ordered by importance)
 
 - Deleting an arbitrary item does not trigger any consistency check.
   Virtual items do not relate to their referenced items. This must be
-  changed. The item in a PC Directory would be the 'master copy'
+  changed. An item in a PC Directory would be the 'master copy'
   and once deleted all referring virtual items should be deleted as well.
 
 - Make all metadata produced by javascript be stored in the database.
@@ -53,6 +56,8 @@ Known Issues (ordered by importance)
   (still don't know how to iterate over properties with spidermonkey)
 
 - Session ID's do not timeout and/or are destroyed.
+
+
 
 Planned improvements / features (ordered by importance)
 
@@ -72,4 +77,5 @@ Planned improvements / features (ordered by importance)
 - include mysql support (already working) into the main branch
   and write autoconf/automake stuff for conditional compilation of
   sqlite3 and/or mysql storage. (That's a challenge :)
+
 

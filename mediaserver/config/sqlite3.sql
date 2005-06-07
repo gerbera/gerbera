@@ -1,4 +1,4 @@
-CREATE TABLE media_files 
+CREATE TABLE cds_objects
 (
     id              INTEGER PRIMARY KEY DEFAULT 0,
     ref_id          INTEGER,
@@ -8,28 +8,28 @@ CREATE TABLE media_files
     dc_title        VARCHAR(256),
     is_restricted   INTEGER NOT NULL DEFAULT 0,
     is_virtual      INTEGER NOT NULL DEFAULT 0,
+    location        VARCHAR(256),
     metadata        TEXT,
 
     update_id       INTEGER NOT NULL DEFAULT 0,
     is_searchable   INTEGER NOT NULL DEFAULT 0,
 
-    location        VARCHAR(256),
     mime_type       VARCHAR(80),
 
     action          VARCHAR(256),
     state           VARCHAR(256)
 );
 
-CREATE INDEX media_files_ref_id ON media_files(ref_id);
-CREATE INDEX media_files_parent_id ON media_files(parent_id);
-CREATE INDEX media_files_object_type ON media_files(object_type);
-CREATE INDEX media_files_is_virtual ON media_files(is_virtual);
-CREATE INDEX media_files_mime_type ON media_files(mime_type);
+CREATE INDEX cds_objects_ref_id ON cds_objects(ref_id);
+CREATE INDEX cds_objects_parent_id ON cds_objects(parent_id);
+CREATE INDEX cds_objects_object_type ON cds_objects(object_type);
+CREATE INDEX cds_objects_is_virtual ON cds_objects(is_virtual);
+CREATE INDEX cds_objects_mime_type ON cds_objects(mime_type);
 
 
-INSERT INTO media_files(id, parent_id, object_type, dc_title, upnp_class) 
+INSERT INTO cds_objects(id, parent_id, object_type, dc_title, upnp_class) 
     VALUES (0, -1, 1, 'Root', 'object.container');
 
-INSERT INTO media_files(id, parent_id, object_type, dc_title, upnp_class) 
+INSERT INTO cds_objects(id, parent_id, object_type, dc_title, upnp_class) 
     VALUES (1, 0, 1, 'PC Directory', 'object.container');
 

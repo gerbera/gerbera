@@ -143,7 +143,7 @@ void SQLStorage::addObject(Ref<CdsObject> obj)
     }
 
     Ref<StringBuffer> qb(new StringBuffer(256));
-    *qb << "INSERT INTO media_files(" << fields->toString() <<
+    *qb << "INSERT INTO cds_objects(" << fields->toString() <<
             ") VALUES (" << values->toString() << ")";
 
 //    printf("insert_query: %s\n", query->toString().c_str());
@@ -158,7 +158,7 @@ void SQLStorage::updateObject(zmm::Ref<CdsObject> obj)
     int objectType = obj->getObjectType();
 
     Ref<StringBuffer> qb(new StringBuffer(256));
-    *qb << "UPDATE media_files SET id = id";
+    *qb << "UPDATE cds_objects SET id = id";
 
     *qb << ", upnp_class = " << quote(obj->getClass());
     *qb << ", dc_title = " << quote(obj->getTitle());
@@ -196,7 +196,7 @@ Ref<CdsObject> SQLStorage::loadObject(String objectID)
 {
     Ref<StringBuffer> qb(new StringBuffer());
 
-    *qb << "SELECT " << select_fields << " FROM media_files f WHERE f.id = "
+    *qb << "SELECT " << select_fields << " FROM cds_objects f WHERE f.id = "
         << objectID;
 
     Ref<SQLResult> res = select(qb->toString());
@@ -226,7 +226,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     Ref<SQLResult> res;
     Ref<SQLRow> row;
 
-    q = String("SELECT object_type FROM media_files WHERE id = ") + objectID;
+    q = String("SELECT object_type FROM cds_objects WHERE id = ") + objectID;
     res = select(q);
     if((row = res->nextRow()) != nil)
     {
@@ -239,7 +239,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
 
     if(param->getFlag() == BROWSE_DIRECT_CHILDREN && IS_CDS_CONTAINER(objectType))
     {
-        q = String("SELECT COUNT(*) FROM media_files WHERE parent_id = ") + objectID;
+        q = String("SELECT COUNT(*) FROM cds_objects WHERE parent_id = ") + objectID;
         res = select(q);
         if((row = res->nextRow()) != nil)
         {
@@ -253,7 +253,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
 
     Ref<StringBuffer> qb(new StringBuffer());
 
-    *qb << "SELECT " << select_fields << " FROM media_files f WHERE ";
+    *qb << "SELECT " << select_fields << " FROM cds_objects f WHERE ";
 
     if(param->getFlag() == BROWSE_DIRECT_CHILDREN && IS_CDS_CONTAINER(objectType))
     {
@@ -287,7 +287,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
         {
             Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
             qb->clear();
-            *qb << "SELECT COUNT(*) FROM media_files WHERE parent_id = " << cont->getID();
+            *qb << "SELECT COUNT(*) FROM cds_objects WHERE parent_id = " << cont->getID();
             res = select(qb->toString());
             if ((row = res->nextRow()) != nil)
             {
@@ -306,7 +306,7 @@ Ref<Array<StringBase> > SQLStorage::getMimeTypes()
 {
     Ref<Array<StringBase> > arr(new Array<StringBase>());
 
-    String q = String("SELECT DISTINCT mime_type FROM media_files ")
+    String q = String("SELECT DISTINCT mime_type FROM cds_objects ")
             + "WHERE mime_type IS NOT NULL ORDER BY mime_type";
     Ref<SQLResult> res = select(q);
     Ref<SQLRow> row;
@@ -322,7 +322,7 @@ Ref<Array<StringBase> > SQLStorage::getMimeTypes()
 Ref<CdsObject> SQLStorage::findObjectByTitle(String title, String parentID)
 {
     Ref<StringBuffer> qb(new StringBuffer());
-    *qb << "SELECT " << select_fields << " FROM media_files WHERE ";
+    *qb << "SELECT " << select_fields << " FROM cds_objects WHERE ";
     if (parentID != nil)
         *qb << "parent_id = " << parentID << " AND ";
     *qb << "dc_title = " << quote(title);
@@ -386,7 +386,7 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
 }
 
 
-static char *del_query = "DELETE FROM media_files WHERE id IN (";
+static char *del_query = "DELETE FROM cds_objects WHERE id IN (";
 
 void SQLStorage::removeObject(zmm::Ref<CdsObject> obj)
 {
@@ -401,7 +401,7 @@ void SQLStorage::removeObject(zmm::Ref<CdsObject> obj)
 void SQLStorage::removeChildren(String id, Ref<StringBuffer> query)
 {
     String q = String("SELECT id, object_type"
-                      " FROM media_files WHERE parent_id = ") + id;
+                      " FROM cds_objects WHERE parent_id = ") + id;
     Ref<SQLResult> res = select(q);
     Ref<SQLRow> row;
 
@@ -434,7 +434,7 @@ void SQLStorage::eraseObject(Ref<CdsObject> object)
 int SQLStorage::getTotalFiles()
 {
     Ref<StringBuffer> query(new StringBuffer());
-    *query << "SELECT COUNT(*) FROM media_files WHERE "
+    *query << "SELECT COUNT(*) FROM cds_objects WHERE "
            << "object_type <> " << OBJECT_TYPE_CONTAINER
            << " AND is_virtual = 0";
     Ref<SQLResult> res = select(query->toString());
