@@ -1,5 +1,42 @@
 Known Issues (ordered by importance)
 
+- speed of file import. This is one of our biggest concerns currently.
+  With a big import script adding many entries for a single file, the
+  speed becomes really slow! When using sqlite3 database engine our
+  machines (which aren't that slow) have an average rate of 1 file
+  added per second, which is extremely slow if you have big collections.
+  The yet to be included in the next release mysql storage option gives
+  a significant speedup, at least in comparison. It raises to about 5
+  files per second.
+  
+  Thus, in the configuration with sqlite3 storage engine the bottleneck
+  of the system is obviously the sqlite3 engine. But when using mysql - the 
+  bottleneck appears to be in 
+    - libmagic, responsible for figuring out the mimetypes for unknown file
+      extensions 
+    - libid3, currently the only component of the metadata detection engine.
+    
+  The libmagic issue may be solved by mapping all relevant file extensions
+  to the mime types directly and disabling parsing of the rest of the files.
+  (May be easily done via configuration file).
+  
+  But libid3 may not be disabled, or we'll have no metadata-based virtual
+  items. Unfortunately libid3 leaves rather few space for optimizations.
+  In any case, also when further metadata detection libraries will be included
+  I assume metadata detection will stay the bottleneck. The rest of the system
+  is just much faster.
+  
+  We are looking for ideas to speed up metadata parsing.
+  One of them is to have a concurrent metadata detection engine.
+  I hope parsing files in parallel would bring some speedup.
+  Currently we are elaborating this approach, but this won't be a
+  revolution, I'm not even sure if it will give any speedup at all -
+  metadata parsing has apparently much more to do with hard drive IO 
+  activity then with computational activity. We all know, how slow
+  it is having several programs wigh frequent hard drive access to 
+  work in parallel.
+
+
 - When directories are added recursively all subdirectories traversed
   are always created in the PC Directory, regardless if any files from
   those directories are taken to the database. This produces A LOT of
