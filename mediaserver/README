@@ -39,6 +39,18 @@ should be aware of. For further explanations please read the TODO file.
 The next release will focus mainly on addressing these issues.
 
 
+REQUIREMENTS
+------------
+
+- XSL-enabled web browser to access the web interface.
+    Tested and works with the recent versions of
+      - Mozilla
+      - Internet Explorer
+    Tested and does not work with the recent versions of
+      - Konqueror
+- Several libraries, see installation instructions.
+
+    
 INSTALLATION
 ------------
 
@@ -111,6 +123,7 @@ are using and write a detailed description of what exactly happened during
 If you find some errors or unclarities in the above description, a message
 would be appreciated.
 
+
 SETUP
 -----
 
@@ -128,6 +141,7 @@ the first launch of the server. Open a web browser and manually
 add this file as a bookmark. When the server is running, the redirector will
 forward you to the web UI. It is quite handy, because the server port may 
 change upon restarts.
+
 
 WHY IS THE WEB UI DISABLED BY DEFAULT?
 --------------------------------------
@@ -149,6 +163,7 @@ network interface.
 In order to enable the UI simply change <ui enabled="no"/> to 
 <ui enabled="yes"/> in the configuration file. 
 And don't blame us for anything! ;>
+
 
 CONFIGURATION
 -------------
@@ -258,8 +273,10 @@ Here is a sample configuration file with description of the various tags.
                 "audio/*". The values of "from" and "to" attributes are
                 case sensitive.
 
+
 RUNNING
 -------
+
 After everything has been set up you can simply run "mediatomb" from the
 console. To shutdown the server cleanly, press Enter.
 
@@ -291,6 +308,7 @@ background, the --user and --group parameters should be used to run
 the server under an unprivileged account. A script for 
 starting/stopping the server is also provided.
 
+
 ACKNOWLEDGEMENTS
 ----------------
 
@@ -311,9 +329,11 @@ We are using the following code in our tree:
 
 - all icons for the UI are from the redhat-artwork-0.117 package under GNU GPL, 
   (I could not find any (C) in the supplied documents)
- 
+
+
 CONTRIBUTIONS
 -------------
+
 Initial version of the mediatomb startup script was contributed 
 by Iain Lea <iain@bricbrac.de>
 

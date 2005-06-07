@@ -122,7 +122,7 @@ obj.title = obj.meta[M_TITLE]; // REMEMBER to set obj.title explicitely :)
 // set further obj properties....
 // add the parent container(s)....
 obj.parentID = ...
-addObject(obj);
+addCdsObject(obj);
 
 // creating another copy
 obj = copyObject(orig);
@@ -130,7 +130,7 @@ obj.title = obj.meta[M_TITLE]; // and again...
 // set further obj properties....
 // add the parent container(s)....
 obj.parentID = ...
-addObject(obj);
+addCdsObject(obj);
 
 /* copyObject is a javascript function, see import.js */
 
@@ -142,7 +142,7 @@ Content directory service Object properties.
 If given an object instance 'obj', following properties 
 can/must/will be defined. Properties marked as 'REQUIRED' are
 required to be defined before passing the object as an argument to the 
-addObject() function.
+addCdsObject() function.
 
 
 --- Common object properties ---
@@ -154,14 +154,14 @@ obj.objectType : INTEGER, REQUIRED This should be set to one of the predefined
                    OBJECT_TYPE_ITEM_EXTERNAL_URL
  
 obj.id         : STRING, the 'orig' object will have this property set,
-                 but it is ignored by the addObject() function.
+                 but it is ignored by the addCdsObject() function.
                  Only automatic ID generation is supported.
 obj.title      : STRING, REQUIRED This is the dispay title of the object,
                  an arbitrary but not empty string
 obj.parentID   : STRING, REQUIRED This must be set because the engine must know 
                  the parent container of the object to be added.
 obj.restricted : BOOLEAN See the UPnP specs
-obj.class      : STRING See the UPnP specs. In addObject this property is set
+obj.class      : STRING See the UPnP specs. In addCdsObject this property is set
                  to default value if omited.
 obj.location   : STRING, REQUIRED Denotes the file path in the file system.
 obj.meta       : OBJECT, object storing key => value pairs of metadata, 
@@ -186,7 +186,7 @@ obj.updateID   : INTEGER See UPnP specs, it is NOT recommended to set this
 
 NOTE: It is legal to set an object's property with any name.
       (because it s a regular JavaScript object), but only the fixed set of
-      properties described above will be checked during addObject,
+      properties described above will be checked during addCdsObject,
       ANY other properties will be ignored.
 
 
@@ -203,7 +203,7 @@ M_TITLE          "dc:title"
 
 
 NOTE: Current implementation ignores any metadata keys except of the listed
-      above when passing the containing object to the addObject() function.
+      above when passing the containing object to the addCdsObject() function.
       This behaviour might be changed in future to allow scripts to set
       metadata keys not known to the server and have the server handle them
       correctly without knowing their semantics.
@@ -218,13 +218,12 @@ Beside that the server implements a small number of custom native functions
 free to use from JavaScript.
 
 
-addObject(obj) : adds the given object to the database, returns the objectID
-                 of the newly created object. This function is the key
-		 to the virtual object engine.
+addCdsObject(obj) : adds the given object to the database, returns the
+                    objectID of the newly created object. This function is
+                    the key to the virtual object engine.
 
-print(msg)     : prints the message to the stdout, should be used for
-                 debugging purposes only. 
-
+print(msg)        : prints the message to the stdout, should be used for
+                    debugging purposes only. 
 
 As you see the list is small, and right now there are NO plans to extend it.
 Keeping the server's JavaScript to look as close to 'pure' JavaScript

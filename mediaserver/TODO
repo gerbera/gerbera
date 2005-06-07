@@ -1,4 +1,5 @@
 Known Issues (ordered by importance)
+------------------------------------
 
 - speed of media import. This is one of our biggest concerns currently.
   With a big import script adding many entries for a single file, the
@@ -60,6 +61,11 @@ Known Issues (ordered by importance)
 
 
 Planned improvements / features (ordered by importance)
+-------------------------------------------------------
+
+- include mysql support (already working) into the main branch
+  and write autoconf/automake stuff for conditional compilation of
+  sqlite3 and/or mysql storage. (That's a challenge :)
 
 - introduce means to cascade scripts. Probably something like include()
   function or preprocessor directive.
@@ -67,15 +73,24 @@ Planned improvements / features (ordered by importance)
 - on the fly reloading of scripts and immediate automatic recreation
   of virtual structure. Should be simple - delete all virtual objects and
   pass every item inside the PC Directory to the script again. This will
-  lighten js development a lot.
+  simplify js development a lot.
 
 - Virtual and corresponding items should share common metadata. Normally
   almost all metadata will be equal. Currently all data is copied for every
   created virtual item. Metadata handling functionality should be reviewed
   once more.
+
+- Ability to explicitely define filesystem directories and files
+  visible to the filesystem browser. Will be done using the
+  include/exclude ruleset semantics similar to Jakarta Ant.
   
-- include mysql support (already working) into the main branch
-  and write autoconf/automake stuff for conditional compilation of
-  sqlite3 and/or mysql storage. (That's a challenge :)
-
-
+- Rewrite web presentation layer. Replace XML/XSL based presentation with
+  plain HTML/CSS presentation. XML/XSL approach seemed to be attractive
+  at the beginning, but as the server evolved it turned out to be
+  cumbersome to work with and instead of simplifying development and
+  providing better presentatin consistency did the opposite.
+  An option is to do XSLT transformation server side, but this would
+  increase system requirements to run the server and imply further
+  dependencies on heavy libraries, which we would rather avoid.
+  Another reason is browser compatibility.
+  
