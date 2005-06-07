@@ -76,6 +76,7 @@ void MetadataReader::addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsI
     char*  ID3_retval = NULL;
   
     Ref<StringConverter> sc = StringConverter::m2i();
+    int genre;
     
     switch (field)
     {
@@ -92,7 +93,7 @@ void MetadataReader::addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsI
             ID3_retval = ID3_GetYear(tag);
             break;
         case M_GENRE:
-            int genre = ID3_GetGenreNum(tag);
+            genre = ID3_GetGenreNum(tag);
             value = String((char *)(ID3_V1GENRE2DESCRIPTION(genre)));
             
             break;
