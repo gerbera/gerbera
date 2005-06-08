@@ -240,6 +240,9 @@ Here is a sample configuration file with description of the various tags.
         here. The server uses UTF-8 for UPnP and for the web UI, this import
         parameter will help you to correctly import your data. (Default if
         missing: ISO-8859-1)
+        
+    <metadata-charset>ISO-8859-1</metadata-charset>
+        Same as above, but defines the charset of the metadata.
 
     <script>
         TODO by bgeradz
