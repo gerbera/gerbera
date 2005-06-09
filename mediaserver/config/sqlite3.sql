@@ -17,8 +17,9 @@ CREATE TABLE cds_objects
     mime_type       VARCHAR(80),
 
     action          VARCHAR(256),
-    state           VARCHAR(256)
+    state           VARCHAR(256),
 
+    flags           INTEGER NOT NULL DEFAULT 0,
     display_prio    INTEGER NOT NULL DEFAULT 0
 );
 
