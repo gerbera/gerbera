@@ -732,11 +732,12 @@ void ContentManager::threadProc()
 
     while(! shutdownFlag)
     {
-        /* if nothing to do, sleep until awakened */        
-        lock();
         currentTask = nil;
+
+        lock();
         if(taskQueue->size() == 0)
         {
+            /* if nothing to do, sleep until awakened */        
             pthread_cond_wait(&taskCond, &taskMutex);            
             unlock();
             continue;
@@ -749,8 +750,16 @@ void ContentManager::threadProc()
         }
         unlock();
 
-        printf("Running asynchronous task: %s\n", task->getDescription().c_str());
-        task->run();
+        printf("Running asynchronous task: %s\n",
+               task->getDescription().c_str());
+        try
+        {
+            task->run();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
         printf("Finished asynchronous task\n");
     }
 }

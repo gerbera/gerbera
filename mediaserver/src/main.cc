@@ -23,6 +23,7 @@
 #include "process.h"
 #include <getopt.h>
 #include "config_manager.h"
+#include "content_manager.h"
 #include "common.h"
 
 #include <sys/types.h>
@@ -38,7 +39,7 @@
 #include <pwd.h>
 #include <grp.h>
 
-#define OPTSTR "i:p:c:u:g:hd"
+#define OPTSTR "i:p:c:u:g:a:dh"
 
 using namespace zmm;
 
@@ -61,10 +62,11 @@ int main(int argc, char **argv, char **envp)
                    {"ip", 1, 0, 'i'},
                    {"port", 1, 0, 'p'},
                    {"config", 1, 0, 'c'},
-                   {"help", 0, 0, 'h'},
-                   {"daemon", 0, 0, 'd'},
                    {"user", 1, 0, 'u'},
                    {"group", 1, 0, 'g'},
+                   {"daemon", 0, 0, 'd'},
+                   {"add", 1, 0, 'g'},
+                   {"help", 0, 0, 'h'},
                    {0, 0, 0, 0}
                };
 
@@ -72,6 +74,7 @@ int main(int argc, char **argv, char **envp)
     String home;
     String user;
     String group;
+    String addFile;
 
     printf("\nMediaTomb UPnP Server version %s\n\n", SERVER_VERSION);
     
@@ -113,6 +116,11 @@ int main(int argc, char **argv, char **envp)
                 group = optarg;
                 break;
                 
+            case 'a':
+                printf("adding file/directory:: %s\n", optarg);
+                addFile = optarg;
+                break;
+                
             case '?':
                 printf("\n");
             case 'h':
@@ -123,8 +131,9 @@ Supported options:\n\
     --port or -p       server port (the SDK only permits values => 49152)\n\
     --config or -c     configuration file to use\n\
     --daemon or -d     run server in background\n\
-    --group or -g      run server unser specified group\n\
     --user or -u       run server under specified username\n\
+    --group or -g      run server unser specified group\n\
+    --add or -a        add the given file/directory\n
     --help or -h       this help message\n\
 \n\
 For more information visit http://mediatomb.sourceforge.net/\n\n");
@@ -263,6 +272,11 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     {
         server->init();
         server->upnp_init(ip, port);
+        if (addFile != nil)
+        {
+            // add file/directory recursively and asynchronously
+            ContentManager::getInstance()->addFile(addFile, true, true);
+        }
 //        String dump = ConfigManager::getInstance()->getElement("/")->print();
 //        printf("Modified config dump:\n%s\n", dump.c_str());
     }
