@@ -194,6 +194,10 @@ void CdsObject::setMetadata(Ref<Dictionary> metadata)
 {
     this->metadata = metadata;
 }
+void CdsObject::removeMetadata(String key)
+{
+    metadata->remove(key);
+}
 
 /* CdsItem */
 

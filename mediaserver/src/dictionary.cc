@@ -86,6 +86,19 @@ String Dictionary::get(String key)
     return nil;
 }
 
+void Dictionary::remove(String key)
+{
+    for (int i = 0; i < elements->size(); i++)
+    {
+        Ref<DictionaryElement> el = elements->get(i);
+        if (el->getKey() == key)
+        {
+            elements->remove(i, 0);
+            return;
+        }
+    }
+}
+
 String Dictionary::encode()
 {
     Ref<StringBuffer> buf(new StringBuffer());

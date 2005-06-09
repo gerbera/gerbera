@@ -135,6 +135,9 @@ public:
     /// \brief Set a single metadata value.
     void setMetadata(zmm::String key, zmm::String value);
 
+    /// \brief Removes metadata with the given key
+    void removeMetadata(zmm::String key);
+    
     /// \brief Set entire metadata dictionary.
     void setMetadata(zmm::Ref<Dictionary> metadata);
     

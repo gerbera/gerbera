@@ -68,6 +68,9 @@ public:
     /// \brief Returns the value for a given key.
     zmm::String get(zmm::String key);
 
+    /// \brief Deletes a key value pair
+    void remove(zmm::String key);
+    
     /// \brief Returns an url encoded version of the whole dictionary.
     /// \todo check if we encode space correctly!! -> '+'
     zmm::String encode();
