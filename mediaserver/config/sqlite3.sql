@@ -18,6 +18,8 @@ CREATE TABLE cds_objects
 
     action          VARCHAR(256),
     state           VARCHAR(256)
+
+    display_prio    INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE INDEX cds_objects_ref_id ON cds_objects(ref_id);
