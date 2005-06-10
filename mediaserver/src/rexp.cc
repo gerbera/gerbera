@@ -6,9 +6,10 @@ using namespace zmm;
 static String error_string(int code, regex_t *regex)
 {
     int size = regerror(code, regex, NULL, 0);
-    char *buf = (char *)malloc(size * sizeof(char));
-    regerror(code, regex, buf, size);
-    return String(buf);
+    String buf = String::allocate(size);
+    regerror(code, regex, buf.c_str(), size);
+    buf.setLength(size - 1);
+    return buf;
 }
 
 RExp::RExp() : Object()

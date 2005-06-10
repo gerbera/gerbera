@@ -23,9 +23,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "object.h"
 #include "ref.h"
+
 
 #define MAX_INT_STRING_LENGTH 12
 
@@ -126,11 +128,20 @@ public:
 	double toDouble();
 
 	int length();
+    inline void setLength(int length)
+    {
+        base->len = length;
+    }
 	char *c_str();
+    inline void updateLength()
+    {
+        base->len = strlen(base->data);
+    }
 
     static String from(int x);
     static String from(double x);
-
+    
+    static String allocate(int size);
 protected:
 	String(int capacity);
 	friend class StringBuffer;

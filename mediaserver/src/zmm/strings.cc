@@ -20,7 +20,6 @@
 
 #include "strings.h"
 
-#include <string.h>
 #include <malloc.h>
 #include "strings.h"
 
@@ -172,6 +171,13 @@ String String::from(double x)
     return ""; // (String("") + x);
     // TODO: optimize
 }
+
+
+String String::allocate(int size)
+{
+    return String(new StringBase(size));
+}
+
 
 int String::operator==(String other)
 {
