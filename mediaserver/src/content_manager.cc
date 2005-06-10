@@ -358,6 +358,8 @@ void ContentManager::updateObject(String objectID, Ref<Dictionary> parameters)
     String description = parameters->get("description");
     String location = parameters->get("location");
 
+    Ref<MetadataReader> meta (new MetadataReader());
+    
     Ref<Storage> storage = Storage::getInstance();
     Ref<UpdateManager> um = UpdateManager::getInstance();
 
@@ -376,10 +378,16 @@ void ContentManager::updateObject(String objectID, Ref<Dictionary> parameters)
         if (string_ok(location)) clone->setLocation(location);
 
         Ref<CdsItem> cloned_item = RefCast(clone, CdsItem);
-        /// \todo description should be taken out of the dictionary
+        
+        if (string_ok(description)) 
+        {
+            cloned_item->setMetadata(meta->getFieldName(M_DESCRIPTION), description);
+        }
+        else
+        {
+            item->removeMetadata(meta->getFieldName(M_DESCRIPTION));
+        }
 
-        // description can be an empty string - if you want to clear it
-//        if (description != nil) cloned_item->setDescription(description);
         if (string_ok(mimetype)) cloned_item->setMimeType(mimetype);
 
         if (!item->equals(clone, true))
@@ -404,7 +412,15 @@ void ContentManager::updateObject(String objectID, Ref<Dictionary> parameters)
         Ref<CdsActiveItem> cloned_item = RefCast(clone, CdsActiveItem);
 
         // state and description can be an empty strings - if you want to clear it
-//        if (description != nil) cloned_item->setDescription(description);
+        if (string_ok(description)) 
+        {
+            cloned_item->setMetadata(meta->getFieldName(M_DESCRIPTION), description);
+        }
+        else
+        {
+            item->removeMetadata(meta->getFieldName(M_DESCRIPTION));
+        }
+
         if (state != nil) cloned_item->setState(state);
 
         if (string_ok(mimetype)) cloned_item->setMimeType(mimetype);

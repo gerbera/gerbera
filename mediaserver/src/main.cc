@@ -75,7 +75,9 @@ int main(int argc, char **argv, char **envp)
     String home;
     String user;
     String group;
-    String addFile;
+    //String addFile;
+
+    Ref<Array<StringBase> > addFile(new Array<StringBase>());
 
     printf("\nMediaTomb UPnP Server version %s\n\n", SERVER_VERSION);
     
@@ -119,7 +121,7 @@ int main(int argc, char **argv, char **envp)
                 
             case 'a':
                 printf("adding file/directory:: %s\n", optarg);
-                addFile = optarg;
+                addFile->append(String(optarg));
                 break;
                 
             case '?':
@@ -273,12 +275,18 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     {
         server->init();
         server->upnp_init(ip, port);
-        if (addFile != nil)
+        if (addFile->size() > 0)
         {
-            // add file/directory recursively and asynchronously
-            ContentManager::getInstance()->addFile(addFile, true, true);
+            for (int i = 0; i < addFile->size(); i++)
+            {
+                // add file/directory recursively and asynchronously
+                printf("adding %s\n", String(addFile->get(i)).c_str());
+                ContentManager::getInstance()->addFile(String(addFile->get(i)), true, true);
+                printf("BGERADZ: FIX THIS!\n");
+                sleep(5);
+            }
         }
-        ContentManager::getInstance()->removeObject("45");
+//        ContentManager::getInstance()->removeObject("45");
 //        String dump = ConfigManager::getInstance()->getElement("/")->print();
 //        printf("Modified config dump:\n%s\n", dump.c_str());
     }
