@@ -86,7 +86,7 @@ public:
     virtual zmm::Ref<CdsObject> loadObject(zmm::String objectID);
     virtual void removeObject(zmm::Ref<CdsObject> object);
     virtual void removeObject(zmm::String objectID);
-    virtual zmm::Ref<zmm::Array<CdsContainer> > getContainerPath(zmm::String objectID);
+    virtual zmm::Ref<zmm::Array<CdsObject> > getObjectPath(zmm::String objectID);
 
     /* accounting methods */
     virtual int getTotalFiles(){ return 0; }
@@ -94,7 +94,7 @@ public:
     /* static methods */
     static zmm::Ref<Storage> getInstance(storage_type_t type = PRIMARY_STORAGE);
 protected:
-    void getContainerPath(zmm::Ref<zmm::Array<CdsContainer> > arr, zmm::String objectID);
+    void getObjectPath(zmm::Ref<zmm::Array<CdsObject> > arr, zmm::String objectID);
 };
 
 #endif // __STORAGE_H__

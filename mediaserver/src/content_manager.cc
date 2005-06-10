@@ -35,6 +35,7 @@ extern "C" {
 #include "update_manager.h"
 #include "string_converter.h"
 #include "metadata_reader.h"
+#include "rexp.h"
 
 struct magic_set *ms = NULL;
 
@@ -42,6 +43,8 @@ using namespace zmm;
 using namespace mxml;
 
 /*********************** utils ***********************/
+#define MIMETYPE_REGEXP "^([a-z0-9_-]+/[a-z0-9_-]+)"
+static Ref<RExp> reMimetype;
 
 static String get_filename(String path)
 {
@@ -68,22 +71,13 @@ static String get_mime_type(String file)
     }
     String mime_type(mt);
 
-    // cut off everything after first space or semicolon character
-    int cut_pos = -1;
-
-    int pos;
-    pos = mime_type.index(';');
-    if (pos > 0)
-        cut_pos = pos;
-
-    pos = mime_type.index(' ');
-    if (pos > 0 && pos < cut_pos)
-        cut_pos = pos;
-
-    if (cut_pos > 0)
-        return mime_type.substring(0, cut_pos);
-    else
-        return mime_type;
+    Ref<Matcher> matcher = reMimetype->matcher(mime_type, 2);
+    if (matcher->next())
+        return matcher->group(1);
+    
+    printf("filemagic returned invalid mimetype for %s\n%s\n",
+           file.c_str(), mt);
+    return nil;
  }
 
 /***************************************************************/
@@ -160,6 +154,10 @@ ContentManager::~ContentManager()
 void ContentManager::init()
 {   
     int ret;
+
+    reMimetype = Ref<RExp>(new RExp());
+    reMimetype->compile(MIMETYPE_REGEXP);
+    
     ret = pthread_mutex_init(&taskMutex, NULL);
     ret = pthread_cond_init(&taskCond, NULL);
     
@@ -218,7 +216,6 @@ void ContentManager::_loadAccounting()
     Ref<Storage> storage = Storage::getInstance();
     acct->totalFiles = storage->getTotalFiles();
 }
-
 void ContentManager::_addFile(String path, int recursive)
 {
 	initScripting();
@@ -270,6 +267,26 @@ void ContentManager::_addFile(String path, int recursive)
     }
     um->flushUpdates();
 }
+void ContentManager::_removeObject(String objectID)
+{
+    /// \todo when removing... what about container updates when removing recursively?
+    if (objectID == "0")
+        throw Exception("cannot remove root container");
+    if (objectID == "1")
+        throw Exception("cannot remove PC-Directory container");
+    /// \todo make PC-Directory ID configurable
+    Ref<Storage> storage = Storage::getInstance();
+    Ref<CdsObject> obj = storage->loadObject(objectID);
+    storage->removeObject(obj);
+    Ref<UpdateManager> um = UpdateManager::getInstance();
+    um->containerChanged(obj->getParentID());
+    
+    // reload accounting
+    ContentManager::getInstance()->loadAccounting();
+    
+    um->flushUpdates();
+}
+
 
 /* scans the given directory and adds everything recursively */
 void ContentManager::addRecursive(String path, String parentID)
@@ -329,26 +346,6 @@ void ContentManager::addRecursive(String path, String parentID)
         }
     }
     closedir(dir);
-}
-
-void ContentManager::removeObject(String objectID)
-{
-    /// \todo when removing... what about container updates when removing recursively?
-    if (objectID == "0")
-        throw Exception("cannot remove root container");
-    if (objectID == "1")
-        throw Exception("cannot remove PC-Directory container");
-    /// \todo make PC-Directory ID configurable
-    Ref<Storage> storage = Storage::getInstance();
-    Ref<CdsObject> obj = storage->loadObject(objectID);
-    storage->removeObject(obj);
-    Ref<UpdateManager> um = UpdateManager::getInstance();
-    um->containerChanged(obj->getParentID());
-    
-    // reload accounting
-    ContentManager::getInstance()->loadAccounting();
-    
-    um->flushUpdates();
 }
 
 void ContentManager::updateObject(String objectID, Ref<Dictionary> parameters)
@@ -732,9 +729,8 @@ void ContentManager::threadProc()
 
     while(! shutdownFlag)
     {
-        currentTask = nil;
-
         lock();
+        currentTask = nil;
         if(taskQueue->size() == 0)
         {
             /* if nothing to do, sleep until awakened */        
@@ -783,39 +779,68 @@ void ContentManager::signal()
     pthread_cond_signal(&taskCond);
 }
 
-void ContentManager::addTask(zmm::Ref<CMTask> task)
+int ContentManager::addTask(zmm::Ref<CMTask> task)
 {
+    int ret = false;
     lock();
+    int size = taskQueue->size();
+    if (size >= 1)
+        ret = true;
     taskQueue->append(task);
     signal();
     unlock();
+    return ret;
 }
 
 /* sync / async methods */
-void ContentManager::addFile(zmm::String path, int recursive, int async)
-{
-    if (async)
-    {
-        Ref<CMTask> task(new CMAddFileTask(path, recursive));
-        task->setDescription(String("Adding ") + path);
-        addTask(task);
-    }
-    else
-    {
-        _addFile(path, recursive);
-    }
-}
-void ContentManager::loadAccounting(int async)
+int ContentManager::loadAccounting(int async)
 {
     if (async)
     {
         Ref<CMTask> task(new CMLoadAccountingTask());
         task->setDescription("Loading info");
-        addTask(task);
+        return addTask(task);
     }
     else
     {
         _loadAccounting();
+        return false;
+    }
+}
+int ContentManager::addFile(zmm::String path, int recursive, int async)
+{
+    if (async)
+    {
+        Ref<CMTask> task(new CMAddFileTask(path, recursive));
+        task->setDescription(String("Adding ") + path);
+        return addTask(task);
+    }
+    else
+    {
+        _addFile(path, recursive);
+        return false;
+    }
+}
+int ContentManager::removeObject(String objectID, int async)
+{
+    if (async)
+    {
+        // building container path for the description
+        Ref<Storage> storage = Storage::getInstance();
+        Ref<Array<CdsObject> > objectPath = storage->getObjectPath(objectID);
+        Ref<StringBuffer> desc(new StringBuffer(objectPath->size() * 10));
+        *desc << "Removing ";
+        for (int i = 0; i < objectPath->size(); i++)
+            *desc << '/' << objectPath->get(i)->getTitle();
+        
+        Ref<CMTask> task(new CMRemoveObjectTask(objectID));
+        task->setDescription(desc->toString());
+        return addTask(task);
+    }
+    else
+    {
+        _removeObject(objectID);
+        return false;
     }
 }
 
@@ -842,6 +867,15 @@ CMAddFileTask::CMAddFileTask(String path, int recursive) : CMTask()
 void CMAddFileTask::run()
 {
     cm->_addFile(path, recursive);
+}
+
+CMRemoveObjectTask::CMRemoveObjectTask(String objectID) : CMTask()
+{
+    this->objectID = objectID;
+}
+void CMRemoveObjectTask::run()
+{
+    cm->_removeObject(objectID);
 }
 
 CMLoadAccountingTask::CMLoadAccountingTask() : CMTask()

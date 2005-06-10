@@ -54,6 +54,15 @@ public:
     virtual void run();
 };
 
+class CMRemoveObjectTask : public CMTask
+{
+protected:
+    zmm::String objectID;
+public:
+    CMRemoveObjectTask(zmm::String objectID);
+    virtual void run();
+};
+
 class CMLoadAccountingTask : public CMTask
 {
 public:
@@ -81,16 +90,19 @@ public:
 
     zmm::Ref<CMAccounting> getAccounting();
     zmm::Ref<CMTask> getCurrentTask();
+   
+    /* the functions below return true if the task has been enqueued */
     
     /* sync/async methods */
-    void addFile(zmm::String path, int recursive=0, int async=true);
-    void loadAccounting(int async=true);
+    int loadAccounting(int async=true);
+    int addFile(zmm::String path, int recursive=0, int async=true);
+    int removeObject(zmm::String objectID, int async=true);
     
     /* don't use these, use the above methods */
-    void _addFile(zmm::String path, int recursive=0);
     void _loadAccounting();
+    void _addFile(zmm::String path, int recursive=0);
+    void _removeObject(zmm::String objectID);
     
-    void removeObject(zmm::String objectID);
 
     /// \brief Updates an object in the database using the given parameters.
     /// \param objectID ID of the object to update
@@ -143,7 +155,8 @@ protected:
     static void *staticThreadProc(void *arg);
     void threadProc();
     
-    void addTask(zmm::Ref<CMTask> task);
+    /// \brief returns true if task is queued, false otherwise
+    int addTask(zmm::Ref<CMTask> task);
 
     zmm::Ref<CMAccounting> acct;
     

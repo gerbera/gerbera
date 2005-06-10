@@ -33,6 +33,8 @@ libmediatomb_a_SOURCES = \
     mem_io_handler.cc \
     process.h \
     process.cc \
+    rexp.h \
+    rexp.cc \
     request_handler.h \
     request_handler.cc\
     server.h \

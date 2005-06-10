@@ -157,11 +157,11 @@ void web::browse::process()
 
     // the path section will contain the "way" to the current container
     Ref<Element> path (new Element("path"));
-      Ref<Array<CdsContainer> > full_path = storage->getContainerPath(object_id);
+    Ref<Array<CdsObject> > full_path = storage->getObjectPath(object_id);
     
     for (int i = 0; i < full_path->size(); i++)
     {
-        Ref<CdsContainer> obj = full_path->get(i);
+        Ref<CdsObject> obj = full_path->get(i);
         Ref<Element> container (new Element("container"));
         container->addAttribute("id", obj->getID());
         container->appendTextChild("dc:title", obj->getTitle());

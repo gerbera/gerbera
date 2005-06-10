@@ -103,19 +103,19 @@ void Storage::removeObject(String objectID)
     removeObject(obj);
 }
 
-Ref<Array<CdsContainer> > Storage::getContainerPath(String objectID)
+Ref<Array<CdsObject> > Storage::getObjectPath(String objectID)
 {
-    Ref<Array<CdsContainer> > arr(new Array<CdsContainer>());
-    getContainerPath(arr, objectID);
+    Ref<Array<CdsObject> > arr(new Array<CdsObject>());
+    getObjectPath(arr, objectID);
     return arr;
 }
-void Storage::getContainerPath(Ref<Array<CdsContainer> > arr, String objectID)
+void Storage::getObjectPath(Ref<Array<CdsObject> > arr, String objectID)
 {
-    Ref<CdsContainer> cont = RefCast(loadObject(objectID), CdsContainer);
-    if (cont->getParentID() == "-1")
-        return arr->append(cont);
-    getContainerPath(arr, cont->getParentID());
-    arr->append(cont);
+    Ref<CdsObject> obj = loadObject(objectID);
+    if (obj->getParentID() == "-1")
+        return;
+    getObjectPath(arr, obj->getParentID());
+    arr->append(obj);
 }
 
 BrowseParam::BrowseParam(String objectID, int flag) : Object()

@@ -39,6 +39,7 @@
 #include <pwd.h>
 #include <grp.h>
 
+
 #define OPTSTR "i:p:c:u:g:a:dh"
 
 using namespace zmm;
@@ -133,7 +134,7 @@ Supported options:\n\
     --daemon or -d     run server in background\n\
     --user or -u       run server under specified username\n\
     --group or -g      run server unser specified group\n\
-    --add or -a        add the given file/directory\n
+    --add or -a        add the given file/directory\n\
     --help or -h       this help message\n\
 \n\
 For more information visit http://mediatomb.sourceforge.net/\n\n");
@@ -277,6 +278,7 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
             // add file/directory recursively and asynchronously
             ContentManager::getInstance()->addFile(addFile, true, true);
         }
+        ContentManager::getInstance()->removeObject("45");
 //        String dump = ConfigManager::getInstance()->getElement("/")->print();
 //        printf("Modified config dump:\n%s\n", dump.c_str());
     }
