@@ -25,24 +25,28 @@
 
 using namespace zmm;
 
-StringBase::StringBase(int capacity)
+StringBase::StringBase(int capacity) : Object()
 {
 	len = capacity;
 	data = (char *)malloc((len + 1) * sizeof(char));
 }
-StringBase::StringBase(char *str)
+StringBase::StringBase(char *str) : Object()
 {
 	len = (int)strlen(str);
 	data = (char *)malloc((len + 1) * sizeof(char));
 	strcpy(data, str);
 }
-StringBase::StringBase(char *str, int len)
+StringBase::StringBase(char *str, int len) : Object()
 {
 	this->len = len;
 	data = (char *)malloc((len + 1) * sizeof(char));
 	memcpy(data, str, len);
 	data[len] = 0;
 }
+// protected
+StringBase::StringBase() : Object()
+{}        
+
 StringBase::~StringBase()
 {
 	free(data);
@@ -171,13 +175,23 @@ String String::from(double x)
     return ""; // (String("") + x);
     // TODO: optimize
 }
-
-
 String String::allocate(int size)
 {
     return String(new StringBase(size));
 }
-
+String String::take(char *data)
+{
+    StringBase *sb = new StringBase();
+    sb->len = strlen(data);
+    return String(sb);
+}
+String String::take(char *data, int length)
+{
+    StringBase *sb = new StringBase();
+    sb->data = data;
+    sb->len = length;
+    return String(sb);
+}
 
 int String::operator==(String other)
 {

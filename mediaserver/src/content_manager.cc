@@ -69,6 +69,7 @@ static String get_mime_type(String file)
         printf("magic_file: %s\n", magic_error(ms));
         return nil;
     }
+    
     String mime_type(mt);
 
     Ref<Matcher> matcher = reMimetype->matcher(mime_type, 2);

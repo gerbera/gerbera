@@ -44,7 +44,8 @@ public:
 	StringBase(char *str);
 	StringBase(char *str, int len);
 	virtual ~StringBase();
-
+protected:
+    StringBase();
 	friend class String;
 };
 
@@ -142,6 +143,8 @@ public:
     static String from(double x);
     
     static String allocate(int size);
+    static String take(char *data, int length);
+    static String take(char *data);
 protected:
 	String(int capacity);
 	friend class StringBuffer;
