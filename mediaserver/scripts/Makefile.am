@@ -13,7 +13,8 @@ tomb-install: tomb-install-dist.py Makefile
 
 _DIST_FILES = \
 	demo_toggle.py \
-	tomb-install-dist.py
+	tomb-install-dist.py \
+    mediatomb-service
 
 EXTRA_DIST = $(_DIST_FILES)
 
