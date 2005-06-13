@@ -61,7 +61,7 @@ Known Issues (ordered by importance)
 
 - Make all metadata produced by javascript be stored in the database.
   Instead of iterating through all known metadata keys, should iterate
-  through all meta properties of the object given to addObject().
+  through all meta properties of the object given to addCdsObject().
   (still don't know how to iterate over properties with spidermonkey)
 
 - Session ID's do not timeout and/or are destroyed.
