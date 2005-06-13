@@ -1,0 +1,66 @@
+#!/bin/sh
+#
+# mediatomb This script starts and stops the mediatomb daemon
+#
+# chkconfig: - 95 30
+# processname: mediatomb
+# description: mediatomb is a daemon process which provides a UPnP service
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# Source networking configuration.
+. /etc/sysconfig/network
+
+# Check that networking is up.
+[ ${NETWORKING} = "no" ] && exit 0
+
+# Set default mediatomb configuration.
+MEDIATOMB="-d -u nobody -g nobody"
+MEDIATOMBOPTIONS="-c /home/jin/.mediatomb/config.xml"
+SETMULTICAST="eth1"
+
+[ -f /usr/bin/mediatomb ] || exit 0
+PATH=$PATH:/usr/bin:/usr/local/bin
+
+# By default it's all good
+RETVAL=0
+
+# See how we were called.
+case "$1" in
+  start)
+	# Start daemon.
+	echo -n "Starting mediatomb: "
+    route add -net 239.0.0.0 netmask 255.0.0.0 $SETMULTICAST >/dev/null 2>&1
+    ifconfig $SETMULTICAST allmulti
+	daemon $NICELEVEL mediatomb $MEDIATOMB $MEDIATOMBOPTIONS
+	RETVAL=$?
+        echo
+        [ $RETVAL = 0 ] && touch /var/lock/subsys/mediatomb
+        ;;
+  stop)
+        # Stop daemons.
+        echo -n "Shutting down mediatomb: "
+        killproc mediatomb
+        RETVAL=$?
+        echo
+        [ $RETVAL = 0 ] && rm -f /var/lock/subsys/mediatomb
+        ;;
+  restart)
+        $0 stop
+        $0 start
+        ;;
+  condrestart)
+       [ -e /var/lock/subsys/mediatomb ] && $0 restart
+       ;;
+  status)
+	status mediatomb
+	RETVAL=$?
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart|status|condrestart}"
+	RETVAL=1
+	;;
+esac
+
+exit $RETVAL
