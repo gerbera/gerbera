@@ -40,6 +40,14 @@ Known Issues (ordered by importance)
   it is having several programs wigh frequent hard drive access to 
   work in parallel.
 
+  Before mysql support arrives or for those doomed to use sqlite3
+  for whatever reason there is an IMHO acceptable workaround.
+  The sqlite3 database file may be placed into a ramdisk, this
+  brings _significant_ speedup.
+  NOTE: In this case you should take care of having a harddisk copy
+  of the database. Shareing a nice script for this purpose would be
+  appreciated.
+  
 
 - When directories are added recursively all subdirectories traversed
   are always created in the PC Directory, regardless if any files from
@@ -73,7 +81,7 @@ Planned improvements / features (ordered by importance)
 - on the fly reloading of scripts and immediate automatic recreation
   of virtual structure. Should be simple - delete all virtual objects and
   pass every item inside the PC Directory to the script again. This will
-  simplify js development a lot.
+  simplify development of JS scripts a lot.
 
 - Virtual and corresponding items should share common metadata. Normally
   almost all metadata will be equal. Currently all data is copied for every
