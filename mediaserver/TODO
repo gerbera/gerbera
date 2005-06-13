@@ -66,6 +66,9 @@ Known Issues (ordered by importance)
 
 - Session ID's do not timeout and/or are destroyed.
 
+- XML parser is very limited. Does not even support comments :)
+  Switching to expat would probably make sense. Correct XML parsing is 
+  an essential capatility of a UPnP device.
 
 
 Planned improvements / features (ordered by importance)
