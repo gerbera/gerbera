@@ -72,7 +72,6 @@ public:
     void remove(zmm::String key);
     
     /// \brief Returns an url encoded version of the whole dictionary.
-    /// \todo check if we encode space correctly!! -> '+'
     zmm::String encode();
 
     /// \brief Makes a dictionary out of url encoded data.
