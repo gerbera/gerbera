@@ -41,8 +41,8 @@ case "$1" in
 	# Start daemon.
 	echo -n "Starting mediatomb: "
     # those settings are necessary for us to react to M-SEARCH requests
-    route add -net 239.0.0.0 netmask 255.0.0.0 $SETMULTICAST >/dev/null 2>&1
-    ifconfig $SETMULTICAST allmulti
+    route add -net 239.0.0.0 netmask 255.0.0.0 $INTERFACE >/dev/null 2>&1
+    ifconfig $INTERFACE allmulti
 	daemon $NICELEVEL mediatomb $MEDIATOMB -i $IFACE_IP $MEDIATOMBOPTIONaS
 	RETVAL=$?
         echo
