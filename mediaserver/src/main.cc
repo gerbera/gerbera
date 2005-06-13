@@ -79,7 +79,7 @@ int main(int argc, char **argv, char **envp)
 
     Ref<Array<StringBase> > addFile(new Array<StringBase>());
 
-    printf("\nMediaTomb UPnP Server version %s\n\n", SERVER_VERSION);
+    printf("\nMediaTomb UPnP Server version %s\n\n", VERSION);
     
     while (1)
     {

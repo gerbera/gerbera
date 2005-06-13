@@ -798,7 +798,6 @@ void ContentManager::signal()
 
 int ContentManager::addTask(zmm::Ref<CMTask> task)
 {
-    printf("pushing task (%x) %s\n", task.getPtr(), task->getDescription().c_str());
     int ret = false;
     lock();
     int size = taskQueue->size();

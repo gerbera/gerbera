@@ -28,7 +28,6 @@
 #include "exceptions.h"
 #include "tools.h"
 
-#define SERVER_VERSION                  "0.8.0"
 /// \TODO implement session timeouts!!!
 #define DEFAULT_SESSION_TIMEOUT         123456
 
@@ -69,7 +68,7 @@
 #define DESC_MANUFACTURER_URL           "http://www.deadlock.dhs.org/upnp"
 #define DESC_MODEL_DESCRIPTION          "Free UPnP AV MediaServer, GNU GPL"
 #define DESC_MODEL_NAME                 "MediaTomb"
-#define DESC_MODEL_NUMBER               SERVER_VERSION 
+#define DESC_MODEL_NUMBER               VERSION 
 #define DESC_SERIAL_NUMBER              "1"
 
 //services
