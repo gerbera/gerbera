@@ -16,12 +16,21 @@
 [ ${NETWORKING} = "no" ] && exit 0
 
 # Set default mediatomb configuration.
+INTERFACE="eth1"
+# make sure to run it as nobody
 MEDIATOMB="-d -u nobody -g nobody"
-MEDIATOMBOPTIONS="-c /home/jin/.mediatomb/config.xml"
-SETMULTICAST="eth1"
+
+# either make an installation in /etc/mediatomb and leave this blank,
+# or specify an alternative config file location using the -c option
+# Note: be aware, that -i parameter is used to set the ip of the 
+# interface specified above
+MEDIATOMBOPTIONS=""
+
 
 [ -f /usr/bin/mediatomb ] || exit 0
 PATH=$PATH:/usr/bin:/usr/local/bin
+
+IFACE_IP=`ifconfig | grep -i "$INTERFACE" -A 1|grep "inet addr"|cut -d " " -f 12|cut -d ":" -f 2`
 
 # By default it's all good
 RETVAL=0
@@ -31,9 +40,10 @@ case "$1" in
   start)
 	# Start daemon.
 	echo -n "Starting mediatomb: "
+    # those settings are necessary for us to react to M-SEARCH requests
     route add -net 239.0.0.0 netmask 255.0.0.0 $SETMULTICAST >/dev/null 2>&1
     ifconfig $SETMULTICAST allmulti
-	daemon $NICELEVEL mediatomb $MEDIATOMB $MEDIATOMBOPTIONS
+	daemon $NICELEVEL mediatomb $MEDIATOMB -i $IFACE_IP $MEDIATOMBOPTIONaS
 	RETVAL=$?
         echo
         [ $RETVAL = 0 ] && touch /var/lock/subsys/mediatomb
