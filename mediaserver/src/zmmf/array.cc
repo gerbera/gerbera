@@ -72,18 +72,28 @@ Object *ArrayBase::get(int index)
 }
 void ArrayBase::remove(int index, int count)
 {
-	int max = index + count;
+    if (index >= siz) // index beyond size
+        return;
+	int max = index + count; // max is the last element to remove + 1
+    if (max > siz) // if remove block is beyond size, cut it
+        max = siz;
+    if (max <= index) // if nothing to remove
+        return;
 	for(int i = index; i < max; i++)
 	{
 		Object *obj = arr[i];
 		if(obj)
 			obj->release();
 	}
-	memmove(
-		(void *)(arr + index),
-		(void *)(arr + (index + count)),
-		count * sizeof(Object *)
-	);
+    int move = siz - max;
+    if (move) // if there is anything to shift
+    {
+    	memmove(
+	    	(void *)(arr + index),
+		    (void *)(arr + index + count),
+    		move * sizeof(Object *)
+	    );
+    }
 	siz -= count;
 }
 void ArrayBase::insert(int index, Object *obj)

@@ -275,20 +275,6 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     {
         server->init();
         server->upnp_init(ip, port);
-        if (addFile->size() > 0)
-        {
-            for (int i = 0; i < addFile->size(); i++)
-            {
-                // add file/directory recursively and asynchronously
-                printf("adding %s\n", String(addFile->get(i)).c_str());
-                ContentManager::getInstance()->addFile(String(addFile->get(i)), true, true);
-                printf("BGERADZ: FIX THIS!\n");
-                sleep(5);
-            }
-        }
-//        ContentManager::getInstance()->removeObject("45");
-//        String dump = ConfigManager::getInstance()->getElement("/")->print();
-//        printf("Modified config dump:\n%s\n", dump.c_str());
     }
     catch(UpnpException upnp_e)
     {
@@ -310,6 +296,24 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
         exit(EXIT_FAILURE);
     }
 
+    if (addFile->size() > 0)
+    {
+        for (int i = 0; i < addFile->size(); i++)
+        {
+            try
+            {   
+                // add file/directory recursively and asynchronously
+                printf("adding %s\n", String(addFile->get(i)).c_str());
+                ContentManager::getInstance()->addFile(String(addFile->get(i)), true, true);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                exit(EXIT_FAILURE);
+            }
+        }
+    }
+    
     signal(SIGINT, signal_handler);
     signal(SIGTERM, signal_handler);
     

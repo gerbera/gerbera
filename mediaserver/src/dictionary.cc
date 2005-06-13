@@ -93,7 +93,7 @@ void Dictionary::remove(String key)
         Ref<DictionaryElement> el = elements->get(i);
         if (el->getKey() == key)
         {
-            elements->remove(i, 0);
+            elements->remove(i, 1);
             return;
         }
     }

@@ -283,7 +283,7 @@ void ContentManager::_removeObject(String objectID)
     um->containerChanged(obj->getParentID());
     
     // reload accounting
-    ContentManager::getInstance()->loadAccounting();
+    loadAccounting();
     
     um->flushUpdates();
 }
@@ -763,8 +763,8 @@ void ContentManager::threadProc()
         }
         unlock();
 
-        printf("Running asynchronous task: %s\n",
-               task->getDescription().c_str());
+//        printf("Running asynchronous task: %s\n",
+//               task->getDescription().c_str());
         try
         {
             task->run();
@@ -773,7 +773,7 @@ void ContentManager::threadProc()
         {
             e.printStackTrace();
         }
-        printf("Finished asynchronous task\n");
+//        printf("Finished asynchronous task\n");
     }
 }
 void *ContentManager::staticThreadProc(void *arg)
@@ -798,6 +798,7 @@ void ContentManager::signal()
 
 int ContentManager::addTask(zmm::Ref<CMTask> task)
 {
+    printf("pushing task (%x) %s\n", task.getPtr(), task->getDescription().c_str());
     int ret = false;
     lock();
     int size = taskQueue->size();
