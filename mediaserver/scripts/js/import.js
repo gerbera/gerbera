@@ -123,8 +123,6 @@ function addAudio(obj)
         desc = desc + ', ' + genre;
     }
 
-    desc = desc + ' Locatoin on disc: ' + obj.location;
-
     var description = obj.meta[M_DESCRIPTION];
     if (!description) 
     {
