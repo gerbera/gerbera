@@ -40,7 +40,7 @@
 #include <grp.h>
 
 
-#define OPTSTR "i:p:c:u:g:a:dh"
+#define OPTSTR "i:p:c:u:g:a:P:dh"
 
 using namespace zmm;
 
@@ -66,6 +66,7 @@ int main(int argc, char **argv, char **envp)
                    {"user", 1, 0, 'u'},
                    {"group", 1, 0, 'g'},
                    {"daemon", 0, 0, 'd'},
+                   {"pid", 0, 0, 'P'},
                    {"add", 1, 0, 'g'},
                    {"help", 0, 0, 'h'},
                    {0, 0, 0, 0}
@@ -75,7 +76,7 @@ int main(int argc, char **argv, char **envp)
     String home;
     String user;
     String group;
-    //String addFile;
+    String pid_file;
 
     Ref<Array<StringBase> > addFile(new Array<StringBase>());
 
@@ -120,8 +121,13 @@ int main(int argc, char **argv, char **envp)
                 break;
                 
             case 'a':
-                printf("adding file/directory:: %s\n", optarg);
+                printf("Adding file/directory: %s\n", optarg);
                 addFile->append(String(optarg));
+                break;
+
+            case 'P':
+                printf("Pid file: %s\n", optarg);
+                pid_file = optarg;
                 break;
                 
             case '?':
@@ -134,6 +140,7 @@ Supported options:\n\
     --port or -p       server port (the SDK only permits values => 49152)\n\
     --config or -c     configuration file to use\n\
     --daemon or -d     run server in background\n\
+    --pidfile or -P    file to hold the pid\n\
     --user or -u       run server under specified username\n\
     --group or -g      run server unser specified group\n\
     --add or -a        add the given file/directory\n\
@@ -192,11 +199,13 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
         char *h = getenv("HOME");
         if (h != NULL) home = h;
 
-        if ((config_file == nil) && (home == nil))
+/*        if ((config_file == nil) && (home == nil))
         {
             printf("No configuration specified and no user home directory set.\n");
             exit(EXIT_FAILURE);
         }
+        
+*/
 
         ConfigManager::init(config_file, home);
     }
@@ -224,7 +233,8 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
         // The HOWTO is Copyright by Devin Watson, under the terms of the BSD License.
         
         /* Our process ID and Session ID */
-        pid_t pid, sid;
+        pid_t pid, sid; 
+        
 
         /* Fork off the parent process */
         pid = fork();
@@ -249,24 +259,46 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
             exit(EXIT_FAILURE);
         }
 
-
-
         /* Change the current working directory */
         if ((chdir("/")) < 0) {
             /* Log the failure */
             exit(EXIT_FAILURE);
         }
 
-        /* Close out the standard file descriptors */
-/*
+        /* Close out the standard file descriptors */        
         close(STDIN_FILENO);
+
+        /*
         close(STDOUT_FILENO);
         close(STDERR_FILENO);
-*/
-        /* Daemon-specific initialization goes here */
+        */
 
     }
 
+    if (pid_file != nil)
+    {
+        pid_t cur_pid;
+        FILE    *f;
+        int     size;
+
+        cur_pid = getpid();
+        String pid = String::from(cur_pid);
+
+        f = fopen(pid_file.c_str(), "w");
+        if (f == NULL)
+        {                    
+            printf("Could not write pid file %s : %s\n", pid_file.c_str(), strerror(errno));
+        }
+        else
+        {
+            size = fwrite(pid.c_str(), sizeof(char), pid.length(), f);
+            fclose(f);
+
+            if (size < pid.length())
+                printf("Error when writing pid file %s : %s\n", pid_file.c_str(), strerror(errno));
+        }
+
+    }
 
     // prepare to run processes
     init_process();
