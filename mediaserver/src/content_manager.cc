@@ -769,7 +769,7 @@ void ContentManager::threadProc()
         }
         unlock();
 
-        log_info(("STARTING %s\n", task->getDescription().c_str()));
+//        log_debug(("Async START %s\n", task->getDescription().c_str()));
         try
         {
             task->run();
@@ -778,7 +778,7 @@ void ContentManager::threadProc()
         {
             e.printStackTrace();
         }
-        log_info(("FINISHED %s\n", task->getDescription().c_str()));
+//        log_debug(("ASYNC STOP  %s\n", task->getDescription().c_str()));
     }
 }
 void *ContentManager::staticThreadProc(void *arg)
@@ -820,7 +820,7 @@ int ContentManager::loadAccounting(int async)
     if (async)
     {
         Ref<CMTask> task(new CMLoadAccountingTask());
-        task->setDescription("Loading info");
+        task->setDescription("Initializing statistics");
         return addTask(task);
     }
     else

@@ -140,7 +140,7 @@ void ConfigManager::validate()
 
     getOption("/import/filesystem-charset", DEFAULT_FILESYSTEM_CHARSET);
     getOption("/import/metadata-charset", DEFAULT_FILESYSTEM_CHARSET);
-    log_info(("checking ip.."));
+    log_info(("checking ip..\n"));
     getOption("/server/ip", ""); // bind to any IP address
     getOption("/server/bookmark", DEFAULT_BOOKMARK_FILE);
     getOption("/server/name", DESC_FRIENDLY_NAME);
