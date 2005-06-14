@@ -203,7 +203,7 @@ void UpdateManager::sendUpdates()
     
     // skip last comma
     String updateString(buf->c_str(), buf->length() - 1);
-//    fprintf(stderr, "threadProc: sending updates: %s\n", updateString.c_str());
+//    flog_info((stderr, "threadProc: sending updates: %s\n", updateString.c_str()));
 
     // send update string...
     ContentDirectoryService::getInstance()->subscription_update(updateString);
@@ -227,13 +227,13 @@ void UpdateManager::threadProc()
 
     while(! shutdownFlag)
     {
-//        fprintf(stderr, "threadProc: awakened...\n"); fflush(stderr);
+//        flog_info((stderr, "threadProc: awakened...\n")); fflush(stderr);
 
         /* if nothing to do, sleep until awakened */
         if(updates->size() == 0)
         {
 
-//            fprintf(stderr, "threadProc: idle sleep ...\n"); fflush(stderr);
+//            flog_info((stderr, "threadProc: idle sleep ...\n")); fflush(stderr);
             ret = pthread_cond_wait(&updateCond, &updateMutex);
             lastIdleMillis = nowMillis;
             continue;
@@ -264,11 +264,11 @@ void UpdateManager::threadProc()
         if(sleepMillis >= MIN_SLEEP) // sleep for sleepMillis milliseconds
         {
             millisToTimespec(nowMillis + sleepMillis, &timeout);
-//            fprintf(stderr, "threadProc: sleeping for %d millis\n", (int)sleepMillis); fflush(stderr);
+//            flog_info((stderr, "threadProc: sleeping for %d millis\n", (int)sleepMillis)); fflush(stderr);
             ret = pthread_cond_timedwait(&updateCond, &updateMutex, &timeout);
 			if (ret)
 			{
-//				fprintf(stderr, "pthread_cont_timedwait(): %s\n", strerror(errno)); fflush(stderr);
+//				flog_info((stderr, "pthread_cont_timedwait(): %s\n", strerror(errno))); fflush(stderr);
 			}
         }
         else // send updates 
@@ -279,7 +279,7 @@ void UpdateManager::threadProc()
         }
     }
     unlock();
-    printf("threadProc: update thread shut down.\n");
+    log_info(("threadProc: update thread shut down.\n"));
 }
 
 void *UpdateManager::staticThreadProc(void *arg)

@@ -154,7 +154,7 @@ Ref<Array<CdsObject> > FsStorage::browse(Ref<BrowseParam> param)
             }
             catch(Exception e)
             {
-                printf("FsStorage: skipping %s : %s\n", childPath.c_str(), e.getMessage().c_str());
+                log_info(("FsStorage: skipping %s : %s\n", childPath.c_str(), e.getMessage().c_str()));
             }
         }
         closedir(dir);

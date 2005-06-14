@@ -20,15 +20,15 @@ void test_parsing(String file)
     try
     {
         root = parser->parseFile(file);
-        printf("parsing successfull\n");
+        log_info(("parsing successfull\n"));
         String xml = root->print();
-        printf("%s\n", xml.c_str());
+        log_info(("%s\n", xml.c_str()));
     }
     catch(ParseException pe)
     {
         String msg = String("Parse error: ")+ pe.getMessage() +" at "+ pe.context->location
                 + " line "+ pe.context->line;
-        fprintf(stderr, "%s\n", msg.c_str());
+        flog_info((stderr, "%s\n", msg.c_str()));
     }
 }
 
@@ -55,7 +55,7 @@ void test_construction()
     test = UpnpXML_CreateResponse("MyActionName", "MyServiceType");
     String test_str = test->print();
 
-    printf("%s\n%s\n", xml.c_str(), test_str.c_str());
+    log_info(("%s\n%s\n", xml.c_str(), test_str.c_str()));
 }
 
 void test_storage()
@@ -73,28 +73,28 @@ void test_storage()
             case OBJECT_TYPE_CONTAINER:
             {
                 Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
-                printf("container: ID: %s, parent_ID: %s, dc_title: %s update_id: %d\n",
+                log_info(("container: ID: %s, parent_ID: %s, dc_title: %s update_id: %d\n",
                     cont->getID().c_str(),
                     cont->getParentID().c_str(),
                     cont->getTitle().c_str(),
                     cont->getUpdateID()
-                );
+                ));
                 break;
             }
             case OBJECT_TYPE_ITEM:
             case (OBJECT_TYPE_ITEM | OBJECT_TYPE_ACTIVE_ITEM):
             {
                 Ref<CdsItem> item = RefCast(obj, CdsItem);
-                printf("item: ID: %s, parent_ID: %s, dc_title: %s\n",
+                log_info(("item: ID: %s, parent_ID: %s, dc_title: %s\n",
                     item->getID().c_str(),
                     item->getParentID().c_str(),
                     item->getTitle().c_str()
-                );
+                ));
                 break;
             }
             default:
             {
-                printf("unknown file type: %d\n", obj->getObjectType());
+                log_info(("unknown file type: %d\n", obj->getObjectType()));
                 exit(1);
             }
         }
@@ -111,9 +111,9 @@ void test_process()
     String str("[String sent to process]");
     String res = run_process("./trigger", "run", str);
 
-    printf("RC: %d\n", res.getBase()->getRefCount());
+    log_info(("RC: %d\n", res.getBase()->getRefCount()));
 
-    printf("Server: returned: %s\n", res.c_str());
+    log_info(("Server: returned: %s\n", res.c_str()));
 }
 
 int main(int argc, char **argv)

@@ -79,15 +79,15 @@ void ConfigManager::init(String filename, String userhome)
         }
 
         if (home_ok)
-            printf("Loading configuration from ~/.mediatomb/config.xml\n");
+            log_info(("Loading configuration from ~/.mediatomb/config.xml\n"));
         else
-            printf("Loading configuration from /etc/mediatomb/config.xml\n");
+            log_info(("Loading configuration from /etc/mediatomb/config.xml\n"));
 
 //        instance->load(userhome + DIR_SEPARATOR + DEFAULT_CONFIG_HOME + DIR_SEPARATOR + DEFAULT_CONFIG_NAME);
     }
 //    else
 
-    printf("Loading configuration from: %s\n", filename.c_str());
+    log_info(("Loading configuration from: %s\n", filename.c_str()));
     instance->load(filename);
 
     instance->prepare_udn();    
@@ -98,7 +98,7 @@ void ConfigManager::validate()
 {
     String temp;
 
-    printf("Checking configuration...\n");
+    log_info(("Checking configuration...\n"));
    
     // first check if the config file itself looks ok, it must have a config
     // and a server tag
@@ -140,7 +140,7 @@ void ConfigManager::validate()
 
     getOption("/import/filesystem-charset", DEFAULT_FILESYSTEM_CHARSET);
     getOption("/import/metadata-charset", DEFAULT_FILESYSTEM_CHARSET);
-    printf("checking ip..");
+    log_info(("checking ip.."));
     getOption("/server/ip", ""); // bind to any IP address
     getOption("/server/bookmark", DEFAULT_BOOKMARK_FILE);
     getOption("/server/name", DESC_FRIENDLY_NAME);
@@ -176,7 +176,7 @@ void ConfigManager::validate()
     Storage::getInstance(PRIMARY_STORAGE);
     Storage::getInstance(FILESYSTEM_STORAGE);
 
-    printf("Configuration check succeeded.\n");
+    log_info(("Configuration check succeeded.\n"));
 }
 
 void ConfigManager::prepare_udn()
@@ -192,7 +192,7 @@ void ConfigManager::prepare_udn()
         uuid_generate(uuid);
         uuid_unparse(uuid, uuid_str);
 
-        printf("UUID GENERATED!: %s\n", uuid_str);
+        log_info(("UUID GENERATED!: %s\n", uuid_str));
         
         element->setText(String("uuid:") + uuid_str);
 
@@ -265,8 +265,8 @@ String ConfigManager::getOption(String xpath, String def)
     if (string_ok(value))
         return value;
 
-    printf("Config: option not found: %s using default value: %s\n",
-           xpath.c_str(), def.c_str());
+    log_info(("Config: option not found: %s using default value: %s\n",
+           xpath.c_str(), def.c_str()));
     
     String pathPart = XPath::getPathPart(xpath);
     String axisPart = XPath::getAxisPart(xpath);

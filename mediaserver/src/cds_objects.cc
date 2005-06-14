@@ -144,7 +144,7 @@ void CdsObject::validate()
             (!string_ok(this->title)) ||
             (!string_ok(this->upnp_class)))
     {
-    //    printf("this->parentID %s, this->title %s, this->upnp_class %s, this->location %s\n", this->parentID.c_str(), this->title.c_str(), this->upnp_class.c_str(), this->location.c_str());
+    //    log_info(("this->parentID %s, this->title %s, this->upnp_class %s, this->location %s\n", this->parentID.c_str(), this->title.c_str(), this->upnp_class.c_str(), this->location.c_str()));
         throw Exception(String("CdsObject: validation failed"));
     }
 
@@ -249,7 +249,7 @@ int CdsItem::equals(Ref<CdsObject> obj, bool exactly)
 void CdsItem::validate()
 {
     CdsObject::validate();
-//    printf("mime: [%s] loc [%s]\n", this->mimeType.c_str(), this->location.c_str());
+//    log_info(("mime: [%s] loc [%s]\n", this->mimeType.c_str(), this->location.c_str()));
     if ((!string_ok(this->mimeType)) || (!check_path(this->location)))
         throw Exception(String("CdsItem: validation failed"));
 }

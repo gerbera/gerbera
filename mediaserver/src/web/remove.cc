@@ -35,7 +35,7 @@ web::remove::remove() : WebRequestHandler()
 
 void web::remove::process()
 {
-    printf("remove: start\n");
+    log_info(("remove: start\n"));
 
     Ref<Session>   session;
     session_data_t sd;
@@ -83,6 +83,6 @@ void web::remove::process()
     sub->put("driver", driver);
     *out << subrequest("browse", sub);
     
-    printf("remove: returning\n");
+    log_info(("remove: returning\n"));
 }
 

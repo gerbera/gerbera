@@ -43,7 +43,7 @@ FileRequestHandler::FileRequestHandler() : RequestHandler()
 
 void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info *info)
 {
-    printf("FileRequestHandler::get_info start\n");
+    log_info(("FileRequestHandler::get_info start\n"));
 
     String object_id;
 
@@ -59,11 +59,11 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     object_id = dict->get("object_id");
     if (object_id == nil)
     {
-        printf("object_id not found in url\n");
+        log_info(("object_id not found in url\n"));
         throw Exception("object_id not found");
     }
 
-    printf("got ObjectID: [%s]\n", object_id.c_str());
+    log_info(("got ObjectID: [%s]\n", object_id.c_str()));
 
     Ref<Storage> storage = Storage::getInstance();
 
@@ -88,20 +88,20 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
         String input = inputElement->print();
         String output;
 
-        printf("Script input: %s\n", input.c_str());
+        log_info(("Script input: %s\n", input.c_str()));
         if(strncmp(action.c_str(), "http://", 7))
         {
             long before = getMillis();
             output = run_process(action, "run", input);
             long after = getMillis();
-            fprintf(stderr, "script executed in %ld milliseconds\n", after - before);
+            log_info(("script executed in %ld milliseconds\n", after - before));
         }
         else
         {
-            printf("fetching %s\n", action.c_str());
+            log_info(("fetching %s\n", action.c_str()));
             output = input;
         }
-        printf("Script output: %s\n", output.c_str());
+        log_info(("Script output: %s\n", output.c_str()));
 
         Ref<CdsObject> clone = CdsObject::createObject(objectType);
         aitem->copyTo(clone);
@@ -110,11 +110,11 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
 
         if (! aitem->equals(clone, true)) // check for all differences
         {
-            printf("Item changed, updating database\n");
+            log_info(("Item changed, updating database\n"));
             storage->updateObject(clone);
             if (! aitem->equals(clone)) // check for visible differences
             {
-                printf("Item changed visually, updating parent\n");
+                log_info(("Item changed visually, updating parent\n"));
                 Ref<UpdateManager> um = UpdateManager::getInstance();
                 um->containerChanged(clone->getParentID());
                 um->flushUpdates(FLUSH_ASAP);
@@ -123,7 +123,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
         }
         else
         {
-            printf("Item untouched...\n");
+            log_info(("Item untouched...\n"));
         }
     }
 
@@ -138,7 +138,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     }
 
     info->file_length = statbuf.st_size;
-    printf("FileIOHandler: get_info: file_length: %d\n", (int)statbuf.st_size);
+    log_info(("FileIOHandler: get_info: file_length: %d\n", (int)statbuf.st_size));
     info->last_modified = statbuf.st_mtime;
     info->is_directory = S_ISDIR(statbuf.st_mode);
 
@@ -153,17 +153,17 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
 
     info->content_type = ixmlCloneDOMString(item->getMimeType().c_str());
 
-    printf("web_get_info: Requested %s, ObjectID: %s, Location: %s\n, MimeType: %s\n",
-           filename, object_id.c_str(), path.c_str(), info->content_type);
+    log_info(("web_get_info: Requested %s, ObjectID: %s, Location: %s\n, MimeType: %s\n",
+           filename, object_id.c_str(), path.c_str(), info->content_type));
 
-    printf("web_get_info(): end\n");
+    log_info(("web_get_info(): end\n"));
 }
 
 Ref<IOHandler> FileRequestHandler::open(IN const char *filename, IN enum UpnpOpenFileMode mode)
 {
     String object_id;
 
-    printf("FileIOHandler web_open(): start\n");
+    log_info(("FileIOHandler web_open(): start\n"));
 
     // Currently we explicitly do not support UPNP_WRITE
     // due to security reasons.
@@ -184,7 +184,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, IN enum UpnpOpe
 
     Ref<Storage> storage = Storage::getInstance();
 
-    printf("FileIOHandler web_open(): Opening media file with object id %s\n", object_id.c_str());
+    log_info(("FileIOHandler web_open(): Opening media file with object id %s\n", object_id.c_str()));
 
     Ref<CdsObject> obj = storage->loadObject(object_id);
 
@@ -201,7 +201,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, IN enum UpnpOpe
     Ref<IOHandler> io_handler(new FileIOHandler(path));
     io_handler->open(mode);
 
-    printf("FileIOHandler web_open: returning\n");
+    log_info(("FileIOHandler web_open: returning\n"));
     return io_handler;
 }
 

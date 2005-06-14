@@ -35,7 +35,7 @@ web::edit_ui::edit_ui() : WebRequestHandler()
 
 void web::edit_ui::process()
 {
-    printf("edit: start\n");
+    log_info(("edit: start\n"));
 
     Ref<Session> session;
     Ref<Storage> storage; // storage instance, will be chosen depending on the driver
@@ -78,6 +78,6 @@ void web::edit_ui::process()
     *out << renderXMLHeader("/edit.xsl");
     *out << root->print();
 
-    printf("edit: returning\n");
+    log_info(("edit: returning\n"));
 }
 

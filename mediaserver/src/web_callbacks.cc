@@ -49,7 +49,7 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
     String path, parameters;
     RequestHandler::split_url(filename, path, parameters);
 
-    //printf("create_handler: got url parameters: [%s]\n", parameters.c_str());
+    //log_info(("create_handler: got url parameters: [%s]\n", parameters.c_str()));
     
     Ref<Dictionary> dict(new Dictionary());
     dict->decode(parameters);
@@ -108,16 +108,16 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
 /// \return -1 Error.
 static int web_get_info(IN const char *filename, OUT struct File_Info *info)
 {
-    //printf("web_get_info: start\n");
+    //log_info(("web_get_info: start\n"));
     try
     {
         Ref<RequestHandler> reqHandler = create_request_handler(filename);
         reqHandler->get_info(filename, info);
-      //  printf("web_get_info: end, returning\n");
+      //  log_info(("web_get_info: end, returning\n"));
     }
     catch(Exception e)
     {
-        printf("web_get_info(): Exception during callback: %s\n", e.getMessage().c_str());
+        log_info(("web_get_info(): Exception during callback: %s\n", e.getMessage().c_str()));
         e.printStackTrace();
         return -1;
     }
@@ -145,12 +145,12 @@ static UpnpWebFileHandle web_open(IN const char *filename,
         Ref<RequestHandler> reqHandler = create_request_handler(filename);
         Ref<IOHandler> ioHandler = reqHandler->open(filename, mode);
         ioHandler->retain();
-        //printf("web_open: end, returning\n");
+        //log_info(("web_open: end, returning\n"));
         return (UpnpWebFileHandle) ioHandler.getPtr();
     }
     catch (Exception ex)
     {
-        printf("web_open(): exception during callback: %s\n", ex.getMessage().c_str());
+        log_info(("web_open(): exception during callback: %s\n", ex.getMessage().c_str()));
         ex.printStackTrace();
         return NULL;
     }
@@ -218,7 +218,7 @@ static int web_seek(IN UpnpWebFileHandle f, IN long offset, IN int whence)
     }
     catch(Exception e)
     {
-        printf("web_seek(): Exception during seek: %s\n", e.getMessage().c_str());
+        log_info(("web_seek(): Exception during seek: %s\n", e.getMessage().c_str()));
         e.printStackTrace();
         return -1;
     }
@@ -243,7 +243,7 @@ static int web_close( IN UpnpWebFileHandle f)
     }
     catch(Exception e)
     {
-        printf("web_seek(): Exception during seek: %s\n", e.getMessage().c_str());
+        log_info(("web_seek(): Exception during seek: %s\n", e.getMessage().c_str()));
         e.printStackTrace();
         return -1;
     }

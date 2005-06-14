@@ -66,7 +66,7 @@ static String get_mime_type(String file)
     char *mt = (char *)magic_file(ms, file.c_str());
     if (mt == NULL)
     {
-        printf("magic_file: %s\n", magic_error(ms));
+        log_info(("magic_file: %s\n", magic_error(ms)));
         return nil;
     }
     
@@ -76,8 +76,8 @@ static String get_mime_type(String file)
     if (matcher->next())
         return matcher->group(1);
     
-    printf("filemagic returned invalid mimetype for %s\n%s\n",
-           file.c_str(), mt);
+    log_info(("filemagic returned invalid mimetype for %s\n%s\n",
+           file.c_str(), mt));
     return nil;
  }
 
@@ -102,7 +102,7 @@ ContentManager::ContentManager() : Object()
     mapEl = cm->getElement("/import/mappings/extension-mimetype");
     if (mapEl == nil)
     {
-        printf("extension-mimetype mappings not found\n");
+        log_info(("extension-mimetype mappings not found\n"));
     }
     else
     {
@@ -119,7 +119,7 @@ ContentManager::ContentManager() : Object()
     mapEl = cm->getElement("/import/mappings/mimetype-upnpclass");
     if (mapEl == nil)
     {
-        printf("mimetype-upnpclass mappings not found\n");
+        log_info(("mimetype-upnpclass mappings not found\n"));
     }
     else
     {
@@ -132,12 +132,12 @@ ContentManager::ContentManager() : Object()
         ms = magic_open(MAGIC_MIME);
         if (ms == NULL)
         {
-	        printf("magic_open failed\n");
+	        log_info(("magic_open failed\n"));
             return;
         }
         if (magic_load(ms, NULL) == -1)
         {
-            printf("magic_load: %s\n", magic_error(ms));
+            log_info(("magic_load: %s\n", magic_error(ms)));
             magic_close(ms);
             ms = NULL;
         }
@@ -248,7 +248,7 @@ void ContentManager::_addFile(String path, int recursive)
             obj = createObjectFromFile(curPath);
             if (obj == nil) // object ignored
             {
-                printf("file ignored: %s\n", curPath.c_str());
+                log_info(("file ignored: %s\n", curPath.c_str()));
                 return;
             }
             obj->setParentID(curParentID);
@@ -326,24 +326,29 @@ void ContentManager::addRecursive(String path, String parentID)
                 obj = createObjectFromFile(newPath);
                 if (obj == nil) // object ignored
                 {
-                    printf("file ignored: %s\n", newPath.c_str());
-                    return;
+                    log_info(("file ignored: %s\n", newPath.c_str()));
                 }
-                obj->setParentID(parentID);
-                addObject(obj);
+                else
+                {
+                    obj->setParentID(parentID);
+                    addObject(obj);
+                }
             }
-			if (IS_CDS_ITEM(obj->getObjectType()))
-			{
-				scripting->processCdsObject(obj);
-			}
-            if (IS_CDS_CONTAINER(obj->getObjectType()))
+            if (obj != nil)
             {
-                addRecursive(newPath, obj->getID());
+    			if (IS_CDS_ITEM(obj->getObjectType()))
+	    		{
+		    		scripting->processCdsObject(obj);
+    			}
+                if (IS_CDS_CONTAINER(obj->getObjectType()))
+                {
+                    addRecursive(newPath, obj->getID());
+                }
             }
         }
         catch(Exception e)
         {
-            printf("skipping %s : %s\n", newPath.c_str(), e.getMessage().c_str());
+            log_info(("skipping %s : %s\n", newPath.c_str(), e.getMessage().c_str()));
         }
     }
     closedir(dir);
@@ -491,6 +496,7 @@ Ref<CdsObject> ContentManager::convertObject(Ref<CdsObject> oldObj, int newType)
     return newObj;
 }
 
+// returns nil if file ignored due to configuration
 Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic)
 {
     String filename = get_filename(path);
@@ -593,7 +599,7 @@ void ContentManager::initScripting()
 	catch (Exception e)
 	{
 		scripting = nil;
-		printf("ContentManager SCRIPTING: %s\n", e.getMessage().c_str());
+		log_info(("ContentManager SCRIPTING: %s\n", e.getMessage().c_str()));
 	}
 
 }
@@ -641,7 +647,7 @@ void ContentManager::addFile2(String path, int recursive)
             obj = createObjectFromFile(curPath);
             if (obj == nil) // object ignored
             {
-                printf("file ignored: %s\n", curPath.c_str());
+                log_info(("file ignored: %s\n", curPath.c_str()));
                 return;
             }
             obj->setParentID(curParentID);
@@ -700,7 +706,7 @@ void ContentManager::addFile2(Ref<DirStack> dirStack, String parentID)
                 obj = createObjectFromFile(newPath);
                 if (obj == nil) // object ignored
                 {
-                    printf("file ignored: %s\n", newPath.c_str());
+                    log_info(("file ignored: %s\n", newPath.c_str()));
                     return;
                 }
                 obj->setParentID(parentID);
@@ -718,7 +724,7 @@ void ContentManager::addFile2(Ref<DirStack> dirStack, String parentID)
         }
         catch(Exception e)
         {
-            printf("skipping %s : %s\n", newPath.c_str(), e.getMessage().c_str());
+            log_info(("skipping %s : %s\n", newPath.c_str(), e.getMessage().c_str()));
         }
     }
     closedir(dir);
@@ -763,8 +769,7 @@ void ContentManager::threadProc()
         }
         unlock();
 
-//        printf("Running asynchronous task: %s\n",
-//               task->getDescription().c_str());
+        log_info(("STARTING %s\n", task->getDescription().c_str()));
         try
         {
             task->run();
@@ -773,7 +778,7 @@ void ContentManager::threadProc()
         {
             e.printStackTrace();
         }
-//        printf("Finished asynchronous task\n");
+        log_info(("FINISHED %s\n", task->getDescription().c_str()));
     }
 }
 void *ContentManager::staticThreadProc(void *arg)
@@ -847,7 +852,8 @@ int ContentManager::removeObject(String objectID, int async)
         Ref<Array<CdsObject> > objectPath = storage->getObjectPath(objectID);
         Ref<StringBuffer> desc(new StringBuffer(objectPath->size() * 10));
         *desc << "Removing ";
-        for (int i = 0; i < objectPath->size(); i++)
+        // skip root container, start from 1
+        for (int i = 1; i < objectPath->size(); i++)
             *desc << '/' << objectPath->get(i)->getTitle();
         
         Ref<CMTask> task(new CMRemoveObjectTask(objectID));

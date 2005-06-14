@@ -43,7 +43,7 @@ static Ref<Element> addAction(String action_type, String action_name)
 
 void web::browse::process()
 {
-//    printf("browse: start\n");
+//    log_info(("browse: start\n"));
 
     int flag;
 
@@ -68,7 +68,7 @@ void web::browse::process()
   
     if (driver == "1")
     {
-//        printf("process: getting normal storage %s\n", driver.c_str());
+//        log_info(("process: getting normal storage %s\n", driver.c_str()));
         storage = Storage::getInstance();
         // depending on the driver we store the data in different
         // locations within the session
@@ -76,7 +76,7 @@ void web::browse::process()
     } 
     else if (driver == "2")
     {
-//        printf("process: getting filesystem storage %s\n", driver.c_str());
+//        log_info(("process: getting filesystem storage %s\n", driver.c_str()));
         storage = Storage::getInstance(FILESYSTEM_STORAGE);
         sd = SECONDARY;
     }
@@ -127,7 +127,7 @@ void web::browse::process()
     
     session->putTo(sd, "requested_count", requested_count);
 
-//    printf("browse:open - browsing object with id [%s]\n", object_id.c_str());
+//    log_info(("browse:open - browsing object with id [%s]\n", object_id.c_str()));
 
     // ok, we validated all the parameters, now we are ready tobrowse
     Ref<BrowseParam> param(new BrowseParam(object_id, flag));
@@ -229,6 +229,6 @@ void web::browse::process()
     *out << renderXMLHeader("/browse.xsl");
     *out << root->print();
     
-//    printf("browse: returning\n");
+//    log_info(("browse: returning\n"));
 }
 

@@ -146,7 +146,7 @@ void SQLStorage::addObject(Ref<CdsObject> obj)
     *qb << "INSERT INTO cds_objects(" << fields->toString() <<
             ") VALUES (" << values->toString() << ")";
 
-//    printf("insert_query: %s\n", query->toString().c_str());
+//    log_info(("insert_query: %s\n", query->toString().c_str()));
 
     exec(qb->toString());
 
@@ -187,7 +187,7 @@ void SQLStorage::updateObject(zmm::Ref<CdsObject> obj)
 
     *qb << " WHERE id = " << obj->getID();
 
-//    printf("upd_query: %s\n", query->toString().c_str());
+//    log_info(("upd_query: %s\n", query->toString().c_str()));
 
     this->exec(qb->toString());
 }
@@ -415,7 +415,7 @@ void SQLStorage::removeChildren(String id, Ref<StringBuffer> query)
         *query << childID;
         if (query->length() > MAX_DELETE_QUERY_LENGTH)
         {
-//            printf("DEL QUERY: %s...\n", query->toString().substring(0, 65).c_str());
+//            log_info(("DEL QUERY: %s...\n", query->toString().substring(0, 65).c_str()));
             *query << ")";
             exec(query->toString());
             query->clear();

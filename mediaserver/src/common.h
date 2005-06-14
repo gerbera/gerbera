@@ -22,11 +22,14 @@
 #define __COMMON_H__
 
 #include <errno.h>
+
+#include "logger.h"
 #include "upnp/upnp.h"
 #include "zmmf/zmmf.h"
 #include "mxml/mxml.h"
 #include "exceptions.h"
 #include "tools.h"
+
 
 /// \TODO implement session timeouts!!!
 #define DEFAULT_SESSION_TIMEOUT         123456
@@ -97,5 +100,9 @@
 #define DEFAULT_BOOKMARK_FILE           "mediatomb.html"
 #define DEFAULT_IGNORE_UNKNOWN_EXTENSIONS "no"
 #define DEFAULT_IMPORT_SCRIPT           "import.js"
+
+
+
+
 #endif // __COMMON_H__
 

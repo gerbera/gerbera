@@ -69,7 +69,7 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions)
                 result->appendTextChild(key, el->getValue());
         }
 
-        //printf("ITEM HAS FOLLOWING METADATA: %s\n", item->getMetadata()->encode().c_str());
+        //log_info(("ITEM HAS FOLLOWING METADATA: %s\n", item->getMetadata()->encode().c_str()));
 
 
         CdsResourceManager::getInstance()->addResources(item, result);
@@ -96,7 +96,7 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions)
         result->appendTextChild("mime-type", aitem->getMimeType());
     }
    
-//    printf("renderen DIDL: %s\n", result->print().c_str());
+//    log_info(("renderen DIDL: %s\n", result->print().c_str()));
 
     return result;
 }
@@ -155,7 +155,7 @@ Ref<Element> UpnpXML_CreateEventPropertySet()
 Ref<Element> UpnpXML_RenderDeviceDescription()
 {
 
-//    printf("UpnpXML_RenderDeviceDescription(): start\n");
+//    log_info(("UpnpXML_RenderDeviceDescription(): start\n"));
     Ref<ConfigManager> config = ConfigManager::getInstance();
 
     Ref<Element> root(new Element("root")); 

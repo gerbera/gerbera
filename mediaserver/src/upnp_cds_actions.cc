@@ -27,7 +27,7 @@ using namespace mxml;
 
 void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
 {
-//    //printf("upnp_action_Browse: start\n");
+//    //log_info(("upnp_action_Browse: start\n"));
     Ref<Storage> storage = Storage::getInstance();
    
     Ref<Element> req = request->getRequest();
@@ -39,8 +39,8 @@ void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
     String RequestedCount = req->getChildText("RequestedCount");
     // String SortCriteria; // not yet supported
 
-    //printf("Browse received parameters: ObjectID [%s] BrowseFlag [%s] StartingIndex [%s] RequestedCount [%s]\n",
-//            ObjectID.c_str(), BrowseFlag.c_str(), StartingIndex.c_str(), RequestedCount.c_str());
+    //log_info(("Browse received parameters: ObjectID [%s] BrowseFlag [%s] StartingIndex [%s] RequestedCount [%s]\n",
+//            ObjectID.c_str(), BrowseFlag.c_str(), StartingIndex.c_str(), RequestedCount.c_str()));
    
 
     if (ObjectID == nil)
@@ -96,12 +96,12 @@ void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
     response->appendTextChild("UpdateID", String("") + systemUpdateID);
 
     request->setResponse(response);
-    //printf("upnp_action_Browse: end\n");
+    //log_info(("upnp_action_Browse: end\n"));
 }
 
 void ContentDirectoryService::upnp_action_GetSearchCapabilities(Ref<ActionRequest> request)
 {
-    //printf("upnp_action_GetSearchCapabilities: start\n");
+    //log_info(("upnp_action_GetSearchCapabilities: start\n"));
 
     Ref<Element> response;
     response = UpnpXML_CreateResponse(request->getActionName(), serviceType);
@@ -109,12 +109,12 @@ void ContentDirectoryService::upnp_action_GetSearchCapabilities(Ref<ActionReques
             
     request->setResponse(response);
 
-    //printf("upnp_action_GetSearchCapabilities: end\n");
+    //log_info(("upnp_action_GetSearchCapabilities: end\n"));
 }
 
 void ContentDirectoryService::upnp_action_GetSortCapabilities(Ref<ActionRequest> request)
 {
-    //printf("upnp_actions_GetSortCapabilities: start\n");
+    //log_info(("upnp_actions_GetSortCapabilities: start\n"));
 
     Ref<Element> response;
     response = UpnpXML_CreateResponse(request->getActionName(), serviceType);
@@ -122,12 +122,12 @@ void ContentDirectoryService::upnp_action_GetSortCapabilities(Ref<ActionRequest>
             
     request->setResponse(response);
 
-    //printf("upnp_actions_GetSortCapabilities: end\n");
+    //log_info(("upnp_actions_GetSortCapabilities: end\n"));
 }
 
 void ContentDirectoryService::upnp_action_GetSystemUpdateID(Ref<ActionRequest> request)
 {
-    //printf("upnp_actions_GetSystemUpdateID: start\n");
+    //log_info(("upnp_actions_GetSystemUpdateID: start\n"));
 
     Ref<Element> response;
     response = UpnpXML_CreateResponse(request->getActionName(), serviceType);
@@ -135,12 +135,12 @@ void ContentDirectoryService::upnp_action_GetSystemUpdateID(Ref<ActionRequest> r
 
     request->setResponse(response);
     
-    //printf("upnp_actions_GetSystemUpdateID: end\n");
+    //log_info(("upnp_actions_GetSystemUpdateID: end\n"));
 }
 
 void ContentDirectoryService::process_action_request(Ref<ActionRequest> request)
 {
-    //printf("ContentDirectoryService::process_action_request: start\n");
+    //log_info(("ContentDirectoryService::process_action_request: start\n"));
 
     if (request->getActionName() == "Browse")
     {
@@ -161,13 +161,13 @@ void ContentDirectoryService::process_action_request(Ref<ActionRequest> request)
     else
     {
         // invalid or unsupported action
-        printf("process_action_request: unrecognized action %s\n",
-                request->getActionName().c_str());
+        log_info(("process_action_request: unrecognized action %s\n",
+                request->getActionName().c_str()));
         request->setErrorCode(UPNP_E_INVALID_ACTION);
         throw UpnpException(UPNP_E_INVALID_ACTION, "unrecognized action");
     }
 
-    //printf("ContentDirectoryService::process_action_request: end\n");
+    //log_info(("ContentDirectoryService::process_action_request: end\n"));
 }
 
 

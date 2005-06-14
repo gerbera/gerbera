@@ -62,7 +62,7 @@ String run_process(String prog, String param, String input)
     /* executing script */
     String command = prog + " " + param + " < " + input_file +
         " > " + output_file;
-    fprintf(stderr, "running %s\n", command.c_str());
+    log_info(("running %s\n", command.c_str()));
     /* int ret = */ (void)system(command.c_str());
 
     /* reading output file */

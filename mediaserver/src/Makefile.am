@@ -27,6 +27,8 @@ libmediatomb_a_SOURCES = \
     file_request_handler.cc \
     io_handler.h \
     io_handler.cc \
+    logger.h \
+    logger.cc \
     metadata_reader.h \
     metadata_reader.cc \
     mem_io_handler.h \

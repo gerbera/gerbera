@@ -65,14 +65,14 @@ zmm::String StringConverter::convert(String str)
         dirty = false;
     }
     
-//    printf("iconv: BEFORE: input bytes left: %d  output bytes left: %d\n",
-//           input_bytes, output_bytes);
+//    log_info(("iconv: BEFORE: input bytes left: %d  output bytes left: %d\n",
+//           input_bytes, output_bytes));
     
     ret = iconv(cd, input_ptr, (size_t *)&input_bytes,
                     output_ptr, (size_t *)&output_bytes);
     if (ret == -1)
     {
-        printf("iconv: %s\n", strerror(errno));
+        log_info(("iconv: %s\n", strerror(errno)));
         String err;
         switch (errno)
         {
@@ -91,19 +91,19 @@ zmm::String StringConverter::convert(String str)
                 break;
         }
         *output_copy = 0;
-        printf("%s\n", err.c_str());
-        printf("iconv: input: %s\n", input);
-        printf("iconv: converted part:  %s\n", output);
+        log_info(("%s\n", err.c_str()));
+        log_info(("iconv: input: %s\n", input));
+        log_info(("iconv: converted part:  %s\n", output));
         dirty = true;
         throw Exception(err);
     }
    
-//    printf("iconv: AFTER: input bytes left: %d  output bytes left: %d\n",
-//           input_bytes, output_bytes);
-//    printf("iconv: returned %d\n", ret);
+//    log_info(("iconv: AFTER: input bytes left: %d  output bytes left: %d\n",
+//           input_bytes, output_bytes));
+//    log_info(("iconv: returned %d\n", ret));
 
 //    *output_copy = 0;
-//    printf("iconv: output: %s\n", output);
+//    log_info(("iconv: output: %s\n", output));
 
     String ret_str = String(output, output_copy - output);
     free(output);

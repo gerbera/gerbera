@@ -74,17 +74,17 @@ void ActionRequest::update()
         String xml = response->print();
         int ret;
 
-        //printf("ActionRequest::update(): \n%s\n\n", xml.c_str());
+        //log_info(("ActionRequest::update(): \n%s\n\n", xml.c_str()));
         
         ret = ixmlParseBufferEx(xml.c_str(), &upnp_request->ActionResult);
         if (ret != IXML_SUCCESS)
         {
-            printf("ActionRequest::update(): could not convert to iXML\n");
+            log_info(("ActionRequest::update(): could not convert to iXML\n"));
             upnp_request->ErrCode = UPNP_E_ACTION_FAILED;    
         } 
         else
         {
-//            printf("ActionRequest::update(): converted to iXML, code %d\n", errCode);
+//            log_info(("ActionRequest::update(): converted to iXML, code %d\n", errCode));
             upnp_request->ErrCode = errCode;    
         }
     }
@@ -99,7 +99,7 @@ void ActionRequest::update()
             upnp_request->ErrCode = UPNP_E_ACTION_FAILED;
         }
         
-        printf("ActionRequest::update(): response is nil, code %d\n", errCode);
+        log_info(("ActionRequest::update(): response is nil, code %d\n", errCode));
     }
 }
 

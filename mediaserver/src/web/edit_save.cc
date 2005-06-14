@@ -36,7 +36,7 @@ web::edit_save::edit_save() : WebRequestHandler()
 
 void web::edit_save::process()
 {
-    printf("change: start\n");
+    log_info(("change: start\n"));
 
     Ref<Session> session;
     Ref<Storage> storage; // storage instance, will be chosen depending on the driver
@@ -89,6 +89,6 @@ void web::edit_save::process()
     sub->put("driver", driver);
     *out << subrequest("browse", sub);
 
-    printf("change: returning\n");
+    log_info(("change: returning\n"));
 }
 

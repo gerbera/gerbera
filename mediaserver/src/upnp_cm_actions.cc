@@ -26,7 +26,7 @@ using namespace mxml;
 
 void ConnectionManagerService::upnp_action_GetCurrentConnectionIDs(Ref<ActionRequest> request)
 {
-    printf("upnp_action_GetCurrentConnectionIDs: start\n");
+    log_info(("upnp_action_GetCurrentConnectionIDs: start\n"));
 
     Ref<Element> response;
     response = UpnpXML_CreateResponse(request->getActionName(), serviceType);
@@ -35,21 +35,21 @@ void ConnectionManagerService::upnp_action_GetCurrentConnectionIDs(Ref<ActionReq
     request->setResponse(response); 
     request->setErrorCode(UPNP_E_SUCCESS);    
    
-    printf("upnp_action_GetCurrentConnectionIDs: end\n");
+    log_info(("upnp_action_GetCurrentConnectionIDs: end\n"));
 }
 
 void ConnectionManagerService::upnp_action_GetCurrentConnectionInfo(Ref<ActionRequest> request)
 {
-    printf("upnp_action_GetCurrentConnectionInfo: start\n");
+    log_info(("upnp_action_GetCurrentConnectionInfo: start\n"));
 
     request->setErrorCode(UPNP_E_NOT_EXIST);
 
-    printf("upnp_action_GetCurrentConnectionInfo: end\n");
+    log_info(("upnp_action_GetCurrentConnectionInfo: end\n"));
 }
 
 void ConnectionManagerService::upnp_action_GetProtocolInfo(Ref<ActionRequest> request)
 {
-    printf("upnp_GetProtocolInfo: start\n");
+    log_info(("upnp_GetProtocolInfo: start\n"));
 
     Ref<Element> response;
     response = UpnpXML_CreateResponse(request->getActionName(), serviceType);
@@ -64,12 +64,12 @@ void ConnectionManagerService::upnp_action_GetProtocolInfo(Ref<ActionRequest> re
     request->setErrorCode(UPNP_E_SUCCESS);
         
     
-    printf("upnp_GetProtocolInfo: end\n");
+    log_info(("upnp_GetProtocolInfo: end\n"));
 }
 
 void ConnectionManagerService::process_action_request(Ref<ActionRequest> request)
 {
-    printf("ConnectionManagerService::process_action_request: start\n");
+    log_info(("ConnectionManagerService::process_action_request: start\n"));
 
     if (request->getActionName() == "GetCurrentConnectionIDs")
     {
@@ -86,15 +86,15 @@ void ConnectionManagerService::process_action_request(Ref<ActionRequest> request
     else
     {
         // invalid or unsupported action
-        printf("process_action_request: unrecognized action %s\n", 
-                request->getActionName().c_str());
+        log_info(("process_action_request: unrecognized action %s\n", 
+                request->getActionName().c_str()));
         request->setErrorCode(UPNP_E_INVALID_ACTION);
         throw UpnpException(UPNP_E_INVALID_ACTION, "unrecognized action");
     }
     
 
     
-    printf("ConnectionManagerService::process_action_request: end\n");
+    log_info(("ConnectionManagerService::process_action_request: end\n"));
 
 }
 

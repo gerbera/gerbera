@@ -24,8 +24,8 @@
 #include "zmm/zmm.h"
 
 #include "array.h"
-
 #include <stdio.h>
+#include "logger.h"
 
 namespace zmm
 {
@@ -41,7 +41,7 @@ public:
     String getMessage();
 
     Ref<Array<StringBase> > getStackTrace();
-    void printStackTrace(FILE *file = stderr);
+    void printStackTrace(FILE *file = LOG_FILE);
 
 };
 

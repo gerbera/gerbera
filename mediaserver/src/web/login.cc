@@ -49,7 +49,7 @@ void web::login::process()
     String username = param("username");
     String password = param("password");
 
-    printf("username: %s, password %s\n", username.c_str(), password.c_str());
+    log_info(("username: %s, password %s\n", username.c_str(), password.c_str()));
 
     if ((username == nil) || (password == nil) || 
         (username == "") || (password == ""))
@@ -77,6 +77,6 @@ void web::login::process()
     *out << "req_type=browse&object_id=0&requested_count=15&driver=1&sid=";
     *out << sid;
     *out << "\"></head></html>";
-//    printf("%s\n", out->toString().c_str());
+//    log_info(("%s\n", out->toString().c_str()));
 }
 

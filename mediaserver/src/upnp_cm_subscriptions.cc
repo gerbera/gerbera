@@ -34,7 +34,7 @@ void ConnectionManagerService::process_subscription_request(zmm::Ref<Subscriptio
 
     Ref<Element> propset, property;
 
-    printf("CM::process_subscription_request - start\n");
+    log_info(("CM::process_subscription_request - start\n"));
 
     Ref<Array<StringBase> > mimeTypes = Storage::getInstance()->getMimeTypes();
     String CSV = mime_types_to_CSV(mimeTypes);
@@ -58,7 +58,7 @@ void ConnectionManagerService::process_subscription_request(zmm::Ref<Subscriptio
             serviceID.c_str(), event, request->getSubscriptionID().c_str());
 
     ixmlDocument_free(event);
-    printf("CM::process_subscription_request - end\n");
+    log_info(("CM::process_subscription_request - end\n"));
 }
 
 void ConnectionManagerService::subscription_update(String sourceProtocol_CSV)
@@ -68,7 +68,7 @@ void ConnectionManagerService::subscription_update(String sourceProtocol_CSV)
 
     Ref<Element> propset, property;
 
-    printf("CM::subscription_update - start\n");
+    log_info(("CM::subscription_update - start\n"));
 
     propset = UpnpXML_CreateEventPropertySet();
     property = propset->getFirstChild();
@@ -90,6 +90,6 @@ void ConnectionManagerService::subscription_update(String sourceProtocol_CSV)
 
     ixmlDocument_free(event);
 
-    printf("CM::subscription_update - end\n");
+    log_info(("CM::subscription_update - end\n"));
 }
 

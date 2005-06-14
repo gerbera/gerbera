@@ -40,7 +40,7 @@
 #include <grp.h>
 
 
-#define OPTSTR "i:p:c:u:g:a:P:dh"
+#define OPTSTR "i:p:c:u:g:a:l:P:dh"
 
 using namespace zmm;
 
@@ -68,6 +68,7 @@ int main(int argc, char **argv, char **envp)
                    {"daemon", 0, 0, 'd'},
                    {"pid", 0, 0, 'P'},
                    {"add", 1, 0, 'g'},
+                   {"logfile", 1, 0, 'l'},
                    {"help", 0, 0, 'h'},
                    {0, 0, 0, 0}
                };
@@ -80,7 +81,6 @@ int main(int argc, char **argv, char **envp)
 
     Ref<Array<StringBase> > addFile(new Array<StringBase>());
 
-    printf("\nMediaTomb UPnP Server version %s\n\n", VERSION);
     
     while (1)
     {
@@ -90,37 +90,38 @@ int main(int argc, char **argv, char **envp)
         switch (o)
         {
             case 'i':
-                printf("Option IP with param %s\n", optarg);
+//                log_info(("Option IP with param %s\n", optarg));
                 ip = optarg;
                 break;
 
             case 'p':
-                printf("Option Port with param %s\n", optarg);
+//                log_info(("Option Port with param %s\n", optarg));
                 port = strtol(optarg, (char **)NULL, 10);
-                printf("port set to: %d\n", port);
+                log_info(("port set to: %d\n", port));
                 break;
-            case 'c':
-                printf("Option config with param %s\n", optarg);
 
+            case 'c':
+//                log_info(("Option config with param %s\n", optarg));
                 config_file = optarg;
-                    
                 break;
+
             case 'd':
-                printf("Starting in deamon mode...");
+//                log_info(("Starting in deamon mode..."));
                 daemon = true;
                 break;
 
             case 'u':
-                printf("Running as user: %s\n", optarg);
+//                log_info(("Running as user: %s\n", optarg));
                 user = optarg;
                 break;
 
             case 'g':
-                printf("Running as group: %s\n", optarg);
+//                log_info(("Running as group: %s\n", optarg));
                 group = optarg;
                 break;
                 
             case 'a':
+//                log_info(("adding file/directory:: %s\n", optarg));
                 printf("Adding file/directory: %s\n", optarg);
                 addFile->append(String(optarg));
                 break;
@@ -130,8 +131,11 @@ int main(int argc, char **argv, char **envp)
                 pid_file = optarg;
                 break;
                 
+            case 'l':
+                log_open(optarg);
+                break;
+                
             case '?':
-                printf("\n");
             case 'h':
                 printf("Usage: mediatomb [options]\n\
                         \n\
@@ -155,6 +159,7 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
          }
     }
 
+    log_info(("======== MediaTomb UPnP Server version %s ========\n", VERSION));
 
     // check if user and/or group parameter was specified and try to run the server
     // under the given user and/or group name
@@ -163,13 +168,13 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
         grp = getgrnam(group.c_str());
         if (grp == NULL)
         {
-            printf("Group %s not found!\n", group.c_str());
+            log_info(("Group %s not found!\n", group.c_str()));
             exit(EXIT_FAILURE);
         }
 
         if (setgid(grp->gr_gid) < 0)
         {
-            printf("setgid failed %s\n", strerror(errno));
+            log_info(("setgid failed %s\n", strerror(errno)));
             exit(EXIT_FAILURE);
         }
     }
@@ -179,13 +184,13 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
         pwd = getpwnam(user.c_str()); 
         if (pwd == NULL)
         {
-            printf("User %s not found!\n", user.c_str());
+            log_info(("User %s not found!\n", user.c_str()));
             exit(EXIT_FAILURE);
         }
 
         if (setuid(pwd->pw_uid) < 0)
         {
-            printf("setuid failed %s\n", strerror(errno));
+            log_info(("setuid failed %s\n", strerror(errno)));
             exit(EXIT_FAILURE);
         }
         
@@ -201,7 +206,7 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
 
 /*        if ((config_file == nil) && (home == nil))
         {
-            printf("No configuration specified and no user home directory set.\n");
+            log_info(("No configuration specified and no user home directory set.\n"));
             exit(EXIT_FAILURE);
         }
         
@@ -211,15 +216,15 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     }
     catch (mxml::ParseException pe)
     {
-        printf("Error parsing config file: %s line %d:\n%s\n",
+        log_info(("Error parsing config file: %s line %d:\n%s\n",
                pe.context->location.c_str(),
                pe.context->line,
-               pe.getMessage().c_str());
+               pe.getMessage().c_str()));
         exit(EXIT_FAILURE);
     }
     catch (Exception e)
     {
-        printf("%s\n", e.getMessage().c_str());
+        log_info(("%s\n", e.getMessage().c_str()));
         exit(EXIT_FAILURE);
     }    
     
@@ -311,7 +316,7 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     catch(UpnpException upnp_e)
     {
         upnp_e.printStackTrace();
-        printf("main: upnp error %d\n ", upnp_e.getErrorCode());
+        log_info(("main: upnp error %d\n ", upnp_e.getErrorCode()));
         try
         {
             server->upnp_cleanup();
@@ -335,7 +340,7 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
             try
             {   
                 // add file/directory recursively and asynchronously
-                printf("adding %s\n", String(addFile->get(i)).c_str());
+                log_info(("adding %s\n", String(addFile->get(i)).c_str()));
                 ContentManager::getInstance()->addFile(String(addFile->get(i)), true, true);
             }
             catch (Exception e)
@@ -356,22 +361,26 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     }
    
     /* shutting down */
+    int ret = EXIT_SUCCESS;
     try
     {
         server->upnp_cleanup();
     }
     catch(UpnpException upnp_e)
     {
-        printf("main: upnp error %d\n ", upnp_e.getErrorCode());
-        return EXIT_FAILURE;
+        log_info(("main: upnp error %d\n ", upnp_e.getErrorCode()));
+        ret = EXIT_FAILURE;
     }
     catch (Exception e)
     {
         e.printStackTrace();
-        return EXIT_FAILURE;
+        ret = EXIT_FAILURE;
     }
-    printf("terminating\n");
-    return EXIT_SUCCESS;
+
+    log_info(("terminating\n"));
+    log_close();
+
+    return ret;
 }
 
 void signal_handler(int signal)

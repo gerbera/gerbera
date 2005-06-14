@@ -215,7 +215,7 @@ void web::new_ui::add_object()
 // when when given, we will serve a special inteface to match the object type
 void web::new_ui::process()
 {
-    printf("edit: start\n");
+    log_info(("edit: start\n"));
 
     Ref<Session> session;
     Ref<Storage> storage; // storage instance, will be chosen depending on the driver
@@ -319,6 +319,6 @@ void web::new_ui::process()
         *out << renderXMLHeader("/new.xsl");
         *out << root->print();
     }
-    printf("edit: returning\n");
+    log_info(("edit: returning\n"));
 }
 

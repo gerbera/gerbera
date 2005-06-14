@@ -113,7 +113,7 @@ static Ref<CdsObject> jsObject2cdsObject(JSContext *cx, JSObject *js)
     objectType = js_get_int_property(cx, js, "objectType", -1);
     if (objectType == -1)
     {
-        printf("scripting: addObject: missing objectType property\n");
+        log_info(("scripting: addObject: missing objectType property\n"));
         return nil;
     }
 
@@ -276,9 +276,9 @@ js_print(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
         str = JS_ValueToString(cx, argv[i]);
         if (!str)
             return JS_FALSE;
-        printf("%s%s", i ? " " : "", JS_GetStringBytes(str));
+        log_info(("%s%s", i ? " " : "", JS_GetStringBytes(str)));
     }
-    printf("\n");
+    log_info(("\n"));
     return JS_TRUE;
 }
 
@@ -415,7 +415,7 @@ js_error_reporter(JSContext *cx, const char *message, JSErrorReport *report)
     while (0);
 
     String err = buf->toString();
-    printf("%s\n", err.c_str());
+    log_info(("%s\n", err.c_str()));
 }
 
 } // extern "C"
@@ -480,11 +480,11 @@ void Scripting::init()
     }
     
     String scriptPath = ConfigManager::getInstance()->getOption("/import/script");
-    printf("Read import script: %s\n", scriptPath.c_str());
+    log_info(("Read import script: %s\n", scriptPath.c_str()));
     
 	String scriptText = read_text_file(scriptPath);
 	if (scriptText == nil)
-		printf("could not read script %s\n", scriptPath.c_str());
+		log_info(("could not read script %s\n", scriptPath.c_str()));
 /*
 	if (!JS_EvaluateScript(cx, glob, script.c_str(), script.length(),
 		scriptPath.c_str(), 0, &ret_val))
@@ -498,7 +498,7 @@ void Scripting::init()
                               scriptPath.c_str(), 1);
     if (! script)
     {
-        printf("Scripting: failed to compile script\n");
+        log_info(("Scripting: failed to compile script\n"));
     }
 }
 Scripting::~Scripting()
@@ -525,7 +525,7 @@ void Scripting::processCdsObject(Ref<CdsObject> obj)
     {
         throw Exception("Scripting: failed to execute script");
     }
-//    printf("Script executed successfully\n");
+//    log_info(("Script executed successfully\n"));
 
     /*
       if (!JS_EvaluateScript(cx, glob, script.c_str(), script.length(),
