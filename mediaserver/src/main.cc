@@ -140,7 +140,7 @@ Supported options:\n\
     --port or -p       server port (the SDK only permits values => 49152)\n\
     --config or -c     configuration file to use\n\
     --daemon or -d     run server in background\n\
-    --pidfile or -P    file to hold the pid\n\
+    --pidfile or -P    file to hold the process id\n\
     --user or -u       run server under specified username\n\
     --group or -g      run server unser specified group\n\
     --add or -a        add the given file/directory\n\
