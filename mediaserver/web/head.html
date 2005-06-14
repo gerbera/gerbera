@@ -15,6 +15,11 @@ function updateAccounting(acct)
     }
 }
 
+function refreshView()
+{
+    top.main.location.href = top.main.location.href;
+}
+
 </script>
 </head>
 <body>
@@ -23,6 +28,9 @@ function updateAccounting(acct)
     <table border="0" width="90%"><tr>
         <td width="20%" valign="top">
             Total files: <span id="acctTotalFiles" style="font-weight:bold"> - </span><br>
+        <a href="#" onClick="javascript: refreshView(); return false;">
+            [refresh view]
+        </a>
         </td>
         <td width="60%" align="center" valign="top">
             <table border="0">
