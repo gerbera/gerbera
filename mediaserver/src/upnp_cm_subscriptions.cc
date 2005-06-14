@@ -34,8 +34,6 @@ void ConnectionManagerService::process_subscription_request(zmm::Ref<Subscriptio
 
     Ref<Element> propset, property;
 
-    log_info(("CM::process_subscription_request - start\n"));
-
     Ref<Array<StringBase> > mimeTypes = Storage::getInstance()->getMimeTypes();
     String CSV = mime_types_to_CSV(mimeTypes);
 
@@ -58,7 +56,6 @@ void ConnectionManagerService::process_subscription_request(zmm::Ref<Subscriptio
             serviceID.c_str(), event, request->getSubscriptionID().c_str());
 
     ixmlDocument_free(event);
-    log_info(("CM::process_subscription_request - end\n"));
 }
 
 void ConnectionManagerService::subscription_update(String sourceProtocol_CSV)
@@ -67,8 +64,6 @@ void ConnectionManagerService::subscription_update(String sourceProtocol_CSV)
     IXML_Document *event = NULL;
 
     Ref<Element> propset, property;
-
-    log_info(("CM::subscription_update - start\n"));
 
     propset = UpnpXML_CreateEventPropertySet();
     property = propset->getFirstChild();
@@ -89,7 +84,5 @@ void ConnectionManagerService::subscription_update(String sourceProtocol_CSV)
             serviceID.c_str(), event);
 
     ixmlDocument_free(event);
-
-    log_info(("CM::subscription_update - end\n"));
 }
 
