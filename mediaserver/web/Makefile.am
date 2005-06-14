@@ -17,7 +17,6 @@ _DIST_FILES = \
 	index.html \
 	login.html \
 	main.css \
-	miniserver.xml \
 	navbar.html \
 	new.xsl \
 	noaccess.html \
