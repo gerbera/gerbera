@@ -296,6 +296,7 @@ Supported options:
     --port or -p       server port (the SDK only permits values => 49152)
     --config or -c     configuration file to use
     --daemon or -d     run server in background
+    --pidfile or -P    file to hold the process id
     --group or -g      run server unser specified group
     --user or -u       run server under specified username
     --help or -h       this help message
