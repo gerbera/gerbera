@@ -101,7 +101,10 @@ function addAudio(obj)
         desc = desc + ', ' + album;
     }
 
-    desc = desc + ', ' + title;
+    if (desc)
+        desc = desc + ', ';
+
+    desc = desc + title;
 
     var date = obj.meta[M_DATE];
     if (!date)
