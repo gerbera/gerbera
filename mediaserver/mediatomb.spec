@@ -41,7 +41,7 @@ chmod +x scripts/tomb-install
 
 
 install scripts/tomb-install $RPM_BUILD_ROOT/%{_bindir}/tomb-install
-install scripts/mediatomb-service $RPM_BUILD_ROOT/%{_initrddir}/mediatomb
+install -D scripts/mediatomb-service $RPM_BUILD_ROOT/%{_initrddir}/mediatomb
 chkconfig --add mediatomb
 
 %clean
@@ -50,6 +50,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root)
 %doc README AUTHORS ChangeLog COPYING INSTALL doc/doxygen.conf 
+%doc scripting-dev.txt scripting-intro.txt
 %{_bindir}/mediatomb
 %{_bindir}/tomb-install
 %{_datadir}/%{name}/
