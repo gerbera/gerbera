@@ -61,7 +61,7 @@ void Exception::printStackTrace(FILE *file)
     {
         Ref<StringBase> trace = stackTrace->get(i);
         fprintf(file, "%s %i %s\n", STRACE_TAG, i, trace->data);
-        fflush(STRACE_TAG);
+        fflush(file);
     }
 }
 
