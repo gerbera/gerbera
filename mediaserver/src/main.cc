@@ -148,6 +148,7 @@ Supported options:\n\
     --user or -u       run server under specified username\n\
     --group or -g      run server unser specified group\n\
     --add or -a        add the given file/directory\n\
+    --logfile or -l    log to specified file\n\
     --help or -h       this help message\n\
 \n\
 For more information visit http://mediatomb.sourceforge.net/\n\n");
