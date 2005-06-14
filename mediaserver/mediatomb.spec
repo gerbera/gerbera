@@ -1,5 +1,5 @@
 %define name mediatomb   
-%define version 0.7.1
+%define version 0.8.0
 %define release 1
 
 Version: %{version}
@@ -12,6 +12,8 @@ Source: %{name}-%{version}.tar.gz
 Buildroot: %{_tmppath}/%{name}-%{version}-buildroot 
 BuildRequires: sqlite-devel => 3
 BuildRequires: libupnp-devel file
+BuildRequires: libjs-devel 
+BuildRequires: id3lib => 3.8.3
 Packager: Sergey Bostandzhyan <jin@deadlock.dhs.org> 
 
 %description
@@ -39,6 +41,8 @@ chmod +x scripts/tomb-install
 
 
 install scripts/tomb-install $RPM_BUILD_ROOT/%{_bindir}/tomb-install
+install scripts/mediatomb-service $RPM_BUILD_ROOT/%{_initrddir}/mediatomb
+chkconfig --add mediatomb
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -49,7 +53,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/mediatomb
 %{_bindir}/tomb-install
 %{_datadir}/%{name}/
-
+%{_initrddir}/mediatomb
 %changelog                      
 * Thu Apr 14 2005 Sergey Bostandzhyan <jin@deadlock.dhs.org>
 - Initial release
