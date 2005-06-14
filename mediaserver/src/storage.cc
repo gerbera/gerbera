@@ -111,9 +111,9 @@ Ref<Array<CdsObject> > Storage::getObjectPath(String objectID)
 }
 void Storage::getObjectPath(Ref<Array<CdsObject> > arr, String objectID)
 {
-    Ref<CdsObject> obj = loadObject(objectID);
-    if (obj->getParentID() == "-1")
+    if (objectID == "-1")
         return;
+    Ref<CdsObject> obj = loadObject(objectID);
     getObjectPath(arr, obj->getParentID());
     arr->append(obj);
 }
