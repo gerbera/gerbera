@@ -5,6 +5,10 @@
 # chkconfig: - 95 30
 # processname: mediatomb
 # description: mediatomb is a daemon process which provides a UPnP service
+# config: /etc/mediatomb
+# config: /etc/mediatomb/config.xml
+# pidfile: /var/run/mediatomb.pid
+
 
 # Source function library.
 . /etc/rc.d/init.d/functions
@@ -16,15 +20,23 @@
 [ ${NETWORKING} = "no" ] && exit 0
 
 # Set default mediatomb configuration.
-INTERFACE="eth1"
-# make sure to run it as nobody
-MEDIATOMB="-d -u nobody -g nobody"
 
 # either make an installation in /etc/mediatomb and leave this blank,
 # or specify an alternative config file location using the -c option
 # Note: be aware, that -i parameter is used to set the ip of the 
 # interface specified above
 MEDIATOMBOPTIONS=""
+
+INTERFACE="eth1"
+
+###############################
+USER="nobody"
+GROUP="nobody"
+PIDFILE="/var/run/mediatomb.pid"
+# make sure to run it as nobody
+MEDIATOMB="-d -u $USER -g $GROUP -P $PIDFILE -l /tmp/tomblog.txt"
+
+
 
 
 [ -f /usr/bin/mediatomb ] || exit 0
@@ -39,11 +51,17 @@ RETVAL=0
 case "$1" in
   start)
 	# Start daemon.
-	echo -n "Starting mediatomb: "
+    echo -n "Applying multicast settings to $INTERFACE... "
     # those settings are necessary for us to react to M-SEARCH requests
     route add -net 239.0.0.0 netmask 255.0.0.0 $INTERFACE >/dev/null 2>&1
     ifconfig $INTERFACE allmulti
-	daemon $NICELEVEL mediatomb $MEDIATOMB -i $IFACE_IP $MEDIATOMBOPTIONaS
+    touch $PIDFILE
+    chown nobody $PIDFILE
+    
+	echo -n "Starting mediatomb: "
+
+    LD_ASSUME_KERNEL=2.2.5 daemon $NICELEVEL mediatomb $MEDIATOMB -i $IFACE_IP $MEDIATOMBOPTIONS
+
 	RETVAL=$?
         echo
         [ $RETVAL = 0 ] && touch /var/lock/subsys/mediatomb
