@@ -49,8 +49,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-%doc README AUTHORS ChangeLog COPYING INSTALL doc/doxygen.conf 
-%doc scripting-dev.txt scripting-intro.txt
+%doc README AUTHORS ChangeLog COPYING INSTALL doc/doxygen.conf TODO
+%doc doc/scripting-dev.txt doc/scripting-intro.txt
 %{_bindir}/mediatomb
 %{_bindir}/tomb-install
 %{_datadir}/%{name}/
