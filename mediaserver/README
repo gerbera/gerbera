@@ -120,6 +120,15 @@ In order to compile MediaTomb you will have to install the following packages:
 
 - id3lib http://id3lib.sourceforge.net/ (at least version 3.8.3)
 
+If the server does not respond to search requests from media renderers or
+control points on the network, try applying these settings to your
+network interface (assuming eth1):
+
+route add -net 239.0.0.0 netmask 255.0.0.0 eth1 >/dev/null 2>&1
+ifconfig eth1 allmulti
+
+Those settings will be applied automatically in the init.d startup script.
+
 If you fail to setup the server on your system please tell us which distro you
 are using and write a detailed description of what exactly happened during 
 ./configure or compilation.
@@ -297,8 +306,10 @@ Supported options:
     --config or -c     configuration file to use
     --daemon or -d     run server in background
     --pidfile or -P    file to hold the process id
-    --group or -g      run server unser specified group
     --user or -u       run server under specified username
+    --group or -g      run server unser specified group
+    --add or -a        add the given file/directory
+    --logfile or -l    log to specified file
     --help or -h       this help message
 
 If you want to run a second server from the same PC, make sure to use a 
@@ -315,6 +326,21 @@ We now also support the daemon mode which allows to start the server in
 background, the --user and --group parameters should be used to run 
 the server under an unprivileged account. A script for 
 starting/stopping the server is also provided.
+
+
+INIT.D STARTUP SCRIPT
+---------------------
+
+We received an init.d startup script for MediaTomb from Iain Lea, I tested it
+on my Fedora Core 3 installation and had to make some adaptions. Took me
+quite a while to figure out that the server would not run without
+the LD_ASSUME_KERNEL=2.2.5 environment variable.
+
+The script now also applies multicast options that are required for
+UPnP (otherwise the server will not react to M-SEARCH requests).
+
+In order to use the script you will have to edit it and set the INTERFACE 
+variable to the desired network interface (eth0, eth1, etc.)
 
 
 ACKNOWLEDGEMENTS
@@ -346,5 +372,5 @@ Initial version of the mediatomb startup script was contributed
 by Iain Lea <iain@bricbrac.de>
 
 --------------------------------------------------------------------------------
-April 17, 2005
+June 14, 2005
 
