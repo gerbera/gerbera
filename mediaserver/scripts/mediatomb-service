@@ -27,19 +27,23 @@
 # interface specified above
 MEDIATOMBOPTIONS=""
 
-INTERFACE="eth1"
+INTERFACE="NOT_SET"
 
 ###############################
 USER="nobody"
 GROUP="nobody"
 PIDFILE="/var/run/mediatomb.pid"
+LOGFILE="/var/log/mediatomb"
 # make sure to run it as nobody
-MEDIATOMB="-d -u $USER -g $GROUP -P $PIDFILE -l /tmp/tomblog.txt"
+MEDIATOMB="-d -u $USER -g $GROUP -P $PIDFILE -l $LOGFILE"
 
 
 
 
 [ -f /usr/bin/mediatomb ] || exit 0
+[ ${INTERFACE} = "NOT_SET" ] && echo "Please edit the script and change \
+the INTERFACE variable to your network device (eth0, eth1, etc.)" && exit 0
+
 PATH=$PATH:/usr/bin:/usr/local/bin
 
 IFACE_IP=`ifconfig | grep -i "$INTERFACE" -A 1|grep "inet addr"|cut -d " " -f 12|cut -d ":" -f 2`
