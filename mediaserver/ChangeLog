@@ -1,6 +1,36 @@
 MediaTomb - UPnP AV Mediaserver for Linux.
 
-v0.7.1  17.04.2005   D-Link DSM-320 fix
+v0.8.0  15.06.2005  Scripting/Virtual Server Layout
+        * Server layout can not be defined using java script,
+          default layout script is provided.
+
+        * Added ID3 tag support.
+
+        * Fixed various memory leaks.
+
+        * Files in the Filesystem Browser are now sorted alphabetically.
+
+        * Added extension to mime-type mappings to the configuration.
+
+        * Added option to limit import by file extensions.
+
+        * Added daemon mode as well as setuid/setgid options, init.d
+          script included.
+
+        * Fixed mime-type recognition when importing media (filemagic output
+          is now parsed using regular expressions)
+
+        * Introduced new log system.
+
+        * Adding/Browsing/Removing media in the UI is now handled 
+          asynchroniously.
+
+        * Added a command line option to import media upon server launch.
+
+        * Added target directory option to tomb-install, cleaned up a few
+          things.
+
+v0.7.1  17.04.2005  D-Link DSM-320 fix
         * Mappings of mime-types to upnp classes are now configurable.
           Actually this is how we solved the DSM-320 problem - they
           crashed if upnp class of items was different than what the
@@ -13,7 +43,7 @@ v0.7.1  17.04.2005   D-Link DSM-320 fix
         * Improved handling of configuration, if non critical options are
           missing we are now setting default values.
 
-v0.7    14.04.2005   First release
+v0.7    14.04.2005  First release
         * The changelog does not start at day 0, updates will be made
           starting from this release.
         
