@@ -46,7 +46,7 @@ install -D scripts/mediatomb-service $RPM_BUILD_ROOT/%{_initrddir}/mediatomb
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%postinst
+%post
 chkconfig --add mediatomb
 
 %files
