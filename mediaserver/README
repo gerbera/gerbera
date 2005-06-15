@@ -42,6 +42,16 @@ The next releasees will focus mainly on addressing these issues.
 The import speed issue is the FIRST thing to be fixed by adding
 mysql database support, so stay tuned.
 
+ANOTHER IMPORTANT NOTE!!!
+the new database is completely NOT backward compatible,
+you will have to recreate your collection. Our apologies for inconvinience.
+The database structure in the current release has been designed, 
+extended and ready for the features yet to come in the next
+releases, so that you keep at least the database when upgrading.
+
+I would suggest a complete reinstall, removing ~/.mediatomb and 
+running new tomb-install is HIGHLY recommended. 
+
 
 REQUIREMENTS
 ------------
