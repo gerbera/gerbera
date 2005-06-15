@@ -42,10 +42,12 @@ chmod +x scripts/tomb-install
 
 install scripts/tomb-install $RPM_BUILD_ROOT/%{_bindir}/tomb-install
 install -D scripts/mediatomb-service $RPM_BUILD_ROOT/%{_initrddir}/mediatomb
-chkconfig --add mediatomb
 
 %clean
 rm -rf $RPM_BUILD_ROOT
+
+%postinst
+chkconfig --add mediatomb
 
 %files
 %defattr(-,root,root)
@@ -55,7 +57,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/tomb-install
 %{_datadir}/%{name}/
 %{_initrddir}/mediatomb
+
 %changelog                      
+* Wed Jun 15 2005 Sergey Bostandzhyan <jin@deadlock.dhs.org>
+- Added init.d script + chkconfig
 * Thu Apr 14 2005 Sergey Bostandzhyan <jin@deadlock.dhs.org>
 - Initial release
 
