@@ -26,6 +26,10 @@
 #include <id3/tag.h>
 #include <id3/misc_support.h>
 
+#include <exiv2/image.hpp>
+#include <exiv2/exif.hpp>
+
+
 #include "common.h"
 #include "dictionary.h"
 #include "cds_objects.h"
@@ -65,6 +69,7 @@ public:
 protected:
     void getID3(zmm::Ref<CdsItem> item);
     void addID3Field(metadata_fields_t field, ID3_Tag *tag, zmm::Ref<CdsItem> item);
+    void getExiv2(zmm::Ref<CdsItem> item);
 };
 
 #endif
