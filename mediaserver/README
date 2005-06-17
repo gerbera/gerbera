@@ -127,6 +127,8 @@ In order to compile MediaTomb you will have to install the following packages:
 
 - SpiderMonkey (JavaScript-C) Engine http://www.mozilla.org/js/spidermonkey/
   You will find some RPMs here: http://ftp.mozilla.org/pub/mozilla.org/js/
+  (the package for this library is called libjs and libjs-devel on Fedora
+   and libsmjs1 and libsmjs-dev on debian)
 
 - id3lib http://id3lib.sourceforge.net/ (at least version 3.8.3)
 
