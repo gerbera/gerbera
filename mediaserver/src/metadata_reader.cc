@@ -53,6 +53,7 @@ void MetadataReader::setMetadata(Ref<CdsItem> item)
     if (mimetype == "audio/mpeg")
         getID3(item);
 
+    /// \TODO check what else is supported by exiv2
     if (mimetype == "image/jpeg")
         getExiv2(item);
 }
