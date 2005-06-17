@@ -1,5 +1,8 @@
 MediaTomb - UPnP AV Mediaserver for Linux.
 
+v0.8.1
+        * Added Exiv metadata support for images.
+
 v0.8.0  15.06.2005  Scripting/Virtual Server Layout
         * Server layout can not be defined using java script,
           default layout script is provided.
