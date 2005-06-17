@@ -34,7 +34,7 @@ extern "C" {
 #include "config_manager.h"
 #include "update_manager.h"
 #include "string_converter.h"
-#include "metadata_reader.h"
+#include "metadata_handler.h"
 #include "rexp.h"
 
 struct magic_set *ms = NULL;
@@ -363,8 +363,6 @@ void ContentManager::updateObject(String objectID, Ref<Dictionary> parameters)
     String description = parameters->get("description");
     String location = parameters->get("location");
 
-    Ref<MetadataReader> meta (new MetadataReader());
-    
     Ref<Storage> storage = Storage::getInstance();
     Ref<UpdateManager> um = UpdateManager::getInstance();
 
@@ -386,11 +384,12 @@ void ContentManager::updateObject(String objectID, Ref<Dictionary> parameters)
         
         if (string_ok(description)) 
         {
-            cloned_item->setMetadata(meta->getFieldName(M_DESCRIPTION), description);
+            cloned_item->setMetadata(MetadataHandler::getFieldName(M_DESCRIPTION),
+                                     description);
         }
         else
         {
-            item->removeMetadata(meta->getFieldName(M_DESCRIPTION));
+            item->removeMetadata(MetadataHandler::getFieldName(M_DESCRIPTION));
         }
 
         if (string_ok(mimetype)) cloned_item->setMimeType(mimetype);
@@ -419,11 +418,12 @@ void ContentManager::updateObject(String objectID, Ref<Dictionary> parameters)
         // state and description can be an empty strings - if you want to clear it
         if (string_ok(description)) 
         {
-            cloned_item->setMetadata(meta->getFieldName(M_DESCRIPTION), description);
+            cloned_item->setMetadata(MetadataHandler::getFieldName(M_DESCRIPTION),
+                                     description);
         }
         else
         {
-            item->removeMetadata(meta->getFieldName(M_DESCRIPTION));
+            item->removeMetadata(MetadataHandler::getFieldName(M_DESCRIPTION));
         }
 
         if (state != nil) cloned_item->setState(state);
@@ -546,8 +546,7 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic)
             item->setClass(upnp_class);
         Ref<StringConverter> f2i = StringConverter::f2i();
         obj->setTitle(f2i->convert(filename));
-        Ref<MetadataReader> metadataReader(new MetadataReader());
-        metadataReader->setMetadata(item);
+        MetadataHandler::setMetadata(item);
     }
     else if (S_ISDIR(statbuf.st_mode))
     {

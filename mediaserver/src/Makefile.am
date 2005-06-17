@@ -1,5 +1,5 @@
 
-SUBDIRS = mxml zmm zmmf storage web uuid md5 scripting
+SUBDIRS = md5 metadata mxml scripting storage uuid web zmm zmmf
 
 noinst_LIBRARIES = libmediatomb.a
 
@@ -29,8 +29,8 @@ libmediatomb_a_SOURCES = \
     io_handler.cc \
     logger.h \
     logger.cc \
-    metadata_reader.h \
-    metadata_reader.cc \
+    metadata_handler.h \
+    metadata_handler.cc \
     mem_io_handler.h \
     mem_io_handler.cc \
     process.h \
@@ -81,6 +81,7 @@ COMMON_LDADD = \
     libmediatomb.a \
     storage/fs/libfs.a \
     storage/libstorage.a \
+    metadata/libmetadata.a \
     mxml/libmxml.a \
     zmmf/libzmmf.a \
     zmm/libzmm.a \

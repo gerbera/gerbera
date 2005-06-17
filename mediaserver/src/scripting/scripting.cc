@@ -22,7 +22,7 @@
 #include "scripting.h"
 #include "storage.h"
 #include "content_manager.h"
-#include "metadata_reader.h"
+#include "metadata_handler.h"
 #include "config_manager.h"
 
 using namespace zmm;

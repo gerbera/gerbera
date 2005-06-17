@@ -23,7 +23,7 @@
 #include "cds_resource_manager.h"
 #include "common.h"
 #include "config_manager.h"
-#include "metadata_reader.h"
+#include "metadata_handler.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -51,9 +51,6 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions)
     if (IS_CDS_ITEM(objectType))
     {
         Ref<CdsItem> item = RefCast(obj, CdsItem);
-
-        Ref<MetadataReader> mr(new MetadataReader());
-        String meta_value;
 
         Ref<Dictionary> meta = obj->getMetadata();
         Ref<Array<DictionaryElement> > elements = meta->getElements();

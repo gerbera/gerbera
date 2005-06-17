@@ -10,8 +10,9 @@ AC_CONFIG_FILES([
     scripts/js/Makefile
 
     src/Makefile
-    src/mxml/Makefile
     src/md5/Makefile
+    src/metadata/Makefile
+    src/mxml/Makefile
     src/storage/Makefile
     src/storage/fs/Makefile
     src/storage/sqlite3/Makefile

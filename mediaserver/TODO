@@ -77,10 +77,24 @@ Known Issues (ordered by importance)
   
 Planned improvements / features (ordered by importance)
 -------------------------------------------------------
+- use the ref_id database field
 
 - include mysql support (already working) into the main branch
   and write autoconf/automake stuff for conditional compilation of
   sqlite3 and/or mysql storage. (That's a challenge :)
+
+- smarter configure script to optionally enable - disable features.
+  Enable conditional compilation.
+  
+- refactor metadata_reader to have plugin architacture
+- Flexible <res> tag handling, own field in the database
+- url marshalling of <res> tags
+- exiv2 thumbnail support
+- readonly access to <res> metadata from
+  javascript
+- add auxilary metadata fields + readonly access from
+  javascript
+
 
 - introduce means to cascade scripts. Probably something like include()
   function or preprocessor directive.
@@ -108,4 +122,6 @@ Planned improvements / features (ordered by importance)
   increase system requirements to run the server and imply further
   dependencies on heavy libraries, which we would rather avoid.
   Another reason is browser compatibility.
-  
+
+
+
