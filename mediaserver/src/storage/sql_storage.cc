@@ -237,6 +237,9 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
         throw StorageException(String("Object not found: ") + objectID);
     }
 
+    row = nil;
+    res = nil;
+    
     if(param->getFlag() == BROWSE_DIRECT_CHILDREN && IS_CDS_CONTAINER(objectType))
     {
         q = String("SELECT COUNT(*) FROM cds_objects WHERE parent_id = ") + objectID;
@@ -251,6 +254,9 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
         param->setTotalMatches(1);
     }
 
+    row = nil;
+    res = nil;    
+    
     Ref<StringBuffer> qb(new StringBuffer());
 
     *qb << "SELECT " << select_fields << " FROM cds_objects f WHERE ";
@@ -277,8 +283,12 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     {
         Ref<CdsObject> obj = createObjectFromRow(row);
         arr->append(obj);
+        row = nil;
     }
 
+    row = nil;
+    res = nil;    
+    
     // update childCount fields
     for (int i = 0; i < arr->size(); i++)
     {
@@ -297,6 +307,8 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
             {
                 cont->setChildCount(0);
             }
+            row = nil;
+            res = nil;
         }
     }
 
@@ -404,18 +416,18 @@ void SQLStorage::removeChildren(String id, Ref<StringBuffer> query)
                       " FROM cds_objects WHERE parent_id = ") + id;
     Ref<SQLResult> res = select(q);
     Ref<SQLRow> row;
-
+    
     while ((row = res->nextRow()) != nil)
     {
         String childID = row->col(0);
         int childObjectType = row->col(1).toInt();
+        row = nil;
         if (IS_CDS_CONTAINER(childObjectType))
             removeChildren(childID, query);
-
         *query << childID;
+        
         if (query->length() > MAX_DELETE_QUERY_LENGTH)
         {
-//            log_info(("DEL QUERY: %s...\n", query->toString().substring(0, 65).c_str()));
             *query << ")";
             exec(query->toString());
             query->clear();

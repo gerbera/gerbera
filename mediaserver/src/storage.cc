@@ -21,8 +21,15 @@
 #include "storage.h"
 #include "config_manager.h"
 
-#include "storage/sqlite3/sqlite3_storage.h"
 #include "storage/fs/fs_storage.h"
+
+#ifdef HAVE_SQLITE3
+#include "storage/sqlite3/sqlite3_storage.h"
+#endif
+
+#ifdef HAVE_MYSQL
+#include "storage/mysql/mysql_storage.h"
+#endif
 
 using namespace zmm;
 
@@ -41,16 +48,29 @@ static Ref<Storage> create_primary_inst()
     Ref<ConfigManager> config = ConfigManager::getInstance();
     type = config->getOption("/server/storage/attribute::driver");
 
-    if (type == "sqlite3")
+    do
     {
-        storage = Ref<Storage>(new Sqlite3Storage());
-        storage->init();
-    }
-    // other database types...
-    else
-    {
+#ifdef HAVE_SQLITE3
+	if (type == "sqlite3")
+        {
+            storage = Ref<Storage>(new Sqlite3Storage());
+            break;
+        }
+#endif
+
+#ifdef HAVE_MYSQL
+        if (type == "mysql")
+        {
+            storage = Ref<Storage>(new MysqlStorage());
+            break;
+        }
+#endif
+        // other database types...
         throw Exception(String("Unknown storage type: ") + type);
     }
+    while (false);
+    
+    storage->init();
     return storage;
 }
 

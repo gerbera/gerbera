@@ -21,6 +21,8 @@
 /// \file id3_handler.cc
 /// \brief Implementeation of the Id3Handler class.
 
+#ifdef HAVE_ID3
+
 #include <id3/tag.h>
 #include <id3/misc_support.h>
 
@@ -97,4 +99,6 @@ Ref<IOHandler> Id3Handler::serveContent(Ref<CdsItem> item, int resNum)
 {
     return nil;
 }
+
+#endif // HAVE_ID3
 

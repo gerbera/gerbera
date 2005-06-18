@@ -14,5 +14,5 @@ libweb_a_SOURCES = \
     refresh.cc \
     remove.cc
 
-INCLUDES = -I.. @common_includes@
+INCLUDES = -I..
 

@@ -70,14 +70,13 @@ libmediatomb_a_SOURCES = \
     xpath.h \
     xpath.cc
 
-INCLUDES=@common_includes@
-
 bin_PROGRAMS = mediatomb
 
 COMMON_LDADD = \
     libmediatomb.a \
     web/libweb.a \
     storage/sqlite3/libsqlite3.a \
+    storage/mysql/libmysql.a \
     libmediatomb.a \
     storage/fs/libfs.a \
     storage/libstorage.a \
@@ -88,7 +87,7 @@ COMMON_LDADD = \
     uuid/libuuid.a \
     md5/libmd5.a \
     scripting/libscripting.a \
-    -lupnp -lixml -lthreadutil -lsqlite3 -lmagic -lid3 -lexiv2 @js_libs@
+    -lupnp -lixml -lthreadutil -lsqlite3 -lmagic -lz -lid3 -lexiv2
 
 mediatomb_SOURCES = main.cc
 mediatomb_LDADD = $(COMMON_LDADD)

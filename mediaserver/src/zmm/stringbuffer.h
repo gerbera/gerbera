@@ -32,26 +32,27 @@ namespace zmm
 class StringBuffer : public Object
 {
 protected:
-	char *data;
-	int capacity;
-	int len;
+    char *data;
+    int capacity;
+    int len;
 public:
-	StringBuffer();
-	StringBuffer(int capacity);
-	virtual ~StringBuffer();
+    StringBuffer();
+    StringBuffer(int capacity);
+    virtual ~StringBuffer();
 
-	StringBuffer &operator<<(String other);
-	StringBuffer &operator<<(char *str);
-	StringBuffer &operator<<(char chr);
-	StringBuffer &operator<<(int x);
+    StringBuffer &operator<<(String other);
+    StringBuffer &operator<<(char *str);
+    StringBuffer &operator<<(char chr);
+    StringBuffer &operator<<(int x);
 
-	int length();
-	char *c_str();
-	String toString();
+    int length();
+    void setLength(int newLength);
+    char *c_str();
+    String toString();
     void clear();
 
 protected:
-	void addCapacity(int increment);
+    void addCapacity(int increment);
 };
 
 } // namespace

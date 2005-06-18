@@ -18,6 +18,8 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#ifdef HAVE_EXIV2
+
 /// \file exiv2_handler.cc
 /// \brief Implementeation of the Exiv2Handler class.
 
@@ -124,4 +126,5 @@ Ref<IOHandler> Exiv2Handler::serveContent(Ref<CdsItem> item, int resNum)
     return nil;
 }
 
+#endif // HAVE_EXIV2
 

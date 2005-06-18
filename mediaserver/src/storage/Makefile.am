@@ -1,5 +1,5 @@
 
-SUBDIRS = sqlite3 fs
+SUBDIRS = sqlite3 mysql fs
 
 noinst_LIBRARIES = libstorage.a
 
@@ -7,5 +7,5 @@ libstorage_a_SOURCES = \
     sql_storage.h \
     sql_storage.cc
 
-INCLUDES = -I.. @common_includes@
+INCLUDES = -I..
 

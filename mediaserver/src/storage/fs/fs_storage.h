@@ -24,8 +24,6 @@
 #include "storage.h"
 #include "dictionary.h"
 
-#include <sqlite3.h>
-
 class FsStorage : public Storage
 {
 public:

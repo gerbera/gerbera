@@ -21,13 +21,10 @@
 #ifndef __SQLITE3_STORAGE_H__
 #define __SQLITE3_STORAGE_H__
 
-#include "storage/sql_storage.h"
-
 #include <sqlite3.h>
 #include <pthread.h>
 
-#define MAX_DELETE_QUERY_LENGTH 8192
-
+#include "storage/sql_storage.h"
 
 class Sqlite3Storage;
 class Sqlite3Result;
@@ -83,9 +80,7 @@ protected:
     sqlite3 *db;
 
     void reportError(zmm::String query);
-/*
-    void removeChildren(zmm::Ref<CdsObject> object, zmm::Ref<zmm::StringBuffer> query);
-*/
+
     void lock();
     void unlock();
 

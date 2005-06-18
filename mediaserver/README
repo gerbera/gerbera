@@ -33,24 +33,16 @@ Next planned features:
 - UPnP improvements (filter parameter for browse)
 
 
-!!!!!!!!!!!!! IMPORTANT NOTE !!!!!!!!!!!!!
-With the introduction of new features in the 0.8 release the media import
-became _VERY SLOW_. There are also numerous other issues you
-should be aware of. For further explanations please read the TODO file.
-The next releasees will focus mainly on addressing these issues.
+MPORTANT NOTE!!!
+Versions 0.7.*, 0.8.0 and 0.8.1 are not database compatible,
 
-The import speed issue is the FIRST thing to be fixed by adding
-mysql database support, so stay tuned.
+You will have to recreate your collection. Our apologies for inconvinience.
 
-ANOTHER IMPORTANT NOTE!!!
-the new database is completely NOT backward compatible,
-you will have to recreate your collection. Our apologies for inconvinience.
-The database structure in the current release has been designed, 
-extended and ready for the features yet to come in the next
-releases, so that you keep at least the database when upgrading.
+When moving from version 0.7.x I would suggest a complete reinstall,
+removing ~/.mediatomb and running new tomb-install is HIGHLY recommended. 
 
-I would suggest a complete reinstall, removing ~/.mediatomb and 
-running new tomb-install is HIGHLY recommended. 
+When moving from 0.8.0 to 0.8.1 it's enough to recreate the database
+using tomb-install
 
 
 REQUIREMENTS
@@ -108,29 +100,33 @@ In order to compile MediaTomb you will have to install the following packages:
   For whatever reason ixml.h is not being installed and nothing
   using libupnp sdk will compile without that.
 
-- sqlite3 from http://www.sqlite.org/
-  On Fedora Core it's sqlite3-devel and 'sqlite3' packages.
-  On Debian it's 'libsqlite3' 'libsqlite3-dev' and 'sqlite3'
-     (the last package includes command line client which is also required)
-
-- filemagic (at least version 4), this is the unix file (1) 
-  On Fedora Core the package is called 'file'
-  On Debian it's libmagic-dev or something similar
+- At least one of the databases:
+  - sqlite3 from http://www.sqlite.org/ (SLOW)
+    On Fedora Core it's sqlite3-devel and 'sqlite3' packages.
+    On Debian it's 'libsqlite3' 'libsqlite3-dev' and 'sqlite3'
+       (the last package includes command line client which is also required)
+  - mysql client library (RECOMMENDED)
+    NOTE: Write operations to sqlite3 database is VERY SLOW, use sqlite3
+    only if you don't have another choise.
   
-- various system headers, but nothing really special, just the usual stuff
+- libmagic (OPTIONAL, RECOMMENDED)
+  On Fedora Core the package is called 'file'
+  On Debian it's libmagic1 and libmagic-dev
 
-- iconv library. As far as I know it's always a part of glibc development
-  package glibc-devel which is almost always installed.
+- SpiderMonkey JavaScript Engine http://www.mozilla.org/js/spidermonkey/
+  (OPTIONAL, HIGHLY RECOMMENDED)
+  This package is necessary for virtual objects to work.
+  You will find some RPMs here: http://ftp.mozilla.org/pub/mozilla.org/js/
+  (Fedora does not have a packages for this library, you will have to
+  fetch / bild it yourself, the library is normally called libjs.
+  On debian install the packages libsmjs1 and libsmjs-dev)
+
+- id3lib http://id3lib.sourceforge.net/ (at least version 3.8.3)
+  (OPTIONAL, RECOMMENDED) You will need this library to have
+  virtual objects for mp3 files
 
 - Python - there is also a setup script that makes necessary installations
   in your home directory, you will need Python to run it.
-
-- SpiderMonkey (JavaScript-C) Engine http://www.mozilla.org/js/spidermonkey/
-  You will find some RPMs here: http://ftp.mozilla.org/pub/mozilla.org/js/
-  (the package for this library is called libjs and libjs-devel on Fedora
-   and libsmjs1 and libsmjs-dev on debian)
-
-- id3lib http://id3lib.sourceforge.net/ (at least version 3.8.3)
 
 If the server does not respond to search requests from media renderers or
 control points on the network, try applying these settings to your
@@ -166,6 +162,11 @@ the first launch of the server. Open a web browser and manually
 add this file as a bookmark. When the server is running, the redirector will
 forward you to the web UI. It is quite handy, because the server port may 
 change upon restarts.
+
+If you want to use mysql as the database (PREFERRED), create the 
+database using following sql script:
+${prefix}/share/mediatomb/mysql.sql
+and change config file accordingly (see CONFIGURATION for details)
 
 
 WHY IS THE WEB UI DISABLED BY DEFAULT?
@@ -246,13 +247,22 @@ Here is a sample configuration file with description of the various tags.
     Bookmark file for fast access to the web UI (Default if missing: 
     mediatomb.html)
     
+<storage driver="...">
+    Specifies the storage driver, currently sqlite3 and mysql are supported.
+    (Required) Every storage driver has it's own configuration parameters.
+    
+    - for sqlite3 use
+    <storage driver="sqlite3">
+       <database-file>sqlite3.db</database-file> Database filename. (Required)
+    </storage>
 
-<storage driver="sqlite3">
-    Specifies the default driver, currently only sqlite3 is supported. Future
-    support of other databases (for example MySQL) is possible. (Required)
-
-    <database-file>sqlite3.db</database-file>
-        Database filename. (Required)
+    - for mysql you'll need something like this:
+    <storage driver="mysql">
+      <host>localhost</host>
+      <username>root</username>
+      <password></password>
+      <database>mediatomb</database>
+    </storage>
 
   
 <import>

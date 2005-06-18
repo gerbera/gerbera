@@ -25,11 +25,6 @@
 #include <string.h>
 #include <unistd.h>
 
-// for older versions of filemagic
-extern "C" {
-#include <magic.h>
-}
-
 #include "content_manager.h"
 #include "config_manager.h"
 #include "update_manager.h"
@@ -37,7 +32,16 @@ extern "C" {
 #include "metadata_handler.h"
 #include "rexp.h"
 
+#define DEFAULT_DIR_CACHE_CAPACITY 10 
+
+#ifdef HAVE_MAGIC
+// for older versions of filemagic
+extern "C" {
+#include <magic.h>
+}
+
 struct magic_set *ms = NULL;
+#endif
 
 using namespace zmm;
 using namespace mxml;
@@ -59,6 +63,7 @@ static String get_filename(String path)
         return path.substring(pos + 1);
 }
 
+#ifdef HAVE_MAGIC
 static String get_mime_type(String file)
 {
     if (ms == NULL)
@@ -79,7 +84,8 @@ static String get_mime_type(String file)
     log_info(("filemagic returned invalid mimetype for %s\n%s\n",
            file.c_str(), mt));
     return nil;
- }
+}
+#endif
 
 /***************************************************************/
 
@@ -88,7 +94,6 @@ static Ref<ContentManager> instance;
 ContentManager::ContentManager() : Object()
 {  
     ignore_unknown_extensions = 0;
-    ms = NULL;
 
     shutdownFlag = false;
 
@@ -127,12 +132,13 @@ ContentManager::ContentManager() : Object()
     }    
     
     /* init fielmagic */
+#ifdef HAVE_MAGIC
     if (! ignore_unknown_extensions)
     {
         ms = magic_open(MAGIC_MIME);
         if (ms == NULL)
         {
-	        log_info(("magic_open failed\n"));
+	    log_info(("magic_open failed\n"));
             return;
         }
         if (magic_load(ms, NULL) == -1)
@@ -142,12 +148,15 @@ ContentManager::ContentManager() : Object()
             ms = NULL;
         }
     }
+#endif // HAVE_MAGIC
 }
 
 ContentManager::~ContentManager()
 {
+#ifdef HAVE_MAGIC
     if (ms)
         magic_close(ms);
+#endif
     pthread_mutex_destroy(&taskMutex);
     pthread_cond_destroy(&taskCond);
 }
@@ -219,7 +228,12 @@ void ContentManager::_loadAccounting()
 }
 void ContentManager::_addFile(String path, int recursive)
 {
-	initScripting();
+#ifdef HAVE_JS
+    initScripting();
+#endif
+
+    // _addFile2(path, recursive);
+    // return;
 
     if (path.charAt(path.length() - 1) == '/')
     {
@@ -257,10 +271,12 @@ void ContentManager::_addFile(String path, int recursive)
         curParentID = obj->getID();
     }
 
-	if (IS_CDS_ITEM(obj->getObjectType()))
+#ifdef HAVE_JS
+    if (IS_CDS_ITEM(obj->getObjectType()))
     {
-		scripting->processCdsObject(obj);
+        scripting->processCdsObject(obj);
     }
+#endif
 
     if (recursive && IS_CDS_CONTAINER(obj->getObjectType()))
     {
@@ -336,10 +352,12 @@ void ContentManager::addRecursive(String path, String parentID)
             }
             if (obj != nil)
             {
-    			if (IS_CDS_ITEM(obj->getObjectType()))
-	    		{
-		    		scripting->processCdsObject(obj);
-    			}
+#ifdef HAVE_JS
+    		if (IS_CDS_ITEM(obj->getObjectType()))
+	    	{
+		    scripting->processCdsObject(obj);
+    		}
+#endif
                 if (IS_CDS_CONTAINER(obj->getObjectType()))
                 {
                     addRecursive(newPath, obj->getID());
@@ -530,7 +548,9 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic)
         {
             if (ignore_unknown_extensions)
                 return nil; // item should be ignored
+#ifdef HAVE_MAGIC	    
             mimetype = get_mime_type(path);
+#endif
         }
         if (mimetype != nil)
         {
@@ -586,6 +606,7 @@ String ContentManager::mimetype2upnpclass(String mimeType)
     return mimetype_upnpclass_map->get((String)parts->get(0) + "/*");
 }
 
+#ifdef HAVE_JS
 void ContentManager::initScripting()
 {
 	if (scripting != nil)
@@ -606,19 +627,20 @@ void ContentManager::destroyScripting()
 {
 	scripting = nil;
 }
-
-
 void ContentManager::reloadScripting()
 {
 	destroyScripting();
 	initScripting();
 }
+#endif // HAVE_JS
 
 /* experimental file adding */
 /*
 void ContentManager::addFile2(String path, int recursive)
 {
-	initScripting();
+#ifdef HAVE_JS
+    initScripting();
+#endif
 
     if (path.charAt(path.length() - 1) == '/')
     {
@@ -655,9 +677,10 @@ void ContentManager::addFile2(String path, int recursive)
         }
         curParentID = obj->getID();
     }
-
-	if (IS_CDS_ITEM(obj->getObjectType()))
-		scripting->processCdsObject(obj);
+#ifdef HAVE_JS
+    if (IS_CDS_ITEM(obj->getObjectType()))
+        scripting->processCdsObject(obj);
+#endif
 
     if (recursive && IS_CDS_CONTAINER(obj->getObjectType()))
     {
@@ -712,10 +735,12 @@ void ContentManager::addFile2(Ref<DirStack> dirStack, String parentID)
                 addObject(obj);
                 um->containerChanged(parentID);
             }
-			if (IS_CDS_ITEM(obj->getObjectType()))
-			{
-				scripting->processCdsObject(obj);
-			}
+#ifdef HAVE_JS
+	    if (IS_CDS_ITEM(obj->getObjectType()))
+	    {
+		scripting->processCdsObject(obj);
+	    }
+#endif
             if (IS_CDS_CONTAINER(obj->getObjectType()))
             {
                 addRecursive(newPath, obj->getID());
@@ -844,7 +869,7 @@ int ContentManager::addFile(zmm::String path, int recursive, int async)
 }
 int ContentManager::removeObject(String objectID, int async)
 {
-    if (async)
+    if (false /* async */) // removal sync, to avoid UI exception
     {
         // building container path for the description
         Ref<Storage> storage = Storage::getInstance();
@@ -911,3 +936,207 @@ CMAccounting::CMAccounting() : Object()
 {
     totalFiles = 0;
 }
+
+
+/* ************** experimental file adding ************** */
+/* dir cache */
+
+DirCacheEntry::DirCacheEntry() : Object()
+{}
+
+DirCache::DirCache() : Object()
+{
+    capacity = DEFAULT_DIR_CACHE_CAPACITY;
+    size = 0;
+    // assume the average filelength to be 10 chars
+    buffer = Ref<StringBuffer>(new StringBuffer(capacity * 10));
+    entries = Ref<Array<DirCacheEntry> >(new Array<DirCacheEntry>(capacity));
+}
+void DirCache::push(zmm::String name)
+{
+    Ref<DirCacheEntry> entry;
+    if (size == capacity)
+    {
+	entry = Ref<DirCacheEntry>(new DirCacheEntry());
+	entries->append(entry);
+    }
+    else
+        entry = entries->get(size);
+    *buffer << "/" << name;
+    entry->end = buffer->length();
+    size++;        
+}
+void DirCache::pop()
+{
+    if (size <= 0)
+        return;
+    size--;
+    if (size == 0)
+        buffer->setLength(0);
+    else
+        buffer->setLength(entries->get(size - 1)->end);
+    entries->get(size)->id = nil;
+}
+void DirCache::clear()
+{
+    for (int i = 0; i < size; i++)
+    {
+        entries->get(i)->id = nil;
+    }
+    size = 0;
+}
+void DirCache::setPath(zmm::String path)
+{
+    int i;
+    Ref<Array<StringBase> > parts = split_string(path, '/');
+    for (i = parts->size(); i < size; i++)
+        entries->get(i)->id = nil;
+    size = parts->size();
+    for (i = 0; i < parts->size(); i++)
+    {
+        push(String(parts->get(i)));
+    }
+}
+String DirCache::getPath()
+{
+    return buffer->toString();
+}
+
+String DirCache::createContainers()
+{
+    Ref<Storage> storage = Storage::getInstance();
+    Ref<ContentManager> cm = ContentManager::getInstance();
+    Ref<StringConverter> f2i = StringConverter::f2i();
+
+    Ref<CdsObject> cont;
+
+    int prev_end;
+    for (int i = 0; i < size; i++)
+    {
+	Ref<DirCacheEntry> entry = entries->get(i);
+        if (entry->id != nil)
+            continue;
+
+	prev_end = (i == 0) ? 1 : entries->get(i - 1)->end + 1;
+        String name = String(buffer->c_str() + prev_end, entry->end - prev_end);
+        /// \todo: PC Directory id configurable
+        String parentID = ((i == 0) ? "1" : entries->get(i - 1)->id);
+        String conv_name = f2i->convert(name);
+        Ref<CdsObject> obj = storage->findObjectByTitle(conv_name, parentID);
+        if (obj != nil)
+        {
+            entry->id = obj->getID();
+            continue;
+        }
+        String path(buffer->c_str(), entry->end);
+        cont = Ref<CdsObject>(new CdsContainer());
+        cont->setParentID(parentID);
+        cont->setTitle(conv_name);
+        cont->setLocation(path);
+        cm->addObject(cont);
+        entry->id = cont->getID();
+    }
+    return cont->getID();
+}
+
+
+
+void ContentManager::_addFile2(String path, int recursive)
+{
+#ifdef HAVE_JS
+    initScripting();
+#endif
+
+    if (path.charAt(path.length() - 1) == '/')
+        path = path.substring(0, path.length() - 1);
+    
+    int slashPos = path.rindex('/');
+    if (slashPos < 0)
+        throw Exception("only absolute paths are accepted");
+
+    Ref<DirCache> dirCache(new DirCache());
+    // if not in root container initialize dirCache's path
+    if (slashPos > 0)
+        dirCache->setPath(path.substring(0, slashPos));
+
+    addRecursive2(dirCache, path.substring(slashPos + 1), recursive);
+}
+
+void ContentManager::addRecursive2(Ref<DirCache> dirCache, String filename, int recursive)
+{
+    String parentID;
+    Ref<CdsObject> obj;
+    Ref<UpdateManager> um = UpdateManager::getInstance();
+
+    String path = dirCache->getPath() + '/' + filename;
+
+    struct stat statbuf;
+    int ret;
+
+    ret = stat(path.c_str(), &statbuf);
+    if (ret != 0)
+        throw Exception(String("Failed to stat ") + path);
+
+    if (S_ISREG(statbuf.st_mode)) // item
+    {
+        obj = createObjectFromFile(dirCache->getPath() +'/'+ filename);
+        if (obj != nil)
+        {
+            String parentID = dirCache->createContainers();
+            obj->setParentID(parentID);
+#ifdef HAVE_JS
+    	    if (IS_CDS_ITEM(obj->getObjectType()))
+	    {
+	        scripting->processCdsObject(obj);
+    	    }
+#endif
+            addObject(obj);
+            um->containerChanged(parentID);
+        }
+        return;
+    }
+    if (! recursive)
+        return;
+    if (S_ISDIR(statbuf.st_mode)) // container
+    {
+        DIR *dir = opendir(path.c_str());
+        if (! dir)
+        {
+            throw Exception(String("could not list directory ")+
+                            path + " : " + strerror(errno));
+        }
+        struct dirent *dent;
+
+        dirCache->push(filename);
+        while ((dent = readdir(dir)) != NULL)
+        {
+            char *name = dent->d_name;
+            if (name[0] == '.')
+            {
+                if (name[1] == 0)
+                {
+                    continue;
+                }
+                else if (name[1] == '.' && name[2] == 0)
+                {
+                    continue;
+                }
+            }
+            try
+            {
+                addRecursive2(dirCache, name, recursive);
+            }
+            catch(Exception e)
+            {
+                printf("skipping %s/%s : %s\n", dirCache->getPath().c_str(), filename.c_str(),
+                       e.getMessage().c_str());
+            }
+        }
+        closedir(dir);
+        dirCache->pop();
+    }
+    else
+        throw Exception(String("unsupported file type: ")+ path);
+}
+
+

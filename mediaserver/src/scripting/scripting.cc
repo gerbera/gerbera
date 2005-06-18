@@ -19,6 +19,8 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#ifdef HAVE_JS
+
 #include "scripting.h"
 #include "storage.h"
 #include "content_manager.h"
@@ -555,4 +557,7 @@ void Scripting::processCdsObject(Ref<CdsObject> obj)
 	}
 */
 }
+
+
+#endif // HAVE_JS
 

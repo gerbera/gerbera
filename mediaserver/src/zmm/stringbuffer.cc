@@ -28,74 +28,79 @@ using namespace zmm;
 
 StringBuffer::StringBuffer()
 {
-	capacity = DEFAULT_STRINGBUFFER_CAPACITY;
-	data = (char *)malloc((capacity + 1) * sizeof(char));
-	data[0] = 0;
-	len = 0;
+    capacity = DEFAULT_STRINGBUFFER_CAPACITY;
+    data = (char *)malloc((capacity + 1) * sizeof(char));
+    data[0] = 0;
+    len = 0;
 }
 StringBuffer::StringBuffer(int capacity)
 {
-	this->capacity = capacity;
-	data = (char *)malloc((capacity + 1) * sizeof(char));
-	data[0] = 0;
-	len = 0;
+    this->capacity = capacity;
+    data = (char *)malloc((capacity + 1) * sizeof(char));
+    data[0] = 0;
+    len = 0;
 }
 StringBuffer::~StringBuffer()
 {
-	free(data);
+    free(data);
 }
 StringBuffer &StringBuffer::operator<<(String other)
 {
-	int otherLen = other.length();
-	if(otherLen)
-	{
-		addCapacity(otherLen);
-		strcpy(data + len, other.base->data);
-		len += otherLen;
-	}
-	return *this;
+    int otherLen = other.length();
+    if(otherLen)
+    {
+        addCapacity(otherLen);
+        strcpy(data + len, other.base->data);
+        len += otherLen;
+    }
+    return *this;
 }
 StringBuffer &StringBuffer::operator<<(char *str)
 {
-	if(! str)
-		return *this;
-	int otherLen = (int)strlen(str);
-	if(otherLen)
-	{
-		addCapacity(otherLen);
-		strcpy(data + len, str);
-		len += otherLen;
-	}
-	return *this;
+    if(! str)
+        return *this;
+    int otherLen = (int)strlen(str);
+    if(otherLen)
+    {
+        addCapacity(otherLen);
+        strcpy(data + len, str);
+        len += otherLen;
+    }
+    return *this;
 }
 StringBuffer &StringBuffer::operator<<(char chr)
 {
-	addCapacity(1);
-	*(data + len) = chr;
-	*(data + len + 1) = 0;
+    addCapacity(1);
+    *(data + len) = chr;
+    *(data + len + 1) = 0;
     len++;
-	return *this;
+    return *this;
 }
 
 StringBuffer &StringBuffer::operator<<(int x)
 {
-	addCapacity(MAX_INT_STRING_LENGTH);
-	char *dest = data + len;
-	sprintf(dest, "%d", x);
-	len += (int)strlen(dest);
-	return *this;
+    addCapacity(MAX_INT_STRING_LENGTH);
+    char *dest = data + len;
+    sprintf(dest, "%d", x);
+    len += (int)strlen(dest);
+    return *this;
 }
 int StringBuffer::length()
 {
-	return len;
+    return len;
+}
+void StringBuffer::setLength(int newLength)
+{
+    addCapacity(newLength);
+    this->len = newLength;
 }
 char *StringBuffer::c_str()
 {
-	return data;
+    return data;
 }
 String StringBuffer::toString()
 {
-	return String(data);
+    return String(data, len);
 }
 
 void StringBuffer::clear()
@@ -106,14 +111,14 @@ void StringBuffer::clear()
 
 void StringBuffer::addCapacity(int increment)
 {
-	int neededCapacity = len + increment + 1;
-	if(neededCapacity > capacity)
-	{
-		int newCapacity = (int)(capacity * STRINGBUFFER_CAPACITY_INCREMENT);
-		if(neededCapacity > newCapacity)
-			newCapacity = neededCapacity;
-		capacity = newCapacity;
-		data = (char *)realloc(data, capacity);
-	}
+    int neededCapacity = len + increment + 1;
+    if(neededCapacity > capacity)
+    {
+        int newCapacity = (int)(capacity * STRINGBUFFER_CAPACITY_INCREMENT);
+        if(neededCapacity > newCapacity)
+            newCapacity = neededCapacity;
+        capacity = newCapacity;
+        data = (char *)realloc(data, capacity);
+    }
 }
 

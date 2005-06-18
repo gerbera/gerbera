@@ -125,7 +125,35 @@ void ConfigManager::validate()
 
     checkOptionString("/server/storage/attribute::driver");
 
-    prepare_path("/server/storage/database-file");
+    String dbDriver = getOption("/server/storage/attribute::driver");
+
+    // checking database driver options
+    do
+    {
+#ifdef HAVE_SQLITE3	    
+        if (dbDriver == "sqlite3")
+        {
+            prepare_path("/server/storage/database-file");            
+            break;
+        }
+#endif
+#ifdef HAVE_MYSQL
+        if (dbDriver == "mysql")
+        {
+            checkOptionString("/server/storage/host");
+            checkOptionString("/server/storage/database");
+            checkOptionString("/server/storage/username");
+            if (getElement("/server/storage/password") == nil)
+                throw Exception("/server/storage/password option not found");            
+            break;
+        }
+#endif
+        // other database types...
+        throw Exception(String("Unknown storage driver: ") + dbDriver);
+    }
+    while (false);
+
+    
 //    temp = checkOptionString("/server/storage/database-file");
 //    check_path_ex(construct_path(temp));
 
@@ -144,7 +172,9 @@ void ConfigManager::validate()
     getOption("/server/ip", ""); // bind to any IP address
     getOption("/server/bookmark", DEFAULT_BOOKMARK_FILE);
     getOption("/server/name", DESC_FRIENDLY_NAME);
+
 /*
+#ifdef HAVE_JS
     try
     {
         temp = getOption("/import/script");
@@ -160,8 +190,12 @@ void ConfigManager::validate()
     Ref<Element> script = getElement("/import/script");
     if (script != nil)
             script->setText(construct_path(temp));
+#endif
 */
+
+#ifdef HAVE_JS
     prepare_path("/import/script");
+#endif
 
     getIntOption("/server/port", 0); // 0 means, that the SDK will any free port itself
     getIntOption("/server/alive", DEFAULT_ALIVE_INTERVAL);

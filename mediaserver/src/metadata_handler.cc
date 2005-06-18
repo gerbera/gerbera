@@ -25,8 +25,13 @@
 #include "string_converter.h"
 #include "logger.h"
 
+#ifdef HAVE_EXIV2
 #include "metadata/exiv2_handler.h"
+#endif
+
+#ifdef HAVE_ID3
 #include "metadata/id3_handler.h"
+#endif
 
 using namespace zmm;
 
@@ -54,12 +59,25 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
     String mimetype = item->getMimeType();
 
     Ref<MetadataHandler> handler;
+    do
+    {
+#ifdef HAVE_ID3
+        if (mimetype == "audio/mpeg")
+	{
+            handler = Ref<MetadataHandler>(new Id3Handler());
+	    break;
+	}
+#endif
+#ifdef HAVE_EXIV2
+        if (mimetype == "image/jpeg")
+	{
+            handler = Ref<MetadataHandler>(new Exiv2Handler());
+	    break;
+	}
+#endif
+    }
+    while (false);
     
-    if (mimetype == "audio/mpeg")
-        handler = Ref<MetadataHandler>(new Id3Handler());
-    else if (mimetype == "image/jpeg")
-        handler = Ref<MetadataHandler>(new Exiv2Handler());
-
     if (handler == nil)
         return;
     handler->fillMetadata(item);

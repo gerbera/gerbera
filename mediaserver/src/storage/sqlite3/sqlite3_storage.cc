@@ -18,34 +18,31 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#ifdef HAVE_SQLITE3
+
 #include "sqlite3_storage.h"
 
 #include "common.h"
 #include "config_manager.h"
-#include "destroyer.h"
 
 using namespace zmm;
 using namespace mxml;
-
-void unlock_func(void *data)
-{
-    ((Sqlite3Storage *)data)->unlock();
-}
-#define LOCK_METHOD lock(); \
-        Ref<Destroyer> destroyer(new Destroyer(unlock_func, this));
-#define UNLOCK_METHOD destroyer->destroy();
 
 Sqlite3Storage::Sqlite3Storage() : SQLStorage()
 {
     db = NULL;
     int res;
 
+    pthread_mutex_init(&lock_mutex, NULL);    
+    /*
     pthread_mutexattr_t mutex_attr;
     res = pthread_mutexattr_init(&mutex_attr);
     res = pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_RECURSIVE_NP);
-
     pthread_mutex_init(&lock_mutex, &mutex_attr);
     pthread_mutexattr_destroy(&mutex_attr);
+    
+    Recursive mutex is apparently not needed anymore
+    */
 }
 
 Sqlite3Storage::~Sqlite3Storage()
@@ -90,7 +87,7 @@ void Sqlite3Storage::reportError(String query)
 
 Ref<SQLResult> Sqlite3Storage::select(String query)
 {
-    LOCK_METHOD;
+    lock();
 
     char *err;
     Sqlite3Result *pres = new Sqlite3Result();
@@ -107,21 +104,22 @@ Ref<SQLResult> Sqlite3Storage::select(String query)
     );
     if(ret != SQLITE_OK)
     {
+        unlock();
         reportError(query);
-        throw StorageException("query error");
+        throw StorageException("Sqlite3: query error");
     }
 
     pres->row = pres->table;
     pres->cur_row = 0;
 
-    UNLOCK_METHOD;
+    unlock();
 
     return res;
 }
 
 int Sqlite3Storage::exec(String query)
 {
-    LOCK_METHOD;
+    lock();
 
     char *err;
     int res = sqlite3_exec(
@@ -133,11 +131,12 @@ int Sqlite3Storage::exec(String query)
     );
     if(res != SQLITE_OK)
     {
+        unlock();
         reportError(query);
-        throw StorageException("query error");
+        throw StorageException("Sqlite3: query error");
     }
 
-    UNLOCK_METHOD;
+    unlock();
 }
 
 int Sqlite3Storage::lastInsertID()
@@ -197,4 +196,6 @@ String Sqlite3Row::col(int index)
 {
     return String(row[index]);
 }
+
+#endif // HAVE_SQlITE3
 

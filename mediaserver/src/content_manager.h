@@ -28,7 +28,10 @@
 #include "cds_objects.h"
 #include "storage.h"
 #include "dictionary.h"
+
+#ifdef HAVE_JS
 #include "scripting/scripting.h"
+#endif
 
 class ContentManager;
 
@@ -78,6 +81,33 @@ public:
     int totalFiles;
 };
 
+class DirCacheEntry : public zmm::Object
+{
+public:
+    DirCacheEntry();
+public:
+    int end;
+    zmm::String id;
+};
+
+class DirCache : public zmm::Object
+{
+protected:
+    zmm::Ref<zmm::StringBuffer> buffer;
+    int size; // number of entries
+    int capacity; // capacity of entries
+    zmm::Ref<zmm::Array<DirCacheEntry> > entries;
+public:
+    DirCache();
+    void push(zmm::String id);
+    void pop();
+    void setPath(zmm::String path);
+    void clear();
+    zmm::String getPath();
+    zmm::String createContainers();
+};
+
+
 class ContentManager : public zmm::Object
 {
 public:
@@ -101,6 +131,7 @@ public:
     /* don't use these, use the above methods */
     void _loadAccounting();
     void _addFile(zmm::String path, int recursive=0);
+    void _addFile2(zmm::String path, int recursive=0);
     void _removeObject(zmm::String objectID);
     
 
@@ -131,11 +162,15 @@ public:
     zmm::Ref<CdsObject> convertObject(zmm::Ref<CdsObject> obj, int objectType);
 
     /// \brief instructs ContentManager to reload scripting environment
+#ifdef HAVE_JS
     void reloadScripting();
+#endif
     
 protected:
-	void initScripting();
-	void destroyScripting();
+#ifdef HAVE_JS
+    void initScripting();
+    void destroyScripting();
+#endif
     
     int ignore_unknown_extensions;
     zmm::Ref<Dictionary> extension_mimetype_map;
@@ -143,11 +178,13 @@ protected:
     
     /* for recursive addition */
     void addRecursive(zmm::String path, zmm::String parentID);
+    void addRecursive2(zmm::Ref<DirCache> dirCache, zmm::String filename, int recursive);
 
     zmm::String extension2mimetype(zmm::String extension);
     zmm::String mimetype2upnpclass(zmm::String mimeType);
-	  
-	zmm::Ref<Scripting> scripting;
+#ifdef HAVE_JS  
+    zmm::Ref<Scripting> scripting;
+#endif
 
     void lock();
     void unlock();

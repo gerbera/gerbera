@@ -6,5 +6,5 @@ libmetadata_a_SOURCES = \
     id3_handler.h \
     id3_handler.cc
 
-INCLUDES = -I.. @common_includes@
+INCLUDES = -I..
 
