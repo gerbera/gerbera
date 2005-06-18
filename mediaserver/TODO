@@ -82,6 +82,7 @@ Planned improvements / features (ordered by importance)
 - smarter configure script to optionally enable - disable features.
   Enable conditional compilation.
   
+- move IOHandler creation logic to metadata_handler
 - Flexible <res> tag handling, own field in the database
 - url marshalling of <res> tags
 - exiv2 thumbnail support
