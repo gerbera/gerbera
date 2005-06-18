@@ -73,8 +73,8 @@ AC_ARG_ENABLE(sqlite3,
   [
 The following options accept 'yes'(default) 'no' and 'auto' as an argument,
 meaning ensure, disable and autodetect respectively.
-If the corresponding --enable option is not given for a particular feature,
-autodetect is assumed.
+If the corresponding --enable/disable option is not given for a particular
+feature autodetect is assumed.
 
   --enable-sqlite3     sqlite3 support],
   [
