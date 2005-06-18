@@ -72,6 +72,7 @@ AC_CHECK_HEADER(magic.h,
     /* checking for magic.h */
 )
 if test "x$MAGIC_OK" = xyes; then
+    LDFLAGS="$LDFLAGS -lmagic"
     AC_DEFINE(HAVE_MAGIC)
 fi
 
@@ -97,6 +98,7 @@ if test "x$SQLITE3_OK" = xyes; then
     fi
 fi
 if test "x$SQLITE3_OK" = xyes; then
+    LDFLAGS="$LDFLAGS -lsqlite3"
     AC_DEFINE(HAVE_SQLITE3)
 fi
 
@@ -106,18 +108,20 @@ MYSQL_OK=yes
 
 AC_PATH_PROG(mysqlconfig, mysql_config, no)
 if test "$mysqlconfig" = no; then
-        AC_MSG_RESULT([mysql_config script not found])
-	MYSQL_OK=no
+    AC_MSG_RESULT([mysql_config script not found])
+    MYSQL_OK=no
 else
-	AC_MSG_CHECKING(mysql libraries)
-	MYSQL_LIBS=`${mysqlconfig} --libs`
-	AC_MSG_RESULT($MYSQL_LIBS)
-	AC_MSG_CHECKING(mysql includes)
-	MYSQL_CFLAGS=`${mysqlconfig} --cflags`
-	AC_MSG_RESULT($MYSQL_CFLAGS)
+    AC_MSG_CHECKING(mysql includes)
+    MYSQL_CFLAGS=`${mysqlconfig} --cflags`
+    AC_MSG_RESULT($MYSQL_CFLAGS)
 
-	CXXFLAGS="$CXXFLAGS $MYSQL_CFLAGS"
-	LDFLAGS="$LDFLAGS $MYSQL_LIBS"
+    AC_MSG_CHECKING(mysql libraries)
+    MYSQL_LIBS=`${mysqlconfig} --libs`
+    AC_MSG_RESULT($MYSQL_LIBS)
+
+    CXXFLAGS="$CXXFLAGS $MYSQL_CFLAGS"
+    LDFLAGS="$LDFLAGS $MYSQL_LIBS"
+
 fi
 if test "x$MYSQL_OK" = xyes; then
     AC_CHECK_HEADER(mysql.h,
@@ -184,6 +188,7 @@ if test "x$ID3_OK" = xyes; then
     )
 fi
 if test "x$ID3_OK" = xyes; then
+   LDFLAGS="$LDFLAGS -lid3"
    AC_DEFINE(HAVE_ID3)
 fi
 
@@ -196,6 +201,7 @@ AC_CHECK_HEADER(exiv2/exif.hpp,
     /* checking for exiv2/exif.h */
 )
 if test "x$EXIV2_OK" = xyes; then
+   LDFLAGS="$LDFLAGS -lexiv2"
    AC_DEFINE(HAVE_EXIV2)
 fi
 
@@ -206,8 +212,8 @@ AC_OUTPUT
 
 echo
 echo "======== CONFIGURATION SUMMARY ========="
-echo "mysql support:       $MYSQL_OK"
 echo "sqlite3 support:     $SQLITE3_OK"
+echo "mysql support:       $MYSQL_OK"
 echo "javascript support:  $JS_OK"
 echo "libmagic support:    $MAGIC_OK"
 echo "libid3 support:      $ID3_OK"
