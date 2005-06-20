@@ -38,11 +38,8 @@ Versions 0.7.*, 0.8.0 and 0.8.1 are not database compatible,
 
 You will have to recreate your collection. Our apologies for inconvinience.
 
-When moving from version 0.7.x I would suggest a complete reinstall,
-removing ~/.mediatomb and running new tomb-install is HIGHLY recommended. 
-
-When moving from 0.8.0 to 0.8.1 it's enough to recreate the database
-using tomb-install
+I would suggest a complete reinstall. Removing ~/.mediatomb and running
+newly installed version of tomb-install is HIGHLY recommended. 
 
 
 REQUIREMENTS
@@ -101,7 +98,7 @@ In order to compile MediaTomb you will have to install the following packages:
   using libupnp sdk will compile without that.
 
 - At least one of the databases:
-  - sqlite3 from http://www.sqlite.org/ (SLOW)
+  - sqlite3 from http://www.sqlite.org/ (Very SLOW media import)
     On Fedora Core it's sqlite3-devel and 'sqlite3' packages.
     On Debian it's 'libsqlite3' 'libsqlite3-dev' and 'sqlite3'
        (the last package includes command line client which is also required)
@@ -165,11 +162,21 @@ add this file as a bookmark. When the server is running, the redirector will
 forward you to the web UI. It is quite handy, because the server port may 
 change upon restarts.
 
-If you want to use mysql as the database (PREFERRED), create the 
-database using following sql script:
-${prefix}/share/mediatomb/mysql.sql
-and change config file accordingly (see CONFIGURATION for details)
+IMPORTANT NOTE:
+Once installed mediatomb uses sqlite3 as the default database backend for the
+sole reason that sqlite may be set up automatically without any manual
+configuration by the user and thus the server will be immediately available
+after installation.
+However, sqlite3 is VERY SLOW at media import, whereas mysql has
+superior performance with any operations. Hence mysql is actually the
+preferred database backend and sqlite3 should only be used as the last resort
+if mysql is not available.
 
+To use mysql you will have to create the mysql database manually
+by invoking the script located at
+${prefix}/share/mediatomb/mysql.sql
+and manualy change the configuration file accordingly
+(see CONFIGURATION for details)
 
 WHY IS THE WEB UI DISABLED BY DEFAULT?
 --------------------------------------
@@ -210,52 +217,52 @@ Here is a sample configuration file with description of the various tags.
   filled by some default value upon server startup. 
 
 
-<ui enabled="no"/>
+<ui enabled="no"/> (Required)
     Enables or disables the web user interface, change to "yes" in order 
-    to enable it. (Required)
+    to enable it.
 
-<port>50555<port/>
+<port>50555<port/> (Optional)
     Specifies the port where the server will be listening for HTTP requests.
     Note, that because of the implementation in the UPnP SDK only ports
-    above 49152 are supported. (Optional parameter)
+    above 49152 are supported.
 
-<ip>192.168.0.23</ip>
+<ip>192.168.0.23</ip> (Optional)
     Specifies the IP address to bind to. (Optional)
     
-<name>MediaTomb</name>
+<name>MediaTomb</name> (Default if missing: MediaTomb)
     Server friendly name, you will see this on your devices that you use to
-    access the server. (Default if missing: MediaTomb)
+    access the server.
     
-<udn/>
+<udn/> (Required)
     Unique Device Name, according to the UPnP spec it must be consistent
     throughout reboots. You can fill in something yourself, but we suggest
     that you leave this tag empty - it will be filled out and saved
-    automatically after the first launch of the server. (Required)
+    automatically after the first launch of the server.
 
-<home>/home/your_user_name/.mediatomb</home>
+<home>/home/your_user_name/.mediatomb</home> (Required)
     Server home - the server will search for the data that it needs relative
     to this directory (for the media database, for directory holding device and 
-    service description xml files, icons, etc.) (Required)
+    service description xml files, icons, etc.)
     
-<webroot>web</webroot>
+<webroot>web</webroot> (Required)
     Root directory for the web server (relative to serer home), this is the 
     location where device description documents, UI xsl files, etc. are
-    stored. (Required)
+    stored.
     
-<alive>180</alive>
-    Interval for broadcasting SSDP:alive messages (Default if missing: 180)
+<alive>180</alive> (Default if missing: 180)
+    Interval for broadcasting SSDP:alive messages
     
-<bookmark>mediatomb.html</bookmark>
-    Bookmark file for fast access to the web UI (Default if missing: 
-    mediatomb.html)
+<bookmark>mediatomb.html</bookmark> (Default if missing: mediatomb.html)
+    Bookmark file for fast access to the web UI
     
-<storage driver="...">
-    Specifies the storage driver, currently sqlite3 and mysql are supported.
-    (Required) Every storage driver has it's own configuration parameters.
+<storage driver="..."> (Required)
+    Specifies the storage driver. Currently sqlite3 and mysql are supported.
+    
+    Every storage driver has it's own configuration parameters.
     
     - for sqlite3 use
     <storage driver="sqlite3">
-       <database-file>sqlite3.db</database-file> Database filename. (Required)
+       <database-file>sqlite3.db</database-file> (Required) Database filename.
     </storage>
 
     - for mysql you'll need something like this:
@@ -265,7 +272,6 @@ Here is a sample configuration file with description of the various tags.
       <password></password>
       <database>mediatomb</database>
     </storage>
-
   
 <import>
     Section specifying various import parameters, currently only one is 

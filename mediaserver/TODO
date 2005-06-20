@@ -1,49 +1,11 @@
 Known Issues (ordered by importance)
 ------------------------------------
 
-- speed of media import. This is one of our biggest concerns currently.
-  With a big import script adding many entries for a single file, the
-  speed becomes really slow! When using sqlite3 database engine our
-  machines (which aren't that slow) have an average rate of 1 file
-  added per second, which is not acceptable and far from possible
-  optimum especially if you have big collections.
-  The now preferred mysql storage option gives a significant speedup.
-  
-  Thus, in the configuration with sqlite3 storage engine the bottleneck
-  of the system is obviously the sqlite3 engine. But when using mysql - the 
-  bottleneck appears to migrate to 
-    - libmagic, responsible for figuring out the mimetypes for unknown file
-      extensions, and 
-    - libid3, currently the only component of the metadata detection engine.
-    
-  The libmagic issue may be solved by mapping all relevant file extensions
-  to the mime types directly and disabling parsing of the rest of the files.
-  (These mappings can be easily formulated through the config file)
-  This should actually be the default behaviour and it does not limit the
-  normal use of the server in any way.
-  
-  libid3 may not be disabled, or we'll have no metadata-based virtual
-  items. Unfortunately libid3 leaves rather few space for optimizations.
-  In any case, also when further metadata detection libraries will be included
-  I assume metadata detection will stay the bottleneck. The rest of the system
-  is just much faster.
-  
-  We are looking for ideas to speed up metadata parsing.
-  One of them is to have a concurrent metadata detection engine.
-  I hope parsing files in parallel would bring some speedup.
-  Currently we are elaborating this approach, but this won't be a
-  revolution, I'm not even sure if it will yield any speedup at all -
-  metadata parsing has apparently much more to do with hard drive IO 
-  activity then with computational activity. We all know, how slow
-  it is having several programs wigh frequent hard drive access to 
-  work in parallel.
-
-  For those doomed to use sqlite3 for whatever reason there is an
-  IMHO acceptable workaround.
-  The sqlite3 database file may be placed into a ramdisk, this
-  brings _significant_ speedup.
-  NOTE: In this case you should take care of having a harddisk copy
-  of the database.
+- Although sqlite3 support is now optional, and won't be compiled in
+  if not present, there are following problems to be fixed.
+  - mediatomb server still looks for a sqlite3.db file.
+  - tomb-install depends on sqlite3 and won't work if it is not installed.
+  This way, sqlite3 is in fact NOT optional yet.
 
 - When directories are added recursively all subdirectories traversed
   are always created in the PC Directory, regardless if any files from
@@ -75,13 +37,6 @@ Planned improvements / features (ordered by importance)
 -------------------------------------------------------
 - use the ref_id database field
 
-- include mysql support (already working) into the main branch
-  and write autoconf/automake stuff for conditional compilation of
-  sqlite3 and/or mysql storage. (That's a challenge :)
-
-- smarter configure script to optionally enable - disable features.
-  Enable conditional compilation.
-  
 - move IOHandler creation logic to metadata_handler
 - Flexible <res> tag handling, own field in the database
 - url marshalling of <res> tags
@@ -90,7 +45,6 @@ Planned improvements / features (ordered by importance)
   javascript
 - add auxilary metadata fields + readonly access from
   javascript
-
 
 - introduce means to cascade scripts. Probably something like include()
   function or preprocessor directive.
