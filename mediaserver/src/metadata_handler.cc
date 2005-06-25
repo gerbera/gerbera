@@ -33,6 +33,10 @@
 #include "metadata/id3_handler.h"
 #endif
 
+#ifdef HAVE_EXTRACTOR
+#include "metadata/extractor_handler.h"
+#endif
+
 using namespace zmm;
 
 mt_key MT_KEYS[] = {
@@ -75,6 +79,13 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
 	    break;
 	}
 #endif
+#ifdef HAVE_EXTRACTOR
+    {
+        handler = Ref<MetadataHandler>(new ExtractorHandler());
+        break;
+    }
+#endif
+
     }
     while (false);
     
