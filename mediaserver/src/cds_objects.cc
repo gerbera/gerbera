@@ -243,12 +243,25 @@ Ref<Dictionary> CdsObject::getResource(int index)
 {
     return resources->get(index);
 }
+String CdsObject::getResource(int index, String key)
+{
+    return resources->get(index)->get(key);
+}
 void CdsObject::setResource(int index, Ref<Dictionary> resource)
 {
     resources->set(resource, index);
 }
+void CdsObject::setResource(int index, String key, String value)
+{
+    resources->get(index)->put(key, value);
+}
 void CdsObject::addResource(Ref<Dictionary> resource)
 {
+    resources->append(resource);
+}
+void CdsObject::addResource()
+{
+    Ref<Dictionary> resource(new Dictionary());
     resources->append(resource);
 }
 

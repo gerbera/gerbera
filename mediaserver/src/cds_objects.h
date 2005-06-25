@@ -165,10 +165,17 @@ public:
     int getResourceCount();
     /// \brief Query resource tag with the given index
     zmm::Ref<Dictionary> getResource(int index);
+    /// \brief Query single resource tag key
+    zmm::String getResource(int index, zmm::String key);
     /// \brief Set resource tag with the given index
     void setResource(int index, zmm::Ref<Dictionary> resource);
+    /// \brief Set resource tag key with the given index and key
+    void setResource(int index, zmm::String key, zmm::String value);
     /// \brief Add resource tag
     void addResource(zmm::Ref<Dictionary> resource);
+    /// \brief Add empty resource tag
+    void addResource();
+    
 
     
     /// \brief Copies all object properties to another object.
