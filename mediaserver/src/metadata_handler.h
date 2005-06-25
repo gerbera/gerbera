@@ -48,6 +48,30 @@ struct mt_key
 
 extern mt_key MT_KEYS[];
 
+// res tag attributes
+typedef enum
+{
+    R_SIZE = 0,
+    R_DURATION,
+    R_BITRATE,
+    R_SAMPLEFREQUENCY,
+    R_NRAUDIOCHANNELS,
+    R_RESOLUTION,
+    R_COLORDEPTH,
+    R_PROTOCOLINFO,
+    R_MAX
+} resource_attributes_t;
+
+typedef struct res_key res_key;
+struct res_key
+{   
+    char *sym;
+    char *upnp;
+};
+
+extern res_key RES_KEYS[];
+
+
 /// \brief This class is responsible for providing access to metadata information
 /// of various media. Currently only id3 is supported.
 class MetadataHandler : public zmm::Object

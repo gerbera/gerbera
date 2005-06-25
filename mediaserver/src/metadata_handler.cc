@@ -33,6 +33,8 @@
 #include "metadata/id3_handler.h"
 #endif
 
+#define HAVE_EXTRACTOR 1
+
 #ifdef HAVE_EXTRACTOR
 #include "metadata/extractor_handler.h"
 #endif
@@ -46,6 +48,17 @@ mt_key MT_KEYS[] = {
     { "M_DATE", "dc:date" },
     { "M_GENRE", "upnp:genre" },
     { "M_DESCRIPTION", "dc:description" }
+};
+
+res_key RES_KEYS[] = {
+    { "R_SIZE", "size" },
+    { "R_DURATION", "duration" },
+    { "R_BITRATE", "bitrate" },
+    { "R_SAMPLEFREQUENCY", "sampleFrequency" },
+    { "R_NRAUDIOCHANNELS", "nrAudioChannels" },
+    { "R_RESOLUTION", "resolution" },
+    { "R_COLORDEPTH", "colorDepth" },
+    { "R_PROTOCOLINFO", "protocolInfo" }
 };
 
 
@@ -67,28 +80,28 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
     {
 #ifdef HAVE_ID3
         if (mimetype == "audio/mpeg")
-	{
+        {
             handler = Ref<MetadataHandler>(new Id3Handler());
-	    break;
-	}
+            break;
+        }
 #endif
 #ifdef HAVE_EXIV2
         if (mimetype == "image/jpeg")
-	{
+        {
             handler = Ref<MetadataHandler>(new Exiv2Handler());
-	    break;
-	}
+            break;
+        }
 #endif
 #ifdef HAVE_EXTRACTOR
-    {
-        handler = Ref<MetadataHandler>(new ExtractorHandler());
-        break;
-    }
+        {
+            handler = Ref<MetadataHandler>(new ExtractorHandler());
+            break;
+        }
 #endif
 
     }
     while (false);
-    
+
     if (handler == nil)
         return;
     handler->fillMetadata(item);

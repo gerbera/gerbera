@@ -21,6 +21,8 @@
 /// \file extractor_handler.cc
 /// \brief Implementeation of the Id3Handler class.
 
+#define HAVE_EXTRACTOR 1
+
 #ifdef HAVE_EXTRACTOR
 
 #include <extractor.h>
