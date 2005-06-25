@@ -125,7 +125,7 @@ void SQLStorage::addObject(Ref<CdsObject> obj)
     Ref<StringBuffer> buf(new StringBuffer());
     for (int i = 0; i < obj->getResourceCount(); i++)
     {
-        if (i == 0)
+        if (i > 0)
             *buf << '&';
         *buf << url_escape(obj->getResource(i)->encode());
     }
@@ -189,7 +189,7 @@ void SQLStorage::updateObject(zmm::Ref<CdsObject> obj)
     Ref<StringBuffer> buf(new StringBuffer());
     for (int i = 0; i < obj->getResourceCount(); i++)
     {
-        if (i == 0)
+        if (i > 0)
             *buf << '&';
         *buf << url_escape(obj->getResource(i)->encode());
     }
