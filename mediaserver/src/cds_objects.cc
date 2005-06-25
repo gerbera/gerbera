@@ -27,6 +27,8 @@ using namespace mxml;
 CdsObject::CdsObject() : Object()
 {
     metadata = Ref<Dictionary>(new Dictionary());
+    auxdata = Ref<Dictionary>(new Dictionary());
+    resources = Ref<Array<Dictionary> >(new Array<Dictionary>());
     restricted = 1;
     virt = 0;
 }
@@ -118,6 +120,9 @@ void CdsObject::copyTo(Ref<CdsObject> obj)
     obj->setLocation(location);
     obj->setVirtual(virt);
     obj->setMetadata(metadata->clone());
+    obj->setAuxData(auxdata->clone());
+    for (int i = 0; i < resources->size(); i++)
+        obj->addResource(resources->get(i));
 }
 int CdsObject::equals(Ref<CdsObject> obj, bool exactly)
 {
@@ -126,14 +131,22 @@ int CdsObject::equals(Ref<CdsObject> obj, bool exactly)
         parentID == obj->getParentID() &&
         restricted == obj->isRestricted() &&
         title == obj->getTitle() &&
-        upnp_class == obj->getClass()
+        upnp_class == obj->getClass() &&
+        resources->size() == obj->resources->size()
        ))
         return 0;
+    // compare all resources
+    for (int i = 0; i < resources->size(); i++)
+        if (! resources->get(i)->equals(obj->resources->get(i)))
+            return 0;
+
     if (! metadata->equals(obj->getMetadata()))
         return 0;
     if (exactly && !
         (location == obj->getLocation() &&
-         virt == obj->isVirtual()))
+         virt == obj->isVirtual() &&
+         auxdata->equals(obj->auxdata)
+        ))
         return 0;
     return 1;
 }
@@ -198,6 +211,47 @@ void CdsObject::removeMetadata(String key)
 {
     metadata->remove(key);
 }
+
+
+String CdsObject::getAuxData(String key)
+{
+    return auxdata->get(key);
+}
+Ref<Dictionary> CdsObject::getAuxData()
+{
+    return auxdata;
+}
+void CdsObject::setAuxData(String key, String value)
+{
+    auxdata->put(key, value);
+}
+void CdsObject::setAuxData(Ref<Dictionary> auxdata)
+{
+    this->auxdata = auxdata;
+}
+void CdsObject::removeAuxData(String key)
+{
+    auxdata->remove(key);
+}
+
+
+int CdsObject::getResourceCount()
+{
+    return resources->size();
+}
+Ref<Dictionary> CdsObject::getResource(int index)
+{
+    return resources->get(index);
+}
+void CdsObject::setResource(int index, Ref<Dictionary> resource)
+{
+    resources->set(resource, index);
+}
+void CdsObject::addResource(Ref<Dictionary> resource)
+{
+    resources->append(resource);
+}
+
 
 /* CdsItem */
 

@@ -278,17 +278,19 @@ Here is a sample configuration file with description of the various tags.
     supported. (Required)
     
     <filesystem-charset>ISO-8859-1</filesystem-charset>
+        (Default if missing: ISO-8859-1)
         Defines the charset of the filesystem. For example, if you have 
         filenames in cyrillic KOI8-R encoding, then you should specify that 
         here. The server uses UTF-8 for UPnP and for the web UI, this import
-        parameter will help you to correctly import your data. (Default if
-        missing: ISO-8859-1)
+        parameter will help you to correctly import your data.
         
     <metadata-charset>ISO-8859-1</metadata-charset>
         Same as above, but defines the charset of the metadata.
 
-    <script>
-        TODO by bgeradz
+    <script> (Required if javascript support is enabled)
+        Points to the script invoked upon media import.
+        For more details read doc/scripting-intro.txt
+        This setting defaults to ${prefix}/share/mediatomb/js/import.js
 
     <mappings>
         Defines various mapping options for importing media, currently
@@ -306,8 +308,11 @@ Here is a sample configuration file with description of the various tags.
                 (everything after the last dot ".") to mimetype.
 
                 Note, that this improves the import speed, because
-                we then do not have to go through filemagic to 
-                get the mimetype information.
+                invoking libmagic to discover the right mimetype
+                of a file is omited for files with extensions listed here. 
+
+                Note, extension is case sensitive, this will probably need
+                to be fixed.
 
         <mimetype-upnpclass>
             This section holds the mimetype to upnp:class mappings. 

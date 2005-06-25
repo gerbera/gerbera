@@ -35,6 +35,8 @@ enum
     _is_restricted,
     _is_virtual,
     _metadata,
+    _auxdata,
+    _resources,
 
     _update_id,
     _is_searchable,
@@ -57,6 +59,8 @@ static char *select_fields = "\
     is_restricted, \
     is_virtual, \
     metadata, \
+    auxdata, \
+    resources, \
     \
     update_id, \
     is_searchable, \
@@ -114,6 +118,20 @@ void SQLStorage::addObject(Ref<CdsObject> obj)
     *fields << ", metadata";
     *values << ", " << quote(obj->getMetadata()->encode());
 
+    *fields << ", auxdata";
+    *values << ", " << quote(obj->getAuxData()->encode());
+
+    // encode resources
+    Ref<StringBuffer> buf(new StringBuffer());
+    for (int i = 0; i < obj->getResourceCount(); i++)
+    {
+        if (i == 0)
+            *buf << '&';
+        *buf << url_escape(obj->getResource(i)->encode());
+    }
+    *fields << ", resources";
+    *values << ", " << quote(buf->toString());
+
     if (IS_CDS_CONTAINER(objectType))
     {
         Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
@@ -165,6 +183,17 @@ void SQLStorage::updateObject(zmm::Ref<CdsObject> obj)
     *qb << ", is_restricted = " << obj->isRestricted();
     *qb << ", is_virtual = " << obj->isVirtual();
     *qb << ", metadata = " << quote(obj->getMetadata()->encode());
+    *qb << ", auxdata = " << quote(obj->getAuxData()->encode());
+
+    // encode resources
+    Ref<StringBuffer> buf(new StringBuffer());
+    for (int i = 0; i < obj->getResourceCount(); i++)
+    {
+        if (i == 0)
+            *buf << '&';
+        *buf << url_escape(obj->getResource(i)->encode());
+    }
+    *qb << ", resources = " << quote(buf->toString());
 
     if(IS_CDS_CONTAINER(objectType))
     {
@@ -361,9 +390,22 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
     obj->setTitle(row->col(_dc_title));
     obj->setClass(row->col(_upnp_class));
     obj->setVirtual(atoi(row->col(_is_virtual).c_str()));
+    
     Ref<Dictionary> meta(new Dictionary());
     meta->decode(row->col(_metadata));
     obj->setMetadata(meta);
+
+    Ref<Dictionary> aux(new Dictionary());
+    aux->decode(row->col(_auxdata));
+    obj->setAuxData(aux);
+
+    Ref<Array<StringBase> > resources = split_string(row->col(_resources), '&');
+    for (int i = 0; i < resources->size(); i++)
+    {
+        Ref<Dictionary> res(new Dictionary());
+        res->decode(url_unescape(String(resources->get(i))));
+        obj->addResource(res);
+    }
 
     int matched_types = 0;
 

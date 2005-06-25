@@ -70,6 +70,8 @@ protected:
     int objectType;
 
     zmm::Ref<Dictionary> metadata;
+    zmm::Ref<Dictionary> auxdata;
+    zmm::Ref<zmm::Array<Dictionary> > resources;
 
 public:
     /// \brief Constructor, currently only sets the restricted flag to 1
@@ -140,6 +142,34 @@ public:
     
     /// \brief Set entire metadata dictionary.
     void setMetadata(zmm::Ref<Dictionary> metadata);
+
+
+
+    /// \brief Query single auxdata value.
+    zmm::String getAuxData(zmm::String key);
+
+    /// \brief Query entire auxdata dictionary.
+    zmm::Ref<Dictionary> getAuxData();
+
+    /// \brief Set a single auxdata value.
+    void setAuxData(zmm::String key, zmm::String value);
+
+    /// \brief Removes auxdata with the given key
+    void removeAuxData(zmm::String key);
+    
+    /// \brief Set entire auxdata dictionary.
+    void setAuxData(zmm::Ref<Dictionary> auxdata);
+
+
+    /// \brief Get number of resource tags
+    int getResourceCount();
+    /// \brief Query resource tag with the given index
+    zmm::Ref<Dictionary> getResource(int index);
+    /// \brief Set resource tag with the given index
+    void setResource(int index, zmm::Ref<Dictionary> resource);
+    /// \brief Add resource tag
+    void addResource(zmm::Ref<Dictionary> resource);
+
     
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)

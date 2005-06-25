@@ -3,10 +3,12 @@ Known Issues (ordered by importance)
 
 - Although sqlite3 support is now optional, and won't be compiled in
   if not present, there are following problems to be fixed.
-  - mediatomb server still looks for a sqlite3.db file.
+  - mediatomb server still looks for the sqlite3.db file.
   - tomb-install depends on sqlite3 and won't work if it is not installed.
-  This way, sqlite3 is in fact NOT optional yet.
+  Hence sqlite3 is in fact NOT optional yet :)
 
+- file extensions in extension-mimetype mappings are case sensitive.
+  
 - When directories are added recursively all subdirectories traversed
   are always created in the PC Directory, regardless if any files from
   those directories are taken to the database. This produces A LOT of

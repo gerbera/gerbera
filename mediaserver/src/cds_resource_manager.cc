@@ -54,7 +54,8 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
     Ref<Dictionary> dict(new Dictionary());
     dict->put(URL_OBJECT_ID, item->getID());
 
-    String urlBase = server->getVirtualURL() + DIR_SEPARATOR + CONTENT_MEDIA_HANDLER + URL_REQUEST_SEPARATOR + dict->encode();
+    String urlBase = server->getVirtualURL() + DIR_SEPARATOR +
+            CONTENT_MEDIA_HANDLER + URL_REQUEST_SEPARATOR + dict->encode();
 
     res = Ref<Element> (new Element("res"));
     String mimeType = item->getMimeType();
@@ -71,6 +72,20 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         res->setText(urlBase);
     }
     element->appendChild(res);
+
+    /// \todo JIN, For you!!!
+if (false)
+    {
+    int resCount = item->getResourceCount();
+    for (int i = 0; i < resCount; i++)
+    {
+        Ref<Dictionary> resource = item->getResource(i);
+        // do something with resource
+    }
+ }
+    
+
+
     
 /*    // main resource
     if (item->getMimeType() == "image/jpeg")

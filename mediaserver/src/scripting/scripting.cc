@@ -166,7 +166,7 @@ static Ref<CdsObject> jsObject2cdsObject(JSContext *cx, JSObject *js)
     JSObject *js_meta = js_get_object_property(cx, js, "meta");
     if (js_meta)
     {
-        // NOTE: only metadata enumerated in MT_KEYS will be taken
+        /// \todo: only metadata enumerated in MT_KEYS is taken
         for (int i = 0; i < M_MAX; i++)
         {
             val = js_get_property(cx, js_meta, MT_KEYS[i].upnp);
@@ -241,17 +241,35 @@ static void cdsObject2jsObject(JSContext *cx, Ref<CdsObject> obj, JSObject *js)
     js_set_int_property(cx, js, "restricted", i);
    
     // setting metadata
-	JSObject *meta_js = JS_NewObject(cx, NULL, NULL, js);
-    Ref<Dictionary> meta = obj->getMetadata();
-    Ref<Array<DictionaryElement> > elements = meta->getElements();
-    int len = elements->size();
-    for (int i = 0; i < len; i++)
     {
-        Ref<DictionaryElement> el = elements->get(i);
-        js_set_property(cx, meta_js, el->getKey().c_str(), el->getValue().c_str());
+    	JSObject *meta_js = JS_NewObject(cx, NULL, NULL, js);
+        Ref<Dictionary> meta = obj->getMetadata();
+        Ref<Array<DictionaryElement> > elements = meta->getElements();
+        int len = elements->size();
+        for (int i = 0; i < len; i++)
+        {
+            Ref<DictionaryElement> el = elements->get(i);
+            js_set_property(cx, meta_js, el->getKey().c_str(), el->getValue().c_str());
+        }
+    	js_set_object_property(cx, js, "meta", meta_js);
     }
-	js_set_object_property(cx, js, "meta", meta_js);
 
+    // setting auxdata
+    {
+    	JSObject *aux_js = JS_NewObject(cx, NULL, NULL, js);
+        Ref<Dictionary> aux = obj->getAuxData();
+        Ref<Array<DictionaryElement> > elements = aux->getElements();
+        int len = elements->size();
+        for (int i = 0; i < len; i++)
+        {
+            Ref<DictionaryElement> el = elements->get(i);
+            js_set_property(cx, aux_js, el->getKey().c_str(), el->getValue().c_str());
+        }
+    	js_set_object_property(cx, js, "aux", aux_js);
+    }
+
+    /// \todo add resources
+    
     // CdsItem
     if (IS_CDS_ITEM(objectType))
     {
