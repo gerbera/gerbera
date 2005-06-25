@@ -3,6 +3,8 @@ noinst_LIBRARIES = libmetadata.a
 libmetadata_a_SOURCES = \
     exiv2_handler.h \
     exiv2_handler.cc \
+    extractor_handler.h \
+    extractor_handler.cc \
     id3_handler.h \
     id3_handler.cc
 
