@@ -71,21 +71,30 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
     { 
         res->setText(urlBase);
     }
-    element->appendChild(res);
 
     /// \todo JIN, For you!!!
-if (false)
-    {
+    
     int resCount = item->getResourceCount();
+    log_debug(("RESOURCE COUNT %d\n", resCount));
+
     for (int i = 0; i < resCount; i++)
     {
         Ref<Dictionary> resource = item->getResource(i);
-        // do something with resource
+
+        Ref<Array<DictionaryElement> > elements = resource->getElements();
+        int len = elements->size();
+
+        String key;
+
+        for (int i = 0; i < len; i++)
+        {
+            Ref<DictionaryElement> el = elements->get(i);
+            key = el->getKey();
+            res->addAttribute(key, el->getValue());
+        }
     }
- }
-    
 
-
+    element->appendChild(res);
     
 /*    // main resource
     if (item->getMimeType() == "image/jpeg")
