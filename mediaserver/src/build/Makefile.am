@@ -9,5 +9,5 @@ mediatomb_SOURCES =
 
 mediatomb_LDADD = \
     libmediatomb.a \
-    -lupnp -lixml -lthreadutil -lz -lextractor
+    -lupnp -lixml -lthreadutil -lz
 

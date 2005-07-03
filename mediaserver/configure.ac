@@ -65,7 +65,7 @@ meaning ensure, disable and autodetect respectively.
 If the corresponding --enable/disable option is not given for a particular
 feature autodetect is assumed.
 
-  --enable-sqlite3     sqlite3 support],
+  --enable-sqlite3         sqlite3 support],
   [
      SQLITE3_EN=$enableval 
      if test "x$enableval" = xno; then
@@ -106,7 +106,7 @@ fi
 
 MYSQL_OK=yes
 AC_ARG_ENABLE(mysql,
-  [  --enable-mysql       mysql support],
+  [  --enable-mysql           mysql support],
   [
      MYSQL_EN=$enableval 
      if test "x$enableval" = xno; then
@@ -167,7 +167,7 @@ fi
 
 JS_OK=yes
 AC_ARG_ENABLE(javascript,
-  [  --enable-javascript  javascript support],
+  [  --enable-javascript      javascript support],
   [
      JS_EN=$enableval 
      if test "x$enableval" = xno; then
@@ -207,7 +207,7 @@ fi
 MAGIC_OK=yes
 
 AC_ARG_ENABLE(libmagic,
-  [  --enable-libmagic    libmagic support],
+  [  --enable-libmagic        libmagic support],
   [
      MAGIC_EN=$enableval 
      if test "x$enableval" = xno; then
@@ -239,7 +239,7 @@ fi
 
 ID3_OK=yes
 AC_ARG_ENABLE(libid3,
-  [  --enable-libid3      libid3 support],
+  [  --enable-libid3          libid3 support],
   [
      ID3_EN=$enableval 
      if test "x$enableval" = xno; then
@@ -274,7 +274,7 @@ fi
 
 EXIV2_OK=yes
 AC_ARG_ENABLE(libexiv2,
-  [  --enable-libexiv2    libexiv2 support],
+  [  --enable-libexiv2        libexiv2 support],
   [
      EXIV2_EN=$enableval 
      if test "x$enableval" = xno; then
@@ -299,6 +299,35 @@ else
 fi
 
 
+######## extractor
+
+EXTRACTOR_OK=yes
+AC_ARG_ENABLE(libextractor,
+  [  --enable-libextractor    libextractor support],
+  [
+     EXTRACTOR_EN=$enableval 
+     if test "x$enableval" = xno; then
+        EXTRACTOR_OK=disabled
+     fi
+  ]
+)
+if test "x$EXTRACTOR_OK" = xyes; then
+    AC_CHECK_HEADER(extractor.h,
+        [],
+        [EXTRACTOR_OK=missing],
+        /* checking for extractor.h */
+    )
+fi
+if test "x$EXTRACTOR_OK" = xyes; then
+   LDFLAGS="$LDFLAGS -lextractor"
+   AC_DEFINE(HAVE_EXTRACTOR)
+else
+    if test "x$EXTRACTOR_EN" = xyes; then
+        AC_MSG_ERROR(unable to configure libextractor support)
+    fi
+fi
+
+
 ###############
 
 AC_OUTPUT
@@ -311,5 +340,6 @@ echo "  javascript   : $JS_OK"
 echo "  libmagic     : $MAGIC_OK"
 echo "  libid3       : $ID3_OK"
 echo "  libexiv2     : $EXIV2_OK"
+echo "  libextractor : $EXTRACTOR_OK"
 echo
 

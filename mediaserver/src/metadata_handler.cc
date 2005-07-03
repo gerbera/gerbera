@@ -33,8 +33,6 @@
 #include "metadata/id3_handler.h"
 #endif
 
-#define HAVE_EXTRACTOR 1
-
 #ifdef HAVE_EXTRACTOR
 #include "metadata/extractor_handler.h"
 #endif
