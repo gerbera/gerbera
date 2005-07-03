@@ -10,18 +10,7 @@ AC_CONFIG_FILES([
     scripts/js/Makefile
 
     src/Makefile
-    src/md5/Makefile
-    src/metadata/Makefile
-    src/mxml/Makefile
-    src/storage/Makefile
-    src/storage/fs/Makefile
-    src/storage/mysql/Makefile
-    src/storage/sqlite3/Makefile
-    src/scripting/Makefile
-    src/uuid/Makefile
-    src/web/Makefile
-    src/zmm/Makefile
-    src/zmmf/Makefile
+    src/build/Makefile
     
     web/Makefile
     web/icons/Makefile

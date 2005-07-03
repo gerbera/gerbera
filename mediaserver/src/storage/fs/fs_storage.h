@@ -21,8 +21,10 @@
 #ifndef __FS_STORAGE_H__
 #define __FS_STORAGE_H__
 
+#include "common.h"
 #include "storage.h"
 #include "dictionary.h"
+#include "rexp.h"
 
 class FsStorage : public Storage
 {
@@ -39,6 +41,9 @@ public:
     virtual zmm::Ref<zmm::Array<zmm::StringBase> > getMimeTypes();
     virtual zmm::Ref<CdsObject> findObjectByTitle(zmm::String title, zmm::String parentID);
 
+    bool fileAllowed(zmm::String path);
+protected:
+    zmm::Ref<zmm::Array<RExp> > include_rules;
 };
 
 #endif // __FS_STORAGE_H__

@@ -21,10 +21,13 @@
 #include <dirent.h>
 
 #include "common.h"
+#include "config_manager.h"
 #include "content_manager.h"
 #include "fs_storage.h"
+#include "mxml/mxml.h"
 
 using namespace zmm;
+using namespace mxml;
 
 FsStorage::FsStorage() : Storage()
 {
@@ -101,6 +104,9 @@ Ref<Array<CdsObject> > FsStorage::browse(Ref<BrowseParam> param)
 
     Ref<CdsObject> obj = cm->createObjectFromFile(path, false);
 
+    if (! fileAllowed(path))
+        throw Exception("this file is blocked from viewing from filesystem browser");
+
     if (param->getFlag() == BROWSE_DIRECT_CHILDREN &&
        IS_CDS_CONTAINER(obj->getObjectType()))
     {
@@ -133,28 +139,31 @@ Ref<Array<CdsObject> > FsStorage::browse(Ref<BrowseParam> param)
                 childPath = path + name;
             else
                 childPath = path + "/" + name;
-            try
+            if (fileAllowed(childPath))
             {
-                Ref<CdsObject> childObj = cm->createObjectFromFile(childPath, false);
-                if (path == "/")
-                    childObj->setParentID("0");
-                else
-                    childObj->setParentID(hex_encode(path.c_str(), path.length()));
+                try
+                {
+                    Ref<CdsObject> childObj = cm->createObjectFromFile(childPath, false);
+                    if (path == "/")
+                        childObj->setParentID("0");
+                    else
+                        childObj->setParentID(hex_encode(path.c_str(), path.length()));
 
-                childObj->setID(hex_encode(childPath.c_str(), childPath.length()));
-                int objectType = childObj->getObjectType();
-                if (IS_CDS_CONTAINER(objectType))
-                {
-                    containers->append(childObj);
+                    childObj->setID(hex_encode(childPath.c_str(), childPath.length()));
+                    int objectType = childObj->getObjectType();
+                    if (IS_CDS_CONTAINER(objectType))
+                    {
+                        containers->append(childObj);
+                    }
+                    else if(IS_CDS_ITEM(objectType))
+                    {
+                        items->append(childObj);
+                    }
                 }
-                else if(IS_CDS_ITEM(objectType))
+                catch(Exception e)
                 {
-                    items->append(childObj);
+                    log_info(("FsStorage: skipping %s : %s\n", childPath.c_str(), e.getMessage().c_str()));
                 }
-            }
-            catch(Exception e)
-            {
-                log_info(("FsStorage: skipping %s : %s\n", childPath.c_str(), e.getMessage().c_str()));
             }
         }
         closedir(dir);
@@ -189,18 +198,16 @@ Ref<Array<CdsObject> > FsStorage::browse(Ref<BrowseParam> param)
         return items;
     }
 
-
-	quicksort((COMPARABLE *)containers->getObjectArray(), containers->size(),
-			  CdsObjectTitleComparator);
-	quicksort((COMPARABLE *)items->getObjectArray(), items->size(),
-			  CdsObjectTitleComparator);
-
-    Ref<Array<CdsObject> > arr(new Array<CdsObject>(10));
+    quicksort((COMPARABLE *)containers->getObjectArray(), containers->size(),
+              CdsObjectTitleComparator);
+    quicksort((COMPARABLE *)items->getObjectArray(), items->size(),
+              CdsObjectTitleComparator);
 
     // merging containers and items into single array
     int start = param->getStartingIndex();
     int end = start + count;
     int sum_size = containers->size() + items->size();
+    Ref<Array<CdsObject> > arr(new Array<CdsObject>(sum_size));
     int i;
     for (i = start; i < end; i++)
     {
@@ -230,8 +237,41 @@ Ref<Array<CdsObject> > FsStorage::browse(Ref<BrowseParam> param)
     return arr;
 }
 
+bool FsStorage::fileAllowed(String path)
+{
+    for (int i = 0; i < include_rules->size(); i++)
+    {
+        Ref<RExp> rule = include_rules->get(i);
+        if (rule->matches(path))
+            return true;
+    }
+    return false;
+}
+
 void FsStorage::init()
 {
+    include_rules = Ref<Array<RExp> >(new Array<RExp>());
+    Ref<ConfigManager> cm = ConfigManager::getInstance();
+    Ref<Element> rules = cm->getElement("filter");
+    if (rules == nil)
+        return;
+    for (int i = 0; i < rules->childCount(); i++)
+    {
+        Ref<Element> rule = rules->getChild(i);
+        String pat = rule->getAttribute("pattern");
+        /// \todo make patterns from simple wildcards instead of
+        /// taking the pattern attribute directly as regexp
+        Ref<RExp> pattern(new RExp());
+        try
+        {
+            pattern->compile(pat);
+            include_rules->append(pattern);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
 }
 
 void FsStorage::addObject(Ref<CdsObject> obj)
