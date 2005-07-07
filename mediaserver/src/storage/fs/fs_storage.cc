@@ -239,6 +239,8 @@ Ref<Array<CdsObject> > FsStorage::browse(Ref<BrowseParam> param)
 
 bool FsStorage::fileAllowed(String path)
 {
+    return true;
+    /*
     for (int i = 0; i < include_rules->size(); i++)
     {
         Ref<RExp> rule = include_rules->get(i);
@@ -246,6 +248,7 @@ bool FsStorage::fileAllowed(String path)
             return true;
     }
     return false;
+    */
 }
 
 void FsStorage::init()
