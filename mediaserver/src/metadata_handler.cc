@@ -37,6 +37,8 @@
 #include "metadata/extractor_handler.h"
 #endif
 
+#include "metadata/libexif_handler.h"
+
 using namespace zmm;
 
 mt_key MT_KEYS[] = {
@@ -83,19 +85,30 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
             break;
         }
 #endif
+
 #ifdef HAVE_EXIV2
-        if (mimetype == "image/jpeg")
+/*        if (mimetype == "image/jpeg")
         {
+            log_info(("Starting exiv2\n"));
             handler = Ref<MetadataHandler>(new Exiv2Handler());
             break;
-        }
+        } */
 #endif
+        
 #ifdef HAVE_EXTRACTOR
+        /*
         {
             handler = Ref<MetadataHandler>(new ExtractorHandler());
             break;
         }
+        */
 #endif
+        if (mimetype == "image/jpeg")
+        {
+            log_info(("Staring libexif\n"));
+            handler = Ref<MetadataHandler>(new LibExifHandler());
+            break;
+        }
 
     }
     while (false);
