@@ -32,5 +32,11 @@
             </mimetype-upnpclass>
         </mappings>
     </import>
+    <libexif>
+        <auxdata>
+            <add tag="EXIF_TAG_MODEL"/>
+            <add tag="EXIF_TAG_DATE_TIME"/>
+        </auxdata>
+    </libexif>
 </config>
 
