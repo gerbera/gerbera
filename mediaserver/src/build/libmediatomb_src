@@ -30,6 +30,7 @@ libmediatomb_a_SOURCES = \
 ../main.cc \
 ../mem_io_handler.cc \
 ../metadata/exiv2_handler.cc \
+../metadata/libexif_handler.cc \
 ../metadata/id3_handler.cc \
 ../metadata/extractor_handler.cc \
 ../process.cc \
