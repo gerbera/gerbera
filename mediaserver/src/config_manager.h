@@ -92,7 +92,22 @@ public:
     /// This function will create a dictionary with the following
     /// key:value paris: "1":"2", "3":"4"
     zmm::Ref<Dictionary> createDictionaryFromNodeset(zmm::Ref<mxml::Element> element, zmm::String nodeName, zmm::String keyAttr, zmm::String valAttr);
-    
+  
+    /// \brief Creates an array of strings from an XML nodeset.
+    /// \param element starting element of the nodeset.
+    /// \param nodeName name of each node in the set
+    /// \param attrName name of the attribute, the value of which shouldbe extracted
+    ///
+    /// Similar to \fn createDictionaryFromNodeset() this one extracts
+    /// data from the following XML:
+    /// <some-section>
+    ///     <tag attr="data"/>
+    ///     <tag attr="otherdata"/>
+    /// <some-section>
+    ///
+    /// This function will create an array like that: ["data", "otherdata"]
+    zmm::Ref<zmm::Array<zmm::StringBase> > createArrayFromNodeset(zmm::Ref<mxml::Element> element, zmm::String nodeName, zmm::String attrName); 
+
     // call this function to initialize global ConfigManager object
     static void init(zmm::String filename, zmm::String userhome);
 

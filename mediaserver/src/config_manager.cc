@@ -206,6 +206,14 @@ void ConfigManager::validate()
     {
         Ref<Dictionary> dict = createDictionaryFromNodeset(el, "map", "from", "to");
     }
+   
+/// \todo #ifdef HAVE_LIBEXIF    
+
+    el = getElement("/import/libexif/auxdata");
+    if (el != nil)
+    {
+        Ref<Array<StringBase> > arr = createArrayFromNodeset(el, "add", "tag");
+    }
     
     Storage::getInstance(PRIMARY_STORAGE);
     Storage::getInstance(FILESYSTEM_STORAGE);
@@ -446,3 +454,22 @@ Ref<Dictionary> ConfigManager::createDictionaryFromNodeset(Ref<Element> element,
     return dict;
 }
 
+Ref<Array<StringBase> > ConfigManager::createArrayFromNodeset(Ref<mxml::Element> element, String nodeName, String attrName)
+{
+    String attrValue;
+    Ref<Array<StringBase> > arr(new Array<StringBase>());
+
+    for (int i = 0; i < element->childCount(); i++)
+    {
+        Ref<Element> child = element->getChild(i);
+        if (child->getName() == nodeName)
+        {
+            attrValue = child->getAttribute(attrName);
+
+            if (string_ok(attrValue))
+                arr->append(attrValue);
+        }
+    }
+
+    return arr;
+}
