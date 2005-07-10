@@ -23,11 +23,13 @@
 /// \file libexif_handler.cc
 /// \brief Implementeation of the LibExifHandler class.
 
+/*
 #include <libexif/exif-data.h>
 #include <libexif/exif-content.h>
+*/
 
 #include "libexif_handler.h"
-#include "string_converter.h"
+//#include "string_converter.h"
 #include "tools.h"
 #include "config_manager.h"
 
@@ -247,10 +249,11 @@ static int getTagFromString(String tag)
     if (tag == "EXIF_TAG_IMAGE_UNIQUE_ID") 
         return  EXIF_TAG_IMAGE_UNIQUE_ID;
 
+    log_warning(("Ignoring unknown libexif tag: %s\n", tag.c_str()));
     return -1;
 }
 
-static void process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<StringConverter> sc, Ref<Array<StringBase> > auxtags)
+void LibExifHandler::process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<StringConverter> sc, Ref<Array<StringBase> > auxtags)
 {
     ExifEntry *e;
     unsigned int i;
@@ -260,6 +263,8 @@ static void process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<StringConv
     for (i = 0; i < content->count; i++) {
         e = content->entries[i];
 
+//        log_info(("Processing entry: %d\n", i));
+        
         switch (e->tag)
         {
             case EXIF_TAG_DATE_TIME:
@@ -282,6 +287,24 @@ static void process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<StringConv
 
                     item->setMetadata(String(MT_KEYS[M_DESCRIPTION].upnp), value);
                     log_info(("Adding dc:description: %s\n", value.c_str()));
+                }
+                break;
+
+            case EXIF_TAG_PIXEL_X_DIMENSION:
+                value = String((char *)exif_entry_get_value(e));
+                if (string_ok(value))
+                {
+                    value = sc->convert(value);
+                    imageX = value;
+                }
+                break;
+
+            case EXIF_TAG_PIXEL_Y_DIMENSION:
+                value = String((char *)exif_entry_get_value(e));
+                if (string_ok(value))
+                {
+                    value = sc->convert(value);
+                    imageY = value;
                 }
                 break;
         }
@@ -319,11 +342,11 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
 
     if (!ed)
     {
-        log_info(("no exif data for %s\n", item->getLocation().c_str()));
+        log_debug(("no exif data for %s\n", item->getLocation().c_str()));
         return;
     }
 
-    log_info(("\n\nPROCESSING FILE %s\n", item->getLocation().c_str()));
+    log_debug(("PROCESSING FILE %s\n", item->getLocation().c_str()));
   
     Ref<ConfigManager> cm = ConfigManager::getInstance();
     Ref<Element> e = cm->getElement("/import/libexif/auxdata");
@@ -332,8 +355,15 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
     
     for (int i = 0; i < EXIF_IFD_COUNT; i++)
     {
+//        log_info(("Processing count %d\n", i));
         if (ed->ifd[i])
             process_ifd (ed->ifd[i], item, sc, aux);
+    }
+
+    // we got the image resolution so we can add our resource
+    if (string_ok(imageX) && string_ok(imageY))
+    {
+        item->setResource(0, String(RES_KEYS[R_RESOLUTION].upnp), imageX + "x" + imageY);
     }
 /*
     // now make sure we have a nice comment
@@ -367,83 +397,6 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
 
 
     exif_data_unref(ed);
-/*
-    // first retrieve jpeg comment
-    String comment = (char *)image->comment().c_str();
-
-    if (exifData.empty())
-    {
-        // no exiv2 record found in image
-        return;
-    }
-  
-    // get date/time
-    Exiv2::ExifData::const_iterator md = exifData.findKey(Exiv2::ExifKey("Exif.Photo.DateTimeOriginal"));
-    if (md != exifData.end()) 
-    {
-        // \TODO convert date to ISO 8601 as required in the UPnP spec
-        item->setMetadata(String(MT_KEYS[M_DATE].upnp), sc->convert(String((char *)md->toString().c_str())));
-    }
-
-    // if there was no jpeg coment, look if there is an exiv2 comment
-    // should we override the normal jpeg comment, if there is an exiv2 one?
-    if (!string_ok(comment))
-    {
-        md = exifData.findKey(Exiv2::ExifKey("Exif.Photo.UserComment"));
-        if (md != exifData.end())
-            comment = (char *)md->toString().c_str();
-    }
-    
-    // if the image has no comment, compose something nice out of the exiv information
-    if (!string_ok(comment))
-    {
-        String cam_model;
-        String flash;
-        String focal_length;
-
-        md = exifData.findKey(Exiv2::ExifKey("Exif.Image.Model"));
-        if (md !=  exifData.end())
-            cam_model = (char *)md->toString().c_str();
-
-        md = exifData.findKey(Exiv2::ExifKey("Exif.Photo.Flash"));
-        if (md !=  exifData.end())
-            flash = (char *)md->toString().c_str();
-
-        md = exifData.findKey(Exiv2::ExifKey("Exif.Photo.FocalLength"));
-        if (md !=  exifData.end())
-        {
-            focal_length = (char *)md->toString().c_str();
-            md = exifData.findKey(Exiv2::ExifKey("Exif.Photo.FocalLengthIn35mmFilm"));
-            if (md !=  exifData.end())
-            {
-                focal_length = focal_length + " (35 mm equivalent: " + (char *)md->toString().c_str() + ")";
-            }
-        }
-
-
-        if (string_ok(cam_model))
-            comment = String("Taken with ") + cam_model;
-
-        if (string_ok(flash))
-        {
-            if (string_ok(comment))
-                comment = comment + ", Flash setting:" + flash;
-            else
-                comment = String("Flash setting: ") + flash;
-        }
-
-        if (string_ok(focal_length))
-        {
-            if (string_ok(comment))
-                comment = comment + ", Focal length: " + focal_length;
-            else
-                comment = String("Focal length: ") + focal_length;
-        }
-    }
-
-    if (string_ok(comment))
-        item->setMetadata(String(MT_KEYS[M_DESCRIPTION].upnp), sc->convert(comment));
-*/
 }
 
 Ref<IOHandler> LibExifHandler::serveContent(Ref<CdsItem> item, int resNum)
