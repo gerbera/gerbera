@@ -61,6 +61,10 @@ zmm::Ref<mxml::Element> UpnpXML_CreateEventPropertySet();
 /// Some elements are statically defined in common.h, others are loaded
 /// from the config with the help of the ConfigManager.
 zmm::Ref<mxml::Element> UpnpXML_RenderDeviceDescription();
-    
+
+/// \brief Renders a resource tag (part of DIDL-Lite XML)
+/// \param URL download location of the item (will be child element of the <res> tag)
+/// \param attributes Dictionary containing the <res> tag attributes (like resolution, etc.)
+zmm::Ref<mxml::Element> UpnpXML_DIDLRenderResource(zmm::String URL, zmm::Ref<Dictionary> attributes);
 #endif // __UPNP_XML_H__
 

@@ -205,3 +205,25 @@ Ref<Element> UpnpXML_RenderDeviceDescription()
 
     return root;
 }
+
+Ref<Element> UpnpXML_DIDLRenderResource(String URL, Ref<Dictionary> attributes)
+{
+    Ref<Element> res(new Element("res"));
+
+    res->setText(URL);
+
+    Ref<Array<DictionaryElement> > elements = attributes->getElements();
+    int len = elements->size();
+
+    String attribute;
+
+    for (int i = 0; i < len; i++)
+    {
+        Ref<DictionaryElement> el = elements->get(i);
+        attribute = el->getKey();
+        res->addAttribute(attribute, el->getValue());
+    }
+
+    return res;
+}
+
