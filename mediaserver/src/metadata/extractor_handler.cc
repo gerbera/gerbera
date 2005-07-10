@@ -19,7 +19,7 @@
  */
 
 /// \file extractor_handler.cc
-/// \brief Implementeation of the Id3Handler class.
+/// \brief Implementeation of the ExtractorHandler class.
 
 #ifdef HAVE_EXTRACTOR
 
@@ -35,11 +35,12 @@ ExtractorHandler::ExtractorHandler() : MetadataHandler()
 {
 }
        
-static void addField(metadata_fields_t field, EXTRACTOR_KeywordList *keywords, Ref<CdsItem> item)
+static void addMetaField(metadata_fields_t field, EXTRACTOR_KeywordList *keywords, Ref<CdsItem> item)
 {
     String value;
     const char *temp = NULL;
-  
+ 
+    /// \todo check if UTF-8 conversion is needed, may already be in UTF-8
     Ref<StringConverter> sc = StringConverter::m2i();
     int genre;
     
@@ -80,14 +81,51 @@ static void addField(metadata_fields_t field, EXTRACTOR_KeywordList *keywords, R
     }
 }
 
+static void addResourceField(resource_attributes_t attr, EXTRACTOR_KeywordList *keywords, Ref<CdsItem> item)
+{
+    String value;
+    const char *temp = NULL;
+  
+    Ref<StringConverter> sc = StringConverter::m2i();
+    int genre;
+    
+    switch (attr)
+    {
+        case R_RESOLUTION:
+            temp = EXTRACTOR_extractLast(EXTRACTOR_SIZE, keywords);
+            break;
+/*        case R_SIZE:
+            temp = EXTRACTOR_extractLast(EXTRACTOR_SIZE, keywords);
+            break;
+*/
+        default:
+            return;
+    }
+
+    if (temp != NULL)
+        value = (char *)temp;
+
+    if (string_ok(value))
+    {
+//        item->setMetadata(String(MT_KEYS[field].upnp), sc->convert(value));
+        item->setResource(0, String(RES_KEYS[attr].upnp), value);
+//        log_info(("Got resource: %d, %s\n", attr, sc->convert(value).c_str()));
+    }
+}
+
 void ExtractorHandler::fillMetadata(Ref<CdsItem> item)
 {
     EXTRACTOR_ExtractorList *extractors = EXTRACTOR_loadDefaultLibraries();
     EXTRACTOR_KeywordList *keywords = EXTRACTOR_getKeywords(extractors, item->getLocation().c_str());
-//    EXTRACTOR_printKeywords(stdout, keywords);
 
+    //EXTRACTOR_printKeywords(stdout, keywords);
+
+    /// \todo loop through available keywords, not through our enum
     for (int i = 0; i < M_MAX; i++)
-        addField((metadata_fields_t) i, keywords, item);
+        addMetaField((metadata_fields_t) i, keywords, item);
+    
+    for (int i = 0; i < R_MAX; i++)
+        addResourceField((resource_attributes_t) i, keywords, item);
     
     EXTRACTOR_freeKeywords(keywords);
     EXTRACTOR_removeAll(extractors);
