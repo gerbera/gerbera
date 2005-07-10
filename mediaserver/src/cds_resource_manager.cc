@@ -43,86 +43,45 @@ Ref<CdsResourceManager> CdsResourceManager::getInstance()
     }
     return instance;
 }
-    
+
+static void addResource(Ref<Dictionary> resource, Ref<Element> element)
+{
+
+}
+
 void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
 {
     Ref<Element> res;
 
+    String urlBase;
     String prot("http-get:*:");
     /// \todo resource options must be read from configuration files
 
     Ref<Dictionary> dict(new Dictionary());
     dict->put(URL_OBJECT_ID, item->getID());
 
-    String urlBase = server->getVirtualURL() + DIR_SEPARATOR +
-            CONTENT_MEDIA_HANDLER + URL_REQUEST_SEPARATOR + dict->encode();
-
-    res = Ref<Element> (new Element("res"));
-    String mimeType = item->getMimeType();
-    if (!string_ok(mimeType)) mimeType = DEFAULT_MIMETYPE;
-    res->addAttribute("protocolInfo", prot + mimeType + ":*");
-
+    /// \todo move this down into the "for" loop and create different urls for each resource once the io handlers are ready
     int objectType = item->getObjectType();
     if (IS_CDS_ITEM_EXTERNAL_URL(objectType))
     {
-        res->setText(item->getLocation());
+        urlBase = item->getLocation();
     }
     else
     { 
-        res->setText(urlBase);
+        urlBase = server->getVirtualURL() + DIR_SEPARATOR +
+            CONTENT_MEDIA_HANDLER + URL_REQUEST_SEPARATOR + dict->encode();
     }
 
-    /// \todo JIN, For you!!!
-    
     int resCount = item->getResourceCount();
-    log_debug(("RESOURCE COUNT %d\n", resCount));
-
     for (int i = 0; i < resCount; i++)
     {
-        Ref<Dictionary> resource = item->getResource(i);
+        /// \todo what if the resource has a different mimetype than the item??
+        String mimeType = item->getMimeType();
+        if (!string_ok(mimeType)) mimeType = DEFAULT_MIMETYPE;
 
-        Ref<Array<DictionaryElement> > elements = resource->getElements();
-        int len = elements->size();
-
-        String key;
-
-        for (int i = 0; i < len; i++)
-        {
-            Ref<DictionaryElement> el = elements->get(i);
-            key = el->getKey();
-            res->addAttribute(key, el->getValue());
-        }
+        Ref<Dictionary> res_attrs = item->getResource(i);
+        res_attrs->put("protocolInfo", prot + mimeType + ":*");
+        element->appendChild(UpnpXML_DIDLRenderResource(urlBase, res_attrs));
     }
-
-    element->appendChild(res);
-    
-/*    // main resource
-    if (item->getMimeType() == "image/jpeg")
-    {
-        res = Ref<Element> (new Element("res"));
-        res->addAttribute("protocolInfo", prot + item->getMimeType() + ":*");
-//        res->addAttribute("resolution", "720x576");
-        res->setText(urlBase);
-        element->appendChild(res);
-    }
-    else
-    {  
-        res = Ref<Element> (new Element("res"));
-        res->addAttribute("protocolInfo", prot + item->getMimeType() + ":*");
-        res->setText(urlBase);
-        element->appendChild(res);
-    }
-
-    // aux resources
-    if (item->getMimeType() == "image/jpeg")
-    {
-        res = Ref<Element> (new Element("res"));
-        res->addAttribute("protocolInfo", prot + item->getMimeType() + ":*");
-        res->addAttribute("resolution", "138x104");
-        res->setText(urlBase + '?' + "138x104");
-        element->appendChild(res);
-    }
-*/
-
 }
 
