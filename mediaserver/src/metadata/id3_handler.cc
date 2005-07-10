@@ -57,6 +57,8 @@ static void addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsItem> item
             break;
         case M_DATE:
             ID3_retval = ID3_GetYear(tag);
+            value = String(ID3_retval);
+            value = value + "-01-01";
             break;
         case M_GENRE:
             genre = ID3_GetGenreNum(tag);
@@ -70,7 +72,7 @@ static void addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsItem> item
             return;
     }
 
-    if (field != M_GENRE)
+    if ((field != M_GENRE) && (field != M_DATE))
         value = String(ID3_retval);
     
     if (ID3_retval)
@@ -86,12 +88,50 @@ static void addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsItem> item
 void Id3Handler::fillMetadata(Ref<CdsItem> item)
 {
     ID3_Tag tag;
-
+    const Mp3_Headerinfo* header;
+    
     tag.Link(item->getLocation().c_str()); // the location has already been checked by the setMetadata function
 
     for (int i = 0; i < M_MAX; i++)
         addID3Field((metadata_fields_t) i, &tag, item);
 
+    header = tag.GetMp3HeaderInfo();
+    if (header) 
+        log_debug(("Got mp3 header\n"));
+    else
+        log_debug(("Could not get mp3 header\n"));
+    
+    if (header)
+    {
+        int temp;
+
+        // note: UPnP requres bytes/second
+        if ((header->vbr_bitrate) > 0)
+        {
+            temp = (header->vbr_bitrate) / 8; 
+        }
+        else
+        {
+            temp = (header->bitrate) / 8;
+        }
+
+        if (temp > 0)
+        {
+            item->setResource(0, String(RES_KEYS[R_BITRATE].upnp), String("") + temp);
+        }
+
+        if ((header->time) > 0)
+        {
+            temp = header->time;
+            log_debug(("mp3 duration: %d\n", temp));
+            /// \todo recalculate the value we get here (I assume in seconds) to hh:mm:ss format
+            /// and add the resource
+        }
+
+
+                
+    }
+    
     tag.Clear();
 }
 
