@@ -73,6 +73,7 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
     string_ok_ex(location);
     check_path_ex(location);
 
+    item->addResource();
     String mimetype = item->getMimeType();
 
     Ref<MetadataHandler> handler;
