@@ -1,4 +1,4 @@
-/*  metadata_reader.cc - this file is part of MediaTomb.
+/*  libexif_handler.cc - this file is part of MediaTomb.
 
     Copyright (C) 2005 Gena Batyan <bgeradz@deadlock.dhs.org>,
     Sergey Bostandzhyan <jin@deadlock.dhs.org>
@@ -18,18 +18,19 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-//#ifdef HAVE_LIBEXIF
-
 /// \file libexif_handler.cc
 /// \brief Implementeation of the LibExifHandler class.
 
-/*
-#include <libexif/exif-data.h>
-#include <libexif/exif-content.h>
-*/
+//#ifdef HAVE_LIBEXIF
+
+#ifdef HAVE_EXTRACTOR
+
+#include <extractor.h>
+
+#endif
+
 
 #include "libexif_handler.h"
-//#include "string_converter.h"
 #include "tools.h"
 #include "config_manager.h"
 
@@ -275,7 +276,6 @@ void LibExifHandler::process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<S
                     //value = split_string(value, ' ');
                     // \TODO convert date to ISO 8601 as required in the UPnP spec
                     item->setMetadata(String(MT_KEYS[M_DATE].upnp), value);
-                    log_info(("Adding dc:date: %s Name: %s\n", value.c_str(), exif_tag_get_name(e->tag)));
                 }
                 break;
 
@@ -286,7 +286,6 @@ void LibExifHandler::process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<S
                     value = sc->convert(value);
 
                     item->setMetadata(String(MT_KEYS[M_DESCRIPTION].upnp), value);
-                    log_info(("Adding dc:description: %s\n", value.c_str()));
                 }
                 break;
 
@@ -309,20 +308,24 @@ void LibExifHandler::process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<S
                 break;
         }
 
-        for (int j = 0; j < auxtags->size(); j++)
+        // if there are any auxilary tags that the user wants - add them
+        if (auxtags != nil)
         {
-
-            tmp = auxtags->get(j);
-            if (string_ok(tmp))
+            for (int j = 0; j < auxtags->size(); j++)
             {
-                if (e->tag == getTagFromString(tmp))
+
+                tmp = auxtags->get(j);
+                if (string_ok(tmp))
                 {
-                    value = String((char *)exif_entry_get_value(e));
-                    if (string_ok(value))
+                    if (e->tag == getTagFromString(tmp))
                     {
-                        value = sc->convert(value);
-                        item->setAuxData(tmp, value);
-                        log_info(("Adding tag: %s with value %s\n", tmp.c_str(), value.c_str()));
+                        value = String((char *)exif_entry_get_value(e));
+                        if (string_ok(value))
+                        {
+                            value = sc->convert(value);
+                            item->setAuxData(tmp, value);
+//                            log_debug(("Adding tag: %s with value %s\n", tmp.c_str(), value.c_str()));
+                        }
                     }
                 }
             }
@@ -341,13 +344,8 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
     ed = exif_data_new_from_file(item->getLocation().c_str());
 
     if (!ed)
-    {
-        log_debug(("no exif data for %s\n", item->getLocation().c_str()));
         return;
-    }
 
-    log_debug(("PROCESSING FILE %s\n", item->getLocation().c_str()));
-  
     Ref<ConfigManager> cm = ConfigManager::getInstance();
     Ref<Element> e = cm->getElement("/import/libexif/auxdata");
     if (e != nil)
@@ -355,7 +353,6 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
     
     for (int i = 0; i < EXIF_IFD_COUNT; i++)
     {
-//        log_info(("Processing count %d\n", i));
         if (ed->ifd[i])
             process_ifd (ed->ifd[i], item, sc, aux);
     }
@@ -365,37 +362,48 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
     {
         item->setResource(0, String(RES_KEYS[R_RESOLUTION].upnp), imageX + "x" + imageY);
     }
-/*
-    // now make sure we have a nice comment
-    String comment = item->getMetadata(String(MT_KEYS[M_DESCRIPTION].upnp));
-    if (!string_ok(comment))
-    {
-        String model = item->getAuxData("A_CAMERA_MODEL");
-        String timestamp = item->getAuxData("A_TIMESTAMP");
-        String desc;
 
-        if (string_ok(model))
-        {
-            desc = String("Camera: ") + model;
-            if (string_ok(timestamp))
-                desc = desc + ", ";
-        }
-
-        log_info(("After modelprocessing desc: %s\n", desc.c_str()));
-        
-        if (string_ok(timestamp))
-            desc = desc + String("Date/Time: ") + timestamp;
-
-        item->setMetadata(String(MT_KEYS[M_DESCRIPTION].upnp), desc);
-        log_info(("Composed and added desc: %s\n", desc.c_str()));
-    }
-*/
+// we can only figure out information about the thumbnail if we have the
+// libextractor library
+#ifdef HAVE_EXTRACTOR    
     if (ed->size) 
     {
-        log_info (("EXIF data contains a thumbnail (%i bytes).\n", ed->size));
+        //log_info(("EXIF data contains a thumbnail (%i bytes).\n", ed->size));
+       
+        int fd;
+        char temp[] = "/tmp/.tombXXXXXX";
+
+        fd = mkstemp(temp);
+
+        String th_filename = temp;
+        if (fd != -1)
+        {
+            write (fd, ed->data, ed->size);
+            close(fd);
+
+            EXTRACTOR_ExtractorList *extractors = EXTRACTOR_loadDefaultLibraries();
+            EXTRACTOR_KeywordList *keywords = EXTRACTOR_getKeywords(extractors, th_filename.c_str());
+    
+
+            String th_mimetype = String((char *)EXTRACTOR_extractLast(EXTRACTOR_MIMETYPE, keywords));
+            String th_resolution = String((char *)EXTRACTOR_extractLast(EXTRACTOR_SIZE, keywords));
+
+            item->addResource();
+            
+            item->setResource(1, String(RES_KEYS[R_PROTOCOLINFO].upnp), renderProtocolInfo(th_mimetype));
+            item->setResource(1, String(RES_KEYS[R_RESOLUTION].upnp), th_resolution);
+
+            EXTRACTOR_freeKeywords(keywords);
+            EXTRACTOR_removeAll(extractors);
+
+            if (remove(th_filename.c_str()) == -1)
+                log_error(("Failed to remove temporary thumbnail file %s (%s)\n", th_filename.c_str(), strerror(errno))); 
+        }
+        else 
+            log_error(("Could not open %s for writing thumbnail: %s\n", th_filename.c_str(), strerror(errno)));
     }
-
-
+#endif
+    
     exif_data_unref(ed);
 }
 
