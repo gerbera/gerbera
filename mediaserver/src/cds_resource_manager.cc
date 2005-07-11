@@ -26,8 +26,6 @@
 using namespace zmm;
 using namespace mxml;
 
-#define DEFAULT_MIMETYPE "*";
-
 static Ref<CdsResourceManager> instance;
 
 CdsResourceManager::CdsResourceManager() : Object()
@@ -54,7 +52,6 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
     Ref<Element> res;
 
     String urlBase;
-    String prot("http-get:*:");
     /// \todo resource options must be read from configuration files
 
     Ref<Dictionary> dict(new Dictionary());
@@ -76,11 +73,15 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
     for (int i = 0; i < resCount; i++)
     {
         /// \todo what if the resource has a different mimetype than the item??
-        String mimeType = item->getMimeType();
-        if (!string_ok(mimeType)) mimeType = DEFAULT_MIMETYPE;
+/*        String mimeType = item->getMimeType();
+        if (!string_ok(mimeType)) mimeType = DEFAULT_MIMETYPE; */
 
         Ref<Dictionary> res_attrs = item->getResource(i);
-        res_attrs->put("protocolInfo", prot + mimeType + ":*");
+        /// \todo who will sync mimetype that is part of the protocl info and
+        /// that is lying in the resources with the information that is in the
+        /// resource tags?
+
+//        res_attrs->put("protocolInfo", prot + mimeType + ":*");
         element->appendChild(UpnpXML_DIDLRenderResource(urlBase, res_attrs));
     }
 }
