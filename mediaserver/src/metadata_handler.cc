@@ -73,12 +73,16 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
     string_ok_ex(location);
     check_path_ex(location);
 
-    item->addResource();
     String mimetype = item->getMimeType();
+
+    item->addResource();
+    item->setResource(0, String(RES_KEYS[R_PROTOCOLINFO].upnp), renderProtocolInfo(mimetype));
 
     Ref<MetadataHandler> handler;
     do
     {
+
+        /// \todo what about mappings here? what if audio/mpeg was remapped to some crap in the config file?
 #ifdef HAVE_ID3
         if (mimetype == "audio/mpeg")
         {
