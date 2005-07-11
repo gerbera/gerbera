@@ -58,7 +58,6 @@ bool string_ok(zmm::String str);
 /// Checks if str is nil or "" and throws an exception if that is the case.
 void string_ok_ex(zmm::String str);
 
-
 /// \brief Render HTML that is doing a redirect to the given ip, port and html page.
 /// \param ip IP address as string.
 /// \param port Port as string.
@@ -71,7 +70,6 @@ zmm::String http_redirect_to(zmm::String ip, zmm::String port, zmm::String page 
 /// \param len Length of the buffer.
 /// \return string of the data in hex representation.
 zmm::String hex_encode(void *data, int len);
-
 
 /// \brief Decodes hex encoded string.
 /// \param encoded hex-encoded string.
@@ -96,6 +94,7 @@ zmm::String url_unescape(zmm::String str);
 /// \return string containing the CSV list
 zmm::String mime_types_to_CSV(zmm::Ref<zmm::Array<zmm::StringBase> > mimeTypes);
 
+/// \todo bgeradz, ffs, comment your shit dammit
 zmm::String read_text_file(zmm::String path);
 
 typedef int (*COMPARATOR) (void *, void *);
@@ -105,6 +104,15 @@ int StringBaseComparatorAsc(void *, void *);
 
 void quicksort(COMPARABLE *arr, int size, COMPARATOR comparator);
 
+/// \brief Renders a string that can be used as the protocolInfo resource 
+/// attribute: "http-get:*:mimetype:*"
+/// 
+/// \param mimetype the mimetype that should be inserted
+zmm::String renderProtocolInfo(zmm::String mimetype);
+
+/// \brief converts a number of seconds to H+:MM:SS representation as required by
+/// the UPnP spec
+zmm::String secondsToHMS(int seconds);
 
 #endif // __TOOLS_H__
 

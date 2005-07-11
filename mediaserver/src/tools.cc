@@ -360,4 +360,33 @@ void quicksort(COMPARABLE *arr, int size, COMPARATOR comparator)
 	quicksort_impl(arr, 0, size - 1, comparator);
 }
 
+String renderProtocolInfo(String mimetype)
+{
+    if (string_ok(mimetype))
+        return String("http-get:*:") + mimetype + ":*";
+    else
+        return String("http-get:*:*:*");
+}
+
+
+String secondsToHMS(int seconds)
+{
+    String h, m, s;
+
+    s = String("") + (seconds % 60);
+    if (s.length() < 2)
+        s = String("0") + s;
+
+    seconds = seconds / 60;
+
+    m = String("") + (seconds % 60);
+    if (m.length() < 2)
+        m = String("0") + m;
+
+    h = String("") + (seconds / 60);
+    if (h.length() < 2)
+        h = String("0") + h;
+
+    return h + ":" + m + ":" + s;
+}
 
