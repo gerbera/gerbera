@@ -122,10 +122,7 @@ void Id3Handler::fillMetadata(Ref<CdsItem> item)
 
         if ((header->time) > 0)
         {
-            temp = header->time;
-            log_debug(("mp3 duration: %d\n", temp));
-            /// \todo recalculate the value we get here (I assume in seconds) to hh:mm:ss format
-            /// and add the resource
+            item->setResource(0, String(RES_KEYS[R_DURATION].upnp), secondsToHMS(header->time));
         }
 
 
