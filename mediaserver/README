@@ -329,7 +329,7 @@ Here is a sample configuration file with description of the various tags.
             libraries.
 
             <libexif>
-                Options for the libexif library.
+                Options for the exif library.
 
                 <auxdata>
                     Currently only adding keywords to auxdata is supported.
@@ -340,6 +340,17 @@ Here is a sample configuration file with description of the various tags.
                         to the given keyword, it will be added to auxdata.
                         You can then use that data in your import scripts.
                 
+            <libextractor>
+                Options for the extractor library.
+
+                <auxdata>
+                    Currently only adding keywords to auxdata is supported.
+                    For a list of keywords/tags see the libextractor documentation.
+
+                    <add tag="keyword"/>
+                        If the library was able to extract the data according
+                        to the given keyword, it will be added to auxdata.
+                        You can then use that data in your import scripts.
 
 RUNNING
 -------
