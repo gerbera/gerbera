@@ -37,7 +37,9 @@
 #include "metadata/extractor_handler.h"
 #endif
 
+#ifdef HAVE_EXIF
 #include "metadata/libexif_handler.h"
+#endif
 
 using namespace zmm;
 
@@ -108,13 +110,14 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
         }
         */
 #endif
+#ifdef HAVE_EXIF
         if (mimetype == "image/jpeg")
         {
             log_info(("Staring libexif\n"));
             handler = Ref<MetadataHandler>(new LibExifHandler());
             break;
         }
-
+#endif
     }
     while (false);
 

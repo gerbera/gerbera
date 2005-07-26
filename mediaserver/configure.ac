@@ -274,7 +274,7 @@ fi
 
 EXIV2_OK=yes
 AC_ARG_ENABLE(libexiv2,
-  [  --enable-libexiv2        libexiv2 support],
+  [  --enable-exiv2           exiv2 support],
   [
      EXIV2_EN=$enableval 
      if test "x$enableval" = xno; then
@@ -294,7 +294,43 @@ if test "x$EXIV2_OK" = xyes; then
    AC_DEFINE(HAVE_EXIV2)
 else
     if test "x$EXIV2_EN" = xyes; then
-        AC_MSG_ERROR(unable to configure libexiv2 support)
+        AC_MSG_ERROR(unable to configure exiv2 support)
+    fi
+fi
+
+
+######## libexif
+
+EXIF_OK=yes
+AC_ARG_ENABLE(libexif,
+  [  --enable-libexif         libexif support],
+  [
+     EXIF_EN=$enableval 
+     if test "x$enableval" = xno; then
+        EXIF_OK=disabled
+     fi
+  ]
+)
+if test "x$EXIF_OK" = xyes; then
+    AC_CHECK_HEADER(libexif/exif-data.h,
+        [],
+        [EXIF_OK=missing],
+        /* checking for libexif/exif-data.h */
+    )
+fi
+if test "x$EXIF_OK" = xyes; then
+    AC_CHECK_HEADER(libexif/exif-content.h,
+        [],
+        [EXIF_OK=missing],
+        /* checking for libexif/exif-content.h */
+    )
+fi
+if test "x$EXIF_OK" = xyes; then
+   LDFLAGS="$LDFLAGS -lexif"
+   AC_DEFINE(HAVE_EXIF)
+else
+    if test "x$EXIF_EN" = xyes; then
+        AC_MSG_ERROR(unable to configure libexif support)
     fi
 fi
 
@@ -340,6 +376,7 @@ echo "  javascript   : $JS_OK"
 echo "  libmagic     : $MAGIC_OK"
 echo "  libid3       : $ID3_OK"
 echo "  libexiv2     : $EXIV2_OK"
+echo "  libexif      : $EXIF_OK"
 echo "  libextractor : $EXTRACTOR_OK"
 echo
 

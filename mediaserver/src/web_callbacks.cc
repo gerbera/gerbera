@@ -46,6 +46,8 @@ using namespace mxml;
 
 static Ref<RequestHandler> create_request_handler(const char *filename)
 {
+    log_debug(("create_request_handler(%s)\n", filename));
+        
     String path, parameters;
     RequestHandler::split_url(filename, path, parameters);
 

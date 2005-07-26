@@ -190,6 +190,7 @@ var arr = orig.mimetype.split("/");
 var mime = arr[0];
 
 var obj = copyObject(orig);
+obj.refID = orig.id;
 
 if (mime == 'audio')
 {

@@ -482,6 +482,7 @@ void ContentManager::addObject(zmm::Ref<CdsObject> obj)
     Ref<Storage> storage = Storage::getInstance();
     Ref<UpdateManager> um = UpdateManager::getInstance();
     storage->addObject(obj);
+    String hui = obj->getRefID();
     um->containerChanged(obj->getParentID());
     
     if (! obj->isVirtual() && IS_CDS_ITEM(obj->getObjectType()))

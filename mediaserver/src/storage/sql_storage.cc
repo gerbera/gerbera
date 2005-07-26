@@ -45,32 +45,39 @@ enum
     _mime_type,
 
     _action,
-    _state
+    _state,
+
+    _ref_resources
 };
 
-static char *select_fields = "\
+static char *select_query_base = "\
+    SELECT \
     \
-    id, \
-    ref_id, \
-    parent_id, \
-    object_type, \
-    upnp_class, \
-    dc_title, \
-    is_restricted, \
-    is_virtual, \
-    metadata, \
-    auxdata, \
-    resources, \
+    f.id, \
+    f.ref_id, \
+    f.parent_id, \
+    f.object_type, \
+    f.upnp_class, \
+    f.dc_title, \
+    f.is_restricted, \
+    f.is_virtual, \
+    f.metadata, \
+    f.auxdata, \
+    f.resources, \
     \
-    update_id, \
-    is_searchable, \
+    f.update_id, \
+    f.is_searchable, \
     \
-    location, \
-    mime_type, \
+    f.location, \
+    f.mime_type, \
     \
-    action, \
-    state";
-
+    f.action, \
+    f.state, \
+    \
+    rf.resources\
+    \
+    FROM cds_objects f LEFT JOIN cds_objects rf \
+    ON f.ref_id = rf.id";
 
 
 SQLRow::SQLRow() : Object()
@@ -100,6 +107,13 @@ void SQLStorage::addObject(Ref<CdsObject> obj)
     *fields << "parent_id";
     *values << obj->getParentID();
 
+    String refID = obj->getRefID();
+    if (refID != nil)
+    {
+        *fields << ", ref_id";
+        *values << ", " << refID;
+    }
+    
     *fields << ", object_type";
     *values << ", " << objectType;
 
@@ -225,8 +239,7 @@ Ref<CdsObject> SQLStorage::loadObject(String objectID)
 {
     Ref<StringBuffer> qb(new StringBuffer());
 
-    *qb << "SELECT " << select_fields << " FROM cds_objects f WHERE f.id = "
-        << objectID;
+    *qb << select_query_base << " WHERE f.id = " << objectID;
 
     Ref<SQLResult> res = select(qb->toString());
     Ref<SQLRow> row;
@@ -288,7 +301,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     
     Ref<StringBuffer> qb(new StringBuffer());
 
-    *qb << "SELECT " << select_fields << " FROM cds_objects f WHERE ";
+    *qb << select_query_base << " WHERE ";
 
     if(param->getFlag() == BROWSE_DIRECT_CHILDREN && IS_CDS_CONTAINER(objectType))
     {
@@ -363,7 +376,7 @@ Ref<Array<StringBase> > SQLStorage::getMimeTypes()
 Ref<CdsObject> SQLStorage::findObjectByTitle(String title, String parentID)
 {
     Ref<StringBuffer> qb(new StringBuffer());
-    *qb << "SELECT " << select_fields << " FROM cds_objects WHERE ";
+    *qb << select_query_base << " WHERE ";
     if (parentID != nil)
         *qb << "parent_id = " << parentID << " AND ";
     *qb << "dc_title = " << quote(title);
@@ -399,7 +412,16 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
     aux->decode(row->col(_auxdata));
     obj->setAuxData(aux);
 
-    Ref<Array<StringBase> > resources = split_string(row->col(_resources), '&');
+    /* first try to fetch object's own resources, if it is empty
+     * try to get them from the object pointed to by ref_id
+     */
+    String resources_str = row->col(_resources);
+    if (resources_str == nil || resources_str.length() == 0)
+    {
+        resources_str = row->col(_ref_resources);
+    }
+
+    Ref<Array<StringBase> > resources = split_string(resources_str, '&');
     for (int i = 0; i < resources->size(); i++)
     {
         Ref<Dictionary> res(new Dictionary());
@@ -432,9 +454,10 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
         aitem->setState(row->col(_state));
         matched_types++;
     }
+
     if(! matched_types)
     {
-        throw StorageException(String("unknown file type: ")+ objectType);
+        throw StorageException(String("unknown object type: ")+ objectType);
     }
     return obj;
 }

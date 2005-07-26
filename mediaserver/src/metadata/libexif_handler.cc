@@ -21,12 +21,10 @@
 /// \file libexif_handler.cc
 /// \brief Implementeation of the LibExifHandler class.
 
-//#ifdef HAVE_LIBEXIF
+#ifdef HAVE_EXIF
 
 #ifdef HAVE_EXTRACTOR
-
 #include <extractor.h>
-
 #endif
 
 
@@ -412,5 +410,5 @@ Ref<IOHandler> LibExifHandler::serveContent(Ref<CdsItem> item, int resNum)
     return nil;
 }
 
-//#endif // HAVE_LIBEXIF
+#endif // HAVE_EXIF
 

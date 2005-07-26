@@ -147,6 +147,9 @@ static Ref<CdsObject> jsObject2cdsObject(JSContext *cx, JSObject *js)
     val = js_get_property(cx, js, "id");
     if (val != nil)
         obj->setID(val);
+    val = js_get_property(cx, js, "refID");
+    if (val != nil)
+        obj->setRefID(val);
     val = js_get_property(cx, js, "parentID");
     if (val != nil)
         obj->setParentID(val);
