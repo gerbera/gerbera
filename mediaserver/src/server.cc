@@ -96,9 +96,6 @@ void Server::upnp_init(String ip, unsigned short port)
 
     virtual_url = String("http://") + ip + ":" + port + "/" + virtual_directory;
 
-    // create description document
-    String desc_doc_url = String("http://") + ip + ":" + port + "/" + "miniserver.xml";
-    
     /// \TODO who should construct absolute paths??? config_manage or the modules?
     // next set webroot directory
     String web_root = config->getOption("/server/webroot");
@@ -129,9 +126,6 @@ void Server::upnp_init(String ip, unsigned short port)
     }
 
     // register root device with the library
-/*    ret = UpnpRegisterRootDevice(desc_doc_url.c_str(), static_upnp_callback, 
-                                 &device_handle, &device_handle);
-*/
     String device_description = String("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") +
                                 UpnpXML_RenderDeviceDescription()->print();
 
