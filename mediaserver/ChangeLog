@@ -1,9 +1,11 @@
 MediaTomb - UPnP AV Mediaserver for Linux.
 
 v0.8.1
+        * implemented keyword extraction for auxdata from libexif
+        * implemented keyword extraction for auxdata from libextractor
         * added Exif metadata support for images via libexif.
         * added resolution attribute to image res tag
-        * added bitrate and duration attribute to mp3 res tag
+        * added bitrate and duration attribute to mp3 res tag (via id3lib)
         * added auxdata field for items, auxilary data can be extracted
           and used by import scripts.
         * added configuration options to specify which aux fields should 
