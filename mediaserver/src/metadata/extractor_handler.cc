@@ -34,14 +34,162 @@ using namespace zmm;
 ExtractorHandler::ExtractorHandler() : MetadataHandler()
 {
 }
-       
-static void addMetaField(metadata_fields_t field, EXTRACTOR_KeywordList *keywords, Ref<CdsItem> item)
+
+static EXTRACTOR_KeywordType getTagFromString(String tag)
+{
+    if (tag == "EXTRACTOR_UNKNOWN")
+        return EXTRACTOR_UNKNOWN;
+    if (tag == "EXTRACTOR_FILENAME")
+        return EXTRACTOR_FILENAME;
+    if (tag == "EXTRACTOR_MIMETYPE")
+        return EXTRACTOR_MIMETYPE;
+    if (tag == "EXTRACTOR_TITLE")
+        return EXTRACTOR_TITLE;
+    if (tag == "EXTRACTOR_AUTHOR")
+        return EXTRACTOR_AUTHOR;
+    if (tag == "EXTRACTOR_ARTIST")
+        return EXTRACTOR_ARTIST;
+    if (tag == "EXTRACTOR_DESCRIPTION")
+        return EXTRACTOR_DESCRIPTION;
+    if (tag == "EXTRACTOR_COMMENT")
+        return EXTRACTOR_COMMENT;
+    if (tag == "EXTRACTOR_DATE")
+        return EXTRACTOR_DATE;
+    if (tag == "EXTRACTOR_PUBLISHER")
+        return EXTRACTOR_PUBLISHER;
+    if (tag == "EXTRACTOR_LANGUAGE")
+        return EXTRACTOR_LANGUAGE;
+    if (tag == "EXTRACTOR_ALBUM")
+        return EXTRACTOR_ALBUM;
+    if (tag == "EXTRACTOR_GENRE")
+        return EXTRACTOR_GENRE;
+    if (tag == "EXTRACTOR_LOCATION")
+        return EXTRACTOR_LOCATION;
+    if (tag == "EXTRACTOR_VERSIONNUMBER")
+        return EXTRACTOR_VERSIONNUMBER;
+    if (tag == "EXTRACTOR_ORGANIZATION")
+        return EXTRACTOR_ORGANIZATION;
+    if (tag == "EXTRACTOR_COPYRIGHT")
+        return EXTRACTOR_COPYRIGHT;
+    if (tag == "EXTRACTOR_SUBJECT")
+        return EXTRACTOR_SUBJECT;
+    if (tag == "EXTRACTOR_KEYWORDS")
+        return EXTRACTOR_KEYWORDS;
+    if (tag == "EXTRACTOR_CONTRIBUTOR")
+        return EXTRACTOR_CONTRIBUTOR;
+    if (tag == "EXTRACTOR_RESOURCE_TYPE")
+        return EXTRACTOR_RESOURCE_TYPE;
+    if (tag == "EXTRACTOR_FORMAT")
+        return EXTRACTOR_FORMAT;
+    if (tag == "EXTRACTOR_RESOURCE_IDENTIFIER")
+        return EXTRACTOR_RESOURCE_IDENTIFIER;
+    if (tag == "EXTRACTOR_SOURCE")
+        return EXTRACTOR_SOURCE;
+    if (tag == "EXTRACTOR_RELATION")
+        return EXTRACTOR_RELATION;
+    if (tag == "EXTRACTOR_COVERAGE")
+        return EXTRACTOR_COVERAGE;
+    if (tag == "EXTRACTOR_SOFTWARE")
+        return EXTRACTOR_SOFTWARE;
+    if (tag == "EXTRACTOR_DISCLAIMER")
+        return EXTRACTOR_DISCLAIMER;
+    if (tag == "EXTRACTOR_WARNING")
+        return EXTRACTOR_WARNING;
+    if (tag == "EXTRACTOR_TRANSLATED")
+        return EXTRACTOR_TRANSLATED;
+    if (tag == "EXTRACTOR_CREATION_DATE")
+        return EXTRACTOR_CREATION_DATE;
+    if (tag == "EXTRACTOR_MODIFICATION_DATE")
+        return EXTRACTOR_MODIFICATION_DATE;
+    if (tag == "EXTRACTOR_CREATOR")
+        return EXTRACTOR_CREATOR;
+    if (tag == "EXTRACTOR_PRODUCER")
+        return EXTRACTOR_PRODUCER;
+    if (tag == "EXTRACTOR_PAGE_COUNT")
+        return EXTRACTOR_PAGE_COUNT;
+    if (tag == "EXTRACTOR_PAGE_ORIENTATION")
+        return EXTRACTOR_PAGE_ORIENTATION;
+    if (tag == "EXTRACTOR_PAPER_SIZE")
+        return EXTRACTOR_PAPER_SIZE;
+    if (tag == "EXTRACTOR_USED_FONTS")
+        return EXTRACTOR_USED_FONTS;
+    if (tag == "EXTRACTOR_PAGE_ORDER")
+        return EXTRACTOR_PAGE_ORDER;
+    if (tag == "EXTRACTOR_CREATED_FOR")
+        return EXTRACTOR_CREATED_FOR;
+    if (tag == "EXTRACTOR_MAGNIFICATION")
+        return EXTRACTOR_MAGNIFICATION;
+    if (tag == "EXTRACTOR_RELEASE")
+        return EXTRACTOR_RELEASE;
+    if (tag == "EXTRACTOR_GROUP")
+        return EXTRACTOR_GROUP;
+    if (tag == "EXTRACTOR_SIZE")
+        return EXTRACTOR_SIZE;
+    if (tag == "EXTRACTOR_SUMMARY")
+        return EXTRACTOR_SUMMARY;
+    if (tag == "EXTRACTOR_PACKAGER")
+        return EXTRACTOR_PACKAGER;
+    if (tag == "EXTRACTOR_VENDOR")
+        return EXTRACTOR_VENDOR;
+    if (tag == "EXTRACTOR_LICENSE")
+        return EXTRACTOR_LICENSE;
+    if (tag == "EXTRACTOR_DISTRIBUTION")
+        return EXTRACTOR_DISTRIBUTION;
+    if (tag == "EXTRACTOR_BUILDHOST")
+        return EXTRACTOR_BUILDHOST;
+    if (tag == "EXTRACTOR_OS")
+        return EXTRACTOR_OS;
+    if (tag == "EXTRACTOR_DEPENDENCY")
+        return EXTRACTOR_DEPENDENCY;
+    if (tag == "EXTRACTOR_HASH_MD4")
+        return EXTRACTOR_HASH_MD4;
+    if (tag == "EXTRACTOR_HASH_MD5")
+        return EXTRACTOR_HASH_MD5;
+    if (tag == "EXTRACTOR_HASH_SHA0")
+        return EXTRACTOR_HASH_SHA0;
+    if (tag == "EXTRACTOR_HASH_SHA1")
+        return EXTRACTOR_HASH_SHA1;
+    if (tag == "EXTRACTOR_HASH_RMD160")
+        return EXTRACTOR_HASH_RMD160;
+    if (tag == "EXTRACTOR_RESOLUTION")
+        return EXTRACTOR_RESOLUTION;
+    if (tag == "EXTRACTOR_CATEGORY")
+        return EXTRACTOR_CATEGORY;
+    if (tag == "EXTRACTOR_BOOKTITLE")
+        return EXTRACTOR_BOOKTITLE;
+    if (tag == "EXTRACTOR_PRIORITY")
+        return EXTRACTOR_PRIORITY;
+    if (tag == "EXTRACTOR_CONFLICTS")
+        return EXTRACTOR_CONFLICTS;
+    if (tag == "EXTRACTOR_REPLACES")
+        return EXTRACTOR_REPLACES;
+    if (tag == "EXTRACTOR_PROVIDES")
+        return EXTRACTOR_PROVIDES;
+    if (tag == "EXTRACTOR_CONDUCTOR")
+        return EXTRACTOR_CONDUCTOR;
+    if (tag == "EXTRACTOR_INTERPRET")
+        return EXTRACTOR_INTERPRET;
+    if (tag == "EXTRACTOR_OWNER")
+        return EXTRACTOR_OWNER;
+    if (tag == "EXTRACTOR_LYRICS")
+        return EXTRACTOR_LYRICS;
+    if (tag == "EXTRACTOR_MEDIA_TYPE")
+        return EXTRACTOR_MEDIA_TYPE;
+    if (tag == "EXTRACTOR_CONTACT")
+        return EXTRACTOR_CONTACT;
+    if (tag == "EXTRACTOR_THUMBNAIL_DATA")
+        return EXTRACTOR_THUMBNAIL_DATA;
+
+    log_warning(("Ignoring unknown libextractor tag: %s\n", tag.c_str()));
+    return EXTRACTOR_UNKNOWN;
+}
+
+static void addMetaField(metadata_fields_t field, EXTRACTOR_KeywordList *keywords, Ref<CdsItem> item, Ref<StringConverter> sc)
 {
     String value;
     const char *temp = NULL;
  
     /// \todo check if UTF-8 conversion is needed, may already be in UTF-8
-    Ref<StringConverter> sc = StringConverter::m2i();
     int genre;
     
     switch (field)
@@ -81,12 +229,10 @@ static void addMetaField(metadata_fields_t field, EXTRACTOR_KeywordList *keyword
     }
 }
 
-static void addResourceField(resource_attributes_t attr, EXTRACTOR_KeywordList *keywords, Ref<CdsItem> item)
+static void addResourceField(resource_attributes_t attr, EXTRACTOR_KeywordList *keywords, Ref<CdsItem> item, Ref<StringConverter> sc)
 {
     String value;
     const char *temp = NULL;
-  
-    Ref<StringConverter> sc = StringConverter::m2i();
     int genre;
     
     switch (attr)
@@ -115,17 +261,49 @@ static void addResourceField(resource_attributes_t attr, EXTRACTOR_KeywordList *
 
 void ExtractorHandler::fillMetadata(Ref<CdsItem> item)
 {
+    Ref<Array<StringBase> > aux;
+    Ref<StringConverter> sc = StringConverter::m2i();
+
+        
     EXTRACTOR_ExtractorList *extractors = EXTRACTOR_loadDefaultLibraries();
     EXTRACTOR_KeywordList *keywords = EXTRACTOR_getKeywords(extractors, item->getLocation().c_str());
 
     //EXTRACTOR_printKeywords(stdout, keywords);
 
-    /// \todo loop through available keywords, not through our enum
     for (int i = 0; i < M_MAX; i++)
-        addMetaField((metadata_fields_t) i, keywords, item);
+        addMetaField((metadata_fields_t) i, keywords, item, sc);
     
     for (int i = 0; i < R_MAX; i++)
-        addResourceField((resource_attributes_t) i, keywords, item);
+        addResourceField((resource_attributes_t) i, keywords, item, sc);
+   
+
+    if (aux != nil)
+    {
+        String value;
+        String tmp;
+        const char *temp = NULL;
+        
+        for (int j = 0; j < aux->size(); j++)
+        {
+
+            tmp = aux->get(j);
+            if (string_ok(tmp))
+            {
+                temp = EXTRACTOR_extractLast(getTagFromString(tmp), keywords);
+                if (temp != NULL)
+                {
+                    value = (char *)temp; 
+                    if (string_ok(value))
+                    {
+                        value = sc->convert(value);
+                        item->setAuxData(tmp, value);
+//                      log_debug(("Adding tag: %s with value %s\n", tmp.c_str(), value.c_str()));
+                    }
+                }
+            }
+        }
+    }
+
     
     EXTRACTOR_freeKeywords(keywords);
     EXTRACTOR_removeAll(extractors);

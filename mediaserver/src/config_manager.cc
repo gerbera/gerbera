@@ -202,19 +202,34 @@ void ConfigManager::validate()
 
 
     Ref<Element> el = getElement("/import/mappings/mimetype-upnpclass");
-    if (el != nil)
+    if (el == nil)
     {
-        Ref<Dictionary> dict = createDictionaryFromNodeset(el, "map", "from", "to");
+//        Ref<Dictionary> dict = createDictionaryFromNodeset(el, "map", "from", "to");
+        getOption("/import/mappings/mimetype-upnpclass", "");
     }
    
-/// \todo #ifdef HAVE_LIBEXIF    
+#ifdef HAVE_EXIF    
 
-    el = getElement("/import/libexif/auxdata");
-    if (el != nil)
-    {
-        Ref<Array<StringBase> > arr = createArrayFromNodeset(el, "add", "tag");
-    }
+el = getElement("/import/library-options/libexif/auxdata");
+if (el == nil)
+{
+//    Ref<Array<StringBase> > arr = createArrayFromNodeset(el, "add", "tag");
+    getOption("/import/library-options/libexif/auxdata", "");
     
+}
+
+#endif    
+
+#ifdef HAVE_EXTRACTOR
+
+el = getElement("/import/library-options/libextractor/auxdata");
+if (el == nil)
+{
+//    Ref<Array<StringBase> > arr = createArrayFromNodeset(el, "add", "tag");
+    getOption("/import/library-options/libextractor/auxdata", "");
+}
+#endif
+
     Storage::getInstance(PRIMARY_STORAGE);
     Storage::getInstance(FILESYSTEM_STORAGE);
 
