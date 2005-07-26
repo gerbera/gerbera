@@ -324,6 +324,22 @@ Here is a sample configuration file with description of the various tags.
                 "audio/*". The values of "from" and "to" attributes are
                 case sensitive.
 
+        <library-options>
+            This section holds optoins for the various supported import 
+            libraries.
+
+            <libexif>
+                Options for the libexif library.
+
+                <auxdata>
+                    Currently only adding keywords to auxdata is supported.
+                    For a list of keywords/tags see the libexif documentation.
+
+                    <add tag="keyword"/>
+                        If the library was able to extract the data according
+                        to the given keyword, it will be added to auxdata.
+                        You can then use that data in your import scripts.
+                
 
 RUNNING
 -------
