@@ -58,7 +58,7 @@ static void addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsItem> item
         case M_DATE:
             ID3_retval = ID3_GetYear(tag);
             value = String(ID3_retval);
-            value = value + "-01-01";
+            value = value + "-00-00";
             break;
         case M_GENRE:
             genre = ID3_GetGenreNum(tag);
