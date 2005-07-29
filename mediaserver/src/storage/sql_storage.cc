@@ -378,8 +378,8 @@ Ref<CdsObject> SQLStorage::findObjectByTitle(String title, String parentID)
     Ref<StringBuffer> qb(new StringBuffer());
     *qb << select_query_base << " WHERE ";
     if (parentID != nil)
-        *qb << "parent_id = " << parentID << " AND ";
-    *qb << "dc_title = " << quote(title);
+        *qb << "f.parent_id = " << parentID << " AND ";
+    *qb << "f.dc_title = " << quote(title);
 
     Ref<SQLResult> res = select(qb->toString());
     Ref<SQLRow> row;
