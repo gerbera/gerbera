@@ -67,7 +67,7 @@ int main(int argc, char **argv, char **envp)
                    {"group", 1, 0, 'g'},
                    {"daemon", 0, 0, 'd'},
                    {"pid", 0, 0, 'P'},
-                   {"add", 1, 0, 'g'},
+                   {"add", 1, 0, 'a'},
                    {"logfile", 1, 0, 'l'},
                    {"help", 0, 0, 'h'},
                    {0, 0, 0, 0}
