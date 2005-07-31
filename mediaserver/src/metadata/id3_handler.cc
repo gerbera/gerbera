@@ -96,11 +96,11 @@ void Id3Handler::fillMetadata(Ref<CdsItem> item)
         addID3Field((metadata_fields_t) i, &tag, item);
 
     header = tag.GetMp3HeaderInfo();
-    if (header) 
+/*    if (header) 
         log_debug(("Got mp3 header\n"));
     else
         log_debug(("Could not get mp3 header\n"));
-    
+*/    
     if (header)
     {
         int temp;
