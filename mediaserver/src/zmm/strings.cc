@@ -43,6 +43,11 @@ StringBase::StringBase(char *str, int len) : Object()
 	memcpy(data, str, len);
 	data[len] = 0;
 }
+bool StringBase::startsWith(StringBase *other)
+{
+    return (!strncmp(data, other->data, other->len));
+}
+
 // protected
 StringBase::StringBase() : Object()
 {}        

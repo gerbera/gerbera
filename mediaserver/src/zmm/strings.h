@@ -43,6 +43,7 @@ public:
 	StringBase(int capacity);
 	StringBase(char *str);
 	StringBase(char *str, int len);
+	bool startsWith(StringBase *other);
 	virtual ~StringBase();
 protected:
     StringBase();
@@ -139,6 +140,11 @@ public:
         base->len = strlen(base->data);
     }
 
+    bool startsWith(String str)
+    {
+        return base->startsWith(str.base);
+    }
+    
     static String from(int x);
     static String from(double x);
     
