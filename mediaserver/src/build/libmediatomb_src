@@ -26,6 +26,7 @@ libmediatomb_a_SOURCES = \
 ../exceptions.cc \
 ../file_io_handler.cc \
 ../file_request_handler.cc \
+../serve_request_handler.cc \
 ../io_handler.cc \
 ../main.cc \
 ../mem_io_handler.cc \
@@ -100,6 +101,7 @@ libmediatomb_a_SOURCES = \
 ../exceptions.h \
 ../file_io_handler.h \
 ../file_request_handler.h \
+../serve_request_handler.h \
 ../io_handler.h \
 ../mem_io_handler.h \
 ../metadata/exiv2_handler.h \
