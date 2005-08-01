@@ -52,10 +52,12 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
 
     String url_path, parameters;
     split_url(filename, url_path, parameters);
-
+    
     Ref<Dictionary> dict(new Dictionary());
     dict->decode(parameters);
 
+    log_debug(("full url (filename): %s, url_path: %s, parameters: %s", filename, url_path.c_str(), parameters.c_str()));
+    
     object_id = dict->get("object_id");
     if (object_id == nil)
     {
