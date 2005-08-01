@@ -48,7 +48,9 @@
 #define URL_REQUEST_TYPE                "req_type"
 #define URL_REQUEST_SEPARATOR           '?'
 
+#define SERVER_VIRTUAL_DIR              "content"
 #define CONTENT_MEDIA_HANDLER           "media"
+#define CONTENT_SERVE_HANDLER           "serve"
 #define CONTENT_UI_HANDLER              "interface"
 // REQUEST TYPES
 #define REQ_TYPE_BROWSE                 "browse"
@@ -58,8 +60,13 @@
 #define DIR_SEPARATOR                   '/'
 
 // MIME TYPES FOR WEB UI
-#define MIME_TYPE_XML                   "text/xml"
-#define MIME_TYPE_HTML                  "text/html"
+#define MIMETYPE_XML                   "text/xml"
+#define MIMETYPE_HTML                  "text/html"
+// default mime types for items in the cds
+#define MIMETYPE_DEFAULT               "application/octet-stream"
+
+// regexp for mimetype matching
+#define MIMETYPE_REGEXP "^([a-z0-9_-]+/[a-z0-9_-]+)"
 
 // device description defaults
 #define DESC_DEVICE_NAMESPACE           "urn:schemas-upnp-org:device-1-0"
