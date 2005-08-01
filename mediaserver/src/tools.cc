@@ -23,7 +23,6 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include "md5/md5.h"
-#include "rexp.h"
 
 using namespace zmm;
 
@@ -392,15 +391,10 @@ String secondsToHMS(int seconds)
 }
 
 #ifdef HAVE_MAGIC
-String get_mime_type(magic_set *ms, String file)
+String get_mime_type(magic_set *ms, Ref<RExp> reMimetype, String file)
 {
-    Ref<RExp> reMimetype;
-
     if (ms == NULL)
         return nil;
-
-    reMimetype = Ref<RExp>(new RExp());
-    reMimetype->compile(MIMETYPE_REGEXP);
 
     char *mt = (char *)magic_file(ms, file.c_str());
     if (mt == NULL)

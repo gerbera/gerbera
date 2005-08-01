@@ -23,7 +23,8 @@
 #ifndef __TOOLS_H__
 #define __TOOLS_H__
 
-#include "common.h"
+#include "rexp.h"
+
 #ifdef HAVE_MAGIC
 // for older versions of filemagic
 extern "C" {
@@ -123,7 +124,7 @@ zmm::String secondsToHMS(int seconds);
 
 #ifdef HAVE_MAGIC
 /// \brief Extracts mimetype from a file using filemagic
-zmm::String get_mime_type(magic_set *ms, zmm::String file);
+zmm::String get_mime_type(magic_set *ms, zmm::Ref<RExp> reMimetype, zmm::String file);
 #endif // HAVE_MAGIC
 
 #endif // __TOOLS_H__
