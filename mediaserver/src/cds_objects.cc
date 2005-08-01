@@ -272,7 +272,7 @@ CdsItem::CdsItem() : CdsObject()
 {
     objectType = OBJECT_TYPE_ITEM;
     upnp_class = "object.item";
-    mimeType = "application/octet-stream";
+    mimeType = MIMETYPE_DEFAULT;
 }
 
 /*void CdsItem::setDescription(String description)
@@ -326,7 +326,7 @@ CdsActiveItem::CdsActiveItem() : CdsItem()
     objectType |= OBJECT_TYPE_ACTIVE_ITEM;
 
     upnp_class = "object.item.activeItem";
-    mimeType = "application/octet-stream";
+    mimeType = MIMETYPE_DEFAULT ;
 }
 
 void CdsActiveItem::setAction(zmm::String action)
@@ -380,7 +380,7 @@ CdsItemExternalURL::CdsItemExternalURL() : CdsItem()
     objectType |= OBJECT_TYPE_ITEM_EXTERNAL_URL;
 
     upnp_class = "object.item";
-    mimeType = "application/octet-stream";
+    mimeType = MIMETYPE_DEFAULT;
 }
 
 void CdsItemExternalURL::setURL(String URL)
