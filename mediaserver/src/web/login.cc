@@ -38,7 +38,7 @@ void web::login::get_info(IN const char *filename, OUT struct File_Info *info)
     info->last_modified = time(NULL);
     info->is_directory = 0;
     info->is_readable = 1;
-    info->content_type = ixmlCloneDOMString(MIME_TYPE_HTML);
+    info->content_type = ixmlCloneDOMString(MIMETYPE_HTML);
 }
 
 
