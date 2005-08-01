@@ -120,6 +120,9 @@ void ConfigManager::validate()
 
     prepare_path("/server/webroot", true);
     
+    if (string_ok(getOption("/server/servedir", "")))
+        prepare_path("/server/servedir", true);
+    
     // udn should be already prepared
     checkOptionString("/server/udn");
 
@@ -234,6 +237,8 @@ if (el == nil)
     Storage::getInstance(FILESYSTEM_STORAGE);
 
     log_info(("Configuration check succeeded.\n"));
+
+    log_debug(("Config file dump after validation: \n%s\n", root->print().c_str()));
 }
 
 void ConfigManager::prepare_udn()
@@ -382,7 +387,11 @@ String ConfigManager::getOption(String xpath)
 {      
     Ref<XPath> rootXPath(new XPath(root));
     String value = rootXPath->getText(xpath);
-    if (string_ok(value))
+
+    /// \TODO is this ok?
+//    if (string_ok(value))
+//        return value;
+    if (value != nil)
         return value;
     throw Exception(String("Config: option not found: ") + xpath);
 }
