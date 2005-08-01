@@ -63,30 +63,6 @@ static String get_filename(String path)
         return path.substring(pos + 1);
 }
 
-#ifdef HAVE_MAGIC
-static String get_mime_type(String file)
-{
-    if (ms == NULL)
-        return nil;
-    char *mt = (char *)magic_file(ms, file.c_str());
-    if (mt == NULL)
-    {
-        log_info(("magic_file: %s\n", magic_error(ms)));
-        return nil;
-    }
-    
-    String mime_type(mt);
-
-    Ref<Matcher> matcher = reMimetype->matcher(mime_type, 2);
-    if (matcher->next())
-        return matcher->group(1);
-    
-    log_info(("filemagic returned invalid mimetype for %s\n%s\n",
-           file.c_str(), mt));
-    return nil;
-}
-#endif
-
 /***************************************************************/
 
 static Ref<ContentManager> instance;
@@ -550,7 +526,7 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic)
             if (ignore_unknown_extensions)
                 return nil; // item should be ignored
 #ifdef HAVE_MAGIC	    
-            mimetype = get_mime_type(path);
+            mimetype = get_mime_type(ms, path);
 #endif
         }
         if (mimetype != nil)

@@ -24,6 +24,13 @@
 #define __TOOLS_H__
 
 #include "common.h"
+#ifdef HAVE_MAGIC
+// for older versions of filemagic
+extern "C" {
+#include <magic.h>
+}
+
+#endif
 
 /// \todo genych, pishi chtoeto hernya delaet
 zmm::Ref<zmm::Array<zmm::StringBase> > split_string(zmm::String str, char sep);
@@ -110,9 +117,14 @@ void quicksort(COMPARABLE *arr, int size, COMPARATOR comparator);
 /// \param mimetype the mimetype that should be inserted
 zmm::String renderProtocolInfo(zmm::String mimetype);
 
-/// \brief converts a number of seconds to H+:MM:SS representation as required by
+/// \brief Converts a number of seconds to H+:MM:SS representation as required by
 /// the UPnP spec
 zmm::String secondsToHMS(int seconds);
+
+#ifdef HAVE_MAGIC
+/// \brief Extracts mimetype from a file using filemagic
+zmm::String get_mime_type(magic_set *ms, zmm::String file);
+#endif // HAVE_MAGIC
 
 #endif // __TOOLS_H__
 

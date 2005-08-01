@@ -23,7 +23,7 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include "md5/md5.h"
-
+#include "rexp.h"
 
 using namespace zmm;
 
@@ -390,4 +390,34 @@ String secondsToHMS(int seconds)
 
     return h + ":" + m + ":" + s;
 }
+
+#ifdef HAVE_MAGIC
+String get_mime_type(magic_set *ms, String file)
+{
+    Ref<RExp> reMimetype;
+
+    if (ms == NULL)
+        return nil;
+
+    reMimetype = Ref<RExp>(new RExp());
+    reMimetype->compile(MIMETYPE_REGEXP);
+
+    char *mt = (char *)magic_file(ms, file.c_str());
+    if (mt == NULL)
+    {
+        log_info(("magic_file: %s\n", magic_error(ms)));
+        return nil;
+    }
+
+    String mime_type(mt);
+
+    Ref<Matcher> matcher = reMimetype->matcher(mime_type, 2);
+    if (matcher->next())
+        return matcher->group(1);
+
+    log_info(("filemagic returned invalid mimetype for %s\n%s\n",
+                file.c_str(), mt));
+    return nil;
+}
+#endif 
 
