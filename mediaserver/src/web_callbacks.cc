@@ -38,6 +38,7 @@
 #include "request_handler.h"
 #include "file_request_handler.h"
 #include "web_request_handler.h"
+#include "serve_request_handler.h"
 #include "web/pages.h"
 #include "dictionary.h"
 
@@ -46,31 +47,46 @@ using namespace mxml;
 
 static Ref<RequestHandler> create_request_handler(const char *filename)
 {
-    log_debug(("create_request_handler(%s)\n", filename));
-        
     String path, parameters;
+    bool serve = false;
+
+    if (string_ok(ConfigManager::getInstance()->getOption("/server/servedir")))
+            serve = true;
+
     RequestHandler::split_url(filename, path, parameters);
 
+    String link = String((char *) filename);
+
+    //log_debug(("Filename: %s, Path: %s\n", filename, path.c_str()));
     //log_info(("create_handler: got url parameters: [%s]\n", parameters.c_str()));
     
     Ref<Dictionary> dict(new Dictionary());
     dict->decode(parameters);
 
-    char *pos = rindex(path.c_str(), DIR_SEPARATOR);
-    if (pos == NULL)
-    {
-        throw Exception(String("Could not find req_type, url:") + (char *)filename);
-    }
-        
-    String handler_type = String(pos + 1);
+    //String handler_type = String(pos + 1);
     
     RequestHandler *ret = NULL;
 
-    if (handler_type == CONTENT_MEDIA_HANDLER)
+    /*
+    log_debug(("Link is: %s, checking against: %s, starts with? %d\n", link.c_str(), 
+                (String(SERVER_VIRTUAL_DIR) + "/" + CONTENT_UI_HANDLER).c_str(), 
+                link.startsWith(String(SERVER_VIRTUAL_DIR) + "/" + CONTENT_UI_HANDLER)));
+    log_debug(("Link is: %s, checking against: %s, starts with? %d\n", link.c_str(), 
+                (String(SERVER_VIRTUAL_DIR) + "/" + CONTENT_MEDIA_HANDLER).c_str(), 
+                link.startsWith(String(SERVER_VIRTUAL_DIR) + "/" + CONTENT_MEDIA_HANDLER)));
+  
+    log_debug(("Link is: %s, checking against: %s, starts with? %d\n", link.c_str(), 
+                (String(SERVER_VIRTUAL_DIR) + "/" + CONTENT_SERVE_HANDLER).c_str(), 
+                link.startsWith(String(SERVER_VIRTUAL_DIR) + "/" + CONTENT_SERVE_HANDLER)));
+  
+    */
+
+                
+    if (link.startsWith(String("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_MEDIA_HANDLER))
     {
         ret = new FileRequestHandler();
     }
-    else if (handler_type == CONTENT_UI_HANDLER)
+    else if (link.startsWith(String("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_UI_HANDLER))
     
     {  
         String value = ConfigManager::getInstance()->getOption("/server/ui/attribute::enabled");
@@ -89,9 +105,16 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
             throw Exception(String("missing ui request type: "));
         }
     } 
+    else if (link.startsWith(String("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER))
+    {
+        if (serve)
+            ret = new ServeRequestHandler();
+        else
+            throw Exception(String("Serving directories is not enabled in configuration"));
+    }
     else
     {
-        throw Exception(String("unknown handler type: ") + handler_type);
+        throw Exception(String("no valid handler type in ") + (char *)filename);
     }
     return Ref<RequestHandler>(ret);
 }
