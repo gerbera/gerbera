@@ -40,7 +40,7 @@ Server::Server() : Object()
 
 void Server::init()
 {
-    virtual_directory = "content";
+    virtual_directory = SERVER_VIRTUAL_DIR; 
 
     cds = ContentDirectoryService::createInstance(DESC_CDS_SERVICE_TYPE,
                                                   DESC_CDS_SERVICE_ID);
