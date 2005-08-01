@@ -86,7 +86,7 @@ void WebRequestHandler::get_info(IN const char *filename, OUT struct File_Info *
     info->last_modified = time(NULL);
     info->is_directory = 0; 
     info->is_readable = 1;
-    String content_type = String(MIME_TYPE_XML) + "; charset=" + DEFAULT_INTERNAL_CHARSET;
+    String content_type = String(MIMETYPE_XML) + "; charset=" + DEFAULT_INTERNAL_CHARSET;
     info->content_type = ixmlCloneDOMString(content_type.c_str());
 }
 
