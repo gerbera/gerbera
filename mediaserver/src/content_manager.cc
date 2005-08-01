@@ -526,7 +526,7 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic)
             if (ignore_unknown_extensions)
                 return nil; // item should be ignored
 #ifdef HAVE_MAGIC	    
-            mimetype = get_mime_type(ms, path);
+            mimetype = get_mime_type(ms, reMimetype, path);
 #endif
         }
         if (mimetype != nil)
