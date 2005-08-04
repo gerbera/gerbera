@@ -48,7 +48,7 @@ void FileIOHandler::open(IN enum UpnpOpenFileMode mode)
     f = fopen(filename.c_str(), "rb");
     if (f == NULL)
     {
-        throw Exception(String("web_open: failed to open: ") + filename.c_str());
+        throw Exception(String("FileIOHandler::open: failed to open: ") + filename.c_str());
     }
 }
 

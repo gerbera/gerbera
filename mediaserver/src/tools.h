@@ -23,6 +23,7 @@
 #ifndef __TOOLS_H__
 #define __TOOLS_H__
 
+#include "common.h"
 #include "rexp.h"
 
 #ifdef HAVE_MAGIC

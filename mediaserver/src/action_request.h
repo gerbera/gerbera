@@ -25,7 +25,8 @@
 #define __ACTION_REQUEST_H__
 
 #include "common.h"
-#include "upnp/ixml.h"
+#include "upnp/upnp.h"
+#include "mxml/mxml.h"
 
 /// \brief This class represents the Upnp_Action_Request type from the SDK.
 ///

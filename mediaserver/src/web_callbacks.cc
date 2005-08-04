@@ -63,8 +63,6 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
     Ref<Dictionary> dict(new Dictionary());
     dict->decode(parameters);
 
-    //String handler_type = String(pos + 1);
-    
     RequestHandler *ret = NULL;
 
     /*
@@ -87,7 +85,6 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
         ret = new FileRequestHandler();
     }
     else if (link.startsWith(String("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_UI_HANDLER))
-    
     {  
         String value = ConfigManager::getInstance()->getOption("/server/ui/attribute::enabled");
         if (value != "yes")

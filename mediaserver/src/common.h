@@ -24,12 +24,8 @@
 #include <errno.h>
 
 #include "logger.h"
-#include "upnp/upnp.h"
 #include "zmmf/zmmf.h"
-#include "mxml/mxml.h"
 #include "exceptions.h"
-#include "tools.h"
-
 
 /// \TODO implement session timeouts!!!
 #define DEFAULT_SESSION_TIMEOUT         123456
