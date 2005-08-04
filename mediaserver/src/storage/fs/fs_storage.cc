@@ -25,6 +25,7 @@
 #include "content_manager.h"
 #include "fs_storage.h"
 #include "mxml/mxml.h"
+#include "tools.h"
 
 using namespace zmm;
 using namespace mxml;

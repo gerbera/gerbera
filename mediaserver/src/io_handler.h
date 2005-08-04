@@ -24,6 +24,7 @@
 #define __IO_HANDLER_H__
 
 #include "common.h"
+#include "upnp/upnp.h"
 
 class IOHandler : public zmm::Object
 {
@@ -33,17 +34,17 @@ public:
     /// \brief Opens a data for the web server.
     /// \param mode in which the data will be opened (we only support UPNP_READ)
     /// \todo Genych, ya tut che to zapamyatowal kak gawno rabotaet? kto filename poluchaet??
-    virtual void open(IN enum UpnpOpenFileMode mode);
+    virtual void open(enum UpnpOpenFileMode mode);
 
     /// \brief Reads previously opened/initialized data sequentially.
     /// \param buf This buffer will be filled by our read functions.
     /// \param length Number of bytes to read.
-    virtual int read(OUT char *buf, IN size_t length);
+    virtual int read(char *buf, size_t length);
 
     /// \brief Writes to previously opened/initialized data sequentially.
     /// \param buf Data to be written.
     /// \param length Number of bytes to write.
-    virtual int write(IN char *buf, IN size_t length);
+    virtual int write(char *buf, size_t length);
                       
     /// \brief Performs a seek on an open/initialized data.
     /// \param offset Number of bytes to move in the buffer. 
@@ -54,7 +55,7 @@ public:
     /// \param whence The position to move relative to. SEEK_CUR to move relative
     /// to current position, SEEK_END to move relative to the end of file,
     /// SEEK_SET to specify an absolute offset.
-    virtual void seek(IN long offset, IN int whence);
+    virtual void seek(long offset, int whence);
 
     /// \brief Close/free previously opened/initialized data.
     virtual void close();

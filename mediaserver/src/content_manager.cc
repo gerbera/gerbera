@@ -25,12 +25,13 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "tools.h"
+#include "rexp.h"
 #include "content_manager.h"
 #include "config_manager.h"
 #include "update_manager.h"
 #include "string_converter.h"
 #include "metadata_handler.h"
-#include "rexp.h"
 
 #define DEFAULT_DIR_CACHE_CAPACITY 10 
 

@@ -24,6 +24,7 @@
 #include "update_manager.h"
 #include "dictionary.h"
 #include "upnp_xml.h"
+#include "tools.h"
 
 using namespace zmm;
 

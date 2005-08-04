@@ -21,14 +21,13 @@
 /// \file web_callbacks.c
 /// This handles the VirtualDirCallbacks that come from the web server.
 
+#include "common.h"
+#include "tools.h"
 #include "web_callbacks.h"
 #include "server.h"
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
-#include "common.h"
 #include "storage.h"
 #include "cds_objects.h"
 #include "process.h"
@@ -41,6 +40,9 @@
 #include "serve_request_handler.h"
 #include "web/pages.h"
 #include "dictionary.h"
+
+#include <sys/types.h>
+#include <sys/stat.h>
 
 using namespace zmm;
 using namespace mxml;

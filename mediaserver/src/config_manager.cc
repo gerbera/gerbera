@@ -25,6 +25,7 @@
 #include "storage.h"
 #include <sys/types.h>
 #include <sys/stat.h>
+#include "tools.h"
 
 using namespace zmm;
 using namespace mxml;

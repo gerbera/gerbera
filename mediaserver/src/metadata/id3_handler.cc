@@ -28,7 +28,8 @@
 
 #include "id3_handler.h"
 #include "string_converter.h"
-#include "logger.h"
+#include "common.h"
+#include "tools.h"
 
 using namespace zmm;
 

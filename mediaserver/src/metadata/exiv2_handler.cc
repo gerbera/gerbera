@@ -28,6 +28,7 @@
 
 #include "exiv2_handler.h"
 #include "string_converter.h"
+#include "tools.h"
 
 using namespace zmm;
 

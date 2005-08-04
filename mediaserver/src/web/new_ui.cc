@@ -26,6 +26,7 @@
 #include "dictionary.h"
 #include "pages.h"
 #include "session_manager.h"
+#include "tools.h"
 
 using namespace zmm;
 using namespace mxml;

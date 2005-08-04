@@ -23,6 +23,7 @@
 #ifndef __CDS_RESOURCE_MANAGER_H__
 #define __CDS_RESOURCE_MANAGER_H__
 
+#include "mxml/mxml.h"
 #include "common.h"
 #include "cds_objects.h"
 

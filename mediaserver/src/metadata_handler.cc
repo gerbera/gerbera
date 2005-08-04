@@ -23,7 +23,7 @@
 
 #include "metadata_handler.h"
 #include "string_converter.h"
-#include "logger.h"
+#include "tools.h"
 
 #ifdef HAVE_EXIV2
 #include "metadata/exiv2_handler.h"

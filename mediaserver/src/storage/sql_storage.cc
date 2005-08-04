@@ -19,6 +19,7 @@
 */
 
 #include "sql_storage.h"
+#include "tools.h"
 
 using namespace zmm;
 

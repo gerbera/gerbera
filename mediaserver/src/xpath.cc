@@ -19,6 +19,7 @@
 */
 
 #include "common.h"
+#include "tools.h"
 #include "xpath.h"
 
 using namespace zmm;

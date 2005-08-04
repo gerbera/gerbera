@@ -33,6 +33,8 @@
 #include "file_io_handler.h"
 #include "dictionary.h"
 #include "serve_request_handler.h"
+#include "tools.h"
+
 
 using namespace zmm;
 using namespace mxml;

@@ -20,6 +20,7 @@
 
 #include "cds_objects.h"
 #include "tools.h"
+#include "mxml/mxml.h"
 
 using namespace zmm;
 using namespace mxml;

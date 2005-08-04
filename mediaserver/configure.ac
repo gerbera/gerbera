@@ -9,8 +9,7 @@ AC_CONFIG_FILES([
     scripts/Makefile
     scripts/js/Makefile
 
-    src/Makefile
-    src/build/Makefile
+    build/Makefile
     
     web/Makefile
     web/icons/Makefile

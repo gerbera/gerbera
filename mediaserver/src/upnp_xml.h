@@ -24,6 +24,7 @@
 #define __UPNP_XML_H__
 
 #include "common.h"
+#include "mxml/mxml.h"
 #include "cds_objects.h"
 
 /// \brief Renders XML for the action response header.

@@ -20,6 +20,8 @@
 
 #include "common.h"
 #include "pages.h"
+#include "tools.h"
+#include "mxml/mxml.h"
 
 using namespace zmm;
 using namespace mxml;

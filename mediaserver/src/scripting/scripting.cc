@@ -26,6 +26,7 @@
 #include "content_manager.h"
 #include "metadata_handler.h"
 #include "config_manager.h"
+#include "tools.h"
 
 using namespace zmm;
 
