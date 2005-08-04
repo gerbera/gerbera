@@ -207,6 +207,9 @@ If you have already performed the setup using tomb-install you will have
 a default configuration file in your ~/.mediatomb directory, it is called
 config.xml
 
+Note: paths starting with / are treated as absulute. Paths which do not
+start with / are treated as relative to server home (See <home>).
+
 Here is a sample configuration file with description of the various tags.
 - "Required" means that the server will not start if the tag is missing in the
   configuration.
@@ -216,66 +219,84 @@ Here is a sample configuration file with description of the various tags.
 - "Default if missing" means, that the tag can be left out, but will be 
   filled by some default value upon server startup. 
 
+<server> (Required)
+    This section defines the server configuration parameters.
 
-<ui enabled="no"/> (Required)
-    Enables or disables the web user interface, change to "yes" in order 
-    to enable it.
+    <ui enabled="no"/> (Required)
+        Enables or disables the web user interface, change to "yes" in order 
+        to enable it.
 
-<port>50555<port/> (Optional)
-    Specifies the port where the server will be listening for HTTP requests.
-    Note, that because of the implementation in the UPnP SDK only ports
-    above 49152 are supported.
+    <port>50555<port/> (Optional)
+        Specifies the port where the server will be listening for HTTP 
+        requests. Note, that because of the implementation in the UPnP SDK 
+        only ports above 49152 are supported.
 
-<ip>192.168.0.23</ip> (Optional)
-    Specifies the IP address to bind to. (Optional)
+    <ip>192.168.0.23</ip> (Optional)
+        Specifies the IP address to bind to. (Optional)
     
-<name>MediaTomb</name> (Default if missing: MediaTomb)
-    Server friendly name, you will see this on your devices that you use to
-    access the server.
+    <name>MediaTomb</name> (Default if missing: MediaTomb)
+        Server friendly name, you will see this on your devices that you use 
+        to access the server.
     
-<udn/> (Required)
-    Unique Device Name, according to the UPnP spec it must be consistent
-    throughout reboots. You can fill in something yourself, but we suggest
-    that you leave this tag empty - it will be filled out and saved
-    automatically after the first launch of the server.
+    <udn/> (Required)
+        Unique Device Name, according to the UPnP spec it must be consistent
+        throughout reboots. You can fill in something yourself, but we suggest
+        that you leave this tag empty - it will be filled out and saved
+        automatically after the first launch of the server.
 
-<home>/home/your_user_name/.mediatomb</home> (Required)
-    Server home - the server will search for the data that it needs relative
-    to this directory (for the media database, for directory holding device and 
-    service description xml files, icons, etc.)
-    
-<webroot>web</webroot> (Required)
-    Root directory for the web server (relative to serer home), this is the 
-    location where device description documents, UI xsl files, etc. are
-    stored.
-    
-<alive>180</alive> (Default if missing: 180)
-    Interval for broadcasting SSDP:alive messages
-    
-<bookmark>mediatomb.html</bookmark> (Default if missing: mediatomb.html)
-    Bookmark file for fast access to the web UI
-    
-<storage driver="..."> (Required)
-    Specifies the storage driver. Currently sqlite3 and mysql are supported.
-    
-    Every storage driver has it's own configuration parameters.
-    
-    - for sqlite3 use
-    <storage driver="sqlite3">
-       <database-file>sqlite3.db</database-file> (Required) Database filename.
-    </storage>
+    <home>/home/your_user_name/.mediatomb</home> (Required)
+        Server home - the server will search for the data that it needs 
+        relative to this directory (for the media database, for directory 
+        holding device and service description xml files, icons, etc.)
+        
+    <webroot>web</webroot> (Required)
+        Root directory for the web server (relative to serer home), this is 
+        the location where device description documents, UI xsl files, etc. 
+        are stored.
 
-    - for mysql you'll need something like this:
-    <storage driver="mysql">
-      <host>localhost</host>
-      <username>root</username>
-      <password></password>
-      <database>mediatomb</database>
-    </storage>
+    <servedir>/home/myuser/mystuff</servedir> (Optional)
+        Files from this directory will be served as from a regular webserver.
+        They do not need to be added to the database, but they are also not
+        served via UPnP browse requests.
+        
+        The url is: http://ip:port/content/serve/
+        Directory listing is not supported, you have to specify full paths.
+        
+        Example: the file something.jar is located in 
+        /home/myuser/mystuff/javasubdir/something.jar on your filesystem. 
+        Assuming the above configuration you could download it by entering 
+        this link in your web browser: 
+        http://192.168.0.23:50555/content/serve/javasubdir/something.jar
+        
+        
+    <alive>180</alive> (Default if missing: 180)
+        Interval for broadcasting SSDP:alive messages
+        
+    <bookmark>mediatomb.html</bookmark> (Default if missing: mediatomb.html)
+        Bookmark file for fast access to the web UI
+        
+    <storage driver="..."> (Required)
+        Specifies the storage driver. Currently sqlite3 and mysql are 
+        supported.
+    
+        Every storage driver has it's own configuration parameters.
+    
+        - for sqlite3 use
+        <storage driver="sqlite3">
+           <database-file>sqlite3.db</database-file> (Required) 
+        </storage>
+
+        - for mysql you'll need something like this:
+        <storage driver="mysql">
+          <host>localhost</host>
+          <username>root</username>
+          <password></password>
+          <database>mediatomb</database>
+        </storage>
   
-<import>
+<import> (Required)
     Section specifying various import parameters, currently only one is 
-    supported. (Required)
+    supported. 
     
     <filesystem-charset>ISO-8859-1</filesystem-charset>
         (Default if missing: ISO-8859-1)
@@ -292,7 +313,7 @@ Here is a sample configuration file with description of the various tags.
         For more details read doc/scripting-intro.txt
         This setting defaults to ${prefix}/share/mediatomb/js/import.js
 
-    <mappings>
+    <mappings> (Optional, also all subsections are optional)
         Defines various mapping options for importing media, currently
         two subsections are supported.
 

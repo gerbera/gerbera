@@ -1,6 +1,8 @@
 MediaTomb - UPnP AV Mediaserver for Linux.
 
 v0.8.1
+        * added "serve" directory, any files there can be downloaded 
+          like from a normal webserver
         * implemented keyword extraction for auxdata from libexif
         * implemented keyword extraction for auxdata from libextractor
         * added Exif metadata support for images via libexif.
