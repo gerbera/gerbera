@@ -75,5 +75,5 @@ Planned improvements / features (ordered by importance)
   dependencies on heavy libraries, which we would rather avoid.
   Another reason is browser compatibility.
 
-
+- Add source filename and line number to log_debug output
 
