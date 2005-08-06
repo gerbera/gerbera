@@ -255,7 +255,7 @@ static void addResourceField(resource_attributes_t attr, EXTRACTOR_KeywordList *
     if (string_ok(value))
     {
 //        item->setMetadata(String(MT_KEYS[field].upnp), sc->convert(value));
-        item->setResource(0, String(RES_KEYS[attr].upnp), value);
+          item->getResource(0)->addAttribute(String(RES_KEYS[attr].upnp), value);
 //        log_info(("Got resource: %d, %s\n", attr, sc->convert(value).c_str()));
     }
 }
