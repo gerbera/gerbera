@@ -126,8 +126,12 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
     handler->fillMetadata(item);
 }
 
-String MetadataHandler::getFieldName(metadata_fields_t field)
+String MetadataHandler::getMetaFieldName(metadata_fields_t field)
 {
     return String(MT_KEYS[field].upnp);
 }
 
+String MetadataHandler::getResAttrName(resource_attributes_t attr)
+{
+    return String(RES_KEYS[attr].upnp);
+}

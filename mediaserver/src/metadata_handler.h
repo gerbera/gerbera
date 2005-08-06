@@ -82,7 +82,8 @@ public:
     MetadataHandler();
        
     static void setMetadata(zmm::Ref<CdsItem> item);
-    static zmm::String getFieldName(metadata_fields_t field);
+    static zmm::String getMetaFieldName(metadata_fields_t field);
+    static zmm::String getResAttrName(resource_attributes_t attr);
 
     virtual void fillMetadata(zmm::Ref<CdsItem> item) = 0;
     virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum) = 0;
