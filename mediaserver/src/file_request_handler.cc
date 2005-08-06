@@ -56,7 +56,8 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     Ref<Dictionary> dict(new Dictionary());
     dict->decode(parameters);
 
-    log_debug(("full url (filename): %s, url_path: %s, parameters: %s", filename, url_path.c_str(), parameters.c_str()));
+    log_debug(("full url (filename): %s, url_path: %s, parameters: %s",
+               filename, url_path.c_str(), parameters.c_str()));
     
     object_id = dict->get("object_id");
     if (object_id == nil)
@@ -199,11 +200,19 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, IN enum UpnpOpe
 
     String path = item->getLocation();
 
+    /* determining which resource to serve */
+    int res_id = 0;
+    String s_res_id = dict->get(URL_RESOURCE_ID);
+    if (s_res_id != nil)
+        res_id = s_res_id.toInt();
 
-    Ref<IOHandler> io_handler(new FileIOHandler(path));
-    io_handler->open(mode);
-
-    log_info(("FileIOHandler web_open: returning\n"));
-    return io_handler;
+    // Per default and in case of a bad resource ID, serve the file
+    // itself
+    if (res_id <= 0 || res_id > item->getResourceCount())
+    {
+        Ref<IOHandler> io_handler(new FileIOHandler(path));
+        io_handler->open(mode);
+        return io_handler;
+    }
 }
 

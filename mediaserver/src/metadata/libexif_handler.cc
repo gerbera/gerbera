@@ -386,10 +386,10 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
             String th_mimetype = String((char *)EXTRACTOR_extractLast(EXTRACTOR_MIMETYPE, keywords));
             String th_resolution = String((char *)EXTRACTOR_extractLast(EXTRACTOR_SIZE, keywords));
 
-            item->addResource();
-            
-            item->setResource(1, String(RES_KEYS[R_PROTOCOLINFO].upnp), renderProtocolInfo(th_mimetype));
-            item->setResource(1, String(RES_KEYS[R_RESOLUTION].upnp), th_resolution);
+            Ref<CdsResource> resource(new CdsResource());
+            resource->addAttribute(String(RES_KEYS[R_PROTOCOLINFO].upnp), renderProtocolInfo(th_mimetype));
+            resource->addAttribute(String(RES_KEYS[R_RESOLUTION].upnp), th_resolution);
+            item->addResource(resource);
 
             EXTRACTOR_freeKeywords(keywords);
             EXTRACTOR_removeAll(extractors);
