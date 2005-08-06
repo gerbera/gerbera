@@ -117,7 +117,7 @@ void quicksort(COMPARABLE *arr, int size, COMPARATOR comparator);
 /// attribute: "http-get:*:mimetype:*"
 /// 
 /// \param mimetype the mimetype that should be inserted
-zmm::String renderProtocolInfo(zmm::String mimetype);
+zmm::String renderProtocolInfo(zmm::String mimetype, zmm::String protocol = PROTOCOL);
 
 /// \brief Converts a number of seconds to H+:MM:SS representation as required by
 /// the UPnP spec

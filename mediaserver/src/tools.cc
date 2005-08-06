@@ -360,10 +360,10 @@ void quicksort(COMPARABLE *arr, int size, COMPARATOR comparator)
 	quicksort_impl(arr, 0, size - 1, comparator);
 }
 
-String renderProtocolInfo(String mimetype)
+String renderProtocolInfo(String mimetype, String protocol)
 {
-    if (string_ok(mimetype))
-        return String("http-get:*:") + mimetype + ":*";
+    if (string_ok(mimetype) && string_ok(protocol))
+        return protocol + ":*:" + mimetype + ":*";
     else
         return String("http-get:*:*:*");
 }

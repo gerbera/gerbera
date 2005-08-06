@@ -111,6 +111,8 @@ void web::new_ui::add_item()
 void web::new_ui::add_url()
 {
     String tmp;
+    String protocol;
+
     Ref<CdsItemExternalURL> item (new CdsItemExternalURL());
     
     item->setParentID(param("object_id"));
@@ -132,9 +134,13 @@ void web::new_ui::add_url()
         tmp = MIMETYPE_DEFAULT;
     }
 
+    protocol = param("protocol");
+    if (!string_ok(protocol))
+        protocol = PROTOCOL;
+    
     item->setMimeType(tmp);
     item->addResource();
-    item->setResource(0, MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(tmp));
+    item->setResource(0, MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(tmp, protocol));
   
     Ref<CdsObject> obj = RefCast(item, CdsObject);
     
@@ -146,7 +152,8 @@ void web::new_ui::add_url()
 
 void web::new_ui::add_internal_url()
 {
-    String tmp;   
+    String tmp; 
+    String protocol;
     Ref<CdsItemInternalURL> item (new CdsItemInternalURL());
     
     item->setParentID(param("object_id"));
@@ -168,9 +175,13 @@ void web::new_ui::add_internal_url()
         tmp = MIMETYPE_DEFAULT;
     }
 
+    protocol = param("protocol");
+    if (!string_ok(protocol))
+        protocol = PROTOCOL;
+
     item->setMimeType(tmp);
     item->addResource();
-    item->setResource(0, MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(tmp));
+    item->setResource(0, MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(tmp, protocol));
    
     Ref<CdsObject> obj = RefCast(item, CdsObject);
     
@@ -363,6 +374,7 @@ void web::new_ui::process()
             else
             {
                 inputs->appendChild(addOption("URL: ", "location"));
+                inputs->appendChild(addOption("Protocol: ", "protocol", PROTOCOL));
             }
             inputs->appendChild(addOption("Class: ", "class", "object.item"));
             inputs->appendChild(addOption("Description: ", "description"));

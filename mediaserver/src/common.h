@@ -62,7 +62,10 @@
 #define MIMETYPE_DEFAULT               "application/octet-stream"
 
 // regexp for mimetype matching
-#define MIMETYPE_REGEXP "^([a-z0-9_-]+/[a-z0-9_-]+)"
+#define MIMETYPE_REGEXP                 "^([a-z0-9_-]+/[a-z0-9_-]+)"
+
+// default protocol 
+#define PROTOCOL                        "http-get"
 
 // device description defaults
 #define DESC_DEVICE_NAMESPACE           "urn:schemas-upnp-org:device-1-0"
