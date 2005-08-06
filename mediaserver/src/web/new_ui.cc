@@ -27,6 +27,7 @@
 #include "pages.h"
 #include "session_manager.h"
 #include "tools.h"
+#include "metadata_handler.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -48,17 +49,21 @@ static Ref<Element> addOption(String option_name, String option_type, String def
 
 void web::new_ui::add_container()
 {
+    String tmp;
+
     Ref<CdsContainer> cont (new CdsContainer());
     cont->setParentID(param("object_id"));
     cont->setTitle(param("title"));
-    if (param("location") != nil)
-        cont->setLocation(param("location"));
+
+    tmp = param("location");
+    if (tmp != nil)
+        cont->setLocation(tmp);
     else
         cont->setLocation("");
 
-    String upnp_class = param("class");
-    if (string_ok(upnp_class))
-        cont->setClass(upnp_class);
+    tmp = param("class");
+    if (string_ok(tmp))
+        cont->setClass(tmp);
 
     Ref<CdsObject> obj = RefCast(cont, CdsObject);
     
@@ -69,26 +74,32 @@ void web::new_ui::add_container()
 
 void web::new_ui::add_item()
 {
+    String tmp;
     Ref<CdsItem> item (new CdsItem());
     
     item->setParentID(param("object_id"));
     item->setTitle(param("title"));
     item->setLocation(param("location"));
 
-    String upnp_class = param("class");
-    if (string_ok(upnp_class))
-        item->setClass(upnp_class);
+    tmp = param("class");
+    if (string_ok(tmp))
+        item->setClass(tmp);
 
-    /// \todo descriptoin should be taken from the dictionary
-/*    String description = param("description");
-    if (string_ok(description))
-        item->setDescription(description);
-*/
+    tmp = param("description");
+    if (string_ok(tmp))
+        item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), tmp);
+
     /// \todo is there a default setting? autoscan? import settings?
-    String mimetype = param("mime-type");
-    if (string_ok(mimetype))
-        item->setMimeType(mimetype);
-    
+    tmp = param("mime-type");
+    if (!string_ok(tmp))
+    {  
+        tmp = MIMETYPE_DEFAULT;
+    }
+
+    item->setMimeType(tmp);
+    item->addResource();
+    item->setResource(0, MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(tmp));
+   
     Ref<CdsObject> obj = RefCast(item, CdsObject);
     
     Ref<ContentManager> cm = ContentManager::getInstance();
@@ -99,24 +110,67 @@ void web::new_ui::add_item()
 
 void web::new_ui::add_url()
 {
+    String tmp;
     Ref<CdsItemExternalURL> item (new CdsItemExternalURL());
     
     item->setParentID(param("object_id"));
     item->setTitle(param("title"));
-    item->setLocation(param("location"));
+    item->setURL(param("location"));
 
-    String upnp_class = param("class");
-    if (string_ok(upnp_class))
-        item->setClass(upnp_class);
+    tmp = param("class");
+    if (string_ok(tmp))
+        item->setClass(tmp);
 
-/*    String description = param("description");
-    if (string_ok(description))
-        item->setDescription(description);
-*/
+    tmp = param("description");
+    if (string_ok(tmp))
+        item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), tmp);
+
     /// \todo is there a default setting? autoscan? import settings?
-    String mimetype = param("mime-type");
-    if (string_ok(mimetype))
-        item->setMimeType(mimetype);
+    tmp = param("mime-type");
+    if (!string_ok(tmp))
+    {  
+        tmp = MIMETYPE_DEFAULT;
+    }
+
+    item->setMimeType(tmp);
+    item->addResource();
+    item->setResource(0, MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(tmp));
+  
+    Ref<CdsObject> obj = RefCast(item, CdsObject);
+    
+    Ref<ContentManager> cm = ContentManager::getInstance();
+
+    cm->addObject(obj);
+
+}
+
+void web::new_ui::add_internal_url()
+{
+    String tmp;   
+    Ref<CdsItemInternalURL> item (new CdsItemInternalURL());
+    
+    item->setParentID(param("object_id"));
+    item->setTitle(param("title"));
+    item->setURL(param("location"));
+
+    tmp = param("class");
+    if (string_ok(tmp))
+        item->setClass(tmp);
+
+    tmp = param("description");
+    if (string_ok(tmp))
+        item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), tmp);
+
+    /// \todo is there a default setting? autoscan? import settings?
+    tmp = param("mime-type");
+    if (!string_ok(tmp))
+    {  
+        tmp = MIMETYPE_DEFAULT;
+    }
+
+    item->setMimeType(tmp);
+    item->addResource();
+    item->setResource(0, MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(tmp));
    
     Ref<CdsObject> obj = RefCast(item, CdsObject);
     
@@ -128,6 +182,7 @@ void web::new_ui::add_url()
 
 void web::new_ui::add_active_item()
 {
+    String tmp;
     Ref<CdsActiveItem> item (new CdsActiveItem());
     
     item->setParentID(param("object_id"));
@@ -135,22 +190,29 @@ void web::new_ui::add_active_item()
     item->setLocation(param("location"));
     item->setAction(param("action"));
 
-    String upnp_class = param("class");
-    if (string_ok(upnp_class))
-        item->setClass(upnp_class);
+    tmp = param("class");
+    if (string_ok(tmp))
+        item->setClass(tmp);
 
-/*    String description = param("description");
-    if (string_ok(description))
-        item->setDescription(description);
-*/
+    tmp = param("description");
+    if (string_ok(tmp))
+        item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), tmp);
+
+    tmp = param("mime-type");
+    if (!string_ok(tmp))
+    {  
+        tmp = MIMETYPE_DEFAULT;
+    }
+
+    item->setMimeType(tmp);
+    item->addResource();
+    item->setResource(0, MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(tmp));
+
     /// \todo is there a default setting? autoscan? import settings?
-    String mimetype = param("mime-type");
-    if (string_ok(mimetype))
-        item->setMimeType(mimetype);
 
-    String state = param("state");
-    if (string_ok(state))
-        item->setState(state);
+    tmp = param("state");
+    if (string_ok(tmp))
+        item->setState(tmp);
     
     Ref<CdsObject> obj = RefCast(item, CdsObject);
     
@@ -179,22 +241,18 @@ void web::new_ui::add_object()
             this->add_container();
             break;
 
-        case OBJECT_TYPE_ITEM:
+        case OBJECT_TYPE_ITEM_INTERNAL_URL:
             if (!string_ok(location))
-                throw Exception(String("no location given"));
-
-            if (!check_path(location, false))
-                throw Exception(String("file not found"));
-            this->add_item();
+                throw Exception(String("No URL given"));
+            this->add_internal_url();
             break;
-        
+
         case OBJECT_TYPE_ITEM_EXTERNAL_URL:
             if (!string_ok(location))
                 throw Exception(String("No URL given"));
             this->add_url();
             break;
- 
-            
+
         case OBJECT_TYPE_ACTIVE_ITEM:
             if (!string_ok(location))
                 throw Exception(String("no location given"));
@@ -202,6 +260,15 @@ void web::new_ui::add_object()
             if (!check_path(location, false))
                 throw Exception(String("path not found"));
             this->add_active_item();
+            break;
+
+        case OBJECT_TYPE_ITEM:
+            if (!string_ok(location))
+                throw Exception(String("no location given"));
+
+            if (!check_path(location, false))
+                throw Exception(String("file not found"));
+            this->add_item();
             break;
 
         default:
@@ -213,7 +280,7 @@ void web::new_ui::add_object()
 // general idea:
 // there will be a special "type" parameter
 // when ommited, we will serve a default interface
-// when when given, we will serve a special inteface to match the object type
+// when given, we will serve a special inteface to match the object type
 void web::new_ui::process()
 {
     log_info(("edit: start\n"));
@@ -225,6 +292,7 @@ void web::new_ui::process()
     String TYPE_ITEM         = String::from(OBJECT_TYPE_ITEM);
     String TYPE_ACTIVE_ITEM  = String::from(OBJECT_TYPE_ACTIVE_ITEM);
     String TYPE_ITEM_EXTERNAL_URL = String::from(OBJECT_TYPE_ITEM_EXTERNAL_URL);
+    String TYPE_ITEM_INTERNAL_URL = String::from(OBJECT_TYPE_ITEM_INTERNAL_URL);
 
     check_request();
 
@@ -281,11 +349,11 @@ void web::new_ui::process()
         select->appendChild(addOption("Item", TYPE_ITEM));
         select->appendChild(addOption("Active Item", TYPE_ACTIVE_ITEM));
         select->appendChild(addOption("External Link (URL)", TYPE_ITEM_EXTERNAL_URL));
-        //    select->appendChild(addOption("Dynamic Item", TYPE_DYNAMIC_ITEM));
+        select->appendChild(addOption("Internal Link (Local URL)", TYPE_ITEM_INTERNAL_URL));
 
         inputs->appendChild(addOption("Title: ", "title"));
 
-        if ((object_type == TYPE_ITEM) || (object_type == TYPE_ITEM_EXTERNAL_URL))
+        if ((object_type == TYPE_ITEM) || (object_type == TYPE_ITEM_EXTERNAL_URL) || (object_type == TYPE_ITEM_INTERNAL_URL))
         {
             select->addAttribute("default", object_type);
             if (object_type == TYPE_ITEM)
@@ -297,7 +365,7 @@ void web::new_ui::process()
                 inputs->appendChild(addOption("URL: ", "location"));
             }
             inputs->appendChild(addOption("Class: ", "class", "object.item"));
-//            inputs->appendChild(addOption("Description: ", "description"));
+            inputs->appendChild(addOption("Description: ", "description"));
             inputs->appendChild(addOption("Mimetype: ", "mime-type"));
         }
         else if (object_type == TYPE_ACTIVE_ITEM)
@@ -305,7 +373,7 @@ void web::new_ui::process()
             select->addAttribute("default", TYPE_ACTIVE_ITEM);
             inputs->appendChild(addOption("Location: ", "location"));
             inputs->appendChild(addOption("Class: ", "class", "object.item.activeItem"));
-//            inputs->appendChild(addOption("Description: ", "description"));
+            inputs->appendChild(addOption("Description: ", "description"));
             inputs->appendChild(addOption("Mimetype: ", "mime-type"));
             inputs->appendChild(addOption("Action Script: ", "action"));
             inputs->appendChild(addOption("State: ", "state"));

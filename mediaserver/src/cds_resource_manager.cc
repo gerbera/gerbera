@@ -59,14 +59,19 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
 
     /// \todo move this down into the "for" loop and create different urls for each resource once the io handlers are ready
     int objectType = item->getObjectType();
-    if (IS_CDS_ITEM_EXTERNAL_URL(objectType))
+    if (IS_CDS_ITEM_INTERNAL_URL(objectType))
+    {
+        urlBase = server->getVirtualURL() + "/" + CONTENT_SERVE_HANDLER + 
+                  "/" + item->getLocation();
+    }
+    else if (IS_CDS_ITEM_EXTERNAL_URL(objectType))
     {
         urlBase = item->getLocation();
     }
     else
     { 
-        urlBase = server->getVirtualURL() + DIR_SEPARATOR +
-            CONTENT_MEDIA_HANDLER + URL_REQUEST_SEPARATOR + dict->encode();
+        urlBase = server->getVirtualURL() + "/" +
+        CONTENT_MEDIA_HANDLER + URL_REQUEST_SEPARATOR + dict->encode();
     }
 
     int resCount = item->getResourceCount();

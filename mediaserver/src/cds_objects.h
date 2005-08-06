@@ -30,11 +30,13 @@
 #define OBJECT_TYPE_ITEM 2
 #define OBJECT_TYPE_ACTIVE_ITEM 4
 #define OBJECT_TYPE_ITEM_EXTERNAL_URL 8
+#define OBJECT_TYPE_ITEM_INTERNAL_URL 16
 
 #define IS_CDS_CONTAINER(type) (type & OBJECT_TYPE_CONTAINER)
 #define IS_CDS_ITEM(type) (type & OBJECT_TYPE_ITEM)
 #define IS_CDS_ACTIVE_ITEM(type) (type & OBJECT_TYPE_ACTIVE_ITEM)
 #define IS_CDS_ITEM_EXTERNAL_URL(type) (type & OBJECT_TYPE_ITEM_EXTERNAL_URL)
+#define IS_CDS_ITEM_INTERNAL_URL(type) (type & OBJECT_TYPE_ITEM_INTERNAL_URL)
 
 int CdsObjectTitleComparator(void *arg1, void *arg2);
 
@@ -294,6 +296,7 @@ public:
     virtual void validate();
 };
 
+/// \brief An item that is accessible via a URL.
 class CdsItemExternalURL : public CdsItem
 {
 public:
@@ -305,7 +308,7 @@ public:
     /// \param URL full url to the item: http://somewhere.com/something.mpg
     void setURL(zmm::String URL);
 
-    /// \brief Get the path of the action script.
+    /// \brief Get the URL of the item.
     zmm::String getURL();
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
@@ -315,6 +318,26 @@ public:
     ///
     /// See description for CdsObject::equals() for details.
     //virtual int equals(zmm::Ref<CdsObject> obj, bool exactly=false);
+
+    /// \brief Checks if the minimum required parameters for the object have been set and are valid.
+    virtual void validate();
+};
+
+/// \brief An item that is pointing to a file located in the "servedir"
+/// directory.
+///
+/// This implementation will alow to easily launch Java games on the
+/// Streamium media renderer. Why "internal URL"? The port of the server
+/// can change upon restarts, I have seen that the SDK often binds to 
+/// a new port (no matter what is configured). The location of an
+/// internal URL will be specified as /mystuff/myfile.txt and will
+/// resolve to http://serverip:serverport/content/serve/mystuff/myfile.txt
+class CdsItemInternalURL : public CdsItemExternalURL
+{
+public:
+
+    /// \brief Constructor, sets the object type.
+    CdsItemInternalURL();
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     virtual void validate();

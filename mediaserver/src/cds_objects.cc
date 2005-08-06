@@ -167,10 +167,14 @@ void CdsObject::validate()
 Ref<CdsObject> CdsObject::createObject(int objectType)
 {
     CdsObject *pobj;
-
+    
     if(IS_CDS_CONTAINER(objectType))
     {
         pobj = new CdsContainer();
+    }
+    else if(IS_CDS_ITEM_INTERNAL_URL(objectType))
+    {
+        pobj = new CdsItemInternalURL();
     }
     else if(IS_CDS_ITEM_EXTERNAL_URL(objectType))
     {
@@ -398,10 +402,27 @@ void CdsItemExternalURL::validate()
 {
     CdsObject::validate();
     if ((!string_ok(this->mimeType)) || (!string_ok(this->location)))
-        throw Exception(String("CdsItem: validation failed"));
+        throw Exception(String("CdsItemExternalURL: validation failed"));
 }
 //---------
 
+CdsItemInternalURL::CdsItemInternalURL() : CdsItemExternalURL()
+{
+    objectType |= OBJECT_TYPE_ITEM_INTERNAL_URL;
+
+    upnp_class = "object.item";
+    mimeType = MIMETYPE_DEFAULT;
+}
+
+void CdsItemInternalURL::validate()
+{
+    CdsObject::validate();
+    if ((!string_ok(this->mimeType)) || (!string_ok(this->location)))
+        throw Exception(String("CdsItemInternalURL: validation failed"));
+
+    if (this->location.startsWith("http://"))
+        throw Exception(String("CdsItemInternalURL: validation failed: must be realtive!"));
+}
 
 CdsContainer::CdsContainer() : CdsObject()
 {

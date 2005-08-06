@@ -87,6 +87,7 @@ protected:
     void add_container();
     void add_item();
     void add_url();
+    void add_internal_url();
     void add_active_item();
     void add_object();
 public:

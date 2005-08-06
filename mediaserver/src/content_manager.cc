@@ -379,12 +379,12 @@ void ContentManager::updateObject(String objectID, Ref<Dictionary> parameters)
         
         if (string_ok(description)) 
         {
-            cloned_item->setMetadata(MetadataHandler::getFieldName(M_DESCRIPTION),
+            cloned_item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION),
                                      description);
         }
         else
         {
-            item->removeMetadata(MetadataHandler::getFieldName(M_DESCRIPTION));
+            item->removeMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION));
         }
 
         if (string_ok(mimetype)) cloned_item->setMimeType(mimetype);
@@ -413,12 +413,12 @@ void ContentManager::updateObject(String objectID, Ref<Dictionary> parameters)
         // state and description can be an empty strings - if you want to clear it
         if (string_ok(description)) 
         {
-            cloned_item->setMetadata(MetadataHandler::getFieldName(M_DESCRIPTION),
+            cloned_item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION),
                                      description);
         }
         else
         {
-            item->removeMetadata(MetadataHandler::getFieldName(M_DESCRIPTION));
+            item->removeMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION));
         }
 
         if (state != nil) cloned_item->setState(state);
