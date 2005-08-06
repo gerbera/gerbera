@@ -97,8 +97,11 @@ void web::new_ui::add_item()
     }
 
     item->setMimeType(tmp);
-    item->addResource();
-    item->setResource(0, MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(tmp));
+
+    Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
+    resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
+                           renderProtocolInfo(tmp));
+    item->addResource(resource);
    
     Ref<CdsObject> obj = RefCast(item, CdsObject);
     
@@ -139,9 +142,12 @@ void web::new_ui::add_url()
         protocol = PROTOCOL;
     
     item->setMimeType(tmp);
-    item->addResource();
-    item->setResource(0, MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(tmp, protocol));
-  
+
+    Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
+    resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
+                           renderProtocolInfo(tmp, protocol));
+    item->addResource(resource);
+
     Ref<CdsObject> obj = RefCast(item, CdsObject);
     
     Ref<ContentManager> cm = ContentManager::getInstance();
@@ -180,9 +186,12 @@ void web::new_ui::add_internal_url()
         protocol = PROTOCOL;
 
     item->setMimeType(tmp);
-    item->addResource();
-    item->setResource(0, MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(tmp, protocol));
-   
+
+    Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
+    resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
+                           renderProtocolInfo(tmp, protocol));
+    item->addResource(resource);
+
     Ref<CdsObject> obj = RefCast(item, CdsObject);
     
     Ref<ContentManager> cm = ContentManager::getInstance();
@@ -216,8 +225,11 @@ void web::new_ui::add_active_item()
     }
 
     item->setMimeType(tmp);
-    item->addResource();
-    item->setResource(0, MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(tmp));
+
+    Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
+    resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
+                           renderProtocolInfo(tmp));
+    item->addResource(resource);
 
     /// \todo is there a default setting? autoscan? import settings?
 
