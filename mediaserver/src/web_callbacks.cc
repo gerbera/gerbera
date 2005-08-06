@@ -84,10 +84,6 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
                 
     if (link.startsWith(String("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_MEDIA_HANDLER))
     {
-        int res_id = 0;
-        String s_res_id = dict->get(URL_RESOURCE_ID);
-        if (s_res_id != nil)
-            res_id = s_res_id.toInt();
         ret = new FileRequestHandler();
     }
     else if (link.startsWith(String("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_UI_HANDLER))

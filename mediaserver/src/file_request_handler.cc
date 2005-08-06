@@ -33,6 +33,8 @@
 #include "file_io_handler.h"
 #include "dictionary.h"
 #include "file_request_handler.h"
+#include "metadata_handler.h"
+#include "tools.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -154,7 +156,30 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
         info->is_readable = 0;
     }
 
-    info->content_type = ixmlCloneDOMString(item->getMimeType().c_str());
+    String mimeType;
+    /* determining which resource to serve */
+
+    int res_id = 0;
+    String s_res_id = dict->get(URL_RESOURCE_ID);
+    if (s_res_id != nil)
+        res_id = s_res_id.toInt();
+
+    if (res_id <= 0 || res_id > item->getResourceCount())
+    {
+        // http-get:*:image/jpeg:*
+        String protocolInfo = item->getResource(res_id)->getAttributes()->get("protocolInfo");
+        if (protocolInfo != nil)
+        {
+            Ref<Array<StringBase> > parts = split_string(protocolInfo, ':');
+            mimeType = parts->get(2);
+        }
+    }
+    else
+    {
+        mimeType = item->getMimeType();
+    }
+    
+    info->content_type = ixmlCloneDOMString(mimeType.c_str());
 
     log_info(("web_get_info: Requested %s, ObjectID: %s, Location: %s\n, MimeType: %s\n",
            filename, object_id.c_str(), path.c_str(), info->content_type));
@@ -208,11 +233,18 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, IN enum UpnpOpe
 
     // Per default and in case of a bad resource ID, serve the file
     // itself
+
     if (res_id <= 0 || res_id > item->getResourceCount())
     {
         Ref<IOHandler> io_handler(new FileIOHandler(path));
         io_handler->open(mode);
         return io_handler;
+    }
+    else
+    {
+        Ref<CdsResource> resource = item->getResource(res_id);
+        Ref<MetadataHandler> h = MetadataHandler::createHandler(resource->getHandlerType());
+        return h->serveContent(item, res_id);
     }
 }
 

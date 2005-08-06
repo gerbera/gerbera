@@ -137,3 +137,15 @@ String MetadataHandler::getResAttrName(resource_attributes_t attr)
 {
     return String(RES_KEYS[attr].upnp);
 }
+
+Ref<MetadataHandler> MetadataHandler::createHandler(int handlerType)
+{
+    switch(handlerType)
+    {
+        case CH_LIBEXIF:
+            return Ref<MetadataHandler>(new LibExifHandler());
+        default:
+            throw Exception(String("unknown content handler ID: ") + handlerType);
+    }
+}
+

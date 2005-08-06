@@ -30,6 +30,7 @@
 
 // content handler Id's
 #define CH_DEFAULT 0
+#define CH_LIBEXIF 1
 
 typedef enum
 {
@@ -88,6 +89,8 @@ public:
     static zmm::String getMetaFieldName(metadata_fields_t field);
     static zmm::String getResAttrName(resource_attributes_t attr);
 
+    static zmm::Ref<MetadataHandler> createHandler(int handlerType);
+    
     virtual void fillMetadata(zmm::Ref<CdsItem> item) = 0;
     virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum) = 0;
 };
