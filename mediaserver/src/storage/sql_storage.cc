@@ -141,8 +141,8 @@ void SQLStorage::addObject(Ref<CdsObject> obj)
     for (int i = 0; i < obj->getResourceCount(); i++)
     {
         if (i > 0)
-            *buf << '&';
-        *buf << url_escape(obj->getResource(i)->encode());
+            *buf << RESOURCE_SEP;
+        *buf << obj->getResource(i)->encode();
     }
     *fields << ", resources";
     *values << ", " << quote(buf->toString());
@@ -205,8 +205,8 @@ void SQLStorage::updateObject(zmm::Ref<CdsObject> obj)
     for (int i = 0; i < obj->getResourceCount(); i++)
     {
         if (i > 0)
-            *buf << '&';
-        *buf << url_escape(obj->getResource(i)->encode());
+            *buf << RESOURCE_SEP;
+        *buf << obj->getResource(i)->encode();
     }
     *qb << ", resources = " << quote(buf->toString());
 
@@ -422,12 +422,11 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
         resources_str = row->col(_ref_resources);
     }
 
-    Ref<Array<StringBase> > resources = split_string(resources_str, '&');
+    Ref<Array<StringBase> > resources = split_string(resources_str,
+                                                     RESOURCE_SEP);
     for (int i = 0; i < resources->size(); i++)
     {
-        Ref<Dictionary> res(new Dictionary());
-        res->decode(url_unescape(String(resources->get(i))));
-        obj->addResource(res);
+        obj->addResource(CdsResource::decode(resources->get(i)));
     }
 
     int matched_types = 0;

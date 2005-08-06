@@ -30,9 +30,9 @@ libmediatomb_a_SOURCES = \
 ../src/main.cc \
 ../src/mem_io_handler.cc \
 ../src/metadata_handler.cc \
+../src/server.cc \
 ../src/process.cc \
 ../src/request_handler.cc \
-../src/server.cc \
 ../src/session_manager.cc \
 ../src/storage.cc \
 ../src/string_converter.cc \
@@ -47,8 +47,8 @@ libmediatomb_a_SOURCES = \
 ../src/upnp_cm_subscriptions.cc \
 ../src/upnp_xml.cc \
 ../src/web_callbacks.cc \
-../src/web_request_handler.cc \
 ../src/xpath.cc \
+../src/web_request_handler.cc \
 ../src/scripting/scripting.cc \
 ../src/storage/fs/fs_storage.cc \
 ../src/storage/mysql/mysql_storage.cc \
@@ -74,6 +74,7 @@ libmediatomb_a_SOURCES = \
 ../src/zmmf/stringtokenizer.cc \
 ../src/config_manager.cc \
 ../src/serve_request_handler.cc \
+../src/cds_resource.cc \
 ../src/rexp.cc \
 ../src/logger.cc \
 ../src/metadata/exiv2_handler.cc \
@@ -90,10 +91,12 @@ libmediatomb_a_SOURCES = \
 ../src/mxml/parseexception.h \
 ../src/mxml/parser.h \
 ../src/mxml/stringinput.h \
+../src/io_handler.h \
 ../src/action_request.h \
 ../src/cds_objects.h \
 ../src/cds_resource_manager.h \
 ../src/common.h \
+../src/cds_resource.h \
 ../src/config_manager.h \
 ../src/content_manager.h \
 ../src/destroyer.h \
@@ -101,10 +104,10 @@ libmediatomb_a_SOURCES = \
 ../src/exceptions.h \
 ../src/file_io_handler.h \
 ../src/file_request_handler.h \
-../src/io_handler.h \
 ../src/mem_io_handler.h \
 ../src/process.h \
 ../src/request_handler.h \
+../src/upnp_xml.h \
 ../src/server.h \
 ../src/session_manager.h \
 ../src/storage.h \
@@ -114,7 +117,6 @@ libmediatomb_a_SOURCES = \
 ../src/update_manager.h \
 ../src/upnp_cds.h \
 ../src/upnp_cm.h \
-../src/upnp_xml.h \
 ../src/web_callbacks.h \
 ../src/web_request_handler.h \
 ../src/xpath.h \

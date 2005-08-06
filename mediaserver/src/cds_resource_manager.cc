@@ -71,7 +71,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
     else
     { 
         urlBase = server->getVirtualURL() + "/" +
-        CONTENT_MEDIA_HANDLER + URL_REQUEST_SEPARATOR + dict->encode();
+            CONTENT_MEDIA_HANDLER + "?" + dict->encode();
     }
 
     int resCount = item->getResourceCount();
@@ -81,13 +81,15 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
 /*        String mimeType = item->getMimeType();
         if (!string_ok(mimeType)) mimeType = DEFAULT_MIMETYPE; */
 
-        Ref<Dictionary> res_attrs = item->getResource(i);
+        Ref<Dictionary> res_attrs = item->getResource(i)->getAttributes();
         /// \todo who will sync mimetype that is part of the protocl info and
         /// that is lying in the resources with the information that is in the
         /// resource tags?
 
 //        res_attrs->put("protocolInfo", prot + mimeType + ":*");
-        element->appendChild(UpnpXML_DIDLRenderResource(urlBase, res_attrs));
+        String tmp = urlBase + "&" + "res_id=" + i;
+      
+        element->appendChild(UpnpXML_DIDLRenderResource(tmp, res_attrs));
     }
 }
 

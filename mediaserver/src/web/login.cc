@@ -73,7 +73,7 @@ void web::login::process()
 //    *out << server->getVirtualURL();
     *out << "/content/";
     *out << CONTENT_UI_HANDLER;
-    *out << URL_REQUEST_SEPARATOR;
+    *out << '?';
     *out << "req_type=browse&object_id=0&requested_count=15&driver=1&sid=";
     *out << sid;
     *out << "\"></head></html>";

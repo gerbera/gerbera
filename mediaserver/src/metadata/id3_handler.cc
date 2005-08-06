@@ -118,16 +118,15 @@ void Id3Handler::fillMetadata(Ref<CdsItem> item)
 
         if (temp > 0)
         {
-            item->setResource(0, String(RES_KEYS[R_BITRATE].upnp), String("") + temp);
+            item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_BITRATE),
+                                               String::from(temp)); 
         }
 
         if ((header->time) > 0)
         {
-            item->setResource(0, String(RES_KEYS[R_DURATION].upnp), secondsToHMS(header->time));
+            item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_DURATION),
+                                               secondsToHMS(header->time));
         }
-
-
-                
     }
     
     tag.Clear();

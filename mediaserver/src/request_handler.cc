@@ -24,7 +24,7 @@ using namespace zmm;
 
 void RequestHandler::split_url(const char *url, String &path, String &parameters)
 {
-    char *i1 = index(url, URL_REQUEST_SEPARATOR);
+    char *i1 = index(url, '?');
 
     if (i1 == NULL)
     {

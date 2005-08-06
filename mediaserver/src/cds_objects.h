@@ -25,6 +25,7 @@
 
 #include "common.h"
 #include "dictionary.h"
+#include "cds_resource.h"
 
 #define OBJECT_TYPE_CONTAINER 1
 #define OBJECT_TYPE_ITEM 2
@@ -73,7 +74,7 @@ protected:
 
     zmm::Ref<Dictionary> metadata;
     zmm::Ref<Dictionary> auxdata;
-    zmm::Ref<zmm::Array<Dictionary> > resources;
+    zmm::Ref<zmm::Array<CdsResource> > resources;
 
 public:
     /// \brief Constructor, currently only sets the restricted flag to 1
@@ -165,20 +166,12 @@ public:
 
     /// \brief Get number of resource tags
     int getResourceCount();
+    /// \brief Query resources
+    zmm::Ref<zmm::Array<CdsResource> > getResources();
     /// \brief Query resource tag with the given index
-    zmm::Ref<Dictionary> getResource(int index);
-    /// \brief Query single resource tag key
-    zmm::String getResource(int index, zmm::String key);
-    /// \brief Set resource tag with the given index
-    void setResource(int index, zmm::Ref<Dictionary> resource);
-    /// \brief Set resource tag key with the given index and key
-    void setResource(int index, zmm::String key, zmm::String value);
+    zmm::Ref<CdsResource> getResource(int index);
     /// \brief Add resource tag
-    void addResource(zmm::Ref<Dictionary> resource);
-    /// \brief Add empty resource tag
-    void addResource();
-    
-
+    void addResource(zmm::Ref<CdsResource> resource);
     
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)

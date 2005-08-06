@@ -191,7 +191,9 @@ String url_escape(String str)
         unsigned char c = (unsigned char)data[i];
         if ((c >= '0' && c <= '9') ||
             (c >= 'A' && c <= 'Z') ||
-            (c >= 'a' && c <= 'z'))
+            (c >= 'a' && c <= 'z') ||
+            c == '_' ||
+            c == '-')
         {
             *buf << (char)c;
         }

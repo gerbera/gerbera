@@ -28,6 +28,9 @@
 #include "cds_objects.h"
 #include "io_handler.h"
 
+// content handler Id's
+#define CH_DEFAULT 0
+
 typedef enum
 {
     M_TITLE = 0,

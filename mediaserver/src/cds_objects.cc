@@ -29,7 +29,7 @@ CdsObject::CdsObject() : Object()
 {
     metadata = Ref<Dictionary>(new Dictionary());
     auxdata = Ref<Dictionary>(new Dictionary());
-    resources = Ref<Array<Dictionary> >(new Array<Dictionary>());
+    resources = Ref<Array<CdsResource> >(new Array<CdsResource>);
     restricted = 1;
     virt = 0;
 }
@@ -244,29 +244,16 @@ int CdsObject::getResourceCount()
 {
     return resources->size();
 }
-Ref<Dictionary> CdsObject::getResource(int index)
+Ref<Array<CdsResource> > CdsObject::getResources()
+{
+    return resources;
+}
+Ref<CdsResource> CdsObject::getResource(int index)
 {
     return resources->get(index);
 }
-String CdsObject::getResource(int index, String key)
+void CdsObject::addResource(Ref<CdsResource> resource)
 {
-    return resources->get(index)->get(key);
-}
-void CdsObject::setResource(int index, Ref<Dictionary> resource)
-{
-    resources->set(resource, index);
-}
-void CdsObject::setResource(int index, String key, String value)
-{
-    resources->get(index)->put(key, value);
-}
-void CdsObject::addResource(Ref<Dictionary> resource)
-{
-    resources->append(resource);
-}
-void CdsObject::addResource()
-{
-    Ref<Dictionary> resource(new Dictionary());
     resources->append(resource);
 }
 

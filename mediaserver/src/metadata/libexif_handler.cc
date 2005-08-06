@@ -357,7 +357,8 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
     // we got the image resolution so we can add our resource
     if (string_ok(imageX) && string_ok(imageY))
     {
-        item->setResource(0, String(RES_KEYS[R_RESOLUTION].upnp), imageX + "x" + imageY);
+        item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION),
+                                           imageX + "x" + imageY);
     }
 
 // we can only figure out information about the thumbnail if we have the

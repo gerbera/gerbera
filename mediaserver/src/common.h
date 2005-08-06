@@ -42,7 +42,6 @@
 // URL FORMATTING CONSTANTS
 #define URL_OBJECT_ID                   "object_id"
 #define URL_REQUEST_TYPE                "req_type"
-#define URL_REQUEST_SEPARATOR           '?'
 
 #define SERVER_VIRTUAL_DIR              "content"
 #define CONTENT_MEDIA_HANDLER           "media"

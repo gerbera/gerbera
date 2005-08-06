@@ -77,8 +77,10 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
 
     String mimetype = item->getMimeType();
 
-    item->addResource();
-    item->setResource(0, String(RES_KEYS[R_PROTOCOLINFO].upnp), renderProtocolInfo(mimetype));
+    Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
+    resource->addAttribute(String(RES_KEYS[R_PROTOCOLINFO].upnp),
+                           renderProtocolInfo(mimetype));
+    item->addResource(resource);
 
     Ref<MetadataHandler> handler;
     do
