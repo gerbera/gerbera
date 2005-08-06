@@ -386,10 +386,13 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
             String th_mimetype = String((char *)EXTRACTOR_extractLast(EXTRACTOR_MIMETYPE, keywords));
             String th_resolution = String((char *)EXTRACTOR_extractLast(EXTRACTOR_SIZE, keywords));
 
+            // \TODO JIN, convert to the new key lookup
             Ref<CdsResource> resource(new CdsResource(CH_LIBEXIF));
             resource->addAttribute(String(RES_KEYS[R_PROTOCOLINFO].upnp), renderProtocolInfo(th_mimetype));
             resource->addAttribute(String(RES_KEYS[R_RESOLUTION].upnp), th_resolution);
             item->addResource(resource);
+
+            log_debug(("TOOOOORTURE: %s\n", resource->encode().c_str()));
 
             EXTRACTOR_freeKeywords(keywords);
             EXTRACTOR_removeAll(extractors);

@@ -234,8 +234,6 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, IN enum UpnpOpe
     // Per default and in case of a bad resource ID, serve the file
     // itself
 
-    log_debug(("PFAAAAAAAAAAAA %d\n", res_id));
-    
     if (res_id <= 0 || res_id > item->getResourceCount())
     {
         Ref<IOHandler> io_handler(new FileIOHandler(path));
