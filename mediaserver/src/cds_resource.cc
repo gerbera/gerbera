@@ -23,7 +23,7 @@
 
 using namespace zmm;
 
-CdsResource::CdsResource(int handler_type) : Object()
+CdsResource::CdsResource(int handlerType) : Object()
 {
     this->handlerType = handlerType;
     this->attributes = Ref<Dictionary>(new Dictionary());

@@ -392,8 +392,6 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
             resource->addAttribute(String(RES_KEYS[R_RESOLUTION].upnp), th_resolution);
             item->addResource(resource);
 
-            log_debug(("TOOOOORTURE: %s\n", resource->encode().c_str()));
-
             EXTRACTOR_freeKeywords(keywords);
             EXTRACTOR_removeAll(extractors);
 
