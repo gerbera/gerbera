@@ -244,7 +244,9 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, IN enum UpnpOpe
     {
         Ref<CdsResource> resource = item->getResource(res_id);
         Ref<MetadataHandler> h = MetadataHandler::createHandler(resource->getHandlerType());
-        return h->serveContent(item, res_id);
+        Ref<IOHandler> io_handler = h->serveContent(item, res_id);
+        io_handler->open(mode);
+        return io_handler;
     }
 }
 
