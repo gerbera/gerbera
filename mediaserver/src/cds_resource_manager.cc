@@ -57,6 +57,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
     Ref<Dictionary> dict(new Dictionary());
     dict->put(URL_OBJECT_ID, item->getID());
 
+    bool addResID = false;
     /// \todo move this down into the "for" loop and create different urls for each resource once the io handlers are ready
     int objectType = item->getObjectType();
     if (IS_CDS_ITEM_INTERNAL_URL(objectType))
@@ -72,6 +73,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
     { 
         urlBase = server->getVirtualURL() + "/" +
             CONTENT_MEDIA_HANDLER + "?" + dict->encode();
+        addResID = true;
     }
 
     int resCount = item->getResourceCount();
@@ -87,7 +89,11 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         /// resource tags?
 
 //        res_attrs->put("protocolInfo", prot + mimeType + ":*");
-        String tmp = urlBase + "&" + "res_id=" + i;
+        String tmp;
+        if (addResID)
+            tmp = urlBase + "&" + "res_id=" + i;
+        else
+            tmp = urlBase;
       
         element->appendChild(UpnpXML_DIDLRenderResource(tmp, res_attrs));
     }

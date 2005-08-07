@@ -92,6 +92,7 @@ public:
 	String operator+(char *str);
 	String operator+(char chr);
 	String operator+(int x);
+	String operator+(double x);
 
 	int operator==(String other);
 	int operator==(char *str);

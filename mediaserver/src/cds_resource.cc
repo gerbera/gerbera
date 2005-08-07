@@ -59,6 +59,14 @@ Ref<Dictionary> CdsResource::getParameters()
 {
     return parameters;
 }
+String CdsResource::getAttribute(String name)
+{
+    return attributes->get(name);
+}
+String CdsResource::getParameter(String name)
+{
+    return parameters->get(name);
+}
 
 bool CdsResource::equals(Ref<CdsResource> other)
 {
@@ -67,6 +75,13 @@ bool CdsResource::equals(Ref<CdsResource> other)
         attributes->equals(other->attributes) &&
         parameters->equals(other->parameters)
     );
+}
+
+Ref<CdsResource> CdsResource::clone()
+{
+    return Ref<CdsResource>(new CdsResource(handlerType,
+                                            attributes,
+                                            parameters));
 }
 
 String CdsResource::encode()

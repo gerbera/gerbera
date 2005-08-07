@@ -16,6 +16,7 @@ v0.8.1
         * refined configure script, almost all dependencies are now
 	      optional.
 	    * changed database, (not backward compatible again)
+        * when an item is deleted all referenced items are deleted as well
 
 v0.8.0  15.06.2005  Scripting/Virtual Server Layout
         * Server layout can not be defined using java script,

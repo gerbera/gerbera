@@ -47,8 +47,11 @@ public:
     int getHandlerType();
     zmm::Ref<Dictionary> getAttributes();
     zmm::Ref<Dictionary> getParameters();
+    zmm::String getAttribute(zmm::String name);
+    zmm::String getParameter(zmm::String name);
 
     bool equals(zmm::Ref<CdsResource> other);
+    zmm::Ref<CdsResource> clone();
 
     zmm::String encode();
     static zmm::Ref<CdsResource> decode(zmm::String serial);

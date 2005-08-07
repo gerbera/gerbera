@@ -123,7 +123,7 @@ void CdsObject::copyTo(Ref<CdsObject> obj)
     obj->setMetadata(metadata->clone());
     obj->setAuxData(auxdata->clone());
     for (int i = 0; i < resources->size(); i++)
-        obj->addResource(resources->get(i));
+        obj->addResource(resources->get(i)->clone());
 }
 int CdsObject::equals(Ref<CdsObject> obj, bool exactly)
 {

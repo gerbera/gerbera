@@ -128,24 +128,24 @@ char *String::c_str()
 }
 String String::operator+(String other)
 {
-	if(! base && ! other.base)
-		return nil;
-	int len = 0;
-	if(base)
-		len = base->len;
+	if(! other.base)
+		return *this;
+	if(! base)
+		return other;
+	int len = base->len;
 	int otherLen = 0;
 	if(other.base)
 		otherLen = other.base->len;
 
 	String res(len + otherLen);
 	strcpy(res.base->data, base->data);
-	strcpy(res.base->data + len, other.base->data);
+    strcpy(res.base->data + len, other.base->data);
 	return res;
 }
 String String::operator+(char *other)
 {
 	if(! other)
-		return String(base);
+		return *this;
 	if(! base)
 		return String(other);
 	int len = base->len;
@@ -165,20 +165,24 @@ String String::operator+(char chr)
 
 String String::operator+(int x)
 {
-	char buf[MAX_INT_STRING_LENGTH];
-	sprintf(buf, "%d", x);
-	return operator+(buf);
+	return operator+(from(x));
+}
+String String::operator+(double x)
+{
+	return operator+(from(x));
 }
 
 String String::from(int x)
 {
-    return (String("") + x);
-    // TODO: optimize
+    StringBase *b = new StringBase(MAX_INT_STRING_LENGTH);
+	sprintf(b->data, "%d", x);
+    return (String(b));
 }
 String String::from(double x)
 {
-    return ""; // (String("") + x);
-    // TODO: optimize
+    StringBase *b = new StringBase(MAX_INT_STRING_LENGTH);
+	sprintf(b->data, "%ld", x);
+    return (String(b));
 }
 String String::allocate(int size)
 {

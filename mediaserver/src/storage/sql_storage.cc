@@ -464,11 +464,11 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
 
 
 static char *del_query = "DELETE FROM cds_objects WHERE id IN (";
+static char *del_query_ref = "DELETE FROM cds_objects WHERE ref_id IN (";
 
 void SQLStorage::removeObject(zmm::Ref<CdsObject> obj)
 {
     Ref<StringBuffer> query(new StringBuffer());
-    *query << del_query;
     if(IS_CDS_CONTAINER(obj->getObjectType()))
         removeChildren(obj->getID(), query);
     *query << obj->getID() << ")";
@@ -494,9 +494,9 @@ void SQLStorage::removeChildren(String id, Ref<StringBuffer> query)
         if (query->length() > MAX_DELETE_QUERY_LENGTH)
         {
             *query << ")";
-            exec(query->toString());
+            exec(String(del_query) + query->toString() + ")");
+            exec(String(del_query_ref) + query->toString() + ")");
             query->clear();
-            *query << del_query;
         }
         else
             *query << ',';
