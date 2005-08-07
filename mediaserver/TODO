@@ -14,11 +14,6 @@ Known Issues (ordered by importance)
   those directories are taken to the database. This produces A LOT of
   garbage in the PC Directory and must be fixed ASAP.
 
-- Deleting an arbitrary item does not trigger any consistency check.
-  Virtual items do not relate to their referenced items. This must be
-  changed. An item in a PC Directory would be the 'master copy'
-  and once deleted all referring virtual items should be deleted as well.
-
 - Make all metadata produced by javascript be stored in the database.
   Instead of iterating through all known metadata keys, should iterate
   through all meta properties of the object given to addCdsObject().
@@ -37,11 +32,7 @@ Known Issues (ordered by importance)
   
 Planned improvements / features (ordered by importance)
 -------------------------------------------------------
-- use the ref_id database field
-
-- move IOHandler creation logic to metadata_handler
-- Flexible <res> tag handling, own field in the database
-- url marshalling of <res> tags
+- report right file length in file_request_handler
 - exiv2 thumbnail support
 - readonly access to <res> metadata from
   javascript

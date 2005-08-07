@@ -1,5 +1,5 @@
-AC_INIT(mediatomb, 0.8.0)
-AM_INIT_AUTOMAKE(mediatomb, 0.8.0)
+AC_INIT(mediatomb, 0.8.1)
+AM_INIT_AUTOMAKE(mediatomb, 0.8.1)
 
 AC_CONFIG_FILES([
     Makefile
