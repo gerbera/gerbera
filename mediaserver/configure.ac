@@ -298,7 +298,7 @@ if test "x$EXTRACTOR_OK" = xyes; then
             ],
             [
                 if(EXTRACTOR_VERSION < 0x00050200)
-                    exit(1);
+                    return 1;
             ]
         )],
         [
