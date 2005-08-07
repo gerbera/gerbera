@@ -115,7 +115,7 @@ AC_ARG_ENABLE(mysql,
 )
 if test "x$MYSQL_OK" = xyes; then
     AC_PATH_PROG(mysqlconfig, mysql_config, no)
-    if test "$mysqlconfig" = no; then
+    if test "x$mysqlconfig" = xno; then
         AC_MSG_RESULT([mysql_config script not found])
         MYSQL_OK=missing
     else
@@ -269,31 +269,56 @@ else
     fi
 fi
 
-######## exiv2
+######## extractor
 
-EXIV2_OK=yes
-AC_ARG_ENABLE(libexiv2,
-  [  --enable-exiv2           exiv2 support],
+EXTRACTOR_OK=yes
+AC_ARG_ENABLE(libextractor,
+  [  --enable-libextractor    libextractor support],
   [
-     EXIV2_EN=$enableval 
+     EXTRACTOR_EN=$enableval 
      if test "x$enableval" = xno; then
-        EXIV2_OK=disabled
+        EXTRACTOR_OK=disabled
      fi
   ]
 )
-if test "x$EXIV2_OK" = xyes; then
-    AC_CHECK_HEADER(exiv2/exif.hpp,
+if test "x$EXTRACTOR_OK" = xyes; then
+    AC_CHECK_HEADER(extractor.h,
         [],
-        [EXIV2_OK=missing],
-        /* checking for exiv2/exif.h */
+        [EXTRACTOR_OK=missing],
+        /* checking for extractor.h */
     )
 fi
-if test "x$EXIV2_OK" = xyes; then
-   LDFLAGS="$LDFLAGS -lexiv2"
-   AC_DEFINE(HAVE_EXIV2)
+if test "x$EXTRACTOR_OK" = xyes; then
+    AC_MSG_CHECKING([extractor version])
+    # AC_CHECKING prints newline
+    AC_RUN_IFELSE(
+        [AC_LANG_PROGRAM(
+            [
+                #include <extractor.h>
+            ],
+            [
+                if(EXTRACTOR_VERSION < 0x00050200)
+                    exit(1);
+            ]
+        )],
+        [
+            AC_MSG_RESULT([>= 0.5.2])
+            EXTRACTOR_GE_0_5_2=yes
+        ],
+        [
+            AC_MSG_RESULT([< 0.5.2])
+        ]
+    )
+fi
+if test "x$EXTRACTOR_OK" = xyes; then
+    LDFLAGS="$LDFLAGS -lextractor"
+    AC_DEFINE(HAVE_EXTRACTOR)
+    if test "x$EXTRACTOR_GE_0_5_2" = xyes; then
+        AC_DEFINE(EXTRACTOR_GE_0_5_2)
+    fi
 else
-    if test "x$EXIV2_EN" = xyes; then
-        AC_MSG_ERROR(unable to configure exiv2 support)
+    if test "x$EXTRACTOR_EN" = xyes; then
+        AC_MSG_ERROR(unable to configure libextractor support)
     fi
 fi
 
@@ -301,14 +326,19 @@ fi
 ######## libexif
 
 EXIF_OK=yes
+if test "x$EXTRACTOR_OK" = xyes -a "x$EXTRACTOR_GE_0_5_2" = xyes; then
+    EXIF_OK="disabled (obsoleted by libextractor >= v0.5.2)"
+fi
 AC_ARG_ENABLE(libexif,
-  [  --enable-libexif         libexif support],
-  [
-     EXIF_EN=$enableval 
-     if test "x$enableval" = xno; then
-        EXIF_OK=disabled
-     fi
-  ]
+    [  --enable-libexif         libexif support],
+    [
+        if test "x$EXTRACTOR_OK" != xyes -o "x$EXTRACTOR_GE_0_5_2" != xyes; then
+            EXIF_EN=$enableval 
+            if test "x$enableval" = xno; then
+                EXIF_OK=disabled
+            fi
+        fi
+    ]
 )
 if test "x$EXIF_OK" = xyes; then
     AC_CHECK_HEADER(libexif/exif-data.h,
@@ -334,33 +364,39 @@ else
 fi
 
 
-######## extractor
 
-EXTRACTOR_OK=yes
-AC_ARG_ENABLE(libextractor,
-  [  --enable-libextractor    libextractor support],
-  [
-     EXTRACTOR_EN=$enableval 
-     if test "x$enableval" = xno; then
-        EXTRACTOR_OK=disabled
-     fi
-  ]
-)
-if test "x$EXTRACTOR_OK" = xyes; then
-    AC_CHECK_HEADER(extractor.h,
-        [],
-        [EXTRACTOR_OK=missing],
-        /* checking for extractor.h */
-    )
-fi
-if test "x$EXTRACTOR_OK" = xyes; then
-   LDFLAGS="$LDFLAGS -lextractor"
-   AC_DEFINE(HAVE_EXTRACTOR)
-else
-    if test "x$EXTRACTOR_EN" = xyes; then
-        AC_MSG_ERROR(unable to configure libextractor support)
-    fi
-fi
+######## exiv2
+# TEMPORARILY DISABLED BECAUSE EXIV2 HAS MEMORY LEAKS
+
+#EXIV2_OK="disabled (force with --enable-exiv2)"
+#AC_ARG_ENABLE(exiv2,
+#  [  --enable-exiv2           exiv2 support],
+#  [
+#     EXIV2_EN=$enableval 
+#     if test "x$enableval" = xno; then
+#        EXIV2_OK=disabled
+#     fi
+#     if test "x$enableval" = xyes; then
+#        EXIV2_OK=yes
+#     fi
+#  ]
+#)
+#if test "x$EXIV2_OK" = xyes; then
+#    AC_CHECK_HEADER(exiv2/exif.hpp,
+#        [],
+#        [EXIV2_OK=missing],
+#        /* checking for exiv2/exif.h */
+#    )
+#fi
+#if test "x$EXIV2_OK" = xyes; then
+#   LDFLAGS="$LDFLAGS -lexiv2"
+#   AC_DEFINE(HAVE_EXIV2)
+#else
+#    if test "x$EXIV2_EN" = xyes; then
+#        AC_MSG_ERROR(unable to configure exiv2 support)
+#    fi
+#fi
+
 
 
 ###############
@@ -374,8 +410,8 @@ echo "  mysql        : $MYSQL_OK"
 echo "  javascript   : $JS_OK"
 echo "  libmagic     : $MAGIC_OK"
 echo "  libid3       : $ID3_OK"
-echo "  libexiv2     : $EXIV2_OK"
-echo "  libexif      : $EXIF_OK"
 echo "  libextractor : $EXTRACTOR_OK"
+echo "  libexif      : $EXIF_OK"
+# echo "  exiv2        : $EXIV2_OK"
 echo
 
