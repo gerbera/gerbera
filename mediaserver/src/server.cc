@@ -175,7 +175,7 @@ void Server::upnp_init(String ip, unsigned short port)
     // initializing ContentManager
     ContentManager::getInstance()->init();    
    
-    config->writeBookmark(ip, String("") + port);
+    config->writeBookmark(ip, String::from(port));
     
 //    log_info(("upnp_init: end\n"));
 }
