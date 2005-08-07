@@ -42,11 +42,6 @@ Ref<CdsResourceManager> CdsResourceManager::getInstance()
     return instance;
 }
 
-static void addResource(Ref<Dictionary> resource, Ref<Element> element)
-{
-
-}
-
 void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
 {
     Ref<Element> res;

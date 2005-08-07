@@ -65,7 +65,12 @@ void web::edit_ui::process()
     Ref<CdsObject> current = storage->loadObject(object_id);
     Ref<Element> didl_object = UpnpXML_DIDLRenderObject(current, true);
     didl_object->appendTextChild("location", current->getLocation());
-    
+    int objectType = current->getObjectType();
+    if (IS_CDS_ITEM_INTERNAL_URL(objectType) || IS_CDS_ITEM_EXTERNAL_URL(objectType))
+        didl_object->appendTextChild("object_type", "url");
+    else if (IS_CDS_ACTIVE_ITEM(objectType))
+        didl_object->appendTextChild("object_type", "act");
+   
     Ref<Element> root (new Element("root"));
     root->addAttribute("xmlns:dc", "http://purl.org/dc/elements/1.1/");
     root->addAttribute("xmlns:upnp", "urn:schemas-upnp-org:metadata-1-0/upnp/");
@@ -74,6 +79,7 @@ void web::edit_ui::process()
     root->appendTextChild("driver", driver);
     root->appendTextChild("sid", sid);
     root->appendTextChild("object_id", object_id);
+
 
     *out << renderXMLHeader("/edit.xsl");
     *out << root->print();

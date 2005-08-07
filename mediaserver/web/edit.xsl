@@ -104,10 +104,24 @@
             <td>Title:</td>
             <td><input name="title" size="24" value="{dc:title}" type="text"/></td>
         </tr>
-        <tr>
-            <td>Location</td>
-            <td><input name="location" size="24" value="{location}" type="text"/></td>
-        </tr>
+        <xsl:choose>
+            <xsl:when test="object_type = 'url'">
+                <tr>
+                    <td>URL</td>
+                    <td><input name="location" size="24" value="{location}" type="text"/></td>
+                </tr>
+                <tr>
+                    <td>Protocol</td>
+                    <td><input name="protocol" size="24" value="{substring-before(res/attribute::protocolInfo, ':')}" type="text"/></td>
+                </tr>
+            </xsl:when>
+            <xsl:otherwise>
+                <tr>
+                    <td>Location</td>
+                    <td><input name="location" size="24" value="{location}" type="text"/></td>
+                </tr>
+            </xsl:otherwise>
+        </xsl:choose>
         <tr>
             <td>UPnP Class:</td>
             <td><input name="class" size="24" value="{upnp:class}" type="text"/></td>
@@ -121,7 +135,7 @@
             <td>Mime Type:</td>
             <td><input name="mime-type" size="24" value="{substring-before(substring-after(substring-after(res/attribute::protocolInfo, ':'), ':'), ':')}" type="text"/></td>
         </tr>
-        <xsl:if test="upnp:class = 'object.item.activeItem'">
+        <xsl:if test="object_type = 'act'">
             <tr>
                 <td>Action:</td>
                 <td><input name="action" size="24" value="{action}" type="text"/></td>

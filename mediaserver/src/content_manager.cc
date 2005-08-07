@@ -357,6 +357,7 @@ void ContentManager::updateObject(String objectID, Ref<Dictionary> parameters)
     String mimetype = parameters->get("mime-type");
     String description = parameters->get("description");
     String location = parameters->get("location");
+    String protocol = parameters->get("protocol");
 
     Ref<Storage> storage = Storage::getInstance();
     Ref<UpdateManager> um = UpdateManager::getInstance();
@@ -376,7 +377,27 @@ void ContentManager::updateObject(String objectID, Ref<Dictionary> parameters)
         if (string_ok(location)) clone->setLocation(location);
 
         Ref<CdsItem> cloned_item = RefCast(clone, CdsItem);
-        
+ 
+        if (string_ok(mimetype) && (string_ok(protocol)))
+        {
+            cloned_item->setMimeType(mimetype);
+            Ref<CdsResource> resource = cloned_item->getResource(0);
+            resource->addAttribute("protocolInfo", renderProtocolInfo(mimetype, protocol));
+        }
+        else if (!string_ok(mimetype) && (string_ok(protocol)))
+        {
+            Ref<CdsResource> resource = cloned_item->getResource(0);
+            resource->addAttribute("protocolInfo", renderProtocolInfo(cloned_item->getMimeType(), protocol));
+        }
+        else if (string_ok(mimetype) && (!string_ok(protocol)))
+        {
+            cloned_item->setMimeType(mimetype);
+            Ref<CdsResource> resource = cloned_item->getResource(0);
+            Ref<Array<StringBase> > parts = split_string(resource->getAttribute("protocolInfo"), ':');
+            protocol = parts->get(0);
+            resource->addAttribute("protocolInfo", renderProtocolInfo(mimetype, protocol));
+        }
+
         if (string_ok(description)) 
         {
             cloned_item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION),
@@ -387,7 +408,6 @@ void ContentManager::updateObject(String objectID, Ref<Dictionary> parameters)
             item->removeMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION));
         }
 
-        if (string_ok(mimetype)) cloned_item->setMimeType(mimetype);
 
         if (!item->equals(clone, true))
         {
