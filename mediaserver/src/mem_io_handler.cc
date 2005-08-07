@@ -38,14 +38,29 @@
 using namespace zmm;
 using namespace mxml;
 
-MemIOHandler::MemIOHandler(String buffer) : IOHandler()
+MemIOHandler::MemIOHandler(void *buffer, int length) : IOHandler()
 {
-    this->buffer = buffer;
+    this->buffer = (char *)malloc(length);
+    this->length = length;
+    memcpy(this->buffer, buffer, length);
+}
+
+MemIOHandler::MemIOHandler(String str) : IOHandler()
+{
+    this->length = str.length();
+    this->buffer = (char *)malloc(length);
+    memcpy(this->buffer, str.c_str(), length);
+}
+
+MemIOHandler::~MemIOHandler()
+{
+    free(buffer);
 }
 
 void MemIOHandler::open(IN enum UpnpOpenFileMode mode)
 {
     pos = 0;
+    log_debug(("called open, pos %d\n", pos));
 }
 
 int MemIOHandler::read(OUT char *buf, IN size_t length)
@@ -53,33 +68,28 @@ int MemIOHandler::read(OUT char *buf, IN size_t length)
     int ret = 0;
     void *p;
 
+    log_debug(("reading from buffer (buf length %d), pos %d, read size %d\n", this->length, pos, length));
+    
     // we indicate EOF by setting pos to -1
     if (pos == -1)
     {
         return 0;
     }
-    
-    p = memccpy(buf, buffer.c_str() + pos, '\0', length);
-    if (p == NULL)
-    {
-        pos = pos + length;
-        ret = (int) length;
-
-        if (pos > buffer.length())
-        {
-            pos = -1;
-        }
-    }
-    else
-    {
-        pos = pos + strlen(buf);
-        ret = strlen(buf);
-        if (pos > buffer.length())
-        {
-            pos = -1;
-        }
-    }
    
+    int rest = this->length - pos;
+    if (length > rest)
+        length = rest;
+        
+    memcpy(buf, buffer + pos, length);
+    pos = pos + length;
+    ret = (int) length;
+
+    if (pos >= this->length)
+    {
+        pos = -1;
+    }
+  
+    log_debug(("read, returning: %d\n", ret));
     return ret; 
  }
                                                                                                                                                                          
@@ -87,13 +97,14 @@ void MemIOHandler::seek(IN long offset, IN int whence)
 {
     if (whence == SEEK_SET)
     {
+        log_debug(("seeking in buffer (SEEK_SET), offset: %ld\n", offset));
         // offset must be positive when SEEK_SET is used
         if (offset < 0) 
         {
             throw Exception("MemIOHandler seek failed: SEEK_SET used with negative offset");
         }
 
-        if (offset > buffer.length())
+        if (offset > length)
         {
             throw Exception("MemIOHandler seek failed: trying to seek past the end of file");
         }
@@ -102,18 +113,19 @@ void MemIOHandler::seek(IN long offset, IN int whence)
     }
     else if (whence == SEEK_CUR)
     {
+        log_debug(("seeking in buffer (SEEK_CUR), offset: %ld\n", offset));
         long temp;
 
         if (pos == -1) 
         {
-            temp = buffer.length();
+            temp = length;
         }
         else
         {
             temp = pos;
         }
         
-        if (((temp + offset) > buffer.length()) ||
+        if (((temp + offset) > length) ||
             ((temp + offset) < 0))
         {
             throw Exception("MemIOHandler seek failed: trying to seek before the beginning/past end of file");
@@ -123,8 +135,9 @@ void MemIOHandler::seek(IN long offset, IN int whence)
     }
     else if (whence == SEEK_END)
     {
-        long temp = buffer.length();
-        if (((temp + offset) > buffer.length()) ||
+        log_debug(("seeking in buffer (SEEK_END), offset: %ld\n", offset));
+        long temp = length;
+        if (((temp + offset) > length) ||
             ((temp + offset) < 0))
         {
             throw Exception("MemIOHandler seek failed: trying to seek before the beginning/past end of file");

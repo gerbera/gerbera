@@ -31,7 +31,8 @@ class MemIOHandler : public IOHandler
 {
 protected:
     /// \brief buffer that is holding our data.
-    zmm::String buffer;
+    char *buffer;
+    int length;
 
     /// \brief current offset in the buffer
     long        pos;
@@ -39,7 +40,9 @@ protected:
 public:
     /// \brief Initializes the internal buffer.
     /// \param buffer all operations will be done on this buffer.
-    MemIOHandler(zmm::String buffer);
+    MemIOHandler(void *buffer, int length);
+    MemIOHandler(zmm::String str);
+    virtual ~MemIOHandler();
 
     /// 
     virtual void open(IN enum UpnpOpenFileMode mode);

@@ -87,8 +87,9 @@ Ref<CdsResource> CdsResource::decode(String serial)
     int size = parts->size();
     if (size != 2 && size != 3)
         throw Exception("CdsResource::decode: Could not parse resources");
+
     int handlerType = String(parts->get(0)).toInt();
-    
+
     Ref<Dictionary> attr(new Dictionary());
     attr->decode(parts->get(1));
 

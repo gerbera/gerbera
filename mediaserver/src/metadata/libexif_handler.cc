@@ -31,6 +31,11 @@
 #include "libexif_handler.h"
 #include "tools.h"
 #include "config_manager.h"
+#include "mem_io_handler.h"
+
+#define RESOURCE_CONTENT_TYPE   "rct"
+// possible resource types
+#define EXIF_THUMBNAIL  "EX_TH"
 
 using namespace zmm;
 using namespace mxml;
@@ -386,10 +391,10 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
             String th_mimetype = String((char *)EXTRACTOR_extractLast(EXTRACTOR_MIMETYPE, keywords));
             String th_resolution = String((char *)EXTRACTOR_extractLast(EXTRACTOR_SIZE, keywords));
 
-            // \TODO JIN, convert to the new key lookup
             Ref<CdsResource> resource(new CdsResource(CH_LIBEXIF));
-            resource->addAttribute(String(RES_KEYS[R_PROTOCOLINFO].upnp), renderProtocolInfo(th_mimetype));
-            resource->addAttribute(String(RES_KEYS[R_RESOLUTION].upnp), th_resolution);
+            resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(th_mimetype));
+            resource->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), th_resolution);
+            resource->addParameter(RESOURCE_CONTENT_TYPE, EXIF_THUMBNAIL);
             item->addResource(resource);
 
             EXTRACTOR_freeKeywords(keywords);
@@ -408,7 +413,25 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
 
 Ref<IOHandler> LibExifHandler::serveContent(Ref<CdsItem> item, int resNum)
 {
-    return nil;
+    ExifData    *ed;
+    Ref<CdsResource> res = item->getResource(resNum);
+    
+    String ctype = res->getParameters()->get(RESOURCE_CONTENT_TYPE);
+
+    if (ctype != EXIF_THUMBNAIL)
+        throw Exception(String("LibExifHandler: got unknown content type: ") + ctype);
+    ed = exif_data_new_from_file(item->getLocation().c_str());
+    if (!ed)
+        throw Exception("LibExifHandler: resource has no exif information");
+
+    if (!(ed->size))
+        throw Exception("LibExifHandler: resource has no exif thumbnail");
+
+    Ref<IOHandler> h(new MemIOHandler(ed->data, ed->size));
+
+    exif_data_unref(ed);
+
+    return h;
 }
 
 #endif // HAVE_EXIF

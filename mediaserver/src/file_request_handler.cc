@@ -45,7 +45,7 @@ FileRequestHandler::FileRequestHandler() : RequestHandler()
 
 void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info *info)
 {
-    log_info(("FileRequestHandler::get_info start\n"));
+    //log_info(("FileRequestHandler::get_info start\n"));
 
     String object_id;
 
@@ -58,17 +58,17 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     Ref<Dictionary> dict(new Dictionary());
     dict->decode(parameters);
 
-    log_debug(("full url (filename): %s, url_path: %s, parameters: %s",
-               filename, url_path.c_str(), parameters.c_str()));
+    //log_debug(("full url (filename): %s, url_path: %s, parameters: %s\n",
+    //           filename, url_path.c_str(), parameters.c_str()));
     
     object_id = dict->get("object_id");
     if (object_id == nil)
     {
-        log_info(("object_id not found in url\n"));
-        throw Exception("object_id not found");
+        //log_info(("object_id not found in url\n"));
+        throw Exception("get_info: object_id not found");
     }
 
-    log_info(("got ObjectID: [%s]\n", object_id.c_str()));
+    //log_info(("got ObjectID: [%s]\n", object_id.c_str()));
 
     Ref<Storage> storage = Storage::getInstance();
 
@@ -78,7 +78,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
 
     if (!IS_CDS_ITEM(objectType))
     {
-        throw Exception("object is not an item");
+        throw Exception("get_info: object is not an item");
     }
 
     // update item info by running action
@@ -142,10 +142,6 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
         throw Exception(String("Failed to stat ") + path);
     }
 
-    info->file_length = statbuf.st_size;
-    log_info(("FileIOHandler: get_info: file_length: %d\n", (int)statbuf.st_size));
-    info->last_modified = statbuf.st_mtime;
-    info->is_directory = S_ISDIR(statbuf.st_mode);
 
     if (access(path.c_str(), R_OK) == 0)
     {
@@ -173,25 +169,33 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
             Ref<Array<StringBase> > parts = split_string(protocolInfo, ':');
             mimeType = parts->get(2);
         }
+       
+        /// \todo we could figure out the content length...
+        info->file_length = -1;
     }
     else
     {
         mimeType = item->getMimeType();
+        info->file_length = statbuf.st_size;
+        //log_info(("FileIOHandler: get_info: file_length: %d\n", (int)statbuf.st_size));
     }
-    
+        
+    info->last_modified = statbuf.st_mtime;
+    info->is_directory = S_ISDIR(statbuf.st_mode);
+   
     info->content_type = ixmlCloneDOMString(mimeType.c_str());
 
-    log_info(("web_get_info: Requested %s, ObjectID: %s, Location: %s\n, MimeType: %s\n",
-           filename, object_id.c_str(), path.c_str(), info->content_type));
+//    log_info(("get_info: Requested %s, ObjectID: %s, Location: %s\n, MimeType: %s\n",
+//          filename, object_id.c_str(), path.c_str(), info->content_type));
 
-    log_info(("web_get_info(): end\n"));
+//    log_info(("web_get_info(): end\n"));
 }
 
 Ref<IOHandler> FileRequestHandler::open(IN const char *filename, IN enum UpnpOpenFileMode mode)
 {
     String object_id;
 
-    log_info(("FileIOHandler web_open(): start\n"));
+ //   log_info(("FileIOHandler web_open(): start\n"));
 
     // Currently we explicitly do not support UPNP_WRITE
     // due to security reasons.
