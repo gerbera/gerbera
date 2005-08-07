@@ -29,6 +29,7 @@ Known Issues (ordered by importance)
   Switching to expat would probably make sense. Correct XML parsing is 
   an essential capatility of a UPnP device.
 
+- add mimetype mappings to serve request handler
   
 Planned improvements / features (ordered by importance)
 -------------------------------------------------------
