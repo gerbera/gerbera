@@ -133,9 +133,7 @@ String String::operator+(String other)
 	if(! base)
 		return other;
 	int len = base->len;
-	int otherLen = 0;
-	if(other.base)
-		otherLen = other.base->len;
+	int otherLen = other.base->len;
 
 	String res(len + otherLen);
 	strcpy(res.base->data, base->data);
@@ -175,13 +173,13 @@ String String::operator+(double x)
 String String::from(int x)
 {
     StringBase *b = new StringBase(MAX_INT_STRING_LENGTH);
-	sprintf(b->data, "%d", x);
+	b->len = sprintf(b->data, "%d", x);
     return (String(b));
 }
 String String::from(double x)
 {
     StringBase *b = new StringBase(MAX_INT_STRING_LENGTH);
-	sprintf(b->data, "%ld", x);
+	b->len = sprintf(b->data, "%ld", x);
     return (String(b));
 }
 String String::allocate(int size)
