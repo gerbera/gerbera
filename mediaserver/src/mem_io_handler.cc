@@ -60,7 +60,6 @@ MemIOHandler::~MemIOHandler()
 void MemIOHandler::open(IN enum UpnpOpenFileMode mode)
 {
     pos = 0;
-    log_debug(("called open, pos %d\n", pos));
 }
 
 int MemIOHandler::read(OUT char *buf, IN size_t length)
@@ -68,8 +67,6 @@ int MemIOHandler::read(OUT char *buf, IN size_t length)
     int ret = 0;
     void *p;
 
-    log_debug(("reading from buffer (buf length %d), pos %d, read size %d\n", this->length, pos, length));
-    
     // we indicate EOF by setting pos to -1
     if (pos == -1)
     {
@@ -89,7 +86,6 @@ int MemIOHandler::read(OUT char *buf, IN size_t length)
         pos = -1;
     }
   
-    log_debug(("read, returning: %d\n", ret));
     return ret; 
  }
                                                                                                                                                                          
@@ -97,7 +93,6 @@ void MemIOHandler::seek(IN long offset, IN int whence)
 {
     if (whence == SEEK_SET)
     {
-        log_debug(("seeking in buffer (SEEK_SET), offset: %ld\n", offset));
         // offset must be positive when SEEK_SET is used
         if (offset < 0) 
         {
@@ -113,7 +108,6 @@ void MemIOHandler::seek(IN long offset, IN int whence)
     }
     else if (whence == SEEK_CUR)
     {
-        log_debug(("seeking in buffer (SEEK_CUR), offset: %ld\n", offset));
         long temp;
 
         if (pos == -1) 
@@ -135,7 +129,6 @@ void MemIOHandler::seek(IN long offset, IN int whence)
     }
     else if (whence == SEEK_END)
     {
-        log_debug(("seeking in buffer (SEEK_END), offset: %ld\n", offset));
         long temp = length;
         if (((temp + offset) > length) ||
             ((temp + offset) < 0))
