@@ -326,9 +326,9 @@ fi
 ######## libexif
 
 EXIF_OK=yes
-if test "x$EXTRACTOR_OK" = xyes -a "x$EXTRACTOR_GE_0_5_2" = xyes; then
-    EXIF_OK="disabled (obsoleted by libextractor >= v0.5.2)"
-fi
+#if test "x$EXTRACTOR_OK" = xyes -a "x$EXTRACTOR_GE_0_5_2" = xyes; then
+#    EXIF_OK="disabled (obsoleted by libextractor >= v0.5.2)"
+#fi
 AC_ARG_ENABLE(libexif,
     [  --enable-libexif         libexif support],
     [
