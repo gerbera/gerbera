@@ -332,12 +332,12 @@ EXIF_OK=yes
 AC_ARG_ENABLE(libexif,
     [  --enable-libexif         libexif support],
     [
-        if test "x$EXTRACTOR_OK" != xyes -o "x$EXTRACTOR_GE_0_5_2" != xyes; then
+#        if test "x$EXTRACTOR_OK" != xyes -o "x$EXTRACTOR_GE_0_5_2" != xyes; then
             EXIF_EN=$enableval 
             if test "x$enableval" = xno; then
                 EXIF_OK=disabled
             fi
-        fi
+#        fi
     ]
 )
 if test "x$EXIF_OK" = xyes; then
