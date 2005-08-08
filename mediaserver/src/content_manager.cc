@@ -123,7 +123,7 @@ ContentManager::ContentManager() : Object()
             magicFile = nil;
         if (magic_load(ms, (magicFile == nil) ? NULL : magicFile.c_str()) == -1)
         {
-            log_warn(("magic_load: %s\n", magic_error(ms)));
+            log_warning(("magic_load: %s\n", magic_error(ms)));
             magic_close(ms);
             ms = NULL;
         }
