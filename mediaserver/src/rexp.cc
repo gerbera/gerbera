@@ -91,7 +91,7 @@ Matcher::Matcher(zmm::Ref<RExp> rexp, String text, int nmatch)
     this->rexp = rexp;
     this->text = text;
     this->ptr = NULL;
-    this->nmatch = nmatch;
+    this->nmatch = nmatch + 1; // for the 0'th group
     if (nmatch)
         this->pmatch = (regmatch_t *)malloc(nmatch * sizeof(regmatch_t));
     else

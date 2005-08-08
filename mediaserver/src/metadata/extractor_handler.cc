@@ -363,13 +363,20 @@ void ExtractorHandler::fillMetadata(Ref<CdsItem> item)
     if (temp)
     {
         Ref<Matcher> matcher = ReAudioFormat->matcher((char *)temp, 7);
-        printf("BR:%s FR:%s H:%s M:%s S:%s TYPE:%s\n",
-               matcher->group(1).c_str(),
-               matcher->group(2).c_str(),
-               matcher->group(4).c_str(),
-               matcher->group(5).c_str(),
-               matcher->group(6).c_str(),
-               matcher->group(7).c_str());
+        if (matcher->next())
+        {
+            log_debug(("BR:%s FR:%s H:%s M:%s S:%s TYPE:%s\n",
+                       matcher->group(1).c_str(),
+                       matcher->group(2).c_str(),
+                       matcher->group(4).c_str(),
+                       matcher->group(5).c_str(),
+                       matcher->group(6).c_str(),
+                       matcher->group(7).c_str()));
+        }
+        else
+        {
+            log_debug(("format pattern unmatched!"));
+        }
     }
 
     EXTRACTOR_freeKeywords(keywords);

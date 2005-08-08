@@ -54,6 +54,7 @@ public:
     virtual ~Matcher();
     zmm::String group(int i);
     bool next();
+    bool matches();
 protected:
     Matcher(zmm::Ref<RExp> rexp, zmm::String text, int nmatch);
 protected:    
