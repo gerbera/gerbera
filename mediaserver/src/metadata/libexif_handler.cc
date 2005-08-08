@@ -278,7 +278,11 @@ void LibExifHandler::process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<S
                     value = sc->convert(value);
                     //value = split_string(value, ' ');
                     // \TODO convert date to ISO 8601 as required in the UPnP spec
-                    item->setMetadata(String(MT_KEYS[M_DATE].upnp), value);
+                    // from YYYY:MM:DD to YYYY-MM-DD
+                    value = value.substring(0, 4) + "-" +
+                            value.substring(5, 2) + "-" +
+                            value.substring(8, 2);
+                    item->setMetadata(MetadataHandler::getMetaFieldName(M_DATE), value);
                 }
                 break;
 
