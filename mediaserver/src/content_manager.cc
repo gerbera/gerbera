@@ -543,7 +543,9 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic)
         int dotIndex = filename.rindex('.');
         if (dotIndex > 0)
             extension = filename.substring(dotIndex + 1);
-        mimetype = extension2mimetype(extension);
+
+        if (magic)
+            mimetype = extension2mimetype(extension);
 
         if (mimetype == nil && magic)
         {
@@ -567,7 +569,8 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic)
             item->setClass(upnp_class);
         Ref<StringConverter> f2i = StringConverter::f2i();
         obj->setTitle(f2i->convert(filename));
-        MetadataHandler::setMetadata(item);
+        if (magic)
+            MetadataHandler::setMetadata(item);
     }
     else if (S_ISDIR(statbuf.st_mode))
     {

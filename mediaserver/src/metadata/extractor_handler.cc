@@ -29,8 +29,11 @@
 #include "string_converter.h"
 #include "common.h"
 #include "tools.h"
+#include "rexp.h"
 
 using namespace zmm;
+
+EXTRACTOR_ExtractorList *extractors = NULL;
 
 ExtractorHandler::ExtractorHandler() : MetadataHandler()
 {
@@ -295,22 +298,26 @@ static void addResourceField(resource_attributes_t attr, EXTRACTOR_KeywordList *
     }
 }
 
+
+
+Ref<RExp> ReAudioFormat;
+
 void ExtractorHandler::fillMetadata(Ref<CdsItem> item)
 {
     Ref<Array<StringBase> > aux;
     Ref<StringConverter> sc = StringConverter::m2i();
-
         
-    EXTRACTOR_ExtractorList *extractors = EXTRACTOR_loadDefaultLibraries();
+    if (! extractors)
+        extractors = EXTRACTOR_loadDefaultLibraries();
     EXTRACTOR_KeywordList *keywords = EXTRACTOR_getKeywords(extractors, item->getLocation().c_str());
 
     //EXTRACTOR_printKeywords(stdout, keywords);
 
     for (int i = 0; i < M_MAX; i++)
-        addMetaField((metadata_fields_t) i, keywords, item, sc);
+        addMetaField((metadata_fields_t)i, keywords, item, sc);
     
     for (int i = 0; i < R_MAX; i++)
-        addResourceField((resource_attributes_t) i, keywords, item, sc);
+        addResourceField((resource_attributes_t)i, keywords, item, sc);
    
 
     if (aux != nil)
@@ -341,12 +348,34 @@ void ExtractorHandler::fillMetadata(Ref<CdsItem> item)
     }
 
     const char *temp = NULL;
+
+    if (ReAudioFormat == nil)
+    {
+        ReAudioFormat = Ref<RExp>(new RExp());
+        // 64 kbps, 44100 hz, 8m30 stereo
+        ReAudioFormat->compile("([0-9]+)\\s+kbps.*?([0-9]+)\\s+hz.*?"
+                               "(([0-9]+)h)?([0-9]+)m([0-9]+)\\s(\\S*)", "i");
+    }
     
     temp = EXTRACTOR_extractLast(EXTRACTOR_FORMAT, keywords);
     log_info(("EXTRACTOR_FORMAT: %s\n", temp));
-    
+
+    if (temp)
+    {
+        Ref<Matcher> matcher = ReAudioFormat->matcher((char *)temp, 7);
+        printf("BR:%s FR:%s H:%s M:%s S:%s TYPE:%s\n",
+               matcher->group(1).c_str(),
+               matcher->group(2).c_str(),
+               matcher->group(4).c_str(),
+               matcher->group(5).c_str(),
+               matcher->group(6).c_str(),
+               matcher->group(7).c_str());
+    }
+
     EXTRACTOR_freeKeywords(keywords);
-    EXTRACTOR_removeAll(extractors);
+
+    // commented out for the sake of efficiency
+    // EXTRACTOR_removeAll(extractors);
 }
 
 Ref<IOHandler> ExtractorHandler::serveContent(Ref<CdsItem> item, int resNum)
