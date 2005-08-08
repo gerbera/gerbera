@@ -214,24 +214,31 @@ void ConfigManager::validate()
    
 #ifdef HAVE_EXIF    
 
-el = getElement("/import/library-options/libexif/auxdata");
-if (el == nil)
-{
-//    Ref<Array<StringBase> > arr = createArrayFromNodeset(el, "add", "tag");
-    getOption("/import/library-options/libexif/auxdata", "");
-    
-}
+    el = getElement("/import/library-options/libexif/auxdata");
+    if (el == nil)
+    {
+    //    Ref<Array<StringBase> > arr = createArrayFromNodeset(el, "add", "tag");
+        getOption("/import/library-options/libexif/auxdata", "");
+        
+    }
 
-#endif    
+#endif // HAVE_EXIF
 
 #ifdef HAVE_EXTRACTOR
 
-el = getElement("/import/library-options/libextractor/auxdata");
-if (el == nil)
-{
-//    Ref<Array<StringBase> > arr = createArrayFromNodeset(el, "add", "tag");
-    getOption("/import/library-options/libextractor/auxdata", "");
-}
+    el = getElement("/import/library-options/libextractor/auxdata");
+    if (el == nil)
+    {
+    //    Ref<Array<StringBase> > arr = createArrayFromNodeset(el, "add", "tag");
+        getOption("/import/library-options/libextractor/auxdata", "");
+    }
+#endif // HAVE_EXTRACTOR
+
+#ifdef HAVE_MAGIC
+    if (string_ok(getOption("/import/magic-file", "")))
+    {
+        prepare_path("/import/magic-file");
+    }
 #endif
 
     Storage::getInstance(PRIMARY_STORAGE);
