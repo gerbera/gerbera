@@ -96,30 +96,33 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
 #endif
 
 #ifdef HAVE_EXIV2
-/*        if (mimetype == "image/jpeg")
-        {
-            log_info(("Starting exiv2\n"));
-            handler = Ref<MetadataHandler>(new Exiv2Handler());
-            break;
-        } */
+/*        
+          if (mimetype == "image/jpeg")
+          {
+          log_info(("Starting exiv2\n"));
+          handler = Ref<MetadataHandler>(new Exiv2Handler());
+          break;
+          } 
+*/
 #endif
-        
+
+#ifdef HAVE_EXIF
+        if (mimetype == "image/jpeg")
+        {
+            handler = Ref<MetadataHandler>(new LibExifHandler());
+            break;
+        }
+#endif // HAVE_EXIF
+
 #ifdef HAVE_EXTRACTOR
-        /*
+
         {
             handler = Ref<MetadataHandler>(new ExtractorHandler());
             break;
         }
-        */
-#endif
-#ifdef HAVE_EXIF
-        if (mimetype == "image/jpeg")
-        {
-            log_info(("Staring libexif\n"));
-            handler = Ref<MetadataHandler>(new LibExifHandler());
-            break;
-        }
-#endif
+
+#endif // HAVE_EXTRACTOR
+
     }
     while (false);
 
@@ -142,8 +145,10 @@ Ref<MetadataHandler> MetadataHandler::createHandler(int handlerType)
 {
     switch(handlerType)
     {
+#ifdef HAVE_EXIF
         case CH_LIBEXIF:
             return Ref<MetadataHandler>(new LibExifHandler());
+#endif
         default:
             throw Exception(String("unknown content handler ID: ") + handlerType);
     }

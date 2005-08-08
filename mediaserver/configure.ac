@@ -401,11 +401,11 @@ fi
 if test "x$EXIF_OK" = xyes; then
     LDFLAGS="$LDFLAGS -lexif"
     AC_DEFINE(HAVE_EXIF)
+    if test "x$EXIF_EGV_1" = xyes; then
+        AC_DEFINE(EXIF_EGV_1)
+    fi
     if test "x$EXIF_EGV_3" = xyes; then
         AC_DEFINE(EXIF_EGV_3)
-    fi
-    if test "x$EXIF_EGV_2" = xyes; then
-        AC_DEFINE(EXIF_EGV_2)
     fi
 else
     if test "x$EXIF_EN" = xyes; then

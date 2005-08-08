@@ -186,8 +186,8 @@ static int getTagFromString(String tag)
         return  EXIF_TAG_MAKER_NOTE;
     if (tag == "EXIF_TAG_USER_COMMENT")
         return  EXIF_TAG_USER_COMMENT;
-    if (tag == "EXIF_TAG_SUBSEC_TIME")
-        return  EXIF_TAG_SUBSEC_TIME;
+/*    if (tag == "EXIF_TAG_SUBSEC_TIME")
+        return  EXIF_TAG_SUBSEC_TIME; */
     if (tag == "EXIF_TAG_SUB_SEC_TIME_ORIGINAL")
         return  EXIF_TAG_SUB_SEC_TIME_ORIGINAL;
     if (tag == "EXIF_TAG_SUB_SEC_TIME_DIGITIZED") 
@@ -257,6 +257,16 @@ static int getTagFromString(String tag)
     return -1;
 }
 
+
+
+#ifdef EXIF_EGV_1
+    #define exif_egv(arg) exif_entry_get_value(arg)
+#endif
+
+#ifdef EXIF_EGV_3
+    #define exif_egv(arg) exif_entry_get_value(arg, NULL, 0)
+#endif
+
 void LibExifHandler::process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<StringConverter> sc, Ref<Array<StringBase> > auxtags)
 {
     ExifEntry *e;
@@ -272,7 +282,7 @@ void LibExifHandler::process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<S
         switch (e->tag)
         {
             case EXIF_TAG_DATE_TIME:
-                value = String((char *)exif_entry_get_value(e));
+                value = String((char *)exif_egv(e));
                 if (string_ok(value))
                 {
                     value = sc->convert(value);
@@ -287,17 +297,16 @@ void LibExifHandler::process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<S
                 break;
 
             case EXIF_TAG_USER_COMMENT:
-                value = String((char *)exif_entry_get_value(e));
+                value = String((char *)exif_egv(e));
                 if (string_ok(value))
                 {
                     value = sc->convert(value);
-
-                    item->setMetadata(String(MT_KEYS[M_DESCRIPTION].upnp), value);
+                    item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), value);
                 }
                 break;
 
             case EXIF_TAG_PIXEL_X_DIMENSION:
-                value = String((char *)exif_entry_get_value(e));
+                value = String((char *)exif_egv(e));
                 if (string_ok(value))
                 {
                     value = sc->convert(value);
@@ -306,7 +315,7 @@ void LibExifHandler::process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<S
                 break;
 
             case EXIF_TAG_PIXEL_Y_DIMENSION:
-                value = String((char *)exif_entry_get_value(e));
+                value = String((char *)exif_egv(e));
                 if (string_ok(value))
                 {
                     value = sc->convert(value);
@@ -326,7 +335,7 @@ void LibExifHandler::process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<S
                 {
                     if (e->tag == getTagFromString(tmp))
                     {
-                        value = String((char *)exif_entry_get_value(e));
+                        value = String((char *)exif_egv(e));
                         if (string_ok(value))
                         {
                             value = sc->convert(value);
@@ -376,7 +385,9 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
     if (ed->size) 
     {
         //log_info(("EXIF data contains a thumbnail (%i bytes).\n", ed->size));
-       
+    
+#ifndef EXTRACTOR_GE_0_5_2
+        
         int fd;
         char temp[] = "/tmp/.tombXXXXXX";
 
@@ -387,10 +398,15 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
         {
             write (fd, ed->data, ed->size);
             close(fd);
-
+#endif // EXTRACTOR_GE_0_5_2
+            
             EXTRACTOR_ExtractorList *extractors = EXTRACTOR_loadDefaultLibraries();
+
+#ifdef EXTRACTOR_GE_0_5_2
+            EXTRACTOR_KeywordList *keywords = EXTRACTOR_getKeywords2(extractors, (const char *)ed->data, ed->size);
+#else
             EXTRACTOR_KeywordList *keywords = EXTRACTOR_getKeywords(extractors, th_filename.c_str());
-    
+#endif // EXTRACTOR_GE_0_5_2
 
             String th_mimetype = String((char *)EXTRACTOR_extractLast(EXTRACTOR_MIMETYPE, keywords));
             String th_resolution = String((char *)EXTRACTOR_extractLast(EXTRACTOR_SIZE, keywords));
@@ -403,14 +419,17 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
 
             EXTRACTOR_freeKeywords(keywords);
             EXTRACTOR_removeAll(extractors);
-
+            
+#ifndef EXTRACTOR_GE_0_5_2
+            
             if (remove(th_filename.c_str()) == -1)
                 log_error(("Failed to remove temporary thumbnail file %s (%s)\n", th_filename.c_str(), strerror(errno))); 
         }
         else 
             log_error(("Could not open %s for writing thumbnail: %s\n", th_filename.c_str(), strerror(errno)));
+#endif // EXTRACTOR_GE_0_5_2
     }
-#endif
+#endif // HAVE_EXTRACTOR
     
     exif_data_unref(ed);
 }

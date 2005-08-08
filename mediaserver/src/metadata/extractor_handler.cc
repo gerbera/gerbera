@@ -181,6 +181,43 @@ static EXTRACTOR_KeywordType getTagFromString(String tag)
     if (tag == "EXTRACTOR_THUMBNAIL_DATA")
         return EXTRACTOR_THUMBNAIL_DATA;
 
+#ifdef EXTRACTOR_GE_0_5_2
+    if (tag == "EXTRACTOR_PUBLICATION_DATE")
+        return EXTRACTOR_PUBLICATION_DATE;
+    if (tag == "EXTRACTOR_CAMERA_MAKE")
+        return EXTRACTOR_CAMERA_MAKE;
+    if (tag == "EXTRACTOR_CAMERA_MODEL")
+        return EXTRACTOR_CAMERA_MODEL;
+    if (tag == "EXTRACTOR_EXPOSURE")
+        return EXTRACTOR_EXPOSURE;
+    if (tag == "EXTRACTOR_APERTURE")
+        return EXTRACTOR_APERTURE;
+    if (tag == "EXTRACTOR_EXPOSURE_BIAS")
+        return EXTRACTOR_EXPOSURE_BIAS;
+    if (tag == "EXTRACTOR_FLASH")
+        return EXTRACTOR_FLASH;
+    if (tag == "EXTRACTOR_FLASH_BIAS")
+        return EXTRACTOR_FLASH_BIAS;
+    if (tag == "EXTRACTOR_FOCAL_LENGTH")
+        return EXTRACTOR_FOCAL_LENGTH;
+    if (tag == "EXTRACTOR_FOCAL_LENGTH_35MM")
+        return EXTRACTOR_FOCAL_LENGTH_35MM;
+    if (tag == "EXTRACTOR_ISO_SPEED")
+        return EXTRACTOR_ISO_SPEED;
+    if (tag == "EXTRACTOR_EXPOSURE_MODE")
+        return EXTRACTOR_EXPOSURE_MODE;
+    if (tag == "EXTRACTOR_METERING_MODE")
+        return EXTRACTOR_METERING_MODE;
+    if (tag == "EXTRACTOR_MACRO_MODE")
+        return EXTRACTOR_MACRO_MODE;
+    if (tag == "EXTRACTOR_IMAGE_QUALITY")
+        return EXTRACTOR_IMAGE_QUALITY;
+    if (tag == "EXTRACTOR_WHITE_BALANCE")
+        return EXTRACTOR_WHITE_BALANCE;
+    if (tag == "EXTRACTOR_ORIENTATION")
+        return EXTRACTOR_ORIENTATION;
+#endif // EXTRACTOR_GE_0_5_2
+
     log_warning(("Ignoring unknown libextractor tag: %s\n", tag.c_str()));
     return EXTRACTOR_UNKNOWN;
 }
@@ -254,9 +291,7 @@ static void addResourceField(resource_attributes_t attr, EXTRACTOR_KeywordList *
 
     if (string_ok(value))
     {
-//        item->setMetadata(String(MT_KEYS[field].upnp), sc->convert(value));
-          item->getResource(0)->addAttribute(String(RES_KEYS[attr].upnp), value);
-//        log_info(("Got resource: %d, %s\n", attr, sc->convert(value).c_str()));
+          item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(attr), value);
     }
 }
 
@@ -305,6 +340,10 @@ void ExtractorHandler::fillMetadata(Ref<CdsItem> item)
         }
     }
 
+    const char *temp = NULL;
+    
+    temp = EXTRACTOR_extractLast(EXTRACTOR_FORMAT, keywords);
+    log_info(("EXTRACTOR_FORMAT: %s\n", temp));
     
     EXTRACTOR_freeKeywords(keywords);
     EXTRACTOR_removeAll(extractors);
