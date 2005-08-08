@@ -265,7 +265,7 @@ if test "x$ID3_OK" = xyes; then
    AC_DEFINE(HAVE_ID3)
 else
     if test "x$ID3_EN" = xyes; then
-        AC_MSG_ERROR(unable to configure libid3 support)
+        AC_MSG_ERROR(unable to configure id3lib support)
     fi
 fi
 
@@ -409,7 +409,7 @@ echo "  sqlite3      : $SQLITE3_OK"
 echo "  mysql        : $MYSQL_OK"
 echo "  javascript   : $JS_OK"
 echo "  libmagic     : $MAGIC_OK"
-echo "  libid3       : $ID3_OK"
+echo "  id3lib       : $ID3_OK"
 echo "  libextractor : $EXTRACTOR_OK"
 echo "  libexif      : $EXIF_OK"
 # echo "  exiv2        : $EXIV2_OK"

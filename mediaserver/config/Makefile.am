@@ -4,7 +4,8 @@ sharedir = $(DESTDIR)@datadir@/mediatomb
 _DIST_FILES = \
     config-dist.xml \
     mysql.sql \
-    sqlite3.sql
+    sqlite3.sql \
+    magic.mime
 
 
 EXTRA_DIST = $(_DIST_FILES)
