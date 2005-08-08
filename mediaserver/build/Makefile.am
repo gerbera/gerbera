@@ -5,7 +5,8 @@ include $(srcdir)/libmediatomb_src
 libmediatomb_a_CXXFLAGS = -I../src
 
 bin_PROGRAMS = mediatomb
-mediatomb_SOURCES =
+mediatomb_SOURCES = ../src/main.cc
+mediatomb_CXXFLAGS = -I../src
 
 mediatomb_LDADD = \
     libmediatomb.a \
