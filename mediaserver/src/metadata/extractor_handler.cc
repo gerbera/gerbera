@@ -362,8 +362,8 @@ void ExtractorHandler::fillMetadata(Ref<CdsItem> item)
 
     if (temp)
     {
-        Ref<Matcher> matcher = ReAudioFormat->matcher((char *)temp, 7);
-        if (matcher->next())
+        Ref<Matcher> matcher = ReAudioFormat->match((char *)temp);
+        if (matcher != nil)
         {
             log_debug(("BR:%s FR:%s H:%s M:%s S:%s TYPE:%s\n",
                        matcher->group(1).c_str(),

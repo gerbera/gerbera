@@ -79,6 +79,14 @@ Ref<Matcher> RExp::matcher(String text, int nmatch)
 {
     return Ref<Matcher>(new Matcher(Ref<RExp>(this), text, nmatch));
 }
+Ref<Matcher> RExp::match(String text, int nmatch)
+{
+    Ref<Matcher> m = matcher(text, nmatch);
+    if (m->next())
+        return m;
+    else
+        return nil;
+}
 
 bool RExp::matches(String text)
 {
@@ -91,10 +99,9 @@ Matcher::Matcher(zmm::Ref<RExp> rexp, String text, int nmatch)
     this->rexp = rexp;
     this->text = text;
     this->ptr = NULL;
-    if (nmatch > 0)
-        this->nmatch = nmatch + 1; // for the 0'th group
-    if (nmatch)
-        this->pmatch = (regmatch_t *)malloc(nmatch * sizeof(regmatch_t));
+    this->nmatch = nmatch++; 
+    if (this->nmatch)
+        this->pmatch = (regmatch_t *)malloc(this->nmatch * sizeof(regmatch_t));
     else
         this->pmatch = NULL;
 }

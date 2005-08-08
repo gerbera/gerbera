@@ -25,7 +25,7 @@
 #include <sys/types.h>
 #include <regex.h>
 
-#define DEFAULT_NMATCH 5
+#define DEFAULT_NMATCH 10
 
 class Matcher;
 
@@ -37,6 +37,7 @@ public:
     void compile(zmm::String pattern, int flags = 0);
     void compile(zmm::String pattern, const char *flags);
     zmm::Ref<Matcher> matcher(zmm::String text, int nmatch = DEFAULT_NMATCH);
+    zmm::Ref<Matcher> match(zmm::String text, int nmatch = DEFAULT_NMATCH);
     bool matches(zmm::String text);
     zmm::String getPattern();
 protected:

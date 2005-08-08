@@ -1018,11 +1018,11 @@ String DirCache::createContainers()
     int prev_end;
     for (int i = 0; i < size; i++)
     {
-	Ref<DirCacheEntry> entry = entries->get(i);
+    	Ref<DirCacheEntry> entry = entries->get(i);
         if (entry->id != nil)
             continue;
 
-	prev_end = (i == 0) ? 1 : entries->get(i - 1)->end + 1;
+	    prev_end = (i == 0) ? 1 : entries->get(i - 1)->end + 1;
         String name = String(buffer->c_str() + prev_end, entry->end - prev_end);
         /// \todo: PC Directory id configurable
         String parentID = ((i == 0) ? "1" : entries->get(i - 1)->id);
