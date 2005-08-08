@@ -33,7 +33,6 @@
 
 using namespace zmm;
 
-EXTRACTOR_ExtractorList *extractors = NULL;
 
 ExtractorHandler::ExtractorHandler() : MetadataHandler()
 {
@@ -301,14 +300,22 @@ static void addResourceField(resource_attributes_t attr, EXTRACTOR_KeywordList *
 
 
 Ref<RExp> ReAudioFormat;
+EXTRACTOR_ExtractorList *extractors = NULL;
+bool load_libraries_failed = false;
 
 void ExtractorHandler::fillMetadata(Ref<CdsItem> item)
 {
+    if (load_libraries_failed)
+        return;
     Ref<Array<StringBase> > aux;
     Ref<StringConverter> sc = StringConverter::m2i();
         
     if (! extractors)
+    {
         extractors = EXTRACTOR_loadDefaultLibraries();
+        if (! extractors)
+            load_libraries_failed = true;
+    }
     EXTRACTOR_KeywordList *keywords = EXTRACTOR_getKeywords(extractors, item->getLocation().c_str());
 
     //EXTRACTOR_printKeywords(stdout, keywords);
@@ -353,7 +360,7 @@ void ExtractorHandler::fillMetadata(Ref<CdsItem> item)
     {
         ReAudioFormat = Ref<RExp>(new RExp());
         // 64 kbps, 44100 hz, 8m30 stereo
-        ReAudioFormat->compile("([0-9]+)\\s+kbps.*?([0-9]+)\\s+hz.*?"
+        ReAudioFormat->compile("([0-9]+)\\s+kbps,\\s*([0-9]+)\\s+hz,\\s*"
                                "(([0-9]+)h)?([0-9]+)m([0-9]+)\\s(\\S+)", "i");
     }
     
