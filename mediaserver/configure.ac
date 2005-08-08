@@ -288,34 +288,36 @@ if test "x$EXTRACTOR_OK" = xyes; then
         /* checking for extractor.h */
     )
 fi
-if test "x$EXTRACTOR_OK" = xyes; then
-    AC_MSG_CHECKING([extractor version])
-    # AC_CHECKING prints newline
-    AC_RUN_IFELSE(
-        [AC_LANG_PROGRAM(
-            [
-                #include <extractor.h>
-            ],
-            [
-                if(EXTRACTOR_VERSION < 0x00050200)
-                    return 1;
-            ]
-        )],
-        [
-            AC_MSG_RESULT([>= 0.5.2])
-            EXTRACTOR_GE_0_5_2=yes
-        ],
-        [
-            AC_MSG_RESULT([< 0.5.2])
-        ]
-    )
-fi
+
+#disabling version check, 0.5.2 is broken!!!
+#if test "x$EXTRACTOR_OK" = xyes; then
+#    AC_MSG_CHECKING([extractor version])
+#    AC_CHECKING prints newline
+#    AC_RUN_IFELSE(
+#        [AC_LANG_PROGRAM(
+#            [
+#                #include <extractor.h>
+#            ],
+#            [
+#                if(EXTRACTOR_VERSION < 0x00050200)
+#                    return 1;
+#            ]
+#        )],
+#        [
+#            AC_MSG_RESULT([>= 0.5.2])
+#            EXTRACTOR_GE_0_5_2=yes
+#        ],
+#        [
+#            AC_MSG_RESULT([< 0.5.2])
+#        ]
+#    )
+#fi
 if test "x$EXTRACTOR_OK" = xyes; then
     LDFLAGS="$LDFLAGS -lextractor"
     AC_DEFINE(HAVE_EXTRACTOR)
-    if test "x$EXTRACTOR_GE_0_5_2" = xyes; then
-        AC_DEFINE(EXTRACTOR_GE_0_5_2)
-    fi
+#    if test "x$EXTRACTOR_GE_0_5_2" = xyes; then
+#        AC_DEFINE(EXTRACTOR_GE_0_5_2)
+#    fi
 else
     if test "x$EXTRACTOR_EN" = xyes; then
         AC_MSG_ERROR(unable to configure libextractor support)
@@ -355,8 +357,56 @@ if test "x$EXIF_OK" = xyes; then
     )
 fi
 if test "x$EXIF_OK" = xyes; then
-   LDFLAGS="$LDFLAGS -lexif"
-   AC_DEFINE(HAVE_EXIF)
+    # try 1 argument signature
+    AC_MSG_CHECKING([exif_entry_get_value signature])
+    AC_COMPILE_IFELSE(
+        [AC_LANG_PROGRAM(
+            [
+                #include <libexif/exif-data.h>
+                #include <libexif/exif-content.h>
+            ],
+            [
+                (void)exif_entry_get_value(0);
+            ]
+        )],
+        [
+            AC_MSG_RESULT([requires 1 argument])
+            EXIF_EGV_1=yes
+        ],
+        [
+            # try 3 argument signature
+            AC_COMPILE_IFELSE(
+                [AC_LANG_PROGRAM(
+                    [
+                        #include <libexif/exif-data.h>
+                        #include <libexif/exif-content.h>
+                    ],
+                    [
+                        (void)exif_entry_get_value(0, 0, 0);
+                    ]
+                )],
+                [
+                    AC_MSG_RESULT([requires 3 arguments])
+                    EXIF_EGV_3=yes
+                ],
+                [
+                    AC_MSG_RESULT([unsupported, disabling])
+                    EXIF_OK="disabled (unsupported version)"
+                ]
+            )
+        ]
+    )
+
+fi
+if test "x$EXIF_OK" = xyes; then
+    LDFLAGS="$LDFLAGS -lexif"
+    AC_DEFINE(HAVE_EXIF)
+    if test "x$EXIF_EGV_3" = xyes; then
+        AC_DEFINE(EXIF_EGV_3)
+    fi
+    if test "x$EXIF_EGV_2" = xyes; then
+        AC_DEFINE(EXIF_EGV_2)
+    fi
 else
     if test "x$EXIF_EN" = xyes; then
         AC_MSG_ERROR(unable to configure libexif support)
