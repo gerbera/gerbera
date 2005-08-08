@@ -49,7 +49,8 @@ using namespace mxml;
 
 /*********************** utils ***********************/
 #define MIMETYPE_REGEXP "^([a-z0-9_-]+/[a-z0-9_-]+)"
-static Ref<RExp> reMimetype;
+
+Ref<RExp> reMimetype;
 
 static String get_filename(String path)
 {

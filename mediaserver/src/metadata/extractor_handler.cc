@@ -354,7 +354,7 @@ void ExtractorHandler::fillMetadata(Ref<CdsItem> item)
         ReAudioFormat = Ref<RExp>(new RExp());
         // 64 kbps, 44100 hz, 8m30 stereo
         ReAudioFormat->compile("([0-9]+)\\s+kbps.*?([0-9]+)\\s+hz.*?"
-                               "(([0-9]+)h)?([0-9]+)m([0-9]+)\\s(\\S*)", "i");
+                               "(([0-9]+)h)?([0-9]+)m([0-9]+)\\s(\\S+)", "i");
     }
     
     temp = EXTRACTOR_extractLast(EXTRACTOR_FORMAT, keywords);
