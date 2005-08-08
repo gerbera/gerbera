@@ -313,6 +313,10 @@ Here is a sample configuration file with description of the various tags.
         For more details read doc/scripting-intro.txt
         This setting defaults to ${prefix}/share/mediatomb/js/import.js
 
+    <magic-file> (Optional)
+        Specifies an alternative file for filemagic, contaning mimetype 
+        information.
+
     <mappings> (Optional, also all subsections are optional)
         Defines various mapping options for importing media, currently
         two subsections are supported.
