@@ -471,8 +471,8 @@ void SQLStorage::removeObject(zmm::Ref<CdsObject> obj)
     Ref<StringBuffer> query(new StringBuffer());
     if(IS_CDS_CONTAINER(obj->getObjectType()))
         removeChildren(obj->getID(), query);
-    exec(String(del_query) + query->toString() + obj->getID() << ")");
-    exec(String(del_query_ref) + query->toString() + obj->getID() << ")");
+    exec(String(del_query) + query->toString() + obj->getID() + ")");
+    exec(String(del_query_ref) + query->toString() + obj->getID() + ")");
 }
 
 void SQLStorage::removeChildren(String id, Ref<StringBuffer> query)
