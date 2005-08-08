@@ -118,9 +118,12 @@ ContentManager::ContentManager() : Object()
 	    log_info(("magic_open failed\n"));
             return;
         }
-        if (magic_load(ms, NULL) == -1)
+        String magicFile = cm->getOption("/import/magic-file");
+        if (! string_ok(magicFile))
+            magicFile = nil;
+        if (magic_load(ms, (magicFile == nil) ? NULL : magicFile.c_str()) == -1)
         {
-            log_info(("magic_load: %s\n", magic_error(ms)));
+            log_warn(("magic_load: %s\n", magic_error(ms)));
             magic_close(ms);
             ms = NULL;
         }

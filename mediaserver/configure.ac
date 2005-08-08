@@ -237,8 +237,8 @@ fi
 ######### id3tag
 
 ID3_OK=yes
-AC_ARG_ENABLE(libid3,
-  [  --enable-libid3          libid3 support],
+AC_ARG_ENABLE(id3lib,
+  [  --enable-id3lib          id3lib support],
   [
      ID3_EN=$enableval 
      if test "x$enableval" = xno; then
