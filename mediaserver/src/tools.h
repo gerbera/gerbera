@@ -25,6 +25,7 @@
 
 #include "common.h"
 #include "rexp.h"
+#include "io_handler.h"
 
 #ifdef HAVE_MAGIC
 // for older versions of filemagic
@@ -127,6 +128,8 @@ zmm::String secondsToHMS(int seconds);
 /// \brief Extracts mimetype from a file using filemagic
 zmm::String get_mime_type(magic_set *ms, zmm::Ref<RExp> reMimetype, zmm::String file);
 #endif // HAVE_MAGIC
+
+zmm::String get_jpeg_resolution(zmm::Ref<IOHandler> ioh);
 
 #endif // __TOOLS_H__
 

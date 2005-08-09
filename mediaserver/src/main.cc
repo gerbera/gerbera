@@ -39,7 +39,6 @@
 #include <pwd.h>
 #include <grp.h>
 
-
 #define OPTSTR "i:p:c:u:g:a:l:P:dh"
 
 using namespace zmm;

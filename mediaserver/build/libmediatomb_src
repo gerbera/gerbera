@@ -27,6 +27,7 @@ libmediatomb_a_SOURCES = \
 ../src/file_io_handler.cc \
 ../src/file_request_handler.cc \
 ../src/io_handler.cc \
+../src/jpeg_resolution.cc \
 ../src/mem_io_handler.cc \
 ../src/metadata_handler.cc \
 ../src/server.cc \

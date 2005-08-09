@@ -451,34 +451,35 @@ fi
 
 ######### libjpeg
 
-LIBJPEG_OK=yes
-AC_ARG_ENABLE(libjpeg,
-  [  --enable-libjpeg         libjpeg support],
-  [
-     LIBJPEG_EN=$enableval 
-     if test "x$enableval" = xno; then
-        LIBJPEG_OK=disabled
-     fi
-  ]
-)
-if test "x$LIBJPEG_OK" = xyes; then
-    AC_CHECK_HEADER(jpeglib.h,
-        [],
-        [LIBJPEG_OK=missing],
-        [
-            #include <stdio.h>
-            /* checking for jpeglib.h */
-        ]
-    )
-fi
-if test "x$LIBJPEG_OK" = xyes; then
-   LDFLAGS="$LDFLAGS -ljpeg"
-   AC_DEFINE(HAVE_LIBJPEG)
-else
-    if test "x$LIBJPEG_EN" = xyes; then
-        AC_MSG_ERROR(unable to configure libjpeg support)
-    fi
-fi
+#LIBJPEG_OK=yes
+#AC_ARG_ENABLE(libjpeg,
+#  [  --enable-libjpeg         libjpeg support],
+#  [
+#     LIBJPEG_EN=$enableval 
+#     if test "x$enableval" = xno; then
+#        LIBJPEG_OK=disabled
+#     fi
+#  ]
+#)
+#if test "x$LIBJPEG_OK" = xyes; then
+#    AC_CHECK_HEADER(jpeglib.h,
+#        [],
+#        [LIBJPEG_OK=missing],
+#        [
+#            #include <stdio.h>
+#            /* checking for jpeglib.h */
+#        ]
+#    )
+#fi
+#if test "x$LIBJPEG_OK" = xyes; then
+#   LDFLAGS="$LDFLAGS -ljpeg"
+#   AC_DEFINE(HAVE_LIBJPEG)
+#else
+#    if test "x$LIBJPEG_EN" = xyes; then
+#        AC_MSG_ERROR(unable to configure libjpeg support)
+#    fi
+#fi
+
 
 ###############
 
@@ -493,7 +494,7 @@ echo "  libmagic     : $MAGIC_OK"
 echo "  id3lib       : $ID3_OK"
 echo "  libextractor : $EXTRACTOR_OK"
 echo "  libexif      : $EXIF_OK"
-echo "  libjpeg      : $LIBJPEG_OK"
+# echo "  libjpeg      : $LIBJPEG_OK"
 # echo "  exiv2        : $EXIV2_OK"
 echo
 
