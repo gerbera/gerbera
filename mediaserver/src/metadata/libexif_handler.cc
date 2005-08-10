@@ -281,6 +281,7 @@ void LibExifHandler::process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<S
         {
             case EXIF_TAG_DATE_TIME:
                 value = String((char *)exif_egv(e));
+                value = trim_string(value);
                 if (string_ok(value))
                 {
                     value = sc->convert(value);
@@ -296,9 +297,7 @@ void LibExifHandler::process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<S
 
             case EXIF_TAG_USER_COMMENT:
                 value = String((char *)exif_egv(e));
-
                 value = trim_string(value);
-
                 if (string_ok(value))
                 {
                     value = sc->convert(value);
@@ -308,6 +307,7 @@ void LibExifHandler::process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<S
 
             case EXIF_TAG_PIXEL_X_DIMENSION:
                 value = String((char *)exif_egv(e));
+                value = trim_string(value);
                 if (string_ok(value))
                 {
                     value = sc->convert(value);
@@ -317,6 +317,7 @@ void LibExifHandler::process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<S
 
             case EXIF_TAG_PIXEL_Y_DIMENSION:
                 value = String((char *)exif_egv(e));
+                value = trim_string(value);
                 if (string_ok(value))
                 {
                     value = sc->convert(value);
@@ -337,6 +338,7 @@ void LibExifHandler::process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<S
                     if (e->tag == getTagFromString(tmp))
                     {
                         value = String((char *)exif_egv(e));
+                        value = trim_string(value);
                         if (string_ok(value))
                         {
                             value = sc->convert(value);
@@ -362,6 +364,7 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
 
     if (!ed)
     {
+        log_debug(("Exif data not found, attempting to set resolution internally...\n"));
         set_jpeg_resolution_resource(item, 0);
         return;
     }
@@ -381,6 +384,10 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
     {
         item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION),
                                            imageX + "x" + imageY);
+    } 
+    else
+    {
+        set_jpeg_resolution_resource(item, 0);
     }
 
     if (ed->size)
