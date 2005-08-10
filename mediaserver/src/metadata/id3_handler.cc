@@ -79,6 +79,8 @@ static void addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsItem> item
     if (ID3_retval)
         delete [] ID3_retval;
 
+    value = trim_string(value);
+    
     if (string_ok(value))
     {
         item->setMetadata(String(MT_KEYS[field].upnp), sc->convert(value));
@@ -126,6 +128,30 @@ void Id3Handler::fillMetadata(Ref<CdsItem> item)
         {
             item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_DURATION),
                                                secondsToHMS(header->time));
+        }
+
+        if ((header->frequency) > 0)
+        {
+            item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), 
+                                               String::from((int)(header->frequency)));
+        }
+
+        temp = 0;
+        switch(header->channelmode)
+        {
+            case MP3CHANNELMODE_STEREO:
+            case MP3CHANNELMODE_JOINT_STEREO:
+            case MP3CHANNELMODE_DUAL_CHANNEL:
+                temp = 2;
+                break;
+            case MP3CHANNELMODE_SINGLE_CHANNEL:
+                temp = 1;
+        }
+
+        if (temp > 0)
+        {
+            item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS),
+                                               String::from(temp));
         }
     }
     

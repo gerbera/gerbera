@@ -262,6 +262,8 @@ static void addMetaField(metadata_fields_t field, EXTRACTOR_KeywordList *keyword
     if (temp != NULL)
         value = (char *)temp;
 
+    value = trim_string(value);
+    
     if (string_ok(value))
     {
         item->setMetadata(String(MT_KEYS[field].upnp), sc->convert(value));
