@@ -60,6 +60,8 @@ Ref<Array<StringBase> > split_string(String str, char sep)
 
 String trim_string(String str)
 {
+    if (str == nil)
+        return nil;
     int i;
     int start = 0;
     int end = 0;
