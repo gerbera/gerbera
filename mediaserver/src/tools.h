@@ -26,6 +26,7 @@
 #include "common.h"
 #include "rexp.h"
 #include "io_handler.h"
+#include "cds_objects.h"
 
 #ifdef HAVE_MAGIC
 // for older versions of filemagic
@@ -134,7 +135,12 @@ zmm::String secondsToHMS(int seconds);
 zmm::String get_mime_type(magic_set *ms, zmm::Ref<RExp> reMimetype, zmm::String file);
 #endif // HAVE_MAGIC
 
+/// \brief Extracts resolution from a JPEG image
 zmm::String get_jpeg_resolution(zmm::Ref<IOHandler> ioh);
+
+/// \brief Sets resolution for a given resource index, item must be a JPEG image
+zmm::String set_jpeg_resolution_resource(zmm::Ref<CdsItem> item, int res_num);
+    
 
 #endif // __TOOLS_H__
 

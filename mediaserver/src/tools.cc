@@ -23,6 +23,8 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include "md5/md5.h"
+#include "file_io_handler.h"
+#include "metadata_handler.h"
 
 #define WHITE_SPACE " \t\r\n"
 
@@ -449,5 +451,26 @@ String get_mime_type(magic_set *ms, Ref<RExp> reMimetype, String file)
                 file.c_str(), mt));
     return nil;
 }
+
 #endif 
+
+String set_jpeg_resolution_resource(Ref<CdsItem> item, int res_num)
+{
+    try
+    {
+        Ref<IOHandler> fio_h(new FileIOHandler(item->getLocation()));
+        fio_h->open(UPNP_READ);
+        String resolution = get_jpeg_resolution(fio_h);
+        log_debug(("RESOLUTION: %s\n", resolution.c_str()));
+
+        if (res_num >= item->getResourceCount())
+            throw Exception("Invalid resource index");
+            
+        item->getResource(res_num)->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), resolution);
+    }
+    catch (Exception e)
+    {
+        e.printStackTrace();
+    }
+}
 
