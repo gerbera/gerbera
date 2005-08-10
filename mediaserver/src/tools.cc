@@ -62,6 +62,11 @@ Ref<Array<StringBase> > split_string(String str, char sep)
 
 String trim_string(String str)
 {
+    fprintf(stderr, "UUUUU:");
+    for (int i = 0; i < str.length(); i++)
+        fprintf(stderr, " %X", str.c_str()[i]);
+    fprintf(stderr, "\n");
+
     if (str == nil)
         return nil;
     int i;
