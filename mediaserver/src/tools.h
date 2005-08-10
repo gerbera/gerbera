@@ -35,8 +35,13 @@ extern "C" {
 
 #endif
 
-/// \todo genych, pishi chtoeto hernya delaet
+/// \brief splits the given string into array of strings using a separator character.
+/// \param sep separator character
+/// \return array of strings
 zmm::Ref<zmm::Array<zmm::StringBase> > split_string(zmm::String str, char sep);
+
+/// \brief returns str with leading and trailing whitespace removed
+zmm::String trim_string(zmm::String str);
 
 /// \brief Checks existance of the specified file or path.
 /// \param path file or directory to be checked.

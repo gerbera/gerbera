@@ -24,6 +24,8 @@
 #include <sys/time.h>
 #include "md5/md5.h"
 
+#define WHITE_SPACE " \t\r\n"
+
 using namespace zmm;
 
 static char *HEX_CHARS = "0123456789abcdef";
@@ -54,6 +56,36 @@ Ref<Array<StringBase> > split_string(String str, char sep)
         }
     }            
     return ret;
+}
+
+String trim_string(String str)
+{
+    int i;
+    int start = 0;
+    int end = 0;
+    int len = str.length();
+
+    char *buf = str.c_str();
+
+    for (i = 0; i < len; i++)
+    {
+        if (! index(WHITE_SPACE, buf[i]))
+        {
+            start = i;
+            break;
+        }
+    }
+    if (i >= len)
+        return String("");
+    for (i = len - 1; i >= start; i--)
+    {
+        if (! index(WHITE_SPACE, buf[i]))
+        {
+            end = i + 1;
+            break;
+        }
+    }
+    return str.substring(start, end - start);
 }
 
 bool check_path(String path, bool needDir)
