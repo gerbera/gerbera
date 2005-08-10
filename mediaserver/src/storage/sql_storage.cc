@@ -493,7 +493,6 @@ void SQLStorage::removeChildren(String id, Ref<StringBuffer> query)
         
         if (query->length() > MAX_DELETE_QUERY_LENGTH)
         {
-            *query << ")";
             exec(String(del_query) + query->toString() + ")");
             exec(String(del_query_ref) + query->toString() + ")");
             query->clear();
