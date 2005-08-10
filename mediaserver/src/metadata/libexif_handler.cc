@@ -297,8 +297,8 @@ void LibExifHandler::process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<S
             case EXIF_TAG_USER_COMMENT:
                 value = String((char *)exif_egv(e));
 
-                trim_string(value);
-                
+                value = trim_string(value);
+
                 if (string_ok(value))
                 {
                     value = sc->convert(value);
