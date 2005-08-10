@@ -23,11 +23,6 @@
 
 #ifdef HAVE_EXIF
 
-#ifdef HAVE_EXTRACTOR
-#include <extractor.h>
-#endif
-
-
 #include "libexif_handler.h"
 #include "tools.h"
 #include "config_manager.h"
@@ -264,7 +259,9 @@ static int getTagFromString(String tag)
 #endif
 
 #ifdef EXIF_EGV_3
-    #define exif_egv(arg) exif_entry_get_value(arg, NULL, 0)
+    #define BUFLEN  512
+    char exif_entry_buffer[BUFLEN];
+    #define exif_egv(arg) exif_entry_get_value(arg, exif_entry_buffer, BUFLEN)
 #endif
 
 void LibExifHandler::process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<StringConverter> sc, Ref<Array<StringBase> > auxtags)
@@ -274,6 +271,7 @@ void LibExifHandler::process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<S
     String value;
     String tmp;
 
+    
     for (i = 0; i < content->count; i++) {
         e = content->entries[i];
 
@@ -298,6 +296,9 @@ void LibExifHandler::process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<S
 
             case EXIF_TAG_USER_COMMENT:
                 value = String((char *)exif_egv(e));
+
+                trim_string(value);
+                
                 if (string_ok(value))
                 {
                     value = sc->convert(value);
@@ -360,7 +361,10 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
     ed = exif_data_new_from_file(item->getLocation().c_str());
 
     if (!ed)
+    {
+        set_jpeg_resolution_resource(item, 0);
         return;
+    }
 
     Ref<ConfigManager> cm = ConfigManager::getInstance();
     Ref<Element> e = cm->getElement("/import/library-options/libexif/auxdata");
@@ -379,58 +383,27 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
                                            imageX + "x" + imageY);
     }
 
-// we can only figure out information about the thumbnail if we have the
-// libextractor library
-#ifdef HAVE_EXTRACTOR    
-    if (ed->size) 
+    if (ed->size)
     {
-        //log_info(("EXIF data contains a thumbnail (%i bytes).\n", ed->size));
-    
-#ifndef EXTRACTOR_GE_0_5_2
-        
-        int fd;
-        char temp[] = "/tmp/.tombXXXXXX";
-
-        fd = mkstemp(temp);
-
-        String th_filename = temp;
-        if (fd != -1)
+        try
         {
-            write (fd, ed->data, ed->size);
-            close(fd);
-#endif // EXTRACTOR_GE_0_5_2
-            
-            EXTRACTOR_ExtractorList *extractors = EXTRACTOR_loadDefaultLibraries();
-
-#ifdef EXTRACTOR_GE_0_5_2
-            EXTRACTOR_KeywordList *keywords = EXTRACTOR_getKeywords2(extractors, (const char *)ed->data, ed->size);
-#else
-            EXTRACTOR_KeywordList *keywords = EXTRACTOR_getKeywords(extractors, th_filename.c_str());
-#endif // EXTRACTOR_GE_0_5_2
-
-            String th_mimetype = String((char *)EXTRACTOR_extractLast(EXTRACTOR_MIMETYPE, keywords));
-            String th_resolution = String((char *)EXTRACTOR_extractLast(EXTRACTOR_SIZE, keywords));
+            Ref<IOHandler> io_h(new MemIOHandler(ed->data, ed->size));
+            io_h->open(UPNP_READ);
+            String th_resolution = get_jpeg_resolution(io_h);
+            log_debug(("RESOLUTION: %s\n", th_resolution.c_str()));
 
             Ref<CdsResource> resource(new CdsResource(CH_LIBEXIF));
-            resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(th_mimetype));
-            resource->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), th_resolution);
+            resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(item->getMimeType()));
+            resource->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), th_resolution); 
             resource->addParameter(RESOURCE_CONTENT_TYPE, EXIF_THUMBNAIL);
             item->addResource(resource);
-
-            EXTRACTOR_freeKeywords(keywords);
-            EXTRACTOR_removeAll(extractors);
-            
-#ifndef EXTRACTOR_GE_0_5_2
-            
-            if (remove(th_filename.c_str()) == -1)
-                log_error(("Failed to remove temporary thumbnail file %s (%s)\n", th_filename.c_str(), strerror(errno))); 
         }
-        else 
-            log_error(("Could not open %s for writing thumbnail: %s\n", th_filename.c_str(), strerror(errno)));
-#endif // EXTRACTOR_GE_0_5_2
-    }
-#endif // HAVE_EXTRACTOR
-    
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+    } // (ed->size)
     exif_data_unref(ed);
 }
 
