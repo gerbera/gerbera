@@ -17,7 +17,7 @@ void uuid_unparse(const uuid_t uu, char *out)
 {
 	struct uuid uuid;
 
-	uuid_unpack(uu, &uuid);
+	uuid_unpack2(uu, &uuid);
 	sprintf(out,
 		"%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x",
 		uuid.time_low, uuid.time_mid, uuid.time_hi_and_version,

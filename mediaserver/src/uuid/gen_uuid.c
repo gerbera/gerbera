@@ -61,7 +61,8 @@ static int get_random_fd(void)
 		gettimeofday(&tv, 0);
 		fd = open("/dev/urandom", O_RDONLY);
 		if (fd == -1)
-			fd = open("/dev/random", O_RDONLY | O_NONBLOCK);
+			fd = open("/dev/random", O_RDONLY);
+			//fd = open("/dev/random", O_RDONLY | O_NONBLOCK);
 		srand((getpid() << 16) ^ getuid() ^ tv.tv_sec ^ tv.tv_usec);
 	}
 	/* Crank the random number generator a few times */
@@ -258,7 +259,7 @@ void uuid_generate_random(uuid_t out)
 	struct uuid uu;
 
 	get_random_bytes(buf, sizeof(buf));
-	uuid_unpack(buf, &uu);
+	uuid_unpack2(buf, &uu);
 
 	uu.clock_seq = (uu.clock_seq & 0x3FFF) | 0x8000;
 	uu.time_hi_and_version = (uu.time_hi_and_version & 0x0FFF) | 0x4000;
