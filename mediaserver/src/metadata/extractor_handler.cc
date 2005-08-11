@@ -365,7 +365,8 @@ void ExtractorHandler::fillMetadata(Ref<CdsItem> item)
         ReAudioFormat->compile("([0-9]+)\\s+kbps,\\s*([0-9]+)\\s+hz,\\s*"
                                "(([0-9]+)h)?([0-9]+)m([0-9]+)\\s(\\S+)", "i");
     }
-    
+   
+    /*
     temp = EXTRACTOR_extractLast(EXTRACTOR_FORMAT, keywords);
     log_info(("EXTRACTOR_FORMAT: %s\n", temp));
 
@@ -388,6 +389,7 @@ void ExtractorHandler::fillMetadata(Ref<CdsItem> item)
         }
     }
 
+    */
     EXTRACTOR_freeKeywords(keywords);
 
     // commented out for the sake of efficiency
