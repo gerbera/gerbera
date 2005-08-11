@@ -68,7 +68,7 @@ zmm::String StringConverter::convert(String str)
 //    log_info(("iconv: BEFORE: input bytes left: %d  output bytes left: %d\n",
 //           input_bytes, output_bytes));
     
-    ret = iconv(cd, input_ptr, (size_t *)&input_bytes,
+    ret = iconv(cd, (const char **)input_ptr, (size_t *)&input_bytes,
                     output_ptr, (size_t *)&output_bytes);
     if (ret == -1)
     {
