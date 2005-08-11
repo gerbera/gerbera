@@ -113,10 +113,14 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
             break;
         }
 #else
+        
+#ifndef HAVE_EXTRACTOR
         if (mimetype == "image/jpeg")
         {
             set_jpeg_resolution_resource(item, 0);
         }
+#endif // EXTRACTOR
+        
 #endif // HAVE_EXIF
         
 #ifdef HAVE_EXTRACTOR
