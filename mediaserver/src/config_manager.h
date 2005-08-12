@@ -116,7 +116,7 @@ public:
 protected:
     // will be used only internally
     void save(zmm::String filename);
-    void validate();
+    void validate(zmm::String serverhome);
     void prepare_udn();
     zmm::String construct_path(zmm::String path);
     void prepare_path(zmm::String path, bool needDir = false);

@@ -35,8 +35,13 @@ static Ref<ConfigManager> instance;
 String ConfigManager::construct_path(String path)
 {
     String home = getOption("/server/home");
+#ifndef __CYGWIN__
     if (path.charAt(0) == '/')
         return path;
+#else
+    if (path.charAt(1) == ':')
+        return path;
+#endif
     if (home == "." && path.charAt(0) == '.')
         return path;
     
@@ -55,6 +60,7 @@ void ConfigManager::init(String filename, String userhome)
     instance = Ref<ConfigManager>(new ConfigManager());
 
     String error_message;
+    String home;
     bool home_ok = true;
 
     if (filename == nil)
@@ -65,8 +71,10 @@ void ConfigManager::init(String filename, String userhome)
             home_ok = false;
         }
         else
-            filename = userhome + DIR_SEPARATOR + DEFAULT_CONFIG_HOME + DIR_SEPARATOR + DEFAULT_CONFIG_NAME;
-       
+        {
+            home = userhome + DIR_SEPARATOR + DEFAULT_CONFIG_HOME;
+            filename = home + DIR_SEPARATOR + DEFAULT_CONFIG_NAME;
+        }
         if (!home_ok)
         {
             if (!check_path(String("") + DIR_SEPARATOR + DEFAULT_ETC + DIR_SEPARATOR + DEFAULT_SYSTEM_HOME + DIR_SEPARATOR + DEFAULT_CONFIG_NAME))
@@ -76,7 +84,8 @@ void ConfigManager::init(String filename, String userhome)
                                        "configuration file on the command line. For a list of options use: mediatomb -h\n");
             }
 
-            filename = String("") + DIR_SEPARATOR + DEFAULT_ETC + DIR_SEPARATOR + DEFAULT_SYSTEM_HOME + DIR_SEPARATOR + DEFAULT_CONFIG_NAME;
+            home = String("") + DIR_SEPARATOR + DEFAULT_ETC + DIR_SEPARATOR + DEFAULT_SYSTEM_HOME;
+            filename = home + DIR_SEPARATOR + DEFAULT_CONFIG_NAME;
         }
 
         if (home_ok)
@@ -92,10 +101,10 @@ void ConfigManager::init(String filename, String userhome)
     instance->load(filename);
 
     instance->prepare_udn();    
-    instance->validate();    
+    instance->validate(home);    
 }
 
-void ConfigManager::validate()
+void ConfigManager::validate(String serverhome)
 {
     String temp;
 
@@ -113,6 +122,8 @@ void ConfigManager::validate()
     // here we will not start the server
 //    temp = checkOptionString("/server/home");
 //    check_path_ex(temp, true);
+
+    getOption("/server/home", serverhome); 
 
     prepare_path("/server/home", true);
     
