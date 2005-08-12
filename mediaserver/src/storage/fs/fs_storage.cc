@@ -30,6 +30,12 @@
 using namespace zmm;
 using namespace mxml;
 
+#ifdef __CYGWIN__
+#define FS_ROOT_DIRECTORY "/cygdrive/"
+#else
+#define FS_ROOT_DORECTPRY "/"
+#endif
+
 FsStorage::FsStorage() : Storage()
 {
 }
@@ -88,7 +94,7 @@ Ref<Array<CdsObject> > FsStorage::browse(Ref<BrowseParam> param)
     String upnp_object_id = path;
     if (path == "0")
     {
-        path = "/";
+        path = FS_ROOT_DIRECTORY;
     }
 
     if (path.charAt(0) != '/')
@@ -136,7 +142,7 @@ Ref<Array<CdsObject> > FsStorage::browse(Ref<BrowseParam> param)
                 }
             }
             String childPath;
-            if (path == "/")
+            if (path == FS_ROOT_DIRECTORY)
                 childPath = path + name;
             else
                 childPath = path + "/" + name;
@@ -145,7 +151,7 @@ Ref<Array<CdsObject> > FsStorage::browse(Ref<BrowseParam> param)
                 try
                 {
                     Ref<CdsObject> childObj = cm->createObjectFromFile(childPath, false);
-                    if (path == "/")
+                    if (path == FS_ROOT_DIRECTORY)
                         childObj->setParentID("0");
                     else
                         childObj->setParentID(hex_encode(path.c_str(), path.length()));
@@ -178,7 +184,7 @@ Ref<Array<CdsObject> > FsStorage::browse(Ref<BrowseParam> param)
     else
     {
         String id, parent_id;
-        if(path == "/")
+        if (path == FS_ROOT_DIRECTORY)
         {
             id = "0";
             parent_id = "-1";

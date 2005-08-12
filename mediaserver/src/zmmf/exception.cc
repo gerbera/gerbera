@@ -20,7 +20,9 @@
 
 #include "exception.h"
 
+#ifndef __CYGWIN__
 #include <execinfo.h>
+#endif
 
 using namespace zmm;
 
@@ -29,7 +31,7 @@ using namespace zmm;
 Exception::Exception(String message)
 {
     this->message = message;
-
+#ifndef __CYGWIN__
     void *b[100];
     int size = backtrace(b, 100);
 
@@ -42,6 +44,7 @@ Exception::Exception(String message)
         stackTrace->append(trace);
     }
     free(s);
+#endif
 }
 
 String Exception::getMessage()
@@ -57,12 +60,14 @@ Ref<Array<StringBase> > Exception::getStackTrace()
 void Exception::printStackTrace(FILE *file)
 {
     fprintf(file, "Exception: %s\n", message.c_str());
+#ifndef __CYGWIN__
     for (int i = 0; i < stackTrace->size(); i++)
     {
         Ref<StringBase> trace = stackTrace->get(i);
         fprintf(file, "%s %i %s\n", STRACE_TAG, i, trace->data);
         fflush(file);
     }
+#endif
 }
 
 

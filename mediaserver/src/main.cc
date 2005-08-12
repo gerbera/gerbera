@@ -201,8 +201,15 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     
     try
     {
+#ifndef __CYGWIN__
         char *h = getenv("HOME");
         if (h != NULL) home = h;
+#else
+        char *h = getenv("HOMEPATH");
+        char *d = getenv("HOMEDRIVE");
+        if ((h != NULL)  && (d != NULL)) home = String(d) + h;
+#endif  // __CYGWIN__
+            
 
 /*        if ((config_file == nil) && (home == nil))
         {
