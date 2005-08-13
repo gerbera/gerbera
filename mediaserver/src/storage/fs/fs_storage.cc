@@ -311,3 +311,9 @@ Ref<CdsObject> FsStorage::findObjectByTitle(String title, String parentID)
     return cm->createObjectFromFile(parentID + "/" + title, false);
 }
 
+Ref<Array<CdsObject> > FsStorage::selectObjects(Ref<SelectParam> param,
+                                                select_mode_t mode)
+{
+    throw StorageException("FsStorage: selectObjects not implemented");
+}
+

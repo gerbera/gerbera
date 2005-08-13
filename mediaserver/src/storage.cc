@@ -94,7 +94,8 @@ Ref<Storage> Storage::getInstance(storage_type_t type)
     }
 }
 
-Ref<CdsObject> Storage::loadObject(String objectID)
+/* this is a fallback implementation! Derived classes should override */
+Ref<CdsObject> Storage::loadObject(String objectID, select_mode_t mode)
 {
     Ref<BrowseParam> param(new BrowseParam(objectID, BROWSE_METADATA));
     Ref<Array<CdsObject> > arr;
@@ -181,5 +182,13 @@ int BrowseParam::getTotalMatches(){
 }
 void BrowseParam::setTotalMatches(int x){
     totalMatches = x;
+}
+
+/* SelectParam class */
+
+SelectParam::SelectParam(int flags, String arg1) : Object()
+{
+    this->flags = flags;
+    this->arg1 = arg1;
 }
 

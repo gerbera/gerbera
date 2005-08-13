@@ -86,6 +86,11 @@ String Dictionary::get(String key)
     return nil;
 }
 
+int Dictionary::size()
+{
+    return elements->size();
+}
+
 void Dictionary::remove(String key)
 {
     for (int i = 0; i < elements->size(); i++)
@@ -137,6 +142,11 @@ void Dictionary::decode(String url)
         }
         data = ampPos + 1;
     }
+}
+
+void Dictionary::clear()
+{
+    elements->remove(0, elements->size());
 }
 
 Ref<Dictionary> Dictionary::clone()

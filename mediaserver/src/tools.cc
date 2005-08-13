@@ -461,7 +461,6 @@ String set_jpeg_resolution_resource(Ref<CdsItem> item, int res_num)
         Ref<IOHandler> fio_h(new FileIOHandler(item->getLocation()));
         fio_h->open(UPNP_READ);
         String resolution = get_jpeg_resolution(fio_h);
-        log_debug(("RESOLUTION: %s\n", resolution.c_str()));
 
         if (res_num >= item->getResourceCount())
             throw Exception("Invalid resource index");

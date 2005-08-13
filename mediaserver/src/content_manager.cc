@@ -276,12 +276,13 @@ void ContentManager::_removeObject(String objectID)
     Ref<Storage> storage = Storage::getInstance();
     Ref<CdsObject> obj = storage->loadObject(objectID);
     storage->removeObject(obj);
-    Ref<UpdateManager> um = UpdateManager::getInstance();
-    um->containerChanged(obj->getParentID());
+
+    // um->containerChanged(obj->getParentID());
     
     // reload accounting
     loadAccounting();
     
+    Ref<UpdateManager> um = UpdateManager::getInstance();
     um->flushUpdates();
 }
 

@@ -57,10 +57,13 @@ public:
     virtual void addObject(zmm::Ref<CdsObject> object);
     virtual void updateObject(zmm::Ref<CdsObject> object);
     virtual void eraseObject(zmm::Ref<CdsObject> object);
-    virtual zmm::Ref<CdsObject> loadObject(zmm::String objectID);
+    virtual zmm::Ref<CdsObject> loadObject(zmm::String objectID,
+                                           select_mode_t mode = SELECT_FULL);
 
+    virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param,
+                                                           select_mode_t mode = SELECT_FULL);
     virtual void removeObject(zmm::Ref<CdsObject> object);
-
+    
     /* accounting methods */
     virtual int getTotalFiles();   
     
@@ -69,8 +72,31 @@ public:
 
     virtual zmm::Ref<CdsObject> findObjectByTitle(zmm::String title, zmm::String parentID);
 protected:
-    virtual zmm::Ref<CdsObject> createObjectFromRow(zmm::Ref<SQLRow> row);
-    void removeChildren(zmm::String id, zmm::Ref<zmm::StringBuffer> query);
+    virtual zmm::Ref<CdsObject> createObjectFromRow(zmm::Ref<SQLRow> row,
+                                                    select_mode_t mode = SELECT_FULL);
+    
+    /* helpers for selectObjects() */
+    zmm::String getSelectQuery(select_mode_t mode);
+
+    zmm::String selectQueryBasic;
+    zmm::String selectQueryExtended;
+    zmm::String selectQueryFull;
+    
+    /* helpers for removeObject() */
+
+    zmm::Ref<Dictionary> rmIDs;
+    zmm::Ref<Dictionary> rmParents;
+    zmm::String rmDummy;
+
+    void rmInit();
+    void rmCleanup();
+    void rmDeleteIDs();
+    void rmUpdateParents();
+    void rmFlush();
+    void rmObject(zmm::Ref<CdsObject> obj);
+    void rmItem(zmm::Ref<CdsObject> obj);
+    void rmChildren(zmm::Ref<CdsObject> obj);
+    void rmDecChildCount(zmm::Ref<CdsObject> obj);
 };
 
 #endif // __SQL_STORAGE_H__

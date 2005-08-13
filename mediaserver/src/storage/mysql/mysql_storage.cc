@@ -72,7 +72,6 @@ void MysqlStorage::init()
     {
         free(db);
         db = NULL;
-        reportError(nil);
         throw StorageException("MysqlStorage.init: mysql_init() failed");
     }
 
@@ -87,10 +86,10 @@ void MysqlStorage::init()
     );
     if(! res_mysql)
     {
+        reportError(nil);
         mysql_close(db);
         free(db);
         db = NULL;
-        reportError(nil);
         throw StorageException("MysqlStorage.init: mysql_real_connect() failed");
     }
 }

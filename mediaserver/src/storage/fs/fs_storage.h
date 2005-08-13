@@ -40,7 +40,8 @@ public:
     virtual zmm::Ref<zmm::Array<CdsObject> > browse(zmm::Ref<BrowseParam> param);
     virtual zmm::Ref<zmm::Array<zmm::StringBase> > getMimeTypes();
     virtual zmm::Ref<CdsObject> findObjectByTitle(zmm::String title, zmm::String parentID);
-
+    virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param,
+                                                           select_mode_t mode = SELECT_FULL); 
     bool fileAllowed(zmm::String path);
 protected:
     zmm::Ref<zmm::Array<RExp> > include_rules;

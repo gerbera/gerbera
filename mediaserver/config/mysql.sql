@@ -16,7 +16,7 @@ CREATE TABLE cds_objects
     update_id       INTEGER NOT NULL DEFAULT 0,
     is_searchable   INTEGER NOT NULL DEFAULT 0,
 
-    mime_type       VARCHAR(80),
+    mime_type       VARCHAR(40),
 
     action          VARCHAR(255),
     state           VARCHAR(255),

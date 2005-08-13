@@ -59,21 +59,27 @@ protected:
     zmm::Ref<zmm::Array<DictionaryElement> > elements;
 public:
 
-    /// \brief Constructor, initializes the Array.
+    /// \brief Constructor, initializes the dictionary.
     Dictionary();
 
-    /// \brief Adds a new key:value pair to the Dictionary.
+    /// \brief Adds a new key:value pair to the dictionary.
     void put(zmm::String key, zmm::String value);
 
     /// \brief Returns the value for a given key.
     zmm::String get(zmm::String key);
 
+    /// \brief Returns the number of elements in the dictinary.
+    int size();
+    
     /// \brief Deletes a key value pair
     void remove(zmm::String key);
     
     /// \brief Returns an url encoded version of the whole dictionary.
     zmm::String encode();
 
+    /// \brief Removes all elements from the dictionary.
+    void clear();
+    
     /// \brief Makes a dictionary out of url encoded data.
     void decode(zmm::String url);
 

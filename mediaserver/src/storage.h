@@ -37,6 +37,15 @@ typedef enum
     FILESYSTEM_STORAGE = 2
 } storage_type_t;
 
+typedef enum
+{
+    SELECT_BASIC = 0,
+    SELECT_EXTENDED,
+    SELECT_FULL,
+
+    SELECT__MAX
+} select_mode_t;
+
 class BrowseParam : public zmm::Object
 {
 protected:
@@ -67,6 +76,20 @@ public:
 
 };
 
+/* flags for SelectParam */
+#define FILTER_PARENT_ID 1
+#define FILTER_REF_ID 2
+
+class Storage;
+class SelectParam : public zmm::Object
+{
+public:
+    SelectParam(int flags, zmm::String arg1);
+public:
+    int flags;
+    zmm::String arg1;
+};
+
 class Storage : public zmm::Object
 {
 public:
@@ -80,10 +103,14 @@ public:
     virtual zmm::Ref<zmm::Array<CdsObject> > browse(zmm::Ref<BrowseParam> param) = 0;
     virtual zmm::Ref<zmm::Array<zmm::StringBase> > getMimeTypes() = 0;
 
+    virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param,
+                                                           select_mode_t mode = SELECT_FULL) = 0;
+    
     virtual zmm::Ref<CdsObject> findObjectByTitle(zmm::String title, zmm::String parentID) = 0;
 
     /* utility methods */
-    virtual zmm::Ref<CdsObject> loadObject(zmm::String objectID);
+    virtual zmm::Ref<CdsObject> loadObject(zmm::String objectID,
+                                           select_mode_t mode = SELECT_FULL);
     virtual void removeObject(zmm::Ref<CdsObject> object);
     virtual void removeObject(zmm::String objectID);
     virtual zmm::Ref<zmm::Array<CdsObject> > getObjectPath(zmm::String objectID);

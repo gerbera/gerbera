@@ -64,7 +64,21 @@ void web::remove::process()
     cm->removeObject(object_id);
 
     object_id = session->getFrom(sd, "object_id");
-    if (object_id == nil) object_id = "0";
+    if (object_id == nil)
+    {
+        object_id = "0";
+    }
+    else
+    {
+        try
+        {
+            Storage::getInstance()->loadObject(object_id);
+        }
+        catch (Exception e)
+        {
+            object_id = "0";
+        }
+    }
 
     requested_count = session->getFrom(sd, "requested_count");
     if ((requested_count == nil) || (requested_count == ""))
