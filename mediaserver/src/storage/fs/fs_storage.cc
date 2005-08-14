@@ -33,7 +33,7 @@ using namespace mxml;
 #ifdef __CYGWIN__
 #define FS_ROOT_DIRECTORY "/cygdrive/"
 #else
-#define FS_ROOT_DIRECTPRY "/"
+#define FS_ROOT_DIRECTORY "/"
 #endif
 
 FsStorage::FsStorage() : Storage()
