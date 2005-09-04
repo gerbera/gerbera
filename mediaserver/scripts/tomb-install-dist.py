@@ -20,8 +20,7 @@ DEFAULT_DBTABL = "sqlite3.sql"
 DEFAULT_ISCRPT = "import.js"
 #default directory for the import scripts
 DEFAULT_IJSDIR = "js"
-#default magic.mime file (needed this, because filemagic returned wrong values on FC4
-DEFAULT_MAGICM = "magic.mime"
+
 try:
     import os.path
     import sys
@@ -137,8 +136,6 @@ def write_config(dir, DEFAULT_SERVER):
 
         cfg = string.replace(cfg, "__DEFAULT_SCRIPT__", os.path.join(DEFAULT_SOURCE, os.path.join(DEFAULT_IJSDIR, DEFAULT_ISCRPT)), 1)
 
-        cfg = string.replace(cfg, "__DEFAULT_MAGICM__", os.path.join(DEFAULT_SOURCE, DEFAULT_MAGICM), 1)
-
         f_out = open(os.path.join(os.path.expanduser(DEFAULT_SERVER),\
                     DEFAULT_CONFIG), 'w')
 
@@ -224,8 +221,7 @@ def main():
             is_clean(dest)
             install_from(src, dest)
         else:
-            if (os.path.exists(os.path.join(os.path.expanduser(dest),\
-                                            db))):
+            if (os.path.exists(os.path.join(os.path.expanduser(dest), db))):
                 raise InstallError("\nWill not overwrite existing database! " +\
                         os.path.join(os.path.expanduser(dest), db))
 
