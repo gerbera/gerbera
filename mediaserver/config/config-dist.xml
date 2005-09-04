@@ -12,7 +12,6 @@
     <import>
         <filesystem-charset>ISO-8859-1</filesystem-charset>
         <script>__DEFAULT_SCRIPT__</script>
-        <magic-file>__DEFAULT_MAGICM__</magic-file>
         <mappings>
             <extension-mimetype ignore-unknown="no">
                 <map from="mp3" to="audio/mpeg"/>
