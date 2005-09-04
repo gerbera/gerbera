@@ -358,7 +358,6 @@ void ContentManager::updateObject(String objectID, Ref<Dictionary> parameters)
 {
     String title = parameters->get("title");
     String upnp_class = parameters->get("class");
-    String autoscan = parameters->get("autoscan");
     String mimetype = parameters->get("mime-type");
     String description = parameters->get("description");
     String location = parameters->get("location");
