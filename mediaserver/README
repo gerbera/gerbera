@@ -359,6 +359,11 @@ Here is a sample configuration file with description of the various tags.
                 <auxdata>
                     Currently only adding keywords to auxdata is supported.
                     For a list of keywords/tags see the libexif documentation.
+                    Auxdata can be read by the import java script to gain more
+                    control over the media structure. For example, you could
+                    additionaly sort your photos by camera model or flash
+                    settings, if this information is provided with the exif
+                    data.
 
                     <add tag="keyword"/>
                         If the library was able to extract the data according
