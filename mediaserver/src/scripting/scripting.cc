@@ -320,9 +320,8 @@ js_print(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
         str = JS_ValueToString(cx, argv[i]);
         if (!str)
             return JS_FALSE;
-        log_info(("%s%s", i ? " " : "", JS_GetStringBytes(str)));
+        log_info(("%s\n", JS_GetStringBytes(str)));
     }
-    log_info(("\n"));
     return JS_TRUE;
 }
 

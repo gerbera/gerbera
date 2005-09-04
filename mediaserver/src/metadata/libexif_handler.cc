@@ -343,7 +343,7 @@ void LibExifHandler::process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<S
                         {
                             value = sc->convert(value);
                             item->setAuxData(tmp, value);
-//                            log_debug(("Adding tag: %s with value %s\n", tmp.c_str(), value.c_str()));
+                            log_debug(("Adding tag: %s with value %s\n", tmp.c_str(), value.c_str()));
                         }
                     }
                 }
