@@ -80,8 +80,8 @@ bool CdsResource::equals(Ref<CdsResource> other)
 Ref<CdsResource> CdsResource::clone()
 {
     return Ref<CdsResource>(new CdsResource(handlerType,
-                                            attributes,
-                                            parameters));
+                                            attributes->clone(),
+                                            parameters->clone()));
 }
 
 String CdsResource::encode()

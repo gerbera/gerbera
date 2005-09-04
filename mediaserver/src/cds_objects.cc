@@ -136,10 +136,15 @@ int CdsObject::equals(Ref<CdsObject> obj, bool exactly)
         resources->size() == obj->resources->size()
        ))
         return 0;
+
     // compare all resources
+    if (resources->size() != obj->resources->size())
+        return 0;
     for (int i = 0; i < resources->size(); i++)
+    {
         if (! resources->get(i)->equals(obj->resources->get(i)))
             return 0;
+    }
 
     if (! metadata->equals(obj->getMetadata()))
         return 0;
