@@ -107,7 +107,11 @@ In order to compile MediaTomb you will have to install the following packages:
     only if you don't have another choise.
   
 - libmagic (OPTIONAL, RECOMMENDED)
-  On Fedora Core the package is called 'file'
+  On Fedora Core the package is called 'file'. (Note, that due to a bug
+  (tested on FC4) filemagic can return wrong mimetypes, see
+  https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=165323 for more
+  information. If you have the problem, try installing file-4.15-1
+  from FC development)
   On Debian it's libmagic1 and libmagic-dev
 
 - SpiderMonkey JavaScript Engine http://www.mozilla.org/js/spidermonkey/
