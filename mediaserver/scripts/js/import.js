@@ -181,9 +181,17 @@ function addVideo(obj)
 // currently no image metadata supported
 function addImage(obj)
 {
-    var chain = new Array('Photo');
+    var chain = new Array('Photos', 'All Photos');
     obj.parentID = addContainerChain("0", chain);
     addCdsObject(obj);
+
+    var date = obj.meta[M_DATE];
+    if (date)
+    {
+        chain = new Array('Photos', 'Date', date);
+        obj.parentID = addContainerChain("0", chain);
+        addCdsObject(obj);
+    }
 }
 
 var arr = orig.mimetype.split("/");

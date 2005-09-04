@@ -397,7 +397,7 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
             Ref<IOHandler> io_h(new MemIOHandler(ed->data, ed->size));
             io_h->open(UPNP_READ);
             String th_resolution = get_jpeg_resolution(io_h);
-          //  log_debug(("RESOLUTION: %s\n", th_resolution.c_str()));
+//            log_debug(("RESOLUTION: %s\n", th_resolution.c_str()));
 
             Ref<CdsResource> resource(new CdsResource(CH_LIBEXIF));
             resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(item->getMimeType()));
