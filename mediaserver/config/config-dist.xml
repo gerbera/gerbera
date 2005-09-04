@@ -32,12 +32,14 @@
                 <map from="image/*" to="object.item.imageItem"/>
             </mimetype-upnpclass>
         </mappings>
+        <library-options>
+            <libexif>
+                <auxdata>
+                    <add tag="EXIF_TAG_MODEL"/>
+                    <add tag="EXIF_TAG_DATE_TIME"/>
+                </auxdata>
+            </libexif>
+        </library-options>
     </import>
-    <libexif>
-        <auxdata>
-            <add tag="EXIF_TAG_MODEL"/>
-            <add tag="EXIF_TAG_DATE_TIME"/>
-        </auxdata>
-    </libexif>
 </config>
 
