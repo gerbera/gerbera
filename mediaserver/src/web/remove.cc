@@ -35,8 +35,6 @@ web::remove::remove() : WebRequestHandler()
 
 void web::remove::process()
 {
-    log_info(("remove: start\n"));
-
     Ref<Session>   session;
     session_data_t sd;
     String         requested_count;
@@ -96,7 +94,5 @@ void web::remove::process()
     sub->put("sid", sid);
     sub->put("driver", driver);
     *out << subrequest("browse", sub);
-    
-    log_info(("remove: returning\n"));
 }
 
