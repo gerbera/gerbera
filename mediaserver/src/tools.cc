@@ -454,7 +454,7 @@ String get_mime_type(magic_set *ms, Ref<RExp> reMimetype, String file)
 
 #endif 
 
-String set_jpeg_resolution_resource(Ref<CdsItem> item, int res_num)
+void set_jpeg_resolution_resource(Ref<CdsItem> item, int res_num)
 {
     try
     {
