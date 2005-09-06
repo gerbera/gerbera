@@ -1,0 +1,71 @@
+MySQL Database HOWTO for impatient.
+
+The sole purpose of this document is to give users who have never dealt
+with MySQL before the necessary minimum of information to install MySQL and
+let mediatomb use it as backend for data storage.
+
+For those even more impatient or not really interested at
+what's going on try
+
+# mysqladmin -u root create mediatomb
+# cat <prefix>/share/mediatomb/mysql.sql | mysql -u root mediatomb
+
+If no error messages come, you're done, just put the config file excerpt
+from README file concerning mysql AS IS into your config.xml.
+
+If the above does not work, you're doomed to at least read the following...
+
+INSTALLING MYSQL
+Normally MySQL database is shipped with several packages, those are
+- Database server, everything necessary to run a database server.
+  (the core package)
+- Client program. This ships a program called 'mysql', which is a small
+  client program which you can use to instruct the server to create
+  databases, run SQL queries, etc. You should have this one installed
+  as well.
+- Development libraries/header files
+  These are necessary to compile mediatomb.
+
+This way, the packages will be called something like
+'mysql-server' 'mysql-client' and 'mysql-dev'
+
+CREATING DATABASE
+You must create a separate logical MySQL database and give mediatomb full
+access to it.
+Before you create a database you need to know the database username and
+eventually password that will allow you to do so.
+IMPORTANT NOTE! database usernames and passwords in MySQL have nothing
+to do with unix accounts. MySQL has it's own usernames/passwords. However
+mysql server may allow only certain unix users to manipulate databases.
+On some distributions MySQL is installed with the main username
+'root' and blank password. (I'll stress again to accent that this has
+nothing to do with the system root user).
+
+Mysql consists of several programs, and they share some command line
+arguments. The programs you'll need to configure MySQL for mediatomb
+both recognize following parameters:
+  -u <username> : means to connect to database using the given username
+     If -u is omited, the name of the currently logged in user is taken
+     as a database username.
+  -p (without argument!) : means to prompt for the password. If -p is
+     omited the server assumes this user requires no password for
+     authentication.
+
+First you must do something like this:
+
+# mysqladmin -u root create mediatomb
+
+This tries to create a database called 'mediatomb' using username 'root'
+and no password.
+
+And afterwards something like
+
+# cat <prefix>/share/mediatomb/mysql.sql | mysql -u root mediatomb
+
+Here you pipe the mediatomb's database creation SQL script to the mysql
+client connected to the previously created database called 'mediatomb'
+using username root and no password.
+
+Once this step is done, modify your mediatomb's config.xml file to use
+the correct host, database name ('mediatomb'
+   

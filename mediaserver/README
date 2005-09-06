@@ -179,8 +179,9 @@ if mysql is not available.
 To use mysql you will have to create the mysql database manually
 by invoking the script located at
 ${prefix}/share/mediatomb/mysql.sql
-and manualy change the configuration file accordingly
+and manualy change mediatomb's configuration file accordingly
 (see CONFIGURATION for details)
+
 
 WHY IS THE WEB UI DISABLED BY DEFAULT?
 --------------------------------------
