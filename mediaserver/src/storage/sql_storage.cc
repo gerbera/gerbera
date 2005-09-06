@@ -654,7 +654,7 @@ void SQLStorage::rmObject(Ref<CdsObject> obj)
     rmIDs->put(id, rmDummy); // schedule for removal
 
     int iParentID = obj->getParentID().toInt();
-    if (iParentID >= 0)
+    if (iParentID > 0)
         rmDecChildCount(loadObject(obj->getParentID()));
 
     if (rmIDs->size() > MAX_REMOVE_BUFFER_SIZE ||
@@ -696,6 +696,11 @@ void SQLStorage::rmChildren(Ref<CdsObject> obj)
     String objID = obj->getID();
     Ref<SelectParam> param(new SelectParam(FILTER_PARENT_ID, objID));
     Ref<Array<CdsObject> > children = selectObjects(param, SELECT_BASIC);
+    if (children->size() == 0)
+    {
+        rmObject(obj);
+        return;
+    }
     for (int i = 0; i < children->size(); i++)
     {
         Ref<CdsObject> child = children->get(i);
