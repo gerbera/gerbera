@@ -70,6 +70,15 @@ function addContainerChain(parentID, arr)
     return parentID;
 }
 
+function normalizeDate(date)
+{
+    var matches = date.match(/([0-9]+)-00-00/);
+    if (matches)
+        return matches[1];
+    else
+        return date;
+}
+
 // ---------------------------------------------------------------------------
 
 function addAudio(obj)
@@ -83,23 +92,15 @@ function addAudio(obj)
 
     var artist = obj.meta[M_ARTIST];
     if (!artist) 
-    {
         artist = 'Unknown';
-    }
     else
-    {
         desc = artist;
-    }
 
     var album = obj.meta[M_ALBUM];
     if (!album) 
-    {
         album = 'Unknown';
-    }
     else
-    {
         desc = desc + ', ' + album;
-    }
 
     if (desc)
         desc = desc + ', ';
@@ -108,23 +109,18 @@ function addAudio(obj)
 
     var date = obj.meta[M_DATE];
     if (!date)
-    {
         date = 'Unknown';
-    }
     else
     {
+        date = normalizeDate(date);
         desc = desc + ', ' + date;
     }
 
     var genre = obj.meta[M_GENRE];
     if (!genre)
-    {
         genre = 'Unknown';
-    }
     else
-    {
         desc = desc + ', ' + genre;
-    }
 
     var description = obj.meta[M_DESCRIPTION];
     if (!description) 
@@ -162,6 +158,7 @@ function addAudio(obj)
     chain = new Array('Audio', 'Genres', genre);
     obj.parentID = addContainerChain("0", chain);
     addCdsObject(obj);
+
 
     chain = new Array('Audio', 'Date', date);
     obj.parentID = addContainerChain("0", chain);

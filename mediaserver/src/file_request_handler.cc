@@ -160,7 +160,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     if (s_res_id != nil)
         res_id = s_res_id.toInt();
 
-    if ((res_id < 0 || res_id > item->getResourceCount()) && (res_id != 0))
+    if (res_id < 0 || res_id >= item->getResourceCount())
     {
         // http-get:*:image/jpeg:*
         String protocolInfo = item->getResource(res_id)->getAttributes()->get("protocolInfo");
