@@ -179,8 +179,8 @@ if MySQL is not available.
 To use MySQL you will have to create a MySQL database manually
 by invoking the SQL script located under the installation directory at
 <prefix>/share/mediatomb/mysql.sql
-and manualy change mediatomb's configuration file accordingly.
-(see CONFIGURATION section of this file for details)
+and manually adapt mediatomb's configuration file.
+(see CONFIGURATION section below for details)
 If you know nothing about MySQL, try doc/mysql.txt before reaching
 for MySQL manual.
 
