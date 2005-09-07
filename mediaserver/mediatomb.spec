@@ -1,5 +1,5 @@
 %define name mediatomb   
-%define version 0.8.0
+%define version 0.8.1
 %define release 1
 
 Version: %{version}
@@ -12,8 +12,6 @@ Source: %{name}-%{version}.tar.gz
 Buildroot: %{_tmppath}/%{name}-%{version}-buildroot 
 BuildRequires: sqlite-devel => 3
 BuildRequires: libupnp-devel file
-BuildRequires: libjs-devel 
-BuildRequires: id3lib => 3.8.3
 Packager: Sergey Bostandzhyan <jin@deadlock.dhs.org> 
 
 %description
@@ -51,14 +49,17 @@ chkconfig --add mediatomb
 
 %files
 %defattr(-,root,root)
-%doc README AUTHORS ChangeLog COPYING INSTALL doc/doxygen.conf TODO
-%doc doc/scripting-dev.txt doc/scripting-intro.txt
+%doc README AUTHORS ChangeLog COPYING INSTALL doc/doxygen.conf TODO FAQ
+%doc doc/scripting-dev.txt doc/scripting-intro.txt doc/mysql.txt
 %{_bindir}/mediatomb
 %{_bindir}/tomb-install
 %{_datadir}/%{name}/
 %{_initrddir}/mediatomb
 
-%changelog                      
+%changelog
+* Wed Sep  7 2005 Sergey Bostandzhyan <jin@deadlock.dhs.org>
+- Removed some buildrequires, our configure script should handle different
+  scenarios itself.
 * Wed Jun 15 2005 Sergey Bostandzhyan <jin@deadlock.dhs.org>
 - Added init.d script + chkconfig
 * Thu Apr 14 2005 Sergey Bostandzhyan <jin@deadlock.dhs.org>
