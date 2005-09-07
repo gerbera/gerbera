@@ -61,7 +61,6 @@ static int js_get_bool_property(JSContext *cx, JSObject *obj, String name)
     jsval val;
     JSBool boolVal;
 
-    JSString *str;
     if (!JS_GetProperty(cx, obj, name.c_str(), &val))
         return -1;
     if (val == JSVAL_VOID)
@@ -375,7 +374,7 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
 static void
 js_error_reporter(JSContext *cx, const char *message, JSErrorReport *report)
 {
-    int i, j, k, n;
+    int n;
     const char *ctmp;
 
     int reportWarnings = 1; // TODO move to object field
@@ -482,8 +481,6 @@ Scripting::Scripting() : Object()
 
 void Scripting::init()
 {
-    jsval val;
-
     /* initialize the JS run time, and return result in rt */
     rt = JS_NewRuntime(1L * 1024L * 1024L);
 

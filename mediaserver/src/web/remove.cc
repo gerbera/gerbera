@@ -59,7 +59,9 @@ void web::remove::process()
     }
  
     Ref<ContentManager> cm = ContentManager::getInstance();
-    cm->removeObject(object_id);
+    Ref<CdsObject> obj = Storage::getInstance()->loadObject(object_id);
+    bool async = (IS_CDS_CONTAINER(obj->getObjectType()));
+    cm->removeObject(object_id, async);
 
     object_id = session->getFrom(sd, "object_id");
     if (object_id == nil)

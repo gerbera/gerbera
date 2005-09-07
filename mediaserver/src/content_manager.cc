@@ -874,7 +874,7 @@ int ContentManager::addFile(zmm::String path, int recursive, int async)
 }
 int ContentManager::removeObject(String objectID, int async)
 {
-    if (false /* async */) // removal sync, to avoid UI exception
+    if (async) // removal sync, to avoid UI exception
     {
         // building container path for the description
         Ref<Storage> storage = Storage::getInstance();

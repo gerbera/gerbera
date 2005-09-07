@@ -48,7 +48,6 @@ void signal_handler(int signal);
 
 int main(int argc, char **argv, char **envp)
 {
-    char    c;
     int     opt_index = 0;
     int     o;
     char    *ip = NULL;

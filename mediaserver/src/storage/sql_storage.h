@@ -87,6 +87,7 @@ protected:
     zmm::Ref<Dictionary> rmIDs;
     zmm::Ref<Dictionary> rmParents;
     zmm::String rmDummy;
+    int rmFileCount;
 
     void rmInit();
     void rmCleanup();

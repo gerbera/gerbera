@@ -179,7 +179,7 @@ String String::from(int x)
 String String::from(double x)
 {
     StringBase *b = new StringBase(MAX_INT_STRING_LENGTH);
-	b->len = sprintf(b->data, "%ld", x);
+	b->len = sprintf(b->data, "%lf", x);
     return (String(b));
 }
 String String::allocate(int size)

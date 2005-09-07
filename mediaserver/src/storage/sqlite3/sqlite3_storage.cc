@@ -31,7 +31,6 @@ using namespace mxml;
 Sqlite3Storage::Sqlite3Storage() : SQLStorage()
 {
     db = NULL;
-    int res;
 
     pthread_mutex_init(&lock_mutex, NULL);    
     /*
@@ -137,6 +136,7 @@ int Sqlite3Storage::exec(String query)
     }
 
     unlock();
+    return true;
 }
 
 int Sqlite3Storage::lastInsertID()

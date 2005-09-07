@@ -21,6 +21,7 @@
 #include "sql_storage.h"
 #include "tools.h"
 #include "update_manager.h"
+#include "content_manager.h"
 
 using namespace zmm;
 
@@ -577,6 +578,7 @@ void SQLStorage::rmInit()
     rmParents = Ref<Dictionary>(new Dictionary());
     if (rmDummy == nil)
         rmDummy = String("");
+    rmFileCount = 0;
 }
 void SQLStorage::rmCleanup()
 {
@@ -598,6 +600,8 @@ void SQLStorage::rmDeleteIDs()
     String q = buf->toString();
     exec(buf->toString());
     rmIDs->clear();
+    ContentManager::getInstance()->getAccounting()->totalFiles -= rmFileCount;
+    rmFileCount = 0;
 }
 void SQLStorage::rmUpdateParents()
 {
@@ -688,6 +692,8 @@ void SQLStorage::rmItem(Ref<CdsObject> obj)
 
     // schedule original object for removal
     rmObject(orig);
+
+    rmFileCount++;
 }
 
 // remvoe children of the given containers

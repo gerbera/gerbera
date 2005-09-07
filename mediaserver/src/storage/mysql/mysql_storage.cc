@@ -30,7 +30,6 @@ using namespace mxml;
 MysqlStorage::MysqlStorage() : SQLStorage()
 {
     db = NULL;
-    int res;
     
     pthread_mutex_init(&lock_mutex, NULL);    
     /*
@@ -157,6 +156,7 @@ int MysqlStorage::exec(String query)
         throw StorageException("Mysql: query error");
     }
     unlock();
+    return true;
 }
 
 int MysqlStorage::lastInsertID()
@@ -188,7 +188,7 @@ MysqlResult::~MysqlResult()
         if (! nullRead)
         {
             MYSQL_ROW mysql_row;
-            while(mysql_row = mysql_fetch_row(mysql_res)); // read out data
+            while ((mysql_row = mysql_fetch_row(mysql_res)) != NULL); // read out data
         }
         mysql_free_result(mysql_res);
         mysql_res = NULL;        
