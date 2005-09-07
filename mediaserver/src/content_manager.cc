@@ -216,7 +216,7 @@ void ContentManager::_addFile(String path, int recursive)
     // _addFile2(path, recursive);
     // return;
 
-    if (path.charAt(path.length() - 1) == '/')
+    if (path.length() > 1 && path.charAt(path.length() - 1) == '/')
     {
         path = path.substring(0, path.length() - 1);
     }
