@@ -119,10 +119,8 @@ In order to compile MediaTomb you will have to install the following packages:
   This package is necessary for virtual objects to work.
   You will find some RPMs here: http://ftp.mozilla.org/pub/mozilla.org/js/
   Fedora does not have a packages for this library, you will have to
-  fetch / bild it yourself, the library is normally called libjs.
-  On debian install the packages libsmjs1 and libsmjs-dev and 
-  specify the location of the headers to configure script:
-  CXXFLAGS=-I/usr/include/smjs ./configure ...
+  fetch / build it yourself, the library is normally called libjs.
+  On debian install the packages libsmjs1 and libsmjs-dev.
 
 - id3lib http://id3lib.sourceforge.net/ (at least version 3.8.3)
   (OPTIONAL, RECOMMENDED) You will need this library to have

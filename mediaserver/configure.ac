@@ -177,7 +177,31 @@ AC_ARG_ENABLE(javascript,
 if test "x$JS_OK" = xyes; then
     AC_CHECK_HEADER(jsapi.h,
         [],
-        [JS_OK=missing],
+        [
+            CXXFLAGS_SAVE=$CXXFLAGS
+            CXXFLAGS="$CXXFLAGS -I/usr/include/smjs"
+            
+            AC_MSG_CHECKING([alternative libjs header location])
+            AC_COMPILE_IFELSE(
+                [AC_LANG_PROGRAM(
+                    [
+                        #define XP_UNIX 1
+                        #include <jsapi.h>
+                    ],
+                    [
+                        (void)JS_NewContext(0, 0);
+                    ]
+                )],
+                [
+                    AC_MSG_RESULT([found under /usr/include/smjs])
+                ],
+                [
+                    CXXFLAGS="$CXXFLAGS_SAVE"
+                    JS_OK=missing
+                    AC_MSG_RESULT([not found, giving up])
+                ]
+            )
+        ],
         /* checking for jsapi.h */
         #define XP_UNIX 1
     )
