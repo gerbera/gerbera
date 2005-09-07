@@ -279,6 +279,8 @@ AC_ARG_ENABLE(libextractor,
      EXTRACTOR_EN=$enableval 
      if test "x$enableval" = xno; then
         EXTRACTOR_OK=disabled
+     else
+        EXTRACTOR_OK=yes
      fi
   ]
 )
