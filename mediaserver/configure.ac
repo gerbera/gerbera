@@ -272,7 +272,7 @@ fi
 
 ######## extractor
 
-EXTRACTOR_OK=yes
+EXTRACTOR_OK=disabled
 AC_ARG_ENABLE(libextractor,
   [  --enable-libextractor    libextractor support],
   [
