@@ -20,7 +20,7 @@ v0.8.1
         * added option to specify an alternative magic file
 
 v0.8.0  15.06.2005  Scripting/Virtual Server Layout
-        * Server layout can not be defined using java script,
+        * Server layout can now be defined using java script,
           default layout script is provided.
 
         * Added ID3 tag support.
