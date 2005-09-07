@@ -161,24 +161,20 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
         res_id = s_res_id.toInt();
 
     if (res_id < 0 || res_id >= item->getResourceCount())
+        throw Exception(String("Invalid resource id: ") + res_id);
+    
+    // http-get:*:image/jpeg:*
+    String protocolInfo = item->getResource(res_id)->getAttributes()->get("protocolInfo");
+    if (protocolInfo != nil)
     {
-        // http-get:*:image/jpeg:*
-        String protocolInfo = item->getResource(res_id)->getAttributes()->get("protocolInfo");
-        if (protocolInfo != nil)
-        {
-            Ref<Array<StringBase> > parts = split_string(protocolInfo, ':');
-            mimeType = parts->get(2);
-        }
-       
-        /// \todo we could figure out the content length...
-        info->file_length = -1;
+        Ref<Array<StringBase> > parts = split_string(protocolInfo, ':');
+        mimeType = parts->get(2);
     }
     else
     {
         mimeType = item->getMimeType();
-        info->file_length = statbuf.st_size;
-        //log_info(("FileIOHandler: get_info: file_length: %d\n", (int)statbuf.st_size));
     }
+    info->file_length = statbuf.st_size;
         
     info->last_modified = statbuf.st_mtime;
     info->is_directory = S_ISDIR(statbuf.st_mode);
