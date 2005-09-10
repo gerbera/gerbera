@@ -29,6 +29,13 @@
 #include "dictionary.h"
 #include "scripting/web_script.h"
 
+
+class SessionException : public zmm::Exception
+{
+public:
+    SessionException(zmm::String message) : zmm::Exception(message) {}
+};
+
 /// \brief This class is responsible for processing requests that come to the user interface.
 class WebRequestHandler : public RequestHandler
 {
@@ -40,7 +47,7 @@ protected:
     zmm::String filename;
 
     /// \brief The name of the page to look for a jssp script.
-    char *pagename;
+    zmm::String pagename;
 
     bool plainXML;
 
@@ -57,7 +64,7 @@ protected:
     zmm::Ref<mxml::Element> root;
     
     /// \brief This is the jssp script to render HTML.
-    zmm::Ref<WebScript> script;
+//    zmm::Ref<WebScript> script;
     
     /// \brief Little support function to access stuff from the dictionary in
     /// in an easier fashion.

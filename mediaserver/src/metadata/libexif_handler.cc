@@ -364,14 +364,14 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
 
     if (!ed)
     {
-        //log_debug(("Exif data not found, attempting to set resolution internally...\n"));
+        log_debug(("Exif data not found, attempting to set resolution internally...\n"));
         set_jpeg_resolution_resource(item, 0);
         return;
     }
 
     Ref<ConfigManager> cm = ConfigManager::getInstance();
-    Ref<Element> e = cm->getElement("/import/library-options/libexif/auxdata");
-    aux = cm->createArrayFromNodeset(e, "add", "tag");
+    Ref<Element> e = cm->getElement(_("/import/library-options/libexif/auxdata"));
+    aux = cm->createArrayFromNodeset(e, _("add"), _("tag"));
 
     for (int i = 0; i < EXIF_IFD_COUNT; i++)
     {
@@ -397,12 +397,12 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
             Ref<IOHandler> io_h(new MemIOHandler(ed->data, ed->size));
             io_h->open(UPNP_READ);
             String th_resolution = get_jpeg_resolution(io_h);
-//            log_debug(("RESOLUTION: %s\n", th_resolution.c_str()));
+            log_debug(("RESOLUTION: %s\n", th_resolution.c_str()));
 
             Ref<CdsResource> resource(new CdsResource(CH_LIBEXIF));
             resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(item->getMimeType()));
             resource->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), th_resolution); 
-            resource->addParameter(RESOURCE_CONTENT_TYPE, EXIF_THUMBNAIL);
+            resource->addParameter(_(RESOURCE_CONTENT_TYPE), _(EXIF_THUMBNAIL));
             item->addResource(resource);
         }
         catch (Exception e)
@@ -419,16 +419,16 @@ Ref<IOHandler> LibExifHandler::serveContent(Ref<CdsItem> item, int resNum)
     ExifData    *ed;
     Ref<CdsResource> res = item->getResource(resNum);
     
-    String ctype = res->getParameters()->get(RESOURCE_CONTENT_TYPE);
+    String ctype = res->getParameters()->get(_(RESOURCE_CONTENT_TYPE));
 
     if (ctype != EXIF_THUMBNAIL)
-        throw Exception(String("LibExifHandler: got unknown content type: ") + ctype);
+        throw Exception(_("LibExifHandler: got unknown content type: ") + ctype);
     ed = exif_data_new_from_file(item->getLocation().c_str());
     if (!ed)
-        throw Exception("LibExifHandler: resource has no exif information");
+        throw Exception(_("LibExifHandler: resource has no exif information"));
 
     if (!(ed->size))
-        throw Exception("LibExifHandler: resource has no exif thumbnail");
+        throw Exception(_("LibExifHandler: resource has no exif thumbnail"));
 
     Ref<IOHandler> h(new MemIOHandler(ed->data, ed->size));
 

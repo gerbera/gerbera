@@ -35,7 +35,7 @@ public:
     JSObject  *glob;
 	JSScript *script;
 public:
-	Script(zmm::Ref<Runtime> runtime);
+	Script(zmm::Ref<Runtime> runtime, JSContext *cx = NULL);
 	virtual ~Script();
     
     zmm::String getProperty(JSObject *obj, zmm::String name);
@@ -49,14 +49,20 @@ public:
 
     void deleteProperty(JSObject *obj, zmm::String name);
 
-    void setGlobalObject(JSObject *glob);
     JSObject *getGlobalObject();
+    void setGlobalObject(JSObject *glob);
+
+    JSContext *getContext();
+
     void initGlobalObject();
 
     void defineFunctions(JSFunctionSpec *functions);
     void load(zmm::String scriptPath);
     void load(zmm::String scriptText, zmm::String scriptPath);
     void execute();
+
+    inline void lock() { runtime->lock(); }
+    inline void unlock() { runtime->unlock(); }
 };
 
 #endif // __SCRIPTING_SCRIPT_H__

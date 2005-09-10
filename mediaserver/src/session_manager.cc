@@ -41,18 +41,6 @@ Session::Session(long timeout) : Dictionary()
     this->timeout = timeout;
 }
 
-long Session::getLastAccessTime()
-{
-    return last_access;
-}
-
-String Session::getID()
-{
-    if (sessionID == nil)
-        sessionID = generate_random_id();
-    return sessionID;
-}
-
 void Session::putTo(session_data_t type, String key, String value)
 {
     switch (type)
@@ -64,7 +52,7 @@ void Session::putTo(session_data_t type, String key, String value)
             driver2->put(key, value);
             break;
         default:
-            throw Exception(String("Unknown session data type: ") + (int)type);
+            throw Exception(_("Unknown session data type: ") + (int)type);
     }
 }
 
@@ -77,7 +65,7 @@ String Session::getFrom(session_data_t type, String key)
         case SECONDARY:
             return driver2->get(key);
         default:
-            throw Exception(String("Unknown session data type: ") + (int)type);
+            throw Exception(_("Unknown session data type: ") + (int)type);
     }
 }
 
@@ -86,9 +74,12 @@ SessionManager::SessionManager() : Object()
      sessions = Ref<Array<Session> >(new Array<Session>());
 }
 
-Ref<Session> SessionManager::createSession(long timeout)
+Ref<Session> SessionManager::createSession(long timeout, String sessionID)
 {
     Ref<Session> newSession(new Session(timeout));
+    if (sessionID == nil)
+        sessionID = generate_random_id();
+    newSession->setID(sessionID);
     sessions->append(newSession);
     return newSession;
 }

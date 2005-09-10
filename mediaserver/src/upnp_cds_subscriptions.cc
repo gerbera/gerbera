@@ -37,17 +37,17 @@ void ContentDirectoryService::process_subscription_request(zmm::Ref<Subscription
    
     propset = UpnpXML_CreateEventPropertySet();
     property = propset->getFirstChild();
-    property->appendTextChild("SystemUpdateID", String("") + systemUpdateID);
+    property->appendTextChild(_("SystemUpdateID"), _("") + systemUpdateID);
 
     String xml = propset->print();
     err = ixmlParseBufferEx(xml.c_str(), &event);
     if (err != IXML_SUCCESS)
     {
-        throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");
+        throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, _("Could not convert property set to ixml"));
     }
 
     UpnpAcceptSubscriptionExt(server->getDeviceHandle(),
-                              ConfigManager::getInstance()->getOption("/server/udn").c_str(),
+                              ConfigManager::getInstance()->getOption(_("/server/udn")).c_str(),
                               serviceID.c_str(), event, request->getSubscriptionID().c_str());
 
     ixmlDocument_free(event);
@@ -67,8 +67,8 @@ void ContentDirectoryService::subscription_update(String containerUpdateIDs_CSV)
 
     propset = UpnpXML_CreateEventPropertySet();
     property = propset->getFirstChild();
-    property->appendTextChild("ContainerUpdateIDs", containerUpdateIDs_CSV); 
-    property->appendTextChild("SystemUpdateID", String("") + systemUpdateID);
+    property->appendTextChild(_("ContainerUpdateIDs"), containerUpdateIDs_CSV); 
+    property->appendTextChild(_("SystemUpdateID"), _("") + systemUpdateID);
 
     String xml = propset->print();
 
@@ -76,15 +76,15 @@ void ContentDirectoryService::subscription_update(String containerUpdateIDs_CSV)
     if (err != IXML_SUCCESS)
     {
         /// \todo add another error code
-        throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");
-        
+        throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, _("Could not convert property set to ixml"));
     }
 
     UpnpNotifyExt(server->getDeviceHandle(),
-                  ConfigManager::getInstance()->getOption("/server/udn").c_str(),
+                  ConfigManager::getInstance()->getOption(_("/server/udn")).c_str(),
                   serviceID.c_str(), event);
 
     ixmlDocument_free(event);
 
     //log_info(("CDS::subscription_update - end\n"));
 }
+

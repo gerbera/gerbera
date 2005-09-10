@@ -45,7 +45,7 @@ public:
 
     /// \brief Returns the value for this DictionaryElement.
     zmm::String getValue();
-    
+
 protected:
     zmm::String key;
     zmm::String value;
@@ -93,6 +93,9 @@ public:
     bool equals(zmm::Ref<Dictionary> other);
 
     zmm::Ref<zmm::Array<DictionaryElement> > getElements();
+
+    /// \brief Frees unnecessary memory
+    inline void optimize() { elements->optimize(); }
 };
 
 #endif // __DICTIONARY_H__

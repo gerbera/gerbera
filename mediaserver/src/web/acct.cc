@@ -22,48 +22,28 @@
 #include "pages.h"
 #include "content_manager.h"
 
-#define AUTO_RELOAD_MILLIS (1000 * 5)
-
 using namespace zmm;
 
 web::acct::acct() : WebRequestHandler()
-{}
+{
+    pagename = _("acct");
+    plainXML = true;
+}
 
 void web::acct::process()
 {
+    check_request();
+        
     Ref<ContentManager> cm = ContentManager::getInstance();
-    
     Ref<CMAccounting> a = cm->getAccounting();
+
     Ref<CMTask> task = cm->getCurrentTask();
-
-    String taskDesc = (task == nil) ? "" : task->getDescription();
-
-//    check_request();
+    if (task != nil)
+        root->appendTextChild(_("current-task"), task->getDescription());
 
     /// \todo JS_escape status
-    
-    *out << "<html><body><script>\n"
-         << "  top.head.updateAccounting({\n"
-         << "    acctTotalFiles: " << a->totalFiles << ",\n"
-         << "    currentTask: '" << taskDesc << "'\n"
-         << "  });\n";
-    if (true) /// \todo do not schedule reload if no asynchronous tasks
-    {
-        *out
-         << "  setTimeout('location.href = location.href;', "
-                           << AUTO_RELOAD_MILLIS << ");\n";
-    }
-    *out << "</script></body></html>\n";
-}
+    root->appendTextChild(_("total-files"), String::from(a->totalFiles));
 
-void web::acct::get_info(IN const char *filename, OUT struct File_Info *info)
-{
-    info->file_length = -1; // length is unknown
-    info->last_modified = time(NULL);
-    info->is_directory = 0; 
-    info->is_readable = 1;
-    String content_type = String("text/html; charset=") + DEFAULT_INTERNAL_CHARSET;
-    info->content_type = ixmlCloneDOMString(content_type.c_str());
+//    log_debug(("ACCT: %s\n", root->print().c_str()));
 }
-
 

@@ -52,24 +52,24 @@ void ServeRequestHandler::get_info(IN const char *filename, OUT struct File_Info
     String url_path, parameters;
     split_url(filename, url_path, parameters);
 
-    len = (String("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER).length();
+    len = (_("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER).length();
 
     if (len > url_path.length())
     {
-        throw Exception(String("There is something wrong with the link ") + url_path);
+        throw Exception(_("There is something wrong with the link ") + url_path);
     }
 
-    String path = ConfigManager::getInstance()->getOption("/server/servedir") + url_path.substring(len, url_path.length());
+    String path = ConfigManager::getInstance()->getOption(_("/server/servedir") + url_path.substring(len, url_path.length()));
     
     ret = stat(path.c_str(), &statbuf);
     if (ret != 0)
     {
-        throw Exception(String("Failed to stat ") + path);
+        throw Exception(_("Failed to stat ") + path);
     }
 
     if (S_ISREG(statbuf.st_mode)) // we have a regular file
     {
-        String mimetype = MIMETYPE_DEFAULT;
+        String mimetype = _(MIMETYPE_DEFAULT);
 #ifdef HAVE_MAGIC
         magic_set *ms = NULL;
         ms = magic_open(MAGIC_MIME);
@@ -86,7 +86,7 @@ void ServeRequestHandler::get_info(IN const char *filename, OUT struct File_Info
                 /// \TODO we could request the mimetype rex from content manager
                 Ref<RExp> reMimetype;
                 reMimetype = Ref<RExp>(new RExp());
-                reMimetype->compile(MIMETYPE_REGEXP);
+                reMimetype->compile(_(MIMETYPE_REGEXP));
 
                 String mime = get_mime_type(ms, reMimetype, path);
                 if (string_ok(mime))
@@ -114,7 +114,7 @@ void ServeRequestHandler::get_info(IN const char *filename, OUT struct File_Info
     }
     else
     {
-         throw Exception(String("Not a regular file: ") + path);
+         throw Exception(_("Not a regular file: ") + path);
     }
 }
 
@@ -125,19 +125,21 @@ Ref<IOHandler> ServeRequestHandler::open(IN const char *filename, IN enum UpnpOp
     // Currently we explicitly do not support UPNP_WRITE
     // due to security reasons.
     if (mode != UPNP_READ)
-        throw Exception("UPNP_WRITE unsupported");
+        throw Exception(_("UPNP_WRITE unsupported"));
 
     String url_path, parameters;
     split_url(filename, url_path, parameters);
 
-    len = (String("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER).length();
+    len = (_("/") + SERVER_VIRTUAL_DIR + "/" +
+                              CONTENT_SERVE_HANDLER).length();
 
     if (len > url_path.length())
     {
-        throw Exception(String("There is something wrong with the link ") + url_path);
+        throw Exception(_("There is something wrong with the link ") +
+                        url_path);
     }
 
-    String path = ConfigManager::getInstance()->getOption("/server/servedir") + url_path.substring(len, url_path.length());
+    String path = ConfigManager::getInstance()->getOption(_("/server/servedir") + url_path.substring(len, url_path.length()));
 
 
     Ref<IOHandler> io_handler(new FileIOHandler(path));

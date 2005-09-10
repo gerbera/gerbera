@@ -26,7 +26,7 @@ using namespace mxml;
 
 web::head::head() : WebRequestHandler()
 {
-    pagename = "head";
+    pagename = _("head");
 }
 
 void web::head::process()

@@ -91,11 +91,11 @@ Ref<Element> Parser::parseFile(String filename)
 Ref<Element> Parser::parseString(String str)
 {
     Ref<Input> input(new StringInput(str));
-	Ref<Context> ctx(new Context(""));
+	Ref<Context> ctx(new Context(_("")));
 	return parse(ctx, input, nil, XML_SKIP);
 }
 
-#define THROW_ERROR(msg) throw ParseException(String("") + msg, ctx)
+#define THROW_ERROR(msg) throw ParseException(msg, ctx)
 
                 
 Ref<Element> Parser::parse(Ref<Context> ctx, Ref<Input> input, String parentTag, int state)
@@ -126,7 +126,7 @@ Ref<Element> Parser::parse(Ref<Context> ctx, Ref<Input> input, String parentTag,
                     state = XML_TAG_OPEN;
                     break;
                 }
-                THROW_ERROR("unexpected symbol:" + c);
+                THROW_ERROR(_("unexpected symbol:") + c);
             }
             case XML_TAG_OPEN:
             {
@@ -164,7 +164,7 @@ Ref<Element> Parser::parse(Ref<Context> ctx, Ref<Input> input, String parentTag,
                 }
                 else
                 {
-                    THROW_ERROR("unexpected symbol: " + c);
+                    THROW_ERROR(_("unexpected symbol: ") + c);
                 }
             }
             case XML_CLOSE_TAG_NAME:
@@ -179,13 +179,13 @@ Ref<Element> Parser::parse(Ref<Context> ctx, Ref<Input> input, String parentTag,
                     String cTag = buf->toString();
                     if(cTag != parentTag)
                     {
-                        THROW_ERROR("unexpected closing tag: </" + cTag +"> expecting </"+ parentTag +">");
+                        THROW_ERROR(_("unexpected closing tag: </") + cTag +"> expecting </"+ parentTag +">");
                     }
                     return nil;
                 }
                 else
                 {
-                    THROW_ERROR("unexpected symbol:" + c);
+                    THROW_ERROR(_("unexpected symbol:") + c);
                 }
             }
             case XML_TAG_NAME:
@@ -216,7 +216,7 @@ Ref<Element> Parser::parse(Ref<Context> ctx, Ref<Input> input, String parentTag,
                     state = XML_END_SLASH;
                     break;
                 }
-                THROW_ERROR("unexpected symbol:" + c);
+                THROW_ERROR(_("unexpected symbol:") + c);
             }
             case XML_PARSE_TAG:
             {
@@ -281,7 +281,7 @@ Ref<Element> Parser::parse(Ref<Context> ctx, Ref<Input> input, String parentTag,
                     state = XML_END_SLASH;
                     break;
                 }
-                THROW_ERROR("unexpected symbol:" + c);
+                THROW_ERROR(_("unexpected symbol:") + c);
             }
             case XML_END_SLASH:
             {
@@ -289,7 +289,7 @@ Ref<Element> Parser::parse(Ref<Context> ctx, Ref<Input> input, String parentTag,
                 {
                     return element;
                 }
-                THROW_ERROR("unexpected symbol:" + c);
+                THROW_ERROR(_("unexpected symbol:") + c);
             }
             case XML_ATTR_NAME:
             {
@@ -305,7 +305,7 @@ Ref<Element> Parser::parse(Ref<Context> ctx, Ref<Input> input, String parentTag,
                     state = XML_ATTR_QUOTE;
                     break;
                 }
-                THROW_ERROR("unexpected symbol:" + c);
+                THROW_ERROR(_("unexpected symbol:") + c);
             }
             case XML_ATTR_QUOTE:
             {
@@ -314,7 +314,7 @@ Ref<Element> Parser::parse(Ref<Context> ctx, Ref<Input> input, String parentTag,
                     state = XML_ATTR_VALUE;
                     break;
                 }
-                THROW_ERROR("unexpected symbol:" + c);
+                THROW_ERROR(_("unexpected symbol:") + c);
             }
             case XML_ATTR_VALUE:
             {
@@ -332,6 +332,6 @@ Ref<Element> Parser::parse(Ref<Context> ctx, Ref<Input> input, String parentTag,
         }
     }
     
-    THROW_ERROR("unexpected end of input");
+    THROW_ERROR(_("unexpected end of input"));
 }
 

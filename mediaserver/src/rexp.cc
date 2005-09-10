@@ -68,7 +68,7 @@ void RExp::compile(zmm::String pattern, const char *sflags)
         {
             case 'i': flags |= REG_ICASE; break;
             case 's': flags |= REG_NEWLINE; break;
-            default: throw Exception(String("RExp: unknown flag: ")+ c);
+            default: throw Exception(_("RExp: unknown flag: ")+ c);
         }
         p++;
     }
@@ -101,14 +101,14 @@ Matcher::Matcher(zmm::Ref<RExp> rexp, String text, int nmatch)
     this->ptr = NULL;
     this->nmatch = nmatch++; 
     if (this->nmatch)
-        this->pmatch = (regmatch_t *)malloc(this->nmatch * sizeof(regmatch_t));
+        this->pmatch = (regmatch_t *)MALLOC(this->nmatch * sizeof(regmatch_t));
     else
         this->pmatch = NULL;
 }
 Matcher::~Matcher()
 {
     if (pmatch)
-        free(pmatch);
+        FREE(pmatch);
 }
 String Matcher::group(int i)
 {

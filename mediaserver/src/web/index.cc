@@ -26,22 +26,11 @@ using namespace mxml;
 
 web::index::index() : WebRequestHandler()
 {
-    pagename = "index";
+    pagename = _("index");
 }
 
 void web::index::process()
 {
-    Ref<Element> suffer(new Element("suffer"));
-    suffer->addAttribute("amount", "very much");
-    
-    Ref<Element> torture(new Element("torture"));
-    torture->addAttribute("message", "and then you die");
-    suffer->appendChild(torture);
-
-    torture = Ref<Element>(new Element("torture"));
-    torture->addAttribute("message", "pulverized");
-    suffer->appendChild(torture);
-
-    root->appendChild(suffer);
+    check_request();
 }
 

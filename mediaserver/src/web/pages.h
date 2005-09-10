@@ -31,6 +31,14 @@
 namespace web
 {
 
+/// \brief Show accounting information.
+class acct : public WebRequestHandler
+{
+public:
+    acct();
+    virtual void process();
+};
+
 /// \brief Add a file or directory to database.
 class add : public WebRequestHandler
 {
@@ -39,13 +47,12 @@ public:
     virtual void process();
 };
 
-/// \brief Show accounting information.
-class acct : public WebRequestHandler
+/// \brief Authentication handler (used over AJAX)
+class auth : public WebRequestHandler
 {
 public:
-    acct();
+    auth();
     virtual void process();
-    virtual void get_info(IN const char *filename, OUT struct File_Info *info);
 };
 
 /// \brief Browser frameset
@@ -64,6 +71,14 @@ public:
     virtual void process();
 };
 
+/// \brief Browser directory tree
+class directories : public WebRequestHandler
+{
+public:
+    directories();
+    virtual void process();
+};
+
 /// \brief Save the changes that were made to an item or container to the database.
 class edit_save : public WebRequestHandler
 {
@@ -77,6 +92,14 @@ class edit_ui : public WebRequestHandler
 {
 public:
     edit_ui();
+    virtual void process();
+};
+
+/// \brief Browser file list
+class files : public WebRequestHandler
+{
+public:
+    files();
     virtual void process();
 };
 
@@ -109,7 +132,6 @@ class login : public WebRequestHandler
 {
 public:
     login();
-    virtual void get_info(IN const char *filename, OUT struct File_Info *info);
     virtual void process();
 };
 
@@ -118,6 +140,14 @@ class remove : public WebRequestHandler
 {
 public:
     remove();
+    virtual void process();
+};
+
+/// \brief Render tree of containers/directories.
+class task : public WebRequestHandler
+{
+public:
+    task();
     virtual void process();
 };
 

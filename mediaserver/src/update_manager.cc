@@ -1,7 +1,7 @@
 /*  update_manager.cc - this file is part of MediaTomb.
                                                                                 
-    Copyright (C) 2005 Gena Batyan <bgeradz@deadlock.dhs.org>,
-                       Sergey Bostandzhyan <jin@deadlock.dhs.org>
+    Copyright (C) 2005 Gena Batyan <bgeradz@deadLOCK.dhs.org>,
+                       Sergey Bostandzhyan <jin@deadLOCK.dhs.org>
                                                                                 
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,7 +30,16 @@
 #define MIN_SLEEP 1
 
 #define MAX_OBJECT_IDS 1000
+#define MAX_LAZY_OBJECT_IDS 1000
 #define OBJECT_ID_HASH_CAPACITY 3109
+
+/*
+#define LOCK()   { printf("lock:   line %d\n", __LINE__); lock(); \
+                   printf("locked: line %d\n", __LINE__); }
+#define UNLOCK() { printf("unlock: line %d\n", __LINE__); unlock(); }
+*/
+#define LOCK lock
+#define UNLOCK unlock
 
 using namespace zmm;
 
@@ -63,24 +72,22 @@ static Ref<UpdateManager> inst;
 
 UpdateManager::UpdateManager() : Object()
 {
-    objectIDs = (int *)malloc(MAX_OBJECT_IDS * sizeof(int));
-    objectIDHash = Ref<DBBHash<int, int> >(new DBBHash<int, int>(OBJECT_ID_HASH_CAPACITY, 0));
+    objectIDs = (int *)MALLOC(MAX_OBJECT_IDS * sizeof(int));
+    objectIDcount = 0;
+    objectIDHash = Ref<DBBHash<int, int> >(new DBBHash<int, int>(OBJECT_ID_HASH_CAPACITY, -100));
 } 
 UpdateManager::~UpdateManager()
 {
-    free(objectIDs);
+    FREE(objectIDs);
     pthread_mutex_destroy(&updateMutex);
     pthread_cond_destroy(&updateCond);
 } 
 
-void UpdateManager::resetUpdates()
-{
-    objectIDHash->zero();
-}
 void UpdateManager::init()
 {
     shutdownFlag = false;
     flushFlag = 0;
+    lazyMode = true;
 
     int ret;
 
@@ -103,39 +110,79 @@ void UpdateManager::init()
 void UpdateManager::shutdown()
 {
     shutdownFlag = true;
-    lock();
+    LOCK();
     pthread_cond_signal(&updateCond);
-    unlock();
+    UNLOCK();
 // detached
 //    pthread_join(updateThread, NULL);
 }
 
+void UpdateManager::containersChanged(int *ids, int size)
+{
+    Storage::getInstance()->incrementUpdateIDs(objectIDs, objectIDcount);
+}
+
 void UpdateManager::containerChanged(int objectID)
 {
-    if (! haveUpdate(objectID))
+    return;
+    hash_slot_t slot;
+    int updateID;
+
+    LOCK();
+
+    bool wasEmpty = (objectIDcount == 0);
+    bool found = objectIDHash->get(objectID, &slot, &updateID);
+    if (found)
     {
-        Ref<Storage> storage = Storage::getInstance();
-        Ref<CdsObject> obj = storage->loadObject(objectID);
-        Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
-
-        int updateID = cont->getUpdateID();
-        updateID++;
-
-        cont->setUpdateID(updateID);
-        storage->updateObject(obj);
-
-        addUpdate(objectID, updateID);
+        if (updateID < 0)
+        {
+            updateID = -updateID + 1;
+            objectIDs[objectIDcount++] = objectID;
+            objectIDHash->put(objectID, slot, updateID);
+        }
     }
+    else
+    {
+        try
+        {
+            Ref<Storage> storage = Storage::getInstance();        
+            Ref<CdsObject> obj = storage->loadObject(objectID);
+            Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
+
+            updateID = cont->getUpdateID();
+            updateID++;
+
+            objectIDs[objectIDcount++] = objectID;
+            objectIDHash->put(objectID, slot, updateID);
+            if (! lazyMode)
+            {
+                cont->setUpdateID(updateID);
+                storage->updateObject(obj);
+            }
+        }
+        catch (Exception e)
+        {}
+    }
+    bool flush = false;
+    if (wasEmpty && objectIDcount == 1)
+        pthread_cond_signal(&updateCond);
+    else if (objectIDcount >= MAX_OBJECT_IDS)
+        flush = true;
+    else if (objectIDHash->size() >= MAX_LAZY_OBJECT_IDS)
+        flush = true;
+    UNLOCK();
+    if (flush)
+        flushUpdates(FLUSH_ASAP);
 }
 void UpdateManager::flushUpdates(int flushFlag)
 {
-    lock();
+    LOCK();
     if (flushFlag > this->flushFlag)
     {
         this->flushFlag = flushFlag;
         pthread_cond_signal(&updateCond);
     }
-    unlock();
+    UNLOCK();
 }
 Ref<UpdateManager> UpdateManager::getInstance()
 {
@@ -158,60 +205,43 @@ void UpdateManager::unlock()
     pthread_mutex_unlock(&updateMutex);
 }
 
-bool UpdateManager::haveUpdate(int objectID)
-{
-    lock();
-    if (objectIDHash->exists(objectID))
-    {
-        unlock();
-        return true;
-    }
-    unlock();
-    return false;
-}
-
 bool UpdateManager::haveUpdates()
 {
-    return (objectIDHash->size() > 0);
-}
-
-void UpdateManager::addUpdate(int objectID, int updateID)
-{
-    lock();
-    objectIDHash->put(objectID, updateID);
-    if (objectIDHash->size() >= MAX_OBJECT_IDS)
-    {
-        unlock();
-        flushUpdates(FLUSH_ASAP);
-        lock();
-    }
-    else if (objectIDHash->size() == 1)
-    {
-        pthread_cond_signal(&updateCond);
-    }
-    unlock();
+    return (objectIDcount > 0);
 }
 
 void UpdateManager::sendUpdates()
 {
-    Ref<StringBuffer> buf(new StringBuffer(64));
-    int size = objectIDHash->size();
+    log_debug(("SEND UPDATES\n"));
+    Ref<StringBuffer> buf(new StringBuffer(objectIDcount * 4));
     int updateID;
-    for (int i = 0; i < size; i++)
+    if (lazyMode)
     {
-        objectIDHash->get(objectIDs[i], &updateID);
-        *buf << objectIDs[i] << ',' << updateID << ',';
+        for (int i = 0; i < objectIDcount; i++)
+        {
+            hash_slot_t slot;
+            objectIDHash->get(objectIDs[i], &slot, &updateID);
+            *buf << objectIDs[i] << ',' << updateID << ',';
+            objectIDHash->put(objectIDs[i], slot, -updateID);
+        }
+        Storage::getInstance()->incrementUpdateIDs(objectIDs, objectIDcount);
     }
+    else
+    {
+        for (int i = 0; i < objectIDcount; i++)
+        {
+            objectIDHash->get(objectIDs[i], &updateID);
+            *buf << objectIDs[i] << ',' << updateID << ',';
+        }
+        objectIDHash->clear();
+    }
+    objectIDcount = 0;
     
     // skip last comma
     String updateString(buf->c_str(), buf->length() - 1);
-//    flog_info((stderr, "threadProc: sending updates: %s\n", updateString.c_str()));
-
     // send update string...
     ContentDirectoryService::getInstance()->subscription_update(updateString);
-
-    // reset update list
-    resetUpdates();
+    log_debug(("SEND UPDATES RETURNING\n"));
 }
 
 
@@ -225,14 +255,14 @@ void UpdateManager::threadProc()
     long lastIdleMillis = 0; // for buffered update interval calculation
     long lastUpdateMillis = 0; // for spec-based update interval calculation
         
-    lock();
+    LOCK();
 
     while (! shutdownFlag)
     {
 //        flog_info((stderr, "threadProc: awakened...\n")); fflush(stderr);
 
         /* if nothing to do, sleep until awakened */
-        if (objectIDHash->size() == 0)
+        if (! haveUpdates())
         {
 
 //            flog_info((stderr, "threadProc: idle sleep ...\n")); fflush(stderr);
@@ -280,7 +310,7 @@ void UpdateManager::threadProc()
             lastUpdateMillis = getMillis();
         }
     }
-    unlock();
+    UNLOCK();
     log_info(("threadProc: update thread shut down.\n"));
 }
 

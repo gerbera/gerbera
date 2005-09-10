@@ -29,23 +29,24 @@ using namespace mxml;
 
 web::containers::containers() : WebRequestHandler()
 {
-    pagename = "containers";
+    pagename = _("containers");
     plainXML = true;
 }
 
 void web::containers::process()
 {
-//    check_request();
-    String parID = param("parent_id");
+    check_request();
+
+    String parID = param(_("parent_id"));
     int parentID;
     if (parID == nil)
-        throw Exception("web::containers: no parent_id given");
+        throw Exception(_("web::containers: no parent_id given"));
     else
         parentID = parID.toInt();
-
+/*
     root->addAttribute("xmlns:dc", "http://purl.org/dc/elements/1.1/");
     root->addAttribute("xmlns:upnp", "urn:schemas-upnp-org:metadata-1-0/upnp/");
-
+*/
     Ref<Storage> storage = Storage::getInstance();
     Ref<BrowseParam> param(new BrowseParam(parentID, BROWSE_DIRECT_CHILDREN));
     param->containersOnly = true;
@@ -53,20 +54,18 @@ void web::containers::process()
     Ref<Array<CdsObject> > arr = storage->browse(param);
 
     // we keep the browse result in the DIDL-Lite tag in our xml
-    Ref<Element> containers (new Element("containers"));
+    Ref<Element> containers (new Element(_("containers")));
 
     for (int i = 0; i < arr->size(); i++)
     {
         Ref<CdsObject> obj = arr->get(i);
-        if (IS_CDS_ITEM(obj->getObjectType()))
-            continue;
         Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
         // this has to be adjusted: the resourced for browsing are different
-        Ref<Element> ce(new Element("container"));
-        ce->addAttribute("id", String::from(cont->getID()));
+        Ref<Element> ce(new Element(_("container")));
+        ce->addAttribute(_("id"), String::from(cont->getID()));
         int childCount = cont->getChildCount();
         if (childCount)
-            ce->addAttribute("childCount", String::from(childCount));
+            ce->addAttribute(_("childCount"), String::from(childCount));
         ce->setText(cont->getTitle());
         containers->appendChild(ce);
     }

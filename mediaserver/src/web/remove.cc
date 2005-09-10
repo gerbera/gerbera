@@ -35,27 +35,28 @@ web::remove::remove() : WebRequestHandler()
 
 void web::remove::process()
 {
+    log_info(("remove: start\n"));
+
     Ref<Session>   session;
     session_data_t sd;
     String         requested_count;
 
     check_request();
     
-    String objID = param("object_id");
-    String sid = param("sid");
-    String driver = param("driver");
+    String objID = param(_("object_id"));
+    String sid = param(_("sid"));
+    String driver = param(_("driver"));
 
     session = SessionManager::getInstance()->getSession(sid);
    
     sd = PRIMARY;
  
     Ref<ContentManager> cm = ContentManager::getInstance();
-
     if (objID != nil)
         cm->removeObject(objID.toInt());
 
     int objectID;
-    objID = session->getFrom(sd, "object_id");
+    objID = session->getFrom(sd, _("object_id"));
     if (objID == nil)
     {
         objectID = 0;
@@ -73,21 +74,23 @@ void web::remove::process()
         }
     }
 
-    requested_count = session->getFrom(sd, "requested_count");
+    requested_count = session->getFrom(sd, _("requested_count"));
     if ((requested_count == nil) || (requested_count == ""))
     {
-        if (requested_count == nil) requested_count = "0";
+        requested_count = _("0");
     }
 
     if (requested_count.toInt() < 0)
-        requested_count = "0";
+        requested_count = _("0");
 
 
     Ref<Dictionary> sub(new Dictionary());
-    sub->put("object_id", String::from(objectID));
-    sub->put("requested_count", requested_count);
-    sub->put("sid", sid);
-    sub->put("driver", driver);
-    *out << subrequest("browse", sub);
+    sub->put(_("object_id"), String::from(objectID));
+    sub->put(_("requested_count"), requested_count);
+    sub->put(_("sid"), sid);
+    sub->put(_("driver"), driver);
+    *out << subrequest(_("browse"), sub);
+    
+    log_info(("remove: returning\n"));
 }
 

@@ -31,7 +31,7 @@ void ConnectionManagerService::upnp_action_GetCurrentConnectionIDs(Ref<ActionReq
 
     Ref<Element> response;
     response = UpnpXML_CreateResponse(request->getActionName(), serviceType);
-    response->appendTextChild("ConnectionID", "0");
+    response->appendTextChild(_("ConnectionID"), _("0"));
 
     request->setResponse(response); 
     request->setErrorCode(UPNP_E_SUCCESS);    
@@ -58,8 +58,8 @@ void ConnectionManagerService::upnp_action_GetProtocolInfo(Ref<ActionRequest> re
     Ref<Array<StringBase> > mimeTypes = Storage::getInstance()->getMimeTypes();
     String CSV = mime_types_to_CSV(mimeTypes);
 
-    response->appendTextChild("Source", CSV);
-    response->appendTextChild("Sink", "");
+    response->appendTextChild(_("Source"), CSV);
+    response->appendTextChild(_("Sink"), _(""));
 
     request->setResponse(response);
     request->setErrorCode(UPNP_E_SUCCESS);
@@ -90,7 +90,7 @@ void ConnectionManagerService::process_action_request(Ref<ActionRequest> request
         log_info(("process_action_request: unrecognized action %s\n", 
                 request->getActionName().c_str()));
         request->setErrorCode(UPNP_E_INVALID_ACTION);
-        throw UpnpException(UPNP_E_INVALID_ACTION, "unrecognized action");
+        throw UpnpException(UPNP_E_INVALID_ACTION, _("unrecognized action"));
     }
     
 

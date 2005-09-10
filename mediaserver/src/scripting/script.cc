@@ -204,27 +204,31 @@ js_error_reporter(JSContext *cx, const char *message, JSErrorReport *report)
 
 /* **************** */
 
-Script::Script(Ref<Runtime> runtime) : Object()
+Script::Script(Ref<Runtime> runtime, JSContext *cx) : Object()
 {
     this->runtime = runtime;
     rt = runtime->getRT();
-    cx = NULL;
     glob = NULL;
 	script = NULL;
 
     /* create a context and associate it with the JS run time */
-    cx = JS_NewContext(rt, 8192);
+    lock();
     if (! cx)
-        throw Exception("Scripting: could not initialize js context");
-
+        cx = JS_NewContext(rt, 8192);
+    unlock();
+    if (! cx)
+        throw Exception(_("Scripting: could not initialize js context"));
+    this->cx = cx;
     JS_SetErrorReporter(cx, js_error_reporter);
 }
 Script::~Script()
 {
+    lock();
     if (script)
         JS_DestroyScript(cx, script);
     if (cx)
 		JS_DestroyContext(cx);
+    unlock();
 }
 
 void Script::setGlobalObject(JSObject *glob)
@@ -236,17 +240,21 @@ JSObject *Script::getGlobalObject()
 {
     return glob;
 }
+JSContext *Script::getContext()
+{
+    return cx;
+}
 
 void Script::initGlobalObject()
 {
     /* create the global object here */
     glob = JS_NewObject(cx, /* global_class */ NULL, NULL, NULL);
     if (! glob)
-        throw Exception("Scripting: could not initialize glboal class");
+        throw Exception(_("Scripting: could not initialize glboal class"));
 
     /* initialize the built-in JS objects and the global object */
     if (! JS_InitStandardClasses(cx, glob))
-        throw Exception("Scripting: JS_InitStandardClasses failed");
+        throw Exception(_("Scripting: JS_InitStandardClasses failed"));
 }
 
 void Script::defineFunctions(JSFunctionSpec *functions)
@@ -254,7 +262,7 @@ void Script::defineFunctions(JSFunctionSpec *functions)
     if (glob == NULL)
         initGlobalObject();
     if (!JS_DefineFunctions(cx, glob, functions))
-        throw Exception("Scripting: JS_DefineFunctions failed");
+        throw Exception(_("Scripting: JS_DefineFunctions failed"));
 }
 
 void Script::load(zmm::String scriptPath)
@@ -270,21 +278,21 @@ void Script::load(String scriptText, String scriptPath)
 	if (!JS_EvaluateScript(cx, glob, script.c_str(), script.length(),
 		scriptPath.c_str(), 0, &ret_val))
 	{
-             throw Exception("Scripting: failed to evaluate script");
+             throw Exception(_("Scripting: failed to evaluate script");
 	}
 */
 
     script = JS_CompileScript(cx, glob, scriptText.c_str(), scriptText.length(),
                               scriptPath.c_str(), 1);
     if (! script)
-        throw Exception(String("Script: failed to compile ") + scriptPath);
+        throw Exception(_("Scripting: failed to compile ") + scriptPath);
 }
 void Script::execute()
 {
     jsval ret_val;
 
     if (!JS_ExecuteScript(cx, glob, script, &ret_val))
-        throw Exception("Script: failed to execute script");
+        throw Exception(_("Script: failed to execute script"));
 }
 
 #endif // HAVE_JS

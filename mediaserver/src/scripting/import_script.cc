@@ -37,7 +37,7 @@ Ref<CdsObject> ImportScript::jsObject2cdsObject(JSObject *js)
     int b;
     int i;
 
-    objectType = getIntProperty(js, "objectType", -1);
+    objectType = getIntProperty(js, _("objectType"), -1);
     if (objectType == -1)
     {
         log_info(("scripting: addObject: missing objectType property\n"));
@@ -49,31 +49,32 @@ Ref<CdsObject> ImportScript::jsObject2cdsObject(JSObject *js)
     // CdsObject
     obj->setVirtual(1); // JS creates only virtual objects
 
-    i = getIntProperty(js, "id", -333);
+    i = getIntProperty(js, _("id"), -333);
     if (i != -333)
         obj->setID(i);
-    i = getIntProperty(js, "refID", -333);
+    i = getIntProperty(js, _("refID"), -333);
     if (i != -333)
         obj->setRefID(i);
-    i = getIntProperty(js, "parentID", -333);
+    i = getIntProperty(js, _("parentID"), -333);
     if (i != -333)
         obj->setParentID(i);
-    val = getProperty(js, "title");
+    val = getProperty(js, _("title"));
     if (val != nil)
         obj->setTitle(val);
-    val = getProperty(js, "class");
+    val = getProperty(js, _("class"));
     if (val != nil)
         obj->setClass(val);
-    val = getProperty(js, "location");
+    val = getProperty(js, _("location"));
     if (val != nil)
         obj->setLocation(val);
-    b = getBoolProperty(js, "restricted");
+    b = getBoolProperty(js, _("restricted"));
     if (b >= 0)
         obj->setRestricted(b);
 
-    JSObject *js_meta = getObjectProperty(js, "meta");
+    JSObject *js_meta = getObjectProperty(js, _("meta"));
     if (js_meta)
     {
+        /*
         JSIdArray *js_meta_ids = JS_Enumerate(cx, js_meta);
         if (js_meta_ids)
         {
@@ -84,13 +85,14 @@ Ref<CdsObject> ImportScript::jsObject2cdsObject(JSObject *js)
             }
         }
         JS_DestroyIdArray(cx, js_meta_ids);
+        */
 
         /// \TODO: only metadata enumerated in MT_KEYS is taken
         for (int i = 0; i < M_MAX; i++)
         {
-            val = getProperty(js_meta, MT_KEYS[i].upnp);
+            val = getProperty(js_meta, _(MT_KEYS[i].upnp));
             if (val != nil)
-                obj->setMetadata(MT_KEYS[i].upnp, val);
+                obj->setMetadata(_(MT_KEYS[i].upnp), val);
         }
     }
 
@@ -99,17 +101,17 @@ Ref<CdsObject> ImportScript::jsObject2cdsObject(JSObject *js)
     {
         Ref<CdsItem> item = RefCast(obj, CdsItem);
 
-        val = getProperty(js, "mimetype");
+        val = getProperty(js, _("mimetype"));
         if (val != nil)
             item->setMimeType(val);
 
         if (IS_CDS_ACTIVE_ITEM(objectType))
         {
             Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
-            val = getProperty(js, "action");
+            val = getProperty(js, _("action"));
             if (val != nil)
                 aitem->setAction(val);
-            val = getProperty(js, "state");
+            val = getProperty(js, _("state"));
             if (val != nil)
                 aitem->setState(val);
         }
@@ -119,10 +121,10 @@ Ref<CdsObject> ImportScript::jsObject2cdsObject(JSObject *js)
     if (IS_CDS_CONTAINER(objectType))
     {
         Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
-        i = getIntProperty(js, "updateID", -1);
+        i = getIntProperty(js, _("updateID"), -1);
         if (i >= 0)
             cont->setUpdateID(i);
-        b = getBoolProperty(js, "searchable");
+        b = getBoolProperty(js, _("searchable"));
         if (b >= 0)
             cont->setSearchable(b);
     }
@@ -138,26 +140,26 @@ void ImportScript::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
 	int objectType = obj->getObjectType();
 
     // CdsObject
-	setIntProperty(js, "objectType", objectType);
+	setIntProperty(js, _("objectType"), objectType);
 
     i = obj->getID();
     if (i != INVALID_OBJECT_ID)
-        setIntProperty(js, "id", i);
+        setIntProperty(js, _("id"), i);
     i = obj->getParentID();
     if (i != INVALID_OBJECT_ID)
-        setIntProperty(js, "parentID", i);
+        setIntProperty(js, _("parentID"), i);
     val = obj->getTitle();
     if (val != nil)
-        setProperty(js, "title", val);
+        setProperty(js, _("title"), val);
     val = obj->getClass();
     if (val != nil)
-        setProperty(js, "class", val);
+        setProperty(js, _("class"), val);
     val = obj->getLocation();
     if (val != nil)
-        setProperty(js, "location", val);
+        setProperty(js, _("location"), val);
 	// TODO: boolean type
 	i = obj->isRestricted();
-    setIntProperty(js, "restricted", i);
+    setIntProperty(js, _("restricted"), i);
    
     // setting metadata
     {
@@ -168,9 +170,9 @@ void ImportScript::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
         for (int i = 0; i < len; i++)
         {
             Ref<DictionaryElement> el = elements->get(i);
-            setProperty(meta_js, el->getKey().c_str(), el->getValue().c_str());
+            setProperty(meta_js, el->getKey(), el->getValue());
         }
-    	setObjectProperty(js, "meta", meta_js);
+    	setObjectProperty(js, _("meta"), meta_js);
     }
 
     // setting auxdata
@@ -182,9 +184,9 @@ void ImportScript::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
         for (int i = 0; i < len; i++)
         {
             Ref<DictionaryElement> el = elements->get(i);
-            setProperty(aux_js, el->getKey().c_str(), el->getValue().c_str());
+            setProperty(aux_js, el->getKey(), el->getValue());
         }
-    	setObjectProperty(js, "aux", aux_js);
+    	setObjectProperty(js, _("aux"), aux_js);
     }
 
     /// \todo add resources
@@ -195,17 +197,17 @@ void ImportScript::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
         Ref<CdsItem> item = RefCast(obj, CdsItem);
 		val = item->getMimeType();
 		if (val != nil)
-			setProperty(js, "mimetype", val);
+			setProperty(js, _("mimetype"), val);
 
         if (IS_CDS_ACTIVE_ITEM(objectType))
         {
             Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
 			val = aitem->getAction();
 			if (val != nil)
-				setProperty(js, "action", val);
+				setProperty(js, _("action"), val);
 			val = aitem->getState();
 			if (val != nil)
-				setProperty(js, "state", val);
+				setProperty(js, _("state"), val);
         }
     }
 
@@ -215,10 +217,10 @@ void ImportScript::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
         Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
         // TODO: boolean type, hide updateID
         i = cont->getUpdateID();
-        setIntProperty(js, "updateID", i);
+        setIntProperty(js, _("updateID"), i);
         
         i = cont->isSearchable();
-        setIntProperty(js, "searchable", i);
+        setIntProperty(js, _("searchable"), i);
     }
 }
 
@@ -226,7 +228,7 @@ void ImportScript::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
 extern "C" {
 
 static JSBool
-js_print(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
+js_log(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
 {
     uintN i;
     JSString *str;
@@ -235,9 +237,8 @@ js_print(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
         str = JS_ValueToString(cx, argv[i]);
         if (!str)
             return JS_FALSE;
-        log_info(("%s%s", i ? " " : "", JS_GetStringBytes(str)));
+        log_info(("%s%s\n", i ? " " : "", JS_GetStringBytes(str)));
     }
-    log_info(("\n"));
     return JS_TRUE;
 }
 
@@ -290,7 +291,7 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
 } // extern "C"
 
 static JSFunctionSpec global_functions[] = {
-    {"print",           js_print,          0},
+    {"log",             js_log,            0},
     {"addCdsObject",    js_addCdsObject,   1},
     {0}
 };
@@ -302,32 +303,48 @@ ImportScript::ImportScript(Ref<Runtime> runtime) : Script(runtime)
 {
     JS_SetContextPrivate(cx, this);
     defineFunctions(global_functions);
-
+    
     /* initialize contstants */
-    setIntProperty(glob, "OBJECT_TYPE_CONTAINER",
+    setIntProperty(glob, _("OBJECT_TYPE_CONTAINER"),
                           OBJECT_TYPE_CONTAINER);
-    setIntProperty(glob, "OBJECT_TYPE_ITEM",
+    setIntProperty(glob, _("OBJECT_TYPE_ITEM"),
                           OBJECT_TYPE_ITEM);
-    setIntProperty(glob, "OBJECT_TYPE_ACTIVE_ITEM",
+    setIntProperty(glob, _("OBJECT_TYPE_ACTIVE_ITEM"),
                           OBJECT_TYPE_ACTIVE_ITEM);
-    setIntProperty(glob, "OBJECT_TYPE_ITEM_EXTERNAL_URL",
+    setIntProperty(glob, _("OBJECT_TYPE_ITEM_EXTERNAL_URL"),
                           OBJECT_TYPE_ITEM_EXTERNAL_URL);
 
     for (int i = 0; i < M_MAX; i++)
     {
-        setProperty(glob, MT_KEYS[i].sym, MT_KEYS[i].upnp);
+        setProperty(glob, _(MT_KEYS[i].sym), _(MT_KEYS[i].upnp));
     }
     
-    String scriptPath = ConfigManager::getInstance()->getOption("/import/script");
+    String scriptPath = ConfigManager::getInstance()->getOption(_("/import/script"));
     load(scriptPath);
+    execute();
+
+    runScript = Ref<Script>(new Script(runtime, getContext()));
+    runScript->setGlobalObject(getGlobalObject());
+    String runScriptSrc = _("PROCESS_OBJECT(orig);");
+    runScript->load(runScriptSrc, _("run script"));
 }
 
 void ImportScript::processCdsObject(Ref<CdsObject> obj)
 {
-    JSObject *orig = JS_NewObject(cx, NULL, NULL, glob);
-    cdsObject2jsObject(obj, orig);
-    setObjectProperty(glob, "orig", orig);
-    execute();
+    lock();
+    try
+    {
+        JSObject *orig = JS_NewObject(cx, NULL, NULL, glob);
+        setObjectProperty(glob, _("orig"), orig);
+        cdsObject2jsObject(obj, orig);
+        runScript->execute();
+    }
+    catch (Exception e)
+    {
+        unlock();
+        throw e;
+    }
+    unlock();
 }
 
 

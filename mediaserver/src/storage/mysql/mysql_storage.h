@@ -23,9 +23,9 @@
 
 #include "common.h"
 #include "storage/sql_storage.h"
+#include "sync.h"
 
 #include <mysql.h>
-#include <pthread.h>
 
 class MysqlRow : public SQLRow
 {
@@ -61,12 +61,12 @@ public:
 
 protected:
     MYSQL *db;
-    pthread_mutex_t lock_mutex;
+    zmm::Ref<Mutex> mutex;
 
     void reportError(zmm::String query);
 
-    void lock();
-    void unlock();    
+    inline void lock() { mutex->lock(); }
+    inline void unlock() { mutex->unlock(); }    
     
     friend void unlock_func(void *data);    
 };

@@ -41,19 +41,19 @@ void ConnectionManagerService::process_subscription_request(zmm::Ref<Subscriptio
 
     propset = UpnpXML_CreateEventPropertySet();
     property = propset->getFirstChild();
-    property->appendTextChild("CurrentConnectionIDs", "0");
-    property->appendTextChild("SinkProtocolInfo", "");
-    property->appendTextChild("SourceProtocolInfo", CSV);
+    property->appendTextChild(_("CurrentConnectionIDs"), _("0"));
+    property->appendTextChild(_("SinkProtocolInfo"), _(""));
+    property->appendTextChild(_("SourceProtocolInfo"), CSV);
 
     String xml = propset->print();
     err = ixmlParseBufferEx(xml.c_str(), &event);
     if (err != IXML_SUCCESS)
     {
-        throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");
+        throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, _("Could not convert property set to ixml"));
     }
 
     UpnpAcceptSubscriptionExt(server->getDeviceHandle(),
-            ConfigManager::getInstance()->getOption("/server/udn").c_str(),
+            ConfigManager::getInstance()->getOption(_("/server/udn")).c_str(),
             serviceID.c_str(), event, request->getSubscriptionID().c_str());
 
     ixmlDocument_free(event);
@@ -68,7 +68,7 @@ void ConnectionManagerService::subscription_update(String sourceProtocol_CSV)
 
     propset = UpnpXML_CreateEventPropertySet();
     property = propset->getFirstChild();
-    property->appendTextChild("SourceProtocolInfo", sourceProtocol_CSV);
+    property->appendTextChild(_("SourceProtocolInfo"), sourceProtocol_CSV);
 
     String xml = propset->print();
 
@@ -76,12 +76,12 @@ void ConnectionManagerService::subscription_update(String sourceProtocol_CSV)
     if (err != IXML_SUCCESS)
     {
         /// \todo add another error code
-        throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");
+        throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, _("Could not convert property set to ixml"));
 
     }
 
     UpnpNotifyExt(server->getDeviceHandle(),
-            ConfigManager::getInstance()->getOption("/server/udn").c_str(),
+            ConfigManager::getInstance()->getOption(_("/server/udn")).c_str(),
             serviceID.c_str(), event);
 
     ixmlDocument_free(event);

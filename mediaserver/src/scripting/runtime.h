@@ -23,7 +23,9 @@
 
 #define XP_UNIX 1
 #include <jsapi.h>
+#include <pthread.h>
 #include "common.h"
+#include "sync.h"
 
 class Runtime : public zmm::Object
 {
@@ -34,6 +36,10 @@ public:
 	virtual ~Runtime();
     JSRuntime *getRT();
     static zmm::Ref<Runtime> getInstance();
+    inline void lock() { mutex->lock(); }
+    inline void unlock() { mutex->unlock(); }
+protected:
+    zmm::Ref<Mutex> mutex;
 };
 
 #endif // __SCRIPTING_RUNTIME_H__

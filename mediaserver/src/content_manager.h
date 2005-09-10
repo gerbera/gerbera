@@ -51,9 +51,9 @@ class CMAddFileTask : public CMTask
 {
 protected:
     zmm::String path;
-    int recursive;
+    bool recursive;
 public:
-    CMAddFileTask(zmm::String path, int recursive=0);
+    CMAddFileTask(zmm::String path, bool recursive=false);
     virtual void run();
 };
 
@@ -123,14 +123,14 @@ public:
     /* the functions below return true if the task has been enqueued */
     
     /* sync/async methods */
-    int loadAccounting(int async=true);
-    int addFile(zmm::String path, int recursive=0, int async=true);
-    int removeObject(int objectID, int async=true);
+    int loadAccounting(bool async=true);
+    int addFile(zmm::String path, bool recursive=true, bool async=true);
+    int removeObject(int objectID, bool async=true);
     
     /* don't use these, use the above methods */
     void _loadAccounting();
-    void _addFile(zmm::String path, int recursive=0);
-    void _addFile2(zmm::String path, int recursive=0);
+    void _addFile(zmm::String path, bool recursive=0);
+    void _addFile2(zmm::String path, bool recursive=0);
     void _removeObject(int objectID);
     
 
@@ -177,7 +177,7 @@ protected:
     
     /* for recursive addition */
     void addRecursive(zmm::String path, int parentID);
-    void addRecursive2(zmm::Ref<DirCache> dirCache, zmm::String filename, int recursive);
+    void addRecursive2(zmm::Ref<DirCache> dirCache, zmm::String filename, bool recursive);
 
     zmm::String extension2mimetype(zmm::String extension);
     zmm::String mimetype2upnpclass(zmm::String mimeType);

@@ -30,13 +30,14 @@ using namespace mxml;
 
 web::items::items() : WebRequestHandler()
 {
-    pagename = "items";
+    pagename = _("items");
 }
 
 void web::items::process()
 {
-//    check_request();
-    String parID = param("parent_id");
+    check_request();
+
+    String parID = param(_("parent_id"));
     int parentID;
     if (parID == nil)
         parentID = 0;
@@ -49,7 +50,7 @@ void web::items::process()
     Ref<Array<CdsObject> > arr = storage->selectObjects(param);
 
     // we keep the browse result in the DIDL-Lite tag in our xml
-    Ref<Element> items (new Element("items"));
+    Ref<Element> items (new Element(_("items")));
 
     for (int i = 0; i < arr->size(); i++)
     {

@@ -29,13 +29,13 @@ protected:
     int errCode;
 public:
     UpnpException(int errCode, zmm::String message);
-    int getErrorCode();
+    inline int getErrorCode() { return errCode; }
 };
 
 class StorageException : public zmm::Exception
 {
 public:
-    StorageException(zmm::String message);
+    inline StorageException(zmm::String message) : zmm::Exception(message) {}
 };
 
 #endif // __EXCEPTIONS_H__

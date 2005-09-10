@@ -62,15 +62,10 @@ int CdsObject::equals(Ref<CdsObject> obj, bool exactly)
         resources->size() == obj->resources->size()
        ))
         return 0;
-
     // compare all resources
-    if (resources->size() != obj->resources->size())
-        return 0;
     for (int i = 0; i < resources->size(); i++)
-    {
         if (! resources->get(i)->equals(obj->resources->get(i)))
             return 0;
-    }
 
     if (! metadata->equals(obj->getMetadata()))
         return 0;
@@ -88,7 +83,7 @@ void CdsObject::validate()
     if ((!string_ok(this->title)) ||
         (!string_ok(this->upnpClass)))
     {
-        throw Exception(String("CdsObject: validation failed"));
+        throw Exception(_("CdsObject: validation failed"));
     }
 
 }
@@ -119,7 +114,7 @@ Ref<CdsObject> CdsObject::createObject(int objectType)
     }
     else
     {
-        throw Exception(String("invalid object type :") + objectType);
+        throw Exception(_("invalid object type :") + objectType);
     }
     return Ref<CdsObject>(pobj);
 }
@@ -130,8 +125,8 @@ Ref<CdsObject> CdsObject::createObject(int objectType)
 CdsItem::CdsItem() : CdsObject()
 {
     objectType = OBJECT_TYPE_ITEM;
-    upnpClass = "object.item";
-    mimeType = MIMETYPE_DEFAULT;
+    upnpClass = _("object.item");
+    mimeType = _(MIMETYPE_DEFAULT);
 }
 
 void CdsItem::copyTo(Ref<CdsObject> obj)
@@ -156,15 +151,15 @@ void CdsItem::validate()
     CdsObject::validate();
 //    log_info(("mime: [%s] loc [%s]\n", this->mimeType.c_str(), this->location.c_str()));
     if ((!string_ok(this->mimeType)) || (!check_path(this->location)))
-        throw Exception("CdsItem: validation failed");
+        throw Exception(_("CdsItem: validation failed"));
 }
 
 CdsActiveItem::CdsActiveItem() : CdsItem()
 {
     objectType |= OBJECT_TYPE_ACTIVE_ITEM;
 
-    upnpClass = "object.item.activeItem";
-    mimeType = MIMETYPE_DEFAULT ;
+    upnpClass = _("object.item.activeItem");
+    mimeType = _(MIMETYPE_DEFAULT);
 }
 
 void CdsActiveItem::copyTo(Ref<CdsObject> obj)
@@ -193,7 +188,7 @@ void CdsActiveItem::validate()
 {
     CdsItem::validate();
     if ((!string_ok(this->action)) || (!check_path(this->action)))
-        throw Exception(String("CdsActiveItem: validation failed"));
+        throw Exception(_("CdsActiveItem: validation failed"));
 }
 //---------
 
@@ -201,15 +196,15 @@ CdsItemExternalURL::CdsItemExternalURL() : CdsItem()
 {
     objectType |= OBJECT_TYPE_ITEM_EXTERNAL_URL;
 
-    upnpClass = "object.item";
-    mimeType = MIMETYPE_DEFAULT;
+    upnpClass = _("object.item");
+    mimeType = _(MIMETYPE_DEFAULT);
 }
 
 void CdsItemExternalURL::validate()
 {
     CdsObject::validate();
     if ((!string_ok(this->mimeType)) || (!string_ok(this->location)))
-        throw Exception(String("CdsItemExternalURL: validation failed"));
+        throw Exception(_("CdsItemExternalURL: validation failed"));
 }
 //---------
 
@@ -217,18 +212,18 @@ CdsItemInternalURL::CdsItemInternalURL() : CdsItemExternalURL()
 {
     objectType |= OBJECT_TYPE_ITEM_INTERNAL_URL;
 
-    upnpClass = "object.item";
-    mimeType = MIMETYPE_DEFAULT;
+    upnpClass = _("object.item");
+    mimeType = _(MIMETYPE_DEFAULT);
 }
 
 void CdsItemInternalURL::validate()
 {
     CdsObject::validate();
     if ((!string_ok(this->mimeType)) || (!string_ok(this->location)))
-        throw Exception(String("CdsItemInternalURL: validation failed"));
+        throw Exception(_("CdsItemInternalURL: validation failed"));
 
-    if (this->location.startsWith("http://"))
-        throw Exception(String("CdsItemInternalURL: validation failed: must be realtive!"));
+    if (this->location.startsWith(_("http://")))
+        throw Exception(_("CdsItemInternalURL: validation failed: must be realtive!"));
 }
 
 CdsContainer::CdsContainer() : CdsObject()
@@ -237,7 +232,7 @@ CdsContainer::CdsContainer() : CdsObject()
     updateID = 0;
     searchable = 0;
     childCount = -1;
-    upnpClass = "object.container";
+    upnpClass = _("object.container");
 }
 
 void CdsContainer::copyTo(Ref<CdsObject> obj)
@@ -263,7 +258,13 @@ void CdsContainer::validate()
     CdsObject::validate();
     /// \TODO well.. we have to know if a container is a real directory or just a virtual container in the database
 /*    if (!check_path(this->location, true))
-        throw Exception(String("CdsContainer: validation failed")); */
+        throw Exception(_("CdsContainer: validation failed")); */
+}
+void CdsObject::optimize()
+{
+    metadata->optimize();
+    auxdata->optimize();
+    resources->optimize();
 }
 
 int CdsObjectTitleComparator(void *arg1, void *arg2)

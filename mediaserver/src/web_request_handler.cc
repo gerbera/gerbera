@@ -24,15 +24,21 @@
 #include "config_manager.h"
 #include "web/pages.h"
 #include "session_manager.h"
+#include "tools.h"
+#include "hash.h"
 
 using namespace zmm;
 using namespace mxml;
 
 #define DEFAULT_PAGE_BUFFER_SIZE 4096
 
+static JSObject *shared_global_object = NULL;
+
+static Ref<DSOHash<WebScript> > script_hash(new DSOHash<WebScript>(37));
+
 WebRequestHandler::WebRequestHandler() : RequestHandler()
 {
-    pagename = NULL;
+    pagename = nil;
     plainXML = false;
 }
 
@@ -43,7 +49,7 @@ String WebRequestHandler::param(String name)
 
 String WebRequestHandler::buildScriptPath(String filename)
 {
-    String scriptRoot = ConfigManager::getInstance()->getOption("/server/webroot");
+    String scriptRoot = ConfigManager::getInstance()->getOption(_("/server/webroot"));
     return String(scriptRoot + "/jssp/") + filename;
 }
 
@@ -53,14 +59,14 @@ void WebRequestHandler::check_request()
 
     // check if the session parameter was supplied and if we have
     // a session with that id
-    String sid = param("sid");
+    String sid = param(_("sid"));
     if (sid == nil)
     {
-        throw Exception(String("no session id given"));
+        throw SessionException(_("no session id given"));
     }
     if (SessionManager::getInstance()->getSession(sid) == nil)
     {
-        throw Exception(String("invalid session id"));
+        throw SessionException(_("invalid session id"));
     }
 }
 
@@ -68,12 +74,13 @@ String WebRequestHandler::renderXMLHeader(String xsl_link)
 {
     if (xsl_link == nil)
     {
-        return String("<?xml version=\"1.0\" encoding=\"")+
+        return _("<?xml version=\"1.0\" encoding=\"") +
             DEFAULT_INTERNAL_CHARSET +"\"?>\n";
     }
     else
     {
-        return String("<?xml version=\"1.0\" encoding=\"")+ DEFAULT_INTERNAL_CHARSET +"\"?>\n";
+        return _("<?xml version=\"1.0\" encoding=\"") +
+                           DEFAULT_INTERNAL_CHARSET +"\"?>\n";
     }
 }
 
@@ -87,9 +94,10 @@ void WebRequestHandler::get_info(IN const char *filename, OUT struct File_Info *
     String contentType;
 
     if (plainXML)
-        contentType = String(MIMETYPE_XML) + "; charset=" + DEFAULT_INTERNAL_CHARSET;
+        contentType = _(MIMETYPE_XML) + "; charset=" + DEFAULT_INTERNAL_CHARSET;
     else
-        contentType = String("text/html; charset=") + DEFAULT_INTERNAL_CHARSET;
+        contentType = _("text/html; charset=") +
+                      DEFAULT_INTERNAL_CHARSET;
     
     info->content_type = ixmlCloneDOMString(contentType.c_str());
 }
@@ -98,42 +106,60 @@ Ref<IOHandler> WebRequestHandler::open(Ref<Dictionary> params, IN enum UpnpOpenF
 {
     this->params = params;
 
-    root = Ref<Element>(new Element("root"));
+    root = Ref<Element>(new Element(_("root")));
     out = Ref<StringBuffer>(new StringBuffer());
 
-    if (pagename == NULL)
-        pagename = "index";
-    String scriptPath = buildScriptPath(String(pagename) + ".jssp");
+    if (pagename == nil)
+        pagename = _("index");
 
-    if (! plainXML)
-    {
-        if (script == nil)
-            script = Ref<WebScript>(new WebScript(Runtime::getInstance(), scriptPath));
-        script->setSessionID(param("sid"));
-    }
-    
     String output;
     // processing page, creating output
     try
     {
         process();
-        log_debug(("RENDERING %s: \n%s\n", pagename, root->print().c_str()));
+        // log_debug(("RENDERING %s: \n%s\n", pagename, root->print().c_str()));
         if (plainXML)
         {
             output = renderXMLHeader() + root->print();
         }
         else
         {
+            String p(pagename);
+            String scriptPath = buildScriptPath(String(p) + ".jssp");
+            hash_slot_t hash_slot;
+            Ref<WebScript> script = script_hash->get(p, &hash_slot);
+            if (script == nil)
+            {
+//                log_debug(("creating script for page %s\n", pagename));
+                script = Ref<WebScript>(new WebScript(Runtime::getInstance(),
+                                        scriptPath, shared_global_object));
+                if (! shared_global_object)
+                    shared_global_object = script->getGlobalObject();
+                
+                script_hash->put(p, hash_slot, script);
+            }
+//            else
+//                log_debug(("cashed script for page %s\n", pagename));
+            script->setSessionID(param(_("sid")));
             output = script->process(root);
         }
+    }
+    catch (SessionException se)
+    {
+        String url = _("/content/interface?req_type=login&slt=") +
+                            generate_random_id();
+        output = _(
+            "<html><head>"
+            "<script>top.location.href = '")+ url +"';</script>"
+            "</head><body></body></html>";
     }
     catch (Exception e)
     {
         e.printStackTrace();
-        Ref<Dictionary> par(new Dictionary());
-        par->put("message", e.getMessage());
-        output = "torture";
+        // Ref<Dictionary> par(new Dictionary());
+        // par->put("message", e.getMessage());
         // output = subrequest("error", par);
+        output = _("JSSP ERROR (page ") + pagename +") : " + e.getMessage();
     }
     root = nil;
 
@@ -162,7 +188,7 @@ String WebRequestHandler::subrequest(String req_type, Ref<Dictionary> params)
     Ref<IOHandler> io_handler = subhandler->open(params, mode);
     
     Ref<StringBuffer> buffer(new StringBuffer(DEFAULT_PAGE_BUFFER_SIZE));
-    char *buf = (char *)malloc(DEFAULT_PAGE_BUFFER_SIZE * sizeof(char));
+    char *buf = (char *)MALLOC(DEFAULT_PAGE_BUFFER_SIZE * sizeof(char));
     while (true)
     {
         int bytesRead = io_handler->read(buf, DEFAULT_PAGE_BUFFER_SIZE);

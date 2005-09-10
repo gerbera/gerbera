@@ -259,7 +259,7 @@ static void addMetaField(metadata_fields_t field, EXTRACTOR_KeywordList *keyword
     }
 
     if (temp != NULL)
-        value = (char *)temp;
+        value = String(temp);
 
     value = trim_string(value);
     
@@ -289,7 +289,7 @@ static void addResourceField(resource_attributes_t attr, EXTRACTOR_KeywordList *
     }
 
     if (temp != NULL)
-        value = (char *)temp;
+        value = String(temp);
 
     if (string_ok(value))
     {
@@ -342,7 +342,7 @@ void ExtractorHandler::fillMetadata(Ref<CdsItem> item)
                 temp = EXTRACTOR_extractLast(getTagFromString(tmp), keywords);
                 if (temp != NULL)
                 {
-                    value = (char *)temp; 
+                    value = String(temp); 
                     if (string_ok(value))
                     {
                         value = sc->convert(value);
@@ -358,8 +358,8 @@ void ExtractorHandler::fillMetadata(Ref<CdsItem> item)
     {
         ReAudioFormat = Ref<RExp>(new RExp());
         // 64 kbps, 44100 hz, 8m30 stereo
-        ReAudioFormat->compile("([0-9]+)\\s+kbps,\\s*([0-9]+)\\s+hz,\\s*"
-                               "(([0-9]+)h)?([0-9]+)m([0-9]+)\\s(\\S+)", "i");
+        ReAudioFormat->compile(_("([0-9]+)\\s+kbps,\\s*([0-9]+)\\s+hz,\\s*"
+                                 "(([0-9]+)h)?([0-9]+)m([0-9]+)\\s(\\S+)"), "i");
     }
    
     /*

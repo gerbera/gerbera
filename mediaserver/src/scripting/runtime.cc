@@ -29,11 +29,12 @@ static Ref<Runtime> instance;
 
 Runtime::Runtime() : Object()
 {
+    mutex = Ref<Mutex>(new Mutex(true)); // need recursive mutex
+
     /* initialize the JS run time, and return result in rt */
     rt = JS_NewRuntime(8L * 1024L * 1024L);
-
     if (!rt)
-        throw Exception("Scripting: could not initialize js runtime");
+        throw Exception(_("Scripting: could not initialize js runtime"));
 }
 Runtime::~Runtime()
 {

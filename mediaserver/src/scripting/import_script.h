@@ -34,6 +34,7 @@ public:
     zmm::Ref<CdsObject> jsObject2cdsObject(JSObject *js);
 protected:
     void cdsObject2jsObject(zmm::Ref<CdsObject> obj, JSObject *js);
+    zmm::Ref<Script> runScript;
 
 };
 

@@ -42,13 +42,13 @@ void web::edit_ui::process()
 
     check_request();
 
-    String objID = param("object_id");
+    String objID = param(_("object_id"));
     int objectID;
-    String driver = param("driver");
-    String sid = param("sid");
+    String driver = param(_("driver"));
+    String sid = param(_("sid"));
 
     if (objID == nil)
-        throw Exception(String("invalid object id"));
+        throw Exception(_("invalid object id"));
     else
         objectID = objID.toInt();
     
@@ -57,24 +57,24 @@ void web::edit_ui::process()
 
     Ref<CdsObject> current = storage->loadObject(objectID);
     Ref<Element> didl_object = UpnpXML_DIDLRenderObject(current, true);
-    didl_object->appendTextChild("location", current->getLocation());
+    didl_object->appendTextChild(_("location"), current->getLocation());
     int objectType = current->getObjectType();
     if (IS_CDS_ITEM_INTERNAL_URL(objectType) || IS_CDS_ITEM_EXTERNAL_URL(objectType))
-        didl_object->appendTextChild("object_type", "url");
+        didl_object->appendTextChild(_("object_type"), _("url"));
     else if (IS_CDS_ACTIVE_ITEM(objectType))
-        didl_object->appendTextChild("object_type", "act");
+        didl_object->appendTextChild(_("object_type"), _("act"));
    
-    Ref<Element> root (new Element("root"));
-    root->addAttribute("xmlns:dc", "http://purl.org/dc/elements/1.1/");
-    root->addAttribute("xmlns:upnp", "urn:schemas-upnp-org:metadata-1-0/upnp/");
+    Ref<Element> root (new Element(_("root")));
+    root->addAttribute(_("xmlns:dc"), _("http://purl.org/dc/elements/1.1/"));
+    root->addAttribute(_("xmlns:upnp"), _("urn:schemas-upnp-org:metadata-1-0/upnp/"));
 
     root->appendChild(didl_object);
-    root->appendTextChild("driver", driver);
-    root->appendTextChild("sid", sid);
-    root->appendTextChild("object_id", String::from(objectID));
+    root->appendTextChild(_("driver"), driver);
+    root->appendTextChild(_("sid"), sid);
+    root->appendTextChild(_("object_id"), String::from(objectID));
 
 
-    *out << renderXMLHeader("/edit.xsl");
+    *out << renderXMLHeader(_("/edit.xsl"));
     *out << root->print();
 }
 

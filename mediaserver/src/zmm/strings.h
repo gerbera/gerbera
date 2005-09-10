@@ -28,26 +28,29 @@
 #include "object.h"
 #include "ref.h"
 
+#define _(str) zmm::String::refer(str)
 
 #define MAX_INT_STRING_LENGTH 12
+#define MAX_LONG_STRING_LENGTH 22 // max ulong: 12345678901234567890
 #define MAX_DOUBLE_STRING_LENGTH 24
 
 namespace zmm
 {
-
-
+        
 class StringBase : public Object
 {
 public:
 	char *data;
 	int len;
+    bool store; // if true, the object is responsible for freeing data
+
 	StringBase(int capacity);
 	StringBase(const char *str);
 	StringBase(const char *str, int len);
 	bool startsWith(StringBase *other);
 	virtual ~StringBase();
 protected:
-    StringBase();
+    inline StringBase() : Object() {}
 	friend class String;
 };
 
@@ -61,7 +64,7 @@ protected:
 	StringBase *base;
 public:
 	String();
-	String(const char *str);
+	explicit String(const char *str);
 	String(const char *str, int len);
 	String(const String &other);
 	String(StringBase *other);
@@ -90,18 +93,18 @@ public:
 	}
 
 	String operator+(String other);
-	String operator+(char *str);
+	String operator+(const char *str);
 	String operator+(char chr);
 	String operator+(int x);
 	String operator+(double x);
 
 	int operator==(String other);
-	int operator==(char *str);
+	int operator==(const char *str);
 	inline int operator!=(String other)
 	{
 		return ! operator==(other);
 	}
-	inline int operator!=(char *str)
+	inline int operator!=(const char *str)
 	{
 		return ! operator==(str);
 	}
@@ -128,7 +131,8 @@ public:
     int index(char ch);
     int rindex(char ch);
 
-	int toInt();
+    long toLong();
+    inline int toInt() { return (int)toLong(); }
 	double toDouble();
 
 	int length();
@@ -148,16 +152,18 @@ public:
     }
     
     static String from(int x);
+    static String from(long x);
     static String from(double x);
     
     static String allocate(int size);
-    static String take(char *data, int length);
-    static String take(char *data);
+    static String take(const char *data, int length);
+    static String take(const char *data);
+    static String refer(const char *str);
+    static String refer(const char *str, int len);
 protected:
 	String(int capacity);
 	friend class StringBuffer;
 };
-
 
 }; // namespace
 

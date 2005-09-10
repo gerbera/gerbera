@@ -24,8 +24,12 @@ libmediatomb_a_SOURCES = \
 ../src/file_io_handler.h \
 ../src/file_request_handler.cc \
 ../src/file_request_handler.h \
-../src/hash/dbb_hash.h \
 ../src/hash/db_hash.h \
+../src/hash/dbb_hash.h \
+../src/hash/dbo_hash.h \
+../src/hash/dsb_hash.h \
+../src/hash/dso_hash.h \
+../src/hash/direct_hash_base.h \
 ../src/hash.h \
 ../src/io_handler.cc \
 ../src/io_handler.h \
@@ -34,6 +38,8 @@ libmediatomb_a_SOURCES = \
 ../src/logger.h \
 ../src/md5/md5.c \
 ../src/md5/md5.h \
+../src/memory.cc \
+../src/memory.h \
 ../src/mem_io_handler.cc \
 ../src/mem_io_handler.h \
 ../src/metadata/exiv2_handler.cc \
@@ -92,6 +98,8 @@ libmediatomb_a_SOURCES = \
 ../src/storage/sql_storage.h \
 ../src/string_converter.cc \
 ../src/string_converter.h \
+../src/sync.cc \
+../src/sync.h \
 ../src/subscription_request.cc \
 ../src/subscription_request.h \
 ../src/tools.cc \
@@ -125,11 +133,14 @@ libmediatomb_a_SOURCES = \
 ../src/web_callbacks.h \
 ../src/web/acct.cc \
 ../src/web/add.cc \
+../src/web/auth.cc \
 ../src/web/browse.cc \
 ../src/web/containers.cc \
+../src/web/directories.cc \
 ../src/web/edit_save.cc \
 ../src/web/edit_ui.cc \
 ../src/web/error.cc \
+../src/web/files.cc \
 ../src/web/head.cc \
 ../src/web/index.cc \
 ../src/web/items.cc \
@@ -139,6 +150,7 @@ libmediatomb_a_SOURCES = \
 ../src/web/pages.h \
 ../src/web/refresh.cc \
 ../src/web/remove.cc \
+../src/web/task.cc \
 ../src/web/tree.cc \
 ../src/web_request_handler.cc \
 ../src/web_request_handler.h \
@@ -161,5 +173,4 @@ libmediatomb_a_SOURCES = \
 ../src/zmm/stringbuffer.h \
 ../src/zmm/strings.cc \
 ../src/zmm/strings.h \
-../src/zmm/zmm.h \
-dummy.h
+../src/zmm/zmm.h

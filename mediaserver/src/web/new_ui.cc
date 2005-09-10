@@ -37,12 +37,12 @@ web::new_ui::new_ui() : WebRequestHandler()
 
 static Ref<Element> addOption(String option_name, String option_type, String default_value = nil)
 {
-    Ref<Element> option (new Element("option"));
-    option->addAttribute("name", option_name);
-    option->addAttribute("type", option_type);
+    Ref<Element> option (new Element(_("option")));
+    option->addAttribute(_("name"), option_name);
+    option->addAttribute(_("type"), option_type);
 
     if (default_value != nil)
-        option->addAttribute("default", default_value);
+        option->addAttribute(_("default"), default_value);
 
     return option;
 }
@@ -53,7 +53,7 @@ void web::new_ui::addContainer()
 
     Ref<CdsContainer> cont (new CdsContainer());
 
-    String objID = param("object_id");
+    String objID = param(_("object_id"));
     int objectID;
     if (objID == nil)
         objectID = 0;
@@ -61,15 +61,15 @@ void web::new_ui::addContainer()
         objectID = objID.toInt();
     cont->setParentID(objectID);
 
-    cont->setTitle(param("title"));
+    cont->setTitle(param(_("title")));
 
-    tmp = param("location");
+    tmp = param(_("location"));
     if (tmp != nil)
         cont->setLocation(tmp);
     else
-        cont->setLocation("");
+        cont->setLocation(_(""));
 
-    tmp = param("class");
+    tmp = param(_("class"));
     if (string_ok(tmp))
         cont->setClass(tmp);
 
@@ -85,7 +85,7 @@ void web::new_ui::addItem()
     String tmp;
     Ref<CdsItem> item (new CdsItem());
 
-    String objID = param("object_id");
+    String objID = param(_("object_id"));
     int objectID;
     if (objID == nil)
         objectID = 0;
@@ -93,22 +93,22 @@ void web::new_ui::addItem()
         objectID = objID.toInt();
     item->setParentID(objectID);
 
-    item->setTitle(param("title"));
-    item->setLocation(param("location"));
+    item->setTitle(param(_("title")));
+    item->setLocation(param(_("location")));
 
-    tmp = param("class");
+    tmp = param(_("class"));
     if (string_ok(tmp))
         item->setClass(tmp);
 
-    tmp = param("description");
+    tmp = param(_("description"));
     if (string_ok(tmp))
         item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), tmp);
 
     /// \todo is there a default setting? autoscan? import settings?
-    tmp = param("mime-type");
+    tmp = param(_("mime-type"));
     if (!string_ok(tmp))
     {  
-        tmp = MIMETYPE_DEFAULT;
+        tmp = _(MIMETYPE_DEFAULT);
     }
 
     item->setMimeType(tmp);
@@ -133,7 +133,7 @@ void web::new_ui::addUrl()
 
     Ref<CdsItemExternalURL> item (new CdsItemExternalURL());
 
-    String objID = param("object_id");
+    String objID = param(_("object_id"));
     int objectID;
     if (objID == nil)
         objectID = 0;
@@ -141,27 +141,27 @@ void web::new_ui::addUrl()
         objectID = objID.toInt();
     item->setParentID(objectID);
 
-    item->setTitle(param("title"));
-    item->setURL(param("location"));
+    item->setTitle(param(_("title")));
+    item->setURL(param(_("location")));
 
-    tmp = param("class");
+    tmp = param(_("class"));
     if (string_ok(tmp))
         item->setClass(tmp);
 
-    tmp = param("description");
+    tmp = param(_("description"));
     if (string_ok(tmp))
         item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), tmp);
 
     /// \todo is there a default setting? autoscan? import settings?
-    tmp = param("mime-type");
+    tmp = param(_("mime-type"));
     if (!string_ok(tmp))
     {  
-        tmp = MIMETYPE_DEFAULT;
+        tmp = _(MIMETYPE_DEFAULT);
     }
 
-    protocol = param("protocol");
+    protocol = param(_("protocol"));
     if (!string_ok(protocol))
-        protocol = PROTOCOL;
+        protocol = _(PROTOCOL);
     
     item->setMimeType(tmp);
 
@@ -184,7 +184,7 @@ void web::new_ui::addInternalUrl()
     String protocol;
     Ref<CdsItemInternalURL> item (new CdsItemInternalURL());
 
-    String objID = param("object_id");
+    String objID = param(_("object_id"));
     int objectID;
     if (objID == nil)
         objectID = 0;
@@ -192,27 +192,27 @@ void web::new_ui::addInternalUrl()
         objectID = objID.toInt();
     item->setParentID(objectID);
     
-    item->setTitle(param("title"));
-    item->setURL(param("location"));
+    item->setTitle(param(_("title")));
+    item->setURL(param(_("location")));
 
-    tmp = param("class");
+    tmp = param(_("class"));
     if (string_ok(tmp))
         item->setClass(tmp);
 
-    tmp = param("description");
+    tmp = param(_("description"));
     if (string_ok(tmp))
         item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), tmp);
 
     /// \todo is there a default setting? autoscan? import settings?
-    tmp = param("mime-type");
+    tmp = param(_("mime-type"));
     if (!string_ok(tmp))
     {  
-        tmp = MIMETYPE_DEFAULT;
+        tmp = _(MIMETYPE_DEFAULT);
     }
 
-    protocol = param("protocol");
+    protocol = param(_("protocol"));
     if (!string_ok(protocol))
-        protocol = PROTOCOL;
+        protocol = _(PROTOCOL);
 
     item->setMimeType(tmp);
 
@@ -234,7 +234,7 @@ void web::new_ui::addActiveItem()
     String tmp;
     Ref<CdsActiveItem> item (new CdsActiveItem());
 
-    String objID = param("object_id");
+    String objID = param(_("object_id"));
     int objectID;
     if (objID == nil)
         objectID = 0;
@@ -242,22 +242,22 @@ void web::new_ui::addActiveItem()
         objectID = objID.toInt();
     item->setParentID(objectID);
     
-    item->setTitle(param("title"));
-    item->setLocation(param("location"));
-    item->setAction(param("action"));
+    item->setTitle(param(_("title")));
+    item->setLocation(param(_("locatin")));
+    item->setAction(param(_("action")));
 
-    tmp = param("class");
+    tmp = param(_("class"));
     if (string_ok(tmp))
         item->setClass(tmp);
 
-    tmp = param("description");
+    tmp = param(_("description"));
     if (string_ok(tmp))
         item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), tmp);
 
-    tmp = param("mime-type");
+    tmp = param(_("mime-type"));
     if (!string_ok(tmp))
     {  
-        tmp = MIMETYPE_DEFAULT;
+        tmp = _(MIMETYPE_DEFAULT);
     }
 
     item->setMimeType(tmp);
@@ -269,7 +269,7 @@ void web::new_ui::addActiveItem()
 
     /// \todo is there a default setting? autoscan? import settings?
 
-    tmp = param("state");
+    tmp = param(_("state"));
     if (string_ok(tmp))
         item->setState(tmp);
     
@@ -282,11 +282,11 @@ void web::new_ui::addActiveItem()
 
 void web::new_ui::addObject()
 {
-    String obj_type = param("type");
-    String location = param("location");
+    String obj_type = param(_("type"));
+    String location = param(_("location"));
     
-    if (!string_ok(param("title")))
-        throw Exception(String("empty title"));
+    if (!string_ok(param(_("title"))))
+        throw Exception(_("empty title"));
 
     switch (obj_type.toInt())
     {
@@ -294,7 +294,7 @@ void web::new_ui::addObject()
             if ((location != nil) && (location != ""))
             {
                 if (!check_path(location, true))
-                    throw Exception(String("path not found"));
+                    throw Exception(_("path not found"));
             }
 
             this->addContainer();
@@ -302,36 +302,36 @@ void web::new_ui::addObject()
 
         case OBJECT_TYPE_ITEM_INTERNAL_URL:
             if (!string_ok(location))
-                throw Exception(String("No URL given"));
+                throw Exception(_("No URL given"));
             this->addInternalUrl();
             break;
 
         case OBJECT_TYPE_ITEM_EXTERNAL_URL:
             if (!string_ok(location))
-                throw Exception(String("No URL given"));
+                throw Exception(_("No URL given"));
             this->addUrl();
             break;
 
         case OBJECT_TYPE_ACTIVE_ITEM:
             if (!string_ok(location))
-                throw Exception(String("no location given"));
+                throw Exception(_("no location given"));
 
             if (!check_path(location, false))
-                throw Exception(String("path not found"));
+                throw Exception(_("path not found"));
             this->addActiveItem();
             break;
 
         case OBJECT_TYPE_ITEM:
             if (!string_ok(location))
-                throw Exception(String("no location given"));
+                throw Exception(_("no location given"));
 
             if (!check_path(location, false))
-                throw Exception(String("file not found"));
+                throw Exception(_("file not found"));
             this->addItem();
             break;
 
         default:
-            throw Exception(String("unknown object type"));
+            throw Exception(_("unknown object type"));
             break;
     }
 }
@@ -342,6 +342,8 @@ void web::new_ui::addObject()
 // when given, we will serve a special inteface to match the object type
 void web::new_ui::process()
 {
+    check_request();
+
     log_info(("edit: start\n"));
 
     Ref<Session> session;
@@ -353,15 +355,13 @@ void web::new_ui::process()
     String TYPE_ITEM_EXTERNAL_URL = String::from(OBJECT_TYPE_ITEM_EXTERNAL_URL);
     String TYPE_ITEM_INTERNAL_URL = String::from(OBJECT_TYPE_ITEM_INTERNAL_URL);
 
-    check_request();
-
-    String object_id = param("object_id");
-    String driver = param("driver");
-    String sid = param("sid");
-    String object_type = param("type");
+    String object_id = param(_("object_id"));
+    String driver = param(_("driver"));
+    String sid = param(_("sid"));
+    String object_type = param(_("type"));
 
     if (!string_ok(object_id))
-        throw Exception(String("invalid object id"));
+        throw Exception(_("invalid object id"));
 
     if (driver == "1")
     {
@@ -369,83 +369,83 @@ void web::new_ui::process()
     }
     else 
     {
-        throw Exception(String("adding objects to secondary driver not supported"));
+        throw Exception(_("adding objects to secondary driver not supported"));
     }
 
-    Ref<Element> root (new Element("root"));
-    root->addAttribute("xmlns:dc", "http://purl.org/dc/elements/1.1/");
-    root->addAttribute("xmlns:upnp", "urn:schemas-upnp-org:metadata-1-0/upnp/");
+    Ref<Element> root (new Element(_("root")));
+    root->addAttribute(_("xmlns:dc"), _("http://purl.org/dc/elements/1.1/"));
+    root->addAttribute(_("xmlns:upnp"), _("urn:schemas-upnp-org:metadata-1-0/upnp/"));
 
-    String reload = param("reload");
+    String reload = param(_("reload"));
 
     if (reload == "0")
     {
         this->addObject();
 
         Ref<Dictionary> sub(new Dictionary());
-        sub->put("object_id", object_id);     
-        sub->put("driver", driver);
-        sub->put("sid", sid);
-        *out << subrequest("browse", sub);
+        sub->put(_("object_id"), object_id);     
+        sub->put(_("driver"), driver);
+        sub->put(_("sid"), sid);
+        *out << subrequest(_("browse"), sub);
 
     }
     else
     {
         //    Ref <Element> last_browse  (new Element("last_browse"));
-        root->appendTextChild("driver", driver);
-        root->appendTextChild("sid", sid);
-        root->appendTextChild("object_id", object_id);
+        root->appendTextChild(_("driver"), driver);
+        root->appendTextChild(_("sid"), sid);
+        root->appendTextChild(_("object_id"), object_id);
 
         //    root->appendChild(last_browse);
 
-        Ref <Element> select (new Element("select"));
+        Ref <Element> select (new Element(_("select")));
         root->appendChild(select);
 
-        Ref <Element> inputs (new Element("inputs"));
+        Ref <Element> inputs (new Element(_("inputs")));
         root->appendChild(inputs);
 
-        select->appendChild(addOption("Container", TYPE_CONTAINER));
-        select->appendChild(addOption("Item", TYPE_ITEM));
-        select->appendChild(addOption("Active Item", TYPE_ACTIVE_ITEM));
-        select->appendChild(addOption("External Link (URL)", TYPE_ITEM_EXTERNAL_URL));
-        select->appendChild(addOption("Internal Link (Local URL)", TYPE_ITEM_INTERNAL_URL));
+        select->appendChild(addOption(_("Container"), TYPE_CONTAINER));
+        select->appendChild(addOption(_("Item"), TYPE_ITEM));
+        select->appendChild(addOption(_("Active Item"), TYPE_ACTIVE_ITEM));
+        select->appendChild(addOption(_("External Link (URL)"), TYPE_ITEM_EXTERNAL_URL));
+        select->appendChild(addOption(_("Internal Link (Local URL)"), TYPE_ITEM_INTERNAL_URL));
 
-        inputs->appendChild(addOption("Title: ", "title"));
+        inputs->appendChild(addOption(_("Title: "), _("title")));
 
         if ((object_type == TYPE_ITEM) || (object_type == TYPE_ITEM_EXTERNAL_URL) || (object_type == TYPE_ITEM_INTERNAL_URL))
         {
-            select->addAttribute("default", object_type);
+            select->addAttribute(_("default"), object_type);
             if (object_type == TYPE_ITEM)
             {
-                inputs->appendChild(addOption("Location: ", "location"));
+                inputs->appendChild(addOption(_("Location: "), _("location")));
             }
             else
             {
-                inputs->appendChild(addOption("URL: ", "location"));
-                inputs->appendChild(addOption("Protocol: ", "protocol", PROTOCOL));
+                inputs->appendChild(addOption(_("URL: "), _("location")));
+                inputs->appendChild(addOption(_("Protocol: "), _("protocol"), _(PROTOCOL)));
             }
-            inputs->appendChild(addOption("Class: ", "class", "object.item"));
-            inputs->appendChild(addOption("Description: ", "description"));
-            inputs->appendChild(addOption("Mimetype: ", "mime-type"));
+            inputs->appendChild(addOption(_("Class: "), _("class"), _("object.item")));
+            inputs->appendChild(addOption(_("Description: "), _("description")));
+            inputs->appendChild(addOption(_("Mimetype: "), _("mime-type")));
         }
         else if (object_type == TYPE_ACTIVE_ITEM)
         {
-            select->addAttribute("default", TYPE_ACTIVE_ITEM);
-            inputs->appendChild(addOption("Location: ", "location"));
-            inputs->appendChild(addOption("Class: ", "class", "object.item.activeItem"));
-            inputs->appendChild(addOption("Description: ", "description"));
-            inputs->appendChild(addOption("Mimetype: ", "mime-type"));
-            inputs->appendChild(addOption("Action Script: ", "action"));
-            inputs->appendChild(addOption("State: ", "state"));
+            select->addAttribute(_("default"), TYPE_ACTIVE_ITEM);
+            inputs->appendChild(addOption(_("Location: "), _("location")));
+            inputs->appendChild(addOption(_("Class: "), _("class"), _("object.item.activeItem")));
+            inputs->appendChild(addOption(_("Description: "), _("description")));
+            inputs->appendChild(addOption(_("Mimetype: "), _("mime-type")));
+            inputs->appendChild(addOption(_("Action Script: "), _("action")));
+            inputs->appendChild(addOption(_("State: "), _("state")));
 
         }
         else
         {
-            select->addAttribute("default", TYPE_CONTAINER);
-            inputs->appendChild(addOption("Class: ", "class", "object.container"));
+            select->addAttribute(_("default"), TYPE_CONTAINER);
+            inputs->appendChild(addOption(_("Class: "), _("class"), _("object.container")));
         }
 
-        *out << renderXMLHeader("/new.xsl");
+        *out << renderXMLHeader(_("/new.xsl"));
         *out << root->print();
     }
     log_info(("edit: returning\n"));

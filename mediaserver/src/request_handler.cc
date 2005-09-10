@@ -29,7 +29,7 @@ void RequestHandler::split_url(const char *url, String &path, String &parameters
     if (i1 == NULL)
     {
         path = String((char *)url);
-        parameters = "";
+        parameters = _("");
     }
     else
     {

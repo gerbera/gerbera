@@ -205,6 +205,9 @@ public:
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     virtual void validate();
 
+    /// \brief Frees unnecessary memory
+    void optimize();
+
     static zmm::Ref<CdsObject> createObject(int objectType);
 
 	friend int CdsObjectTitleComparator(void *arg1, void *arg2);

@@ -80,8 +80,8 @@ bool CdsResource::equals(Ref<CdsResource> other)
 Ref<CdsResource> CdsResource::clone()
 {
     return Ref<CdsResource>(new CdsResource(handlerType,
-                                            attributes->clone(),
-                                            parameters->clone()));
+                                            attributes,
+                                            parameters));
 }
 
 String CdsResource::encode()
@@ -101,7 +101,7 @@ Ref<CdsResource> CdsResource::decode(String serial)
     Ref<Array<StringBase> > parts = split_string(serial, RESOURCE_PART_SEP);
     int size = parts->size();
     if (size != 2 && size != 3)
-        throw Exception("CdsResource::decode: Could not parse resources");
+        throw Exception(_("CdsResource::decode: Could not parse resources"));
 
     int handlerType = String(parts->get(0)).toInt();
 
@@ -116,5 +116,11 @@ Ref<CdsResource> CdsResource::decode(String serial)
     Ref<CdsResource> resource(new CdsResource(handlerType, attr, par));
     
     return resource;
+}
+
+void CdsResource::optimize()
+{
+    attributes->optimize();
+    parameters->optimize();
 }
 

@@ -22,9 +22,9 @@
 #define __SQLITE3_STORAGE_H__
 
 #include <sqlite3.h>
-#include <pthread.h>
 
 #include "storage/sql_storage.h"
+#include "sync.h"
 
 class Sqlite3Storage;
 class Sqlite3Result;
@@ -76,13 +76,14 @@ public:
     virtual int lastInsertID();
 
 protected:
-    pthread_mutex_t lock_mutex;
     sqlite3 *db;
 
+    zmm::Ref<Mutex> mutex;
+    
     void reportError(zmm::String query);
 
-    void lock();
-    void unlock();
+    inline void lock() { mutex->lock(); }
+    inline void unlock() { mutex->unlock(); }
 
     friend void unlock_func(void *data);
 };

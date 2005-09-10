@@ -20,8 +20,8 @@
 
 #include "array.h"
 
-#include <malloc.h>
 #include <string.h>
+#include "memory.h"
 
 using namespace zmm;
 
@@ -32,7 +32,7 @@ void ArrayBase::init(int capacity)
 {
 	this->capacity = capacity;
 	siz = 0;
-	arr = (Object **)malloc(capacity * sizeof(Object *));
+	arr = (Object **)MALLOC(capacity * sizeof(Object *));
 }
 ArrayBase::~ArrayBase()
 {
@@ -42,12 +42,7 @@ ArrayBase::~ArrayBase()
 		if(obj)
 			obj->release();
 	}
-
-    free(arr);
-}
-int ArrayBase::size()
-{
-	return siz;
+    FREE(arr);
 }
 
 void ArrayBase::append(Object *obj)
@@ -109,6 +104,12 @@ void ArrayBase::insert(int index, Object *obj)
     siz++;
 }
 
+void ArrayBase::optimize()
+{
+    capacity = siz;
+    arr = (Object **)REALLOC(arr, capacity * sizeof(Object *));
+}
+
 void ArrayBase::resize(int requiredSize)
 {
 	if(requiredSize > capacity)
@@ -117,7 +118,7 @@ void ArrayBase::resize(int requiredSize)
 		if(requiredSize > newCapacity)
 			newCapacity = requiredSize;
 		capacity = newCapacity;
-		arr = (Object **)realloc(arr, capacity * sizeof(Object *));
+		arr = (Object **)REALLOC(arr, capacity * sizeof(Object *));
 	}
 }
 

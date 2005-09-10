@@ -56,6 +56,8 @@ public:
     zmm::String encode();
     static zmm::Ref<CdsResource> decode(zmm::String serial);
 
+    /// \brief Frees unnecessary memory
+    void optimize();
 };
 
 #endif // __CDS_RESOURCE_H__

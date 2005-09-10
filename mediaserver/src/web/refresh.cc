@@ -42,25 +42,25 @@ void web::refresh::process()
 
     check_request();
     
-    String object_id = param("object_id");
-    String driver = param("driver");
-    String sid = param("sid");
+    String object_id = param(_("object_id"));
+    String driver = param(_("driver"));
+    String sid = param(_("sid"));
 
     storage = Storage::getInstance();
     sd = PRIMARY;
 
     // there must at least a path or an object_id given
     if ((object_id == nil) || (object_id == "")) 
-        throw Exception(String("invalid object id"));
+        throw Exception(_("invalid object id"));
 
     // Reinitialize scripting
 //    ContentManager::getInstance()->reloadScripting(); // DEBUG PURPOSES :>
 
     
     Ref<Dictionary> sub(new Dictionary());
-    sub->put("object_id", object_id);
-    sub->put("driver", driver);
-    sub->put("sid", sid); 
-    *out << subrequest("browse", sub);
+    sub->put(_("object_id"), object_id);
+    sub->put(_("driver"), driver);
+    sub->put(_("sid"), sid); 
+    *out << subrequest(_("browse"), sub);
 }
 

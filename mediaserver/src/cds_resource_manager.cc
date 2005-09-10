@@ -50,7 +50,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
     /// \todo resource options must be read from configuration files
 
     Ref<Dictionary> dict(new Dictionary());
-    dict->put(URL_OBJECT_ID, String::from(item->getID()));
+    dict->put(_(URL_OBJECT_ID), String::from(item->getID()));
 
     bool addResID = false;
     /// \todo move this down into the "for" loop and create different urls for each resource once the io handlers are ready

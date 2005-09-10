@@ -28,8 +28,9 @@
 class WebScript : public Script
 {
 public:
-	WebScript(zmm::Ref<Runtime> runtime, zmm::String srcPath);
+	WebScript(zmm::Ref<Runtime> runtime, zmm::String srcPath, JSObject *glob = NULL);
     zmm::String process(zmm::Ref<mxml::Element> root = nil);	
+    zmm::String processUnlocked(zmm::Ref<mxml::Element> root = nil);	
 
     zmm::Ref<zmm::StringBuffer> output;
     zmm::Ref<zmm::Array<zmm::StringBase> > fragments;
@@ -50,7 +51,6 @@ protected:
             
     long getMtime();
     void printFrag(zmm::String str);
-    
 };
 
 #endif // __SCRIPTING_WEB_SCRIPT_H__

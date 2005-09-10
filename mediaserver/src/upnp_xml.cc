@@ -30,22 +30,23 @@ using namespace mxml;
 
 Ref<Element> UpnpXML_CreateResponse(String actionName, String serviceType)
 {
-    Ref<Element> response(new Element(String("u:") + actionName + "Response"));
-    response->addAttribute("xmlns:u", serviceType);
+    Ref<Element> response(new Element(_("u:") + actionName +
+                                      "Response"));
+    response->addAttribute(_("xmlns:u"), serviceType);
 
     return response; 
 }
 
 Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions)
 {
-    Ref<Element> result(new Element(""));
+    Ref<Element> result(new Element(_("")));
        
-    result->addAttribute("id", String::from(obj->getID()));
-    result->addAttribute("parentID", String::from(obj->getParentID()));
-    result->addAttribute("restricted", obj->isRestricted() ? String("1") : String("0"));
+    result->addAttribute(_("id"), String::from(obj->getID()));
+    result->addAttribute(_("parentID"), String::from(obj->getParentID()));
+    result->addAttribute(_("restricted"), obj->isRestricted() ? _("1") : _("0"));
 
-    result->appendTextChild("dc:title", obj->getTitle());
-    result->appendTextChild("upnp:class", obj->getClass());
+    result->appendTextChild(_("dc:title"), obj->getTitle());
+    result->appendTextChild(_("upnp:class"), obj->getClass());
 
     int objectType = obj->getObjectType();
     if (IS_CDS_ITEM(objectType))
@@ -71,26 +72,26 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions)
 
         CdsResourceManager::getInstance()->addResources(item, result);
        
-        result->setName("item");
+        result->setName(_("item"));
     }
     else if (IS_CDS_CONTAINER(objectType))
     {
         Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
     
-        result->setName("container");
+        result->setName(_("container"));
         int childCount = cont->getChildCount();
         if (childCount >= 0)
-            result->addAttribute("childCount", String::from(childCount));
+            result->addAttribute(_("childCount"), String::from(childCount));
 
     }
 
     if (renderActions && IS_CDS_ACTIVE_ITEM(objectType))
     {
         Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
-        result->appendTextChild("action", aitem->getAction());
-        result->appendTextChild("state", aitem->getState());
-        result->appendTextChild("location", aitem->getLocation());
-        result->appendTextChild("mime-type", aitem->getMimeType());
+        result->appendTextChild(_("action"), aitem->getAction());
+        result->appendTextChild(_("state"), aitem->getState());
+        result->appendTextChild(_("location"), aitem->getLocation());
+        result->appendTextChild(_("mime-type"), aitem->getMimeType());
     }
    
 //    log_info(("renderen DIDL: \n%s\n", result->print().c_str()));
@@ -108,7 +109,7 @@ void UpnpXML_DIDLUpdateObject(Ref<CdsObject> obj, String text)
     {
         Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
 
-        String title = root->getChildText("dc:title");
+        String title = root->getChildText(_("dc:title"));
         if (title != nil && title != "")
             aitem->setTitle(title);
 
@@ -118,21 +119,21 @@ void UpnpXML_DIDLUpdateObject(Ref<CdsObject> obj, String text)
             description = "";
         aitem->setDescription(description);
 */
-        String location = root->getChildText("location");
+        String location = root->getChildText(_("location"));
         if (location != nil && location != "")
             aitem->setLocation(location);
     
-        String mimeType = root->getChildText("mime-type");
+        String mimeType = root->getChildText(_("mime-type"));
         if (mimeType != nil && mimeType != "")
             aitem->setMimeType(mimeType);
 
-        String action = root->getChildText("action");
+        String action = root->getChildText(_("action"));
         if (action != nil && action != "")
             aitem->setAction(action);
 
-        String state = root->getChildText("state");
+        String state = root->getChildText(_("state"));
         if (state == nil)
-            state = "";
+            state = _("");
         aitem->setState(state);
     }
         
@@ -140,10 +141,10 @@ void UpnpXML_DIDLUpdateObject(Ref<CdsObject> obj, String text)
 
 Ref<Element> UpnpXML_CreateEventPropertySet()
 {
-    Ref<Element> propset(new Element("e:propertyset"));
-    propset->addAttribute("xmlns:e", "urn:schemas-upnp-org:event-1-0");
+    Ref<Element> propset(new Element(_("e:propertyset")));
+    propset->addAttribute(_("xmlns:e"), _("urn:schemas-upnp-org:event-1-0"));
 
-    Ref<Element> property(new Element("e:property"));
+    Ref<Element> property(new Element(_("e:property")));
 
     propset->appendChild(property);
     return propset;
@@ -155,46 +156,46 @@ Ref<Element> UpnpXML_RenderDeviceDescription()
 //    log_info(("UpnpXML_RenderDeviceDescription(): start\n"));
     Ref<ConfigManager> config = ConfigManager::getInstance();
 
-    Ref<Element> root(new Element("root")); 
-    root->addAttribute("xmlns", DESC_DEVICE_NAMESPACE);
+    Ref<Element> root(new Element(_("root"))); 
+    root->addAttribute(_("xmlns"), _(DESC_DEVICE_NAMESPACE));
      
-    Ref<Element> specVersion(new Element("specVersion"));
-    specVersion->appendTextChild("major", DESC_SPEC_VERSION_MAJOR);
-    specVersion->appendTextChild("minor", DESC_SPEC_VERSION_MINOR);
+    Ref<Element> specVersion(new Element(_("specVersion")));
+    specVersion->appendTextChild(_("major"), _(DESC_SPEC_VERSION_MAJOR));
+    specVersion->appendTextChild(_("minor"), _(DESC_SPEC_VERSION_MINOR));
 
     root->appendChild(specVersion);
 
 //    root->appendTextChild("URLBase", "");
 
-    Ref<Element> device(new Element("device"));
-    device->appendTextChild("deviceType", DESC_DEVICE_TYPE);
-    device->appendTextChild("presentationURL", "/");
-    device->appendTextChild("friendlyName", config->getOption("/server/name"));
-    device->appendTextChild("manufacturer", DESC_MANUFACTURER);
-    device->appendTextChild("manufacturerURL", DESC_MANUFACTURER_URL);
-    device->appendTextChild("modelDescription", DESC_MODEL_DESCRIPTION);
-    device->appendTextChild("modelName", DESC_MODEL_NAME);
-    device->appendTextChild("modelNumber", DESC_MODEL_NUMBER);
-    device->appendTextChild("serialNumber", DESC_SERIAL_NUMBER);
-    device->appendTextChild("UDN", config->getOption("/server/udn"));
+    Ref<Element> device(new Element(_("device")));
+    device->appendTextChild(_("deviceType"), _(DESC_DEVICE_TYPE));
+    device->appendTextChild(_("presentationURL"), _("/"));
+    device->appendTextChild(_("friendlyName"), config->getOption(_("/server/name")));
+    device->appendTextChild(_("manufacturer"), _(DESC_MANUFACTURER));
+    device->appendTextChild(_("manufacturerURL"), _(DESC_MANUFACTURER_URL));
+    device->appendTextChild(_("modelDescription"), _(DESC_MODEL_DESCRIPTION));
+    device->appendTextChild(_("modelName"), _(DESC_MODEL_NAME));
+    device->appendTextChild(_("modelNumber"), _(DESC_MODEL_NUMBER));
+    device->appendTextChild(_("serialNumber"), _(DESC_SERIAL_NUMBER));
+    device->appendTextChild(_("UDN"), config->getOption(_("/server/udn")));
 
-    Ref<Element> serviceList(new Element("serviceList"));
+    Ref<Element> serviceList(new Element(_("serviceList")));
 
-    Ref<Element> serviceCM(new Element("service"));
-    serviceCM->appendTextChild("serviceType", DESC_CM_SERVICE_TYPE);
-    serviceCM->appendTextChild("serviceId", DESC_CM_SERVICE_ID);
-    serviceCM->appendTextChild("SCPDURL", DESC_CM_SCPD_URL);
-    serviceCM->appendTextChild("controlURL", DESC_CM_CONTROL_URL);
-    serviceCM->appendTextChild("eventSubURL", DESC_CM_EVENT_URL);
+    Ref<Element> serviceCM(new Element(_("service")));
+    serviceCM->appendTextChild(_("serviceType"), _(DESC_CM_SERVICE_TYPE));
+    serviceCM->appendTextChild(_("serviceId"), _(DESC_CM_SERVICE_ID));
+    serviceCM->appendTextChild(_("SCPDURL"), _(DESC_CM_SCPD_URL));
+    serviceCM->appendTextChild(_("controlURL"), _(DESC_CM_CONTROL_URL));
+    serviceCM->appendTextChild(_("eventSubURL"), _(DESC_CM_EVENT_URL));
 
     serviceList->appendChild(serviceCM);
 
-    Ref<Element> serviceCDS(new Element("service"));
-    serviceCDS->appendTextChild("serviceType", DESC_CDS_SERVICE_TYPE);
-    serviceCDS->appendTextChild("serviceId", DESC_CDS_SERVICE_ID);
-    serviceCDS->appendTextChild("SCPDURL", DESC_CDS_SCPD_URL);
-    serviceCDS->appendTextChild("controlURL", DESC_CDS_CONTROL_URL);
-    serviceCDS->appendTextChild("eventSubURL", DESC_CDS_EVENT_URL);
+    Ref<Element> serviceCDS(new Element(_("service")));
+    serviceCDS->appendTextChild(_("serviceType"), _(DESC_CDS_SERVICE_TYPE));
+    serviceCDS->appendTextChild(_("serviceId"), _(DESC_CDS_SERVICE_ID));
+    serviceCDS->appendTextChild(_("SCPDURL"), _(DESC_CDS_SCPD_URL));
+    serviceCDS->appendTextChild(_("controlURL"), _(DESC_CDS_CONTROL_URL));
+    serviceCDS->appendTextChild(_("eventSubURL"), _(DESC_CDS_EVENT_URL));
 
     serviceList->appendChild(serviceCDS);
     
@@ -208,7 +209,7 @@ Ref<Element> UpnpXML_RenderDeviceDescription()
 
 Ref<Element> UpnpXML_DIDLRenderResource(String URL, Ref<Dictionary> attributes)
 {
-    Ref<Element> res(new Element("res"));
+    Ref<Element> res(new Element(_("res")));
 
     res->setText(URL);
 

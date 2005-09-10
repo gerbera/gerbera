@@ -26,11 +26,16 @@ using namespace mxml;
 
 web::tree::tree() : WebRequestHandler()
 {
-    pagename = "tree";
+    pagename = _("tree");
 }
 
 void web::tree::process()
 {
     check_request();
+
+    String type = param(_("type"));
+    if (type == nil)
+        type = _("database");
+    root->addAttribute(_("type"), type);
 }
 

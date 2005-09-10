@@ -30,49 +30,36 @@ using namespace mxml;
 MysqlStorage::MysqlStorage() : SQLStorage()
 {
     db = NULL;
-    
-    pthread_mutex_init(&lock_mutex, NULL);    
-    /*
-    int res;
-    pthread_mutexattr_t mutex_attr;
-    res = pthread_mutexattr_init(&mutex_attr);
-    res = pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_RECURSIVE_NP);
-    pthread_mutex_init(&lock_mutex, &mutex_attr);
-    pthread_mutexattr_destroy(&mutex_attr);
-    
-    Recursive mutex is apparently not needed anymore
-    */
-    
+    mutex = Ref<Mutex>(new Mutex());
 }
 MysqlStorage::~MysqlStorage()
 {
     if (db)
     {
         mysql_close(db);
-        free(db);
+        FREE(db);
     }
-    pthread_mutex_destroy(&lock_mutex);
 }
 
 void MysqlStorage::init()
 {
     Ref<ConfigManager> config = ConfigManager::getInstance();
 
-    String dbHost = config->getOption("/server/storage/host");
-    String dbName = config->getOption("/server/storage/database");
-    String dbUser = config->getOption("/server/storage/username");
-    String dbPass = config->getOption("/server/storage/password", "");
+    String dbHost = config->getOption(_("/server/storage/host"));
+    String dbName = config->getOption(_("/server/storage/database"));
+    String dbUser = config->getOption(_("/server/storage/username"));
+    String dbPass = config->getOption(_("/server/storage/password"), _(""));
 
-    db = (MYSQL *)malloc(sizeof(MYSQL));    
+    db = (MYSQL *)MALLOC(sizeof(MYSQL));    
     
     MYSQL *res_mysql;
 
     res_mysql = mysql_init(db);
     if(! res_mysql)
     {
-        free(db);
+        FREE(db);
         db = NULL;
-        throw StorageException("MysqlStorage.init: mysql_init() failed");
+        throw StorageException(_("MysqlStorage.init: mysql_init() failed"));
     }
 
     res_mysql = mysql_real_connect(db,
@@ -88,27 +75,28 @@ void MysqlStorage::init()
     {
         reportError(nil);
         mysql_close(db);
-        free(db);
+        FREE(db);
         db = NULL;
-        throw StorageException("MysqlStorage.init: mysql_real_connect() failed");
+        throw StorageException(_("MysqlStorage.init: mysql_real_connect() failed"));
     }
+    SQLStorage::init();
 }
 
 String MysqlStorage::quote(String value)
 {
-    char *q = (char *)malloc(value.length() * 2);
+    char *q = (char *)MALLOC(value.length() * 2);
     *q = '\'';
     int size = mysql_real_escape_string(db, q + 1, value.c_str(), value.length());
     q[size + 1] = '\'';
     String ret(q, size + 2);
-    free(q);
+    FREE(q);
     return ret;
 }
 
 void MysqlStorage::reportError(String query)
 {
     if (query == nil)
-        query = "unknown";
+        query = _("unknown");
     fprintf(stderr, "Mysql: (%d) %s\nQuery:%s\n",
         mysql_errno(db),
         mysql_error(db),
@@ -118,6 +106,7 @@ void MysqlStorage::reportError(String query)
 
 Ref<SQLResult> MysqlStorage::select(String query)
 { 
+    log_debug(("MYSQL SELECT QUERY\n"));
     lock();
     
     int res;
@@ -126,7 +115,7 @@ Ref<SQLResult> MysqlStorage::select(String query)
     {
         unlock();
         reportError(query);
-        throw StorageException("Mysql: mysql_real_query() failed");
+        throw StorageException(_("Mysql: mysql_real_query() failed"));
     }
 
     MYSQL_RES *mysql_res;
@@ -135,7 +124,7 @@ Ref<SQLResult> MysqlStorage::select(String query)
     {
         unlock();
         reportError(query);
-        throw StorageException("Mysql: mysql_store_result() failed");
+        throw StorageException(_("Mysql: mysql_store_result() failed"));
     }
     Ref<SQLResult> ret(new MysqlResult(mysql_res));    
 
@@ -146,6 +135,7 @@ Ref<SQLResult> MysqlStorage::select(String query)
 
 void MysqlStorage::exec(String query)
 {
+    log_debug(("MYSQL EXEC QUERY : %s\n", query.c_str()));
     lock();
     
     int res;
@@ -154,10 +144,9 @@ void MysqlStorage::exec(String query)
     {
         reportError(query);
         unlock();
-        throw StorageException("Mysql: query error");
+        throw StorageException(_("Mysql: query error"));
     }
     unlock();
-    return true;
 }
 
 int MysqlStorage::lastInsertID()
@@ -165,18 +154,7 @@ int MysqlStorage::lastInsertID()
     return mysql_insert_id(db);    
 }
 
-void MysqlStorage::lock()
-{
-    pthread_mutex_lock(&lock_mutex);
-}
-void MysqlStorage::unlock()
-{
-    pthread_mutex_unlock(&lock_mutex);
-}
-
 /* MysqlResult */
-
-
 MysqlResult::MysqlResult(MYSQL_RES *mysql_res) : SQLResult()
 {
     this->mysql_res = mysql_res;
@@ -189,7 +167,7 @@ MysqlResult::~MysqlResult()
         if (! nullRead)
         {
             MYSQL_ROW mysql_row;
-            while ((mysql_row = mysql_fetch_row(mysql_res)) != NULL); // read out data
+            while((mysql_row = mysql_fetch_row(mysql_res)) != NULL); // read out data
         }
         mysql_free_result(mysql_res);
         mysql_res = NULL;        

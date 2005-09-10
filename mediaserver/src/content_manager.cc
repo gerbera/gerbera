@@ -82,31 +82,31 @@ ContentManager::ContentManager() : Object()
     Ref<Element> mapEl;  
     
     // loading extension - mimetype map  
-    mapEl = cm->getElement("/import/mappings/extension-mimetype");
+    mapEl = cm->getElement(_("/import/mappings/extension-mimetype"));
     if (mapEl == nil)
     {
         log_info(("extension-mimetype mappings not found\n"));
     }
     else
     {
-        extension_mimetype_map = cm->createDictionaryFromNodeset(mapEl, "map", "from", "to");
+        extension_mimetype_map = cm->createDictionaryFromNodeset(mapEl, _("map"), _("from"), _("to"));
     }
 
     String optIgnoreUnknown = cm->getOption(
-        "/import/mappings/extension-mimetype/attribute::ignore-unknown");
+        _("/import/mappings/extension-mimetype/attribute::ignore-unknown"));
     if (optIgnoreUnknown != nil && optIgnoreUnknown == "yes")
         ignore_unknown_extensions = 1;
 
     
     // loading mimetype - upnpclass map
-    mapEl = cm->getElement("/import/mappings/mimetype-upnpclass");
+    mapEl = cm->getElement(_("/import/mappings/mimetype-upnpclass"));
     if (mapEl == nil)
     {
         log_info(("mimetype-upnpclass mappings not found\n"));
     }
     else
     {
-        mimetype_upnpclass_map = cm->createDictionaryFromNodeset(mapEl, "map", "from", "to");
+        mimetype_upnpclass_map = cm->createDictionaryFromNodeset(mapEl, _("map"), _("from"), _("to"));
     }    
     
     /* init fielmagic */
@@ -119,7 +119,7 @@ ContentManager::ContentManager() : Object()
 	    log_info(("magic_open failed\n"));
             return;
         }
-        String magicFile = cm->getOption("/import/magic-file");
+        String magicFile = cm->getOption(_("/import/magic-file"));
         if (! string_ok(magicFile))
             magicFile = nil;
         if (magic_load(ms, (magicFile == nil) ? NULL : magicFile.c_str()) == -1)
@@ -147,7 +147,7 @@ void ContentManager::init()
     int ret;
 
     reMimetype = Ref<RExp>(new RExp());
-    reMimetype->compile(MIMETYPE_REGEXP);
+    reMimetype->compile(_(MIMETYPE_REGEXP));
     
     ret = pthread_mutex_init(&taskMutex, NULL);
     ret = pthread_cond_init(&taskCond, NULL);
@@ -207,7 +207,7 @@ void ContentManager::_loadAccounting()
     Ref<Storage> storage = Storage::getInstance();
     acct->totalFiles = storage->getTotalFiles();
 }
-void ContentManager::_addFile(String path, int recursive)
+void ContentManager::_addFile(String path, bool recursive)
 {
 #ifdef HAVE_JS
     initScripting();
@@ -216,7 +216,7 @@ void ContentManager::_addFile(String path, int recursive)
     // _addFile2(path, recursive);
     // return;
 
-    if (path.length() > 1 && path.charAt(path.length() - 1) == '/')
+    if (path.charAt(path.length() - 1) == '/')
     {
         path = path.substring(0, path.length() - 1);
     }
@@ -225,7 +225,7 @@ void ContentManager::_addFile(String path, int recursive)
     Ref<Array<StringBase> > parts = split_string(path, '/');
     int curParentID = 1;
     /// \todo make PC-Directory id configurable
-    String curPath = "";
+    String curPath = _("");
     Ref<CdsObject> obj = storage->loadObject(curParentID); // root container
 
     Ref<UpdateManager> um = UpdateManager::getInstance();
@@ -240,7 +240,11 @@ void ContentManager::_addFile(String path, int recursive)
 
         if (obj == nil) // create object
         {
+            long millisStart = getMillis();
             obj = createObjectFromFile(curPath);
+            long elapsed = getMillis() - millisStart;
+            log_debug(("FILE PARSED: %ld\n", elapsed));
+            
             if (obj == nil) // object ignored
             {
                 log_info(("file ignored: %s\n", curPath.c_str()));
@@ -269,9 +273,9 @@ void ContentManager::_removeObject(int objectID)
 {
     /// \todo when removing... what about container updates when removing recursively?
     if (objectID == 0)
-        throw Exception("cannot remove root container");
+        throw Exception(_("cannot remove root container"));
     if (objectID == 1)
-        throw Exception("cannot remove PC-Directory container");
+        throw Exception(_("cannot remove PC-Directory container"));
     /// \todo make PC-Directory ID configurable
     Ref<Storage> storage = Storage::getInstance();
     Ref<CdsObject> obj = storage->loadObject(objectID);
@@ -297,7 +301,7 @@ void ContentManager::addRecursive(String path, int parentID)
     DIR *dir = opendir(path.c_str());
     if (! dir)
     {
-        throw Exception(String("could not list directory ")+
+        throw Exception(_("could not list directory ")+
                         path + " : " + strerror(errno));
     }
     struct dirent *dent;
@@ -318,10 +322,15 @@ void ContentManager::addRecursive(String path, int parentID)
         String newPath = path + "/" + name;
         try
         {
-            Ref<CdsObject> obj = storage->findObjectByTitle(f2i->convert(name), parentID);
+            Ref<CdsObject> obj = storage->findObjectByTitle(f2i->convert(String(name)), parentID);
             if (obj == nil) // create object
             {
+                long millisStart = getMillis();
                 obj = createObjectFromFile(newPath);
+                long elapsed = getMillis() - millisStart;
+                log_debug(("FILE PARSED: %ld\n", elapsed));
+                
+                
                 if (obj == nil) // object ignored
                 {
                     log_info(("file ignored: %s\n", newPath.c_str()));
@@ -335,16 +344,20 @@ void ContentManager::addRecursive(String path, int parentID)
             if (obj != nil)
             {
 #ifdef HAVE_JS
-    		if (IS_CDS_ITEM(obj->getObjectType()))
-	    	{
-                if (importScript != nil)
-    		        importScript->processCdsObject(obj);
-    		}
+        		if (IS_CDS_ITEM(obj->getObjectType()))
+	        	{
+                    long millisStart = getMillis();
+                    if (importScript != nil)
+    		            importScript->processCdsObject(obj);
+                    obj = createObjectFromFile(newPath);
+                    long elapsed = getMillis() - millisStart;
+                    log_debug(("FILE ADDED: %ld\n", elapsed));
+        		}
 #endif
-            if (IS_CDS_CONTAINER(obj->getObjectType()))
-            {
-                addRecursive(newPath, obj->getID());
-            }
+                if (IS_CDS_CONTAINER(obj->getObjectType()))
+                {
+                    addRecursive(newPath, obj->getID());
+                }
             }
         }
         catch(Exception e)
@@ -357,12 +370,13 @@ void ContentManager::addRecursive(String path, int parentID)
 
 void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
 {
-    String title = parameters->get("title");
-    String upnp_class = parameters->get("class");
-    String mimetype = parameters->get("mime-type");
-    String description = parameters->get("description");
-    String location = parameters->get("location");
-    String protocol = parameters->get("protocol");
+    String title = parameters->get(_("title"));
+    String upnp_class = parameters->get(_("class"));
+    String autoscan = parameters->get(_("autoscan"));
+    String mimetype = parameters->get(_("mime-type"));
+    String description = parameters->get(_("description"));
+    String location = parameters->get(_("location"));
+    String protocol = parameters->get(_("protocol"));
 
     Ref<Storage> storage = Storage::getInstance();
     Ref<UpdateManager> um = UpdateManager::getInstance();
@@ -387,20 +401,20 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
         {
             cloned_item->setMimeType(mimetype);
             Ref<CdsResource> resource = cloned_item->getResource(0);
-            resource->addAttribute("protocolInfo", renderProtocolInfo(mimetype, protocol));
+            resource->addAttribute(_("protocolInfo"), renderProtocolInfo(mimetype, protocol));
         }
         else if (!string_ok(mimetype) && (string_ok(protocol)))
         {
             Ref<CdsResource> resource = cloned_item->getResource(0);
-            resource->addAttribute("protocolInfo", renderProtocolInfo(cloned_item->getMimeType(), protocol));
+            resource->addAttribute(_("protocolInfo"), renderProtocolInfo(cloned_item->getMimeType(), protocol));
         }
         else if (string_ok(mimetype) && (!string_ok(protocol)))
         {
             cloned_item->setMimeType(mimetype);
             Ref<CdsResource> resource = cloned_item->getResource(0);
-            Ref<Array<StringBase> > parts = split_string(resource->getAttribute("protocolInfo"), ':');
+            Ref<Array<StringBase> > parts = split_string(resource->getAttribute(_("protocolInfo")), ':');
             protocol = parts->get(0);
-            resource->addAttribute("protocolInfo", renderProtocolInfo(mimetype, protocol));
+            resource->addAttribute(_("protocolInfo"), renderProtocolInfo(mimetype, protocol));
         }
 
         if (string_ok(description)) 
@@ -423,8 +437,8 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
     }
     if (IS_CDS_ACTIVE_ITEM(objectType))
     {
-        String action = parameters->get("action");
-        String state = parameters->get("state");
+        String action = parameters->get(_("action"));
+        String state = parameters->get(_("state"));
 
         Ref<CdsActiveItem> item = RefCast(obj, CdsActiveItem);
         Ref<CdsObject> clone = CdsObject::createObject(objectType);
@@ -505,7 +519,7 @@ Ref<CdsObject> ContentManager::convertObject(Ref<CdsObject> oldObj, int newType)
         return oldObj;
     if (! IS_CDS_ITEM(oldType) || ! IS_CDS_ITEM(newType))
     {
-        throw Exception(String("Cannot convert object type ") + oldType +
+        throw Exception(_("Cannot convert object type ") + oldType +
                         " to " + newType);
     }
 
@@ -527,7 +541,7 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic)
     ret = stat(path.c_str(), &statbuf);
     if (ret != 0)
     {
-        throw Exception(String("Failed to stat ") + path);
+        throw Exception(_("Failed to stat ") + path);
     }
 
     Ref<CdsObject> obj;
@@ -584,7 +598,7 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic)
     else
     {
         // only regular files and directories are supported
-        throw Exception(String("ContentManager: skipping file ") + path.c_str());
+        throw Exception(_("ContentManager: skipping file ") + path.c_str());
     }
 //    Ref<StringConverter> f2i = StringConverter::f2i();
 //    obj->setTitle(f2i->convert(filename));
@@ -704,7 +718,7 @@ void ContentManager::addFile2(Ref<DirStack> dirStack, String parentID)
     DIR *dir = opendir(path.c_str());
     if (! dir)
     {
-        throw Exception(String("could not list directory ")+
+        throw Exception(_("could not list directory ")+
                         path + " : " + strerror(errno));
     }
     struct dirent *dent;
@@ -763,7 +777,7 @@ void ContentManager::addFile2(Ref<DirStack> dirStack, String parentID)
 DirStack::DirStack(String path) : Object()
 {
     pathbuf = Ref<StringBuffer>(new StringBuffer(path));
-    dirstack = (dirstack_t *)malloc(sizeof(dirstack_t) * 20);
+    dirstack = (dirstack_t *)MALLOC(sizeof(dirstack_t) * 20);
 }
 
 DirStack::init(String path)
@@ -842,12 +856,12 @@ int ContentManager::addTask(zmm::Ref<CMTask> task)
 }
 
 /* sync / async methods */
-int ContentManager::loadAccounting(int async)
+int ContentManager::loadAccounting(bool async)
 {
     if (async)
     {
         Ref<CMTask> task(new CMLoadAccountingTask());
-        task->setDescription("Initializing statistics");
+        task->setDescription(_("Initializing statistics"));
         return addTask(task);
     }
     else
@@ -856,12 +870,12 @@ int ContentManager::loadAccounting(int async)
         return false;
     }
 }
-int ContentManager::addFile(zmm::String path, int recursive, int async)
+int ContentManager::addFile(zmm::String path, bool recursive, bool async)
 {
     if (async)
     {
         Ref<CMTask> task(new CMAddFileTask(path, recursive));
-        task->setDescription(String("Adding ") + path);
+        task->setDescription(_("Adding ") + path);
         return addTask(task);
     }
     else
@@ -870,9 +884,9 @@ int ContentManager::addFile(zmm::String path, int recursive, int async)
         return false;
     }
 }
-int ContentManager::removeObject(int objectID, int async)
+int ContentManager::removeObject(int objectID, bool async)
 {
-    if (async) // removal sync, to avoid UI exception
+    if (async)
     {
         // building container path for the description
         Ref<Storage> storage = Storage::getInstance();
@@ -909,7 +923,7 @@ String CMTask::getDescription()
 }
 
 
-CMAddFileTask::CMAddFileTask(String path, int recursive) : CMTask()
+CMAddFileTask::CMAddFileTask(String path, bool recursive) : CMTask()
 {
     this->path = path;
     this->recursive = recursive;
@@ -1037,7 +1051,7 @@ int DirCache::createContainers()
 
 
 
-void ContentManager::_addFile2(String path, int recursive)
+void ContentManager::_addFile2(String path, bool recursive)
 {
 #ifdef HAVE_JS
     initScripting();
@@ -1048,7 +1062,7 @@ void ContentManager::_addFile2(String path, int recursive)
     
     int slashPos = path.rindex('/');
     if (slashPos < 0)
-        throw Exception("only absolute paths are accepted");
+        throw Exception(_("only absolute paths are accepted"));
 
     Ref<DirCache> dirCache(new DirCache());
     // if not in root container initialize dirCache's path
@@ -1058,7 +1072,7 @@ void ContentManager::_addFile2(String path, int recursive)
     addRecursive2(dirCache, path.substring(slashPos + 1), recursive);
 }
 
-void ContentManager::addRecursive2(Ref<DirCache> dirCache, String filename, int recursive)
+void ContentManager::addRecursive2(Ref<DirCache> dirCache, String filename, bool recursive)
 {
     String parentID;
     Ref<CdsObject> obj;
@@ -1071,7 +1085,7 @@ void ContentManager::addRecursive2(Ref<DirCache> dirCache, String filename, int 
 
     ret = stat(path.c_str(), &statbuf);
     if (ret != 0)
-        throw Exception(String("Failed to stat ") + path);
+        throw Exception(_("Failed to stat ") + path);
 
     if (S_ISREG(statbuf.st_mode)) // item
     {
@@ -1099,7 +1113,7 @@ void ContentManager::addRecursive2(Ref<DirCache> dirCache, String filename, int 
         DIR *dir = opendir(path.c_str());
         if (! dir)
         {
-            throw Exception(String("could not list directory ")+
+            throw Exception(_("could not list directory ") +
                             path + " : " + strerror(errno));
         }
         struct dirent *dent;
@@ -1121,7 +1135,7 @@ void ContentManager::addRecursive2(Ref<DirCache> dirCache, String filename, int 
             }
             try
             {
-                addRecursive2(dirCache, name, recursive);
+                addRecursive2(dirCache, String(name), recursive);
             }
             catch(Exception e)
             {
@@ -1133,7 +1147,7 @@ void ContentManager::addRecursive2(Ref<DirCache> dirCache, String filename, int 
         dirCache->pop();
     }
     else
-        throw Exception(String("unsupported file type: ")+ path);
+        throw Exception(_("unsupported file type: ") + path);
 }
 
 

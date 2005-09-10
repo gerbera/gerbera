@@ -20,8 +20,8 @@
 
 #include "stringbuffer.h"
 
-#include <malloc.h>
 #include <string.h>
+#include "memory.h"
 #include "strings.h"
 
 using namespace zmm;
@@ -29,20 +29,20 @@ using namespace zmm;
 StringBuffer::StringBuffer()
 {
     capacity = DEFAULT_STRINGBUFFER_CAPACITY;
-    data = (char *)malloc((capacity + 1) * sizeof(char));
+    data = (char *)MALLOC((capacity + 1) * sizeof(char));
     data[0] = 0;
     len = 0;
 }
 StringBuffer::StringBuffer(int capacity)
 {
     this->capacity = capacity;
-    data = (char *)malloc((capacity + 1) * sizeof(char));
+    data = (char *)MALLOC((capacity + 1) * sizeof(char));
     data[0] = 0;
     len = 0;
 }
 StringBuffer::~StringBuffer()
 {
-    free(data);
+    FREE(data);
 }
 StringBuffer &StringBuffer::operator<<(String other)
 {
@@ -118,7 +118,7 @@ void StringBuffer::addCapacity(int increment)
         if(neededCapacity > newCapacity)
             newCapacity = neededCapacity;
         capacity = newCapacity;
-        data = (char *)realloc(data, capacity);
+        data = (char *)REALLOC(data, capacity);
     }
 }
 

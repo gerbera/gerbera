@@ -45,13 +45,13 @@ void web::edit_save::process()
 
     check_request();
 
-    String objID = param("object_id");
+    String objID = param(_("object_id"));
     int objectID;
-    String driver = param("driver");
-    String sid = param("sid");
+    String driver = param(_("driver"));
+    String sid = param(_("sid"));
 
     if (!string_ok(objID))
-        throw Exception(String("invalid object id"));
+        throw Exception(_("invalid object id"));
     else
         objectID = objID.toInt();
     
@@ -64,22 +64,22 @@ void web::edit_save::process()
     
     Ref<Dictionary> sub(new Dictionary());
     
-    objID = session->getFrom(sd, "object_id");
+    objID = session->getFrom(sd, _("object_id"));
     if (objID == nil)
-        objID = "0";
+        objID = _("0");
 
-    String requested_count = session->getFrom(sd, "requested_count");
+    String requested_count = session->getFrom(sd, _("requested_count"));
     if ((requested_count == nil) || (requested_count == ""))
     {
-        if (requested_count == nil) requested_count = "0";
+        requested_count = _("0");
     }
     if (requested_count.toInt() < 0)
-        requested_count = "0";
+        requested_count = _("0");
 
-    sub->put("object_id", objID);
-    sub->put("requested_count", requested_count);
-    sub->put("sid", sid);
-    sub->put("driver", driver);
-    *out << subrequest("browse", sub);
+    sub->put(_("object_id"), objID);
+    sub->put(_("requested_count"), requested_count);
+    sub->put(_("sid"), sid);
+    sub->put(_("driver"), driver);
+    *out << subrequest(_("browse"), sub);
 }
 

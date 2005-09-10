@@ -32,12 +32,12 @@ void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
    
     Ref<Element> req = request->getRequest();
    
-    String objID = req->getChildText("ObjectID");
+    String objID = req->getChildText(_("ObjectID"));
     int objectID;
-    String BrowseFlag = req->getChildText("BrowseFlag");
+    String BrowseFlag = req->getChildText(_("BrowseFlag"));
     //String Filter; // not yet supported
-    String StartingIndex = req->getChildText("StartingIndex");
-    String RequestedCount = req->getChildText("RequestedCount");
+    String StartingIndex = req->getChildText(_("StartingIndex"));
+    String RequestedCount = req->getChildText(_("RequestedCount"));
     // String SortCriteria; // not yet supported
 
     //log_info(("Browse received parameters: ObjectID [%s] BrowseFlag [%s] StartingIndex [%s] RequestedCount [%s]\n",
@@ -45,7 +45,7 @@ void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
    
 
     if (objID == nil)
-        throw UpnpException(UPNP_E_NO_SUCH_ID, String("empty object id"));
+        throw UpnpException(UPNP_E_NO_SUCH_ID, _("empty object id"));
     else
         objectID = objID.toInt();
     
@@ -56,7 +56,8 @@ void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
     else if(BrowseFlag == "BrowseDirectChildren")
         flag = BROWSE_DIRECT_CHILDREN;
     else
-        throw UpnpException(UPNP_SOAP_E_INVALID_ARGS, String("invalid browse flag: ") + BrowseFlag);
+        throw UpnpException(UPNP_SOAP_E_INVALID_ARGS,
+                            _("invalid browse flag: ") + BrowseFlag);
 
     Ref<BrowseParam> param(new BrowseParam(objectID, flag));
 
@@ -71,16 +72,16 @@ void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
     }
     catch (Exception e)
     {
-        throw UpnpException(UPNP_E_NO_SUCH_ID, String("no such object"));
+        throw UpnpException(UPNP_E_NO_SUCH_ID, _("no such object"));
     }
 
-    Ref<Element> didl_lite (new Element("DIDL-Lite"));
-    didl_lite->addAttribute("xmlns", 
-                            "urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/");
-    didl_lite->addAttribute("xmlns:dc", 
-                            "http://purl.org/dc/elements/1.1/");
-    didl_lite->addAttribute("xmlns:upnp", 
-                            "urn:schemas-upnp-org:metadata-1-0/upnp/");
+    Ref<Element> didl_lite (new Element(_("DIDL-Lite")));
+    didl_lite->addAttribute(_("xmlns"), 
+                            _("urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/"));
+    didl_lite->addAttribute(_("xmlns:dc"), 
+                            _("http://purl.org/dc/elements/1.1/"));
+    didl_lite->addAttribute(_("xmlns:upnp"), 
+                            _("urn:schemas-upnp-org:metadata-1-0/upnp/"));
     
     for(int i = 0; i < arr->size(); i++)
     {
@@ -93,10 +94,10 @@ void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
     Ref<Element> response;
     response = UpnpXML_CreateResponse(request->getActionName(), serviceType);
 
-    response->appendTextChild("Result", didl_lite->print());
-    response->appendTextChild("NumberReturned", String("") + arr->size());
-    response->appendTextChild("TotalMatches", String("") + param->getTotalMatches());
-    response->appendTextChild("UpdateID", String("") + systemUpdateID);
+    response->appendTextChild(_("Result"), didl_lite->print());
+    response->appendTextChild(_("NumberReturned"), String::from(arr->size()));
+    response->appendTextChild(_("TotalMatches"), String::from(param->getTotalMatches()));
+    response->appendTextChild(_("UpdateID"), String::from(systemUpdateID));
 
     request->setResponse(response);
     //log_info(("upnp_action_Browse: end\n"));
@@ -108,7 +109,7 @@ void ContentDirectoryService::upnp_action_GetSearchCapabilities(Ref<ActionReques
 
     Ref<Element> response;
     response = UpnpXML_CreateResponse(request->getActionName(), serviceType);
-    response->appendTextChild("SearchCaps", "");
+    response->appendTextChild(_("SearchCaps"), _(""));
             
     request->setResponse(response);
 
@@ -121,7 +122,7 @@ void ContentDirectoryService::upnp_action_GetSortCapabilities(Ref<ActionRequest>
 
     Ref<Element> response;
     response = UpnpXML_CreateResponse(request->getActionName(), serviceType);
-    response->appendTextChild("SortCaps", "");
+    response->appendTextChild(_("SortCaps"), _(""));
             
     request->setResponse(response);
 
@@ -134,7 +135,7 @@ void ContentDirectoryService::upnp_action_GetSystemUpdateID(Ref<ActionRequest> r
 
     Ref<Element> response;
     response = UpnpXML_CreateResponse(request->getActionName(), serviceType);
-    response->appendTextChild("Id", String("") + systemUpdateID);
+    response->appendTextChild(_("Id"), _("") + systemUpdateID);
 
     request->setResponse(response);
     
@@ -167,7 +168,7 @@ void ContentDirectoryService::process_action_request(Ref<ActionRequest> request)
         log_info(("process_action_request: unrecognized action %s\n",
                 request->getActionName().c_str()));
         request->setErrorCode(UPNP_E_INVALID_ACTION);
-        throw UpnpException(UPNP_E_INVALID_ACTION, "unrecognized action");
+        throw UpnpException(UPNP_E_INVALID_ACTION, _("unrecognized action"));
     }
 
     //log_info(("ContentDirectoryService::process_action_request: end\n"));

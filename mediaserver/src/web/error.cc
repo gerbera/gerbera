@@ -33,15 +33,15 @@ web::error::error() : WebRequestHandler()
 
 void web::error::process()
 {
-    String message = param("message");
+    String message = param(_("message"));
 
-    Ref<Element> root (new Element("root"));
+    Ref<Element> root (new Element(_("root")));
     
-    String validMessagePart = StringConverter::validSubstring(message, "UTF-8");
+    String validMessagePart = StringConverter::validSubstring(message, _("UTF-8"));
     
-    root->appendTextChild("display", "An error has occured. Press Back in your browser to return to the previous page.");
-    root->appendTextChild("error", validMessagePart);
-    *out << renderXMLHeader("/error.xsl");
+    root->appendTextChild(_("display"), _("An error has occured. Press Back in your browser to return to the previous page."));
+    root->appendTextChild(_("error"), validMessagePart);
+    *out << renderXMLHeader(_("/error.xsl"));
     *out << root->print();
 }
 

@@ -33,29 +33,34 @@ using namespace mxml;
 
 web::browse::browse() : WebRequestHandler()
 {
-    pagename = "browse";
+    pagename = _("browse");
 }
 
+/*
 static Ref<Element> addAction(String action_type, String action_name)
 {
     Ref<Element> action (new Element(action_type));
     action->addAttribute("req_type", action_name);
     return action;
 }
+*/
 
 void web::browse::process()
 {
-//    log_info(("browse: start\n"));
+    check_request();
+    
+    String type = param(_("type"));
+    if (type == nil)
+        type = _("database");
+    root->addAttribute(_("type"), type);
 
+/*
     int flag;
 
     Ref<Storage> storage; // storage instance, will be chosen depending on the driver
     Ref<Session> session; // current session
     session_data_t sd;    // the session carries two independand fields for storing data
-
-    check_request();
-    
-    // first get all needed parameters
+            
     String objID = param("object_id");
     String browse_flag = param("browse_flag");
     String starting_index = param("starting_index");
@@ -175,11 +180,11 @@ void web::browse::process()
 
     // this section is used for going to next/prev page
     Ref<Element> page (new Element("page"));
-    page->appendTextChild("NumberReturned", String("") + arr->size());
-    page->appendTextChild("TotalMatches", String("") + param->getTotalMatches());
+    page->appendTextChild("NumberReturned", _("") + arr->size());
+    page->appendTextChild("TotalMatches", _("") + param->getTotalMatches());
     page->appendTextChild("LastStartingIndex", starting_index);
     page->appendTextChild("LastRequestedCount", requested_count);
-    page->appendTextChild("CurrentIndex",  String("") + (starting_index.toInt() + arr->size())); 
+    page->appendTextChild("CurrentIndex",  _("") + (starting_index.toInt() + arr->size())); 
 
     current_browse->appendChild(page);
     
@@ -220,5 +225,7 @@ void web::browse::process()
     
     root->appendChild(current_browse);
     root->appendChild(didl_lite);
+
+    */
 }
 

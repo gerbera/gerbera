@@ -79,7 +79,7 @@ void string_ok_ex(zmm::String str);
 /// \param port Port as string.
 /// \oaram page HTML document to redirect to.
 /// \return string representing the desired HTML document.
-zmm::String http_redirect_to(zmm::String ip, zmm::String port, zmm::String page = "");
+zmm::String http_redirect_to(zmm::String ip, zmm::String port, zmm::String page = _(""));
 
 /// \brief Encodes arbitrary data to a hex string.
 /// \param data Buffer that is holding the data
@@ -96,6 +96,12 @@ zmm::String hex_decode_string(zmm::String encoded);
 /// \brief Generates random id.
 /// \return String representing the newly created id.
 zmm::String generate_random_id();
+
+/// \brief Generates hex md5 sum of the given data.
+zmm::String hex_md5(void *data, int length);
+
+/// \brief Generates hex md5 sum of the given string.
+zmm::String hex_string_md5(zmm::String str);
 
 /// \brief Converts a string to a URL (meaning: %20 instead of space and so on)
 /// \param str String to be converted.
@@ -127,7 +133,7 @@ void quicksort(COMPARABLE *arr, int size, COMPARATOR comparator);
 /// attribute: "http-get:*:mimetype:*"
 /// 
 /// \param mimetype the mimetype that should be inserted
-zmm::String renderProtocolInfo(zmm::String mimetype, zmm::String protocol = PROTOCOL);
+zmm::String renderProtocolInfo(zmm::String mimetype, zmm::String protocol = _(PROTOCOL));
 
 /// \brief Converts a number of seconds to H+:MM:SS representation as required by
 /// the UPnP spec

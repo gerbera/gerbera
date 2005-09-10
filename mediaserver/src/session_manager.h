@@ -53,11 +53,13 @@ public:
     /// \brief Returns the time of last access to the session.
     /// \return time in milliseconds
     /// \todo what time is it? from epoch? not yet implemented
-    long getLastAccessTime();
-
+    inline long getLastAccessTime() { return last_access; }
+    
     /// \brief Returns the session identifier.
-    /// \return sessoin ID as String
-    zmm::String getID();
+    inline zmm::String getID() { return sessionID; }
+
+    /// \brief Sets the session identifier.
+    inline void setID(zmm::String sessionID) { this->sessionID = sessionID; }
 
     /// \brief Saves a value in a specific placeholder.
     /// \param type identifies in which placeholder the data will be saved
@@ -119,7 +121,7 @@ public:
 
     /// \brief Creates a Session with a given timeout.
     /// \param timeout Session timeout in milliseconds.
-    zmm::Ref<Session> createSession(long timeout);
+    zmm::Ref<Session> createSession(long timeout, zmm::String sessionID = nil);
 
     /// \brief Returns the instance to a Session with a given sessionID
     /// \param ID of the Session.

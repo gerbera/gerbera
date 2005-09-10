@@ -43,7 +43,7 @@ static Ref<Storage> create_primary_inst()
     Ref<Storage> storage;
 
     Ref<ConfigManager> config = ConfigManager::getInstance();
-    type = config->getOption("/server/storage/attribute::driver");
+    type = config->getOption(_("/server/storage/attribute::driver"));
 
     do
     {
@@ -63,7 +63,7 @@ static Ref<Storage> create_primary_inst()
         }
 #endif
         // other database types...
-        throw Exception(String("Unknown storage type: ") + type);
+        throw Exception(_("Unknown storage type: ") + type);
     }
     while (false);
     

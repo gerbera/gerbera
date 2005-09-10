@@ -157,7 +157,7 @@ Ref<MetadataHandler> MetadataHandler::createHandler(int handlerType)
             return Ref<MetadataHandler>(new LibExifHandler());
 #endif
         default:
-            throw Exception(String("unknown content handler ID: ") + handlerType);
+            throw Exception(_("unknown content handler ID: ") + handlerType);
     }
 }
 

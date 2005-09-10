@@ -18,7 +18,11 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include <stdio.h>
+#include <malloc.h>
+
 #include "object.h"
+#include "memory.h"
 
 using namespace zmm;
 
@@ -46,3 +50,13 @@ int Object::getRefCount()
 {
     return _ref_count;
 }
+
+void* Object::operator new (size_t size)
+{
+    return MALLOC(size);
+}
+void Object::operator delete (void *ptr)
+{
+    FREE(ptr);
+}
+

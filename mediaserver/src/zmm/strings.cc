@@ -18,9 +18,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "strings.h"
-
-#include <malloc.h>
+#include "memory.h"
 #include "strings.h"
 
 using namespace zmm;
@@ -28,36 +26,35 @@ using namespace zmm;
 StringBase::StringBase(int capacity) : Object()
 {
 	len = capacity;
-	data = (char *)malloc((len + 1) * sizeof(char));
+	data = (char *)MALLOC((len + 1) * sizeof(char));
+    store = true;
 }
 StringBase::StringBase(const char *str) : Object()
 {
 	len = (int)strlen(str);
-	data = (char *)malloc((len + 1) * sizeof(char));
+	data = (char *)MALLOC((len + 1) * sizeof(char));
 	strcpy(data, str);
+    store = true;
 }
 StringBase::StringBase(const char *str, int len) : Object()
 {
 	this->len = len;
-	data = (char *)malloc((len + 1) * sizeof(char));
+	data = (char *)MALLOC((len + 1) * sizeof(char));
 	memcpy(data, str, len);
 	data[len] = 0;
+    store = true;
 }
+
+StringBase::~StringBase()
+{
+    if (store)
+    	FREE(data);
+}
+
 bool StringBase::startsWith(StringBase *other)
 {
     return (!strncmp(data, other->data, other->len));
 }
-
-// protected
-StringBase::StringBase() : Object()
-{}        
-
-StringBase::~StringBase()
-{
-	free(data);
-}
-
-
 
 String::String()
 {
@@ -70,7 +67,7 @@ String::String(int capacity)
 }
 String::String(const char *str)
 {
-	if(str)
+	if (str)
 	{
 		base = new StringBase(str);
 		base->retain();
@@ -78,6 +75,7 @@ String::String(const char *str)
 	else
 		base = NULL;
 }
+                
 String::String(const char *str, int len)
 {
 	if(str)
@@ -140,7 +138,7 @@ String String::operator+(String other)
     strcpy(res.base->data + len, other.base->data);
 	return res;
 }
-String String::operator+(char *other)
+String String::operator+(const char *other)
 {
 	if(! other)
 		return *this;
@@ -176,6 +174,12 @@ String String::from(int x)
 	b->len = sprintf(b->data, "%d", x);
     return (String(b));
 }
+String String::from(long x)
+{
+    StringBase *b = new StringBase(MAX_LONG_STRING_LENGTH);
+	b->len = sprintf(b->data, "%ld", x);
+    return (String(b));
+}
 String String::from(double x)
 {
     StringBase *b = new StringBase(MAX_DOUBLE_STRING_LENGTH);
@@ -186,20 +190,38 @@ String String::allocate(int size)
 {
     return String(new StringBase(size));
 }
-String String::take(char *data)
+String String::take(const char *data)
 {
-    StringBase *sb = new StringBase();
-    sb->len = strlen(data);
-    return String(sb);
+    StringBase *base = new StringBase();
+    base->data = (char *)data;
+    base->len = strlen(data);
+    base->store = true;
+    return String(base);
 }
-String String::take(char *data, int length)
+String String::take(const char *data, int length)
 {
-    StringBase *sb = new StringBase();
-    sb->data = data;
-    sb->len = length;
-    return String(sb);
+    StringBase *base = new StringBase();
+    base->data = (char *)data;
+    base->len = length;
+    base->store = true;
+    return String(base);
 }
-
+String String::refer(const char *data)
+{
+    StringBase *base = new StringBase();
+    base->data = (char *)data;
+    base->len = strlen(data);
+    base->store = false;
+    return String(base);
+}
+String String::refer(const char *data, int len)
+{
+    StringBase *base = new StringBase();
+    base->data = (char *)data;
+    base->len = len;
+    base->store = false;
+    return String(base);
+}
 int String::operator==(String other)
 {
 	if(! base && ! other.base)
@@ -208,7 +230,7 @@ int String::operator==(String other)
 		return ( ! strcmp(base->data, other.base->data) );
 	return 0;
 }
-int String::operator==(char *other)
+int String::operator==(const char *other)
 {
 	if(! base && ! other)
 		return 1;
@@ -227,12 +249,12 @@ String& String::operator=(String other)
 	return *this;
 }
 
-int String::toInt()
+long String::toLong()
 {
 	if(! base)
 		return 0;
 	char *endptr;
-	int res = (int)strtol(base->data, &endptr, 10);
+	long res = (int)strtol(base->data, &endptr, 10);
 	if(*endptr)
         return 0;
     // TODO: throw exception

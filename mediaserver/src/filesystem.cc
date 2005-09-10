@@ -32,15 +32,17 @@
 using namespace zmm;
 using namespace mxml;
 
-#ifdef __CYGWIN__
-#define FS_ROOT_DIRECTORY "/cygdrive/"
-#else
-#define FS_ROOT_DIRECTORY "/"
-#endif
+static Ref<Filesystem> instance;
+Ref<Filesystem> Filesystem::getInstance()
+{
+    if (instance == nil)
+        instance = Ref<Filesystem>(new Filesystem());
+    return instance;
+}
+
 
 int FsObjectComparator(void *arg1, void *arg2)
 {
-    return strcmp(((StringBase *)arg1)->data, ((StringBase *)arg2)->data);
     FsObject *o1 = (FsObject *)arg1;
     FsObject *o2 = (FsObject *)arg2;
     if (o1->isDirectory)
@@ -64,13 +66,13 @@ Filesystem::Filesystem() : Object()
 {
     includeRules = Ref<Array<RExp> >(new Array<RExp>());
     Ref<ConfigManager> cm = ConfigManager::getInstance();
-    Ref<Element> rules = cm->getElement("filter");
+    Ref<Element> rules = cm->getElement(_("filter"));
     if (rules == nil)
         return;
     for (int i = 0; i < rules->childCount(); i++)
     {
         Ref<Element> rule = rules->getChild(i);
-        String pat = rule->getAttribute("pattern");
+        String pat = rule->getAttribute(_("pattern"));
         /// \todo make patterns from simple wildcards instead of
         /// taking the pattern attribute directly as regexp
         Ref<RExp> pattern(new RExp());
@@ -86,14 +88,16 @@ Filesystem::Filesystem() : Object()
     }
 }
 
-Ref<Array<FsObject> > Filesystem::readDirectory(String path)
+Ref<Array<FsObject> > Filesystem::readDirectory(String path, int mask,
+                                                int childMask)
 {
     if (path.charAt(0) != '/')
     {
-        throw StorageException(String("relative paths not allowed: ") + path);
+        throw Exception(_("Filesystem: relative paths not allowed: ") +
+                        path);
     }
     if (! fileAllowed(path))
-        throw Exception("this file is blocked from viewing from filesystem browser");
+        throw Exception(_("Filesystem: file blocked: ") + path);
 
     struct stat statbuf;
     int ret;
@@ -106,7 +110,7 @@ Ref<Array<FsObject> > Filesystem::readDirectory(String path)
     dir = opendir(path.c_str());
     if (! dir)
     {
-        throw Exception(String("could not list directory ")+
+        throw Exception(_("could not list directory ") +
                         path + " : " + strerror(errno));
     }
 
@@ -131,20 +135,40 @@ Ref<Array<FsObject> > Filesystem::readDirectory(String path)
             childPath = path + "/" + name;
         if (fileAllowed(childPath))
         {
-            Ref<FsObject> obj(new FsObject());
-            obj->filename = name;
-
+            bool isDirectory = false;
+            bool hasContent = false;
             ret = stat(childPath.c_str(), &statbuf);
             if (ret != 0)
                 continue;
             if (S_ISREG(statbuf.st_mode))
-            {}
+            {
+                if (! (mask & FS_MASK_FILES))
+                    continue;
+            }
             else if (S_ISDIR(statbuf.st_mode))
             {
-                obj->isDirectory = true;
+                if (! (mask & FS_MASK_DIRECTORIES))
+                    continue;
+                isDirectory = true;
+                if (childMask)
+                {
+                    try
+                    {
+                        hasContent = have(childPath, childMask);
+                    }
+                    catch (Exception e)
+                    {
+                        continue;
+                    }
+                }
             }
             else
                 continue; // special file
+            
+            Ref<FsObject> obj(new FsObject());
+            obj->filename = String(name);
+            obj->isDirectory = isDirectory;
+            obj->hasContent = hasContent;
             files->append(obj);
         }
     }
@@ -156,6 +180,85 @@ Ref<Array<FsObject> > Filesystem::readDirectory(String path)
     return files;
 }
 
+bool Filesystem::have(String path, int mask)
+{
+    /*
+    if (path.charAt(0) != '/')
+    {
+        throw Exception(_("Filesystem relative paths not allowed: ") +
+                        path);
+    }
+    */
+    if (! fileAllowed(path))
+        return false;
+
+    struct stat statbuf;
+    int ret;
+
+    Ref<Array<FsObject> > files(new Array<FsObject>());
+
+    DIR *dir;
+    struct dirent *dent;
+
+    dir = opendir(path.c_str());
+    if (! dir)
+    {
+        throw Exception(_("could not list directory ")+
+                        path + " : " + strerror(errno));
+    }
+
+    bool result = false;
+    while ((dent = readdir(dir)) != NULL)
+    {
+        char *name = dent->d_name;
+        if (name[0] == '.')
+        {
+            if (name[1] == 0)
+            {
+                continue;
+            }
+            else if (name[1] == '.' && name[2] == 0)
+            {
+                continue;
+            }
+        }
+        String childPath;
+        if (path == FS_ROOT_DIRECTORY)
+            childPath = path + name;
+        else
+            childPath = path + "/" + name;
+        if (fileAllowed(childPath))
+        {
+            ret = stat(childPath.c_str(), &statbuf);
+            if (ret != 0)
+                continue;
+            if (S_ISREG(statbuf.st_mode) && mask & FS_MASK_FILES)
+            {
+                result = true;
+                break;
+            }
+            else if (S_ISDIR(statbuf.st_mode) && mask & FS_MASK_DIRECTORIES)
+            {
+                result = true;
+                break;
+            }
+            else
+                continue; // special file
+        }
+    }
+    closedir(dir);
+    return result;
+}
+
+bool Filesystem::haveFiles(String dir)
+{
+    return have(dir, FS_MASK_FILES);    
+}
+bool Filesystem::haveDirectories(String dir)
+{
+    return have(dir, FS_MASK_DIRECTORIES);
+}
+    
 bool Filesystem::fileAllowed(String path)
 {
     return true;

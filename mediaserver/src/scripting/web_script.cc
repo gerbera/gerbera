@@ -40,7 +40,7 @@ void WebScript::xml2js(Ref<Element> el, JSObject *js)
 {
     int i, count;
 
-    setProperty(js, "name", el->getName());
+    setProperty(js, _("name"), el->getName());
     
     // setting element's attributes
     count = el->attributeCount();
@@ -52,13 +52,13 @@ void WebScript::xml2js(Ref<Element> el, JSObject *js)
             Ref<Attribute> attr = el->getAttribute(i);
             setProperty(attr_js, attr->name, attr->value);
         }
-        setObjectProperty(js, "attributes", attr_js);
+        setObjectProperty(js, _("attributes"), attr_js);
     }
     
     String text = el->getText();
     if (text != nil)
     {
-        setProperty(js, "text", text);
+        setProperty(js, _("text"), text);
     }
     else
     {
@@ -73,7 +73,7 @@ void WebScript::xml2js(Ref<Element> el, JSObject *js)
             jsval child_val = OBJECT_TO_JSVAL(child_js);
             JS_SetElement(cx, children_js, i, &child_val);
         }
-        setObjectProperty(js, "children", children_js);
+        setObjectProperty(js, _("children"), children_js);
     }
 }    
 
@@ -126,9 +126,9 @@ js_include(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
         else
         {
             String subscriptPath = WebRequestHandler::buildScriptPath(subscriptFilename);
-            Ref<WebScript> subscript(new WebScript(Runtime::getInstance(), subscriptPath));
-            subscript->setGlobalObject(self->getGlobalObject());
-            *self->output << subscript->process();
+            Ref<WebScript> subscript(new WebScript(Runtime::getInstance(),
+                                     subscriptPath, self->getGlobalObject()));
+            *self->output << subscript->processUnlocked();
             self->includedScripts->append(subscript);
         }
     }
@@ -143,22 +143,66 @@ js_include(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
     return JS_TRUE;
 }
 
+static JSBool
+js_log(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
+{
+    uintN i;
+    JSString *str;
+
+    for (i = 0; i < argc; i++) {
+        str = JS_ValueToString(cx, argv[i]);
+        if (!str)
+            return JS_FALSE;
+        log_info(("%s%s\n", i ? " " : "", JS_GetStringBytes(str)));
+    }
+    return JS_TRUE;
+}
+
 static JSFunctionSpec global_functions[] = {
     {"echo",    js_echo,    1},
     {"frag",    js_frag,    1},
     {"include", js_include, 1},
+    {"log",     js_log,     0},
     {0}
 };
 
-WebScript::WebScript(Ref<Runtime> runtime, String srcPath) : Script(runtime)
+WebScript::WebScript(Ref<Runtime> runtime, String srcPath, JSObject *glob) : Script(runtime)
 {
     this->srcPath = srcPath;
     srcCompileTime = 0L;
-    JS_SetContextPrivate(cx, this);
-    defineFunctions(global_functions);
+    lock();
+    try
+    {
+        JS_SetContextPrivate(cx, this);
+        if (glob)
+            setGlobalObject(glob);
+        defineFunctions(global_functions);
+    }
+    catch (Exception e)
+    {
+        unlock();
+        throw e;
+    }
+    unlock();
 }
 
 String WebScript::process(Ref<Element> root)
+{
+    lock();
+    try
+    {
+        String ret = processUnlocked(root);
+        unlock();
+        return ret;
+    }
+    catch (Exception e)
+    {
+        unlock();
+        throw e;
+    }
+}
+
+String WebScript::processUnlocked(Ref<Element> root)
 {
     output = Ref<StringBuffer>(new StringBuffer());
     checkCompile();
@@ -166,11 +210,11 @@ String WebScript::process(Ref<Element> root)
     {
         JSObject *root_js = JS_NewObject(cx, NULL, NULL, glob);
         xml2js(root, root_js);
-        setObjectProperty(glob, "root", root_js);
+        setObjectProperty(glob, _("root"), root_js);
         if (sessionID == nil)
-            deleteProperty(glob, "SID");
+            deleteProperty(glob, _("SID"));
         else
-            setProperty(glob, "SID", sessionID);
+            setProperty(glob, _("SID"), sessionID);
     }
     includeIndex = 0;
 
@@ -180,8 +224,8 @@ String WebScript::process(Ref<Element> root)
     
     if (root != nil)
     {
-        deleteProperty(glob, "root");
-        deleteProperty(glob, "SID");
+        deleteProperty(glob, _("root"));
+        deleteProperty(glob, _("SID"));
     }
     return ret;
 }
@@ -203,7 +247,7 @@ long WebScript::getMtime()
 
     if (stat(srcPath.c_str(), &st) < 0)
     {
-        throw Exception(String("jssp: template not found: ") + srcPath +
+        throw Exception(_("jssp: template not found: ") + srcPath +
                         " : " + strerror(errno));
     }
     return st.st_mtime;
@@ -270,7 +314,7 @@ void WebScript::compileTemplate(String contents)
         start += 2; // skip open tag
         
         if (! *start)
-            throw Exception("jssp: template error: unclosed tag");
+            throw Exception(_("jssp: template error: unclosed tag"));
 
         bool print_tag = false;
         if (*start == '=')
@@ -281,7 +325,7 @@ void WebScript::compileTemplate(String contents)
 
         end = strstr(start, JSSP_TAG_CLOSE);
         if (end == NULL) // unclosed tag
-            throw Exception("jssp: template error: unclosed tag");
+            throw Exception(_("jssp: template error: unclosed tag"));
         len = end - start;
         
         String code(start, len);
@@ -294,10 +338,10 @@ void WebScript::compileTemplate(String contents)
     }
 
     String ret = output->toString();
-    load(ret, String("jssp_compiled ")+ srcPath);
+    load(ret, _("jssp_compiled ") + srcPath);
     output->clear();
 
-    log_debug(("TPL:--------------\n%s\n--------------\n", ret.c_str()));
+//    log_debug(("TPL:--------------\n%s\n--------------\n", ret.c_str()));
 }
 
 #endif // ifdef HAVE_JS

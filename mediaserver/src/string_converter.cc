@@ -30,7 +30,7 @@ StringConverter::StringConverter(String from, String to) : Object()
     if (cd == (iconv_t)(-1))
     {
         cd = (iconv_t)(0);
-        throw Exception(String("iconv: ") + strerror(errno));
+        throw Exception(_("iconv: ") + strerror(errno));
     }
 }
 
@@ -45,7 +45,7 @@ zmm::String StringConverter::convert(String str)
     int buf_size = str.length() * 3;
 
     char *input = str.c_str();
-    char *output = (char *)malloc(buf_size);    
+    char *output = (char *)MALLOC(buf_size);    
 
     char *input_copy = input;
     char *output_copy = output;
@@ -77,17 +77,17 @@ zmm::String StringConverter::convert(String str)
         switch (errno)
         {
             case EILSEQ:
-                err = "iconv: Invalid character sequence";
+                err = _("iconv: Invalid character sequence");
                 break;
             case EINVAL:
-                err = "iconv: Incomplete multibyte sequence";
+                err = _("iconv: Incomplete multibyte sequence");
                 break;
             case E2BIG:
                 // TODO: should encode the whole string anyway
-                err = "iconv: Insufficient space in output buffer";
+                err = _("iconv: Insufficient space in output buffer");
                 break;
             default:
-                err = String("iconv: ") + strerror(errno);
+                err = _("iconv: ") + strerror(errno);
                 break;
         }
         *output_copy = 0;
@@ -106,7 +106,7 @@ zmm::String StringConverter::convert(String str)
 //    log_info(("iconv: output: %s\n", output));
 
     String ret_str = String(output, output_copy - output);
-    free(output);
+    FREE(output);
     
     //return String(output, output_copy - output);
     return ret_str;
@@ -121,23 +121,22 @@ String StringConverter::validSubstring(String str, String encoding)
 // TODO iconv caching
 Ref<StringConverter> StringConverter::i2f()
 {
-    Ref<ConfigManager> cm = ConfigManager::getInstance();
     Ref<StringConverter> conv(new StringConverter(
-        DEFAULT_INTERNAL_CHARSET, ConfigManager::getInstance()->getOption("/import/filesystem-charset")));
+        _(DEFAULT_INTERNAL_CHARSET), ConfigManager::getInstance()->getOption(_("/import/filesystem-charset"))));
 //        INTERNAL_CHARSET, ConfigManager::getInstance()->getFilesystemCharset()));
     return conv;
 }
 Ref<StringConverter> StringConverter::f2i()
 {
-    Ref<ConfigManager> cm = ConfigManager::getInstance();
     Ref<StringConverter> conv(new StringConverter(
-        ConfigManager::getInstance()->getOption("/import/filesystem-charset"), DEFAULT_INTERNAL_CHARSET));
+        ConfigManager::getInstance()->getOption(_("/import/filesystem-charset")),
+                                                _(DEFAULT_INTERNAL_CHARSET)));
     return conv;
 }
 Ref<StringConverter> StringConverter::m2i()
 {
-    Ref<ConfigManager> cm = ConfigManager::getInstance();
     Ref<StringConverter> conv(new StringConverter(
-        ConfigManager::getInstance()->getOption("/import/metadata-charset"), DEFAULT_INTERNAL_CHARSET));
+        ConfigManager::getInstance()->getOption(_("/import/metadata-charset")),
+                                                _(DEFAULT_INTERNAL_CHARSET)));
     return conv;
 }

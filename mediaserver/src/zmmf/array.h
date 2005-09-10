@@ -39,7 +39,8 @@ public:
     Object *get(int index);
     void remove(int index, int count);
     void insert(int index, Object *el);
-    int size();
+    inline int size() { return siz; }
+    void optimize();
 protected:
     void resize(int requiredSize);
 public:
@@ -57,40 +58,45 @@ protected:
     ArrayBase base;
 
 public:
-    Array() : Object()
+    inline Array() : Object()
     {
         base.init(DEFAULT_ARRAY_CAPACITY);
     }
-    Array(int capacity) : Object()
+    inline Array(int capacity) : Object()
     {
         base.init(capacity);
     }
 
-    void append(Ref<T> el)
+    inline void append(Ref<T> el)
     {
         base.append(el.getPtr());
     }
-    void set(Ref<T> el, int index)
+    inline void set(Ref<T> el, int index)
     {
         base.set(el.getPtr(), index);
     }
-    Ref<T> get(int index)
+    inline Ref<T> get(int index)
     {
         return Ref<T>( (T *)base.get(index) );
     }
-    void remove(int index, int count=1)
+    inline void remove(int index, int count=1)
     {
         base.remove(index, count);
     }
-    void insert(int index, Ref<T> el)
+    inline void insert(int index, Ref<T> el)
     {
         base.insert(index, el.getPtr());
     }
-    int size()
+    inline int size()
     {
         return base.size();
     }
-	Object **getObjectArray()
+    inline void optimize()
+    {
+        base.optimize();
+    }
+    
+	inline Object **getObjectArray()
 	{
 		return base.arr;
 	}

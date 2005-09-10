@@ -126,6 +126,7 @@ public:
                                                            select_mode_t mode = SELECT_FULL) = 0;
     
     virtual zmm::Ref<CdsObject> findObjectByTitle(zmm::String title, int parentID) = 0;
+    virtual void incrementUpdateIDs(int *ids, int size) = 0;
 
     /* utility methods */
     virtual zmm::Ref<CdsObject> loadObject(int objectID,

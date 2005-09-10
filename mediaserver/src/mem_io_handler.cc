@@ -40,7 +40,7 @@ using namespace mxml;
 
 MemIOHandler::MemIOHandler(void *buffer, int length) : IOHandler()
 {
-    this->buffer = (char *)malloc(length);
+    this->buffer = (char *)MALLOC(length);
     this->length = length;
     memcpy(this->buffer, buffer, length);
 }
@@ -48,13 +48,13 @@ MemIOHandler::MemIOHandler(void *buffer, int length) : IOHandler()
 MemIOHandler::MemIOHandler(String str) : IOHandler()
 {
     this->length = str.length();
-    this->buffer = (char *)malloc(length);
+    this->buffer = (char *)MALLOC(length);
     memcpy(this->buffer, str.c_str(), length);
 }
 
 MemIOHandler::~MemIOHandler()
 {
-    free(buffer);
+    FREE(buffer);
 }
 
 void MemIOHandler::open(IN enum UpnpOpenFileMode mode)
@@ -81,7 +81,9 @@ int MemIOHandler::read(OUT char *buf, IN size_t length)
     ret = (int) length;
 
     if (pos >= this->length)
+    {
         pos = -1;
+    }
   
     return ret; 
  }
@@ -93,12 +95,12 @@ void MemIOHandler::seek(IN long offset, IN int whence)
         // offset must be positive when SEEK_SET is used
         if (offset < 0) 
         {
-            throw Exception("MemIOHandler seek failed: SEEK_SET used with negative offset");
+            throw Exception(_("MemIOHandler seek failed: SEEK_SET used with negative offset"));
         }
 
         if (offset > length)
         {
-            throw Exception("MemIOHandler seek failed: trying to seek past the end of file");
+            throw Exception(_("MemIOHandler seek failed: trying to seek past the end of file"));
         }
 
         pos = offset;
@@ -119,7 +121,7 @@ void MemIOHandler::seek(IN long offset, IN int whence)
         if (((temp + offset) > length) ||
             ((temp + offset) < 0))
         {
-            throw Exception("MemIOHandler seek failed: trying to seek before the beginning/past end of file");
+            throw Exception(_("MemIOHandler seek failed: trying to seek before the beginning/past end of file"));
         }
 
         pos = temp + offset;
@@ -130,14 +132,14 @@ void MemIOHandler::seek(IN long offset, IN int whence)
         if (((temp + offset) > length) ||
             ((temp + offset) < 0))
         {
-            throw Exception("MemIOHandler seek failed: trying to seek before the beginning/past end of file");
+            throw Exception(_("MemIOHandler seek failed: trying to seek before the beginning/past end of file"));
         }
 
         pos = temp + offset;
     }
     else
     {
-        throw Exception("MemIOHandler seek failed: unrecognized whence");
+        throw Exception(_("MemIOHandler seek failed: unrecognized whence"));
     }
 }
 

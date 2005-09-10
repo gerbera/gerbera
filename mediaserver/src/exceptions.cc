@@ -27,14 +27,3 @@ UpnpException::UpnpException(int errCode, String message) : Exception(message)
     this->errCode = errCode;
 }
 
-int UpnpException::getErrorCode()
-{
-    return errCode;
-}
-
-
-StorageException::StorageException(String message) : Exception(message)
-{
-
-}
-

@@ -24,26 +24,44 @@
 #include "common.h"
 #include "rexp.h"
 
+#define FS_MASK_FILES 1
+#define FS_MASK_DIRECTORIES 2
+
+#ifdef __CYGWIN__
+#define FS_ROOT_DIRECTORY "/cygdrive/"
+#else
+#define FS_ROOT_DIRECTORY "/"
+#endif
+
 class FsObject : public zmm::Object
 {
 public:
     inline FsObject() : zmm::Object()
-    { isDirectory = false; }
+    {
+        isDirectory = false;
+        hasContent = false;
+    }
 public:
     zmm::String filename;
     bool isDirectory;
+    bool hasContent;
 };
 
 class Filesystem : public zmm::Object
 {
 public:
     Filesystem();
-    ~Filesystem();
 
-    virtual zmm::Ref<zmm::Array<FsObject> > readDirectory(zmm::String path);
+    zmm::Ref<zmm::Array<FsObject> > readDirectory(zmm::String path, int mask,
+                                                  int chldMask = 0);
+    bool haveFiles(zmm::String dir);
+    bool haveDirectories(zmm::String dir);
     bool fileAllowed(zmm::String path);
+    
+    static zmm::Ref<Filesystem> getInstance();
 protected:
     zmm::Ref<zmm::Array<RExp> > includeRules;
+    bool have(zmm::String dir, int mask);
 };
 
 #endif // __FILESYSTEM_H__

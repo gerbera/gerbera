@@ -52,8 +52,8 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
     String path, parameters;
     bool serve = false;
 
-    if (string_ok(ConfigManager::getInstance()->getOption("/server/servedir")))
-            serve = true;
+    if (string_ok(ConfigManager::getInstance()->getOption(_("/server/servedir"))))
+        serve = true;
 
     RequestHandler::split_url(filename, path, parameters);
 
@@ -82,38 +82,41 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
     */
 
                 
-    if (link.startsWith(String("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_MEDIA_HANDLER))
+    if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" +
+                        CONTENT_MEDIA_HANDLER))
     {
         ret = new FileRequestHandler();
     }
-    else if (link.startsWith(String("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_UI_HANDLER))
+    else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" +
+                             CONTENT_UI_HANDLER))
     {  
-        String value = ConfigManager::getInstance()->getOption("/server/ui/attribute::enabled");
+        String value = ConfigManager::getInstance()->getOption(_("/server/ui/attribute::enabled"));
         if (value != "yes")
         {
-            throw Exception("UI disabled in configuration");
+            throw Exception(_("UI disabled in configuration"));
         }
 
-        String r_type = dict->get(URL_REQUEST_TYPE);
+        String r_type = dict->get(_(URL_REQUEST_TYPE));
         if (r_type != nil)
         {
             ret = create_web_request_handler(r_type);
         }
         else
         {
-            ret = create_web_request_handler("index");
+            ret = create_web_request_handler(_("index"));
         }
     } 
-    else if (link.startsWith(String("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER))
+    else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" +
+                             CONTENT_SERVE_HANDLER))
     {
         if (serve)
             ret = new ServeRequestHandler();
         else
-            throw Exception(String("Serving directories is not enabled in configuration"));
+            throw Exception(_("Serving directories is not enabled in configuration"));
     }
     else
     {
-        throw Exception(String("no valid handler type in ") + (char *)filename);
+        throw Exception(_("no valid handler type in ") + filename);
     }
     return Ref<RequestHandler>(ret);
 }

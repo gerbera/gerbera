@@ -81,7 +81,7 @@ String trim_string(String str)
         }
     }
     if (i >= len)
-        return String("");
+        return _("");
     for (i = len - 1; i >= start; i--)
     {
         if (! index(WHITE_SPACE, buf[i]))
@@ -117,10 +117,10 @@ void check_path_ex(String path, bool needDir)
         throw Exception(path + " : " + strerror(errno));
 
     if (needDir && (!S_ISDIR(statbuf.st_mode)))
-        throw Exception(String("Not a directory: ") + path);
+        throw Exception(_("Not a directory: ") + path);
     
     if (!needDir && (S_ISDIR(statbuf.st_mode)))
-        throw Exception(String("Not a file: ") + path);
+        throw Exception(_("Not a file: ") + path);
 
 }
 
@@ -135,12 +135,12 @@ bool string_ok(String str)
 void string_ok_ex(String str)
 {
     if ((str == nil) || (str == ""))
-        throw Exception("Empty string");
+        throw Exception(_("Empty string"));
 }
 
 String http_redirect_to(String ip, String port, String page)
 {
-    return String("<html><head><meta http-equiv=\"Refresh\" content=\"0;URL=http://") + ip + ":" + port + "/" + page + "\"></head><body bgcolor=\"#408bff\"></body></html>";
+    return _("<html><head><meta http-equiv=\"Refresh\" content=\"0;URL=http://") + ip + ":" + port + "/" + page + "\"></head><body bgcolor=\"#408bff\"></body></html>";
 }
 
 String hex_encode(void *data, int len)
@@ -190,31 +190,34 @@ String hex_decode_string(String encoded)
 	return buf->toString();
 }
 
-
 struct randomizer
 {
     struct timeval tv;
-    int pid;
-    int ppid;
+    int salt;
 };
-
-
-String generate_random_id()
+String hex_md5(void *data, int length)
 {
-    struct randomizer st;
-    gettimeofday(&st.tv, NULL);
-    st.pid = rand();
-    st.ppid = rand();
-
     char md5buf[16];
 
     md5_state_t ctx;
     md5_init(&ctx);
-    md5_append(&ctx, (unsigned char *)(&st), sizeof(st));
+    md5_append(&ctx, (unsigned char *)data, length);
     md5_finish(&ctx, (unsigned char *)md5buf);
 
     return hex_encode(md5buf, 16);
 }
+String hex_string_md5(String str)
+{
+    return hex_md5(str.c_str(), str.length());
+}
+String generate_random_id()
+{
+    struct randomizer st;
+    gettimeofday(&st.tv, NULL);
+    st.salt = rand();
+    return hex_md5(&st, sizeof(st));
+}
+
 
 static const char *hex = "0123456789ABCDEF";
 
@@ -310,18 +313,18 @@ String read_text_file(String path)
 	FILE *f = fopen(path.c_str(), "r");
 	if (!f)
     {
-        throw Exception(String("read_text_file: could not open ") +
+        throw Exception(_("read_text_file: could not open ") +
                         path + " : " + strerror(errno));
     }
 	Ref<StringBuffer> buf(new StringBuffer()); 
-	char *buffer = (char *)malloc(1024);
+	char *buffer = (char *)MALLOC(1024);
 	int bytesRead;	
 	while((bytesRead = fread(buffer, 1, 1024, f)) > 0)
 	{
 		*buf << String(buffer, bytesRead);
 	}
 	fclose(f);
-	free(buffer);
+	FREE(buffer);
 	return buf->toString();
 }
 void write_text_file(String path, String contents)
@@ -330,7 +333,7 @@ void write_text_file(String path, String contents)
     FILE *f = fopen(path.c_str(), "w");
     if (!f)
     {
-        throw Exception(String("write_text_file: could not open ") +
+        throw Exception(_("write_text_file: could not open ") +
                         path + " : " + strerror(errno));
     }
     
@@ -339,10 +342,10 @@ void write_text_file(String path, String contents)
     {
         fclose(f);
         if (bytesWritten >= 0)
-            throw Exception(String("write_text_file: incomplete write to ") +
+            throw Exception(_("write_text_file: incomplete write to ") +
                             path + " : ");
         else
-            throw Exception(String("write_text_file: error writing to ") +
+            throw Exception(_("write_text_file: error writing to ") +
                             path + " : " + strerror(errno));
     }
     fclose(f);
@@ -430,29 +433,24 @@ String renderProtocolInfo(String mimetype, String protocol)
     if (string_ok(mimetype) && string_ok(protocol))
         return protocol + ":*:" + mimetype + ":*";
     else
-        return String("http-get:*:*:*");
+        return _("http-get:*:*:*");
 }
 
 
 String secondsToHMS(int seconds)
 {
-    String h, m, s;
+    int h, m, s;
+    
+    s = seconds % 60;
+    seconds /= 60;
 
-    s = String("") + (seconds % 60);
-    if (s.length() < 2)
-        s = String("0") + s;
+    m = seconds % 60;
+    h = seconds / 60;
 
-    seconds = seconds / 60;
-
-    m = String("") + (seconds % 60);
-    if (m.length() < 2)
-        m = String("0") + m;
-
-    h = String("") + (seconds / 60);
-    if (h.length() < 2)
-        h = String("0") + h;
-
-    return h + ":" + m + ":" + s;
+    // XXX:XX:XX
+    char *str = (char *)malloc(10);
+    sprintf(str, "%02d:%02d:%02d\n", h, m, s);
+    return String::take(str);
 }
 
 #ifdef HAVE_MAGIC
@@ -490,7 +488,7 @@ void set_jpeg_resolution_resource(Ref<CdsItem> item, int res_num)
         String resolution = get_jpeg_resolution(fio_h);
 
         if (res_num >= item->getResourceCount())
-            throw Exception("Invalid resource index");
+            throw Exception(_("Invalid resource index"));
             
         item->getResource(res_num)->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), resolution);
     }

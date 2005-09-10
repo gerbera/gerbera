@@ -40,12 +40,15 @@ public:
     void shutdown();
 
     void containerChanged(int objectID);
+    void containersChanged(int *ids, int size);
     void flushUpdates(int flushFlag = FLUSH_SPEC);
 
     static zmm::Ref<UpdateManager> getInstance();
     
 protected:
+    bool lazyMode;
     int *objectIDs;
+    int objectIDcount;
     zmm::Ref<DBBHash<int, int> > objectIDHash;
     
     pthread_t updateThread;
@@ -61,10 +64,7 @@ protected:
     void threadProc();
     
     void sendUpdates();
-    bool haveUpdate(int objectID);
     bool haveUpdates();
-    void addUpdate(int objectID, int updateID);
-    void resetUpdates();
 };
 
 

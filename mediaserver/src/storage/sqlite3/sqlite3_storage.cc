@@ -32,7 +32,7 @@ Sqlite3Storage::Sqlite3Storage() : SQLStorage()
 {
     db = NULL;
 
-    pthread_mutex_init(&lock_mutex, NULL);    
+    mutex = Ref<Mutex>(new Mutex());
     /*
     int res;
     pthread_mutexattr_t mutex_attr;
@@ -49,21 +49,21 @@ Sqlite3Storage::~Sqlite3Storage()
 {
     if (db)
         sqlite3_close(db);
-    pthread_mutex_destroy(&lock_mutex);
 }
 
 void Sqlite3Storage::init()
 {
     Ref<ConfigManager> config = ConfigManager::getInstance();
 
-    String dbFilePath = config->getOption("/server/storage/database-file");
+    String dbFilePath = config->getOption(_("/server/storage/database-file"));
 
     int res = sqlite3_open(dbFilePath.c_str(), &db);
     if(res != SQLITE_OK)
     {
-        throw StorageException(String("Sqlite3Storage.init: could not open ")+
+        throw StorageException(_("Sqlite3Storage.init: could not open ") +
             dbFilePath);
     }
+    SQLStorage::init();
 }
 
 String Sqlite3Storage::quote(String value)
@@ -106,7 +106,7 @@ Ref<SQLResult> Sqlite3Storage::select(String query)
     {
         unlock();
         reportError(query);
-        throw StorageException("Sqlite3: query error");
+        throw StorageException(_("Sqlite3: query error"));
     }
 
     pres->row = pres->table;
@@ -133,25 +133,15 @@ void Sqlite3Storage::exec(String query)
     {
         unlock();
         reportError(query);
-        throw StorageException("Sqlite3: query error");
+        throw StorageException(_("Sqlite3: query error"));
     }
 
     unlock();
-    return true;
 }
 
 int Sqlite3Storage::lastInsertID()
 {
     return (int)sqlite3_last_insert_rowid(db);
-}
-
-void Sqlite3Storage::lock()
-{
-    pthread_mutex_lock(&lock_mutex);
-}
-void Sqlite3Storage::unlock()
-{
-    pthread_mutex_unlock(&lock_mutex);
 }
 
 /* Sqlite3Result */

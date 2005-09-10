@@ -23,6 +23,7 @@
 
 #include <errno.h>
 
+#include "memory.h"
 #include "logger.h"
 #include "zmmf/zmmf.h"
 #include "exceptions.h"

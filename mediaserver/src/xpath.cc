@@ -35,7 +35,7 @@ Ref<Element> XPath::getElement(String xpath)
     String axisPart = getAxisPart(xpath);
     if (axisPart != nil)
     {
-        throw Exception(String("XPath::getElement: unexpected axis in ") + xpath);
+        throw Exception(_("XPath::getElement: unexpected axis in ") + xpath);
     }
     return elementAtPath(xpath);
 }

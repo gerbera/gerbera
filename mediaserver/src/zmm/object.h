@@ -21,6 +21,8 @@
 #ifndef __ZMM_OBJECT_H__
 #define __ZMM_OBJECT_H__
 
+#include <new> // for size_t
+
 namespace zmm
 {
 
@@ -33,6 +35,9 @@ public:
     void retain();
     void release();
     int getRefCount();
+
+    static void* operator new (size_t size); 
+    static void operator delete (void *ptr);
 protected:
     int _ref_count;
 };

@@ -32,7 +32,9 @@ using namespace zmm;
 using namespace mxml;
 
 web::add::add() : WebRequestHandler()
-{}
+{
+    pagename = _("add");
+}
 
 void web::add::process()
 {
@@ -42,18 +44,18 @@ void web::add::process()
 
     check_request();
     
-    String objID = param("object_id");
+    String objID = param(_("object_id"));
     int objectID;
-    String path = param("path");
-    String driver = param("driver");
-    String sid = param("sid");
+    String path = param(_("path"));
+    String driver = param(_("driver"));
+    String sid = param(_("sid"));
 
     storage = Storage::getInstance();
     sd = PRIMARY;
 
     // there must at least a path or an objectID given
     if (((objID == nil) || (objID == "")) && ((path == nil) || (path == "")))
-        throw Exception(String("web::add::process(): missing parameters: either path or object id must be specified"));
+        throw Exception(_("web::add::process(): missing parameters: either path or object id must be specified"));
 
 
     // if path is there, we take it, else browse...
@@ -73,12 +75,12 @@ void web::add::process()
 
     session = SessionManager::getInstance()->getSession(sid);
 
-    objID = session->getFrom(sd, "object_id");
+    objID = session->getFrom(sd, _("object_id"));
     
     Ref<Dictionary> sub(new Dictionary());
-    sub->put("object_id", objID);
-    sub->put("driver", driver);
-    sub->put("sid", sid); 
-    *out << subrequest("browse", sub);
+    sub->put(_("object_id"), objID);
+    sub->put(_("driver"), driver);
+    sub->put(_("sid"), sid); 
+    *out << subrequest(_("browse"), sub);
 }
 
