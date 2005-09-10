@@ -61,11 +61,11 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     //log_debug(("full url (filename): %s, url_path: %s, parameters: %s\n",
     //           filename, url_path.c_str(), parameters.c_str()));
     
-    String objID = dict->get("object_id");
+    String objID = dict->get(_("object_id"));
     if (objID == nil)
     {
         //log_info(("object_id not found in url\n"));
-        throw Exception("get_info: object_id not found");
+        throw Exception(_("get_info: object_id not found"));
     }
     else
         objectID = objID.toInt();
@@ -80,7 +80,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
 
     if (!IS_CDS_ITEM(objectType))
     {
-        throw Exception("get_info: object is not an item");
+        throw Exception(_("get_info: object is not an item"));
     }
 
     // update item info by running action
@@ -99,7 +99,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
         if(strncmp(action.c_str(), "http://", 7))
         {
             long before = getMillis();
-            output = run_process(action, "run", input);
+            output = run_process(action, _("run"), input);
             long after = getMillis();
             log_info(("script executed in %ld milliseconds\n", after - before));
         }
@@ -141,7 +141,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     ret = stat(path.c_str(), &statbuf);
     if (ret != 0)
     {
-        throw Exception(String("Failed to stat ") + path);
+        throw Exception(_("Failed to stat ") + path);
     }
 
 
@@ -158,25 +158,29 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     /* determining which resource to serve */
 
     int res_id = 0;
-    String s_res_id = dict->get(URL_RESOURCE_ID);
+    String s_res_id = dict->get(_(URL_RESOURCE_ID));
     if (s_res_id != nil)
         res_id = s_res_id.toInt();
 
-    if (res_id < 0 || res_id >= item->getResourceCount())
-        throw Exception(String("Invalid resource id: ") + res_id);
-    
-    // http-get:*:image/jpeg:*
-    String protocolInfo = item->getResource(res_id)->getAttributes()->get("protocolInfo");
-    if (protocolInfo != nil)
+    if (res_id <= 0 || res_id > item->getResourceCount())
     {
-        Ref<Array<StringBase> > parts = split_string(protocolInfo, ':');
-        mimeType = parts->get(2);
+        // http-get:*:image/jpeg:*
+        String protocolInfo = item->getResource(res_id)->getAttributes()->get(_("protocolInfo"));
+        if (protocolInfo != nil)
+        {
+            Ref<Array<StringBase> > parts = split_string(protocolInfo, ':');
+            mimeType = parts->get(2);
+        }
+       
+        /// \todo we could figure out the content length...
+        info->file_length = -1;
     }
     else
     {
         mimeType = item->getMimeType();
+        info->file_length = statbuf.st_size;
+        //log_info(("FileIOHandler: get_info: file_length: %d\n", (int)statbuf.st_size));
     }
-    info->file_length = statbuf.st_size;
         
     info->last_modified = statbuf.st_mtime;
     info->is_directory = S_ISDIR(statbuf.st_mode);
@@ -198,7 +202,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, IN enum UpnpOpe
     // Currently we explicitly do not support UPNP_WRITE
     // due to security reasons.
     if (mode != UPNP_READ)
-        throw Exception("UPNP_WRITE unsupported");
+        throw Exception(_("UPNP_WRITE unsupported"));
 
     String url_path, parameters;
     split_url(filename, url_path, parameters);
@@ -206,10 +210,10 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, IN enum UpnpOpe
     Ref<Dictionary> dict(new Dictionary());
     dict->decode(parameters);
 
-    String objID = dict->get("object_id");
+    String objID = dict->get(_("object_id"));
     if (objID == nil)
     {
-        throw Exception("object_id not found");
+        throw Exception(_("object_id not found"));
     }
     else
         objectID = objID.toInt();
@@ -222,7 +226,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, IN enum UpnpOpe
 
     if (!IS_CDS_ITEM(obj->getObjectType()))
     {
-        throw Exception(String("web_open: unsuitable object type: ") + obj->getObjectType());
+        throw Exception(_("web_open: unsuitable object type: ") + obj->getObjectType());
     }
 
     Ref<CdsItem> item = RefCast(obj, CdsItem);
@@ -231,7 +235,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, IN enum UpnpOpe
 
     /* determining which resource to serve */
     int res_id = 0;
-    String s_res_id = dict->get(URL_RESOURCE_ID);
+    String s_res_id = dict->get(_(URL_RESOURCE_ID));
     if (s_res_id != nil)
         res_id = s_res_id.toInt();
 
