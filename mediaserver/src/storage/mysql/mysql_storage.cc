@@ -33,6 +33,7 @@ MysqlStorage::MysqlStorage() : SQLStorage()
     
     pthread_mutex_init(&lock_mutex, NULL);    
     /*
+    int res;
     pthread_mutexattr_t mutex_attr;
     res = pthread_mutexattr_init(&mutex_attr);
     res = pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_RECURSIVE_NP);
@@ -143,7 +144,7 @@ Ref<SQLResult> MysqlStorage::select(String query)
     return ret;
 }
 
-int MysqlStorage::exec(String query)
+void MysqlStorage::exec(String query)
 {
     lock();
     

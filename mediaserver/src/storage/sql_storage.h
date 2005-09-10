@@ -25,6 +25,7 @@
 #include "cds_objects.h"
 #include "dictionary.h"
 #include "storage.h"
+#include "hash.h"
 
 class SQLRow : public zmm::Object
 {
@@ -51,13 +52,13 @@ public:
     /* methods to override in subclasses */
     virtual zmm::String quote(zmm::String str) = 0;
     virtual zmm::Ref<SQLResult> select(zmm::String query) = 0;
-    virtual int exec(zmm::String query) = 0;
+    virtual void exec(zmm::String query) = 0;
     virtual int lastInsertID() = 0;
 
     virtual void addObject(zmm::Ref<CdsObject> object);
     virtual void updateObject(zmm::Ref<CdsObject> object);
     virtual void eraseObject(zmm::Ref<CdsObject> object);
-    virtual zmm::Ref<CdsObject> loadObject(zmm::String objectID,
+    virtual zmm::Ref<CdsObject> loadObject(int objectID,
                                            select_mode_t mode = SELECT_FULL);
 
     virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param,
@@ -70,7 +71,7 @@ public:
     virtual zmm::Ref<zmm::Array<CdsObject> > browse(zmm::Ref<BrowseParam> param);
     virtual zmm::Ref<zmm::Array<zmm::StringBase> > getMimeTypes();
 
-    virtual zmm::Ref<CdsObject> findObjectByTitle(zmm::String title, zmm::String parentID);
+    virtual zmm::Ref<CdsObject> findObjectByTitle(zmm::String title, int parentID);
 protected:
     virtual zmm::Ref<CdsObject> createObjectFromRow(zmm::Ref<SQLRow> row,
                                                     select_mode_t mode = SELECT_FULL);
@@ -84,9 +85,11 @@ protected:
     
     /* helpers for removeObject() */
 
-    zmm::Ref<Dictionary> rmIDs;
-    zmm::Ref<Dictionary> rmParents;
-    zmm::String rmDummy;
+    int *rmIDs;
+    zmm::Ref<DBHash<int> > rmIDHash;
+    int *rmParents;
+    zmm::Ref<DBBHash<int, int> > rmParentHash;
+    
     int rmFileCount;
 
     void rmInit();
