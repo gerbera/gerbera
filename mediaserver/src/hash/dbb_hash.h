@@ -21,117 +21,100 @@
 #ifndef __HASH_DBB_HASH_H__
 #define __HASH_DBB_HASH_H__
 
-#include "hash.h"
+#include "direct_hash_base.h"
 
-template <typename T, typename TV> struct dbb_hash_slot
+template <typename KT, typename VT> struct dbb_hash_slot
 {
-    T key;
-    TV value;
+    KT key;
+    VT value;
 };
 
-template <typename T, typename TV>
-class DBBHash : public zmm::Object
+template <typename KT, typename VT>
+class DBBHash : public DHashBase<KT, struct dbb_hash_slot<KT, VT> >
 {
 protected:
-    int capacity;
-    int count;
-    struct dbb_hash_slot<T, TV> *data;
-    T emptyKey;
+    KT emptyKey;
 public:
-    DBBHash(int capacity, T emptyKey) : zmm::Object()
+    DBBHash(int capacity, KT emptyKey) : DHashBase<KT, struct dbb_hash_slot<KT, VT> >(capacity)
     {
-        this->capacity = capacity;
         this->emptyKey = emptyKey;
-        count = 0;
-        data = (struct dbb_hash_slot<T, TV> *)calloc(capacity, sizeof(struct dbb_hash_slot<T, TV>));
+        clear();
     }
-    virtual ~DBBHash()
+
+    /* virtual methods */
+    virtual int hashCode(KT key)
     {
-        free(data);
+        return baseTypeHashCode((unsigned int)key);
     }
-    void zero()
+    virtual bool match(KT key, struct dbb_hash_slot<KT, VT> *slot)
     {
-        count = 0;
-        memset(data, 0, capacity * sizeof(T));
+        return (key == slot->key);
     }
-    inline int size()
+    virtual bool isEmptySlot(struct dbb_hash_slot<KT, VT> *slot)
     {
-        return count;
+        return (slot->key == emptyKey);
     }
-    T hashCode(T key)
+
+    void clear()
     {
-        return (((unsigned int)key * 0xd2d84a61) ^ 0x7832c9f4) % capacity;
+        if (! emptyKey)
+            zero();
+        else
+        {
+            for (int i = 0; i < capacity; i++)
+                data[i].key = emptyKey;
+            count = 0;
+        }
     }
    
-    bool put(T key, TV value)
+    inline void put(KT key, VT value)
     {
-        int prime = HASH_PRIME;
-        
-        // calculating primary hash
-        int h = hashCode(key);
-        // calculating secondary hash
-        int h2 = (prime - ((int)key % prime)) % capacity;
-        if (h2 == 0)
-            h2 = prime;
-        for (int i = 0; i < HASH_MAX_ITERATIONS; i++)
+        struct dbb_hash_slot<KT, VT> *slot;
+        bool found = search(key, &slot);
+        if (! found)
         {
-            struct dbb_hash_slot<T, TV> *slot = data + h;
-            
-            // found an empty slot
-            if (slot->key == emptyKey)
-            {
-                count++;
-                // log_debug(("hash::put: h:%d  h2:%d  count:%d  i:%d\n", h, h2, count, i));
-                slot->key = key;
-                slot->value = value;
-                return true;
-            }
-            // if found the same key do nothing
-            if (slot->key == key)
-                return false;
-
-            // collision, probing next slot
-            h = (h + h2) % capacity;
+            slot->key = key;
+            count++;
         }
-        throw zmm::Exception(zmm::String("DBBHash::put() failed, maximal number of iterations exceeded: h:") + h + " h2:"+ h2);
+        slot->value = value;
+    }
+    inline void put(KT key, hash_slot_t destSlot, VT value)
+    {
+        struct dbb_hash_slot<KT, VT> *slot = (struct dbb_hash_slot<KT, VT> *)destSlot;
+        if (slot->key == emptyKey)
+        {
+            slot->key = key;
+            count++;
+        }
+        slot->value = value;
     }
 
-    bool get(T key, TV *ret)
+    inline bool get(KT key, VT *value)
     {
-        int prime = HASH_PRIME;
-        
-        // calculating primary hash
-        int h = hashCode(key);
-        // calculating secondary hash
-        int h2 = (prime - ((int)key % prime)) % capacity;
-        if (h2 == 0)
-            h2 = prime;
-        for (int i = 0; i < HASH_MAX_ITERATIONS; i++)
-        {
-            struct dbb_hash_slot<T, TV> *slot = data + h;
-            
-            // found an empty slot
-            if (slot->key == emptyKey)
-                return false;
-            
-            // found the key
-            if (slot->key == key)
-            {
-                *ret = slot->value;
-                return true;
-            }
-            // collision, probing next slot
-            h = (h + h2) % capacity;
-        }
-        throw zmm::Exception(zmm::String("DBHash::exists() failed, maximal number of iterations exceeded: h:") + h + " h2:"+ h2);
+        struct dbb_hash_slot<KT, VT> *slot;
+        bool found = search(key, &slot);
+        if (found)
+            *value = slot->value;
+        return found;
     }
-
-    bool exists(T key)
+    bool get(KT key, hash_slot_t *destSlot, VT *value)
     {
-        TV value;
-        return get(key, &value);
+        struct dbb_hash_slot<KT, VT> **slot = (struct dbb_hash_slot<KT, VT> **)destSlot;
+        bool found = search(key, slot);
+        if (found)
+            *value = (*slot)->value;
+        return found;
+    }
+    inline bool exists(KT key)
+    {
+        struct dbb_hash_slot<KT, VT> *slot;
+        return search(key, &slot);
+    }
+    inline bool exists(KT key, hash_slot_t *destSlot)
+    {
+        return search(key, (struct dbb_hash_slot<KT, VT> **)destSlot);
     }
 };
 
-#endif // __HASH_DB_HASH_H__
+#endif // __HASH_DBB_HASH_H__
 
