@@ -41,20 +41,20 @@ Server::Server() : Object()
 
 void Server::init()
 {
-    virtual_directory = SERVER_VIRTUAL_DIR; 
+    virtual_directory = _(SERVER_VIRTUAL_DIR); 
 
-    cds = ContentDirectoryService::createInstance(DESC_CDS_SERVICE_TYPE,
-                                                  DESC_CDS_SERVICE_ID);
+    cds = ContentDirectoryService::createInstance(_(DESC_CDS_SERVICE_TYPE),
+                                                  _(DESC_CDS_SERVICE_ID));
                                                  
-    cmgr = ConnectionManagerService::createInstance(DESC_CM_SERVICE_TYPE,
-                                                    DESC_CM_SERVICE_ID);
+    cmgr = ConnectionManagerService::createInstance(_(DESC_CM_SERVICE_TYPE),
+                                                    _(DESC_CM_SERVICE_ID));
 
     pthread_mutex_init(&upnp_mutex, NULL);
 
     Ref<ConfigManager> config = ConfigManager::getInstance();
 
-    serverUDN = config->getOption("/server/udn");
-    alive_advertisement = config->getIntOption("/server/alive");
+    serverUDN = config->getOption(_("/server/udn"));
+    alive_advertisement = config->getIntOption(_("/server/alive"));
 }
 
 void Server::upnp_init(String ip, unsigned short port)
@@ -67,21 +67,21 @@ void Server::upnp_init(String ip, unsigned short port)
 
     if (ip == nil)
     {
-        ip = config->getOption("/server/ip", "");
+        ip = config->getOption(_("/server/ip"), _(""));
         if (ip == "") ip = nil;
         log_info(("got ip: %s\n", ip.c_str()));
     }
 
     if (port == 0)
     {
-        port = config->getIntOption("/server/port");
+        port = config->getIntOption(_("/server/port"));
     }
     
     ret = UpnpInit(ip.c_str(), port);
 
     if (ret != UPNP_E_SUCCESS)
     {
-        throw UpnpException(ret, "upnp_init: UpnpInit failed");
+        throw UpnpException(ret, _("upnp_init: UpnpInit failed"));
     }
 
     port = UpnpGetServerPort();
@@ -95,21 +95,21 @@ void Server::upnp_init(String ip, unsigned short port)
 
     log_info(("Server bound to: %s\n", ip.c_str()));
 
-    virtual_url = String("http://") + ip + ":" + port + "/" + virtual_directory;
+    virtual_url = _("http://") + ip + ":" + port + "/" + virtual_directory;
 
     /// \TODO who should construct absolute paths??? config_manage or the modules?
     // next set webroot directory
-    String web_root = config->getOption("/server/webroot");
+    String web_root = config->getOption(_("/server/webroot"));
 
     if (!string_ok(web_root))
     {
-        throw Exception(String("invalid web server root directory"));
+        throw Exception(_("invalid web server root directory"));
     }
     
     ret = UpnpSetWebServerRootDir(web_root.c_str());
     if (ret != UPNP_E_SUCCESS)
     {
-        throw UpnpException(ret, "upnp_init: UpnpSetWebServerRootDir failed");
+        throw UpnpException(ret, _("upnp_init: UpnpSetWebServerRootDir failed"));
     }
 
     log_info(("upnp_init: webroot: %s\n", web_root.c_str())); 
@@ -117,17 +117,17 @@ void Server::upnp_init(String ip, unsigned short port)
     ret = UpnpAddVirtualDir(virtual_directory.c_str());
     if (ret != UPNP_E_SUCCESS)
     {
-        throw UpnpException(ret, "upnp_init: UpnpAddVirtualDir failed");
+        throw UpnpException(ret, _("upnp_init: UpnpAddVirtualDir failed"));
     }
 
     ret = register_web_callbacks();
     if (ret != UPNP_E_SUCCESS)
     {
-        throw UpnpException(ret, "upnp_init: UpnpSetVirtualDirCallbacks failed");
+        throw UpnpException(ret, _("upnp_init: UpnpSetVirtualDirCallbacks failed"));
     }
 
     // register root device with the library
-    String device_description = String("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") +
+    String device_description = _("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") +
                                 UpnpXML_RenderDeviceDescription()->print();
 
 //    log_info(("DEVICE DESCRIPTION: \n%s\n", device_description.c_str()));
@@ -140,14 +140,14 @@ void Server::upnp_init(String ip, unsigned short port)
                                   &device_handle);
     if (ret != UPNP_E_SUCCESS)
     {
-        throw UpnpException(ret, "upnp_init: UpnpRegisterRootDevice failed");
+        throw UpnpException(ret, _("upnp_init: UpnpRegisterRootDevice failed"));
     }
 
     // now unregister in order to cleanup previous instances
     // that might still be there due to crash/unclean shutdown/network interruptions
     ret = UpnpUnRegisterRootDevice(device_handle);
     if (ret != UPNP_E_SUCCESS) {   
-        throw UpnpException(ret, "upnp_init: unregistering failed");
+        throw UpnpException(ret, _("upnp_init: unregistering failed"));
     }
     
     // and register again, we should be clean now
@@ -158,7 +158,7 @@ void Server::upnp_init(String ip, unsigned short port)
                                   &device_handle);
     if (ret != UPNP_E_SUCCESS)
     {
-        throw UpnpException(ret, "upnp_init: UpnpRegisterRootDevice failed");
+        throw UpnpException(ret, _("upnp_init: UpnpRegisterRootDevice failed"));
     }
 
 
@@ -166,7 +166,7 @@ void Server::upnp_init(String ip, unsigned short port)
     ret = UpnpSendAdvertisement(device_handle, alive_advertisement);
     if (ret != UPNP_E_SUCCESS)
     {
-        throw UpnpException(ret, "upnp_init: UpnpSendAdvertisement failed");
+        throw UpnpException(ret, _("upnp_init: UpnpSendAdvertisement failed"));
     }
 
     // initializing UpdateManager
@@ -193,7 +193,7 @@ void Server::upnp_cleanup()
     
     ret = UpnpUnRegisterRootDevice(device_handle);
     if (ret != UPNP_E_SUCCESS) {   
-        throw UpnpException(ret, "upnp_cleanup: UpnpUnRegisterRootDevice failed");
+        throw UpnpException(ret, _("upnp_cleanup: UpnpUnRegisterRootDevice failed"));
     }
    
 //    log_info(("now calling upnp finish\n"));
@@ -307,7 +307,7 @@ void Server::upnp_actions(Ref<ActionRequest> request)
     {
         // not for us
         throw UpnpException(UPNP_E_BAD_REQUEST, 
-                            "upnp_actions: request not for this device");
+                            _("upnp_actions: request not for this device"));
     }
 
     // we need to match the serviceID to one of our services
@@ -328,7 +328,7 @@ void Server::upnp_actions(Ref<ActionRequest> request)
         // cp is asking for a nonexistent service, or for a service
         // that does not support any actions
         throw UpnpException(UPNP_E_BAD_REQUEST, 
-                            "Service does not exist or action not supported");
+                            _("Service does not exist or action not supported"));
     }
 }
 
@@ -341,7 +341,7 @@ void Server::upnp_subscriptions(Ref<SubscriptionRequest> request)
         // not for us
 //        log_info(("upnp_subscriptions: request not for this device\n"));
         throw UpnpException(UPNP_E_BAD_REQUEST,
-                            "upnp_actions: request not for this device");
+                            _("upnp_actions: request not for this device"));
     }
                                                              
     // we need to match the serviceID to one of our services
@@ -361,7 +361,7 @@ void Server::upnp_subscriptions(Ref<SubscriptionRequest> request)
         // cp asks for a nonexistent service or for a service that
         // does not support subscriptions
         throw UpnpException(UPNP_E_BAD_REQUEST, 
-                            "Service does not exist or subscriptions not supported");
+                            _("Service does not exist or subscriptions not supported"));
     }
 }
 
