@@ -30,13 +30,13 @@ StringBase::StringBase(int capacity) : Object()
 	len = capacity;
 	data = (char *)malloc((len + 1) * sizeof(char));
 }
-StringBase::StringBase(char *str) : Object()
+StringBase::StringBase(const char *str) : Object()
 {
 	len = (int)strlen(str);
 	data = (char *)malloc((len + 1) * sizeof(char));
 	strcpy(data, str);
 }
-StringBase::StringBase(char *str, int len) : Object()
+StringBase::StringBase(const char *str, int len) : Object()
 {
 	this->len = len;
 	data = (char *)malloc((len + 1) * sizeof(char));
@@ -68,7 +68,7 @@ String::String(int capacity)
 	base = new StringBase(capacity);
 	base->retain();
 }
-String::String(char *str)
+String::String(const char *str)
 {
 	if(str)
 	{
@@ -78,7 +78,7 @@ String::String(char *str)
 	else
 		base = NULL;
 }
-String::String(char *str, int len)
+String::String(const char *str, int len)
 {
 	if(str)
 	{
@@ -178,7 +178,7 @@ String String::from(int x)
 }
 String String::from(double x)
 {
-    StringBase *b = new StringBase(MAX_INT_STRING_LENGTH);
+    StringBase *b = new StringBase(MAX_DOUBLE_STRING_LENGTH);
 	b->len = sprintf(b->data, "%lf", x);
     return (String(b));
 }
