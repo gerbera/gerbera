@@ -1,4 +1,4 @@
-/*  login.cc - this file is part of MediaTomb.
+/*  refresh.cc - this file is part of MediaTomb.
                                                                                 
     Copyright (C) 2005 Gena Batyan <bgeradz@deadlock.dhs.org>,
                        Sergey Bostandzhyan <jin@deadlock.dhs.org>
@@ -18,59 +18,48 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "server.h"
 #include "common.h"
+#include "pages.h"
+
 #include "storage.h"
 #include "cds_objects.h"
-#include "dictionary.h"
-#include "pages.h"
-#include "session_manager.h"
+#include "upnp_xml.h"
 
 using namespace zmm;
 using namespace mxml;
 
-web::login::login() : WebRequestHandler() 
+web::items::items() : WebRequestHandler()
 {
-    pagename = "login";
+    pagename = "items";
 }
 
-void web::login::get_info(IN const char *filename, OUT struct File_Info *info)
+void web::items::process()
 {
-    info->file_length = -1; // length is unknown
-    info->last_modified = time(NULL);
-    info->is_directory = 0;
-    info->is_readable = 1;
-    info->content_type = ixmlCloneDOMString(MIMETYPE_HTML);
-}
+//    check_request();
+    String parID = param("parent_id");
+    int parentID;
+    if (parID == nil)
+        parentID = 0;
+    else
+        parentID = parID.toInt();
 
+    Ref<Storage> storage = Storage::getInstance();
+    Ref<SelectParam> param(new SelectParam(FILTER_PARENT_ID_ITEMS, parentID));
 
-void web::login::process()
-{
-    // well... at the moment - unsupported
-    /*
-    String username = param("username");
-    String password = param("password");
+    Ref<Array<CdsObject> > arr = storage->selectObjects(param);
 
-    log_info(("username: %s, password %s\n", username.c_str(), password.c_str()));
+    // we keep the browse result in the DIDL-Lite tag in our xml
+    Ref<Element> items (new Element("items"));
 
-    if ((username == nil) || (password == nil) || 
-        (username == "") || (password == ""))
+    for (int i = 0; i < arr->size(); i++)
     {
-        *out << "<html><head><meta http-equiv=\"Refresh\" content=\"0;URL=/noaccess.html\"></head></html>";
-        return;
+        Ref<CdsObject> obj = arr->get(i);
+        // this has to be adjusted: the resourced for browsing are different
+        Ref<Element> didl_object = UpnpXML_DIDLRenderObject(obj);
+
+        items->appendChild(didl_object);
     }
-
-    */
-
-    Ref<SessionManager> sm = SessionManager::getInstance();
-    Ref<Session> s = sm->createSession(DEFAULT_SESSION_TIMEOUT);
     
-    String sid = s->getID();
-
-    root->addAttribute("sid", sid);
-    
-    s->put("object_id", "0");
-    s->put("requested_count", "15");
-    s->put("starting_index", "0");
+    root->appendChild(items);
 }
 

@@ -42,25 +42,20 @@ void web::edit_ui::process()
 
     check_request();
 
-    String object_id = param("object_id");
+    String objID = param("object_id");
+    int objectID;
     String driver = param("driver");
     String sid = param("sid");
 
-    if (object_id == nil)
+    if (objID == nil)
         throw Exception(String("invalid object id"));
+    else
+        objectID = objID.toInt();
     
-    if (driver == "1")
-    {
-        storage = Storage::getInstance();
-        sd = PRIMARY;
-    }
-    else if (driver == "2")
-    {
-        storage = Storage::getInstance(FILESYSTEM_STORAGE);
-        sd = SECONDARY;
-    }
+    storage = Storage::getInstance();
+    sd = PRIMARY;
 
-    Ref<CdsObject> current = storage->loadObject(object_id);
+    Ref<CdsObject> current = storage->loadObject(objectID);
     Ref<Element> didl_object = UpnpXML_DIDLRenderObject(current, true);
     didl_object->appendTextChild("location", current->getLocation());
     int objectType = current->getObjectType();
@@ -76,7 +71,7 @@ void web::edit_ui::process()
     root->appendChild(didl_object);
     root->appendTextChild("driver", driver);
     root->appendTextChild("sid", sid);
-    root->appendTextChild("object_id", object_id);
+    root->appendTextChild("object_id", String::from(objectID));
 
 
     *out << renderXMLHeader("/edit.xsl");

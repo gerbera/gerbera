@@ -73,7 +73,7 @@ int MemIOHandler::read(OUT char *buf, IN size_t length)
     }
    
     int rest = this->length - pos;
-    if ((int)length > rest)
+    if (length > (size_t)rest)
         length = rest;
         
     memcpy(buf, buffer + pos, length);

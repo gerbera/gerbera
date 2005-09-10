@@ -1,4 +1,4 @@
-/*  refresh.cc - this file is part of MediaTomb.
+/*  scripting.h - this file is part of MediaTomb.
                                                                                 
     Copyright (C) 2005 Gena Batyan <bgeradz@deadlock.dhs.org>,
                        Sergey Bostandzhyan <jin@deadlock.dhs.org>
@@ -18,49 +18,24 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "server.h"
-#include <stdio.h>
+#ifndef __SCRIPTING_IMPORT_SCRIPT_H__
+#define __SCRIPTING_IMPORT_SCRIPT_H__
+
 #include "common.h"
-#include "storage.h"
+#include "script.h"
 #include "cds_objects.h"
-#include "dictionary.h"
-#include "pages.h"
-#include "content_manager.h"
-#include "session_manager.h"
 
-using namespace zmm;
-using namespace mxml;
-
-web::refresh::refresh() : WebRequestHandler()
-{}
-
-void web::refresh::process()
+class ImportScript : public Script
 {
-    Ref<Session>   session;
-    Ref<Storage>   storage;
-    session_data_t sd;
-
-    check_request();
+public:
+	ImportScript(zmm::Ref<Runtime> runtime);
+	void processCdsObject(zmm::Ref<CdsObject> obj);	
     
-    String object_id = param("object_id");
-    String driver = param("driver");
-    String sid = param("sid");
+    zmm::Ref<CdsObject> jsObject2cdsObject(JSObject *js);
+protected:
+    void cdsObject2jsObject(zmm::Ref<CdsObject> obj, JSObject *js);
 
-    storage = Storage::getInstance();
-    sd = PRIMARY;
+};
 
-    // there must at least a path or an object_id given
-    if ((object_id == nil) || (object_id == "")) 
-        throw Exception(String("invalid object id"));
-
-    // Reinitialize scripting
-//    ContentManager::getInstance()->reloadScripting(); // DEBUG PURPOSES :>
-
-    
-    Ref<Dictionary> sub(new Dictionary());
-    sub->put("object_id", object_id);
-    sub->put("driver", driver);
-    sub->put("sid", sid); 
-    *out << subrequest("browse", sub);
-}
+#endif // __SCRIPTING_IMPORT_SCRIPT_H__
 

@@ -47,12 +47,20 @@ static Ref<Element> addOption(String option_name, String option_type, String def
     return option;
 }
 
-void web::new_ui::add_container()
+void web::new_ui::addContainer()
 {
     String tmp;
 
     Ref<CdsContainer> cont (new CdsContainer());
-    cont->setParentID(param("object_id"));
+
+    String objID = param("object_id");
+    int objectID;
+    if (objID == nil)
+        objectID = 0;
+    else
+        objectID = objID.toInt();
+    cont->setParentID(objectID);
+
     cont->setTitle(param("title"));
 
     tmp = param("location");
@@ -72,12 +80,19 @@ void web::new_ui::add_container()
     cm->addObject(obj);
 }
 
-void web::new_ui::add_item()
+void web::new_ui::addItem()
 {
     String tmp;
     Ref<CdsItem> item (new CdsItem());
-    
-    item->setParentID(param("object_id"));
+
+    String objID = param("object_id");
+    int objectID;
+    if (objID == nil)
+        objectID = 0;
+    else
+        objectID = objID.toInt();
+    item->setParentID(objectID);
+
     item->setTitle(param("title"));
     item->setLocation(param("location"));
 
@@ -111,14 +126,21 @@ void web::new_ui::add_item()
 
 }
 
-void web::new_ui::add_url()
+void web::new_ui::addUrl()
 {
     String tmp;
     String protocol;
 
     Ref<CdsItemExternalURL> item (new CdsItemExternalURL());
-    
-    item->setParentID(param("object_id"));
+
+    String objID = param("object_id");
+    int objectID;
+    if (objID == nil)
+        objectID = 0;
+    else
+        objectID = objID.toInt();
+    item->setParentID(objectID);
+
     item->setTitle(param("title"));
     item->setURL(param("location"));
 
@@ -156,13 +178,20 @@ void web::new_ui::add_url()
 
 }
 
-void web::new_ui::add_internal_url()
+void web::new_ui::addInternalUrl()
 {
     String tmp; 
     String protocol;
     Ref<CdsItemInternalURL> item (new CdsItemInternalURL());
+
+    String objID = param("object_id");
+    int objectID;
+    if (objID == nil)
+        objectID = 0;
+    else
+        objectID = objID.toInt();
+    item->setParentID(objectID);
     
-    item->setParentID(param("object_id"));
     item->setTitle(param("title"));
     item->setURL(param("location"));
 
@@ -200,12 +229,19 @@ void web::new_ui::add_internal_url()
 
 }
 
-void web::new_ui::add_active_item()
+void web::new_ui::addActiveItem()
 {
     String tmp;
     Ref<CdsActiveItem> item (new CdsActiveItem());
+
+    String objID = param("object_id");
+    int objectID;
+    if (objID == nil)
+        objectID = 0;
+    else
+        objectID = objID.toInt();
+    item->setParentID(objectID);
     
-    item->setParentID(param("object_id"));
     item->setTitle(param("title"));
     item->setLocation(param("location"));
     item->setAction(param("action"));
@@ -244,7 +280,7 @@ void web::new_ui::add_active_item()
     cm->addObject(obj);
 }
 
-void web::new_ui::add_object()
+void web::new_ui::addObject()
 {
     String obj_type = param("type");
     String location = param("location");
@@ -261,19 +297,19 @@ void web::new_ui::add_object()
                     throw Exception(String("path not found"));
             }
 
-            this->add_container();
+            this->addContainer();
             break;
 
         case OBJECT_TYPE_ITEM_INTERNAL_URL:
             if (!string_ok(location))
                 throw Exception(String("No URL given"));
-            this->add_internal_url();
+            this->addInternalUrl();
             break;
 
         case OBJECT_TYPE_ITEM_EXTERNAL_URL:
             if (!string_ok(location))
                 throw Exception(String("No URL given"));
-            this->add_url();
+            this->addUrl();
             break;
 
         case OBJECT_TYPE_ACTIVE_ITEM:
@@ -282,7 +318,7 @@ void web::new_ui::add_object()
 
             if (!check_path(location, false))
                 throw Exception(String("path not found"));
-            this->add_active_item();
+            this->addActiveItem();
             break;
 
         case OBJECT_TYPE_ITEM:
@@ -291,7 +327,7 @@ void web::new_ui::add_object()
 
             if (!check_path(location, false))
                 throw Exception(String("file not found"));
-            this->add_item();
+            this->addItem();
             break;
 
         default:
@@ -344,7 +380,7 @@ void web::new_ui::process()
 
     if (reload == "0")
     {
-        this->add_object();
+        this->addObject();
 
         Ref<Dictionary> sub(new Dictionary());
         sub->put("object_id", object_id);     

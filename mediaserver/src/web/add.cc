@@ -42,33 +42,29 @@ void web::add::process()
 
     check_request();
     
-    String object_id = param("object_id");
+    String objID = param("object_id");
+    int objectID;
     String path = param("path");
     String driver = param("driver");
     String sid = param("sid");
 
-    if (driver == "1")
-    {
-        storage = Storage::getInstance();
-        // depending on the driver we store the data in different
-        // locations within the session
-        sd = PRIMARY;
-    }
-    else if (driver == "2")
-    {
-        storage = Storage::getInstance(FILESYSTEM_STORAGE);
-        sd = SECONDARY;
-    }
+    storage = Storage::getInstance();
+    sd = PRIMARY;
 
-    // there must at least a path or an object_id given
-    if (((object_id == nil) || (object_id == "")) && ((path == nil) || (path == "")))
-        throw Exception(String("missing parameters: either path or object id must be specified"));
+    // there must at least a path or an objectID given
+    if (((objID == nil) || (objID == "")) && ((path == nil) || (path == "")))
+        throw Exception(String("web::add::process(): missing parameters: either path or object id must be specified"));
 
 
     // if path is there, we take it, else browse...
+    if (objID != nil && objID != "")
+        objectID = objID.toInt();
+    else
+        objectID = 0;
+
     if ((path == nil) || (path == ""))
     {
-        Ref<CdsObject> current = storage->loadObject(object_id);
+        Ref<CdsObject> current = storage->loadObject(objectID);
         path = current->getLocation();
     }
     
@@ -77,12 +73,10 @@ void web::add::process()
 
     session = SessionManager::getInstance()->getSession(sid);
 
-    object_id = session->getFrom(sd, "object_id");
-    if (object_id == nil) object_id = "0";
-    
+    objID = session->getFrom(sd, "object_id");
     
     Ref<Dictionary> sub(new Dictionary());
-    sub->put("object_id", object_id);
+    sub->put("object_id", objID);
     sub->put("driver", driver);
     sub->put("sid", sid); 
     *out << subrequest("browse", sub);

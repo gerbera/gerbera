@@ -1,4 +1,4 @@
-/*  scripting.h - this file is part of MediaTomb.
+/*  refresh.cc - this file is part of MediaTomb.
                                                                                 
     Copyright (C) 2005 Gena Batyan <bgeradz@deadlock.dhs.org>,
                        Sergey Bostandzhyan <jin@deadlock.dhs.org>
@@ -18,28 +18,30 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef __SCRIPTING_H__
-#define __SCRIPTING_H__
-
-#define XP_UNIX 1
-#include <jsapi.h>
 #include "common.h"
-#include "cds_objects.h"
+#include "pages.h"
 
-class Scripting : public zmm::Object
+using namespace zmm;
+using namespace mxml;
+
+web::index::index() : WebRequestHandler()
 {
-protected:
-    JSVersion version;
-    JSRuntime *rt;
-    JSContext *cx;
-    JSObject  *glob;
-	JSScript *script;
-public:
-	Scripting();
-	virtual ~Scripting();
-	void init();
-	void processCdsObject(zmm::Ref<CdsObject> obj);	
-};
+    pagename = "index";
+}
 
-#endif // __SCRIPTING_H__
+void web::index::process()
+{
+    Ref<Element> suffer(new Element("suffer"));
+    suffer->addAttribute("amount", "very much");
+    
+    Ref<Element> torture(new Element("torture"));
+    torture->addAttribute("message", "and then you die");
+    suffer->appendChild(torture);
+
+    torture = Ref<Element>(new Element("torture"));
+    torture->addAttribute("message", "pulverized");
+    suffer->appendChild(torture);
+
+    root->appendChild(suffer);
+}
 

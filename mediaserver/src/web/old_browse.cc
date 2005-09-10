@@ -32,9 +32,7 @@ using namespace zmm;
 using namespace mxml;
 
 web::browse::browse() : WebRequestHandler()
-{
-    pagename = "browse";
-}
+{}
 
 static Ref<Element> addAction(String action_type, String action_name)
 {
@@ -191,6 +189,8 @@ void web::browse::process()
     // - containers : actions taht are available only for containers
     Ref<Element> actions (new Element("actions"));
 
+
+
     // depending on the driver we have different actions
     if (driver == "1") // browsing the server database 
     {
@@ -215,10 +215,16 @@ void web::browse::process()
 
     current_browse->appendChild(actions);
 
+    Ref<Element> root (new Element("root"));
     root->addAttribute("xmlns:dc", "http://purl.org/dc/elements/1.1/");
     root->addAttribute("xmlns:upnp", "urn:schemas-upnp-org:metadata-1-0/upnp/");
     
     root->appendChild(current_browse);
     root->appendChild(didl_lite);
+    
+    *out << renderXMLHeader("/browse.xsl");
+    *out << root->print();
+    
+//    log_info(("browse: returning\n"));
 }
 

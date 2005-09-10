@@ -1,4 +1,4 @@
-/*  refresh.cc - this file is part of MediaTomb.
+/*  ref.h - this file is part of MediaTomb.
                                                                                 
     Copyright (C) 2005 Gena Batyan <bgeradz@deadlock.dhs.org>,
                        Sergey Bostandzhyan <jin@deadlock.dhs.org>
@@ -18,49 +18,15 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "server.h"
-#include <stdio.h>
+#ifndef __HASH_H__
+#define __HASH_H__
+
+#define HASH_PRIME 47
+#define HASH_MAX_ITERATIONS 100
+
 #include "common.h"
-#include "storage.h"
-#include "cds_objects.h"
-#include "dictionary.h"
-#include "pages.h"
-#include "content_manager.h"
-#include "session_manager.h"
+#include "hash/db_hash.h"
+#include "hash/dbb_hash.h"
 
-using namespace zmm;
-using namespace mxml;
-
-web::refresh::refresh() : WebRequestHandler()
-{}
-
-void web::refresh::process()
-{
-    Ref<Session>   session;
-    Ref<Storage>   storage;
-    session_data_t sd;
-
-    check_request();
-    
-    String object_id = param("object_id");
-    String driver = param("driver");
-    String sid = param("sid");
-
-    storage = Storage::getInstance();
-    sd = PRIMARY;
-
-    // there must at least a path or an object_id given
-    if ((object_id == nil) || (object_id == "")) 
-        throw Exception(String("invalid object id"));
-
-    // Reinitialize scripting
-//    ContentManager::getInstance()->reloadScripting(); // DEBUG PURPOSES :>
-
-    
-    Ref<Dictionary> sub(new Dictionary());
-    sub->put("object_id", object_id);
-    sub->put("driver", driver);
-    sub->put("sid", sid); 
-    *out << subrequest("browse", sub);
-}
+#endif // __HASH_H__
 

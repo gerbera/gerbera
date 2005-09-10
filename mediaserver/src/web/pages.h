@@ -31,11 +31,76 @@
 namespace web
 {
 
-/// \brief Browse the database (either primary or secondary)
+/// \brief Add a file or directory to database.
+class add : public WebRequestHandler
+{
+public:
+    add();
+    virtual void process();
+};
+
+/// \brief Show accounting information.
+class acct : public WebRequestHandler
+{
+public:
+    acct();
+    virtual void process();
+    virtual void get_info(IN const char *filename, OUT struct File_Info *info);
+};
+
+/// \brief Browser frameset
 class browse : public WebRequestHandler
 {
 public:
     browse();
+    virtual void process();
+};
+
+/// \brief Browser container tree
+class containers : public WebRequestHandler
+{
+public:
+    containers();
+    virtual void process();
+};
+
+/// \brief Save the changes that were made to an item or container to the database.
+class edit_save : public WebRequestHandler
+{
+public:
+    edit_save();
+    virtual void process();
+};
+
+/// \brief Provide user interface for editing item or container properties.
+class edit_ui : public WebRequestHandler
+{
+public:
+    edit_ui();
+    virtual void process();
+};
+
+/// \brief UI head
+class head : public WebRequestHandler
+{
+public:
+    head();
+    virtual void process();
+};
+
+/// \brief main frameset
+class index : public WebRequestHandler
+{
+public:
+    index();
+    virtual void process();
+};
+
+/// \brief Browser item list
+class items : public WebRequestHandler
+{
+public:
+    items();
     virtual void process();
 };
 
@@ -48,14 +113,6 @@ public:
     virtual void process();
 };
 
-/// \brief Add a file or directory to database.
-class add : public WebRequestHandler
-{
-public:
-    add();
-    virtual void process();
-};
-
 /// \brief Remove an item or container from the database.
 class remove : public WebRequestHandler
 {
@@ -64,32 +121,25 @@ public:
     virtual void process();
 };
 
-/// \brief Provide user interface for editing item or container properties.
-class edit_ui : public WebRequestHandler
+/// \brief Render tree of containers/directories.
+class tree : public WebRequestHandler
 {
 public:
-    edit_ui();
+    tree();
     virtual void process();
 };
 
-/// \brief Save the changes that were made to an item or container to the database.
-class edit_save : public WebRequestHandler
-{
-public:
-    edit_save();
-    virtual void process();
-};
 
 /// \brief provide user interface for creating new (virtual) items or containers.
 class new_ui : public WebRequestHandler
 {
 protected:
-    void add_container();
-    void add_item();
-    void add_url();
-    void add_internal_url();
-    void add_active_item();
-    void add_object();
+    void addContainer();
+    void addItem();
+    void addUrl();
+    void addInternalUrl();
+    void addActiveItem();
+    void addObject();
 public:
     new_ui();
     virtual void process();
@@ -103,14 +153,6 @@ public:
     virtual void process();
 };
 
-/// \brief Show accounting information.
-class acct : public WebRequestHandler
-{
-public:
-    acct();
-    virtual void process();
-    void get_info(IN const char *filename, OUT struct File_Info *info);
-};
 
 /// \brief Display a page with an error message.
 class error : public WebRequestHandler

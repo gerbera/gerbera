@@ -49,6 +49,8 @@ public:
     SQLStorage();
     virtual ~SQLStorage();
 
+    virtual void init();
+
     /* methods to override in subclasses */
     virtual zmm::String quote(zmm::String str) = 0;
     virtual zmm::Ref<SQLResult> select(zmm::String query) = 0;
@@ -72,6 +74,7 @@ public:
     virtual zmm::Ref<zmm::Array<zmm::StringBase> > getMimeTypes();
 
     virtual zmm::Ref<CdsObject> findObjectByTitle(zmm::String title, int parentID);
+    virtual void incrementUpdateIDs(int *ids, int size);
 protected:
     virtual zmm::Ref<CdsObject> createObjectFromRow(zmm::Ref<SQLRow> row,
                                                     select_mode_t mode = SELECT_FULL);
@@ -89,8 +92,6 @@ protected:
     zmm::Ref<DBHash<int> > rmIDHash;
     int *rmParents;
     zmm::Ref<DBBHash<int, int> > rmParentHash;
-    
-    int rmFileCount;
 
     void rmInit();
     void rmCleanup();
@@ -101,6 +102,12 @@ protected:
     void rmItem(zmm::Ref<CdsObject> obj);
     void rmChildren(zmm::Ref<CdsObject> obj);
     void rmDecChildCount(zmm::Ref<CdsObject> obj);
+    
+    zmm::Ref<DSOHash<CdsObject> > objectTitleCache;
+    zmm::Ref<DBOHash<int, CdsObject> > objectIDCache;
+    
+    int getNextObjectID();
+    int nextObjectID;
 };
 
 #endif // __SQL_STORAGE_H__

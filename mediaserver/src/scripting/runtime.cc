@@ -1,4 +1,5 @@
-/*  refresh.cc - this file is part of MediaTomb.
+
+/*  scripting.cc - this file is part of MediaTomb.
                                                                                 
     Copyright (C) 2005 Gena Batyan <bgeradz@deadlock.dhs.org>,
                        Sergey Bostandzhyan <jin@deadlock.dhs.org>
@@ -18,49 +19,39 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "server.h"
-#include <stdio.h>
-#include "common.h"
-#include "storage.h"
-#include "cds_objects.h"
-#include "dictionary.h"
-#include "pages.h"
-#include "content_manager.h"
-#include "session_manager.h"
+#ifdef HAVE_JS
+
+#include "runtime.h"
 
 using namespace zmm;
-using namespace mxml;
 
-web::refresh::refresh() : WebRequestHandler()
-{}
+static Ref<Runtime> instance;
 
-void web::refresh::process()
+Runtime::Runtime() : Object()
 {
-    Ref<Session>   session;
-    Ref<Storage>   storage;
-    session_data_t sd;
+    /* initialize the JS run time, and return result in rt */
+    rt = JS_NewRuntime(8L * 1024L * 1024L);
 
-    check_request();
-    
-    String object_id = param("object_id");
-    String driver = param("driver");
-    String sid = param("sid");
-
-    storage = Storage::getInstance();
-    sd = PRIMARY;
-
-    // there must at least a path or an object_id given
-    if ((object_id == nil) || (object_id == "")) 
-        throw Exception(String("invalid object id"));
-
-    // Reinitialize scripting
-//    ContentManager::getInstance()->reloadScripting(); // DEBUG PURPOSES :>
-
-    
-    Ref<Dictionary> sub(new Dictionary());
-    sub->put("object_id", object_id);
-    sub->put("driver", driver);
-    sub->put("sid", sid); 
-    *out << subrequest("browse", sub);
+    if (!rt)
+        throw Exception("Scripting: could not initialize js runtime");
 }
+Runtime::~Runtime()
+{
+	if (rt)
+		JS_DestroyRuntime(rt);
+}
+
+JSRuntime *Runtime::getRT()
+{
+    return rt;
+}
+
+Ref<Runtime> Runtime::getInstance()
+{
+    if (instance == nil)
+        instance = Ref<Runtime>(new Runtime());
+    return instance;
+}
+
+#endif // HAVE_JS
 

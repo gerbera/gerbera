@@ -21,12 +21,14 @@
 #include "sql_storage.h"
 #include "tools.h"
 #include "update_manager.h"
-#include "content_manager.h"
 
 using namespace zmm;
 
-/* maximal number of items to buffer before removing */
-#define MAX_REMOVE_BUFFER_SIZE 1000
+/* maximal number of items to store in the hashtable */
+#define MAX_REMOVE_IDS 1000
+#define REMOVE_ID_HASH_CAPACITY 3109
+
+#define OBJECT_CACHE_CAPACITY 100003
 
 enum
 {
@@ -108,9 +110,41 @@ SQLStorage::SQLStorage() : Storage()
     selectQueryBasic = String(_q_base) + _q_nores;
     selectQueryExtended = String(_q_base) + _q_ext + _q_nores;
     selectQueryFull = String(_q_base) + _q_ext + _q_res;
+
+    rmIDs = NULL;
+    rmParents = NULL;
 }
+
+void SQLStorage::init()
+{
+    objectTitleCache = Ref<DSOHash<CdsObject> >(new DSOHash<CdsObject>(OBJECT_CACHE_CAPACITY));
+    objectIDCache = Ref<DBOHash<int, CdsObject> >(new DBOHash<int, CdsObject>(OBJECT_CACHE_CAPACITY, -100));
+   
+    
+    Ref<SQLResult> res = select(_("SELECT MAX(id) + 1 FROM cds_objects"));
+    Ref<SQLRow> row = res->nextRow();
+    nextObjectID = row->col(0).toInt();
+    
+    log_debug(("PRELOADING OBJECTS...\n"));
+    res = select(getSelectQuery(SELECT_FULL));
+    Ref<Array<CdsObject> > arr(new Array<CdsObject>());
+    while((row = res->nextRow()) != nil)
+    {
+        Ref<CdsObject> obj = createObjectFromRow(row, SELECT_FULL);
+        obj->optimize();
+        objectTitleCache->put(String::from(obj->getParentID()) + '|' + obj->getTitle(), obj);
+        objectIDCache->put(obj->getID(), obj);
+    }
+    log_debug(("PRELOADING OBJECTS DONE\n"));
+}
+
 SQLStorage::~SQLStorage()
-{}
+{
+    if (rmIDs)
+        FREE(rmIDs);
+    if (rmParents)
+        FREE(rmParents);
+}
 
 String SQLStorage::getSelectQuery(select_mode_t mode)
 {
@@ -119,12 +153,22 @@ String SQLStorage::getSelectQuery(select_mode_t mode)
         case SELECT_BASIC: return selectQueryBasic;
         case SELECT_EXTENDED: return selectQueryExtended;
         case SELECT_FULL: return selectQueryFull;
-        default: throw StorageException(String("SQLStorage: invalid mode: ") + (int)mode);
+        default: throw StorageException(_("SQLStorage: invalid mode: ") + (int)mode);
     }
 }
 
+int SQLStorage::getNextObjectID()
+{
+    return nextObjectID++;
+}
 void SQLStorage::addObject(Ref<CdsObject> obj)
 {
+    obj->optimize();
+    objectTitleCache->put(String::from(obj->getParentID()) +'|'+ obj->getTitle(), obj);
+    objectIDCache->put(obj->getID(), obj);
+    obj->setID(getNextObjectID());
+    return; 
+    
     int objectType = obj->getObjectType();
     Ref<StringBuffer> fields(new StringBuffer(128));
     Ref<StringBuffer> values(new StringBuffer(128));
@@ -132,8 +176,8 @@ void SQLStorage::addObject(Ref<CdsObject> obj)
     *fields << "parent_id";
     *values << obj->getParentID();
 
-    String refID = obj->getRefID();
-    if (refID != nil)
+    int refID = obj->getRefID();
+    if (refID != 0)
     {
         *fields << ", ref_id";
         *values << ", " << refID;
@@ -207,11 +251,13 @@ void SQLStorage::addObject(Ref<CdsObject> obj)
 
     exec(qb->toString());
 
-    obj->setID(String::from(lastInsertID()));
+    obj->setID(lastInsertID());
+
 }
 
 void SQLStorage::updateObject(zmm::Ref<CdsObject> obj)
 {
+    log_debug(("UPDATE_OBJECT !!!!!!!!!!!!!!!\n"));
     int objectType = obj->getObjectType();
 
     Ref<StringBuffer> qb(new StringBuffer(256));
@@ -260,8 +306,14 @@ void SQLStorage::updateObject(zmm::Ref<CdsObject> obj)
     this->exec(qb->toString());
 }
 
-Ref<CdsObject> SQLStorage::loadObject(String objectID, select_mode_t mode)
+Ref<CdsObject> SQLStorage::loadObject(int objectID, select_mode_t mode)
 {
+
+    Ref<CdsObject> obj = objectIDCache->get(objectID);
+    if (obj != nil)
+        return obj;
+    throw Exception(_("Object not found: ") + objectID);
+/*        
     Ref<StringBuffer> qb(new StringBuffer());
 
     *qb << getSelectQuery(mode) << " WHERE f.id = " << objectID;
@@ -272,12 +324,13 @@ Ref<CdsObject> SQLStorage::loadObject(String objectID, select_mode_t mode)
     {
         return createObjectFromRow(row, mode);
     }
-    throw Exception(String("Object not found: ") + objectID);
+    throw Exception(_("Object not found: ") + objectID);
+*/
 }
 
 Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
 {
-    String objectID;
+    int objectID;
     int objectType;
 
     objectID = param->getObjectID();
@@ -286,7 +339,8 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     Ref<SQLResult> res;
     Ref<SQLRow> row;
 
-    q = String("SELECT object_type FROM cds_objects WHERE id = ") + objectID;
+    q = _("SELECT object_type FROM cds_objects WHERE id = ") +
+                    objectID;
     res = select(q);
     if((row = res->nextRow()) != nil)
     {
@@ -294,7 +348,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     }
     else
     {
-        throw StorageException(String("Object not found: ") + objectID);
+        throw StorageException(_("Object not found: ") + objectID);
     }
 
     row = nil;
@@ -302,7 +356,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     
     if(param->getFlag() == BROWSE_DIRECT_CHILDREN && IS_CDS_CONTAINER(objectType))
     {
-        q = String("SELECT COUNT(*) FROM cds_objects WHERE parent_id = ") + objectID;
+        q = _("SELECT COUNT(*) FROM cds_objects WHERE parent_id = ") + objectID;
         res = select(q);
         if((row = res->nextRow()) != nil)
         {
@@ -359,6 +413,8 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
             Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
             qb->clear();
             *qb << "SELECT COUNT(*) FROM cds_objects WHERE parent_id = " << cont->getID();
+            if (param->containersOnly)
+                *qb << " AND object_type & " << OBJECT_TYPE_CONTAINER << " <> 0";
             res = select(qb->toString());
             if ((row = res->nextRow()) != nil)
             {
@@ -379,8 +435,8 @@ Ref<Array<StringBase> > SQLStorage::getMimeTypes()
 {
     Ref<Array<StringBase> > arr(new Array<StringBase>());
 
-    String q = String("SELECT DISTINCT mime_type FROM cds_objects ")
-            + "WHERE mime_type IS NOT NULL ORDER BY mime_type";
+    String q = _("SELECT DISTINCT mime_type FROM cds_objects "
+                "WHERE mime_type IS NOT NULL ORDER BY mime_type");
     Ref<SQLResult> res = select(q);
     Ref<SQLRow> row;
 
@@ -392,11 +448,17 @@ Ref<Array<StringBase> > SQLStorage::getMimeTypes()
     return arr;
 }
 
-Ref<CdsObject> SQLStorage::findObjectByTitle(String title, String parentID)
+Ref<CdsObject> SQLStorage::findObjectByTitle(String title, int parentID)
 {
+
+    Ref<CdsObject> obj = objectTitleCache->get(String::from(parentID) +'|'+ title);
+    if (obj != nil)
+        return obj;
+    return nil;
+/*
     Ref<StringBuffer> qb(new StringBuffer());
     *qb << getSelectQuery(SELECT_FULL) << " WHERE ";
-    if (parentID != nil)
+    if (parentID != INVALID_OBJECT_ID)
         *qb << "f.parent_id = " << parentID << " AND ";
     *qb << "f.dc_title = " << quote(title);
 
@@ -408,6 +470,7 @@ Ref<CdsObject> SQLStorage::findObjectByTitle(String title, String parentID)
         return obj;
     }
     return nil;
+*/
 }
 
 Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row, select_mode_t mode)
@@ -416,9 +479,9 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row, select_mode_t mo
     Ref<CdsObject> obj = CdsObject::createObject(objectType);
 
     /* set common properties */
-    obj->setID(row->col(_id));
-    obj->setRefID(row->col(_ref_id));
-    obj->setParentID(row->col(_parent_id));
+    obj->setID(row->col(_id).toInt());
+    obj->setRefID(row->col(_ref_id).toInt());
+    obj->setParentID(row->col(_parent_id).toInt());
     obj->setVirtual(atoi(row->col(_is_virtual).c_str()));
 
     if (mode > SELECT_BASIC)
@@ -493,14 +556,14 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row, select_mode_t mo
 
     if(! matched_types)
     {
-        throw StorageException(String("unknown object type: ")+ objectType);
+        throw StorageException(_("unknown object type: ")+ objectType);
     }
     return obj;
 }
 
 void SQLStorage::eraseObject(Ref<CdsObject> object)
 {
-    throw Exception("SQLStorage::eraseObject shuold never be called !!!!\n");
+    throw Exception(_("SQLStorage::eraseObject shuold never be called !!!!\n"));
 }
 
 int SQLStorage::getTotalFiles()
@@ -518,6 +581,16 @@ int SQLStorage::getTotalFiles()
     return 0;    
 }
 
+void SQLStorage::incrementUpdateIDs(int *ids, int size)
+{
+    Ref<StringBuffer> buf(new StringBuffer(size * 4));
+    *buf << "UPDATE cds_objects SET update_id = update_id + 1 WHERE ID IN(-333";
+    for (int i = 0; i < size; i++)
+        *buf << ',' << ids[i];
+    *buf << ')';
+    exec(buf->toString());
+}
+
 Ref<Array<CdsObject> > SQLStorage::selectObjects(Ref<SelectParam> param,
                                                  select_mode_t mode)
 {
@@ -526,13 +599,21 @@ Ref<Array<CdsObject> > SQLStorage::selectObjects(Ref<SelectParam> param,
     switch (param->flags)
     {
         case FILTER_PARENT_ID:
-            *q << "f.parent_id = " << param->arg1;
+            *q << "f.parent_id = " << param->iArg1;
             break;
         case FILTER_REF_ID:
-            *q << "f.ref_id = " << param->arg1;
+            *q << "f.ref_id = " << param->iArg1;
+            break;
+        case FILTER_PARENT_ID_ITEMS:
+            *q << "f.parent_id = " << param->iArg1 << " AND "
+               << "f.object_type & " << OBJECT_TYPE_ITEM << " <> 0";
+            break;
+        case FILTER_PARENT_ID_CONTAINERS:
+            *q << "f.parent_id = " << param->iArg1 << " AND "
+               << "f.object_type & " << OBJECT_TYPE_CONTAINER << " <> 0";
             break;
         default:
-            throw StorageException(String("selectObjects: invalid operation: ") +
+            throw StorageException(_("selectObjects: invalid operation: ") +
                                    param->flags);
     }
     Ref<SQLResult> res = select(q->toString());
@@ -564,9 +645,11 @@ void SQLStorage::removeObject(Ref<CdsObject> obj)
     }
     catch (Exception e)
     {
+        log_debug(("CLEANUP (EXCEPTION)\n"));
         rmCleanup();
         throw e;
     }
+    log_debug(("CLEANUP (NORMAL)\n"));
     rmCleanup();
 }
 
@@ -574,42 +657,41 @@ void SQLStorage::removeObject(Ref<CdsObject> obj)
 /* helpers for removeObject method */
 void SQLStorage::rmInit()
 {
-    rmIDs = Ref<Dictionary>(new Dictionary());        
-    rmParents = Ref<Dictionary>(new Dictionary());
-    if (rmDummy == nil)
-        rmDummy = String("");
-    rmFileCount = 0;
+    rmIDs = (int *)MALLOC(MAX_REMOVE_IDS * sizeof(int));        
+    rmIDHash = Ref<DBHash<int> >(new DBHash<int>(REMOVE_ID_HASH_CAPACITY, 0));
+
+    rmParents = (int *)MALLOC(MAX_REMOVE_IDS * sizeof(int));
+    rmParentHash = Ref<DBBHash<int, int> >(new DBBHash<int, int>(REMOVE_ID_HASH_CAPACITY, -10));
 }
 void SQLStorage::rmCleanup()
 {
-    rmIDs = nil;
-    rmParents = nil;
+    FREE(rmIDs);
+    rmIDs = NULL;
+    FREE(rmParents);
+    rmParents = NULL;
+    
+    rmIDHash = nil;
+    rmParentHash = nil;
 }
 
 void SQLStorage::rmDeleteIDs()
 {
-    Ref<StringBuffer> buf(new StringBuffer(256));
+    int size = rmIDHash->size();
+    Ref<StringBuffer> buf(new StringBuffer(size * 5));
     *buf << "DELETE FROM cds_objects WHERE id IN (-333";
-    Ref<Array<DictionaryElement> > elements = rmIDs->getElements();
-    int size = elements->size();
     for (int i = 0; i < size; i++)
-        *buf << "," << elements->get(i)->getKey();
-    *buf << ")";
+        *buf << ',' << rmIDs[i];
+    *buf << ')';
     // log_debug(("Removing %s\n", buf->toString().c_str()));
-    
-    String q = buf->toString();
+   
     exec(buf->toString());
-    rmIDs->clear();
-    ContentManager::getInstance()->getAccounting()->totalFiles -= rmFileCount;
-    rmFileCount = 0;
+    rmIDHash->clear();
 }
 void SQLStorage::rmUpdateParents()
 {
     Ref<UpdateManager> um = UpdateManager::getInstance();
-    Ref<Array<DictionaryElement> > elements = rmParents->getElements();
-    for (int i = 0; i < elements->size(); i++)
-        um->containerChanged(elements->get(i)->getKey());
-    rmParents->clear();
+    um->containersChanged(rmParents, rmParentHash->size());
+    rmParentHash->clear();
 }
 
 /* flush scheduled items */
@@ -621,26 +703,30 @@ void SQLStorage::rmFlush()
 
 void SQLStorage::rmDecChildCount(Ref<CdsObject> obj)
 {
-    String id = obj->getID();
-    Ref<StringBase> val = rmParents->get(id);
-    if (val == nil) // child count not yet known
+    int id = obj->getID();
+    int value;
+
+    hash_slot_t hash_slot;
+    bool exists = rmParentHash->get(id, &hash_slot, &value);
+    if (! exists) // child count not yet known
     {
-        String q = String("SELECT COUNT(*) FROM cds_objects WHERE parent_id=") + id;
+        String q = _("SELECT COUNT(*) FROM cds_objects WHERE parent_id=") + id;
         Ref<SQLResult> res = select(q);
         Ref<SQLRow> row = res->nextRow();
-        val = row->col(0);
+        value = row->col(0).toInt();
     }
-    int value = String(val).toInt();
     if (value > 0)
     {
         value--;
-        val = String::from(value);
-        rmParents->put(id, val);
+        rmParents[rmParentHash->size()] = id;
+        if (exists)
+            rmParentHash->put(id, hash_slot, value);
+        else
+            rmParentHash->put(id, value);
         if (value <= 0)
         {
-            int iid = id.toInt();
             /// \TODO unhardcode the id's below
-            if (iid != -1 && iid != 0 && iid != 1)
+            if (id != -1 && id != 0 && id != 1)
                 rmObject(obj);
         }
     }
@@ -651,29 +737,31 @@ void SQLStorage::rmDecChildCount(Ref<CdsObject> obj)
  * for EVERY deleted object */
 void SQLStorage::rmObject(Ref<CdsObject> obj)
 {
-    String id = obj->getID();
-    if (rmIDs->get(id) != nil) // do nothing if already scheduled
+//    log_debug(("rmObject %d, size; %d\n", obj->getID(), rmIDHash->size()));
+    int id = obj->getID();
+    hash_slot_t hash_slot;
+    if (rmIDHash->exists(id, &hash_slot)) // do nothing if already scheduled
         return;
 
-    rmIDs->put(id, rmDummy); // schedule for removal
+    // schedule for removal
+    rmIDs[rmIDHash->size()] = id;
+    rmIDHash->put(id, hash_slot);
 
-    int iParentID = obj->getParentID().toInt();
-    if (iParentID > 0)
-        rmDecChildCount(loadObject(obj->getParentID()));
+    rmDecChildCount(loadObject(obj->getParentID()));
 
-    if (rmIDs->size() > MAX_REMOVE_BUFFER_SIZE ||
-        rmParents->size() > MAX_REMOVE_BUFFER_SIZE)
+    if (rmIDHash->size() > MAX_REMOVE_IDS ||
+        rmParentHash->size() > MAX_REMOVE_IDS)
         rmFlush();
 }
 
 /* item removal helper */
 void SQLStorage::rmItem(Ref<CdsObject> obj)
 {
-    String origID; // id of the original object in PC dir
+    int origID; // id of the original object in PC dir
     Ref<CdsObject> orig;
 
-    String refID = obj->getRefID();
-    if (string_ok(refID)) // this object is a referer (virtual)
+    int refID = obj->getRefID();
+    if (refID != 0) // this object is a referer (virtual)
     {
         origID = refID;
         orig = loadObject(origID, SELECT_BASIC);
@@ -692,21 +780,14 @@ void SQLStorage::rmItem(Ref<CdsObject> obj)
 
     // schedule original object for removal
     rmObject(orig);
-
-    rmFileCount++;
 }
 
 // remvoe children of the given containers
 void SQLStorage::rmChildren(Ref<CdsObject> obj)
 {
-    String objID = obj->getID();
+    int objID = obj->getID();
     Ref<SelectParam> param(new SelectParam(FILTER_PARENT_ID, objID));
     Ref<Array<CdsObject> > children = selectObjects(param, SELECT_BASIC);
-    if (children->size() == 0)
-    {
-        rmObject(obj);
-        return;
-    }
     for (int i = 0; i < children->size(); i++)
     {
         Ref<CdsObject> child = children->get(i);
@@ -719,55 +800,4 @@ void SQLStorage::rmChildren(Ref<CdsObject> obj)
             rmItem(child);
     }
 }
-
-/* ******** */
-
-/* experimental stuff 
-void removeEmptyContainers(String parentID)
-{
-    Ref<CdsObject> obj = loadObject(parentID);
-    if (! IS_CDS_CONTAINER(obj))
-       return;
-    bool nonEmpty = removeEmptyChildren(obj);
-    if (! nonEmpty)
-    {
-        Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
-        if (obj->is_virtual())
-        {
-            /// \TODO: updateID
-            query(String("DELETE FROM cds_objects WHERE id = ") + parentID);
-        }
-    }
-}
-bool removeEmptyChildren(Ref<CdsContainer> parent);
-{
-    Ref<Array<CdsObject> > arr(new Array<CdsObject>());
-    Ref<BrowseParam> param(new BrowseParam(parentID, BROWSE_DIRECT_CHILDREN));
-    arr = browse(param);
-    bool notEmpty = false;
-    int count;
-    for (int i = 0; i < arr->size(); i++)
-    {
-        Ref<CdsObject> obj = arr->get(i);
-        if (IS_CDS_CONTAINER(obj))
-        {
-            Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
-            if (cont->is_virtual())
-            {
-                notEmpty = removeEmptyContainers(cont);
-                if (notEmpty)
-                    count++;
-                else
-                {
-                    /// \TODO: updateID
-                    query(String("DELETE FROM cds_objects WHERE id = ") + parent->getID());
-                }
-            }
-        }
-        else
-            count++;
-    }
-    return (bool)count;
-}
-*/
 

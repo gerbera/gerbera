@@ -45,34 +45,28 @@ void web::edit_save::process()
 
     check_request();
 
-    String object_id = param("object_id");
+    String objID = param("object_id");
+    int objectID;
     String driver = param("driver");
     String sid = param("sid");
 
-    if (!string_ok(object_id))
+    if (!string_ok(objID))
         throw Exception(String("invalid object id"));
+    else
+        objectID = objID.toInt();
     
-    if (driver == "1")
-    {
-        storage = Storage::getInstance();
-        sd = PRIMARY;
-    }
-    else if (driver == "2")
-    {
-        storage = Storage::getInstance(FILESYSTEM_STORAGE);
-        sd = SECONDARY;
-    } else
-        throw Exception(String("invalid driver"));
+    storage = Storage::getInstance();
+    sd = PRIMARY;
 
-
-    ContentManager::getInstance()->updateObject(object_id, params);
+    ContentManager::getInstance()->updateObject(objectID, params);
     
     session = SessionManager::getInstance()->getSession(sid);
     
     Ref<Dictionary> sub(new Dictionary());
     
-    object_id = session->getFrom(sd, "object_id");
-    if (object_id == nil) object_id = "0";
+    objID = session->getFrom(sd, "object_id");
+    if (objID == nil)
+        objID = "0";
 
     String requested_count = session->getFrom(sd, "requested_count");
     if ((requested_count == nil) || (requested_count == ""))
@@ -82,7 +76,7 @@ void web::edit_save::process()
     if (requested_count.toInt() < 0)
         requested_count = "0";
 
-    sub->put("object_id", object_id);
+    sub->put("object_id", objID);
     sub->put("requested_count", requested_count);
     sub->put("sid", sid);
     sub->put("driver", driver);

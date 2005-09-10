@@ -24,17 +24,21 @@ using namespace zmm;
 
 WebRequestHandler *create_web_request_handler(String page)
 {
-    if (page == "browse") return new web::browse();
-    if (page == "login") return new web::login();
-    if (page == "add") return new web::add();
-    if (page == "remove") return new web::remove();
-    if (page == "edit_ui") return new web::edit_ui();
-    if (page == "edit_save") return new web::edit_save();
-    if (page == "error") return new web::error();
-    if (page == "new") return new web::new_ui();
-    if (page == "refresh") return new web::refresh();
     if (page == "acct") return new web::acct();
-    
+    if (page == "add") return new web::add();
+    if (page == "browse") return new web::browse();
+    if (page == "containers") return new web::containers();
+    if (page == "edit_save") return new web::edit_save();
+    if (page == "edit_ui") return new web::edit_ui();
+    if (page == "error") return new web::error();
+    if (page == "head") return new web::head();
+    if (page == "index") return new web::index();
+    if (page == "items") return new web::items();
+    if (page == "login") return new web::login();
+    if (page == "new") return new web::new_ui();
+    if (page == "remove") return new web::remove();
+    if (page == "refresh") return new web::refresh();
+    if (page == "tree") return new web::tree();
     // ...
     
     throw Exception(String("Unknown page: ") + page);
