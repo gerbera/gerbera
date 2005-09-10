@@ -1,0 +1,62 @@
+<html>
+<head>
+    <title>MediaTomb</title>
+    <style type="text/css">
+    <!--
+        body { color: black; background-color: #408bff; }
+    -->
+    </style>
+</head>
+<script>
+
+function updateAccounting(acct)
+{
+    for (var key in acct)
+    {
+        var el = document.getElementById(key);
+        if (el)
+            el.innerHTML = acct[key];
+    }
+}
+
+function refreshView()
+{
+    top.main.location.href = top.main.location.href;
+}
+
+</script>
+</head>
+<body link="black">
+
+<center>
+    <table border="0" width="90%"><tr>
+        <td width="20%" valign="top">
+            Total files: <span id="acctTotalFiles" style="font-weight:bold"> - </span><br>
+<!--
+        <a href="#" onClick="javascript: refreshView(); return false;">
+            [refresh view]
+        </a>
+-->
+        </td>
+        <td width="60%" align="center" valign="top">
+            <table border="0">
+                <tr>
+                    <td align="center">
+                        <span style="font-size: 25px; font-weight: bold;">MEDIATOMB</span>                    
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center">
+                        <span id="currentTask" style="font-style:italic; font-weight: bold; color:#FFFFFF"></span>
+                    </td>
+                </tr>
+            </table>                
+        </td>
+        <td width="20%">
+            &nbsp;        
+        </td>        
+    </tr></table>
+</center>
+
+</body>
+</html>

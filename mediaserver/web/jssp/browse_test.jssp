@@ -1,0 +1,12 @@
+<%
+include("tools.jssp");
+
+didl = findElement(root, "DIDL-Lite");
+
+for (var i = 0; i < didl.children.length; i++)
+{
+    var obj = didl.children[i];
+    echo(findElement(obj, "dc:title").text + "<br>\n");
+}
+
+%>

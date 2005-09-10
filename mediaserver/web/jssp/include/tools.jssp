@@ -1,0 +1,36 @@
+<%
+
+function xmlGetElement(parent, name)
+{
+    for (var i = 0; i < parent.children.length; i++)
+    {
+        if (parent.children[i].name == name)
+            return parent.children[i];
+    }
+    return null;
+}
+
+function xmlGetElementText(parent, name)
+{
+    var el = xmlGetElement(parent, name);
+    if (el == null)
+        return null;
+    return el.text;
+}
+
+
+function link(req_type, param)
+{
+    var url = "/content/interface?req_type="+ req_type +"&sid="+ SID +
+               "&slt="+ Math.random();
+    if (param)
+    {
+        for (var key in param)
+        {
+            url += "&" + key +"="+ param[key];
+        }
+    }
+    return url;
+}
+
+%>

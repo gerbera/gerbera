@@ -1,0 +1,13 @@
+<% include("include/tools.jssp"); %>
+<html>
+    <head>
+        <title>M E D I A T O M B</title>
+        <link rel="StyleSheet" href="/main.css" type="text/css">
+    </head>
+    <frameset rows="80,*" frameborder="yes" border="3" framespacing="0">
+        <frame src="<%= link('head') %>" name="head" noresize scrolling="no">
+        <frame src="<%= link('browse') %>" name="content">
+    </frameset>
+    <body></body>
+</html>
+

@@ -1,0 +1,6 @@
+<html>
+<head>
+    <meta http-equiv="Refresh" content="0;URL=/content/interface?req_type=index&object_id=0&requested_count=15&driver=1&sid=<%= root.attributes['sid'] %>">
+</head>
+</html>
+
