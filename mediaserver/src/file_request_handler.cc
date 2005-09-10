@@ -47,7 +47,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
 {
     //log_info(("FileRequestHandler::get_info start\n"));
 
-    String object_id;
+    int objectID;
 
     struct stat statbuf;
     int ret = 0;
@@ -61,18 +61,20 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     //log_debug(("full url (filename): %s, url_path: %s, parameters: %s\n",
     //           filename, url_path.c_str(), parameters.c_str()));
     
-    object_id = dict->get("object_id");
-    if (object_id == nil)
+    String objID = dict->get("object_id");
+    if (objID == nil)
     {
         //log_info(("object_id not found in url\n"));
         throw Exception("get_info: object_id not found");
     }
+    else
+        objectID = objID.toInt();
 
     //log_info(("got ObjectID: [%s]\n", object_id.c_str()));
 
     Ref<Storage> storage = Storage::getInstance();
 
-    Ref<CdsObject> obj = storage->loadObject(object_id);
+    Ref<CdsObject> obj = storage->loadObject(objectID);
 
     int objectType = obj->getObjectType();
 
@@ -189,7 +191,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
 
 Ref<IOHandler> FileRequestHandler::open(IN const char *filename, IN enum UpnpOpenFileMode mode)
 {
-    String object_id;
+    int objectID;
 
  //   log_info(("FileIOHandler web_open(): start\n"));
 
@@ -204,17 +206,19 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, IN enum UpnpOpe
     Ref<Dictionary> dict(new Dictionary());
     dict->decode(parameters);
 
-    object_id = dict->get("object_id");
-    if (object_id == nil)
+    String objID = dict->get("object_id");
+    if (objID == nil)
     {
         throw Exception("object_id not found");
     }
+    else
+        objectID = objID.toInt();
 
     Ref<Storage> storage = Storage::getInstance();
 
-    log_info(("FileIOHandler web_open(): Opening media file with object id %s\n", object_id.c_str()));
+    log_info(("FileIOHandler web_open(): Opening media file with object id %d\n", objectID));
 
-    Ref<CdsObject> obj = storage->loadObject(object_id);
+    Ref<CdsObject> obj = storage->loadObject(objectID);
 
     if (!IS_CDS_ITEM(obj->getObjectType()))
     {

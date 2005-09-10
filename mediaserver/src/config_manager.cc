@@ -252,9 +252,6 @@ void ConfigManager::validate(String serverhome)
     }
 #endif
 
-    Storage::getInstance(PRIMARY_STORAGE);
-    Storage::getInstance(FILESYSTEM_STORAGE);
-
     log_info(("Configuration check succeeded.\n"));
 
 //    log_debug(("Config file dump after validation: \n%s\n", root->print().c_str()));

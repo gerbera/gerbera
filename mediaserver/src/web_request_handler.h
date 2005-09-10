@@ -24,8 +24,10 @@
 #define __WEB_REQUEST_HANDLER_H__
 
 #include "common.h"
+#include "mxml/mxml.h"
 #include "request_handler.h"
 #include "dictionary.h"
+#include "scripting/web_script.h"
 
 /// \brief This class is responsible for processing requests that come to the user interface.
 class WebRequestHandler : public RequestHandler
@@ -34,8 +36,13 @@ protected:
     /// \brief Decoded URL parameters are stored as a dictionary.
     zmm::Ref<Dictionary> params;
 
-    /// \brief The original URL is available in case someone needs it.
+    /// \brief The oritinal filename from url if anyone needs it.
     zmm::String filename;
+
+    /// \brief The name of the page to look for a jssp script.
+    char *pagename;
+
+    bool plainXML;
 
     /// \brief We can also always see what mode was requested.
     enum UpnpOpenFileMode mode;
@@ -45,13 +52,20 @@ protected:
     /// The XML or HTML that is the result of a request is put in this buffer,
     /// this is what is being served to the web browser.
     zmm::Ref<zmm::StringBuffer> out;
+
+    /// \brief This is the root xml element to be populated by process() method.
+    zmm::Ref<mxml::Element> root;
+    
+    /// \brief This is the jssp script to render HTML.
+    zmm::Ref<WebScript> script;
     
     /// \brief Little support function to access stuff from the dictionary in
     /// in an easier fashion.
     /// \param Name of the parameter we are looking for.
     /// \return Value of the parameter with the given name or nil if not found.
     zmm::String param(zmm::String name);
-
+    
+    
     /// \brief Checks if the incoming request is valid.
     ///
     /// Each request going to the ui must at least have a valid session id, 
@@ -95,6 +109,10 @@ public:
 
     /// \brief This method must be overriden by the subclasses that actually process the given request.
     virtual void process();
+
+    /// \brief builds full path to a script for the given relative filename
+    static zmm::String buildScriptPath(zmm::String filename);
+            
 };
 
 

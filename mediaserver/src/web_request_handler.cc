@@ -21,6 +21,7 @@
 #include "config_manager.h"
 #include "mem_io_handler.h"
 #include "web_request_handler.h"
+#include "config_manager.h"
 #include "web/pages.h"
 #include "session_manager.h"
 
@@ -31,12 +32,19 @@ using namespace mxml;
 
 WebRequestHandler::WebRequestHandler() : RequestHandler()
 {
-    
+    pagename = NULL;
+    plainXML = false;
 }
 
 String WebRequestHandler::param(String name)
 {
     return params->get(name);
+}
+
+String WebRequestHandler::buildScriptPath(String filename)
+{
+    String scriptRoot = ConfigManager::getInstance()->getOption("/server/webroot");
+    return String(scriptRoot + "/jssp/") + filename;
 }
 
 void WebRequestHandler::check_request()
@@ -54,15 +62,6 @@ void WebRequestHandler::check_request()
     {
         throw Exception(String("invalid session id"));
     }
-
-    // check the driver parameter, can't live without it
-    // there can only be two active drivers at the same time
-    String driver = param("driver");
-    if ((driver != "1") && (driver != "2"))
-    {
-        if (driver == nil) driver = "nil";
-        throw Exception(String("Invalid driver selected: ") + driver);
-    }
 }
 
 String WebRequestHandler::renderXMLHeader(String xsl_link)
@@ -74,9 +73,7 @@ String WebRequestHandler::renderXMLHeader(String xsl_link)
     }
     else
     {
-        return String("<?xml version=\"1.0\" encoding=\"")+ DEFAULT_INTERNAL_CHARSET +"\"?>\n" +
-                      "<?xml-stylesheet type=\"text/xsl\" href=\"" + xsl_link +
-                      "\"?>\n";
+        return String("<?xml version=\"1.0\" encoding=\"")+ DEFAULT_INTERNAL_CHARSET +"\"?>\n";
     }
 }
 
@@ -86,33 +83,61 @@ void WebRequestHandler::get_info(IN const char *filename, OUT struct File_Info *
     info->last_modified = time(NULL);
     info->is_directory = 0; 
     info->is_readable = 1;
-    String content_type = String(MIMETYPE_XML) + "; charset=" + DEFAULT_INTERNAL_CHARSET;
-    info->content_type = ixmlCloneDOMString(content_type.c_str());
+
+    String contentType;
+
+    if (plainXML)
+        contentType = String(MIMETYPE_XML) + "; charset=" + DEFAULT_INTERNAL_CHARSET;
+    else
+        contentType = String("text/html; charset=") + DEFAULT_INTERNAL_CHARSET;
+    
+    info->content_type = ixmlCloneDOMString(contentType.c_str());
 }
 
 Ref<IOHandler> WebRequestHandler::open(Ref<Dictionary> params, IN enum UpnpOpenFileMode mode)
 {
     this->params = params;
 
-    // creating the output buffer
-    out = Ref<StringBuffer>(new StringBuffer(DEFAULT_PAGE_BUFFER_SIZE));
+    root = Ref<Element>(new Element("root"));
+    out = Ref<StringBuffer>(new StringBuffer());
 
+    if (pagename == NULL)
+        pagename = "index";
+    String scriptPath = buildScriptPath(String(pagename) + ".jssp");
+
+    if (! plainXML)
+    {
+        if (script == nil)
+            script = Ref<WebScript>(new WebScript(Runtime::getInstance(), scriptPath));
+        script->setSessionID(param("sid"));
+    }
+    
+    String output;
     // processing page, creating output
     try
     {
         process();
+        log_debug(("RENDERING %s: \n%s\n", pagename, root->print().c_str()));
+        if (plainXML)
+        {
+            output = renderXMLHeader() + root->print();
+        }
+        else
+        {
+            output = script->process(root);
+        }
     }
     catch (Exception e)
     {
         e.printStackTrace();
-        out->clear();
         Ref<Dictionary> par(new Dictionary());
         par->put("message", e.getMessage());
-        *out << subrequest("error", par);
+        output = "torture";
+        // output = subrequest("error", par);
     }
+    root = nil;
 
-    // returning output
-    Ref<MemIOHandler> io_handler(new MemIOHandler(out->toString()));
+    Ref<MemIOHandler> io_handler(new MemIOHandler(output));
     io_handler->open(mode);
     return RefCast(io_handler, IOHandler);
 }
@@ -153,7 +178,6 @@ String WebRequestHandler::subrequest(String req_type, Ref<Dictionary> params)
 // this method should be overridden
 void WebRequestHandler::process()
 {
-
 }
 
 

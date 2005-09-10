@@ -24,20 +24,12 @@
 #include <pthread.h>
 
 #include "common.h"
+#include "hash.h"
 
 #define FLUSH_ASAP 2
 #define FLUSH_SPEC 1
 
 long getMillis();
-
-class UpdateInfo : public zmm::Object
-{
-public:
-    zmm::String objectID;
-    int updateID;
-public:
-    UpdateInfo(zmm::String objectID, int updateID);
-};
 
 class UpdateManager : public zmm::Object
 {
@@ -47,13 +39,14 @@ public:
     void init();
     void shutdown();
 
-    void containerChanged(zmm::String objectID);
+    void containerChanged(int objectID);
     void flushUpdates(int flushFlag = FLUSH_SPEC);
 
     static zmm::Ref<UpdateManager> getInstance();
     
 protected:
-    zmm::Ref<zmm::Array<UpdateInfo> > updates;
+    int *objectIDs;
+    zmm::Ref<DBBHash<int, int> > objectIDHash;
     
     pthread_t updateThread;
     pthread_mutex_t updateMutex;
@@ -68,9 +61,9 @@ protected:
     void threadProc();
     
     void sendUpdates();
-    bool haveUpdate(zmm::String objectID);
+    bool haveUpdate(int objectID);
     bool haveUpdates();
-    void addUpdate(zmm::Ref<UpdateInfo> info);
+    void addUpdate(int objectID, int updateID);
     void resetUpdates();
 };
 

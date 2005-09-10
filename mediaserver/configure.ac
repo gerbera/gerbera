@@ -12,7 +12,6 @@ AC_CONFIG_FILES([
     build/Makefile
     
     web/Makefile
-    web/icons/Makefile
 ])
 
 

@@ -39,6 +39,8 @@
 #define IS_CDS_ITEM_EXTERNAL_URL(type) (type & OBJECT_TYPE_ITEM_EXTERNAL_URL)
 #define IS_CDS_ITEM_INTERNAL_URL(type) (type & OBJECT_TYPE_ITEM_INTERNAL_URL)
 
+#define INVALID_OBJECT_ID (-333)
+
 int CdsObjectTitleComparator(void *arg1, void *arg2);
 
 /// \brief Generic object in the Content Directory.
@@ -46,22 +48,22 @@ class CdsObject : public zmm::Object
 {
 protected:
     /// \brief ID of the object in the content directory
-    zmm::String id;
+    int id;
 
     /// \brief ID of the referenced object
-    zmm::String ref_id;
+    int refID;
 
     /// \brief ID of the object's parent
-    zmm::String parentID;
+    int parentID;
 
     /// \brief restricted flag
-    int restricted;
+    bool restricted;
 
     /// \brief dc:title
     zmm::String title;
 
     /// \brief upnp:class
-    zmm::String upnp_class;
+    zmm::String upnpClass;
 
     /// \brief Physical location of the media.
     zmm::String location;
@@ -81,97 +83,111 @@ public:
     CdsObject();
 
     /// \brief Set the object ID.
-    void setID(zmm::String id);
+    inline void setID(int id) { this->id = id; }
 
     /// \brief Retrieve the object ID.
-    zmm::String getID();
+    inline int getID() { return id; }
 
     /// \brief Set the object ID.
-    void setRefID(zmm::String ref_id);
+    inline void setRefID(int refID) { this->refID = refID; }
 
     /// \brief Retrieve the object ID.
-    zmm::String getRefID();
+    inline int getRefID() { return refID; }
 
     /// \brief Set the parent ID of the object.
-    void setParentID(zmm::String parentID);
+    inline void setParentID(int parentID) { this->parentID = parentID; }
 
     /// \brief Retrieve the objects parent ID.
-    zmm::String getParentID();
+    inline int getParentID() { return parentID; }
 
     /// \brief Set the restricted flag.
-    void setRestricted(int restricted);
+    inline void setRestricted(int restricted) { this->restricted = restricted; }
 
     /// \brief Query the restricted flag.
-    int isRestricted();
+    inline bool isRestricted() { return restricted; }
 
     /// \brief Set the object title (dc:title)
-    void setTitle(zmm::String title);
+    inline void setTitle(zmm::String title) { this->title = title; }
 
     /// \brief Retrieve the title.
-    zmm::String getTitle();
+    inline zmm::String getTitle() { return title; }
 
     /// \brief set the upnp:class
-    void setClass(zmm::String upnp_class);
+    inline void setClass(zmm::String upnpClass) { this->upnpClass = upnpClass; }
 
     /// \brief Retrieve class
-    zmm::String getClass();
+    inline zmm::String getClass() { return upnpClass; }
 
     /// \brief Set the physical location of the media (usually an absolute path)
-    void setLocation(zmm::String location);
+    inline void setLocation(zmm::String location) { this->location = location; }
 
     /// \brief Retrieve media location.
-    zmm::String getLocation();
+    inline zmm::String getLocation() { return location; }
 
     /// \brief Set the virtual flag.
-    void setVirtual(int virt);
+    inline void setVirtual(bool virt) { this->virt = virt; }
 
     /// \brief Query the virtual flag.
-    int isVirtual();
+    inline bool isVirtual() { return virt; }
 
     /// \brief Query information on object type: item, container, etc.
-    int getObjectType();
+    inline int getObjectType() { return objectType; }
 
     /// \brief Query single metadata value.
-    zmm::String getMetadata(zmm::String key);
+    inline zmm::String getMetadata(zmm::String key)
+    { return metadata->get(key); }
 
     /// \brief Query entire metadata dictionary.
-    zmm::Ref<Dictionary> getMetadata();
-
-    /// \brief Set a single metadata value.
-    void setMetadata(zmm::String key, zmm::String value);
-
-    /// \brief Removes metadata with the given key
-    void removeMetadata(zmm::String key);
+    inline zmm::Ref<Dictionary> getMetadata() { return metadata; }
     
     /// \brief Set entire metadata dictionary.
-    void setMetadata(zmm::Ref<Dictionary> metadata);
+    inline void setMetadata(zmm::Ref<Dictionary> metadata)
+    { this->metadata = metadata; }
 
+    /// \brief Set a single metadata value.
+    inline void setMetadata(zmm::String key, zmm::String value)
+    { metadata->put(key, value); }
 
+    /// \brief Removes metadata with the given key
+    inline void removeMetadata(zmm::String key)
+    { metadata->remove(key); }
+    
 
     /// \brief Query single auxdata value.
-    zmm::String getAuxData(zmm::String key);
+    inline zmm::String getAuxData(zmm::String key)
+    { return auxdata->get(key); }
 
     /// \brief Query entire auxdata dictionary.
-    zmm::Ref<Dictionary> getAuxData();
+    inline zmm::Ref<Dictionary> getAuxData() { return auxdata; }
 
     /// \brief Set a single auxdata value.
-    void setAuxData(zmm::String key, zmm::String value);
-
-    /// \brief Removes auxdata with the given key
-    void removeAuxData(zmm::String key);
+    inline void setAuxData(zmm::String key, zmm::String value)
+    { auxdata->put(key, value); }
     
     /// \brief Set entire auxdata dictionary.
-    void setAuxData(zmm::Ref<Dictionary> auxdata);
+    inline void setAuxData(zmm::Ref<Dictionary> auxdata)
+    { this->auxdata = auxdata; }
+
+    /// \brief Removes auxdata with the given key
+    inline void removeAuxData(zmm::String key)
+    { auxdata->remove(key); }
+    
 
 
     /// \brief Get number of resource tags
-    int getResourceCount();
+    inline int getResourceCount() { return resources->size(); }
+
     /// \brief Query resources
-    zmm::Ref<zmm::Array<CdsResource> > getResources();
+    inline zmm::Ref<zmm::Array<CdsResource> > getResources()
+    { return resources; }
+    
     /// \brief Query resource tag with the given index
-    zmm::Ref<CdsResource> getResource(int index);
+    inline zmm::Ref<CdsResource> getResource(int index)
+    { return resources->get(index); }
+    
     /// \brief Add resource tag
-    void addResource(zmm::Ref<CdsResource> resource);
+    inline void addResource(zmm::Ref<CdsResource> resource)
+    { resources->append(resource); } 
     
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
@@ -206,10 +222,10 @@ public:
     CdsItem();
 
     /// \brief Set mime-type information of the media.
-    void setMimeType(zmm::String mimeType);
+    inline void setMimeType(zmm::String mimeType) { this->mimeType = mimeType; }
 
     /// \brief Query mime-type information.
-    zmm::String getMimeType();
+    inline zmm::String getMimeType() { return mimeType; }
 
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
@@ -261,20 +277,20 @@ public:
 
     /// \brief Sets the action for the item.
     /// \param action absolute path to the script that will process the XML data.
-    void setAction(zmm::String action);
+    inline void setAction(zmm::String action) { this->action = action; }
 
     /// \brief Get the path of the action script.
-    zmm::String getAction();
+    inline zmm::String getAction() { return action; }
 
     /// \brief Set action state.
     /// \param state any string you want.
     ///
     /// This is quite useful to let the script identify what state the item is in.
     /// Think of it as a cookie (did I already mention that I hate web cookies?)
-    void setState(zmm::String state);
+    inline void setState(zmm::String state) { this->state = state; }
 
     /// \brief Retrieve the item state.
-    zmm::String getState();
+    inline zmm::String getState() { return state; }
 
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
@@ -299,10 +315,10 @@ public:
 
     /// \brief Sets the URL for the item.
     /// \param URL full url to the item: http://somewhere.com/something.mpg
-    void setURL(zmm::String URL);
+    inline void setURL(zmm::String URL) { this->location = location; }
 
     /// \brief Get the URL of the item.
-    zmm::String getURL();
+    inline zmm::String getURL() { return location; }
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
     //virtual void copyTo(zmm::Ref<CdsObject> obj);
@@ -392,7 +408,7 @@ class CdsContainer : public CdsObject
 {
 protected:
     /// \brief searchable flag.
-    int searchable;
+    bool searchable;
 
     /// \brief container update id.
     int updateID;
@@ -405,22 +421,22 @@ public:
     CdsContainer();
 
     /// \brief Set the searchable flag.
-    void setSearchable(int searchable);
+    inline void setSearchable(bool searchable) { this->searchable = searchable; }
 
     /// \brief Query searchable flag.
-    int isSearchable();
+    inline int isSearchable() { return searchable; }
 
     /// \brief Set the container update ID value.
-    void setUpdateID(int updateID);
+    inline void setUpdateID(int updateID) { this->updateID = updateID; }
 
     /// \brief Query container update ID value.
-    int getUpdateID();
+    inline int getUpdateID() { return updateID; }
 
     /// \brief Set container childCount attribute.
-    void setChildCount(int childCount);
+    inline void setChildCount(int childCount) { this->childCount = childCount; }
 
     /// \briefe Retrieve number of children
-    int getChildCount();
+    inline int getChildCount() { return childCount; }
 
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)

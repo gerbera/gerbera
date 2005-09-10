@@ -40,8 +40,8 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions)
 {
     Ref<Element> result(new Element(""));
        
-    result->addAttribute("id", obj->getID());
-    result->addAttribute("parentID", obj->getParentID());
+    result->addAttribute("id", String::from(obj->getID()));
+    result->addAttribute("parentID", String::from(obj->getParentID()));
     result->addAttribute("restricted", obj->isRestricted() ? String("1") : String("0"));
 
     result->appendTextChild("dc:title", obj->getTitle());

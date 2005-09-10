@@ -230,7 +230,6 @@ static void addMetaField(metadata_fields_t field, EXTRACTOR_KeywordList *keyword
     const char *temp = NULL;
  
     /// \todo check if UTF-8 conversion is needed, may already be in UTF-8
-    int genre;
     
     switch (field)
     {
@@ -275,7 +274,6 @@ static void addResourceField(resource_attributes_t attr, EXTRACTOR_KeywordList *
 {
     String value;
     const char *temp = NULL;
-    int genre;
     
     switch (attr)
     {
@@ -355,8 +353,6 @@ void ExtractorHandler::fillMetadata(Ref<CdsItem> item)
             }
         }
     }
-
-    const char *temp = NULL;
 
     if (ReAudioFormat == nil)
     {

@@ -11,7 +11,7 @@
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+    :xGNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
     along with MediaTomb; if not, write to the Free Software
@@ -223,7 +223,7 @@ void ContentManager::_addFile(String path, int recursive)
     Ref<Storage> storage = Storage::getInstance();
 
     Ref<Array<StringBase> > parts = split_string(path, '/');
-    String curParentID = "1";
+    int curParentID = 1;
     /// \todo make PC-Directory id configurable
     String curPath = "";
     Ref<CdsObject> obj = storage->loadObject(curParentID); // root container
@@ -255,7 +255,7 @@ void ContentManager::_addFile(String path, int recursive)
 #ifdef HAVE_JS
     if (IS_CDS_ITEM(obj->getObjectType()))
     {
-        scripting->processCdsObject(obj);
+        importScript->processCdsObject(obj);
     }
 #endif
 
@@ -265,12 +265,12 @@ void ContentManager::_addFile(String path, int recursive)
     }
     um->flushUpdates();
 }
-void ContentManager::_removeObject(String objectID)
+void ContentManager::_removeObject(int objectID)
 {
     /// \todo when removing... what about container updates when removing recursively?
-    if (objectID == "0")
+    if (objectID == 0)
         throw Exception("cannot remove root container");
-    if (objectID == "1")
+    if (objectID == 1)
         throw Exception("cannot remove PC-Directory container");
     /// \todo make PC-Directory ID configurable
     Ref<Storage> storage = Storage::getInstance();
@@ -288,7 +288,7 @@ void ContentManager::_removeObject(String objectID)
 
 
 /* scans the given directory and adds everything recursively */
-void ContentManager::addRecursive(String path, String parentID)
+void ContentManager::addRecursive(String path, int parentID)
 {
     Ref<StringConverter> f2i = StringConverter::f2i();
 
@@ -337,13 +337,14 @@ void ContentManager::addRecursive(String path, String parentID)
 #ifdef HAVE_JS
     		if (IS_CDS_ITEM(obj->getObjectType()))
 	    	{
-		    scripting->processCdsObject(obj);
+                if (importScript != nil)
+    		        importScript->processCdsObject(obj);
     		}
 #endif
-                if (IS_CDS_CONTAINER(obj->getObjectType()))
-                {
-                    addRecursive(newPath, obj->getID());
-                }
+            if (IS_CDS_CONTAINER(obj->getObjectType()))
+            {
+                addRecursive(newPath, obj->getID());
+            }
             }
         }
         catch(Exception e)
@@ -354,7 +355,7 @@ void ContentManager::addRecursive(String path, String parentID)
     closedir(dir);
 }
 
-void ContentManager::updateObject(String objectID, Ref<Dictionary> parameters)
+void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
 {
     String title = parameters->get("title");
     String upnp_class = parameters->get("class");
@@ -483,7 +484,6 @@ void ContentManager::addObject(zmm::Ref<CdsObject> obj)
     Ref<Storage> storage = Storage::getInstance();
     Ref<UpdateManager> um = UpdateManager::getInstance();
     storage->addObject(obj);
-    String hui = obj->getRefID();
     um->containerChanged(obj->getParentID());
     
     if (! obj->isVirtual() && IS_CDS_ITEM(obj->getObjectType()))
@@ -614,23 +614,21 @@ String ContentManager::mimetype2upnpclass(String mimeType)
 #ifdef HAVE_JS
 void ContentManager::initScripting()
 {
-	if (scripting != nil)
+	if (importScript != nil)
 		return;
 	try
 	{
-		scripting = Ref<Scripting>(new Scripting());
-		scripting->init();
+		importScript = Ref<ImportScript>(new ImportScript(Runtime::getInstance()));
 	}
 	catch (Exception e)
 	{
-		scripting = nil;
 		log_info(("ContentManager SCRIPTING: %s\n", e.getMessage().c_str()));
 	}
 
 }
 void ContentManager::destroyScripting()
 {
-	scripting = nil;
+	importScript = nil;
 }
 void ContentManager::reloadScripting()
 {
@@ -872,7 +870,7 @@ int ContentManager::addFile(zmm::String path, int recursive, int async)
         return false;
     }
 }
-int ContentManager::removeObject(String objectID, int async)
+int ContentManager::removeObject(int objectID, int async)
 {
     if (async) // removal sync, to avoid UI exception
     {
@@ -921,7 +919,7 @@ void CMAddFileTask::run()
     cm->_addFile(path, recursive);
 }
 
-CMRemoveObjectTask::CMRemoveObjectTask(String objectID) : CMTask()
+CMRemoveObjectTask::CMRemoveObjectTask(int objectID) : CMTask()
 {
     this->objectID = objectID;
 }
@@ -957,13 +955,13 @@ DirCache::DirCache() : Object()
     buffer = Ref<StringBuffer>(new StringBuffer(capacity * 10));
     entries = Ref<Array<DirCacheEntry> >(new Array<DirCacheEntry>(capacity));
 }
-void DirCache::push(zmm::String name)
+void DirCache::push(String name)
 {
     Ref<DirCacheEntry> entry;
     if (size == capacity)
     {
-	entry = Ref<DirCacheEntry>(new DirCacheEntry());
-	entries->append(entry);
+    	entry = Ref<DirCacheEntry>(new DirCacheEntry());
+	    entries->append(entry);
     }
     else
         entry = entries->get(size);
@@ -980,22 +978,15 @@ void DirCache::pop()
         buffer->setLength(0);
     else
         buffer->setLength(entries->get(size - 1)->end);
-    entries->get(size)->id = nil;
 }
 void DirCache::clear()
 {
-    for (int i = 0; i < size; i++)
-    {
-        entries->get(i)->id = nil;
-    }
     size = 0;
 }
 void DirCache::setPath(zmm::String path)
 {
     int i;
     Ref<Array<StringBase> > parts = split_string(path, '/');
-    for (i = parts->size(); i < size; i++)
-        entries->get(i)->id = nil;
     size = parts->size();
     for (i = 0; i < parts->size(); i++)
     {
@@ -1007,7 +998,7 @@ String DirCache::getPath()
     return buffer->toString();
 }
 
-String DirCache::createContainers()
+int DirCache::createContainers()
 {
     Ref<Storage> storage = Storage::getInstance();
     Ref<ContentManager> cm = ContentManager::getInstance();
@@ -1019,13 +1010,13 @@ String DirCache::createContainers()
     for (int i = 0; i < size; i++)
     {
     	Ref<DirCacheEntry> entry = entries->get(i);
-        if (entry->id != nil)
+        if (entry->id != 0)
             continue;
 
 	    prev_end = (i == 0) ? 1 : entries->get(i - 1)->end + 1;
         String name = String(buffer->c_str() + prev_end, entry->end - prev_end);
         /// \todo: PC Directory id configurable
-        String parentID = ((i == 0) ? "1" : entries->get(i - 1)->id);
+        int parentID = ((i == 0) ? 1 : entries->get(i - 1)->id);
         String conv_name = f2i->convert(name);
         Ref<CdsObject> obj = storage->findObjectByTitle(conv_name, parentID);
         if (obj != nil)
@@ -1087,12 +1078,13 @@ void ContentManager::addRecursive2(Ref<DirCache> dirCache, String filename, int 
         obj = createObjectFromFile(dirCache->getPath() +'/'+ filename);
         if (obj != nil)
         {
-            String parentID = dirCache->createContainers();
+            int parentID = dirCache->createContainers();
             obj->setParentID(parentID);
 #ifdef HAVE_JS
     	    if (IS_CDS_ITEM(obj->getObjectType()))
-	    {
-	        scripting->processCdsObject(obj);
+	        {
+                if (importScript != nil)
+    	            importScript->processCdsObject(obj);
     	    }
 #endif
             addObject(obj);

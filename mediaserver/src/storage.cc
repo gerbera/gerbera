@@ -21,8 +21,6 @@
 #include "storage.h"
 #include "config_manager.h"
 
-#include "storage/fs/fs_storage.h"
-
 #ifdef HAVE_SQLITE3
 #include "storage/sqlite3/sqlite3_storage.h"
 #endif
@@ -34,7 +32,6 @@
 using namespace zmm;
 
 static Ref<Storage> primary_inst;
-static Ref<Storage> filesystem_inst;
 
 Storage::Storage() : Object()
 {
@@ -51,7 +48,7 @@ static Ref<Storage> create_primary_inst()
     do
     {
 #ifdef HAVE_SQLITE3
-	if (type == "sqlite3")
+    	if (type == "sqlite3")
         {
             storage = Ref<Storage>(new Sqlite3Storage());
             break;
@@ -74,28 +71,15 @@ static Ref<Storage> create_primary_inst()
     return storage;
 }
 
-Ref<Storage> Storage::getInstance(storage_type_t type)
+Ref<Storage> Storage::getInstance()
 {
-    switch (type)
-    {
-        case PRIMARY_STORAGE:
-            if(primary_inst == nil)
-                primary_inst = create_primary_inst();
-            return primary_inst;
-        case FILESYSTEM_STORAGE:
-            if(filesystem_inst == nil)
-            {
-                filesystem_inst = Ref<Storage>(new FsStorage());
-                filesystem_inst->init();
-            }
-            return filesystem_inst;
-        default:
-            throw Exception(String("Unknown storage type: ") + (int)type);
-    }
+     if(primary_inst == nil)
+         primary_inst = create_primary_inst();
+     return primary_inst;
 }
 
 /* this is a fallback implementation! Derived classes should override */
-Ref<CdsObject> Storage::loadObject(String objectID, select_mode_t mode)
+Ref<CdsObject> Storage::loadObject(int objectID, select_mode_t mode)
 {
     Ref<BrowseParam> param(new BrowseParam(objectID, BROWSE_METADATA));
     Ref<Array<CdsObject> > arr;
@@ -118,77 +102,24 @@ void Storage::removeObject(zmm::Ref<CdsObject> obj)
     }
     eraseObject(obj);
 }
-void Storage::removeObject(String objectID)
+void Storage::removeObject(int objectID)
 {
     Ref<CdsObject> obj = loadObject(objectID);
     removeObject(obj);
 }
 
-Ref<Array<CdsObject> > Storage::getObjectPath(String objectID)
+Ref<Array<CdsObject> > Storage::getObjectPath(int objectID)
 {
     Ref<Array<CdsObject> > arr(new Array<CdsObject>());
     getObjectPath(arr, objectID);
     return arr;
 }
-void Storage::getObjectPath(Ref<Array<CdsObject> > arr, String objectID)
+void Storage::getObjectPath(Ref<Array<CdsObject> > arr, int objectID)
 {
-    if (objectID == "-1")
+    if (objectID == -1)
         return;
     Ref<CdsObject> obj = loadObject(objectID);
     getObjectPath(arr, obj->getParentID());
     arr->append(obj);
-}
-
-BrowseParam::BrowseParam(String objectID, int flag) : Object()
-{
-    this->objectID = objectID;
-    this->flag = flag;
-    startIndex = 0;
-    requestedCount = 0;
-}
-
-int BrowseParam::getFlag()
-{
-    return flag;
-}
-String BrowseParam::getObjectID()
-{
-    return objectID;
-}
-
-void BrowseParam::setRange(int startIndex, int requestedCount)
-{
-    this->startIndex = startIndex;
-    this->requestedCount = requestedCount;
-}
-void BrowseParam::setStartingIndex(int startIndex)
-{
-    this->startIndex = startIndex;
-}
-void BrowseParam::setRequestedCount(int requestedCount)
-{
-    this->requestedCount = requestedCount;
-}
-
-int BrowseParam::getStartingIndex(){
-    return startIndex;
-}
-int BrowseParam::getRequestedCount(){
-    return requestedCount;
-}
-
-int BrowseParam::getTotalMatches(){
-    return totalMatches;
-}
-void BrowseParam::setTotalMatches(int x){
-    totalMatches = x;
-}
-
-/* SelectParam class */
-
-SelectParam::SelectParam(int flags, String arg1) : Object()
-{
-    this->flags = flags;
-    this->arg1 = arg1;
 }
 

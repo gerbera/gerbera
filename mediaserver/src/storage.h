@@ -33,12 +33,6 @@ typedef enum
 
 typedef enum
 {
-    PRIMARY_STORAGE = 1,
-    FILESYSTEM_STORAGE = 2
-} storage_type_t;
-
-typedef enum
-{
     SELECT_BASIC = 0,
     SELECT_EXTENDED,
     SELECT_FULL,
@@ -46,48 +40,73 @@ typedef enum
     SELECT__MAX
 } select_mode_t;
 
+/* flags for SelectParam */
+#define FILTER_PARENT_ID 1
+#define FILTER_REF_ID 2
+#define FILTER_PARENT_ID_CONTAINERS 3
+#define FILTER_PARENT_ID_ITEMS 4
+
 class BrowseParam : public zmm::Object
 {
 protected:
     int flag;
-    zmm::String objectID;
+    int objectID;
 
-    int startIndex;
+    int startingIndex;
     int requestedCount;
 
     // output parameters
     int totalMatches;
 
 public:
-    BrowseParam(zmm::String objectID, int flag);
+    bool containersOnly;
 
-    int getFlag();
-    zmm::String getObjectID();
+    inline BrowseParam(int objectID, int flag)
+    {
+        this->objectID = objectID;
+        this->flag = flag;
+        startingIndex = 0;
+        requestedCount = 0;
+        containersOnly = false;
+    }
 
-    void setRange(int startIndex, int requestedCount);
-    void setStartingIndex(int startIndex);
-    void setRequestedCount(int requestedCount);
+    inline int getFlag() { return flag;}
+    inline int getObjectID() { return objectID; }
 
-    int getStartingIndex();
-    int getRequestedCount();
+    inline void setRange(int startingIndex, int requestedCount)
+    {
+        this->startingIndex = startingIndex;
+        this->requestedCount = requestedCount;
+    }
+    inline void setStartingIndex(int startingIndex)
+    { this->startingIndex = startingIndex; }
 
-    int getTotalMatches();
-    void setTotalMatches(int x);
+    inline void setRequestedCount(int requestedCount)
+    { this->requestedCount = requestedCount; }
+
+    inline int getStartingIndex() { return startingIndex; }
+    inline int getRequestedCount() { return requestedCount; }
+
+    inline int getTotalMatches() { return totalMatches; }
+
+    inline void setTotalMatches(int totalMatches)
+    { this->totalMatches = totalMatches; }
 
 };
 
-/* flags for SelectParam */
-#define FILTER_PARENT_ID 1
-#define FILTER_REF_ID 2
 
 class Storage;
 class SelectParam : public zmm::Object
 {
 public:
-    SelectParam(int flags, zmm::String arg1);
+    inline SelectParam(int flags, int iArg1)
+    {
+        this->flags = flags;
+        this->iArg1 = iArg1;
+    }
 public:
     int flags;
-    zmm::String arg1;
+    int iArg1;
 };
 
 class Storage : public zmm::Object
@@ -106,22 +125,22 @@ public:
     virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param,
                                                            select_mode_t mode = SELECT_FULL) = 0;
     
-    virtual zmm::Ref<CdsObject> findObjectByTitle(zmm::String title, zmm::String parentID) = 0;
+    virtual zmm::Ref<CdsObject> findObjectByTitle(zmm::String title, int parentID) = 0;
 
     /* utility methods */
-    virtual zmm::Ref<CdsObject> loadObject(zmm::String objectID,
+    virtual zmm::Ref<CdsObject> loadObject(int objectID,
                                            select_mode_t mode = SELECT_FULL);
     virtual void removeObject(zmm::Ref<CdsObject> object);
-    virtual void removeObject(zmm::String objectID);
-    virtual zmm::Ref<zmm::Array<CdsObject> > getObjectPath(zmm::String objectID);
+    virtual void removeObject(int objectID);
+    virtual zmm::Ref<zmm::Array<CdsObject> > getObjectPath(int objectID);
 
     /* accounting methods */
     virtual int getTotalFiles(){ return 0; }
     
     /* static methods */
-    static zmm::Ref<Storage> getInstance(storage_type_t type = PRIMARY_STORAGE);
+    static zmm::Ref<Storage> getInstance();
 protected:
-    void getObjectPath(zmm::Ref<zmm::Array<CdsObject> > arr, zmm::String objectID);
+    void getObjectPath(zmm::Ref<zmm::Array<CdsObject> > arr, int objectID);
 };
 
 #endif // __STORAGE_H__

@@ -101,7 +101,7 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
         }
         else
         {
-            throw Exception(String("missing ui request type: "));
+            ret = create_web_request_handler("index");
         }
     } 
     else if (link.startsWith(String("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER))

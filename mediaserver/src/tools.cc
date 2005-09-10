@@ -22,6 +22,7 @@
 #include "tools.h"
 #include <sys/stat.h>
 #include <sys/time.h>
+#include <errno.h>
 #include "md5/md5.h"
 #include "file_io_handler.h"
 #include "metadata_handler.h"
@@ -308,7 +309,10 @@ String read_text_file(String path)
 {
 	FILE *f = fopen(path.c_str(), "r");
 	if (!f)
-		return nil;
+    {
+        throw Exception(String("read_text_file: could not open ") +
+                        path + " : " + strerror(errno));
+    }
 	Ref<StringBuffer> buf(new StringBuffer()); 
 	char *buffer = (char *)malloc(1024);
 	int bytesRead;	
@@ -319,6 +323,29 @@ String read_text_file(String path)
 	fclose(f);
 	free(buffer);
 	return buf->toString();
+}
+void write_text_file(String path, String contents)
+{
+    int bytesWritten;
+    FILE *f = fopen(path.c_str(), "w");
+    if (!f)
+    {
+        throw Exception(String("write_text_file: could not open ") +
+                        path + " : " + strerror(errno));
+    }
+    
+    fwrite(contents.c_str(), 1, contents.length(), f);
+    if (bytesWritten < contents.length())
+    {
+        fclose(f);
+        if (bytesWritten >= 0)
+            throw Exception(String("write_text_file: incomplete write to ") +
+                            path + " : ");
+        else
+            throw Exception(String("write_text_file: error writing to ") +
+                            path + " : " + strerror(errno));
+    }
+    fclose(f);
 }
 
 

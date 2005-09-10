@@ -30,7 +30,7 @@
 #include "dictionary.h"
 
 #ifdef HAVE_JS
-#include "scripting/scripting.h"
+#include "scripting/import_script.h"
 #endif
 
 class ContentManager;
@@ -60,9 +60,9 @@ public:
 class CMRemoveObjectTask : public CMTask
 {
 protected:
-    zmm::String objectID;
+    int objectID;
 public:
-    CMRemoveObjectTask(zmm::String objectID);
+    CMRemoveObjectTask(int objectID);
     virtual void run();
 };
 
@@ -87,7 +87,7 @@ public:
     DirCacheEntry();
 public:
     int end;
-    zmm::String id;
+    int id;
 };
 
 class DirCache : public zmm::Object
@@ -99,12 +99,12 @@ protected:
     zmm::Ref<zmm::Array<DirCacheEntry> > entries;
 public:
     DirCache();
-    void push(zmm::String id);
+    void push(zmm::String name);
     void pop();
     void setPath(zmm::String path);
     void clear();
     zmm::String getPath();
-    zmm::String createContainers();
+    int createContainers();
 };
 
 class ContentManager : public zmm::Object
@@ -125,19 +125,19 @@ public:
     /* sync/async methods */
     int loadAccounting(int async=true);
     int addFile(zmm::String path, int recursive=0, int async=true);
-    int removeObject(zmm::String objectID, int async=true);
+    int removeObject(int objectID, int async=true);
     
     /* don't use these, use the above methods */
     void _loadAccounting();
     void _addFile(zmm::String path, int recursive=0);
     void _addFile2(zmm::String path, int recursive=0);
-    void _removeObject(zmm::String objectID);
+    void _removeObject(int objectID);
     
 
     /// \brief Updates an object in the database using the given parameters.
     /// \param objectID ID of the object to update
     /// \param parameters key value pairs of fields to be updated
-    void updateObject(zmm::String objectID, zmm::Ref<Dictionary> parameters);
+    void updateObject(int objectID, zmm::Ref<Dictionary> parameters);
 
     zmm::Ref<CdsObject> createObjectFromFile(zmm::String path, bool magic=true);
 
@@ -176,13 +176,14 @@ protected:
     zmm::Ref<Dictionary> mimetype_upnpclass_map;
     
     /* for recursive addition */
-    void addRecursive(zmm::String path, zmm::String parentID);
+    void addRecursive(zmm::String path, int parentID);
     void addRecursive2(zmm::Ref<DirCache> dirCache, zmm::String filename, int recursive);
 
     zmm::String extension2mimetype(zmm::String extension);
     zmm::String mimetype2upnpclass(zmm::String mimeType);
+
 #ifdef HAVE_JS  
-    zmm::Ref<Scripting> scripting;
+    zmm::Ref<ImportScript> importScript;
 #endif
 
     void lock();

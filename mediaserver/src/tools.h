@@ -110,8 +110,11 @@ zmm::String url_unescape(zmm::String str);
 /// \return string containing the CSV list
 zmm::String mime_types_to_CSV(zmm::Ref<zmm::Array<zmm::StringBase> > mimeTypes);
 
-/// \todo bgeradz, ffs, comment your shit dammit
+/// \brief Reads the entire contents of a text file and returns it as a string.
 zmm::String read_text_file(zmm::String path);
+
+/// \brief writes a string into a text file
+void write_text_file(zmm::String path, zmm::String contents);
 
 typedef int (*COMPARATOR) (void *, void *);
 typedef void * COMPARABLE;

@@ -1,8 +1,8 @@
 CREATE TABLE cds_objects
 (
     id              INTEGER PRIMARY KEY AUTO_INCREMENT,
-    ref_id          INTEGER,
-    parent_id       INTEGER NOT NULL,
+    ref_id          INTEGER NOT NULL DEFAULT 0,
+    parent_id       INTEGER NOT NULL DEFAULT 0,
     object_type     INTEGER NOT NULL,
     upnp_class      VARCHAR(80),
     dc_title        VARCHAR(255),

@@ -32,7 +32,8 @@ void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
    
     Ref<Element> req = request->getRequest();
    
-    String ObjectID = req->getChildText("ObjectID");
+    String objID = req->getChildText("ObjectID");
+    int objectID;
     String BrowseFlag = req->getChildText("BrowseFlag");
     //String Filter; // not yet supported
     String StartingIndex = req->getChildText("StartingIndex");
@@ -43,8 +44,10 @@ void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
 //            ObjectID.c_str(), BrowseFlag.c_str(), StartingIndex.c_str(), RequestedCount.c_str()));
    
 
-    if (ObjectID == nil)
+    if (objID == nil)
         throw UpnpException(UPNP_E_NO_SUCH_ID, String("empty object id"));
+    else
+        objectID = objID.toInt();
     
     int flag;
 
@@ -55,7 +58,7 @@ void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
     else
         throw UpnpException(UPNP_SOAP_E_INVALID_ARGS, String("invalid browse flag: ") + BrowseFlag);
 
-    Ref<BrowseParam> param(new BrowseParam(ObjectID, flag));
+    Ref<BrowseParam> param(new BrowseParam(objectID, flag));
 
     param->setStartingIndex(StartingIndex.toInt());
     param->setRequestedCount(RequestedCount.toInt());

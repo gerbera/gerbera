@@ -29,6 +29,9 @@
 #define BUFFERING_INTERVAL 3000
 #define MIN_SLEEP 1
 
+#define MAX_OBJECT_IDS 1000
+#define OBJECT_ID_HASH_CAPACITY 3109
+
 using namespace zmm;
 
 static long start_seconds;
@@ -58,25 +61,21 @@ inline void millisToTimespec(long millis, struct timespec *spec)
 
 static Ref<UpdateManager> inst;
 
-UpdateInfo::UpdateInfo(String objectID, int updateID)
-{
-    this->objectID = objectID;
-    this->updateID = updateID;
-}
-
 UpdateManager::UpdateManager() : Object()
 {
-    resetUpdates();
+    objectIDs = (int *)malloc(MAX_OBJECT_IDS * sizeof(int));
+    objectIDHash = Ref<DBBHash<int, int> >(new DBBHash<int, int>(OBJECT_ID_HASH_CAPACITY, 0));
 } 
 UpdateManager::~UpdateManager()
 {
+    free(objectIDs);
     pthread_mutex_destroy(&updateMutex);
     pthread_cond_destroy(&updateCond);
 } 
 
 void UpdateManager::resetUpdates()
 {
-    updates = Ref<Array<UpdateInfo> >(new Array<UpdateInfo>(10));
+    objectIDHash->zero();
 }
 void UpdateManager::init()
 {
@@ -111,9 +110,9 @@ void UpdateManager::shutdown()
 //    pthread_join(updateThread, NULL);
 }
 
-void UpdateManager::containerChanged(String objectID)
+void UpdateManager::containerChanged(int objectID)
 {
-    if(! haveUpdate(objectID))
+    if (! haveUpdate(objectID))
     {
         Ref<Storage> storage = Storage::getInstance();
         Ref<CdsObject> obj = storage->loadObject(objectID);
@@ -122,18 +121,16 @@ void UpdateManager::containerChanged(String objectID)
         int updateID = cont->getUpdateID();
         updateID++;
 
-        Ref<UpdateInfo> info(new UpdateInfo(objectID, updateID));
-
         cont->setUpdateID(updateID);
         storage->updateObject(obj);
 
-        addUpdate(info);
+        addUpdate(objectID, updateID);
     }
 }
 void UpdateManager::flushUpdates(int flushFlag)
 {
     lock();
-    if(flushFlag > this->flushFlag)
+    if (flushFlag > this->flushFlag)
     {
         this->flushFlag = flushFlag;
         pthread_cond_signal(&updateCond);
@@ -142,7 +139,7 @@ void UpdateManager::flushUpdates(int flushFlag)
 }
 Ref<UpdateManager> UpdateManager::getInstance()
 {
-    if(inst == nil)
+    if (inst == nil)
     {
         init_start_seconds();
         inst = Ref<UpdateManager>(new UpdateManager());
@@ -161,17 +158,13 @@ void UpdateManager::unlock()
     pthread_mutex_unlock(&updateMutex);
 }
 
-bool UpdateManager::haveUpdate(String objectID)
+bool UpdateManager::haveUpdate(int objectID)
 {
     lock();
-    int size = updates->size();
-    for(int i = 0; i < size; i++)
+    if (objectIDHash->exists(objectID))
     {
-        if(updates->get(i)->objectID == objectID)
-        {
-            unlock();
-            return true;
-        }
+        unlock();
+        return true;
     }
     unlock();
     return false;
@@ -179,26 +172,35 @@ bool UpdateManager::haveUpdate(String objectID)
 
 bool UpdateManager::haveUpdates()
 {
-    return (updates->size() > 0);
+    return (objectIDHash->size() > 0);
 }
 
-void UpdateManager::addUpdate(Ref<UpdateInfo> info)
+void UpdateManager::addUpdate(int objectID, int updateID)
 {
     lock();
-    updates->append(info);
-    if(updates->size() == 1)
+    objectIDHash->put(objectID, updateID);
+    if (objectIDHash->size() >= MAX_OBJECT_IDS)
+    {
+        unlock();
+        flushUpdates(FLUSH_ASAP);
+        lock();
+    }
+    else if (objectIDHash->size() == 1)
+    {
         pthread_cond_signal(&updateCond);
+    }
     unlock();
 }
 
 void UpdateManager::sendUpdates()
 {
     Ref<StringBuffer> buf(new StringBuffer(64));
-    int size = updates->size();
-    for(int i = 0; i < size; i++)
+    int size = objectIDHash->size();
+    int updateID;
+    for (int i = 0; i < size; i++)
     {
-        Ref<UpdateInfo> info = updates->get(i);
-        *buf << info->objectID << ',' << info->updateID << ',';
+        objectIDHash->get(objectIDs[i], &updateID);
+        *buf << objectIDs[i] << ',' << updateID << ',';
     }
     
     // skip last comma
@@ -225,12 +227,12 @@ void UpdateManager::threadProc()
         
     lock();
 
-    while(! shutdownFlag)
+    while (! shutdownFlag)
     {
 //        flog_info((stderr, "threadProc: awakened...\n")); fflush(stderr);
 
         /* if nothing to do, sleep until awakened */
-        if(updates->size() == 0)
+        if (objectIDHash->size() == 0)
         {
 
 //            flog_info((stderr, "threadProc: idle sleep ...\n")); fflush(stderr);
@@ -244,9 +246,9 @@ void UpdateManager::threadProc()
         }
 
         /* decide how long to sleep and put to sleepMillis var */
-        if(flushFlag)
+        if (flushFlag)
         {
-            switch(flushFlag)
+            switch (flushFlag)
             {
                 case FLUSH_ASAP: // send ASAP!
                     sleepMillis = 0;
@@ -261,7 +263,7 @@ void UpdateManager::threadProc()
             sleepMillis = BUFFERING_INTERVAL - (nowMillis - lastIdleMillis);
         }
 
-        if(sleepMillis >= MIN_SLEEP) // sleep for sleepMillis milliseconds
+        if (sleepMillis >= MIN_SLEEP) // sleep for sleepMillis milliseconds
         {
             millisToTimespec(nowMillis + sleepMillis, &timeout);
 //            flog_info((stderr, "threadProc: sleeping for %d millis\n", (int)sleepMillis)); fflush(stderr);

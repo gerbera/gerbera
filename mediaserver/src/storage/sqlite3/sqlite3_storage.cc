@@ -34,6 +34,7 @@ Sqlite3Storage::Sqlite3Storage() : SQLStorage()
 
     pthread_mutex_init(&lock_mutex, NULL);    
     /*
+    int res;
     pthread_mutexattr_t mutex_attr;
     res = pthread_mutexattr_init(&mutex_attr);
     res = pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_RECURSIVE_NP);
@@ -116,7 +117,7 @@ Ref<SQLResult> Sqlite3Storage::select(String query)
     return res;
 }
 
-int Sqlite3Storage::exec(String query)
+void Sqlite3Storage::exec(String query)
 {
     lock();
 

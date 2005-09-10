@@ -31,85 +31,11 @@ CdsObject::CdsObject() : Object()
     auxdata = Ref<Dictionary>(new Dictionary());
     resources = Ref<Array<CdsResource> >(new Array<CdsResource>);
     restricted = 1;
+    id = INVALID_OBJECT_ID;
+    parentID = INVALID_OBJECT_ID;
+    refID = 0;
     virt = 0;
 }
-void CdsObject::setID(String id)
-{
-    this->id = id;
-}
-String CdsObject::getID()
-{
-    return id;
-}
-
-void CdsObject::setRefID(String ref_id)
-{
-    this->ref_id = ref_id;
-}
-String CdsObject::getRefID()
-{
-    return ref_id;
-}
-
-void CdsObject::setParentID(String parentID)
-{
-    this->parentID = parentID;
-}
-String CdsObject::getParentID()
-{
-    return parentID;
-}
-
-void CdsObject::setRestricted(int restricted)
-{
-    this->restricted = restricted ? 1 : 0;
-}
-int CdsObject::isRestricted()
-{
-    return restricted;
-}
-
-void CdsObject::setTitle(String title)
-{
-    this->title = title;
-}
-String CdsObject::getTitle()
-{
-    return title;
-}
-
-void CdsObject::setClass(String upnp_class)
-{
-    this->upnp_class = upnp_class;
-}
-String CdsObject::getClass()
-{
-    return upnp_class;
-}
-
-void CdsObject::setLocation(String location)
-{
-    this->location = location;
-}
-
-String CdsObject::getLocation(){
-    return location;
-}
-
-void CdsObject::setVirtual(int virt)
-{
-    this->virt = virt ? 1 : 0;
-}
-int CdsObject::isVirtual()
-{
-    return virt;
-}
-
-int CdsObject::getObjectType()
-{
-    return objectType;
-}
-
 
 void CdsObject::copyTo(Ref<CdsObject> obj)
 {
@@ -117,7 +43,7 @@ void CdsObject::copyTo(Ref<CdsObject> obj)
     obj->setParentID(parentID);
     obj->setRestricted(restricted);
     obj->setTitle(title);
-    obj->setClass(upnp_class);
+    obj->setClass(upnpClass);
     obj->setLocation(location);
     obj->setVirtual(virt);
     obj->setMetadata(metadata->clone());
@@ -132,7 +58,7 @@ int CdsObject::equals(Ref<CdsObject> obj, bool exactly)
         parentID == obj->getParentID() &&
         restricted == obj->isRestricted() &&
         title == obj->getTitle() &&
-        upnp_class == obj->getClass() &&
+        upnpClass == obj->getClass() &&
         resources->size() == obj->resources->size()
        ))
         return 0;
@@ -159,11 +85,9 @@ int CdsObject::equals(Ref<CdsObject> obj, bool exactly)
 
 void CdsObject::validate()
 {
-    if (!string_ok(this->parentID) ||
-            (!string_ok(this->title)) ||
-            (!string_ok(this->upnp_class)))
+    if ((!string_ok(this->title)) ||
+        (!string_ok(this->upnpClass)))
     {
-    //    log_info(("this->parentID %s, this->title %s, this->upnp_class %s, this->location %s\n", this->parentID.c_str(), this->title.c_str(), this->upnp_class.c_str(), this->location.c_str()));
         throw Exception(String("CdsObject: validation failed"));
     }
 
@@ -201,93 +125,13 @@ Ref<CdsObject> CdsObject::createObject(int objectType)
 }
 
 
-String CdsObject::getMetadata(String key)
-{
-    return metadata->get(key);
-}
-Ref<Dictionary> CdsObject::getMetadata()
-{
-    return metadata;
-}
-void CdsObject::setMetadata(String key, String value)
-{
-    metadata->put(key, value);
-}
-void CdsObject::setMetadata(Ref<Dictionary> metadata)
-{
-    this->metadata = metadata;
-}
-void CdsObject::removeMetadata(String key)
-{
-    metadata->remove(key);
-}
-
-
-String CdsObject::getAuxData(String key)
-{
-    return auxdata->get(key);
-}
-Ref<Dictionary> CdsObject::getAuxData()
-{
-    return auxdata;
-}
-void CdsObject::setAuxData(String key, String value)
-{
-    auxdata->put(key, value);
-}
-void CdsObject::setAuxData(Ref<Dictionary> auxdata)
-{
-    this->auxdata = auxdata;
-}
-void CdsObject::removeAuxData(String key)
-{
-    auxdata->remove(key);
-}
-
-
-int CdsObject::getResourceCount()
-{
-    return resources->size();
-}
-Ref<Array<CdsResource> > CdsObject::getResources()
-{
-    return resources;
-}
-Ref<CdsResource> CdsObject::getResource(int index)
-{
-    return resources->get(index);
-}
-void CdsObject::addResource(Ref<CdsResource> resource)
-{
-    resources->append(resource);
-}
-
-
 /* CdsItem */
 
 CdsItem::CdsItem() : CdsObject()
 {
     objectType = OBJECT_TYPE_ITEM;
-    upnp_class = "object.item";
+    upnpClass = "object.item";
     mimeType = MIMETYPE_DEFAULT;
-}
-
-/*void CdsItem::setDescription(String description)
-{
-    this->description = description;
-}
-String CdsItem::getDescription()
-{
-    return this->description;
-}
-*/
-void CdsItem::setMimeType(String mimeType)
-{
-    this->mimeType = mimeType;
-}
-String CdsItem::getMimeType()
-{
-    return mimeType;
 }
 
 void CdsItem::copyTo(Ref<CdsObject> obj)
@@ -304,10 +148,7 @@ int CdsItem::equals(Ref<CdsObject> obj, bool exactly)
     Ref<CdsItem> item = RefCast(obj, CdsItem);
     if (! CdsObject::equals(obj, exactly))
         return 0;
-    return (
-//        description == item->getDescription() &&
-        mimeType == item->getMimeType()
-    );
+    return ( mimeType == item->getMimeType() );
 }
 
 void CdsItem::validate()
@@ -315,33 +156,17 @@ void CdsItem::validate()
     CdsObject::validate();
 //    log_info(("mime: [%s] loc [%s]\n", this->mimeType.c_str(), this->location.c_str()));
     if ((!string_ok(this->mimeType)) || (!check_path(this->location)))
-        throw Exception(String("CdsItem: validation failed"));
+        throw Exception("CdsItem: validation failed");
 }
 
 CdsActiveItem::CdsActiveItem() : CdsItem()
 {
     objectType |= OBJECT_TYPE_ACTIVE_ITEM;
 
-    upnp_class = "object.item.activeItem";
+    upnpClass = "object.item.activeItem";
     mimeType = MIMETYPE_DEFAULT ;
 }
 
-void CdsActiveItem::setAction(zmm::String action)
-{
-    this->action = action;
-}
-zmm::String CdsActiveItem::getAction()
-{
-    return action;
-}
-void CdsActiveItem::setState(zmm::String state)
-{
-    this->state = state;
-}
-zmm::String CdsActiveItem::getState()
-{
-    return state;
-}
 void CdsActiveItem::copyTo(Ref<CdsObject> obj)
 {
     CdsItem::copyTo(obj);
@@ -376,18 +201,8 @@ CdsItemExternalURL::CdsItemExternalURL() : CdsItem()
 {
     objectType |= OBJECT_TYPE_ITEM_EXTERNAL_URL;
 
-    upnp_class = "object.item";
+    upnpClass = "object.item";
     mimeType = MIMETYPE_DEFAULT;
-}
-
-void CdsItemExternalURL::setURL(String URL)
-{
-    setLocation(URL);
-}
-
-String CdsItemExternalURL::getURL()
-{
-    return getLocation();
 }
 
 void CdsItemExternalURL::validate()
@@ -402,7 +217,7 @@ CdsItemInternalURL::CdsItemInternalURL() : CdsItemExternalURL()
 {
     objectType |= OBJECT_TYPE_ITEM_INTERNAL_URL;
 
-    upnp_class = "object.item";
+    upnpClass = "object.item";
     mimeType = MIMETYPE_DEFAULT;
 }
 
@@ -422,34 +237,9 @@ CdsContainer::CdsContainer() : CdsObject()
     updateID = 0;
     searchable = 0;
     childCount = -1;
-    upnp_class = "object.container";
+    upnpClass = "object.container";
 }
 
-void CdsContainer::setSearchable(int searchable)
-{
-    this->searchable = searchable ? 1 : 0;
-}
-int CdsContainer::isSearchable()
-{
-    return searchable;
-}
-
-void CdsContainer::setUpdateID(int updateID)
-{
-    this->updateID = updateID;
-}
-int CdsContainer::getUpdateID()
-{
-    return updateID;
-}
-void CdsContainer::setChildCount(int childCount)
-{
-    this->childCount = childCount;
-}
-int CdsContainer::getChildCount()
-{
-    return childCount;
-}
 void CdsContainer::copyTo(Ref<CdsObject> obj)
 {
     CdsObject::copyTo(obj);

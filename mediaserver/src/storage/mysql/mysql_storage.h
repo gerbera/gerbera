@@ -56,7 +56,7 @@ public:
     virtual void init();
     virtual zmm::String quote(zmm::String str);
     virtual zmm::Ref<SQLResult> select(zmm::String query);
-    virtual int exec(zmm::String query);
+    virtual void exec(zmm::String query);
     virtual int lastInsertID();
 
 protected:

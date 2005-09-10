@@ -1,8 +1,8 @@
 echo 'libmediatomb_a_SOURCES = \'
 
-find ../src -name '*.c' | sed 's/\.c/.c \\/'
-find ../src -name '*.cc' | sed 's/\.cc/.cc \\/'
-find ../src -name '*.h' | sed 's/\.h/.h \\/'
+FILTER='use strict; while (my $line=<STDIN>) { print "$line\n"; if ($line =~ /\.[ch]c?/) { print ($line =~ s/\s+//g) . " \\\n"; } }'
+
+find ../src | perl -e "'$FILTER'"  | sort
 
 echo dummy.h
 

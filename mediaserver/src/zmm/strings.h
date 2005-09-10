@@ -30,6 +30,7 @@
 
 
 #define MAX_INT_STRING_LENGTH 12
+#define MAX_DOUBLE_STRING_LENGTH 24
 
 namespace zmm
 {
@@ -41,8 +42,8 @@ public:
 	char *data;
 	int len;
 	StringBase(int capacity);
-	StringBase(char *str);
-	StringBase(char *str, int len);
+	StringBase(const char *str);
+	StringBase(const char *str, int len);
 	bool startsWith(StringBase *other);
 	virtual ~StringBase();
 protected:
@@ -60,8 +61,8 @@ protected:
 	StringBase *base;
 public:
 	String();
-	String(char *str);
-	String(char *str, int len);
+	String(const char *str);
+	String(const char *str, int len);
 	String(const String &other);
 	String(StringBase *other);
     String(Ref<StringBase> other);
