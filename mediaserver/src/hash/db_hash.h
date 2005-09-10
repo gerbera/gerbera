@@ -38,7 +38,7 @@ public:
     /* virtual methods */
     virtual int hashCode(KT key)
     {
-        return baseTypeHashCode((unsigned int)key);
+        return this->baseTypeHashCode((unsigned int)key);
     }
     virtual bool match(KT key, KT *slot)
     {
@@ -52,12 +52,12 @@ public:
     void clear()
     {
         if (! emptyKey)
-            zero();
+            this->zero();
         else
         {
-            for (int i = 0; i < capacity; i++)
-                data[i] = emptyKey;
-            count = 0;
+            for (int i = 0; i < this->capacity; i++)
+                this->data[i] = emptyKey;
+            this->count = 0;
         }
     }
 
@@ -67,7 +67,7 @@ public:
         if (! search(key, &slot))
         {
             *slot = key;
-            count++;
+            this->count++;
         }
     }
     inline void put(KT key, hash_slot_t destSlot)
@@ -76,7 +76,7 @@ public:
         if (*slot == emptyKey)
         {
             *slot = key;
-            count++;
+            this->count++;
         }
     }
 

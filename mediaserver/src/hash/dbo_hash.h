@@ -48,20 +48,20 @@ protected:
     void init()
     {
         if (! emptyKey)
-            zero();
+            this->zero();
         else
         {
-            for (int i = 0; i < capacity; i++)
-                data[i].key = emptyKey;
-            count = 0;
+            for (int i = 0; i < this->capacity; i++)
+                this->data[i].key = emptyKey;
+            this->count = 0;
         }
     }
     void releaseData()
     {
         dbo_hash_slot<KT, VT> *slot;
-        for (int i = 0; i < capacity; i++)
+        for (int i = 0; i < this->capacity; i++)
         {
-            slot = data + i;
+            slot = this->data + i;
             if (slot->key != emptyKey)
                 slot->value->release();
         }
@@ -70,22 +70,22 @@ public:
     void clear()
     {
         dbo_hash_slot<KT, VT> *slot;
-        for (int i = 0; i < capacity; i++)
+        for (int i = 0; i < this->capacity; i++)
         {
-            slot = data + i;
+            slot = this->data + i;
             if (slot->key != emptyKey)
             {
                 slot->key = emptyKey;
                 slot->value->release();
             }
         }
-        count = 0;
+        this->count = 0;
     }
 
     /* virtual methods */
     virtual int hashCode(KT key)
     {
-        return baseTypeHashCode((unsigned int)key);
+        return this->baseTypeHashCode((unsigned int)key);
     }
     virtual bool match(KT key, struct dbo_hash_slot<KT, VT> *slot)
     {
@@ -114,7 +114,7 @@ public:
         }            
         else
         {
-            count++;
+            this->count++;
             slot->key = key;
             VT *valuePtr = value.getPtr();
             valuePtr->retain();

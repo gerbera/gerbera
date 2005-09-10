@@ -35,7 +35,7 @@ class DSOHash : public DHashBase<zmm::String, struct dso_hash_slot<VT> >
 public:
     DSOHash(int capacity) : DHashBase<zmm::String, struct dso_hash_slot<VT> >(capacity)
     {
-        zero();
+        this->zero();
     }
     virtual ~DSOHash()
     {
@@ -44,9 +44,9 @@ public:
 protected:
     void releaseData()
     {
-        for (int i = 0; i < capacity; i++)
+        for (int i = 0; i < this->capacity; i++)
         {
-            dso_hash_slot<VT> *slot = data + i;
+            dso_hash_slot<VT> *slot = this->data + i;
             if (slot->key)
             {
                 slot->key->release();
@@ -58,7 +58,7 @@ public:
     /* virtual methods */
     virtual int hashCode(zmm::String key)
     {
-        return stringHashCode(key);
+        return this->stringHashCode(key);
     }
     virtual bool match(zmm::String key, struct dso_hash_slot<VT> *slot)
     {
@@ -72,7 +72,7 @@ public:
     void clear()
     {
         releaseData();
-        zero();
+        this->zero();
     }
    
     inline void put(zmm::String key, zmm::Ref<VT> value)
@@ -93,7 +93,7 @@ public:
         }            
         else
         {
-            count++;
+            this->count++;
             zmm::StringBase *keyBase = key.getBase();
             keyBase->retain();
             slot->key = keyBase;

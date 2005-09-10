@@ -100,7 +100,7 @@ int main(int argc, char **argv, char **envp)
 
             case 'c':
 //                log_info(("Option config with param %s\n", optarg));
-                config_file = optarg;
+                config_file = String(optarg);
                 break;
 
             case 'd':
@@ -110,12 +110,12 @@ int main(int argc, char **argv, char **envp)
 
             case 'u':
 //                log_info(("Running as user: %s\n", optarg));
-                user = optarg;
+                user = String(optarg);
                 break;
 
             case 'g':
 //                log_info(("Running as group: %s\n", optarg));
-                group = optarg;
+                group = String(optarg);
                 break;
                 
             case 'a':
@@ -126,7 +126,7 @@ int main(int argc, char **argv, char **envp)
 
             case 'P':
                 printf("Pid file: %s\n", optarg);
-                pid_file = optarg;
+                pid_file = String(optarg);
                 break;
                 
             case 'l':
@@ -202,11 +202,13 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     {
 #ifndef __CYGWIN__
         char *h = getenv("HOME");
-        if (h != NULL) home = h;
+        if (h != NULL)
+            home = String(h);
 #else
         char *h = getenv("HOMEPATH");
         char *d = getenv("HOMEDRIVE");
-        if ((h != NULL)  && (d != NULL)) home = String(d) + h;
+        if ((h != NULL)  && (d != NULL))
+            home = String(d) + h;
 #endif  // __CYGWIN__
             
 
@@ -317,7 +319,7 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     try
     {
         server->init();
-        server->upnp_init(ip, port);
+        server->upnp_init(String(ip), port);
     }
     catch(UpnpException upnp_e)
     {

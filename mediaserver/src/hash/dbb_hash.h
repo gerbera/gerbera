@@ -44,7 +44,7 @@ public:
     /* virtual methods */
     virtual int hashCode(KT key)
     {
-        return baseTypeHashCode((unsigned int)key);
+        return this->baseTypeHashCode((unsigned int)key);
     }
     virtual bool match(KT key, struct dbb_hash_slot<KT, VT> *slot)
     {
@@ -58,12 +58,12 @@ public:
     void clear()
     {
         if (! emptyKey)
-            zero();
+            this->zero();
         else
         {
-            for (int i = 0; i < capacity; i++)
-                data[i].key = emptyKey;
-            count = 0;
+            for (int i = 0; i < this->capacity; i++)
+                this->data[i].key = emptyKey;
+            this->count = 0;
         }
     }
    
@@ -74,7 +74,7 @@ public:
         if (! found)
         {
             slot->key = key;
-            count++;
+            this->count++;
         }
         slot->value = value;
     }
@@ -84,7 +84,7 @@ public:
         if (slot->key == emptyKey)
         {
             slot->key = key;
-            count++;
+            this->count++;
         }
         slot->value = value;
     }
