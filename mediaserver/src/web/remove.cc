@@ -41,42 +41,35 @@ void web::remove::process()
 
     check_request();
     
-    String object_id = param("object_id");
+    String objID = param("object_id");
     String sid = param("sid");
     String driver = param("driver");
 
     session = SessionManager::getInstance()->getSession(sid);
    
-    if (driver == "1")
-    {
-        // depending on the driver we store the data in different
-        // locations within the session
-        sd = PRIMARY;
-    }
-    else if (driver == "2")
-    {
-        sd = SECONDARY;
-    }
+    sd = PRIMARY;
  
     Ref<ContentManager> cm = ContentManager::getInstance();
-    Ref<CdsObject> obj = Storage::getInstance()->loadObject(object_id);
-    bool async = (IS_CDS_CONTAINER(obj->getObjectType()));
-    cm->removeObject(object_id, async);
 
-    object_id = session->getFrom(sd, "object_id");
-    if (object_id == nil)
+    if (objID != nil)
+        cm->removeObject(objID.toInt());
+
+    int objectID;
+    objID = session->getFrom(sd, "object_id");
+    if (objID == nil)
     {
-        object_id = "0";
+        objectID = 0;
     }
     else
     {
+        objectID = objID.toInt();
         try
         {
-            Storage::getInstance()->loadObject(object_id);
+            Storage::getInstance()->loadObject(objectID);
         }
         catch (Exception e)
         {
-            object_id = "0";
+            objectID = 0;
         }
     }
 
@@ -91,7 +84,7 @@ void web::remove::process()
 
 
     Ref<Dictionary> sub(new Dictionary());
-    sub->put("object_id", object_id);
+    sub->put("object_id", String::from(objectID));
     sub->put("requested_count", requested_count);
     sub->put("sid", sid);
     sub->put("driver", driver);
