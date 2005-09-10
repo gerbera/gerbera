@@ -21,12 +21,22 @@
 #ifndef __HASH_H__
 #define __HASH_H__
 
-#define HASH_PRIME 47
+#define HASH_PRIME 29
 #define HASH_MAX_ITERATIONS 100
 
 #include "common.h"
+
+struct hash_slot_struct
+{
+    int dummy;
+};
+typedef struct hash_slot_struct *hash_slot_t;
+
 #include "hash/db_hash.h"
 #include "hash/dbb_hash.h"
+#include "hash/dbo_hash.h"
+#include "hash/dsb_hash.h"
+#include "hash/dso_hash.h"
 
 #endif // __HASH_H__
 
