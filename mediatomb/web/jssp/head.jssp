@@ -1,3 +1,4 @@
+<% include('include/tools.jssp'); %>
 <html>
 <head>
     <title>MediaTomb</title>
@@ -6,17 +7,39 @@
         body { color: black; background-color: #408bff; }
     -->
     </style>
-</head>
+<script>
+var SID = '<%= SID %>';
+</script>
+<script src="/js/tools.js"></script>
+<script src="/js/ajax.js"></script>
 <script>
 
-function updateAccounting(acct)
+function setValue(key, value)
 {
-    for (var key in acct)
+    var el = document.getElementById(key);
+    if (el)
     {
-        var el = document.getElementById(key);
-        if (el)
-            el.innerHTML = acct[key];
+        if (value)
+            el.innerHTML = value;
+        else
+            el.innerHTML = '&nbsp;';
     }
+}
+
+function updateInfo()
+{
+    var url = link('acct');
+    var xml = fetchXML(url);
+    if (! xml)
+        return;
+    var totalFiles = xmlGetElementText(xml, 'total-files');
+    setValue('total-files', totalFiles);
+    
+    var currentTask = xmlGetElementText(xml, 'current-task');
+    setValue('current-task', currentTask);
+
+    if (currentTask)
+        setTimeout('updateInfo()', 5000);
 }
 
 function refreshView()
@@ -24,19 +47,28 @@ function refreshView()
     top.main.location.href = top.main.location.href;
 }
 
+function addTask(name, params)
+{
+    params.name = name;
+    var url = link('task', params);
+    delete params.name;
+    var xml = fetchXML(url);
+    if (! xml)
+        return;
+    updateInfo();
+}
+
 </script>
 </head>
-<body link="black">
+<body link="black" onLoad="updateInfo()">
 
 <center>
     <table border="0" width="90%"><tr>
         <td width="20%" valign="top">
-            Total files: <span id="acctTotalFiles" style="font-weight:bold"> - </span><br>
-<!--
+            Total files: <span id="total-files" style="font-weight:bold"> - </span><br>
         <a href="#" onClick="javascript: refreshView(); return false;">
             [refresh view]
         </a>
--->
         </td>
         <td width="60%" align="center" valign="top">
             <table border="0">
@@ -47,7 +79,7 @@ function refreshView()
                 </tr>
                 <tr>
                     <td align="center">
-                        <span id="currentTask" style="font-style:italic; font-weight: bold; color:#FFFFFF"></span>
+                        <span id="current-task" style="font-style:italic; font-weight: bold; color:#FFFFFF">&nbsp;</span>
                     </td>
                 </tr>
             </table>                
@@ -56,7 +88,12 @@ function refreshView()
             &nbsp;        
         </td>        
     </tr></table>
+
+    <a href="<%= link('browse', {type: 'database'}) %>" target="content">Database</a>
+    &nbsp;&nbsp;|&nbsp;&nbsp;
+    <a href="<%= link('browse', {type: 'filesystem'}) %>" target="content">Filesystem</a>
 </center>
+
 
 </body>
 </html>

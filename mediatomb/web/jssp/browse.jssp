@@ -1,12 +1,15 @@
 <% include("include/tools.jssp"); %>
+<%
+    var t = root.attributes['type'];
+%>
 <html>
 <head>
 <link rel="StyleSheet" href="/main.css" type="text/css">
 </head>
 
 <frameset cols="300,*">
-    <frame name="tree" src="<%= link("tree") %>" scrolling="auto" marginwidth="1" marginheight="1">
-    <frame name="items" src="<%= link("items") %>" scrolling="auto" marginwidth="0" marginheight="0">
+    <frame name="tree" src="<%= link("tree", {type: t}) %>" scrolling="auto" marginwidth="1" marginheight="1">
+    <frame name="items" src="<%= link("items", {type: t}) %>" scrolling="auto" marginwidth="0" marginheight="0">
 </frameset>
 
 </html>

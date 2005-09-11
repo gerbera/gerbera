@@ -14,7 +14,7 @@
         var item = children[i];
         %>
             <tr>
-                <td><%= (i + 1) %></td>
+                <td><%= i + 1 %></td>
                 <td><%= item.attributes['id'] %></td>
                 <td><%= xmlGetElementText(item, "dc:title") %></td>
             </tr>

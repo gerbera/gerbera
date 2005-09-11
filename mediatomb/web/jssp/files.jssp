@@ -1,0 +1,35 @@
+<% include("include/tools.jssp"); %>
+<%
+var files = xmlGetElement(root, "files"); 
+var children = files.children;
+if (! children || ! children.length)
+{
+    echo("Directory has no content");
+}
+else
+{
+    %>
+    <table border="1" cellspacing="1" cellpadding="1">
+    <tr>
+        <td>#</td>
+        <td><b>ID</td>
+        <td><b>Title</b></td>
+    <tr>
+    <%
+        for (var i = 0; i < children.length; i++)
+        {
+            var file = children[i];
+            %>
+                <tr>
+                    <td><%= i + 1 %></td>
+                    <td><%= file.attributes['id'] %></td>
+                    <td><%= file.text %></td>
+                </tr>
+            <%
+        }
+    %>
+    </table>
+    <%
+}
+%>
+

@@ -3,8 +3,10 @@
     <link rel="StyleSheet" href="/main.css" type="text/css">
     <script language="JavaScript">
       var SID = '<%= SID %>';
+      var TYPE = '<%= root.attributes['type'] %>';
     </script>
     <script language="JavaScript" src="/js/tools.js"></script>
+    <script language="JavaScript" src="/js/ajax.js"></script>
     <script language="JavaScript" src="/js/tree.js"></script>
 </head>
 <body onload="initializeTree()">
