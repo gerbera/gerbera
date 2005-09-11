@@ -346,7 +346,7 @@ String ConfigManager::getOption(String xpath, String def)
     Ref<XPath> rootXPath(new XPath(root));
     String value = rootXPath->getText(xpath);
     if (string_ok(value))
-        return value;
+        return trim_string(value);
 
     log_info(("Config: option not found: %s using default value: %s\n",
            xpath.c_str(), def.c_str()));
@@ -413,7 +413,7 @@ String ConfigManager::getOption(String xpath)
 //    if (string_ok(value))
 //        return value;
     if (value != nil)
-        return value;
+        return trim_string(value);
     throw Exception(_("Config: option not found: ") + xpath);
 }
 
