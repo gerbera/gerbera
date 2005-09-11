@@ -48,7 +48,7 @@ function encrypt()
 </head>
 <body onLoad="document.login_form.username.focus()">
 <div style="text-align: center;"><br>
-    <h3>MediaTomb Login:</h3>
+    <h3>Login:</h3>
     <br>
     <form action="/content/interface" method="get" name="login_form" onSubmit="encrypt(); return false;">
         <table style="margin-left: auto; margin-right: auto; 
