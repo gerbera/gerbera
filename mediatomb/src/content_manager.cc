@@ -240,10 +240,10 @@ void ContentManager::_addFile(String path, bool recursive)
 
         if (obj == nil) // create object
         {
-            long millisStart = getMillis();
+//            long millisStart = getMillis();
             obj = createObjectFromFile(curPath);
-            long elapsed = getMillis() - millisStart;
-            log_debug(("FILE PARSED: %ld\n", elapsed));
+//            long elapsed = getMillis() - millisStart;
+//            log_debug(("FILE PARSED: %ld\n", elapsed));
             
             if (obj == nil) // object ignored
             {
@@ -325,10 +325,10 @@ void ContentManager::addRecursive(String path, int parentID)
             Ref<CdsObject> obj = storage->findObjectByTitle(f2i->convert(String(name)), parentID);
             if (obj == nil) // create object
             {
-                long millisStart = getMillis();
+//                long millisStart = getMillis();
                 obj = createObjectFromFile(newPath);
-                long elapsed = getMillis() - millisStart;
-                log_debug(("FILE PARSED: %ld\n", elapsed));
+//                long elapsed = getMillis() - millisStart;
+//                log_debug(("FILE PARSED: %ld\n", elapsed));
                 
                 
                 if (obj == nil) // object ignored
@@ -346,12 +346,12 @@ void ContentManager::addRecursive(String path, int parentID)
 #ifdef HAVE_JS
         		if (IS_CDS_ITEM(obj->getObjectType()))
 	        	{
-                    long millisStart = getMillis();
+//                    long millisStart = getMillis();
                     if (importScript != nil)
     		            importScript->processCdsObject(obj);
                     obj = createObjectFromFile(newPath);
-                    long elapsed = getMillis() - millisStart;
-                    log_debug(("FILE ADDED: %ld\n", elapsed));
+//                    long elapsed = getMillis() - millisStart;
+//                    log_debug(("FILE ADDED: %ld\n", elapsed));
         		}
 #endif
                 if (IS_CDS_CONTAINER(obj->getObjectType()))

@@ -310,12 +310,13 @@ void SQLStorage::updateObject(zmm::Ref<CdsObject> obj)
 
 Ref<CdsObject> SQLStorage::loadObject(int objectID, select_mode_t mode)
 {
-
+/*
     Ref<CdsObject> obj = objectIDCache->get(objectID);
     if (obj != nil)
         return obj;
     throw Exception(_("Object not found: ") + objectID);
-/*        
+*/
+        
     Ref<StringBuffer> qb(new StringBuffer());
 
     *qb << getSelectQuery(mode) << " WHERE f.id = " << objectID;
@@ -327,7 +328,6 @@ Ref<CdsObject> SQLStorage::loadObject(int objectID, select_mode_t mode)
         return createObjectFromRow(row, mode);
     }
     throw Exception(_("Object not found: ") + objectID);
-*/
 }
 
 Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
@@ -452,12 +452,13 @@ Ref<Array<StringBase> > SQLStorage::getMimeTypes()
 
 Ref<CdsObject> SQLStorage::findObjectByTitle(String title, int parentID)
 {
-
+    /*
     Ref<CdsObject> obj = objectTitleCache->get(String::from(parentID) +'|'+ title);
     if (obj != nil)
         return obj;
     return nil;
-/*
+    */
+
     Ref<StringBuffer> qb(new StringBuffer());
     *qb << getSelectQuery(SELECT_FULL) << " WHERE ";
     if (parentID != INVALID_OBJECT_ID)
@@ -472,7 +473,6 @@ Ref<CdsObject> SQLStorage::findObjectByTitle(String title, int parentID)
         return obj;
     }
     return nil;
-*/
 }
 
 Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row, select_mode_t mode)
