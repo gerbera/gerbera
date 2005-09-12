@@ -58,18 +58,84 @@ function DivPoolAlloc()
 }
 function DivPoolFree(theDiv)
 {
-    div.innerHTML = "";
+    theDiv.innerHTML = "";
     var el = {div: theDiv, next: this.freeList};
     this.freeList = el;
 
     this.freeDivs++;
 }
 
+/********** context menu class **********************/
+var ctxm_inst;
+function ContextMenuOnMouseOver()
+{
+    this.clearTimeout();
+}
+function ContextMenuOnMouseOut()
+{
+    this.setTimeout();
+}
+function ContextMenuSetTimeout()
+{
+    this.clearTimeout();
+    this.timer = setTimeout('ctxm_inst.hide()', 1000);
+}
+function ContextMenuClearTimeout()
+{
+    if (this.timer)
+    {
+        clearTimeout(this.timer);
+        this.timer = null;
+    }
+}
+function ContextMenu()
+{
+    this.entries = new Array();
+    this.show = ContextMenuShow;
+    this.hide = ContextMenuHide;
+    this.addEntry = ContextMenuAddEntry;
+
+    this.onMouseOver = ContextMenuOnMouseOver;
+    this.onMouseOut = ContextMenuOnMouseOut;
+    this.setTimeout = ContextMenuSetTimeout;
+    this.clearTimeout = ContextMenuClearTimeout;
+}
+function ContextMenuAddEntry(title, action)
+{
+    var entry = {title: title, action: action};
+    this.entries[this.entries.length] = entry;
+}
+
+function ContextMenuShow(x, y, timeout)
+{
+    if (ctxm_inst)
+        ctxm_inst.hide();
+    var html = '';
+    html += '<div class="ctxm" style="position:absolute; left:'+ x +'px; top:'+ y
+            +'px;" onMouseOver="ctxm_inst.onMouseOver()" onMouseOut="ctxm_inst.onMouseOut()">';
+    for (var i = 0; i < this.entries.length; i++)
+    {
+        var entry = this.entries[i];
+        html += '<div class="ctxm-default" onMouseOver="this.className=\'ctxm-active\'" onMouseOut="this.className=\'ctxm-default\'" onClick="ctxm_inst.hide(); '+ entry.action +'">' + entry.title +'</div>';
+    }
+    html += '</div>';
+    this.div = div_pool_inst.alloc();
+    this.div.innerHTML = html;
+    this.setTimeout();
+    ctxm_inst = this;
+}
+function ContextMenuHide()
+{
+    this.clearTimeout();
+    div_pool_inst.free(this.div);
+    this.div = null;
+    ctxm_inst = null;
+}
 
 /********** special functions used by tree **********/
 function imgUrl(name)
 {
-    return '/tree_icons/'+ name +'.gif';
+    return '/icons/tree/'+ name +'.gif';
 }
 function renderImg(name, extra)
 {
@@ -81,15 +147,49 @@ function renderImg(name, extra)
     return '<img src="'+ imgUrl(name) +'" width="18" height="16" align="absmiddle" '+ attrs +'>';
 }
 
-// toggler
+// node's toggler
 function ntgl(id)
 {
     var node = node_hash[id];
     node.toggle();
 }
+
+// node's context menu
+function nctx(id)
+{
+    var node = node_hash[id];
+    var menu = new ContextMenu();
+    if (TYPE == 'database')
+    {
+        menu.addEntry("Edit", "node_edit('"+ id +"')");
+        menu.addEntry("Delete", "node_delete('"+ id +"')");
+    }
+    else
+    {
+        menu.addEntry("Add to database", "node_add('"+ id +"')");
+    }
+    var x = (node.getDepth() + 2) * 18;
+    var y = node.getY() + 16;
+    menu.show(x, y);
+}
+
+function node_add(id)
+{
+    top.head.addTask("add", {path: id});
+}
+function node_delete(id)
+{
+    top.head.addTask("remove", {object_id: id});
+}
+function node_edit(id)
+{
+    alert("about to edit node "+ id);
+}
+
 function nopen(id)
 {
-    var url = link('items', {parent_id: id});
+    var itemLink = (TYPE == 'database') ? 'items' : 'files';
+    var url = link(itemLink, {parent_id: id});
     parent.items.location.href = url;
 }
 
@@ -116,7 +216,7 @@ function setOutline(html)
 
 function Node(parent, id, title, expandable)
 {
-    node_hash[id] = this;
+    node_hash[''+id+''] = this;
 
     this.parent = parent;
     this.id = id;
@@ -140,6 +240,7 @@ function Node(parent, id, title, expandable)
     this.reloadChildren = NodeReloadChildren;
     this.getY = NodeGetY;
     this.setY = NodeSetY;
+    this.getDepth = NodeGetDepth;
     this.setDiv = NodeSetDiv;
 
     this.getExpanderName = NodeGetExpanderName;
@@ -158,7 +259,7 @@ function NodeRender()
     var r = '';
     r += '<div id="node_'+ this.id +'" class="node" style="top:'+ nextNodeY() +'px"><nobr>';
     r += this.renderOutline();
-    r += '<a href="javascript:nopen('+ this.id +')">'+ this.title +'</a>';
+    r += '<a href="javascript:nopen(\''+ this.id +'\')">'+ this.title +'</a>';
     r += '</nobr></div>';
     return r;
 }
@@ -192,9 +293,10 @@ function NodeGetExpanderName()
 
 function NodeRenderOutline()
 {
-    var extra = 'onclick="ntgl('+ this.id +')"';
+    var extra = 'onclick="ntgl(\''+ this.id +'\')"';
     var outlineImg = renderImg(this.getExpanderName(), extra);
-    var folderImg = renderImg('folder_closed');
+    extra = 'class="fld" onclick="nctx(\''+ this.id +'\')"';
+    var folderImg = renderImg('folder_closed', extra);
     var ret = outlineImg + folderImg;
    
     return _outline_html + ret;
@@ -228,6 +330,12 @@ function NodeSetY(y)
 {
     this.div.style.top = '' + y + 'px';
 }
+function NodeGetDepth()
+{
+    if (! this.parent)
+        return 0;
+    return this.parent.getDepth() + 1;
+}
 
 function NodeSetDiv(div)
 {
@@ -240,7 +348,8 @@ function NodeSetDiv(div)
 function NodeReloadChildren()
 {
     // fetching xml
-    var url = link('containers', {parent_id: this.id});
+    var linkType = (TYPE == 'database') ? 'containers' : 'directories';
+    var url = link(linkType, {parent_id: this.id});
     var xml = fetchXML(url);
     if (! xml)
     {
@@ -410,7 +519,9 @@ function Tree()
     node_hash = new Object();
     setNextNodeY(0);
 
-    this.root = new Node(null, 0, "Root", true);
+    var rootTitle = (TYPE == 'database') ? "Database" : "Filesystem";
+
+    this.root = new Node(null, 0, rootTitle, true);
     this.cdiv = div_pool_inst.alloc();
 
     setOutline('');

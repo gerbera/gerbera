@@ -120,7 +120,7 @@ void SQLStorage::init()
     objectTitleCache = Ref<DSOHash<CdsObject> >(new DSOHash<CdsObject>(OBJECT_CACHE_CAPACITY));
     objectIDCache = Ref<DBOHash<int, CdsObject> >(new DBOHash<int, CdsObject>(OBJECT_CACHE_CAPACITY, -100));
    
-    
+/*    
     Ref<SQLResult> res = select(_("SELECT MAX(id) + 1 FROM cds_objects"));
     Ref<SQLRow> row = res->nextRow();
     nextObjectID = row->col(0).toInt();
@@ -136,6 +136,7 @@ void SQLStorage::init()
         objectIDCache->put(obj->getID(), obj);
     }
     log_debug(("PRELOADING OBJECTS DONE\n"));
+*/
 }
 
 SQLStorage::~SQLStorage()
@@ -163,11 +164,12 @@ int SQLStorage::getNextObjectID()
 }
 void SQLStorage::addObject(Ref<CdsObject> obj)
 {
+    /*
     obj->optimize();
     objectTitleCache->put(String::from(obj->getParentID()) +'|'+ obj->getTitle(), obj);
     objectIDCache->put(obj->getID(), obj);
     obj->setID(getNextObjectID());
-    return; 
+    */
     
     int objectType = obj->getObjectType();
     Ref<StringBuffer> fields(new StringBuffer(128));

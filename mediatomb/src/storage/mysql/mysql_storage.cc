@@ -106,7 +106,6 @@ void MysqlStorage::reportError(String query)
 
 Ref<SQLResult> MysqlStorage::select(String query)
 { 
-    log_debug(("MYSQL SELECT QUERY\n"));
     lock();
     
     int res;
@@ -135,7 +134,6 @@ Ref<SQLResult> MysqlStorage::select(String query)
 
 void MysqlStorage::exec(String query)
 {
-    log_debug(("MYSQL EXEC QUERY : %s\n", query.c_str()));
     lock();
     
     int res;

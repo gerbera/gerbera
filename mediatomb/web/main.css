@@ -1,6 +1,50 @@
-body
+.node
 {
+    position:absolute;
+    left:0px;
     color: black;
-    background-color: #408bff; 
+    font-family : "Helvetica", "Arial", "MS Sans Serif", sans-serif;
+    font-size : 9pt;
+}
+
+.node A:link { color: black; text-decoration: none; }
+.node A:visited { color: black; text-decoration: none; }
+.node A:active { color: black; text-decoration: none; }
+.node A:hover { color: black; text-decoration: none; }
+
+.leaf { color: black;
+    font-family : "Helvetica", "Arial", "MS Sans Serif", sans-serif;
+    font-size : 9pt;}
+.leaf A:link { color: black; text-decoration: none;}
+.leaf A:visited { color: black; text-decoration: none; }
+.leaf A:active { color: black; text-decoration: none; }
+.leaf A:hover { color: black; text-decoration: none; }
+
+/* folder icon */
+.fld { cursor: crosshair; }
+
+/* context menu */
+.ctxm {
+    background-color: #CCCCCC;
+    border 1;
+    border-style: outset;
+    border-color: #0000FF;
+    font-family : "Helvetica", "Arial", "MS Sans Serif", sans-serif;
+    font-size : 9pt;
+    z-index: 1000;
+}
+.ctxm-default
+{
+    background-color: #CCCCCC;
+    color: #FF0000;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+.ctxm-active
+{
+    background-color: #FFFFFF;
+    color: #FF0000;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 

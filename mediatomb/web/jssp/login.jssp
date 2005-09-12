@@ -11,7 +11,7 @@
 
 var SID;
 
-function encrypt()
+function authenticate()
 {
     var username = document.login_form.username.value;
     var password = document.login_form.password.value;
@@ -50,7 +50,7 @@ function encrypt()
 <div style="text-align: center;"><br>
     <h3>Login:</h3>
     <br>
-    <form action="/content/interface" method="get" name="login_form" onSubmit="encrypt(); return false;">
+    <form action="/content/interface" method="get" name="login_form" onSubmit="authenticate(); return false;">
         <table style="margin-left: auto; margin-right: auto; 
                       text-align: left;" border="0" cellpadding="2" 
                       cellspacing="2">
