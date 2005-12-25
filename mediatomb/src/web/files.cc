@@ -1,4 +1,4 @@
-/*  refresh.cc - this file is part of MediaTomb.
+/*  files.cc - this file is part of MediaTomb.
                                                                                 
     Copyright (C) 2005 Gena Batyan <bgeradz@deadlock.dhs.org>,
                        Sergey Bostandzhyan <jin@deadlock.dhs.org>
