@@ -95,7 +95,7 @@ In order to compile MediaTomb you will have to install the following packages:
     make
     make install
     cd ..
-    cp upnp/inc/ixml.h /usr/include/
+    cp upnp/inc/ixml.h /usr/include/upnp/
 
   The last line is vital due to the bug in the SDK's makefiles
   For whatever reason ixml.h is not being installed and nothing
