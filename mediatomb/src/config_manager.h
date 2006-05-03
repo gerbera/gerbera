@@ -34,7 +34,7 @@ protected:
 public:
     ConfigManager();
 
-    void ConfigManager::load(zmm::String filename);
+    void load(zmm::String filename);
     void save();
 
     /// \brief Returns a config option with the given path, if option does not exist a default value is returned.
@@ -74,7 +74,7 @@ public:
 
     /// \brief Checks if the string returned by getOption is valid.
     /// \param xpath xpath expression to the XML node
-    zmm::String ConfigManager::checkOptionString(zmm::String xpath);
+    zmm::String checkOptionString(zmm::String xpath);
 
     /// \brief Creates a dictionary from an XML nodeset.
     /// \param element starting element of the nodeset.
