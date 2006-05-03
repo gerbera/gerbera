@@ -1,5 +1,4 @@
-
-SUBDIRS = build scripts web config doc
+SUBDIRS = tombupnp build scripts web config doc
 
 EXTRA_DIST = mediatomb.spec FAQ
 

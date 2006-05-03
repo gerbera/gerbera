@@ -1,6 +1,8 @@
 AC_INIT(mediatomb, 0.8.1)
 AM_INIT_AUTOMAKE(mediatomb, 0.8.1)
 
+AC_CONFIG_SUBDIRS([tombupnp])
+    
 AC_CONFIG_FILES([
     Makefile
 
@@ -32,26 +34,6 @@ AC_CHECK_HEADER(iconv.h,
     [AC_MSG_ERROR(iconv.h not found)],
     /* checking for iconv.h */
 )
-
-AC_CHECK_HEADER(upnp/upnp.h,
-    [],
-    [AC_MSG_ERROR(upnp/upnp.h not found. Check libupnp installation)],
-    /* checking for upnp/upnp.h */
-)
-
-AC_CHECK_HEADER(upnp/ixml.h,
-    [],
-    [AC_MSG_ERROR(upnp/ixml.h not found. Check libupnp installation)],
-    /* checking for upnp/ixml.h */
-)
-
-AC_CHECK_HEADER(upnp/ithread.h,
-    [],
-    [AC_MSG_ERROR(upnp/ithread.h not found. Check libupnp installation)],
-    /* checking for upnp/ithread.h */
-)
-
-
 
 ######### SQLite3
 
