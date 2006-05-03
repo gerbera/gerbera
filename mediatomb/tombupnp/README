@@ -1,0 +1,291 @@
+Linux* SDK for UPnP* Devices (libupnp)
+Version 1.2.1a
+Release Notes
+
+Copyright (c) 2000-2003 Intel Corporation - All Rights Reserved.
+See LICENSE for details.
+
+November 2003
+
+This file contains information about the above product in the following 
+sections: 
+
+1.  Release Contents
+2.  Package Contents
+3.  System Requirements
+4.  Build Instructions
+5.  Install/Uninstall Instructions
+6.  Product Release Notes
+7.  New Features
+8.  Support and Contact Information
+
+1) Release Contents
+-------------------------------------------
+
+The Linux SDK for UPnP Devices v1.2 is an SDK for development of UPnP device 
+and control point applications for Linux.  It consists of the core UPnP 
+protocols along with a UPnP-specific eXtensible Markup Language (XML) parser 
+supporting the Document Object Model (DOM) Level 2 API and an optional, 
+integrated mini web server for serving UPnP related documents.
+
+2) Package Contents
+-------------------------------------------
+
+The Linux SDK for UPnP Devices v1.2 contains the following: 
+
+README    	This file.  Contains the installation and build instructions, 
+		and release notes.
+LICENSE   	The licensing terms the SDK is distributed under.
+ixml\doc	The files for generating the XML parser documentation from
+		the source code.
+ixml\inc	The public include files required to use the XML parser.
+ixml\src	The source code to the XML parser library.
+threadutil\inc	The public include files required to the threading 
+		utility library.
+threadutil\src	The source code to the threading utility library.
+upnp\doc	The files for generating the SDK documentation from the
+		source code.
+upnp\inc	The public include files required to use the SDK.
+upnp\src      	The source files comprising the SDK, libupnp.so.
+upnp\sample	A sample device and control point application, illustrating the
+          	usage of the SDK.
+
+3) System Requirements
+-------------------------------------------
+
+The SDK for UPnP Devices is designed to compile and run under the 
+Linux operating system.  It does, however, have dependencies on some
+packages that may not be installed by default.  All packages that it
+requires are listed below.  The name of the package and where it can be 
+found is dependent on the distribution of Linux being used.
+
+libpthread  The header and library are installed as part of the glibc-devel
+            package (or equivalent).
+
+Additionally, the documentation for the SDK can be auto-generated from 
+the UPNP.H header file using DOC++, a documentation system for C, C++, 
+IDL, and Java*.  DOC++ generates the documentation in HTML or TeX format.
+Using some additional tools, the TeX output can be converted into a
+PDF file.  To generate the documentation these tools are required:
+
+DOC++       The homepage for DOC++ is http://docpp.sourceforge.net/.
+            The current version as of this release of the SDK is
+            version 3.4.9.  DOC++ is the only requirement for generating
+            the HTML documentation.
+LaTeX/TeX   To generate the PDF documentation, LaTeX and TeX tools are
+            necessary.  The tetex and tetex-latex packages provide these
+            tools.
+dvips       dvips converts the DVI file produced by LaTeX into a PostScript*
+            file.  The tetex-dvips package provides this tool.
+ps2pdf      The final step to making the PDF is converting the PostStript
+            into Portable Document Format.  The ghostscript package provides
+            this tool.
+
+For the UPnP library to function correctly, Linux networking must be configured
+properly for multicasting.  To do this:
+
+route add -net 239.0.0.0 netmask 255.0.0.0 eth0
+
+where 'eth0' is the network adapter that the UPnP library will use.  Without
+this addition, device advertisements and control point searches will not
+function.
+
+4) Build Instructions
+-------------------------------------------
+
+CORE LIBRARIES
+
+The in the examples below, replace $(UPNP) with "libupnp-x.y.z/upnp",
+with x, y, and z corresponding to the version of the library that you have.
+
+All pieces of the SDK are built using the same makefile in the $(UPNP) 
+directory.  A few of options are available:
+
+% cd $(UPNP)
+% make
+
+will build a version of the binaries without debug support and
+
+% cd $(UPNP)
+% make DEBUG=1
+
+will build a debug version with symbols support.
+
+Note that all targets are created in $(UPNP)/bin.
+
+To build the documentation:
+
+% cd $(UPNP)
+% make doc
+
+makes both the HTML and PDF outputs, assuming all the necessary tools are
+installed (see section 3).  To make only the HTML output (requiring only 
+DOC++):
+
+% cd $(UPNP)
+% make html
+
+To generate the PDF file:
+
+% cd $(UPNP)
+% make pdf
+
+In this case, tetex, tetex-latex, tetex-dvips, and ghostscript are necessary
+(refer to section 3 for details).
+
+To build the library with the optional, integrated mini web server (note
+that this is the default):
+
+% cd $(UPNP)
+% make WEB=1
+
+To build without:
+
+% cd $(UPNP)
+% make WEB=0
+
+Note that the WEB and DEBUG variables may be combined in any order.
+
+The SDK for Linux also contains some additional helper APIs, declared in
+inc/tools/upnptools.h.  If these additional tools are not required, they can
+be compiled out:
+
+% cd $(UPNP)
+% make TOOLS=0
+
+By default, the tools are included in the library.  Note that the TOOLS,
+WEB, and DEBUG variables may be combined in any order.
+
+To further remove code that is not required, the library can be build with or 
+with out the control point (client) or device specific code.  To remove this
+code:
+
+% cd $(UPNP)
+% make CLIENT=0
+
+to remove client only code or:
+
+% cd $(UPNP)
+% make DEVICE=0
+
+to remove device only code.
+
+By default, both client and device code is included in the library.  The
+integrated web server is automatically removed when building with 
+DEVICE=0.  Note that the CLIENT, DEVICE, TOOLS, WEB, and DEBUG variables 
+may be combined in any order.
+
+To remove all the targets, object files, and built documentation:
+
+% cd $(UPNP)
+% make clean
+
+CROSS COMPILATION
+
+To cross compile the SDK, a special "TARGET" directive is all that is
+required:
+
+% cd $(UPNP)
+% make TARGET=arm-linux
+
+This will invoke the "arm-linux-gcc" cross compiler to build the library.
+The resultant binaries will be in the "bin/arm-linux" directory.  The
+binaries are always placed in a directory underneath the "bin" (and 
+"bin/debug") directory matching the target name.
+
+SAMPLES
+
+The SDK contains two samples: a TV device application and a control point
+that talks with the TV device.  They are found in the $(UPNP)/sample 
+directory.  To build the device:
+
+% cd $(UPNP)/sample/tvdevice/linux
+% make
+% cp upnp_tv_device $(UPNP)/bin
+% mkdir $(UPNP)/bin/web
+% cp web $(UPNP)/bin/web
+
+To build the sample control point:
+
+% cd $(UPNP)/sample/tvctrlpt/linux
+% make
+% cp upnp_tv_ctrlpt $(UPNP)/bin
+
+5) Install/Uninstall Instructions
+-------------------------------------------
+
+Install
+
+The top-level makefile for the UPnP SDK contains rules to install the 
+necessary components.  To install the SDK, as root:
+
+make install
+
+Or, to install the SDK by hand, the binary files, libupnp.so, libixml.so, and
+libthreadutil.so (or libthreadutil_dbg.so for a debug build), need to 
+be copied (as root) to /lib, /usr/lib, or /usr/local/lib.  Alternatively, the 
+LD_LIBRARY_PATH may be changed to include a directory where the binary is 
+located.  The SDK header files also need to be copied to a location where 
+they can be found.  /usr/include/upnp is a good location for these, 
+although it is not necessary.
+
+Uninstall
+
+Likewise, the top-level makefile contains an uninstall rule, reversing 
+the steps in the install:
+
+make uninstall
+
+Or, to uninstall the SDK from the machine by hand, remove the binary file 
+from where it was placed and remove the directory containing the headers.
+
+6) Product Release Notes
+-------------------------------------------
+
+The SDK for UPnP Devices v1.2.1a has these known issues:
+
+- The UPnP library may not work with older versions of gcc and libstdc++, 
+  causing a segmentation fault when the library loads.  It is recommended
+  that gcc version 2.9 or later be used in building library.
+- The UPnP library does not work the glibc 2.1.92-14 that ships with
+  Red Hat 7.0.  For the library to function, you must updated the glibc
+  and glibc-devel packages to 2.1.94-3 or later.  There is some issue with
+  libpthreads that has been resolved in the 2.1.94 version.
+
+7) New Features
+-------------------------------------------
+
+Changes to the SDK for UPnP Devices version 1.2.1a:
+
+- Changes the NAME_SIZE constant used for URL buffers to 256 bytes to 
+  accomodate longer URLs.
+
+Changes to the SDK for UPnP Devices version 1.2.1:
+ 
+- Integrates an entirely new XML parser that features DOM2 API support and
+  a much smaller code size.
+- Integrates a new threading utility library that manages all threads in
+  the library.
+- Elimination of C++ and other code optimizations have reduced the binary
+  size by over 60%.
+- The web server now supports application-level callbacks to handle 
+  dynamically generated data.
+- The web server now correctly handles chunked encoding.
+- A new client HTTP API has been added that allows downloading of items
+  of unlimited size.
+- The SDK supports much better cross-compilation support.
+- Numerous memory leaks and bugs have been fixed.
+
+8) Support and Contact Information
+-------------------------------------------
+
+Intel is not providing support for the Linux SDK for UPnP Devices.  Two 
+mailing lists for the SDK are available on http://upnp.sourceforge.net/.  
+Questions and problems should be addressed on the appropriate mailing list.
+
+If you find this SDK useful, please send an email to upnp@intel.com and let
+us know.
+
+* Other brands, names, and trademarks are the property of their respective 
+owners.
+
