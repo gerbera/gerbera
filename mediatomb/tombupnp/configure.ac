@@ -8,13 +8,8 @@ AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 
-AC_PROG_CXX
-AC_HEADER_STDC
-AC_LANG_CPLUSPLUS
-
-AC_LANG([C++])
 # Checks for libraries.
-AC_CHECK_LIB([pthread], [pthread_mutex_create])
+AC_CHECK_LIB([pthread], [pthread_mutex_init])
 
 # Checks for header files.
 AC_HEADER_STDC
@@ -39,13 +34,15 @@ AC_FUNC_REALLOC
 AC_FUNC_SELECT_ARGTYPES
 AC_FUNC_STAT
 AC_FUNC_VPRINTF
+AC_FUNC_FSEEKO
 AC_CHECK_FUNCS([ftime gethostname gettimeofday inet_ntoa memmove memset select socket strcasecmp strchr strdup strncasecmp strrchr strstr strtol uname])
-
-AC_CONFIG_FILES([Makefile
-                 build/Makefile
-                ])
 
 INCLUDE_DEVICE_APIS=1
 AC_DEFINE([INCLUDE_DEVICE_APIS], [1], [Compile device API])
 CFLAGS="$CFLAGS -DINCLUDE_DEVICE_APIS -DINTERNAL_WEB_SERVER"
+   
+AC_CONFIG_FILES([Makefile
+                 build/Makefile
+                ])
+
 AC_OUTPUT

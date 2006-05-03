@@ -29,6 +29,8 @@ AC_CHECK_HEADER(pthread.h,
     /* checking for pthread.h */
 )
 
+AC_CHECK_LIB([pthread], [pthread_mutex_init])
+    
 AC_CHECK_HEADER(iconv.h,
     [],
     [AC_MSG_ERROR(iconv.h not found)],
