@@ -20,7 +20,7 @@
 
 #include "upnp_cds.h"
 #include "upnp_xml.h"
-#include "upnp/ixml.h"
+#include "ixml.h"
 #include "server.h"
 
 using namespace zmm;

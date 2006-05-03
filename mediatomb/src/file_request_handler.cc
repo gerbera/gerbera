@@ -29,7 +29,7 @@
 #include "cds_objects.h"
 #include "process.h"
 #include "update_manager.h"
-#include <upnp/ixml.h>
+#include "ixml.h"
 #include "file_io_handler.h"
 #include "dictionary.h"
 #include "file_request_handler.h"

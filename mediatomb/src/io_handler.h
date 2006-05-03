@@ -24,7 +24,7 @@
 #define __IO_HANDLER_H__
 
 #include "common.h"
-#include "upnp/upnp.h"
+#include "upnp.h"
 
 class IOHandler : public zmm::Object
 {

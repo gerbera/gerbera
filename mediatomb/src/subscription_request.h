@@ -25,7 +25,7 @@
 #define __SUBSCRIPTION_REQUEST_H__
 
 #include "common.h"
-#include "upnp/upnp.h"
+#include "upnp.h"
 
 /// \brief This class represents the Upnp_Subscription_Request type from the SDK.
 ///

@@ -25,7 +25,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
-#include <upnp/ixml.h>
+#include "ixml.h"
 #include <time.h>
 #include "common.h"
 #include "storage.h"
