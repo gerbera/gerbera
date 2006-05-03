@@ -53,8 +53,8 @@ zmm::String StringConverter::convert(String str)
     char **input_ptr = &input_copy;
     char **output_ptr = &output_copy;
     
-    int input_bytes = str.length();
-    int output_bytes = buf_size;
+    size_t input_bytes = (size_t)str.length();
+    size_t output_bytes = (size_t)buf_size;
 
     int ret;
   
@@ -68,8 +68,8 @@ zmm::String StringConverter::convert(String str)
 //    log_info(("iconv: BEFORE: input bytes left: %d  output bytes left: %d\n",
 //           input_bytes, output_bytes));
     
-    ret = iconv(cd, (char **)input_ptr, (size_t *)&input_bytes,
-                    output_ptr, (size_t *)&output_bytes);
+    ret = iconv(cd, (char **)input_ptr, &input_bytes,
+            output_ptr, &output_bytes);
     if (ret == -1)
     {
         log_info(("iconv: %s\n", strerror(errno)));
