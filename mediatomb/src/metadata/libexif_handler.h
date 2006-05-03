@@ -42,7 +42,7 @@ protected:
     zmm::String imageX;
     zmm::String imageY;
 
-    void LibExifHandler::process_ifd (ExifContent *content, zmm::Ref<CdsItem> item, zmm::Ref<StringConverter> sc, zmm::Ref<zmm::Array<zmm::StringBase> > auxtags);
+    void process_ifd (ExifContent *content, zmm::Ref<CdsItem> item, zmm::Ref<StringConverter> sc, zmm::Ref<zmm::Array<zmm::StringBase> > auxtags);
     
 public:
     LibExifHandler();
