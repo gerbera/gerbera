@@ -21,13 +21,13 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
+#include <tombconfig.h>
 #include <errno.h>
 
 #include "memory.h"
 #include "logger.h"
 #include "zmmf/zmmf.h"
 #include "exceptions.h"
-
 /// \TODO implement session timeouts!!!
 #define DEFAULT_SESSION_TIMEOUT         123456
 

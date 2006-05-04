@@ -21,7 +21,7 @@
 #ifndef __MEMORY_H__
 #define __MEMORY_H__
 
-#include <malloc.h>
+#include <stdlib.h>
 
 #ifndef MEMPROF
 
