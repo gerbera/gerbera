@@ -7,5 +7,6 @@ AM_CFLAGS=\
           -I$(top_srcdir)/tombupnp/ixml/inc \
           -I$(top_srcdir)/tombupnp/threadutil/inc \
           -I$(top_srcdir)/tombupnp/upnp/src/inc \
-          -I$(top_srcdir)/tombupnp/upnp/inc
+          -I$(top_srcdir)/tombupnp/upnp/inc \
+          -I$(top_srcdir)
 
