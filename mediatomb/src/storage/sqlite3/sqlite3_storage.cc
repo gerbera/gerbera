@@ -18,6 +18,8 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include "autoconfig.h"
+
 #ifdef HAVE_SQLITE3
 
 #include "sqlite3_storage.h"

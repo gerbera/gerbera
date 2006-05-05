@@ -23,6 +23,7 @@
 #ifndef __METADATA_LIBEXIF_H__
 #define __METADATA_LIBEXIF_H__
 
+#include "autoconfig.h"
 #include "metadata_handler.h"
 #include <libexif/exif-data.h>
 #include <libexif/exif-content.h>

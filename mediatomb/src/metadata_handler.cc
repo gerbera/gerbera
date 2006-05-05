@@ -21,6 +21,7 @@
 /// \file metadata_handler.cc
 /// \brief Implementeation of the MetadataHandler class.
 
+#include "autoconfig.h"
 #include "metadata_handler.h"
 #include "string_converter.h"
 #include "tools.h"

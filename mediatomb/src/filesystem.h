@@ -21,6 +21,7 @@
 #ifndef __FILESYSTEM_H__
 #define __FILESYSTEM_H__
 
+#include "autoconfig.h"
 #include "common.h"
 #include "rexp.h"
 

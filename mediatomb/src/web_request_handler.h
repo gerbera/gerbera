@@ -23,6 +23,7 @@
 #ifndef __WEB_REQUEST_HANDLER_H__
 #define __WEB_REQUEST_HANDLER_H__
 
+#include "autoconfig.h"
 #include "common.h"
 #include "mxml/mxml.h"
 #include "request_handler.h"

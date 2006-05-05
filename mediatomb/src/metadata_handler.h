@@ -23,6 +23,7 @@
 #ifndef __METADATA_HANDLER_H__
 #define __METADATA_HANDLER_H__
 
+#include "autoconfig.h"
 #include "common.h"
 #include "dictionary.h"
 #include "cds_objects.h"

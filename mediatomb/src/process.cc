@@ -50,7 +50,7 @@ String run_process(String prog, String param, String input)
     char input_file[MAX_TEMPLATE];
     strcpy(input_file, input_template);
     fd = mkstemp(input_file);
-    write(fd, input.c_str(), input.length());
+    int ret = write(fd, input.c_str(), input.length());
     close(fd);
     
     /* touching output file */
@@ -63,7 +63,7 @@ String run_process(String prog, String param, String input)
     String command = prog + " " + param + " < " + input_file +
         " > " + output_file;
     log_info(("running %s\n", command.c_str()));
-    /* int ret = */ (void)system(command.c_str());
+    ret = system(command.c_str());
 
     /* reading output file */
     file = fopen(output_file, "r");

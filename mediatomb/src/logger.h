@@ -1,6 +1,7 @@
 #ifndef __LOGGER_H__
 #define __LOGGER_H__
 
+#include "autoconfig.h"
 #include <stdio.h>
 
 extern FILE *LOG_FILE;

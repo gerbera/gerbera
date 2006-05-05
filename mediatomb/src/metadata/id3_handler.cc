@@ -21,7 +21,11 @@
 /// \file id3_handler.cc
 /// \brief Implementeation of the Id3Handler class.
 
+#include "autoconfig.h"
+
 #ifdef HAVE_ID3
+
+#undef HAVE_CONFIG_H // else utils.h from the id3 library tries to import "config.h"
 
 #include <id3/tag.h>
 #include <id3/misc_support.h>
