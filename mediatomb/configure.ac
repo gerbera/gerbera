@@ -1,10 +1,34 @@
 AC_PREREQ(2.59)
 AC_INIT([mediatomb], [0.9.0], [jin@deadlock.dhs.org])
-AC_CONFIG_HEADER([tombconfig.h])
+AC_CONFIG_HEADER([autoconfig.h tombupnp/upnp/inc/upnpconfig.h])
 AC_CONFIG_AUX_DIR(configure_aux)
 AC_CONFIG_SRCDIR([src/common.h])
-AM_INIT_AUTOMAKE([ -Wall])
+AM_INIT_AUTOMAKE([1.9])
 
+##########################################################################################
+# The following block is derived from the configure.ac script from the libupnp-1.3.1 package
+# (C) Copyright 2005-2006 RИmi Turboult <r3mi@users.sourceforge.net>
+upnpmaj=0
+upnpmin=1
+upnppatch=0
+AC_DEFINE_UNQUOTED([UPNP_VERSION_STRING], "$PACKAGE_VERSION",
+    [see upnpconfig.h])
+AC_DEFINE_UNQUOTED([UPNP_VERSION_MAJOR], $upnpmaj, [see upnpconfig.h])
+AC_DEFINE_UNQUOTED([UPNP_VERSION_MINOR], $upnpmin, [see upnpconfig.h])
+AC_DEFINE_UNQUOTED([UPNP_VERSION_PATCH], $upnppatch, [see upnpconfig.h])
+
+# debuf flag for the upnp library
+#RT_BOOL_ARG_ENABLE([debug], [no], [extra debugging code])
+#if test "x$enable_debug" = xyes ; then
+#    AC_DEFINE(UPNP_HAVE_DEBUG, 1, [see upnpconfig.h])
+#    AC_DEFINE(DEBUG, 1, [Define to 1 to compile debug code])
+#else
+    AC_DEFINE([NO_DEBUG], [1], [Define to 1 to prevent some debug code])
+    AC_DEFINE([NDEBUG], [1], [Define to 1 to prevent compilation of assert()])
+#fi
+
+##########################################################################################
+ 
 AC_LANG([C++])
 AC_PROG_CXX
 AC_PROG_CC
@@ -15,14 +39,10 @@ AC_HEADER_SYS_WAIT
 AC_SYS_LARGEFILE
 AC_LANG_CPLUSPLUS
 
-
-
-AC_CHECK_HEADERS([syslog.h unistd.h alloca.h pthread.h iconv.h], [],
+   
+AC_CHECK_HEADERS([syslog.h unistd.h alloca.h iconv.h], [],
                  [AC_MSG_ERROR(required header not found)]) 
 
-AC_CHECK_LIB([pthread], [pthread_mutex_init], [], 
-        [AC_MSG_ERROR(required pthread library function not found)])
- 
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h limits.h netdb.h netinet/in.h stdlib.h string.h],
                  [],
                  [AC_MSG_ERROR(required header not found)]) 
@@ -30,14 +50,15 @@ AC_CHECK_HEADERS([sys/file.h sys/ioctl.h sys/socket.h sys/time.h sys/timeb.h],
                  [],
                  [AC_MSG_ERROR(required header not found)]) 
     
-   
+  
 # Checks for typedefs, structures, and compiler characteristics.
 # Our sources are not yet ready for all of this
 #AC_HEADER_STDBOOL
 #AC_C_CONST
 #AC_C_INLINE
 #AC_TYPE_PID_T
-#AC_TYPE_SIZE_T
+AC_TYPE_SIZE_T
+TYPE_SOCKLEN_T
 #AC_HEADER_TIME
 #AC_STRUCT_TM
 
@@ -55,18 +76,21 @@ AC_CHECK_HEADERS([sys/file.h sys/ioctl.h sys/socket.h sys/time.h sys/timeb.h],
 #AC_TYPE_SIGNAL
 #AC_FUNC_STAT
 #AC_FUNC_STRTOD
-#AC_FUNC_VPRINTF
+AC_FUNC_VPRINTF
+AC_FUNC_FSEEKO
 AC_CHECK_FUNCS([ftime gethostname gettimeofday inet_ntoa localtime_r memmove memset],
                [],
                [AC_MSG_ERROR(required library function not found)])
 AC_CHECK_FUNCS([regcomp select socket strcasecmp strchr strdup strerror strncasecmp],
                [],
                [AC_MSG_ERROR(required library function not found)])
-AC_CHECK_FUNCS([strrchr strstr strtol strtoul uname fseeko], [],
+AC_CHECK_FUNCS([strrchr strstr strtol strtoul uname], [],
                [AC_MSG_ERROR(required library function not found)])
 
-AC_DEFINE([INCLUDE_DEVICE_APIS], [1], [Compile device API])
-AC_DEFINE([INTERNAL_WEB_SERVER], [1], [Compile internal web server])    
+AC_DEFINE([UPNP_HAVE_DEVICE], [1], [Compile device API])
+AC_DEFINE([UPNP_HAVE_WEBSERVER], [1], [Compile internal web server])    
+
+ACX_PTHREAD([],[AC_MSG_ERROR([POSIX threads are required to build this program])])
 
 ######### SQLite3
 
