@@ -150,6 +150,9 @@ void Id3Handler::fillMetadata(Ref<CdsItem> item)
                 break;
             case MP3CHANNELMODE_SINGLE_CHANNEL:
                 temp = 1;
+                break;
+            case MP3CHANNELMODE_FALSE:
+                break;
         }
 
         if (temp > 0)

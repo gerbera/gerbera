@@ -51,6 +51,6 @@ int uuid_parse(const char *in, uuid_t uu)
 		uuid.node[i] = strtoul(buf, NULL, 16);
 	}
 	
-	uuid_pack(&uuid, uu);
+	uuid_pack2(&uuid, uu);
 	return 0;
 }

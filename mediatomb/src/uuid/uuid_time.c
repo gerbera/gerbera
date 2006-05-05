@@ -27,7 +27,7 @@ time_t uuid_time(const uuid_t uu, struct timeval *ret_tv)
 	struct timeval		tv;
 	unsigned long long	clock_reg;
 
-	uuid_unpack_(uu, &uuid);
+	uuid_unpack2(uu, &uuid);
 	
 	high = uuid.time_mid | ((uuid.time_hi_and_version & 0xFFF) << 16);
 	clock_reg = uuid.time_low | ((unsigned long long) high << 32);
@@ -46,7 +46,7 @@ int uuid_type(const uuid_t uu)
 {
 	struct uuid		uuid;
 
-	uuid_unpack_(uu, &uuid);	
+	uuid_unpack2(uu, &uuid);	
 	return ((uuid.time_hi_and_version >> 12) & 0xF);
 }
 
@@ -55,7 +55,7 @@ int uuid_variant(const uuid_t uu)
 	struct uuid		uuid;
 	int			var;
 
-	uuid_unpack_(uu, &uuid);	
+	uuid_unpack2(uu, &uuid);	
 	var = uuid.clock_seq;
 
 	if ((var & 0x8000) == 0)

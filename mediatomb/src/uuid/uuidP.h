@@ -32,8 +32,8 @@ struct uuid {
 /*
  * prototypes
  */
-void uuid_pack(const struct uuid *uu, uuid_t ptr);
-void uuid_unpack(const uuid_t in, struct uuid *uu);
+void uuid_pack2(const struct uuid *uu, uuid_t ptr);
+void uuid_unpack2(const uuid_t in, struct uuid *uu);
 
 
 

@@ -15,6 +15,8 @@
  */
 #define _SVID_SOURCE
 
+#include "autoconfig.h"
+
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -250,7 +252,7 @@ void uuid_generate_time(uuid_t out)
 	uu.time_mid = (__u16) clock_mid;
 	uu.time_hi_and_version = (clock_mid >> 16) | 0x1000;
 	memcpy(uu.node, node_id, 6);
-	uuid_pack(&uu, out);
+	uuid_pack2(&uu, out);
 }
 
 void uuid_generate_random(uuid_t out)
@@ -263,7 +265,7 @@ void uuid_generate_random(uuid_t out)
 
 	uu.clock_seq = (uu.clock_seq & 0x3FFF) | 0x8000;
 	uu.time_hi_and_version = (uu.time_hi_and_version & 0x0FFF) | 0x4000;
-	uuid_pack(&uu, out);
+	uuid_pack2(&uu, out);
 }
 
 /*
