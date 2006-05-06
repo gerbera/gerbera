@@ -6,7 +6,7 @@
     <td><b>ID</td>
     <td><b>Title</b></td>
 <tr>
-<%
+<//%
     var items = xmlGetElement(root, "items"); 
     var children = items.children;
     for (var i = 0; i < children.length; i++)
@@ -14,11 +14,11 @@
         var item = children[i];
         %>
             <tr>
-                <td><%= i + 1 %></td>
-                <td><%= item.attributes['id'] %></td>
-                <td><%= xmlGetElementText(item, "dc:title") %></td>
+                <td><//%= i + 1 %></td>
+                <td><//%= item.attributes['id'] %></td>
+                <td><//%= xmlGetElementText(item, "dc:title") %></td>
             </tr>
-        <%
+        <//%
     }
 %>
 </table>

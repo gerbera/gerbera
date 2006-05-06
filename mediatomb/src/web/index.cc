@@ -32,5 +32,9 @@ web::index::index() : WebRequestHandler()
 void web::index::process()
 {
     check_request();
+    String type = param(_("type"));
+    if (type == nil)
+        type = _("database");
+    root->addAttribute(_("type"), type);
 }
 

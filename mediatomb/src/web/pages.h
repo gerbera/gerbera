@@ -32,6 +32,7 @@ namespace web
 {
 
 /// \brief Show accounting information.
+/*
 class acct : public WebRequestHandler
 {
 public:
@@ -46,7 +47,7 @@ public:
     add();
     virtual void process();
 };
-
+*/
 /// \brief Authentication handler (used over AJAX)
 class auth : public WebRequestHandler
 {
@@ -54,7 +55,7 @@ public:
     auth();
     virtual void process();
 };
-
+/*
 /// \brief Browser frameset
 class browse : public WebRequestHandler
 {
@@ -62,7 +63,7 @@ public:
     browse();
     virtual void process();
 };
-
+*/
 /// \brief Browser container tree
 class containers : public WebRequestHandler
 {
@@ -78,7 +79,7 @@ public:
     directories();
     virtual void process();
 };
-
+/*
 /// \brief Save the changes that were made to an item or container to the database.
 class edit_save : public WebRequestHandler
 {
@@ -94,7 +95,7 @@ public:
     edit_ui();
     virtual void process();
 };
-
+*/
 /// \brief Browser file list
 class files : public WebRequestHandler
 {
@@ -102,7 +103,7 @@ public:
     files();
     virtual void process();
 };
-
+/*
 /// \brief UI head
 class head : public WebRequestHandler
 {
@@ -110,7 +111,7 @@ public:
     head();
     virtual void process();
 };
-
+*/
 /// \brief main frameset
 class index : public WebRequestHandler
 {
@@ -134,7 +135,7 @@ public:
     login();
     virtual void process();
 };
-
+/*
 /// \brief Remove an item or container from the database.
 class remove : public WebRequestHandler
 {
@@ -191,7 +192,7 @@ public:
     error();
     virtual void process();
 };
-
+*/
 
 } // namespace
 

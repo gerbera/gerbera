@@ -1,0 +1,49 @@
+/* Tree Style */
+.treetitle {
+	padding:2px;
+	cursor:default;
+	
+	font-family: Tahoma,Verdana,Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	color: #000000;
+}
+.editednode {
+	padding:2px;
+	cursor:default;
+	background-color: #FFFFFF;;
+	color: #000000;
+	
+	font-family: Tahoma,Verdana,Arial, Helvetica, sans-serif;
+	font-size: 11px;
+}
+.editednodeinput {
+	background-color: #FFFFFF;;
+	color: #000000;
+	
+	width: 150px;
+	height: 17px;
+	
+	border-style: solid;
+	border-width: 1px;
+	border-color: #000000;
+	
+	font-family: Tahoma,Verdana,Arial, Helvetica, sans-serif;
+	font-size: 11px;
+}
+.treetitleselectedfocused {
+	padding:2px;
+	cursor:default;
+	background-color: highlight;
+	color: highlighttext;
+	
+	font-family: Tahoma,Verdana,Arial, Helvetica, sans-serif;
+	font-size: 11px;
+}
+.treetitleselectedblured {
+	padding:2px;
+	cursor:default;
+	background-color: menu;
+	color: windowtext;
+	font-family: Tahoma,Verdana,Arial, Helvetica, sans-serif;
+	font-size: 11px;
+}

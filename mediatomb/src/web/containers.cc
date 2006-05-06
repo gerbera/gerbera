@@ -55,19 +55,23 @@ void web::containers::process()
 
     // we keep the browse result in the DIDL-Lite tag in our xml
     Ref<Element> containers (new Element(_("containers")));
+    containers->addAttribute(_("ofId"), parID);
+    containers->addAttribute(_("type"), _("d"));
 
     for (int i = 0; i < arr->size(); i++)
     {
         Ref<CdsObject> obj = arr->get(i);
-        Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
-        // this has to be adjusted: the resourced for browsing are different
-        Ref<Element> ce(new Element(_("container")));
-        ce->addAttribute(_("id"), String::from(cont->getID()));
-        int childCount = cont->getChildCount();
-        if (childCount)
-            ce->addAttribute(_("childCount"), String::from(childCount));
-        ce->setText(cont->getTitle());
-        containers->appendChild(ce);
+        if (IS_CDS_CONTAINER(obj->getObjectType())) {
+            Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
+            // this has to be adjusted: the resources for browsing are different
+            Ref<Element> ce(new Element(_("container")));
+            ce->addAttribute(_("id"), String::from(cont->getID()));
+            int childCount = cont->getChildCount();
+            if (childCount)
+                ce->addAttribute(_("childCount"), String::from(childCount));
+            ce->setText(cont->getTitle());
+            containers->appendChild(ce);
+        }
     }
     
     root->appendChild(containers);

@@ -30,6 +30,7 @@ using namespace mxml;
 web::files::files() : WebRequestHandler()
 {
     pagename = _("files");
+    plainXML = true;
 }
 
 void web::files::process()
@@ -43,27 +44,36 @@ void web::files::process()
     else
         path = hex_decode_string(parentID);
 
-    Ref<Filesystem> fs(new Filesystem());
-    Ref<Array<FsObject> > arr = fs->readDirectory(path, FS_MASK_FILES);
-
-    // we keep the browse result in the DIDL-Lite tag in our xml
-    Ref<Element> files(new Element(_("files")));
-
-    for (int i = 0; i < arr->size(); i++)
+    try
     {
-        Ref<FsObject> obj = arr->get(i);
-
-        Ref<Element> fe(new Element(_("file")));
-        String filename = obj->filename;
-        String filepath = path + filename;
-        String id = hex_encode(filepath.c_str(), filepath.length());
-        fe->addAttribute(_("id"), id);
-        int childCount = 1;
-        if (childCount)
-            fe->addAttribute(_("childCount"), String::from(childCount));
-        fe->setText(filename);
-        files->appendChild(fe);
+        Ref<Filesystem> fs(new Filesystem());
+        Ref<Array<FsObject> > arr = fs->readDirectory(path, FS_MASK_FILES);
+    
+        // we keep the browse result in the DIDL-Lite tag in our xml
+        Ref<Element> files(new Element(_("files")));
+    
+        for (int i = 0; i < arr->size(); i++)
+        {
+            Ref<FsObject> obj = arr->get(i);
+    
+            Ref<Element> fe(new Element(_("file")));
+            String filename = obj->filename;
+            String filepath = path + filename;
+            String id = hex_encode(filepath.c_str(), filepath.length());
+            fe->addAttribute(_("id"), id);
+            int childCount = 1;
+            if (childCount)
+                fe->addAttribute(_("childCount"), String::from(childCount));
+            fe->setText(filename);
+            files->appendChild(fe);
+        }
+        root->appendChild(files);
+        }
+    catch (Exception e)
+    {
+        Ref<Element> error(new Element(_("error")));
+        error->setText(e.getMessage());
+        root->appendChild(error);
     }
-    root->appendChild(files);
 }
 

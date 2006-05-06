@@ -31,6 +31,7 @@ using namespace mxml;
 web::items::items() : WebRequestHandler()
 {
     pagename = _("items");
+    plainXML = true;
 }
 
 void web::items::process()
@@ -49,9 +50,14 @@ void web::items::process()
 
     Ref<Array<CdsObject> > arr = storage->selectObjects(param);
 
+
     // we keep the browse result in the DIDL-Lite tag in our xml
     Ref<Element> items (new Element(_("items")));
-
+    items->addAttribute(_("xmlns:dc"), 
+                            _("http://purl.org/dc/elements/1.1/"));
+    items->addAttribute(_("xmlns:upnp"), 
+                            _("urn:schemas-upnp-org:metadata-1-0/upnp/"));
+                            
     for (int i = 0; i < arr->size(); i++)
     {
         Ref<CdsObject> obj = arr->get(i);

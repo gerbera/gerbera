@@ -18,6 +18,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include <sys/time.h>
 #include "autoconfig.h"
 #include "config_manager.h"
 #include "mem_io_handler.h"
@@ -33,9 +34,9 @@ using namespace mxml;
 
 #define DEFAULT_PAGE_BUFFER_SIZE 4096
 
-static JSObject *shared_global_object = NULL;
+//static JSObject *shared_global_object = NULL;
 
-static Ref<DSOHash<WebScript> > script_hash(new DSOHash<WebScript>(37));
+//static Ref<DSOHash<WebScript> > script_hash(new DSOHash<WebScript>(37));
 
 WebRequestHandler::WebRequestHandler() : RequestHandler()
 {
@@ -48,11 +49,11 @@ String WebRequestHandler::param(String name)
     return params->get(name);
 }
 
-String WebRequestHandler::buildScriptPath(String filename)
+/*String WebRequestHandler::buildScriptPath(String filename)
 {
     String scriptRoot = ConfigManager::getInstance()->getOption(_("/server/webroot"));
     return String(scriptRoot + "/jssp/") + filename;
-}
+}*/
 
 void WebRequestHandler::check_request()
 {
@@ -71,18 +72,10 @@ void WebRequestHandler::check_request()
     }
 }
 
-String WebRequestHandler::renderXMLHeader(String xsl_link)
+String WebRequestHandler::renderXMLHeader()
 {
-    if (xsl_link == nil)
-    {
-        return _("<?xml version=\"1.0\" encoding=\"") +
+    return _("<?xml version=\"1.0\" encoding=\"") +
             DEFAULT_INTERNAL_CHARSET +"\"?>\n";
-    }
-    else
-    {
-        return _("<?xml version=\"1.0\" encoding=\"") +
-                           DEFAULT_INTERNAL_CHARSET +"\"?>\n";
-    }
 }
 
 void WebRequestHandler::get_info(IN const char *filename, OUT struct File_Info *info)
@@ -123,10 +116,10 @@ Ref<IOHandler> WebRequestHandler::open(Ref<Dictionary> params, IN enum UpnpOpenF
         {
             output = renderXMLHeader() + root->print();
         }
-        else
+/*        else
         {
             String p(pagename);
-            String scriptPath = buildScriptPath(String(p) + ".jssp");
+            String scriptPath = buildScriptPath(pagename + ".jssp");
             hash_slot_t hash_slot;
             Ref<WebScript> script = script_hash->get(p, &hash_slot);
             if (script == nil)
@@ -144,6 +137,7 @@ Ref<IOHandler> WebRequestHandler::open(Ref<Dictionary> params, IN enum UpnpOpenF
             script->setSessionID(param(_("sid")));
             output = script->process(root);
         }
+        */
     }
     catch (SessionException se)
     {

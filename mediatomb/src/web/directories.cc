@@ -50,6 +50,8 @@ void web::directories::process()
 
     // we keep the browse result in the DIDL-Lite tag in our xml
     Ref<Element> containers (new Element(_("containers")));
+    containers->addAttribute(_("ofId"), parentID);
+    containers->addAttribute(_("type"), _("f"));
 
     for (int i = 0; i < arr->size(); i++)
     {

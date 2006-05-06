@@ -28,7 +28,7 @@
 #include "mxml/mxml.h"
 #include "request_handler.h"
 #include "dictionary.h"
-#include "scripting/web_script.h"
+//#include "scripting/web_script.h"
 
 
 class SessionException : public zmm::Exception
@@ -84,7 +84,7 @@ protected:
     /// \brief Helper function to create a generic XML document header.
     /// \param xsl_link If not nil, also adds header information that is required for the XSL processor.
     /// \return The header as a string... because our parser does not yet understand <? ?> stuff :)
-    zmm::String renderXMLHeader(zmm::String xsl_link = nil);
+    zmm::String renderXMLHeader();
    
     /// \brief Call another request handler.
     /// \param req_type Type of the request (see pages.cc)

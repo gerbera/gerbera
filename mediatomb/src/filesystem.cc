@@ -158,7 +158,7 @@ Ref<Array<FsObject> > Filesystem::readDirectory(String path, int mask,
                     }
                     catch (Exception e)
                     {
-                        continue;
+                        //continue;
                     }
                 }
             }

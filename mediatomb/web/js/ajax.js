@@ -33,6 +33,8 @@ function fetchXML(url)
 function xmlGetElement(parent, name)
 {
     var ns = null;
+    
+    /*
     if (name.substring(0, 3) == "dc:")
     {
         ns = "http://purl.org/dc/elements/1.1/";
@@ -43,7 +45,8 @@ function xmlGetElement(parent, name)
         ns = "urn:schemas-upnp-org:metadata-1-0/upnp/";
         name = name.substring(5);
     }
-        
+    */
+    
     var els;
     if (ns)
         els = parent.getElementsByTagNameNS(ns, name);

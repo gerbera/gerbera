@@ -24,25 +24,25 @@ using namespace zmm;
 
 WebRequestHandler *create_web_request_handler(String page)
 {
-    if (page == "acct") return new web::acct();
-    if (page == "add") return new web::add();
+    //if (page == "acct") return new web::acct();
+    //if (page == "add") return new web::add();
     if (page == "auth") return new web::auth();
-    if (page == "browse") return new web::browse();
+    //if (page == "browse") return new web::browse();
     if (page == "containers") return new web::containers();
     if (page == "directories") return new web::directories();
-    if (page == "edit_save") return new web::edit_save();
-    if (page == "edit_ui") return new web::edit_ui();
-    if (page == "error") return new web::error();
+    //if (page == "edit_save") return new web::edit_save();
+    //if (page == "edit_ui") return new web::edit_ui();
+    //if (page == "error") return new web::error();
     if (page == "files") return new web::files();
-    if (page == "head") return new web::head();
+    //if (page == "head") return new web::head();
     if (page == "index") return new web::index();
     if (page == "items") return new web::items();
     if (page == "login") return new web::login();
-    if (page == "new") return new web::new_ui();
-    if (page == "remove") return new web::remove();
-    if (page == "refresh") return new web::refresh();
-    if (page == "task") return new web::task();
-    if (page == "tree") return new web::tree();
+    //if (page == "new") return new web::new_ui();
+    //if (page == "remove") return new web::remove();
+    //if (page == "refresh") return new web::refresh();
+    //if (page == "task") return new web::task();
+    //if (page == "tree") return new web::tree();
     // ...
     
     throw Exception(_("Unknown page: ") + page);
