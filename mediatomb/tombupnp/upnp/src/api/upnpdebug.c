@@ -29,6 +29,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
+#include "upnpconfig.h"
+
 #if UPNP_HAVE_DEBUG
 
 #include "config.h"
@@ -46,7 +48,7 @@
 static ithread_mutex_t GlobalDebugMutex;
 
 // Global log level
-static Upnp_LogLevel_e g_log_level = UPNP_DEFAULT_LOG_LEVEL;
+static Upnp_LogLevel g_log_level = UPNP_DEFAULT_LOG_LEVEL;
 
 //File handle for the error log file
 static FILE *ErrFileHnd = NULL;
