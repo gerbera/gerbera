@@ -50,10 +50,6 @@ using namespace mxml;
 static Ref<RequestHandler> create_request_handler(const char *filename)
 {
     String path, parameters;
-    bool serve = false;
-
-    if (string_ok(ConfigManager::getInstance()->getOption(_("/server/servedir"))))
-        serve = true;
 
     RequestHandler::split_url(filename, path, parameters);
 
@@ -109,7 +105,7 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
     else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" +
                              CONTENT_SERVE_HANDLER))
     {
-        if (serve)
+        if (string_ok(ConfigManager::getInstance()->getOption(_("/server/servedir"))))
             ret = new ServeRequestHandler();
         else
             throw Exception(_("Serving directories is not enabled in configuration"));
