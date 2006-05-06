@@ -3,7 +3,7 @@ AC_INIT([mediatomb], [0.9.0], [jin@deadlock.dhs.org])
 AC_CONFIG_HEADER([autoconfig.h tombupnp/upnp/inc/upnpconfig.h])
 AC_CONFIG_AUX_DIR(configure_aux)
 AC_CONFIG_SRCDIR([src/common.h])
-AM_INIT_AUTOMAKE([1.9])
+AM_INIT_AUTOMAKE([1.9 -Wall])
 
 ##########################################################################################
 # The following block is derived from the configure.ac script from the libupnp-1.3.1 package
@@ -23,8 +23,8 @@ AC_DEFINE_UNQUOTED([UPNP_VERSION_PATCH], $upnppatch, [see upnpconfig.h])
 #    AC_DEFINE(UPNP_HAVE_DEBUG, 1, [see upnpconfig.h])
 #    AC_DEFINE(DEBUG, 1, [Define to 1 to compile debug code])
 #else
-    AC_DEFINE([NO_DEBUG], [1], [Define to 1 to prevent some debug code])
-    AC_DEFINE([NDEBUG], [1], [Define to 1 to prevent compilation of assert()])
+#    AC_DEFINE([NO_DEBUG], [1], [Define to 1 to prevent some debug code])
+#    AC_DEFINE([NDEBUG], [1], [Define to 1 to prevent compilation of assert()])
 #fi
 
 ##########################################################################################
@@ -58,7 +58,7 @@ AC_CHECK_HEADERS([sys/file.h sys/ioctl.h sys/socket.h sys/time.h sys/timeb.h],
 #AC_C_INLINE
 #AC_TYPE_PID_T
 AC_TYPE_SIZE_T
-TYPE_SOCKLEN_T
+#TYPE_SOCKLEN_T
 #AC_HEADER_TIME
 #AC_STRUCT_TM
 
@@ -520,6 +520,8 @@ if test "$_FILE_OFFSET_BITS" = "64"; then
     LFS_OK="yes"
 fi
     
+AC_DEFINE(UPNP_HAVE_DEBUG, 1, [see upnpconfig.h])
+AC_DEFINE(DEBUG, 1, [Define to 1 to compile debug code])
 
 ###############
 AC_CONFIG_FILES([
@@ -547,6 +549,5 @@ echo "  libextractor    : $EXTRACTOR_OK"
 echo "  libexif         : $EXIF_OK"
 # echo "  libjpeg      : $LIBJPEG_OK"
 # echo "  exiv2        : $EXIV2_OK"
-echo "Large File Support: $LSF_OK"
 echo
 
