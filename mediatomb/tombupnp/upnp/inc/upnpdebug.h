@@ -247,7 +247,7 @@ void UpnpDisplayFileAndLine (FILE *fd, const char *DbgFileName, int DbgLineNo);
 
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif // UPNP_HAVE_DEBUG

@@ -69,7 +69,7 @@
 
 /** Defined to 1 if the library has been compiled with DEBUG enabled
  *  (i.e. configure --enable-debug) : <upnp/upnpdebug.h> file is available */
-/* #undef UPNP_HAVE_DEBUG */
+#define UPNP_HAVE_DEBUG 1
 
 
 /** Defined to 1 if the library has been compiled with client API enabled

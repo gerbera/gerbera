@@ -182,7 +182,7 @@ send_error_response( IN SOCKINFO * info,
                      IN const char *err_msg,
                      IN http_message_t * hmsg )
 {
-    int content_length;
+    off_t content_length;
     int timeout_secs = SOAP_TIMEOUT;
     int major,
       minor;
@@ -257,7 +257,7 @@ send_var_query_response( IN SOCKINFO * info,
                          IN const char *var_value,
                          IN http_message_t * hmsg )
 {
-    int content_length;
+    off_t content_length;
     int timeout_secs = SOAP_TIMEOUT;
     int major,
       minor;
@@ -678,7 +678,7 @@ send_action_response( IN SOCKINFO * info,
     int major,
       minor;
     int err_code;
-    int content_length;
+    off_t content_length;
     int ret_code;
     int timeout_secs = SOAP_TIMEOUT;
     static char *start_body =

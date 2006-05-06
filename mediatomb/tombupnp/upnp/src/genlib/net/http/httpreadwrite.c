@@ -355,7 +355,7 @@ http_SendMessage( IN SOCKINFO * info,
                     return UPNP_E_FILE_READ_ERROR;
                 }
             } else if( Instr && Instr->IsRangeActive ) {
-                if( fseek( Fp, Instr->RangeOffset, SEEK_CUR ) != 0 ) {
+                if( fseeko( Fp, Instr->RangeOffset, SEEK_CUR ) != 0 ) {
                     free( ChunkBuf );
                     return UPNP_E_FILE_READ_ERROR;
                 }
@@ -1619,6 +1619,7 @@ http_SendStatusResponse( IN SOCKINFO * info,
 *				memory ptr
 *		'c':	(no args) appends CRLF "\r\n"
 *		'd':	arg = int number		// appends decimal number
+*		'h':	arg = off_t number		// appends off_t number
 *		't':	arg = time_t * gmt_time	// appends time in RFC 1123 fmt
 *		'D':	(no args) appends HTTP DATE: header
 *		'S':	(no args) appends HTTP SERVER: header
@@ -1651,6 +1652,7 @@ http_MakeMessage( INOUT membuffer * buf,
     char c;
     char *s = NULL;
     int num;
+    off_t bignum;
     size_t length;
     time_t *loc_time;
     time_t curr_time;
@@ -1738,6 +1740,16 @@ http_MakeMessage( INOUT membuffer * buf,
             }
         }
 
+        else if( c == 'h' )     // off_t
+        {
+            bignum = ( off_t )va_arg( argp, off_t );
+
+            sprintf( tempbuf, "%lld", bignum );
+            if( membuffer_append( buf, tempbuf, strlen( tempbuf ) ) != 0 ) {
+                goto error_handler;
+            }
+        }
+
         else if( c == 't' || c == 'D' ) // date
         {
             if( c == 'D' ) {
@@ -1779,12 +1791,12 @@ http_MakeMessage( INOUT membuffer * buf,
 
         else if( c == 'N' ) {
             // content-length header
-            num = ( int )va_arg( argp, int );
+            bignum = ( off_t )va_arg( argp, off_t );
 
-            assert( num >= 0 );
+            assert( bignum >= 0 );
             if( http_MakeMessage
-                ( buf, http_major_version, http_minor_version, "sdc",
-                  "CONTENT-LENGTH: ", num ) != 0 ) {
+                ( buf, http_major_version, http_minor_version, "shc",
+                  "CONTENT-LENGTH: ", bignum ) != 0 ) {
                 goto error_handler;
             }
         }
@@ -1832,9 +1844,9 @@ http_MakeMessage( INOUT membuffer * buf,
                      "<html><body><h1>",
                      status_code, http_get_code_text( status_code ),
                      "</h1></body></html>" );
-            num = strlen( tempbuf );
+            bignum = strlen( tempbuf );
 
-            if( http_MakeMessage( buf, http_major_version, http_minor_version, "NTcs", num, // content-length
+            if( http_MakeMessage( buf, http_major_version, http_minor_version, "NTcs", bignum, // content-length
                                   "text/html",  // content-type
                                   tempbuf ) != 0 )  // body
             {

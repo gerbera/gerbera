@@ -49,7 +49,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
-
 #include "httpreadwrite.h"
 
 //************************************
@@ -902,7 +901,7 @@ GetDescDocumentAndURL( IN Upnp_DescType descriptionType,
     char aliasStr[LINE_SIZE];
     char *temp_str = NULL;
     FILE *fp = NULL;
-    unsigned fileLen;
+    off_t fileLen;
     unsigned num_read;
     time_t last_modified;
     struct stat file_info;
@@ -3592,8 +3591,9 @@ FreeHandle( int Upnp_Handle )
 
 }  /****************** End of FreeHandle *********************/
 
+
 // **DBG****************************************************
-DBGONLY(
+//DBGONLY(
 
 /**************************************************************************
  * Function: PrintHandleInfo 
@@ -3606,7 +3606,7 @@ DBGONLY(
  *  Return Values: int
  *      UPNP_E_SUCCESS if successful else return appropriate error
  ***************************************************************************/
-            int PrintHandleInfo( IN UpnpClient_Handle Hnd ) {
+/*            int PrintHandleInfo( IN UpnpClient_Handle Hnd ) {
             struct Handle_Info * HndInfo; if( HandleTable[Hnd] != NULL ) {
             HndInfo = HandleTable[Hnd];
             DBGONLY( UpnpPrintf( UPNP_ALL, API, __FILE__, __LINE__,
@@ -3614,6 +3614,7 @@ DBGONLY(
                                  Hnd );
                      UpnpPrintf( UPNP_ALL, API, __FILE__, __LINE__,
                                  "HType_%d\n", HndInfo->HType );
+                ) // dbgonly
 		     DEVICEONLY(
                      if( HndInfo->HType !=
                          HND_CLIENT ) UpnpPrintf( UPNP_ALL, API, __FILE__,
@@ -3626,8 +3627,9 @@ DBGONLY(
             return UPNP_E_INVALID_HANDLE;}
 
             return UPNP_E_SUCCESS;}
+*/
    /****************** End of PrintHandleInfo *********************/
-
+/*
             void printNodes( IXML_Node * tmpRoot, int depth ) {
             int i;
             IXML_NodeList * NodeList1;
@@ -3652,9 +3654,10 @@ DBGONLY(
             }
 
             }
+*/
    /****************** End of printNodes *********************/
 
- )                              // dbgonly
+// )                              // dbgonly
 
     //********************************************************
     //* Name: getlocalhostname

@@ -36,6 +36,14 @@
 
 //@{
 
+#if defined _LARGEFILE_SOURCE && _FILE_OFFSET_BITS+0 != 64
+  #if defined __GNUC__
+  #warning libupnp requires largefile mode - use AC_SYS_LARGEFILE
+  #else
+  # error  libupnp requires largefile mode - use AC_SYS_LARGEFILE
+  #endif
+#endif 
+
 #include <stdio.h>
 #include "ixml.h"
 #include "upnpconfig.h"
@@ -835,7 +843,7 @@ struct File_Info
   /** The length of the file. A length less than 0 indicates the size 
    *  is unknown, and data will be sent until 0 bytes are returned from
    *  a read call. */
-  int file_length;
+  off_t file_length;
 
   /** The time at which the contents of the file was modified;
    *  The time system is always local (not GMT). */
@@ -929,7 +937,7 @@ struct UpnpVirtualDirCallbacks
    int (*seek) (
      IN UpnpWebFileHandle fileHnd,  /** The handle of the file to move the 
                                         file pointer. */
-     IN long offset,                /** The number of bytes to move in the 
+     IN off_t offset,                /** The number of bytes to move in the 
                                         file.  Positive values move foward and 
                                         negative values move backward.  Note 
                                         that this must be positive if the 

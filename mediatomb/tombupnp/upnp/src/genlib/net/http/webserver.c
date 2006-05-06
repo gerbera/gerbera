@@ -629,7 +629,7 @@ get_file_info( IN const char *filename,
     rc = get_content_type( filename, &info->content_type );
 
     DBGONLY( UpnpPrintf( UPNP_INFO, HTTP, __FILE__, __LINE__,
-                         "file info: %s, length: %d, last_mod=%s readable=%d\n",
+                         "file info: %s, length: %lld, last_mod=%s readable=%d\n",
                          filename, info->file_length,
                          asctime( gmtime( &info->last_modified ) ),
                          info->is_readable ); )

@@ -415,6 +415,7 @@ int http_SendStatusResponse( IN SOCKINFO *info, IN int http_status_code,
 *				memory ptr
 *		'c':	(no args) appends CRLF "\r\n"
 *		'd':	arg = int number		// appends decimal number
+*		'h':	arg = off_t number		// appends off_t number
 *		't':	arg = time_t * gmt_time	// appends time in RFC 1123 fmt
 *		'D':	(no args) appends HTTP DATE: header
 *		'S':	(no args) appends HTTP SERVER: header
