@@ -109,7 +109,7 @@ int IOHandler::write(IN char *buf, IN size_t length)
 /// This function is called by the web server to perform seek on an a file.
 ///
 /// \retval 0 On success, non-zero value on error.
-void IOHandler::seek(IN long offset, IN int whence)
+void IOHandler::seek(IN off_t offset, IN int whence)
 {
 }
 

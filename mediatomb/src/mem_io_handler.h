@@ -32,10 +32,10 @@ class MemIOHandler : public IOHandler
 protected:
     /// \brief buffer that is holding our data.
     char *buffer;
-    int length;
+    off_t length;
 
     /// \brief current offset in the buffer
-    long        pos;
+    off_t   pos;
     
 public:
     /// \brief Initializes the internal buffer.
@@ -48,7 +48,7 @@ public:
     virtual void open(IN enum UpnpOpenFileMode mode);
     virtual int read(OUT char *buf, IN size_t length);
                       
-    virtual void seek(IN long offset, IN int whence);
+    virtual void seek(IN off_t offset, IN int whence);
 };
 
 

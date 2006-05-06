@@ -88,7 +88,7 @@ int MemIOHandler::read(OUT char *buf, IN size_t length)
     return ret; 
  }
                                                                                                                                                                          
-void MemIOHandler::seek(IN long offset, IN int whence)
+void MemIOHandler::seek(IN off_t offset, IN int whence)
 {
     if (whence == SEEK_SET)
     {

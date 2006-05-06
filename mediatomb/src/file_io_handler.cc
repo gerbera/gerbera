@@ -67,9 +67,9 @@ int FileIOHandler::read(OUT char *buf, IN size_t length)
     return ret;
  }
                                                                                                                                                                          
-void FileIOHandler::seek(IN long offset, IN int whence)
+void FileIOHandler::seek(IN off_t offset, IN int whence)
 {
-    if (fseek(f, offset, whence) != 0)
+    if (fseeko(f, offset, whence) != 0)
     {
         throw Exception(_("fseek failed"));
     }

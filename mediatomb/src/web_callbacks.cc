@@ -236,7 +236,7 @@ static int web_write(IN UpnpWebFileHandle f, IN char *buf,
 /// The seek operatoin itself is performed by the responsible IOHandler.
 ///
 /// \return 0 On success, non-zero value on error.
-static int web_seek(IN UpnpWebFileHandle f, IN long offset, IN int whence)
+static int web_seek(IN UpnpWebFileHandle f, IN off_t offset, IN int whence)
 {
     try 
     {

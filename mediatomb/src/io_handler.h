@@ -55,7 +55,7 @@ public:
     /// \param whence The position to move relative to. SEEK_CUR to move relative
     /// to current position, SEEK_END to move relative to the end of file,
     /// SEEK_SET to specify an absolute offset.
-    virtual void seek(long offset, int whence);
+    virtual void seek(off_t offset, int whence);
 
     /// \brief Close/free previously opened/initialized data.
     virtual void close();

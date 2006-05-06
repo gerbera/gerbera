@@ -45,7 +45,7 @@ FileRequestHandler::FileRequestHandler() : RequestHandler()
 
 void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info *info)
 {
-    //log_info(("FileRequestHandler::get_info start\n"));
+    log_info(("FileRequestHandler::get_info start\n"));
 
     int objectID;
 
@@ -162,7 +162,8 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     if (s_res_id != nil)
         res_id = s_res_id.toInt();
 
-    if (res_id <= 0 || res_id > item->getResourceCount())
+    log_info(("FileIOHandler: fetching resource id %d\n", res_id));
+    if ((res_id > 0) && (res_id < item->getResourceCount()))
     {
         // http-get:*:image/jpeg:*
         String protocolInfo = item->getResource(res_id)->getAttributes()->get(_("protocolInfo"));
@@ -171,7 +172,8 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
             Ref<Array<StringBase> > parts = split_string(protocolInfo, ':');
             mimeType = parts->get(2);
         }
-       
+      
+        log_info(("FileIOHandler: setting content length to unknown\n"));
         /// \todo we could figure out the content length...
         info->file_length = -1;
     }
@@ -179,7 +181,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     {
         mimeType = item->getMimeType();
         info->file_length = statbuf.st_size;
-        //log_info(("FileIOHandler: get_info: file_length: %d\n", (int)statbuf.st_size));
+        log_info(("FileIOHandler: get_info: file_length: %lld\n", statbuf.st_size));
     }
         
     info->last_modified = statbuf.st_mtime;
@@ -242,17 +244,17 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, IN enum UpnpOpe
     // Per default and in case of a bad resource ID, serve the file
     // itself
 
-    if (res_id <= 0 || res_id > item->getResourceCount())
+    if ((res_id > 0) && (res_id < item->getResourceCount()))
     {
-        Ref<IOHandler> io_handler(new FileIOHandler(path));
+        Ref<CdsResource> resource = item->getResource(res_id);
+        Ref<MetadataHandler> h = MetadataHandler::createHandler(resource->getHandlerType());
+        Ref<IOHandler> io_handler = h->serveContent(item, res_id);
         io_handler->open(mode);
         return io_handler;
     }
     else
     {
-        Ref<CdsResource> resource = item->getResource(res_id);
-        Ref<MetadataHandler> h = MetadataHandler::createHandler(resource->getHandlerType());
-        Ref<IOHandler> io_handler = h->serveContent(item, res_id);
+        Ref<IOHandler> io_handler(new FileIOHandler(path));
         io_handler->open(mode);
         return io_handler;
     }
