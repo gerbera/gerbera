@@ -1,4 +1,5 @@
 EXTRA_DIST = gen_libmediatomb_src.sh
+CLEANFILES  = IUpnpErrFile.txt IUpnpInfoFile.txt
 
 noinst_LIBRARIES = libmediatomb.a
 include $(srcdir)/libmediatomb_src
