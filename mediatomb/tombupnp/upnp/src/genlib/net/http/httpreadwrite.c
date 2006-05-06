@@ -293,7 +293,7 @@ http_SendMessage( IN SOCKINFO * info,
     size_t buf_length;
     char *filename = NULL;
     FILE *Fp;
-    int num_read,
+    off_t num_read,
       num_written,
       amount_to_be_read = 0;
     va_list argp;
@@ -304,7 +304,7 @@ http_SendMessage( IN SOCKINFO * info,
     int RetVal = 0;
 
     // 10 byte allocated for chunk header.
-    int Data_Buf_Size = WEB_SERVER_BUF_SIZE;
+    off_t Data_Buf_Size = WEB_SERVER_BUF_SIZE;
 
     va_start( argp, fmt );
 
