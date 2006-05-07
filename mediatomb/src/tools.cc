@@ -337,7 +337,7 @@ void write_text_file(String path, String contents)
                         path + " : " + strerror(errno));
     }
     
-    fwrite(contents.c_str(), 1, contents.length(), f);
+    bytesWritten = fwrite(contents.c_str(), 1, contents.length(), f);
     if (bytesWritten < contents.length())
     {
         fclose(f);

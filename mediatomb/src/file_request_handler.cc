@@ -162,7 +162,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     if (s_res_id != nil)
         res_id = s_res_id.toInt();
 
-    log_info(("FileIOHandler: fetching resource id %d\n", res_id));
+    log_info(("FileRequestHandler: fetching resource id %d\n", res_id));
     if ((res_id > 0) && (res_id < item->getResourceCount()))
     {
         // http-get:*:image/jpeg:*
@@ -173,7 +173,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
             mimeType = parts->get(2);
         }
       
-        log_info(("FileIOHandler: setting content length to unknown\n"));
+        log_info(("FileRequestHandler: setting content length to unknown\n"));
         /// \todo we could figure out the content length...
         info->file_length = -1;
     }
@@ -181,7 +181,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     {
         mimeType = item->getMimeType();
         info->file_length = statbuf.st_size;
-        log_info(("FileIOHandler: get_info: file_length: %lld\n", statbuf.st_size));
+        log_info(("FileRequestHandler: get_info: file_length: %lld\n", statbuf.st_size));
     }
         
     info->last_modified = statbuf.st_mtime;
