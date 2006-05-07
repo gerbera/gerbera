@@ -2250,7 +2250,7 @@ get_sdk_info( OUT char *info )
         *info = '\0';
     }
 
-    sprintf( info, "%s/%s, UPnP/1.0, Intel SDK for UPnP devices/"
+    sprintf( info, "%s/%s, UPnP/1.0, " PACKAGE_NAME "/"
 	     PACKAGE_VERSION "\r\n",
              sys_info.sysname, sys_info.release );
 }
