@@ -519,16 +519,41 @@ fi
 #fi
 
 
-LFS_OK="no"
-if test "$_FILE_OFFSET_BITS" = "64"; then
-    AC_DEFINE([HAVE_LFS], [1], 
-              [Enable largefile support, if not defined keep old implementation])
-    LFS_OK="yes"
+TOMBDEBUG_OK=disabled
+AC_ARG_ENABLE(tombdebug,
+  [  --enable-tombdebug         enable debug output for the server],
+  [
+     TOMBDEBUG_EN=$enableval 
+     if test "x$enableval" = xno; then
+        TOMBDEBUG_OK=disabled
+     else
+        TOMBDEBUG_OK=yes
+     fi
+  ]
+)
+if test "x$TOMBDEBUG_OK" = xyes; then
+    AC_DEFINE(TOMB_DEBUG, 1, [if defined compile with debug log output])
 fi
-    
-#AC_DEFINE(UPNP_HAVE_DEBUG, 1, [see upnpconfig.h])
-#AC_DEFINE(DEBUG, 1, [Define to 1 to compile debug code])
 
+UPNPDEBUG_OK=disabled
+AC_ARG_ENABLE(upnpdebug,
+  [  --enable-upnpdebug         enable debug output for the upnp library],
+  [
+     UPNPDEBUG_EN=$enableval 
+     if test "x$enableval" = xno; then
+        UPNPDEBUG_OK=disabled
+     else
+        UPNPDEBUG_OK=yes
+     fi
+  ]
+)
+
+if test "x$UPNPDEBUG_OK" = xyes; then
+    AC_DEFINE(UPNP_HAVE_DEBUG, 1, [see upnpconfig.h])
+    AC_DEFINE(DEBUG, 1, [Define to 1 to compile debug code])
+fi
+
+   
 ###############
 AC_CONFIG_FILES([
     Makefile
@@ -545,15 +570,19 @@ AC_CONFIG_FILES([
 AC_OUTPUT
 
 echo
-echo "======== CONFIGURATION SUMMARY ========="
-echo "  sqlite3         : $SQLITE3_OK"
-echo "  mysql           : $MYSQL_OK"
-echo "  javascript      : $JS_OK"
-echo "  libmagic        : $MAGIC_OK"
-echo "  id3lib          : $ID3_OK"
-echo "  libextractor    : $EXTRACTOR_OK"
-echo "  libexif         : $EXIF_OK"
-# echo "  libjpeg      : $LIBJPEG_OK"
-# echo "  exiv2        : $EXIV2_OK"
+echo "CONFIGURATION SUMMARY ----"
+#                        disabled
+echo
+echo "sqlite3       : $SQLITE3_OK"
+echo "mysql         : $MYSQL_OK"
+echo "javascript    : $JS_OK"
+echo "libmagic      : $MAGIC_OK"
+echo "id3lib        : $ID3_OK"
+echo "libexif       : $EXIF_OK"
+echo "libextractor  : $EXTRACTOR_OK"
+echo "tombdebug     : $TOMBDEBUG_OK"
+echo "upnpdebug     : $UPNPDEBUG_OK"
+# echo "  libjpeg     : $LIBJPEG_OK"
+# echo "  exiv2       : $EXIV2_OK"
 echo
 
