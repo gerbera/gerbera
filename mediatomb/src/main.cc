@@ -48,14 +48,15 @@ void signal_handler(int signal);
 
 int main(int argc, char **argv, char **envp)
 {
-    int     opt_index = 0;
-    int     o;
-    char    *ip = NULL;
+    int      opt_index = 0;
+    int      o;
+    char     *ip = NULL;
+    char     * err = NULL;
     unsigned short  port = 0;
-    bool    daemon = false;
+    bool     daemon = false;
 
-    struct passwd *pwd;
-    struct group  *grp;
+    struct   passwd *pwd;
+    struct   group  *grp;
 
     static struct option long_options[] = {
                    {"ip", 1, 0, 'i'},
@@ -94,7 +95,18 @@ int main(int argc, char **argv, char **envp)
 
             case 'p':
 //                log_info(("Option Port with param %s\n", optarg));
-                port = strtol(optarg, (char **)NULL, 10);
+                errno = 0;
+                port = strtol(optarg, &err, 10);
+                if ((port == 0) && (*err))
+                {
+                    log_error(("Invalid port argument: %s\n", optarg));
+                    exit(EXIT_FAILURE);
+                }
+                if (port < 49152)
+                {
+                    log_error(("Port values below 49152 are not allowed by libupnp\n"));
+                    exit(EXIT_FAILURE);
+                }
                 log_info(("port set to: %d\n", port));
                 break;
 
