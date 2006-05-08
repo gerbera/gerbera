@@ -1203,6 +1203,7 @@ process_request( IN http_message_t * req,
     // init
     request_doc = NULL;
     finfo.content_type = NULL;
+    finfo.is_file_length_known = 1;
     //membuffer_init( &content_type );
     alias_grabbed = FALSE;
     err_code = HTTP_INTERNAL_SERVER_ERROR;  // default error
@@ -1356,6 +1357,7 @@ process_request( IN http_message_t * req,
     }
 
     RespInstr->ReadSendSize = finfo.file_length;
+    RespInstr->IsLengthKnown = finfo.is_file_length_known;
 
     //Check other header field.
     if( ( err_code =
@@ -1413,7 +1415,7 @@ process_request( IN http_message_t * req,
         }
 
     } else {
-        if( RespInstr->ReadSendSize >= 0 ) {
+        if((RespInstr->IsLengthKnown) && (RespInstr->ReadSendSize >= 0)) {
             //Content-Range: bytes 222-3333/4000  HTTP_PARTIAL_CONTENT
             //Transfer-Encoding: chunked
             // K means add chunky header ang G means range header.

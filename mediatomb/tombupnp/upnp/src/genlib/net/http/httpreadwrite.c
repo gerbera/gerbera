@@ -315,7 +315,7 @@ http_SendMessage( IN SOCKINFO * info,
 
             assert( Instr );
 
-            if( Instr->ReadSendSize >= 0 )
+            if( (Instr->IsLengthKnown) && (Instr->ReadSendSize >= 0) )
                 amount_to_be_read = Instr->ReadSendSize;
             else
                 amount_to_be_read = Data_Buf_Size;
@@ -383,7 +383,7 @@ http_SendMessage( IN SOCKINFO * info,
 
                     amount_to_be_read = amount_to_be_read - num_read;
 
-                    if( Instr->ReadSendSize < 0 ) {
+                    if( !Instr->IsLengthKnown ) {
                         //read until close
                         amount_to_be_read = Data_Buf_Size;
                     }

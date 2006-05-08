@@ -46,6 +46,7 @@ struct SendInstruction
    int  IsVirtualFile;
    int  IsChunkActive;
    int  IsRangeActive;
+   int  IsLengthKnown;
    int  IsTrailers;
    char RangeHeader[200];
    off_t RangeOffset;
