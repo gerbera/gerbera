@@ -6,6 +6,12 @@
 
     * upnp/src/genlib/net/http/webserver.c: added .css to text/css 
       mimetype mapping to the internal webserver
+
+    * added largefile support
+
+    * upnp/inc/upnp.h: File_Info structure had to be adapted for largefile
+      support (it was no longer possible to indicate unknown filesize with
+      a negative value, so a new variable was introduced)
       
 
 2006-03-05  Rémi Turboult  <r3mi@users.sourceforge.net>
