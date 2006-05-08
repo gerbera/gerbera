@@ -50,7 +50,7 @@ struct SendInstruction
    char RangeHeader[200];
    off_t RangeOffset;
    off_t ReadSendSize;  // Read from local source and send on the network.
-   long RecvWriteSize; // Recv from the network and write into local file.
+   off_t RecvWriteSize; // Recv from the network and write into local file.
 
    //Later few more member could be added depending on the requirement.
 };

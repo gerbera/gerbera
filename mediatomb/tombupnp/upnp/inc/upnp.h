@@ -840,11 +840,15 @@ struct Upnp_Subscription_Request
 
 struct File_Info
 {
-  /** The length of the file. A length less than 0 indicates the size 
-   *  is unknown, and data will be sent until 0 bytes are returned from
+  /** The length of the file. A length less than can zero not be used 
+   *  anymore, so we will use a flag to indicate if the size 
+   *  is unknown, data will be sent until 0 bytes are returned from
    *  a read call. */
   off_t file_length;
 
+  /** 1 if the length is known, otherwise 0 */
+  int is_file_length_known;
+  
   /** The time at which the contents of the file was modified;
    *  The time system is always local (not GMT). */
   time_t last_modified;

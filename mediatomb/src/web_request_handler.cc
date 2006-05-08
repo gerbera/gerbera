@@ -81,6 +81,7 @@ String WebRequestHandler::renderXMLHeader()
 void WebRequestHandler::get_info(IN const char *filename, OUT struct File_Info *info)
 {
     info->file_length = -1; // length is unknown
+    info->is_file_length_known = 0;
     info->last_modified = time(NULL);
     info->is_directory = 0; 
     info->is_readable = 1;

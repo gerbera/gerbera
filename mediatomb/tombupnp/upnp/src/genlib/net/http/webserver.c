@@ -864,15 +864,15 @@ StrTok( char **Src,
 ************************************************************************/
 int
 GetNextRange( char **SrcRangeStr,
-              int *FirstByte,
-              int *LastByte )
+              off_t *FirstByte,
+              off_t *LastByte )
 {
     char *Ptr,
      *Tok;
     int i,
       F = -1,
       L = -1;
-    int Is_Suffix_byte_Range = 1;
+    off_t Is_Suffix_byte_Range = 1;
 
     if( *SrcRangeStr == NULL )
         return -1;
@@ -882,7 +882,7 @@ GetNextRange( char **SrcRangeStr,
     if( ( Ptr = strstr( Tok, "-" ) ) == NULL )
         return -1;
     *Ptr = ' ';
-    sscanf( Tok, "%d%d", &F, &L );
+    sscanf( Tok, "%lld%lld", &F, &L );
 
     if( F == -1 || L == -1 ) {
         *Ptr = '-';
@@ -914,7 +914,8 @@ GetNextRange( char **SrcRangeStr,
 *																		
 * Parameters:															
 *	char * ByteRangeSpecifier ; String containing the range 	
-*	long FileLength ; Length of the file													
+*	File_Info FileInfo ; Structure containing information about the file
+*                        length and if it is known or not
 *	OUT struct SendInstruction * Instr ; SendInstruction object	where the 
 *										range operations will be stored
 *																		
@@ -929,15 +930,16 @@ GetNextRange( char **SrcRangeStr,
 ************************************************************************/
 int
 CreateHTTPRangeResponseHeader( char *ByteRangeSpecifier,
-                               long FileLength,
+                               struct File_Info FileInfo,
                                OUT struct SendInstruction *Instr )
 {
 
-    int FirstByte,
-      LastByte;
-    char *RangeInput,
-     *Ptr;
+    off_t FirstByte, LastByte, FileLength;
+    int IsFileLengthKnown;
+    char *RangeInput, *Ptr;
 
+    FileLength = FileInfo.file_length;
+    IsFileLengthKnown = FileInfo.is_file_length_known;
     Instr->IsRangeActive = 1;
     Instr->ReadSendSize = FileLength;
 
@@ -959,7 +961,7 @@ CreateHTTPRangeResponseHeader( char *ByteRangeSpecifier,
     //Jump =
     Ptr = Ptr + 1;
 
-    if( FileLength < 0 ) {
+    if( IsFileLengthKnown == 0 ) {
         free( RangeInput );
         return HTTP_REQUEST_RANGE_NOT_SATISFIABLE;
     }
@@ -977,26 +979,26 @@ CreateHTTPRangeResponseHeader( char *ByteRangeSpecifier,
 
             Instr->RangeOffset = FirstByte;
             Instr->ReadSendSize = LastByte - FirstByte + 1;
-            sprintf( Instr->RangeHeader, "CONTENT-RANGE: bytes %d-%d/%ld\r\n", FirstByte, LastByte, FileLength );   //Data between two range.
+            sprintf( Instr->RangeHeader, "CONTENT-RANGE: bytes %lld-%lld/%lld\r\n", FirstByte, LastByte, FileLength );   //Data between two range.
         } else if( FirstByte >= 0 && LastByte == -1
                    && FirstByte < FileLength ) {
             Instr->RangeOffset = FirstByte;
             Instr->ReadSendSize = FileLength - FirstByte;
             sprintf( Instr->RangeHeader,
-                     "CONTENT-RANGE: bytes %d-%ld/%ld\r\n", FirstByte,
+                     "CONTENT-RANGE: bytes %lld-%lld/%lld\r\n", FirstByte,
                      FileLength - 1, FileLength );
         } else if( FirstByte == -1 && LastByte > 0 ) {
             if( LastByte >= FileLength ) {
                 Instr->RangeOffset = 0;
                 Instr->ReadSendSize = FileLength;
                 sprintf( Instr->RangeHeader,
-                         "CONTENT-RANGE: bytes 0-%ld/%ld\r\n",
+                         "CONTENT-RANGE: bytes 0-%lld/%lld\r\n",
                          FileLength - 1, FileLength );
             } else {
                 Instr->RangeOffset = FileLength - LastByte;
                 Instr->ReadSendSize = LastByte;
                 sprintf( Instr->RangeHeader,
-                         "CONTENT-RANGE: bytes %ld-%ld/%ld\r\n",
+                         "CONTENT-RANGE: bytes %lld-%lld/%lld\r\n",
                          FileLength - LastByte + 1, FileLength,
                          FileLength );
             }
@@ -1035,7 +1037,7 @@ CreateHTTPRangeResponseHeader( char *ByteRangeSpecifier,
 int
 CheckOtherHTTPHeaders( IN http_message_t * Req,
                        OUT struct SendInstruction *RespInstr,
-                       int FileSize )
+                       struct File_Info FileInfo )
 {
     http_header_t *header;
     ListNode *node;
@@ -1090,7 +1092,7 @@ CheckOtherHTTPHeaders( IN http_message_t * Req,
 
                 case HDR_RANGE:
                     if( ( RetCode = CreateHTTPRangeResponseHeader( TmpBuf,
-                                                                   FileSize,
+                                                                   FileInfo,
                                                                    RespInstr ) )
                         != HTTP_OK ) {
                         free( TmpBuf );
@@ -1358,7 +1360,7 @@ process_request( IN http_message_t * req,
     //Check other header field.
     if( ( err_code =
           CheckOtherHTTPHeaders( req, RespInstr,
-                                 finfo.file_length ) ) != HTTP_OK ) {
+                                 finfo ) ) != HTTP_OK ) {
         goto error_handler;
     }
 
