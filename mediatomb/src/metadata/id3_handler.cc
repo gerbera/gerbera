@@ -25,10 +25,16 @@
 
 #ifdef HAVE_ID3
 
-#undef HAVE_CONFIG_H // else utils.h from the id3 library tries to import "config.h"
+#ifdef HAVE_CONFIG_H
+    #undef HAVE_CONFIG_H // else utils.h from the id3 library tries to import "config.h"
 
-#include <id3/tag.h>
-#include <id3/misc_support.h>
+    #include <id3/tag.h>
+    #include <id3/misc_support.h>
+    #define HAVE_CONFIG_H
+#else
+    #include <id3/tag.h>
+    #include <id3/misc_support.h>
+#endif
 
 #include "id3_handler.h"
 #include "string_converter.h"
