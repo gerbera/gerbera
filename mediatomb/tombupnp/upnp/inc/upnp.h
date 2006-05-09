@@ -840,7 +840,7 @@ struct Upnp_Subscription_Request
 
 struct File_Info
 {
-  /** The length of the file. A length less than can zero not be used 
+  /** The length of the file. A length less than zero can not be used 
    *  anymore, so we will use a flag to indicate if the size 
    *  is unknown, data will be sent until 0 bytes are returned from
    *  a read call. */
