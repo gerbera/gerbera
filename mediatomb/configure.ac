@@ -57,18 +57,15 @@ int main () { return !(sizeof(off_t) == 8); }
 [
   AC_MSG_RESULT(8)
   AC_DEFINE([LARGEFILE_OFF_T_SIZE_8], [1], [sizeof(off_t)])
-  AC_DEFINE([LARGEFILE_SPRINTF], ["%lld"], [how to sprintf off_t])
-  AC_DEFINE([LARGEFILE_SPRINTF_HEX], ["%llx"], [how to sprintf off_t in hex])
+  AC_DEFINE([LARGEFILE_SPRINTF], ["%ll"], [how to sprintf off_t])
 ],
 [
   AC_MSG_RESULT(4)
-  AC_DEFINE([LARGEFILE_SPRINTF], ["%ld"], [how to sprintf off_t])
-  AC_DEFINE([LARGEFILE_SPRINTF_HEX], ["%lx"], [how to sprintf off_t in hex])
+  AC_DEFINE([LARGEFILE_SPRINTF], ["%l"], [how to sprintf off_t])
 ],
 [
   AC_MSG_RESULT(4)
-  AC_DEFINE([LARGEFILE_SPRINTF], ["%ld"], [how to sprintf off_t])
-  AC_DEFINE([LARGEFILE_SPRINTF_HEX], ["%lx"], [how to sprintf off_t])
+  AC_DEFINE([LARGEFILE_SPRINTF], ["%l"], [how to sprintf off_t])
 ])
 
 AC_CHECK_FUNCS([strtoll])

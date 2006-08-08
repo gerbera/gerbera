@@ -633,7 +633,7 @@ get_file_info( IN const char *filename,
     rc = get_content_type( filename, &info->content_type );
 
     DBGONLY( UpnpPrintf( UPNP_INFO, HTTP, __FILE__, __LINE__,
-                         "file info: %s, length: " LARGEFILE_SPRINTF ", last_mod=%s readable=%d\n",
+                         "file info: %s, length: " LARGEFILE_SPRINTF"d" ", last_mod=%s readable=%d\n",
                          filename, info->file_length,
                          asctime( gmtime( &info->last_modified ) ),
                          info->is_readable ); )
@@ -890,7 +890,7 @@ GetNextRange( char **SrcRangeStr,
     if( ( Ptr = strstr( Tok, "-" ) ) == NULL )
         return -1;
     *Ptr = ' ';
-    sscanf( Tok, LARGEFILE_SPRINTF LARGEFILE_SPRINTF, &F, &L );
+    sscanf( Tok, LARGEFILE_SPRINTF"d" LARGEFILE_SPRINTF"d", &F, &L );
 
     if( F == -1 || L == -1 ) {
         *Ptr = '-';
@@ -985,9 +985,9 @@ CreateHTTPRangeResponseHeader( char *ByteRangeSpecifier,
             Instr->RangeOffset = FirstByte;
             Instr->ReadSendSize = LastByte - FirstByte + 1;
             sprintf( Instr->RangeHeader, "CONTENT-RANGE: bytes " 
-                                          LARGEFILE_SPRINTF "-" 
-                                          LARGEFILE_SPRINTF "/" 
-                                          LARGEFILE_SPRINTF "\r\n", 
+                                          LARGEFILE_SPRINTF"d" "-" 
+                                          LARGEFILE_SPRINTF"d" "/" 
+                                          LARGEFILE_SPRINTF"d" "\r\n", 
                                           FirstByte, LastByte, 
                                           FileLength );   //Data between two range.
         } else if( FirstByte >= 0 && LastByte == -1
@@ -996,9 +996,9 @@ CreateHTTPRangeResponseHeader( char *ByteRangeSpecifier,
             Instr->ReadSendSize = FileLength - FirstByte;
             sprintf( Instr->RangeHeader,
                      "CONTENT-RANGE: bytes " 
-                     LARGEFILE_SPRINTF "-"
-                     LARGEFILE_SPRINTF "/"
-                     LARGEFILE_SPRINTF "\r\n", FirstByte,
+                     LARGEFILE_SPRINTF"d" "-"
+                     LARGEFILE_SPRINTF"d" "/"
+                     LARGEFILE_SPRINTF"d" "\r\n", FirstByte,
                      FileLength - 1, FileLength );
         } else if( FirstByte == -1 && LastByte > 0 ) {
             if( LastByte >= FileLength ) {
@@ -1006,17 +1006,17 @@ CreateHTTPRangeResponseHeader( char *ByteRangeSpecifier,
                 Instr->ReadSendSize = FileLength;
                 sprintf( Instr->RangeHeader,
                          "CONTENT-RANGE: bytes 0-"
-                         LARGEFILE_SPRINTF "/"
-                         LARGEFILE_SPRINTF "\r\n",
+                         LARGEFILE_SPRINTF"d" "/"
+                         LARGEFILE_SPRINTF"d" "\r\n",
                          FileLength - 1, FileLength );
             } else {
                 Instr->RangeOffset = FileLength - LastByte;
                 Instr->ReadSendSize = LastByte;
                 sprintf( Instr->RangeHeader,
                          "CONTENT-RANGE: bytes "
-                         LARGEFILE_SPRINTF "-"
-                         LARGEFILE_SPRINTF "/"
-                         LARGEFILE_SPRINTF "\r\n",
+                         LARGEFILE_SPRINTF"d" "-"
+                         LARGEFILE_SPRINTF"d" "/"
+                         LARGEFILE_SPRINTF"d" "\r\n",
                          FileLength - LastByte + 1, FileLength,
                          FileLength );
             }

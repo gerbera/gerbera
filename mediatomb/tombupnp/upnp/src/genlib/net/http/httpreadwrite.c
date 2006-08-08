@@ -420,7 +420,7 @@ http_SendMessage( IN SOCKINFO * info,
                     memcpy( file_buf + num_read, "\r\n", 2 );
 
                     //Hex length for the chunk size.
-                    sprintf( Chunk_Header, LARGEFILE_SPRINTF_HEX, num_read );
+                    sprintf( Chunk_Header, LARGEFILE_SPRINTF"x", num_read );
 
                     //itoa(num_read,Chunk_Header,16); 
                     strcat( Chunk_Header, "\r\n" );
@@ -878,7 +878,7 @@ http_WriteHttpPost( IN void *Handle,
 
             if ( tempbuf == NULL) return UPNP_E_OUTOF_MEMORY;
 
-            sprintf( tempbuf, LARGEFILE_SPRINTF_HEX "\r\n", ( *size ) );    //begin chunk
+            sprintf( tempbuf, LARGEFILE_SPRINTF"x" "\r\n", ( *size ) );    //begin chunk
             tempSize = strlen( tempbuf );
             memcpy( tempbuf + tempSize, buf, ( *size ) );
             memcpy( tempbuf + tempSize + ( *size ), "\r\n", 2 );    //end of chunk
@@ -1888,7 +1888,7 @@ http_MakeMessage( INOUT membuffer * buf,
         {
             bignum = ( off_t )va_arg( argp, off_t );
 
-            sprintf( tempbuf, LARGEFILE_SPRINTF, bignum );
+            sprintf( tempbuf, LARGEFILE_SPRINTF"d", bignum );
 
             if( membuffer_append( buf, tempbuf, strlen( tempbuf ) ) != 0 ) {
                 goto error_handler;

@@ -59,13 +59,8 @@
 
 // LARGE FILE IMPLEMENTATION DEFINES
 #ifndef LARGEFILE_SPRINTF
-    #define LARGEFILE_SPRINTF "%ld"
+    #define LARGEFILE_SPRINTF "%l"
 #endif
-
-#ifndef LARGEFILE_SPRINTF_HEX
-    #define LARGEFILE_SPRINTF "%lx"
-#endif
-
 
 extern off_t g_maxContentLength;
 
