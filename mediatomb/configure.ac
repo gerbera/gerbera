@@ -10,8 +10,8 @@ AM_INIT_AUTOMAKE([1.9 -Wall])
 # libupnp-1.3.1 package, we just set the version number to 0.1.0
 # (C) Copyright 2005-2006 RИmi Turboult <r3mi@users.sourceforge.net>
 upnpmaj=0
-upnpmin=1
-upnppatch=0
+upnpmin=4
+upnppatch=1
 AC_DEFINE_UNQUOTED([UPNP_VERSION_STRING], "$PACKAGE_VERSION",
     [see upnpconfig.h])
 AC_DEFINE_UNQUOTED([UPNP_VERSION_MAJOR], $upnpmaj, [see upnpconfig.h])
@@ -27,9 +27,7 @@ AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
 AC_HEADER_STDBOOL
 AC_HEADER_TIME
-AC_SYS_LARGEFILE
-AC_LANG_CPLUSPLUS
-
+AC_LANG_C
    
 AC_CHECK_HEADERS([syslog.h unistd.h alloca.h iconv.h arpa/inet.h fcntl.h], [],
                  [AC_MSG_ERROR(required header not found)]) 
@@ -37,17 +35,49 @@ AC_CHECK_HEADERS([syslog.h unistd.h alloca.h iconv.h arpa/inet.h fcntl.h], [],
 AC_CHECK_HEADERS([limits.h netdb.h netinet/in.h stdlib.h string.h sys/file.h],
                  [],
                  [AC_MSG_ERROR(required header not found)]) 
-AC_CHECK_HEADERS([sys/ioctl.h sys/socket.h sys/time.h sys/timeb.h pthread.h],
+AC_CHECK_HEADERS([sys/ioctl.h sys/socket.h sys/time.h sys/timeb.h sys/types.h pthread.h],
                  [],
                  [AC_MSG_ERROR(required header not found)]) 
     
-  
+AC_TYPE_OFF_T
+AC_SYS_LARGEFILE
+AC_FUNC_FSEEKO
+
+if test "$ac_cv_func_fseeko" != yes; then
+    AC_MSG_WARN([fseeko has not been found on your system, will use fseek instead.])
+    AC_MSG_WARN([This has not been tested, please report if you have any problems.])
+    AC_DEFINE([fseeko], [fseek], [fseek not present])
+fi
+
+AC_MSG_CHECKING([size of off_t])
+AC_TRY_RUN([
+#include <sys/types.h>
+int main () { return !(sizeof(off_t) == 8); }
+],
+[
+  AC_MSG_RESULT(8)
+  AC_DEFINE([LARGEFILE_OFF_T_SIZE_8], [1], [sizeof(off_t)])
+  AC_DEFINE([LARGEFILE_SPRINTF], ["%lld"], [how to sprintf off_t])
+  AC_DEFINE([LARGEFILE_SPRINTF_HEX], ["%llx"], [how to sprintf off_t in hex])
+],
+[
+  AC_MSG_RESULT(4)
+  AC_DEFINE([LARGEFILE_SPRINTF], ["%ld"], [how to sprintf off_t])
+  AC_DEFINE([LARGEFILE_SPRINTF_HEX], ["%lx"], [how to sprintf off_t in hex])
+],
+[
+  AC_MSG_RESULT(4)
+  AC_DEFINE([LARGEFILE_SPRINTF], ["%ld"], [how to sprintf off_t])
+  AC_DEFINE([LARGEFILE_SPRINTF_HEX], ["%lx"], [how to sprintf off_t])
+])
+
+AC_CHECK_FUNCS([strtoll])
+ 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_TYPE_SIGNAL
 AC_TYPE_PID_T
 AC_TYPE_SIZE_T
-AC_TYPE_OFF_T
 AC_STRUCT_TM
 
 # Checks for library functions.
@@ -62,7 +92,8 @@ AC_FUNC_SELECT_ARGTYPES
 AC_FUNC_STAT
 AC_FUNC_STRTOD
 AC_FUNC_VPRINTF
-AC_FUNC_FSEEKO
+
+AC_LANG_CPLUSPLUS
 
 AC_CHECK_FUNCS([ftime gethostname gettimeofday inet_ntoa localtime_r memmove memset],
                [],
@@ -106,7 +137,7 @@ fi
 if test "x$SQLITE3_OK" = xyes; then
     AC_CHECK_LIB(sqlite3, sqlite3_open,
         [],
-        [SQLITE3_OK=missing]
+        _[SQLITE3_OK=missing]
     )
 fi
 if test "x$SQLITE3_OK" = xyes; then
@@ -553,7 +584,6 @@ if test "x$UPNPDEBUG_OK" = xyes; then
     AC_DEFINE(DEBUG, 1, [Define to 1 to compile debug code])
 fi
 
-   
 ###############
 AC_CONFIG_FILES([
     Makefile
