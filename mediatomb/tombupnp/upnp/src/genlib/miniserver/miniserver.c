@@ -610,7 +610,10 @@ get_miniserver_sockets( MiniServerSockArray * out,
     
     // Jin: nothing against IANA, but... :>
     if( listen_port == 0 )
+    {
         listen_port = APPLICATION_LISTENING_PORT;
+        reuseaddr_on = 0;
+    }
 
     memset( &serverAddr, 0, sizeof( serverAddr ) );
     serverAddr.sin_family = AF_INET;
@@ -649,6 +652,10 @@ get_miniserver_sockets( MiniServerSockArray * out,
                           ( struct sockaddr * )&serverAddr,
                           sizeof( struct sockaddr_in )
              );
+         DBGONLY( UpnpPrintf( UPNP_INFO, MSERV, __FILE__, __LINE__,
+                             "mserv start: bind returned %s (%d)\n", 
+                             strerror(errno), sockError );
+             )
     } else {
         do {
             serverAddr.sin_port = htons( listen_port++ );
