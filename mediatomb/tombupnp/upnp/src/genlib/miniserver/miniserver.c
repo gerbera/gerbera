@@ -594,7 +594,9 @@ get_miniserver_sockets( MiniServerSockArray * out,
     int listenfd;
     int success;
     unsigned short actual_port;
-    int reuseaddr_on = 0;
+    // Jin: we want to use the reuseaddr option so the server stays on
+    // the same port
+    int reuseaddr_on = 1;
     int sockError = UPNP_E_SUCCESS;
     int errCode = 0;
     int miniServerStopSock;
@@ -605,7 +607,9 @@ get_miniserver_sockets( MiniServerSockArray * out,
     }
     // As per the IANA specifications for the use of ports by applications
     // override the listen port passed in with the first available 
-    if( listen_port < APPLICATION_LISTENING_PORT )
+    
+    // Jin: nothing against IANA, but... :>
+    if( listen_port == 0 )
         listen_port = APPLICATION_LISTENING_PORT;
 
     memset( &serverAddr, 0, sizeof( serverAddr ) );
@@ -639,6 +643,8 @@ get_miniserver_sockets( MiniServerSockArray * out,
             return UPNP_E_SOCKET_BIND;
         }
 
+        serverAddr.sin_port = htons( listen_port );
+        
         sockError = bind( listenfd,
                           ( struct sockaddr * )&serverAddr,
                           sizeof( struct sockaddr_in )

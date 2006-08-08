@@ -1165,7 +1165,6 @@ respond_ok( IN SOCKINFO * info,
 
     membuffer_init( &response );
     response.size_inc = 30;
-    printf("gena_device.c:1168 respond_ok() N 0\n");
     if( http_MakeMessage( &response, major, minor,
                           "R" "D" "S" "N" "Xc" "ssc" "sc" "c",
                           HTTP_OK, (off_t)0, X_USER_AGENT,

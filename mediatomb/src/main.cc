@@ -94,10 +94,6 @@ int main(int argc, char **argv, char **envp)
         log_error(("Please take a look at the README file for more information.\n"));
     }
 
-    off_t fokel;
-    fokel = -1;
-    printf("fokel: %lld\n", fokel);
-
     Ref<Array<StringBase> > addFile(new Array<StringBase>());
     
     while (1)
@@ -119,11 +115,6 @@ int main(int argc, char **argv, char **envp)
                 if ((port == 0) && (*err))
                 {
                     log_error(("Invalid port argument: %s\n", optarg));
-                    exit(EXIT_FAILURE);
-                }
-                if (port < 49152)
-                {
-                    log_error(("Port values below 49152 are not allowed by libupnp\n"));
                     exit(EXIT_FAILURE);
                 }
                 log_info(("port set to: %d\n", port));
