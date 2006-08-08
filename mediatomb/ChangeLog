@@ -1,4 +1,10 @@
 MediaTomb - UPnP AV Mediaserver for Linux.
+v0.9.0  Major rework
+        * integrated libupnp (http://pupnp.sf.net/) into our source tree
+        * added largefile support
+        * code has undergone some performance optimizations
+        * fixed a bug where server did not shutdown while http download
+          was in progress
 
 v0.8.1
         * added "serve" directory, any files there can be downloaded 
@@ -14,7 +20,7 @@ v0.8.1
           be extracted and filled by the library.
 	    * added mysql support
         * refined configure script, almost all dependencies are now
-	      optional.
+          optional.
 	    * changed database, (not backward compatible again)
         * when an item is deleted all referenced items are deleted as well
         * added option to specify an alternative magic file
@@ -22,30 +28,19 @@ v0.8.1
 v0.8.0  15.06.2005  Scripting/Virtual Server Layout
         * Server layout can now be defined using java script,
           default layout script is provided.
-
         * Added ID3 tag support.
-
         * Fixed various memory leaks.
-
         * Files in the Filesystem Browser are now sorted alphabetically.
-
         * Added extension to mime-type mappings to the configuration.
-
         * Added option to limit import by file extensions.
-
         * Added daemon mode as well as setuid/setgid options, init.d
           script included.
-
         * Fixed mime-type recognition when importing media (filemagic output
           is now parsed using regular expressions)
-
         * Introduced new log system.
-
-        * Adding/Browsing/Removing media in the UI is now handled 
+        * Adding/Browsing/Removing media in the UI is now handled
           asynchroniously.
-
         * Added a command line option to import media upon server launch.
-
         * Added target directory option to tomb-install, cleaned up a few
           things.
 
