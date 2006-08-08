@@ -1,0 +1,52 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+<HEAD>
+   <TITLE>EXPORT_SPEC int UpnpRenewSubscription</TITLE>
+   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2>EXPORT_SPEC int <A HREF="#DOC.DOCU">UpnpRenewSubscription</A></H2><H2>( IN <!1><A HREF="UpnpClient_Handle.html">UpnpClient_Handle</A> Hnd,<BR>&nbsp;  INOUT int* <!1><A HREF="Upnp_Event_Subscribe.html#DOC.1.4.2.12.4">TimeOut</A>,<BR>&nbsp;  IN Upnp_SID SubsId )</H2><BLOCKQUOTE><B>UpnpRenewSubscription</B> renews a subscription that is about to  expire.</BLOCKQUOTE>
+
+<A NAME="DOC.DOCU"></A>
+<HR>
+<H2>Documentation</H2>
+<BLOCKQUOTE><B>UpnpRenewSubscription</B> renews a subscription that is about to 
+expire.  This function is synchronous.
+
+<P></BLOCKQUOTE>
+<DL><DT><DT><B>Parameters:</B><DD><B>Hnd</B> -   The handle of the control point that 
+is renewing the subscription. 
+<BR><B></B> - <!1><A HREF="Upnp_Event_Subscribe.html#DOC.1.4.2.12.4">TimeOut</A>  Pointer to a variable containing the 
+requested subscription time.  Upon return, 
+it contains the actual renewal time. 
+<BR><B>SubsId</B> -   The ID for the subscription to renew. <BR><DT><B>Returns:</B><DD>  [int] An integer representing one of the following:
+<UL>
+<LI> <TT>UPNP_E_SUCCESS</TT>: The operation completed successfully.
+<LI> <TT>UPNP_E_INVALID_HANDLE</TT>: The handle is not a valid control 
+point handle.
+<LI> <TT>UPNP_E_INVALID_PARAM</TT>: <B>Timeout</B> is not a valid pointer.
+<LI> <TT>UPNP_E_INVALID_SID</TT>: The SID being passed to this function 
+is not a valid subscription ID.
+<LI> <TT>UPNP_E_NETWORK_ERROR</TT>: A network error occured. 
+<LI> <TT>UPNP_E_SOCKET_WRITE</TT>: An error or timeout occurred writing 
+to a socket.
+<LI> <TT>UPNP_E_SOCKET_READ</TT>: An error or timeout occurred reading 
+from a socket.
+<LI> <TT>UPNP_E_SOCKET_BIND</TT>: An error occurred binding a socket.  
+<LI> <TT>UPNP_E_SOCKET_CONNECT</TT>: An error occurred connecting to 
+<B>PublisherUrl</B>.
+<LI> <TT>UPNP_E_OUTOF_SOCKET</TT>: An error occurred creating a socket.
+<LI> <TT>UPNP_E_BAD_RESPONSE</TT>: An error occurred in response from 
+the publisher.
+<LI> <TT>UPNP_E_SUBSCRIBE_UNACCEPTED</TT>: The publisher refused 
+the subscription renew.
+<LI> <TT>UPNP_E_OUTOF_MEMORY</TT>: Insufficient resources exist to 
+complete this operation.
+</UL>
+<BR><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<BR>
+This page was generated with the help of <A HREF="http://docpp.sourceforge.net">DOC++</A>.
+</BODY>
+</HTML>

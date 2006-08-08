@@ -1,0 +1,50 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+<HEAD>
+   <TITLE>EXPORT_SPEC int UpnpDownloadUrlItem</TITLE>
+   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2>EXPORT_SPEC int <A HREF="#DOC.DOCU">UpnpDownloadUrlItem</A></H2><H2>( IN const char* url,<BR>&nbsp;  OUT char** outBuf,<BR>&nbsp;  OUT char* contentType )</H2><BLOCKQUOTE><B>UpnpDownloadUrlItem</B> downloads a file specified in a URL.</BLOCKQUOTE>
+
+<A NAME="DOC.DOCU"></A>
+<HR>
+<H2>Documentation</H2>
+<BLOCKQUOTE><B>UpnpDownloadUrlItem</B> downloads a file specified in a URL.
+The SDK allocates the memory for <B>outBuf</B> and the 
+application is responsible for freeing this memory.  Note that
+the item is passed as a single buffer.  Large items should not
+be transferred using this function.
+
+<P></BLOCKQUOTE>
+<DL><DT><DT><B>Parameters:</B><DD><B>url</B> -   URL of an item to download. 
+<BR><B>outBuf</B> -   Buffer to store the downloaded item. 
+<BR><B>contentType</B> -   HTTP header value content type if 
+present. It should be at least 
+<TT>LINE_SIZE</TT> bytes in size. <BR><DT><B>Returns:</B><DD>  [int] An integer representing one of the following:
+<UL>
+<LI> <TT>UPNP_E_SUCCESS</TT>: The operation completed successfully.
+<LI> <TT>UPNP_E_INVALID_PARAM</TT>: Either <B>url</B>, <B>outBuf</B> 
+or <B>contentType</B> is not a valid pointer.
+<LI> <TT>UPNP_E_INVALID_URL</TT>: The <B>url</B> is not a valid 
+URL.
+<LI> <TT>UPNP_E_OUTOF_MEMORY</TT>: Insufficient resources exist to 
+download this file.
+<LI> <TT>UPNP_E_NETWORK_ERROR</TT>: A network error occurred.
+<LI> <TT>UPNP_E_SOCKET_WRITE</TT>: An error or timeout occurred writing 
+to a socket.
+<LI> <TT>UPNP_E_SOCKET_READ</TT>: An error or timeout occurred reading 
+from a socket.
+<LI> <TT>UPNP_E_SOCKET_BIND</TT>: An error occurred binding a socket.
+<LI> <TT>UPNP_E_SOCKET_CONNECT</TT>: An error occurred connecting a 
+socket.
+<LI> <TT>UPNP_E_OUTOF_SOCKET</TT>: Too many sockets are currently 
+allocated.
+</UL>
+<BR><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<BR>
+This page was generated with the help of <A HREF="http://docpp.sourceforge.net">DOC++</A>.
+</BODY>
+</HTML>

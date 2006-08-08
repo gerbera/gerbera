@@ -1,0 +1,53 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+<HEAD>
+   <TITLE>EXPORT_SPEC int UpnpSendAction</TITLE>
+   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2>EXPORT_SPEC int <A HREF="#DOC.DOCU">UpnpSendAction</A></H2><H2>( IN <!1><A HREF="UpnpClient_Handle.html">UpnpClient_Handle</A> Hnd,<BR>&nbsp;  IN const char* ActionURL,<BR>&nbsp;  IN const char* <!1><A HREF="Upnp_Discovery.html#DOC.1.4.2.11.5">ServiceType</A>,<BR>&nbsp;  IN const char* <!1><A HREF="Upnp_State_Var_Request.html#DOC.1.4.2.8.4">DevUDN</A>,<BR>&nbsp;  IN IXML_Document* Action,<BR>&nbsp;  OUT IXML_Document** RespNode )</H2><BLOCKQUOTE><B>UpnpSendAction</B> sends a message to change a state variable in a service.</BLOCKQUOTE>
+
+<A NAME="DOC.DOCU"></A>
+<HR>
+<H2>Documentation</H2>
+<BLOCKQUOTE><B>UpnpSendAction</B> sends a message to change a state variable
+in a service.  This is a synchronous call that does not return until the 
+action is complete.
+
+<P>Note that a positive return value indicates a SOAP-protocol error code.
+In this case,  the error description can be retrieved from <B>RespNode</B>.
+A negative return value indicates an SDK error.
+
+<P></BLOCKQUOTE>
+<DL><DT><DT><B>Parameters:</B><DD><B>Hnd</B> -   The handle of the control point 
+sending the action. 
+<BR><B>ActionURL</B> -   The action URL of the service. 
+<BR><B></B> - <!1><A HREF="Upnp_Discovery.html#DOC.1.4.2.11.5">ServiceType</A>  The type of the service. 
+<BR><B></B> - <!1><A HREF="Upnp_State_Var_Request.html#DOC.1.4.2.8.4">DevUDN</A>  This parameter is ignored and must be
+<TT>NULL</TT>. 
+<BR><B>Action</B> -   The DOM document for the action. 
+<BR><B>RespNode</B> -   The DOM document for the response 
+to the action.  The SDK allocates 
+this document and the caller needs to free 
+it.  <BR><DT><B>Returns:</B><DD>  [int] An integer representing one of the following:
+<UL>
+<LI> <TT>UPNP_E_SUCCESS</TT>: The operation completed successfully.
+<LI> <TT>UPNP_E_INVALID_HANDLE</TT>: The handle is not a valid control 
+point handle.
+<LI> <TT>UPNP_E_INVALID_URL</TT>: <B>ActionUrl</B> is not a valid URL.
+<LI> <TT>UPNP_E_INVALID_ACTION</TT>: This action is not valid.
+<LI> <TT>UPNP_E_INVALID_DEVICE</TT>: <B>DevUDN</B> is not a 
+valid device.
+<LI> <TT>UPNP_E_INVALID_PARAM</TT>: <B>ServiceType</B>, <B>Action</B>, 
+<B>ActionUrl</B>, or 
+<B>RespNode</B> is not a valid pointer.
+<LI> <TT>UPNP_E_OUTOF_MEMORY</TT>: Insufficient resources exist to 
+complete this operation.
+</UL>
+<BR><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<BR>
+This page was generated with the help of <A HREF="http://docpp.sourceforge.net">DOC++</A>.
+</BODY>
+</HTML>

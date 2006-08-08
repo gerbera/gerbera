@@ -1,0 +1,32 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+<HEAD>
+   <TITLE>EXPORT_SPEC int ixmlDocument_createDocumentEx</TITLE>
+   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2>EXPORT_SPEC int <A HREF="#DOC.DOCU">ixmlDocument_createDocumentEx</A></H2><H2>(IXML_Document** doc )</H2><BLOCKQUOTE>Creates a new empty <B>Document</B> node.</BLOCKQUOTE>
+
+<A NAME="DOC.DOCU"></A>
+<HR>
+<H2>Documentation</H2>
+<BLOCKQUOTE>Creates a new empty <B>Document</B> node.  The 
+<B>ixmlDocument_createDocumentEx</B> API differs from the <B>
+ixmlDocument_createDocument</B> API in that it returns an error code
+describing the reason for the failure rather than just <TT>NULL</TT>.
+
+<P></BLOCKQUOTE>
+<DL><DT><DT><B>Parameters:</B><DD><B>doc</B> -   Pointer to a <B>Document</B> where the 
+new object will be stored. <BR><DT><B>Returns:</B><DD>  [int] An integer representing one of the following:
+<UL>
+<LI> <TT>IXML_SUCCESS</TT>: The operation completed successfully.
+<LI> <TT>IXML_INSUFFICIENT_MEMORY</TT>: Not enough free memory exists 
+to complete this operation.
+</UL>
+<BR><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<BR>
+This page was generated with the help of <A HREF="http://docpp.sourceforge.net">DOC++</A>.
+</BODY>
+</HTML>

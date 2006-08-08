@@ -1,0 +1,28 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+<HEAD>
+   <TITLE>EXPORT_SPEC DOMString ixmlNode_getPrefix</TITLE>
+   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2>EXPORT_SPEC DOMString <A HREF="#DOC.DOCU">ixmlNode_getPrefix</A></H2><H2>(IXML_Node* nodeptr )</H2><BLOCKQUOTE>Retrieves the namespace prefix, if present.</BLOCKQUOTE>
+
+<A NAME="DOC.DOCU"></A>
+<HR>
+<H2>Documentation</H2>
+<BLOCKQUOTE>Retrieves the namespace prefix, if present.  The prefix is the name
+used as an alias for the namespace URI for this element.  Only 
+<B>Node</B>s of type <TT>eELEMENT_NODE</TT> or <TT>eATTRIBUTE_NODE</TT> can have 
+a prefix. <B>Node</B>s created through the <B>Document</B> interface will 
+only contain a prefix if created using <B>ixmlDocument_createElementNS</B>.
+
+<P></BLOCKQUOTE>
+<DL><DT><DT><B>Parameters:</B><DD><B>nodeptr</B> -   The <B>Node</B> from which to retrieve the prefix. <BR><DT><B>Returns:</B><DD>  [DOMString] A <B>DOMString</B> representing the namespace prefix 
+or <TT>NULL</TT>.
+<BR><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<BR>
+This page was generated with the help of <A HREF="http://docpp.sourceforge.net">DOC++</A>.
+</BODY>
+</HTML>

@@ -1,0 +1,32 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+<HEAD>
+   <TITLE>EXPORT_SPEC DOMString ixmlNodetoString</TITLE>
+   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2>EXPORT_SPEC DOMString <A HREF="#DOC.DOCU">ixmlNodetoString</A></H2><H2>(IXML_Node* doc )</H2><BLOCKQUOTE>Renders a <B>Node</B> and all sub-elements into an XML text representation.</BLOCKQUOTE>
+
+<A NAME="DOC.DOCU"></A>
+<HR>
+<H2>Documentation</H2>
+<BLOCKQUOTE>Renders a <B>Node</B> and all sub-elements into an XML text
+representation.  The caller is required to free the <B>DOMString</B>
+returned from this function using <B>ixmlFreeDOMString</B> when it
+is no longer required.
+
+<P>Note that this function can be used for any <B>Node</B>-derived
+interface.  The difference between <B>ixmlNodetoString</B> and
+<B>ixmlDocumenttoString</B> is <B>ixmlNodetoString</B> does not include
+the XML prolog, it only produces XML elements.
+
+<P></BLOCKQUOTE>
+<DL><DT><DT><B>Parameters:</B><DD><B>doc</B> -   The root of the <B>Node</B> tree to render to XML text. <BR><DT><B>Returns:</B><DD>  [DOMString] A <B>DOMString</B> with the XML text representation 
+of the DOM tree or <TT>NULL</TT> on an error.
+<BR><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<BR>
+This page was generated with the help of <A HREF="http://docpp.sourceforge.net">DOC++</A>.
+</BODY>
+</HTML>

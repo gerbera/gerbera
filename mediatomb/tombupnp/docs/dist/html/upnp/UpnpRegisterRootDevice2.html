@@ -1,0 +1,106 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+<HEAD>
+   <TITLE>EXPORT_SPEC int UpnpRegisterRootDevice2</TITLE>
+   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2>EXPORT_SPEC int <A HREF="#DOC.DOCU">UpnpRegisterRootDevice2</A></H2><H2>( IN <!1><A HREF="Upnp_DescType.html">Upnp_DescType</A> descriptionType,<BR>&nbsp;  IN const char* description,<BR>&nbsp;  IN size_t bufferLen,<BR>&nbsp;  IN int config_baseURL,<BR>&nbsp;  IN Upnp_FunPtr Fun,<BR>&nbsp;  IN const void* Cookie,<BR>&nbsp;  OUT <!1><A HREF="UpnpDevice_Handle.html">UpnpDevice_Handle</A>* Hnd )</H2><BLOCKQUOTE><B>UpnpRegisterRootDevice2</B> is similar to <B>UpnpRegisterRootDevice</B>, except that it also allows the description document to be specified as a  file or a memory buffer.</BLOCKQUOTE>
+
+<A NAME="DOC.DOCU"></A>
+<HR>
+<H2>Documentation</H2>
+<BLOCKQUOTE><B>UpnpRegisterRootDevice2</B> is similar to <B>UpnpRegisterRootDevice</B>,
+except that it also allows the description document to be specified as a 
+file or a memory buffer. The description can also be configured to have the
+correct IP and port address.
+
+<P>NOTE: For the configuration to be functional, the internal web server
+MUST be present. In addition, the web server MUST be activated
+(using <B>UpnpSetWebServerRootDir</B>) before calling this function.
+The only condition where the web server can be absent is if the 
+description document is specified as a URL and no configuration is 
+required (i.e. <TT>config_baseURL = 0</TT>.)
+
+<P><B>UpnpRegisterRootDevice2</B> is synchronous and does not generate
+any callbacks.  Callbacks can occur as soon as this function returns.
+
+<P>Examples of using different types of description documents:
+<PRE>
+&nbsp;&nbsp;&nbsp;&nbsp;1)&nbsp;Description&nbsp;specified&nbsp;as&nbsp;a&nbsp;URL:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;descriptionType&nbsp;==&nbsp;UPNPREG_URL_DESC
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;description&nbsp;is&nbsp;the&nbsp;URL
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bufferLen&nbsp;=&nbsp;0&nbsp;(ignored)
+&nbsp;&nbsp;&nbsp;&nbsp;2)&nbsp;Description&nbsp;specified&nbsp;as&nbsp;a&nbsp;file:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;descriptionType&nbsp;==&nbsp;UPNPREG_FILENAME_DESC
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;description&nbsp;is&nbsp;a&nbsp;filename
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bufferLen&nbsp;=&nbsp;0&nbsp;(ignored)
+&nbsp;&nbsp;&nbsp;&nbsp;3)&nbsp;Description&nbsp;specified&nbsp;as&nbsp;a&nbsp;memory&nbsp;buffer:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;descriptionType&nbsp;==&nbsp;UPNPREG_BUF_DESC
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;description&nbsp;is&nbsp;pointer&nbsp;to&nbsp;a&nbsp;memory&nbsp;buffer
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bufferLen&nbsp;==&nbsp;length&nbsp;of&nbsp;memory&nbsp;buffer
+&nbsp;&nbsp;&nbsp;&nbsp;</PRE>
+
+<P></BLOCKQUOTE>
+<DL><DT><DT><B>Parameters:</B><DD><B>descriptionType</B> -   The type of the description 
+document. 
+<BR><B>description</B> -   Treated as a URL, file name or 
+memory buffer depending on 
+description type. 
+<BR><B>bufferLen</B> -   The length of memory buffer if 
+passing a description in a buffer, 
+otherwise it is ignored. 
+<BR><B>config_baseURL</B> -   If nonzero, <TT>URLBase</TT> of 
+description document is 
+configured and the description 
+is served using the internal 
+web server. 
+<BR><B>Fun</B> -   Pointer to the callback function 
+for receiving asynchronous 
+events. 
+<BR><B>Cookie</B> -   Pointer to user data returned 
+with the callback function when 
+invoked. 
+<BR><B>Hnd</B> -   Pointer to a variable to store 
+the new device handle. <BR><DT><B>Returns:</B><DD>  [int] An integer representing one of the following:
+<UL>
+<LI> <TT>UPNP_E_SUCCESS</TT>: The operation completed successfully.
+<LI> <TT>UPNP_E_FINISH</TT>: The SDK is already terminated or 
+is not initialized.
+<LI> <TT>UPNP_E_INVALID_DESC</TT>: The description document is not 
+a valid device description.
+<LI> <TT>UPNP_E_INVALID_PARAM</TT>: Either <B>Callback</B> or <B>Hnd</B> 
+is not a valid pointer or <B>DescURL</B> is <TT>NULL</TT>.
+<LI> <TT>UPNP_E_NETWORK_ERROR</TT>: A network error occurred.
+<LI> <TT>UPNP_E_SOCKET_WRITE</TT>: An error or timeout occurred writing 
+to a socket.
+<LI> <TT>UPNP_E_SOCKET_READ</TT>: An error or timeout occurred reading 
+from a socket.
+<LI> <TT>UPNP_E_SOCKET_BIND</TT>: An error occurred binding a socket.
+<LI> <TT>UPNP_E_SOCKET_CONNECT</TT>: An error occurred connecting the 
+socket.
+<LI> <TT>UPNP_E_OUTOF_SOCKET</TT>: Too many sockets are currently 
+allocated.
+<LI> <TT>UPNP_E_OUTOF_MEMORY</TT>: There are insufficient resources to 
+register this root device.
+<LI> <TT>UPNP_E_URL_TOO_BIG</TT>: Length of the URL is bigger than the 
+internal buffer.
+<LI> <TT>UPNP_E_FILE_NOT_FOUND</TT>: The description file could not 
+be found.
+<LI> <TT>UPNP_E_FILE_READ_ERROR</TT>: An error occurred reading the 
+description file.
+<LI> <TT>UPNP_E_INVALID_URL</TT>: The URL to the description document 
+is invalid.
+<LI> <TT>UPNP_E_EXT_NOT_XML</TT>: The URL to the description document 
+or file should have a <TT>.xml</TT> extension.
+<LI> <TT>UPNP_E_NO_WEB_SERVER</TT>: The internal web server has been 
+compiled out; the SDK cannot configure itself from the 
+description document.
+</UL> 
+<BR><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<BR>
+This page was generated with the help of <A HREF="http://docpp.sourceforge.net">DOC++</A>.
+</BODY>
+</HTML>

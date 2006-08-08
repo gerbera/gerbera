@@ -1,0 +1,62 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+<HEAD>
+   <TITLE>EXPORT_SPEC int UpnpRegisterRootDevice</TITLE>
+   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2>EXPORT_SPEC int <A HREF="#DOC.DOCU">UpnpRegisterRootDevice</A></H2><H2>( IN const char* DescUrl,<BR>&nbsp;  IN Upnp_FunPtr Callback,<BR>&nbsp;  IN const void* Cookie,<BR>&nbsp;  OUT <!1><A HREF="UpnpDevice_Handle.html">UpnpDevice_Handle</A>* Hnd )</H2><BLOCKQUOTE><B>UpnpRegisterRootDevice</B> registers a device application with the SDK.</BLOCKQUOTE>
+
+<A NAME="DOC.DOCU"></A>
+<HR>
+<H2>Documentation</H2>
+<BLOCKQUOTE><B>UpnpRegisterRootDevice</B> registers a device application with
+the SDK.  A device application cannot make any other API
+calls until it registers using this function.  Device applications
+can also register as control points (see <B>UpnpRegisterClient</B>
+to get a control point handle to perform control point
+functionality).
+
+<P><B>UpnpRegisterRootDevice</B> is synchronous and does not generate
+any callbacks.  Callbacks can occur as soon as this function returns.
+
+<P></BLOCKQUOTE>
+<DL><DT><DT><B>Parameters:</B><DD><B>DescUrl</B> -   Pointer to a string containing the 
+description URL for this root device 
+instance. 
+<BR><B>Callback</B> -   Pointer to the callback function for 
+receiving asynchronous events. 
+<BR><B>Cookie</B> -   Pointer to user data returned with the 
+callback function when invoked. 
+<BR><B>Hnd</B> -   Pointer to a variable to store the 
+new device handle. <BR><DT><B>Returns:</B><DD>  [int] An integer representing one of the following:
+<UL>
+<LI> <TT>UPNP_E_SUCCESS</TT>: The operation completed successfully.
+<LI> <TT>UPNP_E_FINISH</TT>: The SDK is already terminated or 
+is not initialized. 
+<LI> <TT>UPNP_E_INVALID_DESC</TT>: The description document was not 
+a valid device description.
+<LI> <TT>UPNP_E_INVALID_URL</TT>: The URL for the description document 
+is not valid.
+<LI> <TT>UPNP_E_INVALID_PARAM</TT>: Either <B>Callback</B> or <B>Hnd</B> 
+is not a valid pointer or <B>DescURL</B> is <TT>NULL</TT>.
+<LI> <TT>UPNP_E_NETWORK_ERROR</TT>: A network error occurred.
+<LI> <TT>UPNP_E_SOCKET_WRITE</TT>: An error or timeout occurred writing 
+to a socket.
+<LI> <TT>UPNP_E_SOCKET_READ</TT>: An error or timeout occurred reading 
+from a socket.
+<LI> <TT>UPNP_E_SOCKET_BIND</TT>: An error occurred binding a socket.
+<LI> <TT>UPNP_E_SOCKET_CONNECT</TT>: An error occurred connecting the 
+socket.
+<LI> <TT>UPNP_E_OUTOF_SOCKET</TT>: Too many sockets are currently 
+allocated.
+<LI> <TT>UPNP_E_OUTOF_MEMORY</TT>: There are insufficient resources to 
+register this root device.
+</UL> 
+<BR><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<BR>
+This page was generated with the help of <A HREF="http://docpp.sourceforge.net">DOC++</A>.
+</BODY>
+</HTML>

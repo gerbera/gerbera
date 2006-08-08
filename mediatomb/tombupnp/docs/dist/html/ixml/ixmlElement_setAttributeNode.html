@@ -1,0 +1,40 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+<HEAD>
+   <TITLE>EXPORT_SPEC int ixmlElement_setAttributeNode</TITLE>
+   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2>EXPORT_SPEC int <A HREF="#DOC.DOCU">ixmlElement_setAttributeNode</A></H2><H2>(IXML_Element* element,<BR>&nbsp;  IXML_Attr* newAttr,<BR>&nbsp;  IXML_Attr** rtAttr )</H2><BLOCKQUOTE>Adds a new attribute node to an <B>Element</B>.</BLOCKQUOTE>
+
+<A NAME="DOC.DOCU"></A>
+<HR>
+<H2>Documentation</H2>
+<BLOCKQUOTE>Adds a new attribute node to an <B>Element</B>.  If an attribute already
+exists with <B>newAttr</B> as a name, it will be replaced with the
+new one and the old one will be returned in <B>rtAttr</B>.
+
+<P></BLOCKQUOTE>
+<DL><DT><DT><B>Parameters:</B><DD><B>element</B> -   The <B>Element</B> in which to add the new 
+attribute. 
+<BR><B>newAttr</B> -   The new <B>Attr</B> to add. 
+<BR><B>rtAttr</B> -   A pointer to an <B>Attr</B> where the old 
+<B>Attr</B> will be stored.  This will have  
+a <TT>NULL</TT> if no prior node 
+existed. <BR><DT><B>Returns:</B><DD>  [int] An integer representing one of the following:
+<UL>
+<LI> <TT>IXML_SUCCESS</TT>: The operation completed successfully.
+<LI> <TT>IXML_INVALID_PARAMETER</TT>: Either <B>element</B> or 
+<B>newAttr</B> is <TT>NULL</TT>.
+<LI> <TT>IXML_WRONG_DOCUMENT_ERR</TT>: <B>newAttr</B> does not belong 
+to the same one as <B>element</B>.
+<LI> <TT>IXML_INUSE_ATTRIBUTE_ERR</TT>: <B>newAttr</B> is already 
+an attribute of another <B>Element</B>.
+</UL>
+<BR><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<BR>
+This page was generated with the help of <A HREF="http://docpp.sourceforge.net">DOC++</A>.
+</BODY>
+</HTML>

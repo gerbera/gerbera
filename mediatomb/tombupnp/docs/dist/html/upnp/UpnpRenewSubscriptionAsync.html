@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+<HEAD>
+   <TITLE>EXPORT_SPEC int UpnpRenewSubscriptionAsync</TITLE>
+   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2>EXPORT_SPEC int <A HREF="#DOC.DOCU">UpnpRenewSubscriptionAsync</A></H2><H2>( IN <!1><A HREF="UpnpClient_Handle.html">UpnpClient_Handle</A> Hnd,<BR>&nbsp;  IN int <!1><A HREF="Upnp_Event_Subscribe.html#DOC.1.4.2.12.4">TimeOut</A>,<BR>&nbsp;  IN Upnp_SID SubsId,<BR>&nbsp;  IN Upnp_FunPtr Fun,<BR>&nbsp;  IN const void* Cookie )</H2><BLOCKQUOTE><B>UpnpRenewSubscriptionAsync</B> renews a subscription that is about to expire, generating a callback when the operation is complete.</BLOCKQUOTE>
+
+<A NAME="DOC.DOCU"></A>
+<HR>
+<H2>Documentation</H2>
+<BLOCKQUOTE><B>UpnpRenewSubscriptionAsync</B> renews a subscription that is about
+to expire, generating a callback when the operation is complete.
+
+<P>Note that many of the error codes for this function are returned in
+the <B>Upnp_Event_Subscribe</B> structure.  In those cases, the function
+returns <TT>UPNP_E_SUCCESS</TT> and the appropriate error code will
+be in the <B>Upnp_Event_Subscribe.ErrCode</B> field in the <B>Event</B>
+structure passed to the callback.
+
+<P></BLOCKQUOTE>
+<DL><DT><DT><B>Parameters:</B><DD><B>Hnd</B> -   The handle of the control point that 
+is renewing the subscription. 
+<BR><B></B> - <!1><A HREF="Upnp_Event_Subscribe.html#DOC.1.4.2.12.4">TimeOut</A>  The requested subscription time.  The 
+actual timeout value is returned when 
+the callback function is called. 
+<BR><B>SubsId</B> -   The ID for the subscription to renew. 
+<BR><B>Fun</B> -   Pointer to a callback function to be 
+invoked when the renewal is complete. 
+<BR><B>Cookie</B> -   Pointer to user data passed 
+to the callback function when invoked. <BR><DT><B>Returns:</B><DD>  [int] An integer representing one of the following:
+<UL>
+<LI> <TT>UPNP_E_SUCCESS</TT>: The operation completed successfully.
+<LI> <TT>UPNP_E_INVALID_HANDLE</TT>: The handle is not a valid control 
+point handle.
+<LI> <TT>UPNP_E_INVALID_SID</TT>: The <B>SubsId</B> is not a valid 
+subscription ID.
+<LI> <TT>UPNP_E_INVALID_PARAM</TT>: Either <B>Fun</B> is not a valid 
+callback function pointer or <B>Timeout</B> is less than zero 
+but is not <TT>UPNP_INFINITE</TT>.
+<LI> <TT>UPNP_E_OUTOF_MEMORY</TT>: Insufficient resources exist to 
+complete this operation.
+<LI> <TT>UPNP_E_NETWORK_ERROR</TT>: A network error occured (returned in 
+the <B>Upnp_Event_Subscribe.ErrCode</B> field as part of the 
+callback).
+<LI> <TT>UPNP_E_SOCKET_WRITE</TT>: An error or timeout occurred writing 
+to a socket (returned in the <B>Upnp_Event_Subscribe.ErrCode</B> 
+field as part of the callback).
+<LI> <TT>UPNP_E_SOCKET_READ</TT>: An error or timeout occurred reading  
+from a socket (returned in the 
+<B>Upnp_Event_Subscribe.ErrCode</B> field as part of the 
+callback).
+<LI> <TT>UPNP_E_SOCKET_BIND</TT>: An error occurred binding the socket 
+(returned in the <B>Upnp_Event_Subscribe.ErrCode</B> field as 
+part of the callback).
+<LI> <TT>UPNP_E_SOCKET_CONNECT</TT>: An error occurred connecting to 
+<B>PublisherUrl</B> (returned in the <B>
+Upnp_Event_Subscribe.ErrCode</B> field as part of the callback).
+<LI> <TT>UPNP_E_OUTOF_SOCKET</TT>: An error occurred creating socket (
+returned in the <B>Upnp_Event_Subscribe.ErrCode</B> field as 
+part of the callback).
+<LI> <TT>UPNP_E_BAD_RESPONSE</TT>: An error occurred in response from 
+the publisher (returned in the <B>
+Upnp_Event_Subscribe.ErrCode</B> field as part of the callback).
+<LI> <TT>UPNP_E_SUBSCRIBE_UNACCEPTED</TT>: The publisher refused 
+the subscription request (returned in the <B>
+Upnp_Event_Subscribe.ErrCode</B> field as part of the callback).
+</UL>
+<BR><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<BR>
+This page was generated with the help of <A HREF="http://docpp.sourceforge.net">DOC++</A>.
+</BODY>
+</HTML>

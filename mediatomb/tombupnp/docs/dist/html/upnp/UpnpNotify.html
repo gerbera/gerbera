@@ -1,0 +1,50 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+<HEAD>
+   <TITLE>EXPORT_SPEC int UpnpNotify</TITLE>
+   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2>EXPORT_SPEC int <A HREF="#DOC.DOCU">UpnpNotify</A></H2><H2>( IN <!1><A HREF="UpnpDevice_Handle.html">UpnpDevice_Handle</A>,<BR>&nbsp;  IN const char* DevID,<BR>&nbsp;  IN const char* ServID,<BR>&nbsp;  IN const char** VarName,<BR>&nbsp;  IN const char** NewVal,<BR>&nbsp;  IN int cVariables )</H2><BLOCKQUOTE><B>UpnpNotify</B> sends out an event change notification to all control points subscribed to a particular service.</BLOCKQUOTE>
+
+<A NAME="DOC.DOCU"></A>
+<HR>
+<H2>Documentation</H2>
+<BLOCKQUOTE><B>UpnpNotify</B> sends out an event change notification to all
+control points subscribed to a particular service.  This function is
+synchronous and generates no callbacks.
+
+<P><B>UpnpNotify</B> may be called during a callback function to send out
+a notification.
+
+<P></BLOCKQUOTE>
+<DL><DT><DT><B>Parameters:</B><DD><B></B> - <!1><A HREF="UpnpDevice_Handle.html">UpnpDevice_Handle</A>  The handle to the device sending the event. 
+<BR><B>DevID</B> -   The device ID of the subdevice of the service 
+generating the event. 
+<BR><B>ServID</B> -   The unique identifier of the service 
+generating the event. 
+<BR><B>VarName</B> -   Pointer to an array of variables that 
+have changed. 
+<BR><B>NewVal</B> -   Pointer to an array of new values for 
+those variables. 
+<BR><B>cVariables</B> -   The count of variables included in this 
+notification. <BR><DT><B>Returns:</B><DD>  [int] An integer representing one of the following:
+<UL>
+<LI> <TT>UPNP_E_SUCCESS</TT>: The operation completed successfully.
+<LI> <TT>UPNP_E_INVALID_HANDLE</TT>: The handle is not a valid device 
+handle.
+<LI> <TT>UPNP_E_INVALID_SERVICE</TT>: The <B>DevId</B>/<B>ServId</B> 
+pair refers to an invalid service.
+<LI> <TT>UPNP_E_INVALID_PARAM</TT>: Either <B>VarName</B>, <B>NewVal</B>, 
+<B>DevID</B>, or <B>ServID</B> is not a valid pointer or 
+<B>cVariables</B> is less than zero.
+<LI> <TT>UPNP_E_OUTOF_MEMORY</TT>: Insufficient resources exist to 
+complete this operation.
+</UL>
+<BR><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<BR>
+This page was generated with the help of <A HREF="http://docpp.sourceforge.net">DOC++</A>.
+</BODY>
+</HTML>

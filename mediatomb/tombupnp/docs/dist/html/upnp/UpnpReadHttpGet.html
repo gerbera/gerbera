@@ -1,0 +1,45 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+<HEAD>
+   <TITLE>EXPORT_SPEC int UpnpReadHttpGet</TITLE>
+   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2>EXPORT_SPEC int <A HREF="#DOC.DOCU">UpnpReadHttpGet</A></H2><H2>( IN void* handle,<BR>&nbsp;  IN OUT char* buf,<BR>&nbsp;  IN OUT unsigned int* size,<BR>&nbsp;  IN int timeout )</H2><BLOCKQUOTE><B>UpnpReadHttpGet</B> gets specified number of bytes from a file  specified in a URL.</BLOCKQUOTE>
+
+<A NAME="DOC.DOCU"></A>
+<HR>
+<H2>Documentation</H2>
+<BLOCKQUOTE><B>UpnpReadHttpGet</B> gets specified number of bytes from a file 
+specified in a URL. 
+
+<P></BLOCKQUOTE>
+<DL><DT><DT><B>Parameters:</B><DD><B>handle</B> -   The token created by the call to 
+<B><!1><A HREF="UpnpOpenHttpGet.html">UpnpOpenHttpGet</A></B>. 
+<BR><B>buf</B> -   The buffer to store the read item. 
+<BR><B>size</B> -   The size of the buffer to be read. 
+<BR><B>timeout</B> -   The time out value sent with the 
+request during which a response is 
+expected from the server, failing 
+which, an error is reported back to 
+the user. <BR><DT><B>Returns:</B><DD>  [int] An integer representing one of the following:
+<UL>
+<LI> <TT>UPNP_E_SUCCESS</TT>: The operation completed successfully.
+<LI> <TT>UPNP_E_INVALID_PARAM</TT>: Either <B>handle</B>, <B>buf</B> 
+or <B>size</B> is not a valid pointer.
+<LI> <TT>UPNP_E_BAD_RESPONSE</TT>: A bad response was received from the 
+remote server.
+<LI> <TT>UPNP_E_BAD_HTTPMSG</TT>: Either the request or response was in 
+the incorrect format.
+<LI> <TT>UPNP_E_CANCELED</TT>: another thread called UpnpCancelHttpGet.
+</UL>
+Note: In case of return values, the status code parameter of the passed 
+in handle value may provide additional information on the return 
+value.
+<BR><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<BR>
+This page was generated with the help of <A HREF="http://docpp.sourceforge.net">DOC++</A>.
+</BODY>
+</HTML>

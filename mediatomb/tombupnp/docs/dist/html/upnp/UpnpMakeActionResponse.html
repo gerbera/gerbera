@@ -1,0 +1,30 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+<HEAD>
+   <TITLE>EXPORT_SPEC IXML_Document* UpnpMakeActionResponse</TITLE>
+   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2>EXPORT_SPEC IXML_Document* <A HREF="#DOC.DOCU">UpnpMakeActionResponse</A></H2><H2>( IN const char*  <!1><A HREF="Upnp_Action_Request.html#DOC.1.4.2.7.4">ActionName</A>,<BR>&nbsp;  IN const char*  ServType,<BR>&nbsp;  IN int NumArg,<BR>&nbsp;  IN const char*  Arg,<BR>&nbsp;  IN ...  )</H2><BLOCKQUOTE><B>UpnpMakeActionResponse</B> creates an action response packet based  on its output parameters (status variable name and value pair).</BLOCKQUOTE>
+
+<A NAME="DOC.DOCU"></A>
+<HR>
+<H2>Documentation</H2>
+<BLOCKQUOTE><B>UpnpMakeActionResponse</B> creates an action response packet based 
+on its output parameters (status variable name and value pair). Any  
+number of input parameters can be passed to this function but every output
+variable name should have a matching value argument. 
+
+<P></BLOCKQUOTE>
+<DL><DT><DT><B>Parameters:</B><DD><B></B> - <!1><A HREF="Upnp_Action_Request.html#DOC.1.4.2.7.4">ActionName</A>  The action name. 
+<BR><B>ServType</B> -   The service type.  
+<BR><B>NumArg</B> -   The number of argument pairs passed. 
+<BR><B>Arg</B> -   The status variable name and value pair. <BR><DT><B>Returns:</B><DD>  [IXML_Document*] The action node of <B>Upnp_Document</B> type or 
+<TT>NULL</TT> if the operation failed.
+<BR><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<BR>
+This page was generated with the help of <A HREF="http://docpp.sourceforge.net">DOC++</A>.
+</BODY>
+</HTML>

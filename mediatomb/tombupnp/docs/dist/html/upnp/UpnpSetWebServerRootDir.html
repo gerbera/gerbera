@@ -1,0 +1,38 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+<HEAD>
+   <TITLE>EXPORT_SPEC int UpnpSetWebServerRootDir</TITLE>
+   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2>EXPORT_SPEC int <A HREF="#DOC.DOCU">UpnpSetWebServerRootDir</A></H2><H2>( IN const char* rootDir )</H2><BLOCKQUOTE><B>UpnpSetWebServerRootDir</B> sets the document root directory for the internal web server.</BLOCKQUOTE>
+
+<A NAME="DOC.DOCU"></A>
+<HR>
+<H2>Documentation</H2>
+<BLOCKQUOTE><B>UpnpSetWebServerRootDir</B> sets the document root directory for
+the internal web server. This directory is considered the
+root directory (i.e. "/") of the web server.
+
+<P>This function also activates or deactivates the web server.
+To disable the web server, pass <TT>NULL</TT> for <B>rootDir</B>; to 
+activate, pass a valid directory string.
+
+<P>Note that this function is not available when the web server is not
+compiled into the SDK.
+
+<P></BLOCKQUOTE>
+<DL><DT><DT><B>Parameters:</B><DD><B>rootDir</B> -   Path of the root directory of the web 
+server. <BR><DT><B>Returns:</B><DD>  [int] An integer representing one of the following:
+<UL>
+<LI> <TT>UPPN_E_SUCCESS</TT>: The operation completed successfully.
+<LI> <TT>UPNP_E_INVALID_ARGUMENT</TT>: <B>rootDir</B> is an invalid 
+directory.
+</UL>
+<BR><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<BR>
+This page was generated with the help of <A HREF="http://docpp.sourceforge.net">DOC++</A>.
+</BODY>
+</HTML>

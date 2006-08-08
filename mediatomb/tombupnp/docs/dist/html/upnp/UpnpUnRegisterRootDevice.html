@@ -1,0 +1,37 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+<HEAD>
+   <TITLE>EXPORT_SPEC int UpnpUnRegisterRootDevice</TITLE>
+   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2>EXPORT_SPEC int <A HREF="#DOC.DOCU">UpnpUnRegisterRootDevice</A></H2><H2>( IN <!1><A HREF="UpnpDevice_Handle.html">UpnpDevice_Handle</A> )</H2><BLOCKQUOTE>Unregisters a root device registered with <B>UpnpRegisterRootDevice</B> or <B>UpnpRegisterRootDevice2</B>.</BLOCKQUOTE>
+
+<A NAME="DOC.DOCU"></A>
+<HR>
+<H2>Documentation</H2>
+<BLOCKQUOTE>Unregisters a root device registered with <B>UpnpRegisterRootDevice</B> or
+<B>UpnpRegisterRootDevice2</B>. After this call, the 
+<B>UpnpDevice_Handle</B> is no longer valid. For all advertisements that 
+have not yet expired, the SDK sends a device unavailable message 
+automatically.
+
+<P><B>UpnpUnRegisterRootDevice</B> is a synchronous call and generates no
+callbacks.  Once this call returns, the SDK will no longer 
+generate callbacks to the application.
+
+<P></BLOCKQUOTE>
+<DL><DT><DT><B>Parameters:</B><DD><B></B> - <!1><A HREF="UpnpDevice_Handle.html">UpnpDevice_Handle</A>  The handle of the root device instance to 
+unregister. <BR><DT><B>Returns:</B><DD>  [int] An integer representing one of the following:
+<UL>
+<LI> <TT>UPNP_E_SUCCESS</TT>: The operation completed successfully.
+<LI> <TT>UPNP_E_INVALID_HANDLE</TT>: The handle is not a valid  
+device handle.
+</UL>
+<BR><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<BR>
+This page was generated with the help of <A HREF="http://docpp.sourceforge.net">DOC++</A>.
+</BODY>
+</HTML>

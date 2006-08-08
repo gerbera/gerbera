@@ -1,0 +1,50 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+<HEAD>
+   <TITLE>EXPORT_SPEC int UpnpSearchAsync</TITLE>
+   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2>EXPORT_SPEC int <A HREF="#DOC.DOCU">UpnpSearchAsync</A></H2><H2>( IN <!1><A HREF="UpnpClient_Handle.html">UpnpClient_Handle</A> Hnd,<BR>&nbsp;  IN int Mx,<BR>&nbsp;  IN const char* Target,<BR>&nbsp;  IN const void* Cookie )</H2><BLOCKQUOTE><B>UpnpSearchAsync</B> searches for devices matching the given search target.</BLOCKQUOTE>
+
+<A NAME="DOC.DOCU"></A>
+<HR>
+<H2>Documentation</H2>
+<BLOCKQUOTE><B>UpnpSearchAsync</B> searches for devices matching the given
+search target.  The function returns immediately and the SDK 
+calls the default callback function, registered during the 
+<B>UpnpRegisterClient</B> call, for each matching root device,
+device, or service.  The application specifies the search type by the 
+<B>Target</B> parameter.  
+
+<P>Note that there is no way for the SDK to distinguish which client
+instance issued a particular search.  Therefore, the client can get
+search callbacks that do not match the original criteria of the search.
+Also, the application will receive multiple callbacks for each search.
+
+<P></BLOCKQUOTE>
+<DL><DT><DT><B>Parameters:</B><DD><B>Hnd</B> -   The handle of the client performing 
+the search. 
+<BR><B>Mx</B> -   The time, in seconds, to wait for 
+responses. If the time is greater 
+than <TT>MAX_SEARCH_TIME</TT> then the time is 
+set to <TT>MAX_SEARCH_TIME</TT>. If the time is 
+less than <TT>MIN_SEARCH_TIME</TT> then the 
+time is set to <TT>MIN_SEARCH_TIME</TT>. 
+<BR><B>Target</B> -   The search target as defined in the UPnP 
+Device Architecture v1.0 specification. 
+<BR><B>Cookie</B> -   The user data to pass when the callback 
+function is invoked. <BR><DT><B>Returns:</B><DD>  [int] An integer representing one of the following:
+<UL>
+<LI> <TT>UPNP_E_SUCCESS</TT>: The operation completed successfully.
+<LI> <TT>UPNP_E_INVALID_HANDLE</TT>: The handle is not a valid control 
+point handle.
+<LI> <TT>UPNP_E_INVALID_PARAM</TT>: <B>Target</B> is <TT>NULL</TT>.
+</UL> 
+<BR><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<BR>
+This page was generated with the help of <A HREF="http://docpp.sourceforge.net">DOC++</A>.
+</BODY>
+</HTML>

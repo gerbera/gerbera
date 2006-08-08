@@ -1,0 +1,29 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+<HEAD>
+   <TITLE>EXPORT_SPEC const DOMString ixmlNode_getLocalName</TITLE>
+   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2>EXPORT_SPEC const DOMString <A HREF="#DOC.DOCU">ixmlNode_getLocalName</A></H2><H2>(IXML_Node* nodeptr )</H2><BLOCKQUOTE>Retrieves the local name of a <B>Node</B>, if present.</BLOCKQUOTE>
+
+<A NAME="DOC.DOCU"></A>
+<HR>
+<H2>Documentation</H2>
+<BLOCKQUOTE>Retrieves the local name of a <B>Node</B>, if present.  The local name is
+the tag name without the namespace prefix.  Only <B>Node</B>s of type
+<TT>eELEMENT_NODE</TT> or <TT>eATTRIBUTE_NODE</TT> can have a local name.
+{\Bf Node}s created through the <B>Document</B> interface will only 
+contain a local name if created using <B>ixmlDocument_createElementNS</B>.
+
+<P></BLOCKQUOTE>
+<DL><DT><DT><B>Parameters:</B><DD><B>nodeptr</B> -   The <B>Node</B> from which to retrieve the local 
+name. <BR><DT><B>Returns:</B><DD>  [const DOMString] A <B>DOMString</B> representing the local name 
+of the <B>Element</B> or <TT>NULL</TT>.
+<BR><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<BR>
+This page was generated with the help of <A HREF="http://docpp.sourceforge.net">DOC++</A>.
+</BODY>
+</HTML>

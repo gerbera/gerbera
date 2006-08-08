@@ -1,0 +1,36 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+<HEAD>
+   <TITLE>EXPORT_SPEC int ixmlNode_appendChild</TITLE>
+   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2>EXPORT_SPEC int <A HREF="#DOC.DOCU">ixmlNode_appendChild</A></H2><H2>(IXML_Node* nodeptr,<BR>&nbsp;  IXML_Node* newChild )</H2><BLOCKQUOTE>Appends a child <B>Node</B> to the list of children of a <B>Node</B>.</BLOCKQUOTE>
+
+<A NAME="DOC.DOCU"></A>
+<HR>
+<H2>Documentation</H2>
+<BLOCKQUOTE>Appends a child <B>Node</B> to the list of children of a <B>Node</B>.  If
+<B>newChild</B> is already in the tree, it is removed first.
+
+<P></BLOCKQUOTE>
+<DL><DT><DT><B>Parameters:</B><DD><B>nodeptr</B> -   The <B>Node</B> in which to append the new child. 
+<BR><B>newChild</B> -   The new child to append. <BR><DT><B>Returns:</B><DD>  [int] An integer representing one of the following:
+<UL>
+<LI> <TT>IXML_SUCCESS</TT>: The operation completed successfully.
+<LI> <TT>IXML_INVALID_PARAMETER</TT>: Either <B>nodeptr</B> or 
+<B>newChild</B> is <TT>NULL</TT>.
+<LI> <TT>IXML_HIERARCHY_REQUEST_ERR</TT>: <B>newChild</B> is of a type 
+that cannot be added as a child of <B>nodeptr</B> or 
+<B>newChild</B> is an ancestor of <B>nodeptr</B>.
+<LI> <TT>IXML_WRONG_DOCUMENT_ERR</TT>: <B>newChild</B> was created from 
+a different document than <B>nodeptr</B>.
+<LI> <TT>IXML_NO_MODIFICATION_ALLOWED_ERR</TT>: <B>nodeptr</B> is a 
+read-only <B>Node</B>.
+<BR><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<BR>
+This page was generated with the help of <A HREF="http://docpp.sourceforge.net">DOC++</A>.
+</BODY>
+</HTML>

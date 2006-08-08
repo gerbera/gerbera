@@ -1,0 +1,49 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+<HEAD>
+   <TITLE>EXPORT_SPEC int ixmlNode_insertBefore</TITLE>
+   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2>EXPORT_SPEC int <A HREF="#DOC.DOCU">ixmlNode_insertBefore</A></H2><H2>(IXML_Node* nodeptr,<BR>&nbsp;  IXML_Node* newChild,<BR>&nbsp;  IXML_Node* refChild )</H2><BLOCKQUOTE>Inserts a new child <B>Node</B> before the existing child <B>Node</B>.</BLOCKQUOTE>
+
+<A NAME="DOC.DOCU"></A>
+<HR>
+<H2>Documentation</H2>
+<BLOCKQUOTE>Inserts a new child <B>Node</B> before the existing child <B>Node</B>.  
+<B>refChild</B> can be <TT>NULL</TT>, which inserts <B>newChild</B> at the
+end of the list of children.  Note that the <B>Node</B> (or <B>Node</B>s) 
+in <B>newChild</B> must already be owned by the owner document (or have no
+owner at all) of <B>nodeptr</B> for insertion.  If not, the <B>Node</B> 
+(or <B>Node</B>s) must be imported into the document using 
+<B>ixmlDocument_importNode</B>.  If <B>newChild</B> is already in the tree,
+it is removed first.
+
+<P></BLOCKQUOTE>
+<DL><DT><DT><B>Parameters:</B><DD><B>nodeptr</B> -   The parent of the <B>Node</B> before which to 
+insert the new child. 
+<BR><B>newChild</B> -   The <B>Node</B> to insert into the tree. 
+<BR><B>refChild</B> -   The reference child where the new <B>Node</B> 
+should be inserted. The new <B>Node</B> will
+appear directly before the reference child. <BR><DT><B>Returns:</B><DD>  [int] An integer representing one of the following:
+<UL>
+<LI> <TT>IXML_SUCCESS</TT>: The operation completed successfully.
+<LI> <TT>IXML_INVALID_PARAMETER</TT>: Either <B>nodeptr</B> or 
+<B>newChild</B> is <TT>NULL</TT>.
+<LI> <TT>IXML_HIERARCHY_REQUEST_ERR</TT>: The type of the <B>Node</B> 
+does not allow children of the type of <B>newChild</B>.
+<LI> <TT>IXML_WRONG_DOCUMENT_ERR</TT>: <B>newChild</B> has an owner 
+document that does not match the owner of <B>nodeptr</B>.
+<LI> <TT>IXML_NO_MODIFICATION_ALLOWED_ERR</TT>: <B>nodeptr</B> is 
+read-only or the parent of the <B>Node</B> being inserted is 
+read-only.
+<LI> <TT>IXML_NOT_FOUND_ERR</TT>: <B>refChild</B> is not a child of 
+<B>nodeptr</B>.
+</UL>
+<BR><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<BR>
+This page was generated with the help of <A HREF="http://docpp.sourceforge.net">DOC++</A>.
+</BODY>
+</HTML>

@@ -1,0 +1,38 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+<HEAD>
+   <TITLE>EXPORT_SPEC int ixmlDocument_createAttributeEx</TITLE>
+   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2>EXPORT_SPEC int <A HREF="#DOC.DOCU">ixmlDocument_createAttributeEx</A></H2><H2>(IXML_Document* doc,<BR>&nbsp;  char* name,<BR>&nbsp;  IXML_Attr** attrNode )</H2><BLOCKQUOTE>Creates a new <B>Attr</B> node with the given name.</BLOCKQUOTE>
+
+<A NAME="DOC.DOCU"></A>
+<HR>
+<H2>Documentation</H2>
+<BLOCKQUOTE>Creates a new <B>Attr</B> node with the given name.  
+
+<P>The <B>ixmlDocument_createAttributeEx</B> API differs from the <B>
+ixmlDocument_createAttribute</B> API in that it returns an error code
+describing the reason for failure rather than just <TT>NULL</TT>.
+
+<P></BLOCKQUOTE>
+<DL><DT><DT><B>Parameters:</B><DD><B>doc</B> -   The owner <B>Document</B> of the new 
+node. 
+<BR><B>name</B> -   The name of the new attribute. 
+<BR><B>attrNode</B> -   A pointer to a <B>Attr</B> where the new 
+object will be stored. <BR><DT><B>Returns:</B><DD>  [int] An integer representing one of the following:
+<UL>
+<LI> <TT>IXML_SUCCESS</TT>: The operation completed successfully.
+<LI> <TT>IXML_INVALID_PARAMETER</TT>: Either <B>doc</B> or <B>name</B> 
+is <TT>NULL</TT>.
+<LI> <TT>IXML_INSUFFICIENT_MEMORY</TT>: Not enough free memory exists 
+to complete this operation.
+</UL>
+<BR><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<BR>
+This page was generated with the help of <A HREF="http://docpp.sourceforge.net">DOC++</A>.
+</BODY>
+</HTML>

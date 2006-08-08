@@ -1,0 +1,55 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+<HEAD>
+   <TITLE>EXPORT_SPEC int UpnpAcceptSubscription</TITLE>
+   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2>EXPORT_SPEC int <A HREF="#DOC.DOCU">UpnpAcceptSubscription</A></H2><H2>( IN <!1><A HREF="UpnpDevice_Handle.html">UpnpDevice_Handle</A> Hnd,<BR>&nbsp;  IN const char* DevID,<BR>&nbsp;  IN const char* ServID,<BR>&nbsp;  IN const char** VarName,<BR>&nbsp;  IN const char** NewVal,<BR>&nbsp;  IN int cVariables,<BR>&nbsp;  IN Upnp_SID SubsId )</H2><BLOCKQUOTE><B>UpnpAcceptSubscription</B> accepts a subscription request and sends out the current state of the eventable variables for a service.</BLOCKQUOTE>
+
+<A NAME="DOC.DOCU"></A>
+<HR>
+<H2>Documentation</H2>
+<BLOCKQUOTE><B>UpnpAcceptSubscription</B> accepts a subscription request and sends
+out the current state of the eventable variables for a service.  
+The device application should call this function when it receives a 
+<TT>UPNP_EVENT_SUBSCRIPTION_REQUEST</TT> callback. This function is 
+synchronous and generates no callbacks.
+
+<P><B>UpnpAcceptSubscription</B> can be called during the execution of 
+a callback function.
+
+<P></BLOCKQUOTE>
+<DL><DT><DT><B>Parameters:</B><DD><B>Hnd</B> -   The handle of the device. 
+<BR><B>DevID</B> -   The device ID of the subdevice of the 
+service generating the event. 
+<BR><B>ServID</B> -   The unique service identifier of the service 
+generating the event. 
+<BR><B>VarName</B> -   Pointer to an array of event variables. 
+<BR><B>NewVal</B> -   Pointer to an array of values for 
+the event variables. 
+<BR><B>cVariables</B> -   The number of event variables in 
+<B>VarName</B>. 
+<BR><B>SubsId</B> -   The subscription ID of the newly 
+registered control point. <BR><DT><B>Returns:</B><DD>  [int] An integer representing one of the following:
+<UL>
+<LI> <TT>UPNP_E_SUCCESS</TT>: The operation completed successfully.
+<LI> <TT>UPNP_E_INVALID_HANDLE</TT>: The handle is not a valid device 
+handle.
+<LI> <TT>UPNP_E_INVALID_SERVICE</TT>: The <B>DevId</B>/<B>ServId</B> 
+pair refers to an invalid service. 
+<LI> <TT>UPNP_E_INVALID_SID</TT>: The specified subscription ID is not 
+valid.
+<LI> <TT>UPNP_E_INVALID_PARAM</TT>: Either <B>VarName</B>, 
+<B>NewVal</B>, <B>DevID</B>, or <B>ServID</B> is not a valid 
+pointer or <B>cVariables</B> is less than zero.
+<LI> <TT>UPNP_E_OUTOF_MEMORY</TT>: Insufficient resources exist to 
+complete this operation.
+</UL>
+<BR><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<BR>
+This page was generated with the help of <A HREF="http://docpp.sourceforge.net">DOC++</A>.
+</BODY>
+</HTML>
