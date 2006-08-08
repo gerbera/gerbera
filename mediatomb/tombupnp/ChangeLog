@@ -7,10 +7,7 @@
     * upnp/src/genlib/net/http/webserver.c: added .css to text/css
       mimetype mapping to the internal webserver
 
-    * added largefile support, api change was requried (see below)
-    * upnp/inc/upnp.h: File_Info structure had to be adapted for largefile
-      support (it was no longer possible to indicate unknown filesize with
-      a negative value, so a new variable was introduced)
+    * added largefile support
 
     * sock.c: reverted a change regarding SIGPIPE, unhandled signal
       when HTTP transfer was cancelled by the client.
