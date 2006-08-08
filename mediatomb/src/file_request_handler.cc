@@ -58,8 +58,8 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     Ref<Dictionary> dict(new Dictionary());
     dict->decode(parameters);
 
-    //log_debug(("full url (filename): %s, url_path: %s, parameters: %s\n",
-    //           filename, url_path.c_str(), parameters.c_str()));
+    log_debug(("full url (filename): %s, url_path: %s, parameters: %s\n",
+               filename, url_path.c_str(), parameters.c_str()));
     
     String objID = dict->get(_("object_id"));
     if (objID == nil)
@@ -183,7 +183,8 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
         mimeType = item->getMimeType();
         info->file_length = statbuf.st_size;
         info->is_file_length_known = 1;
-        log_info(("FileRequestHandler: get_info: file_length: %lld\n", statbuf.st_size));
+        //log_debug(("sizeof off_t %d, statbuf.st_size %d\n", sizeof(off_t), sizeof(statbuf.st_size)));
+        //log_info(("FileRequestHandler: get_info: file_length: " LARGEFILE_SPRINTF "\n", statbuf.st_size));
     }
         
     info->last_modified = statbuf.st_mtime;

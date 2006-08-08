@@ -5,15 +5,6 @@ _DIST_FILES = \
 ./index.html \
 ./js/prof.js \
 ./js/rollover.js \
-./jssp/browse.jssp \
-./jssp/browse_test.jssp \
-./jssp/head.jssp \
-./jssp/include \
-./jssp/include/tools.jssp \
-./jssp/index.jssp \
-./jssp/items.jssp \
-./jssp/login.jssp \
-./jssp/tree.jssp \
 ./js/tools.js \
 ./js/tree.js \
 ./main.css 
