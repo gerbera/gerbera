@@ -195,6 +195,9 @@ static UpnpWebFileHandle web_open(IN const char *filename,
 static int web_read(IN UpnpWebFileHandle f, OUT char *buf, 
                     IN size_t length)
 {
+    if (Server::getInstance()->getShutdownStatus())
+        return -1;
+
     IOHandler *handler = (IOHandler *)f;
     return handler->read(buf, length);
 }

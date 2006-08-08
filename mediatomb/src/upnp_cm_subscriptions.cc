@@ -52,7 +52,7 @@ void ConnectionManagerService::process_subscription_request(zmm::Ref<Subscriptio
         throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, _("Could not convert property set to ixml"));
     }
 
-    UpnpAcceptSubscriptionExt(server->getDeviceHandle(),
+    UpnpAcceptSubscriptionExt(Server::getInstance()->getDeviceHandle(),
             ConfigManager::getInstance()->getOption(_("/server/udn")).c_str(),
             serviceID.c_str(), event, request->getSubscriptionID().c_str());
 
@@ -80,7 +80,7 @@ void ConnectionManagerService::subscription_update(String sourceProtocol_CSV)
 
     }
 
-    UpnpNotifyExt(server->getDeviceHandle(),
+    UpnpNotifyExt(Server::getInstance()->getDeviceHandle(),
             ConfigManager::getInstance()->getOption(_("/server/udn")).c_str(),
             serviceID.c_str(), event);
 

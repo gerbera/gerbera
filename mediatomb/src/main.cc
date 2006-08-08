@@ -78,22 +78,6 @@ int main(int argc, char **argv, char **envp)
     String group;
     String pid_file;
 
-    // before we do anything we will check if MediaTomb and the
-    // UPnP SDK were both compiled with largefile support.
-    // I had at least two cases where AC_SYS_LARGEFILE enabled
-    // 64bit offsets for the SDK part but did not enable them
-    // for MediaTomb. Adaptions to the confgiure script are made
-    // to catch that problem during compile time; still we want
-    // to be absolutely sure that the server was compiled without
-    // this problem.
-
-    if (sizeof(off_t) != UpnpGetOff_tSize())
-    {
-        log_error(("off_t size mismatch!!! Aborting,"));
-        log_error(("Due to a compilation problem the MediaTomb binary contains an error.\n"));
-        log_error(("Please take a look at the README file for more information.\n"));
-    }
-
     Ref<Array<StringBase> > addFile(new Array<StringBase>());
     
     while (1)
@@ -259,7 +243,7 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
         exit(EXIT_FAILURE);
     }    
     
-    server = Ref<Server>(new Server());
+    Ref<Server> server = Server::getInstance();
 
     // starting as daemon if applicable
     if (daemon)

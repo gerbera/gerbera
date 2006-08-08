@@ -57,7 +57,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
     int objectType = item->getObjectType();
     if (IS_CDS_ITEM_INTERNAL_URL(objectType))
     {
-        urlBase = server->getVirtualURL() + "/" + CONTENT_SERVE_HANDLER + 
+        urlBase = Server::getInstance()->getVirtualURL() + "/" + CONTENT_SERVE_HANDLER + 
                   "/" + item->getLocation();
     }
     else if (IS_CDS_ITEM_EXTERNAL_URL(objectType))
@@ -66,7 +66,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
     }
     else
     { 
-        urlBase = server->getVirtualURL() + "/" +
+        urlBase = Server::getInstance()->getVirtualURL() + "/" +
             CONTENT_MEDIA_HANDLER + "?" + dict->encode();
         addResID = true;
     }

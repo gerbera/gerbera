@@ -35,7 +35,9 @@
 class Server : public zmm::Object
 {
 public:
-    Server();
+    /// \brief get Server instance (singleton)
+    static zmm::Ref<Server> getInstance();
+
 
     /// \brief Initializes the server.
     /// 
@@ -101,7 +103,19 @@ public:
     /// returns the port on which the server is actually running.
     zmm::String getPort();
 
+
+    /// \brief Tells if the server is about to be terminated.
+    ///
+    /// This function returns true if the server is about to be
+    /// terminated. This is the case when upnp_clean() was called.
+    bool getShutdownStatus();
+
 protected:
+    /// \brief This flag is set to true by the upnp_cleanup() function.
+    bool server_shutdown_flag;
+
+    Server();
+
     /// \brief Handle for our upnp device.
     ///
     /// This variable is returned by the getDeviceHandle() function.

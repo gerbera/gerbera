@@ -46,7 +46,7 @@ void ContentDirectoryService::process_subscription_request(zmm::Ref<Subscription
         throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, _("Could not convert property set to ixml"));
     }
 
-    UpnpAcceptSubscriptionExt(server->getDeviceHandle(),
+    UpnpAcceptSubscriptionExt(Server::getInstance()->getDeviceHandle(),
                               ConfigManager::getInstance()->getOption(_("/server/udn")).c_str(),
                               serviceID.c_str(), event, request->getSubscriptionID().c_str());
 
@@ -79,7 +79,7 @@ void ContentDirectoryService::subscription_update(String containerUpdateIDs_CSV)
         throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, _("Could not convert property set to ixml"));
     }
 
-    UpnpNotifyExt(server->getDeviceHandle(),
+    UpnpNotifyExt(Server::getInstance()->getDeviceHandle(),
                   ConfigManager::getInstance()->getOption(_("/server/udn")).c_str(),
                   serviceID.c_str(), event);
 

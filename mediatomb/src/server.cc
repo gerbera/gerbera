@@ -28,16 +28,30 @@
 
 using namespace zmm;
 
-Ref<Server> server;
+//Ref<Server> server;
+static Ref<Server> instance = NULL;
 
 static int static_upnp_callback(Upnp_EventType eventtype, void *event, void *cookie)
 {
-    return server->upnp_callback(eventtype, event, cookie);
+    return Server::getInstance()->upnp_callback(eventtype, event, cookie);
 }
+
 
 Server::Server() : Object()
 {
+    server_shutdown_flag = false;
 }
+
+Ref<Server> Server::getInstance()
+{
+    if (instance == NULL)
+    {
+        instance = Ref<Server>(new Server());
+    }
+        
+    return instance;
+}
+
 
 void Server::init()
 {
@@ -180,12 +194,19 @@ void Server::upnp_init(String ip, unsigned short port)
 //    log_info(("upnp_init: end\n"));
 }
 
+bool Server::getShutdownStatus()
+{
+    return server_shutdown_flag;
+}
+
 void Server::upnp_cleanup()
 {
     int ret = 0; // return code    
 
     UpdateManager::getInstance()->shutdown();
     ContentManager::getInstance()->shutdown();
+
+    server_shutdown_flag = true;
 
 //    log_info(("upnp_cleanup: start\n"));
 
