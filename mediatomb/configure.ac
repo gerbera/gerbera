@@ -175,7 +175,7 @@ if test "x$MYSQL_OK" = xyes; then
         MYSQL_OK=missing
     else
         AC_MSG_CHECKING(mysql includes)
-        MYSQL_CFLAGS=`${mysqlconfig} --cflags | sed s/\'//g`
+        MYSQL_CFLAGS=`${mysqlconfig} --include | sed s/\'//g`
         AC_MSG_RESULT($MYSQL_CFLAGS)
 
         AC_MSG_CHECKING(mysql libraries)
@@ -183,6 +183,7 @@ if test "x$MYSQL_OK" = xyes; then
         AC_MSG_RESULT($MYSQL_LIBS)
 
         CXXFLAGS="$CXXFLAGS $MYSQL_CFLAGS"
+#        CFLAGS="$CFLAGS $MYSQL_CFLAGS"
         LDFLAGS="$LDFLAGS $MYSQL_LIBS"
 
     fi

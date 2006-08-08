@@ -1036,13 +1036,6 @@ typedef int  (*Upnp_FunPtr) (
 extern "C" {
 #endif // __cplusplus
 
-// Returns size of "off_t", this allows to check if both, the SDK
-// part and the application were compiled with largefile support.
-// I had problems on at least two different distributions where
-// AC_SYS_LARGEFILE enabled 64bit offsets for the SDK part but
-// did not enable it for the C++ application.
-EXPORT_SPEC int UpnpGetOff_tSize();
-    
 ///@name Initialization and Registration
 //@{
 /** Initializes the Linux SDK for UPnP Devices. This function must be called

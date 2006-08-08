@@ -129,13 +129,6 @@ off_t g_maxContentLength = DEFAULT_SOAP_CONTENT_LENGTH; // in bytes
 // = 0 if unregistered, = 1 if registered.
      int UpnpSdkClientRegistered = 0;
 
-// returns the size of the off_t variable, used to cross check
-// possible compilation problems; see upnp.h for more details
-int UpnpGetOff_tSize()
-{
-    return (sizeof(off_t));
-}
-     
 /****************************************************************************
  * Function: UpnpInit
  *
