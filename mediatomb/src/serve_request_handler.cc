@@ -98,7 +98,6 @@ void ServeRequestHandler::get_info(IN const char *filename, OUT struct File_Info
 #endif // HAVE_MAGIC
 
         info->file_length = statbuf.st_size;
-        info->is_file_length_known = 1;
         info->last_modified = statbuf.st_mtime;
         info->is_directory = S_ISDIR(statbuf.st_mode);
 

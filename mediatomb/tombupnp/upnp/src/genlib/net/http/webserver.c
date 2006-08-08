@@ -938,16 +938,13 @@ GetNextRange( char **SrcRangeStr,
 ************************************************************************/
 int
 CreateHTTPRangeResponseHeader( char *ByteRangeSpecifier,
-                               struct File_Info FileInfo,
+                               off_t FileLength,
                                OUT struct SendInstruction *Instr )
 {
 
-    off_t FirstByte, LastByte, FileLength;
-    int IsFileLengthKnown;
+    off_t FirstByte, LastByte;
     char *RangeInput, *Ptr;
 
-    FileLength = FileInfo.file_length;
-    IsFileLengthKnown = FileInfo.is_file_length_known;
     Instr->IsRangeActive = 1;
     Instr->ReadSendSize = FileLength;
 
@@ -969,7 +966,7 @@ CreateHTTPRangeResponseHeader( char *ByteRangeSpecifier,
     //Jump =
     Ptr = Ptr + 1;
 
-    if( IsFileLengthKnown == 0 ) {
+    if( FileLength < 0 ) {
         free( RangeInput );
         return HTTP_REQUEST_RANGE_NOT_SATISFIABLE;
     }
@@ -1058,7 +1055,7 @@ CreateHTTPRangeResponseHeader( char *ByteRangeSpecifier,
 int
 CheckOtherHTTPHeaders( IN http_message_t * Req,
                        OUT struct SendInstruction *RespInstr,
-                       struct File_Info FileInfo )
+                       off_t FileSize )
 {
     http_header_t *header;
     ListNode *node;
@@ -1113,7 +1110,7 @@ CheckOtherHTTPHeaders( IN http_message_t * Req,
 
                 case HDR_RANGE:
                     if( ( RetCode = CreateHTTPRangeResponseHeader( TmpBuf,
-                                                                   FileInfo,
+                                                                   FileSize,
                                                                    RespInstr ) )
                         != HTTP_OK ) {
                         free( TmpBuf );
@@ -1224,7 +1221,6 @@ process_request( IN http_message_t * req,
     // init
     request_doc = NULL;
     finfo.content_type = NULL;
-    finfo.is_file_length_known = 1;
     //membuffer_init( &content_type );
     alias_grabbed = FALSE;
     err_code = HTTP_INTERNAL_SERVER_ERROR;  // default error
@@ -1284,7 +1280,6 @@ process_request( IN http_message_t * req,
     }
 
     if( using_virtual_dir ) {
-    printf("UPNP: off_t [%d] File_Info [%d]\n", sizeof(off_t), sizeof(struct File_Info));
         if( req->method != HTTPMETHOD_POST ) {
             // get file info
             pVirtualDirCallback = &virtualDirCallback;
@@ -1379,12 +1374,11 @@ process_request( IN http_message_t * req,
     }
 
     RespInstr->ReadSendSize = finfo.file_length;
-    RespInstr->IsLengthKnown = finfo.is_file_length_known;
 
     //Check other header field.
     if( ( err_code =
           CheckOtherHTTPHeaders( req, RespInstr,
-                                 finfo ) ) != HTTP_OK ) {
+                                 finfo.file_length ) ) != HTTP_OK ) {
         goto error_handler;
     }
 
@@ -1440,7 +1434,7 @@ process_request( IN http_message_t * req,
         }
 
     } else {
-        if((RespInstr->IsLengthKnown) && (RespInstr->ReadSendSize >= 0)) {
+        if( RespInstr->ReadSendSize >= 0 ) {
             //Content-Range: bytes 222-3333/4000  HTTP_PARTIAL_CONTENT
             //Transfer-Encoding: chunked
             // K means add chunky header ang G means range header.

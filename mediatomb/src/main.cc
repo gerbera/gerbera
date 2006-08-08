@@ -94,6 +94,10 @@ int main(int argc, char **argv, char **envp)
         log_error(("Please take a look at the README file for more information.\n"));
     }
 
+    off_t fokel;
+    fokel = -1;
+    printf("fokel: %lld\n", fokel);
+
     Ref<Array<StringBase> > addFile(new Array<StringBase>());
     
     while (1)

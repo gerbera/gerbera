@@ -175,14 +175,12 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
       
         log_info(("FileRequestHandler: setting content length to unknown\n"));
         /// \todo we could figure out the content length...
-        info->file_length = 0;
-        info->is_file_length_known = 0;
+        info->file_length = -1;
     }
     else
     {
         mimeType = item->getMimeType();
         info->file_length = statbuf.st_size;
-        info->is_file_length_known = 1;
         //log_debug(("sizeof off_t %d, statbuf.st_size %d\n", sizeof(off_t), sizeof(statbuf.st_size)));
         //log_info(("FileRequestHandler: get_info: file_length: " LARGEFILE_SPRINTF "\n", statbuf.st_size));
     }
