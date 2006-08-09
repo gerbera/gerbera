@@ -18,10 +18,14 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+///\file sqlite3_storage.h
+///\brief Definitions of the Sqlite3Storage, Sqlite3Result, Sqlite3Row and SLTask classes.
+
 #ifndef __SQLITE3_STORAGE_H__
 #define __SQLITE3_STORAGE_H__
 
 #include <sqlite3.h>
+#include <pthread.h>
 
 #include "storage/sql_storage.h"
 #include "sync.h"
@@ -29,46 +33,83 @@
 class Sqlite3Storage;
 class Sqlite3Result;
 
+/// \brief A virtual class that represents a task to be done by the sqlite3 thread.
 class SLTask : public zmm::Object
 {
 public:
+    /// \brief Instantiate a task
+    /// \param mutex the pthread_mutex for notifying the creator of the task, that the task is finished
+    /// \param cond the pthread_cond for notifying the creator of the task, that the task is finished
     SLTask(pthread_mutex_t* mutex, pthread_cond_t* cond);
+    
+    /// \brief run the sqlite3 task
+    /// \param sl The instance of Sqlite3Storage to do the queries with.
     virtual void run(Sqlite3Storage *sl) = 0;
-    bool is_running(); 
+    
+    /// \brief returns true if the task is not completed
+    /// \return true if the task is not completed yet, false if the task is finished and the results are ready.
+    bool is_running();
+    
+    /// \brief modify the creator of the task using the supplied pthread_mutex and pthread_cond, that the task is finished
+    void sendSignal();
+    
 protected:
+    /// \brief true as long as the task is not finished
+    ///
+    /// The value is set by the constructor to true and then to false be sendSignal()
     bool running;
     pthread_cond_t* cond;
     pthread_mutex_t* mutex;
-    void sendSignal();
 };
 
+/// \brief A task for the sqlite3 thread to do a SQL select.
 class SLSelectTask : public SLTask
 {
 public:
+    /// \brief Constructor for the sqlite3 select task
+    /// \param query The SQL query string
+    /// \param mutex see SLTask::SLTask()
+    /// \param cond see SLTask::SLTask()
     SLSelectTask(zmm::String query, pthread_mutex_t* mutex, pthread_cond_t* cond);
     virtual void run(Sqlite3Storage *sl);
+    /// \brief The Sqlite3Result
     zmm::Ref<Sqlite3Result> pres;
 protected:
+    /// \brief The SQL query string
     zmm::String query;
 };
 
+/// \brief A task for the sqlite3 thread to do a SQL exec.
 class SLExecTask : public SLTask
 {
 public:
+    /// \brief Constructor for the sqlite3 exec task
+    /// \param query The SQL query string
+    /// \param mutex see SLTask::SLTask()
+    /// \param cond see SLTask::SLTask()
     SLExecTask(zmm::String query, pthread_mutex_t* mutex, pthread_cond_t* cond);
     virtual void run(Sqlite3Storage *sl);
 protected:
+    /// \brief The SQL query string
     zmm::String query;
 };
 
+/// \brief A task for the sqlite3 thread to get the "last_insert_id".
 class SLGetLastInsertIdTask : public SLTask
 {
 public:
+    /// \brief Constructor for the sqlite3 "get last insert id" task
+    /// \param mutex see SLTask::SLTask()
+    /// \param cond see SLTask::SLTask()
     SLGetLastInsertIdTask(pthread_mutex_t* mutex, pthread_cond_t* cond);
+    
     virtual void run(Sqlite3Storage *sl);
+    
+    /// \brief the result of the task
     int lastInsertId;
 };
 
+/// \brief Represents a row of a result of a sqlite3 select
 class Sqlite3Row : public SQLRow
 {
 public:
@@ -80,6 +121,7 @@ protected:
     friend class Sqlite3Result;
 };
 
+/// \brief Represents a result of a sqlite3 select
 class Sqlite3Result : public SQLResult
 {
 public:
@@ -102,6 +144,8 @@ protected:
 
 void unlock_func(void *data);
 
+
+/// \brief The Storage class for using SQLite3
 class Sqlite3Storage : public SQLStorage
 {
 public:
@@ -127,8 +171,10 @@ protected:
     pthread_cond_t sqliteCond;
     pthread_mutex_t sqliteMutex;
     
+    /// \brief is set to true by shutdown() if the sqlite3 thread should terminate
     bool shutdownFlag;
     
+    /// \brief the tasks to be done by the sqlite3 thread
     zmm::Ref<zmm::Array<SLTask> > taskQueue;
     
     void mutexCondInit(pthread_mutex_t *mutex, pthread_cond_t *cond);

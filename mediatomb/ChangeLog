@@ -5,6 +5,9 @@ v0.9.0  Major rework
         * code has undergone some performance optimizations
         * fixed a bug where server did not shutdown while http download
           was in progress
+        * all sqlite3 queries are now handled by a single, dedicated
+          thread to make MediaTomb work with SQLite3 compiled with
+          "--enable-threadsafe"
 
 v0.8.1
         * added "serve" directory, any files there can be downloaded 

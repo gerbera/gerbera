@@ -141,6 +141,7 @@ void *Sqlite3Storage::staticThreadProc(void *arg)
 {
     Sqlite3Storage *inst = (Sqlite3Storage *)arg;
     inst->threadProc();
+    log_debug(("Sqlite3Storage::staticThreadProc - exiting thread\n"));
     pthread_exit(NULL);
     return NULL;
 }
@@ -180,6 +181,7 @@ void Sqlite3Storage::threadProc()
         try
         {
             task->run(this);
+            task->sendSignal();
         }
         catch (Exception e)
         {
@@ -280,8 +282,6 @@ void SLSelectTask::run(Sqlite3Storage *sl)
 
     lpres->row = pres->table;
     lpres->cur_row = 0;
-    
-    sendSignal();
 }
 
 
@@ -307,8 +307,6 @@ void SLExecTask::run(Sqlite3Storage *sl)
         sl->reportError(query);
         throw StorageException(_("Sqlite3: query error"));
     }
-    
-    sendSignal();
 }
 
 SLGetLastInsertIdTask::SLGetLastInsertIdTask(pthread_mutex_t* mutex, pthread_cond_t* cond) : SLTask(mutex, cond)
@@ -318,7 +316,6 @@ SLGetLastInsertIdTask::SLGetLastInsertIdTask(pthread_mutex_t* mutex, pthread_con
 void SLGetLastInsertIdTask::run(Sqlite3Storage *sl)
 {
     lastInsertId = sqlite3_last_insert_rowid(sl->db);
-    sendSignal();
 }
 
 
