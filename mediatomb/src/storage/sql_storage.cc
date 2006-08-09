@@ -727,7 +727,7 @@ void SQLStorage::rmDecChildCount(Ref<CdsObject> obj)
             rmParentHash->put(id, value);
         if (value <= 0)
         {
-            /// \TODO unhardcode the id's below
+            /// \todo unhardcode the id's below
             if (id != -1 && id != 0 && id != 1)
                 rmObject(obj);
         }

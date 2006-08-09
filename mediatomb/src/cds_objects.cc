@@ -256,7 +256,7 @@ int CdsContainer::equals(Ref<CdsObject> obj, bool exactly)
 void CdsContainer::validate()
 {
     CdsObject::validate();
-    /// \TODO well.. we have to know if a container is a real directory or just a virtual container in the database
+    /// \todo well.. we have to know if a container is a real directory or just a virtual container in the database
 /*    if (!check_path(this->location, true))
         throw Exception(_("CdsContainer: validation failed")); */
 }
@@ -269,7 +269,7 @@ void CdsObject::optimize()
 
 int CdsObjectTitleComparator(void *arg1, void *arg2)
 {
-	// \TODO get rid of getTitle() to avod unnecessary reference counting ops
+	/// \todo get rid of getTitle() to avod unnecessary reference counting ops
 	return strcmp(((CdsObject *)arg1)->title.c_str(),
 			      ((CdsObject *)arg2)->title.c_str());
 }

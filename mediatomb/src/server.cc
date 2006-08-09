@@ -112,7 +112,7 @@ void Server::upnp_init(String ip, unsigned short port)
 
     virtual_url = _("http://") + ip + ":" + port + "/" + virtual_directory;
 
-    /// \TODO who should construct absolute paths??? config_manage or the modules?
+    /// \todo who should construct absolute paths??? config_manage or the modules?
     // next set webroot directory
     String web_root = config->getOption(_("/server/webroot"));
 

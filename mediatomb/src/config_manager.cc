@@ -416,7 +416,7 @@ String ConfigManager::getOption(String xpath)
     Ref<XPath> rootXPath(new XPath(root));
     String value = rootXPath->getText(xpath);
 
-    /// \TODO is this ok?
+    /// \todo is this ok?
 //    if (string_ok(value))
 //        return value;
     if (value != nil)

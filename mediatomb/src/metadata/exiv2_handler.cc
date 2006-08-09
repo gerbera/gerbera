@@ -57,7 +57,7 @@ void Exiv2Handler::fillMetadata(Ref<CdsItem> item)
     Exiv2::ExifData::const_iterator md = exifData.findKey(Exiv2::ExifKey("Exif.Photo.DateTimeOriginal"));
     if (md != exifData.end()) 
     {
-        // \TODO convert date to ISO 8601 as required in the UPnP spec
+        /// \todo convert date to ISO 8601 as required in the UPnP spec
         item->setMetadata(String(MT_KEYS[M_DATE].upnp), sc->convert(String((char *)md->toString().c_str())));
     }
 

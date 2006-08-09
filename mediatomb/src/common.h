@@ -28,7 +28,7 @@
 #include "logger.h"
 #include "zmmf/zmmf.h"
 #include "exceptions.h"
-/// \TODO implement session timeouts!!!
+/// \todo implement session timeouts!!!
 #define DEFAULT_SESSION_TIMEOUT         123456
 
 // ERROR CODES                                                                                 
