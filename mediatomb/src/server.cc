@@ -187,24 +187,26 @@ void Server::upnp_init(String ip, unsigned short port)
     UpdateManager::getInstance()->init();
     
     // initializing ContentManager
-    ContentManager::getInstance()->init();    
+    ContentManager::getInstance()->init();
    
     config->writeBookmark(ip, String::from(port));
     
 //    log_info(("upnp_init: end\n"));
 }
 
+
 bool Server::getShutdownStatus()
 {
     return server_shutdown_flag;
 }
 
-void Server::upnp_cleanup()
+void Server::shutdown()
 {
     int ret = 0; // return code    
 
     UpdateManager::getInstance()->shutdown();
     ContentManager::getInstance()->shutdown();
+    Storage::getInstance()->shutdown();
 
     server_shutdown_flag = true;
 

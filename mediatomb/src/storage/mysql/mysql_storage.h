@@ -58,7 +58,7 @@ public:
     virtual zmm::Ref<SQLResult> select(zmm::String query);
     virtual void exec(zmm::String query);
     virtual int lastInsertID();
-
+    virtual void shutdown();
 protected:
     MYSQL *db;
     zmm::Ref<Mutex> mutex;

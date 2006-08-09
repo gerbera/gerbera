@@ -59,8 +59,8 @@ public:
     /// \brief Cleanup routine to shutdown the server.
     ///
     /// Unregisters the device with the SDK, shuts down the
-    /// update manager task.
-    void upnp_cleanup();
+    /// update manager task, storage task, content manager.
+    void shutdown();
 
     /// \brief Returns the virtual web server URL.
     ///

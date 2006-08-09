@@ -75,6 +75,7 @@ public:
 
     virtual zmm::Ref<CdsObject> findObjectByTitle(zmm::String title, int parentID);
     virtual void incrementUpdateIDs(int *ids, int size);
+    virtual void shutdown() = 0;
 protected:
     virtual zmm::Ref<CdsObject> createObjectFromRow(zmm::Ref<SQLRow> row,
                                                     select_mode_t mode = SELECT_FULL);

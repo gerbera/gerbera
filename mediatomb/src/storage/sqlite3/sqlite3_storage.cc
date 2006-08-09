@@ -33,38 +33,36 @@ using namespace mxml;
 Sqlite3Storage::Sqlite3Storage() : SQLStorage()
 {
     db = NULL;
-
-    mutex = Ref<Mutex>(new Mutex());
-    /*
-    int res;
-    pthread_mutexattr_t mutex_attr;
-    res = pthread_mutexattr_init(&mutex_attr);
-    res = pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_RECURSIVE_NP);
-    pthread_mutex_init(&lock_mutex, &mutex_attr);
-    pthread_mutexattr_destroy(&mutex_attr);
-    
-    Recursive mutex is apparently not needed anymore
-    */
+    shutdownFlag = false;
 }
 
 Sqlite3Storage::~Sqlite3Storage()
 {
-    if (db)
-        sqlite3_close(db);
 }
 
 void Sqlite3Storage::init()
 {
-    Ref<ConfigManager> config = ConfigManager::getInstance();
-
-    String dbFilePath = config->getOption(_("/server/storage/database-file"));
-
-    int res = sqlite3_open(dbFilePath.c_str(), &db);
-    if(res != SQLITE_OK)
-    {
-        throw StorageException(_("Sqlite3Storage.init: could not open ") +
-            dbFilePath);
-    }
+    
+    int ret;
+    
+    ret = pthread_mutex_init(&sqliteMutex, NULL);
+    ret = pthread_cond_init(&sqliteCond, NULL);
+    
+    pthread_attr_t attr;
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    
+    taskQueue = Ref<Array<SLTask> >(new Array<SLTask>());
+    
+    ret = pthread_create(
+        &sqliteThread,
+        &attr,
+        Sqlite3Storage::staticThreadProc,
+        this
+    );
+    
+    pthread_attr_destroy(&attr);
+    
     SQLStorage::init();
 }
 
@@ -87,45 +85,218 @@ void Sqlite3Storage::reportError(String query)
 }
 
 
+void Sqlite3Storage::mutexCondInit(pthread_mutex_t *mutex, pthread_cond_t *cond)
+{
+    pthread_mutex_init(mutex, NULL);
+    pthread_cond_init(cond, NULL);
+}
+void Sqlite3Storage::waitForTask(Ref<SLTask> task, pthread_mutex_t *mutex, pthread_cond_t *cond)
+{
+    addTask(task);
+    if (task->is_running()) { // we check before we lock first, because there is no need to lock then
+        pthread_mutex_lock(mutex);
+        if (task->is_running()) { // we check it a second time after locking to ensure we didn't miss the pthread_cond_signal 
+            pthread_cond_wait(cond, mutex); // waiting for the task to complete
+        }
+    }
+    pthread_mutex_unlock(mutex);
+    pthread_mutex_destroy(mutex);
+    pthread_cond_destroy(cond);
+}
+
 Ref<SQLResult> Sqlite3Storage::select(String query)
 {
-    lock();
-
-    char *err;
-    Sqlite3Result *pres = new Sqlite3Result();
-    Ref<SQLResult> res(pres);
-    pres->storage = Ref<Sqlite3Storage>(this);
-
-    int ret = sqlite3_get_table(
-        db,
-        query.c_str(),
-        &pres->table,
-        &pres->nrow,
-        &pres->ncolumn,
-        &err
-    );
-    if(ret != SQLITE_OK)
-    {
-        unlock();
-        reportError(query);
-        throw StorageException(_("Sqlite3: query error"));
-    }
-
-    pres->row = pres->table;
-    pres->cur_row = 0;
-
-    unlock();
-
+    pthread_mutex_t selectMutex;
+    pthread_cond_t selectCond;
+    mutexCondInit(&selectMutex, &selectCond);
+    SLSelectTask *ptask = new SLSelectTask(query, &selectMutex, &selectCond);
+    Ref<SLTask> task(ptask);
+    waitForTask(task, &selectMutex, &selectCond);
+    Ref<SQLResult> res(ptask->pres.getPtr());
     return res;
 }
 
 void Sqlite3Storage::exec(String query)
 {
-    lock();
+    pthread_mutex_t execMutex;
+    pthread_cond_t execCond;
+    mutexCondInit(&execMutex, &execCond);
+    SLExecTask *ptask = new SLExecTask(query, &execMutex, &execCond);
+    Ref<SLTask> task(ptask);
+    waitForTask(task, &execMutex, &execCond);
+}
 
+int Sqlite3Storage::lastInsertID()
+{
+    pthread_mutex_t execMutex;
+    pthread_cond_t execCond;
+    mutexCondInit(&execMutex, &execCond);
+    SLGetLastInsertIdTask *ptask = new SLGetLastInsertIdTask(&execMutex, &execCond);
+    Ref<SLTask> task(ptask);
+    waitForTask(task, &execMutex, &execCond);
+    return ptask->lastInsertId;
+}
+
+void *Sqlite3Storage::staticThreadProc(void *arg)
+{
+    Sqlite3Storage *inst = (Sqlite3Storage *)arg;
+    inst->threadProc();
+    pthread_exit(NULL);
+    return NULL;
+}
+
+void Sqlite3Storage::threadProc()
+{
+    
+    Ref<SLTask> task;
+    
+    Ref<ConfigManager> config = ConfigManager::getInstance();
+    
+    String dbFilePath = config->getOption(_("/server/storage/database-file"));
+    
+    int res = sqlite3_open(dbFilePath.c_str(), &db);
+    if(res != SQLITE_OK)
+    {
+        throw StorageException(_("Sqlite3Storage.init: could not open ") +
+            dbFilePath);
+    }
+    while(! shutdownFlag)
+    {
+        lock();
+        if(taskQueue->size() == 0)
+        {
+            /* if nothing to do, sleep until awakened */
+            pthread_cond_wait(&sqliteCond, &sqliteMutex);            
+            unlock();
+            continue;
+        }
+        else
+        {
+            task = taskQueue->get(0);
+            taskQueue->remove(0, 1);
+        }
+        unlock();
+        
+        try
+        {
+            task->run(this);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+    if (db)
+        sqlite3_close(db);
+}
+
+void Sqlite3Storage::lock()
+{
+    pthread_mutex_lock(&sqliteMutex);
+}
+void Sqlite3Storage::unlock()
+{
+    pthread_mutex_unlock(&sqliteMutex);
+}
+void Sqlite3Storage::signal()
+{
+    pthread_cond_signal(&sqliteCond);
+}
+
+int Sqlite3Storage::addTask(zmm::Ref<SLTask> task)
+{
+    int ret = false;
+    lock();
+    int size = taskQueue->size();
+    if (size >= 1)
+        ret = true;
+    taskQueue->append(task);
+    signal();
+    unlock();
+    return ret;
+}
+
+void Sqlite3Storage::shutdown()
+{
+    shutdownFlag = true;
+    lock();
+    signal();
+    unlock();
+}
+
+
+/* SLTask */
+
+SLTask::SLTask(pthread_mutex_t *mutex, pthread_cond_t *cond) : Object()
+{
+    running = true;
+    this->cond = cond;
+    this->mutex = mutex;
+}
+bool SLTask::is_running()
+{
+    return running;
+}
+
+void SLTask::sendSignal()
+{
+    pthread_mutex_lock(mutex);
+    running=false;
+    pthread_cond_signal(cond);
+    pthread_mutex_unlock(mutex);
+}
+
+
+/* SLSelectTask */
+
+SLSelectTask::SLSelectTask(zmm::String query, pthread_mutex_t* mutex, pthread_cond_t* cond) : SLTask(mutex, cond)
+{
+    this->query = query;
+    this->cond = cond;
+    this->mutex = mutex;
+}
+
+void SLSelectTask::run(Sqlite3Storage *sl)
+{
+    char *err;
+    Sqlite3Result * lpres = new Sqlite3Result(); 
+    pres = Ref<Sqlite3Result>(lpres); 
+    
+    int ret = sqlite3_get_table(
+        sl->db,
+        query.c_str(),
+        &lpres->table,
+        &lpres->nrow,
+        &lpres->ncolumn,
+        &err
+    );
+    
+    if(ret != SQLITE_OK)
+    {
+        pthread_cond_signal(cond);
+        sl->reportError(query);
+        throw StorageException(_("Sqlite3: query error"));
+    }
+
+    lpres->row = pres->table;
+    lpres->cur_row = 0;
+    
+    sendSignal();
+}
+
+
+/* SLExecTask */
+
+SLExecTask::SLExecTask(zmm::String query, pthread_mutex_t* mutex, pthread_cond_t* cond) : SLTask(mutex, cond)
+{
+    this->query = query;
+}
+
+void SLExecTask::run(Sqlite3Storage *sl)
+{
     char *err;
     int res = sqlite3_exec(
-        db,
+        sl->db,
         query.c_str(),
         NULL,
         NULL,
@@ -133,18 +304,23 @@ void Sqlite3Storage::exec(String query)
     );
     if(res != SQLITE_OK)
     {
-        unlock();
-        reportError(query);
+        sl->reportError(query);
         throw StorageException(_("Sqlite3: query error"));
     }
-
-    unlock();
+    
+    sendSignal();
 }
 
-int Sqlite3Storage::lastInsertID()
+SLGetLastInsertIdTask::SLGetLastInsertIdTask(pthread_mutex_t* mutex, pthread_cond_t* cond) : SLTask(mutex, cond)
 {
-    return (int)sqlite3_last_insert_rowid(db);
 }
+
+void SLGetLastInsertIdTask::run(Sqlite3Storage *sl)
+{
+    lastInsertId = sqlite3_last_insert_rowid(sl->db);
+    sendSignal();
+}
+
 
 /* Sqlite3Result */
 

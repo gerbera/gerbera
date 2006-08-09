@@ -141,6 +141,8 @@ public:
     
     /* static methods */
     static zmm::Ref<Storage> getInstance();
+    
+    virtual void shutdown() = 0;
 protected:
     void getObjectPath(zmm::Ref<zmm::Array<CdsObject> > arr, int objectID);
 };

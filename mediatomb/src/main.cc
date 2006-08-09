@@ -334,7 +334,7 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
         log_info(("main: upnp error %d\n ", upnp_e.getErrorCode()));
         try
         {
-            server->upnp_cleanup();
+            server->shutdown();
         }
         catch (Exception e)
         {
@@ -379,7 +379,7 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     int ret = EXIT_SUCCESS;
     try
     {
-        server->upnp_cleanup();
+        server->shutdown();
     }
     catch(UpnpException upnp_e)
     {

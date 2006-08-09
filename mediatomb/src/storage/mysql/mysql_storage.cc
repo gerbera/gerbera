@@ -154,6 +154,10 @@ int MysqlStorage::lastInsertID()
     return mysql_insert_id(db);    
 }
 
+void MysqlStorage::shutdown()
+{
+}
+
 /* MysqlResult */
 MysqlResult::MysqlResult(MYSQL_RES *mysql_res) : SQLResult()
 {
