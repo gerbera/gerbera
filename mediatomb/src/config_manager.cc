@@ -226,7 +226,13 @@ void ConfigManager::validate(String serverhome)
 //        Ref<Dictionary> dict = createDictionaryFromNodeset(el, "map", "from", "to");
         getOption(_("/import/mappings/mimetype-upnpclass"), _(""));
     }
-   
+  
+    el = getElement(_("/server/custom-http-headers"));
+    if (el == nil)
+    {
+        getOption(_("/server/custom-http-headers"), _(""));
+    }
+
 #ifdef HAVE_EXIF    
 
     el = getElement(_("/import/library-options/libexif/auxdata"));

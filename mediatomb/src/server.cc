@@ -27,6 +27,7 @@
 #include "tools.h"
 
 using namespace zmm;
+using namespace mxml;
 
 //Ref<Server> server;
 static Ref<Server> instance = NULL;
@@ -128,16 +129,27 @@ void Server::upnp_init(String ip, unsigned short port)
 
     log_info(("upnp_init: webroot: %s\n", web_root.c_str())); 
 
-    ret = UpnpAddCustomHTTPHeader("X-User-Agent: aphe");
-    if (ret != UPNP_E_SUCCESS)
+    Ref<Element> headers = config->getElement(_("/server/custom-http-headers"));
+    if (headers != nil)
     {
-        throw UpnpException(ret, _("upnp_init: UpnpSetXUserAgentHeader failed"));
-    }
-
-    ret = UpnpAddCustomHTTPHeader("User-Agent: fokel");
-    if (ret != UPNP_E_SUCCESS)
-    {
-        throw UpnpException(ret, _("upnp_init: UpnpSetXUserAgentHeader failed"));
+        Ref<Array<StringBase> > arr = config->createArrayFromNodeset(headers, _("add"), _("header"));
+        if (arr != nil)
+        {
+            String tmp;
+            for (int i = 0; i < arr->size(); i++)
+            {
+                tmp = arr->get(i);
+                if (string_ok(tmp))
+                {
+                    log_info(("Adding HTTP header \"%s\"\n", tmp.c_str()));
+                    ret = UpnpAddCustomHTTPHeader(tmp.c_str());
+                    if (ret != UPNP_E_SUCCESS)
+                    {
+                        throw UpnpException(ret, _("upnp_init: UpnpAddCustomHTTPHeader failed"));
+                    }
+                }
+            }
+        }
     }
 
     ret = UpnpAddVirtualDir(virtual_directory.c_str());

@@ -17,6 +17,8 @@
     along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+///\file config_manager.h
+///\brief Definitions of the ConfigManager class. 
 
 #ifndef __CONFIG_MANAGER_H__
 #define __CONFIG_MANAGER_H__

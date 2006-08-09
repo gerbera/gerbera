@@ -63,44 +63,19 @@ INSTALLATION
 
 In order to compile MediaTomb you will have to install the following packages:
 
-- UPnP SDK from http://upnp.sourceforge.net/
-  Note:  if you are not using the spec file that is provided on the SF 
-         page of the UPnP SDK project, beware, that "make install" forgets 
-         to put ixml.h to the right place, so you will have to copy it to 
-         /usr/include/upnp manually.
+  Note:  the UPnP SDK is now a part of MediaTomb and does not have to be 
+         installed separately. We base our heavily patched version on
+         libupnp 1.4.1 from http://pupnp.sf.net/
 
-  Note2: for optimal performance you should use custom settings in the 
-         libupnp-1.2.1a/upnp/inc/config.h file.
-         I suggest JOBS_PER_THREAD 1, MIN_THREADS 4
-
-         The SDK RPMs that we are offering along with MediaTomb are patched
-         with the above settings.
-
-  Note3: DSM-320 users - please read the forums on our SourceForge project
-         page. Some problems regarding the UPnP SDK, MediaTomb and the
+  Note2: DSM-320 users: in order to fix the .AVI playback problem
+         add a custom http header to your config.xml:
+         <custom-http-headers>
+            <add header="X-User-Agent: redsonic"/>
+         <custom-http-headers/>
+         Please read the forums on our SourceForge project page for more 
+         information. Some problems regarding the UPnP SDK, MediaTomb and the
          DSM-320 are discussed there, some solutions are offered.
-        
-  If you are not using the RPM package, proceed as following:
-
-  Installation of this package is not straight forward.
-    tar zxvf libupnp-1.2.1.tar.gz
-    cd libupnp-1.2.1
-    cd upnp
-    make
-    make install
-    cd ../ixml
-    make
-    make install
-    cd ../threadutil
-    make
-    make install
-    cd ..
-    cp upnp/inc/ixml.h /usr/include/upnp/
-
-  The last line is vital due to the bug in the SDK's makefiles
-  For whatever reason ixml.h is not being installed and nothing
-  using libupnp sdk will compile without that.
-
+ 
 - At least one of the databases:
   - sqlite3 from http://www.sqlite.org/ (Very SLOW media import)
     On Fedora Core it's sqlite3-devel and 'sqlite3' packages.
@@ -108,7 +83,7 @@ In order to compile MediaTomb you will have to install the following packages:
        (the last package includes command line client which is also required)
   - mysql client library (RECOMMENDED)
     NOTE: Write operations to sqlite3 database is VERY SLOW, use sqlite3
-    only if you don't have another choise.
+    only if you don't have another choice.
   
 - libmagic (OPTIONAL, RECOMMENDED)
   On Fedora Core the package is called 'file'. (Note, that due to a bug
@@ -132,6 +107,9 @@ In order to compile MediaTomb you will have to install the following packages:
 
 - Python - there is also a setup script that makes necessary installations
   in your home directory, you will need Python to run it.
+  Note: if for some reason you can not run python you can still setup the
+  server manually. However, this means that you will have to write your
+  own config.xml file which can be somewhat tricky.
 
 If the server does not respond to search requests from media renderers or
 control points on the network, try applying these settings to your
@@ -302,7 +280,17 @@ Here is a sample configuration file with description of the various tags.
           <password></password>
           <database>mediatomb</database>
         </storage>
-  
+ 
+    <custom-http-headers> (Optional)
+        This section holds the user defined HTTP headers that will be added
+        to all HTTP responses that come from the server.
+
+        <add header="..."/>
+            Specify a header to be added to the response.
+            If you have a DSM-320 use <add header="X-User-Agent: redsonic"/>
+            to fix the .AVI playback problem.
+        
+
 <import> (Required)
     Section specifying various import parameters, currently only one is 
     supported. 
