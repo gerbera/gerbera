@@ -1,17 +1,21 @@
 2006-08-08  Sergey Bostandzhyan <jin@mediatomb.org>
-    * integration: moved libupnp 1.4.1BETA3 into the MediaTomb environment
+    * integration - moved libupnp 1.4.1BETA3 into the MediaTomb environment
     
-    * upnp/src/inc/config.h: changed thread configuration to improve
+    * upnp/src/inc/config.h - changed thread configuration to improve
       internal webserver performance
 
-    * upnp/src/genlib/net/http/webserver.c: added .css to text/css
+    * upnp/src/genlib/net/http/webserver.c - added .css to text/css
       mimetype mapping to the internal webserver
 
     * added largefile support
 
-    * sock.c: reverted a change regarding SIGPIPE, unhandled signal
+    * sock.c - reverted a change regarding SIGPIPE, unhandled signal
       when HTTP transfer was cancelled by the client.
 
+    * added possibility to specify custom HTTP headers
+
+    * fixed a bug in UpnpRemoveVirtualDir - when a directory to be
+      removed was first in the list the whole list was invalidated
 
 2006-07-07 Oxy <virtual_worlds(at)gmx.de>
 
