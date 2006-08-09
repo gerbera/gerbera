@@ -82,6 +82,7 @@
 #define NUM_HANDLE 200
 #define LINE_SIZE  180
 #define NAME_SIZE  256
+#define HEADER_SIZE  256
 #define MNFT_NAME_SIZE  64
 #define MODL_NAME_SIZE  32
 #define SERL_NUMR_SIZE  64
@@ -998,6 +999,13 @@ typedef struct virtual_Dir_List
     struct virtual_Dir_List *next;
     char dirName[NAME_SIZE];
 } virtualDirList;
+
+typedef struct user_HTTP_Header_List
+{
+    struct user_HTTP_Header_List *next;
+    char header[HEADER_SIZE];
+} userHTTPHeaderList;
+
 
 /** All callback functions share the same prototype, documented below.
  *  Note that any memory passed to the callback function
@@ -2607,6 +2615,44 @@ EXPORT_SPEC int UpnpSetWebServerRootDir(
     IN const char* rootDir  /** Path of the root directory of the web 
                                 server. */
     );
+
+/** {\bf UpnpAddHTTPHeader} add a custom header to 
+ *  the internal web server. All HTTP responses will contain the
+ *  specified header.
+ *
+ *  @return [int] An integer representing one of the following:
+ *    \begin{itemize}
+ *       \item {\tt UPPN_E_SUCCESS}: The operation completed successfully.
+ *       \item {\tt UPNP_E_INVALID_ARGUMENT}: {\bf header_string} is empty.
+ *    \end{itemize}
+ */
+ 
+EXPORT_SPEC int UpnpAddCustomHTTPHeader( 
+    IN const char* header_string  /** Header to add (\r\n termination not needed) */
+    );
+
+/** {\bf UpnpRemoveHTTPHeader} removes a header that was previously added
+ *  with {\bf UpnpAddHTTPHeader}.
+ *
+ *  @return [int] An integer representing one of the following:
+ *    \begin{itemize}
+ *       \item {\tt UPPN_E_SUCCESS}: The operation completed successfully.
+ *       \item {\tt UPNP_E_INVALID_ARGUMENT}: {\bf dirName} is not valid.
+ *    \end{itemize}
+ */
+
+EXPORT_SPEC int UpnpRemoveCustomHTTPHeader( 
+    IN const char* header_string  /** Name of the header to remove */
+    );
+
+/** {\bf UpnpRemoveAll} removes all virtual directory mappings.
+ *
+ *  @return [void] This function does not return a value.
+ *
+ */
+
+EXPORT_SPEC void UpnpRemoveAllCustomHTTPHeaders( );
+
 
 /** {\bf UpnpSetVirtualDirCallbacks} sets the callback function to be used to 
  *  access a virtual directory.  Refer to the description of

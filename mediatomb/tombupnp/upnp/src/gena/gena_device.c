@@ -1166,8 +1166,8 @@ respond_ok( IN SOCKINFO * info,
     membuffer_init( &response );
     response.size_inc = 30;
     if( http_MakeMessage( &response, major, minor,
-                          "R" "D" "S" "N" "Xc" "ssc" "sc" "c",
-                          HTTP_OK, (off_t)0, X_USER_AGENT,
+                          "R" "D" "S" "N" "H" "ssc" "sc" "c",
+                          HTTP_OK, (off_t)0, pUserHTTPHeaderList,
                           "SID: ", sub->sid, timeout_str ) != 0 ) {
         membuffer_destroy( &response );
         error_respond( info, HTTP_INTERNAL_SERVER_ERROR, request );

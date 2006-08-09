@@ -127,7 +127,19 @@ void Server::upnp_init(String ip, unsigned short port)
     }
 
     log_info(("upnp_init: webroot: %s\n", web_root.c_str())); 
-    
+
+    ret = UpnpAddCustomHTTPHeader("X-User-Agent: aphe");
+    if (ret != UPNP_E_SUCCESS)
+    {
+        throw UpnpException(ret, _("upnp_init: UpnpSetXUserAgentHeader failed"));
+    }
+
+    ret = UpnpAddCustomHTTPHeader("User-Agent: fokel");
+    if (ret != UPNP_E_SUCCESS)
+    {
+        throw UpnpException(ret, _("upnp_init: UpnpSetXUserAgentHeader failed"));
+    }
+
     ret = UpnpAddVirtualDir(virtual_directory.c_str());
     if (ret != UPNP_E_SUCCESS)
     {

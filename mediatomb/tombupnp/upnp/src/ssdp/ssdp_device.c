@@ -296,11 +296,11 @@ CreateServicePacket( IN int msg_type,
 
     if( msg_type == MSGTYPE_REPLY ) {
         ret_code = http_MakeMessage( &buf, 1, 1,
-                                     "R" "sdc" "D" "s" "ssc" "S" "Xc" "ssc"
+                                     "R" "sdc" "D" "s" "ssc" "S" "H" "ssc"
                                      "ssc" "c", HTTP_OK,
                                      "CACHE-CONTROL: max-age=", duration,
                                      "EXT:\r\n", "LOCATION: ", location,
-                                     X_USER_AGENT,
+                                     pUserHTTPHeaderList,
                                      "ST: ", nt, "USN: ", usn );
         if( ret_code != 0 ) {
             return;
@@ -319,11 +319,12 @@ CreateServicePacket( IN int msg_type,
 
         ret_code = http_MakeMessage( &buf, 1, 1,
                                      "Q" "sssdc" "sdc" "ssc" "ssc" "ssc"
-                                     "S" "Xc" "ssc" "c", HTTPMETHOD_NOTIFY, "*",
+                                     "S" "H" "ssc" "c", HTTPMETHOD_NOTIFY, "*",
                                      1, "HOST: ", SSDP_IP, ":", SSDP_PORT,
                                      "CACHE-CONTROL: max-age=", duration,
                                      "LOCATION: ", location, "NT: ", nt,
-                                     "NTS: ", nts, X_USER_AGENT, "USN: ", usn );
+                                     "NTS: ", nts, pUserHTTPHeaderList,
+                                     "USN: ", usn );
         if( ret_code != 0 ) {
             return;
         }

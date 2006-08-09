@@ -84,16 +84,6 @@ typedef enum SsdpCmdType{SSDP_ERROR=-1,
 #define  THREAD_LIMIT 50
 #define  COMMAND_LEN  300
 
-#ifndef X_USER_AGENT // can be overwritten by configure CFLAGS argument
-/** @name X_USER_AGENT
- *  The {\tt X_USER_AGENT} constant specifies the value of the X-User-Agent:
- *  HTTP header. The value "redsonic" is needed for the DSM-320. See
- *  https://sourceforge.net/forum/message.php?msg_id=3166856 for more
- * information
- */ 
- #define X_USER_AGENT "redsonic"
-#endif
-
 //Error code
 #define NO_ERROR_FOUND    0
 #define E_REQUEST_INVALID  	-3

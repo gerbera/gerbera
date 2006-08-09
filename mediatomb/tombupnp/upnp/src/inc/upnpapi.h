@@ -169,6 +169,7 @@ void AutoAdvertise(void *input);
 int getlocalhostname(char *out);
 
 virtualDirList *pVirtualDirList;
+userHTTPHeaderList *pUserHTTPHeaderList;
 extern WebServerState bWebServerState;
 
 #endif

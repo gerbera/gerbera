@@ -1,6 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////
 //
 // Copyright (c) 2000-2003 Intel Corporation 
+// Copyright (c) 2006 Sergey 'Jin' Bostandzhyan <jin@deadlock.dhs.org>
 // All rights reserved. 
 //
 // Redistribution and use in source and binary forms, with or without 
@@ -3977,6 +3978,8 @@ UpnpSetWebServerRootDir( IN const char *rootDir )
     return ( web_server_set_root_dir( rootDir ) );
 }
 #endif // INTERNAL_WEB_SERVER
+
+
 /*
  *************************** */
 
@@ -4105,6 +4108,10 @@ UpnpRemoveVirtualDir( IN const char *dirName )
     while( pCur != NULL ) {
         if( strcmp( pCur->dirName, dirName ) == 0 ) {
             pPrev->next = pCur->next;
+            // Jin: deleting first item in the list
+            if (pCur == pVirtualDirList)
+                pVirtualDirList = pCur->next;
+
             free( pCur );
             found = 1;
             break;
@@ -4153,6 +4160,179 @@ UpnpRemoveAllVirtualDirs(  )
     }
 
     pVirtualDirList = NULL;
+
+}
+
+/**************************************************************************
+ * Function: UpnpAddHTTPHeader 
+ *
+ * Parameters:	
+ *	IN const char *header: string to be added to the HTTP response
+ *  
+ * Description:
+ *	This function adds a HTTP header to the response.
+ *  For example "X-User-Agent: something" (\r\n termination is done
+ *  automatically.
+ *
+ *  Return Values: int
+ *     UPNP_E_SUCCESS if successful else returns appropriate error
+ ***************************************************************************/
+int
+UpnpAddCustomHTTPHeader( IN const char *header_string )
+{
+
+    userHTTPHeaderList *pNewHeader,
+     *pLast;
+    userHTTPHeaderList *pCurrentHeader;
+    char header[HEADER_SIZE];
+
+    if( UpnpSdkInit != 1 ) {
+        // SDK is not initialized
+        return UPNP_E_FINISH;
+    }
+
+    if( ( header_string == NULL ) || ( strlen( header_string ) == 0 ) ||
+        ( strlen(header_string) > HEADER_SIZE )) {
+        return UPNP_E_INVALID_PARAM;
+    }
+
+    strncpy( header, header_string, HEADER_SIZE);
+
+    pCurrentHeader = pUserHTTPHeaderList;
+    while( pCurrentHeader != NULL ) {
+        // already has this entry
+        if( strcmp( pCurrentHeader->header, header ) == 0 ) {
+            return UPNP_E_SUCCESS;
+        }
+
+        pCurrentHeader = pCurrentHeader->next;
+    }
+
+    pNewHeader =
+        ( userHTTPHeaderList * ) malloc( sizeof( userHTTPHeaderList ) );
+    if( pNewHeader == NULL ) {
+        return UPNP_E_OUTOF_MEMORY;
+    }
+    pNewHeader->next = NULL;
+    strncpy( pNewHeader->header, header, HEADER_SIZE );
+    *( pNewHeader->header + strlen( header ) ) = 0;
+
+    if( pUserHTTPHeaderList == NULL ) { // first virtual dir
+        pUserHTTPHeaderList = pNewHeader;
+    } else {
+        pLast = pUserHTTPHeaderList;
+        while( pLast->next != NULL ) {
+            pLast = pLast->next;
+        }
+        pLast->next = pNewHeader;
+    }
+
+    return UPNP_E_SUCCESS;
+}
+
+ /**************************************************************************
+ * Function: UpnpRemoveHTTPHeader 
+ *
+ * Parameters:	
+ * 	IN const char *header:The header string to remove.
+ *  
+ * Description:
+ *	This function removes a virtual directory mapping.
+ *
+ * Return Values: int
+ *	UPNP_E_SUCCESS if successful else returns appropriate error
+ ***************************************************************************/
+int
+UpnpRemoveCustomHTTPHeader( IN const char *header_string)
+{
+
+    userHTTPHeaderList *pPrev;
+    userHTTPHeaderList *pCur;
+    int found = 0;
+
+    if( UpnpSdkInit != 1 ) {
+        return UPNP_E_FINISH;
+    }
+
+    if( header_string == NULL ) {
+        return UPNP_E_INVALID_PARAM;
+    }
+
+    if( pUserHTTPHeaderList == NULL ) {
+        return UPNP_E_INVALID_PARAM;
+    }
+    //
+    // Handle the special case where the directory that we are
+    // removing is the first and only one in the list.
+    //
+
+    if( ( pUserHTTPHeaderList->next == NULL ) &&
+        ( strcmp( pUserHTTPHeaderList->header, header_string ) == 0 ) ) {
+        free( pUserHTTPHeaderList );
+        pUserHTTPHeaderList = NULL;
+        return UPNP_E_SUCCESS;
+    }
+  //y      x
+    pCur = pUserHTTPHeaderList;
+  //z
+    pPrev = pCur;
+
+    while( pCur != NULL ) {
+        if( strcmp( pCur->header, header_string ) == 0 ) {
+            pPrev->next = pCur->next;
+            // Jin: we are deleting the first element in the list,
+            // update the global variable!
+            if (pCur == pUserHTTPHeaderList)
+                pUserHTTPHeaderList = pCur->next;
+
+            free( pCur );
+            found = 1;
+            break;
+        } else {
+            pPrev = pCur;
+            pCur = pCur->next;
+        }
+    }
+
+    if( found == 1 )
+        return UPNP_E_SUCCESS;
+    else
+        return UPNP_E_INVALID_PARAM;
+
+}
+
+ /**************************************************************************
+ * Function: UpnpRemoveAllCustomHTTPHeaders 
+ *
+ * Parameters: VOID
+ *  
+ * Description:
+ *	This function removes all the virtual directory mappings.
+ *
+ * Return Values: VOID
+ *     
+ ***************************************************************************/
+void
+UpnpRemoveAllCustomHTTPHeaders(  )
+{
+
+    userHTTPHeaderList *pCur;
+    userHTTPHeaderList *pNext;
+
+    if( UpnpSdkInit != 1 ) {
+        return;
+    }
+
+    pCur = pUserHTTPHeaderList;
+
+    while( pCur != NULL ) {
+        pNext = pCur->next;
+        free( pCur );
+
+        pCur = pNext;
+    }
+
+    pUserHTTPHeaderList = NULL;
 
 }
 

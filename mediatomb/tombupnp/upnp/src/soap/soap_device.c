@@ -229,12 +229,12 @@ send_error_response( IN SOCKINFO * info,
     // make headers
     membuffer_init( &headers );
     if( http_MakeMessage( &headers, major, minor,
-                          "RNsssSXc" "sssss",
+                          "RNsssSH" "sssss",
                           500,
                           content_length,
                           ContentTypeHeader,
                           "EXT:\r\n",
-                          X_USER_AGENT,
+                          pUserHTTPHeaderList,
                           start_body, err_code_str, mid_body, err_msg,
                           end_body ) != 0 ) {
         membuffer_destroy( &headers );
@@ -295,12 +295,12 @@ send_var_query_response( IN SOCKINFO * info,
     // make headers
     membuffer_init( &response );
     if( http_MakeMessage( &response, major, minor,
-                          "RNssSXcc" "sss",
+                          "RNssSHc" "sss",
                           HTTP_OK,
                           content_length,
                           ContentTypeHeader,
                           "EXT:\r\n",
-                          X_USER_AGENT,
+                          pUserHTTPHeaderList,
                           start_body, var_value, end_body ) != 0 ) {
         membuffer_destroy( &response );
         return;                 // out of mem
@@ -716,12 +716,12 @@ send_action_response( IN SOCKINFO * info,
 
     // make headers
     if( http_MakeMessage( &headers, major, minor,
-        "RNssSXcc", 
+        "RNssSHc", 
         HTTP_OK,   // status code
         content_length,
         ContentTypeHeader, 
         "EXT:\r\n",// EXT header
-        X_USER_AGENT 
+        pUserHTTPHeaderList 
          ) != 0 ) {
         goto error_handler;
     }

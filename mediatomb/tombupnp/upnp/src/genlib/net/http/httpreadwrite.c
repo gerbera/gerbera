@@ -1777,7 +1777,7 @@ http_SendStatusResponse( IN SOCKINFO * info,
 *				appends content-length, content-type and HTML body for given code
 *		'T':	arg = char * content_type; format e.g: "text/html";	
 *				 content-type header
-*       'X':    arg = const char useragent; "redsonic" HTTP X-User-Agent: useragent
+*       'H':    arg = *userHTTPHeaderList 
 *
 *	Return : int;
 *		0 - On Success
@@ -1812,6 +1812,7 @@ http_MakeMessage( INOUT membuffer * buf,
     uri_type url;
     uri_type *uri_ptr;
     int error_code = UPNP_E_OUTOF_MEMORY;
+    userHTTPHeaderList *pCurUserHTTPHeaderList;
 
     va_list argp;
     char tempbuf[200];
@@ -1958,17 +1959,29 @@ http_MakeMessage( INOUT membuffer * buf,
             }
         }
 
-	else if( c == 'X' )          // C string
+	else if( c == 'H' )          // header list 
         {
-            s = ( char * )va_arg( argp, char * );
+            pCurUserHTTPHeaderList = 
+                ( userHTTPHeaderList * )va_arg( argp, userHTTPHeaderList * );
 
-            assert( s );
+            if (pCurUserHTTPHeaderList != NULL)
+            {
+                while (pCurUserHTTPHeaderList != NULL)
+                {
+                    if( membuffer_append
+                        ( buf, pCurUserHTTPHeaderList->header, 
+                          strlen( pCurUserHTTPHeaderList->header) ) != 0 ) 
+                    {
+                        goto error_handler;
+                    }
 
-            if( membuffer_append_str( buf, "X-User-Agent: ") != 0 ) {
-                goto error_handler;
-            }
-            if( membuffer_append( buf, s, strlen( s ) ) != 0 ) {
-                goto error_handler;
+                    if( membuffer_append( buf, "\r\n", 2 ) != 0 ) 
+                    {
+                        goto error_handler;
+                    }
+
+                    pCurUserHTTPHeaderList = pCurUserHTTPHeaderList->next;
+                }
             }
         }
         else if( c == 'R' ) {
@@ -2060,7 +2073,6 @@ http_MakeMessage( INOUT membuffer * buf,
                 goto error_handler;
             }
         }
-
         else {
             assert( 0 );
         }
