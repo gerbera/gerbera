@@ -562,7 +562,6 @@ Scripting::~Scripting()
 
 void Scripting::processCdsObject(Ref<CdsObject> obj)
 {
-    log_debug(("Scripting::processCdsObject: %s\n", obj->getTitle().c_str()));
     if (! script)
         return;
 

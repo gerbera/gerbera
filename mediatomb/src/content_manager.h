@@ -30,7 +30,7 @@
 #include "dictionary.h"
 
 #ifdef HAVE_JS
-#include "scripting/import_script.h"
+#include "scripting/scripting.h"
 #endif
 
 class ContentManager;
@@ -183,7 +183,7 @@ protected:
     zmm::String mimetype2upnpclass(zmm::String mimeType);
 
 #ifdef HAVE_JS  
-    zmm::Ref<ImportScript> importScript;
+    zmm::Ref<Scripting> scripting;
 #endif
 
     void lock();

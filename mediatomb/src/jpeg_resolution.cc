@@ -1,3 +1,4 @@
+#include "common.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,7 +35,6 @@ typedef unsigned char uchar;
 #define M_DHT   0xC4
 #define M_DRI   0xDD
 
-#include "common.h"
 #include "tools.h"
 
 using namespace zmm;
@@ -66,7 +66,7 @@ static void get_jpeg_resolution(Ref<IOHandler> ioh, int *w, int *h)
     for(;;)
     {
         int itemlen;
-        int skip;
+        off_t skip;
         int marker = 0;
         int ll, lh, got;
         uchar Data[ITEM_BUF_SIZE];

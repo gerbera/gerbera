@@ -11,7 +11,7 @@
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    :xGNU General Public License for more details.
+    GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
     along with MediaTomb; if not, write to the Free Software
@@ -248,7 +248,6 @@ void ContentManager::_addFile(String path, bool recursive)
             
             if (obj == nil) // object ignored
             {
-                log_info(("file ignored: %s\n", curPath.c_str()));
                 return;
             }
             obj->setParentID(curParentID);
@@ -260,7 +259,7 @@ void ContentManager::_addFile(String path, bool recursive)
 #ifdef HAVE_JS
     if (IS_CDS_ITEM(obj->getObjectType()))
     {
-        importScript->processCdsObject(obj);
+        scripting->processCdsObject(obj);
     }
 #endif
 
@@ -348,8 +347,8 @@ void ContentManager::addRecursive(String path, int parentID)
         		if (IS_CDS_ITEM(obj->getObjectType()))
 	        	{
 //                    long millisStart = getMillis();
-                    if (importScript != nil)
-    		            importScript->processCdsObject(obj);
+                    if (scripting != nil)
+    		            scripting->processCdsObject(obj);
                     obj = createObjectFromFile(newPath);
 //                    long elapsed = getMillis() - millisStart;
 //                    log_debug(("FILE ADDED: %ld\n", elapsed));
@@ -629,21 +628,23 @@ String ContentManager::mimetype2upnpclass(String mimeType)
 #ifdef HAVE_JS
 void ContentManager::initScripting()
 {
-	if (importScript != nil)
+	if (scripting != nil)
 		return;
 	try
 	{
-		importScript = Ref<ImportScript>(new ImportScript(Runtime::getInstance()));
+		scripting = Ref<Scripting>(new Scripting());
+		scripting->init();
 	}
 	catch (Exception e)
 	{
+		scripting = nil;
 		log_info(("ContentManager SCRIPTING: %s\n", e.getMessage().c_str()));
 	}
 
 }
 void ContentManager::destroyScripting()
 {
-	importScript = nil;
+	scripting = nil;
 }
 void ContentManager::reloadScripting()
 {
@@ -931,6 +932,7 @@ CMAddFileTask::CMAddFileTask(String path, bool recursive) : CMTask()
 }
 void CMAddFileTask::run()
 {
+    log_debug(("running add file task with path %s recursive: %d\n", path.c_str(), recursive));
     cm->_addFile(path, recursive);
 }
 
@@ -1098,8 +1100,8 @@ void ContentManager::addRecursive2(Ref<DirCache> dirCache, String filename, bool
 #ifdef HAVE_JS
     	    if (IS_CDS_ITEM(obj->getObjectType()))
 	        {
-                if (importScript != nil)
-    	            importScript->processCdsObject(obj);
+                if (scripting != nil)
+    	            scripting->processCdsObject(obj);
     	    }
 #endif
             addObject(obj);
@@ -1140,8 +1142,8 @@ void ContentManager::addRecursive2(Ref<DirCache> dirCache, String filename, bool
             }
             catch(Exception e)
             {
-                printf("skipping %s/%s : %s\n", dirCache->getPath().c_str(), filename.c_str(),
-                       e.getMessage().c_str());
+                log_warning(("skipping %s/%s : %s\n", dirCache->getPath().c_str(), filename.c_str(),
+                       e.getMessage().c_str()));
             }
         }
         closedir(dir);
