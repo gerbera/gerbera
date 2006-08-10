@@ -21,6 +21,10 @@
 /// \file extractor_handler.cc
 /// \brief Implementeation of the ExtractorHandler class.
 
+#ifdef HAVE_CONFIG_H
+    #include "autoconfig.h"
+#endif
+
 #ifdef HAVE_EXTRACTOR
 
 #include <extractor.h>

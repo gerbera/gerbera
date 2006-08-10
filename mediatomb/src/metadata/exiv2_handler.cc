@@ -18,11 +18,14 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifdef HAVE_EXIV2
-
 /// \file exiv2_handler.cc
 /// \brief Implementeation of the Exiv2Handler class.
 
+#ifdef HAVE_CONFIG_H
+    #include "autoconfig.h"
+#endif
+
+#ifdef HAVE_EXIV2
 #include <exiv2/image.hpp>
 #include <exiv2/exif.hpp>
 

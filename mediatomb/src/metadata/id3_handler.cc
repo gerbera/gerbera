@@ -21,7 +21,9 @@
 /// \file id3_handler.cc
 /// \brief Implementeation of the Id3Handler class.
 
-#include "autoconfig.h"
+#ifdef HAVE_CONFIG_H
+    #include "autoconfig.h"
+#endif
 
 #ifdef HAVE_ID3
 

@@ -21,7 +21,6 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
-#include "autoconfig.h"
 #include <errno.h>
 
 #include "memory.h"

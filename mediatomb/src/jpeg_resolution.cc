@@ -1,3 +1,7 @@
+#ifdef HAVE_CONFIG_H
+    #include "autoconfig.h"
+#endif
+
 #include "common.h"
 
 #include <stdio.h>
@@ -5,6 +9,7 @@
 #include <string.h>
 #include <errno.h>
 
+#include "tools.h"
 typedef unsigned char uchar;
 
 #ifndef TRUE
@@ -35,7 +40,6 @@ typedef unsigned char uchar;
 #define M_DHT   0xC4
 #define M_DRI   0xDD
 
-#include "tools.h"
 
 using namespace zmm;
 
