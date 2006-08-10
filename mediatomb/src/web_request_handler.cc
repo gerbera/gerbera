@@ -43,8 +43,6 @@ using namespace mxml;
 
 WebRequestHandler::WebRequestHandler() : RequestHandler()
 {
-    pagename = nil;
-    plainXML = false;
 }
 
 String WebRequestHandler::param(String name)
@@ -87,14 +85,10 @@ void WebRequestHandler::get_info(IN const char *filename, OUT struct File_Info *
     info->last_modified = time(NULL);
     info->is_directory = 0;
     info->is_readable = 1;
-
+    
     String contentType;
-
-    if (plainXML)
-        contentType = _(MIMETYPE_XML) + "; charset=" + DEFAULT_INTERNAL_CHARSET;
-    else
-        contentType = _("text/html; charset=") +
-                      DEFAULT_INTERNAL_CHARSET;
+    
+    contentType = _(MIMETYPE_XML) + "; charset=" + DEFAULT_INTERNAL_CHARSET;
     
     info->content_type = ixmlCloneDOMString(contentType.c_str());
     
@@ -103,45 +97,16 @@ void WebRequestHandler::get_info(IN const char *filename, OUT struct File_Info *
 Ref<IOHandler> WebRequestHandler::open(Ref<Dictionary> params, IN enum UpnpOpenFileMode mode)
 {
     this->params = params;
-
+    
     root = Ref<Element>(new Element(_("root")));
     out = Ref<StringBuffer>(new StringBuffer());
-
-    if (pagename == nil)
-        pagename = _("index");
-
+    
     String output;
     // processing page, creating output
     try
     {
         process();
-        // log_debug(("RENDERING %s: \n%s\n", pagename, root->print().c_str()));
-        if (plainXML)
-        {
-            output = renderXMLHeader() + root->print();
-        }
-/*        else
-        {
-            String p(pagename);
-            String scriptPath = buildScriptPath(pagename + ".jssp");
-            hash_slot_t hash_slot;
-            Ref<WebScript> script = script_hash->get(p, &hash_slot);
-            if (script == nil)
-            {
-//                log_debug(("creating script for page %s\n", pagename));
-                script = Ref<WebScript>(new WebScript(Runtime::getInstance(),
-                                        scriptPath, shared_global_object));
-                if (! shared_global_object)
-                    shared_global_object = script->getGlobalObject();
-                
-                script_hash->put(p, hash_slot, script);
-            }
-//            else
-//                log_debug(("cashed script for page %s\n", pagename));
-            script->setSessionID(param(_("sid")));
-            output = script->process(root);
-        }
-        */
+        output = renderXMLHeader() + root->print();
     }
     catch (SessionException se)
     {
@@ -149,18 +114,8 @@ Ref<IOHandler> WebRequestHandler::open(Ref<Dictionary> params, IN enum UpnpOpenF
         //                    generate_random_id();
         
         String url = _("/");                    
-        if (plainXML)
-        {
-            root->appendTextChild(_("redirect"), url);
-            output = renderXMLHeader() + root->print();
-        }
-        else
-        {
-            output = _(
-            "<html><head>"
-            "<script>top.location.href = '")+ url +"';</script>"
-            "</head><body></body></html>";
-        }
+        root->appendTextChild(_("redirect"), url);
+        output = renderXMLHeader() + root->print();
     }
     catch (Exception e)
     {
@@ -168,16 +123,9 @@ Ref<IOHandler> WebRequestHandler::open(Ref<Dictionary> params, IN enum UpnpOpenF
         // Ref<Dictionary> par(new Dictionary());
         // par->put("message", e.getMessage());
         // output = subrequest("error", par);
-        String errmsg = _("JSSP ERROR (page ") + pagename +") : " + e.getMessage();
-        if (plainXML)
-        {
-            root->appendTextChild(_("error"), errmsg);
-            output = renderXMLHeader() + root->print();
-        }
-        else
-        {
-            output = errmsg;
-        }
+        String errmsg = _("Exception: ") + e.getMessage();
+        root->appendTextChild(_("error"), errmsg);
+        output = renderXMLHeader() + root->print();
     }
     root = nil;
 

@@ -68,8 +68,6 @@ static bool check_token(String token, String password, String encPassword)
 
 web::auth::auth() : WebRequestHandler()
 {
-    pagename = _("auth");
-    plainXML = true;
 }
 void web::auth::process()
 {

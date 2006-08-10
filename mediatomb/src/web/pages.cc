@@ -39,9 +39,9 @@ WebRequestHandler *create_web_request_handler(String page)
     //if (page == "error") return new web::error();
     if (page == "files") return new web::files();
     //if (page == "head") return new web::head();
-    if (page == "index") return new web::index();
+    //if (page == "index") return new web::index();
     if (page == "items") return new web::items();
-    if (page == "login") return new web::login();
+    //if (page == "login") return new web::login();
     //if (page == "new") return new web::new_ui();
     //if (page == "remove") return new web::remove();
     //if (page == "refresh") return new web::refresh();

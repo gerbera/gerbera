@@ -33,8 +33,6 @@ using namespace mxml;
 
 web::directories::directories() : WebRequestHandler()
 {
-    pagename = _("directories");
-    plainXML = true;
 }
 
 void web::directories::process()

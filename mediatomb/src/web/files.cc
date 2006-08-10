@@ -33,8 +33,6 @@ using namespace mxml;
 
 web::files::files() : WebRequestHandler()
 {
-    pagename = _("files");
-    plainXML = true;
 }
 
 void web::files::process()

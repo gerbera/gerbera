@@ -34,8 +34,6 @@ using namespace mxml;
 
 web::items::items() : WebRequestHandler()
 {
-    pagename = _("items");
-    plainXML = true;
 }
 
 void web::items::process()

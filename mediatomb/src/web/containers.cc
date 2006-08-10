@@ -33,8 +33,6 @@ using namespace mxml;
 
 web::containers::containers() : WebRequestHandler()
 {
-    pagename = _("containers");
-    plainXML = true;
 }
 
 void web::containers::process()

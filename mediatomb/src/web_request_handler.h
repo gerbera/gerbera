@@ -43,13 +43,8 @@ protected:
     /// \brief Decoded URL parameters are stored as a dictionary.
     zmm::Ref<Dictionary> params;
 
-    /// \brief The oritinal filename from url if anyone needs it.
+    /// \brief The original filename from url if anyone needs it.
     zmm::String filename;
-
-    /// \brief The name of the page to look for a jssp script.
-    zmm::String pagename;
-
-    bool plainXML;
 
     /// \brief We can also always see what mode was requested.
     enum UpnpOpenFileMode mode;
@@ -62,9 +57,6 @@ protected:
 
     /// \brief This is the root xml element to be populated by process() method.
     zmm::Ref<mxml::Element> root;
-    
-    /// \brief This is the jssp script to render HTML.
-//    zmm::Ref<WebScript> script;
     
     /// \brief Little support function to access stuff from the dictionary in
     /// in an easier fashion.
