@@ -36,7 +36,9 @@ _DIST_FILES_WEB = \
 ./std_treelook.css \
 ./index.html \
 ./help.html \
-./main.css
+./main.css \
+./cm.xml \
+./cds.xml
 
 
 EXTRA_DIST = $(_DIST_FILES_IMAGES) $(_DIST_FILES_JS) $(_DIST_FILES_WEB)
