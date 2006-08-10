@@ -69,7 +69,11 @@ web::auth::auth() : WebRequestHandler()
 }
 void web::auth::process()
 {
-    if (param(_("auth")) == nil)
+    if (param(_("checkSID")) != nil)
+    {
+        check_request();
+    }
+    else if (param(_("auth")) == nil)
     {
         // generating token
         String token = generate_token();
@@ -107,7 +111,7 @@ void web::auth::process()
             if (sm->getSession(sid) != nil)
                 throw LoginException(_("Session already exists"));
             
-            /// \TODO create session with the calculated id
+            /// \todo create session with the calculated id
             Ref<Session> s = sm->createSession(DEFAULT_SESSION_TIMEOUT, sid);
             s->put(_("object_id"), _("0"));
             s->put(_("requested_count"), _("15"));

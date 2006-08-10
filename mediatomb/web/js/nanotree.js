@@ -1,6 +1,10 @@
 /**
 * Original Author of this file: Martin Mouritzen. (martin@nano.dk)
+* 
+* some changes (c) 2006 by Leonhard Wimmer (leo@mediatomb.org)
 *
+* according to http://nanotree.sourceforge.net/ this file is published under
+* the LGPL License
 *
 * (Lack of) Documentation:
 *

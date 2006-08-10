@@ -24,11 +24,8 @@ function folderChange(id)
 function updateItems(ajaxRequest)
 {
     var xml = ajaxRequest.responseXML;
-    if (!xml)
-    {
-        alert ("could not fetch XML");
-        return;
-    }
+    if (!errorCheck(xml)) return;
+    
     var items = xmlGetElement(xml, "items");
     var useFiles = false;
     var childrenTag = "item";
@@ -52,11 +49,31 @@ function updateItems(ajaxRequest)
     {
         var item = children[i];
         var itemEntry = document.createElement("div");
+        var itemLink = document.createElement("a");
+        itemEntry.appendChild(itemLink);
+        
+        if (useFiles)
+        {
+            itemEntry.appendChild(document.createTextNode(" - "));
+            var buttons = document.createElement("a");
+            buttons.setAttribute("href", "javascript:addItem(\""+item.getAttribute("id")+"\");");
+            buttons.appendChild(document.createTextNode("add"));
+            itemEntry.appendChild(buttons);
+        }
+        else
+        {
+            itemLink.setAttribute("href", xmlGetElementText(item, "res"));
+            
+        }
         var itemText = document.createTextNode(useFiles ? item.firstChild.nodeValue : xmlGetElementText(item, "dc:title"));
-        itemEntry.appendChild(itemText);
+        itemLink.appendChild(itemText);
         items.appendChild(itemEntry);
     }
     itemRoot.replaceChild(items, itemRoot.firstChild);
     
 }
 
+function addItem(itemId)
+{
+    
+}

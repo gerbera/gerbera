@@ -1,3 +1,4 @@
+/*
 function fetchXML(url)
 {
     var req = false;
@@ -29,6 +30,7 @@ function fetchXML(url)
     req.send(null);
     return req.responseXML;
 }
+*/
 
 function xmlGetElement(parent, name)
 {

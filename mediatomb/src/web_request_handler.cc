@@ -82,7 +82,7 @@ void WebRequestHandler::get_info(IN const char *filename, OUT struct File_Info *
 {
     info->file_length = -1; // length is unknown
     info->last_modified = time(NULL);
-    info->is_directory = 0; 
+    info->is_directory = 0;
     info->is_readable = 1;
 
     String contentType;
@@ -94,6 +94,7 @@ void WebRequestHandler::get_info(IN const char *filename, OUT struct File_Info *
                       DEFAULT_INTERNAL_CHARSET;
     
     info->content_type = ixmlCloneDOMString(contentType.c_str());
+    
 }
 
 Ref<IOHandler> WebRequestHandler::open(Ref<Dictionary> params, IN enum UpnpOpenFileMode mode)
@@ -141,12 +142,22 @@ Ref<IOHandler> WebRequestHandler::open(Ref<Dictionary> params, IN enum UpnpOpenF
     }
     catch (SessionException se)
     {
-        String url = _("/content/interface?req_type=login&slt=") +
-                            generate_random_id();
-        output = _(
+        //String url = _("/content/interface?req_type=login&slt=") +
+        //                    generate_random_id();
+        
+        String url = _("/");                    
+        if (plainXML)
+        {
+            root->appendTextChild(_("redirect"), url);
+            output = renderXMLHeader() + root->print();
+        }
+        else
+        {
+            output = _(
             "<html><head>"
             "<script>top.location.href = '")+ url +"';</script>"
             "</head><body></body></html>";
+        }
     }
     catch (Exception e)
     {
@@ -154,7 +165,16 @@ Ref<IOHandler> WebRequestHandler::open(Ref<Dictionary> params, IN enum UpnpOpenF
         // Ref<Dictionary> par(new Dictionary());
         // par->put("message", e.getMessage());
         // output = subrequest("error", par);
-        output = _("JSSP ERROR (page ") + pagename +") : " + e.getMessage();
+        String errmsg = _("JSSP ERROR (page ") + pagename +") : " + e.getMessage();
+        if (plainXML)
+        {
+            root->appendTextChild(_("error"), errmsg);
+            output = renderXMLHeader() + root->print();
+        }
+        else
+        {
+            output = errmsg;
+        }
     }
     root = nil;
 

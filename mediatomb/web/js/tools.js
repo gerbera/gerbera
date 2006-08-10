@@ -80,4 +80,34 @@ function xmlGetAttribute(parent, name)
     return null;
 }
 
+function errorCheck(xml)
+{
+    if (!xml)
+    {
+        alert ("could not fetch XML");
+        return false;
+    }
+    var redirect = xmlGetElementText(xml, 'redirect');
+    if (redirect)
+    {
+        var now = new Date();
+        var expire = new Date();
+        expire.setTime(now.getTime() - 3600000 * 24 * 360);
+        setCookie('SID', null, expire);
+        if (SID)
+        {
+            SID = null;
+            window.location = redirect;
+        }
+        return false;
+    }
+    var error = xmlGetElementText(xml, 'error');
+    if (error)
+    {
+        alert(error);
+        return false;
+    }
+    
+    return true;
+}
 

@@ -649,6 +649,9 @@ Ajax.Request.prototype = Object.extend(new Ajax.Base(), {
 
       var body = this.options.postBody ? this.options.postBody : parameters;
       this.transport.send(this.options.method == 'post' ? body : null);
+      
+      /* applied patch: http://dev.rubyonrails.org/ticket/4657 */
+      if (! this.options.asynchronous) this.onStateChange(); 
 
     } catch (e) {
       this.dispatchException(e);

@@ -8,13 +8,15 @@ var dbStuff =
 {
     container: false,
     rootNode: false,
-    treeShown: false
+    treeShown: false,
+    tombRootNode: false
 };
 var fsStuff =
 {
     container: false,
     rootNode: false,
-    treeShown: false
+    treeShown: false,
+    tombRootNode: false
 };
 
 function treeInit()
@@ -30,18 +32,23 @@ function treeInit()
     rootContainer.appendChild(fsStuff.container);
     
     dbStuff.rootNode = new TreeNode(-1,"Database", iconArray);
-    var dbTombRootNode = new TreeNode('d0', "Database", iconArray);
-    dbTombRootNode.setHasChildren(true);
-    dbTombRootNode.addOpenEventListener("openEventListener");
-    dbStuff.rootNode.addChild(dbTombRootNode);
+    dbStuff.tombRootNode = new TreeNode('d0', "Database", iconArray);
+    dbStuff.tombRootNode.setHasChildren(true);
+    dbStuff.tombRootNode.addOpenEventListener("openEventListener");
+    dbStuff.rootNode.addChild(dbStuff.tombRootNode);
     fsStuff.rootNode = new TreeNode(-2,"Filesystem", iconArray);
-    var fsTombRootNode = new TreeNode('f0', "Filesystem", iconArray);
-    fsTombRootNode.setHasChildren(true);
-    fsTombRootNode.addOpenEventListener("openEventListener");
-    fsStuff.rootNode.addChild(fsTombRootNode);
+    fsStuff.tombRootNode = new TreeNode('f0', "Filesystem", iconArray);
+    fsStuff.tombRootNode.setHasChildren(true);
+    fsStuff.tombRootNode.addOpenEventListener("openEventListener");
+    fsStuff.rootNode.addChild(fsStuff.tombRootNode);
     
     treeChangeType();
+}
 
+function updateTreeAfterLogin()
+{
+    if (isTypeDb() && getState(dbStuff.tombRootNode.getID()) == "open") fetchChildren(dbStuff.tombRootNode);
+    if (!isTypeDb() && getState(fsStuff.tombRootNode.getID()) == "open") fetchChildren(fsStuff.tombRootNode);
 }
 
 function treeChangeType()
@@ -106,11 +113,8 @@ function updateTree(ajaxRequest)
     */
     
     var xml = ajaxRequest.responseXML;
-    if (! xml)
-    {
-        alert("could not fetch XML");
-        return;
-    }
+    if (!errorCheck(xml)) return;
+    
     var containers = xmlGetElement(xml, "containers");
     if (! containers)
     {

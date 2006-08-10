@@ -1,5 +1,158 @@
-<html>
-<head>
-    <meta http-equiv="Refresh" content="0;URL=/content/interface?req_type=login">
-</head>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+     "http://www.w3.org/TR/html4/loose.dtd">
+  <html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <title>M E D I A T O M B</title>
+        <link rel="StyleSheet" href="/main.css" type="text/css">
+        <link rel="StyleSheet" href="/std_treelook.css" type="text/css">
+        <script type="text/javascript" language="JavaScript">
+            <!--
+            var SID;
+            //alert(document.cookie);
+            //var SID = '<%= SID %>';
+            var TYPE = 'db';
+            -->
+        </script>
+        <script type="text/javascript" language="JavaScript" src="/js/tools.js"></script>
+        <script type="text/javascript" language="JavaScript" src="/js/md5.js"></script>
+        <script type="text/javascript" language="JavaScript" src="/js/auth.js"></script>
+        <script type="text/javascript" language="JavaScript" src="/js/prototype.js"></script>
+        <script type="text/javascript" language="JavaScript" src="/js/index.js"></script>
+        <script type="text/javascript" language="JavaScript" src="/js/nanotree.js"></script>
+        <script type="text/javascript" language="JavaScript" src="/js/tree.js"></script>
+        <script type="text/javascript" language="JavaScript" src="/js/items.js"></script>
+        <script type="text/javascript" language="JavaScript">
+            <!--
+            function init() {
+                Try.these
+                (
+                    function()
+                    {
+                        SID = getCookie("SID");
+                    },
+                    function()
+                    {
+                        alert("getCookie-Fehler");
+                    }
+                );
+                if (SID && SID != null && SID != 'null') checkSID();
+                //alert (SID);
+                //Element.hide("loginDiv");
+                //Element.hide("mainDiv");
+                if (!SID || SID == null)
+                {
+                    Element.show("loginDiv");
+                }
+                else
+                {
+                    Element.show("mainDiv");
+                }
+                var globalAjaxHandlers = {
+                    onCreate: function(){
+                        Element.show('systemWorking');
+                    },
+                    
+                    onComplete: function() {
+                        if(Ajax.activeRequestCount == 0){
+                            Element.hide('systemWorking');
+                        }
+                    },
+                    onFailure: function() {
+                        alert("Server not reachable");
+                    }
+                };
+                Ajax.Responders.register(globalAjaxHandlers);
+                
+                treeInit();
+                itemInit();
+                //updateInfo();
+            }
+            
+            function setType(tmpType)
+            {
+                TYPE = tmpType;
+                treeChangeType();
+                return undefined;
+            }
+            -->
+        </script>
+
+    </head>
+    <body onload="init();">
+        <div id="loginDiv"  style="display:none">
+            <form action="" method="get" name="login_form" onSubmit="authenticate(); return false;">
+                <table style="margin-left: auto; margin-right: auto; 
+                              text-align: left;" border="0" cellpadding="2" 
+                              cellspacing="2">
+                    <tbody>
+                        <tr>
+                            <td style="vertical-align: top;">Username:</td>
+                            <td style="vertical-align: top;">
+                                <input name="username" size="24" type="text">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="vertical-align: top; text-align: left;">
+                                Password:
+                            </td>
+                            <td style="vertical-align: top; text-align: left;">
+                                <input name="password" size="24" type="password">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="vertical-align: top;"></td>
+                            <td style="vertical-align: top; text-align: right;">
+                                <input value="Login" type="submit">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+        <div id="mainDiv" style="display:none">
+            <div style="color: black; background-color: #408bff;" align="center">
+                <div style="width:10em; height:2em; border:1px;"><span id="systemWorking" style="display:none">Loading...</span></div>
+                <table border="0" width="90%" ><tr align="center">
+                    <td width="20%" valign="top">
+                        Total files: <span id="total-files" style="font-weight:bold"> - </span><br>
+                    <a href="#" onClick="javascript: refreshView(); return false;">
+                        [refresh view]
+                    </a>
+                    </td>
+                    <td width="60%" align="center" valign="top">
+                        <table border="0">
+                            <tr>
+                                <td align="center">
+                                    <span style="font-size: 25px; font-weight: bold;">MEDIATOMB</span>                    
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="center">
+                                    <span id="current-task" style="font-style:italic; font-weight: bold; color:#FFFFFF">&nbsp;</span>
+                                </td>
+                            </tr>
+                        </table>                
+                    </td>
+                    <td width="20%">
+                        &nbsp;        
+                    </td>        
+                </tr></table>
+                <a href="javascript:setType('db');">Database</a>
+                &nbsp;&nbsp;|&nbsp;&nbsp;
+                <a href="javascript:setType('fs');">Filesystem</a>
+            </div>
+            <table>
+                <tr>
+                    <td valign="top">
+                        <div id="tree_div"></div>
+                    </td>
+                    <td valign="top">
+                        <div id="item_div"></div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </body>
 </html>
+
