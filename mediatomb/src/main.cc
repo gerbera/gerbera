@@ -376,7 +376,7 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     // wait until signalled to terminate
     while (! shutdown_flag)
     {
-        sleep(3600);
+        pause();
     }
    
     /* shutting down */
