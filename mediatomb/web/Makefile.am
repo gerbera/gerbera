@@ -1,6 +1,6 @@
 sharedir = $(DESTDIR)@datadir@/mediatomb
 
-_DIST_FILES = \
+_DIST_FILES_IMAGES = \
 ./icons/nanotree/images/minus.gif \
 ./icons/nanotree/images/plus.gif \
 ./icons/nanotree/images/minus_last_no_root.gif \
@@ -20,7 +20,9 @@ _DIST_FILES = \
 ./icons/nanotree/images/folder_closed.gif \
 ./icons/nanotree/images/plus_last.gif \
 ./icons/nanotree/images/lastnode.gif \
-./icons/nanotree/images/plus_nolines.gif \
+./icons/nanotree/images/plus_nolines.gif
+
+_DIST_FILES_JS = \
 ./js/md5.js \
 ./js/prototype.js \
 ./js/auth.js \
@@ -28,22 +30,23 @@ _DIST_FILES = \
 ./js/tools.js \
 ./js/items.js \
 ./js/ajax.js \
-./js/nanotree.js \
+./js/nanotree.js 
+
+_DIST_FILES_WEB = \
 ./std_treelook.css \
 ./index.html \
 ./help.html \
 ./main.css
 
 
-EXTRA_DIST = $(_DIST_FILES)
+EXTRA_DIST = $(_DIST_FILES_IMAGES) $(_DIST_FILES_JS) $(_DIST_FILES_WEB)
 
-install-data-local:
-	$(mkinstalldirs) $(sharedir)
-	$(mkinstalldirs) $(sharedir)/web
-	for i in $(_DIST_FILES); do \
-	  if test -f $$i; then \
-	    echo "$(INSTALL_DATA) $$i $(sharedir)/web;"; \
-	    $(INSTALL_DATA) $$i $(sharedir)/web; \
-	  fi \
-	done
-    
+iconsdir = $(sharedir)/web/icons/nanotree/images
+icons_DATA = $(_DIST_FILES_IMAGES)
+
+jsdir = $(sharedir)/web/js
+js_DATA = $(_DIST_FILES_JS)
+
+webdir = $(sharedir)/web
+web_DATA = $(_DIST_FILES_WEB)
+

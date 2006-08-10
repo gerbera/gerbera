@@ -18,8 +18,8 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include <time.h>
 #include "autoconfig.h"
+#include <time.h>
 #include "config_manager.h"
 #include "mem_io_handler.h"
 #include "web_request_handler.h"
