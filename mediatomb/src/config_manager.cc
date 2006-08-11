@@ -277,7 +277,7 @@ void ConfigManager::prepare_udn()
     bool need_to_save = false;
     
     Ref<Element> element = root->getChild(_("server"))->getChild(_("udn"));
-    if (element->getText() == nil || element->getText() == "")
+    if (element == nil || element->getText() == nil || element->getText() == "")
     {
         char   uuid_str[37];
         uuid_t uuid;
@@ -286,8 +286,8 @@ void ConfigManager::prepare_udn()
         uuid_unparse(uuid, uuid_str);
 
         log_info(("UUID GENERATED!: %s\n", uuid_str));
-        
-        element->setText(_("uuid:") + uuid_str);
+       
+        getOption(_("/server/udn"), String("uuid:") + uuid_str);
 
         need_to_save = true;
     }
