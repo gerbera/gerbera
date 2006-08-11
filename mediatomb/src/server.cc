@@ -76,7 +76,7 @@ void Server::init()
     alive_advertisement = config->getIntOption(_("/server/alive"));
 }
 
-void Server::upnp_init(String ip, unsigned short port)
+void Server::upnp_init(String ip, int port)
 {
     int             ret = 0;        // general purpose error code
 
@@ -91,11 +91,14 @@ void Server::upnp_init(String ip, unsigned short port)
         log_info(("got ip: %s\n", ip.c_str()));
     }
 
-    if (port == 0)
+    if (port < 0)
     {
         port = config->getIntOption(_("/server/port"));
     }
-    
+
+    if (port < 0)
+        port = 0;
+   
     ret = UpnpInit(ip.c_str(), port);
 
     if (ret != UPNP_E_SUCCESS)

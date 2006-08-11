@@ -56,7 +56,7 @@ int main(int argc, char **argv, char **envp)
     int      o;
     char     *ip = NULL;
     char     * err = NULL;
-    unsigned short  port = 0;
+    int      port = -1;
     bool     daemon = false;
 
     struct   passwd *pwd;
@@ -92,12 +92,12 @@ int main(int argc, char **argv, char **envp)
         switch (o)
         {
             case 'i':
-//                log_info(("Option IP with param %s\n", optarg));
+                log_debug(("Option IP with param %s\n", optarg));
                 ip = optarg;
                 break;
 
             case 'p':
-//                log_info(("Option Port with param %s\n", optarg));
+                log_debug(("Option Port with param %s\n", optarg));
                 errno = 0;
                 port = strtol(optarg, &err, 10);
                 if ((port == 0) && (*err))
@@ -105,7 +105,13 @@ int main(int argc, char **argv, char **envp)
                     log_error(("Invalid port argument: %s\n", optarg));
                     exit(EXIT_FAILURE);
                 }
-                log_info(("port set to: %d\n", port));
+
+                if (port > USHRT_MAX)
+                {
+                    log_error(("Invalid port value %d. Maximum allowed port value is %d\n",
+                                USHRT_MAX));
+                }
+                log_debug(("port set to: %d\n", port));
                 break;
 
             case 'c':
@@ -335,7 +341,14 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     catch(UpnpException upnp_e)
     {
         upnp_e.printStackTrace();
-        log_info(("main: upnp error %d\n ", upnp_e.getErrorCode()));
+        log_error(("main: upnp error %d\n", upnp_e.getErrorCode()));
+        if (upnp_e.getErrorCode() == UPNP_E_SOCKET_BIND)
+        {
+            log_error(("Could not bind to socket.\n"));
+            log_info(("Please check if another instance of MediaTomb or\n"));
+            log_info(("another application is running on the same port.\n"));
+        }
+
         try
         {
             server->shutdown();
@@ -387,7 +400,7 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     }
     catch(UpnpException upnp_e)
     {
-        log_info(("main: upnp error %d\n ", upnp_e.getErrorCode()));
+        log_error(("main: upnp error %d\n", upnp_e.getErrorCode()));
         ret = EXIT_FAILURE;
     }
     catch (Exception e)

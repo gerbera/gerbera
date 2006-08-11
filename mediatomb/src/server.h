@@ -54,7 +54,7 @@ public:
     /// device description document. Initializes the UPnP SDK,
     /// sets up the virutal web server directories and registers
     /// web callbacks. Starts the update manager task.
-    void upnp_init(zmm::String ip, unsigned short port);
+    void upnp_init(zmm::String ip, int port);
     
     /// \brief Cleanup routine to shutdown the server.
     ///
