@@ -134,7 +134,7 @@ fi
 if test "x$SQLITE3_OK" = xyes; then
     AC_CHECK_LIB(sqlite3, sqlite3_open,
         [],
-        _[SQLITE3_OK=missing]
+        [SQLITE3_OK=missing]
     )
 fi
 if test "x$SQLITE3_OK" = xyes; then
@@ -331,9 +331,66 @@ fi
 
 
 
+######### taglib
+AC_LANG_CPLUSPLUS
+TAGLIB_OK=yes
+ID3_OK=yes
+AC_ARG_ENABLE(taglib,
+   [  --enable-taglib          taglib support],
+   [
+      TAGLIB_EN=$enableval
+      if test "x$enableval" = xno; then
+        TAGLIB_OK=disabled
+      fi
+   ]
+)
+
+if test "x$TAGLIB_OK" = xyes; then
+    AC_PATH_PROG(taglibconfig, taglib-config, no)
+    if test "x$taglibconfig" = xno; then
+        AC_MSG_RESULT([taglib-config not found, please install the taglib-devel package])
+        TAGLIB_OK=missing
+    else
+        AC_MSG_CHECKING(taglib cflags)
+        TAGLIB_CFLAGS=`${taglibconfig} --cflags`
+        AC_MSG_RESULT($TAGLIB_CFLAGS)
+
+        AC_MSG_CHECKING(taglib libraries)
+        TAGLIB_LIBS=`${taglibconfig} --libs`
+        AC_MSG_RESULT($TAGLIB_LIBS)
+
+        CXXFLAGS="$CXXFLAGS $TAGLIB_CFLAGS"
+        CFLAGS="$CXXFLAGS $TAGLIB_CFLAGS"
+        CPPFLAGS="$CPPFLAGS $TAGLIB_CFLAGS"
+        LDFLAGS="$LDFLAGS $TAGLIB_LIBS"
+        ID3_OK=disabled
+    fi
+fi
+
+if test "x$TAGLIB_OK" = xyes; then
+    AC_CHECK_HEADERS(taglib.h fileref.h tag.h audioproperties.h tstring.h
+        [],
+        [TAGLIB_OK=missing], [$TAGLIB_CFLAGS]
+        /* checking for taglib.h and others*/
+    )
+fi
+
+if test "x$TAGLIB_OK" = xyes; then
+    AC_CHECK_LIB(tag_c, main,[],
+        [TAGLIB_OK=missing]
+    )
+fi
+
+if test "x$TAGLIB_OK" = xyes; then
+    AC_DEFINE([HAVE_TAGLIB], [1], [taglib library presence])
+else
+    if test "x$TAGLIB_EN" = xyes; then
+        AC_MSG_ERROR(unable to configure taglib support)
+    fi
+fi
+
 ######### id3tag
 
-ID3_OK=yes
 AC_ARG_ENABLE(id3lib,
   [  --enable-id3lib          id3lib support],
   [
@@ -548,20 +605,20 @@ fi
 #fi
 
 
-TOMBDEBUG_OK=disabled
+LOGDEBUG_OK=disabled
 AC_ARG_ENABLE(tombdebug,
   [  --enable-tombdebug       enable debug output for the server],
   [
-     TOMBDEBUG_EN=$enableval 
+     LOGDEBUG_EN=$enableval 
      if test "x$enableval" = xno; then
-        TOMBDEBUG_OK=disabled
+        LOGDEBUG_OK=disabled
      else
-        TOMBDEBUG_OK=yes
+        LOGDEBUG_OK=yes
      fi
   ]
 )
-if test "x$TOMBDEBUG_OK" = xyes; then
-    AC_DEFINE(TOMB_DEBUG, 1, [if defined compile with debug log output])
+if test "x$LOGDEBUG_OK" = xyes; then
+    AC_DEFINE(LOG_DEBUG, 1, [if defined compile with debug log output])
 fi
 
 
@@ -621,14 +678,22 @@ echo "sqlite3       : $SQLITE3_OK"
 echo "mysql         : $MYSQL_OK"
 echo "javascript    : $JS_OK"
 echo "libmagic      : $MAGIC_OK"
-echo "id3lib        : $ID3_OK"
 echo "libexif       : $EXIF_OK"
+echo "taglib        : $TAGLIB_OK"
+echo "id3lib        : $ID3_OK"
 echo "libextractor  : $EXTRACTOR_OK"
+
 if test "$LOG_OK" != "yes"; then
     echo "log output    : $LOG_OK"
 fi
-#echo "tombdebug     : $TOMBDEBUG_OK"
-#echo "upnpdebug     : $UPNPDEBUG_OK"
+
+if test "$LOGDEBUG_OK" != "disabled"; then
+    echo "debug log     : $LOGDEBUG_OK"
+fi
+
+if test "$UPNPDEBUG_OK" != "disabled"; then
+    echo "upnpdebug     : $UPNPDEBUG_OK"
+fi
 # echo "  libjpeg     : $LIBJPEG_OK"
 # echo "  exiv2       : $EXIV2_OK"
 echo

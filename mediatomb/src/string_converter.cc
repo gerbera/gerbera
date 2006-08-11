@@ -18,6 +18,8 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+/// \file string_converter.cc
+
 #ifdef HAVE_CONFIG_H
     #include "autoconfig.h"
 #endif
@@ -69,14 +71,14 @@ zmm::String StringConverter::convert(String str)
         dirty = false;
     }
     
-//    log_info(("iconv: BEFORE: input bytes left: %d  output bytes left: %d\n",
-//           input_bytes, output_bytes));
+    log_debug(("iconv: BEFORE: input bytes left: %d  output bytes left: %d\n",
+           input_bytes, output_bytes));
     
     ret = iconv(cd, (char **)input_ptr, &input_bytes,
             output_ptr, &output_bytes);
     if (ret == -1)
     {
-        log_info(("iconv: %s\n", strerror(errno)));
+        log_error(("iconv: %s\n", strerror(errno)));
         String err;
         switch (errno)
         {
@@ -95,34 +97,30 @@ zmm::String StringConverter::convert(String str)
                 break;
         }
         *output_copy = 0;
-        log_info(("%s\n", err.c_str()));
+        log_error(("%s\n", err.c_str()));
         log_info(("iconv: input: %s\n", input));
         log_info(("iconv: converted part:  %s\n", output));
         dirty = true;
         throw Exception(err);
     }
    
-//    log_info(("iconv: AFTER: input bytes left: %d  output bytes left: %d\n",
-//           input_bytes, output_bytes));
-//    log_info(("iconv: returned %d\n", ret));
-
-//    *output_copy = 0;
-//    log_info(("iconv: output: %s\n", output));
+    log_debug(("iconv: AFTER: input bytes left: %d  output bytes left: %d\n",
+           input_bytes, output_bytes));
+    log_debug(("iconv: returned %d\n", ret));
 
     String ret_str = String(output, output_copy - output);
     FREE(output);
     
-    //return String(output, output_copy - output);
     return ret_str;
 }
 
 String StringConverter::validSubstring(String str, String encoding)
 {
-    // TODO: validate string
+    /// \todo: validate string
     return str;
 }
 
-// TODO iconv caching
+/// \todo iconv caching
 Ref<StringConverter> StringConverter::i2f()
 {
     Ref<StringConverter> conv(new StringConverter(

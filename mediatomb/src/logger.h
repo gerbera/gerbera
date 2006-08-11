@@ -19,7 +19,12 @@ void log_close();
 #define log_info(args) _log_info args
 #define log_warning(args) _log_warning args
 #define log_error(args) _log_error args
-#define log_debug(args) _log_debug args
+
+#ifdef LOG_DEBUG
+    #define log_debug(args) _log_debug args
+#else
+    #define log_debug(args)
+#endif
 
 #else
 

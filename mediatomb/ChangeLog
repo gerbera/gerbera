@@ -8,6 +8,16 @@ v0.9.0  Major rework
         * all sqlite3 queries are now handled by a single, dedicated
           thread to make MediaTomb work with SQLite3 compiled with
           "--enable-threadsafe"
+        * fixed a bug where setting -p 0 did not trigger automatic
+          port selection if it had to override the value in config.xml
+        * fixed bug 1425424 - crash on a bad config.xml - we did not handle 
+          the case where the <udn> tag was not present.
+          Thanks to Nektarios K. Papadopoulos <npapadop@users.sourceforge.net>
+          for the report and patch.
+        * added configure option and adapted the code to completely 
+          supress all log output
+        * added configure option and adapted the code to supress
+          debug output
 
 v0.8.1
         * added "serve" directory, any files there can be downloaded 

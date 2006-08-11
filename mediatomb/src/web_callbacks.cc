@@ -59,15 +59,14 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
 
     String link = String((char *) filename);
 
-    //log_debug(("Filename: %s, Path: %s\n", filename, path.c_str()));
-    //log_info(("create_handler: got url parameters: [%s]\n", parameters.c_str()));
+    log_debug(("Filename: %s, Path: %s\n", filename, path.c_str()));
+    log_debug(("create_handler: got url parameters: [%s]\n", parameters.c_str()));
     
     Ref<Dictionary> dict(new Dictionary());
     dict->decode(parameters);
 
     RequestHandler *ret = NULL;
 
-    /*
     log_debug(("Link is: %s, checking against: %s, starts with? %d\n", link.c_str(), 
                 (String(SERVER_VIRTUAL_DIR) + "/" + CONTENT_UI_HANDLER).c_str(), 
                 link.startsWith(String(SERVER_VIRTUAL_DIR) + "/" + CONTENT_UI_HANDLER)));
@@ -79,9 +78,6 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
                 (String(SERVER_VIRTUAL_DIR) + "/" + CONTENT_SERVE_HANDLER).c_str(), 
                 link.startsWith(String(SERVER_VIRTUAL_DIR) + "/" + CONTENT_SERVE_HANDLER)));
   
-    */
-
-                
     if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" +
                         CONTENT_MEDIA_HANDLER))
     {
@@ -135,16 +131,15 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
 /// \return -1 Error.
 static int web_get_info(IN const char *filename, OUT struct File_Info *info)
 {
-    //log_info(("web_get_info: start\n"));
+    log_debug(("web_get_info: start\n"));
     try
     {
         Ref<RequestHandler> reqHandler = create_request_handler(filename);
         reqHandler->get_info(filename, info);
-      //  log_info(("web_get_info: end, returning\n"));
     }
     catch(Exception e)
     {
-        log_info(("web_get_info(): Exception during callback: %s\n", e.getMessage().c_str()));
+        log_error(("web_get_info(): Exception during callback: %s\n", e.getMessage().c_str()));
         e.printStackTrace();
         return -1;
     }
@@ -172,12 +167,11 @@ static UpnpWebFileHandle web_open(IN const char *filename,
         Ref<RequestHandler> reqHandler = create_request_handler(filename);
         Ref<IOHandler> ioHandler = reqHandler->open(filename, mode);
         ioHandler->retain();
-        //log_info(("web_open: end, returning\n"));
         return (UpnpWebFileHandle) ioHandler.getPtr();
     }
     catch (Exception ex)
     {
-        log_info(("web_open(): exception during callback: %s\n", ex.getMessage().c_str()));
+        log_error(("web_open(): exception during callback: %s\n", ex.getMessage().c_str()));
         ex.printStackTrace();
         return NULL;
     }
@@ -248,7 +242,7 @@ static int web_seek(IN UpnpWebFileHandle f, IN off_t offset, IN int whence)
     }
     catch(Exception e)
     {
-        log_info(("web_seek(): Exception during seek: %s\n", e.getMessage().c_str()));
+        log_error(("web_seek(): Exception during seek: %s\n", e.getMessage().c_str()));
         e.printStackTrace();
         return -1;
     }
@@ -273,7 +267,7 @@ static int web_close( IN UpnpWebFileHandle f)
     }
     catch(Exception e)
     {
-        log_info(("web_seek(): Exception during seek: %s\n", e.getMessage().c_str()));
+        log_error(("web_seek(): Exception during seek: %s\n", e.getMessage().c_str()));
         e.printStackTrace();
         return -1;
     }

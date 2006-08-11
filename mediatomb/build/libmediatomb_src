@@ -53,6 +53,8 @@ libmediatomb_a_SOURCES = \
 ../src/metadata/id3_handler.h \
 ../src/metadata/libexif_handler.cc \
 ../src/metadata/libexif_handler.h \
+../src/metadata/taglib_handler.cc \
+../src/metadata/taglib_handler.h \
 ../src/mxml/attribute.cc \
 ../src/mxml/attribute.h \
 ../src/mxml/context.cc \

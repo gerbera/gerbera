@@ -33,9 +33,15 @@
 #include "metadata/exiv2_handler.h"
 #endif
 
-#ifdef HAVE_ID3
+#ifdef HAVE_TAGLIB
+#include "metadata/taglib_handler.h"
+#else
+#ifdef HAVE_ID3 // we only want ID3 if taglib was not found
 #include "metadata/id3_handler.h"
-#endif
+#endif // HAVE_ID3
+#endif // HAVE_TAGLIB
+
+
 
 #ifdef HAVE_EXTRACTOR
 #include "metadata/extractor_handler.h"
@@ -91,13 +97,25 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
     {
 
         /// \todo what about mappings here? what if audio/mpeg was remapped to some crap in the config file?
+#ifdef HAVE_TAGLIB
+        if ((mimetype == "audio/mpeg") || 
+            (mimetype == "application/ogg") || 
+            (mimetype == "audio/x-flac"))
+        {
+            handler = Ref<MetadataHandler>(new TagHandler());
+            break;
+        }
+#else
 #ifdef HAVE_ID3
         if (mimetype == "audio/mpeg")
         {
             handler = Ref<MetadataHandler>(new Id3Handler());
             break;
         }
-#endif
+#endif // HAVE_ID3
+#endif // HAVE_TAGLIB
+
+
 
 #ifdef HAVE_EXIV2
 /*        

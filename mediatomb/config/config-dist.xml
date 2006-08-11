@@ -15,6 +15,7 @@
         <mappings>
             <extension-mimetype ignore-unknown="no">
                 <map from="mp3" to="audio/mpeg"/>
+                <map from="ogg" to="application/ogg"/>
                 <map from="asf" to="video/x-ms-asf"/>
                 <map from="asx" to="video/x-ms-asf"/>
                 <map from="wma" to="audio/x-ms-wma"/>
@@ -27,6 +28,7 @@
             </extension-mimetype>
             <mimetype-upnpclass>
                 <map from="audio/*" to="object.item.audioItem"/>
+                <map from="application/ogg" to="object.item.audioItem"/>
                 <map from="video/*" to="object.item.videoItem"/>
                 <map from="image/*" to="object.item.imageItem"/>
             </mimetype-upnpclass>
