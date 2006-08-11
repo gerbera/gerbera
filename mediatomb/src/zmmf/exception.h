@@ -41,7 +41,11 @@ public:
     String getMessage();
 
     Ref<Array<StringBase> > getStackTrace();
+#ifdef LOG_ENABLED
     void printStackTrace(FILE *file = LOG_FILE);
+#else
+    inline void printStackTrace(FILE *file = LOG_FILE) {}; 
+#endif
 
 };
 

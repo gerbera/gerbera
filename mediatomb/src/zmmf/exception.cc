@@ -60,6 +60,7 @@ Ref<Array<StringBase> > Exception::getStackTrace()
     return stackTrace;
 }
 
+#ifdef LOG_ENABLED
 void Exception::printStackTrace(FILE *file)
 {
     fprintf(file, "Exception: %s\n", message.c_str());
@@ -70,7 +71,7 @@ void Exception::printStackTrace(FILE *file)
         fprintf(file, "%s %i %s\n", STRACE_TAG, i, trace->data);
         fflush(file);
     }
-#endif
+#endif // __CYGWIN__
 }
-
+#endif // LOG_ENABLED
 

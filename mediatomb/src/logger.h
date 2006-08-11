@@ -1,7 +1,9 @@
 #ifndef __LOGGER_H__
 #define __LOGGER_H__
 
-#include "autoconfig.h"
+#ifdef HAVE_CONFIG_H
+    #include "autoconfig.h"
+#endif
 #include <stdio.h>
 
 extern FILE *LOG_FILE;
@@ -9,7 +11,7 @@ extern FILE *LOG_FILE;
 void log_open(char *filename);
 void log_close();
 
-#define LOG_ENABLED
+//#define LOG_ENABLED
 #define LOG_FLUSH 1
 
 #ifdef LOG_ENABLED
