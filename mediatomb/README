@@ -68,10 +68,10 @@ In order to compile MediaTomb you will have to install the following packages:
          libupnp 1.4.1 from http://pupnp.sf.net/
 
   Note2: DSM-320 users: in order to fix the .AVI playback problem
-         add a custom http header to your config.xml:
+         add a custom http header to your config.xml (under the <server> tag):
          <custom-http-headers>
             <add header="X-User-Agent: redsonic"/>
-         <custom-http-headers/>
+         </custom-http-headers>
          Please read the forums on our SourceForge project page for more 
          information. Some problems regarding the UPnP SDK, MediaTomb and the
          DSM-320 are discussed there, some solutions are offered.
