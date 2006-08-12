@@ -263,13 +263,13 @@ void UpdateManager::threadProc()
 
     while (! shutdownFlag)
     {
-//        flog_info((stderr, "threadProc: awakened...\n")); fflush(stderr);
+        log_debug(("threadProc: awakened...\n"));
 
         /* if nothing to do, sleep until awakened */
         if (! haveUpdates())
         {
 
-//            flog_info((stderr, "threadProc: idle sleep ...\n")); fflush(stderr);
+            log_debug(("threadProc: idle sleep ...\n"));
             ret = pthread_cond_wait(&updateCond, &updateMutex);
             lastIdleMillis = nowMillis;
             continue;
@@ -287,7 +287,7 @@ void UpdateManager::threadProc()
                 case FLUSH_ASAP: // send ASAP!
                     sleepMillis = 0;
                     break;
-                default: // send as soon as UPnP minimal event interval allowes
+                default: // send as soon as UPnP minimal event interval allows
                     sleepMillis = SPEC_INTERVAL - (nowMillis - lastUpdateMillis);
                     break;
             }
@@ -300,11 +300,11 @@ void UpdateManager::threadProc()
         if (sleepMillis >= MIN_SLEEP) // sleep for sleepMillis milliseconds
         {
             millisToTimespec(nowMillis + sleepMillis, &timeout);
-//            flog_info((stderr, "threadProc: sleeping for %d millis\n", (int)sleepMillis)); fflush(stderr);
+            log_debug(("threadProc: sleeping for %d millis\n", (int)sleepMillis));
             ret = pthread_cond_timedwait(&updateCond, &updateMutex, &timeout);
 			if (ret)
 			{
-//				flog_info((stderr, "pthread_cont_timedwait(): %s\n", strerror(errno))); fflush(stderr);
+				log_debug(("pthread_cont_timedwait(): %s\n", strerror(errno)));
 			}
         }
         else // send updates 
@@ -315,7 +315,7 @@ void UpdateManager::threadProc()
         }
     }
     UNLOCK();
-    log_info(("threadProc: update thread shut down.\n"));
+    log_debug(("threadProc: update thread shut down.\n"));
 }
 
 void *UpdateManager::staticThreadProc(void *arg)

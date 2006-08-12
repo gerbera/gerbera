@@ -48,7 +48,7 @@ StringConverter::~StringConverter()
 
 zmm::String StringConverter::convert(String str)
 {
-    int buf_size = str.length() * 3;
+    int buf_size = str.length() * 4;
 
     char *input = str.c_str();
     char *output = (char *)MALLOC(buf_size);    
@@ -89,7 +89,7 @@ zmm::String StringConverter::convert(String str)
                 err = _("iconv: Incomplete multibyte sequence");
                 break;
             case E2BIG:
-                // TODO: should encode the whole string anyway
+                /// \todo should encode the whole string anyway
                 err = _("iconv: Insufficient space in output buffer");
                 break;
             default:

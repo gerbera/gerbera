@@ -440,8 +440,8 @@ We are using the following code in our tree:
 - uuid from E2fsprogs 1.35 under GNU GPL, 
   Copyright (C) 1996, 1997, 1998 Theodore Ts'o. <tytso@mit.edu>
   
-  Stuff from the UPnP SDK was conflicting with libuuid, so we had to change a
-  name of one function.
+  Stuff from the UPnP SDK was conflicting with libuuid, so we had to itake
+  the sources in and change the name of one function.
 
 - md5 implementation by L. Peter Deutsch <ghost@aladdin.com>,
   Copyright (C) 1999 Aladdin Enterprises.  All rights reserved. (See source
@@ -453,13 +453,16 @@ We are using the following code in our tree:
 - all icons for the UI are from the redhat-artwork-0.117 package under GNU GPL, 
   (I could not find any (C) in the supplied documents)
 
+- tombupnp is based on pupnp (http://pupnp.sf.net) which is based on
+  libupnp (http://upnp.sf.net), originally distributed under the
+  BSD license, Copyright (c) 2000-2003 Intel Corporation.
 
 CONTRIBUTIONS
 -------------
 
-Initial version of the mediatomb startup script was contributed 
+Initial version of the MediaTomb startup script was contributed 
 by Iain Lea <iain@bricbrac.de>
-
+TagLib support patch was contributed by Benhur Stein <benhur.stein@gmail.com>
 --------------------------------------------------------------------------------
 September 7, 2005
 

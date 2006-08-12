@@ -106,6 +106,8 @@ AC_DEFINE([UPNP_HAVE_DEVICE], [1], [Compile device API])
 AC_DEFINE([UPNP_HAVE_WEBSERVER], [1], [Compile internal web server])    
 
 AC_CHECK_LIB(pthread, pthread_mutex_lock,[], [AC_MSG_ERROR(required library function not found)])    
+
+    
 ######### SQLite3
 
 SQLITE3_OK=yes
@@ -154,6 +156,11 @@ else
 fi
 
 ########## MySQL
+CPPFLAGS_SAVE="$CPPFLAGS"
+CFLAGS_SAVE="$CFLAGS"
+CXXFLAGS_SAVE="$CXXFLAGS"
+LDFLAGS_SAVE="$LDFLAGS"
+
 
 MYSQL_OK=yes
 AC_ARG_ENABLE(mysql,
@@ -182,20 +189,19 @@ if test "x$MYSQL_OK" = xyes; then
         CXXFLAGS="$CXXFLAGS $MYSQL_CFLAGS"
 #        CFLAGS="$CFLAGS $MYSQL_CFLAGS"
         LDFLAGS="$LDFLAGS $MYSQL_LIBS"
-
     fi
 fi
 if test "x$MYSQL_OK" = xyes; then
     AC_CHECK_HEADER(mysql.h,
         [],
-        [MYSQL_OK=missing],
+        [AC_MSG_RESULT(mysql.h failed) MYSQL_OK=missing],
         /* checking for mysql.h */
     )
 fi
 if test "x$MYSQL_OK" = xyes; then
     AC_CHECK_LIB(mysqlclient, mysql_init,
         [],
-        [MYSQL_OK=missing]
+        [AC_MSG_RESULT(mysqlclient link failed) MYSQL_OK=missing]
     )
 fi
 if test "x$MYSQL_OK" = xyes; then
@@ -203,6 +209,10 @@ if test "x$MYSQL_OK" = xyes; then
 else
     if test "x$MYSQL_EN" = xyes; then
         AC_MSG_ERROR(unable to configure mysql support)
+        CFLAGS="$CFLAGS_SAVE"
+        CXXFLAGS="$CXXFLAGS_SAVE"
+        CPPFLAGS="$CPPFLAGS_SAVE"
+        LDFLAGS="$LDFLAGS_SAVE"
     fi
 fi
 
@@ -216,6 +226,11 @@ fi
 
 
 ######### javascript
+CPPFLAGS_SAVE="$CPPFLAGS"
+CFLAGS_SAVE="$CFLAGS"
+CXXFLAGS_SAVE="$CXXFLAGS"
+LDFLAGS_SAVE="$LDFLAGS"
+
 
 JS_OK=yes
 AC_ARG_ENABLE(javascript,
@@ -231,8 +246,7 @@ if test "x$JS_OK" = xyes; then
     AC_CHECK_HEADER(jsapi.h,
         [],
         [
-            CXXFLAGS_SAVE=$CXXFLAGS
-            CXXFLAGS="$CXXFLAGS -I/usr/include/smjs"
+            CXXFLAGS="$CXXFLAGS_SAVE -I/usr/include/smjs"
             
             AC_MSG_CHECKING([alternative libjs header location (debian)])
             AC_COMPILE_IFELSE(
@@ -249,8 +263,7 @@ if test "x$JS_OK" = xyes; then
                     AC_MSG_RESULT([found under /usr/include/smjs])
                 ],
                 [
-                    CXXFLAGS_SAVE=$CXXFLAGS
-                    CXXFLAGS="$CXXFLAGS -I/usr/include/js"
+                    CXXFLAGS="$CXXFLAGS_SAVE -I/usr/include/js"
             
                     AC_MSG_CHECKING([alternative libjs header location (SuSE)])
                     AC_COMPILE_IFELSE(
@@ -267,7 +280,6 @@ if test "x$JS_OK" = xyes; then
                             AC_MSG_RESULT([found under /usr/include/js])
                         ],
                         [
-                            CXXFLAGS="$CXXFLAGS_SAVE"
                             JS_OK=missing
                             AC_MSG_RESULT([not found, giving up])
                         ]
@@ -281,10 +293,10 @@ if test "x$JS_OK" = xyes; then
 fi
 if test "x$JS_OK" = xyes; then
     AC_CHECK_LIB(js, JS_NewObject,
-        [LDFLAGS="$LDFLAGS -ljs"],
+        [],
         [
             AC_CHECK_LIB(smjs, JS_NewObject,
-                [LDFLAGS="$LDFLAGS -lsmjs"],
+                [],
                 [JS_OK=missing]
             )
         ]
@@ -295,9 +307,13 @@ if test "x$JS_OK" = xyes; then
 else
     if test "x$JS_EN" = xyes; then
         AC_MSG_ERROR(unable to configure javascript support)
+        CFLAGS="$CFLAGS_SAVE"
+        CXXFLAGS="$CXXFLAGS_SAVE"
+        CPPFLAGS="$CPPFLAGS_SAVE"
+        LDFLAGS="$LDFLAGS_SAVE"
+
     fi
 fi
-
 
 ########### libmagic
 MAGIC_OK=yes
@@ -321,7 +337,12 @@ if test "x$MAGIC_OK" = xyes; then
 fi
 
 if test "x$MAGIC_OK" = xyes; then
-    LDFLAGS="$LDFLAGS -lmagic"
+    AC_CHECK_LIB(magic, magic_load,
+            [],
+            [MAGIC_OK=missing])
+fi
+
+if test "x$MAGIC_OK" = xyes; then
     AC_DEFINE([HAVE_MAGIC], [1], [filemagic library presence])
 else
     if test "x$MAGIC_EN" = xyes; then
@@ -330,10 +351,15 @@ else
 fi
 
 
-
 ######### taglib
-AC_LANG_CPLUSPLUS
+CPPFLAGS_SAVE="$CPPFLAGS"
+CFLAGS_SAVE="$CFLAGS"
+CXXFLAGS_SAVE="$CXXFLAGS"
+LDFLAGS_SAVE="$LDFLAGS"
+
+
 TAGLIB_OK=yes
+TAGLIB_REQUESTED=no
 ID3_OK=yes
 AC_ARG_ENABLE(taglib,
    [  --enable-taglib          taglib support],
@@ -341,9 +367,25 @@ AC_ARG_ENABLE(taglib,
       TAGLIB_EN=$enableval
       if test "x$enableval" = xno; then
         TAGLIB_OK=disabled
+      else
+        TAGLIB_REQUESTED=yes
       fi
    ]
 )
+
+AC_ARG_ENABLE(id3lib,
+  [  --enable-id3lib          id3lib support],
+  [
+     ID3_EN=$enableval 
+     if test "x$enableval" = xno; then
+        ID3_OK=disabled
+     fi
+  ]
+)
+
+if ((test "x$TAGLIB_EN" = xyes) && (test "x$ID3_EN" = xyes)); then
+    AC_MSG_ERROR([Please select either taglib or id3lib, but not both.])
+fi
 
 if test "x$TAGLIB_OK" = xyes; then
     AC_PATH_PROG(taglibconfig, taglib-config, no)
@@ -359,47 +401,58 @@ if test "x$TAGLIB_OK" = xyes; then
         TAGLIB_LIBS=`${taglibconfig} --libs`
         AC_MSG_RESULT($TAGLIB_LIBS)
 
-        CXXFLAGS="$CXXFLAGS $TAGLIB_CFLAGS"
-        CFLAGS="$CXXFLAGS $TAGLIB_CFLAGS"
-        CPPFLAGS="$CPPFLAGS $TAGLIB_CFLAGS"
-        LDFLAGS="$LDFLAGS $TAGLIB_LIBS"
-        ID3_OK=disabled
     fi
 fi
 
 if test "x$TAGLIB_OK" = xyes; then
-    AC_CHECK_HEADERS(taglib.h fileref.h tag.h audioproperties.h tstring.h
+#    CFLAGS="$CFLAGS $TAGLIB_CFLAGS"
+#    CXXFLAGS="$CXXFLAGS $TAGLIB_CFLAGS"
+    CPPFLAGS="$CPPFLAGS $TAGLIB_CFLAGS"
+
+
+    AC_CHECK_HEADERS([taglib.h fileref.h tag.h audioproperties.h tstring.h],
         [],
-        [TAGLIB_OK=missing], [$TAGLIB_CFLAGS]
-        /* checking for taglib.h and others*/
+        [TAGLIB_OK=missing]
     )
 fi
 
 if test "x$TAGLIB_OK" = xyes; then
-    AC_CHECK_LIB(tag_c, main,[],
+    AC_CHECK_LIB(tag, main,[],
         [TAGLIB_OK=missing]
     )
 fi
 
 if test "x$TAGLIB_OK" = xyes; then
     AC_DEFINE([HAVE_TAGLIB], [1], [taglib library presence])
+        ID3_OK=disabled
 else
     if test "x$TAGLIB_EN" = xyes; then
         AC_MSG_ERROR(unable to configure taglib support)
+        CPPFLAGS="$CPPFLAGS_SAVE"
+        CFLAGS="$CFLAGS_SAVE"
+        CXXFLAGS="$CXXFLAGS_SAVE"
+        LDFLAGS="$LDFLAGS_SAVE"
     fi
 fi
 
-######### id3tag
 
-AC_ARG_ENABLE(id3lib,
-  [  --enable-id3lib          id3lib support],
-  [
-     ID3_EN=$enableval 
-     if test "x$enableval" = xno; then
-        ID3_OK=disabled
-     fi
-  ]
-)
+######### id3tag
+CPPFLAGS_SAVE="$CPPFLAGS"
+CFLAGS_SAVE="$CFLAGS"
+CXXFLAGS_SAVE="$CXXFLAGS"
+LDFLAGS_SAVE="$LDFLAGS"
+
+
+#AC_ARG_ENABLE(id3lib,
+#  [  --enable-id3lib          id3lib support],
+#  [
+#     ID3_EN=$enableval 
+#     if test "x$enableval" = xno; then
+#        ID3_OK=disabled
+#     fi
+#  ]
+#)
+
 if test "x$ID3_OK" = xyes; then
     AC_CHECK_HEADER(id3/tag.h,
         [],
@@ -407,6 +460,7 @@ if test "x$ID3_OK" = xyes; then
         /* checking for id3/tag.h */
     )
 fi
+
 if test "x$ID3_OK" = xyes; then
     AC_CHECK_HEADER(id3/misc_support.h,
         [],
@@ -415,11 +469,22 @@ if test "x$ID3_OK" = xyes; then
     )
 fi
 if test "x$ID3_OK" = xyes; then
-   LDFLAGS="$LDFLAGS -lid3"
+    AC_CHECK_LIB(id3,main,
+        [],
+        [ID3_OK=missing],
+        [$CXXFLAGS]
+    )
+fi
+
+if test "x$ID3_OK" = xyes; then
    AC_DEFINE([HAVE_ID3], [1], [id3lib presence])
 else
     if test "x$ID3_EN" = xyes; then
-        AC_MSG_ERROR(unable to configure id3lib support)
+        if test "x$TAGLIB_OK" = xyes; then
+            AC_MSG_ERROR([Please select either taglib or id3lib, but not both.])
+        else
+            AC_MSG_ERROR(unable to configure id3lib support)
+        fi
     fi
 fi
 
@@ -654,6 +719,25 @@ if test "x$LOG_OK" = xyes; then
     AC_DEFINE(LOG_ENABLED, 1, [if defined compile with log output])
 fi
 
+# now set all collected flags
+if test "x$MYSQL_OK" = xyes; then
+    CXXFLAGS="$CXXFLAGS $MYSQL_CFLAGS"
+    LDFLAGS="$LDFLAGS $MYSQL_LIBS"
+fi
+
+if test "x$JS_OK" = xyes; then
+    CXXFLAGS="$CXXFLAGS $JS_CXXFLAGS"
+    LDFLAGS="$LDFLAGS $JS_LDFLAGS"
+fi
+
+if test "x$MAGIC_OK" = xyes; then
+    LDFLAGS="$LDFLAGS $MAGIC_LDFLAGS"
+fi
+
+if test "x$TAGLIB_OK" = xyes; then
+   CXXFLAGS="$CXXFLAGS $TAGLIB_CFLAGS"
+   LDFLAGS="$LDFLAGS $TAGLIB_LDFLAGS"
+fi
 
 ###############
 AC_CONFIG_FILES([
