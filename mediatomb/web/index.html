@@ -73,6 +73,7 @@
             {
                 TYPE = tmpType;
                 treeChangeType();
+                itemChangeType();
                 return undefined;
             }
             -->
@@ -132,11 +133,11 @@
                                     <span id="current-task" style="font-style:italic; font-weight: bold; color:#FFFFFF">&nbsp;</span>
                                 </td>
                             </tr>
-                        </table>                
+                        </table>
                     </td>
                     <td width="20%">
-                        &nbsp;        
-                    </td>        
+                        &nbsp;
+                    </td>
                 </tr></table>
                 <a href="javascript:setType('db');">Database</a>
                 &nbsp;&nbsp;|&nbsp;&nbsp;
@@ -148,7 +149,10 @@
                         <div id="tree_div"></div>
                     </td>
                     <td valign="top">
-                        <div id="item_div"></div>
+                        <div><a href="javascript:userAddItemStart();">add Item</a></div>
+                        <div id="item_db_div" style="display:none"></div>
+                        <div id="item_fs_div" style="display:none"></div>
+                        <div id="item_add_div" style="display:none"></div>
                     </td>
                 </tr>
             </table>

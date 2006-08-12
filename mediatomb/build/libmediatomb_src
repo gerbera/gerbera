@@ -126,6 +126,8 @@ libmediatomb_a_SOURCES = \
 ../src/uuid/uuidP.h \
 ../src/uuid/uuid_time.c \
 ../src/uuid/uuid_types.h \
+../src/web/add.cc \
+../src/web/add_object.cc \
 ../src/web/auth.cc \
 ../src/web_callbacks.cc \
 ../src/web_callbacks.h \

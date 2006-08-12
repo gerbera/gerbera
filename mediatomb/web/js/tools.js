@@ -1,14 +1,11 @@
 function link(req_type, param)
 {
-    var url = "/content/interface?req_type="+ req_type +"&sid="+ SID +
-               "&slt="+ Math.random();
+    var url = "/content/interface?req_type="+ req_type +"&sid="+ SID;
     if (param)
-    {
         for (var key in param)
         {
             url += "&" + key +"="+ param[key];
         }
-    }
     return url;
 }
 
@@ -111,3 +108,8 @@ function errorCheck(xml)
     return true;
 }
 
+function addBr(element)
+{
+    var newBr = document.createElement('br');
+    element.appendChild(newBr);
+}

@@ -77,12 +77,6 @@ protected:
     /// \return The header as a string... because our parser does not yet understand <? ?> stuff :)
     zmm::String renderXMLHeader();
    
-    /// \brief Call another request handler.
-    /// \param req_type Type of the request (see pages.cc)
-    /// \param params Dictionary containg the decoded parameters from the URL.
-    /// \return String, containing the html/xml output from the request.
-    zmm::String subrequest(zmm::String req_type, zmm::Ref<Dictionary> params);
-
     /// \brief Prepares the output buffer and calls the process function.
     /// \return IOHandler
     /// \todo Genych, chto tut proishodit, ya tolkom che to ne wrubaus?? 

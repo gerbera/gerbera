@@ -1,6 +1,8 @@
 var closedGif = '/icons/nanotree/images/folder_closed.gif';
 var openGif = '/icons/nanotree/images/folder_open.gif';
 var iconArray = new Array(closedGif,openGif);
+var lastNodeDb;
+var lastNodeFs;
 sortNodes = false;
 showRootNode = false;
 
@@ -70,11 +72,23 @@ function treeChangeType()
         showTree('/icons/nanotree/');
         type.treeShown = true;
     }
+    
+    if (isTypeDb())
+    {
+        if (lastNodeDb) selectNode(lastNodeDb);
+    }
+    else
+    {
+        if (lastNodeFs) selectNode(lastNodeFs);
+    }
 }
 
 function standardClick(treeNode)
 {
-    folderChange(treeNode.getID());
+    var id = treeNode.getID()
+    if (isTypeDb()) lastNodeDb = id;
+    else lastNodeFs = id;
+    folderChange(id);
 }
 
 function openEventListener(id)
@@ -143,7 +157,7 @@ function updateTree(ajaxRequest)
         var c = cts[i];
         var id = type+xmlGetAttribute(c, "id");
         
-        //TODO: childCount unnecessary? - hasChildren instead? 
+        //TODO: childCount unnecessary? - hasChildren instead?
         var childCount = xmlGetAttribute(c, "childCount");
         if (childCount)
             childCount = parseInt(childCount);
@@ -151,6 +165,9 @@ function updateTree(ajaxRequest)
         
         var title = xmlGetText(c);
         var child = new TreeNode(id, title, iconArray);
+        
+        //TODO:
+        //child.setEditable(true);
         
         child.setHasChildren(expandable);
         node.addChild(child);

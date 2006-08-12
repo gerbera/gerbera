@@ -27,6 +27,7 @@
 #include "dictionary.h"
 #include "request_handler.h"
 #include "web_request_handler.h"
+#include "cds_objects.h"
 
 namespace web
 {
@@ -69,6 +70,27 @@ class items : public WebRequestHandler
 public:
     items();
     virtual void process();
+};
+
+/// \brief Browser add item
+class add : public WebRequestHandler
+{
+public:
+    add();
+    virtual void process();
+};
+
+/// \brief Browser add object.
+class addObject : public WebRequestHandler
+{
+public:
+    addObject();
+    virtual void process();
+protected:
+    zmm::Ref<CdsObject> addContainer(int objectId);
+    zmm::Ref<CdsObject> addItem(int objectId, zmm::Ref<CdsItem> item);
+    zmm::Ref<CdsObject> addUrl(int objectID, zmm::Ref<CdsItemExternalURL> item);
+    zmm::Ref<CdsObject> addActiveItem(int objectID);
 };
 
 } // namespace

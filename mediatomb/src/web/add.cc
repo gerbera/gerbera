@@ -1,4 +1,4 @@
-/*  pages.cc - this file is part of MediaTomb.
+/*  add.cc - this file is part of MediaTomb.
                                                                                 
     Copyright (C) 2005 Gena Batyan <bgeradz@deadlock.dhs.org>,
                        Sergey Bostandzhyan <jin@deadlock.dhs.org>
@@ -22,21 +22,52 @@
     #include "autoconfig.h"
 #endif
 
+#include "server.h"
+#include <stdio.h>
+#include "common.h"
+//#include "storage.h"
+//#include "cds_objects.h"
+//#include "dictionary.h"
 #include "pages.h"
+#include "tools.h"
+#include "content_manager.h"
+//#include "session_manager.h"
 
 using namespace zmm;
+using namespace mxml;
 
-WebRequestHandler *create_web_request_handler(String page)
+web::add::add() : WebRequestHandler()
 {
-    if (page == "add") return new web::add();
-    if (page == "add_object") return new web::addObject();
-    if (page == "auth") return new web::auth();
-    if (page == "containers") return new web::containers();
-    if (page == "directories") return new web::directories();
-    if (page == "files") return new web::files();
-    if (page == "items") return new web::items();
-    
-    throw Exception(_("Unknown page: ") + page);
 }
 
+void web::add::process()
+{
+    Ref<Storage>   storage;
+
+    check_request();
+    
+    String path;
+    String objID = param(_("object_id"));
+    if (objID == nil || objID == "" || objID == "0")
+        throw Exception(_("web::add::process(): missing parameters: object id must be specified"));
+    else
+        path = hex_decode_string(objID);
+    
+    if (path == nil) throw Exception(_("web::add::process(): illegal path"));
+
+    Ref<ContentManager> cm = ContentManager::getInstance();
+    cm->addFile(path, true);
+    
+    /*
+    session = SessionManager::getInstance()->getSession(sid);
+
+    objID = session->getFrom(sd, _("object_id"));
+    
+    Ref<Dictionary> sub(new Dictionary());
+    sub->put(_("object_id"), objID);
+    sub->put(_("driver"), driver);
+    sub->put(_("sid"), sid); 
+    *out << subrequest(_("browse"), sub);
+    */
+}
 

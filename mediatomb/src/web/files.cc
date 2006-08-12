@@ -60,7 +60,7 @@ void web::files::process()
     
             Ref<Element> fe(new Element(_("file")));
             String filename = obj->filename;
-            String filepath = path + filename;
+            String filepath = path + _("/") + filename;
             String id = hex_encode(filepath.c_str(), filepath.length());
             fe->addAttribute(_("id"), id);
             int childCount = 1;

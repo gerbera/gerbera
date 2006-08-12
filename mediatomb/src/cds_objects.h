@@ -27,6 +27,7 @@
 #include "dictionary.h"
 #include "cds_resource.h"
 
+// ATTENTION: These values need to be changed in web/js/items.js too.
 #define OBJECT_TYPE_CONTAINER 1
 #define OBJECT_TYPE_ITEM 2
 #define OBJECT_TYPE_ACTIVE_ITEM 4
@@ -318,7 +319,7 @@ public:
 
     /// \brief Sets the URL for the item.
     /// \param URL full url to the item: http://somewhere.com/something.mpg
-    inline void setURL(zmm::String URL) { this->location = location; }
+    inline void setURL(zmm::String URL) { this->location = URL; }
 
     /// \brief Get the URL of the item.
     inline zmm::String getURL() { return location; }

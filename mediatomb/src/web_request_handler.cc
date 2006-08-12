@@ -148,25 +148,6 @@ Ref<IOHandler> WebRequestHandler::open(IN const char *filename,
     return open(params, mode);
 }
 
-String WebRequestHandler::subrequest(String req_type, Ref<Dictionary> params)
-{
-    Ref<WebRequestHandler> subhandler(create_web_request_handler(req_type));
-    Ref<IOHandler> io_handler = subhandler->open(params, mode);
-    
-    Ref<StringBuffer> buffer(new StringBuffer(DEFAULT_PAGE_BUFFER_SIZE));
-    char *buf = (char *)MALLOC(DEFAULT_PAGE_BUFFER_SIZE * sizeof(char));
-    while (true)
-    {
-        int bytesRead = io_handler->read(buf, DEFAULT_PAGE_BUFFER_SIZE);
-        if (bytesRead <= 0)
-            break;
-        *buffer << String(buf, bytesRead);
-    }
-    free(buf);
-    return buffer->toString();
-}
-
-
 // this method should be overridden
 void WebRequestHandler::process()
 {
