@@ -1,8 +1,8 @@
 var closedGif = '/icons/nanotree/images/folder_closed.gif';
 var openGif = '/icons/nanotree/images/folder_open.gif';
 var iconArray = new Array(closedGif,openGif);
-var lastNodeDb;
-var lastNodeFs;
+var lastNodeDb = 'd0';
+var lastNodeFs = 'f0';
 sortNodes = false;
 showRootNode = false;
 

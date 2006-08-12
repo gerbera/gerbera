@@ -167,7 +167,7 @@ function updateItemAddFields()
     else if (currentTypeOption == '4')
     {
         fieldAr = new Array('Title', 'Location', 'Class', 'Description', 'Mimetype', 'Action Script', 'State');
-        fieldNameAr = new Array('title', 'location', 'class', 'description', 'mimetype', 'script', 'state');
+        fieldNameAr = new Array('title', 'location', 'class', 'description', 'mimetype', 'action', 'state');
         defaultsAr = new Array('', '', 'object.item.activeItem', '', '', '', '');
     }
     else if (currentTypeOption == '8' || currentTypeOption == '16')
@@ -222,4 +222,5 @@ function itemAddSubmit()
             onComplete: addedItem
         });
 }
+
 
