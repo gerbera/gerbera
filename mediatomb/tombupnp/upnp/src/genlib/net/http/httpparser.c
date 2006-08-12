@@ -2399,7 +2399,7 @@ raw_to_int( IN memptr * raw_value,
     }
 
     errno = 0;
-#ifdef LARGEFILE_OFF_T_SIZE_8
+#if SIZEOF_OFF_T > 4
         num = strtoll( raw_value->buf, &end_ptr, base );
         if( ( num < 0 )
                 // all and only those chars in token should be used for num

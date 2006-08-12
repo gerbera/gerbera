@@ -43,30 +43,14 @@ AC_TYPE_OFF_T
 AC_SYS_LARGEFILE
 AC_FUNC_FSEEKO
 
+
 if test "$ac_cv_func_fseeko" != yes; then
     AC_MSG_WARN([fseeko has not been found on your system, will use fseek instead.])
     AC_MSG_WARN([This has not been tested, please report if you have any problems.])
-    AC_DEFINE([fseeko], [fseek], [fseek not present])
+    AC_DEFINE([fseeko], [fseek], [fseeko not present])
 fi
 
-AC_MSG_CHECKING([size of off_t])
-AC_TRY_RUN([
-#include <sys/types.h>
-int main () { return !(sizeof(off_t) == 8); }
-],
-[
-  AC_MSG_RESULT(8)
-  AC_DEFINE([LARGEFILE_OFF_T_SIZE_8], [1], [sizeof(off_t)])
-  AC_DEFINE([LARGEFILE_SPRINTF], ["%ll"], [how to sprintf off_t])
-],
-[
-  AC_MSG_RESULT(4)
-  AC_DEFINE([LARGEFILE_SPRINTF], ["%l"], [how to sprintf off_t])
-],
-[
-  AC_MSG_RESULT(4)
-  AC_DEFINE([LARGEFILE_SPRINTF], ["%l"], [how to sprintf off_t])
-])
+AC_CHECK_SIZEOF(off_t, 4)
 
 AC_CHECK_FUNCS([strtoll])
  
@@ -707,7 +691,7 @@ fi
 
 LOG_OK=yes
 AC_ARG_ENABLE(log,
-  [  --enable-log             enable all logging output for the server],
+  [  --enable-log             enable or disable logging output for the server],
   [
      LOG_OK_EN=$enableval 
      if test "x$enableval" = xno; then

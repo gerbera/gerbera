@@ -76,15 +76,16 @@ In order to compile MediaTomb you will have to install the following packages:
          information. Some problems regarding the UPnP SDK, MediaTomb and the
          DSM-320 are discussed there, some solutions are offered.
  
-- At least one of the databases:
-  - sqlite3 from http://www.sqlite.org/ (Very SLOW media import)
+- At least one of the databases (REQUIRED):
+  * sqlite3 from http://www.sqlite.org/ (Very SLOW media import)
     On Fedora Core it's sqlite3-devel and 'sqlite3' packages.
     On Debian it's 'libsqlite3' 'libsqlite3-dev' and 'sqlite3'
-       (the last package includes command line client which is also required)
-  - mysql client library (RECOMMENDED)
+    (the last package includes command line client which is also required)
+  * mysql client library 
     NOTE: Write operations to sqlite3 database is VERY SLOW, use sqlite3
     only if you don't have another choice.
-  
+
+
 - libmagic (OPTIONAL, RECOMMENDED)
   On Fedora Core the package is called 'file'. (Note, that due to a bug
   (tested on FC4) filemagic can return wrong mimetypes, see
@@ -101,9 +102,35 @@ In order to compile MediaTomb you will have to install the following packages:
   fetch / build it yourself, the library is normally called libjs.
   On debian install the packages libsmjs1 and libsmjs-dev.
 
+- taglib http://developer.kde.org/~wheeler/taglib.html
+  (OPTIONAL, RECOMMENDED)
+  This library retrieves metadata tags from mp3, ogg and flac files.
+  You will need it if you want to have virtual objects for those
+  files (i.e. nice content layout).
+  Note: It makes no sense to use taglib and id3lib at the same time,
+  therefore the configure script will not allow that. You can
+  choose either taglib or id3lib but you can not use both.
+
 - id3lib http://id3lib.sourceforge.net/ (at least version 3.8.3)
   (OPTIONAL, RECOMMENDED) You will need this library to have
   virtual objects for mp3 files
+
+- libexif http://libexif.sourceforge.net/
+  You will need this library if you want to extract metadata from
+  images. It not only allows you to have virtual objects for photos,
+  but also enables thumbnail support (only if EXIF thumbnails are present
+  in your images).
+
+- libextractor http://gnunet.org/libextractor/
+  This library tries to gather metadata from all kinds of files (also 
+  .avi and .asf). The drawback is, that it can be very slow at scanning
+  video files. We also noticed that it uses a lot of memory when reading
+  files. The result is, that media import becomes extremely slow.
+  It is up to you if you want to use it or not, you may use the
+  extract utility to check if there is any metadata that can be extracted
+  from your media prior to enabling this feature in MediaTomb. By defaault
+  libextractor is disabled, use ./configure --enable-libextractor to
+  activate it.
 
 - Python - there is also a setup script that makes necessary installations
   in your home directory, you will need Python to run it.
@@ -452,6 +479,13 @@ We are using the following code in our tree:
 
 - all icons for the UI are from the redhat-artwork-0.117 package under GNU GPL, 
   (I could not find any (C) in the supplied documents)
+
+- the UI uses the following software:
+  Prototype JavaScript Framework http://prototype.conio.net/
+  (c) 2005 Sam Stephenson <sam@conio.net>, MIT-style license.
+
+  NanoTree http://nanotree.sourceforge.net/
+  (c) ???? Martin Mouritzen <martin@nano.dk>, LGPL license.
 
 - tombupnp is based on pupnp (http://pupnp.sf.net) which is based on
   libupnp (http://upnp.sf.net), originally distributed under the

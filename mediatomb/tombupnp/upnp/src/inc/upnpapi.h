@@ -58,8 +58,10 @@
 #define MAX_SOAP_CONTENT_LENGTH 32000
 
 // LARGE FILE IMPLEMENTATION DEFINES
-#ifndef LARGEFILE_SPRINTF
-    #define LARGEFILE_SPRINTF "%l"
+#if SIZEOF_OFF_T > 4
+    #define OFF_T_SPRINTF "%ll"
+#else
+    #define OFF_T_SPRINTF "%l"
 #endif
 
 extern off_t g_maxContentLength;
