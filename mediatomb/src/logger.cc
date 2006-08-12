@@ -78,11 +78,12 @@ void _log_error(const char *format, ...)
     FLUSHIT
     va_end(ap);
 }
-void _log_debug(const char *format, ...)
+void _log_debug(const char *format, const char *file, int line, ...)
 {
     va_list ap;
     va_start(ap, format);
     log_stamp("DEBUG");
+    fprintf(LOG_FILE, "(%s:%d): ", file, line);
     vfprintf(LOG_FILE, format, ap);
     FLUSHIT
     va_end(ap);

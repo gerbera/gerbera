@@ -431,10 +431,12 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
         }
 
 
+        log_debug(("updateObject: chechking equality of item %s\n", item->getTitle().c_str()));
         if (!item->equals(clone, true))
         {
             cloned_item->validate();
             storage->updateObject(clone);
+            log_debug(("updateObject: calling containerChanged on item %s\n", item->getTitle().c_str()));
             um->containerChanged(item->getParentID());
         }
     }

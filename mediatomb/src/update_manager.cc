@@ -92,6 +92,7 @@ void UpdateManager::init()
     shutdownFlag = false;
     flushFlag = 0;
     lazyMode = true;
+//    lazyMode = false;
 
     int ret;
 
@@ -128,7 +129,6 @@ void UpdateManager::containersChanged(int *ids, int size)
 
 void UpdateManager::containerChanged(int objectID)
 {
-    return;
     hash_slot_t slot;
     int updateID;
 
@@ -178,6 +178,7 @@ void UpdateManager::containerChanged(int objectID)
     if (flush)
         flushUpdates(FLUSH_ASAP);
 }
+
 void UpdateManager::flushUpdates(int flushFlag)
 {
     LOCK();
@@ -263,7 +264,7 @@ void UpdateManager::threadProc()
 
     while (! shutdownFlag)
     {
-        log_debug(("threadProc: awakened...\n"));
+        log_debug(("threadProc: awakened... have updates: %d\n", haveUpdates()));
 
         /* if nothing to do, sleep until awakened */
         if (! haveUpdates())
@@ -301,11 +302,28 @@ void UpdateManager::threadProc()
         {
             millisToTimespec(nowMillis + sleepMillis, &timeout);
             log_debug(("threadProc: sleeping for %d millis\n", (int)sleepMillis));
-            ret = pthread_cond_timedwait(&updateCond, &updateMutex, &timeout);
-			if (ret)
-			{
-				log_debug(("pthread_cont_timedwait(): %s\n", strerror(errno)));
-			}
+            bool wait_done = false;
+            while (!wait_done)
+            {
+                ret = pthread_cond_timedwait(&updateCond, &updateMutex, &timeout);
+                switch (ret)
+                {
+                    case 0:
+                        wait_done = true;
+                        break;
+                    default:
+                        if (ret == ETIMEDOUT)
+                        {
+                            wait_done = true;
+                        }
+                        break;
+                }
+
+            }
+            if (ret)
+            {
+                log_debug(("pthread_cont_timedwait(): %s\n", strerror(errno)));
+            }
         }
         else // send updates 
         {
