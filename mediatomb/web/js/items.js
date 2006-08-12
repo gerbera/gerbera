@@ -68,15 +68,22 @@ function updateItems(ajaxRequest)
         if (useFiles)
         {
             itemEntry.appendChild(document.createTextNode(" - "));
-            var buttons = document.createElement("a");
-            buttons.setAttribute("href", "javascript:addItem(\""+item.getAttribute("id")+"\");");
-            buttons.appendChild(document.createTextNode("add"));
-            itemEntry.appendChild(buttons);
+            
+            var linkEl = document.createElement("a");
+            linkEl.setAttribute("href", "javascript:addItem(\""+item.getAttribute("id")+"\");");
+            linkEl.appendChild(document.createTextNode("add"));
+            itemEntry.appendChild(linkEl);
         }
         else
         {
-            itemLink.setAttribute("href", xmlGetElementText(item, "res"));
+            itemEntry.appendChild(document.createTextNode(" - "));
             
+            var linkEl = document.createElement("a");
+            linkEl.setAttribute("href", "javascript:removeItem(\""+item.getAttribute("id")+"\");");
+            linkEl.appendChild(document.createTextNode("remove"));
+            itemEntry.appendChild(linkEl);
+            
+            itemLink.setAttribute("href", xmlGetElementText(item, "res"));
         }
         var itemText = document.createTextNode(useFiles ? item.firstChild.nodeValue : xmlGetElementText(item, "dc:title"));
         itemLink.appendChild(itemText);
@@ -223,4 +230,21 @@ function itemAddSubmit()
         });
 }
 
+function removeItem(itemId)
+{
+    var url = link("remove", {object_id: itemId});
+    var myAjax = new Ajax.Request(
+        url,
+        {
+            method: 'get',
+            onComplete: removedItem
+        });
+}
 
+function removedItem(ajaxRequest)
+{
+    var xml = ajaxRequest.responseXML;
+    if (!errorCheck(xml)) return;
+    
+    //todo: feedback, reload?
+}

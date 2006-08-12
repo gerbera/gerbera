@@ -80,6 +80,14 @@ public:
     virtual void process();
 };
 
+/// \brief Browser remove item
+class remove : public WebRequestHandler
+{
+public:
+    remove();
+    virtual void process();
+};
+
 /// \brief Browser add object.
 class addObject : public WebRequestHandler
 {

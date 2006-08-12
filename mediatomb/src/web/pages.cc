@@ -29,6 +29,7 @@ using namespace zmm;
 WebRequestHandler *create_web_request_handler(String page)
 {
     if (page == "add") return new web::add();
+    if (page == "remove") return new web::remove();
     if (page == "add_object") return new web::addObject();
     if (page == "auth") return new web::auth();
     if (page == "containers") return new web::containers();

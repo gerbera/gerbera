@@ -25,13 +25,9 @@
 #include "server.h"
 #include <stdio.h>
 #include "common.h"
-//#include "storage.h"
-//#include "cds_objects.h"
-//#include "dictionary.h"
 #include "pages.h"
 #include "tools.h"
 #include "content_manager.h"
-//#include "session_manager.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -42,7 +38,7 @@ web::add::add() : WebRequestHandler()
 
 void web::add::process()
 {
-    Ref<Storage>   storage;
+    log_debug(("add: start\n"));
 
     check_request();
     
@@ -57,17 +53,6 @@ void web::add::process()
 
     Ref<ContentManager> cm = ContentManager::getInstance();
     cm->addFile(path, true);
-    
-    /*
-    session = SessionManager::getInstance()->getSession(sid);
-
-    objID = session->getFrom(sd, _("object_id"));
-    
-    Ref<Dictionary> sub(new Dictionary());
-    sub->put(_("object_id"), objID);
-    sub->put(_("driver"), driver);
-    sub->put(_("sid"), sid); 
-    *out << subrequest(_("browse"), sub);
-    */
+    log_debug(("add: returning\n"));
 }
 

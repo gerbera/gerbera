@@ -137,6 +137,7 @@ libmediatomb_a_SOURCES = \
 ../src/web/items.cc \
 ../src/web/pages.cc \
 ../src/web/pages.h \
+../src/web/remove.cc \
 ../src/web_request_handler.cc \
 ../src/web_request_handler.h \
 ../src/xpath.cc \
