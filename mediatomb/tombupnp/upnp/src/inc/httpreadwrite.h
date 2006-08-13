@@ -490,6 +490,10 @@ int http_SendStatusResponse( IN SOCKINFO *info, IN int http_status_code,
 *				appends content-length, content-type and HTML body for given code
 *		'T':	arg = char * content_type; format e.g: "text/html";	
 *				 content-type header
+*       'H':    arg = *userHTTPHeaderList
+*       'A':    arg = const char* C_string
+*               adds a custom HTTP header to a specific response (filled out
+*               by the user in the File_Info struct), may be NULL
 *
 *	Return : int;
 *		0 - On Success

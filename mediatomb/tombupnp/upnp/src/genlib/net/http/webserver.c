@@ -633,6 +633,8 @@ get_file_info( IN const char *filename,
 
     rc = get_content_type( filename, &info->content_type );
 
+    info->http_header = NULL;
+
     DBGONLY( UpnpPrintf( UPNP_INFO, HTTP, __FILE__, __LINE__,
                          "file info: %s, length: " OFF_T_SPRINTF"d" ", last_mod=%s readable=%d\n",
                          filename, info->file_length,
@@ -710,6 +712,7 @@ get_alias( IN const char *request_file,
         info->is_readable = TRUE;
         info->is_directory = FALSE;
         info->last_modified = alias->last_modified;
+        info->http_header = NULL;
     }
 
     return cmp == 0;
@@ -1222,6 +1225,7 @@ process_request( IN http_message_t * req,
     // init
     request_doc = NULL;
     finfo.content_type = NULL;
+    finfo.http_header = NULL;
     //membuffer_init( &content_type );
     alias_grabbed = FALSE;
     err_code = HTTP_INTERNAL_SERVER_ERROR;  // default error
@@ -1393,29 +1397,32 @@ process_request( IN http_message_t * req,
                 //Content-Range: bytes 222-3333/4000  HTTP_PARTIAL_CONTENT
         //Transfer-Encoding: chunked
         // K means add chunky header ang G means range header.
-        if( http_MakeMessage( headers, resp_major, resp_minor, "RTGKDstcSHCc", HTTP_PARTIAL_CONTENT, // status code
+        if( http_MakeMessage( headers, resp_major, resp_minor, "RTGKDstcSHACc", HTTP_PARTIAL_CONTENT, // status code
                               // RespInstr->ReadSendSize,// content length
                               finfo.content_type,
                               //     content_type.buf,            // content type
                               RespInstr,    // Range
                               "LAST-MODIFIED: ",
                               &finfo.last_modified,
-                              pUserHTTPHeaderList) != 0 ) {
+                              pUserHTTPHeaderList,
+                              finfo.http_header) != 0 ) {
             goto error_handler;
         }
+
     } else if( RespInstr->IsRangeActive && !RespInstr->IsChunkActive ) {
 
         //Content-Range: bytes 222-3333/4000  HTTP_PARTIAL_CONTENT
         //Transfer-Encoding: chunked
         // K means add chunky header ang G means range header.
-        if( http_MakeMessage( headers, resp_major, resp_minor, "RNTGDstcSHCc", HTTP_PARTIAL_CONTENT, // status code
+        if( http_MakeMessage( headers, resp_major, resp_minor, "RNTGDstcSHACc", HTTP_PARTIAL_CONTENT, // status code
                               RespInstr->ReadSendSize,  // content length
                               finfo.content_type,
                               //content_type.buf,            // content type
                               RespInstr,    //Range Info
                               "LAST-MODIFIED: ",
                               &finfo.last_modified,
-                              pUserHTTPHeaderList) != 0 ) {
+                              pUserHTTPHeaderList,
+                              finfo.http_header) != 0 ) {
             goto error_handler;
         }
 
@@ -1424,13 +1431,14 @@ process_request( IN http_message_t * req,
         //Content-Range: bytes 222-3333/4000  HTTP_PARTIAL_CONTENT
         //Transfer-Encoding: chunked
         // K means add chunky header ang G means range header.
-        if( http_MakeMessage( headers, resp_major, resp_minor, "RKTDstcSHCc", HTTP_OK,   // status code
+        if( http_MakeMessage( headers, resp_major, resp_minor, "RKTDstcSHACc", HTTP_OK,   // status code
                               //RespInstr->ReadSendSize,// content length
                               finfo.content_type,
                               // content_type.buf,            // content type
                               "LAST-MODIFIED: ",
                               &finfo.last_modified,
-                              pUserHTTPHeaderList) != 0 ) {
+                              pUserHTTPHeaderList,
+                              finfo.http_header) != 0 ) {
             goto error_handler;
         }
 
@@ -1439,26 +1447,28 @@ process_request( IN http_message_t * req,
             //Content-Range: bytes 222-3333/4000  HTTP_PARTIAL_CONTENT
             //Transfer-Encoding: chunked
             // K means add chunky header ang G means range header.
-            if( http_MakeMessage( headers, resp_major, resp_minor, "RNTDstcSHCc", HTTP_OK,   // status code
+            if( http_MakeMessage( headers, resp_major, resp_minor, "RNTDstcSHACc", HTTP_OK,   // status code
                                   RespInstr->ReadSendSize,  // content length
                                   finfo.content_type,
                                   //content_type.buf,          // content type
                                   "LAST-MODIFIED: ",
                                   &finfo.last_modified,
-                                  pUserHTTPHeaderList) != 0 ) {
+                                  pUserHTTPHeaderList,
+                                  finfo.http_header) != 0 ) {
                 goto error_handler;
             }
         } else {
             //Content-Range: bytes 222-3333/4000  HTTP_PARTIAL_CONTENT
             //Transfer-Encoding: chunked
             // K means add chunky header ang G means range header.
-            if( http_MakeMessage( headers, resp_major, resp_minor, "RTDstcSHCc", HTTP_OK,    // status code
+            if( http_MakeMessage( headers, resp_major, resp_minor, "RTDstcSHACc", HTTP_OK,    // status code
                                   //RespInstr->ReadSendSize,// content length
                                   finfo.content_type,
                                   //content_type.buf,          // content type
                                   "LAST-MODIFIED: ",
                                   &finfo.last_modified,
-                                  pUserHTTPHeaderList) != 0 ) {
+                                  pUserHTTPHeaderList,
+                                  finfo.http_header) != 0 ) {
                 goto error_handler;
             }
         }
@@ -1487,6 +1497,8 @@ process_request( IN http_message_t * req,
   error_handler:
     free( request_doc );
     ixmlFreeDOMString( finfo.content_type );
+    if (finfo.http_header)
+        ixmlFreeDOMString( finfo.http_header);
     //  membuffer_destroy( &content_type );
     if( err_code != UPNP_E_SUCCESS && alias_grabbed ) {
         alias_release( alias );

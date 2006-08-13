@@ -1777,7 +1777,11 @@ http_SendStatusResponse( IN SOCKINFO * info,
 *				appends content-length, content-type and HTML body for given code
 *		'T':	arg = char * content_type; format e.g: "text/html";	
 *				 content-type header
-*       'H':    arg = *userHTTPHeaderList 
+*       'H':    arg = *userHTTPHeaderList
+*       'A':    arg = const char* C_string
+*               adds a custom HTTP header to a specific response (filled out
+*               by the user in the File_Info struct), may be NULL
+
 *
 *	Return : int;
 *		0 - On Success
@@ -1834,7 +1838,26 @@ http_MakeMessage( INOUT membuffer * buf,
             if( membuffer_append( buf, s, strlen( s ) ) != 0 ) {
                 goto error_handler;
             }
-        } else if( c == 'K' )   // Add Chunky header
+        } 
+        else if( c == 'A' )          // C string
+        {
+            s = ( char * )va_arg( argp, char * );
+
+            if (s)
+            {
+                //DBGONLY(UpnpPrintf(UPNP_ALL,HTTP,__FILE__,__LINE__,"Adding a string : %s\n", s);) 
+                if( membuffer_append( buf, s, strlen( s ) ) != 0 ) 
+                {
+                    goto error_handler;
+                }
+                if( membuffer_append( buf, "\r\n", 2 ) != 0 ) 
+                {
+                    goto error_handler;
+                }
+
+            }
+        }
+        else if( c == 'K' )   // Add Chunky header
         {
             if( membuffer_append
                 ( buf, "TRANSFER-ENCODING: chunked\r\n",
