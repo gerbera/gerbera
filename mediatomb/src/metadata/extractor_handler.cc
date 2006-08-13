@@ -224,7 +224,7 @@ static EXTRACTOR_KeywordType getTagFromString(String tag)
         return EXTRACTOR_ORIENTATION;
 #endif // EXTRACTOR_GE_0_5_2
 
-    log_warning(("Ignoring unknown libextractor tag: %s\n", tag.c_str()));
+    log_warning("Ignoring unknown libextractor tag: %s\n", tag.c_str());
     return EXTRACTOR_UNKNOWN;
 }
 
@@ -270,7 +270,7 @@ static void addMetaField(metadata_fields_t field, EXTRACTOR_KeywordList *keyword
     if (string_ok(value))
     {
         item->setMetadata(String(MT_KEYS[field].upnp), sc->convert(value));
-//        log_info(("Setting metadata on item: %d, %s\n", field, sc->convert(value).c_str()));
+//        log_debug("Setting metadata on item: %d, %s\n", field, sc->convert(value).c_str());
     }
 }
 
@@ -368,7 +368,7 @@ void ExtractorHandler::fillMetadata(Ref<CdsItem> item)
    
     /*
     temp = EXTRACTOR_extractLast(EXTRACTOR_FORMAT, keywords);
-    log_info(("EXTRACTOR_FORMAT: %s\n", temp));
+    log_debug("EXTRACTOR_FORMAT: %s\n", temp);
 
     if (temp)
     {

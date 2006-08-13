@@ -121,7 +121,6 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
 /*        
           if (mimetype == "image/jpeg")
           {
-          log_info(("Starting exiv2\n"));
           handler = Ref<MetadataHandler>(new Exiv2Handler());
           break;
           } 

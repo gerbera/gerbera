@@ -16,9 +16,9 @@ void log_close();
 
 #ifdef LOG_ENABLED
 
-#define log_info(args) _log_info args
-#define log_warning(args) _log_warning args
-#define log_error(args) _log_error args
+#define log_info(format, ...) _log_info(format, ## __VA_ARGS__) 
+#define log_warning(format, ...) _log_warning(format, ## __VA_ARGS__) 
+#define log_error(format, ...) _log_error(format, ## __VA_ARGS__)
 
 #ifdef LOG_DEBUG
 
@@ -30,9 +30,9 @@ void log_close();
 
 #else
 
-#define log_info(args)
-#define log_warning(args)
-#define log_error(args)
+#define log_info(format, ...)
+#define log_warning(format, ...)
+#define log_error(format, ...)
 #define log_debug(format, ...)
 
 #endif

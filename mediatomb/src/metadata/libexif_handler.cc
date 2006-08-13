@@ -252,7 +252,7 @@ static int getTagFromString(String tag)
     if (tag == "EXIF_TAG_IMAGE_UNIQUE_ID") 
         return  EXIF_TAG_IMAGE_UNIQUE_ID;
 
-    log_warning(("Ignoring unknown libexif tag: %s\n", tag.c_str()));
+    log_warning("Ignoring unknown libexif tag: %s\n", tag.c_str());
     return -1;
 }
 
@@ -279,7 +279,7 @@ void LibExifHandler::process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<S
     for (i = 0; i < content->count; i++) {
         e = content->entries[i];
 
-//        log_info(("Processing entry: %d\n", i));
+//        log_debug("Processing entry: %d\n", i);
         
         switch (e->tag)
         {

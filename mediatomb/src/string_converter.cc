@@ -78,7 +78,7 @@ zmm::String StringConverter::convert(String str)
             output_ptr, &output_bytes);
     if (ret == -1)
     {
-        log_error(("iconv: %s\n", strerror(errno)));
+        log_error("iconv: %s\n", strerror(errno));
         String err;
         switch (errno)
         {
@@ -97,16 +97,16 @@ zmm::String StringConverter::convert(String str)
                 break;
         }
         *output_copy = 0;
-        log_error(("%s\n", err.c_str()));
-        log_info(("iconv: input: %s\n", input));
-        log_info(("iconv: converted part:  %s\n", output));
+        log_error("%s\n", err.c_str());
+//        log_debug("iconv: input: %s\n", input);
+//        log_debug("iconv: converted part:  %s\n", output);
         dirty = true;
         throw Exception(err);
     }
    
-    //log_debug(("iconv: AFTER: input bytes left: %d  output bytes left: %d\n",
-    //       input_bytes, output_bytes));
-    //log_debug(("iconv: returned %d\n", ret));
+    //log_debug("iconv: AFTER: input bytes left: %d  output bytes left: %d\n",
+    //       input_bytes, output_bytes);
+    //log_debug("iconv: returned %d\n", ret);
 
     String ret_str = String(output, output_copy - output);
     FREE(output);

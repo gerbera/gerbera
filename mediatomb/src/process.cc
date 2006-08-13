@@ -66,7 +66,7 @@ String run_process(String prog, String param, String input)
     /* executing script */
     String command = prog + " " + param + " < " + input_file +
         " > " + output_file;
-    log_info(("running %s\n", command.c_str()));
+    log_debug("running %s\n", command.c_str());
     ret = system(command.c_str());
 
     /* reading output file */

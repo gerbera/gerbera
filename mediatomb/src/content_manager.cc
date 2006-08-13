@@ -89,7 +89,7 @@ ContentManager::ContentManager() : Object()
     mapEl = cm->getElement(_("/import/mappings/extension-mimetype"));
     if (mapEl == nil)
     {
-        log_info(("extension-mimetype mappings not found\n"));
+        log_debug("extension-mimetype mappings not found\n");
     }
     else
     {
@@ -106,7 +106,7 @@ ContentManager::ContentManager() : Object()
     mapEl = cm->getElement(_("/import/mappings/mimetype-upnpclass"));
     if (mapEl == nil)
     {
-        log_info(("mimetype-upnpclass mappings not found\n"));
+        log_debug("mimetype-upnpclass mappings not found\n");
     }
     else
     {
@@ -120,7 +120,7 @@ ContentManager::ContentManager() : Object()
         ms = magic_open(MAGIC_MIME);
         if (ms == NULL)
         {
-	    log_info(("magic_open failed\n"));
+	    log_error("magic_open failed\n");
             return;
         }
         String magicFile = cm->getOption(_("/import/magic-file"));
@@ -128,7 +128,7 @@ ContentManager::ContentManager() : Object()
             magicFile = nil;
         if (magic_load(ms, (magicFile == nil) ? NULL : magicFile.c_str()) == -1)
         {
-            log_warning(("magic_load: %s\n", magic_error(ms)));
+            log_warning("magic_load: %s\n", magic_error(ms));
             magic_close(ms);
             ms = NULL;
         }
@@ -336,7 +336,7 @@ void ContentManager::addRecursive(String path, int parentID)
                 
                 if (obj == nil) // object ignored
                 {
-                    log_info(("file ignored: %s\n", newPath.c_str()));
+                    log_warning("file ignored: %s\n", newPath.c_str());
                 }
                 else
                 {
@@ -365,7 +365,7 @@ void ContentManager::addRecursive(String path, int parentID)
         }
         catch(Exception e)
         {
-            log_info(("skipping %s : %s\n", newPath.c_str(), e.getMessage().c_str()));
+            log_warning("skipping %s : %s\n", newPath.c_str(), e.getMessage().c_str());
         }
     }
     closedir(dir);
@@ -643,7 +643,7 @@ void ContentManager::initScripting()
 	catch (Exception e)
 	{
 		scripting = nil;
-		log_info(("ContentManager SCRIPTING: %s\n", e.getMessage().c_str()));
+		log_error("ContentManager SCRIPTING: %s\n", e.getMessage().c_str());
 	}
 
 }
@@ -692,7 +692,7 @@ void ContentManager::addFile2(String path, int recursive)
             obj = createObjectFromFile(curPath);
             if (obj == nil) // object ignored
             {
-                log_info(("file ignored: %s\n", curPath.c_str()));
+                log_debug("file ignored: %s\n", curPath.c_str());
                 return;
             }
             obj->setParentID(curParentID);
@@ -752,7 +752,7 @@ void ContentManager::addFile2(Ref<DirStack> dirStack, String parentID)
                 obj = createObjectFromFile(newPath);
                 if (obj == nil) // object ignored
                 {
-                    log_info(("file ignored: %s\n", newPath.c_str()));
+                    log_debug("file ignored: %s\n", newPath.c_str());
                     return;
                 }
                 obj->setParentID(parentID);
@@ -772,7 +772,7 @@ void ContentManager::addFile2(Ref<DirStack> dirStack, String parentID)
         }
         catch(Exception e)
         {
-            log_info(("skipping %s : %s\n", newPath.c_str(), e.getMessage().c_str()));
+            log_debug("skipping %s : %s\n", newPath.c_str(), e.getMessage().c_str());
         }
     }
     closedir(dir);
@@ -1147,8 +1147,8 @@ void ContentManager::addRecursive2(Ref<DirCache> dirCache, String filename, bool
             }
             catch(Exception e)
             {
-                log_warning(("skipping %s/%s : %s\n", dirCache->getPath().c_str(), filename.c_str(),
-                       e.getMessage().c_str()));
+                log_warning("Skipping %s/%s : %s\n", dirCache->getPath().c_str(), filename.c_str(),
+                       e.getMessage().c_str());
             }
         }
         closedir(dir);

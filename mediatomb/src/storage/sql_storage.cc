@@ -253,7 +253,7 @@ void SQLStorage::addObject(Ref<CdsObject> obj)
     *qb << "INSERT INTO cds_objects(" << fields->toString() <<
             ") VALUES (" << values->toString() << ")";
 
-//    log_info(("insert_query: %s\n", query->toString().c_str()));
+//    log_debug("insert_query: %s\n", query->toString().c_str());
 
     exec(qb->toString());
 
@@ -307,7 +307,7 @@ void SQLStorage::updateObject(zmm::Ref<CdsObject> obj)
 
     *qb << " WHERE id = " << obj->getID();
 
-//    log_info(("upd_query: %s\n", query->toString().c_str()));
+//    log_debug(("upd_query: %s\n", query->toString().c_str());
 
     this->exec(qb->toString());
 }

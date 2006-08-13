@@ -139,7 +139,7 @@ static int web_get_info(IN const char *filename, OUT struct File_Info *info)
     }
     catch(Exception e)
     {
-        log_error(("web_get_info(): Exception during callback: %s\n", e.getMessage().c_str()));
+        log_error("web_get_info(): Exception during callback: %s\n", e.getMessage().c_str());
         e.printStackTrace();
         return -1;
     }
@@ -171,7 +171,7 @@ static UpnpWebFileHandle web_open(IN const char *filename,
     }
     catch (Exception ex)
     {
-        log_error(("web_open(): exception during callback: %s\n", ex.getMessage().c_str()));
+        log_error("web_open(): exception during callback: %s\n", ex.getMessage().c_str());
         ex.printStackTrace();
         return NULL;
     }
@@ -242,7 +242,7 @@ static int web_seek(IN UpnpWebFileHandle f, IN off_t offset, IN int whence)
     }
     catch(Exception e)
     {
-        log_error(("web_seek(): Exception during seek: %s\n", e.getMessage().c_str()));
+        log_error("web_seek(): Exception during seek: %s\n", e.getMessage().c_str());
         e.printStackTrace();
         return -1;
     }
@@ -267,7 +267,7 @@ static int web_close( IN UpnpWebFileHandle f)
     }
     catch(Exception e)
     {
-        log_error(("web_seek(): Exception during seek: %s\n", e.getMessage().c_str()));
+        log_error("web_seek(): Exception during seek: %s\n", e.getMessage().c_str());
         e.printStackTrace();
         return -1;
     }

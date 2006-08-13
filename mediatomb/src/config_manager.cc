@@ -93,15 +93,15 @@ void ConfigManager::init(String filename, String userhome)
         }
 
         if (home_ok)
-            log_info(("Loading configuration from ~/.mediatomb/config.xml\n"));
+            log_info("Loading configuration from ~/.mediatomb/config.xml\n");
         else
-            log_info(("Loading configuration from /etc/mediatomb/config.xml\n"));
+            log_info("Loading configuration from /etc/mediatomb/config.xml\n");
 
 //        instance->load(userhome + DIR_SEPARATOR + DEFAULT_CONFIG_HOME + DIR_SEPARATOR + DEFAULT_CONFIG_NAME);
     }
 //    else
 
-    log_info(("Loading configuration from: %s\n", filename.c_str()));
+    log_info("Loading configuration from: %s\n", filename.c_str());
     instance->load(filename);
 
     instance->prepare_udn();    
@@ -112,7 +112,7 @@ void ConfigManager::validate(String serverhome)
 {
     String temp;
 
-    log_info(("Checking configuration...\n"));
+    log_info("Checking configuration...\n");
    
     // first check if the config file itself looks ok, it must have a config
     // and a server tag
@@ -190,7 +190,6 @@ void ConfigManager::validate(String serverhome)
               _(DEFAULT_FILESYSTEM_CHARSET));
     getOption(_("/import/metadata-charset"),
               _(DEFAULT_FILESYSTEM_CHARSET));
-    log_info(("checking ip..\n"));
     getOption(_("/server/ip"), _("")); // bind to any IP address
     getOption(_("/server/bookmark"), _(DEFAULT_BOOKMARK_FILE));
     getOption(_("/server/name"), _(DESC_FRIENDLY_NAME));
@@ -267,7 +266,7 @@ void ConfigManager::validate(String serverhome)
     }
 #endif
 
-    log_info(("Configuration check succeeded.\n"));
+    log_info("Configuration check succeeded.\n");
 
     log_debug("Config file dump after validation: \n%s\n", root->print().c_str());
 }
@@ -285,7 +284,7 @@ void ConfigManager::prepare_udn()
         uuid_generate(uuid);
         uuid_unparse(uuid, uuid_str);
 
-        log_info(("UUID GENERATED!: %s\n", uuid_str));
+        log_info("UUID generated: %s\n", uuid_str);
        
         getOption(_("/server/udn"), String("uuid:") + uuid_str);
 
@@ -358,8 +357,8 @@ String ConfigManager::getOption(String xpath, String def)
     if (string_ok(value))
         return trim_string(value);
 
-    log_info(("Config: option not found: %s using default value: %s\n",
-           xpath.c_str(), def.c_str()));
+    log_info("Config: option not found: %s using default value: %s\n",
+           xpath.c_str(), def.c_str());
     
     String pathPart = XPath::getPathPart(xpath);
     String axisPart = XPath::getAxisPart(xpath);

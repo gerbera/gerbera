@@ -79,11 +79,11 @@ String Sqlite3Storage::quote(String value)
 
 void Sqlite3Storage::reportError(String query)
 {
-    log_warning(("SQLITE3: (%d) %s\nQuery:%s\n",
+    log_warning("SQLITE3: (%d) %s\nQuery:%s\n",
         sqlite3_errcode(db),
         sqlite3_errmsg(db),
         (query == nil) ? "unknown" : query.c_str()
-    ));
+    );
 }
 
 

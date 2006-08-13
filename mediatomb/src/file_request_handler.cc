@@ -49,7 +49,7 @@ FileRequestHandler::FileRequestHandler() : RequestHandler()
 
 void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info *info)
 {
-    log_info(("FileRequestHandler::get_info start\n"));
+    log_debug("start\n");
 
     int objectID;
 
@@ -68,13 +68,13 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     String objID = dict->get(_("object_id"));
     if (objID == nil)
     {
-        //log_info(("object_id not found in url\n"));
+        //log_error("object_id not found in url\n");
         throw Exception(_("get_info: object_id not found"));
     }
     else
         objectID = objID.toInt();
 
-    //log_info(("got ObjectID: [%s]\n", object_id.c_str()));
+    //log_debug("got ObjectID: [%s]\n", object_id.c_str());
 
     Ref<Storage> storage = Storage::getInstance();
 
@@ -103,10 +103,14 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
         log_debug("Script input: %s\n", input.c_str());
         if(strncmp(action.c_str(), "http://", 7))
         {
+#ifdef LOG_DEBUG
             long before = getMillis();
+#endif
             output = run_process(action, _("run"), input);
+#ifdef LOG_DEBUG
             long after = getMillis();
-            log_info(("script executed in %ld milliseconds\n", after - before));
+            log_debug("script executed in %ld milliseconds\n", after - before);
+#endif
         }
         else
         {
@@ -122,7 +126,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
 
         if (! aitem->equals(clone, true)) // check for all differences
         {
-            log_info(("Item changed, updating database\n"));
+            log_debug("Item changed, updating database\n");
             storage->updateObject(clone);
             if (! aitem->equals(clone)) // check for visible differences
             {
@@ -135,7 +139,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
         }
         else
         {
-            log_info(("Item untouched...\n"));
+            log_debug("Item untouched...\n");
         }
     }
 
@@ -167,7 +171,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     if (s_res_id != nil)
         res_id = s_res_id.toInt();
 
-    log_info(("FileRequestHandler: fetching resource id %d\n", res_id));
+    log_debug("fetching resource id %d\n", res_id);
     if ((res_id > 0) && (res_id < item->getResourceCount()))
     {
         // http-get:*:image/jpeg:*
@@ -178,7 +182,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
             mimeType = parts->get(2);
         }
       
-        log_info(("FileRequestHandler: setting content length to unknown\n"));
+        log_debug("setting content length to unknown\n");
         /// \todo we could figure out the content length...
         info->file_length = -1;
     }
@@ -186,8 +190,8 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     {
         mimeType = item->getMimeType();
         info->file_length = statbuf.st_size;
-        //log_debug(("sizeof off_t %d, statbuf.st_size %d\n", sizeof(off_t), sizeof(statbuf.st_size)));
-        //log_info(("FileRequestHandler: get_info: file_length: " LARGEFILE_SPRINTF "\n", statbuf.st_size));
+        //log_debug("sizeof off_t %d, statbuf.st_size %d\n", sizeof(off_t), sizeof(statbuf.st_size));
+        //log_debug("get_info: file_length: " OFF_T_SPRINTF "\n", statbuf.st_size);
     }
         
     info->last_modified = statbuf.st_mtime;
@@ -209,17 +213,17 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
             info->http_header = ixmlCloneDOMString(header.c_str());
         }
     }
-    //    log_info(("get_info: Requested %s, ObjectID: %s, Location: %s\n, MimeType: %s\n",
-//          filename, object_id.c_str(), path.c_str(), info->content_type));
+    //    log_debug("get_info: Requested %s, ObjectID: %s, Location: %s\n, MimeType: %s\n",
+//          filename, object_id.c_str(), path.c_str(), info->content_type);
 
-//    log_info(("web_get_info(): end\n"));
+    log_debug("web_get_info(): end\n");
 }
 
 Ref<IOHandler> FileRequestHandler::open(IN const char *filename, IN enum UpnpOpenFileMode mode)
 {
     int objectID;
 
- //   log_info(("FileIOHandler web_open(): start\n"));
+    log_debug("start\n");
 
     // Currently we explicitly do not support UPNP_WRITE
     // due to security reasons.
@@ -242,7 +246,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, IN enum UpnpOpe
 
     Ref<Storage> storage = Storage::getInstance();
 
-    log_info(("FileIOHandler web_open(): Opening media file with object id %d\n", objectID));
+    log_debug("Opening media file with object id %d\n", objectID);
 
     Ref<CdsObject> obj = storage->loadObject(objectID);
 

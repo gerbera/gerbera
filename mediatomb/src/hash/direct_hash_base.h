@@ -123,7 +123,7 @@ public:
                 h2 = secondaryHashCode(h);
             h = (h + h2) % capacity;
         }
-        log_error(("AbstractHash::search() failed, maximal number of iterations exceeded: h:%d  h2:%d\n", h, h2));
+        log_error("AbstractHash::search() failed, maximal number of iterations exceeded: h:%d  h2:%d\n", h, h2);
         throw zmm::Exception(_("AbstractHash::search() failed, maximal number of iterations exceeded: h:") + h + " h2:"+ h2);
     }
 };

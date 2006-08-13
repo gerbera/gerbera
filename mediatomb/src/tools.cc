@@ -465,7 +465,7 @@ String get_mime_type(magic_set *ms, Ref<RExp> reMimetype, String file)
     char *mt = (char *)magic_file(ms, file.c_str());
     if (mt == NULL)
     {
-        log_info(("magic_file: %s\n", magic_error(ms)));
+        log_error("magic_file: %s\n", magic_error(ms));
         return nil;
     }
 
@@ -475,8 +475,8 @@ String get_mime_type(magic_set *ms, Ref<RExp> reMimetype, String file)
     if (matcher->next())
         return matcher->group(1);
 
-    log_info(("filemagic returned invalid mimetype for %s\n%s\n",
-                file.c_str(), mt));
+    log_warning("filemagic returned invalid mimetype for %s\n%s\n",
+                file.c_str(), mt);
     return nil;
 }
 

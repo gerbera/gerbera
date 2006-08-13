@@ -81,7 +81,7 @@ void ServeRequestHandler::get_info(IN const char *filename, OUT struct File_Info
         {
             if (magic_load(ms, NULL) == -1)
             {
-                log_warning(("magic_load: %s\n", magic_error(ms)));
+                log_warning("magic_load: %s\n", magic_error(ms));
                 magic_close(ms);
                 ms = NULL;
             } 

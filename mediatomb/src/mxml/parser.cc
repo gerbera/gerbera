@@ -104,7 +104,7 @@ Ref<Element> Parser::parseString(String str)
                 
 Ref<Element> Parser::parse(Ref<Context> ctx, Ref<Input> input, String parentTag, int state)
 {
-//    log_info(("parse: %s\n", parentTag.c_str()));
+//    log_debug("parse: %s\n", parentTag.c_str());
 	Ref<StringBuffer> buf = Ref<StringBuffer>(new StringBuffer());
 
 	Ref<Element> element;
@@ -117,7 +117,7 @@ Ref<Element> Parser::parse(Ref<Context> ctx, Ref<Input> input, String parentTag,
 	{
 		c = (char)ic;
         
-//      log_info(("state: %s, buf: %s  char:%c\n", getStateName(state), buf->toString().c_str(), c));
+//      log_info("state: %s, buf: %s  char:%c\n", getStateName(state), buf->toString().c_str(), c);
 
 		switch(state)
 		{

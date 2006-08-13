@@ -84,7 +84,6 @@ int main(int argc, char **argv, char **envp)
 
     Ref<Array<StringBase> > addFile(new Array<StringBase>());
    
-    log_warning(("TEST\n"));
     while (1)
     {
         o = getopt_long(argc, argv, OPTSTR, long_options, &opt_index);
@@ -103,50 +102,50 @@ int main(int argc, char **argv, char **envp)
                 port = strtol(optarg, &err, 10);
                 if ((port == 0) && (*err))
                 {
-                    log_error(("Invalid port argument: %s\n", optarg));
+                    log_error("Invalid port argument: %s\n", optarg);
                     exit(EXIT_FAILURE);
                 }
 
                 if (port > USHRT_MAX)
                 {
-                    log_error(("Invalid port value %d. Maximum allowed port value is %d\n",
-                                USHRT_MAX));
+                    log_error("Invalid port value %d. Maximum allowed port value is %d\n",
+                                USHRT_MAX);
                 }
                 log_debug("port set to: %d\n", port);
                 break;
 
             case 'c':
-//                log_info(("Option config with param %s\n", optarg));
+                log_debug("Option config with param %s\n", optarg);
                 config_file = String(optarg);
                 break;
 
             case 'd':
-//                log_info(("Starting in deamon mode..."));
+                log_debug("Starting in deamon mode...");
                 daemon = true;
                 break;
 
             case 'u':
-//                log_info(("Running as user: %s\n", optarg));
+                log_debug("Running as user: %s\n", optarg);
                 user = String(optarg);
                 break;
 
             case 'g':
-//                log_info(("Running as group: %s\n", optarg));
+                log_debug("Running as group: %s\n", optarg);
                 group = String(optarg);
                 break;
                 
             case 'a':
-//                log_info(("adding file/directory:: %s\n", optarg));
-                printf("Adding file/directory: %s\n", optarg);
+                log_debug("Adding file/directory:: %s\n", optarg);
                 addFile->append(String(optarg));
                 break;
 
             case 'P':
-                printf("Pid file: %s\n", optarg);
+                log_debug("Pid file: %s\n", optarg);
                 pid_file = String(optarg);
                 break;
                 
             case 'l':
+                log_debug("Log file: %s\n", optarg);
                 log_open(optarg);
                 break;
                 
@@ -175,8 +174,8 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
          }
     }
 
-    log_info(("======== MediaTomb UPnP Server version %s ========\n", VERSION));
-    log_info(("http://www.mediatomb.org/\n\n"));
+    log_info("======== MediaTomb UPnP Server version %s ========\n", VERSION);
+    log_info("         http://www.mediatomb.org/\n\n");
 
     // check if user and/or group parameter was specified and try to run the server
     // under the given user and/or group name
@@ -185,13 +184,13 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
         grp = getgrnam(group.c_str());
         if (grp == NULL)
         {
-            log_info(("Group %s not found!\n", group.c_str()));
+            log_error("Group %s not found!\n", group.c_str());
             exit(EXIT_FAILURE);
         }
 
         if (setgid(grp->gr_gid) < 0)
         {
-            log_info(("setgid failed %s\n", strerror(errno)));
+            log_error("setgid failed %s\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
     }
@@ -201,13 +200,13 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
         pwd = getpwnam(user.c_str()); 
         if (pwd == NULL)
         {
-            log_info(("User %s not found!\n", user.c_str()));
+            log_error("User %s not found!\n", user.c_str());
             exit(EXIT_FAILURE);
         }
 
         if (setuid(pwd->pw_uid) < 0)
         {
-            log_info(("setuid failed %s\n", strerror(errno)));
+            log_error("setuid failed %s\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
         
@@ -232,7 +231,7 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
 
 /*        if ((config_file == nil) && (home == nil))
         {
-            log_info(("No configuration specified and no user home directory set.\n"));
+            log_info("No configuration specified and no user home directory set.\n");
             exit(EXIT_FAILURE);
         }
         
@@ -242,15 +241,15 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     }
     catch (mxml::ParseException pe)
     {
-        log_info(("Error parsing config file: %s line %d:\n%s\n",
+        log_error("Error parsing config file: %s line %d:\n%s\n",
                pe.context->location.c_str(),
                pe.context->line,
-               pe.getMessage().c_str()));
+               pe.getMessage().c_str());
         exit(EXIT_FAILURE);
     }
     catch (Exception e)
     {
-        log_info(("%s\n", e.getMessage().c_str()));
+        log_error("%s\n", e.getMessage().c_str());
         exit(EXIT_FAILURE);
     }    
     
@@ -318,7 +317,7 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
         f = fopen(pid_file.c_str(), "w");
         if (f == NULL)
         {                    
-            printf("Could not write pid file %s : %s\n", pid_file.c_str(), strerror(errno));
+            log_error("Could not write pid file %s : %s\n", pid_file.c_str(), strerror(errno));
         }
         else
         {
@@ -326,7 +325,7 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
             fclose(f);
 
             if (size < pid.length())
-                printf("Error when writing pid file %s : %s\n", pid_file.c_str(), strerror(errno));
+                log_error("Error when writing pid file %s : %s\n", pid_file.c_str(), strerror(errno));
         }
 
     }
@@ -342,12 +341,12 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     catch(UpnpException upnp_e)
     {
         upnp_e.printStackTrace();
-        log_error(("main: upnp error %d\n", upnp_e.getErrorCode()));
+        log_error("main: upnp error %d\n", upnp_e.getErrorCode());
         if (upnp_e.getErrorCode() == UPNP_E_SOCKET_BIND)
         {
-            log_error(("Could not bind to socket.\n"));
-            log_info(("Please check if another instance of MediaTomb or\n"));
-            log_info(("another application is running on the same port.\n"));
+            log_error("Could not bind to socket.\n");
+            log_info("Please check if another instance of MediaTomb or\n");
+            log_info("another application is running on the same port.\n");
         }
 
         try
@@ -373,7 +372,7 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
             try
             {   
                 // add file/directory recursively and asynchronously
-                log_info(("adding %s\n", String(addFile->get(i)).c_str()));
+                log_info("Adding %s\n", String(addFile->get(i)).c_str());
                 ContentManager::getInstance()->addFile(String(addFile->get(i)), true, true);
             }
             catch (Exception e)
@@ -401,7 +400,7 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     }
     catch(UpnpException upnp_e)
     {
-        log_error(("main: upnp error %d\n", upnp_e.getErrorCode()));
+        log_error("main: upnp error %d\n", upnp_e.getErrorCode());
         ret = EXIT_FAILURE;
     }
     catch (Exception e)
@@ -410,7 +409,7 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
         ret = EXIT_FAILURE;
     }
 
-    log_info(("terminating\n"));
+    log_info("server terminating\n");
     log_close();
 
     return ret;

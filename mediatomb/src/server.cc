@@ -80,15 +80,17 @@ void Server::upnp_init(String ip, int port)
 {
     int             ret = 0;        // general purpose error code
 
-//    log_info(("upnp_init: start\n"));
+    log_debug("start\n");
 
     Ref<ConfigManager> config = ConfigManager::getInstance();
 
     if (ip == nil)
     {
         ip = config->getOption(_("/server/ip"), _(""));
-        if (ip == "") ip = nil;
-        log_info(("got ip: %s\n", ip.c_str()));
+        if (ip == "") 
+            ip = nil;
+        else
+            log_info("got ip: %s\n", ip.c_str());
     }
 
     if (port < 0)
@@ -108,14 +110,14 @@ void Server::upnp_init(String ip, int port)
 
     port = UpnpGetServerPort();
 
-    log_info(("Initialized port: %d\n", port));
+    log_info("Initialized port: %d\n", port);
 
     if (!string_ok(ip))
     {
         ip = String(UpnpGetServerIpAddress());
     }
 
-    log_info(("Server bound to: %s\n", ip.c_str()));
+    log_info("Server bound to: %s\n", ip.c_str());
 
     virtual_url = _("http://") + ip + ":" + port + "/" + virtual_directory;
 
@@ -134,7 +136,7 @@ void Server::upnp_init(String ip, int port)
         throw UpnpException(ret, _("upnp_init: UpnpSetWebServerRootDir failed"));
     }
 
-    log_info(("upnp_init: webroot: %s\n", web_root.c_str())); 
+    log_debug("webroot: %s\n", web_root.c_str()); 
 
     Ref<Element> headers = config->getElement(_("/server/custom-http-headers"));
     if (headers != nil)
@@ -148,7 +150,7 @@ void Server::upnp_init(String ip, int port)
                 tmp = arr->get(i);
                 if (string_ok(tmp))
                 {
-                    log_info(("Adding HTTP header \"%s\"\n", tmp.c_str()));
+                    log_info("Adding HTTP header \"%s\"\n", tmp.c_str());
                     ret = UpnpAddCustomHTTPHeader(tmp.c_str());
                     if (ret != UPNP_E_SUCCESS)
                     {
@@ -175,7 +177,7 @@ void Server::upnp_init(String ip, int port)
     String device_description = _("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") +
                                 UpnpXML_RenderDeviceDescription()->print();
 
-//    log_info(("DEVICE DESCRIPTION: \n%s\n", device_description.c_str()));
+//    log_debug("DEVICE DESCRIPTION: \n%s\n", device_description.c_str());
 
     // register root device with the library
     ret = UpnpRegisterRootDevice2(UPNPREG_BUF_DESC, device_description.c_str(), 
@@ -222,7 +224,7 @@ void Server::upnp_init(String ip, int port)
    
     config->writeBookmark(ip, String::from(port));
     
-//    log_info(("upnp_init: end\n"));
+    log_debug("end\n");
 }
 
 
@@ -241,7 +243,7 @@ void Server::shutdown()
 
     server_shutdown_flag = true;
 
-//    log_info(("upnp_cleanup: start\n"));
+    log_debug("start\n");
 
     // unregister device
     
@@ -250,10 +252,10 @@ void Server::shutdown()
         throw UpnpException(ret, _("upnp_cleanup: UpnpUnRegisterRootDevice failed"));
     }
    
-//    log_info(("now calling upnp finish\n"));
+    log_debug("now calling upnp finish\n");
     UpnpFinish();
 
-//    log_info(("upnp_cleanup: end\n"));
+    log_debug("end\n");
 
     pthread_mutex_destroy(&upnp_mutex);
 }
@@ -268,26 +270,26 @@ int Server::upnp_callback(Upnp_EventType eventtype, void *event, void *cookie)
 {
     int ret = UPNP_E_SUCCESS; // general purpose return code
 
-//    log_info(("upnp_callback: start\n"));
+    log_info("start\n");
 
     // check parameters
     if (event == NULL) {
-        log_info(("upnp_callback: NULL event structure\n"));
+        log_debug("upnp_callback: NULL event structure\n");
         return UPNP_E_BAD_REQUEST;
     }
 
-//    log_info(("event is ok\n"));
+//    log_info("event is ok\n");
     // get device wide mutex (have to figure out what the hell that is)
     pthread_mutex_lock(&upnp_mutex);
 
-//    log_info(("got device mutex\n"));
+//    log_info("got device mutex\n");
 
     // dispatch event based on event type
     switch (eventtype) {
 
         case UPNP_CONTROL_ACTION_REQUEST:
             // a CP is invoking an action
-//            log_info(("upnp_callback: UPNP_CONTROL_ACTION_REQUEST\n"));
+//            log_info("UPNP_CONTROL_ACTION_REQUEST\n");
             try
             {
                 Ref<ActionRequest> request(new ActionRequest((struct Upnp_Action_Request *)event));
@@ -302,14 +304,14 @@ int Server::upnp_callback(Upnp_EventType eventtype, void *event, void *cookie)
             }
             catch(Exception e)
             {
-                log_info(("Exception: %s\n", e.getMessage().c_str()));
+                log_info("Exception: %s\n", e.getMessage().c_str());
             }
             
             break;
 
         case UPNP_EVENT_SUBSCRIPTION_REQUEST:
             // a cp wants a subscription
-//            log_info(("upnp_callback: UPNP_EVENT_SUBSCRIPTION_REQUEST\n"));
+//            log_info("UPNP_EVENT_SUBSCRIPTION_REQUEST\n");
             try
             {
                 Ref<SubscriptionRequest> request(new SubscriptionRequest((struct Upnp_Subscription_Request *)event));
@@ -324,7 +326,7 @@ int Server::upnp_callback(Upnp_EventType eventtype, void *event, void *cookie)
 
         default:
             // unhandled event type
-            log_info(("upnp_callback: unsupported event type: %d\n", eventtype));
+            log_warning("unsupported event type: %d\n", eventtype);
             ret = UPNP_E_BAD_REQUEST;
             break;
     }
@@ -332,8 +334,7 @@ int Server::upnp_callback(Upnp_EventType eventtype, void *event, void *cookie)
     // release device wide mutex
     pthread_mutex_unlock(&upnp_mutex);
 
-//    log_info(("upnp_callback: returning %d\n", ret));
-//    log_info(("upnp_callback: end\n"));
+    log_debug("returning %d\n", ret);
     return ret;
 }
 
@@ -354,7 +355,7 @@ zmm::String Server::getPort()
 
 void Server::upnp_actions(Ref<ActionRequest> request)
 {
-//    log_info(("upnp_actions: start\n"));
+    log_debug("start\n");
 
     // make sure the request is for our device
     if (request->getUDN() != serverUDN)
@@ -368,13 +369,13 @@ void Server::upnp_actions(Ref<ActionRequest> request)
     if (request->getServiceID() == DESC_CM_SERVICE_ID)
     {
         // this call is for the lifetime stats service
-//        log_info(("upnp_actions: request for connection manager service\n"));
+//        log_debug("request for connection manager service\n");
         cmgr->process_action_request(request);
     } 
     else if (request->getServiceID() == DESC_CDS_SERVICE_ID) 
     {
         // this call is for the toaster control service
-//        log_info(("upnp_actions: request for content directory service\n"));
+//        log_debug("upnp_actions: request for content directory service\n");
         cds->process_action_request(request);
     } 
     else 
@@ -393,7 +394,7 @@ void Server::upnp_subscriptions(Ref<SubscriptionRequest> request)
     if (request->getUDN() != serverUDN)
     {
         // not for us
-//        log_info(("upnp_subscriptions: request not for this device\n"));
+//        log_debug("upnp_subscriptions: request not for this device\n");
         throw UpnpException(UPNP_E_BAD_REQUEST,
                             _("upnp_actions: request not for this device"));
     }
@@ -403,13 +404,13 @@ void Server::upnp_subscriptions(Ref<SubscriptionRequest> request)
     if (request->getServiceID() == DESC_CDS_SERVICE_ID)
     {
         // this call is for the content directory service
-//        log_info(("upnp_subscriptions: request for content directory service\n"));
+//        log_debug("upnp_subscriptions: request for content directory service\n");
         cds->process_subscription_request(request);
     }
     else if (request->getServiceID() == DESC_CM_SERVICE_ID)
     {
         // this call is for the connection manager service
-//        log_info(("upnp_subscriptions: request for connection manager service\n"));
+//        log_debug("upnp_subscriptions: request for connection manager service\n");
         cmgr->process_subscription_request(request);
     } else {
         // cp asks for a nonexistent service or for a service that
