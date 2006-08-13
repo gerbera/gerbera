@@ -44,13 +44,18 @@ function updateItems(ajaxRequest)
     var items = xmlGetElement(xml, "items");
     var useFiles = false;
     var childrenTag = "item";
-    if (! items)
+    if (true || ! items)
     {
         items = xmlGetElement(xml, "files");
-        if (! items)
+        if (true || ! items)
         {
             alert("no items or files tag found");
-            alert(ajaxRequest.responseText);
+            //DEBUG:
+            alert(items);
+            //alert(ajaxRequest.responseText);
+            var itemsEl = document.createElement("div");
+            itemsEl.appendChild(document.createTextNode(ajaxRequest.responseText));
+            itemRoot.replaceChild(itemsEl, itemRoot.firstChild);
             return;
         }
         useFiles = true;
@@ -58,7 +63,7 @@ function updateItems(ajaxRequest)
     }
     
     var children = items.getElementsByTagName(childrenTag);
-    var items = document.createElement("div");
+    var itemsEl = document.createElement("div");
     
     for (var i = 0; i < children.length; i++)
     {
@@ -89,9 +94,9 @@ function updateItems(ajaxRequest)
         }
         var itemText = document.createTextNode(useFiles ? item.firstChild.nodeValue : xmlGetElementText(item, "dc:title"));
         itemLink.appendChild(itemText);
-        items.appendChild(itemEntry);
+        itemsEl.appendChild(itemEntry);
     }
-    itemRoot.replaceChild(items, itemRoot.firstChild);
+    itemRoot.replaceChild(itemsEl, itemRoot.firstChild);
     
 }
 

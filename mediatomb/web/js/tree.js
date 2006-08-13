@@ -107,6 +107,7 @@ function fetchChildren(node)
     id = id.substring(1);
     var linkType = (type == 'd') ? 'containers' : 'directories';
     var url = link(linkType, {parent_id: id});
+    
     var myAjax = new Ajax.Request(
         url,
         {
