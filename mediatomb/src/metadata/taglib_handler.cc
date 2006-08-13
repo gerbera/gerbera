@@ -86,7 +86,7 @@ static void addField(metadata_fields_t field, TagLib::FileRef *tag, Ref<CdsItem>
     if (string_ok(value))
     {
         item->setMetadata(String(MT_KEYS[field].upnp), sc->convert(value));
-        log_debug(("Setting metadata on item: %d, %s\n", field, sc->convert(value).c_str()));
+        log_debug("Setting metadata on item: %d, %s\n", field, sc->convert(value).c_str());
     }
 }
 

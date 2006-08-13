@@ -195,7 +195,21 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
    
     info->content_type = ixmlCloneDOMString(mimeType.c_str());
 
-//    log_info(("get_info: Requested %s, ObjectID: %s, Location: %s\n, MimeType: %s\n",
+    log_debug("path: %s\n", path.c_str());
+    int slash_pos = path.rindex(DIR_SEPARATOR);
+    if (slash_pos >= 0)
+    {
+        if (slash_pos < path.length()-1)
+        {
+            slash_pos++;
+
+
+            String header = _("Content-Disposition: attachment; filename=\"") + path.substring(slash_pos) + _("\"");
+            log_debug("Adding content disposition header: %s\n", header.c_str());
+            info->http_header = ixmlCloneDOMString(header.c_str());
+        }
+    }
+    //    log_info(("get_info: Requested %s, ObjectID: %s, Location: %s\n, MimeType: %s\n",
 //          filename, object_id.c_str(), path.c_str(), info->content_type));
 
 //    log_info(("web_get_info(): end\n"));

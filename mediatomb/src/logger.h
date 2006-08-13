@@ -21,8 +21,9 @@ void log_close();
 #define log_error(args) _log_error args
 
 #ifdef LOG_DEBUG
+
 //    #define log_debug(args) _log_debug args
-    #define log_debug(format, ...) _log_debug(format, __FILE__, __LINE__, ## __VA_ARGS__)
+    #define log_debug(format, ...) _log_debug(format, __FILE__, __LINE__, __func__, ## __VA_ARGS__)
 #else
     #define log_debug(format, ...)
 #endif
@@ -40,7 +41,7 @@ void log_close();
 void _log_info(const char *format, ...);
 void _log_warning(const char *format, ...);
 void _log_error(const char *format, ...);
-void _log_debug(const char *format, const char* file, int line, ...);
+void _log_debug(const char *format, const char* file, int line, const char *function, ...);
         
 
 #endif // __LOGGER_H__
