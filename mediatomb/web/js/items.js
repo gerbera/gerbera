@@ -44,10 +44,10 @@ function updateItems(ajaxRequest)
     var items = xmlGetElement(xml, "items");
     var useFiles = false;
     var childrenTag = "item";
-    if (true || ! items)
+    if (! items)
     {
         items = xmlGetElement(xml, "files");
-        if (true || ! items)
+        if (! items)
         {
             alert("no items or files tag found");
             //DEBUG:
