@@ -18,7 +18,6 @@
         <script type="text/javascript" language="JavaScript" src="/js/md5.js"></script>
         <script type="text/javascript" language="JavaScript" src="/js/auth.js"></script>
         <script type="text/javascript" language="JavaScript" src="/js/prototype.js"></script>
-        <script type="text/javascript" language="JavaScript" src="/js/index.js"></script>
         <script type="text/javascript" language="JavaScript" src="/js/nanotree.js"></script>
         <script type="text/javascript" language="JavaScript" src="/js/tree.js"></script>
         <script type="text/javascript" language="JavaScript" src="/js/items.js"></script>
@@ -150,9 +149,16 @@
                     </td>
                     <td valign="top">
                         <div><a href="javascript:userAddItemStart();">add Item</a></div>
-                        <div id="item_db_div" style="display:none"></div>
-                        <div id="item_fs_div" style="display:none"></div>
-                        <div id="item_add_div" style="display:none"></div>
+                        <div id="item_db_div" style="display:none"><div></div></div>
+                        <div id="item_fs_div" style="display:none"><div></div></div>
+                        <div id="item_add_div" style="display:none">
+                            <form action="javascript:itemAddSubmit();" name="addItem">
+                                <select name="objType" onchange="updateItemAddFields()" size="1">
+                                </select>
+                                <div id="item_add_inputs"><div></div></div>
+                                <input type="submit" />
+                            <form>
+                        </div>
                     </td>
                 </tr>
             </table>

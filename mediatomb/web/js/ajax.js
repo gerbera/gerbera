@@ -75,7 +75,6 @@ function xmlGetText(el)
         return el.firstChild.nodeValue;
 }
 
-
 function xmlGetAttribute(parent, name)
 {
     var a = parent.attributes;
@@ -88,20 +87,3 @@ function xmlGetAttribute(parent, name)
     }
     return null;
 }
-
-
-    /*
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == 4)
-        {
-            if (.status == 200)
-            {
-                alert(req.responseXML);
-            }
-            else
-            {
-                alert(xmlhttp.responseText);
-            }
-        }
-    }
-    */

@@ -2,12 +2,14 @@ var itemRoot;
 
 function itemInit()
 {
+    /*
     var newNodeDb = document.createElement('div');
     var newNodeFs = document.createElement('div');
     var newNodeAdd = document.createElement('div');
     $('item_db_div').appendChild(newNodeDb);
     $('item_fs_div').appendChild(newNodeFs);
-    $('item_add_div').appendChild(newNodeAdd);
+    $('item_add_inputs').appendChild(newNodeAdd);
+    */
     itemChangeType();
 }
 
@@ -123,36 +125,40 @@ function userAddItemStart()
 function updateItemAddFields()
 {
     var currentTypeOption;
-    if (document.forms['addItem'] && document.forms['addItem'].elements['objType'])
-        currentTypeOption = document.forms['addItem'].elements['objType'].value;
-    else
-        currentTypeOption = '1';
+    currentTypeOption = document.forms['addItem'].elements['objType'].value;
+    if (!currentTypeOption) currentTypeOption = '1';
     
-    var addItemDiv = document.createElement('div');
+    var inputsDiv = document.createElement('div');
     
-    var formEl = document.createElement('form');
-    addItemDiv.appendChild(formEl);
+    /*var formEl = document.createElement('form');
     formEl.setAttribute('name', 'addItem');
     formEl.setAttribute('action', 'javascript:itemAddSubmit();');
+    
     var selectEl = document.createElement('select');
-    formEl.appendChild(selectEl);
+    selectEl.setAttribute('onchange', 'updateItemAddFields()');
     selectEl.setAttribute('name', 'objType');
     selectEl.setAttribute('size', '1');
-    selectEl.setAttribute('onChange', 'updateItemAddFields()');
+    formEl.appendChild(selectEl);
+    */
     
-    // ATTENTION: These values need to be changed in src/cds_objects.h too.
-    var objTypeOptions = new Array('Container', 'Item', 'Active Item', 'External Link (URL)', 'Internal Link (Local URL)');
-    var objTypeOptionsIds = new Array('1', '2', '4', '8', '16');
+    var selectEl = document.forms['addItem'].elements['objType'];
     
-    for (var i = 0; i < objTypeOptions.length; ++i)
-        selectEl.options[i] = new Option(
-            objTypeOptions[i],
-            objTypeOptionsIds[i],
-            false, 
-            (currentTypeOption && objTypeOptionsIds[i] == currentTypeOption)
-            );
+    //formEl.appendChild(document.createTextNode("<select name='objType' size='1' onchange='updateItemAddFields();'></select>");
     
-    addBr(formEl);
+    if (!selectEl.options[0])
+    {
+        // ATTENTION: These values need to be changed in src/cds_objects.h too.
+        var objTypeOptions = new Array('Container', 'Item', 'Active Item', 'External Link (URL)', 'Internal Link (Local URL)');
+        var objTypeOptionsIds = new Array('1', '2', '4', '8', '16');
+    
+        for (var i = 0; i < objTypeOptions.length; ++i)
+            selectEl.options[i] = new Option(
+                objTypeOptions[i],
+                objTypeOptionsIds[i],
+                false, 
+                (currentTypeOption && objTypeOptionsIds[i] == currentTypeOption)
+                );
+    }
     
     var fieldAr;
     var fieldNameAr;
@@ -184,30 +190,32 @@ function updateItemAddFields()
         defaultsAr = new Array('', '', 'http-get', 'object.item', '', '');
     }
     
+    
     if (fieldAr && defaultsAr)
     {
         for (var i = 0; i < fieldAr.length; ++i)
         {
-            formEl.appendChild(document.createTextNode(fieldAr[i]+": "));
+            inputsDiv.appendChild(document.createTextNode(fieldAr[i]+": "));
             var inputEl = document.createElement('input');
-            formEl.appendChild(inputEl);
             inputEl.setAttribute('type', 'text');
             inputEl.setAttribute('name', fieldNameAr[i]);
             inputEl.setAttribute('value', defaultsAr[i]);
-            addBr(formEl);
+            inputsDiv.appendChild(inputEl);
+            addBr(inputsDiv);
         }
     }
-    
-    
-    var submitEl = document.createElement('input');
-    formEl.appendChild(submitEl);
+   
+    /*var submitEl = document.createElement('input');
     submitEl.setAttribute('type', 'submit');
     
-    var objectTypeDiv = document.createElement('div');
-    addItemDiv.appendChild(objectTypeDiv);
+    formEl.appendChild(submitEl);*/
     
-    var itemRoot = $('item_add_div');
-    itemRoot.replaceChild(addItemDiv, itemRoot.firstChild);
+    //addItemDiv.appendChild(formEl);
+    //var objectTypeDiv = document.createElement('div');
+    //addItemDiv.appendChild(objectTypeDiv);
+
+    var itemRoot = $('item_add_inputs');
+    itemRoot.replaceChild(inputsDiv, itemRoot.firstChild);
 }
 
 function itemAddSubmit()
