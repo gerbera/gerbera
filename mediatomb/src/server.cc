@@ -293,7 +293,7 @@ int Server::upnp_callback(Upnp_EventType eventtype, void *event, void *cookie)
                 Ref<ActionRequest> request(new ActionRequest((struct Upnp_Action_Request *)event));
                 upnp_actions(request);
                 request->update();
-                ((struct Upnp_Action_Request *)event)->ErrCode = ret;
+               // set in update() ((struct Upnp_Action_Request *)event)->ErrCode = ret;
             }
             catch(UpnpException upnp_e)
             {

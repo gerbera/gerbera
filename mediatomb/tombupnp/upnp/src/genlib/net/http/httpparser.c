@@ -870,7 +870,7 @@ match_int( INOUT scanner_t * scanner,
     memptr token;
     token_type_t tok_type;
     parse_status_t status;
-    int num;
+    long num;
     char *end_ptr;
     size_t save_pos;
 

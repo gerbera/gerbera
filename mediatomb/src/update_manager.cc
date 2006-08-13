@@ -91,8 +91,8 @@ void UpdateManager::init()
 {
     shutdownFlag = false;
     flushFlag = 0;
-    lazyMode = true;
-//    lazyMode = false;
+//    lazyMode = true;
+    lazyMode = false;
 
     int ret;
 

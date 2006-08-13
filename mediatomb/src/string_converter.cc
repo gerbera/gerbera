@@ -71,8 +71,8 @@ zmm::String StringConverter::convert(String str)
         dirty = false;
     }
     
-    log_debug(("iconv: BEFORE: input bytes left: %d  output bytes left: %d\n",
-           input_bytes, output_bytes));
+    //log_debug(("iconv: BEFORE: input bytes left: %d  output bytes left: %d\n",
+    //       input_bytes, output_bytes));
     
     ret = iconv(cd, (char **)input_ptr, &input_bytes,
             output_ptr, &output_bytes);
@@ -104,9 +104,9 @@ zmm::String StringConverter::convert(String str)
         throw Exception(err);
     }
    
-    log_debug(("iconv: AFTER: input bytes left: %d  output bytes left: %d\n",
-           input_bytes, output_bytes));
-    log_debug(("iconv: returned %d\n", ret));
+    //log_debug(("iconv: AFTER: input bytes left: %d  output bytes left: %d\n",
+    //       input_bytes, output_bytes));
+    //log_debug(("iconv: returned %d\n", ret));
 
     String ret_str = String(output, output_copy - output);
     FREE(output);

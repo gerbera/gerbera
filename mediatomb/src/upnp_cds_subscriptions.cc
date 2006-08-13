@@ -26,6 +26,7 @@
 #include "upnp_xml.h"
 #include "ixml.h"
 #include "server.h"
+#include "storage.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -42,7 +43,9 @@ void ContentDirectoryService::process_subscription_request(zmm::Ref<Subscription
     propset = UpnpXML_CreateEventPropertySet();
     property = propset->getFirstChild();
     property->appendTextChild(_("SystemUpdateID"), _("") + systemUpdateID);
-
+    Ref<CdsObject> obj = Storage::getInstance()->loadObject(0);
+    Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
+    property->appendTextChild(_("ContainerUpdateIDs"), _("0,") + cont->getUpdateID());
     String xml = propset->print();
     err = ixmlParseBufferEx(xml.c_str(), &event);
     if (err != IXML_SUCCESS)

@@ -229,7 +229,7 @@ send_error_response( IN SOCKINFO * info,
     // make headers
     membuffer_init( &headers );
     if( http_MakeMessage( &headers, major, minor,
-                          "RNsssSH" "sssss",
+                          "RNsDsSHc" "sssss",
                           500,
                           content_length,
                           ContentTypeHeader,
@@ -295,7 +295,7 @@ send_var_query_response( IN SOCKINFO * info,
     // make headers
     membuffer_init( &response );
     if( http_MakeMessage( &response, major, minor,
-                          "RNssSHc" "sss",
+                          "RNsDsSHc" "sss",
                           HTTP_OK,
                           content_length,
                           ContentTypeHeader,
@@ -716,7 +716,7 @@ send_action_response( IN SOCKINFO * info,
 
     // make headers
     if( http_MakeMessage( &headers, major, minor,
-        "RNssSHc", 
+        "RNsDsSHc", 
         HTTP_OK,   // status code
         content_length,
         ContentTypeHeader, 
