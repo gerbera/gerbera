@@ -263,7 +263,7 @@ void SQLStorage::addObject(Ref<CdsObject> obj)
 
 void SQLStorage::updateObject(zmm::Ref<CdsObject> obj)
 {
-    log_debug(("UPDATE_OBJECT !!!!!!!!!!!!!!!\n"));
+    log_debug("UPDATE_OBJECT !!!!!!!!!!!!!!!\n");
     int objectType = obj->getObjectType();
 
     Ref<StringBuffer> qb(new StringBuffer(256));
@@ -651,11 +651,11 @@ void SQLStorage::removeObject(Ref<CdsObject> obj)
     }
     catch (Exception e)
     {
-        log_debug(("CLEANUP (EXCEPTION)\n"));
+        log_debug("CLEANUP (EXCEPTION)\n");
         rmCleanup();
         throw e;
     }
-    log_debug(("CLEANUP (NORMAL)\n"));
+    log_debug("CLEANUP (NORMAL)\n");
     rmCleanup();
 }
 

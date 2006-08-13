@@ -143,7 +143,7 @@ void *Sqlite3Storage::staticThreadProc(void *arg)
 {
     Sqlite3Storage *inst = (Sqlite3Storage *)arg;
     inst->threadProc();
-    log_debug(("Sqlite3Storage::staticThreadProc - exiting thread\n"));
+    log_debug("Sqlite3Storage::staticThreadProc - exiting thread\n");
     pthread_exit(NULL);
     return NULL;
 }

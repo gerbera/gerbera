@@ -217,7 +217,7 @@ bool UpdateManager::haveUpdates()
 
 void UpdateManager::sendUpdates()
 {
-    log_debug(("SEND UPDATES\n"));
+    log_debug("SEND UPDATES\n");
     Ref<StringBuffer> buf(new StringBuffer(objectIDcount * 4));
     int updateID;
     if (lazyMode)
@@ -246,7 +246,7 @@ void UpdateManager::sendUpdates()
     String updateString(buf->c_str(), buf->length() - 1);
     // send update string...
     ContentDirectoryService::getInstance()->subscription_update(updateString);
-    log_debug(("SEND UPDATES RETURNING\n"));
+    log_debug("SEND UPDATES RETURNING\n");
 }
 
 
@@ -264,13 +264,13 @@ void UpdateManager::threadProc()
 
     while (! shutdownFlag)
     {
-        log_debug(("threadProc: awakened... have updates: %d\n", haveUpdates()));
+        log_debug("threadProc: awakened... have updates: %d\n", haveUpdates());
 
         /* if nothing to do, sleep until awakened */
         if (! haveUpdates())
         {
 
-            log_debug(("threadProc: idle sleep ...\n"));
+            log_debug("threadProc: idle sleep ...\n");
             ret = pthread_cond_wait(&updateCond, &updateMutex);
             lastIdleMillis = nowMillis;
             continue;
@@ -301,7 +301,7 @@ void UpdateManager::threadProc()
         if (sleepMillis >= MIN_SLEEP) // sleep for sleepMillis milliseconds
         {
             millisToTimespec(nowMillis + sleepMillis, &timeout);
-            log_debug(("threadProc: sleeping for %d millis\n", (int)sleepMillis));
+            log_debug("threadProc: sleeping for %d millis\n", (int)sleepMillis);
             bool wait_done = false;
             while (!wait_done)
             {
@@ -322,7 +322,7 @@ void UpdateManager::threadProc()
             }
             if (ret)
             {
-                log_debug(("pthread_cont_timedwait(): %s\n", strerror(errno)));
+                log_debug("pthread_cont_timedwait(): %s\n", strerror(errno));
             }
         }
         else // send updates 
@@ -333,7 +333,7 @@ void UpdateManager::threadProc()
         }
     }
     UNLOCK();
-    log_debug(("threadProc: update thread shut down.\n"));
+    log_debug("threadProc: update thread shut down.\n");
 }
 
 void *UpdateManager::staticThreadProc(void *arg)

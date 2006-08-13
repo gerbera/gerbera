@@ -41,13 +41,14 @@ static void log_stamp(const char *type)
     struct tm t;
     time(&unx);
     localtime_r(&unx, &t);
-    fprintf(LOG_FILE, "%.4d-%.2d-%.2d %.2d:%.2d:%.2d %s: ",
+    fprintf(LOG_FILE, "%.4d-%.2d-%.2d %.2d:%.2d:%.2d %*s: ",
            t.tm_year + 1900,
            t.tm_mon,
            t.tm_mday,
            t.tm_hour,
            t.tm_min,
            t.tm_sec,
+           7, // max lenght we have is "WARNING"
            type);
 }
         
@@ -81,9 +82,9 @@ void _log_error(const char *format, ...)
 void _log_debug(const char *format, const char *file, int line, ...)
 {
     va_list ap;
-    va_start(ap, format);
+    va_start(ap, line);
     log_stamp("DEBUG");
-    fprintf(LOG_FILE, "(%s:%d): ", file, line);
+    fprintf(LOG_FILE, "[%s:%d] ", file, line);
     vfprintf(LOG_FILE, format, ap);
     FLUSHIT
     va_end(ap);

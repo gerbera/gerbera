@@ -431,12 +431,12 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
         }
 
 
-        log_debug(("updateObject: chechking equality of item %s\n", item->getTitle().c_str()));
+        log_debug("updateObject: chechking equality of item %s\n", item->getTitle().c_str());
         if (!item->equals(clone, true))
         {
             cloned_item->validate();
             storage->updateObject(clone);
-            log_debug(("updateObject: calling containerChanged on item %s\n", item->getTitle().c_str()));
+            log_debug("updateObject: calling containerChanged on item %s\n", item->getTitle().c_str());
             um->containerChanged(item->getParentID());
         }
     }
@@ -937,7 +937,7 @@ CMAddFileTask::CMAddFileTask(String path, bool recursive) : CMTask()
 }
 void CMAddFileTask::run()
 {
-    log_debug(("running add file task with path %s recursive: %d\n", path.c_str(), recursive));
+    log_debug("running add file task with path %s recursive: %d\n", path.c_str(), recursive);
     cm->_addFile(path, recursive);
 }
 

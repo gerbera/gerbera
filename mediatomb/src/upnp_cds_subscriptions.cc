@@ -38,7 +38,7 @@ void ContentDirectoryService::process_subscription_request(zmm::Ref<Subscription
 
     Ref<Element> propset, property;
    
-    log_debug(("CDS::process_subscription_request - start\n"));
+    log_debug("CDS::process_subscription_request - start\n");
    
     propset = UpnpXML_CreateEventPropertySet();
     property = propset->getFirstChild();
@@ -68,7 +68,7 @@ void ContentDirectoryService::subscription_update(String containerUpdateIDs_CSV)
 
     Ref<Element> propset, property;
     
-    log_debug(("CDS::subscription_update - start\n"));
+    log_debug("CDS::subscription_update - start\n");
 
     systemUpdateID++;
 
@@ -92,6 +92,6 @@ void ContentDirectoryService::subscription_update(String containerUpdateIDs_CSV)
 
     ixmlDocument_free(event);
 
-    log_debug(("CDS::subscription_update - end\n"));
+    log_debug("CDS::subscription_update - end\n");
 }
 

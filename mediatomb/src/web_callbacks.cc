@@ -59,24 +59,24 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
 
     String link = String((char *) filename);
 
-    log_debug(("Filename: %s, Path: %s\n", filename, path.c_str()));
-    log_debug(("create_handler: got url parameters: [%s]\n", parameters.c_str()));
+    log_debug("Filename: %s, Path: %s\n", filename, path.c_str());
+    log_debug("create_handler: got url parameters: [%s]\n", parameters.c_str());
     
     Ref<Dictionary> dict(new Dictionary());
     dict->decode(parameters);
 
     RequestHandler *ret = NULL;
 
-    log_debug(("Link is: %s, checking against: %s, starts with? %d\n", link.c_str(), 
+    log_debug("Link is: %s, checking against: %s, starts with? %d\n", link.c_str(), 
                 (String(SERVER_VIRTUAL_DIR) + "/" + CONTENT_UI_HANDLER).c_str(), 
-                link.startsWith(String(SERVER_VIRTUAL_DIR) + "/" + CONTENT_UI_HANDLER)));
-    log_debug(("Link is: %s, checking against: %s, starts with? %d\n", link.c_str(), 
+                link.startsWith(String(SERVER_VIRTUAL_DIR) + "/" + CONTENT_UI_HANDLER));
+    log_debug("Link is: %s, checking against: %s, starts with? %d\n", link.c_str(), 
                 (String(SERVER_VIRTUAL_DIR) + "/" + CONTENT_MEDIA_HANDLER).c_str(), 
-                link.startsWith(String(SERVER_VIRTUAL_DIR) + "/" + CONTENT_MEDIA_HANDLER)));
+                link.startsWith(String(SERVER_VIRTUAL_DIR) + "/" + CONTENT_MEDIA_HANDLER));
   
-    log_debug(("Link is: %s, checking against: %s, starts with? %d\n", link.c_str(), 
+    log_debug("Link is: %s, checking against: %s, starts with? %d\n", link.c_str(), 
                 (String(SERVER_VIRTUAL_DIR) + "/" + CONTENT_SERVE_HANDLER).c_str(), 
-                link.startsWith(String(SERVER_VIRTUAL_DIR) + "/" + CONTENT_SERVE_HANDLER)));
+                link.startsWith(String(SERVER_VIRTUAL_DIR) + "/" + CONTENT_SERVE_HANDLER));
   
     if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" +
                         CONTENT_MEDIA_HANDLER))
@@ -131,7 +131,7 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
 /// \return -1 Error.
 static int web_get_info(IN const char *filename, OUT struct File_Info *info)
 {
-    log_debug(("web_get_info: start\n"));
+    log_debug("web_get_info: start\n");
     try
     {
         Ref<RequestHandler> reqHandler = create_request_handler(filename);

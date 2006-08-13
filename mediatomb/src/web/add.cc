@@ -38,7 +38,7 @@ web::add::add() : WebRequestHandler()
 
 void web::add::process()
 {
-    log_debug(("add: start\n"));
+    log_debug("add: start\n");
 
     check_request();
     
@@ -53,6 +53,6 @@ void web::add::process()
 
     Ref<ContentManager> cm = ContentManager::getInstance();
     cm->addFile(path, true);
-    log_debug(("add: returning\n"));
+    log_debug("add: returning\n");
 }
 

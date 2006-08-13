@@ -62,8 +62,8 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     Ref<Dictionary> dict(new Dictionary());
     dict->decode(parameters);
 
-    log_debug(("full url (filename): %s, url_path: %s, parameters: %s\n",
-               filename, url_path.c_str(), parameters.c_str()));
+    log_debug("full url (filename): %s, url_path: %s, parameters: %s\n",
+               filename, url_path.c_str(), parameters.c_str());
     
     String objID = dict->get(_("object_id"));
     if (objID == nil)
@@ -100,7 +100,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
         String input = inputElement->print();
         String output;
 
-        log_debug(("Script input: %s\n", input.c_str()));
+        log_debug("Script input: %s\n", input.c_str());
         if(strncmp(action.c_str(), "http://", 7))
         {
             long before = getMillis();
@@ -110,10 +110,10 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
         }
         else
         {
-            log_debug(("fetching %s\n", action.c_str()));
+            log_debug("fetching %s\n", action.c_str());
             output = input;
         }
-        log_debug(("Script output: %s\n", output.c_str()));
+        log_debug("Script output: %s\n", output.c_str());
 
         Ref<CdsObject> clone = CdsObject::createObject(objectType);
         aitem->copyTo(clone);
@@ -126,7 +126,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
             storage->updateObject(clone);
             if (! aitem->equals(clone)) // check for visible differences
             {
-                log_debug(("Item changed visually, updating parent\n"));
+                log_debug("Item changed visually, updating parent\n");
                 Ref<UpdateManager> um = UpdateManager::getInstance();
                 um->containerChanged(clone->getParentID());
                 um->flushUpdates(FLUSH_ASAP);

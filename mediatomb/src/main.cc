@@ -83,7 +83,8 @@ int main(int argc, char **argv, char **envp)
     String pid_file;
 
     Ref<Array<StringBase> > addFile(new Array<StringBase>());
-    
+   
+    log_warning(("TEST\n"));
     while (1)
     {
         o = getopt_long(argc, argv, OPTSTR, long_options, &opt_index);
@@ -92,12 +93,12 @@ int main(int argc, char **argv, char **envp)
         switch (o)
         {
             case 'i':
-                log_debug(("Option IP with param %s\n", optarg));
+                log_debug("Option IP with param %s\n", optarg);
                 ip = optarg;
                 break;
 
             case 'p':
-                log_debug(("Option Port with param %s\n", optarg));
+                log_debug("Option Port with param %s\n", optarg);
                 errno = 0;
                 port = strtol(optarg, &err, 10);
                 if ((port == 0) && (*err))
@@ -111,7 +112,7 @@ int main(int argc, char **argv, char **envp)
                     log_error(("Invalid port value %d. Maximum allowed port value is %d\n",
                                 USHRT_MAX));
                 }
-                log_debug(("port set to: %d\n", port));
+                log_debug("port set to: %d\n", port);
                 break;
 
             case 'c':

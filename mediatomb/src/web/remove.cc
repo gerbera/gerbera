@@ -37,7 +37,7 @@ web::remove::remove() : WebRequestHandler()
 
 void web::remove::process()
 {
-    log_debug(("remove: start\n"));
+    log_debug("remove: start\n");
 
     check_request();
     
@@ -83,6 +83,6 @@ void web::remove::process()
     sub->put(_("driver"), driver);
     *out << subrequest(_("browse"), sub);
     */
-    log_debug(("remove: returning\n"));
+    log_debug("remove: returning\n");
 }
 

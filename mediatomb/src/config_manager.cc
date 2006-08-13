@@ -269,7 +269,7 @@ void ConfigManager::validate(String serverhome)
 
     log_info(("Configuration check succeeded.\n"));
 
-    log_debug(("Config file dump after validation: \n%s\n", root->print().c_str()));
+    log_debug("Config file dump after validation: \n%s\n", root->print().c_str());
 }
 
 void ConfigManager::prepare_udn()
