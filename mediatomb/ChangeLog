@@ -25,6 +25,10 @@ v0.9.0  Major rework
         * fixed bug 1292295 (string conversion was failing on 64bit platforms)
         * fixed issue with ContainerUpdateIDs (were not sent out along with
           accepted subscription)
+        * fixed issue where some directories could not be browse (filesystem 
+          browser). It turned out that we forgot to convert the filenames
+          to UTF-8, as the result invalid characters made their way into
+          the XML that was feeded to the browser.
 
 v0.8.1
         * added "serve" directory, any files there can be downloaded 
