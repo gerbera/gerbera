@@ -50,12 +50,6 @@ function updateItems(ajaxRequest)
         if (! items)
         {
             alert("no items or files tag found");
-            //DEBUG:
-            alert(items);
-            //alert(ajaxRequest.responseText);
-            var itemsEl = document.createElement("div");
-            itemsEl.appendChild(document.createTextNode(ajaxRequest.responseText));
-            itemRoot.replaceChild(itemsEl, itemRoot.firstChild);
             return;
         }
         useFiles = true;
