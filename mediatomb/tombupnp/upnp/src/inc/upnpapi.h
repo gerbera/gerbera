@@ -36,6 +36,7 @@
 
 #include "upnp.h"
 #include "client_table.h"
+#include "membuffer.h"
 
 //#include "../ssdp/ssdplib.h"
 
@@ -172,6 +173,10 @@ int getlocalhostname(char *out);
 
 virtualDirList *pVirtualDirList;
 userHTTPHeaderList *pUserHTTPHeaderList;
+// concatenated list of custom http headers
+membuffer gUserHTTPHeaders;
+
+
 extern WebServerState bWebServerState;
 
 #endif

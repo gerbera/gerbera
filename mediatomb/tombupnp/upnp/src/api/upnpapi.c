@@ -109,9 +109,8 @@ CLIENTONLY( ithread_mutex_t GlobalClientSubscribeMutex;
 
 //This structure is for virtual directory callbacks
      struct UpnpVirtualDirCallbacks virtualDirCallback;
-
 // a local dir which serves as webserver root
-     extern membuffer gDocumentRootDir;
+    extern membuffer gDocumentRootDir;     
 
 // Maximum content-length that the SDK will process on an incoming packet. 
 // Content-Length exceeding this size will be not processed and error 413 
@@ -170,21 +169,6 @@ int UpnpInit( IN const char *HostIP,
         return UPNP_E_INIT;
     }
 
-    // Jin:
-    // check if anything might go wrong because of our
-    // largefile implementation
-    // the idea is to cast all off_t values to (long long)
-    // and to sprintf them as %lld, this works really well
-    // no matter if the library is compiled with or without
-    // largefile support
-    if (sizeof(off_t) > sizeof(long long))
-    {
-        DBGONLY( UpnpPrintf( UPNP_CRITICAL, API, __FILE__, __LINE__,
-                "Large File Support: size of off_t is greater than long long" );
-               )
-        return UPNP_E_INIT_FAILED;
-    }
-
 #ifdef WIN32
 	wVersionRequested = MAKEWORD( 2, 2 );
 
@@ -213,6 +197,7 @@ int UpnpInit( IN const char *HostIP,
 #endif
 
     membuffer_init( &gDocumentRootDir );
+    membuffer_init( &gUserHTTPHeaders );
 
     srand( time( NULL ) );      // needed by SSDP or other parts
 
@@ -431,6 +416,8 @@ UpnpFinish(  )
 
     // remove all virtual dirs
     UpnpRemoveAllVirtualDirs(  );
+    UpnpRemoveAllCustomHTTPHeaders(  );
+    membuffer_destroy(&gUserHTTPHeaders);
     //leuk_he allow static linking:
 	 #ifdef WIN32
 	  #ifdef PTW32_STATIC_LIB
@@ -4160,7 +4147,6 @@ UpnpRemoveAllVirtualDirs(  )
     }
 
     pVirtualDirList = NULL;
-
 }
 
 /**************************************************************************
@@ -4227,6 +4213,9 @@ UpnpAddCustomHTTPHeader( IN const char *header_string )
         pLast->next = pNewHeader;
     }
 
+    if (gUserHTTPHeaders.length > 0)
+        membuffer_append(&gUserHTTPHeaders, "\r\n", 2);
+    membuffer_append(&gUserHTTPHeaders, header_string, strlen(header_string));
     return UPNP_E_SUCCESS;
 }
 
@@ -4261,6 +4250,7 @@ UpnpRemoveCustomHTTPHeader( IN const char *header_string)
     if( pUserHTTPHeaderList == NULL ) {
         return UPNP_E_INVALID_PARAM;
     }
+
     //
     // Handle the special case where the directory that we are
     // removing is the first and only one in the list.
@@ -4270,32 +4260,45 @@ UpnpRemoveCustomHTTPHeader( IN const char *header_string)
         ( strcmp( pUserHTTPHeaderList->header, header_string ) == 0 ) ) {
         free( pUserHTTPHeaderList );
         pUserHTTPHeaderList = NULL;
-        return UPNP_E_SUCCESS;
+        found = 1; 
     }
-  //y      x
-    pCur = pUserHTTPHeaderList;
-  //z
-    pPrev = pCur;
+ 
+    if (!found)
+    {
+        pCur = pUserHTTPHeaderList;
 
-    while( pCur != NULL ) {
-        if( strcmp( pCur->header, header_string ) == 0 ) {
-            pPrev->next = pCur->next;
-            // Jin: we are deleting the first element in the list,
-            // update the global variable!
-            if (pCur == pUserHTTPHeaderList)
-                pUserHTTPHeaderList = pCur->next;
+        pPrev = pCur;
 
-            free( pCur );
-            found = 1;
-            break;
-        } else {
-            pPrev = pCur;
-            pCur = pCur->next;
+        while( pCur != NULL ) {
+            if( strcmp( pCur->header, header_string ) == 0 ) {
+                pPrev->next = pCur->next;
+                // Jin: we are deleting the first element in the list,
+                // update the global variable!
+                if (pCur == pUserHTTPHeaderList)
+                    pUserHTTPHeaderList = pCur->next;
+
+                free( pCur );
+                found = 1;
+                break;
+            } else {
+                pPrev = pCur;
+                pCur = pCur->next;
+            }
         }
     }
-
     if( found == 1 )
+    {
+        membuffer_delete(&gUserHTTPHeaders, 0, gUserHTTPHeaders.length);
+        pCur = pUserHTTPHeaderList;
+        while (pCur != NULL)
+        {
+            if (gUserHTTPHeaders.length > 0)
+                membuffer_append(&gUserHTTPHeaders, "\r\n", 2);
+
+            membuffer_append(&gUserHTTPHeaders, pCur->header, strlen(pCur->header));
+        }
         return UPNP_E_SUCCESS;
+    }
     else
         return UPNP_E_INVALID_PARAM;
 
@@ -4334,6 +4337,7 @@ UpnpRemoveAllCustomHTTPHeaders(  )
 
     pUserHTTPHeaderList = NULL;
 
+    membuffer_delete(&gUserHTTPHeaders, 0, gUserHTTPHeaders.length);
 }
 
  /**************************************************************************

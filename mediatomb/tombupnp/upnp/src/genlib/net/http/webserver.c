@@ -1397,15 +1397,16 @@ process_request( IN http_message_t * req,
                 //Content-Range: bytes 222-3333/4000  HTTP_PARTIAL_CONTENT
         //Transfer-Encoding: chunked
         // K means add chunky header ang G means range header.
-        if( http_MakeMessage( headers, resp_major, resp_minor, "RTGKDstcSHACc", HTTP_PARTIAL_CONTENT, // status code
+        if( http_MakeMessage( headers, resp_major, resp_minor, "RTGKDstcSCAAc", HTTP_PARTIAL_CONTENT, // status code
                               // RespInstr->ReadSendSize,// content length
                               finfo.content_type,
                               //     content_type.buf,            // content type
                               RespInstr,    // Range
                               "LAST-MODIFIED: ",
                               &finfo.last_modified,
-                              pUserHTTPHeaderList,
-                              finfo.http_header) != 0 ) {
+                              finfo.http_header,
+                              gUserHTTPHeaders.buf
+                              ) != 0 ) {
             goto error_handler;
         }
 
@@ -1414,15 +1415,16 @@ process_request( IN http_message_t * req,
         //Content-Range: bytes 222-3333/4000  HTTP_PARTIAL_CONTENT
         //Transfer-Encoding: chunked
         // K means add chunky header ang G means range header.
-        if( http_MakeMessage( headers, resp_major, resp_minor, "RNTGDstcSHACc", HTTP_PARTIAL_CONTENT, // status code
+        if( http_MakeMessage( headers, resp_major, resp_minor, "RNTGDstcSCAAc", HTTP_PARTIAL_CONTENT, // status code
                               RespInstr->ReadSendSize,  // content length
                               finfo.content_type,
                               //content_type.buf,            // content type
                               RespInstr,    //Range Info
                               "LAST-MODIFIED: ",
                               &finfo.last_modified,
-                              pUserHTTPHeaderList,
-                              finfo.http_header) != 0 ) {
+                              finfo.http_header,
+                              gUserHTTPHeaders.buf
+                              ) != 0 ) {
             goto error_handler;
         }
 
@@ -1431,14 +1433,15 @@ process_request( IN http_message_t * req,
         //Content-Range: bytes 222-3333/4000  HTTP_PARTIAL_CONTENT
         //Transfer-Encoding: chunked
         // K means add chunky header ang G means range header.
-        if( http_MakeMessage( headers, resp_major, resp_minor, "RKTDstcSHACc", HTTP_OK,   // status code
+        if( http_MakeMessage( headers, resp_major, resp_minor, "RKTDstcSCAAc", HTTP_OK,   // status code
                               //RespInstr->ReadSendSize,// content length
                               finfo.content_type,
                               // content_type.buf,            // content type
                               "LAST-MODIFIED: ",
                               &finfo.last_modified,
-                              pUserHTTPHeaderList,
-                              finfo.http_header) != 0 ) {
+                              finfo.http_header,
+                              gUserHTTPHeaders.buf
+                              ) != 0 ) {
             goto error_handler;
         }
 
@@ -1447,28 +1450,30 @@ process_request( IN http_message_t * req,
             //Content-Range: bytes 222-3333/4000  HTTP_PARTIAL_CONTENT
             //Transfer-Encoding: chunked
             // K means add chunky header ang G means range header.
-            if( http_MakeMessage( headers, resp_major, resp_minor, "RNTDstcSHACc", HTTP_OK,   // status code
+            if( http_MakeMessage( headers, resp_major, resp_minor, "RNTDstcSCAAc", HTTP_OK,   // status code
                                   RespInstr->ReadSendSize,  // content length
                                   finfo.content_type,
                                   //content_type.buf,          // content type
                                   "LAST-MODIFIED: ",
                                   &finfo.last_modified,
-                                  pUserHTTPHeaderList,
-                                  finfo.http_header) != 0 ) {
+                                  finfo.http_header,
+                                  gUserHTTPHeaders.buf
+                                  ) != 0 ) {
                 goto error_handler;
             }
         } else {
             //Content-Range: bytes 222-3333/4000  HTTP_PARTIAL_CONTENT
             //Transfer-Encoding: chunked
             // K means add chunky header ang G means range header.
-            if( http_MakeMessage( headers, resp_major, resp_minor, "RTDstcSHACc", HTTP_OK,    // status code
+            if( http_MakeMessage( headers, resp_major, resp_minor, "RTDstcSCAAc", HTTP_OK,    // status code
                                   //RespInstr->ReadSendSize,// content length
                                   finfo.content_type,
                                   //content_type.buf,          // content type
                                   "LAST-MODIFIED: ",
                                   &finfo.last_modified,
-                                  pUserHTTPHeaderList,
-                                  finfo.http_header) != 0 ) {
+                                  finfo.http_header,
+                                  gUserHTTPHeaders.buf
+                                  ) != 0 ) {
                 goto error_handler;
             }
         }
@@ -1758,8 +1763,8 @@ web_server_callback( IN http_parser_t * parser,
                                           &RespInstr );
                 //Send response.
 
-                http_MakeMessage( &headers, 1, 1, "RTDSHCc", ret,
-                                  "text/html", pUserHTTPHeaderList );
+                http_MakeMessage( &headers, 1, 1, "RTDSCAc", ret,
+                                  "text/html", gUserHTTPHeaders );
 
                 http_SendMessage( info, &timeout, "b", headers.buf,
                                   headers.length );

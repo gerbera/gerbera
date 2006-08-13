@@ -1731,6 +1731,7 @@ http_SendStatusResponse( IN SOCKINFO * info,
 
     ret = http_MakeMessage( &membuf, response_major, response_minor, "RSCB", http_status_code,  // response start line
                             http_status_code ); // body
+
     if( ret == 0 ) {
         timeout = HTTP_DEFAULT_TIMEOUT;
         ret = http_SendMessage( info, &timeout, "b",
@@ -1769,7 +1770,7 @@ http_SendStatusResponse( IN SOCKINFO * info,
 *		'U':	(no args) appends HTTP USER-AGENT: header
 *		'C':	(no args) appends a HTTP CONNECTION: close header 
 *				depending on major,minor version
-*		'N':	arg1 = int content_length	// content-length header
+*		'N':	arg1 = off_t content_length	// content-length header
 *		'Q':	arg1 = http_method_t; arg2 = char* url; 
 *				arg3 = int url_length // start line of request
 *		'R':	arg = int status_code // adds a response start line
@@ -2040,8 +2041,9 @@ http_MakeMessage( INOUT membuffer * buf,
                      "</h1></body></html>" );
             num = strlen( tempbuf );
 
-            if( http_MakeMessage( buf, http_major_version, http_minor_version, "NTcs", (off_t)num, // content-length
+            if( http_MakeMessage( buf, http_major_version, http_minor_version, "NTAcs", (off_t)num, // content-length
                                   "text/html",  // content-type
+                                  gUserHTTPHeaders.buf,
                                   tempbuf ) != 0 )  // body
             {
                 goto error_handler;

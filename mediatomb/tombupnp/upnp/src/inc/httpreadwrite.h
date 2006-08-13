@@ -482,7 +482,7 @@ int http_SendStatusResponse( IN SOCKINFO *info, IN int http_status_code,
 *		'U':	(no args) appends HTTP USER-AGENT: header
 *		'C':	(no args) appends a HTTP CONNECTION: close header 
 *				depending on major,minor version
-*		'N':	arg1 = int content_length	// content-length header
+*		'N':	arg1 = off_t content_length	// content-length header
 *		'Q':	arg1 = http_method_t; arg2 = char* url; 
 *				arg3 = int url_length // start line of request
 *		'R':	arg = int status_code // adds a response start line
