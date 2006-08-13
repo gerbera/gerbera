@@ -1,5 +1,5 @@
 2006-08-08  Sergey Bostandzhyan <jin@mediatomb.org>
-    * integration - moved libupnp 1.4.1BETA3 into the MediaTomb environment
+    * integration - moved libupnp 1.4.1 into the MediaTomb environment
     
     * upnp/src/inc/config.h - changed thread configuration to improve
       internal webserver performance
@@ -16,6 +16,13 @@
 
     * fixed a bug in UpnpRemoveVirtualDir - when a directory to be
       removed was first in the list the whole list was invalidated
+    
+    * added possibility to add custom HTTP headers to all responses.
+      did not yet covered really all responses, some are still missing.
+
+    * added possibility to supply a custom HTTP header through the
+      File_Info struct via the get_info() callback, this allows to
+      add custom headers only to certain HTTP responses.
 
 2006-07-07 Oxy <virtual_worlds(at)gmx.de>
 
