@@ -346,6 +346,7 @@ LDFLAGS_SAVE="$LDFLAGS"
 
 TAGLIB_OK=yes
 TAGLIB_REQUESTED=no
+ID3_REQUESTED=no
 ID3_OK=yes
 AC_ARG_ENABLE(taglib,
    [  --enable-taglib          taglib support],
@@ -365,11 +366,19 @@ AC_ARG_ENABLE(id3lib,
      ID3_EN=$enableval 
      if test "x$enableval" = xno; then
         ID3_OK=disabled
+     else
+        ID3_REQUESTED=yes
      fi
   ]
 )
 
-if ((test "x$TAGLIB_EN" = xyes) && (test "x$ID3_EN" = xyes)); then
+if ((test "x$TAGLIB_REQUESTED" = xno) && (test "x$ID3_REQUESTED" = xyes)) ; then
+    TAGLIB_OK=disabled
+    AC_MSG_WARN([taglib disabled])
+elif ((test "x$TAGLIB_REQUESTED" = xyes) && (test "x$ID3_REQUESTED" = xno)) ; then
+    ID3_OK=disabled
+    AC_MSG_WARN([id3lib disabled])
+elif ((test "x$TAGLIB_REQUESTED" = xyes) && (test "x$ID3_REQUESTED" = xyes)) ; then
     AC_MSG_ERROR([Please select either taglib or id3lib, but not both.])
 fi
 
