@@ -31,6 +31,10 @@
 #include <sys/stat.h>
 #include "tools.h"
 
+#ifdef HAVE_LANGINFO_H
+    #include <langinfo.h>
+#endif
+
 using namespace zmm;
 using namespace mxml;
 
@@ -186,10 +190,17 @@ void ConfigManager::validate(String serverhome)
     getOption(_("/import/mappings/extension-mimetype/attribute::ignore-unknown"),
               _(DEFAULT_IGNORE_UNKNOWN_EXTENSIONS));
 
-    getOption(_("/import/filesystem-charset"),
-              _(DEFAULT_FILESYSTEM_CHARSET));
-    getOption(_("/import/metadata-charset"),
-              _(DEFAULT_FILESYSTEM_CHARSET));
+#ifdef HAVE_NL_LANGINFO
+    temp = String(nl_langinfo(CODESET));
+    if (!string_ok(temp))
+        temp = _(DEFAULT_FILESYSTEM_CHARSET);
+    log_debug("Setting import charset to %s\n", temp.c_str());
+#else
+    temp = _(DEFAULT_FILESYSTEM_CHARSET);
+#endif        
+    getOption(_("/import/filesystem-charset"), temp);
+    getOption(_("/import/metadata-charset"), temp);
+
     getOption(_("/server/ip"), _("")); // bind to any IP address
     getOption(_("/server/bookmark"), _(DEFAULT_BOOKMARK_FILE));
     getOption(_("/server/name"), _(DESC_FRIENDLY_NAME));

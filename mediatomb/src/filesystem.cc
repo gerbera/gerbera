@@ -32,7 +32,6 @@
 #include "filesystem.h"
 #include "mxml/mxml.h"
 #include "tools.h"
-#include "string_converter.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -171,8 +170,7 @@ Ref<Array<FsObject> > Filesystem::readDirectory(String path, int mask,
                 continue; // special file
             
             Ref<FsObject> obj(new FsObject());
-            Ref<StringConverter> f2i = StringConverter::f2i();
-            obj->filename = String(f2i->convert(String(name)));
+            obj->filename = String(name);
             obj->isDirectory = isDirectory;
             obj->hasContent = hasContent;
             files->append(obj);

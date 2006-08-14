@@ -27,6 +27,7 @@
 #include "tools.h"
 #include "storage.h"
 #include "filesystem.h"
+#include "string_converter.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -66,7 +67,9 @@ void web::files::process()
             int childCount = 1;
             if (childCount)
                 fe->addAttribute(_("childCount"), String::from(childCount));
-            fe->setText(filename);
+
+            Ref<StringConverter> f2i = StringConverter::f2i();
+            fe->setText(f2i->convert(filename));
             files->appendChild(fe);
         }
         root->appendChild(files);

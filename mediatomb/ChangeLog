@@ -29,6 +29,8 @@ v0.9.0  Major rework
           browser). It turned out that we forgot to convert the filenames
           to UTF-8, as the result invalid characters made their way into
           the XML that was feeded to the browser.
+        * we now try to determine the default import charsets by looking
+          at the system locale.
 
 v0.8.1
         * added "serve" directory, any files there can be downloaded 

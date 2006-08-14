@@ -32,6 +32,7 @@ using namespace zmm;
 StringConverter::StringConverter(String from, String to) : Object()
 {
     dirty = false;
+
     cd = iconv_open(to.c_str(), from.c_str());
     if (cd == (iconv_t)(-1))
     {

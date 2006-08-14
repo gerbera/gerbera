@@ -38,7 +38,9 @@ AC_CHECK_HEADERS([limits.h netdb.h netinet/in.h stdlib.h string.h sys/file.h],
 AC_CHECK_HEADERS([sys/ioctl.h sys/socket.h sys/time.h sys/timeb.h sys/types.h pthread.h],
                  [],
                  [AC_MSG_ERROR(required header not found)]) 
-    
+
+AC_CHECK_HEADERS([langinfo.h],[],[AC_MSG_WARN(langinfo.h not found, will not be able to retrieve locale)])
+
 AC_TYPE_OFF_T
 AC_SYS_LARGEFILE
 AC_FUNC_FSEEKO
@@ -52,7 +54,7 @@ fi
 
 AC_CHECK_SIZEOF(off_t, 4)
 
-AC_CHECK_FUNCS([strtoll])
+AC_CHECK_FUNCS([strtoll, nl_langinfo])
  
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
