@@ -22,9 +22,8 @@
     #include "autoconfig.h"
 #endif
 
-#include "common.h"
 #include "pages.h"
-
+#include "common.h"
 #include "storage.h"
 #include "cds_objects.h"
 #include "cds_resource_manager.h"
@@ -52,18 +51,19 @@ void web::items::process()
     
     Ref<Array<CdsObject> > arr = storage->selectObjects(param);
     
-    
-    // we keep the browse result in the DIDL-Lite tag in our xml
     Ref<Element> items (new Element(_("items")));
                             
     for (int i = 0; i < arr->size(); i++)
     {
         Ref<CdsObject> obj = arr->get(i);
-        Ref<Element> item (new Element(_("item")));
-        item->addAttribute(_("id"), String::from(obj->getID()));
-        item->appendTextChild(_("title"), obj->getTitle());
-        item->appendTextChild(_("res"), CdsResourceManager::getInstance()->getFirstResource(RefCast(obj, CdsItem)));
-        items->appendChild(item);
+        if (IS_CDS_ITEM(obj->getObjectType()))
+        {
+            Ref<Element> item (new Element(_("item")));
+            item->addAttribute(_("id"), String::from(obj->getID()));
+            item->appendTextChild(_("title"), obj->getTitle());
+            item->appendTextChild(_("res"), CdsResourceManager::getInstance()->getFirstResource(RefCast(obj, CdsItem)));
+            items->appendChild(item);
+        }
     }
     
     root->appendChild(items);

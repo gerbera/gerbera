@@ -182,11 +182,17 @@ function updateItemAddFields()
         fieldNameAr = new Array('title', 'location', 'class', 'description', 'mime-type', 'action', 'state');
         defaultsAr = new Array('', '', 'object.item.activeItem', '', '', '', '');
     }
-    else if (currentTypeOption == '8' || currentTypeOption == '16')
+    else if (currentTypeOption == '8'))
     {
         fieldAr = new Array('Title', 'URL', 'Protocol', 'Class', 'Description', 'Mimetype');
         fieldNameAr = new Array('title', 'location', 'protocol', 'class', 'description', 'mime-type');
         defaultsAr = new Array('', '', 'http-get', 'object.item', '', '');
+    }
+    else if (currentTypeOption == '16'))
+    {
+        fieldAr = new Array('Title', 'URL', 'Class', 'Description', 'Mimetype');
+        fieldNameAr = new Array('title', 'location', 'class', 'description', 'mime-type');
+        defaultsAr = new Array('', '', 'object.item', '', '');
     }
     
     

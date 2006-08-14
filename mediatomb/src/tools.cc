@@ -439,6 +439,18 @@ String renderProtocolInfo(String mimetype, String protocol)
         return _("http-get:*:*:*");
 }
 
+Ref<ProtocolInfo> parseProtocolInfo(String protocolInfoStr)
+{
+    Ref<ProtocolInfo> protocolInfo(new ProtocolInfo);
+    
+    /// JINTODO
+    /// \todo parse protcolInfoStr :)
+    
+    // example output:
+    protocolInfo->mimetype = _("*");
+    protocolInfo->protocol = _("http-get");
+    return protocolInfo;
+}
 
 String secondsToHMS(int seconds)
 {

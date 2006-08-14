@@ -22,13 +22,15 @@
     #include "autoconfig.h"
 #endif
 
-#include "server.h"
+#include "pages.h"
+
 #include <stdio.h>
 #include "common.h"
-#include "content_manager.h"
 #include "cds_objects.h"
-#include "dictionary.h"
-#include "pages.h"
+
+#include "server.h"
+#include "content_manager.h"
+// ? #include "storage.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -38,11 +40,10 @@ web::edit_load::edit_load() : WebRequestHandler()
 
 void web::edit_load::process()
 {
-    /*
-    Ref<Storage> storage; // storage instance, will be chosen depending on the driver
-        
     check_request();
-
+    
+    Ref<Storage> storage;
+    
     String objID = param(_("object_id"));
     int objectID;
     if (objID == nil)
@@ -51,29 +52,30 @@ void web::edit_load::process()
         objectID = objID.toInt();
     
     storage = Storage::getInstance();
-    Ref<CdsObject> current = storage->loadObject(objectID);
+    Ref<CdsObject> obj = storage->loadObject(objectID);
+    
+    Ref<Element> item (new Element(_("item")));
+    
+    item->appendTextChild(_("title"), obj->getTitle());
+    item->appendTextChild(_("class"), obj->getClass());
+    //item->appendTextChild(_("description"), obj->;
+    
+    item->appendTextChild(_("location"), obj->getLocation());
     
     
+    
+    /*
     Ref<Element> didl_object = UpnpXML_DIDLRenderObject(current, true);
     didl_object->appendTextChild(_("location"), current->getLocation());
+    
+    
     int objectType = current->getObjectType();
     if (IS_CDS_ITEM_INTERNAL_URL(objectType) || IS_CDS_ITEM_EXTERNAL_URL(objectType))
         didl_object->appendTextChild(_("object_type"), _("url"));
     else if (IS_CDS_ACTIVE_ITEM(objectType))
         didl_object->appendTextChild(_("object_type"), _("act"));
-   
-    Ref<Element> root (new Element(_("root")));
-    root->addAttribute(_("xmlns:dc"), _("http://purl.org/dc/elements/1.1/"));
-    root->addAttribute(_("xmlns:upnp"), _("urn:schemas-upnp-org:metadata-1-0/upnp/"));
-
-    root->appendChild(didl_object);
-    root->appendTextChild(_("driver"), driver);
-    root->appendTextChild(_("sid"), sid);
-    root->appendTextChild(_("object_id"), String::from(objectID));
-
-
-    // *out << renderXMLHeader(_("/edit.xsl"));
-    // *out << root->print();
     */
+    
+    root->appendChild(item);
 }
 

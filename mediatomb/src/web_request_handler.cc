@@ -137,6 +137,7 @@ Ref<IOHandler> WebRequestHandler::open(Ref<Dictionary> params, IN enum UpnpOpenF
 Ref<IOHandler> WebRequestHandler::open(IN const char *filename,
                                        IN enum UpnpOpenFileMode mode)
 {
+    log_debug("request: %s\n", filename);
     this->filename = String((char *)filename);
     this->mode = mode;
 
