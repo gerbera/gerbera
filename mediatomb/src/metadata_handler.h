@@ -40,6 +40,7 @@ typedef enum
     M_DATE,
     M_GENRE,
     M_DESCRIPTION,
+    M_TRACKNUMBER,
     M_MAX
 } metadata_fields_t; 
 

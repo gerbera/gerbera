@@ -59,7 +59,8 @@ mt_key MT_KEYS[] = {
     { "M_ALBUM", "upnp:album" },
     { "M_DATE", "dc:date" },
     { "M_GENRE", "upnp:genre" },
-    { "M_DESCRIPTION", "dc:description" }
+    { "M_DESCRIPTION", "dc:description" },
+    { "M_TRACKNUMBER", "upnp:originalTrackNumber"}
 };
 
 res_key RES_KEYS[] = {
@@ -95,7 +96,6 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
     Ref<MetadataHandler> handler;
     do
     {
-
         /// \todo what about mappings here? what if audio/mpeg was remapped to some crap in the config file?
 #ifdef HAVE_TAGLIB
         if ((mimetype == "audio/mpeg") || 

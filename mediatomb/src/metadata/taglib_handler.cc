@@ -48,6 +48,7 @@ static void addField(metadata_fields_t field, TagLib::FileRef *tag, Ref<CdsItem>
 {
     TagLib::String val;
     String value;
+    unsigned int i;
   
     Ref<StringConverter> sc = StringConverter::m2i();
     
@@ -63,22 +64,37 @@ static void addField(metadata_fields_t field, TagLib::FileRef *tag, Ref<CdsItem>
             val = tag->tag()->album();
             break;
         case M_DATE:
-            value = String::from((int)tag->tag()->year());
-            if (string_ok(value))
-                value = value + _("-00-00");
+            i = tag->tag()->year();
+            if (i > 0)
+            {
+                value = String::from(i);
+
+                if (string_ok(value))
+                    value = value + _("-00-00");
+            }
+            else
+                return;
             break;
         case M_GENRE:
             val = tag->tag()->genre();
-            
             break;
         case M_DESCRIPTION:
             val = tag->tag()->comment();
+            break;
+        case M_TRACKNUMBER:
+            i = tag->tag()->track();
+            if (i > 0)
+            {
+                value = String::from(i);
+            }
+            else
+                return;
             break;
         default:
             return;
     }
 
-    if (field != M_DATE)
+    if ((field != M_DATE) && (field != M_TRACKNUMBER))
         value = String((char *)val.toCString());
 
     value = trim_string(value);
@@ -86,7 +102,7 @@ static void addField(metadata_fields_t field, TagLib::FileRef *tag, Ref<CdsItem>
     if (string_ok(value))
     {
         item->setMetadata(String(MT_KEYS[field].upnp), sc->convert(value));
-        log_debug("Setting metadata on item: %d, %s\n", field, sc->convert(value).c_str());
+//        log_debug("Setting metadata on item: %d, %s\n", field, sc->convert(value).c_str());
     }
 }
 

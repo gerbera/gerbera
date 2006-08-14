@@ -55,7 +55,12 @@ static void addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsItem> item
     char*  ID3_retval = NULL;
   
     Ref<StringConverter> sc = StringConverter::m2i();
-    int genre;
+    size_t genre;
+#if SIZEOF_SIZE_T > 4
+    long track;
+#else
+    int track;
+#endif
     
     switch (field)
     {
@@ -76,16 +81,19 @@ static void addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsItem> item
         case M_GENRE:
             genre = ID3_GetGenreNum(tag);
             value = String((char *)(ID3_V1GENRE2DESCRIPTION(genre)));
-            
             break;
         case M_DESCRIPTION:
             ID3_retval = ID3_GetComment(tag);
+            break;
+        case M_TRACKNUMBER:
+            track = ID3_GetTrackNum(tag);
+            value = String::from(track);
             break;
         default:
             return;
     }
 
-    if ((field != M_GENRE) && (field != M_DATE))
+    if ((field != M_GENRE) && (field != M_DATE) && (field != M_TRACKNUMBER))
         value = String(ID3_retval);
     
     if (ID3_retval)

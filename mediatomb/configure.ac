@@ -42,6 +42,7 @@ AC_CHECK_HEADERS([sys/ioctl.h sys/socket.h sys/time.h sys/timeb.h sys/types.h pt
 AC_CHECK_HEADERS([langinfo.h],[],[AC_MSG_WARN(langinfo.h not found, will not be able to retrieve locale)])
 
 AC_TYPE_OFF_T
+AC_TYPE_SIZE_T
 AC_SYS_LARGEFILE
 AC_FUNC_FSEEKO
 
@@ -53,6 +54,7 @@ if test "$ac_cv_func_fseeko" != yes; then
 fi
 
 AC_CHECK_SIZEOF(off_t, 4)
+AC_CHECK_SIZEOF(size_t, 4)
 
 AC_CHECK_FUNCS([strtoll, nl_langinfo])
  
