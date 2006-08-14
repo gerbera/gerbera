@@ -48,33 +48,8 @@ Ref<CdsResourceManager> CdsResourceManager::getInstance()
 
 void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
 {
-    Ref<Element> res;
-
-    String urlBase;
-    /// \todo resource options must be read from configuration files
-
-    Ref<Dictionary> dict(new Dictionary());
-    dict->put(_(URL_OBJECT_ID), String::from(item->getID()));
-
-    bool addResID = false;
-    /// \todo move this down into the "for" loop and create different urls for each resource once the io handlers are ready
-    int objectType = item->getObjectType();
-    if (IS_CDS_ITEM_INTERNAL_URL(objectType))
-    {
-        urlBase = Server::getInstance()->getVirtualURL() + "/" + CONTENT_SERVE_HANDLER + 
-                  "/" + item->getLocation();
-    }
-    else if (IS_CDS_ITEM_EXTERNAL_URL(objectType))
-    {
-        urlBase = item->getLocation();
-    }
-    else
-    { 
-        urlBase = Server::getInstance()->getVirtualURL() + "/" +
-            CONTENT_MEDIA_HANDLER + "?" + dict->encode();
-        addResID = true;
-    }
-
+    Ref<UrlBase> urlBase = addResources_getUrlBase(item);
+    
     int resCount = item->getResourceCount();
     for (int i = 0; i < resCount; i++)
     {
@@ -86,15 +61,55 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         /// \todo who will sync mimetype that is part of the protocl info and
         /// that is lying in the resources with the information that is in the
         /// resource tags?
-
-//        res_attrs->put("protocolInfo", prot + mimeType + ":*");
+        
+        //  res_attrs->put("protocolInfo", prot + mimeType + ":*");
         String tmp;
-        if (addResID)
-            tmp = urlBase + "&" + "res_id=" + i;
+        if (urlBase->addResID)
+            tmp = urlBase->urlBase + i;
         else
-            tmp = urlBase;
+            tmp = urlBase->urlBase;
       
         element->appendChild(UpnpXML_DIDLRenderResource(tmp, res_attrs));
     }
 }
 
+Ref<CdsResourceManager::UrlBase> CdsResourceManager::addResources_getUrlBase(Ref<CdsItem> item)
+{
+    Ref<Element> res;
+    
+    Ref<UrlBase> urlBase(new UrlBase);
+    /// \todo resource options must be read from configuration files
+    
+    Ref<Dictionary> dict(new Dictionary());
+    dict->put(_(URL_OBJECT_ID), String::from(item->getID()));
+    
+    urlBase->addResID = false;
+    /// \todo move this down into the "for" loop and create different urls for each resource once the io handlers are ready
+    int objectType = item->getObjectType();
+    if (IS_CDS_ITEM_INTERNAL_URL(objectType))
+    {
+        urlBase->urlBase = Server::getInstance()->getVirtualURL() + _("/") + CONTENT_SERVE_HANDLER + 
+                  _("/") + item->getLocation();
+    }
+    else if (IS_CDS_ITEM_EXTERNAL_URL(objectType))
+    {
+        urlBase->urlBase = item->getLocation();
+    }
+    else
+    { 
+        urlBase->urlBase = Server::getInstance()->getVirtualURL() + _("/") +
+            CONTENT_MEDIA_HANDLER + _("/") + dict->encode() + _("&res_id=");
+        urlBase->addResID = true;
+    }
+    return urlBase;
+}
+
+String CdsResourceManager::getFirstResource(Ref<CdsItem> item)
+{
+    Ref<UrlBase> urlBase = addResources_getUrlBase(item);
+    
+    if (urlBase->addResID)
+        return urlBase->urlBase + 0;
+    else
+        return urlBase->urlBase;
+}

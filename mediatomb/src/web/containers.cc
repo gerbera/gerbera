@@ -24,7 +24,6 @@
 
 #include "common.h"
 #include "pages.h"
-
 #include "storage.h"
 #include "cds_objects.h"
 
@@ -38,34 +37,29 @@ web::containers::containers() : WebRequestHandler()
 void web::containers::process()
 {
     check_request();
-
+    
     String parID = param(_("parent_id"));
     int parentID;
     if (parID == nil)
         throw Exception(_("web::containers: no parent_id given"));
     else
         parentID = parID.toInt();
-/*
-    root->addAttribute("xmlns:dc", "http://purl.org/dc/elements/1.1/");
-    root->addAttribute("xmlns:upnp", "urn:schemas-upnp-org:metadata-1-0/upnp/");
-*/
+    
     Ref<Storage> storage = Storage::getInstance();
     Ref<BrowseParam> param(new BrowseParam(parentID, BROWSE_DIRECT_CHILDREN));
     param->containersOnly = true;
-
+    
     Ref<Array<CdsObject> > arr = storage->browse(param);
-
-    // we keep the browse result in the DIDL-Lite tag in our xml
+    
     Ref<Element> containers (new Element(_("containers")));
     containers->addAttribute(_("ofId"), parID);
     containers->addAttribute(_("type"), _("d"));
-
+    
     for (int i = 0; i < arr->size(); i++)
     {
         Ref<CdsObject> obj = arr->get(i);
         if (IS_CDS_CONTAINER(obj->getObjectType())) {
             Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
-            // this has to be adjusted: the resources for browsing are different
             Ref<Element> ce(new Element(_("container")));
             ce->addAttribute(_("id"), String::from(cont->getID()));
             int childCount = cont->getChildCount();

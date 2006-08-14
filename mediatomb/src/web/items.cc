@@ -27,7 +27,7 @@
 
 #include "storage.h"
 #include "cds_objects.h"
-#include "upnp_xml.h"
+#include "cds_resource_manager.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -39,34 +39,31 @@ web::items::items() : WebRequestHandler()
 void web::items::process()
 {
     check_request();
-
+    
     String parID = param(_("parent_id"));
     int parentID;
     if (parID == nil)
         parentID = 0;
     else
         parentID = parID.toInt();
-
+    
     Ref<Storage> storage = Storage::getInstance();
     Ref<SelectParam> param(new SelectParam(FILTER_PARENT_ID_ITEMS, parentID));
-
+    
     Ref<Array<CdsObject> > arr = storage->selectObjects(param);
-
-
+    
+    
     // we keep the browse result in the DIDL-Lite tag in our xml
     Ref<Element> items (new Element(_("items")));
-    items->addAttribute(_("xmlns:dc"), 
-                            _("http://purl.org/dc/elements/1.1/"));
-    items->addAttribute(_("xmlns:upnp"), 
-                            _("urn:schemas-upnp-org:metadata-1-0/upnp/"));
                             
     for (int i = 0; i < arr->size(); i++)
     {
         Ref<CdsObject> obj = arr->get(i);
-        // this has to be adjusted: the resourced for browsing are different
-        Ref<Element> didl_object = UpnpXML_DIDLRenderObject(obj);
-
-        items->appendChild(didl_object);
+        Ref<Element> item (new Element(_("item")));
+        item->addAttribute(_("id"), String::from(obj->getID()));
+        item->appendTextChild(_("title"), obj->getTitle());
+        item->appendTextChild(_("res"), CdsResourceManager::getInstance()->getFirstResource(RefCast(obj, CdsItem)));
+        items->appendChild(item);
     }
     
     root->appendChild(items);

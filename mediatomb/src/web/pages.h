@@ -88,6 +88,22 @@ public:
     virtual void process();
 };
 
+/// \brief Browser remove item
+class edit_load : public WebRequestHandler
+{
+public:
+    edit_load();
+    virtual void process();
+};
+
+/// \brief Browser remove item
+class edit_save : public WebRequestHandler
+{
+public:
+    edit_save();
+    virtual void process();
+};
+
 /// \brief Browser add object.
 class addObject : public WebRequestHandler
 {

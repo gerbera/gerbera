@@ -51,7 +51,6 @@ void web::directories::process()
     Ref<Array<FsObject> > arr = fs->readDirectory(path, FS_MASK_DIRECTORIES,
                                                   FS_MASK_DIRECTORIES);
 
-    // we keep the browse result in the DIDL-Lite tag in our xml
     Ref<Element> containers (new Element(_("containers")));
     containers->addAttribute(_("ofId"), parentID);
     containers->addAttribute(_("type"), _("f"));
@@ -67,6 +66,8 @@ void web::directories::process()
             filepath = path + filename;
         else
             filepath = path + '/' + filename;
+        
+        /// \todo replace hex_encode with base64_encode?
         String id = hex_encode(filepath.c_str(), filepath.length());
         ce->addAttribute(_("id"), id);
         if (obj->hasContent)

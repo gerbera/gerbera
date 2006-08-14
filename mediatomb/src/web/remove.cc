@@ -46,43 +46,6 @@ void web::remove::process()
     if (string_ok(objID))
         ContentManager::getInstance()->removeObject(objID.toInt());
 
-    /*
-    int objectID;
-    objID = session->getFrom(sd, _("object_id"));
-    if (objID == nil)
-    {
-        objectID = 0;
-    }
-    else
-    {
-        objectID = objID.toInt();
-        try
-        {
-            Storage::getInstance()->loadObject(objectID);
-        }
-        catch (Exception e)
-        {
-            objectID = 0;
-        }
-    }
-
-    requested_count = session->getFrom(sd, _("requested_count"));
-    if ((requested_count == nil) || (requested_count == ""))
-    {
-        requested_count = _("0");
-    }
-
-    if (requested_count.toInt() < 0)
-        requested_count = _("0");
-
-
-    Ref<Dictionary> sub(new Dictionary());
-    sub->put(_("object_id"), String::from(objectID));
-    sub->put(_("requested_count"), requested_count);
-    sub->put(_("sid"), sid);
-    sub->put(_("driver"), driver);
-    *out << subrequest(_("browse"), sub);
-    */
     log_debug("remove: returning\n");
 }
 

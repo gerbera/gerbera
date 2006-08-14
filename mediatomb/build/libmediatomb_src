@@ -133,6 +133,8 @@ libmediatomb_a_SOURCES = \
 ../src/web_callbacks.h \
 ../src/web/containers.cc \
 ../src/web/directories.cc \
+../src/web/edit_load.cc \
+../src/web/edit_save.cc \
 ../src/web/files.cc \
 ../src/web/items.cc \
 ../src/web/pages.cc \

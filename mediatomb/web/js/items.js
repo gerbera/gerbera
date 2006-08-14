@@ -86,7 +86,7 @@ function updateItems(ajaxRequest)
             
             itemLink.setAttribute("href", xmlGetElementText(item, "res"));
         }
-        var itemText = document.createTextNode(useFiles ? item.firstChild.nodeValue : xmlGetElementText(item, "dc:title"));
+        var itemText = document.createTextNode(useFiles ? item.firstChild.nodeValue : xmlGetElementText(item, "title"));
         itemLink.appendChild(itemText);
         itemsEl.appendChild(itemEntry);
     }

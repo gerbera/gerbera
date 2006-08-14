@@ -52,7 +52,6 @@ void web::files::process()
         Ref<Filesystem> fs(new Filesystem());
         Ref<Array<FsObject> > arr = fs->readDirectory(path, FS_MASK_FILES);
     
-        // we keep the browse result in the DIDL-Lite tag in our xml
         Ref<Element> files(new Element(_("files")));
     
         for (int i = 0; i < arr->size(); i++)

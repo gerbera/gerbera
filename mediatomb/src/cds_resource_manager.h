@@ -26,6 +26,7 @@
 #include "mxml/mxml.h"
 #include "common.h"
 #include "cds_objects.h"
+#include "strings.h"
 
 /// \brief This class is responsible for handling the DIDL-Lite res tags.
 class CdsResourceManager : public zmm::Object
@@ -51,6 +52,28 @@ public:
     /// function would do it. Also, when transcoding will be implemented, the
     /// various transcoded streams will be identified here.
     void addResources(zmm::Ref<CdsItem> item, zmm::Ref<mxml::Element> element);
+    
+    /// \brief Gets the URL of the first resource of the CfsItem.
+    /// \param item Item for which the resources should be built.
+    /// \return The URL
+    zmm::String getFirstResource(zmm::Ref<CdsItem> item);
+    
+protected:
+    class UrlBase : public zmm::Object
+    {
+        public:
+        zmm::String urlBase;
+        bool addResID;
+    };
+    
+    /// \brief Gets the baseUrl for a CdsItem.
+    /// \param item Item for which the baseUrl should be built.
+    ///
+    /// This function gets the baseUrl for the CdsItem and sets addResID
+    /// to true if the resource id needs to be added to the URL.
+    zmm::Ref<UrlBase> addResources_getUrlBase(zmm::Ref<CdsItem> item);
+    
+    
 };
 
 #endif // __CDS_RESOURCE_MANAGER_H__
