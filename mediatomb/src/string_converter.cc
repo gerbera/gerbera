@@ -49,10 +49,17 @@ StringConverter::~StringConverter()
 
 zmm::String StringConverter::convert(String str)
 {
+    String ret_str;
+
     int buf_size = str.length() * 4;
 
     char *input = str.c_str();
-    char *output = (char *)MALLOC(buf_size);    
+    char *output = (char *)MALLOC(buf_size);
+    if (!output)
+    {
+        log_debug("Could not allocate memory for string conversion!\n");
+        throw Exception(_("Could not allocate memory for string conversion!"));
+    }
 
     char *input_copy = input;
     char *output_copy = output;
@@ -84,7 +91,19 @@ zmm::String StringConverter::convert(String str)
         switch (errno)
         {
             case EILSEQ:
+                log_error("%s could not be converted to new encoding: invalid character sequence!\n", str.c_str());
                 err = _("iconv: Invalid character sequence");
+                ret_str = String(output, output_copy - output);
+                if (ret_str == nil)
+                    ret_str = _("");
+
+                    // pad rest with "?"
+                    for (int i = ret_str.length(); i < str.length(); i++)
+                    {
+                        ret_str = ret_str + _("?");
+                    }
+                    FREE(output);
+                    return ret_str;
                 break;
             case EINVAL:
                 err = _("iconv: Incomplete multibyte sequence");
@@ -102,6 +121,8 @@ zmm::String StringConverter::convert(String str)
 //        log_debug("iconv: input: %s\n", input);
 //        log_debug("iconv: converted part:  %s\n", output);
         dirty = true;
+        if (output)
+            FREE(output);
         throw Exception(err);
     }
    
@@ -109,7 +130,7 @@ zmm::String StringConverter::convert(String str)
     //       input_bytes, output_bytes);
     //log_debug("iconv: returned %d\n", ret);
 
-    String ret_str = String(output, output_copy - output);
+    ret_str = String(output, output_copy - output);
     FREE(output);
     
     return ret_str;

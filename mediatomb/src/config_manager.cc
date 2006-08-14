@@ -194,12 +194,13 @@ void ConfigManager::validate(String serverhome)
     temp = String(nl_langinfo(CODESET));
     if (!string_ok(temp))
         temp = _(DEFAULT_FILESYSTEM_CHARSET);
-    log_debug("Setting import charset to %s\n", temp.c_str());
 #else
     temp = _(DEFAULT_FILESYSTEM_CHARSET);
-#endif        
-    getOption(_("/import/filesystem-charset"), temp);
-    getOption(_("/import/metadata-charset"), temp);
+#endif      
+    String charset = getOption(_("/import/filesystem-charset"), temp);
+    log_info("Setting filesystem import charset to %s\n", charset.c_str());
+    charset = getOption(_("/import/metadata-charset"), temp);
+    log_info("Setting metadata import charset to %s\n", charset.c_str());
 
     getOption(_("/server/ip"), _("")); // bind to any IP address
     getOption(_("/server/bookmark"), _(DEFAULT_BOOKMARK_FILE));

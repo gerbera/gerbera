@@ -25,10 +25,13 @@ v0.9.0  Major rework
         * fixed bug 1292295 (string conversion was failing on 64bit platforms)
         * fixed issue with ContainerUpdateIDs (were not sent out along with
           accepted subscription)
-        * fixed issue where some directories could not be browse (filesystem 
+        * fixed issue where some directories could not be browsed (filesystem 
           browser). It turned out that we forgot to convert the filenames
           to UTF-8, as the result invalid characters made their way into
           the XML that was feeded to the browser.
+        * improved illegal character conversion handling - in case iconv
+          fails we will pad the rest of the name string with "?" and print
+          out the failed name in the console.
         * we now try to determine the default import charsets by looking
           at the system locale.
 
