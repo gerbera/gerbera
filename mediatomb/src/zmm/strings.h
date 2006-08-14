@@ -152,7 +152,9 @@ public:
     }
     
     static String from(int x);
+    static String from(unsigned int x);
     static String from(long x);
+    static String from(unsigned long x);
     static String from(double x);
     
     static String allocate(int size);

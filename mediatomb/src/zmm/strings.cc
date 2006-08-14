@@ -178,7 +178,19 @@ String String::from(int x)
 	b->len = sprintf(b->data, "%d", x);
     return (String(b));
 }
+String String::from(unsigned int x)
+{
+    StringBase *b = new StringBase(MAX_INT_STRING_LENGTH);
+	b->len = sprintf(b->data, "%d", x);
+    return (String(b));
+}
 String String::from(long x)
+{
+    StringBase *b = new StringBase(MAX_LONG_STRING_LENGTH);
+	b->len = sprintf(b->data, "%ld", x);
+    return (String(b));
+}
+String String::from(unsigned long x)
 {
     StringBase *b = new StringBase(MAX_LONG_STRING_LENGTH);
 	b->len = sprintf(b->data, "%ld", x);
