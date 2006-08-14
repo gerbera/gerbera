@@ -137,18 +137,11 @@ void quicksort(COMPARABLE *arr, int size, COMPARATOR comparator);
 /// \return The rendered protocolInfo String
 zmm::String renderProtocolInfo(zmm::String mimetype, zmm::String protocol = _(PROTOCOL));
 
-class ProtocolInfo : public zmm::Object
-{
-    public:
-    zmm::String mimetype;
-    zmm::String protocol;
-};
-
 /// \brief Parses a protocolInfo string (see renderProtocolInfo).
 /// 
 /// \param protocolInfoStr the String from renderProtocolInfo.
-/// \return A ProtocolInfo object.
-zmm::Ref<ProtocolInfo> parseProtocolInfo(zmm::String protocolInfoStr);
+/// \return Protocol (i.e. http-get).
+zmm::String getProtocol(zmm::String protocolInfo);
 
 
 /// \brief Converts a number of seconds to H+:MM:SS representation as required by
