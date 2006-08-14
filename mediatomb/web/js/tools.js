@@ -16,7 +16,7 @@ function isTypeDb()
 
 function xmlGetElement(parent, name)
 {
-    var returnVal = Try.these
+    /*var returnVal = Try.these
     (
         function()
         {
@@ -41,7 +41,10 @@ function xmlGetElement(parent, name)
         {
             return parent.getElementsByTagName(name);
         }
-    );
+    );*/
+    
+    var returnVal = parent.getElementsByTagName(name)
+    
     if (!returnVal || !returnVal.length)
         return null;
     else
@@ -55,12 +58,9 @@ function xmlGetElementText(parent, name)
 }
 function xmlGetText(el)
 {
-    if (el == null)
+    if (!el || el.childNodes.length != 1)
         return null;
-    if (el.childNodes.length > 1)
-        return el.childNodes[1].nodeValue;
-    else
-        return el.firstChild.nodeValue;
+    return el.firstChild.nodeValue;
 }
 
 

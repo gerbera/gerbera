@@ -84,6 +84,13 @@ function updateItems(ajaxRequest)
             linkEl.appendChild(document.createTextNode("remove"));
             itemEntry.appendChild(linkEl);
             
+            itemEntry.appendChild(document.createTextNode(", "));
+            
+            linkEl = document.createElement("a");
+            linkEl.setAttribute("href", "javascript:userEditItemStart(\""+item.getAttribute("id")+"\");");
+            linkEl.appendChild(document.createTextNode("edit"));
+            itemEntry.appendChild(linkEl);
+            
             itemLink.setAttribute("href", xmlGetElementText(item, "res"));
         }
         var itemText = document.createTextNode(useFiles ? item.firstChild.nodeValue : xmlGetElementText(item, "title"));
@@ -115,41 +122,68 @@ function addedItem(ajaxRequest)
 
 function userAddItemStart()
 {
-    updateItemAddFields();
+    updateItemAddEditFields();
     Element.hide(itemRoot);
-    itemRoot=$('item_add_div');
+    itemRoot=$('item_add_edit_div');
     Element.show(itemRoot);
 }
 
-function updateItemAddFields()
+function userEditItemStart(objectId)
+{
+    var url = link("edit_load", {object_id: objectId});
+    var myAjax = new Ajax.Request(
+        url,
+        {
+            method: 'get',
+            onComplete: userEditItemCallback
+        });
+}
+
+function userEditItemCallback(ajaxRequest)
+{
+    var xml = ajaxRequest.responseXML;
+    if (!errorCheck(xml)) return;
+    var item = xmlGetElement(xml, "item");
+    updateItemAddEditFields(item);
+    Element.hide(itemRoot);
+    itemRoot=$('item_add_edit_div');
+    Element.show(itemRoot);
+}
+
+function updateItemAddEditFields(editItem)
 {
     var currentTypeOption;
-    currentTypeOption = document.forms['addItem'].elements['objType'].value;
-    if (!currentTypeOption) currentTypeOption = '1';
+    var form = document.forms['addEditItem'];
+    var selectEl = form.elements['objType'];
+    var submitEl = form.elements['submit'];
+    if (!editItem)
+    {
+        selectEl.disabled = false;
+        submitEl.value = 'Add item...';
+        currentTypeOption = selectEl.value;
+        if (!currentTypeOption) currentTypeOption = '1';
+        form.action = 'javascript:itemAddEditSubmit();';
+    }
+    else
+    {
+        selectEl.disabled = true;
+        submitEl.value = 'Update item...';
+        currentTypeOption = xmlGetElementText(editItem, 'objType');
+        var objectId = editItem.getAttribute('object_id');
+        selectEl.value = currentTypeOption;
+        form.action = 'javascript:itemAddEditSubmit('+objectId+');';
+    }
     
     var inputsDiv = document.createElement('div');
-    
-    /*var formEl = document.createElement('form');
-    formEl.setAttribute('name', 'addItem');
-    formEl.setAttribute('action', 'javascript:itemAddSubmit();');
-    
-    var selectEl = document.createElement('select');
-    selectEl.setAttribute('onchange', 'updateItemAddFields()');
-    selectEl.setAttribute('name', 'objType');
-    selectEl.setAttribute('size', '1');
-    formEl.appendChild(selectEl);
-    */
-    
-    var selectEl = document.forms['addItem'].elements['objType'];
-    
-    //formEl.appendChild(document.createTextNode("<select name='objType' size='1' onchange='updateItemAddFields();'></select>");
     
     if (!selectEl.options[0])
     {
         // ATTENTION: These values need to be changed in src/cds_objects.h too.
+        // Note: 'Active Item', 'External Link (URL)', 'Internal Link (Local URL)'
+        // are also 'Items', so they have the item flag set too.
         var objTypeOptions = new Array('Container', 'Item', 'Active Item', 'External Link (URL)', 'Internal Link (Local URL)');
-        var objTypeOptionsIds = new Array('1', '2', '4', '8', '16');
-    
+        var objTypeOptionsIds = new Array('1', '2', '6', '10', '18');
+        
         for (var i = 0; i < objTypeOptions.length; ++i)
             selectEl.options[i] = new Option(
                 objTypeOptions[i],
@@ -176,25 +210,24 @@ function updateItemAddFields()
         fieldNameAr = new Array('title', 'location', 'class', 'description', 'mime-type');
         defaultsAr = new Array('', '', 'object.item', '', '');
     }
-    else if (currentTypeOption == '4')
+    else if (currentTypeOption == '6')
     {
         fieldAr = new Array('Title', 'Location', 'Class', 'Description', 'Mimetype', 'Action Script', 'State');
         fieldNameAr = new Array('title', 'location', 'class', 'description', 'mime-type', 'action', 'state');
         defaultsAr = new Array('', '', 'object.item.activeItem', '', '', '', '');
     }
-    else if (currentTypeOption == '8'))
+    else if (currentTypeOption == '10')
     {
         fieldAr = new Array('Title', 'URL', 'Protocol', 'Class', 'Description', 'Mimetype');
         fieldNameAr = new Array('title', 'location', 'protocol', 'class', 'description', 'mime-type');
         defaultsAr = new Array('', '', 'http-get', 'object.item', '', '');
     }
-    else if (currentTypeOption == '16'))
+    else if (currentTypeOption == '18')
     {
         fieldAr = new Array('Title', 'URL', 'Class', 'Description', 'Mimetype');
         fieldNameAr = new Array('title', 'location', 'class', 'description', 'mime-type');
         defaultsAr = new Array('', '', 'object.item', '', '');
     }
-    
     
     if (fieldAr && defaultsAr)
     {
@@ -204,37 +237,41 @@ function updateItemAddFields()
             var inputEl = document.createElement('input');
             inputEl.setAttribute('type', 'text');
             inputEl.setAttribute('name', fieldNameAr[i]);
-            inputEl.setAttribute('value', defaultsAr[i]);
+            if (!editItem)
+                inputEl.setAttribute('value', defaultsAr[i]);
+            else
+                inputEl.setAttribute('value', xmlGetElementText(editItem, fieldNameAr[i]));
             inputsDiv.appendChild(inputEl);
             addBr(inputsDiv);
         }
     }
-   
-    /*var submitEl = document.createElement('input');
-    submitEl.setAttribute('type', 'submit');
     
-    formEl.appendChild(submitEl);*/
-    
-    //addItemDiv.appendChild(formEl);
-    //var objectTypeDiv = document.createElement('div');
-    //addItemDiv.appendChild(objectTypeDiv);
-
-    var itemRoot = $('item_add_inputs');
+    var itemRoot = $('item_add_edit_inputs');
     itemRoot.replaceChild(inputsDiv, itemRoot.firstChild);
 }
 
-function itemAddSubmit()
+function itemAddEditSubmit(objectId)
 {
-    var form = document.forms['addItem'];
+    var req_type;
     var args = new Object();
-    args["object_id"] = lastNodeDb.substr(1);
+    if (objectId)
+    {
+        req_type = 'edit_save';
+        args['object_id'] = objectId;
+    }
+    else
+    {
+        req_type = 'add_object';
+        args['parent_id'] = lastNodeDb.substr(1);
+    }
+    var form = document.forms['addEditItem'];
     for (var i = 0; i < form.length; ++i)
     {
         var element = form.elements[i];
         args[element.name] = element.value;
     }
     
-    var url = link("add_object", args);
+    var url = link(req_type, args);
     var myAjax = new Ajax.Request(
         url,
         {
@@ -245,7 +282,7 @@ function itemAddSubmit()
 
 function removeItem(itemId)
 {
-    var url = link("remove", {object_id: itemId});
+    var url = link('remove', {object_id: itemId});
     var myAjax = new Ajax.Request(
         url,
         {

@@ -29,7 +29,6 @@ _DIST_FILES_JS = \
 ./js/tree.js \
 ./js/tools.js \
 ./js/items.js \
-./js/ajax.js \
 ./js/nanotree.js 
 
 _DIST_FILES_WEB = \

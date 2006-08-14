@@ -27,10 +27,12 @@
 #include <stdio.h>
 #include "common.h"
 #include "cds_objects.h"
+#include "tools.h"
+#include "storage.h"
 
-#include "server.h"
-#include "content_manager.h"
-// ? #include "storage.h"
+//#include "server.h"
+//#include "content_manager.h"
+
 
 using namespace zmm;
 using namespace mxml;
@@ -56,25 +58,31 @@ void web::edit_load::process()
     
     Ref<Element> item (new Element(_("item")));
     
+    item->setAttribute(_("object_id"), objID);
     item->appendTextChild(_("title"), obj->getTitle());
     item->appendTextChild(_("class"), obj->getClass());
-    //item->appendTextChild(_("description"), obj->;
     
-    item->appendTextChild(_("location"), obj->getLocation());
+    int objectType = obj->getObjectType();
+    item->appendTextChild(_("objType"), String::from(objectType));
     
-    
-    
-    /*
-    Ref<Element> didl_object = UpnpXML_DIDLRenderObject(current, true);
-    didl_object->appendTextChild(_("location"), current->getLocation());
-    
-    
-    int objectType = current->getObjectType();
-    if (IS_CDS_ITEM_INTERNAL_URL(objectType) || IS_CDS_ITEM_EXTERNAL_URL(objectType))
-        didl_object->appendTextChild(_("object_type"), _("url"));
-    else if (IS_CDS_ACTIVE_ITEM(objectType))
-        didl_object->appendTextChild(_("object_type"), _("act"));
-    */
+    if (IS_CDS_ITEM(objectType))
+    {
+        Ref<CdsItem> objItem = RefCast(obj, CdsItem);
+        item->appendTextChild(_("description"), objItem->getMetadata(_("dc:description")));
+        item->appendTextChild(_("location"), objItem->getLocation());
+        item->appendTextChild(_("mime-type"), objItem->getMimeType());
+        
+        if (IS_CDS_ITEM_EXTERNAL_URL(objectType))
+        {
+            item->appendTextChild(_("protocol"), getProtocol(objItem->getResource(0)->getAttribute(_("protocolInfo"))));
+        }
+        else if (IS_CDS_ACTIVE_ITEM(objectType))
+        {
+            Ref<CdsActiveItem> objActiveItem = RefCast(objItem, CdsActiveItem);
+            item->appendTextChild(_("action"), objActiveItem->getAction());
+            item->appendTextChild(_("state"), objActiveItem->getState());
+        }
+    }
     
     root->appendChild(item);
 }

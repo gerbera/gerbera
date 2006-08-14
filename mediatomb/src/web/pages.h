@@ -111,10 +111,10 @@ public:
     addObject();
     virtual void process();
 protected:
-    zmm::Ref<CdsObject> addContainer(int objectId);
-    zmm::Ref<CdsObject> addItem(int objectId, zmm::Ref<CdsItem> item);
-    zmm::Ref<CdsObject> addUrl(int objectID, zmm::Ref<CdsItemExternalURL> item);
-    zmm::Ref<CdsObject> addActiveItem(int objectID);
+    zmm::Ref<CdsObject> addContainer(int parentID);
+    zmm::Ref<CdsObject> addItem(int parentID, zmm::Ref<CdsItem> item);
+    zmm::Ref<CdsObject> addUrl(int parentID, zmm::Ref<CdsItemExternalURL> item, bool addProtocol);
+    zmm::Ref<CdsObject> addActiveItem(int parentID);
 };
 
 } // namespace

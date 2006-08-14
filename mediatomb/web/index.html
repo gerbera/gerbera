@@ -151,12 +151,12 @@
                         <div><a href="javascript:userAddItemStart();">add Item</a></div>
                         <div id="item_db_div" style="display:none"><div></div></div>
                         <div id="item_fs_div" style="display:none"><div></div></div>
-                        <div id="item_add_div" style="display:none">
-                            <form action="javascript:itemAddSubmit();" name="addItem">
-                                <select name="objType" onchange="updateItemAddFields()" size="1">
+                        <div id="item_add_edit_div" style="display:none">
+                            <form name="addEditItem">
+                                <select name="objType" onchange="updateItemAddEditFields()" size="1">
                                 </select>
-                                <div id="item_add_inputs"><div></div></div>
-                                <input type="submit" />
+                                <div id="item_add_edit_inputs"><div></div></div>
+                                <input name="submit" type="submit"/>
                             <form>
                         </div>
                     </td>

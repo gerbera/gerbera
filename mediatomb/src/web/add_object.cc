@@ -49,11 +49,11 @@ web::addObject::addObject() : WebRequestHandler()
     return option;
 }*/
 
-Ref<CdsObject> web::addObject::addContainer(int objectID)
+Ref<CdsObject> web::addObject::addContainer(int parentID)
 {
     Ref<CdsContainer> cont (new CdsContainer());
     
-    cont->setParentID(objectID);
+    cont->setParentID(parentID);
     
     cont->setTitle(param(_("title")));
     
@@ -72,11 +72,11 @@ Ref<CdsObject> web::addObject::addContainer(int objectID)
     return RefCast(cont, CdsObject);
 }
 
-Ref<CdsObject> web::addObject::addItem(int objectID, Ref<CdsItem> item)
+Ref<CdsObject> web::addObject::addItem(int parentID, Ref<CdsItem> item)
 {
     String tmp;
     
-    item->setParentID(objectID);
+    item->setParentID(parentID);
     
     item->setTitle(param(_("title")));
     item->setLocation(param(_("location")));
@@ -100,7 +100,7 @@ Ref<CdsObject> web::addObject::addItem(int objectID, Ref<CdsItem> item)
     return RefCast(item, CdsObject);
 }
 
-Ref<CdsObject> web::addObject::addActiveItem(int objectID)
+Ref<CdsObject> web::addObject::addActiveItem(int parentID)
 {
     String tmp;
     Ref<CdsActiveItem> item (new CdsActiveItem());
@@ -112,15 +112,15 @@ Ref<CdsObject> web::addObject::addActiveItem(int objectID)
     if (string_ok(tmp))
         item->setState(tmp);
     
-    return addItem(objectID, RefCast(item, CdsItem));
+    return addItem(parentID, RefCast(item, CdsItem));
 }
 
-Ref<CdsObject> web::addObject::addUrl(int objectID, Ref<CdsItemExternalURL> item)
+Ref<CdsObject> web::addObject::addUrl(int parentID, Ref<CdsItemExternalURL> item, bool addProtocol)
 {
     String tmp;
-    String protocol;
+    String protocolInfo;
     
-    item->setParentID(objectID);
+    item->setParentID(parentID);
     
     item->setTitle(param(_("title")));
     item->setURL(param(_("location")));
@@ -136,13 +136,19 @@ Ref<CdsObject> web::addObject::addUrl(int objectID, Ref<CdsItemExternalURL> item
         tmp = _(MIMETYPE_DEFAULT);
     item->setMimeType(tmp);
     
-    protocol = param(_("protocol"));
-    if (!string_ok(protocol))
-        protocol = _(PROTOCOL);
+    if (addProtocol)
+    {
+        String protocol = param(_("protocol"));
+        if (string_ok(protocol))
+            protocolInfo = renderProtocolInfo(tmp, protocol);
+        else protocolInfo = renderProtocolInfo(tmp);
+    }
+    else
+        protocolInfo = renderProtocolInfo(tmp);
     
     Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
     resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
-                           renderProtocolInfo(tmp, protocol));
+                           protocolInfo);
     item->addResource(resource);
     
     return RefCast(item, CdsObject);
@@ -161,43 +167,43 @@ void web::addObject::process()
     if (!string_ok(param(_("class"))))
         throw Exception(_("empty class"));
     
-    String objID = param(_("object_id"));
-    int objectID;
-    if (objID == nil)
-        objectID = 0;
+    String parID = param(_("parent_id"));
+    int parentID;
+    if (parID == nil)
+        parentID = 0;
     else
-        objectID = objID.toInt();
+        parentID = parID.toInt();
     
     Ref<CdsObject> obj;
     
     switch (obj_type.toInt())
     {
         case OBJECT_TYPE_CONTAINER:
-            obj = this->addContainer(objectID);
+            obj = this->addContainer(parentID);
             break;
             
         case OBJECT_TYPE_ITEM:
             if (!string_ok(location)) throw Exception(_("no location given"));
             if (!check_path(location, false)) throw Exception(_("file not found"));
-            obj = this->addItem(objectID, Ref<CdsItem> (new CdsItem()));
+            obj = this->addItem(parentID, Ref<CdsItem> (new CdsItem()));
             break;
             
-        case OBJECT_TYPE_ACTIVE_ITEM:
+        case OBJECT_TYPE_ITEM | OBJECT_TYPE_ACTIVE_ITEM:
             if (!string_ok(param(_("action")))) throw Exception(_("no action given"));
             if (!string_ok(location)) throw Exception(_("no location given"));
             if (!check_path(location, false))
                 throw Exception(_("path not found"));
-            obj = this->addActiveItem(objectID);
+            obj = this->addActiveItem(parentID);
             break;
             
-        case OBJECT_TYPE_ITEM_EXTERNAL_URL:
+        case OBJECT_TYPE_ITEM | OBJECT_TYPE_ITEM_EXTERNAL_URL:
             if (!string_ok(location)) throw Exception(_("No URL given"));
-            obj = this->addUrl(objectID, Ref<CdsItemExternalURL> (new CdsItemExternalURL()));
+            obj = this->addUrl(parentID, Ref<CdsItemExternalURL> (new CdsItemExternalURL()), true);
             break;
             
-        case OBJECT_TYPE_ITEM_INTERNAL_URL:
+        case OBJECT_TYPE_ITEM | OBJECT_TYPE_ITEM_INTERNAL_URL:
             if (!string_ok(location)) throw Exception(_("No URL given"));
-            obj = this->addUrl(objectID, Ref<CdsItemExternalURL> (new CdsItemInternalURL()));
+            obj = this->addUrl(parentID, Ref<CdsItemExternalURL> (new CdsItemInternalURL()), false);
             break;
             
         default:

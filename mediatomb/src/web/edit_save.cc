@@ -22,16 +22,12 @@
     #include "autoconfig.h"
 #endif
 
-#include "server.h"
-#include <stdio.h>
-#include "common.h"
-#include "content_manager.h"
-#include "cds_objects.h"
-#include "dictionary.h"
 #include "pages.h"
-#include "session_manager.h"
-#include "update_manager.h"
+#include <stdio.h>
+#include "content_manager.h"
+#include "storage.h"
 #include "tools.h"
+#include "dictionary.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -41,51 +37,18 @@ web::edit_save::edit_save() : WebRequestHandler()
 
 void web::edit_save::process()
 {
-    /*
-    Ref<Session> session;
-    Ref<Storage> storage; // storage instance, will be chosen depending on the driver
-    Ref<ContentManager> content;
-        
-    session_data_t sd;
-
     check_request();
-
+    
     String objID = param(_("object_id"));
     int objectID;
-    String driver = param(_("driver"));
-    String sid = param(_("sid"));
-
     if (!string_ok(objID))
         throw Exception(_("invalid object id"));
     else
         objectID = objID.toInt();
     
-    storage = Storage::getInstance();
-    sd = PRIMARY;
-
+    Ref<Storage> storage = Storage::getInstance();
+    Ref<ContentManager> content;
+    
     ContentManager::getInstance()->updateObject(objectID, params);
-    
-    session = SessionManager::getInstance()->getSession(sid);
-    
-    Ref<Dictionary> sub(new Dictionary());
-    
-    objID = session->getFrom(sd, _("object_id"));
-    if (objID == nil)
-        objID = _("0");
-
-    String requested_count = session->getFrom(sd, _("requested_count"));
-    if ((requested_count == nil) || (requested_count == ""))
-    {
-        requested_count = _("0");
-    }
-    if (requested_count.toInt() < 0)
-        requested_count = _("0");
-
-    sub->put(_("object_id"), objID);
-    sub->put(_("requested_count"), requested_count);
-    sub->put(_("sid"), sid);
-    sub->put(_("driver"), driver);
-    *out << subrequest(_("browse"), sub);
-    */
 }
 
