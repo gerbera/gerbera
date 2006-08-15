@@ -1,22 +1,19 @@
 var itemRoot;
+var rightDocument;
 
 function itemInit()
 {
-    /*
-    var newNodeDb = document.createElement('div');
-    var newNodeFs = document.createElement('div');
-    var newNodeAdd = document.createElement('div');
-    $('item_db_div').appendChild(newNodeDb);
-    $('item_fs_div').appendChild(newNodeFs);
-    $('item_add_inputs').appendChild(newNodeAdd);
-    */
+    rightDocument = frames["rightF"].document;
     itemChangeType();
 }
 
 function itemChangeType()
 {
     var oldItemRoot = itemRoot;
-    itemRoot = isTypeDb() ? $('item_db_div') : $('item_fs_div');
+    var dbItemRoot = rightDocument.getElementById("item_db_div");
+    var fsItemRoot = rightDocument.getElementById("item_fs_div");
+    
+    itemRoot = isTypeDb() ? dbItemRoot : fsItemRoot;
     if (oldItemRoot && oldItemRoot!=itemRoot) Element.hide(oldItemRoot);
     Element.show(itemRoot);
 }
@@ -57,75 +54,76 @@ function updateItems(ajaxRequest)
     }
     
     var children = items.getElementsByTagName(childrenTag);
-    var itemsEl = document.createElement("div");
+    var itemsEl = rightDocument.createElement("div");
     
-    if (!((isTypeDb() && lastNodeDb == 'd0') || (!isTypeDb() && lastNodeFs == 'f0')))
+    //if (!((isTypeDb() && lastNodeDb == 'd0') || (!isTypeDb() && lastNodeFs == 'f0')))
+    if (useFiles)
     {
-        if (useFiles)
+        
+    }
+    else
+    {
+        var ofId = items.getAttribute("ofId");
+        var topDiv = rightDocument.createElement("div");
+        topDiv.appendChild(rightDocument.createTextNode("Container: "));
+        
+        var link = rightDocument.createElement("a");
+        topDiv.appendChild(link);
+        link.setAttribute("href", "javascript:parent.userAddItemStart();");
+        link.appendChild(rightDocument.createTextNode("add Item"));
+        
+        if (lastNodeDb !== 'd0')
         {
+            topDiv.appendChild(rightDocument.createTextNode(", "));
+            link = rightDocument.createElement("a");
+            topDiv.appendChild(link);
+            link.setAttribute("href", "javascript:parent.userEditItemStart("+ofId+");");
+            link.appendChild(rightDocument.createTextNode("edit"));
             
+            topDiv.appendChild(rightDocument.createTextNode(", "));
+            link = rightDocument.createElement("a");
+            topDiv.appendChild(link);
+            link.setAttribute("href", "javascript:parent.removeItem("+ofId+");");
+            link.appendChild(rightDocument.createTextNode("remove"));
         }
-        else
-        {
-            var ofId = items.getAttribute("ofId");
-            var topDiv = document.createElement("div");
-            topDiv.appendChild(document.createTextNode("Container: "));
-            
-            var link = document.createElement("a");
-            topDiv.appendChild(link);
-            link.setAttribute("href", "javascript:removeItem("+ofId+");");
-            link.appendChild(document.createTextNode("remove"));
-            topDiv.appendChild(document.createTextNode(" "));
-            
-            link = document.createElement("a");
-            topDiv.appendChild(link);
-            link.setAttribute("href", "javascript:userEditItemStart("+ofId+");");
-            link.appendChild(document.createTextNode("edit"));
-            topDiv.appendChild(document.createTextNode(" "));
-            
-            link = document.createElement("a");
-            topDiv.appendChild(link);
-            link.setAttribute("href", "javascript:userAddItemStart();");
-            link.appendChild(document.createTextNode("add Item"));
-            
-            itemsEl.appendChild(topDiv);
-        }
+        
+        itemsEl.appendChild(topDiv);
     }
     for (var i = 0; i < children.length; i++)
     {
         var item = children[i];
-        var itemEntry = document.createElement("div");
-        var itemLink = document.createElement("a");
+        var itemEntry = rightDocument.createElement("div");
+        var itemLink = rightDocument.createElement("a");
         itemEntry.appendChild(itemLink);
         
         if (useFiles)
         {
-            itemEntry.appendChild(document.createTextNode(" - "));
+            itemEntry.appendChild(rightDocument.createTextNode(" - "));
             
-            var linkEl = document.createElement("a");
-            linkEl.setAttribute("href", "javascript:addItem(\""+item.getAttribute("id")+"\");");
-            linkEl.appendChild(document.createTextNode("add"));
+            var linkEl = rightDocument.createElement("a");
+            linkEl.setAttribute("href", "javascript:parent.addItem(\""+item.getAttribute("id")+"\");");
+            linkEl.appendChild(rightDocument.createTextNode("add"));
             itemEntry.appendChild(linkEl);
         }
         else
         {
-            itemEntry.appendChild(document.createTextNode(" - "));
+            itemEntry.appendChild(rightDocument.createTextNode(" - "));
             
-            var linkEl = document.createElement("a");
-            linkEl.setAttribute("href", "javascript:removeItem(\""+item.getAttribute("id")+"\");");
-            linkEl.appendChild(document.createTextNode("remove"));
+            var linkEl = rightDocument.createElement("a");
+            linkEl.setAttribute("href", "javascript:parent.removeItem(\""+item.getAttribute("id")+"\");");
+            linkEl.appendChild(rightDocument.createTextNode("remove"));
             itemEntry.appendChild(linkEl);
             
-            itemEntry.appendChild(document.createTextNode(", "));
+            itemEntry.appendChild(rightDocument.createTextNode(", "));
             
-            linkEl = document.createElement("a");
-            linkEl.setAttribute("href", "javascript:userEditItemStart(\""+item.getAttribute("id")+"\");");
-            linkEl.appendChild(document.createTextNode("edit"));
+            linkEl = rightDocument.createElement("a");
+            linkEl.setAttribute("href", "javascript:parent.userEditItemStart(\""+item.getAttribute("id")+"\");");
+            linkEl.appendChild(rightDocument.createTextNode("edit"));
             itemEntry.appendChild(linkEl);
             
             itemLink.setAttribute("href", xmlGetElementText(item, "res"));
         }
-        var itemText = document.createTextNode(useFiles ? item.firstChild.nodeValue : xmlGetElementText(item, "title"));
+        var itemText = rightDocument.createTextNode(useFiles ? item.firstChild.nodeValue : xmlGetElementText(item, "title"));
         itemLink.appendChild(itemText);
         itemsEl.appendChild(itemEntry);
     }
@@ -156,7 +154,7 @@ function userAddItemStart()
 {
     updateItemAddEditFields();
     Element.hide(itemRoot);
-    itemRoot=$('item_add_edit_div');
+    itemRoot=rightDocument.getElementById('item_add_edit_div');
     Element.show(itemRoot);
 }
 
@@ -178,14 +176,14 @@ function userEditItemCallback(ajaxRequest)
     var item = xmlGetElement(xml, "item");
     updateItemAddEditFields(item);
     Element.hide(itemRoot);
-    itemRoot=$('item_add_edit_div');
+    itemRoot=rightDocument.getElementById('item_add_edit_div');
     Element.show(itemRoot);
 }
 
 function updateItemAddEditFields(editItem)
 {
     var currentTypeOption;
-    var form = document.forms['addEditItem'];
+    var form = rightDocument.forms['addEditItem'];
     var selectEl = form.elements['objType'];
     var submitEl = form.elements['submit'];
     if (!editItem)
@@ -194,7 +192,7 @@ function updateItemAddEditFields(editItem)
         submitEl.value = 'Add item...';
         currentTypeOption = selectEl.value;
         if (!currentTypeOption) currentTypeOption = '1';
-        form.action = 'javascript:itemAddEditSubmit();';
+        form.action = 'javascript:parent.itemAddEditSubmit();';
     }
     else
     {
@@ -203,10 +201,10 @@ function updateItemAddEditFields(editItem)
         currentTypeOption = xmlGetElementText(editItem, 'objType');
         var objectId = editItem.getAttribute('object_id');
         selectEl.value = currentTypeOption;
-        form.action = 'javascript:itemAddEditSubmit('+objectId+');';
+        form.action = 'javascript:parent.itemAddEditSubmit('+objectId+');';
     }
     
-    var inputsDiv = document.createElement('div');
+    var inputsDiv = rightDocument.createElement('div');
     
     if (!selectEl.options[0])
     {
@@ -265,8 +263,8 @@ function updateItemAddEditFields(editItem)
     {
         for (var i = 0; i < fieldAr.length; ++i)
         {
-            inputsDiv.appendChild(document.createTextNode(fieldAr[i]+": "));
-            var inputEl = document.createElement('input');
+            inputsDiv.appendChild(rightDocument.createTextNode(fieldAr[i]+": "));
+            var inputEl = rightDocument.createElement('input');
             inputEl.setAttribute('type', 'text');
             inputEl.setAttribute('name', fieldNameAr[i]);
             if (!editItem)
@@ -278,7 +276,7 @@ function updateItemAddEditFields(editItem)
         }
     }
     
-    var itemRoot = $('item_add_edit_inputs');
+    var itemRoot = rightDocument.getElementById("item_add_edit_inputs");
     itemRoot.replaceChild(inputsDiv, itemRoot.firstChild);
 }
 
@@ -296,7 +294,7 @@ function itemAddEditSubmit(objectId)
         req_type = 'add_object';
         args['parent_id'] = lastNodeDb.substr(1);
     }
-    var form = document.forms['addEditItem'];
+    var form = rightDocument.forms['addEditItem'];
     for (var i = 0; i < form.length; ++i)
     {
         var element = form.elements[i];

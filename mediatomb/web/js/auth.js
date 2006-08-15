@@ -19,8 +19,8 @@ function gotToken(ajaxRequest)
     
     var token = xmlGetElementText(xml, "token");
     
-    var username = document.login_form.username.value;
-    var password = document.login_form.password.value;
+    var username = frames["topF"].document.login_form.username.value;
+    var password = frames["topF"].document.login_form.password.value;
     
     // create authentication password
     password = '' + token + ':' + hex_md5(token + hex_md5(password));
@@ -43,8 +43,10 @@ function checkLogin(ajaxRequest)
     var rootEl = xmlGetElement(xml, "root");
     SID = xmlGetAttribute(rootEl, "sid");
     setCookie("SID", SID);
-    Element.hide("loginDiv");
-    Element.show("mainDiv");
+    var topDocument = frames["topF"].document;
+    Element.hide(topDocument.getElementById("loginDiv"));
+    Element.show(topDocument.getElementById("topDiv"));
+    Element.show(frames["leftF"].document.getElementById("treeDiv"));
     updateTreeAfterLogin();
     if (!SID)
         alert('could not obtain session id');

@@ -34,6 +34,9 @@ _DIST_FILES_JS = \
 _DIST_FILES_WEB = \
 ./std_treelook.css \
 ./index.html \
+./left.html \
+./right.html \
+./top.html \
 ./help.html \
 ./main.css \
 ./cm.xml \

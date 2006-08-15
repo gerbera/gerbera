@@ -80,7 +80,7 @@ function errorCheck(xml)
 {
     if (!xml)
     {
-        alert ("could not fetch XML");
+        //alert ("could not fetch XML");
         return false;
     }
     var redirect = xmlGetElementText(xml, 'redirect');

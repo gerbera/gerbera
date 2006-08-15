@@ -53,6 +53,9 @@ var showAllNodesOnStartup = false;
 // Is the roots dragable?
 var dragable = false;
 
+//set to the document the tree is in (needed for frame handling).
+var treeDocument;
+
 
 /************************************************************************
 * The following is just instancevariables.
@@ -359,7 +362,7 @@ function showNode(treeNode,lastNode) {
 	linestring = treeNode.getLineString();
 	var state = getState(treeNode.getID());
 	var str;
-	str = '<div  ondragenter="dragEnter(\'' + treeNode.getID() + '\');" ondragleave="dragLeave();" ondragstart="startDrag(\'' + treeNode.getID() + '\');" ondrag="dragMove();" ondragend="endDrag(\'' + treeNode.getID() + '\')" id="node' + treeNode.getID() + '">';
+	str = '<div  ondragenter="parent.dragEnter(\'' + treeNode.getID() + '\');" ondragleave="parent.dragLeave();" ondragstart="parent.startDrag(\'' + treeNode.getID() + '\');" ondrag="parent.dragMove();" ondragend="parent.endDrag(\'' + treeNode.getID() + '\')" id="node' + treeNode.getID() + '">';
 	str += '<nobr>';
 	for(var y=0;y<linestring.length;y++) {
 		if (linestring.charAt(y) == 'I') {
@@ -373,18 +376,18 @@ function showNode(treeNode,lastNode) {
 		// If this is the first child of the rootNode, and showRootNode is false, we want to display a different icon.
 		if (!showRootNode && (treeNode.getParent() == rootNode) && (treeNode.getParent().getFirstChild() == treeNode)) {
 			if (!lastNode) {
-				str += '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/' + (state == 'open' ? (showLines ? 'minus_no_root' : 'minus_nolines') : (showLines ? 'plus_no_root' : 'plus_nolines')) + '.gif" style="width:19px;height:20px;vertical-align:middle;" OnClick="handleNode(\'' + treeNode.getID() + '\');">';
+				str += '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/' + (state == 'open' ? (showLines ? 'minus_no_root' : 'minus_nolines') : (showLines ? 'plus_no_root' : 'plus_nolines')) + '.gif" style="width:19px;height:20px;vertical-align:middle;" OnClick="parent.handleNode(\'' + treeNode.getID() + '\');">';
 			}
 			else {
-				str += '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/' + (state == 'open' ? 'minus_last' : 'plus_last') + '_no_root.gif" style="width:19px;height:20px;vertical-align:middle;" OnClick="handleNode(\'' + treeNode.getID() + '\');">';
+				str += '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/' + (state == 'open' ? 'minus_last' : 'plus_last') + '_no_root.gif" style="width:19px;height:20px;vertical-align:middle;" OnClick="parent.handleNode(\'' + treeNode.getID() + '\');">';
 			}
 		}
 		else {
 			if (!lastNode) {
-				str += '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/' + (state == 'open' ? (showLines ? 'minus' : 'minus_nolines') : (showLines ? 'plus' : 'plus_nolines')) + '.gif" style="width:19px;height:20px;vertical-align:middle;" OnClick="handleNode(\'' + treeNode.getID() + '\');">';
+				str += '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/' + (state == 'open' ? (showLines ? 'minus' : 'minus_nolines') : (showLines ? 'plus' : 'plus_nolines')) + '.gif" style="width:19px;height:20px;vertical-align:middle;" OnClick="parent.handleNode(\'' + treeNode.getID() + '\');">';
 			}
 			else {
-				str += '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/' + (state == 'open' ? (showLines ? 'minus_last' : 'minus_nolines') : (showLines ? 'plus_last' : 'plus_nolines')) + '.gif" style="width:19px;height:20px;vertical-align:middle;" OnClick="handleNode(\'' + treeNode.getID() + '\');">';
+				str += '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/' + (state == 'open' ? (showLines ? 'minus_last' : 'minus_nolines') : (showLines ? 'plus_last' : 'plus_nolines')) + '.gif" style="width:19px;height:20px;vertical-align:middle;" OnClick="parent.handleNode(\'' + treeNode.getID() + '\');">';
 			}
 		}
 	}
@@ -414,8 +417,8 @@ function showNode(treeNode,lastNode) {
 		}
 	}
 	
-	str += '<img id="iconimage' + treeNode.getID() + '" src="' + iconStartImage + '" style="vertical-align:middle;" OnClick="selectNode(\'' + treeNode.getID() + '\')" OnDblClick="handleNode(\'' + treeNode.getID() + '\')">';
-	str += '&nbsp;<span unselectable="ON" style="vertical-align:middle;" class="treetitle" ID="title' + treeNode.getID() + '" OnDblClick="handleNode(\'' + treeNode.getID() + '\')" OnClick="selectNode(\'' + treeNode.getID() + '\')">';
+	str += '<img id="iconimage' + treeNode.getID() + '" src="' + iconStartImage + '" style="vertical-align:middle;" OnClick="parent.selectNode(\'' + treeNode.getID() + '\')" OnDblClick="parent.handleNode(\'' + treeNode.getID() + '\')">';
+	str += '&nbsp;<span unselectable="ON" style="vertical-align:middle;" class="treetitle" ID="title' + treeNode.getID() + '" OnDblClick="parent.handleNode(\'' + treeNode.getID() + '\')" OnClick="parent.selectNode(\'' + treeNode.getID() + '\')">';
 	str += treeNode.getName();
 	str += '</span>';
 	str += '</nobr>';
@@ -476,12 +479,12 @@ function startDrag(nodeID) {
 	while(srcObj.tagName != 'DIV') {
 		srcObj = srcObj.parentElement;
 	}
-	floatDragElement = document.createElement('DIV');
+	floatDragElement = treeDocument.createElement('DIV');
 
 	floatDragElement.innerHTML = srcObj.innerHTML;
 	floatDragElement.childNodes[0].removeChild(floatDragElement.childNodes[0].childNodes[0]);
 	
-	document.body.appendChild(floatDragElement);
+	treeDocument.body.appendChild(floatDragElement);
 	floatDragElement.style.zIndex = 100;
 	floatDragElement.style.position = 'absolute';
 	floatDragElement.style.filter='progid:DXImageTransform.Microsoft.Alpha(1,opacity=60);';
@@ -585,7 +588,7 @@ function dragMove() {
 function editEnded() {
 	if (treeNodeEdited != null) {
 		// treeNodeEdited.getID();
-		var editTitle = document.getElementById('title' + treeNodeEdited.getID());
+		var editTitle = treeDocument.getElementById('title' + treeNodeEdited.getID());
 		var input = editTitle.childNodes[0];
 	
 		var newValue = input.value;
@@ -618,7 +621,7 @@ function selectNode(nodeID) {
 					return;
 				}
 				treeNodeEdited = treeNode;
-				var editTitle = document.getElementById('title' + treeNode.getID());
+				var editTitle = treeDocument.getElementById('title' + treeNode.getID());
 				editTitle.className = 'editednode';
 				
 
@@ -635,13 +638,13 @@ function selectNode(nodeID) {
 			editEnded();
 		}
         */
-		var oldNodeTitle = document.getElementById('title' + selectedNode);
+		var oldNodeTitle = treeDocument.getElementById('title' + selectedNode);
 		oldNodeTitle.className = 'treetitle';
 	}
     if (selectedNode == null || selectedNode != nodeID)
     {
         selectedNode = nodeID;
-	    var nodetitle = document.getElementById('title' + selectedNode);
+	    var nodetitle = treeDocument.getElementById('title' + selectedNode);
         nodetitle.className = 'treetitleselectedfocused';
     }
 	
@@ -653,7 +656,7 @@ function selectNode(nodeID) {
 	}
 }
 function refreshNode(treeNode) {
-	var submenu = document.getElementById('node' + treeNode.getID() + 'sub');
+	var submenu = treeDocument.getElementById('node' + treeNode.getID() + 'sub');
 	var str = '';
 	for(var i=0;i<treeNode.getChildCount();i++) {
 		var parent = treeNode.getParent();
@@ -670,7 +673,7 @@ function refreshNode(treeNode) {
 		}
 		str += showNode(treeNode.children[i],i == (treeNode.getChildCount() - 1));
 	}
-    var actionimage = document.getElementById('handler' + treeNode.getID());
+    var actionimage = treeDocument.getElementById('handler' + treeNode.getID());
     if (treeNode.getChildCount() == 0) {
         // TreeNode haven't got any children, make sure the right image is displayed.
         if (actionimage.src.indexOf('last') == -1) {
@@ -696,10 +699,10 @@ function refreshNode(treeNode) {
         }
         else {
             if (actionimage.src.indexOf('last') == -1) {
-                actionimage.outerHTML = '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/' + (showLines ? 'plus' : 'plus_nolines') + '.gif" style="width:19px;height:20px;vertical-align:middle;" OnClick="handleNode(\'' + treeNode.getID() + '\');">';
+                actionimage.outerHTML = '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/' + (showLines ? 'plus' : 'plus_nolines') + '.gif" style="width:19px;height:20px;vertical-align:middle;" OnClick="parent.handleNode(\'' + treeNode.getID() + '\');">';
             }
             else {
-                actionimage.outerHTML = '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/plus_last.gif" style="width:19px;height:20px;vertical-align:middle;" OnClick="handleNode(\'' + treeNode.getID() + '\');">';
+                actionimage.outerHTML = '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/plus_last.gif" style="width:19px;height:20px;vertical-align:middle;" OnClick="parent.handleNode(\'' + treeNode.getID() + '\');">';
             }
         }
     }
@@ -711,10 +714,10 @@ function handleNode(nodeID) {
 		return;
 	}
 	
-	var submenu = document.getElementById('node' + nodeID + 'sub');
+	var submenu = treeDocument.getElementById('node' + nodeID + 'sub');
 	
-	var iconimageholder = document.getElementById('iconimage' + nodeID);
-	var actionimage = document.getElementById('handler' + nodeID);
+	var iconimageholder = treeDocument.getElementById('iconimage' + nodeID);
+	var actionimage = treeDocument.getElementById('handler' + nodeID);
 
 	// This will be used if showRootNode is set to false.
 	var firstChildOfRoot = false;
@@ -773,13 +776,13 @@ function fireMoveEvent(treeNode,draggedNodeID,droppedOnNodeID) {
 }
 function blurSelection() {
 	if (selectedNode != null) {
-		var oldNodeTitle = document.getElementById('title' + selectedNode);
+		var oldNodeTitle = treeDocument.getElementById('title' + selectedNode);
 		oldNodeTitle.className = 'treetitleselectedblured';
 	}
 }
 function focusSelection() {
 	if (selectedNode != null) {
-		var oldNodeTitle = document.getElementById('title' + selectedNode);
+		var oldNodeTitle = treeDocument.getElementById('title' + selectedNode);
 		oldNodeTitle.className = 'treetitleselectedfocused';
 	}
 }
@@ -915,4 +918,3 @@ function keyDown(event) {
 		return false;
 	}
 }
-document.onkeydown = keyDown;

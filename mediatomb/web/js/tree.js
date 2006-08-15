@@ -23,10 +23,12 @@ var fsStuff =
 
 function treeInit()
 {
-    var rootContainer = $('tree_div');
+    treeDocument = frames["leftF"].document;
+    treeDocument.onkeydown = keyDown;
+    var rootContainer = treeDocument.getElementById('treeDiv');
     
-    dbStuff.container = document.createElement("div");
-    fsStuff.container = document.createElement("div");
+    dbStuff.container = treeDocument.createElement("div");
+    fsStuff.container = treeDocument.createElement("div");
     
     Element.hide(dbStuff.container);
     Element.hide(fsStuff.container);
