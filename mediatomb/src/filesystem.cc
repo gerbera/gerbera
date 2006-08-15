@@ -226,7 +226,9 @@ bool Filesystem::have(String path, int mask)
             else if (name[1] == '.' && name[2] == 0)
             {
                 continue;
-            }
+            }            
+            else if (!(mask & FS_MASK_HIDDEN))
+                continue;
         }
         String childPath;
         if (path == FS_ROOT_DIRECTORY)
