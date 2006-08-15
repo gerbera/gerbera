@@ -95,6 +95,16 @@
 #define DESC_CDS_CONTROL_URL            "/upnp/control/cds"
 #define DESC_CDS_EVENT_URL              "/upnp/event/cds"
 
+
+// xml namespaces
+#define XML_NAMESPACE_ATTR              "xmlns"
+#define XML_DIDL_LITE_NAMESPACE         "urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/"
+#define XML_DC_NAMESPACE_ATTR           "xmlns:dc"
+#define XML_DC_NAMESPACE                "http://purl.org/dc/elements/1.1/"
+#define XML_UPNP_NAMESPACE_ATTR         "xmlns:upnp"
+#define XML_UPNP_NAMESPACE              "urn:schemas-upnp-org:metadata-1-0/upnp/"
+
+// default values
 #define DEFAULT_INTERNAL_CHARSET        "UTF-8"
 #define DEFAULT_FILESYSTEM_CHARSET      "ISO-8859-1"
 #define DEFAULT_CONFIG_HOME             ".mediatomb"

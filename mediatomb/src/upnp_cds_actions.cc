@@ -80,12 +80,12 @@ void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
     }
 
     Ref<Element> didl_lite (new Element(_("DIDL-Lite")));
-    didl_lite->addAttribute(_("xmlns"), 
-                            _("urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/"));
-    didl_lite->addAttribute(_("xmlns:dc"), 
-                            _("http://purl.org/dc/elements/1.1/"));
-    didl_lite->addAttribute(_("xmlns:upnp"), 
-                            _("urn:schemas-upnp-org:metadata-1-0/upnp/"));
+    didl_lite->addAttribute(_(XML_NAMESPACE_ATTR), 
+                            _(XML_DIDL_LITE_NAMESPACE));
+    didl_lite->addAttribute(_(XML_DC_NAMESPACE_ATTR), 
+                            _(XML_DC_NAMESPACE));
+    didl_lite->addAttribute(_(XML_UPNP_NAMESPACE_ATTR), 
+                            _(XML_UPNP_NAMESPACE));
     
     for(int i = 0; i < arr->size(); i++)
     {

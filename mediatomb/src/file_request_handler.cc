@@ -94,8 +94,8 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
 
         Ref<Element> inputElement = UpnpXML_DIDLRenderObject(obj, true);
 
-        inputElement->setAttribute(_("xmlns:dc"), _("http://purl.org/dc/elements/1.1/"));
-        inputElement->setAttribute(_("xmlns:upnp"), _("urn:schemas-upnp-org:metadata-1-0/upnp/"));
+        inputElement->setAttribute(_(XML_DC_NAMESPACE_ATTR), _(XML_DC_NAMESPACE));
+        inputElement->setAttribute(_(XML_UPNP_NAMESPACE_ATTR), _(XML_UPNP_NAMESPACE));
         String action = aitem->getAction();
         String input = inputElement->print();
         String output;
