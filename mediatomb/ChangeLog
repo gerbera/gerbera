@@ -38,6 +38,7 @@ v0.9.0  Major rework
           1430799). track numbers are now extracted via id3lib/taglib and
           can also be used in the import script. import.js has been adapted
           to add tracknumbers to song names in the Album container.
+        * added option to supress hidden files when browsing the filesystem
 
 v0.8.1
         * added "serve" directory, any files there can be downloaded 
