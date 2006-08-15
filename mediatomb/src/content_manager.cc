@@ -293,6 +293,26 @@ void ContentManager::_removeObject(int objectID)
     um->flushUpdates();
 }
 
+void ContentManager::_rescanDirectory(int objectID)
+{
+    log_debug("start\n");
+    // TEST CODE REMOVE THIS 
+#if 0
+    objectID = 947; 
+
+    Ref<Storage> storage = Storage::getInstance();
+    Ref<CdsObject> obj = storage->loadObject(objectID);
+    if (!IS_CDS_CONTAINER(obj->getObjectType()))
+    {
+        throw Exception(_("Object is not a container: rescan must be triggered on directories\n"));
+    }
+
+    log_debug("Rescanning container: %s, id=%d\n", 
+               obj->getTitle().c_str(), objectID);
+
+    struct dirent *dent;
+#endif
+}
 
 /* scans the given directory and adds everything recursively */
 void ContentManager::addRecursive(String path, int parentID)
@@ -490,6 +510,7 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
         {
             clone->validate();
             storage->updateObject(clone);
+            storage->incrementUIUpdateID(cont->getParentID());
             um->containerChanged(cont->getParentID());
         }
     }
@@ -503,6 +524,11 @@ void ContentManager::addObject(zmm::Ref<CdsObject> obj)
     Ref<Storage> storage = Storage::getInstance();
     Ref<UpdateManager> um = UpdateManager::getInstance();
     storage->addObject(obj);
+    if (IS_CDS_CONTAINER(obj->getObjectType()))
+    {
+        storage->incrementUIUpdateID(obj->getParentID());
+    }
+
     um->containerChanged(obj->getParentID());
     
     if (! obj->isVirtual() && IS_CDS_ITEM(obj->getObjectType()))
@@ -915,6 +941,21 @@ int ContentManager::removeObject(int objectID, bool async)
     }
 }
 
+int ContentManager::rescanDirectory(int objectID, bool async)
+{
+    if (async)
+    {
+        // building container path for the description
+        Ref<CMTask> task(new CMRescanDirectoryTask(objectID));
+        task->setDescription(_("Rescan TesT"));
+        return addTask(task);
+    }
+    else
+    {
+        _rescanDirectory(objectID);
+        return false;
+    }
+}
 
 CMTask::CMTask() : Object()
 {
@@ -948,6 +989,15 @@ CMRemoveObjectTask::CMRemoveObjectTask(int objectID) : CMTask()
 void CMRemoveObjectTask::run()
 {
     cm->_removeObject(objectID);
+}
+
+CMRescanDirectoryTask::CMRescanDirectoryTask(int objectID) : CMTask()
+{
+    this->objectID = objectID;
+}
+void CMRescanDirectoryTask::run()
+{
+    cm->_rescanDirectory(objectID);
 }
 
 CMLoadAccountingTask::CMLoadAccountingTask() : CMTask()

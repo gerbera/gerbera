@@ -73,6 +73,15 @@ public:
     virtual void run();
 };
 
+class CMRescanDirectoryTask : public CMTask
+{
+protected: 
+    int objectID;
+public:
+    CMRescanDirectoryTask(int objectID);
+    virtual void run();
+};
+
 class CMAccounting : public zmm::Object
 {
 public:
@@ -126,12 +135,14 @@ public:
     int loadAccounting(bool async=true);
     int addFile(zmm::String path, bool recursive=true, bool async=true);
     int removeObject(int objectID, bool async=true);
+    int rescanDirectory(int objectID, bool async=true);
     
     /* don't use these, use the above methods */
     void _loadAccounting();
     void _addFile(zmm::String path, bool recursive=0);
     void _addFile2(zmm::String path, bool recursive=0);
     void _removeObject(int objectID);
+    void _rescanDirectory(int objectID);
     
 
     /// \brief Updates an object in the database using the given parameters.
@@ -164,7 +175,8 @@ public:
 #ifdef HAVE_JS
     void reloadScripting();
 #endif
-    
+
+
 protected:
 #ifdef HAVE_JS
     void initScripting();
