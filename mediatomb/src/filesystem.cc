@@ -97,11 +97,11 @@ Ref<Array<FsObject> > Filesystem::readDirectory(String path, int mask,
 {
     if (path.charAt(0) != '/')
     {
-        throw Exception(_("Filesystem: relative paths not allowed: ") +
+        throw _Exception(_("Filesystem: relative paths not allowed: ") +
                         path);
     }
     if (! fileAllowed(path))
-        throw Exception(_("Filesystem: file blocked: ") + path);
+        throw _Exception(_("Filesystem: file blocked: ") + path);
 
     struct stat statbuf;
     int ret;
@@ -114,7 +114,7 @@ Ref<Array<FsObject> > Filesystem::readDirectory(String path, int mask,
     dir = opendir(path.c_str());
     if (! dir)
     {
-        throw Exception(_("could not list directory ") +
+        throw _Exception(_("could not list directory ") +
                         path + " : " + strerror(errno));
     }
 
@@ -191,7 +191,7 @@ bool Filesystem::have(String path, int mask)
     /*
     if (path.charAt(0) != '/')
     {
-        throw Exception(_("Filesystem relative paths not allowed: ") +
+        throw _Exception(_("Filesystem relative paths not allowed: ") +
                         path);
     }
     */
@@ -209,7 +209,7 @@ bool Filesystem::have(String path, int mask)
     dir = opendir(path.c_str());
     if (! dir)
     {
-        throw Exception(_("could not list directory ")+
+        throw _Exception(_("could not list directory ")+
                         path + " : " + strerror(errno));
     }
 

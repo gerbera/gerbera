@@ -100,12 +100,12 @@ void MemIOHandler::seek(IN off_t offset, IN int whence)
         // offset must be positive when SEEK_SET is used
         if (offset < 0) 
         {
-            throw Exception(_("MemIOHandler seek failed: SEEK_SET used with negative offset"));
+            throw _Exception(_("MemIOHandler seek failed: SEEK_SET used with negative offset"));
         }
 
         if (offset > length)
         {
-            throw Exception(_("MemIOHandler seek failed: trying to seek past the end of file"));
+            throw _Exception(_("MemIOHandler seek failed: trying to seek past the end of file"));
         }
 
         pos = offset;
@@ -126,7 +126,7 @@ void MemIOHandler::seek(IN off_t offset, IN int whence)
         if (((temp + offset) > length) ||
             ((temp + offset) < 0))
         {
-            throw Exception(_("MemIOHandler seek failed: trying to seek before the beginning/past end of file"));
+            throw _Exception(_("MemIOHandler seek failed: trying to seek before the beginning/past end of file"));
         }
 
         pos = temp + offset;
@@ -137,14 +137,14 @@ void MemIOHandler::seek(IN off_t offset, IN int whence)
         if (((temp + offset) > length) ||
             ((temp + offset) < 0))
         {
-            throw Exception(_("MemIOHandler seek failed: trying to seek before the beginning/past end of file"));
+            throw _Exception(_("MemIOHandler seek failed: trying to seek before the beginning/past end of file"));
         }
 
         pos = temp + offset;
     }
     else
     {
-        throw Exception(_("MemIOHandler seek failed: unrecognized whence"));
+        throw _Exception(_("MemIOHandler seek failed: unrecognized whence"));
     }
 }
 

@@ -496,24 +496,24 @@ void Scripting::init()
     rt = JS_NewRuntime(1L * 1024L * 1024L);
 
     if (!rt)
-        throw Exception(_("Scripting: could not initialize js runtime"));
+        throw _Exception(_("Scripting: could not initialize js runtime"));
 
     /* create a context and associate it with the JS run time */
     cx = JS_NewContext(rt, 8192);
     if (! cx)
-        throw Exception(_("Scripting: could not initialize js context"));
+        throw _Exception(_("Scripting: could not initialize js context"));
 
     /* create the global object here */
     glob = JS_NewObject(cx, /* global_class */ NULL, NULL, NULL);
     if (! glob)
-        throw Exception(_("Scripting: could not initialize glboal class"));
+        throw _Exception(_("Scripting: could not initialize glboal class"));
 
     /* initialize the built-in JS objects and the global object */
     if (! JS_InitStandardClasses(cx, glob))
-        throw Exception(_("Scripting: JS_InitStandardClasses failed"));
+        throw _Exception(_("Scripting: JS_InitStandardClasses failed"));
 
     if (!JS_DefineFunctions(cx, glob, global_functions))
-        throw Exception(_("Scripting: JS_DefineFunctions on global object failed"));
+        throw _Exception(_("Scripting: JS_DefineFunctions on global object failed"));
 
     /* initialize contstants */
     js_set_int_property(cx, glob, "OBJECT_TYPE_CONTAINER",
@@ -540,7 +540,7 @@ void Scripting::init()
 	if (!JS_EvaluateScript(cx, glob, script.c_str(), script.length(),
 		scriptPath.c_str(), 0, &ret_val))
 	{
-             throw Exception("Scripting: failed to evaluate script");
+             throw _Exception("Scripting: failed to evaluate script");
 	}
 */
     JS_SetErrorReporter(cx, js_error_reporter);
@@ -574,7 +574,7 @@ void Scripting::processCdsObject(Ref<CdsObject> obj)
     js_set_object_property(cx, glob, "orig", orig);
     if (!JS_ExecuteScript(cx, glob, script, &ret_val))
     {
-        throw Exception(_("Scripting: failed to execute script"));
+        throw _Exception(_("Scripting: failed to execute script"));
     }
     log_debug("Script executed successfully\n");
 
@@ -582,7 +582,7 @@ void Scripting::processCdsObject(Ref<CdsObject> obj)
       if (!JS_EvaluateScript(cx, glob, script.c_str(), script.length(),
 		"test-script", 0, &ret_val))
 	{
-		throw Exception("Scripting: failed to evaluate script");
+		throw _Exception("Scripting: failed to evaluate script");
 	}
 */
 }

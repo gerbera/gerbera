@@ -39,7 +39,7 @@ WebRequestHandler *create_web_request_handler(String page)
     if (page == "edit_load") return new web::edit_load();
     if (page == "edit_save") return new web::edit_save();
     
-    throw Exception(_("Unknown page: ") + page);
+    throw _Exception(_("Unknown page: ") + page);
 }
 
 

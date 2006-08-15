@@ -87,7 +87,7 @@ void CdsObject::validate()
     if ((!string_ok(this->title)) ||
         (!string_ok(this->upnpClass)))
     {
-        throw Exception(_("CdsObject: validation failed"));
+        throw _Exception(_("CdsObject: validation failed"));
     }
 
 }
@@ -118,7 +118,7 @@ Ref<CdsObject> CdsObject::createObject(int objectType)
     }
     else
     {
-        throw Exception(_("invalid object type :") + objectType);
+        throw _Exception(_("invalid object type :") + objectType);
     }
     return Ref<CdsObject>(pobj);
 }
@@ -155,7 +155,7 @@ void CdsItem::validate()
     CdsObject::validate();
 //    log_info("mime: [%s] loc [%s]\n", this->mimeType.c_str(), this->location.c_str());
     if ((!string_ok(this->mimeType)) || (!check_path(this->location)))
-        throw Exception(_("CdsItem: validation failed"));
+        throw _Exception(_("CdsItem: validation failed"));
 }
 
 CdsActiveItem::CdsActiveItem() : CdsItem()
@@ -192,7 +192,7 @@ void CdsActiveItem::validate()
 {
     CdsItem::validate();
     if ((!string_ok(this->action)) || (!check_path(this->action)))
-        throw Exception(_("CdsActiveItem: validation failed"));
+        throw _Exception(_("CdsActiveItem: validation failed"));
 }
 //---------
 
@@ -208,7 +208,7 @@ void CdsItemExternalURL::validate()
 {
     CdsObject::validate();
     if ((!string_ok(this->mimeType)) || (!string_ok(this->location)))
-        throw Exception(_("CdsItemExternalURL: validation failed"));
+        throw _Exception(_("CdsItemExternalURL: validation failed"));
 }
 //---------
 
@@ -224,10 +224,10 @@ void CdsItemInternalURL::validate()
 {
     CdsObject::validate();
     if ((!string_ok(this->mimeType)) || (!string_ok(this->location)))
-        throw Exception(_("CdsItemInternalURL: validation failed"));
+        throw _Exception(_("CdsItemInternalURL: validation failed"));
 
     if (this->location.startsWith(_("http://")))
-        throw Exception(_("CdsItemInternalURL: validation failed: must be realtive!"));
+        throw _Exception(_("CdsItemInternalURL: validation failed: must be realtive!"));
 }
 
 CdsContainer::CdsContainer() : CdsObject()
@@ -262,7 +262,7 @@ void CdsContainer::validate()
     CdsObject::validate();
     /// \todo well.. we have to know if a container is a real directory or just a virtual container in the database
 /*    if (!check_path(this->location, true))
-        throw Exception(_("CdsContainer: validation failed")); */
+        throw _Exception(_("CdsContainer: validation failed")); */
 }
 void CdsObject::optimize()
 {

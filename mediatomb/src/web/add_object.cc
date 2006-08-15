@@ -162,10 +162,10 @@ void web::addObject::process()
     String location = param(_("location"));
     
     if (!string_ok(param(_("title"))))
-        throw Exception(_("empty title"));
+        throw _Exception(_("empty title"));
     
     if (!string_ok(param(_("class"))))
-        throw Exception(_("empty class"));
+        throw _Exception(_("empty class"));
     
     String parID = param(_("parent_id"));
     int parentID;
@@ -189,31 +189,31 @@ void web::addObject::process()
             break;
             
         case OBJECT_TYPE_ITEM:
-            if (!string_ok(location)) throw Exception(_("no location given"));
-            if (!check_path(location, false)) throw Exception(_("file not found"));
+            if (!string_ok(location)) throw _Exception(_("no location given"));
+            if (!check_path(location, false)) throw _Exception(_("file not found"));
             obj = this->addItem(parentID, Ref<CdsItem> (new CdsItem()));
             break;
             
         case OBJECT_TYPE_ITEM | OBJECT_TYPE_ACTIVE_ITEM:
-            if (!string_ok(param(_("action")))) throw Exception(_("no action given"));
-            if (!string_ok(location)) throw Exception(_("no location given"));
+            if (!string_ok(param(_("action")))) throw _Exception(_("no action given"));
+            if (!string_ok(location)) throw _Exception(_("no location given"));
             if (!check_path(location, false))
-                throw Exception(_("path not found"));
+                throw _Exception(_("path not found"));
             obj = this->addActiveItem(parentID);
             break;
             
         case OBJECT_TYPE_ITEM | OBJECT_TYPE_ITEM_EXTERNAL_URL:
-            if (!string_ok(location)) throw Exception(_("No URL given"));
+            if (!string_ok(location)) throw _Exception(_("No URL given"));
             obj = this->addUrl(parentID, Ref<CdsItemExternalURL> (new CdsItemExternalURL()), true);
             break;
             
         case OBJECT_TYPE_ITEM | OBJECT_TYPE_ITEM_INTERNAL_URL:
-            if (!string_ok(location)) throw Exception(_("No URL given"));
+            if (!string_ok(location)) throw _Exception(_("No URL given"));
             obj = this->addUrl(parentID, Ref<CdsItemExternalURL> (new CdsItemInternalURL()), false);
             break;
             
         default:
-            throw Exception(_("unknown object type"));
+            throw _Exception(_("unknown object type"));
             break;
     }
     ContentManager::getInstance()->addObject(obj);

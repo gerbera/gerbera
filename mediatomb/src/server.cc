@@ -105,7 +105,7 @@ void Server::upnp_init(String ip, int port)
 
     if (ret != UPNP_E_SUCCESS)
     {
-        throw UpnpException(ret, _("upnp_init: UpnpInit failed"));
+        throw _UpnpException(ret, _("upnp_init: UpnpInit failed"));
     }
 
     port = UpnpGetServerPort();
@@ -127,13 +127,13 @@ void Server::upnp_init(String ip, int port)
 
     if (!string_ok(web_root))
     {
-        throw Exception(_("invalid web server root directory"));
+        throw _Exception(_("invalid web server root directory"));
     }
     
     ret = UpnpSetWebServerRootDir(web_root.c_str());
     if (ret != UPNP_E_SUCCESS)
     {
-        throw UpnpException(ret, _("upnp_init: UpnpSetWebServerRootDir failed"));
+        throw _UpnpException(ret, _("upnp_init: UpnpSetWebServerRootDir failed"));
     }
 
     log_debug("webroot: %s\n", web_root.c_str()); 
@@ -154,7 +154,7 @@ void Server::upnp_init(String ip, int port)
                     ret = UpnpAddCustomHTTPHeader(tmp.c_str());
                     if (ret != UPNP_E_SUCCESS)
                     {
-                        throw UpnpException(ret, _("upnp_init: UpnpAddCustomHTTPHeader failed"));
+                        throw _UpnpException(ret, _("upnp_init: UpnpAddCustomHTTPHeader failed"));
                     }
                 }
             }
@@ -164,13 +164,13 @@ void Server::upnp_init(String ip, int port)
     ret = UpnpAddVirtualDir(virtual_directory.c_str());
     if (ret != UPNP_E_SUCCESS)
     {
-        throw UpnpException(ret, _("upnp_init: UpnpAddVirtualDir failed"));
+        throw _UpnpException(ret, _("upnp_init: UpnpAddVirtualDir failed"));
     }
 
     ret = register_web_callbacks();
     if (ret != UPNP_E_SUCCESS)
     {
-        throw UpnpException(ret, _("upnp_init: UpnpSetVirtualDirCallbacks failed"));
+        throw _UpnpException(ret, _("upnp_init: UpnpSetVirtualDirCallbacks failed"));
     }
 
     // register root device with the library
@@ -187,14 +187,14 @@ void Server::upnp_init(String ip, int port)
                                   &device_handle);
     if (ret != UPNP_E_SUCCESS)
     {
-        throw UpnpException(ret, _("upnp_init: UpnpRegisterRootDevice failed"));
+        throw _UpnpException(ret, _("upnp_init: UpnpRegisterRootDevice failed"));
     }
 
     // now unregister in order to cleanup previous instances
     // that might still be there due to crash/unclean shutdown/network interruptions
     ret = UpnpUnRegisterRootDevice(device_handle);
     if (ret != UPNP_E_SUCCESS) {   
-        throw UpnpException(ret, _("upnp_init: unregistering failed"));
+        throw _UpnpException(ret, _("upnp_init: unregistering failed"));
     }
     
     // and register again, we should be clean now
@@ -205,7 +205,7 @@ void Server::upnp_init(String ip, int port)
                                   &device_handle);
     if (ret != UPNP_E_SUCCESS)
     {
-        throw UpnpException(ret, _("upnp_init: UpnpRegisterRootDevice failed"));
+        throw _UpnpException(ret, _("upnp_init: UpnpRegisterRootDevice failed"));
     }
 
 
@@ -213,7 +213,7 @@ void Server::upnp_init(String ip, int port)
     ret = UpnpSendAdvertisement(device_handle, alive_advertisement);
     if (ret != UPNP_E_SUCCESS)
     {
-        throw UpnpException(ret, _("upnp_init: UpnpSendAdvertisement failed"));
+        throw _UpnpException(ret, _("upnp_init: UpnpSendAdvertisement failed"));
     }
 
     // initializing UpdateManager
@@ -249,7 +249,7 @@ void Server::shutdown()
     
     ret = UpnpUnRegisterRootDevice(device_handle);
     if (ret != UPNP_E_SUCCESS) {   
-        throw UpnpException(ret, _("upnp_cleanup: UpnpUnRegisterRootDevice failed"));
+        throw _UpnpException(ret, _("upnp_cleanup: UpnpUnRegisterRootDevice failed"));
     }
    
     log_debug("now calling upnp finish\n");
@@ -361,7 +361,7 @@ void Server::upnp_actions(Ref<ActionRequest> request)
     if (request->getUDN() != serverUDN)
     {
         // not for us
-        throw UpnpException(UPNP_E_BAD_REQUEST, 
+        throw _UpnpException(UPNP_E_BAD_REQUEST, 
                             _("upnp_actions: request not for this device"));
     }
 
@@ -382,7 +382,7 @@ void Server::upnp_actions(Ref<ActionRequest> request)
     {
         // cp is asking for a nonexistent service, or for a service
         // that does not support any actions
-        throw UpnpException(UPNP_E_BAD_REQUEST, 
+        throw _UpnpException(UPNP_E_BAD_REQUEST, 
                             _("Service does not exist or action not supported"));
     }
 }
@@ -395,7 +395,7 @@ void Server::upnp_subscriptions(Ref<SubscriptionRequest> request)
     {
         // not for us
 //        log_debug("upnp_subscriptions: request not for this device\n");
-        throw UpnpException(UPNP_E_BAD_REQUEST,
+        throw _UpnpException(UPNP_E_BAD_REQUEST,
                             _("upnp_actions: request not for this device"));
     }
                                                              
@@ -415,7 +415,7 @@ void Server::upnp_subscriptions(Ref<SubscriptionRequest> request)
     } else {
         // cp asks for a nonexistent service or for a service that
         // does not support subscriptions
-        throw UpnpException(UPNP_E_BAD_REQUEST, 
+        throw _UpnpException(UPNP_E_BAD_REQUEST, 
                             _("Service does not exist or subscriptions not supported"));
     }
 }

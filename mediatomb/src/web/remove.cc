@@ -45,7 +45,7 @@ void web::remove::process()
     String objID = param(_("object_id"));
     int objectID;
     if (!string_ok(objID))
-        throw Exception(_("invalid object id"));
+        throw _Exception(_("invalid object id"));
     else
         objectID = objID.toInt();
     

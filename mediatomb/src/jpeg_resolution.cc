@@ -65,7 +65,7 @@ static void get_jpeg_resolution(Ref<IOHandler> ioh, int *w, int *h)
     a = ioh_fgetc(ioh);
 
     if (a != 0xff || ioh_fgetc(ioh) != M_SOI)
-        throw Exception(_("get_jpeg_resolution: could not read jpeg specs"));
+        throw _Exception(_("get_jpeg_resolution: could not read jpeg specs"));
     
     for(;;)
     {
@@ -81,12 +81,12 @@ static void get_jpeg_resolution(Ref<IOHandler> ioh, int *w, int *h)
             if (marker != 0xff) break;
 
             if (a >= 6)
-                throw Exception(_("get_jpeg_resolution: too many padding bytes"));
+                throw _Exception(_("get_jpeg_resolution: too many padding bytes"));
         }
 
         // 0xff is legal padding, but if we get that many, something's wrong.
         if (marker == 0xff)
-            throw Exception(_("get_jpeg_resolution: too many padding bytes!"));
+            throw _Exception(_("get_jpeg_resolution: too many padding bytes!"));
 
         // Read the length of the section.
         lh = ioh_fgetc(ioh);
@@ -95,7 +95,7 @@ static void get_jpeg_resolution(Ref<IOHandler> ioh, int *w, int *h)
         itemlen = (lh << 8) | ll;
 
         if (itemlen < 2)
-            throw Exception(_("get_jpeg_resolution: invalid marker"));
+            throw _Exception(_("get_jpeg_resolution: invalid marker"));
 
         skip = 0;
         if (itemlen > ITEM_BUF_SIZE)
@@ -110,14 +110,14 @@ static void get_jpeg_resolution(Ref<IOHandler> ioh, int *w, int *h)
 
         got = ioh->read((char *)(Data + 2), itemlen - 2);
         if (got != itemlen-2)
-            throw Exception(_("get_jpeg_resolution: Premature end of file?"));
+            throw _Exception(_("get_jpeg_resolution: Premature end of file?"));
 
         ioh->seek(skip, SEEK_CUR);
 
         switch(marker)
         {
             case M_EOI:   // in case it's a tables-only JPEG stream
-                throw Exception(_("get_jpeg_resolution: No image in jpeg!"));
+                throw _Exception(_("get_jpeg_resolution: No image in jpeg!"));
             case M_SOF0: 
             case M_SOF1: 
             case M_SOF2: 
@@ -136,7 +136,7 @@ static void get_jpeg_resolution(Ref<IOHandler> ioh, int *w, int *h)
                 return;
         }
     }
-    throw Exception(_("get_jpeg_resolution: resolution not found"));
+    throw _Exception(_("get_jpeg_resolution: resolution not found"));
 }
 
 // IOHandler must be opened

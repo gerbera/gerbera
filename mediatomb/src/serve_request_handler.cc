@@ -60,7 +60,7 @@ void ServeRequestHandler::get_info(IN const char *filename, OUT struct File_Info
 
     if (len > url_path.length())
     {
-        throw Exception(_("There is something wrong with the link ") + url_path);
+        throw _Exception(_("There is something wrong with the link ") + url_path);
     }
 
     String path = ConfigManager::getInstance()->getOption(_("/server/servedir") + url_path.substring(len, url_path.length()));
@@ -68,7 +68,7 @@ void ServeRequestHandler::get_info(IN const char *filename, OUT struct File_Info
     ret = stat(path.c_str(), &statbuf);
     if (ret != 0)
     {
-        throw Exception(_("Failed to stat ") + path);
+        throw _Exception(_("Failed to stat ") + path);
     }
 
     if (S_ISREG(statbuf.st_mode)) // we have a regular file
@@ -118,7 +118,7 @@ void ServeRequestHandler::get_info(IN const char *filename, OUT struct File_Info
     }
     else
     {
-         throw Exception(_("Not a regular file: ") + path);
+         throw _Exception(_("Not a regular file: ") + path);
     }
 }
 
@@ -129,7 +129,7 @@ Ref<IOHandler> ServeRequestHandler::open(IN const char *filename, IN enum UpnpOp
     // Currently we explicitly do not support UPNP_WRITE
     // due to security reasons.
     if (mode != UPNP_READ)
-        throw Exception(_("UPNP_WRITE unsupported"));
+        throw _Exception(_("UPNP_WRITE unsupported"));
 
     String url_path, parameters;
     split_url(filename, url_path, parameters);
@@ -139,7 +139,7 @@ Ref<IOHandler> ServeRequestHandler::open(IN const char *filename, IN enum UpnpOp
 
     if (len > url_path.length())
     {
-        throw Exception(_("There is something wrong with the link ") +
+        throw _Exception(_("There is something wrong with the link ") +
                         url_path);
     }
 

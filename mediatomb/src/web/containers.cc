@@ -41,7 +41,7 @@ void web::containers::process()
     String parID = param(_("parent_id"));
     int parentID;
     if (parID == nil)
-        throw Exception(_("web::containers: no parent_id given"));
+        throw _Exception(_("web::containers: no parent_id given"));
     else
         parentID = parID.toInt();
     

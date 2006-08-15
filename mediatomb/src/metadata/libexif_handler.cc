@@ -328,6 +328,8 @@ void LibExifHandler::process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<S
                     imageY = value;
                 }
                 break;
+            default:
+                break;
         }
 
         // if there are any auxilary tags that the user wants - add them
@@ -426,13 +428,13 @@ Ref<IOHandler> LibExifHandler::serveContent(Ref<CdsItem> item, int resNum)
     String ctype = res->getParameters()->get(_(RESOURCE_CONTENT_TYPE));
 
     if (ctype != EXIF_THUMBNAIL)
-        throw Exception(_("LibExifHandler: got unknown content type: ") + ctype);
+        throw _Exception(_("LibExifHandler: got unknown content type: ") + ctype);
     ed = exif_data_new_from_file(item->getLocation().c_str());
     if (!ed)
-        throw Exception(_("LibExifHandler: resource has no exif information"));
+        throw _Exception(_("LibExifHandler: resource has no exif information"));
 
     if (!(ed->size))
-        throw Exception(_("LibExifHandler: resource has no exif thumbnail"));
+        throw _Exception(_("LibExifHandler: resource has no exif thumbnail"));
 
     Ref<IOHandler> h(new MemIOHandler(ed->data, ed->size));
 

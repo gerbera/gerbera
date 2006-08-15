@@ -89,7 +89,7 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
         String value = ConfigManager::getInstance()->getOption(_("/server/ui/attribute::enabled"));
         if (value != "yes")
         {
-            throw Exception(_("UI disabled in configuration"));
+            throw _Exception(_("UI disabled in configuration"));
         }
 
         String r_type = dict->get(_(URL_REQUEST_TYPE));
@@ -108,11 +108,11 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
         if (string_ok(ConfigManager::getInstance()->getOption(_("/server/servedir"))))
             ret = new ServeRequestHandler();
         else
-            throw Exception(_("Serving directories is not enabled in configuration"));
+            throw _Exception(_("Serving directories is not enabled in configuration"));
     }
     else
     {
-        throw Exception(_("no valid handler type in ") + filename);
+        throw _Exception(_("no valid handler type in ") + filename);
     }
     return Ref<RequestHandler>(ret);
 }

@@ -31,9 +31,34 @@ using namespace zmm;
 
 #define STRACE_TAG "_STRACE_"
 
+Exception::Exception(String message, const char* file, int line, const char* function)
+{
+    this->message = message;
+    this->file = String(file);
+    this->function = String(function);
+    this->line = line;
+#ifndef __CYGWIN__
+    void *b[100];
+    int size = backtrace(b, 100);
+
+    stackTrace = Ref<Array<StringBase> >(new Array<StringBase>(size));
+
+    char **s = backtrace_symbols(b, size);
+    for(int i = 0; i < size; i++)
+    {
+        Ref<StringBase> trace(new StringBase(s[i]));
+        stackTrace->append(trace);
+    }
+    free(s);
+#endif
+}
+
 Exception::Exception(String message)
 {
     this->message = message;
+    this->file = nil;
+    this->function = nil;
+    this->line = -1;
 #ifndef __CYGWIN__
     void *b[100];
     int size = backtrace(b, 100);
@@ -63,7 +88,15 @@ Ref<Array<StringBase> > Exception::getStackTrace()
 #ifdef LOG_ENABLED
 void Exception::printStackTrace(FILE *file)
 {
-    fprintf(file, "Exception: %s\n", message.c_str());
+    if (line >= 0)
+    {
+        fprintf(file, "Exception raised in [%s:%d] %s(): %s\n", 
+                this->file.c_str(), line, function.c_str(), message.c_str());
+    }
+    else
+    {
+        fprintf(file, "Exception: %s\n", message.c_str());
+    }
 #ifndef __CYGWIN__
     for (int i = 0; i < stackTrace->size(); i++)
     {

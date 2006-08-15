@@ -23,12 +23,16 @@
 
 #include "zmmf/zmmf.h"
 
+#define _UpnpException(code, format) UpnpException(code, format, __FILE__, __LINE__, __func__)
+#define _StorageException(format) StorageException(format, __FILE__, __LINE__, __func__)
+
 class UpnpException : public zmm::Exception
 {
 protected:
     int errCode;
 public:
     UpnpException(int errCode, zmm::String message);
+    UpnpException(int errCode, zmm::String message, const char *file, int line, const char *function);
     inline int getErrorCode() { return errCode; }
 };
 
@@ -36,6 +40,8 @@ class StorageException : public zmm::Exception
 {
 public:
     inline StorageException(zmm::String message) : zmm::Exception(message) {}
+    inline StorageException(zmm::String message, const char *file, int line, const char* function) : 
+        zmm::Exception(message, file, line, function) {}
 };
 
 #endif // __EXCEPTIONS_H__

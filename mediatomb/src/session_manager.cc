@@ -56,7 +56,7 @@ void Session::putTo(session_data_t type, String key, String value)
             driver2->put(key, value);
             break;
         default:
-            throw Exception(_("Unknown session data type: ") + (int)type);
+            throw _Exception(_("Unknown session data type: ") + (int)type);
     }
 }
 
@@ -69,7 +69,7 @@ String Session::getFrom(session_data_t type, String key)
         case SECONDARY:
             return driver2->get(key);
         default:
-            throw Exception(_("Unknown session data type: ") + (int)type);
+            throw _Exception(_("Unknown session data type: ") + (int)type);
     }
 }
 

@@ -35,7 +35,7 @@ FileInput::FileInput(String filename) : Input()
     file = fopen(filename.c_str(), "r");
     if (file == NULL)
     {
-        throw Exception(_("could not open file ") + filename + " : " + strerror(errno));
+        throw _Exception(_("could not open file ") + filename + " : " + strerror(errno));
     }
 }
 

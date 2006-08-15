@@ -63,7 +63,7 @@ void MysqlStorage::init()
     {
         FREE(db);
         db = NULL;
-        throw StorageException(_("MysqlStorage.init: mysql_init() failed"));
+        throw _StorageException(_("MysqlStorage.init: mysql_init() failed"));
     }
 
     res_mysql = mysql_real_connect(db,
@@ -81,7 +81,7 @@ void MysqlStorage::init()
         mysql_close(db);
         FREE(db);
         db = NULL;
-        throw StorageException(_("MysqlStorage.init: mysql_real_connect() failed"));
+        throw _StorageException(_("MysqlStorage.init: mysql_real_connect() failed"));
     }
     SQLStorage::init();
 }
@@ -118,7 +118,7 @@ Ref<SQLResult> MysqlStorage::select(String query)
     {
         unlock();
         reportError(query);
-        throw StorageException(_("Mysql: mysql_real_query() failed"));
+        throw _StorageException(_("Mysql: mysql_real_query() failed"));
     }
 
     MYSQL_RES *mysql_res;
@@ -127,7 +127,7 @@ Ref<SQLResult> MysqlStorage::select(String query)
     {
         unlock();
         reportError(query);
-        throw StorageException(_("Mysql: mysql_store_result() failed"));
+        throw _StorageException(_("Mysql: mysql_store_result() failed"));
     }
     Ref<SQLResult> ret(new MysqlResult(mysql_res));    
 
@@ -146,7 +146,7 @@ void MysqlStorage::exec(String query)
     {
         reportError(query);
         unlock();
-        throw StorageException(_("Mysql: query error"));
+        throw _StorageException(_("Mysql: query error"));
     }
     unlock();
 }

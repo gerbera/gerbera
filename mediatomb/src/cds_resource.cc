@@ -105,7 +105,7 @@ Ref<CdsResource> CdsResource::decode(String serial)
     Ref<Array<StringBase> > parts = split_string(serial, RESOURCE_PART_SEP);
     int size = parts->size();
     if (size != 2 && size != 3)
-        throw Exception(_("CdsResource::decode: Could not parse resources"));
+        throw _Exception(_("CdsResource::decode: Could not parse resources"));
 
     int handlerType = String(parts->get(0)).toInt();
 

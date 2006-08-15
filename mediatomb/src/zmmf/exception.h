@@ -27,6 +27,8 @@
 #include <stdio.h>
 #include "logger.h"
 
+#define _Exception(format) Exception(format, __FILE__, __LINE__, __func__)
+
 namespace zmm
 {
 
@@ -34,9 +36,14 @@ class Exception
 {
 protected:
     String message;
+    String file;
+    String function;
+    int    line;
+
     Ref<Array<StringBase> > stackTrace;
 
 public:
+    Exception(String message, const char* file, int line, const char* function);
     Exception(String message);
     String getMessage();
 

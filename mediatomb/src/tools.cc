@@ -117,13 +117,13 @@ void check_path_ex(String path, bool needDir)
 
     ret = stat(path.c_str(), &statbuf);
     if (ret != 0)
-        throw Exception(path + " : " + strerror(errno));
+        throw _Exception(path + " : " + strerror(errno));
 
     if (needDir && (!S_ISDIR(statbuf.st_mode)))
-        throw Exception(_("Not a directory: ") + path);
+        throw _Exception(_("Not a directory: ") + path);
     
     if (!needDir && (S_ISDIR(statbuf.st_mode)))
-        throw Exception(_("Not a file: ") + path);
+        throw _Exception(_("Not a file: ") + path);
 
 }
 
@@ -138,7 +138,7 @@ bool string_ok(String str)
 void string_ok_ex(String str)
 {
     if ((str == nil) || (str == ""))
-        throw Exception(_("Empty string"));
+        throw _Exception(_("Empty string"));
 }
 
 String http_redirect_to(String ip, String port, String page)
@@ -316,7 +316,7 @@ String read_text_file(String path)
 	FILE *f = fopen(path.c_str(), "r");
 	if (!f)
     {
-        throw Exception(_("read_text_file: could not open ") +
+        throw _Exception(_("read_text_file: could not open ") +
                         path + " : " + strerror(errno));
     }
 	Ref<StringBuffer> buf(new StringBuffer()); 
@@ -336,7 +336,7 @@ void write_text_file(String path, String contents)
     FILE *f = fopen(path.c_str(), "w");
     if (!f)
     {
-        throw Exception(_("write_text_file: could not open ") +
+        throw _Exception(_("write_text_file: could not open ") +
                         path + " : " + strerror(errno));
     }
     
@@ -345,10 +345,10 @@ void write_text_file(String path, String contents)
     {
         fclose(f);
         if (bytesWritten >= 0)
-            throw Exception(_("write_text_file: incomplete write to ") +
+            throw _Exception(_("write_text_file: incomplete write to ") +
                             path + " : ");
         else
-            throw Exception(_("write_text_file: error writing to ") +
+            throw _Exception(_("write_text_file: error writing to ") +
                             path + " : " + strerror(errno));
     }
     fclose(f);
@@ -502,7 +502,7 @@ void set_jpeg_resolution_resource(Ref<CdsItem> item, int res_num)
         String resolution = get_jpeg_resolution(fio_h);
 
         if (res_num >= item->getResourceCount())
-            throw Exception(_("Invalid resource index"));
+            throw _Exception(_("Invalid resource index"));
             
         item->getResource(res_num)->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), resolution);
     }

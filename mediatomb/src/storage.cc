@@ -67,7 +67,7 @@ static Ref<Storage> create_primary_inst()
         }
 #endif
         // other database types...
-        throw Exception(_("Unknown storage type: ") + type);
+        throw _Exception(_("Unknown storage type: ") + type);
     }
     while (false);
     

@@ -45,11 +45,11 @@ void web::add::process()
     String path;
     String objID = param(_("object_id"));
     if (objID == nil || objID == "" || objID == "0")
-        throw Exception(_("web::add::process(): missing parameters: object id must be specified"));
+        throw _Exception(_("web::add::process(): missing parameters: object id must be specified"));
     else
         path = hex_decode_string(objID);
     
-    if (path == nil) throw Exception(_("web::add::process(): illegal path"));
+    if (path == nil) throw _Exception(_("web::add::process(): illegal path"));
 
     Ref<ContentManager> cm = ContentManager::getInstance();
     cm->addFile(path, true);

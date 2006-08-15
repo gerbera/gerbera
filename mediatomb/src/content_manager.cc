@@ -276,9 +276,9 @@ void ContentManager::_removeObject(int objectID)
 {
     /// \todo when removing... what about container updates when removing recursively?
     if (objectID == 0)
-        throw Exception(_("cannot remove root container"));
+        throw _Exception(_("cannot remove root container"));
     if (objectID == 1)
-        throw Exception(_("cannot remove PC-Directory container"));
+        throw _Exception(_("cannot remove PC-Directory container"));
     /// \todo make PC-Directory ID configurable
     Ref<Storage> storage = Storage::getInstance();
     Ref<CdsObject> obj = storage->loadObject(objectID);
@@ -304,7 +304,7 @@ void ContentManager::addRecursive(String path, int parentID)
     DIR *dir = opendir(path.c_str());
     if (! dir)
     {
-        throw Exception(_("could not list directory ")+
+        throw _Exception(_("could not list directory ")+
                         path + " : " + strerror(errno));
     }
     struct dirent *dent;
@@ -524,7 +524,7 @@ Ref<CdsObject> ContentManager::convertObject(Ref<CdsObject> oldObj, int newType)
         return oldObj;
     if (! IS_CDS_ITEM(oldType) || ! IS_CDS_ITEM(newType))
     {
-        throw Exception(_("Cannot convert object type ") + oldType +
+        throw _Exception(_("Cannot convert object type ") + oldType +
                         " to " + newType);
     }
 
@@ -546,7 +546,7 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic)
     ret = stat(path.c_str(), &statbuf);
     if (ret != 0)
     {
-        throw Exception(_("Failed to stat ") + path);
+        throw _Exception(_("Failed to stat ") + path);
     }
 
     Ref<CdsObject> obj;
@@ -603,7 +603,7 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic)
     else
     {
         // only regular files and directories are supported
-        throw Exception(_("ContentManager: skipping file ") + path.c_str());
+        throw _Exception(_("ContentManager: skipping file ") + path.c_str());
     }
 //    Ref<StringConverter> f2i = StringConverter::f2i();
 //    obj->setTitle(f2i->convert(filename));
@@ -725,7 +725,7 @@ void ContentManager::addFile2(Ref<DirStack> dirStack, String parentID)
     DIR *dir = opendir(path.c_str());
     if (! dir)
     {
-        throw Exception(_("could not list directory ")+
+        throw _Exception(_("could not list directory ")+
                         path + " : " + strerror(errno));
     }
     struct dirent *dent;
@@ -1070,7 +1070,7 @@ void ContentManager::_addFile2(String path, bool recursive)
     
     int slashPos = path.rindex('/');
     if (slashPos < 0)
-        throw Exception(_("only absolute paths are accepted"));
+        throw _Exception(_("only absolute paths are accepted"));
 
     Ref<DirCache> dirCache(new DirCache());
     // if not in root container initialize dirCache's path
@@ -1093,7 +1093,7 @@ void ContentManager::addRecursive2(Ref<DirCache> dirCache, String filename, bool
 
     ret = stat(path.c_str(), &statbuf);
     if (ret != 0)
-        throw Exception(_("Failed to stat ") + path);
+        throw _Exception(_("Failed to stat ") + path);
 
     if (S_ISREG(statbuf.st_mode)) // item
     {
@@ -1121,7 +1121,7 @@ void ContentManager::addRecursive2(Ref<DirCache> dirCache, String filename, bool
         DIR *dir = opendir(path.c_str());
         if (! dir)
         {
-            throw Exception(_("could not list directory ") +
+            throw _Exception(_("could not list directory ") +
                             path + " : " + strerror(errno));
         }
         struct dirent *dent;
@@ -1155,7 +1155,7 @@ void ContentManager::addRecursive2(Ref<DirCache> dirCache, String filename, bool
         dirCache->pop();
     }
     else
-        throw Exception(_("unsupported file type: ") + path);
+        throw _Exception(_("unsupported file type: ") + path);
 }
 
 

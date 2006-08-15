@@ -158,7 +158,7 @@ String SQLStorage::getSelectQuery(select_mode_t mode)
         case SELECT_BASIC: return selectQueryBasic;
         case SELECT_EXTENDED: return selectQueryExtended;
         case SELECT_FULL: return selectQueryFull;
-        default: throw StorageException(_("SQLStorage: invalid mode: ") + (int)mode);
+        default: throw _StorageException(_("SQLStorage: invalid mode: ") + (int)mode);
     }
 }
 
@@ -318,7 +318,7 @@ Ref<CdsObject> SQLStorage::loadObject(int objectID, select_mode_t mode)
     Ref<CdsObject> obj = objectIDCache->get(objectID);
     if (obj != nil)
         return obj;
-    throw Exception(_("Object not found: ") + objectID);
+    throw _Exception(_("Object not found: ") + objectID);
 */
         
     Ref<StringBuffer> qb(new StringBuffer());
@@ -331,7 +331,7 @@ Ref<CdsObject> SQLStorage::loadObject(int objectID, select_mode_t mode)
     {
         return createObjectFromRow(row, mode);
     }
-    throw Exception(_("Object not found: ") + objectID);
+    throw _Exception(_("Object not found: ") + objectID);
 }
 
 Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
@@ -354,7 +354,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     }
     else
     {
-        throw StorageException(_("Object not found: ") + objectID);
+        throw _StorageException(_("Object not found: ") + objectID);
     }
 
     row = nil;
@@ -562,14 +562,14 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row, select_mode_t mo
 
     if(! matched_types)
     {
-        throw StorageException(_("unknown object type: ")+ objectType);
+        throw _StorageException(_("unknown object type: ")+ objectType);
     }
     return obj;
 }
 
 void SQLStorage::eraseObject(Ref<CdsObject> object)
 {
-    throw Exception(_("SQLStorage::eraseObject shuold never be called !!!!\n"));
+    throw _Exception(_("SQLStorage::eraseObject shuold never be called !!!!\n"));
 }
 
 int SQLStorage::getTotalFiles()
@@ -619,7 +619,7 @@ Ref<Array<CdsObject> > SQLStorage::selectObjects(Ref<SelectParam> param,
                << "f.object_type & " << OBJECT_TYPE_CONTAINER << " <> 0";
             break;
         default:
-            throw StorageException(_("selectObjects: invalid operation: ") +
+            throw _StorageException(_("selectObjects: invalid operation: ") +
                                    param->flags);
     }
     Ref<SQLResult> res = select(q->toString());

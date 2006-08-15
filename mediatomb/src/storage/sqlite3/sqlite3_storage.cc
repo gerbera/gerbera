@@ -160,7 +160,7 @@ void Sqlite3Storage::threadProc()
     int res = sqlite3_open(dbFilePath.c_str(), &db);
     if(res != SQLITE_OK)
     {
-        throw StorageException(_("Sqlite3Storage.init: could not open ") +
+        throw _StorageException(_("Sqlite3Storage.init: could not open ") +
             dbFilePath);
     }
     while(! shutdownFlag)
@@ -279,7 +279,7 @@ void SLSelectTask::run(Sqlite3Storage *sl)
     {
         pthread_cond_signal(cond);
         sl->reportError(query);
-        throw StorageException(_("Sqlite3: query error"));
+        throw _StorageException(_("Sqlite3: query error"));
     }
 
     lpres->row = pres->table;
@@ -307,7 +307,7 @@ void SLExecTask::run(Sqlite3Storage *sl)
     if(res != SQLITE_OK)
     {
         sl->reportError(query);
-        throw StorageException(_("Sqlite3: query error"));
+        throw _StorageException(_("Sqlite3: query error"));
     }
 }
 

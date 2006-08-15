@@ -57,7 +57,7 @@ void RExp::compile(String pattern, int flags)
     this->pattern = pattern;
     ret = regcomp(&regex, pattern.c_str(), flags);
     if (ret != 0)
-        throw Exception(error_string(ret, &regex));
+        throw _Exception(error_string(ret, &regex));
     isCompiled = true;
 }
 
@@ -72,7 +72,7 @@ void RExp::compile(zmm::String pattern, const char *sflags)
         {
             case 'i': flags |= REG_ICASE; break;
             case 's': flags |= REG_NEWLINE; break;
-            default: throw Exception(_("RExp: unknown flag: ")+ c);
+            default: throw _Exception(_("RExp: unknown flag: ")+ c);
         }
         p++;
     }
@@ -148,7 +148,7 @@ bool Matcher::next()
         case 0:
             return true;
         default:
-            throw Exception(error_string(ret, &rexp->regex));
+            throw _Exception(error_string(ret, &rexp->regex));
     }
 }
 

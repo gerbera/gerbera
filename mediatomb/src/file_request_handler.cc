@@ -69,7 +69,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     if (objID == nil)
     {
         //log_error("object_id not found in url\n");
-        throw Exception(_("get_info: object_id not found"));
+        throw _Exception(_("get_info: object_id not found"));
     }
     else
         objectID = objID.toInt();
@@ -84,7 +84,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
 
     if (!IS_CDS_ITEM(objectType))
     {
-        throw Exception(_("get_info: object is not an item"));
+        throw _Exception(_("get_info: object is not an item"));
     }
 
     // update item info by running action
@@ -150,7 +150,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     ret = stat(path.c_str(), &statbuf);
     if (ret != 0)
     {
-        throw Exception(_("Failed to stat ") + path);
+        throw _Exception(_("Failed to stat ") + path);
     }
 
 
@@ -228,7 +228,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, IN enum UpnpOpe
     // Currently we explicitly do not support UPNP_WRITE
     // due to security reasons.
     if (mode != UPNP_READ)
-        throw Exception(_("UPNP_WRITE unsupported"));
+        throw _Exception(_("UPNP_WRITE unsupported"));
 
     String url_path, parameters;
     split_url(filename, url_path, parameters);
@@ -239,7 +239,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, IN enum UpnpOpe
     String objID = dict->get(_("object_id"));
     if (objID == nil)
     {
-        throw Exception(_("object_id not found"));
+        throw _Exception(_("object_id not found"));
     }
     else
         objectID = objID.toInt();
@@ -252,7 +252,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, IN enum UpnpOpe
 
     if (!IS_CDS_ITEM(obj->getObjectType()))
     {
-        throw Exception(_("web_open: unsuitable object type: ") + obj->getObjectType());
+        throw _Exception(_("web_open: unsuitable object type: ") + obj->getObjectType());
     }
 
     Ref<CdsItem> item = RefCast(obj, CdsItem);

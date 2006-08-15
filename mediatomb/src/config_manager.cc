@@ -87,7 +87,7 @@ void ConfigManager::init(String filename, String userhome)
         {
             if (!check_path(_("") + DIR_SEPARATOR + DEFAULT_ETC + DIR_SEPARATOR + DEFAULT_SYSTEM_HOME + DIR_SEPARATOR + DEFAULT_CONFIG_NAME))
             {
-                throw Exception(_("\nThe server configuration file could not be found in ~/.mediatomb and\n") +
+                throw _Exception(_("\nThe server configuration file could not be found in ~/.mediatomb and\n") +
                                        "/etc/mediatomb. Please run the tomb-install script or specify an alternative\n" +  
                                        "configuration file on the command line. For a list of options use: mediatomb -h\n");
             }
@@ -121,10 +121,10 @@ void ConfigManager::validate(String serverhome)
     // first check if the config file itself looks ok, it must have a config
     // and a server tag
     if (root->getName() != "config")
-        throw Exception(_("Error in config file: <config> tag not found"));
+        throw _Exception(_("Error in config file: <config> tag not found"));
 
     if (root->getChild(_("server")) == nil)
-        throw Exception(_("Error in config file: <server> tag not found"));
+        throw _Exception(_("Error in config file: <server> tag not found"));
 
     // now go through the mandatory parameters, if something is missing
     // here we will not start the server
@@ -167,12 +167,12 @@ void ConfigManager::validate(String serverhome)
             checkOptionString(_("/server/storage/database"));
             checkOptionString(_("/server/storage/username"));
             if (getElement(_("/server/storage/password")) == nil)
-                throw Exception(_("/server/storage/password option not found")); 
+                throw _Exception(_("/server/storage/password option not found")); 
             break;
         }
 #endif
         // other database types...
-        throw Exception(_("Unknown storage driver: ") + dbDriver);
+        throw _Exception(_("Unknown storage driver: ") + dbDriver);
     }
     while (false);
 
@@ -185,7 +185,7 @@ void ConfigManager::validate(String serverhome)
     temp = getOption(_("/server/ui/attribute::enabled"),
                      _(DEFAULT_UI_VALUE));
     if ((temp != "yes") && (temp != "no"))
-        throw Exception(_("Error in config file: incorrect parameter for <ui enabled=\")\" /> attribute"));
+        throw _Exception(_("Error in config file: incorrect parameter for <ui enabled=\")\" /> attribute"));
 
     getOption(_("/import/mappings/extension-mimetype/attribute::ignore-unknown"),
               _(DEFAULT_IGNORE_UNKNOWN_EXTENSIONS));
@@ -340,7 +340,7 @@ void ConfigManager::save(String filename)
     FILE *file = fopen(filename.c_str(), "wb");
     if (file == NULL)
     {
-        throw Exception(_("could not open config file ") +
+        throw _Exception(_("could not open config file ") +
                         filename + " for writing : " + strerror(errno));
     }
 
@@ -348,7 +348,7 @@ void ConfigManager::save(String filename)
                               content.length(), file);
     if (bytesWritten < content.length())
     {
-        throw Exception(_("could not write to config file ") +
+        throw _Exception(_("could not write to config file ") +
                         filename + " : " + strerror(errno));
     }
     
@@ -405,7 +405,7 @@ String ConfigManager::getOption(String xpath, String def)
         String spec = XPath::getSpec(axisPart);
         if (axis != "attribute")
         {
-            throw Exception(_("ConfigManager::getOption: only attribute:: axis supported"));
+            throw _Exception(_("ConfigManager::getOption: only attribute:: axis supported"));
         }
         cur->setAttribute(spec, def);
     } 
@@ -435,7 +435,7 @@ String ConfigManager::getOption(String xpath)
 //        return value;
     if (value != nil)
         return trim_string(value);
-    throw Exception(_("Config: option not found: ") + xpath);
+    throw _Exception(_("Config: option not found: ") + xpath);
 }
 
 int ConfigManager::getIntOption(String xpath)
@@ -477,14 +477,14 @@ void ConfigManager::writeBookmark(String ip, String port)
     f = fopen(path.c_str(), "w");
     if (f == NULL)
     {
-        throw Exception(_("writeBookmark: failed to open: ") + path);
+        throw _Exception(_("writeBookmark: failed to open: ") + path);
     }
 
     size = fwrite(data.c_str(), sizeof(char), data.length(), f);
     fclose(f);
 
     if (size < data.length())
-        throw Exception(_("write_Bookmark: failed to write to: ") + path);
+        throw _Exception(_("write_Bookmark: failed to write to: ") + path);
 
 }
 
@@ -492,7 +492,7 @@ String ConfigManager::checkOptionString(String xpath)
 {
     String temp = getOption(xpath);
     if (!string_ok(temp))
-        throw Exception(_("Config: value of ") + xpath + " tag is invalid");
+        throw _Exception(_("Config: value of ") + xpath + " tag is invalid");
 
     return temp;
 }

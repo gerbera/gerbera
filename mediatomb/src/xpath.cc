@@ -39,7 +39,7 @@ Ref<Element> XPath::getElement(String xpath)
     String axisPart = getAxisPart(xpath);
     if (axisPart != nil)
     {
-        throw Exception(_("XPath::getElement: unexpected axis in ") + xpath);
+        throw _Exception(_("XPath::getElement: unexpected axis in ") + xpath);
     }
     return elementAtPath(xpath);
 }
@@ -61,7 +61,7 @@ String XPath::getText(String xpath)
 
     if (axis != "attribute")
     {
-        throw Exception(String("XPath::getText: unexpected axis: ") + axis);
+        throw _Exception(String("XPath::getText: unexpected axis: ") + axis);
     }
    
     return el->getAttribute(spec);

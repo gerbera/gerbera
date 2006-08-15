@@ -37,7 +37,7 @@ StringConverter::StringConverter(String from, String to) : Object()
     if (cd == (iconv_t)(-1))
     {
         cd = (iconv_t)(0);
-        throw Exception(_("iconv: ") + strerror(errno));
+        throw _Exception(_("iconv: ") + strerror(errno));
     }
 }
 
@@ -58,7 +58,7 @@ zmm::String StringConverter::convert(String str)
     if (!output)
     {
         log_debug("Could not allocate memory for string conversion!\n");
-        throw Exception(_("Could not allocate memory for string conversion!"));
+        throw _Exception(_("Could not allocate memory for string conversion!"));
     }
 
     char *input_copy = input;
@@ -123,7 +123,7 @@ zmm::String StringConverter::convert(String str)
         dirty = true;
         if (output)
             FREE(output);
-        throw Exception(err);
+        throw _Exception(err);
     }
    
     //log_debug("iconv: AFTER: input bytes left: %d  output bytes left: %d\n",
