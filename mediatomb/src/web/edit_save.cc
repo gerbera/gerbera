@@ -47,8 +47,12 @@ void web::edit_save::process()
         objectID = objID.toInt();
     
     Ref<Storage> storage = Storage::getInstance();
-    Ref<ContentManager> content;
     
     ContentManager::getInstance()->updateObject(objectID, params);
+    Ref<CdsObject> obj = storage->loadObject(objectID);
+    if (IS_CDS_CONTAINER(obj->getObjectType()))
+    {
+        root->appendTextChild(_("updateContainer"), String::from(obj->getParentID()));
+    }
 }
 

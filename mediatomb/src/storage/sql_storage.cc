@@ -642,7 +642,7 @@ void SQLStorage::removeObject(Ref<CdsObject> obj)
         if(IS_CDS_CONTAINER(obj->getObjectType()))
         {
             rmChildren(obj);
-//            rmObject(obj);
+            rmObject(obj);
         }
         else
             rmItem(obj);

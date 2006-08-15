@@ -59,6 +59,38 @@ function updateItems(ajaxRequest)
     var children = items.getElementsByTagName(childrenTag);
     var itemsEl = document.createElement("div");
     
+    if (!((isTypeDb() && lastNodeDb == 'd0') || (!isTypeDb() && lastNodeFs == 'f0')))
+    {
+        if (useFiles)
+        {
+            
+        }
+        else
+        {
+            var ofId = items.getAttribute("ofId");
+            var topDiv = document.createElement("div");
+            topDiv.appendChild(document.createTextNode("Container: "));
+            
+            var link = document.createElement("a");
+            topDiv.appendChild(link);
+            link.setAttribute("href", "javascript:removeItem("+ofId+");");
+            link.appendChild(document.createTextNode("remove"));
+            topDiv.appendChild(document.createTextNode(" "));
+            
+            link = document.createElement("a");
+            topDiv.appendChild(link);
+            link.setAttribute("href", "javascript:userEditItemStart("+ofId+");");
+            link.appendChild(document.createTextNode("edit"));
+            topDiv.appendChild(document.createTextNode(" "));
+            
+            link = document.createElement("a");
+            topDiv.appendChild(link);
+            link.setAttribute("href", "javascript:userAddItemStart();");
+            link.appendChild(document.createTextNode("add Item"));
+            
+            itemsEl.appendChild(topDiv);
+        }
+    }
     for (var i = 0; i < children.length; i++)
     {
         var item = children[i];
@@ -268,7 +300,8 @@ function itemAddEditSubmit(objectId)
     for (var i = 0; i < form.length; ++i)
     {
         var element = form.elements[i];
-        args[element.name] = element.value;
+        if (element.name != 'submit')
+            args[element.name] = element.value;
     }
     
     var url = link(req_type, args);
@@ -276,8 +309,34 @@ function itemAddEditSubmit(objectId)
         url,
         {
             method: 'get',
-            onComplete: addedItem
+            onComplete: addEditRemoveSubmitted
         });
+}
+
+function addEditRemoveSubmitted(ajaxRequest)
+{
+    var xml = ajaxRequest.responseXML;
+    if (!errorCheck(xml)) return;
+    
+    var updateContainer = xmlGetElement(xml, 'updateContainer');
+    if (updateContainer)
+    {
+        var node = getTreeNode("d"+xmlGetText(updateContainer));
+        if (!node.hasChildren() && updateContainer.getAttribute("add"))
+        {
+            node.setHasChildren(true);
+            refreshNode(node.getParent());
+        }
+        
+        selectNode(node.getID());
+        node.childrenHaveBeenFetched=false;
+        node.resetChildren();
+        
+        fetchChildren(node);
+        //itemChangeType();
+    }
+    else
+        folderChange(selectedNode);
 }
 
 function removeItem(itemId)
@@ -287,14 +346,7 @@ function removeItem(itemId)
         url,
         {
             method: 'get',
-            onComplete: removedItem
+            onComplete: addEditRemoveSubmitted
         });
 }
 
-function removedItem(ajaxRequest)
-{
-    var xml = ajaxRequest.responseXML;
-    if (!errorCheck(xml)) return;
-    
-    //todo: feedback, reload?
-}

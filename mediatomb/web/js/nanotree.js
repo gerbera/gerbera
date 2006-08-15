@@ -609,7 +609,9 @@ function editEnded() {
 function selectNode(nodeID) {
 	var treeNode = getTreeNode(nodeID);
 
-	if (selectedNode != null) {
+	if (selectedNode != null && selectedNode != nodeID) {
+        
+        /*
 		if (selectedNode == nodeID) {
 			if (treeNode.isEditable()) {
 				if (treeNodeEdited == treeNode) {
@@ -632,12 +634,16 @@ function selectNode(nodeID) {
 		if (treeNodeEdited != null) {
 			editEnded();
 		}
+        */
 		var oldNodeTitle = document.getElementById('title' + selectedNode);
 		oldNodeTitle.className = 'treetitle';
 	}
-	selectedNode = nodeID;
-	var nodetitle = document.getElementById('title' + selectedNode);
-	nodetitle.className = 'treetitleselectedfocused';
+    if (selectedNode == null || selectedNode != nodeID)
+    {
+        selectedNode = nodeID;
+	    var nodetitle = document.getElementById('title' + selectedNode);
+        nodetitle.className = 'treetitleselectedfocused';
+    }
 	
 	if (treeNode.gotHandler()) {
 		eval(treeNode.getHandler() + '(getTreeNode(' + nodeID + '));');

@@ -176,10 +176,16 @@ void web::addObject::process()
     
     Ref<CdsObject> obj;
     
+    Ref<Element> updateContainerEl;
+    
     switch (obj_type.toInt())
     {
         case OBJECT_TYPE_CONTAINER:
             obj = this->addContainer(parentID);
+            updateContainerEl = Ref<Element>(new Element(_("updateContainer")));
+            updateContainerEl->setText(parID);
+            updateContainerEl->addAttribute(_("add"), _("1"));
+            root->appendChild(updateContainerEl);
             break;
             
         case OBJECT_TYPE_ITEM:

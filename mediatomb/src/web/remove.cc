@@ -28,6 +28,7 @@
 #include "content_manager.h"
 #include "pages.h"
 #include "tools.h"
+#include "storage.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -38,14 +39,26 @@ web::remove::remove() : WebRequestHandler()
 void web::remove::process()
 {
     log_debug("remove: start\n");
-
+    
     check_request();
     
     String objID = param(_("object_id"));
-
-    if (string_ok(objID))
-        ContentManager::getInstance()->removeObject(objID.toInt());
-
+    int objectID;
+    if (!string_ok(objID))
+        throw Exception(_("invalid object id"));
+    else
+        objectID = objID.toInt();
+    
+    Ref<Storage> storage = Storage::getInstance();
+    Ref<CdsObject> obj = storage->loadObject(objectID);
+    
+    if (IS_CDS_CONTAINER(obj->getObjectType()))
+    {
+        root->appendTextChild(_("updateContainer"), String::from(obj->getParentID()));
+    }
+    
+    ContentManager::getInstance()->removeObject(objectID);
+    
     log_debug("remove: returning\n");
 }
 

@@ -52,6 +52,7 @@ void web::items::process()
     Ref<Array<CdsObject> > arr = storage->selectObjects(param);
     
     Ref<Element> items (new Element(_("items")));
+    items->addAttribute(_("ofId"), parID);
                             
     for (int i = 0; i < arr->size(); i++)
     {

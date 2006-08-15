@@ -63,7 +63,6 @@ function xmlGetText(el)
     return el.firstChild.nodeValue;
 }
 
-
 function xmlGetAttribute(parent, name)
 {
     var a = parent.attributes;
