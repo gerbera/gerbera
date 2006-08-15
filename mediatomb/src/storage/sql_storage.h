@@ -75,6 +75,7 @@ public:
 
     virtual zmm::Ref<CdsObject> findObjectByTitle(zmm::String title, int parentID);
     virtual void incrementUpdateIDs(int *ids, int size);
+    virtual void incrementUIUpdateID(int id);
     virtual void shutdown() = 0;
 protected:
     virtual zmm::Ref<CdsObject> createObjectFromRow(zmm::Ref<SQLRow> row,
@@ -104,10 +105,9 @@ protected:
     void rmChildren(zmm::Ref<CdsObject> obj);
     void rmDecChildCount(zmm::Ref<CdsObject> obj);
     
-    zmm::Ref<DSOHash<CdsObject> > objectTitleCache;
-    zmm::Ref<DBOHash<int, CdsObject> > objectIDCache;
+    //zmm::Ref<DSOHash<CdsObject> > objectTitleCache;
+    //zmm::Ref<DBOHash<int, CdsObject> > objectIDCache;
     
-    int getNextObjectID();
     int nextObjectID;
 };
 

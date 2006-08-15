@@ -128,7 +128,9 @@ public:
     
     virtual zmm::Ref<CdsObject> findObjectByTitle(zmm::String title, int parentID) = 0;
     virtual void incrementUpdateIDs(int *ids, int size) = 0;
-
+    
+    virtual void incrementUIUpdateID(int id) = 0;
+    
     /* utility methods */
     virtual zmm::Ref<CdsObject> loadObject(int objectID,
                                            select_mode_t mode = SELECT_FULL);
@@ -144,6 +146,7 @@ public:
     
     virtual void shutdown() = 0;
 protected:
+    int uiUpdateId;
     void getObjectPath(zmm::Ref<zmm::Array<CdsObject> > arr, int objectID);
 };
 

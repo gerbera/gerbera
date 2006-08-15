@@ -121,8 +121,8 @@ SQLStorage::SQLStorage() : Storage()
 
 void SQLStorage::init()
 {
-    objectTitleCache = Ref<DSOHash<CdsObject> >(new DSOHash<CdsObject>(OBJECT_CACHE_CAPACITY));
-    objectIDCache = Ref<DBOHash<int, CdsObject> >(new DBOHash<int, CdsObject>(OBJECT_CACHE_CAPACITY, -100));
+    //objectTitleCache = Ref<DSOHash<CdsObject> >(new DSOHash<CdsObject>(OBJECT_CACHE_CAPACITY));
+    //objectIDCache = Ref<DBOHash<int, CdsObject> >(new DBOHash<int, CdsObject>(OBJECT_CACHE_CAPACITY, -100));
    
 /*    
     Ref<SQLResult> res = select(_("SELECT MAX(id) + 1 FROM cds_objects"));
@@ -162,10 +162,6 @@ String SQLStorage::getSelectQuery(select_mode_t mode)
     }
 }
 
-int SQLStorage::getNextObjectID()
-{
-    return nextObjectID++;
-}
 void SQLStorage::addObject(Ref<CdsObject> obj)
 {
     /*
@@ -584,17 +580,27 @@ int SQLStorage::getTotalFiles()
     {
         return row->col(0).toInt();
     }
-    return 0;    
+    return 0;
 }
 
 void SQLStorage::incrementUpdateIDs(int *ids, int size)
 {
-    Ref<StringBuffer> buf(new StringBuffer(size * 4));
-    *buf << "UPDATE cds_objects SET update_id = update_id + 1 WHERE ID IN(-333";
-    for (int i = 0; i < size; i++)
+    if (size<1) return;
+    Ref<StringBuffer> buf(new StringBuffer(size * sizeof(int)));
+    *buf << "UPDATE cds_objects SET update_id = update_id + 1 WHERE ID IN(";
+    *buf << ids[0];
+    for (int i = 1; i < size; i++)
         *buf << ',' << ids[i];
     *buf << ')';
     exec(buf->toString());
+}
+
+void SQLStorage::incrementUIUpdateID(int id)
+{
+    //Ref<StringBuffer> buf(new StringBuffer(size * sizeof(int)));
+    log_debug("id: %d\n", id);
+    /// \todo implement this
+    //exec(buf->toString());
 }
 
 Ref<Array<CdsObject> > SQLStorage::selectObjects(Ref<SelectParam> param,
