@@ -128,6 +128,17 @@ function addAudio(obj)
         obj.meta[M_DESCRIPTION] = desc;
     }
 
+    var track = obj.meta[M_TRACKNUMBER];
+    if (!track)
+        track = '';
+    else
+    {
+        if (track.length == 1)
+        {
+            track = '0' + track;
+        }
+        track = track + ' ';
+    }
     var chain = new Array('Audio', 'All audio');
     obj.title = title;
     obj.parentID = addContainerChain("0", chain);
@@ -152,6 +163,7 @@ function addAudio(obj)
     addCdsObject(obj);
 
     chain = new Array('Audio', 'Albums', album);
+    obj.title = track + title; 
     obj.parentID = addContainerChain("0", chain);
     addCdsObject(obj);
 
