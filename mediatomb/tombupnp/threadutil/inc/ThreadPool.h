@@ -91,12 +91,11 @@ typedef enum priority {LOW_PRIORITY,
 #endif
 
 #include "LinkedList.h"
-#include <sys/timeb.h>
+#include <sys/time.h>
 #include "FreeList.h"
 
 #include "ithread.h"
 #include <errno.h>
-#include <sys/timeb.h>
 #define EXPORT 
 typedef int PolicyType;
 #define DEFAULT_POLICY SCHED_OTHER
@@ -150,7 +149,7 @@ typedef struct THREADPOOLJOB
   start_routine func; //function
   void *arg;          //arg
   free_routine free_func; //free function
-  struct timeb requestTime; //time of request
+  struct timeval requestTime; //time of request
   int priority;       //priority of request
   int jobId;         //id 
 } ThreadPoolJob;

@@ -42,7 +42,6 @@ extern "C" {
 
 #include "upnp.h"
 #include <stdio.h>
-//#include <malloc.h>
 #include <time.h>
 
 #define SID_SIZE  41

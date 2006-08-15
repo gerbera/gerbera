@@ -31,11 +31,7 @@
 
 #include <stdarg.h>
 #include <assert.h>
-#ifdef __FreeBSD__
 #include <stdlib.h>
-#else
-#include <malloc.h>
-#endif
 #include <stdio.h>
 #include "iasnprintf.h"
 

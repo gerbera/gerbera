@@ -24,6 +24,9 @@
       File_Info struct via the get_info() callback, this allows to
       add custom headers only to certain HTTP responses.
 
+    * removed all references to malloc.h (only stays in one WIN32 ifdef)
+    * removed use of ftime function (deprecated), using gettimeofday now
+
 2006-07-07 Oxy <virtual_worlds(at)gmx.de>
 
 	* full support for Windows added, static library and DLL are fully

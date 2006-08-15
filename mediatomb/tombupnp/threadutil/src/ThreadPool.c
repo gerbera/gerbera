@@ -169,17 +169,17 @@ SetPriority( ThreadPriority priority )
  *       the difference in milliseconds, time1-time2.
  *****************************************************************************/
 static double
-DiffMillis( struct timeb *time1,
-            struct timeb *time2 )
+DiffMillis( struct timeval *time1,
+            struct timeval *time2 )
 {
     double temp = 0;
 
     assert( time1 != NULL );
     assert( time2 != NULL );
 
-    temp = ( ( double )( time1->time ) - time2->time );
+    temp = ( ( double )( time1->tv_sec ) - time2->tv_sec );
     temp = temp * 1000;
-    temp += ( time1->millitm - time2->millitm );
+    temp += ( (time1->tv_usec/1000) - (time2->tv_usec/1000) );
     return temp;
 }
 
@@ -199,13 +199,13 @@ static void
 BumpPriority( ThreadPool * tp )
 {
     int done = 0;
-    struct timeb now;
+    struct timeval now;
     double diffTime = 0;
     ThreadPoolJob *tempJob = NULL;
 
     assert( tp != NULL );
 
-    ftime( &now );
+    gettimeofday( &now, NULL );
 
     while( !done ) {
         if( tp->medJobQ.size ) {
@@ -268,16 +268,16 @@ static void
 SetRelTimeout( struct timespec *time,
                int relMillis )
 {
-    struct timeb now;
+    struct timeval now;
     int sec = relMillis / 1000;
     int milliSeconds = relMillis % 1000;
 
     assert( time != NULL );
 
-    ftime( &now );
+    gettimeofday( &now, NULL );
 
-    time->tv_sec = now.time + sec;
-    time->tv_nsec = ( now.millitm + milliSeconds ) * 1000000;
+    time->tv_sec = now.tv_sec + sec;
+    time->tv_nsec = ( (now.tv_usec/1000) + milliSeconds ) * 1000000;
 }
 
 /****************************************************************************
@@ -318,11 +318,11 @@ static void StatsInit( ThreadPoolStats * stats ) {
 static void CalcWaitTime( ThreadPool * tp,
                                      ThreadPriority p,
                                      ThreadPoolJob * job ) {
-           struct timeb now;
+           struct timeval now;
            double diff;
            assert( tp != NULL );
            assert( job != NULL );
-           ftime( &now );
+           gettimeofday( &now, NULL );
            diff = DiffMillis( &now, &job->requestTime ); switch ( p ) {
 case HIGH_PRIORITY:
 tp->stats.totalJobsHQ++; tp->stats.totalTimeHQ += diff; break; case MED_PRIORITY:
@@ -344,15 +344,15 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
  *      
  *****************************************************************************/
     static void SetSeed(  ) {
-    struct timeb t;
+    struct timeval t;
 
-    ftime( &t );
+    gettimeofday( &t, NULL );
 #if defined(WIN32)
-    srand( ( unsigned int )t.millitm + (unsigned int)ithread_get_current_thread_id(  ).p );
+    srand( ( unsigned int )(t.tv_usec/1000) + (unsigned int)ithread_get_current_thread_id(  ).p );
 #elif defined(__FreeBSD__)
-    srand( ( unsigned int )t.millitm + (unsigned int)ithread_get_current_thread_id(  ) );
+    srand( ( unsigned int )(t.tv_usec/1000) + (unsigned int)ithread_get_current_thread_id(  ) );
 #else
-    srand( ( unsigned int )t.millitm + ithread_get_current_thread_id(  ) );
+    srand( ( unsigned int )(t.tv_usec/1000) + ithread_get_current_thread_id(  ) );
 #endif
     }
 
@@ -594,7 +594,7 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
         if( newJob ) {
             ( *newJob ) = ( *job );
             newJob->jobId = id;
-            ftime( &newJob->requestTime );
+            gettimeofday( &newJob->requestTime, NULL );
         }
         return newJob;
     }
