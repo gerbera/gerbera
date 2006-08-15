@@ -131,6 +131,8 @@ Ref<Array<FsObject> > Filesystem::readDirectory(String path, int mask,
             {
                 continue;
             }
+            else if (!(mask & FS_MASK_HIDDEN))
+                continue;
         }
         String childPath;
         if (path == FS_ROOT_DIRECTORY)

@@ -27,6 +27,7 @@
 
 #define FS_MASK_FILES 1
 #define FS_MASK_DIRECTORIES 2
+#define FS_MASK_HIDDEN 4 // accept hidden files (start with . "dot")
 
 #ifdef __CYGWIN__
 #define FS_ROOT_DIRECTORY "/cygdrive/"
