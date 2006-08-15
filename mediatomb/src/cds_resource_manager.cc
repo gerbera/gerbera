@@ -98,7 +98,7 @@ Ref<CdsResourceManager::UrlBase> CdsResourceManager::addResources_getUrlBase(Ref
     else
     { 
         urlBase->urlBase = Server::getInstance()->getVirtualURL() + _("/") +
-            CONTENT_MEDIA_HANDLER + _("/") + dict->encode() + _("&res_id=");
+            CONTENT_MEDIA_HANDLER + _("?") + dict->encode() + _("&res_id=");
         urlBase->addResID = true;
     }
     return urlBase;
