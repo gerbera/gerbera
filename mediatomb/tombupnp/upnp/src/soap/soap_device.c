@@ -70,7 +70,7 @@ static const char *Soap_Action_Failed = "Action Failed";
 static const char *Soap_Invalid_Var = "Invalid Var";
 
 const char *ContentTypeHeader =
-    "CONTENT-TYPE: text/xml; charset=\"utf-8\"\r\n";
+    "CONTENT-TYPE: text/xml; charset=UTF-8\r\n";
 
 /****************************************************************************
 *	Function :	get_request_type

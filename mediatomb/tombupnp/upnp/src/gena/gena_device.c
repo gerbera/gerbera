@@ -554,7 +554,7 @@ genaInitNotify( IN UpnpDevice_Handle device_handle,
                          "GENERATED PROPERY SET IN INIT NOTIFY: \n'%s'\n",
                          propertySet ) );
 
-    headers_size = strlen( "CONTENT-TYPE text/xml; charset=\"utf-8\"\r\n" ) +
+    headers_size = strlen( "CONTENT-TYPE text/xml; charset=UTF-8\r\n" ) +
         strlen( "CONTENT-LENGTH: \r\n" ) + MAX_CONTENT_LENGTH +
         strlen( "NT: upnp:event\r\n" ) +
         strlen( "NTS: upnp:propchange\r\n" ) + 1;
@@ -570,7 +570,7 @@ genaInitNotify( IN UpnpDevice_Handle device_handle,
         return UPNP_E_OUTOF_MEMORY;
     }
 
-    sprintf( headers, "CONTENT-TYPE: text/xml; charset=\"utf-8\"\r\nCONTENT-LENGTH: "
+    sprintf( headers, "CONTENT-TYPE: text/xml; charset=UTF-8\r\nCONTENT-LENGTH: "
              "%d\r\nNT: upnp:event\r\nNTS: upnp:propchange\r\n",
              strlen( propertySet ) + 1 );
 
@@ -740,7 +740,7 @@ genaInitNotifyExt( IN UpnpDevice_Handle device_handle,
                          "GENERATED PROPERY SET IN INIT EXT NOTIFY: %s",
                          propertySet ) );
 
-    headers_size = strlen( "CONTENT-TYPE text/xml; charset=\"utf-8\"\r\n" ) +
+    headers_size = strlen( "CONTENT-TYPE text/xml; charset=UTF-8\r\n" ) +
         strlen( "CONTENT-LENGTH: \r\n" ) + MAX_CONTENT_LENGTH +
         strlen( "NT: upnp:event\r\n" ) +
         strlen( "NTS: upnp:propchange\r\n" ) + 1;
@@ -755,7 +755,7 @@ genaInitNotifyExt( IN UpnpDevice_Handle device_handle,
         return UPNP_E_OUTOF_MEMORY;
     }
 
-    sprintf( headers, "CONTENT-TYPE: text/xml; charset=\"utf-8\"\r\nCONTENT-LENGTH: "
+    sprintf( headers, "CONTENT-TYPE: text/xml; charset=UTF-8\r\nCONTENT-LENGTH: "
              OFF_T_SPRINTF"d" "\r\nNT: upnp:event\r\nNTS: upnp:propchange\r\n",
              (off_t) strlen( propertySet ) + 1 );
 
@@ -877,7 +877,7 @@ genaNotifyAllExt( IN UpnpDevice_Handle device_handle,
         return UPNP_E_INVALID_PARAM;
     }
 
-    headers_size = strlen( "CONTENT-TYPE text/xml; charset=\"utf-8\"\r\n" ) +
+    headers_size = strlen( "CONTENT-TYPE text/xml; charset=UTF-8\r\n" ) +
         strlen( "CONTENT-LENGTH: \r\n" ) + MAX_CONTENT_LENGTH +
         strlen( "NT: upnp:event\r\n" ) +
         strlen( "NTS: upnp:propchange\r\n" ) + 1;
@@ -892,7 +892,7 @@ genaNotifyAllExt( IN UpnpDevice_Handle device_handle,
     }
     //changed to add null terminator at end of content
     //content length = (length in bytes of property set) + null char
-    sprintf( headers, "CONTENT-TYPE: text/xml; charset=\"utf-8\"\r\nCONTENT-LENGTH: "
+    sprintf( headers, "CONTENT-TYPE: text/xml; charset=UTF-8\r\nCONTENT-LENGTH: "
              OFF_T_SPRINTF"d" "\r\nNT: upnp:event\r\nNTS: upnp:propchange\r\n",
              (off_t) strlen( propertySet ) + 1 );
 
@@ -1039,7 +1039,7 @@ genaNotifyAll( IN UpnpDevice_Handle device_handle,
         return return_code;
     }
 
-    headers_size = strlen( "CONTENT-TYPE text/xml; charset=\"utf-8\"\r\n" ) +
+    headers_size = strlen( "CONTENT-TYPE text/xml; charset=UTF-8\r\n" ) +
         strlen( "CONTENT-LENGTH: \r\n" ) + MAX_CONTENT_LENGTH +
         strlen( "NT: upnp:event\r\n" ) +
         strlen( "NTS: upnp:propchange\r\n" ) + 1;
@@ -1054,7 +1054,7 @@ genaNotifyAll( IN UpnpDevice_Handle device_handle,
     }
     //changed to add null terminator at end of content
     //content length = (length in bytes of property set) + null char
-    sprintf( headers, "CONTENT-TYPE: text/xml; charset=\"utf-8\"\r\nCONTENT-LENGTH: " OFF_T_SPRINTF"d" "\r\nNT:"
+    sprintf( headers, "CONTENT-TYPE: text/xml; charset=UTF-8\r\nCONTENT-LENGTH: " OFF_T_SPRINTF"d" "\r\nNT:"
              " upnp:event\r\nNTS: upnp:propchange\r\n",
              (off_t) strlen( propertySet ) + 1 );
 

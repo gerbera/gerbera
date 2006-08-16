@@ -2042,7 +2042,7 @@ http_MakeMessage( INOUT membuffer * buf,
             num = strlen( tempbuf );
 
             if( http_MakeMessage( buf, http_major_version, http_minor_version, "NTAcs", (off_t)num, // content-length
-                                  "text/html; charset=\"utf-8\"",  // content-type
+                                  "text/html; charset=UTF-8",  // content-type
                                   gUserHTTPHeaders.buf,
                                   tempbuf ) != 0 )  // body
             {
