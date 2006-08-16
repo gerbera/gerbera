@@ -7,7 +7,8 @@
     * upnp/src/genlib/net/http/webserver.c - added .css to text/css
       mimetype mapping to the internal webserver
 
-    * added largefile support
+    * added largefile support, based on patch originally submitted
+      by Peter Enzerink <sf(at)enzerink.net>
 
     * sock.c - reverted a change regarding SIGPIPE, unhandled signal
       when HTTP transfer was cancelled by the client.
@@ -27,6 +28,8 @@
     * removed all references to malloc.h (only stays in one WIN32 ifdef)
     * removed use of ftime function (deprecated), using gettimeofday now
     * added UTF-8 charset patch submitted by 
+      Olga Soiko <o.soiko(at)sam-solutions.net>
+    * added HTTP 1.1 conformance patch submitted by
       Olga Soiko <o.soiko(at)sam-solutions.net>
 
 2006-07-07 Oxy <virtual_worlds(at)gmx.de>

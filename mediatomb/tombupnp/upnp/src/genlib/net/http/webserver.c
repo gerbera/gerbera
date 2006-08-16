@@ -1235,6 +1235,13 @@ process_request( IN http_message_t * req,
     http_CalcResponseVersion( req->major_version, req->minor_version,
                               &resp_major, &resp_minor );
 
+    if( req->method == HTTPMETHOD_GET ) {
+      if( ( req->major_version == 1 ) && ( req->minor_version == 0 ) ) {
+        resp_major = 1;
+        resp_minor = 1;
+      }
+    }
+
     //
     // remove dots
     //
