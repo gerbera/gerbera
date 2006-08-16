@@ -53,8 +53,9 @@ var showAllNodesOnStartup = false;
 // Is the roots dragable?
 var dragable = false;
 
-//set to the document the tree is in (needed for frame handling).
+//set to the document/window the tree is in (needed for frame handling).
 var treeDocument;
+var treeWindow;
 
 
 /************************************************************************
@@ -333,9 +334,9 @@ function writeStates(nodeID,newstate) {
 function showTree(path) {
 	readStates();
 	href = path;
-	window.focus();
-	window.onblur = blurSelection;
-	window.onfocus = focusSelection;
+	treeWindow.focus();
+	treeWindow.onblur = blurSelection;
+	treeWindow.onfocus = focusSelection;
 	var str = '';
 	str = '<div id="node' + rootNode.getID() + '" class="treetitle" style="display:' + (showRootNode == true ? 'block' : 'none') + '">';
 	str += '<nobr>';
@@ -351,7 +352,7 @@ function showTree(path) {
 		}
 	}
 	container.innerHTML = str;
-	if (window.finishedLoading) {
+	if (treeWindow.finishedLoading) {
 		finishedLoading();
 	}
 }
@@ -475,7 +476,7 @@ function startDrag(nodeID) {
 	}
 	draggedNodeID = nodeID;
 	
-	var srcObj = window.event.srcElement;
+	var srcObj = treeWindow.event.srcElement;
 	while(srcObj.tagName != 'DIV') {
 		srcObj = srcObj.parentElement;
 	}
@@ -514,7 +515,7 @@ function dragEnter(nodeID) {
 	if (colouredElement) {
 		findSpanChild(colouredElement).className = 'treetitle';
 	}
-	colouredElement = window.event.srcElement;
+	colouredElement = treeWindow.event.srcElement;
 	while(colouredElement.tagName != 'DIV') {
 		colouredElement = colouredElement.parentElement;
 		if (colouredElement.tagName == 'BODY') {
@@ -582,8 +583,8 @@ function dragMove() {
 	if (!dragable) {
 		return;
 	}
-	floatDragElement.style.top = window.event.clientY;
-	floatDragElement.style.left = window.event.clientX;
+	floatDragElement.style.top = treeWindow.event.clientY;
+	floatDragElement.style.left = treeWindow.event.clientX;
 }
 function editEnded() {
 	if (treeNodeEdited != null) {
@@ -646,7 +647,7 @@ function selectNode(nodeID) {
         selectedNode = nodeID;
 	    var nodetitle = treeDocument.getElementById('title' + selectedNode);
         nodetitle.className = 'treetitleselectedfocused';
-        ensureElementVisibility(frames["leftF"].window, nodetitle, 35);
+        ensureElementVisibility(treeWindow, treeDocument, nodetitle, 35);
     }
 	
 	if (treeNode.gotHandler()) {
@@ -899,8 +900,8 @@ function selectNextNode() {
 	}
 }
 function keyDown(event) {
-	if (window.event) {
-		event = window.event;
+	if (treeWindow.event) {
+		event = treeWindow.event;
 	}
 	if (event.keyCode == 38) { // Up
 		selectPrevNode();

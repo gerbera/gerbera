@@ -2,18 +2,19 @@
      "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
+        <title>M E D I A T O M B</title>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     </head>
     <body>
         <div id="item_db_div" style="display:none"><div></div></div>
         <div id="item_fs_div" style="display:none"><div></div></div>
         <div id="item_add_edit_div" style="display:none">
-            <form name="addEditItem">
-                <select name="objType" onchange="updateItemAddEditFields()" size="1">
+            <form name="addEditItem" action="javascript:parent.itemAddEditSubmit();">
+                <select name="objType" onchange="parent.updateItemAddEditFields()" size="1">
                 </select>
                 <div id="item_add_edit_inputs"><div></div></div>
                 <input name="submit" type="submit"/>
-            <form>
+            </form>
         </div>
     </body>
 </html>

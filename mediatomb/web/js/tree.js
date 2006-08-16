@@ -24,6 +24,7 @@ var fsStuff =
 function treeInit()
 {
     treeDocument = frames["leftF"].document;
+    treeWindow = frames["leftF"].window;
     treeDocument.onkeydown = keyDown;
     var rootContainer = treeDocument.getElementById('treeDiv');
     

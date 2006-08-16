@@ -62,13 +62,13 @@ function updateItems(ajaxRequest)
         var topDiv = rightDocument.createElement("div");
         topDiv.appendChild(rightDocument.createTextNode("Folder: "));
         
-        if (lastNodeFs == 'f0')
-        {
-            var link = rightDocument.createElement("a");
-            topDiv.appendChild(link);
-            link.setAttribute("href", "javascript:parent.addItem('"+ofId+"');");
-            link.appendChild(rightDocument.createTextNode("add"));
-        }
+        //if (lastNodeFs == 'f0')
+        //{
+        var link = rightDocument.createElement("a");
+        topDiv.appendChild(link);
+        link.setAttribute("href", "javascript:parent.addItem('"+ofId+"');");
+        link.appendChild(rightDocument.createTextNode("add"));
+        //}
         
         itemsEl.appendChild(topDiv);
     }

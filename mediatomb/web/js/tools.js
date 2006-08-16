@@ -124,11 +124,42 @@ function getTopOffset(el)
     return offset;
 }
 
-function ensureElementVisibility(win, el, bottomAdd)
+function ensureElementVisibility(win, doc, el, bottomAdd)
 {
-    var scrollpos = win.pageYOffset;
-    var xoffset = win.pageXOffset;
-    var viewheight = win.innerHeight;
+    var viewheight;
+    if (win.innerHeight) // all except IE
+    {
+        viewheight = win.innerHeight;
+    }
+    else if (doc.documentElement && doc.documentElement.clientHeight)
+        // IE 6 Strict Mode
+    {
+        viewheight = doc.documentElement.clientHeight;
+    }
+    else if (doc.body) // other IEs
+    {
+        viewheight = doc.body.clientHeight;
+    }
+    
+    var scrollpos;
+    var xoffset;
+    if (win.pageYOffset) // all except IE
+    {
+        xoffset = win.pageXOffset;
+        scrollpos = win.pageYOffset;
+    }
+    else if (doc.documentElement && doc.documentElement.scrollTop)
+        // IE 6 Strict
+    {
+        xoffset = doc.documentElement.scrollLeft;
+        scrollpos = doc.documentElement.scrollTop;
+    }
+    else if (document.body) // all other IEs
+    {
+        xoffset = doc.body.scrollLeft;
+        scrollpos = doc.body.scrollTop;
+    }
+    
     var elpos = getTopOffset(el);
     
     if (elpos<scrollpos)
