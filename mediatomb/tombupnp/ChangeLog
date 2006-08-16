@@ -1,4 +1,4 @@
-2006-08-08  Sergey Bostandzhyan <jin@mediatomb.org>
+2006-08-08  Sergey Bostandzhyan <jin(at)mediatomb.org>
     * integration - moved libupnp 1.4.1 into the MediaTomb environment
     
     * upnp/src/inc/config.h - changed thread configuration to improve
@@ -26,6 +26,8 @@
 
     * removed all references to malloc.h (only stays in one WIN32 ifdef)
     * removed use of ftime function (deprecated), using gettimeofday now
+    * added UTF-8 charset patch submitted by 
+      Olga Soiko <o.soiko(at)sam-solutions.net>
 
 2006-07-07 Oxy <virtual_worlds(at)gmx.de>
 

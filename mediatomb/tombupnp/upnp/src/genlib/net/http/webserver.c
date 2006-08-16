@@ -1275,7 +1275,7 @@ process_request( IN http_message_t * req,
 
             using_alias = get_alias( request_doc, alias, &finfo );
             if( using_alias == TRUE ) {
-                finfo.content_type = ixmlCloneDOMString( "text/xml" );
+                finfo.content_type = ixmlCloneDOMString( "text/xml; charset=\"utf-8\"" );
 
                 if( finfo.content_type == NULL ) {
                     goto error_handler;
