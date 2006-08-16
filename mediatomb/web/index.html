@@ -5,14 +5,6 @@
         <meta http-equiv="content-type" content="text/html; charset=UTF-8">
         <title>M E D I A T O M B</title>
         <link rel="StyleSheet" href="/main.css" type="text/css">
-        <script type="text/javascript" language="JavaScript">
-            <!--
-            var SID;
-            //alert(document.cookie);
-            //var SID = '<%= SID %>';
-            var TYPE = 'db';
-            -->
-        </script>
         <script type="text/javascript" language="JavaScript" src="/js/tools.js"></script>
         <script type="text/javascript" language="JavaScript" src="/js/md5.js"></script>
         <script type="text/javascript" language="JavaScript" src="/js/auth.js"></script>
@@ -22,11 +14,14 @@
         <script type="text/javascript" language="JavaScript" src="/js/items.js"></script>
         <script type="text/javascript" language="JavaScript">
             <!--
+            var SID;
+            var TYPE;
             function init() {
                 Try.these
                 (
                     function()
                     {
+                        TYPE = getCookie("TYPE");
                         SID = getCookie("SID");
                     },
                     function()
@@ -34,6 +29,8 @@
                         alert("getCookie-Fehler");
                     }
                 );
+                if (TYPE!="db" && TYPE!="fs") TYPE="db";
+                
                 if (SID && SID != null && SID != 'null') checkSID();
                 //alert (SID);
                 //Element.hide("loginDiv");
@@ -72,19 +69,21 @@
             function setType(tmpType)
             {
                 TYPE = tmpType;
+                setCookie("TYPE", TYPE);
                 treeChangeType();
                 itemChangeType();
                 return undefined;
             }
+            
             //-->
         </script>
 
     </head>
-    <frameset rows="25%,*" onload="init();">
+    <frameset rows="25%,*" onload="init();" frameborder="0">
         <frame src="top.html" name="topF" frameborder="0" noresize>
-        <frameset cols="30%,*">
-            <frame src="left.html" name="leftF" frameborder="0" noresize>
-            <frame src="right.html" name="rightF" frameborder="0" noresize>
+        <frameset cols="30%,*" frameborder="0">
+            <frame src="left.html" name="leftF" frameborder="0">
+            <frame src="right.html" name="rightF" frameborder="0">
         </frameset>
     </frameset>
 </html>

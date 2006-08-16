@@ -56,14 +56,24 @@ function updateItems(ajaxRequest)
     var children = items.getElementsByTagName(childrenTag);
     var itemsEl = rightDocument.createElement("div");
     
-    //if (!((isTypeDb() && lastNodeDb == 'd0') || (!isTypeDb() && lastNodeFs == 'f0')))
+    var ofId = items.getAttribute("ofId");
     if (useFiles)
     {
+        var topDiv = rightDocument.createElement("div");
+        topDiv.appendChild(rightDocument.createTextNode("Folder: "));
         
+        if (lastNodeFs == 'f0')
+        {
+            var link = rightDocument.createElement("a");
+            topDiv.appendChild(link);
+            link.setAttribute("href", "javascript:parent.addItem('"+ofId+"');");
+            link.appendChild(rightDocument.createTextNode("add"));
+        }
+        
+        itemsEl.appendChild(topDiv);
     }
     else
     {
-        var ofId = items.getAttribute("ofId");
         var topDiv = rightDocument.createElement("div");
         topDiv.appendChild(rightDocument.createTextNode("Container: "));
         
@@ -77,13 +87,13 @@ function updateItems(ajaxRequest)
             topDiv.appendChild(rightDocument.createTextNode(", "));
             link = rightDocument.createElement("a");
             topDiv.appendChild(link);
-            link.setAttribute("href", "javascript:parent.userEditItemStart("+ofId+");");
+            link.setAttribute("href", "javascript:parent.userEditItemStart('"+ofId+"');");
             link.appendChild(rightDocument.createTextNode("edit"));
             
             topDiv.appendChild(rightDocument.createTextNode(", "));
             link = rightDocument.createElement("a");
             topDiv.appendChild(link);
-            link.setAttribute("href", "javascript:parent.removeItem("+ofId+");");
+            link.setAttribute("href", "javascript:parent.removeItem('"+ofId+"');");
             link.appendChild(rightDocument.createTextNode("remove"));
         }
         
@@ -272,7 +282,7 @@ function updateItemAddEditFields(editItem)
             else
                 inputEl.setAttribute('value', xmlGetElementText(editItem, fieldNameAr[i]));
             inputsDiv.appendChild(inputEl);
-            addBr(inputsDiv);
+            addBr(rightDocument, inputsDiv);
         }
     }
     

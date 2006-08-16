@@ -67,5 +67,5 @@ function checkSID()
 
 function checkSIDcallback(ajaxRequest)
 {
-    errorCheck(ajaxRequest.responseXML);
+    errorCheck(ajaxRequest.responseXML, true);
 }

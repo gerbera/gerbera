@@ -53,6 +53,7 @@ void web::files::process()
         Ref<Array<FsObject> > arr = fs->readDirectory(path, FS_MASK_FILES);
     
         Ref<Element> files(new Element(_("files")));
+        files->addAttribute(_("ofId"), parentID);
     
         for (int i = 0; i < arr->size(); i++)
         {

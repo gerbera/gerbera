@@ -76,7 +76,7 @@ function xmlGetAttribute(parent, name)
     return null;
 }
 
-function errorCheck(xml)
+function errorCheck(xml, noredirect)
 {
     if (!xml)
     {
@@ -93,7 +93,7 @@ function errorCheck(xml)
         if (SID)
         {
             SID = null;
-            window.location = redirect;
+            if (!noredirect) window.location = redirect;
         }
         return false;
     }
@@ -107,8 +107,36 @@ function errorCheck(xml)
     return true;
 }
 
-function addBr(element)
+function addBr(useDocument, element)
 {
-    var newBr = document.createElement('br');
+    var newBr = useDocument.createElement('br');
     element.appendChild(newBr);
+}
+
+function getTopOffset(el)
+{
+    var offset = 0;
+    while (el != null)
+    {
+        offset += el.offsetTop;
+        el = el.offsetParent;
+    }
+    return offset;
+}
+
+function ensureElementVisibility(win, el, bottomAdd)
+{
+    var scrollpos = win.pageYOffset;
+    var xoffset = win.pageXOffset;
+    var viewheight = win.innerHeight;
+    var elpos = getTopOffset(el);
+    
+    if (elpos<scrollpos)
+    {
+        win.scrollTo(xoffset, elpos);
+    }
+    else if (elpos>scrollpos+viewheight-bottomAdd)
+    {
+        win.scrollTo(xoffset, elpos-viewheight+bottomAdd);
+    }
 }

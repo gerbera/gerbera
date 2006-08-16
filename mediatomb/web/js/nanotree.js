@@ -646,6 +646,7 @@ function selectNode(nodeID) {
         selectedNode = nodeID;
 	    var nodetitle = treeDocument.getElementById('title' + selectedNode);
         nodetitle.className = 'treetitleselectedfocused';
+        ensureElementVisibility(frames["leftF"].window, nodetitle, 35);
     }
 	
 	if (treeNode.gotHandler()) {
