@@ -27,19 +27,30 @@ AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
 AC_HEADER_STDBOOL
 AC_HEADER_TIME
+AC_HEADER_STAT
 AC_LANG_C
    
-AC_CHECK_HEADERS([syslog.h unistd.h alloca.h iconv.h arpa/inet.h fcntl.h], [],
+AC_CHECK_HEADERS([syslog.h stddef.h unistd.h arpa/inet.h fcntl.h], [],
                  [AC_MSG_ERROR(required header not found)]) 
 
 AC_CHECK_HEADERS([limits.h netdb.h netinet/in.h stdlib.h string.h sys/file.h],
                  [],
                  [AC_MSG_ERROR(required header not found)]) 
-AC_CHECK_HEADERS([sys/ioctl.h sys/socket.h sys/time.h sys/timeb.h sys/types.h pthread.h],
+AC_CHECK_HEADERS([sys/ioctl.h sys/socket.h sys/time.h sys/types.h pthread.h],
                  [],
                  [AC_MSG_ERROR(required header not found)]) 
 
 AC_CHECK_HEADERS([langinfo.h],[],[AC_MSG_WARN(langinfo.h not found, will not be able to retrieve locale)])
+
+AC_CHECK_HEADER(iconv.h,
+        [],
+        [
+            AC_CHECK_HEADER(sys/iconv.h,
+                [],
+                [
+                    AC_MSG_ERROR(iconv.h not found on your syytem!)
+                ],)
+        ],)
 
 AC_TYPE_OFF_T
 AC_TYPE_SIZE_T
@@ -56,10 +67,11 @@ fi
 AC_CHECK_SIZEOF(off_t, 4)
 AC_CHECK_SIZEOF(size_t, 4)
 
-AC_CHECK_FUNCS([strtoll, nl_langinfo])
- 
+AC_CHECK_FUNCS(strtoll nl_langinfo,[],[])
+
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
+AC_C_INLINE
 AC_TYPE_SIGNAL
 AC_TYPE_PID_T
 AC_TYPE_SIZE_T
@@ -80,7 +92,7 @@ AC_FUNC_VPRINTF
 
 AC_LANG_CPLUSPLUS
 
-AC_CHECK_FUNCS([ftime gethostname gettimeofday inet_ntoa localtime_r memmove memset],
+AC_CHECK_FUNCS([gethostname gethostbyname gettimeofday inet_ntoa localtime_r memmove memset],
                [],
                [AC_MSG_ERROR(required library function not found)])
 AC_CHECK_FUNCS([regcomp select socket strcasecmp strchr strdup strerror strncasecmp],
