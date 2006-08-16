@@ -413,26 +413,29 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
         if (IS_CDS_CONTAINER(obj->getObjectType()))
         {
             Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
-            qb->clear();
-            *qb << "SELECT COUNT(*) FROM cds_objects WHERE parent_id = " << cont->getID();
-            if (param->containersOnly)
-                *qb << " AND object_type & " << OBJECT_TYPE_CONTAINER << " <> 0";
-            res = select(qb->toString());
-            if ((row = res->nextRow()) != nil)
-            {
-                cont->setChildCount(atoi(row->col(0).c_str()));
-            }
-            else
-            {
-                cont->setChildCount(0);
-            }
-            row = nil;
-            res = nil;
+            cont->setChildCount(getChildCount(cont->getID(), param->containersOnly));
         }
     }
 
     return arr;
 }
+
+int SQLStorage::getChildCount(int contId, bool containersOnly)
+{
+    Ref<SQLRow> row;
+    Ref<SQLResult> res;
+    Ref<StringBuffer> qb(new StringBuffer());
+    *qb << "SELECT COUNT(*) FROM cds_objects WHERE parent_id = " << contId;
+    if (containersOnly)
+        *qb << " AND object_type & " << OBJECT_TYPE_CONTAINER << " <> 0";
+    res = select(qb->toString());
+    if ((row = res->nextRow()) != nil)
+    {
+        return atoi(row->col(0).c_str());
+    }
+    return 0;
+}
+
 Ref<Array<StringBase> > SQLStorage::getMimeTypes()
 {
     Ref<Array<StringBase> > arr(new Array<StringBase>());
@@ -530,6 +533,7 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row, select_mode_t mo
             Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
             cont->setSearchable(atoi(row->col(_is_searchable).c_str()));
             cont->setUpdateID(atoi(row->col(_update_id).c_str()));
+            cont->setLocation(row->col(_location));
         }
         matched_types++;
     }

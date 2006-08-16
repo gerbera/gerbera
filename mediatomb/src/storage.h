@@ -134,6 +134,7 @@ public:
     /* utility methods */
     virtual zmm::Ref<CdsObject> loadObject(int objectID,
                                            select_mode_t mode = SELECT_FULL);
+    virtual int getChildCount(int contId, bool containersOnly = false) = 0;
     virtual void removeObject(zmm::Ref<CdsObject> object);
     virtual void removeObject(int objectID);
     virtual zmm::Ref<zmm::Array<CdsObject> > getObjectPath(int objectID);

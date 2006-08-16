@@ -62,7 +62,8 @@ public:
     virtual void eraseObject(zmm::Ref<CdsObject> object);
     virtual zmm::Ref<CdsObject> loadObject(int objectID,
                                            select_mode_t mode = SELECT_FULL);
-
+    virtual int getChildCount(int contId, bool containersOnly = false);
+    
     virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param,
                                                            select_mode_t mode = SELECT_FULL);
     virtual void removeObject(zmm::Ref<CdsObject> object);
