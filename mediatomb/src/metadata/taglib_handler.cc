@@ -52,8 +52,12 @@ static void addField(metadata_fields_t field, TagLib::FileRef *fileTag, Ref<CdsI
     
     TagLib::Tag *tag = fileTag->tag();
     
-    if (tag == NULL) return;
-    
+    if (tag == NULL) 
+        return;
+
+    if (tag->isEmpty())
+        return;
+
     Ref<StringConverter> sc = StringConverter::m2i();
     
     switch (field)
@@ -115,7 +119,10 @@ void TagHandler::fillMetadata(Ref<CdsItem> item)
     log_debug("adding metadata for: %s\n", item->getLocation().c_str());
     
     TagLib::FileRef tag(item->getLocation().c_str());
-    
+
+    if (tag.isNull())
+        return;
+
     for (int i = 0; i < M_MAX; i++)
         addField((metadata_fields_t) i, &tag, item);
     
@@ -123,7 +130,8 @@ void TagHandler::fillMetadata(Ref<CdsItem> item)
     
     TagLib::AudioProperties *audioProps = tag.audioProperties();
     
-    if (audioProps == NULL) return;
+    if (audioProps == NULL) 
+        return;
     
     // note: UPnP requres bytes/second
     temp = audioProps->bitrate() * 1024 / 8;
