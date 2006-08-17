@@ -30,7 +30,7 @@ AC_HEADER_TIME
 AC_HEADER_STAT
 AC_LANG_C
    
-AC_CHECK_HEADERS([syslog.h stddef.h unistd.h arpa/inet.h fcntl.h], [],
+AC_CHECK_HEADERS([syslog.h stddef.h unistd.h arpa/inet.h fcntl.h getopt.h], [],
                  [AC_MSG_ERROR(required header not found)]) 
 
 AC_CHECK_HEADERS([limits.h netdb.h netinet/in.h stdlib.h string.h sys/file.h],
@@ -42,15 +42,34 @@ AC_CHECK_HEADERS([sys/ioctl.h sys/socket.h sys/time.h sys/types.h pthread.h],
 
 AC_CHECK_HEADERS([langinfo.h],[],[AC_MSG_WARN(langinfo.h not found, will not be able to retrieve locale)])
 
-AC_CHECK_HEADER(iconv.h,
-        [],
+CPPFLAGS_SAVE="$CPPFLAGS"
+CFLAGS_SAVE="$CFLAGS"
+CXXFLAGS_SAVE="$CXXFLAGS"
+LDFLAGS_SAVE="$LDFLAGS"
+
+AC_CHECK_HEADER([iconv.h],
         [
-            AC_CHECK_HEADER(sys/iconv.h,
-                [],
+            AC_CHECK_FUNCS([iconv],[],[AC_MSG_ERROR(iconv library not found on your system)])
+        ],
+        [
+            AC_CHECK_HEADER([/usr/local/include/iconv.h],
                 [
-                    AC_MSG_ERROR(iconv.h not found on your syytem!)
-                ],)
-        ],)
+                    CFLAGS="$CFLAGS -I/usr/local/include" 
+                    LDFLAGS="$LDFLAGS -L/usr/local/lib"
+                    CXXFLAGS="$CXXFLAGS -I/usr/local/include" 
+                    AC_CHECK_FUNCS([iconv],[],[AC_MSG_ERROR(iconv library not found on your system)],[-liconv])
+                ],
+                [
+                    CFLAGS="$CFLAGS_SAVE"
+                    CXXFLAGS="$CXXFLAGS_SAVE"
+                    LDFLAGS="$LDFLAGS_SAVE"
+                    AC_MSG_ERROR(iconv.h not found on your system)
+                ])
+        ])
+
+AC_CHECK_HEADERS(execinfo.h,[],[])
+
+AC_CHECK_TYPES([time_t], [], [], [#include <sys/types.h>])
 
 AC_TYPE_OFF_T
 AC_TYPE_SIZE_T
@@ -68,7 +87,7 @@ AC_CHECK_SIZEOF(off_t, 4)
 AC_CHECK_SIZEOF(size_t, 4)
 
 AC_CHECK_FUNCS(strtoll nl_langinfo,[],[])
-
+AC_CHECK_FUNCS(backtrace backtrace_symbols,[],[])
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_C_INLINE
@@ -101,6 +120,8 @@ AC_CHECK_FUNCS([regcomp select socket strcasecmp strchr strdup strerror strncase
 AC_CHECK_FUNCS([strrchr strstr strtol strtoul uname pthread_mutex_lock], [],
                [AC_MSG_ERROR(required library function not found)])
 
+AC_CHECK_FUNCS([getopt_long], [AC_DEFINE([_GETOPT_DECLARED],[1],[avoid conflict with unistd.h on BSD systems])],
+                [AC_MSG_ERROR(required library function not found)])
 # this is not optional, we need the device and the internal webserver
 AC_DEFINE([UPNP_HAVE_DEVICE], [1], [Compile device API])
 AC_DEFINE([UPNP_HAVE_WEBSERVER], [1], [Compile internal web server])    
@@ -183,7 +204,7 @@ if test "x$MYSQL_OK" = xyes; then
         AC_MSG_RESULT($MYSQL_CFLAGS)
 
         AC_MSG_CHECKING(mysql libraries)
-        MYSQL_LIBS=`${mysqlconfig} --libs | sed s/\'//g`
+        MYSQL_LIBS=`${mysqlconfig} --libs_r | sed s/\'//g`
         AC_MSG_RESULT($MYSQL_LIBS)
 
         CXXFLAGS="$CXXFLAGS $MYSQL_CFLAGS"
@@ -199,13 +220,14 @@ if test "x$MYSQL_OK" = xyes; then
     )
 fi
 if test "x$MYSQL_OK" = xyes; then
-    AC_CHECK_LIB(mysqlclient, mysql_init,
+    AC_CHECK_FUNCS(mysql_init,
         [],
         [AC_MSG_RESULT(mysqlclient link failed) MYSQL_OK=missing]
     )
 fi
 if test "x$MYSQL_OK" = xyes; then
     AC_DEFINE([HAVE_MYSQL], [1], [MySLQ library presence])
+    AC_CHECK_FUNCS([mysql_stmt_init],[],[])
 else
     if test "x$MYSQL_EN" = xyes; then
         AC_MSG_ERROR(unable to configure mysql support)
