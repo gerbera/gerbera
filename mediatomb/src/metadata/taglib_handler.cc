@@ -44,27 +44,31 @@ TagHandler::TagHandler() : MetadataHandler()
 {
 }
        
-static void addField(metadata_fields_t field, TagLib::FileRef *tag, Ref<CdsItem> item)
+static void addField(metadata_fields_t field, TagLib::FileRef *fileTag, Ref<CdsItem> item)
 {
     TagLib::String val;
     String value;
     unsigned int i;
-  
+    
+    TagLib::Tag *tag = fileTag->tag();
+    
+    if (tag == NULL) return;
+    
     Ref<StringConverter> sc = StringConverter::m2i();
     
     switch (field)
     {
         case M_TITLE:
-            val = tag->tag()->title();
+            val = tag->title();
             break;
         case M_ARTIST:
-            val = tag->tag()->artist();
+            val = tag->artist();
             break;
         case M_ALBUM:
-            val = tag->tag()->album();
+            val = tag->album();
             break;
         case M_DATE:
-            i = tag->tag()->year();
+            i = tag->year();
             if (i > 0)
             {
                 value = String::from(i);
@@ -76,13 +80,13 @@ static void addField(metadata_fields_t field, TagLib::FileRef *tag, Ref<CdsItem>
                 return;
             break;
         case M_GENRE:
-            val = tag->tag()->genre();
+            val = tag->genre();
             break;
         case M_DESCRIPTION:
-            val = tag->tag()->comment();
+            val = tag->comment();
             break;
         case M_TRACKNUMBER:
-            i = tag->tag()->track();
+            i = tag->track();
             if (i > 0)
             {
                 value = String::from(i);
@@ -108,15 +112,21 @@ static void addField(metadata_fields_t field, TagLib::FileRef *tag, Ref<CdsItem>
 
 void TagHandler::fillMetadata(Ref<CdsItem> item)
 {
+    log_debug("adding metadata for: %s\n", item->getLocation().c_str());
+    
     TagLib::FileRef tag(item->getLocation().c_str());
     
     for (int i = 0; i < M_MAX; i++)
         addField((metadata_fields_t) i, &tag, item);
-
+    
     int temp;
-
+    
+    TagLib::AudioProperties *audioProps = tag.audioProperties();
+    
+    if (audioProps == NULL) return;
+    
     // note: UPnP requres bytes/second
-    temp = tag.audioProperties()->bitrate() * 1024 / 8;
+    temp = audioProps->bitrate() * 1024 / 8;
 
     if (temp > 0)
     {
@@ -124,21 +134,21 @@ void TagHandler::fillMetadata(Ref<CdsItem> item)
                                            String::from(temp)); 
     }
 
-    temp = tag.audioProperties()->length();
+    temp = audioProps->length();
     if (temp > 0)
     {
         item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_DURATION),
                                            secondsToHMS(temp));
     }
 
-    temp = tag.audioProperties()->sampleRate();
+    temp = audioProps->sampleRate();
     if (temp > 0)
     {
         item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), 
                                            String::from(temp));
     }
 
-    temp = tag.audioProperties()->channels();
+    temp = audioProps->channels();
 
     if (temp > 0)
     {
