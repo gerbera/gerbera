@@ -158,7 +158,7 @@ function addAudio(obj)
     addCdsObject(obj);
 
     chain = new Array('Audio', 'Artists', artist, album);
-    obj.title = title;
+    obj.title = track + title;
     obj.parentID = addContainerChain("0", chain);
     addCdsObject(obj);
 
