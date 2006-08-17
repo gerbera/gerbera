@@ -44,7 +44,7 @@ void web::add::process()
     
     String path;
     String objID = param(_("object_id"));
-    if (objID == nil || objID == "" || objID == "0")
+    if (objID == nil || objID == "")
         throw _Exception(_("web::add::process(): missing parameters: object id must be specified"));
     else
         path = hex_decode_string(objID);

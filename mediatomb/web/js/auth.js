@@ -47,6 +47,7 @@ function checkLogin(ajaxRequest)
     Element.hide(topDocument.getElementById("loginDiv"));
     Element.show(topDocument.getElementById("topDiv"));
     Element.show(frames["leftF"].document.getElementById("treeDiv"));
+    loggedIn = true;
     updateTreeAfterLogin();
     if (!SID)
         alert('could not obtain session id');

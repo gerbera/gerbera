@@ -3,6 +3,9 @@ var openGif = '/icons/nanotree/images/folder_open.gif';
 var iconArray = new Array(closedGif,openGif);
 var lastNodeDb = 'd0';
 var lastNodeFs = 'f0';
+var lastNodeDbWish;
+var lastNodeFsWish;
+
 sortNodes = false;
 showRootNode = false;
 
@@ -25,9 +28,10 @@ function treeInit()
 {
     treeDocument = frames["leftF"].document;
     treeWindow = frames["leftF"].window;
-    treeDocument.onkeydown = keyDown;
-    var rootContainer = treeDocument.getElementById('treeDiv');
     
+    documentID = "mediatombUI";
+    
+    var rootContainer = treeDocument.getElementById('treeDiv');
     dbStuff.container = treeDocument.createElement("div");
     fsStuff.container = treeDocument.createElement("div");
     
@@ -41,19 +45,22 @@ function treeInit()
     dbStuff.tombRootNode.setHasChildren(true);
     dbStuff.tombRootNode.addOpenEventListener("openEventListener");
     dbStuff.rootNode.addChild(dbStuff.tombRootNode);
+    //writeStates('d0','open');
     fsStuff.rootNode = new TreeNode(-2,"Filesystem", iconArray);
     fsStuff.tombRootNode = new TreeNode('f0', "Filesystem", iconArray);
     fsStuff.tombRootNode.setHasChildren(true);
     fsStuff.tombRootNode.addOpenEventListener("openEventListener");
     fsStuff.rootNode.addChild(fsStuff.tombRootNode);
-    
+    //writeStates('f0','open');
     treeChangeType();
+    treeDocument.onkeydown = keyDown;
 }
 
 function updateTreeAfterLogin()
 {
     if (isTypeDb() && getState(dbStuff.tombRootNode.getID()) == "open") fetchChildren(dbStuff.tombRootNode);
     if (!isTypeDb() && getState(fsStuff.tombRootNode.getID()) == "open") fetchChildren(fsStuff.tombRootNode);
+    selectLastNode();
 }
 
 function treeChangeType()
@@ -72,25 +79,54 @@ function treeChangeType()
     }
     if (!type.treeShown)
     {
+        readStates();
+        if (isTypeDb())
+        {
+            writeStates('d0','open');
+            //refreshNode(getTreeNode('d0'));
+        }
+        else
+        {
+            writeStates('f0','open');
+            //refreshNode(getTreeNode('f0'));
+        }
         showTree('/icons/nanotree/');
         type.treeShown = true;
     }
-    
+    if (loggedIn) selectLastNode();
+}
+
+function selectLastNode()
+{
     if (isTypeDb())
     {
+        var saveLastNodeDbWish = lastNodeDbWish;
         if (lastNodeDb) selectNode(lastNodeDb);
+        lastNodeDbWish = saveLastNodeDbWish
     }
     else
     {
+        var saveLastNodeFsWish = lastNodeFsWish;
         if (lastNodeFs) selectNode(lastNodeFs);
+        lastNodeFsWish = saveLastNodeFsWish
     }
 }
 
 function standardClick(treeNode)
 {
-    var id = treeNode.getID()
-    if (isTypeDb()) lastNodeDb = id;
-    else lastNodeFs = id;
+    var id = treeNode.getID();
+    if (isTypeDb())
+    {
+        setCookie('lastNodeDb', id);
+        lastNodeDb = id;
+        lastNodeDbWish=null;
+    }
+    else
+    {
+        setCookie('lastNodeFs', id);
+        lastNodeFs = id;
+        lastNodeFsWish=null;
+    }
     folderChange(id);
 }
 
@@ -141,6 +177,7 @@ function updateTree(ajaxRequest)
     }
     var type = xmlGetAttribute(containers, "type");
     var parentId = type+xmlGetAttribute(containers, "ofId");
+    
     var node = getTreeNode(parentId);
     if (node.childrenHaveBeenFetched)
     {
@@ -155,11 +192,12 @@ function updateTree(ajaxRequest)
     
     var i;
     var len = cts.length;
+    var selectNode = false;
     
     for (var i = 0; i < len; i++)
     {
         var c = cts[i];
-        var id = type+xmlGetAttribute(c, "id");
+        var id = type + xmlGetAttribute(c, "id");
         
         //TODO: childCount unnecessary? - hasChildren instead?
         var childCount = xmlGetAttribute(c, "childCount");
@@ -177,10 +215,24 @@ function updateTree(ajaxRequest)
         node.addChild(child);
         child.addOpenEventListener("openEventListener");
         
+        if (id == lastNodeDbWish)
+        {
+            lastNodeDbWish=null;
+            lastNodeDb = id;
+            selectNode = true;
+        }
+        else if (id == lastNodeFsWish)
+        {
+            lastNodeFsWish=null;
+            lastNodeFs = id;
+            selectNode = true;
+        }
+        
         //recurse immediately:
         //fetchChildren(openEventListener, child);
     }
     node.childrenHaveBeenFetched=true;
     refreshNode(node);
+    if (selectNode) selectLastNode();
 }
 

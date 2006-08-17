@@ -16,6 +16,7 @@
             <!--
             var SID;
             var TYPE;
+            var loggedIn = false;
             function init() {
                 Try.these
                 (
@@ -23,6 +24,8 @@
                     {
                         TYPE = getCookie("TYPE");
                         SID = getCookie("SID");
+                        lastNodeDbWish = getCookie("lastNodeDb");
+                        lastNodeFsWish = getCookie("lastNodeFs");
                     },
                     function()
                     {
@@ -32,9 +35,6 @@
                 if (TYPE!="db" && TYPE!="fs") TYPE="db";
                 
                 if (SID && SID != null && SID != 'null') checkSID();
-                //alert (SID);
-                //Element.hide("loginDiv");
-                //Element.hide("mainDiv");
                 var topDocument = frames["topF"].document;
                 if (!SID || SID == null)
                 {
@@ -42,6 +42,7 @@
                 }
                 else
                 {
+                    loggedIn = true;
                     Element.show(topDocument.getElementById("topDiv"));
                     Element.show(frames["leftF"].document.getElementById("treeDiv"));
                 }
@@ -62,7 +63,6 @@
                 Ajax.Responders.register(globalAjaxHandlers);
                 itemInit();
                 treeInit();
-               
                 //updateInfo();
             }
             
