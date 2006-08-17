@@ -116,6 +116,9 @@
 #define DEFAULT_BOOKMARK_FILE           "mediatomb.html"
 #define DEFAULT_IGNORE_UNKNOWN_EXTENSIONS "no"
 #define DEFAULT_IMPORT_SCRIPT           "import.js"
+#define DEFAULT_MYSQL_HOST              "localhost"
+#define DEFAULT_MYSQL_DB                "mediatomb"
+#define DEFAULT_MYSQL_USER              "mediatomb"
 
 
 

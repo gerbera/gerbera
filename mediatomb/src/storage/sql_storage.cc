@@ -251,10 +251,7 @@ void SQLStorage::addObject(Ref<CdsObject> obj)
 
 //    log_debug("insert_query: %s\n", query->toString().c_str());
 
-    exec(qb->toString());
-
-    obj->setID(lastInsertID());
-
+    obj->setID(exec(qb->toString(), true));
 }
 
 void SQLStorage::updateObject(zmm::Ref<CdsObject> obj)
@@ -567,10 +564,12 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row, select_mode_t mo
     return obj;
 }
 
+/*
 void SQLStorage::eraseObject(Ref<CdsObject> object)
 {
     throw _Exception(_("SQLStorage::eraseObject shuold never be called !!!!\n"));
 }
+*/
 
 int SQLStorage::getTotalFiles()
 {

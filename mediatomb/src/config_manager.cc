@@ -156,18 +156,19 @@ void ConfigManager::validate(String serverhome)
 #ifdef HAVE_SQLITE3	    
         if (dbDriver == "sqlite3")
         {
-            prepare_path(_("/server/storage/database-file"));            
+            prepare_path(_("/server/storage/database-file"));
             break;
         }
 #endif
 #ifdef HAVE_MYSQL
         if (dbDriver == "mysql")
         {
-            checkOptionString(_("/server/storage/host"));
-            checkOptionString(_("/server/storage/database"));
-            checkOptionString(_("/server/storage/username"));
-            if (getElement(_("/server/storage/password")) == nil)
-                throw _Exception(_("/server/storage/password option not found")); 
+            getOption(_("/server/storage/host"), _(DEFAULT_MYSQL_HOST));
+            getOption(_("/server/storage/database"), _(DEFAULT_MYSQL_DB));
+            getOption(_("/server/storage/username"), _(DEFAULT_MYSQL_USER));
+            getOption(_("/server/storage/port"), _("0"));
+            //getOption(_("/server/storage/socket")); - checked in mysql_storage.cc
+            //getOption(_("/server/storage/password")); - checked in mysql_storage.cc
             break;
         }
 #endif

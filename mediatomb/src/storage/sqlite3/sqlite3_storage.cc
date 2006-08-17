@@ -79,7 +79,7 @@ String Sqlite3Storage::quote(String value)
 
 void Sqlite3Storage::reportError(String query)
 {
-    log_warning("SQLITE3: (%d) %s\nQuery:%s\n",
+    log_error("SQLITE3: (%d) %s\nQuery:%s\n",
         sqlite3_errcode(db),
         sqlite3_errmsg(db),
         (query == nil) ? "unknown" : query.c_str()
@@ -92,6 +92,7 @@ void Sqlite3Storage::mutexCondInit(pthread_mutex_t *mutex, pthread_cond_t *cond)
     pthread_mutex_init(mutex, NULL);
     pthread_cond_init(cond, NULL);
 }
+
 void Sqlite3Storage::waitForTask(Ref<SLTask> task, pthread_mutex_t *mutex, pthread_cond_t *cond)
 {
     addTask(task);
@@ -111,33 +112,22 @@ Ref<SQLResult> Sqlite3Storage::select(String query)
     pthread_mutex_t selectMutex;
     pthread_cond_t selectCond;
     mutexCondInit(&selectMutex, &selectCond);
-    SLSelectTask *ptask = new SLSelectTask(query, &selectMutex, &selectCond);
-    Ref<SLTask> task(ptask);
-    waitForTask(task, &selectMutex, &selectCond);
-    Ref<SQLResult> res(ptask->pres.getPtr());
-    return res;
+    Ref<SLSelectTask> ptask (new SLSelectTask(query, &selectMutex, &selectCond));
+    waitForTask(RefCast(ptask, SLTask), &selectMutex, &selectCond);
+    return RefCast(ptask->pres, SQLResult);
 }
 
-void Sqlite3Storage::exec(String query)
+int Sqlite3Storage::exec(String query, bool getLastInsertId)
 {
     pthread_mutex_t execMutex;
     pthread_cond_t execCond;
     mutexCondInit(&execMutex, &execCond);
-    SLExecTask *ptask = new SLExecTask(query, &execMutex, &execCond);
-    Ref<SLTask> task(ptask);
-    waitForTask(task, &execMutex, &execCond);
+    Ref<SLExecTask> ptask (new SLExecTask(query, getLastInsertId, &execMutex, &execCond));
+    waitForTask(RefCast(ptask, SLTask), &execMutex, &execCond);
+    if (getLastInsertId) return ptask->lastInsertId;
+    else return -1;
 }
 
-int Sqlite3Storage::lastInsertID()
-{
-    pthread_mutex_t execMutex;
-    pthread_cond_t execCond;
-    mutexCondInit(&execMutex, &execCond);
-    SLGetLastInsertIdTask *ptask = new SLGetLastInsertIdTask(&execMutex, &execCond);
-    Ref<SLTask> task(ptask);
-    waitForTask(task, &execMutex, &execCond);
-    return ptask->lastInsertId;
-}
 
 void *Sqlite3Storage::staticThreadProc(void *arg)
 {
@@ -169,7 +159,7 @@ void Sqlite3Storage::threadProc()
         if(taskQueue->size() == 0)
         {
             /* if nothing to do, sleep until awakened */
-            pthread_cond_wait(&sqliteCond, &sqliteMutex);            
+            pthread_cond_wait(&sqliteCond, &sqliteMutex);
             unlock();
             continue;
         }
@@ -263,35 +253,34 @@ SLSelectTask::SLSelectTask(zmm::String query, pthread_mutex_t* mutex, pthread_co
 void SLSelectTask::run(Sqlite3Storage *sl)
 {
     char *err;
-    Sqlite3Result * lpres = new Sqlite3Result(); 
-    pres = Ref<Sqlite3Result>(lpres); 
+    pres = Ref<Sqlite3Result>(new Sqlite3Result()); 
     
     int ret = sqlite3_get_table(
         sl->db,
         query.c_str(),
-        &lpres->table,
-        &lpres->nrow,
-        &lpres->ncolumn,
+        &pres->table,
+        &pres->nrow,
+        &pres->ncolumn,
         &err
     );
     
     if(ret != SQLITE_OK)
     {
-        pthread_cond_signal(cond);
         sl->reportError(query);
         throw _StorageException(_("Sqlite3: query error"));
     }
 
-    lpres->row = pres->table;
-    lpres->cur_row = 0;
+    pres->row = pres->table;
+    pres->cur_row = 0;
 }
 
 
 /* SLExecTask */
 
-SLExecTask::SLExecTask(zmm::String query, pthread_mutex_t* mutex, pthread_cond_t* cond) : SLTask(mutex, cond)
+SLExecTask::SLExecTask(zmm::String query, bool getLastInsertId, pthread_mutex_t* mutex, pthread_cond_t* cond) : SLTask(mutex, cond)
 {
     this->query = query;
+    this->getLastInsertId = getLastInsertId;
 }
 
 void SLExecTask::run(Sqlite3Storage *sl)
@@ -309,17 +298,9 @@ void SLExecTask::run(Sqlite3Storage *sl)
         sl->reportError(query);
         throw _StorageException(_("Sqlite3: query error"));
     }
+    if (getLastInsertId)
+        lastInsertId = sqlite3_last_insert_rowid(sl->db);
 }
-
-SLGetLastInsertIdTask::SLGetLastInsertIdTask(pthread_mutex_t* mutex, pthread_cond_t* cond) : SLTask(mutex, cond)
-{
-}
-
-void SLGetLastInsertIdTask::run(Sqlite3Storage *sl)
-{
-    lastInsertId = sqlite3_last_insert_rowid(sl->db);
-}
-
 
 /* Sqlite3Result */
 
@@ -343,9 +324,9 @@ Ref<SQLRow> Sqlite3Result::nextRow()
         cur_row++;
         if (cur_row <= nrow)
         {
-            Sqlite3Row *p = new Sqlite3Row(row);
+            Ref<Sqlite3Row> p (new Sqlite3Row(row));
             p->res = Ref<Sqlite3Result>(this);
-            return Ref<SQLRow>(p);
+            return RefCast(p, SQLRow);
         }
         else
             return nil;

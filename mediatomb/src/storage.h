@@ -118,7 +118,7 @@ public:
     virtual void init() = 0;
     virtual void addObject(zmm::Ref<CdsObject> object) = 0;
     virtual void updateObject(zmm::Ref<CdsObject> object) = 0;
-    virtual void eraseObject(zmm::Ref<CdsObject> object) = 0;
+    //virtual void eraseObject(zmm::Ref<CdsObject> object) = 0;
 
     virtual zmm::Ref<zmm::Array<CdsObject> > browse(zmm::Ref<BrowseParam> param) = 0;
     virtual zmm::Ref<zmm::Array<zmm::StringBase> > getMimeTypes() = 0;
@@ -133,9 +133,9 @@ public:
     
     /* utility methods */
     virtual zmm::Ref<CdsObject> loadObject(int objectID,
-                                           select_mode_t mode = SELECT_FULL);
+                                           select_mode_t mode = SELECT_FULL) = 0;
     virtual int getChildCount(int contId, bool containersOnly = false) = 0;
-    virtual void removeObject(zmm::Ref<CdsObject> object);
+    virtual void removeObject(zmm::Ref<CdsObject> object) = 0;
     virtual void removeObject(int objectID);
     virtual zmm::Ref<zmm::Array<CdsObject> > getObjectPath(int objectID);
 

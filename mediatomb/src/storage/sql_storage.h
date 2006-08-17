@@ -54,12 +54,11 @@ public:
     /* methods to override in subclasses */
     virtual zmm::String quote(zmm::String str) = 0;
     virtual zmm::Ref<SQLResult> select(zmm::String query) = 0;
-    virtual void exec(zmm::String query) = 0;
-    virtual int lastInsertID() = 0;
+    virtual int exec(zmm::String query, bool getLastInsertId = false) = 0;
 
     virtual void addObject(zmm::Ref<CdsObject> object);
     virtual void updateObject(zmm::Ref<CdsObject> object);
-    virtual void eraseObject(zmm::Ref<CdsObject> object);
+    //virtual void eraseObject(zmm::Ref<CdsObject> object);
     virtual zmm::Ref<CdsObject> loadObject(int objectID,
                                            select_mode_t mode = SELECT_FULL);
     virtual int getChildCount(int contId, bool containersOnly = false);

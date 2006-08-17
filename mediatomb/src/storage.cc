@@ -82,7 +82,8 @@ Ref<Storage> Storage::getInstance()
      return primary_inst;
 }
 
-/* this is a fallback implementation! Derived classes should override */
+/*
+// this is a fallback implementation! Derived classes should override 
 Ref<CdsObject> Storage::loadObject(int objectID, select_mode_t mode)
 {
     Ref<BrowseParam> param(new BrowseParam(objectID, BROWSE_METADATA));
@@ -106,6 +107,8 @@ void Storage::removeObject(zmm::Ref<CdsObject> obj)
     }
     eraseObject(obj);
 }
+*/
+
 void Storage::removeObject(int objectID)
 {
     Ref<CdsObject> obj = loadObject(objectID);

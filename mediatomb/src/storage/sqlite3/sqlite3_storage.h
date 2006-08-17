@@ -87,26 +87,14 @@ public:
     /// \param query The SQL query string
     /// \param mutex see SLTask::SLTask()
     /// \param cond see SLTask::SLTask()
-    SLExecTask(zmm::String query, pthread_mutex_t* mutex, pthread_cond_t* cond);
+    SLExecTask(zmm::String query, bool getLastInsertId, pthread_mutex_t* mutex, pthread_cond_t* cond);
     virtual void run(Sqlite3Storage *sl);
+    int lastInsertId;
 protected:
     /// \brief The SQL query string
     zmm::String query;
-};
-
-/// \brief A task for the sqlite3 thread to get the "last_insert_id".
-class SLGetLastInsertIdTask : public SLTask
-{
-public:
-    /// \brief Constructor for the sqlite3 "get last insert id" task
-    /// \param mutex see SLTask::SLTask()
-    /// \param cond see SLTask::SLTask()
-    SLGetLastInsertIdTask(pthread_mutex_t* mutex, pthread_cond_t* cond);
     
-    virtual void run(Sqlite3Storage *sl);
-    
-    /// \brief the result of the task
-    int lastInsertId;
+    bool getLastInsertId;
 };
 
 /// \brief Represents a row of a result of a sqlite3 select
@@ -142,8 +130,6 @@ protected:
 };
 
 
-void unlock_func(void *data);
-
 
 /// \brief The Storage class for using SQLite3
 class Sqlite3Storage : public SQLStorage
@@ -155,12 +141,13 @@ public:
     virtual void init();
     virtual zmm::String quote(zmm::String str);
     virtual zmm::Ref<SQLResult> select(zmm::String query);
-    virtual void exec(zmm::String query);
-    virtual int lastInsertID();
+    virtual int exec(zmm::String query, bool getLastInsertId = false);
     virtual void shutdown();
     
 protected:
     sqlite3 *db;
+    
+    void reportError(zmm::String query);
     
     static void *staticThreadProc(void *arg);
     void threadProc();
@@ -184,9 +171,6 @@ protected:
     void unlock();
     void signal();
     
-    void reportError(zmm::String query);
-
-    friend void unlock_func(void *data);
     friend class SLSelectTask;
     friend class SLExecTask;
     friend class SLGetLastInsertIdTask;
