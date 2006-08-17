@@ -33,6 +33,12 @@
 #include "scripting/scripting.h"
 #endif
 
+typedef enum scan_level_t
+{
+    Basic, // file was added or removed from the directory
+    Full   // file was modified/added/removed
+};
+
 class ContentManager;
 
 class CMTask : public zmm::Object
@@ -77,8 +83,9 @@ class CMRescanDirectoryTask : public CMTask
 {
 protected: 
     int objectID;
+    scan_level_t scanLevel;
 public:
-    CMRescanDirectoryTask(int objectID);
+    CMRescanDirectoryTask(int objectID, scan_level_t scanLevel);
     virtual void run();
 };
 
@@ -135,14 +142,14 @@ public:
     int loadAccounting(bool async=true);
     int addFile(zmm::String path, bool recursive=true, bool async=true);
     int removeObject(int objectID, bool async=true);
-    int rescanDirectory(int objectID, bool async=true);
+    int rescanDirectory(int objectID, scan_level_t scanLevel = Basic, bool async=true);
     
     /* don't use these, use the above methods */
     void _loadAccounting();
     void _addFile(zmm::String path, bool recursive=0);
     void _addFile2(zmm::String path, bool recursive=0);
     void _removeObject(int objectID);
-    void _rescanDirectory(int objectID);
+    void _rescanDirectory(int objectID, scan_level_t scanLevel);
     
 
     /// \brief Updates an object in the database using the given parameters.
@@ -182,7 +189,8 @@ protected:
     void initScripting();
     void destroyScripting();
 #endif
-    
+    time_t last_modified;
+
     int ignore_unknown_extensions;
     zmm::Ref<Dictionary> extension_mimetype_map;
     zmm::Ref<Dictionary> mimetype_upnpclass_map;

@@ -131,7 +131,6 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
 /// \return -1 Error.
 static int web_get_info(IN const char *filename, OUT struct File_Info *info)
 {
-//    log_debug("web_get_info: start\n");
     try
     {
         Ref<RequestHandler> reqHandler = create_request_handler(filename);

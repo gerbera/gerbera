@@ -29,6 +29,7 @@
 #include "upnp_cds.h"
 #include "upnp_cm.h"
 #include "config_manager.h"
+#include <pthread.h>
 
 /// \brief Provides methods to initialize and shutdown
 /// and to retrieve various information about the server.

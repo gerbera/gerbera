@@ -81,9 +81,14 @@ zmm::String StringConverter::convert(String str)
     
     //log_debug(("iconv: BEFORE: input bytes left: %d  output bytes left: %d\n",
     //       input_bytes, output_bytes));
-    
-    ret = iconv(cd, (char **)input_ptr, &input_bytes,
+#ifdef __FreeBSD__
+    ret = iconv(cd, (const char**)input_ptr, &input_bytes,
             output_ptr, &output_bytes);
+#else
+    ret = iconv(cd, input_ptr, &input_bytes,
+            output_ptr, &output_bytes);
+#endif
+
     if (ret == -1)
     {
         log_error("iconv: %s\n", strerror(errno));

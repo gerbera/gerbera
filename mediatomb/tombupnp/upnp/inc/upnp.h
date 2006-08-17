@@ -39,6 +39,7 @@
 #include <stdio.h>
 #ifdef __FreeBSD__
 #include <time.h>
+#include <sys/types.h>
 #endif
 #include "ixml.h"
 #include "upnpconfig.h"

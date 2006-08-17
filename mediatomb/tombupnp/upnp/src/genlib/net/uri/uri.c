@@ -34,8 +34,11 @@
 ************************************************************************/
 
 #ifdef __FreeBSD__
-#include <lwres/netdb.h>
+    #ifdef HAVE_LWRES_NETDB_H
+        #include <lwres/netdb.h>
+    #endif
 #endif
+
 #include "config.h"
 #include "uri.h"
 
@@ -618,7 +621,7 @@ parse_hostport( char *in,
                                    &h,
                                    temp_hostbyname_buff,
                                    BUFFER_SIZE, &errcode );
-#elif defined(__FreeBSD__)
+#elif defined(HAVE_LIBLWRES)
         h = lwres_gethostbyname_r( temp_host_name,
                                    &h_buf,
                                    temp_hostbyname_buff,

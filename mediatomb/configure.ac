@@ -57,7 +57,7 @@ AC_CHECK_HEADER([iconv.h],
                     CFLAGS="$CFLAGS -I/usr/local/include" 
                     LDFLAGS="$LDFLAGS -L/usr/local/lib"
                     CXXFLAGS="$CXXFLAGS -I/usr/local/include" 
-                    AC_CHECK_FUNCS([iconv],[],[AC_MSG_ERROR(iconv library not found on your system)],[-liconv])
+                    AC_CHECK_LIB(iconv, iconv,[],[AC_MSG_ERROR(iconv library not found on your system)])
                 ],
                 [
                     CFLAGS="$CFLAGS_SAVE"
@@ -67,7 +67,9 @@ AC_CHECK_HEADER([iconv.h],
                 ])
         ])
 
-AC_CHECK_HEADERS(execinfo.h,[],[])
+CXXFLAGS_SAVE="$CXXFLAGS"
+CXXFLAGS="$CXXFLAGS -I/usr/local/include"
+AC_CHECK_HEADERS(execinfo.h,[],[CXXFLAGS="$CXXFLAGS_SAVE"])
 
 AC_CHECK_TYPES([time_t], [], [], [#include <sys/types.h>])
 
@@ -122,6 +124,16 @@ AC_CHECK_FUNCS([strrchr strstr strtol strtoul uname pthread_mutex_lock], [],
 
 AC_CHECK_FUNCS([getopt_long], [AC_DEFINE([_GETOPT_DECLARED],[1],[avoid conflict with unistd.h on BSD systems])],
                 [AC_MSG_ERROR(required library function not found)])
+
+AC_CHECK_FUNCS([gethostbyname_r],[],
+        [
+            AC_CHECK_HEADERS([lwres/netdb.h],
+                [
+                    AC_CHECK_LIB(lwres, lwres_gethostbyname_r,[],[AC_MSG_ERROR(required library function not found)])
+                ],
+                [AC_MSG_ERROR(required header not found)])
+        ])
+
 # this is not optional, we need the device and the internal webserver
 AC_DEFINE([UPNP_HAVE_DEVICE], [1], [Compile device API])
 AC_DEFINE([UPNP_HAVE_WEBSERVER], [1], [Compile internal web server])    

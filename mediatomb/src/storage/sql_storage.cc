@@ -223,6 +223,9 @@ void SQLStorage::addObject(Ref<CdsObject> obj)
         *fields << ", update_id";
         *values << ", " << cont->getUpdateID();
 
+        *fields << ", location";
+        *values << ", " << quote(cont->getLocation());
+
         *fields << ", is_searchable";
         *values << ", " << cont->isSearchable();
     }

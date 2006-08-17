@@ -78,6 +78,8 @@ ContentManager::ContentManager() : Object()
     ignore_unknown_extensions = 0;
 
     shutdownFlag = false;
+    
+    last_modified = 0;
 
     acct = Ref<CMAccounting>(new CMAccounting());    
     taskQueue = Ref<Array<CMTask> >(new Array<CMTask>());    
@@ -293,25 +295,87 @@ void ContentManager::_removeObject(int objectID)
     um->flushUpdates();
 }
 
-void ContentManager::_rescanDirectory(int objectID)
+void ContentManager::_rescanDirectory(int objectID, scan_level_t scanLevel)
 {
     log_debug("start\n");
+    int ret;
+    struct dirent *dent;
+    struct stat statbuf;
+    String path;
     // TEST CODE REMOVE THIS 
-#if 0
-    objectID = 947; 
+
+    objectID = 4780; 
 
     Ref<Storage> storage = Storage::getInstance();
     Ref<CdsObject> obj = storage->loadObject(objectID);
     if (!IS_CDS_CONTAINER(obj->getObjectType()))
     {
-        throw Exception(_("Object is not a container: rescan must be triggered on directories\n"));
+        throw _Exception(_("Object is not a container: rescan must be triggered on directories\n"));
     }
 
     log_debug("Rescanning container: %s, id=%d\n", 
                obj->getTitle().c_str(), objectID);
 
-    struct dirent *dent;
-#endif
+    String location = obj->getLocation();
+    if (!string_ok(path))
+        throw _Exception(_("Container has no location information!\n"));
+
+    if (scanLevel == Basic)
+    {
+        ret = stat(path.c_str(), &statbuf);
+        if (ret != 0)
+        {
+            throw _Exception(_("Could not stat directory!\n"));
+        }
+
+        if (last_modified < statbuf.st_mtime)
+        {
+            last_modified = statbuf.st_mtime;
+ //           _rescanDirectoryBasic(objectID);
+        }
+
+    }
+    else if (scanLevel == Full)
+    {
+
+
+        DIR *dir = opendir(location.c_str());
+        if (!dir)
+        {
+            throw _Exception(_("Could not list directory ")+
+                    location + " : " + strerror(errno));
+        }
+
+        while ((dent = readdir(dir)) != NULL)
+        {
+            char *name = dent->d_name;
+            if (name[0] == '.')
+            {
+                if (name[1] == 0)
+                {
+                    continue;
+                }
+                else if (name[1] == '.' && name[2] == 0)
+                {
+                    continue;
+                }
+            }
+
+            path = location + "/" + name; 
+            log_debug("Checking name: %s\n", path.c_str());
+            ret = stat(path.c_str(), &statbuf);
+            if (ret != 0)
+            {
+                log_error("Failed to stat %s\n"), path.c_str();
+                continue;
+            }
+
+        }
+        closedir(dir);
+    }
+    else
+        throw _Exception(_("Unsupported scan type!"));
+
 }
 
 /* scans the given directory and adds everything recursively */
@@ -510,8 +574,8 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
         {
             clone->validate();
             storage->updateObject(clone);
-            storage->incrementUIUpdateID(cont->getParentID());
             um->containerChanged(cont->getParentID());
+            storage->incrementUIUpdateID(cont->getParentID());
         }
     }
 
@@ -521,18 +585,32 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
 void ContentManager::addObject(zmm::Ref<CdsObject> obj)
 {
     obj->validate();
+    int parent_id;
     Ref<Storage> storage = Storage::getInstance();
     Ref<UpdateManager> um = UpdateManager::getInstance();
+        log_debug("Adding: parent ID is %d\n", obj->getParentID());
     storage->addObject(obj);
+    log_debug("After adding: parent ID is %d\n", obj->getParentID());
+
+    parent_id = obj->getParentID();
+    if ((parent_id != -1) && (storage->getChildCount(parent_id) == 1))
+    {
+        Ref<CdsObject> parent(new CdsObject());
+        parent = storage->loadObject(parent_id);
+        log_debug("Will update ID %d\n", parent->getParentID());
+        um->containerChanged(parent->getParentID());
+    }
+
+    um->containerChanged(obj->getParentID());
     if (IS_CDS_CONTAINER(obj->getObjectType()))
     {
         storage->incrementUIUpdateID(obj->getParentID());
     }
-
-    um->containerChanged(obj->getParentID());
-    
+   
     if (! obj->isVirtual() && IS_CDS_ITEM(obj->getObjectType()))
         ContentManager::getInstance()->getAccounting()->totalFiles++;
+
+    um->flushUpdates();
 }
 
 void ContentManager::updateObject(Ref<CdsObject> obj)
@@ -941,18 +1019,18 @@ int ContentManager::removeObject(int objectID, bool async)
     }
 }
 
-int ContentManager::rescanDirectory(int objectID, bool async)
+int ContentManager::rescanDirectory(int objectID, scan_level_t scanLevel, bool async)
 {
     if (async)
     {
         // building container path for the description
-        Ref<CMTask> task(new CMRescanDirectoryTask(objectID));
+        Ref<CMTask> task(new CMRescanDirectoryTask(objectID, scanLevel));
         task->setDescription(_("Rescan TesT"));
         return addTask(task);
     }
     else
     {
-        _rescanDirectory(objectID);
+        _rescanDirectory(objectID, scanLevel);
         return false;
     }
 }
@@ -991,13 +1069,14 @@ void CMRemoveObjectTask::run()
     cm->_removeObject(objectID);
 }
 
-CMRescanDirectoryTask::CMRescanDirectoryTask(int objectID) : CMTask()
+CMRescanDirectoryTask::CMRescanDirectoryTask(int objectID, scan_level_t scanLevel) : CMTask()
 {
     this->objectID = objectID;
+    this->scanLevel = scanLevel;
 }
 void CMRescanDirectoryTask::run()
 {
-    cm->_rescanDirectory(objectID);
+    cm->_rescanDirectory(objectID, scanLevel);
 }
 
 CMLoadAccountingTask::CMLoadAccountingTask() : CMTask()

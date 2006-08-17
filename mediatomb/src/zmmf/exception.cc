@@ -23,8 +23,8 @@
 
 #include "exception.h"
 
-#ifndef __CYGWIN__
-#include <execinfo.h>
+#ifdef HAVE_EXECINFO_H
+    #include <execinfo.h>
 #endif
 
 using namespace zmm;
@@ -37,7 +37,7 @@ Exception::Exception(String message, const char* file, int line, const char* fun
     this->file = String(file);
     this->function = String(function);
     this->line = line;
-#ifndef __CYGWIN__
+#if defined HAVE_BACKTRACE && defined HAVE_BACKTRACE_SYMBOLS
     void *b[100];
     int size = backtrace(b, 100);
 
@@ -59,7 +59,7 @@ Exception::Exception(String message)
     this->file = nil;
     this->function = nil;
     this->line = -1;
-#ifndef __CYGWIN__
+#if defined HAVE_BACKTRACE && defined HAVE_BACKTRACE_SYMBOLS
     void *b[100];
     int size = backtrace(b, 100);
 
@@ -97,7 +97,7 @@ void Exception::printStackTrace(FILE *file)
     {
         fprintf(file, "Exception: %s\n", message.c_str());
     }
-#ifndef __CYGWIN__
+#if defined HAVE_BACKTRACE && defined HAVE_BACKTRACE_SYMBOLS
     for (int i = 0; i < stackTrace->size(); i++)
     {
         Ref<StringBase> trace = stackTrace->get(i);

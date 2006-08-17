@@ -91,8 +91,7 @@ void ConnectionManagerService::process_action_request(Ref<ActionRequest> request
     else
     {
         // invalid or unsupported action
-        log_debug(("unrecognized action %s\n", 
-                request->getActionName().c_str()));
+        log_debug("unrecognized action %s\n", request->getActionName().c_str());
         request->setErrorCode(UPNP_E_INVALID_ACTION);
         throw UpnpException(UPNP_E_INVALID_ACTION, _("unrecognized action"));
     }
