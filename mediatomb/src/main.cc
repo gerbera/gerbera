@@ -49,6 +49,8 @@ using namespace zmm;
 
 int shutdown_flag = 0;
 void signal_handler(int signal);
+void signal_handler_stage2(int signal);
+void signal_handler_kill(int signal);
 
 int main(int argc, char **argv, char **envp)
 {
@@ -417,6 +419,22 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
 
 void signal_handler(int signal)
 {
+    log_info("MediaTomb shutting down. Please wait...\n");
     shutdown_flag = 1;
+    ::signal(SIGINT, signal_handler_stage2);
+    ::signal(SIGTERM, signal_handler_stage2);
+}
+
+void signal_handler_stage2(int signal)
+{
+    log_info("still shutting down...; signal again to kill MediaTomb.\n");
+    ::signal(SIGINT, signal_handler_kill);
+    ::signal(SIGTERM, signal_handler_kill);
+}
+
+void signal_handler_kill(int signal)
+{
+    log_error("User insisted too much! UNCLEAN shutdown, killing all threads...\n");
+    exit(1);
 }
 
