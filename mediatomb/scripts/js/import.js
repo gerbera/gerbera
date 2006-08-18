@@ -92,15 +92,27 @@ function addAudio(obj)
 
     var artist = obj.meta[M_ARTIST];
     if (!artist) 
+    {
         artist = 'Unknown';
+        artist_full = null;
+    }
     else
+    {
+        artist_full = artist;
         desc = artist;
+    }
 
     var album = obj.meta[M_ALBUM];
     if (!album) 
+    {
         album = 'Unknown';
+        album_full = null;
+    }
     else
+    {
         desc = desc + ', ' + album;
+        album_full = album;
+    }
 
     if (desc)
         desc = desc + ', ';
@@ -109,7 +121,9 @@ function addAudio(obj)
 
     var date = obj.meta[M_DATE];
     if (!date)
+    {
         date = 'Unknown';
+    }
     else
     {
         date = normalizeDate(date);
@@ -118,9 +132,13 @@ function addAudio(obj)
 
     var genre = obj.meta[M_GENRE];
     if (!genre)
+    {
         genre = 'Unknown';
+    }
     else
+    {
         desc = desc + ', ' + genre;
+    }
 
     var description = obj.meta[M_DESCRIPTION];
     if (!description) 
@@ -149,7 +167,14 @@ function addAudio(obj)
     addCdsObject(obj);
 
     chain = new Array('Audio', 'All - full name');
-    obj.title = artist + ' - ' + album + ' - ' + title;
+    temp = '';
+    if (artist_full)
+        temp = artist_full;
+
+    if (album_full)
+        temp = temp + ' - ' + album_full + ' - ';
+
+    obj.title = temp + title;
     obj.parentID = addContainerChain("0", chain);
     addCdsObject(obj);
 
