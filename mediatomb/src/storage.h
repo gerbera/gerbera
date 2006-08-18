@@ -25,6 +25,7 @@
 #include "zmmf/zmmf.h"
 #include "cds_objects.h"
 #include "dictionary.h"
+#include "sync.h"
 
 typedef enum
 {
@@ -149,6 +150,7 @@ public:
 protected:
     int uiUpdateId;
     void getObjectPath(zmm::Ref<zmm::Array<CdsObject> > arr, int objectID);
+    static Mutex mutex;
 };
 
 #endif // __STORAGE_H__

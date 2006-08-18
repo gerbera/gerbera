@@ -41,6 +41,8 @@ Storage::Storage() : Object()
 {
 }
 
+
+
 static Ref<Storage> create_primary_inst()
 {
     String type;
@@ -75,11 +77,18 @@ static Ref<Storage> create_primary_inst()
     return storage;
 }
 
+Mutex Storage::mutex = Mutex(false);
+
 Ref<Storage> Storage::getInstance()
 {
-     if(primary_inst == nil)
-         primary_inst = create_primary_inst();
-     return primary_inst;
+    if(primary_inst == nil)
+    {
+        mutex.lock();
+        if (primary_inst == nil)
+            primary_inst = create_primary_inst();
+        mutex.unlock();
+    }
+    return primary_inst;
 }
 
 /*
