@@ -46,15 +46,19 @@ public:
     bool is_running();
     
     /// \brief modify the creator of the task using the supplied pthread_mutex and pthread_cond, that the task is finished
+    void sendSignal(zmm::Exception *e);
+    
     void sendSignal();
     
+    zmm::Exception *exception;
 protected:
     /// \brief true as long as the task is not finished
     ///
     /// The value is set by the constructor to true and then to false be sendSignal()
     bool running;
-    pthread_cond_t* cond;
-    pthread_mutex_t* mutex;
+    pthread_cond_t *cond;
+    pthread_mutex_t *mutex;
+    
 };
 
 /// \brief A task for the mysql thread to do a SQL select.
@@ -138,30 +142,33 @@ public:
     virtual int exec(zmm::String query, bool getLastInsertId = false);
     virtual void shutdown();
 protected:
-    void reportError(zmm::String query, MYSQL *db);
+    zmm::String getError(MYSQL *db);
+    
+    struct _threads
+    {
+        pthread_t thread;
+        pthread_cond_t cond;
+        pthread_mutex_t mutex;
+        MysqlStorage *instance;
+        zmm::String error;
+    } threads[MYSQL_STORAGE_START_THREADS];
     
     static void *staticThreadProc(void *arg);
-    void threadProc();
-    void threadCleanup(void *arg);
+    void threadProc(struct MysqlStorage::_threads *thread);
+    static void staticThreadCleanup(void *arg);
     
     int addTask(zmm::Ref<MSTask> task);
-    
-    pthread_t mysqlThread;
-    pthread_cond_t mysqlCond;
-    pthread_mutex_t mysqlMutex;
     
     /// \brief is set to true by shutdown() if the mysql thread should terminate
     bool shutdownFlag;
     
     /// \brief the tasks to be done by the mysql thread
     zmm::Ref<zmm::Array<MSTask> > taskQueue;
+    pthread_cond_t taskCond;
+    pthread_mutex_t taskMutex;
     
     void mutexCondInit(pthread_mutex_t *mutex, pthread_cond_t *cond);
     void waitForTask(zmm::Ref<MSTask> task, pthread_mutex_t *mutex, pthread_cond_t *cond);
-    
-    void lock();
-    void unlock();
-    void signal();
 };
 
 

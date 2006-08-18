@@ -26,6 +26,7 @@
 #include "dictionary.h"
 #include "storage.h"
 #include "hash.h"
+#include "sync.h"
 
 class SQLRow : public zmm::Object
 {
@@ -48,14 +49,14 @@ class SQLStorage : public Storage
 public:
     SQLStorage();
     virtual ~SQLStorage();
-
+    
     virtual void init();
-
+    
     /* methods to override in subclasses */
     virtual zmm::String quote(zmm::String str) = 0;
     virtual zmm::Ref<SQLResult> select(zmm::String query) = 0;
     virtual int exec(zmm::String query, bool getLastInsertId = false) = 0;
-
+    
     virtual void addObject(zmm::Ref<CdsObject> object);
     virtual void updateObject(zmm::Ref<CdsObject> object);
     //virtual void eraseObject(zmm::Ref<CdsObject> object);
@@ -72,7 +73,7 @@ public:
     
     virtual zmm::Ref<zmm::Array<CdsObject> > browse(zmm::Ref<BrowseParam> param);
     virtual zmm::Ref<zmm::Array<zmm::StringBase> > getMimeTypes();
-
+    
     virtual zmm::Ref<CdsObject> findObjectByTitle(zmm::String title, int parentID);
     virtual void incrementUpdateIDs(int *ids, int size);
     virtual void incrementUIUpdateID(int id);
@@ -89,7 +90,10 @@ protected:
     zmm::String selectQueryFull;
     
     /* helpers for removeObject() */
-
+    
+    zmm::Ref<Mutex> mutex;
+    
+    
     int *rmIDs;
     zmm::Ref<DBHash<int> > rmIDHash;
     int *rmParents;

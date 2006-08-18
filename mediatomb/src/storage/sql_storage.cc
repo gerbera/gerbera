@@ -117,6 +117,8 @@ SQLStorage::SQLStorage() : Storage()
 
     rmIDs = NULL;
     rmParents = NULL;
+    
+    mutex = Ref<Mutex>(new Mutex(false));
 }
 
 void SQLStorage::init()
@@ -648,6 +650,7 @@ Ref<Array<CdsObject> > SQLStorage::selectObjects(Ref<SelectParam> param,
 
 void SQLStorage::removeObject(Ref<CdsObject> obj)
 {
+    mutex->lock();
     rmInit();
     try
     {
@@ -669,6 +672,7 @@ void SQLStorage::removeObject(Ref<CdsObject> obj)
     }
     log_debug("CLEANUP (NORMAL)\n");
     rmCleanup();
+    mutex->unlock();
 }
 
 

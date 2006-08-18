@@ -33,6 +33,7 @@ using namespace mxml;
 
 MysqlStorage::MysqlStorage() : SQLStorage()
 {
+    shutdownFlag = false;
 }
 MysqlStorage::~MysqlStorage()
 {
@@ -42,26 +43,49 @@ void MysqlStorage::init()
 {
     Ref<MSTask> task;
     
-    int ret;
-    
-    ret = pthread_mutex_init(&mysqlMutex, NULL);
-    ret = pthread_cond_init(&mysqlCond, NULL);
+    taskQueue = Ref<Array<MSTask> >(new Array<MSTask>());
     
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
     
-    taskQueue = Ref<Array<MSTask> >(new Array<MSTask>());
+    pthread_mutex_init(&taskMutex, NULL);
+    pthread_cond_init(&taskCond, NULL);
     
-    ret = pthread_create(
-        &mysqlThread,
-        &attr,
-        MysqlStorage::staticThreadProc,
-        this
-    );
-    
+    //threads = new _threads[MYSQL_STORAGE_START_THREADS];
+    for (int i=0; i<MYSQL_STORAGE_START_THREADS; ++i)
+    {
+        int ret;
+        struct _threads *thread = &threads[i];
+        thread->instance = this;
+        thread->error = nil;
+        ret = pthread_mutex_init(&thread->mutex, NULL);
+        ret = pthread_cond_init(&thread->cond, NULL);
+        ret = pthread_create(
+            &thread->thread,
+            &attr,
+            MysqlStorage::staticThreadProc,
+            thread
+        );
+        pthread_mutex_lock(&thread->mutex);
+        if (thread->error == nil)
+        {
+            log_debug("waiting for thread %d ...\n", i);
+            pthread_cond_wait(&thread->cond, &thread->mutex);
+            log_debug("thread %d signalled.\n", i);
+        }
+        String error = thread->error;
+        pthread_mutex_unlock(&thread->mutex);
+        //pthread_cond_destroy(&thread->cond);
+        //pthread_mutex_destroy(&thread->mutex);
+        if (thread->error != _(""))
+        {
+            pthread_attr_destroy(&attr);
+            throw _StorageException(thread->error);
+        }
+    }
+    log_debug("leaving.\n");
     pthread_attr_destroy(&attr);
-    
     SQLStorage::init();
 }
 
@@ -77,14 +101,12 @@ String MysqlStorage::quote(String value)
     return ret;
 }
 
-void MysqlStorage::reportError(String query, MYSQL *db)
+String MysqlStorage::getError(MYSQL *db)
 {
-    if (query == nil)
-        query = _("unknown");
-    log_error("Mysql: (%d) %s\nQuery:%s\n",
-        mysql_errno(db),
-        mysql_error(db),
-        query.c_str());
+    Ref<StringBuffer> err_buf(new StringBuffer());
+    *err_buf << "mysql_error(" << String::from(mysql_errno(db));
+    *err_buf << ") " << String(mysql_error(db));
+    return err_buf->toString();
 }
 
 void MysqlStorage::mutexCondInit(pthread_mutex_t *mutex, pthread_cond_t *cond)
@@ -107,6 +129,7 @@ void MysqlStorage::waitForTask(Ref<MSTask> task, pthread_mutex_t *mutex, pthread
     }
     pthread_mutex_destroy(mutex);
     pthread_cond_destroy(cond);
+    if (task->exception != NULL) throw task->exception;
 }
 
 
@@ -133,27 +156,28 @@ int MysqlStorage::exec(String query, bool getLastInsertId)
 
 void MysqlStorage::shutdown()
 {
+    pthread_mutex_lock(&taskMutex);
     shutdownFlag = true;
-    lock();
-    signal();
-    unlock();
+    pthread_cond_broadcast(&taskCond);
+    pthread_mutex_unlock(&taskMutex);
 }
 
 void *MysqlStorage::staticThreadProc(void *arg)
 {
-    MysqlStorage *inst = (MysqlStorage *)arg;
-    inst->threadProc();
+    struct _threads *thread = (_threads*) arg;
+    thread->instance->threadProc(thread);
     log_debug("exiting thread\n");
     pthread_exit(NULL);
     return NULL;
 }
 
-void MysqlStorage::threadCleanup(void *arg)
+void MysqlStorage::staticThreadCleanup(void *arg)
 {
+    log_debug("mysql_close\n");
     mysql_close((MYSQL*)arg);
 }
 
-void MysqlStorage::threadProc()
+void MysqlStorage::threadProc(struct _threads *thread)
 {
     Ref<MSTask> task;
     
@@ -182,13 +206,14 @@ void MysqlStorage::threadProc()
     res_mysql = mysql_init(&db);
     if(! res_mysql)
     {
-        log_debug("x");
-        //throw _StorageException(_("MysqlStorage.init: mysql_init() failed"));
-        //TODO: handle errors
+        pthread_mutex_lock(&thread->mutex);
+        thread->error = getError(&db);
+        pthread_cond_signal(&thread->cond);
+        pthread_mutex_unlock(&thread->mutex);
+        pthread_exit(NULL);
     }
     
-    //TODO:
-    //pthread_cleanup_push(threadCleanup, res_mysql);
+    pthread_cleanup_push(MysqlStorage::staticThreadCleanup, res_mysql);
     
     res_mysql = mysql_real_connect(&db,
         dbHost.c_str(),
@@ -201,21 +226,29 @@ void MysqlStorage::threadProc()
     );
     if(! res_mysql)
     {
-        log_debug("x");
-        reportError(nil, &db);
-        //throw _StorageException(_("MysqlStorage.init: mysql_real_connect() failed"));
-        //TODO: handle errors
+        pthread_mutex_lock(&thread->mutex);
+        thread->error = getError(&db);
+        pthread_cond_signal(&thread->cond);
+        pthread_mutex_unlock(&thread->mutex);
+        pthread_exit(NULL);
     }
     
+    //signalling calling thread that we are ready and no errors occured
+    pthread_mutex_lock(&thread->mutex);
+    thread->error = _("");
+    pthread_cond_signal(&thread->cond);
+    pthread_mutex_unlock(&thread->mutex);
+    
+    log_debug("mysql thread %u started successfully.\n", pthread_self());
     
     while(! shutdownFlag)
     {
-        lock();
+        pthread_mutex_lock(&taskMutex);
         if(taskQueue->size() == 0)
         {
             /* if nothing to do, sleep until awakened */
-            pthread_cond_wait(&mysqlCond, &mysqlMutex);
-            unlock();
+            pthread_cond_wait(&taskCond, &taskMutex);
+            pthread_mutex_unlock(&taskMutex);
             continue;
         }
         else
@@ -223,7 +256,7 @@ void MysqlStorage::threadProc()
             task = taskQueue->get(0);
             taskQueue->remove(0, 1);
         }
-        unlock();
+        pthread_mutex_unlock(&taskMutex);
         
         try
         {
@@ -232,34 +265,21 @@ void MysqlStorage::threadProc()
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            task->sendSignal(&e);
         }
     }
-}
-
-void MysqlStorage::lock()
-{
-    pthread_mutex_lock(&mysqlMutex);
-}
-void MysqlStorage::unlock()
-{
-    pthread_mutex_unlock(&mysqlMutex);
-}
-void MysqlStorage::signal()
-{
-    pthread_cond_signal(&mysqlCond);
+    pthread_cleanup_pop(1);
 }
 
 int MysqlStorage::addTask(zmm::Ref<MSTask> task)
 {
     int ret = false;
-    lock();
-    int size = taskQueue->size();
-    if (size >= 1)
+    pthread_mutex_lock(&taskMutex);
+    if (taskQueue->size() >= 1)
         ret = true;
     taskQueue->append(task);
-    signal();
-    unlock();
+    pthread_cond_signal(&taskCond);
+    pthread_mutex_unlock(&taskMutex);
     return ret;
 }
 
@@ -270,6 +290,7 @@ MSTask::MSTask(pthread_mutex_t *mutex, pthread_cond_t *cond) : Object()
     running = true;
     this->cond = cond;
     this->mutex = mutex;
+    this->exception = NULL;
 }
 bool MSTask::is_running()
 {
@@ -284,6 +305,11 @@ void MSTask::sendSignal()
     pthread_mutex_unlock(mutex);
 }
 
+void MSTask::sendSignal(Exception *e)
+{
+    this->exception = e;
+    sendSignal();
+}
 
 /* MSSelectTask */
 
@@ -299,13 +325,15 @@ void MSSelectTask::run(MYSQL *db)
     
 //#ifdef HAVE_MYSQL_STMT_INIT
 //#ifdef mysql_stmt_init
-//    log_debug("doing mysql_select. thread: %d\n", pthread_self());
+//    
 //#else
 //    log_debug("UUUUUUUUhhh\n");
 //#endif
 //    log_debug("thread_safe? %dn", mysql_thread_safe());
 //    mysql_thread_init();
-
+    
+    log_debug("doing mysql_select. thread: %d\n", pthread_self());
+    
     int res;
     res = mysql_real_query(db, query.c_str(), query.length());
     if(res)
@@ -335,6 +363,9 @@ MSExecTask::MSExecTask(zmm::String query, bool getLastInsertId, pthread_mutex_t*
 
 void MSExecTask::run(MYSQL *db)
 {
+    
+    log_debug("doing mysql_exec. thread: %d\n", pthread_self());
+    
     int res = mysql_real_query(db, query.c_str(), query.length());
     if(res)
     {

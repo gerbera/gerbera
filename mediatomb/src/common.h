@@ -30,6 +30,9 @@
 /// \todo implement session timeouts!!!
 #define DEFAULT_SESSION_TIMEOUT         123456
 
+/// \brief Number of Mysql threads.
+#define MYSQL_STORAGE_START_THREADS 1
+
 // ERROR CODES                                                                                 
 /// \brief UPnP specific error code.
 #define UPNP_E_ACTION_FAILED            501
