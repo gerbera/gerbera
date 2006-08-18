@@ -332,7 +332,7 @@ void MSSelectTask::run(MYSQL *db)
 //    log_debug("thread_safe? %dn", mysql_thread_safe());
 //    mysql_thread_init();
     
-    log_debug("doing mysql_select. thread: %d\n", pthread_self());
+//    log_debug("doing mysql_select. thread: %d\n", pthread_self());
     
     int res;
     res = mysql_real_query(db, query.c_str(), query.length());

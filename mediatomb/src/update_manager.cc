@@ -69,7 +69,7 @@ long getMillis()
 inline void millisToTimespec(long millis, struct timespec *spec)
 {
     spec->tv_sec = start_seconds + millis / 1000;
-    spec->tv_nsec = millis % 1000;
+    spec->tv_nsec = (millis % 1000) * 1000000;
 }
 
 static Ref<UpdateManager> inst;
@@ -320,9 +320,9 @@ void UpdateManager::threadProc()
                 }
 
             }
-            if (ret)
+            if ((ret) && (ret != ETIMEDOUT))
             {
-                log_debug("pthread_cont_timedwait(): %s\n", strerror(errno));
+                log_debug("pthread_cont_timedwait(): %d, %s\n", ret, strerror(errno));
             }
         }
         else // send updates 

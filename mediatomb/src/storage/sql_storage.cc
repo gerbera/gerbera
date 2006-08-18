@@ -765,15 +765,19 @@ void SQLStorage::rmObject(Ref<CdsObject> obj)
     if (rmIDHash->exists(id, &hash_slot)) // do nothing if already scheduled
         return;
 
+
+    //log_debug("rmIDHash->size()  %d (max: %d)\n", rmIDHash->size(), MAX_REMOVE_IDS);
     // schedule for removal
     rmIDs[rmIDHash->size()] = id;
     rmIDHash->put(id, hash_slot);
 
-    rmDecChildCount(loadObject(obj->getParentID()));
-
-    if (rmIDHash->size() > MAX_REMOVE_IDS ||
-        rmParentHash->size() > MAX_REMOVE_IDS)
+   
+    if (rmIDHash->size() >= MAX_REMOVE_IDS ||
+        rmParentHash->size() >= MAX_REMOVE_IDS)
         rmFlush();
+
+    rmDecChildCount(loadObject(obj->getParentID()));
+   
 }
 
 /* item removal helper */
