@@ -34,7 +34,6 @@ Known Issues (ordered by importance)
 Planned improvements / features (ordered by importance)
 -------------------------------------------------------
 - report right file length in file_request_handler
-- exiv2 thumbnail support
 - readonly access to <res> metadata from
   javascript
 - add auxilary metadata fields + readonly access from
@@ -56,16 +55,3 @@ Planned improvements / features (ordered by importance)
 - Ability to explicitely define filesystem directories and files
   visible to the filesystem browser. Will be done using the
   include/exclude ruleset semantics similar to Jakarta Ant.
-  
-- Rewrite web presentation layer. Replace XML/XSL based presentation with
-  plain HTML/CSS presentation. XML/XSL approach seemed to be attractive
-  at the beginning, but as the server evolved it turned out to be
-  cumbersome to work with and instead of simplifying development and
-  providing better presentatin consistency did the opposite.
-  An option is to do XSLT transformation server side, but this would
-  increase system requirements to run the server and imply further
-  dependencies on heavy libraries, which we would rather avoid.
-  Another reason is browser compatibility.
-
-- Add source filename and line number to log_debug output
-
