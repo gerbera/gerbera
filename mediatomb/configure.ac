@@ -67,9 +67,7 @@ AC_CHECK_HEADER([iconv.h],
                 ])
         ])
 
-CXXFLAGS_SAVE="$CXXFLAGS"
-CXXFLAGS="$CXXFLAGS -I/usr/local/include"
-AC_CHECK_HEADERS(execinfo.h,[],[CXXFLAGS="$CXXFLAGS_SAVE"])
+AC_CHECK_HEADERS(execinfo.h,[],[])
 
 AC_CHECK_TYPES([time_t], [], [], [#include <sys/types.h>])
 
