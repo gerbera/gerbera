@@ -71,9 +71,9 @@ AC_CHECK_HEADERS(execinfo.h,[],[])
 
 AC_CHECK_TYPES([time_t], [], [], [#include <sys/types.h>])
 
+AC_SYS_LARGEFILE
 AC_TYPE_OFF_T
 AC_TYPE_SIZE_T
-AC_SYS_LARGEFILE
 AC_FUNC_FSEEKO
 
 
