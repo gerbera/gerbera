@@ -105,6 +105,11 @@ void Sqlite3Storage::waitForTask(Ref<SLTask> task, pthread_mutex_t *mutex, pthre
     pthread_mutex_unlock(mutex);
     pthread_mutex_destroy(mutex);
     pthread_cond_destroy(cond);
+    if (task->getError() != nil)
+    {
+        log_error("%s\n", task->getError().c_str());
+        throw Exception(task->getError());
+    }
 }
 
 Ref<SQLResult> Sqlite3Storage::select(String query)
@@ -177,7 +182,7 @@ void Sqlite3Storage::threadProc()
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            task->sendSignal(e.getMessage());
         }
     }
     if (db)
@@ -226,6 +231,7 @@ SLTask::SLTask(pthread_mutex_t *mutex, pthread_cond_t *cond) : Object()
     running = true;
     this->cond = cond;
     this->mutex = mutex;
+    this->error = nil;
 }
 bool SLTask::is_running()
 {
@@ -238,6 +244,12 @@ void SLTask::sendSignal()
     running=false;
     pthread_cond_signal(cond);
     pthread_mutex_unlock(mutex);
+}
+
+void SLTask::sendSignal(String error)
+{
+    this->error = error;
+    sendSignal();
 }
 
 

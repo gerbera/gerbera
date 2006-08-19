@@ -46,11 +46,12 @@ public:
     bool is_running();
     
     /// \brief modify the creator of the task using the supplied pthread_mutex and pthread_cond, that the task is finished
-    void sendSignal(zmm::Exception *e);
-    
     void sendSignal();
     
-    zmm::Exception *exception;
+    void sendSignal(zmm::String error);
+    
+    zmm::String getError() { return error; }
+    
 protected:
     /// \brief true as long as the task is not finished
     ///
@@ -58,7 +59,7 @@ protected:
     bool running;
     pthread_cond_t *cond;
     pthread_mutex_t *mutex;
-    
+    zmm::String error;
 };
 
 /// \brief A task for the mysql thread to do a SQL select.

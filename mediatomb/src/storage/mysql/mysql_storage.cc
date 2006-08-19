@@ -76,8 +76,9 @@ void MysqlStorage::init()
         }
         String error = thread->error;
         pthread_mutex_unlock(&thread->mutex);
-        //pthread_cond_destroy(&thread->cond);
-        //pthread_mutex_destroy(&thread->mutex);
+        
+        pthread_cond_destroy(&thread->cond);
+        pthread_mutex_destroy(&thread->mutex);
         if (thread->error != _(""))
         {
             pthread_attr_destroy(&attr);
@@ -105,7 +106,7 @@ String MysqlStorage::getError(MYSQL *db)
 {
     Ref<StringBuffer> err_buf(new StringBuffer());
     *err_buf << "mysql_error(" << String::from(mysql_errno(db));
-    *err_buf << ") " << String(mysql_error(db));
+    *err_buf << "): \"" << String(mysql_error(db)) << "\"";
     return err_buf->toString();
 }
 
@@ -129,7 +130,11 @@ void MysqlStorage::waitForTask(Ref<MSTask> task, pthread_mutex_t *mutex, pthread
     }
     pthread_mutex_destroy(mutex);
     pthread_cond_destroy(cond);
-    if (task->exception != NULL) throw task->exception;
+    if (task->getError() != nil)
+    {
+        log_error("%s\n", task->getError().c_str());
+        throw Exception(task->getError());
+    }
 }
 
 
@@ -265,7 +270,7 @@ void MysqlStorage::threadProc(struct _threads *thread)
         }
         catch (Exception e)
         {
-            task->sendSignal(&e);
+            task->sendSignal(e.getMessage()+getError(&db));
         }
     }
     pthread_cleanup_pop(1);
@@ -290,7 +295,7 @@ MSTask::MSTask(pthread_mutex_t *mutex, pthread_cond_t *cond) : Object()
     running = true;
     this->cond = cond;
     this->mutex = mutex;
-    this->exception = NULL;
+    this->error = nil;
 }
 bool MSTask::is_running()
 {
@@ -305,9 +310,9 @@ void MSTask::sendSignal()
     pthread_mutex_unlock(mutex);
 }
 
-void MSTask::sendSignal(Exception *e)
+void MSTask::sendSignal(String error)
 {
-    this->exception = e;
+    this->error = error;
     sendSignal();
 }
 
@@ -339,7 +344,7 @@ void MSSelectTask::run(MYSQL *db)
     if(res)
     {
         //reportError(query, db);
-        throw _StorageException(_("Mysql: mysql_real_query() failed"));
+        throw _StorageException(_("Mysql: mysql_real_query() failed: "));
     }
 
     MYSQL_RES *mysql_res;
@@ -347,7 +352,7 @@ void MSSelectTask::run(MYSQL *db)
     if(! mysql_res)
     {
         //reportError(query, db);
-        throw _StorageException(_("Mysql: mysql_store_result() failed"));
+        throw _StorageException(_("Mysql: mysql_store_result() failed: "));
     }
     pres = Ref<MysqlResult> (new MysqlResult(mysql_res));
 }
@@ -369,7 +374,7 @@ void MSExecTask::run(MYSQL *db)
     int res = mysql_real_query(db, query.c_str(), query.length());
     if(res)
     {
-        throw _StorageException(_("mysql: query error"));
+        throw _StorageException(_("mysql: query error: "));
     }
     if (getLastInsertId)
     {

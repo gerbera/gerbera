@@ -139,7 +139,9 @@ public:
     virtual void removeObject(zmm::Ref<CdsObject> object) = 0;
     virtual void removeObject(int objectID);
     virtual zmm::Ref<zmm::Array<CdsObject> > getObjectPath(int objectID);
-
+    
+    virtual bool isFileInDatabase(int parentID, zmm::String filename) = 0;
+    
     /* accounting methods */
     virtual int getTotalFiles(){ return 0; }
     

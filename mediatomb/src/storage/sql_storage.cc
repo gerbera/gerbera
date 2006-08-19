@@ -648,6 +648,11 @@ Ref<Array<CdsObject> > SQLStorage::selectObjects(Ref<SelectParam> param,
     return arr;
 }
 
+bool SQLStorage::isFileInDatabase(int parentID, zmm::String filename)
+{
+    return false;
+}
+
 void SQLStorage::removeObject(Ref<CdsObject> obj)
 {
     mutex->lock();
