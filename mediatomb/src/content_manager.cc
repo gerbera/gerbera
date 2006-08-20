@@ -145,6 +145,7 @@ ContentManager::~ContentManager()
         magic_close(ms);
 #endif
     pthread_mutex_destroy(&taskMutex);
+    pthread_mutex_destroy(&last_modified_mutex);
     pthread_cond_destroy(&taskCond);
 }
 
@@ -156,10 +157,28 @@ void ContentManager::init()
     reMimetype->compile(_(MIMETYPE_REGEXP));
     
     ret = pthread_mutex_init(&taskMutex, NULL);
+    if (ret != 0)
+    {
+        throw _Exception(_("Could not initialize taskMutex"));
+    }
     ret = pthread_cond_init(&taskCond, NULL);
-    
+    if (ret != 0)
+    {
+        throw _Exception(_("Could not initialize taskCondition"));
+    }
+    ret = pthread_mutex_init(&last_modified_mutex, NULL);
+    if (ret != 0)
+    {
+        throw _Exception(_("Could not initialize last_modified_mutex"));
+    }
+   
     pthread_attr_t attr;
-    pthread_attr_init(&attr);
+    ret = pthread_attr_init(&attr);
+    if (ret != 0)
+    {
+        throw _Exception(_("Could not initialize attribute"));
+    }
+   
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
     
     ret = pthread_create(
@@ -168,10 +187,21 @@ void ContentManager::init()
         ContentManager::staticThreadProc,
         this
     );
-    
+    if (ret != 0)
+    {
+        throw _Exception(_("Could not start task thread"));
+    }
+
     pthread_attr_destroy(&attr);
 
     loadAccounting();
+}
+
+void ContentManager::setLastModifiedTime(time_t lm)
+{
+    pthread_mutex_lock(&last_modified_mutex);
+    this->last_modified = lm;
+    pthread_mutex_unlock(&last_modified_mutex);
 }
 
 void ContentManager::shutdown()
@@ -295,87 +325,108 @@ void ContentManager::_removeObject(int objectID)
     um->flushUpdates();
 }
 
-void ContentManager::_rescanDirectory(int objectID, scan_level_t scanLevel)
+void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
 {
     log_debug("start\n");
     int ret;
+    int objectID;
     struct dirent *dent;
     struct stat statbuf;
     String path;
+    
     // TEST CODE REMOVE THIS 
-
-    objectID = 4780; 
+    // containerID = 33651; 
 
     Ref<Storage> storage = Storage::getInstance();
-    Ref<CdsObject> obj = storage->loadObject(objectID);
+    Ref<CdsObject> obj = storage->loadObject(containerID);
     if (!IS_CDS_CONTAINER(obj->getObjectType()))
     {
         throw _Exception(_("Object is not a container: rescan must be triggered on directories\n"));
     }
 
     log_debug("Rescanning container: %s, id=%d\n", 
-               obj->getTitle().c_str(), objectID);
+               obj->getTitle().c_str(), containerID);
 
     String location = obj->getLocation();
     if (!string_ok(path))
         throw _Exception(_("Container has no location information!\n"));
 
-    if (scanLevel == Basic)
+    DIR *dir = opendir(location.c_str());
+    if (!dir)
     {
+        throw _Exception(_("Could not list directory ")+
+                location + " : " + strerror(errno));
+    }
+
+    while ((dent = readdir(dir)) != NULL)
+    {
+        char *name = dent->d_name;
+        if (name[0] == '.')
+        {
+            if (name[1] == 0)
+            {
+                continue;
+            }
+            else if (name[1] == '.' && name[2] == 0)
+            {
+                continue;
+            }
+        }
+
+        path = location + "/" + name; 
+        log_debug("Checking name: %s\n", path.c_str());
         ret = stat(path.c_str(), &statbuf);
         if (ret != 0)
         {
-            throw _Exception(_("Could not stat directory!\n"));
+            log_error("Failed to stat %s\n"), path.c_str();
+            continue;
         }
-
-        if (last_modified < statbuf.st_mtime)
+        objectID = storage->isFileInDatabase(containerID, path);
+        if (objectID >= 0)
         {
-            last_modified = statbuf.st_mtime;
- //           _rescanDirectoryBasic(objectID);
-        }
-
-    }
-    else if (scanLevel == Full)
-    {
-
-
-        DIR *dir = opendir(location.c_str());
-        if (!dir)
-        {
-            throw _Exception(_("Could not list directory ")+
-                    location + " : " + strerror(errno));
-        }
-
-        while ((dent = readdir(dir)) != NULL)
-        {
-            char *name = dent->d_name;
-            if (name[0] == '.')
+            if (S_ISREG(statbuf.st_mode))
             {
-                if (name[1] == 0)
+                if (scanLevel == Full)
                 {
-                    continue;
+                    // check modification time and update file if chagned
+                    if (last_modified < statbuf.st_mtime)
+                    {
+                        // update file and time variable
+                        Ref<CdsObject> obj = createObjectFromFile(path);
+                        obj->setID(objectID);
+                        obj->setParentID(containerID);
+                        updateObject(obj);
+                        last_modified = statbuf.st_mtime;
+                    }
                 }
-                else if (name[1] == '.' && name[2] == 0)
-                {
+                else if (scanLevel == Basic)
                     continue;
-                }
+                else
+                    throw Exception(_("Unsupported scan level!"));
             }
-
-            path = location + "/" + name; 
-            log_debug("Checking name: %s\n", path.c_str());
-            ret = stat(path.c_str(), &statbuf);
-            if (ret != 0)
+            else if (S_ISDIR(statbuf.st_mode))
             {
-                log_error("Failed to stat %s\n"), path.c_str();
+                log_debug("Directory handling not yet supported!\n");
+            }
+            else
                 continue;
-            }
 
         }
-        closedir(dir);
+        else
+        {
+            if (S_ISREG(statbuf.st_mode))
+            {
+                // add file, not recursive, not async
+                addFile(path, false, false);
+            }
+            else if (S_ISDIR(statbuf.st_mode))
+            {
+                // add directory, recursive, not async
+                addFile(path, true, false);
+            }
+        }
     }
-    else
-        throw _Exception(_("Unsupported scan type!"));
-
+    closedir(dir);
 }
 
 /* scans the given directory and adds everything recursively */
@@ -471,7 +522,7 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
     Ref<CdsObject> obj = storage->loadObject(objectID);
     int objectType = obj->getObjectType();
 
-    /// \TODO: if we have an active item, does it mean we first go through IS_ITEM and then thorugh IS_ACTIVE item? ask Gena
+    /// \todo if we have an active item, does it mean we first go through IS_ITEM and then thorugh IS_ACTIVE item? ask Gena
     if (IS_CDS_ITEM(objectType))
     {
         Ref<CdsItem> item = RefCast(obj, CdsItem);
@@ -619,6 +670,8 @@ void ContentManager::updateObject(Ref<CdsObject> obj)
     Ref<Storage> storage = Storage::getInstance();
     Ref<UpdateManager> um = UpdateManager::getInstance();
     storage->updateObject(obj);
+    um->containerChanged(obj->getParentID());
+    um->flushUpdates();
 }
 
 Ref<CdsObject> ContentManager::convertObject(Ref<CdsObject> oldObj, int newType)

@@ -189,6 +189,7 @@ protected:
     void initScripting();
     void destroyScripting();
 #endif
+    pthread_mutex_t last_modified_mutex;
     time_t last_modified;
 
     int ignore_unknown_extensions;
@@ -205,6 +206,8 @@ protected:
 #ifdef HAVE_JS  
     zmm::Ref<Scripting> scripting;
 #endif
+
+    void setLastModifiedTime(time_t lm);
 
     void lock();
     void unlock();

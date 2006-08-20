@@ -648,9 +648,9 @@ Ref<Array<CdsObject> > SQLStorage::selectObjects(Ref<SelectParam> param,
     return arr;
 }
 
-bool SQLStorage::isFileInDatabase(int parentID, zmm::String filename)
+int SQLStorage::isFileInDatabase(int parentID, zmm::String filename)
 {
-    return false;
+    return -1;
 }
 
 void SQLStorage::removeObject(Ref<CdsObject> obj)

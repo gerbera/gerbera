@@ -139,8 +139,12 @@ public:
     virtual void removeObject(zmm::Ref<CdsObject> object) = 0;
     virtual void removeObject(int objectID);
     virtual zmm::Ref<zmm::Array<CdsObject> > getObjectPath(int objectID);
-    
-    virtual bool isFileInDatabase(int parentID, zmm::String filename) = 0;
+   
+    /// \brief Determines if a file given by it's name is in the database.
+    /// \param parentID parent container
+    /// \param filename name of the file as stored on disk
+    /// \return objectID if file exists in the database, otherwise a negative value
+    virtual int isFileInDatabase(int parentID, zmm::String filename) = 0;
     
     /* accounting methods */
     virtual int getTotalFiles(){ return 0; }

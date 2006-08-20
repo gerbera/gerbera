@@ -67,7 +67,7 @@ public:
     virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param,
                                                            select_mode_t mode = SELECT_FULL);
                                                            
-    virtual bool isFileInDatabase(int parentID, zmm::String filename);
+    virtual int isFileInDatabase(int parentID, zmm::String filename);
     
     virtual void removeObject(zmm::Ref<CdsObject> object);
     
