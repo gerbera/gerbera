@@ -145,7 +145,12 @@ public:
     /// \param filename name of the file as stored on disk
     /// \return objectID if file exists in the database, otherwise a negative value
     virtual int isFileInDatabase(int parentID, zmm::String filename) = 0;
-    
+  
+    /// \brief Removes all objects under the given parentID that were not found in the list
+    /// \param parentID parent container
+    /// \param list list with checked object ID's, all ID's in that container that are not
+    /// in the list will be removed.
+    virtual void removeChildObjectsNotInList(int parentID, zmm::Ref<zmm::Array<int> > list) = 0;
     /* accounting methods */
     virtual int getTotalFiles(){ return 0; }
     

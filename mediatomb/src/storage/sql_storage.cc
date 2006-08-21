@@ -648,9 +648,14 @@ Ref<Array<CdsObject> > SQLStorage::selectObjects(Ref<SelectParam> param,
     return arr;
 }
 
-int SQLStorage::isFileInDatabase(int parentID, zmm::String filename)
+int SQLStorage::isFileInDatabase(int parentID, String filename)
 {
     return -1;
+}
+
+void SQLStorage::removeChildObjectsNotInList(int parentID, Ref<Array<int> > list)
+{
+    log_debug("NOT IMPLEMENTED :>\n");
 }
 
 void SQLStorage::removeObject(Ref<CdsObject> obj)

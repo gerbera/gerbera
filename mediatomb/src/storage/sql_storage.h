@@ -68,7 +68,9 @@ public:
                                                            select_mode_t mode = SELECT_FULL);
                                                            
     virtual int isFileInDatabase(int parentID, zmm::String filename);
-    
+   
+    virtual void removeChildObjectsNotInList(int parentID, zmm::Ref<zmm::Array<int> > list);
+
     virtual void removeObject(zmm::Ref<CdsObject> object);
     
     /* accounting methods */
