@@ -29,6 +29,7 @@ template <typename KT, typename VT> struct dbb_hash_slot
     VT value;
 };
 
+/// \brief direct hash with binary keys and binary values
 template <typename KT, typename VT>
 class DBBHash : public DHashBase<KT, struct dbb_hash_slot<KT, VT> >
 {

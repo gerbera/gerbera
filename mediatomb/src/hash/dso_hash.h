@@ -29,6 +29,7 @@ template <typename VT> struct dso_hash_slot
     VT *value;
 };
 
+/// \brief direct hash with string keys and object ("Ref") values
 template <typename VT>
 class DSOHash : public DHashBase<zmm::String, struct dso_hash_slot<VT> >
 {

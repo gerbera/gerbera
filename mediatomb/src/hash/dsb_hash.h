@@ -29,6 +29,8 @@ template <typename VT> struct dsb_hash_slot
     VT *value;
 };
 
+
+/// \brief direct hash with string keys and binary values
 template <typename VT>
 class DSBHash : public DHashBase<zmm::String, struct dsb_hash_slot<VT> >
 {

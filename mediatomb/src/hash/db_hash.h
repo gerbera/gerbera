@@ -23,6 +23,7 @@
 
 #include "direct_hash_base.h"
 
+/// \brief direct hash with keys only; type: binary(?)
 template <typename KT>
 class DBHash : public DHashBase<KT, KT>
 {

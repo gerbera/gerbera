@@ -29,6 +29,7 @@ template <typename KT, typename VT> struct dbo_hash_slot
     VT *value;
 };
 
+/// \brief direct hash with binary keys and object ("Ref") values
 template <typename KT, typename VT>
 class DBOHash : public DHashBase<KT, struct dbo_hash_slot<KT, VT> >
 {
