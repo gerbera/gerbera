@@ -30,7 +30,7 @@ template <typename VT> struct dsb_hash_slot
 };
 
 
-/// \brief direct hash with string keys and binary values
+/// \brief Direct hash with string keys and base type values.
 template <typename VT>
 class DSBHash : public DHashBase<zmm::String, struct dsb_hash_slot<VT> >
 {
@@ -52,7 +52,7 @@ public:
                 slot->key->release();
         }
     }
-
+    
     /* virtual methods */
     virtual int hashCode(zmm::String key)
     {
@@ -66,13 +66,24 @@ public:
     {
         return (slot->key == NULL);
     }
-
+    
     void clear()
     {
         releaseData();
         this->zero();
     }
-   
+    
+    inline bool remove(zmm::String key)
+    {
+        struct dsb_hash_slot<VT> *slot;
+        if (! search(key, &slot))
+            return false;
+        slot->key->release();
+        slot->key = NULL;
+        this->count--;
+        return true;
+    }
+    
     inline void put(zmm::String key, VT value)
     {
         struct dsb_hash_slot<VT> *slot;

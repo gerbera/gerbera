@@ -69,13 +69,25 @@ public:
     {
         return (slot->key == NULL);
     }
-
+    
     void clear()
     {
         releaseData();
         this->zero();
     }
-   
+    
+    inline bool remove(zmm::String key)
+    {
+        struct dso_hash_slot<VT> *slot;
+        if (! search(key, &slot))
+            return false;
+        slot->key->release();
+        slot->value->release();
+        slot->key = NULL;
+        this->count--;
+        return true;
+    }
+    
     inline void put(zmm::String key, zmm::Ref<VT> value)
     {
         struct dso_hash_slot<VT> *slot;

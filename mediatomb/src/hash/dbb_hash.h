@@ -29,7 +29,7 @@ template <typename KT, typename VT> struct dbb_hash_slot
     VT value;
 };
 
-/// \brief direct hash with binary keys and binary values
+/// \brief Direct hash with base type keys and base type values.
 template <typename KT, typename VT>
 class DBBHash : public DHashBase<KT, struct dbb_hash_slot<KT, VT> >
 {
@@ -67,7 +67,17 @@ public:
             this->count = 0;
         }
     }
-   
+    
+    inline bool remove(KT key)
+    {
+        struct dbb_hash_slot<KT, VT> *slot;
+        if (! search(key, &slot))
+            return false;
+        slot->key = emptyKey;
+        this->count--;
+        return true;
+    }
+    
     inline void put(KT key, VT value)
     {
         struct dbb_hash_slot<KT, VT> *slot;

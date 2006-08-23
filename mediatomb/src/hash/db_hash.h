@@ -23,7 +23,7 @@
 
 #include "direct_hash_base.h"
 
-/// \brief direct hash with keys only; type: binary(?)
+/// \brief Direct hash with base type keys only.
 template <typename KT>
 class DBHash : public DHashBase<KT, KT>
 {
@@ -61,7 +61,17 @@ public:
             this->count = 0;
         }
     }
-
+    
+    inline bool remove(KT key)
+    {
+       KT *slot;
+        if (! search(key, &slot))
+            return false;
+        *slot = emptyKey;
+        this->count--;
+        return true;
+    }
+    
     inline void put(KT key)
     {
         KT *slot;

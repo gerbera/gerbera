@@ -85,10 +85,9 @@ public:
 
     int secondaryHashCode(int primary)
     {
-        int prime = HASH_PRIME;
-        int h2 = (prime - (primary % prime));
+        int h2 = (HASH_PRIME - (primary % HASH_PRIME));
         if (h2 == 0)
-            h2 = prime;
+            h2 = HASH_PRIME;
         return h2;
     }
    
