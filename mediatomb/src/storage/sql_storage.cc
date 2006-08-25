@@ -653,9 +653,16 @@ int SQLStorage::isFileInDatabase(int parentID, String filename)
     return -1;
 }
 
-void SQLStorage::removeChildObjectsNotInList(int parentID, Ref<Array<int> > list)
+Ref<DBHash<int> > SQLStorage::getObjects(int parentID)
 {
-    log_debug("NOT IMPLEMENTED :>\n");
+    log_debug("NOT IMPLEMENTED!!!!\n");
+    return nil;
+}
+
+
+void SQLStorage::removeObjects(int parentID, zmm::Ref<DBHash<int> > list)
+{
+    log_debug("NOT IMPLEMENTED!!!!\n");
 }
 
 void SQLStorage::removeObject(Ref<CdsObject> obj)

@@ -69,7 +69,9 @@ public:
                                                            
     virtual int isFileInDatabase(int parentID, zmm::String filename);
    
-    virtual void removeChildObjectsNotInList(int parentID, zmm::Ref<zmm::Array<int> > list);
+    virtual zmm::Ref<DBHash<int> > getObjects(int parentID);
+
+    virtual void removeObjects(int parentID, zmm::Ref<DBHash<int> > list);
 
     virtual void removeObject(zmm::Ref<CdsObject> object);
     

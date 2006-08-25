@@ -26,6 +26,7 @@
 #include "cds_objects.h"
 #include "dictionary.h"
 #include "sync.h"
+#include "hash.h"
 
 typedef enum
 {
@@ -146,11 +147,16 @@ public:
     /// \return objectID if file exists in the database, otherwise a negative value
     virtual int isFileInDatabase(int parentID, zmm::String filename) = 0;
   
-    /// \brief Removes all objects under the given parentID that were not found in the list
+    /// \brief Get all objects under the given parentID.
     /// \param parentID parent container
-    /// \param list list with checked object ID's, all ID's in that container that are not
-    /// in the list will be removed.
-    virtual void removeChildObjectsNotInList(int parentID, zmm::Ref<zmm::Array<int> > list) = 0;
+    /// \return DBHash containing the objectID's 
+    virtual zmm::Ref<DBHash<int> > getObjects(int parentID) = 0;
+
+    /// brief Remove all objects found in list
+    /// \param parentID ID of the parent container
+    /// \param list a DBHash containing objectIDs that have to be removed
+    virtual void removeObjects(int parentID, zmm::Ref<DBHash<int> > list) = 0;
+
     /* accounting methods */
     virtual int getTotalFiles(){ return 0; }
     
