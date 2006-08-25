@@ -334,6 +334,8 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
     struct stat statbuf;
     String path;
     
+//    Ref<Array<int> > list(new Array<int>());
+
     // TEST CODE REMOVE THIS 
     // containerID = 33651; 
 
@@ -384,6 +386,7 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
         objectID = storage->isFileInDatabase(containerID, path);
         if (objectID >= 0)
         {
+//            list->append(objectID); // id was found in the container
             if (S_ISREG(statbuf.st_mode))
             {
                 if (scanLevel == Full)
@@ -426,6 +429,8 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
             }
         }
     }
+
+//    storage->removeChildObjectsNotInList(parentID, list);
     closedir(dir);
 }
 
