@@ -71,7 +71,7 @@ public:
    
     virtual zmm::Ref<DBHash<int> > getObjects(int parentID);
 
-    virtual void removeObjects(int parentID, zmm::Ref<DBHash<int> > list);
+    virtual void removeObjects(zmm::Ref<DBHash<int> > list);
 
     virtual void removeObject(zmm::Ref<CdsObject> object);
     

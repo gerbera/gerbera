@@ -660,7 +660,7 @@ Ref<DBHash<int> > SQLStorage::getObjects(int parentID)
 }
 
 
-void SQLStorage::removeObjects(int parentID, zmm::Ref<DBHash<int> > list)
+void SQLStorage::removeObjects(zmm::Ref<DBHash<int> > list)
 {
     log_debug("NOT IMPLEMENTED!!!!\n");
 }

@@ -155,7 +155,7 @@ public:
     /// brief Remove all objects found in list
     /// \param parentID ID of the parent container
     /// \param list a DBHash containing objectIDs that have to be removed
-    virtual void removeObjects(int parentID, zmm::Ref<DBHash<int> > list) = 0;
+    virtual void removeObjects(zmm::Ref<DBHash<int> > list) = 0;
 
     /* accounting methods */
     virtual int getTotalFiles(){ return 0; }
