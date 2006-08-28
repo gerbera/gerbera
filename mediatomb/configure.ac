@@ -1,5 +1,5 @@
 AC_PREREQ(2.59)
-AC_INIT([MediaTomb], [0.9.0], [jin@mediatomb.org])
+AC_INIT([MediaTomb], [0.9.0_pre], [jin@mediatomb.org])
 AC_CONFIG_HEADER([autoconfig.h tombupnp/upnp/inc/upnpconfig.h])
 AC_CONFIG_AUX_DIR(configure_aux)
 AC_CONFIG_SRCDIR([src/common.h])
