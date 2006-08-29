@@ -68,6 +68,10 @@
 #include "upnp.h"
 #include "upnpapi.h"
 
+#ifndef SO_NOSIGPIPE
+    #define SO_NOSIGPIPE 0
+#endif
+
 #define APPLICATION_LISTENING_PORT 49152
 
 struct mserv_request_t {
@@ -633,21 +637,13 @@ get_miniserver_sockets( MiniServerSockArray * out,
         DBGONLY( UpnpPrintf( UPNP_INFO, MSERV, __FILE__, __LINE__,
                              "mserv start: resuseaddr set\n" );
              )
-#if defined SO_NOSIGPIPE
             sockError = setsockopt( listenfd,
                                     SOL_SOCKET,
                                     SO_REUSEADDR | SO_NOSIGPIPE,
                                     ( const char * )&reuseaddr_on,
                                     sizeof( int )
              );
-#else
-            sockError = setsockopt( listenfd,
-                                    SOL_SOCKET,
-                                    SO_REUSEADDR,
-                                    ( const char * )&reuseaddr_on,
-                                    sizeof( int )
-             );
-#endif
+
         if( sockError == UPNP_SOCKETERROR ) {
             shutdown( listenfd, SD_BOTH );
             UpnpCloseSocket( listenfd );
