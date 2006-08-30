@@ -394,11 +394,11 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
                     // check modification time and update file if chagned
                     if (last_modified < statbuf.st_mtime)
                     {
+                        // readd object - we have to do this in order to trigger
+                        // scripting
+                        removeObject(objectID, false);
+                        addFile(path, false, false);
                         // update file and time variable
-                        Ref<CdsObject> obj = createObjectFromFile(path);
-                        obj->setID(objectID);
-                        obj->setParentID(containerID);
-                        updateObject(obj);
                         last_modified = statbuf.st_mtime;
                     }
                 }
