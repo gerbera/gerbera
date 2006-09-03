@@ -132,7 +132,7 @@ AC_LANG_CPLUSPLUS
 AC_CHECK_FUNCS([gethostname gettimeofday localtime_r memmove memset],
                [],
                [AC_MSG_ERROR(required library function not found)])
-AC_CHECK_FUNCS([regcomp select socket strcasecmp strchr strdup strerror strncasecmp],
+AC_CHECK_FUNCS([regcomp select strcasecmp strchr strdup strerror strncasecmp],
                [],
                [AC_MSG_ERROR(required library function not found)])
 AC_CHECK_FUNCS([strrchr strstr strtol strtoul uname pthread_mutex_lock], [],
@@ -147,6 +147,11 @@ AC_CHECK_FUNCS([inet_ntoa],
                                     AC_MSG_ERROR(required library function not found)
                                  ])
                ])
+
+AC_CHECK_FUNCS([socket],
+               [],
+               [AC_MSG_ERROR(required library function not found)])
+
 
 AC_CHECK_FUNCS([gethostbyname],
                []
