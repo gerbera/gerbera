@@ -30,7 +30,7 @@ AC_HEADER_TIME
 AC_HEADER_STAT
 AC_LANG_C
    
-AC_CHECK_HEADERS([syslog.h stddef.h unistd.h arpa/inet.h fcntl.h getopt.h], [],
+AC_CHECK_HEADERS([syslog.h stddef.h unistd.h arpa/inet.h fcntl.h], [],
                  [AC_MSG_ERROR(required header not found)]) 
 
 AC_CHECK_HEADERS([limits.h netdb.h netinet/in.h stdlib.h string.h sys/file.h],
@@ -41,6 +41,24 @@ AC_CHECK_HEADERS([sys/ioctl.h sys/socket.h sys/time.h sys/types.h pthread.h],
                  [AC_MSG_ERROR(required header not found)]) 
 
 AC_CHECK_HEADERS([langinfo.h],[],[AC_MSG_WARN(langinfo.h not found, will not be able to retrieve locale)])
+
+AC_CHECK_HEADERS([getopt.h],
+        [
+            AC_CHECK_FUNCS([getopt_long], 
+                           [AC_DEFINE(
+                                [_GETOPT_DECLARED],
+                                [1],
+                                [avoid conflict with unistd.h on BSD systems]
+                            )], 
+                           [AC_MSG_WARN(
+             getopt_long not found - all command line options will be disabled)
+                           ])
+
+        ],
+        [
+    AC_MSG_WARN(getopt.h not found - all command line options will be disabled)
+        ])
+
 
 CPPFLAGS_SAVE="$CPPFLAGS"
 CFLAGS_SAVE="$CFLAGS"
@@ -119,9 +137,6 @@ AC_CHECK_FUNCS([regcomp select socket strcasecmp strchr strdup strerror strncase
                [AC_MSG_ERROR(required library function not found)])
 AC_CHECK_FUNCS([strrchr strstr strtol strtoul uname pthread_mutex_lock], [],
                [AC_MSG_ERROR(required library function not found)])
-
-AC_CHECK_FUNCS([getopt_long], [AC_DEFINE([_GETOPT_DECLARED],[1],[avoid conflict with unistd.h on BSD systems])],
-                [AC_MSG_ERROR(required library function not found)])
 
 AC_CHECK_FUNCS([gethostbyname_r],[],
         [

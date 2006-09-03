@@ -25,7 +25,11 @@
 #include "common.h"
 #include "server.h"
 #include "process.h"
-#include <getopt.h>
+
+#ifdef HAVE_GETOPT_H
+    #include <getopt.h>
+#endif
+
 #include "config_manager.h"
 #include "content_manager.h"
 #include "common.h"
@@ -43,7 +47,9 @@
 #include <pwd.h>
 #include <grp.h>
 
-#define OPTSTR "i:p:c:u:g:a:l:P:dh"
+#ifdef HAVE_GETOPT_LONG
+    #define OPTSTR "i:p:c:u:g:a:l:P:dh"
+#endif
 
 using namespace zmm;
 
@@ -54,8 +60,6 @@ void signal_handler_kill(int signal);
 
 int main(int argc, char **argv, char **envp)
 {
-    int      opt_index = 0;
-    int      o;
     char     *ip = NULL;
     char     * err = NULL;
     int      port = -1;
@@ -63,7 +67,9 @@ int main(int argc, char **argv, char **envp)
 
     struct   passwd *pwd;
     struct   group  *grp;
-
+#ifdef HAVE_GETOPT_LONG
+    int      opt_index = 0;
+    int      o;
     static struct option long_options[] = {
                    {"ip", 1, 0, 'i'},
                    {"port", 1, 0, 'p'},
@@ -77,6 +83,7 @@ int main(int argc, char **argv, char **envp)
                    {"help", 0, 0, 'h'},
                    {0, 0, 0, 0}
                };
+#endif
 
     String config_file;
     String home;
@@ -85,7 +92,7 @@ int main(int argc, char **argv, char **envp)
     String pid_file;
 
     Ref<Array<StringBase> > addFile(new Array<StringBase>());
-   
+#ifdef HAVE_GETOPT_LONG   
     while (1)
     {
         o = getopt_long(argc, argv, OPTSTR, long_options, &opt_index);
@@ -175,6 +182,9 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
                 break;
          }
     }
+#else
+    log_warning("No getopt_long() support, all command line options disabled");
+#endif
 
     log_info("======== MediaTomb UPnP Server version %s ========\n", VERSION);
     log_info("         http://www.mediatomb.org/\n\n");
