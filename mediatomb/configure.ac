@@ -81,7 +81,7 @@ AC_CHECK_HEADER([iconv.h],
                     CFLAGS="$CFLAGS_SAVE"
                     CXXFLAGS="$CXXFLAGS_SAVE"
                     LDFLAGS="$LDFLAGS_SAVE"
-                    AC_MSG_ERROR(iconv.h not found on your system)
+                    AC_CHECK_FUNCS([iconv],[],[AC_MSG_ERROR(iconv library not found on your system)])
                 ])
         ])
 
@@ -141,7 +141,7 @@ AC_CHECK_FUNCS([strrchr strstr strtol strtoul uname pthread_mutex_lock], [],
 AC_CHECK_FUNCS([inet_ntoa],
                [],
                [
-                    AC_CHECK_LIB(socket, inet_ntoa,
+                    AC_CHECK_LIB(nsl, inet_ntoa,
                                  [],
                                  [
                                     AC_MSG_ERROR(required library function not found)
@@ -150,11 +150,17 @@ AC_CHECK_FUNCS([inet_ntoa],
 
 AC_CHECK_FUNCS([socket],
                [],
-               [AC_MSG_ERROR(required library function not found)])
+               [AC_CHECK_LIB(socket, socket,
+                                 [],
+                                 [
+                                    AC_MSG_ERROR(required library function not found)
+                                 ])
+               ])
+               
 
 
 AC_CHECK_FUNCS([gethostbyname],
-               []
+               [],
                [
                     AC_CHECK_LIB(nsl, gethostbyname, 
                                  [],
