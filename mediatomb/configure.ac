@@ -51,12 +51,12 @@ AC_CHECK_HEADERS([getopt.h],
                                 [avoid conflict with unistd.h on BSD systems]
                             )], 
                            [AC_MSG_WARN(
-             getopt_long not found - all command line options will be disabled)
+             getopt_long not found - all command line options disabled)
                            ])
 
         ],
         [
-    AC_MSG_WARN(getopt.h not found - all command line options will be disabled)
+    AC_MSG_WARN(getopt.h not found - all command line options disabled)
         ])
 
 
@@ -219,7 +219,7 @@ fi
 if test "x$SQLITE3_OK" = xyes; then
     AC_PATH_PROG(sqlite3prog, sqlite3, no)
     if test "$sqlite3prog" = no; then
-        AC_MSG_RESULT([sqlite3 command line client not found])
+        AC_MSG_ERROR([sqlite3 command line client not found])
 	SQLITE3_OK=missing
     fi
 fi
@@ -255,13 +255,38 @@ if test "x$MYSQL_OK" = xyes; then
         AC_MSG_RESULT([mysql_config script not found])
         MYSQL_OK=missing
     else
-        AC_MSG_CHECKING(mysql includes)
-        MYSQL_CFLAGS=`${mysqlconfig} --include | sed s/\'//g`
-        AC_MSG_RESULT($MYSQL_CFLAGS)
+        AC_MSG_CHECKING(mysql_config version)
+        MYSQL_VERSION_MAJOR=`${mysqlconfig} --version | sed 's/\([[0-9]]\)*\.\([[0-9]]*\)\.\([[0-9]]*\)$/\1/'`
+        MYSQL_VERSION_MINOR=`${mysqlconfig} --version | sed 's/\([[0-9]]\)*\.\([[0-9]]*\)\.\([[0-9]]*\)$/\2/'`
+        
+        if test $MYSQL_VERSION_MAJOR -le 3 ; then
+#            if test $MYSQL_VERSION_MINOR -eq 23 ; then
+#                AC_MSG_CHECKING(mysql cflags)
+#                MYSQL_CFLAGS=`${mysqlconfig} --cflags | sed s/\'//g`
+#                AC_MSG_RESULT($MYSQL_CFLAGS)
+#
+#                AC_MSG_CHECKING(mysql libraries)
+#                MYSQL_LIBS=`${mysqlconfig} --libs | sed s/\'//g`
+#                AC_MSG_RESULT($MYSQL_LIBS)
+#
+#            else
+                AC_MSG_ERROR(MySQL version too old)
+#            fi
+            
+        else
+            if test $MYSQL_VERSION_MAJOR -gt 3 ; then
+        
+                AC_MSG_CHECKING(mysql includes)
+                MYSQL_CFLAGS=`${mysqlconfig} --include | sed s/\'//g`
+                AC_MSG_RESULT($MYSQL_CFLAGS)
 
-        AC_MSG_CHECKING(mysql libraries)
-        MYSQL_LIBS=`${mysqlconfig} --libs_r | sed s/\'//g`
-        AC_MSG_RESULT($MYSQL_LIBS)
+                AC_MSG_CHECKING(mysql libraries)
+                MYSQL_LIBS=`${mysqlconfig} --libs_r | sed s/\'//g`
+                AC_MSG_RESULT($MYSQL_LIBS)
+            else
+                AC_MSG_ERROR(Unsupported mysql version)
+            fi
+        fi
 
         CXXFLAGS="$CXXFLAGS $MYSQL_CFLAGS"
 #        CFLAGS="$CFLAGS $MYSQL_CFLAGS"
