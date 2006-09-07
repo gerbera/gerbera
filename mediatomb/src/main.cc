@@ -54,9 +54,7 @@
 using namespace zmm;
 
 int shutdown_flag = 0;
-void signal_handler(int signal);
-void signal_handler_stage2(int signal);
-void signal_handler_kill(int signal);
+void signal_handler(int signum);
 
 int main(int argc, char **argv, char **envp)
 {
@@ -427,24 +425,25 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     return ret;
 }
 
-void signal_handler(int signal)
+void signal_handler(int signum)
 {
-    log_info("MediaTomb shutting down. Please wait...\n");
-    shutdown_flag = 1;
-    ::signal(SIGINT, signal_handler_stage2);
-    ::signal(SIGTERM, signal_handler_stage2);
+    sigset_t mask_set;
+    sigset_t old_set;
+    signal(SIGINT, signal_handler);
+    signal(SIGTERM, signal_handler);
+    sigfillset(&mask_set);
+    sigprocmask(SIG_SETMASK, &mask_set, &old_set);
+
+    shutdown_flag++;
+    if (shutdown_flag == 1)
+        log_info("MediaTomb shutting down. Please wait...\n");
+    else if (shutdown_flag == 2)
+        log_info("Mediatomb still shutting down, signal again to kill.\n");
+    else if (shutdown_flag > 2)
+    {
+        log_error("Clean shutdown failed, killing MediaTomb!\n");
+        exit(1);
+    }
 }
 
-void signal_handler_stage2(int signal)
-{
-    log_info("still shutting down...; signal again to kill MediaTomb.\n");
-    ::signal(SIGINT, signal_handler_kill);
-    ::signal(SIGTERM, signal_handler_kill);
-}
-
-void signal_handler_kill(int signal)
-{
-    log_error("User insisted too much! UNCLEAN shutdown, killing all threads...\n");
-    exit(1);
-}
 
