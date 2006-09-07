@@ -1199,7 +1199,7 @@ ReadResponseLineAndHeaders( IN SOCKINFO * info,
         num_read = sock_read( info, buf, sizeof( buf ), timeout_secs );
         if( num_read > 0 ) {
             // append data to buffer
-            ret_code = membuffer_append( &parser->msg.msg, buf, num_read );
+            ret_code = membuffer_append( &parser->msg.msg, buf, (size_t)num_read );
             if( ret_code != 0 ) {
                 // set failure status
                 parser->http_error_code = HTTP_INTERNAL_SERVER_ERROR;
@@ -1244,7 +1244,7 @@ ReadResponseLineAndHeaders( IN SOCKINFO * info,
         num_read = sock_read( info, buf, sizeof( buf ), timeout_secs );
         if( num_read > 0 ) {
             // append data to buffer
-            ret_code = membuffer_append( &parser->msg.msg, buf, num_read );
+            ret_code = membuffer_append( &parser->msg.msg, buf, (size_t)num_read );
             if( ret_code != 0 ) {
                 // set failure status
                 parser->http_error_code = HTTP_INTERNAL_SERVER_ERROR;
@@ -1345,7 +1345,7 @@ http_ReadHttpGet( IN void *Handle,
         if( num_read > 0 ) {
             // append data to buffer
             ret_code = membuffer_append( &handle->response.msg.msg,
-                                         tempbuf, num_read );
+                                         tempbuf, (size_t)num_read );
             if( ret_code != 0 ) {
                 // set failure status
                 handle->response.http_error_code =
@@ -1800,7 +1800,7 @@ http_MakeMessage( INOUT membuffer * buf,
 {
     char c;
     char *s = NULL;
-    int num;
+    size_t num;
     off_t bignum;
     size_t length;
     time_t *loc_time;
@@ -1903,7 +1903,7 @@ http_MakeMessage( INOUT membuffer * buf,
         {
             num = ( int )va_arg( argp, int );
 
-            sprintf( tempbuf, "%d", num );
+            sprintf( tempbuf, "%d", (int)num );
             if( membuffer_append( buf, tempbuf, strlen( tempbuf ) ) != 0 ) {
                 goto error_handler;
             }
@@ -2058,10 +2058,10 @@ http_MakeMessage( INOUT membuffer * buf,
             method = ( http_method_t ) va_arg( argp, http_method_t );
             method_str = method_to_str( method );
             url_str = ( const char * )va_arg( argp, const char * );
-            num = ( int )va_arg( argp, int );   // length of url_str
+            num = ( size_t )va_arg( argp, size_t );   // length of url_str
 
             if( http_MakeMessage( buf, http_major_version, http_minor_version, "ssbsdsdc", method_str,  // method
-                                  " ", url_str, num,    // url
+                                  " ", url_str, (size_t)num,    // url
                                   " HTTP/", http_major_version, ".",
                                   http_minor_version ) != 0 ) {
                 goto error_handler;
