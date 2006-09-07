@@ -92,6 +92,7 @@ AC_CHECK_TYPES([time_t], [], [], [#include <sys/types.h>])
 AC_SYS_LARGEFILE
 AC_TYPE_OFF_T
 AC_TYPE_SIZE_T
+#AC_CHECK_TYPES([ssize_t], [], [], [#include <sys/types.h>])
 AC_FUNC_FSEEKO
 
 
@@ -238,6 +239,8 @@ CFLAGS_SAVE="$CFLAGS"
 CXXFLAGS_SAVE="$CXXFLAGS"
 LDFLAGS_SAVE="$LDFLAGS"
 
+MYSQL_CFLAGS=""
+MYSQL_LIBS=""
 
 MYSQL_OK=yes
 AC_ARG_ENABLE(mysql,
@@ -270,7 +273,8 @@ if test "x$MYSQL_OK" = xyes; then
 #                AC_MSG_RESULT($MYSQL_LIBS)
 #
 #            else
-                AC_MSG_ERROR(MySQL version too old)
+                AC_MSG_WARN(MySQL version too old)
+                MYSQL_OK=missing
 #            fi
             
         else
@@ -285,6 +289,7 @@ if test "x$MYSQL_OK" = xyes; then
                 AC_MSG_RESULT($MYSQL_LIBS)
             else
                 AC_MSG_ERROR(Unsupported mysql version)
+                MYSQL_OK=missing
             fi
         fi
 
@@ -303,7 +308,7 @@ fi
 if test "x$MYSQL_OK" = xyes; then
     AC_CHECK_FUNCS(mysql_init,
         [],
-        [AC_MSG_RESULT(mysqlclient link failed) MYSQL_OK=missing]
+        [MYSQL_OK=missing AC_MSG_RESULT(mysqlclient link failed)]
     )
 fi
 if test "x$MYSQL_OK" = xyes; then
