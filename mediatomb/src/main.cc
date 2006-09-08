@@ -451,10 +451,10 @@ void signal_handler(int signum)
     if (shutdown_flag == 1)
         log_info("MediaTomb shutting down. Please wait...\n");
     else if (shutdown_flag == 2)
-        log_info("\nMediatomb still shutting down, signal again to kill.\n");
+        log_info("Mediatomb still shutting down, signal again to kill.\n");
     else if (shutdown_flag > 2)
     {
-        log_error("\nClean shutdown failed, killing MediaTomb!\n");
+        log_error("Clean shutdown failed, killing MediaTomb!\n");
         exit(1);
     }
 
