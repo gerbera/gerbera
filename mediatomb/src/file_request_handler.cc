@@ -103,11 +103,11 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
         log_debug("Script input: %s\n", input.c_str());
         if(strncmp(action.c_str(), "http://", 7))
         {
-#ifdef LOG_DEBUG
+#ifdef LOG_TOMBDEBUG
             long before = getMillis();
 #endif
             output = run_process(action, _("run"), input);
-#ifdef LOG_DEBUG
+#ifdef LOG_TOMBDEBUG
             long after = getMillis();
             log_debug("script executed in %ld milliseconds\n", after - before);
 #endif

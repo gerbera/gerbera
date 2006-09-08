@@ -20,7 +20,7 @@ void log_close();
 #define log_warning(format, ...) _log_warning(format, ## __VA_ARGS__) 
 #define log_error(format, ...) _log_error(format, ## __VA_ARGS__)
 
-#ifdef LOG_DEBUG
+#ifdef LOG_TOMBDEBUG
 
 //    #define log_debug(args) _log_debug args
     #define log_debug(format, ...) _log_debug(format, __FILE__, __LINE__, __func__, ## __VA_ARGS__)

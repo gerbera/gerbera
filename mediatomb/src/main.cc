@@ -54,6 +54,8 @@
 using namespace zmm;
 
 int shutdown_flag = 0;
+pthread_t main_thread_id;
+
 void signal_handler(int signum);
 
 int main(int argc, char **argv, char **envp)
@@ -62,6 +64,8 @@ int main(int argc, char **argv, char **envp)
     char     * err = NULL;
     int      port = -1;
     bool     daemon = false;
+
+    struct   sigaction action;
 
     struct   passwd *pwd;
     struct   group  *grp;
@@ -221,8 +225,7 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
         }
         
     }
-   
-    
+
     // TODO: check if -c option is present, if not it is an error NOT to specify config file
     
     try
@@ -392,17 +395,27 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
             }
         }
     }
-    
-    signal(SIGINT, signal_handler);
-    signal(SIGTERM, signal_handler);
-    
+
+    main_thread_id = pthread_self();
+    // install signal handlers
+    action.sa_handler = signal_handler;
+    sigfillset(&action.sa_mask);
+    if (sigaction(SIGINT, &action, NULL) < 0)
+    {
+        log_error("Could not register SIGINT handler!\n");
+    }
+    if (sigaction(SIGTERM, &action, NULL) < 0)
+    {
+        log_error("Could not register SIGTERM handler!\n");
+    }
+
     // wait until signalled to terminate
-    while (! shutdown_flag)
+    while (!shutdown_flag)
     {
         pause();
     }
    
-    /* shutting down */
+    // shutting down 
     int ret = EXIT_SUCCESS;
     try
     {
@@ -427,22 +440,33 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
 
 void signal_handler(int signum)
 {
-    sigset_t mask_set;
-    sigset_t old_set;
-    signal(SIGINT, signal_handler);
-    signal(SIGTERM, signal_handler);
-    sigfillset(&mask_set);
-    sigprocmask(SIG_SETMASK, &mask_set, &old_set);
+    struct sigaction action;
+
+    if (main_thread_id != pthread_self())
+    {
+        return;
+    }
 
     shutdown_flag++;
     if (shutdown_flag == 1)
         log_info("MediaTomb shutting down. Please wait...\n");
     else if (shutdown_flag == 2)
-        log_info("Mediatomb still shutting down, signal again to kill.\n");
+        log_info("\nMediatomb still shutting down, signal again to kill.\n");
     else if (shutdown_flag > 2)
     {
-        log_error("Clean shutdown failed, killing MediaTomb!\n");
+        log_error("\nClean shutdown failed, killing MediaTomb!\n");
         exit(1);
+    }
+
+    action.sa_handler = signal_handler;
+    sigfillset(&action.sa_mask);
+    if (sigaction(SIGINT, &action, NULL) < 0)
+    {
+        log_error("Could not register SIGINT handler!\n");
+    }
+    if (sigaction(SIGTERM, &action, NULL) < 0)
+    {
+        log_error("Could not register SIGTERM handler!\n");
     }
 }
 

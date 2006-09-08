@@ -139,9 +139,9 @@ AC_CHECK_FUNCS([regcomp select strcasecmp strchr strdup strerror strncasecmp],
 AC_CHECK_FUNCS([strrchr strstr strtol strtoul uname pthread_mutex_lock], [],
                [AC_MSG_ERROR(required library function not found)])
 
-AC_CHECK_FUNCS([signal sigfillset sigprocmask],[],
-               [AC_MSG_ERROR(required library function not found)])
-
+AC_CHECK_FUNCS([sigaction pthread_self],[],
+               [AC_MSG_ERROR(required library function not found)]) 
+               
 AC_CHECK_FUNCS([inet_ntoa],
                [],
                [
@@ -803,7 +803,7 @@ AC_ARG_ENABLE(tombdebug,
   ]
 )
 if test "x$LOGDEBUG_OK" = xyes; then
-    AC_DEFINE(LOG_DEBUG, 1, [if defined compile with debug log output])
+    AC_DEFINE(LOG_TOMBDEBUG, 1, [if defined compile with debug log output])
 fi
 
 
