@@ -36,6 +36,7 @@ web::containers::containers() : WebRequestHandler()
 
 void web::containers::process()
 {
+    log_debug(("containers.cc: containers::process()\n"));
     check_request();
     
     String parID = param(_("parent_id"));
