@@ -68,10 +68,6 @@
 #include "upnp.h"
 #include "upnpapi.h"
 
-#ifndef SO_NOSIGPIPE
-    #define SO_NOSIGPIPE 0
-#endif
-
 #define APPLICATION_LISTENING_PORT 49152
 
 struct mserv_request_t {
@@ -609,6 +605,23 @@ get_miniserver_sockets( MiniServerSockArray * out,
     if( listenfd < 0 ) {
         return UPNP_E_OUTOF_SOCKET; // error creating socket
     }
+
+#if defined (SO_NOSIGPIPE)
+    sockError = setsockopt( listenfd,
+            SOL_SOCKET,
+            SO_NOSIGPIPE,
+            ( const char * )&reuseaddr_on,
+            sizeof( int )
+            );
+
+    if( sockError == UPNP_SOCKETERROR ) {
+        shutdown( listenfd, SD_BOTH );
+        UpnpCloseSocket( listenfd );
+        return UPNP_E_SOCKET_BIND;
+    }
+#endif
+
+
     // As per the IANA specifications for the use of ports by applications
     // override the listen port passed in with the first available 
     
@@ -639,7 +652,7 @@ get_miniserver_sockets( MiniServerSockArray * out,
              )
             sockError = setsockopt( listenfd,
                                     SOL_SOCKET,
-                                    SO_REUSEADDR | SO_NOSIGPIPE,
+                                    SO_REUSEADDR,
                                     ( const char * )&reuseaddr_on,
                                     sizeof( int )
              );
