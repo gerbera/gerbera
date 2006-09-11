@@ -44,12 +44,7 @@ AC_CHECK_HEADERS([langinfo.h],[],[AC_MSG_WARN(langinfo.h not found, will not be 
 
 AC_CHECK_HEADERS([getopt.h],
         [
-            AC_CHECK_FUNCS([getopt_long], 
-                           [AC_DEFINE(
-                                [_GETOPT_DECLARED],
-                                [1],
-                                [avoid conflict with unistd.h on BSD systems]
-                            )], 
+            AC_CHECK_FUNCS([getopt_long],[],
                            [AC_MSG_WARN(
              getopt_long not found - all command line options disabled)
                            ])
