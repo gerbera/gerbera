@@ -121,9 +121,11 @@ void MysqlStorage::waitForTask(Ref<MSTask> task, pthread_mutex_t *mutex, pthread
     addTask(task);
     // We check before we lock first, because there is no need to lock then.
     // This is certainly not needed, but maybe faster.
-    if (task->is_running()) { 
+    if (task->is_running())
+    { 
         pthread_mutex_lock(mutex);
-        if (task->is_running()) { // we check it a second time after locking to ensure we didn't miss the pthread_cond_signal 
+        if (task->is_running()) 
+        { // we check it a second time after locking to ensure we didn't miss the pthread_cond_signal 
             pthread_cond_wait(cond, mutex); // waiting for the task to complete
         }
         pthread_mutex_unlock(mutex);

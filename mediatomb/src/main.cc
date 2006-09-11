@@ -440,7 +440,7 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
         ret = EXIT_FAILURE;
     }
 
-    log_info("server terminating\n");
+    log_info("Server terminating\n");
     log_close();
 
     return ret;
