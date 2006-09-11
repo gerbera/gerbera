@@ -343,6 +343,24 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
 
     }
 
+    main_thread_id = pthread_self();
+    // install signal handlers
+    sigset_t mask_set;
+    sigfillset(&mask_set);
+    sigprocmask(SIG_SETMASK, &mask_set, NULL);
+
+    action.sa_handler = signal_handler;
+    sigfillset(&action.sa_mask);
+    if (sigaction(SIGINT, &action, NULL) < 0)
+    {
+        log_error("Could not register SIGINT handler!\n");
+    }
+    if (sigaction(SIGTERM, &action, NULL) < 0)
+    {
+        log_error("Could not register SIGTERM handler!\n");
+    }
+
+
     // prepare to run processes
     init_process();
     
@@ -396,19 +414,9 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
         }
     }
 
-    main_thread_id = pthread_self();
-    // install signal handlers
-    action.sa_handler = signal_handler;
-    sigfillset(&action.sa_mask);
-    if (sigaction(SIGINT, &action, NULL) < 0)
-    {
-        log_error("Could not register SIGINT handler!\n");
-    }
-    if (sigaction(SIGTERM, &action, NULL) < 0)
-    {
-        log_error("Could not register SIGTERM handler!\n");
-    }
-
+    sigemptyset(&mask_set);
+    sigprocmask(SIG_SETMASK, &mask_set, NULL);
+    
     // wait until signalled to terminate
     while (!shutdown_flag)
     {
