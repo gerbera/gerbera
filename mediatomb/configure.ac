@@ -139,7 +139,7 @@ AC_CHECK_FUNCS([regcomp select strcasecmp strchr strdup strerror strncasecmp],
 AC_CHECK_FUNCS([strrchr strstr strtol strtoul uname pthread_mutex_lock], [],
                [AC_MSG_ERROR(required library function not found)])
 
-AC_CHECK_FUNCS([sigaction pthread_self],[],
+AC_CHECK_FUNCS([sigaction sigprocmask pthread_self],[],
                [AC_MSG_ERROR(required library function not found)]) 
                
 AC_CHECK_FUNCS([inet_ntoa],
