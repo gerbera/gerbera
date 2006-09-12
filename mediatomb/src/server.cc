@@ -270,7 +270,7 @@ int Server::upnp_callback(Upnp_EventType eventtype, void *event, void *cookie)
 {
     int ret = UPNP_E_SUCCESS; // general purpose return code
 
-    log_info("start\n");
+    log_debug("start\n");
 
     // check parameters
     if (event == NULL) {
