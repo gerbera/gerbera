@@ -371,6 +371,8 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     }
     catch(UpnpException upnp_e)
     {
+        sigemptyset(&mask_set);
+        sigprocmask(SIG_SETMASK, &mask_set, NULL);
         upnp_e.printStackTrace();
         log_error("main: upnp error %d\n", upnp_e.getErrorCode());
         if (upnp_e.getErrorCode() == UPNP_E_SOCKET_BIND)
