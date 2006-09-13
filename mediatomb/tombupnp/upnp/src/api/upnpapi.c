@@ -3821,14 +3821,12 @@ DBGONLY(
  		return UPNP_E_SUCCESS;
 #else
 
-    char szBuffer[MAX_INTERFACES * sizeof( struct ifreq )];
-    struct ifconf ifConf;
     struct ifreq ifReq;
-    int nResult;
-    int i;
     int LocalSock;
     struct sockaddr_in LocalAddr;
-    int j = 0;
+    struct if_nameindex *iflist = NULL;
+    struct if_nameindex *iflist_save = NULL;
+    int interface_set = 0;
 
     // Create an unbound datagram socket to do the SIOCGIFADDR ioctl on. 
     if( ( LocalSock = socket( AF_INET, SOCK_DGRAM, IPPROTO_UDP ) ) < 0 ) {
@@ -3837,7 +3835,71 @@ DBGONLY(
              )
             return UPNP_E_INIT;
     }
-    // Get the interface configuration information... 
+
+    iflist = iflist_save = if_nameindex();
+    if (iflist == NULL)
+    {
+        DBGONLY( UpnpPrintf( UPNP_ALL, API, __FILE__, __LINE__,                             
+                    "Can't get interface list\n" );)
+        return UPNP_E_INIT;
+    }
+    // add iflist++
+    while (*(char *)iflist != 0)
+    {
+        strncpy( ifReq.ifr_name, iflist->if_name, IF_NAMESIZE );
+        if (ioctl( LocalSock, SIOCGIFFLAGS, &ifReq ) < 0) 
+        {
+            DBGONLY( UpnpPrintf( UPNP_ALL, API, __FILE__, __LINE__,
+                                 "Can't get interface flags for %s:\n",
+                                 ifReq.ifr_name );
+                 )
+            iflist++;
+            continue;
+
+        }
+        
+        // skip loopback interface and also skip interfaces that are down
+        if ((ifReq.ifr_flags & IFF_LOOPBACK) || (!(ifReq.ifr_flags & IFF_UP)))
+        {
+            iflist++;
+            continue;
+        }
+
+        // now get the address for this interface
+        if(ioctl(LocalSock, SIOCGIFADDR, &ifReq) != 0)
+        {
+            DBGONLY( UpnpPrintf( UPNP_ALL, API, __FILE__, __LINE__,
+                                 "Can't get interface address for %s:\n",
+                                 ifReq.ifr_name );
+                 )
+            iflist++;
+            continue;
+        }
+
+        memcpy(&LocalAddr, &ifReq.ifr_addr, sizeof ifReq.ifr_addr);
+        if( LocalAddr.sin_addr.s_addr == htonl( INADDR_LOOPBACK ) ) 
+        {
+            iflist++;
+            continue;
+        }
+
+        iflist++;
+        interface_set = 1;
+    }
+
+    if_freenameindex(iflist_save);
+    
+    close( LocalSock );
+
+    if (!interface_set)
+    {
+        DBGONLY( UpnpPrintf( UPNP_ALL, API, __FILE__, __LINE__,
+                    "Could not find interface to bind to\n");
+               )
+        return UPNP_E_INIT;
+    }
+
+/*    // Get the interface configuration information... 
     ifConf.ifc_len = sizeof szBuffer;
     ifConf.ifc_ifcu.ifcu_buf = ( caddr_t ) szBuffer;
     nResult = ioctl( LocalSock, SIOCGIFCONF, &ifConf );
@@ -3888,7 +3950,8 @@ DBGONLY(
         j++;
 
     }
-    close( LocalSock );
+    */
+
 
     strncpy( out, inet_ntoa( LocalAddr.sin_addr ), LINE_SIZE );
 
