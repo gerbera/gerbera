@@ -68,6 +68,9 @@ void Server::init()
     cmgr = ConnectionManagerService::createInstance(_(DESC_CM_SERVICE_TYPE),
                                                     _(DESC_CM_SERVICE_ID));
 
+    mrreg = MRRegistrarService::createInstance(_(DESC_MRREG_SERVICE_TYPE),
+                                               _(DESC_MRREG_SERVICE_ID));
+                                                    
     pthread_mutex_init(&upnp_mutex, NULL);
 
     Ref<ConfigManager> config = ConfigManager::getInstance();
@@ -378,6 +381,10 @@ void Server::upnp_actions(Ref<ActionRequest> request)
 //        log_debug("upnp_actions: request for content directory service\n");
         cds->process_action_request(request);
     } 
+    else if (request->getServiceID() == DESC_MRREG_SERVICE_ID)
+    {
+        mrreg->process_action_request(request);
+    }
     else 
     {
         // cp is asking for a nonexistent service, or for a service
@@ -412,7 +419,14 @@ void Server::upnp_subscriptions(Ref<SubscriptionRequest> request)
         // this call is for the connection manager service
 //        log_debug("upnp_subscriptions: request for connection manager service\n");
         cmgr->process_subscription_request(request);
-    } else {
+    }
+/*    else if (request->getServiceID() == DESC_MRREG_SERVICE_ID)
+    {
+        mrreg->process_subscription_request(request);
+    }
+*/
+    else 
+    {
         // cp asks for a nonexistent service or for a service that
         // does not support subscriptions
         throw _UpnpException(UPNP_E_BAD_REQUEST, 

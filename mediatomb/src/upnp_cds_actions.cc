@@ -172,7 +172,7 @@ void ContentDirectoryService::process_action_request(Ref<ActionRequest> request)
         log_debug("unrecognized action %s\n",
                 request->getActionName().c_str());
         request->setErrorCode(UPNP_E_INVALID_ACTION);
-        throw UpnpException(UPNP_E_INVALID_ACTION, _("unrecognized action"));
+    //    throw UpnpException(UPNP_E_INVALID_ACTION, _("unrecognized action"));
     }
 
     log_debug("ContentDirectoryService::process_action_request: end\n");

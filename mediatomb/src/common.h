@@ -98,6 +98,12 @@
 #define DESC_CDS_CONTROL_URL            "/upnp/control/cds"
 #define DESC_CDS_EVENT_URL              "/upnp/event/cds"
 
+// media receiver registrar (xbox 360)
+#define DESC_MRREG_SERVICE_TYPE         "urn:microsoft.com:service:X_MS_MediaReceiverRegistrar:1"
+#define DESC_MRREG_SERVICE_ID           "urn:microsoft.com:serviceId:X_MS_MediaReceiverRegistrar"
+#define DESC_MRREG_SCPD_URL             "mr_reg.xml"
+#define DESC_MRREG_CONTROL_URL          "/upnp/control/mr_reg"
+#define DESC_MRREG_EVENT_URL            "/upnp/event/mr_reg"
 
 // xml namespaces
 #define XML_NAMESPACE_ATTR              "xmlns"

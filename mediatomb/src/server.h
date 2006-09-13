@@ -28,6 +28,7 @@
 #include "subscription_request.h"
 #include "upnp_cds.h"
 #include "upnp_cm.h"
+#include "upnp_mrreg.h"
 #include "config_manager.h"
 #include <pthread.h>
 
@@ -176,7 +177,14 @@ protected:
     /// constructor. The class is responsible for processing
     /// an ActionRequest or a SubscriptionRequest.
     zmm::Ref<ConnectionManagerService> cmgr;
-  
+ 
+    /// \brief MediaReceiverRegistrarService instance.
+    /// 
+    /// This class is not fully functional, it always returns "true"
+    /// on IsAuthorized and IsValidated requests. It added to ensure
+    /// Xbos360 compatibility.
+    zmm::Ref<MRRegistrarService> mrreg;
+
     /// \brief Dispatched an ActionRequest between the services.
     /// \param request Incoming ActionRequest.
     ///

@@ -202,6 +202,16 @@ Ref<Element> UpnpXML_RenderDeviceDescription()
     serviceCDS->appendTextChild(_("eventSubURL"), _(DESC_CDS_EVENT_URL));
 
     serviceList->appendChild(serviceCDS);
+
+    // media receiver registrar service for the Xbox 360
+    Ref<Element> serviceMRREG(new Element(_("service")));
+    serviceMRREG->appendTextChild(_("serviceType"), _(DESC_MRREG_SERVICE_TYPE));
+    serviceMRREG->appendTextChild(_("serviceId"), _(DESC_MRREG_SERVICE_ID));
+    serviceMRREG->appendTextChild(_("SCPDURL"), _(DESC_MRREG_SCPD_URL));
+    serviceMRREG->appendTextChild(_("controlURL"), _(DESC_MRREG_CONTROL_URL));
+    serviceMRREG->appendTextChild(_("eventSubURL"), _(DESC_MRREG_EVENT_URL));
+
+    serviceList->appendChild(serviceCDS);
     
     
     device->appendChild(serviceList);

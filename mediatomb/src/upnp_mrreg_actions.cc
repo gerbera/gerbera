@@ -23,19 +23,19 @@
 #endif
 
 #include "tools.h"
-#include "upnp_cm.h"
+#include "upnp_mrreg.h"
 #include "storage.h"
 
 using namespace zmm;
 using namespace mxml;
 
-void ConnectionManagerService::upnp_action_GetCurrentConnectionIDs(Ref<ActionRequest> request)
+void MRRegistrarService::upnp_action_IsAuthorized(Ref<ActionRequest> request)
 {
     log_debug("start\n");
 
     Ref<Element> response;
     response = UpnpXML_CreateResponse(request->getActionName(), serviceType);
-    response->appendTextChild(_("ConnectionID"), _("0"));
+    response->appendTextChild(_("Result"), _("1"));
 
     request->setResponse(response); 
     request->setErrorCode(UPNP_E_SUCCESS);    
@@ -43,7 +43,7 @@ void ConnectionManagerService::upnp_action_GetCurrentConnectionIDs(Ref<ActionReq
     log_debug("end\n");
 }
 
-void ConnectionManagerService::upnp_action_GetCurrentConnectionInfo(Ref<ActionRequest> request)
+void MRRegistrarService::upnp_action_RegisterDevice(Ref<ActionRequest> request)
 {
     log_debug("start\n");
 
@@ -52,51 +52,43 @@ void ConnectionManagerService::upnp_action_GetCurrentConnectionInfo(Ref<ActionRe
     log_debug("upnp_action_GetCurrentConnectionInfo: end\n");
 }
 
-void ConnectionManagerService::upnp_action_GetProtocolInfo(Ref<ActionRequest> request)
+void MRRegistrarService::upnp_action_IsValidated(Ref<ActionRequest> request)
 {
     log_debug("start\n");
-
+ 
     Ref<Element> response;
     response = UpnpXML_CreateResponse(request->getActionName(), serviceType);
+    response->appendTextChild(_("Result"), _("1"));
 
-    Ref<Array<StringBase> > mimeTypes = Storage::getInstance()->getMimeTypes();
-    String CSV = mime_types_to_CSV(mimeTypes);
-
-    response->appendTextChild(_("Source"), CSV);
-    response->appendTextChild(_("Sink"), _(""));
-
-    request->setResponse(response);
-    request->setErrorCode(UPNP_E_SUCCESS);
-        
+    request->setResponse(response); 
+    request->setErrorCode(UPNP_E_SUCCESS);    
     
     log_debug("end\n");
 }
 
-void ConnectionManagerService::process_action_request(Ref<ActionRequest> request)
+void MRRegistrarService::process_action_request(Ref<ActionRequest> request)
 {
     log_debug("start\n");
 
-    if (request->getActionName() == "GetCurrentConnectionIDs")
+    if (request->getActionName() == "IsAuthorized")
     {
-        upnp_action_GetCurrentConnectionIDs(request);
+        upnp_action_IsAuthorized(request);
     }
-    else if (request->getActionName() == "GetCurrentConnectionInfo")
+    else if (request->getActionName() == "RegisterDevice")
     {
-        upnp_action_GetCurrentConnectionInfo(request);
+        upnp_action_RegisterDevice(request);
     }
-    else if (request->getActionName() == "GetProtocolInfo")
+    else if (request->getActionName() == "IsValidated")
     {
-        upnp_action_GetProtocolInfo(request);
+        upnp_action_IsValidated(request);
     }
     else
     {
         // invalid or unsupported action
         log_debug("unrecognized action %s\n", request->getActionName().c_str());
         request->setErrorCode(UPNP_E_INVALID_ACTION);
-//        throw UpnpException(UPNP_E_INVALID_ACTION, _("unrecognized action"));
+        //throw UpnpException(UPNP_E_INVALID_ACTION, _("unrecognized action"));
     }
-    
-
     
     log_debug("end\n");
 
