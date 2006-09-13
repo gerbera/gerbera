@@ -25,6 +25,7 @@
 
 #include "common.h"
 #include "hash.h"
+#include "sync.h"
 
 #define FLUSH_ASAP 2
 #define FLUSH_SPEC 1
@@ -65,6 +66,8 @@ protected:
     
     void sendUpdates();
     bool haveUpdates();
+
+    static Mutex mutex;
 };
 
 
