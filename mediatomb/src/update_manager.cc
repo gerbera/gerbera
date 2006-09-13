@@ -37,15 +37,17 @@
 #define MAX_LAZY_OBJECT_IDS 1000
 #define OBJECT_ID_HASH_CAPACITY 3109
 
-/*
-#define LOCK()   { printf("lock:   line %d\n", __LINE__); lock(); \
+
+#define LOCK()   { printf("lock:   line %d\n", __LINE__); this->lock(); \
                    printf("locked: line %d\n", __LINE__); }
-#define UNLOCK() { printf("unlock: line %d\n", __LINE__); unlock(); }
-*/
-#define LOCK lock
-#define UNLOCK unlock
+#define UNLOCK() { printf("unlock: line %d\n", __LINE__); this->unlock(); }
+
+//#define LOCK lock
+//#define UNLOCK unlock
 
 using namespace zmm;
+
+Mutex UpdateManager::mutex = Mutex(false);
 
 static long start_seconds;
 
@@ -114,10 +116,14 @@ void UpdateManager::init()
 }
 void UpdateManager::shutdown()
 {
+    log_debug("shutdown, locking\n");
     shutdownFlag = true;
     LOCK();
+    log_debug("signalling...\n");
     pthread_cond_signal(&updateCond);
+    log_debug("signalled, unlocking\n");
     UNLOCK();
+    log_debug("unlocked\n");
 // detached
 //    pthread_join(updateThread, NULL);
 }
@@ -193,9 +199,16 @@ Ref<UpdateManager> UpdateManager::getInstance()
 {
     if (inst == nil)
     {
-        init_start_seconds();
-        inst = Ref<UpdateManager>(new UpdateManager());
-        inst->init();
+        mutex.lock();
+        if (inst == nil)
+        {
+            init_start_seconds();
+            inst = Ref<UpdateManager>(new UpdateManager());
+            ///\todo go through all classes and decide how we want to handle 
+            ///class init functions - automatically in getIntsance or by manual calls
+//            inst->init();
+        }
+        mutex.unlock();
     }
     return inst;
 }
@@ -262,7 +275,7 @@ void UpdateManager::threadProc()
         
     LOCK();
 
-    while (! shutdownFlag)
+    while (!shutdownFlag)
     {
         log_debug("threadProc: awakened... have updates: %d\n", haveUpdates());
 
@@ -332,8 +345,9 @@ void UpdateManager::threadProc()
             lastUpdateMillis = getMillis();
         }
     }
+    log_debug("shutting down update thread!\n");
     UNLOCK();
-    log_debug("threadProc: update thread shut down.\n");
+    log_debug("threadProc: update thread shut down, %d\n", pthread_self());
 }
 
 void *UpdateManager::staticThreadProc(void *arg)
