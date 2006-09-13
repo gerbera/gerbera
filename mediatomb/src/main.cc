@@ -467,7 +467,7 @@ void signal_handler(int signum)
         log_error("Clean shutdown failed, killing MediaTomb!\n");
         exit(1);
     }
-
+/*
     action.sa_handler = signal_handler;
     sigfillset(&action.sa_mask);
     if (sigaction(SIGINT, &action, NULL) < 0)
@@ -478,6 +478,7 @@ void signal_handler(int signum)
     {
         log_error("Could not register SIGTERM handler!\n");
     }
+    */
 }
 
 
