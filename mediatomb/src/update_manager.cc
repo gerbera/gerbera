@@ -38,12 +38,12 @@
 #define OBJECT_ID_HASH_CAPACITY 3109
 
 
-#define LOCK()   { printf("lock:   line %d\n", __LINE__); this->lock(); \
+//#define LOCK()   { printf("lock:   line %d\n", __LINE__); this->lock(); \
                    printf("locked: line %d\n", __LINE__); }
-#define UNLOCK() { printf("unlock: line %d\n", __LINE__); this->unlock(); }
+//#define UNLOCK() { printf("unlock: line %d\n", __LINE__); this->unlock(); }
 
-//#define LOCK lock
-//#define UNLOCK unlock
+#define LOCK lock
+#define UNLOCK unlock
 
 using namespace zmm;
 
