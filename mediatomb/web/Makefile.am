@@ -40,7 +40,8 @@ _DIST_FILES_WEB = \
 ./help.html \
 ./main.css \
 ./cm.xml \
-./cds.xml
+./cds.xml \
+./mr_reg.xml    
 
 
 EXTRA_DIST = $(_DIST_FILES_IMAGES) $(_DIST_FILES_JS) $(_DIST_FILES_WEB)

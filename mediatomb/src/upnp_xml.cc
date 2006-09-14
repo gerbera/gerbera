@@ -211,7 +211,7 @@ Ref<Element> UpnpXML_RenderDeviceDescription()
     serviceMRREG->appendTextChild(_("controlURL"), _(DESC_MRREG_CONTROL_URL));
     serviceMRREG->appendTextChild(_("eventSubURL"), _(DESC_MRREG_EVENT_URL));
 
-    serviceList->appendChild(serviceCDS);
+    serviceList->appendChild(serviceMRREG);
     
     
     device->appendChild(serviceList);
