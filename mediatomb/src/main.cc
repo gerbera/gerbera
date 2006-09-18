@@ -66,6 +66,7 @@ int main(int argc, char **argv, char **envp)
     bool     daemon = false;
 
     struct   sigaction action;
+    sigset_t mask_set;
 
     struct   passwd *pwd;
     struct   group  *grp;
@@ -345,11 +346,12 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
 
     main_thread_id = pthread_self();
     // install signal handlers
-    sigset_t mask_set;
     sigfillset(&mask_set);
     sigprocmask(SIG_SETMASK, &mask_set, NULL);
 
+    memset(&action, 0, sizeof(action));
     action.sa_handler = signal_handler;
+    action.sa_flags = 0;
     sigfillset(&action.sa_mask);
     if (sigaction(SIGINT, &action, NULL) < 0)
     {
@@ -359,7 +361,6 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     {
         log_error("Could not register SIGTERM handler!\n");
     }
-
 
     // prepare to run processes
     init_process();
@@ -371,8 +372,10 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     }
     catch(UpnpException upnp_e)
     {
+
         sigemptyset(&mask_set);
         sigprocmask(SIG_SETMASK, &mask_set, NULL);
+
         upnp_e.printStackTrace();
         log_error("main: upnp error %d\n", upnp_e.getErrorCode());
         if (upnp_e.getErrorCode() == UPNP_E_SOCKET_BIND)
@@ -418,7 +421,7 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
 
     sigemptyset(&mask_set);
     sigprocmask(SIG_SETMASK, &mask_set, NULL);
-    
+   
     // wait until signalled to terminate
     while (!shutdown_flag)
     {
@@ -450,7 +453,6 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
 
 void signal_handler(int signum)
 {
-    struct sigaction action;
 
     if (main_thread_id != pthread_self())
     {
@@ -467,18 +469,8 @@ void signal_handler(int signum)
         log_error("Clean shutdown failed, killing MediaTomb!\n");
         exit(1);
     }
-/*
-    action.sa_handler = signal_handler;
-    sigfillset(&action.sa_mask);
-    if (sigaction(SIGINT, &action, NULL) < 0)
-    {
-        log_error("Could not register SIGINT handler!\n");
-    }
-    if (sigaction(SIGTERM, &action, NULL) < 0)
-    {
-        log_error("Could not register SIGTERM handler!\n");
-    }
-    */
+
+    return;
 }
 
 
