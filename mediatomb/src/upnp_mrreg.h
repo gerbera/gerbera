@@ -85,13 +85,12 @@ public:
     /// to the appropriate action for processing.
     void process_action_request(zmm::Ref<ActionRequest> request);
 
-    // subscriptions not supported
     /// \brief Processes an incoming SubscriptionRequest.
     /// \param request Incoming SubscriptionRequest.
     ///
     /// Looks at the incoming SubscriptionRequest and accepts the subscription
-    /// if everything is ok.
-//    void process_subscription_request(zmm::Ref<SubscriptionRequest> request);
+    /// if everything is ok. Currently we do not support any updates.
+    void process_subscription_request(zmm::Ref<SubscriptionRequest> request);
 
     // subscriptions for this service are not supporte  // subscriptions for this service are not supportedd
 

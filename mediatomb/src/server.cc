@@ -420,11 +420,10 @@ void Server::upnp_subscriptions(Ref<SubscriptionRequest> request)
 //        log_debug("upnp_subscriptions: request for connection manager service\n");
         cmgr->process_subscription_request(request);
     }
-/*    else if (request->getServiceID() == DESC_MRREG_SERVICE_ID)
+    else if (request->getServiceID() == DESC_MRREG_SERVICE_ID)
     {
         mrreg->process_subscription_request(request);
     }
-*/
     else 
     {
         // cp asks for a nonexistent service or for a service that
