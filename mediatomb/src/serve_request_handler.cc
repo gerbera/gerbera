@@ -63,7 +63,7 @@ void ServeRequestHandler::get_info(IN const char *filename, OUT struct File_Info
         throw _Exception(_("There is something wrong with the link ") + url_path);
     }
 
-    String path = ConfigManager::getInstance()->getOption(_("/server/servedir") + url_path.substring(len, url_path.length()));
+    String path = ConfigManager::getInstance()->getOption(_("/server/servedir")) + url_path.substring(len, url_path.length());
     
     ret = stat(path.c_str(), &statbuf);
     if (ret != 0)
@@ -143,7 +143,7 @@ Ref<IOHandler> ServeRequestHandler::open(IN const char *filename, IN enum UpnpOp
                         url_path);
     }
 
-    String path = ConfigManager::getInstance()->getOption(_("/server/servedir") + url_path.substring(len, url_path.length()));
+    String path = ConfigManager::getInstance()->getOption(_("/server/servedir")) + url_path.substring(len, url_path.length());
 
 
     Ref<IOHandler> io_handler(new FileIOHandler(path));
