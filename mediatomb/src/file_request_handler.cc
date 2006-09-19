@@ -164,6 +164,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     }
 
     String mimeType;
+    String header;
     /* determining which resource to serve */
 
     int res_id = 0;
@@ -190,6 +191,14 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     {
         mimeType = item->getMimeType();
         info->file_length = statbuf.st_size;
+        // if we are dealing with a regular file we should add the
+        // Accept-Ranges: bytes header, in order to indicate that we support
+        // seeking
+        if (S_ISREG(statbuf.st_mode))
+        {
+            header = _("Accept-Ranges: bytes\r\n");
+        }
+
         //log_debug("sizeof off_t %d, statbuf.st_size %d\n", sizeof(off_t), sizeof(statbuf.st_size));
         //log_debug("get_info: file_length: " OFF_T_SPRINTF "\n", statbuf.st_size);
     }
@@ -208,7 +217,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
             slash_pos++;
 
 
-            String header = _("Content-Disposition: attachment; filename=\"") + path.substring(slash_pos) + _("\"");
+            header = header + _("Content-Disposition: attachment; filename=\"") + path.substring(slash_pos) + _("\"");
             log_debug("Adding content disposition header: %s\n", header.c_str());
             info->http_header = ixmlCloneDOMString(header.c_str());
         }
