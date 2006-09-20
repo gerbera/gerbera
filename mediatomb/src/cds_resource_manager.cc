@@ -76,7 +76,8 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         if (dot > -1)
         {
             String extension = location.substring(dot);
-            if (string_ok(extension))
+            // make sure that the extension does not contain the separator character
+            if (string_ok(extension) && (extension.index(URL_PARAM_SEPARATOR) == -1))
             {
                 tmp = tmp + _("&") + _(URL_FILE_EXTENSION) + _("=") + extension;
                 log_debug("New URL: %s\n", tmp.c_str());
