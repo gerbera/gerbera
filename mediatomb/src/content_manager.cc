@@ -304,6 +304,7 @@ void ContentManager::_addFile(String path, bool recursive)
     }
     um->flushUpdates();
 }
+
 void ContentManager::_removeObject(int objectID)
 {
     /// \todo when removing... what about container updates when removing recursively?
