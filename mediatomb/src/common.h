@@ -47,8 +47,8 @@
 #define URL_REQUEST_TYPE                "req_type"
 #define URL_RESOURCE_ID                 "res_id"
 #define URL_FILE_EXTENSION              "ext"
-#define URL_PARAM_SEPARATOR             '+' // DONT FORGET TO MANUALLY ADJUST web/js/tools.js and the line below
-#define _URL_PARAM_SEPARATOR            "+"
+#define URL_PARAM_SEPARATOR             '/' // DONT FORGET TO MANUALLY ADJUST web/js/tools.js and the line below
+#define _URL_PARAM_SEPARATOR            "/"
 //#define URL_PARAM_SEPARATOR             '?'
 #define SERVER_VIRTUAL_DIR              "content"
 #define CONTENT_MEDIA_HANDLER           "media"
