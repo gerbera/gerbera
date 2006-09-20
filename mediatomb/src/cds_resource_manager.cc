@@ -26,6 +26,7 @@
 #include "dictionary.h"
 #include "server.h"
 #include "common.h"
+#include "tools.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -68,7 +69,19 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
             tmp = urlBase->urlBase + i;
         else
             tmp = urlBase->urlBase;
-      
+     
+        // this is especially for the TG100, we need to add the file extension
+        String location = item->getLocation();
+        int dot = location.rindex('.');
+        if (dot > -1)
+        {
+            String extension = location.substring(dot);
+            if (string_ok(extension))
+            {
+                tmp = tmp + _("&") + _(URL_FILE_EXTENSION) + _("=") + extension;
+                log_debug("New URL: %s\n", tmp.c_str());
+            }
+        }
         element->appendChild(UpnpXML_DIDLRenderResource(tmp, res_attrs));
     }
 }
@@ -98,7 +111,7 @@ Ref<CdsResourceManager::UrlBase> CdsResourceManager::addResources_getUrlBase(Ref
     else
     { 
         urlBase->urlBase = Server::getInstance()->getVirtualURL() + _("/") +
-            CONTENT_MEDIA_HANDLER + _("?") + dict->encode() + _("&") + _(URL_RESOURCE_ID) + _("=");
+            CONTENT_MEDIA_HANDLER + _(_URL_PARAM_SEPARATOR) + dict->encode() + _("&") + _(URL_RESOURCE_ID) + _("=");
         urlBase->addResID = true;
     }
     return urlBase;

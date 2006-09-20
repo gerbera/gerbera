@@ -28,11 +28,11 @@ using namespace zmm;
 
 void RequestHandler::split_url(const char *url, String &path, String &parameters)
 {
-    char *i1 = index(url, '?');
+    char *i1 = index(url, URL_PARAM_SEPARATOR);
 
     if (i1 == NULL)
     {
-        path = String((char *)url);
+        path = String(url);
         parameters = _("");
     }
     else

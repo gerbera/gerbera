@@ -1,6 +1,6 @@
 function link(req_type, param)
 {
-    var url = "/content/interface?req_type="+ req_type +"&sid="+ SID;
+    var url = "/content/interface+req_type="+ req_type +"&sid="+ SID;
     if (param)
         for (var key in param)
         {
