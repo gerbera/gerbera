@@ -384,6 +384,12 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
             log_info("Please check if another instance of MediaTomb or\n");
             log_info("another application is running on the same port.\n");
         }
+        else if (upnp_e.getErrorCode() == UPNP_E_SOCKET_ERROR)
+        {
+            log_error("Socket error.\n");
+            log_info("Please check if your network interface was configured for multicast!\n");
+            log_info("Refer to the README file for more information.\n");
+        }
 
         try
         {
