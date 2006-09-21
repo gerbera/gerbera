@@ -54,6 +54,7 @@
 using namespace zmm;
 
 int shutdown_flag = 0;
+int restart_flag = 0;
 pthread_t main_thread_id;
 
 void signal_handler(int signum);
@@ -361,6 +362,11 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     {
         log_error("Could not register SIGTERM handler!\n");
     }
+    if (sigaction(SIGHUP, &action, NULL) < 0)
+    {
+        log_error("Could not register SIGHUP handler!\n");
+    }
+
 
     // prepare to run processes
     init_process();
@@ -432,8 +438,31 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     while (!shutdown_flag)
     {
         pause();
+        if (restart_flag != 0)
+        {
+            log_info("Restarting MediaTomb!\n");
+            try
+            {
+                server->shutdown();
+                init_process();
+
+                server->init();
+                server->upnp_init(String(ip), port);
+
+                restart_flag = 0;
+            }
+            catch(Exception e)
+            {
+                restart_flag = 0;
+                shutdown_flag = 1;
+                sigemptyset(&mask_set);
+                sigprocmask(SIG_SETMASK, &mask_set, NULL);
+                log_error("Could not restart MediaTomb\n");
+
+            }
+        }
     }
-   
+
     // shutting down 
     int ret = EXIT_SUCCESS;
     try
@@ -465,15 +494,22 @@ void signal_handler(int signum)
         return;
     }
 
-    shutdown_flag++;
-    if (shutdown_flag == 1)
-        log_info("MediaTomb shutting down. Please wait...\n");
-    else if (shutdown_flag == 2)
-        log_info("Mediatomb still shutting down, signal again to kill.\n");
-    else if (shutdown_flag > 2)
+    if ((signum == SIGINT) || (signum == SIGTERM))
     {
-        log_error("Clean shutdown failed, killing MediaTomb!\n");
-        exit(1);
+        shutdown_flag++;
+        if (shutdown_flag == 1)
+            log_info("MediaTomb shutting down. Please wait...\n");
+        else if (shutdown_flag == 2)
+            log_info("Mediatomb still shutting down, signal again to kill.\n");
+        else if (shutdown_flag > 2)
+        {
+            log_error("Clean shutdown failed, killing MediaTomb!\n");
+            exit(1);
+        }
+    }
+    else if (signum == SIGHUP)
+    {
+        restart_flag = 1;
     }
 
     return;
