@@ -41,6 +41,7 @@ v0.9.0  Major rework
         * added option to supress hidden files when browsing the filesystem
         * added X_MS_MediaReceiverRegistrar Service to allow Xbox 360 support
         * added workarounds to enable Telegent TG100 support
+        * server can now be restarted by sending it a SIGHUP
 
 v0.8.1
         * added "serve" directory, any files there can be downloaded 
