@@ -65,7 +65,8 @@ ConfigManager::ConfigManager() : Object()
 
 void ConfigManager::init(String filename, String userhome)
 {
-    instance = Ref<ConfigManager>(new ConfigManager());
+    if (instance == nil)
+        instance = Ref<ConfigManager>(new ConfigManager());
 
     String error_message;
     String home;

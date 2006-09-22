@@ -444,6 +444,30 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
             try
             {
                 server->shutdown();
+                
+                try
+                {
+                    ConfigManager::init(config_file, home);
+                }
+                catch (mxml::ParseException pe)
+                {
+                    log_error("Error parsing config file: %s line %d:\n%s\n",
+                            pe.context->location.c_str(),
+                            pe.context->line,
+                            pe.getMessage().c_str());
+                    log_error("Could not restart MediaTomb\n");
+                    // at this point upnp shutdown has already been called
+                    // so it is safe to exit
+                    exit(EXIT_FAILURE);
+                }
+                catch (Exception e)
+                {
+                    log_error("Error reloading configuration: %s\n", 
+                              e.getMessage().c_str());
+                    e.printStackTrace();
+                    exit(EXIT_FAILURE);
+                }
+
                 init_process();
 
                 server->init();
@@ -451,7 +475,7 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
 
                 restart_flag = 0;
             }
-            catch(Exception e)
+           catch(Exception e)
             {
                 restart_flag = 0;
                 shutdown_flag = 1;
