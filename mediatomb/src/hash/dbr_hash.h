@@ -18,28 +18,41 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef __HASH_DBB_HASH_H__
-#define __HASH_DBB_HASH_H__
+#ifndef __HASH_DBR_HASH_H__
+#define __HASH_DBR_HASH_H__
 
 #include "direct_hash_base.h"
 
-template <typename KT, typename VT> struct dbb_hash_slot
+template <typename KT> struct dbr_hash_slot
 {
     KT key;
-    VT value;
+    int array_slot;
 };
 
-/// \brief Direct hash with base type keys and base type values.
-template <typename KT, typename VT>
-class DBBHash : public DHashBase<KT, struct dbb_hash_slot<KT, VT> >
+template <typename KT> struct hash_data_array_t
+{
+    int size;
+    KT *data;
+};
+
+/// \brief Direct hash with base type keys only. It is NOT thread-safe!
+template <typename KT>
+class DBRHash : public DHashBase<KT, struct dbr_hash_slot<KT> >
 {
 protected:
     KT emptyKey;
+    KT *data_array;
 public:
-    DBBHash(int capacity, KT emptyKey) : DHashBase<KT, struct dbb_hash_slot<KT, VT> >(capacity)
+    DBRHash(int capacity, KT emptyKey) : DHashBase<KT, struct dbr_hash_slot<KT> >(capacity)
     {
         this->emptyKey = emptyKey;
+        data_array = (KT *)MALLOC(capacity * sizeof(KT));
         clear();
+    }
+    
+    virtual ~DBRHash()
+    {
+        FREE(data_array);
     }
     
     /* virtual methods */
@@ -47,15 +60,15 @@ public:
     {
         return this->baseTypeHashCode((unsigned int)key);
     }
-    virtual bool match(KT key, struct dbb_hash_slot<KT, VT> *slot)
+    virtual bool match(KT key, KT *slot)
     {
-        return (key == slot->key);
+       return (key == slot->key);
     }
-    virtual bool isEmptySlot(struct dbb_hash_slot<KT, VT> *slot)
+    virtual bool isEmptySlot(KT *slot)
     {
         return (slot->key == emptyKey);
     }
-
+    
     void clear()
     {
         if (! emptyKey)
@@ -63,69 +76,71 @@ public:
         else
         {
             for (int i = 0; i < this->capacity; i++)
-                this->data[i].key = emptyKey;
+                this->data[i]->key = emptyKey;
             this->count = 0;
         }
     }
     
     inline bool remove(KT key)
     {
-        struct dbb_hash_slot<KT, VT> *slot;
+        struct dbr_hash_slot<KT> *slot;
         if (! search(key, &slot))
             return false;
         slot->key = emptyKey;
-        this->count--;
+        int array_slot = slot->array_slot; 
+        data_array[array_slot] = data_array[--this->count];
+        if (! search(data_array[array_slot], &slot))
+            throw _Exception(_("DBR-Hash-Error: key in data_array not found in hashtable"));
+        slot->array_slot = array_slot;
         return true;
     }
     
-    inline void put(KT key, VT value)
+    inline void put(KT key)
     {
-        struct dbb_hash_slot<KT, VT> *slot;
-        bool found = search(key, &slot);
-        if (! found)
+        struct dbr_hash_slot<KT> *slot;
+        if (! search(key, &slot))
         {
             slot->key = key;
-            this->count++;
+            slot->array_slot = this->count;
+            data_array[this->count++] = key;
         }
-        slot->value = value;
     }
-    inline void put(KT key, hash_slot_t destSlot, VT value)
+    
+    /// \brief returns all keys as an array. After the deletion of the DBRHash object, the array is invalid!
+    inline void getAll(hash_data_array_t<KT> *hash_data_array)
     {
-        struct dbb_hash_slot<KT, VT> *slot = (struct dbb_hash_slot<KT, VT> *)destSlot;
+        hash_data_array->size = this->count;
+        hash_data_array->data = data_array;
+    }
+    
+    /*
+     * is this really needed? seems so make no sense...
+    inline void put(KT key, hash_slot_t destSlot)
+    {
+        KT *slot = (KT *)destSlot;
         if (slot->key == emptyKey)
         {
             slot->key = key;
             this->count++;
         }
-        slot->value = value;
     }
-
-    inline bool get(KT key, VT *value)
-    {
-        struct dbb_hash_slot<KT, VT> *slot;
-        bool found = search(key, &slot);
-        if (found)
-            *value = slot->value;
-        return found;
-    }
-    bool get(KT key, hash_slot_t *destSlot, VT *value)
-    {
-        struct dbb_hash_slot<KT, VT> **slot = (struct dbb_hash_slot<KT, VT> **)destSlot;
-        bool found = search(key, slot);
-        if (found)
-            *value = (*slot)->value;
-        return found;
-    }
+    */
+    
     inline bool exists(KT key)
     {
-        struct dbb_hash_slot<KT, VT> *slot;
+        struct dbr_hash_slot<KT> *slot;
         return search(key, &slot);
     }
+    
+    /*
+     * unneded, i think...
+     
     inline bool exists(KT key, hash_slot_t *destSlot)
     {
-        return search(key, (struct dbb_hash_slot<KT, VT> **)destSlot);
+        return search(key, (KT **)destSlot);
     }
+    */
 };
 
-#endif // __HASH_DBB_HASH_H__
+#endif // __HASH_DBR_HASH_H__
 

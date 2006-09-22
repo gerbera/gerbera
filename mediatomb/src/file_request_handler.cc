@@ -114,6 +114,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
         }
         else
         {
+            /// \todo actually fetch...
             log_debug("fetching %s\n", action.c_str());
             output = input;
         }

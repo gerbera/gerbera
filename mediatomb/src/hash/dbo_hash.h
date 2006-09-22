@@ -107,7 +107,7 @@ public:
     {
         return (slot->key == emptyKey);
     }
-
+    
     inline void put(KT key, zmm::Ref<VT> value)
     {
         struct dbo_hash_slot<KT, VT> *slot;
@@ -123,7 +123,7 @@ public:
             valuePtr->retain();
             slot->value->release();
             slot->value = valuePtr;
-        }            
+        }
         else
         {
             this->count++;

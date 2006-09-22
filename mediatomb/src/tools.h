@@ -41,6 +41,11 @@ extern "C" {
 /// \return array of strings
 zmm::Ref<zmm::Array<zmm::StringBase> > split_string(zmm::String str, char sep);
 
+/// \brief splits the given file path into the path to the file and the filename.
+/// \param str the path to split
+/// \return an array with the path at position 0 and the filename at position 1.
+zmm::Ref<zmm::Array<zmm::StringBase> > split_path(zmm::String str);
+
 /// \brief returns str with leading and trailing whitespace removed
 zmm::String trim_string(zmm::String str);
 

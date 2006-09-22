@@ -50,12 +50,12 @@ public:
     {
         return count;
     }
-
+    
     /* abstract methods to be implemented in deriving classes */
     virtual int hashCode(KT key) = 0;
     virtual bool match(KT key, ST *slot) = 0;
     virtual bool isEmptySlot(ST *slot) = 0;
-
+    
     inline int baseTypeHashCode(unsigned int key)
     {
         return ((key * 0xd2d84a61) ^ 0x7832c9f4) % capacity;
@@ -82,7 +82,7 @@ public:
         }
         return ((sum * 0xd2d84a61) ^ 0x7832c9f4) % capacity;
     }
-
+    
     int secondaryHashCode(int primary)
     {
         int h2 = (HASH_PRIME - (primary % HASH_PRIME));

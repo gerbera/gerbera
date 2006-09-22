@@ -248,59 +248,39 @@ void ContentManager::_addFile(String path, bool recursive)
 #ifdef HAVE_JS
     initScripting();
 #endif
-
+    
     // _addFile2(path, recursive);
     // return;
-
+    
+    /*
     if (path.charAt(path.length() - 1) == '/')
     {
         path = path.substring(0, path.length() - 1);
     }
+    */
     Ref<Storage> storage = Storage::getInstance();
-
-    Ref<Array<StringBase> > parts = split_string(path, '/');
-    int curParentID = 1;
-    /// \todo make PC-Directory id configurable
-    String curPath = _("");
-    Ref<CdsObject> obj = storage->loadObject(curParentID); // root container
-
+    
     Ref<UpdateManager> um = UpdateManager::getInstance();
-    Ref<StringConverter> f2i = StringConverter::f2i();
-
-    for (int i = 0; i < parts->size(); i++)
+    //Ref<StringConverter> f2i = StringConverter::f2i();
+    
+    Ref<CdsObject> obj = storage->findObjectByPath(path);
+    if (obj == nil)
     {
-        String part = parts->get(i);
-        curPath = curPath + "/" + part;
-
-        obj = storage->findObjectByTitle(f2i->convert(part), curParentID);
-
-        if (obj == nil) // create object
+        obj = createObjectFromFile(path);
+        if (obj == nil) // object ignored
+            return;
+        if (IS_CDS_ITEM(obj->getObjectType()))
         {
-//            long millisStart = getMillis();
-            obj = createObjectFromFile(curPath);
-//            long elapsed = getMillis() - millisStart;
-//            log_debug(("FILE PARSED: %ld\n", elapsed));
-            
-            if (obj == nil) // object ignored
-            {
-                return;
-            }
-            obj->setParentID(curParentID);
             addObject(obj);
-        }
-        curParentID = obj->getID();
-    }
-
 #ifdef HAVE_JS
-    if (IS_CDS_ITEM(obj->getObjectType()))
-    {
-        scripting->processCdsObject(obj);
-    }
+            scripting->processCdsObject(obj);
 #endif
-
+        }
+    }
+    
     if (recursive && IS_CDS_CONTAINER(obj->getObjectType()))
     {
-        addRecursive(path, curParentID);
+        addRecursive(path);
     }
     um->flushUpdates();
 }
@@ -314,8 +294,7 @@ void ContentManager::_removeObject(int objectID)
         throw _Exception(_("cannot remove PC-Directory container"));
     /// \todo make PC-Directory ID configurable
     Ref<Storage> storage = Storage::getInstance();
-    Ref<CdsObject> obj = storage->loadObject(objectID);
-    storage->removeObject(obj);
+    storage->removeObject(objectID);
 
     // um->containerChanged(obj->getParentID());
     
@@ -406,7 +385,7 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
                 else if (scanLevel == Basic)
                     continue;
                 else
-                    throw Exception(_("Unsupported scan level!"));
+                    throw _Exception(_("Unsupported scan level!"));
             }
             else if (S_ISDIR(statbuf.st_mode))
             {
@@ -436,7 +415,7 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
 }
 
 /* scans the given directory and adds everything recursively */
-void ContentManager::addRecursive(String path, int parentID)
+void ContentManager::addRecursive(String path)
 {
     Ref<StringConverter> f2i = StringConverter::f2i();
 
@@ -448,6 +427,7 @@ void ContentManager::addRecursive(String path, int parentID)
         throw _Exception(_("could not list directory ")+
                         path + " : " + strerror(errno));
     }
+    int parentID = storage->findObjectIDByPath(path + "/");
     struct dirent *dent;
     while ((dent = readdir(dir)) != NULL)
     {
@@ -466,14 +446,12 @@ void ContentManager::addRecursive(String path, int parentID)
         String newPath = path + "/" + name;
         try
         {
-            Ref<CdsObject> obj = storage->findObjectByTitle(f2i->convert(String(name)), parentID);
+            Ref<CdsObject> obj = nil;
+            if (parentID > 0)
+                obj = storage->findObjectByFilename(String(name), parentID);
             if (obj == nil) // create object
             {
-//                long millisStart = getMillis();
                 obj = createObjectFromFile(newPath);
-//                long elapsed = getMillis() - millisStart;
-//                log_debug(("FILE PARSED: %ld\n", elapsed));
-                
                 
                 if (obj == nil) // object ignored
                 {
@@ -481,8 +459,12 @@ void ContentManager::addRecursive(String path, int parentID)
                 }
                 else
                 {
-                    obj->setParentID(parentID);
-                    addObject(obj);
+                    //obj->setParentID(parentID);
+                    if (IS_CDS_ITEM(obj->getObjectType()))
+                    {
+                        addObject(obj);
+                        parentID = obj->getParentID();
+                    }
                 }
             }
             if (obj != nil)
@@ -490,17 +472,16 @@ void ContentManager::addRecursive(String path, int parentID)
 #ifdef HAVE_JS
         		if (IS_CDS_ITEM(obj->getObjectType()))
 	        	{
-//                    long millisStart = getMillis();
                     if (scripting != nil)
     		            scripting->processCdsObject(obj);
-                    obj = createObjectFromFile(newPath);
-//                    long elapsed = getMillis() - millisStart;
-//                    log_debug(("FILE ADDED: %ld\n", elapsed));
+                    
+                    /// \todo Why was this statement here??? - It seems to be unnecessary
+                    //obj = createObjectFromFile(newPath);
         		}
 #endif
                 if (IS_CDS_CONTAINER(obj->getObjectType()))
                 {
-                    addRecursive(newPath, obj->getID());
+                    addRecursive(newPath);
                 }
             }
         }
@@ -645,28 +626,28 @@ void ContentManager::addObject(zmm::Ref<CdsObject> obj)
     int parent_id;
     Ref<Storage> storage = Storage::getInstance();
     Ref<UpdateManager> um = UpdateManager::getInstance();
-        log_debug("Adding: parent ID is %d\n", obj->getParentID());
+    log_debug("Adding: parent ID is %d\n", obj->getParentID());
     storage->addObject(obj);
     log_debug("After adding: parent ID is %d\n", obj->getParentID());
-
+    
     parent_id = obj->getParentID();
     if ((parent_id != -1) && (storage->getChildCount(parent_id) == 1))
     {
-        Ref<CdsObject> parent(new CdsObject());
+        Ref<CdsObject> parent; //(new CdsObject());
         parent = storage->loadObject(parent_id);
         log_debug("Will update ID %d\n", parent->getParentID());
         um->containerChanged(parent->getParentID());
     }
-
+    
     um->containerChanged(obj->getParentID());
     if (IS_CDS_CONTAINER(obj->getObjectType()))
     {
         storage->incrementUIUpdateID(obj->getParentID());
     }
-   
+    
     if (! obj->isVirtual() && IS_CDS_ITEM(obj->getObjectType()))
         ContentManager::getInstance()->getAccounting()->totalFiles++;
-
+    
     um->flushUpdates();
 }
 
@@ -759,9 +740,15 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic)
     {
         Ref<CdsContainer> cont(new CdsContainer());
         obj = RefCast(cont, CdsObject);
+        /* adding containers is done by Storage now
+         * this exists only to inform the caller that
+         * this is a container
+         */
+        /* 
         cont->setLocation(path);
         Ref<StringConverter> f2i = StringConverter::f2i();
         obj->setTitle(f2i->convert(filename));
+        */
     }
     else
     {
@@ -1154,6 +1141,7 @@ CMAccounting::CMAccounting() : Object()
 /* ************** experimental file adding ************** */
 /* dir cache */
 
+/*
 DirCacheEntry::DirCacheEntry() : Object()
 {}
 
@@ -1244,9 +1232,8 @@ int DirCache::createContainers()
     }
     return cont->getID();
 }
-
-
-
+*/
+/*
 void ContentManager::_addFile2(String path, bool recursive)
 {
 #ifdef HAVE_JS
@@ -1345,5 +1332,5 @@ void ContentManager::addRecursive2(Ref<DirCache> dirCache, String filename, bool
     else
         throw _Exception(_("unsupported file type: ") + path);
 }
-
+*/
 

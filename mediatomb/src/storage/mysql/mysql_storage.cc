@@ -33,16 +33,87 @@ using namespace mxml;
 
 MysqlStorage::MysqlStorage() : SQLStorage()
 {
-    shutdownFlag = false;
+    //shutdownFlag = false;
+    mysql_init_key_initialized = false;
+    /// \todo set dbRemovesDeps to true only for InnoDB.
+    dbRemovesDeps = true; 
+    mutex = Ref<Mutex> (new Mutex());
 }
 MysqlStorage::~MysqlStorage()
 {
 }
 
+void MysqlStorage::checkMysqlThreadInit()
+{
+    if (pthread_getspecific(mysql_init_key) == NULL)
+    {
+        if (mysql_thread_init()) throw _Exception(_("error while calling mysql_thread_init()"));
+        if (pthread_setspecific(mysql_init_key, (void *) 1)) throw _Exception(_("error while calling pthread_setspecific()"));
+    }
+}
+
 void MysqlStorage::init()
 {
-    Ref<MSTask> task;
+    int ret;
     
+    if (! mysql_thread_safe())
+    {
+        throw _Exception(_("mysql library is not thread safe!"));
+    }
+    
+    if (! mysql_init_key_initialized)
+    {
+        /// \todo write destructor function
+        ret = pthread_key_create(&mysql_init_key, NULL);
+        if (ret) throw _Exception(_("could not create pthread_key"));
+        pthread_setspecific(mysql_init_key, (void *) 1);
+        
+        Ref<ConfigManager> config = ConfigManager::getInstance();
+        
+        String dbHost = config->getOption(_("/server/storage/host"));
+        String dbName = config->getOption(_("/server/storage/database"));
+        String dbUser = config->getOption(_("/server/storage/username"));
+        String dbPort = config->getOption(_("/server/storage/port"));
+        String dbPass;
+        if (config->getElement(_("/server/storage/password")) == nil)
+            dbPass = nil;
+        else
+            dbPass = config->getOption(_("/server/storage/password"), _(""));
+        
+        
+        String dbSock;
+        if (config->getElement(_("/server/storage/socket")) == nil)
+            dbSock = nil;
+        else
+            dbSock = config->getOption(_("/server/storage/socket"), _(""));
+        
+        MYSQL *res_mysql;
+        
+        res_mysql = mysql_init(&db);
+        if(! res_mysql)
+            throw _Exception(_("mysql_init failed"));
+        
+        res_mysql = mysql_real_connect(&db,
+            dbHost.c_str(),
+            dbUser.c_str(),
+            (dbPass == nil ? NULL : dbPass.c_str()),
+            dbName.c_str(),
+            dbPort.toInt(), // port
+            (dbSock == nil ? NULL : dbSock.c_str()), // socket
+            0 // flags
+        );
+        if(! res_mysql)
+            throw _Exception(_("mysql_real_connect failed"));
+        
+        
+        
+        mysql_init_key_initialized = true;
+    }
+    else
+        checkMysqlThreadInit();
+    
+    /*
+    Ref<MSTask> task;
     taskQueue = Ref<Array<MSTask> >(new Array<MSTask>());
     
     pthread_attr_t attr;
@@ -87,6 +158,7 @@ void MysqlStorage::init()
     }
     log_debug("leaving.\n");
     pthread_attr_destroy(&attr);
+    */
     SQLStorage::init();
 }
 
@@ -110,6 +182,7 @@ String MysqlStorage::getError(MYSQL *db)
     return err_buf->toString();
 }
 
+/*
 void MysqlStorage::mutexCondInit(pthread_mutex_t *mutex, pthread_cond_t *cond)
 {
     pthread_mutex_init(mutex, NULL);
@@ -135,23 +208,66 @@ void MysqlStorage::waitForTask(Ref<MSTask> task, pthread_mutex_t *mutex, pthread
     if (task->getError() != nil)
     {
         log_error("%s\n", task->getError().c_str());
-        throw Exception(task->getError());
+        throw _Exception(task->getError());
     }
 }
-
+*/
 
 Ref<SQLResult> MysqlStorage::select(String query)
-{ 
+{
+    Exception *e = new Exception(query);
+    e->printStackTrace();
+    delete e;
+    
+    int res;
+    mutex->lock();
+    res = mysql_real_query(&db, query.c_str(), query.length());
+    if(res)
+    {
+        mutex->unlock();
+        throw _StorageException(_("Mysql: mysql_real_query() failed: ") + getError(&db));
+    }
+    
+    MYSQL_RES *mysql_res;
+    mysql_res = mysql_store_result(&db);
+    mutex->unlock();
+    if(! mysql_res)
+    {
+        throw _StorageException(_("Mysql: mysql_store_result() failed: ") + getError(&db));
+    }
+    return Ref<SQLResult> (new MysqlResult(mysql_res));
+    
+    
+    /*
     pthread_mutex_t selectMutex;
     pthread_cond_t selectCond;
     mutexCondInit(&selectMutex, &selectCond);
     Ref<MSSelectTask> ptask (new MSSelectTask(query, &selectMutex, &selectCond));
     waitForTask(RefCast(ptask, MSTask), &selectMutex, &selectCond);
     return RefCast(ptask->pres, SQLResult);
+    */
 }
 
 int MysqlStorage::exec(String query, bool getLastInsertId)
 {
+    Exception *e = new Exception(query);
+    e->printStackTrace();
+    delete e;
+    
+    int res;
+    mutex->lock();
+    res = mysql_real_query(&db, query.c_str(), query.length());
+    if(res)
+    {
+        mutex->unlock();
+        throw _StorageException(_("Mysql: mysql_real_query() failed: ") + getError(&db));
+    }
+    int insert_id=-1;
+    if (getLastInsertId) insert_id = mysql_insert_id(&db);
+    mutex->unlock();
+    return insert_id;
+    
+    /*
     pthread_mutex_t execMutex;
     pthread_cond_t execCond;
     mutexCondInit(&execMutex, &execCond);
@@ -159,16 +275,19 @@ int MysqlStorage::exec(String query, bool getLastInsertId)
     waitForTask(RefCast(ptask, MSTask), &execMutex, &execCond);
     if (getLastInsertId) return ptask->lastInsertId;
     else return -1;
+    */
 }
 
 void MysqlStorage::shutdown()
 {
-    pthread_mutex_lock(&taskMutex);
+    /*pthread_mutex_lock(&taskMutex);
     shutdownFlag = true;
     pthread_cond_broadcast(&taskCond);
     pthread_mutex_unlock(&taskMutex);
+    */
 }
 
+/*
 void *MysqlStorage::staticThreadProc(void *arg)
 {
     struct _threads *thread = (_threads*) arg;
@@ -253,7 +372,7 @@ void MysqlStorage::threadProc(struct _threads *thread)
         pthread_mutex_lock(&taskMutex);
         if(taskQueue->size() == 0)
         {
-            /* if nothing to do, sleep until awakened */
+            // if nothing to do, sleep until awakened 
             pthread_cond_wait(&taskCond, &taskMutex);
             pthread_mutex_unlock(&taskMutex);
             continue;
@@ -289,9 +408,11 @@ int MysqlStorage::addTask(zmm::Ref<MSTask> task)
     pthread_mutex_unlock(&taskMutex);
     return ret;
 }
+*/
 
 /* MSTask */
 
+/*
 MSTask::MSTask(pthread_mutex_t *mutex, pthread_cond_t *cond) : Object()
 {
     running = true;
@@ -317,9 +438,11 @@ void MSTask::sendSignal(String error)
     this->error = error;
     sendSignal();
 }
+*/
 
 /* MSSelectTask */
 
+/*
 MSSelectTask::MSSelectTask(zmm::String query, pthread_mutex_t* mutex, pthread_cond_t* cond) : MSTask(mutex, cond)
 {
     this->query = query;
@@ -358,10 +481,11 @@ void MSSelectTask::run(MYSQL *db)
     }
     pres = Ref<MysqlResult> (new MysqlResult(mysql_res));
 }
-
+*/
 
 /* MSExecTask */
 
+/*
 MSExecTask::MSExecTask(zmm::String query, bool getLastInsertId, pthread_mutex_t* mutex, pthread_cond_t* cond) : MSTask(mutex, cond)
 {
     this->query = query;
@@ -383,8 +507,10 @@ void MSExecTask::run(MYSQL *db)
         lastInsertId = mysql_insert_id(db);
     }
 }
+*/
 
 /* MysqlResult */
+
 MysqlResult::MysqlResult(MYSQL_RES *mysql_res) : SQLResult()
 {
     this->mysql_res = mysql_res;
@@ -400,7 +526,7 @@ MysqlResult::~MysqlResult()
             while((mysql_row = mysql_fetch_row(mysql_res)) != NULL); // read out data
         }
         mysql_free_result(mysql_res);
-        mysql_res = NULL;        
+        mysql_res = NULL;
     }
 }
 Ref<SQLRow> MysqlResult::nextRow()

@@ -77,7 +77,7 @@ static Ref<Storage> create_primary_inst()
     return storage;
 }
 
-Mutex Storage::mutex = Mutex(false);
+Mutex Storage::mutex = Mutex();
 
 Ref<Storage> Storage::getInstance()
 {
@@ -118,11 +118,6 @@ void Storage::removeObject(zmm::Ref<CdsObject> obj)
 }
 */
 
-void Storage::removeObject(int objectID)
-{
-    Ref<CdsObject> obj = loadObject(objectID);
-    removeObject(obj);
-}
 
 Ref<Array<CdsObject> > Storage::getObjectPath(int objectID)
 {

@@ -38,8 +38,8 @@
 #define OBJECT_ID_HASH_CAPACITY 3109
 
 
-//#define LOCK()   { printf("lock:   line %d\n", __LINE__); this->lock(); \
-                   printf("locked: line %d\n", __LINE__); }
+//#define LOCK()   { printf("lock:   line %d\n", __LINE__); this->lock(); 
+//                   printf("locked: line %d\n", __LINE__); }
 //#define UNLOCK() { printf("unlock: line %d\n", __LINE__); this->unlock(); }
 
 #define LOCK lock
@@ -93,8 +93,8 @@ void UpdateManager::init()
 {
     shutdownFlag = false;
     flushFlag = 0;
-//    lazyMode = true;
-    lazyMode = false;
+    lazyMode = true;
+//    lazyMode = false;
 
     int ret;
 

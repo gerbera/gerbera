@@ -33,6 +33,7 @@ struct hash_slot_struct
 typedef struct hash_slot_struct *hash_slot_t;
 
 #include "hash/db_hash.h"
+#include "hash/dbr_hash.h"
 #include "hash/dbb_hash.h"
 #include "hash/dbo_hash.h"
 #include "hash/dsb_hash.h"

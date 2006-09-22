@@ -52,7 +52,7 @@ void FileIOHandler::open(IN enum UpnpOpenFileMode mode)
     f = fopen(filename.c_str(), "rb");
     if (f == NULL)
     {
-        throw Exception(_("FileIOHandler::open: failed to open: ") + filename.c_str());
+        throw _Exception(_("FileIOHandler::open: failed to open: ") + filename.c_str());
     }
 }
 
@@ -75,7 +75,7 @@ void FileIOHandler::seek(IN off_t offset, IN int whence)
 {
     if (fseeko(f, offset, whence) != 0)
     {
-        throw Exception(_("fseek failed"));
+        throw _Exception(_("fseek failed"));
     }
 }
 
@@ -83,7 +83,7 @@ void FileIOHandler::close()
 {
     if (fclose(f) != 0)
     {
-        throw Exception(_("fclose failed"));
+        throw _Exception(_("fclose failed"));
     }
 }
 

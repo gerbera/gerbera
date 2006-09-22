@@ -37,6 +37,7 @@ StringBuffer::StringBuffer()
     data[0] = 0;
     len = 0;
 }
+
 StringBuffer::StringBuffer(int capacity)
 {
     this->capacity = capacity;
@@ -44,10 +45,12 @@ StringBuffer::StringBuffer(int capacity)
     data[0] = 0;
     len = 0;
 }
+
 StringBuffer::~StringBuffer()
 {
     FREE(data);
 }
+
 StringBuffer &StringBuffer::operator<<(String other)
 {
     int otherLen = other.length();
@@ -59,6 +62,7 @@ StringBuffer &StringBuffer::operator<<(String other)
     }
     return *this;
 }
+
 StringBuffer &StringBuffer::operator<<(char *str)
 {
     if(! str)
@@ -89,19 +93,32 @@ StringBuffer &StringBuffer::operator<<(int x)
     len += (int)strlen(dest);
     return *this;
 }
+
+StringBuffer &StringBuffer::operator<<(unsigned int x)
+{
+    addCapacity(MAX_INT_STRING_LENGTH);
+    char *dest = data + len;
+    sprintf(dest, "%u", x);
+    len += (int)strlen(dest);
+    return *this;
+}
+
 int StringBuffer::length()
 {
     return len;
 }
+
 void StringBuffer::setLength(int newLength)
 {
     addCapacity(newLength);
     this->len = newLength;
 }
+
 char *StringBuffer::c_str()
 {
     return data;
 }
+
 String StringBuffer::toString()
 {
     return String(data, len);

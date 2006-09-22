@@ -25,6 +25,7 @@
 #include "sql_storage.h"
 #include "tools.h"
 #include "update_manager.h"
+#include "string_converter.h"
 
 using namespace zmm;
 
@@ -40,27 +41,25 @@ enum
     _ref_id,
     _parent_id,
     _object_type,
-    _is_virtual,
+    //_is_virtual,
 
     _upnp_class,
     _dc_title,
     _is_restricted,
+    _location,
+    _location_hash,
     _metadata,
     _auxdata,
-
+    _resources,
     _update_id,
     _is_searchable,
-
-    _location,
     _mime_type,
-
-    _action,
-    _state,
-
-    _resources,
-    _ref_resources
+    //_action,
+    _state
+    //_ref_resources
 };
 
+/*
 static char *_q_base =
     "SELECT"
     "  f.id"
@@ -94,7 +93,7 @@ static char *_q_res =
     ", rf.resources"
     " FROM cds_objects f LEFT JOIN cds_objects rf"
     " ON f.ref_id = rf.id";
-
+*/
 
 SQLRow::SQLRow() : Object()
 {}
@@ -111,9 +110,9 @@ SQLResult::~SQLResult()
 
 SQLStorage::SQLStorage() : Storage()
 {
-    selectQueryBasic = String(_q_base) + _q_nores;
-    selectQueryExtended = String(_q_base) + _q_ext + _q_nores;
-    selectQueryFull = String(_q_base) + _q_ext + _q_res;
+    //selectQueryBasic = String(_q_base) + _q_nores;
+    //selectQueryExtended = String(_q_base) + _q_ext + _q_nores;
+    //selectQueryFull = String(_q_base) + _q_ext + _q_res;
 
     rmIDs = NULL;
     rmParents = NULL;
@@ -153,8 +152,12 @@ SQLStorage::~SQLStorage()
         FREE(rmParents);
 }
 
-String SQLStorage::getSelectQuery(select_mode_t mode)
+String SQLStorage::getSelectQuery()
 {
+    return _("SELECT f.* FROM cds_object f");
+    //return _("SELECT f.*,rf.resources FROM cds_object f LEFT JOIN cds_object rf ON f.ref_id = rf.id");
+    
+    /*
     switch(mode)
     {
         case SELECT_BASIC: return selectQueryBasic;
@@ -162,155 +165,227 @@ String SQLStorage::getSelectQuery(select_mode_t mode)
         case SELECT_FULL: return selectQueryFull;
         default: throw _StorageException(_("SQLStorage: invalid mode: ") + (int)mode);
     }
+    */
 }
 
-void SQLStorage::addObject(Ref<CdsObject> obj)
+Ref<CdsObject> SQLStorage::checkRefID(Ref<CdsObject> obj)
 {
-    /*
-    obj->optimize();
-    objectTitleCache->put(String::from(obj->getParentID()) +'|'+ obj->getTitle(), obj);
-    objectIDCache->put(obj->getID(), obj);
-    obj->setID(getNextObjectID());
-    */
-    
-    int objectType = obj->getObjectType();
-    Ref<StringBuffer> fields(new StringBuffer(128));
-    Ref<StringBuffer> values(new StringBuffer(128));
-
-    *fields << "parent_id";
-    *values << obj->getParentID();
-
+    if (! obj->isVirtual()) throw _Exception(_("checkRefID called for a non-virtual object"));
     int refID = obj->getRefID();
-    if (refID != 0)
+    String location = obj->getLocation();
+    if (! string_ok(location))
+        throw _Exception(_("tried to check refID without a location set"));
+    if (refID > 0)
     {
-        *fields << ", ref_id";
-        *values << ", " << refID;
+        try
+        {
+            Ref<CdsObject> refObj;
+            refObj = loadObject(refID);
+            if (refObj != nil && refObj->getLocation() == location)
+                return refObj;
+        }
+        catch (Exception e)
+        {
+        }
     }
     
-    *fields << ", object_type";
-    *values << ", " << objectType;
+    return findObjectByPath(location);
+}
 
-    *fields << ", upnp_class";
-    *values << ", " << quote(obj->getClass());
-
-    *fields << ", dc_title";
-    *values << ", " << quote(obj->getTitle());
-
-    *fields << ", is_restricted";
-    *values << ", " << obj->isRestricted();
-
-    *fields << ", is_virtual";
-    *values << ", " << obj->isVirtual();
-
-    *fields << ", metadata";
-    *values << ", " << quote(obj->getMetadata()->encode());
-
-    *fields << ", auxdata";
-    *values << ", " << quote(obj->getAuxData()->encode());
-
+Ref<Dictionary> SQLStorage::_addUpdateObject(Ref<CdsObject> obj, bool isUpdate)
+{
+    Ref<CdsObject> refObj = nil;
+    bool isVirtual =  obj->isVirtual();
+    if (isVirtual)
+    {
+        refObj = checkRefID(obj);
+        if (refObj == nil)
+            throw _Exception(_("tried to add or update a virtual object with illegal reference id and an illegal location"));
+        /// \todo create object on demand?
+        
+    }
+    
+    int objectType = obj->getObjectType();
+    Ref<Dictionary> data(new Dictionary());
+    data->put(_("object_type"), String::from(objectType));
+    
+    if (isVirtual)
+        data->put(_("ref_id"), String::from(refObj->getID()));
+    else if (isUpdate)
+        data->put(_("ref_id"), _("NULL"));
+    
+    if (!isVirtual || refObj->getClass() != obj->getClass())
+        data->put(_("upnp_class"), quote(obj->getClass()));
+    else if (isUpdate)
+        data->put(_("upnp_class"), _("NULL"));
+    
+    if (!isVirtual || refObj->getTitle() != obj->getTitle())
+        data->put(_("dc_title"), quote(obj->getTitle()));
+    else if (isUpdate)
+        data->put(_("dc_title"), _("NULL"));
+    
+    data->put(_("is_restricted"), String::from(obj->isRestricted()));
+    
+    if (isUpdate)
+        data->put(_("metadata"), _("NULL"));
+    Ref<Dictionary> dict = obj->getMetadata();
+    if (dict->size() > 0)
+    {
+        if (!isVirtual || ! refObj->getMetadata()->equals(obj->getMetadata()))
+        {
+            data->put(_("metadata"), quote(dict->encode()));
+        }
+    }
+    
+    if (isUpdate)
+        data->put(_("auxdata"), _("NULL"));
+    dict = obj->getAuxData();
+    if (dict->size() > 0)
+    {
+        if (! isVirtual || ! refObj->getAuxData()->equals(obj->getAuxData()))
+        {
+            data->put(_("auxdata"), quote(obj->getAuxData()->encode()));
+        }
+    }
+    
     // encode resources
-    Ref<StringBuffer> buf(new StringBuffer());
+    Ref<StringBuffer> resBuf(new StringBuffer());
+    //bool atLeastOnResouce = false;
     for (int i = 0; i < obj->getResourceCount(); i++)
     {
         if (i > 0)
-            *buf << RESOURCE_SEP;
-        *buf << obj->getResource(i)->encode();
+            *resBuf << RESOURCE_SEP;
+        *resBuf << obj->getResource(i)->encode();
+        //atLeastOnResouce = true;
     }
-    *fields << ", resources";
-    *values << ", " << quote(buf->toString());
-
+    
+    if (! isVirtual || ! refObj->resourcesEqual(obj))
+        data->put(_("resources"), quote(resBuf->toString()));
+    else if (isUpdate)
+        data->put(_("resources"), _("NULL"));
+    
     if (IS_CDS_CONTAINER(objectType))
     {
         Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
-        *fields << ", update_id";
-        *values << ", " << cont->getUpdateID();
-
-        *fields << ", location";
-        *values << ", " << quote(cont->getLocation());
-
-        *fields << ", is_searchable";
-        *values << ", " << cont->isSearchable();
+        data->put(_("update_id"), String::from(cont->getUpdateID()));
+        
+        if (!isVirtual)
+        {
+            String loc = cont->getLocation();
+            if (!string_ok(loc)) throw _Exception(_("tried to create or update a non-virtual container without a location set"));
+            data->put(_("location"), quote(loc));
+            data->put(_("location_hash"), String::from(stringHash(loc)));
+        }
+        else if (isUpdate)
+        {
+            data->put(_("location"), _("NULL"));
+            data->put(_("location_hash"), _("NULL"));
+        }
+        
+        data->put(_("is_searchable"), String::from(cont->isSearchable()));
+        
+        if (isUpdate)
+            data->put(_("mime_type"), _("NULL"));
     }
+    
     if (IS_CDS_ITEM(objectType))
     {
         Ref<CdsItem> item = RefCast(obj, CdsItem);
-        *fields << ", location";
-        *values << ", " << quote(item->getLocation());
-
-        *fields << ", mime_type";
-        *values << ", " << quote(item->getMimeType());
+        
+        if (!isVirtual)
+        {
+            String loc = item->getLocation();
+            if (!string_ok(loc)) throw _Exception(_("tried to create or update a non-virtual item without a location set"));
+            Ref<Array<StringBase> > pathAr = split_path(loc);
+            String path = pathAr->get(0);
+            int parentID = ensurePathExistence(path);
+            item->setParentID(parentID);
+            String filename = pathAr->get(1);
+            
+            data->put(_("location"), quote(filename));
+            
+            data->put(_("location_hash"), String::from(stringHash(filename)));
+        }
+        else //for URLs
+        {
+            data->put(_("location"), quote(item->getLocation()));
+            if (isUpdate)
+                data->put(_("location_hash"), _("NULL"));
+        }
+        
+        data->put(_("mime_type"), quote(item->getMimeType()));
     }
     if (IS_CDS_ACTIVE_ITEM(objectType))
     {
         Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
-        *fields << ", action";
-        *values << ", " << quote(aitem->getAction());
-
-        *fields << ", state";
-        *values << ", " << quote(aitem->getState());
+        data->put(_("location"), quote(aitem->getAction()));
+        data->put(_("state"), quote(aitem->getState()));
     }
+    else if (isUpdate)
+        data->put(_("state"), _("NULL"));
+    
+    if (obj->getParentID() == INVALID_OBJECT_ID)
+        throw _Exception(_("tried to create or update an object with an illegal parent id"));
+    data->put(_("parent_id"), String::from(obj->getParentID()));
+    
+    return data;
+}
 
+void SQLStorage::addObject(Ref<CdsObject> obj)
+{
+    Ref<Dictionary> data = _addUpdateObject(obj, false);
+    Ref<Array<DictionaryElement> > dataElements = data->getElements();
+    
+    Ref<StringBuffer> fields(new StringBuffer(128));
+    Ref<StringBuffer> values(new StringBuffer(128));
+    for (int i=0; i < dataElements->size(); i++)
+    {
+        Ref<DictionaryElement> element = dataElements->get(i);
+        if (i != 0)
+        {
+            *fields << ", ";
+            *values << ", ";
+        }
+        *fields << element->getKey();
+        *values << element->getValue();
+    }
+    
     Ref<StringBuffer> qb(new StringBuffer(256));
-    *qb << "INSERT INTO cds_objects(" << fields->toString() <<
+    *qb << "INSERT INTO cds_object(" << fields->toString() <<
             ") VALUES (" << values->toString() << ")";
-
-//    log_debug("insert_query: %s\n", query->toString().c_str());
-
+            
+    log_debug("insert_query: %s\n", qb->toString().c_str());
+    
     obj->setID(exec(qb->toString(), true));
 }
 
 void SQLStorage::updateObject(zmm::Ref<CdsObject> obj)
 {
-    log_debug("UPDATE_OBJECT !!!!!!!!!!!!!!!\n");
-    int objectType = obj->getObjectType();
-
+    Ref<Dictionary> data = _addUpdateObject(obj, true);
+    Ref<Array<DictionaryElement> > dataElements = data->getElements();
+    
     Ref<StringBuffer> qb(new StringBuffer(256));
-    *qb << "UPDATE cds_objects SET id = id";
-
-    *qb << ", upnp_class = " << quote(obj->getClass());
-    *qb << ", dc_title = " << quote(obj->getTitle());
-    *qb << ", is_restricted = " << obj->isRestricted();
-    *qb << ", is_virtual = " << obj->isVirtual();
-    *qb << ", metadata = " << quote(obj->getMetadata()->encode());
-    *qb << ", auxdata = " << quote(obj->getAuxData()->encode());
-
-    // encode resources
-    Ref<StringBuffer> buf(new StringBuffer());
-    for (int i = 0; i < obj->getResourceCount(); i++)
+    *qb << "UPDATE cds_object SET ";
+    
+    for (int i=0; i < dataElements->size(); i++)
     {
-        if (i > 0)
-            *buf << RESOURCE_SEP;
-        *buf << obj->getResource(i)->encode();
+        Ref<DictionaryElement> element = dataElements->get(i);
+        if (i != 0)
+        {
+            *qb << ", ";
+        }
+        *qb << element->getKey() << " = "
+            << element->getValue();
     }
-    *qb << ", resources = " << quote(buf->toString());
-
-    if(IS_CDS_CONTAINER(objectType))
-    {
-        Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
-        *qb << ", update_id = " << cont->getUpdateID();
-        *qb << ", is_searchable = " << cont->isSearchable();
-    }
-    if(IS_CDS_ITEM(objectType))
-    {
-        Ref<CdsItem> item = RefCast(obj, CdsItem);
-        *qb << ", location = " << quote(item->getLocation());
-        *qb << ", mime_type = " << quote(item->getMimeType());
-    }
-    if(IS_CDS_ACTIVE_ITEM(objectType))
-    {
-        Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
-        *qb << ", action = " << quote(aitem->getAction());
-        *qb << ", state = " << quote(aitem->getState());
-    }
-
+    
     *qb << " WHERE id = " << obj->getID();
-
-//    log_debug(("upd_query: %s\n", query->toString().c_str());
-
+    
+    log_debug("upd_query: %s\n", qb->toString().c_str());
+    
     this->exec(qb->toString());
 }
 
-Ref<CdsObject> SQLStorage::loadObject(int objectID, select_mode_t mode)
+Ref<CdsObject> SQLStorage::loadObject(int objectID)
 {
 /*
     Ref<CdsObject> obj = objectIDCache->get(objectID);
@@ -318,16 +393,15 @@ Ref<CdsObject> SQLStorage::loadObject(int objectID, select_mode_t mode)
         return obj;
     throw _Exception(_("Object not found: ") + objectID);
 */
-        
     Ref<StringBuffer> qb(new StringBuffer());
 
-    *qb << getSelectQuery(mode) << " WHERE f.id = " << objectID;
+    *qb << getSelectQuery() << " WHERE f.id = " << objectID;
 
     Ref<SQLResult> res = select(qb->toString());
     Ref<SQLRow> row;
     if ((row = res->nextRow()) != nil)
     {
-        return createObjectFromRow(row, mode);
+        return createObjectFromRow(row);
     }
     throw _Exception(_("Object not found: ") + objectID);
 }
@@ -336,14 +410,14 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
 {
     int objectID;
     int objectType;
-
+    
     objectID = param->getObjectID();
-
+    
     String q;
     Ref<SQLResult> res;
     Ref<SQLRow> row;
-
-    q = _("SELECT object_type FROM cds_objects WHERE id = ") +
+    
+    q = _("SELECT object_type FROM cds_object WHERE id = ") +
                     objectID;
     res = select(q);
     if((row = res->nextRow()) != nil)
@@ -354,13 +428,13 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     {
         throw _StorageException(_("Object not found: ") + objectID);
     }
-
+    
     row = nil;
     res = nil;
     
     if(param->getFlag() == BROWSE_DIRECT_CHILDREN && IS_CDS_CONTAINER(objectType))
     {
-        q = _("SELECT COUNT(*) FROM cds_objects WHERE parent_id = ") + objectID;
+        q = _("SELECT COUNT(*) FROM cds_object WHERE parent_id = ") + objectID;
         res = select(q);
         if((row = res->nextRow()) != nil)
         {
@@ -377,7 +451,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     
     Ref<StringBuffer> qb(new StringBuffer());
 
-    *qb << getSelectQuery(SELECT_FULL) << " WHERE ";
+    *qb << getSelectQuery() << " WHERE ";
 
     if(param->getFlag() == BROWSE_DIRECT_CHILDREN && IS_CDS_CONTAINER(objectType))
     {
@@ -400,7 +474,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
 
     while((row = res->nextRow()) != nil)
     {
-        Ref<CdsObject> obj = createObjectFromRow(row, SELECT_FULL);
+        Ref<CdsObject> obj = createObjectFromRow(row);
         arr->append(obj);
         row = nil;
     }
@@ -427,13 +501,13 @@ int SQLStorage::getChildCount(int contId, bool containersOnly)
     Ref<SQLRow> row;
     Ref<SQLResult> res;
     Ref<StringBuffer> qb(new StringBuffer());
-    *qb << "SELECT COUNT(*) FROM cds_objects WHERE parent_id = " << contId;
+    *qb << "SELECT COUNT(*) FROM cds_object WHERE parent_id = " << contId;
     if (containersOnly)
-        *qb << " AND object_type & " << OBJECT_TYPE_CONTAINER << " <> 0";
+        *qb << " AND object_type = " << OBJECT_TYPE_CONTAINER;
     res = select(qb->toString());
     if ((row = res->nextRow()) != nil)
     {
-        return atoi(row->col(0).c_str());
+        return row->col(0).toInt();
     }
     return 0;
 }
@@ -442,10 +516,10 @@ Ref<Array<StringBase> > SQLStorage::getMimeTypes()
 {
     Ref<Array<StringBase> > arr(new Array<StringBase>());
 
-    String q = _("SELECT DISTINCT mime_type FROM cds_objects "
+    String q = _("SELECT DISTINCT mime_type FROM cds_object "
                 "WHERE mime_type IS NOT NULL ORDER BY mime_type");
     Ref<SQLResult> res = select(q);
-    Ref<SQLRow> row;
+    Ref<SQLRow> row;                                 
 
     while ((row = res->nextRow()) != nil)
     {
@@ -455,17 +529,18 @@ Ref<Array<StringBase> > SQLStorage::getMimeTypes()
     return arr;
 }
 
+/*
 Ref<CdsObject> SQLStorage::findObjectByTitle(String title, int parentID)
 {
-    /*
+    *
     Ref<CdsObject> obj = objectTitleCache->get(String::from(parentID) +'|'+ title);
     if (obj != nil)
         return obj;
     return nil;
-    */
+    *
 
     Ref<StringBuffer> qb(new StringBuffer());
-    *qb << getSelectQuery(SELECT_FULL) << " WHERE ";
+    *qb << getSelectQuery() << " WHERE ";
     if (parentID != INVALID_OBJECT_ID)
         *qb << "f.parent_id = " << parentID << " AND ";
     *qb << "f.dc_title = " << quote(title);
@@ -474,13 +549,160 @@ Ref<CdsObject> SQLStorage::findObjectByTitle(String title, int parentID)
     Ref<SQLRow> row;
     if ((row = res->nextRow()) != nil)
     {
-        Ref<CdsObject> obj = createObjectFromRow(row, SELECT_FULL);
+        Ref<CdsObject> obj = createObjectFromRow(row);
         return obj;
     }
     return nil;
 }
+*/
 
-Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row, select_mode_t mode)
+int SQLStorage::isFileInDatabase(int parentID, String filename)
+{
+    Ref<SQLRow> row = _findObjectByFilename(filename, parentID);
+    if (row == nil)
+        return -1;
+    return row->col(_id).toInt();
+}
+
+
+Ref<SQLRow> SQLStorage::_findObjectByFilename(String filename, int parentID)
+{
+    Ref<StringBuffer> qb(new StringBuffer());
+    *qb << "SELECT * FROM `cds_object` "
+        "WHERE `location_hash` = " << stringHash(filename)
+        << " AND `location` = " << quote(filename)
+        << " AND `parent_id` = " << parentID
+        << " AND `ref_id` IS NULL "
+        "LIMIT 1";
+        
+    Ref<SQLResult> res = select(qb->toString());
+    return res->nextRow();
+}
+
+Ref<CdsObject> SQLStorage::findObjectByFilename(String filename, int parentID)
+{
+    Ref<SQLRow> row = _findObjectByFilename(filename, parentID);
+    if (row == nil)
+        return nil;
+    return createObjectFromRow(row);
+}
+
+Ref<SQLRow> SQLStorage::_findObjectByPath(String fullpath)
+{
+    Ref<Array<StringBase> > pathAr = split_path(fullpath);
+    String path = pathAr->get(0);
+    String filename = pathAr->get(1);
+    
+    Ref<StringBuffer> qb(new StringBuffer());
+    if (! string_ok(filename))
+    {
+        if (! string_ok(path))
+            throw _Exception(_("tried to add an empty path"));
+        
+        *qb << "SELECT * FROM `cds_object` "
+            "WHERE `location_hash` = " << stringHash(path)
+            << " AND `location` = " << quote(path)
+            << " AND `ref_id` IS NULL "
+            "LIMIT 1";
+    }
+    else if (! string_ok(path))
+    {
+        *qb << "SELECT * FROM `cds_object` "
+            "WHERE `location_hash` = " << stringHash(fullpath)
+            << " AND `location` = " << quote(fullpath)
+            //<< " AND `parent_id` = " << CDS_ID_FS_ROOT
+            << " AND `ref_id` IS NULL "
+            "LIMIT 1";
+    }
+    else
+    {
+        *qb << "SELECT f.* FROM `cds_object` p "
+            "JOIN `cds_object` f ON p.id=f.parent_id "
+            "WHERE p.`location_hash` = " << stringHash(path)
+            << " AND p.`location` = " << quote(path)
+            << " AND f.`location_hash` = " << stringHash(filename)
+            << " AND f.`location` = " << quote(filename)
+            << " AND p.`ref_id` IS NULL "
+            "LIMIT 1";
+    }
+    
+    Ref<SQLResult> res = select(qb->toString());
+    return res->nextRow();
+}
+
+Ref<CdsObject> SQLStorage::findObjectByPath(String fullpath)
+{
+    Ref<SQLRow> row = _findObjectByPath(fullpath);
+    if (row == nil)
+        return nil;
+    return createObjectFromRow(row);
+}
+
+int SQLStorage::findObjectIDByPath(String fullpath)
+{
+    Ref<SQLRow> row = _findObjectByPath(fullpath);
+    if (row == nil)
+        return -1;
+    return row->col(_id).toInt();
+}
+
+int SQLStorage::ensurePathExistence(String path)
+{
+    Ref<CdsObject> obj = findObjectByPath(path + DIR_SEPARATOR);
+    if (obj != nil) return obj->getID();
+    Ref<Array<StringBase> > pathAr = split_path(path);
+    String parent = pathAr->get(0);
+    String folder = pathAr->get(1);
+    int parentID;
+    if (string_ok(parent))
+        parentID = ensurePathExistence(parent);
+    else
+        parentID = CDS_ID_FS_ROOT;
+    Ref<StringConverter> f2i = StringConverter::f2i();
+    return createContainer(parentID, f2i->convert(folder), path);
+}
+
+int SQLStorage::createContainer(int parentID, String name, String path)
+{
+    Ref<StringBuffer> qb(new StringBuffer());
+    *qb << "INSERT INTO `cds_object`"
+        " (`parent_id`, `object_type`, `upnp_class`, `dc_title`,"
+        " `location`, `location_hash`)"
+        " VALUES ("
+        << parentID
+        << ", " << OBJECT_TYPE_CONTAINER
+        << ", " << quote(_(UPNP_DEFAULT_CLASS_CONTAINER))
+        << ", " << quote(name)
+        << ", " << quote(path)
+        << ", " << stringHash(path)
+        << ")";
+        
+    return exec(qb->toString(), true);
+    
+}
+
+unsigned int SQLStorage::stringHash(String key)
+{
+    unsigned int hash = 5381;
+    unsigned char *data = (unsigned char *)key.c_str();
+    int c;
+    while ((c = *data++))
+        hash = ((hash << 5) + hash) ^ c; /* (hash * 33) ^ c */
+    return hash;
+}
+
+String SQLStorage::getRealLocation(int parentID, String location)
+{
+    log_debug("parentID: %d; location %s\n", parentID, location.c_str());
+    Ref<StringBuffer> qb(new StringBuffer());
+    *qb << "SELECT location FROM `cds_object` "
+        "WHERE id = " << parentID << " LIMIT 1";
+    Ref<SQLResult> res = select(qb->toString());
+    Ref<SQLRow> row = res->nextRow();
+    return row->col(0) + "/" + location;
+}
+
+Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
 {
     int objectType = atoi(row->col(_object_type).c_str());
     Ref<CdsObject> obj = CdsObject::createObject(objectType);
@@ -488,77 +710,79 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row, select_mode_t mo
     /* set common properties */
     obj->setID(row->col(_id).toInt());
     obj->setRefID(row->col(_ref_id).toInt());
+    if (obj->getRefID())
+        obj->setVirtual(true);
+    else
+        obj->setVirtual(false);
+    
     obj->setParentID(row->col(_parent_id).toInt());
-    obj->setVirtual(atoi(row->col(_is_virtual).c_str()));
-
-    if (mode > SELECT_BASIC)
+    //obj->setVirtual(atoi(row->col(_is_virtual).c_str()));
+    
+    obj->setRestricted(atoi(row->col(_is_restricted).c_str()));
+    
+    obj->setTitle(row->col(_dc_title));
+    obj->setClass(row->col(_upnp_class));
+    
+    Ref<Dictionary> meta(new Dictionary());
+    meta->decode(row->col(_metadata));
+    obj->setMetadata(meta);
+    
+    Ref<Dictionary> aux(new Dictionary());
+    aux->decode(row->col(_auxdata));
+    obj->setAuxData(aux);
+    
+    /* first try to fetch object's own resources, if it is empty
+     * try to get them from the object pointed to by ref_id
+     */
+    String resources_str = row->col(_resources);
+    
+    /*
+    if (resources_str == nil || resources_str.length() == 0)
     {
-        obj->setRestricted(atoi(row->col(_is_restricted).c_str()));
-    
-        obj->setTitle(row->col(_dc_title));
-        obj->setClass(row->col(_upnp_class));
-    
-        Ref<Dictionary> meta(new Dictionary());
-        meta->decode(row->col(_metadata));
-        obj->setMetadata(meta);
-
-        Ref<Dictionary> aux(new Dictionary());
-        aux->decode(row->col(_auxdata));
-        obj->setAuxData(aux);
+        resources_str = row->col(_ref_resources);
     }
-
-    if (mode > SELECT_EXTENDED)
+    */
+    
+    //log_debug("resources: %s\n", resources_str.c_str());
+    
+    if (!(resources_str == nil || resources_str.length() == 0))
     {
-        /* first try to fetch object's own resources, if it is empty
-         * try to get them from the object pointed to by ref_id
-         */
-        String resources_str = row->col(_resources);
-        if (resources_str == nil || resources_str.length() == 0)
-        {
-            resources_str = row->col(_ref_resources);
-        }
-
         Ref<Array<StringBase> > resources = split_string(resources_str,
-                                                     RESOURCE_SEP);
+                                                    RESOURCE_SEP);
         for (int i = 0; i < resources->size(); i++)
         {
             obj->addResource(CdsResource::decode(resources->get(i)));
         }
     }
-
+    
     int matched_types = 0;
-
+    
     if (IS_CDS_CONTAINER(objectType))
     {
-        if (mode > SELECT_BASIC)
-        {
-            Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
-            cont->setSearchable(atoi(row->col(_is_searchable).c_str()));
-            cont->setUpdateID(atoi(row->col(_update_id).c_str()));
-            cont->setLocation(row->col(_location));
-        }
+        Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
+        cont->setSearchable(atoi(row->col(_is_searchable).c_str()));
+        cont->setUpdateID(atoi(row->col(_update_id).c_str()));
+        cont->setLocation(row->col(_location));
+        
         matched_types++;
     }
 
     if (IS_CDS_ITEM(objectType))
     {
-        if (mode > SELECT_BASIC)
-        {
-            Ref<CdsItem> item = RefCast(obj, CdsItem);
-            item->setMimeType(row->col(_mime_type));
+        Ref<CdsItem> item = RefCast(obj, CdsItem);
+        item->setMimeType(row->col(_mime_type));
+        if (IS_CDS_PURE_ITEM(objectType) && ! obj->isVirtual())
+            item->setLocation(getRealLocation(obj->getParentID(), row->col(_location)));
+        else
             item->setLocation(row->col(_location));
-        }
         matched_types++;
     }
 
     if (IS_CDS_ACTIVE_ITEM(objectType))
     {
-        if (mode > SELECT_BASIC)
-        {
-            Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
-            aitem->setAction(row->col(_action));
-            aitem->setState(row->col(_state));
-        }
+        Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
+        aitem->setAction(row->col(_location));
+        aitem->setState(row->col(_state));
         matched_types++;
     }
 
@@ -569,19 +793,12 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row, select_mode_t mo
     return obj;
 }
 
-/*
-void SQLStorage::eraseObject(Ref<CdsObject> object)
-{
-    throw _Exception(_("SQLStorage::eraseObject shuold never be called !!!!\n"));
-}
-*/
-
 int SQLStorage::getTotalFiles()
 {
     Ref<StringBuffer> query(new StringBuffer());
-    *query << "SELECT COUNT(*) FROM cds_objects WHERE "
-           << "object_type <> " << OBJECT_TYPE_CONTAINER
-           << " AND is_virtual = 0";
+    *query << "SELECT COUNT(*) FROM cds_object WHERE "
+           << "object_type != " << OBJECT_TYPE_CONTAINER;
+           //<< " AND is_virtual = 0";
     Ref<SQLResult> res = select(query->toString());
     Ref<SQLRow> row;
     if ((row = res->nextRow()) != nil)
@@ -595,7 +812,7 @@ void SQLStorage::incrementUpdateIDs(int *ids, int size)
 {
     if (size<1) return;
     Ref<StringBuffer> buf(new StringBuffer(size * sizeof(int)));
-    *buf << "UPDATE cds_objects SET update_id = update_id + 1 WHERE ID IN(";
+    *buf << "UPDATE cds_object SET update_id = update_id + 1 WHERE ID IN(";
     *buf << ids[0];
     for (int i = 1; i < size; i++)
         *buf << ',' << ids[i];
@@ -611,11 +828,10 @@ void SQLStorage::incrementUIUpdateID(int id)
     //exec(buf->toString());
 }
 
-Ref<Array<CdsObject> > SQLStorage::selectObjects(Ref<SelectParam> param,
-                                                 select_mode_t mode)
+Ref<Array<CdsObject> > SQLStorage::selectObjects(Ref<SelectParam> param)
 {
     Ref<StringBuffer> q(new StringBuffer());
-    *q << getSelectQuery(mode) << " WHERE ";
+    *q << getSelectQuery() << " WHERE ";
     switch (param->flags)
     {
         case FILTER_PARENT_ID:
@@ -642,58 +858,72 @@ Ref<Array<CdsObject> > SQLStorage::selectObjects(Ref<SelectParam> param,
 
     while((row = res->nextRow()) != nil)
     {
-        Ref<CdsObject> obj = createObjectFromRow(row, mode);
+        Ref<CdsObject> obj = createObjectFromRow(row);
         arr->append(obj);
     }
     return arr;
 }
 
-int SQLStorage::isFileInDatabase(int parentID, String filename)
+Ref<DBRHash<int> > SQLStorage::getObjects(int parentID)
 {
-    return -1;
-}
-
-Ref<DBHash<int> > SQLStorage::getObjects(int parentID)
-{
-    log_debug("NOT IMPLEMENTED!!!!\n");
-    return nil;
-}
-
-
-void SQLStorage::removeObjects(zmm::Ref<DBHash<int> > list)
-{
-    log_debug("NOT IMPLEMENTED!!!!\n");
-}
-
-void SQLStorage::removeObject(Ref<CdsObject> obj)
-{
-    mutex->lock();
-    rmInit();
-    try
+    Ref<StringBuffer> q(new StringBuffer());
+    *q << "SELECT id FROM cds_objects WHERE parentID = ";
+    *q << parentID;
+    Ref<SQLResult> res = select(q->toString());
+    Ref<SQLRow> row;
+    
+    Ref<DBRHash<int> > ret;
+    
+    while ((row = res->nextRow()) != nil)
     {
-        if(IS_CDS_CONTAINER(obj->getObjectType()))
+        ret->put(row->col(0).toInt());
+    }
+    return ret;
+}
+
+
+void SQLStorage::removeObjects(zmm::Ref<DBRHash<int> > list)
+{
+    hash_data_array_t<int> hash_data_array;
+    list->getAll(&hash_data_array);
+    int count = hash_data_array.size;
+    int *array = hash_data_array.data;
+    if (count <= 0) return;
+    
+    if (dbRemovesDeps)
+    {
+        Ref<StringBuffer> q(new StringBuffer());
+        *q << "DELETE FROM cds_object WHERE id IN (" << array[0];
+        for (int i = 1; i < count; i++)
         {
-            rmChildren(obj);
-            rmObject(obj);
+            *q << "," << array[i];
         }
-        else
-            rmItem(obj);
-
-        rmFlush();
+        *q << ")";
+        this->exec(q->toString());
     }
-    catch (Exception e)
+    else
     {
-        log_debug("CLEANUP (EXCEPTION)\n");
-        rmCleanup();
-        throw e;
+        throw _Exception(_("manual dependency remove not implemented!"));
     }
-    log_debug("CLEANUP (NORMAL)\n");
-    rmCleanup();
-    mutex->unlock();
+}
+
+void SQLStorage::removeObject(int objectID)
+{
+    if (dbRemovesDeps)
+    {
+        Ref<StringBuffer> q(new StringBuffer());
+        *q << "DELETE FROM cds_object WHERE id = " << objectID;
+        this->exec(q->toString());
+    }
+    else
+    {
+        throw _Exception(_("manual dependency remove not implemented!"));
+    }
 }
 
 
 /* helpers for removeObject method */
+/*
 void SQLStorage::rmInit()
 {
     rmIDs = (int *)MALLOC(MAX_REMOVE_IDS * sizeof(int));        
@@ -732,8 +962,9 @@ void SQLStorage::rmUpdateParents()
     um->containersChanged(rmParents, rmParentHash->size());
     rmParentHash->clear();
 }
-
+*/
 /* flush scheduled items */
+/*
 void SQLStorage::rmFlush()
 {
     rmUpdateParents();
@@ -770,10 +1001,11 @@ void SQLStorage::rmDecChildCount(Ref<CdsObject> obj)
         }
     }
 }
-
+*/
 
 /* schedule an object for removal, will be called
  * for EVERY deleted object */
+ /*
 void SQLStorage::rmObject(Ref<CdsObject> obj)
 {
 //    log_debug(("rmObject %d, size; %d\n", obj->getID(), rmIDHash->size()));
@@ -796,8 +1028,9 @@ void SQLStorage::rmObject(Ref<CdsObject> obj)
     rmDecChildCount(loadObject(obj->getParentID()));
    
 }
-
+*/
 /* item removal helper */
+/*
 void SQLStorage::rmItem(Ref<CdsObject> obj)
 {
     int origID; // id of the original object in PC dir
@@ -844,3 +1077,4 @@ void SQLStorage::rmChildren(Ref<CdsObject> obj)
     }
 }
 
+*/

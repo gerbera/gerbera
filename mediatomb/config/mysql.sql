@@ -1,43 +1,131 @@
-CREATE TABLE cds_objects
-(
-    id              INTEGER PRIMARY KEY AUTO_INCREMENT,
-    ref_id          INTEGER NOT NULL DEFAULT 0,
-    parent_id       INTEGER NOT NULL DEFAULT 0,
-    object_type     INTEGER NOT NULL,
-    upnp_class      VARCHAR(80),
-    dc_title        VARCHAR(255),
-    is_restricted   INTEGER NOT NULL DEFAULT 0,
-    is_virtual      INTEGER NOT NULL DEFAULT 0,
-    location        VARCHAR(255),
-    metadata        TEXT,
-    auxdata         TEXT,
-    resources       TEXT,
+-- MySQL dump 10.10
+--
+-- Host: localhost    Database: mediatomb
+-- ------------------------------------------------------
+-- Server version	5.0.22-Debian_0ubuntu6.06.2-log
 
-    update_id       INTEGER NOT NULL DEFAULT 0,
-    is_searchable   INTEGER NOT NULL DEFAULT 0,
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
-    mime_type       VARCHAR(40),
+--
+-- Table structure for table `cds_object`
+--
 
-    action          VARCHAR(255),
-    state           VARCHAR(255),
+DROP TABLE IF EXISTS `cds_object`;
+CREATE TABLE `cds_object` (
+  `id` int(11) NOT NULL auto_increment,
+  `ref_id` int(11) default NULL,
+  `parent_id` int(11) NOT NULL default '0',
+  `object_type` tinyint(4) NOT NULL,
+  `upnp_class` varchar(80) default NULL,
+  `dc_title` varchar(255) default NULL,
+  `is_restricted` tinyint(4) NOT NULL default '1',
+  `location` varchar(255) default NULL,
+  `location_hash` int(11) unsigned default NULL,
+  `metadata` text,
+  `auxdata` text,
+  `resources` text,
+  `update_id` int(11) NOT NULL default '0',
+  `is_searchable` tinyint(4) NOT NULL default '0',
+  `mime_type` varchar(40) default NULL,
+  `state` varchar(255) default NULL,
+  PRIMARY KEY  (`id`),
+  KEY `cds_object_ref_id` (`ref_id`),
+  KEY `cds_object_parent_id` (`parent_id`),
+  KEY `location_parent` (`location_hash`,`parent_id`),
+  CONSTRAINT `cds_object_ibfk_1` FOREIGN KEY (`ref_id`) REFERENCES `cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `cds_object_ibfk_2` FOREIGN KEY (`parent_id`) REFERENCES `cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-    flags           INTEGER NOT NULL DEFAULT 0,
-    display_prio    INTEGER NOT NULL DEFAULT 0
-);
+--
+-- Dumping data for table `cds_object`
+--
 
 
-CREATE INDEX cds_objects_ref_id ON cds_objects(ref_id);
-CREATE INDEX cds_objects_parent_id ON cds_objects(parent_id);
-CREATE INDEX cds_objects_object_type ON cds_objects(object_type);
-CREATE INDEX cds_objects_is_virtual ON cds_objects(is_virtual);
-CREATE INDEX cds_objects_mime_type ON cds_objects(mime_type);
+/*!40000 ALTER TABLE `cds_object` DISABLE KEYS */;
+LOCK TABLES `cds_object` WRITE;
+INSERT INTO `cds_object` VALUES (-1,NULL,-1,0,NULL,NULL,1,NULL,NULL,NULL,NULL,NULL,0,0,NULL,NULL),(0,NULL,-1,1,'object.container','Root',1,NULL,NULL,NULL,NULL,NULL,0,0,NULL,NULL),(1,NULL,0,1,'object.container','PC Directory',1,NULL,NULL,NULL,NULL,NULL,0,0,NULL,NULL);
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `cds_object` ENABLE KEYS */;
+
+--
+-- Table structure for table `cds_objects`
+--
+
+DROP TABLE IF EXISTS `cds_objects`;
+CREATE TABLE `cds_objects` (
+  `id` int(11) NOT NULL auto_increment,
+  `ref_id` int(11) NOT NULL default '0',
+  `parent_id` int(11) NOT NULL default '0',
+  `object_type` int(11) NOT NULL,
+  `upnp_class` varchar(80) default NULL,
+  `dc_title` varchar(255) default NULL,
+  `is_restricted` int(11) NOT NULL default '0',
+  `is_virtual` int(11) NOT NULL default '0',
+  `location` varchar(255) default NULL,
+  `metadata` text,
+  `auxdata` text,
+  `resources` text,
+  `update_id` int(11) NOT NULL default '0',
+  `is_searchable` int(11) NOT NULL default '0',
+  `mime_type` varchar(40) default NULL,
+  `action` varchar(255) default NULL,
+  `state` varchar(255) default NULL,
+  `flags` int(11) NOT NULL default '0',
+  `display_prio` int(11) NOT NULL default '0',
+  PRIMARY KEY  (`id`),
+  KEY `cds_objects_ref_id` (`ref_id`),
+  KEY `cds_objects_parent_id` (`parent_id`),
+  KEY `cds_objects_object_type` (`object_type`),
+  KEY `cds_objects_is_virtual` (`is_virtual`),
+  KEY `cds_objects_mime_type` (`mime_type`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `cds_objects`
+--
 
 
-INSERT INTO cds_objects(id, parent_id, object_type, dc_title, upnp_class) 
-    VALUES (0, -1, 1, 'Root', 'object.container');
-    
-UPDATE cds_objects SET id = 0 WHERE id = 1;
+/*!40000 ALTER TABLE `cds_objects` DISABLE KEYS */;
+LOCK TABLES `cds_objects` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `cds_objects` ENABLE KEYS */;
 
-INSERT INTO cds_objects(id, parent_id, object_type, dc_title, upnp_class) 
-    VALUES (1, 0, 1, 'PC Directory', 'object.container');
+--
+-- Table structure for table `mt_config`
+--
+
+DROP TABLE IF EXISTS `mt_config`;
+CREATE TABLE `mt_config` (
+  `key` varchar(40) NOT NULL,
+  `value` varchar(255) NOT NULL,
+  PRIMARY KEY  (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `mt_config`
+--
+
+
+/*!40000 ALTER TABLE `mt_config` DISABLE KEYS */;
+LOCK TABLES `mt_config` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `mt_config` ENABLE KEYS */;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 

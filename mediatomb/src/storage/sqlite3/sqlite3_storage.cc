@@ -34,8 +34,8 @@ using namespace mxml;
 
 Sqlite3Storage::Sqlite3Storage() : SQLStorage()
 {
-    db = NULL;
     shutdownFlag = false;
+    dbRemovesDeps = false;
 }
 
 Sqlite3Storage::~Sqlite3Storage()
@@ -77,7 +77,7 @@ String Sqlite3Storage::quote(String value)
     return ret;
 }
 
-void Sqlite3Storage::reportError(String query)
+void Sqlite3Storage::reportError(String query, sqlite3 *db)
 {
     log_error("SQLITE3: (%d) %s\nQuery:%s\n",
         sqlite3_errcode(db),
@@ -108,7 +108,7 @@ void Sqlite3Storage::waitForTask(Ref<SLTask> task, pthread_mutex_t *mutex, pthre
     if (task->getError() != nil)
     {
         log_error("%s\n", task->getError().c_str());
-        throw Exception(task->getError());
+        throw _Exception(task->getError());
     }
 }
 
@@ -148,6 +148,8 @@ void Sqlite3Storage::threadProc()
     
     Ref<SLTask> task;
     
+    sqlite3 *db;
+    
     Ref<ConfigManager> config = ConfigManager::getInstance();
     
     String dbFilePath = config->getOption(_("/server/storage/database-file"));
@@ -177,7 +179,7 @@ void Sqlite3Storage::threadProc()
         
         try
         {
-            task->run(this);
+            task->run(db, this);
             task->sendSignal();
         }
         catch (Exception e)
@@ -262,13 +264,13 @@ SLSelectTask::SLSelectTask(zmm::String query, pthread_mutex_t* mutex, pthread_co
     this->mutex = mutex;
 }
 
-void SLSelectTask::run(Sqlite3Storage *sl)
+void SLSelectTask::run(sqlite3 *db, Sqlite3Storage *sl)
 {
     char *err;
     pres = Ref<Sqlite3Result>(new Sqlite3Result()); 
     
     int ret = sqlite3_get_table(
-        sl->db,
+        db,
         query.c_str(),
         &pres->table,
         &pres->nrow,
@@ -278,7 +280,7 @@ void SLSelectTask::run(Sqlite3Storage *sl)
     
     if(ret != SQLITE_OK)
     {
-        sl->reportError(query);
+        sl->reportError(query, db);
         throw _StorageException(_("Sqlite3: query error"));
     }
 
@@ -295,11 +297,11 @@ SLExecTask::SLExecTask(zmm::String query, bool getLastInsertId, pthread_mutex_t*
     this->getLastInsertId = getLastInsertId;
 }
 
-void SLExecTask::run(Sqlite3Storage *sl)
+void SLExecTask::run(sqlite3 *db, Sqlite3Storage *sl)
 {
     char *err;
     int res = sqlite3_exec(
-        sl->db,
+        db,
         query.c_str(),
         NULL,
         NULL,
@@ -307,11 +309,11 @@ void SLExecTask::run(Sqlite3Storage *sl)
     );
     if(res != SQLITE_OK)
     {
-        sl->reportError(query);
+        sl->reportError(query, db);
         throw _StorageException(_("Sqlite3: query error"));
     }
     if (getLastInsertId)
-        lastInsertId = sqlite3_last_insert_rowid(sl->db);
+        lastInsertId = sqlite3_last_insert_rowid(db);
 }
 
 /* Sqlite3Result */

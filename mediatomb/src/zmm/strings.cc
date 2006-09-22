@@ -181,7 +181,7 @@ String String::from(int x)
 String String::from(unsigned int x)
 {
     StringBase *b = new StringBase(MAX_INT_STRING_LENGTH);
-	b->len = sprintf(b->data, "%d", x);
+	b->len = sprintf(b->data, "%u", x);
     return (String(b));
 }
 String String::from(long x)

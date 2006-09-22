@@ -28,6 +28,7 @@
 
 class MysqlResult;
 
+/*
 /// \brief A virtual class that represents a task to be done by the mysql thread.
 class MSTask : public zmm::Object
 {
@@ -110,6 +111,7 @@ public:
     /// \brief the result of the task
     int lastInsertId;
 };
+*/
 
 class MysqlRow : public SQLRow
 {
@@ -143,8 +145,14 @@ public:
     virtual int exec(zmm::String query, bool getLastInsertId = false);
     virtual void shutdown();
 protected:
+    
+    MYSQL db;
+    
     zmm::String getError(MYSQL *db);
     
+    zmm::Ref<Mutex> mutex;
+    
+    /*
     struct _threads
     {
         pthread_t thread;
@@ -157,19 +165,25 @@ protected:
     static void *staticThreadProc(void *arg);
     void threadProc(struct MysqlStorage::_threads *thread);
     static void staticThreadCleanup(void *arg);
+    */
     
-    int addTask(zmm::Ref<MSTask> task);
+    //int addTask(zmm::Ref<MSTask> task);
     
     /// \brief is set to true by shutdown() if the mysql thread should terminate
-    bool shutdownFlag;
+    //bool shutdownFlag;
+    
+    pthread_key_t mysql_init_key;
+    bool mysql_init_key_initialized;
+    
+    void checkMysqlThreadInit();
     
     /// \brief the tasks to be done by the mysql thread
-    zmm::Ref<zmm::Array<MSTask> > taskQueue;
-    pthread_cond_t taskCond;
-    pthread_mutex_t taskMutex;
+    //zmm::Ref<zmm::Array<MSTask> > taskQueue;
+    //pthread_cond_t taskCond;
+    //pthread_mutex_t taskMutex;
     
-    void mutexCondInit(pthread_mutex_t *mutex, pthread_cond_t *cond);
-    void waitForTask(zmm::Ref<MSTask> task, pthread_mutex_t *mutex, pthread_cond_t *cond);
+    //void mutexCondInit(pthread_mutex_t *mutex, pthread_cond_t *cond);
+    //void waitForTask(zmm::Ref<MSTask> task, pthread_mutex_t *mutex, pthread_cond_t *cond);
 };
 
 

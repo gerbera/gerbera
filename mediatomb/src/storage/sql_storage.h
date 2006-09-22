@@ -59,21 +59,19 @@ public:
     
     virtual void addObject(zmm::Ref<CdsObject> object);
     virtual void updateObject(zmm::Ref<CdsObject> object);
-    //virtual void eraseObject(zmm::Ref<CdsObject> object);
-    virtual zmm::Ref<CdsObject> loadObject(int objectID,
-                                           select_mode_t mode = SELECT_FULL);
+    
+    virtual zmm::Ref<CdsObject> loadObject(int objectID);
     virtual int getChildCount(int contId, bool containersOnly = false);
     
-    virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param,
-                                                           select_mode_t mode = SELECT_FULL);
+    virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param);
                                                            
     virtual int isFileInDatabase(int parentID, zmm::String filename);
    
-    virtual zmm::Ref<DBHash<int> > getObjects(int parentID);
+    virtual zmm::Ref<DBRHash<int> > getObjects(int parentID);
 
-    virtual void removeObjects(zmm::Ref<DBHash<int> > list);
+    virtual void removeObjects(zmm::Ref<DBRHash<int> > list);
 
-    virtual void removeObject(zmm::Ref<CdsObject> object);
+    virtual void removeObject(int objectID);
     
     /* accounting methods */
     virtual int getTotalFiles();   
@@ -81,31 +79,57 @@ public:
     virtual zmm::Ref<zmm::Array<CdsObject> > browse(zmm::Ref<BrowseParam> param);
     virtual zmm::Ref<zmm::Array<zmm::StringBase> > getMimeTypes();
     
-    virtual zmm::Ref<CdsObject> findObjectByTitle(zmm::String title, int parentID);
+    //virtual zmm::Ref<CdsObject> findObjectByTitle(zmm::String title, int parentID);
+    virtual zmm::Ref<CdsObject> findObjectByPath(zmm::String fullpath);
+    virtual zmm::Ref<CdsObject> findObjectByFilename(zmm::String filename, int parentID);
+    virtual int findObjectIDByPath(zmm::String fullpath);
     virtual void incrementUpdateIDs(int *ids, int size);
     virtual void incrementUIUpdateID(int id);
     virtual void shutdown() = 0;
+    
 protected:
-    virtual zmm::Ref<CdsObject> createObjectFromRow(zmm::Ref<SQLRow> row,
-                                                    select_mode_t mode = SELECT_FULL);
+    /* helper forcreateObjectFromRow() */
+    zmm::String getRealLocation(int parentID, zmm::String location);
+    
+    virtual zmm::Ref<CdsObject> createObjectFromRow(zmm::Ref<SQLRow> row);
     
     /* helpers for selectObjects() */
-    zmm::String getSelectQuery(select_mode_t mode);
+    zmm::String getSelectQuery();
     
+    /* helper for findObjectByPath and findObjectIDByPath */ 
+    zmm::Ref<SQLRow> _findObjectByPath(zmm::String fullpath);
+    
+    /* helper for findObjectByFilename and isFileInDatabase */
+    zmm::Ref<SQLRow> _findObjectByFilename(zmm::String filename, int parentID);
+    
+    /* helper for addObject and updateObject */
+    zmm::Ref<Dictionary> _addUpdateObject(zmm::Ref<CdsObject> obj, bool isUpdate);
+    
+    /*
     zmm::String selectQueryBasic;
     zmm::String selectQueryExtended;
     zmm::String selectQueryFull;
+    */
     
     /* helpers for removeObject() */
     
     zmm::Ref<Mutex> mutex;
     
-    
     int *rmIDs;
     zmm::Ref<DBHash<int> > rmIDHash;
     int *rmParents;
     zmm::Ref<DBBHash<int, int> > rmParentHash;
-
+    
+    bool dbRemovesDeps;
+    
+    unsigned int stringHash(zmm::String key);
+    
+    int ensurePathExistence(zmm::String path);
+    zmm::Ref<CdsObject> checkRefID(zmm::Ref<CdsObject> obj);
+    int createContainer(int parentID, zmm::String name, zmm::String path);
+    
+    
+    /*
     void rmInit();
     void rmCleanup();
     void rmDeleteIDs();
@@ -115,11 +139,12 @@ protected:
     void rmItem(zmm::Ref<CdsObject> obj);
     void rmChildren(zmm::Ref<CdsObject> obj);
     void rmDecChildCount(zmm::Ref<CdsObject> obj);
+    */
     
     //zmm::Ref<DSOHash<CdsObject> > objectTitleCache;
     //zmm::Ref<DBOHash<int, CdsObject> > objectIDCache;
     
-    int nextObjectID;
+    //int nextObjectID;
 };
 
 #endif // __SQL_STORAGE_H__

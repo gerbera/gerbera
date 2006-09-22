@@ -44,7 +44,7 @@ public:
     
     /// \brief run the sqlite3 task
     /// \param sl The instance of Sqlite3Storage to do the queries with.
-    virtual void run(Sqlite3Storage *sl) = 0;
+    virtual void run(sqlite3 *db, Sqlite3Storage *sl) = 0;
     
     /// \brief returns true if the task is not completed
     /// \return true if the task is not completed yet, false if the task is finished and the results are ready.
@@ -76,7 +76,7 @@ public:
     /// \param mutex see SLTask::SLTask()
     /// \param cond see SLTask::SLTask()
     SLSelectTask(zmm::String query, pthread_mutex_t* mutex, pthread_cond_t* cond);
-    virtual void run(Sqlite3Storage *sl);
+    virtual void run(sqlite3 *db, Sqlite3Storage *sl);
     /// \brief The Sqlite3Result
     zmm::Ref<Sqlite3Result> pres;
 protected:
@@ -93,7 +93,7 @@ public:
     /// \param mutex see SLTask::SLTask()
     /// \param cond see SLTask::SLTask()
     SLExecTask(zmm::String query, bool getLastInsertId, pthread_mutex_t* mutex, pthread_cond_t* cond);
-    virtual void run(Sqlite3Storage *sl);
+    virtual void run(sqlite3 *db, Sqlite3Storage *sl);
     int lastInsertId;
 protected:
     /// \brief The SQL query string
@@ -150,9 +150,7 @@ public:
     virtual void shutdown();
     
 protected:
-    sqlite3 *db;
-    
-    void reportError(zmm::String query);
+    void reportError(zmm::String query, sqlite3 *db);
     
     static void *staticThreadProc(void *arg);
     void threadProc();

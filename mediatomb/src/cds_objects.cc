@@ -62,23 +62,36 @@ int CdsObject::equals(Ref<CdsObject> obj, bool exactly)
         parentID == obj->getParentID() &&
         restricted == obj->isRestricted() &&
         title == obj->getTitle() &&
-        upnpClass == obj->getClass() &&
-        resources->size() == obj->resources->size()
+        upnpClass == obj->getClass()
        ))
         return 0;
-    // compare all resources
-    for (int i = 0; i < resources->size(); i++)
-        if (! resources->get(i)->equals(obj->resources->get(i)))
-            return 0;
-
+        
+    if (! resourcesEqual(obj))
+        return 0;
+    
     if (! metadata->equals(obj->getMetadata()))
         return 0;
+    
     if (exactly && !
         (location == obj->getLocation() &&
          virt == obj->isVirtual() &&
          auxdata->equals(obj->auxdata)
         ))
         return 0;
+    return 1;
+}
+
+int CdsObject::resourcesEqual(Ref<CdsObject> obj)
+{
+    if (resources->size() != obj->resources->size())
+        return 0;
+    
+    // compare all resources
+    for (int i = 0; i < resources->size(); i++)
+    {
+        if (! resources->get(i)->equals(obj->resources->get(i)))
+            return 0;
+    }
     return 1;
 }
 
@@ -118,7 +131,7 @@ Ref<CdsObject> CdsObject::createObject(int objectType)
     }
     else
     {
-        throw _Exception(_("invalid object type :") + objectType);
+        throw _Exception(_("invalid object type: ") + objectType);
     }
     return Ref<CdsObject>(pobj);
 }
@@ -162,7 +175,7 @@ CdsActiveItem::CdsActiveItem() : CdsItem()
 {
     objectType |= OBJECT_TYPE_ACTIVE_ITEM;
 
-    upnpClass = _("object.item.activeItem");
+    upnpClass = _(UPNP_DEFAULT_CLASS_ACTIVE_ITEM);
     mimeType = _(MIMETYPE_DEFAULT);
 }
 
@@ -200,7 +213,7 @@ CdsItemExternalURL::CdsItemExternalURL() : CdsItem()
 {
     objectType |= OBJECT_TYPE_ITEM_EXTERNAL_URL;
 
-    upnpClass = _("object.item");
+    upnpClass = _(UPNP_DEFAULT_CLASS_ITEM);
     mimeType = _(MIMETYPE_DEFAULT);
 }
 
@@ -236,7 +249,7 @@ CdsContainer::CdsContainer() : CdsObject()
     updateID = 0;
     searchable = 0;
     childCount = -1;
-    upnpClass = _("object.container");
+    upnpClass = _(UPNP_DEFAULT_CLASS_CONTAINER);
 }
 
 void CdsContainer::copyTo(Ref<CdsObject> obj)

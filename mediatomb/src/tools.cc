@@ -64,6 +64,33 @@ Ref<Array<StringBase> > split_string(String str, char sep)
     return ret;
 }
 
+Ref<Array<StringBase> > split_path(String str)
+{
+    Ref<Array<StringBase> > ret(new Array<StringBase>());
+    int pos = str.rindex(DIR_SEPARATOR);
+    const char *data = str.c_str();
+    
+    if (pos <= 0)
+    {
+        ret->append(_(""));
+        if (pos == 0)
+        {
+            String filename(data+1);
+            ret->append(filename);
+        }
+        else
+            ret->append(str);
+    }
+    else
+    {
+        String path(data, pos);
+        ret->append(path);
+        String filename(data + pos + 1);
+        ret->append(filename);
+    }
+    return ret;
+}
+
 String trim_string(String str)
 {
     if (str == nil)

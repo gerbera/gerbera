@@ -97,6 +97,7 @@ public:
     int totalFiles;
 };
 
+/*
 class DirCacheEntry : public zmm::Object
 {
 public:
@@ -122,6 +123,7 @@ public:
     zmm::String getPath();
     int createContainers();
 };
+*/
 
 class ContentManager : public zmm::Object
 {
@@ -144,14 +146,6 @@ public:
     int removeObject(int objectID, bool async=true);
     int rescanDirectory(int objectID, scan_level_t scanLevel = Basic, bool async=true);
     
-    /* don't use these, use the above methods */
-    void _loadAccounting();
-    void _addFile(zmm::String path, bool recursive=0);
-    void _addFile2(zmm::String path, bool recursive=0);
-    void _removeObject(int objectID);
-    void _rescanDirectory(int objectID, scan_level_t scanLevel);
-    
-
     /// \brief Updates an object in the database using the given parameters.
     /// \param objectID ID of the object to update
     /// \param parameters key value pairs of fields to be updated
@@ -195,10 +189,17 @@ protected:
     int ignore_unknown_extensions;
     zmm::Ref<Dictionary> extension_mimetype_map;
     zmm::Ref<Dictionary> mimetype_upnpclass_map;
+
+    /* don't use these, use the above methods */
+    void _loadAccounting();
+    void _addFile(zmm::String path, bool recursive=0);
+    //void _addFile2(zmm::String path, bool recursive=0);
+    void _removeObject(int objectID);
+    void _rescanDirectory(int objectID, scan_level_t scanLevel);
     
     /* for recursive addition */
-    void addRecursive(zmm::String path, int parentID);
-    void addRecursive2(zmm::Ref<DirCache> dirCache, zmm::String filename, bool recursive);
+    void addRecursive(zmm::String path);
+    //void addRecursive2(zmm::Ref<DirCache> dirCache, zmm::String filename, bool recursive);
 
     zmm::String extension2mimetype(zmm::String extension);
     zmm::String mimetype2upnpclass(zmm::String mimeType);
@@ -229,6 +230,10 @@ protected:
     zmm::Ref<zmm::Array<CMTask> > taskQueue;
     zmm::Ref<CMTask> currentTask;
     
+    friend void CMAddFileTask::run();
+    friend void CMRemoveObjectTask::run();
+    friend void CMRescanDirectoryTask::run();
+    friend void CMLoadAccountingTask::run();
 };
 
 #endif // __CONTENT_MANAGER_H__

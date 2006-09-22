@@ -39,7 +39,7 @@
 #define IS_CDS_ACTIVE_ITEM(type) (type & OBJECT_TYPE_ACTIVE_ITEM)
 #define IS_CDS_ITEM_EXTERNAL_URL(type) (type & OBJECT_TYPE_ITEM_EXTERNAL_URL)
 #define IS_CDS_ITEM_INTERNAL_URL(type) (type & OBJECT_TYPE_ITEM_INTERNAL_URL)
-#define IS_CDS_PURE_ITEM(type) (type & OBJECT_TYPE_ITEM && !type & (OBJECT_TYPE_ACTIVE_ITEM | OBJECT_TYPE_ITEM_EXTERNAL_URL | OBJECT_TYPE_ITEM_INTERNAL_URL))
+#define IS_CDS_PURE_ITEM(type) (type == OBJECT_TYPE_ITEM)
 
 #define INVALID_OBJECT_ID (-333)
 
@@ -203,7 +203,11 @@ public:
     /// exactly=true checks all fields, also internal ones, exactly=false checks
     /// only the fields that will be visible in DIDL-Lite
     virtual int equals(zmm::Ref<CdsObject> obj, bool exactly=false);
-
+    
+    /// \brief Checks if current object has the same resources as obj
+    /// \param obj object to check against
+    int resourcesEqual(zmm::Ref<CdsObject> obj);
+    
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     virtual void validate();
 

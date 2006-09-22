@@ -34,6 +34,7 @@ typedef enum
     BROWSE_DIRECT_CHILDREN = 2
 } browse_flag_t;
 
+/*
 typedef enum
 {
     SELECT_BASIC = 0,
@@ -42,6 +43,7 @@ typedef enum
 
     SELECT__MAX
 } select_mode_t;
+*/
 
 /* flags for SelectParam */
 #define FILTER_PARENT_ID 1
@@ -120,45 +122,44 @@ public:
     virtual void init() = 0;
     virtual void addObject(zmm::Ref<CdsObject> object) = 0;
     virtual void updateObject(zmm::Ref<CdsObject> object) = 0;
-    //virtual void eraseObject(zmm::Ref<CdsObject> object) = 0;
 
     virtual zmm::Ref<zmm::Array<CdsObject> > browse(zmm::Ref<BrowseParam> param) = 0;
     virtual zmm::Ref<zmm::Array<zmm::StringBase> > getMimeTypes() = 0;
 
-    virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param,
-                                                           select_mode_t mode = SELECT_FULL) = 0;
+    virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param) = 0;
     
-    virtual zmm::Ref<CdsObject> findObjectByTitle(zmm::String title, int parentID) = 0;
+    //virtual zmm::Ref<CdsObject> findObjectByTitle(zmm::String title, int parentID) = 0;
+    virtual zmm::Ref<CdsObject> findObjectByPath(zmm::String path) = 0;
+    virtual zmm::Ref<CdsObject> findObjectByFilename(zmm::String filename, int parentID) = 0;
+    virtual int findObjectIDByPath(zmm::String fullpath) = 0;
     virtual void incrementUpdateIDs(int *ids, int size) = 0;
     
     virtual void incrementUIUpdateID(int id) = 0;
     
     /* utility methods */
-    virtual zmm::Ref<CdsObject> loadObject(int objectID,
-                                           select_mode_t mode = SELECT_FULL) = 0;
+    virtual zmm::Ref<CdsObject> loadObject(int objectID) = 0;
     virtual int getChildCount(int contId, bool containersOnly = false) = 0;
-    virtual void removeObject(zmm::Ref<CdsObject> object) = 0;
-    virtual void removeObject(int objectID);
+    virtual void removeObject(int objectID) = 0;
     virtual zmm::Ref<zmm::Array<CdsObject> > getObjectPath(int objectID);
-   
+    
     /// \brief Determines if a file given by it's name is in the database.
     /// \param parentID parent container
     /// \param filename name of the file as stored on disk
     /// \return objectID if file exists in the database, otherwise a negative value
     virtual int isFileInDatabase(int parentID, zmm::String filename) = 0;
-  
+    
     /// \brief Get all objects under the given parentID.
     /// \param parentID parent container
     /// \return DBHash containing the objectID's 
-    virtual zmm::Ref<DBHash<int> > getObjects(int parentID) = 0;
-
+    virtual zmm::Ref<DBRHash<int> > getObjects(int parentID) = 0;
+    
     /// brief Remove all objects found in list
     /// \param parentID ID of the parent container
     /// \param list a DBHash containing objectIDs that have to be removed
-    virtual void removeObjects(zmm::Ref<DBHash<int> > list) = 0;
-
+    virtual void removeObjects(zmm::Ref<DBRHash<int> > list) = 0;
+    
     /* accounting methods */
-    virtual int getTotalFiles(){ return 0; }
+    virtual int getTotalFiles() { return 0; }
     
     /* static methods */
     static zmm::Ref<Storage> getInstance();

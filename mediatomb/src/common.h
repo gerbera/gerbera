@@ -31,7 +31,7 @@
 #define DEFAULT_SESSION_TIMEOUT         123456
 
 /// \brief Number of Mysql threads.
-#define MYSQL_STORAGE_START_THREADS     1
+//#define MYSQL_STORAGE_START_THREADS     1
 
 // ERROR CODES                                                                                 
 /// \brief UPnP specific error code.
@@ -41,6 +41,15 @@
 #define UPNP_E_NO_SUCH_ID               701
 #define UPNP_E_NOT_EXIST                706
 
+// UPnP default classes
+#define UPNP_DEFAULT_CLASS_CONTAINER    "object.container"
+#define UPNP_DEFAULT_CLASS_ITEM         "object.item"
+#define UPNP_DEFAULT_CLASS_ACTIVE_ITEM  "object.item.activeItem"
+
+// fixed CdsObjectIDs
+#define CDS_ID_BLACKHOLE                -1
+#define CDS_ID_ROOT                     0
+#define CDS_ID_FS_ROOT                  1
 
 // URL FORMATTING CONSTANTS
 #define URL_OBJECT_ID                   "object_id"

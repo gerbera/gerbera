@@ -216,6 +216,7 @@ void web::addObject::process()
             throw _Exception(_("unknown object type"));
             break;
     }
+    obj->setVirtual(true);
     ContentManager::getInstance()->addObject(obj);
 }
 

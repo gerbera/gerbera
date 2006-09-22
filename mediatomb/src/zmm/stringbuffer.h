@@ -44,6 +44,7 @@ public:
     StringBuffer &operator<<(char *str);
     StringBuffer &operator<<(char chr);
     StringBuffer &operator<<(int x);
+    StringBuffer &operator<<(unsigned int x);
 
     int length();
     void setLength(int newLength);
