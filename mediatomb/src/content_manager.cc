@@ -340,6 +340,8 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
                 location + " : " + strerror(errno));
     }
 
+    Ref<DBRHash<int> > list =  storage->getObjects(containerID);
+
     while ((dent = readdir(dir)) != NULL)
     {
         char *name = dent->d_name;
@@ -366,7 +368,7 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
         objectID = storage->isFileInDatabase(containerID, path);
         if (objectID >= 0)
         {
-//            list->append(objectID); // id was found in the container
+            list->remove(objectID);
             if (S_ISREG(statbuf.st_mode))
             {
                 if (scanLevel == Full)
@@ -410,7 +412,7 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
         }
     }
 
-//    storage->removeChildObjectsNotInList(parentID, list);
+    storage->removeObjects(list);
     closedir(dir);
 }
 
