@@ -867,7 +867,7 @@ Ref<Array<CdsObject> > SQLStorage::selectObjects(Ref<SelectParam> param)
 Ref<DBRHash<int> > SQLStorage::getObjects(int parentID)
 {
     Ref<StringBuffer> q(new StringBuffer());
-    *q << "SELECT id FROM cds_objects WHERE parentID = ";
+    *q << "SELECT id FROM cds_objects WHERE parent_id = ";
     *q << parentID;
     Ref<SQLResult> res = select(q->toString());
     Ref<SQLRow> row;
