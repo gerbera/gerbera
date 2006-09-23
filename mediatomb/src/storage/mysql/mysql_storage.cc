@@ -215,9 +215,11 @@ void MysqlStorage::waitForTask(Ref<MSTask> task, pthread_mutex_t *mutex, pthread
 
 Ref<SQLResult> MysqlStorage::select(String query)
 {
+    /*
     Exception *e = new Exception(query);
     e->printStackTrace();
     delete e;
+    */
     
     int res;
     mutex->lock();
@@ -250,9 +252,11 @@ Ref<SQLResult> MysqlStorage::select(String query)
 
 int MysqlStorage::exec(String query, bool getLastInsertId)
 {
+    /*
     Exception *e = new Exception(query);
     e->printStackTrace();
     delete e;
+    */
     
     int res;
     mutex->lock();
