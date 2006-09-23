@@ -90,7 +90,8 @@ public:
         int array_slot = slot->array_slot; 
         data_array[array_slot] = data_array[--this->count];
         if (! search(data_array[array_slot], &slot))
-            throw _Exception(_("DBR-Hash-Error: key in data_array not found in hashtable"));
+            return false;
+//            throw Exception(_("DBR-Hash-Error: key in data_array not found in hashtable"));
         slot->array_slot = array_slot;
         return true;
     }
