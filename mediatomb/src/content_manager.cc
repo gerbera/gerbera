@@ -312,6 +312,7 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
     int objectID;
     struct dirent *dent;
     struct stat statbuf;
+    String location;
     String path;
     
 //    Ref<Array<int> > list(new Array<int>());
@@ -329,8 +330,8 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
     log_debug("Rescanning container: %s, id=%d\n", 
                obj->getTitle().c_str(), containerID);
 
-    String location = obj->getLocation();
-    if (!string_ok(path))
+    location = obj->getLocation();
+    if (!string_ok(location))
         throw _Exception(_("Container has no location information!\n"));
 
     DIR *dir = opendir(location.c_str());
