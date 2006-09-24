@@ -77,9 +77,10 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         {
             String extension = location.substring(dot);
             // make sure that the extension does not contain the separator character
-            if (string_ok(extension) && (extension.index(URL_PARAM_SEPARATOR) == -1))
+            if (string_ok(extension) && (extension.index(URL_PARAM_SEPARATOR) == -1) 
+                                     && (extension.index(URL_ARG_SEPARATOR) == -1))
             {
-                tmp = tmp + _("&") + _(URL_FILE_EXTENSION) + _("=") + extension;
+                tmp = tmp + _(_URL_ARG_SEPARATOR) + _(URL_FILE_EXTENSION) + _("=") + extension;
                 log_debug("New URL: %s\n", tmp.c_str());
             }
         }
@@ -112,7 +113,7 @@ Ref<CdsResourceManager::UrlBase> CdsResourceManager::addResources_getUrlBase(Ref
     else
     { 
         urlBase->urlBase = Server::getInstance()->getVirtualURL() + _("/") +
-            CONTENT_MEDIA_HANDLER + _(_URL_PARAM_SEPARATOR) + dict->encode() + _("&") + _(URL_RESOURCE_ID) + _("=");
+            CONTENT_MEDIA_HANDLER + _(_URL_PARAM_SEPARATOR) + dict->encode() + _(_URL_ARG_SEPARATOR) + _(URL_RESOURCE_ID) + _("=");
         urlBase->addResID = true;
     }
     return urlBase;

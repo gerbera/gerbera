@@ -142,7 +142,7 @@ Ref<IOHandler> WebRequestHandler::open(IN const char *filename,
     this->mode = mode;
 
     String path, parameters;
-    split_url(filename, path, parameters);
+    split_url(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
 
     Ref<Dictionary> params = Ref<Dictionary>(new Dictionary());
     params->decode(parameters);

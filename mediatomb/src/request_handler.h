@@ -40,10 +40,10 @@ public:
     /// \param parameters variable where the parameters portion will be saved
     ///
     /// This function splits the url into it's path and parameter components.
-    /// content/media?object_id=12345&transcode=wav would be transformed to: 
+    /// content/media SEPARATOR object_id=12345&transcode=wav would be transformed to: 
     /// path = "content/media"
     /// parameters = "object_id=12345&transcode=wav"
-    static void split_url(const char *url, zmm::String &path, zmm::String &parameters);
+    static void split_url(const char *url, char separator, zmm::String &path, zmm::String &parameters);
 };
 
 

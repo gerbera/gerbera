@@ -59,6 +59,8 @@
 #define URL_PARAM_SEPARATOR             '/' 
 #define _URL_PARAM_SEPARATOR            "/"
 #define URL_UI_PARAM_SEPARATOR          '?'
+#define URL_ARG_SEPARATOR               '&'
+#define _URL_ARG_SEPARATOR              "&"
 #define SERVER_VIRTUAL_DIR              "content"
 #define CONTENT_MEDIA_HANDLER           "media"
 #define CONTENT_SERVE_HANDLER           "serve"
