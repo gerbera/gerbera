@@ -29,10 +29,14 @@ class DBHash : public DHashBase<KT, KT>
 {
 protected:
     KT emptyKey;
+    KT deletedKey;
 public:
-    DBHash(int capacity, KT emptyKey) : DHashBase<KT, KT>(capacity)
+    DBHash(int capacity, KT emptyKey, KT deletedKey) : DHashBase<KT, KT>(capacity)
     {
         this->emptyKey = emptyKey;
+        this->deletedKey = deletedKey;
+        if (emptyKey == deletedKey)
+            throw zmm::Exception(_("emptyKey and deletedKey must not be the same!"));
         clear();
     }
 
@@ -67,7 +71,7 @@ public:
        KT *slot;
         if (! search(key, &slot))
             return false;
-        *slot = emptyKey;
+        *slot = deletedKey;
         this->count--;
         return true;
     }
