@@ -25,6 +25,8 @@
 #include "exception.h"
 #include "array.h"
 #include "stringtokenizer.h"
+#include "stack.h"
+#include "queue.h"
 
 #endif // __ZMMF_H__
 

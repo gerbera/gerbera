@@ -27,6 +27,7 @@ libmediatomb_a_SOURCES = \
 ../src/hash/dbb_hash.h \
 ../src/hash/db_hash.h \
 ../src/hash/dbo_hash.h \
+../src/hash/dbr_hash.h \
 ../src/hash/direct_hash_base.h \
 ../src/hash/dsb_hash.h \
 ../src/hash/dso_hash.h \
@@ -152,6 +153,8 @@ libmediatomb_a_SOURCES = \
 ../src/zmmf/array.h \
 ../src/zmmf/exception.cc \
 ../src/zmmf/exception.h \
+../src/zmmf/queue.h \
+../src/zmmf/stack.h \
 ../src/zmmf/stringtokenizer.cc \
 ../src/zmmf/stringtokenizer.h \
 ../src/zmmf/zmmf.h \

@@ -1,5 +1,5 @@
 BEGIN TRANSACTION;
-CREATE TABLE "cds_object" (
+CREATE TABLE "mt_cds_object" (
   "id" integer primary key,
   "ref_id" integer default NULL,
   "parent_id" integer NOT NULL default '0',
@@ -19,14 +19,15 @@ CREATE TABLE "cds_object" (
   CONSTRAINT "cds_object_ibfk_1" FOREIGN KEY ("ref_id") REFERENCES "cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT "cds_object_ibfk_2" FOREIGN KEY ("parent_id") REFERENCES "cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
-INSERT INTO "cds_object" VALUES(-1, NULL, -1, 0, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, 0, 0, NULL, NULL);
-INSERT INTO "cds_object" VALUES(0, NULL, -1, 1, 'object.container', 'Root', 1, NULL, NULL, NULL, NULL, NULL, 0, 0, NULL, NULL);
-INSERT INTO "cds_object" VALUES(1, NULL, 0, 1, 'object.container', 'PC Directory', 1, NULL, NULL, NULL, NULL, NULL, 0, 0, NULL, NULL);
-CREATE TABLE "mt_config" (
+INSERT INTO "mt_cds_object" VALUES(-1, NULL, -1, 0, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, 0, 0, NULL, NULL);
+INSERT INTO "mt_cds_object" VALUES(0, NULL, -1, 1, 'object.container', 'Root', 1, NULL, NULL, NULL, NULL, NULL, 0, 0, NULL, NULL);
+INSERT INTO "mt_cds_object" VALUES(1, NULL, 0, 1, 'object.container', 'PC Directory', 1, NULL, NULL, NULL, NULL, NULL, 0, 0, NULL, NULL);
+CREATE TABLE "mt_internal_setting" (
   "key" varchar(40) primary key NOT NULL,
   "value" varchar(255) NOT NULL
 );
-CREATE INDEX cds_object_ref_id ON cds_object(ref_id);
-CREATE INDEX cds_object_parent_id ON cds_object(parent_id);
-CREATE INDEX location_parent ON cds_object(location_hash,parent_id);
+CREATE INDEX mt_cds_object_ref_id ON mt_cds_object(ref_id);
+CREATE INDEX mt_cds_object_parent_id ON mt_cds_object(parent_id);
+CREATE INDEX mt_location_parent ON mt_cds_object(location_hash,parent_id);
+CREATE INDEX mt_internal_setting_key ON mt_internal_setting(key);
 COMMIT;
