@@ -129,6 +129,7 @@ public:
     MysqlResult(MYSQL_RES *mysql_res);
     virtual ~MysqlResult();
     virtual zmm::Ref<SQLRow> nextRow();
+    virtual unsigned long long getNumRows() { return mysql_num_rows(mysql_res); }
 protected:
     MYSQL_RES *mysql_res;
 };

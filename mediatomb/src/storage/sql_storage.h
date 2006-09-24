@@ -42,6 +42,7 @@ public:
     SQLResult();
     virtual ~SQLResult();
     virtual zmm::Ref<SQLRow> nextRow() = 0;
+    virtual unsigned long long getNumRows() = 0;
 };
 
 class SQLStorage : public Storage

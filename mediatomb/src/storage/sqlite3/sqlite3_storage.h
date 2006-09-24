@@ -121,6 +121,7 @@ public:
     Sqlite3Result();
     virtual ~Sqlite3Result();
     virtual zmm::Ref<SQLRow> nextRow();
+    virtual unsigned long long getNumRows() { return nrow; }
 protected:
     char **table;
     char **row;

@@ -60,11 +60,13 @@ public:
     {
         return this->baseTypeHashCode((unsigned int)key);
     }
-    virtual bool match(KT key, KT *slot)
+    
+    virtual bool match(KT key, struct dbr_hash_slot<KT> *slot)
     {
        return (key == slot->key);
     }
-    virtual bool isEmptySlot(KT *slot)
+    
+    virtual bool isEmptySlot(struct dbr_hash_slot<KT> *slot)
     {
         return (slot->key == emptyKey);
     }
@@ -75,8 +77,12 @@ public:
             this->zero();
         else
         {
+            struct dbr_hash_slot<KT> *slot;
             for (int i = 0; i < this->capacity; i++)
-                this->data[i]->key = emptyKey;
+            {
+                slot = this->data +i;
+                slot->key = emptyKey;
+            }
             this->count = 0;
         }
     }
@@ -90,8 +96,8 @@ public:
         int array_slot = slot->array_slot; 
         data_array[array_slot] = data_array[--this->count];
         if (! search(data_array[array_slot], &slot))
-            return false;
-//            throw Exception(_("DBR-Hash-Error: key in data_array not found in hashtable"));
+//            return false;
+            throw zmm::Exception(_("DBR-Hash-Error: key in data_array not found in hashtable"));
         slot->array_slot = array_slot;
         return true;
     }
