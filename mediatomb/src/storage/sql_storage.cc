@@ -875,7 +875,11 @@ Ref<DBRHash<int> > SQLStorage::getObjects(int parentID)
     Ref<SQLResult> res = select(q->toString());
     Ref<SQLRow> row;
     
-    Ref<DBRHash<int> > ret(new DBRHash<int>(res->getNumRows() * 2, -1));
+    int capacity = res->getNumRows() * 5 + 1;
+    if (capacity < 521)
+        capacity = 521;
+    
+    Ref<DBRHash<int> > ret(new DBRHash<int>(capacity, -2, -3));
     
     while ((row = res->nextRow()) != nil)
     {
@@ -925,7 +929,7 @@ void SQLStorage::removeObject(int objectID)
         {
             q->clear();
             *q << "SELECT DISTINCT id FROM " CDS_OBJECT_TABLE
-                " WHERE parent_if IN (";
+                " WHERE parent_id IN (";
         }
         throw _Exception(_("manual dependency remove not implemented!"));
     }

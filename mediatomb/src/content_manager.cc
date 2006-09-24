@@ -366,7 +366,7 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
             log_error("Failed to stat %s\n"), path.c_str();
             continue;
         }
-        objectID = storage->isFileInDatabase(containerID, path);
+        objectID = storage->isFileInDatabase(containerID, String(name));
         if (objectID >= 0)
         {
             list->remove(objectID);

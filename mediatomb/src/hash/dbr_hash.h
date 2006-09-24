@@ -41,11 +41,15 @@ class DBRHash : public DHashBase<KT, struct dbr_hash_slot<KT> >
 {
 protected:
     KT emptyKey;
+    KT deletedKey;
     KT *data_array;
 public:
-    DBRHash(int capacity, KT emptyKey) : DHashBase<KT, struct dbr_hash_slot<KT> >(capacity)
+    DBRHash(int capacity, KT emptyKey, KT deletedKey) : DHashBase<KT, struct dbr_hash_slot<KT> >(capacity)
     {
+        if (emptyKey == deletedKey)
+            throw zmm::Exception(_("emptyKey and deletedKey must not be the same!"));
         this->emptyKey = emptyKey;
+        this->deletedKey = deletedKey;
         data_array = (KT *)MALLOC(capacity * sizeof(KT));
         clear();
     }
@@ -92,7 +96,7 @@ public:
         struct dbr_hash_slot<KT> *slot;
         if (! search(key, &slot))
             return false;
-        slot->key = emptyKey;
+        slot->key = deletedKey;
         int array_slot = slot->array_slot;
         if (this->count == 1 || this->count-1 == array_slot)
         {
@@ -101,7 +105,10 @@ public:
         }
         data_array[array_slot] = data_array[--this->count];
         if (! search(data_array[array_slot], &slot))
+        {
+            log_debug("DBR-Hash-Error: (%d; array_slot=%d; count=%d)\n", data_array[array_slot], array_slot, this->count);
             throw zmm::Exception(_("DBR-Hash-Error: key in data_array not found in hashtable"));
+        }
         slot->array_slot = array_slot;
         return true;
     }
