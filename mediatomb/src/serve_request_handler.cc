@@ -54,7 +54,7 @@ void ServeRequestHandler::get_info(IN const char *filename, OUT struct File_Info
     int len = 0;
 
     String url_path, parameters;
-    split_url(filename, url_path, parameters);
+    split_url(filename, URL_PARAM_SEPARATOR, url_path, parameters);
 
     len = (_("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER).length();
 
@@ -132,7 +132,7 @@ Ref<IOHandler> ServeRequestHandler::open(IN const char *filename, IN enum UpnpOp
         throw _Exception(_("UPNP_WRITE unsupported"));
 
     String url_path, parameters;
-    split_url(filename, url_path, parameters);
+    split_url(filename, URL_PARAM_SEPARATOR, url_path, parameters);
 
     len = (_("/") + SERVER_VIRTUAL_DIR + "/" +
                               CONTENT_SERVE_HANDLER).length();

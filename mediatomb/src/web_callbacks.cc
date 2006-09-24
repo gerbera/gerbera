@@ -55,16 +55,11 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
 {
     String path, parameters;
 
-    RequestHandler::split_url(filename, path, parameters);
-
     String link = String((char *) filename);
 
 //    log_debug("Filename: %s, Path: %s\n", filename, path.c_str());
 //    log_debug("create_handler: got url parameters: [%s]\n", parameters.c_str());
     
-    Ref<Dictionary> dict(new Dictionary());
-    dict->decode(parameters);
-
     RequestHandler *ret = NULL;
 /*
     log_debug("Link is: %s, checking against: %s, starts with? %d\n", link.c_str(), 
@@ -91,6 +86,11 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
         {
             throw _Exception(_("UI disabled in configuration"));
         }
+
+        RequestHandler::split_url(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
+        Ref<Dictionary> dict(new Dictionary());
+        dict->decode(parameters);
+
 
         String r_type = dict->get(_(URL_REQUEST_TYPE));
         if (r_type != nil)

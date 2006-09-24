@@ -57,7 +57,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     int ret = 0;
 
     String url_path, parameters;
-    split_url(filename, url_path, parameters);
+    split_url(filename, URL_PARAM_SEPARATOR, url_path, parameters);
     
     Ref<Dictionary> dict(new Dictionary());
     dict->decode(parameters);
@@ -241,7 +241,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, IN enum UpnpOpe
         throw _Exception(_("UPNP_WRITE unsupported"));
 
     String url_path, parameters;
-    split_url(filename, url_path, parameters);
+    split_url(filename, URL_PARAM_SEPARATOR, url_path, parameters);
 
     Ref<Dictionary> dict(new Dictionary());
     dict->decode(parameters);
