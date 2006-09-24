@@ -116,7 +116,7 @@ public:
 class MysqlRow : public SQLRow
 {
 public:
-    MysqlRow(MYSQL_ROW mysql_row);
+    MysqlRow(MYSQL_ROW mysql_row, zmm::Ref<SQLResult> sqlResult);
     virtual zmm::String col(int index);
 protected:
     MYSQL_ROW mysql_row;

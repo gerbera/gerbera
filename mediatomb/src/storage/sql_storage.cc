@@ -30,10 +30,11 @@
 using namespace zmm;
 
 /* maximal number of items to store in the hashtable */
-#define MAX_REMOVE_IDS 1000
-#define REMOVE_ID_HASH_CAPACITY 3109
+//#define MAX_REMOVE_IDS 1000
+//#define REMOVE_ID_HASH_CAPACITY 3109
 
-#define OBJECT_CACHE_CAPACITY 100003
+//#define OBJECT_CACHE_CAPACITY 100003
+#define CDS_OBJECT_TABLE    "`cds_object`"
 
 enum
 {
@@ -95,8 +96,10 @@ static char *_q_res =
     " ON f.ref_id = rf.id";
 */
 
-SQLRow::SQLRow() : Object()
-{}
+SQLRow::SQLRow(Ref<SQLResult> sqlResult) : Object()
+{
+    this->sqlResult = sqlResult;
+}
 SQLRow::~SQLRow()
 {}
 
@@ -351,7 +354,7 @@ void SQLStorage::addObject(Ref<CdsObject> obj)
     }
     
     Ref<StringBuffer> qb(new StringBuffer(256));
-    *qb << "INSERT INTO cds_object(" << fields->toString() <<
+    *qb << "INSERT INTO " CDS_OBJECT_TABLE "(" << fields->toString() <<
             ") VALUES (" << values->toString() << ")";
             
     log_debug("insert_query: %s\n", qb->toString().c_str());
@@ -365,7 +368,7 @@ void SQLStorage::updateObject(zmm::Ref<CdsObject> obj)
     Ref<Array<DictionaryElement> > dataElements = data->getElements();
     
     Ref<StringBuffer> qb(new StringBuffer(256));
-    *qb << "UPDATE cds_object SET ";
+    *qb << "UPDATE " CDS_OBJECT_TABLE " SET ";
     
     for (int i=0; i < dataElements->size(); i++)
     {
@@ -417,7 +420,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     Ref<SQLResult> res;
     Ref<SQLRow> row;
     
-    q = _("SELECT object_type FROM cds_object WHERE id = ") +
+    q = _("SELECT object_type FROM " CDS_OBJECT_TABLE " WHERE id = ") +
                     objectID;
     res = select(q);
     if((row = res->nextRow()) != nil)
@@ -434,7 +437,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     
     if(param->getFlag() == BROWSE_DIRECT_CHILDREN && IS_CDS_CONTAINER(objectType))
     {
-        q = _("SELECT COUNT(*) FROM cds_object WHERE parent_id = ") + objectID;
+        q = _("SELECT COUNT(*) FROM " CDS_OBJECT_TABLE " WHERE parent_id = ") + objectID;
         res = select(q);
         if((row = res->nextRow()) != nil)
         {
@@ -501,7 +504,7 @@ int SQLStorage::getChildCount(int contId, bool containersOnly)
     Ref<SQLRow> row;
     Ref<SQLResult> res;
     Ref<StringBuffer> qb(new StringBuffer());
-    *qb << "SELECT COUNT(*) FROM cds_object WHERE parent_id = " << contId;
+    *qb << "SELECT COUNT(*) FROM " CDS_OBJECT_TABLE " WHERE parent_id = " << contId;
     if (containersOnly)
         *qb << " AND object_type = " << OBJECT_TYPE_CONTAINER;
     res = select(qb->toString());
@@ -516,10 +519,10 @@ Ref<Array<StringBase> > SQLStorage::getMimeTypes()
 {
     Ref<Array<StringBase> > arr(new Array<StringBase>());
 
-    String q = _("SELECT DISTINCT mime_type FROM cds_object "
-                "WHERE mime_type IS NOT NULL ORDER BY mime_type");
+    String q = _("SELECT DISTINCT mime_type FROM " CDS_OBJECT_TABLE
+                " WHERE mime_type IS NOT NULL ORDER BY mime_type");
     Ref<SQLResult> res = select(q);
-    Ref<SQLRow> row;                                 
+    Ref<SQLRow> row;
 
     while ((row = res->nextRow()) != nil)
     {
@@ -568,11 +571,11 @@ int SQLStorage::isFileInDatabase(int parentID, String filename)
 Ref<SQLRow> SQLStorage::_findObjectByFilename(String filename, int parentID)
 {
     Ref<StringBuffer> qb(new StringBuffer());
-    *qb << "SELECT * FROM `cds_object` "
-        "WHERE `location_hash` = " << stringHash(filename)
-        << " AND `location` = " << quote(filename)
-        << " AND `parent_id` = " << parentID
-        << " AND `ref_id` IS NULL "
+    *qb << "SELECT * FROM " CDS_OBJECT_TABLE
+        " WHERE location_hash = " << stringHash(filename)
+        << " AND location = " << quote(filename)
+        << " AND parent_id = " << parentID
+        << " AND ref_id IS NULL "
         "LIMIT 1";
         
     Ref<SQLResult> res = select(qb->toString());
@@ -599,16 +602,16 @@ Ref<SQLRow> SQLStorage::_findObjectByPath(String fullpath)
         if (! string_ok(path))
             throw _Exception(_("tried to add an empty path"));
         
-        *qb << "SELECT * FROM `cds_object` "
-            "WHERE `location_hash` = " << stringHash(path)
+        *qb << "SELECT * FROM " CDS_OBJECT_TABLE
+            " WHERE `location_hash` = " << stringHash(path)
             << " AND `location` = " << quote(path)
             << " AND `ref_id` IS NULL "
             "LIMIT 1";
     }
     else if (! string_ok(path))
     {
-        *qb << "SELECT * FROM `cds_object` "
-            "WHERE `location_hash` = " << stringHash(fullpath)
+        *qb << "SELECT * FROM " CDS_OBJECT_TABLE
+            " WHERE `location_hash` = " << stringHash(fullpath)
             << " AND `location` = " << quote(fullpath)
             //<< " AND `parent_id` = " << CDS_ID_FS_ROOT
             << " AND `ref_id` IS NULL "
@@ -616,8 +619,8 @@ Ref<SQLRow> SQLStorage::_findObjectByPath(String fullpath)
     }
     else
     {
-        *qb << "SELECT f.* FROM `cds_object` p "
-            "JOIN `cds_object` f ON p.id=f.parent_id "
+        *qb << "SELECT f.* FROM " CDS_OBJECT_TABLE " p "
+            "JOIN " CDS_OBJECT_TABLE " f ON p.id=f.parent_id "
             "WHERE p.`location_hash` = " << stringHash(path)
             << " AND p.`location` = " << quote(path)
             << " AND f.`location_hash` = " << stringHash(filename)
@@ -665,7 +668,7 @@ int SQLStorage::ensurePathExistence(String path)
 int SQLStorage::createContainer(int parentID, String name, String path)
 {
     Ref<StringBuffer> qb(new StringBuffer());
-    *qb << "INSERT INTO `cds_object`"
+    *qb << "INSERT INTO " CDS_OBJECT_TABLE
         " (`parent_id`, `object_type`, `upnp_class`, `dc_title`,"
         " `location`, `location_hash`)"
         " VALUES ("
@@ -695,8 +698,8 @@ String SQLStorage::getRealLocation(int parentID, String location)
 {
     log_debug("parentID: %d; location %s\n", parentID, location.c_str());
     Ref<StringBuffer> qb(new StringBuffer());
-    *qb << "SELECT location FROM `cds_object` "
-        "WHERE id = " << parentID << " LIMIT 1";
+    *qb << "SELECT location FROM " CDS_OBJECT_TABLE
+        " WHERE id = " << parentID << " LIMIT 1";
     Ref<SQLResult> res = select(qb->toString());
     Ref<SQLRow> row = res->nextRow();
     return row->col(0) + "/" + location;
@@ -796,7 +799,7 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
 int SQLStorage::getTotalFiles()
 {
     Ref<StringBuffer> query(new StringBuffer());
-    *query << "SELECT COUNT(*) FROM cds_object WHERE "
+    *query << "SELECT COUNT(*) FROM " CDS_OBJECT_TABLE " WHERE "
            << "object_type != " << OBJECT_TYPE_CONTAINER;
            //<< " AND is_virtual = 0";
     Ref<SQLResult> res = select(query->toString());
@@ -812,7 +815,7 @@ void SQLStorage::incrementUpdateIDs(int *ids, int size)
 {
     if (size<1) return;
     Ref<StringBuffer> buf(new StringBuffer(size * sizeof(int)));
-    *buf << "UPDATE cds_object SET update_id = update_id + 1 WHERE ID IN(";
+    *buf << "UPDATE " CDS_OBJECT_TABLE " SET update_id = update_id + 1 WHERE ID IN(";
     *buf << ids[0];
     for (int i = 1; i < size; i++)
         *buf << ',' << ids[i];
@@ -867,7 +870,7 @@ Ref<Array<CdsObject> > SQLStorage::selectObjects(Ref<SelectParam> param)
 Ref<DBRHash<int> > SQLStorage::getObjects(int parentID)
 {
     Ref<StringBuffer> q(new StringBuffer());
-    *q << "SELECT id FROM cds_object WHERE parent_id = ";
+    *q << "SELECT id FROM " CDS_OBJECT_TABLE " WHERE parent_id = ";
     *q << parentID;
     Ref<SQLResult> res = select(q->toString());
     Ref<SQLRow> row;
@@ -893,7 +896,7 @@ void SQLStorage::removeObjects(zmm::Ref<DBRHash<int> > list)
     if (dbRemovesDeps)
     {
         Ref<StringBuffer> q(new StringBuffer());
-        *q << "DELETE FROM cds_object WHERE id IN (" << array[0];
+        *q << "DELETE FROM " CDS_OBJECT_TABLE " WHERE id IN (" << array[0];
         for (int i = 1; i < count; i++)
         {
             *q << "," << array[i];
@@ -912,14 +915,22 @@ void SQLStorage::removeObject(int objectID)
     if (dbRemovesDeps)
     {
         Ref<StringBuffer> q(new StringBuffer());
-        *q << "DELETE FROM cds_object WHERE id = " << objectID;
+        *q << "DELETE FROM " CDS_OBJECT_TABLE " WHERE id = " << objectID;
         this->exec(q->toString());
     }
     else
     {
+        Ref<StringBuffer> q(new StringBuffer());
+        while(false)
+        {
+            q->clear();
+            *q << "SELECT DISTINCT id FROM " CDS_OBJECT_TABLE
+                " WHERE parent_if IN (";
+        }
         throw _Exception(_("manual dependency remove not implemented!"));
     }
 }
+
 
 
 /* helpers for removeObject method */

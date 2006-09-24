@@ -28,12 +28,16 @@
 #include "hash.h"
 #include "sync.h"
 
+class SQLResult;
+
 class SQLRow : public zmm::Object
 {
 public:
-    SQLRow();
+    SQLRow(zmm::Ref<SQLResult> sqlResult);
     virtual ~SQLRow();
     virtual zmm::String col(int index) = 0;
+protected:
+    zmm::Ref<SQLResult> sqlResult;
 };
 
 class SQLResult : public zmm::Object

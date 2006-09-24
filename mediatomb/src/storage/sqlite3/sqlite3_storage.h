@@ -106,7 +106,7 @@ protected:
 class Sqlite3Row : public SQLRow
 {
 public:
-    Sqlite3Row(char **row);
+    Sqlite3Row(char **row, zmm::Ref<SQLResult> sqlResult);
     virtual zmm::String col(int index);
 protected:
     char **row;

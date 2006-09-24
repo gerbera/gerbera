@@ -338,7 +338,7 @@ Ref<SQLRow> Sqlite3Result::nextRow()
         cur_row++;
         if (cur_row <= nrow)
         {
-            Ref<Sqlite3Row> p (new Sqlite3Row(row));
+            Ref<Sqlite3Row> p (new Sqlite3Row(row, Ref<SQLResult>(this)));
             p->res = Ref<Sqlite3Result>(this);
             return RefCast(p, SQLRow);
         }
@@ -351,7 +351,7 @@ Ref<SQLRow> Sqlite3Result::nextRow()
 
 /* Sqlite3Row */
 
-Sqlite3Row::Sqlite3Row(char **row)
+Sqlite3Row::Sqlite3Row(char **row, Ref<SQLResult> sqlResult) : SQLRow(sqlResult)
 {
     this->row = row;
 }

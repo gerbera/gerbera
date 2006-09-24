@@ -539,7 +539,7 @@ Ref<SQLRow> MysqlResult::nextRow()
     mysql_row = mysql_fetch_row(mysql_res);
     if(mysql_row)
     {
-        return Ref<SQLRow>(new MysqlRow(mysql_row));
+        return Ref<SQLRow>(new MysqlRow(mysql_row, Ref<SQLResult>(this)));
     }
     nullRead = true;
     mysql_free_result(mysql_res);
@@ -550,7 +550,7 @@ Ref<SQLRow> MysqlResult::nextRow()
 
 /* MysqlRow */
 
-MysqlRow::MysqlRow(MYSQL_ROW mysql_row)
+MysqlRow::MysqlRow(MYSQL_ROW mysql_row, Ref<SQLResult> sqlResult) : SQLRow(sqlResult)
 {
     this->mysql_row = mysql_row;
 }
