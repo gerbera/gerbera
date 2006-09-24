@@ -366,12 +366,14 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
             log_error("Failed to stat %s\n"), path.c_str();
             continue;
         }
-        objectID = storage->isFileInDatabase(containerID, String(name));
-        if (objectID >= 0)
+        
+        if (S_ISREG(statbuf.st_mode))
         {
-            list->remove(objectID);
-            if (S_ISREG(statbuf.st_mode))
+            objectID = storage->isFileInDatabase(containerID, String(name));
+            if (objectID >= 0)
             {
+                list->remove(objectID);
+                
                 if (scanLevel == Full)
                 {
                     // check modification time and update file if chagned
@@ -389,30 +391,29 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
                     continue;
                 else
                     throw _Exception(_("Unsupported scan level!"));
-            }
-            else if (S_ISDIR(statbuf.st_mode))
-            {
-                log_debug("Directory handling not yet supported!\n");
+                
             }
             else
-                continue;
-
-        }
-        else
-        {
-            if (S_ISREG(statbuf.st_mode))
             {
                 // add file, not recursive, not async
                 addFile(path, false, false);
             }
-            else if (S_ISDIR(statbuf.st_mode))
+        }
+        else if (S_ISDIR(statbuf.st_mode))
+        {
+            objectID = storage->isFolderInDatabase(path);
+            if (objectID >= 0)
+            {
+                log_debug("Directory handling not yet supported!\n");
+            }
+            else
             {
                 // add directory, recursive, not async
                 addFile(path, true, false);
             }
         }
     }
-
+    
     storage->removeObjects(list);
     closedir(dir);
 }

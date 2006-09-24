@@ -69,7 +69,8 @@ public:
     virtual int getChildCount(int contId, bool containersOnly = false);
     
     virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param);
-                                                           
+                                         
+    virtual int isFolderInDatabase(zmm::String path);
     virtual int isFileInDatabase(int parentID, zmm::String filename);
    
     virtual zmm::Ref<DBRHash<int> > getObjects(int parentID);

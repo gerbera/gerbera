@@ -559,6 +559,23 @@ Ref<CdsObject> SQLStorage::findObjectByTitle(String title, int parentID)
 }
 */
 
+int SQLStorage::isFolderInDatabase(String path)
+{
+    Ref<StringBuffer> qb(new StringBuffer());
+    *qb << "SELECT `id` FROM " CDS_OBJECT_TABLE
+            " WHERE `location_hash` = " << stringHash(path)
+            << " AND `location` = " << quote(path)
+            << " AND `ref_id` IS NULL "
+            "LIMIT 1";
+     Ref<SQLResult> res = select(qb->toString());
+     if (res == nil)
+         return -2;
+     Ref<SQLRow> row = res->nextRow();
+     if (row == nil)
+         return -1;
+     return row->col(0).toInt();
+}
+
 int SQLStorage::isFileInDatabase(int parentID, String filename)
 {
     Ref<SQLRow> row = _findObjectByFilename(filename, parentID);
@@ -566,7 +583,6 @@ int SQLStorage::isFileInDatabase(int parentID, String filename)
         return -1;
     return row->col(_id).toInt();
 }
-
 
 Ref<SQLRow> SQLStorage::_findObjectByFilename(String filename, int parentID)
 {

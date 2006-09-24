@@ -142,6 +142,11 @@ public:
     virtual void removeObject(int objectID) = 0;
     virtual zmm::Ref<zmm::Array<CdsObject> > getObjectPath(int objectID);
     
+    /// \brief Determines if a folder given by it's full path is in the database
+    /// \param path the path of the folder
+    /// \return objectID if the folder exits, otherwise a negaive value
+    virtual int isFolderInDatabase(zmm::String path) = 0;
+    
     /// \brief Determines if a file given by it's name is in the database.
     /// \param parentID parent container
     /// \param filename name of the file as stored on disk
