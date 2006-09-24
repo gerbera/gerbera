@@ -149,7 +149,7 @@ public:
     virtual zmm::Ref<SQLResult> select(zmm::String query);
     virtual int exec(zmm::String query, bool getLastInsertId = false);
     virtual void shutdown();
-    
+    virtual void storeInternalSetting(zmm::String key, zmm::String value);
 protected:
     void reportError(zmm::String query, sqlite3 *db);
     

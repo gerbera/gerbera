@@ -166,6 +166,10 @@ public:
     /* accounting methods */
     virtual int getTotalFiles() { return 0; }
     
+    /* internal setting methods */
+    virtual zmm::String getInternalSetting(zmm::String key) = 0;
+    virtual void storeInternalSetting(zmm::String key, zmm::String value) = 0;
+    
     /* static methods */
     static zmm::Ref<Storage> getInstance();
     

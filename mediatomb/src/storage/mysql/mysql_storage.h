@@ -145,6 +145,7 @@ public:
     virtual zmm::Ref<SQLResult> select(zmm::String query);
     virtual int exec(zmm::String query, bool getLastInsertId = false);
     virtual void shutdown();
+    virtual void storeInternalSetting(zmm::String key, zmm::String value);
 protected:
     
     MYSQL db;

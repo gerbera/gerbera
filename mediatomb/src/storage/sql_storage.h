@@ -28,6 +28,9 @@
 #include "hash.h"
 #include "sync.h"
 
+#define CDS_OBJECT_TABLE            "`mt_cds_object`"
+#define INTERNAL_SETTINGS_TABLE     "`mt_internal_setting`"
+
 class SQLResult;
 
 class SQLRow : public zmm::Object
@@ -91,6 +94,10 @@ public:
     virtual int findObjectIDByPath(zmm::String fullpath);
     virtual void incrementUpdateIDs(int *ids, int size);
     virtual void incrementUIUpdateID(int id);
+    
+    virtual zmm::String getInternalSetting(zmm::String key);
+    virtual void storeInternalSetting(zmm::String key, zmm::String value) = 0;
+    
     virtual void shutdown() = 0;
     
 protected:

@@ -34,7 +34,6 @@ using namespace zmm;
 //#define REMOVE_ID_HASH_CAPACITY 3109
 
 //#define OBJECT_CACHE_CAPACITY 100003
-#define CDS_OBJECT_TABLE    "`cds_object`"
 
 enum
 {
@@ -43,7 +42,7 @@ enum
     _parent_id,
     _object_type,
     //_is_virtual,
-
+    
     _upnp_class,
     _dc_title,
     _is_restricted,
@@ -951,7 +950,23 @@ void SQLStorage::removeObject(int objectID)
     }
 }
 
-
+String SQLStorage::getInternalSetting(String key)
+{
+    Ref<StringBuffer> q(new StringBuffer());
+    *q << "SELECT `value` FROM " INTERNAL_SETTINGS_TABLE " WHERE `key` =  "
+        << quote(key) << " LIMIT 1";
+    Ref<SQLResult> res = select(q->toString());
+    if (res == nil)
+        return nil;
+    Ref<SQLRow> row = res->nextRow();
+    if (row == nil)
+        return nil;
+    return row->col(0);
+}
+/*
+void SQLStorage::storeInternalSetting(String key, String value)
+overwritten due to different SQL syntax
+*/
 
 /* helpers for removeObject method */
 /*

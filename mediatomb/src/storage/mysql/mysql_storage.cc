@@ -291,6 +291,16 @@ void MysqlStorage::shutdown()
     */
 }
 
+void MysqlStorage::storeInternalSetting(String key, String value)
+{
+    String quotedValue = quote(value);
+    Ref<StringBuffer> q(new StringBuffer());
+    *q << "INSERT INTO " INTERNAL_SETTINGS_TABLE " (`key`, `value`) "
+    "VALUES (" << quote(key) << ", "<< quotedValue << ") "
+    "ON DUPLICATE KEY UPDATE `value` = " << quotedValue;
+    this->exec(q->toString());
+}
+
 /*
 void *MysqlStorage::staticThreadProc(void *arg)
 {
@@ -558,6 +568,7 @@ String MysqlRow::col(int index)
 {
     return String(mysql_row[index]);
 }
+
 
 #endif // HAVE_MYSQL
 

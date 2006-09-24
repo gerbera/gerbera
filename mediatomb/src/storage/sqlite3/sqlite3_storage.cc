@@ -225,6 +225,14 @@ void Sqlite3Storage::shutdown()
     unlock();
 }
 
+void Sqlite3Storage::storeInternalSetting(String key, String value)
+{
+    Ref<StringBuffer> q(new StringBuffer());
+    *q << "INSERT OR REPLACE INTO " INTERNAL_SETTINGS_TABLE " (`key`, `value`) "
+    "VALUES (" << quote(key) << ", "<< quote(value) << ") ";
+    this->exec(q->toString());
+}
+
 
 /* SLTask */
 
@@ -359,6 +367,8 @@ String Sqlite3Row::col(int index)
 {
     return String(row[index]);
 }
+
+
 
 #endif // HAVE_SQlITE3
 
