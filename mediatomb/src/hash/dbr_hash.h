@@ -1,4 +1,4 @@
-/*  ref.h - this file is part of MediaTomb.
+/*  dbr_hash.h - this file is part of MediaTomb.
                                                                                 
     Copyright (C) 2005 Gena Batyan <bgeradz@deadlock.dhs.org>,
                        Sergey Bostandzhyan <jin@deadlock.dhs.org>
@@ -93,10 +93,14 @@ public:
         if (! search(key, &slot))
             return false;
         slot->key = emptyKey;
-        int array_slot = slot->array_slot; 
+        int array_slot = slot->array_slot;
+        if (this->count == 1 || this->count-1 == array_slot)
+        {
+            this->count--;
+            return true;
+        }
         data_array[array_slot] = data_array[--this->count];
         if (! search(data_array[array_slot], &slot))
-//            return false;
             throw zmm::Exception(_("DBR-Hash-Error: key in data_array not found in hashtable"));
         slot->array_slot = array_slot;
         return true;
