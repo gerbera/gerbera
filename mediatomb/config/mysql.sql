@@ -16,11 +16,11 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `cds_object`
+-- Table structure for table `mt_cds_object`
 --
 
-DROP TABLE IF EXISTS `cds_object`;
-CREATE TABLE `cds_object` (
+DROP TABLE IF EXISTS `mt_cds_object`;
+CREATE TABLE `mt_cds_object` (
   `id` int(11) NOT NULL auto_increment,
   `ref_id` int(11) default NULL,
   `parent_id` int(11) NOT NULL default '0',
@@ -41,41 +41,41 @@ CREATE TABLE `cds_object` (
   KEY `cds_object_ref_id` (`ref_id`),
   KEY `cds_object_parent_id` (`parent_id`),
   KEY `location_parent` (`location_hash`,`parent_id`),
-  CONSTRAINT `cds_object_ibfk_1` FOREIGN KEY (`ref_id`) REFERENCES `cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `cds_object_ibfk_2` FOREIGN KEY (`parent_id`) REFERENCES `cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `mt_cds_object_ibfk_1` FOREIGN KEY (`ref_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `mt_cds_object_ibfk_2` FOREIGN KEY (`parent_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table `cds_object`
+-- Dumping data for table `mt_cds_object`
 --
 
 
-/*!40000 ALTER TABLE `cds_object` DISABLE KEYS */;
-LOCK TABLES `cds_object` WRITE;
-INSERT INTO `cds_object` VALUES (-1,NULL,-1,0,NULL,NULL,1,NULL,NULL,NULL,NULL,NULL,0,0,NULL,NULL),(0,NULL,-1,1,'object.container','Root',1,NULL,NULL,NULL,NULL,NULL,0,0,NULL,NULL),(1,NULL,0,1,'object.container','PC Directory',1,NULL,NULL,NULL,NULL,NULL,0,0,NULL,NULL);
+/*!40000 ALTER TABLE `mt_cds_object` DISABLE KEYS */;
+LOCK TABLES `mt_cds_object` WRITE;
+INSERT INTO `mt_cds_object` VALUES (-1,NULL,-1,0,NULL,NULL,1,NULL,NULL,NULL,NULL,NULL,0,0,NULL,NULL),(0,NULL,-1,1,'object.container','Root',1,NULL,NULL,NULL,NULL,NULL,0,0,NULL,NULL),(1,NULL,0,1,'object.container','PC Directory',1,NULL,NULL,NULL,NULL,NULL,2,0,NULL,NULL);
 UNLOCK TABLES;
-/*!40000 ALTER TABLE `cds_object` ENABLE KEYS */;
+/*!40000 ALTER TABLE `mt_cds_object` ENABLE KEYS */;
 
 --
--- Table structure for table `mt_config`
+-- Table structure for table `mt_internal_setting`
 --
 
-DROP TABLE IF EXISTS `mt_config`;
-CREATE TABLE `mt_config` (
+DROP TABLE IF EXISTS `mt_internal_setting`;
+CREATE TABLE `mt_internal_setting` (
   `key` varchar(40) NOT NULL,
   `value` varchar(255) NOT NULL,
   PRIMARY KEY  (`key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table `mt_config`
+-- Dumping data for table `mt_internal_setting`
 --
 
 
-/*!40000 ALTER TABLE `mt_config` DISABLE KEYS */;
-LOCK TABLES `mt_config` WRITE;
+/*!40000 ALTER TABLE `mt_internal_setting` DISABLE KEYS */;
+LOCK TABLES `mt_internal_setting` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE `mt_config` ENABLE KEYS */;
+/*!40000 ALTER TABLE `mt_internal_setting` ENABLE KEYS */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
