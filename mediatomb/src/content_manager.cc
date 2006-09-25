@@ -78,9 +78,31 @@ ContentManager::ContentManager() : Object()
     ignore_unknown_extensions = 0;
 
     shutdownFlag = false;
-    
-    last_modified = 0;
-
+   
+    try 
+    {
+        Ref<Storage> storage = Storage::getInstance();
+        String lastmod = storage->getInternalSetting(_(SET_LAST_MODIFIED));
+        if (lastmod != nil)
+        {
+#if SIZEOF_TIME_T > 4
+            last_modified = lastmod.toLong();
+#else
+            last_modified = lastmod.toInt();
+#endif
+        }
+        else
+        {
+            log_debug("No internal setting for last modified\n");
+            last_modified = 0;
+        }
+    }
+    catch (Exception ex)
+    {
+        log_debug("Exception raised when asking for last modified flag!\n");
+        ex.printStackTrace();
+        last_modified = 0;
+    }
     acct = Ref<CMAccounting>(new CMAccounting());    
     taskQueue = Ref<Array<CMTask> >(new Array<CMTask>());    
 
@@ -145,7 +167,7 @@ ContentManager::~ContentManager()
         magic_close(ms);
 #endif
     pthread_mutex_destroy(&taskMutex);
-    pthread_mutex_destroy(&last_modified_mutex);
+//    pthread_mutex_destroy(&last_modified_mutex);
     pthread_cond_destroy(&taskCond);
 }
 
@@ -166,12 +188,15 @@ void ContentManager::init()
     {
         throw _Exception(_("Could not initialize taskCondition"));
     }
+
+#if 0
     ret = pthread_mutex_init(&last_modified_mutex, NULL);
     if (ret != 0)
     {
         throw _Exception(_("Could not initialize last_modified_mutex"));
     }
-   
+#endif
+
     pthread_attr_t attr;
     ret = pthread_attr_init(&attr);
     if (ret != 0)
@@ -197,12 +222,14 @@ void ContentManager::init()
     loadAccounting();
 }
 
+#if 0
 void ContentManager::setLastModifiedTime(time_t lm)
 {
     pthread_mutex_lock(&last_modified_mutex);
     this->last_modified = lm;
     pthread_mutex_unlock(&last_modified_mutex);
 }
+#endif
 
 void ContentManager::shutdown()
 {
@@ -327,95 +354,121 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
         throw _Exception(_("Object is not a container: rescan must be triggered on directories\n"));
     }
 
+    Ref<Stack<int> > containers(new Stack<int>(256, -666));
+
     log_debug("Rescanning container: %s, id=%d\n", 
                obj->getTitle().c_str(), containerID);
 
-    location = obj->getLocation();
-    if (!string_ok(location))
-        throw _Exception(_("Container has no location information!\n"));
+    log_debug("Starting with last modified time: %lld\n", last_modified);
 
-    DIR *dir = opendir(location.c_str());
-    if (!dir)
-    {
-        throw _Exception(_("Could not list directory ")+
-                location + " : " + strerror(errno));
-    }
-
-    Ref<DBRHash<int> > list =  storage->getObjects(containerID);
-
-    while ((dent = readdir(dir)) != NULL)
-    {
-        char *name = dent->d_name;
-        if (name[0] == '.')
-        {
-            if (name[1] == 0)
-            {
-                continue;
-            }
-            else if (name[1] == '.' && name[2] == 0)
-            {
-                continue;
-            }
-        }
-
-        path = location + "/" + name; 
-        log_debug("Checking name: %s\n", path.c_str());
-        ret = stat(path.c_str(), &statbuf);
-        if (ret != 0)
-        {
-            log_error("Failed to stat %s\n"), path.c_str();
-            continue;
-        }
-        
-        if (S_ISREG(statbuf.st_mode))
-        {
-            objectID = storage->isFileInDatabase(containerID, String(name));
-            if (objectID >= 0)
-            {
-                list->remove(objectID);
-                
-                if (scanLevel == Full)
-                {
-                    // check modification time and update file if chagned
-                    if (last_modified < statbuf.st_mtime)
-                    {
-                        // readd object - we have to do this in order to trigger
-                        // scripting
-                        removeObject(objectID, false);
-                        addFile(path, false, false);
-                        // update file and time variable
-                        last_modified = statbuf.st_mtime;
-                    }
-                }
-                else if (scanLevel == Basic)
-                    continue;
-                else
-                    throw _Exception(_("Unsupported scan level!"));
-                
-            }
-            else
-            {
-                // add file, not recursive, not async
-                addFile(path, false, false);
-            }
-        }
-        else if (S_ISDIR(statbuf.st_mode))
-        {
-            objectID = storage->isFolderInDatabase(path);
-            if (objectID >= 0)
-            {
-                log_debug("Directory handling not yet supported!\n");
-            }
-            else
-            {
-                // add directory, recursive, not async
-                addFile(path, true, false);
-            }
-        }
-    }
+    containers->push(containerID);
     
-    storage->removeObjects(list);
-    closedir(dir);
+    do
+    {
+        log_debug("looping with stack %d\n", containers->size());
+        objectID = containers->pop();
+        log_debug("stack after pop%d\n", containers->size());
+
+        obj = storage->loadObject(objectID);
+        location = obj->getLocation();
+        if (!string_ok(location))
+        {
+            continue;
+            //throw _Exception(_("Container has no location information!\n"));
+        }
+
+        DIR *dir = opendir(location.c_str());
+        if (!dir)
+        {
+            throw _Exception(_("Could not list directory ")+
+                    location + " : " + strerror(errno));
+        }
+
+        Ref<DBRHash<int> > list =  storage->getObjects(containerID);
+
+        while ((dent = readdir(dir)) != NULL)
+        {
+            char *name = dent->d_name;
+            if (name[0] == '.')
+            {
+                if (name[1] == 0)
+                {
+                    continue;
+                }
+                else if (name[1] == '.' && name[2] == 0)
+                {
+                    continue;
+                }
+            }
+
+            path = location + "/" + name; 
+            log_debug("Checking name: %s\n", path.c_str());
+            ret = stat(path.c_str(), &statbuf);
+            if (ret != 0)
+            {
+                log_error("Failed to stat %s\n"), path.c_str();
+                continue;
+            }
+
+            if (S_ISREG(statbuf.st_mode))
+            {
+                log_debug("%s is a regular file!\n", path.c_str());
+                objectID = storage->isFileInDatabase(containerID, String(name));
+                if (objectID >= 0)
+                {
+                    list->remove(objectID);
+
+                    if (scanLevel == FullScan)
+                    {
+                        log_debug("last modified: %lld\n", last_modified);
+                        log_debug("file last modification time: %lld\n", statbuf.st_mtime);
+
+                        // check modification time and update file if chagned
+                        if (last_modified < statbuf.st_mtime)
+                        {
+                            // readd object - we have to do this in order to trigger
+                            // scripting
+                            log_debug("removing object %d, %s\n", objectID, name);
+                            removeObject(objectID, false);
+                            addFile(path, false, false);
+                            // update file and time variable
+                            last_modified = statbuf.st_mtime;
+                        }
+                    }
+                    else if (scanLevel == BasicScan)
+                        continue;
+                    else
+                        throw _Exception(_("Unsupported scan level!"));
+
+                }
+                else
+                {
+                    // add file, not recursive, not async
+                    addFile(path, false, false);
+                }
+            }
+            else if (S_ISDIR(statbuf.st_mode))
+            {
+                log_debug("%s is a directory!\n", path.c_str());
+                objectID = storage->isFolderInDatabase(path);
+                if (objectID >= 0)
+                {
+                    list->remove(objectID);
+                    log_debug("adding %d to containers stack\n", objectID);
+                    containers->push(objectID);
+                }
+                else
+                {
+                    log_debug("Directory is not in database!\n");
+                    // add directory, recursive, not async
+                    addFile(path, true, false);
+                }
+            }
+        }
+
+        storage->removeObjects(list);
+        closedir(dir);
+    } while (!containers->isEmpty());
 }
 
 /* scans the given directory and adds everything recursively */

@@ -35,8 +35,8 @@
 
 typedef enum scan_level_t
 {
-    Basic, // file was added or removed from the directory
-    Full   // file was modified/added/removed
+    BasicScan, // file was added or removed from the directory
+    FullScan   // file was modified/added/removed
 };
 
 class ContentManager;
@@ -144,7 +144,7 @@ public:
     int loadAccounting(bool async=true);
     int addFile(zmm::String path, bool recursive=true, bool async=true);
     int removeObject(int objectID, bool async=true);
-    int rescanDirectory(int objectID, scan_level_t scanLevel = Basic, bool async=true);
+    int rescanDirectory(int objectID, scan_level_t scanLevel = BasicScan, bool async=true);
     
     /// \brief Updates an object in the database using the given parameters.
     /// \param objectID ID of the object to update

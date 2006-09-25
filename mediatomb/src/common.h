@@ -51,6 +51,9 @@
 #define CDS_ID_ROOT                     0
 #define CDS_ID_FS_ROOT                  1
 
+// internal setting keys
+#define SET_LAST_MODIFIED               "last_modified"
+
 // URL FORMATTING CONSTANTS
 #define URL_OBJECT_ID                   "object_id"
 #define URL_REQUEST_TYPE                "req_type"
@@ -71,6 +74,7 @@
 
 // SEPARATOR
 #define DIR_SEPARATOR                   '/'
+#define _DIR_SEPARATOR                  "/"
 
 // MIME TYPES FOR WEB UI
 #define MIMETYPE_XML                   "text/xml"

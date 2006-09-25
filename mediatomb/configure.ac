@@ -99,7 +99,7 @@ fi
 
 AC_CHECK_SIZEOF(off_t, 4)
 AC_CHECK_SIZEOF(size_t, 4)
-
+AC_CHECK_SIZEOF(time_t, 4)
 AC_CHECK_FUNCS(strtoll nl_langinfo,[],[])
 AC_CHECK_FUNCS(backtrace backtrace_symbols,[],[])
 # Checks for typedefs, structures, and compiler characteristics.
