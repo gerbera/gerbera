@@ -50,6 +50,7 @@ public:
     void setLength(int newLength);
     char *c_str();
     String toString();
+    String toString(int offset);
     void clear();
 
 protected:

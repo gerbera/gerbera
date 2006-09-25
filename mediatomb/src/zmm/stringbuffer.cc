@@ -27,6 +27,7 @@
 #include <string.h>
 #include "memory.h"
 #include "strings.h"
+#include "exceptions.h"
 
 using namespace zmm;
 
@@ -123,6 +124,14 @@ String StringBuffer::toString()
 {
     return String(data, len);
 }
+
+String StringBuffer::toString(int offset)
+{
+    if (offset >= len || offset < 0)
+        throw _Exception(_("illegal offset"));
+    return String(data + offset, len - offset);
+}
+
 
 void StringBuffer::clear()
 {

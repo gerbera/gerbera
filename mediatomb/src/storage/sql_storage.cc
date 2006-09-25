@@ -35,6 +35,8 @@ using namespace zmm;
 
 //#define OBJECT_CACHE_CAPACITY 100003
 
+#define MAX_REMOVE_SIZE 10000
+
 enum
 {
     _id = 0,
@@ -156,7 +158,7 @@ SQLStorage::~SQLStorage()
 
 String SQLStorage::getSelectQuery()
 {
-    return _("SELECT f.* FROM cds_object f");
+    return _("SELECT f.* FROM " CDS_OBJECT_TABLE " f");
     //return _("SELECT f.*,rf.resources FROM cds_object f LEFT JOIN cds_object rf ON f.ref_id = rf.id");
     
     /*
@@ -749,17 +751,7 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
     aux->decode(row->col(_auxdata));
     obj->setAuxData(aux);
     
-    /* first try to fetch object's own resources, if it is empty
-     * try to get them from the object pointed to by ref_id
-     */
     String resources_str = row->col(_resources);
-    
-    /*
-    if (resources_str == nil || resources_str.length() == 0)
-    {
-        resources_str = row->col(_ref_resources);
-    }
-    */
     
     //log_debug("resources: %s\n", resources_str.c_str());
     
@@ -904,6 +896,7 @@ Ref<DBRHash<int> > SQLStorage::getObjects(int parentID)
 }
 
 
+
 void SQLStorage::removeObjects(zmm::Ref<DBRHash<int> > list)
 {
     hash_data_array_t<int> hash_data_array;
@@ -912,21 +905,28 @@ void SQLStorage::removeObjects(zmm::Ref<DBRHash<int> > list)
     int *array = hash_data_array.data;
     if (count <= 0) return;
     
+    Ref<StringBuffer> ids(new StringBuffer());
+    for (int i = 0; i < count; i++)
+    {
+        * ids << "," << array[i];
+    }
+    
     if (dbRemovesDeps)
     {
-        Ref<StringBuffer> q(new StringBuffer());
-        *q << "DELETE FROM " CDS_OBJECT_TABLE " WHERE id IN (" << array[0];
-        for (int i = 1; i < count; i++)
-        {
-            *q << "," << array[i];
-        }
-        *q << ")";
-        this->exec(q->toString());
+        _removeObjects(ids->toString(1));
     }
     else
     {
-        throw _Exception(_("manual dependency remove not implemented!"));
+        _recursiveRemove(ids->toString(1));
     }
+}
+
+void SQLStorage::_removeObjects(String objectIDs)
+{
+    Ref<StringBuffer> q(new StringBuffer());
+    *q << "DELETE FROM " CDS_OBJECT_TABLE " WHERE id IN (" << objectIDs
+        << ")";
+    this->exec(q->toString());
 }
 
 void SQLStorage::removeObject(int objectID)
@@ -939,16 +939,41 @@ void SQLStorage::removeObject(int objectID)
     }
     else
     {
-        Ref<StringBuffer> q(new StringBuffer());
-        while(false)
-        {
-            q->clear();
-            *q << "SELECT DISTINCT id FROM " CDS_OBJECT_TABLE
-                " WHERE parent_id IN (";
-        }
-        throw _Exception(_("manual dependency remove not implemented!"));
+        _recursiveRemove(String::from(objectID));
     }
 }
+
+void SQLStorage::_recursiveRemove(String objectIDs)
+{
+    Ref<StringBuffer> q(new StringBuffer());
+    Ref<StringBuffer> remove(new StringBuffer());
+    Ref<StringBuffer> recurse(new StringBuffer());
+    *recurse << "," << objectIDs;
+    *remove << "," << objectIDs;
+    while(recurse->length() != 0)
+    {
+        q->clear();
+        *q << "SELECT DISTINCT id FROM " CDS_OBJECT_TABLE
+            " WHERE parent_id IN (" << recurse->toString(1) << ")";
+        Ref<SQLResult> res = select(q->toString());
+        Ref<SQLRow> row;
+        recurse->clear();
+        while ((row = res->nextRow()) != nil)
+        {
+            *recurse << "," << row->col(0);
+            *remove << "," << row->col(0);
+        }
+        if (remove->length() > MAX_REMOVE_SIZE)
+        {
+            _removeObjects(remove->toString(1));
+            remove->clear();
+        }
+    }
+    
+    if (remove->length() > 0)
+        _removeObjects(remove->toString(1));
+}
+
 
 String SQLStorage::getInternalSetting(String key)
 {

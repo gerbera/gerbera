@@ -118,6 +118,10 @@ protected:
     /* helper for addObject and updateObject */
     zmm::Ref<Dictionary> _addUpdateObject(zmm::Ref<CdsObject> obj, bool isUpdate);
     
+    /* helper for removeObject(s) */
+    void _removeObjects(zmm::String objectIDs);
+    void _recursiveRemove(zmm::String objectIDs);
+    
     /*
     zmm::String selectQueryBasic;
     zmm::String selectQueryExtended;
