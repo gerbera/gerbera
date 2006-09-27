@@ -336,7 +336,6 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
 {
     log_debug("start\n");
     int ret;
-    int objectID;
     struct dirent *dent;
     struct stat statbuf;
     String location;
@@ -366,10 +365,10 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
     do
     {
         log_debug("looping with stack %d\n", containers->size());
-        objectID = containers->pop();
+        containerID = containers->pop();
         log_debug("stack after pop%d\n", containers->size());
 
-        obj = storage->loadObject(objectID);
+        obj = storage->loadObject(containerID);
         location = obj->getLocation();
         if (!string_ok(location))
         {
@@ -384,7 +383,8 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
                     location + " : " + strerror(errno));
         }
 
-        Ref<DBRHash<int> > list =  storage->getObjects(containerID);
+        Ref<DBRHash<int> > list = storage->getObjects(containerID);
+        log_debug("list: %s\n", list->debugGetAll().c_str());
 
         while ((dent = readdir(dir)) != NULL)
         {
@@ -412,11 +412,12 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
 
             if (S_ISREG(statbuf.st_mode))
             {
-                log_debug("%s is a regular file!\n", path.c_str());
-                objectID = storage->isFileInDatabase(containerID, String(name));
+                int objectID = storage->isFileInDatabase(containerID, String(name));
+                log_debug("%s is a regular file! - objectID: %d\n", path.c_str(), objectID);
                 if (objectID >= 0)
                 {
                     list->remove(objectID);
+                    log_debug("removing %d -> list: %s\n", objectID, list->debugGetAll().c_str());
 
                     if (scanLevel == FullScan)
                     {
@@ -450,10 +451,11 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
             else if (S_ISDIR(statbuf.st_mode))
             {
                 log_debug("%s is a directory!\n", path.c_str());
-                objectID = storage->isFolderInDatabase(path);
+                int objectID = storage->isFolderInDatabase(path);
                 if (objectID >= 0)
                 {
                     list->remove(objectID);
+                    log_debug("removing %d -> list: %s\n", objectID, list->debugGetAll().c_str());
                     log_debug("adding %d to containers stack\n", objectID);
                     containers->push(objectID);
                 }
@@ -465,7 +467,7 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
                 }
             }
         }
-
+        log_debug("removing... list: %s\n", list->debugGetAll().c_str());
         storage->removeObjects(list);
         closedir(dir);
     } while (!containers->isEmpty());

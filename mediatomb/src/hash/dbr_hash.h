@@ -131,6 +131,19 @@ public:
         hash_data_array->data = data_array;
     }
     
+    zmm::String debugGetAll()
+    {
+        zmm::Ref<zmm::StringBuffer> buf(new zmm::StringBuffer());
+        if (this->count == 0)
+            return _("");
+        *buf << data_array[0];
+        for (int i = 1; i < this->count; i++)
+        {
+            *buf << ", " << data_array[i];
+        }
+        return buf->toString();
+    }
+    
     /*
      * is this really needed? seems so make no sense...
     inline void put(KT key, hash_slot_t destSlot)
