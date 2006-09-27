@@ -22,102 +22,38 @@
 #define __ZMMF_OBJECT_QUEUE_H__
 
 #include "zmm/zmm.h"
+#include "base_queue.h"
 
 namespace zmm
 {
     /// \brief a simple stack for a base type. NOT thread safe!
     template <class T>
-    class ObjectQueue : public Object
+    class ObjectQueue : public BaseQueue<Object *>
     {
     public:
-        inline ObjectQueue(int initialCapacity) : Object()
+        ObjectQueue(int initialCapacity) : BaseQueue<Object *>(initialCapacity, NULL)
         {
-            capacity = initialCapacity;
-            queueEnd = 0;
-            queueBegin = 0;
-            overlap = false;
-            data = (Object **)MALLOC(capacity * sizeof(Object *));
         }
         
-        inline ~ObjectQueue()
+        ~ObjectQueue()
         {
-            FREE(this->data);
         }
-        
-        inline int getCapacity()
-        {
-            return capacity;
-        }
-        
-        inline int size()
-        {
-            if (overlap) return capacity;
-            if (queueBegin < queueEnd)
-                return queueEnd - queueBegin;
-            return capacity - queueEnd + queueBegin;
-        }
-        
-        inline bool isEmpty()
-        {
-            return (! overlap && queueEnd == queueBegin);
-        }
-        
-        void resize(int requiredSize)
-        {
-            if(requiredSize > capacity)
-            {
-                int count = size();
-                int oldCapacity = capacity;
-                capacity = count + (count / 2);
-                if(requiredSize > capacity)
-                    capacity = requiredSize;
-                data = (Object **)REALLOC(data, capacity * sizeof(Object *));
-                log_debug("resizing %d -> %d\n", oldCapacity, capacity);
-                if ((overlap && (queueEnd != 0)) || queueBegin > queueEnd)
-                {
-                    int moveAmount = oldCapacity - queueBegin;
-                    int newQueueBegin = capacity - moveAmount;
-                    memmove(data + newQueueBegin, data + queueBegin, moveAmount * sizeof(T));
-                    queueBegin = newQueueBegin;
-                }
-                else if (queueEnd == 0)
-                    queueEnd = oldCapacity;
-                overlap = false;
-            }
-        }
-        
         inline void enqueue(Ref<T> element)
         {
-            if (overlap)
-                resize(size() + 1);
             Object *obj = element.getPtr();
             obj->retain();
-            data[queueEnd++] = obj;
-            if (queueEnd == capacity)
-                queueEnd = 0;
-            if (queueEnd == queueBegin)
-                overlap = true;
+            BaseQueue<Object *>::enqueue(obj);
         }
         
         inline Ref<T> dequeue()
         {
-            if (isEmpty())
+            Object *obj = BaseQueue<Object *>::dequeue();
+            if (obj == NULL)
                 return nil;
-            Object *obj = data[queueBegin++];
             Ref<T> ret((T *)obj);
-            ret->release();
-            overlap = false;
-            if (queueBegin == capacity)
-                queueBegin = 0;
+            obj->release();
             return ret;
         }
-        
-    protected:
-        Object **data;
-        int capacity;
-        int queueBegin;
-        int queueEnd;
-        bool overlap;
     };
 }
 

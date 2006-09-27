@@ -31,7 +31,7 @@ namespace zmm
     class Stack : public Object
     {
     public:
-        inline Stack(int initialCapacity, T emptyType) : Object()
+        Stack(int initialCapacity, T emptyType) : Object()
         {
             capacity = initialCapacity;
             this->emptyType = emptyType;
@@ -39,7 +39,7 @@ namespace zmm
             data = (T *)MALLOC(capacity * sizeof(T));
         }
         
-        inline ~Stack()
+        ~Stack()
         {
             FREE(this->data);
         }
