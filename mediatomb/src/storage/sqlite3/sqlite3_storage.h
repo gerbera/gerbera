@@ -156,7 +156,7 @@ protected:
     static void *staticThreadProc(void *arg);
     void threadProc();
     
-    int addTask(zmm::Ref<SLTask> task);
+    void addTask(zmm::Ref<SLTask> task);
     
     pthread_t sqliteThread;
     pthread_cond_t sqliteCond;
@@ -166,7 +166,7 @@ protected:
     bool shutdownFlag;
     
     /// \brief the tasks to be done by the sqlite3 thread
-    zmm::Ref<zmm::Array<SLTask> > taskQueue;
+    zmm::Ref<zmm::ObjectQueue<SLTask> > taskQueue;
     
     void mutexCondInit(pthread_mutex_t *mutex, pthread_cond_t *cond);
     void waitForTask(zmm::Ref<SLTask> task, pthread_mutex_t *mutex, pthread_cond_t *cond);

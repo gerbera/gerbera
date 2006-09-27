@@ -37,7 +37,8 @@
 #include "string_converter.h"
 #include "metadata_handler.h"
 
-#define DEFAULT_DIR_CACHE_CAPACITY 10 
+#define DEFAULT_DIR_CACHE_CAPACITY  10
+#define CM_INITIAL_QUEUE_SIZE       20
 
 #ifdef HAVE_MAGIC
 // for older versions of filemagic
@@ -90,6 +91,7 @@ ContentManager::ContentManager() : Object()
 #else
             last_modified = lastmod.toInt();
 #endif
+            log_debug("Loaded last modified: %d\n", last_modified);
         }
         else
         {
@@ -104,7 +106,7 @@ ContentManager::ContentManager() : Object()
         last_modified = 0;
     }
     acct = Ref<CMAccounting>(new CMAccounting());    
-    taskQueue = Ref<Array<CMTask> >(new Array<CMTask>());    
+    taskQueue = Ref<ObjectQueue<CMTask> >(new ObjectQueue<CMTask>(CM_INITIAL_QUEUE_SIZE));    
 
     Ref<ConfigManager> cm = ConfigManager::getInstance();
     Ref<Element> mapEl;  
@@ -336,6 +338,7 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
 {
     log_debug("start\n");
     int ret;
+    int last_modfied_current_max = last_modified;
     struct dirent *dent;
     struct stat statbuf;
     String location;
@@ -432,8 +435,11 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
                             log_debug("removing object %d, %s\n", objectID, name);
                             removeObject(objectID, false);
                             addFile(path, false, false);
-                            // update file and time variable
-                            last_modified = statbuf.st_mtime;
+                            // update time variable
+                            if (statbuf.st_mtime > last_modfied_current_max)
+                            {
+                                last_modfied_current_max = statbuf.st_mtime;
+                            }
                         }
                     }
                     else if (scanLevel == BasicScan)
@@ -471,6 +477,8 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
         storage->removeObjects(list);
         closedir(dir);
     } while (!containers->isEmpty());
+    last_modified = last_modfied_current_max;
+    storage->storeInternalSetting(_(SET_LAST_MODIFIED), String::from(last_modified));
 }
 
 /* scans the given directory and adds everything recursively */
@@ -1011,18 +1019,16 @@ void ContentManager::threadProc()
     {
         lock();
         currentTask = nil;
-        if(taskQueue->size() == 0)
+        if((task = taskQueue->dequeue()) == nil)
         {
-            /* if nothing to do, sleep until awakened */        
-            pthread_cond_wait(&taskCond, &taskMutex);            
+            /* if nothing to do, sleep until awakened */
+            pthread_cond_wait(&taskCond, &taskMutex);
             unlock();
             continue;
         }
         else
         {
-            task = taskQueue->get(0);
-            taskQueue->remove(0, 1);
-            currentTask = task; 
+            currentTask = task;
         }
         unlock();
 
@@ -1065,7 +1071,7 @@ int ContentManager::addTask(zmm::Ref<CMTask> task)
     int size = taskQueue->size();
     if (size >= 1)
         ret = true;
-    taskQueue->append(task);
+    taskQueue->enqueue(task);
     signal();
     unlock();
     return ret;

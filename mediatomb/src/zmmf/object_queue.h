@@ -1,4 +1,4 @@
-/*  stack.h - this file is part of MediaTomb.
+/*  object_queue.h - this file is part of MediaTomb.
                                                                                 
     Copyright (C) 2005 Gena Batyan <bgeradz@deadlock.dhs.org>,
                        Sergey Bostandzhyan <jin@deadlock.dhs.org>
@@ -18,29 +18,28 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef __ZMMF_QUEUE_H__
-#define __ZMMF_QUEUE_H__
+#ifndef __ZMMF_OBJECT_QUEUE_H__
+#define __ZMMF_OBJECT_QUEUE_H__
 
 #include "zmm/zmm.h"
 
 namespace zmm
 {
     /// \brief a simple stack for a base type. NOT thread safe!
-    template <typename T>
-    class Queue : public Object
+    template <class T>
+    class ObjectQueue : public Object
     {
     public:
-        inline Queue(int initialCapacity, T emptyType) : Object()
+        inline ObjectQueue(int initialCapacity) : Object()
         {
             capacity = initialCapacity;
-            this->emptyType = emptyType;
             queueEnd = 0;
             queueBegin = 0;
             overlap = false;
-            data = (T *)MALLOC(capacity * sizeof(T));
+            data = (Object **)MALLOC(capacity * sizeof(Object *));
         }
         
-        inline ~Queue()
+        inline ~ObjectQueue()
         {
             FREE(this->data);
         }
@@ -72,7 +71,7 @@ namespace zmm
                 capacity = count + (count / 2);
                 if(requiredSize > capacity)
                     capacity = requiredSize;
-                data = (T *)REALLOC(data, capacity * sizeof(T));
+                data = (Object **)REALLOC(data, capacity * sizeof(Object *));
                 log_debug("resizing %d -> %d\n", oldCapacity, capacity);
                 if ((overlap && (queueEnd != 0)) || queueBegin > queueEnd)
                 {
@@ -87,22 +86,26 @@ namespace zmm
             }
         }
         
-        inline void enqueue(T element)
+        inline void enqueue(Ref<T> element)
         {
             if (overlap)
                 resize(size() + 1);
-            data[queueEnd++] = element;
+            Object *obj = element.getPtr();
+            obj->retain();
+            data[queueEnd++] = obj;
             if (queueEnd == capacity)
                 queueEnd = 0;
             if (queueEnd == queueBegin)
                 overlap = true;
         }
         
-        inline T dequeue()
+        inline Ref<T> dequeue()
         {
             if (isEmpty())
-                return emptyType;
-            T ret = data[queueBegin++];
+                return nil;
+            Object *obj = data[queueBegin++];
+            Ref<T> ret((T *)obj);
+            ret->release();
             overlap = false;
             if (queueBegin == capacity)
                 queueBegin = 0;
@@ -110,8 +113,7 @@ namespace zmm
         }
         
     protected:
-        T *data;
-        T emptyType;
+        Object **data;
         int capacity;
         int queueBegin;
         int queueEnd;
@@ -119,5 +121,5 @@ namespace zmm
     };
 }
 
-#endif // __ZMMF_QUEUE_H__
+#endif // __ZMMF_OBJECT_QUEUE_H__
 

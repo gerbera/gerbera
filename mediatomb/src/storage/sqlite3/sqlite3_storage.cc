@@ -29,6 +29,8 @@
 #include "common.h"
 #include "config_manager.h"
 
+#define SL3_INITITAL_QUEUE_SIZE 20
+
 using namespace zmm;
 using namespace mxml;
 
@@ -54,7 +56,7 @@ void Sqlite3Storage::init()
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
     
-    taskQueue = Ref<Array<SLTask> >(new Array<SLTask>());
+    taskQueue = Ref<ObjectQueue<SLTask> >(new ObjectQueue<SLTask>(SL3_INITITAL_QUEUE_SIZE));
     
     ret = pthread_create(
         &sqliteThread,
@@ -163,17 +165,12 @@ void Sqlite3Storage::threadProc()
     while(! shutdownFlag)
     {
         lock();
-        if(taskQueue->size() == 0)
+        if((task = taskQueue->dequeue()) == nil)
         {
             /* if nothing to do, sleep until awakened */
             pthread_cond_wait(&sqliteCond, &sqliteMutex);
             unlock();
             continue;
-        }
-        else
-        {
-            task = taskQueue->get(0);
-            taskQueue->remove(0, 1);
         }
         unlock();
         
@@ -204,17 +201,19 @@ void Sqlite3Storage::signal()
     pthread_cond_signal(&sqliteCond);
 }
 
-int Sqlite3Storage::addTask(zmm::Ref<SLTask> task)
+void Sqlite3Storage::addTask(zmm::Ref<SLTask> task)
 {
-    int ret = false;
+    //int ret = false;
     lock();
+    /*
     int size = taskQueue->size();
     if (size >= 1)
         ret = true;
-    taskQueue->append(task);
+    */
+    taskQueue->enqueue(task);
     signal();
     unlock();
-    return ret;
+    //return ret;
 }
 
 void Sqlite3Storage::shutdown()

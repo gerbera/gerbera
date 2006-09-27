@@ -26,7 +26,8 @@
 #include "array.h"
 #include "stringtokenizer.h"
 #include "stack.h"
-#include "queue.h"
+#include "base_queue.h"
+#include "object_queue.h"
 
 #endif // __ZMMF_H__
 

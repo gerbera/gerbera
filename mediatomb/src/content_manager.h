@@ -183,7 +183,7 @@ protected:
     void initScripting();
     void destroyScripting();
 #endif
-    pthread_mutex_t last_modified_mutex;
+    //pthread_mutex_t last_modified_mutex;
     time_t last_modified;
 
     int ignore_unknown_extensions;
@@ -227,7 +227,7 @@ protected:
 
     bool shutdownFlag;
     
-    zmm::Ref<zmm::Array<CMTask> > taskQueue;
+    zmm::Ref<zmm::ObjectQueue<CMTask> > taskQueue;
     zmm::Ref<CMTask> currentTask;
     
     friend void CMAddFileTask::run();
