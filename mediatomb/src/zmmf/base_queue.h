@@ -30,7 +30,7 @@ namespace zmm
     class BaseQueue : public Object
     {
     public:
-        inline BaseQueue(int initialCapacity, T emptyType) : Object()
+        BaseQueue(int initialCapacity, T emptyType) : Object()
         {
             capacity = initialCapacity;
             this->emptyType = emptyType;
@@ -40,7 +40,7 @@ namespace zmm
             data = (T *)MALLOC(capacity * sizeof(T));
         }
         
-        inline ~BaseQueue()
+        ~BaseQueue()
         {
             FREE(this->data);
         }

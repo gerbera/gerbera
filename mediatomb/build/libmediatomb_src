@@ -152,10 +152,11 @@ libmediatomb_a_SOURCES = \
 ../src/zmmf/array.cc \
 ../src/zmmf/array.h \
 ../src/zmmf/base_queue.h \
+../src/zmmf/base_stack.h \
 ../src/zmmf/exception.cc \
 ../src/zmmf/exception.h \
 ../src/zmmf/object_queue.h \
-../src/zmmf/stack.h \
+../src/zmmf/object_stack.h \
 ../src/zmmf/stringtokenizer.cc \
 ../src/zmmf/stringtokenizer.h \
 ../src/zmmf/zmmf.h \

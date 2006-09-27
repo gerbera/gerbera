@@ -25,7 +25,8 @@
 #include "exception.h"
 #include "array.h"
 #include "stringtokenizer.h"
-#include "stack.h"
+#include "base_stack.h"
+#include "object_stack.h"
 #include "base_queue.h"
 #include "object_queue.h"
 

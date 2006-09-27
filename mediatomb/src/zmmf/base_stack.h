@@ -1,4 +1,4 @@
-/*  stack.h - this file is part of MediaTomb.
+/*  base_stack.h - this file is part of MediaTomb.
                                                                                 
     Copyright (C) 2005 Gena Batyan <bgeradz@deadlock.dhs.org>,
                        Sergey Bostandzhyan <jin@deadlock.dhs.org>
@@ -18,8 +18,8 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef __ZMMF_STACK_H__
-#define __ZMMF_STACK_H__
+#ifndef __ZMMF_BASE_STACK_H__
+#define __ZMMF_BASE_STACK_H__
 
 #include "zmm/zmm.h"
 #include "memory.h"
@@ -28,10 +28,10 @@ namespace zmm
 {
     
     template <typename T>
-    class Stack : public Object
+    class BaseStack : public Object
     {
     public:
-        Stack(int initialCapacity, T emptyType) : Object()
+        BaseStack(int initialCapacity, T emptyType) : Object()
         {
             capacity = initialCapacity;
             this->emptyType = emptyType;
@@ -39,7 +39,7 @@ namespace zmm
             data = (T *)MALLOC(capacity * sizeof(T));
         }
         
-        ~Stack()
+        ~BaseStack()
         {
             FREE(this->data);
         }
@@ -59,12 +59,11 @@ namespace zmm
             return (count == 0);
         }
         
-        inline bool push(T element)
+        inline void push(T element)
         {
             if (count == capacity)
                 resize(count + 1);
             data[count++] = element;
-            return true;
         }
         
         void resize(int requiredSize)
@@ -94,5 +93,5 @@ namespace zmm
     };
 }
 
-#endif // __ZMMF_STACK_H__
+#endif // __ZMMF_BASE_STACK_H__
 

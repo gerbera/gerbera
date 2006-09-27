@@ -37,7 +37,13 @@ namespace zmm
         
         ~ObjectQueue()
         {
+            Object *obj;
+            while(NULL != (obj = BaseQueue<Object *>::dequeue()))
+            {
+                obj->release();
+            }
         }
+        
         inline void enqueue(Ref<T> element)
         {
             Object *obj = element.getPtr();

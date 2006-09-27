@@ -356,7 +356,7 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
         throw _Exception(_("Object is not a container: rescan must be triggered on directories\n"));
     }
 
-    Ref<Stack<int> > containers(new Stack<int>(256, -666));
+    Ref<BaseStack<int> > containers(new BaseStack<int>(256, -666));
 
     log_debug("Rescanning container: %s, id=%d\n", 
                obj->getTitle().c_str(), containerID);
