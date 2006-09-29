@@ -220,10 +220,10 @@ void Server::upnp_init(String ip, int port)
     }
 
     // initializing UpdateManager
-    UpdateManager::getInstance()->init();
+    UpdateManager::getInstance();
     
     // initializing ContentManager
-    ContentManager::getInstance()->init();
+    ContentManager::getInstance();
    
     config->writeBookmark(ip, String::from(port));
     

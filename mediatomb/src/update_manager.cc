@@ -47,8 +47,6 @@
 
 using namespace zmm;
 
-Mutex UpdateManager::mutex = Mutex(false);
-
 static long start_seconds;
 
 void init_start_seconds()
@@ -73,8 +71,6 @@ inline void millisToTimespec(long millis, struct timespec *spec)
     spec->tv_sec = start_seconds + millis / 1000;
     spec->tv_nsec = (millis % 1000) * 1000000;
 }
-
-static Ref<UpdateManager> inst;
 
 UpdateManager::UpdateManager() : Object()
 {
@@ -195,22 +191,32 @@ void UpdateManager::flushUpdates(int flushFlag)
     }
     UNLOCK();
 }
+
+Mutex UpdateManager::getInstanceMutex = Mutex(false);
+Ref<UpdateManager> UpdateManager::instance = nil;
+
 Ref<UpdateManager> UpdateManager::getInstance()
 {
-    if (inst == nil)
+    if (instance == nil)
     {
-        mutex.lock();
-        if (inst == nil)
+        getInstanceMutex.lock();
+        if (instance == nil)
         {
-            init_start_seconds();
-            inst = Ref<UpdateManager>(new UpdateManager());
-            ///\todo go through all classes and decide how we want to handle 
-            ///class init functions - automatically in getIntsance or by manual calls
-//            inst->init();
+            try
+            {
+                init_start_seconds();
+                instance = Ref<UpdateManager>(new UpdateManager());
+                instance->init();
+            }
+            catch (Exception e)
+            {
+                getInstanceMutex.unlock();
+                throw e;
+            }
         }
-        mutex.unlock();
+        getInstanceMutex.unlock();
     }
-    return inst;
+    return instance;
 }
 
 /* private stuff */

@@ -72,8 +72,6 @@ static String get_filename(String path)
 
 /***************************************************************/
 
-static Ref<ContentManager> instance;
-
 ContentManager::ContentManager() : Object()
 {  
     ignore_unknown_extensions = 0;
@@ -244,12 +242,28 @@ void ContentManager::shutdown()
 //    pthread_join(updateThread, NULL);
 }
 
+Ref<ContentManager> ContentManager::instance = nil;
+Mutex ContentManager::getInstanceMutex = Mutex();
 
 Ref<ContentManager> ContentManager::getInstance()
 {
     if (instance == nil)
     {
-        instance = Ref<ContentManager>(new ContentManager());
+        getInstanceMutex.lock();
+        if (instance == nil)
+        {
+            try
+            {
+                instance = Ref<ContentManager>(new ContentManager());
+                instance->init();
+            }
+            catch (Exception e)
+            {
+                getInstanceMutex.unlock();
+                throw e;
+            }
+        }
+        getInstanceMutex.unlock();
     }
     return instance;
 }

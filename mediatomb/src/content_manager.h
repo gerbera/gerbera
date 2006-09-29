@@ -130,7 +130,6 @@ class ContentManager : public zmm::Object
 public:
     ContentManager();
     virtual ~ContentManager();
-    void init();
     void shutdown();
 
     static zmm::Ref<ContentManager> getInstance();
@@ -179,6 +178,12 @@ public:
 
 
 protected:
+    
+    static Mutex getInstanceMutex;
+    static zmm::Ref<ContentManager> instance;
+    
+    void init();
+    
 #ifdef HAVE_JS
     void initScripting();
     void destroyScripting();

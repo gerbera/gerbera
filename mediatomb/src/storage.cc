@@ -41,8 +41,6 @@ Storage::Storage() : Object()
 {
 }
 
-
-
 static Ref<Storage> create_primary_inst()
 {
     String type;

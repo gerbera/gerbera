@@ -37,7 +37,7 @@ class UpdateManager : public zmm::Object
 public:
     UpdateManager();
     virtual ~UpdateManager();
-    void init();
+    
     void shutdown();
 
     void containerChanged(int objectID);
@@ -47,6 +47,10 @@ public:
     static zmm::Ref<UpdateManager> getInstance();
     
 protected:
+    void init();
+    static zmm::Ref<UpdateManager> instance;
+    static Mutex getInstanceMutex;
+    
     bool lazyMode;
     int *objectIDs;
     int objectIDcount;
@@ -66,8 +70,6 @@ protected:
     
     void sendUpdates();
     bool haveUpdates();
-
-    static Mutex mutex;
 };
 
 
