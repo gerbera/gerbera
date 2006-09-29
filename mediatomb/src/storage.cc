@@ -83,7 +83,17 @@ Ref<Storage> Storage::getInstance()
     {
         mutex.lock();
         if (primary_inst == nil)
-            primary_inst = create_primary_inst();
+        {
+            try
+            {
+                primary_inst = create_primary_inst();
+            }
+            catch (Exception e)
+            {
+                mutex.unlock();
+                throw e;
+            }
+        }
         mutex.unlock();
     }
     return primary_inst;
