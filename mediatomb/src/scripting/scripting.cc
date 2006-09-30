@@ -352,17 +352,13 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         Ref<CdsObject> cds_obj = jsObject2cdsObject(cx, js_cds_obj);
 
         Ref<Storage> storage = Storage::getInstance();
-        Ref<CdsObject> db_obj;
         //db_obj = storage->findObjectByFilename(cds_obj->getTitle(),
         //                                                   cds_obj->getParentID());
-        if (db_obj == nil)
+        id = storage->isFileInDatabase(cds_obj->getParentID(), cds_obj->getTitle());
+        if (id < 0)
         {
             ContentManager::getInstance()->addObject(cds_obj);
             id = cds_obj->getID();
-        }
-        else
-        {
-            id = db_obj->getID();
         }
 
         /* setting object ID as return value */
