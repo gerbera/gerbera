@@ -257,7 +257,7 @@ int MysqlStorage::exec(String query, bool getLastInsertId)
     e->printStackTrace();
     delete e;
     */
-    
+
     int res;
     mutex->lock();
     res = mysql_real_query(&db, query.c_str(), query.length());

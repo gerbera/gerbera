@@ -352,7 +352,7 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
 {
     log_debug("start\n");
     int ret;
-    int last_modfied_current_max = last_modified;
+    time_t last_modfied_current_max = last_modified;
     struct dirent *dent;
     struct stat statbuf;
     String location;
@@ -730,6 +730,22 @@ void ContentManager::addObject(zmm::Ref<CdsObject> obj)
         ContentManager::getInstance()->getAccounting()->totalFiles++;
     
     um->flushUpdates();
+}
+
+int ContentManager::addContainerChain(String chain)
+{
+    Ref<Storage> storage = Storage::getInstance();
+    int updateID;
+    int containerID;
+    
+    log_debug("received chain: %s\n", chain.c_str());
+    storage->addContainerChain(chain, &containerID, &updateID);
+    if (updateID != INVALID_OBJECT_ID)
+    {
+        UpdateManager::getInstance()->containerChanged(updateID);
+    }
+
+    return containerID;
 }
 
 void ContentManager::updateObject(Ref<CdsObject> obj)

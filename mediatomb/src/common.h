@@ -147,6 +147,8 @@
 #define DEFAULT_MYSQL_DB                "mediatomb"
 #define DEFAULT_MYSQL_USER              "mediatomb"
 
+// misc
+#define INVALID_OBJECT_ID (-333)
 
 
 

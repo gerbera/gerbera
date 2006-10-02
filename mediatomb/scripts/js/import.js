@@ -16,8 +16,21 @@ function copyObject(obj)
         }
         copy.meta = meta_copy;
     }
+
+    var aux = obj['aux'];
+    if (aux)
+    {
+        aux_copy = new Object();
+        for (key in aux)
+        {
+            aux_copy[key] = aux[key];
+        }
+        copy.aux = aux_copy;
+    }
+
     return obj;
 }
+
 function splitPath(path)
 {
     var start = 0;
@@ -68,6 +81,23 @@ function addContainerChain(parentID, arr)
         parentID = addCdsObject(cont);
     }
     return parentID;
+}
+
+function escapeSlash(name)
+{
+    name = name.replace(/\\/g, "\\\\");
+    name = name.replace(/\//g, "\\/");
+    return name;
+}
+
+function createContainerChain(arr)
+{
+    var path = '';
+    for (var i = 0; i < arr.length; i++)
+    {
+        path = path + '/' + escapeSlash(arr[i]);
+    }
+    return path;
 }
 
 function normalizeDate(date)
@@ -159,12 +189,10 @@ function addAudio(obj)
     }
     var chain = new Array('Audio', 'All audio');
     obj.title = title;
-    obj.parentID = addContainerChain("0", chain);
-    addCdsObject(obj);
+    addCdsObject(obj, createContainerChain(chain));
 
     chain = new Array('Audio', 'Artists', artist, 'All songs');
-    obj.parentID = addContainerChain("0", chain);
-    addCdsObject(obj);
+    addCdsObject(obj, createContainerChain(chain));
 
     chain = new Array('Audio', 'All - full name');
     temp = '';
@@ -175,31 +203,25 @@ function addAudio(obj)
         temp = temp + ' - ' + album_full + ' - ';
 
     obj.title = temp + title;
-    obj.parentID = addContainerChain("0", chain);
-    addCdsObject(obj);
+    addCdsObject(obj, createContainerChain(chain));
 
     chain = new Array('Audio', 'Artists', artist, 'All - full name');
-    obj.parentID = addContainerChain("0", chain);
-    addCdsObject(obj);
+    addCdsObject(obj, createContainerChain(chain));
 
     chain = new Array('Audio', 'Artists', artist, album);
     obj.title = track + title;
-    obj.parentID = addContainerChain("0", chain);
-    addCdsObject(obj);
+    addCdsObject(obj, createContainerChain(chain));
 
     chain = new Array('Audio', 'Albums', album);
     obj.title = track + title; 
-    obj.parentID = addContainerChain("0", chain);
-    addCdsObject(obj);
+    addCdsObject(obj, createContainerChain(chain));
 
     chain = new Array('Audio', 'Genres', genre);
-    obj.parentID = addContainerChain("0", chain);
-    addCdsObject(obj);
+    addCdsObject(obj, createContainerChain(chain));
 
 
     chain = new Array('Audio', 'Date', date);
-    obj.parentID = addContainerChain("0", chain);
-    addCdsObject(obj);
+    addCdsObject(obj, createContainerChain(chain));
 
     
 }
@@ -208,23 +230,20 @@ function addAudio(obj)
 function addVideo(obj)
 {
     var chain = new Array('Video');
-    obj.parentID = addContainerChain("0", chain);
-    addCdsObject(obj);
+    addCdsObject(obj, createContainerChain(chain));
 }
 
 // currently no image metadata supported
 function addImage(obj)
 {
     var chain = new Array('Photos', 'All Photos');
-    obj.parentID = addContainerChain("0", chain);
-    addCdsObject(obj);
+    addCdsObject(obj, createContainerChain(chain));
 
     var date = obj.meta[M_DATE];
     if (date)
     {
         chain = new Array('Photos', 'Date', date);
-        obj.parentID = addContainerChain("0", chain);
-        addCdsObject(obj);
+        addCdsObject(obj, createContainerChain(chain));
     }
 }
 

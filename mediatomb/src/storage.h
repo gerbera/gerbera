@@ -121,6 +121,23 @@ public:
 
     virtual void init() = 0;
     virtual void addObject(zmm::Ref<CdsObject> object) = 0;
+
+    /// \brief Adds a virtual container chain specified by path.
+    /// \param path container path separated by '/'. Slashes in container
+    /// titles must be escaped. 
+    /// \param containerID will be filled in by the function
+    /// \param updateID will be filled in by the function
+    ///
+    /// The function gets a path (i.e. "/Audio/All Music/") and will create
+    /// the container path if needed. The container ID will be filled in with
+    /// the object ID of the container that is last in the path. The
+    /// updateID will hold the objectID of the container that was changed,
+    /// in case new containers were created during the operation.
+    virtual void addContainerChain(zmm::String path, int *containerID, int *updateID) 
+    {
+        *containerID = INVALID_OBJECT_ID;
+        *updateID = INVALID_OBJECT_ID;
+    };
     virtual void updateObject(zmm::Ref<CdsObject> object) = 0;
 
     virtual zmm::Ref<zmm::Array<CdsObject> > browse(zmm::Ref<BrowseParam> param) = 0;
@@ -176,7 +193,7 @@ public:
     virtual void shutdown() = 0;
 protected:
     int uiUpdateId;
-    void getObjectPath(zmm::Ref<zmm::Array<CdsObject> > arr, int objectID);
+void getObjectPath(zmm::Ref<zmm::Array<CdsObject> > arr, int objectID);
     static Mutex mutex;
 };
 

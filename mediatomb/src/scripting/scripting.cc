@@ -337,6 +337,8 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
     try
     {
         jsval arg;
+        JSString *str;
+        String path;
 
         JSObject *js_cds_obj;
 
@@ -346,29 +348,26 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         if (!JS_ValueToObject(cx, arg, &js_cds_obj))
             return JS_FALSE;
 
-        int id;
-
+        str = JS_ValueToString(cx, argv[1]); 
+        if (!str)
+            path = _("/");
+        else 
+            path = String(JS_GetStringBytes(str));
 
         Ref<CdsObject> cds_obj = jsObject2cdsObject(cx, js_cds_obj);
-
-        Ref<Storage> storage = Storage::getInstance();
-        //db_obj = storage->findObjectByFilename(cds_obj->getTitle(),
-        //                                                   cds_obj->getParentID());
-        id = storage->isFileInDatabase(cds_obj->getParentID(), cds_obj->getTitle());
-        if (id < 0)
-        {
-            ContentManager::getInstance()->addObject(cds_obj);
-            id = cds_obj->getID();
-        }
+        Ref<ContentManager> cm = ContentManager::getInstance();
+       
+        int id = cm->addContainerChain(path);
+        cds_obj->setParentID(id); 
+        cm->addObject(cds_obj);
 
         /* setting object ID as return value */
-        String tmp;
-        tmp = tmp + id;
+        String tmp = String::from(id);
         
-        JSString *str = JS_NewStringCopyN(cx, tmp.c_str(), tmp.length());
-    	if (!str)
+        JSString *str2 = JS_NewStringCopyN(cx, tmp.c_str(), tmp.length());
+    	if (!str2)
 	    	return JS_FALSE;
-    	*rval = STRING_TO_JSVAL(str);
+    	*rval = STRING_TO_JSVAL(str2);
 
         return JS_TRUE;
     }

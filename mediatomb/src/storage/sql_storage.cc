@@ -358,7 +358,7 @@ void SQLStorage::addObject(Ref<CdsObject> obj)
     *qb << "INSERT INTO " CDS_OBJECT_TABLE "(" << fields->toString() <<
             ") VALUES (" << values->toString() << ")";
             
-    log_debug("insert_query: %s\n", qb->toString().c_str());
+//    log_debug("insert_query: %s\n", qb->toString().c_str());
     
     obj->setID(exec(qb->toString(), true));
 }

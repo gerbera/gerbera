@@ -41,8 +41,6 @@
 #define IS_CDS_ITEM_INTERNAL_URL(type) (type & OBJECT_TYPE_ITEM_INTERNAL_URL)
 #define IS_CDS_PURE_ITEM(type) (type == OBJECT_TYPE_ITEM)
 
-#define INVALID_OBJECT_ID (-333)
-
 int CdsObjectTitleComparator(void *arg1, void *arg2);
 
 /// \brief Generic object in the Content Directory.
