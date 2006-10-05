@@ -39,6 +39,8 @@ CdsObject::CdsObject() : Object()
     parentID = INVALID_OBJECT_ID;
     refID = 0;
     virt = 0;
+    sortPriority = 0;
+    objectFlags = 0;
 }
 
 void CdsObject::copyTo(Ref<CdsObject> obj)
@@ -52,6 +54,8 @@ void CdsObject::copyTo(Ref<CdsObject> obj)
     obj->setVirtual(virt);
     obj->setMetadata(metadata->clone());
     obj->setAuxData(auxdata->clone());
+    obj->setFlags(objectFlags);
+    obj->setSortPriority(sortPriority);
     for (int i = 0; i < resources->size(); i++)
         obj->addResource(resources->get(i)->clone());
 }
@@ -62,7 +66,8 @@ int CdsObject::equals(Ref<CdsObject> obj, bool exactly)
         parentID == obj->getParentID() &&
         restricted == obj->isRestricted() &&
         title == obj->getTitle() &&
-        upnpClass == obj->getClass()
+        upnpClass == obj->getClass() &&
+        sortPriority == obj->getSortPriority()
        ))
         return 0;
         
@@ -75,7 +80,8 @@ int CdsObject::equals(Ref<CdsObject> obj, bool exactly)
     if (exactly && !
         (location == obj->getLocation() &&
          virt == obj->isVirtual() &&
-         auxdata->equals(obj->auxdata)
+         auxdata->equals(obj->auxdata) &&
+         objectFlags == obj->getFlags()
         ))
         return 0;
     return 1;

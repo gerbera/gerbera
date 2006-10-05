@@ -72,7 +72,13 @@ protected:
     int virt;
 
     /// \brief type of the object: item, container, etc.
-    int objectType;
+    unsigned objectType;
+
+    /// \brief field which can hold various flags for the object 
+    unsigned int objectFlags; 
+
+    /// \brief flag that allows to sort objects within a container
+    int sortPriority;
 
     zmm::Ref<Dictionary> metadata;
     zmm::Ref<Dictionary> auxdata;
@@ -83,15 +89,25 @@ public:
     CdsObject();
 
     /// \brief Set the object ID.
+    ///
+    /// ID is the object ID that is used by the UPnP Content Directory service.
     inline void setID(int id) { this->id = id; }
 
     /// \brief Retrieve the object ID.
+    ///
+    /// ID is the object ID that is used by the UPnP Content Directory service.
     inline int getID() { return id; }
 
-    /// \brief Set the object ID.
+    /// \brief Set the reference object ID.
+    ///
+    /// This is the reference ID that is used by the UPnP Content Directory service.
+    /// It also links the reference and the original objects in the database.
     inline void setRefID(int refID) { this->refID = refID; }
 
-    /// \brief Retrieve the object ID.
+    /// \brief Retrieve the reference object ID.
+    ///
+    /// This is the reference ID that is used by the UPnP Content Directory service.
+    /// It also links the reference and the original objects in the database.
     inline int getRefID() { return refID; }
 
     /// \brief Set the parent ID of the object.
@@ -133,6 +149,17 @@ public:
     /// \brief Query information on object type: item, container, etc.
     inline int getObjectType() { return objectType; }
 
+    /// \brief Retrive sort priority setting.
+    inline int getSortPriority() { return sortPriority; }
+
+    /// \brief Set the sort prioroty of an object.
+    inline void setSortPriority(int sortPriority) { this->sortPriority = sortPriority; }
+
+    /// \brief Get flags of an object.
+    inline unsigned int getFlags() { return objectFlags; }
+
+    /// \brief Set flags for the object.
+    inline void setFlags(unsigned int objectFlags) { this->objectFlags = objectFlags; }
     /// \brief Query single metadata value.
     inline zmm::String getMetadata(zmm::String key)
     { return metadata->get(key); }
