@@ -37,7 +37,7 @@ Next planned features:
 - UPnP improvements (filter parameter for browse)
 
 
-MPORTANT NOTE!!!
+IMPORTANT NOTE!!!
 Versions 0.7.*, 0.8.0 and 0.8.1 are not database compatible,
 
 You will have to recreate your collection. Our apologies for inconvinience.
