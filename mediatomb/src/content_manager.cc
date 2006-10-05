@@ -296,6 +296,11 @@ void ContentManager::_addFile(String path, bool recursive, bool hidden)
             return;
     }
 
+    // never add the server configuration file
+    if (ConfigManager::getInstance()->getConfigFilename() == path)
+        return;
+
+
 #ifdef HAVE_JS
     initScripting();
 #endif
@@ -374,6 +379,7 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
 
     Ref<Storage> storage = Storage::getInstance();
     Ref<CdsObject> obj = storage->loadObject(containerID);
+    Ref<ConfigManager> cm = ConfigManager::getInstance();
     if (!IS_CDS_CONTAINER(obj->getObjectType()))
     {
         throw _Exception(_("Object is not a container: rescan must be triggered on directories\n"));
@@ -474,7 +480,8 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
                 else
                 {
                     // add file, not recursive, not async
-                    addFile(path, false, false);
+                    if (cm->getConfigFilename() != path)
+                        addFile(path, false, false);
                 }
             }
             else if (S_ISDIR(statbuf.st_mode))
@@ -544,6 +551,10 @@ void ContentManager::addRecursive(String path, bool hidden)
                 continue;
         }
         String newPath = path + "/" + name;
+
+        if (ConfigManager::getInstance()->getConfigFilename() == newPath)
+            continue;
+
         try
         {
             Ref<CdsObject> obj = nil;
@@ -812,7 +823,6 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic)
     Ref<CdsObject> obj;
     if (S_ISREG(statbuf.st_mode)) // item
     {
-
         /* retrieve information about item and decide
            if it should be included */
         String mimetype;

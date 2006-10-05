@@ -96,12 +96,12 @@ void ConfigManager::init(String filename, String userhome)
             home = _("") + DIR_SEPARATOR + DEFAULT_ETC + DIR_SEPARATOR + DEFAULT_SYSTEM_HOME;
             filename = home + DIR_SEPARATOR + DEFAULT_CONFIG_NAME;
         }
-
+/*
         if (home_ok)
             log_info("Loading configuration from ~/.mediatomb/config.xml\n");
         else
             log_info("Loading configuration from /etc/mediatomb/config.xml\n");
-
+*/
 //        instance->load(userhome + DIR_SEPARATOR + DEFAULT_CONFIG_HOME + DIR_SEPARATOR + DEFAULT_CONFIG_NAME);
     }
 //    else
@@ -194,6 +194,7 @@ void ConfigManager::validate(String serverhome)
 
 #ifdef HAVE_NL_LANGINFO
     temp = String(nl_langinfo(CODESET));
+    log_debug("received %s from nl_langinfo\n", temp.c_str());
     if (!string_ok(temp))
         temp = _(DEFAULT_FILESYSTEM_CHARSET);
 #else

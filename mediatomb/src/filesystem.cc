@@ -269,6 +269,9 @@ bool Filesystem::haveDirectories(String dir)
     
 bool Filesystem::fileAllowed(String path)
 {
+    if (path == ConfigManager::getInstance()->getConfigFilename())
+        return false;
+
     return true;
     /*
     for (int i = 0; i < include_rules->size(); i++)

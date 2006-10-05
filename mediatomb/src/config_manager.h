@@ -36,6 +36,9 @@ protected:
 public:
     ConfigManager();
 
+    /// \brief Returns the name of the config file that was used to launch the server.
+    inline zmm::String getConfigFilename() { return filename; }
+
     void load(zmm::String filename);
     void save();
 
