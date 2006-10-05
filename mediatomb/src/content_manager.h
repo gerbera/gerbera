@@ -58,8 +58,9 @@ class CMAddFileTask : public CMTask
 protected:
     zmm::String path;
     bool recursive;
+    bool hidden;
 public:
-    CMAddFileTask(zmm::String path, bool recursive=false);
+    CMAddFileTask(zmm::String path, bool recursive=false, bool hidden=false);
     virtual void run();
 };
 
@@ -141,7 +142,7 @@ public:
     
     /* sync/async methods */
     int loadAccounting(bool async=true);
-    int addFile(zmm::String path, bool recursive=true, bool async=true);
+    int addFile(zmm::String path, bool recursive=true, bool async=true, bool hidden=false);
     int removeObject(int objectID, bool async=true);
     int rescanDirectory(int objectID, scan_level_t scanLevel = BasicScan, bool async=true);
     
@@ -203,13 +204,13 @@ protected:
 
     /* don't use these, use the above methods */
     void _loadAccounting();
-    void _addFile(zmm::String path, bool recursive=0);
+    void _addFile(zmm::String path, bool recursive=false, bool hidden=false);
     //void _addFile2(zmm::String path, bool recursive=0);
     void _removeObject(int objectID);
     void _rescanDirectory(int objectID, scan_level_t scanLevel);
     
     /* for recursive addition */
-    void addRecursive(zmm::String path);
+    void addRecursive(zmm::String path, bool hidden=false);
     //void addRecursive2(zmm::Ref<DirCache> dirCache, zmm::String filename, bool recursive);
 
     zmm::String extension2mimetype(zmm::String extension);

@@ -286,8 +286,16 @@ void ContentManager::_loadAccounting()
     Ref<Storage> storage = Storage::getInstance();
     acct->totalFiles = storage->getTotalFiles();
 }
-void ContentManager::_addFile(String path, bool recursive)
+void ContentManager::_addFile(String path, bool recursive, bool hidden)
 {
+    if (hidden == false)
+    {
+
+        String filename = get_filename(path);
+        if (string_ok(filename) && filename.charAt(0) == '.')
+            return;
+    }
+
 #ifdef HAVE_JS
     initScripting();
 #endif
@@ -301,6 +309,7 @@ void ContentManager::_addFile(String path, bool recursive)
         path = path.substring(0, path.length() - 1);
     }
     */
+
     Ref<Storage> storage = Storage::getInstance();
     
     Ref<UpdateManager> um = UpdateManager::getInstance();
@@ -323,7 +332,7 @@ void ContentManager::_addFile(String path, bool recursive)
     
     if (recursive && IS_CDS_CONTAINER(obj->getObjectType()))
     {
-        addRecursive(path);
+        addRecursive(path, hidden);
     }
     um->flushUpdates();
 }
@@ -496,14 +505,22 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
 }
 
 /* scans the given directory and adds everything recursively */
-void ContentManager::addRecursive(String path)
+void ContentManager::addRecursive(String path, bool hidden)
 {
+
+    if (hidden == false)
+    {
+        log_debug("Checking path %s\n", path.c_str());
+        if (path.charAt(0) == '.')
+            return;
+    }
+
     Ref<StringConverter> f2i = StringConverter::f2i();
 
     Ref<UpdateManager> um = UpdateManager::getInstance();
     Ref<Storage> storage = Storage::getInstance();
     DIR *dir = opendir(path.c_str());
-    if (! dir)
+    if (!dir)
     {
         throw _Exception(_("could not list directory ")+
                         path + " : " + strerror(errno));
@@ -523,6 +540,8 @@ void ContentManager::addRecursive(String path)
             {
                 continue;
             }
+            else if (hidden == false)
+                continue;
         }
         String newPath = path + "/" + name;
         try
@@ -562,7 +581,7 @@ void ContentManager::addRecursive(String path)
 #endif
                 if (IS_CDS_CONTAINER(obj->getObjectType()))
                 {
-                    addRecursive(newPath);
+                    addRecursive(newPath, hidden);
                 }
             }
         }
@@ -1122,17 +1141,17 @@ int ContentManager::loadAccounting(bool async)
         return false;
     }
 }
-int ContentManager::addFile(zmm::String path, bool recursive, bool async)
+int ContentManager::addFile(zmm::String path, bool recursive, bool async, bool hidden)
 {
     if (async)
     {
-        Ref<CMTask> task(new CMAddFileTask(path, recursive));
+        Ref<CMTask> task(new CMAddFileTask(path, recursive, hidden));
         task->setDescription(_("Adding ") + path);
         return addTask(task);
     }
     else
     {
-        _addFile(path, recursive);
+        _addFile(path, recursive, hidden);
         return false;
     }
 }
@@ -1190,15 +1209,16 @@ String CMTask::getDescription()
 }
 
 
-CMAddFileTask::CMAddFileTask(String path, bool recursive) : CMTask()
+CMAddFileTask::CMAddFileTask(String path, bool recursive, bool hidden) : CMTask()
 {
     this->path = path;
     this->recursive = recursive;
+    this->hidden = hidden;
 }
 void CMAddFileTask::run()
 {
     log_debug("running add file task with path %s recursive: %d\n", path.c_str(), recursive);
-    cm->_addFile(path, recursive);
+    cm->_addFile(path, recursive, hidden);
 }
 
 CMRemoveObjectTask::CMRemoveObjectTask(int objectID) : CMTask()
