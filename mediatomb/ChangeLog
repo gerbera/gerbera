@@ -42,6 +42,10 @@ v0.9.0  Major rework
         * added X_MS_MediaReceiverRegistrar Service to allow Xbox 360 support
         * added workarounds to enable Telegent TG100 support
         * server can now be restarted by sending it a SIGHUP
+        * the current configuration file will never be displayed in the UI and
+          will never be added to the database - we do not want the user to
+          accidentally share it on the network since it may contain
+          security sensitive data
 
 v0.8.1
         * added "serve" directory, any files there can be downloaded 
