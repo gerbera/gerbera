@@ -218,13 +218,16 @@ void Server::upnp_init(String ip, int port)
     {
         throw _UpnpException(ret, _("upnp_init: UpnpSendAdvertisement failed"));
     }
-
+    
+    // initializing Storage
+    Storage::getInstance();
+    
     // initializing UpdateManager
     UpdateManager::getInstance();
     
     // initializing ContentManager
     ContentManager::getInstance();
-   
+    
     config->writeBookmark(ip, String::from(port));
     
     log_debug("end\n");

@@ -93,7 +93,7 @@ function updateItems(ajaxRequest)
             topDiv.appendChild(rightDocument.createTextNode(", "));
             link = rightDocument.createElement("a");
             topDiv.appendChild(link);
-            link.setAttribute("href", "javascript:parent.removeItem('"+ofId+"');");
+            link.setAttribute("href", "javascript:parent.removeItem('"+ofId+"', false);");
             link.appendChild(rightDocument.createTextNode("remove"));
         }
         
@@ -120,8 +120,15 @@ function updateItems(ajaxRequest)
             itemEntry.appendChild(rightDocument.createTextNode(" - "));
             
             var linkEl = rightDocument.createElement("a");
-            linkEl.setAttribute("href", "javascript:parent.removeItem(\""+item.getAttribute("id")+"\");");
-            linkEl.appendChild(rightDocument.createTextNode("remove"));
+            linkEl.setAttribute("href", "javascript:parent.removeItem(\""+item.getAttribute("id")+"\", false);");
+            linkEl.appendChild(rightDocument.createTextNode("remove this"));
+            itemEntry.appendChild(linkEl);
+            
+            itemEntry.appendChild(rightDocument.createTextNode(", "));
+            
+            linkEl = rightDocument.createElement("a");
+            linkEl.setAttribute("href", "javascript:parent.removeItem(\""+item.getAttribute("id")+"\", true);");
+            linkEl.appendChild(rightDocument.createTextNode("remove all"));
             itemEntry.appendChild(linkEl);
             
             itemEntry.appendChild(rightDocument.createTextNode(", "));
@@ -347,9 +354,13 @@ function addEditRemoveSubmitted(ajaxRequest)
         folderChange(selectedNode);
 }
 
-function removeItem(itemId)
+function removeItem(itemId, all)
 {
-    var url = link('remove', {object_id: itemId});
+    if (all)
+        all_send="1";
+    else
+        all_send="0";
+    var url = link('remove', {object_id: itemId, all: all_send});
     var myAjax = new Ajax.Request(
         url,
         {

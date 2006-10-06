@@ -33,6 +33,8 @@
 #include "storage/mysql/mysql_storage.h"
 #endif
 
+#include "tools.h"
+
 using namespace zmm;
 
 static Ref<Storage> primary_inst;
@@ -140,5 +142,33 @@ void Storage::getObjectPath(Ref<Array<CdsObject> > arr, int objectID)
     Ref<CdsObject> obj = loadObject(objectID);
     getObjectPath(arr, obj->getParentID());
     arr->append(obj);
+}
+
+void Storage::stripAndUnescapeVirtualContainerFromPath(String path, String &first, String &last)
+{
+    if (path.charAt(0) != VIRTUAL_CONTAINER_SEPARATOR)
+    {
+        throw _Exception(_("got non-absolute virtual path; needs to start with: ") + VIRTUAL_CONTAINER_SEPARATOR);
+    }
+    int sep = path.rindex(VIRTUAL_CONTAINER_SEPARATOR);
+    if (sep == 0)
+    {
+        first = _("/");
+        last = path.substring(1);
+    }
+    else
+    {
+        while (sep > 0)
+        {
+            char beforeSep = path.charAt(sep - 1);
+            if (beforeSep != VIRTUAL_CONTAINER_ESCAPE)
+            {
+                break;
+            }
+            sep = path.rindex(sep - 1, VIRTUAL_CONTAINER_SEPARATOR);
+        }
+        first = path.substring(0, sep);
+        last = unescape(path.substring(sep + 1), VIRTUAL_CONTAINER_ESCAPE);
+    }
 }
 

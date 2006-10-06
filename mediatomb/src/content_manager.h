@@ -68,8 +68,9 @@ class CMRemoveObjectTask : public CMTask
 {
 protected:
     int objectID;
+    bool all;
 public:
-    CMRemoveObjectTask(int objectID);
+    CMRemoveObjectTask(int objectID, bool all);
     virtual void run();
 };
 
@@ -137,13 +138,13 @@ public:
 
     zmm::Ref<CMAccounting> getAccounting();
     zmm::Ref<CMTask> getCurrentTask();
-   
+    
     /* the functions below return true if the task has been enqueued */
     
     /* sync/async methods */
     int loadAccounting(bool async=true);
     int addFile(zmm::String path, bool recursive=true, bool async=true, bool hidden=false);
-    int removeObject(int objectID, bool async=true);
+    int removeObject(int objectID, bool async=true, bool all=false);
     int rescanDirectory(int objectID, scan_level_t scanLevel = BasicScan, bool async=true);
     
     /// \brief Updates an object in the database using the given parameters.
@@ -206,7 +207,7 @@ protected:
     void _loadAccounting();
     void _addFile(zmm::String path, bool recursive=false, bool hidden=false);
     //void _addFile2(zmm::String path, bool recursive=0);
-    void _removeObject(int objectID);
+    void _removeObject(int objectID, bool all);
     void _rescanDirectory(int objectID, scan_level_t scanLevel);
     
     /* for recursive addition */

@@ -72,13 +72,16 @@ Ref<Array<StringBase> > split_path(String str)
     
     if (pos <= 0)
     {
+        /* no DIR_SEPARATOR or there is only one separator at the beginning */
         ret->append(_(""));
         if (pos == 0)
         {
+            /* there is only one separator at the beginning "/..." or "/" */
             String filename(data+1);
             ret->append(filename);
         }
         else
+            /* no DIR_SEPARATOR */
             ret->append(str);
     }
     else
@@ -539,3 +542,36 @@ void set_jpeg_resolution_resource(Ref<CdsItem> item, int res_num)
     }
 }
 
+String unescape(String string, char escape)
+{
+    Ref<StringBase> stringBase(new StringBase(string.length()));
+    char *str = stringBase->data;
+    int len = string.length();
+    
+    int last = -1;
+    do
+    {
+        int next = string.index(last + 1, escape);
+        if (next < 0)
+            next = len;
+        if (last < 0)
+            last = 0;
+        int cpLen = next - last;
+        strncpy(str, string.charPtrAt(last), cpLen);
+        str += cpLen;
+        last = next;
+        last++;
+    }
+    while (last < len);
+    *str = '\0';
+    
+    stringBase->len = strlen(stringBase->data);
+    return String(stringBase);
+}
+
+String fallbackString(String first, String fallback)
+{
+    if (first==nil)
+        return fallback;
+    return first;
+}

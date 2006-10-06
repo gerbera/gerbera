@@ -35,6 +35,10 @@ using namespace zmm;
 
 //#define OBJECT_CACHE_CAPACITY 100003
 
+#define LOC_DIR_PREFIX     'D'
+#define LOC_FILE_PREFIX    'F'
+#define LOC_VIRT_PREFIX    'V'
+#define LOC_ILLEGAL_PREFIX 'X'
 #define MAX_REMOVE_SIZE 10000
 
 enum
@@ -44,7 +48,6 @@ enum
     _parent_id,
     _object_type,
     //_is_virtual,
-    
     _upnp_class,
     _dc_title,
     _is_restricted,
@@ -57,45 +60,24 @@ enum
     _is_searchable,
     _mime_type,
     //_action,
-    _state
-    //_ref_resources
+    _state,
+    _ref_upnp_class,
+    _ref_dc_title,
+    _ref_metadata,
+    _ref_auxdata,
+    _ref_resources,
+    _ref_mime_type
 };
 
-/*
-static char *_q_base =
-    "SELECT"
-    "  f.id"
-    ", f.ref_id"
-    ", f.parent_id"
-    ", f.object_type"
-    ", f.is_virtual";
 
-static char *_q_ext = 
-    ", f.upnp_class"
-    ", f.dc_title"
-    ", f.is_restricted"
-    ", f.metadata"
-    ", f.auxdata"
- 
-    ", f.update_id"
-    ", f.is_searchable"
 
-    ", f.location"
-    ", f.mime_type"
+#define SELECT_DATA "f.id,f.ref_id,f.parent_id,f.object_type,f.upnp_class," \
+    "f.dc_title,f.is_restricted,f.location,f.location_hash,f.metadata," \
+    "f.auxdata,f.resources,f.update_id,f.is_searchable,f.mime_type,f.state," \
+    "rf.upnp_class,rf.dc_title,rf.metadata,rf.auxdata,rf.resources,rf.mime_type"
 
-    ", f.action"
-    ", f.state";
-    
-static char *_q_nores = 
-    " FROM cds_objects f";
- 
-static char *_q_res =
-    ", f.resources"
-
-    ", rf.resources"
-    " FROM cds_objects f LEFT JOIN cds_objects rf"
-    " ON f.ref_id = rf.id";
-*/
+#define SQL_QUERY "SELECT " SELECT_DATA " FROM " CDS_OBJECT_TABLE \
+    " f LEFT JOIN " CDS_OBJECT_TABLE " rf ON f.ref_id = rf.id "
 
 SQLRow::SQLRow(Ref<SQLResult> sqlResult) : Object()
 {
@@ -114,10 +96,6 @@ SQLResult::~SQLResult()
 
 SQLStorage::SQLStorage() : Storage()
 {
-    //selectQueryBasic = String(_q_base) + _q_nores;
-    //selectQueryExtended = String(_q_base) + _q_ext + _q_nores;
-    //selectQueryFull = String(_q_base) + _q_ext + _q_res;
-
     rmIDs = NULL;
     rmParents = NULL;
     
@@ -156,22 +134,6 @@ SQLStorage::~SQLStorage()
         FREE(rmParents);
 }
 
-String SQLStorage::getSelectQuery()
-{
-    return _("SELECT f.* FROM " CDS_OBJECT_TABLE " f");
-    //return _("SELECT f.*,rf.resources FROM cds_object f LEFT JOIN cds_object rf ON f.ref_id = rf.id");
-    
-    /*
-    switch(mode)
-    {
-        case SELECT_BASIC: return selectQueryBasic;
-        case SELECT_EXTENDED: return selectQueryExtended;
-        case SELECT_FULL: return selectQueryFull;
-        default: throw _StorageException(_("SQLStorage: invalid mode: ") + (int)mode);
-    }
-    */
-}
-
 Ref<CdsObject> SQLStorage::checkRefID(Ref<CdsObject> obj)
 {
     if (! obj->isVirtual()) throw _Exception(_("checkRefID called for a non-virtual object"));
@@ -199,7 +161,7 @@ Ref<CdsObject> SQLStorage::checkRefID(Ref<CdsObject> obj)
 Ref<Dictionary> SQLStorage::_addUpdateObject(Ref<CdsObject> obj, bool isUpdate)
 {
     Ref<CdsObject> refObj = nil;
-    bool isVirtual =  obj->isVirtual();
+    bool isVirtual = obj->isVirtual();
     if (isVirtual)
     {
         refObj = checkRefID(obj);
@@ -277,14 +239,20 @@ Ref<Dictionary> SQLStorage::_addUpdateObject(Ref<CdsObject> obj, bool isUpdate)
         {
             String loc = cont->getLocation();
             if (!string_ok(loc)) throw _Exception(_("tried to create or update a non-virtual container without a location set"));
-            data->put(_("location"), quote(loc));
-            data->put(_("location_hash"), String::from(stringHash(loc)));
+            String dbLocation = addLocationPrefix(LOC_DIR_PREFIX, loc);
+            data->put(_("location"), quote(dbLocation));
+            data->put(_("location_hash"), String::from(stringHash(dbLocation)));
         }
-        else if (isUpdate)
+        else
+        {
+            throw _Exception(_("tried to add an virtual container via _addUpdateObject; should be done via addContainerChain"));
+        }
+            
+            /*if (isUpdate)
         {
             data->put(_("location"), _("NULL"));
             data->put(_("location_hash"), _("NULL"));
-        }
+        }*/
         
         data->put(_("is_searchable"), String::from(cont->isSearchable()));
         
@@ -305,10 +273,9 @@ Ref<Dictionary> SQLStorage::_addUpdateObject(Ref<CdsObject> obj, bool isUpdate)
             int parentID = ensurePathExistence(path);
             item->setParentID(parentID);
             String filename = pathAr->get(1);
-            
-            data->put(_("location"), quote(filename));
-            
-            data->put(_("location_hash"), String::from(stringHash(filename)));
+            String dbLocation = addLocationPrefix(LOC_FILE_PREFIX, filename);
+            data->put(_("location"), quote(dbLocation));
+            data->put(_("location_hash"), String::from(stringHash(dbLocation)));
         }
         else //for URLs
         {
@@ -386,7 +353,7 @@ void SQLStorage::updateObject(zmm::Ref<CdsObject> obj)
     
     log_debug("upd_query: %s\n", qb->toString().c_str());
     
-    this->exec(qb->toString());
+    exec(qb->toString());
 }
 
 Ref<CdsObject> SQLStorage::loadObject(int objectID)
@@ -399,7 +366,7 @@ Ref<CdsObject> SQLStorage::loadObject(int objectID)
 */
     Ref<StringBuffer> qb(new StringBuffer());
 
-    *qb << getSelectQuery() << " WHERE f.id = " << objectID;
+    *qb << SQL_QUERY " WHERE f.id = " << objectID;
 
     Ref<SQLResult> res = select(qb->toString());
     Ref<SQLRow> row;
@@ -451,17 +418,17 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     }
 
     row = nil;
-    res = nil;    
+    res = nil;
     
     Ref<StringBuffer> qb(new StringBuffer());
 
-    *qb << getSelectQuery() << " WHERE ";
+    *qb << SQL_QUERY " WHERE ";
 
     if(param->getFlag() == BROWSE_DIRECT_CHILDREN && IS_CDS_CONTAINER(objectType))
     {
         int count = param->getRequestedCount();
         if(! count)
-            count = 1000000000;
+            count = INT_MAX;
 
         *qb << "f.parent_id = " << objectID;
         *qb << " ORDER BY f.object_type, f.dc_title";
@@ -469,7 +436,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     }
     else // metadata
     {
-        *qb << "f.id = " << objectID;
+        *qb << "f.id = " << objectID << " LIMIT 1";
     }
     // log_debug(("QUERY: %s\n", qb->toString().c_str()));
     res = select(qb->toString());
@@ -484,7 +451,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     }
 
     row = nil;
-    res = nil;    
+    res = nil;
     
     // update childCount fields
     for (int i = 0; i < arr->size(); i++)
@@ -563,9 +530,10 @@ Ref<CdsObject> SQLStorage::findObjectByTitle(String title, int parentID)
 int SQLStorage::isFolderInDatabase(String path)
 {
     Ref<StringBuffer> qb(new StringBuffer());
+    String dbLocation = addLocationPrefix(LOC_DIR_PREFIX, path);
     *qb << "SELECT `id` FROM " CDS_OBJECT_TABLE
-            " WHERE `location_hash` = " << stringHash(path)
-            << " AND `location` = " << quote(path)
+            " WHERE `location_hash` = " << stringHash(dbLocation)
+            << " AND `location` = " << quote(dbLocation)
             << " AND `ref_id` IS NULL "
             "LIMIT 1";
      Ref<SQLResult> res = select(qb->toString());
@@ -587,12 +555,13 @@ int SQLStorage::isFileInDatabase(int parentID, String filename)
 
 Ref<SQLRow> SQLStorage::_findObjectByFilename(String filename, int parentID)
 {
+    String dbLocation = addLocationPrefix(LOC_FILE_PREFIX, filename);
     Ref<StringBuffer> qb(new StringBuffer());
-    *qb << "SELECT * FROM " CDS_OBJECT_TABLE
-        " WHERE location_hash = " << stringHash(filename)
-        << " AND location = " << quote(filename)
-        << " AND parent_id = " << parentID
-        << " AND ref_id IS NULL "
+    *qb << SQL_QUERY
+        " WHERE `f`.`location_hash` = " << stringHash(dbLocation)
+        << " AND `f`.`location` = " << quote(dbLocation)
+        << " AND `f`.`parent_id` = " << parentID
+        << " AND `f`.`ref_id` IS NULL "
         "LIMIT 1";
         
     Ref<SQLResult> res = select(qb->toString());
@@ -619,30 +588,33 @@ Ref<SQLRow> SQLStorage::_findObjectByPath(String fullpath)
         if (! string_ok(path))
             throw _Exception(_("tried to add an empty path"));
         
-        *qb << "SELECT * FROM " CDS_OBJECT_TABLE
-            " WHERE `location_hash` = " << stringHash(path)
-            << " AND `location` = " << quote(path)
-            << " AND `ref_id` IS NULL "
+        String dbLocation = addLocationPrefix(LOC_DIR_PREFIX, path);
+        *qb << SQL_QUERY
+            " WHERE `f`.`location_hash` = " << stringHash(dbLocation)
+            << " AND `f`.`location` = " << quote(dbLocation)
+            << " AND `f`.`ref_id` IS NULL "
             "LIMIT 1";
     }
     else if (! string_ok(path))
     {
-        *qb << "SELECT * FROM " CDS_OBJECT_TABLE
-            " WHERE `location_hash` = " << stringHash(fullpath)
-            << " AND `location` = " << quote(fullpath)
+        String dbLocation = addLocationPrefix(LOC_DIR_PREFIX, fullpath);
+        *qb << SQL_QUERY
+            " WHERE `f`.`location_hash` = " << stringHash(dbLocation)
+            << " AND `f`.`location` = " << quote(dbLocation)
             //<< " AND `parent_id` = " << CDS_ID_FS_ROOT
-            << " AND `ref_id` IS NULL "
+            << " AND `f`.`ref_id` IS NULL "
             "LIMIT 1";
     }
     else
     {
-        *qb << "SELECT f.* FROM " CDS_OBJECT_TABLE " p "
-            "JOIN " CDS_OBJECT_TABLE " f ON p.id=f.parent_id "
-            "WHERE p.`location_hash` = " << stringHash(path)
-            << " AND p.`location` = " << quote(path)
-            << " AND f.`location_hash` = " << stringHash(filename)
-            << " AND f.`location` = " << quote(filename)
-            << " AND p.`ref_id` IS NULL "
+        String dbLocationPath = addLocationPrefix(LOC_DIR_PREFIX, path);
+        String dbLocationFilename = addLocationPrefix(LOC_FILE_PREFIX, filename);
+        *qb << SQL_QUERY " JOIN " CDS_OBJECT_TABLE " p ON `p`.`id`=`f`.`parent_id` "
+            "WHERE `p`.`location_hash` = " << stringHash(dbLocationPath)
+            << " AND `p`.`location` = " << quote(dbLocationPath)
+            << " AND `f`.`location_hash` = " << stringHash(dbLocationFilename)
+            << " AND `f`.`location` = " << quote(dbLocationFilename)
+            << " AND `p`.`ref_id` IS NULL "
             "LIMIT 1";
     }
     
@@ -679,11 +651,12 @@ int SQLStorage::ensurePathExistence(String path)
     else
         parentID = CDS_ID_FS_ROOT;
     Ref<StringConverter> f2i = StringConverter::f2i();
-    return createContainer(parentID, f2i->convert(folder), path);
+    return createContainer(parentID, f2i->convert(folder), path, false);
 }
 
-int SQLStorage::createContainer(int parentID, String name, String path)
+int SQLStorage::createContainer(int parentID, String name, String path, bool isVirtual)
 {
+    String dbLocation = addLocationPrefix((isVirtual ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX), path);
     Ref<StringBuffer> qb(new StringBuffer());
     *qb << "INSERT INTO " CDS_OBJECT_TABLE
         " (`parent_id`, `object_type`, `upnp_class`, `dc_title`,"
@@ -693,12 +666,71 @@ int SQLStorage::createContainer(int parentID, String name, String path)
         << ", " << OBJECT_TYPE_CONTAINER
         << ", " << quote(_(UPNP_DEFAULT_CLASS_CONTAINER))
         << ", " << quote(name)
-        << ", " << quote(path)
-        << ", " << stringHash(path)
+        << ", " << quote(dbLocation)
+        << ", " << stringHash(dbLocation)
         << ")";
         
     return exec(qb->toString(), true);
     
+}
+
+void SQLStorage::addContainerChain(String path, int *containerID, int *updateID)
+{
+    *updateID = INVALID_OBJECT_ID;
+    if (path == _("/"))
+    {
+        *containerID = CDS_ID_ROOT;
+        return;
+    }
+    Ref<StringBuffer> qb(new StringBuffer());
+    String dbLocation = addLocationPrefix(LOC_VIRT_PREFIX, path);
+    *qb << "SELECT `id` FROM " CDS_OBJECT_TABLE
+            " WHERE `location_hash` = " << stringHash(dbLocation)
+            << " AND `location` = " << quote(dbLocation)
+            << " LIMIT 1";
+    Ref<SQLResult> res = select(qb->toString());
+    if (res != nil)
+    {
+        Ref<SQLRow> row = res->nextRow();
+        if (row != nil)
+        {
+            *containerID = row->col(0).toInt();
+            return;
+        }
+    }
+    int parentContainerID;
+    int parentUpdateID;
+    String newpath, container;
+    stripAndUnescapeVirtualContainerFromPath(path, newpath, container);
+    addContainerChain(newpath, &parentContainerID, &parentUpdateID);
+    *containerID = createContainer(parentContainerID, container, path, true);
+    if (parentUpdateID == INVALID_OBJECT_ID)
+        *updateID = parentContainerID;
+    else
+        *updateID = parentUpdateID;
+}
+
+String SQLStorage::addLocationPrefix(char prefix, String path)
+{
+    return String(prefix) + path;
+}
+
+String SQLStorage::stripLocationPrefix(char* prefix, String path)
+{
+    if (path == nil)
+    {
+        *prefix = LOC_ILLEGAL_PREFIX;
+        return nil;
+    }
+    *prefix = path.charAt(0);
+    return path.substring(1);
+}
+
+String SQLStorage::stripLocationPrefix(String path)
+{
+    if (path == nil)
+        return nil;
+    return path.substring(1);
 }
 
 unsigned int SQLStorage::stringHash(String key)
@@ -719,7 +751,7 @@ String SQLStorage::getRealLocation(int parentID, String location)
         " WHERE id = " << parentID << " LIMIT 1";
     Ref<SQLResult> res = select(qb->toString());
     Ref<SQLRow> row = res->nextRow();
-    return row->col(0) + "/" + location;
+    return stripLocationPrefix(row->col(0)) + "/" + location;
 }
 
 Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
@@ -740,21 +772,20 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
     
     obj->setRestricted(atoi(row->col(_is_restricted).c_str()));
     
-    obj->setTitle(row->col(_dc_title));
-    obj->setClass(row->col(_upnp_class));
+    obj->setTitle(fallbackString(row->col(_dc_title), row->col(_ref_dc_title)));
+    obj->setClass(fallbackString(row->col(_upnp_class), row->col(_ref_upnp_class)));
     
+    String metadataStr = fallbackString(row->col(_metadata), row->col(_ref_metadata));
     Ref<Dictionary> meta(new Dictionary());
-    meta->decode(row->col(_metadata));
+    meta->decode(metadataStr);
     obj->setMetadata(meta);
     
+    String auxdataStr = fallbackString(row->col(_auxdata), row->col(_ref_auxdata));
     Ref<Dictionary> aux(new Dictionary());
-    aux->decode(row->col(_auxdata));
+    aux->decode(auxdataStr);
     obj->setAuxData(aux);
     
-    String resources_str = row->col(_resources);
-    
-    //log_debug("resources: %s\n", resources_str.c_str());
-    
+    String resources_str = fallbackString(row->col(_resources), row->col(_ref_resources));
     if (!(resources_str == nil || resources_str.length() == 0))
     {
         Ref<Array<StringBase> > resources = split_string(resources_str,
@@ -772,26 +803,30 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
         Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
         cont->setSearchable(atoi(row->col(_is_searchable).c_str()));
         cont->setUpdateID(atoi(row->col(_update_id).c_str()));
-        cont->setLocation(row->col(_location));
-        
+        char locationPrefix;
+        cont->setLocation(stripLocationPrefix(&locationPrefix, row->col(_location)));
+        if (locationPrefix == LOC_VIRT_PREFIX)
+            cont->setVirtual(true);
+        else
+            cont->setVirtual(false);
         matched_types++;
     }
-
+    
     if (IS_CDS_ITEM(objectType))
     {
         Ref<CdsItem> item = RefCast(obj, CdsItem);
-        item->setMimeType(row->col(_mime_type));
+        item->setMimeType(fallbackString(row->col(_mime_type), row->col(_ref_mime_type)));
         if (IS_CDS_PURE_ITEM(objectType) && ! obj->isVirtual())
-            item->setLocation(getRealLocation(obj->getParentID(), row->col(_location)));
+            item->setLocation(getRealLocation(obj->getParentID(), stripLocationPrefix(row->col(_location))));
         else
             item->setLocation(row->col(_location));
         matched_types++;
     }
-
+    
     if (IS_CDS_ACTIVE_ITEM(objectType))
     {
         Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
-        aitem->setAction(row->col(_location));
+        aitem->setAction(row->col(_location)); // TODO: use different field
         aitem->setState(row->col(_state));
         matched_types++;
     }
@@ -841,7 +876,7 @@ void SQLStorage::incrementUIUpdateID(int id)
 Ref<Array<CdsObject> > SQLStorage::selectObjects(Ref<SelectParam> param)
 {
     Ref<StringBuffer> q(new StringBuffer());
-    *q << getSelectQuery() << " WHERE ";
+    *q << SQL_QUERY " WHERE ";
     switch (param->flags)
     {
         case FILTER_PARENT_ID:
@@ -862,6 +897,7 @@ Ref<Array<CdsObject> > SQLStorage::selectObjects(Ref<SelectParam> param)
             throw _StorageException(_("selectObjects: invalid operation: ") +
                                    param->flags);
     }
+    *q << " ORDER BY f.object_type, f.dc_title";
     Ref<SQLResult> res = select(q->toString());
     Ref<SQLRow> row;
     Ref<Array<CdsObject> > arr(new Array<CdsObject>());
@@ -918,7 +954,7 @@ void SQLStorage::removeObjects(zmm::Ref<DBRHash<int> > list)
     else
     {
         _recursiveRemove(ids->toString(1));
-    }
+    }                                     
 }
 
 void SQLStorage::_removeObjects(String objectIDs)
@@ -926,16 +962,33 @@ void SQLStorage::_removeObjects(String objectIDs)
     Ref<StringBuffer> q(new StringBuffer());
     *q << "DELETE FROM " CDS_OBJECT_TABLE " WHERE id IN (" << objectIDs
         << ")";
-    this->exec(q->toString());
+    exec(q->toString());
 }
 
-void SQLStorage::removeObject(int objectID)
+void SQLStorage::removeObject(int objectID, bool all)
 {
+    Ref<StringBuffer> q = nil;
+    if (all)
+    {
+        q = Ref<StringBuffer>(new StringBuffer());
+        *q << "SELECT ref_id FROM " CDS_OBJECT_TABLE " WHERE id = "
+            << objectID << " LIMIT 1";
+        Ref<SQLResult> res = select(q->toString());
+        if (res == nil)
+            return;
+        Ref<SQLRow> row = res->nextRow();
+        if (row == nil)
+            return;
+        objectID = row->col(0).toInt();
+    }
     if (dbRemovesDeps)
     {
-        Ref<StringBuffer> q(new StringBuffer());
+        if (q == nil)
+            q = Ref<StringBuffer>(new StringBuffer());
+        else
+            q->clear();
         *q << "DELETE FROM " CDS_OBJECT_TABLE " WHERE id = " << objectID;
-        this->exec(q->toString());
+        exec(q->toString());
     }
     else
     {
@@ -953,8 +1006,10 @@ void SQLStorage::_recursiveRemove(String objectIDs)
     while(recurse->length() != 0)
     {
         q->clear();
+        String recurseStr = recurse->toString(1);
         *q << "SELECT DISTINCT id FROM " CDS_OBJECT_TABLE
-            " WHERE parent_id IN (" << recurse->toString(1) << ")";
+            " WHERE parent_id IN (" << recurseStr << ") OR"
+            " ref_id IN (" << recurseStr << ")";
         Ref<SQLResult> res = select(q->toString());
         Ref<SQLRow> row;
         recurse->clear();

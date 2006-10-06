@@ -75,7 +75,8 @@
 // SEPARATOR
 #define DIR_SEPARATOR                   '/'
 #define _DIR_SEPARATOR                  "/"
-
+#define VIRTUAL_CONTAINER_SEPARATOR     '/'
+#define VIRTUAL_CONTAINER_ESCAPE        '\\'
 // MIME TYPES FOR WEB UI
 #define MIMETYPE_XML                   "text/xml"
 #define MIMETYPE_HTML                  "text/html"

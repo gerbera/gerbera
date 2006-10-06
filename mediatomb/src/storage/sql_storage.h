@@ -75,15 +75,15 @@ public:
                                          
     virtual int isFolderInDatabase(zmm::String path);
     virtual int isFileInDatabase(int parentID, zmm::String filename);
-   
+    
     virtual zmm::Ref<DBRHash<int> > getObjects(int parentID);
-
+    
     virtual void removeObjects(zmm::Ref<DBRHash<int> > list);
-
-    virtual void removeObject(int objectID);
+    
+    virtual void removeObject(int objectID, bool all);
     
     /* accounting methods */
-    virtual int getTotalFiles();   
+    virtual int getTotalFiles();
     
     virtual zmm::Ref<zmm::Array<CdsObject> > browse(zmm::Ref<BrowseParam> param);
     virtual zmm::Ref<zmm::Array<zmm::StringBase> > getMimeTypes();
@@ -95,19 +95,18 @@ public:
     virtual void incrementUpdateIDs(int *ids, int size);
     virtual void incrementUIUpdateID(int id);
     
+    virtual void addContainerChain(zmm::String path, int *containerID, int *updateID);
+    
     virtual zmm::String getInternalSetting(zmm::String key);
     virtual void storeInternalSetting(zmm::String key, zmm::String value) = 0;
     
     virtual void shutdown() = 0;
     
 protected:
-    /* helper forcreateObjectFromRow() */
+    /* helper for createObjectFromRow() */
     zmm::String getRealLocation(int parentID, zmm::String location);
     
     virtual zmm::Ref<CdsObject> createObjectFromRow(zmm::Ref<SQLRow> row);
-    
-    /* helpers for selectObjects() */
-    zmm::String getSelectQuery();
     
     /* helper for findObjectByPath and findObjectIDByPath */ 
     zmm::Ref<SQLRow> _findObjectByPath(zmm::String fullpath);
@@ -121,6 +120,7 @@ protected:
     /* helper for removeObject(s) */
     void _removeObjects(zmm::String objectIDs);
     void _recursiveRemove(zmm::String objectIDs);
+    
     
     /*
     zmm::String selectQueryBasic;
@@ -139,11 +139,15 @@ protected:
     
     bool dbRemovesDeps;
     
+    /* location hash helpers */
+    zmm::String addLocationPrefix(char prefix, zmm::String path);
+    zmm::String stripLocationPrefix(char* prefix, zmm::String path);
+    zmm::String stripLocationPrefix(zmm::String path);
     unsigned int stringHash(zmm::String key);
     
     int ensurePathExistence(zmm::String path);
     zmm::Ref<CdsObject> checkRefID(zmm::Ref<CdsObject> obj);
-    int createContainer(int parentID, zmm::String name, zmm::String path);
+    int createContainer(int parentID, zmm::String name, zmm::String path, bool isVirtual);
     
     
     /*

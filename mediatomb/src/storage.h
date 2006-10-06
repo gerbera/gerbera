@@ -133,11 +133,8 @@ public:
     /// the object ID of the container that is last in the path. The
     /// updateID will hold the objectID of the container that was changed,
     /// in case new containers were created during the operation.
-    virtual void addContainerChain(zmm::String path, int *containerID, int *updateID) 
-    {
-        *containerID = INVALID_OBJECT_ID;
-        *updateID = INVALID_OBJECT_ID;
-    };
+    virtual void addContainerChain(zmm::String path, int *containerID, int *updateID) = 0;
+    
     virtual void updateObject(zmm::Ref<CdsObject> object) = 0;
 
     virtual zmm::Ref<zmm::Array<CdsObject> > browse(zmm::Ref<BrowseParam> param) = 0;
@@ -156,7 +153,18 @@ public:
     /* utility methods */
     virtual zmm::Ref<CdsObject> loadObject(int objectID) = 0;
     virtual int getChildCount(int contId, bool containersOnly = false) = 0;
-    virtual void removeObject(int objectID) = 0;
+    
+    /// \brief Removed the object identified by the objectID from the database.
+    /// all references will be automatically removed. If the object is
+    /// a container, all children will be also removed automatically. If
+    /// the object is a reference to another object, the "all" flag
+    /// determines, if the main object will be removed too.
+    /// \param objectID the object id of the object to remove
+    /// \param all if true and the object to be removed is a reference
+    /// to another object, the referenced object (and all it's references)
+    /// will be removed too. Default: false.
+    virtual void removeObject(int objectID, bool all) = 0;
+    
     virtual zmm::Ref<zmm::Array<CdsObject> > getObjectPath(int objectID);
     
     /// \brief Determines if a folder given by it's full path is in the database
@@ -175,7 +183,7 @@ public:
     /// \return DBHash containing the objectID's 
     virtual zmm::Ref<DBRHash<int> > getObjects(int parentID) = 0;
     
-    /// brief Remove all objects found in list
+    /// \brief Remove all objects found in list
     /// \param parentID ID of the parent container
     /// \param list a DBHash containing objectIDs that have to be removed
     virtual void removeObjects(zmm::Ref<DBRHash<int> > list) = 0;
@@ -193,7 +201,12 @@ public:
     virtual void shutdown() = 0;
 protected:
     int uiUpdateId;
-void getObjectPath(zmm::Ref<zmm::Array<CdsObject> > arr, int objectID);
+    
+    /* helper for addContainerChain */
+    static void stripAndUnescapeVirtualContainerFromPath(zmm::String path, zmm::String &first, zmm::String &last);
+    
+    void getObjectPath(zmm::Ref<zmm::Array<CdsObject> > arr, int objectID);
+    
     static Mutex mutex;
 };
 

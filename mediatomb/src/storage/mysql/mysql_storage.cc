@@ -35,8 +35,8 @@ MysqlStorage::MysqlStorage() : SQLStorage()
 {
     //shutdownFlag = false;
     mysql_init_key_initialized = false;
-    /// \todo set dbRemovesDeps to true only for InnoDB.
-    dbRemovesDeps = true; 
+    /// dbRemovesDeps gets set by init() to the correct value
+    dbRemovesDeps = true;
     mutex = Ref<Mutex> (new Mutex());
 }
 MysqlStorage::~MysqlStorage()
@@ -45,8 +45,10 @@ MysqlStorage::~MysqlStorage()
 
 void MysqlStorage::checkMysqlThreadInit()
 {
+    //log_debug("checkMysqlThreadInit; thread_id=%d\n", pthread_self());
     if (pthread_getspecific(mysql_init_key) == NULL)
     {
+        log_debug("running mysql_thread_init(); thread_id=%d\n", pthread_self());
         if (mysql_thread_init()) throw _Exception(_("error while calling mysql_thread_init()"));
         if (pthread_setspecific(mysql_init_key, (void *) 1)) throw _Exception(_("error while calling pthread_setspecific()"));
     }
@@ -54,6 +56,7 @@ void MysqlStorage::checkMysqlThreadInit()
 
 void MysqlStorage::init()
 {
+    log_debug("start\n");
     int ret;
     
     if (! mysql_thread_safe())
@@ -61,56 +64,52 @@ void MysqlStorage::init()
         throw _Exception(_("mysql library is not thread safe!"));
     }
     
-    if (! mysql_init_key_initialized)
-    {
-        /// \todo write destructor function
-        ret = pthread_key_create(&mysql_init_key, NULL);
-        if (ret) throw _Exception(_("could not create pthread_key"));
-        pthread_setspecific(mysql_init_key, (void *) 1);
-        
-        Ref<ConfigManager> config = ConfigManager::getInstance();
-        
-        String dbHost = config->getOption(_("/server/storage/host"));
-        String dbName = config->getOption(_("/server/storage/database"));
-        String dbUser = config->getOption(_("/server/storage/username"));
-        String dbPort = config->getOption(_("/server/storage/port"));
-        String dbPass;
-        if (config->getElement(_("/server/storage/password")) == nil)
-            dbPass = nil;
-        else
-            dbPass = config->getOption(_("/server/storage/password"), _(""));
-        
-        
-        String dbSock;
-        if (config->getElement(_("/server/storage/socket")) == nil)
-            dbSock = nil;
-        else
-            dbSock = config->getOption(_("/server/storage/socket"), _(""));
-        
-        MYSQL *res_mysql;
-        
-        res_mysql = mysql_init(&db);
-        if(! res_mysql)
-            throw _Exception(_("mysql_init failed"));
-        
-        res_mysql = mysql_real_connect(&db,
-            dbHost.c_str(),
-            dbUser.c_str(),
-            (dbPass == nil ? NULL : dbPass.c_str()),
-            dbName.c_str(),
-            dbPort.toInt(), // port
-            (dbSock == nil ? NULL : dbSock.c_str()), // socket
-            0 // flags
-        );
-        if(! res_mysql)
-            throw _Exception(_("mysql_real_connect failed"));
-        
-        
-        
-        mysql_init_key_initialized = true;
-    }
+    /// \todo write destructor function
+    ret = pthread_key_create(&mysql_init_key, NULL);
+    if (ret) throw _Exception(_("could not create pthread_key"));
+    my_init();
+    pthread_setspecific(mysql_init_key, (void *) 1);
+    
+    Ref<ConfigManager> config = ConfigManager::getInstance();
+    
+    String dbHost = config->getOption(_("/server/storage/host"));
+    String dbName = config->getOption(_("/server/storage/database"));
+    String dbUser = config->getOption(_("/server/storage/username"));
+    String dbPort = config->getOption(_("/server/storage/port"));
+    String dbPass;
+    if (config->getElement(_("/server/storage/password")) == nil)
+        dbPass = nil;
     else
-        checkMysqlThreadInit();
+        dbPass = config->getOption(_("/server/storage/password"), _(""));
+    
+    
+    String dbSock;
+    if (config->getElement(_("/server/storage/socket")) == nil)
+        dbSock = nil;
+    else
+        dbSock = config->getOption(_("/server/storage/socket"), _(""));
+    
+    MYSQL *res_mysql;
+    
+    res_mysql = mysql_init(&db);
+    if(! res_mysql)
+        throw _Exception(_("mysql_init failed"));
+    
+    res_mysql = mysql_real_connect(&db,
+        dbHost.c_str(),
+        dbUser.c_str(),
+        (dbPass == nil ? NULL : dbPass.c_str()),
+        dbName.c_str(),
+        dbPort.toInt(), // port
+        (dbSock == nil ? NULL : dbSock.c_str()), // socket
+        0 // flags
+    );
+    if(! res_mysql)
+        throw _Exception(_("The connection to the MySQL database has failed: ") + getError(&db));
+    
+    
+    
+    mysql_init_key_initialized = true;
     
     /*
     Ref<MSTask> task;
@@ -160,6 +159,7 @@ void MysqlStorage::init()
     pthread_attr_destroy(&attr);
     */
     SQLStorage::init();
+    log_debug("end\n");
 }
 
 String MysqlStorage::quote(String value)
@@ -177,7 +177,7 @@ String MysqlStorage::quote(String value)
 String MysqlStorage::getError(MYSQL *db)
 {
     Ref<StringBuffer> err_buf(new StringBuffer());
-    *err_buf << "mysql_error(" << String::from(mysql_errno(db));
+    *err_buf << "mysql_error (" << String::from(mysql_errno(db));
     *err_buf << "): \"" << String(mysql_error(db)) << "\"";
     return err_buf->toString();
 }
@@ -215,13 +215,15 @@ void MysqlStorage::waitForTask(Ref<MSTask> task, pthread_mutex_t *mutex, pthread
 
 Ref<SQLResult> MysqlStorage::select(String query)
 {
-    /*
+    /* debug...
     Exception *e = new Exception(query);
     e->printStackTrace();
     delete e;
     */
     
     int res;
+    
+    checkMysqlThreadInit();
     mutex->lock();
     res = mysql_real_query(&db, query.c_str(), query.length());
     if(res)
@@ -252,13 +254,15 @@ Ref<SQLResult> MysqlStorage::select(String query)
 
 int MysqlStorage::exec(String query, bool getLastInsertId)
 {
-    /*
+    /* debug..
     Exception *e = new Exception(query);
     e->printStackTrace();
     delete e;
     */
 
     int res;
+    
+    checkMysqlThreadInit();
     mutex->lock();
     res = mysql_real_query(&db, query.c_str(), query.length());
     if(res)
@@ -530,6 +534,7 @@ MysqlResult::MysqlResult(MYSQL_RES *mysql_res) : SQLResult()
     this->mysql_res = mysql_res;
     nullRead = false;
 }
+
 MysqlResult::~MysqlResult()
 {
     if(mysql_res)
@@ -543,6 +548,7 @@ MysqlResult::~MysqlResult()
         mysql_res = NULL;
     }
 }
+
 Ref<SQLRow> MysqlResult::nextRow()
 {   
     MYSQL_ROW mysql_row;
@@ -557,13 +563,13 @@ Ref<SQLRow> MysqlResult::nextRow()
     return nil;
 }
 
-
 /* MysqlRow */
 
 MysqlRow::MysqlRow(MYSQL_ROW mysql_row, Ref<SQLResult> sqlResult) : SQLRow(sqlResult)
 {
     this->mysql_row = mysql_row;
 }
+
 String MysqlRow::col(int index)
 {
     return String(mysql_row[index]);

@@ -49,6 +49,14 @@ void web::remove::process()
     else
         objectID = objID.toInt();
     
+    String allStr = param(_("all"));
+    int allInt;
+    if (!string_ok(allStr))
+        throw _Exception(_("invalid 'all' flag"));
+    else
+        allInt = allStr.toInt();
+    bool all = allInt;
+    
     Ref<Storage> storage = Storage::getInstance();
     Ref<CdsObject> obj = storage->loadObject(objectID);
     
@@ -57,7 +65,7 @@ void web::remove::process()
         root->appendTextChild(_("updateContainer"), String::from(obj->getParentID()));
     }
     
-    ContentManager::getInstance()->removeObject(objectID);
+    ContentManager::getInstance()->removeObject(objectID, true, all);
     
     log_debug("remove: returning\n");
 }

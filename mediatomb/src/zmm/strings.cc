@@ -90,6 +90,12 @@ String::String(const char *str, int len)
 	else
 		base = NULL;
 }
+String::String(char ch)
+{
+    base = new StringBase(&ch, 1);
+    base->retain();
+}
+
 String::String(const String &other)
 {
 	base = other.base;
@@ -306,15 +312,13 @@ String String::substring(int from, int count)
 	*(res.base->data + count) = 0;
 	return res;
 }
-char String::charAt(int index)
-{
-    return base->data[index];
-}
-int String::index(char ch)
+int String::index(int start, char ch)
 {
 	if(! base)
 		return -1;
-    char *pos = ::index(base->data, ch);
+    if (start < 0 || start + 1 > base->len)
+        return -1;
+    char *pos = ::index(base->data + start, ch);
     if (pos)
         return pos - base->data;
     else
@@ -330,4 +334,16 @@ int String::rindex(char ch)
     else
         return -1;
 }
-
+int String::rindex(int end, char ch)
+{
+    if(! base)
+		return -1;
+    if (end < 0 || end + 1 > base->len)
+        return -1;
+    for (char *pos = base->data + end; pos >= base->data; pos--)
+    {
+        if (*pos == ch)
+            return pos - base->data;
+    }
+    return -1;
+}

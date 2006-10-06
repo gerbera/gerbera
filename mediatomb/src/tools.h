@@ -163,7 +163,10 @@ zmm::String get_jpeg_resolution(zmm::Ref<IOHandler> ioh);
 
 /// \brief Sets resolution for a given resource index, item must be a JPEG image
 void set_jpeg_resolution_resource(zmm::Ref<CdsItem> item, int res_num);
-    
+
+zmm::String unescape(zmm::String string, char escape);
+
+zmm::String fallbackString(zmm::String first, zmm::String fallback);
 
 #endif // __TOOLS_H__
 

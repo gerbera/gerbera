@@ -65,6 +65,7 @@ protected:
 public:
 	String();
 	explicit String(const char *str);
+    String(char ch);
 	String(const char *str, int len);
 	String(const String &other);
 	String(StringBase *other);
@@ -127,9 +128,12 @@ public:
 
 	String substring(int from);
 	String substring(int from, int count);
-    char charAt(int index);
-    int index(char ch);
+    inline char charAt(int index) {  return base->data[index]; }
+    inline char *charPtrAt(int index) { return base->data + index; }
+    inline int index(char ch) { return index(0, ch); }
+    int index(int start, char ch);
     int rindex(char ch);
+    int rindex(int end, char ch);
 
     long toLong();
     inline int toInt() { return (int)toLong(); }

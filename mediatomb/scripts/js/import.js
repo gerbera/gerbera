@@ -68,21 +68,6 @@ function concatArrays(arr1, arr2)
     return arr;
 }
 
-function addContainerChain(parentID, arr)
-{
-    for (var i = 0; i < arr.length; i++)
-    {
-        var title = arr[i];
-        var cont = new Object();
-        cont.objectType = OBJECT_TYPE_CONTAINER;
-        cont.parentID = parentID;
-        cont.title = title;
-        cont.upnp_class = 'object.container';
-        parentID = addCdsObject(cont);
-    }
-    return parentID;
-}
-
 function escapeSlash(name)
 {
     name = name.replace(/\\/g, "\\\\");

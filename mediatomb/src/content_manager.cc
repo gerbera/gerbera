@@ -342,7 +342,7 @@ void ContentManager::_addFile(String path, bool recursive, bool hidden)
     um->flushUpdates();
 }
 
-void ContentManager::_removeObject(int objectID)
+void ContentManager::_removeObject(int objectID, bool all)
 {
     /// \todo when removing... what about container updates when removing recursively?
     if (objectID == 0)
@@ -351,7 +351,7 @@ void ContentManager::_removeObject(int objectID)
         throw _Exception(_("cannot remove PC-Directory container"));
     /// \todo make PC-Directory ID configurable
     Ref<Storage> storage = Storage::getInstance();
-    storage->removeObject(objectID);
+    storage->removeObject(objectID, all);
 
     // um->containerChanged(obj->getParentID());
     
@@ -1165,10 +1165,12 @@ int ContentManager::addFile(zmm::String path, bool recursive, bool async, bool h
         return false;
     }
 }
-int ContentManager::removeObject(int objectID, bool async)
+
+int ContentManager::removeObject(int objectID, bool async, bool all)
 {
     if (async)
     {
+        /*
         // building container path for the description
         Ref<Storage> storage = Storage::getInstance();
         Ref<Array<CdsObject> > objectPath = storage->getObjectPath(objectID);
@@ -1177,18 +1179,19 @@ int ContentManager::removeObject(int objectID, bool async)
         // skip root container, start from 1
         for (int i = 1; i < objectPath->size(); i++)
             *desc << '/' << objectPath->get(i)->getTitle();
-        
-        Ref<CMTask> task(new CMRemoveObjectTask(objectID));
-        task->setDescription(desc->toString());
+        */
+        Ref<CMTask> task(new CMRemoveObjectTask(objectID, all));
+        //task->setDescription(desc->toString());
+        task->setDescription(_("description missing!!!!!!!!!!!"));
         return addTask(task);
     }
     else
     {
-        _removeObject(objectID);
+        _removeObject(objectID, all);
         return false;
     }
 }
-
+    
 int ContentManager::rescanDirectory(int objectID, scan_level_t scanLevel, bool async)
 {
     if (async)
@@ -1231,13 +1234,15 @@ void CMAddFileTask::run()
     cm->_addFile(path, recursive, hidden);
 }
 
-CMRemoveObjectTask::CMRemoveObjectTask(int objectID) : CMTask()
+CMRemoveObjectTask::CMRemoveObjectTask(int objectID, bool all) : CMTask()
 {
     this->objectID = objectID;
+    this->all = all;
 }
+
 void CMRemoveObjectTask::run()
 {
-    cm->_removeObject(objectID);
+    cm->_removeObject(objectID, all);
 }
 
 CMRescanDirectoryTask::CMRescanDirectoryTask(int objectID, scan_level_t scanLevel) : CMTask()

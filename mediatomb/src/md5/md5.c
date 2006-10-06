@@ -40,7 +40,7 @@
 #include "md5.h"
 #include <string.h>
 
-#ifdef TEST
+#if 0
 /*
  * Compile with -DTEST to create a self-contained executable test program.
  * The test program should print out the same values as given in section
