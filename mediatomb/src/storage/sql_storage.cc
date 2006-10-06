@@ -431,7 +431,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
             count = INT_MAX;
 
         *qb << "f.parent_id = " << objectID;
-        *qb << " ORDER BY f.object_type, f.dc_title";
+        *qb << " ORDER BY f.object_type, f.dc_title, rf.object_type, rf.dc_title";
         *qb << " LIMIT " << param->getStartingIndex() << "," << count;
     }
     else // metadata
@@ -897,7 +897,7 @@ Ref<Array<CdsObject> > SQLStorage::selectObjects(Ref<SelectParam> param)
             throw _StorageException(_("selectObjects: invalid operation: ") +
                                    param->flags);
     }
-    *q << " ORDER BY f.object_type, f.dc_title";
+    *q << " ORDER BY f.object_type, f.dc_title, rf.object_type, rf.dc_title";
     Ref<SQLResult> res = select(q->toString());
     Ref<SQLRow> row;
     Ref<Array<CdsObject> > arr(new Array<CdsObject>());

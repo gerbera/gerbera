@@ -173,6 +173,10 @@ String String::operator+(int x)
 {
 	return operator+(from(x));
 }
+String String::operator+(unsigned int x)
+{
+	return operator+(from(x));
+}
 String String::operator+(double x)
 {
 	return operator+(from(x));

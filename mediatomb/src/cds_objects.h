@@ -72,7 +72,7 @@ protected:
     int virt;
 
     /// \brief type of the object: item, container, etc.
-    unsigned objectType;
+    unsigned int objectType;
 
     /// \brief field which can hold various flags for the object 
     unsigned int objectFlags; 
@@ -147,7 +147,7 @@ public:
     inline bool isVirtual() { return virt; }
 
     /// \brief Query information on object type: item, container, etc.
-    inline int getObjectType() { return objectType; }
+    inline unsigned int getObjectType() { return objectType; }
 
     /// \brief Retrive sort priority setting.
     inline int getSortPriority() { return sortPriority; }
@@ -239,7 +239,7 @@ public:
     /// \brief Frees unnecessary memory
     void optimize();
 
-    static zmm::Ref<CdsObject> createObject(int objectType);
+    static zmm::Ref<CdsObject> createObject(unsigned int objectType);
 
 	friend int CdsObjectTitleComparator(void *arg1, void *arg2);
 };

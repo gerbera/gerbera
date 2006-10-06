@@ -111,7 +111,7 @@ void CdsObject::validate()
 
 }
 
-Ref<CdsObject> CdsObject::createObject(int objectType)
+Ref<CdsObject> CdsObject::createObject(unsigned int objectType)
 {
     CdsObject *pobj;
     
