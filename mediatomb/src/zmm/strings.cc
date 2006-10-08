@@ -352,7 +352,53 @@ int String::rindex(int end, char ch)
     return -1;
 }
 String String::reduce(char ch)
-{ /// \todo jin: implement this!
-    return String(base);
+{ 
+    if (!base)
+        return nil;
+
+    char *pos = ::index(base->data, ch);
+    if (!pos)
+        return *this;
+  
+    String res(base->len);
+
+    char *pos2 = res.base->data;
+    char *pos3 = base->data;
+    do
+    {
+        if (*(pos + 1) == ch)
+        {
+            if (pos-pos3 == 0)
+            {
+                *pos2 = ch;
+                pos2++;
+            }
+            else
+            {
+                strncpy(pos2, pos3, (pos-pos3)+1);
+                pos2 = pos2 + ((pos-pos3)+1);
+            }
+            while (*pos == ch) pos++;
+            pos3 = pos;
+            if (*pos == '\0')
+            {
+                *pos2 = '\0';
+                break;
+            }
+            pos = ::index(pos, ch);
+        }
+        else
+        {
+            pos++;
+            if (*pos == '\0')
+                break;
+            pos = ::index(pos, ch);
+        }
+    } while (pos);
+    if ((base->data)+(base->len)-pos3)
+        strncpy(pos2, pos3, (base->data)+(base->len)-pos3);
+    pos2[(base->data)+(base->len)-pos3] = '\0';
+    res.updateLength();
+    return res;
 }
 
