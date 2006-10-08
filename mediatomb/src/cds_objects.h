@@ -28,11 +28,11 @@
 #include "cds_resource.h"
 
 // ATTENTION: These values need to be changed in web/js/items.js too.
-#define OBJECT_TYPE_CONTAINER 1
-#define OBJECT_TYPE_ITEM 2
-#define OBJECT_TYPE_ACTIVE_ITEM 4
-#define OBJECT_TYPE_ITEM_EXTERNAL_URL 8
-#define OBJECT_TYPE_ITEM_INTERNAL_URL 16
+#define OBJECT_TYPE_CONTAINER           0x00000001
+#define OBJECT_TYPE_ITEM                0x00000002
+#define OBJECT_TYPE_ACTIVE_ITEM         0x00000004
+#define OBJECT_TYPE_ITEM_EXTERNAL_URL   0x00000008
+#define OBJECT_TYPE_ITEM_INTERNAL_URL   0x00000010
 
 #define IS_CDS_CONTAINER(type) (type & OBJECT_TYPE_CONTAINER)
 #define IS_CDS_ITEM(type) (type & OBJECT_TYPE_ITEM)
@@ -40,6 +40,17 @@
 #define IS_CDS_ITEM_EXTERNAL_URL(type) (type & OBJECT_TYPE_ITEM_EXTERNAL_URL)
 #define IS_CDS_ITEM_INTERNAL_URL(type) (type & OBJECT_TYPE_ITEM_INTERNAL_URL)
 #define IS_CDS_PURE_ITEM(type) (type == OBJECT_TYPE_ITEM)
+
+#define OBJECT_FLAG_RESTRICTED          0x00000001
+#define OBJECT_FLAG_SEARCHABLE          0x00000002
+#define OBJECT_FLAG_USE_RESOURCE_REF    0x00000004
+//#define OBJECT_FLAG_XXX               0x00000008
+//#define OBJECT_FLAG_XXX               0x00000010
+//#define OBJECT_FLAG_XXX               0x00000020
+//#define OBJECT_FLAG_XXX               0x00000040
+//#define OBJECT_FLAG_XXX               0x00000080
+//#define OBJECT_FLAG_XXX               0x00000100
+//#define OBJECT_FLAG_XXX               0x00000200
 
 int CdsObjectTitleComparator(void *arg1, void *arg2);
 
@@ -55,9 +66,6 @@ protected:
 
     /// \brief ID of the object's parent
     int parentID;
-
-    /// \brief restricted flag
-    bool restricted;
 
     /// \brief dc:title
     zmm::String title;
@@ -85,7 +93,7 @@ protected:
     zmm::Ref<zmm::Array<CdsResource> > resources;
 
 public:
-    /// \brief Constructor, currently only sets the restricted flag to 1
+    /// \brief Constructor. Sets the default values.
     CdsObject();
 
     /// \brief Set the object ID.
@@ -117,10 +125,10 @@ public:
     inline int getParentID() { return parentID; }
 
     /// \brief Set the restricted flag.
-    inline void setRestricted(int restricted) { this->restricted = restricted; }
+    inline void setRestricted(bool restricted) { changeFlag(OBJECT_FLAG_RESTRICTED, restricted); }
 
     /// \brief Query the restricted flag.
-    inline bool isRestricted() { return restricted; }
+    inline bool isRestricted() { getFlag(OBJECT_FLAG_RESTRICTED); }
 
     /// \brief Set the object title (dc:title)
     inline void setTitle(zmm::String title) { this->title = title; }
@@ -157,9 +165,22 @@ public:
 
     /// \brief Get flags of an object.
     inline unsigned int getFlags() { return objectFlags; }
+    
+    /// \brief Get a flag of an object.
+    inline unsigned int getFlag(unsigned int mask) { return objectFlags & mask; }
 
     /// \brief Set flags for the object.
     inline void setFlags(unsigned int objectFlags) { this->objectFlags = objectFlags; }
+    
+    /// \biref Set a flag of the object.
+    inline void setFlag(unsigned int mask) { objectFlags |= mask; }
+    
+    /// \biref Set a flag of the object.
+    inline void changeFlag(unsigned int mask, bool value) { if (value) setFlag(mask); else clearFlag(mask); }
+    
+    /// \biref Clears a flag of the object.
+    inline void clearFlag(unsigned int mask) { objectFlags &= !mask; }
+    
     /// \brief Query single metadata value.
     inline zmm::String getMetadata(zmm::String key)
     { return metadata->get(key); }
@@ -441,9 +462,6 @@ public:
 class CdsContainer : public CdsObject
 {
 protected:
-    /// \brief searchable flag.
-    bool searchable;
-
     /// \brief container update id.
     int updateID;
 
@@ -455,10 +473,10 @@ public:
     CdsContainer();
 
     /// \brief Set the searchable flag.
-    inline void setSearchable(bool searchable) { this->searchable = searchable; }
+    inline void setSearchable(bool searchable) { changeFlag(OBJECT_FLAG_SEARCHABLE, searchable); }
 
     /// \brief Query searchable flag.
-    inline int isSearchable() { return searchable; }
+    inline int isSearchable() { getFlag(OBJECT_FLAG_SEARCHABLE); }
 
     /// \brief Set the container update ID value.
     inline void setUpdateID(int updateID) { this->updateID = updateID; }

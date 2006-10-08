@@ -145,6 +145,7 @@ public:
 
     long toLong();
     inline int toInt() { return (int)toLong(); }
+    inline unsigned int toUInt() { return (unsigned int)toLong(); }
 	double toDouble();
 
 	int length();

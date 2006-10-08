@@ -16,6 +16,29 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `mt_cds_active_item`
+--
+
+DROP TABLE IF EXISTS `mt_cds_active_item`;
+CREATE TABLE `mt_cds_active_item` (
+  `id` int(11) NOT NULL,
+  `action` varchar(255) NOT NULL,
+  `state` varchar(255) NOT NULL,
+  PRIMARY KEY  (`id`),
+  CONSTRAINT `mt_cds_active_item_ibfk_1` FOREIGN KEY (`id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `mt_cds_active_item`
+--
+
+
+/*!40000 ALTER TABLE `mt_cds_active_item` DISABLE KEYS */;
+LOCK TABLES `mt_cds_active_item` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `mt_cds_active_item` ENABLE KEYS */;
+
+--
 -- Table structure for table `mt_cds_object`
 --
 
@@ -24,19 +47,17 @@ CREATE TABLE `mt_cds_object` (
   `id` int(11) NOT NULL auto_increment,
   `ref_id` int(11) default NULL,
   `parent_id` int(11) NOT NULL default '0',
-  `object_type` tinyint(4) NOT NULL,
+  `object_type` tinyint(4) unsigned NOT NULL,
   `upnp_class` varchar(80) default NULL,
   `dc_title` varchar(255) default NULL,
-  `is_restricted` tinyint(4) NOT NULL default '1',
   `location` varchar(255) default NULL,
   `location_hash` int(11) unsigned default NULL,
   `metadata` text,
   `auxdata` text,
   `resources` text,
   `update_id` int(11) NOT NULL default '0',
-  `is_searchable` tinyint(4) NOT NULL default '0',
   `mime_type` varchar(40) default NULL,
-  `state` varchar(255) default NULL,
+  `flags` int(11) unsigned NOT NULL default '1',
   PRIMARY KEY  (`id`),
   KEY `cds_object_ref_id` (`ref_id`),
   KEY `cds_object_parent_id` (`parent_id`),
@@ -52,7 +73,7 @@ CREATE TABLE `mt_cds_object` (
 
 /*!40000 ALTER TABLE `mt_cds_object` DISABLE KEYS */;
 LOCK TABLES `mt_cds_object` WRITE;
-INSERT INTO `mt_cds_object` VALUES (-1,NULL,-1,0,NULL,NULL,1,NULL,NULL,NULL,NULL,NULL,0,0,NULL,NULL),(0,NULL,-1,1,'object.container','Root',1,NULL,NULL,NULL,NULL,NULL,0,0,NULL,NULL),(1,NULL,0,1,'object.container','PC Directory',1,NULL,NULL,NULL,NULL,NULL,2,0,NULL,NULL);
+INSERT INTO `mt_cds_object` VALUES (-1,NULL,-1,0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,NULL,1),(0,NULL,-1,1,'object.container','Root',NULL,NULL,NULL,NULL,NULL,0,NULL,1),(1,NULL,0,1,'object.container','PC Directory',NULL,NULL,NULL,NULL,NULL,0,NULL,1);
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `mt_cds_object` ENABLE KEYS */;
 
@@ -74,6 +95,7 @@ CREATE TABLE `mt_internal_setting` (
 
 /*!40000 ALTER TABLE `mt_internal_setting` DISABLE KEYS */;
 LOCK TABLES `mt_internal_setting` WRITE;
+INSERT INTO `mt_internal_setting` VALUES ('db_version','1');
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `mt_internal_setting` ENABLE KEYS */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

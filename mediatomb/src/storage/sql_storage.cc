@@ -47,20 +47,16 @@ enum
     _ref_id,
     _parent_id,
     _object_type,
-    //_is_virtual,
     _upnp_class,
     _dc_title,
-    _is_restricted,
     _location,
     _location_hash,
     _metadata,
     _auxdata,
     _resources,
     _update_id,
-    _is_searchable,
     _mime_type,
-    //_action,
-    _state,
+    _flags,
     _ref_upnp_class,
     _ref_dc_title,
     _ref_metadata,
@@ -69,11 +65,9 @@ enum
     _ref_mime_type
 };
 
-
-
 #define SELECT_DATA "f.id,f.ref_id,f.parent_id,f.object_type,f.upnp_class," \
-    "f.dc_title,f.is_restricted,f.location,f.location_hash,f.metadata," \
-    "f.auxdata,f.resources,f.update_id,f.is_searchable,f.mime_type,f.state," \
+    "f.dc_title,f.location,f.location_hash,f.metadata," \
+    "f.auxdata,f.resources,f.update_id,f.mime_type,f.flags," \
     "rf.upnp_class,rf.dc_title,rf.metadata,rf.auxdata,rf.resources,rf.mime_type"
 
 #define SQL_QUERY "SELECT " SELECT_DATA " FROM " CDS_OBJECT_TABLE \
@@ -189,7 +183,7 @@ Ref<Dictionary> SQLStorage::_addUpdateObject(Ref<CdsObject> obj, bool isUpdate)
     else if (isUpdate)
         data->put(_("dc_title"), _("NULL"));
     
-    data->put(_("is_restricted"), String::from(obj->isRestricted()));
+    data->put(_("flags"), String::from(obj->getFlags()));
     
     if (isUpdate)
         data->put(_("metadata"), _("NULL"));
@@ -250,8 +244,6 @@ Ref<Dictionary> SQLStorage::_addUpdateObject(Ref<CdsObject> obj, bool isUpdate)
             data->put(_("location"), _("NULL"));
             data->put(_("location_hash"), _("NULL"));
         }*/
-        
-        data->put(_("is_searchable"), String::from(cont->isSearchable()));
         
         if (isUpdate)
             data->put(_("mime_type"), _("NULL"));
@@ -766,12 +758,9 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
         obj->setVirtual(false);
     
     obj->setParentID(row->col(_parent_id).toInt());
-    //obj->setVirtual(atoi(row->col(_is_virtual).c_str()));
-    
-    obj->setRestricted(atoi(row->col(_is_restricted).c_str()));
-    
     obj->setTitle(fallbackString(row->col(_dc_title), row->col(_ref_dc_title)));
     obj->setClass(fallbackString(row->col(_upnp_class), row->col(_ref_upnp_class)));
+    obj->setFlags(row->col(_flags).toUInt());
     
     String metadataStr = fallbackString(row->col(_metadata), row->col(_ref_metadata));
     Ref<Dictionary> meta(new Dictionary());
@@ -785,7 +774,7 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
     
     String resources_str = fallbackString(row->col(_resources), row->col(_ref_resources));
     bool resource_zero_ok = false;
-    if (string_ok(resources_str))
+    if (string_ok(resources_str))                                            
     {
         Ref<Array<StringBase> > resources = split_string(resources_str,
                                                     RESOURCE_SEP);
@@ -801,7 +790,6 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
     if (IS_CDS_CONTAINER(objectType))
     {
         Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
-        cont->setSearchable(atoi(row->col(_is_searchable).c_str()));
         cont->setUpdateID(atoi(row->col(_update_id).c_str()));
         char locationPrefix;
         cont->setLocation(stripLocationPrefix(&locationPrefix, row->col(_location)));
@@ -829,8 +817,8 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
     if (IS_CDS_ACTIVE_ITEM(objectType))
     {
         Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
-        aitem->setAction(row->col(_location)); // TODO: use different field
-        aitem->setState(row->col(_state));
+        //aitem->setAction(row->col(_location)); // TODO: use different field
+        //aitem->setState(row->col(_state));
         matched_types++;
     }
 

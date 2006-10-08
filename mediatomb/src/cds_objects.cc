@@ -34,20 +34,18 @@ CdsObject::CdsObject() : Object()
     metadata = Ref<Dictionary>(new Dictionary());
     auxdata = Ref<Dictionary>(new Dictionary());
     resources = Ref<Array<CdsResource> >(new Array<CdsResource>);
-    restricted = 1;
     id = INVALID_OBJECT_ID;
     parentID = INVALID_OBJECT_ID;
     refID = 0;
     virt = 0;
     sortPriority = 0;
-    objectFlags = 0;
+    objectFlags = OBJECT_FLAG_RESTRICTED;
 }
 
 void CdsObject::copyTo(Ref<CdsObject> obj)
 {
     obj->setID(id);
     obj->setParentID(parentID);
-    obj->setRestricted(restricted);
     obj->setTitle(title);
     obj->setClass(upnpClass);
     obj->setLocation(location);
@@ -64,7 +62,7 @@ int CdsObject::equals(Ref<CdsObject> obj, bool exactly)
     if (!(
         id == obj->getID() &&
         parentID == obj->getParentID() &&
-        restricted == obj->isRestricted() &&
+        isRestricted() == obj->isRestricted() &&
         title == obj->getTitle() &&
         upnpClass == obj->getClass() &&
         sortPriority == obj->getSortPriority()
@@ -253,7 +251,7 @@ CdsContainer::CdsContainer() : CdsObject()
 {
     objectType = OBJECT_TYPE_CONTAINER;
     updateID = 0;
-    searchable = 0;
+    // searchable = 0; is now in objectFlags; by default all flags (except "restricted") are not set
     childCount = -1;
     upnpClass = _(UPNP_DEFAULT_CLASS_CONTAINER);
 }
@@ -265,14 +263,13 @@ void CdsContainer::copyTo(Ref<CdsObject> obj)
         return;
     Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
     cont->setUpdateID(updateID);
-    cont->setSearchable(searchable);
 }
 int CdsContainer::equals(Ref<CdsObject> obj, bool exactly)
 {
     Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
     return (
         CdsObject::equals(obj, exactly) &&
-        searchable == cont->isSearchable()
+        isSearchable() == cont->isSearchable()
     );
 }
 
