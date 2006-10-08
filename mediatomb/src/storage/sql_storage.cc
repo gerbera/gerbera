@@ -199,25 +199,23 @@ Ref<Dictionary> SQLStorage::_addUpdateObject(Ref<CdsObject> obj, bool isUpdate)
     if (isUpdate)
         data->put(_("auxdata"), _("NULL"));
     dict = obj->getAuxData();
-    if (dict->size() > 0)
+    if (dict->size() > 0 && (! isVirtual || ! refObj->getAuxData()->equals(obj->getAuxData())))
     {
-        if (! isVirtual || ! refObj->getAuxData()->equals(obj->getAuxData()))
+        data->put(_("auxdata"), quote(obj->getAuxData()->encode()));
+    }
+    
+    if (! isVirtual || (! refObj->getFlag(OBJECT_FLAG_USE_RESOURCE_REF) && ! refObj->resourcesEqual(obj)))
+    {
+        // encode resources
+        Ref<StringBuffer> resBuf(new StringBuffer());
+        for (int i = 0; i < obj->getResourceCount(); i++)
         {
-            data->put(_("auxdata"), quote(obj->getAuxData()->encode()));
+            if (i > 0)
+                *resBuf << RESOURCE_SEP;
+            *resBuf << obj->getResource(i)->encode();
         }
-    }
-    
-    // encode resources
-    Ref<StringBuffer> resBuf(new StringBuffer());
-    for (int i = 0; i < obj->getResourceCount(); i++)
-    {
-        if (i > 0)
-            *resBuf << RESOURCE_SEP;
-        *resBuf << obj->getResource(i)->encode();
-    }
-    
-    if (! isVirtual || ! refObj->resourcesEqual(obj))
         data->put(_("resources"), quote(resBuf->toString()));
+    }
     else if (isUpdate)
         data->put(_("resources"), _("NULL"));
     
