@@ -332,6 +332,28 @@ js_print(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
 }
 
 static JSBool
+js_copyObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
+{
+    jsval arg;
+    JSObject *js_cds_obj;
+
+    try
+    {
+        arg = argv[0];
+        if (!JSVAL_IS_OBJECT(arg))
+            return JS_FALSE;
+        if (!JS_ValueToObject(cx, arg, &js_cds_obj))
+            return JS_FALSE;
+
+    }
+    catch (Exception e)
+    {
+        e.printStackTrace();
+    }
+    return JS_FALSE;
+}
+
+static JSBool
 js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
 {
     try
@@ -358,7 +380,8 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         Ref<ContentManager> cm = ContentManager::getInstance();
        
         int id = cm->addContainerChain(path);
-        cds_obj->setParentID(id); 
+        cds_obj->setParentID(id);
+        cds_obj->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
         cm->addObject(cds_obj);
 
         /* setting object ID as return value */
