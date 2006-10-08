@@ -351,3 +351,8 @@ int String::rindex(int end, char ch)
     }
     return -1;
 }
+String String::reduce(char ch)
+{ /// \todo jin: implement this!
+    return String(base);
+}
+

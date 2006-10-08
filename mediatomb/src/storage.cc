@@ -128,7 +128,7 @@ void Storage::removeObject(zmm::Ref<CdsObject> obj)
 }
 */
 
-
+/*
 Ref<Array<CdsObject> > Storage::getObjectPath(int objectID)
 {
     Ref<Array<CdsObject> > arr(new Array<CdsObject>());
@@ -143,6 +143,7 @@ void Storage::getObjectPath(Ref<Array<CdsObject> > arr, int objectID)
     getObjectPath(arr, obj->getParentID());
     arr->append(obj);
 }
+*/
 
 void Storage::stripAndUnescapeVirtualContainerFromPath(String path, String &first, String &last)
 {

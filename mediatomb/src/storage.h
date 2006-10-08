@@ -165,7 +165,7 @@ public:
     /// will be removed too. Default: false.
     virtual void removeObject(int objectID, bool all) = 0;
     
-    virtual zmm::Ref<zmm::Array<CdsObject> > getObjectPath(int objectID);
+    //virtual zmm::Ref<zmm::Array<CdsObject> > getObjectPath(int objectID);
     
     /// \brief Determines if a folder given by it's full path is in the database
     /// \param path the path of the folder
@@ -205,7 +205,7 @@ protected:
     /* helper for addContainerChain */
     static void stripAndUnescapeVirtualContainerFromPath(zmm::String path, zmm::String &first, zmm::String &last);
     
-    void getObjectPath(zmm::Ref<zmm::Array<CdsObject> > arr, int objectID);
+    //void getObjectPath(zmm::Ref<zmm::Array<CdsObject> > arr, int objectID);
     
     static Mutex mutex;
 };

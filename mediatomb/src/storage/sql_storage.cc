@@ -168,7 +168,6 @@ Ref<Dictionary> SQLStorage::_addUpdateObject(Ref<CdsObject> obj, bool isUpdate)
         if (refObj == nil)
             throw _Exception(_("tried to add or update a virtual object with illegal reference id and an illegal location"));
         /// \todo create object on demand?
-        
     }
     
     int objectType = obj->getObjectType();
@@ -216,13 +215,11 @@ Ref<Dictionary> SQLStorage::_addUpdateObject(Ref<CdsObject> obj, bool isUpdate)
     
     // encode resources
     Ref<StringBuffer> resBuf(new StringBuffer());
-    //bool atLeastOnResouce = false;
     for (int i = 0; i < obj->getResourceCount(); i++)
     {
         if (i > 0)
             *resBuf << RESOURCE_SEP;
         *resBuf << obj->getResource(i)->encode();
-        //atLeastOnResouce = true;
     }
     
     if (! isVirtual || ! refObj->resourcesEqual(obj))
@@ -640,6 +637,7 @@ int SQLStorage::findObjectIDByPath(String fullpath)
 
 int SQLStorage::ensurePathExistence(String path)
 {
+    path = path.reduce(DIR_SEPARATOR);
     Ref<CdsObject> obj = findObjectByPath(path + DIR_SEPARATOR);
     if (obj != nil) return obj->getID();
     Ref<Array<StringBase> > pathAr = split_path(path);
@@ -786,12 +784,14 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
     obj->setAuxData(aux);
     
     String resources_str = fallbackString(row->col(_resources), row->col(_ref_resources));
-    if (!(resources_str == nil || resources_str.length() == 0))
+    bool resource_zero_ok = false;
+    if (string_ok(resources_str))
     {
         Ref<Array<StringBase> > resources = split_string(resources_str,
                                                     RESOURCE_SEP);
         for (int i = 0; i < resources->size(); i++)
         {
+            if (i == 0) resource_zero_ok = true;
             obj->addResource(CdsResource::decode(resources->get(i)));
         }
     }
@@ -814,6 +814,9 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
     
     if (IS_CDS_ITEM(objectType))
     {
+        if (! resource_zero_ok)
+            throw _Exception(_("trying to create object without at least one resource"));
+        
         Ref<CdsItem> item = RefCast(obj, CdsItem);
         item->setMimeType(fallbackString(row->col(_mime_type), row->col(_ref_mime_type)));
         if (IS_CDS_PURE_ITEM(objectType) && ! obj->isVirtual())

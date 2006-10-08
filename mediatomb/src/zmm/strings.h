@@ -129,6 +129,13 @@ public:
 
 	String substring(int from);
 	String substring(int from, int count);
+    
+    /// \brief reduces multiple consecutive occurences of the character ch
+    /// to one occurence
+    /// \param ch the character to reduce
+    /// \return the new string, with ch reduced
+    String reduce(char ch);
+    
     inline char charAt(int index) {  return base->data[index]; }
     inline char *charPtrAt(int index) { return base->data + index; }
     inline int index(char ch) { return index(0, ch); }
