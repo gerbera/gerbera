@@ -163,10 +163,16 @@ public:
 
     /// \brief Adds a virtual container chain specified by path.
     /// \param container path separated by '/'. Slashes in container
-    /// titles must be escaped. 
-    /// \return ID of the last container in the chain.    
+    /// titles must be escaped.
+    /// \return ID of the last container in the chain.
     int addContainerChain(zmm::String chain);
-
+    
+    /// \brief Adds a virtual container specified by parentID and title
+    /// \param parentID the id of the parent.
+    /// \param title the title of the container.
+    /// \param upnpClass the upnp class of the container.
+    void addContainer(int parentID, zmm::String title, zmm::String upnpClass);
+    
     /// \brief Updates an object in the database.
     /// \param obj the object to update
     void updateObject(zmm::Ref<CdsObject> obj);

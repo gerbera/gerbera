@@ -49,27 +49,9 @@ web::addObject::addObject() : WebRequestHandler()
     return option;
 }*/
 
-Ref<CdsObject> web::addObject::addContainer(int parentID)
+void web::addObject::addContainer(int parentID)
 {
-    Ref<CdsContainer> cont (new CdsContainer());
-    
-    cont->setParentID(parentID);
-    
-    cont->setTitle(param(_("title")));
-    
-    /*
-    tmp = param(_("location"));
-    if (tmp != nil)
-        cont->setLocation(tmp);
-    else
-        cont->setLocation(_(""));
-    */
-    
-    String class_str = param(_("class"));
-    if (string_ok(class_str))
-        cont->setClass(class_str);
-    
-    return RefCast(cont, CdsObject);
+    ContentManager::getInstance()->addContainer(parentID, param(_("title")), param(_("class")));
 }
 
 Ref<CdsObject> web::addObject::addItem(int parentID, Ref<CdsItem> item)
@@ -174,18 +156,18 @@ void web::addObject::process()
     else
         parentID = parID.toInt();
     
-    Ref<CdsObject> obj;
+    Ref<CdsObject> obj = nil;
     
     Ref<Element> updateContainerEl;
     
     switch (obj_type.toInt())
     {
         case OBJECT_TYPE_CONTAINER:
-            obj = this->addContainer(parentID);
-            updateContainerEl = Ref<Element>(new Element(_("updateContainer")));
-            updateContainerEl->setText(parID);
-            updateContainerEl->addAttribute(_("add"), _("1"));
-            root->appendChild(updateContainerEl);
+            this->addContainer(parentID);
+            //updateContainerEl = Ref<Element>(new Element(_("updateContainer")));
+            //updateContainerEl->setText(parID);
+            //updateContainerEl->addAttribute(_("add"), _("1"));
+            //root->appendChild(updateContainerEl);
             break;
             
         case OBJECT_TYPE_ITEM:
@@ -216,7 +198,10 @@ void web::addObject::process()
             throw _Exception(_("unknown object type"));
             break;
     }
-    obj->setVirtual(true);
-    ContentManager::getInstance()->addObject(obj);
+    if (obj != nil)
+    {
+        obj->setVirtual(true);
+        ContentManager::getInstance()->addObject(obj);
+    }
 }
 

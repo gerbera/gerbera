@@ -135,6 +135,13 @@ public:
     /// in case new containers were created during the operation.
     virtual void addContainerChain(zmm::String path, int *containerID, int *updateID) = 0;
     
+    /// \brief Builds the container path. Fetches the path of the
+    /// parent and adds the title
+    /// \param parentID the parent id of the parent container
+    /// \param title the title of the container to add to the path.
+    /// It will be escaped.
+    virtual zmm::String buildContainerPath(int parentID, zmm::String title) = 0;
+    
     virtual void updateObject(zmm::Ref<CdsObject> object) = 0;
 
     virtual zmm::Ref<zmm::Array<CdsObject> > browse(zmm::Ref<BrowseParam> param) = 0;
@@ -144,7 +151,7 @@ public:
     
     //virtual zmm::Ref<CdsObject> findObjectByTitle(zmm::String title, int parentID) = 0;
     virtual zmm::Ref<CdsObject> findObjectByPath(zmm::String path) = 0;
-    virtual zmm::Ref<CdsObject> findObjectByFilename(zmm::String filename, int parentID) = 0;
+    virtual zmm::Ref<CdsObject> findObjectByFilename(zmm::String path) = 0;
     virtual int findObjectIDByPath(zmm::String fullpath) = 0;
     virtual void incrementUpdateIDs(int *ids, int size) = 0;
     
@@ -176,7 +183,7 @@ public:
     /// \param parentID parent container
     /// \param filename name of the file as stored on disk
     /// \return objectID if file exists in the database, otherwise a negative value
-    virtual int isFileInDatabase(int parentID, zmm::String filename) = 0;
+    virtual int isFileInDatabase(zmm::String path) = 0;
     
     /// \brief Get all objects under the given parentID.
     /// \param parentID parent container

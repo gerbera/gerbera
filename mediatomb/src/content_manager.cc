@@ -444,7 +444,7 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
 
             if (S_ISREG(statbuf.st_mode))
             {
-                int objectID = storage->isFileInDatabase(containerID, String(name));
+                int objectID = storage->isFileInDatabase(String(path));
                 log_debug("%s is a regular file! - objectID: %d\n", path.c_str(), objectID);
                 if (objectID >= 0)
                 {
@@ -559,7 +559,7 @@ void ContentManager::addRecursive(String path, bool hidden)
         {
             Ref<CdsObject> obj = nil;
             if (parentID > 0)
-                obj = storage->findObjectByFilename(String(name), parentID);
+                obj = storage->findObjectByFilename(String(newPath));
             if (obj == nil) // create object
             {
                 obj = createObjectFromFile(newPath);
@@ -761,6 +761,13 @@ void ContentManager::addObject(zmm::Ref<CdsObject> obj)
     
     um->flushUpdates();
 }
+
+void ContentManager::addContainer(int parentID, String title, String upnpClass)
+{
+    Ref<Storage> storage = Storage::getInstance();
+    addContainerChain(storage->buildContainerPath(parentID, title));
+}
+
 
 int ContentManager::addContainerChain(String chain)
 {

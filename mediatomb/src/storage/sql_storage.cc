@@ -73,6 +73,8 @@ enum
 #define SQL_QUERY "SELECT " SELECT_DATA " FROM " CDS_OBJECT_TABLE \
     " f LEFT JOIN " CDS_OBJECT_TABLE " rf ON f.ref_id = rf.id "
 
+//#define SQL_QUERY_ACTIVE_ITEM "SELECT 
+
 SQLRow::SQLRow(Ref<SQLResult> sqlResult) : Object()
 {
     this->sqlResult = sqlResult;
@@ -204,7 +206,7 @@ Ref<Dictionary> SQLStorage::_addUpdateObject(Ref<CdsObject> obj, bool isUpdate)
         data->put(_("auxdata"), quote(obj->getAuxData()->encode()));
     }
     
-    if (! isVirtual || (! refObj->getFlag(OBJECT_FLAG_USE_RESOURCE_REF) && ! refObj->resourcesEqual(obj)))
+    if (! isVirtual || (! obj->getFlag(OBJECT_FLAG_USE_RESOURCE_REF) && ! refObj->resourcesEqual(obj)))
     {
         // encode resources
         Ref<StringBuffer> resBuf(new StringBuffer());
@@ -221,30 +223,37 @@ Ref<Dictionary> SQLStorage::_addUpdateObject(Ref<CdsObject> obj, bool isUpdate)
     
     if (IS_CDS_CONTAINER(objectType))
     {
+        throw _Exception(_("tried to add a container via _addUpdateObject; is this correct?"));
+        
+        /*
         Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
         data->put(_("update_id"), String::from(cont->getUpdateID()));
         
         if (!isVirtual)
         {
+            
+            /*
             String loc = cont->getLocation();
             if (!string_ok(loc)) throw _Exception(_("tried to create or update a non-virtual container without a location set"));
             String dbLocation = addLocationPrefix(LOC_DIR_PREFIX, loc);
             data->put(_("location"), quote(dbLocation));
             data->put(_("location_hash"), String::from(stringHash(dbLocation)));
+            *\/
         }
         else
         {
             throw _Exception(_("tried to add an virtual container via _addUpdateObject; should be done via addContainerChain"));
         }
             
-            /*if (isUpdate)
+        /*if (isUpdate)
         {
             data->put(_("location"), _("NULL"));
             data->put(_("location_hash"), _("NULL"));
-        }*/
+        }*\/
         
         if (isUpdate)
             data->put(_("mime_type"), _("NULL"));
+        */
     }
     
     if (IS_CDS_ITEM(objectType))
@@ -259,14 +268,14 @@ Ref<Dictionary> SQLStorage::_addUpdateObject(Ref<CdsObject> obj, bool isUpdate)
             String path = pathAr->get(0);
             int parentID = ensurePathExistence(path);
             item->setParentID(parentID);
-            String filename = pathAr->get(1);
-            String dbLocation = addLocationPrefix(LOC_FILE_PREFIX, filename);
+            //String filename = pathAr->get(1);
+            String dbLocation = addLocationPrefix(LOC_FILE_PREFIX, loc);
             data->put(_("location"), quote(dbLocation));
             data->put(_("location_hash"), String::from(stringHash(dbLocation)));
         }
-        else //for URLs
-        {
-            data->put(_("location"), quote(item->getLocation()));
+        else //for URLs 
+        {/// \todo fix: urls are virtual!
+            //data->put(_("location"), quote(item->getLocation()));
             if (isUpdate)
                 data->put(_("location_hash"), _("NULL"));
         }
@@ -277,10 +286,10 @@ Ref<Dictionary> SQLStorage::_addUpdateObject(Ref<CdsObject> obj, bool isUpdate)
     {
         Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
         data->put(_("location"), quote(aitem->getAction()));
-        data->put(_("state"), quote(aitem->getState()));
+        //data->put(_("state"), quote(aitem->getState()));
     }
-    else if (isUpdate)
-        data->put(_("state"), _("NULL"));
+    //else if (isUpdate)
+    //    data->put(_("state"), _("NULL"));
     
     if (obj->getParentID() == INVALID_OBJECT_ID)
         throw _Exception(_("tried to create or update an object with an illegal parent id"));
@@ -514,8 +523,21 @@ Ref<CdsObject> SQLStorage::findObjectByTitle(String title, int parentID)
 }
 */
 
-int SQLStorage::isFolderInDatabase(String path)
+int SQLStorage::isFolderInDatabase(String fullpath)
 {
+    fullpath = fullpath.reduce(DIR_SEPARATOR);
+    Ref<Array<StringBase> > pathAr = split_path(fullpath);
+    String path = pathAr->get(0);
+    String filename = pathAr->get(1);
+    
+    if (! string_ok(path) && ! string_ok(filename))
+        return -3;
+    
+    if (! string_ok(filename))
+        fullpath = path;
+    else if (! string_ok(path))
+        fullpath = _("/") + filename;
+    
     Ref<StringBuffer> qb(new StringBuffer());
     String dbLocation = addLocationPrefix(LOC_DIR_PREFIX, path);
     *qb << "SELECT `id` FROM " CDS_OBJECT_TABLE
@@ -532,22 +554,21 @@ int SQLStorage::isFolderInDatabase(String path)
      return row->col(0).toInt();
 }
 
-int SQLStorage::isFileInDatabase(int parentID, String filename)
+int SQLStorage::isFileInDatabase(String path)
 {
-    Ref<SQLRow> row = _findObjectByFilename(filename, parentID);
+    Ref<SQLRow> row = _findObjectByFilename(path);
     if (row == nil)
         return -1;
     return row->col(_id).toInt();
 }
 
-Ref<SQLRow> SQLStorage::_findObjectByFilename(String filename, int parentID)
+Ref<SQLRow> SQLStorage::_findObjectByFilename(String path)
 {
-    String dbLocation = addLocationPrefix(LOC_FILE_PREFIX, filename);
+    String dbLocation = addLocationPrefix(LOC_FILE_PREFIX, path);
     Ref<StringBuffer> qb(new StringBuffer());
     *qb << SQL_QUERY
         " WHERE `f`.`location_hash` = " << stringHash(dbLocation)
         << " AND `f`.`location` = " << quote(dbLocation)
-        << " AND `f`.`parent_id` = " << parentID
         << " AND `f`.`ref_id` IS NULL "
         "LIMIT 1";
         
@@ -555,9 +576,9 @@ Ref<SQLRow> SQLStorage::_findObjectByFilename(String filename, int parentID)
     return res->nextRow();
 }
 
-Ref<CdsObject> SQLStorage::findObjectByFilename(String filename, int parentID)
+Ref<CdsObject> SQLStorage::findObjectByFilename(String path)
 {
-    Ref<SQLRow> row = _findObjectByFilename(filename, parentID);
+    Ref<SQLRow> row = _findObjectByFilename(path);
     if (row == nil)
         return nil;
     return createObjectFromRow(row);
@@ -565,45 +586,30 @@ Ref<CdsObject> SQLStorage::findObjectByFilename(String filename, int parentID)
 
 Ref<SQLRow> SQLStorage::_findObjectByPath(String fullpath)
 {
+    fullpath = fullpath.reduce(DIR_SEPARATOR);
     Ref<Array<StringBase> > pathAr = split_path(fullpath);
     String path = pathAr->get(0);
     String filename = pathAr->get(1);
     
     Ref<StringBuffer> qb(new StringBuffer());
-    if (! string_ok(filename))
+    bool file = true;
+    if (! string_ok(filename) || ! string_ok(path))
     {
-        if (! string_ok(path))
+        if (! string_ok(filename) && ! string_ok(path))
             throw _Exception(_("tried to add an empty path"));
         
-        String dbLocation = addLocationPrefix(LOC_DIR_PREFIX, path);
-        *qb << SQL_QUERY
-            " WHERE `f`.`location_hash` = " << stringHash(dbLocation)
-            << " AND `f`.`location` = " << quote(dbLocation)
-            << " AND `f`.`ref_id` IS NULL "
-            "LIMIT 1";
+         file = false;
     }
-    else if (! string_ok(path))
-    {
-        String dbLocation = addLocationPrefix(LOC_DIR_PREFIX, fullpath);
-        *qb << SQL_QUERY
-            " WHERE `f`.`location_hash` = " << stringHash(dbLocation)
-            << " AND `f`.`location` = " << quote(dbLocation)
-            //<< " AND `parent_id` = " << CDS_ID_FS_ROOT
-            << " AND `f`.`ref_id` IS NULL "
-            "LIMIT 1";
-    }
+    String dbLocation;
+    if (file)
+        dbLocation = addLocationPrefix(LOC_FILE_PREFIX, fullpath);
     else
-    {
-        String dbLocationPath = addLocationPrefix(LOC_DIR_PREFIX, path);
-        String dbLocationFilename = addLocationPrefix(LOC_FILE_PREFIX, filename);
-        *qb << SQL_QUERY " JOIN " CDS_OBJECT_TABLE " p ON `p`.`id`=`f`.`parent_id` "
-            "WHERE `p`.`location_hash` = " << stringHash(dbLocationPath)
-            << " AND `p`.`location` = " << quote(dbLocationPath)
-            << " AND `f`.`location_hash` = " << stringHash(dbLocationFilename)
-            << " AND `f`.`location` = " << quote(dbLocationFilename)
-            << " AND `p`.`ref_id` IS NULL "
+        dbLocation = addLocationPrefix(LOC_DIR_PREFIX, path);
+    *qb << SQL_QUERY
+            " WHERE `f`.`location_hash` = " << stringHash(dbLocation)
+            << " AND `f`.`location` = " << quote(dbLocation)
+            << " AND `f`.`ref_id` IS NULL "
             "LIMIT 1";
-    }
     
     Ref<SQLResult> res = select(qb->toString());
     return res->nextRow();
@@ -662,8 +668,26 @@ int SQLStorage::createContainer(int parentID, String name, String path, bool isV
     
 }
 
+String SQLStorage::buildContainerPath(int parentID, String title)
+{
+    //title = escape(title, xxx);
+    if (parentID == CDS_ID_ROOT)
+        return String(VIRTUAL_CONTAINER_SEPARATOR) + title;
+    Ref<StringBuffer> qb(new StringBuffer());
+    *qb << "SELECT `location` FROM " CDS_OBJECT_TABLE
+        " WHERE `id` = " << parentID << " LIMIT 1";
+     Ref<SQLResult> res = select(qb->toString());
+    if (res == nil)
+        return nil;
+    Ref<SQLRow> row = res->nextRow();
+    if (row == nil)
+        return nil;
+    return stripLocationPrefix(row->col(0)) + VIRTUAL_CONTAINER_SEPARATOR + title;
+}
+
 void SQLStorage::addContainerChain(String path, int *containerID, int *updateID)
 {
+    path = path.reduce(VIRTUAL_CONTAINER_SEPARATOR);
     *updateID = INVALID_OBJECT_ID;
     if (path == _("/"))
     {
@@ -731,6 +755,7 @@ unsigned int SQLStorage::stringHash(String key)
     return hash;
 }
 
+/*
 String SQLStorage::getRealLocation(int parentID, String location)
 {
     log_debug("parentID: %d; location %s\n", parentID, location.c_str());
@@ -741,6 +766,7 @@ String SQLStorage::getRealLocation(int parentID, String location)
     Ref<SQLRow> row = res->nextRow();
     return stripLocationPrefix(row->col(0)) + "/" + location;
 }
+*/
 
 Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
 {
@@ -806,7 +832,7 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
         Ref<CdsItem> item = RefCast(obj, CdsItem);
         item->setMimeType(fallbackString(row->col(_mime_type), row->col(_ref_mime_type)));
         if (IS_CDS_PURE_ITEM(objectType) && ! obj->isVirtual())
-            item->setLocation(getRealLocation(obj->getParentID(), stripLocationPrefix(row->col(_location))));
+            item->setLocation(stripLocationPrefix(row->col(_location)));
         else
             item->setLocation(row->col(_location));
         matched_types++;

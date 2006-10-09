@@ -111,7 +111,7 @@ public:
     addObject();
     virtual void process();
 protected:
-    zmm::Ref<CdsObject> addContainer(int parentID);
+    void addContainer(int parentID);
     zmm::Ref<CdsObject> addItem(int parentID, zmm::Ref<CdsItem> item);
     zmm::Ref<CdsObject> addUrl(int parentID, zmm::Ref<CdsItemExternalURL> item, bool addProtocol);
     zmm::Ref<CdsObject> addActiveItem(int parentID);

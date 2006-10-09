@@ -29,6 +29,7 @@
 #include "sync.h"
 
 #define CDS_OBJECT_TABLE            "`mt_cds_object`"
+#define CDS_ACTIVE_ITEM_TABLE       "`mt_cds_active_item`"
 #define INTERNAL_SETTINGS_TABLE     "`mt_internal_setting`"
 
 class SQLResult;
@@ -74,7 +75,7 @@ public:
     virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param);
                                          
     virtual int isFolderInDatabase(zmm::String path);
-    virtual int isFileInDatabase(int parentID, zmm::String filename);
+    virtual int isFileInDatabase(zmm::String path);
     
     virtual zmm::Ref<DBRHash<int> > getObjects(int parentID);
     
@@ -90,10 +91,12 @@ public:
     
     //virtual zmm::Ref<CdsObject> findObjectByTitle(zmm::String title, int parentID);
     virtual zmm::Ref<CdsObject> findObjectByPath(zmm::String fullpath);
-    virtual zmm::Ref<CdsObject> findObjectByFilename(zmm::String filename, int parentID);
+    virtual zmm::Ref<CdsObject> findObjectByFilename(zmm::String path);
     virtual int findObjectIDByPath(zmm::String fullpath);
     virtual void incrementUpdateIDs(int *ids, int size);
     virtual void incrementUIUpdateID(int id);
+    
+    virtual zmm::String buildContainerPath(int parentID, zmm::String title);
     
     virtual void addContainerChain(zmm::String path, int *containerID, int *updateID);
     
@@ -112,7 +115,7 @@ protected:
     zmm::Ref<SQLRow> _findObjectByPath(zmm::String fullpath);
     
     /* helper for findObjectByFilename and isFileInDatabase */
-    zmm::Ref<SQLRow> _findObjectByFilename(zmm::String filename, int parentID);
+    zmm::Ref<SQLRow> _findObjectByFilename(zmm::String path);
     
     /* helper for addObject and updateObject */
     zmm::Ref<Dictionary> _addUpdateObject(zmm::Ref<CdsObject> obj, bool isUpdate);
