@@ -336,6 +336,7 @@ js_copyObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval
 {
     jsval arg;
     JSObject *js_cds_obj;
+    JSObject *js_cds_clone_obj;
 
     try
     {
@@ -344,6 +345,14 @@ js_copyObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval
             return JS_FALSE;
         if (!JS_ValueToObject(cx, arg, &js_cds_obj))
             return JS_FALSE;
+
+        Ref<CdsObject> cds_obj = jsObject2cdsObject(cx, js_cds_obj);
+        js_cds_clone_obj = JS_NewObject(cx, NULL, NULL, NULL);
+        cdsObject2jsObject(cx, cds_obj, js_cds_clone_obj);
+
+        *rval = OBJECT_TO_JSVAL(js_cds_clone_obj);
+
+        return JS_TRUE;
 
     }
     catch (Exception e)
@@ -494,7 +503,8 @@ js_error_reporter(JSContext *cx, const char *message, JSErrorReport *report)
 
 static JSFunctionSpec global_functions[] = {
     {"print",           js_print,          0},
-    {"addCdsObject",    js_addCdsObject,   1},
+    {"addCdsObject",    js_addCdsObject,   2},
+    {"copyObject",      js_copyObject,     1},
     {0}
 };
 
