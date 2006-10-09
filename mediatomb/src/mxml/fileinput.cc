@@ -50,6 +50,7 @@ int FileInput::readChar()
     if(ret < 0)
     {
         fclose(file);
+        file = NULL;
         return -1;
     }
     return ret;
