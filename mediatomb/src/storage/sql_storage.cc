@@ -58,7 +58,7 @@ enum
     _mime_type,
     _flags,
     _ref_upnp_class,
-    _ref_dc_title,
+    _ref_location,
     _ref_metadata,
     _ref_auxdata,
     _ref_resources,
@@ -68,7 +68,8 @@ enum
 #define SELECT_DATA "f.id,f.ref_id,f.parent_id,f.object_type,f.upnp_class," \
     "f.dc_title,f.location,f.location_hash,f.metadata," \
     "f.auxdata,f.resources,f.update_id,f.mime_type,f.flags," \
-    "rf.upnp_class,rf.dc_title,rf.metadata,rf.auxdata,rf.resources,rf.mime_type"
+    "rf.upnp_class,rf.location,rf.metadata,rf.auxdata," \
+    "rf.resources,rf.mime_type"
 
 #define SQL_QUERY "SELECT " SELECT_DATA " FROM " CDS_OBJECT_TABLE \
     " f LEFT JOIN " CDS_OBJECT_TABLE " rf ON f.ref_id = rf.id "
@@ -180,10 +181,10 @@ Ref<Dictionary> SQLStorage::_addUpdateObject(Ref<CdsObject> obj, bool isUpdate)
     else if (isUpdate)
         data->put(_("upnp_class"), _("NULL"));
     
-    if (!isVirtual || refObj->getTitle() != obj->getTitle())
-        data->put(_("dc_title"), quote(obj->getTitle()));
-    else if (isUpdate)
-        data->put(_("dc_title"), _("NULL"));
+    //if (!isVirtual || refObj->getTitle() != obj->getTitle())
+    data->put(_("dc_title"), quote(obj->getTitle()));
+    //else if (isUpdate)
+    //    data->put(_("dc_title"), _("NULL"));
     
     data->put(_("flags"), String::from(obj->getFlags()));
     
@@ -427,7 +428,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
             count = INT_MAX;
 
         *qb << "f.parent_id = " << objectID;
-        *qb << " ORDER BY f.object_type, f.dc_title, rf.object_type, rf.dc_title";
+        *qb << " ORDER BY f.object_type, f.dc_title";
         *qb << " LIMIT " << param->getStartingIndex() << "," << count;
     }
     else // metadata
@@ -782,7 +783,7 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
         obj->setVirtual(false);
     
     obj->setParentID(row->col(_parent_id).toInt());
-    obj->setTitle(fallbackString(row->col(_dc_title), row->col(_ref_dc_title)));
+    obj->setTitle(row->col(_dc_title));
     obj->setClass(fallbackString(row->col(_upnp_class), row->col(_ref_upnp_class)));
     obj->setFlags(row->col(_flags).toUInt());
     
@@ -834,7 +835,7 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
         if (IS_CDS_PURE_ITEM(objectType) && ! obj->isVirtual())
             item->setLocation(stripLocationPrefix(row->col(_location)));
         else
-            item->setLocation(row->col(_location));
+            item->setLocation(stripLocationPrefix(row->col(_ref_location)));
         matched_types++;
     }
     
@@ -912,7 +913,7 @@ Ref<Array<CdsObject> > SQLStorage::selectObjects(Ref<SelectParam> param)
             throw _StorageException(_("selectObjects: invalid operation: ") +
                                    param->flags);
     }
-    *q << " ORDER BY f.object_type, f.dc_title, rf.object_type, rf.dc_title";
+    *q << " ORDER BY f.object_type, f.dc_title";
     Ref<SQLResult> res = select(q->toString());
     Ref<SQLRow> row;
     Ref<Array<CdsObject> > arr(new Array<CdsObject>());
