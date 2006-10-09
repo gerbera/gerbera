@@ -163,13 +163,9 @@ function addImage(obj)
 var arr = orig.mimetype.split("/");
 var mime = arr[0];
 
-var test = copyObject(orig);
+// var obj = copyObject(orig);
 
-test.title = "fokel";
-print("test.title: ", test.title); 
-print("orig.title: ", orig.title); 
-
-var obj = orig; //copyObject(orig);
+var obj = orig; 
 obj.refID = orig.id;
 
 if (mime == 'audio')
