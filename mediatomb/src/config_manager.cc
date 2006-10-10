@@ -63,6 +63,156 @@ ConfigManager::ConfigManager() : Object()
 {
 }
 
+String ConfigManager::createDefaultConfig(String userhome)
+{
+    bool mysql_flag = false;
+
+    String homepath = userhome + DIR_SEPARATOR + DEFAULT_CONFIG_HOME;
+
+    if (!check_path(homepath, true))
+    {
+        if (mkdir(homepath.c_str(), 0777) < 0)
+        {
+            throw _Exception(_("Could not create directory ") + homepath + 
+                    " : " + strerror(errno));
+        }
+    }
+
+    String config_filename = homepath + DIR_SEPARATOR + DEFAULT_CONFIG_NAME;
+
+    Ref<Element> config(new Element(_("config")));
+    Ref<Element> server(new Element(_("server")));
+    
+    Ref<Element> ui(new Element(_("ui")));
+    ui->addAttribute(_("enabled"), _(DEFAULT_UI_VALUE));
+
+    server->appendChild(ui);
+    server->appendTextChild(_("name"), _(PACKAGE_NAME));
+    
+    Ref<Element> udn(new Element(_("udn")));
+    server->appendChild(udn);
+
+    server->appendTextChild(_("home"), homepath);
+    server->appendTextChild(_("webroot"), String(_(PACKAGE_DATADIR)) + 
+                                                 DIR_SEPARATOR +  
+                                                 _(DEFAULT_WEB_DIR));
+    
+    Ref<Element> storage(new Element(_("storage")));
+    storage->addAttribute(_("driver"), _(DEFAULT_STORAGE_DRIVER));
+#ifdef HAVE_SQLITE3
+    storage->appendTextChild(_("database-file"), _(DEFAULT_SQLITE3_DB_FILENAME));
+#else
+    storage->appendTextChild(_("host"), _(DEFAULT_MYSQL_HOST));
+    storage->appendTextChild(_("username"), _(DEFAULT_MYSQL_USER));
+//    storage->appendTextChild(_("password"), _(DEFAULT_MYSQL_PASSWORD));
+    storage->appendTextChild(_("database"), _(DEFAULT_MYSQL_DB));
+    mysql_flag = true;
+#endif
+    server->appendChild(storage);
+    config->appendChild(server);
+
+    Ref<Element> import(new Element(_("import")));
+    import->appendTextChild(_("script"), String(_(PACKAGE_DATADIR)) +
+                                                DIR_SEPARATOR + 
+                                                _(DEFAULT_JS_DIR) +
+                                                DIR_SEPARATOR +
+                                                _(DEFAULT_IMPORT_SCRIPT));
+
+    Ref<Element> mappings(new Element(_("mappings")));
+    Ref<Element> extension_mimetype(new Element(_("extension-mimetype")));
+    extension_mimetype->addAttribute(_("ignore-unknown"), _(DEFAULT_IGNORE_UNKNOWN_EXTENSIONS));
+
+    Ref<Element> map0(new Element(_("map")));
+    map0->addAttribute(_("from"), _("mp3"));
+    map0->addAttribute(_("to"), _("audio/mpeg"));
+    extension_mimetype->appendChild(map0);
+
+    Ref<Element> map1(new Element(_("map")));
+    map1->addAttribute(_("from"), _("ogg"));
+    map1->addAttribute(_("to"), _("application/ogg"));
+    extension_mimetype->appendChild(map1);
+
+    Ref<Element> map2(new Element(_("map")));
+    map2->addAttribute(_("from"), _("asf"));
+    map2->addAttribute(_("to"), _("video/x-ms-asf"));
+    extension_mimetype->appendChild(map2);
+
+    Ref<Element> map3(new Element(_("map")));
+    map3->addAttribute(_("from"), _("asx"));
+    map3->addAttribute(_("to"), _("video/x-ms-asf"));
+    extension_mimetype->appendChild(map3);
+
+    Ref<Element> map4(new Element(_("map")));
+    map4->addAttribute(_("from"), _("wma"));
+    map4->addAttribute(_("to"), _("audio/x-ms-wma"));
+    extension_mimetype->appendChild(map4);
+
+    Ref<Element> map5(new Element(_("map")));
+    map5->addAttribute(_("from"), _("wax"));
+    map5->addAttribute(_("to"), _("audio/x-ms-wax"));
+    extension_mimetype->appendChild(map5);
+
+    Ref<Element> map7(new Element(_("map")));
+    map7->addAttribute(_("from"), _("wmv"));
+    map7->addAttribute(_("to"), _("video/x-ms-wmv"));
+    extension_mimetype->appendChild(map7);
+
+    Ref<Element> map8(new Element(_("map")));
+    map8->addAttribute(_("from"), _("wvx"));
+    map8->addAttribute(_("to"), _("video/x-ms-wvx"));
+    extension_mimetype->appendChild(map8);
+
+    Ref<Element> map9(new Element(_("map")));
+    map9->addAttribute(_("from"), _("wm"));
+    map9->addAttribute(_("to"), _("video/x-ms-wm"));
+    extension_mimetype->appendChild(map9);
+
+    Ref<Element> map10(new Element(_("map")));
+    map10->addAttribute(_("from"), _("wmx"));
+    map10->addAttribute(_("to"), _("video/x-ms-wmx"));
+    extension_mimetype->appendChild(map10);
+
+    mappings->appendChild(extension_mimetype);
+    
+    Ref<Element> mimetype_upnpclass(new Element(_("mimetype-upnpclass")));
+
+    Ref<Element> map11(new Element(_("map")));
+    map11->addAttribute(_("from"), _("audio/*"));
+    map11->addAttribute(_("to"), _("object.item.audioItem"));
+    mimetype_upnpclass->appendChild(map11);
+
+    Ref<Element> map12(new Element(_("map")));
+    map12->addAttribute(_("from"), _("application/ogg"));
+    map12->addAttribute(_("to"), _("object.item.audioItem"));
+    mimetype_upnpclass->appendChild(map12);
+
+    Ref<Element> map13(new Element(_("map")));
+    map13->addAttribute(_("from"), _("image/*"));
+    map13->addAttribute(_("to"), _("object.item.imageItem"));
+    mimetype_upnpclass->appendChild(map13);
+    
+    Ref<Element> map14(new Element(_("map")));
+    map14->addAttribute(_("from"), _("video/*"));
+    map14->addAttribute(_("to"), _("object.item.videoItem"));
+    mimetype_upnpclass->appendChild(map14);
+
+    mappings->appendChild(mimetype_upnpclass);
+    import->appendChild(mappings);
+    config->appendChild(import);
+
+    save_text(config_filename, config->print());
+    log_info("MediaTomb configuration was created in: %s\n", 
+            config_filename.c_str());
+
+    if (mysql_flag)
+    {
+        throw _Exception(_("You are using MySQL! Please edit ") + config_filename +
+                " and enter your MySQL host/username/password!");
+    }
+
+    return config_filename;
+}
+
 void ConfigManager::init(String filename, String userhome)
 {
     if (instance == nil)
@@ -88,13 +238,26 @@ void ConfigManager::init(String filename, String userhome)
         {
             if (!check_path(_("") + DIR_SEPARATOR + DEFAULT_ETC + DIR_SEPARATOR + DEFAULT_SYSTEM_HOME + DIR_SEPARATOR + DEFAULT_CONFIG_NAME))
             {
-                throw _Exception(_("\nThe server configuration file could not be found in ~/.mediatomb and\n") +
-                                       "/etc/mediatomb. Please run the tomb-install script or specify an alternative\n" +  
-                                       "configuration file on the command line. For a list of options use: mediatomb -h\n");
+                // we could not find a valid configuration file, so we will create an initial setup
+                // we will do this only if userhome is set
+                if (string_ok(userhome))
+                {
+                    filename = instance->createDefaultConfig(userhome);
+                }
+                else
+                {       
+                    throw _Exception(_("\nThe server configuration file could not be found in ~/.mediatomb and\n") +
+                            "/etc/mediatomb. MediaTomb could not determine your home directory - automatic\n" +
+                            "setup failed. Try specifying an alternative configuration file on the command line.\n" + 
+                            "For a list of options run: mediatomb -h\n");
+                }
             }
+            else
+            {
 
-            home = _("") + DIR_SEPARATOR + DEFAULT_ETC + DIR_SEPARATOR + DEFAULT_SYSTEM_HOME;
-            filename = home + DIR_SEPARATOR + DEFAULT_CONFIG_NAME;
+                home = _("") + DIR_SEPARATOR + DEFAULT_ETC + DIR_SEPARATOR + DEFAULT_SYSTEM_HOME;
+                filename = home + DIR_SEPARATOR + DEFAULT_CONFIG_NAME;
+            }
         }
 /*
         if (home_ok)
@@ -208,6 +371,7 @@ void ConfigManager::validate(String serverhome)
     getOption(_("/server/ip"), _("")); // bind to any IP address
     getOption(_("/server/bookmark"), _(DEFAULT_BOOKMARK_FILE));
     getOption(_("/server/name"), _(DESC_FRIENDLY_NAME));
+    getOption(_("/server/model"), _(DESC_MODEL_NAME));
 
 /*
 #ifdef HAVE_JS
@@ -333,21 +497,19 @@ Ref<ConfigManager> ConfigManager::getInstance()
 
 void ConfigManager::save()
 {
-    save(filename);
+    save_text(filename, root->print());
 }
 
-void ConfigManager::save(String filename)
+void ConfigManager::save_text(String filename, String content)
 {
-    String content = root->print();
-
     FILE *file = fopen(filename.c_str(), "wb");
     if (file == NULL)
     {
-        throw _Exception(_("could not open config file ") +
+        throw _Exception(_("could not open file ") +
                         filename + " for writing : " + strerror(errno));
     }
 
-    int bytesWritten = fwrite(content.c_str(), sizeof(char),
+    size_t bytesWritten = fwrite(content.c_str(), sizeof(char),
                               content.length(), file);
     if (bytesWritten < content.length())
     {

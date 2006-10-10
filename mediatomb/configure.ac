@@ -1,6 +1,6 @@
 AC_PREREQ(2.59)
 AC_INIT([MediaTomb], [0.9.0_pre], [jin@mediatomb.org])
-AC_CONFIG_HEADER([autoconfig.h tombupnp/upnp/inc/upnpconfig.h])
+AM_CONFIG_HEADER([autoconfig.h tombupnp/upnp/inc/upnpconfig.h])
 AC_CONFIG_AUX_DIR(configure_aux)
 AC_CONFIG_SRCDIR([src/common.h])
 AM_INIT_AUTOMAKE([1.9 -Wall])
@@ -29,7 +29,17 @@ AC_HEADER_STDBOOL
 AC_HEADER_TIME
 AC_HEADER_STAT
 AC_LANG_C
+AC_CANONICAL_HOST
    
+DARWIN_OS=0
+case $host in
+    *-*-darwin*)
+        DARWIN_OS=1
+        AC_DEFINE([__DARWIN__], [1], [OSX detected])
+        ;;
+esac
+
+
 AC_CHECK_HEADERS([syslog.h stddef.h unistd.h arpa/inet.h fcntl.h], [],
                  [AC_MSG_ERROR(required header not found)]) 
 
@@ -42,6 +52,9 @@ AC_CHECK_HEADERS([sys/ioctl.h sys/socket.h sys/time.h sys/types.h pthread.h],
 
 AC_CHECK_HEADERS([langinfo.h],[],[AC_MSG_WARN(langinfo.h not found, will not be able to retrieve locale)])
 
+AC_CHECK_HEADERS([sched.h],[],[])
+AC_CHECK_FUNCS([sched_getparam sched_setparam],[],[])
+    
 AC_CHECK_HEADERS([getopt.h],
         [
             AC_CHECK_FUNCS([getopt_long],[],
@@ -62,7 +75,18 @@ LDFLAGS_SAVE="$LDFLAGS"
 
 AC_CHECK_HEADER([iconv.h],
         [
-            AC_CHECK_FUNCS([iconv],[],[AC_MSG_ERROR(iconv library not found on your system)])
+            AC_CHECK_FUNCS([iconv],[],
+                [
+                    LDFLAGS="$LDFLAGS -L/usr/lib -liconv"
+                    AC_CHECK_FUNCS([libiconv],
+                        [
+                            AC_DEFINE([LIBICONV_NAMING], [1], 
+                                      [OSX had no _iconv symbol])
+                        ],
+                        [
+                            AC_MSG_ERROR(iconv library not found on your system)
+                        ])
+                ])
         ],
         [
             AC_CHECK_HEADER([/usr/local/include/iconv.h],
@@ -171,13 +195,22 @@ AC_CHECK_FUNCS([gethostbyname],
                                  ]) 
                ])
 
+if test $DARWIN_OS -eq 1 ; then
+        AC_MSG_NOTICE([You are running OSX, assuming threadsafe gethostbyname version])
+        AC_DEFINE([GETHOSTBYNAME_THREADSAFE], [1], [OSX has a threadsafe gethostbyname version])
+fi
+
 AC_CHECK_FUNCS([gethostbyname_r],[],
         [
             AC_CHECK_HEADERS([lwres/netdb.h],
                 [
                     AC_CHECK_LIB(lwres, lwres_gethostbyname_r,[],[AC_MSG_ERROR(required library function not found)])
                 ],
-                [AC_MSG_ERROR(required header not found)])
+                [
+                    if test $DARWIN_OS -eq 0 ; then
+                        AC_MSG_ERROR([required header not found])
+                    fi
+                ])
         ])
 
 # this is not optional, we need the device and the internal webserver
@@ -208,14 +241,22 @@ feature autodetect is assumed.
 if test "x$SQLITE3_OK" = xyes; then
     AC_CHECK_HEADER(sqlite3.h,
         [],
-        [SQLITE3_OK=missing],
-        /* checking for sqlite3.h */
+        [
+            AC_CHECK_HEADER(/opt/local/include/sqlite3.h,
+                [CXXFLAGS="$CXXFLAGS -I/opt/local/include/"],
+                [SQLITE3_OK=missing])
+        ]
     )
 fi
 if test "x$SQLITE3_OK" = xyes; then
     AC_CHECK_LIB(sqlite3, sqlite3_open,
         [],
-        [SQLITE3_OK=missing]
+        [
+            LDFLAGS="$LDFLAGS -L/opt/local/lib -lsqlite3"
+            AC_CHECK_FUNC(sqlite3_open,
+                [],
+                [SQLITE3_OK=missing])
+        ]
     )
 fi
 if test "x$SQLITE3_OK" = xyes; then
@@ -856,6 +897,9 @@ if test "x$TAGLIB_OK" = xyes; then
    CXXFLAGS="$CXXFLAGS $TAGLIB_CFLAGS"
    LDFLAGS="$LDFLAGS $TAGLIB_LDFLAGS"
 fi
+
+eval PACKAGE_DATADIR="$datadir/$PACKAGE"
+AC_DEFINE_UNQUOTED(PACKAGE_DATADIR, "$PACKAGE_DATADIR", [MediaTomb data directory])
 
 ###############
 AC_CONFIG_FILES([

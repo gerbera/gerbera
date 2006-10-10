@@ -94,11 +94,11 @@
 #define DESC_DEVICE_TYPE                "urn:schemas-upnp-org:device:MediaServer:1"
 #define DESC_SPEC_VERSION_MAJOR         "1"
 #define DESC_SPEC_VERSION_MINOR         "0"
-#define DESC_FRIENDLY_NAME              "MediaTomb"
-#define DESC_MANUFACTURER               "(c) 2004, 2005 Gena Batyan <bgeradz@deadlock.dhs.org>, Sergey Bostandzhyan <jin@deadlock.dhs.org>"
-#define DESC_MANUFACTURER_URL           "http://www.deadlock.dhs.org/upnp"
+#define DESC_FRIENDLY_NAME              PACKAGE_NAME 
+#define DESC_MANUFACTURER               "(c) 2004-2006 Gena Batyan <bgeradz@mediatomb.org>, Sergey Bostandzhyan <jin@mediatomb.org>, Leonhard Wimmer <leo@mediatomb.org>"
+#define DESC_MANUFACTURER_URL           "http://mediatomb.org"
 #define DESC_MODEL_DESCRIPTION          "Free UPnP AV MediaServer, GNU GPL"
-#define DESC_MODEL_NAME                 "MediaTomb"
+#define DESC_MODEL_NAME                 PACKAGE_NAME
 #define DESC_MODEL_NUMBER               VERSION 
 #define DESC_SERIAL_NUMBER              "1"
 
@@ -147,6 +147,16 @@
 #define DEFAULT_MYSQL_HOST              "localhost"
 #define DEFAULT_MYSQL_DB                "mediatomb"
 #define DEFAULT_MYSQL_USER              "mediatomb"
+#define DEFAULT_WEB_DIR                 "web"
+#define DEFAULT_JS_DIR                  "js"
+
+#ifdef HAVE_SQLITE3
+    #define DEFAULT_STORAGE_DRIVER      "sqlite3"
+#else
+    #define DEFAULT_STORAGE_DRIVER      "mysql"
+#endif
+
+#define DEFAULT_SQLITE3_DB_FILENAME     "mediatomb.db"
 
 // misc
 #define INVALID_OBJECT_ID (-333)

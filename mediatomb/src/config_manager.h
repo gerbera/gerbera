@@ -119,8 +119,9 @@ public:
     static zmm::Ref<ConfigManager> getInstance();
 
 protected:
-    // will be used only internally
-    void save(zmm::String filename);
+    // creates a default config.xml file with the most necessary entries and returns the path
+    zmm::String createDefaultConfig(zmm::String userhome);
+    void save_text(zmm::String filename, zmm::String content);
     void validate(zmm::String serverhome);
     void prepare_udn();
     zmm::String construct_path(zmm::String path);
