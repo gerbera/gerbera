@@ -1,5 +1,5 @@
 
-sharedir = $(DESTDIR)@datadir@/mediatomb
+sharedir = $(DESTDIR)@datadir@/@PACKAGE@
 
 _DIST_FILES = \
     config-dist.xml \

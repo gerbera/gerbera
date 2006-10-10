@@ -1,4 +1,4 @@
-sharedir = $(DESTDIR)@datadir@/mediatomb
+sharedir = $(DESTDIR)@datadir@/@PACKAGE@
 
 JS_DIR = js
 
