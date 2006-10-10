@@ -32,9 +32,11 @@
 #include "config.h"
 #include <assert.h>
 #ifndef WIN32
- #include <sys/socket.h>
- #include <netinet/in.h>
- #include <arpa/inet.h>
+ #ifndef __DARWIN__
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #include <arpa/inet.h>
+ #endif
 #else
  #include <winsock2.h>
 #endif

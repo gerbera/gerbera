@@ -29,6 +29,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
+#include "autoconfig.h"
+
 #include "ThreadPool.h"
 #include "FreeList.h"
 #include <assert.h>
@@ -36,6 +38,10 @@
 
 #ifdef STATS
 #include <stdio.h>
+#endif
+
+#if defined (HAVE_UNISTD_H) && defined (HAVE_SCHED_H) && defined (_POSIX_PRIORITY_SCHEDULING)
+    #include <sched.h>
 #endif
 
 /****************************************************************************
@@ -94,12 +100,14 @@ SetPolicyType( PolicyType in )
 {
     #ifdef WIN32
      return sched_setscheduler( 0, in);
-    #else
+    #elif defined (HAVE_SCHED_GETPARAM) && defined (HAVE_SCHED_SETPARAM) 
      struct sched_param current;
 
      sched_getparam( 0, &current );
      current.sched_priority = DEFAULT_SCHED_PARAM;
      return sched_setscheduler( 0, in, &current );
+    #else
+     return -1;
     #endif
 }
 
@@ -349,7 +357,7 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
     gettimeofday( &t, NULL );
 #if defined(WIN32)
     srand( ( unsigned int )(t.tv_usec/1000) + (unsigned int)ithread_get_current_thread_id(  ).p );
-#elif defined(__FreeBSD__)
+#elif defined(__FreeBSD__) || defined (__DARWIN__)
     srand( ( unsigned int )(t.tv_usec/1000) + (unsigned int)ithread_get_current_thread_id(  ) );
 #else
     srand( ( unsigned int )(t.tv_usec/1000) + ithread_get_current_thread_id(  ) );

@@ -614,7 +614,7 @@ parse_hostport( char *in,
         int errCode = 0;
 
         //call gethostbyname_r (reentrant form of gethostbyname)
-#if defined(WIN32)
+#if defined(WIN32) || defined(__DARWIN__)
         h=gethostbyname(temp_host_name);
 #elif defined(SPARC_SOLARIS)
         errCode = gethostbyname_r( temp_host_name,

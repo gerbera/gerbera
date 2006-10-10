@@ -29,6 +29,12 @@
 
 using namespace zmm;
 
+#ifdef LIBICONV_NAMING
+    #define iconv_open libiconv_open
+    #define iconv_close libiconv_close
+    #define iconv libiconv
+#endif
+
 StringConverter::StringConverter(String from, String to) : Object()
 {
     dirty = false;
