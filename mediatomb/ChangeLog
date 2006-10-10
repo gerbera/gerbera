@@ -46,6 +46,8 @@ v0.9.0  Major rework
           will never be added to the database - we do not want the user to
           accidentally share it on the network since it may contain
           security sensitive data
+        * tomb-install is no longer needed, the server will automatically create
+          a default ~/.mediatomb/config.xml file if there is none
 
 v0.8.1
         * added "serve" directory, any files there can be downloaded 
