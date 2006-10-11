@@ -3843,8 +3843,8 @@ DBGONLY(
                     "Can't get interface list\n" );)
         return UPNP_E_INIT;
     }
-    // add iflist++
-    while (*(char *)iflist != 0)
+
+    while (iflist->if_index || iflist->if_name)
     {
         strncpy( ifReq.ifr_name, iflist->if_name, IF_NAMESIZE );
         if (ioctl( LocalSock, SIOCGIFFLAGS, &ifReq ) < 0) 

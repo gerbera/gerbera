@@ -109,7 +109,7 @@ SetPolicyType( PolicyType in )
      current.sched_priority = DEFAULT_SCHED_PARAM;
      return sched_setscheduler( 0, in, &current );
     #else
-     return -1;
+     return 0;
     #endif
 }
 
