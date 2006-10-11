@@ -128,7 +128,7 @@ public:
     inline void setRestricted(bool restricted) { changeFlag(OBJECT_FLAG_RESTRICTED, restricted); }
 
     /// \brief Query the restricted flag.
-    inline bool isRestricted() { getFlag(OBJECT_FLAG_RESTRICTED); }
+    inline bool isRestricted() { return getFlag(OBJECT_FLAG_RESTRICTED); }
 
     /// \brief Set the object title (dc:title)
     inline void setTitle(zmm::String title) { this->title = title; }
@@ -476,7 +476,7 @@ public:
     inline void setSearchable(bool searchable) { changeFlag(OBJECT_FLAG_SEARCHABLE, searchable); }
 
     /// \brief Query searchable flag.
-    inline int isSearchable() { getFlag(OBJECT_FLAG_SEARCHABLE); }
+    inline int isSearchable() { return getFlag(OBJECT_FLAG_SEARCHABLE); }
 
     /// \brief Set the container update ID value.
     inline void setUpdateID(int updateID) { this->updateID = updateID; }

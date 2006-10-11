@@ -455,7 +455,7 @@ void ConfigManager::save_text(String filename, String content)
 
     size_t bytesWritten = fwrite(content.c_str(), sizeof(char),
                               content.length(), file);
-    if (bytesWritten < content.length())
+    if (bytesWritten < (size_t)content.length())
     {
         throw _Exception(_("could not write to config file ") +
                         filename + " : " + strerror(errno));
