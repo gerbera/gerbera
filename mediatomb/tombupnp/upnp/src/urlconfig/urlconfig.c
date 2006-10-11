@@ -32,7 +32,7 @@
 #include "config.h"
 #include <assert.h>
 #ifndef WIN32
- #ifndef __DARWIN__
+ #ifndef __APPLE__
     #include <sys/socket.h>
     #include <netinet/in.h>
     #include <arpa/inet.h>
