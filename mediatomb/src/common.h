@@ -158,6 +158,7 @@
 
 #define DEFAULT_SQLITE3_DB_FILENAME     "mediatomb.db"
 
+#define CONFIG_MAPPINGS_TEMPLATE        "mappings.xml"
 // misc
 #define INVALID_OBJECT_ID (-333)
 

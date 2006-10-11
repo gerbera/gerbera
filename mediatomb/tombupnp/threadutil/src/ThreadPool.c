@@ -29,7 +29,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-#include "autoconfig.h"
+#ifdef HAVE_CONFIG_H
+    #include "autoconfig.h"
+#endif
 
 #include "ThreadPool.h"
 #include "FreeList.h"

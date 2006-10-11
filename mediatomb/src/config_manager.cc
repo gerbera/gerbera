@@ -118,86 +118,30 @@ String ConfigManager::createDefaultConfig(String userhome)
                                                 DIR_SEPARATOR +
                                                 _(DEFAULT_IMPORT_SCRIPT));
 
-    Ref<Element> mappings(new Element(_("mappings")));
-    Ref<Element> extension_mimetype(new Element(_("extension-mimetype")));
-    extension_mimetype->addAttribute(_("ignore-unknown"), _(DEFAULT_IGNORE_UNKNOWN_EXTENSIONS));
 
-    Ref<Element> map0(new Element(_("map")));
-    map0->addAttribute(_("from"), _("mp3"));
-    map0->addAttribute(_("to"), _("audio/mpeg"));
-    extension_mimetype->appendChild(map0);
+    String map_file = _(PACKAGE_DATADIR) + DIR_SEPARATOR + CONFIG_MAPPINGS_TEMPLATE;
 
-    Ref<Element> map1(new Element(_("map")));
-    map1->addAttribute(_("from"), _("ogg"));
-    map1->addAttribute(_("to"), _("application/ogg"));
-    extension_mimetype->appendChild(map1);
+    try
+    {
+        Ref<Parser> parser(new Parser());
+        Ref<Element> mappings(new Element(_("mappings")));
+        mappings = parser->parseFile(map_file);
+        import->appendChild(mappings);
+    }
+    catch (ParseException pe)
+    {
+        log_error("Error parsing template file: %s line %d:\n%s\n",
+                pe.context->location.c_str(),
+                pe.context->line,
+                pe.getMessage().c_str());
+        exit(EXIT_FAILURE);
+    }
 
-    Ref<Element> map2(new Element(_("map")));
-    map2->addAttribute(_("from"), _("asf"));
-    map2->addAttribute(_("to"), _("video/x-ms-asf"));
-    extension_mimetype->appendChild(map2);
-
-    Ref<Element> map3(new Element(_("map")));
-    map3->addAttribute(_("from"), _("asx"));
-    map3->addAttribute(_("to"), _("video/x-ms-asf"));
-    extension_mimetype->appendChild(map3);
-
-    Ref<Element> map4(new Element(_("map")));
-    map4->addAttribute(_("from"), _("wma"));
-    map4->addAttribute(_("to"), _("audio/x-ms-wma"));
-    extension_mimetype->appendChild(map4);
-
-    Ref<Element> map5(new Element(_("map")));
-    map5->addAttribute(_("from"), _("wax"));
-    map5->addAttribute(_("to"), _("audio/x-ms-wax"));
-    extension_mimetype->appendChild(map5);
-
-    Ref<Element> map7(new Element(_("map")));
-    map7->addAttribute(_("from"), _("wmv"));
-    map7->addAttribute(_("to"), _("video/x-ms-wmv"));
-    extension_mimetype->appendChild(map7);
-
-    Ref<Element> map8(new Element(_("map")));
-    map8->addAttribute(_("from"), _("wvx"));
-    map8->addAttribute(_("to"), _("video/x-ms-wvx"));
-    extension_mimetype->appendChild(map8);
-
-    Ref<Element> map9(new Element(_("map")));
-    map9->addAttribute(_("from"), _("wm"));
-    map9->addAttribute(_("to"), _("video/x-ms-wm"));
-    extension_mimetype->appendChild(map9);
-
-    Ref<Element> map10(new Element(_("map")));
-    map10->addAttribute(_("from"), _("wmx"));
-    map10->addAttribute(_("to"), _("video/x-ms-wmx"));
-    extension_mimetype->appendChild(map10);
-
-    mappings->appendChild(extension_mimetype);
-    
-    Ref<Element> mimetype_upnpclass(new Element(_("mimetype-upnpclass")));
-
-    Ref<Element> map11(new Element(_("map")));
-    map11->addAttribute(_("from"), _("audio/*"));
-    map11->addAttribute(_("to"), _("object.item.audioItem"));
-    mimetype_upnpclass->appendChild(map11);
-
-    Ref<Element> map12(new Element(_("map")));
-    map12->addAttribute(_("from"), _("application/ogg"));
-    map12->addAttribute(_("to"), _("object.item.audioItem"));
-    mimetype_upnpclass->appendChild(map12);
-
-    Ref<Element> map13(new Element(_("map")));
-    map13->addAttribute(_("from"), _("image/*"));
-    map13->addAttribute(_("to"), _("object.item.imageItem"));
-    mimetype_upnpclass->appendChild(map13);
-    
-    Ref<Element> map14(new Element(_("map")));
-    map14->addAttribute(_("from"), _("video/*"));
-    map14->addAttribute(_("to"), _("object.item.videoItem"));
-    mimetype_upnpclass->appendChild(map14);
-
-    mappings->appendChild(mimetype_upnpclass);
-    import->appendChild(mappings);
+    catch (Exception ex)
+    {
+        log_error("Could not import mapping template file from %s\n",
+                map_file.c_str());
+    }
     config->appendChild(import);
 
     save_text(config_filename, config->print());

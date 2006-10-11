@@ -1,0 +1,22 @@
+<mappings>
+    <extension-mimetype ignore-unknown="no">
+        <map from="mp3" to="audio/mpeg"/>
+        <map from="ogg" to="application/ogg"/>
+        <map from="asf" to="video/x-ms-asf"/>
+        <map from="asx" to="video/x-ms-asf"/>
+        <map from="wma" to="audio/x-ms-wma"/>
+        <map from="wax" to="audio/x-ms-wax"/>
+        <map from="wmv" to="video/x-ms-wmv"/>
+        <map from="wvx" to="video/x-ms-wvx"/>
+        <map from="wm" to="video/x-ms-wm"/>
+        <map from="wmx" to="video/x-ms-wmx"/>
+        <map from="wmx" to="video/x-ms-wmx"/>
+    </extension-mimetype>
+    <mimetype-upnpclass>
+        <map from="audio/*" to="object.item.audioItem"/>
+        <map from="application/ogg" to="object.item.audioItem"/>
+        <map from="video/*" to="object.item.videoItem"/>
+        <map from="image/*" to="object.item.imageItem"/>
+    </mimetype-upnpclass>
+</mappings>
+
