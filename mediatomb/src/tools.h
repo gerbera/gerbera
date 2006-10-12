@@ -164,9 +164,22 @@ zmm::String get_jpeg_resolution(zmm::Ref<IOHandler> ioh);
 /// \brief Sets resolution for a given resource index, item must be a JPEG image
 void set_jpeg_resolution_resource(zmm::Ref<CdsItem> item, int res_num);
 
+/// \brief Unescapes the given String.
+/// \param string the string to unescape
+/// \param escape the escape character (e.g. "\")
+/// \return the unescaped string
 zmm::String unescape(zmm::String string, char escape);
 
+/// \brief Returns the first string if it isn't "nil", otherwise the fallback string.
+/// \param first the string to return if it isn't nil
+/// \param fallback fallback string to return if first is nil
+/// \return return first if it isn't nil, otherwise fallback
 zmm::String fallbackString(zmm::String first, zmm::String fallback);
+
+/// \brief computes an (unsigned int) hash for the given string
+/// \param str the string to compute the hash for
+/// \return return the (unsigned int) hash value
+unsigned int stringHash(zmm::String str);
 
 #endif // __TOOLS_H__
 

@@ -575,3 +575,14 @@ String fallbackString(String first, String fallback)
         return fallback;
     return first;
 }
+
+unsigned int stringHash(String str)
+{
+    unsigned int hash = 5381;
+    unsigned char *data = (unsigned char *)str.c_str();
+    int c;
+    while ((c = *data++))
+        hash = ((hash << 5) + hash) ^ c; /* (hash * 33) ^ c */
+    return hash;
+}
+

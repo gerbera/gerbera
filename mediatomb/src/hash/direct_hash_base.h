@@ -60,6 +60,7 @@ public:
     {
         return ((key * 0xd2d84a61) ^ 0x7832c9f4) % capacity;
     }
+/*
     int stringHashCode(zmm::String key)
     {
         int i;
@@ -82,6 +83,7 @@ public:
         }
         return ((sum * 0xd2d84a61) ^ 0x7832c9f4) % capacity;
     }
+*/
     
     int secondaryHashCode(int primary)
     {

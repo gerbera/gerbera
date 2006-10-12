@@ -117,8 +117,24 @@ protected:
     /* helper for findObjectByFilename and isFileInDatabase */
     zmm::Ref<SQLRow> _findObjectByFilename(zmm::String path);
     
-    /* helper for addObject and updateObject */
-    zmm::Ref<Dictionary> _addUpdateObject(zmm::Ref<CdsObject> obj, bool isUpdate);
+    
+    /* helper class and helper function for addObject and updateObject */
+    class AddUpdateTable : public Object
+    {
+    public:
+        AddUpdateTable(zmm::String table, zmm::Ref<Dictionary> dict)
+        {
+            this->table = table;
+            this->dict = dict;
+        }
+        zmm::String getTable() { return table; }
+        zmm::Ref<Dictionary> getDict() { return dict; }
+    protected:
+        zmm::String table;
+        zmm::Ref<Dictionary> dict;
+    };
+    zmm::Ref<zmm::Array<AddUpdateTable> > _addUpdateObject(zmm::Ref<CdsObject> obj, bool isUpdate);
+    
     
     /* helper for removeObject(s) */
     void _removeObjects(zmm::String objectIDs);
@@ -146,7 +162,6 @@ protected:
     zmm::String addLocationPrefix(char prefix, zmm::String path);
     zmm::String stripLocationPrefix(char* prefix, zmm::String path);
     zmm::String stripLocationPrefix(zmm::String path);
-    unsigned int stringHash(zmm::String key);
     
     int ensurePathExistence(zmm::String path);
     zmm::Ref<CdsObject> checkRefID(zmm::Ref<CdsObject> obj);

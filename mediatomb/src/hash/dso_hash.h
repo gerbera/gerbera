@@ -22,6 +22,7 @@
 #define __HASH_DSO_HASH_H__
 
 #include "direct_hash_base.h"
+#include "tools.h"
 
 template <typename VT> struct dso_hash_slot
 {
@@ -59,7 +60,7 @@ public:
     /* virtual methods */
     virtual int hashCode(zmm::String key)
     {
-        return this->stringHashCode(key);
+        return stringHash(key);
     }
     virtual bool match(zmm::String key, struct dso_hash_slot<VT> *slot)
     {

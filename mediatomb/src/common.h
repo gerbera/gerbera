@@ -160,7 +160,7 @@
 
 #define CONFIG_MAPPINGS_TEMPLATE        "mappings.xml"
 // misc
-#define INVALID_OBJECT_ID (-333)
+#define INVALID_OBJECT_ID               (-333)
 
 
 

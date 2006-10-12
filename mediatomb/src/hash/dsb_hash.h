@@ -22,6 +22,7 @@
 #define __HASH_DSB_HASH_H__
 
 #include "direct_hash_base.h"
+#include "tools.h"
 
 template <typename VT> struct dsb_hash_slot
 {
@@ -56,7 +57,7 @@ public:
     /* virtual methods */
     virtual int hashCode(zmm::String key)
     {
-        return this->stringHashCode(key);
+        return stringHash(key);
     }
     virtual bool match(zmm::String key, struct dsb_hash_slot<VT> *slot)
     {
