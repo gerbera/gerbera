@@ -438,6 +438,8 @@ else
     fi
 fi
 
+AC_SUBST(JS_CXXFLAGS)
+
 CXXFLAGS="$CXXFLAGS_SAVE"
 
 ########### libmagic
