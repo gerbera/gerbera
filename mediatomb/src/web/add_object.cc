@@ -189,7 +189,7 @@ void web::addObject::process()
             obj = this->addUrl(parentID, Ref<CdsItemExternalURL> (new CdsItemExternalURL()), true);
             break;
             
-        case OBJECT_TYPE_ITEM | OBJECT_TYPE_ITEM_INTERNAL_URL:
+        case OBJECT_TYPE_ITEM | OBJECT_TYPE_ITEM_EXTERNAL_URL | OBJECT_TYPE_ITEM_INTERNAL_URL:
             if (!string_ok(location)) throw _Exception(_("No URL given"));
             obj = this->addUrl(parentID, Ref<CdsItemExternalURL> (new CdsItemInternalURL()), false);
             break;

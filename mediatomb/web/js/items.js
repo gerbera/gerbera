@@ -139,6 +139,7 @@ function updateItems(ajaxRequest)
             itemEntry.appendChild(linkEl);
             
             itemLink.setAttribute("href", xmlGetElementText(item, "res"));
+            itemLink.setAttribute("target", "_blank");
         }
         var itemText = rightDocument.createTextNode(useFiles ? item.firstChild.nodeValue : xmlGetElementText(item, "title"));
         itemLink.appendChild(itemText);
@@ -229,7 +230,7 @@ function updateItemAddEditFields(editItem)
         // Note: 'Active Item', 'External Link (URL)', 'Internal Link (Local URL)'
         // are also 'Items', so they have the item flag set too.
         var objTypeOptions = new Array('Container', 'Item', 'Active Item', 'External Link (URL)', 'Internal Link (Local URL)');
-        var objTypeOptionsIds = new Array('1', '2', '6', '10', '18');
+        var objTypeOptionsIds = new Array('1', '2', '6', '10', '26');
         
         for (var i = 0; i < objTypeOptions.length; ++i)
             selectEl.options[i] = new Option(
@@ -269,7 +270,7 @@ function updateItemAddEditFields(editItem)
         fieldNameAr = new Array('title', 'location', 'protocol', 'class', 'description', 'mime-type');
         defaultsAr = new Array('', '', 'http-get', 'object.item', '', '');
     }
-    else if (currentTypeOption == '18')
+    else if (currentTypeOption == '26')
     {
         fieldAr = new Array('Title', 'URL', 'Class', 'Description', 'Mimetype');
         fieldNameAr = new Array('title', 'location', 'class', 'description', 'mime-type');

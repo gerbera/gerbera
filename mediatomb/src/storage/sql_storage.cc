@@ -290,6 +290,7 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
 
 void SQLStorage::addObject(Ref<CdsObject> obj)
 {
+    obj->setID(INVALID_OBJECT_ID); 
     Ref<Array<AddUpdateTable> > data = _addUpdateObject(obj, false);
     int lastInsertID = INVALID_OBJECT_ID;
     for (int i = 0; i < data->size(); i++)
@@ -334,6 +335,8 @@ void SQLStorage::addObject(Ref<CdsObject> obj)
 
 void SQLStorage::updateObject(zmm::Ref<CdsObject> obj)
 {
+    if (IS_FORBIDDEN_CDS_ID(obj->getID()))
+        throw _Exception(_("tried to update an object with a forbidden ID (")+obj->getID()+")!");
     Ref<Array<AddUpdateTable> > data = _addUpdateObject(obj, true);
     for (int i = 0; i < data->size(); i++)
     {
@@ -666,7 +669,11 @@ String SQLStorage::buildContainerPath(int parentID, String title)
     Ref<SQLRow> row = res->nextRow();
     if (row == nil)
         return nil;
-    return stripLocationPrefix(row->col(0)) + VIRTUAL_CONTAINER_SEPARATOR + title;
+    char prefix;
+    String path = stripLocationPrefix(&prefix, row->col(0)) + VIRTUAL_CONTAINER_SEPARATOR + title;
+    if (prefix != LOC_VIRT_PREFIX)
+        throw _Exception(_("tried to build a virtual container path with an non-virtual parentID"));
+    return path;
 }
 
 void SQLStorage::addContainerChain(String path, int *containerID, int *updateID)
@@ -939,7 +946,10 @@ void SQLStorage::removeObjects(zmm::Ref<DBRHash<int> > list)
     Ref<StringBuffer> ids(new StringBuffer());
     for (int i = 0; i < count; i++)
     {
-        * ids << "," << array[i];
+        int id = array[i];
+        if (IS_FORBIDDEN_CDS_ID(id))
+            throw _Exception(_("tried to delete a forbidden ID (")+id+")!");
+        * ids << "," << id;
     }
     
     if (dbRemovesDeps)
@@ -975,6 +985,13 @@ void SQLStorage::removeObject(int objectID, bool all)
         if (row == nil)
             return;
         objectID = row->col(0).toInt();
+        if (IS_FORBIDDEN_CDS_ID(objectID))
+            throw _Exception(_("tried to delete the reference of an object without an allowed reference"));
+    }
+    else
+    {
+        if (IS_FORBIDDEN_CDS_ID(objectID))
+            throw _Exception(_("tried to delete a forbidden ID (")+objectID+")!");
     }
     if (dbRemovesDeps)
     {
@@ -1010,8 +1027,11 @@ void SQLStorage::_recursiveRemove(String objectIDs)
         recurse->clear();
         while ((row = res->nextRow()) != nil)
         {
-            *recurse << "," << row->col(0);
-            *remove << "," << row->col(0);
+            String id = row->col(0);
+            if (IS_FORBIDDEN_CDS_ID(id.toInt()))
+                throw _Exception(_("tried to delete a forbidden ID (")+id+")!");
+            *recurse << "," << id;
+            *remove << "," << id;
         }
         if (remove->length() > MAX_REMOVE_SIZE)
         {
@@ -1040,6 +1060,6 @@ String SQLStorage::getInternalSetting(String key)
 }
 /*
 void SQLStorage::storeInternalSetting(String key, String value)
-overwritten due to different SQL syntax
+overwritten due to different SQL syntax for MySQL and SQLite3
 */
 

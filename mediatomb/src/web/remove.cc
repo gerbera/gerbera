@@ -65,7 +65,7 @@ void web::remove::process()
         root->appendTextChild(_("updateContainer"), String::from(obj->getParentID()));
     }
     
-    ContentManager::getInstance()->removeObject(objectID, true, all);
+    ContentManager::getInstance()->removeObject(objectID, false, all);
     
     log_debug("remove: returning\n");
 }
