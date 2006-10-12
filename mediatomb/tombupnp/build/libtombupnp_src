@@ -95,5 +95,4 @@ libtombupnp_a_SOURCES = \
 ../upnp/src/uuid/sysdep.c \
 ../upnp/src/uuid/upnp_md5.c \
 ../upnp/src/uuid/upnp_uuid.c \
-../upnp/src/win_dll.c \
 dummy.h

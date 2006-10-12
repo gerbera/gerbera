@@ -35,10 +35,8 @@ DARWIN_OS=0
 case $host in
     *-*-darwin*)
         DARWIN_OS=1
-        AC_DEFINE([__DARWIN__], [1], [OSX detected])
         ;;
 esac
-
 
 AC_CHECK_HEADERS([syslog.h stddef.h unistd.h arpa/inet.h fcntl.h], [],
                  [AC_MSG_ERROR(required header not found)]) 
@@ -197,7 +195,6 @@ AC_CHECK_FUNCS([gethostbyname],
 
 if test $DARWIN_OS -eq 1 ; then
         AC_MSG_NOTICE([You are running OSX, assuming threadsafe gethostbyname version])
-        AC_DEFINE([GETHOSTBYNAME_THREADSAFE], [1], [OSX has a threadsafe gethostbyname version])
 fi
 
 AC_CHECK_FUNCS([gethostbyname_r],[],
@@ -221,7 +218,6 @@ AC_CHECK_LIB(pthread, pthread_mutex_lock,[], [AC_MSG_ERROR(required library func
 
     
 ######### SQLite3
-
 SQLITE3_OK=yes
 AC_ARG_ENABLE(sqlite3,
   [
@@ -243,7 +239,7 @@ if test "x$SQLITE3_OK" = xyes; then
         [],
         [
             AC_CHECK_HEADER(/opt/local/include/sqlite3.h,
-                [CXXFLAGS="$CXXFLAGS -I/opt/local/include/"],
+#                [SQLITE3_CXXFLAGS="$CXXFLAGS -I/opt/local/include/"],
                 [SQLITE3_OK=missing])
         ]
     )
@@ -252,10 +248,14 @@ if test "x$SQLITE3_OK" = xyes; then
     AC_CHECK_LIB(sqlite3, sqlite3_open,
         [],
         [
-            LDFLAGS="$LDFLAGS -L/opt/local/lib -lsqlite3"
+#            LDFLAGS="$LDFLAGS -L/opt/local/lib -lsqlite3"
             AC_CHECK_FUNC(sqlite3_open,
                 [],
-                [SQLITE3_OK=missing])
+#                [SQLITE3_LDFLAGS="$LDFLAGS"],
+                [
+                    SQLITE3_OK=missing
+#                    LDFLAGS="$LDFLAGS_SAVE"
+                ])
         ]
     )
 fi
@@ -267,7 +267,6 @@ if test "x$SQLITE3_OK" = xyes; then
     fi
 fi
 if test "x$SQLITE3_OK" = xyes; then
-    LDFLAGS="$LDFLAGS -lsqlite3"
     AC_DEFINE([HAVE_SQLITE3], [1], [sqlite3 library presence])
 else
     if test "x$SQLITE3_EN" = xyes; then
@@ -276,13 +275,6 @@ else
 fi
 
 ########## MySQL
-CPPFLAGS_SAVE="$CPPFLAGS"
-CFLAGS_SAVE="$CFLAGS"
-CXXFLAGS_SAVE="$CXXFLAGS"
-LDFLAGS_SAVE="$LDFLAGS"
-
-MYSQL_CFLAGS=""
-MYSQL_LIBS=""
 
 MYSQL_OK=yes
 AC_ARG_ENABLE(mysql,
@@ -297,28 +289,16 @@ AC_ARG_ENABLE(mysql,
 if test "x$MYSQL_OK" = xyes; then
     AC_PATH_PROG(mysqlconfig, mysql_config, no)
     if test "x$mysqlconfig" = xno; then
-        AC_MSG_RESULT([mysql_config script not found])
         MYSQL_OK=missing
+        AC_MSG_RESULT([mysql_config script not found])
     else
         AC_MSG_CHECKING(mysql_config version)
         MYSQL_VERSION_MAJOR=`${mysqlconfig} --version | sed 's/\([[0-9]]\)*\.\([[0-9]]*\)\.\([[0-9]]*\)$/\1/'`
         MYSQL_VERSION_MINOR=`${mysqlconfig} --version | sed 's/\([[0-9]]\)*\.\([[0-9]]*\)\.\([[0-9]]*\)$/\2/'`
         
         if test $MYSQL_VERSION_MAJOR -le 3 ; then
-#            if test $MYSQL_VERSION_MINOR -eq 23 ; then
-#                AC_MSG_CHECKING(mysql cflags)
-#                MYSQL_CFLAGS=`${mysqlconfig} --cflags | sed s/\'//g`
-#                AC_MSG_RESULT($MYSQL_CFLAGS)
-#
-#                AC_MSG_CHECKING(mysql libraries)
-#                MYSQL_LIBS=`${mysqlconfig} --libs | sed s/\'//g`
-#                AC_MSG_RESULT($MYSQL_LIBS)
-#
-#            else
                 AC_MSG_WARN(MySQL version too old)
                 MYSQL_OK=missing
-#            fi
-            
         else
             if test $MYSQL_VERSION_MAJOR -gt 3 ; then
         
@@ -336,7 +316,6 @@ if test "x$MYSQL_OK" = xyes; then
         fi
 
         CXXFLAGS="$CXXFLAGS $MYSQL_CFLAGS"
-#        CFLAGS="$CFLAGS $MYSQL_CFLAGS"
         LDFLAGS="$LDFLAGS $MYSQL_LIBS"
     fi
 fi
@@ -359,12 +338,14 @@ if test "x$MYSQL_OK" = xyes; then
 else
     if test "x$MYSQL_EN" = xyes; then
         AC_MSG_ERROR(unable to configure mysql support)
-        CFLAGS="$CFLAGS_SAVE"
-        CXXFLAGS="$CXXFLAGS_SAVE"
-        CPPFLAGS="$CPPFLAGS_SAVE"
-        LDFLAGS="$LDFLAGS_SAVE"
     fi
 fi
+
+AC_SUBST(MYSQL_LIBS)
+AC_SUBST(MYSQL_CFLAGS)
+
+CXXFLAGS="$CXXFLAGS_SAVE"
+LDFLAGS="$LDFLAGS_SAVE"
 
 #########  check if at least one database available
 
@@ -376,11 +357,6 @@ fi
 
 
 ######### javascript
-CPPFLAGS_SAVE="$CPPFLAGS"
-CFLAGS_SAVE="$CFLAGS"
-CXXFLAGS_SAVE="$CXXFLAGS"
-LDFLAGS_SAVE="$LDFLAGS"
-
 
 JS_OK=yes
 AC_ARG_ENABLE(javascript,
@@ -396,7 +372,7 @@ if test "x$JS_OK" = xyes; then
     AC_CHECK_HEADER(jsapi.h,
         [],
         [
-            CXXFLAGS="$CXXFLAGS_SAVE -I/usr/include/smjs"
+            CXXFLAGS="-I/usr/include/smjs"
             
             AC_MSG_CHECKING([alternative libjs header location (debian)])
             AC_COMPILE_IFELSE(
@@ -410,10 +386,11 @@ if test "x$JS_OK" = xyes; then
                     ]
                 )],
                 [
+                    JS_CXXFLAGS="-I/usr/include/smjs"
                     AC_MSG_RESULT([found under /usr/include/smjs])
                 ],
                 [
-                    CXXFLAGS="$CXXFLAGS_SAVE -I/usr/include/js"
+                    CXXFLAGS="-I/usr/include/js"
             
                     AC_MSG_CHECKING([alternative libjs header location (SuSE)])
                     AC_COMPILE_IFELSE(
@@ -427,6 +404,7 @@ if test "x$JS_OK" = xyes; then
                             ]
                         )],
                         [
+                            JS_CXXFLAGS="-I/usr/include/js"
                             AC_MSG_RESULT([found under /usr/include/js])
                         ],
                         [
@@ -457,13 +435,10 @@ if test "x$JS_OK" = xyes; then
 else
     if test "x$JS_EN" = xyes; then
         AC_MSG_ERROR(unable to configure javascript support)
-        CFLAGS="$CFLAGS_SAVE"
-        CXXFLAGS="$CXXFLAGS_SAVE"
-        CPPFLAGS="$CPPFLAGS_SAVE"
-        LDFLAGS="$LDFLAGS_SAVE"
-
     fi
 fi
+
+CXXFLAGS="$CXXFLAGS_SAVE"
 
 ########### libmagic
 MAGIC_OK=yes
@@ -502,11 +477,6 @@ fi
 
 
 ######### taglib
-CPPFLAGS_SAVE="$CPPFLAGS"
-CFLAGS_SAVE="$CFLAGS"
-CXXFLAGS_SAVE="$CXXFLAGS"
-LDFLAGS_SAVE="$LDFLAGS"
-
 
 TAGLIB_OK=yes
 TAGLIB_REQUESTED=no
@@ -564,10 +534,7 @@ if test "x$TAGLIB_OK" = xyes; then
 fi
 
 if test "x$TAGLIB_OK" = xyes; then
-#    CFLAGS="$CFLAGS $TAGLIB_CFLAGS"
-#    CXXFLAGS="$CXXFLAGS $TAGLIB_CFLAGS"
     CPPFLAGS="$CPPFLAGS $TAGLIB_CFLAGS"
-
 
     AC_CHECK_HEADERS([taglib.h fileref.h tag.h audioproperties.h tstring.h],
         [],
@@ -587,20 +554,15 @@ if test "x$TAGLIB_OK" = xyes; then
 else
     if test "x$TAGLIB_EN" = xyes; then
         AC_MSG_ERROR(unable to configure taglib support)
-        CPPFLAGS="$CPPFLAGS_SAVE"
-        CFLAGS="$CFLAGS_SAVE"
-        CXXFLAGS="$CXXFLAGS_SAVE"
-        LDFLAGS="$LDFLAGS_SAVE"
     fi
 fi
 
+AC_SUBST(TAGLIB_CFLAGS)
+AC_SUBST(TAGLIB_LIBS)
+
+CPPFLAGS="$CPPFLAGS_SAVE"
 
 ######### id3tag
-CPPFLAGS_SAVE="$CPPFLAGS"
-CFLAGS_SAVE="$CFLAGS"
-CXXFLAGS_SAVE="$CXXFLAGS"
-LDFLAGS_SAVE="$LDFLAGS"
-
 
 #AC_ARG_ENABLE(id3lib,
 #  [  --enable-id3lib          id3lib support],
@@ -628,10 +590,10 @@ if test "x$ID3_OK" = xyes; then
     )
 fi
 if test "x$ID3_OK" = xyes; then
-    AC_CHECK_LIB(id3,main,
-        [],
-        [ID3_OK=missing],
-        [$CXXFLAGS]
+    AC_CHECK_LIB(z,compress,
+            [AC_CHECK_LIB(id3,main,[],[ID3_OK=missing],[-lz])],
+            [AC_CHECK_LIB(id3,main,[],[ID3_OK=missing],[])],
+            []
     )
 fi
 
@@ -670,6 +632,15 @@ if test "x$EXTRACTOR_OK" = xyes; then
     )
 fi
 
+if test "x$EXTRACTOR_OK" = xyes; then
+    AC_CHECK_LIB(extractor, EXTRACTOR_getKeywords,
+        [],
+        [ID3_OK=missing],
+        []
+    )
+fi
+
+
 #disabling version check, 0.5.2 is broken!!!
 #if test "x$EXTRACTOR_OK" = xyes; then
 #    AC_MSG_CHECKING([extractor version])
@@ -694,7 +665,6 @@ fi
 #    )
 #fi
 if test "x$EXTRACTOR_OK" = xyes; then
-    LDFLAGS="$LDFLAGS -lextractor"
     AC_DEFINE([HAVE_EXTRACTOR], [1], [libextractor library presence])
 #    if test "x$EXTRACTOR_GE_0_5_2" = xyes; then
 #        AC_DEFINE(EXTRACTOR_GE_0_5_2)
@@ -737,6 +707,15 @@ if test "x$EXIF_OK" = xyes; then
         /* checking for libexif/exif-content.h */
     )
 fi
+
+if test "x$EXIF_OK" = xyes; then
+    AC_CHECK_LIB(exif, exif_data_new_from_file,
+        [],
+        [EXIF_OK=missing],
+        []
+    )
+fi
+
 if test "x$EXIF_OK" = xyes; then
     # try 1 argument signature
     AC_MSG_CHECKING([exif_entry_get_value signature])
@@ -780,7 +759,6 @@ if test "x$EXIF_OK" = xyes; then
 
 fi
 if test "x$EXIF_OK" = xyes; then
-    LDFLAGS="$LDFLAGS -lexif"
     AC_DEFINE([HAVE_EXIF], [1], [EXIF library presence])
     if test "x$EXIF_EGV_1" = xyes; then
         AC_DEFINE([EXIF_EGV_1], [1], [exif_entry_get_value() has 1 parameter])
@@ -874,28 +852,9 @@ AC_ARG_ENABLE(log,
      fi
   ]
 )
+
 if test "x$LOG_OK" = xyes; then
     AC_DEFINE(LOG_ENABLED, 1, [if defined compile with log output])
-fi
-
-# now set all collected flags
-if test "x$MYSQL_OK" = xyes; then
-    CXXFLAGS="$CXXFLAGS $MYSQL_CFLAGS"
-    LDFLAGS="$LDFLAGS $MYSQL_LIBS"
-fi
-
-if test "x$JS_OK" = xyes; then
-    CXXFLAGS="$CXXFLAGS $JS_CXXFLAGS"
-    LDFLAGS="$LDFLAGS $JS_LDFLAGS"
-fi
-
-if test "x$MAGIC_OK" = xyes; then
-    LDFLAGS="$LDFLAGS $MAGIC_LDFLAGS"
-fi
-
-if test "x$TAGLIB_OK" = xyes; then
-   CXXFLAGS="$CXXFLAGS $TAGLIB_CFLAGS"
-   LDFLAGS="$LDFLAGS $TAGLIB_LDFLAGS"
 fi
 
 eval PACKAGE_DATADIR="$datadir/$PACKAGE"
