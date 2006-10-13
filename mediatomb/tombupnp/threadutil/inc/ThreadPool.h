@@ -218,6 +218,7 @@ typedef struct THREADPOOL
   int lastJobId; //ids for jobs 
   int shutdown;   //whether or not we are shutting down
   int totalThreads;       //total number of threads	
+  int busyThreads;        // number of threads that are currently executing jobs
   int persistentThreads; //number of persistent threads
   FreeList jobFreeList; //free list of jobs
   LinkedList lowJobQ;    //low priority job Q

@@ -417,7 +417,7 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
             ithread_mutex_lock( &tp->mutex );
 
             if( job ) {
-
+                tp->busyThreads--;
                 FreeThreadPoolJob( tp, job );
                 job = NULL;
 
@@ -477,8 +477,8 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
                 SetRelTimeout( &timeout, tp->attr.maxIdleTime );
 
                 //wait for a job up to the specified max time
-                retCode = ithread_cond_timedwait( &tp->condition,
-                                                  &tp->mutex, &timeout );
+                    retCode = ithread_cond_timedwait( &tp->condition,
+                            &tp->mutex, &timeout );
 
             }
 
@@ -508,10 +508,8 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
 
                 return NULL;
             } else {
-
                 //Pick up persistent job if available
                 if( tp->persistentJob ) {
-
                     job = tp->persistentJob;
                     tp->persistentJob = NULL;
                     tp->persistentThreads++;
@@ -543,7 +541,6 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
                         ListDelNode( &tp->lowJobQ, head, 0 );
 
                     } else {
-
                         // Should never get here
                         assert( 0 );
                         STATSONLY( tp->stats.workerThreads-- );
@@ -556,6 +553,8 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
 
                 }
             }
+            
+            tp->busyThreads++;
 
             ithread_mutex_unlock( &tp->mutex );
 
@@ -681,7 +680,7 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
         threads = tp->totalThreads - tp->persistentThreads;
 
         while( ( threads == 0 )
-               || ( ( jobs / threads ) > tp->attr.jobsPerThread ) ) {
+               || ( ( jobs / threads ) > tp->attr.jobsPerThread ) || (tp->totalThreads == tp->busyThreads)) {
 
             if( CreateWorker( tp ) != 0 )
                 return;
@@ -792,6 +791,7 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
             tp->lastJobId = 0;
             tp->shutdown = 0;
             tp->totalThreads = 0;
+            tp->busyThreads = 0;
             tp->persistentThreads = 0;
 
             for( i = 0; i < tp->attr.minThreads; i++ ) {
