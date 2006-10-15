@@ -32,6 +32,10 @@
     * added HTTP 1.1 conformance patch submitted by
       Olga Soiko <o.soiko(at)sam-solutions.net>
 
+    * changed theadpool implementation; if all threads in the thread pool
+      are busy executing jobs, a new worker thread will be created
+      if a job is scheduled
+
 2006-07-07 Oxy <virtual_worlds(at)gmx.de>
 
 	* full support for Windows added, static library and DLL are fully
