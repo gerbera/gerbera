@@ -127,6 +127,9 @@ public:
     /// \param ID of the Session.
     /// \return intance of the Session with a given ID or nil if no session with that ID was found.
     zmm::Ref<Session> getSession(zmm::String sessionID);
+
+    /// \todo Leo... please describe :>
+    void incrementUIUpdateID(int id) {};
 };
 
 #endif //  __SESSION_MANAGER_H__

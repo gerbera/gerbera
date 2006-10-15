@@ -155,8 +155,6 @@ public:
     virtual int findObjectIDByPath(zmm::String fullpath) = 0;
     virtual void incrementUpdateIDs(int *ids, int size) = 0;
     
-    virtual void incrementUIUpdateID(int id) = 0;
-    
     /* utility methods */
     virtual zmm::Ref<CdsObject> loadObject(int objectID) = 0;
     virtual int getChildCount(int contId, bool containersOnly = false) = 0;

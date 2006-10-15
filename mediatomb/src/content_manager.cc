@@ -36,6 +36,7 @@
 #include "update_manager.h"
 #include "string_converter.h"
 #include "metadata_handler.h"
+#include "session_manager.h"
 
 #define DEFAULT_DIR_CACHE_CAPACITY  10
 #define CM_INITIAL_QUEUE_SIZE       20
@@ -52,7 +53,6 @@ struct magic_set *ms = NULL;
 using namespace zmm;
 using namespace mxml;
 
-/*********************** utils ***********************/
 #define MIMETYPE_REGEXP "^([a-z0-9_-]+/[a-z0-9_-]+)"
 
 Ref<RExp> reMimetype;
@@ -69,8 +69,6 @@ static String get_filename(String path)
     else
         return path.substring(pos + 1);
 }
-
-/***************************************************************/
 
 ContentManager::ContentManager() : Object()
 {  
@@ -724,7 +722,7 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
             clone->validate();
             storage->updateObject(clone);
             um->containerChanged(cont->getParentID());
-            storage->incrementUIUpdateID(cont->getParentID());
+            SessionManager::getInstance()->incrementUIUpdateID(cont->getParentID());
         }
     }
 
@@ -753,7 +751,7 @@ void ContentManager::addObject(zmm::Ref<CdsObject> obj)
     um->containerChanged(obj->getParentID());
     if (IS_CDS_CONTAINER(obj->getObjectType()))
     {
-        storage->incrementUIUpdateID(obj->getParentID());
+        SessionManager::getInstance()->incrementUIUpdateID(obj->getParentID());
     }
     
     if (! obj->isVirtual() && IS_CDS_ITEM(obj->getObjectType()))
