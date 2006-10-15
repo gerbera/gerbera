@@ -70,7 +70,9 @@ namespace zmm
         {
             if(requiredSize > capacity)
             {
+#ifdef LOG_TOMBDEBUG
                 int oldCapacity = capacity;
+#endif
                 capacity = count + (count / 2);
                 if(requiredSize > capacity)
                     capacity = requiredSize;
