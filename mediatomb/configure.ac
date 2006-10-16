@@ -95,18 +95,29 @@ AC_CHECK_HEADER([iconv.h],
             AC_CHECK_HEADER([/usr/local/include/iconv.h],
                 [
                     ICONV_CXXFLAGS="-I/usr/local/include"
+                    LDFLAGS="-L/usr/local/lib"
                     AC_SUBST(ICONV_CXXFLAGS)
-                    AC_CHECK_FUNCS([iconv],[],
+                    AC_CHECK_FUNCS([iconv],
                         [
-                        AC_CHECK_LIB(iconv, iconv, [], 
-                            [
-                                AC_CHECK_LIB(iconv, libiconv, 
-                                    [],
-                                    [AC_MSG_ERROR(iconv library not found on your system)]
-                                )
+                            ICONV_LIBS="-L/usr/local/lib"
+                            AC_SUBST(ICONV_LIBS)
+                        ],
+                        [
+                            AC_CHECK_LIB(iconv, iconv, 
+                                [
+                                    ICONV_LIBS="-L/usr/local/lib -liconv"
+                                    AC_SUBST(ICONV_LIBS)
+                                ], 
+                                 [
+                                    AC_CHECK_LIB(iconv, libiconv, 
+                                        [
+                                            ICONV_LIBS="-L/usr/local/lib -liconv"
+                                            AC_SUBST(ICONV_LIBS)
+                                        ],
+                                        [AC_MSG_ERROR(iconv library not found on your system)]
+                                    )
+                                 ])
                             ])
-
-                        ])
 
                 ],
                 [
