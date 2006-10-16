@@ -167,6 +167,7 @@ protected:
     
     /// \brief the tasks to be done by the sqlite3 thread
     zmm::Ref<zmm::ObjectQueue<SLTask> > taskQueue;
+    bool taskQueueOpen;
     
     void mutexCondInit(pthread_mutex_t *mutex, pthread_cond_t *cond);
     void waitForTask(zmm::Ref<SLTask> task, pthread_mutex_t *mutex, pthread_cond_t *cond);

@@ -27,6 +27,7 @@
 #include "rexp.h"
 #include "io_handler.h"
 #include "cds_objects.h"
+#include <sys/time.h>
 
 #ifdef HAVE_MAGIC
 // for older versions of filemagic
@@ -180,6 +181,20 @@ zmm::String fallbackString(zmm::String first, zmm::String fallback);
 /// \param str the string to compute the hash for
 /// \return return the (unsigned int) hash value
 unsigned int stringHash(zmm::String str);
+
+inline void getTimeval(struct timeval *now) { gettimeofday(now, NULL); }
+
+long getDeltaMillis(struct timeval *first, struct timeval *second = NULL);
+
+void getTimespecAfterMillis(long delta, struct timespec *ret, struct timeval *start);
+
+
+/*
+/// \bried Returns the current milliseconds since the "epoch" or since startMillis (which are counted since the epoch).
+long getMillis(long startMillis = 0);
+
+void millisToTimespec(long millis, struct timespec *spec);
+*/
 
 #endif // __TOOLS_H__
 

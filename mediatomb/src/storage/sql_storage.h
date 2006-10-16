@@ -81,7 +81,7 @@ public:
     
     virtual void removeObjects(zmm::Ref<DBRHash<int> > list);
     
-    virtual void removeObject(int objectID, bool all);
+    virtual int removeObject(int objectID, bool all, int *objectType = NULL);
     
     /* accounting methods */
     virtual int getTotalFiles();
@@ -93,7 +93,7 @@ public:
     virtual zmm::Ref<CdsObject> findObjectByPath(zmm::String fullpath);
     virtual zmm::Ref<CdsObject> findObjectByFilename(zmm::String path);
     virtual int findObjectIDByPath(zmm::String fullpath);
-    virtual void incrementUpdateIDs(int *ids, int size);
+    virtual zmm::String incrementUpdateIDs(int *ids, int size);
     virtual void incrementUIUpdateID(int id);
     
     virtual zmm::String buildContainerPath(int parentID, zmm::String title);

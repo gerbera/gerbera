@@ -337,27 +337,26 @@ void ContentManager::_addFile(String path, bool recursive, bool hidden)
     {
         addRecursive(path, hidden);
     }
-    um->flushUpdates();
 }
 
 void ContentManager::_removeObject(int objectID, bool all)
 {
-    /// \todo when removing... what about container updates when removing recursively?
-    if (objectID == 0)
+    if (objectID == CDS_ID_ROOT)
         throw _Exception(_("cannot remove root container"));
-    if (objectID == 1)
+    if (objectID == CDS_ID_FS_ROOT)
         throw _Exception(_("cannot remove PC-Directory container"));
-    /// \todo make PC-Directory ID configurable
+    if (IS_FORBIDDEN_CDS_ID(objectID))
+        throw _Exception(_("tried to remove illegal object id"));
+    
     Ref<Storage> storage = Storage::getInstance();
-    storage->removeObject(objectID, all);
-
-    // um->containerChanged(obj->getParentID());
+    int objectType;
+    int parentID = storage->removeObject(objectID, all, &objectType);
+    if (IS_CDS_CONTAINER(objectType))
+        SessionManager::getInstance()->incrementUIUpdateID(parentID);
+    UpdateManager::getInstance()->containerChanged(parentID);
     
     // reload accounting
     loadAccounting();
-    
-    Ref<UpdateManager> um = UpdateManager::getInstance();
-    um->flushUpdates();
 }
 
 void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
@@ -502,7 +501,12 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
             }
         }
         log_debug("removing... list: %s\n", list->debugGetAll().c_str());
-        storage->removeObjects(list);
+        if (list->size() > 0)
+        {
+            storage->removeObjects(list);
+            UpdateManager::getInstance()->containerChanged(containerID);
+        }
+        
         closedir(dir);
     } while (!containers->isEmpty());
     last_modified = last_modfied_current_max;
@@ -662,7 +666,7 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
         }
 
 
-        log_debug("updateObject: chechking equality of item %s\n", item->getTitle().c_str());
+        log_debug("updateObject: checking equality of item %s\n", item->getTitle().c_str());
         if (!item->equals(clone, true))
         {
             cloned_item->validate();
@@ -726,7 +730,6 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
         }
     }
 
-    um->flushUpdates();
 }
 
 void ContentManager::addObject(zmm::Ref<CdsObject> obj)
@@ -756,8 +759,6 @@ void ContentManager::addObject(zmm::Ref<CdsObject> obj)
     
     if (! obj->isVirtual() && IS_CDS_ITEM(obj->getObjectType()))
         ContentManager::getInstance()->getAccounting()->totalFiles++;
-    
-    um->flushUpdates();
 }
 
 void ContentManager::addContainer(int parentID, String title, String upnpClass)
@@ -775,10 +776,9 @@ int ContentManager::addContainerChain(String chain)
     
     log_debug("received chain: %s\n", chain.c_str());
     storage->addContainerChain(chain, &containerID, &updateID);
-    if (updateID != INVALID_OBJECT_ID)
-    {
-        UpdateManager::getInstance()->containerChanged(updateID);
-    }
+    // if (updateID != INVALID_OBJECT_ID)
+    // an invalid updateID is checked by containerChanged()
+    UpdateManager::getInstance()->containerChanged(updateID);
 
     return containerID;
 }
@@ -790,7 +790,6 @@ void ContentManager::updateObject(Ref<CdsObject> obj)
     Ref<UpdateManager> um = UpdateManager::getInstance();
     storage->updateObject(obj);
     um->containerChanged(obj->getParentID());
-    um->flushUpdates();
 }
 
 Ref<CdsObject> ContentManager::convertObject(Ref<CdsObject> oldObj, int newType)

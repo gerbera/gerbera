@@ -855,16 +855,38 @@ int SQLStorage::getTotalFiles()
     return 0;
 }
 
-void SQLStorage::incrementUpdateIDs(int *ids, int size)
+String SQLStorage::incrementUpdateIDs(int *ids, int size)
 {
-    if (size<1) return;
+    if (size<1) return nil;
     Ref<StringBuffer> buf(new StringBuffer(size * sizeof(int)));
-    *buf << "UPDATE " CDS_OBJECT_TABLE " SET update_id = update_id + 1 WHERE ID IN(";
-    *buf << ids[0];
+    *buf << "IN (" << ids[0];
     for (int i = 1; i < size; i++)
         *buf << ',' << ids[i];
     *buf << ')';
+    
+    String inStr = buf->toString();
+    
+    buf->clear();
+    *buf << "UPDATE " CDS_OBJECT_TABLE " SET `update_id` = `update_id` + 1 WHERE `id` ";
+    *buf << inStr;
+    
     exec(buf->toString());
+    
+    buf->clear();
+    
+    *buf << "SELECT `id`, `update_id` FROM " CDS_OBJECT_TABLE " WHERE `id` ";
+    *buf << inStr;
+    
+    Ref<SQLResult> res = select(buf->toString());
+    if (res == nil)
+        throw _Exception(_("Error while fetching update ids"));
+    Ref<SQLRow> row;
+    buf->clear();
+    while((row = res->nextRow()) != nil)
+    {
+        *buf << ',' << row->col(0) << ',' << row->col(1);
+    }
+    return buf->toString(1);
 }
 
 void SQLStorage::incrementUIUpdateID(int id)
@@ -970,7 +992,7 @@ void SQLStorage::_removeObjects(String objectIDs)
     exec(q->toString());
 }
 
-void SQLStorage::removeObject(int objectID, bool all)
+int SQLStorage::removeObject(int objectID, bool all, int *objectType)
 {
     Ref<StringBuffer> q = nil;
     if (all)
@@ -980,10 +1002,10 @@ void SQLStorage::removeObject(int objectID, bool all)
             << objectID << " LIMIT 1";
         Ref<SQLResult> res = select(q->toString());
         if (res == nil)
-            return;
+            return INVALID_OBJECT_ID;
         Ref<SQLRow> row = res->nextRow();
         if (row == nil)
-            return;
+            return INVALID_OBJECT_ID;
         objectID = row->col(0).toInt();
         if (IS_FORBIDDEN_CDS_ID(objectID))
             throw _Exception(_("tried to delete the reference of an object without an allowed reference"));
@@ -993,12 +1015,24 @@ void SQLStorage::removeObject(int objectID, bool all)
         if (IS_FORBIDDEN_CDS_ID(objectID))
             throw _Exception(_("tried to delete a forbidden ID (")+objectID+")!");
     }
+    
+    if (q == nil)
+        q = Ref<StringBuffer>(new StringBuffer());
+    else
+        q->clear();
+    *q << "SELECT `parent_id`, `object_type` FROM " CDS_OBJECT_TABLE " WHERE id = " << objectID;
+    Ref<SQLResult> res = select(q->toString());
+    if (res == nil)
+        throw _Exception(_("sql error while getting parent_id"));
+    Ref<SQLRow> row = res->nextRow();
+    if (row == nil)
+        return INVALID_OBJECT_ID;
+    int parentID = row->col(0).toInt();
+    if (objectType != NULL)
+        *objectType = row->col(1).toUInt();
     if (dbRemovesDeps)
     {
-        if (q == nil)
-            q = Ref<StringBuffer>(new StringBuffer());
-        else
-            q->clear();
+        q->clear();
         *q << "DELETE FROM " CDS_OBJECT_TABLE " WHERE id = " << objectID;
         exec(q->toString());
     }
@@ -1006,6 +1040,7 @@ void SQLStorage::removeObject(int objectID, bool all)
     {
         _recursiveRemove(String::from(objectID));
     }
+    return parentID;
 }
 
 void SQLStorage::_recursiveRemove(String objectIDs)

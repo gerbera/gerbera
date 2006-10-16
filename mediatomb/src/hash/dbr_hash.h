@@ -36,6 +36,7 @@ template <typename KT> struct hash_data_array_t
 };
 
 /// \brief Direct hash with base type keys only. It is NOT thread-safe!
+/// It has remove() and getAll() functions
 template <typename KT>
 class DBRHash : public DHashBase<KT, struct dbr_hash_slot<KT> >
 {

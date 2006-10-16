@@ -24,7 +24,6 @@
 
 #include "tools.h"
 #include <sys/stat.h>
-#include <sys/time.h>
 #include <errno.h>
 #include "md5/md5.h"
 #include "file_io_handler.h"
@@ -585,4 +584,62 @@ unsigned int stringHash(String str)
         hash = ((hash << 5) + hash) ^ c; /* (hash * 33) ^ c */
     return hash;
 }
+
+long getDeltaMillis(struct timeval *first, struct timeval *second)
+{
+    struct timeval now;
+    if (second == NULL)
+    {
+        getTimeval(&now);
+        second = &now;
+    }
+    
+    
+    //long delta = (second->tv_sec - first->tv_sec) * 1000L + (second->tv_usec - first->tv_usec) / 1000L;
+    //  log_debug("secf: %ld, secs: %ld, usecf: %ld, usecs: %ld, delta: %ld\n", first->tv_sec, second->tv_sec, first->tv_usec, second->tv_usec, delta);
+    
+    return (second->tv_sec - first->tv_sec) * 1000L + (second->tv_usec - first->tv_usec) / 1000L;
+}
+
+void getTimespecAfterMillis(long delta, struct timespec *ret, struct timeval *start)
+{
+    struct timeval now;
+    if (start == NULL)
+    {
+        getTimeval(&now);
+        start = &now;
+    }
+    ret->tv_sec = start->tv_sec + delta / 1000;
+    ret->tv_nsec = (start->tv_usec + (delta % 1000) * 1000) * 1000;
+    
+    //log_debug("timespec: sec: %ld, nsec: %ld\n", ret->tv_sec, ret->tv_nsec);
+}
+
+
+/*
+unsigned long long getMillis(unsigned long long startMillis)
+{
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    
+    long seconds = now.tv_sec;
+    long millis = now.tv_usec / 1000L;
+    log_debug("getMillis: sec: %ld->%ld, usec: %ld->millis: %ld, ret: %ld\n", now.tv_sec, seconds, now.tv_usec, millis, (seconds * 1000L + millis) - startMillis);
+    return (seconds * 1000L + millis) - startMillis;
+    / *
+    struct timespec spec;
+    clock_gettime(CLOCK_REALTIME, &spec);
+    log_debug("getMillis: sec: %ld, nsec: %ld\n", spec.tv_sec, spec.tv_nsec);
+    return (spec.tv_sec * 1000L + spec.tv_nsec / 1000000L) - startMillis;
+    * /
+}
+
+void millisToTimespec(long long millis, struct timespec *spec)
+{
+    spec->tv_sec = millis / 1000L;
+    spec->tv_nsec = (millis % 1000L) * 1000000L;
+    
+    log_debug("millisToTimespec: millis: %ld -> sec: %ld, nsec: %ld\n", millis, millis/1000L, (millis % 1000L) * 1000000L);
+}
+*/
 

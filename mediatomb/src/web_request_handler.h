@@ -70,7 +70,7 @@ protected:
     /// Each request going to the ui must at least have a valid session id, 
     /// and a driver parameter. Also, there can only by a primary or a
     /// a decondary driver.
-    void check_request();
+    void check_request(bool checkLogin = true);
 
     /// \brief Helper function to create a generic XML document header.
     /// \param xsl_link If not nil, also adds header information that is required for the XSL processor.

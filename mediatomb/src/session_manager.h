@@ -24,13 +24,7 @@
 #define __SESSION_MANAGER_H__
 
 #include "dictionary.h"
-
-/// \brief Each session has two separate information placeholders, one for each driver.
-typedef enum
-{
-    PRIMARY   = 1,
-    SECONDARY = 2
-} session_data_t;
+#include "sync.h"
 
 /// \brief One UI session.
 /// 
@@ -49,7 +43,7 @@ public:
     /// be deleted (will time out)
     /// \todo timeouts and session purging not yet implemented
     Session(long timeout);
-
+    
     /// \brief Returns the time of last access to the session.
     /// \return time in milliseconds
     /// \todo what time is it? from epoch? not yet implemented
@@ -57,47 +51,27 @@ public:
     
     /// \brief Returns the session identifier.
     inline zmm::String getID() { return sessionID; }
-
+    
     /// \brief Sets the session identifier.
     inline void setID(zmm::String sessionID) { this->sessionID = sessionID; }
-
-    /// \brief Saves a value in a specific placeholder.
-    /// \param type identifies in which placeholder the data will be saved
-    /// \param key the key under which the data can be accessed
-    /// \param value a value for the given key
-    ///
-    /// Basically this is not different than saving key:value pairs in a 
-    /// dictionary. The session itself is derived from the Dictionary class,
-    /// but inside the session we have two more separate dictionaries.
-    /// This is required, because we will often need to save different data 
-    /// (for each driver) with same key names
-    void putTo(session_data_t type, zmm::String key, zmm::String value);
-
-    /// \brief Retrieve previously saved data from a specific placeholder.
-    /// \param type identifies from which placeholder the data will be retrieved
-    /// \param key the value for this key will be returned
-    /// \return value as String
-    ///
-    /// This is same as normal "get()" from the Dictionary class, the
-    /// only difference is, that we here identifiy the dictionary by the
-    /// driver (see description for putTo())
-    zmm::String getFrom(session_data_t type, zmm::String key);
-
+    
+    inline bool isLoggedIn() { return loggedIn; }
+    
+    inline void logIn() { loggedIn = true; }
+    
+    inline void logOut() { loggedIn = false; }
+    
 protected:
     /// \brief maximum time the session can be idle (starting from last_access)
     long timeout;
-
+    
     /// \brief time of last access to the session, returned by getLastAccessTime()
     long last_access;
 
     /// \brief arbitrary but unique string representing the ID of the session (returned by getID())
     zmm::String sessionID;
 
-    /// \brief separate placeholder for storing primary driver session info (see putTo() and getFrom())
-    zmm::Ref<Dictionary> driver1;
-    
-    /// \brief separate placeholder for storing secondary driver session info (see putTo() and getFrom())
-    zmm::Ref<Dictionary> driver2;
+    bool loggedIn;
 };
 
 /// \brief This class offers ways to create new sessoins, stores all available sessions and provides access to them.
@@ -106,6 +80,10 @@ class SessionManager : public zmm::Object
 protected:
     /// \brief This array is holding available sessions.
     zmm::Ref<zmm::Array<Session> > sessions;
+    
+    zmm::Ref<Dictionary> accounts;
+    
+    static Mutex mutex;
     
 public:
     /// \brief Constructor, initializes the array.
@@ -127,6 +105,11 @@ public:
     /// \param ID of the Session.
     /// \return intance of the Session with a given ID or nil if no session with that ID was found.
     zmm::Ref<Session> getSession(zmm::String sessionID);
+    
+    /// \brief Removes a session
+    void SessionManager::removeSession(zmm::String sessionID);
+    
+    zmm::String SessionManager::getUserPassword(zmm::String user);
 
     /// \todo Leo... please describe :>
     void incrementUIUpdateID(int id) {};

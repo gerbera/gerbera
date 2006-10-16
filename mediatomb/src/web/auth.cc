@@ -31,7 +31,6 @@
 using namespace zmm;
 using namespace mxml;
 
-#define LOGIN_PASSWORD "102ec827703eeb509f12a2a0eb5b4e2d"
 #define LOGIN_TIMEOUT 10L // in seconds
 
 class LoginException : public zmm::Exception
@@ -52,8 +51,8 @@ static String generate_token()
     long expiration = get_time() + LOGIN_TIMEOUT;
     String salt = generate_random_id();
     return String::from(expiration) + '_' + salt;
-    
 }
+
 static bool check_token(String token, String password, String encPassword)
 {
     Ref<Array<StringBase> > parts = split_string(token, '_');
@@ -75,51 +74,60 @@ void web::auth::process()
     {
         check_request();
     }
+    else if (param(_("logout")) != nil)
+    {
+        check_request();
+        String sid = param(_("sid"));
+        Ref<SessionManager> sessionManager = SessionManager::getInstance();
+        Ref<Session> session = SessionManager::getInstance()->getSession(sid);
+        if (session == nil)
+            throw _Exception(_("illegal session id"));
+        sessionManager->removeSession(sid);
+        root->appendTextChild(_("redirect"), _("/"));
+    }
     else if (param(_("auth")) == nil)
     {
-        // generating token
+        Ref<SessionManager> sessionManager = SessionManager::getInstance();
+        Ref<Session> session = sessionManager->createSession(DEFAULT_SESSION_TIMEOUT);
+        
+        // sending token
         String token = generate_token();
+        session->put(_("token"), token);
         root->appendTextChild(_("token"), token);
+        root->addAttribute(_("sid"), session->getID());
     }
     else
     {
         // login
         try
         {
+            check_request(false);
+            
             // authentication
             String username = param(_("username"));
-            String password = param(_("password"));
-
-            if (! string_ok(username) || ! string_ok(password))
+            String encPassword = param(_("password"));
+            String sid = param(_("sid"));
+            
+            if (! string_ok(username) || ! string_ok(encPassword))
                 throw LoginException(_("Missing username or password"));
-            Ref<Array<StringBase> > parts = split_string(password, ':');
-            if (parts->size() != 2)
-                throw LoginException(_("Invalid password"));
-            String token = parts->get(0);
-            String encPassword = parts->get(1);
-
-            String correctPassword = String(LOGIN_PASSWORD);
             
-            if (! check_token(token, correctPassword, encPassword))
+            Ref<SessionManager> sessionManager = SessionManager::getInstance();
+            Ref<Session> session = sessionManager->getSession(sid);
+            if (session == nil)
+                throw _Exception(_("illegal session id"));
+            
+            //Ref<Array<StringBase> > parts = split_string(password, ':');
+            //if (parts->size() != 2)
+            //    throw LoginException(_("Invalid password"));
+            //String token = parts->get(0);
+            //String encPassword = parts->get(1);
+            
+            String correctPassword = sessionManager->getUserPassword(username);
+            
+            if (! string_ok(correctPassword) || ! check_token(session->get(_("token")), correctPassword, encPassword))
                 throw LoginException(_("Invalid username or password"));
-           
-            // generate sid, the new ID must be the one that has never been sent
-            // over network before and which is not possible to derive from anything
-            // however it must be derivable from md5'd password and given token
-            String sid = hex_string_md5(correctPassword + token);
- 
-            // check whether the session already exists
-            Ref<SessionManager> sm = SessionManager::getInstance();
-            if (sm->getSession(sid) != nil)
-                throw LoginException(_("Session already exists"));
             
-            /// \todo create session with the calculated id
-            Ref<Session> s = sm->createSession(DEFAULT_SESSION_TIMEOUT, sid);
-            s->put(_("object_id"), _("0"));
-            s->put(_("requested_count"), _("15"));
-            s->put(_("starting_index"), _("0"));
-            
-            root->addAttribute(_("sid"), sid);
+            session->logIn();
         }
         catch (LoginException le)
         {

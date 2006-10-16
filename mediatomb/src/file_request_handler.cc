@@ -104,12 +104,13 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
         if(strncmp(action.c_str(), "http://", 7))
         {
 #ifdef LOG_TOMBDEBUG
-            long before = getMillis();
+            struct timeval before;
+            getTimeval(&before);
 #endif
             output = run_process(action, _("run"), input);
 #ifdef LOG_TOMBDEBUG
-            long after = getMillis();
-            log_debug("script executed in %ld milliseconds\n", after - before);
+            long delta = getDeltaMillis(&before);
+            log_debug("script executed in %ld milliseconds\n", delta);
 #endif
         }
         else
@@ -133,8 +134,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
             {
                 log_debug("Item changed visually, updating parent\n");
                 Ref<UpdateManager> um = UpdateManager::getInstance();
-                um->containerChanged(clone->getParentID());
-                um->flushUpdates(FLUSH_ASAP);
+                um->containerChanged(clone->getParentID(), FLUSH_ASAP);
             }
             obj = clone;
         }
@@ -143,11 +143,11 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
             log_debug("Item untouched...\n");
         }
     }
-
+    
     Ref<CdsItem> item = RefCast(obj, CdsItem);
-
+    
     String path = item->getLocation();
-
+    
     ret = stat(path.c_str(), &statbuf);
     if (ret != 0)
     {

@@ -153,7 +153,7 @@ public:
     virtual zmm::Ref<CdsObject> findObjectByPath(zmm::String path) = 0;
     virtual zmm::Ref<CdsObject> findObjectByFilename(zmm::String path) = 0;
     virtual int findObjectIDByPath(zmm::String fullpath) = 0;
-    virtual void incrementUpdateIDs(int *ids, int size) = 0;
+    virtual zmm::String incrementUpdateIDs(int *ids, int size) = 0;
     
     /* utility methods */
     virtual zmm::Ref<CdsObject> loadObject(int objectID) = 0;
@@ -166,9 +166,12 @@ public:
     /// determines, if the main object will be removed too.
     /// \param objectID the object id of the object to remove
     /// \param all if true and the object to be removed is a reference
+    /// \param objectType pointer to an int; will be filled with the objectType of
+    /// the removed object, if not NULL
+    /// \return parent id of the removed object
     /// to another object, the referenced object (and all it's references)
     /// will be removed too. Default: false.
-    virtual void removeObject(int objectID, bool all) = 0;
+    virtual int removeObject(int objectID, bool all, int *objectType = NULL) = 0;
     
     //virtual zmm::Ref<zmm::Array<CdsObject> > getObjectPath(int objectID);
     

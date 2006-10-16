@@ -57,6 +57,7 @@ void Sqlite3Storage::init()
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
     
     taskQueue = Ref<ObjectQueue<SLTask> >(new ObjectQueue<SLTask>(SL3_INITITAL_QUEUE_SIZE));
+    taskQueueOpen = true;
     
     ret = pthread_create(
         &sqliteThread,
@@ -184,9 +185,16 @@ void Sqlite3Storage::threadProc()
             task->sendSignal(e.getMessage());
         }
     }
+    lock();
+    taskQueueOpen = false;
+    while((task = taskQueue->dequeue()) != nil)
+    {
+        task->sendSignal(_("Sorry, sqlite3 thread is shutting down"));
+    }
+    unlock();
     if (db)
         sqlite3_close(db);
-}
+}                                             
 
 void Sqlite3Storage::lock()
 {
@@ -204,12 +212,21 @@ void Sqlite3Storage::signal()
 void Sqlite3Storage::addTask(zmm::Ref<SLTask> task)
 {
     //int ret = false;
-    lock();
+    if (! taskQueueOpen)
+        throw _Exception(_("sqlite3 task queue is already closed"));
+    
+    
     /*
     int size = taskQueue->size();
     if (size >= 1)
         ret = true;
     */
+    lock();
+    if (! taskQueueOpen)
+    {
+        unlock();
+        throw _Exception(_("sqlite3 task queue is already closed"));
+    }
     taskQueue->enqueue(task);
     signal();
     unlock();

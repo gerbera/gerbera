@@ -30,8 +30,6 @@
 #define FLUSH_ASAP 2
 #define FLUSH_SPEC 1
 
-long getMillis();
-
 class UpdateManager : public zmm::Object
 {
 public:
@@ -39,37 +37,30 @@ public:
     virtual ~UpdateManager();
     
     void shutdown();
-
-    void containerChanged(int objectID);
-    void containersChanged(int *ids, int size);
-    void flushUpdates(int flushFlag = FLUSH_SPEC);
-
+    
+    void containerChanged(int objectID, int flushPolicy = FLUSH_SPEC);
+    
     static zmm::Ref<UpdateManager> getInstance();
     
 protected:
     void init();
     static zmm::Ref<UpdateManager> instance;
-    static Mutex getInstanceMutex;
-    
-    bool lazyMode;
-    int *objectIDs;
-    int objectIDcount;
-    zmm::Ref<DBBHash<int, int> > objectIDHash;
-    
-    pthread_t updateThread;
-    pthread_mutex_t updateMutex;
+    static Mutex mutex;
     pthread_cond_t updateCond;
-
-    bool shutdownFlag;
-    int flushFlag;
     
-    void lock();
-    void unlock();
+    zmm::Ref<DBRHash<int> > objectIDHash;
+    
+    bool shutdownFlag;
+    int flushPolicy;
+    
+    int lastContainerChanged;
+    
+    static inline void lock() { mutex.lock(); }
+    static inline void unlock() { mutex.unlock(); }
     static void *staticThreadProc(void *arg);
     void threadProc();
     
-    void sendUpdates();
-    bool haveUpdates();
+    inline bool haveUpdates() { return (objectIDHash->size() > 0); }
 };
 
 

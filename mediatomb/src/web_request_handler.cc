@@ -56,7 +56,7 @@ String WebRequestHandler::param(String name)
     return String(scriptRoot + "/jssp/") + filename;
 }*/
 
-void WebRequestHandler::check_request()
+void WebRequestHandler::check_request(bool checkLogin)
 {
     // we have a minimum set of parameters that are "must have"
 
@@ -67,9 +67,14 @@ void WebRequestHandler::check_request()
     {
         throw SessionException(_("no session id given"));
     }
-    if (SessionManager::getInstance()->getSession(sid) == nil)
+    Ref<Session> session;
+    if ((session = SessionManager::getInstance()->getSession(sid)) == nil)
     {
         throw SessionException(_("invalid session id"));
+    }
+    if (checkLogin && ! session->isLoggedIn())
+    {
+        throw SessionException(_("not logged in"));
     }
 }
 
@@ -113,8 +118,7 @@ Ref<IOHandler> WebRequestHandler::open(Ref<Dictionary> params, IN enum UpnpOpenF
         //String url = _("/content/interface?req_type=login&slt=") +
         //                    generate_random_id();
         
-        String url = _("/");                    
-        root->appendTextChild(_("redirect"), url);
+        root->appendTextChild(_("redirect"), _("/"));
         output = renderXMLHeader() + root->print();
     }
     catch (Exception e)

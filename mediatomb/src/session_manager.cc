@@ -24,80 +24,123 @@
 
 #include "uuid/uuid.h"
 #include "session_manager.h"
+#include "config_manager.h"
+#include "tools.h"
 #include "tools.h"
 
 using namespace zmm;
+using namespace mxml;
 
 static Ref<SessionManager> inst;
 
 Ref<SessionManager> SessionManager::getInstance()
 {
     if (inst == nil)
-        inst = Ref<SessionManager>(new SessionManager());
+    {
+        mutex.lock();
+        if (inst == nil)
+        {
+            try
+            {
+                inst = Ref<SessionManager>(new SessionManager());
+            }
+            catch (Exception e)
+            {
+                mutex.unlock();
+                throw e;
+            }
+        }
+        mutex.unlock();
+    }
     return inst;
 }
 
 Session::Session(long timeout) : Dictionary()
 {
-    driver1 = Ref<Dictionary>(new Dictionary());
-    driver2 = Ref<Dictionary>(new Dictionary());
-
     this->timeout = timeout;
+    loggedIn = false;
+    last_access = 0; /// \todo set to right value
+    sessionID = nil;
 }
 
-void Session::putTo(session_data_t type, String key, String value)
-{
-    switch (type)
-    {
-        case PRIMARY:
-            driver1->put(key, value);
-            break;
-        case SECONDARY:
-            driver2->put(key, value);
-            break;
-        default:
-            throw _Exception(_("Unknown session data type: ") + (int)type);
-    }
-}
-
-String Session::getFrom(session_data_t type, String key)
-{
-    switch (type)
-    {
-        case PRIMARY:
-            return driver1->get(key);
-        case SECONDARY:
-            return driver2->get(key);
-        default:
-            throw _Exception(_("Unknown session data type: ") + (int)type);
-    }
-}
+Mutex SessionManager::mutex = new Mutex();
 
 SessionManager::SessionManager() : Object()
 {
-     sessions = Ref<Array<Session> >(new Array<Session>());
+    Ref<ConfigManager> configManager = ConfigManager::getInstance();
+    Ref<Element> accountsEl = configManager->getElement(_("/server/ui/accounts"));
+    if (accountsEl == nil)
+    {
+        log_debug("accounts tag not found in config\n");
+        accounts = Ref<Dictionary>(new Dictionary());
+    }
+    else
+    {
+        accounts = configManager->createDictionaryFromNodeset(accountsEl, _("account"), _("user"), _("password"));
+    }
+    sessions = Ref<Array<Session> >(new Array<Session>());
 }
 
 Ref<Session> SessionManager::createSession(long timeout, String sessionID)
 {
     Ref<Session> newSession(new Session(timeout));
+    mutex.lock();
     if (sessionID == nil)
-        sessionID = generate_random_id();
+    {
+        int count=0;
+        do
+        {
+            sessionID = generate_random_id();
+            if (count++ > 100)
+                throw _Exception(_("There seems to be something wrong with the random numbers. I tried to get a unique id 100 times and failed."));
+        }
+        while(getSession(sessionID) != nil); // for the rare case, where we get a random id, that is already taken
+    }
+    else if (getSession(sessionID) != nil)
+    {
+        throw _Exception(_("Session id is already taken!"));
+    }
     newSession->setID(sessionID);
     sessions->append(newSession);
+    mutex.unlock();
     return newSession;
 }
 
 Ref<Session> SessionManager::getSession(String sessionID)
 {
+    mutex.lock();
     for (int i = 0; i < sessions->size(); i++)
     {
         Ref<Session> s = sessions->get(i);
         if (s->getID() == sessionID)
+        {
+            mutex.unlock();
             return s;
+        }
     }
-
+    mutex.unlock();
     return nil;
 }
 
+void SessionManager::removeSession(String sessionID)
+{
+    mutex.lock();
+    for (int i = 0; i < sessions->size(); i++)
+    {
+        Ref<Session> s = sessions->get(i);
+        if (s->getID() == sessionID)
+        {
+            sessions->remove(i);
+            mutex.unlock();
+            return;
+        }
+    }
+    mutex.unlock();
+}
 
+String SessionManager::getUserPassword(String user)
+{
+    if (accounts == nil)
+        return nil;
+    return accounts->get(user);
+}

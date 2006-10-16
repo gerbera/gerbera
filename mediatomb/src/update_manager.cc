@@ -24,82 +24,77 @@
 
 #include "update_manager.h"
 
-#include <sys/time.h>
 #include "upnp_cds.h"
 #include "storage.h"
+#include "tools.h"
 
 /* following constants in milliseconds */
 #define SPEC_INTERVAL 2000
-#define BUFFERING_INTERVAL 3000
 #define MIN_SLEEP 1
 
 #define MAX_OBJECT_IDS 1000
-#define MAX_LAZY_OBJECT_IDS 1000
 #define OBJECT_ID_HASH_CAPACITY 3109
 
 
-//#define LOCK()   { printf("lock:   line %d\n", __LINE__); this->lock(); 
-//                   printf("locked: line %d\n", __LINE__); }
-//#define UNLOCK() { printf("unlock: line %d\n", __LINE__); this->unlock(); }
+//#define LOCK()   { printf("!!! try to lock: line %d; thread: %d\n", __LINE__, (int)pthread_self()); lock(); \
+//                   printf("!!! locked:      line %d; thread: %d\n", __LINE__, (int)pthread_self()); }
+//#define UNLOCK() { printf("!!! unlock:      line %d: thread: %d\n", __LINE__, (int)pthread_self()); unlock(); }
 
 #define LOCK lock
 #define UNLOCK unlock
 
 using namespace zmm;
 
-static long start_seconds;
-
-void init_start_seconds()
-{
-    struct timeval now;
-    gettimeofday(&now, NULL);
-    start_seconds = now.tv_sec;
-}
-
-long getMillis()
-{
-    struct timeval now;
-    gettimeofday(&now, NULL);
-
-    long seconds = now.tv_sec - start_seconds;
-    long millis = now.tv_usec / 1000L;
-    
-    return seconds * 1000 + millis;
-}
-inline void millisToTimespec(long millis, struct timespec *spec)
-{
-    spec->tv_sec = start_seconds + millis / 1000;
-    spec->tv_nsec = (millis % 1000) * 1000000;
-}
-
 UpdateManager::UpdateManager() : Object()
 {
-    objectIDs = (int *)MALLOC(MAX_OBJECT_IDS * sizeof(int));
-    objectIDcount = 0;
-    objectIDHash = Ref<DBBHash<int, int> >(new DBBHash<int, int>(OBJECT_ID_HASH_CAPACITY, -100));
-} 
+    objectIDHash = Ref<DBRHash<int> >(new DBRHash<int>(OBJECT_ID_HASH_CAPACITY, INVALID_OBJECT_ID, INVALID_OBJECT_ID_2));
+    shutdownFlag = false;
+    flushPolicy = FLUSH_SPEC;
+    lastContainerChanged = INVALID_OBJECT_ID;
+}
+
+Mutex UpdateManager::mutex = Mutex();
+Ref<UpdateManager> UpdateManager::instance = nil;
+
+Ref<UpdateManager> UpdateManager::getInstance()
+{
+    if (instance == nil)
+    {
+        LOCK();
+        if (instance == nil)
+        {
+            try
+            {
+                instance = Ref<UpdateManager>(new UpdateManager());
+                instance->init();
+            }
+            catch (Exception e)
+            {
+                UNLOCK();
+                throw e;
+            }
+        }
+        UNLOCK();
+    }
+    return instance;
+}
+
 UpdateManager::~UpdateManager()
 {
-    FREE(objectIDs);
-    pthread_mutex_destroy(&updateMutex);
     pthread_cond_destroy(&updateCond);
 } 
 
 void UpdateManager::init()
 {
-    shutdownFlag = false;
-    flushFlag = 0;
-    lazyMode = true;
-//    lazyMode = false;
-
     int ret;
-
-    ret = pthread_mutex_init(&updateMutex, NULL);
+    
     ret = pthread_cond_init(&updateCond, NULL);
     
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    
+    pthread_t updateThread;
     
     ret = pthread_create(
         &updateThread,
@@ -120,248 +115,124 @@ void UpdateManager::shutdown()
     log_debug("signalled, unlocking\n");
     UNLOCK();
     log_debug("unlocked\n");
-// detached
-//    pthread_join(updateThread, NULL);
 }
 
+/*
 void UpdateManager::containersChanged(int *ids, int size)
 {
     Storage::getInstance()->incrementUpdateIDs(objectIDs, objectIDcount);
 }
+*/
 
-void UpdateManager::containerChanged(int objectID)
+void UpdateManager::containerChanged(int objectID, int flushPolicy)
 {
-    hash_slot_t slot;
-    int updateID;
-
+    if (objectID == INVALID_OBJECT_ID)
+        return;
     LOCK();
-
-    bool wasEmpty = (objectIDcount == 0);
-    bool found = objectIDHash->get(objectID, &slot, &updateID);
-    if (found)
+    if (objectID != lastContainerChanged || flushPolicy > this->flushPolicy)
     {
-        if (updateID < 0)
+        // signalling thread if it could have been idle, because 
+        // there were no unprocessed updates
+        bool signal = (! haveUpdates());
+        log_debug("containerChanged. id: %d, signal: %d\n", objectID, signal);
+        objectIDHash->put(objectID);
+        if (objectIDHash->size() >= MAX_OBJECT_IDS)
+            signal = true;
+        lastContainerChanged = objectID;
+        if (flushPolicy > this->flushPolicy)
         {
-            updateID = -updateID + 1;
-            objectIDs[objectIDcount++] = objectID;
-            objectIDHash->put(objectID, slot, updateID);
+            this->flushPolicy = flushPolicy;
+            signal = true;
+        }
+        if (signal)
+        {
+            log_debug("signalling...\n");
+            pthread_cond_signal(&updateCond);
         }
     }
     else
     {
-        try
-        {
-            Ref<Storage> storage = Storage::getInstance();        
-            Ref<CdsObject> obj = storage->loadObject(objectID);
-            Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
-
-            updateID = cont->getUpdateID();
-            updateID++;
-
-            objectIDs[objectIDcount++] = objectID;
-            objectIDHash->put(objectID, slot, updateID);
-            if (! lazyMode)
-            {
-                cont->setUpdateID(updateID);
-                storage->updateObject(obj);
-            }
-        }
-        catch (Exception e)
-        {}
-    }
-    bool flush = false;
-    if (wasEmpty && objectIDcount == 1)
-        pthread_cond_signal(&updateCond);
-    else if (objectIDcount >= MAX_OBJECT_IDS)
-        flush = true;
-    else if (objectIDHash->size() >= MAX_LAZY_OBJECT_IDS)
-        flush = true;
-    UNLOCK();
-    if (flush)
-        flushUpdates(FLUSH_ASAP);
-}
-
-void UpdateManager::flushUpdates(int flushFlag)
-{
-    LOCK();
-    if (flushFlag > this->flushFlag)
-    {
-        this->flushFlag = flushFlag;
-        pthread_cond_signal(&updateCond);
+        log_debug("last container changed!\n");
     }
     UNLOCK();
-}
-
-Mutex UpdateManager::getInstanceMutex = Mutex(false);
-Ref<UpdateManager> UpdateManager::instance = nil;
-
-Ref<UpdateManager> UpdateManager::getInstance()
-{
-    if (instance == nil)
-    {
-        getInstanceMutex.lock();
-        if (instance == nil)
-        {
-            try
-            {
-                init_start_seconds();
-                instance = Ref<UpdateManager>(new UpdateManager());
-                instance->init();
-            }
-            catch (Exception e)
-            {
-                getInstanceMutex.unlock();
-                throw e;
-            }
-        }
-        getInstanceMutex.unlock();
-    }
-    return instance;
 }
 
 /* private stuff */
-void UpdateManager::lock()
-{
-    pthread_mutex_lock(&updateMutex);
-}
-void UpdateManager::unlock()
-{
-    pthread_mutex_unlock(&updateMutex);
-}
-
-bool UpdateManager::haveUpdates()
-{
-    return (objectIDcount > 0);
-}
-
-void UpdateManager::sendUpdates()
-{
-    log_debug("SEND UPDATES\n");
-    Ref<StringBuffer> buf(new StringBuffer(objectIDcount * 4));
-    int updateID;
-    if (lazyMode)
-    {
-        for (int i = 0; i < objectIDcount; i++)
-        {
-            hash_slot_t slot;
-            objectIDHash->get(objectIDs[i], &slot, &updateID);
-            *buf << objectIDs[i] << ',' << updateID << ',';
-            objectIDHash->put(objectIDs[i], slot, -updateID);
-        }
-        Storage::getInstance()->incrementUpdateIDs(objectIDs, objectIDcount);
-    }
-    else
-    {
-        for (int i = 0; i < objectIDcount; i++)
-        {
-            objectIDHash->get(objectIDs[i], &updateID);
-            *buf << objectIDs[i] << ',' << updateID << ',';
-        }
-        objectIDHash->clear();
-    }
-    objectIDcount = 0;
-    
-    // skip last comma
-    String updateString(buf->c_str(), buf->length() - 1);
-    // send update string...
-    ContentDirectoryService::getInstance()->subscription_update(updateString);
-    log_debug("SEND UPDATES RETURNING\n");
-}
-
 
 void UpdateManager::threadProc()
 {
-    struct timespec timeout;
-    int ret;
-
-    long nowMillis;
-    long sleepMillis;
-    long lastIdleMillis = 0; // for buffered update interval calculation
-    long lastUpdateMillis = 0; // for spec-based update interval calculation
-        
+    struct timeval lastUpdate;
+    getTimeval(&lastUpdate);
+    
     LOCK();
-
-    while (!shutdownFlag)
+    while (! shutdownFlag)
     {
-        log_debug("threadProc: awakened... have updates: %d\n", haveUpdates());
-
-        /* if nothing to do, sleep until awakened */
-        if (! haveUpdates())
+        if (haveUpdates())
         {
-
-            log_debug("threadProc: idle sleep ...\n");
-            ret = pthread_cond_wait(&updateCond, &updateMutex);
-            lastIdleMillis = nowMillis;
-            continue;
-        }
-        else
-        {
-            nowMillis = getMillis();
-        }
-
-        /* decide how long to sleep and put to sleepMillis var */
-        if (flushFlag)
-        {
-            switch (flushFlag)
+            long sleepMillis;
+            long timeDiff = getDeltaMillis(&lastUpdate);
+            switch (flushPolicy)
             {
-                case FLUSH_ASAP: // send ASAP!
+                case FLUSH_SPEC:
+                    sleepMillis = SPEC_INTERVAL - timeDiff;
+                    break;
+                case FLUSH_ASAP:
                     sleepMillis = 0;
                     break;
-                default: // send as soon as UPnP minimal event interval allows
-                    sleepMillis = SPEC_INTERVAL - (nowMillis - lastUpdateMillis);
-                    break;
+            }
+            bool sendUpdates = false;
+            if (sleepMillis >= MIN_SLEEP && objectIDHash->size() < MAX_OBJECT_IDS)
+            {
+                struct timespec timeout;
+                getTimespecAfterMillis(timeDiff + sleepMillis, &timeout, &lastUpdate);
+                log_debug("threadProc: sleeping for %ld millis\n", sleepMillis);
+                
+                int ret = pthread_cond_timedwait(&updateCond, mutex.getMutex(), &timeout);
+                if (! shutdownFlag)
+                {
+                    if (ret != 0 && ret != ETIMEDOUT)
+                        throw _Exception(_("pthread_cond_timedwait returned errorcode ") + ret);
+                    if (ret == 0)
+                        sendUpdates = true;
+                }
+            }
+            else
+                sendUpdates = true;
+            
+            if (sendUpdates)
+            {
+                log_debug("sending updates...\n");
+                lastContainerChanged = INVALID_OBJECT_ID;
+                flushPolicy = FLUSH_SPEC;
+                
+                hash_data_array_t<int> hash_data_array;
+                objectIDHash->getAll(&hash_data_array);
+                String updateString = Storage::getInstance()->incrementUpdateIDs(hash_data_array.data,hash_data_array.size);
+                ContentDirectoryService::getInstance()->subscription_update(updateString);
+                objectIDHash->clear();
+                
+                getTimeval(&lastUpdate);
+                log_debug("updates sent.\n");
             }
         }
         else
         {
-            sleepMillis = BUFFERING_INTERVAL - (nowMillis - lastIdleMillis);
-        }
-
-        if (sleepMillis >= MIN_SLEEP) // sleep for sleepMillis milliseconds
-        {
-            millisToTimespec(nowMillis + sleepMillis, &timeout);
-            log_debug("threadProc: sleeping for %d millis\n", (int)sleepMillis);
-            bool wait_done = false;
-            while (!wait_done)
-            {
-                ret = pthread_cond_timedwait(&updateCond, &updateMutex, &timeout);
-                switch (ret)
-                {
-                    case 0:
-                        wait_done = true;
-                        break;
-                    default:
-                        if (ret == ETIMEDOUT)
-                        {
-                            wait_done = true;
-                        }
-                        break;
-                }
-
-            }
-            if ((ret) && (ret != ETIMEDOUT))
-            {
-                log_debug("pthread_cont_timedwait(): %d, %s\n", ret, strerror(errno));
-            }
-        }
-        else // send updates 
-        {
-            flushFlag = 0;
-            sendUpdates();
-            lastUpdateMillis = getMillis();
+            //nothing to do
+            int ret = pthread_cond_wait(&updateCond, mutex.getMutex());
+            if (ret)
+                throw _Exception(_("pthread_cond_wait returned errorcode ") + ret);
         }
     }
-    log_debug("shutting down update thread!\n");
     UNLOCK();
-    log_debug("threadProc: update thread shut down, %d\n", pthread_self());
 }
 
 void *UpdateManager::staticThreadProc(void *arg)
 {
+    log_debug("starting update thread... thread: %d\n", pthread_self());
     UpdateManager *inst = (UpdateManager *)arg;
     inst->threadProc();
+    log_debug("update thread shut down. thread: %d\n", pthread_self());
     pthread_exit(NULL);
     return NULL;
 }
-
 

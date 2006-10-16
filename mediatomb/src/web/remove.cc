@@ -57,14 +57,6 @@ void web::remove::process()
         allInt = allStr.toInt();
     bool all = allInt;
     
-    Ref<Storage> storage = Storage::getInstance();
-    Ref<CdsObject> obj = storage->loadObject(objectID);
-    
-    if (IS_CDS_CONTAINER(obj->getObjectType()))
-    {
-        root->appendTextChild(_("updateContainer"), String::from(obj->getParentID()));
-    }
-    
     ContentManager::getInstance()->removeObject(objectID, false, all);
     
     log_debug("remove: returning\n");

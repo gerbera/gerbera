@@ -31,6 +31,7 @@ public:
     virtual ~Mutex();
     void lock();
     void unlock();
+    inline pthread_mutex_t* getMutex() { return &mutex_struct; }
 protected:
     pthread_mutex_t mutex_struct;
 };

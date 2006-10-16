@@ -85,6 +85,6 @@ void web::edit_load::process()
     }
     
     root->appendChild(item);
-    log_debug("serving XML: \n%s\n",  root->print().c_str());
+    //log_debug("serving XML: \n%s\n",  root->print().c_str());
 }
 
