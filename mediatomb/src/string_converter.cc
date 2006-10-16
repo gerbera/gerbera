@@ -29,12 +29,6 @@
 
 using namespace zmm;
 
-#ifdef LIBICONV_NAMING
-    #define iconv_open libiconv_open
-    #define iconv_close libiconv_close
-    #define iconv libiconv
-#endif
-
 StringConverter::StringConverter(String from, String to) : Object()
 {
     dirty = false;
@@ -87,7 +81,7 @@ zmm::String StringConverter::convert(String str)
     
     //log_debug(("iconv: BEFORE: input bytes left: %d  output bytes left: %d\n",
     //       input_bytes, output_bytes));
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__APPLE__)
     ret = iconv(cd, (const char**)input_ptr, &input_bytes,
             output_ptr, &output_bytes);
 #else

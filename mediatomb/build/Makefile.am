@@ -10,9 +10,11 @@ libmediatomb_a_CXXFLAGS = \
                      -I$(top_srcdir)/tombupnp/threadutil/inc \
                      -I$(top_srcdir)/tombupnp/upnp/inc \
                      -I$(top_srcdir) \
+                     $(SQLITE3_CXXFLAGS) \
                      $(MYSQL_CFLAGS) \
                      $(JS_CXXFLAGS) \
-                     $(TAGLIB_CFLAGS)
+                     $(TAGLIB_CFLAGS) \
+                     $(ICONV_CXXFLAGS)
 
 bin_PROGRAMS = mediatomb
 mediatomb_SOURCES = $(top_srcdir)/src/main.cc
@@ -21,13 +23,17 @@ mediatomb_CXXFLAGS = -I$(top_srcdir)/src \
                      -I$(top_srcdir)/tombupnp/threadutil/inc \
                      -I$(top_srcdir)/tombupnp/upnp/inc \
                      -I$(top_srcdir) \
+                     $(SQLITE3_CXXFLAGS) \
                      $(MYSQL_CFLAGS) \
                      $(JS_CXXFLAGS) \
-                     $(TAGLIB_CFLAGS)
+                     $(TAGLIB_CFLAGS) \
+                     $(ICONV_CXXFLAGS)
 
 mediatomb_LDADD = \
     libmediatomb.a \
     $(top_srcdir)/tombupnp/build/libtombupnp.a \
+    $(ICONV_LIBS) \
+    $(SQLITE3_LIBS) \
     $(MYSQL_LIBS) \
     $(TAGLIB_LIBS)
 

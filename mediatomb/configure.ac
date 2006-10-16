@@ -86,7 +86,7 @@ AC_CHECK_HEADER([iconv.h],
                     AC_CHECK_LIB(iconv, iconv, [], 
                         [
                             AC_CHECK_LIB(iconv, libiconv, [],
-                                [AC_MSG_ERROR(shit not found)]
+                                [AC_MSG_ERROR(iconv library not found on your system)]
                             )
                         ])
                 ])
@@ -96,9 +96,46 @@ AC_CHECK_HEADER([iconv.h],
                 [
                     ICONV_CXXFLAGS="-I/usr/local/include"
                     AC_SUBST(ICONV_CXXFLAGS)
+                    AC_CHECK_FUNCS([iconv],[],
+                        [
+                        AC_CHECK_LIB(iconv, iconv, [], 
+                            [
+                                AC_CHECK_LIB(iconv, libiconv, 
+                                    [],
+                                    [AC_MSG_ERROR(iconv library not found on your system)]
+                                )
+                            ])
+
+                        ])
+
                 ],
                 [
-                    AC_CHECK_FUNCS([iconv],[],[AC_MSG_ERROR(iconv library not found on your system)])
+                    if test $DARWIN_OS -eq 1 ; then
+                        AC_CHECK_HEADER( $DARWIN_DIR/include/iconv.h,
+                            [
+                                ICONV_CXXFLAGS="-I$DARWIN_DIR/include/"
+                                AC_SUBST(ICONV_CXXFLAGS)
+                                LDFLAGS="-L$DARWIN_DIR/lib"
+                                AC_CHECK_FUNCS([iconv],
+                                    [
+                                        ICONV_LIBS="-L$DARWIN_DIR/lib"
+                                        AC_SUBST(ICONV_LIBS)
+                                    ],
+                                    [
+                                        AC_CHECK_LIB(iconv, iconv, [], 
+                                           [
+                                             AC_CHECK_LIB(iconv, libiconv, 
+                                                    [],
+                                                    [AC_MSG_ERROR(iconv library not found on your system)]
+                                                )
+                                           ])
+                                    ])
+                            ],
+                            [AC_MSG_ERROR(iconv library not found on your system)]
+                        )
+                else
+                    AC_MSG_ERROR(iconv library not found on your system)
+                fi
                 ])
         ])
         
