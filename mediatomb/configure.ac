@@ -78,6 +78,8 @@ AC_CHECK_HEADER([iconv.h],
                     LDFLAGS="$LDFLAGS -L/usr/lib -liconv"
                     AC_CHECK_FUNCS([libiconv],
                         [
+                            ICONV_LDFLAGS="-L/usr/lib -liconv"
+                            AC_SUBST(ICONV_LDFLAGS)
                             AC_DEFINE([LIBICONV_NAMING], [1], 
                                       [OSX had no _iconv symbol])
                         ],
@@ -95,12 +97,13 @@ AC_CHECK_HEADER([iconv.h],
                     AC_CHECK_LIB(iconv, iconv,[],[AC_MSG_ERROR(iconv library not found on your system)])
                 ],
                 [
-                    CFLAGS="$CFLAGS_SAVE"
-                    CXXFLAGS="$CXXFLAGS_SAVE"
-                    LDFLAGS="$LDFLAGS_SAVE"
                     AC_CHECK_FUNCS([iconv],[],[AC_MSG_ERROR(iconv library not found on your system)])
                 ])
         ])
+        
+CFLAGS="$CFLAGS_SAVE"
+CXXFLAGS="$CXXFLAGS_SAVE"
+LDFLAGS="$LDFLAGS_SAVE"
 
 AC_CHECK_HEADERS(execinfo.h,[],[])
 
@@ -216,46 +219,46 @@ AC_DEFINE([UPNP_HAVE_WEBSERVER], [1], [Compile internal web server])
 
 AC_CHECK_LIB(pthread, pthread_mutex_lock,[], [AC_MSG_ERROR(required library function not found)])    
 
-    
-######### SQLite3
-SQLITE3_OK=yes
-AC_ARG_ENABLE(sqlite3,
-  [
-The following options accept 'yes'(default) 'no' and 'auto' as an argument,
-meaning ensure, disable and autodetect respectively.
-If the corresponding --enable/disable option is not given for a particular
-feature autodetect is assumed.
-
-  --enable-sqlite3         sqlite3 support],
-  [
-     SQLITE3_EN=$enableval 
-     if test "x$enableval" = xno; then
-        SQLITE3_OK=disabled
-     fi
-  ]
-)
-if test "x$SQLITE3_OK" = xyes; then
-    AC_CHECK_HEADER(sqlite3.h,
-        [],
-        [
-            AC_CHECK_HEADER(/opt/local/include/sqlite3.h,
-#                [SQLITE3_CXXFLAGS="$CXXFLAGS -I/opt/local/include/"],
-                [SQLITE3_OK=missing])
-        ]
+   
+if test $DARWIN_OS -eq 1 ; then
+    AC_ARG_WITH(opendarwin, 
+        AC_HELP_STRING([--with-opendarwin=DIR], [opendarwin installation directoryi (default: /opt/local)]),
+        [DARWIN_DIR=$withval],[DARWIN_DIR="/opt/local"]
     )
 fi
+
+######### SQLite3
+AC_ARG_ENABLE(sqlite3, 
+        AC_HELP_STRING([--enable-sqlite3], [compile with sqlite3 support (default: yes)]),
+        [
+            SQLITE3_EN=$enableval
+            if test "x$enableval" = xno; then
+                SQLITE3_OK=disabled
+            else
+                SQLITE3_OK=yes
+            fi
+        ],
+        [
+            SQLITE3_OK=yes      
+        ]
+)
+if test "x$SQLITE3_OK" = xyes; then
+    AC_CHECK_HEADER(sqlite3.h, [], 
+            [
+                if test $DARWIN_OS -eq 1 ; then
+                    AC_MSG_CHECKING([looking for sqlite3.h in $DARWIN_DIR/include])
+                    AC_CHECK_HEADER( $DARWIN_DIR/include/sqlite3.h, [],
+                        [SQLITE3_OK=missing]
+                    )
+                fi
+            ])
+fi
+
 if test "x$SQLITE3_OK" = xyes; then
     AC_CHECK_LIB(sqlite3, sqlite3_open,
         [],
         [
-#            LDFLAGS="$LDFLAGS -L/opt/local/lib -lsqlite3"
-            AC_CHECK_FUNC(sqlite3_open,
-                [],
-#                [SQLITE3_LDFLAGS="$LDFLAGS"],
-                [
-                    SQLITE3_OK=missing
-#                    LDFLAGS="$LDFLAGS_SAVE"
-                ])
+           SQLITE3_OK=missing
         ]
     )
 fi
@@ -276,15 +279,19 @@ fi
 
 ########## MySQL
 
-MYSQL_OK=yes
-AC_ARG_ENABLE(mysql,
-  [  --enable-mysql           mysql support],
-  [
-     MYSQL_EN=$enableval 
-     if test "x$enableval" = xno; then
-        MYSQL_OK=disabled
-     fi
-  ]
+AC_ARG_ENABLE(mysql, 
+              AC_HELP_STRING([--enable-mysql], [compile with mysql support (default: yes)]),
+              [
+                MYSQL_EN=$enableval 
+                if test "x$enableval" = xno; then
+                    MYSQL_OK=disabled
+                else
+                    MYSQL_OK=yes
+                fi
+              ],
+              [
+                MYSQL_OK=yes
+              ]
 )
 if test "x$MYSQL_OK" = xyes; then
     AC_PATH_PROG(mysqlconfig, mysql_config, no)
@@ -358,15 +365,19 @@ fi
 
 ######### javascript
 
-JS_OK=yes
-AC_ARG_ENABLE(javascript,
-  [  --enable-javascript      javascript support],
-  [
-     JS_EN=$enableval 
-     if test "x$enableval" = xno; then
-        JS_OK=disabled
-     fi
-  ]
+AC_ARG_ENABLE(libjs,
+              AC_HELP_STRING([--enable-libjs], [compile with spidermonkey support (default: yes)]),
+              [
+                JS_EN=$enableval 
+                if test "x$enableval" = xno; then
+                    JS_OK=disabled
+                else
+                    JS_OK=yes
+                fi
+              ],
+              [
+                JS_OK=yes
+              ]
 )
 if test "x$JS_OK" = xyes; then
     AC_CHECK_HEADER(jsapi.h,
@@ -434,7 +445,7 @@ if test "x$JS_OK" = xyes; then
    AC_DEFINE([HAVE_JS], [1], [libjs presence])
 else
     if test "x$JS_EN" = xyes; then
-        AC_MSG_ERROR(unable to configure javascript support)
+        AC_MSG_ERROR(unable to configure libjs support)
     fi
 fi
 
@@ -443,16 +454,20 @@ AC_SUBST(JS_CXXFLAGS)
 CXXFLAGS="$CXXFLAGS_SAVE"
 
 ########### libmagic
-MAGIC_OK=yes
 
 AC_ARG_ENABLE(libmagic,
-  [  --enable-libmagic        libmagic support],
-  [
-     MAGIC_EN=$enableval 
-     if test "x$enableval" = xno; then
-        MAGIC_OK=disabled
-     fi
-  ]
+        AC_HELP_STRING([--enable-libmagic], [compile with filemagic support (default: yes)]),
+        [
+            MAGIC_EN=$enableval 
+            if test "x$enableval" = xno; then
+                MAGIC_OK=disabled
+            else
+                MAGIC_OK=yes
+            fi
+        ],
+        [
+            MAGIC_OK=yes
+        ]
 )
 
 if test "x$MAGIC_OK" = xyes; then
@@ -480,31 +495,38 @@ fi
 
 ######### taglib
 
-TAGLIB_OK=yes
 TAGLIB_REQUESTED=no
 ID3_REQUESTED=no
-ID3_OK=yes
 AC_ARG_ENABLE(taglib,
-   [  --enable-taglib          taglib support],
+        AC_HELP_STRING([--enable-taglib], [compile with taglib support (default: yes, preferred over id3lib)]),
    [
       TAGLIB_EN=$enableval
       if test "x$enableval" = xno; then
         TAGLIB_OK=disabled
       else
         TAGLIB_REQUESTED=yes
+        TAGLIB_OK=yes
       fi
+   ],
+   [
+        TAGLIB_OK=yes
    ]
+
 )
 
 AC_ARG_ENABLE(id3lib,
-  [  --enable-id3lib          id3lib support],
+        AC_HELP_STRING([--enable-id3lib], [compile with taglib support (default: yes, if taglib not present)]),
   [
      ID3_EN=$enableval 
      if test "x$enableval" = xno; then
         ID3_OK=disabled
      else
+        ID3_OK=yes
         ID3_REQUESTED=yes
      fi
+  ],
+  [
+    ID3_OK=yes
   ]
 )
 
@@ -614,9 +636,8 @@ fi
 
 ######## extractor
 
-EXTRACTOR_OK=disabled
 AC_ARG_ENABLE(libextractor,
-  [  --enable-libextractor    libextractor support],
+        AC_HELP_STRING([--enable-libextractor], [compile with libextractor support (default: no)]),
   [
      EXTRACTOR_EN=$enableval 
      if test "x$enableval" = xno; then
@@ -624,7 +645,11 @@ AC_ARG_ENABLE(libextractor,
      else
         EXTRACTOR_OK=yes
      fi
+  ],
+  [
+    EXTRACTOR_OK=disabled
   ]
+
 )
 if test "x$EXTRACTOR_OK" = xyes; then
     AC_CHECK_HEADER(extractor.h,
@@ -680,19 +705,23 @@ fi
 
 ######## libexif
 
-EXIF_OK=yes
 #if test "x$EXTRACTOR_OK" = xyes -a "x$EXTRACTOR_GE_0_5_2" = xyes; then
 #    EXIF_OK="disabled (obsoleted by libextractor >= v0.5.2)"
 #fi
 AC_ARG_ENABLE(libexif,
-    [  --enable-libexif         libexif support],
+        AC_HELP_STRING([--enable-libexif], [compile with libexif support (default: yes)]),
     [
 #        if test "x$EXTRACTOR_OK" != xyes -o "x$EXTRACTOR_GE_0_5_2" != xyes; then
             EXIF_EN=$enableval 
             if test "x$enableval" = xno; then
                 EXIF_OK=disabled
+            else
+                EXIF_OK=yes
             fi
 #        fi
+    ],
+    [
+        EXIF_OK=yes
     ]
 )
 if test "x$EXIF_OK" = xyes; then
@@ -809,9 +838,8 @@ fi
 #fi
 
 
-LOGDEBUG_OK=disabled
 AC_ARG_ENABLE(tombdebug,
-  [  --enable-tombdebug       enable debug output for the server],
+        AC_HELP_STRING([--enable-tombdebug], [enable debug output for MediaTomb (default: no)]),
   [
      LOGDEBUG_EN=$enableval 
      if test "x$enableval" = xno; then
@@ -819,6 +847,9 @@ AC_ARG_ENABLE(tombdebug,
      else
         LOGDEBUG_OK=yes
      fi
+  ],
+  [
+     LOGDEBUG_OK=disabled
   ]
 )
 if test "x$LOGDEBUG_OK" = xyes; then
@@ -826,9 +857,8 @@ if test "x$LOGDEBUG_OK" = xyes; then
 fi
 
 
-UPNPDEBUG_OK=disabled
 AC_ARG_ENABLE(upnpdebug,
-  [  --enable-upnpdebug       enable debug output for the upnp library],
+        AC_HELP_STRING([--enable-upnpdebug], [enable debug output for TombUPnP (default: no)]),
   [
      UPNPDEBUG_EN=$enableval 
      if test "x$enableval" = xno; then
@@ -836,6 +866,9 @@ AC_ARG_ENABLE(upnpdebug,
      else
         UPNPDEBUG_OK=yes
      fi
+  ],
+  [
+    UPNPDEBUG_OK=disabled
   ]
 )
 
@@ -844,14 +877,18 @@ if test "x$UPNPDEBUG_OK" = xyes; then
     AC_DEFINE(DEBUG, 1, [Define to 1 to compile debug code])
 fi
 
-LOG_OK=yes
 AC_ARG_ENABLE(log,
-  [  --enable-log             enable or disable logging output for the server],
+        AC_HELP_STRING([--disable-log], [disable all output from MediaTomb (default: no)]),
   [
      LOG_OK_EN=$enableval 
      if test "x$enableval" = xno; then
         LOG_OK=disabled
+     else
+        LOG_OK=yes
      fi
+  ],
+  [
+      LOG_OK=yes
   ]
 )
 
@@ -883,7 +920,7 @@ echo "CONFIGURATION SUMMARY ----"
 echo
 echo "sqlite3       : $SQLITE3_OK"
 echo "mysql         : $MYSQL_OK"
-echo "javascript    : $JS_OK"
+echo "libjs         : $JS_OK"
 echo "libmagic      : $MAGIC_OK"
 echo "libexif       : $EXIF_OK"
 echo "taglib        : $TAGLIB_OK"
