@@ -65,36 +65,37 @@ AC_CHECK_HEADERS([getopt.h],
     AC_MSG_WARN(getopt.h not found - all command line options disabled)
         ])
 
+AC_CACHE_SAVE
 
 CPPFLAGS_SAVE="$CPPFLAGS"
 CFLAGS_SAVE="$CFLAGS"
 CXXFLAGS_SAVE="$CXXFLAGS"
 LDFLAGS_SAVE="$LDFLAGS"
 
+if test $DARWIN_OS -eq 1 ; then
+    AC_ARG_WITH(opendarwin, 
+        AC_HELP_STRING([--with-opendarwin=DIR], [opendarwin installation directoryi (default: /opt/local)]),
+        [DARWIN_DIR=$withval],[DARWIN_DIR="/opt/local"]
+    )
+fi
+
 AC_CHECK_HEADER([iconv.h],
         [
             AC_CHECK_FUNCS([iconv],[],
                 [
-                    LDFLAGS="$LDFLAGS -L/usr/lib -liconv"
-                    AC_CHECK_FUNCS([libiconv],
+                    AC_CHECK_LIB(iconv, iconv, [], 
                         [
-                            ICONV_LDFLAGS="-L/usr/lib -liconv"
-                            AC_SUBST(ICONV_LDFLAGS)
-                            AC_DEFINE([LIBICONV_NAMING], [1], 
-                                      [OSX had no _iconv symbol])
-                        ],
-                        [
-                            AC_MSG_ERROR(iconv library not found on your system)
+                            AC_CHECK_LIB(iconv, libiconv, [],
+                                [AC_MSG_ERROR(shit not found)]
+                            )
                         ])
                 ])
         ],
         [
             AC_CHECK_HEADER([/usr/local/include/iconv.h],
                 [
-                    CFLAGS="$CFLAGS -I/usr/local/include" 
-                    LDFLAGS="$LDFLAGS -L/usr/local/lib"
-                    CXXFLAGS="$CXXFLAGS -I/usr/local/include" 
-                    AC_CHECK_LIB(iconv, iconv,[],[AC_MSG_ERROR(iconv library not found on your system)])
+                    ICONV_CXXFLAGS="-I/usr/local/include"
+                    AC_SUBST(ICONV_CXXFLAGS)
                 ],
                 [
                     AC_CHECK_FUNCS([iconv],[],[AC_MSG_ERROR(iconv library not found on your system)])
@@ -108,6 +109,8 @@ LDFLAGS="$LDFLAGS_SAVE"
 AC_CHECK_HEADERS(execinfo.h,[],[])
 
 AC_CHECK_TYPES([time_t], [], [], [#include <sys/types.h>])
+
+AC_CACHE_SAVE
 
 AC_SYS_LARGEFILE
 AC_TYPE_OFF_T
@@ -165,6 +168,8 @@ AC_CHECK_FUNCS([sigaction sigprocmask pthread_self if_nameindex],[],
 AC_CHECK_FUNCS([if_freenameindex ioctl],[],
                [AC_MSG_ERROR(required library function not found)]) 
                
+AC_CACHE_SAVE
+
 AC_CHECK_FUNCS([inet_ntoa],
                [],
                [
@@ -220,12 +225,7 @@ AC_DEFINE([UPNP_HAVE_WEBSERVER], [1], [Compile internal web server])
 AC_CHECK_LIB(pthread, pthread_mutex_lock,[], [AC_MSG_ERROR(required library function not found)])    
 
    
-if test $DARWIN_OS -eq 1 ; then
-    AC_ARG_WITH(opendarwin, 
-        AC_HELP_STRING([--with-opendarwin=DIR], [opendarwin installation directoryi (default: /opt/local)]),
-        [DARWIN_DIR=$withval],[DARWIN_DIR="/opt/local"]
-    )
-fi
+AC_CACHE_SAVE
 
 ######### SQLite3
 AC_ARG_ENABLE(sqlite3, 
@@ -246,10 +246,15 @@ if test "x$SQLITE3_OK" = xyes; then
     AC_CHECK_HEADER(sqlite3.h, [], 
             [
                 if test $DARWIN_OS -eq 1 ; then
-                    AC_MSG_CHECKING([looking for sqlite3.h in $DARWIN_DIR/include])
-                    AC_CHECK_HEADER( $DARWIN_DIR/include/sqlite3.h, [],
+                    AC_CHECK_HEADER( $DARWIN_DIR/include/sqlite3.h, 
+                        [
+                            SQLITE3_CXXFLAGS="-I$DARWIN_DIR/include/"
+                            AC_SUBST(SQLITE3_CXXFLAGS)
+                        ],
                         [SQLITE3_OK=missing]
                     )
+                else
+                    SQLITE3_OK=missing
                 fi
             ])
 fi
@@ -258,15 +263,36 @@ if test "x$SQLITE3_OK" = xyes; then
     AC_CHECK_LIB(sqlite3, sqlite3_open,
         [],
         [
-           SQLITE3_OK=missing
+            if test $DARWIN_OS -eq 1 ; then
+                LDFLAGS="-L$DARWIN_DIR/lib -lsqlite3"
+                unset ac_cv_lib_sqlite3_sqlite3_open
+                AC_CHECK_LIB(sqlite3, sqlite3_open,
+                    [
+                        SQLITE3_LIBS="-L$DARWIN_DIR/lib -lsqlite3"
+                        AC_SUBST(SQLITE3_LIBS)
+                    ],
+                    [SQLITE3_OK=missing]
+                )
+            else
+                SQLITE3_OK=missing
+            fi
         ]
     )
 fi
 if test "x$SQLITE3_OK" = xyes; then
     AC_PATH_PROG(sqlite3prog, sqlite3, no)
     if test "$sqlite3prog" = no; then
-        AC_MSG_ERROR([sqlite3 command line client not found])
-	SQLITE3_OK=missing
+        if test $DARWIN_OS -eq 1 ; then
+            unset ac_cv_path_sqlite3prog
+            AC_PATH_PROG(sqlite3prog, sqlite3, no, $DARWIN_DIR/bin)
+            if test "$sqlite3prog" = no; then
+                AC_MSG_ERROR([sqlite3 command line client not found])
+                SQLITE3_OK=missing
+            fi
+        else
+            AC_MSG_ERROR([sqlite3 command line client not found])
+	        SQLITE3_OK=missing
+        fi
     fi
 fi
 if test "x$SQLITE3_OK" = xyes; then
@@ -277,6 +303,7 @@ else
     fi
 fi
 
+LDFLAGS="$LDFLAGS_SAVE"
 ########## MySQL
 
 AC_ARG_ENABLE(mysql, 
