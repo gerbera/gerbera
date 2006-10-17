@@ -240,6 +240,13 @@ Here is a sample configuration file with description of the various tags.
         Enables or disables the web user interface, change to "yes" in order 
         to enable it.
 
+        <accounts enabled="yes"/> (Optional)
+        Specifies a list of usernames and passwords.
+
+            <account user="name" password="password"/>
+            There can be multiple users, however this is mainly a feature 
+            for the future. Right now there are no per-user permissions.
+
     <port>50555<port/> (Optional)
         Specifies the port where the server will be listening for HTTP 
         requests. Note, that because of the implementation in the UPnP SDK 
