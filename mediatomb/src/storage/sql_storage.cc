@@ -22,6 +22,7 @@
     #include "autoconfig.h"
 #endif
 
+#include <limits.h>
 #include "sql_storage.h"
 #include "tools.h"
 #include "update_manager.h"
