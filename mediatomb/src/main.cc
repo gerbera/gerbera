@@ -46,6 +46,7 @@
 #include <signal.h>
 #include <pwd.h>
 #include <grp.h>
+#include <limits.h>
 
 #ifdef HAVE_GETOPT_LONG
     #define OPTSTR "i:p:c:u:g:a:l:P:dh"
