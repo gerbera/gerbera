@@ -230,14 +230,16 @@ String Element::escape(String str)
             case '<' : *buf << "&lt;"; break;
             case '>' : *buf << "&gt;"; break;
             case '&' : *buf << "&amp;"; break;
-            default : if (((*ptr >= 0x00) && (*ptr <= 0x1f)) ||
-                          ((*ptr >= 0x7f) && ((unsigned char)*ptr <= 0x9f)))
-                      {
-                          *buf << ".";
-                      }
-                      else
-                          *buf << *ptr;
-                      break;
+                       // handle control codes
+            default  : if (((*ptr >= 0x00) && (*ptr <= 0x1f) && 
+                            (*ptr != 0x09) && (*ptr != 0x0d) && 
+                            (*ptr != 0x0a)) || (*ptr == 0x7f))
+                       {
+                           *buf << ".";
+                       }
+                       else
+                           *buf << *ptr;
+                       break;
         }
         ptr++;
     }
