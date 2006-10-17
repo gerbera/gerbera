@@ -107,9 +107,9 @@ public:
     zmm::Ref<Session> getSession(zmm::String sessionID);
     
     /// \brief Removes a session
-    void SessionManager::removeSession(zmm::String sessionID);
+    void removeSession(zmm::String sessionID);
     
-    zmm::String SessionManager::getUserPassword(zmm::String user);
+    zmm::String getUserPassword(zmm::String user);
 
     /// \todo Leo... please describe :>
     void incrementUIUpdateID(int id) {};
