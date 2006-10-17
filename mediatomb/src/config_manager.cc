@@ -344,7 +344,6 @@ void ConfigManager::validate(String serverhome)
     getIntOption(_("/server/port"), 0); // 0 means, that the SDK will any free port itself
     getIntOption(_("/server/alive"), DEFAULT_ALIVE_INTERVAL);
 
-
     Ref<Element> el = getElement(_("/import/mappings/mimetype-upnpclass"));
     if (el == nil)
     {
@@ -356,6 +355,12 @@ void ConfigManager::validate(String serverhome)
     if (el == nil)
     {
         getOption(_("/server/custom-http-headers"), _(""));
+    }
+
+    el = getElement(_("/server/ui/accounts"));
+    if (el == nil)
+    {
+        getOption(_("/server/ui/accounts"), _(""));
     }
 
 #ifdef HAVE_EXIF    
