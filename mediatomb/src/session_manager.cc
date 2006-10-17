@@ -141,6 +141,9 @@ void SessionManager::removeSession(String sessionID)
 String SessionManager::getUserPassword(String user)
 {
     if (accounts == nil)
+    {
+        log_debug("No accounts available!\n");
         return nil;
+    }
     return accounts->get(user);
 }
