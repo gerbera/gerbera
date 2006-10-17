@@ -37,7 +37,7 @@
 //@{
 
 #include <stdio.h>
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__APPLE__)
 #include <time.h>
 #include <sys/types.h>
 #endif
