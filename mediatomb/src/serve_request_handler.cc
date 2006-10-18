@@ -47,23 +47,30 @@ ServeRequestHandler::ServeRequestHandler() : RequestHandler()
 {
 }
 
+/// \todo clean up the fix for internal items
 void ServeRequestHandler::get_info(IN const char *filename, OUT struct File_Info *info)
 {
     struct stat statbuf;
     int ret = 0;
     int len = 0;
 
+    log_debug("got filename: %s\n", filename);
+    
     String url_path, parameters;
     split_url(filename, URL_PARAM_SEPARATOR, url_path, parameters);
 
-    len = (_("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER).length();
+    log_debug("url_path: %s, parameters: %s\n", url_path.c_str(), parameters.c_str());
+
+    len = (_("/") + SERVER_VIRTUAL_DIR + _("/") + CONTENT_SERVE_HANDLER).length();
 
     if (len > url_path.length())
     {
         throw _Exception(_("There is something wrong with the link ") + url_path);
     }
 
-    String path = ConfigManager::getInstance()->getOption(_("/server/servedir")) + url_path.substring(len, url_path.length());
+    String path = ConfigManager::getInstance()->getOption(_("/server/servedir")) + url_path.substring(len, url_path.length()) + _("/") + parameters;
+   
+    log_debug("Constructed new path: %s\n", path.c_str());
     
     ret = stat(path.c_str(), &statbuf);
     if (ret != 0)
@@ -134,7 +141,7 @@ Ref<IOHandler> ServeRequestHandler::open(IN const char *filename, IN enum UpnpOp
     String url_path, parameters;
     split_url(filename, URL_PARAM_SEPARATOR, url_path, parameters);
 
-    len = (_("/") + SERVER_VIRTUAL_DIR + "/" +
+    len = (_("/") + SERVER_VIRTUAL_DIR + _("/") +
                               CONTENT_SERVE_HANDLER).length();
 
     if (len > url_path.length())
@@ -143,7 +150,7 @@ Ref<IOHandler> ServeRequestHandler::open(IN const char *filename, IN enum UpnpOp
                         url_path);
     }
 
-    String path = ConfigManager::getInstance()->getOption(_("/server/servedir")) + url_path.substring(len, url_path.length());
+    String path = ConfigManager::getInstance()->getOption(_("/server/servedir")) + url_path.substring(len, url_path.length()) + _("/") + parameters;
 
 
     Ref<IOHandler> io_handler(new FileIOHandler(path));
