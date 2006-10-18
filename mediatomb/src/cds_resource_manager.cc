@@ -69,19 +69,23 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
             tmp = urlBase->urlBase + i;
         else
             tmp = urlBase->urlBase;
-     
-        // this is especially for the TG100, we need to add the file extension
-        String location = item->getLocation();
-        int dot = location.rindex('.');
-        if (dot > -1)
+    
+        if ((!IS_CDS_ITEM_INTERNAL_URL(item->getObjectType())) &&
+            (!IS_CDS_ITEM_EXTERNAL_URL(item->getObjectType())))
         {
-            String extension = location.substring(dot);
-            // make sure that the extension does not contain the separator character
-            if (string_ok(extension) && (extension.index(URL_PARAM_SEPARATOR) == -1) 
-                                     && (extension.index(URL_ARG_SEPARATOR) == -1))
+            // this is especially for the TG100, we need to add the file extension
+            String location = item->getLocation();
+            int dot = location.rindex('.');
+            if (dot > -1)
             {
-                tmp = tmp + _(_URL_ARG_SEPARATOR) + _(URL_FILE_EXTENSION) + _("=") + extension;
-                log_debug("New URL: %s\n", tmp.c_str());
+                String extension = location.substring(dot);
+                // make sure that the extension does not contain the separator character
+                if (string_ok(extension) && (extension.index(URL_PARAM_SEPARATOR) == -1) 
+                        && (extension.index(URL_ARG_SEPARATOR) == -1))
+                {
+                    tmp = tmp + _(_URL_ARG_SEPARATOR) + _(URL_FILE_EXTENSION) + _("=") + extension;
+//                    log_debug("New URL: %s\n", tmp.c_str());
+                }
             }
         }
         element->appendChild(UpnpXML_DIDLRenderResource(tmp, res_attrs));
