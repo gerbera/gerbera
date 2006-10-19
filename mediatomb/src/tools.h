@@ -182,9 +182,12 @@ zmm::String fallbackString(zmm::String first, zmm::String fallback);
 /// \return return the (unsigned int) hash value
 unsigned int stringHash(zmm::String str);
 
+zmm::String intArrayToCSV(int *array, int size);
+
 inline void getTimeval(struct timeval *now) { gettimeofday(now, NULL); }
 
-long getDeltaMillis(struct timeval *first, struct timeval *second = NULL);
+long getDeltaMillis(struct timeval *first);
+long getDeltaMillis(struct timeval *first, struct timeval *second);
 
 void getTimespecAfterMillis(long delta, struct timespec *ret, struct timeval *start);
 

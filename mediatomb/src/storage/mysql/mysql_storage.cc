@@ -38,6 +38,8 @@ MysqlStorage::MysqlStorage() : SQLStorage()
     /// dbRemovesDeps gets set by init() to the correct value
     dbRemovesDeps = true;
     mutex = Ref<Mutex> (new Mutex());
+    table_quote_begin = '`';
+    table_quote_end = '`';
 }
 MysqlStorage::~MysqlStorage()
 {

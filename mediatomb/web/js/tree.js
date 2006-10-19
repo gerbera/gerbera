@@ -119,13 +119,13 @@ function standardClick(treeNode)
     {
         setCookie('lastNodeDb', id);
         lastNodeDb = id;
-        lastNodeDbWish=null;
+        lastNodeDbWish = null;
     }
     else
     {
         setCookie('lastNodeFs', id);
         lastNodeFs = id;
-        lastNodeFsWish=null;
+        lastNodeFsWish = null;
     }
     folderChange(id);
 }
@@ -139,19 +139,24 @@ function openEventListener(id)
     }
 }
 
-function fetchChildren(node)
+function fetchChildren(node, uiUpdate)
 {
     var id = node.getID();
     var type = id.substring(0, 1);
     id = id.substring(1);
     var linkType = (type == 'd') ? 'containers' : 'directories';
     var url = link(linkType, {parent_id: id});
+    var async = ! uiUpdate;
+    
+    //DEBUG?
+    //async = false;
     
     var myAjax = new Ajax.Request(
         url,
         {
             method: 'get',
-            onComplete: updateTree
+            onComplete: updateTree,
+            asynchronous: async,
         });
 }
 

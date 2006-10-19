@@ -585,19 +585,25 @@ unsigned int stringHash(String str)
     return hash;
 }
 
-long getDeltaMillis(struct timeval *first, struct timeval *second)
+String intArrayToCSV(int *array, int size)
+{
+    if (size <= 0)
+        return nil;
+    Ref<StringBuffer> buf(new StringBuffer());
+    for (int i = 0; i < size; i++)
+        *buf << "," << array[i];
+    return buf->toString(1);
+}
+
+long getDeltaMillis(struct timeval *first)
 {
     struct timeval now;
-    if (second == NULL)
-    {
-        getTimeval(&now);
-        second = &now;
-    }
-    
-    
-    //long delta = (second->tv_sec - first->tv_sec) * 1000L + (second->tv_usec - first->tv_usec) / 1000L;
-    //  log_debug("secf: %ld, secs: %ld, usecf: %ld, usecs: %ld, delta: %ld\n", first->tv_sec, second->tv_sec, first->tv_usec, second->tv_usec, delta);
-    
+    getTimeval(&now);
+    return getDeltaMillis(first, &now);
+}
+
+long getDeltaMillis(struct timeval *first, struct timeval *second)
+{
     return (second->tv_sec - first->tv_sec) * 1000L + (second->tv_usec - first->tv_usec) / 1000L;
 }
 
@@ -611,8 +617,13 @@ void getTimespecAfterMillis(long delta, struct timespec *ret, struct timeval *st
     }
     ret->tv_sec = start->tv_sec + delta / 1000;
     ret->tv_nsec = (start->tv_usec + (delta % 1000) * 1000) * 1000;
+    if (ret->tv_nsec >= 1000000000) // >= 1 second
+    {
+        ret->tv_sec ++;
+        ret->tv_nsec -= 1000000000;
+    }
     
-    //log_debug("timespec: sec: %ld, nsec: %ld\n", ret->tv_sec, ret->tv_nsec);
+    log_debug("timespec: sec: %ld, nsec: %ld\n", ret->tv_sec, ret->tv_nsec);
 }
 
 

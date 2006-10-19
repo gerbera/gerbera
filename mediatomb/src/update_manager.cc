@@ -36,7 +36,7 @@
 #define OBJECT_ID_HASH_CAPACITY 3109
 
 
-//#define LOCK()   { printf("!!! try to lock: line %d; thread: %d\n", __LINE__, (int)pthread_self()); lock(); \
+//#define LOCK()   { printf("!!! try to lock: line %d; thread: %d\n", __LINE__, (int)pthread_self()); lock(); 
 //                   printf("!!! locked:      line %d; thread: %d\n", __LINE__, (int)pthread_self()); }
 //#define UNLOCK() { printf("!!! unlock:      line %d: thread: %d\n", __LINE__, (int)pthread_self()); unlock(); }
 
@@ -61,7 +61,8 @@ Ref<UpdateManager> UpdateManager::getInstance()
     if (instance == nil)
     {
         LOCK();
-        if (instance == nil)
+        if (instance == nil) // check again, because there is a very small chance
+                             // that 2 threads tried to lock() concurrently
         {
             try
             {
@@ -105,24 +106,20 @@ void UpdateManager::init()
     
     pthread_attr_destroy(&attr);
 }
+
 void UpdateManager::shutdown()
 {
-    log_debug("shutdown, locking\n");
+    //log_debug("shutdown, locking\n");
     shutdownFlag = true;
-    LOCK();
+    LOCK(); // locking isn't necessary, because shutdown() is the only place
+              // where shutdownFlag get's set (and it's never reset)
+              // and we don't need a predictable scheduling here.
     log_debug("signalling...\n");
     pthread_cond_signal(&updateCond);
-    log_debug("signalled, unlocking\n");
+    //log_debug("signalled, unlocking\n");
     UNLOCK();
-    log_debug("unlocked\n");
+    //log_debug("unlocked\n");
 }
-
-/*
-void UpdateManager::containersChanged(int *ids, int size)
-{
-    Storage::getInstance()->incrementUpdateIDs(objectIDs, objectIDcount);
-}
-*/
 
 void UpdateManager::containerChanged(int objectID, int flushPolicy)
 {
@@ -136,9 +133,16 @@ void UpdateManager::containerChanged(int objectID, int flushPolicy)
         bool signal = (! haveUpdates());
         log_debug("containerChanged. id: %d, signal: %d\n", objectID, signal);
         objectIDHash->put(objectID);
+        
+        // signalling if the hash gets too full
         if (objectIDHash->size() >= MAX_OBJECT_IDS)
             signal = true;
+        
+        // very simple caching, but it get's a lot of hits
         lastContainerChanged = objectID;
+        
+        // signalling if the flushPolicy changes, so the thread recalculates
+        // the sleep time
         if (flushPolicy > this->flushPolicy)
         {
             this->flushPolicy = flushPolicy;
@@ -170,7 +174,9 @@ void UpdateManager::threadProc()
         if (haveUpdates())
         {
             long sleepMillis;
-            long timeDiff = getDeltaMillis(&lastUpdate);
+            struct timeval now;
+            getTimeval(&now);
+            long timeDiff = getDeltaMillis(&lastUpdate, &now);
             switch (flushPolicy)
             {
                 case FLUSH_SPEC:
@@ -180,24 +186,31 @@ void UpdateManager::threadProc()
                     sleepMillis = 0;
                     break;
             }
-            bool sendUpdates = false;
+            bool sendUpdates = true;
             if (sleepMillis >= MIN_SLEEP && objectIDHash->size() < MAX_OBJECT_IDS)
             {
                 struct timespec timeout;
-                getTimespecAfterMillis(timeDiff + sleepMillis, &timeout, &lastUpdate);
+                getTimespecAfterMillis(sleepMillis, &timeout, &now);
                 log_debug("threadProc: sleeping for %ld millis\n", sleepMillis);
+                log_debug("timeDiff: %ld timeout: %ld - %ld\n", timeDiff, timeout.tv_sec, timeout.tv_nsec);
+                log_debug("lastUpdate: %ld %ld\n", lastUpdate.tv_sec, lastUpdate.tv_usec);
+                log_debug("now: %ld %ld\n", now.tv_sec, now.tv_usec);
                 
                 int ret = pthread_cond_timedwait(&updateCond, mutex.getMutex(), &timeout);
+                
                 if (! shutdownFlag)
                 {
                     if (ret != 0 && ret != ETIMEDOUT)
+                    {
+                        log_debug("pthread_cond_timedwait returned errorcode %d\n", ret);
                         throw _Exception(_("pthread_cond_timedwait returned errorcode ") + ret);
-                    if (ret == 0)
-                        sendUpdates = true;
+                    }
+                    if (ret == ETIMEDOUT)
+                        sendUpdates = false;
                 }
+                else
+                    sendUpdates = false;
             }
-            else
-                sendUpdates = true;
             
             if (sendUpdates)
             {
@@ -206,13 +219,17 @@ void UpdateManager::threadProc()
                 flushPolicy = FLUSH_SPEC;
                 
                 hash_data_array_t<int> hash_data_array;
+                // hash_data_array points to the array inside objectIDHash, so
+                // we may only call clear() after we don't need the array anymore
                 objectIDHash->getAll(&hash_data_array);
                 String updateString = Storage::getInstance()->incrementUpdateIDs(hash_data_array.data,hash_data_array.size);
-                ContentDirectoryService::getInstance()->subscription_update(updateString);
-                objectIDHash->clear();
+                objectIDHash->clear(); // hash_data_array will be invalid after clear()
                 
+                UNLOCK(); // we don't need to hold the lock during the sending of the updates
+                ContentDirectoryService::getInstance()->subscription_update(updateString);
                 getTimeval(&lastUpdate);
                 log_debug("updates sent.\n");
+                LOCK();
             }
         }
         else

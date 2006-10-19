@@ -241,10 +241,10 @@ bool Server::getShutdownStatus()
 
 void Server::shutdown()
 {
-    int ret = 0; // return code    
+    int ret = 0; // return code
 
-    UpdateManager::getInstance()->shutdown();
     ContentManager::getInstance()->shutdown();
+    UpdateManager::getInstance()->shutdown();
     Storage::getInstance()->shutdown();
 
     server_shutdown_flag = true;

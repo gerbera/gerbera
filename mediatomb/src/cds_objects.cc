@@ -36,7 +36,7 @@ CdsObject::CdsObject() : Object()
     resources = Ref<Array<CdsResource> >(new Array<CdsResource>);
     id = INVALID_OBJECT_ID;
     parentID = INVALID_OBJECT_ID;
-    refID = 0;
+    refID = INVALID_OBJECT_ID;
     virt = 0;
     sortPriority = 0;
     objectFlags = OBJECT_FLAG_RESTRICTED;
@@ -45,6 +45,7 @@ CdsObject::CdsObject() : Object()
 void CdsObject::copyTo(Ref<CdsObject> obj)
 {
     obj->setID(id);
+    obj->setRefID(refID);
     obj->setParentID(parentID);
     obj->setTitle(title);
     obj->setClass(upnpClass);

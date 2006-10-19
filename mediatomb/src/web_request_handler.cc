@@ -28,7 +28,6 @@
 #include "web_request_handler.h"
 #include "config_manager.h"
 #include "web/pages.h"
-#include "session_manager.h"
 #include "tools.h"
 #include "hash.h"
 
@@ -76,6 +75,9 @@ void WebRequestHandler::check_request(bool checkLogin)
     {
         throw SessionException(_("not logged in"));
     }
+    String uiUpdate = param(_("get_update_ids"));
+    if ((string_ok(uiUpdate) && uiUpdate == _("1")))
+        addUpdateIDs(session, root);
 }
 
 String WebRequestHandler::renderXMLHeader()
@@ -153,9 +155,9 @@ Ref<IOHandler> WebRequestHandler::open(IN const char *filename,
     return open(params, mode);
 }
 
-// this method should be overridden
-void WebRequestHandler::process()
+void WebRequestHandler::addUpdateIDs(Ref<Session> session, Ref<Element> root)
 {
+    String updateIDs = session->getUIUpdateIDs();
+    if (string_ok(updateIDs)) 
+        root->appendTextChild(_("updateIDs"), updateIDs);
 }
-
-

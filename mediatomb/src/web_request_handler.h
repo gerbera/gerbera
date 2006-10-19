@@ -27,6 +27,7 @@
 #include "mxml/mxml.h"
 #include "request_handler.h"
 #include "dictionary.h"
+#include "session_manager.h"
 //#include "scripting/web_script.h"
 
 
@@ -81,6 +82,8 @@ protected:
     /// \return IOHandler
     /// \todo Genych, chto tut proishodit, ya tolkom che to ne wrubaus?? 
     zmm::Ref<IOHandler> open(zmm::Ref<Dictionary>, IN enum UpnpOpenFileMode mode);
+    
+    void addUpdateIDs(zmm::Ref<Session> session, zmm::Ref<mxml::Element> root);
 public:
     /// \brief Constructor, currently empty.
     WebRequestHandler();
@@ -93,16 +96,16 @@ public:
     /// for the FileRequestHandler, where we can check the file and return all
     /// information about it.
     virtual void get_info(IN const char *filename, OUT struct File_Info *info);
-
+    
     /// \brief Decodes the parameters from the filename (URL) and calls the internal open() function.
     /// \param filename The requested URL
     /// \param mode either UPNP_READ or UPNP_WRITE
     /// \return the appropriate IOHandler for the request.
     virtual zmm::Ref<IOHandler> open(IN const char *filename, IN enum UpnpOpenFileMode mode);
-
+    
     /// \brief This method must be overriden by the subclasses that actually process the given request.
-    virtual void process();
-
+    virtual void process() = 0;
+    
     /// \brief builds full path to a script for the given relative filename
     static zmm::String buildScriptPath(zmm::String filename);
             

@@ -28,6 +28,9 @@
 #include "tools.h"
 #include "tools.h"
 
+#define UI_UPDATE_ID_HASH_SIZE  331
+#define MAX_UI_UPDATE_IDS       100
+
 using namespace zmm;
 using namespace mxml;
 
@@ -55,12 +58,50 @@ Ref<SessionManager> SessionManager::getInstance()
     return inst;
 }
 
-Session::Session(long timeout) : Dictionary()
+Session::Session(long timeout) : Dictionary_r()
 {
     this->timeout = timeout;
     loggedIn = false;
     last_access = 0; /// \todo set to right value
     sessionID = nil;
+    uiUpdateIDs = Ref<DBRHash<int> >(new DBRHash<int>(UI_UPDATE_ID_HASH_SIZE, INVALID_OBJECT_ID, INVALID_OBJECT_ID_2));
+    updateAll = false;
+}
+
+void Session::containerChangedUI(int objectID)
+{
+    if (objectID == INVALID_OBJECT_ID)
+        return;
+    mutex->lock();
+    if (! updateAll)
+    {
+        if (uiUpdateIDs->size() >= MAX_UI_UPDATE_IDS)
+        {
+            updateAll = true;
+            uiUpdateIDs->clear();
+        }
+        else
+            uiUpdateIDs->put(objectID);
+    }
+    mutex->unlock();
+}
+
+String Session::getUIUpdateIDs()
+{
+    mutex->lock();
+    if (updateAll)
+    {
+        updateAll = false;
+        mutex->unlock();
+        return _("all");
+    }
+    hash_data_array_t<int> hash_data_array;
+    uiUpdateIDs->getAll(&hash_data_array);
+    String ret = intArrayToCSV(hash_data_array.data, hash_data_array.size);
+    if (ret != nil)
+        uiUpdateIDs->clear();
+    mutex->unlock();
+    return ret;
 }
 
 Mutex SessionManager::mutex = new Mutex();
@@ -146,3 +187,16 @@ String SessionManager::getUserPassword(String user)
     }
     return accounts->get(user);
 }
+
+void SessionManager::containerChangedUI(int objectID)
+{
+    mutex.lock();
+    for (int i = 0; i < sessions->size(); i++)
+    {
+        Ref<Session> session = sessions->get(i);
+        if (session->isLoggedIn())
+            session->containerChangedUI(objectID);
+    }
+    mutex.unlock();
+}
+

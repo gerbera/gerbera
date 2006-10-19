@@ -24,6 +24,7 @@
 #define __DICTIONARY_H__
 
 #include "zmmf/zmmf.h"
+#include "sync.h"
 
 /// \brief This class should never be used directly, it is being used by the Dictionary class.
 class DictionaryElement : public zmm::Object
@@ -96,6 +97,103 @@ public:
 
     /// \brief Frees unnecessary memory
     inline void optimize() { elements->optimize(); }
+};
+
+
+/// \brief Reentrant version of the dictionary
+class Dictionary_r : public Dictionary
+{
+public:
+    Dictionary_r() : Dictionary()
+    {
+        mutex = zmm::Ref<Mutex>(new Mutex(true));
+    }
+    
+    inline void put(zmm::String key, zmm::String value)
+    {
+        mutex->lock();
+        Dictionary::put(key, value);
+        mutex->unlock();
+    }
+    
+    inline zmm::String get(zmm::String key)
+    {
+        mutex->lock();
+        zmm::String ret = Dictionary::get(key);
+        mutex->unlock();
+        return ret;
+    }
+    
+    inline void remove(zmm::String key)
+    {
+        mutex->lock();
+        Dictionary::remove(key);
+        mutex->unlock();
+    }
+    
+    inline zmm::String encode()
+    {
+        mutex->lock();
+        zmm::String ret = Dictionary::encode();
+        mutex->unlock();
+        return ret;
+    }
+    
+    inline void clear()
+    {
+        mutex->lock();
+        Dictionary::clear();
+        mutex->unlock();
+    }
+    
+    inline void decode(zmm::String url)
+    {
+        mutex->lock();
+        Dictionary::decode(url);
+        mutex->unlock();
+    }
+    
+    inline zmm::Ref<Dictionary_r> clone()
+    {
+        mutex->lock();
+        zmm::Ref<Dictionary_r> ret = RefCast(Dictionary::clone(), Dictionary_r);
+        mutex->unlock();
+        return ret;
+    }
+    
+    inline bool isSubsetOf(zmm::Ref<Dictionary> other)
+    {
+        mutex->lock();
+        bool ret = Dictionary::isSubsetOf(other);
+        mutex->unlock();
+        return ret;
+    }
+    
+    inline bool equals(zmm::Ref<Dictionary> other)
+    {
+        mutex->lock();
+        bool ret = Dictionary::equals(other);
+        mutex->unlock();
+        return ret;
+    }                                                                         
+    
+    inline zmm::Ref<zmm::Array<DictionaryElement> > getElements()
+    {
+        mutex->lock();
+        zmm::Ref<zmm::Array<DictionaryElement> > ret = Dictionary::getElements();
+        mutex->unlock();
+        return ret;
+    }
+    
+    inline void optimize()
+    {
+        mutex->lock();
+        Dictionary::optimize();
+        mutex->unlock();
+    }
+    
+protected:
+    zmm::Ref<Mutex> mutex;
 };
 
 #endif // __DICTIONARY_H__

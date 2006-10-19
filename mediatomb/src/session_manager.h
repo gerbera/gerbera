@@ -25,6 +25,7 @@
 
 #include "dictionary.h"
 #include "sync.h"
+#include "hash.h"
 
 /// \brief One UI session.
 /// 
@@ -32,7 +33,7 @@
 /// created. It then will be used to store various information to support
 /// the UI - remember the position of browsing for each driver, remember the page
 /// count for each driver and so on.
-class Session : public Dictionary 
+class Session : public Dictionary_r
 {
 public:
     /// \brief Constructor, creates a session with a given timeout.
@@ -61,7 +62,22 @@ public:
     
     inline void logOut() { loggedIn = false; }
     
+    /// \brief Returns the updateIDs, collected for the sessions,
+    /// and flushes the storage for the ids
+    /// \return the container ids to be updated as String (comma separated)
+    zmm::String getUIUpdateIDs();
+    
 protected:
+    /// \brief Is called by SessionManager if UI update is needed
+    /// \param objectID the container that needs to be updated
+    void containerChangedUI(int objectID);
+    
+    /// \brief True if the ui update id hash became to big and
+    /// the UI shall update every container
+    bool updateAll;
+    
+    zmm::Ref<DBRHash<int> > uiUpdateIDs;
+    
     /// \brief maximum time the session can be idle (starting from last_access)
     long timeout;
     
@@ -72,6 +88,8 @@ protected:
     zmm::String sessionID;
 
     bool loggedIn;
+    
+    friend class SessionManager;
 };
 
 /// \brief This class offers ways to create new sessoins, stores all available sessions and provides access to them.
@@ -111,8 +129,11 @@ public:
     
     zmm::String getUserPassword(zmm::String user);
 
-    /// \todo Leo... please describe :>
-    void incrementUIUpdateID(int id) {};
+    /// \brief Is called whenever a container changed in a way,
+    /// so that it needs to be redrawn in the tree of the UI.
+    /// notifies all active sessions.
+    /// \param objectID
+    void containerChangedUI(int objectID);
 };
 
 #endif //  __SESSION_MANAGER_H__

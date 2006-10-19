@@ -33,6 +33,7 @@
 #include "cds_objects.h"
 #include "process.h"
 #include "update_manager.h"
+#include "session_manager.h"
 #include "ixml.h"
 #include "file_io_handler.h"
 #include "dictionary.h"
@@ -128,12 +129,18 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
 
         if (! aitem->equals(clone, true)) // check for all differences
         {
+            Ref<UpdateManager> um = UpdateManager::getInstance();
+            Ref<SessionManager> sm = SessionManager::getInstance();
+            
             log_debug("Item changed, updating database\n");
-            storage->updateObject(clone);
+            int containerChanged = INVALID_OBJECT_ID;
+            storage->updateObject(clone, &containerChanged);
+            um->containerChanged(containerChanged);
+            sm->containerChangedUI(containerChanged);
+            
             if (! aitem->equals(clone)) // check for visible differences
             {
                 log_debug("Item changed visually, updating parent\n");
-                Ref<UpdateManager> um = UpdateManager::getInstance();
                 um->containerChanged(clone->getParentID(), FLUSH_ASAP);
             }
             obj = clone;

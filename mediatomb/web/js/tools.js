@@ -1,4 +1,4 @@
-function link(req_type, param)
+function link(req_type, param, get_update_ids)
 {
     var url = "/content/interface?req_type="+ req_type +"&sid="+ SID;
     if (param)
@@ -6,6 +6,8 @@ function link(req_type, param)
         {
             url += "&" + key +"="+ param[key];
         }
+    if (get_update_ids && isTypeDb() && dbStuff.treeShown)
+        url += "&get_update_ids=1";
     return url;
 }
 
@@ -16,33 +18,6 @@ function isTypeDb()
 
 function xmlGetElement(parent, name)
 {
-    /*var returnVal = Try.these
-    (
-        function()
-        {
-            var ns = null;
-            var tmpname = name;
-            if (tmpname.substring(0, 3) == "dc:")
-            {
-                ns = "http://purl.org/dc/elements/1.1/";
-                tmpname = tmpname.substring(3);
-            }
-            else if (tmpname.substring(0, 5) == "upnp:")
-            {
-                ns = "urn:schemas-upnp-org:metadata-1-0/upnp/";
-                tmpname = tmpname.substring(5);
-            }
-            if (ns)
-                return parent.getElementsByTagNameNS(ns, tmpname);
-            else
-                return parent.getElementsByTagName(tmpname);
-        },
-        function()
-        {
-            return parent.getElementsByTagName(name);
-        }
-    );*/
-    
     var returnVal = parent.getElementsByTagName(name)
     
     if (!returnVal || !returnVal.length)
@@ -104,6 +79,58 @@ function errorCheck(xml, noredirect)
         return false;
     }
     
+    var updateIDsEl = xmlGetElement(xml, 'updateIDs');
+    if (updateIDsEl)
+    {
+        var updateIDStr = xmlGetText(updateIDsEl);
+        var savedlastNodeDbID = lastNodeDb;
+        var savedlastNodeDbIDParent;
+        if (savedlastNodeDbID != 'd0')
+            savedlastNodeDbIDParent = getTreeNode(savedlastNodeDbID).getParent().getID();
+        //alert('before: lastid: ' + savedlastNodeDbID);
+        //alert('before: node: ' + getTreeNode(savedlastNodeDbID));
+        selectNode('d0');
+        var updateAll = false;
+        if (updateIDStr != 'all')
+        {
+            var updateIDsArr = updateIDStr.split(",");
+            for (var i = 0; i < updateIDsArr.length; i++)
+            {
+                if (updateIDsArr[i] == 0)
+                    updateAll = true;
+            }
+        }
+        else
+            updateAll = true;
+        if (! updateAll)
+        {
+            for (var i = 0; i < updateIDsArr.length; i++)
+            {
+                var node = getTreeNode('d' + updateIDsArr[i]).getParent();
+                node.childrenHaveBeenFetched=false;
+                node.resetChildren();
+                fetchChildren(node, true);
+            }
+        }
+        else
+        {
+            var node = getTreeNode('d0');
+            node.childrenHaveBeenFetched=false;
+            node.resetChildren();
+            fetchChildren(node, true);
+        }
+        var savedlastNodeDb = getTreeNode(savedlastNodeDbID);
+        //alert('lastid: ' + savedlastNodeDbID);
+        //alert('node: ' + savedlastNodeDb);
+        if (savedlastNodeDb)
+            selectNode(savedlastNodeDbID);
+        else if (savedlastNodeDbIDParent)
+        {
+            savedlastNodeDb = getTreeNode(savedlastNodeDbIDParent);
+            if (savedlastNodeDb)
+                selectNode(savedlastNodeDbIDParent);
+        }
+    }
     return true;
 }
 

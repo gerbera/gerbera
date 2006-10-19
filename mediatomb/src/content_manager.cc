@@ -352,7 +352,7 @@ void ContentManager::_removeObject(int objectID, bool all)
     int objectType;
     int parentID = storage->removeObject(objectID, all, &objectType);
     if (IS_CDS_CONTAINER(objectType))
-        SessionManager::getInstance()->incrementUIUpdateID(parentID);
+        SessionManager::getInstance()->containerChangedUI(parentID);
     UpdateManager::getInstance()->containerChanged(parentID);
     
     // reload accounting
@@ -618,6 +618,7 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
 
     Ref<Storage> storage = Storage::getInstance();
     Ref<UpdateManager> um = UpdateManager::getInstance();
+    Ref<SessionManager> sm = SessionManager::getInstance();
 
     Ref<CdsObject> obj = storage->loadObject(objectID);
     int objectType = obj->getObjectType();
@@ -670,7 +671,10 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
         if (!item->equals(clone, true))
         {
             cloned_item->validate();
-            storage->updateObject(clone);
+            int containerChanged = INVALID_OBJECT_ID;
+            storage->updateObject(clone, &containerChanged);
+            um->containerChanged(containerChanged);
+            sm->containerChangedUI(containerChanged);
             log_debug("updateObject: calling containerChanged on item %s\n", item->getTitle().c_str());
             um->containerChanged(item->getParentID());
         }
@@ -708,7 +712,10 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
         if (!item->equals(clone, true))
         {
             cloned_item->validate();
-            storage->updateObject(clone);
+            int containerChanged = INVALID_OBJECT_ID;
+            storage->updateObject(clone, &containerChanged);
+            um->containerChanged(containerChanged);
+            sm->containerChangedUI(containerChanged);
             um->containerChanged(item->getParentID());
         }
     }
@@ -724,9 +731,12 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
         if (!cont->equals(clone, true))
         {
             clone->validate();
-            storage->updateObject(clone);
+            int containerChanged = INVALID_OBJECT_ID;
+            storage->updateObject(clone, &containerChanged);
+            um->containerChanged(containerChanged);
+            sm->containerChangedUI(containerChanged);
             um->containerChanged(cont->getParentID());
-            SessionManager::getInstance()->incrementUIUpdateID(cont->getParentID());
+            sm->containerChangedUI(cont->getParentID());
         }
     }
 
@@ -738,9 +748,14 @@ void ContentManager::addObject(zmm::Ref<CdsObject> obj)
     int parent_id;
     Ref<Storage> storage = Storage::getInstance();
     Ref<UpdateManager> um = UpdateManager::getInstance();
+    Ref<SessionManager> sm = SessionManager::getInstance();
+    int containerChanged = INVALID_OBJECT_ID;
     log_debug("Adding: parent ID is %d\n", obj->getParentID());
-    storage->addObject(obj);
+    storage->addObject(obj, &containerChanged);
     log_debug("After adding: parent ID is %d\n", obj->getParentID());
+    
+    um->containerChanged(containerChanged);
+    sm->containerChangedUI(containerChanged);
     
     parent_id = obj->getParentID();
     if ((parent_id != -1) && (storage->getChildCount(parent_id) == 1))
@@ -753,9 +768,7 @@ void ContentManager::addObject(zmm::Ref<CdsObject> obj)
     
     um->containerChanged(obj->getParentID());
     if (IS_CDS_CONTAINER(obj->getObjectType()))
-    {
-        SessionManager::getInstance()->incrementUIUpdateID(obj->getParentID());
-    }
+        sm->containerChangedUI(obj->getParentID());
     
     if (! obj->isVirtual() && IS_CDS_ITEM(obj->getObjectType()))
         ContentManager::getInstance()->getAccounting()->totalFiles++;
@@ -771,7 +784,7 @@ void ContentManager::addContainer(int parentID, String title, String upnpClass)
 int ContentManager::addContainerChain(String chain)
 {
     Ref<Storage> storage = Storage::getInstance();
-    int updateID;
+    int updateID = INVALID_OBJECT_ID;
     int containerID;
     
     log_debug("received chain: %s\n", chain.c_str());
@@ -779,6 +792,7 @@ int ContentManager::addContainerChain(String chain)
     // if (updateID != INVALID_OBJECT_ID)
     // an invalid updateID is checked by containerChanged()
     UpdateManager::getInstance()->containerChanged(updateID);
+    SessionManager::getInstance()->containerChangedUI(updateID);
 
     return containerID;
 }
@@ -788,8 +802,16 @@ void ContentManager::updateObject(Ref<CdsObject> obj)
     obj->validate();
     Ref<Storage> storage = Storage::getInstance();
     Ref<UpdateManager> um = UpdateManager::getInstance();
-    storage->updateObject(obj);
+    Ref<SessionManager> sm = SessionManager::getInstance();
+    
+    int containerChanged = INVALID_OBJECT_ID;
+    storage->updateObject(obj, &containerChanged);
+    um->containerChanged(containerChanged);
+    sm->containerChangedUI(containerChanged);
+    
     um->containerChanged(obj->getParentID());
+    if (IS_CDS_CONTAINER(obj->getObjectType()))
+        sm->containerChangedUI(obj->getParentID());
 }
 
 Ref<CdsObject> ContentManager::convertObject(Ref<CdsObject> oldObj, int newType)

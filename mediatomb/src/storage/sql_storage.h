@@ -66,14 +66,14 @@ public:
     virtual zmm::Ref<SQLResult> select(zmm::String query) = 0;
     virtual int exec(zmm::String query, bool getLastInsertId = false) = 0;
     
-    virtual void addObject(zmm::Ref<CdsObject> object);
-    virtual void updateObject(zmm::Ref<CdsObject> object);
+    virtual void addObject(zmm::Ref<CdsObject> object, int *changedContainer);
+    virtual void updateObject(zmm::Ref<CdsObject> object, int *changedContainer);
     
     virtual zmm::Ref<CdsObject> loadObject(int objectID);
     virtual int getChildCount(int contId, bool containersOnly = false);
     
     virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param);
-                                         
+    
     virtual int isFolderInDatabase(zmm::String path);
     virtual int isFileInDatabase(zmm::String path);
     
@@ -94,7 +94,6 @@ public:
     virtual zmm::Ref<CdsObject> findObjectByFilename(zmm::String path);
     virtual int findObjectIDByPath(zmm::String fullpath);
     virtual zmm::String incrementUpdateIDs(int *ids, int size);
-    virtual void incrementUIUpdateID(int id);
     
     virtual zmm::String buildContainerPath(int parentID, zmm::String title);
     
@@ -106,6 +105,12 @@ public:
     virtual void shutdown() = 0;
     
 protected:
+    
+    char table_quote_begin;
+    char table_quote_end;
+    
+    zmm::String sql_query;
+    
     /* helper for createObjectFromRow() */
     zmm::String getRealLocation(int parentID, zmm::String location);
     
@@ -133,7 +138,7 @@ protected:
         zmm::String table;
         zmm::Ref<Dictionary> dict;
     };
-    zmm::Ref<zmm::Array<AddUpdateTable> > _addUpdateObject(zmm::Ref<CdsObject> obj, bool isUpdate);
+    zmm::Ref<zmm::Array<AddUpdateTable> > _addUpdateObject(zmm::Ref<CdsObject> obj, bool isUpdate, int *changedContainer);
     
     
     /* helper for removeObject(s) */
@@ -163,7 +168,7 @@ protected:
     zmm::String stripLocationPrefix(char* prefix, zmm::String path);
     zmm::String stripLocationPrefix(zmm::String path);
     
-    int ensurePathExistence(zmm::String path);
+    int ensurePathExistence(zmm::String path, int *changedContainer);
     zmm::Ref<CdsObject> checkRefID(zmm::Ref<CdsObject> obj);
     int createContainer(int parentID, zmm::String name, zmm::String path, bool isVirtual);
     

@@ -20,11 +20,11 @@ function itemChangeType()
 
 function folderChange(id)
 {
-    itemChangeType()
+    itemChangeType();
     var type = id.substring(0, 1);
     id = id.substring(1);
     var itemLink = type == 'd' ? 'items' : 'files';
-    var url = link(itemLink, {parent_id: id});
+    var url = link(itemLink, {parent_id: id}, true);
     var myAjax = new Ajax.Request(
         url,
         {
@@ -151,7 +151,7 @@ function updateItems(ajaxRequest)
 
 function addItem(itemId)
 {
-    var url = link("add", {object_id: itemId});
+    var url = link("add", {object_id: itemId}, true);
     var myAjax = new Ajax.Request(
         url,
         {
@@ -178,7 +178,7 @@ function userAddItemStart()
 
 function userEditItemStart(objectId)
 {
-    var url = link("edit_load", {object_id: objectId});
+    var url = link("edit_load", {object_id: objectId}, true);
     var myAjax = new Ajax.Request(
         url,
         {
@@ -334,6 +334,7 @@ function addEditRemoveSubmitted(ajaxRequest)
     var xml = ajaxRequest.responseXML;
     if (!errorCheck(xml)) return;
     
+    /*
     var updateContainer = xmlGetElement(xml, 'updateContainer');
     if (updateContainer)
     {
@@ -352,7 +353,8 @@ function addEditRemoveSubmitted(ajaxRequest)
         //itemChangeType();
     }
     else
-        folderChange(selectedNode);
+    */
+    folderChange(selectedNode);
 }
 
 function removeItem(itemId, all)
@@ -361,7 +363,7 @@ function removeItem(itemId, all)
         all_send="1";
     else
         all_send="0";
-    var url = link('remove', {object_id: itemId, all: all_send});
+    var url = link('remove', {object_id: itemId, all: all_send}, true);
     var myAjax = new Ajax.Request(
         url,
         {

@@ -120,13 +120,14 @@ public:
     Storage();
 
     virtual void init() = 0;
-    virtual void addObject(zmm::Ref<CdsObject> object) = 0;
+    virtual void addObject(zmm::Ref<CdsObject> object, int *changedContainer) = 0;
 
     /// \brief Adds a virtual container chain specified by path.
     /// \param path container path separated by '/'. Slashes in container
     /// titles must be escaped. 
     /// \param containerID will be filled in by the function
-    /// \param updateID will be filled in by the function
+    /// \param updateID will be filled in by the function only if it is set to INVALID_OBJECT_ID
+    /// and it is necessary to update a container. Otherwise it will be left unchanged.
     ///
     /// The function gets a path (i.e. "/Audio/All Music/") and will create
     /// the container path if needed. The container ID will be filled in with
@@ -142,7 +143,7 @@ public:
     /// It will be escaped.
     virtual zmm::String buildContainerPath(int parentID, zmm::String title) = 0;
     
-    virtual void updateObject(zmm::Ref<CdsObject> object) = 0;
+    virtual void updateObject(zmm::Ref<CdsObject> object, int *changedContainer) = 0;
 
     virtual zmm::Ref<zmm::Array<CdsObject> > browse(zmm::Ref<BrowseParam> param) = 0;
     virtual zmm::Ref<zmm::Array<zmm::StringBase> > getMimeTypes() = 0;

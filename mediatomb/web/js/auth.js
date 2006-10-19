@@ -79,7 +79,7 @@ function logout()
         url,
         {
             method: 'get',
-            asynchronous: true,
+            asynchronous: false,
             onComplete: handleLogout
         });
 }
