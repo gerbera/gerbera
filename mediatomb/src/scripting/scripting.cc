@@ -391,6 +391,7 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         int id = cm->addContainerChain(path);
         cds_obj->setParentID(id);
         cds_obj->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
+        cds_obj->setID(INVALID_OBJECT_ID);
         cm->addObject(cds_obj);
 
         /* setting object ID as return value */
