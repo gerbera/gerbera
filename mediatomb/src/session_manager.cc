@@ -72,18 +72,21 @@ void Session::containerChangedUI(int objectID)
 {
     if (objectID == INVALID_OBJECT_ID)
         return;
-    mutex->lock();
     if (! updateAll)
     {
-        if (uiUpdateIDs->size() >= MAX_UI_UPDATE_IDS)
+        mutex->lock();
+        if (! updateAll)
         {
-            updateAll = true;
-            uiUpdateIDs->clear();
+            if (uiUpdateIDs->size() >= MAX_UI_UPDATE_IDS)
+            {
+                updateAll = true;
+                uiUpdateIDs->clear();
+            }
+            else
+                uiUpdateIDs->put(objectID);
         }
-        else
-            uiUpdateIDs->put(objectID);
+        mutex->unlock();
     }
-    mutex->unlock();
 }
 
 String Session::getUIUpdateIDs()

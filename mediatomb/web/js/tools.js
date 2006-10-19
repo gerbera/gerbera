@@ -106,10 +106,17 @@ function errorCheck(xml, noredirect)
         {
             for (var i = 0; i < updateIDsArr.length; i++)
             {
-                var node = getTreeNode('d' + updateIDsArr[i]).getParent();
-                node.childrenHaveBeenFetched=false;
-                node.resetChildren();
-                fetchChildren(node, true);
+                var node = getTreeNode('d' + updateIDsArr[i]);
+                if (node)
+                {
+                    var parNode = node.getParent();
+                    if (parNode)
+                    {
+                        parNode.childrenHaveBeenFetched=false;
+                        parNode.resetChildren();
+                        fetchChildren(parNode, true);
+                    }
+                }
             }
         }
         else
