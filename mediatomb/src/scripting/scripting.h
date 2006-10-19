@@ -21,7 +21,12 @@
 #ifndef __SCRIPTING_H__
 #define __SCRIPTING_H__
 
-#define XP_UNIX 1
+#ifdef __APPLE__
+    #define XP_MAC 1
+#else
+    #define XP_UNIX 1
+#endif
+
 #include <jsapi.h>
 #include "common.h"
 #include "cds_objects.h"

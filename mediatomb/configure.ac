@@ -5,9 +5,18 @@ AC_CONFIG_AUX_DIR(configure_aux)
 AC_CONFIG_SRCDIR([src/common.h])
 AM_INIT_AUTOMAKE([1.9 -Wall])
 
+    AC_ARG_WITH(search, 
+    AC_HELP_STRING([--with-searchdir=DIR], [additionally search for packages in DIR (default: /opt/local)]),
+    [
+        SEARCH_DIR=$withval
+        AC_MSG_NOTICE([Will also search for packages in $SEARCH_DIR])
+    ],[SEARCH_DIR="/opt/local"]
+)
+
+
 ###############################################################################
 # The following block is derived from the configure.ac script from the 
-# libupnp-1.3.1 package, we just set the version number to 0.1.0
+# libupnp-1.3.1 package
 # (C) Copyright 2005-2006 RИmi Turboult <r3mi@users.sourceforge.net>
 upnpmaj=0
 upnpmin=4
@@ -72,13 +81,6 @@ CFLAGS_SAVE="$CFLAGS"
 CXXFLAGS_SAVE="$CXXFLAGS"
 LDFLAGS_SAVE="$LDFLAGS"
 
-if test $DARWIN_OS -eq 1 ; then
-    AC_ARG_WITH(opendarwin, 
-        AC_HELP_STRING([--with-opendarwin=DIR], [opendarwin installation directoryi (default: /opt/local)]),
-        [DARWIN_DIR=$withval],[DARWIN_DIR="/opt/local"]
-    )
-fi
-
 AC_CHECK_HEADER([iconv.h],
         [
             AC_CHECK_FUNCS([iconv],[],
@@ -121,15 +123,14 @@ AC_CHECK_HEADER([iconv.h],
 
                 ],
                 [
-                    if test $DARWIN_OS -eq 1 ; then
-                        AC_CHECK_HEADER( $DARWIN_DIR/include/iconv.h,
+                        AC_CHECK_HEADER( $SEARCH_DIR/include/iconv.h,
                             [
-                                ICONV_CXXFLAGS="-I$DARWIN_DIR/include/"
+                                ICONV_CXXFLAGS="-I$SEARCH_DIR/include/"
                                 AC_SUBST(ICONV_CXXFLAGS)
-                                LDFLAGS="-L$DARWIN_DIR/lib"
+                                LDFLAGS="-L$SEARCH_DIR/lib"
                                 AC_CHECK_FUNCS([iconv],
                                     [
-                                        ICONV_LIBS="-L$DARWIN_DIR/lib"
+                                        ICONV_LIBS="-L$SEARCH_DIR/lib"
                                         AC_SUBST(ICONV_LIBS)
                                     ],
                                     [
@@ -144,9 +145,6 @@ AC_CHECK_HEADER([iconv.h],
                             ],
                             [AC_MSG_ERROR(iconv library not found on your system)]
                         )
-                else
-                    AC_MSG_ERROR(iconv library not found on your system)
-                fi
                 ])
         ])
         
@@ -293,17 +291,13 @@ AC_ARG_ENABLE(sqlite3,
 if test "x$SQLITE3_OK" = xyes; then
     AC_CHECK_HEADER(sqlite3.h, [], 
             [
-                if test $DARWIN_OS -eq 1 ; then
-                    AC_CHECK_HEADER( $DARWIN_DIR/include/sqlite3.h, 
+                    AC_CHECK_HEADER($SEARCH_DIR/include/sqlite3.h, 
                         [
-                            SQLITE3_CXXFLAGS="-I$DARWIN_DIR/include/"
+                            SQLITE3_CXXFLAGS="-I$SEARCH_DIR/include/"
                             AC_SUBST(SQLITE3_CXXFLAGS)
                         ],
                         [SQLITE3_OK=missing]
                     )
-                else
-                    SQLITE3_OK=missing
-                fi
             ])
 fi
 
@@ -311,36 +305,27 @@ if test "x$SQLITE3_OK" = xyes; then
     AC_CHECK_LIB(sqlite3, sqlite3_open,
         [],
         [
-            if test $DARWIN_OS -eq 1 ; then
-                LDFLAGS="-L$DARWIN_DIR/lib -lsqlite3"
+                LDFLAGS="-L$SEARCH_DIR/lib -lsqlite3"
                 unset ac_cv_lib_sqlite3_sqlite3_open
                 AC_CHECK_LIB(sqlite3, sqlite3_open,
                     [
-                        SQLITE3_LIBS="-L$DARWIN_DIR/lib -lsqlite3"
+                        SQLITE3_LIBS="-L$SEARCH_DIR/lib -lsqlite3"
                         AC_SUBST(SQLITE3_LIBS)
                     ],
                     [SQLITE3_OK=missing]
                 )
-            else
-                SQLITE3_OK=missing
-            fi
         ]
     )
 fi
 if test "x$SQLITE3_OK" = xyes; then
     AC_PATH_PROG(sqlite3prog, sqlite3, no)
     if test "$sqlite3prog" = no; then
-        if test $DARWIN_OS -eq 1 ; then
             unset ac_cv_path_sqlite3prog
-            AC_PATH_PROG(sqlite3prog, sqlite3, no, $DARWIN_DIR/bin)
+            AC_PATH_PROG(sqlite3prog, sqlite3, no, $SEARCH_DIR/bin)
             if test "$sqlite3prog" = no; then
                 AC_MSG_ERROR([sqlite3 command line client not found])
                 SQLITE3_OK=missing
             fi
-        else
-            AC_MSG_ERROR([sqlite3 command line client not found])
-	        SQLITE3_OK=missing
-        fi
     fi
 fi
 if test "x$SQLITE3_OK" = xyes; then
@@ -368,12 +353,26 @@ AC_ARG_ENABLE(mysql,
                 MYSQL_OK=yes
               ]
 )
+
+MYSQL_PROG_FOUND=0
+
 if test "x$MYSQL_OK" = xyes; then
     AC_PATH_PROG(mysqlconfig, mysql_config, no)
     if test "x$mysqlconfig" = xno; then
-        MYSQL_OK=missing
-        AC_MSG_RESULT([mysql_config script not found])
+        unset ac_cv_path_mysqlconfig
+        
+        AC_PATH_PROG(mysqlconfig, mysql_config, no, $SEARCH_DIR/bin)
+        if test "x$mysqlconfig" = xno; then
+            MYSQL_OK=missing
+            AC_MSG_RESULT([mysql_config script not found])
+        else
+            MYSQL_PROG_FOUND=1
+        fi
     else
+        MYSQL_PROG_FOUND=1
+    fi
+
+    if test $MYSQL_PROG_FOUND -eq 1 ; then 
         AC_MSG_CHECKING(mysql_config version)
         MYSQL_VERSION_MAJOR=`${mysqlconfig} --version | sed 's/\([[0-9]]\)*\.\([[0-9]]*\)\.\([[0-9]]*\)$/\1/'`
         MYSQL_VERSION_MINOR=`${mysqlconfig} --version | sed 's/\([[0-9]]\)*\.\([[0-9]]*\)\.\([[0-9]]*\)$/\2/'`
@@ -398,14 +397,23 @@ if test "x$MYSQL_OK" = xyes; then
         fi
 
         CXXFLAGS="$CXXFLAGS $MYSQL_CFLAGS"
+        CFLAGS="$CFLAGS $MYSQL_CFLAGS"
+        CPPFLAGS="$CPPFLAGS $MYSQL_CFLAGS"
         LDFLAGS="$LDFLAGS $MYSQL_LIBS"
     fi
 fi
+
+dnl we are not doing an extra search in $SEARCH_DIR because the
+dnl mysql_config set the correct flags already, if not - something
+dnl is anyway wrong with the mysql installation
+dnl we will however accept custom user flags
 if test "x$MYSQL_OK" = xyes; then
     AC_CHECK_HEADER(mysql.h,
         [],
-        [AC_MSG_RESULT(mysql.h failed) MYSQL_OK=missing],
-        /* checking for mysql.h */
+        [
+            AC_MSG_RESULT(mysql.h failed)
+            MYSQL_OK=missing
+        ]
     )
 fi
 if test "x$MYSQL_OK" = xyes; then
@@ -426,7 +434,9 @@ fi
 AC_SUBST(MYSQL_LIBS)
 AC_SUBST(MYSQL_CFLAGS)
 
+CPPFLAGS="$CPPFLAGS_SAVE"
 CXXFLAGS="$CXXFLAGS_SAVE"
+CFLAGS="$CFLAGS_SAVE"
 LDFLAGS="$LDFLAGS_SAVE"
 
 #########  check if at least one database available
@@ -454,67 +464,67 @@ AC_ARG_ENABLE(libjs,
                 JS_OK=yes
               ]
 )
+
+XP_ADD=""
+
 if test "x$JS_OK" = xyes; then
+    if test $DARWIN_OS -eq 1 ; then
+        XP_ADD="-DXP_MAC"
+    else
+        XP_ADD="-DXP_UNIX $CPPFLAGS"
+    fi
+
+    CXXFLAGS="$CXXFLAGS $XP_ADD"
+    CPPFLAGS="$CPPFLAGS $XP_ADD"
+
     AC_CHECK_HEADER(jsapi.h,
         [],
         [
-            CXXFLAGS="-I/usr/include/smjs"
-            
-            AC_MSG_CHECKING([alternative libjs header location (debian)])
-            AC_COMPILE_IFELSE(
-                [AC_LANG_PROGRAM(
-                    [
-                        #define XP_UNIX 1
-                        #include <jsapi.h>
-                    ],
-                    [
-                        (void)JS_NewContext(0, 0);
-                    ]
-                )],
-                [
-                    JS_CXXFLAGS="-I/usr/include/smjs"
-                    AC_MSG_RESULT([found under /usr/include/smjs])
-                ],
-                [
-                    CXXFLAGS="-I/usr/include/js"
-            
-                    AC_MSG_CHECKING([alternative libjs header location (SuSE)])
-                    AC_COMPILE_IFELSE(
-                        [AC_LANG_PROGRAM(
-                            [
-                                #define XP_UNIX 1
-                                #include <jsapi.h>
-                            ],
-                            [
-                                (void)JS_NewContext(0, 0);
-                            ]
-                        )],
-                        [
-                            JS_CXXFLAGS="-I/usr/include/js"
-                            AC_MSG_RESULT([found under /usr/include/js])
-                        ],
-                        [
-                            JS_OK=missing
-                            AC_MSG_RESULT([not found, giving up])
-                        ]
-                    )
-                ]
-            )
-        ],
-        /* checking for jsapi.h */
-        #define XP_UNIX 1
-    )
+            for sm_path in /usr/include/js /usr/include/smjs /usr/local/include/js /usr/local/include/smjs \
+                    $SEARCH_DIR/include $SEARCH_DIR/include/js $SEARCH_DIR/include/smjs; do
+                if test "x$ac_cv_header_jsapi_h" != xyes ; then
+                    AC_MSG_CHECKING([checking alternative libjs header location: $sm_path])
+                    CXXFLAGS="$XP_ADD -I$sm_path"
+                    unset ac_cv_header_jsapi_h
+                    AC_CHECK_HEADER(jsapi.h,
+                                    [
+                                        JS_CXXFLAGS="-I$sm_path"
+                                        AC_MSG_RESULT([found in $sm_path])
+                                    ],
+                                    [])
+               fi
+            done
+        ])
+   
+        if test "x$ac_cv_header_jsapi_h" != xyes ; then
+                JS_OK=missing
+                AC_MSG_RESULT([not found, giving up])
+        fi
 fi
 if test "x$JS_OK" = xyes; then
     AC_CHECK_LIB(js, JS_NewObject,
         [],
         [
+            unset ac_cv_lib_js_JS_NewObject
             AC_CHECK_LIB(smjs, JS_NewObject,
                 [],
-                [JS_OK=missing]
-            )
-        ]
-    )
+                [
+                    LDFLAGS="-L$SEARCH_DIR/lib -ljs"
+                    unset ac_cv_lib_smjs_JS_NewObject
+                    AC_CHECK_LIB(js, JS_NewObject,
+                        [JS_LIBS="-L$SEARCH_DIR/lib -ljs"],
+                        [
+                            LDFLAGS="-L$SEARCH_DIR/lib -lsmjs"
+                            unset ac_cv_lib_js_JS_NewObject
+                            AC_CHECK_LIB(smjs, JS_NewObject,
+                                [JS_LIBS="-L$SEARCH_DIR/lib -lsmjs"],
+                                [
+                                    JS_OK=missing
+                                    AC_MSG_RESULT(libjs/libsmjs link failed, giving up)
+                                ])
+                        ])
+                ])
+       ]) 
 fi
 if test "x$JS_OK" = xyes; then
    AC_DEFINE([HAVE_JS], [1], [libjs presence])
@@ -525,8 +535,11 @@ else
 fi
 
 AC_SUBST(JS_CXXFLAGS)
+AC_SUBST(JS_LIBS)
 
 CXXFLAGS="$CXXFLAGS_SAVE"
+CPPFLAGS="$CPPFLAGS_SAVE"
+LDFLAGS="$LDFLAGS_SAVE"
 
 ########### libmagic
 
@@ -548,8 +561,14 @@ AC_ARG_ENABLE(libmagic,
 if test "x$MAGIC_OK" = xyes; then
     AC_CHECK_HEADER(magic.h,
         [],
-        [MAGIC_OK=missing],
-        /* checking for magic.h */
+        [
+            AC_CHECK_HEADER($SEARCH_DIR/include/magic.h,
+                [
+                    MAGIC_CXXFLAGS="-I$SEARCH_DIR/include"
+                ],
+                [MAGIC_OK=missing]
+            )
+        ]
     )
 fi
 
@@ -567,6 +586,7 @@ else
     fi
 fi
 
+AC_SUBST(MAGIC_CXXFLAGS)
 
 ######### taglib
 
