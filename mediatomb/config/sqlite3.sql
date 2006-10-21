@@ -20,7 +20,7 @@ CREATE TABLE "mt_cds_object" (
 INSERT INTO "mt_cds_object" VALUES(-1, NULL, -1, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, 1);
 INSERT INTO "mt_cds_object" VALUES(0, NULL, -1, 1, 'object.container', 'Root', NULL, NULL, NULL, NULL, NULL, 0, NULL, 1);
 INSERT INTO "mt_cds_object" VALUES(1, NULL, 0, 1, 'object.container', 'PC Directory', NULL, NULL, NULL, NULL, NULL, 0, NULL, 1);
-CREATE TABLE `mt_cds_active_item` (
+CREATE TABLE "mt_cds_active_item" (
   "id" integer primary key,
   "action" varchar(255) NOT NULL,
   "state" varchar(255) NOT NULL,
