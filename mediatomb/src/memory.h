@@ -1,4 +1,4 @@
-/*  object.h - this file is part of MediaTomb.
+/*  memory.h - this file is part of MediaTomb.
                                                                                 
     Copyright (C) 2005 Gena Batyan <bgeradz@deadlock.dhs.org>,
                        Sergey Bostandzhyan <jin@deadlock.dhs.org>
@@ -18,11 +18,36 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+
+
+
 #ifndef __MEMORY_H__
 #define __MEMORY_H__
 
 #include "autoconfig.h"
 #include <stdlib.h>
+
+#if (!defined(HAVE_MALLOC)) || (!defined(HAVE_REALLOC)) 
+    #include <sys/types.h>
+#else
+    #define HAVE_CALLOC
+#endif
+
+#ifndef HAVE_MALLOC
+    #undef malloc
+    #define malloc rpl_malloc
+#endif
+
+#ifndef HAVE_REALLOC
+    #undef realloc
+    #define realloc rpl_realloc
+#endif
+
+#ifndef HAVE_CALLOC
+    #undef calloc
+    #define calloc rpl_calloc
+#endif
+
 
 #ifndef MEMPROF
 
@@ -40,5 +65,16 @@ void FREE(void *ptr);
 
 #endif
 
+#ifndef HAVE_MALLOC
+void *rpl_malloc(size_t size);
+#endif
+
+#ifndef HAVE_REALLOC
+void *rpl_realloc(void *p, size_t size);
+#endif
+
+#ifndef HAVE_CALLOC
+void *rpl_calloc(size_t n, size_t s);
+#endif
 #endif // __MEMORY_H__
 

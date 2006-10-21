@@ -13,7 +13,6 @@ AM_INIT_AUTOMAKE([1.9 -Wall])
     ],[SEARCH_DIR="/opt/local"]
 )
 
-
 ###############################################################################
 # The following block is derived from the configure.ac script from the 
 # libupnp-1.3.1 package
@@ -184,6 +183,21 @@ AC_TYPE_PID_T
 AC_TYPE_SIZE_T
 AC_STRUCT_TM
 
+AC_ARG_ENABLE(rpl, 
+        AC_HELP_STRING([--disable-rpl], [disable redefinition of malloc to rpl_malloc and realloc to rpl_realloc. Use this if you are sure that you are compiling for the GNU C library (default: enabled)]),
+        [
+            RPL_MALLOC_EN=$enableval
+            if test "x$enableval" = xno; then
+                ac_cv_func_malloc_0_nonnull=yes
+                ac_cv_func_realloc_0_nonnull=yes
+                AC_MSG_NOTICE([Disabling redefinition of malloc to rpl_malloc])
+                AC_MSG_NOTICE([Disabling redefinition of realloc to rpl_realloc])
+                AC_MSG_WARN([Use this feature only if you are sure that you are building for GNU C!])
+            fi
+        ]
+)
+
+
 # Checks for library functions.
 AC_FUNC_ALLOCA
 AC_FUNC_CLOSEDIR_VOID
@@ -270,7 +284,6 @@ AC_DEFINE([UPNP_HAVE_WEBSERVER], [1], [Compile internal web server])
 
 AC_CHECK_LIB(pthread, pthread_mutex_lock,[], [AC_MSG_ERROR(required library function not found)])    
 
-   
 AC_CACHE_SAVE
 
 ######### SQLite3

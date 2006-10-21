@@ -1,4 +1,4 @@
-/*  object.h - this file is part of MediaTomb.
+/*  memory.cc - this file is part of MediaTomb.
                                                                                 
     Copyright (C) 2005 Gena Batyan <bgeradz@deadlock.dhs.org>,
                        Sergey Bostandzhyan <jin@deadlock.dhs.org>
@@ -18,6 +18,8 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+
+
 #ifdef HAVE_CONFIG_H
     #include "autoconfig.h"
 #endif
@@ -26,7 +28,72 @@
 
 #include "memory.h"
 
+#ifndef HAVE_MALLOC
+void *rpl_malloc(size_t size)
+{
+    if (size == 0)
+        ++size;
+
+    return malloc(size);
+}
+#endif
+
+#ifndef HAVE_REALLOC
+void *rpl_realloc(void *p, size_t size)
+{
+    if (size == 0)
+        ++size;
+    
+    return realloc(p, size);
+}
+#endif
+
+/* calloc() function that is glibc compatible.
+   This wrapper function is required at least on Tru64 UNIX 5.1.
+   Copyright (C) 2004, 2005 Free Software Foundation, Inc.
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software Foundation,
+   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
+
+/* written by Jim Meyering */
+
+
+/* Allocate and zero-fill an NxS-byte block of memory from the heap.
+   If N or S is zero, allocate and zero-fill a 1-byte block.  */
+
+#ifndef HAVE_CALLOC
+void *rpl_calloc(size_t n, size_t s)
+{
+    size_t bytes;
+
+    if (n == 0 || s == 0)
+        return calloc (1, 1);
+
+    /* Defend against buggy calloc implementations that mishandle
+       size_t overflow.  */
+    bytes = n * s;
+    if (bytes / s != n)
+        return NULL;
+
+    return calloc (n, s);
+}
+#endif
+
+
 #ifdef MEMPROF
+
+
 
 static int mallocCount = 0;
 static int freeCount = 0;
@@ -39,7 +106,6 @@ static void print_stats()
     printf("MAL:%d FRE:%d CUR:%d TOT:%d MAX:%d\n",
            mallocCount, freeCount, curAlloc, totalAlloc, maxAlloc);
 }
-
 
 void *MALLOC(size_t size)
 {
@@ -89,4 +155,5 @@ void FREE(void *ptr)
 }
 
 #endif
+
 
