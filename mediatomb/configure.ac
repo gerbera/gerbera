@@ -75,6 +75,18 @@ AC_CHECK_HEADERS([getopt.h],
 
 AC_CACHE_SAVE
 
+AC_ARG_ENABLE(static, 
+        AC_HELP_STRING([--enable-static], [build a static version of MediaTomb (default: no)]),
+        [
+            if test "x$enableval" = xyes; then
+                CFLAGS="$CFLAGS -static"
+                CXXFLAGS="$CXXFLAGS -static"
+                AC_MSG_NOTICE([Building a static executable.])
+            fi
+        ]
+)
+
+
 CPPFLAGS_SAVE="$CPPFLAGS"
 CFLAGS_SAVE="$CFLAGS"
 CXXFLAGS_SAVE="$CXXFLAGS"
@@ -186,7 +198,6 @@ AC_STRUCT_TM
 AC_ARG_ENABLE(rpl, 
         AC_HELP_STRING([--disable-rpl], [disable redefinition of malloc to rpl_malloc and realloc to rpl_realloc. Use this if you are sure that you are compiling for the GNU C library (default: enabled)]),
         [
-            RPL_MALLOC_EN=$enableval
             if test "x$enableval" = xno; then
                 ac_cv_func_malloc_0_nonnull=yes
                 ac_cv_func_realloc_0_nonnull=yes
@@ -219,10 +230,10 @@ AC_CHECK_FUNCS([gethostname gettimeofday localtime_r memmove memset],
 AC_CHECK_FUNCS([regcomp select strcasecmp strchr strdup strerror strncasecmp],
                [],
                [AC_MSG_ERROR(required library function not found)])
-AC_CHECK_FUNCS([strrchr strstr strtol strtoul uname pthread_mutex_lock], [],
+AC_CHECK_FUNCS([strrchr strstr strtol strtoul uname], [],
                [AC_MSG_ERROR(required library function not found)])
 
-AC_CHECK_FUNCS([sigaction sigprocmask pthread_self if_nameindex],[],
+AC_CHECK_FUNCS([sigaction sigprocmask if_nameindex],[],
                [AC_MSG_ERROR(required library function not found)]) 
  
 AC_CHECK_FUNCS([if_freenameindex ioctl],[],
@@ -284,6 +295,8 @@ AC_DEFINE([UPNP_HAVE_WEBSERVER], [1], [Compile internal web server])
 
 AC_CHECK_LIB(pthread, pthread_mutex_lock,[], [AC_MSG_ERROR(required library function not found)])    
 
+AC_CHECK_LIB(z,compress,[],[],[])
+    
 AC_CACHE_SAVE
 
 ######### SQLite3
@@ -587,9 +600,11 @@ if test "x$MAGIC_OK" = xyes; then
 fi
 
 if test "x$MAGIC_OK" = xyes; then
-    AC_CHECK_LIB(magic, magic_load,
-            [],
-            [MAGIC_OK=missing])
+     AC_CHECK_LIB(z,compress,
+         [AC_CHECK_LIB(magic,magic_load,[],[MAGIC_OK=missing],[-lz])],
+         [AC_CHECK_LIB(magic,magic_load,[],[MAGIC_OK=missing],[])],
+         []
+     )
 fi
 
 if test "x$MAGIC_OK" = xyes; then
