@@ -102,6 +102,8 @@ libmediatomb_a_SOURCES = \
 ../src/subscription_request.h \
 ../src/sync.cc \
 ../src/sync.h \
+../src/timer.cc \
+../src/timer.h \
 ../src/tools.cc \
 ../src/tools.h \
 ../src/update_manager.cc \

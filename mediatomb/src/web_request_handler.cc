@@ -75,6 +75,7 @@ void WebRequestHandler::check_request(bool checkLogin)
     {
         throw SessionException(_("not logged in"));
     }
+    session->access();
     String uiUpdate = param(_("get_update_ids"));
     if ((string_ok(uiUpdate) && uiUpdate == _("1")))
         addUpdateIDs(session, root);

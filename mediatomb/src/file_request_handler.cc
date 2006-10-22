@@ -105,8 +105,8 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
         if(strncmp(action.c_str(), "http://", 7))
         {
 #ifdef LOG_TOMBDEBUG
-            struct timeval before;
-            getTimeval(&before);
+            struct timespec before;
+            getTimespecNow(&before);
 #endif
             output = run_process(action, _("run"), input);
 #ifdef LOG_TOMBDEBUG

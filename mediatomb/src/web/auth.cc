@@ -23,7 +23,6 @@
 #endif
 
 #include <sys/time.h>
-#include "common.h"
 #include "pages.h"
 #include "tools.h"
 #include "session_manager.h"
@@ -31,7 +30,7 @@
 using namespace zmm;
 using namespace mxml;
 
-#define LOGIN_TIMEOUT 10L // in seconds
+#define LOGIN_TIMEOUT 10 // in seconds
 
 class LoginException : public zmm::Exception
 {
@@ -88,7 +87,7 @@ void web::auth::process()
     else if (param(_("auth")) == nil)
     {
         Ref<SessionManager> sessionManager = SessionManager::getInstance();
-        Ref<Session> session = sessionManager->createSession(DEFAULT_SESSION_TIMEOUT);
+        Ref<Session> session = sessionManager->createSession();
         
         // sending token
         String token = generate_token();

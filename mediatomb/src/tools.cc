@@ -596,62 +596,59 @@ String intArrayToCSV(int *array, int size)
     return buf->toString(1);
 }
 
-long getDeltaMillis(struct timeval *first)
+void getTimespecNow(struct timespec *ts)
 {
-    struct timeval now;
-    getTimeval(&now);
+#ifdef HAVE_RT
+    clock_gettime(CLOCK_REALTIME, ts);
+#else
+    
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    ts->tv_sec = tv.tv_sec;
+    ts->tv_nsec = tv.tv_usec * 1000;
+#endif
+}
+
+long getDeltaMillis(struct timespec *first)
+{
+    struct timespec now;
+    getTimespecNow(&now);
     return getDeltaMillis(first, &now);
 }
 
-long getDeltaMillis(struct timeval *first, struct timeval *second)
+long getDeltaMillis(struct timespec *first, struct timespec *second)
 {
-    return (second->tv_sec - first->tv_sec) * 1000L + (second->tv_usec - first->tv_usec) / 1000L;
+    return (second->tv_sec - first->tv_sec) * 1000 + (second->tv_nsec - first->tv_nsec) / 1000000;
 }
 
-void getTimespecAfterMillis(long delta, struct timespec *ret, struct timeval *start)
+void getTimespecAfterMillis(long delta, struct timespec *ret, struct timespec *start)
 {
-    struct timeval now;
+    struct timespec now;
     if (start == NULL)
     {
-        getTimeval(&now);
+        getTimespecNow(&now);
         start = &now;
     }
     ret->tv_sec = start->tv_sec + delta / 1000;
-    ret->tv_nsec = (start->tv_usec + (delta % 1000) * 1000) * 1000;
+    ret->tv_nsec = (start->tv_nsec + (delta % 1000) * 1000000);
     if (ret->tv_nsec >= 1000000000) // >= 1 second
     {
         ret->tv_sec ++;
         ret->tv_nsec -= 1000000000;
     }
     
-    log_debug("timespec: sec: %ld, nsec: %ld\n", ret->tv_sec, ret->tv_nsec);
+    //log_debug("timespec: sec: %ld, nsec: %ld\n", ret->tv_sec, ret->tv_nsec);
 }
 
-
-/*
-unsigned long long getMillis(unsigned long long startMillis)
+int compareTimespecs(struct timespec *a,  struct timespec *b)
 {
-    struct timeval now;
-    gettimeofday(&now, NULL);
-    
-    long seconds = now.tv_sec;
-    long millis = now.tv_usec / 1000L;
-    log_debug("getMillis: sec: %ld->%ld, usec: %ld->millis: %ld, ret: %ld\n", now.tv_sec, seconds, now.tv_usec, millis, (seconds * 1000L + millis) - startMillis);
-    return (seconds * 1000L + millis) - startMillis;
-    / *
-    struct timespec spec;
-    clock_gettime(CLOCK_REALTIME, &spec);
-    log_debug("getMillis: sec: %ld, nsec: %ld\n", spec.tv_sec, spec.tv_nsec);
-    return (spec.tv_sec * 1000L + spec.tv_nsec / 1000000L) - startMillis;
-    * /
+    if (a->tv_sec < b->tv_sec)
+        return 1;
+    if (a->tv_sec > b->tv_sec)
+        return -1;
+    if (a->tv_nsec < b->tv_nsec)
+        return 1;
+    if (a->tv_nsec > b->tv_nsec)
+        return -1;
+    return 0;
 }
-
-void millisToTimespec(long long millis, struct timespec *spec)
-{
-    spec->tv_sec = millis / 1000L;
-    spec->tv_nsec = (millis % 1000L) * 1000000L;
-    
-    log_debug("millisToTimespec: millis: %ld -> sec: %ld, nsec: %ld\n", millis, millis/1000L, (millis % 1000L) * 1000000L);
-}
-*/
-

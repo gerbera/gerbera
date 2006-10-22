@@ -51,6 +51,7 @@ UpdateManager::UpdateManager() : Object()
     shutdownFlag = false;
     flushPolicy = FLUSH_SPEC;
     lastContainerChanged = INVALID_OBJECT_ID;
+    pthread_cond_init(&updateCond, NULL);
 }
 
 Mutex UpdateManager::mutex = Mutex();
@@ -83,22 +84,17 @@ Ref<UpdateManager> UpdateManager::getInstance()
 UpdateManager::~UpdateManager()
 {
     pthread_cond_destroy(&updateCond);
-} 
+}
 
 void UpdateManager::init()
 {
-    int ret;
-    
-    ret = pthread_cond_init(&updateCond, NULL);
-    
     /*
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
     */
     
-    
-    ret = pthread_create(
+    pthread_create(
         &updateThread,
         NULL, // &attr, // attr
         UpdateManager::staticThreadProc,
@@ -169,8 +165,8 @@ void UpdateManager::containerChanged(int objectID, int flushPolicy)
 
 void UpdateManager::threadProc()
 {
-    struct timeval lastUpdate;
-    getTimeval(&lastUpdate);
+    struct timespec lastUpdate;
+    getTimespecNow(&lastUpdate);
     
     LOCK();
     while (! shutdownFlag)
@@ -178,8 +174,8 @@ void UpdateManager::threadProc()
         if (haveUpdates())
         {
             long sleepMillis;
-            struct timeval now;
-            getTimeval(&now);
+            struct timespec now;
+            getTimespecNow(&now);
             long timeDiff = getDeltaMillis(&lastUpdate, &now);
             switch (flushPolicy)
             {
@@ -196,9 +192,6 @@ void UpdateManager::threadProc()
                 struct timespec timeout;
                 getTimespecAfterMillis(sleepMillis, &timeout, &now);
                 log_debug("threadProc: sleeping for %ld millis\n", sleepMillis);
-                log_debug("timeDiff: %ld timeout: %ld - %ld\n", timeDiff, timeout.tv_sec, timeout.tv_nsec);
-                log_debug("lastUpdate: %ld %ld\n", lastUpdate.tv_sec, lastUpdate.tv_usec);
-                log_debug("now: %ld %ld\n", now.tv_sec, now.tv_usec);
                 
                 int ret = pthread_cond_timedwait(&updateCond, mutex.getMutex(), &timeout);
                 
@@ -207,6 +200,7 @@ void UpdateManager::threadProc()
                     if (ret != 0 && ret != ETIMEDOUT)
                     {
                         log_debug("pthread_cond_timedwait returned errorcode %d\n", ret);
+                        UNLOCK();
                         throw _Exception(_("pthread_cond_timedwait returned errorcode ") + ret);
                     }
                     if (ret == ETIMEDOUT)
@@ -231,7 +225,7 @@ void UpdateManager::threadProc()
                 
                 UNLOCK(); // we don't need to hold the lock during the sending of the updates
                 ContentDirectoryService::getInstance()->subscription_update(updateString);
-                getTimeval(&lastUpdate);
+                getTimespecNow(&lastUpdate);
                 log_debug("updates sent.\n");
                 LOCK();
             }

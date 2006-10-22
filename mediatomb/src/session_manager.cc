@@ -27,6 +27,7 @@
 #include "config_manager.h"
 #include "tools.h"
 #include "tools.h"
+#include "timer.h"
 
 #define UI_UPDATE_ID_HASH_SIZE  61
 #define MAX_UI_UPDATE_IDS       10
@@ -46,6 +47,7 @@ Ref<SessionManager> SessionManager::getInstance()
             try
             {
                 inst = Ref<SessionManager>(new SessionManager());
+                Timer::getInstance()->addTimerSubscriber(RefCast(inst, TimerSubscriber), SESSION_TIMEOUT_CHECK_INTERVAL);
             }
             catch (Exception e)
             {
@@ -62,10 +64,10 @@ Session::Session(long timeout) : Dictionary_r()
 {
     this->timeout = timeout;
     loggedIn = false;
-    last_access = 0; /// \todo set to right value
     sessionID = nil;
     uiUpdateIDs = Ref<DBRHash<int> >(new DBRHash<int>(UI_UPDATE_ID_HASH_SIZE, INVALID_OBJECT_ID, INVALID_OBJECT_ID_2));
     updateAll = false;
+    access();
 }
 
 void Session::containerChangedUI(int objectID)
@@ -109,7 +111,7 @@ String Session::getUIUpdateIDs()
 
 Mutex SessionManager::mutex = new Mutex();
 
-SessionManager::SessionManager() : Object()
+SessionManager::SessionManager() : TimerSubscriber()
 {
     Ref<ConfigManager> configManager = ConfigManager::getInstance();
     Ref<Element> accountsEl = configManager->getElement(_("/server/ui/accounts"));
@@ -125,25 +127,21 @@ SessionManager::SessionManager() : Object()
     sessions = Ref<Array<Session> >(new Array<Session>());
 }
 
-Ref<Session> SessionManager::createSession(long timeout, String sessionID)
+Ref<Session> SessionManager::createSession(long timeout)
 {
     Ref<Session> newSession(new Session(timeout));
     mutex.lock();
-    if (sessionID == nil)
+    
+    int count=0;
+    String sessionID;
+    do
     {
-        int count=0;
-        do
-        {
-            sessionID = generate_random_id();
-            if (count++ > 100)
-                throw _Exception(_("There seems to be something wrong with the random numbers. I tried to get a unique id 100 times and failed."));
-        }
-        while(getSession(sessionID) != nil); // for the rare case, where we get a random id, that is already taken
+        sessionID = generate_random_id();
+        if (count++ > 100)
+            throw _Exception(_("There seems to be something wrong with the random numbers. I tried to get a unique id 100 times and failed."));
     }
-    else if (getSession(sessionID) != nil)
-    {
-        throw _Exception(_("Session id is already taken!"));
-    }
+    while(getSession(sessionID) != nil); // for the rare case, where we get a random id, that is already taken
+    
     newSession->setID(sessionID);
     sessions->append(newSession);
     mutex.unlock();
@@ -175,6 +173,7 @@ void SessionManager::removeSession(String sessionID)
         if (s->getID() == sessionID)
         {
             sessions->remove(i);
+            i--; // to not skip a session. the removed id is now taken by another session
             mutex.unlock();
             return;
         }
@@ -203,3 +202,21 @@ void SessionManager::containerChangedUI(int objectID)
     mutex.unlock();
 }
 
+void SessionManager::timerNotify()
+{
+    log_debug("notified... %d sessions.\n", sessions->size());
+    mutex.lock();
+    struct timespec now;
+    getTimespecNow(&now);
+    for (int i = 0; i < sessions->size(); i++)
+    {
+        Ref<Session> session = sessions->get(i);
+        if (getDeltaMillis(session->getLastAccessTime(), &now) > 1000 * session->getTimeout())
+        {
+            log_debug("session timeout: %s - diff: %ld\n", session->getID().c_str(), getDeltaMillis(session->getLastAccessTime(), &now));
+            sessions->remove(i);
+            i--; // to not skip a session. the removed id is now taken by another session
+        }
+    }
+    mutex.unlock();
+}

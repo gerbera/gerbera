@@ -26,6 +26,7 @@
 #include "dictionary.h"
 #include "sync.h"
 #include "hash.h"
+#include "timer.h"
 
 /// \brief One UI session.
 /// 
@@ -42,13 +43,13 @@ public:
     /// The session is created with a given timeout, each access to the session updates the
     /// last_access value, if last access lies further back than the timeout - the session will
     /// be deleted (will time out)
-    /// \todo timeouts and session purging not yet implemented
     Session(long timeout);
     
     /// \brief Returns the time of last access to the session.
-    /// \return time in milliseconds
-    /// \todo what time is it? from epoch? not yet implemented
-    inline long getLastAccessTime() { return last_access; }
+    /// \return pointer to a timespec
+    inline struct timespec * getLastAccessTime() { return &last_access; }
+    
+    inline long getTimeout() { return timeout; }
     
     /// \brief Returns the session identifier.
     inline zmm::String getID() { return sessionID; }
@@ -62,6 +63,8 @@ public:
     
     inline void logOut() { loggedIn = false; }
     
+    inline void access() { getTimespecNow(&last_access); }
+        
     /// \brief Returns the updateIDs, collected for the sessions,
     /// and flushes the storage for the ids
     /// \return the container ids to be updated as String (comma separated)
@@ -82,7 +85,7 @@ protected:
     long timeout;
     
     /// \brief time of last access to the session, returned by getLastAccessTime()
-    long last_access;
+    struct timespec last_access;
 
     /// \brief arbitrary but unique string representing the ID of the session (returned by getID())
     zmm::String sessionID;
@@ -93,7 +96,7 @@ protected:
 };
 
 /// \brief This class offers ways to create new sessoins, stores all available sessions and provides access to them.
-class SessionManager : public zmm::Object
+class SessionManager : public TimerSubscriber
 {
 protected:
     /// \brief This array is holding available sessions.
@@ -117,7 +120,7 @@ public:
 
     /// \brief Creates a Session with a given timeout.
     /// \param timeout Session timeout in milliseconds.
-    zmm::Ref<Session> createSession(long timeout, zmm::String sessionID = nil);
+    zmm::Ref<Session> createSession(long timeout = DEFAULT_SESSION_TIMEOUT);
 
     /// \brief Returns the instance to a Session with a given sessionID
     /// \param ID of the Session.
@@ -134,6 +137,8 @@ public:
     /// notifies all active sessions.
     /// \param objectID
     void containerChangedUI(int objectID);
+    
+    virtual void timerNotify();
 };
 
 #endif //  __SESSION_MANAGER_H__

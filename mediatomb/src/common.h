@@ -27,11 +27,10 @@
 #include "logger.h"
 #include "zmmf/zmmf.h"
 #include "exceptions.h"
-/// \todo implement session timeouts!!!
-#define DEFAULT_SESSION_TIMEOUT         123456
 
-/// \brief Number of Mysql threads.
-//#define MYSQL_STORAGE_START_THREADS     1
+/// \brief session timeout in seconds
+#define DEFAULT_SESSION_TIMEOUT         (60 * 30)
+#define SESSION_TIMEOUT_CHECK_INTERVAL  (30 * 30)
 
 // ERROR CODES                                                                                 
 /// \brief UPnP specific error code.

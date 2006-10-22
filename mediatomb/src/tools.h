@@ -184,14 +184,15 @@ unsigned int stringHash(zmm::String str);
 
 zmm::String intArrayToCSV(int *array, int size);
 
-inline void getTimeval(struct timeval *now) { gettimeofday(now, NULL); }
+//inline void getTimeval(struct timeval *now) { gettimeofday(now, NULL); }
 
-long getDeltaMillis(struct timeval *first);
-long getDeltaMillis(struct timeval *first, struct timeval *second);
+void getTimespecNow(struct timespec *ts);
 
-void getTimespecAfterMillis(long delta, struct timespec *ret, struct timeval *start);
+long getDeltaMillis(struct timespec *first);
+long getDeltaMillis(struct timespec *first, struct timespec *second);
 
-
+void getTimespecAfterMillis(long delta, struct timespec *ret, struct timespec *start = NULL);
+int compareTimespecs(struct timespec *a,  struct timespec *b);
 /*
 /// \bried Returns the current milliseconds since the "epoch" or since startMillis (which are counted since the epoch).
 long getMillis(long startMillis = 0);
