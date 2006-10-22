@@ -102,8 +102,9 @@ ContentManager::ContentManager() : Object()
         last_modified = 0;
     }
     acct = Ref<CMAccounting>(new CMAccounting());    
-    taskQueue = Ref<ObjectQueue<CMTask> >(new ObjectQueue<CMTask>(CM_INITIAL_QUEUE_SIZE));    
-
+    taskQueue1 = Ref<ObjectQueue<CMTask> >(new ObjectQueue<CMTask>(CM_INITIAL_QUEUE_SIZE));
+    taskQueue2 = Ref<ObjectQueue<CMTask> >(new ObjectQueue<CMTask>(CM_INITIAL_QUEUE_SIZE));    
+    
     Ref<ConfigManager> cm = ConfigManager::getInstance();
     Ref<Element> mapEl;  
     
@@ -1104,7 +1105,7 @@ void ContentManager::threadProc()
     {
         lock();
         currentTask = nil;
-        if((task = taskQueue->dequeue()) == nil)
+        if(((task = taskQueue1->dequeue()) == nil) && ((task = taskQueue2->dequeue()) == nil))
         {
             /* if nothing to do, sleep until awakened */
             pthread_cond_wait(&taskCond, &taskMutex);
@@ -1149,50 +1150,46 @@ void ContentManager::signal()
     pthread_cond_signal(&taskCond);
 }
 
-int ContentManager::addTask(zmm::Ref<CMTask> task)
+void ContentManager::addTask(zmm::Ref<CMTask> task, bool lowPriority)
 {
-    int ret = false;
     lock();
-    int size = taskQueue->size();
-    if (size >= 1)
-        ret = true;
-    taskQueue->enqueue(task);
+    if (! lowPriority)
+        taskQueue1->enqueue(task);
+    else
+        taskQueue2->enqueue(task);
     signal();
     unlock();
-    return ret;
 }
 
 /* sync / async methods */
-int ContentManager::loadAccounting(bool async)
+void ContentManager::loadAccounting(bool async)
 {
     if (async)
     {
         Ref<CMTask> task(new CMLoadAccountingTask());
         task->setDescription(_("Initializing statistics"));
-        return addTask(task);
+        addTask(task);
     }
     else
     {
         _loadAccounting();
-        return false;
     }
 }
-int ContentManager::addFile(zmm::String path, bool recursive, bool async, bool hidden)
+void ContentManager::addFile(zmm::String path, bool recursive, bool async, bool hidden)
 {
     if (async)
     {
         Ref<CMTask> task(new CMAddFileTask(path, recursive, hidden));
         task->setDescription(_("Adding ") + path);
-        return addTask(task);
+        addTask(task);
     }
     else
     {
         _addFile(path, recursive, hidden);
-        return false;
     }
 }
 
-int ContentManager::removeObject(int objectID, bool async, bool all)
+void ContentManager::removeObject(int objectID, bool async, bool all)
 {
     if (async)
     {
@@ -1209,28 +1206,26 @@ int ContentManager::removeObject(int objectID, bool async, bool all)
         Ref<CMTask> task(new CMRemoveObjectTask(objectID, all));
         //task->setDescription(desc->toString());
         task->setDescription(_("description missing!!!!!!!!!!!"));
-        return addTask(task);
+        addTask(task);
     }
     else
     {
         _removeObject(objectID, all);
-        return false;
     }
 }
     
-int ContentManager::rescanDirectory(int objectID, scan_level_t scanLevel, bool async)
+void ContentManager::rescanDirectory(int objectID, scan_level_t scanLevel, bool async)
 {
     if (async)
     {
         // building container path for the description
         Ref<CMTask> task(new CMRescanDirectoryTask(objectID, scanLevel));
         task->setDescription(_("Rescan TesT"));
-        return addTask(task);
+        addTask(task, true); // adding with low priority
     }
     else
     {
         _rescanDirectory(objectID, scanLevel);
-        return false;
     }
 }
 

@@ -142,10 +142,10 @@ public:
     /* the functions below return true if the task has been enqueued */
     
     /* sync/async methods */
-    int loadAccounting(bool async=true);
-    int addFile(zmm::String path, bool recursive=true, bool async=true, bool hidden=false);
-    int removeObject(int objectID, bool async=true, bool all=false);
-    int rescanDirectory(int objectID, scan_level_t scanLevel = BasicScan, bool async=true);
+    void loadAccounting(bool async=true);
+    void addFile(zmm::String path, bool recursive=true, bool async=true, bool hidden=false);
+    void removeObject(int objectID, bool async=true, bool all=false);
+    void rescanDirectory(int objectID, scan_level_t scanLevel = BasicScan, bool async=true);
     
     /// \brief Updates an object in the database using the given parameters.
     /// \param objectID ID of the object to update
@@ -235,8 +235,7 @@ protected:
     static void *staticThreadProc(void *arg);
     void threadProc();
     
-    /// \brief returns true if task is queued, false otherwise
-    int addTask(zmm::Ref<CMTask> task);
+    void addTask(zmm::Ref<CMTask> task, bool lowPriority = false);
 
     zmm::Ref<CMAccounting> acct;
     
@@ -246,7 +245,8 @@ protected:
 
     bool shutdownFlag;
     
-    zmm::Ref<zmm::ObjectQueue<CMTask> > taskQueue;
+    zmm::Ref<zmm::ObjectQueue<CMTask> > taskQueue1; // priority 1
+    zmm::Ref<zmm::ObjectQueue<CMTask> > taskQueue2; // priority 2
     zmm::Ref<CMTask> currentTask;
     
     friend void CMAddFileTask::run();
