@@ -21,6 +21,8 @@
 ///\file sqlite3_storage.h
 ///\brief Definitions of the Sqlite3Storage, Sqlite3Result, Sqlite3Row and SLTask classes.
 
+#ifdef HAVE_SQLITE3
+
 #ifndef __SQLITE3_STORAGE_H__
 #define __SQLITE3_STORAGE_H__
 
@@ -38,9 +40,7 @@ class SLTask : public zmm::Object
 {
 public:
     /// \brief Instantiate a task
-    /// \param mutex the pthread_mutex for notifying the creator of the task, that the task is finished
-    /// \param cond the pthread_cond for notifying the creator of the task, that the task is finished
-    SLTask(pthread_mutex_t* mutex, pthread_cond_t* cond);
+    SLTask();
     
     /// \brief run the sqlite3 task
     /// \param sl The instance of Sqlite3Storage to do the queries with.
@@ -55,6 +55,8 @@ public:
     
     void sendSignal(zmm::String error);
     
+    void waitForTask();
+    
     zmm::String getError() { return error; }
     
 protected:
@@ -62,10 +64,20 @@ protected:
     ///
     /// The value is set by the constructor to true and then to false be sendSignal()
     bool running;
-    pthread_cond_t* cond;
-    pthread_mutex_t* mutex;
+    pthread_cond_t cond;
+    pthread_mutex_t mutex;
     zmm::String error;
 };
+
+/// \brief A task for the sqlite3 thread to do the initial checks.
+class SLInitTask : public SLTask
+{
+public:
+    /// \brief Constructor for the sqlite3 init task
+    SLInitTask() : SLTask() {}
+    virtual void run(sqlite3 *db, Sqlite3Storage *sl);
+};
+
 
 /// \brief A task for the sqlite3 thread to do a SQL select.
 class SLSelectTask : public SLTask
@@ -73,15 +85,14 @@ class SLSelectTask : public SLTask
 public:
     /// \brief Constructor for the sqlite3 select task
     /// \param query The SQL query string
-    /// \param mutex see SLTask::SLTask()
-    /// \param cond see SLTask::SLTask()
-    SLSelectTask(zmm::String query, pthread_mutex_t* mutex, pthread_cond_t* cond);
+    SLSelectTask(zmm::String query);
     virtual void run(sqlite3 *db, Sqlite3Storage *sl);
-    /// \brief The Sqlite3Result
-    zmm::Ref<Sqlite3Result> pres;
+    inline zmm::Ref<SQLResult> getResult() { return RefCast(pres, SQLResult); };
 protected:
     /// \brief The SQL query string
     zmm::String query;
+    /// \brief The Sqlite3Result
+    zmm::Ref<Sqlite3Result> pres;
 };
 
 /// \brief A task for the sqlite3 thread to do a SQL exec.
@@ -90,16 +101,14 @@ class SLExecTask : public SLTask
 public:
     /// \brief Constructor for the sqlite3 exec task
     /// \param query The SQL query string
-    /// \param mutex see SLTask::SLTask()
-    /// \param cond see SLTask::SLTask()
-    SLExecTask(zmm::String query, bool getLastInsertId, pthread_mutex_t* mutex, pthread_cond_t* cond);
+    SLExecTask(zmm::String query, bool getLastInsertId);
     virtual void run(sqlite3 *db, Sqlite3Storage *sl);
-    int lastInsertId;
+    inline int getLastInsertId() { return lastInsertId; }
 protected:
     /// \brief The SQL query string
     zmm::String query;
-    
-    bool getLastInsertId;
+    int lastInsertId;
+    bool getLastInsertIdFlag;
 };
 
 /// \brief Represents a row of a result of a sqlite3 select
@@ -142,7 +151,7 @@ class Sqlite3Storage : public SQLStorage
 {
 public:
     Sqlite3Storage();
-    virtual ~Sqlite3Storage();
+    virtual ~Sqlite3Storage() {}
     
     virtual void init();
     virtual zmm::String quote(zmm::String str);
@@ -151,6 +160,8 @@ public:
     virtual void shutdown();
     virtual void storeInternalSetting(zmm::String key, zmm::String value);
 protected:
+    zmm::String startupError;
+    
     void reportError(zmm::String query, sqlite3 *db);
     
     static void *staticThreadProc(void *arg);
@@ -169,18 +180,16 @@ protected:
     zmm::Ref<zmm::ObjectQueue<SLTask> > taskQueue;
     bool taskQueueOpen;
     
-    void mutexCondInit(pthread_mutex_t *mutex, pthread_cond_t *cond);
-    void waitForTask(zmm::Ref<SLTask> task, pthread_mutex_t *mutex, pthread_cond_t *cond);
-    
     void lock();
     void unlock();
     void signal();
     
     friend class SLSelectTask;
     friend class SLExecTask;
-    friend class SLGetLastInsertIdTask;
+    friend class SLInitTask;
 };
 
 
 #endif // __SQLITE3_STORAGE_H__
 
+#endif // HAVE_SQLITE3

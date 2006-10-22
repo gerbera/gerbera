@@ -45,6 +45,7 @@ public:
 protected:
     void init();
     static zmm::Ref<UpdateManager> instance;
+    pthread_t updateThread;
     static Mutex mutex;
     pthread_cond_t updateCond;
     

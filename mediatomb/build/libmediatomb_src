@@ -88,8 +88,10 @@ libmediatomb_a_SOURCES = \
 ../src/session_manager.h \
 ../src/storage.cc \
 ../src/storage.h \
+../src/storage/mysql/mysql_create_sql.h \
 ../src/storage/mysql/mysql_storage.cc \
 ../src/storage/mysql/mysql_storage.h \
+../src/storage/sqlite3/sqlite3_create_sql.h \
 ../src/storage/sqlite3/sqlite3_storage.cc \
 ../src/storage/sqlite3/sqlite3_storage.h \
 ../src/storage/sql_storage.cc \

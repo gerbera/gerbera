@@ -91,20 +91,21 @@ void UpdateManager::init()
     
     ret = pthread_cond_init(&updateCond, NULL);
     
+    /*
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    */
     
-    pthread_t updateThread;
     
     ret = pthread_create(
         &updateThread,
-        &attr, // attr
+        NULL, // &attr, // attr
         UpdateManager::staticThreadProc,
         this
     );
     
-    pthread_attr_destroy(&attr);
+    //pthread_attr_destroy(&attr);
 }
 
 void UpdateManager::shutdown()
@@ -119,6 +120,9 @@ void UpdateManager::shutdown()
     //log_debug("signalled, unlocking\n");
     UNLOCK();
     //log_debug("unlocked\n");
+    if (updateThread)
+        pthread_join(updateThread, NULL);
+    updateThread = 0;
 }
 
 void UpdateManager::containerChanged(int objectID, int flushPolicy)

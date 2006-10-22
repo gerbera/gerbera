@@ -139,15 +139,16 @@ bool check_path(String path, bool needDir)
     return true;
 }
 
-void check_path_ex(String path, bool needDir)
+void check_path_ex(String path, bool needDir, bool existenceUnneeded)
 {
     int ret = 0;
     struct stat statbuf;
 
     ret = stat(path.c_str(), &statbuf);
-    if (ret != 0)
-        throw _Exception(path + " : " + strerror(errno));
-
+    log_debug("path: %s, ret: %d; errno: %d\n", path.c_str(), ret, errno);
+    if (ret != 0 && (! existenceUnneeded || existenceUnneeded && errno != ENOENT))
+        throw _Exception(path + " : " + errno + (int)existenceUnneeded+ " x " + strerror(errno));
+    
     if (needDir && (!S_ISDIR(statbuf.st_mode)))
         throw _Exception(_("Not a directory: ") + path);
     

@@ -25,13 +25,12 @@
 #include "storage.h"
 #include "config_manager.h"
 
-#ifdef HAVE_SQLITE3
-#include "storage/sqlite3/sqlite3_storage.h"
+#if ! defined(HAVE_MYSQL) && ! defined(HAVE_SQLITE3)
+    #error "need at least one storage (mysql or sqlite3)"
 #endif
 
-#ifdef HAVE_MYSQL
+#include "storage/sqlite3/sqlite3_storage.h"
 #include "storage/mysql/mysql_storage.h"
-#endif
 
 #include "tools.h"
 

@@ -125,7 +125,7 @@ protected:
     void validate(zmm::String serverhome);
     void prepare_udn();
     zmm::String construct_path(zmm::String path);
-    void prepare_path(zmm::String path, bool needDir = false);
+    void prepare_path(zmm::String path, bool needDir = false, bool existenceUnneeded = false);
 };
 
 #endif // __CONFIG_MANAGER_H__

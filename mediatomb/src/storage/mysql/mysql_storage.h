@@ -18,6 +18,8 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#ifdef HAVE_MYSQL
+
 #ifndef __MYSQL_STORAGE_H__
 #define __MYSQL_STORAGE_H__
 
@@ -150,6 +152,8 @@ protected:
     
     MYSQL db;
     
+    bool mysql_connection;
+    
     zmm::String getError(MYSQL *db);
     
     zmm::Ref<Mutex> mutex;
@@ -171,7 +175,7 @@ protected:
     
     //int addTask(zmm::Ref<MSTask> task);
     
-    /// \brief is set to true by shutdown() if the mysql thread should terminate
+    /// \brief is set to true by shutdown() if the mysql connection is already closed
     //bool shutdownFlag;
     
     pthread_key_t mysql_init_key;
@@ -191,3 +195,4 @@ protected:
 
 #endif // __MYSQL_STORAGE_H__
 
+#endif // HAVE_MYSQL

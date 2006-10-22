@@ -264,7 +264,7 @@ void ConfigManager::validate(String serverhome)
 #ifdef HAVE_SQLITE3	    
         if (dbDriver == "sqlite3")
         {
-            prepare_path(_("/server/storage/database-file"));
+            prepare_path(_("/server/storage/database-file"), false, true);
             break;
         }
 #endif
@@ -423,7 +423,7 @@ void ConfigManager::prepare_udn()
         save();
 }
 
-void ConfigManager::prepare_path(String xpath, bool needDir)
+void ConfigManager::prepare_path(String xpath, bool needDir, bool existenceUnneeded)
 {
     String temp;
 
@@ -431,7 +431,7 @@ void ConfigManager::prepare_path(String xpath, bool needDir)
     
     temp = construct_path(temp);
 
-    check_path_ex(temp, needDir);
+    check_path_ex(temp, needDir, existenceUnneeded);
 
     Ref<Element> script = getElement(xpath);
     if (script != nil)

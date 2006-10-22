@@ -28,8 +28,8 @@
 #include "tools.h"
 #include "tools.h"
 
-#define UI_UPDATE_ID_HASH_SIZE  331
-#define MAX_UI_UPDATE_IDS       100
+#define UI_UPDATE_ID_HASH_SIZE  61
+#define MAX_UI_UPDATE_IDS       10
 
 using namespace zmm;
 using namespace mxml;
