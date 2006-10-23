@@ -222,7 +222,7 @@ void Element::print(Ref<StringBuffer> buf, int indent)
 String Element::escape(String str)
 {
     Ref<StringBuffer> buf(new StringBuffer(str.length()));
-    char *ptr = str.c_str();
+    unsigned char *ptr = (unsigned char *)str.c_str();
     while (*ptr)
     {
         switch (*ptr)
@@ -231,7 +231,7 @@ String Element::escape(String str)
             case '>' : *buf << "&gt;"; break;
             case '&' : *buf << "&amp;"; break;
                        // handle control codes
-            default  : if (((*ptr >= 0x00) && (*ptr <= 0x1f) && 
+            default  : if (((*ptr <= 0x1f) && 
                             (*ptr != 0x09) && (*ptr != 0x0d) && 
                             (*ptr != 0x0a)) || (*ptr == 0x7f))
                        {
