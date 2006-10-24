@@ -58,7 +58,7 @@ using namespace zmm;
 int shutdown_flag = 0;
 int restart_flag = 0;
 pthread_t main_thread_id;
-pthread_cond_t *timerCond = NULL;
+Ref<Timer> timer = nil;
 
 void signal_handler(int signum);
 
@@ -437,9 +437,7 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     sigemptyset(&mask_set);
     sigprocmask(SIG_SETMASK, &mask_set, NULL);
     
-    Ref<Timer> timer = Timer::getInstance();
-    
-    timerCond = timer->getCond();
+    timer = Timer::getInstance();
     
     // wait until signalled to terminate
     while (!shutdown_flag)
@@ -541,14 +539,14 @@ void signal_handler(int signum)
             log_error("Clean shutdown failed, killing MediaTomb!\n");
             exit(1);
         }
-        if (timerCond != NULL)
-            pthread_cond_signal(timerCond);
+        if (timer != nil)
+            timer->signal();
     }
     else if (signum == SIGHUP)
     {
         restart_flag = 1;
-        if (timerCond != NULL)
-            pthread_cond_signal(timerCond);
+        if (timer != nil)
+            timer->signal();
     }
 
     return;

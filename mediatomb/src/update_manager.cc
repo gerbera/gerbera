@@ -51,10 +51,10 @@ UpdateManager::UpdateManager() : Object()
     shutdownFlag = false;
     flushPolicy = FLUSH_SPEC;
     lastContainerChanged = INVALID_OBJECT_ID;
-    pthread_cond_init(&updateCond, NULL);
+    cond = Ref<Cond>(new Cond(mutex));
 }
 
-Mutex UpdateManager::mutex = Mutex();
+Ref<Mutex> UpdateManager::mutex = Ref<Mutex>(new Mutex());
 Ref<UpdateManager> UpdateManager::instance = nil;
 
 Ref<UpdateManager> UpdateManager::getInstance()
@@ -83,7 +83,6 @@ Ref<UpdateManager> UpdateManager::getInstance()
 
 UpdateManager::~UpdateManager()
 {
-    pthread_cond_destroy(&updateCond);
 }
 
 void UpdateManager::init()
@@ -112,7 +111,7 @@ void UpdateManager::shutdown()
               // where shutdownFlag get's set (and it's never reset)
               // and we don't need a predictable scheduling here.
     log_debug("signalling...\n");
-    pthread_cond_signal(&updateCond);
+    cond->signal();
     //log_debug("signalled, unlocking\n");
     UNLOCK();
     //log_debug("unlocked\n");
@@ -151,7 +150,7 @@ void UpdateManager::containerChanged(int objectID, int flushPolicy)
         if (signal)
         {
             log_debug("signalling...\n");
-            pthread_cond_signal(&updateCond);
+            cond->signal();
         }
     }
     else
@@ -193,7 +192,7 @@ void UpdateManager::threadProc()
                 getTimespecAfterMillis(sleepMillis, &timeout, &now);
                 log_debug("threadProc: sleeping for %ld millis\n", sleepMillis);
                 
-                int ret = pthread_cond_timedwait(&updateCond, mutex.getMutex(), &timeout);
+                int ret = cond->timedwait(&timeout);
                 
                 if (! shutdownFlag)
                 {
@@ -233,9 +232,11 @@ void UpdateManager::threadProc()
         else
         {
             //nothing to do
-            int ret = pthread_cond_wait(&updateCond, mutex.getMutex());
+            cond->wait();
+            /*
             if (ret)
                 throw _Exception(_("pthread_cond_wait returned errorcode ") + ret);
+            */
         }
     }
     UNLOCK();

@@ -26,10 +26,15 @@
 
 using namespace zmm;
 
+/* Mutex */
+
 Mutex::Mutex(bool recursive) : Object()
 {
+#ifdef LOG_TOMBDEBUG
+    this->recursive = recursive;
+    lock_level = 0;
+#endif
     int res;
-    pthread_mutex_init(&mutex_struct, NULL);    
     if (recursive)
     {
         pthread_mutexattr_t mutex_attr;
@@ -38,17 +43,84 @@ Mutex::Mutex(bool recursive) : Object()
         pthread_mutex_init(&mutex_struct, &mutex_attr);
         pthread_mutexattr_destroy(&mutex_attr);
     }
+    else
+        pthread_mutex_init(&mutex_struct, NULL);
 }
+
 Mutex::~Mutex()
 {
     pthread_mutex_destroy(&mutex_struct);
 }
+
+
+#ifdef LOG_TOMBDEBUG
 void Mutex::lock()
 {
+    pthread_t this_thread = pthread_self();
+    if (lock_level && ! recursive && this_thread == locking_thread)
+        errorExit(_("same thread tried to lock non-recursive mutex twice"));
     pthread_mutex_lock(&mutex_struct);
+    doLock();
 }
+
 void Mutex::unlock()
 {
-    pthread_mutex_unlock(&mutex_struct);
+     pthread_t this_thread = pthread_self();
+     if (lock_level <= 0)
+         errorExit(_("tried to unlock not locked mutex"));
+     if (this_thread != locking_thread)
+         errorExit(_("a different thread tried to unlock the locked mutex"));
+     doUnlock();
+     pthread_mutex_unlock(&mutex_struct);
 }
+
+
+void Mutex::errorExit(String error)
+{
+    //log_error(error.c_str());
+    Exception e(error);
+    e.printStackTrace();
+    exit(1);
+}
+#endif // LOG_TOMBDEBUG
+
+/* Cond */
+
+Cond::Cond(Ref<Mutex> mutex) : Object()
+{
+    this->mutex = mutex;
+    pthread_cond_init(&cond_struct, NULL);
+}
+
+Cond::~Cond()
+{
+    pthread_cond_destroy(&cond_struct);
+}
+
+#ifdef LOG_TOMBDEBUG
+void Cond::wait()
+{
+    mutex->doUnlock();
+    pthread_cond_wait(&cond_struct, mutex->getMutex());
+    mutex->doLock();
+}
+
+int Cond::timedwait(struct timespec *timeout)
+{
+    mutex->doUnlock();
+    int ret = pthread_cond_timedwait(&cond_struct, mutex->getMutex(), timeout);
+    mutex->doLock();
+    return ret;
+}
+
+void Cond::checkwait()
+{
+    if (! mutex->isLocked())
+        mutex->errorExit(_("tried to do a cond_wait with an unlocked mutex"));
+    pthread_t this_thread = pthread_self();
+    pthread_t mutex_thread = mutex->getLockingThread();
+    if (this_thread != mutex_thread)
+        mutex->errorExit(_("tried to do a cond_wait with a mutex locked by another thread"));
+}
+#endif // LOG_TOMBDEBUG
 

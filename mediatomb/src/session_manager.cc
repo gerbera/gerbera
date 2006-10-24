@@ -41,21 +41,20 @@ Ref<SessionManager> SessionManager::getInstance()
 {
     if (inst == nil)
     {
-        mutex.lock();
+        mutex->lock();
         if (inst == nil)
         {
             try
             {
                 inst = Ref<SessionManager>(new SessionManager());
-                Timer::getInstance()->addTimerSubscriber(RefCast(inst, TimerSubscriber), SESSION_TIMEOUT_CHECK_INTERVAL);
             }
             catch (Exception e)
             {
-                mutex.unlock();
+                mutex->unlock();
                 throw e;
             }
         }
-        mutex.unlock();
+        mutex->unlock();
     }
     return inst;
 }
@@ -109,7 +108,7 @@ String Session::getUIUpdateIDs()
     return ret;
 }
 
-Mutex SessionManager::mutex = new Mutex();
+Ref<Mutex> SessionManager::mutex(new Mutex());
 
 SessionManager::SessionManager() : TimerSubscriber()
 {
@@ -125,12 +124,13 @@ SessionManager::SessionManager() : TimerSubscriber()
         accounts = configManager->createDictionaryFromNodeset(accountsEl, _("account"), _("user"), _("password"));
     }
     sessions = Ref<Array<Session> >(new Array<Session>());
+    timerAdded = false;
 }
 
 Ref<Session> SessionManager::createSession(long timeout)
 {
     Ref<Session> newSession(new Session(timeout));
-    mutex.lock();
+    mutex->lock();
     
     int count=0;
     String sessionID;
@@ -140,45 +140,50 @@ Ref<Session> SessionManager::createSession(long timeout)
         if (count++ > 100)
             throw _Exception(_("There seems to be something wrong with the random numbers. I tried to get a unique id 100 times and failed."));
     }
-    while(getSession(sessionID) != nil); // for the rare case, where we get a random id, that is already taken
+    while(getSession(sessionID, false) != nil); // for the rare case, where we get a random id, that is already taken
     
     newSession->setID(sessionID);
     sessions->append(newSession);
-    mutex.unlock();
+    checkTimer();
+    mutex->unlock();
     return newSession;
 }
 
-Ref<Session> SessionManager::getSession(String sessionID)
+Ref<Session> SessionManager::getSession(String sessionID, bool lock)
 {
-    mutex.lock();
+    if (lock)
+        mutex->lock();
     for (int i = 0; i < sessions->size(); i++)
     {
         Ref<Session> s = sessions->get(i);
         if (s->getID() == sessionID)
         {
-            mutex.unlock();
+            if (lock)
+                mutex->unlock();
             return s;
         }
     }
-    mutex.unlock();
+    if (lock)
+        mutex->unlock();
     return nil;
 }
 
 void SessionManager::removeSession(String sessionID)
 {
-    mutex.lock();
+    mutex->lock();
     for (int i = 0; i < sessions->size(); i++)
     {
         Ref<Session> s = sessions->get(i);
         if (s->getID() == sessionID)
         {
             sessions->remove(i);
+            checkTimer();
             i--; // to not skip a session. the removed id is now taken by another session
-            mutex.unlock();
+            mutex->unlock();
             return;
         }
     }
-    mutex.unlock();
+    mutex->unlock();
 }
 
 String SessionManager::getUserPassword(String user)
@@ -192,20 +197,34 @@ String SessionManager::getUserPassword(String user)
 
 void SessionManager::containerChangedUI(int objectID)
 {
-    mutex.lock();
+    mutex->lock();
     for (int i = 0; i < sessions->size(); i++)
     {
         Ref<Session> session = sessions->get(i);
         if (session->isLoggedIn())
             session->containerChangedUI(objectID);
     }
-    mutex.unlock();
+    mutex->unlock();
 }
 
-void SessionManager::timerNotify()
+void SessionManager::checkTimer()
+{
+    if (sessions->size() > 0 && ! timerAdded)
+    {
+        Timer::getInstance()->addTimerSubscriber(RefCast(inst, TimerSubscriber), SESSION_TIMEOUT_CHECK_INTERVAL);
+        timerAdded = true;
+    }
+    else if (sessions->size() <= 0 && timerAdded)
+    {
+        Timer::getInstance()->removeTimerSubscriber(RefCast(inst, TimerSubscriber));
+        timerAdded = false;
+    }
+}
+
+void SessionManager::timerNotify(int id)
 {
     log_debug("notified... %d sessions.\n", sessions->size());
-    mutex.lock();
+    mutex->lock();
     struct timespec now;
     getTimespecNow(&now);
     for (int i = 0; i < sessions->size(); i++)
@@ -215,8 +234,9 @@ void SessionManager::timerNotify()
         {
             log_debug("session timeout: %s - diff: %ld\n", session->getID().c_str(), getDeltaMillis(session->getLastAccessTime(), &now));
             sessions->remove(i);
+            checkTimer();
             i--; // to not skip a session. the removed id is now taken by another session
         }
     }
-    mutex.unlock();
+    mutex->unlock();
 }

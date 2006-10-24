@@ -71,7 +71,9 @@ static String get_filename(String path)
 }
 
 ContentManager::ContentManager() : Object()
-{  
+{
+    taskMutex = Ref<Mutex>(new Mutex());
+    taskCond = Ref<Cond>(new Cond(taskMutex));
     ignore_unknown_extensions = 0;
 
     shutdownFlag = false;
@@ -165,9 +167,6 @@ ContentManager::~ContentManager()
     if (ms)
         magic_close(ms);
 #endif
-    pthread_mutex_destroy(&taskMutex);
-//    pthread_mutex_destroy(&last_modified_mutex);
-    pthread_cond_destroy(&taskCond);
 }
 
 void ContentManager::init()
@@ -177,25 +176,6 @@ void ContentManager::init()
     reMimetype = Ref<RExp>(new RExp());
     reMimetype->compile(_(MIMETYPE_REGEXP));
     
-    ret = pthread_mutex_init(&taskMutex, NULL);
-    if (ret != 0)
-    {
-        throw _Exception(_("Could not initialize taskMutex"));
-    }
-    ret = pthread_cond_init(&taskCond, NULL);
-    if (ret != 0)
-    {
-        throw _Exception(_("Could not initialize taskCondition"));
-    }
-
-#if 0
-    ret = pthread_mutex_init(&last_modified_mutex, NULL);
-    if (ret != 0)
-    {
-        throw _Exception(_("Could not initialize last_modified_mutex"));
-    }
-#endif
-
     pthread_attr_t attr;
     ret = pthread_attr_init(&attr);
     if (ret != 0)
@@ -1108,7 +1088,7 @@ void ContentManager::threadProc()
         if(((task = taskQueue1->dequeue()) == nil) && ((task = taskQueue2->dequeue()) == nil))
         {
             /* if nothing to do, sleep until awakened */
-            pthread_cond_wait(&taskCond, &taskMutex);
+            taskCond->wait();
             unlock();
             continue;
         }
@@ -1136,18 +1116,6 @@ void *ContentManager::staticThreadProc(void *arg)
     inst->threadProc();
     pthread_exit(NULL);
     return NULL;
-}
-void ContentManager::lock()
-{
-    pthread_mutex_lock(&taskMutex);
-}
-void ContentManager::unlock()
-{
-    pthread_mutex_unlock(&taskMutex);
-}
-void ContentManager::signal()
-{
-    pthread_cond_signal(&taskCond);
 }
 
 void ContentManager::addTask(zmm::Ref<CMTask> task, bool lowPriority)

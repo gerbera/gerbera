@@ -30,22 +30,21 @@ using namespace zmm;
 Timer::Timer() : Object()
 {
     subscribers = Ref<Array<TimerSubscriberElement> >(new Array<TimerSubscriberElement>);
-    pthread_cond_init(&cond, NULL);
+    cond = Ref<Cond>(new Cond(mutex));
 }
 
 Timer::~Timer()
 {
-    pthread_cond_destroy(&cond);
 }
 
-Mutex Timer::mutex = Mutex();
+Ref<Mutex> Timer::mutex = Ref<Mutex>(new Mutex(true));
 Ref<Timer> Timer::instance = nil;
 
 Ref<Timer> Timer::getInstance()
 {
     if (instance == nil)
     {
-        mutex.lock();
+        mutex->lock();
         if (instance == nil) // check again, because there is a very small chance
                              // that 2 threads tried to lock() concurrently
         {
@@ -55,31 +54,65 @@ Ref<Timer> Timer::getInstance()
             }
             catch (Exception e)
             {
-                mutex.unlock();
+                mutex->unlock();
                 throw e;
             }
         }
-        mutex.unlock();
+        mutex->unlock();
     }
     return instance;
 }
 
-void Timer::addTimerSubscriber(zmm::Ref<TimerSubscriber> timerSubscriber, unsigned int notifyInterval)
+void Timer::addTimerSubscriber(Ref<TimerSubscriber> timerSubscriber, unsigned int notifyInterval, int id)
 {
     log_debug("adding subscriber...\n");
-    mutex.lock();
-    timerSubscriber->timerNotify();
-    Ref<TimerSubscriberElement> element(new TimerSubscriberElement(timerSubscriber, notifyInterval));
+    if (notifyInterval <= 0)
+        throw _Exception(_("tried to add timer with illegal notifyInterval"));
+    mutex->lock();
+    //timerSubscriber->timerNotify(id);
+    Ref<TimerSubscriberElement> element(new TimerSubscriberElement(timerSubscriber, notifyInterval, id));
+    for(int i = 0; i < subscribers->size(); i++)
+    {
+        if (subscribers->get(i)->equals(element))
+        {
+            mutex->unlock();
+            throw _Exception(_("tried to add same timer twice"));
+        }
+    }
     subscribers->append(element);
-    pthread_cond_signal(&cond);
-    mutex.unlock();
+    signal();
+    mutex->unlock();
+}
+
+void Timer::removeTimerSubscriber(Ref<TimerSubscriber> timerSubscriber, int id)
+{
+    log_debug("removing subscriber...\n");
+    mutex->lock();
+    Ref<TimerSubscriberElement> element(new TimerSubscriberElement(timerSubscriber, 0, id));
+    bool removed = false;
+    for(int i = 0; i < subscribers->size(); i++)
+    {
+        if (subscribers->get(i)->equals(element))
+        {
+            subscribers->remove(i);
+            removed = true;
+            break;
+        }
+    }
+    if (! removed)
+    {
+        mutex->unlock();
+        throw _Exception(_("tried to remove nonexistent timer"));
+    }
+    signal();
+    mutex->unlock();
 }
 
 void Timer::triggerWait()
 {
     log_debug("triggerWait. - %d subscriber(s)\n", subscribers->size());
     
-    mutex.lock();
+    mutex->lock();
     if (subscribers->size() > 0)
     {
         struct timespec *timeout = getNextNotifyTime();
@@ -88,11 +121,11 @@ void Timer::triggerWait()
         if (compareTimespecs(timeout, &now) < 0)
         {
             log_debug("sleeping...\n");
-            int ret = pthread_cond_timedwait(&cond, mutex.getMutex(), timeout);
+            int ret = cond->timedwait(timeout);
             if (ret != 0 && ret != ETIMEDOUT)
             {
                 log_debug("pthread_cond_timedwait returned errorcode %d\n", ret);
-                mutex.unlock();
+                mutex->unlock();
                 throw _Exception(_("pthread_cond_timedwait returned errorcode ") + ret);
             }
             if (ret == ETIMEDOUT)
@@ -108,9 +141,9 @@ void Timer::triggerWait()
     else
     {
         log_debug("nothing to do, sleeping...\n");
-        pthread_cond_wait(&cond, mutex.getMutex());
+        cond->wait();
     }
-    mutex.unlock();
+    mutex->unlock();
 }
 
 void Timer::notify()
@@ -125,7 +158,7 @@ void Timer::notify()
         {
             log_debug("notifying %d\n", i);
             zmm::Ref<TimerSubscriber> subscriber = element->getSubscriber();
-            subscriber->timerNotify();
+            subscriber->timerNotify(element->getID());
             element->notified();
         }
     }
@@ -145,10 +178,11 @@ struct timespec * Timer::getNextNotifyTime()
     return nextTime;
 }
 
-Timer::TimerSubscriberElement::TimerSubscriberElement(Ref<TimerSubscriber> subscriber, unsigned int notifyInterval)
+Timer::TimerSubscriberElement::TimerSubscriberElement(Ref<TimerSubscriber> subscriber, unsigned int notifyInterval, int id)
 {
     this->subscriber = subscriber;
     this->notifyInterval = notifyInterval;
+    this->id = id;
     notified();
 }
 
@@ -157,3 +191,7 @@ void Timer::TimerSubscriberElement::notified()
     getTimespecAfterMillis(notifyInterval * 1000, &nextNotify);
 }
 
+bool Timer::TimerSubscriberElement::equals(Ref<TimerSubscriberElement> other)
+{
+    return (subscriber == other->subscriber && id == other->id);
+}

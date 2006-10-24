@@ -34,7 +34,7 @@ class TimerSubscriber : public zmm::Object
 {
 public:
 virtual ~TimerSubscriber() { }
-    virtual void timerNotify() = 0;
+    virtual void timerNotify(int id) = 0;
     
 protected:
     friend class Timer;
@@ -47,32 +47,36 @@ public:
     ~Timer();
     static zmm::Ref<Timer> getInstance();
     
-    void addTimerSubscriber(zmm::Ref<TimerSubscriber> timerSubscriber, unsigned int notifyInterval);
-    
-    inline pthread_cond_t *getCond() { return &cond; }
+    void addTimerSubscriber(zmm::Ref<TimerSubscriber> timerSubscriber, unsigned int notifyInterval, int id = 0);
+    void removeTimerSubscriber(zmm::Ref<TimerSubscriber> timerSubscriber, int id = 0);
     
     void triggerWait();
+    
+    inline void signal() { cond->signal(); }
     
 protected:
     
     class TimerSubscriberElement : public zmm::Object
     {
     public:
-        TimerSubscriberElement(zmm::Ref<TimerSubscriber> subscriber, unsigned int notifyInterval);
+        TimerSubscriberElement(zmm::Ref<TimerSubscriber> subscriber, unsigned int notifyInterval, int id);
         inline unsigned int getNotifyInterval() { return notifyInterval; }
         inline zmm::Ref<TimerSubscriber> getSubscriber() { return subscriber; }
         inline void notified();
         inline struct timespec *getNextNotify() { return &nextNotify; }
+        inline int getID() { return id; }
+        bool equals(zmm::Ref<TimerSubscriberElement> other);
     protected:
         zmm::Ref<TimerSubscriber> subscriber;
         unsigned int notifyInterval;
+        int id;
         struct timespec nextNotify;
     };
     
     
     static zmm::Ref<Timer> instance;
-    static Mutex mutex;
-    pthread_cond_t cond;
+    static zmm::Ref<Mutex> mutex;
+    zmm::Ref<Cond> cond;
     
     zmm::Ref<zmm::Array<TimerSubscriberElement> > subscribers;
     
@@ -82,3 +86,4 @@ protected:
 };
 
 #endif // __TIMER_H__
+

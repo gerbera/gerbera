@@ -64,7 +64,7 @@ public:
     inline void logOut() { loggedIn = false; }
     
     inline void access() { getTimespecNow(&last_access); }
-        
+    
     /// \brief Returns the updateIDs, collected for the sessions,
     /// and flushes the storage for the ids
     /// \return the container ids to be updated as String (comma separated)
@@ -104,7 +104,10 @@ protected:
     
     zmm::Ref<Dictionary> accounts;
     
-    static Mutex mutex;
+    static zmm::Ref<Mutex> mutex;
+    
+    void checkTimer();
+    bool timerAdded;
     
 public:
     /// \brief Constructor, initializes the array.
@@ -125,7 +128,7 @@ public:
     /// \brief Returns the instance to a Session with a given sessionID
     /// \param ID of the Session.
     /// \return intance of the Session with a given ID or nil if no session with that ID was found.
-    zmm::Ref<Session> getSession(zmm::String sessionID);
+    zmm::Ref<Session> getSession(zmm::String sessionID, bool lock = true);
     
     /// \brief Removes a session
     void removeSession(zmm::String sessionID);
@@ -138,7 +141,7 @@ public:
     /// \param objectID
     void containerChangedUI(int objectID);
     
-    virtual void timerNotify();
+    virtual void timerNotify(int id);
 };
 
 #endif //  __SESSION_MANAGER_H__

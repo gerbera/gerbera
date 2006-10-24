@@ -21,8 +21,6 @@
 #ifndef __UPDATE_MANAGER_H__
 #define __UPDATE_MANAGER_H__
 
-#include <pthread.h>
-
 #include "common.h"
 #include "hash.h"
 #include "sync.h"
@@ -46,8 +44,8 @@ protected:
     void init();
     static zmm::Ref<UpdateManager> instance;
     pthread_t updateThread;
-    static Mutex mutex;
-    pthread_cond_t updateCond;
+    static zmm::Ref<Mutex> mutex;
+    zmm::Ref<Cond> cond;
     
     zmm::Ref<DBRHash<int> > objectIDHash;
     
@@ -56,8 +54,8 @@ protected:
     
     int lastContainerChanged;
     
-    static inline void lock() { mutex.lock(); }
-    static inline void unlock() { mutex.unlock(); }
+    static inline void lock() { mutex->lock(); }
+    static inline void unlock() { mutex->unlock(); }
     static void *staticThreadProc(void *arg);
     void threadProc();
     

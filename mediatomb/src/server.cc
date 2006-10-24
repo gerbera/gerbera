@@ -45,6 +45,7 @@ static int static_upnp_callback(Upnp_EventType eventtype, void *event, void *coo
 Server::Server() : Object()
 {
     server_shutdown_flag = false;
+    upnp_mutex = Ref<Mutex>(new Mutex());
 }
 
 Ref<Server> Server::getInstance()
@@ -71,8 +72,6 @@ void Server::init()
     mrreg = MRRegistrarService::createInstance(_(DESC_MRREG_SERVICE_TYPE),
                                                _(DESC_MRREG_SERVICE_ID));
                                                     
-    pthread_mutex_init(&upnp_mutex, NULL);
-
     Ref<ConfigManager> config = ConfigManager::getInstance();
 
     serverUDN = config->getOption(_("/server/udn"));
@@ -262,8 +261,6 @@ void Server::shutdown()
     UpnpFinish();
 
     log_debug("end\n");
-
-    pthread_mutex_destroy(&upnp_mutex);
 }
 
 String Server::getVirtualURL()
@@ -286,7 +283,7 @@ int Server::upnp_callback(Upnp_EventType eventtype, void *event, void *cookie)
 
 //    log_info("event is ok\n");
     // get device wide mutex (have to figure out what the hell that is)
-    pthread_mutex_lock(&upnp_mutex);
+    upnp_mutex->lock();
 
 //    log_info("got device mutex\n");
 
@@ -338,7 +335,7 @@ int Server::upnp_callback(Upnp_EventType eventtype, void *event, void *cookie)
     }
 
     // release device wide mutex
-    pthread_mutex_unlock(&upnp_mutex);
+    upnp_mutex->unlock();
 
     log_debug("returning %d\n", ret);
     return ret;

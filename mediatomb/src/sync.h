@@ -29,11 +29,53 @@ class Mutex : public zmm::Object
 public:
     Mutex(bool recursuve = false);
     virtual ~Mutex();
+#ifndef LOG_TOMBDEBUG
+    inline void lock() { pthread_mutex_lock(&mutex_struct); }
+    inline void unlock() { pthread_mutex_unlock(&mutex_struct); }
+#else
     void lock();
     void unlock();
-    inline pthread_mutex_t* getMutex() { return &mutex_struct; }
+#endif 
 protected:
     pthread_mutex_t mutex_struct;
+    inline pthread_mutex_t* getMutex() { return &mutex_struct; }
+    
+#ifdef LOG_TOMBDEBUG
+    void errorExit(zmm::String error);
+    inline pthread_t getLockingThread() { return locking_thread; }
+    inline void doLock() { lock_level++; locking_thread = pthread_self(); }
+    inline void doUnlock() { lock_level--; };
+    inline bool isLocked() { return lock_level > 0; }
+    int lock_level;
+    bool recursive;
+    pthread_t locking_thread;
+#endif
+    
+    friend class Cond;
+};
+
+class Cond : public zmm::Object
+{
+public:
+    Cond(zmm::Ref<Mutex> mutex);
+    virtual ~Cond();
+    inline void signal() { pthread_cond_signal(&cond_struct); }
+    inline void broadcast() { pthread_cond_broadcast(&cond_struct); }
+#ifndef LOG_TOMBDEBUG
+    inline void wait() { pthread_cond_wait(&cond_struct, mutex->getMutex()); }
+    inline int timedwait(struct timespec *timeout) { return pthread_cond_timedwait(&cond_struct, mutex->getMutex(), timeout); }
+#else
+    void wait();
+    int timedwait(struct timespec *timeout);
+    void checkwait();
+#endif
+protected:
+    pthread_cond_t cond_struct;
+    zmm::Ref<Mutex> mutex;
+    
+#ifdef LOG_TOMBDEBUG
+    
+#endif
 };
 
 #endif // __SYNC_H__

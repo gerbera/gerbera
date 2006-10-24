@@ -27,7 +27,6 @@
 #define __SQLITE3_STORAGE_H__
 
 #include <sqlite3.h>
-#include <pthread.h>
 
 #include "storage/sql_storage.h"
 #include "sync.h"
@@ -64,8 +63,8 @@ protected:
     ///
     /// The value is set by the constructor to true and then to false be sendSignal()
     bool running;
-    pthread_cond_t cond;
-    pthread_mutex_t mutex;
+    zmm::Ref<Cond> cond;
+    zmm::Ref<Mutex> mutex;
     zmm::String error;
 };
 
@@ -170,8 +169,8 @@ protected:
     void addTask(zmm::Ref<SLTask> task);
     
     pthread_t sqliteThread;
-    pthread_cond_t sqliteCond;
-    pthread_mutex_t sqliteMutex;
+    zmm::Ref<Cond> cond;
+    zmm::Ref<Mutex> mutex;
     
     /// \brief is set to true by shutdown() if the sqlite3 thread should terminate
     bool shutdownFlag;
@@ -180,9 +179,9 @@ protected:
     zmm::Ref<zmm::ObjectQueue<SLTask> > taskQueue;
     bool taskQueueOpen;
     
-    void lock();
-    void unlock();
-    void signal();
+    inline void lock() { mutex->lock(); }
+    inline void unlock() { mutex->unlock(); }
+    inline void signal() { cond->signal(); }
     
     friend class SLSelectTask;
     friend class SLExecTask;

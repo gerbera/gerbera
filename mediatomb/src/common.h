@@ -29,8 +29,16 @@
 #include "exceptions.h"
 
 /// \brief session timeout in seconds
-#define DEFAULT_SESSION_TIMEOUT         (60 * 30)
-#define SESSION_TIMEOUT_CHECK_INTERVAL  (30 * 30)
+//#ifndef LOG_TOMBDEBUG
+    #define DEFAULT_SESSION_TIMEOUT         (60 * 30)
+    #define SESSION_TIMEOUT_CHECK_INTERVAL  (30 * 30)
+/*
+#else
+    #define DEFAULT_SESSION_TIMEOUT         10
+    #define SESSION_TIMEOUT_CHECK_INTERVAL  1
+#endif // ifndef LOG_TOMBDEBUG
+*/
+
 
 // ERROR CODES                                                                                 
 /// \brief UPnP specific error code.

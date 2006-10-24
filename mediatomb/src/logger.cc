@@ -48,7 +48,7 @@ static void log_stamp(const char *type)
            t.tm_hour,
            t.tm_min,
            t.tm_sec,
-           7, // max lenght we have is "WARNING"
+           7, // max length we have is "WARNING"
            type);
 }
         

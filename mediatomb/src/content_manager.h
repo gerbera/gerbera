@@ -22,12 +22,11 @@
 #ifndef __CONTENT_MANAGER_H__
 #define __CONTENT_MANAGER_H__
 
-#include <pthread.h>
-
 #include "common.h"
 #include "cds_objects.h"
 #include "storage.h"
 #include "dictionary.h"
+#include "sync.h"
 
 #ifdef HAVE_JS
 #include "scripting/scripting.h"
@@ -226,12 +225,12 @@ protected:
 #ifdef HAVE_JS  
     zmm::Ref<Scripting> scripting;
 #endif
-
+    
     void setLastModifiedTime(time_t lm);
-
-    void lock();
-    void unlock();
-    void signal();
+    
+    inline void lock() { taskMutex->lock(); }
+    inline void unlock() { taskMutex->unlock(); }
+    inline void signal() { taskCond->signal(); }
     static void *staticThreadProc(void *arg);
     void threadProc();
     
@@ -240,8 +239,8 @@ protected:
     zmm::Ref<CMAccounting> acct;
     
     pthread_t taskThread;
-    pthread_mutex_t taskMutex;
-    pthread_cond_t taskCond;
+    zmm::Ref<Mutex> taskMutex;
+    zmm::Ref<Cond> taskCond;
 
     bool shutdownFlag;
     

@@ -30,7 +30,7 @@
 #include "upnp_cm.h"
 #include "upnp_mrreg.h"
 #include "config_manager.h"
-#include <pthread.h>
+#include "sync.h"
 
 /// \brief Provides methods to initialize and shutdown
 /// and to retrieve various information about the server.
@@ -128,7 +128,7 @@ protected:
     /// The mutex is locked at the entry of upnp_callback() and is
     /// unlocked after the event has been processed. That means that only 
     /// one UPnP request can be processed at a time.
-    pthread_mutex_t upnp_mutex;
+    zmm::Ref<Mutex> upnp_mutex;
 
     /// \brief Unique Device Number of the server.
     ///

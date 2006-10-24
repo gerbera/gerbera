@@ -44,17 +44,15 @@ Sqlite3Storage::Sqlite3Storage() : SQLStorage()
     table_quote_begin = '"';
     table_quote_end = '"';
     startupError = nil;
+    mutex = Ref<Mutex>(new Mutex());
+    cond = Ref<Cond>(new Cond(mutex));
 }
 
 void Sqlite3Storage::init()
 {
     int ret;
     
-    pthread_mutex_init(&sqliteMutex, NULL);
-    pthread_cond_init(&sqliteCond, NULL);
-    
-    pthread_mutex_lock(&sqliteMutex);
-    
+    mutex->lock();
     /*
     pthread_attr_t attr;
     pthread_attr_init(&attr);
@@ -71,8 +69,8 @@ void Sqlite3Storage::init()
         this
     );
     
-    pthread_cond_wait(&sqliteCond, &sqliteMutex);
-    pthread_mutex_unlock(&sqliteMutex);
+    cond->wait();
+    mutex->unlock();
     
     if (startupError != nil)
         throw _StorageException(startupError);
@@ -167,7 +165,7 @@ void Sqlite3Storage::threadProc()
             dbFilePath;
     }
     
-    pthread_cond_signal(&sqliteCond);
+    cond->signal();
     
     while(! shutdownFlag)
     {
@@ -175,7 +173,7 @@ void Sqlite3Storage::threadProc()
         if((task = taskQueue->dequeue()) == nil)
         {
             /* if nothing to do, sleep until awakened */
-            pthread_cond_wait(&sqliteCond, &sqliteMutex);
+            cond->wait();
             unlock();
             continue;
         }
@@ -201,19 +199,6 @@ void Sqlite3Storage::threadProc()
     if (db)
         sqlite3_close(db);
 }                                             
-
-void Sqlite3Storage::lock()
-{
-    pthread_mutex_lock(&sqliteMutex);
-}
-void Sqlite3Storage::unlock()
-{
-    pthread_mutex_unlock(&sqliteMutex);
-}
-void Sqlite3Storage::signal()
-{
-    pthread_cond_signal(&sqliteCond);
-}
 
 void Sqlite3Storage::addTask(zmm::Ref<SLTask> task)
 {
@@ -255,8 +240,8 @@ void Sqlite3Storage::storeInternalSetting(String key, String value)
 SLTask::SLTask() : Object()
 {
     running = true;
-    pthread_mutex_init(&mutex, NULL);
-    pthread_cond_init(&cond, NULL);
+    mutex = Ref<Mutex>(new Mutex());
+    cond = Ref<Cond>(new Cond(mutex));
     error = nil;
 }
 bool SLTask::is_running()
@@ -266,10 +251,10 @@ bool SLTask::is_running()
 
 void SLTask::sendSignal()
 {
-    pthread_mutex_lock(&mutex);
+    mutex->lock();
     running=false;
-    pthread_cond_signal(&cond);
-    pthread_mutex_unlock(&mutex);
+    cond->signal();
+    mutex->unlock();
 }
 
 void SLTask::sendSignal(String error)
@@ -280,15 +265,16 @@ void SLTask::sendSignal(String error)
 
 void SLTask::waitForTask()
 {
-    if (is_running()) { // we check before we lock first, because there is no need to lock then
-        pthread_mutex_lock(&mutex);
-        if (is_running()) { // we check it a second time after locking to ensure we didn't miss the pthread_cond_signal 
-            pthread_cond_wait(&cond, &mutex); // waiting for the task to complete
+    if (is_running())
+    { // we check before we lock first, because there is no need to lock then
+        mutex->lock();
+        if (is_running())
+        { // we check it a second time after locking to ensure we didn't miss the pthread_cond_signal 
+            cond->wait(); // waiting for the task to complete
         }
+        mutex->unlock();
     }
-    pthread_mutex_unlock(&mutex);
-    pthread_mutex_destroy(&mutex);
-    pthread_cond_destroy(&cond);
+    
     if (getError() != nil)
     {
         log_error("%s\n", getError().c_str());
