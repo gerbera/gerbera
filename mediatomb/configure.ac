@@ -201,6 +201,8 @@ AC_ARG_WITH(extractor-libs,
         ]
 )
 
+STATIC="no"
+
 AC_ARG_ENABLE(static, 
         AC_HELP_STRING([--enable-static], [build a static version of MediaTomb (default: no)]),
         [
@@ -208,6 +210,7 @@ AC_ARG_ENABLE(static,
                 CFLAGS="$CFLAGS -static"
                 CXXFLAGS="$CXXFLAGS -static"
                 AC_MSG_NOTICE([Building a static executable.])
+                STATIC="yes"
             fi
         ]
 )
@@ -333,7 +336,7 @@ if test -n "$ICONV_SEARCH_LIBS"; then
                         [
                             ICONV_LIBS="-L$ICONV_SEARCH_LIBS -liconv"
                         ],
-                        [AC_MSG_ERROR(required library iconv not found in requested locatoin $ICONV_SEARCH_LIBS)]
+                        [AC_MSG_ERROR(required library iconv not found in requested location $ICONV_SEARCH_LIBS)]
                     )
                 ]
             ) 
@@ -504,6 +507,35 @@ AC_DEFINE([UPNP_HAVE_WEBSERVER], [1], [Compile internal web server])
 
 AC_CHECK_LIB(pthread, pthread_mutex_lock,[], [AC_MSG_ERROR(required library function not found)])    
 
+# check librt stuff - clock_gettime
+AC_CHECK_FUNC([clock_gettime],
+        [
+            AC_DEFINE([HAVE_CLOCK_GETTIME], [1], [clock_gettime presense])
+        ],
+        [
+            AC_CHECK_LIB(rt, clock_gettime,
+                [
+                    RT_LIBS="-lrt"
+                    AC_DEFINE([HAVE_CLOCK_GETTIME], [1], [clock_gettime presense])
+                ],
+                [
+                    LDFLAGS="-L$SEARCH_DIR_LIBS"
+                    unset ac_cv_lib_rt_clock_gettime
+                    AC_CHECK_LIB(rt, clock_gettime,
+                        [
+                            RT_LIBS="-L$SEARCH_DIR_LIBS -lrt"
+                            AC_DEFINE([HAVE_CLOCK_GETTIME], [1], [clock_gettime presense])
+                        ]
+                    )
+                ]
+            )
+        ]
+)
+
+LDFLAGS="$LDFLAGS_SAVE"
+AC_SUBST(RT_LIBS)
+
+    
 ZLIB_OK=yes
 Z_CXXFLAGS=
 Z_LIBS=
@@ -701,8 +733,8 @@ if test "x$MYSQL_OK" = xyes; then
  
     if test $MYSQL_PROG_FOUND -eq 1 ; then 
         AC_MSG_CHECKING(mysql version)
-        MYSQL_VERSION_MAJOR=`${mysqlconfig} --version 2>/dev/null | sed 's/^\([[0-9]]\+\)\.\([[0-9]]\+\).\([[0-9]]\+\).*$/\1/'`
-        MYSQL_VERSION_MINOR=`${mysqlconfig} --version 2>/dev/null | sed 's/^\([[0-9]]\+\)\.\([[0-9]]\+\).\([[0-9]]\+\).*$/\2/'` 
+        MYSQL_VERSION_MAJOR=`${mysqlconfig} --version 2>/dev/null | sed 's/^\([[0-9]]\{1,\}\)\.\([[0-9]]\{1,\}\).\([[0-9]]\{1,\}\).*$/\1/'`
+        MYSQL_VERSION_MINOR=`${mysqlconfig} --version 2>/dev/null | sed 's/^\([[0-9]]\{1,\}\)\.\([[0-9]]\{1,\}\).\([[0-9]]\{1,\}\).*$/\2/'` 
         
         MYSQL_PRINT_VERSION=`${mysqlconfig} --version`
         AC_MSG_RESULT([$MYSQL_PRINT_VERSION])
@@ -823,17 +855,25 @@ if test "x$JS_OK" = xyes; then
     AC_CHECK_HEADER(jsapi.h,
         [],
         [
-            for sm_path in /usr/include/js /usr/include/smjs /usr/local/include/js /usr/local/include/smjs \
-                    /usr/include/spidermonkey /usr/local/include/spidermonkey $SEARCH_DIR_HEADERS/spidermonkey \
-                    $SEARCH_DIR_HEADERS $SEARCH_DIR_HEADERS/js $SEARCH_DIR_HEADERS/smjs; do
+            for sm_path in $SEARCH_DIR_HEADERS \
+                           /usr/include/js \
+                           /usr/include/smjs \
+                           /usr/local/include/js \
+                           /usr/local/include/smjs \
+                           /usr/include/spidermonkey \
+                           /usr/local/include/spidermonkey \
+                           $SEARCH_DIR_HEADERS/js \
+                           $SEARCH_DIR_HEADERS/smjs \
+                           $SEARCH_DIR_HEADERS/spidermonkey; do 
                 if test "x$ac_cv_header_jsapi_h" != xyes ; then
                     AC_MSG_CHECKING([checking alternative libjs header location: $sm_path])
                     CXXFLAGS="$XP_ADD -I$sm_path"
+                    CPPFLAGS="$XP_ADD -I$sm_path"
                     unset ac_cv_header_jsapi_h
                     AC_CHECK_HEADER(jsapi.h,
                                     [
                                         JS_CXXFLAGS="-I$sm_path"
-                                        AC_MSG_RESULT([found in $sm_path])
+                                        AC_MSG_RESULT([jsapi.h found in $sm_path])
                                     ],
                                     [])
                fi
@@ -1651,6 +1691,10 @@ fi
 
 if test "$UPNPDEBUG_OK" != "disabled"; then
     echo "upnpdebug     : $UPNPDEBUG_OK"
+fi
+
+if test "$STATIC" = "yes"; then
+    echo "static build  : $STATIC"
 fi
 # echo "  libjpeg     : $LIBJPEG_OK"
 # echo "  exiv2       : $EXIV2_OK"
