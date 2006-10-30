@@ -14,8 +14,11 @@ libmediatomb_a_CXXFLAGS = \
                      $(MYSQL_CFLAGS) \
                      $(JS_CXXFLAGS) \
                      $(TAGLIB_CFLAGS) \
+                     $(EXTRACTOR_CXXFLAGS) \
                      $(ICONV_CXXFLAGS) \
                      $(MAGIC_CXXFLAGS) \
+                     $(ID3_CXXFLAGS) \
+                     $(EXIF_CXXFLAGS) \
                      $(Z_CXXFLAGS)
 
 bin_PROGRAMS = mediatomb
@@ -29,8 +32,11 @@ mediatomb_CXXFLAGS = -I$(top_srcdir)/src \
                      $(MYSQL_CFLAGS) \
                      $(JS_CXXFLAGS) \
                      $(TAGLIB_CFLAGS) \
+                     $(EXTRACTOR_CXXFLAGS) \
                      $(ICONV_CXXFLAGS) \
                      $(MAGIC_CXXFLAGS) \
+                     $(ID3_CXXFLAGS) \
+                     $(EXIF_CXXFLAGS) \
                      $(Z_CXXFLAGS)
 
 mediatomb_LDADD = \
@@ -40,6 +46,10 @@ mediatomb_LDADD = \
     $(SQLITE3_LIBS) \
     $(MYSQL_LIBS) \
     $(TAGLIB_LIBS) \
+    $(EXTRACTOR_LIBS) \
     $(JS_LIBS) \
+    $(MAGIC_LIBS) \
+    $(ID3_LIBS) \
+    $(EXIF_LIBS) \
     $(Z_LIBS)
 

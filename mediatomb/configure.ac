@@ -6,16 +6,23 @@ AC_CONFIG_SRCDIR([src/common.h])
 AM_INIT_AUTOMAKE([1.9 -Wall])
 
 
-SEARCH_DIR=""
+SEARCH_DIR="/usr/local"
+   
+DARWIN_OS=0
+
+AC_CANONICAL_HOST
+case $host in
+    *-*-darwin*)
+        DARWIN_OS=1
+        SEARCH_DIR="/opt/local"
+        ;;
+esac
 
 AC_ARG_WITH(search, 
-        AC_HELP_STRING([--with-search=DIR], [Additionally search for packages in DIR (default: /opt/local)]),
+        AC_HELP_STRING([--with-search=DIR], [Additionally search for packages in DIR]),
         [
             SEARCH_DIR=$withval
             AC_MSG_NOTICE([Will also search for packages in $SEARCH_DIR])
-        ],
-        [
-            SEARCH_DIR="/opt/local"
         ]
 )
 
@@ -81,9 +88,16 @@ AC_ARG_WITH(magic-h,
         AC_HELP_STRING([--with-magic-h=DIR], [search for filemagic headers in DIR]),
         [
             MAGIC_SEARCH_HEADERS="$withval"
-            AC_MSG_NOTICE([Will search for filemagic headers in $withval])
         ]
 )
+
+AC_ARG_WITH(magic-libs,
+        AC_HELP_STRING([--with-magic-libs=DIR], [search for filemagic headers in DIR]),
+        [
+            MAGIC_SEARCH_LIBS="$withval"
+        ]
+)
+
 
 AC_ARG_WITH(exif-h,
         AC_HELP_STRING([--with-exif-h=DIR], [search for libexif headers in DIR]),
@@ -101,24 +115,24 @@ AC_ARG_WITH(exif-libs,
         ]
 )
 
-AC_ARG_WITH(taglib-h,
-        AC_HELP_STRING([--with-taglib-h=DIR], [search for taglib headers in DIR]),
-        [
-            TAGLIB_SEARCH_HEADERS="$withval"
-            AC_MSG_NOTICE([Will search for taglib headers in $withval])
-        ]
-)
-
-AC_ARG_WITH(taglib-libs,
-        AC_HELP_STRING([--with-taglib-libs=DIR], [search for taglib libraries in DIR]),
-        [
-            TAGLIB_SEARCH_LIBS="$withval"
-            AC_MSG_NOTICE([Will search for libexif libraries in $withval])
-        ]
-)
+#AC_ARG_WITH(taglib-h,
+#        AC_HELP_STRING([--with-taglib-h=DIR], [search for taglib headers in DIR]),
+#        [
+#            TAGLIB_SEARCH_HEADERS="$withval"
+#            AC_MSG_NOTICE([Will search for taglib headers in $withval])
+#        ]
+#)
+#
+#AC_ARG_WITH(taglib-libs,
+#        AC_HELP_STRING([--with-taglib-libs=DIR], [search for taglib libraries in DIR]),
+#        [
+#            TAGLIB_SEARCH_LIBS="$withval"
+#            AC_MSG_NOTICE([Will search for libexif libraries in $withval])
+#        ]
+#)
 
 AC_ARG_WITH(taglib-cfg,
-        AC_HELP_STRING([--with-taglib-cfg=DIR], [search for taglib-config in DIR]),
+        AC_HELP_STRING([--with-taglib-cfg=taglib-config], [absolute path/name of taglib-config]),
         [
             TAGLIB_SEARCH_CONFIG="$withval"
             AC_MSG_NOTICE([Will search for taglib-config in $withval])
@@ -223,15 +237,7 @@ AC_HEADER_STDBOOL
 AC_HEADER_TIME
 AC_HEADER_STAT
 AC_LANG_C
-AC_CANONICAL_HOST
    
-DARWIN_OS=0
-case $host in
-    *-*-darwin*)
-        DARWIN_OS=1
-        ;;
-esac
-
 AC_CHECK_HEADERS([syslog.h stddef.h unistd.h arpa/inet.h fcntl.h], [],
                  [AC_MSG_ERROR(required header not found)]) 
 
@@ -268,11 +274,13 @@ CFLAGS_SAVE="$CFLAGS"
 CXXFLAGS_SAVE="$CXXFLAGS"
 LDFLAGS_SAVE="$LDFLAGS"
 
+ICONV_CXXFLAGS=
+ICONV_LIBS=
+
 if test -n "$ICONV_SEARCH_HEADERS"; then
 AC_CHECK_HEADER([$ICONV_SEARCH_HEADERS/iconv.h],
         [
             ICONV_CXXFLAGS="-I$ICONV_SEARCH_HEADERS"
-            AC_SUBST(ICONV_CXXFLAGS)
         ],
         [
             AC_MSG_ERROR(iconv.h not found in requested location $ICONV_SEARCH_HEADERS)
@@ -287,17 +295,15 @@ AC_CHECK_HEADER([iconv.h],
             AC_CHECK_HEADER([/usr/local/include/iconv.h],
                 [
                     ICONV_CXXFLAGS="-I/usr/local/include"
-                    AC_SUBST(ICONV_CXXFLAGS)
                     if test -z "$ICONV_SEARCH_LIBS"; then
                         LDFLAGS="-L/usr/local/lib"
                     fi
                 ],
                 [
                     unset ac_cv_header_iconv_h
-                    AC_CHECK_HEADER([$SEARCH_DIR/include/iconv.h],
+                    AC_CHECK_HEADER([$SEARCH_DIR_HEADERS/iconv.h],
                         [
                             ICONV_CXXFLAGS="-I$SEARCH_DIR_HEADERS"
-                            AC_SUBST(ICONV_CXXFLAGS)
                             if test -z "$ICONV_SEARCH_LIBS"; then
                                 LDFLAGS="-L$SEARCH_DIR_LIBS"
                             fi
@@ -315,20 +321,17 @@ if test -n "$ICONV_SEARCH_LIBS"; then
     AC_CHECK_FUNC([iconv],
         [
             ICONV_LIBS="-L$ICONV_SEARCH_LIBS"
-            AC_SUBST(ICONV_LIBS)
         ],
         [
             LDFLAGS="-L$ICONV_SEARCH_LIBS -liconv"
             AC_CHECK_LIB(iconv, iconv,
                 [
                     ICONV_LIBS="-L$ICONV_SEARCH_LIBS -liconv"
-                    AC_SUBST(ICONV_LIBS)
                 ],
                 [
                     AC_CHECK_LIB(iconv, libiconv,
                         [
                             ICONV_LIBS="-L$ICONV_SEARCH_LIBS -liconv"
-                            AC_SUBST(ICONV_LIBS)
                         ],
                         [AC_MSG_ERROR(required library iconv not found in requested locatoin $ICONV_SEARCH_LIBS)]
                     )
@@ -341,7 +344,6 @@ else
     AC_CHECK_FUNC([iconv],
         [
             ICONV_LIBS="$LDFLAGS"
-            AC_SUBST(ICONV_LIBS)
         ],
         [
         
@@ -349,13 +351,11 @@ else
             AC_CHECK_LIB(iconv, iconv, 
                 [
                     ICONV_LIBS="$LDFLAGS"
-                    AC_SUBST(ICONV_LIBS)
                 ], 
                 [
                     AC_CHECK_LIB(iconv, libiconv,
                         [
                             ICONV_LIBS="$LDFLAGS"
-                            AC_SUBST(ICONV_LIBS)
                         ],
                         [AC_MSG_ERROR(required library iconv not found on your system)]
                     )
@@ -364,73 +364,11 @@ else
         ]
     )
 fi
-#AC_CHECK_HEADER([iconv.h],
-#        [
-#            AC_CHECK_FUNCS([iconv],[],
-#                [
-#                    AC_CHECK_LIB(iconv, iconv, [], 
-#                        [
-#                            AC_CHECK_LIB(iconv, libiconv, [],
-#                                [AC_MSG_ERROR(iconv library not found on your system)]
-#                            )
-#                        ])
-#                ])
-#        ],
-#        [
-#            AC_CHECK_HEADER([/usr/local/include/iconv.h],
-#                [
-#                    ICONV_CXXFLAGS="-I/usr/local/include"
-#                    LDFLAGS="-L/usr/local/lib"
-#                    AC_SUBST(ICONV_CXXFLAGS)
-#                    AC_CHECK_FUNCS([iconv],
-#                        [
-#                            ICONV_LIBS="-L/usr/local/lib"
-#                            AC_SUBST(ICONV_LIBS)
-#                        ],
-#                        [
-#                            AC_CHECK_LIB(iconv, iconv, 
-#                                [
-#                                    ICONV_LIBS="-L/usr/local/lib -liconv"
-#                                    AC_SUBST(ICONV_LIBS)
-#                                ], 
-#                                 [
-#                                    AC_CHECK_LIB(iconv, libiconv, 
-#                                        [
-#                                            ICONV_LIBS="-L/usr/local/lib -liconv"
-#                                            AC_SUBST(ICONV_LIBS)
-#                                        ],
-#                                        [AC_MSG_ERROR(iconv library not found on your system)]
-#                                    )
-#                                 ])
-#                            ])
-#
-#                ],
-#                [
-#                        AC_CHECK_HEADER( $SEARCH_DIR/include/iconv.h,
-#                            [
-#                                ICONV_CXXFLAGS="-I$SEARCH_DIR/include/"
-#                                AC_SUBST(ICONV_CXXFLAGS)
-#                                LDFLAGS="-L$SEARCH_DIR/lib"
-#                                AC_CHECK_FUNCS([iconv],
-#                                    [
-#                                        ICONV_LIBS="-L$SEARCH_DIR/lib"
-#                                        AC_SUBST(ICONV_LIBS)
-#                                    ],
-#                                    [
-#                                        AC_CHECK_LIB(iconv, iconv, [], 
-#                                           [
-#                                            AC_CHECK_LIB(iconv, libiconv, 
-#                                                    [],
-#                                                    [AC_MSG_ERROR(iconv library not found on your system)]
-#                                                )
-#                                           ])
-#                                    ])
-#                            ],
-#                            [AC_MSG_ERROR(iconv library not found on your system)]
-#                        )
-#                ])
-#        ])
-#CFLAGS="$CFLAGS_SAVE"
+
+
+AC_SUBST(ICONV_CXXFLAGS)
+AC_SUBST(ICONV_LIBS)
+
 CXXFLAGS="$CXXFLAGS_SAVE"
 LDFLAGS="$LDFLAGS_SAVE"
 
@@ -466,8 +404,8 @@ AC_TYPE_PID_T
 AC_TYPE_SIZE_T
 AC_STRUCT_TM
 
-AC_ARG_ENABLE(rpl, 
-        AC_HELP_STRING([--disable-rpl], [disable redefinition of malloc to rpl_malloc and realloc to rpl_realloc. Use this if you are sure that you are compiling for the GNU C library (default: enabled)]),
+AC_ARG_ENABLE(rpl-malloc, 
+        AC_HELP_STRING([--disable-rpl-malloc], [disable redefinition of malloc to rpl_malloc and realloc to rpl_realloc. Use this if you are sure that you are compiling for the GNU C library (default: enabled)]),
         [
             if test "x$enableval" = xno; then
                 ac_cv_func_malloc_0_nonnull=yes
@@ -567,12 +505,13 @@ AC_DEFINE([UPNP_HAVE_WEBSERVER], [1], [Compile internal web server])
 AC_CHECK_LIB(pthread, pthread_mutex_lock,[], [AC_MSG_ERROR(required library function not found)])    
 
 ZLIB_OK=yes
+Z_CXXFLAGS=
+Z_LIBS=
 if test -n "$Z_SEARCH_HEADERS" ; then
     AC_MSG_NOTICE([Will search for zlib headers in $Z_SEARCH_HEADERS])
     AC_CHECK_HEADER([$Z_SEARCH_HEADERS/zlib.h],
             [
-                ZLIB_CXXFLAGS="-I$Z_SEARCH_HEADERS"
-                AC_SUBST(Z_CXXFLAGS)
+                Z_CXXFLAGS="-I$Z_SEARCH_HEADERS"
             ],
             [
                 AC_MSG_ERROR([zlib.h not found in requested location $Z_SEARCH_HEADERS])
@@ -590,7 +529,6 @@ if test "x$ZLIB_OK" = xyes; then
                 [
                     AC_DEFINE([HAVE_Z], [1], [zlib headers and libraries are present])
                     Z_LIBS="-L$Z_SEARCH_LIBS -lz"
-                    AC_SUBST(Z_LIBS)
                 ]
         )
     else
@@ -603,6 +541,9 @@ if test "x$ZLIB_OK" = xyes; then
 else
     AC_CHECK_LIB(z,uncompress)
 fi
+
+AC_SUBST(Z_CXXFLAGS)
+AC_SUBST(Z_LIBS)
 
 AC_CACHE_SAVE
 
@@ -629,7 +570,6 @@ if test "x$SQLITE3_OK" = xyes; then
         AC_CHECK_HEADER([$SQLITE3_SEARCH_HEADERS/sqlite3.h],
                 [
                     SQLITE3_CXXFLAGS="-I$SQLITE3_SEARCH_HEADERS"
-                    AC_SUBST(SQLITE3_CXXFLAGS)
                     SQLITE3_OK=yes
                 ],
                 [
@@ -647,7 +587,6 @@ if test "x$SQLITE3_OK" = xyes; then
                         AC_CHECK_HEADER($sqlite3_path/sqlite3.h, 
                             [
                                 SQLITE3_CXXFLAGS="-I$sqlite3_path"
-                                AC_SUBST(SQLITE3_CXXFLAGS)
                                 SQLITE3_OK=yes
                             ]
                         )
@@ -664,7 +603,6 @@ if test "x$SQLITE3_OK" = xyes; then
         AC_CHECK_LIB(sqlite3, sqlite3_open,
                 [
                     SQLITE3_LIBS="-L$SQLITE3_SEARCH_LIBS -lsqlite3"
-                    AC_SUBST(SQLITE3_LIBS)
                     SQLITE3_OK=yes
                 ],
                 [
@@ -682,7 +620,6 @@ if test "x$SQLITE3_OK" = xyes; then
                     AC_CHECK_LIB(sqlite3, sqlite3_open,
                         [
                             SQLITE3_LIBS="-L$sqlite3_path -lsqlite3"
-                            AC_SUBST(SQLITE3_LIBS)
                             SQLITE3_OK=yes
                         ]
                     )
@@ -695,6 +632,8 @@ fi
 
 if test "x$SQLITE3_OK" = xyes; then
     AC_DEFINE([HAVE_SQLITE3], [1], [sqlite3 library presence])
+    AC_SUBST(SQLITE3_CXXFLAGS)
+    AC_SUBST(SQLITE3_LIBS)
 else
     if test "x$SQLITE3_EN" = xyes; then
         AC_MSG_ERROR(unable to configure sqlite3 support)
@@ -726,15 +665,19 @@ MYSQL_PROG_FOUND=0
 if test "x$MYSQL_OK" = xyes; then
     if test -n "$MYSQL_SEARCH_CONFIG"; then
         AC_MSG_NOTICE([You specified $MYSQL_SEARCH_CONFIG for mysql_config])
-        AC_CHECK_FILE($MYSQL_SEARCH_CONFIG, 
-                [mysqlconfig="$MYSQL_SEARCH_CONFIG"],
-                [mysqlconfig="no"])
+        
+        if test -f "$MYSQL_SEARCH_CONFIG"; then 
+            mysqlconfig="$MYSQL_SEARCH_CONFIG"
+        else
+            mysqlconfig="no"
+        fi
+        
         if test "x$mysqlconfig" = xno; then
-            AC_MSG_ERROR([mysql_config script not found in requested path $MYSQL_SEARCH_CONFIG])
+            AC_MSG_ERROR([$MYSQL_SEARCH_CONFIG not found])
         else
             MYSQL_TEST=`${mysqlconfig} --version 2>/dev/null`
-            if test -z $MYSQL_TEST; then
-                AC_MSG_ERROR([${mysqlconfig} script could not be executed or returned invalid values])
+            if test -z "$MYSQL_TEST"; then
+                AC_MSG_ERROR([${mysqlconfig} could not be executed or returned invalid values])
             fi
 
             MYSQL_PROG_FOUND=1
@@ -744,7 +687,7 @@ if test "x$MYSQL_OK" = xyes; then
         if test "x$mysqlconfig" = xno; then
             unset ac_cv_path_mysqlconfig
             
-            AC_PATH_PROG(mysqlconfig, mysql_config, no, $SEARCH_DIR/bin)
+            AC_PATH_PROG(mysqlconfig, mysql_config, no, $SEARCH_DIR_PROGS)
             if test "x$mysqlconfig" = xno; then
                 MYSQL_OK=missing
                 AC_MSG_RESULT([mysql_config script not found])
@@ -771,18 +714,16 @@ if test "x$MYSQL_OK" = xyes; then
                 AC_MSG_WARN(MySQL version too old, we only support version 4.0.x or later)
                 MYSQL_OK=missing
         else
-            if test $MYSQL_VERSION_MAJOR -gt 3 ; then
+            if test "$MYSQL_VERSION_MAJOR" -gt 3 ; then
                 AC_MSG_CHECKING(mysql includes)
                 MYSQL_CFLAGS=`${mysqlconfig} --include`
                 AC_MSG_RESULT($MYSQL_CFLAGS)
-                AC_SUBST(MYSQL_CFLAGS)
  
                 AC_MSG_CHECKING(mysql libraries)
                 MYSQL_LIBS=`${mysqlconfig} --libs_r`
                 AC_MSG_RESULT($MYSQL_LIBS)
-                AC_SUBST(MYSQL_LIBS)
             else
-                AC_MSG_ERROR(Unsupported mysql version)
+                AC_MSG_WARN(Unsupported mysql version)
                 MYSQL_OK=missing
             fi
         fi
@@ -815,6 +756,8 @@ if test "x$MYSQL_OK" = xyes; then
 fi
 if test "x$MYSQL_OK" = xyes; then
     AC_DEFINE([HAVE_MYSQL], [1], [MySLQ library presence])
+    AC_SUBST(MYSQL_LIBS)
+    AC_SUBST(MYSQL_CFLAGS)
     AC_CHECK_FUNCS([mysql_stmt_init],[],[])
 else
     if test "x$MYSQL_EN" = xyes; then
@@ -870,7 +813,6 @@ if test "x$JS_OK" = xyes; then
         AC_CHECK_HEADER($JS_SEARCH_HEADERS/jsapi.h,
                 [
                     JS_CXXFLAGS="-I$JS_SEARCH_HEADERS"
-                    AC_SUBST(JS_CXXFLAGS)
                 ],
                 [
                     AC_MSG_ERROR([jsapi.h not found in requested location $JS_SEARCH_HEADERS])
@@ -882,8 +824,8 @@ if test "x$JS_OK" = xyes; then
         [],
         [
             for sm_path in /usr/include/js /usr/include/smjs /usr/local/include/js /usr/local/include/smjs \
-                    /usr/include/spidermonkey /usr/local/include/spidermonkey $SEARCH_DIR/include/spidermonkey \
-                    $SEARCH_DIR/include $SEARCH_DIR/include/js $SEARCH_DIR/include/smjs; do
+                    /usr/include/spidermonkey /usr/local/include/spidermonkey $SEARCH_DIR_HEADERS/spidermonkey \
+                    $SEARCH_DIR_HEADERS $SEARCH_DIR_HEADERS/js $SEARCH_DIR_HEADERS/smjs; do
                 if test "x$ac_cv_header_jsapi_h" != xyes ; then
                     AC_MSG_CHECKING([checking alternative libjs header location: $sm_path])
                     CXXFLAGS="$XP_ADD -I$sm_path"
@@ -934,15 +876,15 @@ if test "x$JS_OK" = xyes; then
             AC_CHECK_LIB(smjs, JS_NewObject,
                 [],
                 [
-                    LDFLAGS="-L$SEARCH_DIR/lib -ljs"
+                    LDFLAGS="-L$SEARCH_DIR_LIBS -ljs"
                     unset ac_cv_lib_smjs_JS_NewObject
                     AC_CHECK_LIB(js, JS_NewObject,
-                        [JS_LIBS="-L$SEARCH_DIR/lib -ljs"],
+                        [JS_LIBS="-L$SEARCH_DIR_LIBS -ljs"],
                         [
-                            LDFLAGS="-L$SEARCH_DIR/lib -lsmjs"
+                            LDFLAGS="-L$SEARCH_DIR_LIBS -lsmjs"
                             unset ac_cv_lib_js_JS_NewObject
                             AC_CHECK_LIB(smjs, JS_NewObject,
-                                [JS_LIBS="-L$SEARCH_DIR/lib -lsmjs"],
+                                [JS_LIBS="-L$SEARCH_DIR_LIBS -lsmjs"],
                                 [
                                     JS_OK=missing
                                     AC_MSG_RESULT(libjs/libsmjs link failed, giving up)
@@ -953,15 +895,14 @@ if test "x$JS_OK" = xyes; then
     fi
 fi
 if test "x$JS_OK" = xyes; then
-   AC_DEFINE([HAVE_JS], [1], [libjs presence])
+    AC_DEFINE([HAVE_JS], [1], [libjs presence])
+    AC_SUBST(JS_CXXFLAGS)
+    AC_SUBST(JS_LIBS)
 else
     if test "x$JS_EN" = xyes; then
         AC_MSG_ERROR(unable to configure libjs support)
     fi
 fi
-
-AC_SUBST(JS_CXXFLAGS)
-AC_SUBST(JS_LIBS)
 
 CXXFLAGS="$CXXFLAGS_SAVE"
 CPPFLAGS="$CPPFLAGS_SAVE"
@@ -985,35 +926,103 @@ AC_ARG_ENABLE(libmagic,
 )
 
 if test "x$MAGIC_OK" = xyes; then
+    if test -n "$MAGIC_SEARCH_HEADERS" ; then
+        AC_MSG_NOTICE([Will search for filemagic headers in $MAGIC_SEARCH_HEADERS])
+        AC_CHECK_HEADER($MAGIC_SEARCH_HEADERS/magic.h,
+                [
+                    MAGIC_CXXFLAGS="-I$MAGIC_SEARCH_HEADERS"
+                ],
+                [
+                    AC_MSG_ERROR([filemagic headers not found in requested location $MAGIC_SEARCH_HEADERS])
+                ]
+        )
+    else
     AC_CHECK_HEADER(magic.h,
         [],
         [
-            AC_CHECK_HEADER($SEARCH_DIR/include/magic.h,
+            unset ac_cv_header_magic_h
+            AC_CHECK_HEADER($SEARCH_DIR_HEADERS/magic.h,
                 [
-                    MAGIC_CXXFLAGS="-I$SEARCH_DIR/include"
+                    MAGIC_CXXFLAGS="-I$SEARCH_DIR_HEADERS"
                 ],
                 [MAGIC_OK=missing]
             )
         ]
     )
+    fi
 fi
 
 if test "x$MAGIC_OK" = xyes; then
-     AC_CHECK_LIB(z,compress,
-         [AC_CHECK_LIB(magic,magic_load,[],[MAGIC_OK=missing],[-lz])],
-         [AC_CHECK_LIB(magic,magic_load,[],[MAGIC_OK=missing],[])]
+    if test -n "$MAGIC_SEARCH_LIBS" ; then
+        LDFLAGS="$LDFLAGS $Z_LIBS"
+        AC_CHECK_LIB(z,compress,
+           [  
+              LDFLAGS="-L$MAGIC_SEARCH_LIBS $Z_LIBS"
+              AC_MSG_NOTICE([Will search for filemagic libraries in $MAGIC_SEARCH_LIBS])
+              AC_CHECK_LIB(magic,magic_load,
+                  [
+                      MAGIC_LIBS="-L$MAGIC_SEARCH_LIBS -lmagic $Z_LIBS"
+                  ],
+                  [
+                      AC_MSG_ERROR([filemagic libraries not found in requested location $MAGIC_SEARCH_LIBS])
+                  ],
+                  [-lz]
+              )
+           ],
+           [
+              LDFLAGS="-L$MAGIC_SEARCH_LIBS"
+              AC_CHECK_LIB(magic,magic_load,
+                  [
+                      MAGIC_LIBS="-L$MAGIC_SEARCH_LIBS -lmagic"
+                  ],
+                  [
+                      AC_MSG_ERROR([filemagic libraries not found in requested location $MAGIC_SEARCH_LIBS])
+                  ]
+              )
+           ]
+       )
+    else
+    LDFLAGS="$LDFLAGS $Z_LIBS"
+    AC_CHECK_LIB(z,compress,
+         [
+            AC_CHECK_LIB(magic,magic_load,
+                [MAGIC_LIBS="$Z_LIBS -lmagic"],
+                [
+                    LDFLAGS="$LDFLAGS -L$SEARCH_DIR_LIBS"
+                    unset ac_cv_lib_magic_magic_load
+                    AC_CHECK_LIB(magic,magic_load,
+                    [MAGIC_LIBS="-L$SEARCH_DIR_LIBS $Z_LIBS -lmagic"],
+                    [MAGIC_OK=missing],[-lz])
+                ],[-lz]
+            )
+         ],
+         [
+            AC_CHECK_LIB(magic,magic_load,
+                [],
+                [
+                    LDFLAGS="-L$SEARCH_DIR_LIBS"
+                    unset ac_cv_lib_magic_magic_load
+                    AC_CHECK_LIB(magic,magic_load,
+                    [MAGIC_LIBS="-L$SEARCH_DIR_LIBS -lmagic"],
+                    [MAGIC_OK=missing])
+                ]
+            )
+        ] 
      )
+    fi
 fi
 
 if test "x$MAGIC_OK" = xyes; then
     AC_DEFINE([HAVE_MAGIC], [1], [filemagic library presence])
+    AC_SUBST(MAGIC_CXXFLAGS)
+    AC_SUBST(MAGIC_LIBS)
 else
     if test "x$MAGIC_EN" = xyes; then
         AC_MSG_ERROR(unable to configure libmagic support)
     fi
 fi
 
-AC_SUBST(MAGIC_CXXFLAGS)
+LDFLGAS="$LDFLAGS_SAVE"
 
 ######### taglib
 
@@ -1062,12 +1071,43 @@ elif ((test "x$TAGLIB_REQUESTED" = xyes) && (test "x$ID3_REQUESTED" = xyes)) ; t
     AC_MSG_ERROR([Please select either taglib or id3lib, but not both.])
 fi
 
+TAGLIB_PROG_FOUND=0
 if test "x$TAGLIB_OK" = xyes; then
-    AC_PATH_PROG(taglibconfig, taglib-config, no)
-    if test "x$taglibconfig" = xno; then
-        AC_MSG_RESULT([taglib-config not found, please install the taglib-devel package])
-        TAGLIB_OK=missing
+    if test -n "$TAGLIB_SEARCH_CONFIG"; then
+        AC_MSG_NOTICE([You specified $TAGLIB_SEARCH_CONFIG for taglib-config])
+        
+        if test -f "$TAGLIB_SEARCH_CONFIG"; then 
+            taglibconfig="$TAGLIB_SEARCH_CONFIG"
+        else
+            taglibconfig="no"
+        fi
+        
+        if test "x$taglibconfig" = xno; then
+            AC_MSG_ERROR([$TAGLIB_SEARCH_CONFIG not found])
+        else
+            TAGLIB_TEST=`${taglibconfig} --version 2>/dev/null`
+            if test -z "$TAGLIB_TEST"; then
+                AC_MSG_ERROR([${taglibconfig} could not be executed or returned invalid values])
+            fi
+            TAGLIB_PROG_FOUND=1
+        fi
     else
+        AC_PATH_PROG(taglibconfig, taglib-config, no)
+        if test "x$taglibconfig" = xno; then
+            unset ac_cv_path_taglibconfig
+            AC_PATH_PROG(taglibconfig, taglib-config, no, $SEARCH_DIR_PROGS)
+            if test "x$taglibconfig" = xno; then
+                TAGLIB_OK=missing
+                AC_MSG_RESULT([taglib-config not found, please install the taglib-devel package])
+            else
+                TAGLIB_PROG_FOUND=1
+            fi
+        else
+            TAGLIB_PROG_FOUND=1
+        fi
+   fi 
+
+   if test "$TAGLIB_PROG_FOUND" -eq 1 ; then
         AC_MSG_CHECKING(taglib cflags)
         TAGLIB_CFLAGS=`${taglibconfig} --cflags`
         AC_MSG_RESULT($TAGLIB_CFLAGS)
@@ -1075,7 +1115,6 @@ if test "x$TAGLIB_OK" = xyes; then
         AC_MSG_CHECKING(taglib libraries)
         TAGLIB_LIBS=`${taglibconfig} --libs`
         AC_MSG_RESULT($TAGLIB_LIBS)
-
     fi
 fi
 
@@ -1089,6 +1128,7 @@ if test "x$TAGLIB_OK" = xyes; then
 fi
 
 if test "x$TAGLIB_OK" = xyes; then
+    LDFLAGS="$TAGLIB_LIBS"
     AC_CHECK_LIB(tag, main, [],
         [TAGLIB_OK=missing]
     )
@@ -1096,17 +1136,16 @@ fi
 
 if test "x$TAGLIB_OK" = xyes; then
     AC_DEFINE([HAVE_TAGLIB], [1], [taglib library presence])
-        ID3_OK=disabled
+    AC_SUBST(TAGLIB_CFLAGS)
+    AC_SUBST(TAGLIB_LIBS)
+    ID3_OK=disabled
 else
     if test "x$TAGLIB_EN" = xyes; then
         AC_MSG_ERROR(unable to configure taglib support)
     fi
 fi
-
-AC_SUBST(TAGLIB_CFLAGS)
-AC_SUBST(TAGLIB_LIBS)
-
 CPPFLAGS="$CPPFLAGS_SAVE"
+LDFLAGS="$LDFLAGS_SAVE"
 
 ######### id3tag
 
@@ -1121,30 +1160,143 @@ CPPFLAGS="$CPPFLAGS_SAVE"
 #)
 
 if test "x$ID3_OK" = xyes; then
+    if test -n "$ID3_SEARCH_HEADERS" ; then
+     CPPFLAGS="-I$ID3_SEARCH_HEADERS"
+     AC_CHECK_HEADER($ID3_SEARCH_HEADERS/id3/tag.h,
+        [
+            ID3_CXXFLAGS="-I$ID3_SEARCH_HEADERS"
+        ],
+        [
+            AC_MSG_ERROR([id3lib headers not found in requested location $ID3_SEARCH_HEADERS])
+        ]
+    )
+   else
     AC_CHECK_HEADER(id3/tag.h,
         [],
-        [ID3_OK=missing],
-        /* checking for id3/tag.h */
+        [
+            unset ac_cv_header_id3_tag_h
+            CPPFLAGS="-I$SEARCH_DIR_HEADERS"
+            AC_CHECK_HEADER(id3/tag.h,
+                [
+                    ID3_CXXFLAGS="-I$SEARCH_DIR_HEADERS"
+                ],
+                [
+                    ID3_OK=missing
+                ]
+            )
+                
+        ]
     )
+    fi
 fi
 
 if test "x$ID3_OK" = xyes; then
+    if test -n "$ID3_SEARCH_HEADERS" ; then
+     CPPFLAGS="-I$ID3_SEARCH_HEADERS"
+     AC_CHECK_HEADER(id3/misc_support.h,
+        [
+            ID3_CXXFLAGS="-I$ID3_SEARCH_HEADERS"
+        ],
+        [
+            AC_MSG_ERROR([id3lib headers not found in requested location $ID3_SEARCH_HEADERS])
+        ]
+    )
+   else
     AC_CHECK_HEADER(id3/misc_support.h,
         [],
-        [ID3_OK=missing],
-        /* checking for id3/misc_support.h */
+        [
+            unset ac_cv_header_id3_misc_support_h
+            CPPFLAGS="-I$SEARCH_DIR_HEADERS"
+            AC_CHECK_HEADER(id3/misc_support.h,
+                [
+                    ID3_CXXFLAGS="-I$SEARCH_DIR_HEADERS"
+                ],
+                [
+                    ID3_OK=missing
+                ]
+            )
+                
+        ]
     )
+    fi
 fi
+
 if test "x$ID3_OK" = xyes; then
+    if test -n "$ID3_SEARCH_LIBS" ; then
+        LDFLAGS="$LDFLAGS $Z_LIBS"
+        AC_CHECK_LIB(z,compress,
+           [
+              LDFLAGS="-L$ID3_SEARCH_LIBS $Z_LIBS"
+              AC_MSG_NOTICE([Will search for id3lib libraries in $ID3_SEARCH_LIBS])
+              AC_CHECK_LIB(id3, main
+                  [
+                      ID3_LIBS="-L$ID3_SEARCH_LIBS -lid3 $Z_LIBS"
+                  ],
+                  [
+                      AC_MSG_ERROR([id3lib libraries not found in requested location $ID3_SEARCH_LIBS])
+                  ],
+                  [-lz]
+              )
+           ],
+           [
+              LDFLAGS="-L$ID_SEARCH_LIBS"
+              AC_CHECK_LIB(id3, main,
+                  [
+                      ID3_LIBS="-L$ID3_SEARCH_LIBS -lid3"
+                  ],
+                  [
+                      AC_MSG_ERROR([id3lib libraries not found in requested location $ID3_SEARCH_LIBS])
+                  ]
+              )
+           ]
+       )
+    else
+    LDFLAGS="$LDFLAGS $Z_LIBS"
     AC_CHECK_LIB(z,compress,
-            [AC_CHECK_LIB(id3,main,[],[ID3_OK=missing],[-lz])],
-            [AC_CHECK_LIB(id3,main,[],[ID3_OK=missing],[])],
-            []
-    )
+         [
+            AC_CHECK_LIB(id3, main,
+                [
+                    ID3_LIBS="$Z_LIBS -lid3"
+                ],
+                [
+                    LDFLAGS="$LDFLAGS -L$SEARCH_DIR_LIBS"
+                    unset ac_cv_lib_id3_main
+                    AC_CHECK_LIB(id3, main,
+                        [
+                            ID3_LIBS="$Z_LIBS -L$SEARCH_DIR_LIBS -lid3"
+                        ],
+                        [
+                            MAGIC_OK=missing
+                        ]
+                    )
+                ],
+                [-lz])
+         ],
+         [
+            AC_CHECK_LIB(id3,main,[],
+                [
+                    LDFLAGS="-L$SEARCH_DIR_LIBS"
+                    unset ac_cv_lib_id3_main
+                    AC_CHECK_LIB(id3, main,
+                        [
+                            ID3_LIBS="-L$SEARCH_DIR_LIBS -lid3"
+                        ],
+                        [
+                            MAGIC_OK=missing
+                        ]
+                    )
+                ]
+            )
+         ] 
+     )
+    fi
+    
 fi
 
 if test "x$ID3_OK" = xyes; then
    AC_DEFINE([HAVE_ID3], [1], [id3lib presence])
+   AC_SUBST(ID3_CXXFLAGS)
+   AC_SUBST(ID3_LIBS)
 else
     if test "x$ID3_EN" = xyes; then
         if test "x$TAGLIB_OK" = xyes; then
@@ -1155,6 +1307,9 @@ else
     fi
 fi
 
+LDFLAGS="$LDFLAGS_SAVE"
+CXXFLAGS="$CXXFLAGS_SAVE"
+CPPFLAGS="$CPPFLAGS_SAVE"
 
 ######## extractor
 
@@ -1174,50 +1329,53 @@ AC_ARG_ENABLE(libextractor,
 
 )
 if test "x$EXTRACTOR_OK" = xyes; then
-    AC_CHECK_HEADER(extractor.h,
-        [],
-        [EXTRACTOR_OK=missing],
-        /* checking for extractor.h */
-    )
+    if test -n "$EXTRACTOR_SEARCH_HEADERS" ; then
+        AC_CHECK_HEADER($EXTRACTOR_SEARCH_HEADERS/extractor.h,
+                [ EXTRACTOR_CXXFLAGS="-I$EXTRACTOR_SEARCH_HEADERS" ],
+                [ AC_MSG_ERROR([extractor headers not found in requested location $EXTRACTOR_SEARCH_HEADERS])]
+        )
+    else
+        AC_CHECK_HEADER(extractor.h,
+            [],
+            [
+                unset ac_cv_header_extractor_h
+                AC_CHECK_HEADER($SEARCH_DIR_INCLUDES/extrator.h,
+                    [ EXTRACTOR_CXXFLAGS="-I$SEARCH_DIR_INCLUDES" ],
+                    [ EXTRACTOR_OK=missing ]
+                )
+            ]
+        )
+    fi
 fi
 
 if test "x$EXTRACTOR_OK" = xyes; then
-    AC_CHECK_LIB(extractor, EXTRACTOR_getKeywords,
-        [],
-        [ID3_OK=missing],
-        []
-    )
+    if test -n "$EXTRACTOR_SEARCH_HEADERS" ; then
+        LDFLAGS="-L$EXTRACTOR_SEARCH_LIBS"
+        AC_CHECK_LIB(extractor, EXTRACTOR_getKeywords,
+                [LDFLAGS="-L$EXTRACTOR_SEARCH_LIBS -lextractor"],
+                [
+                    AC_MSG_ERROR([extractor libraries not found in requested location $EXTRACTOR_SEARCH_LIBS])
+                ]
+        )
+    else
+        AC_CHECK_LIB(extractor, EXTRACTOR_getKeywords,
+            [], 
+            [
+                LDFLAGS="-L$SEARCH_DIR_LIBS"
+                unset ac_cv_lib_extractor_EXTRACTOR_getKeywords
+                AC_CHECK_LIB(extractor, EXTRACTOR_getKeywords,
+                    [ EXTRACTOR_LIBS="-L$SEARCH_DIR_LIBS -lextractor" ],
+                    [ EXTRACTOR_OK=missing ]
+                )
+            ]
+        )
+    fi
 fi
 
-
-#disabling version check, 0.5.2 is broken!!!
-#if test "x$EXTRACTOR_OK" = xyes; then
-#    AC_MSG_CHECKING([extractor version])
-#    AC_CHECKING prints newline
-#    AC_RUN_IFELSE(
-#        [AC_LANG_PROGRAM(
-#            [
-#                #include <extractor.h>
-#            ],
-#            [
-#                if(EXTRACTOR_VERSION < 0x00050200)
-#                    return 1;
-#            ]
-#        )],
-#        [
-#            AC_MSG_RESULT([>= 0.5.2])
-#            EXTRACTOR_GE_0_5_2=yes
-#        ],
-#        [
-#            AC_MSG_RESULT([< 0.5.2])
-#        ]
-#    )
-#fi
 if test "x$EXTRACTOR_OK" = xyes; then
     AC_DEFINE([HAVE_EXTRACTOR], [1], [libextractor library presence])
-#    if test "x$EXTRACTOR_GE_0_5_2" = xyes; then
-#        AC_DEFINE(EXTRACTOR_GE_0_5_2)
-#    fi
+    AC_SUBST(EXTRACTOR_CXXFLAGS)
+    AC_SUBST(EXTRACTOR_LIBS)
 else
     if test "x$EXTRACTOR_EN" = xyes; then
         AC_MSG_ERROR(unable to configure libextractor support)
@@ -1227,46 +1385,77 @@ fi
 
 ######## libexif
 
-#if test "x$EXTRACTOR_OK" = xyes -a "x$EXTRACTOR_GE_0_5_2" = xyes; then
-#    EXIF_OK="disabled (obsoleted by libextractor >= v0.5.2)"
-#fi
 AC_ARG_ENABLE(libexif,
         AC_HELP_STRING([--enable-libexif], [compile with libexif support (default: yes)]),
     [
-#        if test "x$EXTRACTOR_OK" != xyes -o "x$EXTRACTOR_GE_0_5_2" != xyes; then
-            EXIF_EN=$enableval 
-            if test "x$enableval" = xno; then
-                EXIF_OK=disabled
-            else
-                EXIF_OK=yes
-            fi
-#        fi
+        EXIF_EN=$enableval 
+        if test "x$enableval" = xno; then
+            EXIF_OK=disabled
+        else
+            EXIF_OK=yes
+        fi
     ],
     [
         EXIF_OK=yes
     ]
 )
+
 if test "x$EXIF_OK" = xyes; then
-    AC_CHECK_HEADER(libexif/exif-data.h,
-        [],
-        [EXIF_OK=missing],
-        /* checking for libexif/exif-data.h */
-    )
-fi
-if test "x$EXIF_OK" = xyes; then
-    AC_CHECK_HEADER(libexif/exif-content.h,
-        [],
-        [EXIF_OK=missing],
-        /* checking for libexif/exif-content.h */
-    )
+    if test -n "$EXIF_SEARCH_HEADERS" ; then
+        CPPFLAGS="-I$EXIF_SEARCH_HEADERS"
+        AC_CHECK_HEADER($EXIF_SEARCH_HEADERS/libexif/exif-content.h,
+                [
+                    EXIF_CXXFLAGS="-I$EXIF_SEARCH_HEADERS"
+                ],
+                [
+                    AC_MSG_ERROR([libexif headers not found in requested location $EXIF_SEARCH_HEADERS])
+                ]
+        )
+    else 
+        AC_CHECK_HEADER(libexif/exif-content.h,
+            [],
+            [
+                CPPFLAGS="-I$SEARCH_DIR_HEADERS"
+                unset ac_cv_header_libexif_exif_content_h
+                AC_CHECK_HEADER($SEARCH_DIR_HEADERS/libexif/exif-content.h,
+                    [
+                        EXIF_CXXFLAGS="-I$SEARCH_DIR_HEADERS"
+                    ],
+                    [
+                        EXIF_OK=missing
+                    ]
+                )
+            ]
+        )
+    fi
 fi
 
 if test "x$EXIF_OK" = xyes; then
-    AC_CHECK_LIB(exif, exif_data_new_from_file,
-        [],
-        [EXIF_OK=missing],
-        []
-    )
+    if test -n "$EXIF_SEARCH_LIBS" ; then
+        LDFLAGS="-L$EXIF_SEARCH_LIBS"
+        AC_CHECK_LIB(exif, exif_data_new_from_file,
+                [
+                    EXIF_LIBS="-L$EXIF_SEARCH_LIBS -lexif"
+                ],
+                [
+                    AC_MSG_ERROR([libexif libraries not found in requested path $EXIF_SEARCH_LIBS])
+                ]
+        )
+    else
+        AC_CHECK_LIB(exif, exif_data_new_from_file,
+            [],
+            [
+                LDFLAGS="-L$SEARCH_DIR_LIBS"
+                unset ac_cv_lib_exif_exif_data_new_from_file
+                AC_CHECK_LIB(exif, exif_data_new_from_file,
+                    [
+                        EXIF_LIBS="-L$SEARCH_DIR_LIBS -lexif"
+                    ],
+                    [ EXIF_OK=missing ]
+                )
+            ]
+        )
+    fi
 fi
 
 if test "x$EXIF_OK" = xyes; then
@@ -1313,6 +1502,8 @@ if test "x$EXIF_OK" = xyes; then
 fi
 if test "x$EXIF_OK" = xyes; then
     AC_DEFINE([HAVE_EXIF], [1], [EXIF library presence])
+    AC_SUBST(EXIF_CXXFLAGS)
+    AC_SUBST(EXIF_LIBS)
     if test "x$EXIF_EGV_1" = xyes; then
         AC_DEFINE([EXIF_EGV_1], [1], [exif_entry_get_value() has 1 parameter])
     fi
@@ -1325,7 +1516,8 @@ else
     fi
 fi
 
-
+LDFLAGS="$LDFLAGS_SAVE"
+CPPFLAGS="$CPPFLAGS_SAVE"
 
 ######## exiv2
 # TEMPORARILY DISABLED BECAUSE EXIV2 HAS MEMORY LEAKS
