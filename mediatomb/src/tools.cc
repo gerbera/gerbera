@@ -598,7 +598,7 @@ String intArrayToCSV(int *array, int size)
 
 void getTimespecNow(struct timespec *ts)
 {
-#ifdef HAVE_RT
+#ifdef HAVE_CLOCK_GETTIME 
     clock_gettime(CLOCK_REALTIME, ts);
 #else
     

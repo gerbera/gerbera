@@ -51,5 +51,6 @@ mediatomb_LDADD = \
     $(MAGIC_LIBS) \
     $(ID3_LIBS) \
     $(EXIF_LIBS) \
-    $(Z_LIBS)
+    $(Z_LIBS) \
+    $(RT_LIBS)
 
