@@ -215,6 +215,24 @@ AC_ARG_ENABLE(static,
         ]
 )
 
+AUTOCREATE=1
+AC_ARG_ENABLE(db-autocreate,
+        AC_HELP_STRING([--enable-db-autocreate], [enable automatic creation of the media database (default: yes)]),
+        [
+            if test "x$enableval" = xno; then
+                AUTOCREATE=0
+            else
+                AUTOCREATE=1
+            fi
+        ],
+        [
+            AUTOCREATE=1
+        ]
+)
+
+if test $AUTOCREATE -eq 1; then
+    AC_DEFINE([AUTO_CREATE_DATABASE], [1], [create database automatically if it does not exist])
+fi
 
 ###############################################################################
 # The following block is derived from the configure.ac script from the 
