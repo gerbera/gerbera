@@ -132,15 +132,15 @@ void MysqlStorage::init()
     mysql_connection = true;
     
     String dbVersion = nil;
+    mutex->unlock();
     try
     {
-        mutex->unlock();
         dbVersion = getInternalSetting(_("db_version"));
-        mutex->lock();
     }
     catch (Exception)
     {
     }
+    mutex->lock();
     if (dbVersion == nil)
     {
         unsigned char buf[MS_CREATE_SQL_INFLATED_SIZE + 1]; // + 1 for '\0' at the end of the string
@@ -173,7 +173,10 @@ void MysqlStorage::init()
         }
         while(sql_end != NULL);
         
+        mutex->unlock();
         dbVersion = getInternalSetting(_("db_version"));
+        mutex->lock();
+        
         if (dbVersion == nil)
         {
             mutex->unlock();

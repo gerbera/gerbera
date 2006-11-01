@@ -32,7 +32,7 @@ CREATE TABLE "mt_internal_setting" (
 );
 INSERT INTO "mt_internal_setting" VALUES('db_version', '1');
 CREATE INDEX mt_cds_object_ref_id ON mt_cds_object(ref_id);
-CREATE INDEX mt_cds_object_parent_id ON mt_cds_object(parent_id);
+CREATE INDEX mt_cds_object_parent_id ON mt_cds_object(parent_id,object_type,dc_title);
 CREATE INDEX mt_location_parent ON mt_cds_object(location_hash,parent_id);
 CREATE INDEX mt_internal_setting_key ON mt_internal_setting(key);
 COMMIT;
