@@ -42,7 +42,7 @@ void web::files::process()
 
     String path;
     String parentID = param(_("parent_id"));
-    if (! string_ok(parentID))
+    if (! string_ok(parentID) || parentID == "0")
         path = _(FS_ROOT_DIRECTORY);
     else
         path = hex_decode_string(parentID);
