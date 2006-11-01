@@ -76,13 +76,13 @@ static Ref<Storage> create_primary_inst()
     return storage;
 }
 
-Mutex Storage::mutex = Mutex();
+Ref<Mutex> Storage::mutex = Ref<Mutex>(new Mutex());
 
 Ref<Storage> Storage::getInstance()
 {
     if(primary_inst == nil)
     {
-        mutex.lock();
+        mutex->lock();
         if (primary_inst == nil)
         {
             try
@@ -91,11 +91,11 @@ Ref<Storage> Storage::getInstance()
             }
             catch (Exception e)
             {
-                mutex.unlock();
+                mutex->unlock();
                 throw e;
             }
         }
-        mutex.unlock();
+        mutex->unlock();
     }
     return primary_inst;
 }

@@ -44,25 +44,25 @@ Ref<Element> UpnpXML_CreateResponse(String actionName, String serviceType)
 Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions)
 {
     Ref<Element> result(new Element(_("")));
-       
+    
     result->addAttribute(_("id"), String::from(obj->getID()));
     result->addAttribute(_("parentID"), String::from(obj->getParentID()));
     result->addAttribute(_("restricted"), obj->isRestricted() ? _("1") : _("0"));
-
+    
     result->appendTextChild(_("dc:title"), obj->getTitle());
     result->appendTextChild(_("upnp:class"), obj->getClass());
-
+    
     int objectType = obj->getObjectType();
     if (IS_CDS_ITEM(objectType))
     {
         Ref<CdsItem> item = RefCast(obj, CdsItem);
-
+        
         Ref<Dictionary> meta = obj->getMetadata();
         Ref<Array<DictionaryElement> > elements = meta->getElements();
         int len = elements->size();
-
+        
         String key;
-            
+        
         for (int i = 0; i < len; i++)
         {
             Ref<DictionaryElement> el = elements->get(i);
@@ -70,25 +70,25 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions)
             if (key != "dc:title")
                 result->appendTextChild(key, el->getValue());
         }
-
+        
         log_debug("ITEM HAS FOLLOWING METADATA: %s\n", item->getMetadata()->encode().c_str());
-
-
+        
+        
         CdsResourceManager::getInstance()->addResources(item, result);
-       
+        
         result->setName(_("item"));
     }
     else if (IS_CDS_CONTAINER(objectType))
     {
         Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
-    
+        
         result->setName(_("container"));
         int childCount = cont->getChildCount();
         if (childCount >= 0)
             result->addAttribute(_("childCount"), String::from(childCount));
-
+        
     }
-
+    
     if (renderActions && IS_CDS_ACTIVE_ITEM(objectType))
     {
         Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);

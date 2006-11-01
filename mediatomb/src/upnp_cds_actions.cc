@@ -53,13 +53,11 @@ void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
     else
         objectID = objID.toInt();
     
-    int flag;
-
-    if(BrowseFlag == "BrowseMetadata")
-        flag = BROWSE_METADATA;
-    else if(BrowseFlag == "BrowseDirectChildren")
-        flag = BROWSE_DIRECT_CHILDREN;
-    else
+    unsigned int flag = BROWSE_ITEMS | BROWSE_CONTAINERS | BROWSE_EXACT_CHILDCOUNT;
+    
+    if(BrowseFlag == "BrowseDirectChildren")
+        flag |= BROWSE_DIRECT_CHILDREN;
+    else if (BrowseFlag != "BrowseMetadata")
         throw UpnpException(UPNP_SOAP_E_INVALID_ARGS,
                             _("invalid browse flag: ") + BrowseFlag);
 

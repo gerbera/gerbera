@@ -39,36 +39,33 @@ void web::containers::process()
     log_debug(("containers.cc: containers::process()\n"));
     check_request();
     
-    String parID = param(_("parent_id"));
-    int parentID;
-    if (parID == nil)
+    int parentID = intParam(_("parent_id"), INVALID_OBJECT_ID);
+    if (parentID == INVALID_OBJECT_ID)
         throw _Exception(_("web::containers: no parent_id given"));
-    else
-        parentID = parID.toInt();
     
     Ref<Storage> storage = Storage::getInstance();
-    Ref<BrowseParam> param(new BrowseParam(parentID, BROWSE_DIRECT_CHILDREN));
-    param->containersOnly = true;
+    Ref<BrowseParam> param(new BrowseParam(parentID, BROWSE_DIRECT_CHILDREN | BROWSE_CONTAINERS));
     
     Ref<Array<CdsObject> > arr = storage->browse(param);
     
     Ref<Element> containers (new Element(_("containers")));
-    containers->addAttribute(_("ofId"), parID);
+    containers->addAttribute(_("ofId"), String::from(parentID));
     containers->addAttribute(_("type"), _("d"));
     
     for (int i = 0; i < arr->size(); i++)
     {
         Ref<CdsObject> obj = arr->get(i);
-        if (IS_CDS_CONTAINER(obj->getObjectType())) {
-            Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
-            Ref<Element> ce(new Element(_("container")));
-            ce->addAttribute(_("id"), String::from(cont->getID()));
-            int childCount = cont->getChildCount();
-            if (childCount)
-                ce->addAttribute(_("childCount"), String::from(childCount));
-            ce->setText(cont->getTitle());
-            containers->appendChild(ce);
-        }
+        //if (IS_CDS_CONTAINER(obj->getObjectType()))
+        //{
+        Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
+        Ref<Element> ce(new Element(_("container")));
+        ce->addAttribute(_("id"), String::from(cont->getID()));
+        int childCount = cont->getChildCount();
+        if (childCount)
+            ce->addAttribute(_("childCount"), String::from(childCount));
+        ce->setText(cont->getTitle());
+        containers->appendChild(ce);
+        //}
     }
     
     root->appendChild(containers);

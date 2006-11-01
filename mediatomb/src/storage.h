@@ -28,56 +28,41 @@
 #include "sync.h"
 #include "hash.h"
 
-typedef enum
-{
-    BROWSE_METADATA = 1,
-    BROWSE_DIRECT_CHILDREN = 2
-} browse_flag_t;
-
-/*
-typedef enum
-{
-    SELECT_BASIC = 0,
-    SELECT_EXTENDED,
-    SELECT_FULL,
-
-    SELECT__MAX
-} select_mode_t;
-*/
-
-/* flags for SelectParam */
-#define FILTER_PARENT_ID 1
-#define FILTER_REF_ID 2
-#define FILTER_PARENT_ID_CONTAINERS 3
-#define FILTER_PARENT_ID_ITEMS 4
+#define BROWSE_DIRECT_CHILDREN      0x00000001
+#define BROWSE_ITEMS                0x00000002
+#define BROWSE_CONTAINERS           0x00000004
+#define BROWSE_EXACT_CHILDCOUNT     0x00000008
 
 class BrowseParam : public zmm::Object
 {
 protected:
-    int flag;
+    unsigned int flags;
     int objectID;
-
+    
     int startingIndex;
     int requestedCount;
-
+    
     // output parameters
     int totalMatches;
-
+    
 public:
-    bool containersOnly;
-
-    inline BrowseParam(int objectID, int flag)
+    inline BrowseParam(int objectID, unsigned int flags)
     {
         this->objectID = objectID;
-        this->flag = flag;
+        this->flags = flags;
         startingIndex = 0;
         requestedCount = 0;
-        containersOnly = false;
     }
-
-    inline int getFlag() { return flag;}
+    
+    inline int getFlags() { return flags; }
+    inline unsigned int getFlag(unsigned int mask) { return flags & mask; }
+    inline void setFlags(unsigned int flags) { this->flags = flags; }
+    inline void setFlag(unsigned int mask) { flags |= mask; }
+    inline void changeFlag(unsigned int mask, bool value) { if (value) setFlag(mask); else clearFlag(mask); }
+    inline void clearFlag(unsigned int mask) { flags &= !mask; }
+    
     inline int getObjectID() { return objectID; }
-
+    
     inline void setRange(int startingIndex, int requestedCount)
     {
         this->startingIndex = startingIndex;
@@ -85,33 +70,18 @@ public:
     }
     inline void setStartingIndex(int startingIndex)
     { this->startingIndex = startingIndex; }
-
+    
     inline void setRequestedCount(int requestedCount)
     { this->requestedCount = requestedCount; }
-
+    
     inline int getStartingIndex() { return startingIndex; }
     inline int getRequestedCount() { return requestedCount; }
-
+    
     inline int getTotalMatches() { return totalMatches; }
-
+    
     inline void setTotalMatches(int totalMatches)
     { this->totalMatches = totalMatches; }
-
-};
-
-
-class Storage;
-class SelectParam : public zmm::Object
-{
-public:
-    inline SelectParam(int flags, int iArg1)
-    {
-        this->flags = flags;
-        this->iArg1 = iArg1;
-    }
-public:
-    int flags;
-    int iArg1;
+    
 };
 
 class Storage : public zmm::Object
@@ -148,7 +118,7 @@ public:
     virtual zmm::Ref<zmm::Array<CdsObject> > browse(zmm::Ref<BrowseParam> param) = 0;
     virtual zmm::Ref<zmm::Array<zmm::StringBase> > getMimeTypes() = 0;
 
-    virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param) = 0;
+    //virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param) = 0;
     
     //virtual zmm::Ref<CdsObject> findObjectByTitle(zmm::String title, int parentID) = 0;
     virtual zmm::Ref<CdsObject> findObjectByPath(zmm::String path) = 0;
@@ -158,7 +128,7 @@ public:
     
     /* utility methods */
     virtual zmm::Ref<CdsObject> loadObject(int objectID) = 0;
-    virtual int getChildCount(int contId, bool containersOnly = false) = 0;
+    virtual int getChildCount(int contId, bool containers = true, bool items = true) = 0;
     
     /// \brief Removed the object identified by the objectID from the database.
     /// all references will be automatically removed. If the object is
@@ -216,7 +186,7 @@ protected:
     
     //void getObjectPath(zmm::Ref<zmm::Array<CdsObject> > arr, int objectID);
     
-    static Mutex mutex;
+    static zmm::Ref<Mutex> mutex;
 };
 
 #endif // __STORAGE_H__

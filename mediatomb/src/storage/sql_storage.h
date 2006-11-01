@@ -32,6 +32,9 @@
 #define CDS_ACTIVE_ITEM_TABLE       "`mt_cds_active_item`"
 #define INTERNAL_SETTINGS_TABLE     "`mt_internal_setting`"
 
+#define QTB                 table_quote_begin
+#define QTE                 table_quote_end
+
 class SQLResult;
 
 class SQLRow : public zmm::Object
@@ -70,9 +73,9 @@ public:
     virtual void updateObject(zmm::Ref<CdsObject> object, int *changedContainer);
     
     virtual zmm::Ref<CdsObject> loadObject(int objectID);
-    virtual int getChildCount(int contId, bool containersOnly = false);
+    virtual int getChildCount(int contId, bool containers, bool items);
     
-    virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param);
+    //virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param);
     
     virtual int isFolderInDatabase(zmm::String path);
     virtual int isFileInDatabase(zmm::String path);

@@ -42,20 +42,8 @@ void web::remove::process()
     
     check_request();
     
-    String objID = param(_("object_id"));
-    int objectID;
-    if (!string_ok(objID))
-        throw _Exception(_("invalid object id"));
-    else
-        objectID = objID.toInt();
-    
-    String allStr = param(_("all"));
-    int allInt;
-    if (!string_ok(allStr))
-        throw _Exception(_("invalid 'all' flag"));
-    else
-        allInt = allStr.toInt();
-    bool all = allInt;
+    int objectID = intParam(_("object_id"));
+    bool all = intParam(_("all"));
     
     ContentManager::getInstance()->removeObject(objectID, false, all);
     

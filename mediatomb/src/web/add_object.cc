@@ -149,12 +149,7 @@ void web::addObject::process()
     if (!string_ok(param(_("class"))))
         throw _Exception(_("empty class"));
     
-    String parID = param(_("parent_id"));
-    int parentID;
-    if (parID == nil)
-        parentID = 0;
-    else
-        parentID = parID.toInt();
+    int parentID = intParam(_("parent_id"), 0);
     
     Ref<CdsObject> obj = nil;
     

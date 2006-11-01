@@ -66,9 +66,6 @@ enum
     _ref_mime_type
 };
 
-#define QTB                 table_quote_begin
-#define QTE                 table_quote_end
-
 #define SEL_F_QUOTED        << QTB << "f" << QTE <<
 #define SEL_RF_QUOTED       << QTB << "rf" << QTE <<
 
@@ -437,6 +434,9 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     int objectID;
     int objectType;
     
+    bool getContainers = param->getFlag(BROWSE_CONTAINERS);
+    bool getItems = param->getFlag(BROWSE_ITEMS);
+    
     objectID = param->getObjectID();
     
     String q;
@@ -448,7 +448,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     res = select(q);
     if((row = res->nextRow()) != nil)
     {
-        objectType = atoi(row->col(0).c_str());
+        objectType = row->col(0).toInt();
     }
     else
     {
@@ -458,53 +458,66 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     row = nil;
     res = nil;
     
-    if(param->getFlag() == BROWSE_DIRECT_CHILDREN && IS_CDS_CONTAINER(objectType))
+    if(param->getFlag(BROWSE_DIRECT_CHILDREN) && IS_CDS_CONTAINER(objectType))
     {
         q = _("SELECT COUNT(*) FROM " CDS_OBJECT_TABLE " WHERE parent_id = ") + objectID;
         res = select(q);
         if((row = res->nextRow()) != nil)
         {
-            param->setTotalMatches(atoi(row->col(0).c_str()));
+            param->setTotalMatches(row->col(0).toInt());
         }
     }
     else
     {
         param->setTotalMatches(1);
     }
-
+    
     row = nil;
     res = nil;
     
     Ref<StringBuffer> qb(new StringBuffer());
-
+    
     *qb << SQL_QUERY << " WHERE ";
-
-    if(param->getFlag() == BROWSE_DIRECT_CHILDREN && IS_CDS_CONTAINER(objectType))
+    
+    if(param->getFlag(BROWSE_DIRECT_CHILDREN) && IS_CDS_CONTAINER(objectType))
     {
         int count = param->getRequestedCount();
-        if(! count)
-            count = INT_MAX;
-
+        bool doLimit = true;
+        if (! count)
+        {
+            if (param->getStartingIndex())
+                count = INT_MAX;
+            else
+                doLimit = false;
+        }
+        
         *qb << "f.parent_id = " << objectID;
+        if (! getContainers && ! getItems)
+            *qb << " AND 0=1";
+        else if (getContainers && ! getItems)
+            *qb << " AND f.object_type = " << OBJECT_TYPE_CONTAINER;
+        else if (! getContainers && getItems)
+            *qb << " AND f.object_type & " << OBJECT_TYPE_ITEM;
         *qb << " ORDER BY f.object_type, f.dc_title";
-        *qb << " LIMIT " << param->getStartingIndex() << "," << count;
+        if (doLimit)
+            *qb << " LIMIT " << param->getStartingIndex() << "," << count;
     }
     else // metadata
     {
         *qb << "f.id = " << objectID << " LIMIT 1";
     }
-    // log_debug(("QUERY: %s\n", qb->toString().c_str()));
+    log_debug("QUERY: %s\n", qb->toString().c_str());
     res = select(qb->toString());
     
     Ref<Array<CdsObject> > arr(new Array<CdsObject>());
-
+    
     while((row = res->nextRow()) != nil)
     {
         Ref<CdsObject> obj = createObjectFromRow(row);
         arr->append(obj);
         row = nil;
     }
-
+    
     row = nil;
     res = nil;
     
@@ -515,21 +528,25 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
         if (IS_CDS_CONTAINER(obj->getObjectType()))
         {
             Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
-            cont->setChildCount(getChildCount(cont->getID(), param->containersOnly));
+            cont->setChildCount(getChildCount(cont->getID(), getContainers, getItems));
         }
     }
-
+    
     return arr;
 }
 
-int SQLStorage::getChildCount(int contId, bool containersOnly)
+int SQLStorage::getChildCount(int contId, bool containers, bool items)
 {
+    if (! containers && ! items)
+        return 0;
     Ref<SQLRow> row;
     Ref<SQLResult> res;
     Ref<StringBuffer> qb(new StringBuffer());
     *qb << "SELECT COUNT(*) FROM " CDS_OBJECT_TABLE " WHERE parent_id = " << contId;
-    if (containersOnly)
+    if (containers && ! items)
         *qb << " AND object_type = " << OBJECT_TYPE_CONTAINER;
+    else if (items && ! containers)
+        *qb << " AND object_type & " << OBJECT_TYPE_ITEM;
     res = select(qb->toString());
     if ((row = res->nextRow()) != nil)
     {
@@ -783,7 +800,7 @@ String SQLStorage::stripLocationPrefix(String path)
 
 Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
 {
-    int objectType = atoi(row->col(_object_type).c_str());
+    int objectType = row->col(_object_type).toInt();
     Ref<CdsObject> obj = CdsObject::createObject(objectType);
 
     /* set common properties */
@@ -829,7 +846,7 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
     if (IS_CDS_CONTAINER(objectType))
     {
         Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
-        cont->setUpdateID(atoi(row->col(_update_id).c_str()));
+        cont->setUpdateID(row->col(_update_id).toInt());
         char locationPrefix;
         cont->setLocation(stripLocationPrefix(&locationPrefix, row->col(_location)));
         if (locationPrefix == LOC_VIRT_PREFIX)
@@ -934,6 +951,7 @@ String SQLStorage::incrementUpdateIDs(int *ids, int size)
     return buf->toString(1);
 }
 
+/*
 Ref<Array<CdsObject> > SQLStorage::selectObjects(Ref<SelectParam> param)
 {
     Ref<StringBuffer> q(new StringBuffer());
@@ -970,6 +988,7 @@ Ref<Array<CdsObject> > SQLStorage::selectObjects(Ref<SelectParam> param)
     }
     return arr;
 }
+*/
 
 Ref<DBRHash<int> > SQLStorage::getObjects(int parentID)
 {
@@ -1019,7 +1038,7 @@ void SQLStorage::removeObjects(zmm::Ref<DBRHash<int> > list)
     else
     {
         _recursiveRemove(ids->toString(1));
-    }                                     
+    }
 }
 
 void SQLStorage::_removeObjects(String objectIDs)

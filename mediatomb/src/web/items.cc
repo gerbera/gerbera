@@ -39,33 +39,38 @@ void web::items::process()
 {
     check_request();
     
-    String parID = param(_("parent_id"));
-    int parentID;
-    if (parID == nil)
-        parentID = 0;
-    else
-        parentID = parID.toInt();
+    int parentID = intParam(_("parent_id"));
+    int start = intParam(_("start"));
+    int count = intParam(_("count"));
+    if (start < 0)
+        throw _Exception(_("illegal start parameter"));
+    if (count < 0)
+        throw _Exception(_("illegal count parameter"));
     
     Ref<Storage> storage = Storage::getInstance();
-    Ref<SelectParam> param(new SelectParam(FILTER_PARENT_ID_ITEMS, parentID));
+    Ref<BrowseParam> param(new BrowseParam(parentID, BROWSE_DIRECT_CHILDREN | BROWSE_ITEMS));
+    param->setRange(start, count);
     
-    Ref<Array<CdsObject> > arr = storage->selectObjects(param);
+    Ref<Array<CdsObject> > arr = storage->browse(param);
     
     Ref<Element> items (new Element(_("items")));
-    items->addAttribute(_("ofId"), parID);
+    items->addAttribute(_("ofId"), String::from(parentID));
+    items->addAttribute(_("start"), String::from(start));
+    //items->addAttribute(_("returned"), String::from(arr->size()));
+    items->addAttribute(_("totalMatches"), String::from(param->getTotalMatches()));
                             
     for (int i = 0; i < arr->size(); i++)
     {
         Ref<CdsObject> obj = arr->get(i);
-        if (IS_CDS_ITEM(obj->getObjectType()))
-        {
-            Ref<Element> item (new Element(_("item")));
-            item->addAttribute(_("id"), String::from(obj->getID()));
-            item->appendTextChild(_("title"), obj->getTitle());
-            item->appendTextChild(_("res"), CdsResourceManager::getInstance()->getFirstResource(RefCast(obj, CdsItem)));
-            item->appendTextChild(_("virtual"), obj->isVirtual() ? _("1") : _("0"));
-            items->appendChild(item);
-        }
+        //if (IS_CDS_ITEM(obj->getObjectType()))
+        //{
+        Ref<Element> item (new Element(_("item")));
+        item->addAttribute(_("id"), String::from(obj->getID()));
+        item->appendTextChild(_("title"), obj->getTitle());
+        item->appendTextChild(_("res"), CdsResourceManager::getInstance()->getFirstResource(RefCast(obj, CdsItem)));
+        item->appendTextChild(_("virtual"), obj->isVirtual() ? _("1") : _("0"));
+        items->appendChild(item);
+        //}
     }
     
     root->appendChild(items);

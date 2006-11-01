@@ -44,9 +44,13 @@ WebRequestHandler::WebRequestHandler() : RequestHandler()
 {
 }
 
-String WebRequestHandler::param(String name)
+int WebRequestHandler::intParam(String name, int invalid)
 {
-    return params->get(name);
+    String value = param(name);
+    if (!string_ok(value))
+        return invalid;
+    else
+        return value.toInt();
 }
 
 /*String WebRequestHandler::buildScriptPath(String filename)

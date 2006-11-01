@@ -55,7 +55,7 @@ protected:
     /// The XML or HTML that is the result of a request is put in this buffer,
     /// this is what is being served to the web browser.
     zmm::Ref<zmm::StringBuffer> out;
-
+    
     /// \brief This is the root xml element to be populated by process() method.
     zmm::Ref<mxml::Element> root;
     
@@ -63,8 +63,8 @@ protected:
     /// in an easier fashion.
     /// \param Name of the parameter we are looking for.
     /// \return Value of the parameter with the given name or nil if not found.
-    zmm::String param(zmm::String name);
-    
+    inline zmm::String param(zmm::String name) { return params->get(name); }
+    int intParam(zmm::String name, int invalid = 0);
     
     /// \brief Checks if the incoming request is valid.
     ///
@@ -72,12 +72,12 @@ protected:
     /// and a driver parameter. Also, there can only by a primary or a
     /// a decondary driver.
     void check_request(bool checkLogin = true);
-
+    
     /// \brief Helper function to create a generic XML document header.
     /// \param xsl_link If not nil, also adds header information that is required for the XSL processor.
     /// \return The header as a string... because our parser does not yet understand <? ?> stuff :)
     zmm::String renderXMLHeader();
-   
+    
     /// \brief Prepares the output buffer and calls the process function.
     /// \return IOHandler
     /// \todo Genych, chto tut proishodit, ya tolkom che to ne wrubaus?? 
