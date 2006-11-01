@@ -343,6 +343,12 @@ void ConfigManager::validate(String serverhome)
         getOption(_("/import/mappings/mimetype-upnpclass"), _(""));
     }
   
+    el = getElement(_("/import/autoscan"));
+    if (el == nil)
+    {
+        getOption(_("/import/autoscan"), _(""));
+    }
+      
     el = getElement(_("/server/custom-http-headers"));
     if (el == nil)
     {

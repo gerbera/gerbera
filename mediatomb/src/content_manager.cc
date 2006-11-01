@@ -37,6 +37,7 @@
 #include "string_converter.h"
 #include "metadata_handler.h"
 #include "session_manager.h"
+#include "timer.h"
 
 #define DEFAULT_DIR_CACHE_CAPACITY  10
 #define CM_INITIAL_QUEUE_SIZE       20
@@ -349,8 +350,8 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
     struct stat statbuf;
     String location;
     String path;
-    
-//    Ref<Array<int> > list(new Array<int>());
+
+    //    Ref<Array<int> > list(new Array<int>());
 
     // TEST CODE REMOVE THIS 
     // containerID = 33651; 
@@ -363,133 +364,126 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
         throw _Exception(_("Object is not a container: rescan must be triggered on directories\n"));
     }
 
-    Ref<BaseStack<int> > containers(new BaseStack<int>(256, -666));
-
     log_debug("Rescanning container: %s, id=%d\n", 
-               obj->getTitle().c_str(), containerID);
+            obj->getTitle().c_str(), containerID);
 
     log_debug("Starting with last modified time: %lld\n", last_modified);
 
-    containers->push(containerID);
-    
-    do
+    location = obj->getLocation();
+    if (!string_ok(location))
     {
-        log_debug("looping with stack %d\n", containers->size());
-        containerID = containers->pop();
-        log_debug("stack after pop%d\n", containers->size());
+        log_error("Container with ID %d has no location information\n", containerID);
+        return;
+        //        continue;
+        //throw _Exception(_("Container has no location information!\n"));
+    }
 
-        obj = storage->loadObject(containerID);
-        location = obj->getLocation();
-        if (!string_ok(location))
+    DIR *dir = opendir(location.c_str());
+    if (!dir)
+    {
+        throw _Exception(_("Could not list directory ")+
+                location + " : " + strerror(errno));
+    }
+
+    Ref<DBRHash<int> > list = storage->getObjects(containerID);
+    log_debug("list: %s\n", list->debugGetAll().c_str());
+
+    while (((dent = readdir(dir)) != NULL) && (!shutdownFlag))
+    {
+        char *name = dent->d_name;
+        if (name[0] == '.')
         {
-            continue;
-            //throw _Exception(_("Container has no location information!\n"));
-        }
-
-        DIR *dir = opendir(location.c_str());
-        if (!dir)
-        {
-            throw _Exception(_("Could not list directory ")+
-                    location + " : " + strerror(errno));
-        }
-
-        Ref<DBRHash<int> > list = storage->getObjects(containerID);
-        log_debug("list: %s\n", list->debugGetAll().c_str());
-
-        while ((dent = readdir(dir)) != NULL)
-        {
-            char *name = dent->d_name;
-            if (name[0] == '.')
+            if (name[1] == 0)
             {
-                if (name[1] == 0)
-                {
-                    continue;
-                }
-                else if (name[1] == '.' && name[2] == 0)
-                {
-                    continue;
-                }
-            }
-
-            path = location + "/" + name; 
-            log_debug("Checking name: %s\n", path.c_str());
-            ret = stat(path.c_str(), &statbuf);
-            if (ret != 0)
-            {
-                log_error("Failed to stat %s\n"), path.c_str();
                 continue;
             }
-
-            if (S_ISREG(statbuf.st_mode))
+            else if (name[1] == '.' && name[2] == 0)
             {
-                int objectID = storage->isFileInDatabase(String(path));
-                log_debug("%s is a regular file! - objectID: %d\n", path.c_str(), objectID);
-                if (objectID >= 0)
+                continue;
+            }
+        }
+
+        path = location + "/" + name; 
+        log_debug("Checking name: %s\n", path.c_str());
+        ret = stat(path.c_str(), &statbuf);
+        if (ret != 0)
+        {
+            log_error("Failed to stat %s\n"), path.c_str();
+            continue;
+        }
+
+        if (S_ISREG(statbuf.st_mode))
+        {
+            int objectID = storage->isFileInDatabase(String(path));
+            log_debug("%s is a regular file! - objectID: %d\n", path.c_str(), objectID);
+            if (objectID > 0)
+            {
+                list->remove(objectID);
+                log_debug("removing %d -> list: %s\n", objectID, list->debugGetAll().c_str());
+
+                if (scanLevel == FullScan)
                 {
-                    list->remove(objectID);
-                    log_debug("removing %d -> list: %s\n", objectID, list->debugGetAll().c_str());
+                    log_debug("last modified: %lld\n", last_modified);
+                    log_debug("file last modification time: %lld\n", statbuf.st_mtime);
 
-                    if (scanLevel == FullScan)
+                    // check modification time and update file if chagned
+                    if (last_modified < statbuf.st_mtime)
                     {
-                        log_debug("last modified: %lld\n", last_modified);
-                        log_debug("file last modification time: %lld\n", statbuf.st_mtime);
-
-                        // check modification time and update file if chagned
-                        if (last_modified < statbuf.st_mtime)
+                        // readd object - we have to do this in order to trigger
+                        // scripting
+                        log_debug("removing object %d, %s\n", objectID, name);
+                        removeObject(objectID, false);
+                        addFile(path, false, false);
+                        // update time variable
+                        if (statbuf.st_mtime > last_modfied_current_max)
                         {
-                            // readd object - we have to do this in order to trigger
-                            // scripting
-                            log_debug("removing object %d, %s\n", objectID, name);
-                            removeObject(objectID, false);
-                            addFile(path, false, false);
-                            // update time variable
-                            if (statbuf.st_mtime > last_modfied_current_max)
-                            {
-                                last_modfied_current_max = statbuf.st_mtime;
-                            }
+                            last_modfied_current_max = statbuf.st_mtime;
                         }
                     }
-                    else if (scanLevel == BasicScan)
-                        continue;
-                    else
-                        throw _Exception(_("Unsupported scan level!"));
+                }
+                else if (scanLevel == BasicScan)
+                    continue;
+                else
+                    throw _Exception(_("Unsupported scan level!"));
 
-                }
-                else
-                {
-                    // add file, not recursive, not async
-                    if (cm->getConfigFilename() != path)
-                        addFile(path, false, false);
-                }
             }
-            else if (S_ISDIR(statbuf.st_mode))
+            else
             {
-                log_debug("%s is a directory!\n", path.c_str());
-                int objectID = storage->isFolderInDatabase(path);
-                if (objectID >= 0)
-                {
-                    list->remove(objectID);
-                    log_debug("removing %d -> list: %s\n", objectID, list->debugGetAll().c_str());
-                    log_debug("adding %d to containers stack\n", objectID);
-                    containers->push(objectID);
-                }
-                else
-                {
-                    log_debug("Directory is not in database!\n");
-                    // add directory, recursive, not async
-                    addFile(path, true, false);
-                }
+                // add file, not recursive, not async
+                // make sure not to add the current config.xml
+                if (cm->getConfigFilename() != path)
+                    addFile(path, false, false);
             }
         }
-        log_debug("removing... list: %s\n", list->debugGetAll().c_str());
-        if (list->size() > 0)
+        else if (S_ISDIR(statbuf.st_mode))
         {
-            storage->removeObjects(list);
-            UpdateManager::getInstance()->containerChanged(containerID);
+            log_debug("%s is a directory!\n", path.c_str());
+            int objectID = storage->isFolderInDatabase(path);
+            if (objectID > 0)
+            {
+                list->remove(objectID);
+                log_debug("removing %d -> list: %s\n", objectID, list->debugGetAll().c_str());
+                log_debug("adding %d to containers stack\n", objectID);
+                // add a task to rescan the directory that was found
+                rescanDirectory(objectID, scanLevel, true);
+            }
+            else
+            {
+                log_debug("Directory is not in database!\n");
+                // add directory, recursive, async
+                addFile(path, true, true);
+            }
         }
-        
-        closedir(dir);
-    } while (!containers->isEmpty());
+    } // while
+    log_debug("removing... list: %s\n", list->debugGetAll().c_str());
+    if (list->size() > 0)
+    {
+        storage->removeObjects(list);
+        UpdateManager::getInstance()->containerChanged(containerID);
+    }
+
+    closedir(dir);
+
     last_modified = last_modfied_current_max;
     storage->storeInternalSetting(_(SET_LAST_MODIFIED), String::from(last_modified));
 }
@@ -517,7 +511,7 @@ void ContentManager::addRecursive(String path, bool hidden)
     }
     int parentID = storage->findObjectIDByPath(path + "/");
     struct dirent *dent;
-    while ((dent = readdir(dir)) != NULL)
+    while (((dent = readdir(dir)) != NULL) && (!shutdownFlag))
     {
         char *name = dent->d_name;
         if (name[0] == '.')
@@ -1188,7 +1182,7 @@ void ContentManager::rescanDirectory(int objectID, scan_level_t scanLevel, bool 
     {
         // building container path for the description
         Ref<CMTask> task(new CMRescanDirectoryTask(objectID, scanLevel));
-        task->setDescription(_("Rescan TesT"));
+        task->setDescription(_("Autoscan")); /// \todo description should contain the path that we are rescanning
         addTask(task, true); // adding with low priority
     }
     else

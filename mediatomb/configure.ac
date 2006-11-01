@@ -605,6 +605,7 @@ if test "x$ZLIB_OK" = xyes; then
                 [],
                 [
                     LDFLAGS="-L$SEARCH_DIR_LIBS"
+                    unset ac_cv_lib_z_uncompress
                     AC_CHECK_LIB(z, uncompress,
                         [Z_LIBS="-L$SEARCH_DIR_LIBS -lz"]
                     )

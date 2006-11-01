@@ -17,6 +17,7 @@
     along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+/// \file timer.h
 
 #ifndef __TIMER_H__
 #define __TIMER_H__
@@ -30,6 +31,7 @@
 // (in seconds)
 #define TIMER_GCD   1
 
+/// \todo Leo: please add doxygen documentation!
 class TimerSubscriber : public zmm::Object
 {
 public:
