@@ -460,13 +460,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     
     if(param->getFlag(BROWSE_DIRECT_CHILDREN) && IS_CDS_CONTAINER(objectType))
     {
-        qb->clear();
-        *qb << "SELECT COUNT(*) FROM " << QTB << CDS_OBJECT_TABLE << QTE << " WHERE parent_id = " << objectID;
-        res = select(qb->toString());
-        if((row = res->nextRow()) != nil)
-        {
-            param->setTotalMatches(row->col(0).toInt());
-        }
+        param->setTotalMatches(getChildCount(objectID, getContainers, getItems));
     }
     else
     {

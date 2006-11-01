@@ -1,6 +1,7 @@
 var itemRoot;
 var rightDocument;
-var viewItems = 5;
+var viewItems = 50;
+var showMaxPages = 10;
 
 function itemInit()
 {
@@ -60,11 +61,82 @@ function updateItems(ajaxRequest)
         useFiles = true;
         childrenTag = "file";
     }
+    var ofId = items.getAttribute("ofId");
+    
+    var loadItemId = (useFiles ? 'f' : 'd') + ofId;
+    var totalMatches = parseInt(items.getAttribute("totalMatches"));
+    var totalPages = Math.ceil(totalMatches / viewItems);
+    var start = parseInt(items.getAttribute("start"));
+    var thisPage = Math.abs(start / viewItems);
+    var nextPageStart = (thisPage + 1) * viewItems;
+    var prevPageStart = (thisPage - 1) * viewItems;
+    var pagesFrom = thisPage - showMaxPages / 2;
+    if (pagesFrom < 0)
+        pagesFrom = 0;
+    var pagesTo = pagesFrom + showMaxPages - 1;
+    if (pagesTo >= totalPages)
+        pagesTo = totalPages - 1;
+    var pagingLink;
+    var pagingPar = rightDocument.createElement("p");
+    
+    if (thisPage > showMaxPages / 2)
+    {
+        pagingLink = rightDocument.createElement("a");
+        pagingLink.setAttribute("href", "javascript:parent.loadItems('"+loadItemId+"','0');");
+        pagingLink.appendChild(rightDocument.createTextNode("first"));
+        pagingPar.appendChild(pagingLink);
+        pagingPar.appendChild(rightDocument.createTextNode(" "));
+    }
+    
+    if (prevPageStart >= 0)
+    {
+        pagingLink = rightDocument.createElement("a");
+        pagingLink.setAttribute("href", "javascript:parent.loadItems('"+loadItemId+"','"+prevPageStart+"');");
+        pagingLink.appendChild(rightDocument.createTextNode("prev"));
+        pagingPar.appendChild(pagingLink);
+        pagingPar.appendChild(rightDocument.createTextNode(" "));
+    }
+    
+    for (var i = pagesFrom; i <= pagesTo; i++)
+    {
+        if (i == thisPage)
+        {
+            pagingLink = rightDocument.createElement("strong");
+        }
+        else
+        {
+            pagingLink = rightDocument.createElement("a");
+            pagingLink.setAttribute("href", "javascript:parent.loadItems('"+loadItemId+"','"+(i * viewItems)+"');");
+        }
+        pagingLink.appendChild(rightDocument.createTextNode(i));
+        pagingPar.appendChild(pagingLink);
+        pagingPar.appendChild(rightDocument.createTextNode(" "));
+    }
+    
+    if (nextPageStart < totalMatches)
+    {
+        pagingLink = rightDocument.createElement("a");
+        pagingLink.setAttribute("href", "javascript:parent.loadItems('"+loadItemId+"','"+nextPageStart+"');");
+        pagingLink.appendChild(rightDocument.createTextNode("next"));
+        pagingPar.appendChild(pagingLink);
+        pagingPar.appendChild(rightDocument.createTextNode(" "));
+    }
+    
+    if (thisPage < totalPages - showMaxPages / 2)
+    {
+        pagingLink = rightDocument.createElement("a");
+        pagingLink.setAttribute("href", "javascript:parent.loadItems('"+loadItemId+"','"+((totalPages - 1) * viewItems)+"');");
+        pagingLink.appendChild(rightDocument.createTextNode("last"));
+        pagingPar.appendChild(pagingLink);
+        pagingPar.appendChild(rightDocument.createTextNode(" "));
+    }
     
     var children = items.getElementsByTagName(childrenTag);
     var itemsEl = rightDocument.createElement("div");
     
-    var ofId = items.getAttribute("ofId");
+    itemsEl.appendChild(pagingPar);
+    
+    
     if (useFiles)
     {
         var topDiv = rightDocument.createElement("div");
@@ -153,74 +225,10 @@ function updateItems(ajaxRequest)
         itemLink.appendChild(itemText);
         itemsEl.appendChild(itemEntry);
     }
-    var showMaxPages = 10;
-    var loadItemId = (useFiles ? 'f' : 'd') + ofId;
-    var totalMatches = parseInt(items.getAttribute("totalMatches"));
-    var totalPages = Math.ceil(totalMatches / viewItems);
-    var start = parseInt(items.getAttribute("start"));
-    var thisPage = Math.abs(start / viewItems);
-    var nextPageStart = (thisPage + 1) * viewItems;
-    var prevPageStart = (thisPage - 1) * viewItems;
-    var pagesFrom = thisPage - showMaxPages / 2;
-    if (pagesFrom < 0)
-        pagesFrom = 0;
-    var pagesTo = pagesFrom + showMaxPages - 1;
-    if (pagesTo >= totalPages)
-        pagesTo = totalPages - 1;
-    var pagingLink;
     
-    if (thisPage > showMaxPages / 2)
-    {
-        pagingLink = rightDocument.createElement("a");
-        pagingLink.setAttribute("href", "javascript:parent.loadItems('"+loadItemId+"','0');");
-        pagingLink.appendChild(rightDocument.createTextNode("first"));
-        itemsEl.appendChild(pagingLink);
-        itemsEl.appendChild(rightDocument.createTextNode(" "));
-    }
+    itemsEl.appendChild(pagingPar.cloneNode(true));
     
-    if (prevPageStart >= 0)
-    {
-        pagingLink = rightDocument.createElement("a");
-        pagingLink.setAttribute("href", "javascript:parent.loadItems('"+loadItemId+"','"+prevPageStart+"');");
-        pagingLink.appendChild(rightDocument.createTextNode("prev"));
-        itemsEl.appendChild(pagingLink);
-        itemsEl.appendChild(rightDocument.createTextNode(" "));
-    }
-    
-    for (var i = pagesFrom; i <= pagesTo; i++)
-    {
-        if (i == thisPage)
-        {
-            pagingLink = rightDocument.createElement("strong");
-        }
-        else
-        {
-            pagingLink = rightDocument.createElement("a");
-            pagingLink.setAttribute("href", "javascript:parent.loadItems('"+loadItemId+"','"+(i * viewItems)+"');");
-        }
-        pagingLink.appendChild(rightDocument.createTextNode(i));
-        itemsEl.appendChild(pagingLink);
-        itemsEl.appendChild(rightDocument.createTextNode(" "));
-    }
-    
-    if (nextPageStart < totalMatches)
-    {
-        pagingLink = rightDocument.createElement("a");
-        pagingLink.setAttribute("href", "javascript:parent.loadItems('"+loadItemId+"','"+nextPageStart+"');");
-        pagingLink.appendChild(rightDocument.createTextNode("next"));
-        itemsEl.appendChild(pagingLink);
-        itemsEl.appendChild(rightDocument.createTextNode(" "));
-    }
-    
-    if (thisPage < totalPages - showMaxPages / 2)
-    {
-        pagingLink = rightDocument.createElement("a");
-        pagingLink.setAttribute("href", "javascript:parent.loadItems('"+loadItemId+"','"+((totalPages - 1) * viewItems)+"');");
-        pagingLink.appendChild(rightDocument.createTextNode("last"));
-        itemsEl.appendChild(pagingLink);
-        itemsEl.appendChild(rightDocument.createTextNode(" "));
-    }
-    itemsEl.appendChild(rightDocument.createTextNode("totalPages: "+totalPages+"; thisPage: "+thisPage+"; total: "+items.getAttribute("totalMatches")));
+    //itemsEl.appendChild(rightDocument.createTextNode("total: "+totalMatches));
     
     itemRoot.replaceChild(itemsEl, itemRoot.firstChild);
     
