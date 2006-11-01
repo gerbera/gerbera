@@ -28,12 +28,14 @@
 #include "hash.h"
 #include "sync.h"
 
-#define CDS_OBJECT_TABLE            "`mt_cds_object`"
-#define CDS_ACTIVE_ITEM_TABLE       "`mt_cds_active_item`"
-#define INTERNAL_SETTINGS_TABLE     "`mt_internal_setting`"
-
 #define QTB                 table_quote_begin
 #define QTE                 table_quote_end
+
+#define CDS_OBJECT_TABLE            "mt_cds_object"
+#define CDS_ACTIVE_ITEM_TABLE       "mt_cds_active_item"
+#define INTERNAL_SETTINGS_TABLE     "mt_internal_setting"
+
+
 
 class SQLResult;
 
