@@ -229,7 +229,7 @@ void Sqlite3Storage::shutdown()
 void Sqlite3Storage::storeInternalSetting(String key, String value)
 {
     Ref<StringBuffer> q(new StringBuffer());
-    *q << "INSERT OR REPLACE INTO " INTERNAL_SETTINGS_TABLE " (" << QTB << "key" << QTE << ", " << QTB << "value" << QTE << ") "
+    *q << "INSERT OR REPLACE INTO " << QTB << INTERNAL_SETTINGS_TABLE << QTE << " (" << QTB << "key" << QTE << ", " << QTB << "value" << QTE << ") "
     "VALUES (" << quote(key) << ", "<< quote(value) << ") ";
     this->exec(q->toString());
 }

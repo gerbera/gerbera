@@ -281,7 +281,7 @@ void MysqlStorage::storeInternalSetting(String key, String value)
 {
     String quotedValue = quote(value);
     Ref<StringBuffer> q(new StringBuffer());
-    *q << "INSERT INTO " INTERNAL_SETTINGS_TABLE " (`key`, `value`) "
+    *q << "INSERT INTO " << QTB << INTERNAL_SETTINGS_TABLE << QTE << " (`key`, `value`) "
     "VALUES (" << quote(key) << ", "<< quotedValue << ") "
     "ON DUPLICATE KEY UPDATE `value` = " << quotedValue;
     this->exec(q->toString());
