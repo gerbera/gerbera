@@ -329,7 +329,7 @@ AC_CHECK_HEADER([iconv.h],
                                 LDFLAGS="-L$SEARCH_DIR_LIBS"
                             fi
                         ],
-                        [AC_MSG_ERROR(required header iconv.h not found on your systemi)]
+                        [AC_MSG_ERROR(required header iconv.h not found on your system)]
                     )
                 ]
             )
@@ -463,10 +463,10 @@ AC_CHECK_FUNCS([regcomp select strcasecmp strchr strdup strerror strncasecmp],
 AC_CHECK_FUNCS([strrchr strstr strtol strtoul uname], [],
                [AC_MSG_ERROR(required library function not found)])
 
-AC_CHECK_FUNCS([sigaction sigprocmask if_nameindex],[],
+AC_CHECK_FUNCS([sigaction sigprocmask],[],
                [AC_MSG_ERROR(required library function not found)]) 
  
-AC_CHECK_FUNCS([if_freenameindex ioctl],[],
+AC_CHECK_FUNCS([ioctl],[],
                [AC_MSG_ERROR(required library function not found)]) 
                
 AC_CACHE_SAVE
@@ -518,6 +518,23 @@ AC_CHECK_FUNCS([gethostbyname_r],[],
                     fi
                 ])
         ])
+
+AC_CHECK_FUNCS([if_nameindex],[],
+        [
+            AC_CHECK_LIB(nsl, if_nameindex,[],
+                [AC_MSG_ERROR(required library function not found)]
+            )
+        ]
+)
+
+AC_CHECK_FUNCS([if_freenameindex],[],
+        [
+            AC_CHECK_LIB(nsl, if_freenameindex,[],
+                [AC_MSG_ERROR(required library function not found)]
+            )
+        ]
+)
+
 
 # this is not optional, we need the device and the internal webserver
 AC_DEFINE([UPNP_HAVE_DEVICE], [1], [Compile device API])
@@ -574,17 +591,24 @@ fi
 if test "x$ZLIB_OK" = xyes; then
     if test -n "$Z_SEARCH_LIBS" ; then     
         AC_MSG_NOTICE([Will search for zlib libraries in $Z_SEARCH_LIBS])
-        LDFLAGS="-L$Z_SEARCH_LIBS -lz"
+        LDFLAGS="-L$Z_SEARCH_LIBS"
         AC_CHECK_LIB(z, uncompress,
                 [
-                    AC_DEFINE([HAVE_Z], [1], [zlib headers and libraries are present])
                     Z_LIBS="-L$Z_SEARCH_LIBS -lz"
+                ],
+                [
+                    AC_MSG_ERROR([zlib libraries not found in requested location $Z_SEARCH_LIBS])
                 ]
         )
     else
         AC_CHECK_LIB(z,uncompress,
+                [],
                 [
-                    AC_DEFINE([HAVE_Z], [1], [zlib headers and libraries are present])
+                    LDFLAGS="-L$SEARCH_DIR_LIBS"
+                    AC_CHECK_LIB(z, uncompress,
+                        [Z_LIBS="-L$SEARCH_DIR_LIBS -lz"]
+                    )
+                        
                 ]
         )
     fi
@@ -648,7 +672,7 @@ fi
 
 if test "x$SQLITE3_OK" = xyes; then
     if test -n "$SQLITE3_SEARCH_LIBS"; then
-        LDFLAGS="-L$SQLITE3_SEARCH_LIBS -lsqlite3"
+        LDFLAGS="-L$SQLITE3_SEARCH_LIBS"
         AC_MSG_NOTICE([Will search for sqlite3 libraries in $withval])
         AC_CHECK_LIB(sqlite3, sqlite3_open,
                 [
@@ -657,7 +681,8 @@ if test "x$SQLITE3_OK" = xyes; then
                 ],
                 [
                     AC_MSG_ERROR(sqlite3 library not found in requested location $SQLITE3_SEARCH_LIBS)
-                ]
+                ],
+                [-lrt]
         )
     else
     AC_CHECK_LIB(sqlite3, sqlite3_open, [],
@@ -666,16 +691,18 @@ if test "x$SQLITE3_OK" = xyes; then
             for sqlite3_path in $SEARCH_DIR_LIBS; do
                 if test "x$ac_cv_lib_sqlite3_sqlite3_open" != xyes ; then
                     unset ac_cv_lib_sqlite3_sqlite3_open
-                    LDFLAGS="-L$sqlite3_path -lsqlite3"
+                    LDFLAGS="-L$sqlite3_path"
                     AC_CHECK_LIB(sqlite3, sqlite3_open,
                         [
                             SQLITE3_LIBS="-L$sqlite3_path -lsqlite3"
                             SQLITE3_OK=yes
-                        ]
+                        ],
+                        [-lrt]
                     )
                 fi
             done
-        ]
+        ],
+        [-lrt]
     )
     fi
 fi 
@@ -934,12 +961,11 @@ if test "x$JS_OK" = xyes; then
             AC_CHECK_LIB(smjs, JS_NewObject,
                 [],
                 [
-                    LDFLAGS="-L$SEARCH_DIR_LIBS -ljs"
+                    LDFLAGS="-L$SEARCH_DIR_LIBS"
                     unset ac_cv_lib_smjs_JS_NewObject
                     AC_CHECK_LIB(js, JS_NewObject,
                         [JS_LIBS="-L$SEARCH_DIR_LIBS -ljs"],
                         [
-                            LDFLAGS="-L$SEARCH_DIR_LIBS -lsmjs"
                             unset ac_cv_lib_js_JS_NewObject
                             AC_CHECK_LIB(smjs, JS_NewObject,
                                 [JS_LIBS="-L$SEARCH_DIR_LIBS -lsmjs"],

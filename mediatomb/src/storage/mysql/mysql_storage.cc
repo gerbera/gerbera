@@ -80,7 +80,7 @@ void MysqlStorage::init()
         mutex->unlock();
         throw _Exception(_("could not create pthread_key"));
     }
-    mysql_library_init(0, NULL, NULL);
+    mysql_server_init(0, NULL, NULL);
     my_init();
     pthread_setspecific(mysql_init_key, (void *) 1);
     
@@ -273,7 +273,7 @@ void MysqlStorage::shutdown()
         mysql_close(&db);
         mysql_connection = false;
     }
-    mysql_library_end();
+    mysql_server_end();
     mutex->unlock();
 }
 

@@ -240,8 +240,9 @@ Here is a sample configuration file with description of the various tags.
         Enables or disables the web user interface, change to "yes" in order 
         to enable it.
 
-        <accounts enabled="yes"/> (Optional)
-        Specifies a list of usernames and passwords.
+        <accounts enabled="no"/> (Required)
+        Specifies if accounts are enabled or disabled. Accounts can be defined
+        as shown below:
 
             <account user="name" password="password"/>
             There can be multiple users, however this is mainly a feature 

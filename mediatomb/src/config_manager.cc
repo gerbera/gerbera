@@ -84,8 +84,12 @@ String ConfigManager::createDefaultConfig(String userhome)
     Ref<Element> server(new Element(_("server")));
     
     Ref<Element> ui(new Element(_("ui")));
-    ui->addAttribute(_("enabled"), _(DEFAULT_UI_VALUE));
+    ui->addAttribute(_("enabled"), _(DEFAULT_UI_EN_VALUE));
 
+    Ref<Element>accounts(new Element(_("accounts")));
+    accounts->addAttribute(_("enabled"), _(DEFAULT_ACCOUNTS_EN_VALUE));
+    ui->appendChild(accounts);
+    
     server->appendChild(ui);
     server->appendTextChild(_("name"), _(PACKAGE_NAME));
     
@@ -178,40 +182,21 @@ void ConfigManager::init(String filename, String userhome)
             home = userhome + DIR_SEPARATOR + DEFAULT_CONFIG_HOME;
             filename = home + DIR_SEPARATOR + DEFAULT_CONFIG_NAME;
         }
-        if (!home_ok)
-        {
-            if (!check_path(_("") + DIR_SEPARATOR + DEFAULT_ETC + DIR_SEPARATOR + DEFAULT_SYSTEM_HOME + DIR_SEPARATOR + DEFAULT_CONFIG_NAME))
-            {
-                // we could not find a valid configuration file, so we will create an initial setup
-                // we will do this only if userhome is set
-                if (string_ok(userhome))
-                {
-                    filename = instance->createDefaultConfig(userhome);
-                }
-                else
-                {       
-                    throw _Exception(_("\nThe server configuration file could not be found in ~/.mediatomb and\n") +
-                            "/etc/mediatomb. MediaTomb could not determine your home directory - automatic\n" +
-                            "setup failed. Try specifying an alternative configuration file on the command line.\n" + 
-                            "For a list of options run: mediatomb -h\n");
-                }
-            }
-            else
-            {
 
-                home = _("") + DIR_SEPARATOR + DEFAULT_ETC + DIR_SEPARATOR + DEFAULT_SYSTEM_HOME;
-                filename = home + DIR_SEPARATOR + DEFAULT_CONFIG_NAME;
-            }
+        if ((!home_ok) && (string_ok(userhome)))
+        {
+            filename = instance->createDefaultConfig(userhome);
         }
-/*
-        if (home_ok)
-            log_info("Loading configuration from ~/.mediatomb/config.xml\n");
-        else
-            log_info("Loading configuration from /etc/mediatomb/config.xml\n");
-*/
-//        instance->load(userhome + DIR_SEPARATOR + DEFAULT_CONFIG_HOME + DIR_SEPARATOR + DEFAULT_CONFIG_NAME);
+   
     }
-//    else
+
+    if (filename == nil)
+    {       
+        throw _Exception(_("\nThe server configuration file could not be found in ~/.mediatomb\n") +
+                "MediaTomb could not determine your home directory - automatic setup failed.\n" + 
+                "Try specifying an alternative configuration file on the command line.\n" + 
+                "For a list of options run: mediatomb -h\n");
+    }
 
     log_info("Loading configuration from: %s\n", filename.c_str());
     instance->load(filename);
@@ -261,13 +246,14 @@ void ConfigManager::validate(String serverhome)
     // checking database driver options
     do
     {
-#ifdef HAVE_SQLITE3	    
+#ifdef HAVE_SQLITE3
         if (dbDriver == "sqlite3")
         {
             prepare_path(_("/server/storage/database-file"), false, true);
             break;
         }
 #endif
+
 #ifdef HAVE_MYSQL
         if (dbDriver == "mysql")
         {
@@ -292,9 +278,15 @@ void ConfigManager::validate(String serverhome)
     // now go through the optional settings and fix them if anything is missing
    
     temp = getOption(_("/server/ui/attribute::enabled"),
-                     _(DEFAULT_UI_VALUE));
+                     _(DEFAULT_UI_EN_VALUE));
     if ((temp != "yes") && (temp != "no"))
         throw _Exception(_("Error in config file: incorrect parameter for <ui enabled=\")\" /> attribute"));
+
+    temp = getOption(_("/server/ui/accounts/attribute::enabled"), 
+            _(DEFAULT_ACCOUNTS_EN_VALUE));
+
+    if ((temp != "yes") && (temp != "no"))
+        throw _Exception(_("Error in config file: incorrect parameter for <accounts enabled=\")\" /> attribute"));
 
     getOption(_("/import/mappings/extension-mimetype/attribute::ignore-unknown"),
               _(DEFAULT_IGNORE_UNKNOWN_EXTENSIONS));
@@ -355,12 +347,6 @@ void ConfigManager::validate(String serverhome)
     if (el == nil)
     {
         getOption(_("/server/custom-http-headers"), _(""));
-    }
-
-    el = getElement(_("/server/ui/accounts"));
-    if (el == nil)
-    {
-        getOption(_("/server/ui/accounts"), _(""));
     }
 
 #ifdef HAVE_EXIF    
