@@ -3,7 +3,7 @@
 use strict;
 
 my @full_fn = split('/', $ARGV[0]);
-my $filename = pop($full_fn);
+my $filename = pop(@full_fn);
 
 my $new_header = 
 '/*MT*
