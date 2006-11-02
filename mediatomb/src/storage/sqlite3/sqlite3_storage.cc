@@ -29,8 +29,10 @@
 #include "common.h"
 #include "config_manager.h"
 
-#include "sqlite3_create_sql.h"
-#include <zlib.h>
+#ifdef AUTO_CREATE_DATABASE
+    #include "sqlite3_create_sql.h"
+    #include <zlib.h>
+#endif
 
 #define SL3_INITITAL_QUEUE_SIZE 20
 
@@ -86,6 +88,8 @@ void Sqlite3Storage::init()
     }
     if (dbVersion == nil)
     {
+#ifdef AUTO_CREATE_DATABASE
+        log_info("database doesn't seem to exist. automatically creating database...\n");
         Ref<SLInitTask> ptask (new SLInitTask());
         addTask(RefCast(ptask, SLTask));
         ptask->waitForTask();
@@ -93,8 +97,13 @@ void Sqlite3Storage::init()
         if (dbVersion == nil)
         {
             shutdown();
-            throw _Exception(_("error while creating db"));
+            throw _Exception(_("error while creating database"));
         }
+        log_info("database created successfully.\n");
+#else
+        shutdown();
+        throw _Exception(_("database doesn't seem to exist yet and autocreation wasn't compiled in"));
+#endif
     }
     log_debug("db_version: %s\n", dbVersion.c_str());
     
@@ -112,13 +121,10 @@ String Sqlite3Storage::quote(String value)
     return ret;
 }
 
-void Sqlite3Storage::reportError(String query, sqlite3 *db)
+String Sqlite3Storage::getError(String query, sqlite3 *db)
 {
-    log_error("SQLITE3: (%d) %s\nQuery:%s\n",
-        sqlite3_errcode(db),
-        sqlite3_errmsg(db),
-        (query == nil) ? "unknown" : query.c_str()
-    );
+    return _("SQLITE3: (") + sqlite3_errcode(db) + ") " 
+        + sqlite3_errmsg(db) +"\nQuery:" + (query == nil ? _("unknown") : query);
 }
 
 Ref<SQLResult> Sqlite3Storage::select(String query)
@@ -277,11 +283,12 @@ void SLTask::waitForTask()
     
     if (getError() != nil)
     {
-        log_error("%s\n", getError().c_str());
+        //log_error("%s\n", getError().c_str());
         throw _Exception(getError());
     }
 }
 
+#ifdef AUTO_CREATE_DATABASE
 /* SLInitTask */
 
 void SLInitTask::run(sqlite3 *db, Sqlite3Storage *sl)
@@ -304,11 +311,11 @@ void SLInitTask::run(sqlite3 *db, Sqlite3Storage *sl)
     
     if(ret != SQLITE_OK)
     {
-        sl->reportError(_("-"), db);
-        throw _StorageException(_("error while creating db"));
+        throw _StorageException(sl->getError(nil, db));
     }
 }
 
+#endif
 
 /* SLSelectTask */
 
@@ -333,8 +340,7 @@ void SLSelectTask::run(sqlite3 *db, Sqlite3Storage *sl)
     
     if(ret != SQLITE_OK)
     {
-        sl->reportError(query, db);
-        throw _StorageException(_("Sqlite3: query error"));
+        throw _StorageException(sl->getError(query, db));
     }
 
     pres->row = pres->table;
@@ -362,8 +368,7 @@ void SLExecTask::run(sqlite3 *db, Sqlite3Storage *sl)
     );
     if(res != SQLITE_OK)
     {
-        sl->reportError(query, db);
-        throw _StorageException(_("Sqlite3: query error"));
+        throw _StorageException(sl->getError(query, db));
     }
     if (getLastInsertIdFlag)
         lastInsertId = sqlite3_last_insert_rowid(db);

@@ -18,6 +18,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#ifdef AUTO_CREATE_DATABASE
 #ifdef HAVE_MYSQL
 
 #ifndef __MYSQL_CREATE_SQL_H__
@@ -83,3 +84,4 @@ static unsigned char mysql_create_sql[] = /* 788 */
 #endif // __MYSQL_CREATE_SQL_H__
 
 #endif // HAVE_MYSQL
+#endif // AUTO_CREATE_DATABASE

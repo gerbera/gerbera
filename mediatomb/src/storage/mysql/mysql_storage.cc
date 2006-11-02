@@ -28,8 +28,10 @@
 #include "config_manager.h"
 #include "destroyer.h"
 
-#include "mysql_create_sql.h"
-#include <zlib.h>
+#ifdef AUTO_CREATE_DATABASE
+    #include "mysql_create_sql.h"
+    #include <zlib.h>
+#endif
 
 using namespace zmm;
 using namespace mxml;
@@ -40,7 +42,7 @@ MysqlStorage::MysqlStorage() : SQLStorage()
     /// dbRemovesDeps gets set by init() to the correct value
     dbRemovesDeps = true;
     mysql_connection = false;
-    mutex = Ref<Mutex> (new Mutex());
+    mutex = Ref<Mutex> (new Mutex(true));
     table_quote_begin = '`';
     table_quote_end = '`';
 }
@@ -132,7 +134,6 @@ void MysqlStorage::init()
     mysql_connection = true;
     
     String dbVersion = nil;
-    mutex->unlock();
     try
     {
         dbVersion = getInternalSetting(_("db_version"));
@@ -140,9 +141,10 @@ void MysqlStorage::init()
     catch (Exception)
     {
     }
-    mutex->lock();
     if (dbVersion == nil)
     {
+#ifdef AUTO_CREATE_DATABASE
+        log_info("database doesn't seem to exist. automatically creating database...\n");
         unsigned char buf[MS_CREATE_SQL_INFLATED_SIZE + 1]; // + 1 for '\0' at the end of the string
         unsigned long uncompressed_size = MS_CREATE_SQL_INFLATED_SIZE;
         int ret = uncompress(buf, &uncompressed_size, mysql_create_sql, MS_CREATE_SQL_DEFLATED_SIZE);
@@ -172,17 +174,20 @@ void MysqlStorage::init()
             sql_end = index(sql_start, ';');
         }
         while(sql_end != NULL);
-        
-        mutex->unlock();
         dbVersion = getInternalSetting(_("db_version"));
-        mutex->lock();
-        
         if (dbVersion == nil)
         {
             mutex->unlock();
             shutdown();
-            throw _Exception(_("error while creating db"));
+            throw _Exception(_("error while creating database"));
         }
+        log_info("database created successfully.\n");
+#else
+        mutex->unlock();
+        shutdown();
+        throw _Exception(_("database doesn't seem to exist yet and autocreation wasn't compiled in"));
+#endif
+        
     }
     
     mutex->unlock();

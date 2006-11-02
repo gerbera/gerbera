@@ -18,6 +18,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#ifdef AUTO_CREATE_DATABASE
 #ifdef HAVE_SQLITE3
 
 #ifndef __SQLITE3_CREATE_SQL_H__
@@ -69,3 +70,4 @@ static unsigned char sqlite3_create_sql[] = /* 575 */
 #endif // __SQLITE3_CREATE_SQL_H__
 
 #endif // HAVE_SQLITE3
+#endif // AUTO_CREATE_DATABASE
