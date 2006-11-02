@@ -39,26 +39,26 @@ web::files::files() : WebRequestHandler()
 void web::files::process()
 {
     check_request();
-
+    
     String path;
     String parentID = param(_("parent_id"));
     if (! string_ok(parentID) || parentID == "0")
         path = _(FS_ROOT_DIRECTORY);
     else
         path = hex_decode_string(parentID);
-
+    
     try
     {
         Ref<Filesystem> fs(new Filesystem());
         Ref<Array<FsObject> > arr = fs->readDirectory(path, FS_MASK_FILES);
-    
+        
         Ref<Element> files(new Element(_("files")));
         files->addAttribute(_("ofId"), parentID);
-    
+        
         for (int i = 0; i < arr->size(); i++)
         {
             Ref<FsObject> obj = arr->get(i);
-    
+            
             Ref<Element> fe(new Element(_("file")));
             String filename = obj->filename;
             String filepath = path + _("/") + filename;
@@ -67,7 +67,7 @@ void web::files::process()
             int childCount = 1;
             if (childCount)
                 fe->addAttribute(_("childCount"), String::from(childCount));
-
+            
             Ref<StringConverter> f2i = StringConverter::f2i();
             fe->setText(f2i->convert(filename));
             files->appendChild(fe);

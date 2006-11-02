@@ -465,7 +465,7 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
                 log_debug("removing %d -> list: %s\n", objectID, list->debugGetAll().c_str());
                 log_debug("adding %d to containers stack\n", objectID);
                 // add a task to rescan the directory that was found
-                rescanDirectory(objectID, scanLevel, true);
+                rescanDirectory(objectID, scanLevel);
             }
             else
             {
@@ -1176,19 +1176,23 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
     }
 }
     
-void ContentManager::rescanDirectory(int objectID, scan_level_t scanLevel, bool async)
+void ContentManager::rescanDirectory(int objectID, scan_level_t scanLevel)
 {
+    /*
     if (async)
     {
-        // building container path for the description
-        Ref<CMTask> task(new CMRescanDirectoryTask(objectID, scanLevel));
-        task->setDescription(_("Autoscan")); /// \todo description should contain the path that we are rescanning
-        addTask(task, true); // adding with low priority
+    */
+    // building container path for the description
+    Ref<CMTask> task(new CMRescanDirectoryTask(objectID, scanLevel));
+    task->setDescription(_("Autoscan")); /// \todo description should contain the path that we are rescanning
+    addTask(task, true); // adding with low priority
+    /*
     }
     else
     {
         _rescanDirectory(objectID, scanLevel);
     }
+    */
 }
 
 CMTask::CMTask() : Object()

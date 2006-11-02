@@ -1,1 +1,1 @@
-CFLAGS="-g -O0 -Wall" CXXFLAGS="-g -O0 -Wall" ./configure --prefix=/home/jin/Work/UPnP/MediaTomb/dev-install/ --enable-tombdebug $@
+CFLAGS="-g -O0 -Wall" CXXFLAGS="-g -O0 -Wall" ./configure --enable-tombdebug $@
