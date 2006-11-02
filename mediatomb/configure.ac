@@ -216,12 +216,14 @@ AC_ARG_ENABLE(static,
 )
 
 AUTOCREATE=1
+AUTOCREATE_REQUESTED=0
 AC_ARG_ENABLE(db-autocreate,
         AC_HELP_STRING([--enable-db-autocreate], [enable automatic creation of the media database (default: yes)]),
         [
             if test "x$enableval" = xno; then
                 AUTOCREATE=0
             else
+                AUTOCREATE_REQUESTED=1
                 AUTOCREATE=1
             fi
         ],
@@ -229,10 +231,6 @@ AC_ARG_ENABLE(db-autocreate,
             AUTOCREATE=1
         ]
 )
-
-if test $AUTOCREATE -eq 1; then
-    AC_DEFINE([AUTO_CREATE_DATABASE], [1], [create database automatically if it does not exist])
-fi
 
 ###############################################################################
 # The following block is derived from the configure.ac script from the 
@@ -585,40 +583,59 @@ if test -n "$Z_SEARCH_HEADERS" ; then
             ]
     )
 else
-   AC_CHECK_HEADER([zlib.h], [], [ZLIB_OK=no])
+   AC_CHECK_HEADER([zlib.h], [], 
+           [
+                unset ac_cv_header_zlib_h
+                AC_CHECK_HEADER([$SEARCH_DIR_HEADERS/zlib.h],
+                    [
+                        Z_CXXFLAGS="-I$SEARCH_DIR_HEADERS"
+                    ],
+                    [
+                        ZLIB_OK=missing
+                    ])
+           ])
+fi
+
+if test -n "$Z_SEARCH_LIBS" ; then     
+    AC_MSG_NOTICE([Will search for zlib libraries in $Z_SEARCH_LIBS])
+    LDFLAGS="-L$Z_SEARCH_LIBS"
+    AC_CHECK_LIB(z, uncompress,
+            [
+                Z_LIBS="-L$Z_SEARCH_LIBS -lz"
+            ],
+            [
+                AC_MSG_ERROR([zlib libraries not found in requested location $Z_SEARCH_LIBS])
+            ]
+    )
+else
+    AC_CHECK_LIB(z,uncompress,
+            [],
+            [
+                LDFLAGS="-L$SEARCH_DIR_LIBS"
+                unset ac_cv_lib_z_uncompress
+                AC_CHECK_LIB(z, uncompress,
+                    [
+                        Z_LIBS="-L$SEARCH_DIR_LIBS -lz"
+                        ZLIB_OK=missing
+                    ]
+                )
+                    
+            ]
+    )
 fi
 
 if test "x$ZLIB_OK" = xyes; then
-    if test -n "$Z_SEARCH_LIBS" ; then     
-        AC_MSG_NOTICE([Will search for zlib libraries in $Z_SEARCH_LIBS])
-        LDFLAGS="-L$Z_SEARCH_LIBS"
-        AC_CHECK_LIB(z, uncompress,
-                [
-                    Z_LIBS="-L$Z_SEARCH_LIBS -lz"
-                ],
-                [
-                    AC_MSG_ERROR([zlib libraries not found in requested location $Z_SEARCH_LIBS])
-                ]
-        )
-    else
-        AC_CHECK_LIB(z,uncompress,
-                [],
-                [
-                    LDFLAGS="-L$SEARCH_DIR_LIBS"
-                    unset ac_cv_lib_z_uncompress
-                    AC_CHECK_LIB(z, uncompress,
-                        [Z_LIBS="-L$SEARCH_DIR_LIBS -lz"]
-                    )
-                        
-                ]
-        )
+    AC_SUBST(Z_CXXFLAGS)
+    AC_SUBST(Z_LIBS)
+
+    if test $AUTOCREATE -eq 1; then
+        AC_DEFINE([AUTO_CREATE_DATABASE], [1], [create database automatically if it does not exist])
     fi
 else
-    AC_CHECK_LIB(z,uncompress)
+    if test $AUTOCREATE_REQUESTED -eq 1; then
+        AC_MSG_ERROR([Automatic database creation not possible due to missing zlib headers/libraries])
+    fi
 fi
-
-AC_SUBST(Z_CXXFLAGS)
-AC_SUBST(Z_LIBS)
 
 AC_CACHE_SAVE
 
@@ -1200,6 +1217,7 @@ if test "x$TAGLIB_OK" = xyes; then
         AC_MSG_CHECKING(taglib libraries)
         TAGLIB_LIBS=`${taglibconfig} --libs`
         AC_MSG_RESULT($TAGLIB_LIBS)
+        TAGLIB_LIBS="$TALIB_LIBS $Z_LIBS"
     fi
 fi
 
@@ -1726,6 +1744,10 @@ echo "taglib        : $TAGLIB_OK"
 echo "id3lib        : $ID3_OK"
 echo "libextractor  : $EXTRACTOR_OK"
 
+if (test $AUTOCREATE -eq 1) && (test $AUTOCREATE_REQUESTED); then
+    echo "db-autocreate : enabled"
+fi
+        
 if test "$LOG_OK" != "yes"; then
     echo "log output    : $LOG_OK"
 fi
