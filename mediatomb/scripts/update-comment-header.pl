@@ -8,11 +8,9 @@ foreach (@ARGV)
 #my $tmpfile = $_."tmp_update-comment-header";
     my @full_fn = split('/', $full_path);
     my $filename = pop(@full_fn);
-    
-    my $new_header = 
-'/*MT*
-    
-    MediaTomb - http://www.mediatomb.org/
+
+    my $new_header_main = 
+'    MediaTomb - http://www.mediatomb.org/
     
     '.$filename.' - this file is part of MediaTomb.
     
@@ -36,17 +34,65 @@ foreach (@ARGV)
     along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
     
-    $Id$
+    $Id$';
+    
+    my $new_header_c =
+'/*MT*
+    
+'.$new_header_main.'
 */';
-#    print $full_path;
+
+    my $new_header_sgml =
+'<!--*MT*
+    
+'.$new_header_main.'
+-->';
+    
+    print $full_path.": ";
     open (FILE, '<', $full_path);
     my $data = join('', <FILE>);
     close FILE;
+    
+    my $has_file = ($data =~ m|/// *\\file|);
+    my $add_file = ($filename =~ /\.(cc?|h)$/);
+    if (! $has_file && $add_file)
+    {
+        $new_header_c .= "\n\n/// \\file $filename";
+    }
+    my $nothing = 0;
+    if ($data =~ m|/\*MT\*|)
+    {
+        print "/*MT*...";
+        $data =~ s|/\*MT\*(.*?\*)??/|$new_header_c|s;
+    }
+    elsif ($data =~ /<!--\*MT\*/)
+    {
+        print "<!--*MT*...";
+        $data =~ s/<!--\*MT\*.*?->/$new_header_sgml/s;
+    }
+    elsif ($data =~ m|/\*.*this file is part of MediaTomb\.|)
+    {
+        print "old header";
+        $data =~ s|/\*.*this file is part of MediaTomb\..*?\*/|$new_header_c|s;
+    }
+    else
+    {
+        $nothing = 1;
+        print "nothing!";
+    }
+    
+    if (! $nothing)
+    {
+        if ($has_file)
+        {
+            $data =~ s|/// *\\file +.*$|/// \\file $filename|m;
+            print " and had file";
+        }
     open (FILE, '>', $full_path);
-    
-    $data =~ s/\/\*.*this file is part of MediaTomb\..*?\*\//$new_header/s;
-    #$data =~ s/MediaTomb/test/;
-    
     print FILE $data;
+        #print $data;
     close FILE;
+    }
+    print "\n";
 }
+

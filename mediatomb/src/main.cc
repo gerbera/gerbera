@@ -27,6 +27,8 @@
     $Id$
 */
 
+/// \file main.cc
+
 #ifdef HAVE_CONFIG_H
     #include "autoconfig.h"
 #endif

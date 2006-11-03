@@ -37,7 +37,6 @@ _DIST_FILES_WEB = \
 ./left.html \
 ./right.html \
 ./top.html \
-./help.html \
 ./main.css \
 ./cm.xml \
 ./cds.xml \
