@@ -45,7 +45,7 @@
 class TimerSubscriber : public zmm::Object
 {
 public:
-virtual ~TimerSubscriber() { }
+    virtual ~TimerSubscriber() { }
     virtual void timerNotify(int id) = 0;
     
 protected:

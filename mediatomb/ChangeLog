@@ -18,7 +18,7 @@ v0.9.0  Major rework
           supress all log output
         * added configure option and adapted the code to supress
           debug output
-        * added taglib support,thanks to Benhur Stein <benhur.stein@gmail.com>
+        * added taglib support, thanks to Benhur Stein <benhur.stein@gmail.com>
           for the patch. 
         * bug 1524468 (startup in daemon mode fails) does no longer occur
           after the integration of libupnp 1.4.x sources
@@ -48,8 +48,14 @@ v0.9.0  Major rework
           security sensitive data
         * tomb-install is no longer needed, the server will automatically create
           a default ~/.mediatomb/config.xml file if there is none
+        * the database tables will be created automatically if they don't
+          exist
         * adapted configure script to correctly set flags for linkers that
           use the --as-needed option
+        * the "PC Directory" isn't changeable via the UI anymore to ensure a
+          correct view of the "PC Directory"
+        * lookups in the database are now done with hashes, which should make
+          many things faster, especially the adding
 
 v0.8.1
         * added "serve" directory, any files there can be downloaded 

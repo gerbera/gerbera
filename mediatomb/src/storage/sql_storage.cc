@@ -1053,6 +1053,10 @@ void SQLStorage::_removeObjects(String objectIDs)
     *q << "DELETE FROM " << QTB << CDS_OBJECT_TABLE << QTE << " WHERE id IN (" << objectIDs
         << ")";
     exec(q->toString());
+    q->clear();
+    *q << "DELETE FROM " << QTB << CDS_ACTIVE_ITEM_TABLE << QTE << " WHERE id IN (" << objectIDs
+        << ")";
+    exec(q->toString());
 }
 
 int SQLStorage::removeObject(int objectID, bool all, int *objectType)

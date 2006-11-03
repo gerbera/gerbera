@@ -286,12 +286,12 @@ void ContentManager::_addFile(String path, bool recursive, bool hidden)
 {
     if (hidden == false)
     {
-
+        
         String filename = get_filename(path);
         if (string_ok(filename) && filename.charAt(0) == '.')
             return;
     }
-
+    
     // never add the server configuration file
     if (ConfigManager::getInstance()->getConfigFilename() == path)
         return;
