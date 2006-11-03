@@ -1,6 +1,8 @@
 libmediatomb_a_SOURCES = \
 ../src/action_request.cc \
 ../src/action_request.h \
+../src/autoscan_directory.cc \
+../src/autoscan_directory.h \
 ../src/cds_objects.cc \
 ../src/cds_objects.h \
 ../src/cds_resource.cc \

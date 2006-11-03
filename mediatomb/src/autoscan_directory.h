@@ -37,7 +37,7 @@ typedef enum scan_level_t
 typedef enum scan_mode_t
 {
     Timed
-}
+};
 
 /// \brief Provides information about one autoscan directory.
 class AutoscanDirectory : public zmm::Object
