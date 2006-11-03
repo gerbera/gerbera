@@ -36,6 +36,7 @@
 #include "common.h"
 #include "dictionary.h"
 #include "xpath.h"
+#include "autoscan_directory.h"
 
 class ConfigManager : public zmm::Object
 {
@@ -107,7 +108,13 @@ public:
     /// This function will create a dictionary with the following
     /// key:value paris: "1":"2", "3":"4"
     zmm::Ref<Dictionary> createDictionaryFromNodeset(zmm::Ref<mxml::Element> element, zmm::String nodeName, zmm::String keyAttr, zmm::String valAttr);
-  
+ 
+    /// \brief Creates an aray of AutoscanDirectory objects from
+    /// an XML nodeset.
+    /// \param element starting element of the ndoeset.
+    /// \param scanmode add only directories with the specified scanmode to the array
+    zmm::Ref<zmm::Array<AutoscanDirectory> > createAutoscanListFromNodeset(zmm::Ref<mxml::Element> element, scan_mode_t scanmode);
+    
     /// \brief Creates an array of strings from an XML nodeset.
     /// \param element starting element of the nodeset.
     /// \param nodeName name of each node in the set

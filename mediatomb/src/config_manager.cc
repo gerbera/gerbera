@@ -637,6 +637,108 @@ Ref<Dictionary> ConfigManager::createDictionaryFromNodeset(Ref<Element> element,
     return dict;
 }
 
+Ref<Array<AutoscanDirectory> > ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::Element> element, scan_mode_t scanmode)
+{
+    Ref<Array<AutoscanDirectory> > arr(new Array<AutoscanDirectory>());
+    String location;
+    String temp;
+    scan_level_t level;
+    scan_mode_t mode;
+    bool recursive;
+    unsigned int interval;
+   
+    for (int i = 0; i < element->childCount(); i++)
+    {
+        Ref<Element> child = element->getChild(i);
+        if (child->getName() == "directory")
+        {
+            location = child->getAttribute(_("location"));
+            if (!string_ok(location))
+            {
+                log_warning("Skipping autoscan directory with invalid location!\n");
+                continue;
+            }
+            
+            temp = child->getAttribute(_("mode"));
+            if (!string_ok(temp) || (temp != "timed"))
+            {
+                log_warning("Skipping autoscan directory %s: mode attribute is missing or invalid\n", location.c_str());
+                continue;
+            }
+            else
+            {
+                mode = TimedScanMode;
+            }
+
+            if (mode != scanmode)
+                continue; // skip scan modes that we are not interested in (content manager needs one mode type per array)
+            
+            temp =  child->getAttribute(_("level"));
+            if (!string_ok(temp))
+            {
+                log_warning("Skipping autoscan directory %s: level attribute is missing or invalid\n", location.c_str());
+                continue;
+            }
+            else
+            {
+                if (temp == "basic")
+                    level = BasicScan;
+                else if (temp == "full")
+                    level = FullScan;
+                else
+                {
+                    log_warning("Skipping autoscan directory %s: level attribute %s is invalid\n", location.c_str(), temp.c_str());
+                    continue;
+                }
+            }
+
+            temp = child->getAttribute(_("recursive"));
+            if (!string_ok(temp))
+            {
+                log_warning("Skipping autoscan directory %s: recursive attribute is missing or invalid\n", location.c_str());
+                continue;
+            }
+            else
+            {
+               if (temp == "yes")
+                   recursive = true;
+               else if (temp == "no")
+                   recursive = false;
+               else
+               {
+                   log_warning("Skipping autoscan directory %s: recusrive attribute %s is invalid\n", location.c_str(), temp.c_str());
+                   continue;
+               }
+            }
+
+            temp = child->getAttribute(_("interval"));
+            interval = 0;
+            if (mode == TimedScanMode)
+            {
+                if (!string_ok(temp))
+                {
+                    log_warning("Skipping autoscan directory %s: interval attribute is required for timed mode\n", location.c_str());
+                    continue;
+                }
+
+                interval = temp.toUInt();
+
+                if (interval == 0)
+                {
+                    log_warning("Skipping autoscan directory %s: invalid interval attribute\n", location.c_str());
+                    continue;
+                }
+            }
+            
+            Ref<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, interval));
+            arr->append(dir); 
+        }
+    }
+
+    return arr;
+}
+
+
 Ref<Array<StringBase> > ConfigManager::createArrayFromNodeset(Ref<mxml::Element> element, String nodeName, String attrName)
 {
     String attrValue;

@@ -82,7 +82,7 @@ static String get_filename(String path)
         return path.substring(pos + 1);
 }
 
-ContentManager::ContentManager() : Object()
+ContentManager::ContentManager() : TimerSubscriber()
 {
     taskMutex = Ref<Mutex>(new Mutex());
     taskCond = Ref<Cond>(new Cond(taskMutex));
@@ -120,18 +120,12 @@ ContentManager::ContentManager() : Object()
     taskQueue2 = Ref<ObjectQueue<CMTask> >(new ObjectQueue<CMTask>(CM_INITIAL_QUEUE_SIZE));    
     
     Ref<ConfigManager> cm = ConfigManager::getInstance();
-    Ref<Element> mapEl;  
+    Ref<Element> tmpEl;  
     
     // loading extension - mimetype map  
-    mapEl = cm->getElement(_("/import/mappings/extension-mimetype"));
-    if (mapEl == nil)
-    {
-        log_debug("extension-mimetype mappings not found\n");
-    }
-    else
-    {
-        extension_mimetype_map = cm->createDictionaryFromNodeset(mapEl, _("map"), _("from"), _("to"));
-    }
+    // we can always be sure to get a valid element because everything was prepared by the config manager
+    tmpEl = cm->getElement(_("/import/mappings/extension-mimetype"));
+    extension_mimetype_map = cm->createDictionaryFromNodeset(tmpEl, _("map"), _("from"), _("to"));
 
     String optIgnoreUnknown = cm->getOption(
         _("/import/mappings/extension-mimetype/attribute::ignore-unknown"));
@@ -140,16 +134,12 @@ ContentManager::ContentManager() : Object()
 
     
     // loading mimetype - upnpclass map
-    mapEl = cm->getElement(_("/import/mappings/mimetype-upnpclass"));
-    if (mapEl == nil)
-    {
-        log_debug("mimetype-upnpclass mappings not found\n");
-    }
-    else
-    {
-        mimetype_upnpclass_map = cm->createDictionaryFromNodeset(mapEl, _("map"), _("from"), _("to"));
-    }    
-    
+    tmpEl = cm->getElement(_("/import/mappings/mimetype-upnpclass"));
+    mimetype_upnpclass_map = cm->createDictionaryFromNodeset(tmpEl, _("map"), _("from"), _("to"));
+   
+    tmpEl = cm->getElement(_("/import/autoscan"));
+    autoscan_timed = cm->createAutoscanListFromNodeset(tmpEl, TimedScanMode);
+   
     /* init fielmagic */
 #ifdef HAVE_MAGIC
     if (! ignore_unknown_extensions)
@@ -211,6 +201,21 @@ void ContentManager::init()
     pthread_attr_destroy(&attr);
 
     loadAccounting();
+/*
+    Ref<Timer> timer = Timer::getInstance();
+
+
+    for (int i = 0; i < autoscan_timed->size(); i++)
+    {
+        Ref<AutoscanDirectory> dir = autoscan_timed->get(i);
+        timer->addTimerSubscriber(this, dir->getInterval(), i); 
+    }
+*/
+}
+
+void ContentManager::timerNotify(int id)
+{
+
 }
 
 #if 0

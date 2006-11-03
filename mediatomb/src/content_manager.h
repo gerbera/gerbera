@@ -36,16 +36,12 @@
 #include "storage.h"
 #include "dictionary.h"
 #include "sync.h"
+#include "autoscan_directory.h"
+#include "timer.h"
 
 #ifdef HAVE_JS
 #include "scripting/scripting.h"
 #endif
-
-typedef enum scan_level_t
-{
-    BasicScan, // file was added or removed from the directory
-    FullScan   // file was modified/added/removed
-};
 
 class ContentManager;
 
@@ -135,12 +131,13 @@ public:
 };
 */
 
-class ContentManager : public zmm::Object
+class ContentManager : public TimerSubscriber
 {
 public:
-    ContentManager();
     virtual ~ContentManager();
     void shutdown();
+
+    virtual void timerNotify(int id);
 
     static zmm::Ref<ContentManager> getInstance();
 
@@ -200,6 +197,7 @@ public:
 
 
 protected:
+    ContentManager();
     
     static Mutex getInstanceMutex;
     static zmm::Ref<ContentManager> instance;
@@ -216,6 +214,8 @@ protected:
     int ignore_unknown_extensions;
     zmm::Ref<Dictionary> extension_mimetype_map;
     zmm::Ref<Dictionary> mimetype_upnpclass_map;
+    zmm::Ref<zmm::Array<AutoscanDirectory> > autoscan_timed;
+        
 
     /* don't use these, use the above methods */
     void _loadAccounting();

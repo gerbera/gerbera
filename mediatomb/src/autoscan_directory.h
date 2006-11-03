@@ -45,7 +45,7 @@ typedef enum scan_level_t
 ///\brief Scan mode - type of scan (timed, inotify, fam, etc.)
 typedef enum scan_mode_t
 {
-    Timed
+    TimedScanMode
 };
 
 /// \brief Provides information about one autoscan directory.
