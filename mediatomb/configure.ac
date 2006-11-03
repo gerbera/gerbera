@@ -1253,7 +1253,7 @@ fi
 
 if test "x$TAGLIB_OK" = xyes; then
     CPPFLAGS="$CPPFLAGS $TAGLIB_CFLAGS"
-
+    CXXFLAGS="$CXXFLAGS $TAGLIB_CFLAGS"
     AC_CHECK_HEADERS([taglib.h fileref.h tag.h audioproperties.h tstring.h],
         [],
         [TAGLIB_OK=missing]
@@ -1278,6 +1278,7 @@ else
     fi
 fi
 CPPFLAGS="$CPPFLAGS_SAVE"
+CXXFLAGS="$CXXFLAGS_SAVE"
 LDFLAGS="$LDFLAGS_SAVE"
 
 ######### id3tag
@@ -1563,6 +1564,8 @@ if test "x$EXIF_OK" = xyes; then
     fi
 fi
 
+LIBS_SAVE="$LIBS"
+unset LIBS
 if test "x$EXIF_OK" = xyes; then
     if test -n "$EXIF_SEARCH_LIBS" ; then
         LDFLAGS="-L$EXIF_SEARCH_LIBS"
@@ -1633,6 +1636,9 @@ if test "x$EXIF_OK" = xyes; then
     )
 
 fi
+
+LIBS="$LIBS_SAVE $LIBS"
+
 if test "x$EXIF_OK" = xyes; then
     AC_DEFINE([HAVE_EXIF], [1], [EXIF library presence])
     AC_SUBST(EXIF_CXXFLAGS)
@@ -1774,7 +1780,7 @@ echo "taglib        : $TAGLIB_OK"
 echo "id3lib        : $ID3_OK"
 echo "libextractor  : $EXTRACTOR_OK"
 
-if (test $AUTOCREATE -eq 1) && (test $AUTOCREATE_REQUESTED); then
+if (test $AUTOCREATE -eq 1) && (test $AUTOCREATE_REQUESTED -eq 1); then
     echo "db-autocreate : enabled"
 fi
         
