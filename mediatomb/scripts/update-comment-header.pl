@@ -48,6 +48,16 @@ foreach (@ARGV)
 '.$new_header_main.'
 -->';
     
+    my @new_header_main_array = split("\n", $new_header_main);
+    my $new_header_main_number = join("\n#", @new_header_main_array);
+    
+    my $new_header_number = 
+'#*MT*
+#    
+#'.$new_header_main_number.'
+#
+#*MT*';
+    
     print $full_path.": ";
     open (FILE, '<', $full_path);
     my $data = join('', <FILE>);
@@ -70,6 +80,11 @@ foreach (@ARGV)
         print "<!--*MT*...";
         $data =~ s/<!--\*MT\*.*?->/$new_header_sgml/s;
     }
+    elsif ($data =~ /#\*MT\*/)
+    {
+        print "#*MT*...";
+        $data =~ s/#\*MT\*.*?#\*MT\*/$new_header_number/s;
+    }
     elsif ($data =~ m|/\*.*this file is part of MediaTomb\.|)
     {
         print "old header";
@@ -90,7 +105,7 @@ foreach (@ARGV)
         }
     open (FILE, '>', $full_path);
     print FILE $data;
-        #print $data;
+#        print $data;
     close FILE;
     }
     print "\n";
