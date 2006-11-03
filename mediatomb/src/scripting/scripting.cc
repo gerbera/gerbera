@@ -1,4 +1,3 @@
-
 /*  scripting.cc - this file is part of MediaTomb.
                                                                                 
     Copyright (C) 2005 Gena Batyan <bgeradz@deadlock.dhs.org>,

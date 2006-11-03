@@ -1,3 +1,5 @@
+/*MT*/
+
 function link(req_type, param, get_update_ids)
 {
     var url = "/content/interface?req_type="+ req_type +"&sid="+ SID;

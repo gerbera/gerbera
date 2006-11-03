@@ -1,3 +1,5 @@
+/*MT*/
+
 var itemRoot;
 var rightDocument;
 var viewItems = 50;

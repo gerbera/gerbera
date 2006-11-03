@@ -1,3 +1,5 @@
+/*MT*/
+
 var closedGif = '/icons/nanotree/images/folder_closed.gif';
 var openGif = '/icons/nanotree/images/folder_open.gif';
 var iconArray = new Array(closedGif,openGif);

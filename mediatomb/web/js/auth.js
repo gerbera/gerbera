@@ -1,3 +1,5 @@
+/*MT*/
+
 function authenticate()
 {
     
