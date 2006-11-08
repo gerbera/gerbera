@@ -876,7 +876,10 @@ fi
 if test "x$MYSQL_OK" = xyes; then
     AC_CHECK_FUNCS(mysql_init,
         [],
-        [MYSQL_OK=missing AC_MSG_RESULT(mysqlclient link failed)]
+        [
+	    MYSQL_OK=missing
+            AC_MSG_RESULT(mysqlclient link failed)
+        ]
     )
 fi
 if test "x$MYSQL_OK" = xyes; then
