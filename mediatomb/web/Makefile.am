@@ -1,4 +1,4 @@
-sharedir = $(DESTDIR)@datadir@/mediatomb
+sharedir = $(DESTDIR)@datadir@/@PACKAGE@
 
 _DIST_FILES_IMAGES = \
 ./icons/nanotree/images/minus.gif \
@@ -42,15 +42,48 @@ _DIST_FILES_WEB = \
 ./cds.xml \
 ./mr_reg.xml    
 
+WEB_DIR=web
+ICONS_DIR=$(WEB_DIR)/icons
+NANOTREE_DIR=$(ICONS_DIR)/nanotree
+IMAGES_DIR=$(NANOTREE_DIR)/images
+JS_DIR=$(WEB_DIR)/js
+
 
 EXTRA_DIST = $(_DIST_FILES_IMAGES) $(_DIST_FILES_JS) $(_DIST_FILES_WEB)
 
-iconsdir = $(sharedir)/web/icons/nanotree/images
-icons_DATA = $(_DIST_FILES_IMAGES)
+#iconsdir = $(sharedir)/web/icons/nanotree/images
+#icons_DATA = $(_DIST_FILES_IMAGES)
+#
+#jsdir = $(sharedir)/web/js
+#js_DATA = $(_DIST_FILES_JS)
+#
+#webdir = $(sharedir)/web
+#web_DATA = $(_DIST_FILES_WEB)
 
-jsdir = $(sharedir)/web/js
-js_DATA = $(_DIST_FILES_JS)
-
-webdir = $(sharedir)/web
-web_DATA = $(_DIST_FILES_WEB)
+install-data-local:
+	$(mkinstalldirs) $(sharedir)
+	$(mkinstalldirs) $(sharedir)/${WEB_DIR}
+	$(mkinstalldirs) $(sharedir)/${ICONS_DIR}
+	$(mkinstalldirs) $(sharedir)/${NANOTREE_DIR}
+	$(mkinstalldirs) $(sharedir)/${IMAGES_DIR}
+	$(mkinstalldirs) $(sharedir)/${JS_DIR}
+	for i in $(_DIST_FILES_WEB); do \
+      if test -f $$i; then \
+        echo "$(INSTALL_DATA) $$i $(sharedir)/${WEB_DIR};"; \
+        $(INSTALL_DATA) $$i $(sharedir)/${WEB_DIR}; \
+      fi \
+    done
+	for i in $(_DIST_FILES_JS); do \
+      if test -f $$i; then \
+        echo "$(INSTALL_DATA) $$i $(sharedir)/${JS_DIR};"; \
+        $(INSTALL_DATA) $$i $(sharedir)/${JS_DIR}; \
+      fi \
+    done
+	for i in $(_DIST_FILES_IMAGES); do \
+      if test -f $$i; then \
+        echo "$(INSTALL_DATA) $$i $(sharedir)/${IMAGES_DIR};"; \
+        $(INSTALL_DATA) $$i $(sharedir)/${IMAGES_DIR}; \
+      fi \
+    done
+    
 
