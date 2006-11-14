@@ -55,7 +55,7 @@ public:
     ~Timer();
     static zmm::Ref<Timer> getInstance();
     
-    void addTimerSubscriber(zmm::Ref<TimerSubscriber> timerSubscriber, unsigned int notifyInterval, int id = 0);
+    void addTimerSubscriber(zmm::Ref<TimerSubscriber> timerSubscriber, unsigned int notifyInterval, int id = 0, bool once = false);
     void removeTimerSubscriber(zmm::Ref<TimerSubscriber> timerSubscriber, int id = 0);
     
     void triggerWait();

@@ -74,14 +74,14 @@ Ref<Timer> Timer::getInstance()
     return instance;
 }
 
-void Timer::addTimerSubscriber(Ref<TimerSubscriber> timerSubscriber, unsigned int notifyInterval, int id)
+void Timer::addTimerSubscriber(Ref<TimerSubscriber> timerSubscriber, unsigned int notifyInterval, int id, bool once)
 {
     log_debug("adding subscriber...\n");
     if (notifyInterval <= 0)
         throw _Exception(_("tried to add timer with illegal notifyInterval"));
     mutex->lock();
     //timerSubscriber->timerNotify(id);
-    Ref<TimerSubscriberElement> element(new TimerSubscriberElement(timerSubscriber, notifyInterval, id));
+    Ref<TimerSubscriberElement> element(new TimerSubscriberElement(timerSubscriber, notifyInterval, id, once));
     for(int i = 0; i < subscribers->size(); i++)
     {
         if (subscribers->get(i)->equals(element))
