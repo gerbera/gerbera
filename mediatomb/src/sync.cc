@@ -71,6 +71,7 @@ void Mutex::lock()
         errorExit(_("same thread tried to lock non-recursive mutex twice"));
     pthread_mutex_lock(&mutex_struct);
     doLock();
+    autolock = false;
 }
 
 void Mutex::unlock(bool autolock)

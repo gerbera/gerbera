@@ -67,7 +67,7 @@ protected:
 #ifdef LOG_TOMBDEBUG
     void errorExit(zmm::String error);
     inline pthread_t getLockingThread() { return locking_thread; }
-    inline void doLock() { lock_level++; locking_thread = pthread_self(); autolock = false; }
+    inline void doLock() { lock_level++; locking_thread = pthread_self(); }
     inline void doUnlock() { lock_level--; };
     inline bool isLocked() { return lock_level > 0; }
     inline void lockAutolock() { lock(); autolock = true; }
