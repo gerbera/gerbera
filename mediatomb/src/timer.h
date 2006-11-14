@@ -37,10 +37,6 @@
 #include "sync.h"
 
 
-// greatest common divisor for the signal times
-// (in seconds)
-#define TIMER_GCD   1
-
 /// \todo Leo: please add doxygen documentation!
 class TimerSubscriber : public zmm::Object
 {
@@ -71,18 +67,20 @@ protected:
     class TimerSubscriberElement : public zmm::Object
     {
     public:
-        TimerSubscriberElement(zmm::Ref<TimerSubscriber> subscriber, unsigned int notifyInterval, int id);
+        TimerSubscriberElement(zmm::Ref<TimerSubscriber> subscriber, unsigned int notifyInterval, int id, bool once = false);
         inline unsigned int getNotifyInterval() { return notifyInterval; }
         inline zmm::Ref<TimerSubscriber> getSubscriber() { return subscriber; }
         inline void notified();
         inline struct timespec *getNextNotify() { return &nextNotify; }
         inline int getID() { return id; }
         bool equals(zmm::Ref<TimerSubscriberElement> other);
+        bool isOnce() { return once; }
     protected:
         zmm::Ref<TimerSubscriber> subscriber;
         unsigned int notifyInterval;
         int id;
         struct timespec nextNotify;
+        bool once;
     };
     
     

@@ -82,7 +82,7 @@ Object *ArrayBase::get(int index)
 }
 void ArrayBase::remove(int index, int count)
 {
-    if (index >= siz) // index beyond size
+    if (index < 0 || index >= siz) // index beyond size
         return;
 	int max = index + count; // max is the last element to remove + 1
     if (max > siz) // if remove block is beyond size, cut it
@@ -105,6 +105,12 @@ void ArrayBase::remove(int index, int count)
 	    );
     }
 	siz -= count;
+}
+void ArrayBase::removeUnordered(int index)
+{
+    if (index < 0 || index >= siz) // index beyond size
+        return;
+    arr[index] = arr[--siz];
 }
 void ArrayBase::insert(int index, Object *obj)
 {

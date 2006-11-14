@@ -105,7 +105,7 @@ void Timer::removeTimerSubscriber(Ref<TimerSubscriber> timerSubscriber, int id)
     {
         if (subscribers->get(i)->equals(element))
         {
-            subscribers->remove(i);
+            subscribers->removeUnordered(i);
             removed = true;
             break;
         }
@@ -171,6 +171,10 @@ void Timer::notify()
             zmm::Ref<TimerSubscriber> subscriber = element->getSubscriber();
             subscriber->timerNotify(element->getID());
             element->notified();
+            if (element->isOnce())
+            {
+                subscribers->removeUnordered(i--);
+            }
         }
     }
 }
@@ -189,11 +193,12 @@ struct timespec * Timer::getNextNotifyTime()
     return nextTime;
 }
 
-Timer::TimerSubscriberElement::TimerSubscriberElement(Ref<TimerSubscriber> subscriber, unsigned int notifyInterval, int id)
+Timer::TimerSubscriberElement::TimerSubscriberElement(Ref<TimerSubscriber> subscriber, unsigned int notifyInterval, int id, bool once)
 {
     this->subscriber = subscriber;
     this->notifyInterval = notifyInterval;
     this->id = id;
+    this->once = once;
     notified();
 }
 

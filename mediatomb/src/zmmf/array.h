@@ -49,6 +49,7 @@ public:
     void set(Object *el, int index);
     Object *get(int index);
     void remove(int index, int count);
+    void removeUnordered(int index);
     void insert(int index, Object *el);
     inline int size() { return siz; }
     void optimize();
@@ -93,6 +94,10 @@ public:
     inline void remove(int index, int count=1)
     {
         base.remove(index, count);
+    }
+    inline void removeUnordered(int index)
+    {
+        base.removeUnordered(index);
     }
     inline void insert(int index, Ref<T> el)
     {
