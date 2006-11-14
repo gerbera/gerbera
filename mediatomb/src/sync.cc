@@ -76,7 +76,7 @@ void Mutex::lock()
 
 void Mutex::unlock(bool autolock)
 {
-    if (autolock != this->autolock)
+    if (! recursive && autolock != this->autolock)
     {
         if (autolock)
             errorExit(_("unlock() called by autolock, but not locked by an getAutolock()?? - seems to be an error in sync.cc..."));
