@@ -35,18 +35,31 @@
 #include "common.h"
 #include <pthread.h>
 
+class Mutex;
+
+class MutexAutolock : public zmm::Object
+{
+public:
+    ~MutexAutolock();
+protected:
+    MutexAutolock(zmm::Ref<Mutex> mutex);
+    zmm::Ref<Mutex> mutex;
+    friend class Mutex;
+};
+
 class Mutex : public zmm::Object
 {
 public:
-    Mutex(bool recursuve = false);
+    Mutex(bool recursive = false);
     virtual ~Mutex();
 #ifndef LOG_TOMBDEBUG
     inline void lock() { pthread_mutex_lock(&mutex_struct); }
     inline void unlock() { pthread_mutex_unlock(&mutex_struct); }
 #else
     void lock();
-    void unlock();
-#endif 
+    void unlock(bool autolock = false);
+#endif
+    inline zmm::Ref<MutexAutolock> getAutolock() { return zmm::Ref<MutexAutolock>(new MutexAutolock(zmm::Ref<Mutex>(this))); }
 protected:
     pthread_mutex_t mutex_struct;
     inline pthread_mutex_t* getMutex() { return &mutex_struct; }
@@ -57,9 +70,14 @@ protected:
     inline void doLock() { lock_level++; locking_thread = pthread_self(); }
     inline void doUnlock() { lock_level--; };
     inline bool isLocked() { return lock_level > 0; }
+    inline void lockAutolock() { lock(); autolock = true; }
+    void unlockAutolock();
     int lock_level;
     bool recursive;
+    bool autolock;
     pthread_t locking_thread;
+    
+    friend class MutexAutolock;
 #endif
     
     friend class Cond;

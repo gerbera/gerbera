@@ -63,7 +63,6 @@ Mutex::~Mutex()
     pthread_mutex_destroy(&mutex_struct);
 }
 
-
 #ifdef LOG_TOMBDEBUG
 void Mutex::lock()
 {
@@ -74,15 +73,22 @@ void Mutex::lock()
     doLock();
 }
 
-void Mutex::unlock()
+void Mutex::unlock(bool autolock)
 {
-     pthread_t this_thread = pthread_self();
-     if (lock_level <= 0)
-         errorExit(_("tried to unlock not locked mutex"));
-     if (this_thread != locking_thread)
-         errorExit(_("a different thread tried to unlock the locked mutex"));
-     doUnlock();
-     pthread_mutex_unlock(&mutex_struct);
+    if (autolock != this->autolock)
+    {
+        if (autolock)
+            errorExit(_("unlock() called by autolock, but not locked by an getAutolock()?? - seems to be an error in sync.cc..."));
+        else
+            errorExit(_("unlock() called, but locked by an getAutolock()!"));
+    }
+    pthread_t this_thread = pthread_self();
+    if (lock_level <= 0)
+     errorExit(_("tried to unlock not locked mutex"));
+    if (this_thread != locking_thread)
+     errorExit(_("a different thread tried to unlock the locked mutex"));
+    doUnlock();
+    pthread_mutex_unlock(&mutex_struct);
 }
 
 
@@ -93,6 +99,12 @@ void Mutex::errorExit(String error)
     e.printStackTrace();
     exit(1);
 }
+
+void Mutex::unlockAutolock()
+{
+    unlock(true);
+}
+
 #endif // LOG_TOMBDEBUG
 
 /* Cond */
@@ -134,4 +146,24 @@ void Cond::checkwait()
         mutex->errorExit(_("tried to do a cond_wait with a mutex locked by another thread"));
 }
 #endif // LOG_TOMBDEBUG
+
+
+MutexAutolock::MutexAutolock(Ref<Mutex> mutex)
+{
+    this->mutex = mutex;
+#ifdef LOG_TOMBDEBUG
+    mutex->lockAutolock();
+#else
+    mutex->lock();
+#endif
+}
+
+MutexAutolock::~MutexAutolock()
+{
+#ifdef LOG_TOMBDEBUG
+    mutex->unlockAutolock();
+#else
+    mutex->unlock();
+#endif
+}
 
