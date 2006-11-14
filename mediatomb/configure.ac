@@ -29,7 +29,7 @@
 #*MT*
 
 AC_PREREQ(2.59)
-AC_INIT([MediaTomb], [0.9.0_pre], [jin@mediatomb.org])
+AC_INIT([MediaTomb], [0.9.0pre], [jin@mediatomb.org])
 AM_CONFIG_HEADER([autoconfig.h tombupnp/upnp/inc/upnpconfig.h])
 AC_CONFIG_AUX_DIR(configure_aux)
 AC_CONFIG_SRCDIR([src/common.h])
@@ -570,6 +570,9 @@ AC_DEFINE([UPNP_HAVE_WEBSERVER], [1], [Compile internal web server])
 
 AC_CHECK_LIB(pthread, pthread_mutex_lock,[], [AC_MSG_ERROR(required library function not found)])    
 
+LIBS_SAVE="$LIBS"
+unset LIBS
+    
 # check librt stuff - clock_gettime
 AC_CHECK_FUNC([clock_gettime],
         [
@@ -595,6 +598,7 @@ AC_CHECK_FUNC([clock_gettime],
         ]
 )
 
+LIBS="$LIBS_SAVE"
 LDFLAGS="$LDFLAGS_SAVE"
 AC_SUBST(RT_LIBS)
 
@@ -993,12 +997,20 @@ if test "x$JS_OK" = xyes; then
                 ],
                 [
                     LDFLAGS="-L$JS_SEARCH_LIBS -lsmjs"
-                    AC_CHECK_LIB(js, JS_NewObject,
+                    AC_CHECK_LIB(smjs, JS_NewObject,
                         [
                             JS_LIBS="-L$JS_SEARCH_LIBS -lsmjs"
                         ],
                         [
-                            AC_MSG_ERROR([Spidermonkey not found in requested location $JS_SEARCH_LIBS])
+                            LDFLAGS="-L$JS_SEARCH_LIBS -lmozjs"
+                            AC_CHECK_LIB(mozjs, JS_NewObject,
+                                [
+                                    JS_LIBS="-L$JS_SEARCH_LIBS -lmozjs"
+                                ],
+                                [
+                                    AC_MSG_ERROR([Spidermonkey not found in requested location $JS_SEARCH_LIBS])
+                                ]
+                            )
                         ]
                     )
                 ]
@@ -1021,9 +1033,18 @@ if test "x$JS_OK" = xyes; then
                             AC_CHECK_LIB(smjs, JS_NewObject,
                                 [JS_LIBS="-L$SEARCH_DIR_LIBS -lsmjs"],
                                 [
-                                    JS_OK=missing
-                                    AC_MSG_RESULT(libjs/libsmjs link failed, giving up)
-                                ])
+                                    LDFLAGS="-L$JS_SEARCH_LIBS -lmozjs"
+                                    AC_CHECK_LIB(mozjs, JS_NewObject,
+                                            [
+                                                JS_LIBS="-L$JS_SEARCH_LIBS -lmozjs"
+                                            ],
+                                            [
+                                                JS_OK=missing
+                                                AC_MSG_RESULT(libjs/libsmjs link failed, giving up)
+                                            ]
+                                    )
+
+                               ])
                         ])
                 ])
        ])

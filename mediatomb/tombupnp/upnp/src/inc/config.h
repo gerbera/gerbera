@@ -32,9 +32,9 @@
 #ifndef INTERNAL_CONFIG_H
 #define INTERNAL_CONFIG_H 
 
-#include "autoconfig.h"
-
-#define X_USER_AGENT "redsonic"
+#if defined(HAVE_CONFIG_H)
+    #include "autoconfig.h"
+#endif
 
 /** @name Compile time configuration options
  *  The Linux SDK for UPnP Devices contains some compile-time parameters 
@@ -53,7 +53,7 @@
  */
 
 //@{
-#define THREAD_IDLE_TIME 5000
+#define THREAD_IDLE_TIME 30000
 //@}
 
 /** @name JOBS_PER_THREAD
@@ -78,7 +78,7 @@
  */
 
 //@{
-#define MIN_THREADS 4 
+#define MIN_THREADS 2 
 //@}
 
 /** @name MAX_THREADS
