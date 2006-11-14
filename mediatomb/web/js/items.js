@@ -445,6 +445,7 @@ function itemAddEditSubmit(objectId)
 
 function addEditRemoveSubmitted(ajaxRequest)
 {
+    //alert(ajaxRequest.responseText);
     var xml = ajaxRequest.responseXML;
     if (!errorCheck(xml)) return;
     
@@ -473,6 +474,19 @@ function addEditRemoveSubmitted(ajaxRequest)
 
 function removeItem(itemId, all)
 {
+    
+    if (itemId == '0')
+    {
+        alert("Root container cannot be removed!");
+        return;
+    }
+    
+    if ('d'+itemId == selectedNode)
+    {
+        //alert("current selected");
+        // current container will be removed, selecting parent...
+        selectNode(getTreeNode(selectedNode).getParent().getID());
+    }
     if (all)
         all_send="1";
     else

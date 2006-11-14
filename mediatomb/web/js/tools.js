@@ -101,12 +101,6 @@ function errorCheck(xml, noredirect)
         }
         return false;
     }
-    var error = xmlGetElementText(xml, 'error');
-    if (error)
-    {
-        alert(error);
-        return false;
-    }
     
     var updateIDsEl = xmlGetElement(xml, 'updateIDs');
     if (updateIDsEl)
@@ -166,6 +160,12 @@ function errorCheck(xml, noredirect)
             if (savedlastNodeDb)
                 selectNode(savedlastNodeDbIDParent);
         }
+    }
+    var error = xmlGetElementText(xml, 'error');
+    if (error)
+    {
+        alert(error);
+        return false;
     }
     return true;
 }
@@ -234,3 +234,4 @@ function ensureElementVisibility(win, doc, el, bottomAdd)
         win.scrollTo(xoffset, elpos-viewheight+bottomAdd);
     }
 }
+

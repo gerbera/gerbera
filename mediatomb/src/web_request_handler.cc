@@ -174,6 +174,9 @@ Ref<IOHandler> WebRequestHandler::open(IN const char *filename,
 void WebRequestHandler::addUpdateIDs(Ref<Session> session, Ref<Element> root)
 {
     String updateIDs = session->getUIUpdateIDs();
-    if (string_ok(updateIDs)) 
+    if (string_ok(updateIDs))
+    {
+        log_debug("UI: sending update ids: %s\n", updateIDs.c_str());
         root->appendTextChild(_("updateIDs"), updateIDs);
+    }
 }
