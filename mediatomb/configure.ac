@@ -650,6 +650,8 @@ else
                 AC_CHECK_LIB(z, uncompress,
                     [
                         Z_LIBS="-L$SEARCH_DIR_LIBS -lz"
+                    ],
+                    [
                         ZLIB_OK=missing
                     ]
                 )
