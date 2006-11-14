@@ -1024,30 +1024,40 @@ if test "x$JS_OK" = xyes; then
             AC_CHECK_LIB(smjs, JS_NewObject,
                 [],
                 [
-                    LDFLAGS="-L$SEARCH_DIR_LIBS"
                     unset ac_cv_lib_smjs_JS_NewObject
-                    AC_CHECK_LIB(js, JS_NewObject,
-                        [JS_LIBS="-L$SEARCH_DIR_LIBS -ljs"],
+                    AC_CHECK_LIB(mozjs, JS_NewObject,
+                        [],
                         [
+                            LDFLAGS="-L$SEARCH_DIR_LIBS"
                             unset ac_cv_lib_js_JS_NewObject
-                            AC_CHECK_LIB(smjs, JS_NewObject,
-                                [JS_LIBS="-L$SEARCH_DIR_LIBS -lsmjs"],
+                            AC_CHECK_LIB(js, JS_NewObject,
+                                [JS_LIBS="-L$SEARCH_DIR_LIBS -ljs"],
                                 [
-                                    LDFLAGS="-L$JS_SEARCH_LIBS -lmozjs"
-                                    AC_CHECK_LIB(mozjs, JS_NewObject,
-                                            [
-                                                JS_LIBS="-L$JS_SEARCH_LIBS -lmozjs"
-                                            ],
-                                            [
-                                                JS_OK=missing
-                                                AC_MSG_RESULT(libjs/libsmjs link failed, giving up)
-                                            ]
+                                    unset ac_cv_lib_smjs_JS_NewObject
+                                    AC_CHECK_LIB(smjs, JS_NewObject,
+                                        [JS_LIBS="-L$SEARCH_DIR_LIBS -lsmjs"],
+                                        [
+                                            LDFLAGS="-L$SEARCH_DIR_LIBS -lmozjs"
+                                            unset ac_cv_lib_mozjs_JS_NewObject
+                                            AC_CHECK_LIB(mozjs, JS_NewObject,
+                                                [
+                                                    JS_LIBS="-L$SEARCH_DIR_LIBS -lmozjs"
+                                                ],
+                                                [
+                                                    JS_OK=missing
+                                                    AC_MSG_RESULT(libjs/libsmjs link failed, giving up)
+                                                ]
+                                            )
+                                        ]
                                     )
-
-                               ])
-                        ])
-                ])
-       ])
+                                ]
+                            )
+                        ]
+                    )
+                ]
+            )
+       ]
+    )
     fi
 fi
 if test "x$JS_OK" = xyes; then
