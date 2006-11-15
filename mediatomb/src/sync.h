@@ -109,10 +109,6 @@ public:
 protected:
     pthread_cond_t cond_struct;
     zmm::Ref<Mutex> mutex;
-    
-#ifdef LOG_TOMBDEBUG
-    
-#endif
 };
 
 #endif // __SYNC_H__

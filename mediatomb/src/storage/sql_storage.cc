@@ -954,6 +954,8 @@ String SQLStorage::incrementUpdateIDs(int *ids, int size)
     {
         *buf << ',' << row->col(0) << ',' << row->col(1);
     }
+    if (buf->length() <= 0)
+        return nil;
     return buf->toString(1);
 }
 

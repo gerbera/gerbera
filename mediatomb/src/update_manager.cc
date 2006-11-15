@@ -221,9 +221,16 @@ void UpdateManager::threadProc()
                 objectIDHash->clear(); // hash_data_array will be invalid after clear()
                 
                 AUTOUNLOCK(); // we don't need to hold the lock during the sending of the updates
-                ContentDirectoryService::getInstance()->subscription_update(updateString);
-                getTimespecNow(&lastUpdate);
-                log_debug("updates sent.\n");
+                if (string_ok(updateString))
+                {
+                    ContentDirectoryService::getInstance()->subscription_update(updateString);
+                    log_debug("updates sent.\n");
+                    getTimespecNow(&lastUpdate);
+                }
+                else
+                {
+                    log_debug("NOT sending updates (string empty or invalid).\n");
+                }
                 AUTOLOCK2(mutex);
             }
         }

@@ -117,7 +117,11 @@ void Mutex::doLock(bool cond)
 void Mutex::doUnlock(bool cond)
 {
     if (cond)
+    {
         autolock_before_cond_unlock = autolock;
+        if (recursive && lock_level != 1)
+            errorExit(_("tried to unlock a recursive mutex via a cond->wait() or cond->timedwait() call, which is locked more than once - is this correct?"));
+    }
     lock_level--;
 }
 
