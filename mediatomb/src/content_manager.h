@@ -226,7 +226,10 @@ protected:
     
     /// \brief Gets an AutocsanDirectrory from the global list
     zmm::Ref<AutoscanDirectory> getAutoscanDirectory(int scanID, scan_mode_t scanMode);
- 
+
+    /// \brief Removes an AutocsanDirectrory from the global list
+    void removeAutoscanDirectory(int scanID, scan_mode_t scanMode);
+        
     void rescanDirectory(int objectID, int scanID, scan_mode_t scanMode); 
     void _rescanDirectory(int containerID, int scanID, scan_mode_t scanMode, scan_level_t scanLevel);
     /* for recursive addition */

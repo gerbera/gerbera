@@ -212,18 +212,6 @@ void ContentManager::timerNotify(int id)
 {
     Ref<AutoscanDirectory> dir = autoscan_timed->get(id);
     int objectID = dir->getObjectID();
-    if (objectID == INVALID_OBJECT_ID)
-    {
-        int updateID = INVALID_OBJECT_ID;  
-        objectID = Storage::getInstance()->ensurePathExistence(dir->getLocation(), &updateID);
-        if (updateID != INVALID_OBJECT_ID)
-        {
-            UpdateManager::getInstance()->containerChanged(updateID);
-            SessionManager::getInstance()->containerChangedUI(updateID);
-        }
-        dir->setObjectID(objectID);
-    }
-
     rescanDirectory(objectID, dir->getScanID(), dir->getScanMode());
 }
 
@@ -375,26 +363,65 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
     struct stat statbuf;
     String location;
     String path;
-
-    //    Ref<Array<int> > list(new Array<int>());
-
-    // TEST CODE REMOVE THIS 
-    // containerID = 33651; 
+    Ref<CdsObject> obj;
 
     Ref<Storage> storage = Storage::getInstance();
-    Ref<CdsObject> obj = storage->loadObject(containerID);
-    Ref<ConfigManager> cm = ConfigManager::getInstance();
-    if (!IS_CDS_CONTAINER(obj->getObjectType()))
+    
+    if (containerID != INVALID_OBJECT_ID)
     {
-        throw _Exception(_("Object is not a container: rescan must be triggered on directories\n"));
+        try
+        {
+            obj = storage->loadObject(containerID);
+            if (!IS_CDS_CONTAINER(obj->getObjectType()))
+            {
+                throw _Exception(_("Object is not a container: rescan must be triggered on directories\n"));
+ 
+                log_debug("Rescanning container: %s, id=%d\n", obj->getTitle().c_str(), containerID);
+
+            }
+            location = obj->getLocation();
+        }
+        catch (Exception e)
+        {
+            containerID = INVALID_OBJECT_ID;
+        }
     }
 
-    log_debug("Rescanning container: %s, id=%d\n", 
-            obj->getTitle().c_str(), containerID);
+    if (containerID == INVALID_OBJECT_ID)
+    {
+        int updateID = INVALID_OBJECT_ID; 
+        Ref<AutoscanDirectory> adir = getAutoscanDirectory(scanID, scanMode);
+        if (!check_path(adir->getLocation(), true))
+        {
+            if (adir->fromConfig())
+                return;
+            else
+            {
+                adir->setTaskCount(-1);
+                removeObject(containerID, true, true);
+                removeAutoscanDirectory(scanID, scanMode);
+                return;
+            }
+
+        }
+        containerID = Storage::getInstance()->ensurePathExistence(adir->getLocation(), &updateID);
+        if (updateID != INVALID_OBJECT_ID)
+        {
+            UpdateManager::getInstance()->containerChanged(updateID);
+            SessionManager::getInstance()->containerChangedUI(updateID);
+        }
+        adir->setObjectID(containerID);
+        location = adir->getLocation();
+    }
+
+
+       
+    Ref<ConfigManager> cm = ConfigManager::getInstance();
 
     log_debug("Starting with last modified time: %lld\n", last_modified);
 
-    location = obj->getLocation();
+    log_debug("Rescanning location: %s\n", location.c_str());
+
     if (!string_ok(location))
     {
         log_error("Container with ID %d has no location information\n", containerID);
@@ -414,7 +441,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
         {
             adir->setTaskCount(-1);
             removeObject(containerID, true, true);
-            autoscan_timed->remove(scanID);
+            removeAutoscanDirectory(scanID, scanMode);
             return;
         }
     }
@@ -1226,6 +1253,16 @@ Ref<AutoscanDirectory> ContentManager::getAutoscanDirectory(int scanID, scan_mod
     if (scanMode == TimedScanMode)
     {
         return autoscan_timed->get(scanID);
+    }
+
+    return nil;
+}
+ 
+void ContentManager::removeAutoscanDirectory(int scanID, scan_mode_t scanMode)
+{
+    if (scanMode == TimedScanMode)
+    {
+        autoscan_timed->remove(scanID);
     }
 }
     
