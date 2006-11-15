@@ -41,12 +41,6 @@
 
 using namespace zmm;
 
-/* maximal number of items to store in the hashtable */
-//#define MAX_REMOVE_IDS 1000
-//#define REMOVE_ID_HASH_CAPACITY 3109
-
-//#define OBJECT_CACHE_CAPACITY 100003
-
 #define LOC_DIR_PREFIX      'D'
 #define LOC_FILE_PREFIX     'F'
 #define LOC_VIRT_PREFIX     'V'
@@ -594,7 +588,7 @@ int SQLStorage::isFolderInDatabase(String fullpath)
         fullpath = _("/") + filename;
     
     Ref<StringBuffer> qb(new StringBuffer());
-    String dbLocation = addLocationPrefix(LOC_DIR_PREFIX, path);
+    String dbLocation = addLocationPrefix(LOC_DIR_PREFIX, fullpath);
     *qb << "SELECT " << QTB << "id" << QTE << " FROM " << QTB << CDS_OBJECT_TABLE << QTE <<
             " WHERE " << QTB << "location_hash" << QTE << " = " << stringHash(dbLocation)
             << " AND " << QTB << "location" << QTE << " = " << quote(dbLocation)
