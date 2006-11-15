@@ -70,7 +70,7 @@ void Mutex::lock()
     if (lock_level && ! recursive && this_thread == locking_thread)
         errorExit(_("same thread tried to lock non-recursive mutex twice"));
     pthread_mutex_lock(&mutex_struct);
-    doLock();
+    doLock(false);
     autolock = false;
 }
 
@@ -79,7 +79,7 @@ void Mutex::unlock(bool autolock)
     if (! recursive && autolock != this->autolock)
     {
         if (autolock)
-            errorExit(_("unlock() called by autolock, but not locked by an getAutolock()?? - seems to be an error in sync.cc..."));
+            errorExit(_("unlock() called by autolock, but not locked by getAutolock()?? - seems to be an error in sync.cc..."));
         else
             errorExit(_("unlock() called, but locked by an getAutolock()!"));
     }
@@ -88,7 +88,7 @@ void Mutex::unlock(bool autolock)
      errorExit(_("tried to unlock not locked mutex"));
     if (this_thread != locking_thread)
      errorExit(_("a different thread tried to unlock the locked mutex"));
-    doUnlock();
+    doUnlock(false);
     pthread_mutex_unlock(&mutex_struct);
 }
 
@@ -104,6 +104,21 @@ void Mutex::errorExit(String error)
 void Mutex::unlockAutolock()
 {
     unlock(true);
+}
+
+void Mutex::doLock(bool cond)
+{
+    if (cond)
+        autolock = autolock_before_cond_unlock;
+    lock_level++;
+    locking_thread = pthread_self();
+}
+
+void Mutex::doUnlock(bool cond)
+{
+    if (cond)
+        autolock_before_cond_unlock = autolock;
+    lock_level--;
 }
 
 #endif // LOG_TOMBDEBUG
@@ -124,16 +139,16 @@ Cond::~Cond()
 #ifdef LOG_TOMBDEBUG
 void Cond::wait()
 {
-    mutex->doUnlock();
+    mutex->doUnlock(true);
     pthread_cond_wait(&cond_struct, mutex->getMutex());
-    mutex->doLock();
+    mutex->doLock(true);
 }
 
 int Cond::timedwait(struct timespec *timeout)
 {
-    mutex->doUnlock();
+    mutex->doUnlock(true);
     int ret = pthread_cond_timedwait(&cond_struct, mutex->getMutex(), timeout);
-    mutex->doLock();
+    mutex->doLock(true);
     return ret;
 }
 

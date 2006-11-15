@@ -67,14 +67,15 @@ protected:
 #ifdef LOG_TOMBDEBUG
     void errorExit(zmm::String error);
     inline pthread_t getLockingThread() { return locking_thread; }
-    inline void doLock() { lock_level++; locking_thread = pthread_self(); }
-    inline void doUnlock() { lock_level--; };
+    void doLock(bool cond);
+    void doUnlock(bool cond);
     inline bool isLocked() { return lock_level > 0; }
     inline void lockAutolock() { lock(); autolock = true; }
     void unlockAutolock();
     int lock_level;
     bool recursive;
     bool autolock;
+    bool autolock_before_cond_unlock;
     pthread_t locking_thread;
     
     friend class MutexAutolock;
