@@ -641,7 +641,9 @@ Ref<CdsObject> SQLStorage::findObjectByFilename(String path)
 
 Ref<SQLRow> SQLStorage::_findObjectByPath(String fullpath)
 {
+    //log_debug("fullpath: %s\n", fullpath.c_str());
     fullpath = fullpath.reduce(DIR_SEPARATOR);
+    //log_debug("fullpath after reduce: %s\n", fullpath.c_str());
     Ref<Array<StringBase> > pathAr = split_path(fullpath);
     String path = pathAr->get(0);
     String filename = pathAr->get(1);
@@ -653,7 +655,7 @@ Ref<SQLRow> SQLStorage::_findObjectByPath(String fullpath)
         if (! string_ok(filename) && ! string_ok(path))
             throw _Exception(_("tried to add an empty path"));
         
-         file = false;
+        file = false;
     }
     String dbLocation;
     if (file)
