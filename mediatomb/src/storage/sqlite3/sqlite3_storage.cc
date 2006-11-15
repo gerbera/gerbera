@@ -301,12 +301,12 @@ void SLTask::waitForTask()
 
 void SLInitTask::run(sqlite3 *db, Sqlite3Storage *sl)
 {
-    unsigned char buf[SL2_CREATE_SQL_INFLATED_SIZE + 1]; // +1 for '\0' at the end of the string
-    unsigned long uncompressed_size = SL2_CREATE_SQL_INFLATED_SIZE;
-    int ret = uncompress(buf, &uncompressed_size, sqlite3_create_sql, SL2_CREATE_SQL_DEFLATED_SIZE);
-    if (ret != Z_OK || uncompressed_size != SL2_CREATE_SQL_INFLATED_SIZE)
+    unsigned char buf[SL3_CREATE_SQL_INFLATED_SIZE + 1]; // +1 for '\0' at the end of the string
+    unsigned long uncompressed_size = SL3_CREATE_SQL_INFLATED_SIZE;
+    int ret = uncompress(buf, &uncompressed_size, sqlite3_create_sql, SL3_CREATE_SQL_DEFLATED_SIZE);
+    if (ret != Z_OK || uncompressed_size != SL3_CREATE_SQL_INFLATED_SIZE)
         throw _StorageException(_("Error while uncompressing sqlite3 create sql. returned: ") + ret);
-    buf[SL2_CREATE_SQL_INFLATED_SIZE] = '\0';
+    buf[SL3_CREATE_SQL_INFLATED_SIZE] = '\0';
     
     char *err;
     ret = sqlite3_exec(

@@ -13,7 +13,7 @@ CREATE TABLE `mt_cds_object` (
   `object_type` tinyint(4) unsigned NOT NULL,
   `upnp_class` varchar(80) default NULL,
   `dc_title` varchar(255) default NULL,
-  `location` varchar(255) default NULL,
+  `location` text,
   `location_hash` int(11) unsigned default NULL,
   `metadata` text,
   `auxdata` text,
