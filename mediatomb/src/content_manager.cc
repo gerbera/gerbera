@@ -201,21 +201,30 @@ void ContentManager::init()
     pthread_attr_destroy(&attr);
 
     loadAccounting();
-/*
+
     Ref<Timer> timer = Timer::getInstance();
 
+    autoscan_timed->notifyAll(Ref<TimerSubscriber>(this));
 
-    for (int i = 0; i < autoscan_timed->size(); i++)
-    {
-        Ref<AutoscanDirectory> dir = autoscan_timed->get(i);
-        timer->addTimerSubscriber(this, dir->getInterval(), i); 
-    }
-*/
 }
 
 void ContentManager::timerNotify(int id)
 {
+    Ref<AutoscanDirectory> dir = autoscan_timed->get(id);
+    int objectID = dir->getObjectID();
+    if (objectID == INVALID_OBJECT_ID)
+    {
+        int updateID = INVALID_OBJECT_ID;  
+        objectID = Storage::getInstance()->ensurePathExistence(dir->getLocation(), &updateID);
+        if (updateID != INVALID_OBJECT_ID)
+        {
+            UpdateManager::getInstance()->containerChanged(updateID);
+            SessionManager::getInstance()->containerChangedUI(updateID);
+        }
+        dir->setObjectID(objectID);
+    }
 
+    rescanDirectory(objectID, dir->getScanID(), dir->getScanMode());
 }
 
 #if 0
@@ -357,7 +366,7 @@ void ContentManager::_removeObject(int objectID, bool all)
     loadAccounting();
 }
 
-void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
+void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t scanMode, scan_level_t scanLevel)
 {
     log_debug("start\n");
     int ret;
@@ -397,8 +406,16 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
     DIR *dir = opendir(location.c_str());
     if (!dir)
     {
-        throw _Exception(_("Could not list directory ")+
-                location + " : " + strerror(errno));
+        log_warning("Could not open %s: %s", location.c_str(), strerror(errno));
+        Ref<AutoscanDirectory> adir = getAutoscanDirectory(scanID, scanMode);
+        if (adir->fromConfig())
+            return;
+        else
+        {
+            adir->setTaskCount(-1);
+            removeObject(containerID, true, true);
+            autoscan_timed->remove(scanID);
+        }
     }
 
     Ref<DBRHash<int> > list = storage->getObjects(containerID);
@@ -437,7 +454,7 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
                 list->remove(objectID);
                 log_debug("removing %d -> list: %s\n", objectID, list->debugGetAll().c_str());
 
-                if (scanLevel == FullScan)
+                if (scanLevel == FullScanLevel)
                 {
                     log_debug("last modified: %lld\n", last_modified);
                     log_debug("file last modification time: %lld\n", statbuf.st_mtime);
@@ -457,7 +474,7 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
                         }
                     }
                 }
-                else if (scanLevel == BasicScan)
+                else if (scanLevel == BasicScanLevel)
                     continue;
                 else
                     throw _Exception(_("Unsupported scan level!"));
@@ -481,7 +498,7 @@ void ContentManager::_rescanDirectory(int containerID, scan_level_t scanLevel)
                 log_debug("removing %d -> list: %s\n", objectID, list->debugGetAll().c_str());
                 log_debug("adding %d to containers stack\n", objectID);
                 // add a task to rescan the directory that was found
-                rescanDirectory(objectID, scanLevel);
+                rescanDirectory(objectID, scanID, scanMode);
             }
             else
             {
@@ -1192,24 +1209,25 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
     }
 }
     
-void ContentManager::rescanDirectory(int objectID, scan_level_t scanLevel)
+void ContentManager::rescanDirectory(int objectID, int scanID, scan_mode_t scanMode)
 {
-    /*
-    if (async)
-    {
-    */
     // building container path for the description
-    Ref<CMTask> task(new CMRescanDirectoryTask(objectID, scanLevel));
+    Ref<CMTask> task(new CMRescanDirectoryTask(objectID, scanID, scanMode));
     task->setDescription(_("Autoscan")); /// \todo description should contain the path that we are rescanning
+    Ref<AutoscanDirectory> dir = getAutoscanDirectory(scanID, scanMode);
+    dir->incTaskCount();
     addTask(task, true); // adding with low priority
-    /*
-    }
-    else
-    {
-        _rescanDirectory(objectID, scanLevel);
-    }
-    */
 }
+
+
+Ref<AutoscanDirectory> ContentManager::getAutoscanDirectory(int scanID, scan_mode_t scanMode)
+{
+    if (scanMode == TimedScanMode)
+    {
+        return autoscan_timed->get(scanID);
+    }
+}
+    
 
 CMTask::CMTask() : Object()
 {
@@ -1248,14 +1266,28 @@ void CMRemoveObjectTask::run()
     cm->_removeObject(objectID, all);
 }
 
-CMRescanDirectoryTask::CMRescanDirectoryTask(int objectID, scan_level_t scanLevel) : CMTask()
+CMRescanDirectoryTask::CMRescanDirectoryTask(int objectID, int scanID, scan_mode_t scanMode) : CMTask()
 {
+    this->scanID = scanID;
+    this->scanMode = scanMode;
     this->objectID = objectID;
-    this->scanLevel = scanLevel;
 }
+
 void CMRescanDirectoryTask::run()
 {
-    cm->_rescanDirectory(objectID, scanLevel);
+    Ref<AutoscanDirectory> dir = cm->getAutoscanDirectory(scanID, scanMode);
+    if (dir == nil)
+    {
+        throw _Exception(_("Scan requested but directory is no longer valid!"));
+    }
+
+    cm->_rescanDirectory(objectID, dir->getScanID(), dir->getScanMode(), dir->getScanLevel());
+    dir->decTaskCount();
+    
+    if (dir->getTaskCount() == 0)
+    {
+        Timer::getInstance()->addTimerSubscriber(Ref<TimerSubscriber>(cm), dir->getInterval(), dir->getScanID(), true);
+    }
 }
 
 CMLoadAccountingTask::CMLoadAccountingTask() : CMTask()

@@ -637,9 +637,9 @@ Ref<Dictionary> ConfigManager::createDictionaryFromNodeset(Ref<Element> element,
     return dict;
 }
 
-Ref<Array<AutoscanDirectory> > ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::Element> element, scan_mode_t scanmode)
+Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::Element> element, scan_mode_t scanmode)
 {
-    Ref<Array<AutoscanDirectory> > arr(new Array<AutoscanDirectory>());
+    Ref<AutoscanList> list(new AutoscanList());
     String location;
     String temp;
     scan_level_t level;
@@ -647,6 +647,7 @@ Ref<Array<AutoscanDirectory> > ConfigManager::createAutoscanListFromNodeset(zmm:
     bool recursive;
     unsigned int interval;
    
+    int count = 0;
     for (int i = 0; i < element->childCount(); i++)
     {
         Ref<Element> child = element->getChild(i);
@@ -682,9 +683,9 @@ Ref<Array<AutoscanDirectory> > ConfigManager::createAutoscanListFromNodeset(zmm:
             else
             {
                 if (temp == "basic")
-                    level = BasicScan;
+                    level = BasicScanLevel;
                 else if (temp == "full")
-                    level = FullScan;
+                    level = FullScanLevel;
                 else
                 {
                     log_warning("Skipping autoscan directory %s: level attribute %s is invalid\n", location.c_str(), temp.c_str());
@@ -730,12 +731,13 @@ Ref<Array<AutoscanDirectory> > ConfigManager::createAutoscanListFromNodeset(zmm:
                 }
             }
             
-            Ref<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, interval));
-            arr->append(dir); 
+            Ref<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, -1, interval));
+            list->add(dir); 
+            count++;
         }
     }
 
-    return arr;
+    return list;
 }
 
 

@@ -36,7 +36,7 @@
 #include "storage.h"
 #include "dictionary.h"
 #include "sync.h"
-#include "autoscan_directory.h"
+#include "autoscan.h"
 #include "timer.h"
 
 #ifdef HAVE_JS
@@ -89,9 +89,10 @@ class CMRescanDirectoryTask : public CMTask
 {
 protected: 
     int objectID;
-    scan_level_t scanLevel;
+    int scanID;
+    scan_mode_t scanMode;
 public:
-    CMRescanDirectoryTask(int objectID, scan_level_t scanLevel);
+    CMRescanDirectoryTask(int objectID, int scanID, scan_mode_t scanMode);
     virtual void run();
 };
 
@@ -150,7 +151,7 @@ public:
     void loadAccounting(bool async=true);
     void addFile(zmm::String path, bool recursive=true, bool async=true, bool hidden=false);
     void removeObject(int objectID, bool async=true, bool all=false);
-    void rescanDirectory(int objectID, scan_level_t scanLevel = BasicScan);
+//    void rescanDirectory(int objectID, scan_level_t scanLevel = BasicScan);   
     
     /// \brief Updates an object in the database using the given parameters.
     /// \param objectID ID of the object to update
@@ -214,7 +215,7 @@ protected:
     int ignore_unknown_extensions;
     zmm::Ref<Dictionary> extension_mimetype_map;
     zmm::Ref<Dictionary> mimetype_upnpclass_map;
-    zmm::Ref<zmm::Array<AutoscanDirectory> > autoscan_timed;
+    zmm::Ref<AutoscanList> autoscan_timed;
         
 
     /* don't use these, use the above methods */
@@ -222,8 +223,12 @@ protected:
     void _addFile(zmm::String path, bool recursive=false, bool hidden=false);
     //void _addFile2(zmm::String path, bool recursive=0);
     void _removeObject(int objectID, bool all);
-    void _rescanDirectory(int objectID, scan_level_t scanLevel);
     
+    /// \brief Gets an AutocsanDirectrory from the global list
+    zmm::Ref<AutoscanDirectory> getAutoscanDirectory(int scanID, scan_mode_t scanMode);
+ 
+    void rescanDirectory(int objectID, int scanID, scan_mode_t scanMode); 
+    void _rescanDirectory(int containerID, int scanID, scan_mode_t scanMode, scan_level_t scanLevel);
     /* for recursive addition */
     void addRecursive(zmm::String path, bool hidden=false);
     //void addRecursive2(zmm::Ref<DirCache> dirCache, zmm::String filename, bool recursive);

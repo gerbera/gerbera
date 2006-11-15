@@ -120,6 +120,7 @@ public:
     
     virtual void shutdown() = 0;
     
+    virtual int ensurePathExistence(zmm::String path, int *changedContainer);
 protected:
     
     char table_quote_begin;
@@ -184,7 +185,6 @@ protected:
     zmm::String stripLocationPrefix(char* prefix, zmm::String path);
     zmm::String stripLocationPrefix(zmm::String path);
     
-    int ensurePathExistence(zmm::String path, int *changedContainer);
     zmm::Ref<CdsObject> checkRefID(zmm::Ref<CdsObject> obj);
     int createContainer(int parentID, zmm::String name, zmm::String path, bool isVirtual);
     

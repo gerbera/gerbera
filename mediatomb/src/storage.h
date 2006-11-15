@@ -189,6 +189,15 @@ public:
     static zmm::Ref<Storage> getInstance();
     
     virtual void shutdown() = 0;
+
+    /// \brief Ensures that a container given by it's location on disk is
+    /// present in the database. If it does not exist it will be created, but
+    /// it's content will not be added.
+    /// 
+    /// \param *changedContainer returns the ID for the UpdateManager
+    /// \return objectID of the container given by path
+    virtual int ensurePathExistence(zmm::String path, int *changedContainer) = 0;
+        
 protected:
     int uiUpdateId;
     

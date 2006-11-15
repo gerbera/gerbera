@@ -36,7 +36,7 @@
 #include "common.h"
 #include "dictionary.h"
 #include "xpath.h"
-#include "autoscan_directory.h"
+#include "autoscan.h"
 
 class ConfigManager : public zmm::Object
 {
@@ -113,7 +113,7 @@ public:
     /// an XML nodeset.
     /// \param element starting element of the ndoeset.
     /// \param scanmode add only directories with the specified scanmode to the array
-    zmm::Ref<zmm::Array<AutoscanDirectory> > createAutoscanListFromNodeset(zmm::Ref<mxml::Element> element, scan_mode_t scanmode);
+    zmm::Ref<AutoscanList> createAutoscanListFromNodeset(zmm::Ref<mxml::Element> element, scan_mode_t scanmode);
     
     /// \brief Creates an array of strings from an XML nodeset.
     /// \param element starting element of the nodeset.
