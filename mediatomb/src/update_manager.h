@@ -65,8 +65,6 @@ protected:
     
     int lastContainerChanged;
     
-    static inline void lock() { mutex->lock(); }
-    static inline void unlock() { mutex->unlock(); }
     static void *staticThreadProc(void *arg);
     void threadProc();
     

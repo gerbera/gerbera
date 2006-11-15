@@ -35,6 +35,13 @@
 #include "common.h"
 #include <pthread.h>
 
+#define AUTOLOCK1_NOLOCK() zmm::Ref<MutexAutolock> mutex_autolock;
+#define AUTOLOCK1(mutex) zmm::Ref<MutexAutolock> mutex_autolock = mutex->getAutolock();
+#define AUTOUNLOCK() mutex_autolock = nil;
+#define AUTOLOCK2(mutex) mutex_autolock = mutex->getAutolock();
+#define LOCK(mutex) mutex->lock();
+#define UNLOCK(mutex) mutex->unlock();
+
 class Mutex;
 
 class MutexAutolock : public zmm::Object

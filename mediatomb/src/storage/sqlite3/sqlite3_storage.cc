@@ -65,7 +65,7 @@ void Sqlite3Storage::init()
 {
     int ret;
     
-    mutex->lock();
+    AUTOLOCK1(mutex);
     /*
     pthread_attr_t attr;
     pthread_attr_init(&attr);
@@ -83,7 +83,7 @@ void Sqlite3Storage::init()
     );
     
     cond->wait();
-    mutex->unlock();
+    AUTOUNLOCK();
     
     if (startupError != nil)
         throw _StorageException(startupError);
@@ -186,15 +186,15 @@ void Sqlite3Storage::threadProc()
     
     while(! shutdownFlag)
     {
-        lock();
+        LOCK(mutex);
         if((task = taskQueue->dequeue()) == nil)
         {
             /* if nothing to do, sleep until awakened */
             cond->wait();
-            unlock();
+            UNLOCK(mutex);
             continue;
         }
-        unlock();
+        UNLOCK(mutex);
         
         try
         {
@@ -206,38 +206,35 @@ void Sqlite3Storage::threadProc()
             task->sendSignal(e.getMessage());
         }
     }
-    lock();
+    AUTOLOCK1(mutex);
     taskQueueOpen = false;
     while((task = taskQueue->dequeue()) != nil)
     {
         task->sendSignal(_("Sorry, sqlite3 thread is shutting down"));
     }
-    unlock();
     if (db)
         sqlite3_close(db);
-}                                             
+}
 
 void Sqlite3Storage::addTask(zmm::Ref<SLTask> task)
 {
     if (! taskQueueOpen)
         throw _Exception(_("sqlite3 task queue is already closed"));
-    lock();
+    AUTOLOCK1(mutex);
     if (! taskQueueOpen)
     {
-        unlock();
         throw _Exception(_("sqlite3 task queue is already closed"));
     }
     taskQueue->enqueue(task);
     signal();
-    unlock();
 }
 
 void Sqlite3Storage::shutdown()
 {
     shutdownFlag = true;
-    lock();
+    AUTOLOCK1(mutex);
     signal();
-    unlock();
+    AUTOUNLOCK();
     if (sqliteThread)
         pthread_join(sqliteThread, NULL);
     sqliteThread = 0;
@@ -268,10 +265,10 @@ bool SLTask::is_running()
 
 void SLTask::sendSignal()
 {
-    mutex->lock();
+    LOCK(mutex);
     running=false;
     cond->signal();
-    mutex->unlock();
+    UNLOCK(mutex);
 }
 
 void SLTask::sendSignal(String error)
@@ -284,12 +281,12 @@ void SLTask::waitForTask()
 {
     if (is_running())
     { // we check before we lock first, because there is no need to lock then
-        mutex->lock();
+        LOCK(mutex);
         if (is_running())
         { // we check it a second time after locking to ensure we didn't miss the pthread_cond_signal 
             cond->wait(); // waiting for the task to complete
         }
-        mutex->unlock();
+        UNLOCK(mutex);
     }
     
     if (getError() != nil)

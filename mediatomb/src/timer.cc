@@ -55,7 +55,7 @@ Ref<Timer> Timer::getInstance()
 {
     if (instance == nil)
     {
-        mutex->lock();
+        AUTOLOCK1(mutex);
         if (instance == nil) // check again, because there is a very small chance
                              // that 2 threads tried to lock() concurrently
         {
@@ -65,11 +65,9 @@ Ref<Timer> Timer::getInstance()
             }
             catch (Exception e)
             {
-                mutex->unlock();
                 throw e;
             }
         }
-        mutex->unlock();
     }
     return instance;
 }
@@ -79,26 +77,24 @@ void Timer::addTimerSubscriber(Ref<TimerSubscriber> timerSubscriber, unsigned in
     log_debug("adding subscriber...\n");
     if (notifyInterval <= 0)
         throw _Exception(_("tried to add timer with illegal notifyInterval"));
-    mutex->lock();
+    AUTOLOCK1(mutex);
     //timerSubscriber->timerNotify(id);
     Ref<TimerSubscriberElement> element(new TimerSubscriberElement(timerSubscriber, notifyInterval, id, once));
     for(int i = 0; i < subscribers->size(); i++)
     {
         if (subscribers->get(i)->equals(element))
         {
-            mutex->unlock();
             throw _Exception(_("tried to add same timer twice"));
         }
     }
     subscribers->append(element);
     signal();
-    mutex->unlock();
 }
 
 void Timer::removeTimerSubscriber(Ref<TimerSubscriber> timerSubscriber, int id)
 {
     log_debug("removing subscriber...\n");
-    mutex->lock();
+    AUTOLOCK1(mutex);
     Ref<TimerSubscriberElement> element(new TimerSubscriberElement(timerSubscriber, 0, id));
     bool removed = false;
     for(int i = 0; i < subscribers->size(); i++)
@@ -112,18 +108,16 @@ void Timer::removeTimerSubscriber(Ref<TimerSubscriber> timerSubscriber, int id)
     }
     if (! removed)
     {
-        mutex->unlock();
         throw _Exception(_("tried to remove nonexistent timer"));
     }
     signal();
-    mutex->unlock();
 }
 
 void Timer::triggerWait()
 {
     log_debug("triggerWait. - %d subscriber(s)\n", subscribers->size());
     
-    mutex->lock();
+    AUTOLOCK1(mutex);
     if (subscribers->size() > 0)
     {
         struct timespec *timeout = getNextNotifyTime();
@@ -136,7 +130,6 @@ void Timer::triggerWait()
             if (ret != 0 && ret != ETIMEDOUT)
             {
                 log_debug("pthread_cond_timedwait returned errorcode %d\n", ret);
-                mutex->unlock();
                 throw _Exception(_("pthread_cond_timedwait returned errorcode ") + ret);
             }
             if (ret == ETIMEDOUT)
@@ -154,7 +147,6 @@ void Timer::triggerWait()
         log_debug("nothing to do, sleeping...\n");
         cond->wait();
     }
-    mutex->unlock();
 }
 
 void Timer::notify()

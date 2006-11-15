@@ -294,7 +294,7 @@ int Server::upnp_callback(Upnp_EventType eventtype, void *event, void *cookie)
 
 //    log_info("event is ok\n");
     // get device wide mutex (have to figure out what the hell that is)
-    upnp_mutex->lock();
+    AUTOLOCK1(upnp_mutex);
 
 //    log_info("got device mutex\n");
 
@@ -322,7 +322,7 @@ int Server::upnp_callback(Upnp_EventType eventtype, void *event, void *cookie)
             }
             
             break;
-
+            
         case UPNP_EVENT_SUBSCRIPTION_REQUEST:
             // a cp wants a subscription
 //            log_info("UPNP_EVENT_SUBSCRIPTION_REQUEST\n");
@@ -335,19 +335,16 @@ int Server::upnp_callback(Upnp_EventType eventtype, void *event, void *cookie)
             {
                 ret = upnp_e.getErrorCode();
             }
- 
+            
             break;
-
+            
         default:
             // unhandled event type
             log_warning("unsupported event type: %d\n", eventtype);
             ret = UPNP_E_BAD_REQUEST;
             break;
     }
-
-    // release device wide mutex
-    upnp_mutex->unlock();
-
+    
     log_debug("returning %d\n", ret);
     return ret;
 }

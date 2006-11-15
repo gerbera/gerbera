@@ -46,14 +46,6 @@
 #define MAX_OBJECT_IDS 1000
 #define OBJECT_ID_HASH_CAPACITY 3109
 
-
-//#define LOCK()   { printf("!!! try to lock: line %d; thread: %d\n", __LINE__, (int)pthread_self()); lock(); 
-//                   printf("!!! locked:      line %d; thread: %d\n", __LINE__, (int)pthread_self()); }
-//#define UNLOCK() { printf("!!! unlock:      line %d: thread: %d\n", __LINE__, (int)pthread_self()); unlock(); }
-
-#define LOCK lock
-#define UNLOCK unlock
-
 using namespace zmm;
 
 UpdateManager::UpdateManager() : Object()
@@ -72,7 +64,7 @@ Ref<UpdateManager> UpdateManager::getInstance()
 {
     if (instance == nil)
     {
-        LOCK();
+        AUTOLOCK1(mutex);
         if (instance == nil) // check again, because there is a very small chance
                              // that 2 threads tried to lock() concurrently
         {
@@ -83,11 +75,9 @@ Ref<UpdateManager> UpdateManager::getInstance()
             }
             catch (Exception e)
             {
-                UNLOCK();
                 throw e;
             }
         }
-        UNLOCK();
     }
     return instance;
 }
@@ -118,13 +108,12 @@ void UpdateManager::shutdown()
 {
     //log_debug("shutdown, locking\n");
     shutdownFlag = true;
-    LOCK(); // locking isn't necessary, because shutdown() is the only place
-              // where shutdownFlag get's set (and it's never reset)
-              // and we don't need a predictable scheduling here.
+    
+    AUTOLOCK1(mutex);
     log_debug("signalling...\n");
     cond->signal();
     //log_debug("signalled, unlocking\n");
-    UNLOCK();
+    AUTOUNLOCK();
     //log_debug("unlocked\n");
     if (updateThread)
         pthread_join(updateThread, NULL);
@@ -135,7 +124,7 @@ void UpdateManager::containerChanged(int objectID, int flushPolicy)
 {
     if (objectID == INVALID_OBJECT_ID)
         return;
-    LOCK();
+    AUTOLOCK1(mutex);
     if (objectID != lastContainerChanged || flushPolicy > this->flushPolicy)
     {
         // signalling thread if it could have been idle, because 
@@ -168,7 +157,6 @@ void UpdateManager::containerChanged(int objectID, int flushPolicy)
     {
         log_debug("last container changed!\n");
     }
-    UNLOCK();
 }
 
 /* private stuff */
@@ -178,7 +166,7 @@ void UpdateManager::threadProc()
     struct timespec lastUpdate;
     getTimespecNow(&lastUpdate);
     
-    LOCK();
+    AUTOLOCK1(mutex);
     while (! shutdownFlag)
     {
         if (haveUpdates())
@@ -210,7 +198,6 @@ void UpdateManager::threadProc()
                     if (ret != 0 && ret != ETIMEDOUT)
                     {
                         log_debug("pthread_cond_timedwait returned errorcode %d\n", ret);
-                        UNLOCK();
                         throw _Exception(_("pthread_cond_timedwait returned errorcode ") + ret);
                     }
                     if (ret == ETIMEDOUT)
@@ -233,11 +220,11 @@ void UpdateManager::threadProc()
                 String updateString = Storage::getInstance()->incrementUpdateIDs(hash_data_array.data,hash_data_array.size);
                 objectIDHash->clear(); // hash_data_array will be invalid after clear()
                 
-                UNLOCK(); // we don't need to hold the lock during the sending of the updates
+                AUTOUNLOCK(); // we don't need to hold the lock during the sending of the updates
                 ContentDirectoryService::getInstance()->subscription_update(updateString);
                 getTimespecNow(&lastUpdate);
                 log_debug("updates sent.\n");
-                LOCK();
+                AUTOLOCK2(mutex);
             }
         }
         else
@@ -250,7 +237,6 @@ void UpdateManager::threadProc()
             */
         }
     }
-    UNLOCK();
 }
 
 void *UpdateManager::staticThreadProc(void *arg)

@@ -77,12 +77,11 @@ void MysqlStorage::checkMysqlThreadInit()
 void MysqlStorage::init()
 {
     log_debug("start\n");
-    mutex->lock();
+    AUTOLOCK1(mutex);
     int ret;
     
     if (! mysql_thread_safe())
     {
-        mutex->unlock();
         throw _Exception(_("mysql library is not thread safe!"));
     }
     
@@ -90,7 +89,6 @@ void MysqlStorage::init()
     ret = pthread_key_create(&mysql_init_key, NULL);
     if (ret)
     {
-        mutex->unlock();
         throw _Exception(_("could not create pthread_key"));
     }
     mysql_server_init(0, NULL, NULL);
@@ -121,7 +119,6 @@ void MysqlStorage::init()
     res_mysql = mysql_init(&db);
     if(! res_mysql)
     {
-        mutex->unlock();
         throw _Exception(_("mysql_init failed"));
     }
     
@@ -138,7 +135,6 @@ void MysqlStorage::init()
     );
     if(! res_mysql)
     {
-        mutex->unlock();
         throw _Exception(_("The connection to the MySQL database has failed: ") + getError(&db));
     }
     
@@ -167,7 +163,6 @@ void MysqlStorage::init()
         char *sql_end = index(sql_start, ';');
         if (sql_end == NULL)
         {
-            mutex->unlock();
             throw _StorageException(_("';' not found in mysql create sql"));
         }
         do
@@ -175,7 +170,6 @@ void MysqlStorage::init()
             ret = mysql_real_query(&db, sql_start, sql_end - sql_start);
             if (ret)
             {
-                mutex->unlock();
                 throw _StorageException(_("Mysql: error while creating db: ") + getError(&db));
             }
             sql_start = sql_end + 1; // skip ';'
@@ -188,20 +182,20 @@ void MysqlStorage::init()
         dbVersion = getInternalSetting(_("db_version"));
         if (dbVersion == nil)
         {
-            mutex->unlock();
+            AUTOUNLOCK();
             shutdown();
             throw _Exception(_("error while creating database"));
         }
         log_info("database created successfully.\n");
 #else
-        mutex->unlock();
+        AUTOUNLOCK();
         shutdown();
         throw _Exception(_("database doesn't seem to exist yet and autocreation wasn't compiled in"));
 #endif
         
     }
     
-    mutex->unlock();
+    AUTOUNLOCK();
     
     SQLStorage::init();
     log_debug("end\n");
@@ -238,17 +232,15 @@ Ref<SQLResult> MysqlStorage::select(String query)
     int res;
     
     checkMysqlThreadInit();
-    mutex->lock();
+    AUTOLOCK1(mutex);
     res = mysql_real_query(&db, query.c_str(), query.length());
     if (res)
     {
-        mutex->unlock();
         throw _StorageException(_("Mysql: mysql_real_query() failed: ") + getError(&db));
     }
     
     MYSQL_RES *mysql_res;
     mysql_res = mysql_store_result(&db);
-    mutex->unlock();
     if(! mysql_res)
     {
         throw _StorageException(_("Mysql: mysql_store_result() failed: ") + getError(&db));
@@ -268,23 +260,21 @@ int MysqlStorage::exec(String query, bool getLastInsertId)
     int res;
     
     checkMysqlThreadInit();
-    mutex->lock();
+    AUTOLOCK1(mutex);
     res = mysql_real_query(&db, query.c_str(), query.length());
     if(res)
     {
-        mutex->unlock();
         throw _StorageException(_("Mysql: mysql_real_query() failed: ") + getError(&db));
     }
     int insert_id=-1;
     if (getLastInsertId) insert_id = mysql_insert_id(&db);
-    mutex->unlock();
     return insert_id;
     
 }
 
 void MysqlStorage::shutdown()
 {
-    mutex->lock();  // just to ensure, that we don't close while another thread 
+    AUTOLOCK1(mutex);    // just to ensure, that we don't close while another thread 
                     // is executing a query
     
     if(mysql_connection)
@@ -293,7 +283,6 @@ void MysqlStorage::shutdown()
         mysql_connection = false;
     }
     mysql_server_end();
-    mutex->unlock();
 }
 
 void MysqlStorage::storeInternalSetting(String key, String value)

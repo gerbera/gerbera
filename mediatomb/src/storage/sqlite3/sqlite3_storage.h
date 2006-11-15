@@ -190,8 +190,6 @@ protected:
     zmm::Ref<zmm::ObjectQueue<SLTask> > taskQueue;
     bool taskQueueOpen;
     
-    inline void lock() { mutex->lock(); }
-    inline void unlock() { mutex->unlock(); }
     inline void signal() { cond->signal(); }
     
     friend class SLSelectTask;

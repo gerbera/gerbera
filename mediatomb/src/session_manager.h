@@ -137,7 +137,7 @@ public:
     /// \brief Returns the instance to a Session with a given sessionID
     /// \param ID of the Session.
     /// \return intance of the Session with a given ID or nil if no session with that ID was found.
-    zmm::Ref<Session> getSession(zmm::String sessionID, bool lock = true);
+    zmm::Ref<Session> getSession(zmm::String sessionID, bool doLock = true);
     
     /// \brief Removes a session
     void removeSession(zmm::String sessionID);

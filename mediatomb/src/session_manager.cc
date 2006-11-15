@@ -52,7 +52,7 @@ Ref<SessionManager> SessionManager::getInstance()
 {
     if (inst == nil)
     {
-        mutex->lock();
+        AUTOLOCK1(mutex);
         if (inst == nil)
         {
             try
@@ -61,11 +61,9 @@ Ref<SessionManager> SessionManager::getInstance()
             }
             catch (Exception e)
             {
-                mutex->unlock();
                 throw e;
             }
         }
-        mutex->unlock();
     }
     return inst;
 }
@@ -86,7 +84,7 @@ void Session::containerChangedUI(int objectID)
         return;
     if (! updateAll)
     {
-        mutex->lock();
+        AUTOLOCK1(mutex);
         if (! updateAll)
         {
             if (uiUpdateIDs->size() >= MAX_UI_UPDATE_IDS)
@@ -97,17 +95,15 @@ void Session::containerChangedUI(int objectID)
             else
                 uiUpdateIDs->put(objectID);
         }
-        mutex->unlock();
     }
 }
 
 String Session::getUIUpdateIDs()
 {
-    mutex->lock();
+    AUTOLOCK1(mutex);
     if (updateAll)
     {
         updateAll = false;
-        mutex->unlock();
         return _("all");
     }
     hash_data_array_t<int> hash_data_array;
@@ -115,7 +111,6 @@ String Session::getUIUpdateIDs()
     String ret = intArrayToCSV(hash_data_array.data, hash_data_array.size);
     if (ret != nil)
         uiUpdateIDs->clear();
-    mutex->unlock();
     return ret;
 }
 
@@ -141,7 +136,7 @@ SessionManager::SessionManager() : TimerSubscriber()
 Ref<Session> SessionManager::createSession(long timeout)
 {
     Ref<Session> newSession(new Session(timeout));
-    mutex->lock();
+    AUTOLOCK1(mutex);
     
     int count=0;
     String sessionID;
@@ -156,32 +151,29 @@ Ref<Session> SessionManager::createSession(long timeout)
     newSession->setID(sessionID);
     sessions->append(newSession);
     checkTimer();
-    mutex->unlock();
     return newSession;
 }
 
-Ref<Session> SessionManager::getSession(String sessionID, bool lock)
+Ref<Session> SessionManager::getSession(String sessionID, bool doLock)
 {
-    if (lock)
-        mutex->lock();
+    AUTOLOCK1_NOLOCK()
+    if (doLock)
+        AUTOLOCK2(mutex);
     for (int i = 0; i < sessions->size(); i++)
     {
         Ref<Session> s = sessions->get(i);
         if (s->getID() == sessionID)
         {
-            if (lock)
-                mutex->unlock();
+            if (doLock)
             return s;
         }
     }
-    if (lock)
-        mutex->unlock();
     return nil;
 }
 
 void SessionManager::removeSession(String sessionID)
 {
-    mutex->lock();
+    AUTOLOCK1(mutex);
     for (int i = 0; i < sessions->size(); i++)
     {
         Ref<Session> s = sessions->get(i);
@@ -190,11 +182,9 @@ void SessionManager::removeSession(String sessionID)
             sessions->remove(i);
             checkTimer();
             i--; // to not skip a session. the removed id is now taken by another session
-            mutex->unlock();
             return;
         }
     }
-    mutex->unlock();
 }
 
 String SessionManager::getUserPassword(String user)
@@ -208,14 +198,13 @@ String SessionManager::getUserPassword(String user)
 
 void SessionManager::containerChangedUI(int objectID)
 {
-    mutex->lock();
+    AUTOLOCK1(mutex);
     for (int i = 0; i < sessions->size(); i++)
     {
         Ref<Session> session = sessions->get(i);
         if (session->isLoggedIn())
             session->containerChangedUI(objectID);
     }
-    mutex->unlock();
 }
 
 void SessionManager::checkTimer()
@@ -235,7 +224,7 @@ void SessionManager::checkTimer()
 void SessionManager::timerNotify(int id)
 {
     log_debug("notified... %d sessions.\n", sessions->size());
-    mutex->lock();
+    AUTOLOCK1(mutex);
     struct timespec now;
     getTimespecNow(&now);
     for (int i = 0; i < sessions->size(); i++)
@@ -249,5 +238,4 @@ void SessionManager::timerNotify(int id)
             i--; // to not skip a session. the removed id is now taken by another session
         }
     }
-    mutex->unlock();
 }

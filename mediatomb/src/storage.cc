@@ -93,7 +93,7 @@ Ref<Storage> Storage::getInstance()
 {
     if(primary_inst == nil)
     {
-        mutex->lock();
+        AUTOLOCK1(mutex);
         if (primary_inst == nil)
         {
             try
@@ -102,11 +102,9 @@ Ref<Storage> Storage::getInstance()
             }
             catch (Exception e)
             {
-                mutex->unlock();
                 throw e;
             }
         }
-        mutex->unlock();
     }
     return primary_inst;
 }
