@@ -659,6 +659,12 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
                 log_warning("Skipping autoscan directory with invalid location!\n");
                 continue;
             }
+
+            if (check_path(location, false))
+            {
+                log_warning("Skipping %s - not a directory!\n", location.c_str());
+                continue;
+            }
             
             temp = child->getAttribute(_("mode"));
             if (!string_ok(temp) || (temp != "timed"))

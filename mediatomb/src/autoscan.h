@@ -156,6 +156,20 @@ public:
 
     bool fromConfig() { return from_config; }
 
+    /// \brief Sets the last modification time of the current ongoing scan.
+    /// 
+    /// When doing a FullScan we look at modification times of the files.
+    /// During the recursion of one AutoscanDirectory (which will be the
+    /// starting point and which may have subcontainers) we must compare
+    /// the last modification time of the starting point but we may not
+    /// overwrite it until we are done.
+    void setCurrentLMT(time_t lmt);
+
+
+    time_t getPreviousLMT() { return last_mod_previous_scan; }
+
+    void updateLMT() { last_mod_previous_scan = last_mod_current_scan; }
+
 protected:
     zmm::String location;
     scan_mode_t mode;
@@ -166,6 +180,8 @@ protected:
     int taskCount;
     int scanID;
     int objectID;
+    time_t  last_mod_previous_scan; 
+    time_t  last_mod_current_scan;
     
 };
 

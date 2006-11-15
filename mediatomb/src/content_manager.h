@@ -210,7 +210,6 @@ protected:
     void destroyScripting();
 #endif
     //pthread_mutex_t last_modified_mutex;
-    time_t last_modified;
 
     int ignore_unknown_extensions;
     zmm::Ref<Dictionary> extension_mimetype_map;

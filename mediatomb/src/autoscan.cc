@@ -50,6 +50,14 @@ AutoscanDirectory::AutoscanDirectory(String location, scan_mode_t mode,
     scanID = id;
     taskCount = 0;
     objectID = INVALID_OBJECT_ID;
+    last_mod_previous_scan = 0;
+    last_mod_current_scan = 0;
+}
+
+void AutoscanDirectory::setCurrentLMT(time_t lmt) 
+{
+    if (lmt > last_mod_current_scan)
+        last_mod_current_scan = lmt;
 }
 
 AutoscanList::AutoscanList()

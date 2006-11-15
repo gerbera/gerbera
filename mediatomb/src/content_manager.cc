@@ -90,31 +90,6 @@ ContentManager::ContentManager() : TimerSubscriber()
 
     shutdownFlag = false;
    
-    try 
-    {
-        Ref<Storage> storage = Storage::getInstance();
-        String lastmod = storage->getInternalSetting(_(SET_LAST_MODIFIED));
-        if (lastmod != nil)
-        {
-#if SIZEOF_TIME_T > 4
-            last_modified = lastmod.toLong();
-#else
-            last_modified = lastmod.toInt();
-#endif
-            log_debug("Loaded last modified: %d\n", last_modified);
-        }
-        else
-        {
-            log_debug("No internal setting for last modified\n");
-            last_modified = 0;
-        }
-    }
-    catch (Exception ex)
-    {
-        log_debug("Exception raised when asking for last modified flag!\n");
-        ex.printStackTrace();
-        last_modified = 0;
-    }
     acct = Ref<CMAccounting>(new CMAccounting());    
     taskQueue1 = Ref<ObjectQueue<CMTask> >(new ObjectQueue<CMTask>(CM_INITIAL_QUEUE_SIZE));
     taskQueue2 = Ref<ObjectQueue<CMTask> >(new ObjectQueue<CMTask>(CM_INITIAL_QUEUE_SIZE));    
@@ -214,15 +189,6 @@ void ContentManager::timerNotify(int id)
     int objectID = dir->getObjectID();
     rescanDirectory(objectID, dir->getScanID(), dir->getScanMode());
 }
-
-#if 0
-void ContentManager::setLastModifiedTime(time_t lm)
-{
-    pthread_mutex_lock(&last_modified_mutex);
-    this->last_modified = lm;
-    pthread_mutex_unlock(&last_modified_mutex);
-}
-#endif
 
 void ContentManager::shutdown()
 {
@@ -358,12 +324,15 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
 {
     log_debug("start\n");
     int ret;
-    time_t last_modfied_current_max = last_modified;
     struct dirent *dent;
     struct stat statbuf;
     String location;
     String path;
     Ref<CdsObject> obj;
+
+    Ref<AutoscanDirectory> adir = getAutoscanDirectory(scanID, scanMode);
+    if (adir == nil)
+        throw _Exception(_("called with id for nonexistent AutoscanDirectory object"));
 
     Ref<Storage> storage = Storage::getInstance();
     
@@ -390,7 +359,6 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
     if (containerID == INVALID_OBJECT_ID)
     {
         int updateID = INVALID_OBJECT_ID; 
-        Ref<AutoscanDirectory> adir = getAutoscanDirectory(scanID, scanMode);
         if (!check_path(adir->getLocation(), true))
         {
             if (adir->fromConfig())
@@ -414,11 +382,9 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
         location = adir->getLocation();
     }
 
-
+    time_t last_modified_current_max = adir->getPreviousLMT(); 
        
-    Ref<ConfigManager> cm = ConfigManager::getInstance();
-
-    log_debug("Starting with last modified time: %lld\n", last_modified);
+    log_debug("Starting with last modified time: %lld\n", last_modified_current_max);
 
     log_debug("Rescanning location: %s\n", location.c_str());
 
@@ -434,7 +400,6 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
     if (!dir)
     {
         log_warning("Could not open %s: %s", location.c_str(), strerror(errno));
-        Ref<AutoscanDirectory> adir = getAutoscanDirectory(scanID, scanMode);
         if (adir->fromConfig())
             return;
         else
@@ -484,11 +449,11 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
 
                 if (scanLevel == FullScanLevel)
                 {
-                    log_debug("last modified: %lld\n", last_modified);
+                    log_debug("last modified: %lld\n", last_modified_current_max);
                     log_debug("file last modification time: %lld\n", statbuf.st_mtime);
 
                     // check modification time and update file if chagned
-                    if (last_modified < statbuf.st_mtime)
+                    if (last_modified_current_max < statbuf.st_mtime)
                     {
                         // readd object - we have to do this in order to trigger
                         // scripting
@@ -496,10 +461,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
                         removeObject(objectID, false);
                         addFile(path, false, false);
                         // update time variable
-                        if (statbuf.st_mtime > last_modfied_current_max)
-                        {
-                            last_modfied_current_max = statbuf.st_mtime;
-                        }
+                        last_modified_current_max = statbuf.st_mtime;
                     }
                 }
                 else if (scanLevel == BasicScanLevel)
@@ -512,7 +474,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
             {
                 // add file, not recursive, not async
                 // make sure not to add the current config.xml
-                if (cm->getConfigFilename() != path)
+                if (ConfigManager::getInstance()->getConfigFilename() != path)
                     addFile(path, false, false);
             }
         }
@@ -545,8 +507,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
 
     closedir(dir);
 
-    last_modified = last_modfied_current_max;
-    storage->storeInternalSetting(_(SET_LAST_MODIFIED), String::from(last_modified));
+    adir->setCurrentLMT(last_modified_current_max);
 }
 
 /* scans the given directory and adds everything recursively */
@@ -1323,6 +1284,7 @@ void CMRescanDirectoryTask::run()
     
     if (dir->getTaskCount() == 0)
     {
+        dir->updateLMT();
         Timer::getInstance()->addTimerSubscriber(Ref<TimerSubscriber>(cm), dir->getInterval(), dir->getScanID(), true);
     }
 }
