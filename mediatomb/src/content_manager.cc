@@ -415,6 +415,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
             adir->setTaskCount(-1);
             removeObject(containerID, true, true);
             autoscan_timed->remove(scanID);
+            return;
         }
     }
 
@@ -1280,7 +1281,6 @@ void CMRescanDirectoryTask::run()
     {
         throw _Exception(_("Scan requested but directory is no longer valid!"));
     }
-
     cm->_rescanDirectory(objectID, dir->getScanID(), dir->getScanMode(), dir->getScanLevel());
     dir->decTaskCount();
     

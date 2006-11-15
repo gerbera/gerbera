@@ -731,7 +731,7 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
                 }
             }
             
-            Ref<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, -1, interval));
+            Ref<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, true, -1, interval));
             list->add(dir); 
             count++;
         }
