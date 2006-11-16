@@ -317,7 +317,7 @@ void ContentManager::_removeObject(int objectID, bool all)
     UpdateManager::getInstance()->containerChanged(parentID);
     
     // reload accounting
-    loadAccounting();
+    //loadAccounting();
 }
 
 void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t scanMode, scan_level_t scanLevel)
@@ -361,12 +361,14 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
         int updateID = INVALID_OBJECT_ID; 
         if (!check_path(adir->getLocation(), true))
         {
+            adir->setObjectID(INVALID_OBJECT_ID);
             if (adir->fromConfig())
+            {
                 return;
+            }
             else
             {
                 adir->setTaskCount(-1);
-                removeObject(containerID, true, true);
                 removeAutoscanDirectory(scanID, scanMode);
                 return;
             }
@@ -401,11 +403,15 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
     {
         log_warning("Could not open %s: %s", location.c_str(), strerror(errno));
         if (adir->fromConfig())
+        {
+            removeObject(containerID, false);
+            adir->setObjectID(INVALID_OBJECT_ID);
             return;
+        }
         else
         {
             adir->setTaskCount(-1);
-            removeObject(containerID, true, true);
+            removeObject(containerID, false);
             removeAutoscanDirectory(scanID, scanMode);
             return;
         }
