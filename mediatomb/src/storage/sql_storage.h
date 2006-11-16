@@ -45,8 +45,7 @@
 #define CDS_OBJECT_TABLE            "mt_cds_object"
 #define CDS_ACTIVE_ITEM_TABLE       "mt_cds_active_item"
 #define INTERNAL_SETTINGS_TABLE     "mt_internal_setting"
-
-
+#define AUTOSCAN_TABLE              "mt_autoscan"
 
 class SQLResult;
 
@@ -117,6 +116,8 @@ public:
     
     virtual zmm::String getInternalSetting(zmm::String key);
     virtual void storeInternalSetting(zmm::String key, zmm::String value) = 0;
+    
+    virtual zmm::Ref<AutoscanList> getAutoscanList(scan_mode_t scanmode);
     
     virtual void shutdown() = 0;
     

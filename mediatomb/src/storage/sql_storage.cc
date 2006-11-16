@@ -71,6 +71,10 @@ enum
     _ref_mime_type
 };
 
+/* table quote */
+#define TQ(data)        QTB << data << QTE
+
+
 #define SEL_F_QUOTED        << QTB << "f" << QTE <<
 #define SEL_RF_QUOTED       << QTB << "rf" << QTE <<
 
@@ -79,7 +83,7 @@ enum
 #define SEL_EQ_SP_RFQ_DT_BQ  << QTE << ", " SEL_RF_QUOTED "." << QTB <<
 
 #define SELECT_DATA_FOR_STRINGBUFFER \
-  QTB << "f" << QTE << "." << QTB << "id" \
+  TQ("f") << "." << QTB << "id" \
     SEL_EQ_SP_FQ_DT_BQ "ref_id" \
     SEL_EQ_SP_FQ_DT_BQ "parent_id" \
     SEL_EQ_SP_FQ_DT_BQ "object_type" \
@@ -101,10 +105,9 @@ enum
     SEL_EQ_SP_RFQ_DT_BQ "mime_type" << QTE
     
 #define SQL_QUERY_FOR_STRINGBUFFER "SELECT " << SELECT_DATA_FOR_STRINGBUFFER << \
-    " FROM " << QTB << CDS_OBJECT_TABLE << QTE << " " SEL_F_QUOTED " LEFT JOIN " \
-    << QTB << CDS_OBJECT_TABLE << QTE << " " SEL_RF_QUOTED " ON " SEL_F_QUOTED "." \
-    << QTB << "ref_id" << QTE << " = " SEL_RF_QUOTED "." << QTB \
-    << "id" << QTE << " "
+    " FROM " << TQ(CDS_OBJECT_TABLE) << " " SEL_F_QUOTED " LEFT JOIN " \
+    << TQ(CDS_OBJECT_TABLE) << " " SEL_RF_QUOTED " ON " SEL_F_QUOTED "." \
+    << TQ("ref_id") << " = " SEL_RF_QUOTED "." << TQ("id") << " "
     
 #define SQL_QUERY       sql_query
 
@@ -356,7 +359,7 @@ void SQLStorage::addObject(Ref<CdsObject> obj, int *changedContainer)
                 *fields << ", ";
                 *values << ", ";
             }
-            *fields << QTB << element->getKey() << QTE;
+            *fields << TQ(element->getKey());
             if (lastInsertID != INVALID_OBJECT_ID &&
                 element->getKey() == "id" &&
                 element->getValue().toInt() == INVALID_OBJECT_ID )
@@ -448,7 +451,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     Ref<SQLRow> row;
     
     Ref<StringBuffer> qb(new StringBuffer());
-    *qb << "SELECT object_type FROM " << QTB << CDS_OBJECT_TABLE << QTE << " WHERE id = "
+    *qb << "SELECT object_type FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE id = "
         << objectID;
     res = select(qb->toString());
     if((row = res->nextRow()) != nil)
@@ -541,7 +544,7 @@ int SQLStorage::getChildCount(int contId, bool containers, bool items)
     Ref<SQLRow> row;
     Ref<SQLResult> res;
     Ref<StringBuffer> qb(new StringBuffer());
-    *qb << "SELECT COUNT(*) FROM " << QTB << CDS_OBJECT_TABLE << QTE << " WHERE parent_id = " << contId;
+    *qb << "SELECT COUNT(*) FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE parent_id = " << contId;
     if (containers && ! items)
         *qb << " AND object_type = " << OBJECT_TYPE_CONTAINER;
     else if (items && ! containers)
@@ -559,7 +562,7 @@ Ref<Array<StringBase> > SQLStorage::getMimeTypes()
     Ref<Array<StringBase> > arr(new Array<StringBase>());
     
     Ref<StringBuffer> qb(new StringBuffer());
-    *qb << "SELECT DISTINCT mime_type FROM " << QTB << CDS_OBJECT_TABLE << QTE <<
+    *qb << "SELECT DISTINCT mime_type FROM " << TQ(CDS_OBJECT_TABLE) <<
                 " WHERE mime_type IS NOT NULL ORDER BY mime_type";
     Ref<SQLResult> res = select(qb->toString());
     Ref<SQLRow> row;
@@ -589,10 +592,10 @@ int SQLStorage::isFolderInDatabase(String fullpath)
     
     Ref<StringBuffer> qb(new StringBuffer());
     String dbLocation = addLocationPrefix(LOC_DIR_PREFIX, fullpath);
-    *qb << "SELECT " << QTB << "id" << QTE << " FROM " << QTB << CDS_OBJECT_TABLE << QTE <<
-            " WHERE " << QTB << "location_hash" << QTE << " = " << stringHash(dbLocation)
-            << " AND " << QTB << "location" << QTE << " = " << quote(dbLocation)
-            << " AND " << QTB << "ref_id" << QTE << " IS NULL "
+    *qb << "SELECT " << TQ("id") << " FROM " << TQ(CDS_OBJECT_TABLE) <<
+            " WHERE " << TQ("location_hash") << " = " << stringHash(dbLocation)
+            << " AND " << TQ("location") << " = " << quote(dbLocation)
+            << " AND " << TQ("ref_id") << " IS NULL "
             "LIMIT 1";
      Ref<SQLResult> res = select(qb->toString());
      if (res == nil)
@@ -616,9 +619,9 @@ Ref<SQLRow> SQLStorage::_findObjectByFilename(String path)
     String dbLocation = addLocationPrefix(LOC_FILE_PREFIX, path);
     Ref<StringBuffer> qb(new StringBuffer());
     *qb << SQL_QUERY <<
-        " WHERE " SEL_F_QUOTED "." << QTB << "location_hash" << QTE << " = " << stringHash(dbLocation)
-        << " AND " SEL_F_QUOTED "." << QTB << "location" << QTE << " = " << quote(dbLocation)
-        << " AND " SEL_F_QUOTED "." << QTB << "ref_id" << QTE << " IS NULL "
+        " WHERE " SEL_F_QUOTED "." << TQ("location_hash") << " = " << stringHash(dbLocation)
+        << " AND " SEL_F_QUOTED "." << TQ("location") << " = " << quote(dbLocation)
+        << " AND " SEL_F_QUOTED "." << TQ("ref_id") << " IS NULL "
         "LIMIT 1";
         
     Ref<SQLResult> res = select(qb->toString());
@@ -657,9 +660,9 @@ Ref<SQLRow> SQLStorage::_findObjectByPath(String fullpath)
     else
         dbLocation = addLocationPrefix(LOC_DIR_PREFIX, path);
     *qb << SQL_QUERY <<
-            " WHERE " SEL_F_QUOTED "." << QTB << "location_hash" << QTE << " = " << stringHash(dbLocation)
-            << " AND " SEL_F_QUOTED "." << QTB << "location" << QTE << " = " << quote(dbLocation)
-            << " AND " SEL_F_QUOTED "." << QTB << "ref_id" << QTE << " IS NULL "
+            " WHERE " SEL_F_QUOTED "." << TQ("location_hash") << " = " << stringHash(dbLocation)
+            << " AND " SEL_F_QUOTED "." << TQ("location") << " = " << quote(dbLocation)
+            << " AND " SEL_F_QUOTED "." << TQ("ref_id") << " IS NULL "
             "LIMIT 1";
     
     Ref<SQLResult> res = select(qb->toString());
@@ -706,9 +709,9 @@ int SQLStorage::createContainer(int parentID, String name, String path, bool isV
 {
     String dbLocation = addLocationPrefix((isVirtual ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX), path);
     Ref<StringBuffer> qb(new StringBuffer());
-    *qb << "INSERT INTO " << QTB << CDS_OBJECT_TABLE << QTE <<
-        " (" << QTB << "parent_id" << QTE << ", " << QTB << "object_type" << QTE << ", " << QTB << "upnp_class" << QTE << ", " << QTB << "dc_title" << QTE << ","
-        " " << QTB << "location" << QTE << ", " << QTB << "location_hash" << QTE << ")"
+    *qb << "INSERT INTO " << TQ(CDS_OBJECT_TABLE) <<
+        " (" << TQ("parent_id") << ", " << TQ("object_type") << ", " << TQ("upnp_class") << ", " << TQ("dc_title") << ","
+        " " << TQ("location") << ", " << TQ("location_hash") << ")"
         " VALUES ("
         << parentID
         << ", " << OBJECT_TYPE_CONTAINER
@@ -728,8 +731,8 @@ String SQLStorage::buildContainerPath(int parentID, String title)
     if (parentID == CDS_ID_ROOT)
         return String(VIRTUAL_CONTAINER_SEPARATOR) + title;
     Ref<StringBuffer> qb(new StringBuffer());
-    *qb << "SELECT " << QTB << "location" << QTE << " FROM " << QTB << CDS_OBJECT_TABLE << QTE <<
-        " WHERE " << QTB << "id" << QTE << " = " << parentID << " LIMIT 1";
+    *qb << "SELECT " << TQ("location") << " FROM " << TQ(CDS_OBJECT_TABLE) <<
+        " WHERE " << TQ("id") << " = " << parentID << " LIMIT 1";
      Ref<SQLResult> res = select(qb->toString());
     if (res == nil)
         return nil;
@@ -753,9 +756,9 @@ void SQLStorage::addContainerChain(String path, int *containerID, int *updateID)
     }
     Ref<StringBuffer> qb(new StringBuffer());
     String dbLocation = addLocationPrefix(LOC_VIRT_PREFIX, path);
-    *qb << "SELECT " << QTB << "id" << QTE << " FROM " << QTB << CDS_OBJECT_TABLE << QTE <<
-            " WHERE " << QTB << "location_hash" << QTE << " = " << stringHash(dbLocation)
-            << " AND " << QTB << "location" << QTE << " = " << quote(dbLocation)
+    *qb << "SELECT " << TQ("id") << " FROM " << TQ(CDS_OBJECT_TABLE) <<
+            " WHERE " << TQ("location_hash") << " = " << stringHash(dbLocation)
+            << " AND " << TQ("location") << " = " << quote(dbLocation)
             << " LIMIT 1";
     Ref<SQLResult> res = select(qb->toString());
     if (res != nil)
@@ -882,7 +885,7 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
         Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
         
         Ref<StringBuffer> query(new StringBuffer());
-        *query << "SELECT id, action, state FROM " << QTB << CDS_ACTIVE_ITEM_TABLE << QTE
+        *query << "SELECT id, action, state FROM " << TQ(CDS_ACTIVE_ITEM_TABLE)
             << " WHERE id = " << aitem->getID();
         Ref<SQLResult> resAI = select(query->toString());
         Ref<SQLRow> rowAI;
@@ -907,7 +910,7 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
 int SQLStorage::getTotalFiles()
 {
     Ref<StringBuffer> query(new StringBuffer());
-    *query << "SELECT COUNT(*) FROM " << QTB << CDS_OBJECT_TABLE << QTE << " WHERE "
+    *query << "SELECT COUNT(*) FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE "
            << "object_type != " << OBJECT_TYPE_CONTAINER;
            //<< " AND is_virtual = 0";
     Ref<SQLResult> res = select(query->toString());
@@ -931,14 +934,14 @@ String SQLStorage::incrementUpdateIDs(int *ids, int size)
     String inStr = buf->toString();
     
     buf->clear();
-    *buf << "UPDATE " << QTB << CDS_OBJECT_TABLE << QTE << " SET " << QTB << "update_id" << QTE << " = " << QTB << "update_id" << QTE << " + 1 WHERE " << QTB << "id" << QTE << " ";
+    *buf << "UPDATE " << TQ(CDS_OBJECT_TABLE) << " SET " << TQ("update_id") << " = " << TQ("update_id") << " + 1 WHERE " << TQ("id") << " ";
     *buf << inStr;
     
     exec(buf->toString());
     
     buf->clear();
     
-    *buf << "SELECT " << QTB << "id" << QTE << ", " << QTB << "update_id" << QTE << " FROM " << QTB << CDS_OBJECT_TABLE << QTE << " WHERE " << QTB << "id" << QTE << " ";
+    *buf << "SELECT " << TQ("id") << ", " << TQ("update_id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE " << TQ("id") << " ";
     *buf << inStr;
     
     Ref<SQLResult> res = select(buf->toString());
@@ -997,7 +1000,7 @@ Ref<Array<CdsObject> > SQLStorage::selectObjects(Ref<SelectParam> param)
 Ref<DBRHash<int> > SQLStorage::getObjects(int parentID)
 {
     Ref<StringBuffer> q(new StringBuffer());
-    *q << "SELECT id FROM " << QTB << CDS_OBJECT_TABLE << QTE << " WHERE parent_id = ";
+    *q << "SELECT id FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE parent_id = ";
     *q << parentID;
     Ref<SQLResult> res = select(q->toString());
     Ref<SQLRow> row;
@@ -1048,12 +1051,10 @@ void SQLStorage::removeObjects(zmm::Ref<DBRHash<int> > list)
 void SQLStorage::_removeObjects(String objectIDs)
 {
     Ref<StringBuffer> q(new StringBuffer());
-    *q << "DELETE FROM " << QTB << CDS_OBJECT_TABLE << QTE << " WHERE id IN (" << objectIDs
-        << ")";
+    *q << "DELETE FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE id IN (" << objectIDs << ")";
     exec(q->toString());
     q->clear();
-    *q << "DELETE FROM " << QTB << CDS_ACTIVE_ITEM_TABLE << QTE << " WHERE id IN (" << objectIDs
-        << ")";
+    *q << "DELETE FROM " << TQ(CDS_ACTIVE_ITEM_TABLE) << " WHERE id IN (" << objectIDs << ")";
     exec(q->toString());
 }
 
@@ -1063,7 +1064,7 @@ int SQLStorage::removeObject(int objectID, bool all, int *objectType)
     if (all)
     {
         q = Ref<StringBuffer>(new StringBuffer());
-        *q << "SELECT ref_id FROM " << QTB << CDS_OBJECT_TABLE << QTE << " WHERE id = "
+        *q << "SELECT ref_id FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE id = "
             << objectID << " LIMIT 1";
         Ref<SQLResult> res = select(q->toString());
         if (res == nil)
@@ -1085,7 +1086,7 @@ int SQLStorage::removeObject(int objectID, bool all, int *objectType)
         q = Ref<StringBuffer>(new StringBuffer());
     else
         q->clear();
-    *q << "SELECT " << QTB << "parent_id" << QTE << ", " << QTB << "object_type" << QTE << " FROM " << QTB << CDS_OBJECT_TABLE << QTE << " WHERE id = " << objectID;
+    *q << "SELECT " << TQ("parent_id") << ", " << TQ("object_type") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE id = " << objectID;
     Ref<SQLResult> res = select(q->toString());
     if (res == nil)
         throw _Exception(_("sql error while getting parent_id"));
@@ -1098,7 +1099,7 @@ int SQLStorage::removeObject(int objectID, bool all, int *objectType)
     if (dbRemovesDeps)
     {
         q->clear();
-        *q << "DELETE FROM " << QTB << CDS_OBJECT_TABLE << QTE << " WHERE id = " << objectID;
+        *q << "DELETE FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE id = " << objectID;
         exec(q->toString());
     }
     else
@@ -1119,7 +1120,7 @@ void SQLStorage::_recursiveRemove(String objectIDs)
     {
         q->clear();
         String recurseStr = recurse->toString(1);
-        *q << "SELECT DISTINCT id FROM " << QTB << CDS_OBJECT_TABLE << QTE <<
+        *q << "SELECT DISTINCT id FROM " << TQ(CDS_OBJECT_TABLE) <<
             " WHERE parent_id IN (" << recurseStr << ") OR"
             " ref_id IN (" << recurseStr << ")";
         Ref<SQLResult> res = select(q->toString());
@@ -1148,7 +1149,7 @@ void SQLStorage::_recursiveRemove(String objectIDs)
 String SQLStorage::getInternalSetting(String key)
 {
     Ref<StringBuffer> q(new StringBuffer());
-    *q << "SELECT " << QTB << "value" << QTE << " FROM " << QTB << INTERNAL_SETTINGS_TABLE << QTE << " WHERE " << QTB << "key" << QTE << " =  "
+    *q << "SELECT " << TQ("value") << " FROM " << TQ(INTERNAL_SETTINGS_TABLE) << " WHERE " << TQ("key") << " = "
         << quote(key) << " LIMIT 1";
     Ref<SQLResult> res = select(q->toString());
     if (res == nil)
@@ -1163,3 +1164,67 @@ void SQLStorage::storeInternalSetting(String key, String value)
 overwritten due to different SQL syntax for MySQL and SQLite3
 */
 
+
+Ref<AutoscanList> SQLStorage::getAutoscanList(scan_mode_t scanmode)
+{
+    String scanmode_str = nil;
+    switch (scanmode)
+    {
+        case TimedScanMode: scanmode_str = _("timed");
+    }
+    if (scanmode_str == nil)
+        throw Exception(_("illegal scanmode given to getAutoscanList()"));
+    
+    #define FLD(field) << TQ('a') << '.' << field <<
+    Ref<StringBuffer> q(new StringBuffer());
+    *q << "SELECT " FLD("id") "," FLD("scan_level") "," FLD("scan_mode") "," FLD("recursive") "," FLD("interval") ","
+       << TQ('t') << "." << TQ("location")
+       << " FROM " << TQ(AUTOSCAN_TABLE) << " " << TQ('a')
+       << " JOIN " << TQ(CDS_OBJECT_TABLE) << " " << TQ('t')
+       << " ON " FLD("id") " = " << TQ('t') << "." << TQ("id")
+       << " WHERE " FLD("scan_mode") " = " << quote(scanmode_str);
+    Ref<SQLResult> res = select(q->toString());
+    if (res == nil)
+        return nil;
+    Ref<AutoscanList> list(new AutoscanList());
+    Ref<SQLRow> row;
+    while((row = res->nextRow()) != nil)
+    {
+        String id_str = row->col(0);
+        char prefix;
+        String location = stripLocationPrefix(&prefix, row->col(5));
+        if (prefix != LOC_DIR_PREFIX)
+            throw _Exception(_("mt_autoscan referred to an object, that was not a directory - id:") + id_str);
+        
+        scan_level_t level;
+        String level_str = row->col(1);
+        if (level_str == "basic")
+            level = BasicScanLevel;
+        else if (level_str == "full")
+            level = FullScanLevel;
+        else
+            throw _Exception(_("illegal scanlevel (") + level_str + ") for id " + id_str);
+        
+        scan_mode_t mode;
+        String mode_str = row->col(2);
+        if (mode_str == "timed")
+            mode = TimedScanMode;
+        else
+            throw _Exception(_("illegal scanmode (") + mode_str + ") for id " + id_str);
+        
+        bool recursive = false;
+        String recursive_str = row->col(3);
+        if (recursive_str == "1")
+            recursive = true;
+        
+        int interval = 0;
+        if (mode == TimedScanMode)
+            interval = row->col(4).toInt();
+        
+        
+        Ref<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, false, -1, interval));
+        list->add(dir);
+    }
+    
+    return list;
+}

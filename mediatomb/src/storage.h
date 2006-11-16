@@ -38,6 +38,7 @@
 #include "dictionary.h"
 #include "sync.h"
 #include "hash.h"
+#include "autoscan.h"
 
 #define BROWSE_DIRECT_CHILDREN      0x00000001
 #define BROWSE_ITEMS                0x00000002
@@ -184,6 +185,9 @@ public:
     /* internal setting methods */
     virtual zmm::String getInternalSetting(zmm::String key) = 0;
     virtual void storeInternalSetting(zmm::String key, zmm::String value) = 0;
+    
+    /* autoscan methods */
+    virtual zmm::Ref<AutoscanList> getAutoscanList(scan_mode_t scanmode) = 0;
     
     /* static methods */
     static zmm::Ref<Storage> getInstance();
