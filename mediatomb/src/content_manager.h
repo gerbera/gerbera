@@ -200,7 +200,6 @@ public:
 protected:
     ContentManager();
     
-    static Mutex getInstanceMutex;
     static zmm::Ref<ContentManager> instance;
     
     void init();
@@ -244,9 +243,7 @@ protected:
     
     void setLastModifiedTime(time_t lm);
     
-    inline void lock() { taskMutex->lock(); }
-    inline void unlock() { taskMutex->unlock(); }
-    inline void signal() { taskCond->signal(); }
+    inline void signal() { cond->signal(); }
     static void *staticThreadProc(void *arg);
     void threadProc();
     
@@ -255,8 +252,8 @@ protected:
     zmm::Ref<CMAccounting> acct;
     
     pthread_t taskThread;
-    zmm::Ref<Mutex> taskMutex;
-    zmm::Ref<Cond> taskCond;
+    static zmm::Ref<Mutex> mutex;
+    zmm::Ref<Cond> cond;
 
     bool shutdownFlag;
     

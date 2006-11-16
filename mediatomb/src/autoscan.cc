@@ -68,7 +68,7 @@ AutoscanList::AutoscanList()
 
 int AutoscanList::add(Ref<AutoscanDirectory> dir)
 {
-    Ref<MutexAutolock> lock = mutex->getAutolock();
+    AUTOLOCK(mutex);
 
     String loc = dir->getLocation();
     int nil_index = -1;
@@ -103,7 +103,7 @@ int AutoscanList::add(Ref<AutoscanDirectory> dir)
 
 Ref<AutoscanDirectory> AutoscanList::get(int id)
 {
-    Ref<MutexAutolock> lock = mutex->getAutolock();
+    AUTOLOCK(mutex);
 
     if ((id < 0) || (id >= list->size()))
         return nil;
@@ -113,7 +113,7 @@ Ref<AutoscanDirectory> AutoscanList::get(int id)
 
 void AutoscanList::remove(int id)
 {
-    Ref<MutexAutolock> lock = mutex->getAutolock();
+    AUTOLOCK(mutex);
     
     if ((id < 0) || (id >= list->size()))
                 return;
@@ -130,7 +130,7 @@ void AutoscanList::remove(int id)
 
 void AutoscanList::remove(String location)
 {
-    Ref<MutexAutolock> lock = mutex->getAutolock();
+    AUTOLOCK(mutex);
 
     for (int i = 0; i < list->size(); i++)
     {
@@ -151,7 +151,7 @@ void AutoscanList::remove(String location)
 
 void AutoscanList::subscribeAll(Ref<TimerSubscriber> obj)
 {
-    Ref<MutexAutolock> lock = mutex->getAutolock();
+    AUTOLOCK(mutex);
     
     Ref<Timer> timer = Timer::getInstance();
     for (int i = 0; i < list->size(); i++)
@@ -165,7 +165,7 @@ void AutoscanList::subscribeAll(Ref<TimerSubscriber> obj)
 
 void AutoscanList::notifyAll(Ref<TimerSubscriber> obj)
 {
-    Ref<MutexAutolock> lock = mutex->getAutolock();
+    AUTOLOCK(mutex);
     
     Ref<Timer> timer = Timer::getInstance();
     for (int i = 0; i < list->size(); i++)
@@ -179,7 +179,7 @@ void AutoscanList::notifyAll(Ref<TimerSubscriber> obj)
 
 void AutoscanList::subscribeDir(zmm::Ref<TimerSubscriber> obj, int id, bool once)
 {
-    Ref<MutexAutolock> lock = mutex->getAutolock();
+    AUTOLOCK(mutex);
 
     if ((id < 0) || (id >= list->size()))
         return;

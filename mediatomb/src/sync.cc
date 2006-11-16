@@ -187,7 +187,6 @@ MutexAutolock::~MutexAutolock()
     if (locked)
         mutex->unlockAutolock();
 }
-#endif
 
 void MutexAutolock::unlock()
 {
@@ -206,3 +205,4 @@ void MutexAutolock::relock()
         mutex->errorExit(_("tried to relock a locked autolock"));
     locked = true;
 }
+#endif

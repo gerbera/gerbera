@@ -84,8 +84,7 @@ static String get_filename(String path)
 
 ContentManager::ContentManager() : TimerSubscriber()
 {
-    taskMutex = Ref<Mutex>(new Mutex());
-    taskCond = Ref<Cond>(new Cond(taskMutex));
+    cond = Ref<Cond>(new Cond(mutex));
     ignore_unknown_extensions = 0;
 
     shutdownFlag = false;
@@ -175,7 +174,7 @@ void ContentManager::init()
 
     pthread_attr_destroy(&attr);
 
-    loadAccounting();
+    loadAccounting(false);
 
     Ref<Timer> timer = Timer::getInstance();
 
@@ -192,23 +191,21 @@ void ContentManager::timerNotify(int id)
 
 void ContentManager::shutdown()
 {
+    AUTOLOCK(mutex);
     shutdownFlag = true;
-    lock();
     signal();
-    unlock();
-
 // detached
 //    pthread_join(updateThread, NULL);
 }
 
 Ref<ContentManager> ContentManager::instance = nil;
-Mutex ContentManager::getInstanceMutex = Mutex();
+Ref<Mutex> ContentManager::mutex = Ref<Mutex>(new Mutex());
 
 Ref<ContentManager> ContentManager::getInstance()
 {
     if (instance == nil)
     {
-        getInstanceMutex.lock();
+        AUTOLOCK(mutex);
         if (instance == nil)
         {
             try
@@ -218,11 +215,9 @@ Ref<ContentManager> ContentManager::getInstance()
             }
             catch (Exception e)
             {
-                getInstanceMutex.unlock();
                 throw e;
             }
         }
-        getInstanceMutex.unlock();
     }
     return instance;
 }
@@ -234,9 +229,8 @@ Ref<CMAccounting> ContentManager::getAccounting()
 Ref<CMTask> ContentManager::getCurrentTask()
 {
     Ref<CMTask> task;
-    lock();
+    AUTOLOCK(mutex);
     task = currentTask;
-    unlock();
     return task;
 }
 
@@ -1104,23 +1098,22 @@ DirStack::init(String path)
 void ContentManager::threadProc()
 {
     Ref<CMTask> task;
-
+    
+    AUTOLOCK(mutex);
     while(! shutdownFlag)
     {
-        lock();
         currentTask = nil;
         if(((task = taskQueue1->dequeue()) == nil) && ((task = taskQueue2->dequeue()) == nil))
         {
             /* if nothing to do, sleep until awakened */
-            taskCond->wait();
-            unlock();
+            cond->wait();
             continue;
         }
         else
         {
             currentTask = task;
         }
-        unlock();
+        AUTOUNLOCK();
 
 //        log_debug(("Async START %s\n", task->getDescription().c_str()));
         try
@@ -1132,6 +1125,8 @@ void ContentManager::threadProc()
             e.printStackTrace();
         }
 //        log_debug(("ASYNC STOP  %s\n", task->getDescription().c_str()));
+        if (! shutdownFlag)
+            AUTORELOCK();
     }
 }
 void *ContentManager::staticThreadProc(void *arg)
@@ -1144,13 +1139,12 @@ void *ContentManager::staticThreadProc(void *arg)
 
 void ContentManager::addTask(zmm::Ref<CMTask> task, bool lowPriority)
 {
-    lock();
+    AUTOLOCK(mutex);
     if (! lowPriority)
         taskQueue1->enqueue(task);
     else
         taskQueue2->enqueue(task);
     signal();
-    unlock();
 }
 
 /* sync / async methods */
