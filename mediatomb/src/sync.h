@@ -35,10 +35,10 @@
 #include "common.h"
 #include <pthread.h>
 
-#define AUTOLOCK1_NOLOCK() zmm::Ref<MutexAutolock> mutex_autolock;
-#define AUTOLOCK1(mutex) zmm::Ref<MutexAutolock> mutex_autolock = mutex->getAutolock();
-#define AUTOUNLOCK() mutex_autolock = nil;
-#define AUTOLOCK2(mutex) mutex_autolock = mutex->getAutolock();
+#define AUTOLOCK_NOLOCK(mutex) zmm::Ref<MutexAutolock> mutex_autolock = mutex->getAutolock(true);
+#define AUTOLOCK(mutex) zmm::Ref<MutexAutolock> mutex_autolock = mutex->getAutolock();
+#define AUTOUNLOCK() mutex_autolock->unlock();
+#define AUTORELOCK() mutex_autolock->relock();
 #define LOCK(mutex) mutex->lock();
 #define UNLOCK(mutex) mutex->unlock();
 
@@ -47,10 +47,24 @@ class Mutex;
 class MutexAutolock : public zmm::Object
 {
 public:
+    
+#ifndef LOG_TOMBDEBUG
+    inline ~MutexAutolock() { if (locked) pthread_mutex_unlock(pmutex); }
+    inline void unlock() { pthread_mutex_unlock(pmutex); locked = false; }
+    inline void relock() { pthread_mutex_lock(pmutex); locked = true; }
+#else
     ~MutexAutolock();
+    void unlock();
+    void relock();
+#endif
 protected:
-    MutexAutolock(zmm::Ref<Mutex> mutex);
+    MutexAutolock(zmm::Ref<Mutex> mutex, bool unlocked = false);
     zmm::Ref<Mutex> mutex;
+    bool locked;
+#ifndef LOG_TOMBDEBUG
+    pthread_mutex_t *pmutex;
+#endif
+    
     friend class Mutex;
 };
 
@@ -66,7 +80,7 @@ public:
     void lock();
     void unlock(bool autolock = false);
 #endif
-    inline zmm::Ref<MutexAutolock> getAutolock() { return zmm::Ref<MutexAutolock>(new MutexAutolock(zmm::Ref<Mutex>(this))); }
+    inline zmm::Ref<MutexAutolock> getAutolock(bool unlocked = false) { return zmm::Ref<MutexAutolock>(new MutexAutolock(zmm::Ref<Mutex>(this), unlocked)); }
 protected:
     pthread_mutex_t mutex_struct;
     inline pthread_mutex_t* getMutex() { return &mutex_struct; }
@@ -82,12 +96,10 @@ protected:
     int lock_level;
     bool recursive;
     bool autolock;
-    bool autolock_before_cond_unlock;
     pthread_t locking_thread;
-    
-    friend class MutexAutolock;
 #endif
     
+    friend class MutexAutolock;
     friend class Cond;
 };
 

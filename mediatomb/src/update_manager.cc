@@ -64,7 +64,7 @@ Ref<UpdateManager> UpdateManager::getInstance()
 {
     if (instance == nil)
     {
-        AUTOLOCK1(mutex);
+        AUTOLOCK(mutex);
         if (instance == nil) // check again, because there is a very small chance
                              // that 2 threads tried to lock() concurrently
         {
@@ -109,7 +109,7 @@ void UpdateManager::shutdown()
     //log_debug("shutdown, locking\n");
     shutdownFlag = true;
     
-    AUTOLOCK1(mutex);
+    AUTOLOCK(mutex);
     log_debug("signalling...\n");
     cond->signal();
     //log_debug("signalled, unlocking\n");
@@ -124,7 +124,7 @@ void UpdateManager::containerChanged(int objectID, int flushPolicy)
 {
     if (objectID == INVALID_OBJECT_ID)
         return;
-    AUTOLOCK1(mutex);
+    AUTOLOCK(mutex);
     if (objectID != lastContainerChanged || flushPolicy > this->flushPolicy)
     {
         // signalling thread if it could have been idle, because 
@@ -166,7 +166,7 @@ void UpdateManager::threadProc()
     struct timespec lastUpdate;
     getTimespecNow(&lastUpdate);
     
-    AUTOLOCK1(mutex);
+    AUTOLOCK(mutex);
     while (! shutdownFlag)
     {
         if (haveUpdates())
@@ -231,7 +231,7 @@ void UpdateManager::threadProc()
                 {
                     log_debug("NOT sending updates (string empty or invalid).\n");
                 }
-                AUTOLOCK2(mutex);
+                AUTORELOCK();
             }
         }
         else

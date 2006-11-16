@@ -294,7 +294,7 @@ int Server::upnp_callback(Upnp_EventType eventtype, void *event, void *cookie)
 
 //    log_info("event is ok\n");
     // get device wide mutex (have to figure out what the hell that is)
-    AUTOLOCK1(upnp_mutex);
+    AUTOLOCK(upnp_mutex);
 
 //    log_info("got device mutex\n");
 

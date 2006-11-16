@@ -108,21 +108,18 @@ void Mutex::unlockAutolock()
 
 void Mutex::doLock(bool cond)
 {
-    if (cond)
-        autolock = autolock_before_cond_unlock;
     lock_level++;
+    if (! recursive && lock_level > 1)
+        errorExit(_("managed to lock a non-recursive thread twice? cond: ") + cond);
     locking_thread = pthread_self();
 }
 
 void Mutex::doUnlock(bool cond)
 {
-    if (cond)
-    {
-        autolock_before_cond_unlock = autolock;
-        if (recursive && lock_level != 1)
-            errorExit(_("tried to unlock a recursive mutex via a cond->wait() or cond->timedwait() call, which is locked more than once - is this correct?"));
-    }
-    lock_level--;
+    if (cond && recursive && lock_level != 1)
+        errorExit(_("tried to unlock a recursive mutex via a cond->wait() or cond->timedwait() call, which is locked more than once - is this correct?"));
+    if (--lock_level < 0)
+        errorExit(_("unlocked a thread somehow, but it wasn't locked. cond: ") + cond);
 }
 
 #endif // LOG_TOMBDEBUG
@@ -143,9 +140,11 @@ Cond::~Cond()
 #ifdef LOG_TOMBDEBUG
 void Cond::wait()
 {
+    bool autolock_save = mutex->autolock;
     mutex->doUnlock(true);
     pthread_cond_wait(&cond_struct, mutex->getMutex());
     mutex->doLock(true);
+    mutex->autolock = autolock_save;
 }
 
 int Cond::timedwait(struct timespec *timeout)
@@ -168,22 +167,42 @@ void Cond::checkwait()
 #endif // LOG_TOMBDEBUG
 
 
-MutexAutolock::MutexAutolock(Ref<Mutex> mutex)
+MutexAutolock::MutexAutolock(Ref<Mutex> mutex, bool unlocked)
 {
     this->mutex = mutex;
 #ifdef LOG_TOMBDEBUG
-    mutex->lockAutolock();
+    if (! unlocked)
+        mutex->lockAutolock();
 #else
-    mutex->lock();
+    pmutex = mutex->getMutex();
+    if (! unlocked)
+        pthread_mutex_lock(pmutex);
 #endif
+    locked = ! unlocked;
 }
 
+#ifdef LOG_TOMBDEBUG
 MutexAutolock::~MutexAutolock()
 {
-#ifdef LOG_TOMBDEBUG
-    mutex->unlockAutolock();
-#else
-    mutex->unlock();
+    if (locked)
+        mutex->unlockAutolock();
+}
 #endif
+
+void MutexAutolock::unlock()
+{
+    if (locked)
+        mutex->unlockAutolock();
+    else
+        mutex->errorExit(_("tried to unlock a not-locked autolock"));
+    locked = false;
 }
 
+void MutexAutolock::relock()
+{
+    if (! locked)
+        mutex->lockAutolock();
+    else
+        mutex->errorExit(_("tried to relock a locked autolock"));
+    locked = true;
+}

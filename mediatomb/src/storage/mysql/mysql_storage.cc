@@ -77,7 +77,7 @@ void MysqlStorage::checkMysqlThreadInit()
 void MysqlStorage::init()
 {
     log_debug("start\n");
-    AUTOLOCK1(mutex);
+    AUTOLOCK(mutex);
     int ret;
     
     if (! mysql_thread_safe())
@@ -232,7 +232,7 @@ Ref<SQLResult> MysqlStorage::select(String query)
     int res;
     
     checkMysqlThreadInit();
-    AUTOLOCK1(mutex);
+    AUTOLOCK(mutex);
     res = mysql_real_query(&db, query.c_str(), query.length());
     if (res)
     {
@@ -260,7 +260,7 @@ int MysqlStorage::exec(String query, bool getLastInsertId)
     int res;
     
     checkMysqlThreadInit();
-    AUTOLOCK1(mutex);
+    AUTOLOCK(mutex);
     res = mysql_real_query(&db, query.c_str(), query.length());
     if(res)
     {
@@ -274,7 +274,7 @@ int MysqlStorage::exec(String query, bool getLastInsertId)
 
 void MysqlStorage::shutdown()
 {
-    AUTOLOCK1(mutex);    // just to ensure, that we don't close while another thread 
+    AUTOLOCK(mutex);    // just to ensure, that we don't close while another thread 
                     // is executing a query
     
     if(mysql_connection)

@@ -55,7 +55,7 @@ Ref<Timer> Timer::getInstance()
 {
     if (instance == nil)
     {
-        AUTOLOCK1(mutex);
+        AUTOLOCK(mutex);
         if (instance == nil) // check again, because there is a very small chance
                              // that 2 threads tried to lock() concurrently
         {
@@ -77,7 +77,7 @@ void Timer::addTimerSubscriber(Ref<TimerSubscriber> timerSubscriber, unsigned in
     log_debug("adding subscriber...\n");
     if (notifyInterval <= 0)
         throw _Exception(_("tried to add timer with illegal notifyInterval"));
-    AUTOLOCK1(mutex);
+    AUTOLOCK(mutex);
     //timerSubscriber->timerNotify(id);
     Ref<TimerSubscriberElement> element(new TimerSubscriberElement(timerSubscriber, notifyInterval, id, once));
     for(int i = 0; i < subscribers->size(); i++)
@@ -94,7 +94,7 @@ void Timer::addTimerSubscriber(Ref<TimerSubscriber> timerSubscriber, unsigned in
 void Timer::removeTimerSubscriber(Ref<TimerSubscriber> timerSubscriber, int id)
 {
     log_debug("removing subscriber...\n");
-    AUTOLOCK1(mutex);
+    AUTOLOCK(mutex);
     Ref<TimerSubscriberElement> element(new TimerSubscriberElement(timerSubscriber, 0, id));
     bool removed = false;
     for(int i = 0; i < subscribers->size(); i++)
@@ -117,7 +117,7 @@ void Timer::triggerWait()
 {
     log_debug("triggerWait. - %d subscriber(s)\n", subscribers->size());
     
-    AUTOLOCK1(mutex);
+    AUTOLOCK(mutex);
     if (subscribers->size() > 0)
     {
         struct timespec *timeout = getNextNotifyTime();

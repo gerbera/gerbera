@@ -42,6 +42,15 @@ CREATE TABLE `mt_internal_setting` (
   PRIMARY KEY  (`key`)
 ) ENGINE=InnoDB CHARSET=utf8;
 INSERT INTO `mt_internal_setting` VALUES ('db_version','1');
+CREATE TABLE `mt_autoscan` (
+  `id` int(11) NOT NULL,
+  `scan_level` enum('basic','full') NOT NULL,
+  `scan_mode` enum('timed') NOT NULL,
+  `recursive` tinyint(4) unsigned NOT NULL,
+  `interval` int(11) unsigned default NULL,
+  PRIMARY KEY `id` (`id`),
+  CONSTRAINT `mt_autoscan_ibfk_1` FOREIGN KEY (`id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB CHARSET=utf8;
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;

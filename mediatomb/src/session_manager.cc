@@ -52,7 +52,7 @@ Ref<SessionManager> SessionManager::getInstance()
 {
     if (inst == nil)
     {
-        AUTOLOCK1(mutex);
+        AUTOLOCK(mutex);
         if (inst == nil)
         {
             try
@@ -84,7 +84,7 @@ void Session::containerChangedUI(int objectID)
         return;
     if (! updateAll)
     {
-        AUTOLOCK1(mutex);
+        AUTOLOCK(mutex);
         if (! updateAll)
         {
             if (uiUpdateIDs->size() >= MAX_UI_UPDATE_IDS)
@@ -100,7 +100,7 @@ void Session::containerChangedUI(int objectID)
 
 String Session::getUIUpdateIDs()
 {
-    AUTOLOCK1(mutex);
+    AUTOLOCK(mutex);
     if (updateAll)
     {
         updateAll = false;
@@ -136,7 +136,7 @@ SessionManager::SessionManager() : TimerSubscriber()
 Ref<Session> SessionManager::createSession(long timeout)
 {
     Ref<Session> newSession(new Session(timeout));
-    AUTOLOCK1(mutex);
+    AUTOLOCK(mutex);
     
     int count=0;
     String sessionID;
@@ -156,24 +156,21 @@ Ref<Session> SessionManager::createSession(long timeout)
 
 Ref<Session> SessionManager::getSession(String sessionID, bool doLock)
 {
-    AUTOLOCK1_NOLOCK()
+    AUTOLOCK_NOLOCK(mutex)
     if (doLock)
-        AUTOLOCK2(mutex);
+        AUTORELOCK();
     for (int i = 0; i < sessions->size(); i++)
     {
         Ref<Session> s = sessions->get(i);
         if (s->getID() == sessionID)
-        {
-            if (doLock)
             return s;
-        }
     }
     return nil;
 }
 
 void SessionManager::removeSession(String sessionID)
 {
-    AUTOLOCK1(mutex);
+    AUTOLOCK(mutex);
     for (int i = 0; i < sessions->size(); i++)
     {
         Ref<Session> s = sessions->get(i);
@@ -198,7 +195,7 @@ String SessionManager::getUserPassword(String user)
 
 void SessionManager::containerChangedUI(int objectID)
 {
-    AUTOLOCK1(mutex);
+    AUTOLOCK(mutex);
     for (int i = 0; i < sessions->size(); i++)
     {
         Ref<Session> session = sessions->get(i);
@@ -224,7 +221,7 @@ void SessionManager::checkTimer()
 void SessionManager::timerNotify(int id)
 {
     log_debug("notified... %d sessions.\n", sessions->size());
-    AUTOLOCK1(mutex);
+    AUTOLOCK(mutex);
     struct timespec now;
     getTimespecNow(&now);
     for (int i = 0; i < sessions->size(); i++)

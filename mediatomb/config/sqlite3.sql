@@ -31,6 +31,14 @@ CREATE TABLE "mt_internal_setting" (
   "value" varchar(255) NOT NULL
 );
 INSERT INTO "mt_internal_setting" VALUES('db_version', '1');
+CREATE TABLE "mt_autoscan" (
+  "id" integer primary key,
+  "scan_level" varchar(10) NOT NULL,
+  "scan_mode" varchar(10) NOT NULL,
+  "recursive" tinyint unsigned NOT NULL,
+  "interval" integer unsigned default NULL,
+  CONSTRAINT "mt_autoscan_id" FOREIGN KEY ("id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
 CREATE INDEX mt_cds_object_ref_id ON mt_cds_object(ref_id);
 CREATE INDEX mt_cds_object_parent_id ON mt_cds_object(parent_id,object_type,dc_title);
 CREATE INDEX mt_location_parent ON mt_cds_object(location_hash,parent_id);

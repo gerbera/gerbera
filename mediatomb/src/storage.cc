@@ -93,7 +93,7 @@ Ref<Storage> Storage::getInstance()
 {
     if(primary_inst == nil)
     {
-        AUTOLOCK1(mutex);
+        AUTOLOCK(mutex);
         if (primary_inst == nil)
         {
             try

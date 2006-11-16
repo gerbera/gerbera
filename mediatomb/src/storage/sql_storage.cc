@@ -1009,7 +1009,7 @@ Ref<DBRHash<int> > SQLStorage::getObjects(int parentID)
     if (capacity < 521)
         capacity = 521;
     
-    Ref<DBRHash<int> > ret(new DBRHash<int>(capacity, -2, -3));
+    Ref<DBRHash<int> > ret(new DBRHash<int>(capacity, INVALID_OBJECT_ID, INVALID_OBJECT_ID_2));
     
     while ((row = res->nextRow()) != nil)
     {
