@@ -94,7 +94,7 @@ public:
     
     virtual zmm::Ref<DBRHash<int> > getObjects(int parentID);
     
-    virtual void removeObjects(zmm::Ref<DBRHash<int> > list);
+    virtual bool removeObjects(zmm::Ref<DBRHash<int> > list);
     
     virtual int removeObject(int objectID, bool all, int *objectType = NULL);
     

@@ -507,8 +507,10 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
     log_debug("removing... list: %s\n", list->debugGetAll().c_str());
     if (list->size() > 0)
     {
-        storage->removeObjects(list);
+        bool containerRemoved = storage->removeObjects(list);
         UpdateManager::getInstance()->containerChanged(containerID);
+        if (containerRemoved)
+            SessionManager::getInstance()->containerChangedUI(containerID);
     }
 
     closedir(dir);

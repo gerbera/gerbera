@@ -1020,32 +1020,45 @@ Ref<DBRHash<int> > SQLStorage::getObjects(int parentID)
 
 
 
-void SQLStorage::removeObjects(zmm::Ref<DBRHash<int> > list)
+bool SQLStorage::removeObjects(zmm::Ref<DBRHash<int> > list)
 {
+    bool containerRemoved = false;
     hash_data_array_t<int> hash_data_array;
     list->getAll(&hash_data_array);
     int count = hash_data_array.size;
     int *array = hash_data_array.data;
     if (count <= 0)
-        return;
+        return false;
     
-    Ref<StringBuffer> ids(new StringBuffer());
+    Ref<StringBuffer> idsBuf(new StringBuffer());
     for (int i = 0; i < count; i++)
     {
         int id = array[i];
         if (IS_FORBIDDEN_CDS_ID(id))
             throw _Exception(_("tried to delete a forbidden ID (")+id+")!");
-        *ids << "," << id;
+        *idsBuf << "," << id;
     }
+    
+    String ids = idsBuf->toString(1);
+    
+    Ref<StringBuffer> q(new StringBuffer());
+    *q << "SELECT " << TQ("id") << " FROM " << TQ(CDS_OBJECT_TABLE)
+       << " WHERE " << TQ("id") << " IN (" << ids << ")"
+       << " AND " << TQ("object_type") << " = " << OBJECT_TYPE_CONTAINER
+       << " LIMIT 1";
+    Ref<SQLResult> res = select(q->toString());
+    if (res != nil && res->nextRow() != nil)
+        containerRemoved = true;
     
     if (dbRemovesDeps)
     {
-        _removeObjects(ids->toString(1));
+        _removeObjects(ids);
     }
     else
     {
-        _recursiveRemove(ids->toString(1));
+        _recursiveRemove(ids);
     }
+    return containerRemoved;
 }
 
 void SQLStorage::_removeObjects(String objectIDs)
@@ -1055,6 +1068,9 @@ void SQLStorage::_removeObjects(String objectIDs)
     exec(q->toString());
     q->clear();
     *q << "DELETE FROM " << TQ(CDS_ACTIVE_ITEM_TABLE) << " WHERE id IN (" << objectIDs << ")";
+    exec(q->toString());
+    q->clear();
+    *q << "DELETE FROM " << TQ(AUTOSCAN_TABLE) << " WHERE id IN (" << objectIDs << ")";
     exec(q->toString());
 }
 

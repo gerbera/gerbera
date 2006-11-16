@@ -177,7 +177,9 @@ public:
     /// \brief Remove all objects found in list
     /// \param parentID ID of the parent container
     /// \param list a DBHash containing objectIDs that have to be removed
-    virtual void removeObjects(zmm::Ref<DBRHash<int> > list) = 0;
+    /// \return true if a container was in the list, false if the list was empty
+    /// or there were only items in the list
+    virtual bool removeObjects(zmm::Ref<DBRHash<int> > list) = 0;
     
     /* accounting methods */
     virtual int getTotalFiles() { return 0; }
