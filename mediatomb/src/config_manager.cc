@@ -647,7 +647,6 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
     bool recursive;
     unsigned int interval;
    
-    int count = 0;
     for (int i = 0; i < element->childCount(); i++)
     {
         Ref<Element> child = element->getChild(i);
@@ -739,7 +738,6 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
             
             Ref<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, true, -1, interval));
             list->add(dir); 
-            count++;
         }
     }
 
