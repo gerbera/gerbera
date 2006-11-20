@@ -486,9 +486,9 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
             {
                 list->remove(objectID);
                 log_debug("removing %d -> list: %s\n", objectID, list->debugGetAll().c_str());
-                log_debug("adding %d to containers stack\n", objectID);
                 // add a task to rescan the directory that was found
-                rescanDirectory(objectID, scanID, scanMode);
+                if (adir->getRecursive())
+                    rescanDirectory(objectID, scanID, scanMode);
             }
             else
             {
