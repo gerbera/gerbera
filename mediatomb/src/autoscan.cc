@@ -70,7 +70,7 @@ AutoscanList::AutoscanList()
 int AutoscanList::add(Ref<AutoscanDirectory> dir)
 {
     AUTOLOCK(mutex);
-    _add(dir);
+    return _add(dir);
 }
 
 int AutoscanList::_add(Ref<AutoscanDirectory> dir)
