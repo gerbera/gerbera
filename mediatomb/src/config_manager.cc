@@ -299,7 +299,7 @@ void ConfigManager::validate(String serverhome)
     if ((temp != "yes") && (temp != "no"))
         throw _Exception(_("Error in config file: incorrect parameter for <accounts enabled=\")\" /> attribute"));
 
-    temp = getOption(_("/server/import/attribute::hidden-files"),
+    temp = getOption(_("/import/attribute::hidden-files"),
                      _(DEFAULT_HIDDEN_FILES_VALUE));
     if ((temp != "yes") && (temp != "no"))
         throw _Exception(_("Error in config file: incorrect parameter for <import hidden-files=\")\" /> attribute"));
