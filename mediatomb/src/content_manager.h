@@ -191,6 +191,16 @@ public:
     /// the returned object in the database. To do so updateObject must be called
     zmm::Ref<CdsObject> convertObject(zmm::Ref<CdsObject> obj, int objectType);
 
+    /// \brief Gets an AutocsanDirectrory from the watch list.
+    zmm::Ref<AutoscanDirectory> getAutoscanDirectory(int scanID, scan_mode_t scanMode);
+
+    /// \brief Removes an AutocsanDirectrory from the watch list.
+    void removeAutoscanDirectory(int scanID, scan_mode_t scanMode);
+ 
+    /// \brief Add an autoscan directory to the watch list.
+    int addAutoscanDirectory(zmm::Ref<AutoscanDirectory> dir);
+
+
     /// \brief instructs ContentManager to reload scripting environment
 #ifdef HAVE_JS
     void reloadScripting();
@@ -222,12 +232,7 @@ protected:
     //void _addFile2(zmm::String path, bool recursive=0);
     void _removeObject(int objectID, bool all);
     
-    /// \brief Gets an AutocsanDirectrory from the global list
-    zmm::Ref<AutoscanDirectory> getAutoscanDirectory(int scanID, scan_mode_t scanMode);
-
-    /// \brief Removes an AutocsanDirectrory from the global list
-    void removeAutoscanDirectory(int scanID, scan_mode_t scanMode);
-        
+       
     void rescanDirectory(int objectID, int scanID, scan_mode_t scanMode); 
     void _rescanDirectory(int containerID, int scanID, scan_mode_t scanMode, scan_level_t scanLevel);
     /* for recursive addition */

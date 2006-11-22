@@ -66,6 +66,8 @@ public:
     /// \return scanID of the newly added AutoscanDirectory
     int add(zmm::Ref<AutoscanDirectory> dir);
 
+    void addList(zmm::Ref<AutoscanList> list);
+
     zmm::Ref<AutoscanDirectory> get(int id);
 
     void remove(int id);
@@ -89,6 +91,8 @@ public:
 protected:
     zmm::Ref<Mutex> mutex;
     zmm::Ref<zmm::Array<AutoscanDirectory> > list;
+    
+    int _add(zmm::Ref<AutoscanDirectory> dir);
 };
 
 /// \brief Provides information about one autoscan directory.

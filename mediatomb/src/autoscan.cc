@@ -69,6 +69,11 @@ AutoscanList::AutoscanList()
 int AutoscanList::add(Ref<AutoscanDirectory> dir)
 {
     AUTOLOCK(mutex);
+    _add(dir);
+}
+
+int AutoscanList::_add(Ref<AutoscanDirectory> dir)
+{
 
     String loc = dir->getLocation();
     int nil_index = -1;
@@ -99,6 +104,19 @@ int AutoscanList::add(Ref<AutoscanDirectory> dir)
     }
 
     return dir->getScanID();
+}
+
+void AutoscanList::addList(zmm::Ref<AutoscanList> list)
+{
+    AUTOLOCK(mutex);
+    
+    for (int i = 0; i < list->list->size(); i++)
+    {
+        if (list->list->get(i) == nil)
+            continue;
+
+        _add(list->list->get(i));
+    }
 }
 
 Ref<AutoscanDirectory> AutoscanList::get(int id)

@@ -113,7 +113,11 @@ ContentManager::ContentManager() : TimerSubscriber()
    
     tmpEl = cm->getElement(_("/import/autoscan"));
     autoscan_timed = cm->createAutoscanListFromNodeset(tmpEl, TimedScanMode);
-   
+
+    Ref<Storage> storage = Storage::getInstance();
+    Ref<AutoscanList> temp_list = storage->getAutoscanList(TimedScanMode);
+    autoscan_timed->addList(temp_list);
+
     /* init fielmagic */
 #ifdef HAVE_MAGIC
     if (! ignore_unknown_extensions)
@@ -185,6 +189,9 @@ void ContentManager::init()
 void ContentManager::timerNotify(int id)
 {
     Ref<AutoscanDirectory> dir = autoscan_timed->get(id);
+    if (dir == nil)
+        return;
+    
     int objectID = dir->getObjectID();
     rescanDirectory(objectID, dir->getScanID(), dir->getScanMode());
 }
@@ -1220,7 +1227,18 @@ Ref<AutoscanDirectory> ContentManager::getAutoscanDirectory(int scanID, scan_mod
 
     return nil;
 }
- 
+
+int ContentManager::addAutoscanDirectory(Ref<AutoscanDirectory> dir)
+{
+    int scanID = -1;
+    if (dir->getScanMode() == TimedScanMode)
+    {
+        timerNotify(autoscan_timed->add(dir));
+    }
+   
+    return scanID;
+}
+
 void ContentManager::removeAutoscanDirectory(int scanID, scan_mode_t scanMode)
 {
     if (scanMode == TimedScanMode)
