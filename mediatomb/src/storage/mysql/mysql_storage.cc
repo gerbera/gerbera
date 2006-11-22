@@ -138,6 +138,17 @@ void MysqlStorage::init()
         throw _Exception(_("The connection to the MySQL database has failed: ") + getError(&db));
     }
     
+    // ---- delete this!
+    #ifndef HAVE_MYSQL_OPT_RECONNECT
+    #error Jin: please implement HAVE_MYSQL_OPT_RECONNECT
+    #endif
+    // ---
+    
+    #ifdef HAVE_MYSQL_OPT_RECONNECT
+        my_bool my_bool_var = true;
+        mysql_options(&db, MYSQL_OPT_RECONNECT, &my_bool_var);
+    #endif
+    
     mysql_connection = true;
     
     String dbVersion = nil;
