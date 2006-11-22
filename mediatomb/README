@@ -326,10 +326,12 @@ Here is a sample configuration file with description of the various tags.
             to fix the .AVI playback problem.
         
 
-<import> (Required)
-    Section specifying various import parameters, currently only one is 
-    supported. 
-    
+<import hidden-files="no"> (Tag required, attribute optional)
+    Section specifying various import parameters.
+    The attribute "hidden-files" specifies the default import behaviour
+    for hidden files. Autoscan can override this attribute on a per directory
+    basis.
+       
     <filesystem-charset>ISO-8859-1</filesystem-charset>
         (Default if missing: ISO-8859-1)
         Defines the charset of the filesystem. For example, if you have 
@@ -348,6 +350,22 @@ Here is a sample configuration file with description of the various tags.
     <magic-file> (Optional)
         Specifies an alternative file for filemagic, contaning mimetype 
         information.
+
+    <autoscan> (Optoinal)
+        Specifies a list of default autoscan directories.
+
+        <directory location="/tmp/b_test" mode="timed" interval="15" 
+                   level="full" recursive="no" hidden-files="no"/>
+
+        Defines autoscan directory and it's parameters.
+        location    (Required)  absolute directory path
+        mode        (Required)  scan mode, currently only "timed" is supported
+        interval    (Required for timed mode)  scan interval in seconds
+        level       (Required)  either "full" or "basic"
+        recursive   (Required)  "yes" or "no", process directories recursively
+        hidden-files (Optional) "yes" or "no", process hidden files, overrides
+                                the hidden-files value in the <import/> tag
+            
 
     <mappings> (Optional, also all subsections are optional)
         Defines various mapping options for importing media, currently

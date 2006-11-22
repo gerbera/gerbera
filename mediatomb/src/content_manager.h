@@ -149,7 +149,7 @@ public:
     
     /* sync/async methods */
     void loadAccounting(bool async=true);
-    void addFile(zmm::String path, bool recursive=true, bool async=true, bool hidden=false);
+    void addFile(zmm::String path, bool recursive=true, bool async=true, bool hidden=false, bool lowPriority=false);
     void removeObject(int objectID, bool async=true, bool all=false);
 //    void rescanDirectory(int objectID, scan_level_t scanLevel = BasicScan);   
     

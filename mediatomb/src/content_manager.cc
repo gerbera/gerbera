@@ -206,7 +206,7 @@ void ContentManager::shutdown()
 }
 
 Ref<ContentManager> ContentManager::instance = nil;
-Ref<Mutex> ContentManager::mutex = Ref<Mutex>(new Mutex());
+Ref<Mutex> ContentManager::mutex = Ref<Mutex>(new Mutex(true));
 
 Ref<ContentManager> ContentManager::getInstance()
 {
@@ -434,6 +434,10 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
             {
                 continue;
             }
+            else if (!adir->getHidden())
+            {
+                continue;    
+            }
         }
 
         path = location + "/" + name; 
@@ -466,7 +470,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
                         // scripting
                         log_debug("removing object %d, %s\n", objectID, name);
                         removeObject(objectID, false);
-                        addFile(path, false, false);
+                        addFile(path, false, false, adir->getHidden());
                         // update time variable
                         last_modified_current_max = statbuf.st_mtime;
                     }
@@ -482,7 +486,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
                 // add file, not recursive, not async
                 // make sure not to add the current config.xml
                 if (ConfigManager::getInstance()->getConfigFilename() != path)
-                    addFile(path, false, false);
+                    addFile(path, false, false, adir->getHidden());
             }
         }
         else if (S_ISDIR(statbuf.st_mode))
@@ -500,8 +504,8 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
             else
             {
                 log_debug("Directory is not in database!\n");
-                // add directory, recursive, async
-                addFile(path, true, true);
+                // add directory, recursive, async, hidden flag, low priority
+                addFile(path, true, true, adir->getHidden(), true);
             }
         }
     } // while
@@ -1168,13 +1172,13 @@ void ContentManager::loadAccounting(bool async)
         _loadAccounting();
     }
 }
-void ContentManager::addFile(zmm::String path, bool recursive, bool async, bool hidden)
+void ContentManager::addFile(zmm::String path, bool recursive, bool async, bool hidden, bool lowPriority)
 {
     if (async)
     {
         Ref<CMTask> task(new CMAddFileTask(path, recursive, hidden));
         task->setDescription(_("Adding ") + path);
-        addTask(task);
+        addTask(task, lowPriority);
     }
     else
     {

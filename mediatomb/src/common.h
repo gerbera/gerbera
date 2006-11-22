@@ -169,6 +169,7 @@
 #define DEFAULT_MYSQL_USER              "mediatomb"
 #define DEFAULT_WEB_DIR                 "web"
 #define DEFAULT_JS_DIR                  "js"
+#define DEFAULT_HIDDEN_FILES_VALUE      "no"
 
 #ifdef HAVE_SQLITE3
     #define DEFAULT_STORAGE_DRIVER      "sqlite3"

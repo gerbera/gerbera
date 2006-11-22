@@ -299,6 +299,11 @@ void ConfigManager::validate(String serverhome)
     if ((temp != "yes") && (temp != "no"))
         throw _Exception(_("Error in config file: incorrect parameter for <accounts enabled=\")\" /> attribute"));
 
+    temp = getOption(_("/server/import/attribute::hidden-files"),
+                     _(DEFAULT_HIDDEN_FILES_VALUE));
+    if ((temp != "yes") && (temp != "no"))
+        throw _Exception(_("Error in config file: incorrect parameter for <import hidden-files=\")\" /> attribute"));
+
     getOption(_("/import/mappings/extension-mimetype/attribute::ignore-unknown"),
               _(DEFAULT_IGNORE_UNKNOWN_EXTENSIONS));
 
@@ -645,10 +650,14 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
     scan_level_t level;
     scan_mode_t mode;
     bool recursive;
+    bool hidden;
     unsigned int interval;
    
     for (int i = 0; i < element->childCount(); i++)
     {
+        hidden = false;
+        recursive = false;
+
         Ref<Element> child = element->getChild(i);
         if (child->getName() == "directory")
         {
@@ -717,6 +726,22 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
                }
             }
 
+            temp = child->getAttribute(_("hidden-files"));
+            if (!string_ok(temp))
+            {
+                temp = getOption(_("/server/import/attribute::hidden-files"));
+            }
+
+            if (temp == "yes")
+                hidden = true;
+            else if (temp == "no")
+                hidden = false;
+            else
+            {
+                log_warning("Skipping autoscan directory %s: hidden attribute %s is invalid\n", location.c_str(), temp.c_str());
+                continue;
+            }
+
             temp = child->getAttribute(_("interval"));
             interval = 0;
             if (mode == TimedScanMode)
@@ -736,7 +761,7 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
                 }
             }
             
-            Ref<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, true, -1, interval));
+            Ref<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, true, -1, interval, hidden));
             list->add(dir); 
         }
     }

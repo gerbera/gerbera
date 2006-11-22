@@ -435,7 +435,11 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
             {   
                 // add file/directory recursively and asynchronously
                 log_info("Adding %s\n", String(addFile->get(i)).c_str());
-                ContentManager::getInstance()->addFile(String(addFile->get(i)), true, true);
+                bool hidden = false;
+                String h = ConfigManager::getInstance()->getOption(_("/server/import/attribute::hidden-files"));
+                if (h == "yes")
+                    hidden = true;
+                ContentManager::getInstance()->addFile(String(addFile->get(i)), true, true, hidden);
             }
             catch (Exception e)
             {
