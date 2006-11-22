@@ -47,6 +47,8 @@ using namespace zmm;
 #define LOC_ILLEGAL_PREFIX  'X'
 #define MAX_REMOVE_SIZE     10000
 
+#define SQL_NULL             "NULL"
+
 enum
 {
     _id = 0,
@@ -218,10 +220,10 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
     Ref<Dictionary> cdsObjectSql(new Dictionary());
     returnVal->append(Ref<AddUpdateTable> (new AddUpdateTable(_(CDS_OBJECT_TABLE), cdsObjectSql)));
     
-    cdsObjectSql->put(_("object_type"), String::from(objectType));
+    cdsObjectSql->put(_("object_type"), quote(objectType));
     
     if (hasReference)
-        cdsObjectSql->put(_("ref_id"), String::from(refObj->getID()));
+        cdsObjectSql->put(_("ref_id"), quote(refObj->getID()));
     else if (isUpdate)
         cdsObjectSql->put(_("ref_id"), _("NULL"));
     
@@ -235,7 +237,7 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
     //else if (isUpdate)
     //    cdsObjectSql->put(_("dc_title"), _("NULL"));
     
-    cdsObjectSql->put(_("flags"), String::from(obj->getFlags()));
+    cdsObjectSql->put(_("flags"), quote(obj->getFlags()));
     
     if (isUpdate)
         cdsObjectSql->put(_("metadata"), _("NULL"));
@@ -277,7 +279,7 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
             throw _Exception(_("tried to add a container or tried to update a non-virtual container via _addUpdateObject; is this correct?"));
         String dbLocation = addLocationPrefix(LOC_VIRT_PREFIX, obj->getLocation());
         cdsObjectSql->put(_("location"), quote(dbLocation));
-        cdsObjectSql->put(_("location_hash"), String::from(stringHash(dbLocation)));
+        cdsObjectSql->put(_("location_hash"), quote(stringHash(dbLocation)));
     }
     
     if (IS_CDS_ITEM(objectType))
@@ -297,12 +299,12 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
                 //String filename = pathAr->get(1);
                 String dbLocation = addLocationPrefix(LOC_FILE_PREFIX, loc);
                 cdsObjectSql->put(_("location"), quote(dbLocation));
-                cdsObjectSql->put(_("location_hash"), String::from(stringHash(dbLocation)));
+                cdsObjectSql->put(_("location_hash"), quote(stringHash(dbLocation)));
             }
             else //URLs and active items
             {
                 cdsObjectSql->put(_("location"), quote(loc));
-                cdsObjectSql->put(_("location_hash"), _("NULL"));
+                cdsObjectSql->put(_("location_hash"), _(SQL_NULL));
             }
         }
         else 
@@ -311,8 +313,8 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
                 throw _Exception(_("tried to create or update a non-pure item with refID set"));
             if (isUpdate)
             {
-                cdsObjectSql->put(_("location"), _("NULL"));
-                cdsObjectSql->put(_("location_hash"), _("NULL"));
+                cdsObjectSql->put(_("location"), _(SQL_NULL));
+                cdsObjectSql->put(_("location_hash"), _(SQL_NULL));
             }
         }
         
@@ -497,9 +499,9 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
         if (! getContainers && ! getItems)
             *qb << " AND 0=1";
         else if (getContainers && ! getItems)
-            *qb << " AND f.object_type = " << OBJECT_TYPE_CONTAINER;
+            *qb << " AND f.object_type = " << quote(OBJECT_TYPE_CONTAINER);
         else if (! getContainers && getItems)
-            *qb << " AND f.object_type & " << OBJECT_TYPE_ITEM;
+            *qb << " AND f.object_type & " << quote(OBJECT_TYPE_ITEM);
         *qb << " ORDER BY f.object_type, f.dc_title";
         if (doLimit)
             *qb << " LIMIT " << param->getStartingIndex() << "," << count;
@@ -1202,9 +1204,9 @@ Ref<AutoscanList> SQLStorage::getAutoscanList(scan_mode_t scanmode)
     {
         String id_str = row->col(0);
         char prefix;
-        String location = stripLocationPrefix(&prefix, row->col(5));
+        String location = stripLocationPrefix(&prefix, row->col(6));
         if (prefix != LOC_DIR_PREFIX)
-            throw _Exception(_("mt_autoscan referred to an object, that was not a directory - id:") + id_str);
+            throw _Exception(_("mt_autoscan referred to an object, that was not a directory - id: ") + id_str + "; location: " + row->col(6) + "; prefix: " + prefix);
         
         scan_level_t level = remapScanlevel(row->col(1));
         scan_mode_t mode = remapScanmode(row->col(2));
