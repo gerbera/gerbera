@@ -87,6 +87,13 @@ function errorCheck(xml, noredirect)
         //alert ("could not fetch XML");
         return false;
     }
+    var rootEl = xmlGetElement(xml, 'root');
+    var uiDisabled = xmlGetAttribute(rootEl, 'ui_disabled');
+    if (uiDisabled)
+    {
+        window.location = "/disabled.html";
+        return false;
+    }
     var redirect = xmlGetElementText(xml, 'redirect');
     if (redirect)
     {

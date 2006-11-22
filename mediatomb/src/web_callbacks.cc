@@ -90,17 +90,10 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
     else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" +
                              CONTENT_UI_HANDLER))
     {  
-        String value = ConfigManager::getInstance()->getOption(_("/server/ui/attribute::enabled"));
-        if (value != "yes")
-        {
-            throw _Exception(_("UI disabled in configuration"));
-        }
-
         RequestHandler::split_url(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
         Ref<Dictionary> dict(new Dictionary());
         dict->decode(parameters);
-
-
+        
         String r_type = dict->get(_(URL_REQUEST_TYPE));
         if (r_type != nil)
         {
