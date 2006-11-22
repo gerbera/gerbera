@@ -44,10 +44,17 @@ Mutex::Mutex(bool recursive) : Object()
 #ifdef LOG_TOMBDEBUG
     this->recursive = recursive;
     lock_level = 0;
-#endif
+    
     int res;
+    pthread_mutexattr_t mutex_attr;
+    res = pthread_mutexattr_init(&mutex_attr);
+    res = pthread_mutexattr_settype(&mutex_attr, (recursive ? PTHREAD_MUTEX_RECURSIVE : PTHREAD_MUTEX_ERRORCHECK));
+    pthread_mutex_init(&mutex_struct, &mutex_attr);
+    pthread_mutexattr_destroy(&mutex_attr);
+#else
     if (recursive)
     {
+        int res;
         pthread_mutexattr_t mutex_attr;
         res = pthread_mutexattr_init(&mutex_attr);
         res = pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_RECURSIVE);
@@ -56,6 +63,7 @@ Mutex::Mutex(bool recursive) : Object()
     }
     else
         pthread_mutex_init(&mutex_struct, NULL);
+#endif
 }
 
 Mutex::~Mutex()
@@ -159,6 +167,8 @@ void Cond::checkwait()
 {
     if (! mutex->isLocked())
         mutex->errorExit(_("tried to do a cond_wait with an unlocked mutex"));
+    if (mutex->lock_level > 1)
+        mutex->errorExit(_("pthread_cond(timed)wait called for a (recursive) mutex, that is locked more than once!"));
     pthread_t this_thread = pthread_self();
     pthread_t mutex_thread = mutex->getLockingThread();
     if (this_thread != mutex_thread)
