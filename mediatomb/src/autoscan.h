@@ -27,7 +27,7 @@
     $ID: autoscan_directory.h 1126 2006-11-03 01:53:53Z jin $
 */
 
-/// \file autoscan_directory.h
+/// \file autoscan.h
 ///\brief Definitions of the Autoscan classes. 
 
 #ifndef __AUTOSCAN_H__
