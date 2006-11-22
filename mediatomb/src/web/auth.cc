@@ -82,7 +82,26 @@ void web::auth::process()
 {
     if (param(_("checkSID")) != nil)
     {
-        check_request();
+        String sid = param(_("sid"));
+        if (accountsEnabled())
+        {
+            root->appendTextChild(_("accounts"), _("1"));
+            if (string_ok(sid))
+                check_request();
+        }
+        else
+        {
+            root->appendTextChild(_("accounts"), _("0"));
+            Ref<SessionManager> sessionManager = SessionManager::getInstance();
+            Ref<Session> session;
+            if (sid == nil || (session = sessionManager->getSession(sid)) == nil)
+            {
+                session = sessionManager->createSession();
+                root->addAttribute(_("sid"), session->getID());
+            }
+            if (! session->isLoggedIn())
+                session->logIn();
+        }
     }
     else if (param(_("logout")) != nil)
     {
@@ -99,12 +118,12 @@ void web::auth::process()
     {
         Ref<SessionManager> sessionManager = SessionManager::getInstance();
         Ref<Session> session = sessionManager->createSession();
+        root->addAttribute(_("sid"), session->getID());
         
         // sending token
         String token = generate_token();
         session->put(_("token"), token);
         root->appendTextChild(_("token"), token);
-        root->addAttribute(_("sid"), session->getID());
     }
     else
     {

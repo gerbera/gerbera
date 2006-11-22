@@ -98,7 +98,17 @@ function checkSID()
 
 function checkSIDcallback(ajaxRequest)
 {
-    errorCheck(ajaxRequest.responseXML, true);
+    var xml = ajaxRequest.responseXML;
+    errorCheck(xml, true);
+    var rootEl = xmlGetElement(xml, "root");
+    var newSID = xmlGetAttribute(rootEl, "sid");
+    if (newSID)
+    {
+        SID = newSID;
+        setCookie("SID", SID);
+    }
+    var accountsStr = xmlGetElementText(rootEl, "accounts");
+    ACCOUNTS = (accountsStr && accountsStr == "1");
 }
 
 function logout()

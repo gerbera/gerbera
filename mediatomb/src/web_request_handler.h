@@ -37,8 +37,7 @@
 #include "request_handler.h"
 #include "dictionary.h"
 #include "session_manager.h"
-//#include "scripting/web_script.h"
-
+#include "config_manager.h"
 
 class SessionException : public zmm::Exception
 {
@@ -93,6 +92,8 @@ protected:
     zmm::Ref<IOHandler> open(zmm::Ref<Dictionary>, IN enum UpnpOpenFileMode mode);
     
     void addUpdateIDs(zmm::Ref<Session> session, zmm::Ref<mxml::Element> root);
+    
+    bool accountsEnabled() { return (ConfigManager::getInstance()->getOption(_("/server/ui/accounts/attribute::enabled")) == "yes"); }
 public:
     /// \brief Constructor, currently empty.
     WebRequestHandler();

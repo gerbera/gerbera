@@ -42,8 +42,10 @@
         <script type="text/javascript" language="JavaScript" src="/js/items.js"></script>
         <script type="text/javascript" language="JavaScript">
             <!--
-            var SID;
-            var TYPE;
+            var SID;      // session id
+            var TYPE;     // database or filesystem
+            var ACCOUNTS; // accounts enabled or disabled
+                          // is set by checkSID();
             var loggedIn = false;
             function init() {
                 Try.these
@@ -62,8 +64,15 @@
                 );
                 if (TYPE!="db" && TYPE!="fs") TYPE="db";
                 
-                if (SID && SID != null && SID != 'null') checkSID();
+                //if (SID && SID != null && SID != 'null')
+                checkSID();
                 var topDocument = frames["topF"].document;
+                var logoutLinkEl = topDocument.getElementById("logout_link");
+                if (ACCOUNTS)
+                    Element.show(logoutLinkEl);
+                else
+                    Element.hide(logoutLinkEl);
+                
                 if (!SID || SID == null)
                 {
                     Element.show(topDocument.getElementById("loginDiv"));
