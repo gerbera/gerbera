@@ -907,6 +907,9 @@ if test "x$MYSQL_OK" = xyes; then
         [
             AC_MSG_RESULT([found])
             AC_DEFINE([HAVE_MYSQL_OPT_RECONNECT], [1], [MYSQL_OPT_RECONNECT parameter available])
+        ],
+        [
+            AC_MSG_RESULT([no])
         ]
     )
 else
