@@ -729,7 +729,7 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
             temp = child->getAttribute(_("hidden-files"));
             if (!string_ok(temp))
             {
-                temp = getOption(_("/server/import/attribute::hidden-files"));
+                temp = getOption(_("/import/attribute::hidden-files"));
             }
 
             if (temp == "yes")

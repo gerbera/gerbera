@@ -893,6 +893,22 @@ if test "x$MYSQL_OK" = xyes; then
     AC_SUBST(MYSQL_LIBS)
     AC_SUBST(MYSQL_CFLAGS)
     AC_CHECK_FUNCS([mysql_stmt_init],[],[])
+    
+    AC_MSG_CHECKING([MYSQL_OPT_RECONNECT])
+    AC_COMPILE_IFELSE(
+        [AC_LANG_PROGRAM(
+            [
+                #include <mysql.h>
+            ],
+            [
+                (int)mysql_options(0, MYSQL_OPT_RECONNECT, 0);
+            ]
+        )],
+        [
+            AC_MSG_RESULT([found])
+            AC_DEFINE([HAVE_MYSQL_OPT_RECONNECT], [1], [MYSQL_OPT_RECONNECT parameter available])
+        ]
+    )
 else
     if test "x$MYSQL_EN" = xyes; then
         AC_MSG_ERROR(unable to configure mysql support)
