@@ -36,6 +36,7 @@ CREATE TABLE "mt_autoscan" (
   "scan_level" varchar(10) NOT NULL,
   "scan_mode" varchar(10) NOT NULL,
   "recursive" tinyint unsigned NOT NULL,
+  "hidden" tinyint unsigned NOT NULL,
   "interval" integer unsigned default NULL,
   CONSTRAINT "mt_autoscan_id" FOREIGN KEY ("id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );

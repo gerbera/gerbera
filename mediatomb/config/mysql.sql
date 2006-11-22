@@ -47,6 +47,7 @@ CREATE TABLE `mt_autoscan` (
   `scan_level` enum('basic','full') NOT NULL,
   `scan_mode` enum('timed') NOT NULL,
   `recursive` tinyint(4) unsigned NOT NULL,
+  `hidden` tinyint(4) unsigned NOT NULL,
   `interval` int(11) unsigned default NULL,
   PRIMARY KEY `id` (`id`),
   CONSTRAINT `mt_autoscan_ibfk_1` FOREIGN KEY (`id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE

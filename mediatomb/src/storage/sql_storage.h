@@ -78,6 +78,8 @@ public:
     
     /* methods to override in subclasses */
     virtual zmm::String quote(zmm::String str) = 0;
+    virtual zmm::String quote(int val) = 0;
+    virtual zmm::String quote(unsigned int val) = 0;
     virtual zmm::Ref<SQLResult> select(zmm::String query) = 0;
     virtual int exec(zmm::String query, bool getLastInsertId = false) = 0;
     
@@ -118,6 +120,8 @@ public:
     virtual void storeInternalSetting(zmm::String key, zmm::String value) = 0;
     
     virtual zmm::Ref<AutoscanList> getAutoscanList(scan_mode_t scanmode);
+    virtual void addAutoscanDirectory(zmm::Ref<AutoscanDirectory> dir);
+    
     
     virtual void shutdown() = 0;
     
@@ -189,6 +193,14 @@ protected:
     zmm::Ref<CdsObject> checkRefID(zmm::Ref<CdsObject> obj);
     int createContainer(int parentID, zmm::String name, zmm::String path, bool isVirtual);
     
+    /* helpers for autoscan stuff */
+    zmm::String mapScanmode(scan_mode_t scanmode);
+    scan_mode_t remapScanmode(zmm::String scanmode);
+    zmm::String mapScanlevel(scan_level_t scanlevel);
+    scan_level_t remapScanlevel(zmm::String scanlevel);
+    
+    zmm::String mapBool(bool val) { return quote((val ? 1 : 0)); }
+    bool remapBool(zmm::String field) { return (string_ok(field) && field == "1"); }
     
     /*
     void rmInit();

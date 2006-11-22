@@ -39,12 +39,13 @@ using namespace zmm;
 
 AutoscanDirectory::AutoscanDirectory(String location, scan_mode_t mode,
         scan_level_t level, bool recursive, bool from_config,
-        int id, unsigned int interval)
+        int id, unsigned int interval, bool hidden)
 {
     this->location = location;
     this->mode = mode;
     this->level = level;
     this->recursive = recursive;
+    this->hidden = hidden;
     this->interval = interval;
     this->from_config = from_config;
     scanID = id;

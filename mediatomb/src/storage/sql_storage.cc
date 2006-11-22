@@ -1183,22 +1183,16 @@ overwritten due to different SQL syntax for MySQL and SQLite3
 
 Ref<AutoscanList> SQLStorage::getAutoscanList(scan_mode_t scanmode)
 {
-    String scanmode_str = nil;
-    switch (scanmode)
-    {
-        case TimedScanMode: scanmode_str = _("timed");
-    }
-    if (scanmode_str == nil)
-        throw Exception(_("illegal scanmode given to getAutoscanList()"));
+    
     
     #define FLD(field) << TQ('a') << '.' << field <<
     Ref<StringBuffer> q(new StringBuffer());
-    *q << "SELECT " FLD("id") "," FLD("scan_level") "," FLD("scan_mode") "," FLD("recursive") "," FLD("interval") ","
+    *q << "SELECT " FLD("id") "," FLD("scan_level") "," FLD("scan_mode") "," FLD("recursive") "," FLD("hidden") "," FLD("interval") ","
        << TQ('t') << "." << TQ("location")
        << " FROM " << TQ(AUTOSCAN_TABLE) << " " << TQ('a')
        << " JOIN " << TQ(CDS_OBJECT_TABLE) << " " << TQ('t')
        << " ON " FLD("id") " = " << TQ('t') << "." << TQ("id")
-       << " WHERE " FLD("scan_mode") " = " << quote(scanmode_str);
+       << " WHERE " FLD("scan_mode") " = " << quote(mapScanmode(scanmode));
     Ref<SQLResult> res = select(q->toString());
     if (res == nil)
         return nil;
@@ -1212,35 +1206,83 @@ Ref<AutoscanList> SQLStorage::getAutoscanList(scan_mode_t scanmode)
         if (prefix != LOC_DIR_PREFIX)
             throw _Exception(_("mt_autoscan referred to an object, that was not a directory - id:") + id_str);
         
-        scan_level_t level;
-        String level_str = row->col(1);
-        if (level_str == "basic")
-            level = BasicScanLevel;
-        else if (level_str == "full")
-            level = FullScanLevel;
-        else
-            throw _Exception(_("illegal scanlevel (") + level_str + ") for id " + id_str);
-        
-        scan_mode_t mode;
-        String mode_str = row->col(2);
-        if (mode_str == "timed")
-            mode = TimedScanMode;
-        else
-            throw _Exception(_("illegal scanmode (") + mode_str + ") for id " + id_str);
-        
-        bool recursive = false;
-        String recursive_str = row->col(3);
-        if (recursive_str == "1")
-            recursive = true;
-        
+        scan_level_t level = remapScanlevel(row->col(1));
+        scan_mode_t mode = remapScanmode(row->col(2));
+        bool recursive = remapBool(row->col(3));
+        bool hidden = remapBool(row->col(4));
         int interval = 0;
         if (mode == TimedScanMode)
-            interval = row->col(4).toInt();
+            interval = row->col(5).toInt();
         
-        
-        Ref<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, false, -1, interval));
+        Ref<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, false, -1, interval, hidden));
         list->add(dir);
     }
     
     return list;
 }
+
+void SQLStorage::addAutoscanDirectory(Ref<AutoscanDirectory> dir)
+{
+    int objectID = isFolderInDatabase(dir->getLocation());
+    if (objectID < 0)
+        throw _Exception(_("tried to add autoscan directory with illegal location: ") + dir->getLocation());
+    Ref<StringBuffer> q(new StringBuffer());
+    *q << "INSERT INTO " << TQ(AUTOSCAN_TABLE)
+        << " (" << TQ("id") << ", "
+        << TQ("scan_level") << ", "
+        << TQ("scan_mode") << ", "
+        << TQ("recursive") << ", "
+        << TQ("interval") << ") VALUES ("
+        << quote(objectID) << ", "
+        << quote(mapScanlevel(dir->getScanLevel())) << ", "
+        << quote(mapScanmode(dir->getScanMode())) << ", "
+        << mapBool(dir->getRecursive()) << ", "
+        << mapBool(dir->getHidden()) << ", "
+        << quote(dir->getInterval())
+        << ")";
+    exec(q->toString());
+}
+
+String SQLStorage::mapScanmode(scan_mode_t scanmode)
+{
+    String scanmode_str = nil;
+    switch (scanmode)
+    {
+        case TimedScanMode: scanmode_str = _("timed"); break;
+    }
+    if (scanmode_str == nil)
+        throw Exception(_("illegal scanmode given to mapScanmode(): ") + scanmode);
+    return scanmode_str;
+}
+
+scan_mode_t SQLStorage::remapScanmode(String scanmode)
+{
+    if (scanmode == "timed")
+        return TimedScanMode;
+    else
+        throw _Exception(_("illegal scanmode (") + scanmode + ") given to remapScanmode()");
+}
+
+String SQLStorage::mapScanlevel(scan_level_t scanlevel)
+{
+    String scanlevel_str = nil;
+    switch (scanlevel)
+    {
+        case BasicScanLevel: scanlevel_str = _("basic"); break;
+        case FullScanLevel: scanlevel_str = _("full"); break;
+    }
+    if (scanlevel_str == nil)
+        throw Exception(_("illegal scanlevel given to mapScanlevel(): ") + scanlevel);
+    return scanlevel_str;
+}
+
+scan_level_t SQLStorage::remapScanlevel(String scanlevel)
+{
+    if (scanlevel == "basic")
+        return BasicScanLevel;
+    else if (scanlevel == "full")
+        return FullScanLevel;
+    else
+        throw _Exception(_("illegal scanlevel (") + scanlevel + ") given to remapScanlevel()");
+}
+

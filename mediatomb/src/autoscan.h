@@ -104,12 +104,13 @@ public:
     /// \param mode scan mode
     /// \param level scan level
     /// \param recursive process directories recursively
-    /// \param interval rescan interval in seconds (only for timed scan mode),
+    /// \param interval rescan interval in seconds (only for timed scan mode)
+    /// \param hidden include hidden files
     /// zero means none.
     AutoscanDirectory(zmm::String location, scan_mode_t mode, 
                       scan_level_t level, bool recursive,
                       bool from_config,
-                      int id = -1, unsigned int interval=0);
+                      int id = -1, unsigned int interval = 0, bool hidden = false);
 
     zmm::String getLocation() { return location; }
 
@@ -122,6 +123,8 @@ public:
     void setScanLevel(scan_level_t level) { this->level = level; }
 
     bool getRecursive() { return recursive; }
+    
+    bool getHidden() { return hidden; }
 
 //    void setRecursive(bool recursive) { this->recursive = recursive; }
     
@@ -179,6 +182,7 @@ protected:
     scan_mode_t mode;
     scan_level_t level;
     bool recursive;
+    bool hidden;
     bool from_config;
     unsigned int interval;
     int taskCount;
