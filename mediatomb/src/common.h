@@ -158,7 +158,7 @@
 #define DEFAULT_SYSTEM_HOME             "mediatomb"
 #define DEFAULT_ETC                     "etc"
 #define DEFAULT_CONFIG_NAME             "config.xml"
-#define DEFAULT_UI_EN_VALUE             "no"
+#define DEFAULT_UI_EN_VALUE             "yes"
 #define DEFAULT_ACCOUNTS_EN_VALUE       "no"
 #define DEFAULT_ALIVE_INTERVAL          180
 #define DEFAULT_BOOKMARK_FILE           "mediatomb.html"
