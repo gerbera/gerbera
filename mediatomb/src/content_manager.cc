@@ -1248,9 +1248,24 @@ void ContentManager::removeAutoscanDirectory(int scanID, scan_mode_t scanMode)
     if (scanMode == TimedScanMode)
     {
         autoscan_timed->remove(scanID);
+        
+        // if 3rd parameter is true: won't fail if scanID doesn't exist
+        Timer::getInstance()->removeTimerSubscriber(Ref<TimerSubscriber>(this), scanID, true);
     }
-}
     
+}
+
+void ContentManager::removeAutoscanDirectory(String location)
+{
+    int scanID;
+    if ((scanID = autoscan_timed->remove(location)) >= 0)
+    {
+        // if 3rd parameter is true: won't fail if scanID doesn't exist
+        Timer::getInstance()->removeTimerSubscriber(Ref<TimerSubscriber>(this), scanID, true);
+    }
+    // else <other removes... (w/o removeTimerSubscriber!)>
+}
+
 
 CMTask::CMTask() : Object()
 {

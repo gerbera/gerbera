@@ -194,8 +194,10 @@ public:
     /// \brief Gets an AutocsanDirectrory from the watch list.
     zmm::Ref<AutoscanDirectory> getAutoscanDirectory(int scanID, scan_mode_t scanMode);
 
-    /// \brief Removes an AutocsanDirectrory from the watch list.
+    /// \brief Removes an AutoscanDirectrory (found by scanID) from the watch list.
     void removeAutoscanDirectory(int scanID, scan_mode_t scanMode);
+    /// \brief Removes an AutoscanDirectrory (found by location) from the watch list.
+    void removeAutoscanDirectory(zmm::String location);
  
     /// \brief Add an autoscan directory to the watch list.
     int addAutoscanDirectory(zmm::Ref<AutoscanDirectory> dir);

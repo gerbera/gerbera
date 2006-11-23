@@ -147,10 +147,10 @@ void AutoscanList::remove(int id)
     }
 }
 
-void AutoscanList::remove(String location)
+int AutoscanList::remove(String location)
 {
     AUTOLOCK(mutex);
-
+    
     for (int i = 0; i < list->size(); i++)
     {
         if (location == list->get(i)->getLocation())
@@ -163,11 +163,13 @@ void AutoscanList::remove(String location)
             {
                 list->set(nil, i);
             }
-            return;
+            return i;
         }
     }
+    return -1;
 }
 
+/*
 void AutoscanList::subscribeAll(Ref<TimerSubscriber> obj)
 {
     AUTOLOCK(mutex);
@@ -181,6 +183,7 @@ void AutoscanList::subscribeAll(Ref<TimerSubscriber> obj)
         timer->addTimerSubscriber(obj, dir->getInterval(), dir->getScanID(), true);
     }
 }
+*/
 
 void AutoscanList::notifyAll(Ref<TimerSubscriber> obj)
 {
@@ -196,6 +199,7 @@ void AutoscanList::notifyAll(Ref<TimerSubscriber> obj)
     }
 }
 
+/*
 void AutoscanList::subscribeDir(zmm::Ref<TimerSubscriber> obj, int id, bool once)
 {
     AUTOLOCK(mutex);
@@ -207,5 +211,5 @@ void AutoscanList::subscribeDir(zmm::Ref<TimerSubscriber> obj, int id, bool once
     Ref<AutoscanDirectory> dir = list->get(id);
     timer->addTimerSubscriber(obj, dir->getInterval(), dir->getScanID(), once);
 }
-
+*/
 

@@ -71,22 +71,29 @@ public:
     zmm::Ref<AutoscanDirectory> get(int id);
 
     void remove(int id);
-    void remove(zmm::String location);
+    
+    /// \brief removes the AutoscanDirectory with the given location
+    /// \param location the location to remove
+    /// \return the scanID, that was removed; if nothing removed: a negative value
+    int remove(zmm::String location);
 
+    /*
     /// \brief Add timer for each directory in the list.
     /// \param obj instance of the class that will receive notifications.
     void subscribeAll(zmm::Ref<TimerSubscriber> obj);
+    */
 
     /// \brief Send notification for each directory that is stored in the list.
     /// 
     /// \param obj instance of the class that will receive the notifications.
     void notifyAll(zmm::Ref<TimerSubscriber> obj);
         
-    
+    /*
     /// \brief Add timer for given directory.
     /// \param obj instance of the class that will receive notifications.
     /// \param id dir id.
     void subscribeDir(zmm::Ref<TimerSubscriber> obj, int id, bool once = true);
+    */
 
 protected:
     zmm::Ref<Mutex> mutex;

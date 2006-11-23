@@ -92,6 +92,7 @@ function updateItems(ajaxRequest)
     }
     var ofId = items.getAttribute("ofId");
     var isVirtual = (items.getAttribute("virtual") == '1');
+    var isAutoscan = (items.getAttribute("autoscan") == '1');
     var loadItemId = (useFiles ? 'f' : 'd') + ofId;
     var totalMatches = parseInt(items.getAttribute("totalMatches"));
     var totalPages = Math.ceil(totalMatches / viewItems);
@@ -207,11 +208,12 @@ function updateItems(ajaxRequest)
             
             if (! isVirtual)
             {
+                var action = (isAutoscan ? "remove" : "add");
                 topDiv.appendChild(rightDocument.createTextNode(", "));
                 link = rightDocument.createElement("a");
                 topDiv.appendChild(link);
-                link.setAttribute("href", "javascript:parent.addAutoscanDirectory('"+ofId+"');");
-                link.appendChild(rightDocument.createTextNode("add as autoscan dir"));
+                link.setAttribute("href", "javascript:parent.changeAutoscanDirectory('"+action+"','"+ofId+"');");
+                link.appendChild(rightDocument.createTextNode(action+" as autoscan dir"));
             }
         }
         

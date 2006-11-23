@@ -91,7 +91,7 @@ void Timer::addTimerSubscriber(Ref<TimerSubscriber> timerSubscriber, unsigned in
     signal();
 }
 
-void Timer::removeTimerSubscriber(Ref<TimerSubscriber> timerSubscriber, int id)
+void Timer::removeTimerSubscriber(Ref<TimerSubscriber> timerSubscriber, int id, bool dontFail)
 {
     log_debug("removing subscriber...\n");
     AUTOLOCK(mutex);
@@ -106,7 +106,7 @@ void Timer::removeTimerSubscriber(Ref<TimerSubscriber> timerSubscriber, int id)
             break;
         }
     }
-    if (! removed)
+    if (! removed && ! dontFail)
     {
         throw _Exception(_("tried to remove nonexistent timer"));
     }

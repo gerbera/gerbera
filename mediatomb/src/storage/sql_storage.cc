@@ -1246,6 +1246,23 @@ void SQLStorage::addAutoscanDirectory(Ref<AutoscanDirectory> dir)
     exec(q->toString());
 }
 
+void SQLStorage::removeAutoscanDirectory(int objectId)
+{
+    Ref<StringBuffer> q(new StringBuffer());
+    *q << "DELETE FROM " << TQ(AUTOSCAN_TABLE)
+        << " WHERE " << TQ("id") << " = " << quote(objectId);
+    exec(q->toString());
+}
+
+bool SQLStorage::isAutoscanDirectory(int objectId)
+{
+    Ref<StringBuffer> q(new StringBuffer());
+    *q << "SELECT " << TQ("id") << " FROM " << TQ(AUTOSCAN_TABLE)
+        << " WHERE " << TQ("id") << " = " << quote(objectId);
+    Ref<SQLResult> res = select(q->toString());
+    return (res != nil && res->nextRow() != nil);
+}
+
 String SQLStorage::mapScanmode(scan_mode_t scanmode)
 {
     String scanmode_str = nil;

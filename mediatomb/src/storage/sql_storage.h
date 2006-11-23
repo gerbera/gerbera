@@ -121,6 +121,8 @@ public:
     
     virtual zmm::Ref<AutoscanList> getAutoscanList(scan_mode_t scanmode);
     virtual void addAutoscanDirectory(zmm::Ref<AutoscanDirectory> dir);
+    virtual void removeAutoscanDirectory(int objectId);
+    virtual bool isAutoscanDirectory(int objectId);
     
     
     virtual void shutdown() = 0;
