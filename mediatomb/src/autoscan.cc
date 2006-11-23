@@ -78,7 +78,7 @@ int AutoscanList::_add(Ref<AutoscanDirectory> dir)
 
     String loc = dir->getLocation();
     int nil_index = -1;
-
+    
     for (int i = 0; i < list->size(); i++)
     {
         if (list->get(i) == nil)
@@ -86,13 +86,13 @@ int AutoscanList::_add(Ref<AutoscanDirectory> dir)
             nil_index = i;
             continue;
         }
-
+        
         if (loc == list->get(i)->getLocation())
         {
             throw _Exception(_("Attempted to add same autoscan path twice"));
         }
     }
-
+    
     if (nil_index != -1)
     {
         dir->setScanID(nil_index);
@@ -153,7 +153,7 @@ int AutoscanList::remove(String location)
     
     for (int i = 0; i < list->size(); i++)
     {
-        if (location == list->get(i)->getLocation())
+        if (list->get(i) != nil && location == list->get(i)->getLocation())
         {
             if (i == list->size()-1)
             {
