@@ -33,14 +33,14 @@
 * Purpose: This file contains functions for uri, url parsing utility. 
 ************************************************************************/
 
+#include "config.h"
+#include "uri.h"
+
 #ifdef __FreeBSD__
     #ifdef HAVE_LWRES_NETDB_H
         #include <lwres/netdb.h>
     #endif
 #endif
-
-#include "config.h"
-#include "uri.h"
 
 #ifdef WIN32
  #include "inet_pton.h"
