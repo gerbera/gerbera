@@ -927,6 +927,8 @@ struct UpnpVirtualDirCallbacks
    *  {\tt NULL} to signify an error. */
   UpnpWebFileHandle (*open)(
     IN const char *filename,       /** The name of the file to open. */ 
+    OUT struct File_Info *info,    /** Pointer to a structure to store the 
+                                       information on the file. */
     IN enum UpnpOpenFileMode Mode  /** The mode in which to open the file. 
                                        Valid values are {\tt UPNP_READ} or 
                                        {\tt UPNP_WRITE}. */

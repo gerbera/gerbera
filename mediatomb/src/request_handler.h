@@ -41,7 +41,8 @@ class RequestHandler : public zmm::Object
 public:
     RequestHandler();
     virtual void get_info(IN const char *filename, OUT struct File_Info *info);
-    virtual zmm::Ref<IOHandler> open(IN const char *filename, IN enum UpnpOpenFileMode mode);
+    virtual zmm::Ref<IOHandler> open(IN const char *filename, OUT struct File_Info *info, 
+            IN enum UpnpOpenFileMode mode);
 
     /// \brief Splits the url into a path and parameters string.
     /// \param url URL that has to be processed

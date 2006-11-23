@@ -165,6 +165,7 @@ Ref<IOHandler> WebRequestHandler::open(Ref<Dictionary> params, IN enum UpnpOpenF
 }
 
 Ref<IOHandler> WebRequestHandler::open(IN const char *filename,
+                                       OUT struct File_Info *info,
                                        IN enum UpnpOpenFileMode mode)
 {
     log_debug("request: %s\n", filename);
@@ -176,6 +177,7 @@ Ref<IOHandler> WebRequestHandler::open(IN const char *filename,
 
     Ref<Dictionary> params = Ref<Dictionary>(new Dictionary());
     params->decode(parameters);
+    get_info(NULL, info);
     return open(params, mode);
 }
 

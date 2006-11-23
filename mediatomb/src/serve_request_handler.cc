@@ -140,7 +140,9 @@ void ServeRequestHandler::get_info(IN const char *filename, OUT struct File_Info
     }
 }
 
-Ref<IOHandler> ServeRequestHandler::open(IN const char *filename, IN enum UpnpOpenFileMode mode)
+#if 0
+Ref<IOHandler> ServeRequestHandler::open(IN const char *filename, OUT struct File_Info *info, 
+                                         IN enum UpnpOpenFileMode mode)
 {
     int len;
 
@@ -164,6 +166,97 @@ Ref<IOHandler> ServeRequestHandler::open(IN const char *filename, IN enum UpnpOp
     String path = ConfigManager::getInstance()->getOption(_("/server/servedir")) + url_path.substring(len, url_path.length()) + _("/") + parameters;
 
 
+    Ref<IOHandler> io_handler(new FileIOHandler(path));
+    io_handler->open(mode);
+
+    return io_handler;
+}
+#endif
+
+
+Ref<IOHandler> ServeRequestHandler::open(IN const char *filename, OUT struct File_Info *info,
+                                         IN enum UpnpOpenFileMode mode)
+{
+    struct stat statbuf;
+    int ret = 0;
+    int len = 0;
+
+    // Currently we explicitly do not support UPNP_WRITE
+    // due to security reasons.
+    if (mode != UPNP_READ)
+        throw _Exception(_("UPNP_WRITE unsupported"));
+len = (_("/") + SERVER_VIRTUAL_DIR + _("/") + CONTENT_SERVE_HANDLER).length();
+    String url_path, parameters;
+    split_url(filename, URL_PARAM_SEPARATOR, url_path, parameters);
+
+    log_debug("url_path: %s, parameters: %s\n", url_path.c_str(), parameters.c_str());
+
+    len = (_("/") + SERVER_VIRTUAL_DIR + _("/") + CONTENT_SERVE_HANDLER).length();
+
+    if (len > url_path.length())
+    {
+        throw _Exception(_("There is something wrong with the link ") +
+                        url_path);
+    }
+
+    String path = ConfigManager::getInstance()->getOption(_("/server/servedir")) + url_path.substring(len, url_path.length()) + _("/") + parameters;
+
+    log_debug("Constructed new path: %s\n", path.c_str());
+    ret = stat(path.c_str(), &statbuf);
+    if (ret != 0)
+    {
+        throw _Exception(_("Failed to stat ") + path);
+    }
+
+    if (S_ISREG(statbuf.st_mode)) // we have a regular file
+    {
+        String mimetype = _(MIMETYPE_DEFAULT);
+#ifdef HAVE_MAGIC
+        magic_set *ms = NULL;
+        ms = magic_open(MAGIC_MIME);
+        if (ms != NULL)
+        {
+            if (magic_load(ms, NULL) == -1)
+            {
+                log_warning("magic_load: %s\n", magic_error(ms));
+                magic_close(ms);
+                ms = NULL;
+            }
+            else
+            {
+                /// \TODO we could request the mimetype rex from content manager
+                Ref<RExp> reMimetype;
+                reMimetype = Ref<RExp>(new RExp());
+                reMimetype->compile(_(MIMETYPE_REGEXP));
+
+                String mime = get_mime_type(ms, reMimetype, path);
+                if (string_ok(mime))
+                    mimetype = mime;
+
+                magic_close(ms);
+            }
+        }
+#endif // HAVE_MAGIC
+
+        info->file_length = statbuf.st_size;
+        info->last_modified = statbuf.st_mtime;
+        info->is_directory = S_ISDIR(statbuf.st_mode);
+
+        if (access(path.c_str(), R_OK) == 0)
+        {
+            info->is_readable = 1;
+        }
+        else
+        {
+            info->is_readable = 0;
+        }
+
+        info->content_type = ixmlCloneDOMString(mimetype.c_str());
+    }
+    else
+    {
+         throw _Exception(_("Not a regular file: ") + path);
+    }
     Ref<IOHandler> io_handler(new FileIOHandler(path));
     io_handler->open(mode);
 

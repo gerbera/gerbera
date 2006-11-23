@@ -1196,7 +1196,8 @@ process_request( IN http_message_t * req,
                  OUT membuffer * headers,
                  OUT membuffer * filename,
                  OUT struct xml_alias_t *alias,
-                 OUT struct SendInstruction *RespInstr )
+                 OUT struct SendInstruction *RespInstr,
+                 OUT UpnpWebFileHandle* Fp)
 {
     int code;
     int err_code;
@@ -1226,6 +1227,7 @@ process_request( IN http_message_t * req,
     request_doc = NULL;
     finfo.content_type = NULL;
     finfo.http_header = NULL;
+    *Fp = NULL;
     //membuffer_init( &content_type );
     alias_grabbed = FALSE;
     err_code = HTTP_INTERNAL_SERVER_ERROR;  // default error
@@ -1295,13 +1297,29 @@ process_request( IN http_message_t * req,
         if( req->method != HTTPMETHOD_POST ) {
             // get file info
             pVirtualDirCallback = &virtualDirCallback;
-            if( pVirtualDirCallback->get_info( filename->buf, &finfo ) !=
-                0 ) {
-                err_code = HTTP_NOT_FOUND;
-                goto error_handler;
+            if( req->method == HTTPMETHOD_GET ) 
+            {
+                *Fp = pVirtualDirCallback->open( filename->buf, &finfo, UPNP_READ );
+                if( *Fp == NULL )
+                {
+                    err_code = HTTP_NOT_FOUND;
+                    goto error_handler;
+                }
+            }
+            else
+            {
+                if( pVirtualDirCallback->get_info( filename->buf, &finfo ) !=
+                        0 ) {
+                    err_code = HTTP_NOT_FOUND;
+                    goto error_handler;
+                }
             }
             // try index.html if req is a dir
             if( finfo.is_directory ) {
+                if (*Fp != NULL)
+                {
+                    pVirtualDirCallback->close(*Fp);
+                }
                 if( filename->buf[filename->length - 1] == '/' ) {
                     temp_str = "index.html";
                 } else {
@@ -1311,15 +1329,19 @@ process_request( IN http_message_t * req,
                     goto error_handler;
                 }
                 // get info
-                if( ( pVirtualDirCallback->
-                      get_info( filename->buf, &finfo ) != UPNP_E_SUCCESS )
-                    || finfo.is_directory ) {
+                *Fp = pVirtualDirCallback->open( filename->buf, &finfo, UPNP_READ );
+                if( (*Fp == NULL) || finfo.is_directory ) {
                     err_code = HTTP_NOT_FOUND;
                     goto error_handler;
                 }
             }
             // not readable
             if( !finfo.is_readable ) {
+                if (*Fp != NULL)
+                {
+                    pVirtualDirCallback->close(*Fp);
+                    *Fp = NULL;
+                }
                 err_code = HTTP_FORBIDDEN;
                 goto error_handler;
             }
@@ -1549,6 +1571,7 @@ http_RecvPostMessage( http_parser_t * parser,
     int Timeout = 0;
     long Num_Write = 0;
     FILE *Fp;
+    struct File_Info *finfo;
     parse_status_t status = PARSE_OK;
     xboolean ok_on_close = FALSE;
     unsigned int entity_offset = 0;
@@ -1557,7 +1580,7 @@ http_RecvPostMessage( http_parser_t * parser,
 
     if( Instr && Instr->IsVirtualFile ) {
 
-        Fp = virtualDirCallback.open( filename, UPNP_WRITE );
+        Fp = virtualDirCallback.open( filename, finfo, UPNP_WRITE );
         if( Fp == NULL ) {
             return HTTP_INTERNAL_SERVER_ERROR;
         }
@@ -1713,6 +1736,7 @@ web_server_callback( IN http_parser_t * parser,
     struct xml_alias_t xmldoc;
     struct SendInstruction RespInstr;
 
+    UpnpWebFileHandle Fp = NULL;
     //Initialize instruction header.
     RespInstr.IsVirtualFile = 0;
     RespInstr.IsChunkActive = 0;
@@ -1726,7 +1750,7 @@ web_server_callback( IN http_parser_t * parser,
     //the type of request.
     ret =
         process_request( req, &rtype, &headers, &filename, &xmldoc,
-                         &RespInstr );
+                         &RespInstr, &Fp);
     if( ret != UPNP_E_SUCCESS ) {
         // send error code
         http_SendStatusResponse( info, ret, req->major_version,
@@ -1756,7 +1780,7 @@ web_server_callback( IN http_parser_t * parser,
                  */
                 http_SendMessage( info, &timeout, "Ibf", &RespInstr,
                                   headers.buf, headers.length,
-                                  filename.buf );
+                                  filename.buf, Fp );
                 break;
 
             case RESP_HEADERS: // headers only

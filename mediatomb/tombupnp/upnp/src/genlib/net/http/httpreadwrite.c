@@ -304,7 +304,8 @@ http_SendMessage( IN SOCKINFO * info,
     char *buf = NULL;
     size_t buf_length;
     char *filename = NULL;
-    FILE *Fp;
+    UpnpWebFileHandle *Fh = NULL;
+    FILE *Fp = NULL;
     off_t num_read,
       num_written,
       amount_to_be_read = 0;
@@ -347,21 +348,24 @@ http_SendMessage( IN SOCKINFO * info,
         if( c == 'f' ) {        // file name
 
             filename = ( char * )va_arg( argp, char * );
+            Fh = (  UpnpWebFileHandle *)va_arg( argp, UpnpWebFileHandle *);
 
-            if( Instr && Instr->IsVirtualFile )
-                Fp = virtualDirCallback.open( filename, UPNP_READ );
-            else
+            if( !(Instr && Instr->IsVirtualFile) )
+//            if( Instr && Instr->IsVirtualFile )
+//              Fh = (  UpnpWebFileHandle *)va_arg( argp, UpnpWebFileHandle *);
+                //Fp = virtualDirCallback.open( filename, UPNP_READ );
+//            else
                 Fp = fopen( filename, "rb" );
 
-            if( Fp == NULL ) {
+            if( (Fp == NULL) && (Fh == NULL) ){
                 free( ChunkBuf );
                 return UPNP_E_FILE_READ_ERROR;
             }
 
-            assert( Fp );
+//            assert( Fp );
 
             if( Instr && Instr->IsRangeActive && Instr->IsVirtualFile ) {
-                if( virtualDirCallback.seek( Fp, Instr->RangeOffset,
+                if( virtualDirCallback.seek( Fh, Instr->RangeOffset,
                                              SEEK_CUR ) != 0 ) {
                     free( ChunkBuf );
                     return UPNP_E_FILE_READ_ERROR;
@@ -377,7 +381,7 @@ http_SendMessage( IN SOCKINFO * info,
                 if( Instr ) {
                     if( amount_to_be_read >= Data_Buf_Size ) {
                         if( Instr->IsVirtualFile )
-                            num_read = virtualDirCallback.read( Fp,
+                            num_read = virtualDirCallback.read( Fh,
                                                                 file_buf,
                                                                 Data_Buf_Size );
                         else
@@ -385,7 +389,7 @@ http_SendMessage( IN SOCKINFO * info,
                                               Fp );
                     } else {
                         if( Instr->IsVirtualFile )
-                            num_read = virtualDirCallback.read( Fp,
+                            num_read = virtualDirCallback.read( Fh,
                                                                 file_buf,
                                                                 amount_to_be_read );
                         else
@@ -464,7 +468,7 @@ http_SendMessage( IN SOCKINFO * info,
           Cleanup_File:
             va_end( argp );
             if( Instr && Instr->IsVirtualFile )
-                virtualDirCallback.close( Fp );
+                virtualDirCallback.close( Fh );
             else
                 fclose( Fp );
             free( ChunkBuf );

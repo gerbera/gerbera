@@ -151,7 +151,9 @@ static int web_get_info(IN const char *filename, OUT struct File_Info *info)
 /// \brief Opens a file for the web server.
 /// \param filename Name of the file to open (or actually the full URL)
 /// \param mode in which the file will be opened (we only support UPNP_READ)
-/// 
+/// \param File_Info Pointer to the struction that stores information about
+/// the file.
+///
 /// This function is called by the web server when it needs to open a file.
 /// It first calls create_request_handler() which tries to identify the
 /// request and returns us the appropriate IOHandler.
@@ -160,13 +162,13 @@ static int web_get_info(IN const char *filename, OUT struct File_Info *info)
 ///
 /// \return UpnpWebFileHandle A valid file handle.
 /// \return NULL Error.
-static UpnpWebFileHandle web_open(IN const char *filename,
+static UpnpWebFileHandle web_open(IN const char *filename, OUT struct File_Info *info,
                                   IN enum UpnpOpenFileMode mode)
 {
     try
     {
         Ref<RequestHandler> reqHandler = create_request_handler(filename);
-        Ref<IOHandler> ioHandler = reqHandler->open(filename, mode);
+        Ref<IOHandler> ioHandler = reqHandler->open(filename, info, mode);
         ioHandler->retain();
         return (UpnpWebFileHandle) ioHandler.getPtr();
     }

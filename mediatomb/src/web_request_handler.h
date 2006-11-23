@@ -111,7 +111,7 @@ public:
     /// \param filename The requested URL
     /// \param mode either UPNP_READ or UPNP_WRITE
     /// \return the appropriate IOHandler for the request.
-    virtual zmm::Ref<IOHandler> open(IN const char *filename, IN enum UpnpOpenFileMode mode);
+    virtual zmm::Ref<IOHandler> open(IN const char *filename, OUT struct File_Info *info, IN enum UpnpOpenFileMode mode);
     
     /// \brief This method must be overriden by the subclasses that actually process the given request.
     virtual void process() = 0;

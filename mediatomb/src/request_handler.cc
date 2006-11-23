@@ -62,7 +62,8 @@ void RequestHandler::get_info(IN const char *filename, OUT struct File_Info *inf
 {
 
 }
-Ref<IOHandler> RequestHandler::open(IN const char *filename, IN enum UpnpOpenFileMode mode)
+Ref<IOHandler> RequestHandler::open(IN const char *filename, OUT struct File_Info *info,
+        IN enum UpnpOpenFileMode mode)
 {
     return nil;
 }
