@@ -23,6 +23,7 @@ _DIST_FILES_IMAGES = \
 ./icons/nanotree/images/plus_nolines.gif
 
 _DIST_FILES_JS = \
+./js/autoscan.js \
 ./js/md5.js \
 ./js/prototype.js \
 ./js/auth.js \

@@ -1234,6 +1234,7 @@ void SQLStorage::addAutoscanDirectory(Ref<AutoscanDirectory> dir)
         << TQ("scan_level") << ", "
         << TQ("scan_mode") << ", "
         << TQ("recursive") << ", "
+        << TQ("hidden") << ", "
         << TQ("interval") << ") VALUES ("
         << quote(objectID) << ", "
         << quote(mapScanlevel(dir->getScanLevel())) << ", "

@@ -49,6 +49,7 @@ WebRequestHandler *create_web_request_handler(String page)
     if (page == "items") return new web::items();
     if (page == "edit_load") return new web::edit_load();
     if (page == "edit_save") return new web::edit_save();
+    if (page == "autoscan") return new web::autoscan();
     
     throw _Exception(_("Unknown page: ") + page);
 }

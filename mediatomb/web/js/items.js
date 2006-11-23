@@ -91,7 +91,7 @@ function updateItems(ajaxRequest)
         childrenTag = "file";
     }
     var ofId = items.getAttribute("ofId");
-    
+    var isVirtual = (items.getAttribute("virtual") == '1');
     var loadItemId = (useFiles ? 'f' : 'd') + ofId;
     var totalMatches = parseInt(items.getAttribute("totalMatches"));
     var totalPages = Math.ceil(totalMatches / viewItems);
@@ -204,6 +204,15 @@ function updateItems(ajaxRequest)
             topDiv.appendChild(link);
             link.setAttribute("href", "javascript:parent.removeItem('"+ofId+"', false);");
             link.appendChild(rightDocument.createTextNode("remove"));
+            
+            if (! isVirtual)
+            {
+                topDiv.appendChild(rightDocument.createTextNode(", "));
+                link = rightDocument.createElement("a");
+                topDiv.appendChild(link);
+                link.setAttribute("href", "javascript:parent.addAutoscanDirectory('"+ofId+"');");
+                link.appendChild(rightDocument.createTextNode("add as autoscan dir"));
+            }
         }
         
         itemsEl.appendChild(topDiv);
@@ -499,4 +508,3 @@ function removeItem(itemId, all)
             onComplete: addEditRemoveSubmitted
         });
 }
-

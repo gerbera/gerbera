@@ -126,6 +126,14 @@ protected:
     zmm::Ref<CdsObject> addActiveItem(int parentID);
 };
 
+/// \brief autoscan add and remove
+class autoscan : public WebRequestHandler
+{
+public:
+    autoscan();
+    virtual void process();
+};
+
 } // namespace
 
 /// \brief Chooses and creates the appropriate handler for processing the request.

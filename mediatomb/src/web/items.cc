@@ -59,6 +59,7 @@ void web::items::process()
         throw _Exception(_("illegal count parameter"));
     
     Ref<Storage> storage = Storage::getInstance();
+    Ref<CdsObject> obj = storage->loadObject(parentID);
     Ref<BrowseParam> param(new BrowseParam(parentID, BROWSE_DIRECT_CHILDREN | BROWSE_ITEMS));
     param->setRange(start, count);
     
@@ -66,6 +67,7 @@ void web::items::process()
     
     Ref<Element> items (new Element(_("items")));
     items->addAttribute(_("ofId"), String::from(parentID));
+    items->addAttribute(_("virtual"), (obj->isVirtual() ? _("1") : _("0")));
     items->addAttribute(_("start"), String::from(start));
     //items->addAttribute(_("returned"), String::from(arr->size()));
     items->addAttribute(_("totalMatches"), String::from(param->getTotalMatches()));
