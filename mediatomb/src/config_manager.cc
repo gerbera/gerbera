@@ -127,6 +127,7 @@ String ConfigManager::createDefaultConfig(String userhome)
     config->appendChild(server);
 
     Ref<Element> import(new Element(_("import")));
+    import->addAttribute(_("hidden-files"), _(DEFAULT_HIDDEN_FILES_VALUE));
     import->appendTextChild(_("script"), String(_(PACKAGE_DATADIR)) +
                                                 DIR_SEPARATOR + 
                                                 _(DEFAULT_JS_DIR) +
