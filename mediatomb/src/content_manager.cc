@@ -387,8 +387,6 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
 
     time_t last_modified_current_max = adir->getPreviousLMT(); 
        
-    log_debug("Starting with last modified time: %lld\n", last_modified_current_max);
-
     log_debug("Rescanning location: %s\n", location.c_str());
 
     if (!string_ok(location))
@@ -419,7 +417,6 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
     }
 
     Ref<DBRHash<int> > list = storage->getObjects(containerID);
-    log_debug("list: %s\n", list->debugGetAll().c_str());
 
     while (((dent = readdir(dir)) != NULL) && (!shutdownFlag))
     {
@@ -441,7 +438,6 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
         }
 
         path = location + "/" + name; 
-        log_debug("Checking name: %s\n", path.c_str());
         ret = stat(path.c_str(), &statbuf);
         if (ret != 0)
         {
@@ -452,23 +448,17 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
         if (S_ISREG(statbuf.st_mode))
         {
             int objectID = storage->isFileInDatabase(String(path));
-            log_debug("%s is a regular file! - objectID: %d\n", path.c_str(), objectID);
             if (objectID > 0)
             {
                 list->remove(objectID);
-                log_debug("removing %d -> list: %s\n", objectID, list->debugGetAll().c_str());
 
                 if (scanLevel == FullScanLevel)
                 {
-                    log_debug("last modified: %lld\n", last_modified_current_max);
-                    log_debug("file last modification time: %lld\n", statbuf.st_mtime);
-
                     // check modification time and update file if chagned
                     if (last_modified_current_max < statbuf.st_mtime)
                     {
                         // readd object - we have to do this in order to trigger
                         // scripting
-                        log_debug("removing object %d, %s\n", objectID, name);
                         removeObject(objectID, false);
                         addFile(path, false, false, adir->getHidden());
                         // update time variable
@@ -491,25 +481,21 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
         }
         else if (S_ISDIR(statbuf.st_mode))
         {
-            log_debug("%s is a directory!\n", path.c_str());
             int objectID = storage->isFolderInDatabase(path);
             if (objectID > 0)
             {
                 list->remove(objectID);
-                log_debug("removing %d -> list: %s\n", objectID, list->debugGetAll().c_str());
                 // add a task to rescan the directory that was found
                 if (adir->getRecursive())
                     rescanDirectory(objectID, scanID, scanMode);
             }
             else
             {
-                log_debug("Directory is not in database!\n");
                 // add directory, recursive, async, hidden flag, low priority
                 addFile(path, true, true, adir->getHidden(), true);
             }
         }
     } // while
-    log_debug("removing... list: %s\n", list->debugGetAll().c_str());
     if (list->size() > 0)
     {
         bool containerRemoved = storage->removeObjects(list);
