@@ -175,8 +175,9 @@ void TagHandler::fillMetadata(Ref<CdsItem> item)
     
 }
 
-Ref<IOHandler> TagHandler::serveContent(Ref<CdsItem> item, int resNum)
+Ref<IOHandler> TagHandler::serveContent(Ref<CdsItem> item, int resNum, off_t *data_size)
 {
+    *data_size = -1;
     return nil;
 }
 

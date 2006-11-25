@@ -140,40 +140,6 @@ void ServeRequestHandler::get_info(IN const char *filename, OUT struct File_Info
     }
 }
 
-#if 0
-Ref<IOHandler> ServeRequestHandler::open(IN const char *filename, OUT struct File_Info *info, 
-                                         IN enum UpnpOpenFileMode mode)
-{
-    int len;
-
-    // Currently we explicitly do not support UPNP_WRITE
-    // due to security reasons.
-    if (mode != UPNP_READ)
-        throw _Exception(_("UPNP_WRITE unsupported"));
-
-    String url_path, parameters;
-    split_url(filename, URL_PARAM_SEPARATOR, url_path, parameters);
-
-    len = (_("/") + SERVER_VIRTUAL_DIR + _("/") +
-                              CONTENT_SERVE_HANDLER).length();
-
-    if (len > url_path.length())
-    {
-        throw _Exception(_("There is something wrong with the link ") +
-                        url_path);
-    }
-
-    String path = ConfigManager::getInstance()->getOption(_("/server/servedir")) + url_path.substring(len, url_path.length()) + _("/") + parameters;
-
-
-    Ref<IOHandler> io_handler(new FileIOHandler(path));
-    io_handler->open(mode);
-
-    return io_handler;
-}
-#endif
-
-
 Ref<IOHandler> ServeRequestHandler::open(IN const char *filename, OUT struct File_Info *info,
                                          IN enum UpnpOpenFileMode mode)
 {
@@ -185,7 +151,8 @@ Ref<IOHandler> ServeRequestHandler::open(IN const char *filename, OUT struct Fil
     // due to security reasons.
     if (mode != UPNP_READ)
         throw _Exception(_("UPNP_WRITE unsupported"));
-len = (_("/") + SERVER_VIRTUAL_DIR + _("/") + CONTENT_SERVE_HANDLER).length();
+    
+    len = (_("/") + SERVER_VIRTUAL_DIR + _("/") + CONTENT_SERVE_HANDLER).length();
     String url_path, parameters;
     split_url(filename, URL_PARAM_SEPARATOR, url_path, parameters);
 

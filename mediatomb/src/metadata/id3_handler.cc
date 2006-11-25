@@ -190,8 +190,9 @@ void Id3Handler::fillMetadata(Ref<CdsItem> item)
     tag.Clear();
 }
 
-Ref<IOHandler> Id3Handler::serveContent(Ref<CdsItem> item, int resNum)
+Ref<IOHandler> Id3Handler::serveContent(Ref<CdsItem> item, int resNum, off_t *data_size)
 {
+    *data_size = -1;
     return nil;
 }
 

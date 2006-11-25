@@ -46,10 +46,6 @@ using namespace mxml;
 
 #define DEFAULT_PAGE_BUFFER_SIZE 4096
 
-//static JSObject *shared_global_object = NULL;
-
-//static Ref<DSOHash<WebScript> > script_hash(new DSOHash<WebScript>(37));
-
 WebRequestHandler::WebRequestHandler() : RequestHandler()
 {
 }
@@ -62,12 +58,6 @@ int WebRequestHandler::intParam(String name, int invalid)
     else
         return value.toInt();
 }
-
-/*String WebRequestHandler::buildScriptPath(String filename)
-{
-    String scriptRoot = ConfigManager::getInstance()->getOption(_("/server/webroot"));
-    return String(scriptRoot + "/jssp/") + filename;
-}*/
 
 void WebRequestHandler::check_request(bool checkLogin)
 {

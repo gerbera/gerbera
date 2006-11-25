@@ -98,70 +98,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     {
         throw _Exception(_("get_info: object is not an item"));
     }
-
-    // update item info by running action
-    if (IS_CDS_ACTIVE_ITEM(objectType)) // check - if thumbnails, then no action, just show
-    {
-        Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
-
-        Ref<Element> inputElement = UpnpXML_DIDLRenderObject(obj, true);
-
-        inputElement->setAttribute(_(XML_DC_NAMESPACE_ATTR), _(XML_DC_NAMESPACE));
-        inputElement->setAttribute(_(XML_UPNP_NAMESPACE_ATTR), _(XML_UPNP_NAMESPACE));
-        String action = aitem->getAction();
-        String input = inputElement->print();
-        String output;
-
-        log_debug("Script input: %s\n", input.c_str());
-        if(strncmp(action.c_str(), "http://", 7))
-        {
-#ifdef LOG_TOMBDEBUG
-            struct timespec before;
-            getTimespecNow(&before);
-#endif
-            output = run_process(action, _("run"), input);
-#ifdef LOG_TOMBDEBUG
-            long delta = getDeltaMillis(&before);
-            log_debug("script executed in %ld milliseconds\n", delta);
-#endif
-        }
-        else
-        {
-            /// \todo actually fetch...
-            log_debug("fetching %s\n", action.c_str());
-            output = input;
-        }
-        log_debug("Script output: %s\n", output.c_str());
-
-        Ref<CdsObject> clone = CdsObject::createObject(objectType);
-        aitem->copyTo(clone);
-
-        UpnpXML_DIDLUpdateObject(clone, output);
-
-        if (! aitem->equals(clone, true)) // check for all differences
-        {
-            Ref<UpdateManager> um = UpdateManager::getInstance();
-            Ref<SessionManager> sm = SessionManager::getInstance();
-            
-            log_debug("Item changed, updating database\n");
-            int containerChanged = INVALID_OBJECT_ID;
-            storage->updateObject(clone, &containerChanged);
-            um->containerChanged(containerChanged);
-            sm->containerChangedUI(containerChanged);
-            
-            if (! aitem->equals(clone)) // check for visible differences
-            {
-                log_debug("Item changed visually, updating parent\n");
-                um->containerChanged(clone->getParentID(), FLUSH_ASAP);
-            }
-            obj = clone;
-        }
-        else
-        {
-            log_debug("Item untouched...\n");
-        }
-    }
-    
+   
     Ref<CdsItem> item = RefCast(obj, CdsItem);
     
     String path = item->getLocation();
@@ -201,10 +138,18 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
             Ref<Array<StringBase> > parts = split_string(protocolInfo, ':');
             mimeType = parts->get(2);
         }
+        else
+        {
+            mimeType = _(MIMETYPE_DEFAULT);
+        }
       
         log_debug("setting content length to unknown\n");
         /// \todo we could figure out the content length...
         info->file_length = -1;
+        Ref<CdsResource> resource = item->getResource(res_id);
+        Ref<MetadataHandler> h = MetadataHandler::createHandler(resource->getHandlerType());
+/*        Ref<IOHandler> io_handler = */ h->serveContent(item, res_id, &(info->file_length));
+        
     }
     else
     {
@@ -246,74 +191,6 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
 
     log_debug("web_get_info(): end\n");
 }
-
-#if 0
-Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File_Info *info, IN enum UpnpOpenFileMode mode)
-{
-    int objectID;
-
-    log_debug("start\n");
-
-    // Currently we explicitly do not support UPNP_WRITE
-    // due to security reasons.
-    if (mode != UPNP_READ)
-        throw _Exception(_("UPNP_WRITE unsupported"));
-
-    String url_path, parameters;
-    split_url(filename, URL_PARAM_SEPARATOR, url_path, parameters);
-
-    Ref<Dictionary> dict(new Dictionary());
-    dict->decode(parameters);
-
-    String objID = dict->get(_("object_id"));
-    if (objID == nil)
-    {
-        throw _Exception(_("object_id not found"));
-    }
-    else
-        objectID = objID.toInt();
-
-    Ref<Storage> storage = Storage::getInstance();
-
-    log_debug("Opening media file with object id %d\n", objectID);
-
-    Ref<CdsObject> obj = storage->loadObject(objectID);
-
-    if (!IS_CDS_ITEM(obj->getObjectType()))
-    {
-        throw _Exception(_("web_open: unsuitable object type: ") + obj->getObjectType());
-    }
-
-    Ref<CdsItem> item = RefCast(obj, CdsItem);
-
-    String path = item->getLocation();
-
-    /* determining which resource to serve */
-    int res_id = 0;
-    String s_res_id = dict->get(_(URL_RESOURCE_ID));
-    if (s_res_id != nil)
-        res_id = s_res_id.toInt();
-
-    // Per default and in case of a bad resource ID, serve the file
-    // itself
-
-    if ((res_id > 0) && (res_id < item->getResourceCount()))
-    {
-        Ref<CdsResource> resource = item->getResource(res_id);
-        Ref<MetadataHandler> h = MetadataHandler::createHandler(resource->getHandlerType());
-        Ref<IOHandler> io_handler = h->serveContent(item, res_id);
-        io_handler->open(mode);
-        return io_handler;
-    }
-    else
-    {
-        Ref<IOHandler> io_handler(new FileIOHandler(path));
-        io_handler->open(mode);
-        return io_handler;
-    }
-}
-#endif
-
 
 Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File_Info *info, IN enum UpnpOpenFileMode mode)
 {
@@ -479,15 +356,17 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
         {
             Ref<Array<StringBase> > parts = split_string(protocolInfo, ':');
             mimeType = parts->get(2);
-            info->content_type = ixmlCloneDOMString(mimeType.c_str());
+        }
+        else
+        {
+            mimeType = _(MIMETYPE_DEFAULT);
         }
 
-        log_debug("setting content length to unknown\n");
-        /// \todo we could figure out the content length...
+        info->content_type = ixmlCloneDOMString(mimeType.c_str());
         info->file_length = -1;
         Ref<CdsResource> resource = item->getResource(res_id);
         Ref<MetadataHandler> h = MetadataHandler::createHandler(resource->getHandlerType());
-        Ref<IOHandler> io_handler = h->serveContent(item, res_id);
+        Ref<IOHandler> io_handler = h->serveContent(item, res_id, &(info->file_length));
         io_handler->open(mode);
         return io_handler;
     }

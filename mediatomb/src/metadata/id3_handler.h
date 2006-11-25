@@ -41,7 +41,7 @@ class Id3Handler : public MetadataHandler
 public:
     Id3Handler();
     virtual void fillMetadata(zmm::Ref<CdsItem> item);
-    virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum);
+    virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum, off_t *data_size);
 };
 
 #endif // __METADATA_ID3_H__

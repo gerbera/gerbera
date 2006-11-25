@@ -405,8 +405,9 @@ void ExtractorHandler::fillMetadata(Ref<CdsItem> item)
     // EXTRACTOR_removeAll(extractors);
 }
 
-Ref<IOHandler> ExtractorHandler::serveContent(Ref<CdsItem> item, int resNum)
+Ref<IOHandler> ExtractorHandler::serveContent(Ref<CdsItem> item, int resNum, off_t *data_size)
 {
+    *data_size = -1;
     return nil;
 }
 

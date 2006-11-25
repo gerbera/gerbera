@@ -43,7 +43,7 @@ class ExtractorHandler : public MetadataHandler
 public:
     ExtractorHandler();
     virtual void fillMetadata(zmm::Ref<CdsItem> item);
-    virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum);
+    virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum, off_t *data_size);
 };
 
 #endif // __METADATA_EXTRACTOR_H__
