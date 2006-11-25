@@ -44,5 +44,20 @@
                 <input name="submit" type="submit"/>
             </form>
         </div>
+        <div id="autoscan_div" style="display:none">
+            <form name="autoscanForm" action="javascript:parent.autoscanSubmit();">
+                <fieldset>
+                    <legend>Scan Level</legend>
+                    <input type="radio" name="scan_level" id="scan_level_basic" value="basic" checked="checked"> <label for="scan_level_basic">Basic</label>
+                    <input type="radio" name="scan_level" id="scan_level_full" value="full"> <label for="scan_level_full">Full</label>
+                </fieldset>
+                <!-- scan_mode... -->
+                <input type="checkbox" name="recursive" id="recursive" value="true"> <label for="recursive">Recursive</label><br/>
+                <input type="checkbox" name="hidden" id="hidden" value="true"> <label for="hidden">Include hidden files/directories</label><br/>
+                <label for="interval">Scan Interval (in seconds):</label> <input type="text" name="interval" id="interval" value="1800"><br/>
+                <input type="checkbox" name="persistent" id="persistent" value="true"> <label for="persistent">Persistent</label><br/>
+                <input name="submit" type="submit" value="add..."/>
+            </form>
+        <div>
     </body>
 </html>

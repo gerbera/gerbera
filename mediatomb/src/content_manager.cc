@@ -1202,7 +1202,7 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
         _removeObject(objectID, all);
     }
 }
-    
+
 void ContentManager::rescanDirectory(int objectID, int scanID, scan_mode_t scanMode)
 {
     // building container path for the description

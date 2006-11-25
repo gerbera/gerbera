@@ -59,6 +59,12 @@ int WebRequestHandler::intParam(String name, int invalid)
         return value.toInt();
 }
 
+bool WebRequestHandler::boolParam(zmm::String name)
+{
+    String value = param(name);
+    return string_ok(value) && (value == "1" || value == "true");
+}
+
 void WebRequestHandler::check_request(bool checkLogin)
 {
     // we have a minimum set of parameters that are "must have"
@@ -143,7 +149,7 @@ Ref<IOHandler> WebRequestHandler::open(Ref<Dictionary> params, IN enum UpnpOpenF
         // Ref<Dictionary> par(new Dictionary());
         // par->put("message", e.getMessage());
         // output = subrequest("error", par);
-        String errmsg = _("Exception: ") + e.getMessage();
+        String errmsg = _("Error: ") + e.getMessage();
         root->appendTextChild(_("error"), errmsg);
         output = renderXMLHeader() + root->print();
     }

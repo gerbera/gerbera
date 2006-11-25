@@ -242,3 +242,13 @@ function ensureElementVisibility(win, doc, el, bottomAdd)
     }
 }
 
+function formToArray(form, args)
+{
+    for (var i = 1; i < form.length; ++i)
+    {
+        var element = form.elements[i];
+        
+        if ((element.type != 'submit' && element.type != "radio" && element.type != "checkbox") || element.checked)
+            args[element.name] = element.value;
+    }
+}

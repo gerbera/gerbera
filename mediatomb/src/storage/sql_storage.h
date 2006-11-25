@@ -195,12 +195,6 @@ protected:
     zmm::Ref<CdsObject> checkRefID(zmm::Ref<CdsObject> obj);
     int createContainer(int parentID, zmm::String name, zmm::String path, bool isVirtual);
     
-    /* helpers for autoscan stuff */
-    zmm::String mapScanmode(scan_mode_t scanmode);
-    scan_mode_t remapScanmode(zmm::String scanmode);
-    zmm::String mapScanlevel(scan_level_t scanlevel);
-    scan_level_t remapScanlevel(zmm::String scanlevel);
-    
     zmm::String mapBool(bool val) { return quote((val ? 1 : 0)); }
     bool remapBool(zmm::String field) { return (string_ok(field) && field == "1"); }
     

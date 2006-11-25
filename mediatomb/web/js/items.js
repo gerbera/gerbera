@@ -106,29 +106,25 @@ function updateItems(ajaxRequest)
     var pagesTo = pagesFrom + showMaxPages - 1;
     if (pagesTo >= totalPages)
         pagesTo = totalPages - 1;
+    // delete this:
     var pagingLink;
     var pagingPar = rightDocument.createElement("p");
     
+    var first = true;
+    
     if (thisPage > showMaxPages / 2)
-    {
-        pagingLink = rightDocument.createElement("a");
-        pagingLink.setAttribute("href", "javascript:parent.loadItems('"+loadItemId+"','0');");
-        pagingLink.appendChild(rightDocument.createTextNode("first"));
-        pagingPar.appendChild(pagingLink);
-        pagingPar.appendChild(rightDocument.createTextNode(" "));
-    }
+        first = _addLink(pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','0');", "first", " ");
     
     if (prevPageStart >= 0)
-    {
-        pagingLink = rightDocument.createElement("a");
-        pagingLink.setAttribute("href", "javascript:parent.loadItems('"+loadItemId+"','"+prevPageStart+"');");
-        pagingLink.appendChild(rightDocument.createTextNode("prev"));
-        pagingPar.appendChild(pagingLink);
-        pagingPar.appendChild(rightDocument.createTextNode(" "));
-    }
+        first = _addLink(pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','"+prevPageStart+"');", "prev", " ");
     
     for (var i = pagesFrom; i <= pagesTo; i++)
     {
+        if (first)
+            first = false;
+        else
+            pagingPar.appendChild(rightDocument.createTextNode(" "));
+        
         if (i == thisPage)
         {
             pagingLink = rightDocument.createElement("strong");
@@ -140,26 +136,13 @@ function updateItems(ajaxRequest)
         }
         pagingLink.appendChild(rightDocument.createTextNode(i));
         pagingPar.appendChild(pagingLink);
-        pagingPar.appendChild(rightDocument.createTextNode(" "));
     }
     
     if (nextPageStart < totalMatches)
-    {
-        pagingLink = rightDocument.createElement("a");
-        pagingLink.setAttribute("href", "javascript:parent.loadItems('"+loadItemId+"','"+nextPageStart+"');");
-        pagingLink.appendChild(rightDocument.createTextNode("next"));
-        pagingPar.appendChild(pagingLink);
-        pagingPar.appendChild(rightDocument.createTextNode(" "));
-    }
+        first = _addLink(pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','"+nextPageStart+"');", "next", " ");
     
     if (thisPage < totalPages - showMaxPages / 2)
-    {
-        pagingLink = rightDocument.createElement("a");
-        pagingLink.setAttribute("href", "javascript:parent.loadItems('"+loadItemId+"','"+((totalPages - 1) * viewItems)+"');");
-        pagingLink.appendChild(rightDocument.createTextNode("last"));
-        pagingPar.appendChild(pagingLink);
-        pagingPar.appendChild(rightDocument.createTextNode(" "));
-    }
+        first = _addLink(pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','"+((totalPages - 1) * viewItems)+"');", "last", " ");
     
     var children = items.getElementsByTagName(childrenTag);
     var itemsEl = rightDocument.createElement("div");
@@ -187,33 +170,22 @@ function updateItems(ajaxRequest)
         var topDiv = rightDocument.createElement("div");
         topDiv.appendChild(rightDocument.createTextNode("Container: "));
         
-        var link = rightDocument.createElement("a");
-        topDiv.appendChild(link);
-        link.setAttribute("href", "javascript:parent.userAddItemStart();");
-        link.appendChild(rightDocument.createTextNode("add Item"));
+        var link;
+        var first = true;
+        if (isVirtual)
+            first = _addLink(topDiv, first, "javascript:parent.userAddItemStart();", "add Item");
         
         if (lastNodeDb !== 'd0')
         {
-            topDiv.appendChild(rightDocument.createTextNode(", "));
-            link = rightDocument.createElement("a");
-            topDiv.appendChild(link);
-            link.setAttribute("href", "javascript:parent.userEditItemStart('"+ofId+"');");
-            link.appendChild(rightDocument.createTextNode("edit"));
+            if (isVirtual)
+                first = _addLink(topDiv, first, "javascript:parent.userEditItemStart('"+ofId+"');", "edit");
             
-            topDiv.appendChild(rightDocument.createTextNode(", "));
-            link = rightDocument.createElement("a");
-            topDiv.appendChild(link);
-            link.setAttribute("href", "javascript:parent.removeItem('"+ofId+"', false);");
-            link.appendChild(rightDocument.createTextNode("remove"));
+            first = _addLink(topDiv, first, "javascript:parent.removeItem('"+ofId+"', false);", "remove");
             
             if (! isVirtual)
             {
                 var action = (isAutoscan ? "remove" : "add");
-                topDiv.appendChild(rightDocument.createTextNode(", "));
-                link = rightDocument.createElement("a");
-                topDiv.appendChild(link);
-                link.setAttribute("href", "javascript:parent.changeAutoscanDirectory('"+action+"','"+ofId+"');");
-                link.appendChild(rightDocument.createTextNode(action+" as autoscan dir"));
+                first = _addLink(topDiv, first,  "javascript:parent.changeAutoscanDirectory('"+action+"','"+ofId+"');", action+" as autoscan dir");
             }
         }
         
@@ -230,36 +202,21 @@ function updateItems(ajaxRequest)
         {
             itemEntry.appendChild(rightDocument.createTextNode(" - "));
             
-            var linkEl = rightDocument.createElement("a");
-            linkEl.setAttribute("href", "javascript:parent.addItem(\""+item.getAttribute("id")+"\");");
-            linkEl.appendChild(rightDocument.createTextNode("add"));
-            itemEntry.appendChild(linkEl);
+            _addLink(itemEntry, true, "javascript:parent.addItem(\""+item.getAttribute("id")+"\");", "add");
         }
         else
         {
             itemEntry.appendChild(rightDocument.createTextNode(" - "));
             
-            var linkEl = rightDocument.createElement("a");
-            linkEl.setAttribute("href", "javascript:parent.removeItem(\""+item.getAttribute("id")+"\", false);");
-            linkEl.appendChild(rightDocument.createTextNode("remove this"));
-            itemEntry.appendChild(linkEl);
-            
-            itemEntry.appendChild(rightDocument.createTextNode(", "));
-            
-            linkEl = rightDocument.createElement("a");
-            linkEl.setAttribute("href", "javascript:parent.removeItem(\""+item.getAttribute("id")+"\", true);");
-            linkEl.appendChild(rightDocument.createTextNode("remove all"));
-            itemEntry.appendChild(linkEl);
-            
-            itemEntry.appendChild(rightDocument.createTextNode(", "));
-            
-            linkEl = rightDocument.createElement("a");
-            linkEl.setAttribute("href", "javascript:parent.userEditItemStart('"+item.getAttribute("id")+"');");
-            linkEl.appendChild(rightDocument.createTextNode("edit"));
-            itemEntry.appendChild(linkEl);
+            _addLink(itemEntry, true, "javascript:parent.removeItem(\""+item.getAttribute("id")+"\", false);", "remove this");
+            if (isVirtual)
+            {
+                _addLink(itemEntry, false, "javascript:parent.removeItem(\""+item.getAttribute("id")+"\", true);", "remove all");
+                _addLink(itemEntry, false, "javascript:parent.userEditItemStart('"+item.getAttribute("id")+"');", "edit");
+            }
             
             itemLink.setAttribute("href", xmlGetElementText(item, "res"));
-            itemLink.setAttribute("target", "_blank");
+            //itemLink.setAttribute("target", "_blank");
         }
         var itemText = rightDocument.createTextNode(useFiles ? item.firstChild.nodeValue : xmlGetElementText(item, "title"));
         itemLink.appendChild(itemText);
@@ -271,7 +228,19 @@ function updateItems(ajaxRequest)
     //itemsEl.appendChild(rightDocument.createTextNode("total: "+totalMatches));
     
     itemRoot.replaceChild(itemsEl, itemRoot.firstChild);
-    
+}
+
+function _addLink(addToElement, first, href, text, seperator, target)
+{
+    if (! first)
+        addToElement.appendChild(rightDocument.createTextNode((seperator ? seperator : ", ")));
+    var link = rightDocument.createElement("a");
+    addToElement.appendChild(link);
+    link.setAttribute("href", href);
+    if (target)
+        link.setAttribute("target", target);
+    link.appendChild(rightDocument.createTextNode(text));
+    return false; // to set the next "first"
 }
 
 function addItem(itemId)
@@ -438,12 +407,8 @@ function itemAddEditSubmit(objectId)
         args['parent_id'] = lastNodeDb.substr(1);
     }
     var form = rightDocument.forms['addEditItem'];
-    for (var i = 0; i < form.length; ++i)
-    {
-        var element = form.elements[i];
-        if (element.name != 'submit')
-            args[element.name] = element.value;
-    }
+    
+    formToArray(form, args);
     
     var url = link(req_type, args);
     var myAjax = new Ajax.Request(
@@ -457,35 +422,13 @@ function itemAddEditSubmit(objectId)
 function addEditRemoveSubmitted(ajaxRequest)
 {
     //alert(ajaxRequest.responseText);
-    var xml = ajaxRequest.responseXML;
-    if (!errorCheck(xml)) return;
+    if (!errorCheck(ajaxRequest.responseXML)) return;
     
-    /*
-    var updateContainer = xmlGetElement(xml, 'updateContainer');
-    if (updateContainer)
-    {
-        var node = getTreeNode("d"+xmlGetText(updateContainer));
-        if (!node.hasChildren() && updateContainer.getAttribute("add"))
-        {
-            node.setHasChildren(true);
-            refreshNode(node.getParent());
-        }
-        
-        selectNode(node.getID());
-        node.childrenHaveBeenFetched=false;
-        node.resetChildren();
-        
-        fetchChildren(node);
-        //itemChangeType();
-    }
-    else
-    */
     folderChange(selectedNode);
 }
 
 function removeItem(itemId, all)
 {
-    
     if (itemId == '0')
     {
         alert("Root container cannot be removed!");

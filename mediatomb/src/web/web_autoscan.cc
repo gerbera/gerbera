@@ -60,27 +60,41 @@ void web::autoscan::process()
     if (action == "add")
     {
         int objID = intParam(_("object_id"));
-        
-        Ref<CdsObject> obj = storage->loadObject(objID);
-        if (obj == nil
-            || ! IS_CDS_CONTAINER(obj->getObjectType())
-            || obj->isVirtual())
-            throw _Exception(_("tried to add an illegal object (id) as an autoscan directory"));
-        
-        /// \todo make more configurable!
-        Ref<AutoscanDirectory> autoscan(new AutoscanDirectory(
-            obj->getLocation(),
-            TimedScanMode,
-            FullScanLevel,
-            true,
-            false,
-            -1,
-            10,
-            true
-            ));
-        
-        storage->addAutoscanDirectory(autoscan);
-        cm->addAutoscanDirectory(autoscan);
+        bool recursive = boolParam(_("recursive"));
+        bool hidden = boolParam(_("hidden"));
+        bool persistent = boolParam(_("persistent"));
+        int interval = intParam(_("interval"), 0);
+        if (interval <= 0 )
+        {
+            throw _Exception(_("illegal interval given"));
+        }
+        else
+        {
+            String scan_level_str = param(_("scan_level"));
+            scan_level_t scan_level = AutoscanDirectory::remapScanlevel(scan_level_str);
+            scan_mode_t scan_mode = TimedScanMode;
+            
+            Ref<CdsObject> obj = storage->loadObject(objID);
+            if (obj == nil
+                || ! IS_CDS_CONTAINER(obj->getObjectType())
+                || obj->isVirtual())
+                throw _Exception(_("tried to add an illegal object (id) as an autoscan directory"));
+            
+            /// \todo make more configurable!
+            Ref<AutoscanDirectory> autoscan(new AutoscanDirectory(
+                obj->getLocation(),
+                scan_mode,
+                scan_level,
+                recursive,
+                persistent,
+                -1,
+                interval,
+                hidden
+                ));
+            
+            storage->addAutoscanDirectory(autoscan);
+            cm->addAutoscanDirectory(autoscan);
+        }
     }
     else if (action == "remove")
     {

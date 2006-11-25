@@ -213,3 +213,46 @@ void AutoscanList::subscribeDir(zmm::Ref<TimerSubscriber> obj, int id, bool once
 }
 */
 
+String AutoscanDirectory::mapScanmode(scan_mode_t scanmode)
+{
+    String scanmode_str = nil;
+    switch (scanmode)
+    {
+        case TimedScanMode: scanmode_str = _("timed"); break;
+    }
+    if (scanmode_str == nil)
+        throw Exception(_("illegal scanmode given to mapScanmode(): ") + scanmode);
+    return scanmode_str;
+}
+
+scan_mode_t AutoscanDirectory::remapScanmode(String scanmode)
+{
+    if (scanmode == "timed")
+        return TimedScanMode;
+    else
+        throw _Exception(_("illegal scanmode (") + scanmode + ") given to remapScanmode()");
+}
+
+String AutoscanDirectory::mapScanlevel(scan_level_t scanlevel)
+{
+    String scanlevel_str = nil;
+    switch (scanlevel)
+    {
+        case BasicScanLevel: scanlevel_str = _("basic"); break;
+        case FullScanLevel: scanlevel_str = _("full"); break;
+    }
+    if (scanlevel_str == nil)
+        throw Exception(_("illegal scanlevel given to mapScanlevel(): ") + scanlevel);
+    return scanlevel_str;
+}
+
+scan_level_t AutoscanDirectory::remapScanlevel(String scanlevel)
+{
+    if (scanlevel == "basic")
+        return BasicScanLevel;
+    else if (scanlevel == "full")
+        return FullScanLevel;
+    else
+        throw _Exception(_("illegal scanlevel (") + scanlevel + ") given to remapScanlevel()");
+}
+

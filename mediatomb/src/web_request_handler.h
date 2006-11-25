@@ -73,6 +73,7 @@ protected:
     /// \return Value of the parameter with the given name or nil if not found.
     inline zmm::String param(zmm::String name) { return params->get(name); }
     int intParam(zmm::String name, int invalid = 0);
+    bool boolParam(zmm::String name);
     
     /// \brief Checks if the incoming request is valid.
     ///

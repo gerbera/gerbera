@@ -76,7 +76,7 @@ void Timer::addTimerSubscriber(Ref<TimerSubscriber> timerSubscriber, unsigned in
 {
     log_debug("adding subscriber...\n");
     if (notifyInterval <= 0)
-        throw _Exception(_("tried to add timer with illegal notifyInterval"));
+        throw _Exception(_("tried to add timer with illegal notifyInterval: ") + notifyInterval);
     AUTOLOCK(mutex);
     //timerSubscriber->timerNotify(id);
     Ref<TimerSubscriberElement> element(new TimerSubscriberElement(timerSubscriber, notifyInterval, id, once));

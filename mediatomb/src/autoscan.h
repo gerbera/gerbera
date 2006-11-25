@@ -178,12 +178,18 @@ public:
     /// the last modification time of the starting point but we may not
     /// overwrite it until we are done.
     void setCurrentLMT(time_t lmt);
-
-
+    
+    
     time_t getPreviousLMT() { return last_mod_previous_scan; }
-
+    
     void updateLMT() { last_mod_previous_scan = last_mod_current_scan; }
-
+    
+    /* helpers for autoscan stuff */
+    static zmm::String mapScanmode(scan_mode_t scanmode);
+    static scan_mode_t remapScanmode(zmm::String scanmode);
+    static zmm::String mapScanlevel(scan_level_t scanlevel);
+    static scan_level_t remapScanlevel(zmm::String scanlevel);
+    
 protected:
     zmm::String location;
     scan_mode_t mode;
