@@ -159,7 +159,7 @@
 #define DEFAULT_JS_DIR                  "js"
 #define DEFAULT_HIDDEN_FILES_VALUE      "no"
 #define DEFAULT_SESSION_TIMEOUT         30
-#define SESSION_TIMEOUT_CHECK_INTERVAL  (30 * 30)
+#define SESSION_TIMEOUT_CHECK_INTERVAL  (5 * 60)
 
 
 #ifdef HAVE_SQLITE3

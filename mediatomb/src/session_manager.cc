@@ -144,7 +144,7 @@ Ref<Session> SessionManager::createSession(long timeout)
     {
         sessionID = generate_random_id();
         if (count++ > 100)
-            throw _Exception(_("There seems to be something wrong with the random numbers. I tried to get a unique id 100 times and failed."));
+            throw _Exception(_("There seems to be something wrong with the random numbers. I tried to get a unique id 100 times and failed. last sessionID: ") + sessionID);
     }
     while(getSession(sessionID, false) != nil); // for the rare case, where we get a random id, that is already taken
     

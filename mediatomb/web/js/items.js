@@ -216,7 +216,10 @@ function updateItems(ajaxRequest)
             }
             
             itemLink.setAttribute("href", xmlGetElementText(item, "res"));
-            //itemLink.setAttribute("target", "_blank");
+            
+            // the target is needed, because otherwise we probably mess up one of
+            // our frames
+            itemLink.setAttribute("target", "mediatomb_target");
         }
         var itemText = rightDocument.createTextNode(useFiles ? item.firstChild.nodeValue : xmlGetElementText(item, "title"));
         itemLink.appendChild(itemText);
