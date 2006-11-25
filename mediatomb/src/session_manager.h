@@ -132,7 +132,7 @@ public:
 
     /// \brief Creates a Session with a given timeout.
     /// \param timeout Session timeout in milliseconds.
-    zmm::Ref<Session> createSession(long timeout = DEFAULT_SESSION_TIMEOUT);
+    zmm::Ref<Session> createSession(long timeout);
 
     /// \brief Returns the instance to a Session with a given sessionID
     /// \param ID of the Session.

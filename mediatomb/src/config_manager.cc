@@ -99,6 +99,7 @@ String ConfigManager::createDefaultConfig(String userhome)
 
     Ref<Element>accounts(new Element(_("accounts")));
     accounts->addAttribute(_("enabled"), _(DEFAULT_ACCOUNTS_EN_VALUE));
+    accounts->addAttribute(_("session-timeout"), String::from(DEFAULT_SESSION_TIMEOUT));
     ui->appendChild(accounts);
     
     server->appendChild(ui);
@@ -299,6 +300,12 @@ void ConfigManager::validate(String serverhome)
 
     if ((temp != "yes") && (temp != "no"))
         throw _Exception(_("Error in config file: incorrect parameter for <accounts enabled=\")\" /> attribute"));
+
+    int i  = getIntOption(_("/server/ui/accounts/attribute::session-timeout"), DEFAULT_SESSION_TIMEOUT);
+    if (i < 1)
+    {
+        throw _Exception(_("Error in config file: invalid session-timeout %d (must be > 0)\n"));
+    }
 
     temp = getOption(_("/import/attribute::hidden-files"),
                      _(DEFAULT_HIDDEN_FILES_VALUE));

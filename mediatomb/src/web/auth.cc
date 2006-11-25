@@ -80,6 +80,10 @@ web::auth::auth() : WebRequestHandler()
 }
 void web::auth::process()
 {
+    int timeout = ConfigManager::getInstance()->getIntOption(_("/server/ui/accounts/attribute::session-timeout"));
+   
+    timeout = timeout * 60;
+
     if (param(_("checkSID")) != nil)
     {
         String sid = param(_("sid"));
@@ -96,7 +100,7 @@ void web::auth::process()
             Ref<Session> session;
             if (sid == nil || (session = sessionManager->getSession(sid)) == nil)
             {
-                session = sessionManager->createSession();
+                session = sessionManager->createSession(timeout);
                 root->addAttribute(_("sid"), session->getID());
             }
             if (! session->isLoggedIn())
@@ -117,7 +121,7 @@ void web::auth::process()
     else if (param(_("auth")) == nil)
     {
         Ref<SessionManager> sessionManager = SessionManager::getInstance();
-        Ref<Session> session = sessionManager->createSession();
+        Ref<Session> session = sessionManager->createSession(timeout);
         root->addAttribute(_("sid"), session->getID());
         
         // sending token

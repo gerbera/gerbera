@@ -240,9 +240,11 @@ Here is a sample configuration file with description of the various tags.
         Enables or disables the web user interface, change to "yes" in order 
         to enable it.
 
-        <accounts enabled="no"/> (Required)
-        Specifies if accounts are enabled or disabled. Accounts can be defined
-        as shown below:
+        <accounts enabled="yes" session-timeout="30"/> (Required)
+        Specifies if accounts are enabled or disabled. The session-timeout
+        specifies the timeout interval in minutes.
+
+        Accounts can be defined as shown below:
 
             <account user="name" password="password"/>
             There can be multiple users, however this is mainly a feature 

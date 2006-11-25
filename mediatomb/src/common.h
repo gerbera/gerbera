@@ -39,18 +39,6 @@
 #include "zmmf/zmmf.h"
 #include "exceptions.h"
 
-/// \brief session timeout in seconds
-//#ifndef LOG_TOMBDEBUG
-    #define DEFAULT_SESSION_TIMEOUT         (60 * 30)
-    #define SESSION_TIMEOUT_CHECK_INTERVAL  (30 * 30)
-/*
-#else
-    #define DEFAULT_SESSION_TIMEOUT         10
-    #define SESSION_TIMEOUT_CHECK_INTERVAL  1
-#endif // ifndef LOG_TOMBDEBUG
-*/
-
-
 // ERROR CODES                                                                                 
 /// \brief UPnP specific error code.
 #define UPNP_E_ACTION_FAILED            501
@@ -160,7 +148,7 @@
 #define DEFAULT_CONFIG_NAME             "config.xml"
 #define DEFAULT_UI_EN_VALUE             "yes"
 #define DEFAULT_ACCOUNTS_EN_VALUE       "no"
-#define DEFAULT_ALIVE_INTERVAL          180
+#define DEFAULT_ALIVE_INTERVAL          180 // seconds
 #define DEFAULT_BOOKMARK_FILE           "mediatomb.html"
 #define DEFAULT_IGNORE_UNKNOWN_EXTENSIONS "no"
 #define DEFAULT_IMPORT_SCRIPT           "import.js"
@@ -170,6 +158,9 @@
 #define DEFAULT_WEB_DIR                 "web"
 #define DEFAULT_JS_DIR                  "js"
 #define DEFAULT_HIDDEN_FILES_VALUE      "no"
+#define DEFAULT_SESSION_TIMEOUT         30
+#define SESSION_TIMEOUT_CHECK_INTERVAL  (30 * 30)
+
 
 #ifdef HAVE_SQLITE3
     #define DEFAULT_STORAGE_DRIVER      "sqlite3"
