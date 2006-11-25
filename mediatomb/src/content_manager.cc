@@ -1209,6 +1209,9 @@ void ContentManager::rescanDirectory(int objectID, int scanID, scan_mode_t scanM
     Ref<CMTask> task(new CMRescanDirectoryTask(objectID, scanID, scanMode));
     task->setDescription(_("Autoscan")); /// \todo description should contain the path that we are rescanning
     Ref<AutoscanDirectory> dir = getAutoscanDirectory(scanID, scanMode);
+    if (dir == nil)
+        return;
+
     dir->incTaskCount();
     addTask(task, true); // adding with low priority
 }
