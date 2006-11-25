@@ -35,6 +35,7 @@ AC_CONFIG_AUX_DIR(configure_aux)
 AC_CONFIG_SRCDIR([src/common.h])
 AM_INIT_AUTOMAKE([1.9 -Wall])
 
+test x$prefix = "xNONE" && prefix="$ac_default_prefix"
 
 SEARCH_DIR="/usr/local"
    
