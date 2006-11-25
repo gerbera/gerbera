@@ -116,7 +116,7 @@ public:
     /// zero means none.
     AutoscanDirectory(zmm::String location, scan_mode_t mode, 
                       scan_level_t level, bool recursive,
-                      bool from_config,
+                      bool persistent,
                       int id = -1, unsigned int interval = 0, bool hidden = false);
 
     zmm::String getLocation() { return location; }
@@ -168,7 +168,7 @@ public:
 
     int getObjectID() { return objectID; }
 
-    bool fromConfig() { return from_config; }
+    bool persistent() { return persistent_flag; }
 
     /// \brief Sets the last modification time of the current ongoing scan.
     /// 
@@ -190,7 +190,7 @@ protected:
     scan_level_t level;
     bool recursive;
     bool hidden;
-    bool from_config;
+    bool persistent_flag;
     unsigned int interval;
     int taskCount;
     int scanID;

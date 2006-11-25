@@ -350,7 +350,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
         }
         catch (Exception e)
         {
-            if (adir->fromConfig())
+            if (adir->persistent())
             {
                 containerID = INVALID_OBJECT_ID;
             }
@@ -369,7 +369,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
         if (!check_path(adir->getLocation(), true))
         {
             adir->setObjectID(INVALID_OBJECT_ID);
-            if (adir->fromConfig())
+            if (adir->persistent())
             {
                 return;
             }
@@ -407,7 +407,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
     if (!dir)
     {
         log_warning("Could not open %s: %s", location.c_str(), strerror(errno));
-        if (adir->fromConfig())
+        if (adir->persistent())
         {
             removeObject(containerID, false);
             adir->setObjectID(INVALID_OBJECT_ID);

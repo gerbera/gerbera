@@ -38,7 +38,7 @@
 using namespace zmm;
 
 AutoscanDirectory::AutoscanDirectory(String location, scan_mode_t mode,
-        scan_level_t level, bool recursive, bool from_config,
+        scan_level_t level, bool recursive, bool persistent,
         int id, unsigned int interval, bool hidden)
 {
     this->location = location;
@@ -47,7 +47,7 @@ AutoscanDirectory::AutoscanDirectory(String location, scan_mode_t mode,
     this->recursive = recursive;
     this->hidden = hidden;
     this->interval = interval;
-    this->from_config = from_config;
+    this->persistent_flag = persistent;
     scanID = id;
     taskCount = 0;
     objectID = INVALID_OBJECT_ID;
