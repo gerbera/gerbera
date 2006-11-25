@@ -336,7 +336,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
         throw _Exception(_("called with id for nonexistent AutoscanDirectory object"));
 
     Ref<Storage> storage = Storage::getInstance();
-    
+   
     if (containerID != INVALID_OBJECT_ID)
     {
         try
@@ -344,16 +344,22 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
             obj = storage->loadObject(containerID);
             if (!IS_CDS_CONTAINER(obj->getObjectType()))
             {
-                throw _Exception(_("Object is not a container: rescan must be triggered on directories\n"));
- 
-                log_debug("Rescanning container: %s, id=%d\n", obj->getTitle().c_str(), containerID);
-
+                throw Exception(_("Not a container"));
             }
             location = obj->getLocation();
         }
         catch (Exception e)
         {
-            containerID = INVALID_OBJECT_ID;
+            if (adir->fromConfig())
+            {
+                containerID = INVALID_OBJECT_ID;
+            }
+            else
+            {
+                adir->setTaskCount(-1);
+                removeAutoscanDirectory(scanID, scanMode);
+                return;
+            }
         }
     }
 
@@ -373,8 +379,8 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
                 removeAutoscanDirectory(scanID, scanMode);
                 return;
             }
-
         }
+
         containerID = Storage::getInstance()->ensurePathExistence(adir->getLocation(), &updateID);
         if (updateID != INVALID_OBJECT_ID)
         {
