@@ -242,7 +242,9 @@ Here is a sample configuration file with description of the various tags.
 
         <accounts enabled="yes" session-timeout="30"/> (Required)
         Specifies if accounts are enabled or disabled. The session-timeout
-        specifies the timeout interval in minutes.
+        specifies the timeout interval in minutes. The server checks every
+        five minutes for sessions that have timed out, therefore in the worst
+        case the session times out after session-timeout + 5 minutes.
 
         Accounts can be defined as shown below:
 
