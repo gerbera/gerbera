@@ -71,6 +71,14 @@ namespace zmm
             obj->release();
             return ret;
         }
+        
+        inline Ref<T> get(int index)
+        {
+            Object *obj = BaseQueue<Object *>::get(index);
+            if (obj == NULL)
+                return nil;
+            return Ref<T>((T *)obj);
+        }
     };
 }
 
