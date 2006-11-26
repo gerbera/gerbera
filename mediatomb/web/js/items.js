@@ -172,22 +172,45 @@ function updateItems(ajaxRequest)
         
         var link;
         var first = true;
-        if (isVirtual)
-            first = _addLink(topDiv, first, "javascript:parent.userAddItemStart();", "add Item");
+        var addLink = false;
+        var editLink = false;
+        var removeLink = false;
+        var autoscanLink = false;
         
-        if (lastNodeDb !== 'd0')
+        
+        if (lastNodeDb == 'd0')
+        {
+            addLink = true;
+        }
+        else if (lastNodeDb == 'd1')
+        {
+            editLink = true;
+            autoscanLink = true;
+        }
+        else if (lastNodeDb !== 'd0')
         {
             if (isVirtual)
-                first = _addLink(topDiv, first, "javascript:parent.userEditItemStart('"+ofId+"');", "edit");
-            
-            first = _addLink(topDiv, first, "javascript:parent.removeItem('"+ofId+"', false);", "remove");
-            
-            if (! isVirtual)
             {
-                var action = (isAutoscan ? "remove" : "add");
-                first = _addLink(topDiv, first,  "javascript:parent.changeAutoscanDirectory('"+action+"','"+ofId+"');", action+" as autoscan dir");
+                addLink = true;
+                editLink = true;
             }
+            else
+                autoscanLink = true;
+            removeLink = true;
         }
+        
+        if (addLink)
+            first = _addLink(topDiv, first, "javascript:parent.userAddItemStart();", "add Item");
+        if (editLink)
+            first = _addLink(topDiv, first, "javascript:parent.userEditItemStart('"+ofId+"');", "edit");
+        if (removeLink)
+            first = _addLink(topDiv, first, "javascript:parent.removeItem('"+ofId+"', false);", "remove");
+        if (autoscanLink)
+        {
+            var action = (isAutoscan ? "remove" : "add");
+            first = _addLink(topDiv, first,  "javascript:parent.changeAutoscanDirectory('"+action+"','"+ofId+"');", action+" as autoscan dir");
+        }
+        
         
         itemsEl.appendChild(topDiv);
     }

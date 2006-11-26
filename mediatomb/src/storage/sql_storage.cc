@@ -386,9 +386,21 @@ void SQLStorage::addObject(Ref<CdsObject> obj, int *changedContainer)
 
 void SQLStorage::updateObject(zmm::Ref<CdsObject> obj, int *changedContainer)
 {
-    if (IS_FORBIDDEN_CDS_ID(obj->getID()))
-        throw _Exception(_("tried to update an object with a forbidden ID (")+obj->getID()+")!");
-    Ref<Array<AddUpdateTable> > data = _addUpdateObject(obj, true, changedContainer);
+    Ref<Array<AddUpdateTable> > data;
+    if (obj->getID() == CDS_ID_FS_ROOT)
+    {
+        data = Ref<Array<AddUpdateTable> >(new Array<AddUpdateTable>(1));
+        Ref<Dictionary> cdsObjectSql(new Dictionary());
+        data->append(Ref<AddUpdateTable> (new AddUpdateTable(_(CDS_OBJECT_TABLE), cdsObjectSql)));
+        cdsObjectSql->put(_("dc_title"), quote(obj->getTitle()));
+        cdsObjectSql->put(_("upnp_class"), quote(obj->getClass()));
+    }
+    else
+    {
+        if (IS_FORBIDDEN_CDS_ID(obj->getID()))
+            throw _Exception(_("tried to update an object with a forbidden ID (")+obj->getID()+")!");
+        data = _addUpdateObject(obj, true, changedContainer);
+    }
     for (int i = 0; i < data->size(); i++)
     {
         Ref<AddUpdateTable> addUpdateTable = data->get(i);
@@ -509,7 +521,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     {
         *qb << "f.id = " << objectID << " LIMIT 1";
     }
-    log_debug("QUERY: %s\n", qb->toString().c_str());
+    //log_debug("QUERY: %s\n", qb->toString().c_str());
     res = select(qb->toString());
     
     Ref<Array<CdsObject> > arr(new Array<CdsObject>());
