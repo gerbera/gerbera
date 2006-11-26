@@ -623,6 +623,7 @@ int SQLStorage::findObjectIDByPath(String fullpath)
 
 int SQLStorage::ensurePathExistence(String path, int *changedContainer)
 {
+    *changedContainer = INVALID_OBJECT_ID;
     String cleanPath = path.reduce(DIR_SEPARATOR);
     if (cleanPath == DIR_SEPARATOR)
         return CDS_ID_FS_ROOT;

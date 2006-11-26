@@ -262,16 +262,6 @@ void ContentManager::_addFile(String path, bool recursive, bool hidden)
     initScripting();
 #endif
     
-    // _addFile2(path, recursive);
-    // return;
-    
-    /*
-    if (path.charAt(path.length() - 1) == '/')
-    {
-        path = path.substring(0, path.length() - 1);
-    }
-    */
-
     Ref<Storage> storage = Storage::getInstance();
     
     Ref<UpdateManager> um = UpdateManager::getInstance();
@@ -318,6 +308,18 @@ void ContentManager::_removeObject(int objectID, bool all)
     //loadAccounting();
 }
 
+int ContentManager::ensurePathExistence(zmm::String path)
+{
+    int updateID;
+    int containerID = Storage::getInstance()->ensurePathExistence(path, &updateID);
+    if (updateID != INVALID_OBJECT_ID)
+    {
+        UpdateManager::getInstance()->containerChanged(updateID);
+        SessionManager::getInstance()->containerChangedUI(updateID);
+    }
+    return containerID;
+}
+
 void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t scanMode, scan_level_t scanLevel)
 {
     log_debug("start\n");
@@ -362,7 +364,6 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
 
     if (containerID == INVALID_OBJECT_ID)
     {
-        int updateID = INVALID_OBJECT_ID; 
         if (!check_path(adir->getLocation(), true))
         {
             adir->setObjectID(INVALID_OBJECT_ID);
@@ -378,12 +379,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
             }
         }
 
-        containerID = Storage::getInstance()->ensurePathExistence(adir->getLocation(), &updateID);
-        if (updateID != INVALID_OBJECT_ID)
-        {
-            UpdateManager::getInstance()->containerChanged(updateID);
-            SessionManager::getInstance()->containerChangedUI(updateID);
-        }
+        containerID = ensurePathExistence(adir->getLocation());
         adir->setObjectID(containerID);
         location = adir->getLocation();
     }
@@ -1057,6 +1053,51 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
         Ref<CMTask> task(new CMRemoveObjectTask(objectID, all));
         //task->setDescription(desc->toString());
         task->setDescription(_("description missing!!!!!!!!!!!"));
+        Ref<Storage> storage = Storage::getInstance();
+        String path;
+        try
+        {
+            Ref<CdsObject> obj = storage->loadObject(objectID);
+            path = obj->getLocation(); 
+        }
+        catch (Exception e)
+        {
+            log_debug("trying to remove an object ID which is no longer in the database! %d\n", objectID);
+        }
+
+        AUTOLOCK(mutex);
+        int i;
+        int qsize = taskQueue1->size();
+         
+        for (i = 0; i < qsize; i++)
+        {
+            Ref<CMTask> t = taskQueue1->get(i);
+            if (t->getID() == AddFile)
+            {
+                log_debug("comparing, task path: %s, remove path: %s\n", RefCast(t, CMAddFileTask)->getPath().c_str(), path.c_str());
+                if ((RefCast(t, CMAddFileTask)->getPath().startsWith(path)))
+                {
+                    log_debug("Invalidating task with path %s\n", RefCast(t, CMAddFileTask)->getPath().c_str());
+                    t->invalidate();
+                }
+            }
+        }
+
+        qsize = taskQueue2->size();
+        for (i = 0; i < qsize; i++)
+        {
+            Ref<CMTask> t = taskQueue2->get(i);
+            if (t->getID() == AddFile)
+            {
+                log_debug("comparing, task path: %s, remove path: %s\n", RefCast(t, CMAddFileTask)->getPath().c_str(), path.c_str());
+                if ((RefCast(t, CMAddFileTask)->getPath().startsWith(path)))
+                {
+                    t->invalidate();
+                    log_debug("Invalidating task with path %s\n", RefCast(t, CMAddFileTask)->getPath().c_str());
+                }
+            }
+        }
+
         addTask(task);
     }
     else
@@ -1162,6 +1203,11 @@ CMAddFileTask::CMAddFileTask(String path, bool recursive, bool hidden) : CMTask(
     this->recursive = recursive;
     this->hidden = hidden;
     this->taskID = AddFile;
+}
+
+String CMAddFileTask::getPath()
+{
+    return path;
 }
 
 void CMAddFileTask::run()

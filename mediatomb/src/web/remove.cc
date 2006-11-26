@@ -56,7 +56,7 @@ void web::remove::process()
     int objectID = intParam(_("object_id"));
     bool all = intParam(_("all"));
     
-    ContentManager::getInstance()->removeObject(objectID, false, all);
+    ContentManager::getInstance()->removeObject(objectID, true, all);
     
     log_debug("remove: returning\n");
 }
