@@ -1121,7 +1121,8 @@ void ContentManager::threadProc()
 //        log_debug(("Async START %s\n", task->getDescription().c_str()));
         try
         {
-            task->run();
+            if (task->isValid())
+                task->run();
         }
         catch (Exception e)
         {
@@ -1265,23 +1266,43 @@ void ContentManager::removeAutoscanDirectory(String location)
 CMTask::CMTask() : Object()
 {
     cm = ContentManager::getInstance().getPtr();
+    valid = true;
+    taskID = Invalid;
 }
+
 void CMTask::setDescription(String description)
 {
     this->description = description;
 }
+
 String CMTask::getDescription()
 {
     return description;
 }
 
+task_id_t CMTask::getID()
+{
+    return taskID;
+}
+
+void CMTask::invalidate()
+{
+    valid = false;
+}
+
+bool CMTask::isValid()
+{
+    return valid;
+}
 
 CMAddFileTask::CMAddFileTask(String path, bool recursive, bool hidden) : CMTask()
 {
     this->path = path;
     this->recursive = recursive;
     this->hidden = hidden;
+    this->taskID = AddFile;
 }
+
 void CMAddFileTask::run()
 {
     log_debug("running add file task with path %s recursive: %d\n", path.c_str(), recursive);
@@ -1292,6 +1313,7 @@ CMRemoveObjectTask::CMRemoveObjectTask(int objectID, bool all) : CMTask()
 {
     this->objectID = objectID;
     this->all = all;
+    this->taskID = RemoveObject;
 }
 
 void CMRemoveObjectTask::run()
@@ -1304,6 +1326,7 @@ CMRescanDirectoryTask::CMRescanDirectoryTask(int objectID, int scanID, scan_mode
     this->scanID = scanID;
     this->scanMode = scanMode;
     this->objectID = objectID;
+    this->taskID = RescanDirectory;
 }
 
 void CMRescanDirectoryTask::run()
@@ -1324,7 +1347,10 @@ void CMRescanDirectoryTask::run()
 }
 
 CMLoadAccountingTask::CMLoadAccountingTask() : CMTask()
-{}
+{
+    this->taskID = LoadAccounting;
+}
+
 void CMLoadAccountingTask::run()
 {
     cm->_loadAccounting();

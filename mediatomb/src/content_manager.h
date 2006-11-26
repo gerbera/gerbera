@@ -45,16 +45,31 @@
 
 class ContentManager;
 
+typedef enum task_id_t
+{
+    Invalid,
+    AddFile,
+    RemoveObject,
+    LoadAccounting,
+    RescanDirectory
+};
+
 class CMTask : public zmm::Object
 {
 protected:
     ContentManager *cm;
     zmm::String description;
+    task_id_t taskID;
+    bool valid;
+    
 public:
     CMTask();
     virtual void run() = 0;
     void setDescription(zmm::String description);
     zmm::String getDescription();
+    task_id_t getID();
+    bool isValid();
+    void invalidate();
 };
 
 class CMAddFileTask : public CMTask
