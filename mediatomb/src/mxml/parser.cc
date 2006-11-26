@@ -55,7 +55,12 @@ enum xml_parse_state
     XML_DECL_TEXT,
     XML_DECL_CLOSE,
     XML_PARSE_TAG,
-    XML_PARSE_TAG_TEXT
+    XML_PARSE_TAG_TEXT,
+    XML_COMMENT_START,
+    XML_COMMENT_START_NEXT,
+    XML_COMMENT_SKIP,
+    XML_COMMENT_END_SKIP,
+    XML_COMMENT_END
 };
 
 int readChar(Ref<Context> ctx, Ref<Input> input)
@@ -155,12 +160,72 @@ Ref<Element> Parser::parse(Ref<Context> ctx, Ref<Input> input, String parentTag,
                     state = XML_DECL_TEXT;
                     break;
                 }
+                else if (c == '!')
+                {
+                    state = XML_COMMENT_START;
+                    break;
+                }
                 else
                 {
                     *buf << c;
                     state = XML_TAG_NAME;
                     break;
                 }
+            }
+            case XML_COMMENT_START:
+            {
+                if (c == '-')
+                {
+                    state = XML_COMMENT_START_NEXT;
+                    break;
+                }
+                
+                THROW_ERROR(_("unexpected symbol:") + c);
+            }
+            case XML_COMMENT_START_NEXT:
+            {
+                if (c == '-')
+                {
+                    state = XML_COMMENT_SKIP;
+                    break;
+                }
+
+                THROW_ERROR(_("unexpected symbol:") + c);
+            }
+            case XML_COMMENT_SKIP:
+            {
+                if (c == '-')
+                {
+                    state = XML_COMMENT_END_SKIP;
+                    break;
+                }
+
+                state = XML_COMMENT_SKIP;
+                break;
+            }
+            case XML_COMMENT_END_SKIP:
+            {
+                if (c == '-')
+                {
+                    state = XML_COMMENT_END;
+                }
+                else
+                {
+                    state = XML_COMMENT_SKIP;
+                }
+                break;
+            }
+            case XML_COMMENT_END:
+            {
+                if (c == '>')
+                {
+                    state = XML_SKIP;
+                }
+                else
+                {
+                    state = XML_COMMENT_SKIP;
+                }
+                break;
             }
             case XML_DECL_TEXT:
             {
