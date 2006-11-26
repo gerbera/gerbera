@@ -418,8 +418,15 @@ void ConfigManager::validate(String serverhome)
 void ConfigManager::prepare_udn()
 {
     bool need_to_save = false;
-    
-    Ref<Element> element = root->getChild(_("server"))->getChild(_("udn"));
+ 
+    if (root->getName() != "config")
+        return;
+
+    Ref<Element> server = root->getChild(_("server"));
+    if (server == nil)
+        return;
+
+    Ref<Element> element = server->getChild(_("udn"));
     if (element == nil || element->getText() == nil || element->getText() == "")
     {
         char   uuid_str[37];
@@ -490,6 +497,10 @@ void ConfigManager::load(String filename)
     this->filename = filename;
     Ref<Parser> parser(new Parser());
     root = parser->parseFile(filename);
+    if (root == nil)
+    {
+        throw _Exception(_("Unable to parse server configuration!"));
+    }
 }
 
 String ConfigManager::getOption(String xpath, String def)
