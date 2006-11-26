@@ -120,6 +120,11 @@ namespace zmm
             return ret;
         }
         
+        T get(int index)
+        {
+            return data[ (queueBegin + index) % capacity ];
+        }
+        
     protected:
         T *data;
         T emptyType;
