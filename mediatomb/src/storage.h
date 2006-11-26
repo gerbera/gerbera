@@ -126,23 +126,40 @@ public:
     virtual zmm::String buildContainerPath(int parentID, zmm::String title) = 0;
     
     virtual void updateObject(zmm::Ref<CdsObject> object, int *changedContainer) = 0;
-
+    
     virtual zmm::Ref<zmm::Array<CdsObject> > browse(zmm::Ref<BrowseParam> param) = 0;
     virtual zmm::Ref<zmm::Array<zmm::StringBase> > getMimeTypes() = 0;
-
+    
     //virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param) = 0;
     
-    //virtual zmm::Ref<CdsObject> findObjectByTitle(zmm::String title, int parentID) = 0;
+    /// \brief Loads a given (pc directory) object, identified by the given path
+    /// from the database
+    /// \param path the path of the object; object is interpreted as directory
+    /// if the path ends with DIR_SEPERATOR, as file otherwise
+    /// multiple DIR_SEPERATOR are irgnored
+    /// \return the CdsObject
     virtual zmm::Ref<CdsObject> findObjectByPath(zmm::String path) = 0;
-    virtual zmm::Ref<CdsObject> findObjectByFilename(zmm::String path) = 0;
+    
+    /// \brief checks for a given (pc directory) object, identified by the given path
+    /// from the database
+    /// \param path the path of the object; object is interpreted as directory
+    /// if the path ends with DIR_SEPERATOR, as file otherwise
+    /// multiple DIR_SEPERATOR are irgnored
+    /// \return the obejectID
     virtual int findObjectIDByPath(zmm::String fullpath) = 0;
+    
+    /// \brief increments the updateIDs for the given objectIDs
+    /// \param ids pointer to the array of ids
+    /// \param size number of entries in the given array
+    /// \return a String for UPnP: a CSV list; for every existing object:
+    ///  "id,update_id"
     virtual zmm::String incrementUpdateIDs(int *ids, int size) = 0;
     
     /* utility methods */
     virtual zmm::Ref<CdsObject> loadObject(int objectID) = 0;
     virtual int getChildCount(int contId, bool containers = true, bool items = true) = 0;
     
-    /// \brief Removed the object identified by the objectID from the database.
+    /// \brief Removes the object identified by the objectID from the database.
     /// all references will be automatically removed. If the object is
     /// a container, all children will be also removed automatically. If
     /// the object is a reference to another object, the "all" flag
@@ -157,17 +174,6 @@ public:
     virtual int removeObject(int objectID, bool all, int *objectType = NULL) = 0;
     
     //virtual zmm::Ref<zmm::Array<CdsObject> > getObjectPath(int objectID);
-    
-    /// \brief Determines if a folder given by it's full path is in the database
-    /// \param path the path of the folder
-    /// \return objectID if the folder exits, otherwise a negaive value
-    virtual int isFolderInDatabase(zmm::String path) = 0;
-    
-    /// \brief Determines if a file given by it's name is in the database.
-    /// \param parentID parent container
-    /// \param filename name of the file as stored on disk
-    /// \return objectID if file exists in the database, otherwise a negative value
-    virtual int isFileInDatabase(zmm::String path) = 0;
     
     /// \brief Get all objects under the given parentID.
     /// \param parentID parent container

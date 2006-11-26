@@ -71,11 +71,9 @@ Ref<RExp> reMimetype;
 
 static String get_filename(String path)
 {
-    if (path.charAt(path.length() - 1) == '/') // cut off trailing slash
-    {
+    if (path.charAt(path.length() - 1) == DIR_SEPARATOR) // cut off trailing slash
         path = path.substring(0, path.length() - 1);
-    }
-    int pos = path.rindex('/');
+    int pos = path.rindex(DIR_SEPARATOR);
     if (pos < 0)
         return path;
     else
@@ -250,7 +248,6 @@ void ContentManager::_addFile(String path, bool recursive, bool hidden)
 {
     if (hidden == false)
     {
-        
         String filename = get_filename(path);
         if (string_ok(filename) && filename.charAt(0) == '.')
             return;
@@ -443,7 +440,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
             }
         }
 
-        path = location + "/" + name; 
+        path = location + DIR_SEPARATOR + name; 
         ret = stat(path.c_str(), &statbuf);
         if (ret != 0)
         {
@@ -453,7 +450,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
 
         if (S_ISREG(statbuf.st_mode))
         {
-            int objectID = storage->isFileInDatabase(String(path));
+            int objectID = storage->findObjectIDByPath(String(path));
             if (objectID > 0)
             {
                 list->remove(objectID);
@@ -487,7 +484,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
         }
         else if (S_ISDIR(statbuf.st_mode))
         {
-            int objectID = storage->isFolderInDatabase(path);
+            int objectID = storage->findObjectIDByPath(path);
             if (objectID > 0)
             {
                 list->remove(objectID);
@@ -536,7 +533,7 @@ void ContentManager::addRecursive(String path, bool hidden)
         throw _Exception(_("could not list directory ")+
                         path + " : " + strerror(errno));
     }
-    int parentID = storage->findObjectIDByPath(path + "/");
+    int parentID = storage->findObjectIDByPath(path + DIR_SEPARATOR);
     struct dirent *dent;
     while (((dent = readdir(dir)) != NULL) && (!shutdownFlag))
     {
@@ -554,7 +551,7 @@ void ContentManager::addRecursive(String path, bool hidden)
             else if (hidden == false)
                 continue;
         }
-        String newPath = path + "/" + name;
+        String newPath = path + DIR_SEPARATOR + name;
 
         if (ConfigManager::getInstance()->getConfigFilename() == newPath)
             continue;
@@ -563,7 +560,7 @@ void ContentManager::addRecursive(String path, bool hidden)
         {
             Ref<CdsObject> obj = nil;
             if (parentID > 0)
-                obj = storage->findObjectByFilename(String(newPath));
+                obj = storage->findObjectByPath(String(newPath));
             if (obj == nil) // create object
             {
                 obj = createObjectFromFile(newPath);
@@ -927,7 +924,7 @@ String ContentManager::mimetype2upnpclass(String mimeType)
     String upnpClass = mimetype_upnpclass_map->get(mimeType);
     if (upnpClass != nil)
         return upnpClass;
-    // try to match foo/*
+    // try to match foo
     Ref<Array<StringBase> > parts = split_string(mimeType, '/');
     if (parts->size() != 2)
         return nil;
@@ -961,142 +958,6 @@ void ContentManager::reloadScripting()
 	initScripting();
 }
 #endif // HAVE_JS
-
-/* experimental file adding */
-/*
-void ContentManager::addFile2(String path, int recursive)
-{
-#ifdef HAVE_JS
-    initScripting();
-#endif
-
-    if (path.charAt(path.length() - 1) == '/')
-    {
-        path = path.substring(0, path.length() - 1);
-    }
-    Ref<Storage> storage = Storage::getInstance();
-
-    Ref<Array<StringBase> > parts = split_string(path, '/');
-    String curParentID = "0";
-    String curPath = "";
-    Ref<CdsObject> obj = storage->loadObject("0"); // root container
-
-    Ref<UpdateManager> um = UpdateManager::getInstance();
-    Ref<StringConverter> f2i = StringConverter::f2i();
-
-    for (int i = 0; i < parts->size(); i++)
-    {
-        String part = parts->get(i);
-        curPath = curPath + "/" + part;
-
-        obj = storage->findObjectByTitle(f2i->convert(part), curParentID);
-
-        if (obj == nil) // create object
-        {
-            obj = createObjectFromFile(curPath);
-            if (obj == nil) // object ignored
-            {
-                log_debug("file ignored: %s\n", curPath.c_str());
-                return;
-            }
-            obj->setParentID(curParentID);
-            addObject(obj);
-            um->containerChanged(curParentID);
-        }
-        curParentID = obj->getID();
-    }
-#ifdef HAVE_JS
-    if (IS_CDS_ITEM(obj->getObjectType()))
-        scripting->processCdsObject(obj);
-#endif
-
-    if (recursive && IS_CDS_CONTAINER(obj->getObjectType()))
-    {
-        addRecursive(path, curParentID);
-    }
-    um->flushUpdates();
-}
-*/
-
-/* scans the given directory and adds everything recursively */
-/*
-void ContentManager::addFile2(Ref<DirStack> dirStack, String parentID)
-{
-    Ref<StringConverter> f2i = StringConverter::f2i();
-
-    Ref<UpdateManager> um = UpdateManager::getInstance();
-    Ref<Storage> storage = Storage::getInstance();
-    DIR *dir = opendir(path.c_str());
-    if (! dir)
-    {
-        throw _Exception(_("could not list directory ")+
-                        path + " : " + strerror(errno));
-    }
-    struct dirent *dent;
-    while ((dent = readdir(dir)) != NULL)
-    {
-        char *name = dent->d_name;
-        if (name[0] == '.')
-        {
-            if (name[1] == 0)
-            {
-                continue;
-            }
-            else if (name[1] == '.' && name[2] == 0)
-            {
-                continue;
-            }
-        }
-        String newPath = path + "/" + name;
-        try
-        {
-            Ref<CdsObject> obj = storage->findObjectByTitle(f2i->convert(name), parentID);
-            if (obj == nil) // create object
-            {
-                obj = createObjectFromFile(newPath);
-                if (obj == nil) // object ignored
-                {
-                    log_debug("file ignored: %s\n", newPath.c_str());
-                    return;
-                }
-                obj->setParentID(parentID);
-                addObject(obj);
-                um->containerChanged(parentID);
-            }
-#ifdef HAVE_JS
-	    if (IS_CDS_ITEM(obj->getObjectType()))
-	    {
-		scripting->processCdsObject(obj);
-	    }
-#endif
-            if (IS_CDS_CONTAINER(obj->getObjectType()))
-            {
-                addRecursive(newPath, obj->getID());
-            }
-        }
-        catch(Exception e)
-        {
-            log_debug("skipping %s : %s\n", newPath.c_str(), e.getMessage().c_str());
-        }
-    }
-    closedir(dir);
-}
-*/
-
-/* DirStack object */
-/*
-DirStack::DirStack(String path) : Object()
-{
-    pathbuf = Ref<StringBuffer>(new StringBuffer(path));
-    dirstack = (dirstack_t *)MALLOC(sizeof(dirstack_t) * 20);
-}
-
-DirStack::init(String path)
-{
-    Ref<Array<StringBase> > parts = split_string(path, '/');
-    
-}
-*/
 
 void ContentManager::threadProc()
 {
@@ -1360,201 +1221,4 @@ CMAccounting::CMAccounting() : Object()
 {
     totalFiles = 0;
 }
-
-
-/* ************** experimental file adding ************** */
-/* dir cache */
-
-/*
-DirCacheEntry::DirCacheEntry() : Object()
-{}
-
-DirCache::DirCache() : Object()
-{
-    capacity = DEFAULT_DIR_CACHE_CAPACITY;
-    size = 0;
-    // assume the average filelength to be 10 chars
-    buffer = Ref<StringBuffer>(new StringBuffer(capacity * 10));
-    entries = Ref<Array<DirCacheEntry> >(new Array<DirCacheEntry>(capacity));
-}
-void DirCache::push(String name)
-{
-    Ref<DirCacheEntry> entry;
-    if (size == capacity)
-    {
-    	entry = Ref<DirCacheEntry>(new DirCacheEntry());
-	    entries->append(entry);
-    }
-    else
-        entry = entries->get(size);
-    *buffer << "/" << name;
-    entry->end = buffer->length();
-    size++;        
-}
-void DirCache::pop()
-{
-    if (size <= 0)
-        return;
-    size--;
-    if (size == 0)
-        buffer->setLength(0);
-    else
-        buffer->setLength(entries->get(size - 1)->end);
-}
-void DirCache::clear()
-{
-    size = 0;
-}
-void DirCache::setPath(zmm::String path)
-{
-    int i;
-    Ref<Array<StringBase> > parts = split_string(path, '/');
-    size = parts->size();
-    for (i = 0; i < parts->size(); i++)
-    {
-        push(String(parts->get(i)));
-    }
-}
-String DirCache::getPath()
-{
-    return buffer->toString();
-}
-
-int DirCache::createContainers()
-{
-    Ref<Storage> storage = Storage::getInstance();
-    Ref<ContentManager> cm = ContentManager::getInstance();
-    Ref<StringConverter> f2i = StringConverter::f2i();
-
-    Ref<CdsObject> cont;
-
-    int prev_end;
-    for (int i = 0; i < size; i++)
-    {
-    	Ref<DirCacheEntry> entry = entries->get(i);
-        if (entry->id != 0)
-            continue;
-
-	    prev_end = (i == 0) ? 1 : entries->get(i - 1)->end + 1;
-        String name = String(buffer->c_str() + prev_end, entry->end - prev_end);
-        /// \todo: PC Directory id configurable
-        int parentID = ((i == 0) ? 1 : entries->get(i - 1)->id);
-        String conv_name = f2i->convert(name);
-        Ref<CdsObject> obj = storage->findObjectByTitle(conv_name, parentID);
-        if (obj != nil)
-        {
-            entry->id = obj->getID();
-            continue;
-        }
-        String path(buffer->c_str(), entry->end);
-        cont = Ref<CdsObject>(new CdsContainer());
-        cont->setParentID(parentID);
-        cont->setTitle(conv_name);
-        cont->setLocation(path);
-        cm->addObject(cont);
-        entry->id = cont->getID();
-    }
-    return cont->getID();
-}
-*/
-/*
-void ContentManager::_addFile2(String path, bool recursive)
-{
-#ifdef HAVE_JS
-    initScripting();
-#endif
-
-    if (path.charAt(path.length() - 1) == '/')
-        path = path.substring(0, path.length() - 1);
-    
-    int slashPos = path.rindex('/');
-    if (slashPos < 0)
-        throw _Exception(_("only absolute paths are accepted"));
-
-    Ref<DirCache> dirCache(new DirCache());
-    // if not in root container initialize dirCache's path
-    if (slashPos > 0)
-        dirCache->setPath(path.substring(0, slashPos));
-
-    addRecursive2(dirCache, path.substring(slashPos + 1), recursive);
-}
-
-void ContentManager::addRecursive2(Ref<DirCache> dirCache, String filename, bool recursive)
-{
-    String parentID;
-    Ref<CdsObject> obj;
-    Ref<UpdateManager> um = UpdateManager::getInstance();
-
-    String path = dirCache->getPath() + '/' + filename;
-
-    struct stat statbuf;
-    int ret;
-
-    ret = stat(path.c_str(), &statbuf);
-    if (ret != 0)
-        throw _Exception(_("Failed to stat ") + path);
-
-    if (S_ISREG(statbuf.st_mode)) // item
-    {
-        obj = createObjectFromFile(dirCache->getPath() +'/'+ filename);
-        if (obj != nil)
-        {
-            int parentID = dirCache->createContainers();
-            obj->setParentID(parentID);
-#ifdef HAVE_JS
-    	    if (IS_CDS_ITEM(obj->getObjectType()))
-	        {
-                if (scripting != nil)
-    	            scripting->processCdsObject(obj);
-    	    }
-#endif
-            addObject(obj);
-            um->containerChanged(parentID);
-        }
-        return;
-    }
-    if (! recursive)
-        return;
-    if (S_ISDIR(statbuf.st_mode)) // container
-    {
-        DIR *dir = opendir(path.c_str());
-        if (! dir)
-        {
-            throw _Exception(_("could not list directory ") +
-                            path + " : " + strerror(errno));
-        }
-        struct dirent *dent;
-
-        dirCache->push(filename);
-        while ((dent = readdir(dir)) != NULL)
-        {
-            char *name = dent->d_name;
-            if (name[0] == '.')
-            {
-                if (name[1] == 0)
-                {
-                    continue;
-                }
-                else if (name[1] == '.' && name[2] == 0)
-                {
-                    continue;
-                }
-            }
-            try
-            {
-                addRecursive2(dirCache, String(name), recursive);
-            }
-            catch(Exception e)
-            {
-                log_warning("Skipping %s/%s : %s\n", dirCache->getPath().c_str(), filename.c_str(),
-                       e.getMessage().c_str());
-            }
-        }
-        closedir(dir);
-        dirCache->pop();
-    }
-    else
-        throw _Exception(_("unsupported file type: ") + path);
-}
-*/
 

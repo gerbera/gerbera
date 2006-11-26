@@ -296,7 +296,6 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
                 String path = pathAr->get(0);
                 int parentID = ensurePathExistence(path, changedContainer);
                 item->setParentID(parentID);
-                //String filename = pathAr->get(1);
                 String dbLocation = addLocationPrefix(LOC_FILE_PREFIX, loc);
                 cdsObjectSql->put(_("location"), quote(dbLocation));
                 cdsObjectSql->put(_("location_hash"), quote(stringHash(dbLocation)));
@@ -577,67 +576,6 @@ Ref<Array<StringBase> > SQLStorage::getMimeTypes()
     return arr;
 }
 
-int SQLStorage::isFolderInDatabase(String fullpath)
-{
-    fullpath = fullpath.reduce(DIR_SEPARATOR);
-    Ref<Array<StringBase> > pathAr = split_path(fullpath);
-    String path = pathAr->get(0);
-    String filename = pathAr->get(1);
-    
-    if (! string_ok(path) && ! string_ok(filename))
-        return -3;
-    
-    if (! string_ok(filename))
-        fullpath = path;
-    else if (! string_ok(path))
-        fullpath = _("/") + filename;
-    
-    Ref<StringBuffer> qb(new StringBuffer());
-    String dbLocation = addLocationPrefix(LOC_DIR_PREFIX, fullpath);
-    *qb << "SELECT " << TQ("id") << " FROM " << TQ(CDS_OBJECT_TABLE) <<
-            " WHERE " << TQ("location_hash") << " = " << stringHash(dbLocation)
-            << " AND " << TQ("location") << " = " << quote(dbLocation)
-            << " AND " << TQ("ref_id") << " IS NULL "
-            "LIMIT 1";
-     Ref<SQLResult> res = select(qb->toString());
-     if (res == nil)
-         return -2;
-     Ref<SQLRow> row = res->nextRow();
-     if (row == nil)
-         return -1;
-     return row->col(0).toInt();
-}
-
-int SQLStorage::isFileInDatabase(String path)
-{
-    Ref<SQLRow> row = _findObjectByFilename(path);
-    if (row == nil)
-        return -1;
-    return row->col(_id).toInt();
-}
-
-Ref<SQLRow> SQLStorage::_findObjectByFilename(String path)
-{
-    String dbLocation = addLocationPrefix(LOC_FILE_PREFIX, path);
-    Ref<StringBuffer> qb(new StringBuffer());
-    *qb << SQL_QUERY <<
-        " WHERE " SEL_F_QUOTED "." << TQ("location_hash") << " = " << stringHash(dbLocation)
-        << " AND " SEL_F_QUOTED "." << TQ("location") << " = " << quote(dbLocation)
-        << " AND " SEL_F_QUOTED "." << TQ("ref_id") << " IS NULL "
-        "LIMIT 1";
-        
-    Ref<SQLResult> res = select(qb->toString());
-    return res->nextRow();
-}
-
-Ref<CdsObject> SQLStorage::findObjectByFilename(String path)
-{
-    Ref<SQLRow> row = _findObjectByFilename(path);
-    if (row == nil)
-        return nil;
-    return createObjectFromRow(row);
-}
-
 Ref<SQLRow> SQLStorage::_findObjectByPath(String fullpath)
 {
     //log_debug("fullpath: %s\n", fullpath.c_str());
@@ -648,26 +586,22 @@ Ref<SQLRow> SQLStorage::_findObjectByPath(String fullpath)
     String filename = pathAr->get(1);
     
     Ref<StringBuffer> qb(new StringBuffer());
-    bool file = true;
-    if (! string_ok(filename) || ! string_ok(path))
-    {
-        if (! string_ok(filename) && ! string_ok(path))
-            throw _Exception(_("tried to add an empty path"));
-        
-        file = false;
-    }
+    bool file = string_ok(filename);
+    
     String dbLocation;
     if (file)
         dbLocation = addLocationPrefix(LOC_FILE_PREFIX, fullpath);
     else
         dbLocation = addLocationPrefix(LOC_DIR_PREFIX, path);
-    *qb << SQL_QUERY <<
-            " WHERE " SEL_F_QUOTED "." << TQ("location_hash") << " = " << stringHash(dbLocation)
+    *qb << SQL_QUERY
+            << " WHERE " SEL_F_QUOTED "." << TQ("location_hash") << " = " << quote(stringHash(dbLocation))
             << " AND " SEL_F_QUOTED "." << TQ("location") << " = " << quote(dbLocation)
             << " AND " SEL_F_QUOTED "." << TQ("ref_id") << " IS NULL "
             "LIMIT 1";
     
     Ref<SQLResult> res = select(qb->toString());
+    if (res == nil)
+        throw _Exception(_("error while doing select: ") + qb->toString());
     return res->nextRow();
 }
 
@@ -689,19 +623,28 @@ int SQLStorage::findObjectIDByPath(String fullpath)
 
 int SQLStorage::ensurePathExistence(String path, int *changedContainer)
 {
-    path = path.reduce(DIR_SEPARATOR);
+    String cleanPath = path.reduce(DIR_SEPARATOR);
+    if (cleanPath == DIR_SEPARATOR)
+        return CDS_ID_FS_ROOT;
+    if (cleanPath.charAt(cleanPath.length() - 1) == DIR_SEPARATOR) // cut off trailing slash
+        cleanPath = cleanPath.substring(0, cleanPath.length() - 1);
+    return _ensurePathExistence(cleanPath, changedContainer);
+}
+
+int SQLStorage::_ensurePathExistence(String path, int *changedContainer)
+{
+    if (path == DIR_SEPARATOR)
+        return CDS_ID_FS_ROOT;
     Ref<CdsObject> obj = findObjectByPath(path + DIR_SEPARATOR);
-    if (obj != nil) return obj->getID();
+    if (obj != nil)
+        return obj->getID();
     Ref<Array<StringBase> > pathAr = split_path(path);
     String parent = pathAr->get(0);
     String folder = pathAr->get(1);
     int parentID;
-    if (string_ok(parent))
-        parentID = ensurePathExistence(parent, changedContainer);
-    else
-        parentID = CDS_ID_FS_ROOT;
-    Ref<StringConverter> f2i = StringConverter::f2i();
+    parentID = ensurePathExistence(parent, changedContainer);
     
+    Ref<StringConverter> f2i = StringConverter::f2i();
     if (changedContainer != NULL && *changedContainer == INVALID_OBJECT_ID)
         *changedContainer = parentID;
     return createContainer(parentID, f2i->convert(folder), path, false);
@@ -720,7 +663,7 @@ int SQLStorage::createContainer(int parentID, String name, String path, bool isV
         << ", " << quote(_(UPNP_DEFAULT_CLASS_CONTAINER))
         << ", " << quote(name)
         << ", " << quote(dbLocation)
-        << ", " << stringHash(dbLocation)
+        << ", " << quote(stringHash(dbLocation))
         << ")";
         
     return exec(qb->toString(), true);
@@ -751,15 +694,15 @@ String SQLStorage::buildContainerPath(int parentID, String title)
 void SQLStorage::addContainerChain(String path, int *containerID, int *updateID)
 {
     path = path.reduce(VIRTUAL_CONTAINER_SEPARATOR);
-    if (path == _("/"))
+    if (path == VIRTUAL_CONTAINER_SEPARATOR)
     {
         *containerID = CDS_ID_ROOT;
         return;
     }
     Ref<StringBuffer> qb(new StringBuffer());
     String dbLocation = addLocationPrefix(LOC_VIRT_PREFIX, path);
-    *qb << "SELECT " << TQ("id") << " FROM " << TQ(CDS_OBJECT_TABLE) <<
-            " WHERE " << TQ("location_hash") << " = " << stringHash(dbLocation)
+    *qb << "SELECT " << TQ("id") << " FROM " << TQ(CDS_OBJECT_TABLE)
+            << " WHERE " << TQ("location_hash") << " = " << quote(stringHash(dbLocation))
             << " AND " << TQ("location") << " = " << quote(dbLocation)
             << " LIMIT 1";
     Ref<SQLResult> res = select(qb->toString());
@@ -1185,8 +1128,6 @@ overwritten due to different SQL syntax for MySQL and SQLite3
 
 Ref<AutoscanList> SQLStorage::getAutoscanList(scan_mode_t scanmode)
 {
-    
-    
     #define FLD(field) << TQ('a') << '.' << field <<
     Ref<StringBuffer> q(new StringBuffer());
     *q << "SELECT " FLD("id") "," FLD("scan_level") "," FLD("scan_mode") "," FLD("recursive") "," FLD("hidden") "," FLD("interval") ","
@@ -1225,7 +1166,7 @@ Ref<AutoscanList> SQLStorage::getAutoscanList(scan_mode_t scanmode)
 
 void SQLStorage::addAutoscanDirectory(Ref<AutoscanDirectory> dir)
 {
-    int objectID = isFolderInDatabase(dir->getLocation());
+    int objectID = findObjectIDByPath(dir->getLocation() + DIR_SEPARATOR);
     if (objectID < 0)
         throw _Exception(_("tried to add autoscan directory with illegal location: ") + dir->getLocation());
     Ref<StringBuffer> q(new StringBuffer());

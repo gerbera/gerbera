@@ -42,7 +42,10 @@
 #define _(str) zmm::String::refer(str)
 
 #define MAX_INT_STRING_LENGTH 12
-#define MAX_LONG_STRING_LENGTH 22 // max ulong: 12345678901234567890
+
+//max ulong: 12345678901234567890  ???
+#define MAX_LONG_STRING_LENGTH 22
+
 #define MAX_DOUBLE_STRING_LENGTH 24
 
 namespace zmm
@@ -113,6 +116,8 @@ public:
 
 	int operator==(String other);
 	int operator==(const char *str);
+    int operator==(char c);
+    
 	inline int operator!=(String other)
 	{
 		return ! operator==(other);
@@ -120,6 +125,10 @@ public:
 	inline int operator!=(const char *str)
 	{
 		return ! operator==(str);
+	}
+    inline int operator!=(char c)
+	{
+		return ! operator==(c);
 	}
 
 	inline int operator==(NIL_VAR)

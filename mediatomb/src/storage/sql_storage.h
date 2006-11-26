@@ -91,9 +91,6 @@ public:
     
     //virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param);
     
-    virtual int isFolderInDatabase(zmm::String path);
-    virtual int isFileInDatabase(zmm::String path);
-    
     virtual zmm::Ref<DBRHash<int> > getObjects(int parentID);
     
     virtual bool removeObjects(zmm::Ref<DBRHash<int> > list);
@@ -108,7 +105,6 @@ public:
     
     //virtual zmm::Ref<CdsObject> findObjectByTitle(zmm::String title, int parentID);
     virtual zmm::Ref<CdsObject> findObjectByPath(zmm::String fullpath);
-    virtual zmm::Ref<CdsObject> findObjectByFilename(zmm::String path);
     virtual int findObjectIDByPath(zmm::String fullpath);
     virtual zmm::String incrementUpdateIDs(int *ids, int size);
     
@@ -138,14 +134,12 @@ protected:
     /* helper for createObjectFromRow() */
     zmm::String getRealLocation(int parentID, zmm::String location);
     
-    virtual zmm::Ref<CdsObject> createObjectFromRow(zmm::Ref<SQLRow> row);
+    zmm::Ref<CdsObject> createObjectFromRow(zmm::Ref<SQLRow> row);
     
     /* helper for findObjectByPath and findObjectIDByPath */ 
     zmm::Ref<SQLRow> _findObjectByPath(zmm::String fullpath);
     
-    /* helper for findObjectByFilename and isFileInDatabase */
-    zmm::Ref<SQLRow> _findObjectByFilename(zmm::String path);
-    
+    int _ensurePathExistence(zmm::String path, int *changedContainer);
     
     /* helper class and helper function for addObject and updateObject */
     class AddUpdateTable : public Object

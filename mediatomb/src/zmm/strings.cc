@@ -275,6 +275,12 @@ int String::operator==(const char *other)
 		return ( ! strcmp(base->data, other ) );
 	return 0;
 }
+int String::operator==(char c)
+{
+	if(! base || base->len != 1)
+		return 0;
+    return (c == *(base->data));
+}
 
 String& String::operator=(String other)
 {
@@ -318,8 +324,10 @@ String String::substring(int from)
 }
 String String::substring(int from, int count)
 {
-	if(! base)
+	if(! base || count < 0)
 		return nil;
+    if(count == 0)
+        return _("");
 	if(from + count > base->len)
 		count = base->len - from;
 	String res(count);

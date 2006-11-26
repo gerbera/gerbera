@@ -70,29 +70,27 @@ Ref<Array<StringBase> > split_string(String str, char sep)
             ret->append(part);
             data = pos + 1;
         }
-    }            
+    }
     return ret;
 }
 
 Ref<Array<StringBase> > split_path(String str)
 {
+    if (! string_ok(str))
+        throw _Exception(_("invalid path given to split_path"));
     Ref<Array<StringBase> > ret(new Array<StringBase>());
     int pos = str.rindex(DIR_SEPARATOR);
     const char *data = str.c_str();
     
-    if (pos <= 0)
+    if (pos < 0)
+        throw _Exception(_("relative path given to split_path: ") + str);
+    
+    if (pos == 0)
     {
-        /* no DIR_SEPARATOR or there is only one separator at the beginning */
-        ret->append(_(""));
-        if (pos == 0)
-        {
-            /* there is only one separator at the beginning "/..." or "/" */
-            String filename(data+1);
-            ret->append(filename);
-        }
-        else
-            /* no DIR_SEPARATOR */
-            ret->append(str);
+        /* there is only one separator at the beginning "/..." or "/" */
+        ret->append(_(_DIR_SEPARATOR));
+        String filename(data+1);
+        ret->append(filename);
     }
     else
     {
