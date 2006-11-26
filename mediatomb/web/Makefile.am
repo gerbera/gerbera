@@ -13,14 +13,28 @@ _DIST_FILES_IMAGES = \
 ./icons/nanotree/images/user_16x16.gif \
 ./icons/nanotree/images/plus_last_no_root.gif \
 ./icons/nanotree/images/minus_no_root.gif \
-./icons/nanotree/images/folder_open.gif \
 ./icons/nanotree/images/help_16x16.gif \
 ./icons/nanotree/images/t_no_root.gif \
 ./icons/nanotree/images/t.gif \
-./icons/nanotree/images/folder_closed.gif \
 ./icons/nanotree/images/plus_last.gif \
 ./icons/nanotree/images/lastnode.gif \
-./icons/nanotree/images/plus_nolines.gif
+./icons/nanotree/images/plus_nolines.gif \
+./icons/nanotree/images/document-new.png \
+./icons/nanotree/images/folder-new.png \
+./icons/nanotree/images/folder_closed.png \
+./icons/nanotree/images/folder_open.png \
+./icons/nanotree/images/autoscan_folder_closed.png \
+./icons/nanotree/images/autoscan_folder_open.png \
+./icons/nanotree/images/go-first.png \
+./icons/nanotree/images/go-last.png \
+./icons/nanotree/images/go-next.png \
+./icons/nanotree/images/go-previous.png \
+./icons/nanotree/images/remove_all.png \
+./icons/nanotree/images/remove_this.png \
+./icons/nanotree/images/stock-add.png \
+./icons/nanotree/images/stock_edit.png \
+./icons/nanotree/images/stock_exit.png \
+./icons/nanotree/images/view-refresh.png
 
 _DIST_FILES_JS = \
 ./js/autoscan.js \

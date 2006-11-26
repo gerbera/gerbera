@@ -27,9 +27,9 @@
     $Id$
 */
 
-var closedGif = '/icons/nanotree/images/folder_closed.gif';
-var openGif = '/icons/nanotree/images/folder_open.gif';
-var iconArray = new Array(closedGif,openGif);
+var closedPNG = '/icons/nanotree/images/folder_closed.png';
+var openPNG = '/icons/nanotree/images/folder_open.png';
+var iconArray = new Array(closedPNG,openPNG);
 var lastNodeDb = 'd0';
 var lastNodeFs = 'f0';
 var lastNodeDbWish;
