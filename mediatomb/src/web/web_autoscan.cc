@@ -62,7 +62,7 @@ void web::autoscan::process()
         int objID = intParam(_("object_id"));
         bool recursive = boolParam(_("recursive"));
         bool hidden = boolParam(_("hidden"));
-        bool persistent = boolParam(_("persistent"));
+        //bool persistent = boolParam(_("persistent"));
         int interval = intParam(_("interval"), 0);
         if (interval <= 0 )
         {
@@ -86,7 +86,7 @@ void web::autoscan::process()
                 scan_mode,
                 scan_level,
                 recursive,
-                persistent,
+                false,
                 -1,
                 interval,
                 hidden

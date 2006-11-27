@@ -71,6 +71,8 @@ public:
     virtual zmm::String quote(zmm::String str);
     virtual inline zmm::String quote(int val) { return zmm::String::from(val); }
     virtual inline zmm::String quote(unsigned int val) { return zmm::String::from(val); }
+    virtual inline zmm::String quote(long val) { return zmm::String::from(val); }
+    virtual inline zmm::String quote(unsigned long val) { return zmm::String::from(val); }
     virtual zmm::Ref<SQLResult> select(zmm::String query);
     virtual int exec(zmm::String query, bool getLastInsertId = false);
     virtual void shutdown();

@@ -1143,7 +1143,9 @@ Ref<AutoscanList> SQLStorage::getAutoscanList(scan_mode_t scanmode)
 {
     #define FLD(field) << TQ('a') << '.' << field <<
     Ref<StringBuffer> q(new StringBuffer());
-    *q << "SELECT " FLD("id") "," FLD("scan_level") "," FLD("scan_mode") "," FLD("recursive") "," FLD("hidden") "," FLD("interval") ","
+    *q << "SELECT " FLD("id") "," FLD("scan_level") ","
+       FLD("scan_mode") "," FLD("recursive") "," FLD("hidden") ","
+       FLD("interval") "," FLD("last_modified") ","
        << TQ('t') << "." << TQ("location")
        << " FROM " << TQ(AUTOSCAN_TABLE) << " " << TQ('a')
        << " JOIN " << TQ(CDS_OBJECT_TABLE) << " " << TQ('t')
@@ -1158,9 +1160,9 @@ Ref<AutoscanList> SQLStorage::getAutoscanList(scan_mode_t scanmode)
     {
         String id_str = row->col(0);
         char prefix;
-        String location = stripLocationPrefix(&prefix, row->col(6));
+        String location = stripLocationPrefix(&prefix, row->col(7));
         if (prefix != LOC_DIR_PREFIX)
-            throw _Exception(_("mt_autoscan referred to an object, that was not a directory - id: ") + id_str + "; location: " + row->col(6) + "; prefix: " + prefix);
+            throw _Exception(_("mt_autoscan referred to an object, that was not a directory - id: ") + id_str + "; location: " + row->col(7) + "; prefix: " + prefix);
         
         scan_level_t level = AutoscanDirectory::remapScanlevel(row->col(1));
         scan_mode_t mode = AutoscanDirectory::remapScanmode(row->col(2));
@@ -1169,19 +1171,22 @@ Ref<AutoscanList> SQLStorage::getAutoscanList(scan_mode_t scanmode)
         int interval = 0;
         if (mode == TimedScanMode)
             interval = row->col(5).toInt();
+        time_t last_modified = row->col(6).toLong();
         
         Ref<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, false, -1, interval, hidden));
+        dir->setCurrentLMT(last_modified);
+        dir->updateLMT();
         list->add(dir);
     }
     
     return list;
 }
 
-void SQLStorage::addAutoscanDirectory(Ref<AutoscanDirectory> dir)
+void SQLStorage::addAutoscanDirectory(Ref<AutoscanDirectory> adir)
 {
-    int objectID = findObjectIDByPath(dir->getLocation() + DIR_SEPARATOR);
+    int objectID = findObjectIDByPath(adir->getLocation() + DIR_SEPARATOR);
     if (objectID < 0)
-        throw _Exception(_("tried to add autoscan directory with illegal location: ") + dir->getLocation());
+        throw _Exception(_("tried to add autoscan directory with illegal location: ") + adir->getLocation());
     Ref<StringBuffer> q(new StringBuffer());
     *q << "INSERT INTO " << TQ(AUTOSCAN_TABLE)
         << " (" << TQ("id") << ", "
@@ -1189,13 +1194,15 @@ void SQLStorage::addAutoscanDirectory(Ref<AutoscanDirectory> dir)
         << TQ("scan_mode") << ", "
         << TQ("recursive") << ", "
         << TQ("hidden") << ", "
-        << TQ("interval") << ") VALUES ("
+        << TQ("interval") << ", "
+        << TQ("last_modified") << ") VALUES ("
         << quote(objectID) << ", "
-        << quote(AutoscanDirectory::mapScanlevel(dir->getScanLevel())) << ", "
-        << quote(AutoscanDirectory::mapScanmode(dir->getScanMode())) << ", "
-        << mapBool(dir->getRecursive()) << ", "
-        << mapBool(dir->getHidden()) << ", "
-        << quote(dir->getInterval())
+        << quote(AutoscanDirectory::mapScanlevel(adir->getScanLevel())) << ", "
+        << quote(AutoscanDirectory::mapScanmode(adir->getScanMode())) << ", "
+        << mapBool(adir->getRecursive()) << ", "
+        << mapBool(adir->getHidden()) << ", "
+        << quote(adir->getInterval()) << ", "
+        << quote(adir->getPreviousLMT())
         << ")";
     exec(q->toString());
 }
@@ -1217,4 +1224,11 @@ bool SQLStorage::isAutoscanDirectory(int objectId)
     return (res != nil && res->nextRow() != nil);
 }
 
-
+void SQLStorage::autoscanUpdateLM(zmm::Ref<AutoscanDirectory> adir)
+{
+    Ref<StringBuffer> q(new StringBuffer());
+    *q << "UPDATE " << TQ(AUTOSCAN_TABLE)
+        << " SET " << TQ("last_modified") << " = " << quote(adir->getPreviousLMT())
+        << " WHERE " << TQ("id") << " = " << quote(adir->getObjectID());
+    exec(q->toString());
+}

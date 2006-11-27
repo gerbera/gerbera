@@ -38,6 +38,7 @@ CREATE TABLE "mt_autoscan" (
   "recursive" tinyint unsigned NOT NULL,
   "hidden" tinyint unsigned NOT NULL,
   "interval" integer unsigned default NULL,
+  "last_modified" integer unsigned default NULL,
   CONSTRAINT "mt_autoscan_id" FOREIGN KEY ("id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE INDEX mt_cds_object_ref_id ON mt_cds_object(ref_id);

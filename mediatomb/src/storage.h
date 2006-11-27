@@ -196,9 +196,10 @@ public:
     
     /* autoscan methods */
     virtual zmm::Ref<AutoscanList> getAutoscanList(scan_mode_t scanmode) = 0;
-    virtual void addAutoscanDirectory(zmm::Ref<AutoscanDirectory> dir) = 0;
+    virtual void addAutoscanDirectory(zmm::Ref<AutoscanDirectory> adir) = 0;
     virtual void removeAutoscanDirectory(int objectId) = 0;
     virtual bool isAutoscanDirectory(int objectId) = 0;
+    virtual void autoscanUpdateLM(zmm::Ref<AutoscanDirectory> adir) = 0;
     
     /* static methods */
     static zmm::Ref<Storage> getInstance();
