@@ -66,7 +66,7 @@ namespace zmm
             if (overlap) return capacity;
             if (queueBegin <= queueEnd)
                 return queueEnd - queueBegin;
-            return capacity - queueEnd + queueBegin;
+            return capacity - queueBegin + queueEnd;
         }
         
         inline bool isEmpty()
