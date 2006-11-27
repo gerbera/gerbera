@@ -330,9 +330,12 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
     String path;
     Ref<CdsObject> obj;
 
+    if (scanID == INVALID_SCAN_ID)
+        return; 
+
     Ref<AutoscanDirectory> adir = getAutoscanDirectory(scanID, scanMode);
     if (adir == nil)
-        throw _Exception(_("called with id for nonexistent AutoscanDirectory object"));
+        throw _Exception(_("ID valid but nil returned? this should never happen"));
 
     Ref<Storage> storage = Storage::getInstance();
    
@@ -444,6 +447,11 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
             continue;
         }
 
+        // it is possible that someone hits remove while the container is being scanned
+        // in this case we will invalidate the autoscan entry
+        if (adir->getScanID() == INVALID_SCAN_ID)
+            return;
+
         if (S_ISREG(statbuf.st_mode))
         {
             int objectID = storage->findObjectIDByPath(String(path));
@@ -490,6 +498,18 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
             }
             else
             {
+                // we have to make sure that we will never add a path to the task list
+                // if it is going to be removed by a pending remove task.
+                // this lock will make sure that remove is not in the process of invalidating
+                // the AutocsanDirectories in the autoscan_timed list at the time when we
+                // are checking for validity.
+                AUTOLOCK(mutex);
+                
+                // it is possible that someone hits remove while the container is being scanned
+                // in this case we will invalidate the autoscan entry
+                if (adir->getScanID() == INVALID_SCAN_ID)
+                    return;
+
                 // add directory, recursive, async, hidden flag, low priority
                 addFile(path, true, true, adir->getHidden(), true);
             }
@@ -1065,10 +1085,15 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
             log_debug("trying to remove an object ID which is no longer in the database! %d\n", objectID);
         }
 
+        // make sure to remove possible child autoscan directories from the scanlist 
+        autoscan_timed->removeIfSubdir(path);
+
         AUTOLOCK(mutex);
         int i;
         int qsize = taskQueue1->size();
-         
+        
+        // we have to make sure that a currently running autoscan task will not
+        // launch add tasks for directories that anyway are going to be deleted
         for (i = 0; i < qsize; i++)
         {
             Ref<CMTask> t = taskQueue1->get(i);
@@ -1097,7 +1122,8 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
                 }
             }
         }
-
+        
+        
         addTask(task);
     }
     else
@@ -1132,7 +1158,7 @@ Ref<AutoscanDirectory> ContentManager::getAutoscanDirectory(int scanID, scan_mod
 
 int ContentManager::addAutoscanDirectory(Ref<AutoscanDirectory> dir)
 {
-    int scanID = -1;
+    int scanID = INVALID_SCAN_ID;
     if (dir->getScanMode() == TimedScanMode)
     {
         timerNotify(autoscan_timed->add(dir));
@@ -1240,9 +1266,8 @@ void CMRescanDirectoryTask::run()
 {
     Ref<AutoscanDirectory> dir = cm->getAutoscanDirectory(scanID, scanMode);
     if (dir == nil)
-    {
-        throw _Exception(_("Scan requested but directory is no longer valid!"));
-    }
+        return;
+
     cm->_rescanDirectory(objectID, dir->getScanID(), dir->getScanMode(), dir->getScanLevel());
     dir->decTaskCount();
     

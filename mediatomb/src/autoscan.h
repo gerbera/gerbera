@@ -37,6 +37,8 @@
 #include "sync.h"
 #include "timer.h"
 
+#define INVALID_SCAN_ID -1
+
 ///\brief Scan level - the way how exactly directories should be scanned.
 typedef enum scan_level_t
 {
@@ -74,8 +76,13 @@ public:
     
     /// \brief removes the AutoscanDirectory with the given location
     /// \param location the location to remove
-    /// \return the scanID, that was removed; if nothing removed: a negative value
+    /// \return the scanID, that was removed; if nothing removed: INVALID_SCAN_ID
     int remove(zmm::String location);
+
+    /// \brief removes the AutoscanDirectory if it is a subdirectory of a given location.
+    /// \param parent parent directory.
+    /// \param persistent also remove persistent directories.
+    void removeIfSubdir(zmm::String parent, bool persistent = false);
 
     /*
     /// \brief Add timer for each directory in the list.
@@ -117,7 +124,7 @@ public:
     AutoscanDirectory(zmm::String location, scan_mode_t mode, 
                       scan_level_t level, bool recursive,
                       bool persistent,
-                      int id = -1, unsigned int interval = 0, bool hidden = false);
+                      int id = INVALID_SCAN_ID, unsigned int interval = 0, bool hidden = false);
 
     zmm::String getLocation() { return location; }
 

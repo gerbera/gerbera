@@ -136,7 +136,10 @@ void AutoscanList::remove(int id)
     
     if ((id < 0) || (id >= list->size()))
                 return;
-    
+   
+    Ref<AutoscanDirectory> dir = list->get(id);
+    dir->setScanID(INVALID_SCAN_ID);
+
     if (id == list->size()-1)
     {
         list->removeUnordered(id);
@@ -155,6 +158,8 @@ int AutoscanList::remove(String location)
     {
         if (list->get(i) != nil && location == list->get(i)->getLocation())
         {
+            Ref<AutoscanDirectory> dir = list->get(i);
+            dir->setScanID(INVALID_SCAN_ID);
             if (i == list->size()-1)
             {
                 list->removeUnordered(i);
@@ -166,8 +171,34 @@ int AutoscanList::remove(String location)
             return i;
         }
     }
-    return -1;
+    return INVALID_SCAN_ID;
 }
+
+void AutoscanList::removeIfSubdir(String parent, bool persistent)
+{
+    AUTOLOCK(mutex);
+    
+    for (int i = 0; i < list->size(); i++)
+    {
+        if (list->get(i) != nil && (parent.startsWith(list->get(i)->getLocation())))
+        {
+            Ref<AutoscanDirectory> dir = list->get(i);
+            if (dir->persistent() && (persistent == false))
+                continue;
+
+            dir->setScanID(INVALID_SCAN_ID);
+            if (i == list->size()-1)
+            {
+                list->removeUnordered(i);
+            }
+            else
+            {
+                list->set(nil, i);
+            }
+        }
+    }
+}
+
 
 /*
 void AutoscanList::subscribeAll(Ref<TimerSubscriber> obj)
