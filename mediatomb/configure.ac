@@ -35,7 +35,9 @@ AC_CONFIG_AUX_DIR(configure_aux)
 AC_CONFIG_SRCDIR([src/common.h])
 AM_INIT_AUTOMAKE([1.9 -Wall])
 
-test x$prefix = "xNONE" && prefix="$ac_default_prefix"
+if test "x${prefix}" = "xNONE"; then
+    prefix="${ac_default_prefix}"
+fi
 
 SEARCH_DIR="/usr/local"
    
@@ -1805,7 +1807,7 @@ if test "x$LOG_OK" = xyes; then
     AC_DEFINE(LOG_ENABLED, 1, [if defined compile with log output])
 fi
 
-eval PACKAGE_DATADIR="$datadir/$PACKAGE"
+eval PACKAGE_DATADIR="${datarootdir}/${PACKAGE}"
 AC_DEFINE_UNQUOTED(PACKAGE_DATADIR, "$PACKAGE_DATADIR", [MediaTomb data directory])
 
 ###############
