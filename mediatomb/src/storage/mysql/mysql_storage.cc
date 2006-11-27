@@ -35,6 +35,9 @@
 
 #ifdef HAVE_MYSQL
 
+//#define MYSQL_SELECT_DEBUG
+//#define MYSQL_EXEC_DEBUG
+
 #include "mysql_storage.h"
 #include "config_manager.h"
 #include "destroyer.h"
@@ -228,11 +231,11 @@ String MysqlStorage::getError(MYSQL *db)
 
 Ref<SQLResult> MysqlStorage::select(String query)
 {
-    /* debug...
+#ifdef MYSQL_SELECT_DEBUG
     Exception *e = new Exception(query);
     e->printStackTrace();
     delete e;
-    */
+#endif
     
     int res;
     
@@ -256,11 +259,11 @@ Ref<SQLResult> MysqlStorage::select(String query)
 
 int MysqlStorage::exec(String query, bool getLastInsertId)
 {
-    /* debug..
+#ifdef MYSQL_EXEC_DEBUG
     Exception *e = new Exception(query);
     e->printStackTrace();
     delete e;
-    */
+#endif
 
     int res;
     

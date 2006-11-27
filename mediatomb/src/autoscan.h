@@ -179,7 +179,6 @@ public:
     /// overwrite it until we are done.
     void setCurrentLMT(time_t lmt);
     
-    
     time_t getPreviousLMT() { return last_mod_previous_scan; }
     
     void updateLMT() { last_mod_previous_scan = last_mod_current_scan; }

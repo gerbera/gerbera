@@ -480,7 +480,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
         }
         else if (S_ISDIR(statbuf.st_mode))
         {
-            int objectID = storage->findObjectIDByPath(path);
+            int objectID = storage->findObjectIDByPath(path + DIR_SEPARATOR);
             if (objectID > 0)
             {
                 list->remove(objectID);
