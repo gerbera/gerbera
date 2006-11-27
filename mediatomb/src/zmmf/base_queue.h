@@ -64,7 +64,7 @@ namespace zmm
         int size()
         {
             if (overlap) return capacity;
-            if (queueBegin < queueEnd)
+            if (queueBegin <= queueEnd)
                 return queueEnd - queueBegin;
             return capacity - queueEnd + queueBegin;
         }
