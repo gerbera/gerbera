@@ -1807,7 +1807,8 @@ if test "x$LOG_OK" = xyes; then
     AC_DEFINE(LOG_ENABLED, 1, [if defined compile with log output])
 fi
 
-eval PACKAGE_DATADIR="${datarootdir}/${PACKAGE}"
+eval PACKAGE_DATADIR="${datadir}/${PACKAGE}"
+eval PACKAGE_DATADIR="${PACKAGE_DATADIR}"
 AC_DEFINE_UNQUOTED(PACKAGE_DATADIR, "$PACKAGE_DATADIR", [MediaTomb data directory])
 
 ###############
