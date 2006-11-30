@@ -67,7 +67,7 @@ int FsObjectComparator(void *arg1, void *arg2)
     }
 }
 
-Filesystem::Filesystem() : Singleton<Filesystem>()
+Filesystem::Filesystem() : Object()
 {
     includeRules = Ref<Array<RExp> >(new Array<RExp>());
     Ref<ConfigManager> cm = ConfigManager::getInstance();

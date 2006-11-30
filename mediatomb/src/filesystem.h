@@ -60,7 +60,7 @@ public:
     bool hasContent;
 };
 
-class Filesystem : public Singleton<Filesystem>
+class Filesystem : public zmm::Object
 {
 public:
     Filesystem();
