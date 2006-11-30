@@ -69,7 +69,7 @@ using namespace mxml;
 
 Ref<RExp> reMimetype;
 
-SINGLETON_NEED_RECURSIVE_MUTEX(ContentManager);
+SINGLETON_MUTEX(ContentManager, true);
 
 static String get_filename(String path)
 {

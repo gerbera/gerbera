@@ -384,7 +384,7 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     // prepare to run processes
     init_process();
     
-    Ref<SingletonManagement> singletonManager = SingletonManagement::getInstance();
+    Ref<SingletonManager> singletonManager = SingletonManager::getInstance();
     Ref<Server> server;
     try
     {

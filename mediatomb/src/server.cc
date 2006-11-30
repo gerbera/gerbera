@@ -44,6 +44,8 @@
 using namespace zmm;
 using namespace mxml;
 
+SINGLETON_MUTEX(Server, false);
+
 static int static_upnp_callback(Upnp_EventType eventtype, void *event, void *cookie)
 {
     return Server::getInstance()->upnp_callback(eventtype, event, cookie);

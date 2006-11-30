@@ -46,6 +46,8 @@
 using namespace zmm;
 using namespace mxml;
 
+SINGLETON_MUTEX(SessionManager, false);
+
 Session::Session(long timeout) : Dictionary_r()
 {
     this->timeout = timeout;

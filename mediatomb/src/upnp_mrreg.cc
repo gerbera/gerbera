@@ -38,6 +38,8 @@
 using namespace zmm;
 using namespace mxml;
 
+SINGLETON_MUTEX(MRRegistrarService, false);
+
 String MRRegistrarService::serviceType = nil;
 String MRRegistrarService::serviceID = nil;
 

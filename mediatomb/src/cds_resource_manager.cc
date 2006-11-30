@@ -42,6 +42,8 @@
 using namespace zmm;
 using namespace mxml;
 
+SINGLETON_MUTEX(CdsResourceManager, false);
+
 CdsResourceManager::CdsResourceManager() : Singleton<CdsResourceManager>()
 {
 

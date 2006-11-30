@@ -37,17 +37,17 @@
 
 template <class T> class Singleton;
 
-class SingletonManagement : public zmm::Object
+class SingletonManager : public zmm::Object
 {
 public:
-    static zmm::Ref<SingletonManagement> getInstance();
-    SingletonManagement();
+    static zmm::Ref<SingletonManager> getInstance();
+    SingletonManager();
     
     void registerSingleton(zmm::Ref<Singleton<zmm::Object> > object);
     void shutdown();
     
 protected:
-    static zmm::Ref<SingletonManagement> instance;
+    static zmm::Ref<SingletonManager> instance;
     static zmm::Ref<Mutex> mutex;
     
     zmm::Ref<zmm::ObjectStack<Singleton<zmm::Object> > > singletonStack;
@@ -60,7 +60,7 @@ public:
     
     Singleton()
     {
-        SingletonManagement::getInstance()->registerSingleton(zmm::Ref<Singleton<Object> >((Singleton<Object> *)this));
+        SingletonManager::getInstance()->registerSingleton(zmm::Ref<Singleton<Object> >((Singleton<Object> *)this));
     }
     
     virtual ~Singleton() { };
@@ -86,12 +86,11 @@ protected:
     static zmm::Ref<T> instance;
     static zmm::Ref<Mutex> mutex;
     
-    friend class SingletonManagement;
+    friend class SingletonManager;
 };
 
-#define SINGLETON_NEED_RECURSIVE_MUTEX(klass) template <> zmm::Ref<Mutex> Singleton<klass>::mutex = zmm::Ref<Mutex>(new Mutex(true))
-
-template <class T> zmm::Ref<Mutex> Singleton<T>::mutex = zmm::Ref<Mutex>(new Mutex());
+#define SINGLETON_MUTEX(klass, recursive) template <> zmm::Ref<Mutex> Singleton<klass>::mutex = zmm::Ref<Mutex>(new Mutex(recursive))
+//template <class T> zmm::Ref<Mutex> Singleton<T>::mutex = zmm::Ref<Mutex>(new Mutex());
 template <class T> zmm::Ref<T> Singleton<T>::instance = nil;
 
 #endif // __SINGLETON_H__

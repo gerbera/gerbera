@@ -38,6 +38,8 @@
 using namespace zmm;
 using namespace mxml;
 
+SINGLETON_MUTEX(ConnectionManagerService, false);
+
 String ConnectionManagerService::serviceType = nil;
 String ConnectionManagerService::serviceID = nil;
 

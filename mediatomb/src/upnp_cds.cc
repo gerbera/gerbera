@@ -37,6 +37,8 @@
 
 using namespace zmm;
 
+SINGLETON_MUTEX(ContentDirectoryService, false);
+
 String ContentDirectoryService::serviceType = nil;
 String ContentDirectoryService::serviceID = nil;
 

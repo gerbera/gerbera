@@ -52,11 +52,12 @@ void log_close();
 #define log_error(format, ...) _log_error(format, ## __VA_ARGS__)
 
 #ifdef LOG_TOMBDEBUG
-
 //    #define log_debug(args) _log_debug args
     #define log_debug(format, ...) _log_debug(format, __FILE__, __LINE__, __func__, ## __VA_ARGS__)
+    #define print_backtrace() _print_backtrace()
 #else
     #define log_debug(format, ...)
+    #define print_backtrace()
 #endif
 
 #else
@@ -65,6 +66,7 @@ void log_close();
 #define log_warning(format, ...)
 #define log_error(format, ...)
 #define log_debug(format, ...)
+#define print_backtrace()
 
 #endif
 
@@ -73,7 +75,7 @@ void _log_info(const char *format, ...);
 void _log_warning(const char *format, ...);
 void _log_error(const char *format, ...);
 void _log_debug(const char *format, const char* file, int line, const char *function, ...);
-        
+void _print_backtrace();
 
 #endif // __LOGGER_H__
 

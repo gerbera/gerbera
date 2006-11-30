@@ -49,6 +49,8 @@
 using namespace zmm;
 using namespace mxml;
 
+SINGLETON_MUTEX(ConfigManager, false);
+
 String ConfigManager::filename = nil;
 String ConfigManager::userhome = nil;
 

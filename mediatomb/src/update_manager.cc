@@ -48,6 +48,8 @@
 
 using namespace zmm;
 
+SINGLETON_MUTEX(UpdateManager, false);
+
 UpdateManager::UpdateManager() : Singleton<UpdateManager>()
 {
     objectIDHash = Ref<DBRHash<int> >(new DBRHash<int>(OBJECT_ID_HASH_CAPACITY, INVALID_OBJECT_ID, INVALID_OBJECT_ID_2));

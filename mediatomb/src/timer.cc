@@ -37,7 +37,7 @@
 
 using namespace zmm;
 
-SINGLETON_NEED_RECURSIVE_MUTEX(Timer);
+SINGLETON_MUTEX(Timer, true);
 
 Timer::Timer() : Singleton<Timer>()
 {

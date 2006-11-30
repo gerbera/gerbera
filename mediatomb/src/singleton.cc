@@ -39,10 +39,10 @@ using namespace zmm;
 
 #define SINGLETON_MANAGEMENT_INITIAL_CAPACITY 30
 
-Ref<SingletonManagement> SingletonManagement::instance = nil;
-Ref<Mutex> SingletonManagement::mutex = Ref<Mutex>(new Mutex());
+Ref<SingletonManager> SingletonManager::instance = nil;
+Ref<Mutex> SingletonManager::mutex = Ref<Mutex>(new Mutex());
 
-Ref<SingletonManagement> SingletonManagement::getInstance()
+Ref<SingletonManager> SingletonManager::getInstance()
 {
     if (instance == nil)
     {
@@ -50,23 +50,24 @@ Ref<SingletonManagement> SingletonManagement::getInstance()
         if (instance == nil) // check again, because there is a very small chance
                              // that 2 threads tried to lock() concurrently
         {
-            instance = zmm::Ref<SingletonManagement>(new SingletonManagement());
+            instance = zmm::Ref<SingletonManager>(new SingletonManager());
         }
     }
     return instance;
 }
 
-SingletonManagement::SingletonManagement() : Object()
+SingletonManager::SingletonManager() : Object()
 {
     singletonStack = Ref<ObjectStack<Singleton<Object> > >(new ObjectStack<Singleton<Object> >(SINGLETON_MANAGEMENT_INITIAL_CAPACITY));
 }
 
-void SingletonManagement::registerSingleton(Ref<Singleton<Object> > object)
+void SingletonManager::registerSingleton(Ref<Singleton<Object> > object)
 {
+    log_debug("registering new singleton... - %d -> %d\n", singletonStack->size(), singletonStack->size() + 1);
     singletonStack->push(object);
 }
 
-void SingletonManagement::shutdown()
+void SingletonManager::shutdown()
 {
     log_debug("start (%d objects)\n", singletonStack->size());
     AUTOLOCK(mutex);

@@ -40,6 +40,10 @@
 #include <stdarg.h>
 #include <time.h>
 
+#ifdef HAVE_EXECINFO_H
+    #include <execinfo.h>
+#endif
+
 #include "logger.h"
 
 FILE *LOG_FILE = stderr;
@@ -121,4 +125,15 @@ void _log_debug(const char *format, const char *file, int line, const char *func
     va_end(ap);
 }
 
+void _print_backtrace()
+{
+#if defined HAVE_BACKTRACE && defined HAVE_BACKTRACE_SYMBOLS
+    void* b[100];
+    int size = backtrace(b, 100);
+    char **s = backtrace_symbols(b, size);
+    for(int i = 0; i < size; i++)
+        fprintf(LOG_FILE, "_STRACE_ %i %s\n", i, s[i]);
+    free(s);
+#endif
+}
 

@@ -47,6 +47,8 @@
 
 using namespace zmm;
 
+SINGLETON_MUTEX(Storage, false);
+
 Storage::Storage() : Singleton<Storage>()
 {
 }
