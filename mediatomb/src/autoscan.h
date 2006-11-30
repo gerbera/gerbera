@@ -93,7 +93,7 @@ public:
     /// \brief Send notification for each directory that is stored in the list.
     /// 
     /// \param obj instance of the class that will receive the notifications.
-    void notifyAll(zmm::Ref<TimerSubscriber> obj);
+    void notifyAll(zmm::Ref<TimerSubscriberSingleton<Object> > obj);
         
     /*
     /// \brief Add timer for given directory.

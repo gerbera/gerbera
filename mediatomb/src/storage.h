@@ -34,6 +34,7 @@
 
 #include "autoconfig.h"
 #include "zmmf/zmmf.h"
+#include "singleton.h"
 #include "cds_objects.h"
 #include "dictionary.h"
 #include "sync.h"
@@ -96,11 +97,13 @@ public:
     
 };
 
-class Storage : public zmm::Object
+class Storage : public Singleton<Storage>
 {
 public:
     Storage();
-
+    
+    static zmm::Ref<Storage> getInstance();
+    
     virtual void init() = 0;
     virtual void addObject(zmm::Ref<CdsObject> object, int *changedContainer) = 0;
 
@@ -201,9 +204,6 @@ public:
     virtual bool isAutoscanDirectory(int objectId) = 0;
     virtual void autoscanUpdateLM(zmm::Ref<AutoscanDirectory> adir) = 0;
     
-    /* static methods */
-    static zmm::Ref<Storage> getInstance();
-    
     virtual void shutdown() = 0;
 
     /// \brief Ensures that a container given by it's location on disk is
@@ -217,12 +217,12 @@ public:
 protected:
     int uiUpdateId;
     
+    static zmm::Ref<Storage> createInstance();
+    
     /* helper for addContainerChain */
     static void stripAndUnescapeVirtualContainerFromPath(zmm::String path, zmm::String &first, zmm::String &last);
     
     //void getObjectPath(zmm::Ref<zmm::Array<CdsObject> > arr, int objectID);
-    
-    static zmm::Ref<Mutex> mutex;
 };
 
 #endif // __STORAGE_H__

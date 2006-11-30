@@ -532,6 +532,7 @@ Scripting::Scripting() : Object()
 
 void Scripting::init()
 {
+    //log_debug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
     /* initialize the JS run time, and return result in rt */
     rt = JS_NewRuntime(1L * 1024L * 1024L);
 

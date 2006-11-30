@@ -34,6 +34,7 @@
 #endif
 
 #include "common.h"
+#include "singleton.h"
 #include "server.h"
 #include "process.h"
 
@@ -266,7 +267,7 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
         
 */
 
-        ConfigManager::init(config_file, home);
+        ConfigManager::setStaticArgs(config_file, home);
     }
     catch (mxml::ParseException pe)
     {
@@ -282,8 +283,6 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
         exit(EXIT_FAILURE);
     }    
     
-    Ref<Server> server = Server::getInstance();
-
     // starting as daemon if applicable
     if (daemon)
     {
@@ -385,9 +384,11 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     // prepare to run processes
     init_process();
     
+    Ref<SingletonManagement> singletonManager = SingletonManagement::getInstance();
+    Ref<Server> server;
     try
     {
-        server->init();
+        server = Server::getInstance();
         server->upnp_init(String(ip), port);
     }
     catch(UpnpException upnp_e)
@@ -410,10 +411,10 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
             log_info("Please check if your network interface was configured for multicast!\n");
             log_info("Refer to the README file for more information.\n");
         }
-
+        
         try
         {
-            server->shutdown();
+            singletonManager->shutdown();
         }
         catch (Exception e)
         {
@@ -469,11 +470,11 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
             log_info("Restarting MediaTomb!\n");
             try
             {
-                server->shutdown();
+                singletonManager->shutdown();
                 
                 try
                 {
-                    ConfigManager::init(config_file, home);
+                    ConfigManager::setStaticArgs(config_file, home);
                 }
                 catch (mxml::ParseException pe)
                 {
@@ -493,12 +494,13 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
                     e.printStackTrace();
                     exit(EXIT_FAILURE);
                 }
-
+                
                 init_process();
-
-                server->init();
+                
+                ///  \todo fix this for SIGHUP
+                //server->init();
                 server->upnp_init(String(ip), port);
-
+                
                 restart_flag = 0;
             }
            catch(Exception e)
@@ -517,7 +519,7 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     int ret = EXIT_SUCCESS;
     try
     {
-        server->shutdown();
+        singletonManager->shutdown();
     }
     catch(UpnpException upnp_e)
     {

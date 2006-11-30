@@ -34,16 +34,13 @@
 #define __CONFIG_MANAGER_H__
 
 #include "common.h"
+#include "singleton.h"
 #include "dictionary.h"
 #include "xpath.h"
 #include "autoscan.h"
 
-class ConfigManager : public zmm::Object
+class ConfigManager : public Singleton<ConfigManager>
 {
-protected:
-    zmm::String filename;
-    zmm::Ref<mxml::Element> root;
-
 public:
     ConfigManager();
 
@@ -129,12 +126,9 @@ public:
     ///
     /// This function will create an array like that: ["data", "otherdata"]
     zmm::Ref<zmm::Array<zmm::StringBase> > createArrayFromNodeset(zmm::Ref<mxml::Element> element, zmm::String nodeName, zmm::String attrName); 
-
-    // call this function to initialize global ConfigManager object
-    static void init(zmm::String filename, zmm::String userhome);
-
-    static zmm::Ref<ConfigManager> getInstance();
-
+    
+    static void setStaticArgs(zmm::String filename, zmm::String userhome);
+    
 protected:
     // creates a default config.xml file with the most necessary entries and returns the path
     zmm::String createDefaultConfig(zmm::String userhome);
@@ -143,6 +137,10 @@ protected:
     void prepare_udn();
     zmm::String construct_path(zmm::String path);
     void prepare_path(zmm::String path, bool needDir = false, bool existenceUnneeded = false);
+    
+    static zmm::String filename;
+    static zmm::String userhome;
+    zmm::Ref<mxml::Element> root;
 };
 
 #endif // __CONFIG_MANAGER_H__

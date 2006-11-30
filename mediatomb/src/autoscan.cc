@@ -216,7 +216,7 @@ void AutoscanList::subscribeAll(Ref<TimerSubscriber> obj)
 }
 */
 
-void AutoscanList::notifyAll(Ref<TimerSubscriber> obj)
+void AutoscanList::notifyAll(Ref<TimerSubscriberSingleton<Object> > cm)
 {
     AUTOLOCK(mutex);
     
@@ -226,7 +226,7 @@ void AutoscanList::notifyAll(Ref<TimerSubscriber> obj)
         if (list->get(i) == nil)
             continue;
         
-       obj->timerNotify(i);
+       cm->timerNotify(i);
     }
 }
 

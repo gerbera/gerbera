@@ -110,6 +110,8 @@ void ArrayBase::removeUnordered(int index)
 {
     if (index < 0 || index >= siz) // index beyond size
         return;
+    Object *obj = arr[index];
+    obj->release();
     arr[index] = arr[--siz];
 }
 void ArrayBase::insert(int index, Object *obj)

@@ -47,15 +47,6 @@
 using namespace zmm;
 using namespace mxml;
 
-static Ref<Filesystem> instance;
-Ref<Filesystem> Filesystem::getInstance()
-{
-    if (instance == nil)
-        instance = Ref<Filesystem>(new Filesystem());
-    return instance;
-}
-
-
 int FsObjectComparator(void *arg1, void *arg2)
 {
     FsObject *o1 = (FsObject *)arg1;
@@ -76,8 +67,7 @@ int FsObjectComparator(void *arg1, void *arg2)
     }
 }
 
-
-Filesystem::Filesystem() : Object()
+Filesystem::Filesystem() : Singleton<Filesystem>()
 {
     includeRules = Ref<Array<RExp> >(new Array<RExp>());
     Ref<ConfigManager> cm = ConfigManager::getInstance();

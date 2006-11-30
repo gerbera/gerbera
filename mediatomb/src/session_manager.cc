@@ -46,28 +46,6 @@
 using namespace zmm;
 using namespace mxml;
 
-static Ref<SessionManager> inst;
-
-Ref<SessionManager> SessionManager::getInstance()
-{
-    if (inst == nil)
-    {
-        AUTOLOCK(mutex);
-        if (inst == nil)
-        {
-            try
-            {
-                inst = Ref<SessionManager>(new SessionManager());
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-        }
-    }
-    return inst;
-}
-
 Session::Session(long timeout) : Dictionary_r()
 {
     this->timeout = timeout;
@@ -114,9 +92,7 @@ String Session::getUIUpdateIDs()
     return ret;
 }
 
-Ref<Mutex> SessionManager::mutex(new Mutex());
-
-SessionManager::SessionManager() : TimerSubscriber()
+SessionManager::SessionManager() : TimerSubscriberSingleton<SessionManager>()
 {
     Ref<ConfigManager> configManager = ConfigManager::getInstance();
     Ref<Element> accountsEl = configManager->getElement(_("/server/ui/accounts"));
@@ -208,12 +184,12 @@ void SessionManager::checkTimer()
 {
     if (sessions->size() > 0 && ! timerAdded)
     {
-        Timer::getInstance()->addTimerSubscriber(RefCast(inst, TimerSubscriber), SESSION_TIMEOUT_CHECK_INTERVAL);
+        Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this, SessionManager), SESSION_TIMEOUT_CHECK_INTERVAL);
         timerAdded = true;
     }
     else if (sessions->size() <= 0 && timerAdded)
     {
-        Timer::getInstance()->removeTimerSubscriber(RefCast(inst, TimerSubscriber));
+        Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this, SessionManager));
         timerAdded = false;
     }
 }

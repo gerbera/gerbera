@@ -47,13 +47,26 @@
 
 using namespace zmm;
 
-static Ref<Storage> primary_inst;
-
-Storage::Storage() : Object()
+Storage::Storage() : Singleton<Storage>()
 {
 }
 
-static Ref<Storage> create_primary_inst()
+Ref<Storage> Storage::getInstance()
+{
+    if(instance == nil)
+    {
+        AUTOLOCK(mutex);
+        if (instance == nil)
+        {
+            instance = createInstance();
+            instance->init();
+        }
+    }
+    return instance;
+}
+
+
+Ref<Storage> Storage::createInstance()
 {
     String type;
     Ref<Storage> storage;
@@ -83,75 +96,8 @@ static Ref<Storage> create_primary_inst()
     }
     while (false);
     
-    storage->init();
     return storage;
 }
-
-Ref<Mutex> Storage::mutex = Ref<Mutex>(new Mutex());
-
-Ref<Storage> Storage::getInstance()
-{
-    if(primary_inst == nil)
-    {
-        AUTOLOCK(mutex);
-        if (primary_inst == nil)
-        {
-            try
-            {
-                primary_inst = create_primary_inst();
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-        }
-    }
-    return primary_inst;
-}
-
-/*
-// this is a fallback implementation! Derived classes should override 
-Ref<CdsObject> Storage::loadObject(int objectID, select_mode_t mode)
-{
-    Ref<BrowseParam> param(new BrowseParam(objectID, BROWSE_METADATA));
-    Ref<Array<CdsObject> > arr;
-    arr = browse(param);
-    Ref<CdsObject> obj = arr->get(0);
-    return obj;
-}
-
-void Storage::removeObject(zmm::Ref<CdsObject> obj)
-{
-    if(IS_CDS_CONTAINER(obj->getObjectType()))
-    {
-        Ref<BrowseParam> param(new BrowseParam(obj->getID(),
-                               BROWSE_DIRECT_CHILDREN));
-        Ref<Array<CdsObject> > arr = browse(param);
-        for(int i = 0; i < arr->size(); i++)
-        {
-            removeObject(arr->get(i));
-        }
-    }
-    eraseObject(obj);
-}
-*/
-
-/*
-Ref<Array<CdsObject> > Storage::getObjectPath(int objectID)
-{
-    Ref<Array<CdsObject> > arr(new Array<CdsObject>());
-    getObjectPath(arr, objectID);
-    return arr;
-}
-void Storage::getObjectPath(Ref<Array<CdsObject> > arr, int objectID)
-{
-    if (objectID == -1)
-        return;
-    Ref<CdsObject> obj = loadObject(objectID);
-    getObjectPath(arr, obj->getParentID());
-    arr->append(obj);
-}
-*/
 
 void Storage::stripAndUnescapeVirtualContainerFromPath(String path, String &first, String &last)
 {

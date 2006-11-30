@@ -33,6 +33,7 @@
 #define __UPNP_MRREG_H__
 
 #include "common.h"
+#include "singleton.h"
 #include "action_request.h"
 #include "subscription_request.h"
 #include "upnp_xml.h"
@@ -44,16 +45,16 @@
 /// functions will always return true.
 /// These functions were only implemented to enable Xbox360 support.
 /// \todo the whole service class should be rewritten with the use of inheritance
-class MRRegistrarService : public zmm::Object
+class MRRegistrarService : public Singleton<MRRegistrarService>
 {
 
 protected:
     /// \brief UPnP standard defined service type
     /// \todo Check if it makes sense to use it as it is done now...why not define constants here?
-    zmm::String serviceType;
+    static zmm::String serviceType;
     
     /// \brief ID of the service.
-    zmm::String serviceID;    
+    static zmm::String serviceID;    
 
     /// \brief Media Receiver Registrar service action: IsAuthorized()
     /// \param request Incoming ActionRequest.
@@ -81,12 +82,10 @@ public:
     /// \brief Constructor for the CMS, saves the service type and service id
     /// in internal variables.
     /// \todo Check if it makes sense to use it as it is done now...why not define them as constants?
-    MRRegistrarService(zmm::String serviceType, zmm::String serviceID);
-
-    /// \todo what is that here?? only getIntsance should be available, creating a new instance if called for the 1st time.
-    static zmm::Ref<MRRegistrarService> createInstance(zmm::String serviceType, zmm::String serviceID);
-    static zmm::Ref<MRRegistrarService> getInstance();
-
+    MRRegistrarService();
+    
+    static void setStaticArgs(zmm::String serviceType, zmm::String serviceID);
+    
     /// \brief Dispatches the ActionRequest between the available actions.
     /// \param request Incoming ActionRequest.
     ///

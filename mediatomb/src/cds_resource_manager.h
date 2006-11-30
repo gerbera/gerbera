@@ -32,25 +32,19 @@
 #ifndef __CDS_RESOURCE_MANAGER_H__
 #define __CDS_RESOURCE_MANAGER_H__
 
+#include "singleton.h"
 #include "mxml/mxml.h"
 #include "common.h"
 #include "cds_objects.h"
 #include "strings.h"
 
 /// \brief This class is responsible for handling the DIDL-Lite res tags.
-class CdsResourceManager : public zmm::Object
+class CdsResourceManager : public Singleton<CdsResourceManager>
 {
 public:
     /// \brief Constructor, currently empty.
     CdsResourceManager();
 
-    /// \brief Returns the class instance.
-    ///
-    /// This class can be instantiated only once, if no previous
-    /// instances exist getInstance() will create a new one,
-    /// else the existing instance is returned.
-    static zmm::Ref<CdsResourceManager> getInstance();
-    
     /// \brief Adds a resource tag to the item.
     /// \param item Item for which the resources should be added.
     /// \param element Element in the XML to which the resource should be appended.

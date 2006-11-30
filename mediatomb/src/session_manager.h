@@ -32,6 +32,7 @@
 #ifndef __SESSION_MANAGER_H__
 #define __SESSION_MANAGER_H__
 
+#include "singleton.h"
 #include "dictionary.h"
 #include "sync.h"
 #include "hash.h"
@@ -105,7 +106,7 @@ protected:
 };
 
 /// \brief This class offers ways to create new sessoins, stores all available sessions and provides access to them.
-class SessionManager : public TimerSubscriber
+class SessionManager : public TimerSubscriberSingleton<SessionManager>
 {
 protected:
     /// \brief This array is holding available sessions.
@@ -113,27 +114,17 @@ protected:
     
     zmm::Ref<Dictionary> accounts;
     
-    static zmm::Ref<Mutex> mutex;
-    
     void checkTimer();
     bool timerAdded;
     
 public:
     /// \brief Constructor, initializes the array.
     SessionManager();
-
-    /// \brief Returns the SessionManager instance or creates a new SessionManager if called for the first time.
-    /// \return instance of the SessionManager
-    ///
-    /// The SessionManager should only be instantiated once in the whole application, this method 
-    /// provides the means to accomplish it. When called for the first time a new SessionManager will
-    /// be created, otherwise the already existing instance will be returned.
-    static zmm::Ref<SessionManager> getInstance();
-
+    
     /// \brief Creates a Session with a given timeout.
     /// \param timeout Session timeout in milliseconds.
     zmm::Ref<Session> createSession(long timeout);
-
+    
     /// \brief Returns the instance to a Session with a given sessionID
     /// \param ID of the Session.
     /// \return intance of the Session with a given ID or nil if no session with that ID was found.

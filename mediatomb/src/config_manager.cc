@@ -49,7 +49,55 @@
 using namespace zmm;
 using namespace mxml;
 
-static Ref<ConfigManager> instance;
+String ConfigManager::filename = nil;
+String ConfigManager::userhome = nil;
+
+void ConfigManager::setStaticArgs(String _filename, String _userhome)
+{
+    filename = _filename;
+    userhome = _userhome;
+}
+
+ConfigManager::ConfigManager() : Singleton<ConfigManager>()
+{
+    String error_message;
+    String home;
+    bool home_ok = true;
+    
+    if (filename == nil)
+    {
+        // we are looking for ~/.mediatomb
+        if (home_ok && (!check_path(userhome + DIR_SEPARATOR + DEFAULT_CONFIG_HOME + DIR_SEPARATOR + DEFAULT_CONFIG_NAME)))
+        {
+            home_ok = false;
+        }
+        else
+        {
+            home = userhome + DIR_SEPARATOR + DEFAULT_CONFIG_HOME;
+            filename = home + DIR_SEPARATOR + DEFAULT_CONFIG_NAME;
+        }
+        
+        if ((!home_ok) && (string_ok(userhome)))
+        {
+            filename = createDefaultConfig(userhome);
+        }
+        
+    }
+    
+    if (filename == nil)
+    {       
+        throw _Exception(_("\nThe server configuration file could not be found in ~/.mediatomb\n") +
+                "MediaTomb could not determine your home directory - automatic setup failed.\n" + 
+                "Try specifying an alternative configuration file on the command line.\n" + 
+                "For a list of options run: mediatomb -h\n");
+    }
+    
+    log_info("Loading configuration from: %s\n", filename.c_str());
+    load(filename);
+    
+    prepare_udn();
+    validate(home);
+}
 
 String ConfigManager::construct_path(String path)
 {
@@ -68,10 +116,6 @@ String ConfigManager::construct_path(String path)
         return _(".") + DIR_SEPARATOR + path;
     else
         return home + DIR_SEPARATOR + path;
-}
-
-ConfigManager::ConfigManager() : Object()
-{
 }
 
 String ConfigManager::createDefaultConfig(String userhome)
@@ -172,50 +216,6 @@ String ConfigManager::createDefaultConfig(String userhome)
     }
 
     return config_filename;
-}
-
-void ConfigManager::init(String filename, String userhome)
-{
-    if (instance == nil)
-        instance = Ref<ConfigManager>(new ConfigManager());
-
-    String error_message;
-    String home;
-    bool home_ok = true;
-
-    if (filename == nil)
-    {
-        // we are looking for ~/.mediatomb
-        if (home_ok && (!check_path(userhome + DIR_SEPARATOR + DEFAULT_CONFIG_HOME + DIR_SEPARATOR + DEFAULT_CONFIG_NAME)))
-        {
-            home_ok = false;
-        }
-        else
-        {
-            home = userhome + DIR_SEPARATOR + DEFAULT_CONFIG_HOME;
-            filename = home + DIR_SEPARATOR + DEFAULT_CONFIG_NAME;
-        }
-
-        if ((!home_ok) && (string_ok(userhome)))
-        {
-            filename = instance->createDefaultConfig(userhome);
-        }
-   
-    }
-
-    if (filename == nil)
-    {       
-        throw _Exception(_("\nThe server configuration file could not be found in ~/.mediatomb\n") +
-                "MediaTomb could not determine your home directory - automatic setup failed.\n" + 
-                "Try specifying an alternative configuration file on the command line.\n" + 
-                "For a list of options run: mediatomb -h\n");
-    }
-
-    log_info("Loading configuration from: %s\n", filename.c_str());
-    instance->load(filename);
-
-    instance->prepare_udn();    
-    instance->validate(home);    
 }
 
 void ConfigManager::validate(String serverhome)
@@ -460,12 +460,6 @@ void ConfigManager::prepare_path(String xpath, bool needDir, bool existenceUnnee
     if (script != nil)
         script->setText(temp);
 }
-
-Ref<ConfigManager> ConfigManager::getInstance()
-{
-    return instance;
-}
-
 
 void ConfigManager::save()
 {

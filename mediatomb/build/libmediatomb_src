@@ -88,6 +88,8 @@ libmediatomb_a_SOURCES = \
 ../src/server.h \
 ../src/session_manager.cc \
 ../src/session_manager.h \
+../src/singleton.cc \
+../src/singleton.h \
 ../src/storage.cc \
 ../src/storage.h \
 ../src/storage/mysql/mysql_create_sql.h \

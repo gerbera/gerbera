@@ -44,47 +44,34 @@
 using namespace zmm;
 using namespace mxml;
 
-//Ref<Server> server;
-static Ref<Server> instance = NULL;
-
 static int static_upnp_callback(Upnp_EventType eventtype, void *event, void *cookie)
 {
     return Server::getInstance()->upnp_callback(eventtype, event, cookie);
 }
 
-
-Server::Server() : Object()
+Server::Server() : Singleton<Server>()
 {
     server_shutdown_flag = false;
-    upnp_mutex = Ref<Mutex>(new Mutex());
 }
-
-Ref<Server> Server::getInstance()
-{
-    if (instance == NULL)
-    {
-        instance = Ref<Server>(new Server());
-    }
-        
-    return instance;
-}
-
 
 void Server::init()
 {
     virtual_directory = _(SERVER_VIRTUAL_DIR); 
-
-    cds = ContentDirectoryService::createInstance(_(DESC_CDS_SERVICE_TYPE),
-                                                  _(DESC_CDS_SERVICE_ID));
+    
+    ContentDirectoryService::setStaticArgs(_(DESC_CDS_SERVICE_TYPE),
+                                           _(DESC_CDS_SERVICE_ID));
+    cds = ContentDirectoryService::getInstance();
                                                  
-    cmgr = ConnectionManagerService::createInstance(_(DESC_CM_SERVICE_TYPE),
-                                                    _(DESC_CM_SERVICE_ID));
-
-    mrreg = MRRegistrarService::createInstance(_(DESC_MRREG_SERVICE_TYPE),
-                                               _(DESC_MRREG_SERVICE_ID));
+    ConnectionManagerService::setStaticArgs(_(DESC_CM_SERVICE_TYPE),
+                                            _(DESC_CM_SERVICE_ID));
+    cmgr = ConnectionManagerService::getInstance();
+                                                    
+    MRRegistrarService::setStaticArgs(_(DESC_MRREG_SERVICE_TYPE),
+                                      _(DESC_MRREG_SERVICE_ID));
+    mrreg = MRRegistrarService::getInstance();
                                                     
     Ref<ConfigManager> config = ConfigManager::getInstance();
-
+    
     serverUDN = config->getOption(_("/server/udn"));
     alive_advertisement = config->getIntOption(_("/server/alive"));
 }
@@ -243,7 +230,6 @@ void Server::upnp_init(String ip, int port)
     log_debug("end\n");
 }
 
-
 bool Server::getShutdownStatus()
 {
     return server_shutdown_flag;
@@ -252,25 +238,27 @@ bool Server::getShutdownStatus()
 void Server::shutdown()
 {
     int ret = 0; // return code
-
+    
+    /*
     ContentManager::getInstance()->shutdown();
     UpdateManager::getInstance()->shutdown();
     Storage::getInstance()->shutdown();
-
+    */
+    
     server_shutdown_flag = true;
-
+    
     log_debug("start\n");
-
+    
     // unregister device
     
     ret = UpnpUnRegisterRootDevice(device_handle);
     if (ret != UPNP_E_SUCCESS) {   
         throw _UpnpException(ret, _("upnp_cleanup: UpnpUnRegisterRootDevice failed"));
     }
-   
+    
     log_debug("now calling upnp finish\n");
     UpnpFinish();
-
+    
     log_debug("end\n");
 }
 
@@ -294,7 +282,7 @@ int Server::upnp_callback(Upnp_EventType eventtype, void *event, void *cookie)
 
 //    log_info("event is ok\n");
     // get device wide mutex (have to figure out what the hell that is)
-    AUTOLOCK(upnp_mutex);
+    AUTOLOCK(mutex);
 
 //    log_info("got device mutex\n");
 

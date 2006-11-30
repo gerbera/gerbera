@@ -48,42 +48,13 @@
 
 using namespace zmm;
 
-UpdateManager::UpdateManager() : Object()
+UpdateManager::UpdateManager() : Singleton<UpdateManager>()
 {
     objectIDHash = Ref<DBRHash<int> >(new DBRHash<int>(OBJECT_ID_HASH_CAPACITY, INVALID_OBJECT_ID, INVALID_OBJECT_ID_2));
     shutdownFlag = false;
     flushPolicy = FLUSH_SPEC;
     lastContainerChanged = INVALID_OBJECT_ID;
     cond = Ref<Cond>(new Cond(mutex));
-}
-
-Ref<Mutex> UpdateManager::mutex = Ref<Mutex>(new Mutex());
-Ref<UpdateManager> UpdateManager::instance = nil;
-
-Ref<UpdateManager> UpdateManager::getInstance()
-{
-    if (instance == nil)
-    {
-        AUTOLOCK(mutex);
-        if (instance == nil) // check again, because there is a very small chance
-                             // that 2 threads tried to lock() concurrently
-        {
-            try
-            {
-                instance = Ref<UpdateManager>(new UpdateManager());
-                instance->init();
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-        }
-    }
-    return instance;
-}
-
-UpdateManager::~UpdateManager()
-{
 }
 
 void UpdateManager::init()
@@ -106,18 +77,17 @@ void UpdateManager::init()
 
 void UpdateManager::shutdown()
 {
-    //log_debug("shutdown, locking\n");
-    shutdownFlag = true;
-    
+    log_debug("start\n");
     AUTOLOCK(mutex);
+    shutdownFlag = true;
     log_debug("signalling...\n");
     cond->signal();
-    //log_debug("signalled, unlocking\n");
     AUTOUNLOCK();
-    //log_debug("unlocked\n");
+    log_debug("waiting for thread\n");
     if (updateThread)
         pthread_join(updateThread, NULL);
     updateThread = 0;
+    log_debug("end\n");
 }
 
 void UpdateManager::containerChanged(int objectID, int flushPolicy)

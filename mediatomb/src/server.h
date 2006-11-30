@@ -33,6 +33,7 @@
 #define __SERVER_H__
 
 #include "common.h"
+#include "singleton.h"
 #include "action_request.h"
 #include "subscription_request.h"
 #include "upnp_cds.h"
@@ -43,19 +44,18 @@
 
 /// \brief Provides methods to initialize and shutdown
 /// and to retrieve various information about the server.
-class Server : public zmm::Object
+class Server : public Singleton<Server>
 {
 public:
-    /// \brief get Server instance (singleton)
-    static zmm::Ref<Server> getInstance();
-
-
+    
+    Server();
+    
     /// \brief Initializes the server.
     /// 
     /// This function reads information from the config and initializes
     /// various variables (like server UDN and so forth).
-    void init();
-
+    virtual void init();
+    
     
     /// \brief Initializes UPnP portion.
     /// \param ip IP address to bind to.
@@ -71,15 +71,15 @@ public:
     ///
     /// Unregisters the device with the SDK, shuts down the
     /// update manager task, storage task, content manager.
-    void shutdown();
-
+    virtual void shutdown();
+    
     /// \brief Returns the virtual web server URL.
     ///
     /// A special virtual URL is registered with the internal web server,
     /// all content and all ui requests are server from there and are
     /// handled by the web callbacks.
     zmm::String getVirtualURL();
-
+    
     /// \brief Dispatch incoming UPnP events.
     /// \param eventtype Upnp_EventType, identifying what kind of event came in.
     /// \param event Pointer to the event.
@@ -93,7 +93,7 @@ public:
     /// passed on to the appropriate request handler - to upnp_actions() or
     /// upnp_subscriptions()
     int upnp_callback(Upnp_EventType eventtype, void *event, void *cookie);
-
+    
     /// \brief Returns the device handle.
     ///
     /// This function returns the handle for our device (it is needed to
@@ -105,7 +105,7 @@ public:
     /// Returns a string representation of the IP where the server is 
     /// running. This is useful for constructing URL's, etc.
     zmm::String getIP();
-
+    
     /// \brief Returns the port of the server.
     ///
     /// Returns a string representation of the server port. Allthough
@@ -113,8 +113,8 @@ public:
     /// that we actually get that port after startup. This function
     /// returns the port on which the server is actually running.
     zmm::String getPort();
-
-
+    
+    
     /// \brief Tells if the server is about to be terminated.
     ///
     /// This function returns true if the server is about to be
@@ -124,27 +124,18 @@ public:
 protected:
     /// \brief This flag is set to true by the upnp_cleanup() function.
     bool server_shutdown_flag;
-
-    Server();
-
+    
     /// \brief Handle for our upnp device.
     ///
     /// This variable is returned by the getDeviceHandle() function.
     UpnpDevice_Handle device_handle;
-
-    /// \brief Our device mutex.
-    ///
-    /// The mutex is locked at the entry of upnp_callback() and is
-    /// unlocked after the event has been processed. That means that only 
-    /// one UPnP request can be processed at a time.
-    zmm::Ref<Mutex> upnp_mutex;
-
+    
     /// \brief Unique Device Number of the server.
     ///
     /// The UDN is read from the config, it must be unique and
     /// persistent over reboots.
     zmm::String serverUDN;
-   
+    
     /// \brief Name of the virtual web server directory.
     ///
     /// All requests going to /content/ will be handled by our web
@@ -152,14 +143,14 @@ protected:
     /// \todo Is there any need that this is a variable? A constant
     /// should be sufficient here.
     zmm::String virtual_directory;
-
+    
     /// \brief Full virtual web server url.
     /// 
     /// The URL is constructed upon server initialization, since
     /// the real port is not known before. The value of this variable
     /// is returned by the getVirtualURL() function.
     zmm::String virtual_url;
-
+    
     /// \brief Device description document is created on the fly and 
     /// stored here.
     ///
@@ -172,28 +163,28 @@ protected:
     ///
     /// The value is read from the configuration.
     int alive_advertisement;
-
+    
     /// \brief ContentDirectoryService instance.
     /// 
     /// The ContentDirectoryService class is instantiated in the
     /// constructor. The class is responsible for processing
     /// an ActionRequest or a SubscriptionRequest.
     zmm::Ref<ContentDirectoryService> cds;
-
+    
     /// \brief ConnectionManagerService instance.
     /// 
     /// The ConnectionManagerService class is instantiated in the
     /// constructor. The class is responsible for processing
     /// an ActionRequest or a SubscriptionRequest.
     zmm::Ref<ConnectionManagerService> cmgr;
- 
+    
     /// \brief MediaReceiverRegistrarService instance.
     /// 
     /// This class is not fully functional, it always returns "true"
     /// on IsAuthorized and IsValidated requests. It added to ensure
     /// Xbos360 compatibility.
     zmm::Ref<MRRegistrarService> mrreg;
-
+    
     /// \brief Dispatched an ActionRequest between the services.
     /// \param request Incoming ActionRequest.
     ///
@@ -202,7 +193,7 @@ protected:
     /// of the request and calls the process_action_request() for the 
     /// appropriate service.
     void upnp_actions(zmm::Ref<ActionRequest> request);
-
+    
     /// \brief Dispatched a SubscriptionRequest between the services.
     /// \param request Incoming SubscriptionRequest.
     ///

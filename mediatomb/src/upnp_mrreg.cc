@@ -38,25 +38,18 @@
 using namespace zmm;
 using namespace mxml;
 
-static Ref<MRRegistrarService> instance;
+String MRRegistrarService::serviceType = nil;
+String MRRegistrarService::serviceID = nil;
 
-MRRegistrarService::MRRegistrarService(String serviceType, String serviceID) : Object()
+MRRegistrarService::MRRegistrarService() : Singleton<MRRegistrarService>()
 {
-    this->serviceType = serviceType;
-    this->serviceID = serviceID;
-}
+    if (serviceType == nil || serviceID == nil)
+        throw _Exception(_("serviceType or serviceID not set!"));
+}                                   
 
-Ref<MRRegistrarService> MRRegistrarService::createInstance(String serviceType, String serviceID)
+void MRRegistrarService::setStaticArgs(String _serviceType, String _serviceID)
 {
-    if (instance == nil)
-    {
-        instance = Ref<MRRegistrarService>(new MRRegistrarService(serviceType, serviceID));
-    }
-    return instance;
-}
-
-Ref<MRRegistrarService> MRRegistrarService::getInstance()
-{
-    return instance;
+    serviceType = _serviceType;
+    serviceID = _serviceID;
 }
 

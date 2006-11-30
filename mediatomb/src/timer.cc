@@ -34,91 +34,24 @@
 #endif
 
 #include "timer.h"
-#include "tools.h"
 
 using namespace zmm;
 
-Timer::Timer() : Object()
+SINGLETON_NEED_RECURSIVE_MUTEX(Timer);
+
+Timer::Timer() : Singleton<Timer>()
 {
-    subscribers = Ref<Array<TimerSubscriberElement> >(new Array<TimerSubscriberElement>);
+    subscribersSingleton = Ref<Array<TimerSubscriberElement<TimerSubscriberSingleton<Object> > > >(new Array<TimerSubscriberElement<TimerSubscriberSingleton<Object> > >);
+    subscribersObject = Ref<Array<TimerSubscriberElement<TimerSubscriberObject> > >(new Array<TimerSubscriberElement<TimerSubscriberObject> >);
     cond = Ref<Cond>(new Cond(mutex));
-}
-
-Timer::~Timer()
-{
-}
-
-Ref<Mutex> Timer::mutex = Ref<Mutex>(new Mutex(true));
-Ref<Timer> Timer::instance = nil;
-
-Ref<Timer> Timer::getInstance()
-{
-    if (instance == nil)
-    {
-        AUTOLOCK(mutex);
-        if (instance == nil) // check again, because there is a very small chance
-                             // that 2 threads tried to lock() concurrently
-        {
-            try
-            {
-                instance = Ref<Timer>(new Timer());
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-        }
-    }
-    return instance;
-}
-
-void Timer::addTimerSubscriber(Ref<TimerSubscriber> timerSubscriber, unsigned int notifyInterval, int id, bool once)
-{
-    log_debug("adding subscriber...\n");
-    if (notifyInterval <= 0)
-        throw _Exception(_("tried to add timer with illegal notifyInterval: ") + notifyInterval);
-    AUTOLOCK(mutex);
-    //timerSubscriber->timerNotify(id);
-    Ref<TimerSubscriberElement> element(new TimerSubscriberElement(timerSubscriber, notifyInterval, id, once));
-    for(int i = 0; i < subscribers->size(); i++)
-    {
-        if (subscribers->get(i)->equals(element))
-        {
-            throw _Exception(_("tried to add same timer twice"));
-        }
-    }
-    subscribers->append(element);
-    signal();
-}
-
-void Timer::removeTimerSubscriber(Ref<TimerSubscriber> timerSubscriber, int id, bool dontFail)
-{
-    log_debug("removing subscriber...\n");
-    AUTOLOCK(mutex);
-    Ref<TimerSubscriberElement> element(new TimerSubscriberElement(timerSubscriber, 0, id));
-    bool removed = false;
-    for(int i = 0; i < subscribers->size(); i++)
-    {
-        if (subscribers->get(i)->equals(element))
-        {
-            subscribers->removeUnordered(i);
-            removed = true;
-            break;
-        }
-    }
-    if (! removed && ! dontFail)
-    {
-        throw _Exception(_("tried to remove nonexistent timer"));
-    }
-    signal();
 }
 
 void Timer::triggerWait()
 {
-    log_debug("triggerWait. - %d subscriber(s)\n", subscribers->size());
+    log_debug("triggerWait. - %d subscriber(s)\n", subscribersSingleton->size());
     
     AUTOLOCK(mutex);
-    if (subscribers->size() > 0)
+    if (subscribersSingleton->size() > 0 || subscribersObject->size() > 0)
     {
         struct timespec *timeout = getNextNotifyTime();
         struct timespec now;
@@ -134,12 +67,14 @@ void Timer::triggerWait()
             }
             if (ret == ETIMEDOUT)
             {
-                notify();
+                notify<TimerSubscriberSingleton<Object> >();
+                notify<TimerSubscriberObject>();
             }
         }
         else
         {
-            notify();
+            notify<TimerSubscriberSingleton<Object> >();
+            notify<TimerSubscriberObject>();
         }
     }
     else
@@ -149,34 +84,20 @@ void Timer::triggerWait()
     }
 }
 
-void Timer::notify()
-{
-    struct timespec now;
-    getTimespecNow(&now);
-    log_debug("notifying. - %d subscribers\n", subscribers->size());
-    for(int i = 0; i < subscribers->size(); i++)
-    {
-        Ref<TimerSubscriberElement> element = subscribers->get(i);
-        if (compareTimespecs(element->getNextNotify(), &now) >= 0)
-        {
-            log_debug("notifying %d\n", i);
-            zmm::Ref<TimerSubscriber> subscriber = element->getSubscriber();
-            subscriber->timerNotify(element->getID());
-            element->notified();
-            if (element->isOnce())
-            {
-                subscribers->removeUnordered(i--);
-            }
-        }
-    }
-}
-
 struct timespec * Timer::getNextNotifyTime()
 {
     struct timespec *nextTime = NULL;
-    for(int i = 0; i < subscribers->size(); i++)
+    for(int i = 0; i < subscribersSingleton->size(); i++)
     {
-        struct timespec *nextNotify = subscribers->get(i)->getNextNotify();
+        struct timespec *nextNotify = subscribersSingleton->get(i)->getNextNotify();
+        if (nextTime == NULL || compareTimespecs(nextNotify, nextTime) > 0)
+        {
+            nextTime = nextNotify;
+        }
+    }
+    for(int i = 0; i < subscribersObject->size(); i++)
+    {
+        struct timespec *nextNotify = subscribersObject->get(i)->getNextNotify();
         if (nextTime == NULL || compareTimespecs(nextNotify, nextTime) > 0)
         {
             nextTime = nextNotify;
@@ -185,21 +106,14 @@ struct timespec * Timer::getNextNotifyTime()
     return nextTime;
 }
 
-Timer::TimerSubscriberElement::TimerSubscriberElement(Ref<TimerSubscriber> subscriber, unsigned int notifyInterval, int id, bool once)
+template <>
+Ref<Array<Timer::TimerSubscriberElement<TimerSubscriberSingleton<Object> > > > Timer::getAppropriateSubscribers<TimerSubscriberSingleton<Object> >()
 {
-    this->subscriber = subscriber;
-    this->notifyInterval = notifyInterval;
-    this->id = id;
-    this->once = once;
-    notified();
+    return subscribersSingleton;
 }
 
-void Timer::TimerSubscriberElement::notified()
+template <>
+Ref<Array<Timer::TimerSubscriberElement<TimerSubscriberObject> > > Timer::getAppropriateSubscribers<TimerSubscriberObject>()
 {
-    getTimespecAfterMillis(notifyInterval * 1000, &nextNotify);
-}
-
-bool Timer::TimerSubscriberElement::equals(Ref<TimerSubscriberElement> other)
-{
-    return (subscriber == other->subscriber && id == other->id);
+    return subscribersObject;
 }

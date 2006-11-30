@@ -42,20 +42,9 @@
 using namespace zmm;
 using namespace mxml;
 
-static Ref<CdsResourceManager> instance;
-
-CdsResourceManager::CdsResourceManager() : Object()
+CdsResourceManager::CdsResourceManager() : Singleton<CdsResourceManager>()
 {
 
-}
-
-Ref<CdsResourceManager> CdsResourceManager::getInstance()
-{
-    if (instance == nil)
-    {
-        instance = Ref<CdsResourceManager>(new CdsResourceManager());
-    }
-    return instance;
 }
 
 void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)

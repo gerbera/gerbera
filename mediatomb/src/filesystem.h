@@ -60,7 +60,7 @@ public:
     bool hasContent;
 };
 
-class Filesystem : public zmm::Object
+class Filesystem : public Singleton<Filesystem>
 {
 public:
     Filesystem();
@@ -71,7 +71,6 @@ public:
     bool haveDirectories(zmm::String dir);
     bool fileAllowed(zmm::String path);
     
-    static zmm::Ref<Filesystem> getInstance();
 protected:
     zmm::Ref<zmm::Array<RExp> > includeRules;
     bool have(zmm::String dir, int mask);

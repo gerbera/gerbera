@@ -37,26 +37,19 @@
 
 using namespace zmm;
 
-static Ref<ContentDirectoryService> instance;
+String ContentDirectoryService::serviceType = nil;
+String ContentDirectoryService::serviceID = nil;
 
-ContentDirectoryService::ContentDirectoryService(String serviceType, String serviceID) : Object()
+ContentDirectoryService::ContentDirectoryService() : Singleton<ContentDirectoryService>()
 {
-    this->serviceType = serviceType;
-    this->serviceID = serviceID;
+    if (serviceType == nil || serviceID == nil)
+        throw _Exception(_("serviceType or serviceID not set!"));
     systemUpdateID = 0;
 }
 
-Ref<ContentDirectoryService> ContentDirectoryService::createInstance(String serviceType, String serviceID)
+void ContentDirectoryService::setStaticArgs(String _serviceType, String _serviceID)
 {
-    if (instance == nil)
-    {
-        instance = Ref<ContentDirectoryService>(new ContentDirectoryService(serviceType, serviceID));
-    }
-    return instance;
-}
-
-Ref<ContentDirectoryService> ContentDirectoryService::getInstance()
-{
-    return instance;
+    serviceType = _serviceType;
+    serviceID = _serviceID;
 }
 

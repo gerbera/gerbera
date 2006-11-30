@@ -229,13 +229,17 @@ void Sqlite3Storage::addTask(zmm::Ref<SLTask> task)
 
 void Sqlite3Storage::shutdown()
 {
-    shutdownFlag = true;
+    log_debug("start\n");
     AUTOLOCK(mutex);
+    shutdownFlag = true;
+    log_debug("signalling...\n");
     signal();
     AUTOUNLOCK();
+    log_debug("waiting for thread\n");
     if (sqliteThread)
         pthread_join(sqliteThread, NULL);
     sqliteThread = 0;
+    log_debug("end\n");
 }
 
 void Sqlite3Storage::storeInternalSetting(String key, String value)

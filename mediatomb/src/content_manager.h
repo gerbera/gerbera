@@ -148,16 +148,16 @@ public:
 };
 */
 
-class ContentManager : public TimerSubscriber
+class ContentManager : public TimerSubscriberSingleton<ContentManager>
 {
 public:
+    ContentManager();
+    virtual void init();
     virtual ~ContentManager();
     void shutdown();
-
+    
     virtual void timerNotify(int id);
-
-    static zmm::Ref<ContentManager> getInstance();
-
+    
     zmm::Ref<CMAccounting> getAccounting();
     zmm::Ref<CMTask> getCurrentTask();
     
@@ -224,15 +224,8 @@ public:
 #ifdef HAVE_JS
     void reloadScripting();
 #endif
-
-
+    
 protected:
-    ContentManager();
-    
-    static zmm::Ref<ContentManager> instance;
-    
-    void init();
-    
 #ifdef HAVE_JS
     void initScripting();
     void destroyScripting();
@@ -276,7 +269,6 @@ protected:
     zmm::Ref<CMAccounting> acct;
     
     pthread_t taskThread;
-    static zmm::Ref<Mutex> mutex;
     zmm::Ref<Cond> cond;
 
     bool shutdownFlag;

@@ -38,25 +38,18 @@
 using namespace zmm;
 using namespace mxml;
 
-static Ref<ConnectionManagerService> instance;
+String ConnectionManagerService::serviceType = nil;
+String ConnectionManagerService::serviceID = nil;
 
-ConnectionManagerService::ConnectionManagerService(String serviceType, String serviceID) : Object()
+ConnectionManagerService::ConnectionManagerService() : Singleton<ConnectionManagerService>()
 {
-    this->serviceType = serviceType;
-    this->serviceID = serviceID;
+    if (serviceType == nil || serviceID == nil)
+        throw _Exception(_("serviceType or serviceID not set!"));
 }
 
-Ref<ConnectionManagerService> ConnectionManagerService::createInstance(String serviceType, String serviceID)
+void ConnectionManagerService::setStaticArgs(String _serviceType, String _serviceID)
 {
-    if (instance == nil)
-    {
-        instance = Ref<ConnectionManagerService>(new ConnectionManagerService(serviceType, serviceID));
-    }
-    return instance;
-}
-
-Ref<ConnectionManagerService> ConnectionManagerService::getInstance()
-{
-    return instance;
+    serviceType = _serviceType;
+    serviceID = _serviceID;
 }
 

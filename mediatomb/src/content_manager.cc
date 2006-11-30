@@ -69,6 +69,8 @@ using namespace mxml;
 
 Ref<RExp> reMimetype;
 
+SINGLETON_NEED_RECURSIVE_MUTEX(ContentManager);
+
 static String get_filename(String path)
 {
     if (path.charAt(path.length() - 1) == DIR_SEPARATOR) // cut off trailing slash
@@ -80,7 +82,7 @@ static String get_filename(String path)
         return path.substring(pos + 1);
 }
 
-ContentManager::ContentManager() : TimerSubscriber()
+ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
 {
     cond = Ref<Cond>(new Cond(mutex));
     ignore_unknown_extensions = 0;
@@ -173,14 +175,14 @@ void ContentManager::init()
     {
         throw _Exception(_("Could not start task thread"));
     }
-
+    
     pthread_attr_destroy(&attr);
-
+    
     loadAccounting(false);
-
+    
     Ref<Timer> timer = Timer::getInstance();
-
-    autoscan_timed->notifyAll(Ref<TimerSubscriber>(this));
+    
+    autoscan_timed->notifyAll(AS_TIMER_SUBSCRIBER_SINGLETON(this, ContentManager));
 
 }
 
@@ -196,35 +198,17 @@ void ContentManager::timerNotify(int id)
 
 void ContentManager::shutdown()
 {
+    log_debug("start\n");
     AUTOLOCK(mutex);
     shutdownFlag = true;
+    log_debug("signalling...\n");
     signal();
-// detached
-//    pthread_join(updateThread, NULL);
-}
-
-Ref<ContentManager> ContentManager::instance = nil;
-Ref<Mutex> ContentManager::mutex = Ref<Mutex>(new Mutex(true));
-
-Ref<ContentManager> ContentManager::getInstance()
-{
-    if (instance == nil)
-    {
-        AUTOLOCK(mutex);
-        if (instance == nil)
-        {
-            try
-            {
-                instance = Ref<ContentManager>(new ContentManager());
-                instance->init();
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-        }
-    }
-    return instance;
+    AUTOUNLOCK();
+    log_debug("waiting for thread...\n");
+    if (taskThread)
+        pthread_join(taskThread, NULL);
+    taskThread = 0;
+    log_debug("end\n");
 }
 
 Ref<CMAccounting> ContentManager::getAccounting()
@@ -1174,7 +1158,7 @@ void ContentManager::removeAutoscanDirectory(int scanID, scan_mode_t scanMode)
         autoscan_timed->remove(scanID);
         
         // if 3rd parameter is true: won't fail if scanID doesn't exist
-        Timer::getInstance()->removeTimerSubscriber(Ref<TimerSubscriber>(this), scanID, true);
+        Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this, ContentManager), scanID, true);
     }
     
 }
@@ -1185,7 +1169,7 @@ void ContentManager::removeAutoscanDirectory(String location)
     if ((scanID = autoscan_timed->remove(location)) >= 0)
     {
         // if 3rd parameter is true: won't fail if scanID doesn't exist
-        Timer::getInstance()->removeTimerSubscriber(Ref<TimerSubscriber>(this), scanID, true);
+        Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this, ContentManager), scanID, true);
     }
     // else <other removes... (w/o removeTimerSubscriber!)>
 }
@@ -1274,7 +1258,7 @@ void CMRescanDirectoryTask::run()
     if (dir->getTaskCount() == 0)
     {
         dir->updateLMT();
-        Timer::getInstance()->addTimerSubscriber(Ref<TimerSubscriber>(cm), dir->getInterval(), dir->getScanID(), true);
+        Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(cm, ContentManager), dir->getInterval(), dir->getScanID(), true);
     }
 }
 

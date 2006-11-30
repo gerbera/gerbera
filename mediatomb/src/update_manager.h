@@ -33,29 +33,25 @@
 #define __UPDATE_MANAGER_H__
 
 #include "common.h"
+#include "singleton.h"
 #include "hash.h"
 #include "sync.h"
 
 #define FLUSH_ASAP 2
 #define FLUSH_SPEC 1
 
-class UpdateManager : public zmm::Object
+class UpdateManager : public Singleton<UpdateManager>
 {
 public:
     UpdateManager();
-    virtual ~UpdateManager();
-    
-    void shutdown();
+    virtual void shutdown();
+    virtual void init();
     
     void containerChanged(int objectID, int flushPolicy = FLUSH_SPEC);
     
-    static zmm::Ref<UpdateManager> getInstance();
-    
 protected:
-    void init();
-    static zmm::Ref<UpdateManager> instance;
+    
     pthread_t updateThread;
-    static zmm::Ref<Mutex> mutex;
     zmm::Ref<Cond> cond;
     
     zmm::Ref<DBRHash<int> > objectIDHash;
@@ -70,7 +66,6 @@ protected:
     
     inline bool haveUpdates() { return (objectIDHash->size() > 0); }
 };
-
 
 #endif // __UPDATE_MANAGER_H__
 

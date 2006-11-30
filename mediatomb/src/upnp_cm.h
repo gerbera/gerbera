@@ -33,6 +33,7 @@
 #define __UPNP_CM_H__
 
 #include "common.h"
+#include "singleton.h"
 #include "action_request.h"
 #include "subscription_request.h"
 #include "upnp_xml.h"
@@ -40,17 +41,17 @@
 /// \brief This class is responsible for the UPnP Connection Manager Service operations.
 ///
 /// Handles subscription and action invocation requests for the Connection Manager.
-class ConnectionManagerService : public zmm::Object
+class ConnectionManagerService : public Singleton<ConnectionManagerService>
 {
 
 protected:
     /// \brief UPnP standard defined service type
     /// \todo Check if it makes sense to use it as it is done now...why not define constants here?
-    zmm::String serviceType;
+    static zmm::String serviceType;
     
     /// \brief ID of the service.
-    zmm::String serviceID;    
-
+    static zmm::String serviceID;
+    
     /// \brief UPnP standard defined action: GetCurrentConnectionIDs()
     /// \param request Incoming ActionRequest.
     ///
@@ -58,7 +59,7 @@ protected:
     ///
     /// This is currently unsupported (returns empty string)
     void upnp_action_GetCurrentConnectionIDs(zmm::Ref<ActionRequest> request);
-
+    
     /// \brief UPnP standard defined action: GetCurrentConnectionInfo()
     /// \param request Incoming ActionRequest.
     ///
@@ -67,7 +68,7 @@ protected:
     ///
     /// This action is currently unsupported.
     void upnp_action_GetCurrentConnectionInfo(zmm::Ref<ActionRequest> request);
-
+    
     /// \brief UPnP standard defined action: GetProtocolInfo()
     /// \param request Incoming ActionRequest.
     ///
@@ -78,32 +79,30 @@ public:
     /// \brief Constructor for the CMS, saves the service type and service id
     /// in internal variables.
     /// \todo Check if it makes sense to use it as it is done now...why not define them as constants?
-    ConnectionManagerService(zmm::String serviceType, zmm::String serviceID);
-
-    /// \todo what is that here?? only getIntsance should be available, creating a new instance if called for the 1st time.
-    static zmm::Ref<ConnectionManagerService> createInstance(zmm::String serviceType, zmm::String serviceID);
-    static zmm::Ref<ConnectionManagerService> getInstance();
-
+    ConnectionManagerService();
+    
+    static void setStaticArgs(zmm::String serviceType, zmm::String serviceID);
+    
     /// \brief Dispatches the ActionRequest between the available actions.
     /// \param request Incoming ActionRequest.
     ///
     /// This function looks at the incoming ActionRequest and passes it on
     /// to the appropriate action for processing.
     void process_action_request(zmm::Ref<ActionRequest> request);
-
+    
     /// \brief Processes an incoming SubscriptionRequest.
     /// \param request Incoming SubscriptionRequest.
     ///
     /// Looks at the incoming SubscriptionRequest and accepts the subscription
     /// if everything is ok.
     void process_subscription_request(zmm::Ref<SubscriptionRequest> request);
-
+    
     /// \brief Sends out an event to all subscribed devices.
     /// \param sourceProtocol_CSV Comma Separated Value list of protocol information
     ///
     /// Sends out an update with protocol information to all subscribed devices
     void subscription_update(zmm::String sourceProtocol_CSV);
-        
+    
 };
 
 #endif // __UPNP_CM_H__

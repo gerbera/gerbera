@@ -186,5 +186,3 @@ void ContentDirectoryService::process_action_request(Ref<ActionRequest> request)
 
     log_debug("ContentDirectoryService::process_action_request: end\n");
 }
-
-
