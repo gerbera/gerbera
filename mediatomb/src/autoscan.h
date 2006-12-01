@@ -58,7 +58,7 @@ class AutoscanList : public zmm::Object
 {
 public:
     AutoscanList();
-
+    
     /// \brief Adds a new AutoscanDirectory to the list. 
     /// 
     /// The scanID of the directory is invalidated and set to 
@@ -101,7 +101,10 @@ public:
     /// \param id dir id.
     void subscribeDir(zmm::Ref<TimerSubscriber> obj, int id, bool once = true);
     */
-
+    
+    /// \brief updates the last_modified data for all AutoscanDirectories.
+    void updateLMinDB();
+    
 protected:
     zmm::Ref<Mutex> mutex;
     zmm::Ref<zmm::Array<AutoscanDirectory> > list;

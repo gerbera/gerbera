@@ -103,10 +103,9 @@ void Mutex::unlock(bool autolock)
 
 void Mutex::errorExit(String error)
 {
-    //log_error(error.c_str());
-    Exception e(error);
-    e.printStackTrace();
-    exit(1);
+    printf("%s\n", error.c_str());
+    print_backtrace();
+    abort();
 }
 
 void Mutex::unlockAutolock()

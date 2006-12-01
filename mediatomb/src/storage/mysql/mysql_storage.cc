@@ -232,9 +232,8 @@ String MysqlStorage::getError(MYSQL *db)
 Ref<SQLResult> MysqlStorage::select(String query)
 {
 #ifdef MYSQL_SELECT_DEBUG
-    Exception *e = new Exception(query);
-    e->printStackTrace();
-    delete e;
+    log_debug("%s\n", query);
+    print_backtrace();
 #endif
     
     int res;
@@ -260,9 +259,8 @@ Ref<SQLResult> MysqlStorage::select(String query)
 int MysqlStorage::exec(String query, bool getLastInsertId)
 {
 #ifdef MYSQL_EXEC_DEBUG
-    Exception *e = new Exception(query);
-    e->printStackTrace();
-    delete e;
+    log_debug("%s\n", query);
+    print_backtrace();
 #endif
 
     int res;

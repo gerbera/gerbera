@@ -231,26 +231,25 @@ protected:
     void destroyScripting();
 #endif
     //pthread_mutex_t last_modified_mutex;
-
+    
     int ignore_unknown_extensions;
     zmm::Ref<Dictionary> extension_mimetype_map;
     zmm::Ref<Dictionary> mimetype_upnpclass_map;
     zmm::Ref<AutoscanList> autoscan_timed;
-        
-
+    
     /* don't use these, use the above methods */
     void _loadAccounting();
     void _addFile(zmm::String path, bool recursive=false, bool hidden=false);
     //void _addFile2(zmm::String path, bool recursive=0);
     void _removeObject(int objectID, bool all);
     
-       
+    
     void rescanDirectory(int objectID, int scanID, scan_mode_t scanMode); 
     void _rescanDirectory(int containerID, int scanID, scan_mode_t scanMode, scan_level_t scanLevel);
     /* for recursive addition */
     void addRecursive(zmm::String path, bool hidden=false);
     //void addRecursive2(zmm::Ref<DirCache> dirCache, zmm::String filename, bool recursive);
-
+    
     zmm::String extension2mimetype(zmm::String extension);
     zmm::String mimetype2upnpclass(zmm::String mimeType);
 
@@ -265,12 +264,12 @@ protected:
     void threadProc();
     
     void addTask(zmm::Ref<CMTask> task, bool lowPriority = false);
-
+    
     zmm::Ref<CMAccounting> acct;
     
     pthread_t taskThread;
     zmm::Ref<Cond> cond;
-
+    
     bool shutdownFlag;
     
     zmm::Ref<zmm::ObjectQueue<CMTask> > taskQueue1; // priority 1

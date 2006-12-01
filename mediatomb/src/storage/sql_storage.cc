@@ -629,7 +629,7 @@ int SQLStorage::findObjectIDByPath(String fullpath)
 {
     Ref<SQLRow> row = _findObjectByPath(fullpath);
     if (row == nil)
-        return -1;
+        return INVALID_OBJECT_ID;
     return row->col(_id).toInt();
 }
 
@@ -1226,9 +1226,16 @@ bool SQLStorage::isAutoscanDirectory(int objectId)
 
 void SQLStorage::autoscanUpdateLM(zmm::Ref<AutoscanDirectory> adir)
 {
+    int objectID = adir->getObjectID();
+    if (IS_FORBIDDEN_CDS_ID(objectID))
+    {
+        objectID = findObjectIDByPath(adir->getLocation() + '/');
+        if (IS_FORBIDDEN_CDS_ID(objectID))
+            throw _Exception(_("autoscanUpdateLM called with adir with illegal objectID and location"));
+    }
     Ref<StringBuffer> q(new StringBuffer());
     *q << "UPDATE " << TQ(AUTOSCAN_TABLE)
         << " SET " << TQ("last_modified") << " = " << quote(adir->getPreviousLMT())
-        << " WHERE " << TQ("id") << " = " << quote(adir->getObjectID());
+        << " WHERE " << TQ("id") << " = " << quote(objectID);
     exec(q->toString());
 }

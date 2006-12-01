@@ -37,8 +37,6 @@
 
 using namespace zmm;
 
-#define SINGLETON_MANAGEMENT_INITIAL_CAPACITY 30
-
 Ref<SingletonManager> SingletonManager::instance = nil;
 Ref<Mutex> SingletonManager::mutex = Ref<Mutex>(new Mutex());
 
@@ -58,11 +56,20 @@ Ref<SingletonManager> SingletonManager::getInstance()
 
 SingletonManager::SingletonManager() : Object()
 {
-    singletonStack = Ref<ObjectStack<Singleton<Object> > >(new ObjectStack<Singleton<Object> >(SINGLETON_MANAGEMENT_INITIAL_CAPACITY));
+    singletonStack = Ref<ObjectStack<Singleton<Object> > >(new ObjectStack<Singleton<Object> >(SINGLETON_CUR_MAX));
 }
 
 void SingletonManager::registerSingleton(Ref<Singleton<Object> > object)
 {
+    AUTOLOCK(mutex);
+#ifdef LOG_TOMBDEBUG
+    if (singletonStack->size() >= SINGLETON_CUR_MAX)
+    {
+        printf("%d singletons are active (SINGLETON_CUR_MAX=%d) and tried to add another singleton - check this!\n", singletonStack->size(), SINGLETON_CUR_MAX);
+        print_backtrace();
+        abort();
+    }
+#endif
     log_debug("registering new singleton... - %d -> %d\n", singletonStack->size(), singletonStack->size() + 1);
     singletonStack->push(object);
 }
@@ -74,7 +81,9 @@ void SingletonManager::shutdown()
     Ref<Singleton<Object> > object;
     while((object = singletonStack->pop()) != nil)
     {
+        object->singletonActive = false;
         object->shutdown();
+        object->inactivateSingleton();
     }
     log_debug("end\n");
 }

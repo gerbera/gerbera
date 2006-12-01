@@ -156,6 +156,7 @@ void ContentManager::init()
     reMimetype = Ref<RExp>(new RExp());
     reMimetype->compile(_(MIMETYPE_REGEXP));
     
+    /*
     pthread_attr_t attr;
     ret = pthread_attr_init(&attr);
     if (ret != 0)
@@ -164,10 +165,11 @@ void ContentManager::init()
     }
    
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    */
     
     ret = pthread_create(
         &taskThread,
-        &attr, // attr
+        NULL, //&attr, // attr
         ContentManager::staticThreadProc,
         this
     );
@@ -176,9 +178,9 @@ void ContentManager::init()
         throw _Exception(_("Could not start task thread"));
     }
     
-    pthread_attr_destroy(&attr);
+    //pthread_attr_destroy(&attr);
     
-    loadAccounting(false);
+    //loadAccounting(false);
     
     Ref<Timer> timer = Timer::getInstance();
     
@@ -200,6 +202,8 @@ void ContentManager::shutdown()
 {
     log_debug("start\n");
     AUTOLOCK(mutex);
+    log_debug("updating last_modified data for autoscan in database...\n");
+    autoscan_timed->updateLMinDB();
     shutdownFlag = true;
     log_debug("signalling...\n");
     signal();

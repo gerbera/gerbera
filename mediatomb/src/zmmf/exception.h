@@ -38,7 +38,7 @@
 #include <stdio.h>
 #include "logger.h"
 
-#define _Exception(format) Exception(format, __FILE__, __LINE__, __func__)
+#define _Exception(format) zmm::Exception(format, __FILE__, __LINE__, __func__)
 
 namespace zmm
 {

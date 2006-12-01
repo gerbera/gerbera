@@ -34,6 +34,7 @@
 #endif
 
 #include "autoscan.h"
+#include "storage.h"
 
 using namespace zmm;
 
@@ -65,6 +66,13 @@ AutoscanList::AutoscanList()
 {
     mutex = Ref<Mutex>(new Mutex(true));
     list = Ref<Array<AutoscanDirectory> > (new Array<AutoscanDirectory>());
+}
+
+void AutoscanList::updateLMinDB()
+{
+    AUTOLOCK(mutex);
+    for (int i = 0; i < list->size(); i++)
+        Storage::getInstance()->autoscanUpdateLM(list->get(i));
 }
 
 int AutoscanList::add(Ref<AutoscanDirectory> dir)

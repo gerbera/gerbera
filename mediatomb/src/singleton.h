@@ -35,6 +35,8 @@
 #include "sync.h"
 #include "zmmf/zmmf.h"
 
+#define SINGLETON_CUR_MAX 11
+
 template <class T> class Singleton;
 
 class SingletonManager : public zmm::Object
@@ -57,19 +59,17 @@ template <class T>
 class Singleton : public zmm::Object
 {
 public:
-    
-    Singleton()
-    {
-        SingletonManager::getInstance()->registerSingleton(zmm::Ref<Singleton<Object> >((Singleton<Object> *)this));
-    }
-    
     virtual ~Singleton() { };
     
     static zmm::Ref<T> getInstance()
     {
+        if (! instance->singletonActive)
+            throw _Exception(_("singleton is currently inactive!"));
         if (instance == nil)
         {
             AUTOLOCK(mutex);
+            if (! instance->singletonActive)
+                throw _Exception(_("singleton is currently inactive!"));
             if (instance == nil) // check again, because there is a very small chance
                                  // that 2 threads tried to lock() concurrently
             {
@@ -81,10 +81,21 @@ public:
     }
     
 protected:
-    virtual void init() { };
-    virtual void shutdown() { };
-    static zmm::Ref<T> instance;
+    Singleton()
+    {
+        SingletonManager::getInstance()->registerSingleton(zmm::Ref<Singleton<Object> >((Singleton<Object> *)this));
+    }
+    virtual void init() { }
+    virtual void shutdown() { }
+    
     static zmm::Ref<Mutex> mutex;
+    static zmm::Ref<T> instance;
+    
+private:
+    void inactivateSingleton() { singletonActive = false; instance = nil; }
+    //void activateSingleton() { singletonActive = true; }
+    
+    static bool singletonActive;
     
     friend class SingletonManager;
 };
@@ -92,6 +103,7 @@ protected:
 #define SINGLETON_MUTEX(klass, recursive) template <> zmm::Ref<Mutex> Singleton<klass>::mutex = zmm::Ref<Mutex>(new Mutex(recursive))
 //template <class T> zmm::Ref<Mutex> Singleton<T>::mutex = zmm::Ref<Mutex>(new Mutex());
 template <class T> zmm::Ref<T> Singleton<T>::instance = nil;
+template <class T> bool Singleton<T>::singletonActive = true;
 
 #endif // __SINGLETON_H__
 
