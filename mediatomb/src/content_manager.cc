@@ -184,9 +184,7 @@ void ContentManager::init()
     
     //loadAccounting(false);
     
-    Ref<Timer> timer = Timer::getInstance();
-    
-    autoscan_timed->notifyAll(AS_TIMER_SUBSCRIBER_SINGLETON(this, ContentManager));
+    autoscan_timed->notifyAll(AS_TIMER_SUBSCRIBER_SINGLETON(this));
 
 }
 
@@ -1164,7 +1162,7 @@ void ContentManager::removeAutoscanDirectory(int scanID, scan_mode_t scanMode)
         autoscan_timed->remove(scanID);
         
         // if 3rd parameter is true: won't fail if scanID doesn't exist
-        Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this, ContentManager), scanID, true);
+        Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), scanID, true);
     }
     
 }
@@ -1175,7 +1173,7 @@ void ContentManager::removeAutoscanDirectory(String location)
     if ((scanID = autoscan_timed->remove(location)) >= 0)
     {
         // if 3rd parameter is true: won't fail if scanID doesn't exist
-        Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this, ContentManager), scanID, true);
+        Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), scanID, true);
     }
     // else <other removes... (w/o removeTimerSubscriber!)>
 }
@@ -1263,7 +1261,7 @@ void CMRescanDirectoryTask::run(Ref<ContentManager> cm)
     if (dir->getTaskCount() == 0)
     {
         dir->updateLMT();
-        Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON_FROM_REF(cm, ContentManager), dir->getInterval(), dir->getScanID(), true);
+        Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON_FROM_REF(cm), dir->getInterval(), dir->getScanID(), true);
     }
 }
 

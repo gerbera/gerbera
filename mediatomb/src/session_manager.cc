@@ -186,12 +186,12 @@ void SessionManager::checkTimer()
 {
     if (sessions->size() > 0 && ! timerAdded)
     {
-        Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this, SessionManager), SESSION_TIMEOUT_CHECK_INTERVAL);
+        Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), SESSION_TIMEOUT_CHECK_INTERVAL);
         timerAdded = true;
     }
     else if (sessions->size() <= 0 && timerAdded)
     {
-        Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this, SessionManager));
+        Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this));
         timerAdded = false;
     }
 }
