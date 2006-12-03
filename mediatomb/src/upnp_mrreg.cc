@@ -47,7 +47,13 @@ MRRegistrarService::MRRegistrarService() : Singleton<MRRegistrarService>()
 {
     if (serviceType == nil || serviceID == nil)
         throw _Exception(_("serviceType or serviceID not set!"));
-}                                   
+}
+
+MRRegistrarService::~MRRegistrarService()
+{
+    serviceType = nil;
+    serviceID = nil;
+}
 
 void MRRegistrarService::setStaticArgs(String _serviceType, String _serviceID)
 {

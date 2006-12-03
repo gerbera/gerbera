@@ -81,7 +81,7 @@ void web::items::process()
         Ref<Element> item (new Element(_("item")));
         item->addAttribute(_("id"), String::from(obj->getID()));
         item->appendTextChild(_("title"), obj->getTitle());
-        item->appendTextChild(_("res"), CdsResourceManager::getInstance()->getFirstResource(RefCast(obj, CdsItem)));
+        item->appendTextChild(_("res"), CdsResourceManager::getFirstResource(RefCast(obj, CdsItem)));
         item->appendTextChild(_("virtual"), obj->isVirtual() ? _("1") : _("0"));
         items->appendChild(item);
         //}

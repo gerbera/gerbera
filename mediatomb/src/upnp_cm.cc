@@ -49,6 +49,12 @@ ConnectionManagerService::ConnectionManagerService() : Singleton<ConnectionManag
         throw _Exception(_("serviceType or serviceID not set!"));
 }
 
+ConnectionManagerService::~ConnectionManagerService()
+{
+    serviceType = nil;
+    serviceID = nil;
+}
+
 void ConnectionManagerService::setStaticArgs(String _serviceType, String _serviceID)
 {
     serviceType = _serviceType;

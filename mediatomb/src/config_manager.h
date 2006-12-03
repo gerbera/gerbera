@@ -43,7 +43,9 @@ class ConfigManager : public Singleton<ConfigManager>
 {
 public:
     ConfigManager();
-
+    
+    virtual ~ConfigManager();
+    
     /// \brief Returns the name of the config file that was used to launch the server.
     inline zmm::String getConfigFilename() { return filename; }
 

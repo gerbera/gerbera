@@ -56,7 +56,7 @@ MysqlStorage::MysqlStorage() : SQLStorage()
     /// dbRemovesDeps gets set by init() to the correct value
     dbRemovesDeps = true;
     mysql_connection = false;
-    mutex = Ref<Mutex> (new Mutex(true));
+    mysqlMutex = Ref<Mutex> (new Mutex(true));
     table_quote_begin = '`';
     table_quote_end = '`';
 }
@@ -80,7 +80,7 @@ void MysqlStorage::checkMysqlThreadInit()
 void MysqlStorage::init()
 {
     log_debug("start\n");
-    AUTOLOCK(mutex);
+    AUTOLOCK(mysqlMutex);
     int ret;
     
     if (! mysql_thread_safe())
@@ -239,7 +239,7 @@ Ref<SQLResult> MysqlStorage::select(String query)
     int res;
     
     checkMysqlThreadInit();
-    AUTOLOCK(mutex);
+    AUTOLOCK(mysqlMutex);
     res = mysql_real_query(&db, query.c_str(), query.length());
     if (res)
     {
@@ -266,7 +266,7 @@ int MysqlStorage::exec(String query, bool getLastInsertId)
     int res;
     
     checkMysqlThreadInit();
-    AUTOLOCK(mutex);
+    AUTOLOCK(mysqlMutex);
     res = mysql_real_query(&db, query.c_str(), query.length());
     if(res)
     {
@@ -280,7 +280,7 @@ int MysqlStorage::exec(String query, bool getLastInsertId)
 
 void MysqlStorage::shutdown()
 {
-    AUTOLOCK(mutex);    // just to ensure, that we don't close while another thread 
+    AUTOLOCK(mysqlMutex);    // just to ensure, that we don't close while another thread 
                     // is executing a query
     
     if(mysql_connection)

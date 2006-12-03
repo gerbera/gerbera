@@ -86,7 +86,7 @@ protected:
     
     zmm::String getError(MYSQL *db);
     
-    zmm::Ref<Mutex> mutex;
+    zmm::Ref<Mutex> mysqlMutex;
     
     pthread_key_t mysql_init_key;
     bool mysql_init_key_initialized;

@@ -185,7 +185,7 @@ protected:
     
     pthread_t sqliteThread;
     zmm::Ref<Cond> cond;
-    zmm::Ref<Mutex> mutex;
+    zmm::Ref<Mutex> sqliteMutex;
     
     /// \brief is set to true by shutdown() if the sqlite3 thread should terminate
     bool shutdownFlag;

@@ -81,6 +81,8 @@ public:
     /// \todo Check if it makes sense to use it as it is done now...why not define them as constants?
     ConnectionManagerService();
     
+    virtual ~ConnectionManagerService();
+    
     static void setStaticArgs(zmm::String serviceType, zmm::String serviceID);
     
     /// \brief Dispatches the ActionRequest between the available actions.

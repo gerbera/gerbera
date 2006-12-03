@@ -54,6 +54,12 @@ SINGLETON_MUTEX(ConfigManager, false);
 String ConfigManager::filename = nil;
 String ConfigManager::userhome = nil;
 
+ConfigManager::~ConfigManager()
+{
+    filename = nil;
+    userhome = nil;
+}
+
 void ConfigManager::setStaticArgs(String _filename, String _userhome)
 {
     filename = _filename;

@@ -174,8 +174,6 @@ protected:
     
     /* helpers for removeObject() */
     
-    zmm::Ref<Mutex> mutex;
-    
     int *rmIDs;
     zmm::Ref<DBHash<int> > rmIDHash;
     int *rmParents;

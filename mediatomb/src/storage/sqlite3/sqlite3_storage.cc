@@ -57,15 +57,15 @@ Sqlite3Storage::Sqlite3Storage() : SQLStorage()
     table_quote_begin = '"';
     table_quote_end = '"';
     startupError = nil;
-    mutex = Ref<Mutex>(new Mutex());
-    cond = Ref<Cond>(new Cond(mutex));
+    sqliteMutex = Ref<Mutex>(new Mutex());
+    cond = Ref<Cond>(new Cond(sqliteMutex));
 }
 
 void Sqlite3Storage::init()
 {
     int ret;
     
-    AUTOLOCK(mutex);
+    AUTOLOCK(sqliteMutex);
     /*
     pthread_attr_t attr;
     pthread_attr_init(&attr);
@@ -181,7 +181,7 @@ void Sqlite3Storage::threadProc()
         startupError = _("Sqlite3Storage.init: could not open ") +
             dbFilePath;
     }
-    AUTOLOCK(mutex);
+    AUTOLOCK(sqliteMutex);
     cond->signal();
     
     while(! shutdownFlag)
@@ -218,7 +218,7 @@ void Sqlite3Storage::addTask(zmm::Ref<SLTask> task)
 {
     if (! taskQueueOpen)
         throw _Exception(_("sqlite3 task queue is already closed"));
-    AUTOLOCK(mutex);
+    AUTOLOCK(sqliteMutex);
     if (! taskQueueOpen)
     {
         throw _Exception(_("sqlite3 task queue is already closed"));
@@ -230,7 +230,7 @@ void Sqlite3Storage::addTask(zmm::Ref<SLTask> task)
 void Sqlite3Storage::shutdown()
 {
     log_debug("start\n");
-    AUTOLOCK(mutex);
+    AUTOLOCK(sqliteMutex);
     shutdownFlag = true;
     log_debug("signalling...\n");
     signal();
@@ -291,7 +291,7 @@ void SLTask::waitForTask()
     
     if (getError() != nil)
     {
-        //log_error("%s\n", getError().c_str());
+        log_error("%s\n", getError().c_str());
         throw _Exception(getError());
     }
 }

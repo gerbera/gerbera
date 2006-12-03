@@ -39,7 +39,7 @@
 #include "strings.h"
 
 /// \brief This class is responsible for handling the DIDL-Lite res tags.
-class CdsResourceManager : public Singleton<CdsResourceManager>
+class CdsResourceManager : public zmm::Object
 {
 public:
     /// \brief Constructor, currently empty.
@@ -54,12 +54,12 @@ public:
     /// if you want to add another mime/type alias for an existing mime/type, this
     /// function would do it. Also, when transcoding will be implemented, the
     /// various transcoded streams will be identified here.
-    void addResources(zmm::Ref<CdsItem> item, zmm::Ref<mxml::Element> element);
+    static void addResources(zmm::Ref<CdsItem> item, zmm::Ref<mxml::Element> element);
     
     /// \brief Gets the URL of the first resource of the CfsItem.
     /// \param item Item for which the resources should be built.
     /// \return The URL
-    zmm::String getFirstResource(zmm::Ref<CdsItem> item);
+    static zmm::String getFirstResource(zmm::Ref<CdsItem> item);
     
 protected:
     class UrlBase : public zmm::Object
@@ -74,7 +74,7 @@ protected:
     ///
     /// This function gets the baseUrl for the CdsItem and sets addResID
     /// to true if the resource id needs to be added to the URL.
-    zmm::Ref<UrlBase> addResources_getUrlBase(zmm::Ref<CdsItem> item);
+    static zmm::Ref<UrlBase> addResources_getUrlBase(zmm::Ref<CdsItem> item);
     
     
 };

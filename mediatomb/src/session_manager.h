@@ -121,6 +121,8 @@ public:
     /// \brief Constructor, initializes the array.
     SessionManager();
     
+    virtual ~SessionManager() { log_debug("SessionManager destroyed\n"); }
+    
     /// \brief Creates a Session with a given timeout.
     /// \param timeout Session timeout in milliseconds.
     zmm::Ref<Session> createSession(long timeout);

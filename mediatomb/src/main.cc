@@ -414,7 +414,7 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
         
         try
         {
-            singletonManager->shutdown();
+            singletonManager->shutdown(true);
         }
         catch (Exception e)
         {
@@ -470,7 +470,7 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
             log_info("Restarting MediaTomb!\n");
             try
             {
-                singletonManager->shutdown();
+                singletonManager->shutdown(true);
                 
                 try
                 {
@@ -519,7 +519,7 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     int ret = EXIT_SUCCESS;
     try
     {
-        singletonManager->shutdown();
+        singletonManager->shutdown(true);
     }
     catch(UpnpException upnp_e)
     {
@@ -534,18 +534,18 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
 
     log_info("Server terminating\n");
     log_close();
-
+    
     return ret;
 }
 
 void signal_handler(int signum)
 {
-
+    
     if (main_thread_id != pthread_self())
     {
         return;
     }
-
+    
     if ((signum == SIGINT) || (signum == SIGTERM))
     {
         shutdown_flag++;
@@ -570,5 +570,4 @@ void signal_handler(int signum)
 
     return;
 }
-
 

@@ -133,8 +133,6 @@ SQLStorage::SQLStorage() : Storage()
     rmIDs = NULL;
     rmParents = NULL;
     
-    mutex = Ref<Mutex>(new Mutex(false));
-    
     table_quote_begin = '\0';
     table_quote_end = '\0';
 }
@@ -438,7 +436,9 @@ Ref<CdsObject> SQLStorage::loadObject(int objectID)
     throw _Exception(_("Object not found: ") + objectID);
 */
     Ref<StringBuffer> qb(new StringBuffer());
-
+    
+    //log_debug("sql_query = %s\n",sql_query.c_str());
+    
     *qb << SQL_QUERY << " WHERE f.id = " << objectID;
 
     Ref<SQLResult> res = select(qb->toString());

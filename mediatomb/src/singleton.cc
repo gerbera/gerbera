@@ -54,6 +54,12 @@ Ref<SingletonManager> SingletonManager::getInstance()
     return instance;
 }
 
+SingletonManager::~SingletonManager()
+{
+    if (mutex != nil)
+        mutex = nil;
+}
+
 SingletonManager::SingletonManager() : Object()
 {
     singletonStack = Ref<ObjectStack<Singleton<Object> > >(new ObjectStack<Singleton<Object> >(SINGLETON_CUR_MAX));
@@ -74,17 +80,21 @@ void SingletonManager::registerSingleton(Ref<Singleton<Object> > object)
     singletonStack->push(object);
 }
 
-void SingletonManager::shutdown()
+void SingletonManager::shutdown(bool complete)
 {
     log_debug("start (%d objects)\n", singletonStack->size());
     AUTOLOCK(mutex);
     Ref<Singleton<Object> > object;
     while((object = singletonStack->pop()) != nil)
     {
-        object->singletonActive = false;
-        object->shutdown();
+        //log_debug("destoying... \n");
+        //_print_backtrace(stdout);
         object->inactivateSingleton();
+        object->shutdown();
+        //object->destroyMutex();
     }
+    if (complete && instance != nil)
+        instance = nil;
     log_debug("end\n");
 }
 

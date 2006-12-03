@@ -55,13 +55,19 @@ Storage::Storage() : Singleton<Storage>()
 
 Ref<Storage> Storage::getInstance()
 {
+    if (! instance->singletonActive)
+            throw _Exception(_("singleton is currently inactive!"));
     if(instance == nil)
     {
         AUTOLOCK(mutex);
+        if (! instance->singletonActive)
+                throw _Exception(_("singleton is currently inactive!"));
         if (instance == nil)
         {
-            instance = createInstance();
-            instance->init();
+            Ref<Storage> tmpInstance = createInstance();
+            tmpInstance->init();
+            tmpInstance->registerSingleton();
+            instance = tmpInstance;
         }
     }
     return instance;

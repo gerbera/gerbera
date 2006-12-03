@@ -35,7 +35,7 @@
 #include "sync.h"
 #include "zmmf/zmmf.h"
 
-#define SINGLETON_CUR_MAX 11
+#define SINGLETON_CUR_MAX 10
 
 template <class T> class Singleton;
 
@@ -44,9 +44,10 @@ class SingletonManager : public zmm::Object
 public:
     static zmm::Ref<SingletonManager> getInstance();
     SingletonManager();
+    virtual ~SingletonManager();
     
     void registerSingleton(zmm::Ref<Singleton<zmm::Object> > object);
-    void shutdown();
+    virtual void shutdown(bool complete = false);
     
 protected:
     static zmm::Ref<SingletonManager> instance;
@@ -59,7 +60,10 @@ template <class T>
 class Singleton : public zmm::Object
 {
 public:
-    virtual ~Singleton() { };
+    virtual ~Singleton()
+    {
+        mutex = nil;
+    };
     
     static zmm::Ref<T> getInstance()
     {
@@ -73,29 +77,53 @@ public:
             if (instance == nil) // check again, because there is a very small chance
                                  // that 2 threads tried to lock() concurrently
             {
-                instance = zmm::Ref<T>(new T());
-                instance->init();
+                zmm::Ref<T> tmpInstance = zmm::Ref<T>(new T());
+                tmpInstance->init();
+                tmpInstance->registerSingleton();
+                instance = tmpInstance;
             }
         }
         return instance;
     }
     
 protected:
+    
+    /*
     Singleton()
     {
-        SingletonManager::getInstance()->registerSingleton(zmm::Ref<Singleton<Object> >((Singleton<Object> *)this));
     }
+    */
+    
     virtual void init() { }
     virtual void shutdown() { }
     
     static zmm::Ref<Mutex> mutex;
     static zmm::Ref<T> instance;
     
-private:
-    void inactivateSingleton() { singletonActive = false; instance = nil; }
-    //void activateSingleton() { singletonActive = true; }
+    virtual void registerSingleton()
+    {
+        SingletonManager::getInstance()->registerSingleton(zmm::Ref<Singleton<Object> >((Singleton<Object> *)this));
+    }
     
     static bool singletonActive;
+private:
+    virtual void inactivateSingleton()
+    {
+        //log_debug("%d %d\n", singletonActive, instance.getPtr());
+        singletonActive = false;
+        instance = nil;
+    }
+    //void activateSingleton() { singletonActive = true; }
+    
+    /*
+    virtual void destroyMutex()
+    {
+        printf("--- try to destoy mutex...\n");
+        mutex = nil;
+        _print_backtrace(stdout);
+        printf("=== did it work?\n");
+    }
+    */
     
     friend class SingletonManager;
 };

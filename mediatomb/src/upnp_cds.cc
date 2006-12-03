@@ -49,6 +49,12 @@ ContentDirectoryService::ContentDirectoryService() : Singleton<ContentDirectoryS
     systemUpdateID = 0;
 }
 
+ContentDirectoryService::~ContentDirectoryService()
+{
+    serviceType = nil;
+    serviceID = nil;
+}
+
 void ContentDirectoryService::setStaticArgs(String _serviceType, String _serviceID)
 {
     serviceType = _serviceType;

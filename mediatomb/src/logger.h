@@ -75,7 +75,7 @@ void _log_info(const char *format, ...);
 void _log_warning(const char *format, ...);
 void _log_error(const char *format, ...);
 void _log_debug(const char *format, const char* file, int line, const char *function, ...);
-void _print_backtrace();
+void _print_backtrace(FILE* file = LOG_FILE);
 
 #endif // __LOGGER_H__
 

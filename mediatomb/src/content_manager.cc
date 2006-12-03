@@ -86,10 +86,10 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
 {
     cond = Ref<Cond>(new Cond(mutex));
     ignore_unknown_extensions = 0;
-
+    
     shutdownFlag = false;
-   
-    acct = Ref<CMAccounting>(new CMAccounting());    
+    
+    acct = Ref<CMAccounting>(new CMAccounting());
     taskQueue1 = Ref<ObjectQueue<CMTask> >(new ObjectQueue<CMTask>(CM_INITIAL_QUEUE_SIZE));
     taskQueue2 = Ref<ObjectQueue<CMTask> >(new ObjectQueue<CMTask>(CM_INITIAL_QUEUE_SIZE));    
     
@@ -143,10 +143,12 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
 
 ContentManager::~ContentManager()
 {
+    log_debug("ContentManager destroyed\n");
 #ifdef HAVE_MAGIC
     if (ms)
         magic_close(ms);
 #endif
+    reMimetype = nil;
 }
 
 void ContentManager::init()

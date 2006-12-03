@@ -83,6 +83,7 @@ public:
     /// in internal variables.
     /// \todo Check if it makes sense to use it as it is done now...why not define them as constants?
     MRRegistrarService();
+    virtual ~MRRegistrarService();
     
     static void setStaticArgs(zmm::String serviceType, zmm::String serviceID);
     
