@@ -968,7 +968,7 @@ void ContentManager::reloadScripting()
 void ContentManager::threadProc()
 {
     Ref<CMTask> task;
-    
+    Ref<ContentManager> this_ref(this);
     AUTOLOCK(mutex);
     while(! shutdownFlag)
     {
@@ -989,7 +989,7 @@ void ContentManager::threadProc()
         try
         {
             if (task->isValid())
-                task->run();
+                task->run(this_ref);
         }
         catch (Exception e)
         {
@@ -1183,7 +1183,6 @@ void ContentManager::removeAutoscanDirectory(String location)
 
 CMTask::CMTask() : Object()
 {
-    cm = ContentManager::getInstance().getPtr();
     valid = true;
     taskID = Invalid;
 }
@@ -1226,7 +1225,7 @@ String CMAddFileTask::getPath()
     return path;
 }
 
-void CMAddFileTask::run()
+void CMAddFileTask::run(Ref<ContentManager> cm)
 {
     log_debug("running add file task with path %s recursive: %d\n", path.c_str(), recursive);
     cm->_addFile(path, recursive, hidden);
@@ -1239,7 +1238,7 @@ CMRemoveObjectTask::CMRemoveObjectTask(int objectID, bool all) : CMTask()
     this->taskID = RemoveObject;
 }
 
-void CMRemoveObjectTask::run()
+void CMRemoveObjectTask::run(Ref<ContentManager> cm)
 {
     cm->_removeObject(objectID, all);
 }
@@ -1252,7 +1251,7 @@ CMRescanDirectoryTask::CMRescanDirectoryTask(int objectID, int scanID, scan_mode
     this->taskID = RescanDirectory;
 }
 
-void CMRescanDirectoryTask::run()
+void CMRescanDirectoryTask::run(Ref<ContentManager> cm)
 {
     Ref<AutoscanDirectory> dir = cm->getAutoscanDirectory(scanID, scanMode);
     if (dir == nil)
@@ -1264,7 +1263,7 @@ void CMRescanDirectoryTask::run()
     if (dir->getTaskCount() == 0)
     {
         dir->updateLMT();
-        Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(cm, ContentManager), dir->getInterval(), dir->getScanID(), true);
+        Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON_FROM_REF(cm, ContentManager), dir->getInterval(), dir->getScanID(), true);
     }
 }
 
@@ -1273,7 +1272,7 @@ CMLoadAccountingTask::CMLoadAccountingTask() : CMTask()
     this->taskID = LoadAccounting;
 }
 
-void CMLoadAccountingTask::run()
+void CMLoadAccountingTask::run(Ref<ContentManager> cm)
 {
     cm->_loadAccounting();
 }

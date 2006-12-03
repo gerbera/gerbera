@@ -57,14 +57,13 @@ typedef enum task_id_t
 class CMTask : public zmm::Object
 {
 protected:
-    ContentManager *cm;
     zmm::String description;
     task_id_t taskID;
     bool valid;
     
 public:
     CMTask();
-    virtual void run() = 0;
+    virtual void run(zmm::Ref<ContentManager> cm) = 0;
     void setDescription(zmm::String description);
     zmm::String getDescription();
     task_id_t getID();
@@ -81,7 +80,7 @@ protected:
 public:
     CMAddFileTask(zmm::String path, bool recursive=false, bool hidden=false);
     zmm::String getPath();
-    virtual void run();
+    virtual void run(zmm::Ref<ContentManager> cm);
 };
 
 class CMRemoveObjectTask : public CMTask
@@ -91,14 +90,14 @@ protected:
     bool all;
 public:
     CMRemoveObjectTask(int objectID, bool all);
-    virtual void run();
+    virtual void run(zmm::Ref<ContentManager> cm);
 };
 
 class CMLoadAccountingTask : public CMTask
 {
 public:
     CMLoadAccountingTask();
-    virtual void run();
+    virtual void run(zmm::Ref<ContentManager> cm);
 };
 
 class CMRescanDirectoryTask : public CMTask
@@ -109,7 +108,7 @@ protected:
     scan_mode_t scanMode;
 public:
     CMRescanDirectoryTask(int objectID, int scanID, scan_mode_t scanMode);
-    virtual void run();
+    virtual void run(zmm::Ref<ContentManager> cm);
 };
 
 class CMAccounting : public zmm::Object
@@ -276,10 +275,10 @@ protected:
     zmm::Ref<zmm::ObjectQueue<CMTask> > taskQueue2; // priority 2
     zmm::Ref<CMTask> currentTask;
     
-    friend void CMAddFileTask::run();
-    friend void CMRemoveObjectTask::run();
-    friend void CMRescanDirectoryTask::run();
-    friend void CMLoadAccountingTask::run();
+    friend void CMAddFileTask::run(zmm::Ref<ContentManager> cm);
+    friend void CMRemoveObjectTask::run(zmm::Ref<ContentManager> cm);
+    friend void CMRescanDirectoryTask::run(zmm::Ref<ContentManager> cm);
+    friend void CMLoadAccountingTask::run(zmm::Ref<ContentManager> cm);
 };
 
 #endif // __CONTENT_MANAGER_H__

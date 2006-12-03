@@ -39,7 +39,8 @@
 #include "tools.h"
 
 //#define AS_TIMER_SUBSCRIBER(klass, object) RefCast(Ref<TimerSubscriber<Singleton<klass> > >(object), TimerSubscriber<Object>)
-#define AS_TIMER_SUBSCRIBER_SINGLETON(obj, klass) zmm::Ref<TimerSubscriberSingleton<Object> >((TimerSubscriberSingleton<Object>*)obj)
+#define AS_TIMER_SUBSCRIBER_SINGLETON(obj, _) zmm::Ref<TimerSubscriberSingleton<Object> >((TimerSubscriberSingleton<Object>*)obj)
+#define AS_TIMER_SUBSCRIBER_SINGLETON_FROM_REF(obj, _) RefCast(obj, TimerSubscriberSingleton<Object>)
 
 /// \todo Leo: please add doxygen documentation!
 
