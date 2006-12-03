@@ -60,11 +60,6 @@ template <class T>
 class Singleton : public zmm::Object
 {
 public:
-    virtual ~Singleton()
-    {
-        mutex = nil;
-    };
-    
     static zmm::Ref<T> getInstance()
     {
         if (! instance->singletonActive)
@@ -88,11 +83,7 @@ public:
     
 protected:
     
-    /*
-    Singleton()
-    {
-    }
-    */
+    virtual ~Singleton() { mutex = nil; }
     
     virtual void init() { }
     virtual void shutdown() { }
@@ -107,6 +98,7 @@ protected:
     
     static bool singletonActive;
 private:
+    
     virtual void inactivateSingleton()
     {
         //log_debug("%d %d\n", singletonActive, instance.getPtr());

@@ -190,13 +190,11 @@ void MysqlStorage::init()
         dbVersion = getInternalSetting(_("db_version"));
         if (dbVersion == nil)
         {
-            AUTOUNLOCK();
             shutdown();
             throw _Exception(_("error while creating database"));
         }
         log_info("database created successfully.\n");
 #else
-        AUTOUNLOCK();
         shutdown();
         throw _Exception(_("database doesn't seem to exist yet and autocreation wasn't compiled in"));
 #endif

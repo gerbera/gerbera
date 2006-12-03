@@ -84,10 +84,8 @@ void Sqlite3Storage::init()
     
     cond->wait();
     AUTOUNLOCK();
-    
     if (startupError != nil)
         throw _StorageException(startupError);
-    
     
     String dbVersion = nil;
     try

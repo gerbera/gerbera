@@ -1088,13 +1088,16 @@ void SQLStorage::_recursiveRemove(String objectIDs)
     Ref<StringBuffer> q(new StringBuffer());
     Ref<StringBuffer> remove(new StringBuffer());
     Ref<StringBuffer> recurse(new StringBuffer());
+    //Ref<StringBuffer> containers(new StringBuffer());
     *recurse << "," << objectIDs;
     *remove << "," << objectIDs;
+    
+    //*containers << "," << objectIDs;
     while(recurse->length() != 0)
     {
         q->clear();
         String recurseStr = recurse->toString(1);
-        *q << "SELECT DISTINCT id FROM " << TQ(CDS_OBJECT_TABLE) <<
+        *q << "SELECT DISTINCT " << TQ("id") << " FROM " << TQ(CDS_OBJECT_TABLE) <<
             " WHERE parent_id IN (" << recurseStr << ") OR"
             " ref_id IN (" << recurseStr << ")";
         Ref<SQLResult> res = select(q->toString());

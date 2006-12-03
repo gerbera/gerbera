@@ -100,8 +100,6 @@ public:
 class Storage : public Singleton<Storage>
 {
 public:
-    Storage();
-    
     static zmm::Ref<Storage> getInstance();
     
     virtual void init() = 0;
@@ -191,7 +189,7 @@ public:
     virtual bool removeObjects(zmm::Ref<DBRHash<int> > list) = 0;
     
     /* accounting methods */
-    virtual int getTotalFiles() { return 0; }
+    virtual int getTotalFiles() = 0;
     
     /* internal setting methods */
     virtual zmm::String getInternalSetting(zmm::String key) = 0;
@@ -205,7 +203,7 @@ public:
     virtual void autoscanUpdateLM(zmm::Ref<AutoscanDirectory> adir) = 0;
     
     virtual void shutdown() = 0;
-
+    
     /// \brief Ensures that a container given by it's location on disk is
     /// present in the database. If it does not exist it will be created, but
     /// it's content will not be added.
@@ -213,16 +211,11 @@ public:
     /// \param *changedContainer returns the ID for the UpdateManager
     /// \return objectID of the container given by path
     virtual int ensurePathExistence(zmm::String path, int *changedContainer) = 0;
-        
+    
 protected:
-    int uiUpdateId;
-    
-    static zmm::Ref<Storage> createInstance();
-    
     /* helper for addContainerChain */
     static void stripAndUnescapeVirtualContainerFromPath(zmm::String path, zmm::String &first, zmm::String &last);
-    
-    //void getObjectPath(zmm::Ref<zmm::Array<CdsObject> > arr, int objectID);
+    static zmm::Ref<Storage> createInstance();
 };
 
 #endif // __STORAGE_H__

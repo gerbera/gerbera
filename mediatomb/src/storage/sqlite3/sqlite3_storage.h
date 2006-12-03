@@ -121,49 +121,15 @@ protected:
     bool getLastInsertIdFlag;
 };
 
-/// \brief Represents a row of a result of a sqlite3 select
-class Sqlite3Row : public SQLRow
-{
-public:
-    Sqlite3Row(char **row, zmm::Ref<SQLResult> sqlResult);
-    virtual zmm::String col(int index);
-protected:
-    char **row;
-    zmm::Ref<Sqlite3Result> res;
-    friend class Sqlite3Result;
-};
-
-/// \brief Represents a result of a sqlite3 select
-class Sqlite3Result : public SQLResult
-{
-public:
-    Sqlite3Result();
-    virtual ~Sqlite3Result();
-    virtual zmm::Ref<SQLRow> nextRow();
-    virtual unsigned long long getNumRows() { return nrow; }
-protected:
-    char **table;
-    char **row;
-
-    int cur_row;
-
-    int nrow;
-    int ncolumn;
-
-    friend class Sqlite3Storage;
-    friend class SLSelectTask;
-};
-
-
-
 /// \brief The Storage class for using SQLite3
-class Sqlite3Storage : public SQLStorage
+class Sqlite3Storage : private SQLStorage
 {
-public:
+private:
     Sqlite3Storage();
-    virtual ~Sqlite3Storage() {}
-    
+    friend zmm::Ref<Storage> Storage::createInstance();
     virtual void init();
+    virtual void shutdown();
+    
     virtual zmm::String quote(zmm::String str);
     virtual inline zmm::String quote(int val) { return zmm::String::from(val); }
     virtual inline zmm::String quote(unsigned int val) { return zmm::String::from(val); }
@@ -171,9 +137,8 @@ public:
     virtual inline zmm::String quote(unsigned long val) { return zmm::String::from(val); }
     virtual zmm::Ref<SQLResult> select(zmm::String query);
     virtual int exec(zmm::String query, bool getLastInsertId = false);
-    virtual void shutdown();
     virtual void storeInternalSetting(zmm::String key, zmm::String value);
-protected:
+    
     zmm::String startupError;
     
     zmm::String getError(zmm::String query, sqlite3 *db);
@@ -201,6 +166,39 @@ protected:
     friend class SLInitTask;
 };
 
+/// \brief Represents a result of a sqlite3 select
+class Sqlite3Result : public SQLResult
+{
+private:
+    Sqlite3Result();
+    virtual ~Sqlite3Result();
+    virtual zmm::Ref<SQLRow> nextRow();
+    virtual unsigned long long getNumRows() { return nrow; }
+    
+    char **table;
+    char **row;
+    
+    int cur_row;
+    
+    int nrow;
+    int ncolumn;
+    
+    friend class SLSelectTask;
+    friend class Sqlite3Row;
+    friend class Sqlite3Storage;
+};
+
+/// \brief Represents a row of a result of a sqlite3 select
+class Sqlite3Row : public SQLRow
+{
+private:
+    Sqlite3Row(char **row, zmm::Ref<SQLResult> sqlResult);
+    virtual zmm::String col(int index);
+    char **row;
+    zmm::Ref<Sqlite3Result> res;
+    
+    friend class Sqlite3Result;
+};
 
 #endif // __SQLITE3_STORAGE_H__
 

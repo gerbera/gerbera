@@ -39,35 +39,15 @@
 #include "sync.h"
 #include <mysql.h>
 
-
-class MysqlRow : public SQLRow
+class MysqlStorage : private SQLStorage
 {
-public:
-    MysqlRow(MYSQL_ROW mysql_row, zmm::Ref<SQLResult> sqlResult);
-    virtual zmm::String col(int index);
-protected:
-    MYSQL_ROW mysql_row;
-};
-
-class MysqlResult : public SQLResult
-{
-    int nullRead;
-public:
-    MysqlResult(MYSQL_RES *mysql_res);
-    virtual ~MysqlResult();
-    virtual zmm::Ref<SQLRow> nextRow();
-    virtual unsigned long long getNumRows() { return mysql_num_rows(mysql_res); }
-protected:
-    MYSQL_RES *mysql_res;
-};
-
-class MysqlStorage : public SQLStorage
-{
-public:
+private:
     MysqlStorage();
+    friend zmm::Ref<Storage> Storage::createInstance();
     virtual ~MysqlStorage();
-
     virtual void init();
+    virtual void shutdown();
+    
     virtual zmm::String quote(zmm::String str);
     virtual inline zmm::String quote(int val) { return zmm::String::from(val); }
     virtual inline zmm::String quote(unsigned int val) { return zmm::String::from(val); }
@@ -75,10 +55,7 @@ public:
     virtual inline zmm::String quote(unsigned long val) { return zmm::String::from(val); }
     virtual zmm::Ref<SQLResult> select(zmm::String query);
     virtual int exec(zmm::String query, bool getLastInsertId = false);
-    virtual void shutdown();
     virtual void storeInternalSetting(zmm::String key, zmm::String value);
-    
-protected:
     
     MYSQL db;
     
@@ -94,6 +71,29 @@ protected:
     void checkMysqlThreadInit();
 };
 
+class MysqlResult : private SQLResult
+{
+private:
+    int nullRead;
+    MysqlResult(MYSQL_RES *mysql_res);
+    virtual ~MysqlResult();
+    virtual zmm::Ref<SQLRow> nextRow();
+    virtual unsigned long long getNumRows() { return mysql_num_rows(mysql_res); }
+    MYSQL_RES *mysql_res;
+    
+    friend class MysqlRow;
+    friend class MysqlStorage;
+};
+
+class MysqlRow : private SQLRow
+{
+private:
+    MysqlRow(MYSQL_ROW mysql_row, zmm::Ref<SQLResult> sqlResult);
+    virtual zmm::String col(int index);
+    MYSQL_ROW mysql_row;
+    
+    friend zmm::Ref<SQLRow> MysqlResult::nextRow();
+};
 
 #endif // __MYSQL_STORAGE_H__
 

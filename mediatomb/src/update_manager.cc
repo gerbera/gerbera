@@ -210,10 +210,6 @@ void UpdateManager::threadProc()
         {
             //nothing to do
             cond->wait();
-            /*
-            if (ret)
-                throw _Exception(_("pthread_cond_wait returned errorcode ") + ret);
-            */
         }
     }
 }

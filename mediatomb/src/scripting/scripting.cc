@@ -595,6 +595,7 @@ void Scripting::init()
 }
 Scripting::~Scripting()
 {
+    log_debug("destoying scripting\n");
     if (script)
         JS_DestroyScript(cx, script);
     if (cx)

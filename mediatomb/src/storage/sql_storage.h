@@ -68,14 +68,9 @@ public:
     virtual unsigned long long getNumRows() = 0;
 };
 
-class SQLStorage : public Storage
+class SQLStorage : protected Storage
 {
 public:
-    SQLStorage();
-    virtual ~SQLStorage();
-    
-    virtual void init();
-    
     /* methods to override in subclasses */
     virtual zmm::String quote(zmm::String str) = 0;
     virtual zmm::String quote(int val) = 0;
@@ -126,11 +121,17 @@ public:
     virtual void shutdown() = 0;
     
     virtual int ensurePathExistence(zmm::String path, int *changedContainer);
-protected:
     
+protected:
+    SQLStorage();
+    virtual ~SQLStorage();
+    virtual void init();
+    
+    bool dbRemovesDeps;
     char table_quote_begin;
     char table_quote_end;
     
+private:
     zmm::String sql_query;
     
     /* helper for createObjectFromRow() */
@@ -160,17 +161,9 @@ protected:
     };
     zmm::Ref<zmm::Array<AddUpdateTable> > _addUpdateObject(zmm::Ref<CdsObject> obj, bool isUpdate, int *changedContainer);
     
-    
     /* helper for removeObject(s) */
     void _removeObjects(zmm::String objectIDs);
     void _recursiveRemove(zmm::String objectIDs);
-    
-    
-    /*
-    zmm::String selectQueryBasic;
-    zmm::String selectQueryExtended;
-    zmm::String selectQueryFull;
-    */
     
     /* helpers for removeObject() */
     
@@ -178,8 +171,6 @@ protected:
     zmm::Ref<DBHash<int> > rmIDHash;
     int *rmParents;
     zmm::Ref<DBBHash<int, int> > rmParentHash;
-    
-    bool dbRemovesDeps;
     
     /* location hash helpers */
     zmm::String addLocationPrefix(char prefix, zmm::String path);
@@ -192,22 +183,6 @@ protected:
     zmm::String mapBool(bool val) { return quote((val ? 1 : 0)); }
     bool remapBool(zmm::String field) { return (string_ok(field) && field == "1"); }
     
-    /*
-    void rmInit();
-    void rmCleanup();
-    void rmDeleteIDs();
-    void rmUpdateParents();
-    void rmFlush();
-    void rmObject(zmm::Ref<CdsObject> obj);
-    void rmItem(zmm::Ref<CdsObject> obj);
-    void rmChildren(zmm::Ref<CdsObject> obj);
-    void rmDecChildCount(zmm::Ref<CdsObject> obj);
-    */
-    
-    //zmm::Ref<DSOHash<CdsObject> > objectTitleCache;
-    //zmm::Ref<DBOHash<int, CdsObject> > objectIDCache;
-    
-    //int nextObjectID;
 };
 
 #endif // __SQL_STORAGE_H__

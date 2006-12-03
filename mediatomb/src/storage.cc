@@ -49,10 +49,6 @@ using namespace zmm;
 
 SINGLETON_MUTEX(Storage, false);
 
-Storage::Storage() : Singleton<Storage>()
-{
-}
-
 Ref<Storage> Storage::getInstance()
 {
     if (! instance->singletonActive)
