@@ -89,8 +89,8 @@ void SingletonManager::shutdown(bool complete)
     {
         //log_debug("destoying... \n");
         //_print_backtrace(stdout);
-        object->inactivateSingleton();
         object->shutdown();
+        object->inactivateSingleton();
         //object->destroyMutex();
     }
     if (complete && instance != nil)

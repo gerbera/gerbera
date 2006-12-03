@@ -1729,7 +1729,7 @@ web_server_callback( IN http_parser_t * parser,
                      IN SOCKINFO * info )
 {
     int ret;
-    int timeout = 0;
+    int timeout = 10; // select timeout when sending data
     enum resp_type rtype = 0;
     membuffer headers;
     membuffer filename;

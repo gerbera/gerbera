@@ -162,6 +162,7 @@ dispatch_request( IN SOCKINFO * info,
                   http_parser_t * hparser )
 {
     MiniServerCallback callback;
+    int error_code;
 
     switch ( hparser->msg.method ) {
             //Soap Call
@@ -186,6 +187,15 @@ dispatch_request( IN SOCKINFO * info,
         case HTTPMETHOD_POST:
         case HTTPMETHOD_HEAD:
         case HTTPMETHOD_SIMPLEGET:
+            error_code = fcntl(info->socket, F_SETFL, O_NONBLOCK);
+            if (error_code < 0)
+            {
+                DBGONLY( UpnpPrintf
+                     ( UPNP_INFO, MSERV, __FILE__, __LINE__,
+                       "miniserver %d: setting NONBLOCK mode on socket failed\n", info->socket );
+                 )
+
+            }
             callback = gGetCallback;
             break;
 

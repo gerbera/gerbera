@@ -177,6 +177,7 @@ sock_destroy( INOUT SOCKINFO * info,
 *
 *	Note :
 ************************************************************************/
+#if 0
 static int
 sock_read_write( IN SOCKINFO * info,
                  OUT char *buffer,
@@ -263,6 +264,7 @@ sock_read_write( IN SOCKINFO * info,
 
     return numBytes;
 }
+#endif
 
 /************************************************************************
 *	Function :	sock_read
@@ -287,7 +289,92 @@ sock_read( IN SOCKINFO * info,
            IN size_t bufsize,
            INOUT int *timeoutSecs )
 {
-    return sock_read_write( info, buffer, bufsize, timeoutSecs, TRUE );
+//    return sock_read_write( info, buffer, bufsize, timeoutSecs, TRUE );
+    int sockfd = info->socket; 
+    int retCode;
+    fd_set readSet;
+    struct timeval timeout;
+    ssize_t bytes_received = 0;
+    int num_bytes = 0;
+    char* p_buffer = buffer;
+    int no_timeout = 0; // detect end of data
+
+    if (*timeoutSecs < 0)
+    {
+        return UPNP_E_TIMEDOUT;
+    }
+
+    FD_ZERO(&readSet);
+    FD_SET(sockfd, &readSet);
+
+    timeout.tv_sec = *timeoutSecs;
+    timeout.tv_usec = 0;
+       
+    while (TRUE)
+    {
+        if (*timeoutSecs == 0)
+        {
+            retCode = select(sockfd + 1, &readSet, NULL, NULL, NULL);
+        }
+        else
+        {
+            retCode = select(sockfd + 1, &readSet, NULL, NULL, &timeout);
+        }
+
+        if (retCode == -1)
+        {
+            if(errno == EINTR)
+                continue;
+
+            return UPNP_E_SOCKET_ERROR;
+        }
+        
+        if (retCode == 0)
+        {
+            if (no_timeout)
+                return num_bytes;
+            else
+                return UPNP_E_TIMEDOUT;
+        }
+
+        if (FD_ISSET(sockfd, &readSet))
+        {
+            // we use this to detect "end of data" so we do not block
+            // when it may not be needed
+            // only the first select will wait for a timeout (in case a
+            // timeout was specified)
+            timeout.tv_sec = 0; 
+            timeout.tv_usec = 0;
+            if (*timeoutSecs)
+                no_timeout = 1;
+
+            bytes_received = recv(sockfd, p_buffer, bufsize, MSG_NOSIGNAL);
+
+            // nothing more to read
+            if (bytes_received == 0)
+                break;
+
+            // error
+            if (bytes_received < 0)
+                return UPNP_E_SOCKET_ERROR;
+
+            num_bytes = num_bytes + bytes_received;
+            bufsize = bufsize - bytes_received;
+
+            // no space left in buffer
+            if (bufsize <= 0)
+                break;
+
+            p_buffer = buffer + num_bytes;
+        }
+    }
+
+    if (num_bytes < 0)  
+    {
+        return UPNP_E_SOCKET_ERROR;
+    }
+
+    return num_bytes;
 }
 
 /************************************************************************
@@ -313,5 +400,78 @@ sock_write( IN SOCKINFO * info,
             IN size_t bufsize,
             INOUT int *timeoutSecs )
 {
-    return sock_read_write( info, buffer, bufsize, timeoutSecs, FALSE );
+//    return sock_read_write( info, buffer, bufsize, timeoutSecs, FALSE );
+    int sockfd = info->socket;
+    int retCode;
+    fd_set writeSet;
+    struct timeval timeout;
+    ssize_t bytes_sent = 0;
+    int num_bytes = 0;
+    char* p_buffer = buffer;
+
+    if (*timeoutSecs < 0)
+    {
+        return UPNP_E_TIMEDOUT;
+    }
+
+    FD_ZERO(&writeSet);
+    FD_SET(sockfd, &writeSet);
+
+    timeout.tv_sec = *timeoutSecs;
+    timeout.tv_usec = 0;
+
+    while (TRUE)
+    {
+        timeout.tv_sec = *timeoutSecs;
+        timeout.tv_usec = 0;
+
+        if (*timeoutSecs == 0)
+        {
+            retCode = select(sockfd + 1, NULL, &writeSet, NULL, NULL);
+        }
+        else
+        {
+            retCode = select(sockfd + 1, NULL, &writeSet, NULL, &timeout);
+        }
+
+        if (retCode == 0)
+        {
+            return UPNP_E_TIMEDOUT;
+        }
+
+        if (retCode == -1)
+        {
+            if(errno == EINTR)
+                continue;
+
+            return UPNP_E_SOCKET_ERROR;
+        }
+
+        if (FD_ISSET(sockfd, &writeSet))
+        {
+            bytes_sent = send(sockfd, p_buffer, bufsize, MSG_DONTROUTE|MSG_NOSIGNAL);
+            if (bytes_sent < 0)
+            {
+                //return -1;
+                return UPNP_E_SOCKET_ERROR;
+            }
+
+            num_bytes = num_bytes + bytes_sent;
+            bufsize = bufsize - bytes_sent;
+
+            // all sent out 
+            if (bufsize <= 0)
+                break;
+
+            p_buffer = buffer + num_bytes;
+        }
+    }
+
+    if (num_bytes < 0) 
+    {
+        return UPNP_E_SOCKET_ERROR;
+    }
+
+    return num_bytes;
 }
+
