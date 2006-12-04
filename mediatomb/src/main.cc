@@ -256,6 +256,7 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
         char *d = getenv("HOMEDRIVE");
         if ((h != NULL)  && (d != NULL))
             home = String(d) + h;
+            
 #endif  // __CYGWIN__
             
 
@@ -268,6 +269,7 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
 */
 
         ConfigManager::setStaticArgs(config_file, home);
+        ConfigManager::getInstance();
     }
     catch (mxml::ParseException pe)
     {

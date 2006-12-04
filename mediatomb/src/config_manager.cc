@@ -68,8 +68,7 @@ void ConfigManager::setStaticArgs(String _filename, String _userhome)
 
 ConfigManager::ConfigManager() : Singleton<ConfigManager>()
 {
-    String error_message;
-    String home;
+    String home = userhome + DIR_SEPARATOR + DEFAULT_CONFIG_HOME;
     bool home_ok = true;
     
     if (filename == nil)
@@ -81,7 +80,6 @@ ConfigManager::ConfigManager() : Singleton<ConfigManager>()
         }
         else
         {
-            home = userhome + DIR_SEPARATOR + DEFAULT_CONFIG_HOME;
             filename = home + DIR_SEPARATOR + DEFAULT_CONFIG_NAME;
         }
         

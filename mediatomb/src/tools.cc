@@ -155,15 +155,20 @@ void check_path_ex(String path, bool needDir, bool existenceUnneeded)
 
     ret = stat(path.c_str(), &statbuf);
     log_debug("path: %s, ret: %d; errno: %d\n", path.c_str(), ret, errno);
-    if (ret != 0 && (! existenceUnneeded || existenceUnneeded && errno != ENOENT))
-        throw _Exception(path + " : " + errno + (int)existenceUnneeded+ " x " + strerror(errno));
     
+    if (ret != 0)
+    {
+        if (existenceUnneeded && (errno == ENOENT))
+            return;
+        
+        throw _Exception(path + " : " + errno + (int)existenceUnneeded+ " x " + strerror(errno));
+    }
+
     if (needDir && (!S_ISDIR(statbuf.st_mode)))
         throw _Exception(_("Not a directory: ") + path);
     
     if (!needDir && (S_ISDIR(statbuf.st_mode)))
         throw _Exception(_("Not a file: ") + path);
-
 }
 
 bool string_ok(String str)
