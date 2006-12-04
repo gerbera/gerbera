@@ -36,6 +36,10 @@
       are busy executing jobs, a new worker thread will be created
       if a job is scheduled
 
+    * implemented correct select timeout handling, webserver sockets are
+      now put in non blocking mode; this solves the problem when the SDK
+      would not shut down properly because of a blocking send.
+
 2006-07-07 Oxy <virtual_worlds(at)gmx.de>
 
 	* full support for Windows added, static library and DLL are fully
