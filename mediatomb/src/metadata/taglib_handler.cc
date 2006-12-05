@@ -53,13 +53,11 @@ TagHandler::TagHandler() : MetadataHandler()
 {
 }
        
-static void addField(metadata_fields_t field, TagLib::FileRef *fileTag, Ref<CdsItem> item)
+static void addField(metadata_fields_t field, TagLib::Tag *tag, Ref<CdsItem> item)
 {
     TagLib::String val;
     String value;
     unsigned int i;
-    
-    TagLib::Tag *tag = fileTag->tag();
     
     if (tag == NULL) 
         return;
@@ -126,18 +124,21 @@ static void addField(metadata_fields_t field, TagLib::FileRef *fileTag, Ref<CdsI
 void TagHandler::fillMetadata(Ref<CdsItem> item)
 {
     log_debug("adding metadata for: %s\n", item->getLocation().c_str());
-    
-    TagLib::FileRef tag(item->getLocation().c_str());
+   
+    TagLib::FileRef f(item->getLocation().c_str());
 
-    if (tag.isNull())
+    if (f.isNull() || (!f.tag()))
         return;
 
+
+    TagLib::Tag *tag = f.tag();
+
     for (int i = 0; i < M_MAX; i++)
-        addField((metadata_fields_t) i, &tag, item);
+        addField((metadata_fields_t) i, tag, item);
     
     int temp;
     
-    TagLib::AudioProperties *audioProps = tag.audioProperties();
+    TagLib::AudioProperties *audioProps = f.audioProperties();
     
     if (audioProps == NULL) 
         return;
@@ -172,7 +173,9 @@ void TagHandler::fillMetadata(Ref<CdsItem> item)
         item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS),
                                            String::from(temp));
     }
-    
+
+    delete audioProps;
+
 }
 
 Ref<IOHandler> TagHandler::serveContent(Ref<CdsItem> item, int resNum, off_t *data_size)
