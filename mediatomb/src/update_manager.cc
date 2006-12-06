@@ -44,6 +44,7 @@
 #define MIN_SLEEP 1
 
 #define MAX_OBJECT_IDS 1000
+#define MAX_OBJECT_IDS_OVERLOAD 30
 #define OBJECT_ID_HASH_CAPACITY 3109
 
 using namespace zmm;
@@ -74,6 +75,7 @@ void UpdateManager::init()
         this
     );
     
+    //cond->wait();
     //pthread_attr_destroy(&attr);
 }
 
@@ -90,6 +92,52 @@ void UpdateManager::shutdown()
         pthread_join(updateThread, NULL);
     updateThread = 0;
     log_debug("end\n");
+}
+
+void UpdateManager::containersChanged(Ref<IntArray> objectIDs, int flushPolicy)
+{
+    if (objectIDs == nil)
+        return;
+    AUTOLOCK(mutex);
+    // signalling thread if it could have been idle, because 
+    // there were no unprocessed updates
+    bool signal = (! haveUpdates());
+    // signalling if the flushPolicy changes, so the thread recalculates
+    // the sleep time
+    if (flushPolicy > this->flushPolicy)
+    {
+        this->flushPolicy = flushPolicy;
+        signal = true;
+    }
+    int size = objectIDs->size();
+    int hashSize = objectIDHash->size();
+    bool split = (hashSize + size >= MAX_OBJECT_IDS + MAX_OBJECT_IDS_OVERLOAD);
+    for (int i = 0; i < size; i++)
+    {
+        int objectID = objectIDs->get(i);
+        if (objectID != lastContainerChanged)
+        {
+            //log_debug("containerChanged. id: %d, signal: %d\n", objectID, signal);
+            objectIDHash->put(objectID);
+            if (split && objectIDHash->size() > MAX_OBJECT_IDS)
+            {
+                while(objectIDHash->size() > MAX_OBJECT_IDS)
+                {
+                    log_debug("in-between signalling...\n");
+                    cond->signal();
+                    AUTOUNLOCK();
+                    AUTORELOCK();
+                }
+            }
+        }
+    }
+    if (objectIDHash->size() >= MAX_OBJECT_IDS)
+        signal = true;
+    if (signal)
+    {
+        log_debug("signalling...\n");
+        cond->signal();
+    }
 }
 
 void UpdateManager::containerChanged(int objectID, int flushPolicy)
@@ -139,6 +187,7 @@ void UpdateManager::threadProc()
     getTimespecNow(&lastUpdate);
     
     AUTOLOCK(mutex);
+    //cond->signal();
     while (! shutdownFlag)
     {
         if (haveUpdates())

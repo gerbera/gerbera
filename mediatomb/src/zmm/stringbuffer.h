@@ -52,11 +52,13 @@ public:
     virtual ~StringBuffer();
 
     StringBuffer &operator<<(String other);
+    StringBuffer &operator<<(Ref<StringBuffer> other);
     StringBuffer &operator<<(char *str);
     StringBuffer &operator<<(char chr);
     StringBuffer &operator<<(int x);
     StringBuffer &operator<<(unsigned int x);
-
+    void concat(Ref<StringBuffer> other, int offset = 0);
+    
     int length();
     void setLength(int newLength);
     char *c_str();

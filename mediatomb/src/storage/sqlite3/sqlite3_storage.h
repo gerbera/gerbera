@@ -141,7 +141,7 @@ private:
     
     zmm::String startupError;
     
-    zmm::String getError(zmm::String query, sqlite3 *db);
+    zmm::String getError(zmm::String query, zmm::String error, sqlite3 *db);
     
     static void *staticThreadProc(void *arg);
     void threadProc();
@@ -193,7 +193,7 @@ class Sqlite3Row : public SQLRow
 {
 private:
     Sqlite3Row(char **row, zmm::Ref<SQLResult> sqlResult);
-    virtual zmm::String col(int index);
+    inline virtual char* col_c_str(int index) { return row[index]; }
     char **row;
     zmm::Ref<Sqlite3Result> res;
     

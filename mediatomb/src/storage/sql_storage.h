@@ -52,9 +52,10 @@ class SQLResult;
 class SQLRow : public zmm::Object
 {
 public:
-    SQLRow(zmm::Ref<SQLResult> sqlResult);
-    virtual ~SQLRow();
-    virtual zmm::String col(int index) = 0;
+    SQLRow(zmm::Ref<SQLResult> sqlResult) { this->sqlResult = sqlResult; }
+    //virtual ~SQLRow();
+    zmm::String col(int index) { return zmm::String(col_c_str(index)); }
+    virtual char* col_c_str(int index) = 0;
 protected:
     zmm::Ref<SQLResult> sqlResult;
 };
@@ -62,8 +63,8 @@ protected:
 class SQLResult : public zmm::Object
 {
 public:
-    SQLResult();
-    virtual ~SQLResult();
+    //SQLResult();
+    //virtual ~SQLResult();
     virtual zmm::Ref<SQLRow> nextRow() = 0;
     virtual unsigned long long getNumRows() = 0;
 };
@@ -90,9 +91,8 @@ public:
     
     virtual zmm::Ref<DBRHash<int> > getObjects(int parentID);
     
-    virtual bool removeObjects(zmm::Ref<DBRHash<int> > list);
-    
-    virtual int removeObject(int objectID, bool all, int *objectType = NULL);
+    virtual zmm::Ref<zmm::IntArray> removeObject(int objectID, bool all);
+    virtual zmm::Ref<zmm::IntArray> removeObjects(zmm::Ref<DBRHash<int> > list, bool all = false);
     
     /* accounting methods */
     virtual int getTotalFiles();
@@ -163,7 +163,9 @@ private:
     
     /* helper for removeObject(s) */
     void _removeObjects(zmm::String objectIDs);
-    void _recursiveRemove(zmm::String objectIDs);
+    zmm::String _recursiveRemove(zmm::String items, zmm::String containers, bool all);
+    
+    virtual zmm::Ref<zmm::IntArray> _purgeEmptyContainers(zmm::String containerIDs);
     
     /* helpers for removeObject() */
     

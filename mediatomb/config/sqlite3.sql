@@ -17,9 +17,9 @@ CREATE TABLE "mt_cds_object" (
   CONSTRAINT "cds_object_ibfk_1" FOREIGN KEY ("ref_id") REFERENCES "cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT "cds_object_ibfk_2" FOREIGN KEY ("parent_id") REFERENCES "cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
-INSERT INTO "mt_cds_object" VALUES(-1, NULL, -1, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, 1);
-INSERT INTO "mt_cds_object" VALUES(0, NULL, -1, 1, 'object.container', 'Root', NULL, NULL, NULL, NULL, NULL, 0, NULL, 1);
-INSERT INTO "mt_cds_object" VALUES(1, NULL, 0, 1, 'object.container', 'PC Directory', NULL, NULL, NULL, NULL, NULL, 0, NULL, 1);
+INSERT INTO "mt_cds_object" VALUES(-1, NULL, -1, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, 9);
+INSERT INTO "mt_cds_object" VALUES(0, NULL, -1, 1, 'object.container', 'Root', NULL, NULL, NULL, NULL, NULL, 0, NULL, 9);
+INSERT INTO "mt_cds_object" VALUES(1, NULL, 0, 1, 'object.container', 'PC Directory', NULL, NULL, NULL, NULL, NULL, 0, NULL, 9);
 CREATE TABLE "mt_cds_active_item" (
   "id" integer primary key,
   "action" varchar(255) NOT NULL,
@@ -43,6 +43,7 @@ CREATE TABLE "mt_autoscan" (
 );
 CREATE INDEX mt_cds_object_ref_id ON mt_cds_object(ref_id);
 CREATE INDEX mt_cds_object_parent_id ON mt_cds_object(parent_id,object_type,dc_title);
+CREATE INDEX mt_object_type ON mt_cds_object(object_type);
 CREATE INDEX mt_location_parent ON mt_cds_object(location_hash,parent_id);
 CREATE INDEX mt_internal_setting_key ON mt_internal_setting(key);
 COMMIT;

@@ -63,6 +63,8 @@ Sqlite3Storage::Sqlite3Storage() : SQLStorage()
 
 void Sqlite3Storage::init()
 {
+    SQLStorage::init();
+    
     int ret;
     
     AUTOLOCK(sqliteMutex);
@@ -117,8 +119,6 @@ void Sqlite3Storage::init()
     log_debug("db_version: %s\n", dbVersion.c_str());
     
     //pthread_attr_destroy(&attr);
-    
-    SQLStorage::init();
 }
 
 String Sqlite3Storage::quote(String value)
@@ -130,10 +130,10 @@ String Sqlite3Storage::quote(String value)
     return ret;
 }
 
-String Sqlite3Storage::getError(String query, sqlite3 *db)
+String Sqlite3Storage::getError(String query, String error, sqlite3 *db)
 {
     return _("SQLITE3: (") + sqlite3_errcode(db) + ") " 
-        + sqlite3_errmsg(db) +"\nQuery:" + (query == nil ? _("unknown") : query);
+        + sqlite3_errmsg(db) +"\nQuery:" + (query == nil ? _("unknown") : query) + "\nerror: " + (error == nil ? _("unknown") : error);
 }
 
 Ref<SQLResult> Sqlite3Storage::select(String query)
@@ -306,7 +306,7 @@ void SLInitTask::run(sqlite3 *db, Sqlite3Storage *sl)
         throw _StorageException(_("Error while uncompressing sqlite3 create sql. returned: ") + ret);
     buf[SL3_CREATE_SQL_INFLATED_SIZE] = '\0';
     
-    char *err;
+    char *err = NULL;
     ret = sqlite3_exec(
         db,
         (char *)buf,
@@ -314,10 +314,15 @@ void SLInitTask::run(sqlite3 *db, Sqlite3Storage *sl)
         NULL,
         &err
     );
-    
+    String error = nil;
+    if (err != NULL)
+    {
+        error = String(err);
+        sqlite3_free(err);
+    }
     if(ret != SQLITE_OK)
     {
-        throw _StorageException(sl->getError(nil, db));
+        throw _StorageException(sl->getError(String((char *)buf), error, db));
     }
 }
 
@@ -332,9 +337,10 @@ SLSelectTask::SLSelectTask(zmm::String query) : SLTask()
 
 void SLSelectTask::run(sqlite3 *db, Sqlite3Storage *sl)
 {
-    char *err;
+    
     pres = Ref<Sqlite3Result>(new Sqlite3Result()); 
     
+    char *err;
     int ret = sqlite3_get_table(
         db,
         query.c_str(),
@@ -343,12 +349,17 @@ void SLSelectTask::run(sqlite3 *db, Sqlite3Storage *sl)
         &pres->ncolumn,
         &err
     );
-    
+    String error = nil;
+    if (err != NULL)
+    {
+        error = String(err);
+        sqlite3_free(err);
+    }
     if(ret != SQLITE_OK)
     {
-        throw _StorageException(sl->getError(query, db));
+        throw _StorageException(sl->getError(query, error, db));
     }
-
+    
     pres->row = pres->table;
     pres->cur_row = 0;
 }
@@ -372,9 +383,15 @@ void SLExecTask::run(sqlite3 *db, Sqlite3Storage *sl)
         NULL,
         &err
     );
+    String error = nil;
+    if (err != NULL)
+    {
+        error = String(err);
+        sqlite3_free(err);
+    }
     if(res != SQLITE_OK)
     {
-        throw _StorageException(sl->getError(query, db));
+        throw _StorageException(sl->getError(query, error, db));
     }
     if (getLastInsertIdFlag)
         lastInsertId = sqlite3_last_insert_rowid(db);
@@ -419,11 +436,6 @@ Sqlite3Row::Sqlite3Row(char **row, Ref<SQLResult> sqlResult) : SQLRow(sqlResult)
 {
     this->row = row;
 }
-String Sqlite3Row::col(int index)
-{
-    return String(row[index]);
-}
-
 
 #endif // HAVE_SQlITE3
 

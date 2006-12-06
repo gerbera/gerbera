@@ -80,6 +80,8 @@ void MysqlStorage::checkMysqlThreadInit()
 void MysqlStorage::init()
 {
     log_debug("start\n");
+    SQLStorage::init();
+    
     AUTOLOCK(mysqlMutex);
     int ret;
     
@@ -203,7 +205,6 @@ void MysqlStorage::init()
     
     AUTOUNLOCK();
     
-    SQLStorage::init();
     log_debug("end\n");
 }
 
@@ -342,12 +343,6 @@ MysqlRow::MysqlRow(MYSQL_ROW mysql_row, Ref<SQLResult> sqlResult) : SQLRow(sqlRe
 {
     this->mysql_row = mysql_row;
 }
-
-String MysqlRow::col(int index)
-{
-    return String(mysql_row[index]);
-}
-
 
 #endif // HAVE_MYSQL
 

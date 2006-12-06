@@ -606,7 +606,7 @@ String intArrayToCSV(int *array, int size)
         return nil;
     Ref<StringBuffer> buf(new StringBuffer());
     for (int i = 0; i < size; i++)
-        *buf << "," << array[i];
+        *buf << ',' << array[i];
     return buf->toString(1);
 }
 

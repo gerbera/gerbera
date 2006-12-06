@@ -35,7 +35,7 @@
 
 #include "array.h"
 
-#include <string.h>
+//#include <string.h>
 #include "memory.h"
 
 using namespace zmm;

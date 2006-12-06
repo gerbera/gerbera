@@ -160,6 +160,7 @@ libmediatomb_a_SOURCES = \
 ../src/xpath.h \
 ../src/zmmf/array.cc \
 ../src/zmmf/array.h \
+../src/zmmf/base_array.h \
 ../src/zmmf/base_queue.h \
 ../src/zmmf/base_stack.h \
 ../src/zmmf/exception.cc \

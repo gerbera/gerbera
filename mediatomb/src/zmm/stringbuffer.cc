@@ -66,7 +66,7 @@ StringBuffer::~StringBuffer()
 StringBuffer &StringBuffer::operator<<(String other)
 {
     int otherLen = other.length();
-    if(otherLen)
+    if(otherLen > 0)
     {
         addCapacity(otherLen);
         strcpy(data + len, other.base->data);
@@ -74,6 +74,13 @@ StringBuffer &StringBuffer::operator<<(String other)
     }
     return *this;
 }
+
+StringBuffer &StringBuffer::operator<<(Ref<StringBuffer> other)
+{
+    concat(other, 0);
+    return *this;
+}
+
 
 StringBuffer &StringBuffer::operator<<(char *str)
 {
@@ -113,6 +120,20 @@ StringBuffer &StringBuffer::operator<<(unsigned int x)
     sprintf(dest, "%u", x);
     len += (int)strlen(dest);
     return *this;
+}
+
+void StringBuffer::concat(Ref<StringBuffer> other, int offset)
+{
+    int otherLen = other->length();
+    if(otherLen > 0)
+    {
+        if (offset >= otherLen)
+            throw _Exception(_("illegal offset"));
+        otherLen -= offset;
+        addCapacity(otherLen);
+        strcpy(data + len, other->c_str() + offset);
+        len += otherLen;
+    }
 }
 
 int StringBuffer::length()

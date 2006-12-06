@@ -169,10 +169,8 @@ public:
     /// \param all if true and the object to be removed is a reference
     /// \param objectType pointer to an int; will be filled with the objectType of
     /// the removed object, if not NULL
-    /// \return parent id of the removed object
-    /// to another object, the referenced object (and all it's references)
-    /// will be removed too. Default: false.
-    virtual int removeObject(int objectID, bool all, int *objectType = NULL) = 0;
+    /// \return changed container ids
+    virtual zmm::Ref<zmm::IntArray> removeObject(int objectID, bool all) = 0;
     
     //virtual zmm::Ref<zmm::Array<CdsObject> > getObjectPath(int objectID);
     
@@ -182,11 +180,10 @@ public:
     virtual zmm::Ref<DBRHash<int> > getObjects(int parentID) = 0;
     
     /// \brief Remove all objects found in list
-    /// \param parentID ID of the parent container
     /// \param list a DBHash containing objectIDs that have to be removed
-    /// \return true if a container was in the list, false if the list was empty
-    /// or there were only items in the list
-    virtual bool removeObjects(zmm::Ref<DBRHash<int> > list) = 0;
+    /// \param all if true and the object to be removed is a reference
+    /// \return changed container ids
+    virtual zmm::Ref<zmm::IntArray> removeObjects(zmm::Ref<DBRHash<int> > list, bool all = false) = 0;
     
     /* accounting methods */
     virtual int getTotalFiles() = 0;

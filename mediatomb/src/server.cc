@@ -102,7 +102,7 @@ void Server::upnp_init(String ip, int port)
 
     if (port < 0)
         port = 0;
-   
+    
     ret = UpnpInit(ip.c_str(), port);
 
     if (ret != UPNP_E_SUCCESS)

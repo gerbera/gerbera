@@ -89,7 +89,8 @@ class MysqlRow : private SQLRow
 {
 private:
     MysqlRow(MYSQL_ROW mysql_row, zmm::Ref<SQLResult> sqlResult);
-    virtual zmm::String col(int index);
+    inline virtual char* col_c_str(int index) { return mysql_row[index]; }
+    
     MYSQL_ROW mysql_row;
     
     friend zmm::Ref<SQLRow> MysqlResult::nextRow();

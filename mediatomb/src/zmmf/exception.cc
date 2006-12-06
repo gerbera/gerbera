@@ -61,7 +61,8 @@ Exception::Exception(String message, const char* file, int line, const char* fun
         Ref<StringBase> trace(new StringBase(s[i]));
         stackTrace->append(trace);
     }
-    free(s);
+    if (s)
+        free(s);
 #endif
 }
 

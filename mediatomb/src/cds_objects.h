@@ -50,16 +50,16 @@
 #define IS_CDS_ITEM_INTERNAL_URL(type) (type & OBJECT_TYPE_ITEM_INTERNAL_URL)
 #define IS_CDS_PURE_ITEM(type) (type == OBJECT_TYPE_ITEM)
 
-#define OBJECT_FLAG_RESTRICTED          0x00000001
-#define OBJECT_FLAG_SEARCHABLE          0x00000002
-#define OBJECT_FLAG_USE_RESOURCE_REF    0x00000004
-//#define OBJECT_FLAG_XXX               0x00000008
-//#define OBJECT_FLAG_XXX               0x00000010
-//#define OBJECT_FLAG_XXX               0x00000020
-//#define OBJECT_FLAG_XXX               0x00000040
-//#define OBJECT_FLAG_XXX               0x00000080
-//#define OBJECT_FLAG_XXX               0x00000100
-//#define OBJECT_FLAG_XXX               0x00000200
+#define OBJECT_FLAG_RESTRICTED            0x00000001
+#define OBJECT_FLAG_SEARCHABLE            0x00000002
+#define OBJECT_FLAG_USE_RESOURCE_REF      0x00000004
+#define OBJECT_FLAG_PERSISTENT_CONTAINER  0x00000008
+//#define OBJECT_FLAG_XXX                 0x00000010
+//#define OBJECT_FLAG_XXX                 0x00000020
+//#define OBJECT_FLAG_XXX                 0x00000040
+//#define OBJECT_FLAG_XXX                 0x00000080
+//#define OBJECT_FLAG_XXX                 0x00000100
+//#define OBJECT_FLAG_XXX                 0x00000200
 
 int CdsObjectTitleComparator(void *arg1, void *arg2);
 

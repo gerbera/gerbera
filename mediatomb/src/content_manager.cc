@@ -286,11 +286,14 @@ void ContentManager::_removeObject(int objectID, bool all)
         throw _Exception(_("tried to remove illegal object id"));
     
     Ref<Storage> storage = Storage::getInstance();
-    int objectType;
-    int parentID = storage->removeObject(objectID, all, &objectType);
+    
+    #warning ui updated unfinished!
+    Ref<IntArray> changedContainers = storage->removeObject(objectID, all);
+    /*
     if (IS_CDS_CONTAINER(objectType))
         SessionManager::getInstance()->containerChangedUI(parentID);
-    UpdateManager::getInstance()->containerChanged(parentID);
+    */
+    UpdateManager::getInstance()->containersChanged(changedContainers);
     
     // reload accounting
     //loadAccounting();
@@ -505,10 +508,11 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
     } // while
     if (list->size() > 0)
     {
-        bool containerRemoved = storage->removeObjects(list);
-        UpdateManager::getInstance()->containerChanged(containerID);
-        if (containerRemoved)
-            SessionManager::getInstance()->containerChangedUI(containerID);
+        #warning ui updates unfinished!
+        Ref<IntArray> changedContainers = storage->removeObjects(list);
+        UpdateManager::getInstance()->containersChanged(changedContainers);
+        //if (containerRemoved)
+        //    SessionManager::getInstance()->containerChangedUI(containerID);
     }
 
     closedir(dir);
