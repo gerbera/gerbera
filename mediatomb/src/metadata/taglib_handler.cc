@@ -173,9 +173,6 @@ void TagHandler::fillMetadata(Ref<CdsItem> item)
         item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS),
                                            String::from(temp));
     }
-
-    delete audioProps;
-
 }
 
 Ref<IOHandler> TagHandler::serveContent(Ref<CdsItem> item, int resNum, off_t *data_size)

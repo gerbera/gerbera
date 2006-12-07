@@ -1,5 +1,5 @@
 %define name mediatomb   
-%define version 0.8.1
+%define version 0.9.0pre
 %define release 1
 
 Version: %{version}
@@ -32,15 +32,6 @@ rm -rf $RPM_BUILD_ROOT
 
 make install
 
-sed "s,__DEFAULT_SOURCE__,%{_datadir}/%{name}," \
-    < scripts/tomb-install-dist.py > scripts/tomb-install
-
-chmod +x scripts/tomb-install
-
-
-install scripts/tomb-install $RPM_BUILD_ROOT/%{_bindir}/tomb-install
-install -D scripts/mediatomb-service $RPM_BUILD_ROOT/%{_initrddir}/mediatomb
-
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -52,9 +43,8 @@ chkconfig --add mediatomb
 %doc README AUTHORS ChangeLog COPYING INSTALL doc/doxygen.conf TODO FAQ
 %doc doc/scripting-dev.txt doc/scripting-intro.txt doc/mysql.txt
 %{_bindir}/mediatomb
-%{_bindir}/tomb-install
 %{_datadir}/%{name}/
-%{_initrddir}/mediatomb
+#%{_initrddir}/mediatomb
 
 %changelog
 * Wed Sep  7 2005 Sergey Bostandzhyan <jin@deadlock.dhs.org>
