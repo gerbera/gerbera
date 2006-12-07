@@ -1007,7 +1007,7 @@ Ref<IntArray> SQLStorage::removeObjects(zmm::Ref<DBRHash<int> > list, bool all)
     if (items->length() > 0)
         itemsStr = items->toString(1);
     if (containers->length() > 0)
-        containersStr = items->toString(1);
+        containersStr = containers->toString(1);
     String containerIDs = _recursiveRemove(itemsStr, containersStr, all);
     return _purgeEmptyContainers(containerIDs);
 }
