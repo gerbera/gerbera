@@ -53,7 +53,7 @@ Session::Session(long timeout) : Dictionary_r()
     this->timeout = timeout;
     loggedIn = false;
     sessionID = nil;
-    uiUpdateIDs = Ref<DBRHash<int> >(new DBRHash<int>(UI_UPDATE_ID_HASH_SIZE, INVALID_OBJECT_ID, INVALID_OBJECT_ID_2));
+    uiUpdateIDs = Ref<DBRHash<int> >(new DBRHash<int>(UI_UPDATE_ID_HASH_SIZE, MAX_UI_UPDATE_IDS + 5, INVALID_OBJECT_ID, INVALID_OBJECT_ID_2));
     updateAll = false;
     access();
 }

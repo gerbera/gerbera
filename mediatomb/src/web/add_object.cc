@@ -201,7 +201,7 @@ void web::addObject::process()
             break;
             
         default:
-            throw _Exception(_("unknown object type"));
+            throw _Exception(_("unknown object type: ") + obj_type.c_str());
             break;
     }
     if (obj != nil)

@@ -53,7 +53,7 @@ SINGLETON_MUTEX(UpdateManager, false);
 
 UpdateManager::UpdateManager() : Singleton<UpdateManager>()
 {
-    objectIDHash = Ref<DBRHash<int> >(new DBRHash<int>(OBJECT_ID_HASH_CAPACITY, INVALID_OBJECT_ID, INVALID_OBJECT_ID_2));
+    objectIDHash = Ref<DBRHash<int> >(new DBRHash<int>(OBJECT_ID_HASH_CAPACITY, MAX_OBJECT_IDS + 2 * MAX_OBJECT_IDS_OVERLOAD, INVALID_OBJECT_ID, INVALID_OBJECT_ID_2));
     shutdownFlag = false;
     flushPolicy = FLUSH_SPEC;
     lastContainerChanged = INVALID_OBJECT_ID;

@@ -76,7 +76,8 @@ enum
 
 /* table quote */
 #define TQ(data)        QTB << data << QTE
-
+/* table quote with dot */
+#define TQD(data1, data2)        TQ(data1) << '.' << TQ(data2)
 
 #define SEL_F_QUOTED        << QTB << 'f' << QTE <<
 #define SEL_RF_QUOTED       << QTB << "rf" << QTE <<
@@ -193,13 +194,13 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
 {
     int objectType = obj->getObjectType();
     Ref<CdsObject> refObj = nil;
-    bool hasReference = (obj->isVirtual() && IS_CDS_PURE_ITEM(objectType));
-    if (hasReference)
+    bool hasReference = false;
+    if (obj->isVirtual() && IS_CDS_PURE_ITEM(objectType))
     {
+        hasReference = true;
         refObj = checkRefID(obj);
         if (refObj == nil)
             throw _Exception(_("tried to add or update a virtual object with illegal reference id and an illegal location"));
-        /// \todo create object on demand?
     }
     
     Ref<Array<AddUpdateTable> > returnVal(new Array<AddUpdateTable>(2));
@@ -286,8 +287,9 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
                 cdsObjectSql->put(_("location"), quote(dbLocation));
                 cdsObjectSql->put(_("location_hash"), quote(stringHash(dbLocation)));
             }
-            else //URLs and active items
+            else 
             {
+                // URLs and active items
                 cdsObjectSql->put(_("location"), quote(loc));
                 cdsObjectSql->put(_("location_hash"), _(SQL_NULL));
             }
@@ -316,6 +318,25 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
         cdsActiveItemSql->put(_("state"), quote(aitem->getState()));
     }
     
+    // check for a duplicate (virtual) object
+    if (hasReference && ! isUpdate)
+    {
+        Ref<StringBuffer> qb(new StringBuffer());
+        *qb << "SELECT " << TQ("id") 
+            << " FROM " << TQ(CDS_OBJECT_TABLE)
+            << " WHERE " << TQ("parent_id") 
+            << " = " << quote(obj->getParentID())
+            << " AND " << TQ("ref_id") 
+            << " = " << quote(refObj->getID())
+            << " AND " << TQ("dc_title")
+            << " = " << quote(obj->getTitle())
+            << " LIMIT 1";
+        Ref<SQLResult> res = select(qb->toString());
+        // if duplicate items is found - ignore
+        if (res != nil && (res->nextRow() != nil))
+            return nil;
+    }
+    
     if (obj->getParentID() == INVALID_OBJECT_ID)
         throw _Exception(_("tried to create or update an object with an illegal parent id"));
     cdsObjectSql->put(_("parent_id"), String::from(obj->getParentID()));
@@ -329,6 +350,8 @@ void SQLStorage::addObject(Ref<CdsObject> obj, int *changedContainer)
         throw _Exception(_("tried to add an object with an object ID set"));
     //obj->setID(INVALID_OBJECT_ID);
     Ref<Array<AddUpdateTable> > data = _addUpdateObject(obj, false, changedContainer);
+    if (data == nil)
+        return;
     int lastInsertID = INVALID_OBJECT_ID;
     for (int i = 0; i < data->size(); i++)
     {
@@ -386,6 +409,8 @@ void SQLStorage::updateObject(zmm::Ref<CdsObject> obj, int *changedContainer)
         if (IS_FORBIDDEN_CDS_ID(obj->getID()))
             throw _Exception(_("tried to update an object with a forbidden ID (")+obj->getID()+")!");
         data = _addUpdateObject(obj, true, changedContainer);
+        if (data == nil)
+            return;
     }
     for (int i = 0; i < data->size(); i++)
     {
@@ -503,19 +528,19 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
         {
             *qb << " AND f.object_type = "
                 << quote(OBJECT_TYPE_CONTAINER)
-                << " ORDER BY " << TQ("f") << '.' << TQ("dc_title");
+                << " ORDER BY " << TQD('f',"dc_title");
         }
         else if (! getContainers && getItems)
         {
             *qb << " AND f.object_type & "
                 << quote(OBJECT_TYPE_ITEM)
-                << " ORDER BY " << TQ("f") << '.' << TQ("dc_title");
+                << " ORDER BY " << TQD('f',"dc_title");
         }
         else
         {
             *qb << " ORDER BY ("
-            << TQ("f") << '.' << TQ("object_type") << " = " << quote(OBJECT_TYPE_CONTAINER)
-            << ") DESC, "<< TQ("f") << '.' << TQ("dc_title");
+            << TQD("f","object_type") << " = " << quote(OBJECT_TYPE_CONTAINER)
+            << ") DESC, "<< TQD('f',"dc_title");
         }
         if (doLimit)
             *qb << " LIMIT " << param->getStartingIndex() << ',' << count;
@@ -612,9 +637,9 @@ Ref<SQLRow> SQLStorage::_findObjectByPath(String fullpath)
     else
         dbLocation = addLocationPrefix(LOC_DIR_PREFIX, path);
     *qb << SQL_QUERY
-            << " WHERE " SEL_F_QUOTED '.' << TQ("location_hash") << " = " << quote(stringHash(dbLocation))
-            << " AND " SEL_F_QUOTED '.' << TQ("location") << " = " << quote(dbLocation)
-            << " AND " SEL_F_QUOTED '.' << TQ("ref_id") << " IS NULL "
+            << " WHERE " << TQD('f',"location_hash") << " = " << quote(stringHash(dbLocation))
+            << " AND " << TQD('f',"location") << " = " << quote(dbLocation)
+            << " AND " << TQD('f',"ref_id") << " IS NULL "
             "LIMIT 1";
     
     Ref<SQLResult> res = select(qb->toString());
@@ -969,7 +994,7 @@ Ref<DBRHash<int> > SQLStorage::getObjects(int parentID)
     if (capacity < 521)
         capacity = 521;
     
-    Ref<DBRHash<int> > ret(new DBRHash<int>(capacity, INVALID_OBJECT_ID, INVALID_OBJECT_ID_2));
+    Ref<DBRHash<int> > ret(new DBRHash<int>(capacity, res->getNumRows(), INVALID_OBJECT_ID, INVALID_OBJECT_ID_2));
     
     while ((row = res->nextRow()) != nil)
     {
@@ -1296,15 +1321,15 @@ overwritten due to different SQL syntax for MySQL and SQLite3
 
 Ref<AutoscanList> SQLStorage::getAutoscanList(scan_mode_t scanmode)
 {
-    #define FLD(field) << TQ('a') << '.' << field <<
+    #define FLD(field) << TQD('a',field) <<
     Ref<StringBuffer> q(new StringBuffer());
     *q << "SELECT " FLD("id") ',' FLD("scan_level") ','
        FLD("scan_mode") ',' FLD("recursive") ',' FLD("hidden") ','
        FLD("interval") ',' FLD("last_modified") ','
-       << TQ('t') << '.' << TQ("location")
+       << TQD('t',"location")
        << " FROM " << TQ(AUTOSCAN_TABLE) << ' ' << TQ('a')
        << " JOIN " << TQ(CDS_OBJECT_TABLE) << ' ' << TQ('t')
-       << " ON " FLD("id") '=' << TQ('t') << '.' << TQ("id")
+       << " ON " FLD("id") '=' << TQD('t',"id")
        << " WHERE " FLD("scan_mode") '=' << quote(AutoscanDirectory::mapScanmode(scanmode));
     Ref<SQLResult> res = select(q->toString());
     if (res == nil)

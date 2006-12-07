@@ -55,14 +55,25 @@ protected:
     KT emptyKey;
     KT deletedKey;
     KT *data_array;
+#ifdef LOG_TOMBDEBUG
+    int realCapacity;
+#endif
 public:
-    DBRHash(int capacity, KT emptyKey, KT deletedKey) : DHashBase<KT, struct dbr_hash_slot<KT> >(capacity)
+    /// \param hashCapacity the size of the hashtable
+    /// \param realCapacityKT maximum number of elements "you" will store in this instance (has to be < than hashCapacity!)
+    /// WARNING: the number of stored entries MUST be <= realCapacity at all times!
+    DBRHash(int hashCapacity, int realCapacity, KT emptyKey, KT deletedKey) : DHashBase<KT, struct dbr_hash_slot<KT> >(hashCapacity)
     {
+#ifdef LOG_TOMBDEBUG
+        this->realCapacity = realCapacity;
+        if (realCapacity >= hashCapacity)
+            throw zmm::Exception(_("realCapacity MUST be < hashCapacity"));
+#endif
         if (emptyKey == deletedKey)
             throw zmm::Exception(_("emptyKey and deletedKey must not be the same!"));
         this->emptyKey = emptyKey;
         this->deletedKey = deletedKey;
-        data_array = (KT *)MALLOC(capacity * sizeof(KT));
+        data_array = (KT *)MALLOC(realCapacity * sizeof(KT));
         clear();
     }
     
@@ -130,6 +141,10 @@ public:
         struct dbr_hash_slot<KT> *slot;
         if (! search(key, &slot))
         {
+#ifdef LOG_TOMBDEBUG
+            if (this->count >= realCapacity)
+                throw zmm::Exception(_("count (") + this->count + ") reached realCapacity (" + realCapacity + ")!\n");
+#endif
             slot->key = key;
             slot->array_slot = this->count;
             data_array[this->count++] = key;
