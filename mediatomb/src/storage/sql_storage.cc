@@ -496,12 +496,27 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
         
         *qb << "f.parent_id = " << objectID;
         if (! getContainers && ! getItems)
+        {
             *qb << " AND 0=1";
+        }
         else if (getContainers && ! getItems)
-            *qb << " AND f.object_type = " << quote(OBJECT_TYPE_CONTAINER);
+        {
+            *qb << " AND f.object_type = "
+                << quote(OBJECT_TYPE_CONTAINER)
+                << " ORDER BY " << TQ("f") << '.' << TQ("dc_title");
+        }
         else if (! getContainers && getItems)
-            *qb << " AND f.object_type & " << quote(OBJECT_TYPE_ITEM);
-        *qb << " ORDER BY f.object_type, f.dc_title";
+        {
+            *qb << " AND f.object_type & "
+                << quote(OBJECT_TYPE_ITEM)
+                << " ORDER BY " << TQ("f") << '.' << TQ("dc_title");
+        }
+        else
+        {
+            *qb << " ORDER BY ("
+            << TQ("f") << '.' << TQ("object_type") << " = " << quote(OBJECT_TYPE_CONTAINER)
+            << ") DESC, "<< TQ("f") << '.' << TQ("dc_title");
+        }
         if (doLimit)
             *qb << " LIMIT " << param->getStartingIndex() << ',' << count;
     }

@@ -59,9 +59,14 @@
 
 #ifndef MEMPROF
 
-#define MALLOC malloc
+#ifdef LOG_TOMBDEBUG
+    void *MALLOC(size_t size);
+    void *REALLOC(void *ptr, size_t size);
+#else
+    #define MALLOC malloc
+    #define REALLOC realloc
+#endif
 #define CALLOC calloc
-#define REALLOC realloc
 #define FREE free
 
 #else
