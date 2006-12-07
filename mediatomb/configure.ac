@@ -29,7 +29,7 @@
 #*MT*
 
 AC_PREREQ(2.59)
-AC_INIT([MediaTomb], [0.9.0pre], [jin@mediatomb.org])
+AC_INIT([MediaTomb], [0.9.0], [jin@mediatomb.org])
 AM_CONFIG_HEADER([autoconfig.h tombupnp/upnp/inc/upnpconfig.h])
 AC_CONFIG_AUX_DIR(configure_aux)
 AC_CONFIG_SRCDIR([src/common.h])
@@ -1786,6 +1786,10 @@ AC_ARG_ENABLE(upnpdebug,
 if test "x$UPNPDEBUG_OK" = xyes; then
     AC_DEFINE(UPNP_HAVE_DEBUG, 1, [see upnpconfig.h])
     AC_DEFINE(DEBUG, 1, [Define to 1 to compile debug code])
+fi
+
+if (test "x$LOGDEBUG_OK" != xyes) && (test "x$UPNPDEBUG_OK" != xyes); then
+    AC_DEFINE(NDEBUG, 1, [make sure there are no asserts in the retail build])
 fi
 
 AC_ARG_ENABLE(log,
