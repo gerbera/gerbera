@@ -35,6 +35,7 @@ var showMaxPages = 10;
 /* icons */
 
 var iconPath = '/icons/';
+var iconNewItem = iconPath + 'document-new.png';
 var iconAdd = iconPath + 'stock-add.png';
 var iconEdit = iconPath + 'stock_edit.png';
 var iconRefresh = iconPath + 'view-refresh.png';
@@ -209,7 +210,7 @@ function updateItems(ajaxRequest)
         }
         
         if (addLink)
-            first = _addLink(topDiv, first, "javascript:parent.userAddItemStart();", "add Item", iconAdd);
+            first = _addLink(topDiv, first, "javascript:parent.userAddItemStart();", "add Item", iconNewItem);
         if (editLink)
             first = _addLink(topDiv, first, "javascript:parent.userEditItemStart('"+ofId+"');", "edit", iconEdit);
         if (removeLink)
