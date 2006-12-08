@@ -84,12 +84,13 @@ Ref<CdsObject> web::addObject::addItem(int parentID, Ref<CdsItem> item)
     if (!string_ok(tmp))
         tmp = _(MIMETYPE_DEFAULT);
     item->setMimeType(tmp);
-    
+
+/*
     Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
     resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
                            renderProtocolInfo(tmp));
     item->addResource(resource);
-   
+*/   
     return RefCast(item, CdsObject);
 }
 
@@ -207,7 +208,14 @@ void web::addObject::process()
     if (obj != nil)
     {
         obj->setVirtual(true);
-        ContentManager::getInstance()->addObject(obj);
+        if (obj_type.toInt() == OBJECT_TYPE_ITEM)
+        {
+            ContentManager::getInstance()->addVirtualItem(obj);
+        }
+        else
+        {
+            ContentManager::getInstance()->addObject(obj);
+        }
     }
 }
 

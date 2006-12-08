@@ -176,6 +176,14 @@ public:
 
     zmm::Ref<CdsObject> createObjectFromFile(zmm::String path, bool magic=true);
 
+    /// \brief Adds a virtual item.
+    /// \param obj item to add
+    ///
+    /// This function makes sure that the file is first added to
+    /// PC-Directory, however without the scripting execution.
+    /// It then adds the user defined virtual item to the database.
+    void addVirtualItem(zmm::Ref<CdsObject> obj);
+
     /// \brief Adds an object to the database.
     /// \param obj object to add
     ///

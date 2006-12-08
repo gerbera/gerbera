@@ -232,6 +232,31 @@ void ContentManager::_loadAccounting()
     Ref<Storage> storage = Storage::getInstance();
     acct->totalFiles = storage->getTotalFiles();
 }
+
+void ContentManager::addVirtualItem(Ref<CdsObject> obj)
+{
+    obj->validate();
+    String path = obj->getLocation();
+    check_path_ex(path, false, false);
+    Ref<Storage> storage = Storage::getInstance();
+    Ref<CdsObject> pcdir = storage->findObjectByPath(path);
+    if (pcdir == nil)
+    {
+        pcdir = createObjectFromFile(path);
+        if (pcdir == nil)
+        {
+            throw _Exception(_("Could not add ") + path);
+        }
+        if (IS_CDS_ITEM(pcdir->getObjectType()))
+        {
+            this->addObject(pcdir);
+        }
+    }
+
+    addObject(obj);
+
+}
+
 void ContentManager::_addFile(String path, bool recursive, bool hidden)
 {
     if (hidden == false)
@@ -337,7 +362,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
             obj = storage->loadObject(containerID);
             if (!IS_CDS_CONTAINER(obj->getObjectType()))
             {
-                throw Exception(_("Not a container"));
+                throw _Exception(_("Not a container"));
             }
             location = obj->getLocation();
         }
