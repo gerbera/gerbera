@@ -85,6 +85,7 @@ Ref<CdsObject> web::addObject::addItem(int parentID, Ref<CdsItem> item)
         tmp = _(MIMETYPE_DEFAULT);
     item->setMimeType(tmp);
 
+    item->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
 /*
     Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
     resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
