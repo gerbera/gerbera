@@ -74,6 +74,8 @@ void web::containers::process()
         int childCount = cont->getChildCount();
         if (childCount)
             ce->addAttribute(_("childCount"), String::from(childCount));
+        if (cont->isAutoscanStart())
+            ce->addAttribute(_("autoscan"), _("1"));
         ce->setText(cont->getTitle());
         containers->appendChild(ce);
         //}

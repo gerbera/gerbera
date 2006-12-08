@@ -130,7 +130,7 @@ function updateItems(ajaxRequest)
         first = _addLink(pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','0');", "first", iconFirst, " ");
     
     if (prevPageStart >= 0)
-        first = _addLink(pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','"+prevPageStart+"');", "prev", iconPrev, " ");
+        first = _addLink(pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','"+prevPageStart+"');", "previous", iconPrevious, " ");
     
     for (var i = pagesFrom; i <= pagesTo; i++)
     {
@@ -160,14 +160,13 @@ function updateItems(ajaxRequest)
     
     var children = items.getElementsByTagName(childrenTag);
     var itemsEl = rightDocument.createElement("div");
-    
-    itemsEl.appendChild(pagingPar);
-    
+    itemsEl.setAttribute("class", "itemsEl");
     
     if (useFiles)
     {
         var topDiv = rightDocument.createElement("div");
         topDiv.appendChild(rightDocument.createTextNode("Folder: "));
+        topDiv.setAttribute("class", "topDiv");
         
         var first = true
         first = _addLink(topDiv, first, "javascript:parent.addItem('"+ofId+"');", "add", iconAdd);
@@ -179,12 +178,14 @@ function updateItems(ajaxRequest)
     {
         var topDiv = rightDocument.createElement("div");
         topDiv.appendChild(rightDocument.createTextNode("Container: "));
+        topDiv.setAttribute("class", "topDiv");
         
         var link;
         var first = true;
         var addLink = false;
         var editLink = false;
-        var removeLink = false;
+        var removeThisLink = false;
+        var removeAllLink = false;
         var autoscanLink = false;
         
         
@@ -203,49 +204,71 @@ function updateItems(ajaxRequest)
             {
                 addLink = true;
                 editLink = true;
+                removeAllLink = true;
             }
             else
                 autoscanLink = true;
-            removeLink = true;
+            removeThisLink = true;
         }
         
         if (addLink)
             first = _addLink(topDiv, first, "javascript:parent.userAddItemStart();", "add Item", iconNewItem);
         if (editLink)
             first = _addLink(topDiv, first, "javascript:parent.userEditItemStart('"+ofId+"');", "edit", iconEdit);
-        if (removeLink)
+        if (removeThisLink)
             first = _addLink(topDiv, first, "javascript:parent.removeItem('"+ofId+"', false);", "remove", iconRemoveThis);
+        if (removeAllLink)
+            first = _addLink(topDiv, first, "javascript:parent.removeItem('"+ofId+"', true);", "remove all", iconRemoveAll);
         if (autoscanLink)
         {
             var action = (isAutoscan ? "remove" : "add");
             first = _addLink(topDiv, first,  "javascript:parent.changeAutoscanDirectory('"+action+"','"+ofId+"', false);", action+" as autoscan dir");
         }
         
-        
         itemsEl.appendChild(topDiv);
     }
+    itemsEl.appendChild(pagingPar);
+    var itemsTable = rightDocument.createElement("div");
+    itemsTable.setAttribute("class", "itemsTable");
+    itemsEl.appendChild(itemsTable);
     for (var i = 0; i < children.length; i++)
     {
+        var itemRow = rightDocument.createElement("div");
+        itemRow.setAttribute("class", (i % 2 == 0 ? "itemRowA" : "itemRowB"));
         var item = children[i];
         var itemEntry = rightDocument.createElement("div");
+        itemEntry.setAttribute("class", "itemEntry");
         var itemLink = rightDocument.createElement("a");
         itemEntry.appendChild(itemLink);
         
+        var itemButtons = rightDocument.createElement("div");
+        itemButtons.setAttribute("class", "itemButtons");
+        
+        var itemText = rightDocument.createTextNode(useFiles ? item.firstChild.nodeValue : xmlGetElementText(item, "title"));
+        itemLink.appendChild(itemText);
+        
+        var spaceCell = rightDocument.createElement("div");
+        spaceCell.setAttribute("class", "spaceCell");
+        
+        itemRow.appendChild(itemEntry);
+        itemRow.appendChild(spaceCell);
+        itemRow.appendChild(itemButtons);
+
         if (useFiles)
         {
-            itemEntry.appendChild(rightDocument.createTextNode(" - "));
+            //itemEntry.appendChild(rightDocument.createTextNode(" - "));
             
-            _addLink(itemEntry, true, "javascript:parent.addItem(\""+item.getAttribute("id")+"\");", "add", iconAdd);
+            _addLink(itemButtons, true, "javascript:parent.addItem(\""+item.getAttribute("id")+"\");", "add", iconAdd);
         }
         else
         {
-            itemEntry.appendChild(rightDocument.createTextNode(" - "));
+            //itemEntry.appendChild(rightDocument.createTextNode(" - "));
             
-            _addLink(itemEntry, true, "javascript:parent.removeItem(\""+item.getAttribute("id")+"\", false);", "remove this", iconRemoveThis);
+            _addLink(itemButtons, true, "javascript:parent.removeItem(\""+item.getAttribute("id")+"\", false);", "remove this", iconRemoveThis);
             if (isVirtual)
             {
-                _addLink(itemEntry, false, "javascript:parent.removeItem(\""+item.getAttribute("id")+"\", true);", "remove all", iconRemoveAll);
-                _addLink(itemEntry, false, "javascript:parent.userEditItemStart('"+item.getAttribute("id")+"');", "edit", iconEdit);
+                _addLink(itemButtons, false, "javascript:parent.removeItem(\""+item.getAttribute("id")+"\", true);", "remove all", iconRemoveAll);
+                _addLink(itemButtons, false, "javascript:parent.userEditItemStart('"+item.getAttribute("id")+"');", "edit", iconEdit);
             }
             
             itemLink.setAttribute("href", xmlGetElementText(item, "res"));
@@ -254,11 +277,8 @@ function updateItems(ajaxRequest)
             // our frames
             itemLink.setAttribute("target", "mediatomb_target");
         }
-        var itemText = rightDocument.createTextNode(useFiles ? item.firstChild.nodeValue : xmlGetElementText(item, "title"));
-        itemLink.appendChild(itemText);
-        itemsEl.appendChild(itemEntry);
+        itemsTable.appendChild(itemRow);
     }
-    
     itemsEl.appendChild(pagingPar.cloneNode(true));
     
     //itemsEl.appendChild(rightDocument.createTextNode("total: "+totalMatches));
@@ -268,8 +288,11 @@ function updateItems(ajaxRequest)
 
 function _addLink(addToElement, first, href, text, icon, seperator, target)
 {
+    /*
     if (! first)
         addToElement.appendChild(rightDocument.createTextNode((seperator ? seperator : ", ")));
+    */
+    
     var link = rightDocument.createElement("a");
     addToElement.appendChild(link);
     link.setAttribute("href", href);

@@ -71,7 +71,8 @@ enum
     _ref_metadata,
     _ref_auxdata,
     _ref_resources,
-    _ref_mime_type
+    _ref_mime_type,
+    _as_id
 };
 
 /* table quote */
@@ -79,12 +80,12 @@ enum
 /* table quote with dot */
 #define TQD(data1, data2)        TQ(data1) << '.' << TQ(data2)
 
-#define SEL_F_QUOTED        << QTB << 'f' << QTE <<
-#define SEL_RF_QUOTED       << QTB << "rf" << QTE <<
+#define SEL_F_QUOTED        << TQ('f') <<
+#define SEL_RF_QUOTED       << TQ("rf") <<
 
 // end quote, space, f quoted, dot, begin quote
-#define SEL_EQ_SP_FQ_DT_BQ  << QTE << ',' SEL_F_QUOTED '.' << QTB <<
-#define SEL_EQ_SP_RFQ_DT_BQ  << QTE << ',' SEL_RF_QUOTED '.' << QTB <<
+#define SEL_EQ_SP_FQ_DT_BQ  << QTE << ',' << TQ('f') << '.' << QTB <<
+#define SEL_EQ_SP_RFQ_DT_BQ  << QTE << ',' << TQ("rf") << '.' << QTB <<
 
 #define SELECT_DATA_FOR_STRINGBUFFER \
   TQ('f') << '.' << QTB << "id" \
@@ -106,12 +107,14 @@ enum
     SEL_EQ_SP_RFQ_DT_BQ "metadata" \
     SEL_EQ_SP_RFQ_DT_BQ "auxdata" \
     SEL_EQ_SP_RFQ_DT_BQ "resources" \
-    SEL_EQ_SP_RFQ_DT_BQ "mime_type" << QTE
+    SEL_EQ_SP_RFQ_DT_BQ "mime_type" << QTE \
+    << ',' << TQD("as","id")
     
 #define SQL_QUERY_FOR_STRINGBUFFER "SELECT " << SELECT_DATA_FOR_STRINGBUFFER << \
-    " FROM " << TQ(CDS_OBJECT_TABLE) << ' ' SEL_F_QUOTED " LEFT JOIN " \
-    << TQ(CDS_OBJECT_TABLE) << ' ' SEL_RF_QUOTED " ON " SEL_F_QUOTED '.' \
-    << TQ("ref_id") << " = " SEL_RF_QUOTED '.' << TQ("id") << ' '
+    " FROM " << TQ(CDS_OBJECT_TABLE) << ' ' << TQ('f') << " LEFT JOIN " \
+    << TQ(CDS_OBJECT_TABLE) << ' ' << TQ("rf") << " ON " << TQD('f',"ref_id") \
+    << " = " << TQD("rf","id") << " LEFT JOIN " << TQ(AUTOSCAN_TABLE) << ' ' \
+    << TQ("as") << " ON " << TQD("as","id") << " = " << TQD('f',"id") << ' '
     
 #define SQL_QUERY       sql_query
 
@@ -255,7 +258,11 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
                 *resBuf << RESOURCE_SEP;
             *resBuf << obj->getResource(i)->encode();
         }
-        cdsObjectSql->put(_("resources"), quote(resBuf->toString()));
+        String resStr = resBuf->toString();
+        if (string_ok(resStr))
+            cdsObjectSql->put(_("resources"), quote(resStr));
+        else
+            cdsObjectSql->put(_("resources"), _("NULL"));
     }
     else if (isUpdate)
         cdsObjectSql->put(_("resources"), _("NULL"));
@@ -824,7 +831,8 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
                                                     RESOURCE_SEP);
         for (int i = 0; i < resources->size(); i++)
         {
-            if (i == 0) resource_zero_ok = true;
+            if (i == 0)
+                resource_zero_ok = true;
             obj->addResource(CdsResource::decode(resources->get(i)));
         }
     }
@@ -845,6 +853,7 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
         cont->setLocation(stripLocationPrefix(&locationPrefix, row->col(_location)));
         if (locationPrefix == LOC_VIRT_PREFIX)
             cont->setVirtual(true);
+        cont->setAutoscanStart(string_ok(row->col(_as_id)));
         matched_types++;
     }
     

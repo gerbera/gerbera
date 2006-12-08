@@ -1,5 +1,86 @@
 /*MT*/
 
+body
+{
+    background-color:#dddddd;
+    font-family: "Helvetica", "Arial", "MS Sans Serif", sans-serif;
+    font-size: 10pt;
+    /*margin:0;
+    padding:0;*/
+}
+
+input
+{
+    background-color:#dddddd;
+    font-family: "Helvetica", "Arial", "MS Sans Serif", sans-serif;
+    font-size: 10pt;
+}
+
+a
+{
+    color:#000000;
+    text-decoration:none;
+}
+
+div.topDiv
+{
+    vertical-align:middle;
+    padding:5px;
+}
+
+div.itemsTable
+{
+    display:table;
+    width:100%;
+}
+
+div.itemRowA
+{
+    display:table-row;
+    background-color:#cccccc;
+}
+
+div.itemRowB
+{
+    display:table-row;
+    background-color:#aaaaaa;
+}
+
+div.itemRowA:hover
+{
+    background-color:#888888;
+}
+
+div.itemRowB:hover
+{
+    background-color:#888888;
+}
+
+div.itemEntry
+{
+    padding:3px;
+    padding-left:5px;
+    vertical-align:middle;
+    display:table-cell;
+    /* width:auto; */
+}
+
+div.spaceCell
+{
+    display:table-cell;
+    /* width:50%; */
+}
+
+div.itemButtons
+{
+    padding:3px;
+    padding-right:12px;
+    vertical-align:middle;
+    display:table-cell;
+    text-align:right;
+}
+
+/*
 .node
 {
     position:absolute;
@@ -22,10 +103,11 @@
 .leaf A:active { color: black; text-decoration: none; }
 .leaf A:hover { color: black; text-decoration: none; }
 
-/* folder icon */
+/ * folder icon 
 .fld { cursor: crosshair; }
 
-/* context menu */
+
+/ context menu 
 .ctxm {
     background-color: #CCCCCC;
     border: 1px;
@@ -49,4 +131,4 @@
     padding-left: 5px;
     padding-right: 5px;
 }
-
+*/
