@@ -59,7 +59,8 @@ void web::autoscan::process()
         
     if (action == "add")
     {
-        int objID = intParam(_("object_id"));
+        bool fromFs = boolParam(_("fromFs"));
+        //int objID = intParam(_("object_id"));
         bool recursive = boolParam(_("recursive"));
         bool hidden = boolParam(_("hidden"));
         //bool persistent = boolParam(_("persistent"));
@@ -74,15 +75,28 @@ void web::autoscan::process()
             scan_level_t scan_level = AutoscanDirectory::remapScanlevel(scan_level_str);
             scan_mode_t scan_mode = TimedScanMode;
             
-            Ref<CdsObject> obj = storage->loadObject(objID);
-            if (obj == nil
-                || ! IS_CDS_CONTAINER(obj->getObjectType())
-                || obj->isVirtual())
-                throw _Exception(_("tried to add an illegal object (id) as an autoscan directory"));
+            String location;
+            if (fromFs)
+            {
+                location = hex_decode_string(param(_("object_id")));
+                cm->ensurePathExistence(location);
+            }
+            else
+            {
+                Ref<CdsObject> obj = storage->loadObject(intParam(_("object_id")));
+                if (obj == nil
+                    || ! IS_CDS_CONTAINER(obj->getObjectType())
+                    || obj->isVirtual())
+                    throw _Exception(_("tried to add an illegal object (id) as an autoscan directory"));
+                location = obj->getLocation();
+            }
             
-            /// \todo make more configurable!
+            log_debug("adding autoscan: location=%s, scan_mode=%s, scan_level=%s, recursive=%d, interval=%d, hidden=%d\n", 
+                location.c_str(), AutoscanDirectory::mapScanmode(scan_mode).c_str(),
+                AutoscanDirectory::mapScanlevel(scan_level).c_str(), recursive, interval, hidden);
+            
             Ref<AutoscanDirectory> autoscan(new AutoscanDirectory(
-                obj->getLocation(),
+                location,
                 scan_mode,
                 scan_level,
                 recursive,

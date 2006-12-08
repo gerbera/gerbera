@@ -473,7 +473,8 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
             int objectID = storage->findObjectIDByPath(String(path));
             if (objectID > 0)
             {
-                list->remove(objectID);
+                if (list != nil)
+                    list->remove(objectID);
 
                 if (scanLevel == FullScanLevel)
                 {
@@ -507,7 +508,8 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
             int objectID = storage->findObjectIDByPath(path + DIR_SEPARATOR);
             if (objectID > 0)
             {
-                list->remove(objectID);
+                if (list != nil)
+                    list->remove(objectID);
                 // add a task to rescan the directory that was found
                 if (adir->getRecursive())
                     rescanDirectory(objectID, scanID, scanMode);
@@ -531,7 +533,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
             }
         }
     } // while
-    if (list->size() > 0)
+    if (list != nil && list->size() > 0)
     {
         #warning ui updates unfinished!
         Ref<IntArray> changedContainers = storage->removeObjects(list);

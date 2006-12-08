@@ -176,7 +176,7 @@ public:
     
     /// \brief Get all objects under the given parentID.
     /// \param parentID parent container
-    /// \return DBHash containing the objectID's 
+    /// \return DBHash containing the objectID's - nil if there are none! 
     virtual zmm::Ref<DBRHash<int> > getObjects(int parentID) = 0;
     
     /// \brief Remove all objects found in list

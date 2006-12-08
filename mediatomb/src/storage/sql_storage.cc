@@ -990,6 +990,8 @@ Ref<DBRHash<int> > SQLStorage::getObjects(int parentID)
         throw _Exception(_("db error"));
     Ref<SQLRow> row;
     
+    if (res->getNumRows() <= 0)
+        return nil;
     int capacity = res->getNumRows() * 5 + 1;
     if (capacity < 521)
         capacity = 521;

@@ -174,6 +174,7 @@ void *MALLOC(size_t size)
 {
     if (size <= 0)
     {
+        printf("malloc called with 0! aborting...\n");
         _print_backtrace(stderr);
         abort();
     }
@@ -183,6 +184,7 @@ void *REALLOC(void *ptr, size_t size)
 {
     if (size <= 0)
     {
+        printf("realloc called with 0! aborting...\n");
         _print_backtrace(stderr);
         abort();
     }

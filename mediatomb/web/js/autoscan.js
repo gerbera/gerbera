@@ -1,10 +1,12 @@
 var autoscanAddId;
+var autoscanFromFs;
 
-function changeAutoscanDirectory(doAction, objId)
+function changeAutoscanDirectory(doAction, objId, fromFs)
 {
     if (doAction == 'add')
     {
         autoscanAddId = objId;
+        autoscanFromFs = fromFs;
         Element.hide(itemRoot);
         itemRoot = rightDocument.getElementById('autoscan_div');
         Element.show(itemRoot);
@@ -33,6 +35,7 @@ function autoscanSubmit()
     var args = new Object();
     args['action'] = 'add';
     args['object_id'] = autoscanAddId;
+    args['fromFs'] = (autoscanFromFs ? '1' : '0');
     formToArray(form, args);
     var url = link('autoscan', args);
     var myAjax = new Ajax.Request(

@@ -80,6 +80,15 @@ function xmlGetAttribute(parent, name)
     return null;
 }
 
+function appendImgNode(document, node, alt, icon)
+{
+    var img = document.createElement("img");
+    img.setAttribute("src", icon);
+    img.setAttribute("alt", alt);
+    img.setAttribute("border", "0");
+    node.appendChild(img);
+}
+
 function errorCheck(xml, noredirect)
 {
     if (!xml)
@@ -252,3 +261,4 @@ function formToArray(form, args)
             args[element.name] = element.value;
     }
 }
+

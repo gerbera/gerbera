@@ -65,9 +65,11 @@ public:
     DBRHash(int hashCapacity, int realCapacity, KT emptyKey, KT deletedKey) : DHashBase<KT, struct dbr_hash_slot<KT> >(hashCapacity)
     {
 #ifdef LOG_TOMBDEBUG
+        if (realCapacity <=0)
+            throw zmm::Exception(_("illegal realCapacity (") + realCapacity + ")");
         this->realCapacity = realCapacity;
         if (realCapacity >= hashCapacity)
-            throw zmm::Exception(_("realCapacity MUST be < hashCapacity"));
+            throw zmm::Exception(_("realCapacity (") + realCapacity + ") MUST be < hashCapacity (" + hashCapacity + ")");
 #endif
         if (emptyKey == deletedKey)
             throw zmm::Exception(_("emptyKey and deletedKey must not be the same!"));

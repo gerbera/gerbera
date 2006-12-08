@@ -32,6 +32,19 @@ var rightDocument;
 var viewItems = 50;
 var showMaxPages = 10;
 
+/* icons */
+
+var iconPath = '/icons/';
+var iconAdd = iconPath + 'stock-add.png';
+var iconEdit = iconPath + 'stock_edit.png';
+var iconRefresh = iconPath + 'view-refresh.png';
+var iconRemoveThis = iconPath + 'remove_this.png';
+var iconRemoveAll = iconPath + 'remove_all.png';
+var iconFirst = iconPath + 'go-first.png';
+var iconPrevious = iconPath + 'go-previous.png';
+var iconNext = iconPath + 'go-next.png';
+var iconLast = iconPath + 'go-last.png';
+
 function itemInit()
 {
     rightDocument = frames["rightF"].document;
@@ -113,10 +126,10 @@ function updateItems(ajaxRequest)
     var first = true;
     
     if (thisPage > showMaxPages / 2)
-        first = _addLink(pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','0');", "first", " ");
+        first = _addLink(pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','0');", "first", iconFirst, " ");
     
     if (prevPageStart >= 0)
-        first = _addLink(pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','"+prevPageStart+"');", "prev", " ");
+        first = _addLink(pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','"+prevPageStart+"');", "prev", iconPrev, " ");
     
     for (var i = pagesFrom; i <= pagesTo; i++)
     {
@@ -139,10 +152,10 @@ function updateItems(ajaxRequest)
     }
     
     if (nextPageStart < totalMatches)
-        first = _addLink(pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','"+nextPageStart+"');", "next", " ");
+        first = _addLink(pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','"+nextPageStart+"');", "next", iconNext, " ");
     
     if (thisPage < totalPages - showMaxPages / 2)
-        first = _addLink(pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','"+((totalPages - 1) * viewItems)+"');", "last", " ");
+        first = _addLink(pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','"+((totalPages - 1) * viewItems)+"');", "last", iconLast, " ");
     
     var children = items.getElementsByTagName(childrenTag);
     var itemsEl = rightDocument.createElement("div");
@@ -155,13 +168,9 @@ function updateItems(ajaxRequest)
         var topDiv = rightDocument.createElement("div");
         topDiv.appendChild(rightDocument.createTextNode("Folder: "));
         
-        //if (lastNodeFs == 'f0')
-        //{
-        var link = rightDocument.createElement("a");
-        topDiv.appendChild(link);
-        link.setAttribute("href", "javascript:parent.addItem('"+ofId+"');");
-        link.appendChild(rightDocument.createTextNode("add"));
-        //}
+        var first = true
+        first = _addLink(topDiv, first, "javascript:parent.addItem('"+ofId+"');", "add", iconAdd);
+        first = _addLink(topDiv, first, "javascript:parent.changeAutoscanDirectory('add','"+ofId+"', true);", "add as autoscan dir");
         
         itemsEl.appendChild(topDiv);
     }
@@ -200,15 +209,15 @@ function updateItems(ajaxRequest)
         }
         
         if (addLink)
-            first = _addLink(topDiv, first, "javascript:parent.userAddItemStart();", "add Item");
+            first = _addLink(topDiv, first, "javascript:parent.userAddItemStart();", "add Item", iconAdd);
         if (editLink)
-            first = _addLink(topDiv, first, "javascript:parent.userEditItemStart('"+ofId+"');", "edit");
+            first = _addLink(topDiv, first, "javascript:parent.userEditItemStart('"+ofId+"');", "edit", iconEdit);
         if (removeLink)
-            first = _addLink(topDiv, first, "javascript:parent.removeItem('"+ofId+"', false);", "remove");
+            first = _addLink(topDiv, first, "javascript:parent.removeItem('"+ofId+"', false);", "remove", iconRemoveThis);
         if (autoscanLink)
         {
             var action = (isAutoscan ? "remove" : "add");
-            first = _addLink(topDiv, first,  "javascript:parent.changeAutoscanDirectory('"+action+"','"+ofId+"');", action+" as autoscan dir");
+            first = _addLink(topDiv, first,  "javascript:parent.changeAutoscanDirectory('"+action+"','"+ofId+"', false);", action+" as autoscan dir");
         }
         
         
@@ -225,17 +234,17 @@ function updateItems(ajaxRequest)
         {
             itemEntry.appendChild(rightDocument.createTextNode(" - "));
             
-            _addLink(itemEntry, true, "javascript:parent.addItem(\""+item.getAttribute("id")+"\");", "add");
+            _addLink(itemEntry, true, "javascript:parent.addItem(\""+item.getAttribute("id")+"\");", "add", iconAdd);
         }
         else
         {
             itemEntry.appendChild(rightDocument.createTextNode(" - "));
             
-            _addLink(itemEntry, true, "javascript:parent.removeItem(\""+item.getAttribute("id")+"\", false);", "remove this");
+            _addLink(itemEntry, true, "javascript:parent.removeItem(\""+item.getAttribute("id")+"\", false);", "remove this", iconRemoveThis);
             if (isVirtual)
             {
-                _addLink(itemEntry, false, "javascript:parent.removeItem(\""+item.getAttribute("id")+"\", true);", "remove all");
-                _addLink(itemEntry, false, "javascript:parent.userEditItemStart('"+item.getAttribute("id")+"');", "edit");
+                _addLink(itemEntry, false, "javascript:parent.removeItem(\""+item.getAttribute("id")+"\", true);", "remove all", iconRemoveAll);
+                _addLink(itemEntry, false, "javascript:parent.userEditItemStart('"+item.getAttribute("id")+"');", "edit", iconEdit);
             }
             
             itemLink.setAttribute("href", xmlGetElementText(item, "res"));
@@ -256,7 +265,7 @@ function updateItems(ajaxRequest)
     itemRoot.replaceChild(itemsEl, itemRoot.firstChild);
 }
 
-function _addLink(addToElement, first, href, text, seperator, target)
+function _addLink(addToElement, first, href, text, icon, seperator, target)
 {
     if (! first)
         addToElement.appendChild(rightDocument.createTextNode((seperator ? seperator : ", ")));
@@ -265,7 +274,11 @@ function _addLink(addToElement, first, href, text, seperator, target)
     link.setAttribute("href", href);
     if (target)
         link.setAttribute("target", target);
-    link.appendChild(rightDocument.createTextNode(text));
+    
+    if (icon)
+        appendImgNode(rightDocument, link, text, icon);
+    else
+        link.appendChild(rightDocument.createTextNode(text));
     return false; // to set the next "first"
 }
 
