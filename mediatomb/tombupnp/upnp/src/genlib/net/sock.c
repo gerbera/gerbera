@@ -41,6 +41,8 @@
 
 #include "sock.h"
 #include "upnp.h"
+#include "upnpapi.h"
+
 #ifndef WIN32
  #include <arpa/inet.h>
  #include <netinet/in.h>
@@ -427,16 +429,23 @@ sock_write( IN SOCKINFO * info,
 
         if (*timeoutSecs == 0)
         {
-            retCode = select(sockfd + 1, NULL, &writeSet, NULL, NULL);
+            timeout.tv_sec = WEB_SERVER_BLOCK_TIMEOUT;
         }
-        else
-        {
-            retCode = select(sockfd + 1, NULL, &writeSet, NULL, &timeout);
-        }
+        
+        retCode = select(sockfd + 1, NULL, &writeSet, NULL, &timeout);
+
+        if (gUpnpSdkShutdown)
+            return UPNP_E_TIMEDOUT;
 
         if (retCode == 0)
         {
-            return UPNP_E_TIMEDOUT;
+            if (*timeoutSecs != 0)
+                return UPNP_E_TIMEDOUT;
+
+            FD_ZERO(&writeSet);
+            FD_SET(sockfd, &writeSet);
+
+            continue;
         }
 
         if (retCode == -1)

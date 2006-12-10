@@ -169,6 +169,8 @@ int UpnpInit( IN const char *HostIP,
         return UPNP_E_INIT;
     }
 
+    gUpnpSdkShutdown = 0;
+
 #ifdef WIN32
 	wVersionRequested = MAKEWORD( 2, 2 );
 
@@ -370,6 +372,8 @@ UpnpFinish(  )
 
         if( UpnpSdkInit != 1 )
         return UPNP_E_FINISH;
+
+    gUpnpSdkShutdown = 1;
 
     DBGONLY( UpnpPrintf( UPNP_INFO, API, __FILE__, __LINE__,
                          "Inside UpnpFinish : UpnpSdkInit is :%d:\n",

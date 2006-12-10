@@ -204,6 +204,20 @@
 #define SSDP_PACKET_DISTRIBUTE 1
 //@}
 
+
+/** @name WEB_SERVER_BLOCK_TIMEOUT
+ *  When requewsting a blocking select we still will not fully block but
+ *  timeout on {\tt WEB_SERVER_BLOCK_TIMEOUT} and check if the global
+ *  shutdown flag was set. This ensures that we can always cleanly
+ *  shutdown the server, and that UpnpFinish() will never hang waiting for
+ *  threads which may be blocked by select()
+ *  The default time is 5 seconds.
+ */
+
+//@{
+#define WEB_SERVER_BLOCK_TIMEOUT 5
+//@}
+
 /** @name Module Exclusion
  *  Depending on the requirements, the user can selectively discard any of 
  *  the major modules like SOAP, GENA, SSDP or the Internal web server. By 

@@ -179,6 +179,8 @@ membuffer gUserHTTPHeaders;
 
 extern WebServerState bWebServerState;
 
+int gUpnpSdkShutdown;
+
 #endif
 
 
