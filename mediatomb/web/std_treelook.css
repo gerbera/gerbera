@@ -35,15 +35,14 @@
 	cursor:default;
 	background-color: #222222;
 	color: #ffffff;
-	
 	font-family: Tahoma,Verdana,Arial, Helvetica, sans-serif;
 	font-size: 11px;
 }
 .treetitleselectedblured {
 	padding:2px;
 	cursor:default;
-	background-color: menu;
-	color: windowtext;
+	background-color: #222222;
+	color: #ffffff;
 	font-family: Tahoma,Verdana,Arial, Helvetica, sans-serif;
 	font-size: 11px;
 }

@@ -1131,13 +1131,13 @@ Ref<StringBuffer> SQLStorage::_recursiveRemove(Ref<StringBuffer> items, Ref<Stri
     Ref<StringBuffer> remove(new StringBuffer());
     Ref<StringBuffer> changedContainers(new StringBuffer());
     
-    if (items != nil && items->length() > 2)
+    if (items != nil && items->length() > 1)
     {
         *recurseItems << items;
         *removeAddParents << items;
     }
     
-    if (containers != nil && containers->length() > 2)
+    if (containers != nil && containers->length() > 1)
     {
         *recurseContainers << containers;
         *removeAddParents << containers;
