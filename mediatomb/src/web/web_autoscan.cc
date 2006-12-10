@@ -105,9 +105,15 @@ void web::autoscan::process()
                 interval,
                 hidden
                 ));
-            
-            storage->addAutoscanDirectory(autoscan);
-            cm->addAutoscanDirectory(autoscan);
+            try
+            {
+                cm->addAutoscanDirectory(autoscan);
+                storage->addAutoscanDirectory(autoscan);
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
         }
     }
     else if (action == "remove")
