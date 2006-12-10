@@ -95,12 +95,12 @@ class SLSelectTask : public SLTask
 public:
     /// \brief Constructor for the sqlite3 select task
     /// \param query The SQL query string
-    SLSelectTask(zmm::String query);
+    SLSelectTask(const char *query);
     virtual void run(sqlite3 *db, Sqlite3Storage *sl);
     inline zmm::Ref<SQLResult> getResult() { return RefCast(pres, SQLResult); };
 protected:
     /// \brief The SQL query string
-    zmm::String query;
+    const char *query;
     /// \brief The Sqlite3Result
     zmm::Ref<Sqlite3Result> pres;
 };
@@ -111,12 +111,13 @@ class SLExecTask : public SLTask
 public:
     /// \brief Constructor for the sqlite3 exec task
     /// \param query The SQL query string
-    SLExecTask(zmm::String query, bool getLastInsertId);
+    SLExecTask(const char *query, bool getLastInsertId);
     virtual void run(sqlite3 *db, Sqlite3Storage *sl);
     inline int getLastInsertId() { return lastInsertId; }
 protected:
     /// \brief The SQL query string
-    zmm::String query;
+    const char *query;
+    
     int lastInsertId;
     bool getLastInsertIdFlag;
 };
@@ -135,8 +136,8 @@ private:
     virtual inline zmm::String quote(unsigned int val) { return zmm::String::from(val); }
     virtual inline zmm::String quote(long val) { return zmm::String::from(val); }
     virtual inline zmm::String quote(unsigned long val) { return zmm::String::from(val); }
-    virtual zmm::Ref<SQLResult> select(zmm::String query);
-    virtual int exec(zmm::String query, bool getLastInsertId = false);
+    virtual zmm::Ref<SQLResult> select(const char *query, int length);
+    virtual int exec(const char *query, int length, bool getLastInsertId = false);
     virtual void storeInternalSetting(zmm::String key, zmm::String value);
     
     zmm::String startupError;

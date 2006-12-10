@@ -338,7 +338,7 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
             << " AND " << TQ("dc_title")
             << " = " << quote(obj->getTitle())
             << " LIMIT 1";
-        Ref<SQLResult> res = select(qb->toString());
+        Ref<SQLResult> res = select(qb);
         // if duplicate items is found - ignore
         if (res != nil && (res->nextRow() != nil))
             return nil;
@@ -393,10 +393,10 @@ void SQLStorage::addObject(Ref<CdsObject> obj, int *changedContainer)
         
         if ( lastInsertID == INVALID_OBJECT_ID && tableName == _(CDS_OBJECT_TABLE))
         {
-            lastInsertID = exec(qb->toString(), true);
+            lastInsertID = exec(qb, true);
             obj->setID(lastInsertID);
         }
-        else exec(qb->toString());
+        else exec(qb);
     }
 }
 
@@ -443,7 +443,7 @@ void SQLStorage::updateObject(zmm::Ref<CdsObject> obj, int *changedContainer)
         
         log_debug("upd_query: %s\n", qb->toString().c_str());
         
-        exec(qb->toString());
+        exec(qb);
     }
 }
 
@@ -461,7 +461,7 @@ Ref<CdsObject> SQLStorage::loadObject(int objectID)
     
     *qb << SQL_QUERY << " WHERE f.id = " << objectID;
 
-    Ref<SQLResult> res = select(qb->toString());
+    Ref<SQLResult> res = select(qb);
     Ref<SQLRow> row;
     if (res != nil && (row = res->nextRow()) != nil)
     {
@@ -486,7 +486,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     Ref<StringBuffer> qb(new StringBuffer());
     *qb << "SELECT object_type FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE id = "
         << objectID;
-    res = select(qb->toString());
+    res = select(qb);
     if(res != nil && (row = res->nextRow()) != nil)
     {
         objectType = row->col(0).toInt();
@@ -557,7 +557,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
         *qb << "f.id = " << objectID << " LIMIT 1";
     }
     //log_debug("QUERY: %s\n", qb->toString().c_str());
-    res = select(qb->toString());
+    res = select(qb);
     
     Ref<Array<CdsObject> > arr(new Array<CdsObject>());
     
@@ -597,7 +597,7 @@ int SQLStorage::getChildCount(int contId, bool containers, bool items)
         *qb << " AND object_type = " << OBJECT_TYPE_CONTAINER;
     else if (items && ! containers)
         *qb << " AND object_type & " << OBJECT_TYPE_ITEM;
-    res = select(qb->toString());
+    res = select(qb);
     if (res != nil && (row = res->nextRow()) != nil)
     {
         return row->col(0).toInt();
@@ -612,7 +612,7 @@ Ref<Array<StringBase> > SQLStorage::getMimeTypes()
     Ref<StringBuffer> qb(new StringBuffer());
     *qb << "SELECT DISTINCT mime_type FROM " << TQ(CDS_OBJECT_TABLE) <<
                 " WHERE mime_type IS NOT NULL ORDER BY mime_type";
-    Ref<SQLResult> res = select(qb->toString());
+    Ref<SQLResult> res = select(qb);
     if (res == nil)
         throw _Exception(_("db error"));
     
@@ -649,7 +649,7 @@ Ref<SQLRow> SQLStorage::_findObjectByPath(String fullpath)
             << " AND " << TQD('f',"ref_id") << " IS NULL "
             "LIMIT 1";
     
-    Ref<SQLResult> res = select(qb->toString());
+    Ref<SQLResult> res = select(qb);
     if (res == nil)
         throw _Exception(_("error while doing select: ") + qb->toString());
     return res->nextRow();
@@ -717,7 +717,7 @@ int SQLStorage::createContainer(int parentID, String name, String path, bool isV
         << ',' << quote(stringHash(dbLocation))
         << ')';
         
-    return exec(qb->toString(), true);
+    return exec(qb, true);
     
 }
 
@@ -729,7 +729,7 @@ String SQLStorage::buildContainerPath(int parentID, String title)
     Ref<StringBuffer> qb(new StringBuffer());
     *qb << "SELECT " << TQ("location") << " FROM " << TQ(CDS_OBJECT_TABLE) <<
         " WHERE " << TQ("id") << " = " << parentID << " LIMIT 1";
-     Ref<SQLResult> res = select(qb->toString());
+     Ref<SQLResult> res = select(qb);
     if (res == nil)
         return nil;
     Ref<SQLRow> row = res->nextRow();
@@ -756,7 +756,7 @@ void SQLStorage::addContainerChain(String path, int *containerID, int *updateID)
             << " WHERE " << TQ("location_hash") << " = " << quote(stringHash(dbLocation))
             << " AND " << TQ("location") << " = " << quote(dbLocation)
             << " LIMIT 1";
-    Ref<SQLResult> res = select(qb->toString());
+    Ref<SQLResult> res = select(qb);
     if (res != nil)
     {
         Ref<SQLRow> row = res->nextRow();
@@ -885,7 +885,7 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
         Ref<StringBuffer> query(new StringBuffer());
         *query << "SELECT id, action, state FROM " << TQ(CDS_ACTIVE_ITEM_TABLE)
             << " WHERE id = " << aitem->getID();
-        Ref<SQLResult> resAI = select(query->toString());
+        Ref<SQLResult> resAI = select(query);
         Ref<SQLRow> rowAI;
         if (resAI != nil && (rowAI = resAI->nextRow()) != nil)
         {
@@ -911,7 +911,7 @@ int SQLStorage::getTotalFiles()
     *query << "SELECT COUNT(*) FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE "
            << "object_type != " << OBJECT_TYPE_CONTAINER;
            //<< " AND is_virtual = 0";
-    Ref<SQLResult> res = select(query->toString());
+    Ref<SQLResult> res = select(query);
     Ref<SQLRow> row;
     if (res != nil && (row = res->nextRow()) != nil)
     {
@@ -933,12 +933,12 @@ String SQLStorage::incrementUpdateIDs(int *ids, int size)
     Ref<StringBuffer> buf(new StringBuffer());
     *buf << "UPDATE " << TQ(CDS_OBJECT_TABLE) << " SET " << TQ("update_id") << " = " << TQ("update_id") << " + 1 WHERE " << TQ("id") << ' ';
     *buf << inBuf;
-    exec(buf->toString());
+    exec(buf);
     
     buf->clear();
     *buf << "SELECT " << TQ("id") << ',' << TQ("update_id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE " << TQ("id") << ' ';
     *buf << inBuf;
-    Ref<SQLResult> res = select(buf->toString());
+    Ref<SQLResult> res = select(buf);
     if (res == nil)
         throw _Exception(_("Error while fetching update ids"));
     Ref<SQLRow> row;
@@ -994,7 +994,7 @@ Ref<DBRHash<int> > SQLStorage::getObjects(int parentID)
     Ref<StringBuffer> q(new StringBuffer());
     *q << "SELECT id FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE parent_id = ";
     *q << parentID;
-    Ref<SQLResult> res = select(q->toString());
+    Ref<SQLResult> res = select(q);
     if (res == nil)
         throw _Exception(_("db error"));
     Ref<SQLRow> row;
@@ -1024,6 +1024,9 @@ Ref<IntArray> SQLStorage::removeObjects(zmm::Ref<DBRHash<int> > list, bool all)
         return nil;
     
     Ref<StringBuffer> idsBuf(new StringBuffer());
+    *idsBuf << "SELECT " << TQ("id") << ',' << TQ("object_type")
+        << " FROM " << TQ(CDS_OBJECT_TABLE)
+        << " WHERE " << TQ("id") << " IN (";
     for (int i = 0; i < count; i++)
     {
         int id = array[i];
@@ -1031,14 +1034,9 @@ Ref<IntArray> SQLStorage::removeObjects(zmm::Ref<DBRHash<int> > list, bool all)
             throw _Exception(_("tried to delete a forbidden ID (")+id+")!");
         *idsBuf << ',' << id;
     }
-    
-    Ref<StringBuffer> q(new StringBuffer());
-    *q << "SELECT " << TQ("id") << ',' << TQ("object_type")
-        << " FROM " << TQ(CDS_OBJECT_TABLE)
-        << " WHERE " << TQ("id") << " IN (";
-    q->concat(idsBuf, 1);
-    *q << ")";
-    Ref<SQLResult> res = select(q->toString());
+    *idsBuf << ")";
+    Ref<SQLResult> res = select(idsBuf);
+    idsBuf = nil;
     if (res == nil)
         throw _Exception(_("sql error"));
     
@@ -1049,17 +1047,11 @@ Ref<IntArray> SQLStorage::removeObjects(zmm::Ref<DBRHash<int> > list, bool all)
     {
         int objectType = row->col(1).toInt();
         if (IS_CDS_CONTAINER(objectType))
-            *containers << row->col_c_str(0);
+            *containers << ',' << row->col_c_str(0);
         else
-            *items << row->col_c_str(0);
+            *items << ',' << row->col_c_str(0);
     }
-    String itemsStr = nil;
-    String containersStr = nil;
-    if (items->length() > 0)
-        itemsStr = items->toString(1);
-    if (containers->length() > 0)
-        containersStr = containers->toString(1);
-    String containerIDs = _recursiveRemove(itemsStr, containersStr, all);
+    Ref<StringBuffer> containerIDs = _recursiveRemove(items, containers, all);
     return _purgeEmptyContainers(containerIDs);
 }
 
@@ -1067,13 +1059,13 @@ void SQLStorage::_removeObjects(String objectIDs)
 {
     Ref<StringBuffer> q(new StringBuffer());
     *q << "DELETE FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE id IN (" << objectIDs << ')';
-    exec(q->toString());
+    exec(q);
     q->clear();
     *q << "DELETE FROM " << TQ(CDS_ACTIVE_ITEM_TABLE) << " WHERE id IN (" << objectIDs << ')';
-    exec(q->toString());
+    exec(q);
     q->clear();
     *q << "DELETE FROM " << TQ(AUTOSCAN_TABLE) << " WHERE id IN (" << objectIDs << ')';
-    exec(q->toString());
+    exec(q);
 }
 
 Ref<IntArray> SQLStorage::removeObject(int objectID, bool all)
@@ -1081,7 +1073,7 @@ Ref<IntArray> SQLStorage::removeObject(int objectID, bool all)
     Ref<StringBuffer> q(new StringBuffer());
     *q << "SELECT object_type, ref_id FROM " << TQ(CDS_OBJECT_TABLE)
         << " WHERE id = " << quote(objectID) << " LIMIT 1";
-    Ref<SQLResult> res = select(q->toString());
+    Ref<SQLResult> res = select(q);
     if (res == nil)
         return nil;
     Ref<SQLRow> row = res->nextRow();
@@ -1103,83 +1095,81 @@ Ref<IntArray> SQLStorage::removeObject(int objectID, bool all)
     }
     if (IS_FORBIDDEN_CDS_ID(objectID))
         throw _Exception(_("tried to delete a forbidden ID (")+objectID+")!");
-    String containerIDs = nil;
+    Ref<StringBuffer> containerIDs = nil;
+    Ref<StringBuffer> idsBuf(new StringBuffer());
+    *idsBuf << ',' << objectID;
     if (isContainer)
-        containerIDs = _recursiveRemove(nil, String::from(objectID), all);
+        containerIDs = _recursiveRemove(nil, idsBuf, all);
     else
-        containerIDs = _recursiveRemove(String::from(objectID), nil, all);
+        containerIDs = _recursiveRemove(idsBuf, nil, all);
     return _purgeEmptyContainers(containerIDs);
 }
 
-String SQLStorage::_recursiveRemove(String items, String containers, bool all)
+Ref<StringBuffer> SQLStorage::_recursiveRemove(Ref<StringBuffer> items, Ref<StringBuffer> containers, bool all)
 {
     log_debug("start\n");
-    Ref<StringBuffer> q(new StringBuffer());
-    *q << "SELECT DISTINCT " << TQ("id") << ',' << TQ("parent_id")
+    Ref<StringBuffer> recurseItems(new StringBuffer());
+    *recurseItems << "SELECT DISTINCT " << TQ("id") << ',' << TQ("parent_id")
         << " FROM " << TQ(CDS_OBJECT_TABLE) <<
             " WHERE ref_id IN (";
-    String itemSQL1 = q->toString();
+    int recurseItemsLen = recurseItems->length();
     
-    q->clear();
-    *q << "SELECT DISTINCT " << TQ("id") << ',' << TQ("object_type");
+    Ref<StringBuffer> recurseContainers(new StringBuffer());
+    *recurseContainers << "SELECT DISTINCT " << TQ("id") << ',' << TQ("object_type");
     if (all)
-        *q << ',' << TQ("ref_id");
-    *q << " FROM " << TQ(CDS_OBJECT_TABLE) <<
+        *recurseContainers << ',' << TQ("ref_id");
+    *recurseContainers << " FROM " << TQ(CDS_OBJECT_TABLE) <<
             " WHERE parent_id IN (";
-    String containerSQL1 = q->toString();
-    q->clear();
+    int recurseContainersLen = recurseContainers->length();
     
-    *q << "SELECT DISTINCT " << TQ("parent_id")
+    Ref<StringBuffer> removeAddParents(new StringBuffer());
+    *removeAddParents << "SELECT DISTINCT " << TQ("parent_id")
         << " FROM " << TQ(CDS_OBJECT_TABLE)
         << " WHERE id IN (";
-    String getParentSQL1 = q->toString();
-    
-    
+    int removeAddParentsLen = removeAddParents->length();
+        
     Ref<StringBuffer> remove(new StringBuffer());
-    Ref<StringBuffer> recurseItems(new StringBuffer());
-    Ref<StringBuffer> recurseContainers(new StringBuffer());
-    Ref<StringBuffer> recurseAddParents(new StringBuffer());
     Ref<StringBuffer> changedContainers(new StringBuffer());
     
-    if (string_ok(items))
+    if (items != nil && items->length() > 2)
     {
-        *remove << ',' << items;
-        *recurseItems << ',' << items;
-        *recurseAddParents << ',' << items;
+        *recurseItems << items;
+        *removeAddParents << items;
     }
     
-    if (string_ok(containers))
+    if (containers != nil && containers->length() > 2)
     {
-        *remove << ',' << containers;
-        *recurseContainers << ',' << containers;
-        *recurseAddParents << ',' << containers;
+        *recurseContainers << containers;
+        *removeAddParents << containers;
     }
     
     Ref<SQLResult> res;
     Ref<SQLRow> row;
     int count = 0;
-    while(recurseItems->length() > 0 || recurseAddParents->length() > 0 || recurseContainers->length() > 0)
+    while(recurseItems->length() > recurseItemsLen 
+        || removeAddParents->length() > removeAddParentsLen 
+        || recurseContainers->length() > recurseContainersLen)
     {
-        if (recurseAddParents->length() > 0)
+        if (removeAddParents->length() > removeAddParentsLen)
         {
-            q->clear();
-            *q << getParentSQL1;
-            q->concat(recurseAddParents, 1);  // skip first char
-            *q << ')';
-            recurseAddParents->clear();
-            res = select(q->toString());
+            // add ids to remove
+            *remove << removeAddParents->c_str(removeAddParentsLen);
+            // get rid of first ','
+            removeAddParents->setCharAt(removeAddParentsLen, ' ');
+            *removeAddParents << ')';
+            res = select(removeAddParents);
+            // reset length
+            removeAddParents->setLength(removeAddParentsLen);
             while ((row = res->nextRow()) != nil)
                 *changedContainers << ',' << row->col_c_str(0);
         }
         
-        if (recurseItems->length() > 0)
+        if (recurseItems->length() > recurseItemsLen)
         {
-            q->clear();
-            *q << itemSQL1;
-            q->concat(recurseItems, 1);  // skip first char
-            *q << ')';
-            recurseItems->clear();
-            res = select(q->toString());
+            recurseItems->setCharAt(recurseItemsLen, ' ');
+            *recurseItems << ')';
+            res = select(recurseItems);
+            recurseItems->setLength(recurseItemsLen);
             while ((row = res->nextRow()) != nil)
             {
                 *remove << ',' << row->col_c_str(0);
@@ -1188,40 +1178,50 @@ String SQLStorage::_recursiveRemove(String items, String containers, bool all)
             }
         }
         
-        if (recurseContainers->length() > 0)
+        if (recurseContainers->length() > recurseContainersLen)
         {
-            q->clear();
-            *q << containerSQL1;
-            q->concat(recurseContainers, 1);
-            *q << ')';
-            recurseContainers->clear();
-            res = select(q->toString());
+            recurseContainers->setCharAt(recurseContainersLen, ' ');
+            *recurseContainers << ')';
+            res = select(recurseContainers);
+            recurseContainers->setLength(recurseContainersLen);
             while ((row = res->nextRow()) != nil)
             {
                 //containers->append(row->col(1).toInt());
                 
                 int objectType = row->col(1).toInt();
-                *remove << ',' << row->col_c_str(0);
                 if (IS_CDS_CONTAINER(objectType))
+                {
                     *recurseContainers << ',' << row->col_c_str(0);
+                    *remove << ',' << row->col_c_str(0);
+                }
                 else
                 {
                     if (all)
                     {
                         String refId = row->col(2);
                         if (string_ok(refId))
-                            *recurseAddParents << ',' << refId;
+                        {
+                            *removeAddParents << ',' << refId;
+                            *recurseItems << ',' << refId;
+                            //*remove << ',' << refId;
+                        }
                         else
+                        {
+                            *remove << ',' << row->col_c_str(0);
                             *recurseItems << ',' << row->col_c_str(0);
+                        }
                     }
                     else
+                    {
+                        *remove << ',' << row->col_c_str(0);
                         *recurseItems << ',' << row->col_c_str(0);
+                    }
                 }
                 //log_debug("id: %s; parent_id: %s\n", id.c_str(), parentId.c_str());
             }
         }
         
-        if (remove->length() > MAX_REMOVE_SIZE)
+        if (remove->length() > MAX_REMOVE_SIZE) // remove->length() > 0) // )
         {
             _removeObjects(remove->toString(1));
             remove->clear();
@@ -1234,10 +1234,10 @@ String SQLStorage::_recursiveRemove(String items, String containers, bool all)
     if (remove->length() > 0)
         _removeObjects(remove->toString(1));
     log_debug("end\n");
-    return changedContainers->toString(1);
+    return changedContainers;
 }
 
-Ref<IntArray> SQLStorage::_purgeEmptyContainers(String containerIDs)
+Ref<IntArray> SQLStorage::_purgeEmptyContainers(Ref<StringBuffer> containerIDs)
 {
     //int size = containerIDs->size();
     log_debug("start\n");
@@ -1246,22 +1246,22 @@ Ref<IntArray> SQLStorage::_purgeEmptyContainers(String containerIDs)
     //if (size <= 0)
     //    return;
     
-    Ref<StringBuffer> qbSel = Ref<StringBuffer>(new StringBuffer());
-    *qbSel << "SELECT a.id, COUNT(b.parent_id), a.parent_id, a.flags "
+    Ref<StringBuffer> bufSel(new StringBuffer());
+    *bufSel << "SELECT a.id, COUNT(b.parent_id), a.parent_id, a.flags "
         "FROM " << TQ(CDS_OBJECT_TABLE) << " a "
         "LEFT JOIN " << TQ(CDS_OBJECT_TABLE) << " b "
         "ON a.id=b.parent_id "
-        "WHERE a.object_type=1 AND a.id IN (";  //(a.flags & " << OBJECT_FLAG_PERSISTENT_CONTAINER << ") = 0 AND 
-    String strSel1 = qbSel->toString();
+        "WHERE a.object_type=1 AND a.id IN (";  //(a.flags & " << OBJECT_FLAG_PERSISTENT_CONTAINER << ") = 0 AND
+    int bufSelLen = bufSel->length();
     String strSel2 = _(") GROUP BY a.id"); // HAVING COUNT(b.parent_id)=0");
-    Ref<StringBuffer> bufSel(new StringBuffer());
+    
     Ref<StringBuffer> bufDel(new StringBuffer());
     Ref<IntArray> changedContainers(new IntArray());
     
     Ref<SQLResult> res;
     Ref<SQLRow> row;
     
-    *bufSel << ',' << containerIDs;
+    *bufSel << containerIDs;
     /*
     for (int i = 0; i < size; i++)
         *bufSel << ',' << quote(containerIDs->get(i));
@@ -1271,14 +1271,13 @@ Ref<IntArray> SQLStorage::_purgeEmptyContainers(String containerIDs)
     do
     {
         again = false;
-        qbSel->clear();
-        *qbSel << strSel1 << bufSel->toString(1) << strSel2;
-        log_debug("sql: %s\n", qbSel->c_str());
-        res = select(qbSel->toString());
+        bufSel->setCharAt(bufSelLen, ' ');
+        *bufSel << strSel2;
+        log_debug("sql: %s\n", bufSel->c_str());
+        res = select(bufSel);
+        bufSel->setLength(bufSelLen);
         if (res == nil)
             throw _Exception(_("db error"));
-        bufSel->clear();
-        bufDel->clear();
         while ((row = res->nextRow()) != nil)
         {
             int flags = row->col(3).toInt();
@@ -1298,15 +1297,16 @@ Ref<IntArray> SQLStorage::_purgeEmptyContainers(String containerIDs)
         if (bufDel->length() > 0)
         {
             _removeObjects(bufDel->toString(1));
-            if (bufSel->length() > 0)
+            bufDel->clear();
+            if (bufSel->length() > bufSelLen)
                 again = true;
         }
         if (count++ >= MAX_REMOVE_RECURSION)
             throw _Exception(_("there seems to be a recursion..."));
     }
     while (again);
-    if (bufSel->length() > 0)
-        changedContainers->addCSV(bufSel->toString(1));
+    if (bufSel->length() > bufSelLen)
+        changedContainers->addCSV(bufSel->toString(bufSelLen + 1));
     log_debug("end; changedContainers: %s\n", changedContainers->toCSV().c_str());
     return changedContainers;
 }
@@ -1316,7 +1316,7 @@ String SQLStorage::getInternalSetting(String key)
     Ref<StringBuffer> q(new StringBuffer());
     *q << "SELECT " << TQ("value") << " FROM " << TQ(INTERNAL_SETTINGS_TABLE) << " WHERE " << TQ("key") << " = "
         << quote(key) << " LIMIT 1";
-    Ref<SQLResult> res = select(q->toString());
+    Ref<SQLResult> res = select(q);
     if (res == nil)
         return nil;
     Ref<SQLRow> row = res->nextRow();
@@ -1342,7 +1342,7 @@ Ref<AutoscanList> SQLStorage::getAutoscanList(scan_mode_t scanmode)
        << " JOIN " << TQ(CDS_OBJECT_TABLE) << ' ' << TQ('t')
        << " ON " FLD("id") '=' << TQD('t',"id")
        << " WHERE " FLD("scan_mode") '=' << quote(AutoscanDirectory::mapScanmode(scanmode));
-    Ref<SQLResult> res = select(q->toString());
+    Ref<SQLResult> res = select(q);
     if (res == nil)
         return nil;
     Ref<AutoscanList> list(new AutoscanList());
@@ -1379,6 +1379,11 @@ void SQLStorage::addAutoscanDirectory(Ref<AutoscanDirectory> adir)
     if (objectID < 0)
         throw _Exception(_("tried to add autoscan directory with illegal location: ") + adir->getLocation());
     Ref<StringBuffer> q(new StringBuffer());
+    *q << "UPDATE " << TQ(CDS_OBJECT_TABLE)
+        << " SET " << TQ("flags") << " = (" << TQ("flags") << " | " << OBJECT_FLAG_PERSISTENT_CONTAINER
+        << ") WHERE " << TQ("id") << " = " << quote(objectID);
+    exec(q);
+    q->clear();
     *q << "INSERT INTO " << TQ(AUTOSCAN_TABLE)
         << " (" << TQ("id") << ','
         << TQ("scan_level") << ','
@@ -1395,7 +1400,7 @@ void SQLStorage::addAutoscanDirectory(Ref<AutoscanDirectory> adir)
         << quote(adir->getInterval()) << ','
         << quote(adir->getPreviousLMT())
         << ')';
-    exec(q->toString());
+    exec(q);
 }
 
 void SQLStorage::removeAutoscanDirectory(int objectId)
@@ -1403,7 +1408,12 @@ void SQLStorage::removeAutoscanDirectory(int objectId)
     Ref<StringBuffer> q(new StringBuffer());
     *q << "DELETE FROM " << TQ(AUTOSCAN_TABLE)
         << " WHERE " << TQ("id") << " = " << quote(objectId);
-    exec(q->toString());
+    exec(q);
+    q->clear();
+    *q << "UPDATE " << TQ(CDS_OBJECT_TABLE)
+        << " SET " << TQ("flags") << " = (" << TQ("flags") << " & ~" << OBJECT_FLAG_PERSISTENT_CONTAINER
+        << ") WHERE " << TQ("id") << " = " << quote(objectId);
+    exec(q);
 }
 
 bool SQLStorage::isAutoscanDirectory(int objectId)
@@ -1411,7 +1421,7 @@ bool SQLStorage::isAutoscanDirectory(int objectId)
     Ref<StringBuffer> q(new StringBuffer());
     *q << "SELECT " << TQ("id") << " FROM " << TQ(AUTOSCAN_TABLE)
         << " WHERE " << TQ("id") << " = " << quote(objectId);
-    Ref<SQLResult> res = select(q->toString());
+    Ref<SQLResult> res = select(q);
     return (res != nil && res->nextRow() != nil);
 }
 
@@ -1428,5 +1438,5 @@ void SQLStorage::autoscanUpdateLM(zmm::Ref<AutoscanDirectory> adir)
     *q << "UPDATE " << TQ(AUTOSCAN_TABLE)
         << " SET " << TQ("last_modified") << " = " << quote(adir->getPreviousLMT())
         << " WHERE " << TQ("id") << " = " << quote(objectID);
-    exec(q->toString());
+    exec(q);
 }

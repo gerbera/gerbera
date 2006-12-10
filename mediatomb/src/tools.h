@@ -82,6 +82,8 @@ void check_path_ex(zmm::String path, bool needDir = false, bool existenceUnneede
 /// Checks if str is nil or ""
 bool string_ok(zmm::String str);
 
+bool string_ok(zmm::Ref<zmm::StringBuffer> str);
+
 /// \brief Checks if the string contains any data.
 /// \param str String to be checked.
 /// 

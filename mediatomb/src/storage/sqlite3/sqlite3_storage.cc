@@ -136,7 +136,7 @@ String Sqlite3Storage::getError(String query, String error, sqlite3 *db)
         + sqlite3_errmsg(db) +"\nQuery:" + (query == nil ? _("unknown") : query) + "\nerror: " + (error == nil ? _("unknown") : error);
 }
 
-Ref<SQLResult> Sqlite3Storage::select(String query)
+Ref<SQLResult> Sqlite3Storage::select(const char *query, int length)
 {
     Ref<SLSelectTask> ptask (new SLSelectTask(query));
     addTask(RefCast(ptask, SLTask));
@@ -144,7 +144,7 @@ Ref<SQLResult> Sqlite3Storage::select(String query)
     return ptask->getResult();
 }
 
-int Sqlite3Storage::exec(String query, bool getLastInsertId)
+int Sqlite3Storage::exec(const char *query, int length, bool getLastInsertId)
 {
     Ref<SLExecTask> ptask (new SLExecTask(query, getLastInsertId));
     addTask(RefCast(ptask, SLTask));
@@ -152,7 +152,6 @@ int Sqlite3Storage::exec(String query, bool getLastInsertId)
     if (getLastInsertId) return ptask->getLastInsertId();
     else return -1;
 }
-
 
 void *Sqlite3Storage::staticThreadProc(void *arg)
 {
@@ -245,7 +244,7 @@ void Sqlite3Storage::storeInternalSetting(String key, String value)
     Ref<StringBuffer> q(new StringBuffer());
     *q << "INSERT OR REPLACE INTO " << QTB << INTERNAL_SETTINGS_TABLE << QTE << " (" << QTB << "key" << QTE << ", " << QTB << "value" << QTE << ") "
     "VALUES (" << quote(key) << ", "<< quote(value) << ") ";
-    this->exec(q->toString());
+    this->execSB(q);
 }
 
 
@@ -330,7 +329,7 @@ void SLInitTask::run(sqlite3 *db, Sqlite3Storage *sl)
 
 /* SLSelectTask */
 
-SLSelectTask::SLSelectTask(zmm::String query) : SLTask()
+SLSelectTask::SLSelectTask(const char *query) : SLTask()
 {
     this->query = query;
 }
@@ -343,7 +342,7 @@ void SLSelectTask::run(sqlite3 *db, Sqlite3Storage *sl)
     char *err;
     int ret = sqlite3_get_table(
         db,
-        query.c_str(),
+        query,
         &pres->table,
         &pres->nrow,
         &pres->ncolumn,
@@ -357,7 +356,7 @@ void SLSelectTask::run(sqlite3 *db, Sqlite3Storage *sl)
     }
     if(ret != SQLITE_OK)
     {
-        throw _StorageException(sl->getError(query, error, db));
+        throw _StorageException(sl->getError(String(query), error, db));
     }
     
     pres->row = pres->table;
@@ -367,7 +366,7 @@ void SLSelectTask::run(sqlite3 *db, Sqlite3Storage *sl)
 
 /* SLExecTask */
 
-SLExecTask::SLExecTask(zmm::String query, bool getLastInsertId) : SLTask()
+SLExecTask::SLExecTask(const char *query, bool getLastInsertId) : SLTask()
 {
     this->query = query;
     this->getLastInsertIdFlag = getLastInsertId;
@@ -378,7 +377,7 @@ void SLExecTask::run(sqlite3 *db, Sqlite3Storage *sl)
     char *err;
     int res = sqlite3_exec(
         db,
-        query.c_str(),
+        query,
         NULL,
         NULL,
         &err
@@ -391,7 +390,7 @@ void SLExecTask::run(sqlite3 *db, Sqlite3Storage *sl)
     }
     if(res != SQLITE_OK)
     {
-        throw _StorageException(sl->getError(query, error, db));
+        throw _StorageException(sl->getError(String(query), error, db));
     }
     if (getLastInsertIdFlag)
         lastInsertId = sqlite3_last_insert_rowid(db);

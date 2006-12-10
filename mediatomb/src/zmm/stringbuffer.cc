@@ -143,13 +143,18 @@ int StringBuffer::length()
 
 void StringBuffer::setLength(int newLength)
 {
-    addCapacity(newLength);
+    if (newLength > len)
+        ensureCapacity(newLength + 1);
+    
     this->len = newLength;
+    data[len + 1] = 0;
 }
 
-char *StringBuffer::c_str()
+char *StringBuffer::c_str(int offset)
 {
-    return data;
+    if (offset >= len || offset < 0)
+        throw _Exception(_("illegal offset"));
+    return data + offset;
 }
 
 String StringBuffer::toString()
@@ -164,6 +169,12 @@ String StringBuffer::toString(int offset)
     return String(data + offset, len - offset);
 }
 
+void StringBuffer::setCharAt(int index, char c)
+{
+    if (index < 0 || index >= len)
+        throw _Exception(_("illegal index"));
+    data[index] = c;
+}
 
 void StringBuffer::clear()
 {
@@ -171,9 +182,8 @@ void StringBuffer::clear()
     data[0] = 0;
 }
 
-void StringBuffer::addCapacity(int increment)
+void StringBuffer::ensureCapacity(int neededCapacity)
 {
-    int neededCapacity = len + increment + 1;
     if(neededCapacity > capacity)
     {
         int newCapacity = (int)(capacity * STRINGBUFFER_CAPACITY_INCREMENT);
@@ -183,4 +193,3 @@ void StringBuffer::addCapacity(int increment)
         data = (char *)REALLOC(data, capacity);
     }
 }
-

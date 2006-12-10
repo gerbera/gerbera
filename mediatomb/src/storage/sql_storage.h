@@ -78,8 +78,20 @@ public:
     virtual zmm::String quote(unsigned int val) = 0;
     virtual zmm::String quote(long val) = 0;
     virtual zmm::String quote(unsigned long val) = 0;
-    virtual zmm::Ref<SQLResult> select(zmm::String query) = 0;
-    virtual int exec(zmm::String query, bool getLastInsertId = false) = 0;
+    virtual zmm::Ref<SQLResult> select(const char *query, int length) = 0;
+    virtual int exec(const char *query, int length, bool getLastInsertId = false) = 0;
+    
+    /* wrapper functions for select and exec */
+    zmm::Ref<SQLResult> select(zmm::Ref<zmm::StringBuffer> buf)
+        { return select(buf->c_str(), buf->length()); }
+    int exec(zmm::Ref<zmm::StringBuffer> buf, bool getLastInsertId = false)
+        { return exec(buf->c_str(), buf->length(), getLastInsertId); }
+    
+    /// \todo get rid of this wrapper - MysqlStorage and Sqlite3Storage won't find the above one. why?
+    int execSB(zmm::Ref<zmm::StringBuffer> buf, bool getLastInsertId = false)
+        { return exec(buf, getLastInsertId); }
+    //virtual int execi(zmm::Ref<zmm::StringBuffer> buf, bool getLastInsertId = false)
+    //    { return exec(buf->c_str(), buf->length(), getLastInsertId); }
     
     virtual void addObject(zmm::Ref<CdsObject> object, int *changedContainer);
     virtual void updateObject(zmm::Ref<CdsObject> object, int *changedContainer);
@@ -163,9 +175,9 @@ private:
     
     /* helper for removeObject(s) */
     void _removeObjects(zmm::String objectIDs);
-    zmm::String _recursiveRemove(zmm::String items, zmm::String containers, bool all);
+    zmm::Ref<zmm::StringBuffer> _recursiveRemove(zmm::Ref<zmm::StringBuffer> items, zmm::Ref<zmm::StringBuffer> containers, bool all);
     
-    virtual zmm::Ref<zmm::IntArray> _purgeEmptyContainers(zmm::String containerIDs);
+    virtual zmm::Ref<zmm::IntArray> _purgeEmptyContainers(zmm::Ref<zmm::StringBuffer> containerIDs);
     
     /* helpers for removeObject() */
     

@@ -189,7 +189,7 @@ function fetchChildren(node, uiUpdate)
         {
             method: 'get',
             onComplete: updateTree,
-            asynchronous: async,
+            asynchronous: async
         });
 }
 

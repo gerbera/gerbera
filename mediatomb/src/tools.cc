@@ -175,8 +175,16 @@ bool string_ok(String str)
 {
     if ((str == nil) || (str == ""))
         return false;
-
     return true;
+}
+
+bool string_ok(Ref<StringBuffer> str)
+{
+    
+    if ((str == nil) || (str->length()<=0))
+        return false;
+    else
+        return true;
 }
 
 void string_ok_ex(String str)

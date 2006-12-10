@@ -61,13 +61,15 @@ public:
     
     int length();
     void setLength(int newLength);
-    char *c_str();
+    char *c_str(int offset = 0);
     String toString();
     String toString(int offset);
     void clear();
-
+    void ensureCapacity(int neededCapacity);
+    void setCharAt(int index, char c);
+    
 protected:
-    void addCapacity(int increment);
+    inline void addCapacity(int increment) { ensureCapacity(len + increment + 1); }
 };
 
 } // namespace

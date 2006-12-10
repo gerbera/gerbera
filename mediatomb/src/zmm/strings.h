@@ -79,7 +79,7 @@ protected:
 public:
 	String();
 	explicit String(const char *str);
-    String(char ch);
+    explicit String(char ch);
 	String(const char *str, int len);
 	String(const String &other);
 	String(StringBase *other);

@@ -229,7 +229,7 @@ String MysqlStorage::getError(MYSQL *db)
     return err_buf->toString();
 }
 
-Ref<SQLResult> MysqlStorage::select(String query)
+Ref<SQLResult> MysqlStorage::select(const char *query, int length)
 {
 #ifdef MYSQL_SELECT_DEBUG
     log_debug("%s\n", query);
@@ -240,7 +240,7 @@ Ref<SQLResult> MysqlStorage::select(String query)
     
     checkMysqlThreadInit();
     AUTOLOCK(mysqlMutex);
-    res = mysql_real_query(&db, query.c_str(), query.length());
+    res = mysql_real_query(&db, query, length);
     if (res)
     {
         throw _StorageException(_("Mysql: mysql_real_query() failed: ") + getError(&db));
@@ -253,10 +253,9 @@ Ref<SQLResult> MysqlStorage::select(String query)
         throw _StorageException(_("Mysql: mysql_store_result() failed: ") + getError(&db));
     }
     return Ref<SQLResult> (new MysqlResult(mysql_res));
-    
 }
 
-int MysqlStorage::exec(String query, bool getLastInsertId)
+int MysqlStorage::exec(const char *query, int length, bool getLastInsertId)
 {
 #ifdef MYSQL_EXEC_DEBUG
     log_debug("%s\n", query);
@@ -267,7 +266,7 @@ int MysqlStorage::exec(String query, bool getLastInsertId)
     
     checkMysqlThreadInit();
     AUTOLOCK(mysqlMutex);
-    res = mysql_real_query(&db, query.c_str(), query.length());
+    res = mysql_real_query(&db, query, length);
     if(res)
     {
         throw _StorageException(_("Mysql: mysql_real_query() failed: ") + getError(&db));
@@ -298,7 +297,7 @@ void MysqlStorage::storeInternalSetting(String key, String value)
     *q << "INSERT INTO " << QTB << INTERNAL_SETTINGS_TABLE << QTE << " (`key`, `value`) "
     "VALUES (" << quote(key) << ", "<< quotedValue << ") "
     "ON DUPLICATE KEY UPDATE `value` = " << quotedValue;
-    this->exec(q->toString());
+    execSB(q);
 }
 
 

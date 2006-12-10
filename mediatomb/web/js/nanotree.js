@@ -826,7 +826,8 @@ function expandNode() {
 	if (state == 'open') {
 		var currentTreeNode = getTreeNode(selectedNode);
 		if (currentTreeNode.hasChildren()) {
-			selectNode(currentTreeNode.children[0].getID());
+            if (currentTreeNode.children[0])
+                selectNode(currentTreeNode.children[0].getID());
 		}
 	}
 	else {

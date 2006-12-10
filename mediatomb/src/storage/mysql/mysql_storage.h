@@ -53,8 +53,8 @@ private:
     virtual inline zmm::String quote(unsigned int val) { return zmm::String::from(val); }
     virtual inline zmm::String quote(long val) { return zmm::String::from(val); }
     virtual inline zmm::String quote(unsigned long val) { return zmm::String::from(val); }
-    virtual zmm::Ref<SQLResult> select(zmm::String query);
-    virtual int exec(zmm::String query, bool getLastInsertId = false);
+    virtual zmm::Ref<SQLResult> select(const char *query, int length);
+    virtual int exec(const char *query, int length, bool getLastInsertId = false);
     virtual void storeInternalSetting(zmm::String key, zmm::String value);
     
     MYSQL db;
