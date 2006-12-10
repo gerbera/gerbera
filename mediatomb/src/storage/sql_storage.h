@@ -101,7 +101,7 @@ public:
     
     //virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param);
     
-    virtual zmm::Ref<DBRHash<int> > getObjects(int parentID);
+    virtual zmm::Ref<DBRHash<int> > getObjects(int parentID, bool withoutContainer);
     
     virtual zmm::Ref<zmm::IntArray> removeObject(int objectID, bool all);
     virtual zmm::Ref<zmm::IntArray> removeObjects(zmm::Ref<DBRHash<int> > list, bool all = false);

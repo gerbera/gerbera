@@ -989,10 +989,13 @@ Ref<Array<CdsObject> > SQLStorage::selectObjects(Ref<SelectParam> param)
 }
 */
 
-Ref<DBRHash<int> > SQLStorage::getObjects(int parentID)
+Ref<DBRHash<int> > SQLStorage::getObjects(int parentID, bool withoutContainer)
 {
     Ref<StringBuffer> q(new StringBuffer());
-    *q << "SELECT id FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE parent_id = ";
+    *q << "SELECT id FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";
+    if (withoutContainer)
+        *q << "object_type != " << OBJECT_TYPE_CONTAINER << " AND ";
+    *q << "parent_id = ";
     *q << parentID;
     Ref<SQLResult> res = select(q);
     if (res == nil)
