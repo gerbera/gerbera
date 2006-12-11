@@ -112,11 +112,23 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
     mimetype_upnpclass_map = cm->createDictionaryFromNodeset(tmpEl, _("map"), _("from"), _("to"));
    
     tmpEl = cm->getElement(_("/import/autoscan"));
-    autoscan_timed = cm->createAutoscanListFromNodeset(tmpEl, TimedScanMode);
+    Ref<AutoscanList> config_timed_list = cm->createAutoscanListFromNodeset(tmpEl, TimedScanMode);
+
+    for (int i = 0; i < config_timed_list->size(); i++)
+    {
+        Ref<AutoscanDirectory> dir = config_timed_list->get(i);
+        if (dir != nil)
+        {
+            String path = dir->getLocation();
+            if (!check_path(path, true))
+            {
+                dir->setObjectID(ensurePathExistence(path));
+            }
+        }
+    }
 
     Ref<Storage> storage = Storage::getInstance();
-    Ref<AutoscanList> temp_list = storage->getAutoscanList(TimedScanMode);
-    autoscan_timed->addList(temp_list);
+    autoscan_timed = storage->getAutoscanList(TimedScanMode, config_timed_list);
 
     /* init fielmagic */
 #ifdef HAVE_MAGIC
@@ -434,7 +446,8 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
         }
     }
 
-    Ref<DBRHash<int> > list = storage->getObjects(containerID);
+    // request only items if non-recursive scan is wanted
+    Ref<DBRHash<int> > list = storage->getObjects(containerID, !adir->getRecursive());
 
     while (((dent = readdir(dir)) != NULL) && (!shutdownFlag))
     {
@@ -503,7 +516,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
                     addFile(path, false, false, adir->getHidden());
             }
         }
-        else if (S_ISDIR(statbuf.st_mode))
+        else if (S_ISDIR(statbuf.st_mode) && (!adir->getRecursive()))
         {
             int objectID = storage->findObjectIDByPath(path + DIR_SEPARATOR);
             if (objectID > 0)
@@ -511,8 +524,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
                 if (list != nil)
                     list->remove(objectID);
                 // add a task to rescan the directory that was found
-                if (adir->getRecursive())
-                    rescanDirectory(objectID, scanID, scanMode);
+                rescanDirectory(objectID, scanID, scanMode);
             }
             else
             {
@@ -1094,9 +1106,11 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
         task->setDescription(_("description missing!!!!!!!!!!!"));
         Ref<Storage> storage = Storage::getInstance();
         String path;
+        Ref<CdsObject> obj;
+
         try
         {
-            Ref<CdsObject> obj = storage->loadObject(objectID);
+            obj = storage->loadObject(objectID);
             path = obj->getLocation(); 
         }
         catch (Exception e)
@@ -1104,44 +1118,47 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
             log_debug("trying to remove an object ID which is no longer in the database! %d\n", objectID);
         }
 
-        // make sure to remove possible child autoscan directories from the scanlist 
-        autoscan_timed->removeIfSubdir(path);
-
-        AUTOLOCK(mutex);
-        int i;
-        int qsize = taskQueue1->size();
-        
-        // we have to make sure that a currently running autoscan task will not
-        // launch add tasks for directories that anyway are going to be deleted
-        for (i = 0; i < qsize; i++)
+        if (IS_CDS_CONTAINER(obj->getObjectType()))
         {
-            Ref<CMTask> t = taskQueue1->get(i);
-            if (t->getID() == AddFile)
+            // make sure to remove possible child autoscan directories from the scanlist 
+            autoscan_timed->removeIfSubdir(path);
+
+            AUTOLOCK(mutex);
+            int i;
+            int qsize = taskQueue1->size();
+
+            // we have to make sure that a currently running autoscan task will not
+            // launch add tasks for directories that anyway are going to be deleted
+            for (i = 0; i < qsize; i++)
             {
-                log_debug("comparing, task path: %s, remove path: %s\n", RefCast(t, CMAddFileTask)->getPath().c_str(), path.c_str());
-                if ((RefCast(t, CMAddFileTask)->getPath().startsWith(path)))
+                Ref<CMTask> t = taskQueue1->get(i);
+                if (t->getID() == AddFile)
                 {
-                    log_debug("Invalidating task with path %s\n", RefCast(t, CMAddFileTask)->getPath().c_str());
-                    t->invalidate();
+                    log_debug("comparing, task path: %s, remove path: %s\n", RefCast(t, CMAddFileTask)->getPath().c_str(), path.c_str());
+                    if ((RefCast(t, CMAddFileTask)->getPath().startsWith(path)))
+                    {
+                        log_debug("Invalidating task with path %s\n", RefCast(t, CMAddFileTask)->getPath().c_str());
+                        t->invalidate();
+                    }
                 }
             }
-        }
 
-        qsize = taskQueue2->size();
-        for (i = 0; i < qsize; i++)
-        {
-            Ref<CMTask> t = taskQueue2->get(i);
-            if (t->getID() == AddFile)
+            qsize = taskQueue2->size();
+            for (i = 0; i < qsize; i++)
             {
-                log_debug("comparing, task path: %s, remove path: %s\n", RefCast(t, CMAddFileTask)->getPath().c_str(), path.c_str());
-                if ((RefCast(t, CMAddFileTask)->getPath().startsWith(path)))
+                Ref<CMTask> t = taskQueue2->get(i);
+                if (t->getID() == AddFile)
                 {
-                    t->invalidate();
-                    log_debug("Invalidating task with path %s\n", RefCast(t, CMAddFileTask)->getPath().c_str());
+                    log_debug("comparing, task path: %s, remove path: %s\n", RefCast(t, CMAddFileTask)->getPath().c_str(), path.c_str());
+                    if ((RefCast(t, CMAddFileTask)->getPath().startsWith(path)))
+                    {
+                        t->invalidate();
+                        log_debug("Invalidating task with path %s\n", RefCast(t, CMAddFileTask)->getPath().c_str());
+                    }
                 }
             }
-        }
-        
+        } 
+
         
         addTask(task);
     }
