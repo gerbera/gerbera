@@ -39,6 +39,22 @@ var lastNodeFs = 'f0';
 var lastNodeDbWish;
 var lastNodeFsWish;
 
+var imageExtension = '.png';
+var imageStyle = "width:32px;height:20px;vertical-align:middle;";
+var imageLastnode = 'lastnode';
+var imageWhite = 'white';
+var imageTNoRoot = 't_no_root';
+var imageMinus = 'minus';
+var imageMinusNoRoot = 'minus_no_root';
+var imageMinusLastNoRoot = 'minus_last_no_root';
+var imageMinusLast = 'minus_last';
+var imageMinusNoLines = 'minus_nolines';
+var imagePlusNoRoot = 'plus_no_root';
+var imagePlusLastNoRoot = 'plus_last_no_root';
+var imagePlusNoLines = 'plus_nolines';
+var imagePlus = 'plus';
+var imagePlusLast = 'plus_last';
+
 sortNodes = false;
 showRootNode = false;
 

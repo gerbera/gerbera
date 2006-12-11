@@ -1,24 +1,24 @@
 sharedir = $(DESTDIR)@datadir@/@PACKAGE@
 
 _DIST_FILES_IMAGES = \
-./icons/nanotree/images/minus.gif \
-./icons/nanotree/images/plus.gif \
-./icons/nanotree/images/minus_last_no_root.gif \
-./icons/nanotree/images/minus_last.gif \
-./icons/nanotree/images/white.gif \
-./icons/nanotree/images/plus_no_root.gif \
+./icons/nanotree/images/minus.png \
+./icons/nanotree/images/plus.png \
+./icons/nanotree/images/minus_last_no_root.png \
+./icons/nanotree/images/minus_last.png \
+./icons/nanotree/images/white.png \
+./icons/nanotree/images/plus_no_root.png \
 ./icons/nanotree/images/page16x16.gif \
-./icons/nanotree/images/minus_nolines.gif \
-./icons/nanotree/images/line.gif \
+./icons/nanotree/images/minus_nolines.png \
+./icons/nanotree/images/line.png \
 ./icons/nanotree/images/user_16x16.gif \
-./icons/nanotree/images/plus_last_no_root.gif \
-./icons/nanotree/images/minus_no_root.gif \
+./icons/nanotree/images/plus_last_no_root.png \
+./icons/nanotree/images/minus_no_root.png \
 ./icons/nanotree/images/help_16x16.gif \
-./icons/nanotree/images/t_no_root.gif \
-./icons/nanotree/images/t.gif \
-./icons/nanotree/images/plus_last.gif \
-./icons/nanotree/images/lastnode.gif \
-./icons/nanotree/images/plus_nolines.gif \
+./icons/nanotree/images/t_no_root.png \
+./icons/nanotree/images/t.png \
+./icons/nanotree/images/plus_last.png \
+./icons/nanotree/images/lastnode.png \
+./icons/nanotree/images/plus_nolines.png \
 ./icons/nanotree/images/folder-new.png \
 ./icons/nanotree/images/folder_closed.png \
 ./icons/nanotree/images/folder_open.png \

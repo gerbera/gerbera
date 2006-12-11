@@ -367,28 +367,28 @@ function showNode(treeNode,lastNode) {
 	str += '<nobr>';
 	for(var y=0;y<linestring.length;y++) {
 		if (linestring.charAt(y) == 'I') {
-			str += '<img src="' + href + 'images/' + (showLines ? 'line' : 'white') + '.gif" style="width:19px;height:20px;vertical-align:middle;">';
+			str += '<img src="' + href + 'images/' + (showLines ? 'line' : imageWhite) + imageExtension + '" style=' + imageStyle + '>';
 		}
 		else if (linestring.charAt(y) == 'B') {
-			str += '<img src="' + href + 'images/white.gif" style="width:19px;height:20px;vertical-align:middle;">';
+			str += '<img src="' + href + 'images/' + imageWhite + imageExtension + '" style=' + imageStyle + '>';
 		}
 	}
 	if (treeNode.hasChildren()) {
 		// If this is the first child of the rootNode, and showRootNode is false, we want to display a different icon.
 		if (!showRootNode && (treeNode.getParent() == rootNode) && (treeNode.getParent().getFirstChild() == treeNode)) {
 			if (!lastNode) {
-				str += '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/' + (state == 'open' ? (showLines ? 'minus_no_root' : 'minus_nolines') : (showLines ? 'plus_no_root' : 'plus_nolines')) + '.gif" style="width:19px;height:20px;vertical-align:middle;" OnClick="parent.handleNode(\'' + treeNode.getID() + '\');">';
+				str += '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/' + (state == 'open' ? (showLines ? imageMinusNoRoot : imageMinusNoLines) : (showLines ? imagePlusNoRoot : imagePlusNoLines)) + imageExtension + '" style=' + imageStyle + ' OnClick="parent.handleNode(\'' + treeNode.getID() + '\');">';
 			}
 			else {
-				str += '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/' + (state == 'open' ? 'minus_last' : 'plus_last') + '_no_root.gif" style="width:19px;height:20px;vertical-align:middle;" OnClick="parent.handleNode(\'' + treeNode.getID() + '\');">';
+				str += '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/' + (state == 'open' ? imageMinusLast : imagePlusLast) + '_no_root' + imageExtension + '" style=' + imageStyle + ' OnClick="parent.handleNode(\'' + treeNode.getID() + '\');">';
 			}
 		}
 		else {
 			if (!lastNode) {
-				str += '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/' + (state == 'open' ? (showLines ? 'minus' : 'minus_nolines') : (showLines ? 'plus' : 'plus_nolines')) + '.gif" style="width:19px;height:20px;vertical-align:middle;" OnClick="parent.handleNode(\'' + treeNode.getID() + '\');">';
+				str += '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/' + (state == 'open' ? (showLines ? imageMinus : imageMinusNoLines) : (showLines ? imagePlus : imagePlusNoLines)) + imageExtension + '" style=' + imageStyle + ' OnClick="parent.handleNode(\'' + treeNode.getID() + '\');">';
 			}
 			else {
-				str += '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/' + (state == 'open' ? (showLines ? 'minus_last' : 'minus_nolines') : (showLines ? 'plus_last' : 'plus_nolines')) + '.gif" style="width:19px;height:20px;vertical-align:middle;" OnClick="parent.handleNode(\'' + treeNode.getID() + '\');">';
+				str += '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/' + (state == 'open' ? (showLines ? imageMinusLast : imageMinusNoLines) : (showLines ? imagePlusLast : imagePlusNoLines)) + imageExtension + '" style=' + imageStyle + ' OnClick="parent.handleNode(\'' + treeNode.getID() + '\');">';
 			}
 		}
 	}
@@ -396,18 +396,18 @@ function showNode(treeNode,lastNode) {
 		// If this is the first child of the rootNode, and showRootNode is false, we want to display a different icon.
 		if (!showRootNode && (treeNode.getParent() == rootNode) && (treeNode.getParent().getFirstChild() == treeNode)) {
 			if (!lastNode) {
-				str += '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/' + (showLines ? 't_no_root' : 'white') + '.gif" style="width:19px;height:20px;vertical-align:middle;">';
+				str += '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/' + (showLines ? imageTNoRoot : imageWhite) + imageExtension + '" style=' + imageStyle + '>';
 			}
 			else {
-				str += '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/white.gif" style="width:19px;height:20px;vertical-align:middle;">';
+				str += '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/' + imageWhite + imageExtension + '" style=' + imageStyle + '>';
 			}
 		}
 		else {
 			if (!lastNode) {
-				str += '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/' + (showLines ? 't' : 'white') + '.gif" style="width:19px;height:20px;vertical-align:middle;">';
+				str += '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/' + (showLines ? 't' : imageWhite) + imageExtension + '" style=' + imageStyle + '>';
 			}
 			else {
-				str += '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/' + (showLines ? 'lastnode' : 'white') + '.gif" style="width:19px;height:20px;vertical-align:middle;">';
+				str += '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/' + (showLines ? imageLastnode : imageWhite) + '.png" style=' + imageStyle + '>';
 			}
 		}
 	}
@@ -679,10 +679,10 @@ function refreshNode(treeNode) {
     if (treeNode.getChildCount() == 0) {
         // TreeNode haven't got any children, make sure the right image is displayed.
         if (actionimage.src.indexOf('last') == -1) {
-            actionimage.src = href + 'images/' + (showLines ? 't' : 'white') + '.gif';
+            actionimage.src = href + 'images/' + (showLines ? 't' : imageWhite) + imageExtension;
         }
         else {
-            actionimage.src = href + 'images/' + (showLines ? 'lastnode' : 'white') + '.gif';
+            actionimage.src = href + 'images/' + (showLines ? imageLastnode : imageWhite) + imageExtension;
         }
         actionimage.onclick = null;
         
@@ -693,18 +693,18 @@ function refreshNode(treeNode) {
     }
     else {
         // We have children, make sure to display the + and - icon.
-        if (actionimage.src.indexOf('plus') != -1) {                                                                                                  
+        if (actionimage.src.indexOf(imagePlus) != -1) {                                                                                                  
             // The TreeNode has already got children, and displays them.                                                             
         }
-        else if (actionimage.src.indexOf('minus') != -1) {
+        else if (actionimage.src.indexOf(imageMinus) != -1) {
             // The TreeNode has already got children, and displays them.
         }
         else {
             if (actionimage.src.indexOf('last') == -1) {
-                actionimage.outerHTML = '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/' + (showLines ? 'plus' : 'plus_nolines') + '.gif" style="width:19px;height:20px;vertical-align:middle;" OnClick="parent.handleNode(\'' + treeNode.getID() + '\');">';
+                actionimage.outerHTML = '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/' + (showLines ? imagePlus : imagePlusNoLines) + imageExtension + '" style=' + imageStyle + ' OnClick="parent.handleNode(\'' + treeNode.getID() + '\');">';
             }
             else {
-                actionimage.outerHTML = '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/plus_last.gif" style="width:19px;height:20px;vertical-align:middle;" OnClick="parent.handleNode(\'' + treeNode.getID() + '\');">';
+                actionimage.outerHTML = '<img id="handler' + treeNode.getID() + '" src="' + href + 'images/' + imagePlusLast + '" style=' + imageStyle + ' OnClick="parent.handleNode(\'' + treeNode.getID() + '\');">';
             }
         }
     }
@@ -735,10 +735,10 @@ function handleNode(nodeID) {
 		iconimageholder.src = treeNode.getOpenIcon();
 	
 		if (actionimage.src.indexOf('last') == -1) {
-			actionimage.src = href + 'images/' + ((firstChildOfRoot) ? 'minus_no_root' : (showLines ? 'minus' : 'minus_nolines')) + '.gif';
+			actionimage.src = href + 'images/' + ((firstChildOfRoot) ? imageMinusNoRoot : (showLines ? imageMinus : imageMinusNoLines)) + imageExtension;
 		}
 		else {
-			actionimage.src = href + 'images/' + ((firstChildOfRoot) ? 'minus_last_no_root' : (showLines ? 'minus_last' : 'minus_nolines')) + '.gif';
+			actionimage.src = href + 'images/' + ((firstChildOfRoot) ? imageMinusLastNoRoot : (showLines ? imageMinusLast : imageMinusNoLines)) + imageExtension;
 		}
 	}
 	else {
@@ -748,10 +748,10 @@ function handleNode(nodeID) {
 		iconimageholder.src = treeNode.getIcon();
 		
 		if (actionimage.src.indexOf('last') == -1) {
-			actionimage.src = href + 'images/' + ((firstChildOfRoot) ? 'plus_no_root' : (showLines ? 'plus' : 'plus_nolines')) + '.gif';
+			actionimage.src = href + 'images/' + ((firstChildOfRoot) ? imagePlusNoRoot : (showLines ? imagePlus : imagePlusNoLines)) + imageExtension;
 		}
 		else {                                                                   
-			actionimage.src = href + 'images/' + ((firstChildOfRoot) ? 'plus_last_no_root' : (showLines ? 'plus_last' : 'plus_nolines')) + '.gif';
+			actionimage.src = href + 'images/' + ((firstChildOfRoot) ? imagePlusLastNoRoot : (showLines ? imagePlusLast : imagePlusNoLines)) + imageExtension;
 		}
 	}
 }
