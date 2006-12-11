@@ -120,7 +120,7 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
         if (dir != nil)
         {
             String path = dir->getLocation();
-            if (!check_path(path, true))
+            if (check_path(path, true))
             {
                 dir->setObjectID(ensurePathExistence(path));
             }

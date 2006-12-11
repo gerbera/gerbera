@@ -106,7 +106,7 @@ function updateItems(ajaxRequest)
     }
     var ofId = items.getAttribute("ofId");
     var isVirtual = (items.getAttribute("virtual") == '1');
-    var isAutoscan = (items.getAttribute("autoscan") == '1');
+    var autoscanType = items.getAttribute("autoscan");
     var loadItemId = (useFiles ? 'f' : 'd') + ofId;
     var totalMatches = parseInt(items.getAttribute("totalMatches"));
     var totalPages = Math.ceil(totalMatches / viewItems);
@@ -221,8 +221,15 @@ function updateItems(ajaxRequest)
             first = _addLink(topDiv, first, "javascript:parent.removeItem('"+ofId+"', true);", "remove all", iconRemoveAll);
         if (autoscanLink)
         {
-            var action = (isAutoscan ? "remove" : "add");
-            first = _addLink(topDiv, first,  "javascript:parent.changeAutoscanDirectory('"+action+"','"+ofId+"', false);", action+" as autoscan dir");
+            if (autoscanType == "2")
+            {
+                topDiv.appendChild(rightDocument.createTextNode(" (added as autoscan directory through config.xml)"));
+            }
+            else
+            {
+                var action = (autoscanType == "1" ? "remove" : "add");
+                first = _addLink(topDiv, first,  "javascript:parent.changeAutoscanDirectory('"+action+"','"+ofId+"', false);", action+" as autoscan dir");
+            }
         }
         
         itemsEl.appendChild(topDiv);

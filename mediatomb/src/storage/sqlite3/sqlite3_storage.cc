@@ -97,6 +97,7 @@ void Sqlite3Storage::init()
     catch (Exception)
     {
     }
+    
     if (dbVersion == nil)
     {
 #ifdef AUTO_CREATE_DATABASE
@@ -117,6 +118,8 @@ void Sqlite3Storage::init()
 #endif
     }
     log_debug("db_version: %s\n", dbVersion.c_str());
+    if (! string_ok(dbVersion) || dbVersion != "1")
+        throw _Exception(_("The database seems to be from a newer version!"));
     
     //pthread_attr_destroy(&attr);
 }
@@ -246,7 +249,6 @@ void Sqlite3Storage::storeInternalSetting(String key, String value)
     "VALUES (" << quote(key) << ", "<< quote(value) << ") ";
     this->execSB(q);
 }
-
 
 /* SLTask */
 

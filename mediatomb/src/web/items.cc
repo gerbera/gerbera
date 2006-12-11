@@ -68,7 +68,7 @@ void web::items::process()
     Ref<Element> items (new Element(_("items")));
     items->addAttribute(_("ofId"), String::from(parentID));
     items->addAttribute(_("virtual"), (obj->isVirtual() ? _("1") : _("0")));
-    items->addAttribute(_("autoscan"), (storage->isAutoscanDirectory(parentID) ? _("1") : _("0")));
+    items->addAttribute(_("autoscan"), String::from(storage->getAutoscanDirectoryType(parentID)));
     items->addAttribute(_("start"), String::from(start));
     //items->addAttribute(_("returned"), String::from(arr->size()));
     items->addAttribute(_("totalMatches"), String::from(param->getTotalMatches()));

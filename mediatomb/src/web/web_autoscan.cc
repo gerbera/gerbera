@@ -119,8 +119,8 @@ void web::autoscan::process()
     else if (action == "remove")
     {
         int objID = intParam(_("object_id"));
-        if (! storage->isAutoscanDirectory(objID))
-            throw _Exception(_("the object id ")+objID+" is not among the list of the autoscan directories");
+        if (storage->getAutoscanDirectoryType(objID) != 1)
+            throw _Exception(_("the object id ")+objID+" is not among the list of the autoscan directories, or it was defined in config.xml");
         Ref<CdsObject> obj = storage->loadObject(objID);
         if (obj == nil
             || ! IS_CDS_CONTAINER(obj->getObjectType())

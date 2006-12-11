@@ -1335,19 +1335,22 @@ overwritten due to different SQL syntax for MySQL and SQLite3
 
 Ref<AutoscanList> SQLStorage::getAutoscanList(scan_mode_t scanmode, Ref<AutoscanList> list)
 {
-    //delete cfg as
+    log_debug("removing autoscans from config...\n");
     Ref<StringBuffer> q(new StringBuffer());
     *q << "DELETE FROM " << TQ(AUTOSCAN_TABLE) << " WHERE "
         << TQ("persistent") << " = " << quote(1);
     exec(q);
     
     int listSize = list->size();
+    log_debug("adding autoscans from config... (%d)\n", listSize);
     for (int i = 0; i < listSize; i++)
     {
+        log_debug("getting ad from list..\n");
         Ref<AutoscanDirectory> ad = list->get(i);
         if (ad == nil)
             continue;
         int objectID = ad->getObjectID();
+        log_debug("object_id = %d\n", objectID);
         if (objectID == INVALID_OBJECT_ID)
             continue;
         q->clear();
@@ -1391,6 +1394,8 @@ Ref<AutoscanList> SQLStorage::getAutoscanList(scan_mode_t scanmode, Ref<Autoscan
         if (mode == TimedScanMode)
             interval = row->col(5).toInt();
         time_t last_modified = row->col(6).toLong();
+        
+        log_debug("adding autoscan location: %s\n", location.c_str());
         
         Ref<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, persistent, -1, interval, hidden));
         dir->setObjectID(ObjectID);
@@ -1448,13 +1453,19 @@ void SQLStorage::removeAutoscanDirectory(int objectId)
     exec(q);
 }
 
-bool SQLStorage::isAutoscanDirectory(int objectId)
+int SQLStorage::getAutoscanDirectoryType(int objectId)
 {
     Ref<StringBuffer> q(new StringBuffer());
-    *q << "SELECT " << TQ("id") << " FROM " << TQ(AUTOSCAN_TABLE)
+    *q << "SELECT " << TQ("persistent") << " FROM " << TQ(AUTOSCAN_TABLE)
         << " WHERE " << TQ("id") << " = " << quote(objectId);
     Ref<SQLResult> res = select(q);
-    return (res != nil && res->nextRow() != nil);
+    Ref<SQLRow> row;
+    if (res == nil || (row = res->nextRow()) == nil)
+        return 0;
+    if (! remapBool(row->col(0)))
+        return 1;
+    else
+        return 2;
 }
 
 void SQLStorage::autoscanUpdateLM(zmm::Ref<AutoscanDirectory> adir)

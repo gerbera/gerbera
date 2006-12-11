@@ -197,7 +197,11 @@ public:
     virtual zmm::Ref<AutoscanList> getAutoscanList(scan_mode_t scanmode, zmm::Ref<AutoscanList> list) = 0;
     virtual void addAutoscanDirectory(zmm::Ref<AutoscanDirectory> adir) = 0;
     virtual void removeAutoscanDirectory(int objectId) = 0;
-    virtual bool isAutoscanDirectory(int objectId) = 0;
+    
+    /// \brief returns wheather the given id is an autoscan start point and if yes, if it is persistent
+    /// \param objectId the object id to check
+    /// \return 0 if the given id is no autoscan start point, 1 if it is a non-persistent one, 2 if it is a persistent on
+    virtual int getAutoscanDirectoryType(int objectId) = 0;
     virtual void autoscanUpdateLM(zmm::Ref<AutoscanDirectory> adir) = 0;
     
     virtual void shutdown() = 0;

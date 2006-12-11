@@ -158,6 +158,7 @@ void MysqlStorage::init()
     catch (Exception)
     {
     }
+    
     if (dbVersion == nil)
     {
 #ifdef AUTO_CREATE_DATABASE
@@ -202,6 +203,9 @@ void MysqlStorage::init()
 #endif
         
     }
+    log_debug("db_version: %s\n", dbVersion.c_str());
+    if (! string_ok(dbVersion) || dbVersion != "1")
+        throw _Exception(_("The database seems to be from a newer version!"));
     
     AUTOUNLOCK();
     
