@@ -992,10 +992,10 @@ Ref<Array<CdsObject> > SQLStorage::selectObjects(Ref<SelectParam> param)
 Ref<DBRHash<int> > SQLStorage::getObjects(int parentID, bool withoutContainer)
 {
     Ref<StringBuffer> q(new StringBuffer());
-    *q << "SELECT id FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";
+    *q << "SELECT " << TQ("id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";
     if (withoutContainer)
-        *q << "object_type != " << OBJECT_TYPE_CONTAINER << " AND ";
-    *q << "parent_id = ";
+        *q << TQ("object_type") << " != " << OBJECT_TYPE_CONTAINER << " AND ";
+    *q << TQ("parent_id") << " = ";
     *q << parentID;
     Ref<SQLResult> res = select(q);
     if (res == nil)
@@ -1333,13 +1333,37 @@ overwritten due to different SQL syntax for MySQL and SQLite3
 */
 
 
-Ref<AutoscanList> SQLStorage::getAutoscanList(scan_mode_t scanmode)
+Ref<AutoscanList> SQLStorage::getAutoscanList(scan_mode_t scanmode, Ref<AutoscanList> list)
 {
-    #define FLD(field) << TQD('a',field) <<
+    //delete cfg as
     Ref<StringBuffer> q(new StringBuffer());
+    *q << "DELETE FROM " << TQ(AUTOSCAN_TABLE) << " WHERE "
+        << TQ("persistent") << " = " << quote(1);
+    exec(q);
+    
+    int listSize = list->size();
+    for (int i = 0; i < listSize; i++)
+    {
+        Ref<AutoscanDirectory> ad = list->get(i);
+        if (ad == nil)
+            continue;
+        int objectID = ad->getObjectID();
+        if (objectID == INVALID_OBJECT_ID)
+            continue;
+        q->clear();
+        *q << "DELETE FROM " << TQ(AUTOSCAN_TABLE)
+            << " WHERE " << TQ("id") << " = " << quote(objectID);
+        exec(q);
+        // only persistent asD should be given to getAutoscanList
+        assert(ad->persistent());
+        addAutoscanDirectory(ad);
+    }
+    
+    #define FLD(field) << TQD('a',field) <<
+    q->clear();
     *q << "SELECT " FLD("id") ',' FLD("scan_level") ','
        FLD("scan_mode") ',' FLD("recursive") ',' FLD("hidden") ','
-       FLD("interval") ',' FLD("last_modified") ','
+       FLD("interval") ',' FLD("last_modified") ',' FLD("persistent") ','
        << TQD('t',"location")
        << " FROM " << TQ(AUTOSCAN_TABLE) << ' ' << TQ('a')
        << " JOIN " << TQ(CDS_OBJECT_TABLE) << ' ' << TQ('t')
@@ -1348,32 +1372,34 @@ Ref<AutoscanList> SQLStorage::getAutoscanList(scan_mode_t scanmode)
     Ref<SQLResult> res = select(q);
     if (res == nil)
         return nil;
-    Ref<AutoscanList> list(new AutoscanList());
+    Ref<AutoscanList> listNew(new AutoscanList());
     Ref<SQLRow> row;
     while((row = res->nextRow()) != nil)
     {
-        String id_str = row->col(0);
+        int ObjectID = row->col(0).toInt();
         char prefix;
-        String location = stripLocationPrefix(&prefix, row->col(7));
+        String location = stripLocationPrefix(&prefix, row->col(8));
         if (prefix != LOC_DIR_PREFIX)
-            throw _Exception(_("mt_autoscan referred to an object, that was not a directory - id: ") + id_str + "; location: " + row->col(7) + "; prefix: " + prefix);
+            throw _Exception(_("mt_autoscan referred to an object, that was not a directory - id: ") + ObjectID + "; location: " + row->col(8) + "; prefix: " + prefix);
         
         scan_level_t level = AutoscanDirectory::remapScanlevel(row->col(1));
         scan_mode_t mode = AutoscanDirectory::remapScanmode(row->col(2));
         bool recursive = remapBool(row->col(3));
         bool hidden = remapBool(row->col(4));
+        bool persistent = remapBool(row->col(7));
         int interval = 0;
         if (mode == TimedScanMode)
             interval = row->col(5).toInt();
         time_t last_modified = row->col(6).toLong();
         
-        Ref<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, false, -1, interval, hidden));
+        Ref<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, persistent, -1, interval, hidden));
+        dir->setObjectID(ObjectID);
         dir->setCurrentLMT(last_modified);
         dir->updateLMT();
-        list->add(dir);
+        listNew->add(dir);
     }
     
-    return list;
+    return listNew;
 }
 
 void SQLStorage::addAutoscanDirectory(Ref<AutoscanDirectory> adir)
@@ -1394,14 +1420,17 @@ void SQLStorage::addAutoscanDirectory(Ref<AutoscanDirectory> adir)
         << TQ("recursive") << ','
         << TQ("hidden") << ','
         << TQ("interval") << ','
-        << TQ("last_modified") << ") VALUES ("
+        << TQ("last_modified") << ','
+        << TQ("persistent")
+        << ") VALUES ("
         << quote(objectID) << ','
         << quote(AutoscanDirectory::mapScanlevel(adir->getScanLevel())) << ','
         << quote(AutoscanDirectory::mapScanmode(adir->getScanMode())) << ','
         << mapBool(adir->getRecursive()) << ','
         << mapBool(adir->getHidden()) << ','
         << quote(adir->getInterval()) << ','
-        << quote(adir->getPreviousLMT())
+        << quote(adir->getPreviousLMT()) << ','
+        << quote(adir->persistent() ? '1' : '0')
         << ')';
     exec(q);
 }

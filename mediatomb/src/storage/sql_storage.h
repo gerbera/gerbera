@@ -78,6 +78,7 @@ public:
     virtual zmm::String quote(unsigned int val) = 0;
     virtual zmm::String quote(long val) = 0;
     virtual zmm::String quote(unsigned long val) = 0;
+    virtual zmm::String quote(bool val) = 0;
     virtual zmm::Ref<SQLResult> select(const char *query, int length) = 0;
     virtual int exec(const char *query, int length, bool getLastInsertId = false) = 0;
     
@@ -124,7 +125,7 @@ public:
     virtual zmm::String getInternalSetting(zmm::String key);
     virtual void storeInternalSetting(zmm::String key, zmm::String value) = 0;
     
-    virtual zmm::Ref<AutoscanList> getAutoscanList(scan_mode_t scanmode);
+    virtual zmm::Ref<AutoscanList> getAutoscanList(scan_mode_t scanmode, zmm::Ref<AutoscanList> list);
     virtual void addAutoscanDirectory(zmm::Ref<AutoscanDirectory> adir);
     virtual void removeAutoscanDirectory(int objectId);
     virtual bool isAutoscanDirectory(int objectId);

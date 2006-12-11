@@ -178,7 +178,7 @@ public:
     /// \param parentID parent container
     /// \param withoutContainer if false: all children are returned; if true: only items are returned
     /// \return DBHash containing the objectID's - nil if there are none! 
-    virtual zmm::Ref<DBRHash<int> > getObjects(int parentID, bool withoutContainer = false) = 0;
+    virtual zmm::Ref<DBRHash<int> > getObjects(int parentID, bool withoutContainer) = 0;
     
     /// \brief Remove all objects found in list
     /// \param list a DBHash containing objectIDs that have to be removed
@@ -194,7 +194,7 @@ public:
     virtual void storeInternalSetting(zmm::String key, zmm::String value) = 0;
     
     /* autoscan methods */
-    virtual zmm::Ref<AutoscanList> getAutoscanList(scan_mode_t scanmode) = 0;
+    virtual zmm::Ref<AutoscanList> getAutoscanList(scan_mode_t scanmode, zmm::Ref<AutoscanList> list) = 0;
     virtual void addAutoscanDirectory(zmm::Ref<AutoscanDirectory> adir) = 0;
     virtual void removeAutoscanDirectory(int objectId) = 0;
     virtual bool isAutoscanDirectory(int objectId) = 0;

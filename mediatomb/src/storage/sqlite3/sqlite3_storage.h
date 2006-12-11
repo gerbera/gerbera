@@ -136,6 +136,7 @@ private:
     virtual inline zmm::String quote(unsigned int val) { return zmm::String::from(val); }
     virtual inline zmm::String quote(long val) { return zmm::String::from(val); }
     virtual inline zmm::String quote(unsigned long val) { return zmm::String::from(val); }
+    virtual inline zmm::String quote(bool val) { return zmm::String(val ? '1' : '0'); }
     virtual zmm::Ref<SQLResult> select(const char *query, int length);
     virtual int exec(const char *query, int length, bool getLastInsertId = false);
     virtual void storeInternalSetting(zmm::String key, zmm::String value);

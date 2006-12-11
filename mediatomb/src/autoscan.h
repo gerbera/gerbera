@@ -71,7 +71,9 @@ public:
     void addList(zmm::Ref<AutoscanList> list);
 
     zmm::Ref<AutoscanDirectory> get(int id);
-
+    
+    int size() { return list->size(); }
+    
     void remove(int id);
     
     /// \brief removes the AutoscanDirectory with the given location
