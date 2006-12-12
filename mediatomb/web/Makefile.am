@@ -19,7 +19,6 @@ _DIST_FILES_IMAGES = \
 ./icons/nanotree/images/plus_last.png \
 ./icons/nanotree/images/lastnode.png \
 ./icons/nanotree/images/plus_nolines.png \
-./icons/nanotree/images/folder-new.png \
 ./icons/nanotree/images/folder_closed.png \
 ./icons/nanotree/images/folder_open.png \
 ./icons/nanotree/images/autoscan_folder_closed.png \
@@ -27,6 +26,7 @@ _DIST_FILES_IMAGES = \
 
 _DIST_FILES_ICONS = \
 ./icons/document-new.png \
+./icons/folder_new.png \
 ./icons/go-first.png \
 ./icons/go-last.png \
 ./icons/go-next.png \
