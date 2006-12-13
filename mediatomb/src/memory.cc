@@ -172,22 +172,26 @@ void FREE(void *ptr)
 #ifdef LOG_TOMBDEBUG
 void *MALLOC(size_t size)
 {
+#ifdef DEBUG_MALLOC_0    
     if (size <= 0)
     {
         printf("malloc called with 0! aborting...\n");
         _print_backtrace(stderr);
         abort();
     }
+#endif
     return malloc(size);
 }
 void *REALLOC(void *ptr, size_t size)
 {
+#ifdef DEBUG_MALLOC_0
     if (size <= 0)
     {
         printf("realloc called with 0! aborting...\n");
         _print_backtrace(stderr);
         abort();
     }
+#endif
     return realloc(ptr, size);
 }
 

@@ -265,6 +265,26 @@ AC_ARG_ENABLE(db-autocreate,
         ]
 )
 
+DEBUG_MALLOC_0=0
+AC_ARG_ENABLE([debug-malloc0],
+            [
+AC_HELP_STRING([--enable-debug-malloc0=no],
+[only for debugging purposes: abort when we try to call malloc or realloc with a value of zero])
+            ],
+            [
+                if test "x$enableval" = xno; then
+                    DEBUG_MALLOC_0=0
+                else
+                    DEBUG_MALLOC_0=1
+                fi
+            ]
+)
+
+if test $DEBUG_MALLOC_0 -eq 1; then
+    AC_DEFINE([DEBUG_MALLOC_0], [1], [debug: abort on malloc/realloc of zero bytes])
+fi
+
+
 ###############################################################################
 # The following block is derived from the configure.ac script from the 
 # libupnp-1.3.1 package

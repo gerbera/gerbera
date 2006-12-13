@@ -175,6 +175,9 @@
 #define INVALID_OBJECT_ID               (-333)
 #define INVALID_OBJECT_ID_2             (-666)
 
+#ifndef DEFAULT_JS_RUNTIME_MEM
+    #define DEFAULT_JS_RUNTIME_MEM      (1L * 1024L * 1024L)
+#endif
 
 
 #endif // __COMMON_H__

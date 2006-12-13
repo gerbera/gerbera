@@ -534,7 +534,7 @@ void Scripting::init()
 {
     //log_debug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
     /* initialize the JS run time, and return result in rt */
-    rt = JS_NewRuntime(1L * 1024L * 1024L);
+    rt = JS_NewRuntime(DEFAULT_JS_RUNTIME_MEM);
 
     if (!rt)
         throw _Exception(_("Scripting: could not initialize js runtime"));
