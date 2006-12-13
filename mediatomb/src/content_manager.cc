@@ -516,7 +516,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
                     addFile(path, false, false, adir->getHidden());
             }
         }
-        else if (S_ISDIR(statbuf.st_mode) && (!adir->getRecursive()))
+        else if (S_ISDIR(statbuf.st_mode) && (adir->getRecursive()))
         {
             int objectID = storage->findObjectIDByPath(path + DIR_SEPARATOR);
             if (objectID > 0)

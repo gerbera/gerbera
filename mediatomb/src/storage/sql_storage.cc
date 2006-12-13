@@ -1395,7 +1395,7 @@ Ref<AutoscanList> SQLStorage::getAutoscanList(scan_mode_t scanmode, Ref<Autoscan
             interval = row->col(5).toInt();
         time_t last_modified = row->col(6).toLong();
         
-        log_debug("adding autoscan location: %s\n", location.c_str());
+        log_debug("adding autoscan location: %s; recursive: %d\n", location.c_str(), recursive);
         
         Ref<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, persistent, -1, interval, hidden));
         dir->setObjectID(ObjectID);
