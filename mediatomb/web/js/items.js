@@ -45,6 +45,7 @@ var iconFirst = iconPath + 'go-first.png';
 var iconPrevious = iconPath + 'go-previous.png';
 var iconNext = iconPath + 'go-next.png';
 var iconLast = iconPath + 'go-last.png';
+var iconAddAutoscan = iconPath + 'add_as_autoscan.png';
 
 function itemInit()
 {
@@ -170,7 +171,7 @@ function updateItems(ajaxRequest)
         
         var first = true
         first = _addLink(topDiv, first, "javascript:parent.addItem('"+ofId+"');", "add", iconAdd);
-        first = _addLink(topDiv, first, "javascript:parent.changeAutoscanDirectory('add','"+ofId+"', true);", "add as autoscan dir");
+        first = _addLink(topDiv, first, "javascript:parent.changeAutoscanDirectory('add','"+ofId+"', true);", "add as autoscan dir", iconAddAutoscan);
         
         itemsEl.appendChild(topDiv);
     }
@@ -228,7 +229,8 @@ function updateItems(ajaxRequest)
             else
             {
                 var action = (autoscanType == "1" ? "remove" : "add");
-                first = _addLink(topDiv, first,  "javascript:parent.changeAutoscanDirectory('"+action+"','"+ofId+"', false);", action+" as autoscan dir");
+                var icon = (autoscanType == "1" ? null : iconAddAutoscan);
+                first = _addLink(topDiv, first,  "javascript:parent.changeAutoscanDirectory('"+action+"','"+ofId+"', false);", action+" as autoscan dir", icon);
             }
         }
         
