@@ -100,20 +100,25 @@ void web::autoscan::process()
                 scan_mode,
                 scan_level,
                 recursive,
-                false,
-                -1,
+                false, // persistent
+                -1, // autoscan id - used only internally by CM
                 interval,
                 hidden
                 ));
+            /* 
+            
             try
             {
-                cm->addAutoscanDirectory(autoscan);
-                storage->addAutoscanDirectory(autoscan);
+            */
+            cm->addAutoscanDirectory(autoscan);
+            //storage->addAutoscanDirectory(autoscan);
+            /* why was this here??
             }
             catch (Exception e)
             {
                 throw e;
             }
+            */
         }
     }
     else if (action == "remove")
@@ -129,6 +134,23 @@ void web::autoscan::process()
         
         storage->removeAutoscanDirectory(objID);
         cm->removeAutoscanDirectory(obj->getLocation());
+    }
+    else if (action == "list")
+    {
+        /// \todo use a method of ContentManager, should give back all autoscans
+        Ref<AutoscanList> autoscanList = storage->getAutoscanList(TimedScanMode);
+        
+        int size = autoscanList->size();
+        Ref<Element> autoscansEl (new Element(_("autoscans")));
+        for (int i = 0; i < size; i++)
+        {
+            Ref<AutoscanDirectory> autoscanDir = autoscanList->get(i);
+            Ref<Element> autoscanEl (new Element(_("autoscan")));
+            autoscanEl->addAttribute(_("objectID"), String::from(autoscanDir->getObjectID()));
+            autoscanEl->appendTextChild(_("location"), autoscanDir->getLocation());
+            //autoscanEl->appendTextChild(_("scan_level"), AutoscanDirectory::mapScanlevel(autoscanDir->getScanLevel()));
+            autoscansEl->appendChild(autoscanEl);
+        }
     }
     else
         throw _Exception(_("web:autoscan called with illegal action"));
