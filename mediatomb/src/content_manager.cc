@@ -128,7 +128,8 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
     }
 
     Ref<Storage> storage = Storage::getInstance();
-    autoscan_timed = storage->getAutoscanList(TimedScanMode, config_timed_list);
+    storage->updateAutoscanPersistentList(TimedScanMode, config_timed_list);
+    autoscan_timed = storage->getAutoscanList(TimedScanMode);
 
     /* init fielmagic */
 #ifdef HAVE_MAGIC

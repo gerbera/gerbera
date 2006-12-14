@@ -260,7 +260,7 @@ function updateItems(ajaxRequest)
         itemRow.appendChild(itemEntry);
         itemRow.appendChild(spaceCell);
         itemRow.appendChild(itemButtons);
-
+        
         if (useFiles)
         {
             //itemEntry.appendChild(rightDocument.createTextNode(" - "));

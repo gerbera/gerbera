@@ -151,6 +151,7 @@ void web::autoscan::process()
             //autoscanEl->appendTextChild(_("scan_level"), AutoscanDirectory::mapScanlevel(autoscanDir->getScanLevel()));
             autoscansEl->appendChild(autoscanEl);
         }
+        root->appendChild(autoscansEl);
     }
     else
         throw _Exception(_("web:autoscan called with illegal action"));

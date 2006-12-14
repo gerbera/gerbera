@@ -194,7 +194,8 @@ public:
     virtual void storeInternalSetting(zmm::String key, zmm::String value) = 0;
     
     /* autoscan methods */
-    virtual zmm::Ref<AutoscanList> getAutoscanList(scan_mode_t scanmode, zmm::Ref<AutoscanList> list) = 0;
+    virtual void updateAutoscanPersistentList(scan_mode_t scanmode, zmm::Ref<AutoscanList> list) = 0;
+    virtual zmm::Ref<AutoscanList> getAutoscanList(scan_mode_t scanmode) = 0;
     virtual void addAutoscanDirectory(zmm::Ref<AutoscanDirectory> adir) = 0;
     virtual void removeAutoscanDirectory(int objectId) = 0;
     

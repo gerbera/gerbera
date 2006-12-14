@@ -1332,17 +1332,18 @@ void SQLStorage::storeInternalSetting(String key, String value)
 overwritten due to different SQL syntax for MySQL and SQLite3
 */
 
-
-Ref<AutoscanList> SQLStorage::getAutoscanList(scan_mode_t scanmode, Ref<AutoscanList> list)
+void SQLStorage::updateAutoscanPersistentList(scan_mode_t scanmode, Ref<AutoscanList> list)
 {
-    log_debug("removing autoscans from config...\n");
+    log_debug("removing persistent autoscans - scanmode: %s;\n", AutoscanDirectory::mapScanmode(scanmode).c_str());
     Ref<StringBuffer> q(new StringBuffer());
     *q << "DELETE FROM " << TQ(AUTOSCAN_TABLE) << " WHERE "
-        << TQ("persistent") << " = " << quote(1);
+        << TQ("persistent") << " = " << quote(1)
+        << " AND " << TQ("scan_mode") << " = "
+        << quote(AutoscanDirectory::mapScanmode(scanmode));
     exec(q);
     
     int listSize = list->size();
-    log_debug("adding autoscans from config... (%d)\n", listSize);
+    log_debug("adding persistent autoscans (%d)\n", listSize);
     for (int i = 0; i < listSize; i++)
     {
         log_debug("getting ad from list..\n");
@@ -1359,11 +1360,16 @@ Ref<AutoscanList> SQLStorage::getAutoscanList(scan_mode_t scanmode, Ref<Autoscan
         exec(q);
         // only persistent asD should be given to getAutoscanList
         assert(ad->persistent());
+        // the scanmode should match the given parameter
+        assert(ad->getScanMode() == scanmode);
         addAutoscanDirectory(ad);
     }
-    
+}
+
+Ref<AutoscanList> SQLStorage::getAutoscanList(scan_mode_t scanmode)
+{
     #define FLD(field) << TQD('a',field) <<
-    q->clear();
+    Ref<StringBuffer> q(new StringBuffer());
     *q << "SELECT " FLD("id") ',' FLD("scan_level") ','
        FLD("scan_mode") ',' FLD("recursive") ',' FLD("hidden") ','
        FLD("interval") ',' FLD("last_modified") ',' FLD("persistent") ','

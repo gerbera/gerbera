@@ -35,8 +35,12 @@
         <link rel="StyleSheet" href="/main.css" type="text/css">
     </head>
     <body>
-        <div id="item_db_div" style="display:none"><div></div></div>
-        <div id="item_fs_div" style="display:none"><div></div></div>
+        <div id="item_db_div" style="display:none">
+            <div></div>
+        </div>
+        <div id="item_fs_div" style="display:none">
+            <div></div>
+        </div>
         <div id="item_add_edit_div" style="display:none">
             <form name="addEditItem" action="javascript:parent.itemAddEditSubmit();">
                 <select name="objType" onchange="parent.updateItemAddEditFields()" size="1">
@@ -59,6 +63,9 @@
                 <!-- <input type="checkbox" name="persistent" id="persistent" value="true"> <label for="persistent">Persistent</label><br/> -->
                 <input name="submit" type="submit" value="add..."/>
             </form>
-        <div>
+        </div>
+        <div id="autoscan_list_div" style="display:none">
+            <div></div>
+        </div>
     </body>
 </html>
