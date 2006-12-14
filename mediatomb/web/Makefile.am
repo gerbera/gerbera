@@ -34,6 +34,7 @@ _DIST_FILES_ICONS = \
 ./icons/remove_all.png \
 ./icons/remove_this.png \
 ./icons/stock-add.png \
+./icons/add_as_autoscan.png \
 ./icons/stock_edit.png \
 ./icons/stock_exit.png \
 ./icons/view-refresh.png
