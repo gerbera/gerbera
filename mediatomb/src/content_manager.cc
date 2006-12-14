@@ -413,6 +413,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
 
         containerID = ensurePathExistence(adir->getLocation());
         adir->setObjectID(containerID);
+        storage->addAutoscanDirectory(adir);
         location = adir->getLocation();
     }
 
