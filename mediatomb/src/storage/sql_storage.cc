@@ -409,6 +409,7 @@ void SQLStorage::updateObject(zmm::Ref<CdsObject> obj, int *changedContainer)
         Ref<Dictionary> cdsObjectSql(new Dictionary());
         data->append(Ref<AddUpdateTable> (new AddUpdateTable(_(CDS_OBJECT_TABLE), cdsObjectSql)));
         cdsObjectSql->put(_("dc_title"), quote(obj->getTitle()));
+        setFsRootName(obj->getTitle());
         cdsObjectSql->put(_("upnp_class"), quote(obj->getClass()));
     }
     else
@@ -1488,4 +1489,25 @@ void SQLStorage::autoscanUpdateLM(zmm::Ref<AutoscanDirectory> adir)
         << " SET " << TQ("last_modified") << " = " << quote(adir->getPreviousLMT())
         << " WHERE " << TQ("id") << " = " << quote(objectID);
     exec(q);
+}
+
+String SQLStorage::getFsRootName()
+{
+    if (string_ok(fsRootName))
+        return fsRootName;
+    setFsRootName();
+    return fsRootName;
+}
+
+void SQLStorage::setFsRootName(String rootName)
+{
+    if (string_ok(rootName))
+    {
+        fsRootName = rootName;
+    }
+    else
+    {
+        Ref<CdsObject> fsRootObj = loadObject(CDS_ID_FS_ROOT);
+        fsRootName = fsRootObj->getTitle();
+    }
 }

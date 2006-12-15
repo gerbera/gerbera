@@ -59,14 +59,51 @@ void web::items::process()
         throw _Exception(_("illegal count parameter"));
     
     Ref<Storage> storage = Storage::getInstance();
-    Ref<CdsObject> obj = storage->loadObject(parentID);
+    Ref<Element> items (new Element(_("items")));
+    items->addAttribute(_("ofId"), String::from(parentID));
+    root->appendChild(items);
+    Ref<CdsObject> obj;
+    try
+    {
+        obj = storage->loadObject(parentID);
+    }
+    catch (Exception e)
+    {
+        items->addAttribute(_("success"), _("0"));
+        return;
+    }
     Ref<BrowseParam> param(new BrowseParam(parentID, BROWSE_DIRECT_CHILDREN | BROWSE_ITEMS));
     param->setRange(start, count);
     
-    Ref<Array<CdsObject> > arr = storage->browse(param);
+    Ref<Array<CdsObject> > arr;
+    try
+    {
+        arr = storage->browse(param);
+    }
+    catch (Exception e)
+    {
+        items->addAttribute(_("success"), _("0"));
+        return;
+    }
+    items->addAttribute(_("success"), _("1"));
     
-    Ref<Element> items (new Element(_("items")));
-    items->addAttribute(_("ofId"), String::from(parentID));
+    String location = nil;
+    if (obj->getID() == CDS_ID_ROOT)
+    {
+        location = _("/");
+    }
+    else if (obj->getID() == CDS_ID_FS_ROOT)
+    {
+        location = _("/") + storage->getFsRootName();
+    }
+    else if (string_ok(obj->getLocation()))
+    {
+        location = obj->getLocation();
+        if (! obj->isVirtual())
+            location = _("/") + storage->getFsRootName() + location;
+    }
+    if (string_ok(location))
+        items->addAttribute(_("location"), location);
     items->addAttribute(_("virtual"), (obj->isVirtual() ? _("1") : _("0")));
     items->addAttribute(_("autoscan"), String::from(storage->getAutoscanDirectoryType(parentID)));
     items->addAttribute(_("start"), String::from(start));

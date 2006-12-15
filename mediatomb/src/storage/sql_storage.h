@@ -137,6 +137,8 @@ public:
     
     virtual int ensurePathExistence(zmm::String path, int *changedContainer);
     
+    virtual zmm::String getFsRootName();
+    
 protected:
     SQLStorage();
     virtual ~SQLStorage();
@@ -200,6 +202,9 @@ private:
     zmm::String mapBool(bool val) { return quote((val ? 1 : 0)); }
     bool remapBool(zmm::String field) { return (string_ok(field) && field == "1"); }
     
+    void setFsRootName(zmm::String rootName = nil);
+    
+    zmm::String fsRootName;
 };
 
 #endif // __SQL_STORAGE_H__

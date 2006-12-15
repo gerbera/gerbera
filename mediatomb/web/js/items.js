@@ -105,9 +105,25 @@ function updateItems(ajaxRequest)
         useFiles = true;
         childrenTag = "file";
     }
+    
     var ofId = items.getAttribute("ofId");
+    var success = items.getAttribute("success");
+    if (! success || success != "1")
+    {
+        var prefix = (useFiles ? 'f' : 'd');
+        var node = getTreeNode(prefix + ofId);
+        var parNode = node.getParent();
+        parNode.childrenHaveBeenFetched=false;
+        parNode.resetChildren();
+        fetchChildren(parNode, true, true);
+        //selectNode(parNode.getID());
+        //alert("no success!");
+        return;
+    }
+    
     var isVirtual = (items.getAttribute("virtual") == '1');
     var autoscanType = items.getAttribute("autoscan");
+    var path = items.getAttribute("location");
     var loadItemId = (useFiles ? 'f' : 'd') + ofId;
     var totalMatches = parseInt(items.getAttribute("totalMatches"));
     var totalPages = Math.ceil(totalMatches / viewItems);
@@ -166,7 +182,7 @@ function updateItems(ajaxRequest)
     if (useFiles)
     {
         var topDiv = rightDocument.createElement("div");
-        topDiv.appendChild(rightDocument.createTextNode("Folder: "));
+        topDiv.appendChild(rightDocument.createTextNode("Directory: " + path));
         topDiv.setAttribute("class", "topDiv");
         
         var first = true
@@ -178,10 +194,10 @@ function updateItems(ajaxRequest)
     else
     {
         var topDiv = rightDocument.createElement("div");
-        topDiv.appendChild(rightDocument.createTextNode("Container: "));
+        topDiv.appendChild(rightDocument.createTextNode("Container: " + path));
         topDiv.setAttribute("class", "topDiv");
         
-        var link;
+        var link;                               
         var first = true;
         var addLink = false;
         var editLink = false;

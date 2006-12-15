@@ -57,14 +57,28 @@ void web::directories::process()
         path = _(FS_ROOT_DIRECTORY);
     else
         path = hex_decode_string(parentID);
-
-    Ref<Filesystem> fs(new Filesystem());
-    Ref<Array<FsObject> > arr = fs->readDirectory(path, FS_MASK_DIRECTORIES,
-                                                  FS_MASK_DIRECTORIES);
-
+    
     Ref<Element> containers (new Element(_("containers")));
     containers->addAttribute(_("ofId"), parentID);
+    containers->addAttribute(_("select_it"), param(_("select_it")));
     containers->addAttribute(_("type"), _("f"));
+    root->appendChild(containers);
+    
+    Ref<Filesystem> fs(new Filesystem());
+    
+    Ref<Array<FsObject> > arr;
+    try
+    {
+        arr = fs->readDirectory(path, FS_MASK_DIRECTORIES,
+                                                      FS_MASK_DIRECTORIES);
+    }
+    catch (Exception e)
+    {
+        containers->addAttribute(_("success"), _("0"));
+        return;
+    }
+    containers->addAttribute(_("success"), _("1"));
+    
 
     for (int i = 0; i < arr->size(); i++)
     {
@@ -88,6 +102,5 @@ void web::directories::process()
         ce->setText(f2i->convert(filename));
         containers->appendChild(ce);
     }
-    root->appendChild(containers);
 }
 

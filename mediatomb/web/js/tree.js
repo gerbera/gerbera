@@ -188,13 +188,13 @@ function openEventListener(id)
     }
 }
 
-function fetchChildren(node, uiUpdate)
+function fetchChildren(node, uiUpdate, selectIt)
 {
     var id = node.getID();
     var type = id.substring(0, 1);
     id = id.substring(1);
     var linkType = (type == 'd') ? 'containers' : 'directories';
-    var url = link(linkType, {parent_id: id});
+    var url = link(linkType, {parent_id: id, select_it: (selectIt ? '1' : '0')});
     var async = ! uiUpdate;
     
     //DEBUG?
@@ -233,6 +233,21 @@ function updateTree(ajaxRequest)
     var parentId = type+xmlGetAttribute(containers, "ofId");
     
     var node = getTreeNode(parentId);
+    var success = containers.getAttribute("success");
+    if (! success || success != "1")
+    {
+        var parNode = node.getParent();
+        parNode.childrenHaveBeenFetched=false;
+        parNode.resetChildren();
+        fetchChildren(parNode, true, true);
+        //selectNode(parNode.getID());
+        //alert("no success!");
+        return;
+    }
+    
+    var selectItStr = containers.getAttribute("select_it");
+    var selectIt = (selectItStr && selectItStr == '1');
+    
     if (node.childrenHaveBeenFetched)
     {
         return;
@@ -246,7 +261,7 @@ function updateTree(ajaxRequest)
     
     var i;
     var len = cts.length;
-    var selectNode = false;
+    var doSelectLastNode = false;
     
     for (var i = 0; i < len; i++)
     {
@@ -275,20 +290,28 @@ function updateTree(ajaxRequest)
         {
             lastNodeDbWish=null;
             lastNodeDb = id;
-            selectNode = true;
+            doSelectLastNode = true;
         }
         else if (id == lastNodeFsWish)
         {
             lastNodeFsWish=null;
             lastNodeFs = id;
-            selectNode = true;
+            doSelectLastNode = true;
         }
         
         //recurse immediately:
         //fetchChildren(openEventListener, child);
     }
-    node.childrenHaveBeenFetched=true;
+    node.childrenHaveBeenFetched = true;
     refreshNode(node);
-    if (selectNode) selectLastNode();
+    if (doSelectLastNode)
+        selectLastNode();
+    else if (selectIt)
+    {
+        //alert("selecting: " + parentId);
+        selectNode(parentId);
+        //selectNode("d0");
+        //alert("selected! " + parentId);
+    }
 }
 

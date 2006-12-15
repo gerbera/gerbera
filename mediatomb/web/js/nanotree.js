@@ -640,7 +640,8 @@ function selectNode(nodeID) {
 		}
         */
 		var oldNodeTitle = treeDocument.getElementById('title' + selectedNode);
-		oldNodeTitle.className = 'treetitle';
+        if (oldNodeTitle)
+            oldNodeTitle.className = 'treetitle';
 	}
     if (selectedNode == null || selectedNode != nodeID)
     {
@@ -779,13 +780,15 @@ function fireMoveEvent(treeNode,draggedNodeID,droppedOnNodeID) {
 function blurSelection() {
 	if (selectedNode != null) {
 		var oldNodeTitle = treeDocument.getElementById('title' + selectedNode);
-		oldNodeTitle.className = 'treetitleselectedblured';
+		if (oldNodeTitle)
+            oldNodeTitle.className = 'treetitleselectedblured';
 	}
 }
 function focusSelection() {
 	if (selectedNode != null) {
 		var oldNodeTitle = treeDocument.getElementById('title' + selectedNode);
-		oldNodeTitle.className = 'treetitleselectedfocused';
+        if (oldNodeTitle)
+            oldNodeTitle.className = 'treetitleselectedfocused';
 	}
 }
 function getCookieVal (offset) {  

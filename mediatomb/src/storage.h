@@ -215,6 +215,8 @@ public:
     /// \return objectID of the container given by path
     virtual int ensurePathExistence(zmm::String path, int *changedContainer) = 0;
     
+    virtual zmm::String getFsRootName() = 0;
+    
 protected:
     /* helper for addContainerChain */
     static void stripAndUnescapeVirtualContainerFromPath(zmm::String path, zmm::String &first, zmm::String &last);
