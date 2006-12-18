@@ -40,7 +40,7 @@ var lastNodeDbWish;
 var lastNodeFsWish;
 
 var imageExtension = '.png';
-var imageStyle = "width:27px;height:24px;vertical-align:middle;";
+var imageStyle = "width:24px;height:26px;vertical-align:middle;";
 var imageLastnode = 'lastnode';
 var imageWhite = 'white';
 var imageTNoRoot = 't_no_root';
