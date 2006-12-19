@@ -419,7 +419,7 @@ function showNode(treeNode,lastNode) {
 	}
 	
 	str += '<img id="iconimage' + treeNode.getID() + '" src="' + iconStartImage + '" style="vertical-align:middle;" OnClick="parent.selectNode(\'' + treeNode.getID() + '\')" OnDblClick="parent.handleNode(\'' + treeNode.getID() + '\')">';
-	str += '&nbsp;<span unselectable="ON" style="vertical-align:middle;" class="treetitle" ID="title' + treeNode.getID() + '" OnDblClick="parent.handleNode(\'' + treeNode.getID() + '\')" OnClick="parent.selectNode(\'' + treeNode.getID() + '\')">';
+	str += '&nbsp;<span unselectable="ON" style="vertical-align:bottom;" class="treetitle" ID="title' + treeNode.getID() + '" OnDblClick="parent.handleNode(\'' + treeNode.getID() + '\')" OnClick="parent.selectNode(\'' + treeNode.getID() + '\')">';
 	str += treeNode.getName();
 	str += '</span>';
 	str += '</nobr>';
