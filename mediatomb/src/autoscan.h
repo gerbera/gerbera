@@ -131,6 +131,10 @@ public:
                       bool persistent,
                       int id = INVALID_SCAN_ID, unsigned int interval = 0, bool hidden = false);
 
+    void setStorageID(int storageID) { this->storageID = storageID; }
+
+    int getStorageID() { return storageID; }
+
     zmm::String getLocation() { return location; }
 
     scan_mode_t getScanMode() { return mode; }
@@ -212,6 +216,7 @@ protected:
     int taskCount;
     int scanID;
     int objectID;
+    int storageID;
     time_t  last_mod_previous_scan; 
     time_t  last_mod_current_scan;
     

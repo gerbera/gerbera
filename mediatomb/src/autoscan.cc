@@ -52,6 +52,7 @@ AutoscanDirectory::AutoscanDirectory(String location, scan_mode_t mode,
     scanID = id;
     taskCount = 0;
     objectID = INVALID_OBJECT_ID;
+    storageID = INVALID_OBJECT_ID;
     last_mod_previous_scan = 0;
     last_mod_current_scan = 0;
 }
