@@ -85,6 +85,7 @@ ConfigManager::ConfigManager() : Singleton<ConfigManager>()
         
         if ((!home_ok) && (string_ok(userhome)))
         {
+            userhome = normalizePath(userhome);
             filename = createDefaultConfig(userhome);
         }
         
@@ -687,7 +688,15 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
                 continue;
             }
 
-            location = normalizePath(location);
+            try
+            {
+                location = normalizePath(location);
+            }
+            catch (Exception e)
+            {
+                log_warning("Skipping autoscan directory \"%s\": %s\n", location.c_str(), e.getMessage().c_str());
+                continue;
+            }
 
             if (check_path(location, false))
             {
