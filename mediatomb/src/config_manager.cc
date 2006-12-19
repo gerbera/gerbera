@@ -687,6 +687,8 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
                 continue;
             }
 
+            location = normalizePath(location);
+
             if (check_path(location, false))
             {
                 log_warning("Skipping %s - not a directory!\n", location.c_str());

@@ -674,3 +674,16 @@ int compareTimespecs(struct timespec *a,  struct timespec *b)
         return -1;
     return 0;
 }
+
+String normalizePath(String path)
+{
+    path = path.reduce(DIR_SEPARATOR);
+    if (path.charAt(path.length() - 1) == DIR_SEPARATOR) // cut off trailing slash
+        path = path.substring(0, path.length() - 1);
+
+    if (path.find(DIR_SEPARATOR + ".." + DIR_SEPARATOR) || (path.find(DIR_SEPARATOR + "..") == (path.length() - 3)))
+        throw _Exception(_("'..' not allowed in path!"));
+
+    return path;
+}
+

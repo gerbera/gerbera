@@ -420,4 +420,21 @@ String String::reduce(char ch)
     res.updateLength();
     return res;
 }
+int String::find(const char *needle)
+{
+    if (!base)
+        return 0;
 
+    char *pos = strstr(base->data, needle);
+    if (pos)
+    {
+        return (pos-(base->data));
+    }
+    else
+        return 0;
+
+}
+int String::find(String needle)
+{
+    return find(needle.base->data);
+}

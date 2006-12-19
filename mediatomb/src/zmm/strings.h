@@ -183,7 +183,12 @@ public:
     {
         return base->startsWith(str.base);
     }
+
     
+   
+    int find(const char *needle);
+    int find(String needle);
+
     static String from(int x);
     static String from(unsigned int x);
     static String from(long x);

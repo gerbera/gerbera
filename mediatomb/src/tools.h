@@ -210,5 +210,9 @@ long getMillis(long startMillis = 0);
 void millisToTimespec(long millis, struct timespec *spec);
 */
 
+/// \brief This function makes sure that there are no trailing slashes, no 
+/// consecutive slashes. If /../ or /..\0 is encountered an exception is 
+/// thrown.
+zmm::String normalizePath(zmm::String path);
 #endif // __TOOLS_H__
 
