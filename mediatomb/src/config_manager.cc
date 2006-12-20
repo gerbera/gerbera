@@ -792,7 +792,15 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
             }
             
             Ref<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, true, -1, interval, hidden));
-            list->add(dir); 
+            try
+            {
+                list->add(dir); 
+            }
+            catch (Exception e)
+            {
+                log_error("Could not add %s: %s\n", location.c_str(), e.getMessage().c_str());
+                continue;
+            }
         }
     }
 
