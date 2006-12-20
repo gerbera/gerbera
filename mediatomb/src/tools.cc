@@ -194,7 +194,7 @@ void string_ok_ex(String str)
 
 String http_redirect_to(String ip, String port, String page)
 {
-    return _("<html><head><meta http-equiv=\"Refresh\" content=\"0;URL=http://") + ip + ":" + port + "/" + page + "\"></head><body bgcolor=\"#408bff\"></body></html>";
+    return _("<html><head><meta http-equiv=\"Refresh\" content=\"0;URL=http://") + ip + ":" + port + "/" + page + "\"></head><body bgcolor=\"#dddddd\"></body></html>";
 }
 
 String hex_encode(void *data, int len)
