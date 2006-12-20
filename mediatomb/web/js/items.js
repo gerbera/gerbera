@@ -142,11 +142,16 @@ function updateItems(ajaxRequest)
     
     var first = true;
     
+    /*
     if (thisPage > showMaxPages / 2)
         first = _addLink(pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','0');", "first", iconFirst, " ");
+    */
     
     if (prevPageStart >= 0)
+    {
+        first = _addLink(pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','0');", "first", iconFirst, " ");
         first = _addLink(pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','"+prevPageStart+"');", "previous", iconPrevious, " ");
+    }
     
     for (var i = pagesFrom; i <= pagesTo; i++)
     {
@@ -169,10 +174,15 @@ function updateItems(ajaxRequest)
     }
     
     if (nextPageStart < totalMatches)
+    {
         first = _addLink(pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','"+nextPageStart+"');", "next", iconNext, " ");
+        first = _addLink(pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','"+((totalPages - 1) * viewItems)+"');", "last", iconLast, " ");
+    }
     
+    /*
     if (thisPage < totalPages - showMaxPages / 2)
         first = _addLink(pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','"+((totalPages - 1) * viewItems)+"');", "last", iconLast, " ");
+    */
     
     var children = items.getElementsByTagName(childrenTag);
     var itemsEl = rightDocument.createElement("div");
