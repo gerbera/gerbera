@@ -44,8 +44,8 @@ CREATE TABLE `mt_internal_setting` (
 ) ENGINE=InnoDB CHARSET=utf8;
 INSERT INTO `mt_internal_setting` VALUES ('db_version','1');
 CREATE TABLE `mt_autoscan` (
-  `id` int(11) NOT NULL,
-  `obj_id` integer default NULL,
+  `id` int(11) NOT NULL auto_increment,
+  `obj_id` int(11) default NULL,
   `scan_level` enum('basic','full') NOT NULL,
   `scan_mode` enum('timed') NOT NULL,
   `recursive` tinyint(4) unsigned NOT NULL,
@@ -54,7 +54,7 @@ CREATE TABLE `mt_autoscan` (
   `last_modified` bigint(20) unsigned default NULL,
   `persistent` tinyint(4) unsigned NOT NULL default '0',
   `location` text,
-  `touched` tinyint(4) unsigned NOT NULL, default '1',
+  `touched` tinyint(4) unsigned NOT NULL default '1',
   PRIMARY KEY `id` (`id`),
   KEY `mt_autoscan_obj_id` (`obj_id`),
   CONSTRAINT `mt_autoscan_ibfk_1` FOREIGN KEY (`obj_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE

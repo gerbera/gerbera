@@ -545,7 +545,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
             << ") DESC, "<< TQD('f',"dc_title");
         }
         if (doLimit)
-            *qb << " LIMIT " << param->getStartingIndex() << ',' << count;
+            *qb << " LIMIT " << count << " OFFSET " << param->getStartingIndex();
     }
     else // metadata
     {
@@ -1512,6 +1512,8 @@ void SQLStorage::updateAutoscanDirectory(Ref<AutoscanDirectory> adir)
 
 void SQLStorage::removeAutoscanDirectoryByObjectID(int objectID)
 {
+    if (objectID == INVALID_OBJECT_ID)
+        return;
     Ref<StringBuffer> q(new StringBuffer());
     *q << "DELETE FROM " << TQ(AUTOSCAN_TABLE)
         << " WHERE " << TQ("obj_id") << " = " << quote(objectID);
@@ -1522,6 +1524,8 @@ void SQLStorage::removeAutoscanDirectoryByObjectID(int objectID)
 
 void SQLStorage::removeAutoscanDirectory(int autoscanID)
 {
+    if (autoscanID == INVALID_OBJECT_ID)
+        return;
     int objectID = _getAutoscanObjectID(autoscanID);
     Ref<StringBuffer> q(new StringBuffer());
     *q << "DELETE FROM " << TQ(AUTOSCAN_TABLE)
@@ -1531,11 +1535,13 @@ void SQLStorage::removeAutoscanDirectory(int autoscanID)
         _autoscanChangePersistentFlag(objectID, false);
 }
 
-int SQLStorage::getAutoscanDirectoryType(int objectId)
+int SQLStorage::getAutoscanDirectoryType(int objectID)
 {
+    if (objectID == INVALID_OBJECT_ID)
+        return 0;
     Ref<StringBuffer> q(new StringBuffer());
     *q << "SELECT " << TQ("persistent") << " FROM " << TQ(AUTOSCAN_TABLE)
-        << " WHERE " << TQ("obj_id") << " = " << quote(objectId);
+        << " WHERE " << TQ("obj_id") << " = " << quote(objectID);
     Ref<SQLResult> res = select(q);
     Ref<SQLRow> row;
     if (res == nil || (row = res->nextRow()) == nil)

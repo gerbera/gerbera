@@ -246,14 +246,14 @@ Ref<SQLResult> MysqlStorage::select(const char *query, int length)
     res = mysql_real_query(&db, query, length);
     if (res)
     {
-        throw _StorageException(_("Mysql: mysql_real_query() failed: ") + getError(&db));
+        throw _StorageException(_("Mysql: mysql_real_query() failed: ") + getError(&db) + "; query: " + query);
     }
     
     MYSQL_RES *mysql_res;
     mysql_res = mysql_store_result(&db);
     if(! mysql_res)
     {
-        throw _StorageException(_("Mysql: mysql_store_result() failed: ") + getError(&db));
+        throw _StorageException(_("Mysql: mysql_store_result() failed: ") + getError(&db) + "; query: " + query);
     }
     return Ref<SQLResult> (new MysqlResult(mysql_res));
 }
@@ -272,7 +272,7 @@ int MysqlStorage::exec(const char *query, int length, bool getLastInsertId)
     res = mysql_real_query(&db, query, length);
     if(res)
     {
-        throw _StorageException(_("Mysql: mysql_real_query() failed: ") + getError(&db));
+        throw _StorageException(_("Mysql: mysql_real_query() failed: ") + getError(&db) + "; query: " + query);
     }
     int insert_id=-1;
     if (getLastInsertId) insert_id = mysql_insert_id(&db);
