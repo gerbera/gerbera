@@ -7,13 +7,10 @@ _DIST_FILES_IMAGES = \
 ./icons/nanotree/images/minus_last.png \
 ./icons/nanotree/images/white.png \
 ./icons/nanotree/images/plus_no_root.png \
-./icons/nanotree/images/page16x16.gif \
 ./icons/nanotree/images/minus_nolines.png \
 ./icons/nanotree/images/line.png \
-./icons/nanotree/images/user_16x16.gif \
 ./icons/nanotree/images/plus_last_no_root.png \
 ./icons/nanotree/images/minus_no_root.png \
-./icons/nanotree/images/help_16x16.gif \
 ./icons/nanotree/images/t_no_root.png \
 ./icons/nanotree/images/t.png \
 ./icons/nanotree/images/plus_last.png \
