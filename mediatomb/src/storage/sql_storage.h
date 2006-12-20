@@ -128,8 +128,10 @@ public:
     
     virtual void updateAutoscanPersistentList(scan_mode_t scanmode, zmm::Ref<AutoscanList> list);
     virtual zmm::Ref<AutoscanList> getAutoscanList(scan_mode_t scanmode);
-    virtual void addAutoscanDirectory(zmm::Ref<AutoscanDirectory> adir);
-    virtual void removeAutoscanDirectory(int objectId);
+    virtual int addAutoscanDirectory(zmm::Ref<AutoscanDirectory> adir);
+    virtual void updateAutoscanDirectory(zmm::Ref<AutoscanDirectory> adir);
+    virtual void removeAutoscanDirectoryByObjectID(int objectID);
+    virtual void removeAutoscanDirectory(int autoscanID);
     virtual int getAutoscanDirectoryType(int objectId);
     virtual void autoscanUpdateLM(zmm::Ref<AutoscanDirectory> adir);
     
@@ -141,7 +143,7 @@ public:
     
 protected:
     SQLStorage();
-    virtual ~SQLStorage();
+    //virtual ~SQLStorage();
     virtual void init();
     
     bool dbRemovesDeps;
@@ -184,12 +186,9 @@ private:
     
     virtual zmm::Ref<zmm::IntArray> _purgeEmptyContainers(zmm::Ref<zmm::StringBuffer> containerIDs);
     
-    /* helpers for removeObject() */
-    
-    int *rmIDs;
-    zmm::Ref<DBHash<int> > rmIDHash;
-    int *rmParents;
-    zmm::Ref<DBBHash<int, int> > rmParentHash;
+    /* helpers for autoscan */
+    int _getAutoscanObjectID(int autoscanID);
+    void _autoscanChangePersistentFlag(int objectID, bool persistent);
     
     /* location hash helpers */
     zmm::String addLocationPrefix(char prefix, zmm::String path);

@@ -111,7 +111,7 @@ void web::autoscan::process()
             {
             */
             cm->addAutoscanDirectory(autoscan);
-            //storage->addAutoscanDirectory(autoscan);
+            storage->addAutoscanDirectory(autoscan);
             /* why was this here??
             }
             catch (Exception e)
@@ -132,7 +132,7 @@ void web::autoscan::process()
             || obj->isVirtual())
             throw _Exception(_("tried to remove an illegal object (id) from the list of the autoscan directories"));
         
-        storage->removeAutoscanDirectory(objID);
+        storage->removeAutoscanDirectoryByObjectID(objID);
         cm->removeAutoscanDirectory(obj->getLocation());
     }
     else if (action == "list")

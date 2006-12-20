@@ -389,6 +389,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
             {
                 adir->setTaskCount(-1);
                 removeAutoscanDirectory(scanID, scanMode);
+                storage->removeAutoscanDirectory(adir->getStorageID());
                 return;
             }
         }
@@ -399,6 +400,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
         if (!check_path(adir->getLocation(), true))
         {
             adir->setObjectID(INVALID_OBJECT_ID);
+            storage->updateAutoscanDirectory(adir);
             if (adir->persistent())
             {
                 return;
@@ -407,13 +409,14 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
             {
                 adir->setTaskCount(-1);
                 removeAutoscanDirectory(scanID, scanMode);
+                storage->removeAutoscanDirectory(adir->getStorageID());
                 return;
             }
         }
 
         containerID = ensurePathExistence(adir->getLocation());
         adir->setObjectID(containerID);
-        storage->addAutoscanDirectory(adir);
+        storage->updateAutoscanDirectory(adir);
         location = adir->getLocation();
     }
 
@@ -437,6 +440,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
         {
             removeObject(containerID, false);
             adir->setObjectID(INVALID_OBJECT_ID);
+            storage->updateAutoscanDirectory(adir);
             return;
         }
         else
@@ -444,6 +448,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
             adir->setTaskCount(-1);
             removeObject(containerID, false);
             removeAutoscanDirectory(scanID, scanMode);
+            storage->removeAutoscanDirectory(adir->getStorageID());
             return;
         }
     }
@@ -515,7 +520,11 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
                 // add file, not recursive, not async
                 // make sure not to add the current config.xml
                 if (ConfigManager::getInstance()->getConfigFilename() != path)
+                {
                     addFile(path, false, false, adir->getHidden());
+                    if (last_modified_current_max < statbuf.st_mtime)
+                        last_modified_current_max = statbuf.st_mtime;
+                }
             }
         }
         else if (S_ISDIR(statbuf.st_mode) && (adir->getRecursive()))

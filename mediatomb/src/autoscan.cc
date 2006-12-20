@@ -73,7 +73,12 @@ void AutoscanList::updateLMinDB()
 {
     AUTOLOCK(mutex);
     for (int i = 0; i < list->size(); i++)
-        Storage::getInstance()->autoscanUpdateLM(list->get(i));
+    {
+        log_debug("i: %d\n", i);
+        Ref<AutoscanDirectory> ad = list->get(i);
+        if (ad != nil)
+            Storage::getInstance()->autoscanUpdateLM(ad);
+    }
 }
 
 int AutoscanList::add(Ref<AutoscanDirectory> dir)

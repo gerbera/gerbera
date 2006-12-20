@@ -114,7 +114,7 @@ enum
     " FROM " << TQ(CDS_OBJECT_TABLE) << ' ' << TQ('f') << " LEFT JOIN " \
     << TQ(CDS_OBJECT_TABLE) << ' ' << TQ("rf") << " ON " << TQD('f',"ref_id") \
     << " = " << TQD("rf","id") << " LEFT JOIN " << TQ(AUTOSCAN_TABLE) << ' ' \
-    << TQ("as") << " ON " << TQD("as","id") << " = " << TQD('f',"id") << ' '
+    << TQ("as") << " ON " << TQD("as","obj_id") << " = " << TQD('f',"id") << ' '
     
 #define SQL_QUERY       sql_query
 
@@ -122,9 +122,6 @@ enum
 
 SQLStorage::SQLStorage() : Storage()
 {
-    rmIDs = NULL;
-    rmParents = NULL;
-    
     table_quote_begin = '\0';
     table_quote_end = '\0';
 }
@@ -161,13 +158,11 @@ void SQLStorage::init()
 */
 }
 
+/*
 SQLStorage::~SQLStorage()
 {
-    if (rmIDs)
-        FREE(rmIDs);
-    if (rmParents)
-        FREE(rmParents);
 }
+*/
 
 Ref<CdsObject> SQLStorage::checkRefID(Ref<CdsObject> obj)
 {
@@ -215,22 +210,22 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
     if (hasReference)
         cdsObjectSql->put(_("ref_id"), quote(refObj->getID()));
     else if (isUpdate)
-        cdsObjectSql->put(_("ref_id"), _("NULL"));
+        cdsObjectSql->put(_("ref_id"), _(SQL_NULL));
     
     if (! hasReference || refObj->getClass() != obj->getClass())
         cdsObjectSql->put(_("upnp_class"), quote(obj->getClass()));
     else if (isUpdate)
-        cdsObjectSql->put(_("upnp_class"), _("NULL"));
+        cdsObjectSql->put(_("upnp_class"), _(SQL_NULL));
     
     //if (!hasReference || refObj->getTitle() != obj->getTitle())
     cdsObjectSql->put(_("dc_title"), quote(obj->getTitle()));
     //else if (isUpdate)
-    //    cdsObjectSql->put(_("dc_title"), _("NULL"));
+    //    cdsObjectSql->put(_("dc_title"), _(SQL_NULL));
     
     cdsObjectSql->put(_("flags"), quote(obj->getFlags()));
     
     if (isUpdate)
-        cdsObjectSql->put(_("metadata"), _("NULL"));
+        cdsObjectSql->put(_("metadata"), _(SQL_NULL));
     Ref<Dictionary> dict = obj->getMetadata();
     if (dict->size() > 0)
     {
@@ -241,7 +236,7 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
     }
     
     if (isUpdate)
-        cdsObjectSql->put(_("auxdata"), _("NULL"));
+        cdsObjectSql->put(_("auxdata"), _(SQL_NULL));
     dict = obj->getAuxData();
     if (dict->size() > 0 && (! hasReference || ! refObj->getAuxData()->equals(obj->getAuxData())))
     {
@@ -262,10 +257,10 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
         if (string_ok(resStr))
             cdsObjectSql->put(_("resources"), quote(resStr));
         else
-            cdsObjectSql->put(_("resources"), _("NULL"));
+            cdsObjectSql->put(_("resources"), _(SQL_NULL));
     }
     else if (isUpdate)
-        cdsObjectSql->put(_("resources"), _("NULL"));
+        cdsObjectSql->put(_("resources"), _(SQL_NULL));
     
     if (IS_CDS_CONTAINER(objectType))
     {
@@ -1335,136 +1330,213 @@ overwritten due to different SQL syntax for MySQL and SQLite3
 
 void SQLStorage::updateAutoscanPersistentList(scan_mode_t scanmode, Ref<AutoscanList> list)
 {
-    log_debug("removing persistent autoscans - scanmode: %s;\n", AutoscanDirectory::mapScanmode(scanmode).c_str());
+    
+    log_debug("setting persistent autoscans untouched - scanmode: %s;\n", AutoscanDirectory::mapScanmode(scanmode).c_str());
     Ref<StringBuffer> q(new StringBuffer());
-    *q << "DELETE FROM " << TQ(AUTOSCAN_TABLE) << " WHERE "
-        << TQ("persistent") << " = " << quote(1)
+    *q << "UPDATE " << TQ(AUTOSCAN_TABLE)
+        << " SET " << TQ("touched") << '=' << mapBool(false)
+        << " WHERE "
+        << TQ("persistent") << " = " << mapBool(true)
         << " AND " << TQ("scan_mode") << " = "
         << quote(AutoscanDirectory::mapScanmode(scanmode));
     exec(q);
     
     int listSize = list->size();
-    log_debug("adding persistent autoscans (%d)\n", listSize);
+    log_debug("updating/adding persistent autoscans (count: %d)\n", listSize);
     for (int i = 0; i < listSize; i++)
     {
-        log_debug("getting ad from list..\n");
+        log_debug("getting ad %d from list..\n", i);
         Ref<AutoscanDirectory> ad = list->get(i);
         if (ad == nil)
             continue;
-        int objectID = ad->getObjectID();
-        log_debug("object_id = %d\n", objectID);
-        if (objectID == INVALID_OBJECT_ID)
-            continue;
-        q->clear();
-        *q << "DELETE FROM " << TQ(AUTOSCAN_TABLE)
-            << " WHERE " << TQ("id") << " = " << quote(objectID);
-        exec(q);
+        
         // only persistent asD should be given to getAutoscanList
         assert(ad->persistent());
         // the scanmode should match the given parameter
         assert(ad->getScanMode() == scanmode);
-        addAutoscanDirectory(ad);
+        
+        String location = ad->getLocation();
+        if (! string_ok(location))
+            throw _Exception(_("AutoscanDirectoy with illegal location given to SQLStorage::updateAutoscanPersistentList"));
+        
+        q->clear();
+        *q << "SELECT " << TQ("id") << " FROM " << TQ(AUTOSCAN_TABLE)
+            << " WHERE ";
+        int objectID = findObjectIDByPath(location + '/');
+        log_debug("objectID = %d\n", objectID);
+        if (objectID == INVALID_OBJECT_ID)
+            *q << TQ("location") << '=' << quote(location);
+        else
+            *q << TQ("obj_id") << '=' << quote(objectID);
+        *q << " LIMIT 1";
+        Ref<SQLResult> res = select(q);
+        if (res == nil)
+            throw _StorageException(_("query error while selecting from autoscan list"));
+        Ref<SQLRow> row;
+        if ((row = res->nextRow()) != nil)
+        {
+            ad->setStorageID(row->col(0).toInt());
+            updateAutoscanDirectory(ad);
+        }
+        else
+            addAutoscanDirectory(ad);
     }
+    
+    q->clear();
+    *q << "DELETE FROM " << TQ(AUTOSCAN_TABLE)
+        << " WHERE " << TQ("touched") << '=' << mapBool(false);
+    exec(q);
 }
 
 Ref<AutoscanList> SQLStorage::getAutoscanList(scan_mode_t scanmode)
 {
     #define FLD(field) << TQD('a',field) <<
     Ref<StringBuffer> q(new StringBuffer());
-    *q << "SELECT " FLD("id") ',' FLD("scan_level") ','
+    *q << "SELECT " FLD("id") ',' FLD("obj_id") ',' FLD("scan_level") ','
        FLD("scan_mode") ',' FLD("recursive") ',' FLD("hidden") ','
        FLD("interval") ',' FLD("last_modified") ',' FLD("persistent") ','
-       << TQD('t',"location")
+       FLD("location") ',' << TQD('t',"location")
        << " FROM " << TQ(AUTOSCAN_TABLE) << ' ' << TQ('a')
-       << " JOIN " << TQ(CDS_OBJECT_TABLE) << ' ' << TQ('t')
-       << " ON " FLD("id") '=' << TQD('t',"id")
+       << " LEFT JOIN " << TQ(CDS_OBJECT_TABLE) << ' ' << TQ('t')
+       << " ON " FLD("obj_id") '=' << TQD('t',"id")
        << " WHERE " FLD("scan_mode") '=' << quote(AutoscanDirectory::mapScanmode(scanmode));
     Ref<SQLResult> res = select(q);
     if (res == nil)
-        return nil;
-    Ref<AutoscanList> listNew(new AutoscanList());
+        throw _StorageException(_("query error while fetching autoscan list"));
+    Ref<AutoscanList> ret(new AutoscanList());
     Ref<SQLRow> row;
     while((row = res->nextRow()) != nil)
     {
-        int ObjectID = row->col(0).toInt();
-        char prefix;
-        String location = stripLocationPrefix(&prefix, row->col(8));
-        if (prefix != LOC_DIR_PREFIX)
-            throw _Exception(_("mt_autoscan referred to an object, that was not a directory - id: ") + ObjectID + "; location: " + row->col(8) + "; prefix: " + prefix);
+        int objectID = INVALID_OBJECT_ID;
+        String objectIDstr = row->col(1);
+        if (string_ok(objectIDstr))
+            objectID = objectIDstr.toInt();
+        int storageID = row->col(0).toInt();
         
-        scan_level_t level = AutoscanDirectory::remapScanlevel(row->col(1));
-        scan_mode_t mode = AutoscanDirectory::remapScanmode(row->col(2));
-        bool recursive = remapBool(row->col(3));
-        bool hidden = remapBool(row->col(4));
-        bool persistent = remapBool(row->col(7));
+        String location;
+        if (objectID == INVALID_OBJECT_ID)
+            location = row->col(9);
+        else
+        {
+            char prefix;
+            location = stripLocationPrefix(&prefix, row->col(10));
+            if (prefix != LOC_DIR_PREFIX)
+                throw _Exception(_("mt_autoscan referred to an object, that was not a directory - id: ") + objectID + "; location: " + row->col(9) + "; prefix: " + prefix);
+        }
+        
+        scan_level_t level = AutoscanDirectory::remapScanlevel(row->col(2));
+        scan_mode_t mode = AutoscanDirectory::remapScanmode(row->col(3));
+        bool recursive = remapBool(row->col(4));
+        bool hidden = remapBool(row->col(5));
+        bool persistent = remapBool(row->col(8));
         int interval = 0;
         if (mode == TimedScanMode)
-            interval = row->col(5).toInt();
-        time_t last_modified = row->col(6).toLong();
+            interval = row->col(6).toInt();
+        time_t last_modified = row->col(7).toLong();
         
         log_debug("adding autoscan location: %s; recursive: %d\n", location.c_str(), recursive);
         
         Ref<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, persistent, -1, interval, hidden));
-        dir->setObjectID(ObjectID);
+        dir->setObjectID(objectID);
+        dir->setStorageID(storageID);
         dir->setCurrentLMT(last_modified);
         dir->updateLMT();
-        listNew->add(dir);
+        ret->add(dir);
     }
     
-    return listNew;
+    return ret;
 }
 
-void SQLStorage::addAutoscanDirectory(Ref<AutoscanDirectory> adir)
+int SQLStorage::addAutoscanDirectory(Ref<AutoscanDirectory> adir)
 {
+    if (adir->getStorageID() >= 0)
+        throw _Exception(_("tried to add autoscan directory with a storage id set"));
     int objectID = findObjectIDByPath(adir->getLocation() + DIR_SEPARATOR);
-    if (objectID < 0)
-        throw _Exception(_("tried to add autoscan directory with illegal location: ") + adir->getLocation());
+    if (! adir->persistent() && objectID < 0)
+        throw _Exception(_("tried to add non-persistent autoscan directory with an illegal objectID or location"));
+    
+    _autoscanChangePersistentFlag(objectID, true);
+    
     Ref<StringBuffer> q(new StringBuffer());
-    *q << "UPDATE " << TQ(CDS_OBJECT_TABLE)
-        << " SET " << TQ("flags") << " = (" << TQ("flags") << " | " << OBJECT_FLAG_PERSISTENT_CONTAINER
-        << ") WHERE " << TQ("id") << " = " << quote(objectID);
-    exec(q);
-    q->clear();
     *q << "INSERT INTO " << TQ(AUTOSCAN_TABLE)
-        << " (" << TQ("id") << ','
+        << " (" << TQ("obj_id") << ','
         << TQ("scan_level") << ','
         << TQ("scan_mode") << ','
         << TQ("recursive") << ','
         << TQ("hidden") << ','
         << TQ("interval") << ','
         << TQ("last_modified") << ','
-        << TQ("persistent")
+        << TQ("persistent") << ','
+        << TQ("location")
         << ") VALUES ("
-        << quote(objectID) << ','
+        << (objectID >= 0 ? quote(objectID) : _(SQL_NULL)) << ','
         << quote(AutoscanDirectory::mapScanlevel(adir->getScanLevel())) << ','
         << quote(AutoscanDirectory::mapScanmode(adir->getScanMode())) << ','
         << mapBool(adir->getRecursive()) << ','
         << mapBool(adir->getHidden()) << ','
         << quote(adir->getInterval()) << ','
         << quote(adir->getPreviousLMT()) << ','
-        << quote(adir->persistent() ? '1' : '0')
+        << mapBool(adir->persistent()) << ','
+        << (objectID >= 0 ? _(SQL_NULL) : quote(adir->getLocation()))
         << ')';
+    return exec(q, true);
+}
+
+void SQLStorage::updateAutoscanDirectory(Ref<AutoscanDirectory> adir)
+{
+    log_debug("id: %d, obj_id: %d\n", adir->getStorageID(), adir->getObjectID());
+    int objectID = adir->getObjectID();
+    int objectIDold = _getAutoscanObjectID(adir->getStorageID());
+    if (objectIDold != objectID)
+    {
+        _autoscanChangePersistentFlag(objectIDold, false);
+        _autoscanChangePersistentFlag(objectID, true);
+    }
+    Ref<StringBuffer> q(new StringBuffer());
+    *q << "UPDATE " << TQ(AUTOSCAN_TABLE)
+        << " SET " << TQ("obj_id") << '=' << (objectID >= 0 ? quote(objectID) : _(SQL_NULL))
+        << ',' << TQ("scan_level") << '='
+        << quote(AutoscanDirectory::mapScanlevel(adir->getScanLevel()))
+        << ',' << TQ("scan_mode") << '='
+        << quote(AutoscanDirectory::mapScanmode(adir->getScanMode()))
+        << ',' << TQ("recursive") << '=' << mapBool(adir->getRecursive())
+        << ',' << TQ("hidden") << '=' << mapBool(adir->getHidden())
+        << ',' << TQ("interval") << '=' << quote(adir->getInterval());
+    if (adir->getPreviousLMT() > 0)
+        *q << ',' << TQ("last_modified") << '=' << quote(adir->getPreviousLMT());
+    *q << ',' << TQ("persistent") << '=' << mapBool(adir->persistent())
+        << ',' << TQ("location") << '=' << (objectID >= 0 ? _(SQL_NULL) : quote(adir->getLocation()))
+        << ',' << TQ("touched") << '=' << mapBool(true)
+        << " WHERE " << TQ("id") << '=' << quote(adir->getStorageID());
     exec(q);
 }
 
-void SQLStorage::removeAutoscanDirectory(int objectId)
+void SQLStorage::removeAutoscanDirectoryByObjectID(int objectID)
 {
     Ref<StringBuffer> q(new StringBuffer());
     *q << "DELETE FROM " << TQ(AUTOSCAN_TABLE)
-        << " WHERE " << TQ("id") << " = " << quote(objectId);
+        << " WHERE " << TQ("obj_id") << " = " << quote(objectID);
     exec(q);
-    q->clear();
-    *q << "UPDATE " << TQ(CDS_OBJECT_TABLE)
-        << " SET " << TQ("flags") << " = (" << TQ("flags") << " & ~" << OBJECT_FLAG_PERSISTENT_CONTAINER
-        << ") WHERE " << TQ("id") << " = " << quote(objectId);
+    
+    _autoscanChangePersistentFlag(objectID, false);
+}
+
+void SQLStorage::removeAutoscanDirectory(int autoscanID)
+{
+    int objectID = _getAutoscanObjectID(autoscanID);
+    Ref<StringBuffer> q(new StringBuffer());
+    *q << "DELETE FROM " << TQ(AUTOSCAN_TABLE)
+        << " WHERE " << TQ("id") << " = " << quote(autoscanID);
     exec(q);
+    if (objectID != INVALID_OBJECT_ID)
+        _autoscanChangePersistentFlag(objectID, false);
 }
 
 int SQLStorage::getAutoscanDirectoryType(int objectId)
 {
     Ref<StringBuffer> q(new StringBuffer());
     *q << "SELECT " << TQ("persistent") << " FROM " << TQ(AUTOSCAN_TABLE)
-        << " WHERE " << TQ("id") << " = " << quote(objectId);
+        << " WHERE " << TQ("obj_id") << " = " << quote(objectId);
     Ref<SQLResult> res = select(q);
     Ref<SQLRow> row;
     if (res == nil || (row = res->nextRow()) == nil)
@@ -1475,8 +1547,35 @@ int SQLStorage::getAutoscanDirectoryType(int objectId)
         return 2;
 }
 
+int SQLStorage::_getAutoscanObjectID(int autoscanID)
+{
+    Ref<StringBuffer> q(new StringBuffer());
+    *q << "SELECT " << TQ("obj_id") << " FROM " << TQ(AUTOSCAN_TABLE)
+        << " WHERE " << TQ("id") << " = " << quote(autoscanID)
+        << " LIMIT 1";
+    Ref<SQLResult> res = select(q);
+    if (res == nil)
+        throw _StorageException(_("error while doing select on "));
+    Ref<SQLRow> row;
+    if ((row = res->nextRow()) != nil && string_ok(row->col(0)))
+        return row->col(0).toInt();
+    return INVALID_OBJECT_ID;
+}
+
+void SQLStorage::_autoscanChangePersistentFlag(int objectID, bool persistent)
+{
+    Ref<StringBuffer> q(new StringBuffer());
+    *q << "UPDATE " << TQ(CDS_OBJECT_TABLE)
+        << " SET " << TQ("flags") << " = (" << TQ("flags")
+        << (persistent ? _(" | ") : _(" & ~"))
+        << OBJECT_FLAG_PERSISTENT_CONTAINER
+        << ") WHERE " << TQ("id") << " = " << quote(objectID);
+    exec(q);
+}
+
 void SQLStorage::autoscanUpdateLM(zmm::Ref<AutoscanDirectory> adir)
 {
+    /*
     int objectID = adir->getObjectID();
     if (IS_FORBIDDEN_CDS_ID(objectID))
     {
@@ -1484,10 +1583,12 @@ void SQLStorage::autoscanUpdateLM(zmm::Ref<AutoscanDirectory> adir)
         if (IS_FORBIDDEN_CDS_ID(objectID))
             throw _Exception(_("autoscanUpdateLM called with adir with illegal objectID and location"));
     }
+    */
+    log_debug("id: %d; last_modified: %d\n", adir->getStorageID(), adir->getPreviousLMT());
     Ref<StringBuffer> q(new StringBuffer());
     *q << "UPDATE " << TQ(AUTOSCAN_TABLE)
         << " SET " << TQ("last_modified") << " = " << quote(adir->getPreviousLMT())
-        << " WHERE " << TQ("id") << " = " << quote(objectID);
+        << " WHERE " << TQ("id") << " = " << quote(adir->getStorageID());
     exec(q);
 }
 
