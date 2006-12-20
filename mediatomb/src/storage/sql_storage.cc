@@ -112,8 +112,8 @@ enum
 #define SQL_QUERY_FOR_STRINGBUFFER "SELECT " << SELECT_DATA_FOR_STRINGBUFFER << \
     " FROM " << TQ(CDS_OBJECT_TABLE) << ' ' << TQ('f') << " LEFT JOIN " \
     << TQ(CDS_OBJECT_TABLE) << ' ' << TQ("rf") << " ON " << TQD('f',"ref_id") \
-    << " = " << TQD("rf","id") << " LEFT JOIN " << TQ(AUTOSCAN_TABLE) << ' ' \
-    << TQ("as") << " ON " << TQD("as","obj_id") << " = " << TQD('f',"id") << ' '
+    << '=' << TQD("rf","id") << " LEFT JOIN " << TQ(AUTOSCAN_TABLE) << ' ' \
+    << TQ("as") << " ON " << TQD("as","obj_id") << '=' << TQD('f',"id") << ' '
     
 #define SQL_QUERY       sql_query
 
@@ -326,11 +326,11 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
         *qb << "SELECT " << TQ("id") 
             << " FROM " << TQ(CDS_OBJECT_TABLE)
             << " WHERE " << TQ("parent_id") 
-            << " = " << quote(obj->getParentID())
+            << '=' << quote(obj->getParentID())
             << " AND " << TQ("ref_id") 
-            << " = " << quote(refObj->getID())
+            << '=' << quote(refObj->getID())
             << " AND " << TQ("dc_title")
-            << " = " << quote(obj->getTitle())
+            << '=' << quote(obj->getTitle())
             << " LIMIT 1";
         Ref<SQLResult> res = select(qb);
         // if duplicate items is found - ignore
@@ -380,7 +380,7 @@ void SQLStorage::addObject(Ref<CdsObject> obj, int *changedContainer)
         }
         
         Ref<StringBuffer> qb(new StringBuffer(256));
-        *qb << "INSERT INTO " << tableName << '(' << fields->toString() <<
+        *qb << "INSERT INTO " << TQ(tableName) << " (" << fields->toString() <<
                 ") VALUES (" << values->toString() << ')';
                 
         log_debug("insert_query: %s\n", qb->toString().c_str());
@@ -421,7 +421,7 @@ void SQLStorage::updateObject(zmm::Ref<CdsObject> obj, int *changedContainer)
         Ref<Array<DictionaryElement> > dataElements = addUpdateTable->getDict()->getElements();
         
         Ref<StringBuffer> qb(new StringBuffer(256));
-        *qb << "UPDATE " << tableName << " SET ";
+        *qb << "UPDATE " << TQ(tableName) << " SET ";
         
         for (int j = 0; j < dataElements->size(); j++)
         {
@@ -430,7 +430,7 @@ void SQLStorage::updateObject(zmm::Ref<CdsObject> obj, int *changedContainer)
             {
                 *qb << ',';
             }
-            *qb << element->getKey() << " = "
+            *qb << TQ(element->getKey()) << '='
                 << element->getValue();
         }
         
@@ -454,7 +454,7 @@ Ref<CdsObject> SQLStorage::loadObject(int objectID)
     
     //log_debug("sql_query = %s\n",sql_query.c_str());
     
-    *qb << SQL_QUERY << " WHERE " << TQD('f',"id") << " = " << objectID;
+    *qb << SQL_QUERY << " WHERE " << TQD('f',"id") << '=' << objectID;
 
     Ref<SQLResult> res = select(qb);
     Ref<SQLRow> row;
@@ -542,7 +542,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
         else
         {
             *qb << " ORDER BY ("
-            << TQD("f","object_type") << " = " << quote(OBJECT_TYPE_CONTAINER)
+            << TQD('f',"object_type") << '=' << quote(OBJECT_TYPE_CONTAINER)
             << ") DESC, "<< TQD('f',"dc_title");
         }
         if (doLimit)
@@ -643,8 +643,8 @@ Ref<SQLRow> SQLStorage::_findObjectByPath(String fullpath)
     else
         dbLocation = addLocationPrefix(LOC_DIR_PREFIX, path);
     *qb << SQL_QUERY
-            << " WHERE " << TQD('f',"location_hash") << " = " << quote(stringHash(dbLocation))
-            << " AND " << TQD('f',"location") << " = " << quote(dbLocation)
+            << " WHERE " << TQD('f',"location_hash") << '=' << quote(stringHash(dbLocation))
+            << " AND " << TQD('f',"location") << '=' << quote(dbLocation)
             << " AND " << TQD('f',"ref_id") << " IS NULL "
             "LIMIT 1";
     
@@ -727,7 +727,7 @@ String SQLStorage::buildContainerPath(int parentID, String title)
         return String(VIRTUAL_CONTAINER_SEPARATOR) + title;
     Ref<StringBuffer> qb(new StringBuffer());
     *qb << "SELECT " << TQ("location") << " FROM " << TQ(CDS_OBJECT_TABLE) <<
-        " WHERE " << TQ("id") << " = " << parentID << " LIMIT 1";
+        " WHERE " << TQ("id") << '=' << parentID << " LIMIT 1";
      Ref<SQLResult> res = select(qb);
     if (res == nil)
         return nil;
@@ -752,8 +752,8 @@ void SQLStorage::addContainerChain(String path, int *containerID, int *updateID)
     Ref<StringBuffer> qb(new StringBuffer());
     String dbLocation = addLocationPrefix(LOC_VIRT_PREFIX, path);
     *qb << "SELECT " << TQ("id") << " FROM " << TQ(CDS_OBJECT_TABLE)
-            << " WHERE " << TQ("location_hash") << " = " << quote(stringHash(dbLocation))
-            << " AND " << TQ("location") << " = " << quote(dbLocation)
+            << " WHERE " << TQ("location_hash") << '=' << quote(stringHash(dbLocation))
+            << " AND " << TQ("location") << '=' << quote(dbLocation)
             << " LIMIT 1";
     Ref<SQLResult> res = select(qb);
     if (res != nil)
