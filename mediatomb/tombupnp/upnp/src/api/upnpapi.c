@@ -1,7 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////
 //
 // Copyright (c) 2000-2003 Intel Corporation 
-// Copyright (c) 2006 Sergey 'Jin' Bostandzhyan <jin@deadlock.dhs.org>
 // All rights reserved. 
 //
 // Redistribution and use in source and binary forms, with or without 
@@ -29,6 +28,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 ///////////////////////////////////////////////////////////////////////////
+/*TU*/
 
 //File upnpapi.c
 #include "config.h"

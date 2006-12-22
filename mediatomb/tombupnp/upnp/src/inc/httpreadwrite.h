@@ -28,6 +28,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 ///////////////////////////////////////////////////////////////////////////
+/*TU*/
 
 #ifndef GENLIB_NET_HTTP_HTTPREADWRITE_H
 #define GENLIB_NET_HTTP_HTTPREADWRITE_H

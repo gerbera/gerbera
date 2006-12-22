@@ -8,7 +8,7 @@ Copyright (c) 2006 Michel Pfeiffer and others <virtual_worlds@gmx.de>
 Copyright (c) 2006 Sergey 'Jin' Bostandzhyan <jin@mediatomb.org>
 
 See LICENSE for details. Note, that all changes that were added by
-the MediaTomb team are covered by LGPL.
+the MediaTomb team are covered by LGPL, see README_LICENSE for more information.
 
 Also note, that contrary to TombUPnP, MediaTomb sources are covered by the 
 GPL license.

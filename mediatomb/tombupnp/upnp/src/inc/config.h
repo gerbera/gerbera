@@ -28,6 +28,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 ///////////////////////////////////////////////////////////////////////////
+/*TU*/
 
 #ifndef INTERNAL_CONFIG_H
 #define INTERNAL_CONFIG_H 
