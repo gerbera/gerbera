@@ -31,22 +31,6 @@ var rightDocument;
 var viewItems = 50;
 var showMaxPages = 10;
 
-/* icons */
-
-var iconPath = '/icons/';
-var iconNewItem = iconPath + 'document-new.png';
-var iconAdd = iconPath + 'stock-add.png';
-var iconEdit = iconPath + 'stock_edit.png';
-var iconRefresh = iconPath + 'view-refresh.png';
-var iconRemoveThis = iconPath + 'remove_this.png';
-var iconRemoveAll = iconPath + 'remove_all.png';
-var iconFirst = iconPath + 'go-first.png';
-var iconPrevious = iconPath + 'go-previous.png';
-var iconNext = iconPath + 'go-next.png';
-var iconLast = iconPath + 'go-last.png';
-var iconAddAutoscan = iconPath + 'add_as_autoscan.png';
-var iconRemoveAutoscan = iconPath + 'remove_autoscan.png';
-
 function itemInit()
 {
     rightDocument = frames["rightF"].document;
@@ -204,10 +188,23 @@ function updateItems(ajaxRequest)
     else
     {
         var topDiv = rightDocument.createElement("div");
-        topDiv.appendChild(rightDocument.createTextNode("Container: " + path));
+        
+        var contIcon = rightDocument.createElement("img");
+        
+        var iconSrc = iconContainer;
+        if (autoscanType == '1')
+            iconSrc = iconContainerAutoscan;
+        if (autoscanType == '2')
+            iconSrc = iconContainerAutoscanConfig;
+        
+        contIcon.setAttribute("src", iconSrc);
+        contIcon.setAttribute("alt", "container:");
+        topDiv.appendChild(contIcon);
+        topDiv.appendChild(rightDocument.createTextNode(" " + path));
+        //topDiv.appendChild(rightDocument.createTextNode("Container: " + path));
         topDiv.setAttribute("class", "topDiv");
         
-        var link;                               
+        var link;
         var first = true;
         var addLink = false;
         var editLink = false;

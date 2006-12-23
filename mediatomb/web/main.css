@@ -22,6 +22,11 @@ a
     text-decoration:none;
 }
 
+a.selected
+{
+    text-decoration:underline; 
+}
+
 div.topDiv
 {
     vertical-align:middle;

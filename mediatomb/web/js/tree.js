@@ -26,13 +26,10 @@
     $Id$
 */
 
-var imagePath = '/icons/nanotree/images/';
-var closedPNG = imagePath + 'folder_closed.png';
-var openPNG = imagePath + 'folder_open.png';
-var iconArray = new Array(closedPNG,openPNG);
-var autoscanClosedPNG = imagePath + 'autoscan_folder_closed.png';
-var autoscanOpenPNG = imagePath + 'autoscan_folder_open.png';
-var autoscanIconArray = new Array(autoscanClosedPNG,autoscanOpenPNG);
+
+var iconArray = new Array(iconTreeClosed,iconTreeOpen);
+var autoscanIconArray = new Array(iconTreeAutoscanClosed,iconTreeAutoscanOpen);
+var autoscanConfigIconArray = new Array(iconTreeAutoscanConfigClosed,iconTreeAutoscanConfigOpen);
 var lastNodeDb = 'd0';
 var lastNodeFs = 'f0';
 var lastNodeDbWish;
@@ -275,8 +272,14 @@ function updateTree(ajaxRequest)
         
         var autoscan = xmlGetAttribute(c, "autoscan");
         
+        var thisIconArray = iconArray;
+        if (autoscan == '1')
+            thisIconArray = autoscanIconArray;
+        if (autoscan == '2')
+            thisIconArray = autoscanConfigIconArray;
+        
         var title = xmlGetText(c);
-        var child = new TreeNode(id, title, (autoscan ? autoscanIconArray: iconArray));
+        var child = new TreeNode(id, title, thisIconArray);
         
         //TODO:
         //child.setEditable(true);

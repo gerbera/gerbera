@@ -45,6 +45,7 @@ _DIST_FILES_JS = \
 ./js/tree.js \
 ./js/tools.js \
 ./js/items.js \
+./js/icons.js \
 ./js/nanotree.js 
 
 _DIST_FILES_WEB = \

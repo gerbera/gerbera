@@ -71,7 +71,7 @@ enum
     _ref_auxdata,
     _ref_resources,
     _ref_mime_type,
-    _as_id
+    _as_persistent
 };
 
 /* table quote */
@@ -107,7 +107,7 @@ enum
     SEL_EQ_SP_RFQ_DT_BQ "auxdata" \
     SEL_EQ_SP_RFQ_DT_BQ "resources" \
     SEL_EQ_SP_RFQ_DT_BQ "mime_type" << QTE \
-    << ',' << TQD("as","id")
+    << ',' << TQD("as","persistent")
     
 #define SQL_QUERY_FOR_STRINGBUFFER "SELECT " << SELECT_DATA_FOR_STRINGBUFFER << \
     " FROM " << TQ(CDS_OBJECT_TABLE) << ' ' << TQ('f') << " LEFT JOIN " \
@@ -852,7 +852,17 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
         cont->setLocation(stripLocationPrefix(&locationPrefix, row->col(_location)));
         if (locationPrefix == LOC_VIRT_PREFIX)
             cont->setVirtual(true);
-        cont->setAutoscanStart(string_ok(row->col(_as_id)));
+        
+        String autoscanPersistent = row->col(_as_persistent);
+        if (string_ok(autoscanPersistent))
+        {
+            if (remapBool(autoscanPersistent))
+                cont->setAutoscanType(OBJECT_AUTOSCAN_CFG);
+            else
+                cont->setAutoscanType(OBJECT_AUTOSCAN_UI);
+        }
+        else
+            cont->setAutoscanType(OBJECT_AUTOSCAN_NONE);
         matched_types++;
     }
     

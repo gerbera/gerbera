@@ -60,6 +60,10 @@
 //#define OBJECT_FLAG_XXX                 0x00000100
 //#define OBJECT_FLAG_XXX                 0x00000200
 
+#define OBJECT_AUTOSCAN_NONE    0
+#define OBJECT_AUTOSCAN_UI      1
+#define OBJECT_AUTOSCAN_CFG     2
+
 int CdsObjectTitleComparator(void *arg1, void *arg2);
 
 /// \brief Generic object in the Content Directory.
@@ -477,7 +481,7 @@ protected:
     int childCount;
     
     /// \brief wheather this container is an autoscan start point.
-    bool autoscanStart;
+    int autoscanType;
     
 public:
     /// \brief Constructor, initializes default values for the flags and sets the object type.
@@ -502,10 +506,10 @@ public:
     inline int getChildCount() { return childCount; }
     
     /// \brief returns wheather this container is an autoscan start point.
-    inline bool isAutoscanStart() { return autoscanStart; }
+    inline int getAutoscanType() { return autoscanType; }
     
     /// \brief sets wheather this container is an autoscan start point.
-    inline void setAutoscanStart(bool val) { autoscanStart = val; }
+    inline void setAutoscanType(int type) { autoscanType = type; }
     
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)

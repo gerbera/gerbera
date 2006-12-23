@@ -265,7 +265,7 @@ CdsContainer::CdsContainer() : CdsObject()
     // searchable = 0; is now in objectFlags; by default all flags (except "restricted") are not set
     childCount = -1;
     upnpClass = _(UPNP_DEFAULT_CLASS_CONTAINER);
-    autoscanStart = false;
+    autoscanType = OBJECT_AUTOSCAN_NONE;
 }
 
 void CdsContainer::copyTo(Ref<CdsObject> obj)
