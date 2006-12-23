@@ -8,7 +8,7 @@ foreach (@ARGV)
 #my $tmpfile = $_."tmp_update-comment-header";
     my @full_fn = split('/', $full_path);
     my $filename = pop(@full_fn);
-
+    
     my $new_header_main = 
 '    MediaTomb - http://www.mediatomb.org/
     
@@ -35,6 +35,25 @@ foreach (@ARGV)
     
     $Id$';
     
+    my $new_header_tombupnp = 
+'    TombUPnP - a library for developing UPnP applications.
+    
+    Copyright (C) 2006 Sergey \'Jin\' Bostandzhyan <jin@mediatomb.org>
+    
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License version 2.1 as published by the Free Software Foundation.
+    
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+    
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin Street, Fifth Floor,
+    Boston, MA  02110-1301  USA';
+    
     my $new_header_c =
 '/*MT*
     
@@ -56,6 +75,12 @@ foreach (@ARGV)
 #'.$new_header_main_number.'
 #
 #*MT*';
+    
+    my $new_header_c_tombupnp =
+'/*TU*
+    
+'.$new_header_tombupnp.'
+*/';
     
     print $full_path.": ";
     open (FILE, '<', $full_path);
@@ -89,6 +114,11 @@ foreach (@ARGV)
 #        print "old header";
 #        $data =~ s|/\*.*this file is part of MediaTomb\..*?\*/|$new_header_c|s;
 #    }
+    elsif ($data =~ m|/\*TU\*|)
+    {
+        print "/*TU*...";
+        $data =~ s|/\*TU\*(.*?\*)??/|$new_header_c_tombupnp|s;
+    }
     else
     {
         $nothing = 1;
@@ -102,10 +132,10 @@ foreach (@ARGV)
             $data =~ s|/// *\\file +.*$|/// \\file $filename|m;
             print " and had file";
         }
-    open (FILE, '>', $full_path);
-    print FILE $data;
+        open (FILE, '>', $full_path);
+        print FILE $data;
 #        print $data;
-    close FILE;
+        close FILE;
     }
     print "\n";
 }
