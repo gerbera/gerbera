@@ -380,6 +380,12 @@ For more information visit http://mediatomb.sourceforge.net/\n\n");
     {
         log_error("Could not register SIGHUP handler!\n");
     }
+    if (sigaction(SIGPIPE, &action, NULL) < 0)
+    {
+        log_error("Could not register SIGPIPE handler!\n");
+    }
+
+
 
 
     // prepare to run processes
