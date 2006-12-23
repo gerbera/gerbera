@@ -1061,18 +1061,50 @@ Ref<IntArray> SQLStorage::removeObjects(zmm::Ref<DBRHash<int> > list, bool all)
 void SQLStorage::_removeObjects(String objectIDs)
 {
     Ref<StringBuffer> q(new StringBuffer());
-    *q << "DELETE FROM " << TQ(CDS_OBJECT_TABLE)
-        << " WHERE " << TQ("id") << " IN (" << objectIDs << ')';
-    exec(q);
+    *q << "SELECT " << TQD('a',"id") << ',' << TQD('a',"persistent")
+        << ',' << TQD('o',"location")
+        << " FROM " << TQ(AUTOSCAN_TABLE) << " a"
+        " JOIN "  << TQ(CDS_OBJECT_TABLE) << " o"
+        " ON " << TQD('o',"id") << '=' << TQD('a',"obj_id")
+        << " WHERE " << TQD('o',"id") << " IN (" << objectIDs << ')';
+    Ref<SQLResult> res = select(q);
+    if (res != nil)
+    {
+        Ref<StringBuffer> delete_as(new StringBuffer());
+        Ref<SQLRow> row;
+        while((row = res->nextRow()) != nil)
+        {
+            bool persistent = remapBool(row->col(1));
+            if (persistent)
+            {
+                String location = stripLocationPrefix(row->col(2));
+                *q << "UPDATE " << TQ(AUTOSCAN_TABLE)
+                    << " SET " << TQ("obj_id") << "=" SQL_NULL
+                    << ',' << TQ("location") << '=' << quote(location)
+                    << " WHERE " << TQ("id") << '=' << quote(row->col(0));
+            }
+            else
+                *delete_as << ',' << row->col_c_str(0);
+        }
+        
+        if (delete_as->length() > 0)
+        {
+            q->clear();
+            *q << "DELETE FROM " << TQ(AUTOSCAN_TABLE)
+                << " WHERE " << TQ("obj_id") << " IN (";
+            q->concat(delete_as, 1);
+            *q << ')';
+            exec(q);
+        }
+    }
+    
     q->clear();
-    
-    #warning todo: fix
-    
     *q << "DELETE FROM " << TQ(CDS_ACTIVE_ITEM_TABLE)
         << " WHERE " << TQ("id") << " IN (" << objectIDs << ')';
     exec(q);
+    
     q->clear();
-    *q << "DELETE FROM " << TQ(AUTOSCAN_TABLE)
+    *q << "DELETE FROM " << TQ(CDS_OBJECT_TABLE)
         << " WHERE " << TQ("id") << " IN (" << objectIDs << ')';
     exec(q);
 }
