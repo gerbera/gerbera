@@ -45,6 +45,7 @@ var iconPrevious = iconPath + 'go-previous.png';
 var iconNext = iconPath + 'go-next.png';
 var iconLast = iconPath + 'go-last.png';
 var iconAddAutoscan = iconPath + 'add_as_autoscan.png';
+var iconRemoveAutoscan = iconPath + 'remove_autoscan.png';
 
 function itemInit()
 {
@@ -254,7 +255,7 @@ function updateItems(ajaxRequest)
             else
             {
                 var action = (autoscanType == "1" ? "remove" : "add");
-                var icon = (autoscanType == "1" ? null : iconAddAutoscan);
+                var icon = (autoscanType == "1" ? iconRemoveAutoscan : iconAddAutoscan);
                 first = _addLink(topDiv, first,  "javascript:parent.changeAutoscanDirectory('"+action+"','"+ofId+"', false);", action+" as autoscan dir", icon);
             }
         }
