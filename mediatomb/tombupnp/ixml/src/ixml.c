@@ -103,14 +103,16 @@ ixmlPrintDomTreeRecursive( IN IXML_Node * nodeptr,
                 break;
 
             case eCDATA_SECTION_NODE:
+                ixml_membuf_append_str( buf, "<![CDATA[" );
                 ixml_membuf_append_str( buf, nodeValue );
+                ixml_membuf_append_str( buf, "]]>" );
                 break;
 
             case ePROCESSING_INSTRUCTION_NODE:
                 ixml_membuf_append_str( buf, "<?" );
                 ixml_membuf_append_str( buf, nodeName );
                 ixml_membuf_append_str( buf, " " );
-                ixml_membuf_append_str( buf, nodeValue );
+                copy_with_escape( buf, nodeValue );
                 ixml_membuf_append_str( buf, "?>\n" );
                 break;
 
@@ -122,10 +124,9 @@ ixmlPrintDomTreeRecursive( IN IXML_Node * nodeptr,
             case eATTRIBUTE_NODE:
                 ixml_membuf_append_str( buf, nodeName );
                 ixml_membuf_append_str( buf, "=\"" );
-                if( nodeValue != NULL ) {
-                    ixml_membuf_append_str( buf, nodeValue );
-                }
+                copy_with_escape( buf, nodeValue );
                 ixml_membuf_append_str( buf, "\"" );
+
                 if( nodeptr->nextSibling != NULL ) {
                     ixml_membuf_append_str( buf, " " );
                     ixmlPrintDomTreeRecursive( nodeptr->nextSibling, buf );
@@ -210,7 +211,7 @@ ixmlPrintDomTree( IN IXML_Node * nodeptr,
         case eATTRIBUTE_NODE:
             ixml_membuf_append_str( buf, nodeName );
             ixml_membuf_append_str( buf, "=\"" );
-            ixml_membuf_append_str( buf, nodeValue );
+            copy_with_escape( buf, nodeValue );
             ixml_membuf_append_str( buf, "\"" );
             break;
 
@@ -281,7 +282,7 @@ ixmlDomTreetoString( IN IXML_Node * nodeptr,
         case eATTRIBUTE_NODE:
             ixml_membuf_append_str( buf, nodeName );
             ixml_membuf_append_str( buf, "=\"" );
-            ixml_membuf_append_str( buf, nodeValue );
+            copy_with_escape( buf, nodeValue );
             ixml_membuf_append_str( buf, "\"" );
             break;
 
