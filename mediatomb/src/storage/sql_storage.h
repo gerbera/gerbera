@@ -104,8 +104,8 @@ public:
     
     virtual zmm::Ref<DBRHash<int> > getObjects(int parentID, bool withoutContainer);
     
-    virtual zmm::Ref<zmm::IntArray> removeObject(int objectID, bool all);
-    virtual zmm::Ref<zmm::IntArray> removeObjects(zmm::Ref<DBRHash<int> > list, bool all = false);
+    virtual zmm::Ref<ChangedContainers> removeObject(int objectID, bool all);
+    virtual zmm::Ref<ChangedContainers> removeObjects(zmm::Ref<DBRHash<int> > list, bool all = false);
     
     /* accounting methods */
     virtual int getTotalFiles();
@@ -150,6 +150,19 @@ protected:
     char table_quote_end;
     
 private:
+    
+    class ChangedContainersStr : public Object
+    {
+    public:
+        ChangedContainersStr()
+        {
+            upnp = zmm::Ref<zmm::StringBuffer>(new zmm::StringBuffer());
+            ui = zmm::Ref<zmm::StringBuffer>(new zmm::StringBuffer());
+        }
+        zmm::Ref<zmm::StringBuffer> upnp;
+        zmm::Ref<zmm::StringBuffer> ui;
+    };
+    
     zmm::String sql_query;
     
     /* helper for createObjectFromRow() */
@@ -180,10 +193,10 @@ private:
     zmm::Ref<zmm::Array<AddUpdateTable> > _addUpdateObject(zmm::Ref<CdsObject> obj, bool isUpdate, int *changedContainer);
     
     /* helper for removeObject(s) */
-    void _removeObjects(zmm::String objectIDs);
-    zmm::Ref<zmm::StringBuffer> _recursiveRemove(zmm::Ref<zmm::StringBuffer> items, zmm::Ref<zmm::StringBuffer> containers, bool all);
+    void _removeObjects(zmm::Ref<zmm::StringBuffer> objectIDs, int offset);
+    zmm::Ref<ChangedContainersStr> _recursiveRemove(zmm::Ref<zmm::StringBuffer> items, zmm::Ref<zmm::StringBuffer> containers, bool all);
     
-    virtual zmm::Ref<zmm::IntArray> _purgeEmptyContainers(zmm::Ref<zmm::StringBuffer> containerIDs);
+    virtual zmm::Ref<ChangedContainers> _purgeEmptyContainers(zmm::Ref<ChangedContainersStr> changedContainersStr);
     
     /* helpers for autoscan */
     int _getAutoscanObjectID(int autoscanID);

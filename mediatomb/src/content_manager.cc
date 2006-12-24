@@ -324,13 +324,10 @@ void ContentManager::_removeObject(int objectID, bool all)
     
     Ref<Storage> storage = Storage::getInstance();
     
-    #warning ui updated unfinished!
-    Ref<IntArray> changedContainers = storage->removeObject(objectID, all);
-    /*
-    if (IS_CDS_CONTAINER(objectType))
-        SessionManager::getInstance()->containerChangedUI(parentID);
-    */
-    UpdateManager::getInstance()->containersChanged(changedContainers);
+    Ref<Storage::ChangedContainers> changedContainers = storage->removeObject(objectID, all);
+
+    SessionManager::getInstance()->containerChangedUI(changedContainers->ui);
+    UpdateManager::getInstance()->containersChanged(changedContainers->upnp);
     
     // reload accounting
     //loadAccounting();
@@ -557,11 +554,9 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
     } // while
     if (list != nil && list->size() > 0)
     {
-        #warning ui updates unfinished!
-        Ref<IntArray> changedContainers = storage->removeObjects(list);
-        UpdateManager::getInstance()->containersChanged(changedContainers);
-        //if (containerRemoved)
-        //    SessionManager::getInstance()->containerChangedUI(containerID);
+        Ref<Storage::ChangedContainers> changedContainers = storage->removeObjects(list);
+        SessionManager::getInstance()->containerChangedUI(changedContainers->ui);
+        UpdateManager::getInstance()->containersChanged(changedContainers->upnp);
     }
 
     closedir(dir);

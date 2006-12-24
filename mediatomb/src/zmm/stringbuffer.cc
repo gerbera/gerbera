@@ -151,7 +151,7 @@ void StringBuffer::setLength(int newLength)
 
 char *StringBuffer::c_str(int offset)
 {
-    if (offset >= len || offset < 0)
+    if (offset > len || offset < 0)
         throw _Exception(_("illegal offset"));
     return data + offset;
 }
@@ -163,14 +163,14 @@ String StringBuffer::toString()
 
 String StringBuffer::toString(int offset)
 {
-    if (offset >= len || offset < 0)
+    if (offset > len || offset < 0)
         throw _Exception(_("illegal offset"));
     return String(data + offset, len - offset);
 }
 
 void StringBuffer::setCharAt(int index, char c)
 {
-    if (index < 0 || index >= len)
+    if (index > len || index < 0)
         throw _Exception(_("illegal index"));
     data[index] = c;
 }

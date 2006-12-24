@@ -1027,7 +1027,7 @@ Ref<DBRHash<int> > SQLStorage::getObjects(int parentID, bool withoutContainer)
     return ret;
 }
 
-Ref<IntArray> SQLStorage::removeObjects(zmm::Ref<DBRHash<int> > list, bool all)
+Ref<Storage::ChangedContainers> SQLStorage::removeObjects(zmm::Ref<DBRHash<int> > list, bool all)
 {
     hash_data_array_t<int> hash_data_array;
     list->getAll(&hash_data_array);
@@ -1064,11 +1064,10 @@ Ref<IntArray> SQLStorage::removeObjects(zmm::Ref<DBRHash<int> > list, bool all)
         else
             *items << ',' << row->col_c_str(0);
     }
-    Ref<StringBuffer> containerIDs = _recursiveRemove(items, containers, all);
-    return _purgeEmptyContainers(containerIDs);
+    return _purgeEmptyContainers(_recursiveRemove(items, containers, all));
 }
 
-void SQLStorage::_removeObjects(String objectIDs)
+void SQLStorage::_removeObjects(Ref<StringBuffer> objectIDs, int offset)
 {
     Ref<StringBuffer> q(new StringBuffer());
     *q << "SELECT " << TQD('a',"id") << ',' << TQD('a',"persistent")
@@ -1076,7 +1075,9 @@ void SQLStorage::_removeObjects(String objectIDs)
         << " FROM " << TQ(AUTOSCAN_TABLE) << " a"
         " JOIN "  << TQ(CDS_OBJECT_TABLE) << " o"
         " ON " << TQD('o',"id") << '=' << TQD('a',"obj_id")
-        << " WHERE " << TQD('o',"id") << " IN (" << objectIDs << ')';
+        << " WHERE " << TQD('o',"id") << " IN (";
+    q->concat(objectIDs, offset);
+    *q << ')';
     Ref<SQLResult> res = select(q);
     if (res != nil)
     {
@@ -1110,16 +1111,20 @@ void SQLStorage::_removeObjects(String objectIDs)
     
     q->clear();
     *q << "DELETE FROM " << TQ(CDS_ACTIVE_ITEM_TABLE)
-        << " WHERE " << TQ("id") << " IN (" << objectIDs << ')';
+        << " WHERE " << TQ("id") << " IN (";
+    q->concat(objectIDs, offset);
+    *q << ')';
     exec(q);
     
     q->clear();
     *q << "DELETE FROM " << TQ(CDS_OBJECT_TABLE)
-        << " WHERE " << TQ("id") << " IN (" << objectIDs << ')';
+        << " WHERE " << TQ("id") << " IN (";
+    q->concat(objectIDs, offset);
+    *q << ')';
     exec(q);
 }
 
-Ref<IntArray> SQLStorage::removeObject(int objectID, bool all)
+Ref<Storage::ChangedContainers> SQLStorage::removeObject(int objectID, bool all)
 {
     Ref<StringBuffer> q(new StringBuffer());
     *q << "SELECT " << TQ("object_type") << ',' << TQ("ref_id")
@@ -1147,17 +1152,17 @@ Ref<IntArray> SQLStorage::removeObject(int objectID, bool all)
     }
     if (IS_FORBIDDEN_CDS_ID(objectID))
         throw _Exception(_("tried to delete a forbidden ID (") + objectID + ")!");
-    Ref<StringBuffer> containerIDs = nil;
     Ref<StringBuffer> idsBuf(new StringBuffer());
     *idsBuf << ',' << objectID;
+    Ref<ChangedContainersStr> changedContainers = nil;
     if (isContainer)
-        containerIDs = _recursiveRemove(nil, idsBuf, all);
+        changedContainers = _recursiveRemove(nil, idsBuf, all);
     else
-        containerIDs = _recursiveRemove(idsBuf, nil, all);
-    return _purgeEmptyContainers(containerIDs);
+        changedContainers = _recursiveRemove(idsBuf, nil, all);
+    return _purgeEmptyContainers(changedContainers);
 }
 
-Ref<StringBuffer> SQLStorage::_recursiveRemove(Ref<StringBuffer> items, Ref<StringBuffer> containers, bool all)
+Ref<SQLStorage::ChangedContainersStr> SQLStorage::_recursiveRemove(Ref<StringBuffer> items, Ref<StringBuffer> containers, bool all)
 {
     log_debug("start\n");
     Ref<StringBuffer> recurseItems(new StringBuffer());
@@ -1180,9 +1185,12 @@ Ref<StringBuffer> SQLStorage::_recursiveRemove(Ref<StringBuffer> items, Ref<Stri
         << " FROM " << TQ(CDS_OBJECT_TABLE)
         << " WHERE " << TQ("id") << " IN (";
     int removeAddParentsLen = removeAddParents->length();
-        
+    
     Ref<StringBuffer> remove(new StringBuffer());
-    Ref<StringBuffer> changedContainers(new StringBuffer());
+    Ref<ChangedContainersStr> changedContainers(new ChangedContainersStr());
+    
+    Ref<SQLResult> res;
+    Ref<SQLRow> row;
     
     if (items != nil && items->length() > 1)
     {
@@ -1193,14 +1201,22 @@ Ref<StringBuffer> SQLStorage::_recursiveRemove(Ref<StringBuffer> items, Ref<Stri
     if (containers != nil && containers->length() > 1)
     {
         *recurseContainers << containers;
+        
+        *remove << containers;
         *removeAddParents << containers;
+        removeAddParents->setCharAt(removeAddParentsLen, ' ');
+        *removeAddParents << ')';
+        res = select(removeAddParents);
+        if (res == nil)
+            throw _StorageException(_("sql error"));
+        removeAddParents->setLength(removeAddParentsLen);
+        while ((row = res->nextRow()) != nil)
+            *changedContainers->ui << ',' << row->col_c_str(0);
     }
     
-    Ref<SQLResult> res;
-    Ref<SQLRow> row;
     int count = 0;
     while(recurseItems->length() > recurseItemsLen 
-        || removeAddParents->length() > removeAddParentsLen 
+        || removeAddParents->length() > removeAddParentsLen
         || recurseContainers->length() > recurseContainersLen)
     {
         if (removeAddParents->length() > removeAddParentsLen)
@@ -1211,10 +1227,12 @@ Ref<StringBuffer> SQLStorage::_recursiveRemove(Ref<StringBuffer> items, Ref<Stri
             removeAddParents->setCharAt(removeAddParentsLen, ' ');
             *removeAddParents << ')';
             res = select(removeAddParents);
+            if (res == nil)
+                throw _StorageException(_("sql error"));
             // reset length
             removeAddParents->setLength(removeAddParentsLen);
             while ((row = res->nextRow()) != nil)
-                *changedContainers << ',' << row->col_c_str(0);
+                *changedContainers->upnp << ',' << row->col_c_str(0);
         }
         
         if (recurseItems->length() > recurseItemsLen)
@@ -1222,11 +1240,13 @@ Ref<StringBuffer> SQLStorage::_recursiveRemove(Ref<StringBuffer> items, Ref<Stri
             recurseItems->setCharAt(recurseItemsLen, ' ');
             *recurseItems << ')';
             res = select(recurseItems);
+            if (res == nil)
+                throw _StorageException(_("sql error"));
             recurseItems->setLength(recurseItemsLen);
             while ((row = res->nextRow()) != nil)
             {
                 *remove << ',' << row->col_c_str(0);
-                *changedContainers << ',' << row->col_c_str(1);
+                *changedContainers->upnp << ',' << row->col_c_str(1);
                 //log_debug("refs-add id: %s; parent_id: %s\n", id.c_str(), parentId.c_str());
             }
         }
@@ -1236,6 +1256,8 @@ Ref<StringBuffer> SQLStorage::_recursiveRemove(Ref<StringBuffer> items, Ref<Stri
             recurseContainers->setCharAt(recurseContainersLen, ' ');
             *recurseContainers << ')';
             res = select(recurseContainers);
+            if (res == nil)
+                throw _StorageException(_("sql error"));
             recurseContainers->setLength(recurseContainersLen);
             while ((row = res->nextRow()) != nil)
             {
@@ -1276,7 +1298,7 @@ Ref<StringBuffer> SQLStorage::_recursiveRemove(Ref<StringBuffer> items, Ref<Stri
         
         if (remove->length() > MAX_REMOVE_SIZE) // remove->length() > 0) // )
         {
-            _removeObjects(remove->toString(1));
+            _removeObjects(remove, 1);
             remove->clear();
         }
         
@@ -1285,22 +1307,20 @@ Ref<StringBuffer> SQLStorage::_recursiveRemove(Ref<StringBuffer> items, Ref<Stri
     }
     
     if (remove->length() > 0)
-        _removeObjects(remove->toString(1));
+        _removeObjects(remove, 1);
     log_debug("end\n");
     return changedContainers;
 }
 
-Ref<IntArray> SQLStorage::_purgeEmptyContainers(Ref<StringBuffer> containerIDs)
+Ref<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(Ref<ChangedContainersStr> changedContainersStr)
 {
-    //int size = containerIDs->size();
-    log_debug("start\n");
-    if (! string_ok(containerIDs))
-        return nil;
-    //if (size <= 0)
-    //    return;
+    log_debug("start upnp: %s; ui: %s\n", changedContainersStr->upnp->c_str(), changedContainersStr->ui->c_str());
+    Ref<ChangedContainers> changedContainers(new ChangedContainers());
+    if (! string_ok(changedContainersStr->upnp) && ! string_ok(changedContainersStr->ui))
+        return changedContainers;
     
-    Ref<StringBuffer> bufSel(new StringBuffer());
-    *bufSel << "SELECT " << TQD('a',"id")
+    Ref<StringBuffer> bufSelUI(new StringBuffer());
+    *bufSelUI << "SELECT " << TQD('a',"id")
         << ", COUNT(" << TQD('b',"parent_id") 
         << ")," << TQD('a',"parent_id") << ',' << TQD('a',"flags")
         << " FROM " << TQ(CDS_OBJECT_TABLE) << ' ' << TQ('a')
@@ -1308,62 +1328,105 @@ Ref<IntArray> SQLStorage::_purgeEmptyContainers(Ref<StringBuffer> containerIDs)
         << " ON " << TQD('a',"id") << '=' << TQD('b',"parent_id") 
         << " WHERE " << TQD('a',"object_type") << '=' << quote(1)
         << " AND " << TQD('a',"id") << " IN (";  //(a.flags & " << OBJECT_FLAG_PERSISTENT_CONTAINER << ") = 0 AND
-    int bufSelLen = bufSel->length();
+    int bufSelLen = bufSelUI->length();
     String strSel2 = _(") GROUP BY a.id"); // HAVING COUNT(b.parent_id)=0");
     
+    Ref<StringBuffer> bufSelUpnp(new StringBuffer());
+    *bufSelUpnp << bufSelUI;
+    
     Ref<StringBuffer> bufDel(new StringBuffer());
-    Ref<IntArray> changedContainers(new IntArray());
     
     Ref<SQLResult> res;
     Ref<SQLRow> row;
     
-    *bufSel << containerIDs;
-    /*
-    for (int i = 0; i < size; i++)
-        *bufSel << ',' << quote(containerIDs->get(i));
-    */
+    *bufSelUI << changedContainersStr->ui;
+    *bufSelUpnp << changedContainersStr->upnp;
+    
     bool again;
     int count = 0;
     do
     {
         again = false;
-        bufSel->setCharAt(bufSelLen, ' ');
-        *bufSel << strSel2;
-        log_debug("sql: %s\n", bufSel->c_str());
-        res = select(bufSel);
-        bufSel->setLength(bufSelLen);
-        if (res == nil)
-            throw _Exception(_("db error"));
-        while ((row = res->nextRow()) != nil)
+        
+        if (bufSelUpnp->length() > bufSelLen)
         {
-            int flags = row->col(3).toInt();
-            if (flags & OBJECT_FLAG_PERSISTENT_CONTAINER)
-                changedContainers->append(row->col(0).toInt());
-            else if (row->col(1) == "0")
+            bufSelUpnp->setCharAt(bufSelLen, ' ');
+            *bufSelUpnp << strSel2;
+            log_debug("upnp-sql: %s\n", bufSelUpnp->c_str());
+            res = select(bufSelUpnp);
+            bufSelUpnp->setLength(bufSelLen);
+            if (res == nil)
+                throw _Exception(_("db error"));
+            while ((row = res->nextRow()) != nil)
             {
-                *bufDel << ',' << row->col_c_str(0);
-                *bufSel << ',' << row->col_c_str(2);
-            }
-            else
-            {
-                *bufSel << ',' << row->col_c_str(0);
+                int flags = row->col(3).toInt();
+                if (flags & OBJECT_FLAG_PERSISTENT_CONTAINER)
+                    changedContainers->upnp->append(row->col(0).toInt());
+                else if (row->col(1) == "0")
+                {
+                    *bufDel << ',' << row->col_c_str(0);
+                    *bufSelUI << ',' << row->col_c_str(2);
+                }
+                else
+                {
+                    *bufSelUpnp << ',' << row->col_c_str(0);
+                }
             }
         }
+        
+        if (bufSelUI->length() > bufSelLen)
+        {
+            bufSelUI->setCharAt(bufSelLen, ' ');
+            *bufSelUI << strSel2;
+            log_debug("ui-sql: %s\n", bufSelUI->c_str());
+            res = select(bufSelUI);
+            bufSelUI->setLength(bufSelLen);
+            if (res == nil)
+                throw _Exception(_("db error"));
+            while ((row = res->nextRow()) != nil)
+            {
+                int flags = row->col(3).toInt();
+                if (flags & OBJECT_FLAG_PERSISTENT_CONTAINER)
+                {
+                    changedContainers->ui->append(row->col(0).toInt());
+                    changedContainers->upnp->append(row->col(0).toInt());
+                }
+                else if (row->col(1) == "0")
+                {
+                    *bufDel << ',' << row->col_c_str(0);
+                    *bufSelUI << ',' << row->col_c_str(2);
+                }
+                else
+                {
+                    *bufSelUI << ',' << row->col_c_str(0);
+                }
+            }
+        }
+        
         //log_debug("selecting: %s; removing: %s\n", bufSel->c_str(), bufDel->c_str());
         if (bufDel->length() > 0)
         {
-            _removeObjects(bufDel->toString(1));
+            _removeObjects(bufDel, 1);
             bufDel->clear();
-            if (bufSel->length() > bufSelLen)
+            if (bufSelUI->length() > bufSelLen || bufSelUpnp->length() > bufSelLen)
                 again = true;
         }
         if (count++ >= MAX_REMOVE_RECURSION)
-            throw _Exception(_("there seems to be a recursion..."));
+            throw _Exception(_("there seems to be an infinite loop..."));
     }
     while (again);
-    if (bufSel->length() > bufSelLen)
-        changedContainers->addCSV(bufSel->toString(bufSelLen + 1));
-    log_debug("end; changedContainers: %s\n", changedContainers->toCSV().c_str());
+    
+    if (bufSelUI->length() > bufSelLen)
+    {
+        changedContainers->ui->addCSV(bufSelUI->toString(bufSelLen + 1));
+        changedContainers->upnp->addCSV(bufSelUI->toString(bufSelLen + 1));
+    }
+    if (bufSelUpnp->length() > bufSelLen)
+    {
+        changedContainers->upnp->addCSV(bufSelUpnp->toString(bufSelLen + 1));
+    }
+    log_debug("end; changedContainers (upnp): %s\n", changedContainers->upnp->toCSV().c_str());
+    log_debug("end; changedContainers (ui): %s\n", changedContainers->ui->toCSV().c_str());
     return changedContainers;
 }
 

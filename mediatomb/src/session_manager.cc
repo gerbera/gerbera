@@ -77,6 +77,28 @@ void Session::containerChangedUI(int objectID)
     }
 }
 
+void Session::containerChangedUI(Ref<IntArray> objectIDs)
+{
+    if (updateAll)
+        return;
+    if (objectIDs == nil)
+        return;
+    int arSize = objectIDs->size();
+    AUTOLOCK(mutex);
+    if (updateAll)
+        return;
+    if (uiUpdateIDs->size() + arSize >= MAX_UI_UPDATE_IDS)
+    {
+        updateAll = true;
+        uiUpdateIDs->clear();
+        return;
+    }
+    for (int i = 0; i < arSize; i++)
+    {
+        uiUpdateIDs->put(objectIDs->get(i));
+    }
+}
+
 String Session::getUIUpdateIDs()
 {
     AUTOLOCK(mutex);
@@ -172,12 +194,29 @@ String SessionManager::getUserPassword(String user)
 
 void SessionManager::containerChangedUI(int objectID)
 {
+    if (sessions->size() <= 0)
+        return;
     AUTOLOCK(mutex);
-    for (int i = 0; i < sessions->size(); i++)
+    int sesSize = sessions->size();
+    for (int i = 0; i < sesSize; i++)
     {
         Ref<Session> session = sessions->get(i);
         if (session->isLoggedIn())
             session->containerChangedUI(objectID);
+    }
+}
+
+void SessionManager::containerChangedUI(Ref<IntArray> objectIDs)
+{
+    if (sessions->size() <= 0)
+        return;
+    AUTOLOCK(mutex);
+    int sesSize = sessions->size();
+    for (int i = 0; i < sesSize; i++)
+    {
+        Ref<Session> session = sessions->get(i);
+        if (session->isLoggedIn())
+            session->containerChangedUI(objectIDs);
     }
 }
 

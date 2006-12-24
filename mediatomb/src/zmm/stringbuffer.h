@@ -49,7 +49,7 @@ public:
     StringBuffer();
     StringBuffer(int capacity);
     virtual ~StringBuffer();
-
+    
     StringBuffer &operator<<(String other);
     StringBuffer &operator<<(Ref<StringBuffer> other);
     StringBuffer &operator<<(char *str);

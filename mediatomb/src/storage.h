@@ -159,6 +159,18 @@ public:
     virtual zmm::Ref<CdsObject> loadObject(int objectID) = 0;
     virtual int getChildCount(int contId, bool containers = true, bool items = true) = 0;
     
+    class ChangedContainers : public Object
+    {
+    public:
+        ChangedContainers()
+        {
+         upnp = zmm::Ref<zmm::IntArray>(new zmm::IntArray());
+         ui = zmm::Ref<zmm::IntArray>(new zmm::IntArray());
+        }
+        zmm::Ref<zmm::IntArray> upnp;
+        zmm::Ref<zmm::IntArray> ui;
+    };
+    
     /// \brief Removes the object identified by the objectID from the database.
     /// all references will be automatically removed. If the object is
     /// a container, all children will be also removed automatically. If
@@ -169,7 +181,7 @@ public:
     /// \param objectType pointer to an int; will be filled with the objectType of
     /// the removed object, if not NULL
     /// \return changed container ids
-    virtual zmm::Ref<zmm::IntArray> removeObject(int objectID, bool all) = 0;
+    virtual zmm::Ref<ChangedContainers> removeObject(int objectID, bool all) = 0;
     
     //virtual zmm::Ref<zmm::Array<CdsObject> > getObjectPath(int objectID);
     
@@ -183,7 +195,7 @@ public:
     /// \param list a DBHash containing objectIDs that have to be removed
     /// \param all if true and the object to be removed is a reference
     /// \return changed container ids
-    virtual zmm::Ref<zmm::IntArray> removeObjects(zmm::Ref<DBRHash<int> > list, bool all = false) = 0;
+    virtual zmm::Ref<ChangedContainers> removeObjects(zmm::Ref<DBRHash<int> > list, bool all = false) = 0;
     
     /* accounting methods */
     virtual int getTotalFiles() = 0;

@@ -84,6 +84,8 @@ protected:
     /// \param objectID the container that needs to be updated
     void containerChangedUI(int objectID);
     
+    void containerChangedUI(zmm::Ref<zmm::IntArray> objectIDs);
+    
     /// \brief True if the ui update id hash became to big and
     /// the UI shall update every container
     bool updateAll;
@@ -141,6 +143,8 @@ public:
     /// notifies all active sessions.
     /// \param objectID
     void containerChangedUI(int objectID);
+    
+    void containerChangedUI(zmm::Ref<zmm::IntArray> objectIDs);
     
     virtual void timerNotify(int id);
 };
