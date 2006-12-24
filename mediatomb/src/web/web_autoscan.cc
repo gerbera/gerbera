@@ -75,6 +75,7 @@ void web::autoscan::process()
             scan_mode_t scan_mode = TimedScanMode;
             
             String location;
+            int objectID = INVALID_OBJECT_ID;
             if (fromFs)
             {
                 location = hex_decode_string(param(_("object_id")));
@@ -88,6 +89,7 @@ void web::autoscan::process()
                     || obj->isVirtual())
                     throw _Exception(_("tried to add an illegal object (id) as an autoscan directory"));
                 location = obj->getLocation();
+                objectID = obj->getID();
             }
             
             log_debug("adding autoscan: location=%s, scan_mode=%s, scan_level=%s, recursive=%d, interval=%d, hidden=%d\n", 
@@ -111,6 +113,7 @@ void web::autoscan::process()
             */
             cm->addAutoscanDirectory(autoscan);
             storage->addAutoscanDirectory(autoscan);
+            SessionManager::getInstance()->containerChangedUI(objectID);
             /* why was this here??
             }
             catch (Exception e)
@@ -133,6 +136,7 @@ void web::autoscan::process()
         
         storage->removeAutoscanDirectoryByObjectID(objID);
         cm->removeAutoscanDirectory(obj->getLocation());
+        SessionManager::getInstance()->containerChangedUI(objID);
     }
     else if (action == "list")
     {
