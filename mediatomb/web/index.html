@@ -31,6 +31,7 @@
     <head>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8">
         <title>MEDIATOMB</title>
+        <script type="text/javascript" language="JavaScript" src="/js/wz_tooltip.js"></script>
         <script type="text/javascript" language="JavaScript" src="/js/tools.js"></script>
         <script type="text/javascript" language="JavaScript" src="/js/icons.js"></script>
         <script type="text/javascript" language="JavaScript" src="/js/md5.js"></script>
@@ -105,15 +106,15 @@
                 Ajax.Responders.register(globalAjaxHandlers);
                 itemInit();
                 treeInit();
-                Element.addClassName(topDocument.getElementById('type_' + TYPE), 'selected');
+                Element.addClassName(frames["topleftF"].document.getElementById('type_' + TYPE), 'selected');
                 //updateInfo();
             }
             
             function setType(tmpType)
             {
-                var topDocument = frames["topF"].document;
-                var deselectedEl = topDocument.getElementById('type_' + TYPE);
-                var selectedEl = topDocument.getElementById('type_' + tmpType);
+                var topLeftDocument = frames["topleftF"].document;
+                var deselectedEl = topLeftDocument.getElementById('type_' + TYPE);
+                var selectedEl = topLeftDocument.getElementById('type_' + tmpType);
                 
                 if (deselectedEl != selectedEl)
                 {
@@ -135,11 +136,17 @@
         </script>
 
     </head>
-    <frameset rows="120px,*" onload="init();">
+    <frameset rows="100px,*" onload="init();">
         <frame src="top.html" name="topF" frameborder="0" noresize>
         <frameset cols="30%,*">
-            <frame src="left.html" name="leftF" frameborder="0" noresize>
-            <frame src="right.html" name="rightF" frameborder="0" noresize>
+            <frameset rows="40px,*">
+                <frame src="topleft.html" name="topleftF" frameborder="0" noresize>
+                <frame src="left.html" name="leftF" frameborder="0" noresize>
+            </frameset>
+            <frameset rows="40px,*">
+                <frame src="topright.html" name="toprightF" frameborder="0" noresize>
+                <frame src="right.html" name="rightF" frameborder="0" noresize>
+            </frameset>
         </frameset>
     </frameset>
 </html>

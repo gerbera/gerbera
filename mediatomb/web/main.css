@@ -5,8 +5,8 @@ body
     background-color:#dddddd;
     font-family: "Helvetica", "Arial", "MS Sans Serif", sans-serif;
     font-size: 10pt;
-    /*margin:0;
-    padding:0;*/
+    margin:0;
+    padding:0;
 }
 
 input
@@ -30,13 +30,20 @@ a.selected
 div.topDiv
 {
     vertical-align:middle;
-    padding:5px;
+    /* padding:5px; */
 }
 
 div.itemsTable
 {
     display:table;
     width:100%;
+}
+
+div.contTable
+{
+    display:table;
+    width:100%;
+    padding-top:5px;
 }
 
 div.itemRowA
@@ -51,6 +58,11 @@ div.itemRowB
     background-color:#aaaaaa;
 }
 
+div.contRow
+{
+    display:table-row;
+}
+
 div.itemRowA:hover
 {
     background-color:#888888;
@@ -61,19 +73,24 @@ div.itemRowB:hover
     background-color:#888888;
 }
 
+div.contEntry
+{
+    vertical-align:middle;
+    display:table-cell;
+    padding-left:5px;
+}
+
+div.contEntry img
+{
+    vertical-align:middle;
+}
+
 div.itemEntry
 {
     padding:3px;
     padding-left:5px;
     vertical-align:middle;
     display:table-cell;
-    /* width:auto; */
-}
-
-div.spaceCell
-{
-    display:table-cell;
-    /* width:50%; */
 }
 
 div.itemButtons
@@ -85,6 +102,10 @@ div.itemButtons
     text-align:right;
 }
 
+span.contText
+{
+    vertical-align:middle;
+}
 /*
 .node
 {

@@ -27,13 +27,16 @@
 */
 
 var itemRoot;
+var topItemRoot
 var rightDocument;
+var topRightDocument;
 var viewItems = 50;
 var showMaxPages = 10;
 
 function itemInit()
 {
     rightDocument = frames["rightF"].document;
+    topRightDocument = frames["toprightF"].document;
     itemChangeType();
 }
 
@@ -46,6 +49,14 @@ function itemChangeType()
     itemRoot = isTypeDb() ? dbItemRoot : fsItemRoot;
     if (oldItemRoot && oldItemRoot!=itemRoot) Element.hide(oldItemRoot);
     Element.show(itemRoot);
+    
+    var oldTopItemRoot = topItemRoot;
+    var dbTopItemRoot = topRightDocument.getElementById("item_db_div");
+    var fsTopItemRoot = topRightDocument.getElementById("item_fs_div");
+    
+    topItemRoot = isTypeDb() ? dbTopItemRoot : fsTopItemRoot;
+    if (oldTopItemRoot && oldTopItemRoot!=topItemRoot) Element.hide(oldTopItemRoot);
+    Element.show(topItemRoot);
 }
 
 function folderChange(id)
@@ -171,26 +182,48 @@ function updateItems(ajaxRequest)
     
     var children = items.getElementsByTagName(childrenTag);
     var itemsEl = rightDocument.createElement("div");
+    var topItemsEl = topRightDocument.createElement("div");
     itemsEl.setAttribute("class", "itemsEl");
+    
+    var topTopDiv  = topRightDocument.createElement("div");
+    topTopDiv.setAttribute("class", "topDiv");
+    topItemsEl.appendChild(topTopDiv);
+    
+    var contTable = topRightDocument.createElement("div");
+    contTable.setAttribute("class", "contTable");
+    topTopDiv.appendChild(contTable);
+    var contRow = topRightDocument.createElement("div");
+    contRow.setAttribute("class", "contRow");
+    contTable.appendChild(contRow);
+    
+    var leftDiv = topRightDocument.createElement("div");
+    leftDiv.setAttribute("class", "contEntry");
+    
+    var contIcon = topRightDocument.createElement("img");
+    leftDiv.appendChild(contIcon);
+    
+    var pathEl = topRightDocument.createElement("span");
+    pathEl.setAttribute("class", "contText");
+    pathEl.appendChild(topRightDocument.createTextNode(" " + path));
+    leftDiv.appendChild(pathEl);
+    
+    var buttons = topRightDocument.createElement("div");
+    buttons.setAttribute("class", "itemButtons");
+    
+    contRow.appendChild(leftDiv);
+    contRow.appendChild(buttons);
     
     if (useFiles)
     {
-        var topDiv = rightDocument.createElement("div");
-        topDiv.appendChild(rightDocument.createTextNode("Directory: " + path));
-        topDiv.setAttribute("class", "topDiv");
+        contIcon.setAttribute("src", iconContainer);
+        contIcon.setAttribute("alt", "directory:");
         
         var first = true
-        first = _addLink(topDiv, first, "javascript:parent.addItem('"+ofId+"');", "add", iconAdd);
-        first = _addLink(topDiv, first, "javascript:parent.changeAutoscanDirectory('add','"+ofId+"', true);", "add as autoscan dir", iconAddAutoscan);
-        
-        itemsEl.appendChild(topDiv);
+        first = _addLink(buttons, first, "javascript:parent.addItem('"+ofId+"');", "add", iconAdd);
+        first = _addLink(buttons, first, "javascript:parent.changeAutoscanDirectory('add','"+ofId+"', true);", "add as autoscan dir", iconAddAutoscan);
     }
     else
     {
-        var topDiv = rightDocument.createElement("div");
-        
-        var contIcon = rightDocument.createElement("img");
-        
         var iconSrc = iconContainer;
         if (autoscanType == '1')
             iconSrc = iconContainerAutoscan;
@@ -199,10 +232,6 @@ function updateItems(ajaxRequest)
         
         contIcon.setAttribute("src", iconSrc);
         contIcon.setAttribute("alt", "container:");
-        topDiv.appendChild(contIcon);
-        topDiv.appendChild(rightDocument.createTextNode(" " + path));
-        //topDiv.appendChild(rightDocument.createTextNode("Container: " + path));
-        topDiv.setAttribute("class", "topDiv");
         
         var link;
         var first = true;
@@ -236,31 +265,29 @@ function updateItems(ajaxRequest)
         }
         
         if (addLink)
-            first = _addLink(topDiv, first, "javascript:parent.userAddItemStart();", "add Item", iconNewItem);
+            first = _addLink(buttons, first, "javascript:parent.userAddItemStart();", "add Item", iconNewItem);
         if (editLink)
-            first = _addLink(topDiv, first, "javascript:parent.userEditItemStart('"+ofId+"');", "edit", iconEdit);
+            first = _addLink(buttons, first, "javascript:parent.userEditItemStart('"+ofId+"');", "edit", iconEdit);
         if (removeThisLink)
-            first = _addLink(topDiv, first, "javascript:parent.removeItem('"+ofId+"', false);", "remove", iconRemoveThis);
+            first = _addLink(buttons, first, "javascript:parent.removeItem('"+ofId+"', false);", "remove", iconRemoveThis);
         if (removeAllLink)
-            first = _addLink(topDiv, first, "javascript:parent.removeItem('"+ofId+"', true);", "remove all", iconRemoveAll);
+            first = _addLink(buttons, first, "javascript:parent.removeItem('"+ofId+"', true);", "remove all", iconRemoveAll);
         if (autoscanLink)
         {
             if (autoscanType == "2")
             {
-                topDiv.appendChild(rightDocument.createTextNode(" (added as autoscan directory through config.xml)"));
+                //buttons.appendChild(topRightDocument.createTextNode(" (added as autoscan directory through config.xml)"));
             }
             else
             {
                 var action = (autoscanType == "1" ? "remove" : "add");
                 var icon = (autoscanType == "1" ? iconRemoveAutoscan : iconAddAutoscan);
-                first = _addLink(topDiv, first,  "javascript:parent.changeAutoscanDirectory('"+action+"','"+ofId+"', false);", action+" as autoscan dir", icon);
+                first = _addLink(buttons, first,  "javascript:parent.changeAutoscanDirectory('"+action+"','"+ofId+"', false);", action+" as autoscan dir", icon);
             }
         }
-        
-        itemsEl.appendChild(topDiv);
     }
     itemsEl.appendChild(pagingPar);
-    var itemsTable = rightDocument.createElement("div");
+    var itemsTable = topRightDocument.createElement("div");
     itemsTable.setAttribute("class", "itemsTable");
     itemsEl.appendChild(itemsTable);
     for (var i = 0; i < children.length; i++)
@@ -279,11 +306,7 @@ function updateItems(ajaxRequest)
         var itemText = rightDocument.createTextNode(useFiles ? item.firstChild.nodeValue : xmlGetElementText(item, "title"));
         itemLink.appendChild(itemText);
         
-        var spaceCell = rightDocument.createElement("div");
-        spaceCell.setAttribute("class", "spaceCell");
-        
         itemRow.appendChild(itemEntry);
-        itemRow.appendChild(spaceCell);
         itemRow.appendChild(itemButtons);
         
         if (useFiles)
@@ -316,6 +339,7 @@ function updateItems(ajaxRequest)
     //itemsEl.appendChild(rightDocument.createTextNode("total: "+totalMatches));
     
     itemRoot.replaceChild(itemsEl, itemRoot.firstChild);
+    topItemRoot.replaceChild(topItemsEl, topItemRoot.firstChild);
 }
 
 function _addLink(addToElement, first, href, text, icon, seperator, target)

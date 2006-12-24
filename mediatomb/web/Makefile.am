@@ -51,7 +51,8 @@ _DIST_FILES_JS = \
 ./js/tools.js \
 ./js/items.js \
 ./js/icons.js \
-./js/nanotree.js 
+./js/nanotree.js \
+./js/wz_tooltip.js
 
 _DIST_FILES_WEB = \
 ./disabled.html \
@@ -60,6 +61,8 @@ _DIST_FILES_WEB = \
 ./left.html \
 ./right.html \
 ./top.html \
+./topleft.html \
+./topright.html \
 ./main.css \
 ./cm.xml \
 ./cds.xml \

@@ -515,12 +515,16 @@ We are using the following code in our tree:
   (c) 2005 Sam Stephenson <sam@conio.net>, MIT-style license.
 
   NanoTree http://nanotree.sourceforge.net/
-  (c) ???? Martin Mouritzen <martin@nano.dk>, LGPL license.
+  (c) ???? Martin Mouritzen <martin@nano.dk>; LGPL
+  
+  wz_tooltip.js http://www.walterzorn.com/
+  (c) 002-2005 Walter Zorn; LGPL
 
 - tombupnp is based on pupnp (http://pupnp.sf.net) which is based on
   libupnp (http://upnp.sf.net), originally distributed under the
   BSD license, Copyright (c) 2000-2003 Intel Corporation.
 
+  
 CONTRIBUTIONS
 -------------
 
