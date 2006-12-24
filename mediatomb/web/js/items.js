@@ -204,7 +204,6 @@ function updateItems(ajaxRequest)
     
     var pathEl = topRightDocument.createElement("span");
     pathEl.setAttribute("class", "contText");
-    pathEl.appendChild(topRightDocument.createTextNode(" " + path));
     leftDiv.appendChild(pathEl);
     
     var buttons = topRightDocument.createElement("div");
@@ -217,6 +216,8 @@ function updateItems(ajaxRequest)
     {
         contIcon.setAttribute("src", iconContainer);
         contIcon.setAttribute("alt", "directory:");
+        
+        pathEl.appendChild(topRightDocument.createTextNode(" /Filesystem" + path));
         
         var first = true
         first = _addLink(buttons, first, "javascript:parent.addItem('"+ofId+"');", "add", iconAdd);
@@ -232,6 +233,8 @@ function updateItems(ajaxRequest)
         
         contIcon.setAttribute("src", iconSrc);
         contIcon.setAttribute("alt", "container:");
+        
+        pathEl.appendChild(topRightDocument.createTextNode(" /Database" + path));
         
         var link;
         var first = true;

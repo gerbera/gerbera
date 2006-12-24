@@ -87,6 +87,7 @@
                 var globalAjaxHandlers = {
                     onCreate: function()
                     {
+                        Element.hide(topDocument.getElementById("systemIdle"));
                         Element.show(topDocument.getElementById("systemWorking"));
                     },
                     
@@ -95,7 +96,10 @@
                         if(Ajax.activeRequestCount < 0)
                             Ajax.activeRequestCount = 0;
                         if(Ajax.activeRequestCount == 0)
+                        {
                             Element.hide(topDocument.getElementById("systemWorking"));
+                            Element.show(topDocument.getElementById("systemIdle"));
+                        }
                     },
                     
                     onFailure: function()
