@@ -507,9 +507,6 @@ We are using the following code in our tree:
 - md5 javascript implementation distributed under BSD License,
   Copyright (C) Paul Johnston 1999 - 2002. http://pajhome.org.uk/crypt/md5 
 
-- all icons for the UI are from the redhat-artwork-0.117 package under GNU GPL, 
-  (I could not find any (C) in the supplied documents)
-
 - the UI uses the following software:
   Prototype JavaScript Framework http://prototype.conio.net/
   (c) 2005 Sam Stephenson <sam@conio.net>, MIT-style license.
