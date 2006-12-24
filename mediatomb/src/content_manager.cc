@@ -86,6 +86,7 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
     cond = Ref<Cond>(new Cond(mutex));
     ignore_unknown_extensions = 0;
     
+    working = false;
     shutdownFlag = false;
     
     acct = Ref<CMAccounting>(new CMAccounting());
@@ -1016,13 +1017,16 @@ void ContentManager::threadProc()
     Ref<CMTask> task;
     Ref<ContentManager> this_ref(this);
     AUTOLOCK(mutex);
+    working = true;
     while(! shutdownFlag)
     {
         currentTask = nil;
         if(((task = taskQueue1->dequeue()) == nil) && ((task = taskQueue2->dequeue()) == nil))
         {
+            working = false;
             /* if nothing to do, sleep until awakened */
             cond->wait();
+            working = true;
             continue;
         }
         else

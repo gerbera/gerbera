@@ -47,10 +47,10 @@ public:
     
     /// \brief Returns the name of the config file that was used to launch the server.
     inline zmm::String getConfigFilename() { return filename; }
-
+    
     void load(zmm::String filename);
     void save();
-
+    
     /// \brief Returns a config option with the given path, if option does not exist a default value is returned.
     /// \param xpath option xpath
     /// \param def default value if option not found

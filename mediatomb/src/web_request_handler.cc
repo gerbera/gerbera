@@ -36,6 +36,7 @@
 #include "mem_io_handler.h"
 #include "web_request_handler.h"
 #include "config_manager.h"
+#include "content_manager.h"
 #include "web/pages.h"
 #include "tools.h"
 #include "hash.h"
@@ -85,9 +86,13 @@ void WebRequestHandler::check_request(bool checkLogin)
         throw SessionException(_("not logged in"));
     }
     session->access();
+    
     String uiUpdate = param(_("get_update_ids"));
     if ((string_ok(uiUpdate) && uiUpdate == _("1")))
-        addUpdateIDs(session, root);
+    {
+        if (! ContentManager::getInstance()->isBusy())
+            addUpdateIDs(session, root);
+    }
 }
 
 String WebRequestHandler::renderXMLHeader()

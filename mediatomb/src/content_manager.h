@@ -156,6 +156,8 @@ public:
     
     virtual void timerNotify(int id);
     
+    bool isBusy() { return working; }
+    
     zmm::Ref<CMAccounting> getAccounting();
     zmm::Ref<CMTask> getCurrentTask();
     
@@ -275,6 +277,8 @@ protected:
     
     pthread_t taskThread;
     zmm::Ref<Cond> cond;
+    
+    bool working;
     
     bool shutdownFlag;
     
