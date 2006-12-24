@@ -43,6 +43,7 @@ _DIST_FILES_ICONS = \
 ./icons/status.png \
 ./icons/status_loading.png \
 ./icons/status_updates_pending.png \
+./icons/mediatomb.png \
 ./icons/view-refresh.png
 
 _DIST_FILES_JS = \
