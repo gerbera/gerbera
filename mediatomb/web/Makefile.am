@@ -40,8 +40,9 @@ _DIST_FILES_ICONS = \
 ./icons/autoscan_config_folder_open.png \
 ./icons/autoscan_folder_open.png \
 ./icons/folder_open.png \
-./icons/loading.png \
-./icons/loading_active.png \
+./icons/status.png \
+./icons/status_loading.png \
+./icons/status_updates_pending.png \
 ./icons/view-refresh.png
 
 _DIST_FILES_JS = \
