@@ -46,11 +46,23 @@ a
     text-decoration:none;
 }
 
-a.selected
+div.db_fs_selector
+{
+    text-align:center;
+    padding-top:12px;
+}
+
+div.db_fs_selector a
+{
+    padding:2px 4px;
+}
+
+div.db_fs_selector a.selected
 {
     /* text-decoration:underline; */
     background-color: #222222;
 	color: #ffffff;
+    
 }
 
 div.topDiv

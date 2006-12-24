@@ -55,4 +55,3 @@ var iconTreeAutoscanOpen = treeImagePath + 'autoscan_folder_open.png';
 var iconTreeAutoscanConfigOpen = treeImagePath + 'autoscan_config_folder_open.png';
 var iconTreeAutoscanConfigClosed = treeImagePath + 'autoscan_config_folder_closed.png';
 
-
