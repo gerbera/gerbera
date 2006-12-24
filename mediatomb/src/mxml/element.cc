@@ -232,7 +232,7 @@ void Element::print(Ref<StringBuffer> buf, int indent)
 String Element::escape(String str)
 {
     Ref<StringBuffer> buf(new StringBuffer(str.length()));
-    char *ptr = str.c_str();
+    signed char *ptr = (signed char *)str.c_str();
     while (*ptr)
     {
         switch (*ptr)
@@ -245,7 +245,7 @@ String Element::escape(String str)
                             (*ptr != 0x09) && (*ptr != 0x0d) && 
                             (*ptr != 0x0a)) || (*ptr == 0x7f))
                        {
-                           *buf << ".";
+                           *buf << '.';
                        }
                        else
                            *buf << *ptr;

@@ -198,7 +198,7 @@ is_identifier_char( IN char c )
 *	Note :
 ************************************************************************/
 static XINLINE xboolean
-is_control_char( IN char c )
+is_control_char( IN signed char c )
 {
     return ( ( c >= 0 && c <= 31 ) || ( c == 127 ) );
 }

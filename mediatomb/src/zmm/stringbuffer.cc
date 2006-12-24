@@ -94,6 +94,12 @@ StringBuffer &StringBuffer::operator<<(char *str)
     }
     return *this;
 }
+
+StringBuffer &StringBuffer::operator<<(signed char *str)
+{
+    return operator<<((char *)str);
+}
+
 StringBuffer &StringBuffer::operator<<(char chr)
 {
     addCapacity(1);
@@ -101,6 +107,11 @@ StringBuffer &StringBuffer::operator<<(char chr)
     *(data + len + 1) = 0;
     len++;
     return *this;
+}
+
+StringBuffer &StringBuffer::operator<<(signed char chr)
+{
+    return operator<<((char)chr);
 }
 
 StringBuffer &StringBuffer::operator<<(int x)

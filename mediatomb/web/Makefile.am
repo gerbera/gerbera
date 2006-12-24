@@ -19,7 +19,9 @@ _DIST_FILES_IMAGES = \
 ./icons/nanotree/images/folder_closed.png \
 ./icons/nanotree/images/folder_open.png \
 ./icons/nanotree/images/autoscan_folder_closed.png \
-./icons/nanotree/images/autoscan_folder_open.png
+./icons/nanotree/images/autoscan_folder_open.png \
+./icons/nanotree/images/autoscan_config_folder_open.png \
+./icons/nanotree/images/autoscan_config_folder_closed.png
 
 _DIST_FILES_ICONS = \
 ./icons/document-new.png \
@@ -35,6 +37,9 @@ _DIST_FILES_ICONS = \
 ./icons/remove_autoscan.png \
 ./icons/stock_edit.png \
 ./icons/stock_exit.png \
+./icons/autoscan_config_folder_open.png \
+./icons/autoscan_folder_open.png \
+./icons/folder_open.png \
 ./icons/view-refresh.png
 
 _DIST_FILES_JS = \

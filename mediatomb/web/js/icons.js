@@ -41,6 +41,9 @@ var iconNext = iconPath + 'go-next.png';
 var iconLast = iconPath + 'go-last.png';
 var iconAddAutoscan = iconPath + 'add_as_autoscan.png';
 var iconRemoveAutoscan = iconPath + 'remove_autoscan.png';
+var iconContainer = iconPath + 'folder_open.png';
+var iconContainerAutoscan = iconPath + 'autoscan_folder_open.png';
+var iconContainerAutoscanConfig = iconPath + 'autoscan_config_folder_open.png';
 
 /* icons for tree.js */
 
@@ -49,12 +52,7 @@ var iconTreeClosed = treeImagePath + 'folder_closed.png';
 var iconTreeOpen = treeImagePath + 'folder_open.png';
 var iconTreeAutoscanClosed = treeImagePath + 'autoscan_folder_closed.png';
 var iconTreeAutoscanOpen = treeImagePath + 'autoscan_folder_open.png';
-var iconTreeAutoscanConfigOpen = treeImagePath + 'autoscan_folder_open.png';
-var iconTreeAutoscanConfigClosed = treeImagePath + 'autoscan_folder_open.png';
+var iconTreeAutoscanConfigOpen = treeImagePath + 'autoscan_config_folder_open.png';
+var iconTreeAutoscanConfigClosed = treeImagePath + 'autoscan_config_folder_closed.png';
 
-
-/* FIXME - should be replaced by icons w/o line on the left */
-var iconContainer = treeImagePath + 'folder_open.png';
-var iconContainerAutoscan = treeImagePath + 'autoscan_folder_open.png';
-var iconContainerAutoscanConfig = treeImagePath + 'autoscan_folder_open.png';
 

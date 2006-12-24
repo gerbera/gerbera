@@ -53,6 +53,8 @@ public:
     StringBuffer &operator<<(String other);
     StringBuffer &operator<<(Ref<StringBuffer> other);
     StringBuffer &operator<<(char *str);
+    StringBuffer &operator<<(signed char *str);
+    StringBuffer &operator<<(signed char chr);
     StringBuffer &operator<<(char chr);
     StringBuffer &operator<<(int x);
     StringBuffer &operator<<(unsigned int x);
