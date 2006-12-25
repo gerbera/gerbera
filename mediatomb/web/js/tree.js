@@ -59,15 +59,29 @@ var dbStuff =
     container: false,
     rootNode: false,
     treeShown: false,
-    tombRootNode: false
+    tombRootNode: false,
+    refreshQueue: new Array()
 };
 var fsStuff =
 {
     container: false,
     rootNode: false,
     treeShown: false,
-    tombRootNode: false
+    tombRootNode: false,
+    refreshQueue: new Array()
 };
+
+/* nanotree.js overrides... */
+
+function getTreeNode(nodeID) {
+    var type = nodeID.substr(0,1);
+    if (type == 'd')
+        return findNodeWithID(dbStuff.rootNode,nodeID);
+    if (type == 'f')
+        return findNodeWithID(fsStuff.rootNode,nodeID);
+}
+
+/* overrides END */
 
 function treeInit()
 {
@@ -138,7 +152,34 @@ function treeChangeType()
         showTree('/icons/nanotree/');
         type.treeShown = true;
     }
-    if (loggedIn) selectLastNode();
+    while (type.refreshQueue.length > 0)
+    {
+        refreshNode(type.refreshQueue.pop());
+    }
+    if (loggedIn)
+    {
+        selectLastNode();
+    }
+}
+
+function refreshOrQueueNode(node)
+{
+    var id = node.getID();
+    var type = id.substr(0,1);
+     if (isTypeDb())
+    {
+        if (type == 'd')
+            refreshNode(node);
+        else
+            fsStuff.refreshQueue.push(node);
+    }
+    else
+    {
+        if (type == 'f')
+            refreshNode(node);
+        else
+            dbStuff.refreshQueue.push(node);
+    }
 }
 
 function selectLastNode()
@@ -146,14 +187,31 @@ function selectLastNode()
     if (isTypeDb())
     {
         var saveLastNodeDbWish = lastNodeDbWish;
-        if (lastNodeDb) selectNode(lastNodeDb);
+        if (lastNodeDb)
+            selectNode(lastNodeDb);
         lastNodeDbWish = saveLastNodeDbWish
     }
     else
     {
         var saveLastNodeFsWish = lastNodeFsWish;
-        if (lastNodeFs) selectNode(lastNodeFs);
+        if (lastNodeFs)
+            selectNode(lastNodeFs);
         lastNodeFsWish = saveLastNodeFsWish
+    }
+}
+
+function selectNodeIfVisible(nodeID)
+{
+    var type = nodeID.substr(0,1);
+    if (isTypeDb())
+    {
+        if (type == 'd')
+            selectNode(nodeID);
+    }
+    else
+    {
+        if (type == 'f')
+            selectNode(nodeID);
     }
 }
 
@@ -162,17 +220,24 @@ function standardClick(treeNode)
     var id = treeNode.getID();
     if (isTypeDb())
     {
-        setCookie('lastNodeDb', id);
-        lastNodeDb = id;
-        lastNodeDbWish = null;
+        if (id.substr(0,1) == 'd')
+        {
+            setCookie('lastNodeDb', id);
+            lastNodeDb = id;
+            lastNodeDbWish = null;
+            folderChange(id);
+        }
     }
     else
     {
-        setCookie('lastNodeFs', id);
-        lastNodeFs = id;
-        lastNodeFsWish = null;
+        if (id.substr(0,1) == 'f')
+        {
+            setCookie('lastNodeFs', id);
+            lastNodeFs = id;
+            lastNodeFsWish = null;
+            folderChange(id);
+        }
     }
-    folderChange(id);
 }
 
 function openEventListener(id)
@@ -305,13 +370,13 @@ function updateTree(ajaxRequest)
         //fetchChildren(openEventListener, child);
     }
     node.childrenHaveBeenFetched = true;
-    refreshNode(node);
+    refreshOrQueueNode(node);
     if (doSelectLastNode)
         selectLastNode();
     else if (selectIt)
     {
         //alert("selecting: " + parentId);
-        selectNode(parentId);
+        selectNodeIfVisible(parentId);
         //selectNode("d0");
         //alert("selected! " + parentId);
     }

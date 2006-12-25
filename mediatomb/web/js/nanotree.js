@@ -264,9 +264,13 @@ function TreeNode(id,name,icon,param,orderNumber) {
 	}
 	
 }
+
+/* overridden in tree.js to serve use the correct rootNode
 function getTreeNode(nodeID) {
 	return findNodeWithID(rootNode,nodeID);
 }
+*/
+
 function findNodeWithID(node,nodeID) {
 	if (node.getID() == nodeID) {
 		return node;

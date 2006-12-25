@@ -127,7 +127,7 @@ function errorCheck(xml, noredirect)
             savedlastNodeDbIDParent = getTreeNode(savedlastNodeDbID).getParent().getID();
         //alert('before: lastid: ' + savedlastNodeDbID);
         //alert('before: node: ' + getTreeNode(savedlastNodeDbID));
-        selectNode('d0');
+        selectNodeIfVisible('d0');
         var updateAll = false;
         if (updateIDStr != 'all')
         {
@@ -168,12 +168,12 @@ function errorCheck(xml, noredirect)
         //alert('lastid: ' + savedlastNodeDbID);
         //alert('node: ' + savedlastNodeDb);
         if (savedlastNodeDb)
-            selectNode(savedlastNodeDbID);
+            selectNodeIfVisible(savedlastNodeDbID);
         else if (savedlastNodeDbIDParent)
         {
             savedlastNodeDb = getTreeNode(savedlastNodeDbIDParent);
             if (savedlastNodeDb)
-                selectNode(savedlastNodeDbIDParent);
+                selectNodeIfVisible(savedlastNodeDbIDParent);
         }
     }
     var error = xmlGetElementText(xml, 'error');
