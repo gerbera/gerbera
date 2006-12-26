@@ -328,11 +328,12 @@ function getUpdatesCallback(ajaxRequest)
     errorCheck(xml, true);
 }
 
-function userActivity()
+function userActivity(event)
 {
     if (timer)
     {
         window.clearTimeout(timer);
         timer = window.setTimeout("getUpdates(true)", INACTIVITY_TIMEOUT);
     }
+    return true;
 }
