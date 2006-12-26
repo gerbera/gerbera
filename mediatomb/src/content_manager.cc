@@ -590,6 +590,10 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<CMTask> task)
     struct dirent *dent;
     // abort loop if either:
     // no valid directory returned, server is about to shutdown, the task is there and was invalidated
+    if (task != nil)
+    {
+        log_debug("IS TASK VALID? [%d], taskoath: [%s]\n", task->isValid(), path.c_str());
+    }
     while (((dent = readdir(dir)) != NULL) && (!shutdownFlag) && (task == nil || ((task != nil) && task->isValid())))
     {
         char *name = dent->d_name;
@@ -648,7 +652,7 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<CMTask> task)
 #endif
                 if (IS_CDS_CONTAINER(obj->getObjectType()))
                 {
-                    addRecursive(newPath, hidden);
+                    addRecursive(newPath, hidden, task);
                 }
             }
         }
@@ -1098,6 +1102,19 @@ void ContentManager::addFile(zmm::String path, bool recursive, bool async, bool 
     }
 }
 
+void ContentManager::invalidateAddTask(Ref<CMTask> t, String path)
+{
+    if (t->getID() == AddFile)
+    {
+        log_debug("comparing, task path: %s, remove path: %s\n", RefCast(t, CMAddFileTask)->getPath().c_str(), path.c_str());
+        if ((RefCast(t, CMAddFileTask)->getPath().startsWith(path)))
+        {
+            log_debug("Invalidating task with path %s\n", RefCast(t, CMAddFileTask)->getPath().c_str());
+            t->invalidate();
+        }
+    }
+}
+
 void ContentManager::removeObject(int objectID, bool async, bool all)
 {
     if (async)
@@ -1149,34 +1166,23 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
             for (i = 0; i < qsize; i++)
             {
                 Ref<CMTask> t = taskQueue1->get(i);
-                if (t->getID() == AddFile)
-                {
-                    log_debug("comparing, task path: %s, remove path: %s\n", RefCast(t, CMAddFileTask)->getPath().c_str(), path.c_str());
-                    if ((RefCast(t, CMAddFileTask)->getPath().startsWith(path)))
-                    {
-                        log_debug("Invalidating task with path %s\n", RefCast(t, CMAddFileTask)->getPath().c_str());
-                        t->invalidate();
-                    }
-                }
+                invalidateAddTask(t, path);
             }
 
             qsize = taskQueue2->size();
             for (i = 0; i < qsize; i++)
             {
                 Ref<CMTask> t = taskQueue2->get(i);
-                if (t->getID() == AddFile)
-                {
-                    log_debug("comparing, task path: %s, remove path: %s\n", RefCast(t, CMAddFileTask)->getPath().c_str(), path.c_str());
-                    if ((RefCast(t, CMAddFileTask)->getPath().startsWith(path)))
-                    {
-                        t->invalidate();
-                        log_debug("Invalidating task with path %s\n", RefCast(t, CMAddFileTask)->getPath().c_str());
-                    }
-                }
+                invalidateAddTask(t, path);
+            }
+
+            Ref<CMTask> t = getCurrentTask();
+            if (t != nil)
+            {
+                invalidateAddTask(t, path);
             }
         } 
 
-        
         addTask(task);
     }
     else
@@ -1291,7 +1297,7 @@ String CMAddFileTask::getPath()
 void CMAddFileTask::run(Ref<ContentManager> cm)
 {
     log_debug("running add file task with path %s recursive: %d\n", path.c_str(), recursive);
-    cm->_addFile(path, recursive, hidden);
+    cm->_addFile(path, recursive, hidden, Ref<CMTask> (this));
 }
 
 CMRemoveObjectTask::CMRemoveObjectTask(int objectID, bool all) : CMTask()

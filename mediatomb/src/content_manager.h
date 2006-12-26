@@ -261,6 +261,8 @@ protected:
     zmm::String extension2mimetype(zmm::String extension);
     zmm::String mimetype2upnpclass(zmm::String mimeType);
 
+    void invalidateAddTask(zmm::Ref<CMTask> t, zmm::String path);
+    
 #ifdef HAVE_JS  
     zmm::Ref<Scripting> scripting;
 #endif
