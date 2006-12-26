@@ -270,7 +270,7 @@ void ContentManager::addVirtualItem(Ref<CdsObject> obj)
 
 }
 
-void ContentManager::_addFile(String path, bool recursive, bool hidden)
+void ContentManager::_addFile(String path, bool recursive, bool hidden, Ref<CMTask> task)
 {
     if (hidden == false)
     {
@@ -310,7 +310,7 @@ void ContentManager::_addFile(String path, bool recursive, bool hidden)
     
     if (recursive && IS_CDS_CONTAINER(obj->getObjectType()))
     {
-        addRecursive(path, hidden);
+        addRecursive(path, hidden, task);
     }
 }
 
@@ -566,7 +566,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
 }
 
 /* scans the given directory and adds everything recursively */
-void ContentManager::addRecursive(String path, bool hidden)
+void ContentManager::addRecursive(String path, bool hidden, Ref<CMTask> task)
 {
 
     if (hidden == false)
@@ -588,7 +588,9 @@ void ContentManager::addRecursive(String path, bool hidden)
     }
     int parentID = storage->findObjectIDByPath(path + DIR_SEPARATOR);
     struct dirent *dent;
-    while (((dent = readdir(dir)) != NULL) && (!shutdownFlag))
+    // abort loop if either:
+    // no valid directory returned, server is about to shutdown, the task is there and was invalidated
+    while (((dent = readdir(dir)) != NULL) && (!shutdownFlag) && (task == nil || ((task != nil) && task->isValid())))
     {
         char *name = dent->d_name;
         if (name[0] == '.')
@@ -1125,15 +1127,21 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
         catch (Exception e)
         {
             log_debug("trying to remove an object ID which is no longer in the database! %d\n", objectID);
+            return;
         }
 
         if (IS_CDS_CONTAINER(obj->getObjectType()))
         {
+            int i;
+
             // make sure to remove possible child autoscan directories from the scanlist 
-            autoscan_timed->removeIfSubdir(path);
+            Ref<IntArray> rm_list = autoscan_timed->removeIfSubdir(path);
+            for (i = 0; i < rm_list->size(); i++)
+            {
+                Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), rm_list->get(i), true);
+            }
 
             AUTOLOCK(mutex);
-            int i;
             int qsize = taskQueue1->size();
 
             // we have to make sure that a currently running autoscan task will not

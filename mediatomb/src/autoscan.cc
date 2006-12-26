@@ -187,18 +187,22 @@ int AutoscanList::remove(String location)
     return INVALID_SCAN_ID;
 }
 
-void AutoscanList::removeIfSubdir(String parent, bool persistent)
+Ref<IntArray> AutoscanList::removeIfSubdir(String parent, bool persistent)
 {
     AUTOLOCK(mutex);
-    
+
+    Ref<IntArray> rm_id_list(new IntArray());
+
     for (int i = 0; i < list->size(); i++)
     {
-        if (list->get(i) != nil && (parent.startsWith(list->get(i)->getLocation())))
+        if (list->get(i) != nil && (list->get(i)->getLocation().startsWith(parent)))
         {
             Ref<AutoscanDirectory> dir = list->get(i);
             if (dir->persistent() && (persistent == false))
+            {
                 continue;
-
+            }
+            rm_id_list->append(dir->getScanID());
             dir->setScanID(INVALID_SCAN_ID);
             if (i == list->size()-1)
             {
@@ -210,6 +214,8 @@ void AutoscanList::removeIfSubdir(String parent, bool persistent)
             }
         }
     }
+
+    return rm_id_list;
 }
 
 

@@ -83,7 +83,7 @@ public:
     /// \brief removes the AutoscanDirectory if it is a subdirectory of a given location.
     /// \param parent parent directory.
     /// \param persistent also remove persistent directories.
-    void removeIfSubdir(zmm::String parent, bool persistent = false);
+    zmm::Ref<zmm::IntArray> removeIfSubdir(zmm::String parent, bool persistent = false);
 
     /*
     /// \brief Add timer for each directory in the list.
