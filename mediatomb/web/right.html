@@ -50,17 +50,54 @@
         </div>
         <div id="autoscan_div" style="display:none">
             <form name="autoscanForm" action="javascript:parent.autoscanSubmit();">
-                <fieldset>
-                    <legend>Scan Level</legend>
-                    <input type="radio" name="scan_level" id="scan_level_basic" value="basic" checked="checked"> <label for="scan_level_basic">Basic</label>
-                    <input type="radio" name="scan_level" id="scan_level_full" value="full"> <label for="scan_level_full">Full</label>
-                </fieldset>
-                <!-- scan_mode... -->
-                <input type="checkbox" name="recursive" id="recursive" value="true"> <label for="recursive">Recursive</label><br/>
-                <input type="checkbox" name="hidden" id="hidden" value="true"> <label for="hidden">Include hidden files/directories</label><br/>
-                <label for="interval">Scan Interval (in seconds):</label> <input type="text" name="interval" id="interval" value="1800"><br/>
-                <!-- <input type="checkbox" name="persistent" id="persistent" value="true"> <label for="persistent">Persistent</label><br/> -->
-                <input name="submit" type="submit" value="add..."/>
+                    <table class="classicForm" align="center">
+                        <tr>
+                            <!-- <td colspan="2">
+                                <fieldset> -->
+                            <td align="right">
+                                Scan Level:
+                            </td>
+                            <td>
+                                    <!-- <legend>Scan Level</legend> -->
+                                    <input type="radio" name="scan_level" id="scan_level_basic" value="basic" checked="checked"> <label for="scan_level_basic">Basic</label>
+                                    <input type="radio" name="scan_level" id="scan_level_full" value="full"> <label for="scan_level_full">Full</label>
+                                <!-- </fieldset> -->
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right">
+                                <label for="recursive">Recursive:</label>
+                            </td>
+                            <td>
+                                <!-- scan_mode... -->
+                                <input type="checkbox" name="recursive" id="recursive" value="true">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right">
+                                <label for="hidden">Include hidden files/directories:</label>
+                            </td>
+                            <td>
+                                <input type="checkbox" name="hidden" id="hidden" value="true">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right">
+                                <label for="interval">Scan Interval (in seconds):</label>
+                            </td>
+                            <td>
+                                <input type="text" name="interval" id="interval" value="1800" size="4">
+                            </td>
+                        </tr>
+                        <!-- <input type="checkbox" name="persistent" id="persistent" value="true"> <label for="persistent">Persistent</label><br/> -->
+                        <tr><td>&nbsp;</td></tr>
+                        <tr>
+                            <td colspan="2" align="right">
+                                <input name="submit" type="submit" value="add..."/>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
             </form>
         </div>
         <div id="autoscan_list_div" style="display:none">

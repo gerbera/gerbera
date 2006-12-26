@@ -927,4 +927,8 @@ function keyDown(event) {
 		expandNode();
 		return false;
 	}
+    // 13: enter
+    // 32: space
+    // 33: PgUp
+    // 34: PgDown
 }

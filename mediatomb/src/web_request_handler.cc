@@ -99,22 +99,26 @@ void WebRequestHandler::check_request(bool checkLogin)
         }
         else
         {
+            /*
             if (1 || ContentManager::getInstance()->isBusy())
             {
-                if (session->hasUIUpdateIDs())
-                {
-                    log_debug("UI updates pending...\n");
-                    Ref<Element> updateIDs(new Element(_("updateIDs")));
-                    updateIDs->addAttribute(_("pending"), _("1"));
-                    root->appendChild(updateIDs);
-                }
-                else
-                {
-                    log_debug("no updates pending.\n");
-                }
+            */
+            Ref<Element> updateIDs(new Element(_("updateIDs")));
+            root->appendChild(updateIDs);
+            if (session->hasUIUpdateIDs())
+            {
+                log_debug("UI updates pending...\n");
+                updateIDs->addAttribute(_("pending"), _("1"));
+            }
+            else
+            {
+                log_debug("no UI updates.\n");
+            }
+            /*
             }
             else
                 addUpdateIDs(session, root);
+            */
         }
     }
 }
@@ -207,10 +211,14 @@ Ref<IOHandler> WebRequestHandler::open(IN const char *filename,
 
 void WebRequestHandler::addUpdateIDs(Ref<Session> session, Ref<Element> root)
 {
+    Ref<Element> updateIDsEl(new Element(_("updateIDs")));
+    root->appendChild(updateIDsEl);
+    
     String updateIDs = session->getUIUpdateIDs();
     if (string_ok(updateIDs))
     {
         log_debug("UI: sending update ids: %s\n", updateIDs.c_str());
-        root->appendTextChild(_("updateIDs"), updateIDs);
+        updateIDsEl->setText(updateIDs);
+        updateIDsEl->addAttribute(_("updates"), _("1"));
     }
 }

@@ -144,6 +144,12 @@ span.contText
 {
     vertical-align:middle;
 }
+
+table.classicForm
+{
+    padding:5px;
+    padding-left:10px;
+}
 /*
 .node
 {

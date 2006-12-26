@@ -159,6 +159,7 @@ function treeChangeType()
     if (loggedIn)
     {
         selectLastNode();
+        getUpdates(true);
     }
 }
 

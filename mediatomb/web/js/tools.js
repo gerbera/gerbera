@@ -130,6 +130,15 @@ function errorCheck(xml, noredirect)
             if (! timer)
                 timer = window.setTimeout("getUpdates(true)", INACTIVITY_TIMEOUT);
         }
+        else if (updateIDsEl.getAttribute("updates") != '1')
+        {
+            setStatus("no_updates");
+            if (timer)
+            {
+                window.clearTimeout(timer);
+                timer = false;
+            }
+        }
         else
         {
             var updateIDStr = xmlGetText(updateIDsEl);
