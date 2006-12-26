@@ -133,6 +133,15 @@ public:
     virtual void process();
 };
 
+/// \brief autoscan add and remove
+class update : public WebRequestHandler
+{
+public:
+    //update();
+    virtual void process();
+};
+
+
 } // namespace
 
 /// \brief Chooses and creates the appropriate handler for processing the request.

@@ -1078,9 +1078,13 @@ void SQLStorage::_removeObjects(Ref<StringBuffer> objectIDs, int offset)
         << " WHERE " << TQD('o',"id") << " IN (";
     q->concat(objectIDs, offset);
     *q << ')';
+    
+    log_debug("%s\n", q->c_str());
+    
     Ref<SQLResult> res = select(q);
     if (res != nil)
     {
+        log_debug("relevant autoscans!\n");
         Ref<StringBuffer> delete_as(new StringBuffer());
         Ref<SQLRow> row;
         while((row = res->nextRow()) != nil)
@@ -1096,16 +1100,18 @@ void SQLStorage::_removeObjects(Ref<StringBuffer> objectIDs, int offset)
             }
             else
                 *delete_as << ',' << row->col_c_str(0);
+            log_debug("relevant autoscan: %d; persistent: %d\n", row->col_c_str(0), persistent);
         }
         
         if (delete_as->length() > 0)
         {
             q->clear();
             *q << "DELETE FROM " << TQ(AUTOSCAN_TABLE)
-                << " WHERE " << TQ("obj_id") << " IN (";
+                << " WHERE " << TQ("id") << " IN (";
             q->concat(delete_as, 1);
             *q << ')';
             exec(q);
+            log_debug("deleting autoscans: %s\n", delete_as->c_str());
         }
     }
     
@@ -1541,7 +1547,10 @@ Ref<AutoscanList> SQLStorage::getAutoscanList(scan_mode_t scanmode)
             char prefix;
             location = stripLocationPrefix(&prefix, row->col(10));
             if (prefix != LOC_DIR_PREFIX)
-                throw _Exception(_("mt_autoscan referred to an object, that was not a directory - id: ") + objectID + "; location: " + row->col(9) + "; prefix: " + prefix);
+            {
+                removeAutoscanDirectory(storageID);
+                continue;
+            }
         }
         
         scan_level_t level = AutoscanDirectory::remapScanlevel(row->col(2));

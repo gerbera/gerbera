@@ -101,6 +101,8 @@ void Session::containerChangedUI(Ref<IntArray> objectIDs)
 
 String Session::getUIUpdateIDs()
 {
+    if (! hasUIUpdateIDs())
+        return nil;
     AUTOLOCK(mutex);
     if (updateAll)
     {
@@ -113,6 +115,22 @@ String Session::getUIUpdateIDs()
     if (ret != nil)
         uiUpdateIDs->clear();
     return ret;
+}
+
+bool Session::hasUIUpdateIDs()
+{
+    if (updateAll)
+        return true;
+    // AUTOLOCK(mutex); only accessing an int - shouldn't be necessary
+    return (uiUpdateIDs->size() > 0);
+}
+
+void Session::clearUpdateIDs()
+{
+    log_debug("clearing UI updateIDs\n");
+    AUTOLOCK(mutex);
+    uiUpdateIDs->clear();
+    updateAll = false;
 }
 
 SessionManager::SessionManager() : TimerSubscriberSingleton<SessionManager>()

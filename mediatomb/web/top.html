@@ -72,8 +72,15 @@
                     [refresh view]
                 </a>-->
                 <div>
-                    <span id="systemIdle"><img src="icons/status.png"></span>
-                    <span id="systemWorking" style="display:none"><img src="icons/status_loading.png"></span>
+                    <span id="statusIdle">
+                        <span id="statusNoUpdates"><img src="icons/status.png"></span>
+                        <span id="statusUpdatesPending" style="display:none">
+                            <a href="javascript:parent.getUpdates(true);">
+                                <img src="icons/status_updates_pending.png" border="0">
+                            </a>
+                        </span>
+                    </span>
+                    <span id="statusWorking" style="display:none"><img src="icons/status_loading.png"></span>
                 </div>
                 </td>
                 <td width="60%" align="center" valign="top">

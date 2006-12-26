@@ -87,8 +87,7 @@
                 var globalAjaxHandlers = {
                     onCreate: function()
                     {
-                        Element.hide(topDocument.getElementById("systemIdle"));
-                        Element.show(topDocument.getElementById("systemWorking"));
+                        setStatus("loading");
                     },
                     
                     onComplete: function()
@@ -97,8 +96,7 @@
                             Ajax.activeRequestCount = 0;
                         if(Ajax.activeRequestCount == 0)
                         {
-                            Element.hide(topDocument.getElementById("systemWorking"));
-                            Element.show(topDocument.getElementById("systemIdle"));
+                            setStatus("idle");
                         }
                     },
                     
@@ -111,6 +109,8 @@
                 itemInit();
                 treeInit();
                 Element.addClassName(frames["topleftF"].document.getElementById('type_' + TYPE), 'selected');
+                
+                rightDocument.onkeypress=userActivity;
                 //updateInfo();
             }
             

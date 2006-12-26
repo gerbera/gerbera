@@ -79,6 +79,10 @@ public:
     /// \return the container ids to be updated as String (comma separated)
     zmm::String getUIUpdateIDs();
     
+    bool hasUIUpdateIDs();
+    
+    void clearUpdateIDs();
+    
 protected:
     /// \brief Is called by SessionManager if UI update is needed
     /// \param objectID the container that needs to be updated

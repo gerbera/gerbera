@@ -156,6 +156,7 @@ libmediatomb_a_SOURCES = \
 ../src/web_request_handler.cc \
 ../src/web_request_handler.h \
 ../src/web/web_autoscan.cc \
+../src/web/web_update.cc \
 ../src/xpath.cc \
 ../src/xpath.h \
 ../src/zmmf/array.cc \

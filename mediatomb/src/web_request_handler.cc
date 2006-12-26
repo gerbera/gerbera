@@ -68,7 +68,7 @@ bool WebRequestHandler::boolParam(zmm::String name)
 void WebRequestHandler::check_request(bool checkLogin)
 {
     // we have a minimum set of parameters that are "must have"
-
+    
     // check if the session parameter was supplied and if we have
     // a session with that id
     String sid = param(_("sid"));
@@ -90,8 +90,32 @@ void WebRequestHandler::check_request(bool checkLogin)
     String uiUpdate = param(_("get_update_ids"));
     if ((string_ok(uiUpdate) && uiUpdate == _("1")))
     {
-        if (! ContentManager::getInstance()->isBusy())
+        log_debug("UI wants updates.\n");
+        String forceUpdate = param(_("force_update"));
+        if ((string_ok(forceUpdate) && forceUpdate ==_("1")))
+        {
+            log_debug("UI forces updates.\n");
             addUpdateIDs(session, root);
+        }
+        else
+        {
+            if (1 || ContentManager::getInstance()->isBusy())
+            {
+                if (session->hasUIUpdateIDs())
+                {
+                    log_debug("UI updates pending...\n");
+                    Ref<Element> updateIDs(new Element(_("updateIDs")));
+                    updateIDs->addAttribute(_("pending"), _("1"));
+                    root->appendChild(updateIDs);
+                }
+                else
+                {
+                    log_debug("no updates pending.\n");
+                }
+            }
+            else
+                addUpdateIDs(session, root);
+        }
     }
 }
 

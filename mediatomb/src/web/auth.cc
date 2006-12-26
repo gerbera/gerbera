@@ -85,18 +85,22 @@ void web::auth::process()
 
     if (param(_("checkSID")) != nil)
     {
+        log_debug("checking sid...\n");
+        Ref<SessionManager> sessionManager = SessionManager::getInstance();
+        Ref<Session> session = nil;
         String sid = param(_("sid"));
         if (accountsEnabled())
         {
             root->appendTextChild(_("accounts"), _("1"));
             if (string_ok(sid))
+            {
+                session = sessionManager->getSession(sid);
                 check_request();
+            }
         }
         else
         {
             root->appendTextChild(_("accounts"), _("0"));
-            Ref<SessionManager> sessionManager = SessionManager::getInstance();
-            Ref<Session> session;
             if (sid == nil || (session = sessionManager->getSession(sid)) == nil)
             {
                 session = sessionManager->createSession(timeout);
@@ -105,6 +109,8 @@ void web::auth::process()
             if (! session->isLoggedIn())
                 session->logIn();
         }
+        if (session != nil)
+            session->clearUpdateIDs();
     }
     else if (param(_("logout")) != nil)
     {

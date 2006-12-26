@@ -26,6 +26,8 @@
     $Id$
 */
 
+var INACTIVITY_TIMEOUT = 3000;
+
 function link(req_type, param, get_update_ids)
 {
     var url = "/content/interface?req_type="+ encodeURI(req_type) +"&sid="+ SID;
@@ -88,6 +90,8 @@ function appendImgNode(document, node, alt, icon)
     node.appendChild(img);
 }
 
+var timer;
+
 function errorCheck(xml, noredirect)
 {
     if (!xml)
@@ -120,60 +124,75 @@ function errorCheck(xml, noredirect)
     var updateIDsEl = xmlGetElement(xml, 'updateIDs');
     if (updateIDsEl)
     {
-        var updateIDStr = xmlGetText(updateIDsEl);
-        var savedlastNodeDbID = lastNodeDb;
-        var savedlastNodeDbIDParent;
-        if (savedlastNodeDbID != 'd0')
-            savedlastNodeDbIDParent = getTreeNode(savedlastNodeDbID).getParent().getID();
-        //alert('before: lastid: ' + savedlastNodeDbID);
-        //alert('before: node: ' + getTreeNode(savedlastNodeDbID));
-        selectNodeIfVisible('d0');
-        var updateAll = false;
-        if (updateIDStr != 'all')
+        if (updateIDsEl.getAttribute("pending") == '1')
         {
-            var updateIDsArr = updateIDStr.split(",");
-            for (var i = 0; i < updateIDsArr.length; i++)
-            {
-                if (updateIDsArr[i] == 0)
-                    updateAll = true;
-            }
+            setStatus("updates_pending");
+            if (! timer)
+                timer = window.setTimeout("getUpdates(true)", INACTIVITY_TIMEOUT);
         }
         else
-            updateAll = true;
-        if (! updateAll)
         {
-            for (var i = 0; i < updateIDsArr.length; i++)
+            var updateIDStr = xmlGetText(updateIDsEl);
+            var savedlastNodeDbID = lastNodeDb;
+            var savedlastNodeDbIDParent;
+            if (savedlastNodeDbID != 'd0')
+                savedlastNodeDbIDParent = getTreeNode(savedlastNodeDbID).getParent().getID();
+            //alert('before: lastid: ' + savedlastNodeDbID);
+            //alert('before: node: ' + getTreeNode(savedlastNodeDbID));
+            selectNodeIfVisible('d0');
+            var updateAll = false;
+            if (updateIDStr != 'all')
             {
-                var node = getTreeNode('d' + updateIDsArr[i]);
-                if (node)
+                var updateIDsArr = updateIDStr.split(",");
+                for (var i = 0; i < updateIDsArr.length; i++)
                 {
-                    var parNode = node.getParent();
-                    if (parNode)
+                    if (updateIDsArr[i] == 0)
+                        updateAll = true;
+                }
+            }
+            else
+                updateAll = true;
+            if (! updateAll)
+            {
+                for (var i = 0; i < updateIDsArr.length; i++)
+                {
+                    var node = getTreeNode('d' + updateIDsArr[i]);
+                    if (node)
                     {
-                        parNode.childrenHaveBeenFetched=false;
-                        parNode.resetChildren();
-                        fetchChildren(parNode, true);
+                        var parNode = node.getParent();
+                        if (parNode)
+                        {
+                            parNode.childrenHaveBeenFetched=false;
+                            parNode.resetChildren();
+                            fetchChildren(parNode, true);
+                        }
                     }
                 }
             }
-        }
-        else
-        {
-            var node = getTreeNode('d0');
-            node.childrenHaveBeenFetched=false;
-            node.resetChildren();
-            fetchChildren(node, true);
-        }
-        var savedlastNodeDb = getTreeNode(savedlastNodeDbID);
-        //alert('lastid: ' + savedlastNodeDbID);
-        //alert('node: ' + savedlastNodeDb);
-        if (savedlastNodeDb)
-            selectNodeIfVisible(savedlastNodeDbID);
-        else if (savedlastNodeDbIDParent)
-        {
-            savedlastNodeDb = getTreeNode(savedlastNodeDbIDParent);
+            else
+            {
+                var node = getTreeNode('d0');
+                node.childrenHaveBeenFetched=false;
+                node.resetChildren();
+                fetchChildren(node, true);
+            }
+            var savedlastNodeDb = getTreeNode(savedlastNodeDbID);
+            //alert('lastid: ' + savedlastNodeDbID);
+            //alert('node: ' + savedlastNodeDb);
             if (savedlastNodeDb)
-                selectNodeIfVisible(savedlastNodeDbIDParent);
+                selectNodeIfVisible(savedlastNodeDbID);
+            else if (savedlastNodeDbIDParent)
+            {
+                savedlastNodeDb = getTreeNode(savedlastNodeDbIDParent);
+                if (savedlastNodeDb)
+                    selectNodeIfVisible(savedlastNodeDbIDParent);
+            }
+            setStatus("no_updates");
+            if (timer)
+            {
+                window.clearTimeout(timer);
+                timer = false;
+            }
         }
     }
     var error = xmlGetElementText(xml, 'error');
@@ -261,3 +280,59 @@ function formToArray(form, args)
     }
 }
 
+var status_updates_pending = false;
+
+function setStatus(status)
+{
+    var topDocument = frames["topF"].document;
+    
+    if (status == "idle")
+    {
+        Element.hide(topDocument.getElementById("statusWorking"));
+        Element.show(topDocument.getElementById("statusIdle"));
+    }
+    else if (status == "loading")
+    {
+        Element.hide(topDocument.getElementById("statusIdle"));
+        Element.show(topDocument.getElementById("statusWorking"));
+    }
+    else if (status == "updates_pending" && ! status_updates_pending)
+    {
+        Element.hide(topDocument.getElementById("statusNoUpdates"));
+        Element.show(topDocument.getElementById("statusUpdatesPending"));
+        status_updates_pending = true;
+    }
+    else if (status == "no_updates" && status_updates_pending)
+    {
+        Element.hide(topDocument.getElementById("statusUpdatesPending"));
+        Element.show(topDocument.getElementById("statusNoUpdates"));
+        status_updates_pending = false;
+    }
+}
+
+function getUpdates(force)
+{
+    var url = link('update', {force_update: (force ? '1' : '0')}, true);
+    var myAjax = new Ajax.Request(
+        url,
+        {
+            method: 'get',
+            asynchronous: false,
+            onComplete: getUpdatesCallback
+        });
+}
+
+function getUpdatesCallback(ajaxRequest)
+{
+    var xml = ajaxRequest.responseXML;
+    errorCheck(xml, true);
+}
+
+function userActivity()
+{
+    if (timer)
+    {
+        window.clearTimeout(timer);
+        timer = window.setTimeout("getUpdates(true)", INACTIVITY_TIMEOUT);
+    }
+}

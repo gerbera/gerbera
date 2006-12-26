@@ -217,6 +217,7 @@ function selectNodeIfVisible(nodeID)
 
 function standardClick(treeNode)
 {
+    userActivity();
     var id = treeNode.getID();
     if (isTypeDb())
     {
