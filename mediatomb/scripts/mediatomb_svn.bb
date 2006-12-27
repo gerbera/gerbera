@@ -15,6 +15,7 @@ inherit autotools
 
 EXTRA_OECONF="--disable-mysql --disable-rpl-malloc --enable-sqlite3 \
             --enable-libjs --enable-libmagic --enable-taglib --enable-libexif \
+            --disable-largefile \
               --with-sqlite3-h=${STAGING_DIR}/${TARGET_SYS}/include \
               --with-sqlite3-libs=${STAGING_DIR}/${TARGET_SYS}/lib \
               --with-magic-h=${STAGING_DIR}/${TARGET_SYS}/include \
