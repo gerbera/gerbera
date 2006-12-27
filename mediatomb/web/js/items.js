@@ -555,7 +555,7 @@ function addEditRemoveSubmitted(ajaxRequest)
     if (!errorCheck(ajaxRequest.responseXML)) return;
     
     folderChange(selectedNode);
-    window.setTimeout("getUpdates(false)", 500);
+    window.setTimeout("getUpdates(false)", 1000);
 }
 
 function removeItem(itemId, all)
