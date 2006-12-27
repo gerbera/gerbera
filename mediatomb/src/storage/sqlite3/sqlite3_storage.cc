@@ -52,7 +52,6 @@ using namespace mxml;
 Sqlite3Storage::Sqlite3Storage() : SQLStorage()
 {
     shutdownFlag = false;
-    dbRemovesDeps = false;
     table_quote_begin = '"';
     table_quote_end = '"';
     startupError = nil;

@@ -88,7 +88,6 @@ In order to compile MediaTomb you will have to install the following packages:
     NOTE: Write operations to sqlite3 database is VERY SLOW, use sqlite3
     only if you don't have another choice.
 
-
 - libmagic (OPTIONAL, RECOMMENDED)
   On Fedora Core the package is called 'file'. (Note, that due to a bug
   (tested on FC4) filemagic can return wrong mimetypes, see
@@ -135,12 +134,6 @@ In order to compile MediaTomb you will have to install the following packages:
   libextractor is disabled, use ./configure --enable-libextractor to
   activate it.
 
-- Python - there is also a setup script that makes necessary installations
-  in your home directory, you will need Python to run it.
-  Note: if for some reason you can not run python you can still setup the
-  server manually. However, this means that you will have to write your
-  own config.xml file which can be somewhat tricky.
-
 If the server does not respond to search requests from media renderers or
 control points on the network, try applying these settings to your
 network interface (assuming eth1):
@@ -186,6 +179,8 @@ superior performance with any operations. Hence mysql is actually the
 preferred database backend and sqlite3 should only be used as the last resort
 if MySQL is not available.
 
+------ incorrect - dbs are now created automatically -----
+
 To use MySQL you will have to create a MySQL database manually
 by invoking the SQL script located under the installation directory at
 <prefix>/share/mediatomb/mysql.sql
@@ -194,6 +189,7 @@ and manually adapt mediatomb's configuration file.
 If you know nothing about MySQL, try doc/mysql.txt before reaching
 for MySQL manual.
 
+-----------------------------------------------------------
 
 WHY IS THE WEB UI DISABLED BY DEFAULT?
 --------------------------------------

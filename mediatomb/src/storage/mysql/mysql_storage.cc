@@ -52,8 +52,6 @@ using namespace mxml;
 MysqlStorage::MysqlStorage() : SQLStorage()
 {
     mysql_init_key_initialized = false;
-    /// dbRemovesDeps gets set by init() to the correct value
-    dbRemovesDeps = true;
     mysql_connection = false;
     mysqlMutex = Ref<Mutex> (new Mutex(true));
     table_quote_begin = '`';

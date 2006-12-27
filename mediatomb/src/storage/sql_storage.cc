@@ -1576,7 +1576,7 @@ Ref<AutoscanList> SQLStorage::getAutoscanList(scan_mode_t scanmode)
     return ret;
 }
 
-int SQLStorage::addAutoscanDirectory(Ref<AutoscanDirectory> adir)
+void SQLStorage::addAutoscanDirectory(Ref<AutoscanDirectory> adir)
 {
     if (adir->getStorageID() >= 0)
         throw _Exception(_("tried to add autoscan directory with a storage id set"));
@@ -1608,7 +1608,7 @@ int SQLStorage::addAutoscanDirectory(Ref<AutoscanDirectory> adir)
         << mapBool(adir->persistent()) << ','
         << (objectID >= 0 ? _(SQL_NULL) : quote(adir->getLocation()))
         << ')';
-    return exec(q, true);
+    adir->setStorageID(exec(q, true));
 }
 
 void SQLStorage::updateAutoscanDirectory(Ref<AutoscanDirectory> adir)

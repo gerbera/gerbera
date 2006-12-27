@@ -127,7 +127,7 @@ public:
     
     virtual void updateAutoscanPersistentList(scan_mode_t scanmode, zmm::Ref<AutoscanList> list);
     virtual zmm::Ref<AutoscanList> getAutoscanList(scan_mode_t scanmode);
-    virtual int addAutoscanDirectory(zmm::Ref<AutoscanDirectory> adir);
+    virtual void addAutoscanDirectory(zmm::Ref<AutoscanDirectory> adir);
     virtual void updateAutoscanDirectory(zmm::Ref<AutoscanDirectory> adir);
     virtual void removeAutoscanDirectoryByObjectID(int objectID);
     virtual void removeAutoscanDirectory(int autoscanID);
@@ -145,7 +145,6 @@ protected:
     //virtual ~SQLStorage();
     virtual void init();
     
-    bool dbRemovesDeps;
     char table_quote_begin;
     char table_quote_end;
     
