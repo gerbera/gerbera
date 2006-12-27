@@ -438,8 +438,6 @@ function updateItemAddEditFields(editItem)
         form.action = 'javascript:parent.itemAddEditSubmit('+objectId+');';
     }
     
-    var inputsDiv = rightDocument.createElement('div');
-    
     if (!selectEl.options[0])
     {
         // ATTENTION: These values need to be changed in src/cds_objects.h too.
@@ -493,11 +491,21 @@ function updateItemAddEditFields(editItem)
         defaultsAr = new Array('', '', 'object.item', '', '');
     }
     
+    var itemTbody = rightDocument.createElement('tbody');
+    var itemRoot = rightDocument.getElementById("item_add_edit_inputs");
     if (fieldAr && defaultsAr)
     {
         for (var i = 0; i < fieldAr.length; ++i)
         {
-            inputsDiv.appendChild(rightDocument.createTextNode(fieldAr[i]+": "));
+            var inputTr = rightDocument.createElement('tr');
+            itemTbody.appendChild(inputTr);
+            var inputTd = rightDocument.createElement('td');
+            inputTr.appendChild(inputTd);
+            inputTd.setAttribute("align", "right");
+            inputTd.appendChild(rightDocument.createTextNode(fieldAr[i]+": "));
+            
+            var inputTd = rightDocument.createElement('td');
+            inputTr.appendChild(inputTd);
             var inputEl = rightDocument.createElement('input');
             inputEl.setAttribute('type', 'text');
             inputEl.setAttribute('name', fieldNameAr[i]);
@@ -505,13 +513,13 @@ function updateItemAddEditFields(editItem)
                 inputEl.setAttribute('value', defaultsAr[i]);
             else
                 inputEl.setAttribute('value', xmlGetElementText(editItem, fieldNameAr[i]));
-            inputsDiv.appendChild(inputEl);
-            addBr(rightDocument, inputsDiv);
+            
+            inputTd.appendChild(inputEl);
         }
     }
-    
-    var itemRoot = rightDocument.getElementById("item_add_edit_inputs");
-    itemRoot.replaceChild(inputsDiv, itemRoot.firstChild);
+    var oldNode = rightDocument.getElementById("item_add_edit_tbody");
+    oldNode.parentNode.replaceChild(itemTbody, oldNode);
+    itemTbody.setAttribute("id", "item_add_edit_tbody");
 }
 
 function itemAddEditSubmit(objectId)

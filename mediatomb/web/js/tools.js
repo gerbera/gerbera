@@ -129,6 +129,7 @@ function errorCheck(xml, noredirect)
             setStatus("updates_pending");
             if (! timer)
                 timer = window.setTimeout("getUpdates(true)", INACTIVITY_TIMEOUT);
+            last_update = new Date().getTime();
         }
         else if (updateIDsEl.getAttribute("updates") != '1')
         {
@@ -138,6 +139,7 @@ function errorCheck(xml, noredirect)
                 window.clearTimeout(timer);
                 timer = false;
             }
+            last_update = new Date().getTime();
         }
         else
         {
@@ -202,6 +204,7 @@ function errorCheck(xml, noredirect)
                 window.clearTimeout(timer);
                 timer = false;
             }
+            last_update = new Date();
         }
     }
     var error = xmlGetElementText(xml, 'error');
@@ -321,14 +324,17 @@ function setStatus(status)
 
 function getUpdates(force)
 {
-    var url = link('update', {force_update: (force ? '1' : '0')}, true);
-    var myAjax = new Ajax.Request(
-        url,
-        {
-            method: 'get',
-            asynchronous: false,
-            onComplete: getUpdatesCallback
-        });
+    if (isTypeDb())
+    {
+        var url = link('update', {force_update: (force ? '1' : '0')}, true);
+        var myAjax = new Ajax.Request(
+            url,
+            {
+                method: 'get',
+                asynchronous: false,
+                onComplete: getUpdatesCallback
+            });
+    }
 }
 
 function getUpdatesCallback(ajaxRequest)
@@ -345,4 +351,16 @@ function userActivity(event)
         timer = window.setTimeout("getUpdates(true)", INACTIVITY_TIMEOUT);
     }
     return true;
+}
+
+var last_update = new Date().getTime();
+
+function mouseDownHandler(event)
+{
+    var now = new Date().getTime();
+    if (last_update + 3000 < now)
+    {
+        getUpdates(false);
+        last_update = now;
+    }
 }

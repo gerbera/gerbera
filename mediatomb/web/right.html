@@ -42,10 +42,22 @@
         </div>
         <div id="item_add_edit_div" style="display:none">
             <form name="addEditItem" action="javascript:parent.itemAddEditSubmit();">
-                <select name="objType" onchange="parent.updateItemAddEditFields()" size="1">
-                </select>
-                <div id="item_add_edit_inputs"><div></div></div>
-                <input name="submit" type="submit"/>
+                <table class="classicForm" align="center">
+                    <tr>
+                        <td></td>
+                        <td>
+                            <select name="objType" onchange="parent.updateItemAddEditFields()" size="1"></select>
+                        </td>
+                    </tr>
+                    <tbody id="item_add_edit_tbody">
+                        <tr></tr>
+                    </tbody>
+                    <tr>
+                        <td colspan="2" align="right">
+                            <input name="submit" type="submit"/>
+                        </td>
+                    </tr>
+                </table>
             </form>
         </div>
         <div id="autoscan_div" style="display:none">

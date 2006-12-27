@@ -113,6 +113,7 @@ function treeInit()
     //writeStates('f0','open');
     treeChangeType();
     treeDocument.onkeydown = keyDown;
+    treeDocument.onmousedown = mouseDownHandler;
 }
 
 function updateTreeAfterLogin()
@@ -159,7 +160,10 @@ function treeChangeType()
     if (loggedIn)
     {
         selectLastNode();
-        getUpdates(true);
+        if (isTypeDb())
+            getUpdates(true);
+        else
+            setStatus("no_updates");
     }
 }
 

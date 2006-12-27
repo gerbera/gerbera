@@ -150,55 +150,29 @@ table.classicForm
     padding:5px;
     padding-left:10px;
 }
-/*
-.node
+
+img.status
 {
-    position:absolute;
-    left:0px;
-    color: black;
-    font-family : "Helvetica", "Arial", "MS Sans Serif", sans-serif;
-    font-size : 9pt;
+    position:fixed;
+    top:26px;
+    left:120px;
+    z-index:12;
 }
 
-.node A:link { color: black; text-decoration: none; }
-.node A:visited { color: black; text-decoration: none; }
-.node A:active { color: black; text-decoration: none; }
-.node A:hover { color: black; text-decoration: none; }
-
-.leaf { color: black;
-    font-family : "Helvetica", "Arial", "MS Sans Serif", sans-serif;
-    font-size : 9pt;}
-.leaf A:link { color: black; text-decoration: none;}
-.leaf A:visited { color: black; text-decoration: none; }
-.leaf A:active { color: black; text-decoration: none; }
-.leaf A:hover { color: black; text-decoration: none; }
-
-/ * folder icon 
-.fld { cursor: crosshair; }
-
-
-/ context menu 
-.ctxm {
-    background-color: #CCCCCC;
-    border: 1px;
-    border-style: outset;
-    border-color: #0000FF;
-    font-family : "Helvetica", "Arial", "MS Sans Serif", sans-serif;
-    font-size : 9pt;
-    z-index: 1000;
-}
-.ctxm-default
+img.logo
 {
-    background-color: #CCCCCC;
-    color: #FF0000;
-    padding-left: 5px;
-    padding-right: 5px;
+    position:relative;
+    text-align:center;
+    top:5px;
+    z-index:10;
+    vertical-align:middle;
 }
-.ctxm-active
+
+img#logout_img
 {
-    background-color: #FFFFFF;
-    color: #FF0000;
-    padding-left: 5px;
-    padding-right: 5px;
+    position:relative;
+    z-index:11;
+    left:23%;
+    vertical-align:middle;
+    top:4px;
 }
-*/
