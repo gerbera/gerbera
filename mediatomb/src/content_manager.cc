@@ -106,7 +106,13 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
     if (optIgnoreUnknown != nil && optIgnoreUnknown == "yes")
         ignore_unknown_extensions = 1;
 
-    
+    if (ignore_unknown_extensions && (extension_mimetype_map->size() == 0))
+    {
+        log_warning("Ignore unknown extensions set, but no mappings specified\n");
+        log_warning("Please review your configuration!\n");
+        ignore_unknown_extensions = 0;
+    }
+   
     // loading mimetype - upnpclass map
     tmpEl = cm->getElement(_("/import/mappings/mimetype-upnpclass"));
     mimetype_upnpclass_map = cm->createDictionaryFromNodeset(tmpEl, _("map"), _("from"), _("to"));
