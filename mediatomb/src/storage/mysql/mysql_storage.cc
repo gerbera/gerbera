@@ -211,10 +211,14 @@ void MysqlStorage::init()
 
 String MysqlStorage::quote(String value)
 {
-    // \todo replace with "_real_"
+    /* note: mysql_real_escape_string returns a maximum of (length * 2 + 1)
+     * chars; we need +1 for the first ' - the second ' will be written over
+     * the \0; then the string won't be null-terminated, but that doesn't matter,
+     * because we give the correct length to String()
+     */
     char *q = (char *)MALLOC(value.length() * 2 + 2);
     *q = '\'';
-    int size = mysql_escape_string(q + 1, value.c_str(), value.length());
+    int size = mysql_real_escape_string(db, q + 1, value.c_str(), value.length());
     q[size + 1] = '\'';
     String ret(q, size + 2);
     FREE(q);
