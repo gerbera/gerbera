@@ -218,7 +218,7 @@ String MysqlStorage::quote(String value)
      */
     char *q = (char *)MALLOC(value.length() * 2 + 2);
     *q = '\'';
-    int size = mysql_real_escape_string(db, q + 1, value.c_str(), value.length());
+    long size = mysql_real_escape_string(&db, q + 1, value.c_str(), value.length());
     q[size + 1] = '\'';
     String ret(q, size + 2);
     FREE(q);
