@@ -482,7 +482,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
         ret = stat(path.c_str(), &statbuf);
         if (ret != 0)
         {
-            log_error("Failed to stat %s\n"), path.c_str();
+            log_error("Failed to stat %s\n", path.c_str());
             continue;
         }
 
