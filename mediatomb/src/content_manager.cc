@@ -137,7 +137,7 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
     storage->updateAutoscanPersistentList(TimedScanMode, config_timed_list);
     autoscan_timed = storage->getAutoscanList(TimedScanMode);
 
-    /* init fielmagic */
+    /* init filemagic */
 #ifdef HAVE_MAGIC
     if (! ignore_unknown_extensions)
     {

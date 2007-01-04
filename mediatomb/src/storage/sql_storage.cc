@@ -221,8 +221,6 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
     //else if (isUpdate)
     //    cdsObjectSql->put(_("dc_title"), _(SQL_NULL));
     
-    cdsObjectSql->put(_("flags"), quote(obj->getFlags()));
-    
     if (isUpdate)
         cdsObjectSql->put(_("metadata"), _(SQL_NULL));
     Ref<Dictionary> dict = obj->getMetadata();
@@ -260,6 +258,10 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
     }
     else if (isUpdate)
         cdsObjectSql->put(_("resources"), _(SQL_NULL));
+    
+    obj->clearFlag(OBJECT_FLAG_USE_RESOURCE_REF);
+    
+    cdsObjectSql->put(_("flags"), quote(obj->getFlags()));
     
     if (IS_CDS_CONTAINER(objectType))
     {
