@@ -100,9 +100,9 @@
                         }
                     },
                     
-                    onFailure: function()
+                    onException: function()
                     {
-                        alert("Server not reachable");
+                        alert("MediaTomb cannot be reached! Please check if the server is still running.");
                     }
                 };
                 Ajax.Responders.register(globalAjaxHandlers);

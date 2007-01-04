@@ -113,10 +113,10 @@ function errorCheck(xml, noredirect)
         var expire = new Date();
         expire.setTime(now.getTime() - 3600000 * 24 * 360);
         setCookie('SID', null, expire);
-        if (SID)
+        if (SID && ! noredirect)
         {
             SID = null;
-            if (!noredirect) window.location = redirect;
+            window.location = redirect;
         }
         return false;
     }
@@ -340,7 +340,7 @@ function getUpdates(force)
 function getUpdatesCallback(ajaxRequest)
 {
     var xml = ajaxRequest.responseXML;
-    errorCheck(xml, true);
+    errorCheck(xml);
 }
 
 function userActivity(event)
