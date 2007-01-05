@@ -32,6 +32,7 @@
 #define __ZMM_OBJECT_H__
 
 #include <new> // for size_t
+#include "atomic.h"
 
 namespace zmm
 {
@@ -49,7 +50,10 @@ public:
     static void* operator new (size_t size); 
     static void operator delete (void *ptr);
 protected:
-    int _ref_count;
+    atomic_t _ref_count;
+#ifdef ATOMIC_NEED_MUTEX
+    pthread_mutex_t mutex;
+#endif
 };
 
 

@@ -159,6 +159,7 @@ libmediatomb_a_SOURCES = \
 ../src/web/web_update.cc \
 ../src/xpath.cc \
 ../src/xpath.h \
+../src/zmm/atomic.h \
 ../src/zmmf/array.cc \
 ../src/zmmf/array.h \
 ../src/zmmf/base_array.h \
