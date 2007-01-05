@@ -144,17 +144,19 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
         ms = magic_open(MAGIC_MIME);
         if (ms == NULL)
         {
-	    log_error("magic_open failed\n");
-            return;
+            log_error("magic_open failed\n");
         }
-        String magicFile = cm->getOption(_("/import/magic-file"));
-        if (! string_ok(magicFile))
-            magicFile = nil;
-        if (magic_load(ms, (magicFile == nil) ? NULL : magicFile.c_str()) == -1)
+        else
         {
-            log_warning("magic_load: %s\n", magic_error(ms));
-            magic_close(ms);
-            ms = NULL;
+            String magicFile = cm->getOption(_("/import/magic-file"));
+            if (! string_ok(magicFile))
+                magicFile = nil;
+            if (magic_load(ms, (magicFile == nil) ? NULL : magicFile.c_str()) == -1)
+            {
+                log_warning("magic_load: %s\n", magic_error(ms));
+                magic_close(ms);
+                ms = NULL;
+            }
         }
     }
 #endif // HAVE_MAGIC
