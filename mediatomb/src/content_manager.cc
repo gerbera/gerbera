@@ -561,6 +561,12 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
             }
         }
     } // while
+    
+    closedir(dir);
+
+    if (shutdownFlag)
+        return;
+
     if (list != nil && list->size() > 0)
     {
         Ref<Storage::ChangedContainers> changedContainers = storage->removeObjects(list);
@@ -568,7 +574,6 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
         UpdateManager::getInstance()->containersChanged(changedContainers->upnp);
     }
 
-    closedir(dir);
 
     adir->setCurrentLMT(last_modified_current_max);
 }
