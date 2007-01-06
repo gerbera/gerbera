@@ -86,6 +86,7 @@
 // MIME TYPES FOR WEB UI
 #define MIMETYPE_XML                   "text/xml"
 #define MIMETYPE_HTML                  "text/html"
+#define MIMETYPE_TEXT                  "text/plain"
 // default mime types for items in the cds
 #define MIMETYPE_DEFAULT               "application/octet-stream"
 

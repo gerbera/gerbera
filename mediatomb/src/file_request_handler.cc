@@ -62,6 +62,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
 {
     log_debug("start\n");
 
+    String mimeType;
     int objectID;
 
     struct stat statbuf;
@@ -99,8 +100,31 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     }
    
     Ref<CdsItem> item = RefCast(obj, CdsItem);
-    
+
     String path = item->getLocation();
+    
+    // determining which resource to serve 
+    int res_id = 0;
+    String s_res_id = dict->get(_(URL_RESOURCE_ID));
+    if (s_res_id != nil)
+        res_id = s_res_id.toInt();
+
+
+    String ext = dict->get(_("ext"));
+    if (ext == ".srt")
+    {
+        int dot = path.rindex('.');
+        if (dot > -1)
+        {
+            path = path.substring(0, dot);
+        }
+
+        path = path + ext;
+        mimeType = _(MIMETYPE_TEXT);
+
+        // reset resource id
+        res_id = 0;
+    }
     
     ret = stat(path.c_str(), &statbuf);
     if (ret != 0)
@@ -118,15 +142,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
         info->is_readable = 0;
     }
 
-    String mimeType;
     String header;
-    /* determining which resource to serve */
-
-    int res_id = 0;
-    String s_res_id = dict->get(_(URL_RESOURCE_ID));
-    if (s_res_id != nil)
-        res_id = s_res_id.toInt();
-
     log_debug("fetching resource id %d\n", res_id);
     if ((res_id > 0) && (res_id < item->getResourceCount()))
     {
@@ -152,7 +168,9 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     }
     else
     {
-        mimeType = item->getMimeType();
+        if (mimeType == nil)
+            mimeType = item->getMimeType();
+
         info->file_length = statbuf.st_size;
         // if we are dealing with a regular file we should add the
         // Accept-Ranges: bytes header, in order to indicate that we support
@@ -194,6 +212,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
 Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File_Info *info, IN enum UpnpOpenFileMode mode)
 {
     int objectID;
+    String mimeType;
     int ret;
 
     log_debug("start\n");
@@ -299,6 +318,27 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
 
     String path = item->getLocation();
 
+    // determining which resource to serve 
+    int res_id = 0;
+    String s_res_id = dict->get(_(URL_RESOURCE_ID));
+    if (s_res_id != nil)
+        res_id = s_res_id.toInt();
+
+    String ext = dict->get(_("ext"));
+    if (ext == ".srt")
+    {
+        int dot = path.rindex('.');
+        if (dot > -1)
+        {
+            path = path.substring(0, dot);
+        }
+
+        path = path + ext;
+        mimeType = _(MIMETYPE_TEXT);
+        // reset resource id
+        res_id = 0;
+    }
+
     ret = stat(path.c_str(), &statbuf);
     if (ret != 0)
     {
@@ -315,7 +355,6 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
         info->is_readable = 0;
     }
 
-    String mimeType;
     String header;
 
     info->last_modified = statbuf.st_mtime;
@@ -336,13 +375,6 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
             info->http_header = ixmlCloneDOMString(header.c_str());
         }
     }
-    /* determining which resource to serve */
-    int res_id = 0;
-    String s_res_id = dict->get(_(URL_RESOURCE_ID));
-    if (s_res_id != nil)
-        res_id = s_res_id.toInt();
-
-
     log_debug("fetching resource id %d\n", res_id);
     // Per default and in case of a bad resource ID, serve the file
     // itself
@@ -371,7 +403,9 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
     }
     else
     {
-        mimeType = item->getMimeType();
+        if (mimeType == nil)
+            mimeType = item->getMimeType();
+
         info->file_length = statbuf.st_size;
         info->content_type = ixmlCloneDOMString(mimeType.c_str());
         // if we are dealing with a regular file we should add the
