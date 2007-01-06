@@ -563,6 +563,62 @@ void set_jpeg_resolution_resource(Ref<CdsItem> item, int res_num)
     }
 }
 
+String escape(String string, char escape_char, char to_escape)
+{
+    Ref<StringBase> stringBase(new StringBase(string.length() * 2));
+    char *str = stringBase->data;
+    int len = string.length();
+    
+    bool possible_more_esc = true;
+    bool possible_more_char = true;
+    
+    int last = 0;
+    do
+    {
+        int next_esc = -1;
+        if (possible_more_esc)
+        {
+            next_esc = string.index(last, escape_char);
+            if (next_esc < 0)
+                possible_more_esc = false;
+        }
+        
+        int next = -1;
+        if (possible_more_char)
+        {
+            next = string.index(last, to_escape);
+            if (next < 0)
+                possible_more_char = false;
+        }
+        
+        if (next < 0 || (next_esc >= 0 && next_esc < next))
+        {
+            next = next_esc;
+        }
+        
+        if (next < 0)
+            next = len;
+        int cpLen = next - last;
+        if (cpLen > 0)
+        {
+            strncpy(str, string.charPtrAt(last), cpLen);
+            str += cpLen;
+        }
+        if (next < len)
+        {
+            *(str++) = '\\';
+            *(str++) = string.charAt(next);
+        }
+        last = next;
+        last++;
+    }
+    while (last < len);
+    *str = '\0';
+    
+    stringBase->len = strlen(stringBase->data);
+    return String(stringBase->data);
+}
+
 String unescape(String string, char escape)
 {
     Ref<StringBase> stringBase(new StringBase(string.length()));

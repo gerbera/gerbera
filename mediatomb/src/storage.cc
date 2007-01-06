@@ -125,8 +125,16 @@ void Storage::stripAndUnescapeVirtualContainerFromPath(String path, String &firs
             }
             sep = path.rindex(sep - 1, VIRTUAL_CONTAINER_SEPARATOR);
         }
-        first = path.substring(0, sep);
-        last = unescape(path.substring(sep + 1), VIRTUAL_CONTAINER_ESCAPE);
+        if (sep == 0)
+        {
+            first = _("/");
+            last = unescape(path.substring(sep + 1), VIRTUAL_CONTAINER_ESCAPE);
+        }
+        else
+        {
+            first = path.substring(0, sep);
+            last = unescape(path.substring(sep + 1), VIRTUAL_CONTAINER_ESCAPE);
+        }
     }
 }
 

@@ -852,7 +852,7 @@ void ContentManager::addObject(zmm::Ref<CdsObject> obj)
 void ContentManager::addContainer(int parentID, String title, String upnpClass)
 {
     Ref<Storage> storage = Storage::getInstance();
-    addContainerChain(storage->buildContainerPath(parentID, title));
+    addContainerChain(storage->buildContainerPath(parentID, escape(title, VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR)));
 }
 
 

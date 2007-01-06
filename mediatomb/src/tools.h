@@ -174,6 +174,8 @@ zmm::String get_jpeg_resolution(zmm::Ref<IOHandler> ioh);
 /// \brief Sets resolution for a given resource index, item must be a JPEG image
 void set_jpeg_resolution_resource(zmm::Ref<CdsItem> item, int res_num);
 
+zmm::String escape(zmm::String string, char escape_char, char to_escape);
+
 /// \brief Unescapes the given String.
 /// \param string the string to unescape
 /// \param escape the escape character (e.g. "\")
