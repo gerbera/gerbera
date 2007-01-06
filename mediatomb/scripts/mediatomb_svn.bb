@@ -29,4 +29,4 @@ EXTRA_OECONF = "--disable-mysql \
                 --with-zlib-libs=${STAGING_DIR}/${TARGET_SYS}/lib \
                 --with-js-h=${STAGING_DIR}/${TARGET_SYS}/include/js \
                 --with-js-libs=${STAGING_DIR}/${TARGET_SYS}/lib \
-                --with-taglib-cfg=${STAGING_DIR}/${BUILD_SYS}/bin/taglib-config"
+                --with-taglib-cfg=${STAGING_BINDIR_CROSS}/taglib-config"
