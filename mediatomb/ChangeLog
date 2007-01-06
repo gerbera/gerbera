@@ -60,6 +60,11 @@ v0.9.0  Major rework
         * changed the database field "location" from varchar(255) to text to
           allow urls and locations of unlimited size
         * created a new theme for the UI
+        * added support for "blind" .srt requests - some renderers like the
+          DSM320 will blindly request the url provided via browse, replacing
+          and found file extension with .srt, we will look for the .srt file
+          in the directory where the original media is located, using the
+          same filename, but with the .srt extension
 
 v0.8.1
         * added "serve" directory, any files there can be downloaded 
