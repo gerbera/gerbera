@@ -1,5 +1,7 @@
 MediaTomb - UPnP AV Mediaserver for Linux.
 v0.9.0  Major rework
+        * the UI was completely rewritten from scratch; it uses AJAX for all
+          requests
         * integrated libupnp (http://pupnp.sf.net/) into our source tree
         * added largefile support
         * code has undergone some performance optimizations
