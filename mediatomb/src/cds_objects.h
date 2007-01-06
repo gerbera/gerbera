@@ -155,7 +155,7 @@ public:
     inline zmm::String getClass() { return upnpClass; }
 
     /// \brief Set the physical location of the media (usually an absolute path)
-    inline void setLocation(zmm::String location) { this->location = location.reduce(DIR_SEPARATOR); }
+    inline void setLocation(zmm::String location) { this->location = location; }
 
     /// \brief Retrieve media location.
     inline zmm::String getLocation() { return location; }
