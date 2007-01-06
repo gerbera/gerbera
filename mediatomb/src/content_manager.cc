@@ -822,6 +822,10 @@ void ContentManager::addObject(zmm::Ref<CdsObject> obj)
     Ref<SessionManager> sm = SessionManager::getInstance();
     int containerChanged = INVALID_OBJECT_ID;
     log_debug("Adding: parent ID is %d\n", obj->getParentID());
+    if (!IS_CDS_ITEM_EXTERNAL_URL(obj->getObjectType()))
+    {
+        obj->setLocation(obj->getLocation().reduce(DIR_SEPARATOR));
+    }
     storage->addObject(obj, &containerChanged);
     log_debug("After adding: parent ID is %d\n", obj->getParentID());
     
