@@ -26,7 +26,7 @@
     $Id$
 */
 
-var INACTIVITY_TIMEOUT = 10000;
+var INACTIVITY_TIMEOUT = 3500;
 
 function link(req_type, param, get_update_ids)
 {
