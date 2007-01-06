@@ -62,10 +62,6 @@
 #include <stdio.h>
 #endif
 
-#if defined (HAVE_UNISTD_H) && defined (HAVE_SCHED_H) && defined (_POSIX_PRIORITY_SCHEDULING)
-    #include <sched.h>
-#endif
-
 /****************************************************************************
  * Function: CmpThreadPoolJob
  *
@@ -122,12 +118,6 @@ SetPolicyType( PolicyType in )
 {
     #ifdef WIN32
      return sched_setscheduler( 0, in);
-    #elif defined (HAVE_SCHED_GETPARAM) && defined (HAVE_SCHED_SETPARAM) 
-     struct sched_param current;
-
-     sched_getparam( 0, &current );
-     current.sched_priority = DEFAULT_SCHED_PARAM;
-     return sched_setscheduler( 0, in, &current );
     #else
      return 0;
     #endif
