@@ -33,22 +33,26 @@
 #endif
 
 #include "request_handler.h"
+#include "tools.h"
 
 using namespace zmm;
 
 void RequestHandler::split_url(const char *url, char separator, String &path, String &parameters)
 {
-    char *i1 = rindex(url, separator);
+    String url_s = String(url);
+    url_s = url_unescape(url_s);
 
-    if (i1 == NULL)
+    int i1 = url_s.rindex(separator);
+
+    if (i1 < 0)
     {
-        path = String(url);
+        path = url_s;
         parameters = _("");
     }
     else
     {
-        parameters = String(i1 + 1);
-        path = String((char *)url, i1 - url);
+        parameters = url_s.substring(i1 + 1);
+        path = url_s.substring(0, i1);
     }
 }
 
