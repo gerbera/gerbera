@@ -514,7 +514,7 @@ String secondsToHMS(int seconds)
 
     // XXX:XX:XX
     char *str = (char *)malloc(10);
-    sprintf(str, "%02d:%02d:%02d\n", h, m, s);
+    sprintf(str, "%02d:%02d:%02d", h, m, s);
     return String::take(str);
 }
 
