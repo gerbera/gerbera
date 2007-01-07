@@ -386,6 +386,19 @@ elif test $ATOMIC_X86 -eq 1; then
     AC_MSG_WARN(You specified to use atomic arithmetics code for x86 single processor systems! The resulting binary must not be used on SMP machines!)
 fi
 
+SKIP_FSEEKO_TEST=0
+AC_ARG_ENABLE([fseeko-check],
+              [
+AC_HELP_STRING([--disable-fseeko-check],
+[This is a workaround for a bug on some Debian distros, use this if configure fails complaining about off_t (default: no)])
+            ],
+            [
+                if test "x$enableval" = xno; then
+                    SKIP_FSEEKO_TEST=1     
+                fi
+            ]
+)
+
 
 ###############################################################################
 # The following block is derived from the configure.ac script from the 
@@ -556,13 +569,17 @@ AC_SYS_LARGEFILE
 AC_TYPE_OFF_T
 AC_TYPE_SIZE_T
 #AC_CHECK_TYPES([ssize_t], [], [], [#include <sys/types.h>])
-AC_FUNC_FSEEKO
 
+if test "$SKIP_FSEEKO_TEST" -eq 0; then
+    AC_FUNC_FSEEKO
 
-if test "$ac_cv_func_fseeko" != yes; then
-    AC_MSG_WARN([fseeko has not been found on your system, will use fseek instead.])
-    AC_MSG_WARN([This has not been tested, please report if you have any problems.])
-    AC_DEFINE([fseeko], [fseek], [fseeko not present])
+    if test "$ac_cv_func_fseeko" != yes; then
+        AC_MSG_WARN([fseeko has not been found on your system, will use fseek instead.])
+        AC_MSG_WARN([This has not been tested, please report if you have any problems.])
+        AC_DEFINE([fseeko], [fseek], [fseeko not present])
+    fi
+else
+    AC_MSG_WARN([Skipping fseeko test! (requested by user)])
 fi
 
 AC_CHECK_SIZEOF(off_t, 4)
