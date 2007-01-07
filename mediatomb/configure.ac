@@ -43,6 +43,7 @@ SEARCH_DIR="/usr/local"
 DARWIN_OS=0
 
 AC_CANONICAL_HOST
+
 case $host in
     *-*-darwin*)
         DARWIN_OS=1
@@ -266,9 +267,9 @@ AC_ARG_ENABLE(db-autocreate,
 
 DEBUG_MALLOC_0=0
 AC_ARG_ENABLE([debug-malloc0],
-            [
-AC_HELP_STRING([--enable-debug-malloc0=no],
-[only for debugging purposes: abort when we try to call malloc or realloc with a value of zero])
+              [
+AC_HELP_STRING([--enable-debug-malloc0],
+[only for debugging purposes: abort when we try to call malloc or realloc with a value of zero (default: no)])
             ],
             [
                 if test "x$enableval" = xno; then
@@ -281,6 +282,108 @@ AC_HELP_STRING([--enable-debug-malloc0=no],
 
 if test $DEBUG_MALLOC_0 -eq 1; then
     AC_DEFINE([DEBUG_MALLOC_0], [1], [debug: abort on malloc/realloc of zero bytes])
+fi
+
+ATOMIC_X86_SMP=0
+ATOMIC_X86_SMP_REQ=0
+X86=0
+case $host_cpu in
+    *86)
+        ATOMIC_X86_SMP=1
+        X86=1
+    ;;
+esac
+
+#AC_ARG_ENABLE([atomic-x86-smp],
+#              [
+#AC_HELP_STRING([--enable-atomic-x86-smp=auto],
+#[use x86 smp code for atomic arithmetic operations, this is the default setting for ALL x86 systems! It will work on both, SMP and UP and should be usedi by default.])
+#            ],
+#            [
+#                if test "x$enableval" = xno; then
+#                    ATOMIC_X86_SMP=0 
+#                else
+#                    if test "$X86" -eq 1; then
+#                        ATOMIC_X86_SMP=1
+#                        ATOMIC_X86_SMP_REQ=1
+#                    else
+#                        AC_MSG_ERROR([Tried to activate x86 specific option for a non x86 host!])
+#                    fi
+#                fi
+#            ]
+#)
+
+ATOMIC_X86=0
+AC_ARG_ENABLE([atomic-x86-single],
+              [
+AC_HELP_STRING([--enable-atomic-x86-single],
+[use x86 singleprocessor code for atomic arithmetic operations, this will increase performance but you must not use the compiled binary on an SMP system. Doing so might result in crashes and unexpected behaviour (default: no)])
+            ],
+            [
+                if test "x$enableval" = xno; then
+                    ATOMIC_X86=0 
+                else
+                    if test "$X86" -eq 1; then
+                        ATOMIC_X86=1
+                        ATOMIC_X86_SMP=0
+                    else
+                        AC_MSG_ERROR([Tried to activate x86 specific option for a non x86 host!])
+                    fi
+                fi
+            ]
+)
+
+AC_ARG_ENABLE([atomic-pthread],
+              [
+AC_HELP_STRING([--enable-atomic-pthread],
+[use pthreads for atomic arithmetic operations, this will deliver the worst performance but is the only portable option (default: automatic, depending on architecture])
+            ],
+            [
+                if test "x$enableval" = xyes; then
+                    if test "$ATOMIC_X86" -eq 1; then
+                        AC_MSG_ERROR([You can not use atomic-x86-single and atomic-pthread code at the same time!])
+                    else
+
+                        ATOMIC_X86=0 
+                        ATOMIC_X86_SMP=0 
+                    fi
+                fi
+            ]
+)
+
+
+AC_ARG_ENABLE([atomic],
+              [
+AC_HELP_STRING([--disable-atomic],
+[NEVER use this! This is only for devel/debugging - disables all atomic arithmetics code (default: no)])
+            ],
+            [
+                if test "x$enableval" = xno; then
+                        ATOMIC_X86=0
+                        ATOMIC_X86_SMP=0
+
+                        AC_MSG_WARN(You disabled the use of atomic arithmetics! You have been warned!)
+                        AC_DEFINE([ATOMIC_TORTURE], [1], [NEVER use this! This is only for devel/debugging - disables all atomic arithmetics code.])
+                fi
+            ]
+)
+
+
+
+if ((test $ATOMIC_X86_SMP -eq 1) && (test $ATOMIC_X86 -eq 1)); then
+    AC_MSG_ERROR([Cannot use atomic-x86-smp and atomic-x86 options at the same time!])
+fi
+
+if (((test $ATOMIC_X86_SMP -eq 1) || (test $ATOMIC_X86 -eq 1)) && 
+     (test "$X86" -eq 0)); then
+    AC_MSG_ERROR([Cannot use x86 specific code on a non a $host_cpu system!])
+fi
+
+if test $ATOMIC_X86_SMP -eq 1; then
+    AC_DEFINE([ATOMIC_X86_SMP], [1], [use x86 assembler code for atomic arithmetic operations - default for SMP and UP systems])
+elif test $ATOMIC_X86 -eq 1; then
+    AC_DEFINE([ATOMIC_X86], [1], [use x86 assembler code for atomic arithmetic operations that will only work oni singleprocessor systems - compiled binary will be buggy on SMP])
+    AC_MSG_WARN(You specified to use atomic arithmetics code for x86 single processor systems! The resulting binary must not be used on SMP machines!)
 fi
 
 

@@ -31,11 +31,6 @@
 #ifndef __ATOMIC_H__
 #define __ATOMIC_H__
 
-
-/// \todo !!!!!!!!! GET RID OF THIS !!!!!!!
-#define ATOMIC_TORTURE
-// (just while developing and testing)
-
 typedef struct { volatile int x; } atomic_t;
 //#define ATOMIC_INIT(y) {(y)}
 
