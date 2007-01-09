@@ -158,6 +158,7 @@
 #define DEFAULT_WEB_DIR                 "web"
 #define DEFAULT_JS_DIR                  "js"
 #define DEFAULT_HIDDEN_FILES_VALUE      "no"
+#define DEFAULT_UPNP_MAX_FIELD_LENGTH   (-1)
 #define DEFAULT_SESSION_TIMEOUT         30
 #define SESSION_TIMEOUT_CHECK_INTERVAL  (5 * 60)
 
