@@ -329,6 +329,15 @@ Here is a sample configuration file with description of the various tags.
             to fix the .AVI playback problem.
         
 
+    <max-browse-field-length> (Optional)
+        This will limit title/description/etc. lenghts of containers and
+        items during a UPnP browse, this feature was added a s workaround
+        for the TG100 bug which can only handle titles no longer than 100 
+        characters. 
+        A negative value will disable will disable this feature, zero is not 
+        allowed.
+
+
 <import hidden-files="no"> (Tag required, attribute optional)
     Section specifying various import parameters.
     The attribute "hidden-files" specifies the default import behaviour
