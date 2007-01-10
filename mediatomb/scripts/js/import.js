@@ -135,7 +135,7 @@ function addAudio(obj)
     addCdsObject(obj, createContainerChain(chain));
     
     
-    chain = new Array('Audio', 'Date', date);
+    chain = new Array('Audio', 'Year', date);
     addCdsObject(obj, createContainerChain(chain));
 }
 
