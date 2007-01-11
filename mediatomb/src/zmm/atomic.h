@@ -31,15 +31,15 @@
 #ifndef __ATOMIC_H__
 #define __ATOMIC_H__
 
-typedef struct { volatile int x; } atomic_t;
+typedef struct { volatile int x; } mt_atomic_t;
 //#define ATOMIC_INIT(y) {(y)}
 
-static inline void atomic_set(atomic_t *at, int val)
+static inline void atomic_set(mt_atomic_t *at, int val)
 {
     at->x = val;
 }
 
-static inline int atomic_get(atomic_t *at)
+static inline int atomic_get(mt_atomic_t *at)
 {
     return (at->x);
 }
@@ -59,7 +59,7 @@ static inline int atomic_get(atomic_t *at)
 
 #if defined(ATOMIC_X86_SMP) || defined(ATOMIC_X86)
     #define ATOMIC_DEFINED
-    static inline void atomic_inc(atomic_t *at)
+    static inline void atomic_inc(mt_atomic_t *at)
     {
         __asm__ __volatile__(
             ASM_LOCK "incl %0"
@@ -69,7 +69,7 @@ static inline int atomic_get(atomic_t *at)
         );
     }
     
-    static inline bool atomic_dec(atomic_t *at)
+    static inline bool atomic_dec(mt_atomic_t *at)
     {
         unsigned char c;
         __asm__ __volatile__(
@@ -90,12 +90,12 @@ static inline int atomic_get(atomic_t *at)
     #endif
 
     // this is NOT atomic in most cases! Don't use ATOMIC_TORTURE!
-    static inline void atomic_inc(atomic_t *at)
+    static inline void atomic_inc(mt_atomic_t *at)
     {
         at->x++;
     }
     
-    static inline bool atomic_dec(atomic_t *at)
+    static inline bool atomic_dec(mt_atomic_t *at)
     {
         return ((--at->x) == 0);
     }
@@ -104,13 +104,13 @@ static inline int atomic_get(atomic_t *at)
 #ifndef ATOMIC_DEFINED
     #include <pthread.h>
     #define ATOMIC_NEED_MUTEX
-    static inline void atomic_inc(atomic_t *at, pthread_mutex_t *mutex)
+    static inline void atomic_inc(mt_atomic_t *at, pthread_mutex_t *mutex)
     {
         pthread_mutex_lock(mutex);
         at->x++;
         pthread_mutex_unlock(mutex);
     }
-    static inline bool atomic_dec(atomic_t *at, pthread_mutex_t *mutex)
+    static inline bool atomic_dec(mt_atomic_t *at, pthread_mutex_t *mutex)
     {
         pthread_mutex_lock(mutex);
         int newval = (--at->x);

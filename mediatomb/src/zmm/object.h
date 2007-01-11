@@ -50,7 +50,7 @@ public:
     static void* operator new (size_t size); 
     static void operator delete (void *ptr);
 protected:
-    atomic_t _ref_count;
+    mt_atomic_t _ref_count;
 #ifdef ATOMIC_NEED_MUTEX
     pthread_mutex_t mutex;
 #endif
