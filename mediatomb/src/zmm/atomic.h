@@ -64,7 +64,7 @@ static inline int atomic_get(mt_atomic_t *at)
         __asm__ __volatile__(
             ASM_LOCK "incl %0"
             :"=m" (at->x)
-            :"0" (at->x)
+            :"m" (at->x)
             :"cc"
         );
     }
@@ -75,7 +75,7 @@ static inline int atomic_get(mt_atomic_t *at)
         __asm__ __volatile__(
             ASM_LOCK "decl %0; sete %1"
             :"=m" (at->x), "=g" (c)
-            :"0" (at->x)
+            :"m" (at->x)
             :"cc"
         );
         return (c!=0);
