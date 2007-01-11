@@ -115,7 +115,7 @@ public:
 #else
     void wait();
     int timedwait(struct timespec *timeout);
-    void checkwait();
+    //void checkwait();
 #endif
 protected:
     pthread_cond_t cond_struct;

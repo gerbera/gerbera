@@ -73,10 +73,10 @@ Mutex::~Mutex()
 #ifdef LOG_TOMBDEBUG
 void Mutex::lock()
 {
+    pthread_mutex_lock(&mutex_struct);
     pthread_t this_thread = pthread_self();
     if (lock_level && ! recursive && this_thread == locking_thread)
         errorExit(_("same thread tried to lock non-recursive mutex twice"));
-    pthread_mutex_lock(&mutex_struct);
     doLock(false);
     autolock = false;
 }
@@ -161,6 +161,7 @@ int Cond::timedwait(struct timespec *timeout)
     return ret;
 }
 
+/*
 void Cond::checkwait()
 {
     if (! mutex->isLocked())
@@ -172,6 +173,7 @@ void Cond::checkwait()
     if (this_thread != mutex_thread)
         mutex->errorExit(_("tried to do a cond_wait with a mutex locked by another thread"));
 }
+*/
 #endif // LOG_TOMBDEBUG
 
 
