@@ -288,7 +288,7 @@ void SLTask::waitForTask()
     
     if (getError() != nil)
     {
-        log_error("%s\n", getError().c_str());
+        log_debug("%s\n", getError().c_str());
         throw _Exception(getError());
     }
 }

@@ -230,7 +230,7 @@ String MysqlStorage::getError(MYSQL *db)
     Ref<StringBuffer> err_buf(new StringBuffer());
     *err_buf << "mysql_error (" << String::from(mysql_errno(db));
     *err_buf << "): \"" << String(mysql_error(db)) << "\"";
-    log_error("%s\n", err_buf->c_str());
+    log_debug("%s\n", err_buf->c_str());
     return err_buf->toString();
 }
 
