@@ -1042,6 +1042,7 @@ Ref<Storage::ChangedContainers> SQLStorage::removeObjects(zmm::Ref<DBRHash<int> 
     *idsBuf << "SELECT " << TQ("id") << ',' << TQ("object_type")
         << " FROM " << TQ(CDS_OBJECT_TABLE)
         << " WHERE " << TQ("id") << " IN (";
+    int firstComma = idsBuf->length();
     for (int i = 0; i < count; i++)
     {
         int id = array[i];
@@ -1049,6 +1050,7 @@ Ref<Storage::ChangedContainers> SQLStorage::removeObjects(zmm::Ref<DBRHash<int> 
             throw _Exception(_("tried to delete a forbidden ID (") + id + ")!");
         *idsBuf << ',' << id;
     }
+    idsBuf->setCharAt(firstComma, ' ');
     *idsBuf << ')';
     Ref<SQLResult> res = select(idsBuf);
     idsBuf = nil;
