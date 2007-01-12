@@ -341,7 +341,7 @@ int String::index(int start, char ch)
 		return -1;
     if (start < 0 || start + 1 > base->len)
         return -1;
-    char *pos = ::index(base->data + start, ch);
+    char *pos = ::strchr(base->data + start, ch);
     if (pos)
         return pos - base->data;
     else
@@ -375,7 +375,7 @@ String String::reduce(char ch)
     if (!base)
         return nil;
 
-    char *pos = ::index(base->data, ch);
+    char *pos = ::strchr(base->data, ch);
     if (!pos)
         return *this;
   
@@ -404,14 +404,14 @@ String String::reduce(char ch)
                 *pos2 = '\0';
                 break;
             }
-            pos = ::index(pos, ch);
+            pos = ::strchr(pos, ch);
         }
         else
         {
             pos++;
             if (*pos == '\0')
                 break;
-            pos = ::index(pos, ch);
+            pos = ::strchr(pos, ch);
         }
     } while (pos);
     if ((base->data)+(base->len)-pos3)

@@ -52,6 +52,9 @@ protected:
     /// action.
     int systemUpdateID;
 
+    /// \brief All strings in the XML will be cut at this length.
+    int stringLimit;
+
     /// \brief UPnP standard defined action: Browse()
     /// \param request Incoming ActionRequest.
     ///

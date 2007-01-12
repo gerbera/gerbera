@@ -56,7 +56,7 @@ zmm::Ref<mxml::Element> UpnpXML_CreateResponse(zmm::String actionName, zmm::Stri
 /// either a container or an item. The renderActions parameter tells us whether to also
 /// show the special fields of an active item in the XML. This is currently used when
 /// providing the XML representation of an active item to a trigger/toggle script.
-zmm::Ref<mxml::Element> UpnpXML_DIDLRenderObject(zmm::Ref<CdsObject> obj, bool renderActions = false);
+zmm::Ref<mxml::Element> UpnpXML_DIDLRenderObject(zmm::Ref<CdsObject> obj, bool renderActions = false, int stringLimit = -1);
 
 /// \todo change the text string to element, parsing should be done outside
 void UpnpXML_DIDLUpdateObject(zmm::Ref<CdsObject> obj, zmm::String text);

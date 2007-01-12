@@ -53,7 +53,7 @@ Ref<Array<StringBase> > split_string(String str, char sep)
     char *end = data + str.length();
     while (data < end)
     {
-        char *pos = index(data, sep);
+        char *pos = strchr(data, sep);
         if (pos == NULL)
         {
             String part(data);
@@ -115,7 +115,7 @@ String trim_string(String str)
 
     for (i = 0; i < len; i++)
     {
-        if (! index(WHITE_SPACE, buf[i]))
+        if (! strchr(WHITE_SPACE, buf[i]))
         {
             start = i;
             break;
@@ -125,7 +125,7 @@ String trim_string(String str)
         return _("");
     for (i = len - 1; i >= start; i--)
     {
-        if (! index(WHITE_SPACE, buf[i]))
+        if (! strchr(WHITE_SPACE, buf[i]))
         {
             end = i + 1;
             break;
@@ -226,8 +226,8 @@ String hex_decode_string(String encoded)
 	Ref<StringBuffer> buf(new StringBuffer(len / 2));
 	for (int i = 0; i < len; i += 2)
 	{
-		char *chi = index(HEX_CHARS, ptr[i]);
-		char *clo = index(HEX_CHARS, ptr[i + 1]);
+		char *chi = strchr(HEX_CHARS, ptr[i]);
+		char *clo = strchr(HEX_CHARS, ptr[i + 1]);
 		int hi, lo;
 		
 		if (chi)
@@ -322,13 +322,13 @@ String url_unescape(String str)
 
             char *pos;
 
-            pos = index(hex, chi);
+            pos = strchr(hex, chi);
             if (!pos)
                 hi = 0;
             else
                 hi = pos - hex;
 
-            pos = index(hex, clo);
+            pos = strchr(hex, clo);
             if (!pos)
                 lo = 0;
             else

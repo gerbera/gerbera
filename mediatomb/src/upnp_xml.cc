@@ -52,15 +52,24 @@ Ref<Element> UpnpXML_CreateResponse(String actionName, String serviceType)
     return response; 
 }
 
-Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions)
+Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions, int stringLimit)
 {
     Ref<Element> result(new Element(_("")));
     
     result->addAttribute(_("id"), String::from(obj->getID()));
     result->addAttribute(_("parentID"), String::from(obj->getParentID()));
     result->addAttribute(_("restricted"), obj->isRestricted() ? _("1") : _("0"));
+   
+    String tmp = obj->getTitle();
+
+    if ((stringLimit > 0) && (tmp.length() > stringLimit))
+    {
+        tmp = tmp.substring(0, stringLimit-3);
+        tmp = tmp + _("...");
+    }
+   
+    result->appendTextChild(_("dc:title"), tmp);
     
-    result->appendTextChild(_("dc:title"), obj->getTitle());
     result->appendTextChild(_("upnp:class"), obj->getClass());
     
     int objectType = obj->getObjectType();
@@ -78,7 +87,17 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions)
         {
             Ref<DictionaryElement> el = elements->get(i);
             key = el->getKey();
-            if (key != "dc:title")
+            if (key == "dc:description")
+            {
+                tmp = el->getValue();
+                if ((stringLimit > 0) && (tmp.length() > stringLimit))
+                {
+                    tmp = tmp.substring(0, stringLimit-3);
+                    tmp = tmp + _("...");
+                }
+                result->appendTextChild(key, tmp);
+            }
+            else if (key != "dc:title")
                 result->appendTextChild(key, el->getValue());
         }
         

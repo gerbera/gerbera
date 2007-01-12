@@ -34,6 +34,7 @@
 #endif
 
 #include "upnp_cds.h"
+#include "config_manager.h"
 
 using namespace zmm;
 
@@ -47,6 +48,8 @@ ContentDirectoryService::ContentDirectoryService() : Singleton<ContentDirectoryS
     if (serviceType == nil || serviceID == nil)
         throw _Exception(_("serviceType or serviceID not set!"));
     systemUpdateID = 0;
+
+    stringLimit = ConfigManager::getInstance()->getIntOption(_("/server/upnp-string-limit"));
 }
 
 ContentDirectoryService::~ContentDirectoryService()

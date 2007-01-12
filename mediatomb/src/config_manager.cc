@@ -341,11 +341,11 @@ void ConfigManager::validate(String serverhome)
     getOption(_("/server/model"), _(DESC_MODEL_NAME));
     getOption(_("/server/manufacturerURL"), _(DESC_MANUFACTURER_URL));
 
-    i = getIntOption(_("/server/max-browse-field-length"), 
-            DEFAULT_UPNP_MAX_FIELD_LENGTH);
+    i = getIntOption(_("/server/upnp-string-limit"), 
+            DEFAULT_UPNP_STRING_LIMIT);
     if (i == 0)
     {
-        throw _Exception(_("Error in config file: invalid value for <max-browse-field-length>"));
+        throw _Exception(_("Error in config file: invalid value for <upnp-string-limit>"));
     }
 
 /*
