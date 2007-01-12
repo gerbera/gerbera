@@ -329,7 +329,7 @@ Here is a sample configuration file with description of the various tags.
             to fix the .AVI playback problem.
         
 
-    <max-browse-field-length> (Optional)
+    <upnp-sting-limit> (Optional)
         This will limit title/description/etc. lenghts of containers and
         items during a UPnP browse, this feature was added a s workaround
         for the TG100 bug which can only handle titles no longer than 100 
