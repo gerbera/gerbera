@@ -53,6 +53,10 @@
 * Purpose: This file contains functions for uri, url parsing utility. 
 ************************************************************************/
 
+#ifdef HAVE_CONFIG_H
+    #include "autoconfig.h"
+#endif
+
 #include "config.h"
 #include "uri.h"
 

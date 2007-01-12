@@ -49,6 +49,10 @@
     Boston, MA  02110-1301  USA
 */
 
+#ifdef HAVE_CONFIG_H
+    #include "autoconfig.h"
+#endif
+
 //File upnpapi.c
 #include "config.h"
 #include <assert.h>
