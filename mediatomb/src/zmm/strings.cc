@@ -351,7 +351,7 @@ int String::rindex(char ch)
 {
 	if(! base)
 		return -1;
-    char *pos = ::rindex(base->data, ch);
+    char *pos = ::strrchr(base->data, ch);
     if (pos)
         return pos - base->data;
     else

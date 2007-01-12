@@ -140,12 +140,12 @@ void Dictionary::decode(String url)
     char *dataEnd = data + url.length();
     while (data < dataEnd)
     {
-        char *ampPos = index(data, '&');
+        char *ampPos = strchr(data, '&');
         if (!ampPos)
         {
             ampPos = dataEnd;
         }
-        char *eqPos = index(data, '=');
+        char *eqPos = strchr(data, '=');
         if(eqPos && eqPos < ampPos)
         {
             String key(data, eqPos - data);

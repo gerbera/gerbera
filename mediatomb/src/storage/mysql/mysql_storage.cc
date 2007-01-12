@@ -169,7 +169,7 @@ void MysqlStorage::init()
         buf[MS_CREATE_SQL_INFLATED_SIZE] = '\0';
         
         char *sql_start = (char *)buf;
-        char *sql_end = index(sql_start, ';');
+        char *sql_end = strchr(sql_start, ';');
         if (sql_end == NULL)
         {
             throw _StorageException(_("';' not found in mysql create sql"));
@@ -185,7 +185,7 @@ void MysqlStorage::init()
             if (*sql_start == '\n')  // skip newline
                 sql_start++;
             
-            sql_end = index(sql_start, ';');
+            sql_end = strchr(sql_start, ';');
         }
         while(sql_end != NULL);
         dbVersion = getInternalSetting(_("db_version"));
