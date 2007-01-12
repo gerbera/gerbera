@@ -50,6 +50,9 @@ case $host in
         DARWIN_OS=1
         SEARCH_DIR="/opt/local"
         ;;
+    *-*-solaris*)
+        AC_DEFINE([SOLARIS], [1], [we are on solaris])
+        ;;
 esac
 
 AC_ARG_WITH(search, 
