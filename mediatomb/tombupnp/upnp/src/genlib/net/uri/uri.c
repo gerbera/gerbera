@@ -148,7 +148,7 @@ is_unreserved( char in )
 *	Note :
 ************************************************************************/
 int
-is_escaped( char *in )
+is_escaped( const char *in )
 {
 
     if( ( in[0] == '%' ) && ( isxdigit( in[1] ) ) && isxdigit( in[2] ) ) {
@@ -227,7 +227,7 @@ replace_escaped( char *in,
 *	Note :
 ************************************************************************/
 int
-parse_uric( char *in,
+parse_uric( const char *in,
             int max,
             token * out )
 {
@@ -519,12 +519,12 @@ token_cmp( token * in1,
 ************************************************************************/
 int
 parse_port( int max,
-            char *port,
+            const char *port,
             unsigned short *out )
 {
 
-    char *finger = port;
-    char *max_ptr = finger + max;
+    const char *finger = port;
+    const char *max_ptr = finger + max;
     unsigned short temp = 0;
 
     while( ( finger < max_ptr ) && ( isdigit( *finger ) ) ) {
@@ -556,7 +556,7 @@ parse_port( int max,
 *	Note :
 ************************************************************************/
 int
-parse_hostport( char *in,
+parse_hostport( const char *in,
                 int max,
                 hostport_type * out )
 {
@@ -636,7 +636,7 @@ parse_hostport( char *in,
         //call gethostbyname_r (reentrant form of gethostbyname)
 #if defined(WIN32) || defined(__APPLE__)
         h=gethostbyname(temp_host_name);
-#elif defined(SPARC_SOLARIS)
+#elif defined(SOLARIS)
         errCode = gethostbyname_r( temp_host_name,
                                    &h,
                                    temp_hostbyname_buff,
@@ -704,7 +704,7 @@ parse_hostport( char *in,
 *	Note :
 ************************************************************************/
 int
-parse_scheme( char *in,
+parse_scheme( const char *in,
               int max,
               token * out )
 {
@@ -1017,7 +1017,7 @@ resolve_rel_url( char *base_url,
 *	Note :
 ************************************************************************/
 int
-parse_uri( char *in,
+parse_uri( const char *in,
            int max,
            uri_type * out )
 {
@@ -1097,8 +1097,8 @@ parse_uri_and_unescape( char *in,
     if( ( ret = parse_uri( in, max, out ) ) != HTTP_SUCCESS )
         return ret;
     if( out->pathquery.size > 0 )
-        remove_escaped_chars( out->pathquery.buff, &out->pathquery.size );
+        remove_escaped_chars( (char *)out->pathquery.buff, &out->pathquery.size );
     if( out->fragment.size > 0 )
-        remove_escaped_chars( out->fragment.buff, &out->fragment.size );
+        remove_escaped_chars( (char *)out->fragment.buff, &out->fragment.size );
     return HTTP_SUCCESS;
 }

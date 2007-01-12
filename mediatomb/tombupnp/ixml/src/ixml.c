@@ -39,7 +39,7 @@
 *=================================================================*/
 static void
 copy_with_escape( INOUT ixml_membuf * buf,
-                  IN char *p )
+                  IN const char *p )
 {
     int i;
     int plen;
@@ -87,13 +87,13 @@ void
 ixmlPrintDomTreeRecursive( IN IXML_Node * nodeptr,
                            IN ixml_membuf * buf )
 {
-    char *nodeName = NULL;
-    char *nodeValue = NULL;
+    const char *nodeName = NULL;
+    const char *nodeValue = NULL;
     IXML_Node *child = NULL,
      *sibling = NULL;
 
     if( nodeptr != NULL ) {
-        nodeName = ( char * )ixmlNode_getNodeName( nodeptr );
+        nodeName = ( const char * )ixmlNode_getNodeName( nodeptr );
         nodeValue = ixmlNode_getNodeValue( nodeptr );
 
         switch ( ixmlNode_getNodeType( nodeptr ) ) {
@@ -146,7 +146,7 @@ ixmlPrintDomTreeRecursive( IN IXML_Node * nodeptr,
                 if( ( child != NULL )
                     && ( ixmlNode_getNodeType( child ) ==
                          eELEMENT_NODE ) ) {
-                    ixml_membuf_append_str( buf, ">\n" );
+                    ixml_membuf_append_str( buf, ">\r\n" );
                 } else {
                     ixml_membuf_append_str( buf, ">" );
                 }
@@ -164,7 +164,7 @@ ixmlPrintDomTreeRecursive( IN IXML_Node * nodeptr,
                     && ixmlNode_getNodeType( sibling ) == eTEXT_NODE ) {
                     ixml_membuf_append_str( buf, ">" );
                 } else {
-                    ixml_membuf_append_str( buf, ">\n" );
+                    ixml_membuf_append_str( buf, ">\r\n" );
                 }
                 ixmlPrintDomTreeRecursive( ixmlNode_getNextSibling
                                            ( nodeptr ), buf );
@@ -188,15 +188,15 @@ void
 ixmlPrintDomTree( IN IXML_Node * nodeptr,
                   IN ixml_membuf * buf )
 {
-    char *nodeName = NULL;
-    char *nodeValue = NULL;
+    const char *nodeName = NULL;
+    const char *nodeValue = NULL;
     IXML_Node *child = NULL;
 
     if( ( nodeptr == NULL ) || ( buf == NULL ) ) {
         return;
     }
 
-    nodeName = ( char * )ixmlNode_getNodeName( nodeptr );
+    nodeName = ( const char * )ixmlNode_getNodeName( nodeptr );
     nodeValue = ixmlNode_getNodeValue( nodeptr );
 
     switch ( ixmlNode_getNodeType( nodeptr ) ) {
@@ -227,7 +227,7 @@ ixmlPrintDomTree( IN IXML_Node * nodeptr,
             child = ixmlNode_getFirstChild( nodeptr );
             if( ( child != NULL )
                 && ( ixmlNode_getNodeType( child ) == eELEMENT_NODE ) ) {
-                ixml_membuf_append_str( buf, ">\n" );
+                ixml_membuf_append_str( buf, ">\r\n" );
             } else {
                 ixml_membuf_append_str( buf, ">" );
             }
@@ -239,7 +239,7 @@ ixmlPrintDomTree( IN IXML_Node * nodeptr,
             // Done with children.  Output the end tag.
             ixml_membuf_append_str( buf, "</" );
             ixml_membuf_append_str( buf, nodeName );
-            ixml_membuf_append_str( buf, ">\n" );
+            ixml_membuf_append_str( buf, ">\r\n" );
             break;
 
         default:
@@ -259,15 +259,15 @@ void
 ixmlDomTreetoString( IN IXML_Node * nodeptr,
                      IN ixml_membuf * buf )
 {
-    char *nodeName = NULL;
-    char *nodeValue = NULL;
+    const char *nodeName = NULL;
+    const char *nodeValue = NULL;
     IXML_Node *child = NULL;
 
     if( ( nodeptr == NULL ) || ( buf == NULL ) ) {
         return;
     }
 
-    nodeName = ( char * )ixmlNode_getNodeName( nodeptr );
+    nodeName = ( const char * )ixmlNode_getNodeName( nodeptr );
     nodeValue = ixmlNode_getNodeValue( nodeptr );
 
     switch ( ixmlNode_getNodeType( nodeptr ) ) {
@@ -325,7 +325,7 @@ ixmlDomTreetoString( IN IXML_Node * nodeptr,
 *
 *=================================================================*/
 int
-ixmlLoadDocumentEx( IN char *xmlFile,
+ixmlLoadDocumentEx( IN const char *xmlFile,
                     IXML_Document ** doc )
 {
 
@@ -343,7 +343,7 @@ ixmlLoadDocumentEx( IN char *xmlFile,
 *
 *=================================================================*/
 IXML_Document *
-ixmlLoadDocument( IN char *xmlFile )
+ixmlLoadDocument( IN const char *xmlFile )
 {
 
     IXML_Document *doc = NULL;
@@ -372,7 +372,7 @@ ixmlPrintDocument(IXML_Document *doc)
     }
 
     ixml_membuf_init( buf );
-    ixml_membuf_append_str( buf, "<?xml version=\"1.0\"?>\n" );
+    ixml_membuf_append_str( buf, "<?xml version=\"1.0\"?>\r\n" );
     ixmlPrintDomTree( rootNode, buf );
     return buf->buf;
 
@@ -421,7 +421,7 @@ ixmlDocumenttoString(IXML_Document *doc)
     }
 
     ixml_membuf_init( buf );
-    ixml_membuf_append_str( buf, "<?xml version=\"1.0\"?>\n" );
+    ixml_membuf_append_str( buf, "<?xml version=\"1.0\"?>\r\n" );
     ixmlDomTreetoString( rootNode, buf );
     return buf->buf;
 
@@ -470,7 +470,7 @@ ixmlRelaxParser(char errorChar)
 *
 *=================================================================*/
 int
-ixmlParseBufferEx( IN char *buffer,
+ixmlParseBufferEx( IN const char *buffer,
                    IXML_Document ** retDoc )
 {
 
@@ -478,7 +478,7 @@ ixmlParseBufferEx( IN char *buffer,
         return IXML_INVALID_PARAMETER;
     }
 
-    if( strlen( buffer ) == 0 ) {
+    if( buffer[0] == '\0' ) {
         return IXML_INVALID_PARAMETER;
     }
 
@@ -492,7 +492,7 @@ ixmlParseBufferEx( IN char *buffer,
 *
 *=================================================================*/
 IXML_Document *
-ixmlParseBuffer( IN char *buffer )
+ixmlParseBuffer( IN const char *buffer )
 {
     IXML_Document *doc = NULL;
 

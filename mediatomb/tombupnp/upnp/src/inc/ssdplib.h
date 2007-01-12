@@ -80,7 +80,7 @@ typedef enum SsdpCmdType{SSDP_ERROR=-1,
 #define  SSDP_IP   "239.255.255.250"
 #define  SSDP_PORT 1900
 #define  NUM_TRY 3
-#define  NUM_COPY 2
+#define  NUM_COPY 1
 #define  THREAD_LIMIT 50
 #define  COMMAND_LEN  300
 

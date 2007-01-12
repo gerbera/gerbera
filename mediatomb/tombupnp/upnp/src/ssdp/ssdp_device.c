@@ -255,6 +255,17 @@ NewRequestHandler( IN struct sockaddr_in *DestAddr,
     for( Index = 0; Index < NumPacket; Index++ ) {
         int rc;
 
+        // The reason to keep this loop is purely historical/documentation,
+        // according to section 9.2 of HTTPU spec:
+        // 
+        // "If a multicast resource would send a response(s) to any copy of the 
+        //  request, it SHOULD send its response(s) to each copy of the request 
+        //  it receives. It MUST NOT repeat its response(s) per copy of the 
+        //  reuqest."
+        //  
+        // http://www.upnp.org/download/draft-goland-http-udp-04.txt
+        //
+        // So, NUM_COPY has been changed from 2 to 1.
         NumCopy = 0;
         while( NumCopy < NUM_COPY ) {
             DBGONLY( UpnpPrintf( UPNP_INFO, SSDP, __FILE__, __LINE__,
@@ -319,7 +330,7 @@ CreateServicePacket( IN int msg_type,
                                      "R" "sdc" "D" "s" "ssc" "S" "ssc"
                                      "ssc" "A" "c", HTTP_OK,
                                      "CACHE-CONTROL: max-age=", duration,
-                                     "EXT:\r\n", "LOCATION: ", location,
+                                     "EXT:", "LOCATION: ", location,
                                      "ST: ", nt, "USN: ", usn, 
                                      gUserHTTPHeaders.buf );
         if( ret_code != 0 ) {

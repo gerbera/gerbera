@@ -28,7 +28,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
-#define socklen_t int
+typedef int socklen_t;
 #define EAFNOSUPPORT 97
 /*
  * WARNING: Don't even consider trying to compile this on a system where
@@ -387,4 +387,3 @@ int inet_pton(int af,const char *src,void *dst)
 	/* NOTREACHED */
 }
 #endif
-

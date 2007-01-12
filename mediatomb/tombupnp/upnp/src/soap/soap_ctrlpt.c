@@ -232,11 +232,11 @@ dom_find_deep_node( IN char *names[],
 *
 *	Note :The given node must have a text node as its first child
 ****************************************************************************/
-static DOMString
+static const DOMString
 get_node_value( IN IXML_Node * node )
 {
     IXML_Node *text_node = NULL;
-    DOMString text_value = NULL;
+    const DOMString text_value = NULL;
 
     text_node = ixmlNode_getFirstChild( node );
     if( text_node == NULL ) {
@@ -266,18 +266,19 @@ get_node_value( IN IXML_Node * node )
 ****************************************************************************/
 static XINLINE int
 get_host_and_path( IN char *ctrl_url,
-                   OUT memptr * host,
-                   OUT memptr * path,
+                   OUT const memptr *host,
+                   OUT const memptr *path,
                    OUT uri_type * url )
 {
     if( parse_uri( ctrl_url, strlen( ctrl_url ), url ) != HTTP_SUCCESS ) {
         return -1;
     }
-    host->buf = url->hostport.text.buff;
-    host->length = url->hostport.text.size;
+    // This is done to ensure that the buffer is kept const
+    ((memptr *)host)->buf = (char *)url->hostport.text.buff;
+    ((memptr *)host)->length = url->hostport.text.size;
 
-    path->buf = url->pathquery.buff;
-    path->length = url->pathquery.size;
+    ((memptr *)path)->buf = (char *)url->pathquery.buff;
+    ((memptr *)path)->length = url->pathquery.size;
 
     return 0;
 }
@@ -434,12 +435,12 @@ get_response_value( IN http_message_t * hmsg,
     IXML_Node *error_node = NULL;
     IXML_Document *doc = NULL;
     char *node_str = NULL;
-    char *temp_str = NULL;
+    const char *temp_str = NULL;
     DOMString error_node_str = NULL;
     int err_code;
     xboolean done = FALSE;
     char *names[5];
-    DOMString nodeValue;
+    const DOMString nodeValue;
 
     err_code = UPNP_E_BAD_RESPONSE; // default error
 
@@ -622,11 +623,13 @@ SoapSendAction( IN char *action_url,
     xboolean got_response = FALSE;
 
     char *xml_start =
-//        "<?xml version=\"1.0\"?>\n" required??
-		"<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" "
-        "s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">\n"
+        "<s:Envelope "
+        "xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" "
+        "s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">\r\n"
         "<s:Body>";
-    char *xml_end = "</s:Body>\n" "</s:Envelope>\n";
+    char *xml_end =
+        "</s:Body>\r\n"
+        "</s:Envelope>\r\n\r\n";
     int xml_start_len;
     int xml_end_len;
     int action_str_len;
@@ -675,7 +678,7 @@ SoapSendAction( IN char *action_url,
                           &url, (off_t)(xml_start_len + action_str_len + xml_end_len),   // content-length
                           ContentTypeHeader,
                           "SOAPACTION: \"", service_type, "#", name.buf,
-                          name.length, "\"\r\n", xml_start, xml_start_len,
+                          name.length, "\"", xml_start, xml_start_len,
                           action_str, action_str_len, xml_end,
                           xml_end_len ) != 0 ) {
         goto error_handler;
@@ -758,20 +761,25 @@ SoapSendActionEx( IN char *action_url,
     xboolean got_response = FALSE;
 
     char *xml_start =
-//		"<?xml version=\"1.0\"?>\n" required??
-        "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" "
-        "s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">\n";
-    char *xml_body_start = "<s:Body>";
-    char *xml_end = "</s:Body>\n" "</s:Envelope>\n";
+        "<s:Envelope "
+        "xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" "
+        "s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">\r\n";
+    char *xml_header_start =
+        "<s:Header>\r\n";
+    char *xml_header_end =
+        "</s:Header>\r\n";
+    char *xml_body_start =
+        "<s:Body>";
+    char *xml_end =
+        "</s:Body>\r\n"
+        "</s:Envelope>\r\n";
     int xml_start_len;
-    int xml_end_len;
-    char *xml_header_start = "<s:Header>\n";
-    char *xml_header_end = "</s:Header>\n";
     int xml_header_start_len;
-    int xml_header_end_len;
     int xml_header_str_len;
-    int action_str_len;
+    int xml_header_end_len;
     int xml_body_start_len;
+    int action_str_len;
+    int xml_end_len;
 
     *response_node = NULL;      // init
 
@@ -833,7 +841,7 @@ SoapSendActionEx( IN char *action_url,
                                         xml_end_len), // content-length
                           ContentTypeHeader,
                           "SOAPACTION: \"", service_type, "#", name.buf,
-                          name.length, "\"\r\n",
+                          name.length, "\"",
                           xml_start, xml_start_len,
                           xml_header_start, xml_header_start_len,
                           xml_header_str, xml_header_str_len,
@@ -903,8 +911,8 @@ SoapGetServiceVarStatus( IN char *action_url,
                          IN char *var_name,
                          OUT char **var_value )
 {
-    memptr host;                // value for HOST header
-    memptr path;                // ctrl path in first line in msg
+    const memptr host;                // value for HOST header
+    const memptr path;                // ctrl path in first line in msg
     uri_type url;
     membuffer request;
     int ret_code;
@@ -912,15 +920,18 @@ SoapGetServiceVarStatus( IN char *action_url,
     int upnp_error_code;
 
     char *xml_start =
-//		"<?xml version=\"1.0\"?>\n" required??
-        "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" "
-        "s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">\n"
-        "<s:Body>\n"
-        "<u:QueryStateVariable xmlns:u=\"urn:schemas-upnp-org:control-1-0\">\n"
+        "<s:Envelope "
+        "xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" "
+        "s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">\r\n"
+        "<s:Body>\r\n"
+        "<u:QueryStateVariable xmlns:u=\"urn:schemas-upnp-org:control-1-0\">\r\n"
         "<u:varName>";
 
-    char *xml_end = "</u:varName>\n"
-        "</u:QueryStateVariable>\n" "</s:Body>\n" "</s:Envelope>\n";
+    char *xml_end =
+        "</u:varName>\r\n"
+        "</u:QueryStateVariable>\r\n"
+        "</s:Body>\r\n"
+        "</s:Envelope>\r\n";
 
     *var_value = NULL;          // return NULL in case of an error
 

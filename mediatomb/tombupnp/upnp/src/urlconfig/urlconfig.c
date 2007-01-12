@@ -215,7 +215,7 @@ config_description_doc( INOUT IXML_Document * doc,
     IXML_Node *rootNode = NULL;
     IXML_Node *urlbase_node = NULL;
     char *urlBaseStr = "URLBase";
-    DOMString domStr = NULL;
+    const DOMString domStr = NULL;
     uri_type uri;
     int err_code;
     int len;

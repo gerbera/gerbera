@@ -40,6 +40,31 @@
       now put in non blocking mode; this solves the problem when the SDK
       would not shut down properly because of a blocking send.
 
+2006-12-23 Marcelo Jimenez <mroberto(at)users.sourceforge.net>
+
+	* Finished const-ifications as suggested by Erik Johansson in
+	SF Patch tracker [ 1587272 ].
+
+2006-12-23 Marcelo Jimenez <mroberto(at)users.sourceforge.net>
+
+	* Erik Johansson's patch for const-ified ixml
+	SF Patch tracker [ 1587272 ].
+
+2006-12-23 Marcelo Jimenez <mroberto(at)users.sourceforge.net>
+
+	* David Maass's patch for VStudio2005 compilation failure.
+	SF Patch tracker [ 1581161 ].
+
+2006-12-23 Marcelo Jimenez <mroberto(at)users.sourceforge.net>
+
+	* Erik Johansson's patch for invalid xml output.
+	SF Bug Tracker [ 1590466 ].
+
+2006-12-23 Marcelo Jimenez <mroberto(at)users.sourceforge.net>
+
+	* Erik Johansson's patch for typo in ixmlparser.c.
+	SF Bug tracker [ 1590469 ].
+
 2006-07-07 Oxy <virtual_worlds(at)gmx.de>
 
 	* full support for Windows added, static library and DLL are fully
