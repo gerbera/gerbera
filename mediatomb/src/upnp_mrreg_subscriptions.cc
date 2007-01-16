@@ -33,6 +33,8 @@
     #include "autoconfig.h"
 #endif
 
+#if defined(ENABLE_MRREG)
+
 #include "tools.h"
 #include "upnp_mrreg.h"
 #include "server.h"
@@ -99,3 +101,6 @@ void MRRegistrarService::subscription_update(String sourceProtocol_CSV)
     ixmlDocument_free(event);
 }
 #endif
+
+#endif // ENABLE_MRREG
+

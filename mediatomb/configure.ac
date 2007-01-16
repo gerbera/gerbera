@@ -390,6 +390,18 @@ elif test $ATOMIC_X86 -eq 1; then
     AC_MSG_WARN(You specified to use atomic arithmetics code for x86 single processor systems! The resulting binary must not be used on SMP machines!)
 fi
 
+AC_ARG_ENABLE([mrreg-service],
+              [
+AC_HELP_STRING([--enable-mrreg-service],
+[Enable the X_MS_MediaReceiverRegistrar UPnP service. This is for future XBox 360 support, other renderers will probably not need it (default: no)])
+              ],
+              [
+                if test "x$enableval" = xyes; then
+                    AC_DEFINE([ENABLE_MRREG], [1], [Enable the X_MS_MediaReceiverRegistrar UPnP service. This is for future XBox 360 support, other renderers will probably not need it])
+                fi 
+              ]
+)
+
 SKIP_FSEEKO_TEST=0
 AC_ARG_ENABLE([fseeko-check],
               [

@@ -33,6 +33,8 @@
     #include "autoconfig.h"
 #endif
 
+#if defined(ENABLE_MRREG)
+
 #include "tools.h"
 #include "upnp_mrreg.h"
 #include "storage.h"
@@ -105,4 +107,5 @@ void MRRegistrarService::process_action_request(Ref<ActionRequest> request)
 
 }
 
+#endif // ENABLE_MRREG
 

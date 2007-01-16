@@ -33,6 +33,8 @@
     #include "autoconfig.h"
 #endif
 
+#if defined(ENABLE_MRREG)
+
 #include "upnp_mrreg.h"
 
 using namespace zmm;
@@ -61,3 +63,4 @@ void MRRegistrarService::setStaticArgs(String _serviceType, String _serviceID)
     serviceID = _serviceID;
 }
 
+#endif // ENABLE_MRREG

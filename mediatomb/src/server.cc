@@ -67,11 +67,13 @@ void Server::init()
     ConnectionManagerService::setStaticArgs(_(DESC_CM_SERVICE_TYPE),
                                             _(DESC_CM_SERVICE_ID));
     cmgr = ConnectionManagerService::getInstance();
-                                                    
+
+#if defined(ENABLE_MRREG)                                                    
     MRRegistrarService::setStaticArgs(_(DESC_MRREG_SERVICE_TYPE),
                                       _(DESC_MRREG_SERVICE_ID));
     mrreg = MRRegistrarService::getInstance();
-                                                    
+#endif
+
     Ref<ConfigManager> config = ConfigManager::getInstance();
     
     serverUDN = config->getOption(_("/server/udn"));
@@ -379,10 +381,12 @@ void Server::upnp_actions(Ref<ActionRequest> request)
 //        log_debug("upnp_actions: request for content directory service\n");
         cds->process_action_request(request);
     } 
+#if defined(ENABLE_MRREG)
     else if (request->getServiceID() == DESC_MRREG_SERVICE_ID)
     {
         mrreg->process_action_request(request);
     }
+#endif
     else 
     {
         // cp is asking for a nonexistent service, or for a service
@@ -418,10 +422,12 @@ void Server::upnp_subscriptions(Ref<SubscriptionRequest> request)
 //        log_debug("upnp_subscriptions: request for connection manager service\n");
         cmgr->process_subscription_request(request);
     }
+#if defined(ENABLE_MRREG)
     else if (request->getServiceID() == DESC_MRREG_SERVICE_ID)
     {
         mrreg->process_subscription_request(request);
     }
+#endif
     else 
     {
         // cp asks for a nonexistent service or for a service that

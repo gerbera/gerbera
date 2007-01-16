@@ -29,6 +29,8 @@
 
 /// \file upnp_mrreg.h
 /// \brief Definition of the ConnectionManagerService class.
+#if defined(ENABLE_MRREG)
+
 #ifndef __UPNP_MRREG_H__
 #define __UPNP_MRREG_H__
 
@@ -112,4 +114,6 @@ public:
 };
 
 #endif // __UPNP_CM_H__
+
+#endif // ENABLE_MRREG
 
