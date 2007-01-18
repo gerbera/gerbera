@@ -317,7 +317,7 @@ gena_subscribe( IN char *url,
                                         HTTPMETHOD_SUBSCRIBE, &dest_url,
                                         "CALLBACK: <http://", LOCAL_HOST,
                                         ":", LOCAL_PORT,
-                                        "/>" "NT: upnp:event"
+                                        "/>\r\n" "NT: upnp:event\r\n"
                                         "TIMEOUT: Second-", timeout_str );
     }
     if( return_code != 0 ) {

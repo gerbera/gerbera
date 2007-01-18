@@ -116,17 +116,6 @@
 #define MAX_THREADS 12 
 //@}
 
-/** @name MAX_JOBS_TOTAL
- *  The {\tt MAX_JOBS_TOTAL} constant determines the maximum number of jobs
- *  that can be queued. If this limit is reached further jobs will be thrown
- *  to avoid memory exhaustion. The default value 100.
- *  (Added by Axis.)
- */
-
-//@{
-#define MAX_JOBS_TOTAL 100
-//@}
-
 /** @name DEFAULT_SOAP_CONTENT_LENGTH
  * SOAP messages will read at most {\tt DEFAULT_SOAP_CONTENT_LENGTH} bytes.  
  * This prevents devices that have a misbehaving web server to send 

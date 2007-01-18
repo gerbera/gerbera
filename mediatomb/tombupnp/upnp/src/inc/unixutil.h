@@ -40,7 +40,7 @@
 #else
  #define XINLINE
 
- typedef int socklen_t;
+ #define socklen_t int
  #define EAFNOSUPPORT 97
 #endif
 

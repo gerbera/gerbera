@@ -196,12 +196,11 @@ addToAction( IN int response,
 
         if( response ) {
             sprintf( ActBuff,
-                "<u:%sResponse xmlns:u=\"%s\">\r\n</u:%sResponse>",
-                ActionName, ServType, ActionName );
+                     "<u:%sResponse xmlns:u=\"%s\"></u:%sResponse>",
+                     ActionName, ServType, ActionName );
         } else {
-            sprintf( ActBuff,
-                "<u:%s xmlns:u=\"%s\">\r\n</u:%s>",
-                ActionName, ServType, ActionName );
+            sprintf( ActBuff, "<u:%s xmlns:u=\"%s\"></u:%s>",
+                     ActionName, ServType, ActionName );
         }
 
         rc = ixmlParseBufferEx( ActBuff, ActionDoc );
@@ -275,13 +274,11 @@ makeAction( IN int response,
     }
 
     if( response ) {
-        sprintf( ActBuff,
-            "<u:%sResponse xmlns:u=\"%s\">\r\n</u:%sResponse>",
-            ActionName, ServType, ActionName );
+        sprintf( ActBuff, "<u:%sResponse xmlns:u=\"%s\"></u:%sResponse>",
+                 ActionName, ServType, ActionName );
     } else {
-        sprintf( ActBuff,
-            "<u:%s xmlns:u=\"%s\">\r\n</u:%s>",
-            ActionName, ServType, ActionName );
+        sprintf( ActBuff, "<u:%s xmlns:u=\"%s\"></u:%s>",
+                 ActionName, ServType, ActionName );
     }
 
     if( ixmlParseBufferEx( ActBuff, &ActionDoc ) != IXML_SUCCESS ) {

@@ -7,7 +7,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
-typedef int socklen_t;
+#define socklen_t int
 #define EAFNOSUPPORT 97
 
 /*

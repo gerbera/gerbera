@@ -65,7 +65,7 @@
  #include <netinet/in.h>
  #include <arpa/inet.h>
 
- #ifndef SOLARIS
+ #ifndef SPARC_SOLARIS
 // #include <linux/if.h>
   #include <net/if.h>
  #else
@@ -132,9 +132,8 @@ CLIENTONLY( ithread_mutex_t GlobalClientSubscribeMutex;
 
 //This structure is for virtual directory callbacks
      struct UpnpVirtualDirCallbacks virtualDirCallback;
-
 // a local dir which serves as webserver root
-    extern membuffer gDocumentRootDir;
+    extern membuffer gDocumentRootDir;     
 
 // Maximum content-length that the SDK will process on an incoming packet. 
 // Content-Length exceeding this size will be not processed and error 413 
@@ -271,7 +270,6 @@ int UpnpInit( IN const char *HostIP,
     TPAttrSetMinThreads( &attr, MIN_THREADS );
     TPAttrSetJobsPerThread( &attr, JOBS_PER_THREAD );
     TPAttrSetIdleTime( &attr, THREAD_IDLE_TIME );
-    TPAttrSetMaxJobsTotal( &attr, MAX_JOBS_TOTAL );
 
     if( ThreadPoolInit( &gSendThreadPool, &attr ) != UPNP_E_SUCCESS ) {
         UpnpSdkInit = 0;
@@ -3371,20 +3369,19 @@ UpnpDownloadXmlDoc( const char *url,
             return ret_code;
     }
 
+	/* TODO: MoNKi: Do not check this?? Some routers (Linksys WRT54GS) sends
+	   "CONTENT-TYPE: application/octet-stream". If the data sended is not
+	   an xml file, ixmlParseBufferEx will fail and the function will return
+	   UPNP_E_INVALID_DESC too.*/
+
     if( strncasecmp( content_type, "text/xml", strlen( "text/xml" ) ) ) {
-        DBGONLY(
-            UpnpPrintf( UPNP_INFO, API, __FILE__, __LINE__, "Not text/xml\n" );
-        )
-        // Linksys WRT54G router returns 
-        // "CONTENT-TYPE: application/octet-stream".
-        // Let's be nice to Linksys and try to parse document anyway.
-        // If the data sended is not a xml file, ixmlParseBufferEx
-        // will fail and the function will return UPNP_E_INVALID_DESC too.
-#if 0
         free( xml_buf );
-        return UPNP_E_INVALID_DESC;
-#endif
+        DBGONLY( UpnpPrintf( UPNP_CRITICAL, API, __FILE__, __LINE__,
+                             "Not text/xml\n" );
+             )
+            return UPNP_E_INVALID_DESC;
     }
+    // end of TODO Do not check this
 
     ret_code = ixmlParseBufferEx( xml_buf, xmlDoc );
     free( xml_buf );
@@ -3745,7 +3742,7 @@ FreeHandle( int Upnp_Handle )
 }  /****************** End of FreeHandle *********************/
 
 // **DBG****************************************************
-//DBGONLY(
+DBGONLY(
 
 /**************************************************************************
  * Function: PrintHandleInfo 
@@ -3786,7 +3783,7 @@ FreeHandle( int Upnp_Handle )
             IXML_NodeList * NodeList1;
             IXML_Node * ChildNode1;
             unsigned short NodeType;
-            const DOMString NodeValue;
+            DOMString NodeValue;
             const DOMString NodeName;
             NodeList1 = ixmlNode_getChildNodes( tmpRoot );
             for( i = 0; i < 100; i++ ) {
@@ -3807,7 +3804,7 @@ FreeHandle( int Upnp_Handle )
             }
    /****************** End of printNodes *********************/
 
-// )                              // dbgonly
+ )                              // dbgonly
 
     //********************************************************
     //* Name: getlocalhostname
@@ -3929,6 +3926,60 @@ FreeHandle( int Upnp_Handle )
         return UPNP_E_INIT;
     }
 
+/*    // Get the interface configuration information... 
+    ifConf.ifc_len = sizeof szBuffer;
+    ifConf.ifc_ifcu.ifcu_buf = ( caddr_t ) szBuffer;
+    nResult = ioctl( LocalSock, SIOCGIFCONF, &ifConf );
+
+    if( nResult < 0 ) {
+        DBGONLY( UpnpPrintf( UPNP_ALL, API, __FILE__, __LINE__,
+                             "DiscoverInterfaces: SIOCGIFCONF returned error\n" );
+             )
+
+            return UPNP_E_INIT;
+    }
+    // Cycle through the list of interfaces looking for IP addresses. 
+
+    for( i = 0; ( ( i < ifConf.ifc_len ) && ( j < DEFAULT_INTERFACE ) ); ) {
+        struct ifreq *pifReq =
+            ( struct ifreq * )( ( caddr_t ) ifConf.ifc_req + i );
+        i += sizeof *pifReq;
+
+        // See if this is the sort of interface we want to deal with.
+        strcpy( ifReq.ifr_name, pifReq->ifr_name );
+        if( ioctl( LocalSock, SIOCGIFFLAGS, &ifReq ) < 0 ) {
+            DBGONLY( UpnpPrintf( UPNP_ALL, API, __FILE__, __LINE__,
+                                 "Can't get interface flags for %s:\n",
+                                 ifReq.ifr_name );
+                 )
+
+        }
+        // Skip loopback, point-to-point and down interfaces, 
+        // except don't skip down interfaces
+        // if we're trying to get a list of configurable interfaces. 
+        if( ( ifReq.ifr_flags & IFF_LOOPBACK )
+            || ( !( ifReq.ifr_flags & IFF_UP ) ) ) {
+            continue;
+        }
+        if( pifReq->ifr_addr.sa_family == AF_INET ) {
+            // Get a pointer to the address...
+            memcpy( &LocalAddr, &pifReq->ifr_addr,
+                    sizeof pifReq->ifr_addr );
+
+            // We don't want the loopback interface. 
+            if( LocalAddr.sin_addr.s_addr == htonl( INADDR_LOOPBACK ) ) {
+                continue;
+            }
+
+        }
+        //increment j if we found an address which is not loopback
+        //and is up
+        j++;
+
+    }
+    */
+
+
     strncpy( out, inet_ntoa( LocalAddr.sin_addr ), LINE_SIZE );
 
     DBGONLY( UpnpPrintf( UPNP_ALL, API, __FILE__, __LINE__,
@@ -4004,6 +4055,8 @@ UpnpSetWebServerRootDir( IN const char *rootDir )
     return ( web_server_set_root_dir( rootDir ) );
 }
 #endif // INTERNAL_WEB_SERVER
+
+
 /*
  *************************** */
 

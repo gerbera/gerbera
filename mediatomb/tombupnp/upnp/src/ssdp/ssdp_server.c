@@ -112,7 +112,7 @@ CLIENTONLY( SOCKET gSsdpReqSocket = 0;
     IXML_Node *tmpNode = NULL;
     IXML_Node *tmpNode2 = NULL;
     IXML_Node *textNode = NULL;
-    const DOMString tmpStr;
+    DOMString tmpStr;
     char SERVER[200];
 
     DBGONLY( const DOMString dbgStr;
@@ -922,7 +922,6 @@ get_ssdp_sockets( MiniServerSockArray * out )
     struct ip_mreq ssdpMcastAddr;
     struct sockaddr_in ssdpAddr;
     int option = 1;
-    struct in_addr addr;
 
     CLIENTONLY( if( ( ssdpReqSock = socket( AF_INET, SOCK_DGRAM, 0 ) )
                     == UPNP_INVALID_SOCKET ) {
@@ -998,7 +997,7 @@ get_ssdp_sockets( MiniServerSockArray * out )
     }
 
     memset( ( void * )&ssdpMcastAddr, 0, sizeof( struct ip_mreq ) );
-    ssdpMcastAddr.imr_interface.s_addr = inet_addr( LOCAL_HOST );
+    ssdpMcastAddr.imr_interface.s_addr = htonl( INADDR_ANY );
     ssdpMcastAddr.imr_multiaddr.s_addr = inet_addr( SSDP_IP );
     if( setsockopt( ssdpSock, IPPROTO_IP, IP_ADD_MEMBERSHIP,
                     ( char * )&ssdpMcastAddr,
@@ -1013,17 +1012,6 @@ get_ssdp_sockets( MiniServerSockArray * out )
         CLIENTONLY( UpnpCloseSocket( ssdpReqSock ) );
         return UPNP_E_SOCKET_ERROR;
     }
-
-    /* Set multicast interface. */
-    memset( ( void * )&addr, 0, sizeof( struct in_addr ));
-    addr.s_addr = inet_addr(LOCAL_HOST);
-    if (setsockopt(ssdpSock, IPPROTO_IP, IP_MULTICAST_IF,
-                   (char *)&addr, sizeof addr) != 0) {
-        DBGONLY(UpnpPrintf( UPNP_INFO, SSDP, __FILE__, __LINE__,
-                            "Couldn't set multicast interface.\n" ));
-        /* This is probably not a critical error, so let's continue. */
-    }
-
     // result is not checked becuase it will fail in WinMe and Win9x.
     setsockopt( ssdpSock, IPPROTO_IP,
                 IP_MULTICAST_TTL, &ttl, sizeof( ttl ) );

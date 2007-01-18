@@ -80,33 +80,32 @@ typedef enum priority {LOW_PRIORITY,
 #define DEFAULT_JOBS_PER_THREAD 10    //default jobs per thread used by TPAttrInit
 #define DEFAULT_STARVATION_TIME	500   //default starvation time used by TPAttrInit
 #define DEFAULT_IDLE_TIME 10 * 1000   //default idle time used by TPAttrInit
-#define DEFAULT_FREE_ROUTINE NULL     //default free routine used TPJobInit
-#define DEFAULT_MAX_JOBS_TOTAL 100    //default max jobs used TPAttrInit
+#define DEFAULT_FREE_ROUTINE NULL     //default free routine used TPJobInit 
 
 #define STATS 1 //always include stats because code change is minimal
 
 
-//Statistics
+//Statistics 
 #ifdef WIN32 // todo: check why STATSONLY fails during compilation
  #undef STATS
 #endif
 
 #ifdef STATS
- #define STATSONLY(x) x
+#define STATSONLY(x) x
 #else
- #define STATSONLY(x)
+#define STATSONLY(x)
 #endif
 
 #ifdef _DEBUG
- #define DEBUG 1
+#define DEBUG 1
 #endif
 
 //DEBUGGING
 #ifndef WIN32
  #ifdef DEBUG
-  #define DBGONLY(x) x
+ #define DBGONLY(x) x
  #else
-  #define DBGONLY(x)
+ #define DBGONLY(x)
  #endif
 #endif
 
@@ -133,30 +132,28 @@ typedef void (*free_routine)(void *arg);
  * Name: ThreadPoolAttr
  *
  *  Description:
- *     Attributes for thread pool. Used to set and change parameters of
+ *     Attributes for thread pool. Used to set and change parameters of 
  *     thread pool
  *****************************************************************************/
 typedef struct THREADPOOLATTR
 {
-  int minThreads;     // minThreads, ThreadPool will always maintain at least
-                      // this many threads
+  int minThreads; //minThreads, ThreadPool will always maintain at least
+                  //this many threads
+  
+  int maxThreads; //maxThreads, ThreadPool will never have more than this
+                  //number of threads
+  
+  int maxIdleTime;   //maxIdleTime (in milliseconds) 
+                     // this is the maximum time a thread will remain idle
+                     // before dying
 
-  int maxThreads;     // maxThreads, ThreadPool will never have more than this
-                      // number of threads
-
-  int maxIdleTime;    // maxIdleTime (in milliseconds)
-                      // this is the maximum time a thread will remain idle
-                      // before dying
-
-  int jobsPerThread;  // jobs per thread to maintain
-
-  int maxJobsTotal;   // maximum number of jobs that can be queued totally.
-
-  int starvationTime; // the time a low priority or med priority
-	              // job waits before getting bumped
-                      // up a priority (in milliseconds)
-
-  PolicyType schedPolicy; // scheduling policy to use
+  int jobsPerThread; //jobs per thread to maintain
+					  
+  int starvationTime;   //the time a low priority or med priority
+	                    //job waits before getting bumped
+                        //up a priority (in milliseconds)
+  
+  PolicyType schedPolicy; //scheduling policy to use
 
 } ThreadPoolAttr;
 
@@ -189,20 +186,20 @@ typedef struct TPOOLSTATS
 {
   double totalTimeHQ; //total time spent by all jobs in high priority Q
   int totalJobsHQ;    //total jobs in HQ run so far
-  double avgWaitHQ;   //average wait in HQ
+  double avgWaitHQ;   //average wait in HQ 
   double totalTimeMQ; //total time spent by all jobs in med priority Q
   int totalJobsMQ;    //total jobs in MQ run so far
   double avgWaitMQ;   //average wait in MQ
   double totalTimeLQ; //total time spent by all jobs in low priority Q
   int totalJobsLQ;    //total jobs in LQ run so far
-  double avgWaitLQ;	//average wait in LQ
+  double avgWaitLQ;	//average wait in LQ	
   double totalWorkTime; //total time spent working for all threads
   double totalIdleTime; //total time spent idle for all threads
   int workerThreads; //number of current workerThreads
   int idleThreads;   //number of current idle threads
   int persistentThreads; //number of persistent threads
   int totalThreads; //total number of current threads
-  int maxThreads; //max threads so far
+  int maxThreads; //max threads so far	
   int currentJobsHQ; // current jobs in Q
   int currentJobsLQ; //current jobs in Q
   int currentJobsMQ; //current jobs in Q
@@ -542,19 +539,6 @@ int TPAttrSetStarvationTime(ThreadPoolAttr *attr, int starvationTime);
  *****************************************************************************/
 int TPAttrSetSchedPolicy(ThreadPoolAttr *attr, PolicyType schedPolicy);
 
-
-/****************************************************************************
- * Function: TPAttrSetMaxJobsTotal
- *
- *  Description:
- *      Sets the maximum number jobs that can be qeued totally.
- *  Parameters:
- *      attr - must be valid thread pool attributes.
- *      maxJobsTotal - maximum number of jobs
- *  Returns:
- *      Always returns 0.
- *****************************************************************************/
-int TPAttrSetMaxJobsTotal(ThreadPoolAttr *attr, int maxJobsTotal);
 
 /****************************************************************************
  * Function: ThreadPoolGetStats
