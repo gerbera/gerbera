@@ -188,7 +188,7 @@ Supported options:\n\
     --daemon or -d     run server in background\n\
     --pidfile or -P    file to hold the process id\n\
     --user or -u       run server under specified username\n\
-    --group or -g      run server unser specified group\n\
+    --group or -g      run server under specified group\n\
     --add or -a        add the given file/directory\n\
     --logfile or -l    log to specified file\n\
     --help or -h       this help message\n\
