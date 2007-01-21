@@ -193,7 +193,7 @@ Supported options:\n\
     --logfile or -l    log to specified file\n\
     --help or -h       this help message\n\
 \n\
-For more information visit http://mediatomb.sourceforge.net/\n\n");
+For more information visit http://mediatomb.org/\n\n");
 
                 exit(EXIT_FAILURE);
 

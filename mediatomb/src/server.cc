@@ -230,6 +230,8 @@ void Server::upnp_init(String ip, int port)
     ContentManager::getInstance();
     
     config->writeBookmark(ip, String::from(port));
+    log_info("MediaTomb Web UI can be reached by following this link:\n");
+    log_info("http://%s:%d/\n", ip.c_str(), port);
     
     log_debug("end\n");
 }
