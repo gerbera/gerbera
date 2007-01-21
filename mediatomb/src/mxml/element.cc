@@ -241,6 +241,8 @@ String Element::escape(String str)
             case '<' : *buf << "&lt;"; break;
             case '>' : *buf << "&gt;"; break;
             case '&' : *buf << "&amp;"; break;
+            case '"' : *buf << "&quot;"; break;
+            case '\'' : *buf << "&apos;"; break;
                        // handle control codes
             default  : if (((*ptr >= 0x00) && (*ptr <= 0x1f) && 
                             (*ptr != 0x09) && (*ptr != 0x0d) && 
