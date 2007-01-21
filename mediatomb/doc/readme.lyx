@@ -38,30 +38,7 @@ MediaTomb - UPnP Mediaserver
 \end_layout
 
 \begin_layout Date
-30.12.2006
-\end_layout
-
-\begin_layout Author
-\begin_inset CharStyle Firstname
-status inlined
-
-\begin_layout Standard
-Sergey
-\end_layout
-
-\end_inset
-
-
-\begin_inset CharStyle Surname
-status inlined
-
-\begin_layout Standard
-Bostandzhyan
-\end_layout
-
-\end_inset
-
-
+21.01.2007
 \end_layout
 
 \begin_layout Section
@@ -433,7 +410,7 @@ ions are available.
 \end_layout
 
 \begin_layout Subsubsection
-Enable X_MS_MediaReceiverRegistrar Support
+X_MS_MediaReceiverRegistrar Support
 \end_layout
 
 \begin_layout Code
@@ -453,7 +430,7 @@ istrar UPnP service, this was implemented for future Xbox 360 support.
 \end_layout
 
 \begin_layout Subsubsection
-Disable Fseeko Check
+Fseeko Check
 \end_layout
 
 \begin_layout Code
@@ -472,7 +449,7 @@ This is a workaround for a bug in some Debian distros, disable this check
 \end_layout
 
 \begin_layout Subsubsection
-Disable Largefile Support
+Largefile Support
 \end_layout
 
 \begin_layout Code
@@ -490,7 +467,7 @@ By default largefile support will be autodetected by configure, however
 \end_layout
 
 \begin_layout Subsubsection
-Disable Redifinition Of Malloc And Realloc
+Redifinition Of Malloc And Realloc
 \end_layout
 
 \begin_layout Code
@@ -621,7 +598,7 @@ This will print the detected mimetype, this is exactly the information that
 \end_layout
 
 \begin_layout Subsubsection
-id3lib Support
+Id3lib Support
 \end_layout
 
 \begin_layout Code
@@ -636,11 +613,11 @@ Default: enabled, preferred over taglib
 This library will parse id3 tags of your MP3 files, the gathered information
  will be saved in the database and provided via UPnP.
  Further, the gathered metadata will be used by the import script to create
- a nice container layout (Audio/Arist/Album, etc.)
+ a nice container layout (Audio/Artist/Album, etc.)
 \end_layout
 
 \begin_layout Subsubsection
-taglib Support
+Taglib Support
 \end_layout
 
 \begin_layout Code
@@ -657,7 +634,7 @@ This library will parse id3 tags of your MP3 files as well as information
  It claims to be faster than id3lib, but it also seems to have some drawbacks.
  We had some cases where it crashed when trying to parse tags of certain
  MP3 files on embedded systems, we had reports and observed that it had
- problems parsing the samplerates.
+ problems parsing the sample rates.
  We also did some valgrinding and detected memory leaks.
  Our feeling is, that you will have more stable results with id3lib, however
  it is up to you to enable or disable this library.
@@ -665,7 +642,7 @@ This library will parse id3 tags of your MP3 files as well as information
 \end_layout
 
 \begin_layout Subsubsection
-libexif Support
+Libexif Support
 \end_layout
 
 \begin_layout Code
@@ -684,8 +661,197 @@ The exif library will gather metadata from your photos, it will also find
  be offered as additional resources via UPnP.
 \end_layout
 
+\begin_layout Subsubsection
+Libextractor Support
+\end_layout
+
+\begin_layout Code
+--enable-libextractor
+\end_layout
+
+\begin_layout Description
+Default: disabled
+\end_layout
+
+\begin_layout Standard
+Libextractor is a library that attempts to parse all sorts of files, this
+ includes exif data, id3 tags and much more.
+ It can also deal with .AVI and .ASF files which is useful when your video
+ files have the appropriate metadata.
+ The drawback is - it is slow, especially slow on scanning big video files,
+ so it slows down the import process considerably.
+ For this reason this library is disabled by default.
+\end_layout
+
+\begin_layout Subsubsection
+MediaTomb Debug Output
+\end_layout
+
+\begin_layout Code
+--enable-tombdebug
+\end_layout
+
+\begin_layout Description
+Default: disabled
+\end_layout
+
+\begin_layout Standard
+This option enables debug output, the server will print out a lot of information
+ which is mainly interesting to developers.
+ Use this if you are trying to trace down a bug or a problem, the additional
+ output may give you some clues.
+\end_layout
+
+\begin_layout Subsubsection
+UPnP Library Debug Output
+\end_layout
+
+\begin_layout Code
+--enable-upnpdebug
+\end_layout
+
+\begin_layout Description
+Default: disabled
+\end_layout
+
+\begin_layout Standard
+This option enables debug output of the UPnP SDK.
+ You should not need it under normal circumstances.
+\end_layout
+
+\begin_layout Subsubsection
+Log Output
+\end_layout
+
+\begin_layout Code
+--disable-log
+\end_layout
+
+\begin_layout Description
+Default: enabled
+\end_layout
+
+\begin_layout Standard
+This option allows you to suppress all log output from the server.
+\end_layout
+
+\begin_layout Subsubsection
+Package Search Directory
+\end_layout
+
+\begin_layout Code
+--with-search=DIR
+\end_layout
+
+\begin_layout Description
+Default: /opt/local on Darwin, /usr/local on all other systems
+\end_layout
+
+\begin_layout Standard
+Some systems may have whole sets of packages installed in an alternative
+ location, for example Darwinports on OSX get installed to /opt/local.
+ This option tells the configure script to additionally search for headers
+ and libraries of various packages in DIR/include and DIR/lib.
+\end_layout
+
+\begin_layout Subsubsection
+Specifying Header And Library Locations Of Various Packages
+\end_layout
+
+\begin_layout Standard
+You can specify the exact location of particular headers and libraries.
+ Some packages use extra programs that tell us the appropriate flags that
+ are needed for compilation - like mysql_config.
+ You can also specify the exact location of those programs.
+ The parameters are self explanatory, in case of headers and libraries the
+ DIR parameter is the directory where those headers and libraries are located.
+\end_layout
+
+\begin_layout Code
+--with-sqlite3-h=DIR            search for sqlite3 headers only in DIR
+\end_layout
+
+\begin_layout Code
+--with-sqlite3-libs=DIR         search for sqlite3 libraries only in DIR
+\end_layout
+
+\begin_layout Code
+--with-mysql-cfg=mysql_config   absolute path/name of mysql_config
+\end_layout
+
+\begin_layout Code
+--with-js-h=DIR                 search for js (spidermonkey) headers in
+ DIR
+\end_layout
+
+\begin_layout Code
+--with-js-libs=DIR              search for js (spidermonkey) libraries in
+ DIR
+\end_layout
+
+\begin_layout Code
+--with-magic-h=DIR              search for filemagic headers in DIR
+\end_layout
+
+\begin_layout Code
+--with-magic-libs=DIR           search for filemagic headers in DIR
+\end_layout
+
+\begin_layout Code
+--with-exif-h=DIR               search for libexif headers in DIR
+\end_layout
+
+\begin_layout Code
+--with-exif-libs=DIR            search for libexif libraries in DIR   --with-tag
+lib-cfg=taglib-config absolute path/name of taglib-config
+\end_layout
+
+\begin_layout Code
+--with-id3lib-h=DIR             search for id3lib headers in DIR
+\end_layout
+
+\begin_layout Code
+--with-id3lib-libs=DIR          search for id3lib libraries in DIR
+\end_layout
+
+\begin_layout Code
+--with-zlib-h=DIR               search for zlib headers in DIR
+\end_layout
+
+\begin_layout Code
+--with-zlib-libs=DIR            search for zlib libraries in DIR
+\end_layout
+
+\begin_layout Code
+--with-iconv-h=DIR              search for iconv headers in DIR
+\end_layout
+
+\begin_layout Code
+--with-iconv-libs=DIR           search for iconv libraries in DIR
+\end_layout
+
+\begin_layout Code
+--with-extractor-h=DIR          search for extractor headers in DIR
+\end_layout
+
+\begin_layout Code
+--with-extractor-libs=DIR       search for extractor libraries in DIR 
+\end_layout
+
+\begin_layout Subsubsection
+The devconf Script
+\end_layout
+
+\begin_layout Standard
+If you are doing some development work and some debugging, you will probably
+ want to compile with the -g flag and also disable optimization.
+ The devconf script does exactly that.
+ In addition, it accepts command line parameters that are passed to the
+ configure script.
+\end_layout
+
 \begin_layout Section
-Installation
+Initial Installation
 \end_layout
 
 \begin_layout Subsection
@@ -725,7 +891,282 @@ First Time Launch
 \end_layout
 
 \begin_layout Standard
-Bla....
+When starting MediaTomb for the first time, a .mediatomb directory will be
+ created in your home.
+ Further, a default server configuration file, called config.xml will be
+ generated in that directory.
+\end_layout
+
+\begin_layout Subsubsection
+Using Sqlite Database
+\end_layout
+
+\begin_layout Standard
+If you are using sqlite - you are ready to go, the database file will be
+ created automatically and will be located ~/.mediatomb/mediatomb.db If needed
+ you can adjust the database filename and location in the server configuration
+ file.
+\end_layout
+
+\begin_layout Subsubsection
+Using MySLQ Database
+\end_layout
+
+\begin_layout Standard
+If MediaTomb was compiled with support for both databases, sqlite will be
+ chosen as default because the initial database can be created and used
+ without any user interaction.
+ If MediaTomb was compiled only with MySQÖ support, the appropriate config.xml
+ file will be created in the ~/.mediatomb directory, but the server will
+ then terminate, because user interaction is required.
+\end_layout
+
+\begin_layout Standard
+You must create a separate logical MySQL database and give MediaTomb full
+ access to it.
+ In order to create a database you need to know it's username and password.
+ Database usernames and passwords in MySQL have nothing to do with unix
+ accounts, MySQL has it's own usernames/passwords.
+ However a mysql server may allow only certain unix users to manipulate
+ databases.
+ On some distributions MySQL is installed with the main username "root"
+ and blank password (this has nothing to do with the system root user).
+ Consult the MySQL documentation if you want to create a dedicated user
+ with a password, in our example we will assume that the MySQL username
+ is 
+\begin_inset Quotes sld
+\end_inset
+
+root
+\begin_inset Quotes srd
+\end_inset
+
+ and that the password is blank.
+\end_layout
+
+\begin_layout Standard
+Make sure you have the appropriate permissions and run this in your shell
+ in order to create the database for MediaTomb:
+\end_layout
+
+\begin_layout Code
+mysqladmin -u root create mediatomb
+\end_layout
+
+\begin_layout Standard
+Now make sure that your server configuration file has the correct storage
+ settings:
+\end_layout
+
+\begin_layout Code
+<server>
+\end_layout
+
+\begin_layout Code
+...
+\end_layout
+
+\begin_layout Code
+  <storage driver="mysql">
+\end_layout
+
+\begin_layout Code
+    <host>localhost</host>
+\end_layout
+
+\begin_layout Code
+    <username>root</username>
+\end_layout
+
+\begin_layout Code
+    <database>mediatomb</database>
+\end_layout
+
+\begin_layout Code
+  </storage>
+\end_layout
+
+\begin_layout Code
+...
+\end_layout
+
+\begin_layout Code
+</server>
+\end_layout
+
+\begin_layout Description
+Note: if the password tag is ommited - it means that the password is blank.
+\end_layout
+
+\begin_layout Standard
+After creating the database and making the appropriate changes in your MediaTomb
+ config file you are ready to go - launch the server, and everything should
+ work.
+\end_layout
+
+\begin_layout Section
+Setup And Configuration
+\end_layout
+
+\begin_layout Subsection
+Command Line Options
+\end_layout
+
+\begin_layout Standard
+There is a number of options that can be passed via command line upon server
+ startup, for a short summary you can invoke MediaTomb with the following
+ parameter:
+\end_layout
+
+\begin_layout Code
+mediatomb --help
+\end_layout
+
+\begin_layout Description
+Note: the command line options override settings in the configuration file!
+\end_layout
+
+\begin_layout Subsubsection
+IP Address
+\end_layout
+
+\begin_layout Code
+--ip or -i
+\end_layout
+
+\begin_layout Standard
+The server will bind to the given IP address, currently we can not bind
+ to multiple interfaces so binding to 0.0.0.0 will not be possible.
+\end_layout
+
+\begin_layout Subsubsection
+Port
+\end_layout
+
+\begin_layout Code
+--port or -p
+\end_layout
+
+\begin_layout Standard
+Specify the server port that will be used for the web user interface, for
+ serving media and for UPnP requests, minimum allowed value is 49152.
+ If this option is ommited a default port will be chosen, however, in this
+ case it is possible that the port will change upon server restart.
+\end_layout
+
+\begin_layout Subsubsection
+Configuration File
+\end_layout
+
+\begin_layout Code
+ --config or -c
+\end_layout
+
+\begin_layout Standard
+By default MediaTomb will search for a file named 
+\begin_inset Quotes sld
+\end_inset
+
+config.xml
+\begin_inset Quotes srd
+\end_inset
+
+ in the ~/.mediatomb directory.
+ This option allows you to specify a config file by the name and location
+ of your choice.
+ The filename must be absolute.
+\end_layout
+
+\begin_layout Subsubsection
+Daemon Mode
+\end_layout
+
+\begin_layout Code
+--daemon or -d
+\end_layout
+
+\begin_layout Standard
+Run the server in background, MediaTomb will shutdown on SIGTERM, SIGINT
+ and restart on SIGHUP.
+\end_layout
+
+\begin_layout Subsubsection
+Write PID File
+\end_layout
+
+\begin_layout Code
+--pidfile or -P
+\end_layout
+
+\begin_layout Standard
+Specify a file that will hold the server process ID, the filename must be
+ absolute.
+\end_layout
+
+\begin_layout Subsubsection
+Run Under Different Username
+\end_layout
+
+\begin_layout Code
+--user or -u
+\end_layout
+
+\begin_layout Standard
+Run MediaTomb under the specified username, this is especially useful in
+ combination with the daemon mode.
+\end_layout
+
+\begin_layout Subsubsection
+Run Under Different Group
+\end_layout
+
+\begin_layout Code
+--group or -g
+\end_layout
+
+\begin_layout Standard
+Run MediaTomb under the specified group, this is especially useful in combinatio
+n with the daemon mode.
+\end_layout
+
+\begin_layout Subsubsection
+Add Content
+\end_layout
+
+\begin_layout Code
+--add or -a
+\end_layout
+
+\begin_layout Standard
+Add the specified directory or filename to the database without UI interaction.
+ The path must be absolute, if path is a directory then it will be added
+ recursively.
+ If path is a file, then only the given file will be imported.
+\end_layout
+
+\begin_layout Subsubsection
+Log To File
+\end_layout
+
+\begin_layout Code
+--logfile or -l
+\end_layout
+
+\begin_layout Standard
+Do not output log messages to stdout, but redirect everything to a specified
+ file.
+\end_layout
+
+\begin_layout Subsubsection
+Display Command Line Summary
+\end_layout
+
+\begin_layout Code
+--help or -h
+\end_layout
+
+\begin_layout Standard
+Print a summary about the available command line options.
 \end_layout
 
 \end_body
