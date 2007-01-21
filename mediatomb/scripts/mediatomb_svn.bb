@@ -1,7 +1,7 @@
 DESCRIPTION = "MediaTomb - UPnP AV MediaServer for Linux"
 HOMEPAGE = "http://mediatomb.org/"
 LICENSE = "GPLv2"
-DEPENDS = "sqlite3 libexif js zlib file taglib"
+DEPENDS = "sqlite3 libexif js zlib file id3lib"
 PV = "0.8+0.9pre1+svn${SRCDATE}-sqlite"
 PR = "r1"
 
@@ -16,7 +16,7 @@ EXTRA_OECONF = "--disable-mysql \
 		--enable-sqlite3 \
                 --enable-libjs \
 		--enable-libmagic \
-		--enable-taglib \
+		--enable-id3lib \
 		--enable-libexif \
                 --disable-largefile \
                 --with-sqlite3-h=${STAGING_INCDIR} \
@@ -29,4 +29,5 @@ EXTRA_OECONF = "--disable-mysql \
                 --with-zlib-libs=${STAGING_LIBDIR} \
                 --with-js-h=${STAGING_INCDIR}/js \
                 --with-js-libs=${STAGING_LIBDIR} \
-                --with-taglib-cfg=${STAGING_BINDIR_CROSS}/taglib-config"
+                --with-id3lib-h=${STAGING_INCDIR} \
+                --with-id3lib-libs=${STAGING_LIBDIR}"
