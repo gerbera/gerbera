@@ -340,6 +340,7 @@ void ConfigManager::validate(String serverhome)
     getOption(_("/server/name"), _(DESC_FRIENDLY_NAME));
     getOption(_("/server/model"), _(DESC_MODEL_NAME));
     getOption(_("/server/manufacturerURL"), _(DESC_MANUFACTURER_URL));
+    getOption(_("/server/presentationURL"), _(""));
 
     i = getIntOption(_("/server/upnp-string-limit"), 
             DEFAULT_UPNP_STRING_LIMIT);
