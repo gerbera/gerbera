@@ -73,7 +73,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     split_url(filename, URL_PARAM_SEPARATOR, url_path, parameters);
     
     Ref<Dictionary> dict(new Dictionary());
-    dict->decode(parameters);
+    dict->decode(xml_unescape(parameters));
 
     log_debug("full url (filename): %s, url_path: %s, parameters: %s\n",
                filename, url_path.c_str(), parameters.c_str());
@@ -126,7 +126,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
         // reset resource id
         res_id = 0;
     }
-    
+   
     ret = stat(path.c_str(), &statbuf);
     if (ret != 0)
     {
@@ -228,7 +228,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
     split_url(filename, URL_PARAM_SEPARATOR, url_path, parameters);
 
     Ref<Dictionary> dict(new Dictionary());
-    dict->decode(parameters);
+    dict->decode(xml_unescape(parameters));
     log_debug("full url (filename): %s, url_path: %s, parameters: %s\n",
                filename, url_path.c_str(), parameters.c_str());
 

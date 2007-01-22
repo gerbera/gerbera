@@ -183,6 +183,13 @@ zmm::String escape(zmm::String string, char escape_char, char to_escape);
 /// \return the unescaped string
 zmm::String unescape(zmm::String string, char escape);
 
+/// \brief Unescape &amp; &quot; and similar XML sequences.
+///
+/// This function will silently ignore and pass on any invalid combinations.
+/// \param string that should be unescaped
+/// \return the unescaped string
+zmm::String xml_unescape(zmm::String string);
+
 /// \brief Returns the first string if it isn't "nil", otherwise the fallback string.
 /// \param first the string to return if it isn't nil
 /// \param fallback fallback string to return if first is nil

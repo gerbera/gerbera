@@ -647,6 +647,61 @@ String unescape(String string, char escape)
     return String(stringBase);
 }
 
+String xml_unescape(String string)
+{
+    Ref<StringBuffer> buf(new StringBuffer(string.length()));
+    signed char *ptr = (signed char *)string.c_str();
+    while (*ptr)
+    {
+        if (*ptr == '&')
+        {
+            if ((*(ptr + 1) == 'l') && (*(ptr + 2) == 't') && 
+                (*(ptr + 3) == ';'))
+            {
+                *buf << '<';
+                ptr = ptr + 3;
+            }
+            else if ((*(ptr + 1) == 'g') && (*(ptr + 2) == 't') && 
+                     (*(ptr + 3) == ';'))
+            {
+                *buf << '>';
+                ptr = ptr + 3;
+            }
+            else if ((*(ptr + 1) == 'q') && (*(ptr + 2) == 'u') && 
+                     (*(ptr + 3) == 'o') && (*(ptr + 4) == 't') &&
+                     (*(ptr + 5) == ';'))
+            {
+                *buf << '"';
+                ptr = ptr + 5;
+            }
+            else if (*(ptr + 1) == 'a')
+            {
+                if ((*(ptr + 2) == 'm') && (*(ptr + 3) == 'p') && 
+                    (*(ptr + 4) == ';'))
+                    {
+                        *buf << '&';
+                        ptr = ptr + 4;
+                    }
+                else if ((*(ptr + 2) == 'p') && (*(ptr + 3) == 'o') &&
+                         (*(ptr + 4) == 's') && (*(ptr + 5) == ';'))
+                {
+                    *buf << '\'';
+                    ptr = ptr + 5;
+                }
+            }
+            else
+                *buf << *ptr;
+        }
+        else
+            *buf << *ptr;
+
+        ptr++;
+    }
+
+    return buf->toString();
+}
+
+
 String fallbackString(String first, String fallback)
 {
     if (first==nil)
