@@ -184,7 +184,7 @@ Ref<Element> UpnpXML_CreateEventPropertySet()
     return propset;
 }
 
-Ref<Element> UpnpXML_RenderDeviceDescription()
+Ref<Element> UpnpXML_RenderDeviceDescription(String presentationURL)
 {
 
     log_debug("start\n");
@@ -203,7 +203,11 @@ Ref<Element> UpnpXML_RenderDeviceDescription()
 
     Ref<Element> device(new Element(_("device")));
     device->appendTextChild(_("deviceType"), _(DESC_DEVICE_TYPE));
-    device->appendTextChild(_("presentationURL"), _("/"));
+    if (!string_ok(presentationURL))
+        device->appendTextChild(_("presentationURL"), _("/"));
+    else
+        device->appendTextChild(_("presentationURL"), presentationURL);
+
     device->appendTextChild(_("friendlyName"), config->getOption(_("/server/name")));
     device->appendTextChild(_("manufacturer"), _(DESC_MANUFACTURER));
     device->appendTextChild(_("manufacturerURL"), config->getOption(_("/server/manufacturerURL")));

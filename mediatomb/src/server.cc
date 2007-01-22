@@ -176,10 +176,11 @@ void Server::upnp_init(String ip, int port)
     {
         throw _UpnpException(ret, _("upnp_init: UpnpSetVirtualDirCallbacks failed"));
     }
-
+    String presentationURL = _("http://") + ip + _(":") + port + _("/");
     // register root device with the library
-    String device_description = _("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") +
-                                UpnpXML_RenderDeviceDescription()->print();
+    String device_description = 
+        _("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") +
+         UpnpXML_RenderDeviceDescription(presentationURL)->print();
 
 //    log_debug("DEVICE DESCRIPTION: \n%s\n", device_description.c_str());
 
