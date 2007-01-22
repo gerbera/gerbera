@@ -107,16 +107,6 @@ private:
     }
     //void activateSingleton() { singletonActive = true; }
     
-    /*
-    virtual void destroyMutex()
-    {
-        printf("--- try to destoy mutex...\n");
-        mutex = nil;
-        _print_backtrace(stdout);
-        printf("=== did it work?\n");
-    }
-    */
-    
     friend class SingletonManager;
 };
 
