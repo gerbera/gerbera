@@ -926,6 +926,7 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
         int rc = EOUTOFMEM;
 
         int tempId = -1;
+        int totalJobs;
 
         ThreadPoolJob *temp = NULL;
 
@@ -941,6 +942,13 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
         assert( ( job->priority == LOW_PRIORITY )
                 || ( job->priority == MED_PRIORITY )
                 || ( job->priority == HIGH_PRIORITY ) );
+
+        totalJobs = tp->highJobQ.size + tp->lowJobQ.size + tp->medJobQ.size;
+        if (totalJobs >= tp->attr.maxJobsTotal) {
+            fprintf(stderr, "total jobs = %d, too many jobs", totalJobs);
+            ithread_mutex_unlock( &tp->mutex );
+            return rc;
+        }
 
         if( jobId == NULL )
             jobId = &tempId;
@@ -1287,6 +1295,7 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
         attr->minThreads = DEFAULT_MIN_THREADS;
         attr->schedPolicy = DEFAULT_POLICY;
         attr->starvationTime = DEFAULT_STARVATION_TIME;
+        attr->maxJobsTotal = DEFAULT_MAX_JOBS_TOTAL;
         return 0;
     }
 
@@ -1537,6 +1546,29 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
                printf( "Total Time spent Idle in seconds : %f\n",
                        stats->totalIdleTime );}
 #endif
+
+ /****************************************************************************
+ * Function: TPAttrSetMaxJobsTotal
+ *
+ *  Description:
+ *      Sets the maximum number jobs that can be qeued totally.
+ *  Parameters:
+ *      attr - must be valid thread pool attributes.
+ *      maxJobsTotal - maximum number of jobs
+ *  Returns:
+ *      Always returns 0.
+ *****************************************************************************/
+    int TPAttrSetMaxJobsTotal( ThreadPoolAttr * attr,
+                               int  maxJobsTotal ) {
+        assert( attr != NULL );
+
+        if( attr == NULL ) {
+            return EINVAL;
+        }
+
+        attr->maxJobsTotal = maxJobsTotal;
+        return 0;
+    }
 
 /****************************************************************************
  * Function: ThreadPoolGetStats

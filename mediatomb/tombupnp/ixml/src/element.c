@@ -71,7 +71,7 @@ ixmlElement_getTagName( IN IXML_Element * element )
 *=================================================================*/
 int
 ixmlElement_setTagName( IN IXML_Element * element,
-                        IN char *tagName )
+                        IN const char *tagName )
 {
     int rc = IXML_SUCCESS;
 
@@ -104,9 +104,9 @@ ixmlElement_setTagName( IN IXML_Element * element,
 *       does not have a specified value.
 *
 *=================================================================*/
-DOMString
+const DOMString
 ixmlElement_getAttribute( IN IXML_Element * element,
-                          IN DOMString name )
+                          IN const DOMString name )
 {
     IXML_Node *attrNode;
 
@@ -142,8 +142,8 @@ ixmlElement_getAttribute( IN IXML_Element * element,
 *=================================================================*/
 int
 ixmlElement_setAttribute( IN IXML_Element * element,
-                          IN char *name,
-                          IN char *value )
+                          IN const char *name,
+                          IN const char *value )
 {
     IXML_Node *attrNode;
     IXML_Attr *newAttrNode;
@@ -221,7 +221,7 @@ ixmlElement_setAttribute( IN IXML_Element * element,
 *=================================================================*/
 int
 ixmlElement_removeAttribute( IN IXML_Element * element,
-                             IN char *name )
+                             IN const char *name )
 {
 
     IXML_Node *attrNode;
@@ -262,7 +262,7 @@ ixmlElement_removeAttribute( IN IXML_Element * element,
 *=================================================================*/
 IXML_Attr *
 ixmlElement_getAttributeNode( IN IXML_Element * element,
-                              IN char *name )
+                              IN const char *name )
 {
 
     IXML_Node *attrNode;
@@ -483,7 +483,7 @@ ixmlElement_removeAttributeNode( IN IXML_Element * element,
 *=================================================================*/
 IXML_NodeList *
 ixmlElement_getElementsByTagName( IN IXML_Element * element,
-                                  IN char *tagName )
+                                  IN const char *tagName )
 {
     IXML_NodeList *returnNodeList = NULL;
 
@@ -508,10 +508,10 @@ ixmlElement_getElementsByTagName( IN IXML_Element * element,
 *       not have the specified value.
 *
 *=================================================================*/
-DOMString
+const DOMString
 ixmlElement_getAttributeNS( IN IXML_Element * element,
-                            IN DOMString namespaceURI,
-                            IN DOMString localName )
+                            IN const DOMString namespaceURI,
+                            IN const DOMString localName )
 {
     IXML_Node *attrNode;
 
@@ -553,9 +553,9 @@ ixmlElement_getAttributeNS( IN IXML_Element * element,
 *=================================================================*/
 int
 ixmlElement_setAttributeNS( IN IXML_Element * element,
-                            IN DOMString namespaceURI,
-                            IN DOMString qualifiedName,
-                            IN DOMString value )
+                            IN const DOMString namespaceURI,
+                            IN const DOMString qualifiedName,
+                            IN const DOMString value )
 {
     IXML_Node *attrNode = NULL;
     IXML_Node newAttrNode;
@@ -672,8 +672,8 @@ ixmlElement_setAttributeNS( IN IXML_Element * element,
 *=================================================================*/
 int
 ixmlElement_removeAttributeNS( IN IXML_Element * element,
-                               IN DOMString namespaceURI,
-                               IN DOMString localName )
+                               IN const DOMString namespaceURI,
+                               IN const DOMString localName )
 {
     IXML_Node *attrNode;
 
@@ -719,8 +719,8 @@ ixmlElement_removeAttributeNS( IN IXML_Element * element,
 *=================================================================*/
 IXML_Attr *
 ixmlElement_getAttributeNodeNS( IN IXML_Element * element,
-                                IN DOMString namespaceURI,
-                                IN DOMString localName )
+                                IN const DOMString namespaceURI,
+                                IN const DOMString localName )
 {
 
     IXML_Node *attrNode;
@@ -861,8 +861,8 @@ ixmlElement_setAttributeNodeNS( IN IXML_Element * element,
 *=================================================================*/
 IXML_NodeList *
 ixmlElement_getElementsByTagNameNS( IN IXML_Element * element,
-                                    IN DOMString namespaceURI,
-                                    IN DOMString localName )
+                                    IN const DOMString namespaceURI,
+                                    IN const DOMString localName )
 {
     IXML_Node *node = ( IXML_Node * ) element;
     IXML_NodeList *nodeList = NULL;
@@ -892,7 +892,7 @@ ixmlElement_getElementsByTagNameNS( IN IXML_Element * element,
 *=================================================================*/
 BOOL
 ixmlElement_hasAttribute( IN IXML_Element * element,
-                          IN DOMString name )
+                          IN const DOMString name )
 {
 
     IXML_Node *attrNode;
@@ -930,8 +930,8 @@ ixmlElement_hasAttribute( IN IXML_Element * element,
 *=================================================================*/
 BOOL
 ixmlElement_hasAttributeNS( IN IXML_Element * element,
-                            IN DOMString namespaceURI,
-                            IN DOMString localName )
+                            IN const DOMString namespaceURI,
+                            IN const DOMString localName )
 {
 
     IXML_Node *attrNode;

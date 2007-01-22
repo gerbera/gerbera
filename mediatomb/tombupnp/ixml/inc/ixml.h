@@ -259,7 +259,7 @@ ixmlNode_getNodeName(IXML_Node *nodeptr
    *  @return [DOMString] A {\bf DOMString} of the {\bf Node} value.
    */
 
-EXPORT_SPEC DOMString               
+EXPORT_SPEC const DOMString               
 ixmlNode_getNodeValue(IXML_Node *nodeptr  
 		        /** Pointer to the {\bf Node} to retrieve the value. */
                      );
@@ -281,7 +281,7 @@ ixmlNode_getNodeValue(IXML_Node *nodeptr
 EXPORT_SPEC int                     
 ixmlNode_setNodeValue(IXML_Node *nodeptr, 
 		        /** The {\bf Node} to which to assign a new value. */
-                      char *newNodeValue  
+                      const char *newNodeValue  
 		        /** The new value of the {\bf Node}. */
                   );
 
@@ -438,7 +438,7 @@ ixmlNode_getNamespaceURI(IXML_Node *nodeptr
    *                      or {\tt NULL}.
    */
 
-EXPORT_SPEC DOMString               
+EXPORT_SPEC const DOMString               
 ixmlNode_getPrefix(IXML_Node *nodeptr  
 		     /** The {\bf Node} from which to retrieve the prefix. */
                );
@@ -866,7 +866,7 @@ EXPORT_SPEC int
 ixmlDocument_createCDATASectionEx(IXML_Document *doc,  
 		                    /** The owner {\bf Document} of the new 
 				        node. */
-                                  DOMString data,      
+                                  const DOMString data,      
 				    /** The data to associate with the new 
 				        {\bf CDATASection} node. */
                                   IXML_CDATASection** cdNode   
@@ -885,7 +885,7 @@ EXPORT_SPEC IXML_CDATASection*
 ixmlDocument_createCDATASection(IXML_Document *doc,  
 				  /** The owner {\bf Document} of the new 
 				      node. */
-                                DOMString data  
+                                const DOMString data  
 				  /** The data to associate with the new {\bf 
 				      CDATASection} node. */
                                );
@@ -898,7 +898,7 @@ ixmlDocument_createCDATASection(IXML_Document *doc,
 EXPORT_SPEC IXML_Attr*
 ixmlDocument_createAttribute(IXML_Document *doc,  
 		               /** The owner {\bf Document} of the new node. */
-                             char *name      
+                             const char *name      
 			       /** The name of the new attribute. */
                             );
 
@@ -923,7 +923,7 @@ EXPORT_SPEC int
 ixmlDocument_createAttributeEx(IXML_Document *doc,  
 		                 /** The owner {\bf Document} of the new 
 				     node. */
-                               char *name,      
+                               const char *name,      
 			         /** The name of the new attribute. */
                                IXML_Attr** attrNode
 			         /** A pointer to a {\bf Attr} where the new 
@@ -942,7 +942,7 @@ ixmlDocument_createAttributeEx(IXML_Document *doc,
 EXPORT_SPEC IXML_NodeList*
 ixmlDocument_getElementsByTagName(IXML_Document *doc,     
 		                    /** The {\bf Document} to search. */
-                                  DOMString tagName  
+                                  const DOMString tagName  
 				    /** The tag name to find. */
                                  );
 
@@ -969,10 +969,10 @@ EXPORT_SPEC int
 ixmlDocument_createElementNSEx(IXML_Document *doc,           
 		                 /** The owner {\bf Document} of the new 
 				     node. */
-                               DOMString namespaceURI,  
+                               const DOMString namespaceURI,  
 			         /** The namespace URI for the new {\bf 
 				     Element}. */
-                               DOMString qualifiedName,  
+                               const DOMString qualifiedName,  
 			         /** The qualified name of the new {\bf 
 				     Element}. */
                                IXML_Element** rtElement
@@ -991,10 +991,10 @@ ixmlDocument_createElementNSEx(IXML_Document *doc,
 EXPORT_SPEC IXML_Element*
 ixmlDocument_createElementNS(IXML_Document *doc,           
 		               /** The owner {\bf Document} of the new node. */
-                             DOMString namespaceURI,  
+                             const DOMString namespaceURI,  
 			       /** The namespace URI for the new {\bf 
 				   Element}. */
-                             DOMString qualifiedName  
+                             const DOMString qualifiedName  
 			       /** The qualified name of the new {\bf 
 				   Element}. */
                              );
@@ -1020,9 +1020,9 @@ EXPORT_SPEC int
 ixmlDocument_createAttributeNSEx(IXML_Document *doc,
 		                   /** The owner {\bf Document} of the new 
 				       {\bf Attr}. */
-                                 DOMString namespaceURI, 
+                                 const DOMString namespaceURI, 
 				   /** The namespace URI for the attribute. */
-                                 DOMString qualifiedName, 
+                                 const DOMString qualifiedName, 
 				   /** The qualified name of the attribute. */
                                  IXML_Attr** attrNode
 				   /** A pointer to an {\bf Attr} where the 
@@ -1039,9 +1039,9 @@ EXPORT_SPEC IXML_Attr*
 ixmlDocument_createAttributeNS(IXML_Document *doc, 
 		                 /** The owner {\bf Document} of the new 
 				     {\bf Attr}. */
-                               DOMString namespaceURI, 
+                               const DOMString namespaceURI, 
 			         /** The namespace URI for the attribute. */
-                               DOMString qualifiedName 
+                               const DOMString qualifiedName 
 			         /** The qualified name of the attribute. */
                               );   
 
@@ -1058,11 +1058,11 @@ ixmlDocument_createAttributeNS(IXML_Document *doc,
 EXPORT_SPEC IXML_NodeList*   
 ixmlDocument_getElementsByTagNameNS(IXML_Document* doc,          
 		                      /** The {\bf Document} to search. */
-                                    DOMString namespaceURI, 
+                                    const DOMString namespaceURI, 
 				      /** The namespace of the elements to 
                                           find or {\tt "*"} to match any 
                                           namespace. */
-                                    DOMString localName     
+                                    const DOMString localName     
 				      /** The local name of the elements to 
                                           find or {\tt "*"} to match any local 
                                           name.  */
@@ -1078,7 +1078,7 @@ EXPORT_SPEC IXML_Element*
 ixmlDocument_getElementById(IXML_Document* doc,         
 		              /** The owner {\bf Document} of the {\bf 
 			          Element}. */
-                            DOMString tagName  
+                            const DOMString tagName  
 			      /** The name of the {\bf Element}.*/
                             );
 
@@ -1173,11 +1173,11 @@ ixmlElement_getTagName(IXML_Element* element
    *                      attribute.
    */
 
-EXPORT_SPEC DOMString   
+EXPORT_SPEC const DOMString   
 ixmlElement_getAttribute(IXML_Element* element,  
 		           /** The {\bf Element} from which to retrieve the 
 			       attribute. */
-                         DOMString name     
+                         const DOMString name     
 			   /** The name of the attribute to retrieve. */
                         );
 
@@ -1201,9 +1201,9 @@ EXPORT_SPEC int
 ixmlElement_setAttribute(IXML_Element* element,  
 		           /** The {\bf Element} on which to set the 
 			       attribute. */
-                         DOMString name,    
+                         const DOMString name,    
 			   /** The name of the attribute. */
-                         DOMString value    
+                         const DOMString value
 			   /** The value of the attribute.  Note that this is 
 			       a non-parsed string and any markup must be 
 			       escaped. */
@@ -1223,7 +1223,7 @@ EXPORT_SPEC int
 ixmlElement_removeAttribute(IXML_Element* element,  
 		              /** The {\bf Element} from which to remove the 
 			          attribute. */
-                            DOMString name     
+                            const DOMString name     
 			      /** The name of the attribute to remove.  */
                            );              
 
@@ -1239,7 +1239,7 @@ EXPORT_SPEC IXML_Attr*
 ixmlElement_getAttributeNode(IXML_Element* element,  
 		               /** The {\bf Element} from which to get the 
 				   attribute node.  */
-                             DOMString name     
+                             const DOMString name     
 			       /** The name of the attribute node to find. */
                             );
 
@@ -1308,7 +1308,7 @@ EXPORT_SPEC IXML_NodeList*
 ixmlElement_getElementsByTagName(IXML_Element* element,  
 		                   /** The {\bf Element} from which to start 
 				       the search. */
-                                 DOMString tagName  
+                                 const DOMString tagName
 				   /** The name of the tag for which to 
 				       search. */
                                 );
@@ -1321,13 +1321,13 @@ ixmlElement_getElementsByTagName(IXML_Element* element,
    *                      matching attribute.
    */
 
-EXPORT_SPEC DOMString   
+EXPORT_SPEC const DOMString
 ixmlElement_getAttributeNS(IXML_Element* element,       
 		             /** The {\bf Element} from which to get the 
 			         attribute value. */
-                           DOMString namespaceURI, 
+                           const DOMString namespaceURI, 
 			     /** The namespace URI of the attribute. */
-                           DOMString localname     
+                           const DOMString localname     
 			     /** The local name of the attribute. */
                           );
 
@@ -1357,11 +1357,11 @@ EXPORT_SPEC int
 ixmlElement_setAttributeNS(IXML_Element* element,         
 		             /** The {\bf Element} on which to set the 
 			         attribute. */
-                           DOMString namespaceURI,   
+                           const DOMString namespaceURI,   
 		             /** The namespace URI of the new attribute. */
-                           DOMString qualifiedName,  
+                           const DOMString qualifiedName,  
 			     /** The qualified name of the attribute. */
-                           DOMString value 
+                           const DOMString value 
 			     /** The new value for the attribute. */
                           );
 
@@ -1379,9 +1379,9 @@ EXPORT_SPEC int
 ixmlElement_removeAttributeNS(IXML_Element* element,        
 		                /** The {\bf Element} from which to remove the 
 				    the attribute. */
-                              DOMString namespaceURI,  
+                              const DOMString namespaceURI,  
 			        /** The namespace URI of the attribute. */
-                              DOMString localName      
+                              const DOMString localName      
 			        /** The local name of the attribute.*/
                              );
 
@@ -1394,9 +1394,9 @@ EXPORT_SPEC IXML_Attr*
 ixmlElement_getAttributeNodeNS(IXML_Element* element,        
 		                 /** The {\bf Element} from which to get the 
 				     attribute. */
-                               DOMString namespaceURI,  
+                               const DOMString namespaceURI,  
 			         /** The namespace URI of the attribute. */
-                               DOMString localName      
+                               const DOMString localName      
 			         /** The local name of the attribute. */
                               );
 
@@ -1440,10 +1440,10 @@ EXPORT_SPEC IXML_NodeList*
 ixmlElement_getElementsByTagNameNS(IXML_Element* element,        
 		                     /** The {\bf Element} from which to start 
 				         the search. */
-                                   DOMString namespaceURI,  
+                                   const DOMString namespaceURI,
 				     /** The namespace URI of the {\bf 
 				         Element}s to find. */
-                                   DOMString localName      
+                                   const DOMString localName      
 				     /** The local name of the {\bf Element}s 
 				         to find. */
                                   );
@@ -1460,7 +1460,7 @@ EXPORT_SPEC BOOL
 ixmlElement_hasAttribute(IXML_Element* element, 
 		           /** The {\bf Element} on which to check for an 
 			       attribute. */
-                         DOMString name    
+                         const DOMString name    
 			   /** The name of the attribute for which to check. */
                         );
 
@@ -1476,9 +1476,9 @@ EXPORT_SPEC BOOL
 ixmlElement_hasAttributeNS(IXML_Element* element,       
 		             /** The {\bf Element} on which to check for the 
 			         attribute. */
-                           DOMString namespaceURI, 
+                           const DOMString namespaceURI, 
 			     /** The namespace URI of the attribute. */
-                           DOMString localName     
+                           const DOMString localName     
 			     /** The local name of the attribute. */
                           );
 
@@ -1528,7 +1528,7 @@ ixmlNamedNodeMap_getLength(IXML_NamedNodeMap *nnMap
 EXPORT_SPEC IXML_Node*   
 ixmlNamedNodeMap_getNamedItem(IXML_NamedNodeMap *nnMap, 
 		                /** The {\bf NamedNodeMap} to search. */
-                              DOMString name       
+                              const DOMString name       
 			        /** The name of the {\bf Node} to find. */
                              );
 
@@ -1559,7 +1559,7 @@ EXPORT_SPEC IXML_Node*
 ixmlNamedNodeMap_removeNamedItem(IXML_NamedNodeMap *nnMap,  
 		                   /** The {\bf NamedNodeMap} from which to 
 				       remove the item. */
-                                 DOMString name        
+                                 const DOMString name        
 				   /** The name of the item to remove. */
                                 );
 
@@ -1591,10 +1591,10 @@ EXPORT_SPEC IXML_Node*
 ixmlNamedNodeMap_getNamedItemNS(IXML_NamedNodeMap *nnMap,    
 		                  /** The {\bf NamedNodeMap} from which to 
 				      remove the {\bf Node}. */
-                                DOMString *namespaceURI,
+                                const DOMString *namespaceURI,
 				  /** The namespace URI of the {\bf Node} to 
                                       remove. */
-                                DOMString localName     
+                                const DOMString localName     
 				  /** The local name of the {\bf Node} to 
 				      remove. */
                                );
@@ -1626,10 +1626,10 @@ EXPORT_SPEC IXML_Node*
 ixmlNamedNodeMap_removeNamedItemNS(IXML_NamedNodeMap *nnMap,    
 		                     /** The {\bf NamedNodeMap} from which to 
 				         remove the {\bf Node}. */
-                                   DOMString namespaceURI, 
+                                   const DOMString namespaceURI, 
 				     /** The namespace URI of the {\bf Node} 
 				         to remove. */
-                                   DOMString localName     
+                                   const DOMString localName     
 				     /** The local name of the {\bf Node} to 
 				         remove. */
                                   );
@@ -1818,7 +1818,7 @@ ixmlRelaxParser(char errorChar);
    *                      {\tt NULL} on an error. 
    */
 EXPORT_SPEC IXML_Document*
-ixmlParseBuffer(char *buffer 
+ixmlParseBuffer(const char *buffer 
 		  /** The buffer that contains the XML text to convert to a 
 		      {\bf Document}. */
                );
@@ -1841,7 +1841,7 @@ ixmlParseBuffer(char *buffer
    */
 
 EXPORT_SPEC int
-ixmlParseBufferEx(char *buffer, 
+ixmlParseBufferEx(const char *buffer, 
 		    /** The buffer that contains the XML text to convert to a 
 		        {\bf Document}. */
                   IXML_Document** doc 
@@ -1856,7 +1856,7 @@ ixmlParseBufferEx(char *buffer,
    */
 
 EXPORT_SPEC IXML_Document*
-ixmlLoadDocument(char* xmlFile      
+ixmlLoadDocument(const char* xmlFile      
 		   /** The filename of the XML text to convert to a {\bf 
 		       Document}. */
                 );
@@ -1878,7 +1878,7 @@ ixmlLoadDocument(char* xmlFile
    */
 
 EXPORT_SPEC int 
-ixmlLoadDocumentEx(char* xmlFile,      
+ixmlLoadDocumentEx(const char* xmlFile,      
 		     /** The filename of the XML text to convert to a {\bf 
 		         Document}. */
                    IXML_Document** doc   

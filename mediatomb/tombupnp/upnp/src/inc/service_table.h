@@ -245,7 +245,7 @@ service_info * FindServiceEventURLPath( service_table *table,
 *	Note :
 ************************************************************************/
 service_info * FindServiceControlURLPath( service_table *table,
-					  char * controlURLPath);
+					  const char * controlURLPath);
 
 /************************************************************************
 *	Function :	printService

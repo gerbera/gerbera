@@ -175,7 +175,7 @@ ixmlNode_getLocalName( IN IXML_Node * nodeptr )
 *=================================================================*/
 int
 ixmlNode_setNamespaceURI( IN IXML_Node * nodeptr,
-                          IN char *namespaceURI )
+                          IN const char *namespaceURI )
 {
 
     if( nodeptr == NULL ) {
@@ -207,7 +207,7 @@ ixmlNode_setNamespaceURI( IN IXML_Node * nodeptr,
 *=================================================================*/
 int
 ixmlNode_setPrefix( IN IXML_Node * nodeptr,
-                    IN char *prefix )
+                    IN const char *prefix )
 {
 
     if( nodeptr == NULL ) {
@@ -240,7 +240,7 @@ ixmlNode_setPrefix( IN IXML_Node * nodeptr,
 *=================================================================*/
 int
 ixmlNode_setLocalName( IN IXML_Node * nodeptr,
-                       IN char *localName )
+                       IN const char *localName )
 {
 
     assert( nodeptr != NULL );
@@ -288,10 +288,10 @@ ixmlNode_getNamespaceURI( IN IXML_Node * nodeptr )
 *       the prefix of the node.
 *
 *=================================================================*/
-DOMString
+const DOMString
 ixmlNode_getPrefix( IN IXML_Node * nodeptr )
 {
-    DOMString prefix = NULL;
+    const DOMString prefix = NULL;
 
     if( nodeptr != NULL ) {
         prefix = nodeptr->prefix;
@@ -309,7 +309,7 @@ ixmlNode_getPrefix( IN IXML_Node * nodeptr )
 *       the nodeValue of the node.
 *
 *=================================================================*/
-DOMString
+const DOMString
 ixmlNode_getNodeValue( IN IXML_Node * nodeptr )
 {
 
@@ -330,7 +330,7 @@ ixmlNode_getNodeValue( IN IXML_Node * nodeptr )
 *=================================================================*/
 int
 ixmlNode_setNodeValue( IN IXML_Node * nodeptr,
-                       IN char *newNodeValue )
+                       IN const char *newNodeValue )
 {
     int rc = IXML_SUCCESS;
 
@@ -1425,7 +1425,7 @@ ixmlNode_hasAttributes( IXML_Node * nodeptr )
 *=================================================================*/
 void
 ixmlNode_getElementsByTagNameRecursive( IN IXML_Node * n,
-                                        IN char *tagname,
+                                        IN const char *tagname,
                                         OUT IXML_NodeList ** list )
 {
     const char *name;
@@ -1457,7 +1457,7 @@ ixmlNode_getElementsByTagNameRecursive( IN IXML_Node * n,
 *=================================================================*/
 void
 ixmlNode_getElementsByTagName( IN IXML_Node * n,
-                               IN char *tagname,
+                               IN const char *tagname,
                                OUT IXML_NodeList ** list )
 {
     const char *name;
@@ -1484,8 +1484,8 @@ ixmlNode_getElementsByTagName( IN IXML_Node * n,
 *=================================================================*/
 void
 ixmlNode_getElementsByTagNameNSRecursive( IN IXML_Node * n,
-                                          IN char *namespaceURI,
-                                          IN char *localName,
+                                          IN const char *namespaceURI,
+                                          IN const char *localName,
                                           OUT IXML_NodeList ** list )
 {
     const DOMString nsURI;
@@ -1525,8 +1525,8 @@ ixmlNode_getElementsByTagNameNSRecursive( IN IXML_Node * n,
 *=================================================================*/
 void
 ixmlNode_getElementsByTagNameNS( IN IXML_Node * n,
-                                 IN char *namespaceURI,
-                                 IN char *localName,
+                                 IN const char *namespaceURI,
+                                 IN const char *localName,
                                  OUT IXML_NodeList ** list )
 {
     const DOMString nsURI;
@@ -1560,7 +1560,7 @@ ixmlNode_getElementsByTagNameNS( IN IXML_Node * n,
 *=================================================================*/
 int
 ixmlNode_setNodeName( IN IXML_Node * node,
-                      IN DOMString qualifiedName )
+                      IN const DOMString qualifiedName )
 {
     int rc = IXML_SUCCESS;
 

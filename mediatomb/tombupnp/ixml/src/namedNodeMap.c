@@ -41,7 +41,7 @@
 *=================================================================*/
 unsigned long
 ixmlNamedNodeMap_getItemNumber( IN IXML_NamedNodeMap * nnMap,
-                                IN char *name )
+                                IN const char *name )
 {
     IXML_Node *tempNode;
     unsigned long returnItemNo = 0;
@@ -92,7 +92,7 @@ ixmlNamedNodeMap_init( IN IXML_NamedNodeMap * nnMap )
 *=================================================================*/
 IXML_Node *
 ixmlNamedNodeMap_getNamedItem( IN IXML_NamedNodeMap * nnMap,
-                               IN char *name )
+                               IN const char *name )
 {
     long index;
 

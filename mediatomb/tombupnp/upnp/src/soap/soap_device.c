@@ -288,10 +288,9 @@ send_var_query_response( IN SOCKINFO * info,
 {
     off_t content_length;
     int timeout_secs = SOAP_TIMEOUT;
-    int major,
-      minor;
+    int major;
+    int minor;
     const char *start_body =
-//		"<?xml version=\"1.0\"?>\n" required??
         "<s:Envelope "
         "xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" "
         "s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">\n"
@@ -617,13 +616,13 @@ get_device_info( IN http_message_t * request,
     service_info *serv_info;
     char save_char;
     int ret_code = -1;          // error by default
-    char *control_url;
+    const char *control_url;
     char *actionName = NULL;
 
     // null-terminate pathquery of url
     control_url = request->uri.pathquery.buff;
     save_char = control_url[request->uri.pathquery.size];
-    control_url[request->uri.pathquery.size] = '\0';
+    ((char *)control_url)[request->uri.pathquery.size] = '\0';
 
     HandleLock(  );
 
@@ -680,7 +679,7 @@ get_device_info( IN http_message_t * request,
     ret_code = 0;
 
   error_handler:
-    control_url[request->uri.pathquery.size] = save_char;   // restore
+    ((char *)control_url)[request->uri.pathquery.size] = save_char;   // restore
     HandleUnlock(  );
     return ret_code;
 }
@@ -794,7 +793,7 @@ get_var_name( IN IXML_Document * TempDoc,
     IXML_Node *VarNameNode = NULL;
     IXML_Node *VarNode = NULL;
     const DOMString StNodeName = NULL;
-    DOMString Temp = NULL;
+    const DOMString Temp = NULL;
     int ret_val = -1;
 
     // Got the Envelop node here

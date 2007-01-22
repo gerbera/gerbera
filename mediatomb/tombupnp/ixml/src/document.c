@@ -373,7 +373,7 @@ ixmlDocument_createTextNode( IN IXML_Document * doc,
 ================================================================*/
 int
 ixmlDocument_createAttributeEx( IN IXML_Document * doc,
-                                IN char *name,
+                                IN const char *name,
                                 OUT IXML_Attr ** rtAttr )
 {
     IXML_Attr *attrNode = NULL;
@@ -427,7 +427,7 @@ ixmlDocument_createAttributeEx( IN IXML_Document * doc,
 ================================================================*/
 IXML_Attr *
 ixmlDocument_createAttribute( IN IXML_Document * doc,
-                              IN char *name )
+                              IN const char *name )
 {
     IXML_Attr *attrNode = NULL;
 
@@ -451,8 +451,8 @@ ixmlDocument_createAttribute( IN IXML_Document * doc,
 *=================================================================*/
 int
 ixmlDocument_createAttributeNSEx( IN IXML_Document * doc,
-                                  IN DOMString namespaceURI,
-                                  IN DOMString qualifiedName,
+                                  IN const DOMString namespaceURI,
+                                  IN const DOMString qualifiedName,
                                   OUT IXML_Attr ** rtAttr )
 {
     IXML_Attr *attrNode = NULL;
@@ -507,8 +507,8 @@ ixmlDocument_createAttributeNSEx( IN IXML_Document * doc,
 *=================================================================*/
 IXML_Attr *
 ixmlDocument_createAttributeNS( IN IXML_Document * doc,
-                                IN DOMString namespaceURI,
-                                IN DOMString qualifiedName )
+                                IN const DOMString namespaceURI,
+                                IN const DOMString qualifiedName )
 {
     IXML_Attr *attrNode = NULL;
 
@@ -531,7 +531,7 @@ ixmlDocument_createAttributeNS( IN IXML_Document * doc,
 *=================================================================*/
 int
 ixmlDocument_createCDATASectionEx( IN IXML_Document * doc,
-                                   IN DOMString data,
+                                   IN const DOMString data,
                                    OUT IXML_CDATASection ** rtCD )
 {
     int errCode = IXML_SUCCESS;
@@ -588,7 +588,7 @@ ixmlDocument_createCDATASectionEx( IN IXML_Document * doc,
 *=================================================================*/
 IXML_CDATASection *
 ixmlDocument_createCDATASection( IN IXML_Document * doc,
-                                 IN DOMString data )
+                                 IN const DOMString data )
 {
 
     IXML_CDATASection *cDSectionNode = NULL;
@@ -613,8 +613,8 @@ ixmlDocument_createCDATASection( IN IXML_Document * doc,
 *=================================================================*/
 int
 ixmlDocument_createElementNSEx( IN IXML_Document * doc,
-                                IN DOMString namespaceURI,
-                                IN DOMString qualifiedName,
+                                IN const DOMString namespaceURI,
+                                IN const DOMString qualifiedName,
                                 OUT IXML_Element ** rtElement )
 {
 
@@ -673,8 +673,8 @@ ixmlDocument_createElementNSEx( IN IXML_Document * doc,
 *=================================================================*/
 IXML_Element *
 ixmlDocument_createElementNS( IN IXML_Document * doc,
-                              IN DOMString namespaceURI,
-                              IN DOMString qualifiedName )
+                              IN const DOMString namespaceURI,
+                              IN const DOMString qualifiedName )
 {
     IXML_Element *newElement = NULL;
 
@@ -698,7 +698,7 @@ ixmlDocument_createElementNS( IN IXML_Document * doc,
 *=================================================================*/
 IXML_NodeList *
 ixmlDocument_getElementsByTagName( IN IXML_Document * doc,
-                                   IN char *tagName )
+                                   IN const char *tagName )
 {
     IXML_NodeList *returnNodeList = NULL;
 
@@ -728,8 +728,8 @@ ixmlDocument_getElementsByTagName( IN IXML_Document * doc,
 *=================================================================*/
 IXML_NodeList *
 ixmlDocument_getElementsByTagNameNS( IN IXML_Document * doc,
-                                     IN DOMString namespaceURI,
-                                     IN DOMString localName )
+                                     IN const DOMString namespaceURI,
+                                     IN const DOMString localName )
 {
     IXML_NodeList *returnNodeList = NULL;
 
@@ -756,7 +756,7 @@ ixmlDocument_getElementsByTagNameNS( IN IXML_Document * doc,
 *=================================================================*/
 IXML_Element *
 ixmlDocument_getElementById( IN IXML_Document * doc,
-                             IN DOMString tagName )
+                             IN const DOMString tagName )
 {
     IXML_Element *rtElement = NULL;
     IXML_Node *nodeptr = ( IXML_Node * ) doc;

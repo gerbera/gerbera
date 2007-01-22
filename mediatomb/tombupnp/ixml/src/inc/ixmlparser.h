@@ -88,8 +88,8 @@ typedef struct _Parser
 
 
 
-int     Parser_LoadDocument( IXML_Document **retDoc, char * xmlFile, BOOL file);
-BOOL    Parser_isValidXmlName( DOMString name);
+int     Parser_LoadDocument( IXML_Document **retDoc, const char * xmlFile, BOOL file);
+BOOL    Parser_isValidXmlName( const DOMString name);
 int     Parser_setNodePrefixAndLocalName(IXML_Node *newIXML_NodeIXML_Attr);
 void    Parser_freeNodeContent( IXML_Node *IXML_Nodeptr);
 
@@ -98,7 +98,7 @@ void    Parser_setErrorChar( char c );
 void    ixmlAttr_free(IXML_Attr *attrNode);
 void    ixmlAttr_init(IXML_Attr *attrNode);
 
-int     ixmlElement_setTagName(IXML_Element *element, char *tagName);
+int     ixmlElement_setTagName(IXML_Element *element, const char *tagName);
 
 void    ixmlNamedNodeMap_init(IXML_NamedNodeMap *nnMap);
 int     ixmlNamedNodeMap_addToNamedNodeMap(IXML_NamedNodeMap **nnMap, IXML_Node *add);
@@ -106,12 +106,12 @@ int     ixmlNamedNodeMap_addToNamedNodeMap(IXML_NamedNodeMap **nnMap, IXML_Node 
 void    ixmlNode_init(IXML_Node *IXML_Nodeptr);
 BOOL    ixmlNode_compare(IXML_Node *srcIXML_Node, IXML_Node *destIXML_Node);
 
-void    ixmlNode_getElementsByTagName( IXML_Node *n, char *tagname, IXML_NodeList **list);
-void    ixmlNode_getElementsByTagNameNS( IXML_Node *IXML_Node, char *namespaceURI,
-                char *localName, IXML_NodeList **list);
+void    ixmlNode_getElementsByTagName( IXML_Node *n, const char *tagname, IXML_NodeList **list);
+void    ixmlNode_getElementsByTagNameNS( IXML_Node *IXML_Node, const char *namespaceURI,
+                const char *localName, IXML_NodeList **list);
 
 int     ixmlNode_setNodeProperties(IXML_Node* node, IXML_Node *src);
-int     ixmlNode_setNodeName( IXML_Node* node, DOMString qualifiedName);
+int     ixmlNode_setNodeName( IXML_Node* node, const DOMString qualifiedName);
 
 void    ixmlNodeList_init(IXML_NodeList *nList);
 int     ixmlNodeList_addToNodeList(IXML_NodeList **nList, IXML_Node *add);

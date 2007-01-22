@@ -65,7 +65,7 @@
 #else
  #include <winsock2.h>
 
- #define socklen_t int
+ typedef int socklen_t;
  #define EAFNOSUPPORT 97
 #endif
 #include "unixutil.h"
@@ -711,6 +711,11 @@ get_miniserver_sockets( MiniServerSockArray * out,
                               sizeof( struct sockaddr_in )
                  );
             if( sockError == UPNP_SOCKETERROR ) {
+#ifdef WIN32
+				errCode = WSAGetLastError();
+#else
+				errCode = errno; 
+#endif
                 if( errno == EADDRINUSE )
                     errCode = 1;
             } else

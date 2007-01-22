@@ -398,7 +398,7 @@ FindServiceEventURLPath( service_table * table,
 ************************************************************************/
 service_info *
 FindServiceControlURLPath( service_table * table,
-                           char *controlURLPath )
+                           const char *controlURLPath )
 {
     service_info *finger = NULL;
     uri_type parsed_url;
@@ -664,7 +664,7 @@ DOMString
 getElementValue( IXML_Node * node )
 {
     IXML_Node *child = ( IXML_Node * ) ixmlNode_getFirstChild( node );
-    DOMString temp = NULL;
+    const DOMString temp = NULL;
 
     if( ( child != 0 ) && ( ixmlNode_getNodeType( child ) == eTEXT_NODE ) ) {
         temp = ixmlNode_getNodeValue( child );
