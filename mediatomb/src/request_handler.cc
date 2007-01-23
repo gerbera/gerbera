@@ -40,7 +40,7 @@ using namespace zmm;
 
 void RequestHandler::split_url(const char *url, char separator, String &path, String &parameters)
 {
-    String url_s = String(url);
+    String url_s = unescape_amp(String(url));
     url_s = url_unescape(url_s);
 
     int i1 = url_s.rindex(separator);
