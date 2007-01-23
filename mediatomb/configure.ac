@@ -1144,16 +1144,32 @@ if test "x$PGSQL_OK" = xyes; then
    fi 
 
    if test "$PGSQL_PROG_FOUND" -eq 1 ; then
-        AC_MSG_CHECKING(postgresql cflags)
-        PGSQL_CFLAGS=`${pgconfig} --includedir`
-        PGSQL_CFLAGS="-I${PGSQL_CFLAGS}"
-        AC_MSG_RESULT($PGSQL_CFLAGS)
+        AC_MSG_CHECKING(if postgresql version is threadsafe)
+        PGSQL_THREADSAFE=`${pgconfig} --configure | grep -- '--enable-thread-safety'`
+    
+        if test -z "$PGSQL_THREADSAFE"; then
+            if test "x$PGSQL_EN" = xyes; then
+                AC_MSG_ERROR([this PostgreSQL version is not thread safe!])
+            else
+                PGSQL_OK=disabled
+            fi
+        fi
 
-        AC_MSG_CHECKING(postgresql libraries)
-        PGSQL_LIBS=`${pgconfig} --libdir`
-        PGSQL_LIBS="-L${PGSQL_LIBS} -lpq"
-        AC_MSG_RESULT($PGSQL_LIBS)
-    fi
+        if test "x$PGSQL_OK" = xyes; then
+            AC_MSG_RESULT(yes)
+            AC_MSG_CHECKING(postgresql cflags)
+            PGSQL_CFLAGS=`${pgconfig} --includedir`
+            PGSQL_CFLAGS="-I${PGSQL_CFLAGS}"
+            AC_MSG_RESULT($PGSQL_CFLAGS)
+
+            AC_MSG_CHECKING(postgresql libraries)
+            PGSQL_LIBS=`${pgconfig} --libdir`
+            PGSQL_LIBS="-L${PGSQL_LIBS} -lpq"
+            AC_MSG_RESULT($PGSQL_LIBS)
+        else
+            AC_MSG_RESULT([no, disabling])
+        fi
+   fi
 fi
 
 if test "x$PGSQL_OK" = xyes; then
@@ -1170,6 +1186,12 @@ if test "x$PGSQL_OK" = xyes; then
     AC_CHECK_LIB(pq, PQconnectdb, [],
         [PGSQL_OK=missing]
     )
+fi
+
+if test "x$PGSQL_OK" = xyes; then
+    LDFLAGS="$PGSQL_LIBS"
+    AC_CHECK_LIB(pq, PQisthreadsafe, [AC_DEFINE([HAVE_PQISTHREADSAFE], [1], [PQisthreadsafe function availability])],
+            [])
 fi
 
 if test "x$PGSQL_OK" = xyes; then
