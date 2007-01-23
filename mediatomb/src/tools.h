@@ -190,6 +190,9 @@ zmm::String unescape(zmm::String string, char escape);
 /// \return the unescaped string
 zmm::String xml_unescape(zmm::String string);
 
+// jin - add doc :)
+zmm::String unescape_amp(zmm::String string);
+
 /// \brief Returns the first string if it isn't "nil", otherwise the fallback string.
 /// \param first the string to return if it isn't nil
 /// \param fallback fallback string to return if first is nil

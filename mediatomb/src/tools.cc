@@ -635,7 +635,8 @@ String unescape(String string, char escape)
         if (last < 0)
             last = 0;
         int cpLen = next - last;
-        strncpy(str, string.charPtrAt(last), cpLen);
+        if (cpLen > 0)
+            strncpy(str, string.charPtrAt(last), cpLen);
         str += cpLen;
         last = next;
         last++;
@@ -647,6 +648,7 @@ String unescape(String string, char escape)
     return String(stringBase);
 }
 
+/*
 String xml_unescape(String string)
 {
     Ref<StringBuffer> buf(new StringBuffer(string.length()));
@@ -700,7 +702,49 @@ String xml_unescape(String string)
 
     return buf->toString();
 }
+*/
 
+String unescape_amp(String string)
+{
+    if (string == nil)
+        return nil;
+    Ref<StringBase> stringBase(new StringBase(string.length()));
+    char *str = stringBase->data;
+    int len = string.length();
+
+    printf("Starting with string: [%s]\n", string.c_str());
+    int last = 0;
+    do
+    {
+        int skip = 0;
+        int next = last - 1;
+        do
+        {
+            next = string.index(next + 1, '&');
+            if ((next < len) && (string.charAt(next + 1) == 'a') && 
+                (string.charAt(next + 2) == 'm') &&
+                (string.charAt(next + 3) == 'p') &&
+                (string.charAt(next + 4) == ';'))
+            {
+                skip = 4;
+            }
+        }
+        while(next > 0 && skip == 0);
+        
+        if (next < 0)
+            next = len;
+        
+        int cpLen = next - last + 1;
+        strncpy(str, string.charPtrAt(last), cpLen);
+        str += cpLen;
+        last = next + skip + 1;
+    }
+    while (last <= len);
+    
+    stringBase->len = str - stringBase->data - 1;
+    assert(stringBase->len == strlen(stringBase->data));
+    return String(stringBase);
+}
 
 String fallbackString(String first, String fallback)
 {
