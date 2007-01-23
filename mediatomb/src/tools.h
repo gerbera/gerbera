@@ -183,14 +183,21 @@ zmm::String escape(zmm::String string, char escape_char, char to_escape);
 /// \return the unescaped string
 zmm::String unescape(zmm::String string, char escape);
 
+/*
 /// \brief Unescape &amp; &quot; and similar XML sequences.
 ///
 /// This function will silently ignore and pass on any invalid combinations.
 /// \param string that should be unescaped
 /// \return the unescaped string
 zmm::String xml_unescape(zmm::String string);
+*/
 
-// jin - add doc :)
+/// brief Unescape all &amp; occurances in a given string.
+///
+/// This function will look for &amp; in a string and convert it to '&',
+/// all other tokens are not touched.
+/// \param string that should be unescaped
+/// \return the unescaped string
 zmm::String unescape_amp(zmm::String string);
 
 /// \brief Returns the first string if it isn't "nil", otherwise the fallback string.
