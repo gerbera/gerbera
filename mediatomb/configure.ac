@@ -106,13 +106,13 @@ AC_ARG_WITH(mysql-cfg,
             MYSQL_SEARCH_CONFIG="$withval"
         ]
 )
-
-AC_ARG_WITH(pg-cfg,
-        AC_HELP_STRING([--with-pg-cfg=pg_config], [absolute path/name of pg_config (for the PostgreSQL database)]),
-        [
-            PGSQL_SEARCH_CONFIG="$withval"
-        ]
-)
+##
+##AC_ARG_WITH(pg-cfg,
+##       AC_HELP_STRING([--with-pg-cfg=pg_config], [absolute path/name of pg_config (for the PostgreSQL database)]),
+##        [
+##            PGSQL_SEARCH_CONFIG="$withval"
+##        ]
+##)
 
 
 
@@ -1091,130 +1091,134 @@ CFLAGS="$CFLAGS_SAVE"
 LDFLAGS="$LDFLAGS_SAVE"
 
 ######### PostgreSQL
-AC_ARG_ENABLE(postgresql, 
-              AC_HELP_STRING([--enable-postgresql], [compile with postgresql support (default: yes)]),
-              [
-                PGSQL_EN=$enableval 
-                if test "x$enableval" = xno; then
-                    PGSQL_OK=disabled
-                else
-                    PGSQL_OK=yes
-                fi
-              ],
-              [
-                PGSQL_OK=yes
-              ]
-)
-
-
-PGSQL_PROG_FOUND=0
-if test "x$PGSQL_OK" = xyes; then
-    if test -n "$PGSQL_SEARCH_CONFIG"; then
-        AC_MSG_NOTICE([You specified $PGSQL_SEARCH_CONFIG for pg_config])
-        
-        if test -f "$PGSQL_SEARCH_CONFIG"; then 
-            pgconfig="$PGSQL_SEARCH_CONFIG"
-        else
-            pgconfig="no"
-        fi
-        
-        if test "x$pgconfig" = xno; then
-            AC_MSG_ERROR([$PGSQL_SEARCH_CONFIG not found])
-        else
-            PGSQL_TEST=`${pgconfig} --version 2>/dev/null`
-            if test -z "$PGSQL_TEST"; then
-                AC_MSG_ERROR([${pgconfig} could not be executed or returned invalid values])
-            fi
-            PGSQL_PROG_FOUND=1
-        fi
-    else
-        AC_PATH_PROG(pgconfig, pg_config, no)
-        if test "x$pgconfig" = xno; then
-            unset ac_cv_path_pgconfig
-            AC_PATH_PROG(pgconfig, pg_config, no, $SEARCH_DIR_PROGS)
-            if test "x$pgconfig" = xno; then
-                PGSQL_OK=missing
-                AC_MSG_RESULT([pg_config not found, please install the postgresql-devel package])
-            else
-                PGSQL_PROG_FOUND=1
-            fi
-        else
-            PGSQL_PROG_FOUND=1
-        fi
-   fi 
-
-   if test "$PGSQL_PROG_FOUND" -eq 1 ; then
-        AC_MSG_CHECKING(if postgresql version is threadsafe)
-        PGSQL_THREADSAFE=`${pgconfig} --configure | grep -- '--enable-thread-safety'`
-    
-        if test -z "$PGSQL_THREADSAFE"; then
-            if test "x$PGSQL_EN" = xyes; then
-                AC_MSG_ERROR([this PostgreSQL version is not thread safe!])
-            else
-                PGSQL_OK=disabled
-            fi
-        fi
-
-        if test "x$PGSQL_OK" = xyes; then
-            AC_MSG_RESULT(yes)
-            AC_MSG_CHECKING(postgresql cflags)
-            PGSQL_CFLAGS=`${pgconfig} --includedir`
-            PGSQL_CFLAGS="-I${PGSQL_CFLAGS}"
-            AC_MSG_RESULT($PGSQL_CFLAGS)
-
-            AC_MSG_CHECKING(postgresql libraries)
-            PGSQL_LIBS=`${pgconfig} --libdir`
-            PGSQL_LIBS="-L${PGSQL_LIBS} -lpq"
-            AC_MSG_RESULT($PGSQL_LIBS)
-        else
-            AC_MSG_RESULT([no, disabling])
-        fi
-   fi
-fi
-
-if test "x$PGSQL_OK" = xyes; then
-    CPPFLAGS="$CPPFLAGS $PGSQL_CFLAGS"
-    CXXFLAGS="$CXXFLAGS $PGSQL_CFLAGS"
-    AC_CHECK_HEADERS([libpq-fe.h],
-        [],
-        [PGSQL_OK=missing]
-    )
-fi
-
-if test "x$PGSQL_OK" = xyes; then
-    LDFLAGS="$PGSQL_LIBS"
-    AC_CHECK_LIB(pq, PQconnectdb, [],
-        [PGSQL_OK=missing]
-    )
-fi
-
-if test "x$PGSQL_OK" = xyes; then
-    LDFLAGS="$PGSQL_LIBS"
-    AC_CHECK_LIB(pq, PQisthreadsafe, [AC_DEFINE([HAVE_PQISTHREADSAFE], [1], [PQisthreadsafe function availability])],
-            [])
-fi
-
-if test "x$PGSQL_OK" = xyes; then
-    AC_DEFINE([HAVE_PGSQL], [1], [PostgreSQL library presence])
-    AC_SUBST(PGSQL_CFLAGS)
-    AC_SUBST(PGSQL_LIBS)
-else
-    if test "x$PGSQL_EN" = xyes; then
-        AC_MSG_ERROR(unable to configure PostgreSQL support)
-    fi
-fi
-CPPFLAGS="$CPPFLAGS_SAVE"
-CXXFLAGS="$CXXFLAGS_SAVE"
-LDFLAGS="$LDFLAGS_SAVE"
+##AC_ARG_ENABLE(postgresql, 
+##              AC_HELP_STRING([--enable-postgresql], [compile with postgresql support (default: yes)]),
+##              [
+##                PGSQL_EN=$enableval 
+##                if test "x$enableval" = xno; then
+##                    PGSQL_OK=disabled
+##                else
+##                    PGSQL_OK=yes
+##                fi
+##              ],
+##              [
+##                PGSQL_OK=yes
+##              ]
+##)
+##
+##
+##PGSQL_PROG_FOUND=0
+##if test "x$PGSQL_OK" = xyes; then
+##    if test -n "$PGSQL_SEARCH_CONFIG"; then
+##        AC_MSG_NOTICE([You specified $PGSQL_SEARCH_CONFIG for pg_config])
+##        
+##        if test -f "$PGSQL_SEARCH_CONFIG"; then 
+##            pgconfig="$PGSQL_SEARCH_CONFIG"
+##        else
+##            pgconfig="no"
+##        fi
+##        
+##        if test "x$pgconfig" = xno; then
+##            AC_MSG_ERROR([$PGSQL_SEARCH_CONFIG not found])
+##        else
+##            PGSQL_TEST=`${pgconfig} --version 2>/dev/null`
+##            if test -z "$PGSQL_TEST"; then
+##                AC_MSG_ERROR([${pgconfig} could not be executed or returned invalid values])
+##            fi
+##            PGSQL_PROG_FOUND=1
+##        fi
+##    else
+##        AC_PATH_PROG(pgconfig, pg_config, no)
+##        if test "x$pgconfig" = xno; then
+##            unset ac_cv_path_pgconfig
+##            AC_PATH_PROG(pgconfig, pg_config, no, $SEARCH_DIR_PROGS)
+##            if test "x$pgconfig" = xno; then
+##                PGSQL_OK=missing
+##                AC_MSG_RESULT([pg_config not found, please install the postgresql-devel package])
+##            else
+##                PGSQL_PROG_FOUND=1
+##            fi
+##        else
+##            PGSQL_PROG_FOUND=1
+##        fi
+##   fi 
+##
+##   if test "$PGSQL_PROG_FOUND" -eq 1 ; then
+##        AC_MSG_CHECKING(if postgresql version is threadsafe)
+##        PGSQL_THREADSAFE=`${pgconfig} --configure | grep -- '--enable-thread-safety'`
+##    
+##       if test -z "$PGSQL_THREADSAFE"; then
+##            if test "x$PGSQL_EN" = xyes; then
+##                AC_MSG_ERROR([this PostgreSQL version is not thread safe!])
+##            else
+##                PGSQL_OK=disabled
+##            fi
+##        fi
+##
+##        if test "x$PGSQL_OK" = xyes; then
+##            AC_MSG_RESULT(yes)
+##            AC_MSG_CHECKING(postgresql cflags)
+##            PGSQL_CFLAGS=`${pgconfig} --includedir`
+##            PGSQL_CFLAGS="-I${PGSQL_CFLAGS}"
+##            AC_MSG_RESULT($PGSQL_CFLAGS)
+##
+##            AC_MSG_CHECKING(postgresql libraries)
+##            PGSQL_LIBS=`${pgconfig} --libdir`
+##            PGSQL_LIBS="-L${PGSQL_LIBS} -lpq"
+##            AC_MSG_RESULT($PGSQL_LIBS)
+##        else
+##            AC_MSG_RESULT([no, disabling])
+##        fi
+##   fi
+##fi
+##
+##if test "x$PGSQL_OK" = xyes; then
+##    CPPFLAGS="$CPPFLAGS $PGSQL_CFLAGS"
+##    CXXFLAGS="$CXXFLAGS $PGSQL_CFLAGS"
+##    AC_CHECK_HEADERS([libpq-fe.h],
+##        [],
+##        [PGSQL_OK=missing]
+##    )
+##fi
+##
+##if test "x$PGSQL_OK" = xyes; then
+##    LDFLAGS="$PGSQL_LIBS"
+##    AC_CHECK_LIB(pq, PQconnectdb, [],
+##        [PGSQL_OK=missing]
+##    )
+##fi
+##
+##if test "x$PGSQL_OK" = xyes; then
+##    LDFLAGS="$PGSQL_LIBS"
+##    AC_CHECK_LIB(pq, PQisthreadsafe, [AC_DEFINE([HAVE_PQISTHREADSAFE], [1], [PQisthreadsafe function availability])],
+##            [])
+##fi
+##
+##if test "x$PGSQL_OK" = xyes; then
+##    AC_DEFINE([HAVE_PGSQL], [1], [PostgreSQL library presence])
+##    AC_SUBST(PGSQL_CFLAGS)
+##    AC_SUBST(PGSQL_LIBS)
+##else
+##    if test "x$PGSQL_EN" = xyes; then
+##        AC_MSG_ERROR(unable to configure PostgreSQL support)
+##    fi
+##fi
+##CPPFLAGS="$CPPFLAGS_SAVE"
+##CXXFLAGS="$CXXFLAGS_SAVE"
+##LDFLAGS="$LDFLAGS_SAVE"
 
 
 
 
 #########  check if at least one database available
 
-if ((test "x$SQLITE3_OK" != xyes) && (test "x$MYSQL_OK" != xyes) && (test "x$PGSQL_OK" != xyes)); then
-    AC_MSG_ERROR(Support of at least one of mysql, postgresql or sqlite3 must be configured)
+##if ((test "x$SQLITE3_OK" != xyes) && (test "x$MYSQL_OK" != xyes) && (test "x$PGSQL_OK" != xyes)); then
+##    AC_MSG_ERROR(Support of at least one of mysql, postgresql or sqlite3 must be configured)
+##fi
+if ((test "x$SQLITE3_OK" != xyes) && (test "x$MYSQL_OK" != xyes)); then
+    AC_MSG_ERROR(Support of at least one of mysql or sqlite3 must be configured)
 fi
+
 
 
 ######### javascript
@@ -2120,7 +2124,7 @@ echo "CONFIGURATION SUMMARY ----"
 echo
 echo "sqlite3       : $SQLITE3_OK"
 echo "mysql         : $MYSQL_OK"
-echo "postgresql    : $PGSQL_OK"
+##echo "postgresql    : $PGSQL_OK"
 echo "libjs         : $JS_OK"
 echo "libmagic      : $MAGIC_OK"
 echo "libexif       : $EXIF_OK"
