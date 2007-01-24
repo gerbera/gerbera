@@ -712,7 +712,6 @@ String unescape_amp(String string)
     char *str = stringBase->data;
     int len = string.length();
 
-    printf("Starting with string: [%s]\n", string.c_str());
     int last = 0;
     do
     {
