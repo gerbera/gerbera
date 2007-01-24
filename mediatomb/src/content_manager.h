@@ -45,7 +45,7 @@
 
 class ContentManager;
 
-typedef enum task_id_t
+typedef enum task_type_t
 {
     Invalid,
     AddFile,
@@ -58,7 +58,8 @@ class CMTask : public zmm::Object
 {
 protected:
     zmm::String description;
-    task_id_t taskID;
+    task_type_t taskType;
+    unsigned int taskID;
     bool valid;
     
 public:
@@ -66,7 +67,9 @@ public:
     virtual void run(zmm::Ref<ContentManager> cm) = 0;
     void setDescription(zmm::String description);
     zmm::String getDescription();
-    task_id_t getID();
+    task_type_t getType();
+    unsigned int getID();
+    void setID(unsigned int taskID);
     bool isValid();
     void invalidate();
 };
@@ -160,7 +163,17 @@ public:
     bool isBusy() { return working; }
     
     zmm::Ref<CMAccounting> getAccounting();
+
+    /// \brief Returns the task that is currently being executed.
     zmm::Ref<CMTask> getCurrentTask();
+
+    /// \brief Returns the list of all enqueued tasks, including the current task.
+    zmm::Ref<zmm::Array<CMTask> > getTasklist();
+
+    /// \brief Find a task identified by the task ID and invalidate it.
+    /// \return true if task was found and invalidated, otherwise false
+    bool invalidateTask(unsigned int taskID);
+
     
     /* the functions below return true if the task has been enqueued */
     
@@ -288,6 +301,8 @@ protected:
     zmm::Ref<zmm::ObjectQueue<CMTask> > taskQueue1; // priority 1
     zmm::Ref<zmm::ObjectQueue<CMTask> > taskQueue2; // priority 2
     zmm::Ref<CMTask> currentTask;
+
+    unsigned int taskID;
     
     friend void CMAddFileTask::run(zmm::Ref<ContentManager> cm);
     friend void CMRemoveObjectTask::run(zmm::Ref<ContentManager> cm);

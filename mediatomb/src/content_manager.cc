@@ -86,7 +86,8 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
 {
     cond = Ref<Cond>(new Cond(mutex));
     ignore_unknown_extensions = 0;
-    
+   
+    taskID = 0;
     working = false;
     shutdownFlag = false;
     
@@ -248,6 +249,37 @@ Ref<CMTask> ContentManager::getCurrentTask()
     task = currentTask;
     return task;
 }
+
+Ref<Array<CMTask> > ContentManager::getTasklist()
+{
+    int i;
+    Ref<Array<CMTask> > taskList(new Array<CMTask>());
+
+    AUTOLOCK(mutex);
+    Ref<CMTask> t = getCurrentTask();
+    if (t != nil)
+    {
+        taskList->append(t); 
+    }
+
+    int qsize = taskQueue1->size();
+
+    for (i = 0; i < qsize; i++)
+    {
+        Ref<CMTask> t = taskQueue1->get(i);
+        taskList->append(t);
+    }
+
+    qsize = taskQueue2->size();
+    for (i = 0; i < qsize; i++)
+    {
+        Ref<CMTask> t = taskQueue2->get(i);
+        taskList->append(t);
+    }
+
+    return taskList;
+}
+
 
 void ContentManager::_loadAccounting()
 {
@@ -1085,6 +1117,9 @@ void *ContentManager::staticThreadProc(void *arg)
 void ContentManager::addTask(zmm::Ref<CMTask> task, bool lowPriority)
 {
     AUTOLOCK(mutex);
+
+    task->setID(taskID++);
+
     if (! lowPriority)
         taskQueue1->enqueue(task);
     else
@@ -1122,7 +1157,7 @@ void ContentManager::addFile(zmm::String path, bool recursive, bool async, bool 
 
 void ContentManager::invalidateAddTask(Ref<CMTask> t, String path)
 {
-    if (t->getID() == AddFile)
+    if (t->getType() == AddFile)
     {
         log_debug("comparing, task path: %s, remove path: %s\n", RefCast(t, CMAddFileTask)->getPath().c_str(), path.c_str());
         if ((RefCast(t, CMAddFileTask)->getPath().startsWith(path)))
@@ -1131,6 +1166,47 @@ void ContentManager::invalidateAddTask(Ref<CMTask> t, String path)
             t->invalidate();
         }
     }
+}
+
+bool ContentManager::invalidateTask(unsigned int taskID)
+{
+    int i;
+
+    AUTOLOCK(mutex);
+    Ref<CMTask> t = getCurrentTask();
+    if (t != nil)
+    {
+        if (t->getID() == taskID)
+        {
+            t->invalidate();
+            return true;
+        }
+    }
+
+    int qsize = taskQueue1->size();
+
+    for (i = 0; i < qsize; i++)
+    {
+        Ref<CMTask> t = taskQueue1->get(i);
+        if (t->getID() == taskID)
+        {
+            t->invalidate();
+            return true;
+        }
+    }
+
+    qsize = taskQueue2->size();
+    for (i = 0; i < qsize; i++)
+    {
+        Ref<CMTask> t = taskQueue2->get(i);
+        if (t->getID() == taskID)
+        {
+            t->invalidate();
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void ContentManager::removeObject(int objectID, bool async, bool all)
@@ -1271,7 +1347,8 @@ void ContentManager::removeAutoscanDirectory(String location)
 CMTask::CMTask() : Object()
 {
     valid = true;
-    taskID = Invalid;
+    taskType = Invalid;
+    taskID = 0;
 }
 
 void CMTask::setDescription(String description)
@@ -1284,9 +1361,19 @@ String CMTask::getDescription()
     return description;
 }
 
-task_id_t CMTask::getID()
+task_type_t CMTask::getType()
+{
+    return taskType;
+}
+
+unsigned int CMTask::getID()
 {
     return taskID;
+}
+
+void CMTask::setID(unsigned int taskID)
+{
+    this->taskID = taskID;
 }
 
 void CMTask::invalidate()
@@ -1304,7 +1391,7 @@ CMAddFileTask::CMAddFileTask(String path, bool recursive, bool hidden) : CMTask(
     this->path = path;
     this->recursive = recursive;
     this->hidden = hidden;
-    this->taskID = AddFile;
+    this->taskType = AddFile;
 }
 
 String CMAddFileTask::getPath()
@@ -1322,7 +1409,7 @@ CMRemoveObjectTask::CMRemoveObjectTask(int objectID, bool all) : CMTask()
 {
     this->objectID = objectID;
     this->all = all;
-    this->taskID = RemoveObject;
+    this->taskType = RemoveObject;
 }
 
 void CMRemoveObjectTask::run(Ref<ContentManager> cm)
@@ -1335,7 +1422,7 @@ CMRescanDirectoryTask::CMRescanDirectoryTask(int objectID, int scanID, scan_mode
     this->scanID = scanID;
     this->scanMode = scanMode;
     this->objectID = objectID;
-    this->taskID = RescanDirectory;
+    this->taskType = RescanDirectory;
 }
 
 void CMRescanDirectoryTask::run(Ref<ContentManager> cm)
@@ -1356,7 +1443,7 @@ void CMRescanDirectoryTask::run(Ref<ContentManager> cm)
 
 CMLoadAccountingTask::CMLoadAccountingTask() : CMTask()
 {
-    this->taskID = LoadAccounting;
+    this->taskType = LoadAccounting;
 }
 
 void CMLoadAccountingTask::run(Ref<ContentManager> cm)
