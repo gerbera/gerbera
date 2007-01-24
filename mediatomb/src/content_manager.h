@@ -171,8 +171,7 @@ public:
     zmm::Ref<zmm::Array<CMTask> > getTasklist();
 
     /// \brief Find a task identified by the task ID and invalidate it.
-    /// \return true if task was found and invalidated, otherwise false
-    bool invalidateTask(unsigned int taskID);
+    void invalidateTask(unsigned int taskID);
 
     
     /* the functions below return true if the task has been enqueued */

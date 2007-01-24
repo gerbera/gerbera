@@ -259,7 +259,8 @@ Ref<Array<CMTask> > ContentManager::getTasklist()
     Ref<CMTask> t = getCurrentTask();
     if (t != nil)
     {
-        taskList->append(t); 
+        if (t->isValid())
+            taskList->append(t); 
     }
 
     int qsize = taskQueue1->size();
@@ -267,14 +268,16 @@ Ref<Array<CMTask> > ContentManager::getTasklist()
     for (i = 0; i < qsize; i++)
     {
         Ref<CMTask> t = taskQueue1->get(i);
-        taskList->append(t);
+        if (t->isValid())
+            taskList->append(t);
     }
 
     qsize = taskQueue2->size();
     for (i = 0; i < qsize; i++)
     {
         Ref<CMTask> t = taskQueue2->get(i);
-        taskList->append(t);
+        if (t->isValid())
+            taskList->append(t);
     }
 
     return taskList;
@@ -1168,7 +1171,7 @@ void ContentManager::invalidateAddTask(Ref<CMTask> t, String path)
     }
 }
 
-bool ContentManager::invalidateTask(unsigned int taskID)
+void ContentManager::invalidateTask(unsigned int taskID)
 {
     int i;
 
@@ -1179,7 +1182,7 @@ bool ContentManager::invalidateTask(unsigned int taskID)
         if (t->getID() == taskID)
         {
             t->invalidate();
-            return true;
+            return;
         }
     }
 
@@ -1191,7 +1194,7 @@ bool ContentManager::invalidateTask(unsigned int taskID)
         if (t->getID() == taskID)
         {
             t->invalidate();
-            return true;
+            return;
         }
     }
 
@@ -1202,11 +1205,9 @@ bool ContentManager::invalidateTask(unsigned int taskID)
         if (t->getID() == taskID)
         {
             t->invalidate();
-            return true;
+            return;
         }
     }
-
-    return false;
 }
 
 void ContentManager::removeObject(int objectID, bool async, bool all)
