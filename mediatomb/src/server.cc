@@ -179,7 +179,23 @@ void Server::upnp_init(String ip, int port)
 
     String presentationURL =  config->getOption(_("/server/presentationURL"));
     if (!string_ok(presentationURL))
+    {
         presentationURL = _("http://") + ip + ":" + port + "/";
+    }
+    else
+    {
+        String appendto = 
+           config->getOption(_("/server/presentationURL/attribute::append-to"));
+        if (appendto == "ip")
+        {
+            presentationURL = _("http://") + ip + ":" + presentationURL;
+        }
+        else if (appendto == "port")
+        {
+            presentationURL = _("http://") + ip + ":" + port + "/" + 
+                              presentationURL;
+        } // else appendto is none and we take the URL as it entered by user
+    }
 
     // register root device with the library
     String device_description = 

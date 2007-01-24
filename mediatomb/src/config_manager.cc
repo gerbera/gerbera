@@ -341,6 +341,19 @@ void ConfigManager::validate(String serverhome)
     getOption(_("/server/model"), _(DESC_MODEL_NAME));
     getOption(_("/server/manufacturerURL"), _(DESC_MANUFACTURER_URL));
     getOption(_("/server/presentationURL"), _(""));
+    temp = getOption(_("/server/presentationURL/attribute::append-to"), 
+            _(DEFAULT_PRES_URL_APPENDTO_ATTR));
+
+    if ((temp != "none") && (temp != "ip") && (temp != "port"))
+    {
+        throw _Exception(_("Error in config file: invalid \"append-to\" attribute value in <presentationURL> tag"));
+    }
+
+    if (((temp == "ip") || (temp == "port")) && 
+         !string_ok(getOption(_("/server/presentationURL"))))
+    {
+        throw _Exception(_("Error in config file: \"append-to\" attribute value in <presentationURL> tag is set to \"") + temp + _("\" but no URL is specified"));
+    }
 
     i = getIntOption(_("/server/upnp-string-limit"), 
             DEFAULT_UPNP_STRING_LIMIT);
