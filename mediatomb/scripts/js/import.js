@@ -160,7 +160,7 @@ function addImage(obj)
     }
 }
 
-var arr = orig.mimetype.split("/");
+var arr = orig.mimetype.split('/');
 var mime = arr[0];
 
 // var obj = copyObject(orig);
@@ -168,7 +168,7 @@ var mime = arr[0];
 var obj = orig; 
 obj.refID = orig.id;
 
-if (mime == 'audio')
+if ((mime == 'audio') || (orig.mimetype == 'application/ogg'))
 {
     addAudio(obj);
 }
