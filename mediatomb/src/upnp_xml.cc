@@ -217,6 +217,58 @@ Ref<Element> UpnpXML_RenderDeviceDescription(String presentationURL)
     device->appendTextChild(_("serialNumber"), _(DESC_SERIAL_NUMBER));
     device->appendTextChild(_("UDN"), config->getOption(_("/server/udn")));
 
+    Ref<Element> iconList(new Element(_("iconList")));
+
+    Ref<Element> icon48_png(new Element(_("icon")));
+    icon48_png->appendTextChild(_("mimetype"), _(DESC_ICON_PNG_MIMETYPE));
+    icon48_png->appendTextChild(_("width"), _("48"));
+    icon48_png->appendTextChild(_("height"), _("48"));
+    icon48_png->appendTextChild(_("depth"), _("8"));
+    icon48_png->appendTextChild(_("url"), _(DESC_ICON48_PNG));
+    iconList->appendChild(icon48_png);
+
+    Ref<Element> icon48_bmp(new Element(_("icon")));
+    icon48_bmp->appendTextChild(_("mimetype"), _(DESC_ICON_BMP_MIMETYPE));
+    icon48_bmp->appendTextChild(_("width"), _("48"));
+    icon48_bmp->appendTextChild(_("height"), _("48"));
+    icon48_bmp->appendTextChild(_("depth"), _("8"));
+    icon48_bmp->appendTextChild(_("url"), _(DESC_ICON48_BMP));
+    iconList->appendChild(icon48_bmp);
+
+    Ref<Element> icon32_png(new Element(_("icon")));
+    icon32_png->appendTextChild(_("mimetype"), _(DESC_ICON_PNG_MIMETYPE));
+    icon32_png->appendTextChild(_("width"), _("32"));
+    icon32_png->appendTextChild(_("height"), _("32"));
+    icon32_png->appendTextChild(_("depth"), _("8"));
+    icon32_png->appendTextChild(_("url"), _(DESC_ICON32_PNG));
+    iconList->appendChild(icon32_png);
+
+    Ref<Element> icon32_bmp(new Element(_("icon")));
+    icon32_bmp->appendTextChild(_("mimetype"), _(DESC_ICON_BMP_MIMETYPE));
+    icon32_bmp->appendTextChild(_("width"), _("32"));
+    icon32_bmp->appendTextChild(_("height"), _("32"));
+    icon32_bmp->appendTextChild(_("depth"), _("8"));
+    icon32_bmp->appendTextChild(_("url"), _(DESC_ICON32_BMP));
+    iconList->appendChild(icon32_bmp);
+
+    Ref<Element> icon16_png(new Element(_("icon")));
+    icon16_png->appendTextChild(_("mimetype"), _(DESC_ICON_PNG_MIMETYPE));
+    icon16_png->appendTextChild(_("width"), _("16"));
+    icon16_png->appendTextChild(_("height"), _("16"));
+    icon16_png->appendTextChild(_("depth"), _("8"));
+    icon16_png->appendTextChild(_("url"), _(DESC_ICON16_PNG));
+    iconList->appendChild(icon16_png);
+
+    Ref<Element> icon16_bmp(new Element(_("icon")));
+    icon16_bmp->appendTextChild(_("mimetype"), _(DESC_ICON_BMP_MIMETYPE));
+    icon16_bmp->appendTextChild(_("width"), _("16"));
+    icon16_bmp->appendTextChild(_("height"), _("16"));
+    icon16_bmp->appendTextChild(_("depth"), _("8"));
+    icon16_bmp->appendTextChild(_("url"), _(DESC_ICON16_BMP));
+    iconList->appendChild(icon16_bmp);
+
+    device->appendChild(iconList);
+
     Ref<Element> serviceList(new Element(_("serviceList")));
 
     Ref<Element> serviceCM(new Element(_("service")));

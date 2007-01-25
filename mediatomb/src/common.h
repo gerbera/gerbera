@@ -128,6 +128,15 @@
 #define DESC_CDS_CONTROL_URL            "/upnp/control/cds"
 #define DESC_CDS_EVENT_URL              "/upnp/event/cds"
 
+#define DESC_ICON_PNG_MIMETYPE          "image/png"
+#define DESC_ICON_BMP_MIMETYPE          "image/x-ms-bmp"
+#define DESC_ICON48_PNG                 "/icons/mt-icon48.png"
+#define DESC_ICON32_PNG                 "/icons/mt-icon32.png"
+#define DESC_ICON16_PNG                 "/icons/mt-icon16.png"
+#define DESC_ICON48_BMP                 "/icons/mt-icon48.bmp"
+#define DESC_ICON32_BMP                 "/icons/mt-icon32.bmp"
+#define DESC_ICON16_BMP                 "/icons/mt-icon16.bmp"
+
 #if defined(ENABLE_MRREG)
     // media receiver registrar (xbox 360)
     #define DESC_MRREG_SERVICE_TYPE     "urn:microsoft.com:service:X_MS_MediaReceiverRegistrar:1"

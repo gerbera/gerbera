@@ -45,6 +45,12 @@ _DIST_FILES_ICONS = \
 ./icons/status_updates_pending.png \
 ./icons/mediatomb.png \
 ./icons/film.png \
+./icons/mt-icon16.png \
+./icons/mt-icon16.bmp \
+./icons/mt-icon32.png \
+./icons/mt-icon32.bmp \
+./icons/mt-icon48.png \
+./icons/mt-icon48.bmp \
 ./icons/view-refresh.png
 
 _DIST_FILES_JS = \
@@ -71,7 +77,8 @@ _DIST_FILES_WEB = \
 ./main.css \
 ./cm.xml \
 ./cds.xml \
-./mr_reg.xml    
+./favicon.ico \
+./mr_reg.xml
 
 EXTRA_DIST = $(_DIST_FILES_IMAGES) $(_DIST_FILES_JS) $(_DIST_FILES_WEB) \
              $(_DIST_FILES_ICONS)

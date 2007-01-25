@@ -82,7 +82,7 @@ sqlite (version > 3.x)
 
  
 \shape italic
-(REQUIRED if mysql is not available)
+(REQUIRED if mysql and postgresql is not available)
 \end_layout
 
 \begin_layout Itemize
@@ -93,13 +93,24 @@ mysql client library (version > 4.0.x)
 
  
 \shape italic
-(REQUIRED if sqlite is not available)
+(REQUIRED if sqlite and postgresql is not available)
+\end_layout
+
+\begin_layout Itemize
+postgresql 
+\begin_inset LatexCommand \url[http://www.postgresql.org/]{http://www.postgresql.org/}
+
+\end_inset
+
+ 
+\shape italic
+(REQUIRED if sqlite and mysql is not available)
 \end_layout
 
 \begin_layout Itemize
 libmagic 
 \shape italic
-OPTIONAL, RECOMMENDED
+(OPTIONAL, RECOMMENDED)
 \shape default
  This is the 'file' package, it is used to determine the mimetype of the
  media.
@@ -255,7 +266,7 @@ Install Location Of Architecture Independend Files
 \end_layout
 
 \begin_layout Description
-Default: /usr/local
+Default: /usr/local/
 \end_layout
 
 \begin_layout Standard
@@ -744,12 +755,12 @@ Package Search Directory
 \end_layout
 
 \begin_layout Description
-Default: /opt/local on Darwin, /usr/local on all other systems
+Default: /opt/local/ on Darwin, /usr/local/ on all other systems
 \end_layout
 
 \begin_layout Standard
 Some systems may have whole sets of packages installed in an alternative
- location, for example Darwinports on OSX get installed to /opt/local.
+ location, for example Darwinports on OSX get installed to /opt/local/.
  This option tells the configure script to additionally search for headers
  and libraries of various packages in DIR/include and DIR/lib.
 \end_layout
@@ -802,8 +813,11 @@ You can specify the exact location of particular headers and libraries.
 \end_layout
 
 \begin_layout Code
---with-exif-libs=DIR            search for libexif libraries in DIR   --with-tag
-lib-cfg=taglib-config absolute path/name of taglib-config
+--with-exif-libs=DIR            search for libexif libraries in DIR
+\end_layout
+
+\begin_layout Code
+--with-taglib-cfg=taglib-config absolute path/name of taglib-config
 \end_layout
 
 \begin_layout Code
@@ -916,7 +930,7 @@ Using MySLQ Database
 If MediaTomb was compiled with support for both databases, sqlite will be
  chosen as default because the initial database can be created and used
  without any user interaction.
- If MediaTomb was compiled only with MySQÖ support, the appropriate config.xml
+ If MediaTomb was compiled only with MySQL support, the appropriate config.xml
  file will be created in the ~/.mediatomb directory, but the server will
  then terminate, because user interaction is required.
 \end_layout
@@ -1167,6 +1181,95 @@ Display Command Line Summary
 
 \begin_layout Standard
 Print a summary about the available command line options.
+\end_layout
+
+\begin_layout Subsection
+Configuration File
+\end_layout
+
+\begin_layout Standard
+MediaTomb is highly configurable and allows the user to set various options
+ and preferences that define the servers behaviour.
+ Rather than enforcing certain features upon the user, we prefer to offer
+ a number of choices where possible.
+ The heart of MediaTomb configuration is the config.xml file, which is located
+ in the ~/.mediatomb directory.
+ The file is in the XML format and can be edited by a simple text editor,
+ here is the list of all available options:
+\end_layout
+
+\begin_layout Itemize
+"
+\series bold
+Required
+\series default
+" means that the server will not start if the tag is missing in the configuratio
+n.
+\end_layout
+
+\begin_layout Itemize
+"
+\series bold
+Optional
+\series default
+" means that the tag can be left out of the configuration file.
+\end_layout
+
+\begin_layout Itemize
+"
+\series bold
+Default if missing
+\series default
+" means, that the tag can be left out, but will be filled by a default value
+ upon server startup.
+ 
+\end_layout
+
+\begin_layout Code
+<server> 
+\end_layout
+
+\begin_layout Standard
+(Required) This section defines the server configuration parameters.
+\end_layout
+
+\begin_layout Standard
+<ui enabled="no"/> (Required) Enables or disables the web user interface,
+ change to "yes" in order to enable it.
+\end_layout
+
+\begin_layout Standard
+<accounts enabled="yes" session-timeout="30"/> (Required) Specifies if accounts
+ are enabled or disabled.
+ The session-timeout specifies the timeout interval in minutes.
+ The server checks every five minutes for sessions that have timed out,
+ therefore in the worst case the session times out after session-timeout
+ + 5 minutes.
+\end_layout
+
+\begin_layout Standard
+Accounts can be defined as shown below:
+\end_layout
+
+\begin_layout Standard
+<account user="name" password="password"/> There can be multiple users,
+ however this is mainly a feature for the future.
+ Right now there are no per-user permissions.
+\end_layout
+
+\begin_layout Standard
+<port>50555</port> (Optional) Specifies the port where the server will be
+ listening for HTTP requests.
+ Note, that because of the implementation in the UPnP SDK only ports above
+ 49152 are supported.
+\end_layout
+
+\begin_layout Standard
+<ip>192.168.0.23</ip> (Optional) Specifies the IP address to bind to.
+ (Optional) <name>MediaTomb</name> (Default if missing: MediaTomb) Server
+ friendly name, you will see this on your devices that you use to access
+ the server.
+ 
 \end_layout
 
 \end_body
