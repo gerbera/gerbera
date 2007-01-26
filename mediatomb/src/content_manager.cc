@@ -253,14 +253,23 @@ Ref<CMTask> ContentManager::getCurrentTask()
 Ref<Array<CMTask> > ContentManager::getTasklist()
 {
     int i;
-    Ref<Array<CMTask> > taskList(new Array<CMTask>());
+    Ref<Array<CMTask> > taskList = nil;
 
     AUTOLOCK(mutex);
     Ref<CMTask> t = getCurrentTask();
-    if (t != nil)
+
+    // if there is no current task, then the queues are empty
+    // and we do not have to allocate the array
+    if (t == nil)
+        return nil;
+
+    if (t->isValid())
     {
-        if (t->isValid())
-            taskList->append(t); 
+        if (taskList == nil)
+        {
+            taskList = Ref<Array<CMTask> >(new Array<CMTask>());
+        }
+        taskList->append(t); 
     }
 
     int qsize = taskQueue1->size();
@@ -269,7 +278,13 @@ Ref<Array<CMTask> > ContentManager::getTasklist()
     {
         Ref<CMTask> t = taskQueue1->get(i);
         if (t->isValid())
+        {
+            if (taskList == nil)
+            {
+                taskList = Ref<Array<CMTask> >(new Array<CMTask>()); 
+            }
             taskList->append(t);
+        }
     }
 
     qsize = taskQueue2->size();
@@ -277,7 +292,13 @@ Ref<Array<CMTask> > ContentManager::getTasklist()
     {
         Ref<CMTask> t = taskQueue2->get(i);
         if (t->isValid())
+        {
+            if (taskList == nil)
+            {
+                taskList = Ref<Array<CMTask> >(new Array<CMTask>()); 
+            }
             taskList->append(t);
+        }
     }
 
     return taskList;

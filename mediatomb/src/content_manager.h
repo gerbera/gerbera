@@ -167,7 +167,7 @@ public:
     /// \brief Returns the task that is currently being executed.
     zmm::Ref<CMTask> getCurrentTask();
 
-    /// \brief Returns the list of all enqueued tasks, including the current task.
+    /// \brief Returns the list of all enqueued tasks, including the current or nil if no tasks are present.
     zmm::Ref<zmm::Array<CMTask> > getTasklist();
 
     /// \brief Find a task identified by the task ID and invalidate it.
