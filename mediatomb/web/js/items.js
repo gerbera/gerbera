@@ -146,8 +146,8 @@ function updateItems(ajaxRequest)
     
     if (prevPageStart >= 0)
     {
-        first = _addLink(pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','0');", "first", iconFirst, " ");
-        first = _addLink(pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','"+prevPageStart+"');", "previous", iconPrevious, " ");
+        first = _addLink(rightDocument, pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','0');", "first", iconFirst, " ");
+        first = _addLink(rightDocument, pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','"+prevPageStart+"');", "previous", iconPrevious, " ");
     }
     
     for (var i = pagesFrom; i <= pagesTo; i++)
@@ -172,8 +172,8 @@ function updateItems(ajaxRequest)
     
     if (nextPageStart < totalMatches)
     {
-        first = _addLink(pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','"+nextPageStart+"');", "next", iconNext, " ");
-        first = _addLink(pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','"+((totalPages - 1) * viewItems)+"');", "last", iconLast, " ");
+        first = _addLink(rightDocument, pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','"+nextPageStart+"');", "next", iconNext, " ");
+        first = _addLink(rightDocument, pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','"+((totalPages - 1) * viewItems)+"');", "last", iconLast, " ");
     }
     
     /*
@@ -221,8 +221,8 @@ function updateItems(ajaxRequest)
         pathEl.appendChild(topRightDocument.createTextNode(" /Filesystem" + path));
         
         var first = true
-        first = _addLink(buttons, first, "javascript:parent.addItem('"+ofId+"');", "add", iconAdd);
-        first = _addLink(buttons, first, "javascript:parent.changeAutoscanDirectory('add','"+ofId+"', true);", "add as autoscan dir", iconAddAutoscan);
+        first = _addLink(topRightDocument, buttons, first, "javascript:parent.addItem('"+ofId+"');", "add", iconAdd);
+        first = _addLink(topRightDocument, buttons, first, "javascript:parent.changeAutoscanDirectory('add','"+ofId+"', true);", "add as autoscan dir", iconAddAutoscan);
     }
     else
     {
@@ -269,13 +269,13 @@ function updateItems(ajaxRequest)
         }
         
         if (addLink)
-            first = _addLink(buttons, first, "javascript:parent.userAddItemStart();", "add Item", iconNewItem);
+            first = _addLink(topRightDocument, buttons, first, "javascript:parent.userAddItemStart();", "add Item", iconNewItem);
         if (editLink)
-            first = _addLink(buttons, first, "javascript:parent.userEditItemStart('"+ofId+"');", "edit", iconEdit);
+            first = _addLink(topRightDocument, buttons, first, "javascript:parent.userEditItemStart('"+ofId+"');", "edit", iconEdit);
         if (removeThisLink)
-            first = _addLink(buttons, first, "javascript:parent.removeItem('"+ofId+"', false);", "remove", iconRemoveThis);
+            first = _addLink(topRightDocument, buttons, first, "javascript:parent.removeItem('"+ofId+"', false);", "remove", iconRemoveThis);
         if (removeAllLink)
-            first = _addLink(buttons, first, "javascript:parent.removeItem('"+ofId+"', true);", "remove all", iconRemoveAll);
+            first = _addLink(topRightDocument, buttons, first, "javascript:parent.removeItem('"+ofId+"', true);", "remove all", iconRemoveAll);
         if (autoscanLink)
         {
             if (autoscanType == "2")
@@ -286,12 +286,12 @@ function updateItems(ajaxRequest)
             {
                 var action = (autoscanType == "1" ? "remove" : "add");
                 var icon = (autoscanType == "1" ? iconRemoveAutoscan : iconAddAutoscan);
-                first = _addLink(buttons, first,  "javascript:parent.changeAutoscanDirectory('"+action+"','"+ofId+"', false);", action+" as autoscan dir", icon);
+                first = _addLink(topRightDocument, buttons, first,  "javascript:parent.changeAutoscanDirectory('"+action+"','"+ofId+"', false);", action+" as autoscan dir", icon);
             }
         }
     }
     itemsEl.appendChild(pagingPar);
-    var itemsTable = topRightDocument.createElement("div");
+    var itemsTable = rightDocument.createElement("div");
     itemsTable.setAttribute("class", "itemsTable");
     itemsEl.appendChild(itemsTable);
     for (var i = 0; i < children.length; i++)
@@ -317,17 +317,17 @@ function updateItems(ajaxRequest)
         {
             //itemEntry.appendChild(rightDocument.createTextNode(" - "));
             
-            _addLink(itemButtons, true, "javascript:parent.addItem(\""+item.getAttribute("id")+"\");", "add", iconAdd);
+            _addLink(rightDocument, itemButtons, true, "javascript:parent.addItem(\""+item.getAttribute("id")+"\");", "add", iconAdd);
         }
         else
         {
             //itemEntry.appendChild(rightDocument.createTextNode(" - "));
             
-            _addLink(itemButtons, true, "javascript:parent.removeItem(\""+item.getAttribute("id")+"\", false);", "remove this", iconRemoveThis);
+            _addLink(rightDocument, itemButtons, true, "javascript:parent.removeItem(\""+item.getAttribute("id")+"\", false);", "remove this", iconRemoveThis);
             if (isVirtual)
             {
-                _addLink(itemButtons, false, "javascript:parent.removeItem(\""+item.getAttribute("id")+"\", true);", "remove all", iconRemoveAll);
-                _addLink(itemButtons, false, "javascript:parent.userEditItemStart('"+item.getAttribute("id")+"');", "edit", iconEdit);
+                _addLink(rightDocument, itemButtons, false, "javascript:parent.removeItem(\""+item.getAttribute("id")+"\", true);", "remove all", iconRemoveAll);
+                _addLink(rightDocument, itemButtons, false, "javascript:parent.userEditItemStart('"+item.getAttribute("id")+"');", "edit", iconEdit);
             }
             
             itemLink.setAttribute("href", xmlGetElementText(item, "res"));
@@ -346,23 +346,23 @@ function updateItems(ajaxRequest)
     topItemRoot.replaceChild(topItemsEl, topItemRoot.firstChild);
 }
 
-function _addLink(addToElement, first, href, text, icon, seperator, target)
+function _addLink(useDocument, addToElement, first, href, text, icon, seperator, target)
 {
     /*
     if (! first)
         addToElement.appendChild(rightDocument.createTextNode((seperator ? seperator : ", ")));
     */
     
-    var link = rightDocument.createElement("a");
+    var link = useDocument.createElement("a");
     addToElement.appendChild(link);
     link.setAttribute("href", href);
     if (target)
         link.setAttribute("target", target);
     
     if (icon)
-        appendImgNode(rightDocument, link, text, icon);
+        appendImgNode(useDocument, link, text, icon);
     else
-        link.appendChild(rightDocument.createTextNode(text));
+        link.appendChild(useDocument.createTextNode(text));
     return false; // to set the next "first"
 }
 
