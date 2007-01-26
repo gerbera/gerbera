@@ -741,7 +741,7 @@ String unescape_amp(String string)
     while (last <= len);
     
     stringBase->len = str - stringBase->data - 1;
-    assert(stringBase->len == strlen(stringBase->data));
+    assert(stringBase->len == (int)strlen(stringBase->data));
     return String(stringBase);
 }
 
