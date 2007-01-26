@@ -266,7 +266,7 @@ protected:
     
     
     void rescanDirectory(int objectID, int scanID, scan_mode_t scanMode); 
-    void _rescanDirectory(int containerID, int scanID, scan_mode_t scanMode, scan_level_t scanLevel);
+    void _rescanDirectory(int containerID, int scanID, scan_mode_t scanMode, scan_level_t scanLevel, zmm::Ref<CMTask> task=nil);
     /* for recursive addition */
     void addRecursive(zmm::String path, bool hidden=false, zmm::Ref<CMTask> task=nil);
     //void addRecursive2(zmm::Ref<DirCache> dirCache, zmm::String filename, bool recursive);

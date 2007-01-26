@@ -263,14 +263,8 @@ Ref<Array<CMTask> > ContentManager::getTasklist()
     if (t == nil)
         return nil;
 
-    if (t->isValid())
-    {
-        if (taskList == nil)
-        {
-            taskList = Ref<Array<CMTask> >(new Array<CMTask>());
-        }
-        taskList->append(t); 
-    }
+    taskList = Ref<Array<CMTask> >(new Array<CMTask>());
+    taskList->append(t); 
 
     int qsize = taskQueue1->size();
 
@@ -278,13 +272,7 @@ Ref<Array<CMTask> > ContentManager::getTasklist()
     {
         Ref<CMTask> t = taskQueue1->get(i);
         if (t->isValid())
-        {
-            if (taskList == nil)
-            {
-                taskList = Ref<Array<CMTask> >(new Array<CMTask>()); 
-            }
             taskList->append(t);
-        }
     }
 
     qsize = taskQueue2->size();
@@ -292,13 +280,7 @@ Ref<Array<CMTask> > ContentManager::getTasklist()
     {
         Ref<CMTask> t = taskQueue2->get(i);
         if (t->isValid())
-        {
-            if (taskList == nil)
-            {
-                taskList = Ref<Array<CMTask> >(new Array<CMTask>()); 
-            }
-            taskList->append(t);
-        }
+            taskList = Ref<Array<CMTask> >(new Array<CMTask>()); 
     }
 
     return taskList;
@@ -411,7 +393,7 @@ int ContentManager::ensurePathExistence(zmm::String path)
     return containerID;
 }
 
-void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t scanMode, scan_level_t scanLevel)
+void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t scanMode, scan_level_t scanLevel, Ref<CMTask> task)
 {
     log_debug("start\n");
     int ret;
@@ -518,7 +500,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
     // request only items if non-recursive scan is wanted
     Ref<DBRHash<int> > list = storage->getObjects(containerID, !adir->getRecursive());
 
-    while (((dent = readdir(dir)) != NULL) && (!shutdownFlag))
+    while (((dent = readdir(dir)) != NULL) && (!shutdownFlag) && (task == nil || ((task != nil) && task->isValid())))
     {
         char *name = dent->d_name;
         if (name[0] == '.')
@@ -621,7 +603,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
     
     closedir(dir);
 
-    if (shutdownFlag)
+    if ((shutdownFlag) || ((task != nil) && !task->isValid()))
         return;
 
     if (list != nil && list->size() > 0)
@@ -1453,7 +1435,7 @@ void CMRescanDirectoryTask::run(Ref<ContentManager> cm)
     if (dir == nil)
         return;
 
-    cm->_rescanDirectory(objectID, dir->getScanID(), dir->getScanMode(), dir->getScanLevel());
+    cm->_rescanDirectory(objectID, dir->getScanID(), dir->getScanMode(), dir->getScanLevel(), Ref<CMTask> (this));
     dir->decTaskCount();
     
     if (dir->getTaskCount() == 0)
