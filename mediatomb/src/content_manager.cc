@@ -1306,7 +1306,7 @@ void ContentManager::rescanDirectory(int objectID, int scanID, scan_mode_t scanM
     else
         level = _("full");
 
-    task->setDescription(_("performing ") + level + _(" scan on ") + dir->getLocation());
+    task->setDescription(_("performing ") + level + " scan on " + dir->getLocation() + '/');
     addTask(task, true); // adding with low priority
 }
 

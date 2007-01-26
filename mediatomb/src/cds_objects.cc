@@ -341,7 +341,7 @@ String CdsItem::getVirtualPath()
     Ref<Storage> storage = Storage::getInstance();
     Ref<CdsObject> cont = storage->loadObject(getParentID());
     String location = cont->getVirtualPath();
-    location = location + _("/") + getTitle();
+    location = location + '/' + getTitle();
 
     if (!string_ok(location))
         throw _Exception(_("virtual location not available"));
