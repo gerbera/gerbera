@@ -253,7 +253,7 @@ public:
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
     virtual void copyTo(zmm::Ref<CdsObject> obj);
-
+    
     /// \brief Checks if current object is equal to obj.
     /// \param obj object to check against
     /// \param exactly tells to check really everything or only the "public" version
@@ -269,13 +269,13 @@ public:
     
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     virtual void validate();
-
+    
     /// \brief Frees unnecessary memory
     void optimize();
-
+    
     static zmm::Ref<CdsObject> createObject(unsigned int objectType);
-
-	friend int CdsObjectTitleComparator(void *arg1, void *arg2);
+    
+    friend int CdsObjectTitleComparator(void *arg1, void *arg2);
 };
 
 /// \brief An Item in the content directory.

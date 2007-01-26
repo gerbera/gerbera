@@ -302,9 +302,9 @@ void CdsObject::optimize()
 
 int CdsObjectTitleComparator(void *arg1, void *arg2)
 {
-	/// \todo get rid of getTitle() to avod unnecessary reference counting ops
-	return strcmp(((CdsObject *)arg1)->title.c_str(),
-			      ((CdsObject *)arg2)->title.c_str());
+    /// \todo get rid of getTitle() to avod unnecessary reference counting ops
+    return strcmp(((CdsObject *)arg1)->title.c_str(),
+                ((CdsObject *)arg2)->title.c_str());
 }
 
 

@@ -43,7 +43,7 @@ using namespace zmm;
 
 Object::Object()
 {
-	atomic_set(&_ref_count, 0);
+    atomic_set(&_ref_count, 0);
 #ifdef ATOMIC_NEED_MUTEX
     pthread_mutex_init(&mutex, NULL);
 #endif
@@ -60,19 +60,19 @@ void Object::retain()
 #ifdef ATOMIC_NEED_MUTEX
     atomic_inc(&_ref_count, &mutex);
 #else
-	atomic_inc(&_ref_count);
+    atomic_inc(&_ref_count);
 #endif
 }
 void Object::release()
 {
 #ifdef ATOMIC_NEED_MUTEX
-	if(atomic_dec(&_ref_count, &mutex))
+    if(atomic_dec(&_ref_count, &mutex))
 #else
     if(atomic_dec(&_ref_count))
 #endif
-	{
-		delete this;
-	}
+    {
+        delete this;
+    }
 }
 
 int Object::getRefCount()

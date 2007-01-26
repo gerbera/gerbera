@@ -80,10 +80,10 @@ v0.8.1
           and used by import scripts.
         * added configuration options to specify which aux fields should 
           be extracted and filled by the library.
-	    * added mysql support
+        * added mysql support
         * refined configure script, almost all dependencies are now
           optional.
-	    * changed database, (not backward compatible again)
+        * changed database, (not backward compatible again)
         * when an item is deleted all referenced items are deleted as well
         * added option to specify an alternative magic file
 
