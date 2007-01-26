@@ -87,21 +87,7 @@ void web::items::process()
     }
     items->addAttribute(_("success"), _("1"));
     
-    String location = nil;
-    if (obj->getID() == CDS_ID_ROOT)
-    {
-        location = _("/");
-    }
-    else if (obj->getID() == CDS_ID_FS_ROOT)
-    {
-        location = _("/") + storage->getFsRootName();
-    }
-    else if (string_ok(obj->getLocation()))
-    {
-        location = obj->getLocation();
-        if (! obj->isVirtual())
-            location = _("/") + storage->getFsRootName() + location;
-    }
+    String location = obj->getVirtualPath(); 
     if (string_ok(location))
         items->addAttribute(_("location"), location);
     items->addAttribute(_("virtual"), (obj->isVirtual() ? _("1") : _("0")));

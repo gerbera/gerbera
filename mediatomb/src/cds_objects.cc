@@ -35,6 +35,7 @@
 
 #include "cds_objects.h"
 #include "tools.h"
+#include "storage.h"
 #include "mxml/mxml.h"
 
 using namespace zmm;
@@ -305,6 +306,47 @@ int CdsObjectTitleComparator(void *arg1, void *arg2)
     /// \todo get rid of getTitle() to avod unnecessary reference counting ops
     return strcmp(((CdsObject *)arg1)->title.c_str(),
                 ((CdsObject *)arg2)->title.c_str());
+}
+
+String CdsContainer::getVirtualPath()
+{
+    String location;
+    if (getID() == CDS_ID_ROOT)
+    {
+        location = _("/");
+    }
+    else if (getID() == CDS_ID_FS_ROOT)
+    {
+        Ref<Storage> storage = Storage::getInstance();
+        location = _("/") + storage->getFsRootName();
+    }
+    else if (string_ok(getLocation()))
+    {
+        location = getLocation();
+        if (! isVirtual())
+        {
+            Ref<Storage> storage = Storage::getInstance();
+            location = _("/") + storage->getFsRootName() + location;
+        }
+    }
+
+    if (!string_ok(location))
+        throw _Exception(_("virtual location not available"));
+
+    return location;
+}
+
+String CdsItem::getVirtualPath()
+{
+    Ref<Storage> storage = Storage::getInstance();
+    Ref<CdsObject> cont = storage->loadObject(getParentID());
+    String location = cont->getVirtualPath();
+    location = location + _("/") + getTitle();
+
+    if (!string_ok(location))
+        throw _Exception(_("virtual location not available"));
+
+    return location;
 }
 
 

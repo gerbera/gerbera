@@ -274,6 +274,9 @@ public:
     void optimize();
     
     static zmm::Ref<CdsObject> createObject(unsigned int objectType);
+
+    /// \brief Returns the path to the object as it appears in the database tree.
+    virtual zmm::String getVirtualPath() = 0; 
     
     friend int CdsObjectTitleComparator(void *arg1, void *arg2);
 };
@@ -306,6 +309,9 @@ public:
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     virtual void validate();
+
+    /// \brief Returns the path to the object as it appears in the database tree.
+    virtual zmm::String getVirtualPath();
 };
 
 /// \brief An Active Item in the content directory.
@@ -523,6 +529,9 @@ public:
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     virtual void validate();
+    
+    /// \brief Returns the path to the object as it appears in the database tree.
+    virtual zmm::String getVirtualPath();
 };
 
 #endif // __CDS_OBJECTS_H__

@@ -1152,7 +1152,7 @@ void ContentManager::addFile(zmm::String path, bool recursive, bool async, bool 
     if (async)
     {
         Ref<CMTask> task(new CMAddFileTask(path, recursive, hidden));
-        task->setDescription(_("Adding ") + path);
+        task->setDescription(_("adding ") + path);
         addTask(task, lowPriority);
     }
     else
@@ -1228,8 +1228,6 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
             *desc << '/' << objectPath->get(i)->getTitle();
         */
         Ref<CMTask> task(new CMRemoveObjectTask(objectID, all));
-        //task->setDescription(desc->toString());
-        task->setDescription(_("description missing!!!!!!!!!!!"));
         Ref<Storage> storage = Storage::getInstance();
         String path;
         Ref<CdsObject> obj;
@@ -1237,7 +1235,11 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
         try
         {
             obj = storage->loadObject(objectID);
-            path = obj->getLocation(); 
+            path = obj->getLocation();
+
+            String vpath = obj->getVirtualPath();
+            if (string_ok(vpath))
+                task->setDescription(_("removing ") + obj->getVirtualPath());
         }
         catch (Exception e)
         {
@@ -1293,12 +1295,18 @@ void ContentManager::rescanDirectory(int objectID, int scanID, scan_mode_t scanM
 {
     // building container path for the description
     Ref<CMTask> task(new CMRescanDirectoryTask(objectID, scanID, scanMode));
-    task->setDescription(_("Autoscan")); /// \todo description should contain the path that we are rescanning
     Ref<AutoscanDirectory> dir = getAutoscanDirectory(scanID, scanMode);
     if (dir == nil)
         return;
 
     dir->incTaskCount();
+    String level;
+    if (dir->getScanLevel() == BasicScanLevel)
+        level = _("basic");
+    else
+        level = _("full");
+
+    task->setDescription(_("performing ") + level + _(" scan on ") + dir->getLocation());
     addTask(task, true); // adding with low priority
 }
 
