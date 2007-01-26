@@ -538,7 +538,8 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
         }
         else if (! getContainers && getItems)
         {
-            *qb << " AND " << TQD('f',"object_type") << " & "
+            *qb << " AND (" << TQD('f',"object_type") << " & "
+                << quote(OBJECT_TYPE_ITEM) << ") = " 
                 << quote(OBJECT_TYPE_ITEM)
                 << " ORDER BY " << TQD('f',"dc_title");
         }
@@ -596,7 +597,8 @@ int SQLStorage::getChildCount(int contId, bool containers, bool items)
     if (containers && ! items)
         *qb << " AND " << TQ("object_type") << '=' << OBJECT_TYPE_CONTAINER;
     else if (items && ! containers)
-        *qb << " AND " << TQ("object_type") << " & " << OBJECT_TYPE_ITEM;
+        *qb << " AND (" << TQ("object_type") << " & " << OBJECT_TYPE_ITEM
+            << ") = " << OBJECT_TYPE_ITEM;
     res = select(qb);
     if (res != nil && (row = res->nextRow()) != nil)
     {
