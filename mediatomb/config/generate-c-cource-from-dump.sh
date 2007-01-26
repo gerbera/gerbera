@@ -13,6 +13,12 @@ case "$1" in
   VARIABLE=sqlite3_create_sql
   FN_FINAL=sqlite3_create_sql.h
   ;;
+ "pgsql"*)
+  FN=pgsql.sql
+  DEF=PG_CREATE_SQL
+  VARIABLE=pgsql_create_sql
+  FN_FINAL=pgsql_create_sql.h
+  ;;
  *)
   echo 'illegal parameter'
   exit
