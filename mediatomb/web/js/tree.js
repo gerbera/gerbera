@@ -46,10 +46,8 @@ var imageMinus = 'minus';
 var imageMinusNoRoot = 'minus_no_root';
 var imageMinusLastNoRoot = 'minus_last_no_root';
 var imageMinusLast = 'minus_last';
-var imageMinusNoLines = 'minus_nolines';
 var imagePlusNoRoot = 'plus_no_root';
 var imagePlusLastNoRoot = 'plus_last_no_root';
-var imagePlusNoLines = 'plus_nolines';
 var imagePlus = 'plus';
 var imagePlusLast = 'plus_last';
 
