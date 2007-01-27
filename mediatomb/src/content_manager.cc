@@ -530,7 +530,10 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
         // it is possible that someone hits remove while the container is being scanned
         // in this case we will invalidate the autoscan entry
         if (adir->getScanID() == INVALID_SCAN_ID)
+        {
+            closedir(dir);
             return;
+        }
 
         if (S_ISREG(statbuf.st_mode))
         {
@@ -593,7 +596,10 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
                 // it is possible that someone hits remove while the container is being scanned
                 // in this case we will invalidate the autoscan entry
                 if (adir->getScanID() == INVALID_SCAN_ID)
+                {
+                    closedir(dir);
                     return;
+                }
                 
                 // add directory, recursive, async, hidden flag, low priority
                 addFile(path, true, true, adir->getHidden(), true);
