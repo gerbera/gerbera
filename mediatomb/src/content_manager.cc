@@ -373,9 +373,12 @@ void ContentManager::_removeObject(int objectID, bool all)
     Ref<Storage> storage = Storage::getInstance();
     
     Ref<Storage::ChangedContainers> changedContainers = storage->removeObject(objectID, all);
-
-    SessionManager::getInstance()->containerChangedUI(changedContainers->ui);
-    UpdateManager::getInstance()->containersChanged(changedContainers->upnp);
+    
+    if (changedContainers != nil)
+    {
+        SessionManager::getInstance()->containerChangedUI(changedContainers->ui);
+        UpdateManager::getInstance()->containersChanged(changedContainers->upnp);
+    }
     
     // reload accounting
     //loadAccounting();
@@ -615,8 +618,11 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
     if (list != nil && list->size() > 0)
     {
         Ref<Storage::ChangedContainers> changedContainers = storage->removeObjects(list);
-        SessionManager::getInstance()->containerChangedUI(changedContainers->ui);
-        UpdateManager::getInstance()->containersChanged(changedContainers->upnp);
+        if (changedContainers != nil)
+        {
+            SessionManager::getInstance()->containerChangedUI(changedContainers->ui);
+            UpdateManager::getInstance()->containersChanged(changedContainers->upnp);
+        }
     }
 
 
