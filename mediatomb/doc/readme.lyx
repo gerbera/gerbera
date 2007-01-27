@@ -1019,10 +1019,6 @@ After creating the database and making the appropriate changes in your MediaTomb
 \end_layout
 
 \begin_layout Section
-Setup And Configuration
-\end_layout
-
-\begin_layout Subsection
 Command Line Options
 \end_layout
 
@@ -1040,7 +1036,7 @@ mediatomb --help
 Note: the command line options override settings in the configuration file!
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
 IP Address
 \end_layout
 
@@ -1053,7 +1049,7 @@ The server will bind to the given IP address, currently we can not bind
  to multiple interfaces so binding to 0.0.0.0 will not be possible.
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
 Port
 \end_layout
 
@@ -1068,7 +1064,7 @@ Specify the server port that will be used for the web user interface, for
  case it is possible that the port will change upon server restart.
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
 Configuration File
 \end_layout
 
@@ -1091,7 +1087,7 @@ config.xml
  The filename must be absolute.
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
 Daemon Mode
 \end_layout
 
@@ -1104,7 +1100,7 @@ Run the server in background, MediaTomb will shutdown on SIGTERM, SIGINT
  and restart on SIGHUP.
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
 Write PID File
 \end_layout
 
@@ -1117,7 +1113,7 @@ Specify a file that will hold the server process ID, the filename must be
  absolute.
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
 Run Under Different Username
 \end_layout
 
@@ -1130,7 +1126,7 @@ Run MediaTomb under the specified username, this is especially useful in
  combination with the daemon mode.
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
 Run Under Different Group
 \end_layout
 
@@ -1143,7 +1139,7 @@ Run MediaTomb under the specified group, this is especially useful in combinatio
 n with the daemon mode.
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
 Add Content
 \end_layout
 
@@ -1158,7 +1154,7 @@ Add the specified directory or filename to the database without UI interaction.
  If path is a file, then only the given file will be imported.
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
 Log To File
 \end_layout
 
@@ -1171,7 +1167,7 @@ Do not output log messages to stdout, but redirect everything to a specified
  file.
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
 Display Command Line Summary
 \end_layout
 
@@ -1183,7 +1179,7 @@ Display Command Line Summary
 Print a summary about the available command line options.
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Configuration File
 \end_layout
 
@@ -1225,22 +1221,51 @@ Default if missing
  
 \end_layout
 
+\begin_layout Standard
+The root tag of MediaTomb configuration is:
+\end_layout
+
+\begin_layout Code
+<config>
+\end_layout
+
+\begin_layout Subsection
+Server Settings
+\end_layout
+
+\begin_layout Standard
+These settings define the server configuration, this includes UPnP behaviour,
+ selection of database, accounts for the UI as well as installation loactions
+ of shared data.
+\end_layout
+
+\begin_layout Description
+(Required) This section defines the server configuration parameters.
+\end_layout
+
 \begin_layout Code
 <server> 
 \end_layout
 
-\begin_layout Standard
-(Required) This section defines the server configuration parameters.
+\begin_layout Code
+
 \end_layout
 
-\begin_layout Standard
-<ui enabled="no"/> (Required) Enables or disables the web user interface,
- change to "yes" in order to enable it.
+\begin_layout Code
+<ui enabled="no"/> 
 \end_layout
 
-\begin_layout Standard
-<accounts enabled="yes" session-timeout="30"/> (Required) Specifies if accounts
- are enabled or disabled.
+\begin_layout Description
+(Required) Enables or disables the web user interface, change to "yes" in
+ order to enable it.
+\end_layout
+
+\begin_layout Code
+<accounts enabled="yes" session-timeout="30"/>
+\end_layout
+
+\begin_layout Description
+(Required) Specifies if accounts are enabled or disabled.
  The session-timeout specifies the timeout interval in minutes.
  The server checks every five minutes for sessions that have timed out,
  therefore in the worst case the session times out after session-timeout
@@ -1251,25 +1276,27 @@ Default if missing
 Accounts can be defined as shown below:
 \end_layout
 
-\begin_layout Standard
-<account user="name" password="password"/> There can be multiple users,
- however this is mainly a feature for the future.
+\begin_layout Code
+<account user="name" password="password"/>
+\end_layout
+
+\begin_layout Description
+(Optional) There can be multiple users, however this is mainly a feature
+ for the future.
  Right now there are no per-user permissions.
 \end_layout
 
-\begin_layout Standard
-<port>50555</port> (Optional) Specifies the port where the server will be
- listening for HTTP requests.
- Note, that because of the implementation in the UPnP SDK only ports above
- 49152 are supported.
+\begin_layout Code
+<port>0</port>
 \end_layout
 
-\begin_layout Standard
-<ip>192.168.0.23</ip> (Optional) Specifies the IP address to bind to.
- (Optional) <name>MediaTomb</name> (Default if missing: MediaTomb) Server
- friendly name, you will see this on your devices that you use to access
- the server.
- 
+\begin_layout Description
+(Optional) Specifies the port where the server will be listening for HTTP
+ requests.
+ Note, that because of the implementation in the UPnP SDK only ports above
+ 49152 are supported.
+ The value of zero means, that a port will be automatically selected by
+ the SDK.
 \end_layout
 
 \end_body
