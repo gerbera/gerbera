@@ -586,9 +586,7 @@ web_server_destroy( void )
 
     if( bWebServerState == WEB_SERVER_ENABLED ) {
         membuffer_destroy( &gDocumentRootDir );
-        // I am not in the mood to figure out why the counter is not zero
-        // at this point
-        *gAliasDoc.ct = 0;
+       
         alias_release( &gAliasDoc );
 
         ithread_mutex_lock( &gWebMutex );
