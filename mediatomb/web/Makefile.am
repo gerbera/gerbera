@@ -7,7 +7,6 @@ _DIST_FILES_IMAGES = \
 ./icons/nanotree/images/minus_last.png \
 ./icons/nanotree/images/white.png \
 ./icons/nanotree/images/plus_no_root.png \
-./icons/nanotree/images/minus_nolines.png \
 ./icons/nanotree/images/line.png \
 ./icons/nanotree/images/plus_last_no_root.png \
 ./icons/nanotree/images/minus_no_root.png \
@@ -15,7 +14,6 @@ _DIST_FILES_IMAGES = \
 ./icons/nanotree/images/t.png \
 ./icons/nanotree/images/plus_last.png \
 ./icons/nanotree/images/lastnode.png \
-./icons/nanotree/images/plus_nolines.png \
 ./icons/nanotree/images/folder_closed.png \
 ./icons/nanotree/images/folder_open.png \
 ./icons/nanotree/images/autoscan_folder_closed.png \
