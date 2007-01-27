@@ -37,6 +37,7 @@
 #include "request_handler.h"
 #include "web_request_handler.h"
 #include "cds_objects.h"
+#include "content_manager.h"
 
 namespace web
 {
@@ -134,12 +135,20 @@ public:
     virtual void process();
 };
 
-/// \brief autoscan add and remove
+/// \brief UI updates
 class update : public WebRequestHandler
 {
 public:
-    //update();
     virtual void process();
+};
+
+/// \brief task list and task cancel
+class tasks : public WebRequestHandler
+{
+public:
+    virtual void process();
+private:
+    void appendTask(zmm::Ref<mxml::Element> el, zmm::Ref<CMTask> task);
 };
 
 

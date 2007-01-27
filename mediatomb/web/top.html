@@ -68,22 +68,21 @@
         <div id="topDiv" style="color: black; display:none; background-image:url(icons/film.png); background-repeat:repeat-x; background-position: 40px 15px;">
             <div align="center">
             <span id="statusIdle">
-            <span id="statusNoUpdates"><img src="icons/status.png" class="status"></span>
+            <span id="statusNoUpdates"><img src="icons/status.png" width="25" height="38" alt="idle" class="status"></span>
             <span id="statusUpdatesPending" style="display:none">
                 <a href="javascript:parent.getUpdates(true);">
-                    <img src="icons/status_updates_pending.png" border="0" class="status">
+                    <img src="icons/status_updates_pending.png" width="25" height="38" alt="updates pending..." border="0" class="status">
                 </a>
             </span>
             </span>
-            <span id="statusWorking" style="display:none"><img src="icons/status_loading.png" class="status"></span>
-            <img src="icons/mediatomb.png" class="logo">
-            <a id="logout_link" href="javascript:parent.logout();"><img id="logout_img" alt="Logout" src="/icons/stock_exit.png" border="0"></a>
+            <span id="statusWorking" style="display:none"><img src="icons/status_loading.png" width="25" height="38" alt="loading..." class="status"></span>
+            <img src="icons/mediatomb.png" width="253" height="81" alt="MEDIATOMB" class="logo">
+            <a id="logout_link" href="javascript:parent.logout();"><img id="logout_img" width="30" height="20" alt="Logout" src="/icons/stock_exit.png" border="0"></a>
             </div>
-            <!-- <hr>
-            <a id="type_db" href="javascript:parent.setType('db');">Database</a>
-            &nbsp;&nbsp;|&nbsp;&nbsp;
-            <a id="type_fs" href="javascript:parent.setType('fs');">Filesystem</a>
-            -->
+            <div class="taskDiv">
+             <table class="taskTable" width="100%"><tr><td id="currentTask">&nbsp;</td>
+             <td align="right">other Tasks | Autoscans</td></tr></table>
+            </div>
         </div>
         <noscript>
             <p align="center" style="font-size: 25px; font-weight: bold;">MEDIATOMB</p>

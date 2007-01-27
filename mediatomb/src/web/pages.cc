@@ -51,6 +51,7 @@ WebRequestHandler *create_web_request_handler(String page)
     if (page == "edit_save") return new web::edit_save();
     if (page == "autoscan") return new web::autoscan();
     if (page == "update") return new web::update();
+    if (page == "tasks") return new web::tasks();
     
     throw _Exception(_("Unknown page: ") + page);
 }

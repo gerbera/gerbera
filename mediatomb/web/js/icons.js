@@ -30,21 +30,23 @@
 /* icons for items.js */
 
 var iconPath = '/icons/';
-var iconNewItem = iconPath + 'document-new.png';
-var iconAdd = iconPath + 'stock-add.png';
-var iconEdit = iconPath + 'stock_edit.png';
-var iconRefresh = iconPath + 'view-refresh.png';
-var iconRemoveThis = iconPath + 'remove_this.png';
-var iconRemoveAll = iconPath + 'remove_all.png';
-var iconFirst = iconPath + 'go-first.png';
-var iconPrevious = iconPath + 'go-previous.png';
-var iconNext = iconPath + 'go-next.png';
-var iconLast = iconPath + 'go-last.png';
-var iconAddAutoscan = iconPath + 'add_as_autoscan.png';
-var iconRemoveAutoscan = iconPath + 'remove_autoscan.png';
-var iconContainer = iconPath + 'folder_open.png';
-var iconContainerAutoscan = iconPath + 'autoscan_folder_open.png';
-var iconContainerAutoscanConfig = iconPath + 'autoscan_config_folder_open.png';
+
+var iconNewItem = {src: iconPath + 'document-new.png', width: 30, height: 20};
+var iconAdd = {src: iconPath + 'stock-add.png', width: 30, height: 20};
+var iconEdit = {src: iconPath + 'stock_edit.png', width: 30, height: 20};
+var iconRemoveThis = {src: iconPath + 'remove_this.png', width: 30, height: 20};
+var iconRemoveAll = {src: iconPath + 'remove_all.png', width: 30, height: 20};
+var iconAddAutoscan = {src: iconPath + 'add_as_autoscan.png', width: 30, height: 20};
+var iconRemoveAutoscan = {src: iconPath + 'remove_autoscan.png', width: 30, height: 20};
+
+var iconFirst = {src: iconPath + 'go-first.png', width: 32, height: 20};
+var iconPrevious = {src: iconPath + 'go-previous.png', width: 32, height: 20};
+var iconNext = {src: iconPath + 'go-next.png', width: 32, height: 20};
+var iconLast = {src: iconPath + 'go-last.png', width: 32, height: 20};
+
+var iconContainer = {src: iconPath + 'folder_open.png', width: 24, height: 29};
+var iconContainerAutoscan = {src: iconPath + 'autoscan_folder_open.png', width: 24, height: 29};
+var iconContainerAutoscanConfig = {src: iconPath + 'autoscan_config_folder_open.png', width: 24, height: 29};
 
 /* icons for tree.js */
 

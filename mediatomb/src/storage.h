@@ -165,8 +165,8 @@ public:
     public:
         ChangedContainers()
         {
-         upnp = zmm::Ref<zmm::IntArray>(new zmm::IntArray());
-         ui = zmm::Ref<zmm::IntArray>(new zmm::IntArray());
+            upnp = zmm::Ref<zmm::IntArray>(new zmm::IntArray());
+            ui = zmm::Ref<zmm::IntArray>(new zmm::IntArray());
         }
         zmm::Ref<zmm::IntArray> upnp;
         zmm::Ref<zmm::IntArray> ui;
@@ -183,8 +183,6 @@ public:
     /// the removed object, if not NULL
     /// \return changed container ids
     virtual zmm::Ref<ChangedContainers> removeObject(int objectID, bool all) = 0;
-    
-    //virtual zmm::Ref<zmm::Array<CdsObject> > getObjectPath(int objectID);
     
     /// \brief Get all objects under the given parentID.
     /// \param parentID parent container

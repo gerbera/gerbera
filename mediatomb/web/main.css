@@ -30,15 +30,21 @@ body
 {
     background-color:#dddddd;
     font-family: "Helvetica", "Arial", "MS Sans Serif", sans-serif;
-    font-size: 10pt;
+    font-size: 13px;
     margin:0;
     padding:0;
+}
+
+/* IE png-fix from http://webfx.eae.net/dhtml/pngbehavior/pngbehavior.html */
+img
+{
+   behavior: url("js/pngbehavior.htc");
 }
 
 input
 {
     font-family: "Helvetica", "Arial", "MS Sans Serif", sans-serif;
-    font-size: 10pt;
+    font-size: 13px;
 }
 
 a
@@ -72,72 +78,69 @@ div.topDiv
     /* padding:5px; */
 }
 
+div.taskDiv
+{
+    margin-top:-4px;
+    margin-left:20px;
+    margin-right:20px;
+}
+
+/*
 div.itemsTable
 {
     display:table;
     width:100%;
 }
+*/
 
-div.contTable
+table.contTable
 {
-    display:table;
-    width:100%;
     padding-top:5px;
 }
 
-div.itemRowA
+tr.itemRowA
 {
-    display:table-row;
     background-color:#cccccc;
 }
 
-div.itemRowB
+tr.itemRowB
 {
-    display:table-row;
     background-color:#aaaaaa;
 }
 
-div.contRow
-{
-    display:table-row;
-}
-
-div.itemRowA:hover
+tr.itemRowA:hover
 {
     background-color:#888888;
 }
 
-div.itemRowB:hover
+tr.itemRowB:hover
 {
     background-color:#888888;
 }
 
-div.contEntry
+td.contEntry
 {
     vertical-align:middle;
-    display:table-cell;
     padding-left:5px;
 }
 
-div.contEntry img
+td.contEntry img
 {
     vertical-align:middle;
 }
 
-div.itemEntry
+td.itemEntry
 {
     padding:3px;
     padding-left:5px;
     vertical-align:middle;
-    display:table-cell;
 }
 
-div.itemButtons
+td.itemButtons
 {
     padding:3px;
     padding-right:12px;
     vertical-align:middle;
-    display:table-cell;
     text-align:right;
 }
 

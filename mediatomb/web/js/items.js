@@ -48,8 +48,9 @@ function itemChangeType()
     var fsItemRoot = rightDocument.getElementById("item_fs_div");
     
     itemRoot = isTypeDb() ? dbItemRoot : fsItemRoot;
-    if (oldItemRoot && oldItemRoot!=itemRoot) Element.hide(oldItemRoot);
-    Element.show(itemRoot);
+    var dummy;
+    if (oldItemRoot && oldItemRoot!=itemRoot) dummy = Element.hide(oldItemRoot);
+    dummy = Element.show(itemRoot);
     
     var oldTopItemRoot = topItemRoot;
     var dbTopItemRoot = topRightDocument.getElementById("item_db_div");
@@ -190,14 +191,16 @@ function updateItems(ajaxRequest)
     topTopDiv.setAttribute("class", "topDiv");
     topItemsEl.appendChild(topTopDiv);
     
-    var contTable = topRightDocument.createElement("div");
+    var contTable = topRightDocument.createElement("table");
+    contTable.setAttribute("width", "100%");
     contTable.setAttribute("class", "contTable");
+    var contTableBody = topRightDocument.createElement("tbody");
+    contTable.appendChild(contTableBody);
     topTopDiv.appendChild(contTable);
-    var contRow = topRightDocument.createElement("div");
-    contRow.setAttribute("class", "contRow");
-    contTable.appendChild(contRow);
+    var contRow = topRightDocument.createElement("tr");
+    contTableBody.appendChild(contRow);
     
-    var leftDiv = topRightDocument.createElement("div");
+    var leftDiv = topRightDocument.createElement("td");
     leftDiv.setAttribute("class", "contEntry");
     
     var contIcon = topRightDocument.createElement("img");
@@ -207,7 +210,7 @@ function updateItems(ajaxRequest)
     pathEl.setAttribute("class", "contText");
     leftDiv.appendChild(pathEl);
     
-    var buttons = topRightDocument.createElement("div");
+    var buttons = topRightDocument.createElement("td");
     buttons.setAttribute("class", "itemButtons");
     
     contRow.appendChild(leftDiv);
@@ -215,8 +218,10 @@ function updateItems(ajaxRequest)
     
     if (useFiles)
     {
-        contIcon.setAttribute("src", iconContainer);
+        contIcon.setAttribute("src", iconContainer.src);
         contIcon.setAttribute("alt", "directory:");
+        contIcon.setAttribute("width", iconContainer.width);
+        contIcon.setAttribute("height", iconContainer.height);
         
         pathEl.appendChild(topRightDocument.createTextNode(" /Filesystem" + path));
         
@@ -232,8 +237,10 @@ function updateItems(ajaxRequest)
         if (autoscanType == '2')
             iconSrc = iconContainerAutoscanConfig;
         
-        contIcon.setAttribute("src", iconSrc);
+        contIcon.setAttribute("src", iconSrc.src);
         contIcon.setAttribute("alt", "container:");
+        contIcon.setAttribute("width", iconSrc.width);
+        contIcon.setAttribute("height", iconSrc.height);
         
         pathEl.appendChild(topRightDocument.createTextNode(" /Database" + path));
         
@@ -291,20 +298,22 @@ function updateItems(ajaxRequest)
         }
     }
     itemsEl.appendChild(pagingPar);
-    var itemsTable = rightDocument.createElement("div");
-    itemsTable.setAttribute("class", "itemsTable");
+    var itemsTable = rightDocument.createElement("table");
+    itemsTable.setAttribute("width", "100%");
+    var itemsTableBody = rightDocument.createElement("tbody");
+    itemsTable.appendChild(itemsTableBody);
     itemsEl.appendChild(itemsTable);
     for (var i = 0; i < children.length; i++)
     {
-        var itemRow = rightDocument.createElement("div");
+        var itemRow = rightDocument.createElement("tr");
         itemRow.setAttribute("class", (i % 2 == 0 ? "itemRowA" : "itemRowB"));
         var item = children[i];
-        var itemEntry = rightDocument.createElement("div");
+        var itemEntry = rightDocument.createElement("td");
         itemEntry.setAttribute("class", "itemEntry");
         var itemLink = rightDocument.createElement("a");
         itemEntry.appendChild(itemLink);
         
-        var itemButtons = rightDocument.createElement("div");
+        var itemButtons = rightDocument.createElement("td");
         itemButtons.setAttribute("class", "itemButtons");
         
         var itemText = rightDocument.createTextNode(useFiles ? item.firstChild.nodeValue : xmlGetElementText(item, "title"));
@@ -336,7 +345,7 @@ function updateItems(ajaxRequest)
             // our frames
             itemLink.setAttribute("target", "mediatomb_target");
         }
-        itemsTable.appendChild(itemRow);
+        itemsTableBody.appendChild(itemRow);
     }
     itemsEl.appendChild(pagingPar.cloneNode(true));
     

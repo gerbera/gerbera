@@ -82,12 +82,14 @@ function xmlGetAttribute(parent, name)
     return null;
 }
 
-function appendImgNode(document, node, alt, icon)
+function appendImgNode(document, node, alt, icon, width, height)
 {
     var img = document.createElement("img");
-    img.setAttribute("src", icon);
+    img.setAttribute("src", icon.src);
     img.setAttribute("alt", alt);
     img.setAttribute("border", "0");
+    img.setAttribute("width", icon.width);
+    img.setAttribute("height", icon.height);
     node.appendChild(img);
 }
 
