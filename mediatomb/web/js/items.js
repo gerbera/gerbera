@@ -223,7 +223,7 @@ function updateItems(ajaxRequest)
         contIcon.setAttribute("width", iconContainer.width);
         contIcon.setAttribute("height", iconContainer.height);
         
-        pathEl.appendChild(topRightDocument.createTextNode(" /Filesystem" + path));
+        pathEl.appendChild(topRightDocument.createTextNode(" /Filesystem" + path + '/'));
         
         var first = true
         first = _addLink(topRightDocument, buttons, first, "javascript:parent.addItem('"+ofId+"');", "add", iconAdd);
@@ -242,7 +242,7 @@ function updateItems(ajaxRequest)
         contIcon.setAttribute("width", iconSrc.width);
         contIcon.setAttribute("height", iconSrc.height);
         
-        pathEl.appendChild(topRightDocument.createTextNode(" /Database" + path));
+        pathEl.appendChild(topRightDocument.createTextNode(" /Database" + path + '/'));
         
         var link;
         var first = true;
