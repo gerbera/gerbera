@@ -85,14 +85,6 @@ div.taskDiv
     margin-right:20px;
 }
 
-/*
-div.itemsTable
-{
-    display:table;
-    width:100%;
-}
-*/
-
 table.contTable
 {
     padding-top:5px;
@@ -108,12 +100,7 @@ tr.itemRowB
     background-color:#aaaaaa;
 }
 
-tr.itemRowA:hover
-{
-    background-color:#888888;
-}
-
-tr.itemRowB:hover
+tr.itemRowA:hover, tr.itemRowB:hover
 {
     background-color:#888888;
 }
@@ -124,7 +111,7 @@ td.contEntry
     padding-left:5px;
 }
 
-td.contEntry img
+td.contEntry img, td.itemButtons a, td.itemButtons img, span.contText
 {
     vertical-align:middle;
 }
@@ -144,10 +131,6 @@ td.itemButtons
     text-align:right;
 }
 
-span.contText
-{
-    vertical-align:middle;
-}
 
 table.classicForm
 {
