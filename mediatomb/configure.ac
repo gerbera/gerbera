@@ -460,7 +460,7 @@ AC_CHECK_HEADERS([sys/ioctl.h sys/socket.h sys/time.h sys/types.h pthread.h],
                  [],
                  [AC_MSG_ERROR(required header not found)]) 
 
-AC_CHECK_HEADERS([langinfo.h],[],[AC_MSG_WARN(langinfo.h not found, will not be able to retrieve locale)])
+AC_CHECK_HEADERS([langinfo.h locale.h],[],[AC_MSG_WARN(Header that is required to retrieve system locale not found, will use default value)])
 
 AC_CHECK_HEADERS([sched.h],[],[])
 AC_CHECK_FUNCS([sched_getparam sched_setparam],[],[])
@@ -610,7 +610,7 @@ fi
 AC_CHECK_SIZEOF(off_t, 4)
 AC_CHECK_SIZEOF(size_t, 4)
 AC_CHECK_SIZEOF(time_t, 4)
-AC_CHECK_FUNCS(strtoll nl_langinfo,[],[])
+AC_CHECK_FUNCS(strtoll nl_langinfo setlocale,[],[])
 AC_CHECK_FUNCS(backtrace backtrace_symbols,[],[])
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST

@@ -42,9 +42,11 @@
 #include <sys/stat.h>
 #include "tools.h"
 
-#ifdef HAVE_LANGINFO_H
+#if defined(HAVE_LANGINFO_H) && defined(HAVE_LOCALE_H)
     #include <langinfo.h>
+    #include <locale.h>
 #endif
+
 
 using namespace zmm;
 using namespace mxml;
@@ -332,9 +334,13 @@ void ConfigManager::validate(String serverhome)
     getOption(_("/import/mappings/extension-mimetype/attribute::ignore-unknown"),
               _(DEFAULT_IGNORE_UNKNOWN_EXTENSIONS));
 
-#ifdef HAVE_NL_LANGINFO
-    temp = String(nl_langinfo(CODESET));
-    log_debug("received %s from nl_langinfo\n", temp.c_str());
+#if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
+    if (setlocale(LC_ALL, "") != NULL)
+    {
+        temp = String(nl_langinfo(CODESET));
+        log_debug("received %s from nl_langinfo\n", temp.c_str());
+    }
+
     if (!string_ok(temp))
         temp = _(DEFAULT_FILESYSTEM_CHARSET);
 #else
