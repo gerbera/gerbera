@@ -55,6 +55,7 @@ _DIST_FILES_JS = \
 ./js/md5.js \
 ./js/prototype.js \
 ./js/auth.js \
+./js/tasks.js \
 ./js/tree.js \
 ./js/tools.js \
 ./js/items.js \
