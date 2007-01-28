@@ -1164,7 +1164,7 @@ void ContentManager::addFile(zmm::String path, bool recursive, bool async, bool 
     if (async)
     {
         Ref<CMTask> task(new CMAddFileTask(path, recursive, hidden));
-        task->setDescription(_("adding ") + path);
+        task->setDescription(_("Adding: ") + path + '/');
         addTask(task, lowPriority);
     }
     else
@@ -1251,7 +1251,7 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
 
             String vpath = obj->getVirtualPath();
             if (string_ok(vpath))
-                task->setDescription(_("removing ") + obj->getVirtualPath());
+                task->setDescription(_("Removing: ") + obj->getVirtualPath());
         }
         catch (Exception e)
         {
@@ -1318,7 +1318,7 @@ void ContentManager::rescanDirectory(int objectID, int scanID, scan_mode_t scanM
     else
         level = _("full");
 
-    task->setDescription(_("performing ") + level + " scan on " + dir->getLocation() + '/');
+    task->setDescription(_("Performing ") + level + " scan on " + dir->getLocation() + '/');
     addTask(task, true); // adding with low priority
 }
 
