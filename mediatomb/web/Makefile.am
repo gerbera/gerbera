@@ -48,7 +48,8 @@ _DIST_FILES_ICONS = \
 ./icons/mt-icon32.png \
 ./icons/mt-icon32.bmp \
 ./icons/mt-icon48.png \
-./icons/mt-icon48.bmp
+./icons/mt-icon48.bmp \
+./icons/blank.gif
 
 _DIST_FILES_JS = \
 ./js/autoscan.js \
@@ -61,7 +62,9 @@ _DIST_FILES_JS = \
 ./js/items.js \
 ./js/icons.js \
 ./js/nanotree.js \
-./js/wz_tooltip.js
+./js/pngbehavior.htc
+
+#./js/wz_tooltip.js
 
 _DIST_FILES_WEB = \
 ./disabled.html \
