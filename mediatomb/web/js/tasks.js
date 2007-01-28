@@ -79,7 +79,10 @@ function updateCurrentTask(taskEl)
 function clearPollInterval()
 {
     if (pollInterval)
+    {
         window.clearInterval(pollInterval);
+        pollInterval = false;
+    }
 }
 
 function startPollInterval()
