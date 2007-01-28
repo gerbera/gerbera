@@ -49,6 +49,7 @@ using namespace mxml;
 
 WebRequestHandler::WebRequestHandler() : RequestHandler()
 {
+    checkRequestCalled = false;
 }
 
 int WebRequestHandler::intParam(String name, int invalid)
@@ -72,56 +73,19 @@ void WebRequestHandler::check_request(bool checkLogin)
     
     // check if the session parameter was supplied and if we have
     // a session with that id
+    
+    checkRequestCalled = true;
+    
     String sid = param(_("sid"));
     if (sid == nil)
-    {
         throw SessionException(_("no session id given"));
-    }
-    Ref<Session> session;
-    if ((session = SessionManager::getInstance()->getSession(sid)) == nil)
-    {
-        throw SessionException(_("invalid session id"));
-    }
-    if (checkLogin && ! session->isLoggedIn())
-    {
-        throw SessionException(_("not logged in"));
-    }
-    session->access();
     
-    String uiUpdate = param(_("get_update_ids"));
-    if ((string_ok(uiUpdate) && uiUpdate == _("1")))
-    {
-        log_debug("UI wants updates.\n");
-        String forceUpdate = param(_("force_update"));
-        if ((string_ok(forceUpdate) && forceUpdate ==_("1")))
-        {
-            log_debug("UI forces updates.\n");
-            addUpdateIDs(session, root);
-        }
-        else
-        {
-            /*
-            if (1 || ContentManager::getInstance()->isBusy())
-            {
-            */
-            Ref<Element> updateIDs(new Element(_("updateIDs")));
-            root->appendChild(updateIDs);
-            if (session->hasUIUpdateIDs())
-            {
-                log_debug("UI updates pending...\n");
-                updateIDs->addAttribute(_("pending"), _("1"));
-            }
-            else
-            {
-                log_debug("no UI updates.\n");
-            }
-            /*
-            }
-            else
-                addUpdateIDs(session, root);
-            */
-        }
-    }
+    if ((session = SessionManager::getInstance()->getSession(sid)) == nil)
+        throw SessionException(_("invalid session id"));
+    
+    if (checkLogin && ! session->isLoggedIn())
+        throw SessionException(_("not logged in"));
+    session->access();
 }
 
 String WebRequestHandler::renderXMLHeader()
@@ -165,6 +129,14 @@ Ref<IOHandler> WebRequestHandler::open(Ref<Dictionary> params, IN enum UpnpOpenF
         else
         {
             process();
+            
+            if (checkRequestCalled)
+            {
+                // add current task
+                appendTask(root, ContentManager::getInstance()->getCurrentTask());
+                
+                handleUpdateIDs();
+            }
         }
         output = renderXMLHeader() + root->print();
     }
@@ -210,7 +182,38 @@ Ref<IOHandler> WebRequestHandler::open(IN const char *filename,
     return open(params, mode);
 }
 
-void WebRequestHandler::addUpdateIDs(Ref<Session> session, Ref<Element> root)
+void WebRequestHandler::handleUpdateIDs()
+{
+    // session will be filled by check_request
+    
+    String uiUpdate = param(_("get_update_ids"));
+    if ((string_ok(uiUpdate) && uiUpdate == _("1")))
+    {
+        log_debug("UI wants updates.\n");
+        String forceUpdate = param(_("force_update"));
+        if ((string_ok(forceUpdate) && forceUpdate ==_("1")))
+        {
+            log_debug("UI forces updates.\n");
+            addUpdateIDs(root, session);
+        }
+        else
+        {
+            Ref<Element> updateIDs(new Element(_("updateIDs")));
+            root->appendChild(updateIDs);
+            if (session->hasUIUpdateIDs())
+            {
+                log_debug("UI updates pending...\n");
+                updateIDs->addAttribute(_("pending"), _("1"));
+            }
+            else
+            {
+                log_debug("no UI updates.\n");
+            }
+        }
+    }
+}
+
+void WebRequestHandler::addUpdateIDs(Ref<Element> root, Ref<Session> session)
 {
     Ref<Element> updateIDsEl(new Element(_("updateIDs")));
     root->appendChild(updateIDsEl);
@@ -222,4 +225,14 @@ void WebRequestHandler::addUpdateIDs(Ref<Session> session, Ref<Element> root)
         updateIDsEl->setText(updateIDs);
         updateIDsEl->addAttribute(_("updates"), _("1"));
     }
+}
+
+void WebRequestHandler::appendTask(Ref<Element> el, Ref<CMTask> task)
+{
+    if (task == nil || el == nil)
+        return;
+    Ref<Element> taskEl (new Element(_("task")));
+    taskEl->addAttribute(_("id"), String::from(task->getID())); 
+    taskEl->setText(task->getDescription());
+    el->appendChild(taskEl);
 }

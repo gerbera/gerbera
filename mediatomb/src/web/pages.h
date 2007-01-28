@@ -37,7 +37,6 @@
 #include "request_handler.h"
 #include "web_request_handler.h"
 #include "cds_objects.h"
-#include "content_manager.h"
 
 namespace web
 {
@@ -147,8 +146,6 @@ class tasks : public WebRequestHandler
 {
 public:
     virtual void process();
-private:
-    void appendTask(zmm::Ref<mxml::Element> el, zmm::Ref<CMTask> task);
 };
 
 

@@ -27,6 +27,7 @@
     $Id$
 */
 
+/*
 function updateCurrentTask()
 {
     var url = link('tasks', {action: 'current'}, false);
@@ -37,7 +38,57 @@ function updateCurrentTask()
             onComplete: updateCurrentTasksCallback
         });
 }
+*/
 
+var currentTaskID = -1;
+
+var pollInterval;
+
+// will be set by checkSIDcallback() (auth.js)
+var pollWhenIdle = false;
+var pollIntervalTime = 2000;
+
+function updateCurrentTask(taskEl)
+{
+    var taskID = -1;
+    if (taskEl)
+        taskID = taskEl.getAttribute('id');
+    if (taskID != currentTaskID)
+    {
+        currentTaskID = taskID;
+        var topDocument = frames["topF"].document;
+        
+        var currentTaskTdEl = topDocument.getElementById("currentTaskTd");
+        if (taskID == -1)
+        {
+            if (! pollWhenIdle)
+                clearPollInterval();
+            Element.hide(currentTaskTdEl);
+        }
+        else
+        {
+            var currentTaskTxtEl = topDocument.getElementById("currentTaskText").firstChild;
+            currentTaskTxtEl.replaceData(0, currentTaskTxtEl.length, taskEl.firstChild.data);
+            Element.show(currentTaskTdEl);
+            if (! pollWhenIdle) // will be started by checkSIDcallback() (auth.js) otherwise
+                startPollInterval();
+        }
+    }
+}
+
+function clearPollInterval()
+{
+    if (pollInterval)
+        window.clearInterval(pollInterval);
+}
+
+function startPollInterval()
+{
+    if (! pollInterval)
+        pollInterval = window.setInterval("getUpdates(false)", pollIntervalTime);
+}
+
+/*
 function updateCurrentTasksCallback(ajaxRequest)
 {
     var xml = ajaxRequest.responseXML
@@ -49,8 +100,16 @@ function updateCurrentTasksCallback(ajaxRequest)
     var topDocument = frames["topF"].document;
     var currentTaskTxtEl = topDocument.getElementById("currentTask").firstChild;
     currentTaskTxtEl.deleteData(0, currentTaskTxtEl.length);
-    if (tasks.length <= 0) return;
+    if (tasks.length <= 0)
+        return;
     currentTaskTxtEl.insertData(0, tasks[0].firstChild.data);
+}
+*/
+
+function cancelCurrentTask()
+{
+    if (currentTaskID != -1)
+        cancelTask(currentTaskID);
 }
 
 function cancelTask(taskID)
@@ -67,5 +126,6 @@ function cancelTask(taskID)
 function cancelTaskCallback(ajaxRequest)
 {
     var xml = ajaxRequest.responseXML
-    if (! errorCheck(xml)) return;
+    if (! errorCheck(xml))
+        return;
 }

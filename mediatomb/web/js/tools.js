@@ -103,12 +103,14 @@ function errorCheck(xml, noredirect)
         return false;
     }
     var rootEl = xmlGetElement(xml, 'root');
+    
     var uiDisabled = xmlGetAttribute(rootEl, 'ui_disabled');
     if (uiDisabled)
     {
         window.location = "/disabled.html";
         return false;
     }
+    
     var redirect = xmlGetElementText(xml, 'redirect');
     if (redirect)
     {
@@ -124,92 +126,13 @@ function errorCheck(xml, noredirect)
         return false;
     }
     
+    // clears current task if no task element
+    updateCurrentTask(xmlGetElement(xml, 'task'));
+    
     var updateIDsEl = xmlGetElement(xml, 'updateIDs');
     if (updateIDsEl)
-    {
-        if (updateIDsEl.getAttribute("pending") == '1')
-        {
-            setStatus("updates_pending");
-            if (! timer)
-                timer = window.setTimeout("getUpdates(true)", INACTIVITY_TIMEOUT);
-            last_update = new Date().getTime();
-        }
-        else if (updateIDsEl.getAttribute("updates") != '1')
-        {
-            setStatus("no_updates");
-            if (timer)
-            {
-                window.clearTimeout(timer);
-                timer = false;
-            }
-            last_update = new Date().getTime();
-        }
-        else
-        {
-            var updateIDStr = xmlGetText(updateIDsEl);
-            var savedlastNodeDbID = lastNodeDb;
-            var savedlastNodeDbIDParent;
-            if (savedlastNodeDbID != 'd0')
-                savedlastNodeDbIDParent = getTreeNode(savedlastNodeDbID).getParent().getID();
-            //alert('before: lastid: ' + savedlastNodeDbID);
-            //alert('before: node: ' + getTreeNode(savedlastNodeDbID));
-            selectNodeIfVisible('d0');
-            var updateAll = false;
-            if (updateIDStr != 'all')
-            {
-                var updateIDsArr = updateIDStr.split(",");
-                for (var i = 0; i < updateIDsArr.length; i++)
-                {
-                    if (updateIDsArr[i] == 0)
-                        updateAll = true;
-                }
-            }
-            else
-                updateAll = true;
-            if (! updateAll)
-            {
-                for (var i = 0; i < updateIDsArr.length; i++)
-                {
-                    var node = getTreeNode('d' + updateIDsArr[i]);
-                    if (node)
-                    {
-                        var parNode = node.getParent();
-                        if (parNode)
-                        {
-                            parNode.childrenHaveBeenFetched=false;
-                            parNode.resetChildren();
-                            fetchChildren(parNode, true);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                var node = getTreeNode('d0');
-                node.childrenHaveBeenFetched=false;
-                node.resetChildren();
-                fetchChildren(node, true);
-            }
-            var savedlastNodeDb = getTreeNode(savedlastNodeDbID);
-            //alert('lastid: ' + savedlastNodeDbID);
-            //alert('node: ' + savedlastNodeDb);
-            if (savedlastNodeDb)
-                selectNodeIfVisible(savedlastNodeDbID);
-            else if (savedlastNodeDbIDParent)
-            {
-                savedlastNodeDb = getTreeNode(savedlastNodeDbIDParent);
-                if (savedlastNodeDb)
-                    selectNodeIfVisible(savedlastNodeDbIDParent);
-            }
-            setStatus("no_updates");
-            if (timer)
-            {
-                window.clearTimeout(timer);
-                timer = false;
-            }
-            last_update = new Date();
-        }
-    }
+        handleUIUpdates(updateIDsEl);
+    
     var error = xmlGetElementText(xml, 'error');
     if (error)
     {
@@ -217,6 +140,90 @@ function errorCheck(xml, noredirect)
         return false;
     }
     return true;
+}
+
+function handleUIUpdates(updateIDsEl)
+{
+    if (updateIDsEl.getAttribute("pending") == '1')
+    {
+        setStatus("updates_pending");
+        if (! timer)
+            timer = window.setTimeout("getUpdates(true)", INACTIVITY_TIMEOUT);
+        last_update = new Date().getTime();
+    }
+    else if (updateIDsEl.getAttribute("updates") != '1')
+    {
+        setStatus("no_updates");
+        if (timer)
+        {
+            window.clearTimeout(timer);
+            timer = false;
+        }
+        last_update = new Date().getTime();
+    }
+    else
+    {
+        var updateIDStr = xmlGetText(updateIDsEl);
+        var savedlastNodeDbID = lastNodeDb;
+        var savedlastNodeDbIDParent;
+        if (savedlastNodeDbID != 'd0')
+            savedlastNodeDbIDParent = getTreeNode(savedlastNodeDbID).getParent().getID();
+        //alert('before: lastid: ' + savedlastNodeDbID);
+        //alert('before: node: ' + getTreeNode(savedlastNodeDbID));
+        selectNodeIfVisible('d0');
+        var updateAll = false;
+        if (updateIDStr != 'all')
+        {
+            var updateIDsArr = updateIDStr.split(",");
+            for (var i = 0; i < updateIDsArr.length; i++)
+            {
+                if (updateIDsArr[i] == 0)
+                    updateAll = true;
+            }
+        }
+        else
+            updateAll = true;
+        if (! updateAll)
+        {
+            for (var i = 0; i < updateIDsArr.length; i++)
+            {
+                var node = getTreeNode('d' + updateIDsArr[i]);
+                if (node)
+                {
+                    var parNode = node.getParent();
+                    if (parNode)
+                    {
+                        parNode.childrenHaveBeenFetched=false;
+                        parNode.resetChildren();
+                        fetchChildren(parNode, true);
+                    }
+                }
+            }
+        }
+        else
+        {
+            var node = getTreeNode('d0');
+            node.childrenHaveBeenFetched=false;
+            node.resetChildren();
+            fetchChildren(node, true);
+        }
+        var savedlastNodeDb = getTreeNode(savedlastNodeDbID);
+        if (savedlastNodeDb)
+            selectNodeIfVisible(savedlastNodeDbID);
+        else if (savedlastNodeDbIDParent)
+        {
+            savedlastNodeDb = getTreeNode(savedlastNodeDbIDParent);
+            if (savedlastNodeDb)
+                selectNodeIfVisible(savedlastNodeDbIDParent);
+        }
+        setStatus("no_updates");
+        if (timer)
+        {
+            window.clearTimeout(timer);
+            timer = false;
+        }
+        last_update = new Date();
+    }
 }
 
 function addBr(useDocument, element)
@@ -327,23 +334,22 @@ function setStatus(status)
 
 function getUpdates(force)
 {
-    if (isTypeDb())
-    {
-        var url = link('update', {force_update: (force ? '1' : '0')}, true);
-        var myAjax = new Ajax.Request(
-            url,
-            {
-                method: 'get',
-                asynchronous: false,
-                onComplete: getUpdatesCallback
-            });
-    }
+    var url = link('update', {force_update: (force ? '1' : '0')}, true);
+    var myAjax = new Ajax.Request(
+        url,
+        {
+            method: 'get',
+            asynchronous: false,
+            onComplete: getUpdatesCallback
+        });
 }
 
 function getUpdatesCallback(ajaxRequest)
 {
     var xml = ajaxRequest.responseXML;
-    errorCheck(xml);
+    if (! errorCheck(xml))
+        return;
+    last_update = new Date().getTime();
 }
 
 function userActivity(event)
@@ -367,3 +373,4 @@ function mouseDownHandler(event)
         last_update = now;
     }
 }
+

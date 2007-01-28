@@ -83,7 +83,7 @@ void web::auth::process()
     int timeout = ConfigManager::getInstance()->getIntOption(_("/server/ui/accounts/attribute::session-timeout"));
    
     timeout = timeout * 60;
-
+    
     if (param(_("checkSID")) != nil)
     {
         log_debug("checking sid...\n");
@@ -112,6 +112,13 @@ void web::auth::process()
         }
         if (session != nil)
             session->clearUpdateIDs();
+        
+        Ref<ConfigManager> cm = ConfigManager::getInstance();
+        Ref<Element> config (new Element(_("config")));
+        root->appendChild(config);
+        config->addAttribute(_("poll-when-idle"), cm->getOption(_("/server/ui/attribute::poll-when-idle")));
+        config->addAttribute(_("poll-interval"), cm->getOption(_("/server/ui/attribute::poll-interval")));
+        
     }
     else if (param(_("logout")) != nil)
     {

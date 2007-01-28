@@ -109,6 +109,15 @@ function checkSIDcallback(ajaxRequest)
     }
     var accountsStr = xmlGetElementText(rootEl, "accounts");
     ACCOUNTS = (accountsStr && accountsStr == "1");
+    
+    var configEl = xmlGetElement(rootEl, "config");
+    if (configEl)
+    {
+        pollIntervalTime = xmlGetAttribute(configEl, "poll-interval") * 1000;
+        pollWhenIdle = (xmlGetAttribute(configEl, "poll-when-idle") == "yes");
+        if (pollWhenIdle)
+            startPollInterval();
+    }
 }
 
 function logout()

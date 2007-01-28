@@ -48,16 +48,10 @@ void web::tasks::process()
         throw _Exception(_("web:tasks called with illegal action"));
     Ref<ContentManager> cm = ContentManager::getInstance();
     
-    if (action == "current")
+    if (action == "list")
     {
         Ref<Element> tasksEl (new Element(_("tasks")));
-        appendTask(tasksEl, cm->getCurrentTask());
-        root->appendChild(tasksEl);
-    }
-    else if (action == "list")
-    {
-        Ref<Element> tasksEl (new Element(_("tasks")));
-        root->appendChild(tasksEl);
+        root->appendChild(tasksEl); // inherited from WebRequestHandler
         Ref<Array<CMTask> > taskList = cm->getTasklist();
         if (taskList == nil)
             return;
@@ -76,12 +70,3 @@ void web::tasks::process()
         throw _Exception(_("web:tasks called with illegal action"));
 }
 
-void web::tasks::appendTask(Ref<Element> el, Ref<CMTask> task)
-{
-    if (task == nil || el == nil)
-        return;
-    Ref<Element> taskEl (new Element(_("task")));
-    taskEl->addAttribute(_("id"), String::from(task->getID())); 
-    taskEl->setText(task->getDescription());
-    el->appendChild(taskEl);
-}

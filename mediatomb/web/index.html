@@ -106,6 +106,7 @@
                     onException: function()
                     {
                         alert("MediaTomb cannot be reached! Please check if the server is still running.");
+                        clearPollInterval();
                     }
                 };
                 Ajax.Responders.register(globalAjaxHandlers);
@@ -114,7 +115,10 @@
                 Element.addClassName(frames["topleftF"].document.getElementById('type_' + TYPE), 'selected');
                 
                 rightDocument.onkeypress=userActivity;
-                //updateInfo();
+                rightDocument.onmousedown = mouseDownHandler;
+                topDocument.onmousedown = mouseDownHandler;
+                frames["topleftF"].document.onmousedown = mouseDownHandler;
+                frames["toprightF"].document.onmousedown = mouseDownHandler;
             }
             
             function setType(tmpType)

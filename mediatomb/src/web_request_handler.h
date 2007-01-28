@@ -38,6 +38,7 @@
 #include "dictionary.h"
 #include "session_manager.h"
 #include "config_manager.h"
+#include "content_manager.h"
 
 class SessionException : public zmm::Exception
 {
@@ -49,15 +50,17 @@ public:
 class WebRequestHandler : public RequestHandler
 {
 protected:
+    bool checkRequestCalled;
+    
     /// \brief Decoded URL parameters are stored as a dictionary.
     zmm::Ref<Dictionary> params;
-
+    
     /// \brief The original filename from url if anyone needs it.
     zmm::String filename;
-
+    
     /// \brief We can also always see what mode was requested.
     enum UpnpOpenFileMode mode;
-
+    
     /// \brief This is filled during request processing and holds the output.
     ///
     /// The XML or HTML that is the result of a request is put in this buffer,
@@ -66,6 +69,10 @@ protected:
     
     /// \brief This is the root xml element to be populated by process() method.
     zmm::Ref<mxml::Element> root;
+    
+    /// \brief The current session, used for this request; will be filled by
+    /// check_request()
+    zmm::Ref<Session> session;
     
     /// \brief Little support function to access stuff from the dictionary in
     /// in an easier fashion.
@@ -92,8 +99,23 @@ protected:
     /// \todo Genych, chto tut proishodit, ya tolkom che to ne wrubaus?? 
     zmm::Ref<IOHandler> open(zmm::Ref<Dictionary>, IN enum UpnpOpenFileMode mode);
     
-    void addUpdateIDs(zmm::Ref<Session> session, zmm::Ref<mxml::Element> root);
+    /// \brief add the ui update ids from the given session as xml tags to the given root element
+    /// \param root the xml element to add the elements to
+    /// \param session the session from which the ui update ids should be taken
+    void addUpdateIDs(zmm::Ref<mxml::Element> root, zmm::Ref<Session> session);
     
+    /// \brief check if ui update ids should be added to the response and add
+    /// them in that case.
+    /// must only be called after check_request
+    void handleUpdateIDs();
+    
+    /// \brief add the content manager task to the given xml element as xml elements
+    /// \param el the xml element to add the elements to
+    /// \param task the task to add to the given xml element
+    void appendTask(zmm::Ref<mxml::Element> el, zmm::Ref<CMTask> task);
+    
+    /// \brief check if accounts are enabled in the config
+    /// \return true if accounts are enabled, false if not
     bool accountsEnabled() { return (ConfigManager::getInstance()->getOption(_("/server/ui/accounts/attribute::enabled")) == "yes"); }
 public:
     /// \brief Constructor, currently empty.
@@ -119,7 +141,7 @@ public:
     
     /// \brief builds full path to a script for the given relative filename
     static zmm::String buildScriptPath(zmm::String filename);
-            
+    
 };
 
 
