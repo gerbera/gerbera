@@ -82,6 +82,7 @@ function checkLogin(ajaxRequest)
     Element.show(frames["leftF"].document.getElementById("treeDiv"));
     Element.show(frames["topleftF"].document.getElementById("db_fs_selector"));
     loggedIn = true;
+    initLoggedIn();
     updateTreeAfterLogin();
 }
 

@@ -110,14 +110,20 @@
                         clearPollInterval();
                     }
                 };
+                if (loggedIn)
+                    initLoggedIn();
                 Ajax.Responders.register(globalAjaxHandlers);
+            }
+            
+            function initLoggedIn()
+            {
                 itemInit();
                 treeInit();
                 Element.addClassName(frames["topleftF"].document.getElementById('type_' + TYPE), 'selected');
                 
-                rightDocument.onkeypress=userActivity;
-                rightDocument.onmousedown = mouseDownHandler;
-                topDocument.onmousedown = mouseDownHandler;
+                frames["rightF"].document.onkeypress=userActivity;
+                frames["rightF"].document.onmousedown = mouseDownHandler;
+                frames["topF"].document.onmousedown = mouseDownHandler;
                 frames["topleftF"].document.onmousedown = mouseDownHandler;
                 frames["toprightF"].document.onmousedown = mouseDownHandler;
             }
