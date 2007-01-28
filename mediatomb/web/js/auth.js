@@ -80,6 +80,7 @@ function checkLogin(ajaxRequest)
     Element.hide(topDocument.getElementById("loginDiv"));
     Element.show(topDocument.getElementById("topDiv"));
     Element.show(frames["leftF"].document.getElementById("treeDiv"));
+    Element.show(frames["topleftF"].document.getElementById("db_fs_selector"));
     loggedIn = true;
     updateTreeAfterLogin();
 }

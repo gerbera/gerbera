@@ -334,14 +334,17 @@ function setStatus(status)
 
 function getUpdates(force)
 {
-    var url = link('update', {force_update: (force ? '1' : '0')}, true);
-    var myAjax = new Ajax.Request(
-        url,
-        {
-            method: 'get',
-            asynchronous: false,
-            onComplete: getUpdatesCallback
-        });
+    if (loggedIn)
+    {
+        var url = link('update', {force_update: (force ? '1' : '0')}, true);
+        var myAjax = new Ajax.Request(
+            url,
+            {
+                method: 'get',
+                asynchronous: false,
+                onComplete: getUpdatesCallback
+            });
+    }
 }
 
 function getUpdatesCallback(ajaxRequest)
