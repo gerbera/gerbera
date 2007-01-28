@@ -87,7 +87,7 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
     cond = Ref<Cond>(new Cond(mutex));
     ignore_unknown_extensions = 0;
    
-    taskID = 0;
+    taskID = 1;
     working = false;
     shutdownFlag = false;
     
@@ -503,6 +503,14 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
     // request only items if non-recursive scan is wanted
     Ref<DBRHash<int> > list = storage->getObjects(containerID, !adir->getRecursive());
 
+    unsigned int thisTaskID;
+    if (task != nil)
+    {
+        thisTaskID = task->getID();
+    }
+    else
+        thisTaskID = 0;
+
     while (((dent = readdir(dir)) != NULL) && (!shutdownFlag) && (task == nil || ((task != nil) && task->isValid())))
     {
         char *name = dent->d_name;
@@ -554,7 +562,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
                         // readd object - we have to do this in order to trigger
                         // scripting
                         removeObject(objectID, false);
-                        addFile(path, false, false, adir->getHidden());
+                        addFileInternal(path, false, false, adir->getHidden());
                         // update time variable
                         last_modified_current_max = statbuf.st_mtime;
                     }
@@ -571,7 +579,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
                 // make sure not to add the current config.xml
                 if (ConfigManager::getInstance()->getConfigFilename() != path)
                 {
-                    addFile(path, false, false, adir->getHidden());
+                    addFileInternal(path, false, false, adir->getHidden());
                     if (last_modified_current_max < statbuf.st_mtime)
                         last_modified_current_max = statbuf.st_mtime;
                 }
@@ -585,7 +593,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
                 if (list != nil)
                     list->remove(objectID);
                 // add a task to rescan the directory that was found
-                rescanDirectory(objectID, scanID, scanMode);
+                rescanDirectory(objectID, scanID, scanMode, path + DIR_SEPARATOR);
             }
             else
             {
@@ -605,7 +613,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
                 }
                 
                 // add directory, recursive, async, hidden flag, low priority
-                addFile(path, true, true, adir->getHidden(), true);
+                addFileInternal(path, true, true, adir->getHidden(), true, thisTaskID);
             }
         }
     } // while
@@ -1161,10 +1169,17 @@ void ContentManager::loadAccounting(bool async)
 }
 void ContentManager::addFile(zmm::String path, bool recursive, bool async, bool hidden, bool lowPriority)
 {
+    addFileInternal(path, recursive, async, hidden, lowPriority);
+}
+
+void ContentManager::addFileInternal(zmm::String path, bool recursive, bool async, 
+                                     bool hidden, bool lowPriority, unsigned int parentTaskID)
+{
     if (async)
     {
         Ref<CMTask> task(new CMAddFileTask(path, recursive, hidden));
         task->setDescription(_("Adding: ") + path);
+        task->setParentID(parentTaskID);
         addTask(task, lowPriority);
     }
     else
@@ -1194,7 +1209,7 @@ void ContentManager::invalidateTask(unsigned int taskID)
     Ref<CMTask> t = getCurrentTask();
     if (t != nil)
     {
-        if (t->getID() == taskID)
+        if ((t->getID() == taskID) || (t->getParentID() == taskID))
         {
             t->invalidate();
             return;
@@ -1206,7 +1221,7 @@ void ContentManager::invalidateTask(unsigned int taskID)
     for (i = 0; i < qsize; i++)
     {
         Ref<CMTask> t = taskQueue1->get(i);
-        if (t->getID() == taskID)
+        if ((t->getID() == taskID) || (t->getParentID() == taskID))
         {
             t->invalidate();
             return;
@@ -1217,7 +1232,7 @@ void ContentManager::invalidateTask(unsigned int taskID)
     for (i = 0; i < qsize; i++)
     {
         Ref<CMTask> t = taskQueue2->get(i);
-        if (t->getID() == taskID)
+        if ((t->getID() == taskID) || (t->getParentID() == taskID))
         {
             t->invalidate();
             return;
@@ -1303,7 +1318,7 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
     }
 }
 
-void ContentManager::rescanDirectory(int objectID, int scanID, scan_mode_t scanMode)
+void ContentManager::rescanDirectory(int objectID, int scanID, scan_mode_t scanMode, String descPath)
 {
     // building container path for the description
     Ref<CMTask> task(new CMRescanDirectoryTask(objectID, scanID, scanMode));
@@ -1318,7 +1333,10 @@ void ContentManager::rescanDirectory(int objectID, int scanID, scan_mode_t scanM
     else
         level = _("full");
 
-    task->setDescription(_("Performing ") + level + " scan: " + dir->getLocation() + '/');
+    if (!string_ok(descPath))
+        descPath = dir->getLocation();
+
+    task->setDescription(_("Performing ") + level + " scan: " + descPath);
     addTask(task, true); // adding with low priority
 }
 
@@ -1373,41 +1391,7 @@ CMTask::CMTask() : Object()
     valid = true;
     taskType = Invalid;
     taskID = 0;
-}
-
-void CMTask::setDescription(String description)
-{
-    this->description = description;
-}
-
-String CMTask::getDescription()
-{
-    return description;
-}
-
-task_type_t CMTask::getType()
-{
-    return taskType;
-}
-
-unsigned int CMTask::getID()
-{
-    return taskID;
-}
-
-void CMTask::setID(unsigned int taskID)
-{
-    this->taskID = taskID;
-}
-
-void CMTask::invalidate()
-{
-    valid = false;
-}
-
-bool CMTask::isValid()
-{
-    return valid;
+    parentTaskID = 0;
 }
 
 CMAddFileTask::CMAddFileTask(String path, bool recursive, bool hidden) : CMTask()

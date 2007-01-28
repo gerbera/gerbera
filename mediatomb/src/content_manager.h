@@ -59,19 +59,22 @@ class CMTask : public zmm::Object
 protected:
     zmm::String description;
     task_type_t taskType;
+    unsigned int parentTaskID;
     unsigned int taskID;
     bool valid;
     
 public:
     CMTask();
     virtual void run(zmm::Ref<ContentManager> cm) = 0;
-    void setDescription(zmm::String description);
-    zmm::String getDescription();
-    task_type_t getType();
-    unsigned int getID();
-    void setID(unsigned int taskID);
-    bool isValid();
-    void invalidate();
+    inline void setDescription(zmm::String description) { this->description = description; };
+    inline zmm::String getDescription() { return description; };
+    inline task_type_t getType() { return taskType; };
+    inline unsigned int getID() { return taskID; };
+    inline unsigned int getParentID() { return parentTaskID; };
+    inline void setID(unsigned int taskID) { this->taskID = taskID; };
+    inline void setParentID(unsigned int parentTaskID = 0) { this->parentTaskID = parentTaskID; };
+    inline bool isValid() { return valid; };
+    inline void invalidate() { valid = false; };
 };
 
 class CMAddFileTask : public CMTask
@@ -260,12 +263,15 @@ protected:
     
     /* don't use these, use the above methods */
     void _loadAccounting();
+
+    void addFileInternal(zmm::String path, bool recursive=true, bool async=true, bool hidden=false, bool lowPriority=false, 
+                         unsigned int parentTaskID = 0);
     void _addFile(zmm::String path, bool recursive=false, bool hidden=false, zmm::Ref<CMTask> task=nil);
     //void _addFile2(zmm::String path, bool recursive=0);
     void _removeObject(int objectID, bool all);
     
     
-    void rescanDirectory(int objectID, int scanID, scan_mode_t scanMode); 
+    void rescanDirectory(int objectID, int scanID, scan_mode_t scanMode, zmm::String descPath = nil); 
     void _rescanDirectory(int containerID, int scanID, scan_mode_t scanMode, scan_level_t scanLevel, zmm::Ref<CMTask> task=nil);
     /* for recursive addition */
     void addRecursive(zmm::String path, bool hidden=false, zmm::Ref<CMTask> task=nil);
