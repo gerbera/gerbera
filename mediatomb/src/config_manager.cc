@@ -302,6 +302,12 @@ void ConfigManager::validate(String serverhome)
     if ((temp != "yes") && (temp != "no"))
         throw _Exception(_("Error in config file: incorrect parameter for <ui enabled=\")\" /> attribute"));
 
+    temp = getOption(_("/server/ui/attribute::poll-when-idle"),
+            _(DEFAULT_POLL_WHEN_IDLE_VALUE));
+
+    if ((temp != "yes") && (temp != "no"))
+        throw _Exception(_("Error in config file: incorrect parameter for <ui poll-when-idle=\")\" /> attribute"));
+
     temp = getOption(_("/server/ui/accounts/attribute::enabled"), 
             _(DEFAULT_ACCOUNTS_EN_VALUE));
 
@@ -357,7 +363,7 @@ void ConfigManager::validate(String serverhome)
 
     i = getIntOption(_("/server/upnp-string-limit"), 
             DEFAULT_UPNP_STRING_LIMIT);
-    if (i == 0)
+    if ((i != -1) && (i < 4))
     {
         throw _Exception(_("Error in config file: invalid value for <upnp-string-limit>"));
     }

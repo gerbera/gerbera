@@ -193,7 +193,7 @@ Supported options:\n\
     --logfile or -l    log to specified file\n\
     --help or -h       this help message\n\
 \n\
-For more information visit http://mediatomb.org/\n\n");
+For more information visit " DESC_MANUFACTURER_URL "\n\n");
 
                 exit(EXIT_FAILURE);
 
@@ -206,7 +206,7 @@ For more information visit http://mediatomb.org/\n\n");
 #endif
 
     log_info("======== MediaTomb UPnP Server version %s ========\n", VERSION);
-    log_info("         http://www.mediatomb.org/\n\n");
+    log_info("         " DESC_MANUFACTURER_URL "\n\n");
 
     // check if user and/or group parameter was specified and try to run the server
     // under the given user and/or group name

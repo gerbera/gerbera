@@ -107,7 +107,7 @@
 #define DESC_SPEC_VERSION_MINOR         "0"
 #define DESC_FRIENDLY_NAME              PACKAGE_NAME 
 #define DESC_MANUFACTURER               "(c) 2004-2006 Gena Batyan <bgeradz@mediatomb.org>, Sergey Bostandzhyan <jin@mediatomb.org>, Leonhard Wimmer <leo@mediatomb.org>"
-#define DESC_MANUFACTURER_URL           "http://mediatomb.org"
+#define DESC_MANUFACTURER_URL           "http://mediatomb.org/"
 #define DESC_MODEL_DESCRIPTION          "Free UPnP AV MediaServer, GNU GPL"
 #define DESC_MODEL_NAME                 PACKAGE_NAME
 #define DESC_MODEL_NUMBER               VERSION 
@@ -162,6 +162,7 @@
 #define DEFAULT_ETC                     "etc"
 #define DEFAULT_CONFIG_NAME             "config.xml"
 #define DEFAULT_UI_EN_VALUE             "yes"
+#define DEFAULT_POLL_WHEN_IDLE_VALUE    "no"
 #define DEFAULT_ACCOUNTS_EN_VALUE       "no"
 #define DEFAULT_ALIVE_INTERVAL          180 // seconds
 #define DEFAULT_BOOKMARK_FILE           "mediatomb.html"

@@ -10,9 +10,6 @@ http://mediatomb.org/
 
 THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY! USE AT YOUR OWN RISK!
 
-NOTE: by default the server UI is disabled! Check the "SETUP" section to find
-out why and how to enable it.
-
 If you encounter any problems with this software, you are encouraged to
 post to the project forums at http://sourceforge.net/forum/?group_id=129766
 or to e-mail us directly.
@@ -20,44 +17,42 @@ or to e-mail us directly.
 FEATURES
 --------
 
-The 0.8.x releases will focus on virtual containers. There are a lot of
-things that have to be taken care of, lots of known issues that have to
-be fixed. Here is a list of implemented features:
+- browse media via UPnP
 - scriptable virtual containers (check doc/scripting-intro.txt for details)
+- automatic directory rescans
+- metadata extraction (exif, id3, etc.)
 - daemon mode
 - configurable filename to mimetype mappings
 - configurable mimetype to upnp:class mappings
 - add/remove/edit/browse media via the web UI
-- browse media via UPnP
 - stream/download media
 - cds container updates
 - adding external URLs
 - ActiveItems (see Help in the UI for details)
 
 Next planned features:
-- improvements for virtual containers 
 - transcoding
 - UPnP improvements (filter parameter for browse)
 
 
 IMPORTANT NOTE!!!
-Versions 0.7.*, 0.8.0 and 0.8.1 are not database compatible,
+Versions 0.7.*, 0.8.* and 0.9.0 are not database compatible,
 
 You will have to recreate your collection. Our apologies for inconvinience.
-
-I would suggest a complete reinstall. Removing ~/.mediatomb and running
-newly installed version of tomb-install is HIGHLY recommended. 
+The 0.9.0 and later releases will introduce a database migration option.
 
 
 REQUIREMENTS
 ------------
 
-- XSL-enabled web browser to access the web interface.
+- Javascript enabled to access the web interface.
     Tested and works with the recent versions of
       - Mozilla
-      - Internet Explorer
+      - Opera
     Tested and does not work with the recent versions of
       - Konqueror
+      - Internet Explorer, Safari
+- At least sqlite3 or mysql
 - Several libraries, see installation instructions.
 
     
@@ -235,9 +230,29 @@ Here is a sample configuration file with description of the various tags.
 <server> (Required)
     This section defines the server configuration parameters.
 
-    <ui enabled="no"/> (Required)
+    <ui enabled="yes" poll-when-idle="no"/> (Required)
         Enables or disables the web user interface, change to "yes" in order 
-        to enable it.
+        to enable it. 
+
+        The poll-when-idle attribute is optional and is set to "no" by default.
+        It influences the behaviour of displaying current tasks:
+        - when the user does something in the UI (i.e. clicks around) we 
+          always poll for the current task and will display it
+        - if a task is active, we will continue polling in the background and
+          update the current task view accordingly
+        - when there is no active task we will stop the background polling and
+          only request updates upon user actions, but not when the user
+          is idle (i.e. does not click around in the UI)
+
+        Setting this option to "yes" will do background polling even when
+        there are no current tasks; this may be useful if you defined
+        multiple users and want to see the tasks the other user is queueing
+        on the server while you are actually idle.
+
+        The possible tasks are:
+        - adding files or directories
+        - removing items or containers
+        - automatic rescans
 
         <accounts enabled="yes" session-timeout="30"/> (Required)
         Specifies if accounts are enabled or disabled. The session-timeout
@@ -257,11 +272,33 @@ Here is a sample configuration file with description of the various tags.
         only ports above 49152 are supported.
 
     <ip>192.168.0.23</ip> (Optional)
-        Specifies the IP address to bind to. (Optional)
+        Specifies the IP address to bind to.
     
     <name>MediaTomb</name> (Default if missing: MediaTomb)
         Server friendly name, you will see this on your devices that you use 
         to access the server.
+
+    <manufacturerURL>http://mediatomb.org/</manufacturerURL> (Optional)
+        This sets the manufacturer URL of a UPnP device, this may be necessary
+        to trick some renderers in order to enable special features that
+        otherwise are only active with the vendor implemented server.
+
+    <presentationURL append-to="ip">80/index.html</presentationURL> (Optional)
+        By default the presentation URL points to our web UI, however, vendors
+        who want to ship our server along with their NAS devices may want to
+        point to the main configuration page of the device.
+
+        Here are the allowed append-to values:
+        append-to="none"    use the string specified in the presentationURL
+                            tag as it is.
+        append-to="ip"      append the string specified in the presentationURL
+                            tag to the ip address of the server, i.e.:
+                            This is useful when you want to point the URL to 
+                            the port of your webserver.
+        append-to="port"    append the string specified in the presentationURL
+                            tag to the server ip and port, this may be useful
+                            if you want to serve some static pages using
+                            the builtin webserver.
     
     <udn/> (Required)
         Unique Device Name, according to the UPnP spec it must be consistent
@@ -334,9 +371,9 @@ Here is a sample configuration file with description of the various tags.
         items during a UPnP browse, this feature was added a s workaround
         for the TG100 bug which can only handle titles no longer than 100 
         characters. 
-        A negative value will disable will disable this feature, zero is not 
-        allowed.
-
+        A negative value will disable will disable this feature, the minimum 
+        allowed value is "4" because three dots will be appended to the cut off
+        string to indicate the limiting.
 
 <import hidden-files="no"> (Tag required, attribute optional)
     Section specifying various import parameters.
