@@ -1164,7 +1164,7 @@ void ContentManager::addFile(zmm::String path, bool recursive, bool async, bool 
     if (async)
     {
         Ref<CMTask> task(new CMAddFileTask(path, recursive, hidden));
-        task->setDescription(_("Adding: ") + path + '/');
+        task->setDescription(_("Adding: ") + path);
         addTask(task, lowPriority);
     }
     else
