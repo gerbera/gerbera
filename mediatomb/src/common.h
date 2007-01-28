@@ -163,6 +163,7 @@
 #define DEFAULT_CONFIG_NAME             "config.xml"
 #define DEFAULT_UI_EN_VALUE             "yes"
 #define DEFAULT_POLL_WHEN_IDLE_VALUE    "no"
+#define DEFAULT_POLL_INTERVAL           2 
 #define DEFAULT_ACCOUNTS_EN_VALUE       "no"
 #define DEFAULT_ALIVE_INTERVAL          180 // seconds
 #define DEFAULT_BOOKMARK_FILE           "mediatomb.html"

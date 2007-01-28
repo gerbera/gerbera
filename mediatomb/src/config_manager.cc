@@ -308,13 +308,17 @@ void ConfigManager::validate(String serverhome)
     if ((temp != "yes") && (temp != "no"))
         throw _Exception(_("Error in config file: incorrect parameter for <ui poll-when-idle=\")\" /> attribute"));
 
+    int i = getIntOption(_("/server/ui/attribute::poll-interval"), DEFAULT_POLL_INTERVAL);
+    if (i < 1)
+        throw _Exception(_("Error in config file: incorrect parameter for <ui poll-interval=\")\" /> attribute"));
+
     temp = getOption(_("/server/ui/accounts/attribute::enabled"), 
             _(DEFAULT_ACCOUNTS_EN_VALUE));
 
     if ((temp != "yes") && (temp != "no"))
         throw _Exception(_("Error in config file: incorrect parameter for <accounts enabled=\")\" /> attribute"));
 
-    int i  = getIntOption(_("/server/ui/accounts/attribute::session-timeout"), DEFAULT_SESSION_TIMEOUT);
+    i  = getIntOption(_("/server/ui/accounts/attribute::session-timeout"), DEFAULT_SESSION_TIMEOUT);
     if (i < 1)
     {
         throw _Exception(_("Error in config file: invalid session-timeout %d (must be > 0)\n"));

@@ -230,9 +230,14 @@ Here is a sample configuration file with description of the various tags.
 <server> (Required)
     This section defines the server configuration parameters.
 
-    <ui enabled="yes" poll-when-idle="no"/> (Required)
+    <ui enabled="yes" poll-interval="2" poll-when-idle="no"/> (Required)
         Enables or disables the web user interface, change to "yes" in order 
-        to enable it. 
+        to enable it.
+
+        The poll-interval is an integer value which specifies how often the
+        UI will poll for tasks. The interval is specified in seconds, only
+        values greater than zero are allowed. This attribute is optional, the 
+        default interval is 2 seconds.
 
         The poll-when-idle attribute is optional and is set to "no" by default.
         It influences the behaviour of displaying current tasks:
