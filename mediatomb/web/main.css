@@ -35,7 +35,7 @@ body
     padding:0;
 }
 
-/* IE png-fix from http://webfx.eae.net/dhtml/pngbehavior/pngbehavior.html */
+/* IE PNG fix from http://webfx.eae.net/dhtml/pngbehavior/pngbehavior.html */
 img
 {
    behavior: url("js/pngbehavior.htc");

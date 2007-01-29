@@ -84,7 +84,16 @@ void web::auth::process()
    
     timeout = timeout * 60;
     
-    if (param(_("checkSID")) != nil)
+    if (param(_("getConfig")) != nil)
+    {
+        Ref<ConfigManager> cm = ConfigManager::getInstance();
+        Ref<Element> config (new Element(_("config")));
+        root->appendChild(config);
+        config->addAttribute(_("poll-when-idle"), cm->getOption(_("/server/ui/attribute::poll-when-idle")));
+        config->addAttribute(_("poll-interval"), cm->getOption(_("/server/ui/attribute::poll-interval")));
+        config->appendChild(cm->getElement(_("/server/ui/items-per-page")));
+    }
+    else if (param(_("checkSID")) != nil)
     {
         log_debug("checking sid...\n");
         Ref<SessionManager> sessionManager = SessionManager::getInstance();
@@ -112,13 +121,6 @@ void web::auth::process()
         }
         if (session != nil)
             session->clearUpdateIDs();
-        
-        Ref<ConfigManager> cm = ConfigManager::getInstance();
-        Ref<Element> config (new Element(_("config")));
-        root->appendChild(config);
-        config->addAttribute(_("poll-when-idle"), cm->getOption(_("/server/ui/attribute::poll-when-idle")));
-        config->addAttribute(_("poll-interval"), cm->getOption(_("/server/ui/attribute::poll-interval")));
-        
     }
     else if (param(_("logout")) != nil)
     {

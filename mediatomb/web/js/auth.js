@@ -111,15 +111,6 @@ function checkSIDcallback(ajaxRequest)
     }
     var accountsStr = xmlGetElementText(rootEl, "accounts");
     ACCOUNTS = (accountsStr && accountsStr == "1");
-    
-    var configEl = xmlGetElement(rootEl, "config");
-    if (configEl)
-    {
-        pollIntervalTime = xmlGetAttribute(configEl, "poll-interval") * 1000;
-        pollWhenIdle = (xmlGetAttribute(configEl, "poll-when-idle") == "yes");
-        if (pollWhenIdle)
-            startPollInterval();
-    }
 }
 
 function logout()
@@ -137,4 +128,55 @@ function logout()
 function handleLogout(ajaxRequest)
 {
     errorCheck(ajaxRequest.responseXML);
+}
+
+function getConfig()
+{
+    var url = link('auth', {getConfig: 1});
+    var myAjax = new Ajax.Request(
+        url,
+        {
+            method: 'get',
+            asynchronous: false,
+            onComplete: getConfigCallback
+        });
+}
+
+function getConfigCallback(ajaxRequest)
+{
+    var xml = ajaxRequest.responseXML;
+    errorCheck(xml, true);
+    var rootEl = xmlGetElement(xml, "root");
+    var configEl = xmlGetElement(rootEl, "config");
+    if (configEl)
+    {
+        pollIntervalTime = xmlGetAttribute(configEl, "poll-interval") * 1000;
+        pollWhenIdle = (xmlGetAttribute(configEl, "poll-when-idle") == "yes");
+        if (pollWhenIdle)
+            startPollInterval();
+        var itemsPerPageOptionsEl = xmlGetElement(configEl, "items-per-page");
+        if (itemsPerPageOptionsEl)
+        {
+            var newDefaultViewItems = xmlGetAttribute(itemsPerPageOptionsEl, "default");
+            var options = itemsPerPageOptionsEl.getElementsByTagName("option");
+            var newItemOptions = new Array();
+            var defaultViewItemsFound = false;
+            var currentViewItemsFound = false;
+            for (var i = 0; i < options.length; i++)
+            {
+                var itemOption = options[i].firstChild.nodeValue;
+                newItemOptions[i] = itemOption;
+                if (itemOption == newDefaultViewItems)
+                    defaultViewItemsFound = true;
+                if (viewItems != -1 && itemOption == viewItems)
+                    currentViewItemsFound = true;
+            }
+            if (defaultViewItemsFound)
+            {
+                itemOptions = newItemOptions;
+                if (! currentViewItemsFound)
+                    viewItems = newDefaultViewItems;
+            }
+        }
+    }
 }

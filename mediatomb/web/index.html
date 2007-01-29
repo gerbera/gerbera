@@ -51,6 +51,16 @@
             var ACCOUNTS; // accounts enabled or disabled
                           // is set by checkSID();
             var loggedIn = false;
+            var isMSIE = /MSIE/.test(navigator.userAgent);
+            if (isMSIE)
+            {
+                var msieWarn = getCookie("MSIEwarn");
+                if (msieWarn != "ok")
+                {
+                    setCookie("MSIEwarn", "ok");
+                    alert('MediaTomb UI is very limited with Internet Explorer! Please see the section "Internet Explorer" in the README file.');
+                }
+            }
             function init() {
                 Try.these
                 (
@@ -60,6 +70,9 @@
                         SID = getCookie("SID");
                         lastNodeDbWish = getCookie("lastNodeDb");
                         lastNodeFsWish = getCookie("lastNodeFs");
+                        var cookieViewItems = getCookie("viewItems");
+                        if (cookieViewItems)
+                            viewItems = cookieViewItems;
                     },
                     function()
                     {
@@ -117,6 +130,7 @@
             
             function initLoggedIn()
             {
+                getConfig();
                 itemInit();
                 treeInit();
                 Element.addClassName(frames["topleftF"].document.getElementById('type_' + TYPE), 'selected');

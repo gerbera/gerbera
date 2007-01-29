@@ -31,14 +31,21 @@ var itemRoot;
 var topItemRoot
 var rightDocument;
 var topRightDocument;
-var viewItems = 50;
-var showMaxPages = 10;
+
+// will be overridden by getConfigCallback() (auth.js)
+// dann hast du nicht irgendwelche schrittlaenge und scheisse...
+var itemOptions = new Array(10, 25, 50, 100);
+var viewItems = -1;
+var defaultViewItems = 25;
+var showAddPages = 3;
 
 function itemInit()
 {
     rightDocument = frames["rightF"].document;
     topRightDocument = frames["toprightF"].document;
     itemChangeType();
+    if (viewItems == -1)
+        viewItems = defaultViewItems;
 }
 
 function itemChangeType()
@@ -128,15 +135,49 @@ function updateItems(ajaxRequest)
     var thisPage = Math.abs(start / viewItems);
     var nextPageStart = (thisPage + 1) * viewItems;
     var prevPageStart = (thisPage - 1) * viewItems;
-    var pagesFrom = thisPage - showMaxPages / 2;
+    var pagesFrom;
+    var pagesTo
+    if (thisPage <= showAddPages + 1)
+    {
+        pagesFrom = 0;
+        pagesTo = showAddPages * 2 + 1;
+    }
+    else if (thisPage < totalPages - showAddPages - 1)
+    {
+        pagesFrom = thisPage - showAddPages;
+        pagesTo = thisPage + showAddPages;
+    }
+    else
+    {
+        pagesFrom = totalPages - showAddPages * 2 - 2;
+        pagesTo = totalPages - 1;
+    }
+    
+    if (pagesFrom == 2)
+        pagesFrom--;
     if (pagesFrom < 0)
         pagesFrom = 0;
-    var pagesTo = pagesFrom + showMaxPages - 1;
+    if (pagesTo == totalPages - 3)
+        pagesTo++;
+    
     if (pagesTo >= totalPages)
         pagesTo = totalPages - 1;
-    // delete this:
-    var pagingLink;
-    var pagingPar = rightDocument.createElement("p");
+    
+    var pagingTab1 = rightDocument.createElement("table");
+    pagingTab1.setAttribute("align", "center");
+    var pagingTbody1 = rightDocument.createElement("tbody");
+    var pagingRow = rightDocument.createElement("tr");
+    var pagingCellLeft = rightDocument.createElement("td");
+    pagingCellLeft.setAttribute("align", "right");
+    var pagingCellCenter = rightDocument.createElement("td");
+    pagingCellCenter.setAttribute("align", "center");
+    var pagingCellRight = rightDocument.createElement("td");
+    pagingCellRight.setAttribute("align", "left");
+    pagingTab1.appendChild(pagingTbody1);
+    pagingTbody1.appendChild(pagingRow);
+    pagingRow.appendChild(pagingCellLeft);
+    pagingRow.appendChild(pagingCellCenter);
+    pagingRow.appendChild(pagingCellRight);
     
     var first = true;
     
@@ -147,8 +188,48 @@ function updateItems(ajaxRequest)
     
     if (prevPageStart >= 0)
     {
-        first = _addLink(rightDocument, pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','0');", "first", iconFirst, " ");
-        first = _addLink(rightDocument, pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','"+prevPageStart+"');", "previous", iconPrevious, " ");
+        _addLink(rightDocument, pagingCellLeft, false, "javascript:parent.loadItems('"+loadItemId+"','0');", "first", iconFirst, " ");
+        _addLink(rightDocument, pagingCellLeft, false, "javascript:parent.loadItems('"+loadItemId+"','"+prevPageStart+"');", "previous", iconPrevious, " ");
+    }
+    else
+    {
+        appendImgNode(rightDocument, pagingCellLeft, "", iconArrowReplacement);
+        appendImgNode(rightDocument, pagingCellLeft, "", iconArrowReplacement);
+    }
+    
+    if (nextPageStart < totalMatches)
+    {
+        _addLink(rightDocument, pagingCellRight, false, "javascript:parent.loadItems('"+loadItemId+"','"+nextPageStart+"');", "next", iconNext, " ");
+        _addLink(rightDocument, pagingCellRight, false, "javascript:parent.loadItems('"+loadItemId+"','"+((totalPages - 1) * viewItems)+"');", "last", iconLast, " ");
+    }
+    else
+    {
+        appendImgNode(rightDocument, pagingCellRight, "", iconArrowReplacement);
+        appendImgNode(rightDocument, pagingCellRight, "", iconArrowReplacement);
+    }
+    
+    var pagingTab2 = rightDocument.createElement("table");
+    pagingTab2.setAttribute("align", "center");
+    var pagingTbody2 = rightDocument.createElement("tbody");
+    pagingTab2.appendChild(pagingTbody2);
+    var pagingPagesRow = rightDocument.createElement("tr");
+    var pagingPagesCell = rightDocument.createElement("td");
+    pagingPagesCell.setAttribute("align", "center");
+    pagingPagesCell.setAttribute("colspan", "3");
+    pagingTbody2.appendChild(pagingPagesRow);
+    pagingPagesRow.appendChild(pagingPagesCell);
+    
+    var first = true;
+    
+    if (pagesFrom > 0)
+    {
+        first = false;
+        var pagingLink = rightDocument.createElement("a");
+        pagingLink.setAttribute("href", "javascript:parent.loadItems('"+loadItemId+"','0');");
+        pagingLink.appendChild(rightDocument.createTextNode(1));
+        pagingPagesCell.appendChild(pagingLink);
+        if (pagesFrom > 1)
+            pagingPagesCell.appendChild(rightDocument.createTextNode(" ..."));
     }
     
     for (var i = pagesFrom; i <= pagesTo; i++)
@@ -156,7 +237,9 @@ function updateItems(ajaxRequest)
         if (first)
             first = false;
         else
-            pagingPar.appendChild(rightDocument.createTextNode(" "));
+            pagingPagesCell.appendChild(rightDocument.createTextNode(" "));
+        
+        var pagingLink;
         
         if (i == thisPage)
         {
@@ -167,19 +250,26 @@ function updateItems(ajaxRequest)
             pagingLink = rightDocument.createElement("a");
             pagingLink.setAttribute("href", "javascript:parent.loadItems('"+loadItemId+"','"+(i * viewItems)+"');");
         }
-        pagingLink.appendChild(rightDocument.createTextNode(i));
-        pagingPar.appendChild(pagingLink);
+        pagingLink.appendChild(rightDocument.createTextNode( i + 1));
+        pagingPagesCell.appendChild(pagingLink);
     }
     
-    if (nextPageStart < totalMatches)
+    if (pagesTo < totalPages - 1)
     {
-        first = _addLink(rightDocument, pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','"+nextPageStart+"');", "next", iconNext, " ");
-        first = _addLink(rightDocument, pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','"+((totalPages - 1) * viewItems)+"');", "last", iconLast, " ");
+        var pagingLink = rightDocument.createElement("a");
+        pagingLink.setAttribute("href", "javascript:parent.loadItems('"+loadItemId+"','"+((totalPages - 1) * viewItems)+"');");
+        pagingLink.appendChild(rightDocument.createTextNode(totalPages));
+        if (pagesTo < totalPages - 2)
+            pagingPagesCell.appendChild(rightDocument.createTextNode(" ... "));
+        else
+            pagingPagesCell.appendChild(rightDocument.createTextNode(" "));
+        pagingPagesCell.appendChild(pagingLink);
+        
     }
     
     /*
     if (thisPage < totalPages - showMaxPages / 2)
-        first = _addLink(pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','"+((totalPages - 1) * viewItems)+"');", "last", iconLast, " ");
+        first = _addLink(pagingPagesCell, first, "javascript:parent.loadItems('"+loadItemId+"','"+((totalPages - 1) * viewItems)+"');", "last", iconLast, " ");
     */
     
     var children = items.getElementsByTagName(childrenTag);
@@ -252,7 +342,6 @@ function updateItems(ajaxRequest)
         var removeAllLink = false;
         var autoscanLink = false;
         
-        
         if (lastNodeDb == 'd0')
         {
             addLink = true;
@@ -297,9 +386,30 @@ function updateItems(ajaxRequest)
             }
         }
     }
-    itemsEl.appendChild(pagingPar);
+    
+    var pagingForm = rightDocument.createElement("form");
+    pagingForm.setAttribute("name", "itemsPerPageForm1");
+    var pagingSelect = rightDocument.createElement("select");
+    pagingForm.appendChild(pagingSelect);
+    pagingSelect.setAttribute("size", "1");
+    pagingSelect.setAttribute("onchange", "parent.changeItemsPerPage(1)");
+    pagingSelect.setAttribute("name", "itemsPerPage1");
+    
+    // deactivated for MSIE for now..
+    if (! isMSIE)
+        pagingCellCenter.appendChild(pagingForm);
+    
+    itemsEl.appendChild(pagingTab1.cloneNode(true));
+    itemsEl.appendChild(pagingTab2.cloneNode(true));
+    
+    pagingForm.setAttribute("name", "itemsPerPageForm2");
+    pagingSelect.setAttribute("onchange", "parent.changeItemsPerPage(2)");
+    pagingSelect.setAttribute("name", "itemsPerPage2");
+    
+    
     var itemsTable = rightDocument.createElement("table");
     itemsTable.setAttribute("width", "100%");
+    itemsTable.setAttribute("cellspacing", "0");
     var itemsTableBody = rightDocument.createElement("tbody");
     itemsTable.appendChild(itemsTableBody);
     itemsEl.appendChild(itemsTable);
@@ -347,12 +457,59 @@ function updateItems(ajaxRequest)
         }
         itemsTableBody.appendChild(itemRow);
     }
-    itemsEl.appendChild(pagingPar.cloneNode(true));
+    
+    itemsEl.appendChild(pagingTab2);
+    itemsEl.appendChild(pagingTab1);
     
     //itemsEl.appendChild(rightDocument.createTextNode("total: "+totalMatches));
     
     itemRoot.replaceChild(itemsEl, itemRoot.firstChild);
     topItemRoot.replaceChild(topItemsEl, topItemRoot.firstChild);
+    
+    /* partly works with IE...
+    for (var i = 0; i < rightDocument.forms.length; i++)
+    {
+        var form = rightDocument.forms[i];
+        if (form.name == 'itemsPerPageForm1')
+            _addItemsPerPage(form.elements, 1);
+        if (form.name == 'itemsPerPageForm2')
+            _addItemsPerPage(form.elements, 2);
+    }
+    */
+    
+    // deactivated for MSIE for now...
+    if (! isMSIE)
+    {
+        _addItemsPerPage(rightDocument.forms['itemsPerPageForm1'].elements['itemsPerPage1']);
+        _addItemsPerPage(rightDocument.forms['itemsPerPageForm2'].elements['itemsPerPage2']);
+    }
+}
+
+function _addItemsPerPage(itemsPerPageEl) //IE itemsPerPageFormElements, formId)
+{
+    /* partly works with IE...
+    var itemsPerPageEl;
+    for (var i = 0; i < itemsPerPageFormElements.length; i ++)
+    {
+        if (itemsPerPageFormElements[i].name == 'itemsPerPage'+formId)
+            itemsPerPageEl = itemsPerPageFormElements[i];
+    }
+    */
+    
+    if (itemsPerPageEl)
+    {
+        //itemsPerPageEl.onchange='parent.changeItemsPerPage('+formId+')';
+        for (var i = 0; i < itemOptions.length; i ++)
+        {
+            var itemCount = itemOptions[i];
+            itemsPerPageEl.options[i] = new Option(
+                itemCount,
+                itemCount,
+                false,
+                itemCount == viewItems
+            );
+        }
+    }
 }
 
 function _addLink(useDocument, addToElement, first, href, text, icon, seperator, target)
@@ -594,3 +751,15 @@ function removeItem(itemId, all)
             onComplete: addEditRemoveSubmitted
         });
 }
+
+function changeItemsPerPage(formId)
+{
+    var newViewItems = rightDocument.forms['itemsPerPageForm'+formId].elements['itemsPerPage'+formId].value;
+    if (newViewItems != viewItems)
+    {
+        viewItems = newViewItems;
+        setCookie("viewItems", viewItems);
+        folderChange(selectedNode);
+    }
+}
+

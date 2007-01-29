@@ -44,7 +44,7 @@ var currentTaskID = -1;
 
 var pollInterval;
 
-// will be set by checkSIDcallback() (auth.js)
+// will be set by getConfigCallback() (auth.js)
 var pollWhenIdle = false;
 var pollIntervalTime = 2000;
 
@@ -70,7 +70,7 @@ function updateCurrentTask(taskEl)
             var currentTaskTxtEl = topDocument.getElementById("currentTaskText").firstChild;
             currentTaskTxtEl.replaceData(0, currentTaskTxtEl.length, taskEl.firstChild.data);
             Element.show(currentTaskTdEl);
-            if (! pollWhenIdle) // will be started by checkSIDcallback() (auth.js) otherwise
+            if (! pollWhenIdle) // will be started by getConfigCallback() (auth.js) otherwise
                 startPollInterval();
         }
     }

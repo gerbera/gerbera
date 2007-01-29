@@ -3,9 +3,7 @@ sharedir = $(DESTDIR)@datadir@/@PACKAGE@
 
 _DIST_FILES = \
     config-dist.xml \
-    mappings.xml \
-    mysql.sql \
-    sqlite3.sql
+    mappings.xml
 
 EXTRA_DIST = $(_DIST_FILES)
 

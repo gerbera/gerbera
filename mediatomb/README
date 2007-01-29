@@ -186,27 +186,35 @@ for MySQL manual.
 
 -----------------------------------------------------------
 
-WHY IS THE WEB UI DISABLED BY DEFAULT?
---------------------------------------
-IMPORTANT!!! Please read this carefully.
 
-The server has a web UI that allows you to browse the contents of your
-harddrive and to easily add media. The problem is, that since it is a 
-web UI running on the server, it can be accessed by anyone on your network,
-meaning that anyone could browse and download your data. This is probably
-a lesser issue in a small home environment (which is actually the intended
-audience) but could easily become an issue on a bigger network.
+USER INTERFACE
+--------------
 
-The irony is, that you can not yet add any media to the server, without 
-the UI :) So if you feel unsecure, you should probably temporarily enable
-the user interface, start the server on 127.0.0.1, add the media that you 
-want to share, disable the UI and restart the server on your normal LAN 
-network interface.
+The UI can be accessed via .... <description where to find the UI URL>
 
-In order to enable the UI simply change <ui enabled="no"/> to 
-<ui enabled="yes"/> in the configuration file. 
-And don't blame us for anything! ;>
+Internet Explorer
+-----------------
 
+We don't recommend using "Internet Explorer" <= 6 for accessing the UI, because
+the UI uses many advanced technologies which aren't very well supported by
+"Internet Explorer". Especially the optic is completely messed up but most
+functions should work. One feature that doesn't work at all with IE is the
+selection of the number of items per page. If you want IE to be fully supported,
+feel free to send us patches.
+
+Supported browsers
+------------------
+
+The following browsers were tested with our UI and seem to work perfectly:
+
+* Firefox 1.5
+* Firefox 2
+* Opera 9
+
+Limited functionality:
+
+* Internet Explorer <= 6
+(currently untested with IE 7)
 
 CONFIGURATION
 -------------
@@ -572,19 +580,18 @@ We are using the following code in our tree:
   Copyright (C) Paul Johnston 1999 - 2002. http://pajhome.org.uk/crypt/md5 
 
 - the UI uses the following software:
-  Prototype JavaScript Framework http://prototype.conio.net/
-  (c) 2005 Sam Stephenson <sam@conio.net>, MIT-style license.
-
-  NanoTree http://nanotree.sourceforge.net/
+  Prototype JavaScript Framework http://www.prototypejs.org/
+  (c) 2005-2007 Sam Stephenson, MIT-style license.
+  
+  (heavily modified version of) NanoTree http://nanotree.sourceforge.net/
   (c) 2003 (?) Martin Mouritzen <martin@nano.dk>; LGPL
   
-  wz_tooltip.js http://www.walterzorn.com/
-  (c) 002-2005 Walter Zorn; LGPL
-
+  IE PNG fix from http://webfx.eae.net/dhtml/pngbehavior/pngbehavior.html
+  
 - tombupnp is based on pupnp (http://pupnp.sf.net) which is based on
   libupnp (http://upnp.sf.net), originally distributed under the
   BSD license, Copyright (c) 2000-2003 Intel Corporation.
-
+  
   
 CONTRIBUTIONS
 -------------
@@ -593,5 +600,5 @@ Initial version of the MediaTomb startup script was contributed
 by Iain Lea <iain@bricbrac.de>
 TagLib support patch was contributed by Benhur Stein <benhur.stein@gmail.com>
 --------------------------------------------------------------------------------
-September 7, 2005
+January 29, 2007
 

@@ -43,6 +43,7 @@ var iconFirst = {src: iconPath + 'go-first.png', width: 32, height: 20};
 var iconPrevious = {src: iconPath + 'go-previous.png', width: 32, height: 20};
 var iconNext = {src: iconPath + 'go-next.png', width: 32, height: 20};
 var iconLast = {src: iconPath + 'go-last.png', width: 32, height: 20};
+var iconArrowReplacement = {src: iconPath + 'blank.png', width: 32, height: 20};
 
 var iconContainer = {src: iconPath + 'folder_open.png', width: 24, height: 29};
 var iconContainerAutoscan = {src: iconPath + 'autoscan_folder_open.png', width: 24, height: 29};
