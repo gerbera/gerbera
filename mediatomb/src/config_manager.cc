@@ -327,7 +327,7 @@ void ConfigManager::validate(String serverhome)
         if ((ipp_default != DEFAULT_ITEMS_PER_PAGE_1) && (ipp_default != DEFAULT_ITEMS_PER_PAGE_2) &&
             (ipp_default != DEFAULT_ITEMS_PER_PAGE_3) && (ipp_default != DEFAULT_ITEMS_PER_PAGE_4))
         {
-            throw _Exception(_("Error in config file: you specified an <items-per-page default=\"\"> value that is not listed in the defaults"));
+            throw _Exception(_("Error in config file: you specified an <items-per-page default=\"\"> value that is not listed in the options"));
         }
 
         element->appendTextChild(_("option"), String::from(DEFAULT_ITEMS_PER_PAGE_1));
