@@ -314,6 +314,42 @@ void ConfigManager::validate(String serverhome)
     if (i < 1)
         throw _Exception(_("Error in config file: incorrect parameter for <ui poll-interval=\")\" /> attribute"));
 
+
+    int ipp_default = getIntOption(_("/server/ui/items-per-page/attribute::default"), DEFAULT_ITEMS_PER_PAGE_2);
+    if (i < 1)
+        throw _Exception(_("Error in config file: incorrect parameter for <items-per-page default=\")\" /> attribute"));
+
+    // now get the option list for the drop down menu
+    Ref<Element> element = getElement(_("/server/ui/items-per-page"));
+    // create default structure
+    if (element->childCount() == 0)
+    {
+        element->appendTextChild(_("option"), String::from(DEFAULT_ITEMS_PER_PAGE_1));
+        element->appendTextChild(_("option"), String::from(DEFAULT_ITEMS_PER_PAGE_2));
+        element->appendTextChild(_("option"), String::from(DEFAULT_ITEMS_PER_PAGE_3));
+        element->appendTextChild(_("option"), String::from(DEFAULT_ITEMS_PER_PAGE_4));
+    }
+    else // validate user settings
+    {
+        bool default_found = false;
+        for (int j = 0; j < element->childCount(); j++)
+        {
+            Ref<Element> child = element->getChild(j);
+            if (child->getName() == "option")
+            {
+                i = child->getText().toInt();
+                if (i < 1)
+                    throw _Exception(_("Error in config file: incorrect <option> value for <items-per-page>"));
+
+                if (i == ipp_default)
+                    default_found = true;
+            }
+        }
+
+        if (!default_found)
+            throw _Exception(_("Error in config file: at least one <option> under <items-per-page> must match the <items-per-page default=\")\" /> attribute"));
+    }
+
     temp = getOption(_("/server/ui/accounts/attribute::enabled"), 
             _(DEFAULT_ACCOUNTS_EN_VALUE));
 
