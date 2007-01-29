@@ -324,8 +324,8 @@ void ConfigManager::validate(String serverhome)
     // create default structure
     if (element->childCount() == 0)
     {
-        if ((i != DEFAULT_ITEMS_PER_PAGE_1) && (i != DEFAULT_ITEMS_PER_PAGE_2) &&
-            (i != DEFAULT_ITEMS_PER_PAGE_3) && (i != DEFAULT_ITEMS_PER_PAGE_4))
+        if ((ipp_default != DEFAULT_ITEMS_PER_PAGE_1) && (ipp_default != DEFAULT_ITEMS_PER_PAGE_2) &&
+            (ipp_default != DEFAULT_ITEMS_PER_PAGE_3) && (ipp_default != DEFAULT_ITEMS_PER_PAGE_4))
         {
             throw _Exception(_("Error in config file: you specified an <items-per-page default=\"\"> value that is not listed in the defaults"));
         }
