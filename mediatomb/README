@@ -271,6 +271,20 @@ Here is a sample configuration file with description of the various tags.
             There can be multiple users, however this is mainly a feature 
             for the future. Right now there are no per-user permissions.
 
+        <items-per-page default="25"> (Optional)
+        This tells the UI the default number of items per page that will be 
+        shown when browsing the database.
+
+        The values for the items per page dropdown menu can also be
+        defined:
+            <option>10</option>
+            <option>25</option>
+            <option>50</option>
+            
+        Note: this list must contain the default value, i.e. if you
+        define a default value of 25, then one of the <option> tags
+        must also list this value.
+
     <port>50555</port> (Optional)
         Specifies the port where the server will be listening for HTTP 
         requests. Note, that because of the implementation in the UPnP SDK 

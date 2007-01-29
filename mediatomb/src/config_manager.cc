@@ -302,28 +302,34 @@ void ConfigManager::validate(String serverhome)
     temp = getOption(_("/server/ui/attribute::enabled"),
                      _(DEFAULT_UI_EN_VALUE));
     if ((temp != "yes") && (temp != "no"))
-        throw _Exception(_("Error in config file: incorrect parameter for <ui enabled=\")\" /> attribute"));
+        throw _Exception(_("Error in config file: incorrect parameter for <ui enabled=\"\" /> attribute"));
 
     temp = getOption(_("/server/ui/attribute::poll-when-idle"),
             _(DEFAULT_POLL_WHEN_IDLE_VALUE));
 
     if ((temp != "yes") && (temp != "no"))
-        throw _Exception(_("Error in config file: incorrect parameter for <ui poll-when-idle=\")\" /> attribute"));
+        throw _Exception(_("Error in config file: incorrect parameter for <ui poll-when-idle=\"\" /> attribute"));
 
     int i = getIntOption(_("/server/ui/attribute::poll-interval"), DEFAULT_POLL_INTERVAL);
     if (i < 1)
-        throw _Exception(_("Error in config file: incorrect parameter for <ui poll-interval=\")\" /> attribute"));
+        throw _Exception(_("Error in config file: incorrect parameter for <ui poll-interval=\"\" /> attribute"));
 
 
     int ipp_default = getIntOption(_("/server/ui/items-per-page/attribute::default"), DEFAULT_ITEMS_PER_PAGE_2);
     if (i < 1)
-        throw _Exception(_("Error in config file: incorrect parameter for <items-per-page default=\")\" /> attribute"));
+        throw _Exception(_("Error in config file: incorrect parameter for <items-per-page default=\"\" /> attribute"));
 
     // now get the option list for the drop down menu
     Ref<Element> element = getElement(_("/server/ui/items-per-page"));
     // create default structure
     if (element->childCount() == 0)
     {
+        if ((i != DEFAULT_ITEMS_PER_PAGE_1) && (i != DEFAULT_ITEMS_PER_PAGE_2) &&
+            (i != DEFAULT_ITEMS_PER_PAGE_3) && (i != DEFAULT_ITEMS_PER_PAGE_4))
+        {
+            throw _Exception(_("Error in config file: you specified an <items-per-page default=\"\"> value that is not listed in the defaults"));
+        }
+
         element->appendTextChild(_("option"), String::from(DEFAULT_ITEMS_PER_PAGE_1));
         element->appendTextChild(_("option"), String::from(DEFAULT_ITEMS_PER_PAGE_2));
         element->appendTextChild(_("option"), String::from(DEFAULT_ITEMS_PER_PAGE_3));
@@ -347,14 +353,14 @@ void ConfigManager::validate(String serverhome)
         }
 
         if (!default_found)
-            throw _Exception(_("Error in config file: at least one <option> under <items-per-page> must match the <items-per-page default=\")\" /> attribute"));
+            throw _Exception(_("Error in config file: at least one <option> under <items-per-page> must match the <items-per-page default=\"\" /> attribute"));
     }
 
     temp = getOption(_("/server/ui/accounts/attribute::enabled"), 
             _(DEFAULT_ACCOUNTS_EN_VALUE));
 
     if ((temp != "yes") && (temp != "no"))
-        throw _Exception(_("Error in config file: incorrect parameter for <accounts enabled=\")\" /> attribute"));
+        throw _Exception(_("Error in config file: incorrect parameter for <accounts enabled=\"\" /> attribute"));
 
     i  = getIntOption(_("/server/ui/accounts/attribute::session-timeout"), DEFAULT_SESSION_TIMEOUT);
     if (i < 1)
@@ -365,7 +371,7 @@ void ConfigManager::validate(String serverhome)
     temp = getOption(_("/import/attribute::hidden-files"),
                      _(DEFAULT_HIDDEN_FILES_VALUE));
     if ((temp != "yes") && (temp != "no"))
-        throw _Exception(_("Error in config file: incorrect parameter for <import hidden-files=\")\" /> attribute"));
+        throw _Exception(_("Error in config file: incorrect parameter for <import hidden-files=\"\" /> attribute"));
 
     getOption(_("/import/mappings/extension-mimetype/attribute::ignore-unknown"),
               _(DEFAULT_IGNORE_UNKNOWN_EXTENSIONS));
