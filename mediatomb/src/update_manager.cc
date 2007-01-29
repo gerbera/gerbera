@@ -38,6 +38,8 @@
 #include "upnp_cds.h"
 #include "storage.h"
 #include "tools.h"
+#include <sys/types.h>
+#include <signal.h>
 
 /* following constants in milliseconds */
 #define SPEC_INTERVAL 2000
@@ -218,8 +220,10 @@ void UpdateManager::threadProc()
                 {
                     if (ret != 0 && ret != ETIMEDOUT)
                     {
-                        log_debug("pthread_cond_timedwait returned errorcode %d\n", ret);
-                        throw _Exception(_("pthread_cond_timedwait returned errorcode ") + ret);
+                        log_error("Fatal error: pthread_cond_timedwait returned errorcode %d\n", ret);
+                        log_error("Forcing MediaTomb shutdown.\n");
+                        print_backtrace();
+                        kill(0, SIGINT);
                     }
                     if (ret == ETIMEDOUT)
                         sendUpdates = false;
@@ -233,20 +237,39 @@ void UpdateManager::threadProc()
                 log_debug("sending updates...\n");
                 lastContainerChanged = INVALID_OBJECT_ID;
                 flushPolicy = FLUSH_SPEC;
-                
-                hash_data_array_t<int> hash_data_array;
-                // hash_data_array points to the array inside objectIDHash, so
-                // we may only call clear() after we don't need the array anymore
-                objectIDHash->getAll(&hash_data_array);
-                String updateString = Storage::getInstance()->incrementUpdateIDs(hash_data_array.data,hash_data_array.size);
-                objectIDHash->clear(); // hash_data_array will be invalid after clear()
-                
+                String updateString;
+
+                try
+                {
+                    hash_data_array_t<int> hash_data_array;
+                    // hash_data_array points to the array inside objectIDHash, so
+                    // we may only call clear() after we don't need the array anymore
+                    objectIDHash->getAll(&hash_data_array);
+                    updateString = Storage::getInstance()->incrementUpdateIDs(hash_data_array.data,hash_data_array.size);
+                    objectIDHash->clear(); // hash_data_array will be invalid after clear()
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                    log_error("Fatal error when sending updates: %s\n", e.getMessage().c_str());
+                    log_error("Forcing MediaTomb shutdown.\n");
+                    kill(0, SIGINT);
+                }
                 AUTOUNLOCK(); // we don't need to hold the lock during the sending of the updates
                 if (string_ok(updateString))
                 {
+                    try
+                    {
                     ContentDirectoryService::getInstance()->subscription_update(updateString);
                     log_debug("updates sent.\n");
                     getTimespecNow(&lastUpdate);
+                    }
+                    catch (Exception e)
+                    {
+                        log_error("Fatal error when sending updates: %s\n", e.getMessage().c_str());
+                        log_error("Forcing MediaTomb shutdown.\n");
+                        kill(0, SIGINT);
+                    }
                 }
                 else
                 {
