@@ -88,6 +88,7 @@ div.taskDiv
 table.contTable
 {
     padding-top:5px;
+    white-space:nowrap;
 }
 
 tr.itemRowA
