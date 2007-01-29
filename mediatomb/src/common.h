@@ -130,12 +130,17 @@
 
 #define DESC_ICON_PNG_MIMETYPE          "image/png"
 #define DESC_ICON_BMP_MIMETYPE          "image/x-ms-bmp"
-#define DESC_ICON48_PNG                 "/icons/mt-icon48.png"
+#define DESC_ICON_JPG_MIMETYPE          "image/jpeg"
 #define DESC_ICON32_PNG                 "/icons/mt-icon32.png"
-#define DESC_ICON16_PNG                 "/icons/mt-icon16.png"
-#define DESC_ICON48_BMP                 "/icons/mt-icon48.bmp"
 #define DESC_ICON32_BMP                 "/icons/mt-icon32.bmp"
-#define DESC_ICON16_BMP                 "/icons/mt-icon16.bmp"
+#define DESC_ICON32_JPG                 "/icons/mt-icon32.jpg"
+#define DESC_ICON48_PNG                 "/icons/mt-icon48.png"
+#define DESC_ICON48_BMP                 "/icons/mt-icon48.bmp"
+#define DESC_ICON48_JPG                 "/icons/mt-icon48.jpg"
+#define DESC_ICON120_JPG                "/icons/mt-icon120.jpg"
+#define DESC_ICON120_PNG                "/icons/mt-icon120.png"
+#define DESC_ICON120_BMP                "/icons/mt-icon120.bmp"
+
 
 #if defined(ENABLE_MRREG)
     // media receiver registrar (xbox 360)

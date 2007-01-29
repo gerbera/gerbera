@@ -219,11 +219,35 @@ Ref<Element> UpnpXML_RenderDeviceDescription(String presentationURL)
 
     Ref<Element> iconList(new Element(_("iconList")));
 
+    Ref<Element> icon120_png(new Element(_("icon")));
+    icon120_png->appendTextChild(_("mimetype"), _(DESC_ICON_PNG_MIMETYPE));
+    icon120_png->appendTextChild(_("width"), _("120"));
+    icon120_png->appendTextChild(_("height"), _("120"));
+    icon120_png->appendTextChild(_("depth"), _("24"));
+    icon120_png->appendTextChild(_("url"), _(DESC_ICON120_PNG));
+    iconList->appendChild(icon120_png);
+
+    Ref<Element> icon120_bmp(new Element(_("icon")));
+    icon120_bmp->appendTextChild(_("mimetype"), _(DESC_ICON_BMP_MIMETYPE));
+    icon120_bmp->appendTextChild(_("width"), _("120"));
+    icon120_bmp->appendTextChild(_("height"), _("120"));
+    icon120_bmp->appendTextChild(_("depth"), _("24"));
+    icon120_bmp->appendTextChild(_("url"), _(DESC_ICON120_BMP));
+    iconList->appendChild(icon120_bmp);
+
+    Ref<Element> icon120_jpg(new Element(_("icon")));
+    icon120_jpg->appendTextChild(_("mimetype"), _(DESC_ICON_JPG_MIMETYPE));
+    icon120_jpg->appendTextChild(_("width"), _("120"));
+    icon120_jpg->appendTextChild(_("height"), _("120"));
+    icon120_jpg->appendTextChild(_("depth"), _("24"));
+    icon120_jpg->appendTextChild(_("url"), _(DESC_ICON120_JPG));
+    iconList->appendChild(icon120_jpg);
+
     Ref<Element> icon48_png(new Element(_("icon")));
     icon48_png->appendTextChild(_("mimetype"), _(DESC_ICON_PNG_MIMETYPE));
     icon48_png->appendTextChild(_("width"), _("48"));
     icon48_png->appendTextChild(_("height"), _("48"));
-    icon48_png->appendTextChild(_("depth"), _("8"));
+    icon48_png->appendTextChild(_("depth"), _("24"));
     icon48_png->appendTextChild(_("url"), _(DESC_ICON48_PNG));
     iconList->appendChild(icon48_png);
 
@@ -231,9 +255,17 @@ Ref<Element> UpnpXML_RenderDeviceDescription(String presentationURL)
     icon48_bmp->appendTextChild(_("mimetype"), _(DESC_ICON_BMP_MIMETYPE));
     icon48_bmp->appendTextChild(_("width"), _("48"));
     icon48_bmp->appendTextChild(_("height"), _("48"));
-    icon48_bmp->appendTextChild(_("depth"), _("8"));
+    icon48_bmp->appendTextChild(_("depth"), _("24"));
     icon48_bmp->appendTextChild(_("url"), _(DESC_ICON48_BMP));
     iconList->appendChild(icon48_bmp);
+
+    Ref<Element> icon48_jpg(new Element(_("icon")));
+    icon48_jpg->appendTextChild(_("mimetype"), _(DESC_ICON_JPG_MIMETYPE));
+    icon48_jpg->appendTextChild(_("width"), _("48"));
+    icon48_jpg->appendTextChild(_("height"), _("48"));
+    icon48_jpg->appendTextChild(_("depth"), _("24"));
+    icon48_jpg->appendTextChild(_("url"), _(DESC_ICON48_JPG));
+    iconList->appendChild(icon48_jpg);
 
     Ref<Element> icon32_png(new Element(_("icon")));
     icon32_png->appendTextChild(_("mimetype"), _(DESC_ICON_PNG_MIMETYPE));
@@ -251,21 +283,13 @@ Ref<Element> UpnpXML_RenderDeviceDescription(String presentationURL)
     icon32_bmp->appendTextChild(_("url"), _(DESC_ICON32_BMP));
     iconList->appendChild(icon32_bmp);
 
-    Ref<Element> icon16_png(new Element(_("icon")));
-    icon16_png->appendTextChild(_("mimetype"), _(DESC_ICON_PNG_MIMETYPE));
-    icon16_png->appendTextChild(_("width"), _("16"));
-    icon16_png->appendTextChild(_("height"), _("16"));
-    icon16_png->appendTextChild(_("depth"), _("8"));
-    icon16_png->appendTextChild(_("url"), _(DESC_ICON16_PNG));
-    iconList->appendChild(icon16_png);
-
-    Ref<Element> icon16_bmp(new Element(_("icon")));
-    icon16_bmp->appendTextChild(_("mimetype"), _(DESC_ICON_BMP_MIMETYPE));
-    icon16_bmp->appendTextChild(_("width"), _("16"));
-    icon16_bmp->appendTextChild(_("height"), _("16"));
-    icon16_bmp->appendTextChild(_("depth"), _("8"));
-    icon16_bmp->appendTextChild(_("url"), _(DESC_ICON16_BMP));
-    iconList->appendChild(icon16_bmp);
+    Ref<Element> icon32_jpg(new Element(_("icon")));
+    icon32_jpg->appendTextChild(_("mimetype"), _(DESC_ICON_JPG_MIMETYPE));
+    icon32_jpg->appendTextChild(_("width"), _("32"));
+    icon32_jpg->appendTextChild(_("height"), _("32"));
+    icon32_jpg->appendTextChild(_("depth"), _("8"));
+    icon32_jpg->appendTextChild(_("url"), _(DESC_ICON32_JPG));
+    iconList->appendChild(icon32_jpg);
 
     device->appendChild(iconList);
 

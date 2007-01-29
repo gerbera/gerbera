@@ -43,12 +43,15 @@ _DIST_FILES_ICONS = \
 ./icons/status_updates_pending.png \
 ./icons/mediatomb.png \
 ./icons/film.png \
-./icons/mt-icon16.png \
-./icons/mt-icon16.bmp \
-./icons/mt-icon32.png \
-./icons/mt-icon32.bmp \
+./icons/mt-icon120.jpg \
+./icons/mt-icon120.png \
+./icons/mt-icon120.bmp \
+./icons/mt-icon48.jpg \
 ./icons/mt-icon48.png \
 ./icons/mt-icon48.bmp \
+./icons/mt-icon32.jpg \
+./icons/mt-icon32.png \
+./icons/mt-icon32.bmp \
 ./icons/blank.png \
 ./icons/blank.gif
 
