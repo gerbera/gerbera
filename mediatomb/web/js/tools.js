@@ -27,7 +27,7 @@
     $Id$
 */
 
-var INACTIVITY_TIMEOUT = 3500;
+var INACTIVITY_TIMEOUT = 5000;
 
 function link(req_type, param, get_update_ids)
 {
@@ -369,6 +369,7 @@ var last_update = new Date().getTime();
 
 function mouseDownHandler(event)
 {
+    userActivity();
     var now = new Date().getTime();
     if (last_update + 3000 < now)
     {

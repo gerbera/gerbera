@@ -160,6 +160,7 @@ function getConfigCallback(ajaxRequest)
             var newDefaultViewItems = xmlGetAttribute(itemsPerPageOptionsEl, "default");
             var options = itemsPerPageOptionsEl.getElementsByTagName("option");
             var newItemOptions = new Array();
+            var newViewItemsMin = -1;
             var defaultViewItemsFound = false;
             var currentViewItemsFound = false;
             for (var i = 0; i < options.length; i++)
@@ -170,10 +171,13 @@ function getConfigCallback(ajaxRequest)
                     defaultViewItemsFound = true;
                 if (viewItems != -1 && itemOption == viewItems)
                     currentViewItemsFound = true;
+                if (newViewItemsMin == -1 || itemOption < newViewItemsMin)
+                    newViewItemsMin = itemOption;
             }
             if (defaultViewItemsFound)
             {
                 itemOptions = newItemOptions;
+                viewItemsMin = newViewItemsMin;
                 if (! currentViewItemsFound)
                     viewItems = newDefaultViewItems;
             }

@@ -35,6 +35,7 @@ var topRightDocument;
 // will be overridden by getConfigCallback() (auth.js)
 // dann hast du nicht irgendwelche schrittlaenge und scheisse...
 var itemOptions = new Array(10, 25, 50, 100);
+var viewItemsMin = 10;
 var viewItems = -1;
 var defaultViewItems = 25;
 var showAddPages = 3;
@@ -135,142 +136,153 @@ function updateItems(ajaxRequest)
     var thisPage = Math.abs(start / viewItems);
     var nextPageStart = (thisPage + 1) * viewItems;
     var prevPageStart = (thisPage - 1) * viewItems;
-    var pagesFrom;
-    var pagesTo
-    if (thisPage <= showAddPages + 1)
+    var showPaging = (! useFiles && totalMatches > viewItemsMin);
+    var showPagingPages = (totalPages > 1);
+    if (showPaging)
     {
-        pagesFrom = 0;
-        pagesTo = showAddPages * 2 + 1;
-    }
-    else if (thisPage < totalPages - showAddPages - 1)
-    {
-        pagesFrom = thisPage - showAddPages;
-        pagesTo = thisPage + showAddPages;
-    }
-    else
-    {
-        pagesFrom = totalPages - showAddPages * 2 - 2;
-        pagesTo = totalPages - 1;
-    }
-    
-    if (pagesFrom == 2)
-        pagesFrom--;
-    if (pagesFrom < 0)
-        pagesFrom = 0;
-    if (pagesTo == totalPages - 3)
-        pagesTo++;
-    
-    if (pagesTo >= totalPages)
-        pagesTo = totalPages - 1;
-    
-    var pagingTab1 = rightDocument.createElement("table");
-    pagingTab1.setAttribute("align", "center");
-    var pagingTbody1 = rightDocument.createElement("tbody");
-    var pagingRow = rightDocument.createElement("tr");
-    var pagingCellLeft = rightDocument.createElement("td");
-    pagingCellLeft.setAttribute("align", "right");
-    var pagingCellCenter = rightDocument.createElement("td");
-    pagingCellCenter.setAttribute("align", "center");
-    var pagingCellRight = rightDocument.createElement("td");
-    pagingCellRight.setAttribute("align", "left");
-    pagingTab1.appendChild(pagingTbody1);
-    pagingTbody1.appendChild(pagingRow);
-    pagingRow.appendChild(pagingCellLeft);
-    pagingRow.appendChild(pagingCellCenter);
-    pagingRow.appendChild(pagingCellRight);
-    
-    var first = true;
-    
-    /*
-    if (thisPage > showMaxPages / 2)
-        first = _addLink(pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','0');", "first", iconFirst, " ");
-    */
-    
-    if (prevPageStart >= 0)
-    {
-        _addLink(rightDocument, pagingCellLeft, false, "javascript:parent.loadItems('"+loadItemId+"','0');", "first", iconFirst, " ");
-        _addLink(rightDocument, pagingCellLeft, false, "javascript:parent.loadItems('"+loadItemId+"','"+prevPageStart+"');", "previous", iconPrevious, " ");
-    }
-    else
-    {
-        appendImgNode(rightDocument, pagingCellLeft, "", iconArrowReplacement);
-        appendImgNode(rightDocument, pagingCellLeft, "", iconArrowReplacement);
-    }
-    
-    if (nextPageStart < totalMatches)
-    {
-        _addLink(rightDocument, pagingCellRight, false, "javascript:parent.loadItems('"+loadItemId+"','"+nextPageStart+"');", "next", iconNext, " ");
-        _addLink(rightDocument, pagingCellRight, false, "javascript:parent.loadItems('"+loadItemId+"','"+((totalPages - 1) * viewItems)+"');", "last", iconLast, " ");
-    }
-    else
-    {
-        appendImgNode(rightDocument, pagingCellRight, "", iconArrowReplacement);
-        appendImgNode(rightDocument, pagingCellRight, "", iconArrowReplacement);
-    }
-    
-    var pagingTab2 = rightDocument.createElement("table");
-    pagingTab2.setAttribute("align", "center");
-    var pagingTbody2 = rightDocument.createElement("tbody");
-    pagingTab2.appendChild(pagingTbody2);
-    var pagingPagesRow = rightDocument.createElement("tr");
-    var pagingPagesCell = rightDocument.createElement("td");
-    pagingPagesCell.setAttribute("align", "center");
-    pagingPagesCell.setAttribute("colspan", "3");
-    pagingTbody2.appendChild(pagingPagesRow);
-    pagingPagesRow.appendChild(pagingPagesCell);
-    
-    var first = true;
-    
-    if (pagesFrom > 0)
-    {
-        first = false;
-        var pagingLink = rightDocument.createElement("a");
-        pagingLink.setAttribute("href", "javascript:parent.loadItems('"+loadItemId+"','0');");
-        pagingLink.appendChild(rightDocument.createTextNode(1));
-        pagingPagesCell.appendChild(pagingLink);
-        if (pagesFrom > 1)
-            pagingPagesCell.appendChild(rightDocument.createTextNode(" ..."));
-    }
-    
-    for (var i = pagesFrom; i <= pagesTo; i++)
-    {
-        if (first)
-            first = false;
-        else
-            pagingPagesCell.appendChild(rightDocument.createTextNode(" "));
-        
-        var pagingLink;
-        
-        if (i == thisPage)
+        if (showPagingPages)
         {
-            pagingLink = rightDocument.createElement("strong");
+            var pagesFrom;
+            var pagesTo
+            if (thisPage <= showAddPages + 1)
+            {
+                pagesFrom = 0;
+                pagesTo = showAddPages * 2 + 1;
+            }
+            else if (thisPage < totalPages - showAddPages - 1)
+            {
+                pagesFrom = thisPage - showAddPages;
+                pagesTo = thisPage + showAddPages;
+            }
+            else
+            {
+                pagesFrom = totalPages - showAddPages * 2 - 2;
+                pagesTo = totalPages - 1;
+            }
+            
+            if (pagesFrom == 2)
+                pagesFrom--;
+            if (pagesFrom < 0)
+                pagesFrom = 0;
+            if (pagesTo == totalPages - 3)
+                pagesTo++;
+            
+            if (pagesTo >= totalPages)
+                pagesTo = totalPages - 1;
+        }
+        
+        var pagingTab1 = rightDocument.createElement("table");
+        pagingTab1.setAttribute("align", "center");
+        var pagingTbody1 = rightDocument.createElement("tbody");
+        var pagingRow = rightDocument.createElement("tr");
+        var pagingCellLeft = rightDocument.createElement("td");
+        pagingCellLeft.setAttribute("align", "right");
+        var pagingCellCenter = rightDocument.createElement("td");
+        pagingCellCenter.setAttribute("align", "center");
+        var pagingCellRight = rightDocument.createElement("td");
+        pagingCellRight.setAttribute("align", "left");
+        pagingTab1.appendChild(pagingTbody1);
+        pagingTbody1.appendChild(pagingRow);
+        pagingRow.appendChild(pagingCellLeft);
+        pagingRow.appendChild(pagingCellCenter);
+        pagingRow.appendChild(pagingCellRight);
+        
+        var first = true;
+        
+        /*
+        if (thisPage > showMaxPages / 2)
+            first = _addLink(pagingPar, first, "javascript:parent.loadItems('"+loadItemId+"','0');", "first", iconFirst, " ");
+        */
+        
+        if (prevPageStart >= 0)
+        {
+            _addLink(rightDocument, pagingCellLeft, false, "javascript:parent.loadItems('"+loadItemId+"','0');", "first", iconFirst, " ");
+            _addLink(rightDocument, pagingCellLeft, false, "javascript:parent.loadItems('"+loadItemId+"','"+prevPageStart+"');", "previous", iconPrevious, " ");
         }
         else
         {
-            pagingLink = rightDocument.createElement("a");
-            pagingLink.setAttribute("href", "javascript:parent.loadItems('"+loadItemId+"','"+(i * viewItems)+"');");
+            appendImgNode(rightDocument, pagingCellLeft, "", iconArrowReplacement);
+            appendImgNode(rightDocument, pagingCellLeft, "", iconArrowReplacement);
         }
-        pagingLink.appendChild(rightDocument.createTextNode( i + 1));
-        pagingPagesCell.appendChild(pagingLink);
-    }
-    
-    if (pagesTo < totalPages - 1)
-    {
-        var pagingLink = rightDocument.createElement("a");
-        pagingLink.setAttribute("href", "javascript:parent.loadItems('"+loadItemId+"','"+((totalPages - 1) * viewItems)+"');");
-        pagingLink.appendChild(rightDocument.createTextNode(totalPages));
-        if (pagesTo < totalPages - 2)
-            pagingPagesCell.appendChild(rightDocument.createTextNode(" ... "));
-        else
-            pagingPagesCell.appendChild(rightDocument.createTextNode(" "));
-        pagingPagesCell.appendChild(pagingLink);
         
+        if (nextPageStart < totalMatches)
+        {
+            _addLink(rightDocument, pagingCellRight, false, "javascript:parent.loadItems('"+loadItemId+"','"+nextPageStart+"');", "next", iconNext, " ");
+            _addLink(rightDocument, pagingCellRight, false, "javascript:parent.loadItems('"+loadItemId+"','"+((totalPages - 1) * viewItems)+"');", "last", iconLast, " ");
+        }
+        else
+        {
+            appendImgNode(rightDocument, pagingCellRight, "", iconArrowReplacement);
+            appendImgNode(rightDocument, pagingCellRight, "", iconArrowReplacement);
+        }
+        
+        if (showPagingPages)
+        {
+            var pagingTab2 = rightDocument.createElement("table");
+            pagingTab2.setAttribute("align", "center");
+            var pagingTbody2 = rightDocument.createElement("tbody");
+            pagingTab2.appendChild(pagingTbody2);
+            var pagingPagesRow = rightDocument.createElement("tr");
+            var pagingPagesCell = rightDocument.createElement("td");
+            pagingPagesCell.setAttribute("align", "center");
+            pagingPagesCell.setAttribute("colspan", "3");
+            pagingTbody2.appendChild(pagingPagesRow);
+            pagingPagesRow.appendChild(pagingPagesCell);
+            
+            var first = true;
+            
+            if (pagesFrom > 0)
+            {
+                first = false;
+                var pagingLink = rightDocument.createElement("a");
+                pagingLink.setAttribute("href", "javascript:parent.loadItems('"+loadItemId+"','0');");
+                pagingLink.appendChild(rightDocument.createTextNode(1));
+                pagingPagesCell.appendChild(pagingLink);
+                if (pagesFrom > 1)
+                    pagingPagesCell.appendChild(rightDocument.createTextNode(" ..."));
+            }
+            
+            for (var i = pagesFrom; i <= pagesTo; i++)
+            {
+                if (first)
+                    first = false;
+                else
+                    pagingPagesCell.appendChild(rightDocument.createTextNode(" "));
+                
+                var pagingLink;
+                
+                if (i == thisPage)
+                {
+                    pagingLink = rightDocument.createElement("strong");
+                }
+                else
+                {
+                    pagingLink = rightDocument.createElement("a");
+                    pagingLink.setAttribute("href", "javascript:parent.loadItems('"+loadItemId+"','"+(i * viewItems)+"');");
+                }
+                pagingLink.appendChild(rightDocument.createTextNode( i + 1));
+                pagingPagesCell.appendChild(pagingLink);
+            }
+            
+            if (pagesTo < totalPages - 1)
+            {
+                var pagingLink = rightDocument.createElement("a");
+                pagingLink.setAttribute("href", "javascript:parent.loadItems('"+loadItemId+"','"+((totalPages - 1) * viewItems)+"');");
+                pagingLink.appendChild(rightDocument.createTextNode(totalPages));
+                if (pagesTo < totalPages - 2)
+                    pagingPagesCell.appendChild(rightDocument.createTextNode(" ... "));
+                else
+                    pagingPagesCell.appendChild(rightDocument.createTextNode(" "));
+                pagingPagesCell.appendChild(pagingLink);
+                
+            }
+        }
+        
+        /*
+        if (thisPage < totalPages - showMaxPages / 2)
+            first = _addLink(pagingPagesCell, first, "javascript:parent.loadItems('"+loadItemId+"','"+((totalPages - 1) * viewItems)+"');", "last", iconLast, " ");
+        */
     }
-    
-    /*
-    if (thisPage < totalPages - showMaxPages / 2)
-        first = _addLink(pagingPagesCell, first, "javascript:parent.loadItems('"+loadItemId+"','"+((totalPages - 1) * viewItems)+"');", "last", iconLast, " ");
-    */
     
     var children = items.getElementsByTagName(childrenTag);
     var itemsEl = rightDocument.createElement("div");
@@ -387,25 +399,28 @@ function updateItems(ajaxRequest)
         }
     }
     
-    var pagingForm = rightDocument.createElement("form");
-    pagingForm.setAttribute("name", "itemsPerPageForm1");
-    var pagingSelect = rightDocument.createElement("select");
-    pagingForm.appendChild(pagingSelect);
-    pagingSelect.setAttribute("size", "1");
-    pagingSelect.setAttribute("onchange", "parent.changeItemsPerPage(1)");
-    pagingSelect.setAttribute("name", "itemsPerPage1");
-    
-    // deactivated for MSIE for now..
-    if (! isMSIE)
-        pagingCellCenter.appendChild(pagingForm);
-    
-    itemsEl.appendChild(pagingTab1.cloneNode(true));
-    itemsEl.appendChild(pagingTab2.cloneNode(true));
-    
-    pagingForm.setAttribute("name", "itemsPerPageForm2");
-    pagingSelect.setAttribute("onchange", "parent.changeItemsPerPage(2)");
-    pagingSelect.setAttribute("name", "itemsPerPage2");
-    
+    if (showPaging)
+    {
+        var pagingForm = rightDocument.createElement("form");
+        pagingForm.setAttribute("name", "itemsPerPageForm1");
+        var pagingSelect = rightDocument.createElement("select");
+        pagingForm.appendChild(pagingSelect);
+        pagingSelect.setAttribute("size", "1");
+        pagingSelect.setAttribute("onchange", "parent.changeItemsPerPage(1)");
+        pagingSelect.setAttribute("name", "itemsPerPage1");
+        
+        // deactivated for MSIE for now..
+        if (! isMSIE)
+            pagingCellCenter.appendChild(pagingForm);
+        
+        itemsEl.appendChild(pagingTab1.cloneNode(true));
+        if (showPagingPages)
+            itemsEl.appendChild(pagingTab2.cloneNode(true));
+        
+        pagingForm.setAttribute("name", "itemsPerPageForm2");
+        pagingSelect.setAttribute("onchange", "parent.changeItemsPerPage(2)");
+        pagingSelect.setAttribute("name", "itemsPerPage2");
+    }
     
     var itemsTable = rightDocument.createElement("table");
     itemsTable.setAttribute("width", "100%");
@@ -458,8 +473,12 @@ function updateItems(ajaxRequest)
         itemsTableBody.appendChild(itemRow);
     }
     
-    itemsEl.appendChild(pagingTab2);
-    itemsEl.appendChild(pagingTab1);
+    if (showPaging)
+    {
+        if (showPagingPages)
+            itemsEl.appendChild(pagingTab2);
+        itemsEl.appendChild(pagingTab1);
+    }
     
     //itemsEl.appendChild(rightDocument.createTextNode("total: "+totalMatches));
     
@@ -477,11 +496,14 @@ function updateItems(ajaxRequest)
     }
     */
     
-    // deactivated for MSIE for now...
-    if (! isMSIE)
+    if (showPaging)
     {
-        _addItemsPerPage(rightDocument.forms['itemsPerPageForm1'].elements['itemsPerPage1']);
-        _addItemsPerPage(rightDocument.forms['itemsPerPageForm2'].elements['itemsPerPage2']);
+        // deactivated for MSIE for now...
+        if (! isMSIE)
+        {
+            _addItemsPerPage(rightDocument.forms['itemsPerPageForm1'].elements['itemsPerPage1']);
+            _addItemsPerPage(rightDocument.forms['itemsPerPageForm2'].elements['itemsPerPage2']);
+        }
     }
 }
 
