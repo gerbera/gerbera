@@ -39,6 +39,18 @@ using namespace zmm;
 
 SINGLETON_MUTEX(Timer, true);
 
+template <>
+Ref<Array<Timer::TimerSubscriberElement<TimerSubscriberSingleton<Object> > > > Timer::getAppropriateSubscribers<TimerSubscriberSingleton<Object> >()
+{
+    return subscribersSingleton;
+}
+
+template <>
+Ref<Array<Timer::TimerSubscriberElement<TimerSubscriberObject> > > Timer::getAppropriateSubscribers<TimerSubscriberObject>()
+{
+    return subscribersObject;
+}
+
 Timer::Timer() : Singleton<Timer>()
 {
     subscribersSingleton = Ref<Array<TimerSubscriberElement<TimerSubscriberSingleton<Object> > > >(new Array<TimerSubscriberElement<TimerSubscriberSingleton<Object> > >);
@@ -106,14 +118,3 @@ struct timespec * Timer::getNextNotifyTime()
     return nextTime;
 }
 
-template <>
-Ref<Array<Timer::TimerSubscriberElement<TimerSubscriberSingleton<Object> > > > Timer::getAppropriateSubscribers<TimerSubscriberSingleton<Object> >()
-{
-    return subscribersSingleton;
-}
-
-template <>
-Ref<Array<Timer::TimerSubscriberElement<TimerSubscriberObject> > > Timer::getAppropriateSubscribers<TimerSubscriberObject>()
-{
-    return subscribersObject;
-}
