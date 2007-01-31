@@ -1211,16 +1211,6 @@ Optional
 " means that the tag can be left out of the configuration file.
 \end_layout
 
-\begin_layout Itemize
-"
-\series bold
-Default if missing
-\series default
-" means, that the tag can be left out, but will be filled by a default value
- upon server startup.
- 
-\end_layout
-
 \begin_layout Standard
 The root tag of MediaTomb configuration is:
 \end_layout
@@ -1239,20 +1229,313 @@ These settings define the server configuration, this includes UPnP behaviour,
  of shared data.
 \end_layout
 
+\begin_layout Code
+<server> 
+\end_layout
+
 \begin_layout Description
 (Required) This section defines the server configuration parameters.
 \end_layout
 
 \begin_layout Code
-<server> 
+    <port>0</port>
+\end_layout
+
+\begin_layout Description
+(Optional) Specifies the port where the server will be listening for HTTP
+ requests.
+ Note, that because of the implementation in the UPnP SDK only ports above
+ 49152 are supported.
+ The value of zero means, that a port will be automatically selected by
+ the SDK.
+\end_layout
+
+\begin_layout Description
+Default: 0 (automatic)
 \end_layout
 
 \begin_layout Code
+    <ip>192.168.0.23</ip> 
+\end_layout
+
+\begin_layout Description
+(Optional) Specifies the IP address to bind to, by default one of the available
+ interfaces will be selected.
+\end_layout
+
+\begin_layout Description
+Default: first available interface.
+\end_layout
+
+\begin_layout Code
+    <name>MediaTomb</name> 
+\end_layout
+
+\begin_layout Description
+(Optional) Server friendly name, you will see this on your devices that
+ you use to access the server.
+\end_layout
+
+\begin_layout Description
+Default: MediaTomb
+\end_layout
+
+\begin_layout Code
+    <manufacturerURL>http://mediatomb.org/</manufacturerURL> 
+\end_layout
+
+\begin_layout Description
+(Optional) This sets the manufacturer URL of a UPnP device, this may be
+ necessary to trick some renderers in order to enable special features that
+ otherwise are only active with the vendor implemented server.
+\end_layout
+
+\begin_layout Description
+Default: http://mediatomb.org/
+\end_layout
+
+\begin_layout Code
+    <presentationURL append-to="ip">80/index.html</presentationURL> 
+\end_layout
+
+\begin_layout Description
+(Optional) The presentation URL defines the loaction of the servers user
+ interface, usuall you do not need to change this however, vendors who want
+ to ship our server along with their NAS devices may want to point to the
+ main configuration page of the device.
+\end_layout
+
+\begin_layout Description
+Default: 
+\begin_inset Quotes sld
+\end_inset
+
+/
+\begin_inset Quotes srd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The append-to attribute defines how the text in the presentationURL tag
+ should be treated.
+\end_layout
+
+\begin_layout Standard
+The allowed values are:
+\end_layout
+
+\begin_layout Code
+        append-to="none" 
+\end_layout
+
+\begin_layout Standard
+Use the string exactly as it appears in the presentationURL tag.
+ 
+\end_layout
+
+\begin_layout Code
+        append-to="ip" 
+\end_layout
+
+\begin_layout Standard
+Append the string specified in the presentationURL tag to the ip address
+ of the server, this is useful in a dynamic ip environment where you do
+ not know the ip but want to point the URL to the port of your webserver.
+         
+\end_layout
+
+\begin_layout Code
+        append-to="port" 
+\end_layout
+
+\begin_layout Standard
+Append the string specified in the presentationURL tag to the server ip
+ and port, this may be useful if you want to serve some static pages using
+ the builtin webserver.
+\end_layout
+
+\begin_layout Description
+Default: 
+\begin_inset Quotes sld
+\end_inset
+
+none
+\begin_inset Quotes srd
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
-<ui enabled="no"/> 
+    <udn/> 
+\end_layout
+
+\begin_layout Description
+(Required) Unique Device Name, according to the UPnP spec it must be consistent
+ throughout reboots.
+ You can fill in something yourself, but we suggest that you leave this
+ tag empty - it will be filled out and saved automatically after the first
+ launch of the server.
+\end_layout
+
+\begin_layout Description
+Default: automatically generated
+\end_layout
+
+\begin_layout Code
+    <home>/home/your_user_name/.mediatomb</home> 
+\end_layout
+
+\begin_layout Description
+(Required) Server home - the server will search for the data that it needs
+ relative to this directory - basically for the sqlite database file.
+ The mediatomb.html bookmark file will also be generated in that directory.
+\end_layout
+
+\begin_layout Description
+Default: ~/.mediatomb
+\end_layout
+
+\begin_layout Code
+    <webroot>/usr/share/mediatomb/web</webroot>
+\end_layout
+
+\begin_layout Description
+(Required) Root directory for the web server, this is the location where
+ device description documents, UI html and js files, icons, etc.
+ are stored.
+\end_layout
+
+\begin_layout Description
+Default: depends on the installation prefix that is passed to the configure
+ script.
+\end_layout
+
+\begin_layout Code
+    <servedir>/home/myuser/mystuff</servedir>
+\end_layout
+
+\begin_layout Description
+(Optional) Files from this directory will be served as from a regular webserver.
+ They do not need to be added to the database, but they are also not served
+ via UPnP browse requests.
+ Directory listing is not supported, you have to specify full paths.
+\end_layout
+
+\begin_layout Description
+Example: the file something.jar is located in /home/myuser/mystuff/javasubdir/som
+ething.jar on your filesystem.
+ Your ip address is 192.168.0.23, the server is running on port 50500.
+ Assuming the above configuration you could download it by entering this
+ link in your web browser: http://192.168.0.23:50500/content/serve/javasubdir/somet
+hing.jar
+\end_layout
+
+\begin_layout Description
+Default: empty (disabled)
+\end_layout
+
+\begin_layout Code
+    <alive>180</alive> 
+\end_layout
+
+\begin_layout Description
+(Optional) Interval for broadcasting SSDP:alive messages 
+\end_layout
+
+\begin_layout Description
+Default: 180, this is according to the UPnP specification.
+\end_layout
+
+\begin_layout Code
+    <custom-http-headers> 
+\end_layout
+
+\begin_layout Description
+(Optional) This section holds the user defined HTTP headers that will be
+ added to all HTTP responses that come from the server.
+\end_layout
+
+\begin_layout Code
+        <add header="..."/> 
+\end_layout
+
+\begin_layout Description
+(Optional) Specify a header to be added to the response.
+ If you have a DSM-320 use <add header="X-User-Agent: redsonic"/> to fix
+ the .AVI playback problem.
+\end_layout
+
+\begin_layout Code
+    <upnp-string-limit>
+\end_layout
+
+\begin_layout Description
+(Optional) This will limit title and description lenghts of containers and
+ items in UPnP browse replies, this feature was added a s workaround for
+ the TG100 bug which can only handle titles no longer than 100 characters.
+ A negative value will disable this feature, the minimum allowed value is
+ "4" because three dots will be appended to the string if it has been cut
+ off to indicate that limiting took place.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+UI Settings
+\end_layout
+
+\begin_layout Code
+    <ui enabled="yes" poll-interval="2" poll-when-idle="no"/> 
+\end_layout
+
+\begin_layout Description
+(Required)         Enables or disables the web user interface, change to
+ "yes" in order         to enable it.
+\end_layout
+
+\begin_layout Standard
+The poll-interval is an integer value which specifies how often the UI will
+ poll for tasks.
+ The interval is specified in seconds, only values greater than zero are
+ allowed.
+ This attribute is optional, the default interval is 2 seconds.
+\end_layout
+
+\begin_layout Standard
+The poll-when-idle attribute is optional and is set to "no" by default.
+ It influences the behaviour of displaying current tasks: - when the user
+ does something in the UI (i.e.
+ clicks around) we always poll for the current task and will display it
+ - if a task is active, we will continue polling in the background and update
+ the current task view accordingly - when there is no active task (i.e.
+ the server is currently idle) we will stop the background polling and only
+ request updates upon user actions, but not when the user is idle (i.e.
+ does not click around in the UI)
+\end_layout
+
+\begin_layout Standard
+Setting poll-when-idle to "yes" will do background polling even when there
+ are no current tasks; this may be useful if you defined multiple users
+ and want to see the tasks the other user is queueing on the server while
+ you are actually idle.
+\end_layout
+
+\begin_layout Standard
+The tasks are that are monitored are:
+\end_layout
+
+\begin_layout Itemize
+adding files or directories
+\end_layout
+
+\begin_layout Itemize
+removing items or containers
+\end_layout
+
+\begin_layout Itemize
+automatic rescans 
 \end_layout
 
 \begin_layout Description
@@ -1261,7 +1544,7 @@ These settings define the server configuration, this includes UPnP behaviour,
 \end_layout
 
 \begin_layout Code
-<accounts enabled="yes" session-timeout="30"/>
+        <accounts enabled="yes" session-timeout="30"/>
 \end_layout
 
 \begin_layout Description
@@ -1277,7 +1560,7 @@ Accounts can be defined as shown below:
 \end_layout
 
 \begin_layout Code
-<account user="name" password="password"/>
+            <account user="name" password="password"/>
 \end_layout
 
 \begin_layout Description
@@ -1287,16 +1570,68 @@ Accounts can be defined as shown below:
 \end_layout
 
 \begin_layout Code
-<port>0</port>
+        <items-per-page default="25"> 
 \end_layout
 
 \begin_layout Description
-(Optional) Specifies the port where the server will be listening for HTTP
- requests.
- Note, that because of the implementation in the UPnP SDK only ports above
- 49152 are supported.
- The value of zero means, that a port will be automatically selected by
- the SDK.
+(Optional) This tells the UI the default number of items per page that will
+ be shown when browsing the database.
+\end_layout
+
+\begin_layout Standard
+The values for the items per page dropdown menu can be defined in the following
+ manner: 
+\end_layout
+
+\begin_layout Code
+        <option>10</option>
+\end_layout
+
+\begin_layout Code
+        <option>25</option>
+\end_layout
+
+\begin_layout Code
+        <option>50</option>
+\end_layout
+
+\begin_layout Description
+Note: this list must contain the default value, i.e.
+ if you define a default value of 25, then one of the <option> tags must
+ also list this value.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Database Settings
+\end_layout
+
+\begin_layout Code
+<storage driver="..."> 
+\end_layout
+
+\begin_layout Description
+(Required) Specifies the storage driver.
+ Currently sqlite3 and mysql are supported.
+\end_layout
+
+\begin_layout Standard
+Every storage driver has it's own configuration parameters.
+\end_layout
+
+\begin_layout Standard
+Sqlite3 is defined as follows:
+\end_layout
+
+\begin_layout Code
+<storage driver="sqlite3"> <database-file>sqlite3.db</database-file> (Required)
+ </storage>
+\end_layout
+
+\begin_layout Standard
+- for mysql you'll need something like this: <storage driver="mysql"> <host>loca
+lhost</host> <username>root</username> <password></password> <database>mediatomb
+</database> </storage> 
 \end_layout
 
 \end_body
