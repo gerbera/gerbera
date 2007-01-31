@@ -82,6 +82,7 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions, in
         int len = elements->size();
         
         String key;
+        String upnp_class = obj->getClass();
         
         for (int i = 0; i < len; i++)
         {
@@ -97,7 +98,13 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions, in
                 }
                 result->appendTextChild(key, tmp);
             }
-            else if (key != "dc:title")
+            else if (key == "upnp:originalTrackNumber")
+            {
+                if (upnp_class == "object.item.audioItem.musicTrack")
+                    result->appendTextChild(key, el->getValue());
+            }
+            else if ((key != "dc:title") || 
+                    ((key == "upnp:originalTrackNumber") && (upnp_class == "object.item.audioItem.musicTrack")))
                 result->appendTextChild(key, el->getValue());
         }
         
