@@ -1389,6 +1389,7 @@ void ContentManager::removeAutoscanDirectory(String location)
 CMTask::CMTask() : Object()
 {
     valid = true;
+    cancellable = true;
     taskType = Invalid;
     taskID = 0;
     parentTaskID = 0;
@@ -1418,6 +1419,7 @@ CMRemoveObjectTask::CMRemoveObjectTask(int objectID, bool all) : CMTask()
     this->objectID = objectID;
     this->all = all;
     this->taskType = RemoveObject;
+    cancellable = false;
 }
 
 void CMRemoveObjectTask::run(Ref<ContentManager> cm)

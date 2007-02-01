@@ -638,7 +638,7 @@ parse_hostport( const char *in,
         int errCode = 0;
 
         //call gethostbyname_r (reentrant form of gethostbyname)
-#if defined(WIN32) || defined(__APPLE__)
+#if defined(WIN32) || defined(__APPLE__) || defined(__CYGWIN__)
         h=gethostbyname(temp_host_name);
 #elif defined(SOLARIS)
         errCode = gethostbyname_r( temp_host_name,

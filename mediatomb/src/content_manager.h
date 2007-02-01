@@ -62,6 +62,7 @@ protected:
     unsigned int parentTaskID;
     unsigned int taskID;
     bool valid;
+    bool cancellable;
     
 public:
     CMTask();
@@ -74,6 +75,7 @@ public:
     inline void setID(unsigned int taskID) { this->taskID = taskID; };
     inline void setParentID(unsigned int parentTaskID = 0) { this->parentTaskID = parentTaskID; };
     inline bool isValid() { return valid; };
+    inline bool isCancellable() { return cancellable; };
     inline void invalidate() { valid = false; };
 };
 
