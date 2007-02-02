@@ -1339,7 +1339,7 @@ Optional
 
 \begin_layout Standard
 The presentation URL defines the location of the servers user interface,
- usuall you do not need to change this however, vendors who want to ship
+ usually you do not need to change this however, vendors who want to ship
  our server along with their NAS devices may want to point to the main configura
 tion page of the device.
 \end_layout
@@ -1385,7 +1385,7 @@ Use the string exactly as it appears in the presentationURL tag.
 \begin_layout Standard
 Append the string specified in the presentationURL tag to the ip address
  of the server, this is useful in a dynamic ip environment where you do
- not know the ip but want to point the URL to the port of your webserver.
+ not know the ip but want to point the URL to the port of your web server.
          
 \end_layout
 
@@ -1396,7 +1396,7 @@ Append the string specified in the presentationURL tag to the ip address
 \begin_layout Standard
 Append the string specified in the presentationURL tag to the server ip
  and port, this may be useful if you want to serve some static pages using
- the builtin webserver.
+ the built in web server.
 \end_layout
 
 \begin_layout Standard
@@ -1492,7 +1492,7 @@ Optional
 \end_layout
 
 \begin_layout Standard
-Files from this directory will be served as from a regular webserver.
+Files from this directory will be served as from a regular web server.
  They do not need to be added to the database, but they are also not served
  via UPnP browse requests.
  Directory listing is not supported, you have to specify full paths.
@@ -1571,7 +1571,7 @@ Optional
 \end_layout
 
 \begin_layout Standard
-This will limit title and description lenghts of containers and items in
+This will limit title and description length of containers and items in
  UPnP browse replies, this feature was added a s workaround for the TG100
  bug which can only handle titles no longer than 100 characters.
  A negative value will disable this feature, the minimum allowed value is
@@ -1614,7 +1614,7 @@ The poll-interval is an integer value which specifies how often the UI will
 
 \begin_layout Standard
 The poll-when-idle attribute is optional and is set to "no" by default.
- It influences the behaviour of displaying current tasks: - when the user
+ It influences the behavior of displaying current tasks: - when the user
  does something in the UI (i.e.
  clicks around) we always poll for the current task and will display it
  - if a task is active, we will continue polling in the background and update
@@ -1627,7 +1627,7 @@ The poll-when-idle attribute is optional and is set to "no" by default.
 \begin_layout Standard
 Setting poll-when-idle to "yes" will do background polling even when there
  are no current tasks; this may be useful if you defined multiple users
- and want to see the tasks the other user is queueing on the server while
+ and want to see the tasks the other user is queuing on the server while
  you are actually idle.
 \end_layout
 
@@ -1786,7 +1786,7 @@ Default:
 \end_layout
 
 \begin_layout Standard
-The values for the items per page dropdown menu can be defined in the following
+The values for the items per page drop down menu can be defined in the following
  manner: 
 \end_layout
 
@@ -1859,7 +1859,7 @@ Optional
 \end_layout
 
 \begin_layout Standard
-The database loacation is relative to the server's home, if the database
+The database location is relative to the server's home, if the database
  does not exist it will be created automatically.
 \end_layout
 
@@ -1951,7 +1951,7 @@ Optional
 
 \begin_layout Standard
 Defines the charset of the filesystem.
- For example, if you have filenames in cyrillic KOI8-R encoding, then you
+ For example, if you have filenames in Cyrillic KOI8-R encoding, then you
  should specify that here.
  The server uses UTF-8 for UPnP and for the web UI, this import parameter
  will help you to correctly import your data.
@@ -1962,7 +1962,7 @@ Defines the charset of the filesystem.
 \emph on
 Default: 
 \emph default
-if nl_langinfo() function is present, this setting will be autodetected
+if nl_langinfo() function is present, this setting will be auto detected
  based on your system locale, else set to ISO-8859-1
 \end_layout
 
@@ -1976,7 +1976,7 @@ Optional
 
 \begin_layout Standard
 Same as above, but defines the charset of the metadata (i.e.
- id3 tags, Exif informatoin, etc.)
+ id3 tags, Exif information, etc.)
 \end_layout
 
 \begin_layout Standard
@@ -1984,7 +1984,7 @@ Same as above, but defines the charset of the metadata (i.e.
 \emph on
 Default: 
 \emph default
-if nl_langinfo() function is present, this setting will be autodetected
+if nl_langinfo() function is present, this setting will be auto detected
  based on your system locale, else set to ISO-8859-1
 \end_layout
 
@@ -2006,7 +2006,7 @@ Points to the script invoked upon media import.
 \emph on
 Default: 
 \emph default
-${prefix}/share/mediatomb/js/import.js, where ${prefix} is your intallation
+${prefix}/share/mediatomb/js/import.js, where ${prefix} is your installation
  prefix directory.
 \end_layout
 
@@ -2019,7 +2019,7 @@ Optional
 \end_layout
 
 \begin_layout Standard
-Specifies an alternative file for filemagic, contaning mimetype information.
+Specifies an alternative file for filemagic, containing mimetype information.
 \end_layout
 
 \begin_layout Standard
@@ -2040,7 +2040,7 @@ This section defines persistent autoscan directories.
  is that autoscan directories that are defined via the config file can not
  be removed in the UI.
  Even if the directory gets removed on disk, the server will try to monitor
- the specified location and will readd the removed directory if it becomes
+ the specified location and will re add the removed directory if it becomes
  available/gets created again.
 \end_layout
 
@@ -2081,7 +2081,7 @@ Required
 \end_layout
 
 \begin_layout Code
-            location="/monitored/direcory"
+            location="/monitored/directory"
 \end_layout
 
 \begin_layout Standard
@@ -2133,7 +2133,7 @@ Required
 Either "full" or "basic".
  Basic mode will only check if any files have been added or were deleted
  from the monitored directory, full mode will remember the last modification
- time and readd the media that has changed.
+ time and re add the media that has changed.
  Full mode might be useful when you want to monitor changes in the media,
  like id3 tags and alike.
 \end_layout
@@ -2148,7 +2148,7 @@ Required
 
 \begin_layout Standard
 Values of "yes" or "no" are allowed, specifies if autoscan shall monitor
- the given directory incluiding all subdirectories.
+ the given directory including all sub directories.
 \end_layout
 
 \begin_layout Paragraph*
@@ -2186,9 +2186,9 @@ Various Mappings
 
 \begin_layout Standard
 This section defines mimetype and upnp:class mappings, it is vital if filemagic
- is not available - in this case media type autodetection will fail and
+ is not available - in this case media type auto detection will fail and
  you will have to set the mimetypes manually by matching the file extension.
- It is also helpful if you want to override autodetected mimetypes or simply
+ It is also helpful if you want to override auto detected mimetypes or simply
  skip filemagic processing for known filetypes.
 \end_layout
 
@@ -2254,7 +2254,7 @@ Specifies a mapping from a certain filename extension (everything after
 
 \begin_layout Description
 Note: this improves the import speed, because invoking libmagic to discover
- the right mimetype of a file is omited for files with extensions listed
+ the right mimetype of a file is omitted for files with extensions listed
  here.
 \end_layout
 
@@ -2313,7 +2313,7 @@ This section holds options for the various supported import libraries, it
 UPnP defines certain tags to pass along metadata of the media (like title,
  artist, year, etc.), however some media provides more metadata and exceeds
  the scope of UPnP.
- This additional metadata can be used to finetune the server layout, it
+ This additional metadata can be used to fine tune the server layout, it
  allows the user to create a more complex container structure using a customized
  import script.
  The metadata that can be extracted depends on the library, currently we
