@@ -210,7 +210,7 @@ This library tries to gather metadata from all kinds of files (also .avi
  utility that is provided with the library to check if there is any metadata
  that can be extracted from your media prior to enabling this feature in
  MediaTomb.
- By defaault libextractor is disabled, use ./configure --enable-libextractor
+ By default libextractor is disabled, use ./configure --enable-libextractor
  to activate it.
 \end_layout
 
@@ -279,9 +279,9 @@ ion, but want to install MediaTomb only for your user.
 
 \begin_layout Description
 Important: the prefix path will be compiled into the binary; the binary
- will still be relocatetable, but you move those files you will have to
- point MediaTomb to the proper location by specifying it in the server configura
-tion file.
+ will still be relocatable, but you move those files you will have to point
+ MediaTomb to the proper location by specifying it in the server configuration
+ file.
  
 \end_layout
 
@@ -364,7 +364,7 @@ Default: disabled
 
 \begin_layout Standard
 This feature is only for debugging purposes, whenever a malloc or realloc
- with a value of zero bytes is encountered, the server will termine with
+ with a value of zero bytes is encountered, the server will terminate with
  abort()
 \end_layout
 
@@ -478,7 +478,7 @@ By default largefile support will be autodetected by configure, however
 \end_layout
 
 \begin_layout Subsubsection
-Redifinition Of Malloc And Realloc
+Redefinition Of Malloc And Realloc
 \end_layout
 
 \begin_layout Code
@@ -566,7 +566,7 @@ The main problem with this library is, that it is called differently on
  For example, it is called js on Fedora, but is available under the name
  of smjs on Debian.
  If configure fails to find your js headers and libraries you can point
- it to the desired locatoins (see options below).
+ it to the desired locations (see options below).
 \end_layout
 
 \begin_layout Subsubsection
@@ -1009,7 +1009,7 @@ Now make sure that your server configuration file has the correct storage
 \end_layout
 
 \begin_layout Description
-Note: if the password tag is ommited - it means that the password is blank.
+Note: if the password tag is omitted - it means that the password is blank.
 \end_layout
 
 \begin_layout Standard
@@ -1060,7 +1060,7 @@ Port
 \begin_layout Standard
 Specify the server port that will be used for the web user interface, for
  serving media and for UPnP requests, minimum allowed value is 49152.
- If this option is ommited a default port will be chosen, however, in this
+ If this option is omitted a default port will be chosen, however, in this
  case it is possible that the port will change upon server restart.
 \end_layout
 
@@ -1185,7 +1185,7 @@ Configuration File
 
 \begin_layout Standard
 MediaTomb is highly configurable and allows the user to set various options
- and preferences that define the servers behaviour.
+ and preferences that define the servers behavior.
  Rather than enforcing certain features upon the user, we prefer to offer
  a number of choices where possible.
  The heart of MediaTomb configuration is the config.xml file, which is located
@@ -1224,8 +1224,8 @@ Server Settings
 \end_layout
 
 \begin_layout Standard
-These settings define the server configuration, this includes UPnP behaviour,
- selection of database, accounts for the UI as well as installation loactions
+These settings define the server configuration, this includes UPnP behavior,
+ selection of database, accounts for the UI as well as installation locations
  of shared data.
 \end_layout
 
@@ -1260,9 +1260,9 @@ Specifies the port where the server will be listening for HTTP requests.
 \begin_layout Standard
 
 \emph on
-Default
+Default:
 \emph default
-: 0 (automatic)
+ 0 (automatic)
 \end_layout
 
 \begin_layout Paragraph*
@@ -1281,9 +1281,9 @@ Specifies the IP address to bind to, by default one of the available interfaces
 \begin_layout Standard
 
 \emph on
-Default
+Default:
 \emph default
-: first available interface.
+ first available interface.
 \end_layout
 
 \begin_layout Paragraph*
@@ -1302,9 +1302,9 @@ Server friendly name, you will see this on your devices that you use to
 \begin_layout Standard
 
 \emph on
-Default
+Default:
 \emph default
-: MediaTomb
+ MediaTomb
 \end_layout
 
 \begin_layout Paragraph*
@@ -1324,9 +1324,9 @@ This tag sets the manufacturer URL of a UPnP device, this may be necessary
 \begin_layout Standard
 
 \emph on
-Default
+Default:
 \emph default
-: http://mediatomb.org/
+ http://mediatomb.org/
 \end_layout
 
 \begin_layout Paragraph*
@@ -1338,7 +1338,7 @@ Optional
 \end_layout
 
 \begin_layout Standard
-The presentation URL defines the loaction of the servers user interface,
+The presentation URL defines the location of the servers user interface,
  usuall you do not need to change this however, vendors who want to ship
  our server along with their NAS devices may want to point to the main configura
 tion page of the device.
@@ -1347,9 +1347,9 @@ tion page of the device.
 \begin_layout Standard
 
 \emph on
-Default
+Default:
 \emph default
-: 
+ 
 \begin_inset Quotes sld
 \end_inset
 
@@ -1402,9 +1402,9 @@ Append the string specified in the presentationURL tag to the server ip
 \begin_layout Standard
 
 \emph on
-Default
+Default:
 \emph default
-: 
+ 
 \begin_inset Quotes sld
 \end_inset
 
@@ -1434,9 +1434,9 @@ Unique Device Name, according to the UPnP spec it must be consistent throughout
 \begin_layout Standard
 
 \emph on
-Default
+Default:
 \emph default
-: automatically if the tag is empty generated
+ automatically if the tag is empty generated
 \end_layout
 
 \begin_layout Paragraph*
@@ -1456,9 +1456,9 @@ Server home - the server will search for the data that it needs relative
 \begin_layout Standard
 
 \emph on
-Default
+Default:
 \emph default
-: ~/.mediatomb
+ ~/.mediatomb
 \end_layout
 
 \begin_layout Paragraph*
@@ -1478,9 +1478,9 @@ Root directory for the web server, this is the location where device description
 \begin_layout Standard
 
 \emph on
-Default
+Default:
 \emph default
-: depends on the installation prefix that is passed to the configure script.
+ depends on the installation prefix that is passed to the configure script.
 \end_layout
 
 \begin_layout Paragraph*
@@ -1510,9 +1510,9 @@ hing.jar
 \begin_layout Standard
 
 \emph on
-Default
+Default:
 \emph default
-: empty (disabled)
+ empty (disabled)
 \end_layout
 
 \begin_layout Paragraph*
@@ -1530,9 +1530,9 @@ Interval for broadcasting SSDP:alive messages
 \begin_layout Standard
 
 \emph on
-Default
+Default:
 \emph default
-: 180, this is according to the UPnP specification.
+ 180, this is according to the UPnP specification.
 \end_layout
 
 \begin_layout Paragraph*
@@ -1582,9 +1582,9 @@ This will limit title and description lenghts of containers and items in
 \begin_layout Standard
 
 \emph on
-Default
+Default: 
 \emph default
-: disabled
+disabled
 \end_layout
 
 \begin_layout Subsubsection
@@ -1632,6 +1632,56 @@ Setting poll-when-idle to "yes" will do background polling even when there
 \end_layout
 
 \begin_layout Standard
+
+\emph on
+Default:
+\emph default
+ enabled = 
+\begin_inset Quotes sld
+\end_inset
+
+yes
+\emph on
+
+\begin_inset Quotes srd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: 
+\emph default
+poll-interval = 
+\begin_inset Quotes sld
+\end_inset
+
+2
+\begin_inset Quotes srd
+\end_inset
+
+ seconds
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: 
+\emph default
+poll-when-idle = 
+\begin_inset Quotes sld
+\end_inset
+
+no
+\begin_inset Quotes srd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 The tasks are that are monitored are:
 \end_layout
 
@@ -1647,17 +1697,16 @@ removing items or containers
 automatic rescans 
 \end_layout
 
-\begin_layout Description
-(Required) Enables or disables the web user interface, change to "yes" in
- order to enable it.
+\begin_layout Paragraph*
+Required
 \end_layout
 
 \begin_layout Code
         <accounts enabled="yes" session-timeout="30"/>
 \end_layout
 
-\begin_layout Description
-(Required) Specifies if accounts are enabled or disabled.
+\begin_layout Standard
+Specifies if accounts are enabled or disabled.
  The session-timeout specifies the timeout interval in minutes.
  The server checks every five minutes for sessions that have timed out,
  therefore in the worst case the session times out after session-timeout
@@ -1665,26 +1714,75 @@ automatic rescans
 \end_layout
 
 \begin_layout Standard
+
+\emph on
+Default: 
+\emph default
+enabled=
+\begin_inset Quotes srd
+\end_inset
+
+no
+\emph on
+
+\begin_inset Quotes srd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default:
+\emph default
+ session-timeout=
+\begin_inset Quotes srd
+\end_inset
+
+30
+\begin_inset Quotes srd
+\end_inset
+
+ minutes
+\end_layout
+
+\begin_layout Standard
 Accounts can be defined as shown below:
+\end_layout
+
+\begin_layout Paragraph*
+Optional
 \end_layout
 
 \begin_layout Code
             <account user="name" password="password"/>
 \end_layout
 
-\begin_layout Description
-(Optional) There can be multiple users, however this is mainly a feature
- for the future.
+\begin_layout Standard
+There can be multiple users, however this is mainly a feature for the future.
  Right now there are no per-user permissions.
+\end_layout
+
+\begin_layout Paragraph*
+Optional
 \end_layout
 
 \begin_layout Code
         <items-per-page default="25"> 
 \end_layout
 
-\begin_layout Description
-(Optional) This tells the UI the default number of items per page that will
- be shown when browsing the database.
+\begin_layout Standard
+This sets the default number of items per page that will be shown when browsing
+ the database in the web UI.
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default:
+\emph default
+ 25
 \end_layout
 
 \begin_layout Standard
@@ -1693,15 +1791,19 @@ The values for the items per page dropdown menu can be defined in the following
 \end_layout
 
 \begin_layout Code
-        <option>10</option>
+            <option>10</option>
 \end_layout
 
 \begin_layout Code
-        <option>25</option>
+            <option>25</option>
 \end_layout
 
 \begin_layout Code
-        <option>50</option>
+            <option>50</option>
+\end_layout
+
+\begin_layout Code
+            <option>100</option>
 \end_layout
 
 \begin_layout Description
@@ -1711,21 +1813,29 @@ Note: this list must contain the default value, i.e.
  
 \end_layout
 
+\begin_layout Standard
+
+\emph on
+Default:
+\emph default
+ 10, 25, 50, 100
+\end_layout
+
 \begin_layout Subsubsection
 Database Settings
 \end_layout
 
-\begin_layout Code
-<storage driver="..."> 
+\begin_layout Paragraph*
+Required
 \end_layout
 
-\begin_layout Description
-(Required) Specifies the storage driver.
- Currently sqlite3 and mysql are supported.
+\begin_layout Code
+    <storage driver="..."> 
 \end_layout
 
 \begin_layout Standard
-Every storage driver has it's own configuration parameters.
+Specifies the storage driver, currently sqlite3 and mysql are supported.
+ Each storage driver has it's own configuration parameters.
 \end_layout
 
 \begin_layout Standard
@@ -1733,14 +1843,616 @@ Sqlite3 is defined as follows:
 \end_layout
 
 \begin_layout Code
-<storage driver="sqlite3"> <database-file>sqlite3.db</database-file> (Required)
- </storage>
+    <storage driver="sqlite3">
+\end_layout
+
+\begin_layout Paragraph*
+Optional
+\end_layout
+
+\begin_layout Code
+        <database-file>mediatomb.db</database-file>
+\end_layout
+
+\begin_layout Code
+
 \end_layout
 
 \begin_layout Standard
-- for mysql you'll need something like this: <storage driver="mysql"> <host>loca
-lhost</host> <username>root</username> <password></password> <database>mediatomb
-</database> </storage> 
+The database loacation is relative to the server's home, if the database
+ does not exist it will be created automatically.
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default:
+\emph default
+ mediatomb.db
+\end_layout
+
+\begin_layout Standard
+MySQL is defined as follows:
+\end_layout
+
+\begin_layout Code
+    <storage driver="mysql">
+\end_layout
+
+\begin_layout Code
+        <host>localhost</host>
+\end_layout
+
+\begin_layout Code
+        <username>root</username>
+\end_layout
+
+\begin_layout Code
+        <password></password>
+\end_layout
+
+\begin_layout Code
+        <database>mediatomb</database>
+\end_layout
+
+\begin_layout Code
+    </storage> 
+\end_layout
+
+\begin_layout Subsection
+Import Settings
+\end_layout
+
+\begin_layout Standard
+The import settings define various options on how to aggregate the content.
+\end_layout
+
+\begin_layout Standard
+The section is identified by the import tag:
+\end_layout
+
+\begin_layout Paragraph*
+Required
+\end_layout
+
+\begin_layout Code
+<import hidden-files="no">
+\end_layout
+
+\begin_layout Paragraph*
+Optional
+\end_layout
+
+\begin_layout Code
+        hidden-files="no"
+\end_layout
+
+\begin_layout Standard
+This attribute defines if files starting with a dot will be imported into
+ the database.
+ Autoscan can override this attribute on a per directory basis.
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: 
+\emph default
+no - do not import hidden files
+\end_layout
+
+\begin_layout Paragraph*
+Optional
+\end_layout
+
+\begin_layout Code
+    <filesystem-charset>ISO-8859-1</filesystem-charset>
+\end_layout
+
+\begin_layout Standard
+Defines the charset of the filesystem.
+ For example, if you have filenames in cyrillic KOI8-R encoding, then you
+ should specify that here.
+ The server uses UTF-8 for UPnP and for the web UI, this import parameter
+ will help you to correctly import your data.
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: 
+\emph default
+if nl_langinfo() function is present, this setting will be autodetected
+ based on your system locale, else set to ISO-8859-1
+\end_layout
+
+\begin_layout Paragraph*
+Optional
+\end_layout
+
+\begin_layout Code
+    <metadata-charset>ISO-8859-1</metadata-charset>
+\end_layout
+
+\begin_layout Standard
+Same as above, but defines the charset of the metadata (i.e.
+ id3 tags, Exif informatoin, etc.)
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: 
+\emph default
+if nl_langinfo() function is present, this setting will be autodetected
+ based on your system locale, else set to ISO-8859-1
+\end_layout
+
+\begin_layout Paragraph*
+Required (if javascript support is enabled)
+\end_layout
+
+\begin_layout Code
+    <script>/path/to/my/import/script.js</script>
+\end_layout
+
+\begin_layout Standard
+Points to the script invoked upon media import.
+ For more details read doc/scripting-intro.txt
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: 
+\emph default
+${prefix}/share/mediatomb/js/import.js, where ${prefix} is your intallation
+ prefix directory.
+\end_layout
+
+\begin_layout Paragraph*
+Optional
+\end_layout
+
+\begin_layout Code
+    <magic-file>
+\end_layout
+
+\begin_layout Standard
+Specifies an alternative file for filemagic, contaning mimetype information.
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default:
+\emph default
+ none
+\end_layout
+
+\begin_layout Subsubsection
+Autoscan Settings
+\end_layout
+
+\begin_layout Standard
+This section defines persistent autoscan directories.
+ It is also possible to define autoscan directories in the UI, the difference
+ is that autoscan directories that are defined via the config file can not
+ be removed in the UI.
+ Even if the directory gets removed on disk, the server will try to monitor
+ the specified location and will readd the removed directory if it becomes
+ available/gets created again.
+\end_layout
+
+\begin_layout Paragraph*
+Optional
+\end_layout
+
+\begin_layout Code
+    <autoscan>
+\end_layout
+
+\begin_layout Standard
+Specifies a list of default autoscan directories.
+\end_layout
+
+\begin_layout Paragraph*
+Optional
+\end_layout
+
+\begin_layout Code
+        <directory location="/media" mode="timed" interval="15" 
+\end_layout
+
+\begin_layout Code
+                   level="full" recursive="no" hidden-files="no"/>
+\end_layout
+
+\begin_layout Standard
+Defines an autoscan directory and it's parameters.
+\end_layout
+
+\begin_layout Standard
+The attributes specify various autoscan options:
+\end_layout
+
+\begin_layout Paragraph*
+Required
+\end_layout
+
+\begin_layout Code
+            location="/monitored/direcory"
+\end_layout
+
+\begin_layout Standard
+Absolute path to the directory that shall be monitored.
+\end_layout
+
+\begin_layout Paragraph*
+Required
+\end_layout
+
+\begin_layout Code
+            mode="timed"
+\end_layout
+
+\begin_layout Standard
+Scan mode, currently only "timed" is supported, future releases will introduce
+ other modes - like inotify.
+\end_layout
+
+\begin_layout Paragraph*
+Required (for mode 
+\begin_inset Quotes sld
+\end_inset
+
+timed
+\begin_inset Quotes srd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Code
+            interval="timed"
+\end_layout
+
+\begin_layout Standard
+Scan interval in seconds.
+\end_layout
+
+\begin_layout Paragraph*
+Required
+\end_layout
+
+\begin_layout Code
+            level="basic"
+\end_layout
+
+\begin_layout Standard
+Either "full" or "basic".
+ Basic mode will only check if any files have been added or were deleted
+ from the monitored directory, full mode will remember the last modification
+ time and readd the media that has changed.
+ Full mode might be useful when you want to monitor changes in the media,
+ like id3 tags and alike.
+\end_layout
+
+\begin_layout Paragraph*
+Required
+\end_layout
+
+\begin_layout Code
+            recursive="no"
+\end_layout
+
+\begin_layout Standard
+Values of "yes" or "no" are allowed, specifies if autoscan shall monitor
+ the given directory incluiding all subdirectories.
+\end_layout
+
+\begin_layout Paragraph*
+Optional
+\end_layout
+
+\begin_layout Code
+            hidden-files="no"
+\end_layout
+
+\begin_layout Standard
+Allowed values: "yes" or "no", process hidden files, overrides the hidden-files
+ value in the <import/> tag.
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: 
+\emph default
+value specified in <import hidden-files=
+\begin_inset Quotes srd
+\end_inset
+
+
+\begin_inset Quotes srd
+\end_inset
+
+/>
+\end_layout
+
+\begin_layout Subsubsection
+Various Mappings
+\end_layout
+
+\begin_layout Standard
+This section defines mimetype and upnp:class mappings, it is vital if filemagic
+ is not available - in this case media type autodetection will fail and
+ you will have to set the mimetypes manually by matching the file extension.
+ It is also helpful if you want to override autodetected mimetypes or simply
+ skip filemagic processing for known filetypes.
+\end_layout
+
+\begin_layout Paragraph*
+Optional
+\end_layout
+
+\begin_layout Code
+    <mappings>
+\end_layout
+
+\begin_layout Standard
+Defines various mapping options for importing media, currently two subsections
+ are supported.
+\end_layout
+
+\begin_layout Paragraph*
+Optional
+\end_layout
+
+\begin_layout Code
+        <extension-mimetype ignore-unknown="no"> 
+\end_layout
+
+\begin_layout Standard
+This section holds the filename extension to mimetype mappings.
+\end_layout
+
+\begin_layout Paragraph*
+Optional
+\end_layout
+
+\begin_layout Code
+                            ignore-unknown="no"
+\end_layout
+
+\begin_layout Standard
+If ignore-unknown is set to "yes", then only the extensions that are listed
+ in this section are imported.
+ 
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default:
+\emph default
+ no
+\end_layout
+
+\begin_layout Paragraph*
+Optional
+\end_layout
+
+\begin_layout Code
+            <map from="mp3" to="audio/mpeg"/>
+\end_layout
+
+\begin_layout Standard
+Specifies a mapping from a certain filename extension (everything after
+ the last dot ".") to mimetype.
+\end_layout
+
+\begin_layout Description
+Note: this improves the import speed, because invoking libmagic to discover
+ the right mimetype of a file is omited for files with extensions listed
+ here.
+\end_layout
+
+\begin_layout Description
+Note: extension is case sensitive, this will probably need to be fixed.
+ 
+\end_layout
+
+\begin_layout Paragraph*
+Optional
+\end_layout
+
+\begin_layout Code
+        <mimetype-upnpclass> 
+\end_layout
+
+\begin_layout Standard
+This section holds the mimetype to upnp:class mappings.
+ 
+\end_layout
+
+\begin_layout Paragraph*
+Optional
+\end_layout
+
+\begin_layout Code
+            <map from="audio/*" to="object.item.audioItem.musicTrack"/>
+\end_layout
+
+\begin_layout Standard
+Specifies a mapping from a certain mimetype to upnp:class in the Content
+ Directory.
+ The mime type can either be entered explicitly "audio/mpeg" or using a
+ wildcard after the slash "audio/*".
+ The values of "from" and "to" attributes are case sensitive.
+\end_layout
+
+\begin_layout Subsubsection
+Metadata Parsing Library Options
+\end_layout
+
+\begin_layout Paragraph*
+Optional
+\end_layout
+
+\begin_layout Code
+    <library-options> 
+\end_layout
+
+\begin_layout Standard
+This section holds options for the various supported import libraries, it
+ is useful in conjunction with virtual container scripting.
+\end_layout
+
+\begin_layout Standard
+UPnP defines certain tags to pass along metadata of the media (like title,
+ artist, year, etc.), however some media provides more metadata and exceeds
+ the scope of UPnP.
+ This additional metadata can be used to finetune the server layout, it
+ allows the user to create a more complex container structure using a customized
+ import script.
+ The metadata that can be extracted depends on the library, currently we
+ support libebexif and libextractor, the libraries provide a default set
+ of keys that can be passed in the options below.
+ The data according to those keys will the be extracted from the media and
+ imported into the database along with the item.
+ When processing the item, the import script will have full access to the
+ gathered metadata, thus allowing the user to organize the data with the
+ use of the extracted information.
+ A practical example would be: if have more than one digital camera in your
+ family you could extract the camera model from the Exif tags and sort your
+ photos in a structure of your choice, like:
+\end_layout
+
+\begin_layout Standard
+Photos/MyCamera1/All Photos
+\end_layout
+
+\begin_layout Standard
+Photos/MyCamera1/Date
+\end_layout
+
+\begin_layout Standard
+Photos/MyCamera2/All Photos
+\end_layout
+
+\begin_layout Standard
+Photos/MyCamera2/Date
+\end_layout
+
+\begin_layout Standard
+etc.
+\end_layout
+
+\begin_layout Paragraph*
+Optional
+\end_layout
+
+\begin_layout Code
+        <libexif>
+\end_layout
+
+\begin_layout Standard
+Options for the exif library.
+\end_layout
+
+\begin_layout Paragraph*
+Optional
+\end_layout
+
+\begin_layout Code
+            <auxdata>
+\end_layout
+
+\begin_layout Standard
+Currently only adding keywords to auxdata is supported.
+ For a list of keywords/tags see the libexif documentation.
+ Auxdata can be read by the import java script to gain more control over
+ the media structure.
+\end_layout
+
+\begin_layout Paragraph*
+Optional
+\end_layout
+
+\begin_layout Code
+                <add tag="keyword"/>
+\end_layout
+
+\begin_layout Standard
+If the library was able to extract the data according to the given keyword,
+ it will be added to auxdata.
+ You can then use that data in your import scripts.
+ 
+\end_layout
+
+\begin_layout Standard
+An sample configuration for the example described above would be:
+\end_layout
+
+\begin_layout Code
+        <libexif>
+\end_layout
+
+\begin_layout Code
+            <auxdata>
+\end_layout
+
+\begin_layout Code
+                <add tag="EXIF_TAG_MODEL"/>
+\end_layout
+
+\begin_layout Code
+            </auxdata>
+\end_layout
+
+\begin_layout Code
+        </libexif> 
+\end_layout
+
+\begin_layout Paragraph*
+Optional
+\end_layout
+
+\begin_layout Code
+        <libextractor> 
+\end_layout
+
+\begin_layout Standard
+Options for the extractor library.
+\end_layout
+
+\begin_layout Paragraph*
+Optional
+\end_layout
+
+\begin_layout Code
+            <auxdata>
+\end_layout
+
+\begin_layout Standard
+Currently only adding keywords to auxdata is supported.
+ For a list of keywords/tags see the libextractor documentation.
+\end_layout
+
+\begin_layout Paragraph*
+Optional
+\end_layout
+
+\begin_layout Code
+                <add tag="keyword"/>
+\end_layout
+
+\begin_layout Standard
+If the library was able to extract the data according to the given keyword,
+ it will be added to auxdata.
+ You can then use that data in your import scripts.
+ 
 \end_layout
 
 \end_body
