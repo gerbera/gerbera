@@ -101,22 +101,6 @@ tr.itemRowB
     background-color:#aaaaaa;
 }
 
-tr.itemRowA:hover, tr.itemRowB:hover
-{
-    background-color:#888888;
-}
-
-td.contEntry
-{
-    vertical-align:middle;
-    padding-left:5px;
-}
-
-td.contEntry img, td.itemButtons a, td.itemButtons img, span.contText
-{
-    vertical-align:middle;
-}
-
 td.itemEntry
 {
     padding:3px;
@@ -132,11 +116,73 @@ td.itemButtons
     text-align:right;
 }
 
+tr.itemRowA:hover, tr.itemRowB:hover
+{
+    background-color:#888888;
+}
+
+tr.itemRowA div.itemLeft:hover
+{
+    background-color:#888888;
+}
+
+tr.itemRowA div.itemLeft
+{
+    padding:3px;
+    padding-left:5px;
+    vertical-align:middle;
+    background-color:#cccccc;
+}
+
+tr.itemRowA div.itemRight
+{
+    padding:3px;
+    padding-right:12px;
+    vertical-align:middle;
+    text-align:right;
+    background-color:#cccccc;
+}
+
+tr.itemRowB div.itemLeft
+{
+    padding:3px;
+    padding-left:5px;
+    vertical-align:middle;
+    background-color:#aaaaaa;
+}
+
+tr.itemRowB div.itemRight
+{
+    padding:3px;
+    padding-right:12px;
+    vertical-align:middle;
+    text-align:right;
+    background-color:#aaaaaa;
+}
+
+td.contEntry
+{
+    vertical-align:middle;
+    padding-left:5px;
+}
+
+td.contEntry img, td.itemButtons a, td.itemButtons img, span.contText
+{
+    vertical-align:middle;
+}
+
+/*
+td.itemEntry, td.itemButtons
+{
+    padding:0px;
+}
+*/
 
 table.classicForm
 {
     padding:5px;
     padding-left:10px;
+    padding-top: 20px;
 }
 
 img.status

@@ -297,7 +297,7 @@ function formToArray(form, args)
     {
         var element = form.elements[i];
         
-        if (element.type && ((element.type != 'submit' && element.type != "radio" && element.type != "checkbox") || element.checked))
+        if (element.type && ((element.type != 'submit' && element.type != "radio" && element.type != "checkbox") || element.checked) && ! element.disabled)
             args[element.name] = element.value;
     }
 }

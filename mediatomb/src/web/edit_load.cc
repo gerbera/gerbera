@@ -70,8 +70,16 @@ void web::edit_load::process()
     Ref<Element> item (new Element(_("item")));
     
     item->setAttribute(_("object_id"), objID);
-    item->appendTextChild(_("title"), obj->getTitle());
-    item->appendTextChild(_("class"), obj->getClass());
+    
+    Ref<Element> title (new Element(_("title")));
+    title->setText(obj->getTitle());
+    title->addAttribute(_("editable"), obj->isVirtual() ? _("1") : _("0"));
+    item->appendChild(title);
+    
+    Ref<Element> classEl (new Element(_("class")));
+    classEl->setText(obj->getClass());
+    classEl->addAttribute(_("editable"), _("1"));
+    item->appendChild(classEl);
     
     int objectType = obj->getObjectType();
     item->appendTextChild(_("objType"), String::from(objectType));
@@ -79,19 +87,45 @@ void web::edit_load::process()
     if (IS_CDS_ITEM(objectType))
     {
         Ref<CdsItem> objItem = RefCast(obj, CdsItem);
-        item->appendTextChild(_("description"), objItem->getMetadata(_("dc:description")));
-        item->appendTextChild(_("location"), objItem->getLocation());
-        item->appendTextChild(_("mime-type"), objItem->getMimeType());
+        
+        Ref<Element> description (new Element(_("description")));
+        description->setText(objItem->getMetadata(_("dc:description")));
+        description->addAttribute(_("editable"), _("1"));
+        item->appendChild(description);
+        
+        Ref<Element> location (new Element(_("location")));
+        location->setText(objItem->getLocation());
+        if (IS_CDS_PURE_ITEM(objectType) || ! objItem->isVirtual())
+            location->addAttribute(_("editable"),_("0"));
+        else
+            location->addAttribute(_("editable"),_("1"));
+        item->appendChild(location);
+        
+        Ref<Element> mimeType (new Element(_("mime-type")));
+        mimeType->setText(objItem->getMimeType());
+        mimeType->addAttribute(_("editable"), _("1"));
+        item->appendChild(mimeType);
         
         if (IS_CDS_ITEM_EXTERNAL_URL(objectType))
         {
-            item->appendTextChild(_("protocol"), getProtocol(objItem->getResource(0)->getAttribute(_("protocolInfo"))));
+            Ref<Element> protocol (new Element(_("protocol")));
+            protocol->setText(getProtocol(objItem->getResource(0)->getAttribute(_("protocolInfo"))));
+            protocol->addAttribute(_("editable"), _("1"));
+            item->appendChild(protocol);
         }
         else if (IS_CDS_ACTIVE_ITEM(objectType))
         {
             Ref<CdsActiveItem> objActiveItem = RefCast(objItem, CdsActiveItem);
-            item->appendTextChild(_("action"), objActiveItem->getAction());
-            item->appendTextChild(_("state"), objActiveItem->getState());
+            
+            Ref<Element> action (new Element(_("action")));
+            action->setText(objActiveItem->getAction());
+            action->addAttribute(_("editable"), _("1"));
+            item->appendChild(action);
+            
+            Ref<Element> state (new Element(_("state")));
+            state->setText(objActiveItem->getState());
+            state->addAttribute(_("editable"), _("1"));
+            item->appendChild(state);
         }
     }
     

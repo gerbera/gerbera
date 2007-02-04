@@ -433,19 +433,41 @@ function updateItems(ajaxRequest)
         var itemRow = rightDocument.createElement("tr");
         itemRow.setAttribute("class", (i % 2 == 0 ? "itemRowA" : "itemRowB"));
         var item = children[i];
-        var itemEntry = rightDocument.createElement("td");
-        itemEntry.setAttribute("class", "itemEntry");
+        var itemEntryTd = rightDocument.createElement("td");
+        itemEntryTd.setAttribute("class", "itemEntry");
+        var itemEntry;
+        if (isMSIE)
+        {
+            itemEntry = rightDocument.createElement("div"); // another div only for IE...
+            itemEntry.setAttribute("class", "itemLeft");
+            itemEntryTd.appendChild(itemEntry);
+        }
+        else
+        {
+            itemEntry = itemEntryTd;
+        }
         var itemLink = rightDocument.createElement("a");
         itemEntry.appendChild(itemLink);
         
-        var itemButtons = rightDocument.createElement("td");
-        itemButtons.setAttribute("class", "itemButtons");
+        var itemButtonsTd = rightDocument.createElement("td");
+        itemButtonsTd.setAttribute("class", "itemButtons");
+        var itemButtons;
+        if (isMSIE)
+        {
+            itemButtons = rightDocument.createElement("div"); // another div only for IE...
+            itemButtons.setAttribute("class", "itemRight");
+            itemButtonsTd.appendChild(itemButtons);
+        }
+        else
+        {
+            itemButtons = itemButtonsTd;
+        }
         
         var itemText = rightDocument.createTextNode(useFiles ? item.firstChild.nodeValue : xmlGetElementText(item, "title"));
         itemLink.appendChild(itemText);
         
-        itemRow.appendChild(itemEntry);
-        itemRow.appendChild(itemButtons);
+        itemRow.appendChild(itemEntryTd);
+        itemRow.appendChild(itemButtonsTd);
         
         if (useFiles)
         {
@@ -461,8 +483,9 @@ function updateItems(ajaxRequest)
             if (isVirtual)
             {
                 _addLink(rightDocument, itemButtons, false, "javascript:parent.removeItem(\""+item.getAttribute("id")+"\", true);", "remove all", iconRemoveAll);
-                _addLink(rightDocument, itemButtons, false, "javascript:parent.userEditItemStart('"+item.getAttribute("id")+"');", "edit", iconEdit);
             }
+            
+            _addLink(rightDocument, itemButtons, false, "javascript:parent.userEditItemStart('"+item.getAttribute("id")+"');", "edit", iconEdit);
             
             itemLink.setAttribute("href", xmlGetElementText(item, "res"));
             
@@ -698,10 +721,16 @@ function updateItemAddEditFields(editItem)
             var inputEl = rightDocument.createElement('input');
             inputEl.setAttribute('type', 'text');
             inputEl.setAttribute('name', fieldNameAr[i]);
+            inputEl.setAttribute('size', '40');
             if (!editItem)
                 inputEl.setAttribute('value', defaultsAr[i]);
             else
-                inputEl.setAttribute('value', xmlGetElementText(editItem, fieldNameAr[i]));
+            {
+                var xmlElement = xmlGetElement(editItem, fieldNameAr[i]);
+                inputEl.setAttribute('value', xmlGetText(xmlElement));
+                if(xmlElement.getAttribute('editable') != '1')
+                    inputEl.setAttribute('disabled', 'disabled');
+            }
             
             inputTd.appendChild(inputEl);
         }
