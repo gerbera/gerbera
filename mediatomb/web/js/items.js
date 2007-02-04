@@ -69,20 +69,34 @@ function itemChangeType()
     Element.show(topItemRoot);
 }
 
+var lastFolder;
+var lastItemStart;
+
 function folderChange(id)
 {
-    loadItems(id, 0);
+    if (id == lastFolder)
+        loadItems(id, lastItemStart);
+    else
+        loadItems(id, 0);
 }
 
-function loadItems(id, start, count)
+function loadItems(id, start)
 {
+    if (formShown)
+        return;
+    /*
     if (! count)
         count = viewItems;
+    */
+    
+    lastItemStart = start;
+    lastFolder = id;
+    
     itemChangeType();
     var type = id.substring(0, 1);
     id = id.substring(1);
     var itemLink = type == 'd' ? 'items' : 'files';
-    var url = link(itemLink, {parent_id: id, start: start, count: count}, true);
+    var url = link(itemLink, {parent_id: id, start: start, count: viewItems}, true);
     var myAjax = new Ajax.Request(
         url,
         {
@@ -596,8 +610,11 @@ function addedItem(ajaxRequest)
     //todo: feedback
 }
 
+var formShown = false;
+
 function userAddItemStart()
 {
+    formShown = true;
     updateItemAddEditFields();
     Element.hide(itemRoot);
     itemRoot=rightDocument.getElementById('item_add_edit_div');
@@ -742,6 +759,7 @@ function updateItemAddEditFields(editItem)
 
 function itemAddEditSubmit(objectId)
 {
+    formShown = false;
     var req_type;
     var args = new Object();
     if (objectId)

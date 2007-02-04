@@ -109,7 +109,5 @@ void web::items::process()
         items->appendChild(item);
         //}
     }
-    
-    root->appendChild(items);
 }
 

@@ -232,7 +232,8 @@ void WebRequestHandler::appendTask(Ref<Element> el, Ref<CMTask> task)
     if (task == nil || el == nil)
         return;
     Ref<Element> taskEl (new Element(_("task")));
-    taskEl->addAttribute(_("id"), String::from(task->getID())); 
+    taskEl->addAttribute(_("id"), String::from(task->getID()));
+    taskEl->addAttribute(_("cancellable"), task->isCancellable() ? _("1") : _("0"));
     taskEl->setText(task->getDescription());
     el->appendChild(taskEl);
 }

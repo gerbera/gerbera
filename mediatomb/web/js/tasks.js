@@ -69,6 +69,11 @@ function updateCurrentTask(taskEl)
         {
             var currentTaskTxtEl = topDocument.getElementById("currentTaskText").firstChild;
             currentTaskTxtEl.replaceData(0, currentTaskTxtEl.length, taskEl.firstChild.data);
+            var cancelCurrentTaskEl = topDocument.getElementById("cancelCurrentTask");
+            if (taskEl.getAttribute("cancellable") == "1")
+                Element.show(cancelCurrentTaskEl);
+            else
+                Element.hide(cancelCurrentTaskEl);
             Element.show(currentTaskTdEl);
             if (! pollWhenIdle) // will be started by getConfigCallback() (auth.js) otherwise
                 startPollInterval();
