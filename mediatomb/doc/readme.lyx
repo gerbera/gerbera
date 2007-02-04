@@ -42,6 +42,96 @@ MediaTomb - UPnP Mediaserver
 \end_layout
 
 \begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Standard
+MediaTomb implements the UPnP MediaServer V 1.0 specification that can be
+ found on 
+\begin_inset LatexCommand \url[http://www.upnp.org/]{http://www.upnp.org/}
+
+\end_inset
+
+ The current implementation focuses on parts that are required by the specificat
+ion, however we look into extending the functionality to cover the optional
+ parts of the spec as well.
+\end_layout
+
+\begin_layout Standard
+MediaTomb should work with any UPnP compliant MediaRenderer, please tell
+ us if you experience difficulties with particular models, also take a look
+ at the Supported Devices list for more information.
+\end_layout
+
+\begin_layout Subsection
+Currently Supported Features
+\end_layout
+
+\begin_layout Itemize
+browse and playback your media via UPnP
+\end_layout
+
+\begin_layout Itemize
+metadata extraction (id3, exif, etc.)
+\end_layout
+
+\begin_layout Itemize
+user defined server layout based on extracted metadata (scriptable virtual
+ containers)
+\end_layout
+
+\begin_layout Itemize
+automatic directory rescans
+\end_layout
+
+\begin_layout Itemize
+sophisticated web UI with a tree view of the database, allowing to add/remove/ed
+it/browse your media
+\end_layout
+
+\begin_layout Itemize
+support for external URLs
+\end_layout
+
+\begin_layout Itemize
+support for ContentDirectoryService container updates
+\end_layout
+
+\begin_layout Itemize
+Active Items (experimental feature), allows execution of server side scripts
+ upon HTTP GET requests to certain items
+\end_layout
+
+\begin_layout Itemize
+highly flexible configuration, allowing you to control the behaviour of
+ various features of the server
+\end_layout
+
+\begin_layout Itemize
+support for Linux, FreeBSD, Mac OS X
+\end_layout
+
+\begin_layout Itemize
+runs on x86, Alpha, ARM, MIPS, Sparc
+\end_layout
+
+\begin_layout Subsection
+Planned Features
+\end_layout
+
+\begin_layout Itemize
+transcoding of audio and video
+\end_layout
+
+\begin_layout Itemize
+playlist support
+\end_layout
+
+\begin_layout Itemize
+various UPnP improvements
+\end_layout
+
+\begin_layout Section
 \noindent
 \align left
 Requirements
@@ -215,16 +305,40 @@ This library tries to gather metadata from all kinds of files (also .avi
 \end_layout
 
 \begin_layout Standard
-In order to use the web UI you will need the following:
+In order to use the web UI you will need to have javascript enabled in your
+ web browser.
 \end_layout
 
 \begin_layout Standard
-- Javascript enabled to access the web interface.
- Tested and works with the recent versions of - Mozilla - Opera Tested and
- does not work with the recent versions of - Konqueror - Internet Explorer,
- Safari - At least sqlite3 or mysql - Several libraries, see installation
- instructions.
- 
+The UI has been tested and works with the recent versions of :
+\end_layout
+
+\begin_layout Itemize
+Firefox/Mozilla
+\end_layout
+
+\begin_layout Itemize
+Opera 
+\end_layout
+
+\begin_layout Standard
+Tested and does not work with the recent versions of:
+\end_layout
+
+\begin_layout Itemize
+Konqueror 
+\end_layout
+
+\begin_layout Itemize
+Safari 
+\end_layout
+
+\begin_layout Standard
+Limited functionality with:
+\end_layout
+
+\begin_layout Itemize
+Internet Explorer 6 and 7
 \end_layout
 
 \begin_layout Section
@@ -1255,6 +1369,14 @@ Required
 
 \begin_layout Standard
 This section defines the server configuration parameters.
+\end_layout
+
+\begin_layout Standard
+\begin_inset LatexCommand \printindex{}
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Paragraph*
@@ -2471,6 +2593,160 @@ If the library was able to extract the data according to the given keyword,
 \end_layout
 
 \begin_layout Section
+Supported Devices
+\end_layout
+
+\begin_layout Paragraph*
+Attention Hardware Manufacturers:
+\end_layout
+
+\begin_layout Standard
+If you want to improve compatibility between MediaTomb and your renderer
+ device or if you are interested in a port of MediaTomb for your NAS device
+ please e-mail to: contact (at) mediatomb (dot) org
+\end_layout
+
+\begin_layout Subsection
+MediaRenderers
+\end_layout
+
+\begin_layout Standard
+This is the list of client devices that MediaTomb has been tested with and
+ that are known to work.
+ Please drop us a mail if you are using MediaTomb with a device that is
+ not in the list, report any success and failure.
+ We will try to fix the issues and will add the device to the list.
+\end_layout
+
+\begin_layout Subsubsection
+Acer
+\end_layout
+
+\begin_layout Itemize
+AT3705-MGW
+\end_layout
+
+\begin_layout Subsubsection
+Denon
+\end_layout
+
+\begin_layout Itemize
+AVR 4306
+\end_layout
+
+\begin_layout Subsubsection
+D-Link
+\end_layout
+
+\begin_layout Itemize
+DSM-320
+\end_layout
+
+\begin_layout Itemize
+DSM-320RD
+\end_layout
+
+\begin_layout Itemize
+DSM-520
+\end_layout
+
+\begin_layout Standard
+Some additional settings in MediaTomb configuration are required to enable
+ special features for the DSM renderers.
+ If you have a DSM-320 and are experiencing problems during AVI playback,
+ add the following to the server section of your config.xml:
+\end_layout
+
+\begin_layout Code
+<custom-http-headers>
+\end_layout
+
+\begin_layout Code
+    <add header="X-User-Agent: redsonic"/>
+\end_layout
+
+\begin_layout Code
+</custom-http-headers> 
+\end_layout
+
+\begin_layout Subsubsection
+Netgear
+\end_layout
+
+\begin_layout Itemize
+EVA700
+\end_layout
+
+\begin_layout Subsubsection
+Philips
+\end_layout
+
+\begin_layout Itemize
+Streamium SL-300i
+\end_layout
+
+\begin_layout Itemize
+Streamium SL-400i
+\end_layout
+
+\begin_layout Itemize
+Streamium MX-6000i
+\end_layout
+
+\begin_layout Itemize
+SLA-5520
+\end_layout
+
+\begin_layout Subsubsection
+Siemens
+\end_layout
+
+\begin_layout Itemize
+Gigaset M740AV
+\end_layout
+
+\begin_layout Subsubsection
+Telegent
+\end_layout
+
+\begin_layout Itemize
+TG100
+\end_layout
+
+\begin_layout Standard
+The TG100 client has a problem browsing containers, where item titles exceed
+ 101 characters.
+ We implemented a server-side workaround which allows you to limit the lengths
+ of all titles and descriptions.
+ Use the following settings in the server section of your configuration
+ file:
+\end_layout
+
+\begin_layout Code
+<upnp-string-limit>101</upnp-string-limit>
+\end_layout
+
+\begin_layout Subsection
+Network Attached Storage Devices
+\end_layout
+
+\begin_layout Standard
+We provide a bitbake metadata file for the OpenEmbedded environment, it
+ allows to easily crosscompile MediaTomb for various platforms.
+ We have successfuly tested MediaTomb on ARM and MIPSel based devices, so
+ it should be possible to install and run the server on various linux based
+ NAS products that are available on the market.
+\end_layout
+
+\begin_layout Subsubsection
+Excito
+\end_layout
+
+\begin_layout Itemize
+Bubba Mini Server
+\end_layout
+
+\begin_layout Section
 Running The Server
 \end_layout
 
@@ -2591,6 +2867,10 @@ TagLib support patch was contributed by Benhur Stein <benhur.stein at gmail.com>
 \begin_layout Itemize
 tombupnp is kept in sync with the latest pupnp patches, see documentation
  in the tombupnp directory
+\end_layout
+
+\begin_layout Standard
+
 \end_layout
 
 \end_body
