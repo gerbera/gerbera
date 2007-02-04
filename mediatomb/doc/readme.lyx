@@ -214,6 +214,19 @@ This library tries to gather metadata from all kinds of files (also .avi
  to activate it.
 \end_layout
 
+\begin_layout Standard
+In order to use the web UI you will need the following:
+\end_layout
+
+\begin_layout Standard
+- Javascript enabled to access the web interface.
+ Tested and works with the recent versions of - Mozilla - Opera Tested and
+ does not work with the recent versions of - Konqueror - Internet Explorer,
+ Safari - At least sqlite3 or mysql - Several libraries, see installation
+ instructions.
+ 
+\end_layout
+
 \begin_layout Section
 Compiling From Source
 \end_layout
@@ -1190,6 +1203,9 @@ MediaTomb is highly configurable and allows the user to set various options
  a number of choices where possible.
  The heart of MediaTomb configuration is the config.xml file, which is located
  in the ~/.mediatomb directory.
+ If the configuration file is not found in the default location and no configura
+tion was specified on the command line, MediaTomb will generate a default
+ config.xml file in the ~/.mediatomb directory.
  The file is in the XML format and can be edited by a simple text editor,
  here is the list of all available options:
 \end_layout
@@ -2452,7 +2468,129 @@ Optional
 If the library was able to extract the data according to the given keyword,
  it will be added to auxdata.
  You can then use that data in your import scripts.
+\end_layout
+
+\begin_layout Section
+Running The Server
+\end_layout
+
+\begin_layout Standard
+When you run MediaTomb for the first time a default configuration will be
+ created in the ~/.mediatomb directory.
+ If you are using the sqlite database no further intervention is necessary,
+ if you are using MySQL you will have to make some adjustments (see Configuratio
+n section for more details).
+ To start the server simply run "mediatomb" from the console, to shutdown
+ cleanly press Ctrl-C.
+ At startup MediaTomb will print a link to the web UI.
+\end_layout
+
+\begin_layout Description
+Note: Internet Explorer support is limited and not yet finished.
+ It is very difficult to support this browser because of a huge number of
+ bugs in its javascript implementation.
+ If you don't believe us - just visit 
+\begin_inset LatexCommand \url[http://selfhtml.org/]{http://selfhtml.org/}
+
+\end_inset
+
+ and see how often IE is mentioned in not following the specs or simply
+ not working with certain functions and features.
+ We recommend Firefox.
+\end_layout
+
+\begin_layout Standard
+If you want to run a second server from the same PC, make sure to use a
+ different configuration file with a different udn and a different database.
+\end_layout
+
+\begin_layout Standard
+After server launch the bookmark file is created in the ~/.mediatomb directory.
+ You now can manually add the bookmark ~/.mediatomb/mediatomb.html in your
+ browser.
+ This will redirect you to the UI if the server is running.
+\end_layout
+
+\begin_layout Standard
+Assuming that you enabled the UI, you should now be able to get around quite
+ easily.
+\end_layout
+
+\begin_layout Standard
+We also support the daemon mode which allows to start the server in background,
+ the --user and --group parameters should be used to run the server under
+ an unprivileged account.
+ A script for starting/stopping the server is provided.
  
+\end_layout
+
+\begin_layout Section
+Acknowledgments
+\end_layout
+
+\begin_layout Standard
+We are using the following code in our tree:
+\end_layout
+
+\begin_layout Itemize
+uuid from E2fsprogs 1.35 under GNU GPL, Copyright (C) 1996, 1997, 1998 Theodore
+ Ts'o.
+ <tytso@mit.edu> Some functions from the UPnP SDK were conflicting with libuuid,
+ so we had to take the sources in and do some renaming.
+\end_layout
+
+\begin_layout Itemize
+md5 implementation by L.
+ Peter Deutsch <ghost@aladdin.com>, Copyright (C) 1999 Aladdin Enterprises.
+ All rights reserved.
+ (See source headers for further details)
+\end_layout
+
+\begin_layout Itemize
+md5 javascript implementation distributed under BSD License, Copyright (C)
+ Paul Johnston 1999 - 2002.
+ http://pajhome.org.uk/crypt/md5
+\end_layout
+
+\begin_layout Itemize
+Prototype JavaScript Framework http://www.prototypejs.org/ (c) 2005-2007 Sam
+ Stephenson, MIT-style license.
+\end_layout
+
+\begin_layout Itemize
+(heavily modified version of) NanoTree http://nanotree.sourceforge.net/ (c)
+ 2003 (?) Martin Mouritzen <martin@nano.dk>; LGPL
+\end_layout
+
+\begin_layout Itemize
+IE PNG fix from http://webfx.eae.net/dhtml/pngbehavior/pngbehavior.html
+\end_layout
+
+\begin_layout Itemize
+tombupnp is based on pupnp (http://pupnp.sf.net) which is based on libupnp
+ (http://upnp.sf.net), originally distributed under the BSD license, Copyright
+ (c) 2000-2003 Intel Corporation.
+ Note that all changes to libupnp code that were made by the MediaTomb team
+ are covered by the LGPL license.
+ 
+\end_layout
+
+\begin_layout Section
+Contributions
+\end_layout
+
+\begin_layout Itemize
+Initial version of the MediaTomb startup script was contributed by Iain
+ Lea <iain at bricbrac.de> 
+\end_layout
+
+\begin_layout Itemize
+TagLib support patch was contributed by Benhur Stein <benhur.stein at gmail.com>
+\end_layout
+
+\begin_layout Itemize
+tombupnp is kept in sync with the latest pupnp patches, see documentation
+ in the tombupnp directory
 \end_layout
 
 \end_body
