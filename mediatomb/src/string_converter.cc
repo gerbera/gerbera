@@ -90,7 +90,7 @@ zmm::String StringConverter::convert(String str)
     
     //log_debug(("iconv: BEFORE: input bytes left: %d  output bytes left: %d\n",
     //       input_bytes, output_bytes));
-#if defined(__FreeBSD__) || defined(__APPLE__) || defined(SOLARIS)
+#if defined(__FreeBSD__) || defined(__APPLE__) || defined(SOLARIS) || defined(__CYGWIN__)
     ret = iconv(cd, (const char**)input_ptr, &input_bytes,
             output_ptr, &output_bytes);
 #else

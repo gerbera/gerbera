@@ -3838,8 +3838,8 @@ FreeHandle( int Upnp_Handle )
  ***************************************************************************/
     int getlocalhostname( OUT char *out ) {
 
-#ifdef WIN32
- 	 struct hostent *h=NULL;
+#if defined(WIN32) || defined(__CYGWIN__)
+    struct hostent *h=NULL;
     struct sockaddr_in LocalAddr;
 
  		gethostname(out,LINE_SIZE);

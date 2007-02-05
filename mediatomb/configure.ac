@@ -42,8 +42,11 @@ fi
 SEARCH_DIR="/usr/local"
    
 DARWIN_OS=0
+CYGWIN_OS=0
 
 AC_CANONICAL_HOST
+
+echo $host
 
 case $host in
     *-*-darwin*)
@@ -53,6 +56,9 @@ case $host in
     *-*-solaris*)
         AC_DEFINE([SOLARIS], [1], [we are on solaris])
         ;;
+    *-*-cygwin*)
+        CYGWIN_OS=1
+	;;
 esac
 
 AC_ARG_WITH(search, 
@@ -699,6 +705,8 @@ AC_CHECK_FUNCS([gethostbyname],
 
 if test $DARWIN_OS -eq 1 ; then
         AC_MSG_NOTICE([You are running OSX, assuming threadsafe gethostbyname version])
+elif test $CYGWIN_OS -eq 1; then
+        AC_MSG_NOTICE([Your are building under Cygwin, assuming threadsafe gethostbyname implementation])
 fi
 
 AC_CHECK_FUNCS([gethostbyname_r],[],
@@ -708,7 +716,7 @@ AC_CHECK_FUNCS([gethostbyname_r],[],
                     AC_CHECK_LIB(lwres, lwres_gethostbyname_r,[],[AC_MSG_ERROR(required library function not found)])
                 ],
                 [
-                    if test $DARWIN_OS -eq 0 ; then
+                    if ((test $DARWIN_OS -eq 0) && (test $CYGWIN_OS -eq 0)) ; then
                         AC_MSG_ERROR([required header not found])
                     fi
                 ])
@@ -717,7 +725,11 @@ AC_CHECK_FUNCS([gethostbyname_r],[],
 AC_CHECK_FUNCS([if_nameindex],[],
         [
             AC_CHECK_LIB(nsl, if_nameindex,[],
-                [AC_MSG_ERROR(required library function not found)]
+                [
+                    if test $CYGWIN_OS -eq 0; then
+                        AC_MSG_ERROR(required library function not found)
+                    fi
+                ]
             )
         ]
 )
@@ -725,7 +737,11 @@ AC_CHECK_FUNCS([if_nameindex],[],
 AC_CHECK_FUNCS([if_freenameindex],[],
         [
             AC_CHECK_LIB(nsl, if_freenameindex,[],
-                [AC_MSG_ERROR(required library function not found)]
+                [
+                    if test $CYGWIN_OS -eq 0; then
+                        AC_MSG_ERROR(required library function not found)
+                    fi
+                ]
             )
         ]
 )

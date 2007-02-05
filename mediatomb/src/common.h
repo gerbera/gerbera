@@ -162,7 +162,11 @@
 // default values
 #define DEFAULT_INTERNAL_CHARSET        "UTF-8"
 #define DEFAULT_FILESYSTEM_CHARSET      "ISO-8859-1"
-#define DEFAULT_CONFIG_HOME             ".mediatomb"
+#if defined(__CYGWIN__)
+    #define DEFAULT_CONFIG_HOME         "MediaTomb"
+#else
+    #define DEFAULT_CONFIG_HOME         ".mediatomb"
+#endif
 #define DEFAULT_SYSTEM_HOME             "mediatomb"
 #define DEFAULT_ETC                     "etc"
 #define DEFAULT_CONFIG_NAME             "config.xml"

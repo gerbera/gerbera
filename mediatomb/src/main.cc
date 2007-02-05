@@ -243,14 +243,13 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         
     }
 
-    // TODO: check if -c option is present, if not it is an error NOT to specify config file
-    
     try
     {
 #ifndef __CYGWIN__
         char *h = getenv("HOME");
         if (h != NULL)
             home = String(h);
+
 #else
         char *h = getenv("HOMEPATH");
         char *d = getenv("HOMEDRIVE");
@@ -267,7 +266,6 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         }
         
 */
-
         ConfigManager::setStaticArgs(config_file, home);
         ConfigManager::getInstance();
     }

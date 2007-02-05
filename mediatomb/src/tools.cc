@@ -831,11 +831,15 @@ int compareTimespecs(struct timespec *a,  struct timespec *b)
 
 String normalizePath(String path)
 {
+    log_debug("Normalizing path: %s\n", path.c_str());
     path = path.reduce(DIR_SEPARATOR);
     if (path.charAt(path.length() - 1) == DIR_SEPARATOR) // cut off trailing slash
         path = path.substring(0, path.length() - 1);
-
+#ifndef __CYGWIN__
     if (!path.startsWith(_("/")))
+#else
+    if ((!path.length() > 1) && (path.charAt(1) != ':'))
+#endif
         throw _Exception(_("Relative paths are not allowed!\n"));
     
     if (path.find(_(_DIR_SEPARATOR) + ".." + _DIR_SEPARATOR) || (path.find(_(_DIR_SEPARATOR) + "..") == (path.length() - 3)))

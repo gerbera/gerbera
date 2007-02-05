@@ -111,13 +111,14 @@ ConfigManager::ConfigManager() : Singleton<ConfigManager>()
 String ConfigManager::construct_path(String path)
 {
     String home = getOption(_("/server/home"));
-#ifndef __CYGWIN__
+
     if (path.charAt(0) == '/')
         return path;
-#else
-    if (path.charAt(1) == ':')
+#if defined(__CYGWIN__)
+
+    if ((path.length() > 1) && (path.charAt(1) == ':'))
         return path;
-#endif
+#endif  
     if (home == "." && path.charAt(0) == '.')
         return path;
     
@@ -538,7 +539,7 @@ void ConfigManager::prepare_path(String xpath, bool needDir, bool existenceUnnee
     String temp;
 
     temp = checkOptionString(xpath);
-    
+
     temp = construct_path(temp);
 
     check_path_ex(temp, needDir, existenceUnneeded);
