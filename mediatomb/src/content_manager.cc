@@ -1356,7 +1356,8 @@ int ContentManager::addAutoscanDirectory(Ref<AutoscanDirectory> dir)
     int scanID = INVALID_SCAN_ID;
     if (dir->getScanMode() == TimedScanMode)
     {
-        timerNotify(autoscan_timed->add(dir));
+        scanID = autoscan_timed->add(dir);
+        timerNotify(scanID);
     }
    
     return scanID;
@@ -1383,6 +1384,46 @@ void ContentManager::removeAutoscanDirectory(String location)
         Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), scanID, true);
     }
     // else <other removes... (w/o removeTimerSubscriber!)>
+}
+
+void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir, scan_mode_t scanMode)
+{
+    if (dir->getScanID() == INVALID_SCAN_ID)
+    {
+        addAutoscanDirectory(dir);
+        return;
+    }
+
+    AUTOLOCK(mutex);
+    Ref<AutoscanDirectory> original = getAutoscanDirectory(dir->getScanID(), scanMode);
+    if (original == nil)
+    {
+        ///\todo what do we do here? obviously the ID is no longer valid, try to add or fail?
+        return;
+    }
+
+    // make sure timer events will not get triggered for directory that is being updated
+    Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), original->getScanID(), true);
+
+    // changing from full scan to basic scan need to reset last modification time
+    if ((original->getScanLevel() == FullScanLevel) && (dir->getScanLevel() == BasicScanLevel))
+    {
+        original->setScanLevel(BasicScanLevel);
+        original->setCurrentLMT(0);
+        original->updateLMT();
+    }
+    else
+    {
+        original->setScanLevel(FullScanLevel);
+    }
+
+    original->setHidden(dir->getHidden());
+    original->setRecursive(dir->getRecursive());
+    original->setInterval(dir->getInterval());
+
+    // any update forces an immediate scan, the timer subscription will be handled
+    // by CMRescanDirectoryTask and will be done automatically after the scan
+    rescanDirectory(original->getObjectID(), original->getScanID(), original->getScanMode());
 }
 
 

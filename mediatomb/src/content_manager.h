@@ -245,6 +245,11 @@ public:
     /// \brief Add an autoscan directory to the watch list.
     int addAutoscanDirectory(zmm::Ref<AutoscanDirectory> dir);
 
+    /// \brief Update autoscan parameters for an existing autoscan directory
+    /// \param dir it is important to set the correct scanID!
+    /// \param scanMode this is the scanMode of the original directory
+    void setAutoscanDirectory(zmm::Ref<AutoscanDirectory> dir, scan_mode_t scanMode);
+
 
     /// \brief instructs ContentManager to reload scripting environment
 #ifdef HAVE_JS

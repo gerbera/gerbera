@@ -146,10 +146,12 @@ public:
     void setScanLevel(scan_level_t level) { this->level = level; }
 
     bool getRecursive() { return recursive; }
-    
+   
+    void setHidden(bool hidden) { this->hidden = hidden; }
+
     bool getHidden() { return hidden; }
 
-//    void setRecursive(bool recursive) { this->recursive = recursive; }
+    void setRecursive(bool recursive) { this->recursive = recursive; }
     
     unsigned int getInterval() { return interval; }
 
