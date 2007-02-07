@@ -46,8 +46,6 @@ CYGWIN_OS=0
 
 AC_CANONICAL_HOST
 
-echo $host
-
 case $host in
     *-*-darwin*)
         DARWIN_OS=1

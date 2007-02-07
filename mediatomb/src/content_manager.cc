@@ -1212,7 +1212,6 @@ void ContentManager::invalidateTask(unsigned int taskID)
         if ((t->getID() == taskID) || (t->getParentID() == taskID))
         {
             t->invalidate();
-            return;
         }
     }
 
@@ -1224,7 +1223,6 @@ void ContentManager::invalidateTask(unsigned int taskID)
         if ((t->getID() == taskID) || (t->getParentID() == taskID))
         {
             t->invalidate();
-            return;
         }
     }
 
@@ -1235,7 +1233,6 @@ void ContentManager::invalidateTask(unsigned int taskID)
         if ((t->getID() == taskID) || (t->getParentID() == taskID))
         {
             t->invalidate();
-            return;
         }
     }
 }
