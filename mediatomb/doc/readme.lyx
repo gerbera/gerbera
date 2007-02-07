@@ -1359,32 +1359,46 @@ These settings define the server configuration, this includes UPnP behavior,
  of shared data.
 \end_layout
 
-\begin_layout Paragraph*
-Required
-\end_layout
-
 \begin_layout Code
 <server> 
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Required
 \end_layout
 
 \begin_layout Standard
 This section defines the server configuration parameters.
 \end_layout
 
-\begin_layout Standard
-\begin_inset LatexCommand \printindex{}
-
-\end_inset
-
+\begin_layout Code
 
 \end_layout
 
-\begin_layout Paragraph*
-Optional
+\begin_layout Code
+
 \end_layout
 
 \begin_layout Code
     <port>0</port>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default
+\emph default
+:
+\emph on
+ 0 (automatic)
 \end_layout
 
 \begin_layout Standard
@@ -1395,16 +1409,12 @@ Specifies the port where the server will be listening for HTTP requests.
  the SDK.
 \end_layout
 
-\begin_layout Standard
+\begin_layout Code
 
-\emph on
-Default:
-\emph default
- 0 (automatic)
 \end_layout
 
-\begin_layout Paragraph*
-Optional
+\begin_layout Code
+
 \end_layout
 
 \begin_layout Code
@@ -1412,20 +1422,32 @@ Optional
 \end_layout
 
 \begin_layout Standard
-Specifies the IP address to bind to, by default one of the available interfaces
- will be selected.
+
+\emph on
+Optional
 \end_layout
 
 \begin_layout Standard
 
 \emph on
-Default:
+Default
 \emph default
+:
+\emph on
  first available interface.
 \end_layout
 
-\begin_layout Paragraph*
-Optional
+\begin_layout Standard
+Specifies the IP address to bind to, by default one of the available interfaces
+ will be selected.
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
 \end_layout
 
 \begin_layout Code
@@ -1433,24 +1455,52 @@ Optional
 \end_layout
 
 \begin_layout Standard
-Server friendly name, you will see this on your devices that you use to
- access the server.
+
+\emph on
+Optional
 \end_layout
 
 \begin_layout Standard
 
 \emph on
-Default:
+Default
 \emph default
+:
+\emph on
  MediaTomb
 \end_layout
 
-\begin_layout Paragraph*
-Optional
+\begin_layout Standard
+Server friendly name, you will see this on your devices that you use to
+ access the server.
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
 \end_layout
 
 \begin_layout Code
     <manufacturerURL>http://mediatomb.org/</manufacturerURL> 
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default
+\emph default
+:
+\emph on
+ http://mediatomb.cc/
 \end_layout
 
 \begin_layout Standard
@@ -1459,16 +1509,12 @@ This tag sets the manufacturer URL of a UPnP device, this may be necessary
  are only active with the vendor implemented server.
 \end_layout
 
-\begin_layout Standard
+\begin_layout Code
 
-\emph on
-Default:
-\emph default
- http://mediatomb.org/
 \end_layout
 
-\begin_layout Paragraph*
-Optional
+\begin_layout Code
+
 \end_layout
 
 \begin_layout Code
@@ -1476,17 +1522,18 @@ Optional
 \end_layout
 
 \begin_layout Standard
-The presentation URL defines the location of the servers user interface,
- usually you do not need to change this however, vendors who want to ship
- our server along with their NAS devices may want to point to the main configura
-tion page of the device.
+
+\emph on
+Optional
 \end_layout
 
 \begin_layout Standard
 
 \emph on
-Default:
+Default
 \emph default
+:
+\emph on
  
 \begin_inset Quotes sld
 \end_inset
@@ -1496,6 +1543,13 @@ Default:
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+The presentation URL defines the location of the servers user interface,
+ usually you do not need to change this however, vendors who want to ship
+ our server along with their NAS devices may want to point to the main configura
+tion page of the device.
 \end_layout
 
 \begin_layout Standard
@@ -1509,6 +1563,26 @@ The allowed values are:
 
 \begin_layout Code
         append-to="none" 
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: 
+\begin_inset Quotes sld
+\end_inset
+
+none
+\begin_inset Quotes srd
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1537,28 +1611,32 @@ Append the string specified in the presentationURL tag to the server ip
  the built in web server.
 \end_layout
 
-\begin_layout Standard
-
-\emph on
-Default:
-\emph default
- 
-\begin_inset Quotes sld
-\end_inset
-
-none
-\begin_inset Quotes srd
-\end_inset
-
+\begin_layout Code
 
 \end_layout
 
-\begin_layout Paragraph*
-Required
+\begin_layout Code
+
 \end_layout
 
 \begin_layout Code
     <udn/> 
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Required
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default
+\emph default
+:
+\emph on
+ automatically generated if the tag is empty
 \end_layout
 
 \begin_layout Standard
@@ -1569,20 +1647,28 @@ Unique Device Name, according to the UPnP spec it must be consistent throughout
  launch of the server.
 \end_layout
 
-\begin_layout Standard
+\begin_layout Code
 
-\emph on
-Default:
-\emph default
- automatically if the tag is empty generated
 \end_layout
 
-\begin_layout Paragraph*
-Required
+\begin_layout Code
+
 \end_layout
 
 \begin_layout Code
     <home>/home/your_user_name/.mediatomb</home> 
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Required
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: ~/.mediatomb
 \end_layout
 
 \begin_layout Standard
@@ -1591,20 +1677,29 @@ Server home - the server will search for the data that it needs relative
  The mediatomb.html bookmark file will also be generated in that directory.
 \end_layout
 
-\begin_layout Standard
+\begin_layout Code
 
-\emph on
-Default:
-\emph default
- ~/.mediatomb
 \end_layout
 
-\begin_layout Paragraph*
-Required
+\begin_layout Code
+
 \end_layout
 
 \begin_layout Code
     <webroot>/usr/share/mediatomb/web</webroot>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Required
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: depends on the installation prefix that is passed to the configure
+ script.
 \end_layout
 
 \begin_layout Standard
@@ -1613,20 +1708,28 @@ Root directory for the web server, this is the location where device description
  are stored.
 \end_layout
 
-\begin_layout Standard
+\begin_layout Code
 
-\emph on
-Default:
-\emph default
- depends on the installation prefix that is passed to the configure script.
 \end_layout
 
-\begin_layout Paragraph*
-Optional
+\begin_layout Code
+
 \end_layout
 
 \begin_layout Code
     <servedir>/home/myuser/mystuff</servedir>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: empty (disabled)
 \end_layout
 
 \begin_layout Standard
@@ -1645,16 +1748,12 @@ ething.jar on your filesystem.
 hing.jar
 \end_layout
 
-\begin_layout Standard
+\begin_layout Code
 
-\emph on
-Default:
-\emph default
- empty (disabled)
 \end_layout
 
-\begin_layout Paragraph*
-Optional
+\begin_layout Code
+
 \end_layout
 
 \begin_layout Code
@@ -1662,7 +1761,9 @@ Optional
 \end_layout
 
 \begin_layout Standard
-Interval for broadcasting SSDP:alive messages 
+
+\emph on
+Optional
 \end_layout
 
 \begin_layout Standard
@@ -1670,11 +1771,21 @@ Interval for broadcasting SSDP:alive messages
 \emph on
 Default:
 \emph default
- 180, this is according to the UPnP specification.
+ 
+\emph on
+180, this is according to the UPnP specification.
 \end_layout
 
-\begin_layout Paragraph*
-Optional
+\begin_layout Standard
+Interval for broadcasting SSDP:alive messages 
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
 \end_layout
 
 \begin_layout Code
@@ -1682,16 +1793,32 @@ Optional
 \end_layout
 
 \begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
 This section holds the user defined HTTP headers that will be added to all
  HTTP responses that come from the server.
 \end_layout
 
-\begin_layout Paragraph*
-Optional
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
 \end_layout
 
 \begin_layout Code
         <add header="..."/> 
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
 \end_layout
 
 \begin_layout Standard
@@ -1700,12 +1827,32 @@ Specify a header to be added to the response.
  the .AVI playback problem.
 \end_layout
 
-\begin_layout Paragraph*
-Optional
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
 \end_layout
 
 \begin_layout Code
     <upnp-string-limit>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default:
+\emph default
+ 
+\emph on
+disabled
 \end_layout
 
 \begin_layout Standard
@@ -1717,24 +1864,26 @@ This will limit title and description length of containers and items in
  off to indicate that limiting took place.
 \end_layout
 
-\begin_layout Standard
-
-\emph on
-Default: 
-\emph default
-disabled
-\end_layout
-
 \begin_layout Subsubsection
 UI Settings
 \end_layout
 
-\begin_layout Paragraph*
-Required
+\begin_layout Code
+    <ui enabled="yes" poll-interval="2" poll-when-idle="no"/>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+This section defines various user interface settings.
 \end_layout
 
 \begin_layout Code
-    <ui enabled="yes" poll-interval="2" poll-when-idle="no"/> 
+enabled = "yes"
 \end_layout
 
 \begin_layout Standard
@@ -1770,56 +1919,6 @@ Setting poll-when-idle to "yes" will do background polling even when there
 \end_layout
 
 \begin_layout Standard
-
-\emph on
-Default:
-\emph default
- enabled = 
-\begin_inset Quotes sld
-\end_inset
-
-yes
-\emph on
-
-\begin_inset Quotes srd
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Default: 
-\emph default
-poll-interval = 
-\begin_inset Quotes sld
-\end_inset
-
-2
-\begin_inset Quotes srd
-\end_inset
-
- seconds
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Default: 
-\emph default
-poll-when-idle = 
-\begin_inset Quotes sld
-\end_inset
-
-no
-\begin_inset Quotes srd
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
 The tasks are that are monitored are:
 \end_layout
 
@@ -1837,6 +1936,14 @@ automatic rescans
 
 \begin_layout Paragraph*
 Required
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
 \end_layout
 
 \begin_layout Code
@@ -1894,6 +2001,14 @@ Optional
 \end_layout
 
 \begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
             <account user="name" password="password"/>
 \end_layout
 
@@ -1904,6 +2019,14 @@ There can be multiple users, however this is mainly a feature for the future.
 
 \begin_layout Paragraph*
 Optional
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
 \end_layout
 
 \begin_layout Code
@@ -1981,11 +2104,27 @@ Sqlite3 is defined as follows:
 \end_layout
 
 \begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
     <storage driver="sqlite3">
 \end_layout
 
 \begin_layout Paragraph*
 Optional
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
 \end_layout
 
 \begin_layout Code
@@ -2084,6 +2223,14 @@ Optional
 \end_layout
 
 \begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
     <filesystem-charset>ISO-8859-1</filesystem-charset>
 \end_layout
 
@@ -2109,6 +2256,14 @@ Optional
 \end_layout
 
 \begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
     <metadata-charset>ISO-8859-1</metadata-charset>
 \end_layout
 
@@ -2131,6 +2286,14 @@ Required (if javascript support is enabled)
 \end_layout
 
 \begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
     <script>/path/to/my/import/script.js</script>
 \end_layout
 
@@ -2150,6 +2313,14 @@ ${prefix}/share/mediatomb/js/import.js, where ${prefix} is your installation
 
 \begin_layout Paragraph*
 Optional
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
 \end_layout
 
 \begin_layout Code
@@ -2199,6 +2370,14 @@ Optional
 \end_layout
 
 \begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
         <directory location="/media" mode="timed" interval="15" 
 \end_layout
 
@@ -2219,6 +2398,14 @@ Required
 \end_layout
 
 \begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
             location="/monitored/directory"
 \end_layout
 
@@ -2228,6 +2415,14 @@ Absolute path to the directory that shall be monitored.
 
 \begin_layout Paragraph*
 Required
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
 \end_layout
 
 \begin_layout Code
@@ -2252,6 +2447,14 @@ timed
 \end_layout
 
 \begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
             interval="timed"
 \end_layout
 
@@ -2261,6 +2464,14 @@ Scan interval in seconds.
 
 \begin_layout Paragraph*
 Required
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
 \end_layout
 
 \begin_layout Code
@@ -2281,6 +2492,14 @@ Required
 \end_layout
 
 \begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
             recursive="no"
 \end_layout
 
@@ -2291,6 +2510,14 @@ Values of "yes" or "no" are allowed, specifies if autoscan shall monitor
 
 \begin_layout Paragraph*
 Optional
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
 \end_layout
 
 \begin_layout Code
@@ -2348,6 +2575,14 @@ Optional
 \end_layout
 
 \begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
         <extension-mimetype ignore-unknown="no"> 
 \end_layout
 
@@ -2357,6 +2592,14 @@ This section holds the filename extension to mimetype mappings.
 
 \begin_layout Paragraph*
 Optional
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
 \end_layout
 
 \begin_layout Code
@@ -2379,6 +2622,14 @@ Default:
 
 \begin_layout Paragraph*
 Optional
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
 \end_layout
 
 \begin_layout Code
@@ -2406,6 +2657,14 @@ Optional
 \end_layout
 
 \begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
         <mimetype-upnpclass> 
 \end_layout
 
@@ -2416,6 +2675,14 @@ This section holds the mimetype to upnp:class mappings.
 
 \begin_layout Paragraph*
 Optional
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
 \end_layout
 
 \begin_layout Code
@@ -2504,6 +2771,14 @@ Optional
 \end_layout
 
 \begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
             <auxdata>
 \end_layout
 
@@ -2516,6 +2791,14 @@ Currently only adding keywords to auxdata is supported.
 
 \begin_layout Paragraph*
 Optional
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
 \end_layout
 
 \begin_layout Code
@@ -2558,6 +2841,14 @@ Optional
 \end_layout
 
 \begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
         <libextractor> 
 \end_layout
 
@@ -2567,6 +2858,14 @@ Options for the extractor library.
 
 \begin_layout Paragraph*
 Optional
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
 \end_layout
 
 \begin_layout Code
@@ -2580,6 +2879,14 @@ Currently only adding keywords to auxdata is supported.
 
 \begin_layout Paragraph*
 Optional
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
 \end_layout
 
 \begin_layout Code
