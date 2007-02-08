@@ -1540,47 +1540,75 @@ Ref<AutoscanList> SQLStorage::getAutoscanList(scan_mode_t scanmode)
     Ref<SQLRow> row;
     while((row = res->nextRow()) != nil)
     {
-        int objectID = INVALID_OBJECT_ID;
-        String objectIDstr = row->col(1);
-        if (string_ok(objectIDstr))
-            objectID = objectIDstr.toInt();
-        int storageID = row->col(0).toInt();
-        
-        String location;
-        if (objectID == INVALID_OBJECT_ID)
-            location = row->col(9);
+        Ref<AutoscanDirectory> dir = _fillAutoscanDirectory(row);
+        if (dir == nil)
+            removeAutoscanDirectory(row->col(0).toInt());
         else
-        {
-            char prefix;
-            location = stripLocationPrefix(&prefix, row->col(10));
-            if (prefix != LOC_DIR_PREFIX)
-            {
-                removeAutoscanDirectory(storageID);
-                continue;
-            }
-        }
-        
-        scan_level_t level = AutoscanDirectory::remapScanlevel(row->col(2));
-        scan_mode_t mode = AutoscanDirectory::remapScanmode(row->col(3));
-        bool recursive = remapBool(row->col(4));
-        bool hidden = remapBool(row->col(5));
-        bool persistent = remapBool(row->col(8));
-        int interval = 0;
-        if (mode == TimedScanMode)
-            interval = row->col(6).toInt();
-        time_t last_modified = row->col(7).toLong();
-        
-        log_debug("adding autoscan location: %s; recursive: %d\n", location.c_str(), recursive);
-        
-        Ref<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, persistent, -1, interval, hidden));
-        dir->setObjectID(objectID);
-        dir->setStorageID(storageID);
-        dir->setCurrentLMT(last_modified);
-        dir->updateLMT();
-        ret->add(dir);
+            ret->add(dir);
+    }
+    return ret;
+}
+
+Ref<AutoscanDirectory> SQLStorage::getAutoscanDirectory(int objectID)
+{
+    #define FLD(field) << TQD('a',field) <<
+    Ref<StringBuffer> q(new StringBuffer());
+    *q << "SELECT " FLD("id") ',' FLD("obj_id") ',' FLD("scan_level") ','
+       FLD("scan_mode") ',' FLD("recursive") ',' FLD("hidden") ','
+       FLD("interval") ',' FLD("last_modified") ',' FLD("persistent") ','
+       FLD("location") ',' << TQD('t',"location")
+       << " FROM " << TQ(AUTOSCAN_TABLE) << ' ' << TQ('a')
+       << " LEFT JOIN " << TQ(CDS_OBJECT_TABLE) << ' ' << TQ('t')
+       << " ON " FLD("obj_id") '=' << TQD('t',"id")
+       << " WHERE " << TQD('t',"id") << '=' << quote(objectID);
+    Ref<SQLResult> res = select(q);
+    if (res == nil)
+        throw _StorageException(_("query error while fetching autoscan"));
+    Ref<AutoscanList> ret(new AutoscanList());
+    Ref<SQLRow> row = res->nextRow();
+    if (row == nil)
+        return nil;
+    else
+        return _fillAutoscanDirectory(row);
+}
+
+Ref<AutoscanDirectory> SQLStorage::_fillAutoscanDirectory(Ref<SQLRow> row)
+{
+    int objectID = INVALID_OBJECT_ID;
+    String objectIDstr = row->col(1);
+    if (string_ok(objectIDstr))
+        objectID = objectIDstr.toInt();
+    int storageID = row->col(0).toInt();
+    
+    String location;
+    if (objectID == INVALID_OBJECT_ID)
+        location = row->col(9);
+    else
+    {
+        char prefix;
+        location = stripLocationPrefix(&prefix, row->col(10));
+        if (prefix != LOC_DIR_PREFIX)
+            return nil;
     }
     
-    return ret;
+    scan_level_t level = AutoscanDirectory::remapScanlevel(row->col(2));
+    scan_mode_t mode = AutoscanDirectory::remapScanmode(row->col(3));
+    bool recursive = remapBool(row->col(4));
+    bool hidden = remapBool(row->col(5));
+    bool persistent = remapBool(row->col(8));
+    int interval = 0;
+    if (mode == TimedScanMode)
+        interval = row->col(6).toInt();
+    time_t last_modified = row->col(7).toLong();
+    
+    //log_debug("adding autoscan location: %s; recursive: %d\n", location.c_str(), recursive);
+    
+    Ref<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, persistent, -1, interval, hidden));
+    dir->setObjectID(objectID);
+    dir->setStorageID(storageID);
+    dir->setCurrentLMT(last_modified);
+    dir->updateLMT();
+    return dir;
 }
 
 void SQLStorage::addAutoscanDirectory(Ref<AutoscanDirectory> adir)

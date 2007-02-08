@@ -215,6 +215,7 @@ public:
     /// \param objectId the object id to check
     /// \return 0 if the given id is no autoscan start point, 1 if it is a non-persistent one, 2 if it is a persistent on
     virtual int getAutoscanDirectoryType(int objectId) = 0;
+    virtual zmm::Ref<AutoscanDirectory> getAutoscanDirectory(int objectID) = 0;
     virtual void autoscanUpdateLM(zmm::Ref<AutoscanDirectory> adir) = 0;
     
     virtual void shutdown() = 0;

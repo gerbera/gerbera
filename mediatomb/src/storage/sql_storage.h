@@ -134,6 +134,7 @@ public:
     virtual void removeAutoscanDirectory(int autoscanID);
     virtual int getAutoscanDirectoryType(int objectId);
     virtual void autoscanUpdateLM(zmm::Ref<AutoscanDirectory> adir);
+    virtual zmm::Ref<AutoscanDirectory> getAutoscanDirectory(int objectID);
     
     virtual void shutdown() = 0;
     
@@ -201,6 +202,7 @@ private:
     /* helpers for autoscan */
     int _getAutoscanObjectID(int autoscanID);
     void _autoscanChangePersistentFlag(int objectID, bool persistent);
+    zmm::Ref<AutoscanDirectory> _fillAutoscanDirectory(zmm::Ref<SQLRow> row);
     
     /* location hash helpers */
     zmm::String addLocationPrefix(char prefix, zmm::String path);
