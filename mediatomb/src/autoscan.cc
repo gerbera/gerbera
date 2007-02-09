@@ -164,6 +164,32 @@ void AutoscanList::remove(int id)
     }
 }
 
+/*
+int AutoscanList::removeByObjectID(int objectID)
+{
+    AUTOLOCK(mutex);
+
+    for (int i = 0; i < list->size(); i++)
+    {
+        if (list->get(i) != nil && objectID == list->get(i)->getObjectID())
+        {
+            Ref<AutoscanDirectory> dir = list->get(i);
+            dir->setScanID(INVALID_SCAN_ID);
+            if (i == list->size()-1)
+            {
+                list->removeUnordered(i);
+            }
+            else
+            {
+                list->set(nil, i);
+            }
+            return i;
+        }
+    }
+    return INVALID_SCAN_ID;
+}
+*/
+
 int AutoscanList::remove(String location)
 {
     AUTOLOCK(mutex);
@@ -263,6 +289,15 @@ void AutoscanList::subscribeDir(zmm::Ref<TimerSubscriber> obj, int id, bool once
     timer->addTimerSubscriber(obj, dir->getInterval(), dir->getScanID(), once);
 }
 */
+
+void AutoscanDirectory::setLocation(String location)
+{
+    if (this->location != nil)
+        this->location = location;
+    else
+        throw _Exception(_("UNALLOWED LOCATION CHANGE!"));
+
+}
 
 String AutoscanDirectory::mapScanmode(scan_mode_t scanmode)
 {

@@ -112,8 +112,7 @@ void web::autoscan::process()
             try
             {
             */
-            cm->addAutoscanDirectory(autoscan);
-            storage->addAutoscanDirectory(autoscan);
+            cm->setAutoscanDirectory(autoscan);
             SessionManager::getInstance()->containerChangedUI(objectID);
             /* why was this here??
             }
@@ -135,9 +134,7 @@ void web::autoscan::process()
             || obj->isVirtual())
             throw _Exception(_("tried to remove an illegal object (id) from the list of the autoscan directories"));
         
-        storage->removeAutoscanDirectoryByObjectID(objID);
-        cm->removeAutoscanDirectory(obj->getLocation());
-        SessionManager::getInstance()->containerChangedUI(objID);
+        cm->removeAutoscanDirectory(objID);
     }
     else if (action == "list")
     {

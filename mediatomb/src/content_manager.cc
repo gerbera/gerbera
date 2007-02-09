@@ -1348,30 +1348,26 @@ Ref<AutoscanDirectory> ContentManager::getAutoscanDirectory(int scanID, scan_mod
     return nil;
 }
 
-int ContentManager::addAutoscanDirectory(Ref<AutoscanDirectory> dir)
-{
-    int scanID = INVALID_SCAN_ID;
-    if (dir->getScanMode() == TimedScanMode)
-    {
-        scanID = autoscan_timed->add(dir);
-        timerNotify(scanID);
-    }
-   
-    return scanID;
-}
-
 void ContentManager::removeAutoscanDirectory(int scanID, scan_mode_t scanMode)
 {
     if (scanMode == TimedScanMode)
     {
+        Ref<Storage> storage = Storage::getInstance();
+        Ref<AutoscanDirectory> adir = autoscan_timed->get(scanID);
+        if (adir == nil)
+            return;
+
         autoscan_timed->remove(scanID);
+        storage->removeAutoscanDirectory(adir->getStorageID());
         
         // if 3rd parameter is true: won't fail if scanID doesn't exist
         Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), scanID, true);
+
     }
     
 }
 
+/*
 void ContentManager::removeAutoscanDirectory(String location)
 {
     int scanID;
@@ -1382,20 +1378,46 @@ void ContentManager::removeAutoscanDirectory(String location)
     }
     // else <other removes... (w/o removeTimerSubscriber!)>
 }
+*/
 
-void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir, scan_mode_t scanMode)
+void ContentManager::removeAutoscanDirectory(int objectID)
 {
-    if (dir->getScanID() == INVALID_SCAN_ID)
-    {
-        addAutoscanDirectory(dir);
-        return;
-    }
+    Ref<Storage> storage = Storage::getInstance();
+    Ref<AutoscanDirectory> adir = storage->getAutoscanDirectory(objectID);
+    if (adir == nil)
+        throw _Exception(_("can not remove autoscan directory - was not an autoscan"));
 
-    AUTOLOCK(mutex);
-    Ref<AutoscanDirectory> original = getAutoscanDirectory(dir->getScanID(), scanMode);
+    if (adir->getScanMode() == TimedScanMode)
+    {
+        int scanID = autoscan_timed->remove(adir->getLocation());
+        storage->removeAutoscanDirectoryByObjectID(objectID);
+        Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), scanID, true);
+    }
+}
+
+void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
+{
+    Ref<Storage> storage = Storage::getInstance();
+    Ref<AutoscanDirectory> original = storage->getAutoscanDirectory(dir->getObjectID());
+
+    // adding a new autoscan directory
     if (original == nil)
     {
-        ///\todo what do we do here? obviously the ID is no longer valid, try to add or fail?
+        int scanID = INVALID_SCAN_ID;
+        if (dir->getScanMode() == TimedScanMode)
+        {
+            scanID = autoscan_timed->add(dir);
+            Ref<CdsObject> obj = storage->loadObject(dir->getObjectID());
+            if (obj == nil
+                    || ! IS_CDS_CONTAINER(obj->getObjectType())
+                    || obj->isVirtual())
+                throw _Exception(_("tried to remove an illegal object (id) from the list of the autoscan directories"));
+
+            dir->setLocation(obj->getLocation());
+            storage->addAutoscanDirectory(dir);
+            timerNotify(scanID);
+            SessionManager::getInstance()->containerChangedUI(dir->getObjectID());
+        }
         return;
     }
 
@@ -1417,6 +1439,10 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir, scan_mode_
     original->setHidden(dir->getHidden());
     original->setRecursive(dir->getRecursive());
     original->setInterval(dir->getInterval());
+
+    storage->updateAutoscanDirectory(original);
+
+    SessionManager::getInstance()->containerChangedUI(original->getObjectID());
 
     // any update forces an immediate scan, the timer subscription will be handled
     // by CMRescanDirectoryTask and will be done automatically after the scan

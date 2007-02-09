@@ -71,11 +71,17 @@ public:
     void addList(zmm::Ref<AutoscanList> list);
 
     zmm::Ref<AutoscanDirectory> get(int id);
+
+    zmm::Ref<AutoscanDirectory> get(zmm::String location);
     
     int size() { return list->size(); }
-    
+   
+    /// \brief removes the AutoscanDirectory given by its scan ID
     void remove(int id);
-    
+/*
+    /// \brief removes the AutoscanDirectory given by its object ID
+    int removeByObjectID(int objectID);
+*/    
     /// \brief removes the AutoscanDirectory with the given location
     /// \param location the location to remove
     /// \return the scanID, that was removed; if nothing removed: INVALID_SCAN_ID
@@ -134,6 +140,9 @@ public:
     void setStorageID(int storageID) { this->storageID = storageID; }
 
     int getStorageID() { return storageID; }
+
+    /// \brief The location can only be set once! 
+    void setLocation(zmm::String location);
 
     zmm::String getLocation() { return location; }
 

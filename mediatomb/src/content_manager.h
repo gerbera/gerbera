@@ -239,16 +239,16 @@ public:
 
     /// \brief Removes an AutoscanDirectrory (found by scanID) from the watch list.
     void removeAutoscanDirectory(int scanID, scan_mode_t scanMode);
+/*
     /// \brief Removes an AutoscanDirectrory (found by location) from the watch list.
     void removeAutoscanDirectory(zmm::String location);
+*/    
+    /// \brief Removes an AutoscanDirectory (by objectID) from the watch list.
+    void removeAutoscanDirectory(int objectID);
  
-    /// \brief Add an autoscan directory to the watch list.
-    int addAutoscanDirectory(zmm::Ref<AutoscanDirectory> dir);
-
-    /// \brief Update autoscan parameters for an existing autoscan directory
-    /// \param dir it is important to set the correct scanID!
-    /// \param scanMode this is the scanMode of the original directory
-    void setAutoscanDirectory(zmm::Ref<AutoscanDirectory> dir, scan_mode_t scanMode);
+    /// \brief Update autoscan parameters for an existing autoscan directory 
+    /// or add a new autoscan directory
+    void setAutoscanDirectory(zmm::Ref<AutoscanDirectory> dir);
 
 
     /// \brief instructs ContentManager to reload scripting environment
