@@ -215,9 +215,20 @@ public:
     /// \param objectId the object id to check
     /// \return 0 if the given id is no autoscan start point, 1 if it is a non-persistent one, 2 if it is a persistent on
     virtual int getAutoscanDirectoryType(int objectId) = 0;
+    
+    /// \brief returns the AutoscanDirectory for the given objectID or nil if
+    /// it's not an autoscan start point - scan id will be invalid
+    /// \param objectID the object id to get the AutoscanDirectory for
+    /// \return nil if the given id is no autoscan start point,
+    /// or the matching AutoscanDirectory
     virtual zmm::Ref<AutoscanDirectory> getAutoscanDirectory(int objectID) = 0;
+    
+    /// \brief updates the last modified info for the given AutoscanDirectory
+    /// in the database
+    /// \param adir the AutoscanDirectory to be updated
     virtual void autoscanUpdateLM(zmm::Ref<AutoscanDirectory> adir) = 0;
     
+    /// \brief shutdown the Storage with its possible threads
     virtual void shutdown() = 0;
     
     /// \brief Ensures that a container given by it's location on disk is

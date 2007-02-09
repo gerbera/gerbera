@@ -1603,7 +1603,7 @@ Ref<AutoscanDirectory> SQLStorage::_fillAutoscanDirectory(Ref<SQLRow> row)
     
     //log_debug("adding autoscan location: %s; recursive: %d\n", location.c_str(), recursive);
     
-    Ref<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, persistent, -1, interval, hidden));
+    Ref<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, persistent, INVALID_SCAN_ID, interval, hidden));
     dir->setObjectID(objectID);
     dir->setStorageID(storageID);
     dir->setCurrentLMT(last_modified);
