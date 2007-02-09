@@ -63,6 +63,25 @@ MediaTomb should work with any UPnP compliant MediaRenderer, please tell
  at the Supported Devices list for more information.
 \end_layout
 
+\begin_layout Paragraph*
+WARNING! 
+\end_layout
+
+\begin_layout Standard
+The server has an integrated filesystem browser in the UI, that means that
+ anyone who has access to the UI can browse your filesystem (with user permissio
+ns under which the server is running) and also download your data! If you
+ want maximum security - disable the UI completely! Account authentication
+ offers simple protection that might hold back your kids, but it is not
+ secure enough for use in an untrusted environment!
+\end_layout
+
+\begin_layout Description
+Note: since the server is meant to be used in a home LAN environment the
+ UI is enabled by default and accounts are deactivated, thus allowing anyone
+ on your network to connect to the user interface.
+\end_layout
+
 \begin_layout Subsection
 Currently Supported Features
 \end_layout
@@ -85,12 +104,13 @@ automatic directory rescans
 \end_layout
 
 \begin_layout Itemize
-sophisticated web UI with a tree view of the database, allowing to add/remove/ed
-it/browse your media
+sophisticated web UI with a tree view of the database and the filesystem,
+ allowing to add/remove/edit/browse your media
 \end_layout
 
 \begin_layout Itemize
-support for external URLs
+support for external URLs (create links to internet content and serve them
+ via UPnP to your renderer)
 \end_layout
 
 \begin_layout Itemize
@@ -1868,6 +1888,33 @@ This will limit title and description length of containers and items in
 UI Settings
 \end_layout
 
+\begin_layout Paragraph*
+WARNING! 
+\end_layout
+
+\begin_layout Standard
+The server has an integrated filesystem browser, that means that anyone
+ who has access to the UI can browse your filesystem (with user permissions
+ under which the server is running) and also download your data! If you
+ want maximum security - disable the UI completely! Account authentication
+ offers simple protection that might hold back your kids, but it is not
+ secure enough for use in an untrusted environment!
+\end_layout
+
+\begin_layout Description
+Note: since the server is meant to be used in a home LAN environment the
+ UI is enabled by default and accounts are deactivated, thus allowing anyone
+ on your network to connect to the user interface.
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
 \begin_layout Code
     <ui enabled="yes" poll-interval="2" poll-when-idle="no"/>
 \end_layout
@@ -1883,7 +1930,27 @@ This section defines various user interface settings.
 \end_layout
 
 \begin_layout Code
-enabled = "yes"
+
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+        enabled="yes"
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: yes
 \end_layout
 
 \begin_layout Standard
@@ -1891,18 +1958,64 @@ Enables or disables the web user interface, change to "yes" in order to
  enable it.
 \end_layout
 
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+        poll-interval="2" 
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: 2
+\end_layout
+
 \begin_layout Standard
 The poll-interval is an integer value which specifies how often the UI will
  poll for tasks.
  The interval is specified in seconds, only values greater than zero are
  allowed.
- This attribute is optional, the default interval is 2 seconds.
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+        poll-when-idle="no"
 \end_layout
 
 \begin_layout Standard
-The poll-when-idle attribute is optional and is set to "no" by default.
- It influences the behavior of displaying current tasks: - when the user
- does something in the UI (i.e.
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: no
+\end_layout
+
+\begin_layout Standard
+The poll-when-idle attribute influences the behavior of displaying current
+ tasks: - when the user does something in the UI (i.e.
  clicks around) we always poll for the current task and will display it
  - if a task is active, we will continue polling in the background and update
  the current task view accordingly - when there is no active task (i.e.
@@ -1934,10 +2047,6 @@ removing items or containers
 automatic rescans 
 \end_layout
 
-\begin_layout Paragraph*
-Required
-\end_layout
-
 \begin_layout Code
 
 \end_layout
@@ -1951,61 +2060,72 @@ Required
 \end_layout
 
 \begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+This section holds various account settings.
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+                  enabled="yes"
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: yes
+\end_layout
+
+\begin_layout Standard
 Specifies if accounts are enabled or disabled.
- The session-timeout specifies the timeout interval in minutes.
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+                  session-timeout="30"
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: 30
+\end_layout
+
+\begin_layout Standard
+The session-timeout attribute specifies the timeout interval in minutes.
  The server checks every five minutes for sessions that have timed out,
  therefore in the worst case the session times out after session-timeout
  + 5 minutes.
 \end_layout
 
 \begin_layout Standard
-
-\emph on
-Default: 
-\emph default
-enabled=
-\begin_inset Quotes srd
-\end_inset
-
-no
-\emph on
-
-\begin_inset Quotes srd
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Default:
-\emph default
- session-timeout=
-\begin_inset Quotes srd
-\end_inset
-
-30
-\begin_inset Quotes srd
-\end_inset
-
- minutes
-\end_layout
-
-\begin_layout Standard
 Accounts can be defined as shown below:
-\end_layout
-
-\begin_layout Paragraph*
-Optional
-\end_layout
-
-\begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-
 \end_layout
 
 \begin_layout Code
@@ -2013,12 +2133,14 @@ Optional
 \end_layout
 
 \begin_layout Standard
-There can be multiple users, however this is mainly a feature for the future.
- Right now there are no per-user permissions.
+
+\emph on
+Optional
 \end_layout
 
-\begin_layout Paragraph*
-Optional
+\begin_layout Standard
+There can be multiple users, however this is mainly a feature for the future.
+ Right now there are no per-user permissions.
 \end_layout
 
 \begin_layout Code
@@ -2034,16 +2156,20 @@ Optional
 \end_layout
 
 \begin_layout Standard
-This sets the default number of items per page that will be shown when browsing
- the database in the web UI.
+
+\emph on
+Optional
 \end_layout
 
 \begin_layout Standard
 
 \emph on
-Default:
-\emph default
- 25
+Default: 25
+\end_layout
+
+\begin_layout Standard
+This sets the default number of items per page that will be shown when browsing
+ the database in the web UI.
 \end_layout
 
 \begin_layout Standard
@@ -2067,6 +2193,12 @@ The values for the items per page drop down menu can be defined in the following
             <option>100</option>
 \end_layout
 
+\begin_layout Standard
+
+\emph on
+Default: 10, 25, 50, 100
+\end_layout
+
 \begin_layout Description
 Note: this list must contain the default value, i.e.
  if you define a default value of 25, then one of the <option> tags must
@@ -2074,24 +2206,18 @@ Note: this list must contain the default value, i.e.
  
 \end_layout
 
-\begin_layout Standard
-
-\emph on
-Default:
-\emph default
- 10, 25, 50, 100
-\end_layout
-
 \begin_layout Subsubsection
 Database Settings
 \end_layout
 
-\begin_layout Paragraph*
-Required
-\end_layout
-
 \begin_layout Code
     <storage driver="..."> 
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Required
 \end_layout
 
 \begin_layout Standard
@@ -2104,19 +2230,7 @@ Sqlite3 is defined as follows:
 \end_layout
 
 \begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-
-\end_layout
-
-\begin_layout Code
     <storage driver="sqlite3">
-\end_layout
-
-\begin_layout Paragraph*
-Optional
 \end_layout
 
 \begin_layout Code
@@ -2131,13 +2245,10 @@ Optional
         <database-file>mediatomb.db</database-file>
 \end_layout
 
-\begin_layout Code
-
-\end_layout
-
 \begin_layout Standard
-The database location is relative to the server's home, if the database
- does not exist it will be created automatically.
+
+\emph on
+Optional
 \end_layout
 
 \begin_layout Standard
@@ -2145,7 +2256,14 @@ The database location is relative to the server's home, if the database
 \emph on
 Default:
 \emph default
- mediatomb.db
+ 
+\emph on
+mediatomb.db
+\end_layout
+
+\begin_layout Standard
+The database location is relative to the server's home, if the sqlite database
+ does not exist it will be created automatically.
 \end_layout
 
 \begin_layout Standard
@@ -2176,6 +2294,10 @@ MySQL is defined as follows:
     </storage> 
 \end_layout
 
+\begin_layout Standard
+Ask Leo for more information:)
+\end_layout
+
 \begin_layout Subsection
 Import Settings
 \end_layout
@@ -2184,20 +2306,18 @@ Import Settings
 The import settings define various options on how to aggregate the content.
 \end_layout
 
-\begin_layout Standard
-The section is identified by the import tag:
-\end_layout
-
-\begin_layout Paragraph*
-Required
-\end_layout
-
 \begin_layout Code
 <import hidden-files="no">
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Standard
+
+\emph on
 Optional
+\end_layout
+
+\begin_layout Standard
+This tag defines the import section.
 \end_layout
 
 \begin_layout Code
@@ -2205,21 +2325,21 @@ Optional
 \end_layout
 
 \begin_layout Standard
-This attribute defines if files starting with a dot will be imported into
- the database.
- Autoscan can override this attribute on a per directory basis.
+
+\emph on
+Optional
 \end_layout
 
 \begin_layout Standard
 
 \emph on
-Default: 
-\emph default
-no - do not import hidden files
+Default: no
 \end_layout
 
-\begin_layout Paragraph*
-Optional
+\begin_layout Standard
+This attribute defines if files starting with a dot will be imported into
+ the database.
+ Autoscan can override this attribute on a per directory basis.
 \end_layout
 
 \begin_layout Code
@@ -2235,24 +2355,28 @@ Optional
 \end_layout
 
 \begin_layout Standard
-Defines the charset of the filesystem.
- For example, if you have filenames in Cyrillic KOI8-R encoding, then you
- should specify that here.
- The server uses UTF-8 for UPnP and for the web UI, this import parameter
- will help you to correctly import your data.
+
+\emph on
+Optional
 \end_layout
 
 \begin_layout Standard
 
 \emph on
-Default: 
+Default:
 \emph default
+ 
+\emph on
 if nl_langinfo() function is present, this setting will be auto detected
  based on your system locale, else set to ISO-8859-1
 \end_layout
 
-\begin_layout Paragraph*
-Optional
+\begin_layout Standard
+Defines the charset of the filesystem.
+ For example, if you have filenames in Cyrillic KOI8-R encoding, then you
+ should specify that here.
+ The server uses UTF-8 internally, this import parameter will help you to
+ correctly import your data.
 \end_layout
 
 \begin_layout Code
@@ -2268,21 +2392,25 @@ Optional
 \end_layout
 
 \begin_layout Standard
-Same as above, but defines the charset of the metadata (i.e.
- id3 tags, Exif information, etc.)
+
+\emph on
+Optional
 \end_layout
 
 \begin_layout Standard
 
 \emph on
-Default: 
+Default:
 \emph default
+ 
+\emph on
 if nl_langinfo() function is present, this setting will be auto detected
  based on your system locale, else set to ISO-8859-1
 \end_layout
 
-\begin_layout Paragraph*
-Required (if javascript support is enabled)
+\begin_layout Standard
+Same as above, but defines the charset of the metadata (i.e.
+ id3 tags, Exif information, etc.)
 \end_layout
 
 \begin_layout Code
@@ -2298,21 +2426,25 @@ Required (if javascript support is enabled)
 \end_layout
 
 \begin_layout Standard
-Points to the script invoked upon media import.
- For more details read doc/scripting-intro.txt
+
+\emph on
+Required if javascript support is enabled
 \end_layout
 
 \begin_layout Standard
 
 \emph on
-Default: 
+Default:
 \emph default
+ 
+\emph on
 ${prefix}/share/mediatomb/js/import.js, where ${prefix} is your installation
  prefix directory.
 \end_layout
 
-\begin_layout Paragraph*
-Optional
+\begin_layout Standard
+Points to the script invoked upon media import.
+ For more details read doc/scripting-intro.txt
 \end_layout
 
 \begin_layout Code
@@ -2328,15 +2460,19 @@ Optional
 \end_layout
 
 \begin_layout Standard
-Specifies an alternative file for filemagic, containing mimetype information.
+Optional
 \end_layout
 
 \begin_layout Standard
-
-\emph on
 Default:
+\emph on
+ 
 \emph default
- none
+none
+\end_layout
+
+\begin_layout Standard
+Specifies an alternative file for filemagic, containing mimetype information.
 \end_layout
 
 \begin_layout Subsubsection
@@ -2353,20 +2489,18 @@ This section defines persistent autoscan directories.
  available/gets created again.
 \end_layout
 
-\begin_layout Paragraph*
-Optional
-\end_layout
-
 \begin_layout Code
     <autoscan>
 \end_layout
 
 \begin_layout Standard
-Specifies a list of default autoscan directories.
+
+\emph on
+Optional
 \end_layout
 
-\begin_layout Paragraph*
-Optional
+\begin_layout Standard
+Specifies a list of default autoscan directories.
 \end_layout
 
 \begin_layout Code
@@ -2386,6 +2520,12 @@ Optional
 \end_layout
 
 \begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
 Defines an autoscan directory and it's parameters.
 \end_layout
 
@@ -2393,40 +2533,44 @@ Defines an autoscan directory and it's parameters.
 The attributes specify various autoscan options:
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+                   location="/monitored/directory"
+\end_layout
+
+\begin_layout Standard
+
+\emph on
 Required
-\end_layout
-
-\begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-            location="/monitored/directory"
 \end_layout
 
 \begin_layout Standard
 Absolute path to the directory that shall be monitored.
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+                   mode="timed"
+\end_layout
+
+\begin_layout Standard
+
+\emph on
 Required
-\end_layout
-
-\begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-            mode="timed"
 \end_layout
 
 \begin_layout Standard
@@ -2434,8 +2578,22 @@ Scan mode, currently only "timed" is supported, future releases will introduce
  other modes - like inotify.
 \end_layout
 
-\begin_layout Paragraph*
-Required (for mode 
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+                   interval="timed"
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Required for 
 \begin_inset Quotes sld
 \end_inset
 
@@ -2443,39 +2601,29 @@ timed
 \begin_inset Quotes srd
 \end_inset
 
-)
-\end_layout
-
-\begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-            interval="timed"
+ mode
 \end_layout
 
 \begin_layout Standard
 Scan interval in seconds.
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+                   level="basic"
+\end_layout
+
+\begin_layout Standard
+
+\emph on
 Required
-\end_layout
-
-\begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-            level="basic"
 \end_layout
 
 \begin_layout Standard
@@ -2487,20 +2635,22 @@ Either "full" or "basic".
  like id3 tags and alike.
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+                   recursive="no"
+\end_layout
+
+\begin_layout Standard
+
+\emph on
 Required
-\end_layout
-
-\begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-            recursive="no"
 \end_layout
 
 \begin_layout Standard
@@ -2508,10 +2658,6 @@ Values of "yes" or "no" are allowed, specifies if autoscan shall monitor
  the given directory including all sub directories.
 \end_layout
 
-\begin_layout Paragraph*
-Optional
-\end_layout
-
 \begin_layout Code
 
 \end_layout
@@ -2521,19 +2667,22 @@ Optional
 \end_layout
 
 \begin_layout Code
-            hidden-files="no"
-\end_layout
-
-\begin_layout Standard
-Allowed values: "yes" or "no", process hidden files, overrides the hidden-files
- value in the <import/> tag.
+                   hidden-files="no"
 \end_layout
 
 \begin_layout Standard
 
 \emph on
-Default: 
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default:
 \emph default
+ 
+\emph on
 value specified in <import hidden-files=
 \begin_inset Quotes srd
 \end_inset
@@ -2543,6 +2692,11 @@ value specified in <import hidden-files=
 \end_inset
 
 />
+\end_layout
+
+\begin_layout Standard
+Allowed values: "yes" or "no", process hidden files, overrides the hidden-files
+ value in the <import/> tag.
 \end_layout
 
 \begin_layout Subsubsection
@@ -2557,21 +2711,19 @@ This section defines mimetype and upnp:class mappings, it is vital if filemagic
  skip filemagic processing for known filetypes.
 \end_layout
 
-\begin_layout Paragraph*
-Optional
-\end_layout
-
 \begin_layout Code
     <mappings>
 \end_layout
 
 \begin_layout Standard
-Defines various mapping options for importing media, currently two subsections
- are supported.
+
+\emph on
+Optional
 \end_layout
 
-\begin_layout Paragraph*
-Optional
+\begin_layout Standard
+Defines various mapping options for importing media, currently two subsections
+ are supported.
 \end_layout
 
 \begin_layout Code
@@ -2587,11 +2739,13 @@ Optional
 \end_layout
 
 \begin_layout Standard
-This section holds the filename extension to mimetype mappings.
+
+\emph on
+Optional
 \end_layout
 
-\begin_layout Paragraph*
-Optional
+\begin_layout Standard
+This section holds the filename extension to mimetype mappings.
 \end_layout
 
 \begin_layout Code
@@ -2607,9 +2761,9 @@ Optional
 \end_layout
 
 \begin_layout Standard
-If ignore-unknown is set to "yes", then only the extensions that are listed
- in this section are imported.
- 
+
+\emph on
+Optional
 \end_layout
 
 \begin_layout Standard
@@ -2617,11 +2771,15 @@ If ignore-unknown is set to "yes", then only the extensions that are listed
 \emph on
 Default:
 \emph default
- no
+ 
+\emph on
+no
 \end_layout
 
-\begin_layout Paragraph*
-Optional
+\begin_layout Standard
+If ignore-unknown is set to "yes", then only the extensions that are listed
+ in this section are imported.
+ 
 \end_layout
 
 \begin_layout Code
@@ -2634,6 +2792,12 @@ Optional
 
 \begin_layout Code
             <map from="mp3" to="audio/mpeg"/>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
 \end_layout
 
 \begin_layout Standard
@@ -2652,10 +2816,6 @@ Note: extension is case sensitive, this will probably need to be fixed.
  
 \end_layout
 
-\begin_layout Paragraph*
-Optional
-\end_layout
-
 \begin_layout Code
 
 \end_layout
@@ -2669,12 +2829,14 @@ Optional
 \end_layout
 
 \begin_layout Standard
-This section holds the mimetype to upnp:class mappings.
- 
+
+\emph on
+Optional
 \end_layout
 
-\begin_layout Paragraph*
-Optional
+\begin_layout Standard
+This section holds the mimetype to upnp:class mappings.
+ 
 \end_layout
 
 \begin_layout Code
@@ -2690,6 +2852,12 @@ Optional
 \end_layout
 
 \begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
 Specifies a mapping from a certain mimetype to upnp:class in the Content
  Directory.
  The mime type can either be entered explicitly "audio/mpeg" or using a
@@ -2701,12 +2869,14 @@ Specifies a mapping from a certain mimetype to upnp:class in the Content
 Metadata Parsing Library Options
 \end_layout
 
-\begin_layout Paragraph*
-Optional
-\end_layout
-
 \begin_layout Code
     <library-options> 
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
 \end_layout
 
 \begin_layout Standard
@@ -2754,20 +2924,26 @@ Photos/MyCamera2/Date
 etc.
 \end_layout
 
-\begin_layout Paragraph*
-Optional
+\begin_layout Code
+
 \end_layout
 
 \begin_layout Code
-        <libexif>
+ 
+\end_layout
+
+\begin_layout Code
+       <libexif>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
 \end_layout
 
 \begin_layout Standard
 Options for the exif library.
-\end_layout
-
-\begin_layout Paragraph*
-Optional
 \end_layout
 
 \begin_layout Code
@@ -2783,14 +2959,16 @@ Optional
 \end_layout
 
 \begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
 Currently only adding keywords to auxdata is supported.
  For a list of keywords/tags see the libexif documentation.
  Auxdata can be read by the import java script to gain more control over
  the media structure.
-\end_layout
-
-\begin_layout Paragraph*
-Optional
 \end_layout
 
 \begin_layout Code
@@ -2803,6 +2981,12 @@ Optional
 
 \begin_layout Code
                 <add tag="keyword"/>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
 \end_layout
 
 \begin_layout Standard
@@ -2836,28 +3020,34 @@ An sample configuration for the example described above would be:
         </libexif> 
 \end_layout
 
-\begin_layout Paragraph*
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+  
+\end_layout
+
+\begin_layout Standard
+Libextractor options are defined under this tag: 
+\end_layout
+
+\begin_layout Code
+       <libextractor>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
 Optional
-\end_layout
-
-\begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-        <libextractor> 
 \end_layout
 
 \begin_layout Standard
 Options for the extractor library.
-\end_layout
-
-\begin_layout Paragraph*
-Optional
 \end_layout
 
 \begin_layout Code
@@ -2873,12 +3063,14 @@ Optional
 \end_layout
 
 \begin_layout Standard
-Currently only adding keywords to auxdata is supported.
- For a list of keywords/tags see the libextractor documentation.
+
+\emph on
+Optional
 \end_layout
 
-\begin_layout Paragraph*
-Optional
+\begin_layout Standard
+Currently only adding keywords to auxdata is supported.
+ For a list of keywords/tags see the libextractor documentation.
 \end_layout
 
 \begin_layout Code
@@ -2891,6 +3083,12 @@ Optional
 
 \begin_layout Code
                 <add tag="keyword"/>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
 \end_layout
 
 \begin_layout Standard
@@ -3105,6 +3303,63 @@ We also support the daemon mode which allows to start the server in background,
  an unprivileged account.
  A script for starting/stopping the server is provided.
  
+\end_layout
+
+\begin_layout Section
+Legal
+\end_layout
+
+\begin_layout Paragraph*
+THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY! USE AT YOUR OWN RISK! 
+\end_layout
+
+\begin_layout Subsection
+Copyright
+\end_layout
+
+\begin_layout Paragraph*
+Copyright (C) 2005 
+\end_layout
+
+\begin_layout Standard
+Gena Batyan <bgeradz at mediatomb dot cc>,
+\end_layout
+
+\begin_layout Standard
+Sergey Bostandzhyan <jin at mediatomb dot cc> 
+\end_layout
+
+\begin_layout Paragraph*
+Copyright (C) 2006-2007
+\end_layout
+
+\begin_layout Standard
+Gena Batyan <bgeradz at mediatomb dot cc>,
+\end_layout
+
+\begin_layout Standard
+Sergey Bostandzhyan <jin at mediatomb dot cc>
+\end_layout
+
+\begin_layout Standard
+Leonhard Wimmer <leo at mediatomb dot org>
+\end_layout
+
+\begin_layout Subsection
+License
+\end_layout
+
+\begin_layout Standard
+MediaTomb is free software; you can redistribute it and/or modify it under
+ the terms of the GNU General Public License version 2 as published by the
+ Free Software Foundation.
+ MediaTomb is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE.
+ See the GNU General Public License for more details.
+ You should have received a copy of the GNU General Public License version
+ 2 along with MediaTomb; if not, write to the Free Software Foundation,
+ Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA 
 \end_layout
 
 \begin_layout Section
