@@ -53,6 +53,7 @@ _DIST_FILES_ICONS = \
 ./icons/mt-icon32.png \
 ./icons/mt-icon32.bmp \
 ./icons/blank.png \
+./icons/edit_autoscan.png \
 ./icons/blank.gif
 
 _DIST_FILES_JS = \
