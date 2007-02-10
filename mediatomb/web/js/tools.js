@@ -29,6 +29,16 @@
 
 var INACTIVITY_TIMEOUT = 5000;
 
+/*
+function genericCallback(ajaxRequest)
+{
+    var xml = ajaxRequest.responseXML;
+    if (! errorCheck(xml))
+        return;
+    //last_update = new Date().getTime();
+}
+*/
+
 function link(req_type, param, get_update_ids)
 {
     var url = "/content/interface?req_type="+ encodeURI(req_type) +"&sid="+ SID;

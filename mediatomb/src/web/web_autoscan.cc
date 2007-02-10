@@ -56,22 +56,65 @@ void web::autoscan::process()
     
     Ref<Storage> storage = Storage::getInstance();
     Ref<ContentManager> cm = ContentManager::getInstance();
-        
-    if (action == "add")
+    
+    if (action == "as_edit_load")
     {
-        bool fromFs = boolParam(_("fromFs"));
-        //int objID = intParam(_("object_id"));
+        bool fromFs = boolParam(_("from_fs"));
+        Ref<Element> autoscan (new Element(_("autoscan")));
+        root->appendChild(autoscan);
+        if (fromFs)
+        {
+            // to be finished...
+            autoscan->appendTextChild(_("from_fs"), _("1"));
+            autoscan->appendTextChild(_("object_id"), param(_("object_id")));
+            autoscan->appendTextChild(_("scan_level"), _("none"));
+            autoscan->appendTextChild(_("recursive"), _("0"));
+            autoscan->appendTextChild(_("hidden"), _("0"));
+            autoscan->appendTextChild(_("interval"), _("1800"));
+        }
+        else
+        {
+            autoscan->appendTextChild(_("from_fs"), _("0"));
+            autoscan->appendTextChild(_("object_id"), param(_("object_id")));
+            Ref<AutoscanDirectory> adir = storage->getAutoscanDirectory(intParam(_("object_id")));
+            if (adir == nil)
+            {
+                autoscan->appendTextChild(_("scan_level"), _("none"));
+                autoscan->appendTextChild(_("recursive"), _("0"));
+                autoscan->appendTextChild(_("hidden"), _("0"));
+                autoscan->appendTextChild(_("interval"), _("1800"));
+            }
+            else
+            {
+                autoscan->appendTextChild(_("scan_level"), AutoscanDirectory::mapScanlevel(adir->getScanLevel()));
+                autoscan->appendTextChild(_("recursive"), (adir->getRecursive() ? _("1") : _("0") ));
+                autoscan->appendTextChild(_("hidden"), (adir->getHidden() ? _("1") : _("0") ));
+                autoscan->appendTextChild(_("interval"), String::from(adir->getInterval()));
+            }
+        }
+    }
+    else if (action == "as_edit_save")
+    {
+        bool fromFs = boolParam(_("from_fs"));
         bool recursive = boolParam(_("recursive"));
         bool hidden = boolParam(_("hidden"));
         //bool persistent = boolParam(_("persistent"));
         int interval = intParam(_("interval"), 0);
         if (interval <= 0 )
-        {
             throw _Exception(_("illegal interval given"));
+        
+        String scan_level_str = param(_("scan_level"));
+        if (scan_level_str == "none")
+        {
+            // remove...
+            if (fromFs)
+                throw _Exception(_("removing from fs is not implemented yet.."));
+            cm->removeAutoscanDirectory(intParam(_("object_id")));
         }
         else
         {
-            String scan_level_str = param(_("scan_level"));
+            // add or update
+            
             scan_level_t scan_level = AutoscanDirectory::remapScanlevel(scan_level_str);
             scan_mode_t scan_mode = TimedScanMode;
             
@@ -80,61 +123,30 @@ void web::autoscan::process()
             if (fromFs)
             {
                 location = hex_decode_string(param(_("object_id")));
-                cm->ensurePathExistence(location);
+                objectID = cm->ensurePathExistence(location);
             }
             else
             {
-                Ref<CdsObject> obj = storage->loadObject(intParam(_("object_id")));
-                if (obj == nil
-                    || ! IS_CDS_CONTAINER(obj->getObjectType())
-                    || obj->isVirtual())
-                    throw _Exception(_("tried to add an illegal object (id) as an autoscan directory"));
-                location = obj->getLocation();
-                objectID = obj->getID();
+                objectID = intParam(_("object_id"));
             }
             
-            log_debug("adding autoscan: location=%s, scan_mode=%s, scan_level=%s, recursive=%d, interval=%d, hidden=%d\n", 
-                location.c_str(), AutoscanDirectory::mapScanmode(scan_mode).c_str(),
-                AutoscanDirectory::mapScanlevel(scan_level).c_str(), recursive, interval, hidden);
+            //log_debug("adding autoscan: location=%s, scan_mode=%s, scan_level=%s, recursive=%d, interval=%d, hidden=%d\n", 
+            //    location.c_str(), AutoscanDirectory::mapScanmode(scan_mode).c_str(),
+            //    AutoscanDirectory::mapScanlevel(scan_level).c_str(), recursive, interval, hidden);
             
             Ref<AutoscanDirectory> autoscan(new AutoscanDirectory(
-                location,
+                nil, //location
                 scan_mode,
                 scan_level,
                 recursive,
                 false, // persistent
-                -1, // autoscan id - used only internally by CM
+                INVALID_SCAN_ID, // autoscan id - used only internally by CM
                 interval,
                 hidden
                 ));
-            /* 
-            
-            try
-            {
-            */
+            autoscan->setObjectID(objectID);
             cm->setAutoscanDirectory(autoscan);
-            SessionManager::getInstance()->containerChangedUI(objectID);
-            /* why was this here??
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-            */
         }
-    }
-    else if (action == "remove")
-    {
-        int objID = intParam(_("object_id"));
-        if (storage->getAutoscanDirectoryType(objID) != 1)
-            throw _Exception(_("the object id ")+objID+" is not among the list of the autoscan directories, or it was defined in config.xml");
-        Ref<CdsObject> obj = storage->loadObject(objID);
-        if (obj == nil
-            || ! IS_CDS_CONTAINER(obj->getObjectType())
-            || obj->isVirtual())
-            throw _Exception(_("tried to remove an illegal object (id) from the list of the autoscan directories"));
-        
-        cm->removeAutoscanDirectory(objID);
     }
     else if (action == "list")
     {

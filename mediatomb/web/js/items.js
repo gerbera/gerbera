@@ -343,7 +343,7 @@ function updateItems(ajaxRequest)
         
         var first = true
         first = _addLink(topRightDocument, buttons, first, "javascript:parent.addItem('"+ofId+"');", "add", iconAdd);
-        first = _addLink(topRightDocument, buttons, first, "javascript:parent.changeAutoscanDirectory('add','"+ofId+"', true);", "add as autoscan dir", iconAddAutoscan);
+        first = _addLink(topRightDocument, buttons, first, "javascript:parent.editLoadAutoscanDirectory("+ofId+"', true);", "add as autoscan dir", iconAddAutoscan);
     }
     else
     {
@@ -406,9 +406,12 @@ function updateItems(ajaxRequest)
             }
             else
             {
+                /*
                 var action = (autoscanType == "1" ? "remove" : "add");
                 var icon = (autoscanType == "1" ? iconRemoveAutoscan : iconAddAutoscan);
-                first = _addLink(topRightDocument, buttons, first,  "javascript:parent.changeAutoscanDirectory('"+action+"','"+ofId+"', false);", action+" as autoscan dir", icon);
+                */
+                var icon = iconAddAutoscan;
+                first = _addLink(topRightDocument, buttons, first,  "javascript:parent.editLoadAutoscanDirectory('"+ofId+"', false);", "change autoscan dir", icon);
             }
         }
     }
@@ -639,7 +642,7 @@ function userEditItemCallback(ajaxRequest)
     var item = xmlGetElement(xml, "item");
     updateItemAddEditFields(item);
     Element.hide(itemRoot);
-    itemRoot=rightDocument.getElementById('item_add_edit_div');
+    itemRoot = rightDocument.getElementById('item_add_edit_div');
     Element.show(itemRoot);
 }
 

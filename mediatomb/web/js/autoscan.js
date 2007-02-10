@@ -27,8 +27,10 @@
     $Id$
 */
 
-var autoscanAddId;
+var autoscanId;
 var autoscanFromFs;
+
+/* not completely finished...
 
 function showAutoscanDirs()
 {
@@ -88,49 +90,60 @@ function showAutoscanCallback(ajaxRequest)
     itemRoot.replaceChild(autoscanHTMLel, itemRoot.firstChild);
     Element.show(itemRoot);
 }
+*/
 
-function changeAutoscanDirectory(doAction, objId, fromFs)
+function editLoadAutoscanDirectory(objectId, fromFs)
 {
-    if (doAction == 'add')
-    {
-        autoscanAddId = objId;
-        autoscanFromFs = fromFs;
-        Element.hide(itemRoot);
-        itemRoot = rightDocument.getElementById('autoscan_div');
-        Element.show(itemRoot);
-    }
-    else
-    {
-        var url = link('autoscan', {action: doAction, object_id: objId}, true);
-        var myAjax = new Ajax.Request(
-            url,
-            {
-                method: 'get',
-                onComplete: changeAutoscanCallback
-            });
-    }
+    var url = link("autoscan", {action: 'as_edit_load', object_id: objectId, from_fs: fromFs}, true);
+    var myAjax = new Ajax.Request(
+        url,
+        {
+            method: 'get',
+            onComplete: editLoadAutoscanDirectoryCallback
+        });
 }
 
-function changeAutoscanCallback(ajaxRequest)
+function editLoadAutoscanDirectoryCallback(ajaxRequest)
 {
-    if (errorCheck(ajaxRequest.responseXML))
-        folderChange(selectedNode);
+    var xml = ajaxRequest.responseXML;
+    if (!errorCheck(xml)) return;
+    var autoscan = xmlGetElement(xml, "autoscan");
+    updateAutoscanEditFields(autoscan);
+    Element.hide(itemRoot);
+    itemRoot = rightDocument.getElementById('autoscan_div');
+    Element.show(itemRoot);
+}
+
+function updateAutoscanEditFields(autoscan)
+{
+    autoscanId = xmlGetElementText(autoscan, 'object_id');
+    autoscanFromFs = xmlGetElementText(autoscan, 'from_fs') == '1';
+    var elements = rightDocument.forms['autoscanForm'].elements;
+    elements['scan_level'].value = xmlGetElementText(autoscan, 'scan_level');
+    elements['recursive'].checked = xmlGetElementText(autoscan, 'recursive') == '1';
+    elements['hidden'].checked = xmlGetElementText(autoscan, 'hidden') == '1';
+    elements['interval'].value = xmlGetElementText(autoscan, 'interval');
 }
 
 function autoscanSubmit()
 {
     var form = rightDocument.forms['autoscanForm'];
     var args = new Object();
-    args['action'] = 'add';
-    args['object_id'] = autoscanAddId;
-    args['fromFs'] = (autoscanFromFs ? '1' : '0');
+    args['action'] = 'as_edit_save';
+    args['object_id'] = autoscanId;
+    args['from_fs'] = (autoscanFromFs ? '1' : '0');
     formToArray(form, args);
     var url = link('autoscan', args);
     var myAjax = new Ajax.Request(
         url,
         {
             method: 'get',
-            onComplete: changeAutoscanCallback
+            onComplete: autoscanSubmitCallback
         });
 }
 
+function autoscanSubmitCallback(ajaxRequest)
+{
+    if (errorCheck(ajaxRequest.responseXML))
+        folderChange(selectedNode);
+}

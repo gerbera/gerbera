@@ -1411,7 +1411,8 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
                     || ! IS_CDS_CONTAINER(obj->getObjectType())
                     || obj->isVirtual())
                 throw _Exception(_("tried to remove an illegal object (id) from the list of the autoscan directories"));
-
+            
+            log_debug("location: %s\n", obj->getLocation().c_str());
             if (!string_ok(obj->getLocation()))
                 throw _Exception(_("tried to add an illegal object as autoscan - no location information available!"));
 
