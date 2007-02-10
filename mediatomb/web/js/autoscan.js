@@ -120,7 +120,8 @@ function updateAutoscanEditFields(autoscan)
     autoscanId = xmlGetElementText(autoscan, 'object_id');
     autoscanFromFs = xmlGetElementText(autoscan, 'from_fs') == '1';
     var elements = rightDocument.forms['autoscanForm'].elements;
-    elements['scan_level'].value = xmlGetElementText(autoscan, 'scan_level');
+    var scan_level_checked = 'scan_level_' + xmlGetElementText(autoscan, 'scan_level');
+    elements[scan_level_checked].checked = true;
     elements['recursive'].checked = xmlGetElementText(autoscan, 'recursive') == '1';
     elements['hidden'].checked = xmlGetElementText(autoscan, 'hidden') == '1';
     elements['interval'].value = xmlGetElementText(autoscan, 'interval');
