@@ -1,0 +1,182 @@
+#LyX 1.4.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 245
+\begin_document
+\begin_header
+\textclass docbook
+\language english
+\inputencoding auto
+\fontscheme default
+\graphics default
+\paperfontsize default
+\papersize default
+\use_geometry false
+\use_amsmath 0
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes true
+\end_header
+
+\begin_body
+
+\begin_layout Title
+MediaTomb Scripting
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Standard
+MediaTomb allows you to customize the structure of how your media is being
+ presented to your renderer.
+ One of the most important features introduced since the version 0.8 are
+ the virtual containers and virtual items.
+ Let's think of possible scenarios:
+\end_layout
+
+\begin_layout Itemize
+you may want to separate your content by music, photo, video, maybe create
+ a special container with all non playable stuff
+\end_layout
+
+\begin_layout Itemize
+you may want your music to be sorted by genre, year, artist, album so you
+ can more easily find your favorite song when browsing the server
+\end_layout
+
+\begin_layout Itemize
+you want to have your photos that you took with your favorite digital camera
+ to appear in a special folder , or maybe you even want to separate the
+ photos that you took with flash-on from the ones that you made without
+ flash
+\end_layout
+
+\begin_layout Itemize
+your media player does not support video, so you do not even want to see
+ the Video container
+\end_layout
+
+\begin_layout Itemize
+it's up to your imagination :)
+\end_layout
+
+\begin_layout Standard
+The scenarios described above and much more can be achieved with the help
+ of an import script.
+\end_layout
+
+\begin_layout Section
+How It Works
+\end_layout
+
+\begin_layout Standard
+This section will give you some overview on how virtual objects work and
+ on how they are related to scripting.
+\end_layout
+
+\begin_layout Subsection
+Understanding Virtual Objects.
+\end_layout
+
+\begin_layout Standard
+When you add a file or directory to the database via the web interface several
+ things happen.
+\end_layout
+
+\begin_layout Enumerate
+The object is inserted into the PC Directory.
+ PC Directory is simply a special non-removable container.
+ Any media file added will have an entry inside the PC Directory tree.
+ PC Directory's hierarchy reflects the filesystem hierarchy All objects
+ inside the PC Directory including itself are NON-VIRTUAL objects.
+ All virtual objects may have a different title, descripting, etc., but they
+ are still references to objects in the PC-Directory.
+ That's why it is not possible to change a location of a virtual object
+ - the only exceptions are URL items and Active items.
+\end_layout
+
+\begin_layout Enumerate
+Once an item is added to the PC Directory it is forwarded to the virtual
+ object engine.
+ The virtual object engine's mission is to organize and present the media
+ database in a logical hierarchy based on the available metadata of the
+ items.
+\end_layout
+
+\begin_layout Standard
+Each UPnP server implements this so called virtual object hierarchy in a
+ different way.
+ Audio files are usually sorted by artist, album, some servers may just
+ present a view similar to the filesystem and so on.
+ Most servers have strong limitations on the structure of the virtual containers
+, they usually offer a predefined layout of data and the user has to live
+ with it.
+ In Mediatomb we try to address this shortcoming by introducing the scriptable
+ virtual object engine.
+ It is designed to be:
+\end_layout
+
+\begin_layout Itemize
+maximally flexible
+\end_layout
+
+\begin_layout Itemize
+easily customizable and extendable
+\end_layout
+
+\begin_layout Itemize
+robust and efficient
+\end_layout
+
+\begin_layout Standard
+We try to achieve these goals by embedding a scripting runtime environment
+ that allows the execution of ECMAScript-262 conform scripts better known
+ as JavaScript.
+ We are using Mozilla's JavaScript implementation called SpiderMonkey, it
+ is a stand-alone easily embeddable javascript engine, supporting JavaScript
+ versions 1.0 through 1.4.
+\end_layout
+
+\begin_layout Subsection
+Theory Of Operation
+\end_layout
+
+\begin_layout Standard
+After an item is added to the PC Directory it is automatically fed as input
+ to the import script.
+ The script then creates one or more virtual items for the given item.
+ Items created from scripts are always marked virtual.
+ 
+\end_layout
+
+\begin_layout Standard
+When the virtual object engine gets notified of an added item following
+ happens: A javascript object is created mirroring the properties of the
+ item.
+ The object is introduced to the script environment and bound to the predefined
+ variable 'orig'.
+ This way a variable orig is always defined for every script invocation
+ and represents the original data of the added item.
+ Then the script is invoked.
+\end_layout
+
+\begin_layout Standard
+In the current implementation if you modify the script you will have to
+ restart the server for the new logic to take effect.
+ Note, that the script is only triggered when new objects are added to the
+ database, also note that the script does not modify any objects that already
+ exist in the database.
+\end_layout
+
+\end_body
+\end_document
