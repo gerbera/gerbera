@@ -96,12 +96,6 @@ void web::autoscan::process()
     else if (action == "as_edit_save")
     {
         bool fromFs = boolParam(_("from_fs"));
-        bool recursive = boolParam(_("recursive"));
-        bool hidden = boolParam(_("hidden"));
-        //bool persistent = boolParam(_("persistent"));
-        int interval = intParam(_("interval"), 0);
-        if (interval <= 0 )
-            throw _Exception(_("illegal interval given"));
         
         String scan_level_str = param(_("scan_level"));
         if (scan_level_str == "none")
@@ -109,12 +103,24 @@ void web::autoscan::process()
             // remove...
             if (fromFs)
                 throw _Exception(_("removing from fs is not implemented yet.."));
-            cm->removeAutoscanDirectory(intParam(_("object_id")));
+            try
+            {
+                cm->removeAutoscanDirectory(intParam(_("object_id")));
+            }
+            catch (Exception e)
+            {
+                // didn't work, well we don't care in this case
+            }
         }
         else
         {
             // add or update
-            
+            bool recursive = boolParam(_("recursive"));
+            bool hidden = boolParam(_("hidden"));
+            //bool persistent = boolParam(_("persistent"));
+            int interval = intParam(_("interval"), 0);
+            if (interval <= 0 )
+            throw _Exception(_("illegal interval given"));
             scan_level_t scan_level = AutoscanDirectory::remapScanlevel(scan_level_str);
             scan_mode_t scan_mode = TimedScanMode;
             
