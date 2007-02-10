@@ -292,7 +292,7 @@ void AutoscanList::subscribeDir(zmm::Ref<TimerSubscriber> obj, int id, bool once
 
 void AutoscanDirectory::setLocation(String location)
 {
-    if (this->location != nil)
+    if (this->location == nil)
         this->location = location;
     else
         throw _Exception(_("UNALLOWED LOCATION CHANGE!"));

@@ -1406,15 +1406,18 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
         int scanID = INVALID_SCAN_ID;
         if (dir->getScanMode() == TimedScanMode)
         {
-            scanID = autoscan_timed->add(dir);
             Ref<CdsObject> obj = storage->loadObject(dir->getObjectID());
             if (obj == nil
                     || ! IS_CDS_CONTAINER(obj->getObjectType())
                     || obj->isVirtual())
                 throw _Exception(_("tried to remove an illegal object (id) from the list of the autoscan directories"));
 
+            if (!string_ok(obj->getLocation()))
+                throw _Exception(_("tried to add an illegal object as autoscan - no location information available!"));
+
             dir->setLocation(obj->getLocation());
             storage->addAutoscanDirectory(dir);
+            scanID = autoscan_timed->add(dir);
             timerNotify(scanID);
             SessionManager::getInstance()->containerChangedUI(dir->getObjectID());
         }
