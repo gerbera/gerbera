@@ -37,7 +37,8 @@ var iconEdit = {src: iconPath + 'stock_edit.png', width: 30, height: 20};
 var iconRemoveThis = {src: iconPath + 'remove_this.png', width: 30, height: 20};
 var iconRemoveAll = {src: iconPath + 'remove_all.png', width: 30, height: 20};
 var iconAddAutoscan = {src: iconPath + 'add_as_autoscan.png', width: 30, height: 20};
-var iconRemoveAutoscan = {src: iconPath + 'remove_autoscan.png', width: 30, height: 20};
+//var iconRemoveAutoscan = {src: iconPath + 'remove_autoscan.png', width: 30, height: 20};
+var iconEditAutoscan = {src: iconPath + 'edit_autoscan.png', width: 30, height: 20};
 
 var iconFirst = {src: iconPath + 'go-first.png', width: 32, height: 20};
 var iconPrevious = {src: iconPath + 'go-previous.png', width: 32, height: 20};

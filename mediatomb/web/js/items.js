@@ -406,12 +406,7 @@ function updateItems(ajaxRequest)
             }
             else
             {
-                /*
-                var action = (autoscanType == "1" ? "remove" : "add");
-                var icon = (autoscanType == "1" ? iconRemoveAutoscan : iconAddAutoscan);
-                */
-                var icon = iconAddAutoscan;
-                first = _addLink(topRightDocument, buttons, first,  "javascript:parent.editLoadAutoscanDirectory('"+ofId+"', false);", "change autoscan dir", icon);
+                first = _addLink(topRightDocument, buttons, first,  "javascript:parent.editLoadAutoscanDirectory('"+ofId+"', false);", "change autoscan dir", iconEditAutoscan);
             }
         }
     }

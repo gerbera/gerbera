@@ -72,9 +72,9 @@
                             </td>
                             <td>
                                     <!-- <legend>Scan Level</legend> -->
-                                    <input type="radio" name="scan_level" id="scan_level_none" value="none" checked="checked"> <label for="scan_level_none">None</label>
-                                    <input type="radio" name="scan_level" id="scan_level_basic" value="basic"> <label for="scan_level_basic">Basic</label>
-                                    <input type="radio" name="scan_level" id="scan_level_full" value="full"> <label for="scan_level_full">Full</label>
+                                    <input type="radio" name="scan_level" id="scan_level_none" value="none" checked="checked" onchange="parent.scanLevelChanged();"> <label for="scan_level_none">None</label>
+                                    <input type="radio" name="scan_level" id="scan_level_basic" value="basic" onchange="parent.scanLevelChanged();"> <label for="scan_level_basic">Basic</label>
+                                    <input type="radio" name="scan_level" id="scan_level_full" value="full" onchange="parent.scanLevelChanged();"> <label for="scan_level_full">Full</label>
                                 <!-- </fieldset> -->
                             </td>
                         </tr>

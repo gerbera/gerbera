@@ -109,6 +109,7 @@ function editLoadAutoscanDirectoryCallback(ajaxRequest)
     if (!errorCheck(xml)) return;
     var autoscan = xmlGetElement(xml, "autoscan");
     updateAutoscanEditFields(autoscan);
+    scanLevelChanged();
     Element.hide(itemRoot);
     itemRoot = rightDocument.getElementById('autoscan_div');
     Element.show(itemRoot);
@@ -146,4 +147,21 @@ function autoscanSubmitCallback(ajaxRequest)
 {
     if (errorCheck(ajaxRequest.responseXML))
         folderChange(selectedNode);
+}
+
+function scanLevelChanged()
+{
+    var elements = rightDocument.forms['autoscanForm'].elements;
+    if (elements['scan_level_none'].checked)
+    {
+        elements['recursive'].disabled = true;
+        elements['hidden'].disabled = true;
+        elements['interval'].disabled = true;
+    }
+    else
+    {
+        elements['recursive'].disabled = false;
+        elements['hidden'].disabled = false;
+        elements['interval'].disabled = false;
+    }
 }
