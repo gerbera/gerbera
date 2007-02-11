@@ -1644,7 +1644,7 @@ if test "x$ID3_OK" = xyes; then
               AC_MSG_NOTICE([Will search for id3lib libraries in $ID3_SEARCH_LIBS])
               AC_CHECK_LIB(id3, main,
                   [
-                      ID3_LIBS="-L$ID3_SEARCH_LIBS -lid3 $Z_LIBS"
+                      ID3_LIBS="-L$ID3_SEARCH_LIBS $Z_LIBS -lid3 "
                   ],
                   [
                       AC_MSG_ERROR([id3lib libraries not found in requested location $ID3_SEARCH_LIBS])
