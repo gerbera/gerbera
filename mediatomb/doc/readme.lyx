@@ -47,9 +47,8 @@ Introduction
 
 \begin_layout Standard
 MediaTomb is an open source (GPL) UPnP MediaServer with a nice web user
- interface.
- MediaTomb allows you to stream your digital media through your home network
- and listen to/watch it on a variety of UPnP compatible devices.
+ interface, it allows you to stream your digital media through your home
+ network and listen to/watch it on a variety of UPnP compatible devices.
 \end_layout
 
 \begin_layout Standard
@@ -59,6 +58,7 @@ MediaTomb implements the UPnP MediaServer V 1.0 specification that can be
 
 \end_inset
 
+.
  The current implementation focuses on parts that are required by the specificat
 ion, however we look into extending the functionality to cover the optional
  parts of the spec as well.
@@ -89,6 +89,10 @@ Note: since the server is meant to be used in a home LAN environment the
  on your network to connect to the user interface.
 \end_layout
 
+\begin_layout Standard
+THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY! USE AT YOUR OWN RISK!
+\end_layout
+
 \begin_layout Subsection
 Currently Supported Features
 \end_layout
@@ -98,7 +102,12 @@ browse and playback your media via UPnP
 \end_layout
 
 \begin_layout Itemize
-metadata extraction (id3, exif, etc.)
+metadata extraction from mp3, ogg, flac, jpeg, etc.
+ files.
+\end_layout
+
+\begin_layout Itemize
+Exif thumbnail support
 \end_layout
 
 \begin_layout Itemize
@@ -3114,11 +3123,18 @@ Attention Hardware Manufacturers:
 \begin_layout Standard
 If you want to improve compatibility between MediaTomb and your renderer
  device or if you are interested in a port of MediaTomb for your NAS device
- please e-mail to: contact (at) mediatomb (dot) org
+ please e-mail to: <contact at mediatomb dot cc>
 \end_layout
 
 \begin_layout Subsection
 MediaRenderers
+\end_layout
+
+\begin_layout Standard
+MediaTomb supports all UPnP compliant MediaRenderers, however there can
+ always be various problems that depend on the particular device implementation.
+ We always try to implement workarounds to compensate for failures and limitatio
+ns of various renderers.
 \end_layout
 
 \begin_layout Standard
@@ -3328,7 +3344,7 @@ Copyright (C) 2005
 \end_layout
 
 \begin_layout Standard
-Gena Batyan <bgeradz at mediatomb dot cc>,
+Gena Batyan <bgeradz at mediatomb dot cc>
 \end_layout
 
 \begin_layout Standard
@@ -3340,7 +3356,7 @@ Copyright (C) 2006-2007
 \end_layout
 
 \begin_layout Standard
-Gena Batyan <bgeradz at mediatomb dot cc>,
+Gena Batyan <bgeradz at mediatomb dot cc>
 \end_layout
 
 \begin_layout Standard
@@ -3348,7 +3364,7 @@ Sergey Bostandzhyan <jin at mediatomb dot cc>
 \end_layout
 
 \begin_layout Standard
-Leonhard Wimmer <leo at mediatomb dot org>
+Leonhard Wimmer <leo at mediatomb dot cc>
 \end_layout
 
 \begin_layout Subsection
