@@ -1642,7 +1642,7 @@ if test "x$ID3_OK" = xyes; then
            [
               LDFLAGS="-L$ID3_SEARCH_LIBS $Z_LIBS"
               AC_MSG_NOTICE([Will search for id3lib libraries in $ID3_SEARCH_LIBS])
-              AC_CHECK_LIB(id3, main
+              AC_CHECK_LIB(id3, main,
                   [
                       ID3_LIBS="-L$ID3_SEARCH_LIBS -lid3 $Z_LIBS"
                   ],
