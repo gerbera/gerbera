@@ -34,7 +34,7 @@
 \begin_body
 
 \begin_layout Title
-MediaTomb - UPnP Mediaserver
+MediaTomb - UPnP MediaServer
 \end_layout
 
 \begin_layout Date
@@ -43,6 +43,13 @@ MediaTomb - UPnP Mediaserver
 
 \begin_layout Section
 Introduction
+\end_layout
+
+\begin_layout Standard
+MediaTomb is an open source (GPL) UPnP MediaServer with a nice web user
+ interface.
+ MediaTomb allows you to stream your digital media through your home network
+ and listen to/watch it on a variety of UPnP compatible devices.
 \end_layout
 
 \begin_layout Standard
@@ -68,11 +75,11 @@ WARNING!
 \end_layout
 
 \begin_layout Standard
-The server has an integrated filesystem browser in the UI, that means that
- anyone who has access to the UI can browse your filesystem (with user permissio
-ns under which the server is running) and also download your data! If you
- want maximum security - disable the UI completely! Account authentication
- offers simple protection that might hold back your kids, but it is not
+The server has an integrated file system browser in the UI, that means that
+ anyone who has access to the UI can browse your file system (with user
+ permissions under which the server is running) and also download your data!
+ If you want maximum security - disable the UI completely! Account authenticatio
+n offers simple protection that might hold back your kids, but it is not
  secure enough for use in an untrusted environment!
 \end_layout
 
@@ -104,7 +111,7 @@ automatic directory rescans
 \end_layout
 
 \begin_layout Itemize
-sophisticated web UI with a tree view of the database and the filesystem,
+sophisticated web UI with a tree view of the database and the file system,
  allowing to add/remove/edit/browse your media
 \end_layout
 
@@ -123,8 +130,8 @@ Active Items (experimental feature), allows execution of server side scripts
 \end_layout
 
 \begin_layout Itemize
-highly flexible configuration, allowing you to control the behaviour of
- various features of the server
+highly flexible configuration, allowing you to control the behavior of various
+ features of the server
 \end_layout
 
 \begin_layout Itemize
@@ -153,7 +160,6 @@ various UPnP improvements
 
 \begin_layout Section
 \noindent
-\align left
 Requirements
 \end_layout
 
@@ -222,9 +228,9 @@ libmagic
 \shape italic
 (OPTIONAL, RECOMMENDED)
 \shape default
- This is the 'file' package, it is used to determine the mimetype of the
+ This is the 'file' package, it is used to determine the mime type of the
  media.
- If you don't have this you will have to enter file extension to mimetype
+ If you don't have this you will have to enter file extension to mime type
  mappings manually in your config file.
 \end_layout
 
@@ -398,14 +404,14 @@ Configure Options
 \begin_layout Standard
 The MediaTomb configure script provides a large variety of options, allowing
  you to specify the additional libraries that will be used, features that
- will be compiled or disabled, workarounds for known bugs in some distros
+ will be compiled or disabled, workarounds for known bugs in some distributions
  and so on.
  Some options are straightforward, some require deeper knowledge - make
  sure you know what you are doing :)
 \end_layout
 
 \begin_layout Subsubsection
-Install Location Of Architecture Independend Files
+Install Location Of Architecture Independent Files
 \end_layout
 
 \begin_layout Code
@@ -556,7 +562,7 @@ Use Pthread Code For Atomic Operations
 \end_layout
 
 \begin_layout Description
-Default: autodetect
+Default: auto detect
 \end_layout
 
 \begin_layout Standard
@@ -600,9 +606,9 @@ Default: enabled
 \end_layout
 
 \begin_layout Standard
-This is a workaround for a bug in some Debian distros, disable this check
- if you know that your system has largefile support, but configure fails
- to detect it.
+This is a workaround for a bug in some Debian distributions, disable this
+ check if you know that your system has large file support, but configure
+ fails to detect it.
  For more information see: ADD LINK HERE
 \end_layout
 
@@ -619,7 +625,7 @@ Default: auto
 \end_layout
 
 \begin_layout Standard
-By default largefile support will be autodetected by configure, however
+By default largefile support will be auto detected by configure, however
  you can disable it if you do not want it or if you experience problems
  with it on your system.
 \end_layout
@@ -642,7 +648,7 @@ Autoconf may redefine malloc and realloc functions to rpl_malloc and rpl_realloc
  against a non GNU C library.
  Since malloc and realloc may behave different on other systems, this gives
  us the opportunity to write wrapper functions to handle special cases.
- However, this redefinition may get triggered when crosscompiling, even
+ However, this redefinition may get triggered when cross compiling, even
  if you are compiling against the GNU C lib.
  If this is the case, you can use this option to disable the redefinition.
 \end_layout
@@ -686,7 +692,7 @@ ion section.
 \end_layout
 
 \begin_layout Subsubsection
-Spidermonkey LibJS Support
+SpiderMonkey LibJS Support
 \end_layout
 
 \begin_layout Code
@@ -698,18 +704,18 @@ Default: enabled
 \end_layout
 
 \begin_layout Standard
-Spidermonkey is Mozillas JavaScript engine, it plays a very important role
+SpiderMonkey is Mozilla's JavaScript engine, it plays a very important role
  in MediaTomb.
  We use it to create a nice virtual container layout based on the metadata
  that is extracted from your media.
  We also allow the user to create custom import scripts, so everyone has
- the possibility to adapt the layout to one's personal needs.
+ the possibility to adapt the layout to ones personal needs.
  Read more about this in the installation section.
 \end_layout
 
 \begin_layout Standard
 The main problem with this library is, that it is called differently on
- various distros and that it is installed in different locations.
+ various distributions and that it is installed in different locations.
  For example, it is called js on Fedora, but is available under the name
  of smjs on Debian.
  If configure fails to find your js headers and libraries you can point
@@ -730,12 +736,12 @@ Default: enabled
 
 \begin_layout Standard
 This library determines the file type and provides us with the appropriate
- mimetype information.
- It is very important to correctly determine the mimetype of your media
+ mime type information.
+ It is very important to correctly determine the mime type of your media
  - this information will be sent to your renderer.
- Based on the mimetype information, the renderer will decide if it can play/disp
-lay the particular file or not.
- If autodetection returns strange mimetypes, you may want to do a check
+ Based on the mime type information, the renderer will decide if it can
+ play/display the particular file or not.
+ If auto detection returns strange mime types, you may want to do a check
  using the 'file' command (the 'file' package must be installed on your
  system).
  Assuming that you want to check somefile.avi enter the following in your
@@ -747,11 +753,11 @@ file -i somefile.avi
 \end_layout
 
 \begin_layout Standard
-This will print the detected mimetype, this is exactly the information that
- we use in MediaTomb.
- You can override autodetection by defining appropriate file extension to
- mimetype mappings in your configuration file.
- You can also edit the mimetype information of an imported object manually
+This will print the detected mime type, this is exactly the information
+ that we use in MediaTomb.
+ You can override auto detection by defining appropriate file extension
+ to mime type mappings in your configuration file.
+ You can also edit the mime type information of an imported object manually
  via the web UI.
 \end_layout
 
@@ -1065,12 +1071,12 @@ Using Sqlite Database
 \begin_layout Standard
 If you are using sqlite - you are ready to go, the database file will be
  created automatically and will be located ~/.mediatomb/mediatomb.db If needed
- you can adjust the database filename and location in the server configuration
+ you can adjust the database file name and location in the server configuration
  file.
 \end_layout
 
 \begin_layout Subsubsection
-Using MySLQ Database
+Using MySQL Database
 \end_layout
 
 \begin_layout Standard
@@ -1085,15 +1091,15 @@ If MediaTomb was compiled with support for both databases, sqlite will be
 \begin_layout Standard
 You must create a separate logical MySQL database and give MediaTomb full
  access to it.
- In order to create a database you need to know it's username and password.
- Database usernames and passwords in MySQL have nothing to do with unix
- accounts, MySQL has it's own usernames/passwords.
- However a mysql server may allow only certain unix users to manipulate
+ In order to create a database you need to know it's user name and password.
+ Database user names and passwords in MySQL have nothing to do with UNIX
+ accounts, MySQL has it's own user names/passwords.
+ However a MySQL server may allow only certain UNIX users to manipulate
  databases.
- On some distributions MySQL is installed with the main username "root"
+ On some distributions MySQL is installed with the main user name "root"
  and blank password (this has nothing to do with the system root user).
  Consult the MySQL documentation if you want to create a dedicated user
- with a password, in our example we will assume that the MySQL username
+ with a password, in our example we will assume that the MySQL user name
  is 
 \begin_inset Quotes sld
 \end_inset
@@ -1171,7 +1177,7 @@ Command Line Options
 
 \begin_layout Standard
 There is a number of options that can be passed via command line upon server
- startup, for a short summary you can invoke MediaTomb with the following
+ start up, for a short summary you can invoke MediaTomb with the following
  parameter:
 \end_layout
 
@@ -1231,7 +1237,7 @@ config.xml
  in the ~/.mediatomb directory.
  This option allows you to specify a config file by the name and location
  of your choice.
- The filename must be absolute.
+ The file name must be absolute.
 \end_layout
 
 \begin_layout Subsection
@@ -1261,7 +1267,7 @@ Specify a file that will hold the server process ID, the filename must be
 \end_layout
 
 \begin_layout Subsection
-Run Under Different Username
+Run Under Different User Name
 \end_layout
 
 \begin_layout Code
@@ -1269,7 +1275,7 @@ Run Under Different Username
 \end_layout
 
 \begin_layout Standard
-Run MediaTomb under the specified username, this is especially useful in
+Run MediaTomb under the specified user name, this is especially useful in
  combination with the daemon mode.
 \end_layout
 
@@ -1295,7 +1301,7 @@ Add Content
 \end_layout
 
 \begin_layout Standard
-Add the specified directory or filename to the database without UI interaction.
+Add the specified directory or file name to the database without UI interaction.
  The path must be absolute, if path is a directory then it will be added
  recursively.
  If path is a file, then only the given file will be imported.
@@ -2373,7 +2379,7 @@ if nl_langinfo() function is present, this setting will be auto detected
 
 \begin_layout Standard
 Defines the charset of the filesystem.
- For example, if you have filenames in Cyrillic KOI8-R encoding, then you
+ For example, if you have file names in Cyrillic KOI8-R encoding, then you
  should specify that here.
  The server uses UTF-8 internally, this import parameter will help you to
  correctly import your data.
@@ -2472,7 +2478,7 @@ none
 \end_layout
 
 \begin_layout Standard
-Specifies an alternative file for filemagic, containing mimetype information.
+Specifies an alternative file for filemagic, containing mime type information.
 \end_layout
 
 \begin_layout Subsubsection
@@ -2704,11 +2710,11 @@ Various Mappings
 \end_layout
 
 \begin_layout Standard
-This section defines mimetype and upnp:class mappings, it is vital if filemagic
+This section defines mime type and upnp:class mappings, it is vital if filemagic
  is not available - in this case media type auto detection will fail and
- you will have to set the mimetypes manually by matching the file extension.
- It is also helpful if you want to override auto detected mimetypes or simply
- skip filemagic processing for known filetypes.
+ you will have to set the mime types manually by matching the file extension.
+ It is also helpful if you want to override auto detected mime types or
+ simply skip filemagic processing for known file types.
 \end_layout
 
 \begin_layout Code
@@ -2745,7 +2751,7 @@ Optional
 \end_layout
 
 \begin_layout Standard
-This section holds the filename extension to mimetype mappings.
+This section holds the file name extension to mime type mappings.
 \end_layout
 
 \begin_layout Code
@@ -2801,13 +2807,13 @@ Optional
 \end_layout
 
 \begin_layout Standard
-Specifies a mapping from a certain filename extension (everything after
- the last dot ".") to mimetype.
+Specifies a mapping from a certain file name extension (everything after
+ the last dot ".") to mime type.
 \end_layout
 
 \begin_layout Description
 Note: this improves the import speed, because invoking libmagic to discover
- the right mimetype of a file is omitted for files with extensions listed
+ the right mime type of a file is omitted for files with extensions listed
  here.
 \end_layout
 
@@ -2835,7 +2841,7 @@ Optional
 \end_layout
 
 \begin_layout Standard
-This section holds the mimetype to upnp:class mappings.
+This section holds the mime type to upnp:class mappings.
  
 \end_layout
 
@@ -2858,7 +2864,7 @@ Optional
 \end_layout
 
 \begin_layout Standard
-Specifies a mapping from a certain mimetype to upnp:class in the Content
+Specifies a mapping from a certain mime type to upnp:class in the Content
  Directory.
  The mime type can either be entered explicitly "audio/mpeg" or using a
  wildcard after the slash "audio/*".
@@ -3237,10 +3243,10 @@ Network Attached Storage Devices
 
 \begin_layout Standard
 We provide a bitbake metadata file for the OpenEmbedded environment, it
- allows to easily crosscompile MediaTomb for various platforms.
- We have successfuly tested MediaTomb on ARM and MIPSel based devices, so
- it should be possible to install and run the server on various linux based
- NAS products that are available on the market.
+ allows to easily cross compile MediaTomb for various platforms.
+ We have successfully tested MediaTomb on ARM and MIPSel based devices,
+ so it should be possible to install and run the server on various Linux
+ based NAS products that are available on the market.
 \end_layout
 
 \begin_layout Subsubsection
@@ -3263,7 +3269,7 @@ When you run MediaTomb for the first time a default configuration will be
 n section for more details).
  To start the server simply run "mediatomb" from the console, to shutdown
  cleanly press Ctrl-C.
- At startup MediaTomb will print a link to the web UI.
+ At start up MediaTomb will print a link to the web UI.
 \end_layout
 
 \begin_layout Description
@@ -3373,13 +3379,14 @@ We are using the following code in our tree:
 \begin_layout Itemize
 uuid from E2fsprogs 1.35 under GNU GPL, Copyright (C) 1996, 1997, 1998 Theodore
  Ts'o.
- <tytso@mit.edu> Some functions from the UPnP SDK were conflicting with libuuid,
- so we had to take the sources in and do some renaming.
+ <tytso at mit dot edu> Some functions from the UPnP SDK were conflicting
+ with libuuid, so we had to take the sources in and do some renaming.
 \end_layout
 
 \begin_layout Itemize
 md5 implementation by L.
- Peter Deutsch <ghost@aladdin.com>, Copyright (C) 1999 Aladdin Enterprises.
+ Peter Deutsch <ghost at aladdin dot com>, Copyright (C) 1999 Aladdin Enterprise
+s.
  All rights reserved.
  (See source headers for further details)
 \end_layout
@@ -3397,7 +3404,7 @@ Prototype JavaScript Framework http://www.prototypejs.org/ (c) 2005-2007 Sam
 
 \begin_layout Itemize
 (heavily modified version of) NanoTree http://nanotree.sourceforge.net/ (c)
- 2003 (?) Martin Mouritzen <martin@nano.dk>; LGPL
+ 2003 (?) Martin Mouritzen <martin at nano dot dk>; LGPL
 \end_layout
 
 \begin_layout Itemize
@@ -3418,12 +3425,13 @@ Contributions
 \end_layout
 
 \begin_layout Itemize
-Initial version of the MediaTomb startup script was contributed by Iain
- Lea <iain at bricbrac.de> 
+Initial version of the MediaTomb start up script was contributed by Iain
+ Lea <iain at bricbrac dot de> 
 \end_layout
 
 \begin_layout Itemize
-TagLib support patch was contributed by Benhur Stein <benhur.stein at gmail.com>
+TagLib support patch was contributed by Benhur Stein <benhur.stein at gmail
+ dot com>
 \end_layout
 
 \begin_layout Itemize
