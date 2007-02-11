@@ -207,7 +207,7 @@ sqlite (version > 3.x)
 
  
 \shape italic
-(REQUIRED if mysql and postgresql is not available)
+(REQUIRED if mysql is not available)
 \end_layout
 
 \begin_layout Itemize
@@ -218,18 +218,7 @@ mysql client library (version > 4.0.x)
 
  
 \shape italic
-(REQUIRED if sqlite and postgresql is not available)
-\end_layout
-
-\begin_layout Itemize
-postgresql 
-\begin_inset LatexCommand \url[http://www.postgresql.org/]{http://www.postgresql.org/}
-
-\end_inset
-
- 
-\shape italic
-(REQUIRED if sqlite and mysql is not available)
+(REQUIRED if sqlite is not available)
 \end_layout
 
 \begin_layout Itemize
@@ -2290,19 +2279,19 @@ MySQL is defined as follows:
 \end_layout
 
 \begin_layout Code
-        <host>localhost</host>
+        <host>localhost</host> - optional; default: "localhost"
 \end_layout
 
 \begin_layout Code
-        <username>root</username>
+        <username>root</username> - optional; default: "mediatomb"
 \end_layout
 
 \begin_layout Code
-        <password></password>
+        <password></password> - optional; default: no password
 \end_layout
 
 \begin_layout Code
-        <database>mediatomb</database>
+        <database>mediatomb</database> - optional; default: "mediatomb"
 \end_layout
 
 \begin_layout Code
@@ -2310,7 +2299,150 @@ MySQL is defined as follows:
 \end_layout
 
 \begin_layout Standard
-Ask Leo for more information:)
+MediaTomb has to be able to connect to the MySQL server and at least the
+ (empty) database has to exist.
+ To create the database and provide MediaTomb with the ability to connect
+ to the MySQL server you need to have the appropriate permissions.
+ Connect to the MySQL database as 
+\begin_inset Quotes sld
+\end_inset
+
+root
+\begin_inset Quotes srd
+\end_inset
+
+ or any other user with the appropriate permissions:
+\end_layout
+
+\begin_layout Code
+$ mysql [-u <username>] [-p]
+\end_layout
+
+\begin_layout Standard
+(You'll probably need to use 
+\begin_inset Quotes sld
+\end_inset
+
+-u
+\begin_inset Quotes srd
+\end_inset
+
+ to specify a different MySQL user and 
+\begin_inset Quotes sld
+\end_inset
+
+-p
+\begin_inset Quotes srd
+\end_inset
+
+ to specify a password.)
+\end_layout
+
+\begin_layout Standard
+Create a new database for MediaTomb: (substitute 
+\begin_inset Quotes sld
+\end_inset
+
+<database name>
+\begin_inset Quotes srd
+\end_inset
+
+ with the name of the database)
+\end_layout
+
+\begin_layout Code
+mysql> CREATE DATABASE <database name>;
+\end_layout
+
+\begin_layout Standard
+Give MediaTomb the permissions to access the database:
+\end_layout
+
+\begin_layout Code
+mysql> GRANT ALL ON <database name>.* TO '<user name>'@'<hostname>' IDENTIFIED
+ BY '<password>';
+\end_layout
+
+\begin_layout Standard
+If you don't want to set a password, omit 
+\begin_inset Quotes sld
+\end_inset
+
+IDENTIFIED BY ..
+\begin_inset Quotes srd
+\end_inset
+
+ completely.
+ You could also use the MySQL 
+\begin_inset Quotes sld
+\end_inset
+
+root
+\begin_inset Quotes srd
+\end_inset
+
+ user with MediaTomb directly, but this is not recommended.
+\end_layout
+
+\begin_layout Standard
+To create a database and a user named 
+\begin_inset Quotes sld
+\end_inset
+
+mediatomb
+\begin_inset Quotes srd
+\end_inset
+
+ (who is only ably to connect via 
+\begin_inset Quotes sld
+\end_inset
+
+localhost
+\begin_inset Quotes srd
+\end_inset
+
+) without a password (the defaults) use:
+\end_layout
+
+\begin_layout Code
+mysql> CREATE DATABASE mediatomb;
+\end_layout
+
+\begin_layout Code
+mysql> GRANT ALL ON mediatomb.* TO 'mediatomb'@'localhost';
+\end_layout
+
+\begin_layout Standard
+If MediaTomb was compiled with database auto creation the tables will be
+ created automatically during the first startup.
+ All table names have a 
+\begin_inset Quotes sld
+\end_inset
+
+mt_
+\begin_inset Quotes srd
+\end_inset
+
+ prefix, so you can theoretically share the database with a different applicatio
+n.
+ However, this is not recommended.
+\end_layout
+
+\begin_layout Standard
+If database auto creation wasn't compiled in (
+\begin_inset Quotes sld
+\end_inset
+
+--disable-db-autocreate
+\begin_inset Quotes srd
+\end_inset
+
+) you have to create the tables manually:
+\end_layout
+
+\begin_layout Code
+$ mysql [-u <username>] [-p] <database name> < <install prefix>/share/mediatomb/
+mysql.sql
 \end_layout
 
 \begin_layout Subsection
