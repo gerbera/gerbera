@@ -1359,6 +1359,7 @@ void ContentManager::removeAutoscanDirectory(int scanID, scan_mode_t scanMode)
 
         autoscan_timed->remove(scanID);
         storage->removeAutoscanDirectory(adir->getStorageID());
+        SessionManager::getInstance()->containerChangedUI(adir->getObjectID());
         
         // if 3rd parameter is true: won't fail if scanID doesn't exist
         Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), scanID, true);
@@ -1391,6 +1392,7 @@ void ContentManager::removeAutoscanDirectory(int objectID)
     {
         int scanID = autoscan_timed->remove(adir->getLocation());
         storage->removeAutoscanDirectoryByObjectID(objectID);
+        SessionManager::getInstance()->containerChangedUI(objectID);
         Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), scanID, true);
     }
 }
