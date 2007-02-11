@@ -343,7 +343,7 @@ function updateItems(ajaxRequest)
         
         var first = true
         first = _addLink(topRightDocument, buttons, first, "javascript:parent.addItem('"+ofId+"');", "add", iconAdd);
-        first = _addLink(topRightDocument, buttons, first, "javascript:parent.editLoadAutoscanDirectory("+ofId+"', true);", "add as autoscan dir", iconAddAutoscan);
+        first = _addLink(topRightDocument, buttons, first, "javascript:parent.editLoadAutoscanDirectory('"+ofId+"', true);", "add as autoscan dir", iconAddAutoscan);
     }
     else
     {
