@@ -144,12 +144,28 @@ Ref<AutoscanDirectory> AutoscanList::get(int id)
     return list->get(id);
 }
 
+Ref<AutoscanDirectory> AutoscanList::getByObjectID(int objectID)
+{
+    AUTOLOCK(mutex);
+
+    for (int i = 0; i < list->size(); i++)
+    {
+        if (list->get(i) != nil && objectID == list->get(i)->getObjectID())
+            return list->get(i);
+    }
+    return nil;
+}
+
+
 void AutoscanList::remove(int id)
 {
     AUTOLOCK(mutex);
     
     if ((id < 0) || (id >= list->size()))
-                return;
+    {
+        log_debug("No such ID %d!\n", id);
+        return;
+    }
    
     Ref<AutoscanDirectory> dir = list->get(id);
     dir->setScanID(INVALID_SCAN_ID);
@@ -162,9 +178,10 @@ void AutoscanList::remove(int id)
     {
         list->set(nil, id);
     }
+
+    log_debug("ID %d removed!\n", id);
 }
 
-/*
 int AutoscanList::removeByObjectID(int objectID)
 {
     AUTOLOCK(mutex);
@@ -188,7 +205,6 @@ int AutoscanList::removeByObjectID(int objectID)
     }
     return INVALID_SCAN_ID;
 }
-*/
 
 int AutoscanList::remove(String location)
 {
@@ -287,6 +303,24 @@ void AutoscanList::subscribeDir(zmm::Ref<TimerSubscriber> obj, int id, bool once
     Ref<Timer> timer = Timer::getInstance();
     Ref<AutoscanDirectory> dir = list->get(id);
     timer->addTimerSubscriber(obj, dir->getInterval(), dir->getScanID(), once);
+}
+*/
+
+/*
+void AutoscanList::dump()
+{
+    log_debug("Dumping autoscan list: %d elements\n", list->size());
+    for (int i = 0; i < list->size();i++)
+    {
+        Ref<AutoscanDirectory> dir = list->get(i);
+        log_debug("Position: %d", i);
+        if (dir == nil)
+            printf("[nil]\n");
+        else
+            printf("[scanid=%d objectid=%d location=%s]\n",
+                    dir->getScanID(), dir->getObjectID(),
+                    dir->getLocation().c_str());
+    }
 }
 */
 

@@ -1355,7 +1355,7 @@ void ContentManager::removeAutoscanDirectory(int scanID, scan_mode_t scanMode)
         Ref<Storage> storage = Storage::getInstance();
         Ref<AutoscanDirectory> adir = autoscan_timed->get(scanID);
         if (adir == nil)
-            return;
+            throw _Exception(_("can not remove autoscan directory - was not an autoscan"));
 
         autoscan_timed->remove(scanID);
         storage->removeAutoscanDirectory(adir->getStorageID());
@@ -1399,13 +1399,15 @@ void ContentManager::removeAutoscanDirectory(int objectID)
 
 void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
 {
+    int scanID = INVALID_SCAN_ID;
     Ref<Storage> storage = Storage::getInstance();
-    Ref<AutoscanDirectory> original = storage->getAutoscanDirectory(dir->getObjectID());
+    Ref<AutoscanDirectory> original;
 
+    // We will have to change this for other scan modes
+    original = autoscan_timed->getByObjectID(dir->getObjectID());
     // adding a new autoscan directory
     if (original == nil)
     {
-        int scanID = INVALID_SCAN_ID;
         if (dir->getScanMode() == TimedScanMode)
         {
             Ref<CdsObject> obj = storage->loadObject(dir->getObjectID());
@@ -1427,32 +1429,29 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
         return;
     }
 
-    // make sure timer events will not get triggered for directory that is being updated
     Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), original->getScanID(), true);
 
     // changing from full scan to basic scan need to reset last modification time
     if ((original->getScanLevel() == FullScanLevel) && (dir->getScanLevel() == BasicScanLevel))
     {
         original->setScanLevel(BasicScanLevel);
-        original->setCurrentLMT(0);
-        original->updateLMT();
-    }
-    else
-    {
-        original->setScanLevel(FullScanLevel);
+        original->resetLMT();
     }
 
+    original->setScanLevel(dir->getScanLevel());
     original->setHidden(dir->getHidden());
     original->setRecursive(dir->getRecursive());
     original->setInterval(dir->getInterval());
 
+    if (dir->getScanMode() == TimedScanMode)
+    {
+        autoscan_timed->remove(original->getScanID());
+        scanID = autoscan_timed->add(original);
+        timerNotify(scanID);
+    }
+    
     storage->updateAutoscanDirectory(original);
-
     SessionManager::getInstance()->containerChangedUI(original->getObjectID());
-
-    // any update forces an immediate scan, the timer subscription will be handled
-    // by CMRescanDirectoryTask and will be done automatically after the scan
-    rescanDirectory(original->getObjectID(), original->getScanID(), original->getScanMode());
 }
 
 

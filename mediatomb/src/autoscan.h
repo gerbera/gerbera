@@ -72,16 +72,17 @@ public:
 
     zmm::Ref<AutoscanDirectory> get(int id);
 
-    zmm::Ref<AutoscanDirectory> get(zmm::String location);
+//    zmm::Ref<AutoscanDirectory> get(zmm::String location);
     
+    zmm::Ref<AutoscanDirectory> getByObjectID(int objectID);
+
     int size() { return list->size(); }
    
     /// \brief removes the AutoscanDirectory given by its scan ID
     void remove(int id);
-/*
-    /// \brief removes the AutoscanDirectory given by its object ID
+
     int removeByObjectID(int objectID);
-*/    
+    
     /// \brief removes the AutoscanDirectory with the given location
     /// \param location the location to remove
     /// \return the scanID, that was removed; if nothing removed: INVALID_SCAN_ID
@@ -112,7 +113,11 @@ public:
     
     /// \brief updates the last_modified data for all AutoscanDirectories.
     void updateLMinDB();
-    
+
+/*
+    void dump();
+*/
+
 protected:
     zmm::Ref<Mutex> mutex;
     zmm::Ref<zmm::Array<AutoscanDirectory> > list;
@@ -204,11 +209,14 @@ public:
     /// starting point and which may have subcontainers) we must compare
     /// the last modification time of the starting point but we may not
     /// overwrite it until we are done.
+    /// The time will be only set if it is higher than the previous value!
     void setCurrentLMT(time_t lmt);
     
     time_t getPreviousLMT() { return last_mod_previous_scan; }
     
     void updateLMT() { last_mod_previous_scan = last_mod_current_scan; }
+
+    void resetLMT() { last_mod_previous_scan = 0; last_mod_current_scan = 0; }
     
     /* helpers for autoscan stuff */
     static zmm::String mapScanmode(scan_mode_t scanmode);

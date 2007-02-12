@@ -189,11 +189,11 @@ void WebRequestHandler::handleUpdateIDs()
     String uiUpdate = param(_("get_update_ids"));
     if ((string_ok(uiUpdate) && uiUpdate == _("1")))
     {
-        log_debug("UI wants updates.\n");
+//        log_debug("UI wants updates.\n");
         String forceUpdate = param(_("force_update"));
         if ((string_ok(forceUpdate) && forceUpdate ==_("1")))
         {
-            log_debug("UI forces updates.\n");
+//            log_debug("UI forces updates.\n");
             addUpdateIDs(root, session);
         }
         else
@@ -202,12 +202,12 @@ void WebRequestHandler::handleUpdateIDs()
             root->appendChild(updateIDs);
             if (session->hasUIUpdateIDs())
             {
-                log_debug("UI updates pending...\n");
+//                log_debug("UI updates pending...\n");
                 updateIDs->addAttribute(_("pending"), _("1"));
             }
             else
             {
-                log_debug("no UI updates.\n");
+//                log_debug("no UI updates.\n");
             }
         }
     }
