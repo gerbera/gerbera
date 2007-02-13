@@ -41,6 +41,7 @@
 #include "metadata_handler.h"
 #include "config_manager.h"
 #include "tools.h"
+#include "string_converter.h"
 
 using namespace zmm;
 
@@ -532,7 +533,36 @@ Scripting::Scripting() : Object()
 
 void Scripting::init()
 {
-    //log_debug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+    if (script)
+    {
+        throw _Exception(_("Scripting already initialized!"));
+    }
+
+    String scriptPath = ConfigManager::getInstance()->getOption(_("/import/script"));
+    if (!string_ok(scriptPath))
+    {
+        // maybe someone just does not want it?
+        return;
+    }
+
+    log_info("Read import script: %s\n", scriptPath.c_str());
+    
+	String scriptText = read_text_file(scriptPath);
+	if (scriptText == nil)
+    {
+        throw _Exception(String("Could not read script ") + scriptPath.c_str());
+    }
+
+    Ref<StringConverter> j2i = StringConverter::j2i();
+    try
+    {
+        scriptText = j2i->convert(scriptText, true);
+    }
+    catch (Exception e)
+    {
+        throw _Exception(String("Failed to convert import script:") + e.getMessage().c_str());
+    }
+
     /* initialize the JS run time, and return result in rt */
     rt = JS_NewRuntime(DEFAULT_JS_RUNTIME_MEM);
 
@@ -571,12 +601,8 @@ void Scripting::init()
         js_set_property(cx, glob, MT_KEYS[i].sym, String(MT_KEYS[i].upnp));
     }
     
-    String scriptPath = ConfigManager::getInstance()->getOption(_("/import/script"));
-    log_info("Read import script: %s\n", scriptPath.c_str());
-    
-	String scriptText = read_text_file(scriptPath);
-	if (scriptText == nil)
-		log_warning("Could not read script %s\n", scriptPath.c_str());
+    JS_SetErrorReporter(cx, js_error_reporter);
+
 /*
 	if (!JS_EvaluateScript(cx, glob, script.c_str(), script.length(),
 		scriptPath.c_str(), 0, &ret_val))
@@ -584,7 +610,6 @@ void Scripting::init()
              throw _Exception("Scripting: failed to evaluate script");
 	}
 */
-    JS_SetErrorReporter(cx, js_error_reporter);
 
     script = JS_CompileScript(cx, glob, scriptText.c_str(), scriptText.length(),
                               scriptPath.c_str(), 1);

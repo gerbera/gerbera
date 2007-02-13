@@ -37,18 +37,28 @@
 
 class StringConverter : public zmm::Object
 {
-protected:
-    iconv_t cd;
-    bool dirty;
 public:
     StringConverter(zmm::String from, zmm::String to);
     virtual ~StringConverter();
-    zmm::String convert(zmm::String str);
-	static zmm::String validSubstring(zmm::String str, zmm::String encoding);
-    
+    /// \brief Converts uses the from and to values that were passed 
+    /// to the constructor to convert the string str to a specific character 
+    /// set.
+    /// \param str String to be converted.
+    /// \param validate if this parameter is true then an exception will be 
+    /// thrown if illegal input is encountered. If false, illegal characters
+    /// will be padded with '?' and the function will return the string.
+    zmm::String convert(zmm::String str, bool validate=false);
+    bool validate(zmm::String str);
+
     static zmm::Ref<StringConverter> i2f();
     static zmm::Ref<StringConverter> f2i();
     static zmm::Ref<StringConverter> m2i();
+    static zmm::Ref<StringConverter> j2i();
+protected:
+    iconv_t cd;
+    bool dirty;
+
+    zmm::String _convert(zmm::String str, bool validate);
 };
 
 #endif // __STRING_CONVERTER_H__

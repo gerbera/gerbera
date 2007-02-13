@@ -162,6 +162,9 @@
 // default values
 #define DEFAULT_INTERNAL_CHARSET        "UTF-8"
 #define DEFAULT_FILESYSTEM_CHARSET      "ISO-8859-1"
+#if defined(HAVE_JS)
+    #define DEFAULT_JS_CHARSET          "UTF-8"
+#endif
 #if defined(__CYGWIN__)
     #define DEFAULT_CONFIG_HOME         "MediaTomb"
 #else

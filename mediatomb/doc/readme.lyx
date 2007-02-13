@@ -2229,12 +2229,44 @@ Specifies the storage driver, currently sqlite3 and mysql are supported.
  Each storage driver has it's own configuration parameters.
 \end_layout
 
-\begin_layout Standard
-Sqlite3 is defined as follows:
+\begin_layout Code
+             driver="sqlite3"
 \end_layout
 
-\begin_layout Code
-    <storage driver="sqlite3">
+\begin_layout Standard
+
+\emph on
+Required
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: sqlite3
+\end_layout
+
+\begin_layout Standard
+Allowed values are 
+\begin_inset Quotes sld
+\end_inset
+
+sqlite3
+\begin_inset Quotes srd
+\end_inset
+
+ or 
+\begin_inset Quotes sld
+\end_inset
+
+mysql
+\begin_inset Quotes srd
+\end_inset
+
+, the available options depend on the selected driver.
+\end_layout
+
+\begin_layout Standard
+There is only one option for sqlite:
 \end_layout
 
 \begin_layout Code
@@ -2271,31 +2303,115 @@ The database location is relative to the server's home, if the sqlite database
 \end_layout
 
 \begin_layout Standard
-MySQL is defined as follows:
+Below are the options for MySQL:
 \end_layout
 
 \begin_layout Code
-    <storage driver="mysql">
+    
 \end_layout
 
 \begin_layout Code
-        <host>localhost</host> - optional; default: "localhost"
+        <host>localhost</host>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: "localhost"
+\end_layout
+
+\begin_layout Standard
+This specifies the host where your MySQL database is running.
 \end_layout
 
 \begin_layout Code
-        <username>root</username> - optional; default: "mediatomb"
+ 
 \end_layout
 
 \begin_layout Code
-        <password></password> - optional; default: no password
+ 
 \end_layout
 
 \begin_layout Code
-        <database>mediatomb</database> - optional; default: "mediatomb"
+        <username>root</username>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: "mediatomb"
+\end_layout
+
+\begin_layout Standard
+This option sets the user name that will be used to connect to the database.
 \end_layout
 
 \begin_layout Code
-    </storage> 
+
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+        <password></password>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: no password
+\end_layout
+
+\begin_layout Standard
+Password for your MySQL user.
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+        <database>mediatomb</database>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: "mediatomb"
+\end_layout
+
+\begin_layout Standard
+Name of the database that will be used by MediaTomb.
 \end_layout
 
 \begin_layout Standard
@@ -2429,7 +2545,8 @@ n.
 \end_layout
 
 \begin_layout Standard
-If database auto creation wasn't compiled in (
+If database auto creation wasn't compiled in (configure was run with the
+ 
 \begin_inset Quotes sld
 \end_inset
 
@@ -2437,7 +2554,7 @@ If database auto creation wasn't compiled in (
 \begin_inset Quotes srd
 \end_inset
 
-) you have to create the tables manually:
+ or zlib.h was not available) you have to create the tables manually:
 \end_layout
 
 \begin_layout Code

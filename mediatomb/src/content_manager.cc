@@ -350,7 +350,8 @@ void ContentManager::_addFile(String path, bool recursive, bool hidden, Ref<CMTa
         {
             addObject(obj);
 #ifdef HAVE_JS
-            scripting->processCdsObject(obj);
+            if (scripting != nil)
+                scripting->processCdsObject(obj);
 #endif
         }
     }
@@ -1069,19 +1070,21 @@ String ContentManager::mimetype2upnpclass(String mimeType)
 #ifdef HAVE_JS
 void ContentManager::initScripting()
 {
-	if (scripting != nil)
-		return;
-	try
-	{
-		scripting = Ref<Scripting>(new Scripting());
-		scripting->init();
-	}
-	catch (Exception e)
-	{
-		scripting = nil;
-		log_error("ContentManager SCRIPTING: %s\n", e.getMessage().c_str());
-	}
-
+    if (scripting == nil)
+    {
+        AUTOLOCK(mutex);
+        if (scripting == nil)
+            try
+            {
+                scripting = Ref<Scripting>(new Scripting());
+                scripting->init();
+            }
+        catch (Exception e)
+        {
+            scripting = nil;
+            log_error("ContentManager SCRIPTING: %s\n", e.getMessage().c_str());
+        }
+    }
 }
 void ContentManager::destroyScripting()
 {

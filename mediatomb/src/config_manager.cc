@@ -183,12 +183,13 @@ String ConfigManager::createDefaultConfig(String userhome)
 
     Ref<Element> import(new Element(_("import")));
     import->addAttribute(_("hidden-files"), _(DEFAULT_HIDDEN_FILES_VALUE));
+#ifdef HAVE_JS
     import->appendTextChild(_("script"), String(_(PACKAGE_DATADIR)) +
                                                 DIR_SEPARATOR + 
                                                 _(DEFAULT_JS_DIR) +
                                                 DIR_SEPARATOR +
                                                 _(DEFAULT_IMPORT_SCRIPT));
-
+#endif
 
     String map_file = _(PACKAGE_DATADIR) + DIR_SEPARATOR + CONFIG_MAPPINGS_TEMPLATE;
 
@@ -442,6 +443,10 @@ void ConfigManager::validate(String serverhome)
 */
 
 #ifdef HAVE_JS
+    temp = getOption(_("/import/script/attribute::charset"), _(DEFAULT_JS_CHARSET));
+    if (!string_ok(temp))
+        throw _Exception(_("Invalid import script cahrset!"));
+
     prepare_path(_("/import/script"));
 #endif
 

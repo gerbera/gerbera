@@ -56,7 +56,25 @@ StringConverter::~StringConverter()
         iconv_close(cd);
 }
 
-zmm::String StringConverter::convert(String str)
+zmm::String StringConverter::convert(String str, bool validate)
+{
+    return _convert(str, validate);
+}
+
+bool StringConverter::validate(String str)
+{
+    try
+    {
+        _convert(str, true);
+        return true;
+    }
+    catch (Exception e)
+    {
+        return false;
+    }
+}
+
+zmm::String StringConverter::_convert(String str, bool validate)
 {
     String ret_str;
 
@@ -107,6 +125,9 @@ zmm::String StringConverter::convert(String str)
             case EILSEQ:
                 log_error("%s could not be converted to new encoding: invalid character sequence!\n", str.c_str());
                 err = _("iconv: Invalid character sequence");
+                if (validate)
+                    throw _Exception(err);
+
                 ret_str = String(output, output_copy - output);
                 if (ret_str == nil)
                     ret_str = _("");
@@ -150,12 +171,6 @@ zmm::String StringConverter::convert(String str)
     return ret_str;
 }
 
-String StringConverter::validSubstring(String str, String encoding)
-{
-    /// \todo: validate string
-    return str;
-}
-
 /// \todo iconv caching
 Ref<StringConverter> StringConverter::i2f()
 {
@@ -176,5 +191,13 @@ Ref<StringConverter> StringConverter::m2i()
     Ref<StringConverter> conv(new StringConverter(
         ConfigManager::getInstance()->getOption(_("/import/metadata-charset")),
                                                 _(DEFAULT_INTERNAL_CHARSET)));
+    return conv;
+}
+
+Ref<StringConverter> StringConverter::j2i()
+{
+    Ref<StringConverter> conv(new StringConverter(
+        ConfigManager::getInstance()->getOption(_("/import/script/attribute::charset")),
+                                                _(DEFAULT_JS_CHARSET)));
     return conv;
 }
