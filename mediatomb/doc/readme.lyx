@@ -1383,8 +1383,22 @@ These settings define the server configuration, this includes UPnP behavior,
  of shared data.
 \end_layout
 
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Code
-<server> 
+<server>
 \end_layout
 
 \begin_layout Standard
@@ -1401,12 +1415,36 @@ This section defines the server configuration parameters.
 
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
     <port>0</port>
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1437,12 +1475,36 @@ Specifies the port where the server will be listening for HTTP requests.
 
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
     <ip>192.168.0.23</ip> 
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1470,12 +1532,36 @@ Specifies the IP address to bind to, by default one of the available interfaces
 
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
     <name>MediaTomb</name> 
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1503,12 +1589,36 @@ Server friendly name, you will see this on your devices that you use to
 
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
     <manufacturerURL>http://mediatomb.org/</manufacturerURL> 
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1537,12 +1647,36 @@ This tag sets the manufacturer URL of a UPnP device, this may be necessary
 
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
     <presentationURL append-to="ip">80/index.html</presentationURL> 
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1639,12 +1773,36 @@ Append the string specified in the presentationURL tag to the server ip
 
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
     <udn/> 
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1675,12 +1833,36 @@ Unique Device Name, according to the UPnP spec it must be consistent throughout
 
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
     <home>/home/your_user_name/.mediatomb</home> 
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1705,12 +1887,36 @@ Server home - the server will search for the data that it needs relative
 
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
     <webroot>/usr/share/mediatomb/web</webroot>
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1736,12 +1942,36 @@ Root directory for the web server, this is the location where device description
 
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
     <servedir>/home/myuser/mystuff</servedir>
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1776,12 +2006,36 @@ hing.jar
 
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
     <alive>180</alive> 
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1808,12 +2062,36 @@ Interval for broadcasting SSDP:alive messages
 
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
     <custom-http-headers> 
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1831,12 +2109,36 @@ This section holds the user defined HTTP headers that will be added to all
 
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
         <add header="..."/> 
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1855,12 +2157,36 @@ Specify a header to be added to the response.
 
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
     <upnp-string-limit>
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1886,6 +2212,20 @@ This will limit title and description length of containers and items in
  A negative value will disable this feature, the minimum allowed value is
  "4" because three dots will be appended to the string if it has been cut
  off to indicate that limiting took place.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsubsection
@@ -2686,7 +3026,7 @@ Same as above, but defines the charset of the metadata (i.e.
 \end_layout
 
 \begin_layout Code
-    <script>/path/to/my/import/script.js</script>
+    <script charset="UTF-8">/path/to/my/import/script.js</script>
 \end_layout
 
 \begin_layout Standard
@@ -2709,6 +3049,34 @@ ${prefix}/share/mediatomb/js/import.js, where ${prefix} is your installation
 \begin_layout Standard
 Points to the script invoked upon media import.
  For more details read doc/scripting-intro.txt
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+            charset="UTF-8"
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: UTF-8
+\end_layout
+
+\begin_layout Standard
+Specifies the import script encoding.
 \end_layout
 
 \begin_layout Code
