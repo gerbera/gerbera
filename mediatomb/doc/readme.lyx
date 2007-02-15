@@ -1411,10 +1411,6 @@ Required
 This section defines the server configuration parameters.
 \end_layout
 
-\begin_layout Code
-
-\end_layout
-
 \begin_layout Standard
 \begin_inset ERT
 status open
@@ -1430,21 +1426,7 @@ status open
 \end_layout
 
 \begin_layout Code
-    <port>0</port>
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem></itemizedlist>
-\end_layout
-
-\end_inset
-
-
+<port>0</port>
 \end_layout
 
 \begin_layout Standard
@@ -1471,17 +1453,13 @@ Specifies the port where the server will be listening for HTTP requests.
  the SDK.
 \end_layout
 
-\begin_layout Code
-
-\end_layout
-
 \begin_layout Standard
 \begin_inset ERT
 status open
 
 \begin_layout Standard
 
-<itemizedlist><listitem>
+</listitem><listitem>
 \end_layout
 
 \end_inset
@@ -1490,21 +1468,7 @@ status open
 \end_layout
 
 \begin_layout Code
-    <ip>192.168.0.23</ip> 
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status collapsed
-
-\begin_layout Standard
-
-</listitem></itemizedlist>
-\end_layout
-
-\end_inset
-
-
+<ip>192.168.0.23</ip> 
 \end_layout
 
 \begin_layout Standard
@@ -1528,17 +1492,13 @@ Specifies the IP address to bind to, by default one of the available interfaces
  will be selected.
 \end_layout
 
-\begin_layout Code
-
-\end_layout
-
 \begin_layout Standard
 \begin_inset ERT
 status open
 
 \begin_layout Standard
 
-<itemizedlist><listitem>
+</listitem><listitem>
 \end_layout
 
 \end_inset
@@ -1547,21 +1507,7 @@ status open
 \end_layout
 
 \begin_layout Code
-    <name>MediaTomb</name> 
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status collapsed
-
-\begin_layout Standard
-
-</listitem></itemizedlist>
-\end_layout
-
-\end_inset
-
-
+<name>MediaTomb</name> 
 \end_layout
 
 \begin_layout Standard
@@ -1585,17 +1531,13 @@ Server friendly name, you will see this on your devices that you use to
  access the server.
 \end_layout
 
-\begin_layout Code
-
-\end_layout
-
 \begin_layout Standard
 \begin_inset ERT
 status open
 
 \begin_layout Standard
 
-<itemizedlist><listitem>
+</listitem><listitem>
 \end_layout
 
 \end_inset
@@ -1604,21 +1546,7 @@ status open
 \end_layout
 
 \begin_layout Code
-    <manufacturerURL>http://mediatomb.org/</manufacturerURL> 
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status collapsed
-
-\begin_layout Standard
-
-</listitem></itemizedlist>
-\end_layout
-
-\end_inset
-
-
+<manufacturerURL>http://mediatomb.org/</manufacturerURL> 
 \end_layout
 
 \begin_layout Standard
@@ -1643,17 +1571,13 @@ This tag sets the manufacturer URL of a UPnP device, this may be necessary
  are only active with the vendor implemented server.
 \end_layout
 
-\begin_layout Code
-
-\end_layout
-
 \begin_layout Standard
 \begin_inset ERT
 status open
 
 \begin_layout Standard
 
-<itemizedlist><listitem>
+</listitem><listitem>
 \end_layout
 
 \end_inset
@@ -1662,21 +1586,7 @@ status open
 \end_layout
 
 \begin_layout Code
-    <presentationURL append-to="ip">80/index.html</presentationURL> 
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status collapsed
-
-\begin_layout Standard
-
-</listitem></itemizedlist>
-\end_layout
-
-\end_inset
-
-
+<presentationURL append-to="ip">80/index.html</presentationURL> 
 \end_layout
 
 \begin_layout Standard
@@ -1769,17 +1679,13 @@ Append the string specified in the presentationURL tag to the server ip
  the built in web server.
 \end_layout
 
-\begin_layout Code
-
-\end_layout
-
 \begin_layout Standard
 \begin_inset ERT
 status open
 
 \begin_layout Standard
 
-<itemizedlist><listitem>
+</listitem><listitem>
 \end_layout
 
 \end_inset
@@ -1788,21 +1694,7 @@ status open
 \end_layout
 
 \begin_layout Code
-    <udn/> 
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status collapsed
-
-\begin_layout Standard
-
-</listitem></itemizedlist>
-\end_layout
-
-\end_inset
-
-
+<udn/> 
 \end_layout
 
 \begin_layout Standard
@@ -1829,17 +1721,13 @@ Unique Device Name, according to the UPnP spec it must be consistent throughout
  launch of the server.
 \end_layout
 
-\begin_layout Code
-
-\end_layout
-
 \begin_layout Standard
 \begin_inset ERT
 status open
 
 \begin_layout Standard
 
-<itemizedlist><listitem>
+</listitem><listitem>
 \end_layout
 
 \end_inset
@@ -1848,21 +1736,7 @@ status open
 \end_layout
 
 \begin_layout Code
-    <home>/home/your_user_name/.mediatomb</home> 
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem></itemizedlist>
-\end_layout
-
-\end_inset
-
-
+<home>/home/your_user_name/.mediatomb</home> 
 \end_layout
 
 \begin_layout Standard
@@ -1883,17 +1757,13 @@ Server home - the server will search for the data that it needs relative
  The mediatomb.html bookmark file will also be generated in that directory.
 \end_layout
 
-\begin_layout Code
-
-\end_layout
-
 \begin_layout Standard
 \begin_inset ERT
 status open
 
 \begin_layout Standard
 
-<itemizedlist><listitem>
+</listitem><listitem>
 \end_layout
 
 \end_inset
@@ -1902,21 +1772,7 @@ status open
 \end_layout
 
 \begin_layout Code
-    <webroot>/usr/share/mediatomb/web</webroot>
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status collapsed
-
-\begin_layout Standard
-
-</listitem></itemizedlist>
-\end_layout
-
-\end_inset
-
-
+<webroot>/usr/share/mediatomb/web</webroot>
 \end_layout
 
 \begin_layout Standard
@@ -1938,17 +1794,13 @@ Root directory for the web server, this is the location where device description
  are stored.
 \end_layout
 
-\begin_layout Code
-
-\end_layout
-
 \begin_layout Standard
 \begin_inset ERT
 status open
 
 \begin_layout Standard
 
-<itemizedlist><listitem>
+</listitem><listitem>
 \end_layout
 
 \end_inset
@@ -1957,21 +1809,7 @@ status open
 \end_layout
 
 \begin_layout Code
-    <servedir>/home/myuser/mystuff</servedir>
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status collapsed
-
-\begin_layout Standard
-
-</listitem></itemizedlist>
-\end_layout
-
-\end_inset
-
-
+<servedir>/home/myuser/mystuff</servedir>
 \end_layout
 
 \begin_layout Standard
@@ -2002,17 +1840,13 @@ ething.jar on your filesystem.
 hing.jar
 \end_layout
 
-\begin_layout Code
-
-\end_layout
-
 \begin_layout Standard
 \begin_inset ERT
 status open
 
 \begin_layout Standard
 
-<itemizedlist><listitem>
+</listitem><listitem>
 \end_layout
 
 \end_inset
@@ -2021,21 +1855,7 @@ status open
 \end_layout
 
 \begin_layout Code
-    <alive>180</alive> 
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status collapsed
-
-\begin_layout Standard
-
-</listitem></itemizedlist>
-\end_layout
-
-\end_inset
-
-
+<alive>180</alive>
 \end_layout
 
 \begin_layout Standard
@@ -2058,17 +1878,13 @@ Default:
 Interval for broadcasting SSDP:alive messages 
 \end_layout
 
-\begin_layout Code
-
-\end_layout
-
 \begin_layout Standard
 \begin_inset ERT
 status open
 
 \begin_layout Standard
 
-<itemizedlist><listitem>
+</listitem><listitem>
 \end_layout
 
 \end_inset
@@ -2077,21 +1893,7 @@ status open
 \end_layout
 
 \begin_layout Code
-    <custom-http-headers> 
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status collapsed
-
-\begin_layout Standard
-
-</listitem></itemizedlist>
-\end_layout
-
-\end_inset
-
-
+<custom-http-headers>
 \end_layout
 
 \begin_layout Standard
@@ -2105,10 +1907,6 @@ This section holds the user defined HTTP headers that will be added to all
  HTTP responses that come from the server.
 \end_layout
 
-\begin_layout Code
-
-\end_layout
-
 \begin_layout Standard
 \begin_inset ERT
 status open
@@ -2124,21 +1922,7 @@ status open
 \end_layout
 
 \begin_layout Code
-        <add header="..."/> 
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status collapsed
-
-\begin_layout Standard
-
-</listitem></itemizedlist>
-\end_layout
-
-\end_inset
-
-
+<add header="..."/>
 \end_layout
 
 \begin_layout Standard
@@ -2153,31 +1937,9 @@ Specify a header to be added to the response.
  the .AVI playback problem.
 \end_layout
 
-\begin_layout Code
-
-\end_layout
-
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
-
-\begin_layout Standard
-
-<itemizedlist><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-    <upnp-string-limit>
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Standard
 
@@ -2187,6 +1949,24 @@ status collapsed
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<upnp-string-limit>
 \end_layout
 
 \begin_layout Standard
@@ -2216,7 +1996,21 @@ This will limit title and description length of containers and items in
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
 
 \begin_layout Standard
 
@@ -4070,10 +3864,6 @@ TagLib support patch was contributed by Benhur Stein <benhur.stein at gmail
 \begin_layout Itemize
 tombupnp is kept in sync with the latest pupnp patches, see documentation
  in the tombupnp directory
-\end_layout
-
-\begin_layout Standard
-
 \end_layout
 
 \end_body
