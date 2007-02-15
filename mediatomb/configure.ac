@@ -1314,19 +1314,19 @@ fi
 if test "x$JS_OK" = xyes; then
     if test -n "$JS_SEARCH_LIBS" ; then
         AC_MSG_NOTICE([Will search for js (spidermonkey) libraries in $withval])
-        LDFLAGS="-L$JS_SEARCH_LIBS -ljs"
+        LDFLAGS="$LDFLAGS -L$JS_SEARCH_LIBS $LDFLAGS_SAVE -ljs"
         AC_CHECK_LIB(js, JS_NewObject,
                 [
                     JS_LIBS="-L$JS_SEARCH_LIBS -ljs"
                 ],
                 [
-                    LDFLAGS="-L$JS_SEARCH_LIBS -lsmjs"
+                    LDFLAGS="-L$JS_SEARCH_LIBS $LDFLAGS_SAVE -lsmjs"
                     AC_CHECK_LIB(smjs, JS_NewObject,
                         [
-                            JS_LIBS="-L$JS_SEARCH_LIBS -lsmjs"
+                            JS_LIBS="-L$JS_SEARCH_LIBS $LDFLAGS_SAVE -lsmjs"
                         ],
                         [
-                            LDFLAGS="-L$JS_SEARCH_LIBS -lmozjs"
+                            LDFLAGS="-L$JS_SEARCH_LIBS $LDFLAGS_SAVE -lmozjs"
                             AC_CHECK_LIB(mozjs, JS_NewObject,
                                 [
                                     JS_LIBS="-L$JS_SEARCH_LIBS -lmozjs"
@@ -1352,7 +1352,7 @@ if test "x$JS_OK" = xyes; then
                     AC_CHECK_LIB(mozjs, JS_NewObject,
                         [],
                         [
-                            LDFLAGS="-L$SEARCH_DIR_LIBS"
+                            LDFLAGS="-L$SEARCH_DIR_LIBS $LDFLAGS_SAVE"
                             unset ac_cv_lib_js_JS_NewObject
                             AC_CHECK_LIB(js, JS_NewObject,
                                 [JS_LIBS="-L$SEARCH_DIR_LIBS -ljs"],
@@ -1361,7 +1361,7 @@ if test "x$JS_OK" = xyes; then
                                     AC_CHECK_LIB(smjs, JS_NewObject,
                                         [JS_LIBS="-L$SEARCH_DIR_LIBS -lsmjs"],
                                         [
-                                            LDFLAGS="-L$SEARCH_DIR_LIBS -lmozjs"
+                                            LDFLAGS="-L$SEARCH_DIR_LIBS $LDFLAGS_SAVE -lmozjs"
                                             unset ac_cv_lib_mozjs_JS_NewObject
                                             AC_CHECK_LIB(mozjs, JS_NewObject,
                                                 [

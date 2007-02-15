@@ -194,6 +194,7 @@ Ref<StringConverter> StringConverter::m2i()
     return conv;
 }
 
+#ifdef HAVE_JS
 Ref<StringConverter> StringConverter::j2i()
 {
     Ref<StringConverter> conv(new StringConverter(
@@ -201,3 +202,5 @@ Ref<StringConverter> StringConverter::j2i()
                                                 _(DEFAULT_JS_CHARSET)));
     return conv;
 }
+#endif
+

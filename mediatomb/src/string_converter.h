@@ -53,7 +53,9 @@ public:
     static zmm::Ref<StringConverter> i2f();
     static zmm::Ref<StringConverter> f2i();
     static zmm::Ref<StringConverter> m2i();
+#ifdef HAVE_JS    
     static zmm::Ref<StringConverter> j2i();
+#endif
 protected:
     iconv_t cd;
     bool dirty;
