@@ -1,604 +1,1713 @@
-MediaTomb - UPnP AV mediaserver for Linux, distributed under GNU GPL.
+MediaTomb - UPnP MediaServer
 
-Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.org>,
-                   Sergey Bostandzhyan <jin@mediatomb.org>
-Copyright (C) 2006 Gena Batyan <bgeradz@mediatomb.org>,
-                   Sergey Bostandzhyan <jin@mediatomb.org>,
-                   Leonhard Wimmer <leo@mediatomb.org>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-http://mediatomb.org/
+Table of Contents
+
+1. Introduction
+
+    1.1. Currently Supported Features
+    1.2. Planned Features
+
+2. Requirements
+3. Compiling From Source
+
+    3.1. Standard Method
+    3.2. Configure Options
+
+4. Initial Installation
+
+    4.1. Network Setup
+    4.2. First Time Launch
+
+5. Command Line Options
+
+    5.1. IP Address
+    5.2. Port
+    5.3. Configuration File
+    5.4. Daemon Mode
+    5.5. Write PID File
+    5.6. Run Under Different User Name
+    5.7. Run Under Different Group
+    5.8. Add Content
+    5.9. Log To File
+    5.10. Display Command Line Summary
+
+6. Configuration File
+
+    6.1. Server Settings
+    6.2. Import Settings
+
+7. Supported Devices
+
+    7.1. MediaRenderers
+    7.2. Network Attached Storage Devices
+
+8. Running The Server
+9. Legal
+
+    9.1. Copyright
+    9.2. License
+
+10. Acknowledgments
+11. Contributions
+
+1. Introduction
+
+MediaTomb is an open source (GPL) UPnP MediaServer with a nice web user
+interface, it allows you to stream your digital media through your home network
+and listen to/watch it on a variety of UPnP compatible devices.
+
+MediaTomb implements the UPnP MediaServer V 1.0 specification that can be found
+on http://www.upnp.org/. The current implementation focuses on parts that are
+required by the specification, however we look into extending the functionality
+to cover the optional parts of the spec as well.
+
+MediaTomb should work with any UPnP compliant MediaRenderer, please tell us if
+you experience difficulties with particular models, also take a look at the
+Supported Devices list for more information.
+
+WARNING!
+
+The server has an integrated file system browser in the UI, that means that
+anyone who has access to the UI can browse your file system (with user
+permissions under which the server is running) and also download your data! If
+you want maximum security - disable the UI completely! Account authentication
+offers simple protection that might hold back your kids, but it is not secure
+enough for use in an untrusted environment!
+
+Note:
+
+    since the server is meant to be used in a home LAN environment the UI is
+    enabled by default and accounts are deactivated, thus allowing anyone on
+    your network to connect to the user interface.
 
 THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY! USE AT YOUR OWN RISK!
 
-If you encounter any problems with this software, you are encouraged to
-post to the project forums at http://sourceforge.net/forum/?group_id=129766
-or to e-mail us directly.
+1.1. Currently Supported Features
 
-FEATURES
---------
+  ● browse and playback your media via UPnP
 
-- browse media via UPnP
-- scriptable virtual containers (check doc/scripting-intro.txt for details)
-- automatic directory rescans
-- metadata extraction (exif, id3, etc.)
-- daemon mode
-- configurable filename to mimetype mappings
-- configurable mimetype to upnp:class mappings
-- add/remove/edit/browse media via the web UI
-- stream/download media
-- cds container updates
-- adding external URLs
-- ActiveItems (see Help in the UI for details)
+  ● metadata extraction from mp3, ogg, flac, jpeg, etc. files.
 
-Next planned features:
-- transcoding
-- UPnP improvements (filter parameter for browse)
+  ● Exif thumbnail support
 
+  ● user defined server layout based on extracted metadata (scriptable virtual
+    containers)
 
-IMPORTANT NOTE!!!
-Versions 0.7.*, 0.8.* and 0.9.0 are not database compatible,
+  ● automatic directory rescans
 
-You will have to recreate your collection. Our apologies for inconvinience.
-The 0.9.0 and later releases will introduce a database migration option.
+  ● sophisticated web UI with a tree view of the database and the file system,
+    allowing to add/remove/edit/browse your media
 
+  ● support for external URLs (create links to internet content and serve them
+    via UPnP to your renderer)
 
-REQUIREMENTS
-------------
+  ● support for ContentDirectoryService container updates
 
-- Javascript enabled to access the web interface.
-    Tested and works with the recent versions of
-      - Mozilla
-      - Opera
-    Tested and does not work with the recent versions of
-      - Konqueror
-      - Internet Explorer, Safari
-- At least sqlite3 or mysql
-- Several libraries, see installation instructions.
+  ● Active Items (experimental feature), allows execution of server side
+    scripts upon HTTP GET requests to certain items
 
-    
-INSTALLATION
-------------
+  ● highly flexible configuration, allowing you to control the behavior of
+    various features of the server
 
-In order to compile MediaTomb you will have to install the following packages:
+  ● support for Linux, FreeBSD, Mac OS X
 
-  Note:  the UPnP SDK is now a part of MediaTomb and does not have to be 
-         installed separately. We base our heavily patched version on
-         libupnp 1.4.1 from http://pupnp.sf.net/
+  ● runs on x86, Alpha, ARM, MIPS, Sparc
 
-  Note2: DSM-320 users: in order to fix the .AVI playback problem
-         add a custom http header to your config.xml (under the <server> tag):
-         <custom-http-headers>
-            <add header="X-User-Agent: redsonic"/>
-         </custom-http-headers>
-         Please read the forums on our SourceForge project page for more 
-         information. Some problems regarding the UPnP SDK, MediaTomb and the
-         DSM-320 are discussed there, some solutions are offered.
- 
-- At least one of the databases (REQUIRED):
-  * sqlite3 from http://www.sqlite.org/ (Very SLOW media import)
-    On Fedora Core it's sqlite3-devel and 'sqlite3' packages.
-    On Debian it's 'libsqlite3' 'libsqlite3-dev' and 'sqlite3'
-    (the last package includes command line client which is also required)
-  * mysql client library 
-    NOTE: Write operations to sqlite3 database is VERY SLOW, use sqlite3
-    only if you don't have another choice.
+1.2. Planned Features
 
-- libmagic (OPTIONAL, RECOMMENDED)
-  On Fedora Core the package is called 'file'. (Note, that due to a bug
-  (tested on FC4) filemagic can return wrong mimetypes, see
-  https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=165323 for more
-  information. If you have the problem, try installing file-4.15-1
-  from FC development)
-  On Debian it's libmagic1 and libmagic-dev
+  ● transcoding of audio and video
 
-- SpiderMonkey JavaScript Engine http://www.mozilla.org/js/spidermonkey/
-  (OPTIONAL, HIGHLY RECOMMENDED)
-  This package is necessary for virtual objects to work.
-  You will find some RPMs here: http://ftp.mozilla.org/pub/mozilla.org/js/
-  Fedora does not have a packages for this library, you will have to
-  fetch / build it yourself, the library is normally called libjs.
-  On debian install the packages libsmjs1 and libsmjs-dev.
+  ● playlist support
 
-- taglib http://developer.kde.org/~wheeler/taglib.html
-  (OPTIONAL, RECOMMENDED)
-  This library retrieves metadata tags from mp3, ogg and flac files.
-  You will need it if you want to have virtual objects for those
-  files (i.e. nice content layout).
-  Note: It makes no sense to use taglib and id3lib at the same time,
-  therefore the configure script will not allow that. You can
-  choose either taglib or id3lib but you can not use both.
+  ● various UPnP improvements
 
-- id3lib http://id3lib.sourceforge.net/ (at least version 3.8.3)
-  (OPTIONAL, RECOMMENDED) You will need this library to have
-  virtual objects for mp3 files
+2. Requirements
 
-- libexif http://libexif.sourceforge.net/
-  You will need this library if you want to extract metadata from
-  images. It not only allows you to have virtual objects for photos,
-  but also enables thumbnail support (only if EXIF thumbnails are present
-  in your images).
+Note:
 
-- libextractor http://gnunet.org/libextractor/
-  This library tries to gather metadata from all kinds of files (also 
-  .avi and .asf). The drawback is, that it can be very slow at scanning
-  video files. We also noticed that it uses a lot of memory when reading
-  files. The result is, that media import becomes extremely slow.
-  It is up to you if you want to use it or not, you may use the
-  extract utility to check if there is any metadata that can be extracted
-  from your media prior to enabling this feature in MediaTomb. By defaault
-  libextractor is disabled, use ./configure --enable-libextractor to
-  activate it.
+    remember to install associated development packages, because development
+    headers are needed for compilation!
 
-If the server does not respond to search requests from media renderers or
-control points on the network, try applying these settings to your
-network interface (assuming eth1):
+Note:
 
-route add -net 239.0.0.0 netmask 255.0.0.0 eth1 >/dev/null 2>&1
-ifconfig eth1 allmulti
+    libupnp is now a part of MediaTomb and does not have to be installed
+    separately. We base our heavily patched version on libupnp 1.4.1 from http:
+    //pupnp.sf.net/
 
-Those settings will be applied automatically in the init.d startup script.
+Note:
 
-If you fail to setup the server on your system please tell us which distro you
-are using and write a detailed description of what exactly happened during 
-./configure or compilation.
+    you need at least one database in order to compile and run MediaTomb -
+    either sqlite or mysql.
 
-If you find some errors or unclarities in the above description, a message
-would be appreciated.
+In order to compile MediaTomb you will have to install the following packages.:
 
+  ● sqlite (version > 3.x) http://www.sqlite.org/ REQUIRED (if mysql is not
+    available)
 
-SETUP
------
+  ● mysql client library (version > 4.0.x) http://mysql.org/ REQUIRED (if
+    sqlite is not available)
 
-So you have finally installed MediaTomb and want to check it out. There is
-however one thing that you have to do - before using the server for the
-first time you must run the tomb-install script to perform the setup in
-your home directory.
+  ● zlib http://www.zlib.net/ OPTIONAL, HIGHLY RECOMMENDED
 
-tomb-install will create a ~/.mediatomb directory in your home. There you will
-find the server configuration file (config.xml), the database, the link to
-the web directory and the html redirector.
+    Zlib is a compression library that is available on most systems, we need it
+    for the database autocreation functionality. Make sure to install the zlib
+    development package providing zlib.h, if it is not available you will need
+    to create the MediaTomb sqlite3/MySQL database manually.
 
-By default the redirector is called mediatomb.html, it is created after
-the first launch of the server. Open a web browser and manually
-add this file as a bookmark. When the server is running, the redirector will
-forward you to the web UI. It is quite handy, because the server port may 
-change upon restarts.
+  ● libmagic OPTIONAL, RECOMMENDED
 
-IMPORTANT NOTE:
-Once installed mediatomb uses sqlite3 as the default database backend for the
-sole reason that sqlite may be set up automatically without any manual
-configuration by the user and thus the server will be immediately available
-after installation.
-However, sqlite3 is VERY SLOW at media import, whereas mysql has
-superior performance with any operations. Hence mysql is actually the
-preferred database backend and sqlite3 should only be used as the last resort
-if MySQL is not available.
+    This is the 'file' package, it is used to determine the mime type of the
+    media. If you don't have this you will have to enter file extension to mime
+    type mappings manually in your config file.
 
------- incorrect - dbs are now created automatically -----
+  ● js - SpiderMonkey JavaScript Engine http://www.mozilla.org/js/spidermonkey/
+    OPTIONAL, HIGHLY RECOMMENDED
 
-To use MySQL you will have to create a MySQL database manually
-by invoking the SQL script located under the installation directory at
-<prefix>/share/mediatomb/mysql.sql
-and manually adapt mediatomb's configuration file.
-(see CONFIGURATION section below for details)
-If you know nothing about MySQL, try doc/mysql.txt before reaching
-for MySQL manual.
+    This package is necessary to allow the creation of virtual containers. The
+    import.js script defines the layout of your media, the default import
+    script will create a structure sorted by Audio/Photo/Video, it will make
+    use of the gathered metadata (like ID3 tags) to sort your music by Artist/
+    Album/Genre/Year , etc. The import script can be adjusted and modified - it
+    allows you to create the layout that you want.
 
------------------------------------------------------------
+  ● taglib http://developer.kde.org/~wheeler/taglib.html OPTIONAL, RECOMMENDED
 
+    This library retrieves metadata from mp3, ogg and flac files. You will need
+    it if you want to have virtual objects for those files (i.e. nice content
+    layout).
 
-USER INTERFACE
---------------
+    Note:
 
-The UI can be accessed via .... <description where to find the UI URL>
+        It makes no sense to use taglib and id3lib at the same time, the
+        configure script will first look for taglib, if taglib detection fails
+        it will search for id3lib. You can also force the script to take the
+        library of your choice, overriding the default setting.
 
-Internet Explorer
------------------
+  ● id3lib http://id3lib.sourceforge.net/ (at least version 3.8.3) OPTIONAL,
+    RECOMMENDED (if taglib is not available)
 
-We don't recommend using "Internet Explorer" <= 6 for accessing the UI, because
-the UI uses many advanced technologies which aren't very well supported by
-"Internet Explorer". Especially the optic is completely messed up but most
-functions should work. One feature that doesn't work at all with IE is the
-selection of the number of items per page. If you want IE to be fully supported,
-feel free to send us patches.
+    This library retrieves id3 tags from mp3 files.
 
-Supported browsers
-------------------
+  ● libexif http://libexif.sourceforge.net/ OPTIONAL, RECOMMENDED
 
-The following browsers were tested with our UI and seem to work perfectly:
+    You will need this library if you want to extract metadata from images,
+    this will allow you to have virtual containers for your Photos, sorted by
+    various attributes like Date, etc. It also enables thumbnail support: if
+    EXIF thumbnails are present in your images they will also be offered via
+    UPnP.
 
-* Firefox 1.5
-* Firefox 2
-* Opera 9
+  ● libextractor http://gnunet.org/libextractor/ OPTIONAL
 
-Limited functionality:
+    This library tries to gather metadata from all kinds of files (also .avi
+    and .asf). The drawback is, that it can be very slow at scanning video
+    files. We also noticed that it uses a lot of memory when reading files, the
+    result is, that media import becomes extremely slow. It is up to you if you
+    want to use it or not, you may try the 'extract' utility that is provided
+    with the library to check if there is any metadata that can be extracted
+    from your media prior to enabling this feature in MediaTomb. By default
+    libextractor is disabled, use ./configure --enable-libextractor to activate
+    it.
 
-* Internet Explorer <= 6
-(currently untested with IE 7)
+In order to use the web UI you will need to have javascript enabled in your web
+browser.
 
-CONFIGURATION
--------------
+The UI has been tested and works with the recent versions of :
 
-If you have already performed the setup using tomb-install you will have
-a default configuration file in your ~/.mediatomb directory, it is called
-config.xml
+  ● Firefox/Mozilla
 
-Note: paths starting with / are treated as absulute. Paths which do not
-start with / are treated as relative to server home (See <home>).
+  ● Opera
 
-Here is a sample configuration file with description of the various tags.
-- "Required" means that the server will not start if the tag is missing in the
-  configuration.
+Tested and does not work with the recent versions of:
 
-- "Optional" means that the tag can be left out of the configuration file.
+  ● Konqueror
 
-- "Default if missing" means, that the tag can be left out, but will be 
-  filled by some default value upon server startup. 
+  ● Safari
 
-<server> (Required)
-    This section defines the server configuration parameters.
+Limited functionality with:
 
-    <ui enabled="yes" poll-interval="2" poll-when-idle="no"/> (Required)
-        Enables or disables the web user interface, change to "yes" in order 
-        to enable it.
+  ● Internet Explorer 6 and 7
 
-        The poll-interval is an integer value which specifies how often the
-        UI will poll for tasks. The interval is specified in seconds, only
-        values greater than zero are allowed. This attribute is optional, the 
-        default interval is 2 seconds.
+3. Compiling From Source
 
-        The poll-when-idle attribute is optional and is set to "no" by default.
-        It influences the behaviour of displaying current tasks:
-        - when the user does something in the UI (i.e. clicks around) we 
-          always poll for the current task and will display it
-        - if a task is active, we will continue polling in the background and
-          update the current task view accordingly
-        - when there is no active task we will stop the background polling and
-          only request updates upon user actions, but not when the user
-          is idle (i.e. does not click around in the UI)
+3.1. Standard Method
 
-        Setting this option to "yes" will do background polling even when
-        there are no current tasks; this may be useful if you defined
-        multiple users and want to see the tasks the other user is queueing
-        on the server while you are actually idle.
+If you don't care about the details - make sure you have installed the required
+packages and the appropriate development headers and simply run
 
-        The possible tasks are:
-        - adding files or directories
-        - removing items or containers
-        - automatic rescans
+$ ./configure
+$ make
+$ make install
 
-        <accounts enabled="yes" session-timeout="30"/> (Required)
-        Specifies if accounts are enabled or disabled. The session-timeout
-        specifies the timeout interval in minutes. The server checks every
-        five minutes for sessions that have timed out, therefore in the worst
-        case the session times out after session-timeout + 5 minutes.
+This should compile and install MediaTomb, the resulting binary is ready to
+run.
+
+3.2. Configure Options
+
+The MediaTomb configure script provides a large variety of options, allowing
+you to specify the additional libraries that will be used, features that will
+be compiled or disabled, workarounds for known bugs in some distributions and
+so on. Some options are straightforward, some require deeper knowledge - make
+sure you know what you are doing :)
+
+3.2.1. Install Location Of Architecture Independent Files
+
+--prefix=PREFIX
+
+Default:
+
+    /usr/local/
+
+Install all architecture independent files - all .js files and .png images for
+the Web UI, the import.js script, the service description XML files - in the
+directory of your choice. This is especially useful if you do not want to
+perform a system-wide installation, but want to install MediaTomb only for your
+user.
+
+Important:
+
+    the prefix path will be compiled into the binary; the binary will still be
+    relocatable, but you move those files you will have to point MediaTomb to
+    the proper location by specifying it in the server configuration file.
+
+3.2.2. Static Build
+
+--enable-static
+
+Default:
+
+    disabled
+
+Build a static binary. This may be useful if you plan to install a precompiled
+MediaTomb binary on a system that does not have all the required libraries and
+where installation of those libraries is not possible due to reasons beyond
+your control.
+
+Note:
+
+    if you enable this option, make sure that you have all static versions of
+    the appropriate libraries installed on your system. The configure script
+    may not detect that those are missing - in this case you will get linker
+    errors. Some distributions, for example Fedora Core, do not ship static
+    library versions.
+
+3.2.3. Automatically Create Database
+
+--enable-db-autocreate
+
+Default:
+
+    enabled
+
+Automatically create the database if it is missing (for example upon a first
+time launch). Disabling this will make the resulting binary a little smaller,
+however you will have to take care of the database creation yourself by
+invoking the appropriate .sql scripts that are provided with the package.
+
+Note:
+
+    the server configuration file has to be setup correctly. Either sqlite or
+    MySQL has to be chosen in the storage section, for sqlite the database file
+    has to point to a writable location, for MySQL the user has to be setup
+    with a valid password and permissions and the database “mediatomb” has to
+    exist.
+
+3.2.4. Debug Malloc/Realloc Of Zero bytes
+
+--enable-debug-malloc0
+
+Default:
+
+    disabled
+
+This feature is only for debugging purposes, whenever a malloc or realloc with
+a value of zero bytes is encountered, the server will terminate with abort()
+
+3.2.5. Use Atomic Assembler Code For x86 Single CPU systems
+
+--enable-atomic-x86-single
+
+Default:
+
+    disabled
+
+Use assembler code suited for single CPU x86 machines. This may improve
+performance, but your binary will not function properly on SMP systems. If you
+specify this for a non x86 architecture the binary will not run at all. If you
+wonder about the purpose of assembler code in a mediaserver application: we
+need it for atomic operations that are required for reference counting. The
+pthread library will be used as a fallback for other architectures, but can
+also be forced by a designated configure option. This however, will have the
+worst performance.
+
+By default x86 SMP code will be used on x86 systems - it will reliably work on
+both SMP and single CPU systems, but will not be as fast as the
+atomic-x86-single option on uniprocessor machines.
+
+3.2.6. Use Pthread Code For Atomic Operations
+
+--enable-atomic-pthread
+
+Default:
+
+    auto detect
+
+This is the default setting for non x86 architectures, we may add assembler
+optimizations for other architectures as well, but currently only x86
+optimizations are available. This option may also be safely used on x86
+machines - the drawback is poor performance, compared to assembler optimized
+code.
+
+3.2.7. X_MS_MediaReceiverRegistrar Support
+
+--enable-mrreg-service
+
+Default:
+
+    disabled
+
+This option will enable the compilation and support of the
+X_MS_MediaReceiverRegistrar UPnP service, this was implemented for future Xbox
+360 support. If you have a renderer that requires this service, you can safely
+enable it. It will always return true to IsValidated and IsAuthorized requests.
+
+3.2.8. Fseeko Check
+
+--disable-fseeko-check
+
+Default:
+
+    enabled
+
+This is a workaround for a bug in some Debian distributions, disable this check
+if you know that your system has large file support, but configure fails to
+detect it. For more information see: ADD LINK HERE
+
+3.2.9. Largefile Support
+
+--disable-largefile
+
+Default:
+
+    auto
+
+By default largefile support will be auto detected by configure, however you
+can disable it if you do not want it or if you experience problems with it on
+your system.
+
+3.2.10. Redefinition Of Malloc And Realloc
+
+--disable-rpl-malloc
+
+Default:
+
+    enabled
+
+Autoconf may redefine malloc and realloc functions to rpl_malloc and
+rpl_realloc, usually this will happen if the autotools think that you are
+compiling against a non GNU C library. Since malloc and realloc may behave
+different on other systems, this gives us the opportunity to write wrapper
+functions to handle special cases. However, this redefinition may get triggered
+when cross compiling, even if you are compiling against the GNU C lib. If this
+is the case, you can use this option to disable the redefinition.
+
+3.2.11. SQLite Support
+
+--enable-sqlite3
+
+Default:
+
+    enabled
+
+The SQLite database is very easy in installation and use, you do not have to
+setup any users, permissions, etc. A database file will be simply created as
+specified in the MediaTomb configuration. At least SQLite version 3 is
+required.
+
+3.2.12. MySQL Support
+
+--enable-mysql
+
+Default:
+
+    enabled
+
+MySQL is a very powerful database, however it requires some additional setup.
+You will find information on how to setup MediaTomb with MySQL in the
+Installation section.
+
+3.2.13. SpiderMonkey LibJS Support
+
+--enable-libjs
+
+Default:
+
+    enabled
+
+SpiderMonkey is Mozilla's JavaScript engine, it plays a very important role in
+MediaTomb. We use it to create a nice virtual container layout based on the
+metadata that is extracted from your media. We also allow the user to create
+custom import scripts, so everyone has the possibility to adapt the layout to
+ones personal needs. Read more about this in the installation section.
+
+The main problem with this library is, that it is called differently on various
+distributions and that it is installed in different locations. For example, it
+is called js on Fedora, but is available under the name of smjs on Debian. If
+configure fails to find your js headers and libraries you can point it to the
+desired locations (see options below).
+
+3.2.14. Filemagic Support
+
+--enable-libmagic
+
+Default:
+
+    enabled
+
+This library determines the file type and provides us with the appropriate mime
+type information. It is very important to correctly determine the mime type of
+your media - this information will be sent to your renderer. Based on the mime
+type information, the renderer will decide if it can play/display the
+particular file or not. If auto detection returns strange mime types, you may
+want to do a check using the 'file' command (the 'file' package must be
+installed on your system). Assuming that you want to check somefile.avi enter
+the following in your terminal:
+
+$ file -i somefile.avi
+
+This will print the detected mime type, this is exactly the information that we
+use in MediaTomb. You can override auto detection by defining appropriate file
+extension to mime type mappings in your configuration file. You can also edit
+the mime type information of an imported object manually via the web UI.
+
+3.2.15. Id3lib Support
+
+--enable-id3lib
+
+Default:
+
+    enabled, preferred over taglib
+
+This library will parse id3 tags of your MP3 files, the gathered information
+will be saved in the database and provided via UPnP. Further, the gathered
+metadata will be used by the import script to create a nice container layout
+(Audio/Artist/Album, etc.)
+
+3.2.16. Taglib Support
+
+--enable-taglib
+
+Default:
+
+    disabled if id3lib is available
+
+This library will parse id3 tags of your MP3 files as well as information
+provided with flac files. It claims to be faster than id3lib, but it also seems
+to have some drawbacks. We had some cases where it crashed when trying to parse
+tags of certain MP3 files on embedded systems, we had reports and observed that
+it had problems parsing the sample rates. We also did some valgrinding and
+detected memory leaks. Our feeling is, that you will have more stable results
+with id3lib, however it is up to you to enable or disable this library. By
+default id3lib will be taken if both libraries are present on the system.
+
+3.2.17. Libexif Support
+
+--enable-libexif
+
+Default:
+
+    enabled
+
+The exif library will gather metadata from your photos, it will also find exif
+thumbnails which are created automatically by most digital camera models. The
+gathered data will be used by the import script, the thumbnails will be offered
+as additional resources via UPnP.
+
+3.2.18. Libextractor Support
+
+--enable-libextractor
+
+Default:
+
+    disabled
+
+Libextractor is a library that attempts to parse all sorts of files, this
+includes exif data, id3 tags and much more. It can also deal with .AVI and .ASF
+files which is useful when your video files have the appropriate metadata. The
+drawback is - it is slow, especially slow on scanning big video files, so it
+slows down the import process considerably. For this reason this library is
+disabled by default.
+
+3.2.19. MediaTomb Debug Output
+
+--enable-tombdebug
+
+Default:
+
+    disabled
+
+This option enables debug output, the server will print out a lot of
+information which is mainly interesting to developers. Use this if you are
+trying to trace down a bug or a problem, the additional output may give you
+some clues.
+
+3.2.20. UPnP Library Debug Output
+
+--enable-upnpdebug
+
+Default:
+
+    disabled
+
+This option enables debug output of the UPnP SDK. You should not need it under
+normal circumstances.
+
+3.2.21. Log Output
+
+--disable-log
+
+Default:
+
+    enabled
+
+This option allows you to suppress all log output from the server.
+
+3.2.22. Package Search Directory
+
+--with-search=DIR
+
+Default:
+
+    /opt/local/ on Darwin, /usr/local/ on all other systems
+
+Some systems may have whole sets of packages installed in an alternative
+location, for example Darwinports on OSX get installed to /opt/local/. This
+option tells the configure script to additionally search for headers and
+libraries of various packages in DIR/include and DIR/lib.
+
+3.2.23. Specifying Header And Library Locations Of Various Packages
+
+You can specify the exact location of particular headers and libraries. Some
+packages use extra programs that tell us the appropriate flags that are needed
+for compilation - like mysql_config. You can also specify the exact location of
+those programs. The parameters are self explanatory, in case of headers and
+libraries the DIR parameter is the directory where those headers and libraries
+are located.
+
+--with-sqlite3-h=DIR            search for sqlite3 headers only in DIR
+--with-sqlite3-libs=DIR         search for sqlite3 libraries only in DIR
+--with-mysql-cfg=mysql_config   absolute path/name of mysql_config
+--with-js-h=DIR                 search for js (spidermonkey) headers in DIR
+--with-js-libs=DIR              search for js (spidermonkey) libraries in DIR
+--with-magic-h=DIR              search for filemagic headers in DIR
+--with-magic-libs=DIR           search for filemagic headers in DIR
+--with-exif-h=DIR               search for libexif headers in DIR
+--with-exif-libs=DIR            search for libexif libraries in DIR
+--with-taglib-cfg=taglib-config absolute path/name of taglib-config
+--with-id3lib-h=DIR             search for id3lib headers in DIR
+--with-id3lib-libs=DIR          search for id3lib libraries in DIR
+--with-zlib-h=DIR               search for zlib headers in DIR
+--with-zlib-libs=DIR            search for zlib libraries in DIR
+--with-iconv-h=DIR              search for iconv headers in DIR
+--with-iconv-libs=DIR           search for iconv libraries in DIR
+--with-extractor-h=DIR          search for extractor headers in DIR
+--with-extractor-libs=DIR       search for extractor libraries in DIR
+
+3.2.24. The devconf Script
+
+If you are doing some development work and some debugging, you will probably
+want to compile with the -g flag and also disable optimization. The devconf
+script does exactly that. In addition, it accepts command line parameters that
+are passed to the configure script.
+
+4. Initial Installation
+
+4.1. Network Setup
+
+Some systems require a special setup on the network interface. If MediaTomb
+exits with UPnP Error -117, or if it does not respond to M-SEARCH requests from
+the renderer (i.e. MediaTomb is running, but your renderer device does not show
+it) you should try the following settings (the lines below assume that
+MediaTomb is running on a Linux machine, on network interface eth1):
+
+# route add -net 239.0.0.0 netmask 255.0.0.0 eth1
+# ifconfig eth1 allmulti
+
+Those settings will be applied automatically by the init.d startup script.
+
+You should also make sure that your firewall is not blocking port UDP port 1900
+(required for SSDP) and UDP/TCP port of MediaTomb. By default MediaTomb will
+select a free port starting with 49152, however you can specify a port of your
+choice in the configuration file.
+
+4.2. First Time Launch
+
+When starting MediaTomb for the first time, a .mediatomb directory will be
+created in your home. Further, a default server configuration file, called
+config.xml will be generated in that directory.
+
+4.2.1. Using Sqlite Database
+
+If you are using sqlite - you are ready to go, the database file will be
+created automatically and will be located ~/.mediatomb/mediatomb.db If needed
+you can adjust the database file name and location in the server configuration
+file.
+
+4.2.2. Using MySQL Database
+
+If MediaTomb was compiled with support for both databases, sqlite will be
+chosen as default because the initial database can be created and used without
+any user interaction. If MediaTomb was compiled only with MySQL support, the
+appropriate config.xml file will be created in the ~/.mediatomb directory, but
+the server will then terminate, because user interaction is required.
+
+MediaTomb has to be able to connect to the MySQL server and at least the
+(empty) database has to exist. To create the database and provide MediaTomb
+with the ability to connect to the MySQL server you need to have the
+appropriate permissions. Note that user names and passwords in MySQL have
+nothing to do with UNIX accounts, MySQL has it's own user names/passwords.
+Connect to the MySQL database as “root” or any other user with the appropriate
+permissions:
+
+$ mysql [-u <username>] [-p]
+
+(You'll probably need to use “-u” to specify a different MySQL user and “-p” to
+specify a password.)
+
+Create a new database for MediaTomb: (substitute “<database name>” with the
+name of the database)
+
+mysql> CREATE DATABASE <database name>;
+
+(You can also use “mysqladmin” instead.)
+
+Give MediaTomb the permissions to access the database:
+
+mysql> GRANT ALL ON <database name>.* TO '<user name>'@'<hostname>' IDENTIFIED BY '<password>';
+
+If you don't want to set a password, omit “IDENTIFIED BY ..” completely. You
+could also use the MySQL “root” user with MediaTomb directly, but this is not
+recommended.
+
+To create a database and a user named “mediatomb” (who is only able to connect
+via “localhost”) without a password (the defaults) use:
+
+mysql> CREATE DATABASE mediatomb;
+mysql> GRANT ALL ON mediatomb.* TO 'mediatomb'@'localhost';
+
+If MediaTomb was compiled with database auto creation the tables will be
+created automatically during the first startup. All table names have a “mt_”
+prefix, so you can theoretically share the database with a different
+application. However, this is not recommended.
+
+If database auto creation wasn't compiled in (configure was run with the
+“--disable-db-autocreate” or zlib.h was not available) you have to create the
+tables manually:
+
+$ mysql [-u <username>] [-p] <database name> < <install prefix>/share/mediatomb/mysql.sql
+
+After creating the database and making the appropriate changes in your
+MediaTomb config file you are ready to go - launch the server, and everything
+should work.
+
+5. Command Line Options
+
+There is a number of options that can be passed via command line upon server
+start up, for a short summary you can invoke MediaTomb with the following
+parameter:
+
+$ mediatomb --help
+
+Note:
+
+    the command line options override settings in the configuration file!
+
+5.1. IP Address
+
+--ip or -i
+
+The server will bind to the given IP address, currently we can not bind to
+multiple interfaces so binding to 0.0.0.0 will not be possible.
+
+5.2. Port
+
+--port or -p
+
+Specify the server port that will be used for the web user interface, for
+serving media and for UPnP requests, minimum allowed value is 49152. If this
+option is omitted a default port will be chosen, however, in this case it is
+possible that the port will change upon server restart.
+
+5.3. Configuration File
+
+ --config or -c
+
+By default MediaTomb will search for a file named “config.xml” in the ~
+/.mediatomb directory. This option allows you to specify a config file by the
+name and location of your choice. The file name must be absolute.
+
+5.4. Daemon Mode
+
+--daemon or -d
+
+Run the server in background, MediaTomb will shutdown on SIGTERM, SIGINT and
+restart on SIGHUP.
+
+5.5. Write PID File
+
+--pidfile or -P
+
+Specify a file that will hold the server process ID, the filename must be
+absolute.
+
+5.6. Run Under Different User Name
+
+--user or -u
+
+Run MediaTomb under the specified user name, this is especially useful in
+combination with the daemon mode.
+
+5.7. Run Under Different Group
+
+--group or -g
+
+Run MediaTomb under the specified group, this is especially useful in
+combination with the daemon mode.
+
+5.8. Add Content
+
+--add or -a
+
+Add the specified directory or file name to the database without UI
+interaction. The path must be absolute, if path is a directory then it will be
+added recursively. If path is a file, then only the given file will be
+imported.
+
+5.9. Log To File
+
+--logfile or -l
+
+Do not output log messages to stdout, but redirect everything to a specified
+file.
+
+5.10. Display Command Line Summary
+
+--help or -h
+
+Print a summary about the available command line options.
+
+6. Configuration File
+
+MediaTomb is highly configurable and allows the user to set various options and
+preferences that define the servers behavior. Rather than enforcing certain
+features upon the user, we prefer to offer a number of choices where possible.
+The heart of MediaTomb configuration is the config.xml file, which is located
+in the ~/.mediatomb directory. If the configuration file is not found in the
+default location and no configuration was specified on the command line,
+MediaTomb will generate a default config.xml file in the ~/.mediatomb
+directory. The file is in the XML format and can be edited by a simple text
+editor, here is the list of all available options:
+
+  ● "Required" means that the server will not start if the tag is missing in
+    the configuration.
+
+  ● "Optional" means that the tag can be left out of the configuration file.
+
+The root tag of MediaTomb configuration is:
+
+<config>
+
+6.1. Server Settings
+
+These settings define the server configuration, this includes UPnP behavior,
+selection of database, accounts for the UI as well as installation locations of
+shared data.
+
+<server>
+
+Required
+
+This section defines the server configuration parameters.
+
+Child tags:
+
+  ● <port>0</port>
+
+    Optional
+
+    Default: 0 (automatic)
+
+    Specifies the port where the server will be listening for HTTP requests.
+    Note, that because of the implementation in the UPnP SDK only ports above
+    49152 are supported. The value of zero means, that a port will be
+    automatically selected by the SDK.
+
+  ● <ip>192.168.0.23</ip>
+
+    Optional
+
+    Default: first available interface.
+
+    Specifies the IP address to bind to, by default one of the available
+    interfaces will be selected.
+
+  ● <name>MediaTomb</name>
+
+    Optional
+
+    Default: MediaTomb
+
+    Server friendly name, you will see this on your devices that you use to
+    access the server.
+
+  ● <manufacturerURL>http://mediatomb.org/</manufacturerURL>
+
+    Optional
+
+    Default: http://mediatomb.cc/
+
+    This tag sets the manufacturer URL of a UPnP device, this may be necessary
+    to trick some renderers in order to enable special features that otherwise
+    are only active with the vendor implemented server.
+
+  ● <presentationURL append-to="ip">80/index.html</presentationURL>
+
+    Optional
+
+    Default: “/”
+
+    The presentation URL defines the location of the servers user interface,
+    usually you do not need to change this however, vendors who want to ship
+    our server along with their NAS devices may want to point to the main
+    configuration page of the device.
+
+    Attributes:
+
+      ○ append-to=...
+
+        Optional
+
+        Default: “none”
+
+        The append-to attribute defines how the text in the presentationURL tag
+        should be treated.
+
+        The allowed values are:
+
+        append-to="none"
+
+        Use the string exactly as it appears in the presentationURL tag.
+
+        append-to="ip"
+
+        Append the string specified in the presentationURL tag to the ip
+        address of the server, this is useful in a dynamic ip environment where
+        you do not know the ip but want to point the URL to the port of your
+        web server.
+
+        append-to="port"
+
+        Append the string specified in the presentationURL tag to the server ip
+        and port, this may be useful if you want to serve some static pages
+        using the built in web server.
+
+  ● <udn/>
+
+    Required
+
+    Default: automatically generated if the tag is empty
+
+    Unique Device Name, according to the UPnP spec it must be consistent
+    throughout reboots. You can fill in something yourself, but we suggest that
+    you leave this tag empty - it will be filled out and saved automatically
+    after the first launch of the server.
+
+  ● <home>/home/your_user_name/.mediatomb</home>
+
+    Required
+
+    Default: ~/.mediatomb
+
+    Server home - the server will search for the data that it needs relative to
+    this directory - basically for the sqlite database file. The mediatomb.html
+    bookmark file will also be generated in that directory.
+
+  ● <webroot>/usr/share/mediatomb/web</webroot>
+
+    Required
+
+    Default: depends on the installation prefix that is passed to the configure
+    script.
+
+    Root directory for the web server, this is the location where device
+    description documents, UI html and js files, icons, etc. are stored.
+
+  ● <servedir>/home/myuser/mystuff</servedir>
+
+    Optional
+
+    Default: empty (disabled)
+
+    Files from this directory will be served as from a regular web server. They
+    do not need to be added to the database, but they are also not served via
+    UPnP browse requests. Directory listing is not supported, you have to
+    specify full paths.
+
+    Example:
+
+        the file something.jar is located in /home/myuser/mystuff/javasubdir/
+        something.jar on your filesystem. Your ip address is 192.168.0.23, the
+        server is running on port 50500. Assuming the above configuration you
+        could download it by entering this link in your web browser: http://
+        192.168.0.23:50500/content/serve/javasubdir/something.jar
+
+  ● <alive>180</alive>
+
+    Optional
+
+    Default: 180, this is according to the UPnP specification.
+
+    Interval for broadcasting SSDP:alive messages
+
+  ● <custom-http-headers>
+
+    Optional
+
+    This section holds the user defined HTTP headers that will be added to all
+    HTTP responses that come from the server.
+
+    Child tags:
+
+      ○ <add header="..."/>
+        <add header="..."/>
+        ...
+
+        Optional
+
+        Specify a header to be added to the response. If you have a DSM-320 use
+        <add header="X-User-Agent: redsonic"/> to fix the .AVI playback
+        problem.
+
+  ● <upnp-string-limit>
+
+    Optional
+
+    Default: disabled
+
+    This will limit title and description length of containers and items in
+    UPnP browse replies, this feature was added a s workaround for the TG100
+    bug which can only handle titles no longer than 100 characters. A negative
+    value will disable this feature, the minimum allowed value is "4" because
+    three dots will be appended to the string if it has been cut off to
+    indicate that limiting took place.
+
+  ● <ui enabled="yes" poll-interval="2" poll-when-idle="no"/>
+
+    Optional
+
+    This section defines various user interface settings.
+
+    WARNING!
+
+    The server has an integrated filesystem browser, that means that anyone who
+    has access to the UI can browse your filesystem (with user permissions
+    under which the server is running) and also download your data! If you want
+    maximum security - disable the UI completely! Account authentication offers
+    simple protection that might hold back your kids, but it is not secure
+    enough for use in an untrusted environment!
+
+    Note:
+
+        since the server is meant to be used in a home LAN environment the UI
+        is enabled by default and accounts are deactivated, thus allowing
+        anyone on your network to connect to the user interface.
+
+    Attributes:
+
+      ○ enabled=...
+
+        Optional
+
+        Default: yes
+
+        Enables (“yes”) or disables (“no”) the web user interface.
+
+      ○ poll-interval=...
+
+        Optional
+
+        Default: 2
+
+        The poll-interval is an integer value which specifies how often the UI
+        will poll for tasks. The interval is specified in seconds, only values
+        greater than zero are allowed.
+
+      ○ poll-when-idle=...
+
+        Optional
+
+        Default: no
+
+        The poll-when-idle attribute influences the behavior of displaying
+        current tasks: - when the user does something in the UI (i.e. clicks
+        around) we always poll for the current task and will display it - if a
+        task is active, we will continue polling in the background and update
+        the current task view accordingly - when there is no active task (i.e.
+        the server is currently idle) we will stop the background polling and
+        only request updates upon user actions, but not when the user is idle
+        (i.e. does not click around in the UI)
+
+        Setting poll-when-idle to "yes" will do background polling even when
+        there are no current tasks; this may be useful if you defined multiple
+        users and want to see the tasks the other user is queuing on the server
+        while you are actually idle.
+
+        The tasks that are monitored are:
+
+          □ adding files or directories
+
+          □ removing items or containers
+
+          □ automatic rescans
+
+    Child tags:
+
+      ○ <accounts enabled="yes" session-timeout="30"/>
+
+        Optional
+
+        This section holds various account settings.
+
+        Attributes:
+
+          □ enabled=...
+
+            Optional
+
+            Default: yes
+
+            Specifies if accounts are enabled (“yes”) or disabled (“no”).
+
+          □ session-timeout=...
+
+            Optional
+
+            Default: 30
+
+            The session-timeout attribute specifies the timeout interval in
+            minutes. The server checks every five minutes for sessions that
+            have timed out, therefore in the worst case the session times out
+            after session-timeout + 5 minutes.
 
         Accounts can be defined as shown below:
 
+          □ <account user="name" password="password"/>
             <account user="name" password="password"/>
-            There can be multiple users, however this is mainly a feature 
-            for the future. Right now there are no per-user permissions.
+            ....
 
-        <items-per-page default="25"> (Optional)
-        This tells the UI the default number of items per page that will be 
-        shown when browsing the database.
+            Optional
 
-        The values for the items per page dropdown menu can also be
-        defined:
-            <option>10</option>
+            There can be multiple users, however this is mainly a feature for
+            the future. Right now there are no per-user permissions.
+
+      ○ <items-per-page default="25">
+
+        Optional
+
+        Default: 25
+
+        This sets the default number of items per page that will be shown when
+        browsing the database in the web UI.
+
+        The values for the items per page drop down menu can be defined in the
+        following manner:
+
+          □ <option>10</option>
             <option>25</option>
             <option>50</option>
-            
-        Note: this list must contain the default value, i.e. if you
-        define a default value of 25, then one of the <option> tags
-        must also list this value.
+            <option>100</option>
 
-    <port>50555</port> (Optional)
-        Specifies the port where the server will be listening for HTTP 
-        requests. Note, that because of the implementation in the UPnP SDK 
-        only ports above 49152 are supported.
+            Default: 10, 25, 50, 100
 
-    <ip>192.168.0.23</ip> (Optional)
-        Specifies the IP address to bind to.
-    
-    <name>MediaTomb</name> (Default if missing: MediaTomb)
-        Server friendly name, you will see this on your devices that you use 
-        to access the server.
+            Note:
 
-    <manufacturerURL>http://mediatomb.org/</manufacturerURL> (Optional)
-        This sets the manufacturer URL of a UPnP device, this may be necessary
-        to trick some renderers in order to enable special features that
-        otherwise are only active with the vendor implemented server.
+                this list must contain the default value, i.e. if you define a
+                default value of 25, then one of the <option> tags must also
+                list this value.
 
-    <presentationURL append-to="ip">80/index.html</presentationURL> (Optional)
-        By default the presentation URL points to our web UI, however, vendors
-        who want to ship our server along with their NAS devices may want to
-        point to the main configuration page of the device.
+  ● <storage driver="...">
 
-        Here are the allowed append-to values:
-        append-to="none"    use the string specified in the presentationURL
-                            tag as it is.
-        append-to="ip"      append the string specified in the presentationURL
-                            tag to the ip address of the server, i.e.:
-                            This is useful when you want to point the URL to 
-                            the port of your webserver.
-        append-to="port"    append the string specified in the presentationURL
-                            tag to the server ip and port, this may be useful
-                            if you want to serve some static pages using
-                            the builtin webserver.
-    
-    <udn/> (Required)
-        Unique Device Name, according to the UPnP spec it must be consistent
-        throughout reboots. You can fill in something yourself, but we suggest
-        that you leave this tag empty - it will be filled out and saved
-        automatically after the first launch of the server.
+    Required
 
-    <home>/home/your_user_name/.mediatomb</home> (Required)
-        Server home - the server will search for the data that it needs 
-        relative to this directory (for the media database, for directory 
-        holding device and service description xml files, icons, etc.)
-        
-    <webroot>web</webroot> (Required)
-        Root directory for the web server (relative to serer home), this is 
-        the location where device description documents, UI xsl files, etc. 
-        are stored.
+    Specifies the storage driver, currently sqlite3 and mysql are supported.
+    Each storage driver has it's own configuration parameters.
 
-    <servedir>/home/myuser/mystuff</servedir> (Optional)
-        Files from this directory will be served as from a regular webserver.
-        They do not need to be added to the database, but they are also not
-        served via UPnP browse requests.
-        
-        The url is: http://ip:port/content/serve/
-        Directory listing is not supported, you have to specify full paths.
-        
-        Example: the file something.jar is located in 
-        /home/myuser/mystuff/javasubdir/something.jar on your filesystem. 
-        Assuming the above configuration you could download it by entering 
-        this link in your web browser: 
-        http://192.168.0.23:50555/content/serve/javasubdir/something.jar
-        
-        
-    <alive>180</alive> (Default if missing: 180)
-        Interval for broadcasting SSDP:alive messages
-        
-    <bookmark>mediatomb.html</bookmark> (Default if missing: mediatomb.html)
-        Bookmark file for fast access to the web UI
-        
-    <storage driver="..."> (Required)
-        Specifies the storage driver. Currently sqlite3 and mysql are 
-        supported.
-    
-        Every storage driver has it's own configuration parameters.
-    
-        - for sqlite3 use
-        <storage driver="sqlite3">
-           <database-file>sqlite3.db</database-file> (Required) 
-        </storage>
+    Attributes:
 
-        - for mysql you'll need something like this:
-        <storage driver="mysql">
-          <host>localhost</host>
-          <username>root</username>
-          <password></password>
-          <database>mediatomb</database>
-        </storage>
- 
-    <custom-http-headers> (Optional)
-        This section holds the user defined HTTP headers that will be added
-        to all HTTP responses that come from the server.
+      ○ driver=...
 
-        <add header="..."/>
-            Specify a header to be added to the response.
-            If you have a DSM-320 use <add header="X-User-Agent: redsonic"/>
-            to fix the .AVI playback problem.
-        
+        Required
 
-    <upnp-string-limit> (Optional)
-        This will limit title/description/etc. lenghts of containers and
-        items during a UPnP browse, this feature was added a s workaround
-        for the TG100 bug which can only handle titles no longer than 100 
-        characters. 
-        A negative value will disable will disable this feature, the minimum 
-        allowed value is "4" because three dots will be appended to the cut off
-        string to indicate the limiting.
+        Default: sqlite3
 
-<import hidden-files="no"> (Tag required, attribute optional)
-    Section specifying various import parameters.
-    The attribute "hidden-files" specifies the default import behaviour
-    for hidden files. Autoscan can override this attribute on a per directory
-    basis.
-       
-    <filesystem-charset>ISO-8859-1</filesystem-charset>
-        (Default if missing: ISO-8859-1)
-        Defines the charset of the filesystem. For example, if you have 
-        filenames in cyrillic KOI8-R encoding, then you should specify that 
-        here. The server uses UTF-8 for UPnP and for the web UI, this import
-        parameter will help you to correctly import your data.
-        
-    <metadata-charset>ISO-8859-1</metadata-charset>
-        Same as above, but defines the charset of the metadata.
+        Allowed values are “sqlite3” or “mysql”, the available options depend
+        on the selected driver.
 
-    <script> (Required if javascript support is enabled)
-        Points to the script invoked upon media import.
-        For more details read doc/scripting-intro.txt
-        This setting defaults to ${prefix}/share/mediatomb/js/import.js
+          □ driver="sqlite3"
 
-    <magic-file> (Optional)
-        Specifies an alternative file for filemagic, contaning mimetype 
-        information.
+            There is only one child tag for sqlite:
 
-    <autoscan> (Optoinal)
-        Specifies a list of default autoscan directories.
+              ● <database-file>mediatomb.db</database-file>
 
-        <directory location="/tmp/b_test" mode="timed" interval="15" 
-                   level="full" recursive="no" hidden-files="no"/>
+                Optional
 
-        Defines autoscan directory and it's parameters.
-        location    (Required)  absolute directory path
-        mode        (Required)  scan mode, currently only "timed" is supported
-        interval    (Required for timed mode)  scan interval in seconds
-        level       (Required)  either "full" or "basic"
-        recursive   (Required)  "yes" or "no", process directories recursively
-        hidden-files (Optional) "yes" or "no", process hidden files, overrides
-                                the hidden-files value in the <import/> tag
-            
+                Default: mediatomb.db
 
-    <mappings> (Optional, also all subsections are optional)
-        Defines various mapping options for importing media, currently
-        two subsections are supported.
+                The database location is relative to the server's home, if the
+                sqlite database does not exist it will be created
+                automatically.
 
-        <extension-mimetype ignore-unknown="no">
-            This section holds the filename extension to mimetype mappings.
-            
-            If "ignore-unknown" is set to "yes", then only the extensions 
-            that are listed in this section are imported. (Default if 
-            missing: no)
+          □ driver="mysql"
 
-            <map from="mp3" to="audio/mpeg"/>
-                Specifies a mapping from a certain filename extension
-                (everything after the last dot ".") to mimetype.
+            Below are the child tags for MySQL:
 
-                Note, that this improves the import speed, because
-                invoking libmagic to discover the right mimetype
-                of a file is omited for files with extensions listed here. 
+              ● <host>localhost</host>
 
-                Note, extension is case sensitive, this will probably need
-                to be fixed.
+                Optional
 
-        <mimetype-upnpclass>
-            This section holds the mimetype to upnp:class mappings. 
-            
-            <map from="audio/*" to="object.item.audioItem"/>
-                Specifies a mapping from a certain mimetype to upnp:class
-                in the Content Directory. The mime type can either be entered 
-                explicitly "audio/mpeg" or using a wildcard after the slash 
-                "audio/*". The values of "from" and "to" attributes are
-                case sensitive.
+                Default: "localhost"
 
-        <library-options>
-            This section holds optoins for the various supported import 
-            libraries.
+                This specifies the host where your MySQL database is running.
 
-            <libexif>
-                Options for the exif library.
+              ● <username>root</username>
 
-                <auxdata>
-                    Currently only adding keywords to auxdata is supported.
-                    For a list of keywords/tags see the libexif documentation.
-                    Auxdata can be read by the import java script to gain more
-                    control over the media structure. For example, you could
-                    additionaly sort your photos by camera model or flash
-                    settings, if this information is provided with the exif
-                    data.
+                Optional
 
-                    <add tag="keyword"/>
-                        If the library was able to extract the data according
-                        to the given keyword, it will be added to auxdata.
-                        You can then use that data in your import scripts.
-                
-            <libextractor>
-                Options for the extractor library.
+                Default: "mediatomb"
 
-                <auxdata>
-                    Currently only adding keywords to auxdata is supported.
-                    For a list of keywords/tags see the libextractor documentation.
+                This option sets the user name that will be used to connect to
+                the database.
 
-                    <add tag="keyword"/>
-                        If the library was able to extract the data according
-                        to the given keyword, it will be added to auxdata.
-                        You can then use that data in your import scripts.
+              ● <password></password>
 
-RUNNING
--------
+                Optional
 
-After everything has been set up you can simply run "mediatomb" from the
-console. To shutdown the server cleanly, press Enter.
+                Default: no password
 
-There is also a small number of command line arguments:
+                Defines the password for the MySQL user. If the tag doesn't
+                exist MediaTomb will use no password, if the tag exists, but is
+                empty MediaTomb will use an empty password. MySQL has a
+                distinction between no password and an empty password.
 
-Usage: mediatomb [options]
-                        
-Supported options:
-    --ip or -i         ip address
-    --port or -p       server port (the SDK only permits values => 49152)
-    --config or -c     configuration file to use
-    --daemon or -d     run server in background
-    --pidfile or -P    file to hold the process id
-    --user or -u       run server under specified username
-    --group or -g      run server unser specified group
-    --add or -a        add the given file/directory
-    --logfile or -l    log to specified file
-    --help or -h       this help message
+              ● <database>mediatomb</database>
 
-If you want to run a second server from the same PC, make sure to use a 
+                Optional
+
+                Default: "mediatomb"
+
+                Name of the database that will be used by MediaTomb.
+
+6.2. Import Settings
+
+The import settings define various options on how to aggregate the content.
+
+<import hidden-files="no">
+
+Optional
+
+This tag defines the import section.
+
+Attributes:
+
+  ● hidden-files=...
+
+    Optional
+
+    Default: no
+
+    This attribute defines if files starting with a dot will be imported into
+    the database (“yes”). Autoscan can override this attribute on a per
+    directory basis.
+
+Child tags:
+
+  ● <filesystem-charset>ISO-8859-1</filesystem-charset>
+
+    Optional
+
+    Default: if nl_langinfo() function is present, this setting will be auto
+    detected based on your system locale, else set to ISO-8859-1
+
+    Defines the charset of the filesystem. For example, if you have file names
+    in Cyrillic KOI8-R encoding, then you should specify that here. The server
+    uses UTF-8 internally, this import parameter will help you to correctly
+    import your data.
+
+  ● <metadata-charset>ISO-8859-1</metadata-charset>
+
+    Optional
+
+    Default: if nl_langinfo() function is present, this setting will be auto
+    detected based on your system locale, else set to ISO-8859-1
+
+    Same as above, but defines the charset of the metadata (i.e. id3 tags, Exif
+    information, etc.)
+
+  ● <script charset="UTF-8">/path/to/my/import/script.js</script>
+
+    Required if javascript support is enabled
+
+    Default: ${prefix}/share/mediatomb/js/import.js, where ${prefix} is your
+    installation prefix directory.
+
+    Points to the script invoked upon media import. For more details read doc/
+    scripting-intro.txt
+
+    Attributes:
+
+      ○ charset=...
+
+        Optional
+
+        Default: UTF-8
+
+        Specifies the import script encoding.
+
+  ● <magic-file>/path/to/my/magic-file</magic-file>
+
+    Optional
+
+    Default: System default
+
+    Specifies an alternative file for filemagic, containing mime type
+    information.
+
+  ● <autoscan>
+
+    Optional
+
+    Specifies a list of default autoscan directories.
+
+    This section defines persistent autoscan directories. It is also possible
+    to define autoscan directories in the UI, the difference is that autoscan
+    directories that are defined via the config file can not be removed in the
+    UI. Even if the directory gets removed on disk, the server will try to
+    monitor the specified location and will re add the removed directory if it
+    becomes available/gets created again.
+
+    Child tags:
+
+      ○ <directory location="/media" mode="timed" interval="15"
+            level="full" recursive="no" hidden-files="no"/>
+        <directory location="/audio" mode="timed" interval="30"
+            level="basic" recursive="yes" hidden-files="no"/>
+        ...
+
+        Optional
+
+        Defines an autoscan directory and it's parameters.
+
+        The attributes specify various autoscan options:
+
+          □ location=...
+
+            Required
+
+            Absolute path to the directory that shall be monitored.
+
+          □ mode=...
+
+            Required
+
+            Scan mode, currently only "timed" is supported, future releases
+            will introduce other modes - like inotify.
+
+          □ interval=...
+
+            Required for “timed” mode
+
+            Scan interval in seconds.
+
+          □ level=...
+
+            Required
+
+            Either "full" or "basic". Basic mode will only check if any files
+            have been added or were deleted from the monitored directory, full
+            mode will remember the last modification time and re add the media
+            that has changed. Full mode might be useful when you want to
+            monitor changes in the media, like id3 tags and alike.
+
+          □ recursive=...
+
+            Required
+
+            Values of "yes" or "no" are allowed, specifies if autoscan shall
+            monitor the given directory including all sub directories.
+
+          □ hidden-files=...
+
+            Optional
+
+            Default: value specified in <import hidden-files=””/>
+
+            Allowed values: "yes" or "no", process hidden files, overrides the
+            hidden-files value in the <import/> tag.
+
+  ● <mappings>
+
+    Optional
+
+    Defines various mapping options for importing media, currently two
+    subsections are supported.
+
+    This section defines mime type and upnp:class mappings, it is vital if
+    filemagic is not available - in this case media type auto detection will
+    fail and you will have to set the mime types manually by matching the file
+    extension. It is also helpful if you want to override auto detected mime
+    types or simply skip filemagic processing for known file types.
+
+      ○ <extension-mimetype ignore-unknown="no">
+
+        Optional
+
+        This section holds the file name extension to mime type mappings.
+
+        Attributes:
+
+          □ ignore-unknown=...
+
+            Optional
+
+            Default: no
+
+            If ignore-unknown is set to "yes", then only the extensions that
+            are listed in this section are imported.
+
+        Child tags:
+
+          □ <map from="mp3" to="audio/mpeg"/>
+
+            Optional
+
+            Specifies a mapping from a certain file name extension (everything
+            after the last dot ".") to mime type.
+
+            Note:
+
+                this improves the import speed, because invoking libmagic to
+                discover the right mime type of a file is omitted for files
+                with extensions listed here.
+
+            Note:
+
+                extension is case sensitive, this will probably need to be
+                fixed.
+
+      ○ <mimetype-upnpclass>
+
+        Optional
+
+        This section holds the mime type to upnp:class mappings.
+
+        Child tags:
+
+          □ <map from="audio/*" to="object.item.audioItem.musicTrack"/>
+
+            Optional
+
+            Specifies a mapping from a certain mime type to upnp:class in the
+            Content Directory. The mime type can either be entered explicitly
+            "audio/mpeg" or using a wildcard after the slash "audio/*". The
+            values of "from" and "to" attributes are case sensitive.
+
+  ● <library-options>
+
+    Optional
+
+    This section holds options for the various supported import libraries, it
+    is useful in conjunction with virtual container scripting.
+
+    UPnP defines certain tags to pass along metadata of the media (like title,
+    artist, year, etc.), however some media provides more metadata and exceeds
+    the scope of UPnP. This additional metadata can be used to fine tune the
+    server layout, it allows the user to create a more complex container
+    structure using a customized import script. The metadata that can be
+    extracted depends on the library, currently we support libebexif and
+    libextractor, the libraries provide a default set of keys that can be
+    passed in the options below. The data according to those keys will the be
+    extracted from the media and imported into the database along with the
+    item. When processing the item, the import script will have full access to
+    the gathered metadata, thus allowing the user to organize the data with the
+    use of the extracted information. A practical example would be: if have
+    more than one digital camera in your family you could extract the camera
+    model from the Exif tags and sort your photos in a structure of your
+    choice, like:
+
+    Photos/MyCamera1/All Photos
+
+    Photos/MyCamera1/Date
+
+    Photos/MyCamera2/All Photos
+
+    Photos/MyCamera2/Date
+
+    etc.
+
+    Child tags:
+
+      ○ <libexif>
+
+        Optional
+
+        Options for the exif library.
+
+        Child tags:
+
+          □ <auxdata>
+
+            Optional
+
+            Currently only adding keywords to auxdata is supported. For a list
+            of keywords/tags see the libexif documentation. Auxdata can be read
+            by the import java script to gain more control over the media
+            structure.
+
+            Child tags:
+
+              ● <add tag="keyword1"/>
+                <add tag="keyword2"/>
+                ...
+
+                Optional
+
+                If the library was able to extract the data according to the
+                given keyword, it will be added to auxdata. You can then use
+                that data in your import scripts.
+
+        A sample configuration for the example described above would be:
+
+        <libexif>
+            <auxdata>
+                <add tag="EXIF_TAG_MODEL"/>
+            </auxdata>
+        </libexif>
+
+      ○ <libextractor>
+
+        Optional
+
+        Options for the extractor library.
+
+        Child tags:
+
+          □ <auxdata>
+
+            Optional
+
+            Currently only adding keywords to auxdata is supported. For a list
+            of keywords/tags see the libextractor documentation.
+
+            Child tags:
+
+              ● <add tag="keyword1"/>
+                <add tag="keyword2"/>
+                ...
+
+                Optional
+
+                If the library was able to extract the data according to the
+                given keyword, it will be added to auxdata. You can then use
+                that data in your import scripts.
+
+7. Supported Devices
+
+Attention Hardware Manufacturers:
+
+If you want to improve compatibility between MediaTomb and your renderer device
+or if you are interested in a port of MediaTomb for your NAS device please
+e-mail to: <contact at mediatomb dot cc>
+
+7.1. MediaRenderers
+
+MediaTomb supports all UPnP compliant MediaRenderers, however there can always
+be various problems that depend on the particular device implementation. We
+always try to implement workarounds to compensate for failures and limitations
+of various renderers.
+
+This is the list of client devices that MediaTomb has been tested with and that
+are known to work. Please drop us a mail if you are using MediaTomb with a
+device that is not in the list, report any success and failure. We will try to
+fix the issues and will add the device to the list.
+
+7.1.1. Acer
+
+  ● AT3705-MGW
+
+7.1.2. Denon
+
+  ● AVR 4306
+
+7.1.3. D-Link
+
+  ● DSM-320
+
+  ● DSM-320RD
+
+  ● DSM-520
+
+Some additional settings in MediaTomb configuration are required to enable
+special features for the DSM renderers. If you have a DSM-320 and are
+experiencing problems during AVI playback, add the following to the server
+section of your config.xml:
+
+<custom-http-headers>
+    <add header="X-User-Agent: redsonic"/>
+</custom-http-headers>
+
+7.1.4. Netgear
+
+  ● EVA700
+
+7.1.5. Philips
+
+  ● Streamium SL-300i
+
+  ● Streamium SL-400i
+
+  ● Streamium MX-6000i
+
+  ● SLA-5520
+
+7.1.6. Siemens
+
+  ● Gigaset M740AV
+
+7.1.7. Telegent
+
+  ● TG100
+
+The TG100 client has a problem browsing containers, where item titles exceed
+101 characters. We implemented a server-side workaround which allows you to
+limit the lengths of all titles and descriptions. Use the following settings in
+the server section of your configuration file:
+
+<upnp-string-limit>101</upnp-string-limit>
+
+7.2. Network Attached Storage Devices
+
+We provide a bitbake metadata file for the OpenEmbedded environment, it allows
+to easily cross compile MediaTomb for various platforms. We have successfully
+tested MediaTomb on ARM and MIPSel based devices, so it should be possible to
+install and run the server on various Linux based NAS products that are
+available on the market.
+
+7.2.1. Excito
+
+  ● Bubba Mini Server
+
+8. Running The Server
+
+When you run MediaTomb for the first time a default configuration will be
+created in the ~/.mediatomb directory. If you are using the sqlite database no
+further intervention is necessary, if you are using MySQL you will have to make
+some adjustments (see Configuration section for more details). To start the
+server simply run "mediatomb" from the console, to shutdown cleanly press
+Ctrl-C. At start up MediaTomb will print a link to the web UI.
+
+Note:
+
+    Internet Explorer support is limited and not yet finished. It is very
+    difficult to support this browser because of a huge number of bugs in its
+    javascript implementation. If you don't believe us - just visit http://
+    selfhtml.org/ and see how often IE is mentioned in not following the specs
+    or simply not working with certain functions and features. We recommend
+    Firefox.
+
+If you want to run a second server from the same PC, make sure to use a
 different configuration file with a different udn and a different database.
 
-After server launch the bookmark file is created in ~/.mediatomb
-You now can manually add the bookmark ~/.mediatomb/mediatomb.html in your 
+After server launch the bookmark file is created in the ~/.mediatomb directory.
+You now can manually add the bookmark ~/.mediatomb/mediatomb.html in your
 browser. This will redirect you to the UI if the server is running.
 
-Assuming that you enabeld the UI, you should now be able to get around
-quite easily.
+Assuming that you enabled the UI, you should now be able to get around quite
+easily.
 
-We now also support the daemon mode which allows to start the server in
-background, the --user and --group parameters should be used to run 
-the server under an unprivileged account. A script for 
-starting/stopping the server is also provided.
+We also support the daemon mode which allows to start the server in background,
+the --user and --group parameters should be used to run the server under an
+unprivileged account. A script for starting/stopping the server is provided.
 
+9. Legal
 
-INIT.D STARTUP SCRIPT
----------------------
+THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY! USE AT YOUR OWN RISK!
 
-We received an init.d startup script for MediaTomb from Iain Lea, I tested it
-on my Fedora Core 3 installation and had to make some adaptions. Took me
-quite a while to figure out that the server would not run without
-the LD_ASSUME_KERNEL=2.2.5 environment variable.
+9.1. Copyright
 
-The script now also applies multicast options that are required for
-UPnP (otherwise the server will not react to M-SEARCH requests).
+Copyright (C) 2005
 
-In order to use the script you will have to edit it and set the INTERFACE 
-variable to the desired network interface (eth0, eth1, etc.)
+Gena Batyan <bgeradz at mediatomb dot cc>
 
+Sergey Bostandzhyan <jin at mediatomb dot cc>
 
-ACKNOWLEDGEMENTS
-----------------
+Copyright (C) 2006-2007
+
+Gena Batyan <bgeradz at mediatomb dot cc>
+
+Sergey Bostandzhyan <jin at mediatomb dot cc>
+
+Leonhard Wimmer <leo at mediatomb dot cc>
+
+9.2. License
+
+MediaTomb is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License version 2 as published by the Free
+Software Foundation. MediaTomb is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public
+License for more details. You should have received a copy of the GNU General
+Public License version 2 along with MediaTomb; if not, write to the Free
+Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+USA
+
+10. Acknowledgments
 
 We are using the following code in our tree:
 
-- uuid from E2fsprogs 1.35 under GNU GPL, 
-  Copyright (C) 1996, 1997, 1998 Theodore Ts'o. <tytso@mit.edu>
-  
-  Stuff from the UPnP SDK was conflicting with libuuid, so we had to itake
-  the sources in and change the name of one function.
+  ● uuid from E2fsprogs 1.35 under GNU GPL, Copyright (C) 1996, 1997, 1998
+    Theodore Ts'o. <tytso at mit dot edu> Some functions from the UPnP SDK were
+    conflicting with libuuid, so we had to take the sources in and do some
+    renaming.
 
-- md5 implementation by L. Peter Deutsch <ghost@aladdin.com>,
-  Copyright (C) 1999 Aladdin Enterprises.  All rights reserved. (See source
-  headers for further details)
+  ● md5 implementation by L. Peter Deutsch <ghost at aladdin dot com>,
+    Copyright (C) 1999 Aladdin Enterprises. All rights reserved. (See source
+    headers for further details)
 
-- md5 javascript implementation distributed under BSD License,
-  Copyright (C) Paul Johnston 1999 - 2002. http://pajhome.org.uk/crypt/md5 
+  ● md5 javascript implementation distributed under BSD License, Copyright (C)
+    Paul Johnston 1999 - 2002. http://pajhome.org.uk/crypt/md5
 
-- the UI uses the following software:
-  Prototype JavaScript Framework http://www.prototypejs.org/
-  (c) 2005-2007 Sam Stephenson, MIT-style license.
-  
-  (heavily modified version of) NanoTree http://nanotree.sourceforge.net/
-  (c) 2003 (?) Martin Mouritzen <martin@nano.dk>; LGPL
-  
-  IE PNG fix from http://webfx.eae.net/dhtml/pngbehavior/pngbehavior.html
-  
-- tombupnp is based on pupnp (http://pupnp.sf.net) which is based on
-  libupnp (http://upnp.sf.net), originally distributed under the
-  BSD license, Copyright (c) 2000-2003 Intel Corporation.
-  
-  
-CONTRIBUTIONS
--------------
+  ● Prototype JavaScript Framework http://www.prototypejs.org/ (c) 2005-2007
+    Sam Stephenson, MIT-style license.
 
-Initial version of the MediaTomb startup script was contributed 
-by Iain Lea <iain@bricbrac.de>
-TagLib support patch was contributed by Benhur Stein <benhur.stein@gmail.com>
---------------------------------------------------------------------------------
-January 29, 2007
+  ● (heavily modified version of) NanoTree http://nanotree.sourceforge.net/ (c)
+    2003 (?) Martin Mouritzen <martin at nano dot dk>; LGPL
+
+  ● IE PNG fix from http://webfx.eae.net/dhtml/pngbehavior/pngbehavior.html
+
+  ● tombupnp is based on pupnp (http://pupnp.sf.net) which is based on libupnp
+    (http://upnp.sf.net), originally distributed under the BSD license,
+    Copyright (c) 2000-2003 Intel Corporation. Note that all changes to libupnp
+    code that were made by the MediaTomb team are covered by the LGPL license.
+
+11. Contributions
+
+  ● Initial version of the MediaTomb start up script was contributed by Iain
+    Lea <iain at bricbrac dot de>
+
+  ● TagLib support patch was contributed by Benhur Stein <benhur.stein at gmail
+    dot com>
+
+  ● tombupnp is kept in sync with the latest pupnp patches, see documentation
+    in the tombupnp directory
 
