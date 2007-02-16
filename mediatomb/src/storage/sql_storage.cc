@@ -702,10 +702,10 @@ int SQLStorage::_ensurePathExistence(String path, int *changedContainer)
     Ref<StringConverter> f2i = StringConverter::f2i();
     if (changedContainer != NULL && *changedContainer == INVALID_OBJECT_ID)
         *changedContainer = parentID;
-    return createContainer(parentID, f2i->convert(folder), path, false);
+    return createContainer(parentID, f2i->convert(folder), path, false, nil);
 }
 
-int SQLStorage::createContainer(int parentID, String name, String path, bool isVirtual)
+int SQLStorage::createContainer(int parentID, String name, String path, bool isVirtual, String upnpClass)
 {
     String dbLocation = addLocationPrefix((isVirtual ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX), path);
     Ref<StringBuffer> qb(new StringBuffer());
@@ -715,7 +715,7 @@ int SQLStorage::createContainer(int parentID, String name, String path, bool isV
         << TQ("location") << ',' << TQ("location_hash") << ") VALUES ("
         << parentID
         << ',' << OBJECT_TYPE_CONTAINER
-        << ',' << quote(_(UPNP_DEFAULT_CLASS_CONTAINER))
+        << ',' << (string_ok(upnpClass) ? quote(upnpClass) : quote(_(UPNP_DEFAULT_CLASS_CONTAINER)))
         << ',' << quote(name)
         << ',' << quote(dbLocation)
         << ',' << quote(stringHash(dbLocation))
@@ -774,10 +774,10 @@ void SQLStorage::addContainerChain(String path, String lastClass, int *container
     int parentContainerID;
     String newpath, container;
     stripAndUnescapeVirtualContainerFromPath(path, newpath, container);
-    addContainerChain(newpath, lastClass, &parentContainerID, updateID);
+    addContainerChain(newpath, nil, &parentContainerID, updateID);
     if (updateID != NULL && *updateID == INVALID_OBJECT_ID)
         *updateID = parentContainerID;
-    *containerID = createContainer(parentContainerID, container, path, true);
+    *containerID = createContainer(parentContainerID, container, path, true, lastClass);
 }
 
 String SQLStorage::addLocationPrefix(char prefix, String path)
