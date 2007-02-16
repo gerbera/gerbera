@@ -107,7 +107,9 @@ public:
 
     /// \brief Adds a virtual container chain specified by path.
     /// \param path container path separated by '/'. Slashes in container
-    /// titles must be escaped. 
+    /// titles must be escaped.
+    /// \param lastClass upnp:class of the last container in the chain, it
+    /// is only set when the container is created for the first time.
     /// \param containerID will be filled in by the function
     /// \param updateID will be filled in by the function only if it is set to INVALID_OBJECT_ID
     /// and it is necessary to update a container. Otherwise it will be left unchanged.
@@ -117,7 +119,7 @@ public:
     /// the object ID of the container that is last in the path. The
     /// updateID will hold the objectID of the container that was changed,
     /// in case new containers were created during the operation.
-    virtual void addContainerChain(zmm::String path, int *containerID, int *updateID) = 0;
+    virtual void addContainerChain(zmm::String path, zmm::String lastClass, int *containerID, int *updateID) = 0;
     
     /// \brief Builds the container path. Fetches the path of the
     /// parent and adds the title

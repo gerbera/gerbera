@@ -381,6 +381,7 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         jsval arg;
         JSString *str;
         String path;
+        String containerclass;
 
         JSObject *js_cds_obj;
 
@@ -396,10 +397,14 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         else 
             path = String(JS_GetStringBytes(str));
 
+        JSString *cont = JS_ValueToString(cx, argv[2]);
+        if (cont)
+            containerclass = String(JS_GetStringBytes(cont));
+
         Ref<CdsObject> cds_obj = jsObject2cdsObject(cx, js_cds_obj);
         Ref<ContentManager> cm = ContentManager::getInstance();
        
-        int id = cm->addContainerChain(path);
+        int id = cm->addContainerChain(path, containerclass);
         cds_obj->setParentID(id);
         cds_obj->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
         cds_obj->setID(INVALID_OBJECT_ID);
@@ -514,8 +519,9 @@ js_error_reporter(JSContext *cx, const char *message, JSErrorReport *report)
 } // extern "C"
 
 static JSFunctionSpec global_functions[] = {
+//   js name            native name        number of arguments
     {"print",           js_print,          0},
-    {"addCdsObject",    js_addCdsObject,   2},
+    {"addCdsObject",    js_addCdsObject,   3},
     {"copyObject",      js_copyObject,     1},
     {0}
 };

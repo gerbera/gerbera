@@ -909,21 +909,25 @@ void ContentManager::addObject(zmm::Ref<CdsObject> obj)
         ContentManager::getInstance()->getAccounting()->totalFiles++;
 }
 
+
 void ContentManager::addContainer(int parentID, String title, String upnpClass)
 {
     Ref<Storage> storage = Storage::getInstance();
-    addContainerChain(storage->buildContainerPath(parentID, escape(title, VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR)));
+    addContainerChain(storage->buildContainerPath(parentID, escape(title, VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR)), upnpClass);
 }
 
 
-int ContentManager::addContainerChain(String chain)
+int ContentManager::addContainerChain(String chain, String lastClass)
 {
     Ref<Storage> storage = Storage::getInstance();
     int updateID = INVALID_OBJECT_ID;
     int containerID;
     
     log_debug("received chain: %s\n", chain.c_str());
-    storage->addContainerChain(chain, &containerID, &updateID);
+    if (!string_ok(lastClass))
+        lastClass = _(UPNP_DEFAULT_CLASS_CONTAINER);
+
+    storage->addContainerChain(chain, lastClass, &containerID, &updateID);
     // if (updateID != INVALID_OBJECT_ID)
     // an invalid updateID is checked by containerChanged()
     UpdateManager::getInstance()->containerChanged(updateID);

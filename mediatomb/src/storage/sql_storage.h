@@ -121,7 +121,7 @@ public:
     
     virtual zmm::String buildContainerPath(int parentID, zmm::String title);
     
-    virtual void addContainerChain(zmm::String path, int *containerID, int *updateID);
+    virtual void addContainerChain(zmm::String path, zmm::String lastClass, int *containerID, int *updateID);
     
     virtual zmm::String getInternalSetting(zmm::String key);
     virtual void storeInternalSetting(zmm::String key, zmm::String value) = 0;

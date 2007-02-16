@@ -213,8 +213,9 @@ public:
     /// \brief Adds a virtual container chain specified by path.
     /// \param container path separated by '/'. Slashes in container
     /// titles must be escaped.
+    /// \param lastClass upnp:class of the last container in the chain
     /// \return ID of the last container in the chain.
-    int addContainerChain(zmm::String chain);
+    int addContainerChain(zmm::String chain, zmm::String lastClass);
     
     /// \brief Adds a virtual container specified by parentID and title
     /// \param parentID the id of the parent.

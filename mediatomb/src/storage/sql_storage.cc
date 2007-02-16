@@ -746,7 +746,7 @@ String SQLStorage::buildContainerPath(int parentID, String title)
     return path;
 }
 
-void SQLStorage::addContainerChain(String path, int *containerID, int *updateID)
+void SQLStorage::addContainerChain(String path, String lastClass, int *containerID, int *updateID)
 {
     path = path.reduce(VIRTUAL_CONTAINER_SEPARATOR);
     if (path == VIRTUAL_CONTAINER_SEPARATOR)
@@ -774,7 +774,7 @@ void SQLStorage::addContainerChain(String path, int *containerID, int *updateID)
     int parentContainerID;
     String newpath, container;
     stripAndUnescapeVirtualContainerFromPath(path, newpath, container);
-    addContainerChain(newpath, &parentContainerID, updateID);
+    addContainerChain(newpath, lastClass, &parentContainerID, updateID);
     if (updateID != NULL && *updateID == INVALID_OBJECT_ID)
         *updateID = parentContainerID;
     *containerID = createContainer(parentContainerID, container, path, true);

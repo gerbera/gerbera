@@ -205,8 +205,11 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
     log_warning("No getopt_long() support, all command line options disabled");
 #endif
 
-    log_info("======== MediaTomb UPnP Server version %s ========\n", VERSION);
-    log_info("         " DESC_MANUFACTURER_URL "\n\n");
+    printf("\nMediaTomb UPnP Server version %s - %s\n\n", VERSION, 
+           DESC_MANUFACTURER_URL);
+    printf("===============================================================================\n");
+    printf("Copyright 2005-2007 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer.\n");
+    printf("MediaTomb is free software, covered by the GNU General Public License version 2\n\n");
 
     // check if user and/or group parameter was specified and try to run the server
     // under the given user and/or group name
