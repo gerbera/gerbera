@@ -924,9 +924,6 @@ int ContentManager::addContainerChain(String chain, String lastClass)
     int containerID;
     
     log_debug("received chain: %s\n", chain.c_str());
-    if (!string_ok(lastClass))
-        lastClass = _(UPNP_DEFAULT_CLASS_CONTAINER);
-
     storage->addContainerChain(chain, lastClass, &containerID, &updateID);
     // if (updateID != INVALID_OBJECT_ID)
     // an invalid updateID is checked by containerChanged()
