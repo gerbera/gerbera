@@ -199,7 +199,21 @@ Note: you need at least one database in order to compile and run MediaTomb
 In order to compile MediaTomb you will have to install the following packages.:
 \end_layout
 
-\begin_layout Itemize
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 sqlite (version > 3.x) 
 \begin_inset LatexCommand \url[http://www.sqlite.org/]{http://www.sqlite.org/}
 
@@ -207,10 +221,24 @@ sqlite (version > 3.x)
 
  
 \shape italic
-(REQUIRED if mysql is not available)
+REQUIRED (if mysql is not available)
 \end_layout
 
-\begin_layout Itemize
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 mysql client library (version > 4.0.x) 
 \begin_inset LatexCommand \url[http://mysql.org/]{http://mysql.org/}
 
@@ -218,21 +246,84 @@ mysql client library (version > 4.0.x)
 
  
 \shape italic
-(REQUIRED if sqlite is not available)
+REQUIRED (if sqlite is not available)
 \end_layout
 
-\begin_layout Itemize
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+zlib 
+\begin_inset LatexCommand \url[http://www.zlib.net/]{http://www.zlib.net/}
+
+\end_inset
+
+ 
+\emph on
+OPTIONAL, HIGHLY RECOMMENDED
+\end_layout
+
+\begin_layout Standard
+Zlib is a compression library that is available on most systems, we need
+ it for the database autocreation functionality.
+ Make sure to install the zlib development package providing zlib.h, if it
+ is not available you will need to create the MediaTomb sqlite3/MySQL database
+ manually.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 libmagic 
 \shape italic
-(OPTIONAL, RECOMMENDED)
-\shape default
- This is the 'file' package, it is used to determine the mime type of the
+OPTIONAL, RECOMMENDED
+\end_layout
+
+\begin_layout Standard
+This is the 'file' package, it is used to determine the mime type of the
  media.
  If you don't have this you will have to enter file extension to mime type
  mappings manually in your config file.
 \end_layout
 
-\begin_layout Itemize
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 js - SpiderMonkey JavaScript Engine 
 \begin_inset LatexCommand \url[http://www.mozilla.org/js/spidermonkey/]{http://www.mozilla.org/js/spidermonkey/}
 
@@ -240,9 +331,11 @@ js - SpiderMonkey JavaScript Engine
 
 
 \shape italic
- (OPTIONAL, HIGHLY RECOMMENDED)
-\shape default
- This package is necessary to allow the creation of virtual containers.
+ OPTIONAL, HIGHLY RECOMMENDED
+\end_layout
+
+\begin_layout Standard
+This package is necessary to allow the creation of virtual containers.
  The import.js script defines the layout of your media, the default import
  script will create a structure sorted by Audio/Photo/Video, it will make
  use of the gathered metadata (like ID3 tags) to sort your music by Artist/Album
@@ -251,7 +344,21 @@ js - SpiderMonkey JavaScript Engine
  the layout that you want.
 \end_layout
 
-\begin_layout Itemize
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 taglib 
 \begin_inset LatexCommand \url[http://developer.kde.org/~wheeler/taglib.html]{http://developer.kde.org/~wheeler/taglib.html}
 
@@ -259,12 +366,18 @@ taglib
 
  
 \shape italic
-(OPTIONAL, RECOMMENDED) 
-\shape default
+OPTIONAL, RECOMMENDED
+\end_layout
+
+\begin_layout Standard
 This library retrieves metadata from mp3, ogg and flac files.
  You will need it if you want to have virtual objects for those files (i.e.
  nice content layout).
  
+\end_layout
+
+\begin_layout Description
+
 \series bold
 Note: 
 \series default
@@ -275,20 +388,52 @@ It makes no sense to use taglib and id3lib at the same time, the configure
  the default setting.
 \end_layout
 
-\begin_layout Itemize
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 id3lib 
 \begin_inset LatexCommand \url[http://id3lib.sourceforge.net/]{http://id3lib.sourceforge.net/}
 
 \end_inset
 
- (at least version 3.8.3) 
+ (at least version 3.8.3)
 \shape italic
-(OPTIONAL, RECOMMENDED if taglib is not available) 
+ OPTIONAL, RECOMMENDED (if taglib is not available)
 \shape default
+ 
+\end_layout
+
+\begin_layout Standard
 This library retrieves id3 tags from mp3 files.
 \end_layout
 
-\begin_layout Itemize
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 libexif 
 \begin_inset LatexCommand \url[http://libexif.sourceforge.net/]{http://libexif.sourceforge.net/}
 
@@ -296,16 +441,32 @@ libexif
 
  
 \shape italic
-(OPTIONAL, RECOMMENDED)
-\shape default
- You will need this library if you want to extract metadata from images,
+OPTIONAL, RECOMMENDED
+\end_layout
+
+\begin_layout Standard
+You will need this library if you want to extract metadata from images,
  this will allow you to have virtual containers for your Photos, sorted
  by various attributes like Date, etc.
  It also enables thumbnail support: if EXIF thumbnails are present in your
  images they will also be offered via UPnP.
 \end_layout
 
-\begin_layout Itemize
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 libextractor 
 \begin_inset LatexCommand \url[http://gnunet.org/libextractor/]{http://gnunet.org/libextractor/}
 
@@ -313,8 +474,10 @@ libextractor
 
  
 \shape italic
-(OPTIONAL) 
-\shape default
+OPTIONAL
+\end_layout
+
+\begin_layout Standard
 This library tries to gather metadata from all kinds of files (also .avi
  and .asf).
  The drawback is, that it can be very slow at scanning video files.
@@ -326,6 +489,20 @@ This library tries to gather metadata from all kinds of files (also .avi
  MediaTomb.
  By default libextractor is disabled, use ./configure --enable-libextractor
  to activate it.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1110,57 +1287,151 @@ root
 \end_layout
 
 \begin_layout Standard
-Make sure you have the appropriate permissions and run this in your shell
- in order to create the database for MediaTomb:
+MediaTomb has to be able to connect to the MySQL server and at least the
+ (empty) database has to exist.
+ To create the database and provide MediaTomb with the ability to connect
+ to the MySQL server you need to have the appropriate permissions.
+ Connect to the MySQL database as 
+\begin_inset Quotes sld
+\end_inset
+
+root
+\begin_inset Quotes srd
+\end_inset
+
+ or any other user with the appropriate permissions:
 \end_layout
 
 \begin_layout Code
-mysqladmin -u root create mediatomb
+$ mysql [-u <username>] [-p]
 \end_layout
 
 \begin_layout Standard
-Now make sure that your server configuration file has the correct storage
- settings:
+(You'll probably need to use 
+\begin_inset Quotes sld
+\end_inset
+
+-u
+\begin_inset Quotes srd
+\end_inset
+
+ to specify a different MySQL user and 
+\begin_inset Quotes sld
+\end_inset
+
+-p
+\begin_inset Quotes srd
+\end_inset
+
+ to specify a password.)
+\end_layout
+
+\begin_layout Standard
+Create a new database for MediaTomb: (substitute 
+\begin_inset Quotes sld
+\end_inset
+
+<database name>
+\begin_inset Quotes srd
+\end_inset
+
+ with the name of the database)
 \end_layout
 
 \begin_layout Code
-<server>
+mysql> CREATE DATABASE <database name>;
+\end_layout
+
+\begin_layout Standard
+Give MediaTomb the permissions to access the database:
 \end_layout
 
 \begin_layout Code
-...
+mysql> GRANT ALL ON <database name>.* TO '<user name>'@'<hostname>' IDENTIFIED
+ BY '<password>';
+\end_layout
+
+\begin_layout Standard
+If you don't want to set a password, omit 
+\begin_inset Quotes sld
+\end_inset
+
+IDENTIFIED BY ..
+\begin_inset Quotes srd
+\end_inset
+
+ completely.
+ You could also use the MySQL 
+\begin_inset Quotes sld
+\end_inset
+
+root
+\begin_inset Quotes srd
+\end_inset
+
+ user with MediaTomb directly, but this is not recommended.
+\end_layout
+
+\begin_layout Standard
+To create a database and a user named 
+\begin_inset Quotes sld
+\end_inset
+
+mediatomb
+\begin_inset Quotes srd
+\end_inset
+
+ (who is only able to connect via 
+\begin_inset Quotes sld
+\end_inset
+
+localhost
+\begin_inset Quotes srd
+\end_inset
+
+) without a password (the defaults) use:
 \end_layout
 
 \begin_layout Code
-  <storage driver="mysql">
+mysql> CREATE DATABASE mediatomb;
 \end_layout
 
 \begin_layout Code
-    <host>localhost</host>
+mysql> GRANT ALL ON mediatomb.* TO 'mediatomb'@'localhost';
+\end_layout
+
+\begin_layout Standard
+If MediaTomb was compiled with database auto creation the tables will be
+ created automatically during the first startup.
+ All table names have a 
+\begin_inset Quotes sld
+\end_inset
+
+mt_
+\begin_inset Quotes srd
+\end_inset
+
+ prefix, so you can theoretically share the database with a different applicatio
+n.
+ However, this is not recommended.
+\end_layout
+
+\begin_layout Standard
+If database auto creation wasn't compiled in (configure was run with the
+ 
+\begin_inset Quotes sld
+\end_inset
+
+--disable-db-autocreate
+\begin_inset Quotes srd
+\end_inset
+
+ or zlib.h was not available) you have to create the tables manually:
 \end_layout
 
 \begin_layout Code
-    <username>root</username>
-\end_layout
-
-\begin_layout Code
-    <database>mediatomb</database>
-\end_layout
-
-\begin_layout Code
-  </storage>
-\end_layout
-
-\begin_layout Code
-...
-\end_layout
-
-\begin_layout Code
-</server>
-\end_layout
-
-\begin_layout Description
-Note: if the password tag is omitted - it means that the password is blank.
+$ mysql [-u <username>] [-p] <database name> < <install prefix>/share/mediatomb/
+mysql.sql
 \end_layout
 
 \begin_layout Standard
@@ -2546,154 +2817,6 @@ Default: "mediatomb"
 
 \begin_layout Standard
 Name of the database that will be used by MediaTomb.
-\end_layout
-
-\begin_layout Standard
-MediaTomb has to be able to connect to the MySQL server and at least the
- (empty) database has to exist.
- To create the database and provide MediaTomb with the ability to connect
- to the MySQL server you need to have the appropriate permissions.
- Connect to the MySQL database as 
-\begin_inset Quotes sld
-\end_inset
-
-root
-\begin_inset Quotes srd
-\end_inset
-
- or any other user with the appropriate permissions:
-\end_layout
-
-\begin_layout Code
-$ mysql [-u <username>] [-p]
-\end_layout
-
-\begin_layout Standard
-(You'll probably need to use 
-\begin_inset Quotes sld
-\end_inset
-
--u
-\begin_inset Quotes srd
-\end_inset
-
- to specify a different MySQL user and 
-\begin_inset Quotes sld
-\end_inset
-
--p
-\begin_inset Quotes srd
-\end_inset
-
- to specify a password.)
-\end_layout
-
-\begin_layout Standard
-Create a new database for MediaTomb: (substitute 
-\begin_inset Quotes sld
-\end_inset
-
-<database name>
-\begin_inset Quotes srd
-\end_inset
-
- with the name of the database)
-\end_layout
-
-\begin_layout Code
-mysql> CREATE DATABASE <database name>;
-\end_layout
-
-\begin_layout Standard
-Give MediaTomb the permissions to access the database:
-\end_layout
-
-\begin_layout Code
-mysql> GRANT ALL ON <database name>.* TO '<user name>'@'<hostname>' IDENTIFIED
- BY '<password>';
-\end_layout
-
-\begin_layout Standard
-If you don't want to set a password, omit 
-\begin_inset Quotes sld
-\end_inset
-
-IDENTIFIED BY ..
-\begin_inset Quotes srd
-\end_inset
-
- completely.
- You could also use the MySQL 
-\begin_inset Quotes sld
-\end_inset
-
-root
-\begin_inset Quotes srd
-\end_inset
-
- user with MediaTomb directly, but this is not recommended.
-\end_layout
-
-\begin_layout Standard
-To create a database and a user named 
-\begin_inset Quotes sld
-\end_inset
-
-mediatomb
-\begin_inset Quotes srd
-\end_inset
-
- (who is only ably to connect via 
-\begin_inset Quotes sld
-\end_inset
-
-localhost
-\begin_inset Quotes srd
-\end_inset
-
-) without a password (the defaults) use:
-\end_layout
-
-\begin_layout Code
-mysql> CREATE DATABASE mediatomb;
-\end_layout
-
-\begin_layout Code
-mysql> GRANT ALL ON mediatomb.* TO 'mediatomb'@'localhost';
-\end_layout
-
-\begin_layout Standard
-If MediaTomb was compiled with database auto creation the tables will be
- created automatically during the first startup.
- All table names have a 
-\begin_inset Quotes sld
-\end_inset
-
-mt_
-\begin_inset Quotes srd
-\end_inset
-
- prefix, so you can theoretically share the database with a different applicatio
-n.
- However, this is not recommended.
-\end_layout
-
-\begin_layout Standard
-If database auto creation wasn't compiled in (configure was run with the
- 
-\begin_inset Quotes sld
-\end_inset
-
---disable-db-autocreate
-\begin_inset Quotes srd
-\end_inset
-
- or zlib.h was not available) you have to create the tables manually:
-\end_layout
-
-\begin_layout Code
-$ mysql [-u <username>] [-p] <database name> < <install prefix>/share/mediatomb/
-mysql.sql
 \end_layout
 
 \begin_layout Subsection
