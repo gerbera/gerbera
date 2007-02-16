@@ -84,10 +84,9 @@ function loadItems(id, start)
 {
     if (formShown)
         return;
-    /*
-    if (! count)
-        count = viewItems;
-    */
+    
+    if (start % viewItems != 0)
+        start = Math.floor((start / viewItems)) * viewItems;
     
     lastItemStart = start;
     lastFolder = id;
