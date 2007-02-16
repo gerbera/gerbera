@@ -66,27 +66,40 @@
             </form>
         </div>
         <div id="topDiv" style="color:black; display:none; background-image:url(icons/film.png); background-repeat:repeat-x; background-position: 40px 15px;">
-            <div align="center">
-            <span id="statusIdle">
-            <span id="statusNoUpdates"><img src="icons/status.png" width="25" height="38" alt="idle" class="status"></span>
-            <span id="statusUpdatesPending" style="display:none"><a href="javascript:parent.getUpdates(true);"><img src="icons/status_updates_pending.png" width="25" height="38" alt="updates pending..." border="0" class="status"></a></span>
-            </span>
-            <span id="statusWorking" style="display:none"><img src="icons/status_loading.png" width="25" height="38" alt="loading..." class="status"></span>
-            <img src="icons/mediatomb.png" width="253" height="81" alt="MEDIATOMB" class="logo">
-            <a id="logout_link" href="javascript:parent.logout();"><img id="logout_img" width="30" height="20" alt="Logout" src="/icons/stock_exit.png" border="0"></a>
-            </div>
-            <div class="taskDiv">
-             <table class="taskTable" width="100%"><tr>
-                <td id="currentTaskTd" style="display:none;vertical-align:middle;">
-                    <a id="cancelCurrentTask" href="javascript:parent.cancelCurrentTask();">
-                        <img src="/icons/remove_this.png" width="30" height="20" alt="cancel task" border="0" style="vertical-align:middle;">
-                    </a>
-                    <img id="cancelCurrentTaskPlaceholder" src="/icons/blank.png" width="30" height="20" alt="" border="0" style="vertical-align:middle;display:none;">
-                    <span style="vertical-align:middle;" id="currentTaskText">&nbsp;</span>
-                </td>
-                <td align="right"><!-- other Tasks | Autoscans --></td>
-             </tr></table>
-            </div>
+        
+            <table width="100%" cellspacing="0" border="0">
+                <tr>
+                    <td width="20%" valign="middle" align="center">
+                    <!--
+                        <span id="statusIdle">
+                            <span id="statusNoUpdates"><img src="icons/status.png" width="25" height="38" alt="idle" class="status"></span>
+                            <span id="statusUpdatesPending" style="display:none"><a href="javascript:parent.getUpdates(true);"><img src="icons/status_updates_pending.png" width="25" height="38" alt="updates pending..." border="0" class="status"></a></span>
+                        </span>
+                        <span id="statusWorking" style="display:none"><img src="icons/status_loading.png" width="25" height="38" alt="loading..." class="status"></span>
+                        -->
+                        <img src="icons/status.png" width="25" height="38" alt="idle" class="status" id="statusIdle">
+                        <a href="javascript:parent.getUpdates(true);" id="statusUpdatesPending" style="display:none"><img src="icons/status_updates_pending.png" width="25" height="38" alt="updates pending..." border="0" class="status"></a>
+                        <img src="icons/status_loading.png" width="25" height="38" alt="loading..." class="status" id="statusWorking" style="display:none">
+                        
+                    </td>
+                    <td width="60%" valign="middle" align="center">
+                        <img src="icons/mediatomb.png" width="253" height="81" alt="MEDIATOMB" class="logo">
+                    </td>
+                    <td width="20%" valign="middle" align="center">
+                        <a id="logout_link" href="javascript:parent.logout();"><img id="logout_img" width="30" height="20" alt="Logout" src="/icons/stock_exit.png" border="0"></a>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" id="currentTaskTd" style="display:none;vertical-align:middle;">
+                        <a id="cancelCurrentTask" href="javascript:parent.cancelCurrentTask();">
+                            <img src="/icons/remove_this.png" width="30" height="20" alt="cancel task" border="0" style="vertical-align:middle;">
+                        </a>
+                        <img id="cancelCurrentTaskPlaceholder" src="/icons/blank.png" width="30" height="20" alt="" border="0" style="vertical-align:middle;display:none;">
+                        <span style="vertical-align:middle;" id="currentTaskText">&nbsp;</span>
+                    </td>
+                    <td align="right"><!-- other Tasks | Autoscans --></td>
+                </tr>
+             </table>
         </div>
         <noscript>
             <p align="center" style="font-size: 25px; font-weight: bold;">MEDIATOMB</p>

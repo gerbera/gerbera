@@ -320,32 +320,47 @@ function formToArray(form, args)
 }
 
 var status_updates_pending = false;
+var status_loading = false;
 
 function setStatus(status)
 {
     var topDocument = frames["topF"].document;
     
-    if (status == "idle")
+    if (status == "idle" && status_loading)
     {
+        status_loading = false;
         Element.hide(topDocument.getElementById("statusWorking"));
-        Element.show(topDocument.getElementById("statusIdle"));
+        if (status_updates_pending)
+            Element.show(topDocument.getElementById("statusUpdatesPending"));
+        else
+            Element.show(topDocument.getElementById("statusIdle"));
     }
-    else if (status == "loading")
+    else if (status == "loading" && ! status_loading)
     {
-        Element.hide(topDocument.getElementById("statusIdle"));
+        status_loading = true;
+        if (status_updates_pending)
+            Element.hide(topDocument.getElementById("statusUpdatesPending"));
+        else
+            Element.hide(topDocument.getElementById("statusIdle"));
         Element.show(topDocument.getElementById("statusWorking"));
     }
     else if (status == "updates_pending" && ! status_updates_pending)
     {
-        Element.hide(topDocument.getElementById("statusNoUpdates"));
-        Element.show(topDocument.getElementById("statusUpdatesPending"));
         status_updates_pending = true;
+        if (! status_loading)
+        {
+            Element.hide(topDocument.getElementById("statusIdle"));
+            Element.show(topDocument.getElementById("statusUpdatesPending"));
+        }
     }
     else if (status == "no_updates" && status_updates_pending)
     {
-        Element.hide(topDocument.getElementById("statusUpdatesPending"));
-        Element.show(topDocument.getElementById("statusNoUpdates"));
         status_updates_pending = false;
+        if (! status_loading)
+        {
+            Element.hide(topDocument.getElementById("statusUpdatesPending"));
+            Element.show(topDocument.getElementById("statusIdle"));
+        }
     }
 }
 

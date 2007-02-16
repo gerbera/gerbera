@@ -33,7 +33,6 @@
         <meta http-equiv="content-type" content="text/html; charset=UTF-8">
         <title>MEDIATOMB</title>
         <link rel="shortcut icon" href="/favicon.ico" type="image/ico"> 
-        <!-- <script type="text/javascript" language="JavaScript" src="/js/wz_tooltip.js"></script> -->
         <script type="text/javascript" language="JavaScript" src="/js/tools.js"></script>
         <script type="text/javascript" language="JavaScript" src="/js/icons.js"></script>
         <script type="text/javascript" language="JavaScript" src="/js/md5.js"></script>
@@ -58,7 +57,7 @@
                 if (msieWarn != "ok")
                 {
                     setCookie("MSIEwarn", "ok");
-                    alert('MediaTomb UI is very limited with Internet Explorer! Please see the section "Internet Explorer" in the README file.');
+                    alert('MediaTomb UI is very limited with Internet Explorer and some elements will be displayed incorrectly! Please see the section "Internet Explorer" in the README file.');
                 }
             }
             function init() {
@@ -168,7 +167,7 @@
         </script>
 
     </head>
-    <frameset frameborder="1" border="2" framespacing="2" bordercolor="#FFFFFF" rows="108px,*" onload="init();">
+    <frameset frameborder="1" border="2" framespacing="2" bordercolor="#FFFFFF" rows="112px,*" onload="init();">
         <frame src="top.html" name="topF" frameborder="0" noresize>
         <frameset cols="30%,*" frameborder="1" border="2" framespacing="2" bordercolor="#FFFFFF">
             <frameset rows="40px,*"  frameborder="1" border="2" framespacing="2" bordercolor="#FFFFFF">

@@ -317,16 +317,20 @@ function updateItems(ajaxRequest)
     
     var leftDiv = topRightDocument.createElement("td");
     leftDiv.setAttribute("class", "contEntry");
+    leftDiv.setAttribute("valign", "middle");
     
     var contIcon = topRightDocument.createElement("img");
     leftDiv.appendChild(contIcon);
+    //contIcon.setAttribute("style", "vertical-align:middle;");
     
     var pathEl = topRightDocument.createElement("span");
     pathEl.setAttribute("class", "contText");
+    //pathEl.setAttribute("style", "vertical-align:middle;");
     leftDiv.appendChild(pathEl);
     
     var buttons = topRightDocument.createElement("td");
     buttons.setAttribute("class", "itemButtons");
+    buttons.setAttribute("align", "right");
     
     contRow.appendChild(leftDiv);
     contRow.appendChild(buttons);
@@ -462,6 +466,7 @@ function updateItems(ajaxRequest)
         
         var itemButtonsTd = rightDocument.createElement("td");
         itemButtonsTd.setAttribute("class", "itemButtons");
+        itemButtonsTd.setAttribute("align", "right");
         var itemButtons;
         if (isMSIE)
         {

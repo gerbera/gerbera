@@ -83,13 +83,6 @@ div.topDiv
     /* padding:5px; */
 }
 
-div.taskDiv
-{
-    margin-top:-4px;
-    margin-left:0px;
-    margin-right:20px;
-}
-
 table.contTable
 {
     padding-top:5px;
@@ -176,13 +169,6 @@ td.contEntry img, td.itemButtons a, td.itemButtons img, span.contText
     vertical-align:middle;
 }
 
-/*
-td.itemEntry, td.itemButtons
-{
-    padding:0px;
-}
-*/
-
 table.classicForm
 {
     padding:5px;
@@ -192,26 +178,18 @@ table.classicForm
 
 img.status
 {
-    position:fixed;
-    top:26px;
-    left:120px;
+    margin-top:4px;
     z-index:12;
 }
 
 img.logo
 {
-    position:relative;
+    margin-top:1px;
     text-align:center;
-    top:5px;
     z-index:10;
-    vertical-align:middle;
 }
 
 img#logout_img
 {
-    position:relative;
     z-index:11;
-    left:23%;
-    vertical-align:middle;
-    top:4px;
 }
