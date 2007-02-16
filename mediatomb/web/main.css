@@ -47,6 +47,11 @@ input
     font-size: 13px;
 }
 
+input.button
+{
+    width: 5em;
+}
+
 a
 {
     color:#000000;
