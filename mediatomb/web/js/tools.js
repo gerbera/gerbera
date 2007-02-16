@@ -27,7 +27,10 @@
     $Id$
 */
 
-var INACTIVITY_TIMEOUT = 5000;
+var INACTIVITY_TIMEOUT       = 5000;
+var INACTIVITY_TIMEOUT_SHORT = 1000;
+
+var use_inactivity_timeout_short = false;
 
 /*
 function genericCallback(ajaxRequest)
@@ -158,7 +161,11 @@ function handleUIUpdates(updateIDsEl)
     {
         setStatus("updates_pending");
         if (! timer)
-            timer = window.setTimeout("getUpdates(true)", INACTIVITY_TIMEOUT);
+        {
+            timer = window.setTimeout("getUpdates(true)", (use_inactivity_timeout_short ? INACTIVITY_TIMEOUT_SHORT : INACTIVITY_TIMEOUT));
+            if (use_inactivity_timeout_short)
+                use_inactivity_timeout_short = false;
+        }
         last_update = new Date().getTime();
     }
     else if (updateIDsEl.getAttribute("updates") != '1')
@@ -370,7 +377,9 @@ function userActivity(event)
     if (timer)
     {
         window.clearTimeout(timer);
-        timer = window.setTimeout("getUpdates(true)", INACTIVITY_TIMEOUT);
+        timer = window.setTimeout("getUpdates(true)", (use_inactivity_timeout_short ? INACTIVITY_TIMEOUT_SHORT : INACTIVITY_TIMEOUT));
+        if (use_inactivity_timeout_short)
+            use_inactivity_timeout_short = false;
     }
     return true;
 }

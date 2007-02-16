@@ -811,6 +811,8 @@ function removeItem(itemId, all)
     else
         all_send="0";
     var url = link('remove', {object_id: itemId, all: all_send}, true);
+    
+    use_inactivity_timeout_short = true;
     var myAjax = new Ajax.Request(
         url,
         {
