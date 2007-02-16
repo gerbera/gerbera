@@ -37,10 +37,6 @@
 MediaTomb - UPnP MediaServer
 \end_layout
 
-\begin_layout Date
-21.01.2007
-\end_layout
-
 \begin_layout Section
 Introduction
 \end_layout
@@ -226,7 +222,7 @@ REQUIRED (if mysql is not available)
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Standard
 
@@ -251,7 +247,7 @@ REQUIRED (if sqlite is not available)
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Standard
 
@@ -556,15 +552,15 @@ If you don't care about the details - make sure you have installed the required
 \end_layout
 
 \begin_layout Code
-./configure
+$ ./configure
 \end_layout
 
 \begin_layout Code
-make
+$ make
 \end_layout
 
 \begin_layout Code
-make install
+$ make install
 \end_layout
 
 \begin_layout Standard
@@ -924,7 +920,7 @@ This library determines the file type and provides us with the appropriate
 \end_layout
 
 \begin_layout Code
-file -i somefile.avi
+$ file -i somefile.avi
 \end_layout
 
 \begin_layout Standard
@@ -1210,11 +1206,11 @@ Some systems require a special setup on the network interface.
 \end_layout
 
 \begin_layout Code
-route add -net 239.0.0.0 netmask 255.0.0.0 eth1
+# route add -net 239.0.0.0 netmask 255.0.0.0 eth1
 \end_layout
 
 \begin_layout Code
-ifconfig eth1 allmulti
+# ifconfig eth1 allmulti
 \end_layout
 
 \begin_layout Standard
@@ -1264,33 +1260,12 @@ If MediaTomb was compiled with support for both databases, sqlite will be
 \end_layout
 
 \begin_layout Standard
-You must create a separate logical MySQL database and give MediaTomb full
- access to it.
- In order to create a database you need to know it's user name and password.
- Database user names and passwords in MySQL have nothing to do with UNIX
- accounts, MySQL has it's own user names/passwords.
- However a MySQL server may allow only certain UNIX users to manipulate
- databases.
- On some distributions MySQL is installed with the main user name "root"
- and blank password (this has nothing to do with the system root user).
- Consult the MySQL documentation if you want to create a dedicated user
- with a password, in our example we will assume that the MySQL user name
- is 
-\begin_inset Quotes sld
-\end_inset
-
-root
-\begin_inset Quotes srd
-\end_inset
-
- and that the password is blank.
-\end_layout
-
-\begin_layout Standard
 MediaTomb has to be able to connect to the MySQL server and at least the
  (empty) database has to exist.
  To create the database and provide MediaTomb with the ability to connect
  to the MySQL server you need to have the appropriate permissions.
+ Note that user names and passwords in MySQL have nothing to do with UNIX
+ accounts, MySQL has it's own user names/passwords.
  Connect to the MySQL database as 
 \begin_inset Quotes sld
 \end_inset
@@ -1340,6 +1315,18 @@ Create a new database for MediaTomb: (substitute
 
 \begin_layout Code
 mysql> CREATE DATABASE <database name>;
+\end_layout
+
+\begin_layout Standard
+(You can also use 
+\begin_inset Quotes sld
+\end_inset
+
+mysqladmin
+\begin_inset Quotes srd
+\end_inset
+
+ instead.)
 \end_layout
 
 \begin_layout Standard
@@ -1451,7 +1438,7 @@ There is a number of options that can be passed via command line upon server
 \end_layout
 
 \begin_layout Code
-mediatomb --help
+$ mediatomb --help
 \end_layout
 
 \begin_layout Description
@@ -1654,20 +1641,6 @@ These settings define the server configuration, this includes UPnP behavior,
  of shared data.
 \end_layout
 
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-<itemizedlist><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
 \begin_layout Code
 <server>
 \end_layout
@@ -1680,6 +1653,10 @@ Required
 
 \begin_layout Standard
 This section defines the server configuration parameters.
+\end_layout
+
+\begin_layout Standard
+Child tags:
 \end_layout
 
 \begin_layout Standard
@@ -1817,7 +1794,7 @@ status open
 \end_layout
 
 \begin_layout Code
-<manufacturerURL>http://mediatomb.org/</manufacturerURL> 
+<manufacturerURL>http://mediatomb.org/</manufacturerURL>
 \end_layout
 
 \begin_layout Standard
@@ -1857,7 +1834,7 @@ status open
 \end_layout
 
 \begin_layout Code
-<presentationURL append-to="ip">80/index.html</presentationURL> 
+<presentationURL append-to="ip">80/index.html</presentationURL>
 \end_layout
 
 \begin_layout Standard
@@ -1892,16 +1869,25 @@ tion page of the device.
 \end_layout
 
 \begin_layout Standard
-The append-to attribute defines how the text in the presentationURL tag
- should be treated.
+Attributes:
 \end_layout
 
 \begin_layout Standard
-The allowed values are:
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Code
-        append-to="none" 
+append-to=...
 \end_layout
 
 \begin_layout Standard
@@ -1925,12 +1911,25 @@ none
 \end_layout
 
 \begin_layout Standard
+The append-to attribute defines how the text in the presentationURL tag
+ should be treated.
+\end_layout
+
+\begin_layout Standard
+The allowed values are:
+\end_layout
+
+\begin_layout Code
+append-to="none"
+\end_layout
+
+\begin_layout Standard
 Use the string exactly as it appears in the presentationURL tag.
  
 \end_layout
 
 \begin_layout Code
-        append-to="ip" 
+append-to="ip"
 \end_layout
 
 \begin_layout Standard
@@ -1941,13 +1940,27 @@ Append the string specified in the presentationURL tag to the ip address
 \end_layout
 
 \begin_layout Code
-        append-to="port" 
+append-to="port"
 \end_layout
 
 \begin_layout Standard
 Append the string specified in the presentationURL tag to the server ip
  and port, this may be useful if you want to serve some static pages using
  the built in web server.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -2179,6 +2192,10 @@ This section holds the user defined HTTP headers that will be added to all
 \end_layout
 
 \begin_layout Standard
+Child tags:
+\end_layout
+
+\begin_layout Standard
 \begin_inset ERT
 status open
 
@@ -2194,6 +2211,14 @@ status open
 
 \begin_layout Code
 <add header="..."/>
+\end_layout
+
+\begin_layout Code
+<add header="..."/>
+\end_layout
+
+\begin_layout Code
+...
 \end_layout
 
 \begin_layout Standard
@@ -2285,7 +2310,7 @@ status open
 
 \begin_layout Standard
 
-</listitem></itemizedlist>
+<itemizedlist><listitem>
 \end_layout
 
 \end_inset
@@ -2293,8 +2318,18 @@ status open
 
 \end_layout
 
-\begin_layout Subsubsection
-UI Settings
+\begin_layout Code
+<ui enabled="yes" poll-interval="2" poll-when-idle="no"/>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+This section defines various user interface settings.
 \end_layout
 
 \begin_layout Paragraph*
@@ -2316,38 +2351,26 @@ Note: since the server is meant to be used in a home LAN environment the
  on your network to connect to the user interface.
 \end_layout
 
-\begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-    <ui enabled="yes" poll-interval="2" poll-when-idle="no"/>
+\begin_layout Standard
+Attributes:
 \end_layout
 
 \begin_layout Standard
-
-\emph on
-Optional
-\end_layout
+\begin_inset ERT
+status open
 
 \begin_layout Standard
-This section defines various user interface settings.
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-        enabled="yes"
+enabled=...
 \end_layout
 
 \begin_layout Standard
@@ -2363,20 +2386,41 @@ Default: yes
 \end_layout
 
 \begin_layout Standard
-Enables or disables the web user interface, change to "yes" in order to
- enable it.
+Enables (
+\begin_inset Quotes sld
+\end_inset
+
+yes
+\begin_inset Quotes srd
+\end_inset
+
+) or disables (
+\begin_inset Quotes sld
+\end_inset
+
+no
+\begin_inset Quotes srd
+\end_inset
+
+) the web user interface.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-        poll-interval="2" 
+poll-interval=...
 \end_layout
 
 \begin_layout Standard
@@ -2398,16 +2442,22 @@ The poll-interval is an integer value which specifies how often the UI will
  allowed.
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-        poll-when-idle="no"
+poll-when-idle=...
 \end_layout
 
 \begin_layout Standard
@@ -2441,7 +2491,7 @@ Setting poll-when-idle to "yes" will do background polling even when there
 \end_layout
 
 \begin_layout Standard
-The tasks are that are monitored are:
+The tasks that are monitored are:
 \end_layout
 
 \begin_layout Itemize
@@ -2456,16 +2506,40 @@ removing items or containers
 automatic rescans 
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Child tags:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-        <accounts enabled="yes" session-timeout="30"/>
+<accounts enabled="yes" session-timeout="30"/>
 \end_layout
 
 \begin_layout Standard
@@ -2478,16 +2552,26 @@ Optional
 This section holds various account settings.
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+Attributes:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-                  enabled="yes"
+enabled=...
 \end_layout
 
 \begin_layout Standard
@@ -2503,15 +2587,41 @@ Default: yes
 \end_layout
 
 \begin_layout Standard
-Specifies if accounts are enabled or disabled.
+Specifies if accounts are enabled (
+\begin_inset Quotes sld
+\end_inset
+
+yes
+\begin_inset Quotes srd
+\end_inset
+
+) or disabled (
+\begin_inset Quotes sld
+\end_inset
+
+no
+\begin_inset Quotes srd
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-                  session-timeout="30"
+session-timeout=...
 \end_layout
 
 \begin_layout Standard
@@ -2534,11 +2644,47 @@ The session-timeout attribute specifies the timeout interval in minutes.
 \end_layout
 
 \begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 Accounts can be defined as shown below:
 \end_layout
 
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Code
-            <account user="name" password="password"/>
+<account user="name" password="password"/>
+\end_layout
+
+\begin_layout Code
+<account user="name" password="password"/>
+\end_layout
+
+\begin_layout Code
+....
 \end_layout
 
 \begin_layout Standard
@@ -2552,16 +2698,36 @@ There can be multiple users, however this is mainly a feature for the future.
  Right now there are no per-user permissions.
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-        <items-per-page default="25"> 
+<items-per-page default="25"> 
 \end_layout
 
 \begin_layout Standard
@@ -2583,23 +2749,37 @@ This sets the default number of items per page that will be shown when browsing
 
 \begin_layout Standard
 The values for the items per page drop down menu can be defined in the following
- manner: 
+ manner:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Code
-            <option>10</option>
+<option>10</option>
 \end_layout
 
 \begin_layout Code
-            <option>25</option>
+<option>25</option>
 \end_layout
 
 \begin_layout Code
-            <option>50</option>
+<option>50</option>
 \end_layout
 
 \begin_layout Code
-            <option>100</option>
+<option>100</option>
 \end_layout
 
 \begin_layout Standard
@@ -2615,12 +2795,50 @@ Note: this list must contain the default value, i.e.
  
 \end_layout
 
-\begin_layout Subsubsection
-Database Settings
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Code
-    <storage driver="..."> 
+<storage driver="..."> 
 \end_layout
 
 \begin_layout Standard
@@ -2634,8 +2852,26 @@ Specifies the storage driver, currently sqlite3 and mysql are supported.
  Each storage driver has it's own configuration parameters.
 \end_layout
 
+\begin_layout Standard
+Attributes:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Code
-             driver="sqlite3"
+driver=...
 \end_layout
 
 \begin_layout Standard
@@ -2671,19 +2907,43 @@ mysql
 \end_layout
 
 \begin_layout Standard
-There is only one option for sqlite:
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Code
+driver="sqlite3"
+\end_layout
+
+\begin_layout Standard
+There is only one child tag for sqlite:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-        <database-file>mediatomb.db</database-file>
+<database-file>mediatomb.db</database-file>
 \end_layout
 
 \begin_layout Standard
@@ -2708,15 +2968,61 @@ The database location is relative to the server's home, if the sqlite database
 \end_layout
 
 \begin_layout Standard
-Below are the options for MySQL:
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Code
-    
+driver="mysql"
+\end_layout
+
+\begin_layout Standard
+\begin_inset LatexCommand \label{config-mysql}
+
+\end_inset
+
+Below are the child tags for MySQL:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Code
-        <host>localhost</host>
+<host>localhost</host>
 \end_layout
 
 \begin_layout Standard
@@ -2735,16 +3041,22 @@ Default: "localhost"
 This specifies the host where your MySQL database is running.
 \end_layout
 
-\begin_layout Code
- 
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Code
- 
-\end_layout
-
-\begin_layout Code
-        <username>root</username>
+<username>root</username>
 \end_layout
 
 \begin_layout Standard
@@ -2763,16 +3075,22 @@ Default: "mediatomb"
 This option sets the user name that will be used to connect to the database.
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-        <password></password>
+<password></password>
 \end_layout
 
 \begin_layout Standard
@@ -2788,19 +3106,28 @@ Default: no password
 \end_layout
 
 \begin_layout Standard
-Password for your MySQL user.
+Defines the password for the MySQL user.
+ If the tag doesn't exist MediaTomb will use no password, if the tag exists,
+ but is empty MediaTomb will use an empty password.
+ MySQL has a distinction between no password and an empty password.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-        <database>mediatomb</database>
+<database>mediatomb</database>
 \end_layout
 
 \begin_layout Standard
@@ -2817,6 +3144,62 @@ Default: "mediatomb"
 
 \begin_layout Standard
 Name of the database that will be used by MediaTomb.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
@@ -2841,8 +3224,26 @@ Optional
 This tag defines the import section.
 \end_layout
 
+\begin_layout Standard
+Attributes:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Code
-        hidden-files="no"
+hidden-files=...
 \end_layout
 
 \begin_layout Standard
@@ -2859,20 +3260,52 @@ Default: no
 
 \begin_layout Standard
 This attribute defines if files starting with a dot will be imported into
- the database.
+ the database (
+\begin_inset Quotes sld
+\end_inset
+
+yes
+\begin_inset Quotes srd
+\end_inset
+
+).
  Autoscan can override this attribute on a per directory basis.
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Child tags:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-    <filesystem-charset>ISO-8859-1</filesystem-charset>
+<filesystem-charset>ISO-8859-1</filesystem-charset>
 \end_layout
 
 \begin_layout Standard
@@ -2900,16 +3333,22 @@ Defines the charset of the filesystem.
  correctly import your data.
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-    <metadata-charset>ISO-8859-1</metadata-charset>
+<metadata-charset>ISO-8859-1</metadata-charset>
 \end_layout
 
 \begin_layout Standard
@@ -2934,16 +3373,22 @@ Same as above, but defines the charset of the metadata (i.e.
  id3 tags, Exif information, etc.)
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-    <script charset="UTF-8">/path/to/my/import/script.js</script>
+<script charset="UTF-8">/path/to/my/import/script.js</script>
 \end_layout
 
 \begin_layout Standard
@@ -2968,16 +3413,26 @@ Points to the script invoked upon media import.
  For more details read doc/scripting-intro.txt
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+Attributes:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-            charset="UTF-8"
+charset=...
 \end_layout
 
 \begin_layout Standard
@@ -2996,50 +3451,70 @@ Default: UTF-8
 Specifies the import script encoding.
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+\begin_inset ERT
+status open
 
+\begin_layout Standard
+
+</listitem></itemizedlist>
 \end_layout
 
-\begin_layout Code
+\end_inset
 
-\end_layout
 
-\begin_layout Code
-    <magic-file>
 \end_layout
 
 \begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<magic-file>/path/to/my/magic-file</magic-file>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
 Optional
 \end_layout
 
 \begin_layout Standard
-Default:
+
 \emph on
- 
-\emph default
-none
+Default: System default
 \end_layout
 
 \begin_layout Standard
 Specifies an alternative file for filemagic, containing mime type information.
 \end_layout
 
-\begin_layout Subsubsection
-Autoscan Settings
-\end_layout
+\begin_layout Standard
+\begin_inset ERT
+status open
 
 \begin_layout Standard
-This section defines persistent autoscan directories.
- It is also possible to define autoscan directories in the UI, the difference
- is that autoscan directories that are defined via the config file can not
- be removed in the UI.
- Even if the directory gets removed on disk, the server will try to monitor
- the specified location and will re add the removed directory if it becomes
- available/gets created again.
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Code
-    <autoscan>
+<autoscan>
 \end_layout
 
 \begin_layout Standard
@@ -3052,20 +3527,52 @@ Optional
 Specifies a list of default autoscan directories.
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+This section defines persistent autoscan directories.
+ It is also possible to define autoscan directories in the UI, the difference
+ is that autoscan directories that are defined via the config file can not
+ be removed in the UI.
+ Even if the directory gets removed on disk, the server will try to monitor
+ the specified location and will re add the removed directory if it becomes
+ available/gets created again.
+\end_layout
+
+\begin_layout Standard
+Child tags:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
-
+<directory location="/media" mode="timed" interval="15"
 \end_layout
 
 \begin_layout Code
-        <directory location="/media" mode="timed" interval="15" 
+    level="full" recursive="no" hidden-files="no"/>
 \end_layout
 
 \begin_layout Code
-                   level="full" recursive="no" hidden-files="no"/>
+<directory location="/audio" mode="timed" interval="30"
+\end_layout
+
+\begin_layout Code
+    level="basic" recursive="yes" hidden-files="no"/>
+\end_layout
+
+\begin_layout Code
+...
 \end_layout
 
 \begin_layout Standard
@@ -3082,16 +3589,22 @@ Defines an autoscan directory and it's parameters.
 The attributes specify various autoscan options:
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-                   location="/monitored/directory"
+location=...
 \end_layout
 
 \begin_layout Standard
@@ -3104,16 +3617,22 @@ Required
 Absolute path to the directory that shall be monitored.
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-                   mode="timed"
+mode=...
 \end_layout
 
 \begin_layout Standard
@@ -3127,16 +3646,22 @@ Scan mode, currently only "timed" is supported, future releases will introduce
  other modes - like inotify.
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-                   interval="timed"
+interval=...
 \end_layout
 
 \begin_layout Standard
@@ -3157,16 +3682,22 @@ timed
 Scan interval in seconds.
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-                   level="basic"
+level=...
 \end_layout
 
 \begin_layout Standard
@@ -3184,16 +3715,22 @@ Either "full" or "basic".
  like id3 tags and alike.
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-                   recursive="no"
+recursive=...
 \end_layout
 
 \begin_layout Standard
@@ -3207,16 +3744,22 @@ Values of "yes" or "no" are allowed, specifies if autoscan shall monitor
  the given directory including all sub directories.
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-                   hidden-files="no"
+hidden-files=...
 \end_layout
 
 \begin_layout Standard
@@ -3248,20 +3791,50 @@ Allowed values: "yes" or "no", process hidden files, overrides the hidden-files
  value in the <import/> tag.
 \end_layout
 
-\begin_layout Subsubsection
-Various Mappings
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-This section defines mime type and upnp:class mappings, it is vital if filemagic
- is not available - in this case media type auto detection will fail and
- you will have to set the mime types manually by matching the file extension.
- It is also helpful if you want to override auto detected mime types or
- simply skip filemagic processing for known file types.
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Code
-    <mappings>
+<mappings>
 \end_layout
 
 \begin_layout Standard
@@ -3275,16 +3848,30 @@ Defines various mapping options for importing media, currently two subsections
  are supported.
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+This section defines mime type and upnp:class mappings, it is vital if filemagic
+ is not available - in this case media type auto detection will fail and
+ you will have to set the mime types manually by matching the file extension.
+ It is also helpful if you want to override auto detected mime types or
+ simply skip filemagic processing for known file types.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-        <extension-mimetype ignore-unknown="no"> 
+<extension-mimetype ignore-unknown="no"> 
 \end_layout
 
 \begin_layout Standard
@@ -3297,16 +3884,26 @@ Optional
 This section holds the file name extension to mime type mappings.
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+Attributes:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-                            ignore-unknown="no"
+ignore-unknown=...
 \end_layout
 
 \begin_layout Standard
@@ -3331,16 +3928,40 @@ If ignore-unknown is set to "yes", then only the extensions that are listed
  
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Child tags:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-            <map from="mp3" to="audio/mpeg"/>
+<map from="mp3" to="audio/mpeg"/>
 \end_layout
 
 \begin_layout Standard
@@ -3365,16 +3986,36 @@ Note: extension is case sensitive, this will probably need to be fixed.
  
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-        <mimetype-upnpclass> 
+<mimetype-upnpclass> 
 \end_layout
 
 \begin_layout Standard
@@ -3388,16 +4029,26 @@ This section holds the mime type to upnp:class mappings.
  
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+Child tags:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-            <map from="audio/*" to="object.item.audioItem.musicTrack"/>
+<map from="audio/*" to="object.item.audioItem.musicTrack"/>
 \end_layout
 
 \begin_layout Standard
@@ -3414,12 +4065,50 @@ Specifies a mapping from a certain mime type to upnp:class in the Content
  The values of "from" and "to" attributes are case sensitive.
 \end_layout
 
-\begin_layout Subsubsection
-Metadata Parsing Library Options
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Code
-    <library-options> 
+<library-options>
 \end_layout
 
 \begin_layout Standard
@@ -3473,16 +4162,26 @@ Photos/MyCamera2/Date
 etc.
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+Child tags:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
- 
-\end_layout
-
-\begin_layout Code
-       <libexif>
+<libexif>
 \end_layout
 
 \begin_layout Standard
@@ -3495,16 +4194,26 @@ Optional
 Options for the exif library.
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+Child tags:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-            <auxdata>
+<auxdata>
 \end_layout
 
 \begin_layout Standard
@@ -3520,16 +4229,34 @@ Currently only adding keywords to auxdata is supported.
  the media structure.
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+Child tags:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
-
+<add tag="keyword1"/>
 \end_layout
 
 \begin_layout Code
-                <add tag="keyword"/>
+<add tag="keyword2"/>
+\end_layout
+
+\begin_layout Code
+...
 \end_layout
 
 \begin_layout Standard
@@ -3542,51 +4269,76 @@ Optional
 If the library was able to extract the data according to the given keyword,
  it will be added to auxdata.
  You can then use that data in your import scripts.
- 
 \end_layout
 
 \begin_layout Standard
-An sample configuration for the example described above would be:
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
 \end_layout
 
-\begin_layout Code
-        <libexif>
-\end_layout
+\end_inset
 
-\begin_layout Code
-            <auxdata>
-\end_layout
 
-\begin_layout Code
-                <add tag="EXIF_TAG_MODEL"/>
-\end_layout
-
-\begin_layout Code
-            </auxdata>
-\end_layout
-
-\begin_layout Code
-        </libexif> 
-\end_layout
-
-\begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-  
 \end_layout
 
 \begin_layout Standard
-Libextractor options are defined under this tag: 
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+A sample configuration for the example described above would be:
 \end_layout
 
 \begin_layout Code
-       <libextractor>
+<libexif>
+\end_layout
+
+\begin_layout Code
+    <auxdata>
+\end_layout
+
+\begin_layout Code
+        <add tag="EXIF_TAG_MODEL"/>
+\end_layout
+
+\begin_layout Code
+    </auxdata>
+\end_layout
+
+\begin_layout Code
+</libexif> 
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<libextractor>
 \end_layout
 
 \begin_layout Standard
@@ -3599,16 +4351,26 @@ Optional
 Options for the extractor library.
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+Child tags:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-            <auxdata>
+<auxdata>
 \end_layout
 
 \begin_layout Standard
@@ -3622,16 +4384,34 @@ Currently only adding keywords to auxdata is supported.
  For a list of keywords/tags see the libextractor documentation.
 \end_layout
 
-\begin_layout Code
+\begin_layout Standard
+Child tags:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Code
-
+<add tag="keyword1"/>
 \end_layout
 
 \begin_layout Code
-                <add tag="keyword"/>
+<add tag="keyword2"/>
+\end_layout
+
+\begin_layout Code
+...
 \end_layout
 
 \begin_layout Standard
@@ -3644,6 +4424,62 @@ Optional
 If the library was able to extract the data according to the given keyword,
  it will be added to auxdata.
  You can then use that data in your import scripts.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
