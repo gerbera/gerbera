@@ -10,16 +10,16 @@ foreach (@ARGV)
     my $filename = pop(@full_fn);
     
     my $new_header_main = 
-'    MediaTomb - http://www.mediatomb.org/
+'    MediaTomb - http://www.mediatomb.cc/
     
     '.$filename.' - this file is part of MediaTomb.
     
-    Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.org>,
-                       Sergey \'Jin\' Bostandzhyan <jin@mediatomb.org>
+    Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
+                       Sergey \'Jin\' Bostandzhyan <jin@mediatomb.cc>
     
-    Copyright (C) 2006-2007 Gena Batyan <bgeradz@mediatomb.org>,
-                            Sergey \'Jin\' Bostandzhyan <jin@mediatomb.org>,
-                            Leonhard Wimmer <leo@mediatomb.org>
+    Copyright (C) 2006-2007 Gena Batyan <bgeradz@mediatomb.cc>,
+                            Sergey \'Jin\' Bostandzhyan <jin@mediatomb.cc>,
+                            Leonhard Wimmer <leo@mediatomb.cc>
     
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
@@ -39,7 +39,7 @@ foreach (@ARGV)
     my $new_header_tombupnp = 
 '    TombUPnP - a library for developing UPnP applications.
     
-    Copyright (C) 2006-2007 Sergey \'Jin\' Bostandzhyan <jin@mediatomb.org>
+    Copyright (C) 2006-2007 Sergey \'Jin\' Bostandzhyan <jin@mediatomb.cc>
     
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
