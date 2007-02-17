@@ -54,12 +54,6 @@ Ref<SingletonManager> SingletonManager::getInstance()
     return instance;
 }
 
-SingletonManager::~SingletonManager()
-{
-    if (mutex != nil)
-        mutex = nil;
-}
-
 SingletonManager::SingletonManager() : Object()
 {
     singletonStack = Ref<ObjectStack<Singleton<Object> > >(new ObjectStack<Singleton<Object> >(SINGLETON_CUR_MAX));

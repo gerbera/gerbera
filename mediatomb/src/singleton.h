@@ -44,7 +44,6 @@ class SingletonManager : public zmm::Object
 public:
     static zmm::Ref<SingletonManager> getInstance();
     SingletonManager();
-    virtual ~SingletonManager();
     
     void registerSingleton(zmm::Ref<Singleton<zmm::Object> > object);
     virtual void shutdown(bool complete = false);
@@ -62,12 +61,12 @@ class Singleton : public zmm::Object
 public:
     static zmm::Ref<T> getInstance()
     {
-        if (! instance->singletonActive)
+        if (! singletonActive)
             throw _Exception(_("singleton is currently inactive!"));
         if (instance == nil)
         {
             AUTOLOCK(mutex);
-            if (! instance->singletonActive)
+            if (! singletonActive)
                 throw _Exception(_("singleton is currently inactive!"));
             if (instance == nil) // check again, because there is a very small chance
                                  // that 2 threads tried to lock() concurrently
@@ -83,20 +82,20 @@ public:
     
 protected:
     
-    virtual ~Singleton() { mutex = nil; }
+    virtual ~Singleton() { }
     
     virtual void init() { }
     virtual void shutdown() { }
     
     static zmm::Ref<Mutex> mutex;
     static zmm::Ref<T> instance;
+    static bool singletonActive;
     
     virtual void registerSingleton()
     {
         SingletonManager::getInstance()->registerSingleton(zmm::Ref<Singleton<Object> >((Singleton<Object> *)this));
     }
     
-    static bool singletonActive;
 private:
     
     virtual void inactivateSingleton()
@@ -105,7 +104,7 @@ private:
         singletonActive = false;
         instance = nil;
     }
-    void reactivateSingleton() { singletonActive = true; }
+    virtual void reactivateSingleton() { singletonActive = true; }
     
     friend class SingletonManager;
 };
