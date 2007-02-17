@@ -68,8 +68,6 @@ _DIST_FILES_JS = \
 ./js/nanotree.js \
 ./js/pngbehavior.htc
 
-#./js/wz_tooltip.js
-
 _DIST_FILES_WEB = \
 ./disabled.html \
 ./std_treelook.css \
