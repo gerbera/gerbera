@@ -688,7 +688,7 @@ void ConfigManager::writeBookmark(String ip, String port)
     String  data; 
     int     size; 
   
-    String value = ConfigManager::getInstance()->getOption(_("/server/ui/attribute::enabled"));
+    String value = getOption(_("/server/ui/attribute::enabled"));
     if (value != "yes")
     {
         data = http_redirect_to(ip, port, _("disabled.html"));

@@ -279,7 +279,8 @@ void Server::shutdown()
     // unregister device
     
     ret = UpnpUnRegisterRootDevice(device_handle);
-    if (ret != UPNP_E_SUCCESS) {   
+    if (ret != UPNP_E_SUCCESS) 
+    {   
         throw _UpnpException(ret, _("upnp_cleanup: UpnpUnRegisterRootDevice failed"));
     }
     

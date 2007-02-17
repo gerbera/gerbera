@@ -216,7 +216,7 @@ sqlite (version > 3.x)
 \end_inset
 
  
-\shape italic
+\emph on
 REQUIRED (if mysql is not available)
 \end_layout
 
@@ -241,7 +241,7 @@ mysql client library (version > 4.0.x)
 \end_inset
 
  
-\shape italic
+\emph on
 REQUIRED (if sqlite is not available)
 \end_layout
 
@@ -294,7 +294,7 @@ status collapsed
 
 \begin_layout Standard
 libmagic 
-\shape italic
+\emph on
 OPTIONAL, RECOMMENDED
 \end_layout
 
@@ -327,7 +327,10 @@ js - SpiderMonkey JavaScript Engine
 
 
 \shape italic
- OPTIONAL, HIGHLY RECOMMENDED
+ 
+\shape default
+\emph on
+OPTIONAL, HIGHLY RECOMMENDED
 \end_layout
 
 \begin_layout Standard
@@ -361,7 +364,7 @@ taglib
 \end_inset
 
  
-\shape italic
+\emph on
 OPTIONAL, RECOMMENDED
 \end_layout
 
@@ -406,9 +409,10 @@ id3lib
 
  (at least version 3.8.3)
 \shape italic
- OPTIONAL, RECOMMENDED (if taglib is not available)
-\shape default
  
+\shape default
+\emph on
+OPTIONAL, RECOMMENDED (if taglib is not available) 
 \end_layout
 
 \begin_layout Standard
@@ -436,7 +440,7 @@ libexif
 \end_inset
 
  
-\shape italic
+\emph on
 OPTIONAL, RECOMMENDED
 \end_layout
 
@@ -469,7 +473,7 @@ libextractor
 \end_inset
 
  
-\shape italic
+\emph on
 OPTIONAL
 \end_layout
 
