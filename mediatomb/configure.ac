@@ -1282,12 +1282,15 @@ if test "x$JS_OK" = xyes; then
             for sm_path in $SEARCH_DIR_HEADERS \
                            /usr/include/js \
                            /usr/include/smjs \
+                           /usr/include/mozjs \
                            /usr/local/include/js \
                            /usr/local/include/smjs \
+                           /usr/local/include/mozjs \
                            /usr/include/spidermonkey \
                            /usr/local/include/spidermonkey \
                            $SEARCH_DIR_HEADERS/js \
                            $SEARCH_DIR_HEADERS/smjs \
+                           $SEARCH_DIR_HEADERS/mozjs \
                            $SEARCH_DIR_HEADERS/spidermonkey; do 
                 if test "x$ac_cv_header_jsapi_h" != xyes ; then
                     AC_MSG_CHECKING([checking alternative libjs header location: $sm_path])
