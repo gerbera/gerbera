@@ -84,6 +84,9 @@ void SingletonManager::shutdown(bool complete)
 {
     log_debug("start (%d objects)\n", singletonStack->size());
     AUTOLOCK(mutex);
+    
+    Ref<ObjectStack<Singleton<Object> > > singletonStackReactivate(new ObjectStack<Singleton<Object> >(SINGLETON_CUR_MAX));
+    
     Ref<Singleton<Object> > object;
     while((object = singletonStack->pop()) != nil)
     {
@@ -91,8 +94,11 @@ void SingletonManager::shutdown(bool complete)
         //_print_backtrace(stdout);
         object->shutdown();
         object->inactivateSingleton();
+        singletonStackReactivate->push(object);
         //object->destroyMutex();
     }
+    while((object = singletonStackReactivate->pop()) != nil)
+        object->reactivateSingleton();
     if (complete && instance != nil)
         instance = nil;
     log_debug("end\n");

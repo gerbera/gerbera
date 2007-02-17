@@ -73,8 +73,8 @@ public:
                                  // that 2 threads tried to lock() concurrently
             {
                 zmm::Ref<T> tmpInstance = zmm::Ref<T>(new T());
-                tmpInstance->init();
                 tmpInstance->registerSingleton();
+                tmpInstance->init();
                 instance = tmpInstance;
             }
         }
@@ -105,7 +105,7 @@ private:
         singletonActive = false;
         instance = nil;
     }
-    //void activateSingleton() { singletonActive = true; }
+    void reactivateSingleton() { singletonActive = true; }
     
     friend class SingletonManager;
 };
