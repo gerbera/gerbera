@@ -72,7 +72,7 @@ public:
 
     zmm::Ref<AutoscanDirectory> get(int id);
 
-//    zmm::Ref<AutoscanDirectory> get(zmm::String location);
+    zmm::Ref<AutoscanDirectory> get(zmm::String location);
     
     zmm::Ref<AutoscanDirectory> getByObjectID(int objectID);
 

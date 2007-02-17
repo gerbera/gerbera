@@ -156,6 +156,17 @@ Ref<AutoscanDirectory> AutoscanList::getByObjectID(int objectID)
     return nil;
 }
 
+Ref<AutoscanDirectory> AutoscanList::get(String location)
+{
+    AUTOLOCK(mutex);
+    for (int i = 0; i < list->size(); i++)
+    {
+        if (list->get(i) != nil && (location == list->get(i)->getLocation()))
+            return list->get(i);
+    }
+    return nil;
+
+}
 
 void AutoscanList::remove(int id)
 {

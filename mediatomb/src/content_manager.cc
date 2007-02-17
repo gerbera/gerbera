@@ -1352,6 +1352,12 @@ Ref<AutoscanDirectory> ContentManager::getAutoscanDirectory(int scanID, scan_mod
     return nil;
 }
 
+Ref<AutoscanDirectory> ContentManager::getAutoscanDirectory(String location)
+{
+    // \todo change this when more scanmodes become available
+    return autoscan_timed->get(location);
+}
+
 void ContentManager::removeAutoscanDirectory(int scanID, scan_mode_t scanMode)
 {
     if (scanMode == TimedScanMode)
@@ -1372,19 +1378,6 @@ void ContentManager::removeAutoscanDirectory(int scanID, scan_mode_t scanMode)
     
 }
 
-/*
-void ContentManager::removeAutoscanDirectory(String location)
-{
-    int scanID;
-    if ((scanID = autoscan_timed->remove(location)) >= 0)
-    {
-        // if 3rd parameter is true: won't fail if scanID doesn't exist
-        Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), scanID, true);
-    }
-    // else <other removes... (w/o removeTimerSubscriber!)>
-}
-*/
-
 void ContentManager::removeAutoscanDirectory(int objectID)
 {
     Ref<Storage> storage = Storage::getInstance();
@@ -1399,6 +1392,16 @@ void ContentManager::removeAutoscanDirectory(int objectID)
         SessionManager::getInstance()->containerChangedUI(objectID);
         Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), scanID, true);
     }
+}
+
+void ContentManager::removeAutoscanDirectory(String location)
+{
+    /// \todo change this when more scanmodes become avaiable
+    Ref<AutoscanDirectory> adir = autoscan_timed->get(location);
+    if (adir == nil)
+        throw _Exception(_("can not remove autoscan directory - was not an autoscan"));
+    
+    removeAutoscanDirectory(adir->getObjectID());
 }
 
 void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
