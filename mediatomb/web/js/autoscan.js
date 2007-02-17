@@ -22,7 +22,7 @@
     
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
     
     $Id$
 */
@@ -135,6 +135,8 @@ function autoscanSubmit()
     args['object_id'] = autoscanId;
     args['from_fs'] = (autoscanFromFs ? '1' : '0');
     formToArray(form, args);
+    if (args['scan_level'] == 'none')
+        use_inactivity_timeout_short = true;
     var url = link('autoscan', args);
     var myAjax = new Ajax.Request(
         url,
