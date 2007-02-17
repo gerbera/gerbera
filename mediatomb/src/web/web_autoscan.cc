@@ -54,8 +54,8 @@ void web::autoscan::process()
     if (! string_ok(action))
         throw _Exception(_("web:autoscan called with illegal action"));
     
-    Ref<Storage> storage = Storage::getInstance();
     Ref<ContentManager> cm = ContentManager::getInstance();
+    Ref<Storage> storage = Storage::getInstance();
     
     if (action == "as_edit_load")
     {
@@ -64,33 +64,17 @@ void web::autoscan::process()
         root->appendChild(autoscan);
         if (fromFs)
         {
-            // to be finished...
             autoscan->appendTextChild(_("from_fs"), _("1"));
             autoscan->appendTextChild(_("object_id"), param(_("object_id")));
-            autoscan->appendTextChild(_("scan_level"), _("none"));
-            autoscan->appendTextChild(_("recursive"), _("0"));
-            autoscan->appendTextChild(_("hidden"), _("0"));
-            autoscan->appendTextChild(_("interval"), _("1800"));
+            Ref<AutoscanDirectory> adir = cm->getAutoscanDirectory(hex_decode_string(param(_("object_id"))));
+            autoscan2XML(autoscan, adir);
         }
         else
         {
             autoscan->appendTextChild(_("from_fs"), _("0"));
             autoscan->appendTextChild(_("object_id"), param(_("object_id")));
             Ref<AutoscanDirectory> adir = storage->getAutoscanDirectory(intParam(_("object_id")));
-            if (adir == nil)
-            {
-                autoscan->appendTextChild(_("scan_level"), _("none"));
-                autoscan->appendTextChild(_("recursive"), _("0"));
-                autoscan->appendTextChild(_("hidden"), _("0"));
-                autoscan->appendTextChild(_("interval"), _("1800"));
-            }
-            else
-            {
-                autoscan->appendTextChild(_("scan_level"), AutoscanDirectory::mapScanlevel(adir->getScanLevel()));
-                autoscan->appendTextChild(_("recursive"), (adir->getRecursive() ? _("1") : _("0") ));
-                autoscan->appendTextChild(_("hidden"), (adir->getHidden() ? _("1") : _("0") ));
-                autoscan->appendTextChild(_("interval"), String::from(adir->getInterval()));
-            }
+            autoscan2XML(autoscan, adir);
         }
     }
     else if (action == "as_edit_save")
@@ -101,11 +85,12 @@ void web::autoscan::process()
         if (scan_level_str == "none")
         {
             // remove...
-            if (fromFs)
-                throw _Exception(_("removing from fs is not implemented yet.."));
             try
             {
-                cm->removeAutoscanDirectory(intParam(_("object_id")));
+                if (fromFs)
+                    cm->removeAutoscanDirectory(hex_decode_string(param(_("object_id"))));
+                else
+                    cm->removeAutoscanDirectory(intParam(_("object_id")));
             }
             catch (Exception e)
             {
@@ -176,3 +161,20 @@ void web::autoscan::process()
         throw _Exception(_("web:autoscan called with illegal action"));
 }
 
+void web::autoscan::autoscan2XML(Ref<Element> element, Ref<AutoscanDirectory> adir)
+{
+    if (adir == nil)
+    {
+        element->appendTextChild(_("scan_level"), _("none"));
+        element->appendTextChild(_("recursive"), _("0"));
+        element->appendTextChild(_("hidden"), _("0"));
+        element->appendTextChild(_("interval"), _("1800"));
+    }
+    else
+    {
+        element->appendTextChild(_("scan_level"), AutoscanDirectory::mapScanlevel(adir->getScanLevel()));
+        element->appendTextChild(_("recursive"), (adir->getRecursive() ? _("1") : _("0") ));
+        element->appendTextChild(_("hidden"), (adir->getHidden() ? _("1") : _("0") ));
+        element->appendTextChild(_("interval"), String::from(adir->getInterval()));
+    }
+}

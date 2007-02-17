@@ -132,6 +132,8 @@ class autoscan : public WebRequestHandler
 public:
     autoscan();
     virtual void process();
+protected:
+    void autoscan2XML(zmm::Ref<mxml::Element> element, zmm::Ref<AutoscanDirectory> adir);
 };
 
 /// \brief UI updates
