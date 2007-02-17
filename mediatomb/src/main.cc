@@ -90,18 +90,18 @@ int main(int argc, char **argv, char **envp)
     int      opt_index = 0;
     int      o;
     static struct option long_options[] = {
-                   {"ip", 1, 0, 'i'},
-                   {"port", 1, 0, 'p'},
-                   {"config", 1, 0, 'c'},
-                   {"user", 1, 0, 'u'},
-                   {"group", 1, 0, 'g'},
-                   {"daemon", 0, 0, 'd'},
-                   {"pidfile", 1, 0, 'P'},
-                   {"add", 1, 0, 'a'},
-                   {"logfile", 1, 0, 'l'},
-                   {"help", 0, 0, 'h'},
-                   {0, 0, 0, 0}
-               };
+        {"ip", 1, 0, 'i'},
+        {"port", 1, 0, 'p'},
+        {"config", 1, 0, 'c'},
+        {"user", 1, 0, 'u'},
+        {"group", 1, 0, 'g'},
+        {"daemon", 0, 0, 'd'},
+        {"pidfile", 1, 0, 'P'},
+        {"add", 1, 0, 'a'},
+        {"logfile", 1, 0, 'l'},
+        {"help", 0, 0, 'h'},
+        {0, 0, 0, 0}
+    };
 #endif
 
     String config_file;
@@ -328,12 +328,8 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
 
         /* Close out the standard file descriptors */        
         close(STDIN_FILENO);
-
-        /*
         close(STDOUT_FILENO);
         close(STDERR_FILENO);
-        */
-
     }
 
     if (pid_file != nil)
@@ -479,11 +475,16 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
             log_info("Restarting MediaTomb!\n");
             try
             {
+                server = nil;
+
                 singletonManager->shutdown(true);
+                singletonManager = nil;
+                singletonManager = SingletonManager::getInstance();
                 
                 try
                 {
                     ConfigManager::setStaticArgs(config_file, home);
+                    ConfigManager::getInstance();
                 }
                 catch (mxml::ParseException pe)
                 {
@@ -507,7 +508,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
                 init_process();
                 
                 ///  \todo fix this for SIGHUP
-                //server->init();
+                server = Server::getInstance();
                 server->upnp_init(String(ip), port);
                 
                 restart_flag = 0;
