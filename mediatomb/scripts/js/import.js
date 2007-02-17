@@ -5,6 +5,7 @@ UPNP_MUSIC_CONTAINER = 'object.container.musicContainer';
 UPNP_MUSIC_ALBUM     = 'object.container.album.musicAlbum';
 //UPNP_MUSIC_ARTIST    = 'object.container.person.musicArtist';
 UPNP_MUSIC_GENRE     = 'object.container.genre.musicGenre';
+UPNP_DEFAULT_CONTAINER = 'object.container';
 
 function escapeSlash(name)
 {
@@ -98,7 +99,11 @@ function addAudio(obj)
     {
         obj.meta[M_DESCRIPTION] = desc;
     }
+
+// uncomment this if you want to have track numbers in front of the title
+// in album view
     
+/*    
     var track = obj.meta[M_TRACKNUMBER];
     if (!track)
         track = '';
@@ -110,6 +115,10 @@ function addAudio(obj)
         }
         track = track + ' ';
     }
+*/
+    // comment this out if you uncomment the stuff above  :)
+    var track = '';
+
     var chain = new Array('Audio', 'All audio');
     obj.title = title;
     addCdsObject(obj, createContainerChain(chain), UPNP_MUSIC_CONTAINER);
@@ -158,13 +167,13 @@ function addVideo(obj)
 function addImage(obj)
 {
     var chain = new Array('Photos', 'All Photos');
-    addCdsObject(obj, createContainerChain(chain));
+    addCdsObject(obj, createContainerChain(chain), UPNP_DEFAULT_CONTAINER);
 
     var date = obj.meta[M_DATE];
     if (date)
     {
         chain = new Array('Photos', 'Date', date);
-        addCdsObject(obj, createContainerChain(chain));
+        addCdsObject(obj, createContainerChain(chain), UPNP_DEFAULT_CONTAINER);
     }
 }
 

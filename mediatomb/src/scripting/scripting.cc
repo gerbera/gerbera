@@ -399,7 +399,11 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
 
         JSString *cont = JS_ValueToString(cx, argv[2]);
         if (cont)
+        {
             containerclass = String(JS_GetStringBytes(cont));
+            if (!string_ok(containerclass) || containerclass == "undefined")
+                containerclass = nil;
+        }
 
         Ref<CdsObject> cds_obj = jsObject2cdsObject(cx, js_cds_obj);
         Ref<ContentManager> cm = ContentManager::getInstance();
