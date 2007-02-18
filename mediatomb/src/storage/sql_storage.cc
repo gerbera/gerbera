@@ -299,13 +299,6 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
                 cdsObjectSql->put(_("location"), quote(loc));
                 cdsObjectSql->put(_("location_hash"), _(SQL_NULL));
             }
-            if (item->getTrackNumber() > 0)
-                cdsObjectSql->put(_("track_number"), quote(item->getTrackNumber()));
-            else
-            {
-                if (isUpdate)
-                    cdsObjectSql->put(_("track_number"), _(SQL_NULL));
-            }
         }
         else 
         {
@@ -316,6 +309,16 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
                 cdsObjectSql->put(_("location"), _(SQL_NULL));
                 cdsObjectSql->put(_("location_hash"), _(SQL_NULL));
             }
+        }
+        
+        if (item->getTrackNumber() > 0)
+        {
+            cdsObjectSql->put(_("track_number"), quote(item->getTrackNumber()));
+        }
+        else
+        {
+            if (isUpdate)
+                cdsObjectSql->put(_("track_number"), _(SQL_NULL));
         }
         
         cdsObjectSql->put(_("mime_type"), quote(item->getMimeType()));
