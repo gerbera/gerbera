@@ -128,6 +128,8 @@ function updateItems(ajaxRequest)
     var success = items.getAttribute("success");
     if (! success || success != "1")
     {
+        if (node == '0')
+            return;
         var prefix = (useFiles ? 'f' : 'd');
         var node = getTreeNode(prefix + ofId);
         var parNode = node.getParent();
