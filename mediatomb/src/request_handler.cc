@@ -40,10 +40,19 @@ using namespace zmm;
 
 void RequestHandler::split_url(const char *url, char separator, String &path, String &parameters)
 {
+    int i1;
+
     String url_s = unescape_amp(String(url));
+
+    if (separator == '/')
+        i1 = url_s.rindex(separator);
+    else if (separator == '?')
+        i1 = url_s.index(separator);
+    else
+        throw _Exception(_("Forbidden separator: " + separator));
+
     url_s = url_unescape(url_s);
 
-    int i1 = url_s.rindex(separator);
 
     if (i1 < 0)
     {

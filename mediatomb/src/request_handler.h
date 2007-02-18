@@ -44,7 +44,9 @@ public:
     virtual zmm::Ref<IOHandler> open(IN const char *filename, OUT struct File_Info *info, 
             IN enum UpnpOpenFileMode mode);
 
-    /// \brief Splits the url into a path and parameters string.
+    /// \brief Splits the url into a path and parameters string. 
+    /// Only '?' and '/' separators are allowed, otherwise an exception will
+    /// be thrown.
     /// \param url URL that has to be processed
     /// \param path variable where the path portion will be saved
     /// \param parameters variable where the parameters portion will be saved
