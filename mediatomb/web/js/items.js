@@ -614,7 +614,7 @@ function addedItem(ajaxRequest)
     var xml = ajaxRequest.responseXML;
     if (!errorCheck(xml)) return;
     
-    //todo: feedback
+    addUpdateTimer();
 }
 
 var formShown = false;

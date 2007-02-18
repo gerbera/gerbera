@@ -160,22 +160,13 @@ function handleUIUpdates(updateIDsEl)
     if (updateIDsEl.getAttribute("pending") == '1')
     {
         setStatus("updates_pending");
-        if (! timer)
-        {
-            timer = window.setTimeout("getUpdates(true)", (use_inactivity_timeout_short ? INACTIVITY_TIMEOUT_SHORT : INACTIVITY_TIMEOUT));
-            if (use_inactivity_timeout_short)
-                use_inactivity_timeout_short = false;
-        }
+        addUpdateTimer();
         last_update = new Date().getTime();
     }
     else if (updateIDsEl.getAttribute("updates") != '1')
     {
         setStatus("no_updates");
-        if (timer)
-        {
-            window.clearTimeout(timer);
-            timer = false;
-        }
+        clearUpdateTimer();
         last_update = new Date().getTime();
     }
     else
@@ -389,13 +380,8 @@ function getUpdatesCallback(ajaxRequest)
 
 function userActivity(event)
 {
-    if (timer)
-    {
-        window.clearTimeout(timer);
-        timer = window.setTimeout("getUpdates(true)", (use_inactivity_timeout_short ? INACTIVITY_TIMEOUT_SHORT : INACTIVITY_TIMEOUT));
-        if (use_inactivity_timeout_short)
-            use_inactivity_timeout_short = false;
-    }
+    clearUpdateTimer();
+    addUpdateTimer();
     return true;
 }
 
@@ -409,6 +395,25 @@ function mouseDownHandler(event)
     {
         getUpdates(false);
         last_update = now;
+    }
+}
+
+function addUpdateTimer()
+{
+    if (! timer)
+    {
+        timer = window.setTimeout("getUpdates(true)", (use_inactivity_timeout_short ? INACTIVITY_TIMEOUT_SHORT : INACTIVITY_TIMEOUT));
+        if (use_inactivity_timeout_short)
+            use_inactivity_timeout_short = false;
+    }
+}
+
+function clearUpdateTimer()
+{
+    if (timer)
+    {
+        window.clearTimeout(timer);
+        timer = false;
     }
 }
 
