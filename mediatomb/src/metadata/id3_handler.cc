@@ -96,7 +96,12 @@ static void addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsItem> item
             break;
         case M_TRACKNUMBER:
             track = ID3_GetTrackNum(tag);
-            value = String::from(track);
+            if (track > 0)
+            {
+                value = String::from(track);
+            }
+            else
+                return;
             break;
         default:
             return;

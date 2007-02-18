@@ -54,6 +54,8 @@
 #define UPNP_DEFAULT_CLASS_CONTAINER    "object.container"
 #define UPNP_DEFAULT_CLASS_ITEM         "object.item"
 #define UPNP_DEFAULT_CLASS_ACTIVE_ITEM  "object.item.activeItem"
+#define UPNP_DEFAULT_CLASS_MUSIC_ALBUM  "object.container.album.musicAlbum"
+#define UPNP_DEFAULT_CLASS_MUSIC_TRACK  "object.item.audioItem.musicTrack"
 
 // fixed CdsObjectIDs
 #define CDS_ID_BLACKHOLE                -1
