@@ -161,6 +161,7 @@ CdsItem::CdsItem() : CdsObject()
     objectType = OBJECT_TYPE_ITEM;
     upnpClass = _("object.item");
     mimeType = _(MIMETYPE_DEFAULT);
+    trackNumber = 0;
 }
 
 void CdsItem::copyTo(Ref<CdsObject> obj)

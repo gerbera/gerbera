@@ -288,6 +288,8 @@ protected:
     /// \brief mime-type of the media.
     zmm::String mimeType;
 
+    int trackNumber;
+
 public:
     /// \brief Constructor, sets the object type and default upnp:class (object.item)
     CdsItem();
@@ -298,6 +300,10 @@ public:
     /// \brief Query mime-type information.
     inline zmm::String getMimeType() { return mimeType; }
 
+    /// \brief Sets the upnp:originalTrackNumber property
+    inline void setTrackNumber(int trackNumber) { this->trackNumber = trackNumber; }
+    
+    inline int getTrackNumber() { return trackNumber; }
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
     virtual void copyTo(zmm::Ref<CdsObject> obj);
