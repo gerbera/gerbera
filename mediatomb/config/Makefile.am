@@ -1,5 +1,4 @@
-
-sharedir = $(DESTDIR)@datadir@/@PACKAGE@
+sharedir = @datadir@/@PACKAGE@
 
 _DIST_FILES = \
     config-dist.xml \
@@ -10,3 +9,4 @@ _DIST_FILES = \
 EXTRA_DIST = $(_DIST_FILES)
 
 share_DATA = $(_DIST_FILES)
+
