@@ -67,8 +67,6 @@ using namespace mxml;
 
 #define MIMETYPE_REGEXP "^([a-z0-9_-]+/[a-z0-9_-]+)"
 
-Ref<RExp> reMimetype;
-
 SINGLETON_MUTEX(ContentManager, true);
 
 static String get_filename(String path)
@@ -167,11 +165,6 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
 ContentManager::~ContentManager()
 {
     log_debug("ContentManager destroyed\n");
-#ifdef HAVE_MAGIC
-    if (ms)
-        magic_close(ms);
-#endif
-    reMimetype = nil;
 }
 
 void ContentManager::init()
@@ -235,6 +228,14 @@ void ContentManager::shutdown()
     if (taskThread)
         pthread_join(taskThread, NULL);
     taskThread = 0;
+#ifdef HAVE_MAGIC
+    if (ms)
+    {
+        magic_close(ms);
+        ms = NULL;
+    }
+#endif
+
     log_debug("end\n");
 }
 

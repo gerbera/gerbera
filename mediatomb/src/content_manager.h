@@ -266,6 +266,8 @@ protected:
 #endif
     //pthread_mutex_t last_modified_mutex;
     
+    zmm::Ref<RExp> reMimetype;
+
     int ignore_unknown_extensions;
     zmm::Ref<Dictionary> extension_mimetype_map;
     zmm::Ref<Dictionary> mimetype_upnpclass_map;
