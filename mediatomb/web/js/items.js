@@ -643,6 +643,7 @@ function userEditItemCallback(ajaxRequest)
     Element.hide(itemRoot);
     itemRoot = rightDocument.getElementById('item_add_edit_div');
     Element.show(itemRoot);
+    use_inactivity_timeout_short = true;
 }
 
 function updateItemAddEditFields(editItem)

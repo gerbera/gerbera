@@ -44,11 +44,11 @@ function genericCallback(ajaxRequest)
 
 function link(req_type, param, get_update_ids)
 {
-    var url = "/content/interface?req_type="+ encodeURI(req_type) +"&sid="+ SID;
+    var url = "/content/interface?req_type="+ encodeURIComponent(req_type) +"&sid="+ SID;
     if (param)
         for (var key in param)
         {
-            url += "&" + encodeURI(key) +"="+ encodeURI(param[key]);
+            url += "&" + encodeURIComponent(key) +"="+ encodeURIComponent(param[key]);
         }
     if (get_update_ids && isTypeDb() && dbStuff.treeShown)
         url += "&get_update_ids=1";
