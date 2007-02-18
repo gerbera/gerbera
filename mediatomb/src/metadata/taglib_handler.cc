@@ -85,7 +85,7 @@ static void addField(metadata_fields_t field, TagLib::Tag *tag, Ref<CdsItem> ite
                 value = String::from(i);
 
                 if (string_ok(value))
-                    value = value + _("-00-00");
+                    value = value + _("-01-01");
             }
             else
                 return;
