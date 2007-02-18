@@ -45,6 +45,7 @@
 #define BROWSE_ITEMS                0x00000002
 #define BROWSE_CONTAINERS           0x00000004
 #define BROWSE_EXACT_CHILDCOUNT     0x00000008
+#define BROWSE_TRACK_SORT           0x00000010
 
 class BrowseParam : public zmm::Object
 {

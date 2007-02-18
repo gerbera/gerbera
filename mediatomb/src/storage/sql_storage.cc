@@ -66,6 +66,7 @@ enum
     _update_id,
     _mime_type,
     _flags,
+    _track_number,
     _ref_upnp_class,
     _ref_location,
     _ref_metadata,
@@ -102,6 +103,7 @@ enum
     SEL_EQ_SP_FQ_DT_BQ "update_id" \
     SEL_EQ_SP_FQ_DT_BQ "mime_type" \
     SEL_EQ_SP_FQ_DT_BQ "flags" \
+    SEL_EQ_SP_FQ_DT_BQ "track_number" \
     SEL_EQ_SP_RFQ_DT_BQ "upnp_class" \
     SEL_EQ_SP_RFQ_DT_BQ "location" \
     SEL_EQ_SP_RFQ_DT_BQ "metadata" \
@@ -297,6 +299,7 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
                 cdsObjectSql->put(_("location"), quote(loc));
                 cdsObjectSql->put(_("location_hash"), _(SQL_NULL));
             }
+            cdsObjectSql->put(_("track_number"), (item->getTrackNumber() <= 0 ? _(SQL_NULL) : quote(item->getTrackNumber())));
         }
         else 
         {
@@ -510,6 +513,13 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     row = nil;
     res = nil;
     
+    // order by code..
+    qb->clear();
+    if (param->getFlag(BROWSE_TRACK_SORT))
+        *qb << TQD('f',"track_number") << ',';
+    *qb << TQD('f',"dc_title");
+    String orderByCode = qb->toString();
+    
     qb->clear();
     *qb << SQL_QUERY << " WHERE ";
     
@@ -534,20 +544,20 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
         {
             *qb << " AND " << TQD('f',"object_type") << '='
                 << quote(OBJECT_TYPE_CONTAINER)
-                << " ORDER BY " << TQD('f',"dc_title");
+                << " ORDER BY " << orderByCode;
         }
         else if (! getContainers && getItems)
         {
             *qb << " AND (" << TQD('f',"object_type") << " & "
                 << quote(OBJECT_TYPE_ITEM) << ") = " 
                 << quote(OBJECT_TYPE_ITEM)
-                << " ORDER BY " << TQD('f',"dc_title");
+                << " ORDER BY " << orderByCode;
         }
         else
         {
             *qb << " ORDER BY ("
             << TQD('f',"object_type") << '=' << quote(OBJECT_TYPE_CONTAINER)
-            << ") DESC, "<< TQD('f',"dc_title");
+            << ") DESC, " << orderByCode;
         }
         if (doLimit)
             *qb << " LIMIT " << count << " OFFSET " << param->getStartingIndex();
@@ -829,7 +839,7 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
     
     String resources_str = fallbackString(row->col(_resources), row->col(_ref_resources));
     bool resource_zero_ok = false;
-    if (string_ok(resources_str))                                            
+    if (string_ok(resources_str))
     {
         Ref<Array<StringBase> > resources = split_string(resources_str,
                                                     RESOURCE_SEP);
@@ -889,6 +899,9 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
         {
             item->setLocation(row->col(_location));
         }
+        
+        item->setTrackNumber(row->col(_track_number).toInt());
+        
         matched_types++;
     }
     
