@@ -192,11 +192,11 @@ static Ref<CdsObject> jsObject2cdsObject(JSContext *cx, JSObject *js)
             {
                 if (i == M_TRACKNUMBER)
                 {
-                    int i = val.toInt();
-                    if (i > 0)
+                    int j = val.toInt();
+                    if (j > 0)
                     {
                         obj->setMetadata(String(MT_KEYS[i].upnp), val);
-                        RefCast(obj, CdsItem)->setTrackNumber(i);
+                        RefCast(obj, CdsItem)->setTrackNumber(j);
                     }
                     else
                         RefCast(obj, CdsItem)->setTrackNumber(0);
