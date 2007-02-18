@@ -72,6 +72,10 @@ void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
         throw UpnpException(UPNP_SOAP_E_INVALID_ARGS,
                             _("invalid browse flag: ") + BrowseFlag);
 
+    Ref<CdsObject> parent = storage->loadObject(objectID);
+    if (parent->getClass() == UPNP_DEFAULT_CLASS_MUSIC_ALBUM)
+        flag |= BROWSE_TRACK_SORT;
+
     Ref<BrowseParam> param(new BrowseParam(objectID, flag));
 
     param->setStartingIndex(StartingIndex.toInt());

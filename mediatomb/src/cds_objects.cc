@@ -172,13 +172,15 @@ void CdsItem::copyTo(Ref<CdsObject> obj)
     Ref<CdsItem> item = RefCast(obj, CdsItem);
 //    item->setDescription(description);
     item->setMimeType(mimeType);
+    item->setTrackNumber(trackNumber);
 }
 int CdsItem::equals(Ref<CdsObject> obj, bool exactly)
 {
     Ref<CdsItem> item = RefCast(obj, CdsItem);
     if (! CdsObject::equals(obj, exactly))
         return 0;
-    return ( mimeType == item->getMimeType() );
+    return ((mimeType == item->getMimeType()) && 
+            (trackNumber == item->getTrackNumber()));
 }
 
 void CdsItem::validate()

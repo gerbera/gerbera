@@ -99,6 +99,7 @@ static void addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsItem> item
             if (track > 0)
             {
                 value = String::from(track);
+                item->setTrackNumber((int)track);
             }
             else
                 return;

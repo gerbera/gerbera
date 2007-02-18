@@ -101,6 +101,7 @@ static void addField(metadata_fields_t field, TagLib::Tag *tag, Ref<CdsItem> ite
             if (i > 0)
             {
                 value = String::from(i);
+                item->setTrackNumber((int)i);
             }
             else
                 return;
