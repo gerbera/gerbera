@@ -78,7 +78,7 @@ static void log_stamp(const char *type)
     localtime_r(&unx, &t);
     fprintf(LOG_FILE, "%.4d-%.2d-%.2d %.2d:%.2d:%.2d %*s: ",
            t.tm_year + 1900,
-           t.tm_mon,
+           t.tm_mon + 1,
            t.tm_mday,
            t.tm_hour,
            t.tm_min,

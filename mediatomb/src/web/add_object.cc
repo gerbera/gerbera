@@ -86,12 +86,8 @@ Ref<CdsObject> web::addObject::addItem(int parentID, Ref<CdsItem> item)
     item->setMimeType(tmp);
 
     item->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
-/*
-    Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
-    resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
-                           renderProtocolInfo(tmp));
-    item->addResource(resource);
-*/   
+
+   
     return RefCast(item, CdsObject);
 }
 
@@ -106,8 +102,29 @@ Ref<CdsObject> web::addObject::addActiveItem(int parentID)
     tmp = param(_("state"));
     if (string_ok(tmp))
         item->setState(tmp);
+
+    item->setParentID(parentID);
     
-    return addItem(parentID, RefCast(item, CdsItem));
+    item->setTitle(param(_("title")));
+    item->setLocation(param(_("location")));
+    item->setClass(param(_("class")));
+    
+    tmp = param(_("description"));
+    if (string_ok(tmp))
+        item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), tmp);
+    
+    /// \todo is there a default setting? autoscan? import settings?
+    tmp = param(_("mime-type"));
+    if (!string_ok(tmp))
+        tmp = _(MIMETYPE_DEFAULT);
+    item->setMimeType(tmp);
+
+    Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
+    resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
+                           renderProtocolInfo(tmp));
+    item->addResource(resource);
+
+    return RefCast(item, CdsObject);
 }
 
 Ref<CdsObject> web::addObject::addUrl(int parentID, Ref<CdsItemExternalURL> item, bool addProtocol)
