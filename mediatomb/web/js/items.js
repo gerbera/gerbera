@@ -803,6 +803,7 @@ function addEditRemoveSubmitted(ajaxRequest)
     
     folderChange(selectedNode);
     window.setTimeout("getUpdates(false)", 1000);
+    use_inactivity_timeout_short = true;
 }
 
 function removeItem(itemId, all)
