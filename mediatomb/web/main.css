@@ -178,7 +178,8 @@ table.classicForm
 
 img.status
 {
-    margin-top:4px;
+    margin-left:60px;
+    margin-top:7px;
     z-index:12;
 }
 
@@ -191,5 +192,6 @@ img.logo
 
 img#logout_img
 {
+    margin-top:7px;
     z-index:11;
 }
