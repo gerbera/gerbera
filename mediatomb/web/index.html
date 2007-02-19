@@ -120,6 +120,12 @@
                     {
                         alert("MediaTomb cannot be reached! Please check if the server is still running.");
                         clearPollInterval();
+                        if(Ajax.activeRequestCount < 0)
+                            Ajax.activeRequestCount = 0;
+                        if(Ajax.activeRequestCount == 0)
+                        {
+                            setStatus("idle");
+                        }
                     }
                 };
                 if (loggedIn)

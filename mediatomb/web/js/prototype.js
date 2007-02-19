@@ -797,6 +797,9 @@ Ajax.Responders.register({
   },
   onComplete: function() {
     Ajax.activeRequestCount--;
+  },
+  onException: function() {
+    Ajax.activeRequestCount--;
   }
 });
 
