@@ -26,7 +26,7 @@ function createContainerChain(arr)
 
 function normalizeDate(date)
 {
-    var matches = date.match(/([0-9]+)-00-00/);
+    var matches = date.match(/([0-9]+)-01-01/);
     if (matches)
         return matches[1];
     else
