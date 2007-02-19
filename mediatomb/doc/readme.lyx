@@ -37,6 +37,116 @@
 MediaTomb - UPnP MediaServer
 \end_layout
 
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+<copyright>
+\end_layout
+
+\begin_layout Standard
+
+  <year>2005</year>
+\end_layout
+
+\begin_layout Standard
+
+  <holder>Gena Batsyan</holder>
+\end_layout
+
+\begin_layout Standard
+
+  <holder>Sergey Bostandzhyan</holder>
+\end_layout
+
+\begin_layout Standard
+
+</copyright>
+\end_layout
+
+\begin_layout Standard
+
+<copyright>
+\end_layout
+
+\begin_layout Standard
+
+  <year>2006-2007</year>
+\end_layout
+
+\begin_layout Standard
+
+  <holder>Gena Batsyan</holder>
+\end_layout
+
+\begin_layout Standard
+
+  <holder>Sergey Bostandzhyan</holder>
+\end_layout
+
+\begin_layout Standard
+
+  <holder>Leonhard Wimmer</holder>
+\end_layout
+
+\begin_layout Standard
+
+</copyright>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<releaseinfo>This documentation is valid for MediaTomb version 0.9.0.</releaseinfo>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+<legalnotice>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY! USE AT YOUR OWN RISK!
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</legalnotice>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
 Introduction
 \end_layout
@@ -83,10 +193,6 @@ n offers simple protection that might hold back your kids, but it is not
 Note: since the server is meant to be used in a home LAN environment the
  UI is enabled by default and accounts are deactivated, thus allowing anyone
  on your network to connect to the user interface.
-\end_layout
-
-\begin_layout Standard
-THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY! USE AT YOUR OWN RISK!
 \end_layout
 
 \begin_layout Subsection
@@ -4755,7 +4861,7 @@ MediaTomb is free software; you can redistribute it and/or modify it under
  See the GNU General Public License for more details.
  You should have received a copy of the GNU General Public License version
  2 along with MediaTomb; if not, write to the Free Software Foundation,
- Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA 
+ Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 \end_layout
 
 \begin_layout Section
