@@ -801,9 +801,8 @@ function addEditRemoveSubmitted(ajaxRequest)
     //alert(ajaxRequest.responseText);
     if (!errorCheck(ajaxRequest.responseXML)) return;
     
+    window.setTimeout("getUpdates(true)", 800);
     folderChange(selectedNode);
-    window.setTimeout("getUpdates(false)", 1000);
-    use_inactivity_timeout_short = true;
 }
 
 function removeItem(itemId, all)
