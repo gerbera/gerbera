@@ -795,7 +795,7 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
         }
         else
         {
-            item->removeMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION));
+            cloned_item->removeMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION));
         }
 
 
@@ -833,7 +833,7 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
         }
         else
         {
-            item->removeMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION));
+            cloned_item->removeMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION));
         }
 
         if (state != nil) cloned_item->setState(state);
