@@ -78,7 +78,7 @@ function xmlGetElementText(parent, name)
 function xmlGetText(el)
 {
     if (!el || el.childNodes.length != 1)
-        return null;
+        return "";
     return el.firstChild.nodeValue;
 }
 
