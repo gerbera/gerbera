@@ -55,9 +55,9 @@
                     </tbody>
                     <tr>
                         <td colspan="2" align="right">
-                            <!-- TODO: doesn't work for add... 
-                            <input name="cancel" type="button" value="Cancel" onClick="parent.folderChange(parent.selectedNode);">
-                            -->
+                            <!-- TODO: doesn't work for add... --> 
+                            <input name="cancel" type="button" value="Cancel" onClick="parent.cancelButtonPressed();">
+                            <!-- -->
                             <input name="submit" type="submit">
                         </td>
                     </tr>
@@ -110,7 +110,7 @@
                         <tr><td>&nbsp;</td></tr>
                         <tr>
                             <td colspan="2" align="right">
-                                <input name="cancel" type="button" value="Cancel" class="button" onClick="parent.folderChange(parent.selectedNode);">
+                                <input name="cancel" type="button" value="Cancel" class="button" onClick="parent.cancelButtonPressed();">
                                 <input name="submit" type="submit" value="Set" class="button">
                             </td>
                         </tr>

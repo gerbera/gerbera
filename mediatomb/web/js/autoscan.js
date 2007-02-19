@@ -129,6 +129,7 @@ function updateAutoscanEditFields(autoscan)
 
 function autoscanSubmit()
 {
+    itemChangeType();
     var form = rightDocument.forms['autoscanForm'];
     var args = new Object();
     args['action'] = 'as_edit_save';

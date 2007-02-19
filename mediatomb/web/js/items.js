@@ -32,6 +32,9 @@ var topItemRoot
 var rightDocument;
 var topRightDocument;
 
+var dbItemRoot;
+var fsItemRoot;
+
 // will be overridden by getConfigCallback() (auth.js)
 // dann hast du nicht irgendwelche schrittlaenge und scheisse...
 var itemOptions = new Array(10, 25, 50, 100);
@@ -44,6 +47,8 @@ function itemInit()
 {
     rightDocument = frames["rightF"].document;
     topRightDocument = frames["toprightF"].document;
+    dbItemRoot = rightDocument.getElementById("item_db_div");
+    fsItemRoot = rightDocument.getElementById("item_fs_div");
     itemChangeType();
     if (viewItems == -1)
         viewItems = defaultViewItems;
@@ -52,8 +57,6 @@ function itemInit()
 function itemChangeType()
 {
     var oldItemRoot = itemRoot;
-    var dbItemRoot = rightDocument.getElementById("item_db_div");
-    var fsItemRoot = rightDocument.getElementById("item_fs_div");
     
     itemRoot = isTypeDb() ? dbItemRoot : fsItemRoot;
     var dummy;
@@ -74,6 +77,8 @@ var lastItemStart;
 
 function folderChange(id)
 {
+    //if (itemRoot != dbItemRoot && itemRoot != fsItemRoot)
+    //    return;
     if (id == lastFolder)
         loadItems(id, lastItemStart);
     else
@@ -82,16 +87,13 @@ function folderChange(id)
 
 function loadItems(id, start)
 {
-    if (formShown)
-        return;
-    
     if (start % viewItems != 0)
         start = Math.floor((start / viewItems)) * viewItems;
     
     lastItemStart = start;
     lastFolder = id;
     
-    itemChangeType();
+    //itemChangeType();
     var type = id.substring(0, 1);
     id = id.substring(1);
     var itemLink = type == 'd' ? 'items' : 'files';
@@ -526,7 +528,10 @@ function updateItems(ajaxRequest)
     
     //itemsEl.appendChild(rightDocument.createTextNode("total: "+totalMatches));
     
-    itemRoot.replaceChild(itemsEl, itemRoot.firstChild);
+    if (useFiles)
+        fsItemRoot.replaceChild(itemsEl, fsItemRoot.firstChild);
+    else
+        dbItemRoot.replaceChild(itemsEl, dbItemRoot.firstChild);
     topItemRoot.replaceChild(topItemsEl, topItemRoot.firstChild);
     
     /* partly works with IE...
@@ -617,11 +622,8 @@ function addedItem(ajaxRequest)
     addUpdateTimer();
 }
 
-var formShown = false;
-
 function userAddItemStart()
 {
-    formShown = true;
     updateItemAddEditFields();
     Element.hide(itemRoot);
     itemRoot=rightDocument.getElementById('item_add_edit_div');
@@ -729,7 +731,7 @@ function updateItemAddEditFields(editItem)
     }
     
     var itemTbody = rightDocument.createElement('tbody');
-    var itemRoot = rightDocument.getElementById("item_add_edit_inputs");
+    //itemRoot = rightDocument.getElementById("item_add_edit_inputs");
     if (fieldAr && defaultsAr)
     {
         for (var i = 0; i < fieldAr.length; ++i)
@@ -767,7 +769,8 @@ function updateItemAddEditFields(editItem)
 
 function itemAddEditSubmit(objectId)
 {
-    formShown = false;
+    itemChangeType();
+    
     var req_type;
     var args = new Object();
     if (objectId)
@@ -842,3 +845,7 @@ function changeItemsPerPage(formId)
     }
 }
 
+function cancelButtonPressed()
+{
+    itemChangeType();
+}
