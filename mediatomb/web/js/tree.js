@@ -356,7 +356,14 @@ function updateTree(ajaxRequest)
         //child.setEditable(true);
         
         child.setHasChildren(expandable);
-        node.addChild(child);
+        try
+        {
+            node.addChild(child);
+        }
+        catch (e)
+        {
+            return;
+        }
         child.addOpenEventListener("openEventListener");
         
         if (id == lastNodeDbWish)
