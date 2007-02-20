@@ -170,7 +170,15 @@ protected:
             {
                 log_debug("notifying %d\n", i);
                 zmm::Ref<T> subscriber = element->getSubscriber();
-                subscriber->timerNotify(element->getID());
+                try
+                {
+                    subscriber->timerNotify(element->getID());
+                }
+                catch (zmm::Exception e)
+                {
+                    log_debug("timer caught exception!\n");
+                    e.printStackTrace();
+                }
                 element->notified();
                 if (element->isOnce())
                 {
