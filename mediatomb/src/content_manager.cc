@@ -1429,6 +1429,7 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
                 throw _Exception(_("tried to add an illegal object as autoscan - no location information available!"));
 
             dir->setLocation(obj->getLocation());
+            dir->resetLMT();
             storage->addAutoscanDirectory(dir);
             scanID = autoscan_timed->add(dir);
             timerNotify(scanID);
@@ -1443,6 +1444,12 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
     if ((original->getScanLevel() == FullScanLevel) && (dir->getScanLevel() == BasicScanLevel))
     {
         original->setScanLevel(BasicScanLevel);
+        original->resetLMT();
+    } 
+    else if (((original->getScanLevel() == FullScanLevel) &&
+             (dir->getScanLevel() == FullScanLevel)) && 
+             (!original->getRecursive() && dir->getRecursive()))
+    {
         original->resetLMT();
     }
 
