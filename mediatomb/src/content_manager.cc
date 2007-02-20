@@ -1459,7 +1459,6 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
     }
     
     storage->updateAutoscanDirectory(original);
-    SessionManager::getInstance()->containerChangedUI(original->getObjectID());
 }
 
 
