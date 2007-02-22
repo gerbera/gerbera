@@ -1,5 +1,14 @@
 MediaTomb - UPnP MediaServer
 
+This documentation is valid for MediaTomb version 0.9.0.
+
+Copyright   2005 Gena Batsyan, Sergey Bostandzhyan
+
+Copyright   2006-2007 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer
+
+THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY! USE AT YOUR OWN RISK!http://
+new.mediatomb.org/pages/documentation
+
 -------------------------------------------------------------------------------
 
 Table of Contents
@@ -81,8 +90,6 @@ Note:
     since the server is meant to be used in a home LAN environment the UI is
     enabled by default and accounts are deactivated, thus allowing anyone on
     your network to connect to the user interface.
-
-THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY! USE AT YOUR OWN RISK!
 
 1.1. Currently Supported Features
 
@@ -684,7 +691,9 @@ mysql> CREATE DATABASE <database name>;
 
 Give MediaTomb the permissions to access the database:
 
-mysql> GRANT ALL ON <database name>.* TO '<user name>'@'<hostname>' IDENTIFIED BY '<password>';
+mysql> GRANT ALL ON <database name>.*
+       TO '<user name>'@'<hostname>'
+       IDENTIFIED BY '<password>';
 
 If you don't want to set a password, omit "IDENTIFIED BY .." completely. You
 could also use the MySQL "root" user with MediaTomb directly, but this is not
@@ -705,7 +714,9 @@ If database auto creation wasn't compiled in (configure was run with the
 "--disable-db-autocreate" or zlib.h was not available) you have to create the
 tables manually:
 
-$ mysql [-u <username>] [-p] <database name> < <install prefix>/share/mediatomb/mysql.sql
+$ mysql [-u <username>] [-p] \
+  <database name> < \
+  <install prefix>/share/mediatomb/mysql.sql
 
 After creating the database and making the appropriate changes in your
 MediaTomb config file you are ready to go - launch the server, and everything
@@ -1476,8 +1487,8 @@ Child tags:
 
             Child tags:
 
-              * <add tag="keyword1"/>
-                <add tag="keyword2"/>
+              * <add-data tag="keyword1"/>
+                <add-data tag="keyword2"/>
                 ...
 
                 Optional
@@ -1490,7 +1501,7 @@ Child tags:
 
         <libexif>
             <auxdata>
-                <add tag="EXIF_TAG_MODEL"/>
+                <add-data tag="EXIF_TAG_MODEL"/>
             </auxdata>
         </libexif>
 
@@ -1511,8 +1522,8 @@ Child tags:
 
             Child tags:
 
-              * <add tag="keyword1"/>
-                <add tag="keyword2"/>
+              * <add-data tag="keyword1"/>
+                <add-data tag="keyword2"/>
                 ...
 
                 Optional
@@ -1668,8 +1679,8 @@ useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public
 License for more details. You should have received a copy of the GNU General
 Public License version 2 along with MediaTomb; if not, write to the Free
-Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
-USA
+Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301,
+USA.
 
 10. Acknowledgments
 

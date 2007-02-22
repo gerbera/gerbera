@@ -1,4 +1,8 @@
-<config>
+<?xml version="1.0" encoding="UTF-8"?>
+<config
+        xmlns="http://mediatomb.cc/0.9.0/config"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://mediatomb.cc/0.9.0/config http://mediatomb.cc/0.9.0/config.xsd">
     <server>
         <ui enabled="no"/>
         <name>__DEFAULT_NAME__</name>
@@ -36,7 +40,7 @@
         <library-options>
             <libexif>
                 <auxdata>
-                    <add tag="EXIF_TAG_MODEL"/>
+                    <add-data tag="EXIF_TAG_MODEL"/>
                 </auxdata>
             </libexif>
         </library-options>

@@ -50,7 +50,6 @@ public:
     inline zmm::String getConfigFilename() { return filename; }
     
     void load(zmm::String filename);
-    void save();
     
     /// \brief Returns a config option with the given path, if option does not exist a default value is returned.
     /// \param xpath option xpath
@@ -134,6 +133,7 @@ public:
 protected:
     // creates a default config.xml file with the most necessary entries and returns the path
     zmm::String createDefaultConfig(zmm::String userhome);
+    void save();
     void save_text(zmm::String filename, zmm::String content);
     void validate(zmm::String serverhome);
     void prepare_udn();

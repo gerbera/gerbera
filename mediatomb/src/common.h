@@ -215,6 +215,10 @@
     #define DEFAULT_JS_RUNTIME_MEM      (1L * 1024L * 1024L)
 #endif
 
+#define XML_HEADER                      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+#define XML_XMLNS                         "http://mediatomb.cc/0.9.0/config"
+#define XML_XMLNS_XSI                     "http://www.w3.org/2001/XMLSchema-instance"
+#define XML_XSI_SCHEMA_LOCATION           "http://mediatomb.cc/0.9.0/config http://mediatomb.cc/0.9.0/config.xsd"
 
 #endif // __COMMON_H__
 

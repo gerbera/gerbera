@@ -130,7 +130,8 @@ status collapsed
 \end_layout
 
 \begin_layout Standard
-THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY! USE AT YOUR OWN RISK!
+THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY! USE AT YOUR OWN RISK!http://new.
+mediatomb.org/pages/documentation
 \end_layout
 
 \begin_layout Standard
@@ -1444,8 +1445,15 @@ Give MediaTomb the permissions to access the database:
 \end_layout
 
 \begin_layout Code
-mysql> GRANT ALL ON <database name>.* TO '<user name>'@'<hostname>' IDENTIFIED
- BY '<password>';
+mysql> GRANT ALL ON <database name>.*
+\end_layout
+
+\begin_layout Code
+       TO '<user name>'@'<hostname>'
+\end_layout
+
+\begin_layout Code
+       IDENTIFIED BY '<password>';
 \end_layout
 
 \begin_layout Standard
@@ -1527,8 +1535,19 @@ If database auto creation wasn't compiled in (configure was run with the
 \end_layout
 
 \begin_layout Code
-$ mysql [-u <username>] [-p] <database name> < <install prefix>/share/mediatomb/
-mysql.sql
+$ mysql [-u <username>] [-p] 
+\backslash
+
+\end_layout
+
+\begin_layout Code
+  <database name> < 
+\backslash
+
+\end_layout
+
+\begin_layout Code
+  <install prefix>/share/mediatomb/mysql.sql
 \end_layout
 
 \begin_layout Standard
@@ -4358,11 +4377,11 @@ status open
 \end_layout
 
 \begin_layout Code
-<add tag="keyword1"/>
+<add-data tag="keyword1"/>
 \end_layout
 
 \begin_layout Code
-<add tag="keyword2"/>
+<add-data tag="keyword2"/>
 \end_layout
 
 \begin_layout Code
@@ -4422,7 +4441,7 @@ A sample configuration for the example described above would be:
 \end_layout
 
 \begin_layout Code
-        <add tag="EXIF_TAG_MODEL"/>
+        <add-data tag="EXIF_TAG_MODEL"/>
 \end_layout
 
 \begin_layout Code
@@ -4513,11 +4532,11 @@ status open
 \end_layout
 
 \begin_layout Code
-<add tag="keyword1"/>
+<add-data tag="keyword1"/>
 \end_layout
 
 \begin_layout Code
-<add tag="keyword2"/>
+<add-data tag="keyword2"/>
 \end_layout
 
 \begin_layout Code

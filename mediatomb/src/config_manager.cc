@@ -146,6 +146,9 @@ String ConfigManager::createDefaultConfig(String userhome)
     String config_filename = homepath + DIR_SEPARATOR + DEFAULT_CONFIG_NAME;
 
     Ref<Element> config(new Element(_("config")));
+    config->addAttribute(_("xmlns"), _(XML_XMLNS));
+    config->addAttribute(_("xmlns:xsi"), _(XML_XMLNS_XSI));
+    config->addAttribute(_("xsi:schemaLocation"), _(XML_XSI_SCHEMA_LOCATION));
     Ref<Element> server(new Element(_("server")));
     
     Ref<Element> ui(new Element(_("ui")));
@@ -477,7 +480,7 @@ void ConfigManager::validate(String serverhome)
     el = getElement(_("/import/library-options/libexif/auxdata"));
     if (el == nil)
     {
-    //    Ref<Array<StringBase> > arr = createArrayFromNodeset(el, "add", "tag");
+    //    Ref<Array<StringBase> > arr = createArrayFromNodeset(el, "add-data", "tag");
         getOption(_("/import/library-options/libexif/auxdata"),
                   _(""));
         
@@ -490,7 +493,7 @@ void ConfigManager::validate(String serverhome)
     el = getElement(_("/import/library-options/libextractor/auxdata"));
     if (el == nil)
     {
-    //    Ref<Array<StringBase> > arr = createArrayFromNodeset(el, "add", "tag");
+    //    Ref<Array<StringBase> > arr = createArrayFromNodeset(el, "add-data", "tag");
         getOption(_("/import/library-options/libextractor/auxdata"),
                   _(""));
     }
@@ -567,8 +570,11 @@ void ConfigManager::save_text(String filename, String content)
         throw _Exception(_("could not open file ") +
                         filename + " for writing : " + strerror(errno));
     }
-
-    size_t bytesWritten = fwrite(content.c_str(), sizeof(char),
+    
+    size_t bytesWritten = fwrite(XML_HEADER, sizeof(char),
+                              strlen(XML_HEADER), file);
+    
+    bytesWritten = fwrite(content.c_str(), sizeof(char),
                               content.length(), file);
     if (bytesWritten < (size_t)content.length())
     {
