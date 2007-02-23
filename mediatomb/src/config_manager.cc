@@ -186,13 +186,17 @@ String ConfigManager::createDefaultConfig(String userhome)
 
     Ref<Element> import(new Element(_("import")));
     import->addAttribute(_("hidden-files"), _(DEFAULT_HIDDEN_FILES_VALUE));
+
+    Ref<Element> layout(new Element(_("virtual-layout")));
+    layout->addAttribute(_("type"), _(DEFAULT_LAYOUT_TYPE));
 #ifdef HAVE_JS
-    import->appendTextChild(_("script"), String(_(PACKAGE_DATADIR)) +
+    layout->appendTextChild(_("script"), String(_(PACKAGE_DATADIR)) +
                                                 DIR_SEPARATOR + 
                                                 _(DEFAULT_JS_DIR) +
                                                 DIR_SEPARATOR +
                                                 _(DEFAULT_IMPORT_SCRIPT));
 #endif
+    import->appendChild(layout);
 
     String map_file = _(PACKAGE_DATADIR) + DIR_SEPARATOR + CONFIG_MAPPINGS_TEMPLATE;
 
@@ -445,12 +449,31 @@ void ConfigManager::validate(String serverhome)
 #endif
 */
 
-#ifdef HAVE_JS
-    temp = getOption(_("/import/script/attribute::charset"), _(DEFAULT_JS_CHARSET));
-    if (!string_ok(temp))
+    temp = getOption(_("/import/virtual-layout/attribute::type"), _(DEFAULT_LAYOUT_TYPE));
+    if ((temp != "js") && (temp != "builtin") && (temp != "disabled"))
+        throw _Exception(_("Error in config file: invalid virtual layout type specified!"));
+
+#ifndef HAVE_JS
+    if (temp == "js")
+        throw _Exception(_("MediaTomb was compiled without js support, however you specified \"js\" to be used for the virtual-layout."));
+#else
+
+    // check js stuff
+    charset = getOption(_("/import/virtual-layout/script/attribute::charset"), _(DEFAULT_JS_CHARSET));
+    if ((temp == "js") &&(!string_ok(charset)))
         throw _Exception(_("Invalid import script cahrset!"));
 
-    prepare_path(_("/import/script"));
+    String script_path = getOption(_("/import/virtual-layout/script"), _(PACKAGE_DATADIR) +
+                                                          DIR_SEPARATOR + 
+                                                        _(DEFAULT_JS_DIR) +
+                                                          DIR_SEPARATOR +
+                                                        _(DEFAULT_IMPORT_SCRIPT));
+    if (temp == "js")
+    {
+        if (!string_ok(script_path))
+            throw _Exception(_("Error in config file: you specified \"js\" to be used for virtual layout, but script location is invalid."));
+        prepare_path(_("/import/virtual-layout/script"));
+    }
 #endif
 
     getIntOption(_("/server/port"), 0); // 0 means, that the SDK will any free port itself

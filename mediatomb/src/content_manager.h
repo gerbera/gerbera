@@ -39,9 +39,7 @@
 #include "autoscan.h"
 #include "timer.h"
 
-#ifdef HAVE_JS
-#include "scripting/scripting.h"
-#endif
+#include "layout/layout.h"
 
 class ContentManager;
 
@@ -213,9 +211,9 @@ public:
     /// \brief Adds a virtual container chain specified by path.
     /// \param container path separated by '/'. Slashes in container
     /// titles must be escaped.
-    /// \param lastClass upnp:class of the last container in the chain
+    /// \param lastClass upnp:class of the last container in the chain, if nil then the default class will be taken
     /// \return ID of the last container in the chain.
-    int addContainerChain(zmm::String chain, zmm::String lastClass);
+    int addContainerChain(zmm::String chain, zmm::String lastClass = nil);
     
     /// \brief Adds a virtual container specified by parentID and title
     /// \param parentID the id of the parent.
@@ -255,15 +253,12 @@ public:
 
 
     /// \brief instructs ContentManager to reload scripting environment
-#ifdef HAVE_JS
-    void reloadScripting();
-#endif
+    void reloadLayout();
     
 protected:
-#ifdef HAVE_JS
-    void initScripting();
-    void destroyScripting();
-#endif
+    void initLayout();
+    void destroyLayout();
+    
     //pthread_mutex_t last_modified_mutex;
     
     zmm::Ref<RExp> reMimetype;
@@ -294,9 +289,7 @@ protected:
 
     void invalidateAddTask(zmm::Ref<CMTask> t, zmm::String path);
     
-#ifdef HAVE_JS  
-    zmm::Ref<Scripting> scripting;
-#endif
+    zmm::Ref<Layout> layout;
     
     void setLastModifiedTime(time_t lm);
     

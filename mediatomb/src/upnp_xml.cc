@@ -88,7 +88,7 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions, in
         {
             Ref<DictionaryElement> el = elements->get(i);
             key = el->getKey();
-            if (key == "dc:description")
+            if (key == MetadataHandler::getMetaFieldName(M_DESCRIPTION))
             {
                 tmp = el->getValue();
                 if ((stringLimit > 0) && (tmp.length() > stringLimit))
@@ -98,13 +98,14 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions, in
                 }
                 result->appendTextChild(key, tmp);
             }
-            else if (key == "upnp:originalTrackNumber")
+            else if (key == MetadataHandler::getMetaFieldName(M_TRACKNUMBER))
             {
-                if (upnp_class == "object.item.audioItem.musicTrack")
+                if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_TRACK)
                     result->appendTextChild(key, el->getValue());
             }
-            else if ((key != "dc:title") || 
-                    ((key == "upnp:originalTrackNumber") && (upnp_class == "object.item.audioItem.musicTrack")))
+            else if ((key != MetadataHandler::getMetaFieldName(M_TITLE)) || 
+                    ((key == MetadataHandler::getMetaFieldName(M_TRACKNUMBER)) && 
+                     (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_TRACK)))
                 result->appendTextChild(key, el->getValue());
         }
         

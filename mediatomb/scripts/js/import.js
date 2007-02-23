@@ -39,6 +39,8 @@ function addAudio(obj)
 {
  
     var desc = '';
+    var artist_full;
+    var album_full;
     
     // first gather data
     var title = obj.meta[M_TITLE];

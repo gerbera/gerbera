@@ -35,7 +35,7 @@
 
 #ifdef HAVE_JS
 
-#include "scripting.h"
+#include "js_layout.h"
 #include "storage.h"
 #include "content_manager.h"
 #include "metadata_handler.h"
@@ -547,7 +547,7 @@ static JSFunctionSpec global_functions[] = {
 
 /* **************** */
 
-Scripting::Scripting() : Object()
+JSLayout::JSLayout() : Layout()
 {
     rt = NULL;
     cx = NULL;
@@ -555,18 +555,17 @@ Scripting::Scripting() : Object()
 	script = NULL;
 }
 
-void Scripting::init()
+void JSLayout::init()
 {
     if (script)
     {
-        throw _Exception(_("Scripting already initialized!"));
+        throw _Exception(_("JSLayout already initialized!"));
     }
 
-    String scriptPath = ConfigManager::getInstance()->getOption(_("/import/script"));
+    String scriptPath = ConfigManager::getInstance()->getOption(_("/import/virtual-layout/script"));
     if (!string_ok(scriptPath))
     {
-        // maybe someone just does not want it?
-        return;
+        throw _Exception(_("JSLayout is turned off."));
     }
 
     log_info("Read import script: %s\n", scriptPath.c_str());
@@ -591,24 +590,24 @@ void Scripting::init()
     rt = JS_NewRuntime(DEFAULT_JS_RUNTIME_MEM);
 
     if (!rt)
-        throw _Exception(_("Scripting: could not initialize js runtime"));
+        throw _Exception(_("JSLayout: could not initialize js runtime"));
 
     /* create a context and associate it with the JS run time */
     cx = JS_NewContext(rt, 8192);
     if (! cx)
-        throw _Exception(_("Scripting: could not initialize js context"));
+        throw _Exception(_("JSLayout: could not initialize js context"));
 
     /* create the global object here */
     glob = JS_NewObject(cx, /* global_class */ NULL, NULL, NULL);
     if (! glob)
-        throw _Exception(_("Scripting: could not initialize glboal class"));
+        throw _Exception(_("JSLayout: could not initialize glboal class"));
 
     /* initialize the built-in JS objects and the global object */
     if (! JS_InitStandardClasses(cx, glob))
-        throw _Exception(_("Scripting: JS_InitStandardClasses failed"));
+        throw _Exception(_("JSLayout: JS_InitStandardClasses failed"));
 
     if (!JS_DefineFunctions(cx, glob, global_functions))
-        throw _Exception(_("Scripting: JS_DefineFunctions on global object failed"));
+        throw _Exception(_("JSLayout: JS_DefineFunctions on global object failed"));
 
     /* initialize contstants */
     js_set_int_property(cx, glob, "OBJECT_TYPE_CONTAINER",
@@ -631,7 +630,7 @@ void Scripting::init()
 	if (!JS_EvaluateScript(cx, glob, script.c_str(), script.length(),
 		scriptPath.c_str(), 0, &ret_val))
 	{
-             throw _Exception("Scripting: failed to evaluate script");
+             throw _Exception("JSLayout: failed to evaluate script");
 	}
 */
 
@@ -639,10 +638,10 @@ void Scripting::init()
                               scriptPath.c_str(), 1);
     if (! script)
     {
-        log_error("Scripting: failed to compile script\n");
+        log_error("JSLayout: failed to compile script\n");
     }
 }
-Scripting::~Scripting()
+JSLayout::~JSLayout()
 {
     log_debug("destoying scripting\n");
     if (script)
@@ -653,7 +652,7 @@ Scripting::~Scripting()
 		JS_DestroyRuntime(rt);
 }
 
-void Scripting::processCdsObject(Ref<CdsObject> obj)
+void JSLayout::processCdsObject(Ref<CdsObject> obj)
 {
     if (! script)
         return;
@@ -665,7 +664,7 @@ void Scripting::processCdsObject(Ref<CdsObject> obj)
     js_set_object_property(cx, glob, "orig", orig);
     if (!JS_ExecuteScript(cx, glob, script, &ret_val))
     {
-        throw _Exception(_("Scripting: failed to execute script"));
+        throw _Exception(_("JSLayout: failed to execute script"));
     }
     log_debug("Script executed successfully\n");
 
@@ -673,7 +672,7 @@ void Scripting::processCdsObject(Ref<CdsObject> obj)
       if (!JS_EvaluateScript(cx, glob, script.c_str(), script.length(),
 		"test-script", 0, &ret_val))
 	{
-		throw _Exception("Scripting: failed to evaluate script");
+		throw _Exception("JSLayout: failed to evaluate script");
 	}
 */
 }

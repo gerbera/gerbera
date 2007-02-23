@@ -1943,7 +1943,43 @@ Default
 \end_layout
 
 \begin_layout Standard
-This tag sets the manufacturer URL of a UPnP device, this may be necessary
+This tag sets the manufacturer URL of a UPnP device, a custom setting may
+ be necessary to trick some renderers in order to enable special features
+ that otherwise are only active with the vendor implemented server.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<model>MediaTomb</model>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: MediaTomb
+\end_layout
+
+\begin_layout Standard
+This tag sets the model name of a UPnP device, a custom setting may be necessary
  to trick some renderers in order to enable special features that otherwise
  are only active with the vendor implemented server.
 \end_layout
@@ -2288,7 +2324,47 @@ Default:
 \end_layout
 
 \begin_layout Standard
-Interval for broadcasting SSDP:alive messages 
+Interval for broadcasting SSDP:alive messages
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<bookmark>mediatomb.html</bookmark>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: mediatomb.html
+\end_layout
+
+\begin_layout Standard
+The bookmark file offers an easy way to access the user interface, it is
+ especially helpful when the server is not configured to run on a fixed
+ port.
+ Each time the server is started, the bookmark file will be filled in with
+ a redirect to the servers current IP address and port.
+ To use it, simply bookmark this file in your browser, the default location
+ is ~/.mediatomb/mediatomb.html
 \end_layout
 
 \begin_layout Standard
@@ -3464,7 +3540,7 @@ Defines the charset of the filesystem.
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -3517,13 +3593,125 @@ status open
 \end_layout
 
 \begin_layout Code
+<virtual-layout type="builtin">
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+Defines options for the virtual container layout; the so called 
+\begin_inset Quotes sld
+\end_inset
+
+virtual container layout
+\begin_inset Quotes srd
+\end_inset
+
+ is the way how the server organizes the media according to the extracted
+ metadata.
+ For example, it allows sorting audio files by Album, Artist, Year and so
+ on.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+type=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: builtin
+\end_layout
+
+\begin_layout Standard
+Specifies what will be used to create the virtual layout, possible values
+ are:
+\end_layout
+
+\begin_layout Itemize
+builtin: a default layout will be created by the server
+\end_layout
+
+\begin_layout Itemize
+js: a user customizable javascript will be used (MediaTomb must be compiled
+ with js support)
+\end_layout
+
+\begin_layout Itemize
+disabled: only PC-Directory structure will be created, i.e.
+ no virtual layout
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
 <script charset="UTF-8">/path/to/my/import/script.js</script>
 \end_layout
 
 \begin_layout Standard
 
 \emph on
-Required if javascript support is enabled
+Required if virtual layout type is 
+\begin_inset Quotes sld
+\end_inset
+
+js
+\emph default
+
+\begin_inset Quotes srd
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3578,6 +3766,20 @@ Default: UTF-8
 
 \begin_layout Standard
 Specifies the import script encoding.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard

@@ -338,7 +338,10 @@ void ExtractorHandler::fillMetadata(Ref<CdsItem> item)
     
     for (int i = 0; i < R_MAX; i++)
         addResourceField((resource_attributes_t)i, keywords, item, sc);
-   
+
+    Ref<ConfigManager> cm = ConfigManager::getInstance();
+    Ref<Element> e = cm->getElement(_("/import/library-options/libextractor/auxdata"));
+    aux = cm->createArrayFromNodeset(e, _("add"), _("tag"));
 
     if (aux != nil)
     {

@@ -56,6 +56,8 @@
 #define UPNP_DEFAULT_CLASS_ACTIVE_ITEM  "object.item.activeItem"
 #define UPNP_DEFAULT_CLASS_MUSIC_ALBUM  "object.container.album.musicAlbum"
 #define UPNP_DEFAULT_CLASS_MUSIC_TRACK  "object.item.audioItem.musicTrack"
+#define UPNP_DEFAULT_CLASS_MUSIC_CONT   "object.container.musicContainer"
+#define UPNP_DEFAULT_CLASS_MUSIC_GENRE  "object.container.genre.musicGenre"
 
 // fixed CdsObjectIDs
 #define CDS_ID_BLACKHOLE                -1
@@ -166,6 +168,7 @@
 #define DEFAULT_FILESYSTEM_CHARSET      "ISO-8859-1"
 #if defined(HAVE_JS)
     #define DEFAULT_JS_CHARSET          "UTF-8"
+    #define DEFAULT_JS_EN_VALUE         "yes"
 #endif
 #if defined(__CYGWIN__)
     #define DEFAULT_CONFIG_HOME         "MediaTomb"
@@ -197,6 +200,7 @@
 #define DEFAULT_ITEMS_PER_PAGE_2         25
 #define DEFAULT_ITEMS_PER_PAGE_3         50
 #define DEFAULT_ITEMS_PER_PAGE_4         100
+#define DEFAULT_LAYOUT_TYPE             "builtin" 
 
 #ifdef HAVE_SQLITE3
     #define DEFAULT_STORAGE_DRIVER      "sqlite3"

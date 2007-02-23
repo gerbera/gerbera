@@ -29,8 +29,8 @@
 
 /// \file scripting.h
 
-#ifndef __SCRIPTING_H__
-#define __SCRIPTING_H__
+#ifndef __JS_SCRIPTING_H__
+#define __JS_SCRIPTING_H__
 
 #ifdef __APPLE__
     #define XP_MAC 1
@@ -39,10 +39,9 @@
 #endif
 
 #include <jsapi.h>
-#include "common.h"
-#include "cds_objects.h"
+#include "layout.h"
 
-class Scripting : public zmm::Object
+class JSLayout : public Layout
 {
 protected:
     JSVersion version;
@@ -51,10 +50,10 @@ protected:
     JSObject  *glob;
 	JSScript *script;
 public:
-	Scripting();
-	virtual ~Scripting();
-	void init();
-	void processCdsObject(zmm::Ref<CdsObject> obj);	
+	JSLayout();
+	virtual ~JSLayout();
+	virtual void init();
+	virtual void processCdsObject(zmm::Ref<CdsObject> obj);	
 };
 
 #endif // __SCRIPTING_H__

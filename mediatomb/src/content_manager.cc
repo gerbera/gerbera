@@ -49,6 +49,11 @@
 #include "metadata_handler.h"
 #include "session_manager.h"
 #include "timer.h"
+#include "layout/fallback_layout.h"
+
+#ifdef HAVE_JS
+    #include "layout/js_layout.h"
+#endif
 
 #define DEFAULT_DIR_CACHE_CAPACITY  10
 #define CM_INITIAL_QUEUE_SIZE       20
@@ -331,10 +336,7 @@ void ContentManager::_addFile(String path, bool recursive, bool hidden, Ref<CMTa
     if (ConfigManager::getInstance()->getConfigFilename() == path)
         return;
 
-
-#ifdef HAVE_JS
-    initScripting();
-#endif
+    initLayout();
     
     Ref<Storage> storage = Storage::getInstance();
     
@@ -350,10 +352,8 @@ void ContentManager::_addFile(String path, bool recursive, bool hidden, Ref<CMTa
         if (IS_CDS_ITEM(obj->getObjectType()))
         {
             addObject(obj);
-#ifdef HAVE_JS
-            if (scripting != nil)
-                scripting->processCdsObject(obj);
-#endif
+            if (layout != nil)
+                layout->processCdsObject(obj);
         }
     }
     
@@ -562,7 +562,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
                     if (last_modified_current_max < statbuf.st_mtime)
                     {
                         // readd object - we have to do this in order to trigger
-                        // scripting
+                        // layout
                         removeObject(objectID, false);
                         addFileInternal(path, false, false, adir->getHidden());
                         // update time variable
@@ -714,16 +714,16 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<CMTask> task)
             }
             if (obj != nil)
             {
-#ifdef HAVE_JS
+//#ifdef HAVE_JS
         		if (IS_CDS_ITEM(obj->getObjectType()))
 	        	{
-                    if (scripting != nil)
-    		            scripting->processCdsObject(obj);
+                    if (layout != nil)
+    		            layout->processCdsObject(obj);
                     
                     /// \todo Why was this statement here??? - It seems to be unnecessary
                     //obj = createObjectFromFile(newPath);
         		}
-#endif
+//#endif
                 if (IS_CDS_CONTAINER(obj->getObjectType()))
                 {
                     addRecursive(newPath, hidden, task);
@@ -1069,35 +1069,50 @@ String ContentManager::mimetype2upnpclass(String mimeType)
     return mimetype_upnpclass_map->get((String)parts->get(0) + "/*");
 }
 
-#ifdef HAVE_JS
-void ContentManager::initScripting()
+void ContentManager::initLayout()
 {
-    if (scripting == nil)
+
+    if (layout == nil)
     {
         AUTOLOCK(mutex);
-        if (scripting == nil)
+        if (layout == nil)
             try
             {
-                scripting = Ref<Scripting>(new Scripting());
-                scripting->init();
+                Layout *s = NULL;
+                String layout_type = ConfigManager::getInstance()->getOption(_("/import/virtual-layout/attribute::type"));
+                if (layout_type == "js")
+                {
+#ifdef HAVE_JS
+                    s = new JSLayout();
+                    layout = Ref<Layout>(s);
+                    layout->init();
+#else
+                    log_error("Cannot init layout: MediaTomb compiled without js support but js script was requested.");
+#endif
+                }
+                else if (layout_type == "builtin")
+                {
+                    s = new FallbackLayout();
+                    layout = Ref<Layout>(s);
+                }
             }
         catch (Exception e)
         {
-            scripting = nil;
-            log_error("ContentManager SCRIPTING: %s\n", e.getMessage().c_str());
+            layout = nil;
+            log_error("ContentManager virtual container layout: %s\n", e.getMessage().c_str());
         }
     }
 }
-void ContentManager::destroyScripting()
+
+void ContentManager::destroyLayout()
 {
-	scripting = nil;
+	layout = nil;
 }
-void ContentManager::reloadScripting()
+void ContentManager::reloadLayout()
 {
-	destroyScripting();
-	initScripting();
+	destroyLayout();
+	initLayout();
 }
-#endif // HAVE_JS
 
 void ContentManager::threadProc()
 {

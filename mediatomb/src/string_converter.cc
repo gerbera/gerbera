@@ -198,7 +198,7 @@ Ref<StringConverter> StringConverter::m2i()
 Ref<StringConverter> StringConverter::j2i()
 {
     Ref<StringConverter> conv(new StringConverter(
-        ConfigManager::getInstance()->getOption(_("/import/script/attribute::charset")),
+        ConfigManager::getInstance()->getOption(_("/import/virtual-layout/script/attribute::charset")),
                                                 _(DEFAULT_JS_CHARSET)));
     return conv;
 }

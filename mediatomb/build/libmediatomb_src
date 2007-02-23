@@ -37,6 +37,11 @@ libmediatomb_a_SOURCES = \
 ../src/io_handler.cc \
 ../src/io_handler.h \
 ../src/jpeg_resolution.cc \
+../src/layout/fallback_layout.cc \
+../src/layout/fallback_layout.h \
+../src/layout/js_layout.cc \
+../src/layout/js_layout.h \
+../src/layout/layout.h \
 ../src/logger.cc \
 ../src/logger.h \
 ../src/main.cc \
@@ -80,8 +85,6 @@ libmediatomb_a_SOURCES = \
 ../src/request_handler.h \
 ../src/rexp.cc \
 ../src/rexp.h \
-../src/scripting/scripting.cc \
-../src/scripting/scripting.h \
 ../src/server.cc \
 ../src/serve_request_handler.cc \
 ../src/serve_request_handler.h \
