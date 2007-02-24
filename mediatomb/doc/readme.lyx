@@ -436,11 +436,12 @@ js - SpiderMonkey JavaScript Engine
  
 \shape default
 \emph on
-OPTIONAL, HIGHLY RECOMMENDED
+OPTIONAL, RECOMMENDED
 \end_layout
 
 \begin_layout Standard
-This package is necessary to allow the creation of virtual containers.
+This package is necessary to allow the user defined creation of virtual
+ containers.
  The import.js script defines the layout of your media, the default import
  script will create a structure sorted by Audio/Photo/Video, it will make
  use of the gathered metadata (like ID3 tags) to sort your music by Artist/Album
@@ -3886,7 +3887,7 @@ status open
 \end_layout
 
 \begin_layout Code
-<directory location="/media" mode="timed" interval="15"
+<directory location="/media" mode="timed" interval="3600"
 \end_layout
 
 \begin_layout Code
@@ -3894,7 +3895,7 @@ status open
 \end_layout
 
 \begin_layout Code
-<directory location="/audio" mode="timed" interval="30"
+<directory location="/audio" mode="timed" interval="1800"
 \end_layout
 
 \begin_layout Code
