@@ -93,6 +93,7 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
     taskID = 1;
     working = false;
     shutdownFlag = false;
+    layout_enabled = false;
     
     acct = Ref<CMAccounting>(new CMAccounting());
     taskQueue1 = Ref<ObjectQueue<CMTask> >(new ObjectQueue<CMTask>(CM_INITIAL_QUEUE_SIZE));
@@ -165,6 +166,10 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
         }
     }
 #endif // HAVE_MAGIC
+
+    String layout_type = cm->getOption(_("/import/virtual-layout/attribute::type"));
+    if ((layout_type == "builtin") || (layout_type == "js"))
+        layout_enabled = true;
 }
 
 ContentManager::~ContentManager()
@@ -336,7 +341,8 @@ void ContentManager::_addFile(String path, bool recursive, bool hidden, Ref<CMTa
     if (ConfigManager::getInstance()->getConfigFilename() == path)
         return;
 
-    initLayout();
+    if (layout_enabled)
+        initLayout();
     
     Ref<Storage> storage = Storage::getInstance();
     

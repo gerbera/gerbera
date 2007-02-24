@@ -290,6 +290,7 @@ protected:
     void invalidateAddTask(zmm::Ref<CMTask> t, zmm::String path);
     
     zmm::Ref<Layout> layout;
+    bool layout_enabled;
     
     void setLastModifiedTime(time_t lm);
     
