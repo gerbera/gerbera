@@ -199,7 +199,7 @@ Ref<StringConverter> StringConverter::j2i()
 {
     Ref<StringConverter> conv(new StringConverter(
         ConfigManager::getInstance()->getOption(_("/import/virtual-layout/script/attribute::charset")),
-                                                _(DEFAULT_JS_CHARSET)));
+                                                _(DEFAULT_INTERNAL_CHARSET)));
     return conv;
 }
 #endif

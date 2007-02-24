@@ -41,6 +41,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "tools.h"
+#include "string_converter.h"
 
 #if defined(HAVE_LANGINFO_H) && defined(HAVE_LOCALE_H)
     #include <langinfo.h>
@@ -396,10 +397,40 @@ void ConfigManager::validate(String serverhome)
         temp = _(DEFAULT_FILESYSTEM_CHARSET);
 #else
     temp = _(DEFAULT_FILESYSTEM_CHARSET);
+    // check if the one we take as default is actually available
+    try
+    {
+        Ref<StringConverter> conv(new StringConverter(temp,
+                                                 _(DEFAULT_INTERNAL_CHARSET)));
+    }
+    catch (Exception e)
+    {
+        temp = _(DEFAULT_FALLBACK_CHARSET);
+    }
 #endif      
     String charset = getOption(_("/import/filesystem-charset"), temp);
+    try
+    {
+        Ref<StringConverter> conv(new StringConverter(charset, 
+                                                _(DEFAULT_INTERNAL_CHARSET)));
+    }
+    catch (Exception e)
+    {
+        throw _Exception(_("Error in config file: unsupported filesystem-charset specified: ") + charset);
+    }
+
     log_info("Setting filesystem import charset to %s\n", charset.c_str());
     charset = getOption(_("/import/metadata-charset"), temp);
+    try
+    {
+        Ref<StringConverter> conv(new StringConverter(charset, 
+                                                _(DEFAULT_INTERNAL_CHARSET)));
+    }
+    catch (Exception e)
+    {
+        throw _Exception(_("Error in config file: unsupported metadata-charset specified: ") + charset);
+    }
+
     log_info("Setting metadata import charset to %s\n", charset.c_str());
 
     getOption(_("/server/ip"), _("")); // bind to any IP address
@@ -460,8 +491,18 @@ void ConfigManager::validate(String serverhome)
 
     // check js stuff
     charset = getOption(_("/import/virtual-layout/script/attribute::charset"), _(DEFAULT_JS_CHARSET));
-    if ((temp == "js") &&(!string_ok(charset)))
-        throw _Exception(_("Invalid import script cahrset!"));
+    if (temp == "js") 
+    {
+        try
+        {
+            Ref<StringConverter> conv(new StringConverter(charset, 
+                                                _(DEFAULT_INTERNAL_CHARSET)));
+        }
+        catch (Exception e)
+        {
+            throw _Exception(_("Error in config file: unsupported import script cahrset specified: ") + charset);
+        }
+    }
 
     String script_path = getOption(_("/import/virtual-layout/script"), _(PACKAGE_DATADIR) +
                                                           DIR_SEPARATOR + 

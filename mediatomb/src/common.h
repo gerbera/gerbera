@@ -166,6 +166,7 @@
 // default values
 #define DEFAULT_INTERNAL_CHARSET        "UTF-8"
 #define DEFAULT_FILESYSTEM_CHARSET      "ISO-8859-1"
+#define DEFAULT_FALLBACK_CHARSET        "US-ASCII"
 #if defined(HAVE_JS)
     #define DEFAULT_JS_CHARSET          "UTF-8"
     #define DEFAULT_JS_EN_VALUE         "yes"
