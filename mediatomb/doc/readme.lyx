@@ -250,7 +250,7 @@ support for Linux, FreeBSD, Mac OS X
 \end_layout
 
 \begin_layout Itemize
-runs on x86, Alpha, ARM, MIPS, Sparc
+runs on x86, Alpha, ARM, MIPS, Sparc, PowerPC
 \end_layout
 
 \begin_layout Subsection
@@ -4895,6 +4895,14 @@ Some additional settings in MediaTomb configuration are required to enable
 
 \begin_layout Code
 </custom-http-headers> 
+\end_layout
+
+\begin_layout Subsubsection
+Linksys
+\end_layout
+
+\begin_layout Itemize
+WMLS11B (Wireless-B Music System)
 \end_layout
 
 \begin_layout Subsubsection

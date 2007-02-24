@@ -6,8 +6,7 @@ Copyright   2005 Gena Batsyan, Sergey Bostandzhyan
 
 Copyright   2006-2007 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer
 
-THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY! USE AT YOUR OWN RISK!http://
-new.mediatomb.org/pages/documentation
+THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY! USE AT YOUR OWN RISK!
 
 -------------------------------------------------------------------------------
 
@@ -120,7 +119,7 @@ Note:
 
   * support for Linux, FreeBSD, Mac OS X
 
-  * runs on x86, Alpha, ARM, MIPS, Sparc
+  * runs on x86, Alpha, ARM, MIPS, Sparc, PowerPC
 
 1.2. Planned Features
 
@@ -170,14 +169,14 @@ In order to compile MediaTomb you will have to install the following packages.:
     type mappings manually in your config file.
 
   * js - SpiderMonkey JavaScript Engine http://www.mozilla.org/js/spidermonkey/
-    OPTIONAL, HIGHLY RECOMMENDED
+    OPTIONAL, RECOMMENDED
 
-    This package is necessary to allow the creation of virtual containers. The
-    import.js script defines the layout of your media, the default import
-    script will create a structure sorted by Audio/Photo/Video, it will make
-    use of the gathered metadata (like ID3 tags) to sort your music by Artist/
-    Album/Genre/Year , etc. The import script can be adjusted and modified - it
-    allows you to create the layout that you want.
+    This package is necessary to allow the user defined creation of virtual
+    containers. The import.js script defines the layout of your media, the
+    default import script will create a structure sorted by Audio/Photo/Video,
+    it will make use of the gathered metadata (like ID3 tags) to sort your
+    music by Artist/Album/Genre/Year , etc. The import script can be adjusted
+    and modified - it allows you to create the layout that you want.
 
   * taglib http://developer.kde.org/~wheeler/taglib.html OPTIONAL, RECOMMENDED
 
@@ -878,9 +877,19 @@ Child tags:
 
     Default: http://mediatomb.cc/
 
-    This tag sets the manufacturer URL of a UPnP device, this may be necessary
-    to trick some renderers in order to enable special features that otherwise
-    are only active with the vendor implemented server.
+    This tag sets the manufacturer URL of a UPnP device, a custom setting may
+    be necessary to trick some renderers in order to enable special features
+    that otherwise are only active with the vendor implemented server.
+
+  * <model>MediaTomb</model>
+
+    Optional
+
+    Default: MediaTomb
+
+    This tag sets the model name of a UPnP device, a custom setting may be
+    necessary to trick some renderers in order to enable special features that
+    otherwise are only active with the vendor implemented server.
 
   * <presentationURL append-to="ip">80/index.html</presentationURL>
 
@@ -980,6 +989,19 @@ Child tags:
     Default: 180, this is according to the UPnP specification.
 
     Interval for broadcasting SSDP:alive messages
+
+  * <bookmark>mediatomb.html</bookmark>
+
+    Optional
+
+    Default: mediatomb.html
+
+    The bookmark file offers an easy way to access the user interface, it is
+    especially helpful when the server is not configured to run on a fixed
+    port. Each time the server is started, the bookmark file will be filled in
+    with a redirect to the servers current IP address and port. To use it,
+    simply bookmark this file in your browser, the default location is ~
+    /.mediatomb/mediatomb.html
 
   * <custom-http-headers>
 
@@ -1265,25 +1287,51 @@ Child tags:
     Same as above, but defines the charset of the metadata (i.e. id3 tags, Exif
     information, etc.)
 
-  * <script charset="UTF-8">/path/to/my/import/script.js</script>
+  * <virtual-layout type="builtin">
 
-    Required if javascript support is enabled
+    Optional
 
-    Default: ${prefix}/share/mediatomb/js/import.js, where ${prefix} is your
-    installation prefix directory.
+    Defines options for the virtual container layout; the so called "virtual
+    container layout" is the way how the server organizes the media according
+    to the extracted metadata. For example, it allows sorting audio files by
+    Album, Artist, Year and so on.
 
-    Points to the script invoked upon media import. For more details read doc/
-    scripting-intro.txt
-
-    Attributes:
-
-      o charset=...
+      o type=...
 
         Optional
 
-        Default: UTF-8
+        Default: builtin
 
-        Specifies the import script encoding.
+        Specifies what will be used to create the virtual layout, possible
+        values are:
+
+          - builtin: a default layout will be created by the server
+
+          - js: a user customizable javascript will be used (MediaTomb must be
+            compiled with js support)
+
+          - disabled: only PC-Directory structure will be created, i.e. no
+            virtual layout
+
+      o <script charset="UTF-8">/path/to/my/import/script.js</script>
+
+        Required if virtual layout type is "js"
+
+        Default: ${prefix}/share/mediatomb/js/import.js, where ${prefix} is
+        your installation prefix directory.
+
+        Points to the script invoked upon media import. For more details read
+        doc/scripting-intro.txt
+
+        Attributes:
+
+          - charset=...
+
+            Optional
+
+            Default: UTF-8
+
+            Specifies the import script encoding.
 
   * <magic-file>/path/to/my/magic-file</magic-file>
 
@@ -1309,9 +1357,9 @@ Child tags:
 
     Child tags:
 
-      o <directory location="/media" mode="timed" interval="15"
+      o <directory location="/media" mode="timed" interval="3600"
             level="full" recursive="no" hidden-files="no"/>
-        <directory location="/audio" mode="timed" interval="30"
+        <directory location="/audio" mode="timed" interval="1800"
             level="basic" recursive="yes" hidden-files="no"/>
         ...
 
@@ -1577,11 +1625,15 @@ section of your config.xml:
     <add header="X-User-Agent: redsonic"/>
 </custom-http-headers>
 
-7.1.4. Netgear
+7.1.4. Linksys
+
+  * WMLS11B (Wireless-B Music System)
+
+7.1.5. Netgear
 
   * EVA700
 
-7.1.5. Philips
+7.1.6. Philips
 
   * Streamium SL-300i
 
@@ -1591,11 +1643,11 @@ section of your config.xml:
 
   * SLA-5520
 
-7.1.6. Siemens
+7.1.7. Siemens
 
   * Gigaset M740AV
 
-7.1.7. Telegent
+7.1.8. Telegent
 
   * TG100
 
