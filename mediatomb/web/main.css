@@ -178,8 +178,7 @@ table.classicForm
 
 .status
 {
-    margin-left:60px;
-    margin-top:7px;
+    vertical-align:middle;
     z-index:12;
 }
 
