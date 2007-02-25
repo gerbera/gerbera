@@ -50,8 +50,9 @@ you may want to separate your content by music, photo, video, maybe create
 \end_layout
 
 \begin_layout Itemize
-you may want your music to be sorted by genre, year, artist, album so you
- can more easily find your favorite song when browsing the server
+you may want your music to be sorted by genre, year, artist, album, or maybe
+ by starting letters, so you can more easily find your favorite song when
+ browsing the server
 \end_layout
 
 \begin_layout Itemize
@@ -97,7 +98,7 @@ When you add a file or directory to the database via the web interface several
 The object is inserted into the PC Directory.
  PC Directory is simply a special non-removable container.
  Any media file added will have an entry inside the PC Directory tree.
- PC Directory's hierarchy reflects the filesystem hierarchy All objects
+ PC Directory's hierarchy reflects the filesystem hierarchy, all objects
  inside the PC Directory including itself are NON-VIRTUAL objects.
  All virtual objects may have a different title, descripting, etc., but they
  are still references to objects in the PC-Directory.
@@ -121,7 +122,7 @@ Each UPnP server implements this so called virtual object hierarchy in a
  Most servers have strong limitations on the structure of the virtual containers
 , they usually offer a predefined layout of data and the user has to live
  with it.
- In Mediatomb we try to address this shortcoming by introducing the scriptable
+ In MediaTomb we try to address this shortcoming by introducing the scriptable
  virtual object engine.
  It is designed to be:
 \end_layout
@@ -154,14 +155,15 @@ Theory Of Operation
 \begin_layout Standard
 After an item is added to the PC Directory it is automatically fed as input
  to the import script.
- The script then creates one or more virtual items for the given item.
+ The script then creates one or more virtual items for the given original
+ item.
  Items created from scripts are always marked virtual.
  
 \end_layout
 
 \begin_layout Standard
-When the virtual object engine gets notified of an added item following
- happens: A javascript object is created mirroring the properties of the
+When the virtual object engine gets notified of an added item, following
+ happens: a javascript object is created mirroring the properties of the
  item.
  The object is introduced to the script environment and bound to the predefined
  variable 'orig'.
@@ -171,11 +173,534 @@ When the virtual object engine gets notified of an added item following
 \end_layout
 
 \begin_layout Standard
-In the current implementation if you modify the script you will have to
- restart the server for the new logic to take effect.
+In the current implementation, if you modify the script then you will have
+ to restart the server for the new logic to take effect.
  Note, that the script is only triggered when new objects are added to the
  database, also note that the script does not modify any objects that already
- exist in the database.
+ exist in the database - it only processes new objects that are being added.
+\end_layout
+
+\begin_layout Section
+The Import Script
+\end_layout
+
+\begin_layout Standard
+In this section we will introduce the properties of the object that will
+ be processed by the script, as well as functions that are offered by the
+ server.
+\end_layout
+
+\begin_layout Subsection
+The 'orig' Object
+\end_layout
+
+\begin_layout Standard
+As described in Section 2.2, each time an item is added to the database the
+ import script is invoked.
+ So, one script invocation processes exactly one non virtual item, and creates
+ a number of virtual items and containers.
+ The original item is made available in the form of the global variable
+ 'orig'.
+ It is usually a good idea to only read from this variable and to create
+ and only modify local copies.
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+RW 
+\emph default
+means read/write, i.e.
+ - changes made to that property will be transferred into the database.
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+RO
+\emph default
+ means, that this is a readonly property, any changes made to it will get
+ lost.
+\end_layout
+
+\begin_layout Standard
+Let's take a look at the 'orig' object that you receive in the script:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.title
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\emph on
+RW
+\end_layout
+
+\begin_layout Standard
+This is the title of the original object, since the object represents an
+ entry in the PC-Directory, the title will be set to it's filename.
+ This field corresponds to dc:title in the DIDL-Lite XML.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.id
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\emph on
+RO
+\end_layout
+
+\begin_layout Standard
+The object ID, make sure to set all refID's (reference IDs) of your virtual
+ objects to that ID.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.parentID
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\emph on
+RO
+\end_layout
+
+\begin_layout Standard
+The object ID of the parent container.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.class
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\emph on
+RW
+\end_layout
+
+\begin_layout Standard
+The upnp class of the item, this corresponds to upnp:class in the DIDL-Lite
+ XML.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.location
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\emph on
+RO
+\end_layout
+
+\begin_layout Standard
+Location on disk, given by the absolute path and filename.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.mimetype
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\emph on
+RW
+\end_layout
+
+\begin_layout Standard
+Mimetype of the object.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.meta
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\emph on
+RW
+\end_layout
+
+\begin_layout Standard
+Array holding the metadata that was extracted from the object (i.e.
+ id3/exif/etc.
+ information)
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.meta[M_TITLE]
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\emph on
+RW
+\end_layout
+
+\begin_layout Standard
+Extracted title (for example the id3 title if the object is an mp3 file),
+ if you want that your new virtual object is displayed under this title
+ you will have to set obj.title = orig.meta[M_TITLE]
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.meta[M_ARTIST]
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+RW
+\end_layout
+
+\begin_layout Standard
+Artist information, this correponds to upnp:artist in the DIDL-Lite XML.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.meta[M_ALBUM]
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\emph on
+RW
+\end_layout
+
+\begin_layout Standard
+Album information, this corresponds to upnp:album in the DIDL-Lite XML.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.meta[M_DATE]
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+RW
+\end_layout
+
+\begin_layout Standard
+Date, must be in the format of YYYY-MM-DD (required by the UPnP spec), this
+ corresponds to dc:date in the DIDL-Lite XML.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.meta[M_GENRE]
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\emph on
+RW
+\end_layout
+
+\begin_layout Standard
+Genre of the item, this corresponds to upnp:genre in the DIDL-Lite XML.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.meta[M_DESCRIPTION]
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+RW
+\end_layout
+
+\begin_layout Standard
+Description of the item, this corresponds to dc:description in the DIDL-Lite
+ XML.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.meta[M_TRACKNUMBER]
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+RW
+\end_layout
+
+\begin_layout Standard
+Track number of the item, this corresponds to upnp:originalTrackNumber in
+ the DIDL-Lite XML.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.aux
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+RO
+\end_layout
+
+\begin_layout Standard
+Array holding the so called auxilary data.
+ Aux data is metadata that is not part of UPnP, for example - this can be
+ a camera model that was used to make a photo, or the information if the
+ photo was taken with or without flash.
+ Currently aux data can be gathered from libexif and libextractor (see the
+ Import section in the main documentation for more details).
+ So, this array will hold the tags that you specified in your config.xml,
+ allowing you to create your virtual structure according to your liking.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \end_body
