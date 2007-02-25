@@ -24,10 +24,10 @@
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
     
-    $Id: scripting.h 1124 2007-02-17 21:49:15Z lww $
+    $Id$
 */
 
-/// \file fallback.h
+/// \file fallback_layout.h
 
 #ifndef __FALLBACK_LAYOUT_H__
 #define __FALLBACK_LAYOUT_H__

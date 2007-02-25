@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    scripting.cc - this file is part of MediaTomb.
+    js_layout.cc - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -27,7 +27,7 @@
     $Id$
 */
 
-/// \file scripting.cc
+/// \file js_layout.cc
 
 #ifdef HAVE_CONFIG_H
     #include "autoconfig.h"

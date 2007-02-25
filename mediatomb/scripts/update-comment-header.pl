@@ -9,6 +9,8 @@ foreach (@ARGV)
     my @full_fn = split('/', $full_path);
     my $filename = pop(@full_fn);
     
+    $filename =~ s/\.sql\.tmpl\.h/_create_sql\.h/;
+    
     my $new_header_main = 
 '    MediaTomb - http://www.mediatomb.cc/
     

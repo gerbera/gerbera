@@ -24,7 +24,7 @@
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
     
-    $Id: scripting.h 1124 2007-02-17 21:49:15Z lww $
+    $Id$
 */
 
 /// \file layout.h
@@ -41,5 +41,5 @@ public:
 	virtual void processCdsObject(zmm::Ref<CdsObject> obj) = 0;	
 };
 
-#endif // __SCRIPTING_H__
+#endif // __LAYOUT_H__
 

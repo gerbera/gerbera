@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    scripting.h - this file is part of MediaTomb.
+    js_layout.h - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -27,7 +27,7 @@
     $Id$
 */
 
-/// \file scripting.h
+/// \file js_layout.h
 
 #ifndef __JS_SCRIPTING_H__
 #define __JS_SCRIPTING_H__
@@ -56,5 +56,5 @@ public:
 	virtual void processCdsObject(zmm::Ref<CdsObject> obj);	
 };
 
-#endif // __SCRIPTING_H__
+#endif // __JS_SCRIPTING_H__
 
