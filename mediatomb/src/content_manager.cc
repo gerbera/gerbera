@@ -245,7 +245,6 @@ void ContentManager::shutdown()
         ms = NULL;
     }
 #endif
-
     log_debug("end\n");
 }
 
@@ -1167,7 +1166,10 @@ void ContentManager::threadProc()
         if (! shutdownFlag)
             AUTORELOCK();
     }
+
+    Storage::getInstance()->threadCleanup();
 }
+
 void *ContentManager::staticThreadProc(void *arg)
 {
     ContentManager *inst = (ContentManager *)arg;
