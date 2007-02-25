@@ -1,7 +1,6 @@
 sharedir = @datadir@/@PACKAGE@
 
 _DIST_FILES = \
-    config-dist.xml \
     mappings.xml \
     sqlite3.sql \
     mysql.sql

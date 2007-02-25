@@ -187,7 +187,7 @@
     <xs:element name="import">
         <xs:complexType>
             <xs:all>
-                <xs:element ref="script" minOccurs="0"/>
+                <xs:element ref="virtual-layout" minOccurs="0"/>
                 <xs:element ref="mappings" minOccurs="0"/>
                 <xs:element ref="filesystem-charset" minOccurs="0"/>
                 <xs:element ref="metadata-charset" minOccurs="0"/>
@@ -199,6 +199,24 @@
         </xs:complexType>
     </xs:element>
 
+    <xs:element name="virtual-layout">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="script" minOccurs="0"/>
+            </xs:sequence>
+            <xs:attribute name="type" default="builtin">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="builtin"/>
+                        <xs:enumeration value="js"/>
+                        <xs:enumeration value="disabled"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+    
+    
     <xs:element name="filesystem-charset" type="xs:string"/>
 
     <xs:element name="metadata-charset" type="xs:string"/>
