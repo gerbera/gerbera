@@ -330,6 +330,7 @@ void ContentManager::addVirtualItem(Ref<CdsObject> obj)
 
 void ContentManager::_addFile(String path, bool recursive, bool hidden, Ref<CMTask> task)
 {
+    PROF_INIT(profiling);
     if (hidden == false)
     {
         String filename = get_filename(path);
@@ -359,14 +360,19 @@ void ContentManager::_addFile(String path, bool recursive, bool hidden, Ref<CMTa
         {
             addObject(obj);
             if (layout != nil)
+            {
+                PROF_START(&profiling);
                 layout->processCdsObject(obj);
+                PROF_END(&profiling);
+            }
         }
     }
     
     if (recursive && IS_CDS_CONTAINER(obj->getObjectType()))
     {
-        addRecursive(path, hidden, task);
+        addRecursive(path, hidden, task, &profiling);
     }
+    PROF_PRINT(&profiling);
 }
 
 void ContentManager::_removeObject(int objectID, bool all)
@@ -646,7 +652,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
 }
 
 /* scans the given directory and adds everything recursively */
-void ContentManager::addRecursive(String path, bool hidden, Ref<CMTask> task)
+void ContentManager::addRecursive(String path, bool hidden, Ref<CMTask> task, profiling_t *profiling)
 {
 
     if (hidden == false)
@@ -724,7 +730,11 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<CMTask> task)
         		if (IS_CDS_ITEM(obj->getObjectType()))
 	        	{
                     if (layout != nil)
+                    {
+                        PROF_START(profiling);
     		            layout->processCdsObject(obj);
+                        PROF_END(profiling);
+                    }
                     
                     /// \todo Why was this statement here??? - It seems to be unnecessary
                     //obj = createObjectFromFile(newPath);
@@ -732,7 +742,7 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<CMTask> task)
 //#endif
                 if (IS_CDS_CONTAINER(obj->getObjectType()))
                 {
-                    addRecursive(newPath, hidden, task);
+                    addRecursive(newPath, hidden, task, profiling);
                 }
             }
         }

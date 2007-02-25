@@ -233,5 +233,43 @@ void millisToTimespec(long millis, struct timespec *spec);
 /// consecutive slashes. If /../ or /..\0 is encountered an exception is 
 /// thrown.
 zmm::String normalizePath(zmm::String path);
+
+
+#ifdef LOG_TOMBDEBUG
+
+struct profiling_t
+{
+    struct timespec sum;
+    struct timespec last_start;
+    bool running;
+};
+
+#define PROFILING_T_INIT {{0,0},{0,0},false}
+
+void profiling_start(struct profiling_t *data);
+void profiling_end(struct profiling_t *data);
+void profiling_print(struct profiling_t *data);
+
+#define PROF_INIT(var) profiling_t var = PROFILING_T_INIT
+#define PROF_START(var) profiling_start(var)
+#define PROF_END(var) profiling_end(var)
+#define PROF_PRINT(var) profiling_print(var)
+
+#else
+
+#define profiling_t int
+#define PROF_INIT(var) profiling_t var
+#define PROF_START(var)
+#define PROF_END(var)
+#define PROF_PRINT(var)
+
+/*
+#define profiling_start()
+#define profiling_end()
+#define profiling_get_time()
+*/
+
+#endif
+
 #endif // __TOOLS_H__
 

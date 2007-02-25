@@ -849,3 +849,69 @@ String normalizePath(String path)
     return path;
 }
 
+#ifdef LOG_TOMBDEBUG
+
+//profiling_t test = PROFILING_T_INIT;
+
+void profiling_start(struct profiling_t *data)
+{
+    if (data->running)
+    {
+        log_debug("profiling_start() called on an already running profile! - aborting...\n");
+        print_backtrace();
+        abort();
+        return;
+    }
+    data->running = true;
+    getTimespecNow(&(data->last_start));
+}
+
+void profiling_end(struct profiling_t *data)
+{
+    struct timespec now;
+    getTimespecNow(&now);
+    if (! data->running)
+    {
+        log_debug("profiling_end() called on a not-running profile! - aborting...\n");
+        print_backtrace();
+        abort();
+        return;
+    }
+    struct timespec *sum = &(data->sum);
+    struct timespec *last_start = &(data->last_start);
+    sum->tv_sec += now.tv_sec - last_start->tv_sec;
+    //log_debug("!!!!!! adding %d sec\n", now.tv_sec - last_start->tv_sec);
+    if (now.tv_nsec >= last_start->tv_nsec)
+    {
+        sum->tv_nsec += now.tv_nsec - last_start->tv_nsec;
+        //log_debug("adding %ld nsec\n", now.tv_nsec - last_start->tv_nsec);
+    }
+    else
+    {
+        sum->tv_nsec += 1000000000 + now.tv_nsec - last_start->tv_nsec;
+        //log_debug("adding 1 sec %ld nsec\n", 1000000000 + now.tv_nsec - last_start->tv_nsec);
+        sum->tv_sec ++;
+    }
+    if (sum->tv_nsec >= 1000000000)
+    {
+        sum->tv_nsec -= 1000000000;
+        sum->tv_sec ++;
+    }
+    
+    data->running = false;
+}
+
+void profiling_print(struct profiling_t *data)
+{
+    if (data->running)
+    {
+        log_debug("profiling_print() called on running profile! - aborting...\n");
+        print_backtrace();
+        abort();
+        return;
+    }
+    //log_debug("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nPROFILING: took %ld sec %ld nsec thread %u\n", data->sum.tv_sec, data->sum.tv_nsec, pthread_self());
+    log_debug("PROFILING: took %ld sec %ld nsec\n", data->sum.tv_sec, data->sum.tv_nsec);
+}
+
+#endif
