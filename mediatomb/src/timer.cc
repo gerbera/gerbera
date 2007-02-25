@@ -42,12 +42,16 @@ SINGLETON_MUTEX(Timer, true);
 template <>
 Ref<Array<Timer::TimerSubscriberElement<TimerSubscriberSingleton<Object> > > > Timer::getAppropriateSubscribers<TimerSubscriberSingleton<Object> >()
 {
+    if (subscribersSingleton == nil)
+        throw _Exception(_("timer already inactive!"));
     return subscribersSingleton;
 }
 
 template <>
 Ref<Array<Timer::TimerSubscriberElement<TimerSubscriberObject> > > Timer::getAppropriateSubscribers<TimerSubscriberObject>()
 {
+    if (subscribersObject == nil)
+        throw _Exception(_("timer already inactive!"));
     return subscribersObject;
 }
 
@@ -118,3 +122,9 @@ struct timespec * Timer::getNextNotifyTime()
     return nextTime;
 }
 
+void Timer::shutdown()
+{
+    subscribersSingleton = nil;
+    subscribersObject = nil;
+    log_debug("finished.\n");
+}

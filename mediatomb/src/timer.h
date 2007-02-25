@@ -68,8 +68,10 @@ class Timer : public Singleton<Timer>
 {
 public:
     Timer();
-    //~Timer();
+    virtual ~Timer() { log_debug("Timer destroyed!\n"); }
     //static zmm::Ref<Timer> getInstance();
+    
+    virtual void shutdown();
     
     template <class T>
     void addTimerSubscriber(zmm::Ref<T> timerSubscriber, unsigned int notifyInterval, int id = 0, bool once = false)
@@ -187,7 +189,6 @@ protected:
             }
         }
     }
-    
     
     struct timespec *getNextNotifyTime();
 };
