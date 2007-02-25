@@ -118,8 +118,38 @@
                 </div>
             </form>
         </div>
-        <div id="autoscan_list_div" style="display:none">
+        <div id="autoscan_list_div" style="display:none;">
             <div></div>
         </div>
+        <div id="loginDiv" style="display:none;">
+            <form action="javascript:parent.authenticate();" name="login_form">
+                <table style="margin-left: auto; margin-right: auto; margin-top: 60px;
+                              text-align: left;" border="0" cellpadding="2" 
+                              cellspacing="2">
+                    <tbody>
+                        <tr>
+                            <td style="vertical-align: top;">Username:</td>
+                            <td style="vertical-align: top;">
+                                <input name="username" size="24" type="text">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="vertical-align: top; text-align: left;">
+                                Password:
+                            </td>
+                            <td style="vertical-align: top; text-align: left;">
+                                <input name="password" size="24" type="password">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="vertical-align: top;"></td>
+                            <td style="vertical-align: top; text-align: right;">
+                                <input value="Login" type="submit">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div>                                  
     </body>
 </html>

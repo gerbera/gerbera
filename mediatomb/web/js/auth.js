@@ -56,8 +56,8 @@ function gotToken(ajaxRequest)
     else
         setCookie("SID", SID);
     
-    var username = frames["topF"].document.login_form.username.value;
-    var password = frames["topF"].document.login_form.password.value;
+    var username = frames["rightF"].document.login_form.username.value;
+    var password = frames["rightF"].document.login_form.password.value;
     
     // create authentication password
     password = hex_md5(token + password);
@@ -77,10 +77,16 @@ function checkLogin(ajaxRequest)
     if (!errorCheck(xml)) return;
     
     var topDocument = frames["topF"].document;
-    Element.hide(topDocument.getElementById("loginDiv"));
-    Element.show(topDocument.getElementById("topDiv"));
+    var rightDocument = frames["rightF"].document;
+    var leftDocument = frames["leftF"].document;
+    Element.hide(rightDocument.getElementById("loginDiv"));
+    Element.hide(leftDocument.getElementById("leftLoginDiv"));
+    //Element.show(topDocument.getElementById("topDiv"));
+    Element.show(topDocument.getElementById("statusDiv"));
     Element.show(frames["leftF"].document.getElementById("treeDiv"));
     Element.show(frames["topleftF"].document.getElementById("db_fs_selector"));
+    if (ACCOUNTS)
+        Element.show(topDocument.getElementById("logout_link"));
     loggedIn = true;
     initLoggedIn();
     updateTreeAfterLogin();

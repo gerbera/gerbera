@@ -83,22 +83,31 @@
                 //if (SID && SID != null && SID != 'null')
                 checkSID();
                 var topDocument = frames["topF"].document;
+                var rightDocument = frames["rightF"].document;
+                var leftDocument = frames["leftF"].document;
+                
+                /*
                 var logoutLinkEl = topDocument.getElementById("logout_link");
                 if (ACCOUNTS)
                     Element.show(logoutLinkEl);
                 else
                     Element.hide(logoutLinkEl);
-                
+                */
+                    
                 if (!SID || SID == null)
                 {
-                    Element.show(topDocument.getElementById("loginDiv"));
+                    Element.show(rightDocument.getElementById("loginDiv"));
+                    Element.show(leftDocument.getElementById("leftLoginDiv"));
                 }
                 else
                 {
                     loggedIn = true;
                     Element.show(topDocument.getElementById("topDiv"));
-                    Element.show(frames["leftF"].document.getElementById("treeDiv"));
+                    Element.show(leftDocument.getElementById("treeDiv"));
                     Element.show(frames["topleftF"].document.getElementById("db_fs_selector"));
+                    Element.show(topDocument.getElementById("statusDiv"));
+                    if (ACCOUNTS)
+                        Element.show(topDocument.getElementById("logout_link"));
                 }
                 var globalAjaxHandlers = {
                     onCreate: function()
