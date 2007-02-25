@@ -75,6 +75,14 @@ void MysqlStorage::checkMysqlThreadInit()
     }
 }
 
+void MysqlStorage::threadCleanup()
+{
+    if (pthread_getspecific(mysql_init_key) != NULL)
+    {
+        mysql_thread_end();
+    }
+}
+
 void MysqlStorage::init()
 {
     log_debug("start\n");

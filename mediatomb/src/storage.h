@@ -244,6 +244,9 @@ public:
     
     virtual zmm::String getFsRootName() = 0;
     
+    virtual void threadCleanup() = 0;
+    virtual bool threadCleanupRequired() = 0;
+    
 protected:
     /* helper for addContainerChain */
     static void stripAndUnescapeVirtualContainerFromPath(zmm::String path, zmm::String &first, zmm::String &last);

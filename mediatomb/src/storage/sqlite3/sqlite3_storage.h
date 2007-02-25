@@ -162,6 +162,9 @@ private:
     zmm::Ref<zmm::ObjectQueue<SLTask> > taskQueue;
     bool taskQueueOpen;
     
+    virtual void threadCleanup() {}
+    virtual bool threadCleanupRequired() { return false; }
+    
     inline void signal() { cond->signal(); }
     
     friend class SLSelectTask;

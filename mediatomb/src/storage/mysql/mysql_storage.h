@@ -67,6 +67,9 @@ private:
     
     zmm::Ref<Mutex> mysqlMutex;
     
+    virtual void threadCleanup();
+    virtual bool threadCleanupRequired() { return true; }
+    
     pthread_key_t mysql_init_key;
     bool mysql_init_key_initialized;
     
