@@ -460,13 +460,14 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
     sigemptyset(&mask_set);
     sigprocmask(SIG_SETMASK, &mask_set, NULL);
     
-    timer = Timer::getInstance();
-    
     // wait until signalled to terminate
     while (!shutdown_flag)
     {
         //pause();
         //sleep(timer->getNotifyInterval());
+        
+        if (timer == nil)
+            timer = Timer::getInstance();
         
         timer->triggerWait();
         
@@ -476,7 +477,8 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
             try
             {
                 server = nil;
-
+                timer = nil;
+                
                 singletonManager->shutdown(true);
                 singletonManager = nil;
                 singletonManager = SingletonManager::getInstance();
