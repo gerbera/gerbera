@@ -45,8 +45,6 @@
 using namespace zmm;
 using namespace mxml;
 
-#define DEFAULT_PAGE_BUFFER_SIZE 4096
-
 WebRequestHandler::WebRequestHandler() : RequestHandler()
 {
     checkRequestCalled = false;
