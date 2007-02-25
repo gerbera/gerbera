@@ -43,7 +43,7 @@ v0.9.0  Major rework
         * added option to supress hidden files when browsing the filesystem
         * added X_MS_MediaReceiverRegistrar Service to allow future Xbox 360 
           support
-        * added workarounds to enable Telegent TG100 support
+        * added workarounds to enable Telegent TG100 avi playback
         * server can now be restarted by sending it a SIGHUP
         * the current configuration file will never be displayed in the UI and
           will never be added to the database - we do not want the user to
@@ -69,6 +69,24 @@ v0.9.0  Major rework
           same filename, but with the .srt extension
         * created XML schema for "config.xml" to provide the possiblity of
           validating the configuration
+        * added fallback if js is not available - there is a builtin feature
+          to create a default virtual layout now; config.xml has got an
+          option to select the virtual-layout type, it can be builting, js or
+          disabled.
+        * added charset option to the import script, it is not possible to
+          specify the script encoding
+        * we now validate filesystem, metadata and scripting charsets upon 
+          startup
+        * added a special option that allows limiting title and description
+          lengths in UPnP browse requests to a specified length; this was
+          necessary to work around a bug in the TG100 that has problems
+          browsing items where title length exceeds 101 characters.
+        * import.js can now specify the upnp class of the last container in the
+          chain
+        * all containers with the upnp class object.container.album.musicAlbum
+          will automatically be sorted by track number.
+        * added option to configure the presentation URL to make it easier
+          for NAS vendors to integrate the server into their web UI
 
 v0.8.1
         * added "serve" directory, any files there can be downloaded 
