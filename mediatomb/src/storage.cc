@@ -33,7 +33,6 @@
     #include "autoconfig.h"
 #endif
 
-#include "storage.h"
 #include "config_manager.h"
 
 #if ! defined(HAVE_MYSQL) && ! defined(HAVE_SQLITE3)

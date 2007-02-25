@@ -44,11 +44,25 @@
 using namespace zmm;
 using namespace mxml;
 
+Ref<Storage> Server::storage = nil;
+
 SINGLETON_MUTEX(Server, false);
 
 static int static_upnp_callback(Upnp_EventType eventtype, void *event, void *cookie)
 {
     return Server::getInstance()->upnp_callback(eventtype, event, cookie);
+}
+
+void Server::static_cleanup_callback()
+{
+    if (storage != nil)
+    {
+        try
+        {
+            storage->threadCleanup();
+        }
+        catch (Exception ex) {}
+    }
 }
 
 Server::Server() : Singleton<Server>()
@@ -104,8 +118,17 @@ void Server::upnp_init(String ip, int port)
 
     if (port < 0)
         port = 0;
-    
-    ret = UpnpInit(ip.c_str(), port);
+
+
+    void *cb = NULL;
+    // this is important, so the storage lives a little longer when
+    // shutdown is initiated
+    storage = Storage::getInstance();
+
+    if (storage->threadCleanupRequired())
+        cb = (void *)static_cleanup_callback;
+
+    ret = UpnpInit(ip.c_str(), port, cb);
 
     if (ret != UPNP_E_SUCCESS)
     {
@@ -240,10 +263,7 @@ void Server::upnp_init(String ip, int port)
     {
         throw _UpnpException(ret, _("upnp_init: UpnpSendAdvertisement failed"));
     }
-    
-    // initializing Storage
-    Storage::getInstance();
-    
+       
     // initializing UpdateManager
     UpdateManager::getInstance();
     
@@ -286,7 +306,8 @@ void Server::shutdown()
     
     log_debug("now calling upnp finish\n");
     UpnpFinish();
-    
+    storage = nil;
+
     log_debug("end\n");
 }
 

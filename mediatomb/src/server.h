@@ -41,6 +41,7 @@
 #include "upnp_mrreg.h"
 #include "config_manager.h"
 #include "sync.h"
+#include "storage.h"
 
 /// \brief Provides methods to initialize and shutdown
 /// and to retrieve various information about the server.
@@ -93,7 +94,7 @@ public:
     /// passed on to the appropriate request handler - to upnp_actions() or
     /// upnp_subscriptions()
     int upnp_callback(Upnp_EventType eventtype, void *event, void *cookie);
-    
+  
     /// \brief Returns the device handle.
     ///
     /// This function returns the handle for our device (it is needed to
@@ -121,7 +122,11 @@ public:
     /// terminated. This is the case when upnp_clean() was called.
     bool getShutdownStatus();
 
+    static void static_cleanup_callback();
+ 
 protected:
+    static zmm::Ref<Storage> storage;
+
     /// \brief This flag is set to true by the upnp_cleanup() function.
     bool server_shutdown_flag;
     
@@ -205,8 +210,6 @@ protected:
     /// appropriate service.
     void upnp_subscriptions(zmm::Ref<SubscriptionRequest> request);
 };
-
-extern zmm::Ref<Server> server;
 
 #endif // __SERVER_H__
 

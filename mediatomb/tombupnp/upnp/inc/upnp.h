@@ -1108,8 +1108,13 @@ EXPORT_SPEC int UpnpInit(
                                     string format, for example "192.168.0.1", 
                                     or {\tt NULL} to use the first adapter's 
                                     IP address. */
-    IN unsigned short DestPort  /** The destination port number to use.  0 
+    IN unsigned short DestPort, /** The destination port number to use.  0 
                                     will pick an arbitrary free port. */
+    IN void *thread_cleanup  /** A user defined callback function that 
+                                    will get triggered each time a thread dies
+                                    (only for threads that were calling other
+                                    user callbacks). We need this to allow
+                                    extra cleanup, for example for MySQL */
     );
 
 /** Terminates the Linux SDK for UPnP Devices. This function must be the last 

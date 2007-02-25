@@ -177,7 +177,9 @@ off_t g_maxContentLength = DEFAULT_SOAP_CONTENT_LENGTH; // in bytes
  *	UPNP_E_INIT if UPnP is already initialized
  *****************************************************************************/
 int UpnpInit( IN const char *HostIP,
-              IN unsigned short DestPort )
+              IN unsigned short DestPort,
+              IN void *thread_cleanup
+            )
 {
     int retVal = 0;
     ThreadPoolAttr attr;
@@ -272,12 +274,14 @@ int UpnpInit( IN const char *HostIP,
     TPAttrSetIdleTime( &attr, THREAD_IDLE_TIME );
     TPAttrSetMaxJobsTotal( &attr, MAX_JOBS_TOTAL );
 
+    gSendThreadPool.free_func = (free_thread_func)thread_cleanup;
     if( ThreadPoolInit( &gSendThreadPool, &attr ) != UPNP_E_SUCCESS ) {
         UpnpSdkInit = 0;
         UpnpFinish(  );
         return UPNP_E_INIT_FAILED;
     }
 
+    gRecvThreadPool.free_func = (free_thread_func)thread_cleanup;
     if( ThreadPoolInit( &gRecvThreadPool, &attr ) != UPNP_E_SUCCESS ) {
         UpnpSdkInit = 0;
         UpnpFinish(  );

@@ -127,6 +127,7 @@ typedef int PolicyType;
  *     Function for freeing a thread argument
  *****************************************************************************/
 typedef void (*free_routine)(void *arg);
+typedef void (*free_thread_func)(void);
 
 /****************************************************************************
  * Name: ThreadPoolAttr
@@ -248,7 +249,9 @@ typedef struct THREADPOOL
   ThreadPoolJob *persistentJob; //persistent job
  
   ThreadPoolAttr attr; //thread pool attributes
-  
+ 
+  free_thread_func free_func; // user defined thread cleanup function
+
   //statistics 
   STATSONLY(ThreadPoolStats stats;)
  
@@ -449,7 +452,6 @@ int TPJobSetPriority(ThreadPoolJob *job, ThreadPriority priority);
  *      Always returns 0.
  *****************************************************************************/
 int TPJobSetFreeFunction(ThreadPoolJob *job, free_routine func);
-
 
 /****************************************************************************
  * Function: TPAttrInit

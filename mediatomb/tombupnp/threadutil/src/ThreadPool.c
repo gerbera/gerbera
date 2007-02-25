@@ -472,6 +472,10 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
                     STATSONLY( tp->stats.idleThreads-- );
 
                     tp->totalThreads--;
+                   
+                    if (tp->free_func)
+                        tp->free_func();
+
                     ithread_cond_broadcast( &tp->start_and_shutdown );
                     ithread_mutex_unlock( &tp->mutex );
 					//leuk_he
@@ -480,6 +484,9 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
 	                   pthread_win32_thread_detach_np ();
 	                  #endif
 	                 #endif
+
+
+
                     return NULL;
                 }
 
@@ -504,6 +511,9 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
             //if shutdown then stop
             if( tp->shutdown ) {
                 tp->totalThreads--;
+
+                if (tp->free_func)
+                    tp->free_func();
 
                 ithread_cond_broadcast( &tp->start_and_shutdown );
 
