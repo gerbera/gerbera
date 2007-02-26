@@ -1,4 +1,4 @@
-MediaTomb - UPnP AV Mediaserver for Linux.
+MediaTomb - UPnP AV Mediaserver.
 v0.9.0  Major rework
         * the UI was completely rewritten from scratch; it uses AJAX for all
           requests
