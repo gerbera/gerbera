@@ -1,0 +1,36 @@
+This package was debianized by Leonhard Wimmer <leo@mediatomb.cc> on
+Sat, 17 Feb 2007 20:46:34 +0100.
+
+It was downloaded from http://mediatomb.cc/
+
+Upstream Author: Gena Batyan <bgeradz@mediatomb.cc>, 
+                 Sergey Bostandzhyan <jin@mediatomb.cc>,
+                 Leonhard Wimmer <leo@mediatomb.cc>
+
+Copyright: 2005 Gena Batyan <bgeradz@mediatomb.cc>, 
+                Sergey Bostandzhyan <jin@mediatomb.cc>,
+           2006-2007 Gena Batyan <bgeradz@mediatomb.cc>, 
+                     Sergey Bostandzhyan <jin@mediatomb.cc>,
+                     Leonhard Wimmer <leo@mediatomb.cc>
+
+
+License:
+
+   This package is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License version 2
+   as published by the Free Software Foundation.
+
+   This package is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   version 2 along with MediaTomb; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
+
+On Debian systems, the complete text of the GNU General
+Public License can be found in `/usr/share/common-licenses/GPL'.
+
+The Debian packaging is (C) 2007, Leonhard Wimmer <leo@mediatomb.cc> and
+is licensed under the GPL, see above.
