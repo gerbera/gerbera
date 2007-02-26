@@ -64,7 +64,7 @@ case "$1" in
     
 	echo -n "Starting mediatomb: "
 
-    LD_ASSUME_KERNEL=2.2.5 daemon $NICELEVEL mediatomb $MEDIATOMB -i $IFACE_IP $MEDIATOMBOPTIONS
+    daemon $NICELEVEL mediatomb $MEDIATOMB -i $IFACE_IP $MEDIATOMBOPTIONS
 
 	RETVAL=$?
         echo
