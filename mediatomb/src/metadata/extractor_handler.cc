@@ -38,13 +38,17 @@
 
 #include <extractor.h>
 
+#include "config_manager.h"
 #include "extractor_handler.h"
 #include "string_converter.h"
 #include "common.h"
 #include "tools.h"
 #include "rexp.h"
+#include "mxml/mxml.h"
+
 
 using namespace zmm;
+using namespace mxml;
 
 
 ExtractorHandler::ExtractorHandler() : MetadataHandler()
