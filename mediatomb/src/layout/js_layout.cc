@@ -123,6 +123,17 @@ static void js_set_property(JSContext *cx, JSObject *obj, char *name, String val
         return;
 }
 
+static void js_set_char_property(JSContext *cx, JSObject *obj, char *name, char *value)
+{
+    jsval val;
+    JSString *str = JS_NewStringCopyN(cx, value, strlen(value));
+	if (!str)
+		return;
+	val = STRING_TO_JSVAL(str);
+    if (!JS_SetProperty(cx, obj, name, &val))
+        return;
+}
+
 static void js_set_int_property(JSContext *cx, JSObject *obj, char *name, int value)
 {
     jsval val;
@@ -623,7 +634,14 @@ void JSLayout::init()
     {
         js_set_property(cx, glob, MT_KEYS[i].sym, String(MT_KEYS[i].upnp));
     }
-    
+   
+    js_set_char_property(cx, glob, "UPNP_CLASS_CONTAINER_MUSIC", UPNP_DEFAULT_CLASS_MUSIC_CONT);
+    js_set_char_property(cx, glob, "UPNP_CLASS_CONTAINER_MUSIC_ALBUM", UPNP_DEFAULT_CLASS_MUSIC_ALBUM);
+    js_set_char_property(cx, glob, "UPNP_CLASS_CONTAINER_MUSIC_ARTIST", UPNP_DEFAULT_CLASS_MUSIC_ARTIST);
+    js_set_char_property(cx, glob, "UPNP_CLASS_CONTAINER_MUSIC_GENRE", UPNP_DEFAULT_CLASS_MUSIC_GENRE);
+    js_set_char_property(cx, glob, "UPNP_CLASS_CONTAINER", UPNP_DEFAULT_CLASS_CONTAINER);
+    js_set_char_property(cx, glob, "UPNP_CLASS_ITEM", UPNP_DEFAULT_CLASS_ITEM);
+    js_set_char_property(cx, glob, "UPNP_CLASS_ITEM_MUSIC_TRACK", UPNP_DEFAULT_CLASS_MUSIC_TRACK);
     JS_SetErrorReporter(cx, js_error_reporter);
 
 /*

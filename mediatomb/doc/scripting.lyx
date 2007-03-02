@@ -190,6 +190,10 @@ In this section we will introduce the properties of the object that will
 \end_layout
 
 \begin_layout Subsection
+Global Variables And Constants
+\end_layout
+
+\begin_layout Subsubsection
 The 'orig' Object
 \end_layout
 
@@ -204,7 +208,13 @@ As described in Section 2.2, each time an item is added to the database the
  and only modify local copies.
 \end_layout
 
-\begin_layout Itemize
+\begin_layout Standard
+Here is a list of properties of an object, you can set them you create a
+ new object or when you modify a copy of the 'orig' object.
+ 
+\end_layout
+
+\begin_layout Standard
 
 \emph on
 RW 
@@ -213,17 +223,13 @@ means read/write, i.e.
  - changes made to that property will be transferred into the database.
 \end_layout
 
-\begin_layout Itemize
+\begin_layout Standard
 
 \emph on
 RO
 \emph default
  means, that this is a readonly property, any changes made to it will get
  lost.
-\end_layout
-
-\begin_layout Standard
-Let's take a look at the 'orig' object that you receive in the script:
 \end_layout
 
 \begin_layout Standard
@@ -686,6 +692,439 @@ Array holding the so called auxilary data.
  Import section in the main documentation for more details).
  So, this array will hold the tags that you specified in your config.xml,
  allowing you to create your virtual structure according to your liking.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Constants
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+UPNP_CLASS_CONTAINER
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Type: string
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Value: object.container
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+UPNP_CLASS_CONTAINER_MUSIC
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Type: string
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Value: object.container.musicContainer
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+UPNP_CLASS_CONTAINER_MUSIC_ARTIST
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Type: string
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Value: object.container.person.musicArtist
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+UPNP_CLASS_CONTINAER_MUSIC_GENRE
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Type: string
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Value: object.container.genre.musicGenre
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+UPNP_CLASS_CONTAINER_MUSIC_ALBUM
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Type: string
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Value: object.container.album.musicAlbum
+\end_layout
+
+\begin_layout Description
+Note: this container class will be treaded by the server in a special way,
+ all music items in this container will be sorted by ID3 track number.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+UPNP_CLASS_ITEM
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Type: string
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Value: object.item
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+UPNP_CLASS_ITEM_MUSIC_TRACK
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Type: string
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Value: object.item.audioItem.musicTrack
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Available Functions
+\end_layout
+
+\begin_layout Standard
+This section will introduce the functions that you can use in order to add
+ your objects to the database.
+ Some functions are offered by the server, and some helper functions are
+ defined in your import script.
+\end_layout
+
+\begin_layout Subsubsection
+Server Functions
+\end_layout
+
+\begin_layout Standard
+The server offers three functions which can be called from within the import
+ script:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+addCdsObject(object, containerChain, lastContainerClass);
+\end_layout
+
+\begin_layout Standard
+This function adds a virtual object to the server database, the path in
+ the database is defined by the containerChain parameter.
+ The third argument is optional, it allows to set the upnp:class of the
+ last container in the chain.
+\end_layout
+
+\begin_layout Standard
+Parameters:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+object
+\end_layout
+
+\begin_layout Standard
+A virtual object that is either a copy of or a reference to 'orig', see
+ Section 3.2 for a list of properties.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+containerChain
+\end_layout
+
+\begin_layout Standard
+A string, defining where the object will be added in the database hierarchy.
+ The containers in the chain are separated by a slash '/', for example,
+ a value of '/Audio/All Music' will add the object to the Audio, All Music
+ container in the server hierarchy.
+ Make sure to properly escape the slash characters in container names.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+lastContainerClass
+\end_layout
+
+\begin_layout Standard
+A string, defining the upnp:class of the container that appears last in
+ the chain.
+ This parameter can be ommited, in this case the default value 'object.container'
+ will be taken.
+ Setting specific upnp container classes is useful to define the special
+ meaning of a particular container; for example, the server will always
+ sort songs by track number if upnp class of a container is set to 'object.contai
+ner.album.musicAlbum'.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+newObject copyObject(originalObject);
+\end_layout
+
+\begin_layout Standard
+This function creates a copy of the virtual object.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+print(...);
+\end_layout
+
+\begin_layout Standard
+This function is useful for debugging scripts, it simply prints to the standard
+ output.
 \end_layout
 
 \begin_layout Standard

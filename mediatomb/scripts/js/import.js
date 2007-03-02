@@ -1,12 +1,3 @@
-// global defines
-
-// UPnP container classes
-UPNP_MUSIC_CONTAINER = 'object.container.musicContainer';
-UPNP_MUSIC_ALBUM     = 'object.container.album.musicAlbum';
-//UPNP_MUSIC_ARTIST    = 'object.container.person.musicArtist';
-UPNP_MUSIC_GENRE     = 'object.container.genre.musicGenre';
-UPNP_DEFAULT_CONTAINER = 'object.container';
-
 function escapeSlash(name)
 {
     name = name.replace(/\\/g, "\\\\");
@@ -123,10 +114,10 @@ function addAudio(obj)
 
     var chain = new Array('Audio', 'All audio');
     obj.title = title;
-    addCdsObject(obj, createContainerChain(chain), UPNP_MUSIC_CONTAINER);
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC);
     
     chain = new Array('Audio', 'Artists', artist, 'All songs');
-    addCdsObject(obj, createContainerChain(chain), UPNP_MUSIC_CONTAINER);
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC);
     
     chain = new Array('Audio', 'All - full name');
     temp = '';
@@ -137,25 +128,24 @@ function addAudio(obj)
         temp = temp + ' - ' + album_full + ' - ';
     
     obj.title = temp + title;
-    addCdsObject(obj, createContainerChain(chain), UPNP_MUSIC_CONTAINER);
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC);
     
     chain = new Array('Audio', 'Artists', artist, 'All - full name');
-    addCdsObject(obj, createContainerChain(chain), UPNP_MUSIC_CONTAINER);
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC);
     
     chain = new Array('Audio', 'Artists', artist, album);
     obj.title = track + title;
-    addCdsObject(obj, createContainerChain(chain), UPNP_MUSIC_ALBUM);
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ALBUM);
     
     chain = new Array('Audio', 'Albums', album);
     obj.title = track + title; 
-    addCdsObject(obj, createContainerChain(chain), UPNP_MUSIC_ALBUM);
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ALBUM);
     
     chain = new Array('Audio', 'Genres', genre);
-    addCdsObject(obj, createContainerChain(chain), UPNP_MUSIC_GENRE);
-    
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_GENRE);
     
     chain = new Array('Audio', 'Year', date);
-    addCdsObject(obj, createContainerChain(chain), UPNP_MUSIC_CONTAINER);
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC);
 }
 
 // currently no video metadata supported
@@ -169,13 +159,13 @@ function addVideo(obj)
 function addImage(obj)
 {
     var chain = new Array('Photos', 'All Photos');
-    addCdsObject(obj, createContainerChain(chain), UPNP_DEFAULT_CONTAINER);
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER);
 
     var date = obj.meta[M_DATE];
     if (date)
     {
         chain = new Array('Photos', 'Date', date);
-        addCdsObject(obj, createContainerChain(chain), UPNP_DEFAULT_CONTAINER);
+        addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER);
     }
 }
 
