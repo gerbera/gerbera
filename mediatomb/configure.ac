@@ -1097,6 +1097,8 @@ else
     if test "x$MYSQL_EN" = xyes; then
         AC_MSG_ERROR(unable to configure mysql support)
     fi
+    MYSQL_CFLAGS=
+    MYSQL_LIBS=
 fi
 
 CPPFLAGS="$CPPFLAGS_SAVE"
@@ -1802,6 +1804,8 @@ else
     if test "x$TAGLIB_EN" = xyes; then
         AC_MSG_ERROR(unable to configure taglib support)
     fi
+    TAGLIB_CFLAGS=
+    TAGLIB_LIBS=
 fi
 CPPFLAGS="$CPPFLAGS_SAVE"
 CXXFLAGS="$CXXFLAGS_SAVE"
