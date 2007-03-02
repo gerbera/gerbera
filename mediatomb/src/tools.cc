@@ -851,10 +851,21 @@ String normalizePath(String path)
 
 #ifdef LOG_TOMBDEBUG
 
-//profiling_t test = PROFILING_T_INIT;
+void profiling_thread_check(struct profiling_t *data)
+{
+    if (data->thread != pthread_self())
+    {
+        log_debug("profiling_..() called from a different thread than profiling_init was called! (init: %d; this: %d) - aborting...\n", data->thread, pthread_self());
+        print_backtrace();
+        abort();
+        return;
+    }
+}
+
 
 void profiling_start(struct profiling_t *data)
 {
+    profiling_thread_check(data);
     if (data->running)
     {
         log_debug("profiling_start() called on an already running profile! - aborting...\n");
@@ -868,6 +879,7 @@ void profiling_start(struct profiling_t *data)
 
 void profiling_end(struct profiling_t *data)
 {
+    profiling_thread_check(data);
     struct timespec now;
     getTimespecNow(&now);
     if (! data->running)

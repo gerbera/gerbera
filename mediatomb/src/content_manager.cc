@@ -361,7 +361,15 @@ void ContentManager::_addFile(String path, bool recursive, bool hidden, Ref<CMTa
             if (layout != nil)
             {
                 PROF_START(&profiling);
-                layout->processCdsObject(obj);
+                try
+                {
+                    layout->processCdsObject(obj);
+                }
+                catch (Exception e)
+                {
+                    PROF_END(&profiling);
+                    throw e;
+                }
                 PROF_END(&profiling);
             }
         }
@@ -731,7 +739,15 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<CMTask> task, pr
                     if (layout != nil)
                     {
                         PROF_START(profiling);
-    		            layout->processCdsObject(obj);
+                        try
+                        {
+                            layout->processCdsObject(obj);
+                        }
+                        catch (Exception e)
+                        {
+                            PROF_END(profiling);
+                            throw e;
+                        }
                         PROF_END(profiling);
                     }
                     

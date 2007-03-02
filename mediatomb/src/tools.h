@@ -242,9 +242,10 @@ struct profiling_t
     struct timespec sum;
     struct timespec last_start;
     bool running;
+    pthread_t thread;
 };
 
-#define PROFILING_T_INIT {{0,0},{0,0},false}
+#define PROFILING_T_INIT {{0,0},{0,0},false, pthread_self()}
 
 void profiling_start(struct profiling_t *data);
 void profiling_end(struct profiling_t *data);
