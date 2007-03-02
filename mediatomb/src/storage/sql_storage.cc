@@ -477,7 +477,7 @@ Ref<CdsObject> SQLStorage::loadObject(int objectID)
     {
         return createObjectFromRow(row);
     }
-    throw _Exception(_("Object not found: ") + objectID);
+    throw _ObjectNotFoundException(_("Object not found: ") + objectID);
 }
 
 Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
@@ -504,7 +504,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     }
     else
     {
-        throw _StorageException(_("Object not found: ") + objectID);
+        throw _ObjectNotFoundException(_("Object not found: ") + objectID);
     }
     
     row = nil;
@@ -937,7 +937,7 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
 
     if(! matched_types)
     {
-        throw _StorageException(_("unknown object type: ")+ objectType);
+        throw _StorageException(nil, _("unknown object type: ")+ objectType);
     }
     return obj;
 }
@@ -1243,7 +1243,7 @@ Ref<SQLStorage::ChangedContainersStr> SQLStorage::_recursiveRemove(Ref<StringBuf
         *removeAddParents << ')';
         res = select(removeAddParents);
         if (res == nil)
-            throw _StorageException(_("sql error"));
+            throw _StorageException(nil, _("sql error"));
         removeAddParents->setLength(removeAddParentsLen);
         while ((row = res->nextRow()) != nil)
             *changedContainers->ui << ',' << row->col_c_str(0);
@@ -1263,7 +1263,7 @@ Ref<SQLStorage::ChangedContainersStr> SQLStorage::_recursiveRemove(Ref<StringBuf
             *removeAddParents << ')';
             res = select(removeAddParents);
             if (res == nil)
-                throw _StorageException(_("sql error"));
+                throw _StorageException(nil, _("sql error"));
             // reset length
             removeAddParents->setLength(removeAddParentsLen);
             while ((row = res->nextRow()) != nil)
@@ -1276,7 +1276,7 @@ Ref<SQLStorage::ChangedContainersStr> SQLStorage::_recursiveRemove(Ref<StringBuf
             *recurseItems << ')';
             res = select(recurseItems);
             if (res == nil)
-                throw _StorageException(_("sql error"));
+                throw _StorageException(nil, _("sql error"));
             recurseItems->setLength(recurseItemsLen);
             while ((row = res->nextRow()) != nil)
             {
@@ -1292,7 +1292,7 @@ Ref<SQLStorage::ChangedContainersStr> SQLStorage::_recursiveRemove(Ref<StringBuf
             *recurseContainers << ')';
             res = select(recurseContainers);
             if (res == nil)
-                throw _StorageException(_("sql error"));
+                throw _StorageException(nil, _("sql error"));
             recurseContainers->setLength(recurseContainersLen);
             while ((row = res->nextRow()) != nil)
             {
@@ -1526,7 +1526,7 @@ void SQLStorage::updateAutoscanPersistentList(scan_mode_t scanmode, Ref<Autoscan
         *q << " LIMIT 1";
         Ref<SQLResult> res = select(q);
         if (res == nil)
-            throw _StorageException(_("query error while selecting from autoscan list"));
+            throw _StorageException(nil, _("query error while selecting from autoscan list"));
         Ref<SQLRow> row;
         if ((row = res->nextRow()) != nil)
         {
@@ -1557,7 +1557,7 @@ Ref<AutoscanList> SQLStorage::getAutoscanList(scan_mode_t scanmode)
        << " WHERE " FLD("scan_mode") '=' << quote(AutoscanDirectory::mapScanmode(scanmode));
     Ref<SQLResult> res = select(q);
     if (res == nil)
-        throw _StorageException(_("query error while fetching autoscan list"));
+        throw _StorageException(nil, _("query error while fetching autoscan list"));
     Ref<AutoscanList> ret(new AutoscanList());
     Ref<SQLRow> row;
     while((row = res->nextRow()) != nil)
@@ -1585,7 +1585,7 @@ Ref<AutoscanDirectory> SQLStorage::getAutoscanDirectory(int objectID)
        << " WHERE " << TQD('t',"id") << '=' << quote(objectID);
     Ref<SQLResult> res = select(q);
     if (res == nil)
-        throw _StorageException(_("query error while fetching autoscan"));
+        throw _StorageException(nil, _("query error while fetching autoscan"));
     Ref<AutoscanList> ret(new AutoscanList());
     Ref<SQLRow> row = res->nextRow();
     if (row == nil)
@@ -1747,7 +1747,7 @@ int SQLStorage::_getAutoscanObjectID(int autoscanID)
         << " LIMIT 1";
     Ref<SQLResult> res = select(q);
     if (res == nil)
-        throw _StorageException(_("error while doing select on "));
+        throw _StorageException(nil, _("error while doing select on "));
     Ref<SQLRow> row;
     if ((row = res->nextRow()) != nil && string_ok(row->col(0)))
         return row->col(0).toInt();

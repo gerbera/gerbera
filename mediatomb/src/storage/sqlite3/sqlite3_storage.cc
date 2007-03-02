@@ -86,7 +86,7 @@ void Sqlite3Storage::init()
     cond->wait();
     AUTOUNLOCK();
     if (startupError != nil)
-        throw _StorageException(startupError);
+        throw _StorageException(nil, startupError);
     
     String dbVersion = nil;
     try
@@ -303,7 +303,7 @@ void SLInitTask::run(sqlite3 *db, Sqlite3Storage *sl)
     unsigned long uncompressed_size = SL3_CREATE_SQL_INFLATED_SIZE;
     int ret = uncompress(buf, &uncompressed_size, sqlite3_create_sql, SL3_CREATE_SQL_DEFLATED_SIZE);
     if (ret != Z_OK || uncompressed_size != SL3_CREATE_SQL_INFLATED_SIZE)
-        throw _StorageException(_("Error while uncompressing sqlite3 create sql. returned: ") + ret);
+        throw _StorageException(nil, _("Error while uncompressing sqlite3 create sql. returned: ") + ret);
     buf[SL3_CREATE_SQL_INFLATED_SIZE] = '\0';
     
     char *err = NULL;
@@ -322,7 +322,7 @@ void SLInitTask::run(sqlite3 *db, Sqlite3Storage *sl)
     }
     if(ret != SQLITE_OK)
     {
-        throw _StorageException(sl->getError(String((char *)buf), error, db));
+        throw _StorageException(nil, sl->getError(String((char *)buf), error, db));
     }
 }
 
@@ -357,7 +357,7 @@ void SLSelectTask::run(sqlite3 *db, Sqlite3Storage *sl)
     }
     if(ret != SQLITE_OK)
     {
-        throw _StorageException(sl->getError(String(query), error, db));
+        throw _StorageException(nil, sl->getError(String(query), error, db));
     }
     
     pres->row = pres->table;
@@ -391,7 +391,7 @@ void SLExecTask::run(sqlite3 *db, Sqlite3Storage *sl)
     }
     if(res != SQLITE_OK)
     {
-        throw _StorageException(sl->getError(String(query), error, db));
+        throw _StorageException(nil, sl->getError(String(query), error, db));
     }
     if (getLastInsertIdFlag)
         lastInsertId = sqlite3_last_insert_rowid(db);

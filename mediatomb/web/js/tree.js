@@ -297,12 +297,18 @@ function updateTree(ajaxRequest)
         return;
     }
     var type = xmlGetAttribute(containers, "type");
-    var parentId = type+xmlGetAttribute(containers, "ofId");
+    var ofId = xmlGetAttribute(containers, "ofId");
+    var parentId = type+ofId;
     
     var node = getTreeNode(parentId);
     var success = containers.getAttribute("success");
     if (! success || success != "1")
     {
+        if (ofId == '0')
+        {
+            alert("Oops, your database seems to be corrupt. Please report this problem.");
+            return;
+        }
         var parNode = node.getParent();
         parNode.childrenHaveBeenFetched=false;
         parNode.resetChildren();

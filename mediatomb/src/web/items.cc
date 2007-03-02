@@ -67,7 +67,7 @@ void web::items::process()
     {
         obj = storage->loadObject(parentID);
     }
-    catch (Exception e)
+    catch (ObjectNotFoundException e)
     {
         items->addAttribute(_("success"), _("0"));
         return;
@@ -83,7 +83,7 @@ void web::items::process()
     {
         arr = storage->browse(param);
     }
-    catch (Exception e)
+    catch (ObjectNotFoundException e)
     {
         items->addAttribute(_("success"), _("0"));
         return;

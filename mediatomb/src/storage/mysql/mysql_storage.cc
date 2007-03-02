@@ -173,21 +173,22 @@ void MysqlStorage::init()
         unsigned long uncompressed_size = MS_CREATE_SQL_INFLATED_SIZE;
         int ret = uncompress(buf, &uncompressed_size, mysql_create_sql, MS_CREATE_SQL_DEFLATED_SIZE);
         if (ret != Z_OK || uncompressed_size != MS_CREATE_SQL_INFLATED_SIZE)
-            throw _StorageException(_("Error while uncompressing mysql create sql. returned: ") + ret);
+            throw _Exception(_("Error while uncompressing mysql create sql. returned: ") + ret);
         buf[MS_CREATE_SQL_INFLATED_SIZE] = '\0';
         
         char *sql_start = (char *)buf;
         char *sql_end = strchr(sql_start, ';');
         if (sql_end == NULL)
         {
-            throw _StorageException(_("';' not found in mysql create sql"));
+            throw _Exception(_("';' not found in mysql create sql"));
         }
         do
         {
             ret = mysql_real_query(&db, sql_start, sql_end - sql_start);
             if (ret)
             {
-                throw _StorageException(_("Mysql: error while creating db: ") + getError(&db));
+                String myError = getError(&db);
+                throw _StorageException(myError, _("Mysql: error while creating db: ") + myError);
             }
             sql_start = sql_end + 1; // skip ';'
             if (*sql_start == '\n')  // skip newline
@@ -257,14 +258,16 @@ Ref<SQLResult> MysqlStorage::select(const char *query, int length)
     res = mysql_real_query(&db, query, length);
     if (res)
     {
-        throw _StorageException(_("Mysql: mysql_real_query() failed: ") + getError(&db) + "; query: " + query);
+        String myError = getError(&db);
+        throw _StorageException(myError, _("Mysql: mysql_real_query() failed: ") + myError + "; query: " + query);
     }
     
     MYSQL_RES *mysql_res;
     mysql_res = mysql_store_result(&db);
     if(! mysql_res)
     {
-        throw _StorageException(_("Mysql: mysql_store_result() failed: ") + getError(&db) + "; query: " + query);
+        String myError = getError(&db);
+        throw _StorageException(myError, _("Mysql: mysql_store_result() failed: ") + myError + "; query: " + query);
     }
     return Ref<SQLResult> (new MysqlResult(mysql_res));
 }
@@ -283,7 +286,8 @@ int MysqlStorage::exec(const char *query, int length, bool getLastInsertId)
     res = mysql_real_query(&db, query, length);
     if(res)
     {
-        throw _StorageException(_("Mysql: mysql_real_query() failed: ") + getError(&db) + "; query: " + query);
+        String myError = getError(&db);
+        throw _StorageException(myError, _("Mysql: mysql_real_query() failed: ") + myError + "; query: " + query);
     }
     int insert_id=-1;
     if (getLastInsertId) insert_id = mysql_insert_id(&db);

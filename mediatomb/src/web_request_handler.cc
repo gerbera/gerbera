@@ -136,7 +136,6 @@ Ref<IOHandler> WebRequestHandler::open(Ref<Dictionary> params, IN enum UpnpOpenF
                 handleUpdateIDs();
             }
         }
-        output = renderXMLHeader() + root->print();
     }
     catch (SessionException se)
     {
@@ -144,7 +143,11 @@ Ref<IOHandler> WebRequestHandler::open(Ref<Dictionary> params, IN enum UpnpOpenF
         //                    generate_random_id();
         
         root->appendTextChild(_("redirect"), _("/"));
-        output = renderXMLHeader() + root->print();
+    }
+    catch (StorageException e)
+    {
+        e.printStackTrace();
+        root->appendTextChild(_("error"), e.getUserMessage());
     }
     catch (Exception e)
     {
@@ -154,10 +157,11 @@ Ref<IOHandler> WebRequestHandler::open(Ref<Dictionary> params, IN enum UpnpOpenF
         // output = subrequest("error", par);
         String errmsg = _("Error: ") + e.getMessage();
         root->appendTextChild(_("error"), errmsg);
-        output = renderXMLHeader() + root->print();
     }
-    root = nil;
-
+    output = renderXMLHeader() + root->print();
+    
+    //root = nil;
+    
     Ref<MemIOHandler> io_handler(new MemIOHandler(output));
     io_handler->open(mode);
     return RefCast(io_handler, IOHandler);

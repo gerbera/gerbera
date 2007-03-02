@@ -34,8 +34,10 @@
 
 #include "zmmf/zmmf.h"
 
-#define _UpnpException(code, format) UpnpException(code, format, __FILE__, __LINE__, __func__)
-#define _StorageException(format) StorageException(format, __FILE__, __LINE__, __func__)
+#define EXCEPTION_DATA __FILE__, __LINE__, __func__
+#define _UpnpException(code, msg) UpnpException(code, msg, EXCEPTION_DATA)
+#define _StorageException(usermsg, debugmsg) StorageException(usermsg, debugmsg, EXCEPTION_DATA)
+#define _ObjectNotFoundException(msg) ObjectNotFoundException(msg, EXCEPTION_DATA)
 
 class UpnpException : public zmm::Exception
 {
@@ -49,10 +51,21 @@ public:
 
 class StorageException : public zmm::Exception
 {
+protected:
+    zmm::String userMessage;
 public:
-    inline StorageException(zmm::String message) : zmm::Exception(message) {}
-    inline StorageException(zmm::String message, const char *file, int line, const char* function) : 
-        zmm::Exception(message, file, line, function) {}
+    inline StorageException(zmm::String _userMessage, zmm::String message) : zmm::Exception(message) { userMessage = _userMessage; }
+    inline StorageException(zmm::String _userMessage, zmm::String message, const char *file, int line, const char* function) : 
+        zmm::Exception(message, file, line, function) { userMessage = _userMessage;  }
+    zmm::String getUserMessage() { return (userMessage != nil ? userMessage : message); } 
+};
+
+class ObjectNotFoundException : public StorageException
+{
+public:
+    inline ObjectNotFoundException(zmm::String message) : StorageException(message, message) {}
+    inline ObjectNotFoundException(zmm::String message, const char *file, int line, const char* function) :
+        StorageException(message, message, file, line, function) {}
 };
 
 #endif // __EXCEPTIONS_H__
