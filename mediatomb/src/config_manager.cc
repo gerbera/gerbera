@@ -397,6 +397,7 @@ void ConfigManager::validate(String serverhome)
         temp = _(DEFAULT_FILESYSTEM_CHARSET);
 #else
     temp = _(DEFAULT_FILESYSTEM_CHARSET);
+#endif      
     // check if the one we take as default is actually available
     try
     {
@@ -407,7 +408,6 @@ void ConfigManager::validate(String serverhome)
     {
         temp = _(DEFAULT_FALLBACK_CHARSET);
     }
-#endif      
     String charset = getOption(_("/import/filesystem-charset"), temp);
     try
     {
