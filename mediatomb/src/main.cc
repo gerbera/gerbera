@@ -29,6 +29,11 @@
 
 /// \file main.cc
 
+/// \mainpage Sourcecode Documentation.
+///
+/// This documentation was generated using doxygen, you can repdoruce it by 
+/// running "doxygen doxygen.conf" from the mediatomb/doc/ directory.
+
 #ifdef HAVE_CONFIG_H
     #include "autoconfig.h"
 #endif
