@@ -247,6 +247,138 @@ status open
 \end_layout
 
 \begin_layout Code
+orig.objectType
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+RW
+\end_layout
+
+\begin_layout Standard
+This defines the object type, following types are available:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+OBJECT_TYPE_CONTAINER
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+OBJECT_TYPE_ITEM
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+OBJECT_TYPE_ACTIVE_ITEM
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+OBJECT_TYPE_ITEM_EXTERNAL_URL
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+OBJECT_TYPE_ITEM_INTERNAL_URL
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
 orig.title
 \end_layout
 
@@ -265,7 +397,7 @@ This is the title of the original object, since the object represents an
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Standard
 
@@ -713,6 +845,13 @@ Constants
 \end_layout
 
 \begin_layout Standard
+Actually there are no such things as constants in JS, so those are actually
+ predefined global variables that are set during JS engine initialization.
+ Do not assign any values to them, otherwise following script invocation
+ will be using wrong values.
+\end_layout
+
+\begin_layout Standard
 \begin_inset ERT
 status open
 
@@ -899,7 +1038,7 @@ Value: object.item
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Standard
 
@@ -925,6 +1064,156 @@ Type: string
 
 \emph on
 Value: object.item.audioItem.musicTrack
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+OBJECT_TYPE_CONTAINER
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Type: integer
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Value: 1
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+OBJECT_TYPE_ITEM
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Type: integer
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Value: 2
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+OBJECT_TYPE_ACTIVE_ITEM
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Type: integer
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Value: 4
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+OBJECT_TYPE_ITEM_EXTERNAL_URL
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Type: integer
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Value: 8
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+OBJECT_TYPE_ITEM_INTERNAL_URL
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Type: integer
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Value: 16
 \end_layout
 
 \begin_layout Standard
@@ -1097,11 +1386,11 @@ status open
 \end_layout
 
 \begin_layout Code
-newObject copyObject(originalObject);
+copyObject(originalObject);
 \end_layout
 
 \begin_layout Standard
-This function creates a copy of the virtual object.
+This function returns a copy of the virtual object.
 \end_layout
 
 \begin_layout Standard

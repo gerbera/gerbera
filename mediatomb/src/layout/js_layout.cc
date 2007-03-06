@@ -629,6 +629,9 @@ void JSLayout::init()
                                    OBJECT_TYPE_ACTIVE_ITEM);
     js_set_int_property(cx, glob, "OBJECT_TYPE_ITEM_EXTERNAL_URL",
                                    OBJECT_TYPE_ITEM_EXTERNAL_URL);
+    js_set_int_property(cx, glob, "OBJECT_TYPE_ITEM_INTERNAL_URL",
+                                   OBJECT_TYPE_ITEM_INTERNAL_URL);
+
 
     for (int i = 0; i < M_MAX; i++)
     {
