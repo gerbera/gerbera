@@ -35,6 +35,8 @@
 
 #ifdef HAVE_MYSQL
 
+#define MYSQL_SET_NAMES "/*!40101 SET NAMES utf8 */"
+
 //#define MYSQL_SELECT_DEBUG
 //#define MYSQL_EXEC_DEBUG
 
@@ -147,6 +149,13 @@ void MysqlStorage::init()
     if(! res_mysql)
     {
         throw _Exception(_("The connection to the MySQL database has failed: ") + getError(&db));
+    }
+    
+    int res = mysql_real_query(&db, MYSQL_SET_NAMES, strlen(MYSQL_SET_NAMES));
+    if(res)
+    {
+        String myError = getError(&db);
+        throw _StorageException(nil, _("MySQL query 'SET NAMES' failed!"));
     }
     
     #ifdef HAVE_MYSQL_OPT_RECONNECT
