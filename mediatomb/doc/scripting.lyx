@@ -279,6 +279,10 @@ OBJECT_TYPE_CONTAINER
 \end_layout
 
 \begin_layout Standard
+Object is a container.
+\end_layout
+
+\begin_layout Standard
 \begin_inset ERT
 status collapsed
 
@@ -294,6 +298,10 @@ status collapsed
 
 \begin_layout Code
 OBJECT_TYPE_ITEM
+\end_layout
+
+\begin_layout Standard
+Object is an item.
 \end_layout
 
 \begin_layout Standard
@@ -315,6 +323,10 @@ OBJECT_TYPE_ACTIVE_ITEM
 \end_layout
 
 \begin_layout Standard
+Object is an active item.
+\end_layout
+
+\begin_layout Standard
 \begin_inset ERT
 status collapsed
 
@@ -333,6 +345,10 @@ OBJECT_TYPE_ITEM_EXTERNAL_URL
 \end_layout
 
 \begin_layout Standard
+Object is a link to a resouce on the internet.
+\end_layout
+
+\begin_layout Standard
 \begin_inset ERT
 status collapsed
 
@@ -348,6 +364,10 @@ status collapsed
 
 \begin_layout Code
 OBJECT_TYPE_ITEM_INTERNAL_URL
+\end_layout
+
+\begin_layout Standard
+Object is an internal link.
 \end_layout
 
 \begin_layout Standard
@@ -1428,6 +1448,560 @@ status open
 \end_inset
 
 
+\end_layout
+
+\begin_layout Section
+Walkthrough
+\end_layout
+
+\begin_layout Standard
+Now it is time to take a closer look at the default import script that is
+ supplied with MediaTomb.
+ Usually it is installed in the /usr/share/mediatomb/js/import.js directory,
+ but you will also find it in scripts/js/import.js in the MediaTomb source
+ tree.
+\end_layout
+
+\begin_layout Description
+Note: this is not a JavaScript tutorial, if you are new to JS you should
+ probably make yourself familiar with the language.
+\end_layout
+
+\begin_layout Subsection
+Helper Functions
+\end_layout
+
+\begin_layout Standard
+At the beginning of the script we define a couple of helper functions that
+ we will use later on.
+\end_layout
+
+\begin_layout Standard
+The first function escapes slash '/' characters in a string.
+ This is necessary, because the container chain is defined by a slash separated
+ string, where slash has a special meaning - it defines the container hierarchy.
+ That means, that slashes that appear in the object's title need to be properly
+ escaped.
+\end_layout
+
+\begin_layout Code
+function escapeSlash(name) 
+\end_layout
+
+\begin_layout Code
+{     
+\end_layout
+
+\begin_layout Code
+    name = name.replace(/
+\backslash
+
+\backslash
+/g, "
+\backslash
+
+\backslash
+
+\backslash
+
+\backslash
+");
+\end_layout
+
+\begin_layout Code
+    name = name.replace(/
+\backslash
+//g, "
+\backslash
+
+\backslash
+/");
+\end_layout
+
+\begin_layout Code
+    return name; 
+\end_layout
+
+\begin_layout Code
+}
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Standard
+The following function makes it easier to work with container chains; it
+ takes an array of container names as argument, makes sure that the names
+ are properly escaped and adds the slash separators as necessary.
+ It returns a string that is formatted to be used as a parameter for the
+ addCdsObject function.
+\end_layout
+
+\begin_layout Code
+function createContainerChain(arr) 
+\end_layout
+
+\begin_layout Code
+{
+\end_layout
+
+\begin_layout Code
+    var path = '';     for (var i = 0; i < arr.length; i++)
+\end_layout
+
+\begin_layout Code
+    {
+\end_layout
+
+\begin_layout Code
+        path = path + '/' + escapeSlash(arr[i]);     
+\end_layout
+
+\begin_layout Code
+    }
+\end_layout
+
+\begin_layout Code
+    return path; 
+\end_layout
+
+\begin_layout Code
+}
+\end_layout
+
+\begin_layout Standard
+I just realized, that this may not be what we want...
+ TODO Jin!!!
+\end_layout
+
+\begin_layout Code
+function normalizeDate(date) 
+\end_layout
+
+\begin_layout Code
+{
+\end_layout
+
+\begin_layout Code
+    var matches = date.match(/([0-9]+)-01-01/);
+\end_layout
+
+\begin_layout Code
+    if (matches)
+\end_layout
+
+\begin_layout Code
+        return matches[1];
+\end_layout
+
+\begin_layout Code
+    else
+\end_layout
+
+\begin_layout Code
+        return date;
+\end_layout
+
+\begin_layout Code
+}
+\end_layout
+
+\begin_layout Standard
+Next, let's look at the functions that organize our content in the database
+ by creating the virtual structure.
+ Each media type - audio, image and video is handled by a separate function.
+\end_layout
+
+\begin_layout Standard
+The biggest one is the function that handles audio - the reason is simple:
+ mp3 files offer a lot of metadata like album, artist, genre, etc.
+ information, this allows us to create a nice container layout.
+\end_layout
+
+\begin_layout Code
+function addAudio(obj) 
+\end_layout
+
+\begin_layout Code
+{
+\end_layout
+
+\begin_layout Code
+    var desc = '';
+\end_layout
+
+\begin_layout Code
+    var artist_full;
+\end_layout
+
+\begin_layout Code
+    var album_full;
+\end_layout
+
+\begin_layout Standard
+First we will gather all the metadata that is provided by our object, of
+ course it is possible that some fields are empty - we will have to check
+ that to make sure that we handle this case correctly.
+     
+\end_layout
+
+\begin_layout Code
+    var title = obj.meta[M_TITLE];
+\end_layout
+
+\begin_layout Standard
+Note the difference between obj.title and obj.meta[M_TITLE] - while object.title
+ will originally be set to the filename, obj.meta[M_TITLE] will contain the
+ parsed title - in this particular example the ID3 title of an MP3.
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+    if (!title) title = obj.title;
+\end_layout
+
+\begin_layout Code
+    var artist = obj.meta[M_ARTIST];
+\end_layout
+
+\begin_layout Code
+    if (!artist)
+\end_layout
+
+\begin_layout Code
+    {
+\end_layout
+
+\begin_layout Code
+        artist = 'Unknown';
+\end_layout
+
+\begin_layout Code
+        artist_full = null;
+\end_layout
+
+\begin_layout Code
+    }
+\end_layout
+
+\begin_layout Code
+    else
+\end_layout
+
+\begin_layout Code
+    {
+\end_layout
+
+\begin_layout Code
+        artist_full = artist;
+\end_layout
+
+\begin_layout Code
+        desc = artist;
+\end_layout
+
+\begin_layout Code
+    }
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+   var album = obj.meta[M_ALBUM];
+\end_layout
+
+\begin_layout Code
+   if (!album)
+\end_layout
+
+\begin_layout Code
+    {   
+\end_layout
+
+\begin_layout Code
+        album = 'Unknown';
+\end_layout
+
+\begin_layout Code
+        album_full = null;
+\end_layout
+
+\begin_layout Code
+    }
+\end_layout
+
+\begin_layout Code
+    else
+\end_layout
+
+\begin_layout Code
+    {
+\end_layout
+
+\begin_layout Code
+        desc = desc + ', ' + album;
+\end_layout
+
+\begin_layout Code
+        album_full = album;
+\end_layout
+
+\begin_layout Code
+    }
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+    if (desc)
+\end_layout
+
+\begin_layout Code
+        desc = desc + ', ';
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+    desc = desc + title;
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+    var date = obj.meta[M_DATE];
+\end_layout
+
+\begin_layout Code
+    if (!date)
+\end_layout
+
+\begin_layout Code
+    {
+\end_layout
+
+\begin_layout Code
+        date = 'Unknown';
+\end_layout
+
+\begin_layout Code
+    }
+\end_layout
+
+\begin_layout Code
+    else
+\end_layout
+
+\begin_layout Code
+    {
+\end_layout
+
+\begin_layout Code
+        date = normalizeDate(date);
+\end_layout
+
+\begin_layout Code
+        desc = desc + ', ' + date;
+\end_layout
+
+\begin_layout Code
+    }
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+    var genre = obj.meta[M_GENRE];
+\end_layout
+
+\begin_layout Code
+    if (!genre)
+\end_layout
+
+\begin_layout Code
+    {
+\end_layout
+
+\begin_layout Code
+        genre = 'Unknown';
+\end_layout
+
+\begin_layout Code
+    }
+\end_layout
+
+\begin_layout Code
+    else
+\end_layout
+
+\begin_layout Code
+    {
+\end_layout
+
+\begin_layout Code
+        desc = desc + ', ' + genre;
+\end_layout
+
+\begin_layout Code
+    }
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+    var description = obj.meta[M_DESCRIPTION];
+\end_layout
+
+\begin_layout Code
+    if (!description)
+\end_layout
+
+\begin_layout Code
+    {
+\end_layout
+
+\begin_layout Standard
+Note how we are setting properties of an object - in this case we put together
+ a description and we are setting for objects that did not already have
+ one.
+\end_layout
+
+\begin_layout Code
+        obj.meta[M_DESCRIPTION] = desc;
+\end_layout
+
+\begin_layout Code
+    }
+\end_layout
+
+\begin_layout Standard
+We finally gathered all data that we need, so let's create a nice layout
+ for our audio files.
+ Note how we are constructing the chain, in the line below the array 'chain'
+ will be converted to 'Audio/All audio' by the createContainerChain() function.
+\end_layout
+
+\begin_layout Code
+    var chain = new Array('Audio', 'All audio');
+\end_layout
+
+\begin_layout Code
+    obj.title = title;
+\end_layout
+
+\begin_layout Standard
+The UPnP class argument to addCdsObject() is optional, if it is not supplied
+ the default UPnP class will be used.
+ However, it is suggested to correctly set UPnP classes of containers and
+ object - this information may be used by some renderers to identify the
+ type of the container and present the content in a different manner .
+\end_layout
+
+\begin_layout Code
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC);
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+    chain = new Array('Audio', 'Artists', artist, 'All songs');
+\end_layout
+
+\begin_layout Code
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC);
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+    chain = new Array('Audio', 'All - full name');
+\end_layout
+
+\begin_layout Code
+    var temp = '';
+\end_layout
+
+\begin_layout Code
+    if (artist_full)
+\end_layout
+
+\begin_layout Code
+        temp = artist_full;
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+    if (album_full)
+\end_layout
+
+\begin_layout Code
+        temp = temp + ' - ' + album_full + ' - ';
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+    obj.title = temp + title;
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC);
+\end_layout
+
+\begin_layout Code
+    chain = new Array('Audio', 'Artists', artist, 'All - full name');  
+   addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC);
+\end_layout
+
+\begin_layout Code
+    chain = new Array('Audio', 'Artists', artist, album);     obj.title =
+ track + title;     addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CO
+NTAINER_MUSIC_ALBUM);
+\end_layout
+
+\begin_layout Code
+    chain = new Array('Audio', 'Albums', album);     obj.title = track +
+ title;     addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_
+MUSIC_ALBUM);
+\end_layout
+
+\begin_layout Code
+    chain = new Array('Audio', 'Genres', genre);     addCdsObject(obj, createCon
+tainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_GENRE);
+\end_layout
+
+\begin_layout Code
+    chain = new Array('Audio', 'Year', date);     addCdsObject(obj, createContai
+nerChain(chain), UPNP_CLASS_CONTAINER_MUSIC); } 
 \end_layout
 
 \end_body

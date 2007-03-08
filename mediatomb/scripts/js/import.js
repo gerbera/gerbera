@@ -109,7 +109,7 @@ function addAudio(obj)
         track = track + ' ';
     }
 */
-    // comment this out if you uncomment the stuff above  :)
+    // comment the following line out if you uncomment the stuff above  :)
     var track = '';
 
     var chain = new Array('Audio', 'All audio');
@@ -120,7 +120,7 @@ function addAudio(obj)
     addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC);
     
     chain = new Array('Audio', 'All - full name');
-    temp = '';
+    var temp = '';
     if (artist_full)
         temp = artist_full;
     
