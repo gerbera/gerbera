@@ -331,9 +331,10 @@ membuffer_assign( INOUT membuffer * m,
         return return_code;
     }
     // copy
-    memcpy( m->buf, buf, buf_len );
-    m->buf[buf_len] = 0;        // null-terminate
-
+    if( buf_len ) {
+        memcpy( m->buf, buf, buf_len );
+        m->buf[buf_len] = 0;        // null-terminate
+    }
     m->length = buf_len;
 
     return 0;
