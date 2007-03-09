@@ -1,0 +1,242 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+"http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
+<refentry>
+    <refentryinfo>
+        <productname>MediaTomb 0.9.0</productname>
+        <address>contact@mediatomb.cc</address>
+        <author>
+            <firstname>Sergey</firstname>
+            <surname>Bostandzhyan</surname>
+        </author>
+        <author>
+            <firstname>Leonhard</firstname>
+            <surname>Wimmer</surname>
+        </author>
+        <copyright>
+            <year>2005</year>
+            <holder>Gena Batsyan</holder>
+            <holder>Sergey Bostandzhyan</holder>
+        </copyright>
+        <copyright>
+            <year>2006-2007</year>
+            <holder>Gena Batsyan</holder>
+            <holder>Sergey Bostandzhyan</holder>
+            <holder>Leonhard Wimmer</holder>
+        </copyright>
+        <date>2007-03-09</date>
+    </refentryinfo>
+    <refmeta>
+        <refentrytitle>MEDIATOMB</refentrytitle>
+        <manvolnum>1</manvolnum>
+    </refmeta>
+    <refnamediv>
+        <refname>mediatomb</refname>
+        <refpurpose>UPnP MediaServer</refpurpose>
+    </refnamediv>
+    <refsynopsisdiv>
+        <cmdsynopsis>
+            <command>mediatomb</command>
+
+            <arg>
+                <option>-i <replaceable>IP address</replaceable>
+                </option>
+            </arg>
+
+            <arg>
+                <option>-p <replaceable>port</replaceable>
+                </option>
+            </arg>
+
+            <arg>
+                <option>-c <replaceable>config file</replaceable>
+                </option>
+            </arg>
+
+            <arg>
+                <option>-d</option>
+            </arg>
+
+            <arg>
+                <option>-P <replaceable>PID file</replaceable>
+                </option>
+            </arg>
+
+            <arg>
+                <option>-u <replaceable>user</replaceable>
+                </option>
+            </arg>
+
+            <arg>
+                <option>-g <replaceable>group</replaceable>
+                </option>
+            </arg>
+
+            <arg>
+                <option>-a <replaceable>path</replaceable>
+                </option>
+            </arg>
+
+            <arg>
+                <option>-l <replaceable>logfile</replaceable>
+                </option>
+            </arg>
+
+            <arg>
+                <option>-h</option>
+            </arg>
+
+        </cmdsynopsis>
+    </refsynopsisdiv>
+    <refsect1>
+        <title>DESCRIPTION</title>
+
+        <para>This manual page describes the command line parameters for
+        MediaTomb. For a detailed documentation please see the README file which
+        is distributed with MediaTomb or visit http://mediatomb.cc/.</para>
+    </refsect1>
+    <refsect1>
+        <title>OPTIONS</title>
+
+        <variablelist>
+
+            <varlistentry>
+                <term>
+                    <option>-i</option>,
+                    <option>--ip</option>
+                </term>
+                <listitem>
+                    <para>The server will bind to the given IP address, currently we can not bind to
+                    multiple interfaces so binding to 0.0.0.0 will not be possible.</para>
+                </listitem>
+            </varlistentry>
+
+
+            <varlistentry>
+                <term>
+                    <option>-p</option>,
+                    <option>--port</option>
+                </term>
+                <listitem>
+                    <para>Specify the server port that will be used for the web user interface, for
+                    serving media and for UPnP requests, minimum allowed value is 49152. If this
+                    option is omitted a default port will be chosen, however, in this case it is
+                    possible that the port will change upon server restart.</para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>
+                    <option>-c</option>,
+                    <option>--config</option>
+                </term>
+                <listitem>
+                    <para>By default MediaTomb will search for a file named "config.xml" in the ~/.mediatomb directory. This option allows you to specify a config file by the
+                    name and location of your choice. The file name must be absolute.</para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>
+                    <option>-d</option>,
+                    <option>--daemon</option>
+                </term>
+                <listitem>
+                    <para>Run the server in background, MediaTomb will shutdown on SIGTERM, SIGINT and
+                    restart on SIGHUP.</para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>
+                    <option>-P</option>,
+                    <option>--pidfile</option>
+                </term>
+                <listitem>
+                    <para>Specify a file that will hold the server process ID, the filename must be
+                    absolute.</para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>
+                    <option>-u</option>,
+                    <option>--user</option>
+                </term>
+                <listitem>
+                    <para>Run MediaTomb under the specified user name, this is especially useful in
+                    combination with the daemon mode.</para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>
+                    <option>-g</option>,
+                    <option>--group</option>
+                </term>
+                <listitem>
+                    <para>Run MediaTomb under the specified group, this is especially useful in
+                    combination with the daemon mode.</para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>
+                    <option>-a</option>,
+                    <option>--add</option>
+                </term>
+                <listitem>
+                    <para>Add the specified directory or file name to the database without UI
+                    interaction. The path must be absolute, if path is a directory then it will be
+                    added recursively. If path is a file, then only the given file will be
+                    imported.</para>
+                </listitem>
+            </varlistentry>
+
+
+            <varlistentry>
+                <term>
+                    <option>-l</option>,
+                    <option>--logfile</option>
+                </term>
+                <listitem>
+                    <para>Do not output log messages to stdout, but redirect everything to a specified
+                    file.</para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>
+                    <option>-h</option>,
+                    <option>--help</option>
+                </term>
+                <listitem>
+                    <para>Print a summary about the available command line options.</para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+    </refsect1>
+    <refsect1>
+        <title>COPYRIGHT</title>
+        <para>This manual page is part of MediaTomb.</para>
+        <variablelist>
+            <varlistentry>
+                <term>Copyright (C) 2005 by</term>
+                <listitem>
+                    <para>Gena Batsyan, Sergey Bostandzhyan</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>Copyright (C) 2006-2008 by</term>
+                <listitem>
+                    <para>Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer</para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+
+        <para>Permission is granted to copy, distribute and/or modify this document under
+      the terms of the <acronym>GNU</acronym> General Public License version 2 as published by the Free Software Foundation.</para>
+
+    </refsect1>
+</refentry>
+
