@@ -1,6 +1,7 @@
 
 _DIST_FILES = \
-	doxygen.conf
+	doxygen.conf \
+    mediatomb.1
 
 EXTRA_DIST = $(_DIST_FILES)
 
