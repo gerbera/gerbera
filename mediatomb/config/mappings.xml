@@ -18,5 +18,11 @@
         <map from="video/*" to="object.item.videoItem"/>
         <map from="image/*" to="object.item.imageItem"/>
     </mimetype-upnpclass>
+    <mimetype-contenttype>
+        <treat mimetype="audio/mpeg" as="mp3"/>
+        <treat mimetype="application/ogg" as="ogg"/>
+        <treat mimetype="audio/x-flac" as="flac"/>
+        <treat mimetype="image/jpeg" as="jpg"/>
+    </mimetype-contenttype>
 </mappings>
 
