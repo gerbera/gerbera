@@ -37,6 +37,7 @@
 #include "metadata_handler.h"
 #include "string_converter.h"
 #include "tools.h"
+#include "config_manager.h"
 
 #ifdef HAVE_EXIV2
 #include "metadata/exiv2_handler.h"
@@ -103,20 +104,22 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
     item->addResource(resource);
 
     Ref<MetadataHandler> handler;
+    Ref<Dictionary> mappings = ConfigManager::getInstance()->getMimeToContentTypeMappings();
+
+    String content_type = mappings->get(mimetype);
     do
     {
-        /// \todo what about mappings here? what if audio/mpeg was remapped to some crap in the config file?
 #ifdef HAVE_TAGLIB
-        if ((mimetype == "audio/mpeg") || 
-            (mimetype == "application/ogg") || 
-            (mimetype == "audio/x-flac"))
+        if ((content_type == CONTENT_TYPE_MP3) || 
+            (content_type == CONTENT_TYPE_OGG) || 
+            (content_type == CONTENT_TYPE_FLAC))
         {
             handler = Ref<MetadataHandler>(new TagHandler());
             break;
         }
 #else
 #ifdef HAVE_ID3
-        if (mimetype == "audio/mpeg")
+        if (content_type == CONTENT_TYPE_MP3)
         {
             handler = Ref<MetadataHandler>(new Id3Handler());
             break;
@@ -128,7 +131,7 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
 
 #ifdef HAVE_EXIV2
 /*        
-          if (mimetype == "image/jpeg")
+          if (content_type == CONTENT_TYPE_JPG)
           {
           handler = Ref<MetadataHandler>(new Exiv2Handler());
           break;
@@ -137,7 +140,7 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
 #endif
 
 #ifdef HAVE_EXIF
-        if (mimetype == "image/jpeg")
+        if (content_type == CONTENT_TYPE_JPG)
         {
             handler = Ref<MetadataHandler>(new LibExifHandler());
             break;
@@ -145,7 +148,7 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
 #else
         
 #ifndef HAVE_EXTRACTOR
-        if (mimetype == "image/jpeg")
+        if (content_type == CONTENT_TYPE_JPG)
         {
             set_jpeg_resolution_resource(item, 0);
         }

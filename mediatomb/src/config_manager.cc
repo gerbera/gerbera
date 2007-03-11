@@ -42,6 +42,7 @@
 #include <sys/stat.h>
 #include "tools.h"
 #include "string_converter.h"
+#include "metadata_handler.h"
 
 #if defined(HAVE_LANGINFO_H) && defined(HAVE_LOCALE_H)
     #include <langinfo.h>
@@ -385,6 +386,26 @@ void ConfigManager::validate(String serverhome)
 
     getOption(_("/import/mappings/extension-mimetype/attribute::ignore-unknown"),
               _(DEFAULT_IGNORE_UNKNOWN_EXTENSIONS));
+
+    Ref<Element> tmpEl;
+    tmpEl = getElement(_("/import/mappings/mimetype-contenttype"));
+    if (tmpEl != nil)
+    {
+        mime_content = createDictionaryFromNodeset(tmpEl, _("treat"), 
+                       _("mimetype"), _("as"));
+        if (mime_content == nil)
+        {
+            mime_content = Ref<Dictionary>(new Dictionary());
+        }
+    }
+    else
+    {
+        mime_content = Ref<Dictionary>(new Dictionary());
+        mime_content->put(_("audio/mpeg"), _(CONTENT_TYPE_MP3));
+        mime_content->put(_("application/ogg"), _(CONTENT_TYPE_OGG));
+        mime_content->put(_("audio/x-flac"), _(CONTENT_TYPE_FLAC));
+        mime_content->put(_("image/jpeg"), _(CONTENT_TYPE_JPG));
+    }
 
 #if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
     if (setlocale(LC_ALL, "") != NULL)
@@ -982,4 +1003,9 @@ Ref<Array<StringBase> > ConfigManager::createArrayFromNodeset(Ref<mxml::Element>
     }
 
     return arr;
+}
+
+Ref<Dictionary> ConfigManager::getMimeToContentTypeMappings()
+{
+    return mime_content;
 }

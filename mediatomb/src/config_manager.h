@@ -129,7 +129,9 @@ public:
     zmm::Ref<zmm::Array<zmm::StringBase> > createArrayFromNodeset(zmm::Ref<mxml::Element> element, zmm::String nodeName, zmm::String attrName); 
     
     static void setStaticArgs(zmm::String filename, zmm::String userhome);
-    
+   
+    zmm::Ref<Dictionary> getMimeToContentTypeMappings();
+
 protected:
     // creates a default config.xml file with the most necessary entries and returns the path
     zmm::String createDefaultConfig(zmm::String userhome);
@@ -143,6 +145,8 @@ protected:
     static zmm::String filename;
     static zmm::String userhome;
     zmm::Ref<mxml::Element> root;
+
+    zmm::Ref<Dictionary> mime_content;
 };
 
 #endif // __CONFIG_MANAGER_H__

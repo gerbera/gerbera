@@ -41,6 +41,11 @@
 #define CH_DEFAULT 0
 #define CH_LIBEXIF 1
 
+#define CONTENT_TYPE_MP3    "mp3"
+#define CONTENT_TYPE_OGG    "ogg"
+#define CONTENT_TYPE_FLAC   "flac"
+#define CONTENT_TYPE_JPG    "jpg"
+
 typedef enum
 {
     M_TITLE = 0,

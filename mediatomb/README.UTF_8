@@ -1481,6 +1481,61 @@ Child tags:
             "audio/mpeg" or using a wildcard after the slash "audio/*". The
             values of "from" and "to" attributes are case sensitive.
 
+      ○ <mimetype-contenttype>
+
+        Optional
+
+        This section makes sure that the server knows about remapped mimetypes
+        and still extracts the metadata correctly. For example, we know that
+        id3lib can only handle mp3 files, the default mimetype of mp3 content
+        is audio/mpeg. If the user remaps mp3 files to a different mimetype, we
+        must know about it so we can still pass this item to id3lib for
+        metadata extraction.
+
+        Note:
+
+            if this section is not present in your config file, the defaults
+            will be filled in automatically. However, if you add an empty tag,
+            without defining the following <treat> tags, the server will assume
+            that you want to have an empty list and no files will be process by
+            the metadata handler.
+
+          □ <treat mimetype="audio/mpeg" as="mp3"/>
+
+            Optional
+
+            Tells the server what content the specified mimetype actually is.
+
+            The 'as' attribute can have following values:
+
+              ● mp3
+
+                Default mimetype: audio/mpeg
+
+                The content is an mp3 file and should be processed by either
+                id3lib or taglib (if available).
+
+              ● ogg
+
+                Default mimetype: application/ogg
+
+                The content is an ogg file and should be processed by taglib
+                (if available).
+
+              ● flac
+
+                Default mimetype: audio/x-flac
+
+                The content is a flac file and should be processed by taglib
+                (if available).
+
+              ● jpg
+
+                Default mimetype: image/jpeg
+
+                The content is a jpeg image and should be processed by libexif
+                (if available).
+
   ● <library-options>
 
     Optional

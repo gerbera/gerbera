@@ -1,4 +1,4 @@
-#LyX 1.4.3 created this file. For more info see http://www.lyx.org/
+#LyX 1.4.4 created this file. For more info see http://www.lyx.org/
 \lyxformat 245
 \begin_document
 \begin_header
@@ -4394,6 +4394,220 @@ Specifies a mapping from a certain mime type to upnp:class in the Content
  The mime type can either be entered explicitly "audio/mpeg" or using a
  wildcard after the slash "audio/*".
  The values of "from" and "to" attributes are case sensitive.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<mimetype-contenttype>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+This section makes sure that the server knows about remapped mimetypes and
+ still extracts the metadata correctly.
+ For example, we know that id3lib can only handle mp3 files, the default
+ mimetype of mp3 content is audio/mpeg.
+ If the user remaps mp3 files to a different mimetype, we must know about
+ it so we can still pass this item to id3lib for metadata extraction.
+\end_layout
+
+\begin_layout Description
+Note: if this section is not present in your config file, the defaults will
+ be filled in automatically.
+ However, if you add an empty tag, without defining the following <treat>
+ tags, the server will assume that you want to have an empty list and no
+ files will be process by the metadata handler.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<treat mimetype="audio/mpeg" as="mp3"/>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+Tells the server what content the specified mimetype actually is.
+\end_layout
+
+\begin_layout Standard
+The 'as' attribute can have following values:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+mp3
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default mimetype: audio/mpeg
+\end_layout
+
+\begin_layout Standard
+The content is an mp3 file and should be processed by either id3lib or taglib
+ (if available).
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+ogg
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default mimetype: application/ogg
+\end_layout
+
+\begin_layout Standard
+The content is an ogg file and should be processed by taglib (if available).
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+flac
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default mimetype: audio/x-flac
+\end_layout
+
+\begin_layout Standard
+The content is a flac file and should be processed by taglib (if available).
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+jpg
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default mimetype: image/jpeg
+\end_layout
+
+\begin_layout Standard
+The content is a jpeg image and should be processed by libexif (if available).
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
