@@ -432,7 +432,7 @@ AC_HELP_STRING([--disable-fseeko-check],
 ###############################################################################
 # The following block is derived from the configure.ac script from the 
 # libupnp-1.3.1 package
-# (C) Copyright 2005-2006 RИmi Turboult <r3mi@users.sourceforge.net>
+# (C) Copyright 2005-2006 R�Иmi Turboult <r3mi@users.sourceforge.net>
 upnpmaj=0
 upnpmin=4
 upnppatch=1
@@ -460,7 +460,7 @@ AC_CHECK_HEADERS([syslog.h stddef.h unistd.h arpa/inet.h fcntl.h], [],
 AC_CHECK_HEADERS([limits.h netdb.h netinet/in.h stdlib.h string.h sys/file.h],
                  [],
                  [AC_MSG_ERROR(required header not found)]) 
-AC_CHECK_HEADERS([sys/ioctl.h sys/socket.h sys/time.h sys/types.h pthread.h],
+AC_CHECK_HEADERS([sys/ioctl.h sys/socket.h sys/time.h sys/types.h],
                  [],
                  [AC_MSG_ERROR(required header not found)]) 
 
@@ -749,7 +749,10 @@ AC_CHECK_FUNCS([if_freenameindex],[],
 AC_DEFINE([UPNP_HAVE_DEVICE], [1], [Compile device API])
 AC_DEFINE([UPNP_HAVE_WEBSERVER], [1], [Compile internal web server])    
 
-AC_CHECK_LIB(pthread, pthread_mutex_lock,[], [AC_MSG_ERROR(required library function not found)])    
+# see acinclude.m4 for the definition of ACX_PTHREAD
+ACX_PTHREAD(,AC_MSG_ERROR(POSIX threads missing))
+AC_SUBST(PTHREAD_LIBS)
+AC_SUBST(PTHREAD_CFLAGS)
 
 LIBS_SAVE="$LIBS"
 unset LIBS
