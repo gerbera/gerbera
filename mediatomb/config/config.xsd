@@ -300,6 +300,7 @@
         <xs:complexType>
             <xs:all>
                 <xs:element ref="extension-mimetype" minOccurs="0"/>
+                <xs:element ref="mimetype-contenttype" minOccurs="0"/>
                 <xs:element ref="mimetype-upnpclass" minOccurs="0"/>
             </xs:all>
         </xs:complexType>
@@ -314,6 +315,22 @@
         </xs:complexType>
     </xs:element>
 
+    <xs:element name="mimetype-contenttype">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="treat" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="ignore-unknown" type="boolean" default="no"/>
+        </xs:complexType>
+    </xs:element>
+    
+    <xs:element name="treat">
+        <xs:complexType>
+            <xs:attribute name="mimetype" type="xs:string" use="required"/>
+            <xs:attribute name="as" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    
     <xs:element name="mimetype-upnpclass">
         <xs:complexType>
             <xs:sequence>
