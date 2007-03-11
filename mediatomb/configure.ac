@@ -1778,7 +1778,7 @@ if test "x$TAGLIB_OK" = xyes; then
         AC_MSG_CHECKING(taglib libraries)
         TAGLIB_LIBS=`${taglibconfig} --libs`
         AC_MSG_RESULT($TAGLIB_LIBS)
-        TAGLIB_LIBS="$TALIB_LIBS $Z_LIBS"
+        TAGLIB_LIBS="$TAGLIB_LIBS $Z_LIBS"
     fi
 fi
 
@@ -1842,7 +1842,7 @@ if test "x$EXTRACTOR_OK" = xyes; then
             [],
             [
                 unset ac_cv_header_extractor_h
-                AC_CHECK_HEADER($SEARCH_DIR_HEADERS/extrator.h,
+                AC_CHECK_HEADER($SEARCH_DIR_HEADERS/extractor.h,
                     [ EXTRACTOR_CXXFLAGS="-I$SEARCH_DIR_HEADERS" ],
                     [ EXTRACTOR_OK=missing ]
                 )
