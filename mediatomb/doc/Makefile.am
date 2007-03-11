@@ -4,4 +4,5 @@ _DIST_FILES = \
 
 EXTRA_DIST = $(_DIST_FILES)
 
+man_MANS=mediatomb.1
 
