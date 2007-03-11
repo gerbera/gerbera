@@ -1733,6 +1733,8 @@ CPPFLAGS="$CPPFLAGS_SAVE"
 ######## taglib
 
 TAGLIB_PROG_FOUND=0
+TAGLIB_LIBS=
+TAGLIB_CFLAGS=
 if test "x$TAGLIB_OK" = xyes; then
     if test -n "$TAGLIB_SEARCH_CONFIG"; then
         AC_MSG_NOTICE([You specified $TAGLIB_SEARCH_CONFIG for taglib-config])
@@ -1840,8 +1842,8 @@ if test "x$EXTRACTOR_OK" = xyes; then
             [],
             [
                 unset ac_cv_header_extractor_h
-                AC_CHECK_HEADER($SEARCH_DIR_INCLUDES/extrator.h,
-                    [ EXTRACTOR_CXXFLAGS="-I$SEARCH_DIR_INCLUDES" ],
+                AC_CHECK_HEADER($SEARCH_DIR_HEADERS/extrator.h,
+                    [ EXTRACTOR_CXXFLAGS="-I$SEARCH_DIR_HEADERS" ],
                     [ EXTRACTOR_OK=missing ]
                 )
             ]
