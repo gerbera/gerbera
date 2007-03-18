@@ -66,7 +66,7 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
 
     String link = String((char *) filename);
 
-//    log_debug("Filename: %s, Path: %s\n", filename, path.c_str());
+    log_debug("Filename: %s, Path: %s\n", filename, path.c_str());
 //    log_debug("create_handler: got url parameters: [%s]\n", parameters.c_str());
     
     RequestHandler *ret = NULL;
@@ -90,7 +90,8 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
     else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" +
                              CONTENT_UI_HANDLER))
     {  
-        RequestHandler::split_url(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
+        RequestHandler::split_url(filename, URL_UI_PARAM_SEPARATOR, path, 
+                parameters, false);
         Ref<Dictionary> dict(new Dictionary());
         dict->decode(parameters);
         

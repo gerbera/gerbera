@@ -1318,7 +1318,9 @@ process_request( IN http_message_t * req,
             pVirtualDirCallback = &virtualDirCallback;
             if( req->method == HTTPMETHOD_GET ) 
             {
-                *Fp = pVirtualDirCallback->open( filename->buf, &finfo, UPNP_READ );
+                // use urlbuf instead of filename, because the filename 
+                // is already unescaped, but we want the escaped version
+                *Fp = pVirtualDirCallback->open( req->urlbuf, &finfo, UPNP_READ );
                 if( *Fp == NULL )
                 {
                     err_code = HTTP_NOT_FOUND;
@@ -1327,7 +1329,10 @@ process_request( IN http_message_t * req,
             }
             else
             {
-                if( pVirtualDirCallback->get_info( filename->buf, &finfo ) !=
+                // use urlbuf instead of filename, because the filename 
+                // is already unescaped, but we want the escaped version
+
+                if( pVirtualDirCallback->get_info( req->urlbuf, &finfo ) !=
                         0 ) {
                     err_code = HTTP_NOT_FOUND;
                     goto error_handler;

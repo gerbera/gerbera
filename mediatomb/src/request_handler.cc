@@ -38,11 +38,15 @@
 
 using namespace zmm;
 
-void RequestHandler::split_url(const char *url, char separator, String &path, String &parameters)
+void RequestHandler::split_url(const char *url, char separator, String &path, String &parameters, bool force_amp_unescape)
 {
     int i1;
 
-    String url_s = unescape_amp(String(url));
+    String url_s;
+    if (force_amp_unescape)
+        url_s = unescape_amp(String(url));
+    else
+        url_s = String(url);
 
     if (separator == '/')
         i1 = url_s.rindex(separator);
@@ -51,7 +55,6 @@ void RequestHandler::split_url(const char *url, char separator, String &path, St
     else
         throw _Exception(_("Forbidden separator: " + separator));
 
-    url_s = url_unescape(url_s);
 
 
     if (i1 < 0)
@@ -66,18 +69,4 @@ void RequestHandler::split_url(const char *url, char separator, String &path, St
     }
 }
 
-
-RequestHandler::RequestHandler() : zmm::Object()
-{
-}
-
-void RequestHandler::get_info(IN const char *filename, OUT struct File_Info *info)
-{
-
-}
-Ref<IOHandler> RequestHandler::open(IN const char *filename, OUT struct File_Info *info,
-        IN enum UpnpOpenFileMode mode)
-{
-    return nil;
-}
 

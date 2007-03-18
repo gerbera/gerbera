@@ -39,10 +39,11 @@
 class RequestHandler : public zmm::Object
 {
 public:
-    RequestHandler();
-    virtual void get_info(IN const char *filename, OUT struct File_Info *info);
-    virtual zmm::Ref<IOHandler> open(IN const char *filename, OUT struct File_Info *info, 
-            IN enum UpnpOpenFileMode mode);
+    virtual void get_info(IN const char *filename, 
+                          OUT struct File_Info *info) = 0;
+    virtual zmm::Ref<IOHandler> open(IN const char *filename, 
+                                     OUT struct File_Info *info, 
+                                     IN enum UpnpOpenFileMode mode) = 0;
 
     /// \brief Splits the url into a path and parameters string. 
     /// Only '?' and '/' separators are allowed, otherwise an exception will
@@ -55,7 +56,9 @@ public:
     /// content/media SEPARATOR object_id=12345&transcode=wav would be transformed to: 
     /// path = "content/media"
     /// parameters = "object_id=12345&transcode=wav"
-    static void split_url(const char *url, char separator, zmm::String &path, zmm::String &parameters);
+    static void split_url(const char *url, char separator, 
+                          zmm::String &path, zmm::String &parameters,
+                          bool force_amp_unescape = true);
 };
 
 
