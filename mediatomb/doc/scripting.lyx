@@ -1,4 +1,4 @@
-#LyX 1.4.3 created this file. For more info see http://www.lyx.org/
+#LyX 1.4.4 created this file. For more info see http://www.lyx.org/
 \lyxformat 245
 \begin_document
 \begin_header
@@ -30,6 +30,116 @@
 
 \begin_layout Title
 MediaTomb Scripting
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+<copyright>
+\end_layout
+
+\begin_layout Standard
+
+  <year>2005</year>
+\end_layout
+
+\begin_layout Standard
+
+  <holder>Gena Batsyan</holder>
+\end_layout
+
+\begin_layout Standard
+
+  <holder>Sergey Bostandzhyan</holder>
+\end_layout
+
+\begin_layout Standard
+
+</copyright>
+\end_layout
+
+\begin_layout Standard
+
+<copyright>
+\end_layout
+
+\begin_layout Standard
+
+  <year>2006-2007</year>
+\end_layout
+
+\begin_layout Standard
+
+  <holder>Gena Batsyan</holder>
+\end_layout
+
+\begin_layout Standard
+
+  <holder>Sergey Bostandzhyan</holder>
+\end_layout
+
+\begin_layout Standard
+
+  <holder>Leonhard Wimmer</holder>
+\end_layout
+
+\begin_layout Standard
+
+</copyright>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<releaseinfo>This documentation is valid for MediaTomb version 0.9.0.</releaseinfo>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<legalnotice>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY! USE AT YOUR OWN RISK!
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</legalnotice>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -97,9 +207,9 @@ When you add a file or directory to the database via the web interface several
 The object is inserted into the PC Directory.
  PC Directory is simply a special non-removable container.
  Any media file added will have an entry inside the PC Directory tree.
- PC Directory's hierarchy reflects the filesystem hierarchy, all objects
+ PC Directory's hierarchy reflects the file system hierarchy, all objects
  inside the PC Directory including itself are NON-VIRTUAL objects.
- All virtual objects may have a different title, descripting, etc., but they
+ All virtual objects may have a different title, description, etc., but they
  are still references to objects in the PC-Directory.
  That's why it is not possible to change a location of a virtual object
  - the only exceptions are URL items and Active items.
@@ -117,7 +227,7 @@ Once an item is added to the PC Directory it is forwarded to the virtual
 Each UPnP server implements this so called virtual object hierarchy in a
  different way.
  Audio files are usually sorted by artist, album, some servers may just
- present a view similar to the filesystem and so on.
+ present a view similar to the file system and so on.
  Most servers have strong limitations on the structure of the virtual containers
 , they usually offer a predefined layout of data and the user has to live
  with it.
@@ -228,7 +338,7 @@ means read/write, i.e.
 \emph on
 RO
 \emph default
- means, that this is a readonly property, any changes made to it will get
+ means, that this is a read only property, any changes made to it will get
  lost.
 \end_layout
 
@@ -345,7 +455,7 @@ OBJECT_TYPE_ITEM_EXTERNAL_URL
 \end_layout
 
 \begin_layout Standard
-Object is a link to a resouce on the internet.
+Object is a link to a resource on the internet.
 \end_layout
 
 \begin_layout Standard
@@ -411,7 +521,7 @@ RW
 
 \begin_layout Standard
 This is the title of the original object, since the object represents an
- entry in the PC-Directory, the title will be set to it's filename.
+ entry in the PC-Directory, the title will be set to it's file name.
  This field corresponds to dc:title in the DIDL-Lite XML.
 \end_layout
 
@@ -530,7 +640,7 @@ RO
 \end_layout
 
 \begin_layout Standard
-Location on disk, given by the absolute path and filename.
+Location on disk, given by the absolute path and file name.
 \end_layout
 
 \begin_layout Standard
@@ -649,7 +759,7 @@ RW
 \end_layout
 
 \begin_layout Standard
-Artist information, this correponds to upnp:artist in the DIDL-Lite XML.
+Artist information, this corresponds to upnp:artist in the DIDL-Lite XML.
 \end_layout
 
 \begin_layout Standard
@@ -836,7 +946,7 @@ RO
 \end_layout
 
 \begin_layout Standard
-Array holding the so called auxilary data.
+Array holding the so called auxiliary data.
  Aux data is metadata that is not part of UPnP, for example - this can be
  a camera model that was used to make a photo, or the information if the
  photo was taken with or without flash.
@@ -976,7 +1086,7 @@ status collapsed
 \end_layout
 
 \begin_layout Code
-UPNP_CLASS_CONTINAER_MUSIC_GENRE
+UPNP_CLASS_CONTAINER_MUSIC_GENRE
 \end_layout
 
 \begin_layout Standard
@@ -1022,7 +1132,7 @@ Value: object.container.album.musicAlbum
 \end_layout
 
 \begin_layout Description
-Note: this container class will be treaded by the server in a special way,
+Note: this container class will be treated by the server in a special way,
  all music items in this container will be sorted by ID3 track number.
 \end_layout
 
@@ -1369,7 +1479,7 @@ lastContainerClass
 \begin_layout Standard
 A string, defining the upnp:class of the container that appears last in
  the chain.
- This parameter can be ommited, in this case the default value 'object.container'
+ This parameter can be omitted, in this case the default value 'object.container'
  will be taken.
  Setting specific upnp container classes is useful to define the special
  meaning of a particular container; for example, the server will always
@@ -1547,7 +1657,11 @@ function createContainerChain(arr)
 \end_layout
 
 \begin_layout Code
-    var path = '';     for (var i = 0; i < arr.length; i++)
+    var path = '';
+\end_layout
+
+\begin_layout Code
+    for (var i = 0; i < arr.length; i++)
 \end_layout
 
 \begin_layout Code
@@ -1607,10 +1721,18 @@ function normalizeDate(date)
 }
 \end_layout
 
+\begin_layout Subsection
+Content Handlers
+\end_layout
+
 \begin_layout Standard
-Next, let's look at the functions that organize our content in the database
- by creating the virtual structure.
+Let's look at the functions that organize our content in the database by
+ creating the virtual structure.
  Each media type - audio, image and video is handled by a separate function.
+\end_layout
+
+\begin_layout Subsubsection
+Audio Content Handler
 \end_layout
 
 \begin_layout Standard
@@ -1652,8 +1774,8 @@ First we will gather all the metadata that is provided by our object, of
 
 \begin_layout Standard
 Note the difference between obj.title and obj.meta[M_TITLE] - while object.title
- will originally be set to the filename, obj.meta[M_TITLE] will contain the
- parsed title - in this particular example the ID3 title of an MP3.
+ will originally be set to the file name, obj.meta[M_TITLE] will contain
+ the parsed title - in this particular example the ID3 title of an MP3.
 \end_layout
 
 \begin_layout Code
@@ -1909,7 +2031,7 @@ We finally gathered all data that we need, so let's create a nice layout
 The UPnP class argument to addCdsObject() is optional, if it is not supplied
  the default UPnP class will be used.
  However, it is suggested to correctly set UPnP classes of containers and
- object - this information may be used by some renderers to identify the
+ objects - this information may be used by some renderers to identify the
  type of the container and present the content in a different manner .
 \end_layout
 
@@ -1978,30 +2100,285 @@ The UPnP class argument to addCdsObject() is optional, if it is not supplied
 \end_layout
 
 \begin_layout Code
-    chain = new Array('Audio', 'Artists', artist, 'All - full name');  
-   addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC);
+
 \end_layout
 
 \begin_layout Code
-    chain = new Array('Audio', 'Artists', artist, album);     obj.title =
- track + title;     addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CO
-NTAINER_MUSIC_ALBUM);
+    chain = new Array('Audio', 'Artists', artist, 'All - full name');
 \end_layout
 
 \begin_layout Code
-    chain = new Array('Audio', 'Albums', album);     obj.title = track +
- title;     addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_
-MUSIC_ALBUM);
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC);
 \end_layout
 
 \begin_layout Code
-    chain = new Array('Audio', 'Genres', genre);     addCdsObject(obj, createCon
-tainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_GENRE);
+
 \end_layout
 
 \begin_layout Code
-    chain = new Array('Audio', 'Year', date);     addCdsObject(obj, createContai
-nerChain(chain), UPNP_CLASS_CONTAINER_MUSIC); } 
+    chain = new Array('Audio', 'Artists', artist, album);
+\end_layout
+
+\begin_layout Code
+    obj.title = track + title;
+\end_layout
+
+\begin_layout Standard
+Remember, the server will sort all items by ID3 track if the container class
+ is set to UPNP_CLASS_CONTAINER_MUSIC_ALBUM.
+\end_layout
+
+\begin_layout Code
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_AL
+BUM);
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+    chain = new Array('Audio', 'Albums', album);
+\end_layout
+
+\begin_layout Code
+    obj.title = track + title;
+\end_layout
+
+\begin_layout Code
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_AL
+BUM);
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+    chain = new Array('Audio', 'Genres', genre);
+\end_layout
+
+\begin_layout Code
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_GE
+NRE);
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+    chain = new Array('Audio', 'Year', date);
+\end_layout
+
+\begin_layout Code
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC);
+ 
+\end_layout
+
+\begin_layout Code
+}
+\end_layout
+
+\begin_layout Subsubsection
+Image Content Handler
+\end_layout
+
+\begin_layout Standard
+This function takes care of images.
+ Currently it does very little sorting, but could easily be extended - photos
+ made by digital cameras provide lots of information in the Exif tag, so
+ you could easily add code to sort your pictures by camera model or anything
+ Exif field you might be interested in.
+\end_layout
+
+\begin_layout Description
+Note: if you want to use those additional Exif fields you need to compile
+ MediaTomb with libexif support and also specify the fields of interest
+ in the import section of your configuration file (See documentation about
+ library-options).
+\end_layout
+
+\begin_layout Code
+function addImage(obj) 
+\end_layout
+
+\begin_layout Code
+{
+\end_layout
+
+\begin_layout Code
+    var chain = new Array('Photos', 'All Photos');
+\end_layout
+
+\begin_layout Code
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER);
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+    var date = obj.meta[M_DATE];
+\end_layout
+
+\begin_layout Code
+    if (date)
+\end_layout
+
+\begin_layout Code
+    {
+\end_layout
+
+\begin_layout Code
+        chain = new Array('Photos', 'Date', date);
+\end_layout
+
+\begin_layout Code
+        addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER);
+\end_layout
+
+\begin_layout Code
+    }
+\end_layout
+
+\begin_layout Code
+}
+\end_layout
+
+\begin_layout Standard
+Just like in the addAudio() function - we simply construct our container
+ chain and add the object.
+\end_layout
+
+\begin_layout Subsubsection
+Video Content Handler
+\end_layout
+
+\begin_layout Standard
+Not much to say here...
+ I think libextractor is capable of retrieving some information from video
+ files, however I seldom encountered any video files populated with metadata.
+ So for now we just put everything into the 'All Video' container.
+\end_layout
+
+\begin_layout Code
+function addVideo(obj) 
+\end_layout
+
+\begin_layout Code
+{
+\end_layout
+
+\begin_layout Code
+    var chain = new Array('Video');
+\end_layout
+
+\begin_layout Code
+    addCdsObject(obj, createContainerChain(chain));
+\end_layout
+
+\begin_layout Code
+}
+\end_layout
+
+\begin_layout Subsection
+Putting it all together
+\end_layout
+
+\begin_layout Standard
+This is the main part of the script, it looks at the mimetype of the original
+ object and feeds the object to the appropriate content handler.
+\end_layout
+
+\begin_layout Code
+var arr = orig.mimetype.split('/'); 
+\end_layout
+
+\begin_layout Code
+var mime = arr[0];
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+var obj = orig;
+\end_layout
+
+\begin_layout Standard
+All virtual objects are references to objects in the PC-Directory, so make
+ sure to correctly set the reference ID!
+\end_layout
+
+\begin_layout Code
+obj.refID = orig.id;
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+if ((mime == 'audio') || (orig.mimetype == 'application/ogg')) 
+\end_layout
+
+\begin_layout Code
+{
+\end_layout
+
+\begin_layout Code
+    addAudio(obj); 
+\end_layout
+
+\begin_layout Code
+}
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+if (mime == 'video') 
+\end_layout
+
+\begin_layout Code
+{
+\end_layout
+
+\begin_layout Code
+    addVideo(obj);
+\end_layout
+
+\begin_layout Code
+}
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+if (mime == 'image') 
+\end_layout
+
+\begin_layout Code
+{
+\end_layout
+
+\begin_layout Code
+    addImage(obj); 
+\end_layout
+
+\begin_layout Code
+}
+\end_layout
+
+\begin_layout Standard
+Happy scripting!
 \end_layout
 
 \end_body

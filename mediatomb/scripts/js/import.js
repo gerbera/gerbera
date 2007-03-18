@@ -155,7 +155,6 @@ function addVideo(obj)
     addCdsObject(obj, createContainerChain(chain));
 }
 
-// currently no image metadata supported
 function addImage(obj)
 {
     var chain = new Array('Photos', 'All Photos');
