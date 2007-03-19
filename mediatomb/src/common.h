@@ -122,14 +122,14 @@
 //services
 // connection manager
 #define DESC_CM_SERVICE_TYPE            "urn:schemas-upnp-org:service:ConnectionManager:1"
-#define DESC_CM_SERVICE_ID              "urn:schemas-upnp-org:service:ConnectionManager"
+#define DESC_CM_SERVICE_ID              "urn:schemas-upnp-org:serviceId:ConnectionManager"
 #define DESC_CM_SCPD_URL                "cm.xml"
 #define DESC_CM_CONTROL_URL             "/upnp/control/cm"
 #define DESC_CM_EVENT_URL               "/upnp/event/cm"
 
 // content directory
 #define DESC_CDS_SERVICE_TYPE           "urn:schemas-upnp-org:service:ContentDirectory:1"
-#define DESC_CDS_SERVICE_ID             "urn:schemas-upnp-org:service:ContentDirectory"
+#define DESC_CDS_SERVICE_ID             "urn:schemas-upnp-org:serviceId:ContentDirectory"
 #define DESC_CDS_SCPD_URL               "cds.xml"
 #define DESC_CDS_CONTROL_URL            "/upnp/control/cds"
 #define DESC_CDS_EVENT_URL              "/upnp/event/cds"
