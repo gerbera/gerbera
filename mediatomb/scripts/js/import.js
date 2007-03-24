@@ -15,9 +15,9 @@ function createContainerChain(arr)
     return path;
 }
 
-function normalizeDate(date)
+function getYear(date)
 {
-    var matches = date.match(/([0-9]+)-01-01/);
+    var matches = date.match(/^([0-9]{4})-/);
     if (matches)
         return matches[1];
     else
@@ -73,7 +73,7 @@ function addAudio(obj)
     }
     else
     {
-        date = normalizeDate(date);
+        date = getYear(date);
         desc = desc + ', ' + date;
     }
     
