@@ -1361,18 +1361,7 @@ status open
 \end_layout
 
 \begin_layout Subsection
-Available Functions
-\end_layout
-
-\begin_layout Standard
-This section will introduce the functions that you can use in order to add
- your objects to the database.
- Some functions are offered by the server, and some helper functions are
- defined in your import script.
-\end_layout
-
-\begin_layout Subsubsection
-Server Functions
+Available Server Functions
 \end_layout
 
 \begin_layout Standard
@@ -1685,12 +1674,11 @@ function createContainerChain(arr)
 \end_layout
 
 \begin_layout Standard
-I just realized, that this may not be what we want...
- TODO Jin!!!
+This function retrieves the year from a yyyy-mm-dd formatted string.
 \end_layout
 
 \begin_layout Code
-function normalizeDate(date) 
+function getYear(date) 
 \end_layout
 
 \begin_layout Code
@@ -1698,7 +1686,7 @@ function normalizeDate(date)
 \end_layout
 
 \begin_layout Code
-    var matches = date.match(/([0-9]+)-01-01/);
+    var matches = date.match(/^([0-9]{4})-/);
 \end_layout
 
 \begin_layout Code
