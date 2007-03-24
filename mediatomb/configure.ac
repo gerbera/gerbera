@@ -266,14 +266,17 @@ AC_ARG_ENABLE(static,
 )
 
 AUTOCREATE=1
+AUTOCREATE_PRINT=
 AUTOCREATE_REQUESTED=0
 AC_ARG_ENABLE(db-autocreate,
         AC_HELP_STRING([--enable-db-autocreate], [enable automatic creation of the media database (default: yes)]),
         [
             if test "x$enableval" = xno; then
                 AUTOCREATE=0
+                AUTOCREATE_PRINT="disabled"
             else
                 AUTOCREATE_REQUESTED=1
+                AUTOCREATE_PRINT="yes"
                 AUTOCREATE=1
             fi
         ],
@@ -2158,8 +2161,8 @@ echo "id3lib        : $ID3_OK"
 echo "taglib        : $TAGLIB_OK"
 echo "libextractor  : $EXTRACTOR_OK"
 
-if (test $AUTOCREATE -eq 1) && (test $AUTOCREATE_REQUESTED -eq 1); then
-    echo "db-autocreate : enabled"
+if  test -n $AUTOCREATE_PRINT; then
+    echo "db-autocreate : $AUTOCREATE_PRINT"
 fi
         
 if test "$LOG_OK" != "yes"; then
