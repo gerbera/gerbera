@@ -2007,7 +2007,7 @@ status open
 \end_layout
 
 \begin_layout Code
-<model>MediaTomb</model>
+<modelName>MediaTomb</modelName>
 \end_layout
 
 \begin_layout Standard
@@ -2026,6 +2026,42 @@ Default: MediaTomb
 This tag sets the model name of a UPnP device, a custom setting may be necessary
  to trick some renderers in order to enable special features that otherwise
  are only active with the vendor implemented server.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<modelNumber>0.9.0</modelNumber>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: MediaTomb version
+\end_layout
+
+\begin_layout Standard
+This tag sets the model number of a UPnP device, a custom setting may be
+ necessary to trick some renderers in order to enable special features that
+ otherwise are only active with the vendor implemented server.
 \end_layout
 
 \begin_layout Standard

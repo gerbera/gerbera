@@ -457,7 +457,8 @@ void ConfigManager::validate(String serverhome)
     getOption(_("/server/ip"), _("")); // bind to any IP address
     getOption(_("/server/bookmark"), _(DEFAULT_BOOKMARK_FILE));
     getOption(_("/server/name"), _(DESC_FRIENDLY_NAME));
-    getOption(_("/server/model"), _(DESC_MODEL_NAME));
+    getOption(_("/server/modelName"), _(DESC_MODEL_NAME));
+    getOption(_("/server/modelNumber"), _(DESC_MODEL_NUMBER));
     getOption(_("/server/manufacturerURL"), _(DESC_MANUFACTURER_URL));
     getOption(_("/server/presentationURL"), _(""));
     temp = getOption(_("/server/presentationURL/attribute::append-to"), 

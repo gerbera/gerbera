@@ -220,8 +220,8 @@ Ref<Element> UpnpXML_RenderDeviceDescription(String presentationURL)
     device->appendTextChild(_("manufacturer"), _(DESC_MANUFACTURER));
     device->appendTextChild(_("manufacturerURL"), config->getOption(_("/server/manufacturerURL")));
     device->appendTextChild(_("modelDescription"), _(DESC_MODEL_DESCRIPTION));
-    device->appendTextChild(_("modelName"), config->getOption(_("/server/model")));
-    device->appendTextChild(_("modelNumber"), _(DESC_MODEL_NUMBER));
+    device->appendTextChild(_("modelName"), config->getOption(_("/server/modelName")));
+    device->appendTextChild(_("modelNumber"), config->getOption(_("/server/modelNumber")));
     device->appendTextChild(_("serialNumber"), _(DESC_SERIAL_NUMBER));
     device->appendTextChild(_("UDN"), config->getOption(_("/server/udn")));
 
