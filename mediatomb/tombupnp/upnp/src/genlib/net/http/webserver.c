@@ -1595,7 +1595,7 @@ http_RecvPostMessage( http_parser_t * parser,
     int Timeout = 0;
     long Num_Write = 0;
     FILE *Fp;
-    struct File_Info *finfo;
+    struct File_Info *finfo = NULL;
     parse_status_t status = PARSE_OK;
     xboolean ok_on_close = FALSE;
     unsigned int entity_offset = 0;
