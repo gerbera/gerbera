@@ -806,6 +806,23 @@ unset LIBS
 AC_CHECK_FUNC([clock_gettime],
         [
             AC_DEFINE([HAVE_CLOCK_GETTIME], [1], [clock_gettime presense])
+# we sill might need -lrt for sqlite3, so let's check for it
+            if test "x$SQLITE3_OK" = xyes; then
+            AC_CHECK_LIB(rt, clock_gettime,
+                [
+                    RT_LIBS="-lrt"
+                ],
+                [
+                    LDFLAGS="-L$SEARCH_DIR_LIBS"
+                    unset ac_cv_lib_rt_clock_gettime
+                    AC_CHECK_LIB(rt, clock_gettime,
+                        [
+                            RT_LIBS="-L$SEARCH_DIR_LIBS -lrt"
+                        ]
+                    )
+                ]
+            )
+            fi
         ],
         [
             AC_CHECK_LIB(rt, clock_gettime,
@@ -955,40 +972,38 @@ fi
 
 if test "x$SQLITE3_OK" = xyes; then
     if test -n "$SQLITE3_SEARCH_LIBS"; then
-        LDFLAGS="-L$SQLITE3_SEARCH_LIBS"
+        LDFLAGS="-L$SQLITE3_SEARCH_LIBS $RT_LIBS"
         AC_MSG_NOTICE([Will search for sqlite3 libraries in $withval])
         AC_CHECK_LIB(sqlite3, sqlite3_open,
                 [
-                    SQLITE3_LIBS="-L$SQLITE3_SEARCH_LIBS -lsqlite3"
+                    SQLITE3_LIBS="-L$SQLITE3_SEARCH_LIBS $RT_LIBS -lsqlite3"
                     SQLITE3_OK=yes
                 ],
                 [
                     AC_MSG_ERROR(sqlite3 library not found in requested location $SQLITE3_SEARCH_LIBS)
-                ],
-                [$RT_LIBS]
+                ]
         )
     else
+    LDFLAGS="$RT_LIBS"
     AC_CHECK_LIB(sqlite3, sqlite3_open, [],
         [
             SQLITE3_OK=missing
             for sqlite3_path in $SEARCH_DIR_LIBS; do
                 if test "x$ac_cv_lib_sqlite3_sqlite3_open" != xyes ; then
                     unset ac_cv_lib_sqlite3_sqlite3_open
-                    LDFLAGS="-L$sqlite3_path"
+                    LDFLAGS="-L$sqlite3_path $RT_LIBS"
                     AC_CHECK_LIB(sqlite3, sqlite3_open,
                         [
-                            SQLITE3_LIBS="-L$sqlite3_path -lsqlite3"
+                            SQLITE3_LIBS="-L$sqlite3_path $RT_LIBS -lsqlite3"
                             SQLITE3_OK=yes
                         ],
                         [
                             SQLITE3_OK=missing
-                        ],
-                        [$RT_LIBS] 
+                        ]
                      )
                 fi
             done
-        ],
-        [$RT_LIBS]
+        ]
     )
     fi
 fi 
