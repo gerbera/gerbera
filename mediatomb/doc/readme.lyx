@@ -900,6 +900,29 @@ ions are available.
 \end_layout
 
 \begin_layout Subsubsection
+Enable SIGHUP Handling
+\end_layout
+
+\begin_layout Code
+--enable-sighup
+\end_layout
+
+\begin_layout Standard
+This option turns on SIGHUP handling, every time a SIGHUP is caught we will
+ attempt to restart the server and reread the configuration file.
+ By default this feature is enabled for x86 platforms, but is disabled for
+ others.
+ We discovered that MediaTomb will not cleanly restart on ARM based systems,
+ investigations revealed that this is somehow related to an unclean libupnp
+ shutdown.
+ This will be fixed in a later release.
+\end_layout
+
+\begin_layout Description
+Default: auto detect
+\end_layout
+
+\begin_layout Subsubsection
 X_MS_MediaReceiverRegistrar Support
 \end_layout
 
@@ -5188,7 +5211,28 @@ Some additional settings in MediaTomb configuration are required to enable
 \end_layout
 
 \begin_layout Code
-</custom-http-headers> 
+</custom-http-headers>
+\end_layout
+
+\begin_layout Standard
+Further, the DSM-320 behaves differently if it thinks that it is dealing
+ with the D-Link server.
+ Add the following to the server section of your configuration to achieve
+ that:
+\end_layout
+
+\begin_layout Code
+<manufacturerURL>redsonic.com</manufacturerURL>
+\end_layout
+
+\begin_layout Code
+<modelNumber>105</modelNumber>
+\end_layout
+
+\begin_layout Standard
+It is still being investigated, but we were able to get subtitles working
+ with a U.S.
+ DSM-320 unit running firmware version 1.09
 \end_layout
 
 \begin_layout Subsubsection

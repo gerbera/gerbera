@@ -580,9 +580,13 @@ void signal_handler(int signum)
     }
     else if (signum == SIGHUP)
     {
+#if defined(ENABLE_SIGHUP)
         restart_flag = 1;
         if (timer != nil)
             timer->signal();
+#else
+        log_warning("SIGHUP handling was disabled during compilation.\n");
+#endif
     }
 
     return;

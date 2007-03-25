@@ -87,6 +87,7 @@ v0.9.0  Major rework
           will automatically be sorted by track number.
         * added option to configure the presentation URL to make it easier
           for NAS vendors to integrate the server into their web UI
+        * made model number configurable
 
 v0.8.1
         * added "serve" directory, any files there can be downloaded 

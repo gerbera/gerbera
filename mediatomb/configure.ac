@@ -86,37 +86,19 @@ AC_ARG_WITH(sqlite3-libs,
         ]
 )
 
-# mysql_config should deal with everything
-#
-#AC_ARG_WITH(mysql-h, 
-#        AC_HELP_STRING([--with-mysql-h=DIR], [search for mysql headers only in DIR]),
-#        [
-#            MYSQL_SEARCH_HEADERS="$withval"
-#            AC_MSG_NOTICE([Will search for mysql headers in $withval])
-#        ]
-#)
-#
-#AC_ARG_WITH(mysql-libs, 
-#        AC_HELP_STRING([--with-mysql-libs=DIR], [search for mysql libraries in DIR]),
-#        [
-#            MYSQL_SEARCH_LIBS="$withval"
-#            AC_MSG_NOTICE([Will search for mysql libraries in $withval])
-#        ]
-#)
-
 AC_ARG_WITH(mysql-cfg,
         AC_HELP_STRING([--with-mysql-cfg=mysql_config], [absolute path/name of mysql_config]),
         [
             MYSQL_SEARCH_CONFIG="$withval"
         ]
 )
-##
-##AC_ARG_WITH(pg-cfg,
-##       AC_HELP_STRING([--with-pg-cfg=pg_config], [absolute path/name of pg_config (for the PostgreSQL database)]),
-##        [
-##            PGSQL_SEARCH_CONFIG="$withval"
-##        ]
-##)
+
+# AC_ARG_WITH(pg-cfg,
+#       AC_HELP_STRING([--with-pg-cfg=pg_config], [absolute path/name of pg_config (for the PostgreSQL database)]),
+#        [
+#            PGSQL_SEARCH_CONFIG="$withval"
+#        ]
+#)
 
 
 
@@ -164,22 +146,6 @@ AC_ARG_WITH(exif-libs,
             AC_MSG_NOTICE([Will search for libexif libraries in $withval])
         ]
 )
-
-#AC_ARG_WITH(taglib-h,
-#        AC_HELP_STRING([--with-taglib-h=DIR], [search for taglib headers in DIR]),
-#        [
-#            TAGLIB_SEARCH_HEADERS="$withval"
-#            AC_MSG_NOTICE([Will search for taglib headers in $withval])
-#        ]
-#)
-#
-#AC_ARG_WITH(taglib-libs,
-#        AC_HELP_STRING([--with-taglib-libs=DIR], [search for taglib libraries in DIR]),
-#        [
-#            TAGLIB_SEARCH_LIBS="$withval"
-#            AC_MSG_NOTICE([Will search for libexif libraries in $withval])
-#        ]
-#)
 
 AC_ARG_WITH(taglib-cfg,
         AC_HELP_STRING([--with-taglib-cfg=taglib-config], [absolute path/name of taglib-config]),
@@ -417,6 +383,30 @@ if test $ATOMIC_X86_SMP -eq 1; then
 elif test $ATOMIC_X86 -eq 1; then
     AC_DEFINE([ATOMIC_X86], [1], [use x86 assembler code for atomic arithmetic operations that will only work oni singleprocessor systems - compiled binary will be buggy on SMP])
     AC_MSG_WARN(You specified to use atomic arithmetics code for x86 single processor systems! The resulting binary must not be used on SMP machines!)
+fi
+
+
+SIGHUP=0
+if test $X86 -eq 1; then
+    SIGHUP=1
+fi
+
+AC_ARG_ENABLE([sighup],
+              [
+AC_HELP_STRING([--enable-sighup],
+[enable SIGHUP handling, by default this is only enabled for x86 platforms, consult the README for more information (default: auto)])
+            ],
+            [
+                if test "x$enableval" = xno; then
+                    SIGHUP=0
+                else
+                    SIGHUP=1
+                fi
+            ]
+)
+
+if test $SIGHUP -eq 1; then
+    AC_DEFINE([ENABLE_SIGHUP], [1], [enable SIGHUP handling])
 fi
 
 AC_ARG_ENABLE([mrreg-service],
