@@ -318,6 +318,12 @@ As described in Section 2.2, each time an item is added to the database the
  and only modify local copies.
 \end_layout
 
+\begin_layout Description
+Note: modifying the properties of the orig object will not propagate the
+ changes to the database, only a call to the addCdsObject() will permanently
+ add the object.
+\end_layout
+
 \begin_layout Standard
 Here is a list of properties of an object, you can set them you create a
  new object or when you modify a copy of the 'orig' object.
@@ -1445,6 +1451,12 @@ A string, defining where the object will be added in the database hierarchy.
  a value of '/Audio/All Music' will add the object to the Audio, All Music
  container in the server hierarchy.
  Make sure to properly escape the slash characters in container names.
+ You will find more information on container chain escaping in 
+\begin_inset LatexCommand \ref{escapeSlash}
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -1576,6 +1588,10 @@ At the beginning of the script we define a couple of helper functions that
 \end_layout
 
 \begin_layout Standard
+\begin_inset LatexCommand \label{escapeSlash}
+
+\end_inset
+
 The first function escapes slash '/' characters in a string.
  This is necessary, because the container chain is defined by a slash separated
  string, where slash has a special meaning - it defines the container hierarchy.
