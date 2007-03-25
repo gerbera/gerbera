@@ -304,6 +304,22 @@ if test $DEBUG_MALLOC_0 -eq 1; then
     AC_DEFINE([DEBUG_MALLOC_0], [1], [debug: abort on malloc/realloc of zero bytes])
 fi
 
+PTHREAD_FORCE_LIB=0
+AC_ARG_ENABLE([pthread-lib],
+              [
+AC_HELP_STRING([--enable-pthread-lib],
+[if this option is set we will try to link with -lpthread, else the flag for pthread will be autodetected (default: no)])
+            ],
+            [
+                if test "x$enableval" = xno; then
+                    PTHREAD_FORCE_LIB=0
+                else
+                    PTHREAD_FORCE_LIB=1
+                fi
+            ]
+)
+
+
 ATOMIC_X86_SMP=0
 ATOMIC_X86_SMP_REQ=0
 X86=0
@@ -313,25 +329,6 @@ case $host_cpu in
         X86=1
     ;;
 esac
-
-#AC_ARG_ENABLE([atomic-x86-smp],
-#              [
-#AC_HELP_STRING([--enable-atomic-x86-smp=auto],
-#[use x86 smp code for atomic arithmetic operations, this is the default setting for ALL x86 systems! It will work on both, SMP and UP and should be usedi by default.])
-#            ],
-#            [
-#                if test "x$enableval" = xno; then
-#                    ATOMIC_X86_SMP=0 
-#                else
-#                    if test "$X86" -eq 1; then
-#                        ATOMIC_X86_SMP=1
-#                        ATOMIC_X86_SMP_REQ=1
-#                    else
-#                        AC_MSG_ERROR([Tried to activate x86 specific option for a non x86 host!])
-#                    fi
-#                fi
-#            ]
-#)
 
 ATOMIC_X86=0
 AC_ARG_ENABLE([atomic-x86-single],
@@ -753,9 +750,17 @@ AC_DEFINE([UPNP_HAVE_DEVICE], [1], [Compile device API])
 AC_DEFINE([UPNP_HAVE_WEBSERVER], [1], [Compile internal web server])    
 
 # see acinclude.m4 for the definition of ACX_PTHREAD
-ACX_PTHREAD(,AC_MSG_ERROR(POSIX threads missing))
-AC_SUBST(PTHREAD_LIBS)
-AC_SUBST(PTHREAD_CFLAGS)
+if test $PTHREAD_FORCE_LIB -eq 1; then
+    AC_CHECK_LIB(pthread, pthread_create,[],
+            [
+                AC_MSG_ERROR([pthread library not found, try running configure without the --enable-pthread-lib option])
+            ]
+    )
+else
+    ACX_PTHREAD(,AC_MSG_ERROR(POSIX threads missing))
+    AC_SUBST(PTHREAD_LIBS)
+    AC_SUBST(PTHREAD_CFLAGS)
+fi
 
 LIBS_SAVE="$LIBS"
 unset LIBS
