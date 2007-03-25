@@ -194,7 +194,7 @@ void UpdateManager::threadProc()
     {
         if (haveUpdates())
         {
-            long sleepMillis;
+            long sleepMillis = 0;
             struct timespec now;
             getTimespecNow(&now);
             long timeDiff = getDeltaMillis(&lastUpdate, &now);
