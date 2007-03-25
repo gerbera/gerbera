@@ -804,6 +804,50 @@ This feature is only for debugging purposes, whenever a malloc or realloc
 \end_layout
 
 \begin_layout Subsubsection
+Force Linking With The Pthread Library
+\end_layout
+
+\begin_layout Code
+--enable-pthread-lib
+\end_layout
+
+\begin_layout Description
+Default: disabled
+\end_layout
+
+\begin_layout Standard
+We use the ACX_PTHREAD macro from the autoconf archive to determine the
+ way how to link against the pthread library.
+ Usually it works fine, but it can fail when cross compiling.
+ This configure option tells us to use -lpthread when linking, it seems
+ to be needed when building MediaTomb under Optware.
+ Note, that using --disable-pthread-lib will not prevent automatic checks
+ against the pthread library.
+\end_layout
+
+\begin_layout Subsubsection
+Force Linking With The Iconv Library
+\end_layout
+
+\begin_layout Code
+--enable-iconv-lib
+\end_layout
+
+\begin_layout Description
+Default: disabled
+\end_layout
+
+\begin_layout Standard
+By default we will attempt to use iconv functionality provided with glibc,
+ however under some circumstances it may make sense to link against a separate
+ iconv library.
+ This option will attempt to do that.
+ Note, that using --disable-iconv-lib will not prevent automatic attempts
+ to link ageinst the iconv library in the case where builtin glibc iconv
+ functionality is not available.
+\end_layout
+
+\begin_layout Subsubsection
 Use Atomic Assembler Code For x86 Single CPU systems
 \end_layout
 
@@ -5354,9 +5398,15 @@ IE PNG fix from http://webfx.eae.net/dhtml/pngbehavior/pngbehavior.html
 tombupnp is based on pupnp (http://pupnp.sf.net) which is based on libupnp
  (http://upnp.sf.net), originally distributed under the BSD license, Copyright
  (c) 2000-2003 Intel Corporation.
- Note that all changes to libupnp code that were made by the MediaTomb team
- are covered by the LGPL license.
+ Note that all changes to libupnp/pupnp code that were made by the MediaTomb
+ team are covered by the LGPL license.
  
+\end_layout
+
+\begin_layout Itemize
+ACX_PTHREAD autoconf script http://autoconf-archive.cryp.to/acx_pthread.html
+ (C) 2006 Steven G.
+ Johnson <stevenj at alum dot mit dot edu>
 \end_layout
 
 \begin_layout Section

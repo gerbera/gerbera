@@ -266,7 +266,7 @@ AC_ARG_ENABLE(static,
 )
 
 AUTOCREATE=1
-AUTOCREATE_PRINT=
+AUTOCREATE_PRINT="0"
 AUTOCREATE_REQUESTED=0
 AC_ARG_ENABLE(db-autocreate,
         AC_HELP_STRING([--enable-db-autocreate], [enable automatic creation of the media database (default: yes)]),
@@ -318,6 +318,22 @@ AC_HELP_STRING([--enable-pthread-lib],
                 fi
             ]
 )
+
+ICONV_FORCE_LIB=0
+AC_ARG_ENABLE([iconv-lib],
+              [
+AC_HELP_STRING([--enable-iconv-lib],
+[if this option is set we will try to link with -liconv, else we will first try to use iconv built into glibc and only then search for libiconv (default: no)])
+            ],
+            [
+                if test "x$enableval" = xno; then
+                    ICONV_FORCE_LIB=0
+                else
+                    ICONV_FORCE_LIB=1
+                fi
+            ]
+)
+
 
 
 ATOMIC_X86_SMP=0
@@ -532,55 +548,86 @@ AC_CHECK_HEADER([iconv.h],
 )
 fi
 
+LIBICONV=0
 if test -n "$ICONV_SEARCH_LIBS"; then
-    LDFLAGS="-L$ICONV_SEARCH_LIBS"
-    AC_CHECK_FUNC([iconv],
-        [
-            ICONV_LIBS="-L$ICONV_SEARCH_LIBS"
-        ],
-        [
-            LDFLAGS="-L$ICONV_SEARCH_LIBS -liconv"
-            AC_CHECK_LIB(iconv, iconv,
+    if test $ICONV_FORCE_LIB -eq 0; then
+        LDFLAGS="-L$ICONV_SEARCH_LIBS"
+        AC_CHECK_FUNC([iconv],
+            [
+                ICONV_LIBS="-L$ICONV_SEARCH_LIBS"
+            ],
+            [
+                LDFLAGS="-L$ICONV_SEARCH_LIBS -liconv"
+                AC_CHECK_LIB(iconv, iconv,
+                    [
+                        ICONV_LIBS="-L$ICONV_SEARCH_LIBS -liconv"
+                        LIBICONV=1
+                    ],
+                    [
+                        AC_CHECK_LIB(iconv, libiconv,
+                            [
+                                ICONV_LIBS="-L$ICONV_SEARCH_LIBS -liconv"
+                                LIBICONV=1
+                            ],
+                            [AC_MSG_ERROR(required library iconv not found in requested location $ICONV_SEARCH_LIBS)]
+                        )
+                    ]
+                ) 
+            ]
+        ) 
+    else
+        LDFLAGS="-L$ICONV_SEARCH_LIBS -liconv"
+        AC_CHECK_LIB(iconv, iconv,
                 [
                     ICONV_LIBS="-L$ICONV_SEARCH_LIBS -liconv"
+                    LIBICONV=1
                 ],
-                [
-                    AC_CHECK_LIB(iconv, libiconv,
-                        [
-                            ICONV_LIBS="-L$ICONV_SEARCH_LIBS -liconv"
-                        ],
-                        [AC_MSG_ERROR(required library iconv not found in requested location $ICONV_SEARCH_LIBS)]
-                    )
-                ]
-            ) 
-        ]
-    ) 
-
+                [AC_MSG_ERROR(You specified to use libiconv but it was not found in the requested location $ICONV_SEARCH_LIBS)]
+        )
+    fi
 else
-    AC_CHECK_FUNC([iconv],
-        [
-            ICONV_LIBS="$LDFLAGS"
-        ],
-        [
+    if test $ICONV_FORCE_LIB -eq 0; then
+        AC_CHECK_FUNC([iconv],
+            [
+                ICONV_LIBS="$LDFLAGS"
+            ],
+            [
         
-            LDFLAGS="$LDFLAGS -liconv"
-            AC_CHECK_LIB(iconv, iconv, 
+                LDFLAGS="$LDFLAGS -liconv"
+                AC_CHECK_LIB(iconv, iconv, 
+                    [
+                        ICONV_LIBS="$LDFLAGS"
+                        LIBICONV=1
+                    ], 
+                    [
+                        AC_CHECK_LIB(iconv, libiconv,
+                            [
+                                ICONV_LIBS="$LDFLAGS"
+                                LIBICONV=1
+                            ],
+                            [AC_MSG_ERROR(required library iconv not found on your system)]
+                        )
+                    ]
+                )
+            ]
+        )
+    else
+        LDFLAGS="$LDFLAGS -liconv"
+        AC_CHECK_LIB(iconv, iconv,
                 [
                     ICONV_LIBS="$LDFLAGS"
-                ], 
+                    LIBICONV=1
+                ],
                 [
-                    AC_CHECK_LIB(iconv, libiconv,
-                        [
-                            ICONV_LIBS="$LDFLAGS"
-                        ],
-                        [AC_MSG_ERROR(required library iconv not found on your system)]
-                    )
+                    AC_MSG_ERROR(You specified to use libiconv but the library was not found)
                 ]
-            )
-        ]
-    )
+       )
+    fi
 fi
 
+if test $LIBICONV -eq 1; then
+    AC_DEFINE([HAVE_LIBICONV], [1], [we are using the libiconv library])
+fi
 
 AC_SUBST(ICONV_CXXFLAGS)
 AC_SUBST(ICONV_LIBS)
@@ -943,8 +990,11 @@ if test "x$SQLITE3_OK" = xyes; then
                             SQLITE3_LIBS="-L$sqlite3_path -lsqlite3"
                             SQLITE3_OK=yes
                         ],
-                        [-lrt]
-                    )
+                        [
+                            SQLITE3_OK=missing
+                        ],
+                        [-lrt] 
+                     )
                 fi
             done
         ],
@@ -2166,7 +2216,7 @@ echo "id3lib        : $ID3_OK"
 echo "taglib        : $TAGLIB_OK"
 echo "libextractor  : $EXTRACTOR_OK"
 
-if  test -n $AUTOCREATE_PRINT; then
+if  test $AUTOCREATE_PRINT != "0"; then
     echo "db-autocreate : $AUTOCREATE_PRINT"
 fi
         
