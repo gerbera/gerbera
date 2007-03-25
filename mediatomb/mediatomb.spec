@@ -44,7 +44,8 @@ chkconfig --del mediatomb
 
 %files
 %defattr(-,root,root)
-%doc README AUTHORS ChangeLog COPYING INSTALL doc/doxygen.conf
+%doc README README.UTF_8 AUTHORS ChangeLog COPYING INSTALL doc/doxygen.conf
+%doc doc/scripting.txt doc/scripting_utf8.txt
 %{_bindir}/mediatomb
 %{_datadir}/%{name}/
 %{_mandir}/man1/*

@@ -1,0 +1,691 @@
+MediaTomb Scripting
+
+This documentation is valid for MediaTomb version 0.9.0.
+
+Copyright   2005 Gena Batsyan, Sergey Bostandzhyan
+
+Copyright   2006-2007 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer
+
+THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY! USE AT YOUR OWN RISK!
+
+-------------------------------------------------------------------------------
+
+Table of Contents
+
+1. Introduction
+2. How It Works
+
+    2.1. Understanding Virtual Objects.
+    2.2. Theory Of Operation
+
+3. The Import Script
+
+    3.1. Global Variables And Constants
+    3.2. Available Server Functions
+
+4. Walkthrough
+
+    4.1. Helper Functions
+    4.2. Content Handlers
+    4.3. Putting it all together
+
+1. Introduction
+
+MediaTomb allows you to customize the structure of how your media is being
+presented to your renderer. One of the most important features introduced since
+the version 0.8 are the virtual containers and virtual items. Let's think of
+possible scenarios:
+
+  * you may want to separate your content by music, photo, video, maybe create
+    a special container with all non playable stuff
+
+  * you may want your music to be sorted by genre, year, artist, album, or
+    maybe by starting letters, so you can more easily find your favorite song
+    when browsing the server
+
+  * you want to have your photos that you took with your favorite digital
+    camera to appear in a special folder, or maybe you even want to separate
+    the photos that you took with flash-on from the ones that you made without
+    flash
+
+  * your media player does not support video, so you do not even want to see
+    the Video container
+
+  * it's up to your imagination :)
+
+The scenarios described above and much more can be achieved with the help of an
+import script.
+
+2. How It Works
+
+This section will give you some overview on how virtual objects work and on how
+they are related to scripting.
+
+2.1. Understanding Virtual Objects.
+
+When you add a file or directory to the database via the web interface several
+things happen.
+
+ 1. The object is inserted into the PC Directory. PC Directory is simply a
+    special non-removable container. Any media file added will have an entry
+    inside the PC Directory tree. PC Directory's hierarchy reflects the file
+    system hierarchy, all objects inside the PC Directory including itself are
+    NON-VIRTUAL objects. All virtual objects may have a different title,
+    description, etc., but they are still references to objects in the
+    PC-Directory. That's why it is not possible to change a location of a
+    virtual object - the only exceptions are URL items and Active items.
+
+ 2. Once an item is added to the PC Directory it is forwarded to the virtual
+    object engine. The virtual object engine's mission is to organize and
+    present the media database in a logical hierarchy based on the available
+    metadata of the items.
+
+Each UPnP server implements this so called virtual object hierarchy in a
+different way. Audio files are usually sorted by artist, album, some servers
+may just present a view similar to the file system and so on. Most servers have
+strong limitations on the structure of the virtual containers, they usually
+offer a predefined layout of data and the user has to live with it. In
+MediaTomb we try to address this shortcoming by introducing the scriptable
+virtual object engine. It is designed to be:
+
+  * maximally flexible
+
+  * easily customizable and extendable
+
+  * robust and efficient
+
+We try to achieve these goals by embedding a scripting runtime environment that
+allows the execution of ECMAScript-262 conform scripts better known as
+JavaScript. We are using Mozilla's JavaScript implementation called
+SpiderMonkey, it is a stand-alone easily embeddable javascript engine,
+supporting JavaScript versions 1.0 through 1.4.
+
+2.2. Theory Of Operation
+
+After an item is added to the PC Directory it is automatically fed as input to
+the import script. The script then creates one or more virtual items for the
+given original item. Items created from scripts are always marked virtual.
+
+When the virtual object engine gets notified of an added item, following
+happens: a javascript object is created mirroring the properties of the item.
+The object is introduced to the script environment and bound to the predefined
+variable 'orig'. This way a variable orig is always defined for every script
+invocation and represents the original data of the added item. Then the script
+is invoked.
+
+In the current implementation, if you modify the script then you will have to
+restart the server for the new logic to take effect. Note, that the script is
+only triggered when new objects are added to the database, also note that the
+script does not modify any objects that already exist in the database - it only
+processes new objects that are being added.
+
+3. The Import Script
+
+In this section we will introduce the properties of the object that will be
+processed by the script, as well as functions that are offered by the server.
+
+3.1. Global Variables And Constants
+
+3.1.1. The 'orig' Object
+
+As described in Section 2.2, each time an item is added to the database the
+import script is invoked. So, one script invocation processes exactly one non
+virtual item, and creates a number of virtual items and containers. The
+original item is made available in the form of the global variable 'orig'. It
+is usually a good idea to only read from this variable and to create and only
+modify local copies.
+
+Note:
+
+    modifying the properties of the orig object will not propagate the changes
+    to the database, only a call to the addCdsObject() will permanently add the
+    object.
+
+Here is a list of properties of an object, you can set them you create a new
+object or when you modify a copy of the 'orig' object.
+
+RW means read/write, i.e. - changes made to that property will be transferred
+into the database.
+
+RO means, that this is a read only property, any changes made to it will get
+lost.
+
+  * orig.objectType
+
+    RW
+
+    This defines the object type, following types are available:
+
+      o OBJECT_TYPE_CONTAINER
+
+        Object is a container.
+
+      o OBJECT_TYPE_ITEM
+
+        Object is an item.
+
+      o OBJECT_TYPE_ACTIVE_ITEM
+
+        Object is an active item.
+
+      o OBJECT_TYPE_ITEM_EXTERNAL_URL
+
+        Object is a link to a resource on the internet.
+
+      o OBJECT_TYPE_ITEM_INTERNAL_URL
+
+        Object is an internal link.
+
+  * orig.title
+
+    RW
+
+    This is the title of the original object, since the object represents an
+    entry in the PC-Directory, the title will be set to it's file name. This
+    field corresponds to dc:title in the DIDL-Lite XML.
+
+  * orig.id
+
+    RO
+
+    The object ID, make sure to set all refID's (reference IDs) of your virtual
+    objects to that ID.
+
+  * orig.parentID
+
+    RO
+
+    The object ID of the parent container.
+
+  * orig.class
+
+    RW
+
+    The upnp class of the item, this corresponds to upnp:class in the DIDL-Lite
+    XML.
+
+  * orig.location
+
+    RO
+
+    Location on disk, given by the absolute path and file name.
+
+  * orig.mimetype
+
+    RW
+
+    Mimetype of the object.
+
+  * orig.meta
+
+    RW
+
+    Array holding the metadata that was extracted from the object (i.e. id3/
+    exif/etc. information)
+
+      o orig.meta[M_TITLE]
+
+        RW
+
+        Extracted title (for example the id3 title if the object is an mp3
+        file), if you want that your new virtual object is displayed under this
+        title you will have to set obj.title = orig.meta[M_TITLE]
+
+      o orig.meta[M_ARTIST]
+
+        RW
+
+        Artist information, this corresponds to upnp:artist in the DIDL-Lite
+        XML.
+
+      o orig.meta[M_ALBUM]
+
+        RW
+
+        Album information, this corresponds to upnp:album in the DIDL-Lite XML.
+
+      o orig.meta[M_DATE]
+
+        RW
+
+        Date, must be in the format of YYYY-MM-DD (required by the UPnP spec),
+        this corresponds to dc:date in the DIDL-Lite XML.
+
+      o orig.meta[M_GENRE]
+
+        RW
+
+        Genre of the item, this corresponds to upnp:genre in the DIDL-Lite XML.
+
+      o orig.meta[M_DESCRIPTION]
+
+        RW
+
+        Description of the item, this corresponds to dc:description in the
+        DIDL-Lite XML.
+
+      o orig.meta[M_TRACKNUMBER]
+
+        RW
+
+        Track number of the item, this corresponds to upnp:originalTrackNumber
+        in the DIDL-Lite XML.
+
+  * orig.aux
+
+    RO
+
+    Array holding the so called auxiliary data. Aux data is metadata that is
+    not part of UPnP, for example - this can be a camera model that was used to
+    make a photo, or the information if the photo was taken with or without
+    flash. Currently aux data can be gathered from libexif and libextractor
+    (see the Import section in the main documentation for more details). So,
+    this array will hold the tags that you specified in your config.xml,
+    allowing you to create your virtual structure according to your liking.
+
+3.1.2. Constants
+
+Actually there are no such things as constants in JS, so those are actually
+predefined global variables that are set during JS engine initialization. Do
+not assign any values to them, otherwise following script invocation will be
+using wrong values.
+
+  * UPNP_CLASS_CONTAINER
+
+    Type: string
+
+    Value: object.container
+
+  * UPNP_CLASS_CONTAINER_MUSIC
+
+    Type: string
+
+    Value: object.container.musicContainer
+
+  * UPNP_CLASS_CONTAINER_MUSIC_ARTIST
+
+    Type: string
+
+    Value: object.container.person.musicArtist
+
+  * UPNP_CLASS_CONTAINER_MUSIC_GENRE
+
+    Type: string
+
+    Value: object.container.genre.musicGenre
+
+  * UPNP_CLASS_CONTAINER_MUSIC_ALBUM
+
+    Type: string
+
+    Value: object.container.album.musicAlbum
+
+    Note:
+
+        this container class will be treated by the server in a special way,
+        all music items in this container will be sorted by ID3 track number.
+
+  * UPNP_CLASS_ITEM
+
+    Type: string
+
+    Value: object.item
+
+  * UPNP_CLASS_ITEM_MUSIC_TRACK
+
+    Type: string
+
+    Value: object.item.audioItem.musicTrack
+
+  * OBJECT_TYPE_CONTAINER
+
+    Type: integer
+
+    Value: 1
+
+  * OBJECT_TYPE_ITEM
+
+    Type: integer
+
+    Value: 2
+
+  * OBJECT_TYPE_ACTIVE_ITEM
+
+    Type: integer
+
+    Value: 4
+
+  * OBJECT_TYPE_ITEM_EXTERNAL_URL
+
+    Type: integer
+
+    Value: 8
+
+  * OBJECT_TYPE_ITEM_INTERNAL_URL
+
+    Type: integer
+
+    Value: 16
+
+3.2. Available Server Functions
+
+The server offers three functions which can be called from within the import
+script:
+
+  * addCdsObject(object, containerChain, lastContainerClass);
+
+    This function adds a virtual object to the server database, the path in the
+    database is defined by the containerChain parameter. The third argument is
+    optional, it allows to set the upnp:class of the last container in the
+    chain.
+
+    Parameters:
+
+      o object
+
+        A virtual object that is either a copy of or a reference to 'orig', see
+        Section 3.2 for a list of properties.
+
+      o containerChain
+
+        A string, defining where the object will be added in the database
+        hierarchy. The containers in the chain are separated by a slash '/',
+        for example, a value of '/Audio/All Music' will add the object to the
+        Audio, All Music container in the server hierarchy. Make sure to
+        properly escape the slash characters in container names. You will find
+        more information on container chain escaping in Section 4.1, "Helper
+        Functions".
+
+      o lastContainerClass
+
+        A string, defining the upnp:class of the container that appears last in
+        the chain. This parameter can be omitted, in this case the default
+        value 'object.container' will be taken. Setting specific upnp container
+        classes is useful to define the special meaning of a particular
+        container; for example, the server will always sort songs by track
+        number if upnp class of a container is set to
+        'object.container.album.musicAlbum'.
+
+  * copyObject(originalObject);
+
+    This function returns a copy of the virtual object.
+
+  * print(...);
+
+    This function is useful for debugging scripts, it simply prints to the
+    standard output.
+
+4. Walkthrough
+
+Now it is time to take a closer look at the default import script that is
+supplied with MediaTomb. Usually it is installed in the /usr/share/mediatomb/js
+/import.js directory, but you will also find it in scripts/js/import.js in the
+MediaTomb source tree.
+
+Note:
+
+    this is not a JavaScript tutorial, if you are new to JS you should probably
+    make yourself familiar with the language.
+
+4.1. Helper Functions
+
+At the beginning of the script we define a couple of helper functions that we
+will use later on.
+
+The first function escapes slash '/' characters in a string. This is necessary,
+because the container chain is defined by a slash separated string, where slash
+has a special meaning - it defines the container hierarchy. That means, that
+slashes that appear in the object's title need to be properly escaped.
+
+function escapeSlash(name)
+{
+    name = name.replace(/\\/g, "\\\\");
+    name = name.replace(/\//g, "\\/");
+    return name;
+}
+
+
+The following function makes it easier to work with container chains; it takes
+an array of container names as argument, makes sure that the names are properly
+escaped and adds the slash separators as necessary. It returns a string that is
+formatted to be used as a parameter for the addCdsObject function.
+
+function createContainerChain(arr)
+{
+    var path = '';
+    for (var i = 0; i < arr.length; i++)
+    {
+        path = path + '/' + escapeSlash(arr[i]);
+    }
+    return path;
+}
+
+This function retrieves the year from a yyyy-mm-dd formatted string.
+
+function getYear(date)
+{
+    var matches = date.match(/^([0-9]{4})-/);
+    if (matches)
+        return matches[1];
+    else
+        return date;
+}
+
+4.2. Content Handlers
+
+Let's look at the functions that organize our content in the database by
+creating the virtual structure. Each media type - audio, image and video is
+handled by a separate function.
+
+4.2.1. Audio Content Handler
+
+The biggest one is the function that handles audio - the reason is simple: mp3
+files offer a lot of metadata like album, artist, genre, etc. information, this
+allows us to create a nice container layout.
+
+function addAudio(obj)
+{
+    var desc = '';
+    var artist_full;
+    var album_full;
+
+First we will gather all the metadata that is provided by our object, of course
+it is possible that some fields are empty - we will have to check that to make
+sure that we handle this case correctly.
+
+    var title = obj.meta[M_TITLE];
+
+Note the difference between obj.title and obj.meta[M_TITLE] - while
+object.title will originally be set to the file name, obj.meta[M_TITLE] will
+contain the parsed title - in this particular example the ID3 title of an MP3.
+
+
+    if (!title) title = obj.title;
+    var artist = obj.meta[M_ARTIST];
+    if (!artist)
+    {
+        artist = 'Unknown';
+        artist_full = null;
+    }
+    else
+    {
+        artist_full = artist;
+        desc = artist;
+    }
+
+   var album = obj.meta[M_ALBUM];
+   if (!album)
+    {
+        album = 'Unknown';
+        album_full = null;
+    }
+    else
+    {
+        desc = desc + ', ' + album;
+        album_full = album;
+    }
+
+    if (desc)
+        desc = desc + ', ';
+
+    desc = desc + title;
+
+    var date = obj.meta[M_DATE];
+    if (!date)
+    {
+        date = 'Unknown';
+    }
+    else
+    {
+        date = normalizeDate(date);
+        desc = desc + ', ' + date;
+    }
+
+    var genre = obj.meta[M_GENRE];
+    if (!genre)
+    {
+        genre = 'Unknown';
+    }
+    else
+    {
+        desc = desc + ', ' + genre;
+    }
+
+    var description = obj.meta[M_DESCRIPTION];
+    if (!description)
+    {
+
+Note how we are setting properties of an object - in this case we put together
+a description and we are setting for objects that did not already have one.
+
+        obj.meta[M_DESCRIPTION] = desc;
+    }
+
+We finally gathered all data that we need, so let's create a nice layout for
+our audio files. Note how we are constructing the chain, in the line below the
+array 'chain' will be converted to 'Audio/All audio' by the
+createContainerChain() function.
+
+    var chain = new Array('Audio', 'All audio');
+    obj.title = title;
+
+The UPnP class argument to addCdsObject() is optional, if it is not supplied
+the default UPnP class will be used. However, it is suggested to correctly set
+UPnP classes of containers and objects - this information may be used by some
+renderers to identify the type of the container and present the content in a
+different manner .
+
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC);
+
+    chain = new Array('Audio', 'Artists', artist, 'All songs');
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC);
+
+    chain = new Array('Audio', 'All - full name');
+    var temp = '';
+    if (artist_full)
+        temp = artist_full;
+
+    if (album_full)
+        temp = temp + ' - ' + album_full + ' - ';
+
+    obj.title = temp + title;
+
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC);
+
+    chain = new Array('Audio', 'Artists', artist, 'All - full name');
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC);
+
+    chain = new Array('Audio', 'Artists', artist, album);
+    obj.title = track + title;
+
+Remember, the server will sort all items by ID3 track if the container class is
+set to UPNP_CLASS_CONTAINER_MUSIC_ALBUM.
+
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ALBUM);
+
+    chain = new Array('Audio', 'Albums', album);
+    obj.title = track + title;
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ALBUM);
+
+    chain = new Array('Audio', 'Genres', genre);
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_GENRE);
+
+    chain = new Array('Audio', 'Year', date);
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC);
+}
+
+4.2.2. Image Content Handler
+
+This function takes care of images. Currently it does very little sorting, but
+could easily be extended - photos made by digital cameras provide lots of
+information in the Exif tag, so you could easily add code to sort your pictures
+by camera model or anything Exif field you might be interested in.
+
+Note:
+
+    if you want to use those additional Exif fields you need to compile
+    MediaTomb with libexif support and also specify the fields of interest in
+    the import section of your configuration file (See documentation about
+    library-options).
+
+function addImage(obj)
+{
+    var chain = new Array('Photos', 'All Photos');
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER);
+
+    var date = obj.meta[M_DATE];
+    if (date)
+    {
+        chain = new Array('Photos', 'Date', date);
+        addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER);
+    }
+}
+
+Just like in the addAudio() function - we simply construct our container chain
+and add the object.
+
+4.2.3. Video Content Handler
+
+Not much to say here... I think libextractor is capable of retrieving some
+information from video files, however I seldom encountered any video files
+populated with metadata. So for now we just put everything into the 'All Video'
+container.
+
+function addVideo(obj)
+{
+    var chain = new Array('Video');
+    addCdsObject(obj, createContainerChain(chain));
+}
+
+4.3. Putting it all together
+
+This is the main part of the script, it looks at the mimetype of the original
+object and feeds the object to the appropriate content handler.
+
+var arr = orig.mimetype.split('/');
+var mime = arr[0];
+
+var obj = orig;
+
+All virtual objects are references to objects in the PC-Directory, so make sure
+to correctly set the reference ID!
+
+obj.refID = orig.id;
+
+if ((mime == 'audio') || (orig.mimetype == 'application/ogg'))
+{
+    addAudio(obj);
+}
+
+if (mime == 'video')
+{
+    addVideo(obj);
+}
+
+if (mime == 'image')
+{
+    addImage(obj);
+}
+
+Happy scripting!
+
