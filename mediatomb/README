@@ -330,7 +330,37 @@ Default:
 This feature is only for debugging purposes, whenever a malloc or realloc with
 a value of zero bytes is encountered, the server will terminate with abort()
 
-3.2.5. Use Atomic Assembler Code For x86 Single CPU systems
+3.2.5. Force Linking With The Pthread Library
+
+--enable-pthread-lib
+
+Default:
+
+    disabled
+
+We use the ACX_PTHREAD macro from the autoconf archive to determine the way how
+to link against the pthread library. Usually it works fine, but it can fail
+when cross compiling. This configure option tells us to use -lpthread when
+linking, it seems to be needed when building MediaTomb under Optware. Note,
+that using --disable-pthread-lib will not prevent automatic checks against the
+pthread library.
+
+3.2.6. Force Linking With The Iconv Library
+
+--enable-iconv-lib
+
+Default:
+
+    disabled
+
+By default we will attempt to use iconv functionality provided with glibc,
+however under some circumstances it may make sense to link against a separate
+iconv library. This option will attempt to do that. Note, that using
+--disable-iconv-lib will not prevent automatic attempts to link ageinst the
+iconv library in the case where builtin glibc iconv functionality is not
+available.
+
+3.2.7. Use Atomic Assembler Code For x86 Single CPU systems
 
 --enable-atomic-x86-single
 
@@ -351,7 +381,7 @@ By default x86 SMP code will be used on x86 systems - it will reliably work on
 both SMP and single CPU systems, but will not be as fast as the
 atomic-x86-single option on uniprocessor machines.
 
-3.2.6. Use Pthread Code For Atomic Operations
+3.2.8. Use Pthread Code For Atomic Operations
 
 --enable-atomic-pthread
 
@@ -365,7 +395,22 @@ optimizations are available. This option may also be safely used on x86
 machines - the drawback is poor performance, compared to assembler optimized
 code.
 
-3.2.7. X_MS_MediaReceiverRegistrar Support
+3.2.9. Enable SIGHUP Handling
+
+--enable-sighup
+
+This option turns on SIGHUP handling, every time a SIGHUP is caught we will
+attempt to restart the server and reread the configuration file. By default
+this feature is enabled for x86 platforms, but is disabled for others. We
+discovered that MediaTomb will not cleanly restart on ARM based systems,
+investigations revealed that this is somehow related to an unclean libupnp
+shutdown. This will be fixed in a later release.
+
+Default:
+
+    auto detect
+
+3.2.10. X_MS_MediaReceiverRegistrar Support
 
 --enable-mrreg-service
 
@@ -378,7 +423,7 @@ X_MS_MediaReceiverRegistrar UPnP service, this was implemented for future Xbox
 360 support. If you have a renderer that requires this service, you can safely
 enable it. It will always return true to IsValidated and IsAuthorized requests.
 
-3.2.8. Fseeko Check
+3.2.11. Fseeko Check
 
 --disable-fseeko-check
 
@@ -390,7 +435,7 @@ This is a workaround for a bug in some Debian distributions, disable this check
 if you know that your system has large file support, but configure fails to
 detect it. For more information see: ADD LINK HERE
 
-3.2.9. Largefile Support
+3.2.12. Largefile Support
 
 --disable-largefile
 
@@ -402,7 +447,7 @@ By default largefile support will be auto detected by configure, however you
 can disable it if you do not want it or if you experience problems with it on
 your system.
 
-3.2.10. Redefinition Of Malloc And Realloc
+3.2.13. Redefinition Of Malloc And Realloc
 
 --disable-rpl-malloc
 
@@ -418,7 +463,7 @@ functions to handle special cases. However, this redefinition may get triggered
 when cross compiling, even if you are compiling against the GNU C lib. If this
 is the case, you can use this option to disable the redefinition.
 
-3.2.11. SQLite Support
+3.2.14. SQLite Support
 
 --enable-sqlite3
 
@@ -431,7 +476,7 @@ setup any users, permissions, etc. A database file will be simply created as
 specified in the MediaTomb configuration. At least SQLite version 3 is
 required.
 
-3.2.12. MySQL Support
+3.2.15. MySQL Support
 
 --enable-mysql
 
@@ -443,7 +488,7 @@ MySQL is a very powerful database, however it requires some additional setup.
 You will find information on how to setup MediaTomb with MySQL in the
 Installation section.
 
-3.2.13. SpiderMonkey LibJS Support
+3.2.16. SpiderMonkey LibJS Support
 
 --enable-libjs
 
@@ -463,7 +508,7 @@ is called js on Fedora, but is available under the name of smjs on Debian. If
 configure fails to find your js headers and libraries you can point it to the
 desired locations (see options below).
 
-3.2.14. Filemagic Support
+3.2.17. Filemagic Support
 
 --enable-libmagic
 
@@ -487,7 +532,7 @@ use in MediaTomb. You can override auto detection by defining appropriate file
 extension to mime type mappings in your configuration file. You can also edit
 the mime type information of an imported object manually via the web UI.
 
-3.2.15. Id3lib Support
+3.2.18. Id3lib Support
 
 --enable-id3lib
 
@@ -500,7 +545,7 @@ will be saved in the database and provided via UPnP. Further, the gathered
 metadata will be used by the import script to create a nice container layout
 (Audio/Artist/Album, etc.)
 
-3.2.16. Taglib Support
+3.2.19. Taglib Support
 
 --enable-taglib
 
@@ -517,7 +562,7 @@ detected memory leaks. Our feeling is, that you will have more stable results
 with id3lib, however it is up to you to enable or disable this library. By
 default id3lib will be taken if both libraries are present on the system.
 
-3.2.17. Libexif Support
+3.2.20. Libexif Support
 
 --enable-libexif
 
@@ -530,7 +575,7 @@ thumbnails which are created automatically by most digital camera models. The
 gathered data will be used by the import script, the thumbnails will be offered
 as additional resources via UPnP.
 
-3.2.18. Libextractor Support
+3.2.21. Libextractor Support
 
 --enable-libextractor
 
@@ -545,7 +590,7 @@ drawback is - it is slow, especially slow on scanning big video files, so it
 slows down the import process considerably. For this reason this library is
 disabled by default.
 
-3.2.19. MediaTomb Debug Output
+3.2.22. MediaTomb Debug Output
 
 --enable-tombdebug
 
@@ -558,7 +603,7 @@ information which is mainly interesting to developers. Use this if you are
 trying to trace down a bug or a problem, the additional output may give you
 some clues.
 
-3.2.20. UPnP Library Debug Output
+3.2.23. UPnP Library Debug Output
 
 --enable-upnpdebug
 
@@ -569,7 +614,7 @@ Default:
 This option enables debug output of the UPnP SDK. You should not need it under
 normal circumstances.
 
-3.2.21. Log Output
+3.2.24. Log Output
 
 --disable-log
 
@@ -579,7 +624,7 @@ Default:
 
 This option allows you to suppress all log output from the server.
 
-3.2.22. Package Search Directory
+3.2.25. Package Search Directory
 
 --with-search=DIR
 
@@ -592,7 +637,7 @@ location, for example Darwinports on OSX get installed to /opt/local/. This
 option tells the configure script to additionally search for headers and
 libraries of various packages in DIR/include and DIR/lib.
 
-3.2.23. Specifying Header And Library Locations Of Various Packages
+3.2.26. Specifying Header And Library Locations Of Various Packages
 
 You can specify the exact location of particular headers and libraries. Some
 packages use extra programs that tell us the appropriate flags that are needed
@@ -620,7 +665,7 @@ are located.
 --with-extractor-h=DIR          search for extractor headers in DIR
 --with-extractor-libs=DIR       search for extractor libraries in DIR
 
-3.2.24. The devconf Script
+3.2.27. The devconf Script
 
 If you are doing some development work and some debugging, you will probably
 want to compile with the -g flag and also disable optimization. The devconf
@@ -881,13 +926,23 @@ Child tags:
     be necessary to trick some renderers in order to enable special features
     that otherwise are only active with the vendor implemented server.
 
-  * <model>MediaTomb</model>
+  * <modelName>MediaTomb</modelName>
 
     Optional
 
     Default: MediaTomb
 
     This tag sets the model name of a UPnP device, a custom setting may be
+    necessary to trick some renderers in order to enable special features that
+    otherwise are only active with the vendor implemented server.
+
+  * <modelNumber>0.9.0</modelNumber>
+
+    Optional
+
+    Default: MediaTomb version
+
+    This tag sets the model number of a UPnP device, a custom setting may be
     necessary to trick some renderers in order to enable special features that
     otherwise are only active with the vendor implemented server.
 
@@ -1680,6 +1735,16 @@ section of your config.xml:
     <add header="X-User-Agent: redsonic"/>
 </custom-http-headers>
 
+Further, the DSM-320 behaves differently if it thinks that it is dealing with
+the D-Link server. Add the following to the server section of your
+configuration to achieve that:
+
+<manufacturerURL>redsonic.com</manufacturerURL>
+<modelNumber>105</modelNumber>
+
+It is still being investigated, but we were able to get subtitles working with
+a U.S. DSM-320 unit running firmware version 1.09
+
 7.1.4. Linksys
 
   * WMLS11B (Wireless-B Music System)
@@ -1816,7 +1881,12 @@ We are using the following code in our tree:
   * tombupnp is based on pupnp (http://pupnp.sf.net) which is based on libupnp
     (http://upnp.sf.net), originally distributed under the BSD license,
     Copyright (c) 2000-2003 Intel Corporation. Note that all changes to libupnp
-    code that were made by the MediaTomb team are covered by the LGPL license.
+    /pupnp code that were made by the MediaTomb team are covered by the LGPL
+    license.
+
+  * ACX_PTHREAD autoconf script http://autoconf-archive.cryp.to/
+    acx_pthread.html (C) 2006 Steven G. Johnson <stevenj at alum dot mit dot
+    edu>
 
 11. Contributions
 
