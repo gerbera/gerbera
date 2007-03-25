@@ -6,9 +6,6 @@
 # dh-make output file, you may use that output file without restriction.
 # This special exception was added by Craig Small in version 0.37 of dh-make.
 
-# Uncomment this to turn on verbose mode.
-#export DH_VERBOSE=1
-
 
 # These are used for cross-compiling and for saving the configure script
 # from having to guess our platform (since we know it already)
@@ -26,7 +23,6 @@ endif
 
 config.status: configure
 	dh_testdir
-	# Add here commands to configure the package.
 	CFLAGS="$(CFLAGS)" ./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info
 
 
@@ -34,19 +30,13 @@ build: build-stamp
 
 build-stamp:  config.status
 	dh_testdir
-
-	# Add here commands to compile the package.
 	$(MAKE)
-	#docbook-to-man debian/mediatomb.sgml > mediatomb.1
-
 	touch build-stamp
 
 clean:
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp 
-
-	# Add here commands to clean up after the build process.
 	-$(MAKE) distclean
 ifneq "$(wildcard /usr/share/misc/config.sub)" ""
 	cp -f /usr/share/misc/config.sub config.sub
@@ -63,8 +53,6 @@ install: build
 	dh_testroot
 	dh_clean -k 
 	dh_installdirs
-
-	# Add here commands to install the package into debian/mediatomb.
 	$(MAKE) install DESTDIR=$(CURDIR)/debian/mediatomb
 
 
