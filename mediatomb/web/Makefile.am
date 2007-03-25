@@ -1,5 +1,3 @@
-sharedir = @datadir@/@PACKAGE@
-
 _DIST_FILES_IMAGES = \
 ./icons/nanotree/images/minus.png \
 ./icons/nanotree/images/plus.png \
@@ -83,18 +81,15 @@ _DIST_FILES_WEB = \
 ./favicon.ico \
 ./mr_reg.xml
 
-EXTRA_DIST = $(_DIST_FILES_IMAGES) $(_DIST_FILES_JS) $(_DIST_FILES_WEB) \
-             $(_DIST_FILES_ICONS)
+imagesdir = $(pkgdatadir)/web/icons/nanotree/images
+dist_images_DATA = $(_DIST_FILES_IMAGES)
 
-imagesdir = $(sharedir)/web/icons/nanotree/images
-images_DATA = $(_DIST_FILES_IMAGES)
-
-iconsdir = $(sharedir)/web/icons
-icons_DATA = $(_DIST_FILES_ICONS)
+iconsdir = $(pkgdatadir)/web/icons
+dist_icons_DATA = $(_DIST_FILES_ICONS)
     
-jsdir = $(sharedir)/web/js
-js_DATA = $(_DIST_FILES_JS)
+jsdir = $(pkgdatadir)/web/js
+dist_js_DATA = $(_DIST_FILES_JS)
 
-webdir = $(sharedir)/web
-web_DATA = $(_DIST_FILES_WEB)
+webdir = $(pkgdatadir)/web
+dist_web_DATA = $(_DIST_FILES_WEB)
 
