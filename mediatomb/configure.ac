@@ -965,7 +965,7 @@ if test "x$SQLITE3_OK" = xyes; then
                 [
                     AC_MSG_ERROR(sqlite3 library not found in requested location $SQLITE3_SEARCH_LIBS)
                 ],
-                [-lrt]
+                [$RT_LIBS]
         )
     else
     AC_CHECK_LIB(sqlite3, sqlite3_open, [],
@@ -983,12 +983,12 @@ if test "x$SQLITE3_OK" = xyes; then
                         [
                             SQLITE3_OK=missing
                         ],
-                        [-lrt] 
+                        [$RT_LIBS] 
                      )
                 fi
             done
         ],
-        [-lrt]
+        [$RT_LIBS]
     )
     fi
 fi 
