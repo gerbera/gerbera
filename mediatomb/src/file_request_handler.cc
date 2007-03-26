@@ -68,6 +68,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
 
     struct stat statbuf;
     int ret = 0;
+    bool is_srt = false;
 
     String url_path, parameters;
     split_url(filename, URL_PARAM_SEPARATOR, url_path, parameters);
@@ -125,12 +126,17 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
 
         // reset resource id
         res_id = 0;
+        is_srt = true;
     }
    
     ret = stat(path.c_str(), &statbuf);
     if (ret != 0)
     {
-        throw _Exception(_("Failed to stat ") + path);
+        if (is_srt)
+            throw SubtitlesNotFoundException(_("Subtitle file ") + path + " is not available.");
+        else
+            throw _Exception(_("Failed to open ") + path + " - " + strerror(errno));
+
     }
 
 
@@ -215,6 +221,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
     int objectID;
     String mimeType;
     int ret;
+    bool is_srt = false;
 
     log_debug("start\n");
     struct stat statbuf;
@@ -338,14 +345,17 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
         mimeType = _(MIMETYPE_TEXT);
         // reset resource id
         res_id = 0;
+        is_srt = true;
     }
 
     ret = stat(path.c_str(), &statbuf);
     if (ret != 0)
     {
-        throw _Exception(_("Failed to stat ") + path);
+        if (is_srt)
+            throw SubtitlesNotFoundException(_("Subtitle file ") + path + " is not available.");
+        else
+            throw _Exception(_("Failed to open ") + path + " - " + strerror(errno));
     }
-
 
     if (access(path.c_str(), R_OK) == 0)
     {

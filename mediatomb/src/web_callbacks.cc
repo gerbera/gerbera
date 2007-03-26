@@ -139,10 +139,14 @@ static int web_get_info(IN const char *filename, OUT struct File_Info *info)
         Ref<RequestHandler> reqHandler = create_request_handler(filename);
         reqHandler->get_info(filename, info);
     }
-    catch(Exception e)
+    catch (SubtitlesNotFoundException sex)
     {
-        log_error("web_get_info(): Exception during callback: %s\n", e.getMessage().c_str());
-        e.printStackTrace();
+        log_info("%s\n", sex.getMessage().c_str());
+        return -1;
+    }
+    catch (Exception e)
+    {
+        log_error("%s\n", e.getMessage().c_str());
         return -1;
     }
 
@@ -173,10 +177,14 @@ static UpnpWebFileHandle web_open(IN const char *filename, OUT struct File_Info 
         ioHandler->retain();
         return (UpnpWebFileHandle) ioHandler.getPtr();
     }
+    catch (SubtitlesNotFoundException sex)
+    {
+        log_info("%s\n", sex.getMessage().c_str());
+        return NULL;
+    }
     catch (Exception ex)
     {
-        log_error("web_open(): exception during callback: %s\n", ex.getMessage().c_str());
-        ex.printStackTrace();
+        log_error("%s\n", ex.getMessage().c_str());
         return NULL;
     }
 }
