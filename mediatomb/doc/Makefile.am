@@ -1,11 +1,11 @@
 
-_DIST_FILES = \
+_DIST_FILES_CONF = \
 	doxygen.conf \
-    mediatomb.1 \
     scripting.txt \
     scripting_utf8.txt
 
-EXTRA_DIST = $(_DIST_FILES)
+man1_MANS=mediatomb.1
 
-man_MANS=mediatomb.1
+EXTRA_DIST = $(_DIST_FILES_CONF) $(man1_MANS)
+
 
