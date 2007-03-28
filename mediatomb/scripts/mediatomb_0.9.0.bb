@@ -2,9 +2,9 @@ DESCRIPTION = "MediaTomb - UPnP AV MediaServer for Linux"
 HOMEPAGE = "http://mediatomb.cc/"
 LICENSE = "GPLv2"
 DEPENDS = "sqlite3 libexif js zlib file id3lib"
-PR = "r1"
+PR = "r0"
 
-SRC_URI = "${SOURCEFORGE_MIRROR}/mediatomb/mediatomb-0.9.0.tar.gz"
+SRC_URI = "${SOURCEFORGE_MIRROR}/mediatomb/mediatomb-${PV}.tar.gz"
 
 inherit autotools pkgconfig
 
