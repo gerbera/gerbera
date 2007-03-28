@@ -36,7 +36,7 @@ v0.9.0  Major rework
           out the failed name in the console.
         * we now try to determine the default import charsets by looking
           at the system locale.
-        * implemented track number metadata extractino (feature request
+        * implemented track number metadata extraction (feature request
           1430799). track numbers are now extracted via id3lib/taglib and
           can also be used in the import script. import.js has been adapted
           to add tracknumbers to song names in the Album container.
@@ -78,13 +78,14 @@ v0.9.0  Major rework
         * we now validate filesystem, metadata and scripting charsets upon 
           startup
         * added a special option that allows limiting title and description
-          lengths in UPnP browse requests to a specified length; this was
+          lengths in UPnP browse replies to a specified length; this was
           necessary to work around a bug in the TG100 that has problems
           browsing items where title length exceeds 101 characters.
         * import.js can now specify the upnp class of the last container in the
           chain
-        * all containers with the upnp class object.container.album.musicAlbum
-          will automatically be sorted by track number.
+        * all items within a container which upnp class is set to 
+          object.container.album.musicAlbum will automatically be sorted by 
+          track number.
         * added option to configure the presentation URL to make it easier
           for NAS vendors to integrate the server into their web UI
         * made model number configurable
