@@ -4,9 +4,7 @@ LICENSE = "GPLv2"
 DEPENDS = "sqlite3 libexif js zlib file id3lib"
 PR = "r1"
 
-SRC_URI = "${SOURCEFORGE_MIRROR}/mediatomb/mediatomb-0.9.0-pre.tar.gz"
-
-S = "${WORKDIR}/${PN}-0.9.0-pre"
+SRC_URI = "${SOURCEFORGE_MIRROR}/mediatomb/mediatomb-0.9.0.tar.gz"
 
 inherit autotools pkgconfig
 
