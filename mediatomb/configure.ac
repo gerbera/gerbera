@@ -1921,7 +1921,7 @@ if test "x$EXTRACTOR_OK" = xyes; then
     if test -n "$EXTRACTOR_SEARCH_HEADERS" ; then
         LDFLAGS="-L$EXTRACTOR_SEARCH_LIBS"
         AC_CHECK_LIB(extractor, EXTRACTOR_getKeywords,
-                [LDFLAGS="-L$EXTRACTOR_SEARCH_LIBS -lextractor"],
+                [ EXTRACTOR_LIBS="-L$EXTRACTOR_SEARCH_LIBS -lextractor" ],
                 [
                     AC_MSG_ERROR([extractor libraries not found in requested location $EXTRACTOR_SEARCH_LIBS])
                 ]
