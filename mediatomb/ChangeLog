@@ -1,4 +1,14 @@
 MediaTomb - UPnP AV Mediaserver.
+(after v0.9.0) Minor fixes
+        * fixed a bug in configure.ac: the --with-extractor-libs= parameter
+          didn't work
+        * fixed a MySQL related bug: if the path or filename contained non-UTF8
+          characters, the inserted strings weren't complete
+        * circumvented a bug/feature of older MySQL versions, that caused the
+          MySQL database creation script to fail
+        * MySQL database version pumped to 2 (MediaTomb will automatically
+          update the database during the first launch)
+          
 v0.9.0  Major rework
         * the UI was completely rewritten from scratch; it uses AJAX for all
           requests

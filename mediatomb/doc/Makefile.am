@@ -1,6 +1,6 @@
 
 _DIST_FILES_CONF = \
-	doxygen.conf \
+    doxygen.conf \
     scripting.txt \
     scripting_utf8.txt
 

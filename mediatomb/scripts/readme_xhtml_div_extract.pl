@@ -5,7 +5,7 @@ use XML::XQL;
 use XML::XQL::DOM;
 
 
-binmode STDOUT, ":utf8";
+#binmode STDOUT, ":utf8";
 
 sub my_tag_compression
 {
