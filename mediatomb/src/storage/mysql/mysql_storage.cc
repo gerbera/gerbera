@@ -49,6 +49,12 @@
     #include <zlib.h>
 #endif
 
+#define MYSQL_UPDATE_1_2_1 "ALTER TABLE `mt_cds_object` CHANGE `location` `location` BLOB NULL DEFAULT NULL"
+#define MYSQL_UPDATE_1_2_2 "ALTER TABLE `mt_cds_object` CHANGE `metadata` `metadata` BLOB NULL DEFAULT NULL"
+#define MYSQL_UPDATE_1_2_3 "ALTER TABLE `mt_cds_object` CHANGE `auxdata` `auxdata` BLOB NULL DEFAULT NULL"
+#define MYSQL_UPDATE_1_2_4 "ALTER TABLE `mt_cds_object` CHANGE `resources` `resources` BLOB NULL DEFAULT NULL"
+#define MYSQL_UPDATE_1_2_5 "UPDATE `mt_internal_setting` SET `value`='2' WHERE `key`='db_version'"
+
 using namespace zmm;
 using namespace mxml;
 
@@ -220,7 +226,22 @@ void MysqlStorage::init()
         
     }
     log_debug("db_version: %s\n", dbVersion.c_str());
-    if (! string_ok(dbVersion) || dbVersion != "1")
+    
+    /* --- database upgrades --- */
+    if (dbVersion == "1")
+    {
+        log_info("Doing an automatic database upgrade from database version 1 to version 2...\n");
+        _exec(MYSQL_UPDATE_1_2_1);
+        _exec(MYSQL_UPDATE_1_2_2);
+        _exec(MYSQL_UPDATE_1_2_3);
+        _exec(MYSQL_UPDATE_1_2_4);
+        _exec(MYSQL_UPDATE_1_2_5);
+        log_info("database upgrade successful.\n");
+        dbVersion = _("2");
+    }
+    /* --- --- ---*/
+    
+    if (! string_ok(dbVersion) || dbVersion != "2")
         throw _Exception(_("The database seems to be from a newer version!"));
     
     AUTOUNLOCK();
@@ -327,6 +348,14 @@ void MysqlStorage::storeInternalSetting(String key, String value)
     execSB(q);
 }
 
+void MysqlStorage::_exec(const char *query)
+{
+    if (mysql_real_query(&db, query, strlen(query)))
+    {
+        String myError = getError(&db);
+        throw _StorageException(myError, _("Mysql: error while updating db: ") + myError);
+    }
+}
 
 /* MysqlResult */
 
