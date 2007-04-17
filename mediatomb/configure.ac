@@ -972,7 +972,7 @@ fi
 
 if test "x$SQLITE3_OK" = xyes; then
     if test -n "$SQLITE3_SEARCH_LIBS"; then
-        LDFLAGS="-L$SQLITE3_SEARCH_LIBS $RT_LIBS"
+        LDFLAGS="$LDFLAGS -L$SQLITE3_SEARCH_LIBS $RT_LIBS"
         AC_MSG_NOTICE([Will search for sqlite3 libraries in $withval])
         AC_CHECK_LIB(sqlite3, sqlite3_open,
                 [
