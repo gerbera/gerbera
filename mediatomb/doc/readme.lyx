@@ -5217,8 +5217,8 @@ Some additional settings in MediaTomb configuration are required to enable
 \begin_layout Standard
 Further, the DSM-320 behaves differently if it thinks that it is dealing
  with the D-Link server.
- Add the following to the server section of your configuration to achieve
- that:
+ Add the following to the server section of your configuration to enable
+ srt subtitle support:
 \end_layout
 
 \begin_layout Code
