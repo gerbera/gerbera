@@ -5244,6 +5244,14 @@ WMLS11B (Wireless-B Music System)
 \end_layout
 
 \begin_layout Subsubsection
+NeoDigits
+\end_layout
+
+\begin_layout Itemize
+HELIOS X3000
+\end_layout
+
+\begin_layout Subsubsection
 Netgear
 \end_layout
 
@@ -5269,6 +5277,14 @@ Streamium MX-6000i
 
 \begin_layout Itemize
 SLA-5520
+\end_layout
+
+\begin_layout Subsubsection
+Pinnacle
+\end_layout
+
+\begin_layout Itemize
+ShowCenter 200
 \end_layout
 
 \begin_layout Subsubsection
@@ -5310,6 +5326,14 @@ We provide a bitbake metadata file for the OpenEmbedded environment, it
  We have successfully tested MediaTomb on ARM and MIPSel based devices,
  so it should be possible to install and run the server on various Linux
  based NAS products that are available on the market.
+\end_layout
+
+\begin_layout Subsubsection
+Buffalo
+\end_layout
+
+\begin_layout Itemize
+LinkStation
 \end_layout
 
 \begin_layout Subsubsection
