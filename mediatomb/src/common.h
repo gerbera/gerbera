@@ -59,7 +59,7 @@
 #define UPNP_DEFAULT_CLASS_MUSIC_CONT   "object.container.musicContainer"
 #define UPNP_DEFAULT_CLASS_MUSIC_GENRE  "object.container.genre.musicGenre"
 #define UPNP_DEFAULT_CLASS_MUSIC_ARTIST "object.container.person.musicArtist"
-
+#define UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER "object.container.playlistContainer"
 
 // fixed CdsObjectIDs
 #define CDS_ID_BLACKHOLE                -1

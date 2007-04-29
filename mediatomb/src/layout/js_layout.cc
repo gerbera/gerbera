@@ -57,6 +57,9 @@ static JSClass global_class = {
 };
 */
 
+FILE *currentHandle;
+int currentObject;
+char* currentLine;
 
 static String js_get_property(JSContext *cx, JSObject *obj, String name)
 {
@@ -182,7 +185,7 @@ static Ref<CdsObject> jsObject2cdsObject(JSContext *cx, JSObject *js)
     val = js_get_property(cx, js, _("title"));
     if (val != nil)
         obj->setTitle(val);
-    val = js_get_property(cx, js, _("class"));
+    val = js_get_property(cx, js, _("upnpclass"));
     if (val != nil)
         obj->setClass(val);
     val = js_get_property(cx, js, _("location"));
@@ -219,7 +222,7 @@ static Ref<CdsObject> jsObject2cdsObject(JSContext *cx, JSObject *js)
     }
 
     // CdsItem
-    if (IS_CDS_ITEM(objectType))
+    if (IS_CDS_ITEM(objectType) || (IS_CDS_ITEM_EXTERNAL_URL(objectType))) // tmporary HACK
     {
         Ref<CdsItem> item = RefCast(obj, CdsItem);
 
@@ -236,6 +239,31 @@ static Ref<CdsObject> jsObject2cdsObject(JSContext *cx, JSObject *js)
             val = js_get_property(cx, js, _("state"));
             if (val != nil)
                 aitem->setState(val);
+        }
+
+        if (IS_CDS_ITEM_EXTERNAL_URL(objectType))
+        {
+            String protocolInfo;
+
+            obj->setRestricted(true);
+            Ref<CdsItemExternalURL> item = RefCast(obj, CdsItemExternalURL);
+            val = js_get_property(cx, js, _("description"));
+            if (val != nil)
+               item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), val);
+            val = js_get_property(cx, js, _("protocol"));
+            if (val != nil)
+            {
+                protocolInfo = renderProtocolInfo(item->getMimeType(), val);
+            }
+            else
+            {
+                protocolInfo = renderProtocolInfo(item->getMimeType(), _(MIMETYPE_DEFAULT));
+            }
+            Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
+            resource->addAttribute(MetadataHandler::getResAttrName(
+                        R_PROTOCOLINFO), protocolInfo);
+
+            item->addResource(resource);
         }
     }
 
@@ -278,7 +306,7 @@ static void cdsObject2jsObject(JSContext *cx, Ref<CdsObject> obj, JSObject *js)
         js_set_property(cx, js, "title", val);
     val = obj->getClass();
     if (val != nil)
-        js_set_property(cx, js, "class", val);
+        js_set_property(cx, js, "upnpclass", val);
     val = obj->getLocation();
     if (val != nil)
         js_set_property(cx, js, "location", val);
@@ -362,7 +390,7 @@ js_print(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
         str = JS_ValueToString(cx, argv[i]);
         if (!str)
             return JS_FALSE;
-        log_debug("%s\n", JS_GetStringBytes(str));
+        log_js("%s\n", JS_GetStringBytes(str));
     }
     return JS_TRUE;
 }
@@ -435,7 +463,12 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
        
         int id = cm->addContainerChain(path, containerclass);
         cds_obj->setParentID(id);
-        cds_obj->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
+        if (!IS_CDS_ITEM_EXTERNAL_URL(cds_obj->getObjectType()) &&
+            !IS_CDS_ITEM_INTERNAL_URL(cds_obj->getObjectType()))
+        {
+            cds_obj->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
+        }
+
         cds_obj->setID(INVALID_OBJECT_ID);
         cm->addObject(cds_obj);
 
@@ -454,6 +487,63 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         e.printStackTrace();
     }
     return JS_FALSE;
+}
+
+static JSBool
+js_readln(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
+{
+    if (!currentHandle)
+    {
+        if (currentObject == -1)
+        {
+            log_js("can not determine current object\n");
+            return JS_FALSE;
+        }
+       
+        try
+        {
+            Ref<Storage> storage = Storage::getInstance();
+            Ref<CdsObject> obj = storage->loadObject(currentObject);
+
+            if (!IS_CDS_PURE_ITEM(obj->getObjectType()))
+            {
+                log_js("read opearation is only allowed on items\n");
+                return JS_FALSE;
+            }
+
+            Ref<CdsItem> item = RefCast(obj, CdsItem);
+            currentHandle = fopen(item->getLocation().c_str(), "r");
+
+            if (!currentHandle)
+            {
+                log_js("Could not open \"%s\": %s\n", 
+                        item->getLocation().c_str(), strerror(errno));
+                return JS_FALSE;
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return JS_FALSE;
+        }
+    }
+
+    if (!currentLine)
+        currentLine = (char *)MALLOC(1024);
+
+
+    currentLine[0] = '\0';
+
+    fgets(currentLine, 1024, currentHandle);
+
+    JSString *line = JS_NewStringCopyZ(cx, currentLine);
+
+    if (!line)
+        return JS_FALSE;
+
+    *rval = STRING_TO_JSVAL(line);
+
+    return JS_TRUE;
 }
 
 static void
@@ -542,7 +632,7 @@ js_error_reporter(JSContext *cx, const char *message, JSErrorReport *report)
     while (0);
 
     String err = buf->toString();
-    log_debug("%s\n", err.c_str());
+    log_js("%s\n", err.c_str());
 }
 
 } // extern "C"
@@ -552,6 +642,7 @@ static JSFunctionSpec global_functions[] = {
     {"print",           js_print,          0},
     {"addCdsObject",    js_addCdsObject,   3},
     {"copyObject",      js_copyObject,     1},
+    {"readln",          js_readln,         0},
     {0}
 };
 
@@ -564,6 +655,9 @@ JSLayout::JSLayout() : Layout()
     cx = NULL;
     glob = NULL;
 	script = NULL;
+    currentObject = -1;
+    currentHandle = NULL;
+    currentLine = 0;
 }
 
 void JSLayout::init()
@@ -611,7 +705,7 @@ void JSLayout::init()
     /* create the global object here */
     glob = JS_NewObject(cx, /* global_class */ NULL, NULL, NULL);
     if (! glob)
-        throw _Exception(_("JSLayout: could not initialize glboal class"));
+        throw _Exception(_("JSLayout: could not initialize global class"));
 
     /* initialize the built-in JS objects and the global object */
     if (! JS_InitStandardClasses(cx, glob))
@@ -645,6 +739,8 @@ void JSLayout::init()
     js_set_char_property(cx, glob, "UPNP_CLASS_CONTAINER", UPNP_DEFAULT_CLASS_CONTAINER);
     js_set_char_property(cx, glob, "UPNP_CLASS_ITEM", UPNP_DEFAULT_CLASS_ITEM);
     js_set_char_property(cx, glob, "UPNP_CLASS_ITEM_MUSIC_TRACK", UPNP_DEFAULT_CLASS_MUSIC_TRACK);
+    js_set_char_property(cx, glob, "UPNP_CLASS_PLAYLIST_CONTAINER", 
+                                    UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER);
     JS_SetErrorReporter(cx, js_error_reporter);
 
 /*
@@ -680,6 +776,7 @@ void JSLayout::processCdsObject(Ref<CdsObject> obj)
 
     jsval ret_val;
 
+    currentObject = obj->getID();
     JSObject *orig = JS_NewObject(cx, NULL, NULL, glob);
     cdsObject2jsObject(cx, obj, orig);
     js_set_object_property(cx, glob, "orig", orig);
@@ -688,6 +785,18 @@ void JSLayout::processCdsObject(Ref<CdsObject> obj)
         throw _Exception(_("JSLayout: failed to execute script"));
     }
     log_debug("Script executed successfully\n");
+    currentObject = -1;
+
+    if (currentHandle)
+        fclose(currentHandle);
+
+    if (currentLine)
+    {
+        FREE(currentLine);
+        currentLine = NULL;
+    }
+
+
 
     /*
       if (!JS_EvaluateScript(cx, glob, script.c_str(), script.length(),

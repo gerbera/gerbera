@@ -49,6 +49,7 @@ protected:
     JSContext *cx;
     JSObject  *glob;
 	JSScript *script;
+
 public:
 	JSLayout();
 	virtual ~JSLayout();

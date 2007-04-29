@@ -114,6 +114,15 @@ void _log_error(const char *format, ...)
     FLUSHIT
     va_end(ap);
 }
+void _log_js(const char *format, ...)
+{
+    va_list ap;
+    va_start(ap, format);
+    log_stamp("JS");
+    vfprintf(LOG_FILE, format, ap);
+    FLUSHIT
+    va_end(ap);
+}
 void _log_debug(const char *format, const char *file, int line, const char *function, ...)
 {
     va_list ap;

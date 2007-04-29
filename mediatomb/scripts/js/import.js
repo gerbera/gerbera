@@ -176,7 +176,28 @@ var mime = arr[0];
 var obj = orig; 
 obj.refID = orig.id;
 
-if ((mime == 'audio') || (orig.mimetype == 'application/ogg'))
+if (orig.mimetype == 'audio/x-mpegurl')
+{
+    line = '';
+    chain = new Array('Audio', 'Playlists', orig.title);
+    do
+    {
+        line = readln();
+        if (line.match(/^http/))
+        {
+            var exturl = new Object();
+            exturl.mimetype = 'audio/mpeg';
+            exturl.objectType = OBJECT_TYPE_ITEM_EXTERNAL_URL;
+            exturl.location = line;
+            exturl.title = line;
+            exturl.protocol = 'http-get';
+            exturl.upnpclass = UPNP_CLASS_ITEM_MUSIC_TRACK;
+            exturl.description = "Song from " + orig.title;
+            print("Adding " + line);
+            addCdsObject(exturl, createContainerChain(chain),  UPNP_CLASS_PLAYLIST_CONTAINER);
+        }
+    } while (line);
+} else if ((mime == 'audio') || (orig.mimetype == 'application/ogg'))
 {
     addAudio(obj);
 }
