@@ -153,8 +153,8 @@ Introduction
 
 \begin_layout Standard
 MediaTomb comes with an AJAX driven web user interface that allows to add
- or remove media from the database, modify properties of media items and
- it also provides the means of selecting various Autoscan options.
+ or remove media from the database and modify properties of media items.
+ It also provides the means of selecting various Autoscan options.
  The UI is constantly improving, our goal is to offer a wide range of features
  to allow the user to easily control the server.
 \end_layout
