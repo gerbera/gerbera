@@ -171,6 +171,11 @@ Here is a list of icons used in the MediaTomb UI.
 Database View
 \end_layout
 
+\begin_layout Standard
+The Database View presents the content that was added to the servers database
+ - this is the hierarchy that will be served to UPnP devices.
+\end_layout
+
 \begin_layout Subsubsection
 \begin_inset Graphics
 	filename ../web/icons/document-new.png
@@ -297,7 +302,7 @@ Item
 
 \begin_layout Standard
 A media item, typically an audio, photo or video file that resides on the
- servers local filesystem.
+ servers local file system.
 \end_layout
 
 \begin_layout Standard
@@ -325,7 +330,7 @@ Title
 \begin_layout Standard
 Title of the item as it will appear in the UI or as it will be presented
  to UPnP devices, this can be anything and does not have to be the actual
- filename.
+ file name.
 \end_layout
 
 \begin_layout Standard
@@ -414,10 +419,10 @@ Mimetype
 \end_layout
 
 \begin_layout Standard
-This identifies the mimetype of the media and is probably one of the most
+This identifies the mime type of the media and is probably one of the most
  important fields - this will tell your device what kind of file it is dealing
  with.
- If you are unsure, use the file utility to retrieve the mimetype information,
+ If you are unsure, use the file utility to retrieve the mime type information,
  type the following in a console (this example uses a jpg image):
 \end_layout
 
@@ -505,7 +510,7 @@ Title
 \begin_layout Standard
 Title of the item as it will appear in the UI or as it will be presented
  to UPnP devices, this can be anything and does not have to be the actual
- filename.
+ file name.
 \end_layout
 
 \begin_layout Standard
@@ -594,7 +599,7 @@ Mimetype
 \end_layout
 
 \begin_layout Standard
-This identifies the mimetype of the media and is probably one of the most
+This identifies the mime type of the media and is probably one of the most
  important fields - this will tell your device what kind of file it is dealing
  with.
 \end_layout
@@ -723,7 +728,7 @@ Title
 \begin_layout Standard
 Title of the item as it will appear in the UI or as it will be presented
  to UPnP devices, this can be anything and does not have to be the actual
- filename.
+ file name.
 \end_layout
 
 \begin_layout Standard
@@ -835,7 +840,7 @@ Mimetype
 \end_layout
 
 \begin_layout Standard
-This identifies the mimetype of the media and is probably one of the most
+This identifies the mime type of the media and is probably one of the most
  important fields - this will tell your device what kind of file it is dealing
  with.
  
@@ -904,7 +909,7 @@ Title
 \begin_layout Standard
 Title of the item as it will appear in the UI or as it will be presented
  to UPnP devices, this can be anything and does not have to be the actual
- filename.
+ file name.
 \end_layout
 
 \begin_layout Standard
@@ -993,7 +998,7 @@ Mimetype
 \end_layout
 
 \begin_layout Standard
-This identifies the mimetype of the media and is probably one of the most
+This identifies the mime type of the media and is probably one of the most
  important fields - this will tell your device what kind of file it is dealing
  with.
 \end_layout
@@ -1045,7 +1050,7 @@ Allows to edit various object properties.
 \begin_layout Description
 Note: you can not modify the title and the location of objects in the PC-Directo
 ry because it is a special container that must guarantee a 1:1 mapping to
- the filesystem.
+ the file system.
 \end_layout
 
 \begin_layout Description
@@ -1100,8 +1105,317 @@ Note: the remove feature does not touch the files on your drive, the remove
  operation is only performed in the MediaTomb database.
 \end_layout
 
-\begin_layout Code
+\begin_layout Subsubsection
+\begin_inset Graphics
+	filename ../web/icons/add_as_autoscan.png
 
+\end_inset
+
+ 
+\begin_inset LatexCommand \label{sec:Set-Autoscan-Properties}
+
+\end_inset
+
+Set Autoscan Properties
+\end_layout
+
+\begin_layout Standard
+In the Database view this icon is only available for containers in the PC-Direct
+ory.
+ Here are the possible settings:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+Scan Level
+\end_layout
+
+\begin_layout Standard
+Defines the autoscan type, can be one of the following:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+None
+\end_layout
+
+\begin_layout Standard
+The directory will not be scanned, use this setting if you do not want to
+ monitor the directory any longer.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+Basic
+\end_layout
+
+\begin_layout Standard
+The 
+\begin_inset Quotes sld
+\end_inset
+
+Basic
+\begin_inset Quotes srd
+\end_inset
+
+ autoscan type will only keep track if files have been added to or have
+ been removed from the monitored directory.
+ It will not detect changes inside the files, i.e.
+ if you modify an id3 tag of your MP3, the metadata in the database will
+ not be updated.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+Full
+\end_layout
+
+\begin_layout Standard
+The 
+\begin_inset Quotes sld
+\end_inset
+
+Full
+\begin_inset Quotes srd
+\end_inset
+
+ autoscan type will not only keep track of deleted or newly added files,
+ but it will also watch the modification times and re add the media if it
+ detects any changes.
+ This might be useful if you updated the id3 information of an mp3 file
+ or exif information of an image file.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+Recursive
+\end_layout
+
+\begin_layout Standard
+Operate recursively, also monitoring files in subdirectories.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+Include hidden files/directories
+\end_layout
+
+\begin_layout Standard
+Process or ignore hidden files and directories, i.e.
+ those starting with a dot.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+Scan Interval
+\end_layout
+
+\begin_layout Standard
+Interval in seconds, the directory will be rescanned in given intervals.
+\end_layout
+
+\begin_layout Description
+Note: the countdown for the next rescan starts only after the current scan
+ is complete.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Filesystem View
+\end_layout
+
+\begin_layout Standard
+The Filesystem View allows you to browse the contents of your harddrive
+ and add media to the severs database.
+\end_layout
+
+\begin_layout Subsubsection
+\begin_inset Graphics
+	filename ../web/icons/stock-add.png
+
+\end_inset
+
+Add File or Directory
+\end_layout
+
+\begin_layout Standard
+Adds a file or directory to the servers database, use this to make your
+ media available to UPnP devices.
+\end_layout
+
+\begin_layout Subsubsection
+\begin_inset Graphics
+	filename ../web/icons/add_as_autoscan.png
+
+\end_inset
+
+Set Autoscan Properties
+\end_layout
+
+\begin_layout Standard
+Same as 
+\begin_inset LatexCommand \ref{sec:Set-Autoscan-Properties}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+UI Status
+\end_layout
+
+\begin_layout Subsubsection
+\begin_inset Graphics
+	filename ../web/icons/status_loading.png
+
+\end_inset
+
+ Loading
+\end_layout
+
+\begin_layout Standard
+Red eyes indicate that the UI is currently loading data/building up the
+ tree structure.
+\end_layout
+
+\begin_layout Subsubsection
+\begin_inset Graphics
+	filename ../web/icons/status_updates_pending.png
+
+\end_inset
+
+ Updates Pending
+\end_layout
+
+\begin_layout Standard
+Orange eyes indicate that the database has changed and that the UI needs
+ to be updated in order to reflect those changes.
+ The update will usually take place after a certain timeout, which depends
+ on your actions.
+ If you are constantly navigating, the update will be delayed further to
+ prevent the case that the tree gets updated during navigation - this would
+ be very annoying.
+ You can skip the timeout and cause an immediate update by clicking on the
+ skull icon.
 \end_layout
 
 \end_body
