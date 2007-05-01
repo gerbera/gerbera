@@ -1706,6 +1706,32 @@ Run the server in background, MediaTomb will shutdown on SIGTERM, SIGINT
 \end_layout
 
 \begin_layout Subsection
+Home Directory
+\end_layout
+
+\begin_layout Code
+--home or -m
+\end_layout
+
+\begin_layout Standard
+Specify an alternative home directory.
+ By default MediaTomb will try to retrieve the users home directory from
+ the environment, then it will look for a .mediatomb directory in users home;
+ if found it will try to find the default configuration file.
+\end_layout
+
+\begin_layout Standard
+This option is useful in two cases: when the home directory can not be retrieved
+ from the environment (in this case you could also use -c to point MediaTomb
+ to your configuration file or when you want to create a new configuration
+ in a non standard locatin (for example, when setting up daemon mode).
+ In the case, that the -m parameter is given, but no default configuration
+ exists, MediaTomb will not create an additional .mediatomb directory, but
+ will assume that you want to create a default configuration in the directory
+ that was specified with the -m parameter.
+\end_layout
+
+\begin_layout Subsection
 Write PID File
 \end_layout
 
