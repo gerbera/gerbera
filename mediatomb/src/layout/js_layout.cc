@@ -169,6 +169,9 @@ static Ref<CdsObject> jsObject2cdsObject(JSContext *cx, JSObject *js)
     }
 
     Ref<CdsObject> obj = CdsObject::createObject(objectType);
+    objectType = obj->getObjectType(); // this is important, because the
+                                       // type will be changed appropriately
+                                       // by the create function
 
     // CdsObject
     obj->setVirtual(1); // JS creates only virtual objects
@@ -222,7 +225,7 @@ static Ref<CdsObject> jsObject2cdsObject(JSContext *cx, JSObject *js)
     }
 
     // CdsItem
-    if (IS_CDS_ITEM(objectType) || (IS_CDS_ITEM_EXTERNAL_URL(objectType))) // tmporary HACK
+    if (IS_CDS_ITEM(objectType))
     {
         Ref<CdsItem> item = RefCast(obj, CdsItem);
 
