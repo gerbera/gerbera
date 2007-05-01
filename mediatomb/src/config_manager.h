@@ -128,7 +128,7 @@ public:
     /// This function will create an array like that: ["data", "otherdata"]
     zmm::Ref<zmm::Array<zmm::StringBase> > createArrayFromNodeset(zmm::Ref<mxml::Element> element, zmm::String nodeName, zmm::String attrName); 
     
-    static void setStaticArgs(zmm::String filename, zmm::String userhome);
+    static void setStaticArgs(zmm::String filename, zmm::String userhome, bool _set_default_in_home = true);
    
     zmm::Ref<Dictionary> getMimeToContentTypeMappings();
 
@@ -144,9 +144,12 @@ protected:
     
     static zmm::String filename;
     static zmm::String userhome;
+    static bool set_default_in_home;
+
     zmm::Ref<mxml::Element> root;
 
     zmm::Ref<Dictionary> mime_content;
+
 };
 
 #endif // __CONFIG_MANAGER_H__

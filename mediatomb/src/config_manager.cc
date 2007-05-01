@@ -57,28 +57,35 @@ SINGLETON_MUTEX(ConfigManager, false);
 
 String ConfigManager::filename = nil;
 String ConfigManager::userhome = nil;
+bool ConfigManager::set_default_in_home = true;
 
 ConfigManager::~ConfigManager()
 {
     filename = nil;
     userhome = nil;
+    set_default_in_home = true;
 }
 
-void ConfigManager::setStaticArgs(String _filename, String _userhome)
+void ConfigManager::setStaticArgs(String _filename, String _userhome, bool _set_default_in_home)
 {
     filename = _filename;
     userhome = _userhome;
+    set_default_in_home = _set_default_in_home;
 }
 
 ConfigManager::ConfigManager() : Singleton<ConfigManager>()
 {
-    String home = userhome + DIR_SEPARATOR + DEFAULT_CONFIG_HOME;
+    String defhome;
+    if (set_default_in_home)
+        defhome = _(DEFAULT_CONFIG_HOME);
+
+    String home = userhome + DIR_SEPARATOR + defhome;
     bool home_ok = true;
     
     if (filename == nil)
     {
         // we are looking for ~/.mediatomb
-        if (home_ok && (!check_path(userhome + DIR_SEPARATOR + DEFAULT_CONFIG_HOME + DIR_SEPARATOR + DEFAULT_CONFIG_NAME)))
+        if (home_ok && (!check_path(userhome + DIR_SEPARATOR + defhome + DIR_SEPARATOR + DEFAULT_CONFIG_NAME)))
         {
             home_ok = false;
         }
@@ -133,8 +140,12 @@ String ConfigManager::construct_path(String path)
 String ConfigManager::createDefaultConfig(String userhome)
 {
     bool mysql_flag = false;
+    String defhome;
 
-    String homepath = userhome + DIR_SEPARATOR + DEFAULT_CONFIG_HOME;
+    if (set_default_in_home)
+        defhome = _(DEFAULT_CONFIG_HOME);
+
+    String homepath = userhome + DIR_SEPARATOR + defhome;
 
     if (!check_path(homepath, true))
     {
