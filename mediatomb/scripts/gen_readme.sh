@@ -27,3 +27,7 @@ FILENAME_ASCII=scripting.txt
 FILENAME_UTF_8=scripting_utf8.txt
 gen_readme
 
+FILENAME=ui
+FILENAME_ASCII=ui.txt
+FILENAME_UTF_8=ui_utf8.txt
+gen_readme
