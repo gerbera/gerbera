@@ -1,4 +1,4 @@
-#LyX 1.4.4 created this file. For more info see http://www.lyx.org/
+#LyX 1.4.3 created this file. For more info see http://www.lyx.org/
 \lyxformat 245
 \begin_document
 \begin_header
@@ -172,7 +172,7 @@ Database View
 \end_layout
 
 \begin_layout Standard
-The Database View presents the content that was added to the servers database
+The database view presents the content that was added to the servers database
  - this is the hierarchy that will be served to UPnP devices.
 \end_layout
 
@@ -186,7 +186,7 @@ Create New Object
 \end_layout
 
 \begin_layout Standard
-Creates a new object in the database.
+Manually creates a new object in the database.
  
 \end_layout
 
@@ -214,7 +214,7 @@ Container
 \end_layout
 
 \begin_layout Standard
-A container, that can hold other items or containers.
+A container, that can hold other containers or items.
  
 \end_layout
 
@@ -750,7 +750,8 @@ URL
 \end_layout
 
 \begin_layout Standard
-The URL to the stream, typically http://somewhere.org/somefile.mp3
+The URL to the stream, for example http://www.deadlock.dhs.org/192/Deadlock_Veteran.
+04.Uznik.mp3
 \end_layout
 
 \begin_layout Standard
