@@ -1,0 +1,10 @@
+#!/bin/sh -e
+
+if [ "$1" = "purge" ] ; then
+    rm -f /var/lib/mediatomb/sqlite3.db /var/lib/mediatomb/mediatomb.html /var/log/mediatomb /var/run/mediatomb.pid
+    userdel mediatomb || true
+fi
+
+#DEBHELPER#
+
+exit 0

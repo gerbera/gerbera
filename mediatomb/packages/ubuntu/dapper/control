@@ -2,13 +2,12 @@ Source: mediatomb
 Section: net
 Priority: optional
 Maintainer: Leonhard Wimmer <leo@mediatomb.cc>
-Build-Depends: debhelper (>= 5), autotools-dev, libexif-dev, libid3-3.8.3-dev,
- libmagic-dev, libmysqlclient15-dev, libsqlite3-dev, zlib1g-dev, libmozjs-dev
+Build-Depends: debhelper (>= 5), autotools-dev, libexif-dev, libid3-3.8.3-dev, libmagic-dev, libmysqlclient15-dev, libsqlite3-dev, zlib1g-dev, libsmjs-dev
 Standards-Version: 3.7.2
 
 Package: mediatomb
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, adduser (>= 3.34), passwd
 Description: UPnP MediaServer
  MediaTomb is an open source (GPL) UPnP MediaServer with a nice web user
  interface, it allows you to stream your digital media through your home network
