@@ -438,7 +438,7 @@ AC_HELP_STRING([--disable-fseeko-check],
 ###############################################################################
 # The following block is derived from the configure.ac script from the 
 # libupnp-1.3.1 package
-# (C) Copyright 2005-2006 RÅ–òmi Turboult <r3mi@users.sourceforge.net>
+# (C) Copyright 2005-2006 Remi Turboult <r3mi@users.sourceforge.net>
 upnpmaj=0
 upnpmin=4
 upnppatch=1
@@ -639,7 +639,7 @@ AC_TYPE_SIZE_T
 if test "$SKIP_FSEEKO_TEST" -eq 0; then
     AC_FUNC_FSEEKO
 
-    if test "$ac_cv_func_fseeko" != yes; then
+    if test "$ac_cv_func_fseeko" = no || test "$ac_cv_sys_largefile_source" = unknown; then
         AC_MSG_WARN([fseeko has not been found on your system, will use fseek instead.])
         AC_MSG_WARN([This has not been tested, please report if you have any problems.])
         AC_DEFINE([fseeko], [fseek], [fseeko not present])
