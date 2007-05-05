@@ -1,23 +1,35 @@
+/*MT*
 
-/*  scripting.cc - this file is part of MediaTomb.
-                                                                                
-    Copyright (C) 2005 Gena Batyan <bgeradz@deadlock.dhs.org>,
-                       Sergey Bostandzhyan <jin@deadlock.dhs.org>
-                                                                                
-    MediaTomb is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-                                                                                
-    MediaTomb is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-                                                                                
-    You should have received a copy of the GNU General Public License
-    along with MediaTomb; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+  MediaTomb - http://www.mediatomb.cc/
+
+  import_script.cc - this file is part of MediaTomb.
+
+  Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
+  Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
+
+  Copyright (C) 2006-2007 Gena Batyan <bgeradz@mediatomb.cc>,
+  Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
+  Leonhard Wimmer <leo@mediatomb.cc>
+
+  MediaTomb is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License version 2
+  as published by the Free Software Foundation.
+
+  MediaTomb is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  version 2 along with MediaTomb; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
+
+  $Id$
+ */
+
+#ifdef HAVE_CONFIG_H
+    #include "autoconfig.h"
+#endif
 
 #ifdef HAVE_JS
 
@@ -27,6 +39,7 @@
 #include "metadata_handler.h"
 #include "config_manager.h"
 #include "tools.h"
+#include "string_converter.h"
 
 using namespace zmm;
 
@@ -40,28 +53,31 @@ Ref<CdsObject> ImportScript::jsObject2cdsObject(JSObject *js)
     objectType = getIntProperty(js, _("objectType"), -1);
     if (objectType == -1)
     {
-        log_info(("scripting: addObject: missing objectType property\n"));
+        log_error("missing objectType property\n");
         return nil;
     }
 
     Ref<CdsObject> obj = CdsObject::createObject(objectType);
+    objectType = obj->getObjectType(); // this is important, because the
+    // type will be changed appropriately
+    // by the create function
 
     // CdsObject
     obj->setVirtual(1); // JS creates only virtual objects
 
-    i = getIntProperty(js, _("id"), -333);
-    if (i != -333)
+    i = getIntProperty(js, _("id"), INVALID_OBJECT_ID);
+    if (i != INVALID_OBJECT_ID)
         obj->setID(i);
-    i = getIntProperty(js, _("refID"), -333);
-    if (i != -333)
+    i = getIntProperty(js, _("refID"), INVALID_OBJECT_ID);
+    if (i != INVALID_OBJECT_ID)
         obj->setRefID(i);
-    i = getIntProperty(js, _("parentID"), -333);
-    if (i != -333)
+    i = getIntProperty(js, _("parentID"), INVALID_OBJECT_ID);
+    if (i != INVALID_OBJECT_ID)
         obj->setParentID(i);
     val = getProperty(js, _("title"));
     if (val != nil)
         obj->setTitle(val);
-    val = getProperty(js, _("class"));
+    val = getProperty(js, _("upnpclass"));
     if (val != nil)
         obj->setClass(val);
     val = getProperty(js, _("location"));
@@ -74,25 +90,26 @@ Ref<CdsObject> ImportScript::jsObject2cdsObject(JSObject *js)
     JSObject *js_meta = getObjectProperty(js, _("meta"));
     if (js_meta)
     {
-        /*
-        JSIdArray *js_meta_ids = JS_Enumerate(cx, js_meta);
-        if (js_meta_ids)
-        {
-            for (int i = 0; i < js_meta_ids->length; i++)
-            {
-                jsid id = js_meta_ids->vector[i];
-                log_debug(("META ID: %d\n", id));
-            }
-        }
-        JS_DestroyIdArray(cx, js_meta_ids);
-        */
-
-        /// \TODO: only metadata enumerated in MT_KEYS is taken
+        /// \todo: only metadata enumerated in MT_KEYS is taken
         for (int i = 0; i < M_MAX; i++)
         {
             val = getProperty(js_meta, _(MT_KEYS[i].upnp));
             if (val != nil)
-                obj->setMetadata(_(MT_KEYS[i].upnp), val);
+            {
+                if (i == M_TRACKNUMBER)
+                {
+                    int j = val.toInt();
+                    if (j > 0)
+                    {
+                        obj->setMetadata(String(MT_KEYS[i].upnp), val);
+                        RefCast(obj, CdsItem)->setTrackNumber(j);
+                    }
+                    else
+                        RefCast(obj, CdsItem)->setTrackNumber(0);
+                }
+                else
+                    obj->setMetadata(String(MT_KEYS[i].upnp), val);
+            }
         }
     }
 
@@ -115,6 +132,31 @@ Ref<CdsObject> ImportScript::jsObject2cdsObject(JSObject *js)
             if (val != nil)
                 aitem->setState(val);
         }
+
+        if (IS_CDS_ITEM_EXTERNAL_URL(objectType))
+        {
+            String protocolInfo;
+
+            obj->setRestricted(true);
+            Ref<CdsItemExternalURL> item = RefCast(obj, CdsItemExternalURL);
+            val = getProperty(js, _("description"));
+            if (val != nil)
+                item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), val);
+            val = getProperty(js, _("protocol"));
+            if (val != nil)
+            {
+                protocolInfo = renderProtocolInfo(item->getMimeType(), val);
+            }
+            else
+            {
+                protocolInfo = renderProtocolInfo(item->getMimeType(), _(MIMETYPE_DEFAULT));
+            }
+            Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
+            resource->addAttribute(MetadataHandler::getResAttrName(
+                        R_PROTOCOLINFO), protocolInfo);
+
+            item->addResource(resource);
+        }
     }
 
     // CdsDirectory
@@ -130,40 +172,44 @@ Ref<CdsObject> ImportScript::jsObject2cdsObject(JSObject *js)
     }
 
     return obj;
+
 }
 
 void ImportScript::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
 {
-	String val;
-	int i;
+    String val;
+    int i;
 
-	int objectType = obj->getObjectType();
+    int objectType = obj->getObjectType();
 
     // CdsObject
-	setIntProperty(js, _("objectType"), objectType);
+    setIntProperty(js, _("objectType"), objectType);
 
     i = obj->getID();
+
     if (i != INVALID_OBJECT_ID)
         setIntProperty(js, _("id"), i);
+
     i = obj->getParentID();
     if (i != INVALID_OBJECT_ID)
         setIntProperty(js, _("parentID"), i);
+
     val = obj->getTitle();
     if (val != nil)
         setProperty(js, _("title"), val);
     val = obj->getClass();
     if (val != nil)
-        setProperty(js, _("class"), val);
+        setProperty(js, _("upnpclass"), val);
     val = obj->getLocation();
     if (val != nil)
         setProperty(js, _("location"), val);
-	// TODO: boolean type
-	i = obj->isRestricted();
+    // TODO: boolean type
+    i = obj->isRestricted();
     setIntProperty(js, _("restricted"), i);
-   
+
     // setting metadata
     {
-    	JSObject *meta_js = JS_NewObject(cx, NULL, NULL, js);
+        JSObject *meta_js = JS_NewObject(cx, NULL, NULL, js);
         Ref<Dictionary> meta = obj->getMetadata();
         Ref<Array<DictionaryElement> > elements = meta->getElements();
         int len = elements->size();
@@ -172,12 +218,12 @@ void ImportScript::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
             Ref<DictionaryElement> el = elements->get(i);
             setProperty(meta_js, el->getKey(), el->getValue());
         }
-    	setObjectProperty(js, _("meta"), meta_js);
+        setObjectProperty(js, _("meta"), meta_js);
     }
 
     // setting auxdata
     {
-    	JSObject *aux_js = JS_NewObject(cx, NULL, NULL, js);
+        JSObject *aux_js = JS_NewObject(cx, NULL, NULL, js);
         Ref<Dictionary> aux = obj->getAuxData();
         Ref<Array<DictionaryElement> > elements = aux->getElements();
         int len = elements->size();
@@ -186,28 +232,28 @@ void ImportScript::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
             Ref<DictionaryElement> el = elements->get(i);
             setProperty(aux_js, el->getKey(), el->getValue());
         }
-    	setObjectProperty(js, _("aux"), aux_js);
+        setObjectProperty(js, _("aux"), aux_js);
     }
 
     /// \todo add resources
-    
+
     // CdsItem
     if (IS_CDS_ITEM(objectType))
     {
         Ref<CdsItem> item = RefCast(obj, CdsItem);
-		val = item->getMimeType();
-		if (val != nil)
-			setProperty(js, _("mimetype"), val);
+        val = item->getMimeType();
+        if (val != nil)
+            setProperty(js, _("mimetype"), val);
 
         if (IS_CDS_ACTIVE_ITEM(objectType))
         {
             Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
-			val = aitem->getAction();
-			if (val != nil)
-				setProperty(js, _("action"), val);
-			val = aitem->getState();
-			if (val != nil)
-				setProperty(js, _("state"), val);
+            val = aitem->getAction();
+            if (val != nil)
+                setProperty(js, _("action"), val);
+            val = aitem->getState();
+            if (val != nil)
+                setProperty(js, _("state"), val);
         }
     }
 
@@ -218,7 +264,7 @@ void ImportScript::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
         // TODO: boolean type, hide updateID
         i = cont->getUpdateID();
         setIntProperty(js, _("updateID"), i);
-        
+
         i = cont->isSearchable();
         setIntProperty(js, _("searchable"), i);
     }
@@ -228,7 +274,7 @@ void ImportScript::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
 extern "C" {
 
 static JSBool
-js_log(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
+js_print(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
 {
     uintN i;
     JSString *str;
@@ -237,21 +283,57 @@ js_log(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
         str = JS_ValueToString(cx, argv[i]);
         if (!str)
             return JS_FALSE;
-        log_info(("%s%s\n", i ? " " : "", JS_GetStringBytes(str)));
+        log_js("%s\n", JS_GetStringBytes(str));
     }
     return JS_TRUE;
 }
 
 static JSBool
-js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
-{ 
+js_copyObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
+{
+    jsval arg;
+    JSObject *js_cds_obj;
+    JSObject *js_cds_clone_obj;
+
     ImportScript *self = (ImportScript *)JS_GetContextPrivate(cx);
 
     try
     {
+        arg = argv[0];
+        if (!JSVAL_IS_OBJECT(arg))
+            return JS_FALSE;
+        if (!JS_ValueToObject(cx, arg, &js_cds_obj))
+            return JS_FALSE;
+
+        Ref<CdsObject> cds_obj = self->jsObject2cdsObject(js_cds_obj);
+        js_cds_clone_obj = JS_NewObject(cx, NULL, NULL, NULL);
+        self->cdsObject2jsObject(cds_obj, js_cds_clone_obj);
+
+        *rval = OBJECT_TO_JSVAL(js_cds_clone_obj);
+
+        return JS_TRUE;
+
+    }
+    catch (Exception e)
+    {
+        e.printStackTrace();
+    }
+    return JS_FALSE;
+}
+
+static JSBool
+js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
+{
+    try
+    {
         jsval arg;
+        JSString *str;
+        String path;
+        String containerclass;
 
         JSObject *js_cds_obj;
+
+        ImportScript *self = (ImportScript *)JS_GetContextPrivate(cx);
 
         arg = argv[0];
         if (!JSVAL_IS_OBJECT(arg))
@@ -259,25 +341,41 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         if (!JS_ValueToObject(cx, arg, &js_cds_obj))
             return JS_FALSE;
 
-        int id;
+        str = JS_ValueToString(cx, argv[1]);
+        if (!str)
+            path = _("/");
+        else
+            path = String(JS_GetStringBytes(str));
+
+        JSString *cont = JS_ValueToString(cx, argv[2]);
+        if (cont)
+        {
+            containerclass = String(JS_GetStringBytes(cont));
+            if (!string_ok(containerclass) || containerclass == "undefined")
+                containerclass = nil;
+        }
 
         Ref<CdsObject> cds_obj = self->jsObject2cdsObject(js_cds_obj);
+        Ref<ContentManager> cm = ContentManager::getInstance();
 
-        Ref<Storage> storage = Storage::getInstance();
-        Ref<CdsObject> db_obj = storage->findObjectByTitle(cds_obj->getTitle(),
-                                                           cds_obj->getParentID());
-        if (db_obj == nil)
+        int id = cm->addContainerChain(path, containerclass);
+        cds_obj->setParentID(id);
+        if (!IS_CDS_ITEM_EXTERNAL_URL(cds_obj->getObjectType()) &&
+            !IS_CDS_ITEM_INTERNAL_URL(cds_obj->getObjectType()))
         {
-            ContentManager::getInstance()->addObject(cds_obj);
-            id = cds_obj->getID();
+            cds_obj->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
         }
-        else
-        {
-            id = db_obj->getID();
-        }
+
+        cds_obj->setID(INVALID_OBJECT_ID);
+        cm->addObject(cds_obj);
 
         /* setting object ID as return value */
-    	*rval = INT_TO_JSVAL(id);
+        String tmp = String::from(id);
+
+        JSString *str2 = JS_NewStringCopyN(cx, tmp.c_str(), tmp.length());
+        if (!str2)
+            return JS_FALSE;
+        *rval = STRING_TO_JSVAL(str2);
 
         return JS_TRUE;
     }
@@ -288,11 +386,13 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
     return JS_FALSE;
 }
 
+
 } // extern "C"
 
 static JSFunctionSpec global_functions[] = {
-    {"log",             js_log,            0},
-    {"addCdsObject",    js_addCdsObject,   1},
+    {"print",           js_print,          0},
+    {"addCdsObject",    js_addCdsObject,   3},
+    {"copyObject",      js_copyObject,     1},
     {0}
 };
 
@@ -313,24 +413,47 @@ ImportScript::ImportScript(Ref<Runtime> runtime) : Script(runtime)
                           OBJECT_TYPE_ACTIVE_ITEM);
     setIntProperty(glob, _("OBJECT_TYPE_ITEM_EXTERNAL_URL"),
                           OBJECT_TYPE_ITEM_EXTERNAL_URL);
+    setIntProperty(glob, _("OBJECT_TYPE_ITEM_INTERNAL_URL"),
+                          OBJECT_TYPE_ITEM_INTERNAL_URL);
+
 
     for (int i = 0; i < M_MAX; i++)
     {
         setProperty(glob, _(MT_KEYS[i].sym), _(MT_KEYS[i].upnp));
     }
+
+    setProperty(glob, _("UPNP_CLASS_CONTAINER_MUSIC"), 
+                       _(UPNP_DEFAULT_CLASS_MUSIC_CONT));
+    setProperty(glob, _("UPNP_CLASS_CONTAINER_MUSIC_ALBUM"), 
+                       _(UPNP_DEFAULT_CLASS_MUSIC_ALBUM));
+    setProperty(glob, _("UPNP_CLASS_CONTAINER_MUSIC_ARTIST"), 
+                      _(UPNP_DEFAULT_CLASS_MUSIC_ARTIST));
+    setProperty(glob, _("UPNP_CLASS_CONTAINER_MUSIC_GENRE"), 
+                       _(UPNP_DEFAULT_CLASS_MUSIC_GENRE));
+    setProperty(glob, _("UPNP_CLASS_CONTAINER"), 
+                      _(UPNP_DEFAULT_CLASS_CONTAINER));
+    setProperty(glob, _("UPNP_CLASS_ITEM"), _(UPNP_DEFAULT_CLASS_ITEM));
+    setProperty(glob, _("UPNP_CLASS_ITEM_MUSIC_TRACK"), 
+                       _(UPNP_DEFAULT_CLASS_MUSIC_TRACK));
+    setProperty(glob, _("UPNP_CLASS_PLAYLIST_CONTAINER"),
+                       _(UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER));
+
     
-    String scriptPath = ConfigManager::getInstance()->getOption(_("/import/script"));
+    String scriptPath = ConfigManager::getInstance()->getOption(_("/import/virtual-layout/script")); 
     load(scriptPath);
+/*
     execute();
 
     runScript = Ref<Script>(new Script(runtime, getContext()));
     runScript->setGlobalObject(getGlobalObject());
     String runScriptSrc = _("PROCESS_OBJECT(orig);");
     runScript->load(runScriptSrc, _("run script"));
+*/
 }
 
 void ImportScript::processCdsObject(Ref<CdsObject> obj)
 {
+/*
     lock();
     try
     {
@@ -345,6 +468,12 @@ void ImportScript::processCdsObject(Ref<CdsObject> obj)
         throw e;
     }
     unlock();
+*/
+
+   JSObject *orig = JS_NewObject(cx, NULL, NULL, glob);
+   setObjectProperty(glob, _("orig"), orig);
+   cdsObject2jsObject(obj, orig);
+   execute();
 }
 
 

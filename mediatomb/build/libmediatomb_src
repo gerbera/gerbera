@@ -85,6 +85,12 @@ libmediatomb_a_SOURCES = \
 ../src/request_handler.h \
 ../src/rexp.cc \
 ../src/rexp.h \
+../src/scripting/import_script.cc \
+../src/scripting/import_script.h \
+../src/scripting/runtime.cc \
+../src/scripting/runtime.h \
+../src/scripting/script.cc \
+../src/scripting/script.h \
 ../src/server.cc \
 ../src/serve_request_handler.cc \
 ../src/serve_request_handler.h \

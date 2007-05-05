@@ -38,7 +38,6 @@ class FallbackLayout : public Layout
 {
 public:
 	FallbackLayout();
-	virtual void init();
 	virtual void processCdsObject(zmm::Ref<CdsObject> obj);	
 };
 

@@ -57,8 +57,6 @@ public:
 
     /// \brief Returns the runtime for script execution.
     JSRuntime *getRT();
-    static zmm::Ref<Runtime> getInstance();
-
 };
 
 #endif // __SCRIPTING_RUNTIME_H__

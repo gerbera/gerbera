@@ -19,10 +19,15 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#ifdef HAVE_CONFIG_H
+    #include "autoconfig.h"
+#endif
+
 #ifdef HAVE_JS
 
 #include "script.h"
 #include "tools.h"
+#include "string_converter.h"
 
 using namespace zmm;
 
@@ -199,7 +204,7 @@ js_error_reporter(JSContext *cx, const char *message, JSErrorReport *report)
     while (0);
 
     String err = buf->toString();
-    log_info(("%s\n", err.c_str()));
+    log_js("%s\n", err.c_str());
 }
 
 /* **************** */
@@ -270,7 +275,7 @@ void Script::load(zmm::String scriptPath)
     String scriptText = read_text_file(scriptPath);
 
     if (!string_ok(scriptText))
-        throw _Exception("empty script");
+        throw _Exception(_("empty script"));
 
     Ref<StringConverter> j2i = StringConverter::j2i();
     try

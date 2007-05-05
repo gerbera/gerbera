@@ -192,10 +192,6 @@ FallbackLayout::FallbackLayout() : Layout()
 {
 }
 
-void FallbackLayout::init()
-{
-}
-
 void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj)
 {
     log_debug("Process CDS Object: %s\n", obj->getTitle().c_str());

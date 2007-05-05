@@ -29,33 +29,22 @@
 
 /// \file js_layout.h
 
-#ifndef __JS_SCRIPTING_H__
-#define __JS_SCRIPTING_H__
+#ifndef __JS_LAYOUT_H__
+#define __JS_LAYOUT_H__
 
-#ifdef __APPLE__
-    #define XP_MAC 1
-#else
-    #define XP_UNIX 1
-#endif
-
-#include <jsapi.h>
 #include "layout.h"
+#include "scripting/import_script.h"
 
 class JSLayout : public Layout
 {
 protected:
-    JSVersion version;
-    JSRuntime *rt;
-    JSContext *cx;
-    JSObject  *glob;
-	JSScript *script;
+    zmm::Ref<ImportScript> import_script;
 
 public:
 	JSLayout();
 	virtual ~JSLayout();
-	virtual void init();
 	virtual void processCdsObject(zmm::Ref<CdsObject> obj);	
 };
 
-#endif // __JS_SCRIPTING_H__
+#endif // __JS_LAYOUT_H__
 
