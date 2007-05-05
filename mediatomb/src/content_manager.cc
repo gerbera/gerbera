@@ -1116,7 +1116,6 @@ void ContentManager::initLayout()
 #ifdef HAVE_JS
                     s = new JSLayout();
                     layout = Ref<Layout>(s);
-                    layout->init();
 #else
                     log_error("Cannot init layout: MediaTomb compiled without js support but js script was requested.");
 #endif
