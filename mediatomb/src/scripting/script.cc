@@ -28,6 +28,7 @@
 #include "script.h"
 #include "tools.h"
 #include "string_converter.h"
+#include "metadata_handler.h"
 
 using namespace zmm;
 
@@ -300,6 +301,234 @@ void Script::execute()
     if (!JS_ExecuteScript(cx, glob, script, &ret_val))
         throw _Exception(_("Script: failed to execute script"));
 }
+
+Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js)
+{
+    String val;
+    int objectType;
+    int b;
+    int i;
+
+    objectType = getIntProperty(js, _("objectType"), -1);
+    if (objectType == -1)
+    {
+        log_error("missing objectType property\n");
+        return nil;
+    }
+
+    Ref<CdsObject> obj = CdsObject::createObject(objectType);
+    objectType = obj->getObjectType(); // this is important, because the
+    // type will be changed appropriately
+    // by the create function
+
+    // CdsObject
+    obj->setVirtual(1); // JS creates only virtual objects
+
+    i = getIntProperty(js, _("id"), INVALID_OBJECT_ID);
+    if (i != INVALID_OBJECT_ID)
+        obj->setID(i);
+    i = getIntProperty(js, _("refID"), INVALID_OBJECT_ID);
+    if (i != INVALID_OBJECT_ID)
+        obj->setRefID(i);
+    i = getIntProperty(js, _("parentID"), INVALID_OBJECT_ID);
+    if (i != INVALID_OBJECT_ID)
+        obj->setParentID(i);
+    val = getProperty(js, _("title"));
+    if (val != nil)
+        obj->setTitle(val);
+    val = getProperty(js, _("upnpclass"));
+    if (val != nil)
+        obj->setClass(val);
+    val = getProperty(js, _("location"));
+    if (val != nil)
+        obj->setLocation(val);
+    b = getBoolProperty(js, _("restricted"));
+    if (b >= 0)
+        obj->setRestricted(b);
+
+    JSObject *js_meta = getObjectProperty(js, _("meta"));
+    if (js_meta)
+    {
+        /// \todo: only metadata enumerated in MT_KEYS is taken
+        for (int i = 0; i < M_MAX; i++)
+        {
+            val = getProperty(js_meta, _(MT_KEYS[i].upnp));
+            if (val != nil)
+            {
+                if (i == M_TRACKNUMBER)
+                {
+                    int j = val.toInt();
+                    if (j > 0)
+                    {
+                        obj->setMetadata(String(MT_KEYS[i].upnp), val);
+                        RefCast(obj, CdsItem)->setTrackNumber(j);
+                    }
+                    else
+                        RefCast(obj, CdsItem)->setTrackNumber(0);
+                }
+                else
+                    obj->setMetadata(String(MT_KEYS[i].upnp), val);
+            }
+        }
+    }
+
+    // CdsItem
+    if (IS_CDS_ITEM(objectType))
+    {
+        Ref<CdsItem> item = RefCast(obj, CdsItem);
+
+        val = getProperty(js, _("mimetype"));
+        if (val != nil)
+            item->setMimeType(val);
+
+        if (IS_CDS_ACTIVE_ITEM(objectType))
+        {
+            Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
+            val = getProperty(js, _("action"));
+            if (val != nil)
+                aitem->setAction(val);
+            val = getProperty(js, _("state"));
+            if (val != nil)
+                aitem->setState(val);
+        }
+
+        if (IS_CDS_ITEM_EXTERNAL_URL(objectType))
+        {
+            String protocolInfo;
+
+            obj->setRestricted(true);
+            Ref<CdsItemExternalURL> item = RefCast(obj, CdsItemExternalURL);
+            val = getProperty(js, _("description"));
+            if (val != nil)
+                item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), val);
+            val = getProperty(js, _("protocol"));
+            if (val != nil)
+            {
+                protocolInfo = renderProtocolInfo(item->getMimeType(), val);
+            }
+            else
+            {
+                protocolInfo = renderProtocolInfo(item->getMimeType(), _(MIMETYPE_DEFAULT));
+            }
+            Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
+            resource->addAttribute(MetadataHandler::getResAttrName(
+                        R_PROTOCOLINFO), protocolInfo);
+
+            item->addResource(resource);
+        }
+    }
+
+    // CdsDirectory
+    if (IS_CDS_CONTAINER(objectType))
+    {
+        Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
+        i = getIntProperty(js, _("updateID"), -1);
+        if (i >= 0)
+            cont->setUpdateID(i);
+        b = getBoolProperty(js, _("searchable"));
+        if (b >= 0)
+            cont->setSearchable(b);
+    }
+
+    return obj;
+
+}
+
+void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
+{
+    String val;
+    int i;
+
+    int objectType = obj->getObjectType();
+
+    // CdsObject
+    setIntProperty(js, _("objectType"), objectType);
+
+    i = obj->getID();
+
+    if (i != INVALID_OBJECT_ID)
+        setIntProperty(js, _("id"), i);
+
+    i = obj->getParentID();
+    if (i != INVALID_OBJECT_ID)
+        setIntProperty(js, _("parentID"), i);
+
+    val = obj->getTitle();
+    if (val != nil)
+        setProperty(js, _("title"), val);
+    val = obj->getClass();
+    if (val != nil)
+        setProperty(js, _("upnpclass"), val);
+    val = obj->getLocation();
+    if (val != nil)
+        setProperty(js, _("location"), val);
+    // TODO: boolean type
+    i = obj->isRestricted();
+    setIntProperty(js, _("restricted"), i);
+
+    // setting metadata
+    {
+        JSObject *meta_js = JS_NewObject(cx, NULL, NULL, js);
+        Ref<Dictionary> meta = obj->getMetadata();
+        Ref<Array<DictionaryElement> > elements = meta->getElements();
+        int len = elements->size();
+        for (int i = 0; i < len; i++)
+        {
+            Ref<DictionaryElement> el = elements->get(i);
+            setProperty(meta_js, el->getKey(), el->getValue());
+        }
+        setObjectProperty(js, _("meta"), meta_js);
+    }
+
+    // setting auxdata
+    {
+        JSObject *aux_js = JS_NewObject(cx, NULL, NULL, js);
+        Ref<Dictionary> aux = obj->getAuxData();
+        Ref<Array<DictionaryElement> > elements = aux->getElements();
+        int len = elements->size();
+        for (int i = 0; i < len; i++)
+        {
+            Ref<DictionaryElement> el = elements->get(i);
+            setProperty(aux_js, el->getKey(), el->getValue());
+        }
+        setObjectProperty(js, _("aux"), aux_js);
+    }
+
+    /// \todo add resources
+
+    // CdsItem
+    if (IS_CDS_ITEM(objectType))
+    {
+        Ref<CdsItem> item = RefCast(obj, CdsItem);
+        val = item->getMimeType();
+        if (val != nil)
+            setProperty(js, _("mimetype"), val);
+
+        if (IS_CDS_ACTIVE_ITEM(objectType))
+        {
+            Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
+            val = aitem->getAction();
+            if (val != nil)
+                setProperty(js, _("action"), val);
+            val = aitem->getState();
+            if (val != nil)
+                setProperty(js, _("state"), val);
+        }
+    }
+
+    // CdsDirectory
+    if (IS_CDS_CONTAINER(objectType))
+    {
+        Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
+        // TODO: boolean type, hide updateID
+        i = cont->getUpdateID();
+        setIntProperty(js, _("updateID"), i);
+
+        i = cont->isSearchable();
+        setIntProperty(js, _("searchable"), i);
+    }
+}
+
 
 #endif // HAVE_JS
 

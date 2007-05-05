@@ -43,9 +43,6 @@ public:
 	ImportScript(zmm::Ref<Runtime> runtime);
 	void processCdsObject(zmm::Ref<CdsObject> obj);	
     
-    zmm::Ref<CdsObject> jsObject2cdsObject(JSObject *js);
-    void cdsObject2jsObject(zmm::Ref<CdsObject> obj, JSObject *js);
-
 protected:
     zmm::Ref<Script> runScript;
 

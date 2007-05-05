@@ -16,7 +16,11 @@
     You should have received a copy of the GNU General Public License
     along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+    $Id $
 */
+
+/// \file script.h
 
 #ifndef __SCRIPTING_SCRIPT_H__
 #define __SCRIPTING_SCRIPT_H__
@@ -30,6 +34,7 @@
 #include <jsapi.h>
 #include "common.h"
 #include "runtime.h"
+#include "cds_objects.h"
 
 class Script : public zmm::Object
 {
@@ -65,6 +70,12 @@ public:
     void load(zmm::String scriptPath);
     void load(zmm::String scriptText, zmm::String scriptPath);
     void execute();
+
+    /// \todo can those two functions really stay here, or do we need
+    /// a class inbetween to keep a nice separation?
+    zmm::Ref<CdsObject> jsObject2cdsObject(JSObject *js);
+    void cdsObject2jsObject(zmm::Ref<CdsObject> obj, JSObject *js);
+
 };
 
 #endif // __SCRIPTING_SCRIPT_H__
