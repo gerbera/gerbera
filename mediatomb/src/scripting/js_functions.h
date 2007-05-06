@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    import_script.cc - this file is part of MediaTomb.
+    js_functions.h - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -27,41 +27,34 @@
     $Id$
 */
 
-/// \file import_script.cc
+/// \file js_functions.h 
+/// \brief These functions can be called from scripts.
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
+#ifndef __SCRIPTING_JS_FUNCTIONS_H__
+#define __SCRIPTING_JS_FUNCTIONS_H__
+
+#ifdef __APPLE__
+    #define XP_MAC 1
+#else
+    #define XP_UNIX 1
 #endif
 
-#ifdef HAVE_JS
+#include <jsapi.h>
 
-#include "import_script.h"
-#include "config_manager.h"
-#include "js_functions.h"
+extern "C" {
 
-using namespace zmm;
+/// \brief Log output.
+JSBool js_print(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval);
 
-static JSFunctionSpec global_functions[] = {
-    {"addCdsObject",    js_addCdsObject,   3},
-    {"copyObject",      js_copyObject,     1},
-    {0}
-};
+/// \brief Adds an object to the database.
+JSBool js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval);
 
-ImportScript::ImportScript(Ref<Runtime> runtime) : Script(runtime)
-{
-    defineFunctions(global_functions);
-    
-    String scriptPath = ConfigManager::getInstance()->getOption(_("/import/virtual-layout/script")); 
-    load(scriptPath);
-}
+/// \brief Reads a line from a text file.
+JSBool js_readln(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval);
 
-void ImportScript::processCdsObject(Ref<CdsObject> obj)
-{
-   JSObject *orig = JS_NewObject(cx, NULL, NULL, glob);
-   setObjectProperty(glob, _("orig"), orig);
-   cdsObject2jsObject(obj, orig);
-   execute();
-}
+/// \brief Makes a copy of an CDS object.
+JSBool js_copyObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval);
 
-#endif // HAVE_JS
+} // extern "C"
 
+#endif//__SCRIPTING_JS_FUNCTIONS_H__

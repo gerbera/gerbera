@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    import_script.cc - this file is part of MediaTomb.
+    playlist_parser_script.cc - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -24,10 +24,10 @@
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
     
-    $Id$
+    $Id: import_script.cc 1270 2007-05-06 15:21:57Z lww $
 */
 
-/// \file import_script.cc
+/// \file playlist_parser_script.cc
 
 #ifdef HAVE_CONFIG_H
     #include "autoconfig.h"
@@ -35,31 +35,33 @@
 
 #ifdef HAVE_JS
 
-#include "import_script.h"
+#include "playlist_parser_script.h"
 #include "config_manager.h"
 #include "js_functions.h"
 
 using namespace zmm;
 
 static JSFunctionSpec global_functions[] = {
-    {"addCdsObject",    js_addCdsObject,   3},
     {"copyObject",      js_copyObject,     1},
+    {"readln",          js_readln,         0},
     {0}
 };
 
-ImportScript::ImportScript(Ref<Runtime> runtime) : Script(runtime)
+
+PlaylistParserScript::PlaylistParserScript(Ref<Runtime> runtime) : Script(runtime)
 {
     defineFunctions(global_functions);
     
-    String scriptPath = ConfigManager::getInstance()->getOption(_("/import/virtual-layout/script")); 
+//    String scriptPath = ConfigManager::getInstance()->getOption(_("/import/virtual-layout/script")); 
+    String scriptPath = _("/tmp/parser.js");
     load(scriptPath);
 }
 
-void ImportScript::processCdsObject(Ref<CdsObject> obj)
+void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj)
 {
-   JSObject *orig = JS_NewObject(cx, NULL, NULL, glob);
-   setObjectProperty(glob, _("orig"), orig);
-   cdsObject2jsObject(obj, orig);
+   JSObject *playlist = JS_NewObject(cx, NULL, NULL, glob);
+   setObjectProperty(glob, _("playlist"), playlist);
+   cdsObject2jsObject(obj, playlist);
    execute();
 }
 

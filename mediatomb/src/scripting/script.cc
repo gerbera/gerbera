@@ -39,8 +39,14 @@
 #include "tools.h"
 #include "string_converter.h"
 #include "metadata_handler.h"
+#include "js_functions.h"
 
 using namespace zmm;
+
+static JSFunctionSpec global_functions[] = {
+    {"print",           js_print,          0},
+    {0}
+};
 
 String Script::getProperty(JSObject *obj, String name)
 {
@@ -230,7 +236,46 @@ Script::Script(Ref<Runtime> runtime) : Object()
     
     JS_SetErrorReporter(cx, js_error_reporter);
     initGlobalObject();
+
+    JS_SetPrivate(cx, glob, this);
+
+    /* initialize contstants */
+    setIntProperty(glob, _("OBJECT_TYPE_CONTAINER"),
+                          OBJECT_TYPE_CONTAINER);
+    setIntProperty(glob, _("OBJECT_TYPE_ITEM"),
+                          OBJECT_TYPE_ITEM);
+    setIntProperty(glob, _("OBJECT_TYPE_ACTIVE_ITEM"),
+                          OBJECT_TYPE_ACTIVE_ITEM);
+    setIntProperty(glob, _("OBJECT_TYPE_ITEM_EXTERNAL_URL"),
+                          OBJECT_TYPE_ITEM_EXTERNAL_URL);
+    setIntProperty(glob, _("OBJECT_TYPE_ITEM_INTERNAL_URL"),
+                          OBJECT_TYPE_ITEM_INTERNAL_URL);
+    
+
+    for (int i = 0; i < M_MAX; i++)
+    {
+        setProperty(glob, _(MT_KEYS[i].sym), _(MT_KEYS[i].upnp));
+    }
+    
+    setProperty(glob, _("UPNP_CLASS_CONTAINER_MUSIC"), 
+                       _(UPNP_DEFAULT_CLASS_MUSIC_CONT));
+    setProperty(glob, _("UPNP_CLASS_CONTAINER_MUSIC_ALBUM"),
+                       _(UPNP_DEFAULT_CLASS_MUSIC_ALBUM));
+    setProperty(glob, _("UPNP_CLASS_CONTAINER_MUSIC_ARTIST"),
+                      _(UPNP_DEFAULT_CLASS_MUSIC_ARTIST));
+    setProperty(glob, _("UPNP_CLASS_CONTAINER_MUSIC_GENRE"),
+                       _(UPNP_DEFAULT_CLASS_MUSIC_GENRE));
+    setProperty(glob, _("UPNP_CLASS_CONTAINER"),
+                      _(UPNP_DEFAULT_CLASS_CONTAINER));
+    setProperty(glob, _("UPNP_CLASS_ITEM"), _(UPNP_DEFAULT_CLASS_ITEM));
+    setProperty(glob, _("UPNP_CLASS_ITEM_MUSIC_TRACK"),
+                       _(UPNP_DEFAULT_CLASS_MUSIC_TRACK));
+    setProperty(glob, _("UPNP_CLASS_PLAYLIST_CONTAINER"),
+                       _(UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER));
+    
+    defineFunctions(global_functions);
 }
+
 Script::~Script()
 {
     if (script)
