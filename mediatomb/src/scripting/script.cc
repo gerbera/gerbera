@@ -220,27 +220,21 @@ js_error_reporter(JSContext *cx, const char *message, JSErrorReport *report)
 
 /* **************** */
 
-Script::Script(Ref<Runtime> runtime, JSContext *cx) : Object()
+Script::Script(Ref<Runtime> runtime) : Object()
 {
     this->runtime = runtime;
     rt = runtime->getRT();
+    cx = runtime->getCX();
     glob = NULL;
 	script = NULL;
-
-    /* create a context and associate it with the JS run time */
-    if (! cx)
-        cx = JS_NewContext(rt, 8192);
-    if (! cx)
-        throw _Exception(_("Scripting: could not initialize js context"));
-    this->cx = cx;
+    
     JS_SetErrorReporter(cx, js_error_reporter);
+    initGlobalObject();
 }
 Script::~Script()
 {
     if (script)
         JS_DestroyScript(cx, script);
-    if (cx)
-		JS_DestroyContext(cx);
 }
 
 void Script::setGlobalObject(JSObject *glob)
@@ -271,9 +265,6 @@ void Script::initGlobalObject()
 
 void Script::defineFunctions(JSFunctionSpec *functions)
 {
-    if (glob == NULL)
-        initGlobalObject();
-
     if (!JS_DefineFunctions(cx, glob, functions))
         throw _Exception(_("Scripting: JS_DefineFunctions failed"));
 }

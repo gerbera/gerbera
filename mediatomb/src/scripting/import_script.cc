@@ -70,7 +70,7 @@ js_copyObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval
     JSObject *js_cds_obj;
     JSObject *js_cds_clone_obj;
 
-    ImportScript *self = (ImportScript *)JS_GetContextPrivate(cx);
+    ImportScript *self = (ImportScript *)JS_GetPrivate(cx, obj);
 
     try
     {
@@ -108,7 +108,7 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
 
         JSObject *js_cds_obj;
 
-        ImportScript *self = (ImportScript *)JS_GetContextPrivate(cx);
+        ImportScript *self = (ImportScript *)JS_GetPrivate(cx, obj);
 
         arg = argv[0];
         if (!JSVAL_IS_OBJECT(arg))
@@ -176,8 +176,9 @@ static JSFunctionSpec global_functions[] = {
 
 ImportScript::ImportScript(Ref<Runtime> runtime) : Script(runtime)
 {
-    JS_SetContextPrivate(cx, this);
     defineFunctions(global_functions);
+    
+    JS_SetPrivate(cx, glob, this);
     
     /* initialize contstants */
     setIntProperty(glob, _("OBJECT_TYPE_CONTAINER"),
@@ -212,7 +213,6 @@ ImportScript::ImportScript(Ref<Runtime> runtime) : Script(runtime)
                        _(UPNP_DEFAULT_CLASS_MUSIC_TRACK));
     setProperty(glob, _("UPNP_CLASS_PLAYLIST_CONTAINER"),
                        _(UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER));
-
     
     String scriptPath = ConfigManager::getInstance()->getOption(_("/import/virtual-layout/script")); 
     load(scriptPath);

@@ -50,13 +50,17 @@ class Runtime : public Singleton<Runtime>
 {
 protected:
     JSRuntime *rt;
+    JSContext *cx;
 
 public:
 	Runtime();
 	virtual ~Runtime();
 
     /// \brief Returns the runtime for script execution.
-    JSRuntime *getRT();
+    JSRuntime *getRT() { return rt; }
+    
+    /// \brief Returns the conext for script execution.
+    JSContext *getCX() { return cx; }
 };
 
 #endif // __SCRIPTING_RUNTIME_H__

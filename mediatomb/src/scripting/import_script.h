@@ -43,8 +43,6 @@ public:
 	ImportScript(zmm::Ref<Runtime> runtime);
 	void processCdsObject(zmm::Ref<CdsObject> obj);	
     
-protected:
-    zmm::Ref<Script> runScript;
 
 };
 

@@ -52,7 +52,7 @@ public:
     JSObject  *glob;
 	JSScript *script;
 public:
-	Script(zmm::Ref<Runtime> runtime, JSContext *cx = NULL);
+	Script(zmm::Ref<Runtime> runtime);
 	virtual ~Script();
     
     zmm::String getProperty(JSObject *obj, zmm::String name);
@@ -68,21 +68,23 @@ public:
 
     JSObject *getGlobalObject();
     void setGlobalObject(JSObject *glob);
-
+    
     JSContext *getContext();
-
-    void initGlobalObject();
-
+    
     void defineFunctions(JSFunctionSpec *functions);
     void load(zmm::String scriptPath);
     void load(zmm::String scriptText, zmm::String scriptPath);
-    void execute();
-
+    
     /// \todo can those two functions really stay here, or do we need
     /// a class inbetween to keep a nice separation?
     zmm::Ref<CdsObject> jsObject2cdsObject(JSObject *js);
     void cdsObject2jsObject(zmm::Ref<CdsObject> obj, JSObject *js);
 
+protected:
+    void execute();
+    
+private:
+    void initGlobalObject();
 };
 
 #endif // __SCRIPTING_SCRIPT_H__
