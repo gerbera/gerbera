@@ -54,7 +54,7 @@
 #define OBJECT_FLAG_SEARCHABLE            0x00000002
 #define OBJECT_FLAG_USE_RESOURCE_REF      0x00000004
 #define OBJECT_FLAG_PERSISTENT_CONTAINER  0x00000008
-//#define OBJECT_FLAG_XXX                 0x00000010
+#define OBJECT_FLAG_PLAYLIST_REF          0x00000010
 //#define OBJECT_FLAG_XXX                 0x00000020
 //#define OBJECT_FLAG_XXX                 0x00000040
 //#define OBJECT_FLAG_XXX                 0x00000080

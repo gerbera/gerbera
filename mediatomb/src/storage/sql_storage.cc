@@ -195,8 +195,11 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
     int objectType = obj->getObjectType();
     Ref<CdsObject> refObj = nil;
     bool hasReference = false;
+    bool playlistRef = obj->getFlag(OBJECT_FLAG_PLAYLIST_REF);
     if (obj->isVirtual() && IS_CDS_PURE_ITEM(objectType))
     {
+        if (playlistRef)
+            throw _Exception(_("tried to add or update a virtual, pure object with the PLAYLIST_REF flag"));
         hasReference = true;
         refObj = checkRefID(obj);
         if (refObj == nil)
@@ -209,7 +212,7 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
     
     cdsObjectSql->put(_("object_type"), quote(objectType));
     
-    if (hasReference)
+    if (hasReference || playlistRef)
         cdsObjectSql->put(_("ref_id"), quote(refObj->getID()));
     else if (isUpdate)
         cdsObjectSql->put(_("ref_id"), _(SQL_NULL));
