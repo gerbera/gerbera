@@ -134,6 +134,13 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         if (!IS_CDS_ITEM_EXTERNAL_URL(cds_obj->getObjectType()) &&
             !IS_CDS_ITEM_INTERNAL_URL(cds_obj->getObjectType()))
         {
+            if (cds_obj->getFlag(OBJECT_FLAG_PLAYLIST_REF))
+            {
+                cm->addFile(cds_obj->getLocation(), false, false, true);
+            }
+            /// \todo Leo, was ist in diesem fall? Wir brauchen die
+            /// object ID von dem objekt was im PCDirectory erzeugt wurde,
+            /// damit die referenz gesetzt werden kann
             cds_obj->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
         }
 

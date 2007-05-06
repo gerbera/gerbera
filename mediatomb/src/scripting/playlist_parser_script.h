@@ -40,7 +40,7 @@ class PlaylistParserScript : public Script
 {
 public:
 	PlaylistParserScript(zmm::Ref<Runtime> runtime);
-	void processPlaylistObject(zmm::Ref<CdsObject> obj);	
+	void processPlaylistObject(zmm::Ref<CdsObject> obj);
 };
 
 #endif // __SCRIPTING_PLAYLIST_PARSER_SCRIPT_H__

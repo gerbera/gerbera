@@ -87,6 +87,10 @@ libmediatomb_a_SOURCES = \
 ../src/rexp.h \
 ../src/scripting/import_script.cc \
 ../src/scripting/import_script.h \
+../src/scripting/js_functions.cc \
+../src/scripting/js_functions.h \
+../src/scripting/playlist_parser_script.cc \
+../src/scripting/playlist_parser_script.h \
 ../src/scripting/runtime.cc \
 ../src/scripting/runtime.h \
 ../src/scripting/script.cc \

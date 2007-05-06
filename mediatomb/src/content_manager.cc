@@ -343,6 +343,10 @@ void ContentManager::_addFile(String path, bool recursive, bool hidden, Ref<CMTa
 
     if (layout_enabled)
         initLayout();
+
+#ifdef HAVE_JS
+    initJS();
+#endif
     
     Ref<Storage> storage = Storage::getInstance();
     
@@ -364,6 +368,19 @@ void ContentManager::_addFile(String path, bool recursive, bool hidden, Ref<CMTa
                 try
                 {
                     layout->processCdsObject(obj);
+#ifdef HAVE_JS
+                    if (playlist_parser_script != nil)
+                    {
+                        Ref<Dictionary> mappings = 
+                            ConfigManager::getInstance()->getMimeToContentTypeMappings();
+                        String mimetype = RefCast(obj, CdsItem)->getMimeType();
+                        String content_type = mappings->get(mimetype);
+                        if (content_type == CONTENT_TYPE_PLAYLIST)
+                        {
+                            playlist_parser_script->processPlaylistObject(obj);
+                        }
+                    }
+#endif
                 }
                 catch (Exception e)
                 {
@@ -374,7 +391,7 @@ void ContentManager::_addFile(String path, bool recursive, bool hidden, Ref<CMTa
             }
         }
     }
-    
+
     if (recursive && IS_CDS_CONTAINER(obj->getObjectType()))
     {
         addRecursive(path, hidden, task, &profiling);
@@ -742,6 +759,18 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<CMTask> task, pr
                         try
                         {
                             layout->processCdsObject(obj);
+#ifdef HAVE_JS
+                            if (playlist_parser_script != nil)
+                            {
+                                Ref<Dictionary> mappings = ConfigManager::getInstance()->getMimeToContentTypeMappings();
+                                String mimetype = RefCast(obj, CdsItem)->getMimeType();
+                                String content_type = mappings->get(mimetype);
+                                if (content_type == CONTENT_TYPE_PLAYLIST)
+                                {
+                                    playlist_parser_script->processPlaylistObject(obj);
+                                }
+                            }
+#endif
                         }
                         catch (Exception e)
                         {
@@ -1134,10 +1163,25 @@ void ContentManager::initLayout()
     }
 }
 
+#ifdef HAVE_JS
+void ContentManager::initJS()
+{
+    playlist_parser_script = Ref<PlaylistParserScript>(new PlaylistParserScript(Runtime::getInstance()));
+
+}
+
+void ContentManager::destroyJS()
+{
+    playlist_parser_script = nil;
+}
+
+#endif
+
 void ContentManager::destroyLayout()
 {
 	layout = nil;
 }
+
 void ContentManager::reloadLayout()
 {
 	destroyLayout();

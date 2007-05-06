@@ -41,10 +41,11 @@
 #define CH_DEFAULT 0
 #define CH_LIBEXIF 1
 
-#define CONTENT_TYPE_MP3    "mp3"
-#define CONTENT_TYPE_OGG    "ogg"
-#define CONTENT_TYPE_FLAC   "flac"
-#define CONTENT_TYPE_JPG    "jpg"
+#define CONTENT_TYPE_MP3        "mp3"
+#define CONTENT_TYPE_OGG        "ogg"
+#define CONTENT_TYPE_FLAC       "flac"
+#define CONTENT_TYPE_JPG        "jpg"
+#define CONTENT_TYPE_PLAYLIST   "pls"
 
 typedef enum
 {
@@ -92,7 +93,7 @@ extern res_key RES_KEYS[];
 
 
 /// \brief This class is responsible for providing access to metadata information
-/// of various media. Currently only id3 is supported.
+/// of various media. 
 class MetadataHandler : public zmm::Object
 {
 public:

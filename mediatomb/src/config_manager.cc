@@ -416,6 +416,7 @@ void ConfigManager::validate(String serverhome)
         mime_content->put(_("application/ogg"), _(CONTENT_TYPE_OGG));
         mime_content->put(_("audio/x-flac"), _(CONTENT_TYPE_FLAC));
         mime_content->put(_("image/jpeg"), _(CONTENT_TYPE_JPG));
+        mime_content->put(_("audio/x-mpegurl"), _(CONTENT_TYPE_PLAYLIST));
     }
 
 #if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
@@ -493,25 +494,18 @@ void ConfigManager::validate(String serverhome)
         throw _Exception(_("Error in config file: invalid value for <upnp-string-limit>"));
     }
 
-/*
+/// \todo Jin: finalize playlist script configuration once we know how we want it
 #ifdef HAVE_JS
-    try
-    {
-        temp = getOption(_("/import/script"));
-    }
-    catch (Exception ex)
-    {
-        temp = "";
-    }
+    String script_path = getOption(_("/import/playlists/script"), _(PACKAGE_DATADIR) +
+            DIR_SEPARATOR +
+            _(DEFAULT_JS_DIR) +
+            DIR_SEPARATOR +
+            _(DEFAULT_PLAYLISTS_SCRIPT));
+    if (!string_ok(script_path))
+        throw _Exception(_("playlist script location invalid"));
+    prepare_path(_("/import/playlists/script"));
 
-    if (string_ok(temp))
-            check_path_ex(construct_path(temp));
-
-    Ref<Element> script = getElement("/import/script");
-    if (script != nil)
-            script->setText(construct_path(temp));
 #endif
-*/
 
     temp = getOption(_("/import/virtual-layout/attribute::type"), _(DEFAULT_LAYOUT_TYPE));
     if ((temp != "js") && (temp != "builtin") && (temp != "disabled"))
@@ -537,7 +531,7 @@ void ConfigManager::validate(String serverhome)
         }
     }
 
-    String script_path = getOption(_("/import/virtual-layout/script"), _(PACKAGE_DATADIR) +
+    script_path = getOption(_("/import/virtual-layout/script"), _(PACKAGE_DATADIR) +
                                                           DIR_SEPARATOR + 
                                                         _(DEFAULT_JS_DIR) +
                                                           DIR_SEPARATOR +
