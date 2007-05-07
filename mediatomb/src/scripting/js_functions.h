@@ -49,9 +49,6 @@ JSBool js_print(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
 /// \brief Adds an object to the database.
 JSBool js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval);
 
-/// \brief Reads a line from a text file.
-JSBool js_readln(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval);
-
 /// \brief Makes a copy of an CDS object.
 JSBool js_copyObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval);
 

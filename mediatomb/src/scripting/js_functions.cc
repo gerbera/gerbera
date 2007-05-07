@@ -134,10 +134,11 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         if (!IS_CDS_ITEM_EXTERNAL_URL(cds_obj->getObjectType()) &&
             !IS_CDS_ITEM_INTERNAL_URL(cds_obj->getObjectType()))
         {
-            if (cds_obj->getFlag(OBJECT_FLAG_PLAYLIST_REF))
+/*            if (cds_obj->getFlag(OBJECT_FLAG_PLAYLIST_REF))
             {
                 cm->addFile(cds_obj->getLocation(), false, false, true);
             }
+*/
             /// \todo Leo, was ist in diesem fall? Wir brauchen die
             /// object ID von dem objekt was im PCDirectory erzeugt wurde,
             /// damit die referenz gesetzt werden kann
@@ -163,63 +164,6 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
     }
     return JS_FALSE;
 }
-
- JSBool
-js_readln(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
-{
-/*    if (!currentHandle)
-    {
-        if (currentObject == -1)
-        {
-            log_js("can not determine current object\n");
-            return JS_FALSE;
-        }
-
-        try
-        {
-            Ref<Storage> storage = Storage::getInstance();
-            Ref<CdsObject> obj = storage->loadObject(currentObject);
-
-            if (!IS_CDS_PURE_ITEM(obj->getObjectType()))
-            {
-                log_js("read opearation is only allowed on items\n");
-                return JS_FALSE;
-            }
-
-            Ref<CdsItem> item = RefCast(obj, CdsItem);
-            currentHandle = fopen(item->getLocation().c_str(), "r");
-
-            if (!currentHandle)
-            {
-                log_js("Could not open \"%s\": %s\n",
-                        item->getLocation().c_str(), strerror(errno));
-                return JS_FALSE;
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            return JS_FALSE;
-        }
-    }
-
-    if (!currentLine)
-        currentLine = (char *)MALLOC(1024);
-
-    currentLine[0] = '\0';
-
-    fgets(currentLine, 1024, currentHandle);
-
-    JSString *line = JS_NewStringCopyZ(cx, currentLine);
-
-    if (!line)
-        return JS_FALSE;
-
-    *rval = STRING_TO_JSVAL(line);
-*/
-    return JS_TRUE;
-}
-
 
 } // extern "C"
 
