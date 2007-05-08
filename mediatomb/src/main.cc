@@ -67,7 +67,7 @@
 #include <limits.h>
 
 #ifdef HAVE_GETOPT_LONG
-    #define OPTSTR "i:p:c:m:u:g:a:l:P:dh"
+    #define OPTSTR "i:p:c:m:f:u:g:a:l:P:dh"
 #endif
 
 using namespace zmm;
@@ -85,7 +85,6 @@ int main(int argc, char **argv, char **envp)
     char     * err = NULL;
     int      port = -1;
     bool     daemon = false;
-    bool     default_home = true;
     struct   sigaction action;
     sigset_t mask_set;
 
@@ -99,6 +98,7 @@ int main(int argc, char **argv, char **envp)
         {"port", 1, 0, 'p'},
         {"config", 1, 0, 'c'},
         {"home", 1, 0, 'm'},
+        {"cfgdir", 1, 0, 'f'},
         {"user", 1, 0, 'u'},
         {"group", 1, 0, 'g'},
         {"daemon", 0, 0, 'd'},
@@ -112,6 +112,7 @@ int main(int argc, char **argv, char **envp)
 
     String config_file;
     String home;
+    String confdir;
     String user;
     String group;
     String pid_file;
@@ -186,9 +187,12 @@ int main(int argc, char **argv, char **envp)
             case 'm':
                 log_debug("Home setting: %s\n", optarg);
                 home = String(optarg);
-                default_home = false;
                 break;
-               
+              
+            case 'f':
+                log_debug("Confdir setting: %s\n", optarg);
+                confdir = String(optarg);
+                break;
             case '?':
             case 'h':
                 printf("Usage: mediatomb [options]\n\
@@ -199,6 +203,7 @@ Supported options:\n\
     --config or -c     configuration file to use\n\
     --daemon or -d     run server in background\n\
     --home or -m       define the home directory\n\
+    --cfgdir or -f    name of the directory that is holding the configuration\n\
     --pidfile or -P    file to hold the process id\n\
     --user or -u       run server under specified username\n\
     --group or -g      run server under specified group\n\
@@ -287,6 +292,9 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
             exit(EXIT_FAILURE);
         }
 
+        if (!string_ok(confdir))
+            confdir = _(DEFAULT_CONFIG_HOME);
+
 /*        if ((config_file == nil) && (home == nil))
         {
             log_info("No configuration specified and no user home directory set.\n");
@@ -294,7 +302,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         }
         
 */
-        ConfigManager::setStaticArgs(config_file, home, default_home);
+        ConfigManager::setStaticArgs(config_file, home, confdir);
         ConfigManager::getInstance();
     }
     catch (mxml::ParseException pe)
@@ -510,7 +518,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
                 
                 try
                 {
-                    ConfigManager::setStaticArgs(config_file, home, default_home);
+                    ConfigManager::setStaticArgs(config_file, home, confdir);
                     ConfigManager::getInstance();
                 }
                 catch (mxml::ParseException pe)

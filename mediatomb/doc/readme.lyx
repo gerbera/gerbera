@@ -1716,19 +1716,44 @@ Home Directory
 \begin_layout Standard
 Specify an alternative home directory.
  By default MediaTomb will try to retrieve the users home directory from
- the environment, then it will look for a .mediatomb directory in users home;
- if found it will try to find the default configuration file.
+ the environment, then it will look for a .mediatomb directory in users home.
+ If .mediatomb was found we will try to find the default configuration file
+ (config.xml), if not found we will create both, the .mediatomb directory
+ and the default config file.
 \end_layout
 
 \begin_layout Standard
 This option is useful in two cases: when the home directory can not be retrieved
  from the environment (in this case you could also use -c to point MediaTomb
  to your configuration file or when you want to create a new configuration
- in a non standard locatin (for example, when setting up daemon mode).
- In the case, that the -m parameter is given, but no default configuration
- exists, MediaTomb will not create an additional .mediatomb directory, but
- will assume that you want to create a default configuration in the directory
- that was specified with the -m parameter.
+ in a non standard location (for example, when setting up daemon mode).
+ In the latter case you can combine this parameter with the parameter described
+ in 
+\begin_inset LatexCommand \ref{sec:Config-Directory}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+\begin_inset LatexCommand \label{sec:Config-Directory}
+
+\end_inset
+
+Config Directory
+\end_layout
+
+\begin_layout Code
+--cfgdir or -f
+\end_layout
+
+\begin_layout Standard
+The default configuration directory is combined out of the users home and
+ the default that equals to .mediatomb, this option allows you to override
+ the default directory naming.
+ This is useful when you want to setup the server in a nonstandard location,
+ but want that the default configuration to be written by the server.
 \end_layout
 
 \begin_layout Subsection
