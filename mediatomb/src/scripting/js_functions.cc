@@ -127,6 +127,9 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         }
 
         Ref<CdsObject> cds_obj = self->jsObject2cdsObject(js_cds_obj);
+        if (cds_obj == nil)
+            return JS_FALSE;
+
         Ref<ContentManager> cm = ContentManager::getInstance();
 
         int id = cm->addContainerChain(path, containerclass);
@@ -134,11 +137,15 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         if (!IS_CDS_ITEM_EXTERNAL_URL(cds_obj->getObjectType()) &&
             !IS_CDS_ITEM_INTERNAL_URL(cds_obj->getObjectType()))
         {
-/*            if (cds_obj->getFlag(OBJECT_FLAG_PLAYLIST_REF))
-            {
-                cm->addFile(cds_obj->getLocation(), false, false, true);
-            }
-*/
+            // \todo get hidden file setting from config manager?
+            /// what about same stuff in content manager, why is it not used
+            /// there?
+
+            int id = cm->addFile(cds_obj->getLocation(), false, false, true);
+            if (id == INVALID_OBJECT_ID)
+                return JS_FALSE;
+
+            cds_obj->setRefID(id);
             /// \todo Leo, was ist in diesem fall? Wir brauchen die
             /// object ID von dem objekt was im PCDirectory erzeugt wurde,
             /// damit die referenz gesetzt werden kann

@@ -327,19 +327,19 @@ void ContentManager::addVirtualItem(Ref<CdsObject> obj)
 
 }
 
-void ContentManager::_addFile(String path, bool recursive, bool hidden, Ref<CMTask> task)
+int ContentManager::_addFile(String path, bool recursive, bool hidden, Ref<CMTask> task)
 {
     PROF_INIT(profiling);
     if (hidden == false)
     {
         String filename = get_filename(path);
         if (string_ok(filename) && filename.charAt(0) == '.')
-            return;
+            return INVALID_OBJECT_ID;
     }
     
     // never add the server configuration file
     if (ConfigManager::getInstance()->getConfigFilename() == path)
-        return;
+        return INVALID_OBJECT_ID;;
 
     if (layout_enabled)
         initLayout();
@@ -352,13 +352,13 @@ void ContentManager::_addFile(String path, bool recursive, bool hidden, Ref<CMTa
     
     Ref<UpdateManager> um = UpdateManager::getInstance();
     //Ref<StringConverter> f2i = StringConverter::f2i();
-    
+ 
     Ref<CdsObject> obj = storage->findObjectByPath(path);
     if (obj == nil)
     {
         obj = createObjectFromFile(path);
         if (obj == nil) // object ignored
-            return;
+            return INVALID_OBJECT_ID;
         if (IS_CDS_ITEM(obj->getObjectType()))
         {
             addObject(obj);
@@ -391,12 +391,14 @@ void ContentManager::_addFile(String path, bool recursive, bool hidden, Ref<CMTa
             }
         }
     }
-
+        
     if (recursive && IS_CDS_CONTAINER(obj->getObjectType()))
     {
         addRecursive(path, hidden, task, &profiling);
     }
     PROF_PRINT(&profiling);
+
+    return obj->getID();
 }
 
 void ContentManager::_removeObject(int objectID, bool all)
@@ -1264,12 +1266,12 @@ void ContentManager::loadAccounting(bool async)
         _loadAccounting();
     }
 }
-void ContentManager::addFile(zmm::String path, bool recursive, bool async, bool hidden, bool lowPriority)
+int ContentManager::addFile(zmm::String path, bool recursive, bool async, bool hidden, bool lowPriority)
 {
-    addFileInternal(path, recursive, async, hidden, lowPriority);
+    return addFileInternal(path, recursive, async, hidden, lowPriority);
 }
 
-void ContentManager::addFileInternal(zmm::String path, bool recursive, bool async, 
+int ContentManager::addFileInternal(zmm::String path, bool recursive, bool async, 
                                      bool hidden, bool lowPriority, unsigned int parentTaskID)
 {
     if (async)
@@ -1278,10 +1280,11 @@ void ContentManager::addFileInternal(zmm::String path, bool recursive, bool asyn
         task->setDescription(_("Adding: ") + path);
         task->setParentID(parentTaskID);
         addTask(task, lowPriority);
+        return INVALID_OBJECT_ID;
     }
     else
     {
-        _addFile(path, recursive, hidden);
+        return _addFile(path, recursive, hidden);
     }
 }
 

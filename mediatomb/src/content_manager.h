@@ -181,7 +181,15 @@ public:
     
     /* sync/async methods */
     void loadAccounting(bool async=true);
-    void addFile(zmm::String path, bool recursive=true, bool async=true, bool hidden=false, bool lowPriority=false);
+
+    /// \brief Adds a file or directory to the database.
+    /// \param path absolute path to the file
+    /// \param recursive recursive add (process subdirecotories)
+    /// \param async queue task or perform a blocking call
+    /// \param hidden true allows to import hidden files, false ignores them
+    /// \param queue for immediate processing or in normal order
+    /// \return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
+    int addFile(zmm::String path, bool recursive=true, bool async=true, bool hidden=false, bool lowPriority=false);
     int ensurePathExistence(zmm::String path);
     void removeObject(int objectID, bool async=true, bool all=false);
 //    void rescanDirectory(int objectID, scan_level_t scanLevel = BasicScan);   
@@ -276,9 +284,9 @@ protected:
     /* don't use these, use the above methods */
     void _loadAccounting();
 
-    void addFileInternal(zmm::String path, bool recursive=true, bool async=true, bool hidden=false, bool lowPriority=false, 
+    int addFileInternal(zmm::String path, bool recursive=true, bool async=true, bool hidden=false, bool lowPriority=false, 
                          unsigned int parentTaskID = 0);
-    void _addFile(zmm::String path, bool recursive=false, bool hidden=false, zmm::Ref<CMTask> task=nil);
+    int _addFile(zmm::String path, bool recursive=false, bool hidden=false, zmm::Ref<CMTask> task=nil);
     //void _addFile2(zmm::String path, bool recursive=0);
     void _removeObject(int objectID, bool all);
     
