@@ -98,7 +98,7 @@ String PlaylistParserScript::readln()
     if (fgets(currentLine, ONE_TEXTLINE_BYTES, currentHandle) == NULL)
         return nil;
     else
-        return String(currentLine);
+        return trim_string(String(currentLine));
 }
 
 void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj)
