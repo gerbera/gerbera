@@ -141,11 +141,11 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
             /// what about same stuff in content manager, why is it not used
             /// there?
 
-            int id = cm->addFile(cds_obj->getLocation(), false, false, true);
-            if (id == INVALID_OBJECT_ID)
+            int pcd_id = cm->addFile(cds_obj->getLocation(), false, false, true);
+            if (pcd_id == INVALID_OBJECT_ID)
                 return JS_FALSE;
 
-            cds_obj->setRefID(id);
+            cds_obj->setRefID(pcd_id);
             /// \todo Leo, was ist in diesem fall? Wir brauchen die
             /// object ID von dem objekt was im PCDirectory erzeugt wurde,
             /// damit die referenz gesetzt werden kann
