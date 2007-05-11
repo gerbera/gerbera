@@ -137,18 +137,23 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         if (!IS_CDS_ITEM_EXTERNAL_URL(cds_obj->getObjectType()) &&
             !IS_CDS_ITEM_INTERNAL_URL(cds_obj->getObjectType()))
         {
-            // \todo get hidden file setting from config manager?
+            /// \todo get hidden file setting from config manager?
             /// what about same stuff in content manager, why is it not used
             /// there?
 
-            int pcd_id = cm->addFile(cds_obj->getLocation(), false, false, true);
-            if (pcd_id == INVALID_OBJECT_ID)
-                return JS_FALSE;
+            if (cds_obj->getFlag(OBJECT_FLAG_PLAYLIST_REF))
+            {
 
-            cds_obj->setRefID(pcd_id);
-            /// \todo Leo, was ist in diesem fall? Wir brauchen die
-            /// object ID von dem objekt was im PCDirectory erzeugt wurde,
-            /// damit die referenz gesetzt werden kann
+                int pcd_id = cm->addFile(cds_obj->getLocation(), false, false, true);
+                if (pcd_id == INVALID_OBJECT_ID)
+                    return JS_FALSE;
+
+                /// \todo remove this (finalize playlist implementation)
+                cds_obj->clearFlag(OBJECT_FLAG_PLAYLIST_REF);
+
+                cds_obj->setRefID(pcd_id);
+            }
+
             cds_obj->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
         }
 
