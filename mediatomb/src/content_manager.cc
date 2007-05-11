@@ -1168,7 +1168,8 @@ void ContentManager::initLayout()
 #ifdef HAVE_JS
 void ContentManager::initJS()
 {
-    playlist_parser_script = Ref<PlaylistParserScript>(new PlaylistParserScript(Runtime::getInstance()));
+    if (playlist_parser_script == nil)
+        playlist_parser_script = Ref<PlaylistParserScript>(new PlaylistParserScript(Runtime::getInstance()));
 
 }
 
