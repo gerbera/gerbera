@@ -61,7 +61,7 @@ String Script::getProperty(JSObject *obj, String name)
         return nil;
     return String(JS_GetStringBytes(str));
 }
-bool Script::getBoolProperty(JSObject *obj, String name)
+int Script::getBoolProperty(JSObject *obj, String name)
 {
     jsval val;
     JSBool boolVal;
@@ -391,12 +391,11 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js)
     b = getBoolProperty(js, _("restricted"));
     if (b >= 0)
         obj->setRestricted(b);
-/*
+    
     b = getBoolProperty(js, _("fromPlaylist"));
-    log_debug("SETTING PLAYLIST REFERENCE!");
     if (b > 0)
         obj->setFlag(OBJECT_FLAG_PLAYLIST_REF);
-*/
+    
     JSObject *js_meta = getObjectProperty(js, _("meta"));
     if (js_meta)
     {

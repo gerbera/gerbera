@@ -56,7 +56,7 @@ public:
 	virtual ~Script();
     
     zmm::String getProperty(JSObject *obj, zmm::String name);
-    bool getBoolProperty(JSObject *obj, zmm::String name);
+    int getBoolProperty(JSObject *obj, zmm::String name);
     int getIntProperty(JSObject *obj, zmm::String name, int def);
     JSObject *getObjectProperty(JSObject *obj, zmm::String name);
 
