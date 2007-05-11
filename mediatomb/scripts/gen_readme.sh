@@ -1,4 +1,5 @@
 #!/bin/sh
+# $Id$
 
 gen_readme () {
 

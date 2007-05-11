@@ -24,7 +24,7 @@
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
     
-    $Id: import_script.cc 1270 2007-05-06 15:21:57Z lww $
+    $Id$
 */
 
 /// \file playlist_parser_script.cc
@@ -72,6 +72,7 @@ js_readln(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
 } // extern "C"
 
 static JSFunctionSpec global_functions[] = {
+    {"addCdsObject",    js_addCdsObject,   3},
     {"copyObject",      js_copyObject,     1},
     {"readln",          js_readln,         0},
     {0}

@@ -1140,21 +1140,18 @@ void ContentManager::initLayout()
         if (layout == nil)
             try
             {
-                Layout *s = NULL;
                 String layout_type = ConfigManager::getInstance()->getOption(_("/import/virtual-layout/attribute::type"));
                 if (layout_type == "js")
                 {
 #ifdef HAVE_JS
-                    s = new JSLayout();
-                    layout = Ref<Layout>(s);
+                    layout = Ref<Layout>((Layout *)new JSLayout());
 #else
                     log_error("Cannot init layout: MediaTomb compiled without js support but js script was requested.");
 #endif
                 }
                 else if (layout_type == "builtin")
                 {
-                    s = new FallbackLayout();
-                    layout = Ref<Layout>(s);
+                    layout = Ref<Layout>((FallbackLayout *)new FallbackLayout());
                 }
             }
         catch (Exception e)
