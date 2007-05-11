@@ -213,7 +213,7 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
     cdsObjectSql->put(_("object_type"), quote(objectType));
     
     if (hasReference || playlistRef)
-        cdsObjectSql->put(_("ref_id"), quote(refObj->getID()));
+        cdsObjectSql->put(_("ref_id"), quote(hasReference ? refObj->getID() : obj->getRefID() ));
     else if (isUpdate)
         cdsObjectSql->put(_("ref_id"), _(SQL_NULL));
     
