@@ -736,23 +736,36 @@ int SQLStorage::_ensurePathExistence(String path, int *changedContainer)
     Ref<StringConverter> f2i = StringConverter::f2i();
     if (changedContainer != NULL && *changedContainer == INVALID_OBJECT_ID)
         *changedContainer = parentID;
-    return createContainer(parentID, f2i->convert(folder), path, false, nil);
+    return createContainer(parentID, f2i->convert(folder), path, false, nil, INVALID_OBJECT_ID);
 }
 
-int SQLStorage::createContainer(int parentID, String name, String path, bool isVirtual, String upnpClass)
+int SQLStorage::createContainer(int parentID, String name, String path, bool isVirtual, String upnpClass, int refID)
 {
+    if (refID > 0)
+    {
+        Ref<CdsObject> refObj = loadObject(refID);
+        if (refObj == nil)
+            throw _Exception(_("tried to create container with refID set, but refID doesn't point to an existing object"));
+    }
     String dbLocation = addLocationPrefix((isVirtual ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX), path);
     Ref<StringBuffer> qb(new StringBuffer());
-    *qb << "INSERT INTO " << TQ(CDS_OBJECT_TABLE)
-        << " (" << TQ("parent_id") << ',' << TQ("object_type")
-        << ',' << TQ("upnp_class") << ',' << TQ("dc_title") << ','
-        << TQ("location") << ',' << TQ("location_hash") << ") VALUES ("
-        << parentID
-        << ',' << OBJECT_TYPE_CONTAINER
-        << ',' << (string_ok(upnpClass) ? quote(upnpClass) : quote(_(UPNP_DEFAULT_CLASS_CONTAINER)))
-        << ',' << quote(name)
-        << ',' << quote(dbLocation)
-        << ',' << quote(stringHash(dbLocation))
+    *qb << "INSERT INTO " 
+        << TQ(CDS_OBJECT_TABLE)
+        << " ("
+        << TQ("parent_id") << ','
+        << TQ("object_type") << ','
+        << TQ("upnp_class") << ','
+        << TQ("dc_title") << ','
+        << TQ("location") << ','
+        << TQ("location_hash") << ','
+        << TQ("ref_id") << ") VALUES ("
+        << parentID << ','
+        << OBJECT_TYPE_CONTAINER << ','
+        << (string_ok(upnpClass) ? quote(upnpClass) : quote(_(UPNP_DEFAULT_CLASS_CONTAINER))) << ',' 
+        << quote(name) << ','
+        << quote(dbLocation) << ','
+        << quote(stringHash(dbLocation)) << ','
+        << (refID > 0 ? quote(refID) : _(SQL_NULL))
         << ')';
         
     return exec(qb, true);
@@ -780,7 +793,7 @@ String SQLStorage::buildContainerPath(int parentID, String title)
     return path;
 }
 
-void SQLStorage::addContainerChain(String path, String lastClass, int *containerID, int *updateID, int lastRefID)
+void SQLStorage::addContainerChain(String path, String lastClass, int lastRefID, int *containerID, int *updateID)
 {
     path = path.reduce(VIRTUAL_CONTAINER_SEPARATOR);
     if (path == VIRTUAL_CONTAINER_SEPARATOR)
@@ -808,10 +821,10 @@ void SQLStorage::addContainerChain(String path, String lastClass, int *container
     int parentContainerID;
     String newpath, container;
     stripAndUnescapeVirtualContainerFromPath(path, newpath, container);
-    addContainerChain(newpath, nil, &parentContainerID, updateID);
+    addContainerChain(newpath, nil, INVALID_OBJECT_ID, &parentContainerID, updateID);
     if (updateID != NULL && *updateID == INVALID_OBJECT_ID)
         *updateID = parentContainerID;
-    *containerID = createContainer(parentContainerID, container, path, true, lastClass);
+    *containerID = createContainer(parentContainerID, container, path, true, lastClass, lastRefID);
 }
 
 String SQLStorage::addLocationPrefix(char prefix, String path)

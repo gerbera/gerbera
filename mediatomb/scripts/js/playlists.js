@@ -67,7 +67,7 @@ else if (type == 'm3u')
             duration = RegExp.$1;
             title = RegExp.$2;
         }
-        else if (! line.match(/^(#|\s*$)/)
+        else if (! line.match(/^(#|\s*$)/))
         {
             addPlaylistItem(line, playlistChain, duration, title);
             duration = null;

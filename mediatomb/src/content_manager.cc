@@ -987,8 +987,8 @@ int ContentManager::addContainerChain(String chain, String lastClass, int lastRe
     int containerID;
     
     log_debug("received chain: %s\n", chain.c_str());
-    storage->addContainerChain(chain, lastClass,
-                              &containerID, &updateID, lastRefID);
+    storage->addContainerChain(chain, lastClass, lastRefID,
+                              &containerID, &updateID);
     // if (updateID != INVALID_OBJECT_ID)
     // an invalid updateID is checked by containerChanged()
     UpdateManager::getInstance()->containerChanged(updateID);

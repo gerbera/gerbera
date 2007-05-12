@@ -190,6 +190,7 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         {
             if (self->whoami() == S_PLAYLIST)
             {
+                cds_obj->setFlag(OBJECT_FLAG_PLAYLIST_REF);
                 cds_obj->setRefID(orig_object->getID());
             }
         }
