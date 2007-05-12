@@ -120,7 +120,8 @@ public:
     /// the object ID of the container that is last in the path. The
     /// updateID will hold the objectID of the container that was changed,
     /// in case new containers were created during the operation.
-    virtual void addContainerChain(zmm::String path, zmm::String lastClass, int *containerID, int *updateID) = 0;
+    virtual void addContainerChain(zmm::String path, zmm::String lastClass, 
+            int *containerID, int *updateID, int lastRefID = INVALID_OBJECT_ID) = 0;
     
     /// \brief Builds the container path. Fetches the path of the
     /// parent and adds the title

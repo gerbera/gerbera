@@ -980,14 +980,15 @@ void ContentManager::addContainer(int parentID, String title, String upnpClass)
 }
 
 
-int ContentManager::addContainerChain(String chain, String lastClass)
+int ContentManager::addContainerChain(String chain, String lastClass, int lastRefID)
 {
     Ref<Storage> storage = Storage::getInstance();
     int updateID = INVALID_OBJECT_ID;
     int containerID;
     
     log_debug("received chain: %s\n", chain.c_str());
-    storage->addContainerChain(chain, lastClass, &containerID, &updateID);
+    storage->addContainerChain(chain, lastClass,
+                              &containerID, &updateID, lastRefID);
     // if (updateID != INVALID_OBJECT_ID)
     // an invalid updateID is checked by containerChanged()
     UpdateManager::getInstance()->containerChanged(updateID);

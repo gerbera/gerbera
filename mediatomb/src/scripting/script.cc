@@ -392,10 +392,6 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js)
     if (b >= 0)
         obj->setRestricted(b);
     
-    b = getBoolProperty(js, _("fromPlaylist"));
-    if (b > 0)
-        obj->setFlag(OBJECT_FLAG_PLAYLIST_REF);
-    
     JSObject *js_meta = getObjectProperty(js, _("meta"));
     if (js_meta)
     {

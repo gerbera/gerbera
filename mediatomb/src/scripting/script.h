@@ -43,6 +43,12 @@
 #include "runtime.h"
 #include "cds_objects.h"
 
+typedef enum
+{
+    S_IMPORT = 0,
+    S_PLAYLIST
+} script_class_t;
+
 class Script : public zmm::Object
 {
 public:
@@ -79,6 +85,8 @@ public:
     /// a class inbetween to keep a nice separation?
     zmm::Ref<CdsObject> jsObject2cdsObject(JSObject *js);
     void cdsObject2jsObject(zmm::Ref<CdsObject> obj, JSObject *js);
+
+    virtual script_class_t whoami() = 0;
 
 protected:
     void execute();

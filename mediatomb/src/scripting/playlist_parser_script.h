@@ -42,6 +42,7 @@ public:
 	PlaylistParserScript(zmm::Ref<Runtime> runtime);
     zmm::String readln();
 	void processPlaylistObject(zmm::Ref<CdsObject> obj);
+    virtual script_class_t whoami() { return S_PLAYLIST; }
 
 private:
     FILE *currentHandle;

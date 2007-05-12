@@ -780,7 +780,7 @@ String SQLStorage::buildContainerPath(int parentID, String title)
     return path;
 }
 
-void SQLStorage::addContainerChain(String path, String lastClass, int *containerID, int *updateID)
+void SQLStorage::addContainerChain(String path, String lastClass, int *containerID, int *updateID, int lastRefID)
 {
     path = path.reduce(VIRTUAL_CONTAINER_SEPARATOR);
     if (path == VIRTUAL_CONTAINER_SEPARATOR)

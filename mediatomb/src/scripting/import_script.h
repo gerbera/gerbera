@@ -42,7 +42,7 @@ class ImportScript : public Script
 public:
 	ImportScript(zmm::Ref<Runtime> runtime);
 	void processCdsObject(zmm::Ref<CdsObject> obj);	
-    
+    virtual script_class_t whoami() { return S_IMPORT; }
 
 };
 

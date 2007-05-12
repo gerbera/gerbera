@@ -36,6 +36,7 @@
 #include "js_functions.h"
 
 #include "script.h"
+#include <typeinfo>
 #include "storage.h"
 #include "content_manager.h"
 #include "metadata_handler.h"
@@ -103,8 +104,16 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         String containerclass;
 
         JSObject *js_cds_obj;
+        JSObject *js_orig_obj;
+        Ref<CdsObject> orig_object;
 
         Script *self = (Script *)JS_GetPrivate(cx, obj);
+
+        if (self == NULL)
+        {
+            log_debug("Could not retrieve class instance from global object\n");
+            return FALSE;
+        }
 
         arg = argv[0];
         if (!JSVAL_IS_OBJECT(arg))
@@ -126,13 +135,35 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
                 containerclass = nil;
         }
 
+        if (self->whoami() == S_PLAYLIST)
+            js_orig_obj = self->getObjectProperty(obj, _("playlist"));
+        else if (self->whoami() == S_IMPORT)
+            js_orig_obj = self->getObjectProperty(obj, _("orig"));
+        
+        if (js_orig_obj == NULL)
+        {
+            log_debug("Could not retrieve orig/playlist object\n");
+            return JS_FALSE;
+        }
+
+        orig_object = self->jsObject2cdsObject(js_orig_obj);
+        if (orig_object == nil)
+            return JS_FALSE;
+
         Ref<CdsObject> cds_obj = self->jsObject2cdsObject(js_cds_obj);
         if (cds_obj == nil)
             return JS_FALSE;
 
         Ref<ContentManager> cm = ContentManager::getInstance();
 
-        int id = cm->addContainerChain(path, containerclass);
+        int id;
+        
+        if (self->whoami() == S_PLAYLIST)
+            id = cm->addContainerChain(path, containerclass, 
+                    orig_object->getID());
+        else
+            id = cm->addContainerChain(path, containerclass);
+
         cds_obj->setParentID(id);
         if (!IS_CDS_ITEM_EXTERNAL_URL(cds_obj->getObjectType()) &&
             !IS_CDS_ITEM_INTERNAL_URL(cds_obj->getObjectType()))
@@ -141,20 +172,26 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
             /// what about same stuff in content manager, why is it not used
             /// there?
 
-            if (cds_obj->getFlag(OBJECT_FLAG_PLAYLIST_REF))
+            if (self->whoami() == S_PLAYLIST)
             {
-
                 int pcd_id = cm->addFile(cds_obj->getLocation(), false, false, true);
                 if (pcd_id == INVALID_OBJECT_ID)
                     return JS_FALSE;
 
-                /// \todo remove this (finalize playlist implementation)
-                cds_obj->clearFlag(OBJECT_FLAG_PLAYLIST_REF);
-
                 cds_obj->setRefID(pcd_id);
             }
+            else
+                cds_obj->setRefID(orig_object->getID());
 
             cds_obj->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
+        }
+        else if (IS_CDS_ITEM_EXTERNAL_URL(cds_obj->getObjectType()) || 
+                 IS_CDS_ITEM_INTERNAL_URL(cds_obj->getObjectType()))
+        {
+            if (self->whoami() == S_PLAYLIST)
+            {
+                cds_obj->setRefID(orig_object->getID());
+            }
         }
 
         cds_obj->setID(INVALID_OBJECT_ID);
