@@ -45,7 +45,7 @@
 #define CONTENT_TYPE_OGG        "ogg"
 #define CONTENT_TYPE_FLAC       "flac"
 #define CONTENT_TYPE_JPG        "jpg"
-#define CONTENT_TYPE_PLAYLIST   "pls"
+#define CONTENT_TYPE_PLAYLIST   "playlist"
 
 typedef enum
 {

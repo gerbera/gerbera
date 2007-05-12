@@ -11,6 +11,8 @@
         <map from="wm" to="video/x-ms-wm"/>
         <map from="wmx" to="video/x-ms-wmx"/>
         <map from="wmx" to="video/x-ms-wmx"/>
+        <map from="m3u" to="audio/x-mpegurl"/>
+        <map from="pls" to="audio/x-scpls"/>
     </extension-mimetype>
     <mimetype-upnpclass>
         <map from="audio/*" to="object.item.audioItem.musicTrack"/>
@@ -23,6 +25,8 @@
         <treat mimetype="application/ogg" as="ogg"/>
         <treat mimetype="audio/x-flac" as="flac"/>
         <treat mimetype="image/jpeg" as="jpg"/>
+        <treat mimetype="audio/x-mpegurl" as="playlist"/>
+        <treat mimetype="audio/x-scpls" as="playlist"/>
     </mimetype-contenttype>
 </mappings>
 
