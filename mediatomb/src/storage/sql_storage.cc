@@ -196,7 +196,17 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
     Ref<CdsObject> refObj = nil;
     bool hasReference = false;
     bool playlistRef = obj->getFlag(OBJECT_FLAG_PLAYLIST_REF);
-    if (obj->isVirtual() && IS_CDS_PURE_ITEM(objectType))
+    if (playlistRef)
+    {
+        if (IS_CDS_PURE_ITEM(objectType))
+            throw _Exception(_("tried to add pure item with PLAYLIST_REF flag set"));
+        if (obj->getRefID() <= 0)
+            throw _Exception(_("PLAYLIST_REF flag set but refId is <=0"));
+        refObj = loadObject(obj->getRefID());
+        if (refObj == nil)
+            throw _Exception(_("PLAYLIST_REF flag set but refId doesn't point to an existing object"));
+    }
+    else if (obj->isVirtual() && IS_CDS_PURE_ITEM(objectType))
     {
         if (playlistRef)
             throw _Exception(_("tried to add or update a virtual, pure object with the PLAYLIST_REF flag"));
@@ -205,6 +215,8 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
         if (refObj == nil)
             throw _Exception(_("tried to add or update a virtual object with illegal reference id and an illegal location"));
     }
+    else if (obj->getRefID() > 0)
+        throw _Exception(_("refId set, but it makes no sense"));
     
     Ref<Array<AddUpdateTable> > returnVal(new Array<AddUpdateTable>(2));
     Ref<Dictionary> cdsObjectSql(new Dictionary());
@@ -213,7 +225,7 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
     cdsObjectSql->put(_("object_type"), quote(objectType));
     
     if (hasReference || playlistRef)
-        cdsObjectSql->put(_("ref_id"), quote(hasReference ? refObj->getID() : obj->getRefID() ));
+        cdsObjectSql->put(_("ref_id"), quote(refObj->getID()));
     else if (isUpdate)
         cdsObjectSql->put(_("ref_id"), _(SQL_NULL));
     
