@@ -47,22 +47,12 @@ Runtime::Runtime() : Singleton<Runtime>()
     rt = JS_NewRuntime(8L * 1024L * 1024L);
     if (!rt)
         throw Exception(_("Scripting: could not initialize js runtime"));
-    
-    /* create a context and associate it with the JS run time */
-    cx = JS_NewContext(rt, 8192);
-    if (! cx)
-        throw _Exception(_("Scripting: could not initialize js context"));
 }
 Runtime::~Runtime()
 {
-    if (cx)
-		JS_DestroyContext(cx);
-    cx = NULL;
-    
 	if (rt)
 		JS_DestroyRuntime(rt);
     rt = NULL;
-    
 }
 
 #endif // HAVE_JS

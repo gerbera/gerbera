@@ -230,15 +230,20 @@ Script::Script(Ref<Runtime> runtime) : Object()
 {
     this->runtime = runtime;
     rt = runtime->getRT();
-    cx = runtime->getCX();
+    
+    /* create a context and associate it with the JS run time */
+    cx = JS_NewContext(rt, 8192);
+    if (! cx)
+        throw _Exception(_("Scripting: could not initialize js context"));
+    
     glob = NULL;
 	script = NULL;
     
     JS_SetErrorReporter(cx, js_error_reporter);
     initGlobalObject();
-
+    
     JS_SetPrivate(cx, glob, this);
-
+    
     /* initialize contstants */
     setIntProperty(glob, _("OBJECT_TYPE_CONTAINER"),
                           OBJECT_TYPE_CONTAINER);
@@ -280,6 +285,10 @@ Script::~Script()
 {
     if (script)
         JS_DestroyScript(cx, script);
+    
+    if (cx)
+		JS_DestroyContext(cx);
+    cx = NULL;
 }
 
 void Script::setGlobalObject(JSObject *glob)
