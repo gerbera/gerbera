@@ -27,7 +27,7 @@
     $Id$
 */
 
-/// \file js_functions.h 
+/// \file js_functions.h
 /// \brief These functions can be called from scripts.
 
 #ifndef __SCRIPTING_JS_FUNCTIONS_H__

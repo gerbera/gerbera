@@ -30,7 +30,7 @@
 /// \file common.h
 #if defined(HAVE_CONFIG_H)
     #include "autoconfig.h"
-#endif
+#endif                                                
 
 #ifndef __COMMON_H__
 #define __COMMON_H__
@@ -188,7 +188,7 @@
 #define DEFAULT_IGNORE_UNKNOWN_EXTENSIONS "no"
 #define DEFAULT_IMPORT_SCRIPT           "import.js"
 #define DEFAULT_PLAYLISTS_SCRIPT        "playlists.js"
-#define DEFAULT_COMMON_SCRIPT           "functions.js"
+#define DEFAULT_COMMON_SCRIPT           "common.js"
 #define DEFAULT_MYSQL_HOST              "localhost"
 #define DEFAULT_MYSQL_DB                "mediatomb"
 #define DEFAULT_MYSQL_USER              "mediatomb"

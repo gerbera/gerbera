@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    playlist_paserser_script.h - this file is part of MediaTomb.
+    playlist_parser_script.h - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>

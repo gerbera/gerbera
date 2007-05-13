@@ -56,12 +56,37 @@ foreach (@ARGV)
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.';
     
+    my $new_header_free = 
+'    MediaTomb - http://www.mediatomb.cc/
+    
+    '.$filename.' - this file is part of MediaTomb.
+    
+    Copyright (C) 2006-2007 Gena Batyan <bgeradz@mediatomb.cc>,
+                            Sergey \'Jin\' Bostandzhyan <jin@mediatomb.cc>,
+                            Leonhard Wimmer <leo@mediatomb.cc>
+    
+    This file is free software; the copyright owners give unlimited permission
+    to copy and/or redistribute it; with or without modifications, as long as
+    this notice is preserved.
+    
+    This file is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    
+    $Id$';
+    
     my $new_header_c =
 '/*MT*
     
 '.$new_header_main.'
 */';
-
+    
+    my $new_header_free_c =
+'/*MT_F*
+    
+'.$new_header_free.'
+*/';
+    
     my $new_header_sgml =
 '<!--*MT*
     
@@ -110,6 +135,11 @@ foreach (@ARGV)
     {
         print "#*MT*...";
         $data =~ s/#\*MT\*.*?#\*MT\*/$new_header_number/s;
+    }
+    elsif ($data =~ m|/\*MT_F\*|)
+    {
+        print "/*MT_F*...";
+        $data =~ s|/\*MT_F\*(.*?\*)??/|$new_header_free_c|s;
     }
 #    elsif ($data =~ m|/\*.*this file is part of MediaTomb\.|)
 #    {

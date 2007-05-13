@@ -1,11 +1,30 @@
-// playlist.js - default MediaTomb playlist parsing script
-//
-// $Id$
+// Default MediaTomb playlist parsing script.
 //
 // Note: This script currently only handles .m3u and .pls playlists, but it can
 // easily be extended. It doesn't use the "correct" way to parse the playlist, 
 // but a more fault-tolerant way, so it will try to do it's best and won't
 // complain even if the playlist is completely messed up.
+
+/*MT_F*
+    
+    MediaTomb - http://www.mediatomb.cc/
+    
+    playlists.js - this file is part of MediaTomb.
+    
+    Copyright (C) 2006-2007 Gena Batyan <bgeradz@mediatomb.cc>,
+                            Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
+                            Leonhard Wimmer <leo@mediatomb.cc>
+    
+    This file is free software; the copyright owners give unlimited permission
+    to copy and/or redistribute it; with or without modifications, as long as
+    this notice is preserved.
+    
+    This file is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    
+    $Id$
+*/
 
 function addPlaylistItem(location, title, playlistChain)
 {
