@@ -539,7 +539,7 @@ void ConfigManager::validate(String serverhome)
 #else
 
     // check js stuff
-    charset = getOption(_("/import/scripting/virtual-layout/script/attribute::charset"), _(DEFAULT_JS_CHARSET));
+    charset = getOption(_("/import/scripting/attribute::script-charset"), _(DEFAULT_JS_CHARSET));
     if (temp == "js") 
     {
         try

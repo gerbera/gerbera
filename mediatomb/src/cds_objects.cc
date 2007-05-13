@@ -114,11 +114,11 @@ int CdsObject::resourcesEqual(Ref<CdsObject> obj)
 
 void CdsObject::validate()
 {
-    if ((!string_ok(this->title)) ||
-        (!string_ok(this->upnpClass)))
-    {
-        throw _Exception(_("CdsObject: validation failed"));
-    }
+    if (!string_ok(this->title))
+        throw _Exception(_("Object validation failed: missing title!\n"));
+
+    if (!string_ok(this->upnpClass))
+        throw _Exception(_("Object validation failed: missing upnp class\n"));
 
 }
 
@@ -187,8 +187,15 @@ void CdsItem::validate()
 {
     CdsObject::validate();
 //    log_info("mime: [%s] loc [%s]\n", this->mimeType.c_str(), this->location.c_str());
-    if ((!string_ok(this->mimeType)) || (!check_path(this->location)))
-        throw _Exception(_("CdsItem: validation failed"));
+    if (!string_ok(this->mimeType))
+        throw _Exception(_("Item validation failed: missing mimetype"));
+
+    if (!string_ok(this->location))
+        throw _Exception(_("Item validation failed: missing location"));
+
+    if (!check_path(this->location))
+        throw _Exception(_("Item validation failed: file ") + 
+                this->location + " not found");
 }
 
 CdsActiveItem::CdsActiveItem() : CdsItem()
@@ -224,8 +231,12 @@ int CdsActiveItem::equals(Ref<CdsObject> obj, bool exactly)
 void CdsActiveItem::validate()
 {
     CdsItem::validate();
-    if ((!string_ok(this->action)) || (!check_path(this->action)))
-        throw _Exception(_("CdsActiveItem: validation failed"));
+    if (!string_ok(this->action))
+        throw _Exception(_("Active Item validation failed: missing action\n"));
+       
+    if (!check_path(this->action))
+        throw _Exception(_("ctive Item validation failed: action script ") +
+                this->action + " not found\n");
 }
 //---------
 
@@ -240,8 +251,11 @@ CdsItemExternalURL::CdsItemExternalURL() : CdsItem()
 void CdsItemExternalURL::validate()
 {
     CdsObject::validate();
-    if ((!string_ok(this->mimeType)) || (!string_ok(this->location)))
-        throw _Exception(_("CdsItemExternalURL: validation failed"));
+    if (!string_ok(this->mimeType))
+        throw _Exception(_("URL Item validation failed: missing mimetype\n"));
+      
+    if (!string_ok(this->location))
+        throw _Exception(_("URL Item validation failed: missing URL\n"));
 }
 //---------
 
@@ -255,12 +269,10 @@ CdsItemInternalURL::CdsItemInternalURL() : CdsItemExternalURL()
 
 void CdsItemInternalURL::validate()
 {
-    CdsObject::validate();
-    if ((!string_ok(this->mimeType)) || (!string_ok(this->location)))
-        throw _Exception(_("CdsItemInternalURL: validation failed"));
+    CdsItemExternalURL::validate();
 
     if (this->location.startsWith(_("http://")))
-        throw _Exception(_("CdsItemInternalURL: validation failed: must be realtive!"));
+        throw _Exception(_("Internal URL item validation failed: only realative URLs allowd\n"));
 }
 
 CdsContainer::CdsContainer() : CdsObject()
