@@ -167,7 +167,7 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
     }
 #endif // HAVE_MAGIC
 
-    String layout_type = cm->getOption(_("/import/virtual-layout/attribute::type"));
+    String layout_type = cm->getOption(_("/import/scripting/virtual-layout/attribute::type"));
     if ((layout_type == "builtin") || (layout_type == "js"))
         layout_enabled = true;
 }
@@ -1141,7 +1141,7 @@ void ContentManager::initLayout()
         if (layout == nil)
             try
             {
-                String layout_type = ConfigManager::getInstance()->getOption(_("/import/virtual-layout/attribute::type"));
+                String layout_type = ConfigManager::getInstance()->getOption(_("/import/scripting/virtual-layout/attribute::type"));
                 if (layout_type == "js")
                 {
 #ifdef HAVE_JS

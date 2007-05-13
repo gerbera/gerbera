@@ -40,6 +40,7 @@
 #include "string_converter.h"
 #include "metadata_handler.h"
 #include "js_functions.h"
+#include "config_manager.h"
 
 using namespace zmm;
 
@@ -279,12 +280,33 @@ Script::Script(Ref<Runtime> runtime) : Object()
                        _(UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER));
     
     defineFunctions(global_functions);
+
+    String common_scr_path = ConfigManager::getInstance()->getOption(_("/import/scripting/common-script"));
+
+    if (!string_ok(common_scr_path))
+        log_js("Common script disabled in configuration\n");
+    else
+    {
+        try
+        {
+            common_script = _load(common_scr_path);
+            _execute(common_script);
+        }
+        catch (Exception e)
+        {
+            log_js("Unable to load %s: %s\n", common_scr_path.c_str(), 
+                    e.getMessage().c_str());
+        }
+    }
 }
 
 Script::~Script()
 {
     if (script)
         JS_DestroyScript(cx, script);
+
+    if (common_script)
+        JS_DestroyScript(cx, common_script);
     
     if (cx)
 		JS_DestroyContext(cx);
@@ -323,10 +345,12 @@ void Script::defineFunctions(JSFunctionSpec *functions)
         throw _Exception(_("Scripting: JS_DefineFunctions failed"));
 }
 
-void Script::load(zmm::String scriptPath)
+JSScript *Script::_load(zmm::String scriptPath)
 {
     if (glob == NULL)
         initGlobalObject();
+
+    JSScript *scr;
 
     String scriptText = read_text_file(scriptPath);
 
@@ -343,18 +367,34 @@ void Script::load(zmm::String scriptPath)
         throw _Exception(String("Failed to convert import script:") + e.getMessage().c_str());
     }
 
-    script = JS_CompileScript(cx, glob, scriptText.c_str(), scriptText.length(),
+    scr = JS_CompileScript(cx, glob, scriptText.c_str(), scriptText.length(),
                               scriptPath.c_str(), 1);
-    if (! script)
+    if (! scr)
         throw _Exception(_("Scripting: failed to compile ") + scriptPath);
+
+    return scr;
+}
+
+void Script::load(zmm::String scriptPath)
+{
+    if (script)
+        JS_DestroyScript(cx, script);
+
+    script = _load((scriptPath));
+}
+
+
+void Script::_execute(JSScript *scr)
+{
+    jsval ret_val;
+
+    if (!JS_ExecuteScript(cx, glob, scr, &ret_val))
+        throw _Exception(_("Script: failed to execute script"));
 }
 
 void Script::execute()
 {
-    jsval ret_val;
-
-    if (!JS_ExecuteScript(cx, glob, script, &ret_val))
-        throw _Exception(_("Script: failed to execute script"));
+    _execute(script);
 }
 
 Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js)

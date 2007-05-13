@@ -57,6 +57,8 @@ public:
     JSContext *cx;
     JSObject  *glob;
 	JSScript *script;
+    JSScript *common_script;
+
 public:
 	Script(zmm::Ref<Runtime> runtime);
 	virtual ~Script();
@@ -93,6 +95,8 @@ protected:
     
 private:
     void initGlobalObject();
+    JSScript *_load(zmm::String scriptPath);
+    void _execute(JSScript *scr);
 };
 
 #endif // __SCRIPTING_SCRIPT_H__

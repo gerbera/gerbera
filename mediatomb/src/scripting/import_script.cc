@@ -51,7 +51,7 @@ ImportScript::ImportScript(Ref<Runtime> runtime) : Script(runtime)
 {
     defineFunctions(global_functions);
     
-    String scriptPath = ConfigManager::getInstance()->getOption(_("/import/virtual-layout/script")); 
+    String scriptPath = ConfigManager::getInstance()->getOption(_("/import/scripting/virtual-layout/import-script")); 
     load(scriptPath);
 }
 

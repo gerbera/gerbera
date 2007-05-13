@@ -87,7 +87,7 @@ PlaylistParserScript::PlaylistParserScript(Ref<Runtime> runtime) : Script(runtim
 
     defineFunctions(global_functions);
     
-    String scriptPath = ConfigManager::getInstance()->getOption(_("/import/playlists/script")); 
+    String scriptPath = ConfigManager::getInstance()->getOption(_("/import/scripting/playlist-script")); 
     load(scriptPath);
 }
 

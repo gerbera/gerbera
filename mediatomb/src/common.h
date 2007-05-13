@@ -169,10 +169,8 @@
 #define DEFAULT_INTERNAL_CHARSET        "UTF-8"
 #define DEFAULT_FILESYSTEM_CHARSET      "ISO-8859-1"
 #define DEFAULT_FALLBACK_CHARSET        "US-ASCII"
-#if defined(HAVE_JS)
-    #define DEFAULT_JS_CHARSET          "UTF-8"
-    #define DEFAULT_JS_EN_VALUE         "yes"
-#endif
+#define DEFAULT_JS_CHARSET              "UTF-8"
+
 #if defined(__CYGWIN__)
     #define DEFAULT_CONFIG_HOME         "MediaTomb"
 #else
@@ -190,6 +188,7 @@
 #define DEFAULT_IGNORE_UNKNOWN_EXTENSIONS "no"
 #define DEFAULT_IMPORT_SCRIPT           "import.js"
 #define DEFAULT_PLAYLISTS_SCRIPT        "playlists.js"
+#define DEFAULT_COMMON_SCRIPT           "functions.js"
 #define DEFAULT_MYSQL_HOST              "localhost"
 #define DEFAULT_MYSQL_DB                "mediatomb"
 #define DEFAULT_MYSQL_USER              "mediatomb"

@@ -192,16 +192,34 @@ String ConfigManager::createDefaultConfig(String userhome)
     Ref<Element> import(new Element(_("import")));
     import->addAttribute(_("hidden-files"), _(DEFAULT_HIDDEN_FILES_VALUE));
 
+    Ref<Element> scripting(new Element(_("scripting")));
+    scripting->addAttribute(_("script-charset"), _(DEFAULT_JS_CHARSET));
+    import->appendChild(scripting);
+
     Ref<Element> layout(new Element(_("virtual-layout")));
     layout->addAttribute(_("type"), _(DEFAULT_LAYOUT_TYPE));
 #ifdef HAVE_JS
-    layout->appendTextChild(_("script"), String(_(PACKAGE_DATADIR)) +
+    layout->appendTextChild(_("import-script"), String(_(PACKAGE_DATADIR)) +
                                                 DIR_SEPARATOR + 
                                                 _(DEFAULT_JS_DIR) +
                                                 DIR_SEPARATOR +
                                                 _(DEFAULT_IMPORT_SCRIPT));
+    scripting->appendTextChild(_("common-script"), 
+                String(_(PACKAGE_DATADIR)) + 
+                DIR_SEPARATOR + 
+                _(DEFAULT_JS_DIR) + 
+                DIR_SEPARATOR +
+                _(DEFAULT_COMMON_SCRIPT));
+
+    scripting->appendTextChild(_("playlist-script"),
+                String(_(PACKAGE_DATADIR)) +
+                DIR_SEPARATOR +
+                _(DEFAULT_JS_DIR) +
+                DIR_SEPARATOR +
+                _(DEFAULT_PLAYLISTS_SCRIPT));
+
 #endif
-    import->appendChild(layout);
+    scripting->appendChild(layout);
 
     String map_file = _(PACKAGE_DATADIR) + DIR_SEPARATOR + CONFIG_MAPPINGS_TEMPLATE;
 
@@ -489,18 +507,29 @@ void ConfigManager::validate(String serverhome)
 
 /// \todo Jin: finalize playlist script configuration once we know how we want it
 #ifdef HAVE_JS
-    String script_path = getOption(_("/import/playlists/script"), _(PACKAGE_DATADIR) +
+    String script_path = getOption(_("/import/scripting/playlist-script"), _(PACKAGE_DATADIR) +
             DIR_SEPARATOR +
             _(DEFAULT_JS_DIR) +
             DIR_SEPARATOR +
             _(DEFAULT_PLAYLISTS_SCRIPT));
     if (!string_ok(script_path))
         throw _Exception(_("playlist script location invalid"));
-    prepare_path(_("/import/playlists/script"));
+    prepare_path(_("/import/scripting/playlist-script"));
+
+   script_path = getOption(_("/import/scripting/comon-script"), 
+           _(PACKAGE_DATADIR) +
+            DIR_SEPARATOR +
+            _(DEFAULT_JS_DIR) +
+            DIR_SEPARATOR +
+            _(DEFAULT_COMMON_SCRIPT));
+    if (!string_ok(script_path))
+        throw _Exception(_("common script location invalid"));
+    prepare_path(_("/import/scripting/common-script"));
+
 
 #endif
 
-    temp = getOption(_("/import/virtual-layout/attribute::type"), _(DEFAULT_LAYOUT_TYPE));
+    temp = getOption(_("/import/scripting/virtual-layout/attribute::type"), _(DEFAULT_LAYOUT_TYPE));
     if ((temp != "js") && (temp != "builtin") && (temp != "disabled"))
         throw _Exception(_("Error in config file: invalid virtual layout type specified!"));
 
@@ -510,7 +539,7 @@ void ConfigManager::validate(String serverhome)
 #else
 
     // check js stuff
-    charset = getOption(_("/import/virtual-layout/script/attribute::charset"), _(DEFAULT_JS_CHARSET));
+    charset = getOption(_("/import/scripting/virtual-layout/script/attribute::charset"), _(DEFAULT_JS_CHARSET));
     if (temp == "js") 
     {
         try
@@ -524,7 +553,7 @@ void ConfigManager::validate(String serverhome)
         }
     }
 
-    script_path = getOption(_("/import/virtual-layout/script"), _(PACKAGE_DATADIR) +
+    script_path = getOption(_("/import/scripting/virtual-layout/import-script"), _(PACKAGE_DATADIR) +
                                                           DIR_SEPARATOR + 
                                                         _(DEFAULT_JS_DIR) +
                                                           DIR_SEPARATOR +
@@ -533,7 +562,7 @@ void ConfigManager::validate(String serverhome)
     {
         if (!string_ok(script_path))
             throw _Exception(_("Error in config file: you specified \"js\" to be used for virtual layout, but script location is invalid."));
-        prepare_path(_("/import/virtual-layout/script"));
+        prepare_path(_("/import/scripting/virtual-layout/import-script"));
     }
 #endif
 
