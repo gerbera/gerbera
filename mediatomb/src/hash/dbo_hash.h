@@ -169,4 +169,3 @@ public:
 };
 
 #endif // __HASH_DBO_HASH_H__
-

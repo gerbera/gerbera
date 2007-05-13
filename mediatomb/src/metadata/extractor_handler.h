@@ -47,5 +47,3 @@ public:
 };
 
 #endif // __METADATA_EXTRACTOR_H__
-
-

@@ -159,4 +159,3 @@ public:
 WebRequestHandler *create_web_request_handler(zmm::String page);
 
 #endif // __WEB_PAGES_H__
-

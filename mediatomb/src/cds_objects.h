@@ -541,4 +541,3 @@ public:
 };
 
 #endif // __CDS_OBJECTS_H__
-

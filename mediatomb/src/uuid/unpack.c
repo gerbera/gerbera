@@ -37,4 +37,3 @@ void uuid_unpack2(const uuid_t in, struct uuid *uu)
 
 	memcpy(uu->node, ptr, 6);
 }
-

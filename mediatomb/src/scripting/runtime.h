@@ -29,7 +29,6 @@
 
 /// \file runtime.h
 
-
 #ifndef __SCRIPTING_RUNTIME_H__
 #define __SCRIPTING_RUNTIME_H__
 
@@ -52,12 +51,11 @@ protected:
     JSRuntime *rt;
 
 public:
-	Runtime();
-	virtual ~Runtime();
-
+    Runtime();
+    virtual ~Runtime();
+    
     /// \brief Returns the runtime for script execution.
     JSRuntime *getRT() { return rt; }
 };
 
 #endif // __SCRIPTING_RUNTIME_H__
-

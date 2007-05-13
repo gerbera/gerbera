@@ -25,4 +25,3 @@ void uuid_unparse(const uuid_t uu, char *out)
 		uuid.node[0], uuid.node[1], uuid.node[2],
 		uuid.node[3], uuid.node[4], uuid.node[5]);
 }
-

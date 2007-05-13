@@ -138,4 +138,3 @@ void CdsResource::optimize()
     attributes->optimize();
     parameters->optimize();
 }
-

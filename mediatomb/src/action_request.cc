@@ -118,5 +118,3 @@ void ActionRequest::update()
         log_error("ActionRequest::update(): response is nil, code %d\n", errCode);
     }
 }
-
-

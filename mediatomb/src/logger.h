@@ -81,4 +81,3 @@ void _log_debug(const char *format, const char* file, int line, const char *func
 void _print_backtrace(FILE* file = LOG_FILE);
 
 #endif // __LOGGER_H__
-

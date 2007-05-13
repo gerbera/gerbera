@@ -196,4 +196,3 @@ Ref<Array<DictionaryElement> > Dictionary::getElements()
 {
     return elements;
 }
-

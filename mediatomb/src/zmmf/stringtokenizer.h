@@ -40,12 +40,12 @@ namespace zmm
 class StringTokenizer : public Object
 {
 public:
-	StringTokenizer(String str);
-	String nextToken(String seps);
+    StringTokenizer(String str);
+    String nextToken(String seps);
 protected:
-	String str;
-	int len;
-	int pos;
+    String str;
+    int len;
+    int pos;
 };
 
 } // namespace

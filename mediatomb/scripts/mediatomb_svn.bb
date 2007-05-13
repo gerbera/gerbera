@@ -13,11 +13,11 @@ inherit autotools pkgconfig
 
 EXTRA_OECONF = "--disable-mysql \
                 --disable-rpl-malloc \
-		--enable-sqlite3 \
+                --enable-sqlite3 \
                 --enable-libjs \
-		--enable-libmagic \
-		--enable-id3lib \
-		--enable-libexif \
+                --enable-libmagic \
+                --enable-id3lib \
+                --enable-libexif \
                 --disable-largefile \
                 --with-sqlite3-h=${STAGING_INCDIR} \
                 --with-sqlite3-libs=${STAGING_LIBDIR} \

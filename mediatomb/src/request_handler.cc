@@ -68,5 +68,3 @@ void RequestHandler::split_url(const char *url, char separator, String &path, St
         path = url_s.substring(0, i1);
     }
 }
-
-

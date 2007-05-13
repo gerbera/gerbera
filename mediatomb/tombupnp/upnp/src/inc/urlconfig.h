@@ -81,4 +81,3 @@ int configure_urlbase( INOUT IXML_Document *doc,
 #endif
 
 #endif /* URLCONFIG_H */
-

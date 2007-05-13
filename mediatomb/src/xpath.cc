@@ -128,4 +128,3 @@ String XPath::getSpec(String axisPart)
     char *pos = strstr(axisPart.c_str(), "::");
     return String(pos + 2);
 }
-

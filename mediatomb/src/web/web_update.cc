@@ -51,6 +51,3 @@ void web::update::process()
 {
     check_request();
 }
-
-
-

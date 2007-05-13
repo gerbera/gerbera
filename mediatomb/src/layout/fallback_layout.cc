@@ -207,5 +207,3 @@ void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj)
     else if (mimetype.startsWith(_("audio")) || (mimetype == "application/ogg"))
         addAudio(clone);
 }
-
-

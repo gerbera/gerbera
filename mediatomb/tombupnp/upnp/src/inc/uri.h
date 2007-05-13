@@ -515,4 +515,3 @@ EXTERN_C void free_http_message(http_message * message);
 #endif
 
 #endif // GENLIB_NET_URI_H
-

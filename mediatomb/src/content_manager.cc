@@ -753,8 +753,8 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<CMTask> task, pr
             if (obj != nil)
             {
 //#ifdef HAVE_JS
-        		if (IS_CDS_ITEM(obj->getObjectType()))
-	        	{
+                if (IS_CDS_ITEM(obj->getObjectType()))
+                {
                     if (layout != nil)
                     {
                         PROF_START(profiling);
@@ -784,7 +784,7 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<CMTask> task, pr
                     
                     /// \todo Why was this statement here??? - It seems to be unnecessary
                     //obj = createObjectFromFile(newPath);
-        		}
+                }
 //#endif
                 if (IS_CDS_CONTAINER(obj->getObjectType()))
                 {
@@ -1067,7 +1067,7 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic)
         {
             if (ignore_unknown_extensions)
                 return nil; // item should be ignored
-#ifdef HAVE_MAGIC	    
+#ifdef HAVE_MAGIC        
             mimetype = get_mime_type(ms, reMimetype, path);
 #endif
         }
@@ -1180,13 +1180,13 @@ void ContentManager::destroyJS()
 
 void ContentManager::destroyLayout()
 {
-	layout = nil;
+    layout = nil;
 }
 
 void ContentManager::reloadLayout()
 {
-	destroyLayout();
-	initLayout();
+    destroyLayout();
+    initLayout();
 }
 
 void ContentManager::threadProc()
@@ -1642,4 +1642,3 @@ CMAccounting::CMAccounting() : Object()
 {
     totalFiles = 0;
 }
-

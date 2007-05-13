@@ -257,4 +257,3 @@ protected:
 };
 
 #endif // __STORAGE_H__
-

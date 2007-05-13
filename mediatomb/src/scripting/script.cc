@@ -107,9 +107,9 @@ void Script::setProperty(JSObject *obj, String name, String value)
 {
     jsval val;
     JSString *str = JS_NewStringCopyN(cx, value.c_str(), value.length());
-	if (!str)
-		return;
-	val = STRING_TO_JSVAL(str);
+    if (!str)
+        return;
+    val = STRING_TO_JSVAL(str);
     if (!JS_SetProperty(cx, obj, name.c_str(), &val))
         return;
 }
@@ -126,7 +126,7 @@ void Script::setIntProperty(JSObject *obj, String name, int value)
 void Script::setObjectProperty(JSObject *parent, String name, JSObject *obj)
 {
     jsval val;
-	val = OBJECT_TO_JSVAL(obj);
+    val = OBJECT_TO_JSVAL(obj);
     if (!JS_SetProperty(cx, parent, name.c_str(), &val))
         return;
 }
@@ -238,7 +238,7 @@ Script::Script(Ref<Runtime> runtime) : Object()
         throw _Exception(_("Scripting: could not initialize js context"));
     
     glob = NULL;
-	script = NULL;
+    script = NULL;
     
     JS_SetErrorReporter(cx, js_error_reporter);
     initGlobalObject();
@@ -304,12 +304,12 @@ Script::~Script()
 {
     if (script)
         JS_DestroyScript(cx, script);
-
+    
     if (common_script)
         JS_DestroyScript(cx, common_script);
     
     if (cx)
-		JS_DestroyContext(cx);
+        JS_DestroyContext(cx);
     cx = NULL;
 }
 
@@ -626,4 +626,3 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
 
 
 #endif // HAVE_JS
-

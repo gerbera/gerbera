@@ -66,4 +66,3 @@ void web::add::process()
     cm->addFile(path, true);
     log_debug("add: returning\n");
 }
-

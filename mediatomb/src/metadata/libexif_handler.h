@@ -60,4 +60,3 @@ public:
 };
 
 #endif // __METADATA_LIBEXIF_H__
-

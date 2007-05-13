@@ -50,10 +50,9 @@ Runtime::Runtime() : Singleton<Runtime>()
 }
 Runtime::~Runtime()
 {
-	if (rt)
-		JS_DestroyRuntime(rt);
+    if (rt)
+        JS_DestroyRuntime(rt);
     rt = NULL;
 }
 
 #endif // HAVE_JS
-

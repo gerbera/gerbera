@@ -41,14 +41,14 @@ using namespace zmm;
 /* XmlAttr methods */
 Attribute::Attribute(String name, String value) : Object()
 {
-	this->name = name;
-	this->value = value;
+this->name = name;
+this->value = value;
 }
 Attribute::Attribute(String name) : Object()
 {
-	this->name = name;
+this->name = name;
 }
 void Attribute::setValue(String value)
 {
-	this->value = value;
+this->value = value;
 }

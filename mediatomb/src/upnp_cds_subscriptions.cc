@@ -105,4 +105,3 @@ void ContentDirectoryService::subscription_update(String containerUpdateIDs_CSV)
 
     log_debug("end\n");
 }
-

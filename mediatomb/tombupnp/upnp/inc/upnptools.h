@@ -226,5 +226,3 @@ EXPORT_SPEC const char * UpnpGetErrorMessage(
 #endif // UPNP_HAVE_TOOLS
 
 #endif // UPNP_TOOLS_H
-
-

@@ -80,4 +80,3 @@ curl_off_t curlx_strtoll(const char *nptr, char **endptr, int base);
 
 #endif // #if 0
 #endif
-

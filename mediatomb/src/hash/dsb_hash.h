@@ -141,4 +141,3 @@ public:
 };
 
 #endif // __HASH_DSB_HASH_H__
-

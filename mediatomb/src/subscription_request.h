@@ -78,4 +78,3 @@ public:
 };
 
 #endif // __SUBSCRIPTION_REQUEST_H__
-

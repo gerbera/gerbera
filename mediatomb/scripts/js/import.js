@@ -1,4 +1,5 @@
 // Default MediaTomb import script.
+// see MediaTomb scripting documentation for more information
 
 /*MT_F*
     

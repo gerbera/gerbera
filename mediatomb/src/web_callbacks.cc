@@ -313,4 +313,3 @@ int register_web_callbacks()
     ret = UpnpSetVirtualDirCallbacks(&cb);
     return ret;
 }   
-

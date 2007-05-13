@@ -41,10 +41,9 @@ protected:
     zmm::Ref<ImportScript> import_script;
 
 public:
-	JSLayout();
-	virtual ~JSLayout();
-	virtual void processCdsObject(zmm::Ref<CdsObject> obj);	
+    JSLayout();
+    virtual ~JSLayout();
+    virtual void processCdsObject(zmm::Ref<CdsObject> obj);
 };
 
 #endif // __JS_LAYOUT_H__
-

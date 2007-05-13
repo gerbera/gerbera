@@ -34,7 +34,3 @@ struct uuid {
  */
 void uuid_pack2(const struct uuid *uu, uuid_t ptr);
 void uuid_unpack2(const uuid_t in, struct uuid *uu);
-
-
-
-

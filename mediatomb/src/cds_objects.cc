@@ -363,6 +363,3 @@ String CdsItem::getVirtualPath()
 
     return location;
 }
-
-
-

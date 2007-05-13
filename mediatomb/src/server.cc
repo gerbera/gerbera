@@ -481,5 +481,3 @@ void Server::upnp_subscriptions(Ref<SubscriptionRequest> request)
                             _("Service does not exist or subscriptions not supported"));
     }
 }
-
-

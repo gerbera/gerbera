@@ -103,4 +103,3 @@ else:
     # os.system("/run/something/useful")
 
 sys.stdout.write(item.render())
-

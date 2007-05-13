@@ -153,4 +153,3 @@ public:
 };
 
 #endif // __HASH_DSO_HASH_H__
-

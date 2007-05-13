@@ -46,4 +46,3 @@ UpnpException::UpnpException(int errCode, String message, const char *file, int 
 {
     this->errCode = errCode;
 }
-

@@ -136,5 +136,3 @@ void IOHandler::seek(IN off_t offset, IN int whence)
 void IOHandler::close()
 {
 }
-
-

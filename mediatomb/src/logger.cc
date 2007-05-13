@@ -145,4 +145,3 @@ void _print_backtrace(FILE* file)
     free(s);
 #endif
 }
-

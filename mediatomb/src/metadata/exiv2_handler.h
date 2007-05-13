@@ -44,4 +44,3 @@ public:
 };
 
 #endif // __METADATA_EXIV2_H__
-

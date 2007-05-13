@@ -83,4 +83,3 @@ namespace zmm
 }
 
 #endif // __ZMMF_OBJECT_QUEUE_H__
-

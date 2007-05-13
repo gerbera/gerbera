@@ -139,4 +139,3 @@ public:
 };
 
 #endif // __HASH_DBB_HASH_H__
-

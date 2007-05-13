@@ -42,12 +42,11 @@ class Context;
 class ParseException : public zmm::Exception
 {
 public:
-	zmm::Ref<Context> context;
+    zmm::Ref<Context> context;
 public:
-	ParseException(zmm::String msg, zmm::Ref<Context> context);
+    ParseException(zmm::String msg, zmm::Ref<Context> context);
 };
 
 }
 
 #endif // __MXML_PARSEEXCEPTION_H__
-

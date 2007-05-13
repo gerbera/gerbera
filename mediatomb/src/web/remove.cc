@@ -60,4 +60,3 @@ void web::remove::process()
     
     log_debug("remove: returning\n");
 }
-

@@ -55,5 +55,3 @@ WebRequestHandler *create_web_request_handler(String page)
     
     throw _Exception(_("Unknown page: ") + page);
 }
-
-

@@ -45,10 +45,9 @@ protected:
     char *ptr;
 public:
     StringInput(zmm::String str);
-	virtual int readChar();
+virtual int readChar();
 };
 
 }
 
 #endif // __MXML_STRINGINPUT_H__
-

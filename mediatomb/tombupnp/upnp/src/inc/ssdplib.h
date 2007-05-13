@@ -542,4 +542,3 @@ int AdvertiseAndReply(IN int AdFlag,
                     IN char *ServiceType, int Exp);
 
 #endif
-

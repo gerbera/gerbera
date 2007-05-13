@@ -229,4 +229,3 @@ Ref<IOHandler> ServeRequestHandler::open(IN const char *filename, OUT struct Fil
 
     return io_handler;
 }
-

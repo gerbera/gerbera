@@ -44,15 +44,14 @@ class Input;
 class Parser : public zmm::Object
 {
 public:
-	Parser();
-	zmm::Ref<Element> parseFile(zmm::String);
+    Parser();
+    zmm::Ref<Element> parseFile(zmm::String);
     zmm::Ref<Element> parseString(zmm::String);
 protected:
-	zmm::Ref<Element> parse(zmm::Ref<Context> ctx, zmm::Ref<Input> input,
+    zmm::Ref<Element> parse(zmm::Ref<Context> ctx, zmm::Ref<Input> input,
                             zmm::String parentTag, int state);
 };
 
 }
 
 #endif // __MXML_PARSER_H__
-

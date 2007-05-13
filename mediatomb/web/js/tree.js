@@ -400,4 +400,3 @@ function updateTree(ajaxRequest)
         //alert("selected! " + parentId);
     }
 }
-

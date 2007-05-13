@@ -117,4 +117,3 @@ void    ixmlNodeList_init(IXML_NodeList *nList);
 int     ixmlNodeList_addToNodeList(IXML_NodeList **nList, IXML_Node *add);
 
 #endif  // _IXMLPARSER_H
-

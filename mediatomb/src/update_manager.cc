@@ -295,4 +295,3 @@ void *UpdateManager::staticThreadProc(void *arg)
     pthread_exit(NULL);
     return NULL;
 }
-

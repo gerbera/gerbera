@@ -112,10 +112,10 @@ public:
         base.optimize();
     }
     
-	inline Object **getObjectArray()
-	{
-		return base.arr;
-	}
+    inline Object **getObjectArray()
+    {
+        return base.arr;
+    }
 };
 
 

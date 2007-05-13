@@ -56,24 +56,24 @@ public:
     JSRuntime *rt;
     JSContext *cx;
     JSObject  *glob;
-	JSScript *script;
+    JSScript *script;
     JSScript *common_script;
-
+    
 public:
-	Script(zmm::Ref<Runtime> runtime);
-	virtual ~Script();
+    Script(zmm::Ref<Runtime> runtime);
+    virtual ~Script();
     
     zmm::String getProperty(JSObject *obj, zmm::String name);
     int getBoolProperty(JSObject *obj, zmm::String name);
     int getIntProperty(JSObject *obj, zmm::String name, int def);
     JSObject *getObjectProperty(JSObject *obj, zmm::String name);
-
+    
     void setProperty(JSObject *obj, zmm::String name, zmm::String value);
     void setIntProperty(JSObject *obj, zmm::String name, int value);
     void setObjectProperty(JSObject *parent, zmm::String name, JSObject *obj);
-
+    
     void deleteProperty(JSObject *obj, zmm::String name);
-
+    
     JSObject *getGlobalObject();
     void setGlobalObject(JSObject *glob);
     
@@ -87,9 +87,9 @@ public:
     /// a class inbetween to keep a nice separation?
     zmm::Ref<CdsObject> jsObject2cdsObject(JSObject *js);
     void cdsObject2jsObject(zmm::Ref<CdsObject> obj, JSObject *js);
-
+    
     virtual script_class_t whoami() = 0;
-
+    
 protected:
     void execute();
     
@@ -100,4 +100,3 @@ private:
 };
 
 #endif // __SCRIPTING_SCRIPT_H__
-

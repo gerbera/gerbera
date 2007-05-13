@@ -41,23 +41,22 @@ using namespace zmm;
 
 StringTokenizer::StringTokenizer(String str)
 {
-	this->str = str;
-	pos = 0;
-	len = str.length();
+    this->str = str;
+    pos = 0;
+    len = str.length();
 }
 String StringTokenizer::nextToken(String seps)
 {
-	char *cstr = str.c_str();
-	char *cseps = seps.c_str();
-	while(pos < len && strchr(cseps, cstr[pos]))
-		pos++;
-	if(pos < len)
-	{
-		int start = pos;
-		while(pos < len && ! strchr(cseps, cstr[pos]))
-			pos++;
-		return str.substring(start, pos - start);
-	}
-	return nil;
+    char *cstr = str.c_str();
+    char *cseps = seps.c_str();
+    while(pos < len && strchr(cseps, cstr[pos]))
+        pos++;
+    if(pos < len)
+    {
+        int start = pos;
+        while(pos < len && ! strchr(cseps, cstr[pos]))
+            pos++;
+        return str.substring(start, pos - start);
+    }
+    return nil;
 }
-

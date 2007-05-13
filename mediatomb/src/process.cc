@@ -102,5 +102,3 @@ String run_process(String prog, String param, String input)
 
     return output->toString();
 }
-
-

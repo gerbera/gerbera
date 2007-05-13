@@ -80,7 +80,7 @@ Ref<Storage> Storage::createInstance()
     do
     {
 #ifdef HAVE_SQLITE3
-    	if (type == "sqlite3")
+        if (type == "sqlite3")
         {
             storage = Ref<Storage>(new Sqlite3Storage());
             break;
@@ -137,4 +137,3 @@ void Storage::stripAndUnescapeVirtualContainerFromPath(String path, String &firs
         }
     }
 }
-

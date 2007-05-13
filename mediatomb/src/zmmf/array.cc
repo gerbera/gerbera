@@ -45,66 +45,66 @@ ArrayBase::ArrayBase()
 
 void ArrayBase::init(int capacity)
 {
-	this->capacity = capacity;
-	siz = 0;
-	arr = (Object **)MALLOC(capacity * sizeof(Object *));
+    this->capacity = capacity;
+    siz = 0;
+    arr = (Object **)MALLOC(capacity * sizeof(Object *));
 }
 ArrayBase::~ArrayBase()
 {
-	for(int i = 0; i < siz; i++)
-	{
-		Object *obj = arr[i];
-		if(obj)
-			obj->release();
-	}
+    for(int i = 0; i < siz; i++)
+    {
+        Object *obj = arr[i];
+        if(obj)
+            obj->release();
+    }
     FREE(arr);
 }
 
 void ArrayBase::append(Object *obj)
 {
-	obj->retain();
-	resize(siz + 1);
-	arr[siz++] = obj;
+    obj->retain();
+    resize(siz + 1);
+    arr[siz++] = obj;
 }
 
 void ArrayBase::set(Object *obj, int index)
 {
-	Object *old = arr[index];
-	if(old)
-		old->release();
-	if(obj)
-		obj->retain();
-	arr[index] = obj;
+    Object *old = arr[index];
+    if(old)
+        old->release();
+    if(obj)
+        obj->retain();
+    arr[index] = obj;
 }
 Object *ArrayBase::get(int index)
 {
-	return arr[index];
+    return arr[index];
 }
 void ArrayBase::remove(int index, int count)
 {
     if (index < 0 || index >= siz) // index beyond size
         return;
-	int max = index + count; // max is the last element to remove + 1
+    int max = index + count; // max is the last element to remove + 1
     if (max > siz) // if remove block is beyond size, cut it
         max = siz;
     if (max <= index) // if nothing to remove
         return;
-	for(int i = index; i < max; i++)
-	{
-		Object *obj = arr[i];
-		if(obj)
-			obj->release();
-	}
+    for(int i = index; i < max; i++)
+    {
+        Object *obj = arr[i];
+        if(obj)
+            obj->release();
+    }
     int move = siz - max;
     if (move) // if there is anything to shift
     {
-    	memmove(
-	    	(void *)(arr + index),
-		    (void *)(arr + index + count),
-    		move * sizeof(Object *)
-	    );
+        memmove(
+            (void *)(arr + index),
+            (void *)(arr + index + count),
+            move * sizeof(Object *)
+        );
     }
-	siz -= count;
+    siz -= count;
 }
 void ArrayBase::removeUnordered(int index)
 {
@@ -116,14 +116,14 @@ void ArrayBase::removeUnordered(int index)
 }
 void ArrayBase::insert(int index, Object *obj)
 {
-	resize(siz + 1);
-	memmove(
-		(void *)(arr + (index + 1)),
-		(void *)(arr + index),
-		(siz - index) * sizeof(Object *)
-	);
-	obj->retain();
-	arr[index] = obj;
+    resize(siz + 1);
+    memmove(
+        (void *)(arr + (index + 1)),
+        (void *)(arr + index),
+        (siz - index) * sizeof(Object *)
+    );
+    obj->retain();
+    arr[index] = obj;
     siz++;
 }
 
@@ -135,13 +135,12 @@ void ArrayBase::optimize()
 
 void ArrayBase::resize(int requiredSize)
 {
-	if(requiredSize > capacity)
-	{
-		int newCapacity = siz + (siz / 2);
-		if(requiredSize > newCapacity)
-			newCapacity = requiredSize;
-		capacity = newCapacity;
-		arr = (Object **)REALLOC(arr, capacity * sizeof(Object *));
-	}
+    if(requiredSize > capacity)
+    {
+        int newCapacity = siz + (siz / 2);
+        if(requiredSize > newCapacity)
+            newCapacity = requiredSize;
+        capacity = newCapacity;
+        arr = (Object **)REALLOC(arr, capacity * sizeof(Object *));
+    }
 }
-

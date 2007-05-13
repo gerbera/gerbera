@@ -38,4 +38,3 @@ void init_process();
 zmm::String run_process(zmm::String prog, zmm::String param, zmm::String input);
 
 #endif // __PROCESS_H__
-

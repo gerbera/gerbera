@@ -115,4 +115,3 @@ template <class T> zmm::Ref<T> Singleton<T>::instance = nil;
 template <class T> bool Singleton<T>::singletonActive = true;
 
 #endif // __SINGLETON_H__
-

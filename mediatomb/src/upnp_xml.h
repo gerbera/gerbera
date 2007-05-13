@@ -77,4 +77,3 @@ zmm::Ref<mxml::Element> UpnpXML_RenderDeviceDescription(zmm::String presentation
 /// \param attributes Dictionary containing the <res> tag attributes (like resolution, etc.)
 zmm::Ref<mxml::Element> UpnpXML_DIDLRenderResource(zmm::String URL, zmm::Ref<Dictionary> attributes);
 #endif // __UPNP_XML_H__
-

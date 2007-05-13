@@ -90,4 +90,3 @@ void *rpl_realloc(void *p, size_t size);
 void *rpl_calloc(size_t n, size_t s);
 #endif
 #endif // __MEMORY_H__
-

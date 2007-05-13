@@ -56,7 +56,7 @@ case $host in
         ;;
     *-*-cygwin*)
         CYGWIN_OS=1
-	;;
+        ;;
 esac
 
 AC_ARG_WITH(search, 
@@ -1130,7 +1130,7 @@ if test "x$MYSQL_OK" = xyes; then
     AC_CHECK_FUNCS(mysql_init,
         [],
         [
-	    MYSQL_OK=missing
+            MYSQL_OK=missing
             AC_MSG_RESULT(mysqlclient link failed)
         ]
     )

@@ -51,4 +51,3 @@ typedef struct hash_slot_struct *hash_slot_t;
 #include "hash/dso_hash.h"
 
 #endif // __HASH_H__
-

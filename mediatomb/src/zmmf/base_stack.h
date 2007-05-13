@@ -107,4 +107,3 @@ namespace zmm
 }
 
 #endif // __ZMMF_BASE_STACK_H__
-

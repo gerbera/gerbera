@@ -60,4 +60,3 @@ void ConnectionManagerService::setStaticArgs(String _serviceType, String _servic
     serviceType = _serviceType;
     serviceID = _serviceID;
 }
-

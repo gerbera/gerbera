@@ -163,4 +163,3 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj)
 }
 
 #endif // HAVE_JS
-

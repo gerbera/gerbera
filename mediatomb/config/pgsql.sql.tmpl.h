@@ -34,4 +34,3 @@
 
 #ifndef __PGSQL_CREATE_SQL_H__
 #define __PGSQL_CREATE_SQL_H__
-

@@ -220,4 +220,3 @@ private:
 };
 
 #endif // __SQL_STORAGE_H__
-

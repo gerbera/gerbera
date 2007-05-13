@@ -108,4 +108,3 @@ void MRRegistrarService::process_action_request(Ref<ActionRequest> request)
 }
 
 #endif // ENABLE_MRREG
-

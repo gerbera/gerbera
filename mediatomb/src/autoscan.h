@@ -242,4 +242,3 @@ protected:
 };
 
 #endif
-

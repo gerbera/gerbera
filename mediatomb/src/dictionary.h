@@ -206,4 +206,3 @@ protected:
 };
 
 #endif // __DICTIONARY_H__
-

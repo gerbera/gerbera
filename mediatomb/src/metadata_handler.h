@@ -112,4 +112,3 @@ public:
 };
 
 #endif // __METADATA_HANDLER_H__
-

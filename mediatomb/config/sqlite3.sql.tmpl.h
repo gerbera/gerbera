@@ -34,4 +34,3 @@
 
 #ifndef __SQLITE3_CREATE_SQL_H__
 #define __SQLITE3_CREATE_SQL_H__
-

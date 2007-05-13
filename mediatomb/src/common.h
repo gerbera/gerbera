@@ -228,4 +228,3 @@
 #define XML_XSI_SCHEMA_LOCATION           "http://mediatomb.cc/" VERSION "/config http://mediatomb.cc/" VERSION "/config.xsd"
 
 #endif // __COMMON_H__
-

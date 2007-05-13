@@ -438,4 +438,3 @@ Sqlite3Row::Sqlite3Row(char **row, Ref<SQLResult> sqlResult) : SQLRow(sqlResult)
 }
 
 #endif // HAVE_SQlITE3
-

@@ -386,4 +386,3 @@ scan_level_t AutoscanDirectory::remapScanlevel(String scanlevel)
     else
         throw _Exception(_("illegal scanlevel (") + scanlevel + ") given to remapScanlevel()");
 }
-

@@ -69,4 +69,3 @@ void web::tasks::process()
     else
         throw _Exception(_("web:tasks called with illegal action"));
 }
-

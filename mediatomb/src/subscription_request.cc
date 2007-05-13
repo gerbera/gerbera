@@ -62,5 +62,3 @@ String SubscriptionRequest::getSubscriptionID()
 {
     return sID;
 }
-
-

@@ -419,4 +419,3 @@ Ref<IOHandler> ExtractorHandler::serveContent(Ref<CdsItem> item, int resNum, off
 }
 
 #endif // HAVE_EXTRACTOR
-

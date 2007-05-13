@@ -37,8 +37,7 @@
 class Layout : public zmm::Object
 {
 public:
-	virtual void processCdsObject(zmm::Ref<CdsObject> obj) = 0;	
+    virtual void processCdsObject(zmm::Ref<CdsObject> obj) = 0;
 };
 
 #endif // __LAYOUT_H__
-

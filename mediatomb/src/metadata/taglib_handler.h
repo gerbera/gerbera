@@ -45,5 +45,3 @@ public:
 };
 
 #endif // __METADATA_TAGLIB_H__
-
-

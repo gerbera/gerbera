@@ -42,16 +42,16 @@ using namespace mxml;
 
 enum xml_parse_state
 {
-	XML_SKIP,
-	XML_TAG_NAME,
-	XML_TAG_SKIP,
+    XML_SKIP,
+    XML_TAG_NAME,
+    XML_TAG_SKIP,
     XML_TAG_OPEN,
     XML_CLOSE_TAG_NAME,
-	XML_END_SLASH,
-	XML_ATTR_NAME,
-	XML_ATTR_QUOTE,
-	XML_ATTR_VALUE,
-	XML_TAG_CLOSE,
+    XML_END_SLASH,
+    XML_ATTR_NAME,
+    XML_ATTR_QUOTE,
+    XML_ATTR_VALUE,
+    XML_TAG_CLOSE,
     XML_DECL_TEXT,
     XML_DECL_CLOSE,
     XML_PARSE_TAG,
@@ -65,35 +65,35 @@ enum xml_parse_state
 
 int readChar(Ref<Context> ctx, Ref<Input> input)
 {
-	int res = input->readChar();
-	if(res == '\r')
-		res = input->readChar();
-	if(res < 0)
-		return res;
-	if(res == '\n')
-	{
-		ctx->line ++;
-		ctx->col = 1;
-	}
-	else
-		ctx->col ++;
-	return res;
+    int res = input->readChar();
+    if(res == '\r')
+        res = input->readChar();
+    if(res < 0)
+        return res;
+    if(res == '\n')
+    {
+        ctx->line ++;
+        ctx->col = 1;
+    }
+    else
+        ctx->col ++;
+    return res;
 }
 
 int isSkip(char c)
 {
-	return (c == ' ' || c == '\t' || c == '\r' || c == '\n');
+    return (c == ' ' || c == '\t' || c == '\r' || c == '\n');
 }
 
 int isID(char c)
 {
-	return
-	(
-		(c >= 'A' && c <= 'Z') ||
-		(c >= 'a' && c <= 'z') ||
-		(c >= '0' && c <= '9') ||
-		c == '-' || c == '_' || c == ':'
-	);
+    return
+    (
+        (c >= 'A' && c <= 'Z') ||
+        (c >= 'a' && c <= 'z') ||
+        (c >= '0' && c <= '9') ||
+        c == '-' || c == '_' || c == ':'
+    );
 }
 
 
@@ -104,15 +104,15 @@ Parser::Parser()
 Ref<Element> Parser::parseFile(String filename)
 {
     Ref<Input> input(new FileInput(filename));
-	Ref<Context> ctx(new Context(filename));
-	return parse(ctx, input, nil, XML_SKIP);
+    Ref<Context> ctx(new Context(filename));
+    return parse(ctx, input, nil, XML_SKIP);
 }
 
 Ref<Element> Parser::parseString(String str)
 {
     Ref<Input> input(new StringInput(str));
-	Ref<Context> ctx(new Context(_("")));
-	return parse(ctx, input, nil, XML_SKIP);
+    Ref<Context> ctx(new Context(_("")));
+    return parse(ctx, input, nil, XML_SKIP);
 }
 
 #define THROW_ERROR(msg) throw ParseException(msg, ctx)
@@ -121,22 +121,22 @@ Ref<Element> Parser::parseString(String str)
 Ref<Element> Parser::parse(Ref<Context> ctx, Ref<Input> input, String parentTag, int state)
 {
 //    log_debug("parse: %s\n", parentTag.c_str());
-	Ref<StringBuffer> buf = Ref<StringBuffer>(new StringBuffer());
+    Ref<StringBuffer> buf = Ref<StringBuffer>(new StringBuffer());
 
-	Ref<Element> element;
-	Ref<Attribute> attr;
+    Ref<Element> element;
+    Ref<Attribute> attr;
 
-	int ic;
-	char c;
+    int ic;
+    char c;
 
-	while((ic = readChar(ctx, input)) > 0)
-	{
-		c = (char)ic;
+    while((ic = readChar(ctx, input)) > 0)
+    {
+        c = (char)ic;
         
 //      log_info("state: %s, buf: %s  char:%c\n", getStateName(state), buf->toString().c_str(), c);
 
-		switch(state)
-		{
+        switch(state)
+        {
             case XML_SKIP:
             {
                 if(isSkip(c))
@@ -414,4 +414,3 @@ Ref<Element> Parser::parse(Ref<Context> ctx, Ref<Input> input, String parentTag,
     
     THROW_ERROR(_("unexpected end of input"));
 }
-

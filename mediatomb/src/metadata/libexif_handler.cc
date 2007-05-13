@@ -454,4 +454,3 @@ Ref<IOHandler> LibExifHandler::serveContent(Ref<CdsItem> item, int resNum, off_t
 }
 
 #endif // HAVE_EXIF
-

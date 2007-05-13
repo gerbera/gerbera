@@ -42,11 +42,11 @@ namespace mxml
 class Element : public zmm::Object
 {
 public:
-	zmm::String name;
-	zmm::String text;
-	zmm::Ref<zmm::Array<Attribute> > attributes;
-	zmm::Ref<zmm::Array<Element> > children;
-	zmm::Ref<Context> context;
+    zmm::String name;
+    zmm::String text;
+    zmm::Ref<zmm::Array<Attribute> > attributes;
+    zmm::Ref<zmm::Array<Element> > children;
+    zmm::Ref<Context> context;
 
 public:
     Element(zmm::String name);
@@ -86,4 +86,3 @@ protected:
 } // namespace
 
 #endif // __MXML_ELEMENT_H__
-

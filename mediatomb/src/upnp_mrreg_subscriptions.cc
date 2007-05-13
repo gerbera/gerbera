@@ -103,4 +103,3 @@ void MRRegistrarService::subscription_update(String sourceProtocol_CSV)
 #endif
 
 #endif // ENABLE_MRREG
-

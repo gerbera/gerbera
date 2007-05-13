@@ -34,4 +34,3 @@
 
 #ifndef __MYSQL_CREATE_SQL_H__
 #define __MYSQL_CREATE_SQL_H__
-

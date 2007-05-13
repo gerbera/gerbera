@@ -183,4 +183,3 @@ Ref<IOHandler> TagHandler::serveContent(Ref<CdsItem> item, int resNum, off_t *da
 }
 
 #endif // HAVE_TAGLIB
-

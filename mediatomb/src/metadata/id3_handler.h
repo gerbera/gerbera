@@ -45,5 +45,3 @@ public:
 };
 
 #endif // __METADATA_ID3_H__
-
-

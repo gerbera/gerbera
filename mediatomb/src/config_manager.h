@@ -153,4 +153,3 @@ protected:
 };
 
 #endif // __CONFIG_MANAGER_H__
-

@@ -187,4 +187,3 @@ String get_jpeg_resolution(Ref<IOHandler> ioh)
 
     return String::from(w) + "x" + h;
 }
-

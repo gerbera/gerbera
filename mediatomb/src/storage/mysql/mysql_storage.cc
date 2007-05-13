@@ -401,4 +401,3 @@ MysqlRow::MysqlRow(MYSQL_ROW mysql_row, Ref<SQLResult> sqlResult) : SQLRow(sqlRe
 }
 
 #endif // HAVE_MYSQL
-

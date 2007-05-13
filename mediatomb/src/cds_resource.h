@@ -72,4 +72,3 @@ public:
 };
 
 #endif // __CDS_RESOURCE_H__
-

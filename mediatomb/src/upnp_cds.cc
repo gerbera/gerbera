@@ -63,4 +63,3 @@ void ContentDirectoryService::setStaticArgs(String _serviceType, String _service
     serviceType = _serviceType;
     serviceID = _serviceID;
 }
-

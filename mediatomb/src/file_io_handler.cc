@@ -95,5 +95,3 @@ void FileIOHandler::close()
         throw _Exception(_("fclose failed"));
     }
 }
-
-

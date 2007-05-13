@@ -206,4 +206,3 @@ Ref<IOHandler> Id3Handler::serveContent(Ref<CdsItem> item, int resNum, off_t *da
 }
 
 #endif // HAVE_ID3
-

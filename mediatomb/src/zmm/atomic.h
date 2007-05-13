@@ -123,4 +123,3 @@ static inline int atomic_get(mt_atomic_t *at)
 #endif
 
 #endif // __ATOMIC_H__
-

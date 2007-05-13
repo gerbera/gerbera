@@ -284,4 +284,3 @@ bool Filesystem::fileAllowed(String path)
     return false;
     */
 }
-

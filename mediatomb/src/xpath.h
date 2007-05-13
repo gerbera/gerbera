@@ -53,4 +53,3 @@ protected:
 };
 
 #endif // __XPATH_H__
-

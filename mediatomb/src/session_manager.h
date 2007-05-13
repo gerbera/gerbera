@@ -155,4 +155,3 @@ public:
 };
 
 #endif //  __SESSION_MANAGER_H__
-

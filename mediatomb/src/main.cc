@@ -619,4 +619,3 @@ void signal_handler(int signum)
 
     return;
 }
-

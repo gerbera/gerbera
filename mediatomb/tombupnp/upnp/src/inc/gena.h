@@ -370,12 +370,3 @@ void error_respond( IN SOCKINFO *info, IN int error_code,
 
 
 #endif // GENA
-
-
-
-
-
-
-
-
-

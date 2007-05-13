@@ -203,4 +203,3 @@ public:
 };
 
 #endif // __HASH_DBR_HASH_H__
-

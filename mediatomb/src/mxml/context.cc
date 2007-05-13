@@ -40,9 +40,9 @@ using namespace mxml;
 
 Context::Context(String location) : Object()
 {
-	this->location = location;
-	line = 1;
-	col = 1;
+    this->location = location;
+    line = 1;
+    col = 1;
 }
 Context::Context()
 {
@@ -50,16 +50,15 @@ Context::Context()
 
 Ref<Context> Context::clone()
 {
-	Ref<Context> copy = Ref<Context>(new Context());
-	copy->location = location;
-	copy->parent = parent;
-	copy->line = line;
-	copy->col = col;
-	return copy;
+    Ref<Context> copy = Ref<Context>(new Context());
+    copy->location = location;
+    copy->parent = parent;
+    copy->line = line;
+    copy->col = col;
+    return copy;
 }
 
 void Context::setParent(Ref<Context> parent)
 {
-	this->parent = parent;
+    this->parent = parent;
 }
-

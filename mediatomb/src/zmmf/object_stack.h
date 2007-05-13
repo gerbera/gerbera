@@ -76,4 +76,3 @@ namespace zmm
 }
 
 #endif // __ZMMF_OBJECT_STACK_H__
-

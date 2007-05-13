@@ -162,4 +162,3 @@ bool Matcher::next()
             throw _Exception(error_string(ret, &rexp->regex));
     }
 }
-

@@ -69,4 +69,3 @@ protected:
 };
 
 #endif // __UPDATE_MANAGER_H__
-

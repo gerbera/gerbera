@@ -47,10 +47,9 @@ protected:
 public:
     FileInput(zmm::String filename);
     virtual ~FileInput();
-	virtual int readChar();
+virtual int readChar();
 };
 
 } // namespace
 
 #endif // __MXML_FILEINPUT_H__
-

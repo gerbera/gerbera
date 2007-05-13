@@ -53,14 +53,14 @@ String Element::getAttribute(String name)
 {
     if(attributes == nil)
         return nil;
-	int len = attributes->size();
-	for(int i = 0; i < len; i++)
-	{
-		Ref<Attribute> attr = attributes->get(i);
-		if(attr->name == name)
-			return attr->value;
-	}
-	return nil;
+int len = attributes->size();
+for(int i = 0; i < len; i++)
+{
+Ref<Attribute> attr = attributes->get(i);
+if(attr->name == name)
+return attr->value;
+}
+return nil;
 }
 void Element::addAttribute(String name, String value)
 {
@@ -79,16 +79,16 @@ void Element::setAttribute(String name, String value)
 {
     if (attributes == nil)
         attributes = Ref<Array<Attribute> >(new Array<Attribute>());
-	int len = attributes->size();
-	for(int i = 0; i < len; i++)
-	{
-		Ref<Attribute> attr = attributes->get(i);
-		if(attr->name == name)
+int len = attributes->size();
+for(int i = 0; i < len; i++)
+{
+Ref<Attribute> attr = attributes->get(i);
+if(attr->name == name)
         {
-			attr->setValue(value);
+attr->setValue(value);
             return;
         }
-	}
+}
     addAttribute(name, value);
 }
 
@@ -258,5 +258,3 @@ String Element::escape(String str)
     }
     return buf->toString();
 }
-
-

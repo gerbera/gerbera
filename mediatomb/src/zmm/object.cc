@@ -88,4 +88,3 @@ void Object::operator delete (void *ptr)
 {
     FREE(ptr);
 }
-

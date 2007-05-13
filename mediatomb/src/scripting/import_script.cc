@@ -64,4 +64,3 @@ void ImportScript::processCdsObject(Ref<CdsObject> obj)
 }
 
 #endif // HAVE_JS
-

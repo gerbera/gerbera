@@ -193,4 +193,3 @@ Ref<MetadataHandler> MetadataHandler::createHandler(int handlerType)
             throw _Exception(_("unknown content handler ID: ") + handlerType);
     }
 }
-

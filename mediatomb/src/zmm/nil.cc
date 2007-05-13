@@ -36,5 +36,3 @@
 #include "nil.h"
 
 struct nil_struct_t *nil_inst;
-
-

@@ -66,4 +66,3 @@ int FileInput::readChar()
     }
     return ret;
 }
-

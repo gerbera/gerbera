@@ -140,4 +140,3 @@ Ref<IOHandler> Exiv2Handler::serveContent(Ref<CdsItem> item, int resNum)
 }
 
 #endif // HAVE_EXIV2
-

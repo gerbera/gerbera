@@ -59,4 +59,3 @@ int StringInput::readChar()
         return -1;
     }
 }
-

@@ -39,10 +39,9 @@ class Input : public zmm::Object
 {
 public:
     Input(){};
-	virtual int readChar() = 0;
+virtual int readChar() = 0;
 };
 
 }
 
 #endif // __MXML_INPUT_H__
-

@@ -40,18 +40,17 @@ namespace mxml
 class Context : public zmm::Object
 {
 public:
-	zmm::Ref<Context> parent;
-	zmm::String location;
-	int line;
-	int col;
+zmm::Ref<Context> parent;
+zmm::String location;
+int line;
+int col;
 public:
-	Context(zmm::String location);
-	Context();
-	zmm::Ref<Context> clone();
-	void setParent(zmm::Ref<Context> parent);
+Context(zmm::String location);
+Context();
+zmm::Ref<Context> clone();
+void setParent(zmm::Ref<Context> parent);
 };
 
 } // namespace
 
 #endif // __MXML_CONTEXT_H__
-

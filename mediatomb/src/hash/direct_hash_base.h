@@ -141,4 +141,3 @@ public:
 };
 
 #endif // __HASH_DIRECT_HASH_BASE_H__
-

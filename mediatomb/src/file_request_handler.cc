@@ -431,4 +431,3 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
         return io_handler;
     }
 }
-

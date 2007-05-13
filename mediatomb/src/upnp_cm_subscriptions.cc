@@ -101,4 +101,3 @@ void ConnectionManagerService::subscription_update(String sourceProtocol_CSV)
 
     ixmlDocument_free(event);
 }
-

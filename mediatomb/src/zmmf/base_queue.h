@@ -136,4 +136,3 @@ namespace zmm
 }
 
 #endif // __ZMMF_BASE_QUEUE_H__
-

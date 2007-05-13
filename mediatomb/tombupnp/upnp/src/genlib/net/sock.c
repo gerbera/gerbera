@@ -502,4 +502,3 @@ sock_write( IN SOCKINFO * info,
 
     return num_bytes;
 }
-

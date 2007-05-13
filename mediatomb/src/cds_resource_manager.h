@@ -80,4 +80,3 @@ protected:
 };
 
 #endif // __CDS_RESOURCE_MANAGER_H__
-

@@ -22,4 +22,3 @@ int uuid_is_null(const uuid_t uu)
 			return 0;
 	return 1;
 }
-

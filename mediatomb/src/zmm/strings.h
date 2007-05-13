@@ -54,18 +54,18 @@ namespace zmm
 class StringBase : public Object
 {
 public:
-	char *data;
-	int len;
+    char *data;
+    int len;
     bool store; // if true, the object is responsible for freeing data
-
-	StringBase(int capacity);
-	StringBase(const char *str);
-	StringBase(const char *str, int len);
-	bool startsWith(StringBase *other);
-	virtual ~StringBase();
+    
+    StringBase(int capacity);
+    StringBase(const char *str);
+    StringBase(const char *str, int len);
+    bool startsWith(StringBase *other);
+    virtual ~StringBase();
 protected:
     inline StringBase() : Object() {}
-	friend class String;
+    friend class String;
 };
 
 
@@ -75,70 +75,70 @@ class StringBuffer;
 class String
 {
 protected:
-	StringBase *base;
+    StringBase *base;
 public:
-	String();
-	explicit String(const char *str);
+    String();
+    explicit String(const char *str);
     explicit String(char ch);
-	String(const char *str, int len);
-	String(const String &other);
-	String(StringBase *other);
+    String(const char *str, int len);
+    String(const String &other);
+    String(StringBase *other);
     String(Ref<StringBase> other);
-
+    
     inline StringBase *getBase()
     {
         return base;
     }
     
-	inline String(NIL_VAR)
-	{
-		base = NULL;
-	}
+    inline String(NIL_VAR)
+    {
+        base = NULL;
+    }
+    
+    ~String();
+    
+    String &operator=(String other);
+    
+    inline String &operator=(NIL_VAR)
+    {
+        if(base)
+            base->release();
+        base = NULL;
+        return *this;
+    }
 
-	~String();
-
-	String &operator=(String other);
-
-	inline String &operator=(NIL_VAR)
-	{
-		if(base)
-			base->release();
-		base = NULL;
-		return *this;
-	}
-
-	String operator+(String other);
-	String operator+(const char *str);
-	String operator+(char chr);
-	String operator+(int x);
+    String operator+(String other);
+    String operator+(const char *str);
+    String operator+(char chr);
+    String operator+(int x);
     String operator+(unsigned int x);
-	String operator+(double x);
+    String operator+(double x);
 
-	int operator==(String other);
-	int operator==(const char *str);
+    int operator==(String other);
+    int operator==(const char *str);
     int operator==(char c);
     
-	inline int operator!=(String other)
-	{
-		return ! operator==(other);
-	}
-	inline int operator!=(const char *str)
-	{
-		return ! operator==(str);
-	}
+    inline int operator!=(String other)
+    {
+        return ! operator==(other);
+    }
+    inline int operator!=(const char *str)
+    {
+        return ! operator==(str);
+    }
     inline int operator!=(char c)
-	{
-		return ! operator==(c);
-	}
+    {
+        return ! operator==(c);
+    }
 
-	inline int operator==(NIL_VAR)
-	{
-		return (base == NULL);
-	}
-	inline int operator!=(NIL_VAR)
-	{
-		return (base != NULL);
-	}
+    inline int operator==(NIL_VAR)
+    {
+        return (base == NULL);
+    }
+    inline int operator!=(NIL_VAR)
+    {
+        return (base != NULL);
+    }
 
 
     inline operator Ref<StringBase>()
@@ -147,8 +147,8 @@ public:
     }
 
 
-	String substring(int from);
-	String substring(int from, int count);
+    String substring(int from);
+    String substring(int from, int count);
     
     /// \brief reduces multiple consecutive occurences of the character ch
     /// to one occurence
@@ -166,29 +166,29 @@ public:
     long toLong();
     inline int toInt() { return (int)toLong(); }
     inline unsigned int toUInt() { return (unsigned int)toLong(); }
-	double toDouble();
+    double toDouble();
 
-	int length();
+    int length();
     inline void setLength(int length)
     {
         base->len = length;
     }
-	char *c_str();
+    char *c_str();
     inline void updateLength()
     {
         base->len = strlen(base->data);
     }
-
+    
     bool startsWith(String str)
     {
         return base->startsWith(str.base);
     }
-
     
-   
+    
+    
     int find(const char *needle);
     int find(String needle);
-
+    
     static String from(int x);
     static String from(unsigned int x);
     static String from(long x);
@@ -201,8 +201,8 @@ public:
     static String refer(const char *str);
     static String refer(const char *str, int len);
 protected:
-	String(int capacity);
-	friend class StringBuffer;
+    String(int capacity);
+    friend class StringBuffer;
 };
 
 }; // namespace

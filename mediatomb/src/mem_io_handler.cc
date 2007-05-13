@@ -156,4 +156,3 @@ void MemIOHandler::seek(IN off_t offset, IN int whence)
         throw _Exception(_("MemIOHandler seek failed: unrecognized whence"));
     }
 }
-

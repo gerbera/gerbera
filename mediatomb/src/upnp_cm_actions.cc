@@ -112,5 +112,3 @@ void ConnectionManagerService::process_action_request(Ref<ActionRequest> request
     log_debug("end\n");
 
 }
-
-

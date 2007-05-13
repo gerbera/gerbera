@@ -75,4 +75,3 @@ public:
     inline SubtitlesNotFoundException(zmm::String message, const char *file, int line, const char* function) : zmm::Exception(message, file, line, function) {}
 };
 #endif // __EXCEPTIONS_H__
-

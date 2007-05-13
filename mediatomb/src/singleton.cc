@@ -97,4 +97,3 @@ void SingletonManager::shutdown(bool complete)
         instance = nil;
     log_debug("end\n");
 }
-

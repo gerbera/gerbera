@@ -416,4 +416,3 @@ function clearUpdateTimer()
         timer = false;
     }
 }
-

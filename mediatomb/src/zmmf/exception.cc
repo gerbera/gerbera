@@ -120,4 +120,3 @@ void Exception::printStackTrace(FILE *file)
 #endif // __CYGWIN__
 }
 #endif // LOG_ENABLED
-

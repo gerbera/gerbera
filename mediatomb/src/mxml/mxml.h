@@ -44,4 +44,3 @@
 #include "stringinput.h"
 
 #endif // __MXML_H__
-

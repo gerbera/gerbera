@@ -59,4 +59,3 @@ void JSLayout::processCdsObject(Ref<CdsObject> obj)
 
 
 #endif // HAVE_JS
-

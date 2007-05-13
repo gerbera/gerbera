@@ -116,4 +116,3 @@ public:
 #endif // __UPNP_CM_H__
 
 #endif // ENABLE_MRREG
-
