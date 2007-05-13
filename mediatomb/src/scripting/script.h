@@ -83,8 +83,6 @@ public:
     void load(zmm::String scriptPath);
     void load(zmm::String scriptText, zmm::String scriptPath);
     
-    /// \todo can those two functions really stay here, or do we need
-    /// a class inbetween to keep a nice separation?
     zmm::Ref<CdsObject> jsObject2cdsObject(JSObject *js);
     void cdsObject2jsObject(zmm::Ref<CdsObject> obj, JSObject *js);
     

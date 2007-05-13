@@ -202,4 +202,13 @@ Ref<StringConverter> StringConverter::j2i()
                                                 _(DEFAULT_INTERNAL_CHARSET)));
     return conv;
 }
+
+Ref<StringConverter> StringConverter::p2i()
+{
+    Ref<StringConverter> conv(new StringConverter(
+        ConfigManager::getInstance()->getOption(_("/import/playlist-charset")),
+                                                _(DEFAULT_INTERNAL_CHARSET)));
+    return conv;
+}
+
 #endif

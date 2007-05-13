@@ -50,11 +50,20 @@ public:
     zmm::String convert(zmm::String str, bool validate=false);
     bool validate(zmm::String str);
 
+    /// \brief internal (UTF-8) to filesystem
     static zmm::Ref<StringConverter> i2f();
+
+    /// \brief filesystem to internal
     static zmm::Ref<StringConverter> f2i();
+
+    /// \brief metadata to internal
     static zmm::Ref<StringConverter> m2i();
-#ifdef HAVE_JS    
+#ifdef HAVE_JS
+    /// \brief scripting to internal
     static zmm::Ref<StringConverter> j2i();
+
+    /// \brief playlist to internal
+    static zmm::Ref<StringConverter> p2i();
 #endif
 protected:
     iconv_t cd;

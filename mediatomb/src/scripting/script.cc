@@ -403,6 +403,12 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js)
     int objectType;
     int b;
     int i;
+    Ref<StringConverter> p2i;
+
+    if (this->whoami() == S_PLAYLIST)
+    {
+        p2i = StringConverter::p2i();
+    }
 
     objectType = getIntProperty(js, _("objectType"), -1);
     if (objectType == -1)
@@ -430,10 +436,23 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js)
         obj->setParentID(i);
     val = getProperty(js, _("title"));
     if (val != nil)
+    {
+        if (this->whoami() == S_PLAYLIST)
+            val = p2i->convert(val);
+
         obj->setTitle(val);
+    }
+
     val = getProperty(js, _("upnpclass"));
     if (val != nil)
+    {
+        if (this->whoami() == S_PLAYLIST)
+            val = p2i->convert(val);
+
         obj->setClass(val);
+    }
+
+    // location must not be touched by character conversion!
     val = getProperty(js, _("location"));
     if (val != nil)
         obj->setLocation(val);
@@ -462,7 +481,12 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js)
                         RefCast(obj, CdsItem)->setTrackNumber(0);
                 }
                 else
+                {
+                    if (this->whoami() == S_PLAYLIST)
+                        val = p2i->convert(val);
+
                     obj->setMetadata(String(MT_KEYS[i].upnp), val);
+                }
             }
         }
     }
@@ -474,11 +498,28 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js)
 
         val = getProperty(js, _("mimetype"));
         if (val != nil)
+        {
+            if (this->whoami() == S_PLAYLIST)
+                val = p2i->convert(val);
+
             item->setMimeType(val);
+        }
+
+        /// \todo check what this is doing here, wasn't it already handled
+        /// in the MT_KEYS loop?
+        val = getProperty(js, _("description"));
+        if (val != nil)
+        {
+            if (this->whoami() == S_PLAYLIST)
+                val = p2i->convert(val);
+
+            item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), val);
+        }
 
         if (IS_CDS_ACTIVE_ITEM(objectType))
         {
             Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
+            /// \todo what about character conversion for action and state fields?
             val = getProperty(js, _("action"));
             if (val != nil)
                 aitem->setAction(val);
@@ -493,12 +534,12 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js)
 
             obj->setRestricted(true);
             Ref<CdsItemExternalURL> item = RefCast(obj, CdsItemExternalURL);
-            val = getProperty(js, _("description"));
-            if (val != nil)
-                item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), val);
-            val = getProperty(js, _("protocol"));
+           val = getProperty(js, _("protocol"));
             if (val != nil)
             {
+                if (this->whoami() == S_PLAYLIST)
+                    val = p2i->convert(val);
+
                 protocolInfo = renderProtocolInfo(item->getMimeType(), val);
             }
             else
@@ -520,6 +561,7 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js)
         i = getIntProperty(js, _("updateID"), -1);
         if (i >= 0)
             cont->setUpdateID(i);
+
         b = getBoolProperty(js, _("searchable"));
         if (b >= 0)
             cont->setSearchable(b);

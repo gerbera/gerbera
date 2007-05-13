@@ -477,6 +477,20 @@ void ConfigManager::validate(String serverhome)
 
     log_info("Setting metadata import charset to %s\n", charset.c_str());
 
+    charset = getOption(_("/import/playlist-charset"), temp);
+    try
+    {
+        Ref<StringConverter> conv(new StringConverter(charset, 
+                                                _(DEFAULT_INTERNAL_CHARSET)));
+    }
+    catch (Exception e)
+    {
+        throw _Exception(_("Error in config file: unsupported playlist-charset specified: ") + charset);
+    }
+
+    log_info("Setting playlist charset to %s\n", charset.c_str());
+
+
     getOption(_("/server/ip"), _("")); // bind to any IP address
     getOption(_("/server/bookmark"), _(DEFAULT_BOOKMARK_FILE));
     getOption(_("/server/name"), _(DESC_FRIENDLY_NAME));
