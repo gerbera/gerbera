@@ -1,3 +1,7 @@
+// functions.js - default common MediaTomb script functions
+//
+// $Id$
+
 function escapeSlash(name)
 {   
     name = name.replace(/\\/g, "\\\\");
@@ -22,5 +26,4 @@ function getYear(date)
         return matches[1];
     else
         return date;
-}   
-
+}

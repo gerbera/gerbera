@@ -1,3 +1,7 @@
+// import.js - default MediaTomb import script
+//
+// $Id$
+
 function addAudio(obj)
 {
  
@@ -162,4 +166,3 @@ if (mime == 'image')
 {
     addImage(obj);
 }
-

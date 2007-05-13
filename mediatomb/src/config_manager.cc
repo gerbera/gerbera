@@ -516,7 +516,7 @@ void ConfigManager::validate(String serverhome)
         throw _Exception(_("playlist script location invalid"));
     prepare_path(_("/import/scripting/playlist-script"));
 
-   script_path = getOption(_("/import/scripting/comon-script"), 
+   script_path = getOption(_("/import/scripting/common-script"), 
            _(PACKAGE_DATADIR) +
             DIR_SEPARATOR +
             _(DEFAULT_JS_DIR) +
