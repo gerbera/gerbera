@@ -41,6 +41,7 @@
 #include <typeinfo>
 #include "storage.h"
 #include "content_manager.h"
+#include "config_manager.h"
 #include "metadata_handler.h"
 
 using namespace zmm;
@@ -159,8 +160,10 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         Ref<ContentManager> cm = ContentManager::getInstance();
 
         int id;
-        
-        if (self->whoami() == S_PLAYLIST)
+
+        if ((self->whoami() == S_PLAYLIST) &&
+            (ConfigManager::getInstance()->
+             getOption(_("/import/scripting/playlist-script/attribute::create-link")) == "yes"))
             id = cm->addContainerChain(path, containerclass, 
                     orig_object->getID());
         else
@@ -190,7 +193,9 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         else if (IS_CDS_ITEM_EXTERNAL_URL(cds_obj->getObjectType()) || 
                  IS_CDS_ITEM_INTERNAL_URL(cds_obj->getObjectType()))
         {
-            if (self->whoami() == S_PLAYLIST)
+            if ((self->whoami() == S_PLAYLIST) &&
+            (ConfigManager::getInstance()->
+             getOption(_("/import/scripting/playlist-script/attribute::create-link")) == "yes"))
             {
                 cds_obj->setFlag(OBJECT_FLAG_PLAYLIST_REF);
                 cds_obj->setRefID(orig_object->getID());

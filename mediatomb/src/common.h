@@ -70,6 +70,9 @@
 // internal setting keys
 #define SET_LAST_MODIFIED               "last_modified"
 
+#define YES                             "yes"
+#define NO                              "no"
+
 // URL FORMATTING CONSTANTS
 #define URL_OBJECT_ID                   "object_id"
 #define URL_REQUEST_TYPE                "req_type"
@@ -179,22 +182,23 @@
 #define DEFAULT_SYSTEM_HOME             "mediatomb"
 #define DEFAULT_ETC                     "etc"
 #define DEFAULT_CONFIG_NAME             "config.xml"
-#define DEFAULT_UI_EN_VALUE             "yes"
-#define DEFAULT_POLL_WHEN_IDLE_VALUE    "no"
+#define DEFAULT_UI_EN_VALUE             YES
+#define DEFAULT_POLL_WHEN_IDLE_VALUE    NO
 #define DEFAULT_POLL_INTERVAL           2 
-#define DEFAULT_ACCOUNTS_EN_VALUE       "no"
+#define DEFAULT_ACCOUNTS_EN_VALUE       NO
 #define DEFAULT_ALIVE_INTERVAL          180 // seconds
 #define DEFAULT_BOOKMARK_FILE           "mediatomb.html"
-#define DEFAULT_IGNORE_UNKNOWN_EXTENSIONS "no"
+#define DEFAULT_IGNORE_UNKNOWN_EXTENSIONS NO
 #define DEFAULT_IMPORT_SCRIPT           "import.js"
 #define DEFAULT_PLAYLISTS_SCRIPT        "playlists.js"
+#define DEFAULT_PLAYLIST_CREATE_LINK    YES
 #define DEFAULT_COMMON_SCRIPT           "common.js"
 #define DEFAULT_MYSQL_HOST              "localhost"
 #define DEFAULT_MYSQL_DB                "mediatomb"
 #define DEFAULT_MYSQL_USER              "mediatomb"
 #define DEFAULT_WEB_DIR                 "web"
 #define DEFAULT_JS_DIR                  "js"
-#define DEFAULT_HIDDEN_FILES_VALUE      "no"
+#define DEFAULT_HIDDEN_FILES_VALUE      NO
 #define DEFAULT_UPNP_STRING_LIMIT       (-1)
 #define DEFAULT_SESSION_TIMEOUT         30
 #define SESSION_TIMEOUT_CHECK_INTERVAL  (5 * 60)

@@ -540,6 +540,10 @@ void ConfigManager::validate(String serverhome)
         throw _Exception(_("common script location invalid"));
     prepare_path(_("/import/scripting/common-script"));
 
+    temp = getOption(_("/import/scripting/playlist-script/attribute::create-link"), _(DEFAULT_PLAYLIST_CREATE_LINK));
+    if ((temp != "yes") && (temp != "no"))
+        throw _Exception(_("Error in config file: invalid \"create-link\" attribute value in <playlist-script> tag"));
+
 
 #endif
 
