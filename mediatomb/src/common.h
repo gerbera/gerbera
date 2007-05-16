@@ -203,10 +203,10 @@
 #define DEFAULT_SESSION_TIMEOUT         30
 #define SESSION_TIMEOUT_CHECK_INTERVAL  (5 * 60)
 #define DEFAULT_PRES_URL_APPENDTO_ATTR  "none"
-#define DEFAULT_ITEMS_PER_PAGE_1         10
-#define DEFAULT_ITEMS_PER_PAGE_2         25
-#define DEFAULT_ITEMS_PER_PAGE_3         50
-#define DEFAULT_ITEMS_PER_PAGE_4         100
+#define DEFAULT_ITEMS_PER_PAGE_1        10
+#define DEFAULT_ITEMS_PER_PAGE_2        25
+#define DEFAULT_ITEMS_PER_PAGE_3        50
+#define DEFAULT_ITEMS_PER_PAGE_4        100
 #define DEFAULT_LAYOUT_TYPE             "builtin" 
 
 #ifdef HAVE_SQLITE3
