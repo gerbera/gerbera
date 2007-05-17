@@ -41,16 +41,8 @@
 
 using namespace zmm;
 
-static JSFunctionSpec global_functions[] = {
-    {"addCdsObject",    js_addCdsObject,   3},
-    {"copyObject",      js_copyObject,     1},
-    {0}
-};
-
 ImportScript::ImportScript(Ref<Runtime> runtime) : Script(runtime)
 {
-    defineFunctions(global_functions);
-    
     String scriptPath = ConfigManager::getInstance()->getOption(_("/import/scripting/virtual-layout/import-script")); 
     load(scriptPath);
 }

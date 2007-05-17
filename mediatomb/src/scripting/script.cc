@@ -44,8 +44,10 @@
 
 using namespace zmm;
 
-static JSFunctionSpec global_functions[] = {
+static JSFunctionSpec js_global_functions[] = {
     {"print",           js_print,          0},
+    {"addCdsObject",    js_addCdsObject,   3},
+    {"copyObject",      js_copyObject,     1},
     {0}
 };
 
@@ -279,10 +281,10 @@ Script::Script(Ref<Runtime> runtime) : Object()
     setProperty(glob, _("UPNP_CLASS_PLAYLIST_CONTAINER"),
                        _(UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER));
     
-    defineFunctions(global_functions);
-
+    defineFunctions(js_global_functions);
+    
     String common_scr_path = ConfigManager::getInstance()->getOption(_("/import/scripting/common-script"));
-
+    
     if (!string_ok(common_scr_path))
         log_js("Common script disabled in configuration\n");
     else
@@ -339,9 +341,15 @@ void Script::initGlobalObject()
         throw _Exception(_("Scripting: JS_InitStandardClasses failed"));
 }
 
+void Script::defineFunction(String name, JSNative function, int numParams)
+{
+    if (! JS_DefineFunction(cx, glob, name.c_str(), function, numParams, 0))
+        throw _Exception(_("Scripting: JS_DefineFunction failed"));
+}
+
 void Script::defineFunctions(JSFunctionSpec *functions)
 {
-    if (!JS_DefineFunctions(cx, glob, functions))
+    if (! JS_DefineFunctions(cx, glob, functions))
         throw _Exception(_("Scripting: JS_DefineFunctions failed"));
 }
 

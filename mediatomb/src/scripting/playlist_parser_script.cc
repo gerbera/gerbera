@@ -71,21 +71,13 @@ js_readln(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
     
 } // extern "C"
 
-static JSFunctionSpec global_functions[] = {
-    {"addCdsObject",    js_addCdsObject,   3},
-    {"copyObject",      js_copyObject,     1},
-    {"readln",          js_readln,         0},
-    {0}
-};
-
-
 PlaylistParserScript::PlaylistParserScript(Ref<Runtime> runtime) : Script(runtime)
 {
     currentHandle = NULL;
     currentObjectID = INVALID_OBJECT_ID;
     currentLine = NULL;
-
-    defineFunctions(global_functions);
+    
+    defineFunction(_("readln"), js_readln, 0);
     
     String scriptPath = ConfigManager::getInstance()->getOption(_("/import/scripting/playlist-script")); 
     load(scriptPath);
