@@ -236,6 +236,10 @@ void millisToTimespec(long millis, struct timespec *spec);
 /// thrown.
 zmm::String normalizePath(zmm::String path);
 
+/// \brief Finds the IP address of the specified network interface.
+/// \param interface i.e. eth0, lo, etc.
+/// \return IP address or nil if interface was not found.
+zmm::String interfaceToIP(zmm::String interface);
 
 #ifdef LOG_TOMBDEBUG
 
