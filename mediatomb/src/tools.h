@@ -68,11 +68,13 @@ bool check_path(zmm::String path, bool needDir = false);
 /// \brief Checks existance of the specified file or path.
 /// \param path file or directory to be checked.
 /// \param needDir true when checked item has to be a directory.
+/// \return last modification time of the path or directory
 ///
 /// More or less the same as check_path, the only difference is,
 /// that this function throws an exception if a path or directory
-/// was not found or was not the desired type.
-void check_path_ex(zmm::String path, bool needDir = false, bool existenceUnneeded = false);
+/// was not found or was not the desired type. Additionally this function
+/// returns the last modification time of the file or directory.
+time_t check_path_ex(zmm::String path, bool needDir = false, bool existenceUnneeded = false);
     
 /// \brief Checks if the string contains any data.
 /// \param str String to be checked.
@@ -273,3 +275,4 @@ void profiling_print(struct profiling_t *data);
 #endif
 
 #endif // __TOOLS_H__
+
