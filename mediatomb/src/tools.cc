@@ -36,6 +36,19 @@
 #include "tools.h"
 #include <sys/stat.h>
 #include <errno.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+#ifndef SOLARIS
+    #include <net/if.h>
+#else
+    #include <fcntl.h>
+    #include <net/if.h>
+    #include <sys/sockio.h>
+#endif
+
 #include "md5/md5.h"
 #include "file_io_handler.h"
 #include "metadata_handler.h"
@@ -850,6 +863,57 @@ String normalizePath(String path)
 
     return path;
 }
+
+String interfaceToIP(String interface)
+{
+    struct if_nameindex *iflist = NULL;
+    struct if_nameindex *iflist_free = NULL;
+    struct ifreq if_request;
+    struct sockaddr_in local_address;
+    int local_socket;
+
+    local_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    if (local_socket < 0)
+    {
+        log_error("Could not create local socket\n");
+        return nil;
+    }
+
+    iflist = iflist_free = if_nameindex();
+    if (iflist == NULL)
+    {
+        log_error("Could not get interface list\n");
+        close(local_socket);
+        return nil;
+    }
+
+    while (iflist->if_index || iflist->if_name)
+    {
+        if (interface == iflist->if_name)
+        {
+            strncpy(if_request.ifr_name, iflist->if_name, IF_NAMESIZE);
+            if (ioctl(local_socket, SIOCGIFADDR, &if_request) != 0)
+            {
+                log_error("Could not determine interface address\n");
+                close(local_socket);
+                if_freenameindex(iflist_free);
+                return nil;
+            }
+
+            memcpy(&local_address, &if_request.ifr_addr, sizeof(if_request.ifr_addr));
+            String ip = String(inet_ntoa(local_address.sin_addr));
+            if_freenameindex(iflist_free);
+            close(local_socket);
+            return ip;
+        }
+        iflist++;
+    }
+
+    close(local_socket);
+    if_freenameindex(iflist_free);
+    return nil;
+}
+
 
 #ifdef LOG_TOMBDEBUG
 
