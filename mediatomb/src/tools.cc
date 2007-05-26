@@ -872,6 +872,9 @@ String interfaceToIP(String interface)
     struct sockaddr_in local_address;
     int local_socket;
 
+    if (!string_ok(interface))
+            return nil;
+
     local_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (local_socket < 0)
     {

@@ -81,7 +81,6 @@ void signal_handler(int signum);
 
 int main(int argc, char **argv, char **envp)
 {
-    char     *ip = NULL;
     char     * err = NULL;
     int      port = -1;
     bool     daemon = false;
@@ -94,7 +93,7 @@ int main(int argc, char **argv, char **envp)
     int      opt_index = 0;
     int      o;
     static struct option long_options[] = {
-        {"ip", 1, 0, 'i'},
+        {"interface", 1, 0, 'i'},
         {"port", 1, 0, 'p'},
         {"config", 1, 0, 'c'},
         {"home", 1, 0, 'm'},
@@ -116,6 +115,7 @@ int main(int argc, char **argv, char **envp)
     String user;
     String group;
     String pid_file;
+    String interface;
 
     Ref<Array<StringBase> > addFile(new Array<StringBase>());
 #ifdef HAVE_GETOPT_LONG   
@@ -127,12 +127,12 @@ int main(int argc, char **argv, char **envp)
         switch (o)
         {
             case 'i':
-                log_debug("Option IP with param %s\n", optarg);
-                ip = optarg;
+                log_debug("Option interface with param %s\n", optarg);
+                interface = String(optarg);
                 break;
 
             case 'p':
-                log_debug("Option Port with param %s\n", optarg);
+                log_debug("Option port with param %s\n", optarg);
                 errno = 0;
                 port = strtol(optarg, &err, 10);
                 if ((port == 0) && (*err))
@@ -198,7 +198,7 @@ int main(int argc, char **argv, char **envp)
                 printf("Usage: mediatomb [options]\n\
                         \n\
 Supported options:\n\
-    --ip or -i         ip address\n\
+    --interface or -i  network interface to bind to\n\
     --port or -p       server port (the SDK only permits values => 49152)\n\
     --config or -c     configuration file to use\n\
     --daemon or -d     run server in background\n\
@@ -427,7 +427,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
     try
     {
         server = Server::getInstance();
-        server->upnp_init(String(ip), port);
+        server->upnp_init(interface, port);
     }
     catch(UpnpException upnp_e)
     {
@@ -544,7 +544,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
                 
                 ///  \todo fix this for SIGHUP
                 server = Server::getInstance();
-                server->upnp_init(String(ip), port);
+                server->upnp_init(interface, port);
                 
                 restart_flag = 0;
             }

@@ -94,22 +94,25 @@ void Server::init()
     alive_advertisement = config->getIntOption(_("/server/alive"));
 }
 
-void Server::upnp_init(String ip, int port)
+void Server::upnp_init(String iface, int port)
 {
-    int             ret = 0;        // general purpose error code
+    int ret = 0;        // general purpose error code
+    String ip;
 
     log_debug("start\n");
 
     Ref<ConfigManager> config = ConfigManager::getInstance();
 
-    if (ip == nil)
-    {
-        ip = config->getOption(_("/server/ip"), _(""));
-        if (ip == "") 
-            ip = nil;
-        else
-            log_info("got ip: %s\n", ip.c_str());
-    }
+    if (!string_ok(iface))
+        iface = config->getOption(_("/server/interface"));
+
+    ip = interfaceToIP(iface);
+
+    if (string_ok(iface) && !string_ok(ip))
+        throw _Exception(_("Could not find interface: ") + iface);
+
+    log_debug("interface: %s ip: %s\n", iface.c_str(), ip.c_str());
+
 
     if (port < 0)
     {

@@ -3874,6 +3874,7 @@ FreeHandle( int Upnp_Handle )
     {
         DBGONLY( UpnpPrintf( UPNP_ALL, API, __FILE__, __LINE__,                             
                     "Can't get interface list\n" );)
+        close( LocalSock );
         return UPNP_E_INIT;
     }
 

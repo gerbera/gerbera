@@ -491,7 +491,7 @@ void ConfigManager::validate(String serverhome)
     log_info("Setting playlist charset to %s\n", charset.c_str());
 
 
-    getOption(_("/server/ip"), _("")); // bind to any IP address
+    getOption(_("/server/interface"), _("")); // bind to any IP address
     getOption(_("/server/bookmark"), _(DEFAULT_BOOKMARK_FILE));
     getOption(_("/server/name"), _(DESC_FRIENDLY_NAME));
     getOption(_("/server/modelName"), _(DESC_MODEL_NAME));

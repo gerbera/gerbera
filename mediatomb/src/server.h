@@ -59,14 +59,14 @@ public:
     
     
     /// \brief Initializes UPnP portion.
-    /// \param ip IP address to bind to.
+    /// \param interface to bind to.
     /// \param port Port where the server will be listening for requests.
     ///
     /// Reads information from the config and creates a 
     /// device description document. Initializes the UPnP SDK,
     /// sets up the virutal web server directories and registers
     /// web callbacks. Starts the update manager task.
-    void upnp_init(zmm::String ip, int port);
+    void upnp_init(zmm::String interface, int port);
     
     /// \brief Cleanup routine to shutdown the server.
     ///
