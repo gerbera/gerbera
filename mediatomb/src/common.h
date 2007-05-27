@@ -60,6 +60,10 @@
 #define UPNP_DEFAULT_CLASS_MUSIC_GENRE  "object.container.genre.musicGenre"
 #define UPNP_DEFAULT_CLASS_MUSIC_ARTIST "object.container.person.musicArtist"
 
+#define D_PROFILE                       "DLNA.ORG_PN"
+#define D_DEFAULT_OPS                   "DLNA.ORG_OP=01"
+#define D_DEFAULT_CONVERSION_INDICATOR  "DLNA.ORG_CI=0"
+#define D_MP3                           "MP3"
 
 // fixed CdsObjectIDs
 #define CDS_ID_BLACKHOLE                -1
@@ -69,6 +73,9 @@
 
 // internal setting keys
 #define SET_LAST_MODIFIED               "last_modified"
+
+#define YES                             "yes"
+#define NO                              "no"
 
 // URL FORMATTING CONSTANTS
 #define URL_OBJECT_ID                   "object_id"
@@ -169,10 +176,8 @@
 #define DEFAULT_INTERNAL_CHARSET        "UTF-8"
 #define DEFAULT_FILESYSTEM_CHARSET      "ISO-8859-1"
 #define DEFAULT_FALLBACK_CHARSET        "US-ASCII"
-#if defined(HAVE_JS)
     #define DEFAULT_JS_CHARSET          "UTF-8"
-    #define DEFAULT_JS_EN_VALUE         "yes"
-#endif
+
 #if defined(__CYGWIN__)
     #define DEFAULT_CONFIG_HOME         "MediaTomb"
 #else
@@ -181,20 +186,20 @@
 #define DEFAULT_SYSTEM_HOME             "mediatomb"
 #define DEFAULT_ETC                     "etc"
 #define DEFAULT_CONFIG_NAME             "config.xml"
-#define DEFAULT_UI_EN_VALUE             "yes"
-#define DEFAULT_POLL_WHEN_IDLE_VALUE    "no"
+#define DEFAULT_UI_EN_VALUE             YES
+#define DEFAULT_POLL_WHEN_IDLE_VALUE    NO
 #define DEFAULT_POLL_INTERVAL           2 
-#define DEFAULT_ACCOUNTS_EN_VALUE       "no"
+#define DEFAULT_ACCOUNTS_EN_VALUE       NO
 #define DEFAULT_ALIVE_INTERVAL          180 // seconds
 #define DEFAULT_BOOKMARK_FILE           "mediatomb.html"
-#define DEFAULT_IGNORE_UNKNOWN_EXTENSIONS "no"
+#define DEFAULT_IGNORE_UNKNOWN_EXTENSIONS NO
 #define DEFAULT_IMPORT_SCRIPT           "import.js"
 #define DEFAULT_MYSQL_HOST              "localhost"
 #define DEFAULT_MYSQL_DB                "mediatomb"
 #define DEFAULT_MYSQL_USER              "mediatomb"
 #define DEFAULT_WEB_DIR                 "web"
 #define DEFAULT_JS_DIR                  "js"
-#define DEFAULT_HIDDEN_FILES_VALUE      "no"
+#define DEFAULT_HIDDEN_FILES_VALUE      NO
 #define DEFAULT_UPNP_STRING_LIMIT       (-1)
 #define DEFAULT_SESSION_TIMEOUT         30
 #define SESSION_TIMEOUT_CHECK_INTERVAL  (5 * 60)
@@ -204,7 +209,7 @@
 #define DEFAULT_ITEMS_PER_PAGE_3         50
 #define DEFAULT_ITEMS_PER_PAGE_4         100
 #define DEFAULT_LAYOUT_TYPE             "builtin" 
-
+#define DEFAULT_EXTEND_PROTOCOLINFO     NO
 #ifdef HAVE_SQLITE3
     #define DEFAULT_STORAGE_DRIVER      "sqlite3"
 #else

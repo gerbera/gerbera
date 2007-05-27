@@ -128,7 +128,7 @@ public:
     /// This function will create an array like that: ["data", "otherdata"]
     zmm::Ref<zmm::Array<zmm::StringBase> > createArrayFromNodeset(zmm::Ref<mxml::Element> element, zmm::String nodeName, zmm::String attrName); 
     
-    static void setStaticArgs(zmm::String filename, zmm::String userhome);
+    static void setStaticArgs(zmm::String _filename, zmm::String _userhome, zmm::String _config_dir = _(DEFAULT_CONFIG_HOME));
    
     zmm::Ref<Dictionary> getMimeToContentTypeMappings();
 

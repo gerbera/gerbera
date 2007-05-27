@@ -148,7 +148,7 @@ bool check_path(String path, bool needDir)
     return true;
 }
 
-void check_path_ex(String path, bool needDir, bool existenceUnneeded)
+time_t check_path_ex(String path, bool needDir, bool existenceUnneeded)
 {
     int ret = 0;
     struct stat statbuf;
@@ -159,7 +159,7 @@ void check_path_ex(String path, bool needDir, bool existenceUnneeded)
     if (ret != 0)
     {
         if (existenceUnneeded && (errno == ENOENT))
-            return;
+            return 0;
         
         throw _Exception(path + " : " + errno + (int)existenceUnneeded+ " x " + strerror(errno));
     }
@@ -169,6 +169,8 @@ void check_path_ex(String path, bool needDir, bool existenceUnneeded)
     
     if (!needDir && (S_ISDIR(statbuf.st_mode)))
         throw _Exception(_("Not a file: ") + path);
+
+    return statbuf.st_mtime;
 }
 
 bool string_ok(String str)
@@ -483,10 +485,15 @@ void quicksort(COMPARABLE *arr, int size, COMPARATOR comparator)
 	quicksort_impl(arr, 0, size - 1, comparator);
 }
 
-String renderProtocolInfo(String mimetype, String protocol)
+String renderProtocolInfo(String mimetype, String protocol, String extend)
 {
     if (string_ok(mimetype) && string_ok(protocol))
+    {
+        if (string_ok(extend))
+            return protocol + ":*:" + mimetype + ":" + extend;
+        else
         return protocol + ":*:" + mimetype + ":*";
+    }
     else
         return _("http-get:*:*:*");
 }
@@ -847,6 +854,14 @@ String normalizePath(String path)
 
 
     return path;
+}
+
+bool validateYesNo(String value)
+{
+    if ((value != "yes") && (value != "no"))
+        return false;
+    else
+        return true;
 }
 
 #ifdef LOG_TOMBDEBUG

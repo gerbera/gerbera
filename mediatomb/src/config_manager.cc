@@ -66,7 +66,7 @@ ConfigManager::~ConfigManager()
     config_dir = _(DEFAULT_CONFIG_HOME);
 }
 
-void ConfigManager::setStaticArgs(String _filename, String _userhome)
+void ConfigManager::setStaticArgs(String _filename, String _userhome, String _config_dir)
 {
     filename = _filename;
     userhome = _userhome;
@@ -315,13 +315,13 @@ void ConfigManager::validate(String serverhome)
    
     temp = getOption(_("/server/ui/attribute::enabled"),
                      _(DEFAULT_UI_EN_VALUE));
-    if ((temp != "yes") && (temp != "no"))
+    if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: incorrect parameter for <ui enabled=\"\" /> attribute"));
 
     temp = getOption(_("/server/ui/attribute::poll-when-idle"),
             _(DEFAULT_POLL_WHEN_IDLE_VALUE));
 
-    if ((temp != "yes") && (temp != "no"))
+    if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: incorrect parameter for <ui poll-when-idle=\"\" /> attribute"));
 
     int i = getIntOption(_("/server/ui/attribute::poll-interval"), DEFAULT_POLL_INTERVAL);
@@ -373,7 +373,7 @@ void ConfigManager::validate(String serverhome)
     temp = getOption(_("/server/ui/accounts/attribute::enabled"), 
             _(DEFAULT_ACCOUNTS_EN_VALUE));
 
-    if ((temp != "yes") && (temp != "no"))
+    if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: incorrect parameter for <accounts enabled=\"\" /> attribute"));
 
     i  = getIntOption(_("/server/ui/accounts/attribute::session-timeout"), DEFAULT_SESSION_TIMEOUT);
@@ -384,7 +384,7 @@ void ConfigManager::validate(String serverhome)
 
     temp = getOption(_("/import/attribute::hidden-files"),
                      _(DEFAULT_HIDDEN_FILES_VALUE));
-    if ((temp != "yes") && (temp != "no"))
+    if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: incorrect parameter for <import hidden-files=\"\" /> attribute"));
 
     getOption(_("/import/mappings/extension-mimetype/attribute::ignore-unknown"),
@@ -457,11 +457,20 @@ void ConfigManager::validate(String serverhome)
 
     log_info("Setting metadata import charset to %s\n", charset.c_str());
 
+#ifdef EXTEND_PROTOCOLINFO
+    temp = getOption(_("/server/protocolInfo/attribute::extend"),
+                     _(DEFAULT_EXTEND_PROTOCOLINFO));
+    if (!validateYesNo(temp))
+        throw _Exception(_("Error in config file: extend attribute of the protocolInfo tag must be either \"yes\" or \"no\""));
+#endif
+
     getOption(_("/server/ip"), _("")); // bind to any IP address
     getOption(_("/server/bookmark"), _(DEFAULT_BOOKMARK_FILE));
     getOption(_("/server/name"), _(DESC_FRIENDLY_NAME));
     getOption(_("/server/modelName"), _(DESC_MODEL_NAME));
+    getOption(_("/server/modelDescription"), _(DESC_MODEL_DESCRIPTION));
     getOption(_("/server/modelNumber"), _(DESC_MODEL_NUMBER));
+    getOption(_("/server/serialNumber"), _(DESC_SERIAL_NUMBER));
     getOption(_("/server/manufacturerURL"), _(DESC_MANUFACTURER_URL));
     getOption(_("/server/presentationURL"), _(""));
     temp = getOption(_("/server/presentationURL/attribute::append-to"), 

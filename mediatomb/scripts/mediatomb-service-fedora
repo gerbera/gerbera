@@ -54,7 +54,7 @@ RETVAL=0
 # See how we were called.
 case "$1" in
   start)
-	# Start daemon.
+    # Start daemon.
     echo -n "Applying multicast settings to $INTERFACE... "
     # those settings are necessary for us to react to M-SEARCH requests
     route add -net 239.0.0.0 netmask 255.0.0.0 $INTERFACE >/dev/null 2>&1
@@ -62,11 +62,11 @@ case "$1" in
     touch $PIDFILE
     chown nobody $PIDFILE
     
-	echo -n "Starting mediatomb: "
-
+    echo -n "Starting mediatomb: "
+    
     daemon $NICELEVEL mediatomb $MEDIATOMB -i $IFACE_IP $MEDIATOMBOPTIONS
-
-	RETVAL=$?
+    
+    RETVAL=$?
         echo
         [ $RETVAL = 0 ] && touch /var/lock/subsys/mediatomb
         ;;
@@ -86,13 +86,13 @@ case "$1" in
        [ -e /var/lock/subsys/mediatomb ] && $0 restart
        ;;
   status)
-	status mediatomb
-	RETVAL=$?
-	;;
+    status mediatomb
+    RETVAL=$?
+    ;;
   *)
-	echo "Usage: $0 {start|stop|restart|status|condrestart}"
-	RETVAL=1
-	;;
+    echo "Usage: $0 {start|stop|restart|status|condrestart}"
+    RETVAL=1
+    ;;
 esac
 
 exit $RETVAL
