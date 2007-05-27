@@ -362,7 +362,7 @@ js_print(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
         str = JS_ValueToString(cx, argv[i]);
         if (!str)
             return JS_FALSE;
-        log_debug("%s\n", JS_GetStringBytes(str));
+        log_js("%s\n", JS_GetStringBytes(str));
     }
     return JS_TRUE;
 }
@@ -542,7 +542,7 @@ js_error_reporter(JSContext *cx, const char *message, JSErrorReport *report)
     while (0);
 
     String err = buf->toString();
-    log_debug("%s\n", err.c_str());
+    log_js("%s\n", err.c_str());
 }
 
 } // extern "C"

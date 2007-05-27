@@ -438,7 +438,7 @@ AC_HELP_STRING([--disable-fseeko-check],
 ###############################################################################
 # The following block is derived from the configure.ac script from the 
 # libupnp-1.3.1 package
-# (C) Copyright 2005-2006 RÅ–òmi Turboult <r3mi@users.sourceforge.net>
+# (C) Copyright 2005-2006 Remi Turboult <r3mi@users.sourceforge.net>
 upnpmaj=0
 upnpmin=4
 upnppatch=1
@@ -639,7 +639,7 @@ AC_TYPE_SIZE_T
 if test "$SKIP_FSEEKO_TEST" -eq 0; then
     AC_FUNC_FSEEKO
 
-    if test "$ac_cv_func_fseeko" != yes; then
+    if test "$ac_cv_func_fseeko" = no || test "$ac_cv_sys_largefile_source" = unknown; then
         AC_MSG_WARN([fseeko has not been found on your system, will use fseek instead.])
         AC_MSG_WARN([This has not been tested, please report if you have any problems.])
         AC_DEFINE([fseeko], [fseek], [fseeko not present])
@@ -940,7 +940,7 @@ AC_ARG_ENABLE(sqlite3,
 
 if test "x$SQLITE3_OK" = xyes; then
     if test -n "$SQLITE3_SEARCH_HEADERS"; then
-        AC_MSG_NOTICE([Will search for sqlite3 headers in $withval])
+        AC_MSG_NOTICE([Will search for sqlite3 headers in $SQLITE3_SEARCH_HEADERS])
         AC_CHECK_HEADER([$SQLITE3_SEARCH_HEADERS/sqlite3.h],
                 [
                     SQLITE3_CXXFLAGS="-I$SQLITE3_SEARCH_HEADERS"
@@ -973,7 +973,7 @@ fi
 if test "x$SQLITE3_OK" = xyes; then
     if test -n "$SQLITE3_SEARCH_LIBS"; then
         LDFLAGS="$LDFLAGS -L$SQLITE3_SEARCH_LIBS $RT_LIBS"
-        AC_MSG_NOTICE([Will search for sqlite3 libraries in $withval])
+        AC_MSG_NOTICE([Will search for sqlite3 libraries in $SQLITE3_SEARCH_LIBS])
         AC_CHECK_LIB(sqlite3, sqlite3_open,
                 [
                     SQLITE3_LIBS="-L$SQLITE3_SEARCH_LIBS $RT_LIBS -lsqlite3"
@@ -1333,7 +1333,7 @@ if test "x$JS_OK" = xyes; then
     CPPFLAGS="$CPPFLAGS $XP_ADD"
 
     if test -n "$JS_SEARCH_HEADERS" ; then
-        AC_MSG_NOTICE([Will search for js (spidermonkey) headers in $withval])
+        AC_MSG_NOTICE([Will search for js (spidermonkey) headers in $JS_SEARCH_HEADERS])
         AC_CHECK_HEADER($JS_SEARCH_HEADERS/jsapi.h,
                 [
                     JS_CXXFLAGS="-I$JS_SEARCH_HEADERS"
@@ -1384,7 +1384,7 @@ fi
 
 if test "x$JS_OK" = xyes; then
     if test -n "$JS_SEARCH_LIBS" ; then
-        AC_MSG_NOTICE([Will search for js (spidermonkey) libraries in $withval])
+        AC_MSG_NOTICE([Will search for js (spidermonkey) libraries in $JS_SEARCH_LIBS])
         LDFLAGS="$LDFLAGS -L$JS_SEARCH_LIBS $LDFLAGS_SAVE -ljs"
         AC_CHECK_LIB(js, JS_NewObject,
                 [
