@@ -20,7 +20,6 @@ MT_GROUP="nobody"
 MT_PIDFILE="/var/run/mediatomb.pid"
 
 ## Location of the log file
-
 MT_LOGFILE="/var/log/mediatomb"
 
 ## Location of the config file/database

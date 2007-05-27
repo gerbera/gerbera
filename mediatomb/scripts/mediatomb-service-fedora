@@ -51,8 +51,11 @@ case "$1" in
     # those settings are necessary for us to react to M-SEARCH requests
     route add -net 239.0.0.0 netmask 255.0.0.0 $MT_INTERFACE >/dev/null 2>&1
     ifconfig $MT_INTERFACE allmulti
-    touch $PIDFILE
-    chown nobody $PIDFILE
+    touch $MT_PIDFILE
+    chown nobody $MT_PIDFILE
+
+    mkdir -p "/$MT_HOME/$MT_CFGDIR"
+    chown nobody "/$MT_HOME/$MT_CFGDIR"
     
     echo -n "Starting mediatomb: "
     
