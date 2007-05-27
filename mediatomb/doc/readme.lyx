@@ -943,6 +943,29 @@ istrar UPnP service, this was implemented for future Xbox 360 support.
 \end_layout
 
 \begin_layout Subsubsection
+Playstation 3 Support
+\end_layout
+
+\begin_layout Code
+--enable-protocolinfo-extension
+\end_layout
+
+\begin_layout Description
+Default: enabled
+\end_layout
+
+\begin_layout Standard
+This option allows to send additional information in the protocolInfo attribute,
+ this will enable MP3 and MPEG4 playback for the Playstation 3, but may
+ also be useful to some other renderers.
+\end_layout
+
+\begin_layout Description
+Note: allthough compiled in, this feature is disabled in configuration by
+ default.
+\end_layout
+
+\begin_layout Subsubsection
 Fseeko Check
 \end_layout
 
@@ -958,7 +981,7 @@ Default: enabled
 This is a workaround for a bug in some Debian distributions, disable this
  check if you know that your system has large file support, but configure
  fails to detect it.
- For more information see: ADD LINK HERE
+ 
 \end_layout
 
 \begin_layout Subsubsection
@@ -2479,6 +2502,45 @@ Default:
 
 \begin_layout Standard
 Interval for broadcasting SSDP:alive messages
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<protocolInfo extend="no"/>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default:
+\emph default
+ 
+\emph on
+no
+\end_layout
+
+\begin_layout Standard
+Adds specific tags to the protocolInfo attribute, this is required to enable
+ MP3 and MPEG4 playback on Playstation 3.
 \end_layout
 
 \begin_layout Standard
@@ -5287,6 +5349,22 @@ It is still being investigated, but we were able to get subtitles working
 \end_layout
 
 \begin_layout Subsubsection
+HP
+\end_layout
+
+\begin_layout Itemize
+MediaSmart TV
+\end_layout
+
+\begin_layout Subsubsection
+I-O Data
+\end_layout
+
+\begin_layout Itemize
+AVeL LinkPlayer2 AVLP2/DVDLA
+\end_layout
+
+\begin_layout Subsubsection
 Linksys
 \end_layout
 
@@ -5365,6 +5443,18 @@ The TG100 client has a problem browsing containers, where item titles exceed
 
 \begin_layout Code
 <upnp-string-limit>101</upnp-string-limit>
+\end_layout
+
+\begin_layout Subsubsection
+TerraTec
+\end_layout
+
+\begin_layout Itemize
+NOXON iRadio 
+\end_layout
+
+\begin_layout Itemize
+NOXON 2 Audio 
 \end_layout
 
 \begin_layout Subsection

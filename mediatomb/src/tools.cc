@@ -498,10 +498,15 @@ void quicksort(COMPARABLE *arr, int size, COMPARATOR comparator)
     quicksort_impl(arr, 0, size - 1, comparator);
 }
 
-String renderProtocolInfo(String mimetype, String protocol)
+String renderProtocolInfo(String mimetype, String protocol, String extend)
 {
     if (string_ok(mimetype) && string_ok(protocol))
-        return protocol + ":*:" + mimetype + ":*";
+    {
+        if (string_ok(extend))
+            return protocol + ":*:" + mimetype + ":" + extend;
+        else
+            return protocol + ":*:" + mimetype + ":*";
+    }
     else
         return _("http-get:*:*:*");
 }
@@ -917,6 +922,13 @@ String interfaceToIP(String interface)
     return nil;
 }
 
+bool validateYesNo(String value)
+{
+    if ((value != "yes") && (value != "no"))
+        return false;
+    else
+        return true;
+}
 
 #ifdef LOG_TOMBDEBUG
 

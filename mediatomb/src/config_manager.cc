@@ -333,13 +333,13 @@ void ConfigManager::validate(String serverhome)
    
     temp = getOption(_("/server/ui/attribute::enabled"),
                      _(DEFAULT_UI_EN_VALUE));
-    if ((temp != "yes") && (temp != "no"))
+    if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: incorrect parameter for <ui enabled=\"\" /> attribute"));
 
     temp = getOption(_("/server/ui/attribute::poll-when-idle"),
             _(DEFAULT_POLL_WHEN_IDLE_VALUE));
 
-    if ((temp != "yes") && (temp != "no"))
+    if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: incorrect parameter for <ui poll-when-idle=\"\" /> attribute"));
 
     int i = getIntOption(_("/server/ui/attribute::poll-interval"), DEFAULT_POLL_INTERVAL);
@@ -391,7 +391,7 @@ void ConfigManager::validate(String serverhome)
     temp = getOption(_("/server/ui/accounts/attribute::enabled"), 
             _(DEFAULT_ACCOUNTS_EN_VALUE));
 
-    if ((temp != "yes") && (temp != "no"))
+    if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: incorrect parameter for <accounts enabled=\"\" /> attribute"));
 
     i  = getIntOption(_("/server/ui/accounts/attribute::session-timeout"), DEFAULT_SESSION_TIMEOUT);
@@ -402,7 +402,7 @@ void ConfigManager::validate(String serverhome)
 
     temp = getOption(_("/import/attribute::hidden-files"),
                      _(DEFAULT_HIDDEN_FILES_VALUE));
-    if ((temp != "yes") && (temp != "no"))
+    if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: incorrect parameter for <import hidden-files=\"\" /> attribute"));
 
     getOption(_("/import/mappings/extension-mimetype/attribute::ignore-unknown"),
@@ -490,6 +490,12 @@ void ConfigManager::validate(String serverhome)
 
     log_info("Setting playlist charset to %s\n", charset.c_str());
 
+#ifdef EXTEND_PROTOCOLINFO
+    temp = getOption(_("/server/protocolInfo/attribute::extend"),
+                     _(DEFAULT_EXTEND_PROTOCOLINFO));
+    if (!validateYesNo(temp))
+        throw _Exception(_("Error in config file: extend attribute of the protocolInfo tag must be either \"yes\" or \"no\""));
+#endif
 
     getOption(_("/server/interface"), _("")); // bind to any IP address
     getOption(_("/server/bookmark"), _(DEFAULT_BOOKMARK_FILE));

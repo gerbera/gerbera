@@ -38,6 +38,7 @@
 #include "server.h"
 #include "common.h"
 #include "tools.h"
+#include "metadata_handler.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -49,7 +50,14 @@ CdsResourceManager::CdsResourceManager() : Object()
 void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
 {
     Ref<UrlBase> urlBase = addResources_getUrlBase(item);
-    
+
+#ifdef EXTEND_PROTOCOLINFO
+    String prot;
+    Ref<ConfigManager> config = ConfigManager::getInstance();
+    Ref<Dictionary> mappings = config->getMimeToContentTypeMappings();
+    String content_type = mappings->get(item->getMimeType());
+#endif
+
     int resCount = item->getResourceCount();
     for (int i = 0; i < resCount; i++)
     {
@@ -87,6 +95,26 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                 }
             }
         }
+#ifdef EXTEND_PROTOCOLINFO
+            if (config->getOption(_("/server/protocolInfo/attribute::extend")) == "yes")
+            {
+                prot = res_attrs->get(MetadataHandler::getResAttrName(R_PROTOCOLINFO));
+                log_debug("EXTENDING PROTOCOLINFO!!! %s\n", prot.c_str());
+                String extend;
+                if (content_type == CONTENT_TYPE_MP3)
+                    extend = _(D_PROFILE) + "=" + D_MP3 + ";";
+
+                extend = extend + D_DEFAULT_OPS + ";" + 
+                                  D_DEFAULT_CONVERSION_INDICATOR;
+                
+                prot = prot.substring(0, prot.rindex(':')+1) + extend;
+                log_debug("New protocolInfo: %s\n", prot.c_str());
+
+                res_attrs->put(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
+                        prot);
+            }
+#endif
+
         element->appendChild(UpnpXML_DIDLRenderResource(tmp, res_attrs));
     }
 }

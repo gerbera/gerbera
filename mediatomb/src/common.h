@@ -61,6 +61,11 @@
 #define UPNP_DEFAULT_CLASS_MUSIC_ARTIST "object.container.person.musicArtist"
 #define UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER "object.container.playlistContainer"
 
+#define D_PROFILE                       "DLNA.ORG_PN"
+#define D_DEFAULT_OPS                   "DLNA.ORG_OP=01"
+#define D_DEFAULT_CONVERSION_INDICATOR  "DLNA.ORG_CI=0"
+#define D_MP3                           "MP3"
+
 // fixed CdsObjectIDs
 #define CDS_ID_BLACKHOLE                -1
 #define CDS_ID_ROOT                     0
@@ -208,7 +213,7 @@
 #define DEFAULT_ITEMS_PER_PAGE_3        50
 #define DEFAULT_ITEMS_PER_PAGE_4        100
 #define DEFAULT_LAYOUT_TYPE             "builtin" 
-
+#define DEFAULT_EXTEND_PROTOCOLINFO     NO
 #ifdef HAVE_SQLITE3
     #define DEFAULT_STORAGE_DRIVER      "sqlite3"
 #else

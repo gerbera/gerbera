@@ -153,7 +153,7 @@ void quicksort(COMPARABLE *arr, int size, COMPARATOR comparator);
 /// \param mimetype the mimetype that should be inserted
 /// \param protocol the protocol which should be inserted (default: "http-get")
 /// \return The rendered protocolInfo String
-zmm::String renderProtocolInfo(zmm::String mimetype, zmm::String protocol = _(PROTOCOL));
+zmm::String renderProtocolInfo(zmm::String mimetype, zmm::String protocol = _(PROTOCOL), zmm::String extend = nil);
 
 /// \brief Parses a protocolInfo string (see renderProtocolInfo).
 /// 
@@ -240,6 +240,10 @@ zmm::String normalizePath(zmm::String path);
 /// \param interface i.e. eth0, lo, etc.
 /// \return IP address or nil if interface was not found.
 zmm::String interfaceToIP(zmm::String interface);
+
+/// \brief Returns true if the given string is eitehr "yes" or "no", otherwise
+/// returns false.
+bool validateYesNo(zmm::String value);
 
 #ifdef LOG_TOMBDEBUG
 
