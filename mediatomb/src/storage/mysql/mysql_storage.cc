@@ -53,7 +53,8 @@
 #define MYSQL_UPDATE_1_2_2 "ALTER TABLE `mt_cds_object` CHANGE `metadata` `metadata` BLOB NULL DEFAULT NULL"
 #define MYSQL_UPDATE_1_2_3 "ALTER TABLE `mt_cds_object` CHANGE `auxdata` `auxdata` BLOB NULL DEFAULT NULL"
 #define MYSQL_UPDATE_1_2_4 "ALTER TABLE `mt_cds_object` CHANGE `resources` `resources` BLOB NULL DEFAULT NULL"
-#define MYSQL_UPDATE_1_2_5 "UPDATE `mt_internal_setting` SET `value`='2' WHERE `key`='db_version'"
+#define MYSQL_UPDATE_1_2_5 "ALTER TABLE `mt_autoscan` CHANGE `location` `location` BLOB NULL DEFAULT NULL"
+#define MYSQL_UPDATE_1_2_6 "UPDATE `mt_internal_setting` SET `value`='2' WHERE `key`='db_version'"
 
 using namespace zmm;
 using namespace mxml;
@@ -236,6 +237,7 @@ void MysqlStorage::init()
         _exec(MYSQL_UPDATE_1_2_3);
         _exec(MYSQL_UPDATE_1_2_4);
         _exec(MYSQL_UPDATE_1_2_5);
+        _exec(MYSQL_UPDATE_1_2_6);
         log_info("database upgrade successful.\n");
         dbVersion = _("2");
     }

@@ -28,7 +28,7 @@ esac
 ./zpipe < $FN > ${FN}.Z
 
 REAL_SIZE=`du -b --apparent-size $FN | awk '{print $1}'`
-GZIPPED_SIZE=`du -b --apparent-size $FN.Z | awk '{print $1}`
+GZIPPED_SIZE=`du -b --apparent-size $FN.Z | awk '{print $1}'`
 
 FN_Z_C=${FN}.Z.c
 

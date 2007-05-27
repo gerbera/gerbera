@@ -58,7 +58,7 @@ CREATE TABLE `mt_autoscan` (
   `interval` int(11) unsigned default NULL,
   `last_modified` bigint(20) unsigned default NULL,
   `persistent` tinyint(4) unsigned NOT NULL default '0',
-  `location` text,
+  `location` blob,
   `touched` tinyint(4) unsigned NOT NULL default '1',
   PRIMARY KEY `id` (`id`),
   KEY `mt_autoscan_obj_id` (`obj_id`),
