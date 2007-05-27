@@ -38,7 +38,9 @@
 #include "sync.h"
 #include "autoscan.h"
 #include "timer.h"
-#include "scripting/playlist_parser_script.h"
+#ifdef HAVE_JS
+    #include "scripting/playlist_parser_script.h"
+#endif
 #include "layout/layout.h"
 
 class ContentManager;
@@ -307,7 +309,11 @@ protected:
     void invalidateAddTask(zmm::Ref<CMTask> t, zmm::String path);
     
     zmm::Ref<Layout> layout;
+
+#ifdef HAVE_JS
     zmm::Ref<PlaylistParserScript> playlist_parser_script;
+#endif
+
     bool layout_enabled;
     
     void setLastModifiedTime(time_t lm);
