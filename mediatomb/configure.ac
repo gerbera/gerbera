@@ -43,6 +43,7 @@ SEARCH_DIR="/usr/local"
    
 DARWIN_OS=0
 CYGWIN_OS=0
+FREEBSD_OS=0
 
 AC_CANONICAL_HOST
 
@@ -56,6 +57,9 @@ case $host in
         ;;
     *-*-cygwin*)
         CYGWIN_OS=1
+        ;;
+    *-*-freebsd*)
+        FREEBSD_OS=1
 	;;
 esac
 
@@ -990,8 +994,13 @@ if test "x$SQLITE3_OK" = xyes; then
 fi
 
 if test "x$SQLITE3_OK" = xyes; then
+    ADD_PTHREAD_LIB=
+    if test $FREEBSD_OS -eq 1; then
+        ADD_PTHREAD_LIBS="$PTHREAD_LIBS"
+    fi
+
     if test -n "$SQLITE3_SEARCH_LIBS"; then
-        LDFLAGS="$LDFLAGS -L$SQLITE3_SEARCH_LIBS $RT_LIBS"
+        LDFLAGS="$LDFLAGS_SAVE -L$SQLITE3_SEARCH_LIBS $RT_LIBS $ADD_PTHREAD_LIBS"
         AC_MSG_NOTICE([Will search for sqlite3 libraries in $SQLITE3_SEARCH_LIBS])
         AC_CHECK_LIB(sqlite3, sqlite3_open,
                 [
@@ -1003,14 +1012,14 @@ if test "x$SQLITE3_OK" = xyes; then
                 ]
         )
     else
-    LDFLAGS="$LDFLAGS_SAVE $RT_LIBS"
+    LDFLAGS="$LDFLAGS_SAVE $RT_LIBS $ADD_PTHREAD_LIBS"
     AC_CHECK_LIB(sqlite3, sqlite3_open, [],
         [
             SQLITE3_OK=missing
             for sqlite3_path in $SEARCH_DIR_LIBS; do
                 if test "x$ac_cv_lib_sqlite3_sqlite3_open" != xyes ; then
                     unset ac_cv_lib_sqlite3_sqlite3_open
-                    LDFLAGS="$LDFLAGS_SAVE -L$sqlite3_path $RT_LIBS"
+                    LDFLAGS="$LDFLAGS_SAVE -L$sqlite3_path $RT_LIBS $ADD_PTHREAD_LIBS"
                     AC_CHECK_LIB(sqlite3, sqlite3_open,
                         [
                             SQLITE3_LIBS="-L$sqlite3_path $RT_LIBS -lsqlite3"
@@ -1402,21 +1411,27 @@ if test "x$JS_OK" = xyes; then
 fi
 
 if test "x$JS_OK" = xyes; then
+
+    ADD_PTHREAD_LIB=
+    if test $FREEBSD_OS -eq 1; then
+        ADD_PTHREAD_LIBS="$PTHREAD_LIBS"
+    fi
+
     if test -n "$JS_SEARCH_LIBS" ; then
         AC_MSG_NOTICE([Will search for js (spidermonkey) libraries in $JS_SEARCH_LIBS])
-        LDFLAGS="$LDFLAGS -L$JS_SEARCH_LIBS $LDFLAGS_SAVE -ljs"
+        LDFLAGS="-L$JS_SEARCH_LIBS $LDFLAGS_SAVE $ADD_PTHREAD_LIBS -ljs"
         AC_CHECK_LIB(js, JS_NewObject,
                 [
                     JS_LIBS="-L$JS_SEARCH_LIBS -ljs"
                 ],
                 [
-                    LDFLAGS="-L$JS_SEARCH_LIBS $LDFLAGS_SAVE -lsmjs"
+                    LDFLAGS="-L$JS_SEARCH_LIBS $LDFLAGS_SAVE $ADD_PTHREAD_LIBS -lsmjs"
                     AC_CHECK_LIB(smjs, JS_NewObject,
                         [
-                            JS_LIBS="-L$JS_SEARCH_LIBS $LDFLAGS_SAVE -lsmjs"
+                            JS_LIBS="-L$JS_SEARCH_LIBS $LDFLAGS_SAVE $ADD_PTHREAD_LIBS -lsmjs"
                         ],
                         [
-                            LDFLAGS="-L$JS_SEARCH_LIBS $LDFLAGS_SAVE -lmozjs"
+                            LDFLAGS="-L$JS_SEARCH_LIBS $LDFLAGS_SAVE $ADD_PTHREAD_LIBS -lmozjs"
                             AC_CHECK_LIB(mozjs, JS_NewObject,
                                 [
                                     JS_LIBS="-L$JS_SEARCH_LIBS -lmozjs"
@@ -1430,7 +1445,7 @@ if test "x$JS_OK" = xyes; then
                 ]
         )
     else
-    
+    LDFLAGS="$LDFLAGS $ADD_PTHREAD_LIBS" 
     AC_CHECK_LIB(js, JS_NewObject,
         [],
         [
@@ -1442,7 +1457,7 @@ if test "x$JS_OK" = xyes; then
                     AC_CHECK_LIB(mozjs, JS_NewObject,
                         [],
                         [
-                            LDFLAGS="-L$SEARCH_DIR_LIBS $LDFLAGS_SAVE"
+                            LDFLAGS="-L$SEARCH_DIR_LIBS $LDFLAGS_SAVE $ADD_PTHREAD_LIBS"
                             unset ac_cv_lib_js_JS_NewObject
                             AC_CHECK_LIB(js, JS_NewObject,
                                 [JS_LIBS="-L$SEARCH_DIR_LIBS -ljs"],
