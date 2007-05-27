@@ -30,16 +30,18 @@ Table of Contents
 
 5. Command Line Options
 
-    5.1. IP Address
+    5.1. Network Interface
     5.2. Port
     5.3. Configuration File
     5.4. Daemon Mode
-    5.5. Write PID File
-    5.6. Run Under Different User Name
-    5.7. Run Under Different Group
-    5.8. Add Content
-    5.9. Log To File
-    5.10. Display Command Line Summary
+    5.5. Home Directory
+    5.6. Config Directory
+    5.7. Write PID File
+    5.8. Run Under Different User Name
+    5.9. Run Under Different Group
+    5.10. Add Content
+    5.11. Log To File
+    5.12. Display Command Line Summary
 
 6. Configuration File
 
@@ -179,6 +181,7 @@ In order to compile MediaTomb you will have to install the following packages.:
     and modified - it allows you to create the layout that you want.
 
   ● taglib http://developer.kde.org/~wheeler/taglib.html OPTIONAL, RECOMMENDED
+    (if id3lib is not available)
 
     This library retrieves metadata from mp3, ogg and flac files. You will need
     it if you want to have virtual objects for those files (i.e. nice content
@@ -187,12 +190,12 @@ In order to compile MediaTomb you will have to install the following packages.:
     Note:
 
         It makes no sense to use taglib and id3lib at the same time, the
-        configure script will first look for taglib, if taglib detection fails
-        it will search for id3lib. You can also force the script to take the
+        configure script will first look for id3lib, if id3lib detection fails
+        it will search for taglib. You can also force the script to take the
         library of your choice, overriding the default setting.
 
   ● id3lib http://id3lib.sourceforge.net/ (at least version 3.8.3) OPTIONAL,
-    RECOMMENDED (if taglib is not available)
+    RECOMMENDED
 
     This library retrieves id3 tags from mp3 files.
 
@@ -423,7 +426,24 @@ X_MS_MediaReceiverRegistrar UPnP service, this was implemented for future Xbox
 360 support. If you have a renderer that requires this service, you can safely
 enable it. It will always return true to IsValidated and IsAuthorized requests.
 
-3.2.11. Fseeko Check
+3.2.11. Playstation 3 Support
+
+--enable-protocolinfo-extension
+
+Default:
+
+    enabled
+
+This option allows to send additional information in the protocolInfo
+attribute, this will enable MP3 and MPEG4 playback for the Playstation 3, but
+may also be useful to some other renderers.
+
+Note:
+
+    allthough compiled in, this feature is disabled in configuration by
+    default.
+
+3.2.12. Fseeko Check
 
 --disable-fseeko-check
 
@@ -433,9 +453,9 @@ Default:
 
 This is a workaround for a bug in some Debian distributions, disable this check
 if you know that your system has large file support, but configure fails to
-detect it. For more information see: ADD LINK HERE
+detect it.
 
-3.2.12. Largefile Support
+3.2.13. Largefile Support
 
 --disable-largefile
 
@@ -447,7 +467,7 @@ By default largefile support will be auto detected by configure, however you
 can disable it if you do not want it or if you experience problems with it on
 your system.
 
-3.2.13. Redefinition Of Malloc And Realloc
+3.2.14. Redefinition Of Malloc And Realloc
 
 --disable-rpl-malloc
 
@@ -463,7 +483,7 @@ functions to handle special cases. However, this redefinition may get triggered
 when cross compiling, even if you are compiling against the GNU C lib. If this
 is the case, you can use this option to disable the redefinition.
 
-3.2.14. SQLite Support
+3.2.15. SQLite Support
 
 --enable-sqlite3
 
@@ -476,7 +496,7 @@ setup any users, permissions, etc. A database file will be simply created as
 specified in the MediaTomb configuration. At least SQLite version 3 is
 required.
 
-3.2.15. MySQL Support
+3.2.16. MySQL Support
 
 --enable-mysql
 
@@ -488,7 +508,7 @@ MySQL is a very powerful database, however it requires some additional setup.
 You will find information on how to setup MediaTomb with MySQL in the
 Installation section.
 
-3.2.16. SpiderMonkey LibJS Support
+3.2.17. SpiderMonkey LibJS Support
 
 --enable-libjs
 
@@ -508,7 +528,7 @@ is called js on Fedora, but is available under the name of smjs on Debian. If
 configure fails to find your js headers and libraries you can point it to the
 desired locations (see options below).
 
-3.2.17. Filemagic Support
+3.2.18. Filemagic Support
 
 --enable-libmagic
 
@@ -532,7 +552,7 @@ use in MediaTomb. You can override auto detection by defining appropriate file
 extension to mime type mappings in your configuration file. You can also edit
 the mime type information of an imported object manually via the web UI.
 
-3.2.18. Id3lib Support
+3.2.19. Id3lib Support
 
 --enable-id3lib
 
@@ -545,7 +565,7 @@ will be saved in the database and provided via UPnP. Further, the gathered
 metadata will be used by the import script to create a nice container layout
 (Audio/Artist/Album, etc.)
 
-3.2.19. Taglib Support
+3.2.20. Taglib Support
 
 --enable-taglib
 
@@ -562,7 +582,7 @@ detected memory leaks. Our feeling is, that you will have more stable results
 with id3lib, however it is up to you to enable or disable this library. By
 default id3lib will be taken if both libraries are present on the system.
 
-3.2.20. Libexif Support
+3.2.21. Libexif Support
 
 --enable-libexif
 
@@ -575,7 +595,7 @@ thumbnails which are created automatically by most digital camera models. The
 gathered data will be used by the import script, the thumbnails will be offered
 as additional resources via UPnP.
 
-3.2.21. Libextractor Support
+3.2.22. Libextractor Support
 
 --enable-libextractor
 
@@ -590,7 +610,7 @@ drawback is - it is slow, especially slow on scanning big video files, so it
 slows down the import process considerably. For this reason this library is
 disabled by default.
 
-3.2.22. MediaTomb Debug Output
+3.2.23. MediaTomb Debug Output
 
 --enable-tombdebug
 
@@ -603,7 +623,7 @@ information which is mainly interesting to developers. Use this if you are
 trying to trace down a bug or a problem, the additional output may give you
 some clues.
 
-3.2.23. UPnP Library Debug Output
+3.2.24. UPnP Library Debug Output
 
 --enable-upnpdebug
 
@@ -614,7 +634,7 @@ Default:
 This option enables debug output of the UPnP SDK. You should not need it under
 normal circumstances.
 
-3.2.24. Log Output
+3.2.25. Log Output
 
 --disable-log
 
@@ -624,7 +644,7 @@ Default:
 
 This option allows you to suppress all log output from the server.
 
-3.2.25. Package Search Directory
+3.2.26. Package Search Directory
 
 --with-search=DIR
 
@@ -637,7 +657,7 @@ location, for example Darwinports on OSX get installed to /opt/local/. This
 option tells the configure script to additionally search for headers and
 libraries of various packages in DIR/include and DIR/lib.
 
-3.2.26. Specifying Header And Library Locations Of Various Packages
+3.2.27. Specifying Header And Library Locations Of Various Packages
 
 You can specify the exact location of particular headers and libraries. Some
 packages use extra programs that tell us the appropriate flags that are needed
@@ -665,7 +685,7 @@ are located.
 --with-extractor-h=DIR          search for extractor headers in DIR
 --with-extractor-libs=DIR       search for extractor libraries in DIR
 
-3.2.27. The devconf Script
+3.2.28. The devconf Script
 
 If you are doing some development work and some debugging, you will probably
 want to compile with the -g flag and also disable optimization. The devconf
@@ -778,12 +798,12 @@ Note:
 
     the command line options override settings in the configuration file!
 
-5.1. IP Address
+5.1. Network Interface
 
---ip or -i
+--interface or -i
 
-The server will bind to the given IP address, currently we can not bind to
-multiple interfaces so binding to 0.0.0.0 will not be possible.
+The server will bind to the given network interface, currently we can only bind
+to one interface at a time.
 
 5.2. Port
 
@@ -809,28 +829,55 @@ name and location of your choice. The file name must be absolute.
 Run the server in background, MediaTomb will shutdown on SIGTERM, SIGINT and
 restart on SIGHUP.
 
-5.5. Write PID File
+5.5. Home Directory
+
+--home or -m
+
+Specify an alternative home directory. By default MediaTomb will try to
+retrieve the users home directory from the environment, then it will look for a
+.mediatomb directory in users home. If .mediatomb was found we will try to find
+the default configuration file (config.xml), if not found we will create both,
+the .mediatomb directory and the default config file.
+
+This option is useful in two cases: when the home directory can not be
+retrieved from the environment (in this case you could also use -c to point
+MediaTomb to your configuration file or when you want to create a new
+configuration in a non standard location (for example, when setting up daemon
+mode). In the latter case you can combine this parameter with the parameter
+described in Section 5.6, “Config Directory”
+
+5.6. Config Directory
+
+--cfgdir or -f
+
+The default configuration directory is combined out of the users home and the
+default that equals to .mediatomb, this option allows you to override the
+default directory naming. This is useful when you want to setup the server in a
+nonstandard location, but want that the default configuration to be written by
+the server.
+
+5.7. Write PID File
 
 --pidfile or -P
 
 Specify a file that will hold the server process ID, the filename must be
 absolute.
 
-5.6. Run Under Different User Name
+5.8. Run Under Different User Name
 
 --user or -u
 
 Run MediaTomb under the specified user name, this is especially useful in
 combination with the daemon mode.
 
-5.7. Run Under Different Group
+5.9. Run Under Different Group
 
 --group or -g
 
 Run MediaTomb under the specified group, this is especially useful in
 combination with the daemon mode.
 
-5.8. Add Content
+5.10. Add Content
 
 --add or -a
 
@@ -839,14 +886,14 @@ interaction. The path must be absolute, if path is a directory then it will be
 added recursively. If path is a file, then only the given file will be
 imported.
 
-5.9. Log To File
+5.11. Log To File
 
 --logfile or -l
 
 Do not output log messages to stdout, but redirect everything to a specified
 file.
 
-5.10. Display Command Line Summary
+5.12. Display Command Line Summary
 
 --help or -h
 
@@ -1044,6 +1091,15 @@ Child tags:
     Default: 180, this is according to the UPnP specification.
 
     Interval for broadcasting SSDP:alive messages
+
+  ● <protocolInfo extend="no"/>
+
+    Optional
+
+    Default: no
+
+    Adds specific tags to the protocolInfo attribute, this is required to
+    enable MP3 and MPEG4 playback on Playstation 3.
 
   ● <bookmark>mediatomb.html</bookmark>
 
@@ -1737,7 +1793,7 @@ section of your config.xml:
 
 Further, the DSM-320 behaves differently if it thinks that it is dealing with
 the D-Link server. Add the following to the server section of your
-configuration to achieve that:
+configuration to enable srt subtitle support:
 
 <manufacturerURL>redsonic.com</manufacturerURL>
 <modelNumber>105</modelNumber>
@@ -1745,15 +1801,27 @@ configuration to achieve that:
 It is still being investigated, but we were able to get subtitles working with
 a U.S. DSM-320 unit running firmware version 1.09
 
-7.1.4. Linksys
+7.1.4. HP
+
+  ● MediaSmart TV
+
+7.1.5. I-O Data
+
+  ● AVeL LinkPlayer2 AVLP2/DVDLA
+
+7.1.6. Linksys
 
   ● WMLS11B (Wireless-B Music System)
 
-7.1.5. Netgear
+7.1.7. NeoDigits
+
+  ● HELIOS X3000
+
+7.1.8. Netgear
 
   ● EVA700
 
-7.1.6. Philips
+7.1.9. Philips
 
   ● Streamium SL-300i
 
@@ -1763,11 +1831,15 @@ a U.S. DSM-320 unit running firmware version 1.09
 
   ● SLA-5520
 
-7.1.7. Siemens
+7.1.10. Pinnacle
+
+  ● ShowCenter 200
+
+7.1.11. Siemens
 
   ● Gigaset M740AV
 
-7.1.8. Telegent
+7.1.12. Telegent
 
   ● TG100
 
@@ -1778,6 +1850,12 @@ the server section of your configuration file:
 
 <upnp-string-limit>101</upnp-string-limit>
 
+7.1.13. TerraTec
+
+  ● NOXON iRadio
+
+  ● NOXON 2 Audio
+
 7.2. Network Attached Storage Devices
 
 We provide a bitbake metadata file for the OpenEmbedded environment, it allows
@@ -1786,7 +1864,11 @@ tested MediaTomb on ARM and MIPSel based devices, so it should be possible to
 install and run the server on various Linux based NAS products that are
 available on the market.
 
-7.2.1. Excito
+7.2.1. Buffalo
+
+  ● LinkStation
+
+7.2.2. Excito
 
   ● Bubba Mini Server
 
