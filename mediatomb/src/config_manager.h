@@ -144,9 +144,12 @@ protected:
     
     static zmm::String filename;
     static zmm::String userhome;
+    static zmm::String config_dir;
+
     zmm::Ref<mxml::Element> root;
 
     zmm::Ref<Dictionary> mime_content;
+
 };
 
 #endif // __CONFIG_MANAGER_H__

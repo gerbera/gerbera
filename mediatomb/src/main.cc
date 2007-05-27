@@ -67,7 +67,7 @@
 #include <limits.h>
 
 #ifdef HAVE_GETOPT_LONG
-    #define OPTSTR "i:p:c:u:g:a:l:P:dh"
+    #define OPTSTR "i:p:c:m:f:u:g:a:l:P:dh"
 #endif
 
 using namespace zmm;
@@ -98,6 +98,8 @@ int main(int argc, char **argv, char **envp)
         {"ip", 1, 0, 'i'},
         {"port", 1, 0, 'p'},
         {"config", 1, 0, 'c'},
+        {"home", 1, 0, 'm'},
+        {"cfgdir", 1, 0, 'f'},
         {"user", 1, 0, 'u'},
         {"group", 1, 0, 'g'},
         {"daemon", 0, 0, 'd'},
@@ -111,6 +113,7 @@ int main(int argc, char **argv, char **envp)
 
     String config_file;
     String home;
+    String confdir;
     String user;
     String group;
     String pid_file;
@@ -181,7 +184,16 @@ int main(int argc, char **argv, char **envp)
                 log_debug("Log file: %s\n", optarg);
                 log_open(optarg);
                 break;
-                
+
+            case 'm':
+                log_debug("Home setting: %s\n", optarg);
+                home = String(optarg);
+                break;
+              
+            case 'f':
+                log_debug("Confdir setting: %s\n", optarg);
+                confdir = String(optarg);
+                break;
             case '?':
             case 'h':
                 printf("Usage: mediatomb [options]\n\
@@ -191,6 +203,8 @@ Supported options:\n\
     --port or -p       server port (the SDK only permits values => 49152)\n\
     --config or -c     configuration file to use\n\
     --daemon or -d     run server in background\n\
+    --home or -m       define the home directory\n\
+    --cfgdir or -f    name of the directory that is holding the configuration\n\
     --pidfile or -P    file to hold the process id\n\
     --user or -u       run server under specified username\n\
     --group or -g      run server under specified group\n\
@@ -210,11 +224,14 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
     log_warning("No getopt_long() support, all command line options disabled");
 #endif
 
-    printf("\nMediaTomb UPnP Server version %s - %s\n\n", VERSION, 
-           DESC_MANUFACTURER_URL);
-    printf("===============================================================================\n");
-    printf("Copyright 2005-2007 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer.\n");
-    printf("MediaTomb is free software, covered by the GNU General Public License version 2\n\n");
+    if (!daemon)
+    {
+        printf("\nMediaTomb UPnP Server version %s - %s\n\n", VERSION, 
+                DESC_MANUFACTURER_URL);
+        printf("===============================================================================\n");
+        printf("Copyright 2005-2007 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer.\n");
+        printf("MediaTomb is free software, covered by the GNU General Public License version 2\n\n");
+    }
 
     // check if user and/or group parameter was specified and try to run the server
     // under the given user and/or group name
@@ -253,6 +270,9 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
 
     try
     {
+        // if home is not given by the user, get it from the environment
+        if (!string_ok(home))
+        {
 #ifndef __CYGWIN__
         char *h = getenv("HOME");
         if (h != NULL)
@@ -265,7 +285,16 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
             home = String(d) + h;
             
 #endif  // __CYGWIN__
-            
+        }
+
+        if (!string_ok(home))
+        {
+            log_error("Could not determine users home directory\n");
+            exit(EXIT_FAILURE);
+        }
+
+        if (!string_ok(confdir))
+            confdir = _(DEFAULT_CONFIG_HOME);
 
 /*        if ((config_file == nil) && (home == nil))
         {
@@ -274,7 +303,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         }
         
 */
-        ConfigManager::setStaticArgs(config_file, home);
+        ConfigManager::setStaticArgs(config_file, home, confdir);
         ConfigManager::getInstance();
     }
     catch (mxml::ParseException pe)
@@ -490,7 +519,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
                 
                 try
                 {
-                    ConfigManager::setStaticArgs(config_file, home);
+                    ConfigManager::setStaticArgs(config_file, home, confdir);
                     ConfigManager::getInstance();
                 }
                 catch (mxml::ParseException pe)
