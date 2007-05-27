@@ -3,16 +3,15 @@
 "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
 <refentry>
     <refentryinfo>
-        <productname>MediaTomb 0.9.0</productname>
+        <title>User commands</title>
+        <productname>MediaTomb</productname>
+        <productnumber>0.9.1</productnumber>
+        <date>2007-05-27</date>
         <address>contact@mediatomb.cc</address>
-        <author>
-            <firstname>Sergey</firstname>
-            <surname>Bostandzhyan</surname>
-        </author>
-        <author>
-            <firstname>Leonhard</firstname>
-            <surname>Wimmer</surname>
-        </author>
+        <authorgroup>
+            <collab><collabname>Sergey Bostandzhyan</collabname></collab>
+            <collab><collabname>Leonhard Wimmer</collabname></collab>
+        </authorgroup>
         <copyright>
             <year>2005</year>
             <holder>Gena Batsyan</holder>
@@ -24,7 +23,11 @@
             <holder>Sergey Bostandzhyan</holder>
             <holder>Leonhard Wimmer</holder>
         </copyright>
-        <date>2007-03-09</date>
+        <legalnotice>
+            <para>This manual page is part of MediaTomb.</para>
+            <para>Permission is granted to copy, distribute and/or modify this document under
+          the terms of the <acronym>GNU</acronym> General Public License version 2 as published by the Free Software Foundation.</para>
+        </legalnotice>
     </refentryinfo>
     <refmeta>
         <refentrytitle>MEDIATOMB</refentrytitle>
@@ -55,6 +58,16 @@
 
             <arg>
                 <option>-d</option>
+            </arg>
+
+            <arg>
+                <option>-m <replaceable>home dir</replaceable>
+                </option>
+            </arg>
+
+            <arg>
+                <option>-f <replaceable>config dir</replaceable>
+                </option>
             </arg>
 
             <arg>
@@ -111,7 +124,6 @@
                 </listitem>
             </varlistentry>
 
-
             <varlistentry>
                 <term>
                     <option>-p</option>,
@@ -144,6 +156,42 @@
                 <listitem>
                     <para>Run the server in background, MediaTomb will shutdown on SIGTERM, SIGINT and
                     restart on SIGHUP.</para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>
+                    <option>-m</option>,
+                    <option>--home</option>
+                </term>
+                <listitem>
+                    <para>Specify an alternative home directory. By default MediaTomb will try to
+                    retrieve the users home directory from the environment, then it will look for a
+                    .mediatomb directory in users home. If .mediatomb was found we will try to find
+                    the default configuration file (config.xml), if not found we will create both,
+                    the .mediatomb directory and the default config file.</para>
+                    
+                    <para>This option is useful in two cases: when the home directory can not be
+                    retrieved from the environment (in this case you could also use -c to point
+                    MediaTomb to your configuration file or when you want to create a new
+                    configuration in a non standard location (for example, when setting up daemon
+                    mode). In the latter case you can combine this parameter with the parameter
+                    described in Section 5.6, "Config Directory"</para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>
+                    <option>-f</option>,
+                    <option>--cfgdir</option>
+                </term>
+                <listitem>
+                <para>The default configuration directory is combined out of the users home and the
+                default that equals to .mediatomb, this option allows you to override the
+                default directory naming. This is useful when you want to setup the server in a
+                nonstandard location, but want that the default configuration to be written by
+                the server.
+                </para>
                 </listitem>
             </varlistentry>
 
@@ -193,7 +241,6 @@
                 </listitem>
             </varlistentry>
 
-
             <varlistentry>
                 <term>
                     <option>-l</option>,
@@ -215,28 +262,6 @@
                 </listitem>
             </varlistentry>
         </variablelist>
-    </refsect1>
-    <refsect1>
-        <title>COPYRIGHT</title>
-        <para>This manual page is part of MediaTomb.</para>
-        <variablelist>
-            <varlistentry>
-                <term>Copyright (C) 2005 by</term>
-                <listitem>
-                    <para>Gena Batsyan, Sergey Bostandzhyan</para>
-                </listitem>
-            </varlistentry>
-            <varlistentry>
-                <term>Copyright (C) 2006-2008 by</term>
-                <listitem>
-                    <para>Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer</para>
-                </listitem>
-            </varlistentry>
-        </variablelist>
-
-        <para>Permission is granted to copy, distribute and/or modify this document under
-      the terms of the <acronym>GNU</acronym> General Public License version 2 as published by the Free Software Foundation.</para>
-
     </refsect1>
 </refentry>
 

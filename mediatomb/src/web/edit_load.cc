@@ -73,7 +73,7 @@ void web::edit_load::process()
     
     Ref<Element> title (new Element(_("title")));
     title->setText(obj->getTitle());
-    title->addAttribute(_("editable"), obj->isVirtual() ? _("1") : _("0"));
+    title->addAttribute(_("editable"), obj->isVirtual() || objectID == CDS_ID_FS_ROOT ? _("1") : _("0"));
     item->appendChild(title);
     
     Ref<Element> classEl (new Element(_("class")));
