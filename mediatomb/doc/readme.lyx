@@ -1665,16 +1665,16 @@ Note: the command line options override settings in the configuration file!
 \end_layout
 
 \begin_layout Subsection
-IP Address
+Network Interface
 \end_layout
 
 \begin_layout Code
---ip or -i
+--interface or -i
 \end_layout
 
 \begin_layout Standard
-The server will bind to the given IP address, currently we can not bind
- to multiple interfaces so binding to 0.0.0.0 will not be possible.
+The server will bind to the given network interface, currently we can only
+ bind to one interface at a time.
 \end_layout
 
 \begin_layout Subsection
