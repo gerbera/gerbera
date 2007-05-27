@@ -1,5 +1,5 @@
 %define name mediatomb 
-%define version 0.9.0
+%define version 0.9.1
 %define release 1
 
 Version: %{version}
@@ -30,6 +30,7 @@ make
 rm -rf $RPM_BUILD_ROOT
 
 install -D -m0755 scripts/mediatomb-service-fedora %{buildroot}%{_initrddir}/mediatomb
+install -D -m0755 config/mediatomb-conf-fedora %{buildroot}%{_sysconfdir}/mediatomb.conf
 
 %makeinstall
 
@@ -46,13 +47,16 @@ chkconfig --del mediatomb
 %defattr(-,root,root)
 %doc README README.UTF_8 AUTHORS ChangeLog COPYING INSTALL doc/doxygen.conf
 %doc doc/scripting.txt doc/scripting_utf8.txt
+%{_sysconfdir}/mediatomb.conf
 %{_bindir}/mediatomb
 %{_datadir}/%{name}/
 %{_mandir}/man1/*
 %{_initrddir}/mediatomb
 
 %changelog
-* Sun Mar 25 2007 Sergey Bostandzhyan <jin@mediatomb.cc> -0 0.9.0-1
+* Sun May 27 2007 Sergey Bostandzhyan <jin@mediatomb.cc> 0.9.1-1
+- updated the init script
+* Sun Mar 25 2007 Sergey Bostandzhyan <jin@mediatomb.cc> 0.9.0-1
 - Synced with the new script naming and adjusted for the release,
   added man page.
 * Mon Feb 26 2007 Sergey Bostandzhyan <jin@mediatomb.cc>
