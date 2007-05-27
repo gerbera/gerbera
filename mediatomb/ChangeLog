@@ -1,8 +1,15 @@
 MediaTomb - UPnP AV Mediaserver.
-(after v0.9.0) Minor fixes
-        * fixed a bug in configure.ac: the --with-extractor-libs= parameter
+(after v0.9.0)
+        * added support for Playstation 3
+        * added command line option that allows to tell the server where to
+          put the configuration upon first startup
+        * fixed a fseeko-check related bug in configure
+        * the configure script now honors the LDFLAGS while checking for sqlite3
+        * fixed wrong message printout in configure
+        * PC Directory can now be renamed in the UI
+        * fixed a bug in configure.ac, the --with-extractor-libs= parameter
           didn't work
-        * fixed a MySQL related bug: if the path or filename contained non-UTF8
+        * fixed a MySQL related bug, if the path or filename contained non-UTF8
           characters, the inserted strings weren't complete
         * circumvented a bug/feature of older MySQL versions, that caused the
           MySQL database creation script to fail
