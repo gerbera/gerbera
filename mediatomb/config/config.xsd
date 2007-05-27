@@ -75,6 +75,7 @@
                 <xs:element ref="custom-http-headers" minOccurs="0"/>
                 <xs:element ref="modelDescription" minOccurs="0"/>
                 <xs:element ref="serialNumber" minOccurs="0"/>
+                <xs:element ref="protocolInfo" minOccurs="0"/>
             </xs:all>
         </xs:complexType>
     </xs:element>
@@ -133,6 +134,12 @@
     <xs:element name="modelDescription" type="xs:string"/>
 
     <xs:element name="serialNumber" type="xs:string"/>
+
+    <xs:element name="protocolInfo">
+        <xs:complexType>
+            <xs:attribute name="extend" type="boolean" default="no"/>
+        </xs:complexType>
+    </xs:element>
 
     <xs:element name="add">
         <xs:complexType>
