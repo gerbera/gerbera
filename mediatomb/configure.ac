@@ -1003,14 +1003,14 @@ if test "x$SQLITE3_OK" = xyes; then
                 ]
         )
     else
-    LDFLAGS="$RT_LIBS"
+    LDFLAGS="$LDFLAGS_SAVE $RT_LIBS"
     AC_CHECK_LIB(sqlite3, sqlite3_open, [],
         [
             SQLITE3_OK=missing
             for sqlite3_path in $SEARCH_DIR_LIBS; do
                 if test "x$ac_cv_lib_sqlite3_sqlite3_open" != xyes ; then
                     unset ac_cv_lib_sqlite3_sqlite3_open
-                    LDFLAGS="-L$sqlite3_path $RT_LIBS"
+                    LDFLAGS="$LDFLAGS_SAVE -L$sqlite3_path $RT_LIBS"
                     AC_CHECK_LIB(sqlite3, sqlite3_open,
                         [
                             SQLITE3_LIBS="-L$sqlite3_path $RT_LIBS -lsqlite3"
