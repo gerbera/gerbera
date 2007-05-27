@@ -472,7 +472,7 @@ taglib
 
  
 \emph on
-OPTIONAL, RECOMMENDED
+OPTIONAL, RECOMMENDED (if id3lib is not available)
 \end_layout
 
 \begin_layout Standard
@@ -488,8 +488,8 @@ This library retrieves metadata from mp3, ogg and flac files.
 Note: 
 \series default
 It makes no sense to use taglib and id3lib at the same time, the configure
- script will first look for taglib, if taglib detection fails it will search
- for id3lib.
+ script will first look for id3lib, if id3lib detection fails it will search
+ for taglib.
  You can also force the script to take the library of your choice, overriding
  the default setting.
 \end_layout
@@ -519,7 +519,7 @@ id3lib
  
 \shape default
 \emph on
-OPTIONAL, RECOMMENDED (if taglib is not available) 
+OPTIONAL, RECOMMENDED
 \end_layout
 
 \begin_layout Standard

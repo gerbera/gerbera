@@ -959,7 +959,7 @@ AC_ARG_ENABLE(sqlite3,
 
 if test "x$SQLITE3_OK" = xyes; then
     if test -n "$SQLITE3_SEARCH_HEADERS"; then
-        AC_MSG_NOTICE([Will search for sqlite3 headers in $withval])
+        AC_MSG_NOTICE([Will search for sqlite3 headers in $SQLITE3_SEARCH_HEADERS])
         AC_CHECK_HEADER([$SQLITE3_SEARCH_HEADERS/sqlite3.h],
                 [
                     SQLITE3_CXXFLAGS="-I$SQLITE3_SEARCH_HEADERS"
@@ -992,7 +992,7 @@ fi
 if test "x$SQLITE3_OK" = xyes; then
     if test -n "$SQLITE3_SEARCH_LIBS"; then
         LDFLAGS="$LDFLAGS -L$SQLITE3_SEARCH_LIBS $RT_LIBS"
-        AC_MSG_NOTICE([Will search for sqlite3 libraries in $withval])
+        AC_MSG_NOTICE([Will search for sqlite3 libraries in $SQLITE3_SEARCH_LIBS])
         AC_CHECK_LIB(sqlite3, sqlite3_open,
                 [
                     SQLITE3_LIBS="-L$SQLITE3_SEARCH_LIBS $RT_LIBS -lsqlite3"
@@ -1352,7 +1352,7 @@ if test "x$JS_OK" = xyes; then
     CPPFLAGS="$CPPFLAGS $XP_ADD"
 
     if test -n "$JS_SEARCH_HEADERS" ; then
-        AC_MSG_NOTICE([Will search for js (spidermonkey) headers in $withval])
+        AC_MSG_NOTICE([Will search for js (spidermonkey) headers in $JS_SEARCH_HEADERS])
         AC_CHECK_HEADER($JS_SEARCH_HEADERS/jsapi.h,
                 [
                     JS_CXXFLAGS="-I$JS_SEARCH_HEADERS"
@@ -1403,7 +1403,7 @@ fi
 
 if test "x$JS_OK" = xyes; then
     if test -n "$JS_SEARCH_LIBS" ; then
-        AC_MSG_NOTICE([Will search for js (spidermonkey) libraries in $withval])
+        AC_MSG_NOTICE([Will search for js (spidermonkey) libraries in $JS_SEARCH_LIBS])
         LDFLAGS="$LDFLAGS -L$JS_SEARCH_LIBS $LDFLAGS_SAVE -ljs"
         AC_CHECK_LIB(js, JS_NewObject,
                 [

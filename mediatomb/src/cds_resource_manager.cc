@@ -99,7 +99,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
             if (config->getOption(_("/server/protocolInfo/attribute::extend")) == "yes")
             {
                 prot = res_attrs->get(MetadataHandler::getResAttrName(R_PROTOCOLINFO));
-                log_debug("EXTENDING PROTOCOLINFO!!! %s\n", prot.c_str());
+          
                 String extend;
                 if (content_type == CONTENT_TYPE_MP3)
                     extend = _(D_PROFILE) + "=" + D_MP3 + ";";
@@ -108,7 +108,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                                   D_DEFAULT_CONVERSION_INDICATOR;
                 
                 prot = prot.substring(0, prot.rindex(':')+1) + extend;
-                log_debug("New protocolInfo: %s\n", prot.c_str());
+                log_debug("extended protocolInfo: %s\n", prot.c_str());
 
                 res_attrs->put(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
                         prot);
