@@ -421,6 +421,25 @@ AC_HELP_STRING([--enable-mrreg-service],
               ]
 )
 
+EXTEND_PROTINFO=1
+AC_ARG_ENABLE([protocolinfo-extension],
+              [
+AC_HELP_STRING([--enable-protocolinfo-extension],
+[This is required for Playstation 3 support, it adds certain tags to the protocolInfo attribute (default: yes)])
+              ],
+              [
+                if test "x$enableval" = xno; then
+                    EXTEND_PROTINFO=0
+                else
+                    EXTEND_PROTINFO=1
+                fi 
+              ]
+)
+
+if test $EXTEND_PROTINFO -eq 1; then
+    AC_DEFINE([EXTEND_PROTOCOLINFO], [1], [This is required for Playstation 3 support, it adds certain tags to the protocolInfo attribute])
+fi
+
 SKIP_FSEEKO_TEST=0
 AC_ARG_ENABLE([fseeko-check],
               [
