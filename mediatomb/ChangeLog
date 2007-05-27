@@ -4,6 +4,7 @@ v0.9.1  Playstation 3 support
         * added command line option that allows to tell the server where to
           put the configuration upon first startup
         * fixed a fseeko-check related bug in configure
+        * the configure script now honors the LDFLAGS while checking for sqlite3
         * fixed wrong message printout in configure
         * PC Directory can now be renamed in the UI
         * fixed a bug in configure.ac, the --with-extractor-libs= parameter
