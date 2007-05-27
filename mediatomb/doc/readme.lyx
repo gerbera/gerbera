@@ -107,7 +107,7 @@ status open
 
 \begin_layout Standard
 
-<releaseinfo>This documentation is valid for MediaTomb version 0.9.0.</releaseinfo>
+<releaseinfo>This documentation is valid for MediaTomb version 0.9.1.</releaseinfo>
 \end_layout
 
 \end_inset
@@ -2140,7 +2140,7 @@ status open
 \end_layout
 
 \begin_layout Code
-<modelNumber>0.9.0</modelNumber>
+<modelNumber>0.9.1</modelNumber>
 \end_layout
 
 \begin_layout Standard

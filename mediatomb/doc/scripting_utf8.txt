@@ -1,6 +1,6 @@
 MediaTomb Scripting
 
-This documentation is valid for MediaTomb version 0.9.0.
+This documentation is valid for MediaTomb version 0.9.1.
 
 Copyright   2005 Gena Batsyan, Sergey Bostandzhyan
 
