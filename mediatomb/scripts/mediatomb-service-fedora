@@ -38,7 +38,7 @@ the MT_INTERFACE variable to your network device (eth0, eth1, etc.)" && exit 0
 
 PATH=$PATH:/usr/bin:/usr/local/bin
 
-IFACE_IP=`ifconfig | grep -i "$MT_NTERFACE" -A 1|grep "inet addr"|cut -d " " -f 12|cut -d ":" -f 2`
+IFACE_IP=`ifconfig | grep -i "$MT_INTERFACE" -A 1|grep "inet addr"|cut -d " " -f 12|cut -d ":" -f 2`
 
 # By default it's all good
 RETVAL=0
