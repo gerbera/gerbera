@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<config xmlns="http://mediatomb.cc/0.9.0/config" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://mediatomb.cc/0.9.0/config http://mediatomb.cc/0.9.0/config.xsd">
+<config xmlns="http://mediatomb.cc/0.9.1/config" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://mediatomb.cc/0.9.1/config http://mediatomb.cc/0.9.1/config.xsd">
   <server>
     <ui enabled="yes">
       <accounts enabled="no" session-timeout="30"/>

@@ -1,3 +1,9 @@
+mediatomb (0.9.1-1sarge1) sarge; urgency=low
+
+  * New MediaTomb release 0.9.1
+
+ -- Leonhard Wimmer <leo@mediatomb.cc>  Mon, 28 May 2007 01:01:47 +0200
+
 mediatomb (0.9.0-1sarge1) sarge; urgency=low
 
   * Initial release

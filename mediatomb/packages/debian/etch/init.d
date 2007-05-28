@@ -38,9 +38,16 @@ then
 fi
 
 # if NO_START is set, exit gracefully
-[ "$NO_START" != "" ] && exit 0
+[ "$NO_START" = "yes" ] && exit 0
 
 D_ARGS="-c /etc/mediatomb/config.xml -d -u $USER -g $GROUP -P $PIDFILE -l $LOGFILE"
+
+if [ "$INTERFACE" != "" ] ; then
+    IFACE_IP=`/sbin/ifconfig | grep -i "$INTERFACE" -A 1 | grep "inet addr" | cut -d " " -f 12 | cut -d ":" -f 2`
+    [ "$IFACE_IP" != "" ] && DARGS="$DARGS -i $IFACE_IP"
+fi
+
+
 
 # Gracefully exit if the package has been removed.
 test -x $DAEMON || exit 0
