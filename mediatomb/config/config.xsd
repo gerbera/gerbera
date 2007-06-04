@@ -295,6 +295,7 @@
                 <xs:simpleType>
                     <xs:restriction base="xs:string">
                         <xs:enumeration value="timed"/>
+                        <xs:enumeration value="inotify"/>
                     </xs:restriction>
                 </xs:simpleType>
             </xs:attribute>

@@ -1220,6 +1220,26 @@ Libextractor is a library that attempts to parse all sorts of files, this
 \end_layout
 
 \begin_layout Subsubsection
+Inotify Support
+\end_layout
+
+\begin_layout Code
+--enable-inotify
+\end_layout
+
+\begin_layout Description
+Default: enabled
+\end_layout
+
+\begin_layout Standard
+Inotify is a kernel mechanism that allows monitoring of filesystem events.
+ You need this if you want to use the Inotify Autoscan mode, contrary to
+ the Timed mode which recsans given directories in specified intervals,
+ Inotify mode will immedeately propagate changes in monitored directories
+ on the filesystem to the database.
+\end_layout
+
+\begin_layout Subsubsection
 MediaTomb Debug Output
 \end_layout
 
@@ -1362,7 +1382,11 @@ You can specify the exact location of particular headers and libraries.
 \end_layout
 
 \begin_layout Code
---with-iconv-h=DIR              search for iconv headers in DIR
+--with-inotify-h=DIR            search for inotify header in DIR
+\end_layout
+
+\begin_layout Code
+--with-iconv-h=DIR              search for iconv headers in DIR/sys
 \end_layout
 
 \begin_layout Code
@@ -1665,16 +1689,16 @@ Note: the command line options override settings in the configuration file!
 \end_layout
 
 \begin_layout Subsection
-Network Interface
+IP Address
 \end_layout
 
 \begin_layout Code
---interface or -i
+--ip or -i
 \end_layout
 
 \begin_layout Standard
-The server will bind to the given network interface, currently we can only
- bind to one interface at a time.
+The server will bind to the given IP address, currently we can not bind
+ to multiple interfaces so binding to 0.0.0.0 will not be possible.
 \end_layout
 
 \begin_layout Subsection
@@ -2159,6 +2183,40 @@ Default: MediaTomb version
 This tag sets the model number of a UPnP device, a custom setting may be
  necessary to trick some renderers in order to enable special features that
  otherwise are only active with the vendor implemented server.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<serialNumber>1</serialNumber>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: 1
+\end_layout
+
+\begin_layout Standard
+This tag sets the serial number of a UPnP device.
 \end_layout
 
 \begin_layout Standard
@@ -4111,11 +4169,11 @@ status open
 \end_layout
 
 \begin_layout Code
-<directory location="/audio" mode="timed" interval="1800"
+<directory location="/audio" mode="inotify" 
 \end_layout
 
 \begin_layout Code
-    level="basic" recursive="yes" hidden-files="no"/>
+    recursive="yes" hidden-files="no"/>
 \end_layout
 
 \begin_layout Code
@@ -4189,8 +4247,17 @@ Required
 \end_layout
 
 \begin_layout Standard
-Scan mode, currently only "timed" is supported, future releases will introduce
- other modes - like inotify.
+Scan mode, currently 
+\begin_inset Quotes sld
+\end_inset
+
+inotify
+\begin_inset Quotes srd
+\end_inset
+
+ and "timed" are supported.
+ Timed mode rescans the given directory in specified intervals, inotify
+ mode uses the kernel inotify mechanism to watch for filesystem events.
 \end_layout
 
 \begin_layout Standard
@@ -4250,7 +4317,15 @@ level=...
 \begin_layout Standard
 
 \emph on
-Required
+Required for 
+\begin_inset Quotes sld
+\end_inset
+
+timed
+\begin_inset Quotes srd
+\end_inset
+
+ mode
 \end_layout
 
 \begin_layout Standard
@@ -5613,14 +5688,14 @@ uuid from E2fsprogs 1.35 under GNU GPL, Copyright (C) 1996, 1997, 1998 Theodore
 
 \begin_layout Itemize
 md5 implementation by L.
- Peter Deutsch <ghost at aladdin dot com>, Copyright (C) 1999 Aladdin Enterprise
+ Peter Deutsch <ghost at aladdin dot com>, Copyright (c) 1999 Aladdin Enterprise
 s.
  All rights reserved.
  (See source headers for further details)
 \end_layout
 
 \begin_layout Itemize
-md5 javascript implementation distributed under BSD License, Copyright (C)
+md5 javascript implementation distributed under BSD License, Copyright (c)
  Paul Johnston 1999 - 2002.
  http://pajhome.org.uk/crypt/md5
 \end_layout
@@ -5650,8 +5725,14 @@ tombupnp is based on pupnp (http://pupnp.sf.net) which is based on libupnp
 
 \begin_layout Itemize
 ACX_PTHREAD autoconf script http://autoconf-archive.cryp.to/acx_pthread.html
- (C) 2006 Steven G.
+ (c) 2006 Steven G.
  Johnson <stevenj at alum dot mit dot edu>
+\end_layout
+
+\begin_layout Itemize
+The the Inotify::nextEvent() function is based on code from the inotify
+ tools package, http://inotify-tools.sf.net/, distributed under GPL v2, (c)
+ Rohan McGovern <rohan at mcgovern dot id dot au>
 \end_layout
 
 \begin_layout Section
@@ -5669,8 +5750,8 @@ TagLib support patch was contributed by Benhur Stein <benhur.stein at gmail
 \end_layout
 
 \begin_layout Itemize
-tombupnp is kept in sync with the latest pupnp patches, see documentation
- in the tombupnp directory
+tombupnp is kept in sync with the latest pupnp (http://pupnp.sf.net/) patches,
+ see documentation in the tombupnp directory
 \end_layout
 
 \end_body

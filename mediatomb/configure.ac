@@ -29,7 +29,7 @@
 #*MT*
 
 AC_PREREQ(2.59)
-AC_INIT([MediaTomb], [0.9.0], [jin@mediatomb.cc])
+AC_INIT([MediaTomb], [0.9.2], [jin@mediatomb.cc])
 AM_CONFIG_HEADER([autoconfig.h tombupnp/upnp/inc/upnpconfig.h])
 AC_CONFIG_AUX_DIR(configure_aux)
 AC_CONFIG_SRCDIR([src/common.h])
@@ -1770,7 +1770,7 @@ if test "x$ID3_OK" = xyes; then
                             ID3_LIBS="$Z_LIBS -L$SEARCH_DIR_LIBS -lid3"
                         ],
                         [
-                            MAGIC_OK=missing
+                            ID3_OK=missing
                         ]
                     )
                 ],
@@ -1786,7 +1786,7 @@ if test "x$ID3_OK" = xyes; then
                             ID3_LIBS="-L$SEARCH_DIR_LIBS -lid3"
                         ],
                         [
-                            MAGIC_OK=missing
+                            ID3_OK=missing
                         ]
                     )
                 ]

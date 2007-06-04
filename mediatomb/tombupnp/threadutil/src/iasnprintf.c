@@ -29,6 +29,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
+#ifdef HAVE_CONFIG_H
+    #include "autoconfig.h"
+#endif
+
 #include <stdarg.h>
 #include <assert.h>
 #include <stdlib.h>
