@@ -360,4 +360,3 @@ Ref<Element> UpnpXML_DIDLRenderResource(String URL, Ref<Dictionary> attributes)
 
     return res;
 }
-

@@ -283,4 +283,3 @@ void profiling_print(struct profiling_t *data);
 #endif
 
 #endif // __TOOLS_H__
-

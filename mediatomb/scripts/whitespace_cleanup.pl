@@ -12,13 +12,19 @@ foreach (@ARGV)
     open (FILE, '<', $full_path);
     my $data = join('', <FILE>);
     close FILE;
-    
+
+    if (length($data) == 0)
+    {
+	print "0\n";
+	next;
+    }
+
     my $last_chars = substr($data, -2);
     #print "x-".$last_chars."-x";
     
     my $modified = 0;
     
-    if ($last_chars =~ m|^[^\n]\n$|)
+    if ($last_chars =~ m|^[^\n]\n|s)
     {
         print "-";
     }
@@ -27,8 +33,8 @@ foreach (@ARGV)
         if ($last_chars eq "\n\n")
         {
             print "!!!!!!";
-            #$data =~ s|\n+$|\n|s;
-            #$modified = 1;
+            $data =~ s|\n+$|\n|s;
+            $modified = 1;
         }
         else
         {
@@ -36,9 +42,14 @@ foreach (@ARGV)
         }
     }
     
-    $last_chars = substr($data, -2);
-    #print "y-".$last_chars."-y";
+    if ($modified)
+    {
+	#$last_chars = substr($data, -2);
+	printf("y-%x %x-y",ord(substr($data,-2,1)), ord(substr($data,-1)));
+    }
     
+    
+    #$modified = 0;
     if ($modified)
     {
         open (FILE, '>', $full_path);
