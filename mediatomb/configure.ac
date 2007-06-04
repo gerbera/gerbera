@@ -43,6 +43,7 @@ SEARCH_DIR="/usr/local"
    
 DARWIN_OS=0
 CYGWIN_OS=0
+FREEBSD_OS=0
 
 AC_CANONICAL_HOST
 
@@ -57,6 +58,9 @@ case $host in
     *-*-cygwin*)
         CYGWIN_OS=1
         ;;
+    *-*-freebsd*)
+        FREEBSD_OS=1
+	;;
 esac
 
 AC_ARG_WITH(search, 
@@ -805,6 +809,9 @@ AC_CHECK_FUNCS([if_freenameindex],[],
 AC_DEFINE([UPNP_HAVE_DEVICE], [1], [Compile device API])
 AC_DEFINE([UPNP_HAVE_WEBSERVER], [1], [Compile internal web server])    
 
+    
+ADD_PTHREAD_CFLAGS=
+
 # see acinclude.m4 for the definition of ACX_PTHREAD
 if test $PTHREAD_FORCE_LIB -eq 1; then
     AC_CHECK_LIB(pthread, pthread_create,[],
@@ -814,6 +821,11 @@ if test $PTHREAD_FORCE_LIB -eq 1; then
     )
 else
     ACX_PTHREAD(,AC_MSG_ERROR(POSIX threads missing))
+
+    if test $FREEBSD_OS -eq 1; then
+        ADD_PTHREAD_CFLAGS="$PTHREAD_CFLAGS"
+    fi
+
     AC_SUBST(PTHREAD_LIBS)
     AC_SUBST(PTHREAD_CFLAGS)
 fi
@@ -991,7 +1003,7 @@ fi
 
 if test "x$SQLITE3_OK" = xyes; then
     if test -n "$SQLITE3_SEARCH_LIBS"; then
-        LDFLAGS="$LDFLAGS -L$SQLITE3_SEARCH_LIBS $RT_LIBS"
+        LDFLAGS="$LDFLAGS_SAVE -L$SQLITE3_SEARCH_LIBS $RT_LIBS $ADD_PTHREAD_CFLAGS"
         AC_MSG_NOTICE([Will search for sqlite3 libraries in $SQLITE3_SEARCH_LIBS])
         AC_CHECK_LIB(sqlite3, sqlite3_open,
                 [
@@ -1003,14 +1015,14 @@ if test "x$SQLITE3_OK" = xyes; then
                 ]
         )
     else
-    LDFLAGS="$RT_LIBS"
+    LDFLAGS="$LDFLAGS_SAVE $RT_LIBS $ADD_PTHREAD_CFLAGS"
     AC_CHECK_LIB(sqlite3, sqlite3_open, [],
         [
             SQLITE3_OK=missing
             for sqlite3_path in $SEARCH_DIR_LIBS; do
                 if test "x$ac_cv_lib_sqlite3_sqlite3_open" != xyes ; then
                     unset ac_cv_lib_sqlite3_sqlite3_open
-                    LDFLAGS="-L$sqlite3_path $RT_LIBS"
+                    LDFLAGS="$LDFLAGS_SAVE -L$sqlite3_path $RT_LIBS $ADD_PTHREAD_CFLAGS"
                     AC_CHECK_LIB(sqlite3, sqlite3_open,
                         [
                             SQLITE3_LIBS="-L$sqlite3_path $RT_LIBS -lsqlite3"
@@ -1404,19 +1416,19 @@ fi
 if test "x$JS_OK" = xyes; then
     if test -n "$JS_SEARCH_LIBS" ; then
         AC_MSG_NOTICE([Will search for js (spidermonkey) libraries in $JS_SEARCH_LIBS])
-        LDFLAGS="$LDFLAGS -L$JS_SEARCH_LIBS $LDFLAGS_SAVE -ljs"
+        LDFLAGS="-L$JS_SEARCH_LIBS $LDFLAGS_SAVE -ljs $ADD_PTHREAD_CFLAGS"
         AC_CHECK_LIB(js, JS_NewObject,
                 [
                     JS_LIBS="-L$JS_SEARCH_LIBS -ljs"
                 ],
                 [
-                    LDFLAGS="-L$JS_SEARCH_LIBS $LDFLAGS_SAVE -lsmjs"
+                    LDFLAGS="-L$JS_SEARCH_LIBS $LDFLAGS_SAVE -lsmjs $ADD_PTHREAD_CFLAGS"
                     AC_CHECK_LIB(smjs, JS_NewObject,
                         [
-                            JS_LIBS="-L$JS_SEARCH_LIBS $LDFLAGS_SAVE -lsmjs"
+                            JS_LIBS="-L$JS_SEARCH_LIBS $LDFLAGS_SAVE -lsmjs $ADD_PTHREAD_CFLAGS"
                         ],
                         [
-                            LDFLAGS="-L$JS_SEARCH_LIBS $LDFLAGS_SAVE -lmozjs"
+                            LDFLAGS="-L$JS_SEARCH_LIBS $LDFLAGS_SAVE -lmozjs $ADD_PTHREAD_CFLAGS"
                             AC_CHECK_LIB(mozjs, JS_NewObject,
                                 [
                                     JS_LIBS="-L$JS_SEARCH_LIBS -lmozjs"
@@ -1430,7 +1442,7 @@ if test "x$JS_OK" = xyes; then
                 ]
         )
     else
-    
+    LDFLAGS="$LDFLAGS_SAVE $ADD_PTHREAD_CFLAGS"
     AC_CHECK_LIB(js, JS_NewObject,
         [],
         [
@@ -1442,7 +1454,7 @@ if test "x$JS_OK" = xyes; then
                     AC_CHECK_LIB(mozjs, JS_NewObject,
                         [],
                         [
-                            LDFLAGS="-L$SEARCH_DIR_LIBS $LDFLAGS_SAVE"
+                            LDFLAGS="-L$SEARCH_DIR_LIBS $LDFLAGS_SAVE $ADD_PTHREAD_CFLAGS"
                             unset ac_cv_lib_js_JS_NewObject
                             AC_CHECK_LIB(js, JS_NewObject,
                                 [JS_LIBS="-L$SEARCH_DIR_LIBS -ljs"],
@@ -1770,7 +1782,7 @@ if test "x$ID3_OK" = xyes; then
                             ID3_LIBS="$Z_LIBS -L$SEARCH_DIR_LIBS -lid3"
                         ],
                         [
-                            ID3_OK=missing
+                            MAGIC_OK=missing
                         ]
                     )
                 ],
@@ -1786,7 +1798,7 @@ if test "x$ID3_OK" = xyes; then
                             ID3_LIBS="-L$SEARCH_DIR_LIBS -lid3"
                         ],
                         [
-                            ID3_OK=missing
+                            MAGIC_OK=missing
                         ]
                     )
                 ]
