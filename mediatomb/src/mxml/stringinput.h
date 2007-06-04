@@ -45,7 +45,7 @@ protected:
     char *ptr;
 public:
     StringInput(zmm::String str);
-virtual int readChar();
+    virtual int readChar();
 };
 
 }

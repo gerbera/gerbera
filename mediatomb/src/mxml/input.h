@@ -39,7 +39,7 @@ class Input : public zmm::Object
 {
 public:
     Input(){};
-virtual int readChar() = 0;
+    virtual int readChar() = 0;
 };
 
 }

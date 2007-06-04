@@ -40,12 +40,12 @@ namespace mxml
 class Attribute : public zmm::Object
 {
 public:
-zmm::String name;
-zmm::String value;
+    zmm::String name;
+    zmm::String value;
 public:
-Attribute(zmm::String name);
-Attribute(zmm::String name, zmm::String value);
-void setValue(zmm::String value);
+    Attribute(zmm::String name);
+    Attribute(zmm::String name, zmm::String value);
+    void setValue(zmm::String value);
 };
 
 }

@@ -184,8 +184,6 @@ public:
         return base->startsWith(str.base);
     }
     
-    
-    
     int find(const char *needle);
     int find(String needle);
     

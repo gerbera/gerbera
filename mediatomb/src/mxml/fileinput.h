@@ -47,7 +47,7 @@ protected:
 public:
     FileInput(zmm::String filename);
     virtual ~FileInput();
-virtual int readChar();
+    virtual int readChar();
 };
 
 } // namespace
