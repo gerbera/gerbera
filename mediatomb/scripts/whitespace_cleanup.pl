@@ -48,8 +48,22 @@ foreach (@ARGV)
 	printf("y-%x %x-y",ord(substr($data,-2,1)), ord(substr($data,-1)));
     }
     
+    if (0) #tab-cleanup
+    {
+	my $data_before = $data;
+	
+	$data =~ s|\t|    |g;
     
-    #$modified = 0;
+	if ($data_before ne $data)
+	{
+	    print "TAB";
+	    $modified = 1;
+	}
+    }
+    
+    # off for safety reasons
+    $modified = 0;
+
     if ($modified)
     {
         open (FILE, '>', $full_path);
