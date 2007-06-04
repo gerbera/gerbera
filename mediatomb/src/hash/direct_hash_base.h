@@ -66,6 +66,10 @@ public:
     virtual int hashCode(KT key) = 0;
     virtual bool match(KT key, ST *slot) = 0;
     virtual bool isEmptySlot(ST *slot) = 0;
+    virtual bool isDeletedSlot(ST *slot)
+    {
+        return false;
+    }
     
     inline int baseTypeHashCode(unsigned int key)
     {
@@ -112,6 +116,9 @@ public:
         int h = hashCode(key);
         // secondary hash
         int h2 = 0;
+        
+        ST *deletedSlot = NULL;
+        
         for (int i = 0; i < HASH_MAX_ITERATIONS; i++)
         {
             ST *slot = data + h;
@@ -119,23 +126,30 @@ public:
             // found an empty slot
             if (isEmptySlot(slot))
             {
-                *retSlot = slot;
+                if (deletedSlot)
+                    *retSlot = deletedSlot;
+                else
+                    *retSlot = slot;
                 return false;
             }
-
-            // found the key
-            if (match(key, slot))
+            
+            if (isDeletedSlot(slot))
             {
+                deletedSlot = slot;
+            }
+            else if (match(key, slot))
+            {
+                // found the key
                 *retSlot = slot;
                 return true;
             }
-
+            
             // collision, probing next slot
             if (! h2)
                 h2 = secondaryHashCode(h);
             h = (h + h2) % capacity;
         }
-        log_error("AbstractHash::search() failed, maximal number of iterations exceeded: h:%d  h2:%d\n", h, h2);
+        log_error("AbstractHash::search() failed, maximal number of iterations exceeded: h:%d  h2:%d size:%d\n", h, h2, count);
         throw zmm::Exception(_("AbstractHash::search() failed, maximal number of iterations exceeded: h:") + h + " h2:"+ h2);
     }
 };

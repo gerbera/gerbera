@@ -33,6 +33,7 @@
 #define __HASH_DBO_HASH_H__
 
 #include "direct_hash_base.h"
+#include <assert.h>
 
 template <typename KT, typename VT> struct dbo_hash_slot
 {
@@ -46,10 +47,14 @@ class DBOHash : public DHashBase<KT, struct dbo_hash_slot<KT, VT> >
 {
 protected:
     KT emptyKey;
+    KT deletedKey;
 public:
-    DBOHash(int capacity, KT emptyKey) : DHashBase<KT, struct dbo_hash_slot<KT, VT> >(capacity)
+    DBOHash(int capacity, KT emptyKey, KT deletedKey) : DHashBase<KT, struct dbo_hash_slot<KT, VT> >(capacity)
     {
+        // emptyKey and deletedKey must not be the same!
+        assert(emptyKey != deletedKey);
         this->emptyKey = emptyKey;
+        this->deletedKey = deletedKey;
         init();
     }
     virtual ~DBOHash()
@@ -74,7 +79,7 @@ protected:
         for (int i = 0; i < this->capacity; i++)
         {
             slot = this->data + i;
-            if (slot->key != emptyKey)
+            if (slot->key != emptyKey && slot->key != deletedKey)
                 slot->value->release();
         }
     }
@@ -85,10 +90,14 @@ public:
         for (int i = 0; i < this->capacity; i++)
         {
             slot = this->data + i;
-            if (slot->key != emptyKey)
+            if (slot->key != emptyKey && slot->key != deletedKey)
             {
                 slot->key = emptyKey;
                 slot->value->release();
+            }
+            else if (slot->key == deletedKey)
+            {
+                slot->key = emptyKey;
             }
         }
         this->count = 0;
@@ -99,7 +108,7 @@ public:
         struct dbo_hash_slot<KT, VT> *slot;
         if (! search(key, &slot))
             return false;
-        slot->key = emptyKey;
+        slot->key = deletedKey;
         slot->value->release();
         this->count--;
         return true;
@@ -119,6 +128,11 @@ public:
         return (slot->key == emptyKey);
     }
     
+    virtual bool isDeletedSlot(struct dbo_hash_slot<KT, VT> *slot)
+    {
+        return (slot->key == deletedKey);
+    }
+    
     inline void put(KT key, zmm::Ref<VT> value)
     {
         struct dbo_hash_slot<KT, VT> *slot;
@@ -128,7 +142,7 @@ public:
     void put(KT key, hash_slot_t destSlot, zmm::Ref<VT> value)
     {
         struct dbo_hash_slot<KT, VT> *slot = (struct dbo_hash_slot<KT, VT> *)destSlot;
-        if (slot->key != emptyKey)
+        if (slot->key != emptyKey && slot->key != deletedKey)
         {
             VT *valuePtr = value.getPtr();
             valuePtr->retain();

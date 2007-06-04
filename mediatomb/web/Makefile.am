@@ -14,10 +14,14 @@ _DIST_FILES_IMAGES = \
 ./icons/nanotree/images/lastnode.png \
 ./icons/nanotree/images/folder_closed.png \
 ./icons/nanotree/images/folder_open.png \
-./icons/nanotree/images/autoscan_folder_closed.png \
-./icons/nanotree/images/autoscan_folder_open.png \
-./icons/nanotree/images/autoscan_config_folder_open.png \
-./icons/nanotree/images/autoscan_config_folder_closed.png
+./icons/nanotree/images/autoscan_timed_folder_closed.png \
+./icons/nanotree/images/autoscan_timed_folder_open.png \
+./icons/nanotree/images/autoscan_timed_config_folder_open.png \
+./icons/nanotree/images/autoscan_timed_config_folder_closed.png \
+./icons/nanotree/images/autoscan_inotify_folder_closed.png \
+./icons/nanotree/images/autoscan_inotify_folder_open.png \
+./icons/nanotree/images/autoscan_inotify_config_folder_open.png \
+./icons/nanotree/images/autoscan_inotify_config_folder_closed.png
 
 _DIST_FILES_ICONS = \
 ./icons/document-new.png \
@@ -33,8 +37,10 @@ _DIST_FILES_ICONS = \
 ./icons/remove_autoscan.png \
 ./icons/stock_edit.png \
 ./icons/stock_exit.png \
-./icons/autoscan_config_folder_open.png \
-./icons/autoscan_folder_open.png \
+./icons/autoscan_timed_config_folder_open.png \
+./icons/autoscan_timed_folder_open.png \
+./icons/autoscan_inotify_config_folder_open.png \
+./icons/autoscan_inotify_folder_open.png \
 ./icons/folder_open.png \
 ./icons/status.png \
 ./icons/status_loading.png \

@@ -216,11 +216,22 @@ public:
     virtual void updateAutoscanDirectory(zmm::Ref<AutoscanDirectory> adir) = 0;
     virtual void removeAutoscanDirectoryByObjectID(int objectID) = 0;
     virtual void removeAutoscanDirectory(int autoscanID) = 0;
+    /// \brief checks if the given object is a direct or indirect child of
+    /// a recursive autoscan start point
+    /// \param objectID the object id of the object to check
+    /// \return the objectID of the nearest matching autoscan start point or
+    /// INVALID_OBJECT_ID if it is not a child.
+    virtual int isAutoscanChild(int objectID) = 0;
     
     /// \brief returns wheather the given id is an autoscan start point and if yes, if it is persistent
     /// \param objectId the object id to check
-    /// \return 0 if the given id is no autoscan start point, 1 if it is a non-persistent one, 2 if it is a persistent on
+    /// \return 0 if the given id is no autoscan start point, 1 if it is a non-persistent one, 2 if it is a persistent one
     virtual int getAutoscanDirectoryType(int objectId) = 0;
+    
+    /// \brief returns wheather the given id is an autoscan start point and if yes, if it is recursive
+    /// \param objectId the object id to check
+    /// \return 0 if the given id is no autoscan start point, 1 if it is a non-recursive one, 2 if it is a recursive on
+    virtual int isAutoscanDirectoryRecursive(int objectId) = 0;
     
     /// \brief returns the AutoscanDirectory for the given objectID or nil if
     /// it's not an autoscan start point - scan id will be invalid
@@ -233,6 +244,10 @@ public:
     /// in the database
     /// \param adir the AutoscanDirectory to be updated
     virtual void autoscanUpdateLM(zmm::Ref<AutoscanDirectory> adir) = 0;
+    
+    virtual void checkOverlappingAutoscans(zmm::Ref<AutoscanDirectory> adir) = 0;
+    
+    virtual zmm::Ref<zmm::IntArray> getPathIDs(int objectID) = 0;
     
     /// \brief shutdown the Storage with its possible threads
     virtual void shutdown() = 0;

@@ -29,8 +29,10 @@
 
 
 var iconArray = new Array(iconTreeClosed,iconTreeOpen);
-var autoscanIconArray = new Array(iconTreeAutoscanClosed,iconTreeAutoscanOpen);
-var autoscanConfigIconArray = new Array(iconTreeAutoscanConfigClosed,iconTreeAutoscanConfigOpen);
+var autoscanTimedIconArray = new Array(iconTreeAutoscanTimedClosed, iconTreeAutoscanTimedOpen);
+var autoscanTimedConfigIconArray = new Array(iconTreeAutoscanTimedConfigClosed, iconTreeAutoscanTimedConfigOpen);
+var autoscanInotifyIconArray = new Array(iconTreeAutoscanInotifyClosed, iconTreeAutoscanInotifyOpen);
+var autoscanInotifyConfigIconArray = new Array(iconTreeAutoscanInotifyConfigClosed, iconTreeAutoscanInotifyConfigOpen);
 var lastNodeDb = 'd0';
 var lastNodeFs = 'f0';
 var lastNodeDbWish;
@@ -347,13 +349,25 @@ function updateTree(ajaxRequest)
             childCount = parseInt(childCount);
         var expandable = childCount ? true : false;
         
-        var autoscan = xmlGetAttribute(c, "autoscan");
+        var autoscanType = xmlGetAttribute(c, "autoscanType");
+        var autoscanMode = xmlGetAttribute(c, "autoscanMode");
         
         var thisIconArray = iconArray;
-        if (autoscan == '1')
-            thisIconArray = autoscanIconArray;
-        if (autoscan == '2')
-            thisIconArray = autoscanConfigIconArray;
+        if (autoscanType == '1')
+        {
+            if (autoscanMode == '2')
+                thisIconArray = autoscanInotifyIconArray;
+            else
+                thisIconArray = autoscanTimedIconArray;
+        }
+        
+        if (autoscanType == '2')
+        {
+            if (autoscanMode == '2')
+                thisIconArray = autoscanInotifyConfigIconArray;
+            else
+                thisIconArray = autoscanTimedConfigIconArray;
+        }
         
         var title = xmlGetText(c);
         var child = new TreeNode(id, title, thisIconArray);

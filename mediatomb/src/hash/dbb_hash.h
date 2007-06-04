@@ -79,6 +79,7 @@ public:
         }
     }
     
+    /* need to use deleted key
     inline bool remove(KT key)
     {
         struct dbb_hash_slot<KT, VT> *slot;
@@ -88,6 +89,7 @@ public:
         this->count--;
         return true;
     }
+    */
     
     inline void put(KT key, VT value)
     {

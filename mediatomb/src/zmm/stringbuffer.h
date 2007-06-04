@@ -62,6 +62,7 @@ public:
     void concat(Ref<StringBuffer> other, int offset = 0);
     
     int length();
+    int getCapacity() { return capacity; }
     void setLength(int newLength);
     char *c_str(int offset = 0);
     String toString();

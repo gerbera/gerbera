@@ -1,5 +1,13 @@
 MediaTomb - UPnP AV Mediaserver.
-(after v0.9.0)
+(after v0.9.1)
+        * MySQL database version pumped to 3 (MediaTomb will automatically
+          update the database during the first launch)
+        * Sqlute3 database version pumped to 2 (MediaTomb will automatically
+          update the database during the first launch)
+        * added support for inotify based autoscan
+        * playlist support
+
+v0.9.1  Playstation 3 support
         * added support for Playstation 3
         * added command line option that allows to tell the server where to
           put the configuration upon first startup
@@ -15,7 +23,7 @@ MediaTomb - UPnP AV Mediaserver.
           MySQL database creation script to fail
         * MySQL database version pumped to 2 (MediaTomb will automatically
           update the database during the first launch)
-          
+
 v0.9.0  Major rework
         * the UI was completely rewritten from scratch; it uses AJAX for all
           requests

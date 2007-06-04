@@ -45,6 +45,12 @@
     #include <zlib.h>
 #endif
 
+// updates 1->2
+#define SQLITE3_UPDATE_1_2_1 "DROP INDEX mt_autoscan_obj_id"
+#define SQLITE3_UPDATE_1_2_2 "CREATE UNIQUE INDEX mt_autoscan_obj_id ON mt_autoscan(obj_id)"
+#define SQLITE3_UPDATE_1_2_3 "ALTER TABLE \"mt_autoscan\" ADD \"path_ids\" text"
+#define SQLITE3_UPDATE_1_2_4 "UPDATE \"mt_internal_setting\" SET \"value\"='2' WHERE \"key\"='db_version' AND \"value\"='1'"
+
 #define SL3_INITITAL_QUEUE_SIZE 20
 
 using namespace zmm;
@@ -117,10 +123,31 @@ void Sqlite3Storage::init()
 #endif
     }
     log_debug("db_version: %s\n", dbVersion.c_str());
-    if (! string_ok(dbVersion) || dbVersion != "1")
+    
+    /* --- database upgrades --- */
+    
+    if (dbVersion == "1")
+    {
+        log_info("Doing an automatic database upgrade from database version 1 to version 2...\n");
+        _exec(SQLITE3_UPDATE_1_2_1);
+        _exec(SQLITE3_UPDATE_1_2_2);
+        _exec(SQLITE3_UPDATE_1_2_3);
+        _exec(SQLITE3_UPDATE_1_2_4);
+        log_info("database upgrade successful.\n");
+        dbVersion = _("2");
+    }
+    
+    /* --- --- ---*/
+    
+    if (! string_ok(dbVersion) || dbVersion != "2")
         throw _Exception(_("The database seems to be from a newer version!"));
     
     //pthread_attr_destroy(&attr);
+}
+
+void Sqlite3Storage::_exec(const char *query)
+{
+    exec(query, strlen(query), false);
 }
 
 String Sqlite3Storage::quote(String value)
@@ -363,7 +390,6 @@ void SLSelectTask::run(sqlite3 *db, Sqlite3Storage *sl)
     pres->row = pres->table;
     pres->cur_row = 0;
 }
-
 
 /* SLExecTask */
 

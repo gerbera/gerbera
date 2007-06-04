@@ -29,6 +29,7 @@
 
 var autoscanId;
 var autoscanFromFs;
+var autoscanPersistent;
 
 /* not completely finished...
 
@@ -108,8 +109,21 @@ function editLoadAutoscanDirectoryCallback(ajaxRequest)
     var xml = ajaxRequest.responseXML;
     if (!errorCheck(xml)) return;
     var autoscan = xmlGetElement(xml, "autoscan");
+    
     updateAutoscanEditFields(autoscan);
-    scanLevelChanged();
+    scanModeChanged(true);
+    
+    if (autoscanPersistent)
+    {
+        Element.show(frames["rightF"].document.getElementById("autoscan_persistent_message"));
+        Element.hide(frames["rightF"].document.getElementById("autoscan_set_button"));
+    }
+    else
+    {
+        Element.hide(frames["rightF"].document.getElementById("autoscan_persistent_message"));
+        Element.show(frames["rightF"].document.getElementById("autoscan_set_button"));
+    }
+    
     Element.hide(itemRoot);
     itemRoot = rightDocument.getElementById('autoscan_div');
     Element.show(itemRoot);
@@ -120,7 +134,14 @@ function updateAutoscanEditFields(autoscan)
     autoscanId = xmlGetElementText(autoscan, 'object_id');
     autoscanFromFs = xmlGetElementText(autoscan, 'from_fs') == '1';
     var elements = rightDocument.forms['autoscanForm'].elements;
+    var scan_mode_checked = 'scan_mode_' + xmlGetElementText(autoscan, 'scan_mode');
     var scan_level_checked = 'scan_level_' + xmlGetElementText(autoscan, 'scan_level');
+    var persistent = xmlGetElementText(autoscan, 'persistent');
+    if (persistent == '1')
+        autoscanPersistent = true;
+    else
+        autoscanPersistent = false;
+    elements[scan_mode_checked].checked = true;
     elements[scan_level_checked].checked = true;
     elements['recursive'].checked = xmlGetElementText(autoscan, 'recursive') == '1';
     elements['hidden'].checked = xmlGetElementText(autoscan, 'hidden') == '1';
@@ -136,7 +157,7 @@ function autoscanSubmit()
     args['object_id'] = autoscanId;
     args['from_fs'] = (autoscanFromFs ? '1' : '0');
     formToArray(form, args);
-    if (args['scan_level'] == 'none')
+    if (args['scan_mode'] == 'none')
         use_inactivity_timeout_short = true;
     var url = link('autoscan', args);
     var myAjax = new Ajax.Request(
@@ -155,17 +176,64 @@ function autoscanSubmitCallback(ajaxRequest)
 
 function scanLevelChanged()
 {
+    
+}
+
+function scanModeChanged(filled)
+{
     var elements = rightDocument.forms['autoscanForm'].elements;
-    if (elements['scan_level_none'].checked)
+    if (autoscanPersistent)
     {
-        elements['recursive'].disabled = true;
-        elements['hidden'].disabled = true;
-        elements['interval'].disabled = true;
+        elements['scan_mode_none'].disabled = true;
+        elements['scan_mode_timed'].disabled = true;
+        elements['scan_mode_inotify'].disabled = true;
     }
     else
     {
+        elements['scan_mode_none'].disabled = false;
+        elements['scan_mode_timed'].disabled = false;
+        elements['scan_mode_inotify'].disabled = false;
+    }
+    
+    var scan_level_text = rightDocument.getElementById("scan_level_text");
+    if (autoscanPersistent || elements['scan_mode_none'].checked)
+    {
+        elements['scan_level_basic'].disabled = true;
+        elements['scan_level_full'].disabled = true;
+        elements['recursive'].disabled = true;
+        elements['hidden'].disabled = true;
+        elements['interval'].disabled = true;
+        scan_level_text.replaceChild(rightDocument.createTextNode("Scan Level:"), scan_level_text.firstChild);
+    }
+    else
+    {
+        elements['scan_level_basic'].disabled = false;
+        elements['scan_level_full'].disabled = false;
+        var scan_interval_row = rightDocument.getElementById("scan_interval_row");
+        if (elements['scan_mode_inotify'].checked)
+        {
+            scan_level_text.replaceChild(rightDocument.createTextNode("Initial Scan:"), scan_level_text.firstChild);
+            if (! filled)
+                elements['scan_level_basic'].checked = true;
+            Element.hide(scan_interval_row);
+        }
+        else
+        {
+            scan_level_text.replaceChild(rightDocument.createTextNode("Scan Level:"), scan_level_text.firstChild);
+            if (! filled)
+                elements['scan_level_full'].checked = true;
+            Element.show(scan_interval_row);
+        }
+        
         elements['recursive'].disabled = false;
         elements['hidden'].disabled = false;
-        elements['interval'].disabled = false;
+        if (elements['scan_mode_timed'].checked)
+        {
+            elements['interval'].disabled = false;
+            if (elements['interval'].value == '0')
+                elements['interval'].value = '1800';
+        }
+        else
+            elements['interval'].disabled = true;
     }
 }

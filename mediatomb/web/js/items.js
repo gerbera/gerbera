@@ -147,10 +147,13 @@ function updateItems(ajaxRequest)
     }
     
     var isVirtual = (items.getAttribute("virtual") == '1');
-    var autoscanType = items.getAttribute("autoscan");
+    var autoscanType = items.getAttribute("autoscanType");
+    var autoscanMode = items.getAttribute("autoscanMode");
     var path = items.getAttribute("location");
     var loadItemId = (useFiles ? 'f' : 'd') + ofId;
     var totalMatches = parseInt(items.getAttribute("totalMatches"));
+    var isProtected = (items.getAttribute("protectContainer") == '1');
+    var itemsProtected = (items.getAttribute("protectItems") == '1');
     var totalPages = Math.ceil(totalMatches / viewItems);
     var start = parseInt(items.getAttribute("start"));
     var thisPage = Math.abs(start / viewItems);
@@ -359,9 +362,20 @@ function updateItems(ajaxRequest)
     {
         var iconSrc = iconContainer;
         if (autoscanType == '1')
-            iconSrc = iconContainerAutoscan;
+        {
+            if (autoscanMode == '2')
+                iconSrc = iconContainerAutoscanInotify;
+            else
+                iconSrc = iconContainerAutoscanTimed;
+        }
+        
         if (autoscanType == '2')
-            iconSrc = iconContainerAutoscanConfig;
+        {
+            if (autoscanMode == '2')
+                iconSrc = iconContainerAutoscanInotifyConfig;
+            else
+                iconSrc = iconContainerAutoscanTimedConfig;
+        }
         
         contIcon.setAttribute("src", iconSrc.src);
         contIcon.setAttribute("alt", "container:");
@@ -393,12 +407,19 @@ function updateItems(ajaxRequest)
             {
                 addLink = true;
                 editLink = true;
-                removeAllLink = true;
+                if (! isProtected)
+                    removeAllLink = true;
             }
             else
+            if (! isProtected)
+            {
+                removeThisLink = true;
                 autoscanLink = true;
-            removeThisLink = true;
+            }
         }
+        
+        if (autoscanType > 0)
+            autoscanLink = true;
         
         if (addLink)
             first = _addLink(topRightDocument, buttons, first, "javascript:parent.userAddItemStart();", "add Item", iconNewItem);
@@ -409,16 +430,7 @@ function updateItems(ajaxRequest)
         if (removeAllLink)
             first = _addLink(topRightDocument, buttons, first, "javascript:parent.removeItem('"+ofId+"', true);", "remove all", iconRemoveAll);
         if (autoscanLink)
-        {
-            if (autoscanType == "2")
-            {
-                //buttons.appendChild(topRightDocument.createTextNode(" (added as autoscan directory through config.xml)"));
-            }
-            else
-            {
-                first = _addLink(topRightDocument, buttons, first,  "javascript:parent.editLoadAutoscanDirectory('"+ofId+"', false);", "change autoscan dir", iconEditAutoscan);
-            }
-        }
+            first = _addLink(topRightDocument, buttons, first,  "javascript:parent.editLoadAutoscanDirectory('"+ofId+"', false);", "change autoscan dir", iconEditAutoscan);
     }
     
     if (showPaging)
@@ -502,10 +514,13 @@ function updateItems(ajaxRequest)
         {
             //itemEntry.appendChild(rightDocument.createTextNode(" - "));
             
-            _addLink(rightDocument, itemButtons, true, "javascript:parent.removeItem(\""+item.getAttribute("id")+"\", false);", "remove this", iconRemoveThis);
-            if (isVirtual)
+            if (! itemsProtected)
             {
-                _addLink(rightDocument, itemButtons, false, "javascript:parent.removeItem(\""+item.getAttribute("id")+"\", true);", "remove all", iconRemoveAll);
+                _addLink(rightDocument, itemButtons, true, "javascript:parent.removeItem(\""+item.getAttribute("id")+"\", false);", "remove this", iconRemoveThis);
+                if (isVirtual)
+                {
+                    _addLink(rightDocument, itemButtons, false, "javascript:parent.removeItem(\""+item.getAttribute("id")+"\", true);", "remove all", iconRemoveAll);
+                }
             }
             
             _addLink(rightDocument, itemButtons, false, "javascript:parent.userEditItemStart('"+item.getAttribute("id")+"');", "edit", iconEdit);

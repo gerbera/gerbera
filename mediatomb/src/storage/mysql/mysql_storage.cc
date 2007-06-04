@@ -49,12 +49,20 @@
     #include <zlib.h>
 #endif
 
+// updates 1->2
 #define MYSQL_UPDATE_1_2_1 "ALTER TABLE `mt_cds_object` CHANGE `location` `location` BLOB NULL DEFAULT NULL"
 #define MYSQL_UPDATE_1_2_2 "ALTER TABLE `mt_cds_object` CHANGE `metadata` `metadata` BLOB NULL DEFAULT NULL"
 #define MYSQL_UPDATE_1_2_3 "ALTER TABLE `mt_cds_object` CHANGE `auxdata` `auxdata` BLOB NULL DEFAULT NULL"
 #define MYSQL_UPDATE_1_2_4 "ALTER TABLE `mt_cds_object` CHANGE `resources` `resources` BLOB NULL DEFAULT NULL"
 #define MYSQL_UPDATE_1_2_5 "ALTER TABLE `mt_autoscan` CHANGE `location` `location` BLOB NULL DEFAULT NULL"
 #define MYSQL_UPDATE_1_2_6 "UPDATE `mt_internal_setting` SET `value`='2' WHERE `key`='db_version'"
+
+// updates 2->3
+#define MYSQL_UPDATE_2_3_1 "ALTER TABLE `mt_autoscan` CHANGE `scan_mode` `scan_mode` ENUM( 'timed', 'inotify' ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL"
+#define MYSQL_UPDATE_2_3_2 "ALTER TABLE `mt_autoscan` DROP INDEX `mt_autoscan_obj_id`, ADD UNIQUE `mt_autoscan_obj_id` ( `obj_id` )"
+#define MYSQL_UPDATE_2_3_3 "ALTER TABLE `mt_autoscan` ADD `path_ids` BLOB AFTER `location`"
+#define MYSQL_UPDATE_2_3_4 "UPDATE `mt_internal_setting` SET `value`='3' WHERE `key`='db_version' AND `value`='2'"
+
 
 using namespace zmm;
 using namespace mxml;
@@ -241,10 +249,21 @@ void MysqlStorage::init()
         log_info("database upgrade successful.\n");
         dbVersion = _("2");
     }
+    
+    if (dbVersion == "2")
+    {
+        log_info("Doing an automatic database upgrade from database version 2 to version 3...\n");
+        _exec(MYSQL_UPDATE_2_3_1);
+        _exec(MYSQL_UPDATE_2_3_2);
+        _exec(MYSQL_UPDATE_2_3_3);
+        _exec(MYSQL_UPDATE_2_3_4);
+        log_info("database upgrade successful.\n");
+        dbVersion = _("3");
+    }
     /* --- --- ---*/
     
-    if (! string_ok(dbVersion) || dbVersion != "2")
-        throw _Exception(_("The database seems to be from a newer version!"));
+    if (! string_ok(dbVersion) || dbVersion != "3")
+        throw _Exception(_("The database seems to be from a newer version (database version ") + dbVersion + ")!");
     
     AUTOUNLOCK();
     

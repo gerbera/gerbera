@@ -92,6 +92,11 @@ void web::auth::process()
         config->addAttribute(_("poll-when-idle"), cm->getOption(_("/server/ui/attribute::poll-when-idle")));
         config->addAttribute(_("poll-interval"), cm->getOption(_("/server/ui/attribute::poll-interval")));
         config->appendChild(cm->getElement(_("/server/ui/items-per-page")));
+#ifdef HAVE_INOTIFYTOOLS
+        config->addAttribute(_("have-inotify"), _("1"));
+#else
+        config->addAttribute(_("have-inotify"), _("0"));
+#endif
     }
     else if (param(_("checkSID")) != nil)
     {

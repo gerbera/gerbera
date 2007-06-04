@@ -47,15 +47,24 @@ var iconLast = {src: iconPath + 'go-last.png', width: 32, height: 20};
 var iconArrowReplacement = {src: iconPath + 'blank.png', width: 32, height: 20};
 
 var iconContainer = {src: iconPath + 'folder_open.png', width: 24, height: 29};
-var iconContainerAutoscan = {src: iconPath + 'autoscan_folder_open.png', width: 24, height: 29};
-var iconContainerAutoscanConfig = {src: iconPath + 'autoscan_config_folder_open.png', width: 24, height: 29};
+var iconContainerAutoscanTimed = {src: iconPath + 'autoscan_timed_folder_open.png', width: 24, height: 29};
+var iconContainerAutoscanTimedConfig = {src: iconPath + 'autoscan_timed_config_folder_open.png', width: 24, height: 29};
+var iconContainerAutoscanInotify = {src: iconPath + 'autoscan_inotify_folder_open.png', width: 24, height: 29};
+
+var iconContainerAutoscanInotifyConfig = {src: iconPath + 'autoscan_inotify_config_folder_open.png', width: 24, height: 29};
+// ---
 
 /* icons for tree.js */
 
 var treeImagePath = '/icons/nanotree/images/';
 var iconTreeClosed = treeImagePath + 'folder_closed.png';
 var iconTreeOpen = treeImagePath + 'folder_open.png';
-var iconTreeAutoscanClosed = treeImagePath + 'autoscan_folder_closed.png';
-var iconTreeAutoscanOpen = treeImagePath + 'autoscan_folder_open.png';
-var iconTreeAutoscanConfigOpen = treeImagePath + 'autoscan_config_folder_open.png';
-var iconTreeAutoscanConfigClosed = treeImagePath + 'autoscan_config_folder_closed.png';
+var iconTreeAutoscanTimedClosed = treeImagePath + 'autoscan_timed_folder_closed.png';
+var iconTreeAutoscanTimedOpen = treeImagePath + 'autoscan_timed_folder_open.png';
+var iconTreeAutoscanTimedConfigClosed = treeImagePath + 'autoscan_timed_config_folder_closed.png';
+var iconTreeAutoscanTimedConfigOpen = treeImagePath + 'autoscan_timed_config_folder_open.png';
+
+var iconTreeAutoscanInotifyOpen = treeImagePath + 'autoscan_inotify_folder_open.png';
+var iconTreeAutoscanInotifyClosed = treeImagePath + 'autoscan_inotify_folder_closed.png';
+var iconTreeAutoscanInotifyConfigOpen = treeImagePath + 'autoscan_inotify_config_folder_open.png';
+var iconTreeAutoscanInotifyConfigClosed = treeImagePath + 'autoscan_inotify_config_folder_closed.png';

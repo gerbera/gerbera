@@ -81,8 +81,8 @@ void web::autoscan::process()
     {
         bool fromFs = boolParam(_("from_fs"));
         
-        String scan_level_str = param(_("scan_level"));
-        if (scan_level_str == "none")
+        String scan_mode_str = param(_("scan_mode"));
+        if (scan_mode_str == "none")
         {
             // remove...
             try
@@ -103,11 +103,13 @@ void web::autoscan::process()
             bool recursive = boolParam(_("recursive"));
             bool hidden = boolParam(_("hidden"));
             //bool persistent = boolParam(_("persistent"));
+            
+            scan_mode_t scan_mode = AutoscanDirectory::remapScanmode(scan_mode_str);
+            scan_level_t scan_level;
+            scan_level = AutoscanDirectory::remapScanlevel(param(_("scan_level")));
             int interval = intParam(_("interval"), 0);
-            if (interval <= 0 )
-            throw _Exception(_("illegal interval given"));
-            scan_level_t scan_level = AutoscanDirectory::remapScanlevel(scan_level_str);
-            scan_mode_t scan_mode = TimedScanMode;
+            if (scan_mode == TimedScanMode && interval <= 0)
+                throw _Exception(_("illegal interval given"));
             
             String location;
             int objectID = INVALID_OBJECT_ID;
@@ -142,6 +144,7 @@ void web::autoscan::process()
     else if (action == "list")
     {
         /// \todo use a method of ContentManager, should give back all autoscans
+        abort();
         Ref<AutoscanList> autoscanList = storage->getAutoscanList(TimedScanMode);
         
         int size = autoscanList->size();
@@ -165,16 +168,20 @@ void web::autoscan::autoscan2XML(Ref<Element> element, Ref<AutoscanDirectory> ad
 {
     if (adir == nil)
     {
-        element->appendTextChild(_("scan_level"), _("none"));
+        element->appendTextChild(_("scan_mode"), _("none"));
+        element->appendTextChild(_("scan_level"), _("full"));
         element->appendTextChild(_("recursive"), _("0"));
         element->appendTextChild(_("hidden"), _("0"));
         element->appendTextChild(_("interval"), _("1800"));
+        element->appendTextChild(_("persistent"), _("0"));
     }
     else
     {
+        element->appendTextChild(_("scan_mode"), AutoscanDirectory::mapScanmode(adir->getScanMode()));
         element->appendTextChild(_("scan_level"), AutoscanDirectory::mapScanlevel(adir->getScanLevel()));
         element->appendTextChild(_("recursive"), (adir->getRecursive() ? _("1") : _("0") ));
         element->appendTextChild(_("hidden"), (adir->getHidden() ? _("1") : _("0") ));
         element->appendTextChild(_("interval"), String::from(adir->getInterval()));
+        element->appendTextChild(_("persistent"), (adir->persistent() ? _("1") : _("0") ));
     }
 }

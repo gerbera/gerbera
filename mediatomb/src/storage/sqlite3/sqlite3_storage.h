@@ -142,6 +142,8 @@ private:
     virtual int exec(const char *query, int length, bool getLastInsertId = false);
     virtual void storeInternalSetting(zmm::String key, zmm::String value);
     
+    void _exec(const char *query);
+    
     zmm::String startupError;
     
     zmm::String getError(zmm::String query, zmm::String error, sqlite3 *db);

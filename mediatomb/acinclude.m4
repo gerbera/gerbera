@@ -5,7 +5,7 @@
 # This script has been downloaded from
 # http://autoconf-archive.cryp.to/acx_pthread.html
 #
-# Copyright � 2006 Steven G. Johnson <stevenj@alum.mit.edu>
+# Copyright © 2006 Steven G. Johnson <stevenj@alum.mit.edu>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -231,4 +231,3 @@ else
 fi
 AC_LANG_RESTORE
 ])dnl ACX_PTHREAD
-

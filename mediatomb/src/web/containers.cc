@@ -86,7 +86,20 @@ void web::containers::process()
         int childCount = cont->getChildCount();
         if (childCount)
             ce->addAttribute(_("childCount"), String::from(childCount));
-        ce->addAttribute(_("autoscan"), String::from(cont->getAutoscanType()));
+        int autoscanType = cont->getAutoscanType();
+        ce->addAttribute(_("autoscanType"), String::from(autoscanType));
+        
+        int autoscanMode = 0;
+        if (autoscanType > 0)
+        {
+            autoscanMode = 1;
+#ifdef HAVE_INOTIFY
+            Ref<AutoscanDirectory> adir = storage->getAutoscanDirectory(cont->getID());
+            if ((adir != nil) && (adir->getScanMode() == InotifyScanMode))
+                autoscanMode = 2;
+#endif
+        }
+        ce->addAttribute(_("autoscanMode"), String::from(autoscanMode));
         ce->setText(cont->getTitle());
         containers->appendChild(ce);
         //}

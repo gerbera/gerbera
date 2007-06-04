@@ -94,11 +94,50 @@ void web::items::process()
     if (string_ok(location))
         items->addAttribute(_("location"), location);
     items->addAttribute(_("virtual"), (obj->isVirtual() ? _("1") : _("0")));
-    items->addAttribute(_("autoscan"), String::from(storage->getAutoscanDirectoryType(parentID)));
+
+    int autoscanType = storage->getAutoscanDirectoryType(parentID);
+    items->addAttribute(_("autoscanType"), String::from(autoscanType));
     items->addAttribute(_("start"), String::from(start));
     //items->addAttribute(_("returned"), String::from(arr->size()));
     items->addAttribute(_("totalMatches"), String::from(param->getTotalMatches()));
-                            
+
+    int protectContainer = 0;
+    int protectItems = 0;
+    int autoscanMode = 0;
+
+    if (autoscanType > 0)
+        autoscanMode = 1;
+
+#ifdef HAVE_INOTIFY
+    int startpoint_id = INVALID_OBJECT_ID;
+    if (autoscanType == 0)
+    {
+        startpoint_id = storage->isAutoscanChild(parentID);
+    }
+    else
+    {
+        startpoint_id = parentID;
+    }
+    
+    if (startpoint_id != INVALID_OBJECT_ID)
+    {
+        Ref<AutoscanDirectory> adir = storage->getAutoscanDirectory(startpoint_id);
+        if ((adir != nil) && (adir->getScanMode() == InotifyScanMode))
+        {
+            protectItems = 1;
+            if (autoscanType == 0 || adir->persistent())
+                protectContainer = 1;
+
+            autoscanMode = 2;
+        }
+    }
+
+#endif
+
+    items->addAttribute(_("protectContainer"), String::from(protectContainer));
+    items->addAttribute(_("protectItems"), String::from(protectItems));
+    items->addAttribute(_("autoscanMode"), String::from(autoscanMode));
+
     for (int i = 0; i < arr->size(); i++)
     {
         Ref<CdsObject> obj = arr->get(i);

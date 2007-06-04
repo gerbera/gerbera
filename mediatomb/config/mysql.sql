@@ -47,21 +47,22 @@ CREATE TABLE `mt_internal_setting` (
   `value` varchar(255) NOT NULL,
   PRIMARY KEY  (`key`)
 ) ENGINE=MyISAM CHARSET=utf8;
-INSERT INTO `mt_internal_setting` VALUES ('db_version','2');
+INSERT INTO `mt_internal_setting` VALUES ('db_version','3');
 CREATE TABLE `mt_autoscan` (
   `id` int(11) NOT NULL auto_increment,
   `obj_id` int(11) default NULL,
   `scan_level` enum('basic','full') NOT NULL,
-  `scan_mode` enum('timed') NOT NULL,
+  `scan_mode` enum('timed','inotify') NOT NULL,
   `recursive` tinyint(4) unsigned NOT NULL,
   `hidden` tinyint(4) unsigned NOT NULL,
   `interval` int(11) unsigned default NULL,
   `last_modified` bigint(20) unsigned default NULL,
   `persistent` tinyint(4) unsigned NOT NULL default '0',
   `location` blob,
+  `path_ids` blob,
   `touched` tinyint(4) unsigned NOT NULL default '1',
   PRIMARY KEY `id` (`id`),
-  KEY `mt_autoscan_obj_id` (`obj_id`),
+  UNIQUE KEY `mt_autoscan_obj_id` (`obj_id`),
   CONSTRAINT `mt_autoscan_ibfk_1` FOREIGN KEY (`obj_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=MyISAM CHARSET=utf8;
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;

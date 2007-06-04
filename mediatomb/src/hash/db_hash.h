@@ -44,10 +44,10 @@ protected:
 public:
     DBHash(int capacity, KT emptyKey, KT deletedKey) : DHashBase<KT, KT>(capacity)
     {
+        // emptyKey and deletedKey must not be the same!
+        assert(emptyKey != deletedKey);
         this->emptyKey = emptyKey;
         this->deletedKey = deletedKey;
-        if (emptyKey == deletedKey)
-            throw zmm::Exception(_("emptyKey and deletedKey must not be the same!"));
         clear();
     }
 
@@ -64,7 +64,12 @@ public:
     {
         return (*slot == emptyKey);
     }
-   
+    
+    virtual bool isDeletedSlot(KT *slot)
+    {
+        return (*slot == deletedKey);
+    }
+    
     void clear()
     {
         if (! emptyKey)
@@ -105,7 +110,7 @@ public:
             this->count++;
         }
     }
-
+    
     inline bool exists(KT key)
     {
         KT *slot;

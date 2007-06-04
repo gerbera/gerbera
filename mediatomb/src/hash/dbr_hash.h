@@ -100,6 +100,11 @@ public:
         return (slot->key == emptyKey);
     }
     
+    virtual bool isDeletedSlot(struct dbr_hash_slot<KT> *slot)
+    {
+        return (slot->key == deletedKey);
+    }
+    
     void clear()
     {
         if (! emptyKey)

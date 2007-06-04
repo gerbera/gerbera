@@ -188,5 +188,11 @@ function getConfigCallback(ajaxRequest)
                     viewItems = newDefaultViewItems;
             }
         }
+        var haveInotify = xmlGetAttribute(configEl, "have-inotify");
+        if (haveInotify)
+        {
+            Element.show(frames["rightF"].document.getElementById("scan_mode_inotify"));
+            Element.show(frames["rightF"].document.getElementById("scan_mode_inotify_label"));
+        }
     }
 }

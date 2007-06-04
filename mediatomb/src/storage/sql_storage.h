@@ -132,8 +132,13 @@ public:
     virtual void removeAutoscanDirectoryByObjectID(int objectID);
     virtual void removeAutoscanDirectory(int autoscanID);
     virtual int getAutoscanDirectoryType(int objectId);
+    virtual int isAutoscanDirectoryRecursive(int objectId);
     virtual void autoscanUpdateLM(zmm::Ref<AutoscanDirectory> adir);
     virtual zmm::Ref<AutoscanDirectory> getAutoscanDirectory(int objectID);
+    virtual int isAutoscanChild(int objectID);
+    virtual void checkOverlappingAutoscans(zmm::Ref<AutoscanDirectory> adir);
+    
+    virtual zmm::Ref<zmm::IntArray> getPathIDs(int objectID);
     
     virtual void shutdown() = 0;
     
@@ -202,6 +207,8 @@ private:
     int _getAutoscanObjectID(int autoscanID);
     void _autoscanChangePersistentFlag(int objectID, bool persistent);
     zmm::Ref<AutoscanDirectory> _fillAutoscanDirectory(zmm::Ref<SQLRow> row);
+    int _getAutoscanDirectoryInfo(int objectID, zmm::String field);
+    zmm::Ref<zmm::IntArray> _checkOverlappingAutoscans(zmm::Ref<AutoscanDirectory> adir);
     
     /* location hash helpers */
     zmm::String addLocationPrefix(char prefix, zmm::String path);

@@ -85,6 +85,7 @@ public:
         this->zero();
     }
     
+    /* #error need to use deleted key
     inline bool remove(zmm::String key)
     {
         struct dsb_hash_slot<VT> *slot;
@@ -95,6 +96,7 @@ public:
         this->count--;
         return true;
     }
+    */
     
     inline void put(zmm::String key, VT value)
     {

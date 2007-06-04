@@ -1567,7 +1567,9 @@ void SQLStorage::updateAutoscanPersistentList(scan_mode_t scanmode, Ref<Autoscan
     
     q->clear();
     *q << "DELETE FROM " << TQ(AUTOSCAN_TABLE)
-        << " WHERE " << TQ("touched") << '=' << mapBool(false);
+        << " WHERE " << TQ("touched") << '=' << mapBool(false)
+        << " AND " << TQ("scan_mode") << '='
+        << quote(AutoscanDirectory::mapScanmode(scanmode));
     exec(q);
 }
 
@@ -1663,11 +1665,15 @@ Ref<AutoscanDirectory> SQLStorage::_fillAutoscanDirectory(Ref<SQLRow> row)
 
 void SQLStorage::addAutoscanDirectory(Ref<AutoscanDirectory> adir)
 {
+    if (adir == nil)
+        throw _Exception(_("addAutoscanDirectory called with adir==nil"));
     if (adir->getStorageID() >= 0)
         throw _Exception(_("tried to add autoscan directory with a storage id set"));
     int objectID = findObjectIDByPath(adir->getLocation() + DIR_SEPARATOR);
     if (! adir->persistent() && objectID < 0)
         throw _Exception(_("tried to add non-persistent autoscan directory with an illegal objectID or location"));
+    
+    Ref<IntArray> pathIds = _checkOverlappingAutoscans(adir);
     
     _autoscanChangePersistentFlag(objectID, true);
     
@@ -1681,7 +1687,8 @@ void SQLStorage::addAutoscanDirectory(Ref<AutoscanDirectory> adir)
         << TQ("interval") << ','
         << TQ("last_modified") << ','
         << TQ("persistent") << ','
-        << TQ("location")
+        << TQ("location") << ','
+        << TQ("path_ids")
         << ") VALUES ("
         << (objectID >= 0 ? quote(objectID) : _(SQL_NULL)) << ','
         << quote(AutoscanDirectory::mapScanlevel(adir->getScanLevel())) << ','
@@ -1691,7 +1698,8 @@ void SQLStorage::addAutoscanDirectory(Ref<AutoscanDirectory> adir)
         << quote(adir->getInterval()) << ','
         << quote(adir->getPreviousLMT()) << ','
         << mapBool(adir->persistent()) << ','
-        << (objectID >= 0 ? _(SQL_NULL) : quote(adir->getLocation()))
+        << (objectID >= 0 ? _(SQL_NULL) : quote(adir->getLocation())) << ','
+        << (pathIds == nil ? _(SQL_NULL) : quote(_(",") + pathIds->toCSV() + ','))
         << ')';
     adir->setStorageID(exec(q, true));
 }
@@ -1699,6 +1707,12 @@ void SQLStorage::addAutoscanDirectory(Ref<AutoscanDirectory> adir)
 void SQLStorage::updateAutoscanDirectory(Ref<AutoscanDirectory> adir)
 {
     log_debug("id: %d, obj_id: %d\n", adir->getStorageID(), adir->getObjectID());
+    
+    if (adir == nil)
+        throw _Exception(_("updateAutoscanDirectory called with adir==nil"));
+    
+    Ref<IntArray> pathIds = _checkOverlappingAutoscans(adir);
+    
     int objectID = adir->getObjectID();
     int objectIDold = _getAutoscanObjectID(adir->getStorageID());
     if (objectIDold != objectID)
@@ -1720,6 +1734,7 @@ void SQLStorage::updateAutoscanDirectory(Ref<AutoscanDirectory> adir)
         *q << ',' << TQ("last_modified") << '=' << quote(adir->getPreviousLMT());
     *q << ',' << TQ("persistent") << '=' << mapBool(adir->persistent())
         << ',' << TQ("location") << '=' << (objectID >= 0 ? _(SQL_NULL) : quote(adir->getLocation()))
+        << ',' << TQ("path_ids") << '=' << (pathIds == nil ? _(SQL_NULL) : quote(_(",") + pathIds->toCSV() + ','))
         << ',' << TQ("touched") << '=' << mapBool(true)
         << " WHERE " << TQ("id") << '=' << quote(adir->getStorageID());
     exec(q);
@@ -1752,10 +1767,20 @@ void SQLStorage::removeAutoscanDirectory(int autoscanID)
 
 int SQLStorage::getAutoscanDirectoryType(int objectID)
 {
+    return _getAutoscanDirectoryInfo(objectID, _("persistent"));
+}
+
+int SQLStorage::isAutoscanDirectoryRecursive(int objectID)
+{
+    return _getAutoscanDirectoryInfo(objectID, _("recursive"));
+}
+
+int SQLStorage::_getAutoscanDirectoryInfo(int objectID, String field)
+{
     if (objectID == INVALID_OBJECT_ID)
         return 0;
     Ref<StringBuffer> q(new StringBuffer());
-    *q << "SELECT " << TQ("persistent") << " FROM " << TQ(AUTOSCAN_TABLE)
+    *q << "SELECT " << TQ(field) << " FROM " << TQ(AUTOSCAN_TABLE)
         << " WHERE " << TQ("obj_id") << '=' << quote(objectID);
     Ref<SQLResult> res = select(q);
     Ref<SQLRow> row;
@@ -1784,6 +1809,8 @@ int SQLStorage::_getAutoscanObjectID(int autoscanID)
 
 void SQLStorage::_autoscanChangePersistentFlag(int objectID, bool persistent)
 {
+    if (objectID == INVALID_OBJECT_ID && objectID == INVALID_OBJECT_ID_2)
+        return;
     Ref<StringBuffer> q(new StringBuffer());
     *q << "UPDATE " << TQ(CDS_OBJECT_TABLE)
         << " SET " << TQ("flags") << " = (" << TQ("flags")
@@ -1793,7 +1820,7 @@ void SQLStorage::_autoscanChangePersistentFlag(int objectID, bool persistent)
     exec(q);
 }
 
-void SQLStorage::autoscanUpdateLM(zmm::Ref<AutoscanDirectory> adir)
+void SQLStorage::autoscanUpdateLM(Ref<AutoscanDirectory> adir)
 {
     /*
     int objectID = adir->getObjectID();
@@ -1810,6 +1837,140 @@ void SQLStorage::autoscanUpdateLM(zmm::Ref<AutoscanDirectory> adir)
         << " SET " << TQ("last_modified") << '=' << quote(adir->getPreviousLMT())
         << " WHERE " << TQ("id") << '=' << quote(adir->getStorageID());
     exec(q);
+}
+
+int SQLStorage::isAutoscanChild(int objectID)
+{
+    Ref<IntArray> pathIDs = getPathIDs(objectID);
+    if (pathIDs == nil)
+        return INVALID_OBJECT_ID;
+    for (int i = 0; i < pathIDs->size(); i++)
+    {
+        int recursive = isAutoscanDirectoryRecursive(pathIDs->get(i));
+        if (recursive == 2)
+            return pathIDs->get(i);
+    }
+    return INVALID_OBJECT_ID;
+}
+
+void SQLStorage::checkOverlappingAutoscans(Ref<AutoscanDirectory> adir)
+{
+    _checkOverlappingAutoscans(adir);
+}
+
+Ref<IntArray> SQLStorage::_checkOverlappingAutoscans(Ref<AutoscanDirectory> adir)
+{
+    if (adir == nil)
+        throw _Exception(_("_checkOverlappingAutoscans called with adir==nil"));
+    int checkObjectID = adir->getObjectID();
+    if (checkObjectID == INVALID_OBJECT_ID)
+        return nil;
+    int storageID = adir->getStorageID();
+    
+    Ref<SQLResult> res;
+    Ref<SQLRow> row;
+    
+    Ref<StringBuffer> q(new StringBuffer());
+    
+    *q << "SELECT " << TQ("id")
+        << " FROM " << TQ(AUTOSCAN_TABLE)
+        << " WHERE " << TQ("obj_id") << " = "
+        << quote(checkObjectID);
+    if (storageID >= 0)
+        *q << " AND " << TQ("id") << " != " << quote(storageID);
+    
+    res = select(q);
+    if (res == nil)
+        throw _Exception(_("SQL error"));
+    
+    if ((row = res->nextRow()) != nil)
+    {
+        Ref<CdsObject> obj = loadObject(checkObjectID);
+        if (obj == nil)
+            throw _Exception(_("Referenced object (by Autoscan) not found."));
+        log_error("There is already an Autoscan set on %s\n", obj->getLocation().c_str());
+        throw _Exception(_("There is already an Autoscan set on ") + obj->getLocation());
+    }
+    
+    if (adir->getRecursive())
+    {
+        q->clear();
+        *q << "SELECT " << TQ("obj_id")
+            << " FROM " << TQ(AUTOSCAN_TABLE)
+            << " WHERE " << TQ("path_ids") << " LIKE "
+            << quote(_("%,") + checkObjectID + ",%");
+        if (storageID >= 0)
+            *q << " AND " << TQ("id") << " != " << quote(storageID);
+        *q << " LIMIT 1";
+        
+        log_debug("------------ %s\n", q->c_str());
+        
+        res = select(q);
+        if (res == nil)
+            throw _Exception(_("SQL error"));
+        if ((row = res->nextRow()) != nil)
+        {
+            int objectID = row->col(0).toInt();
+            log_debug("-------------- %d\n", objectID);
+            Ref<CdsObject> obj = loadObject(objectID);
+            if (obj == nil)
+                throw _Exception(_("Referenced object (by Autoscan) not found."));
+            log_error("Overlapping Autoscans are not allowed. There is already an Autoscan set on %s\n", obj->getLocation().c_str());
+            throw _Exception(_("Overlapping Autoscans are not allowed. There is already an Autoscan set on ") + obj->getLocation());
+        }
+    }
+    
+    Ref<IntArray> pathIDs = getPathIDs(checkObjectID);
+    if (pathIDs == nil)
+        throw _Exception(_("getPathIDs returned nil"));
+    q->clear();
+    *q << "SELECT " << TQ("obj_id")
+        << " FROM " << TQ(AUTOSCAN_TABLE)
+        << " WHERE " << TQ("obj_id") << " IN ("
+        << pathIDs->toCSV()
+        << ") AND " << TQ("recursive") << '=' << mapBool(true);
+    if (storageID >= 0)
+        *q << " AND " << TQ("id") << " != " << quote(storageID);
+    *q << " LIMIT 1";
+    
+    res = select(q);
+    if (res == nil)
+        throw _Exception(_("SQL error"));
+    if ((row = res->nextRow()) == nil)
+        return pathIDs;
+    else
+    {
+        int objectID = row->col(0).toInt();
+        Ref<CdsObject> obj = loadObject(objectID);
+        if (obj == nil)
+            throw _Exception(_("Referenced object (by Autoscan) not found."));
+        log_error("Overlapping Autoscans are not allowed. There is already a recursive Autoscan set on %s\n", obj->getLocation().c_str());
+        throw _Exception(_("Overlapping Autoscans are not allowed. There is already a recursive Autoscan set on ") + obj->getLocation());
+    }
+}
+
+Ref<IntArray> SQLStorage::getPathIDs(int objectID)
+{
+    if (objectID == INVALID_OBJECT_ID)
+        return nil;
+    Ref<IntArray> pathIDs(new IntArray());
+    Ref<StringBuffer> q(new StringBuffer());
+    *q << "SELECT " << TQ("parent_id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";
+    *q << TQ("id") << '=';
+    int selBufLen = q->length();
+    Ref<SQLResult> res;
+    Ref<SQLRow> row;
+    while (objectID != CDS_ID_ROOT)
+    {
+        pathIDs->append(objectID);
+        q->setLength(selBufLen);
+        *q << quote(objectID) << " LIMIT 1";
+        res = select(q);
+        if (res == nil || (row = res->nextRow()) == nil)
+            break;
+        objectID = row->col(0).toInt();
+    }
+    return pathIDs;
 }
 
 String SQLStorage::getFsRootName()
