@@ -21,7 +21,8 @@ libmediatomb_a_CXXFLAGS = \
                      $(ID3_CXXFLAGS) \
                      $(EXIF_CXXFLAGS) \
                      $(Z_CXXFLAGS) \
-                     $(PTHREAD_CFLAGS)
+                     $(PTHREAD_CFLAGS) \
+                     $(INOTIFY_CXXFLAGS)
 
 bin_PROGRAMS = mediatomb
 mediatomb_SOURCES = $(top_srcdir)/src/main.cc
@@ -41,7 +42,8 @@ mediatomb_CXXFLAGS = -I$(top_srcdir)/src \
                      $(ID3_CXXFLAGS) \
                      $(EXIF_CXXFLAGS) \
                      $(Z_CXXFLAGS) \
-                     $(PTHREAD_CFLAGS)
+                     $(PTHREAD_CFLAGS) \
+                     $(INOTIFY_CXXFLAGS)
 
 mediatomb_LDADD = \
     libmediatomb.a \

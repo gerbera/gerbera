@@ -189,6 +189,14 @@ AC_ARG_WITH(zlib-libs,
         ]
 )
 
+AC_ARG_WITH(inotify-h,
+        AC_HELP_STRING([--with-inotify-h=DIR], [search for inotify header in DIR/sys]),
+        [
+            INOTIFY_SEARCH_HEADERS="$withval"
+            AC_MSG_NOTICE([Will search for inotify header in $withval/sys])
+        ]
+)
+
 AC_ARG_WITH(iconv-h,
         AC_HELP_STRING([--with-iconv-h=DIR], [search for iconv headers in DIR]),
         [
@@ -2156,6 +2164,99 @@ CPPFLAGS="$CPPFLAGS_SAVE"
 #    fi
 #fi
 
+########## INOTIFY TOOLS
+
+AC_ARG_ENABLE(inotify,
+        AC_HELP_STRING([--enable-inotify], [compile with inotify support (default: yes)]),
+        [
+            INOTIFY_EN=$enableval
+            if test "x$enableval" = xno; then
+                INOTIFY_OK=disabled
+            else
+                INOTIFY_OK=yes
+            fi
+        ],
+        [
+            INOTIFY_OK=yes      
+        ]
+)
+
+if test "x$INOTIFY_OK" = xyes; then
+    if test -n "$INOTIFY_SEARCH_HEADERS"; then
+        AC_MSG_NOTICE([Will search for inotify header in $INOTIFY_SEARCH_HEADERS])
+        AC_CHECK_HEADER([$INOTIFY_SEARCH_HEADERS/sys/inotify.h],
+                [
+                            INOTIFY_CXXFLAGS="-I$INOTIFY_SEARCH_HEADERS"
+                            INOTIFY_OK=yes
+                ],
+                [
+                    AC_MSG_ERROR(inotify.h not found in requested location $INOTIFY_SEARCH_HEADERS)
+                ]
+        )
+    else
+        inotify_path= 
+        AC_CHECK_HEADER(sys/inotify.h, [], 
+            [
+                INOTIFY_OK=missing
+                for inotify_path in $SEARCH_DIR_HEADERS; do
+                    if test "x$ac_cv_header_sys_inotify_h" != xyes ; then
+                        unset ac_cv_header_sys_inotify_h
+                        AC_CHECK_HEADER($inotify_path/sys/inotify.h, 
+                            [
+                                INOTIFY_CXXFLAGS="-I$inotify_path"
+                                INOTIFY_OK=yes
+                            ]
+                        )
+                    fi
+                done
+            ])
+    fi
+fi
+
+if test "x$INOTIFY_EN" != xno; then
+dnl The check below was inspired by configure.ac from the inotify tools
+dnl package, see the "Acknowledgements" section in our README file for more 
+dnl information.
+    CXXFLAGS="$CXXFLAGS $INOTIFY_CXXFLAGS"
+    AC_MSG_CHECKING([whether sys/inotify.h works])
+    AC_RUN_IFELSE(
+        AC_LANG_PROGRAM([[#include <sys/inotify.h>]],
+                         [[return (-1 == inotify_init());]]
+                       ),
+                [
+                    AC_MSG_RESULT([yes]); 
+                    AC_DEFINE([SYS_INOTIFY_H_OK],[1],[sys/inotify.h exists and works correctly])],
+                [
+                    AC_MSG_RESULT([no, using own inotify headers])
+                    AC_MSG_CHECKING([whether inotify-nosys.h works])
+                    AC_RUN_IFELSE(
+                        AC_LANG_PROGRAM([[#include "src/inotify-nosys.h"]],
+                         [[return (-1 == inotify_init());]]
+                        ),
+                        [
+                            AC_MSG_RESULT([yes]);
+                            INOTIFY_OK=yes
+                        ],
+                        [
+                            AC_MSG_RESULT([no, disabling inotify support])
+                            INOTIFY_OK=missing
+                        ])
+
+                ])
+fi
+
+if test "x$INOTIFY_OK" = xyes; then
+    AC_DEFINE([HAVE_INOTIFY], [1], [inotify presence])
+    AC_SUBST(INOTIFY_CXXFLAGS)
+else
+    if test "x$INOTIFY_EN" = xyes; then
+        AC_MSG_ERROR(unable to configure inotify support)
+    fi
+fi
+
+LDFLAGS="$LDFLAGS_SAVE"
+CPPFLAGS="$CPPFLAGS_SAVE"
+CXXFLAGS="$CXXFLAGS_SAVE"
 
 AC_ARG_ENABLE(tombdebug,
         AC_HELP_STRING([--enable-tombdebug], [enable debug output for MediaTomb (default: no)]),
@@ -2247,6 +2348,7 @@ echo "mysql         : $MYSQL_OK"
 ##echo "postgresql    : $PGSQL_OK"
 echo "libjs         : $JS_OK"
 echo "libmagic      : $MAGIC_OK"
+echo "inotify       : $INOTIFY_OK"
 echo "libexif       : $EXIF_OK"
 echo "id3lib        : $ID3_OK"
 echo "taglib        : $TAGLIB_OK"

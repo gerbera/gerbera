@@ -143,6 +143,25 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
     storage->updateAutoscanPersistentList(TimedScanMode, config_timed_list);
     autoscan_timed = storage->getAutoscanList(TimedScanMode);
 
+#ifdef HAVE_INOTIFY
+    Ref<AutoscanList> config_inotify_list = cm->createAutoscanListFromNodeset(tmpEl, InotifyScanMode);
+
+    for (int i = 0; i < config_inotify_list->size(); i++)
+    {
+        Ref<AutoscanDirectory> dir = config_inotify_list->get(i);
+        if (dir != nil)
+        {
+            String path = dir->getLocation();
+            if (check_path(path, true))
+            {
+                dir->setObjectID(ensurePathExistence(path));
+            }
+        }
+    }
+
+    storage->updateAutoscanPersistentList(InotifyScanMode, config_inotify_list);
+    autoscan_inotify = storage->getAutoscanList(InotifyScanMode);
+#endif
     /* init filemagic */
 #ifdef HAVE_MAGIC
     if (! ignore_unknown_extensions)
@@ -212,6 +231,17 @@ void ContentManager::init()
     
     autoscan_timed->notifyAll(AS_TIMER_SUBSCRIBER_SINGLETON(this));
 
+#ifdef HAVE_INOTIFY
+    inotify = Ref<AutoscanInotify>(new AutoscanInotify());
+    /// \todo change this for 0.9.1 (we need a new autoscan architecture)
+    for (int i = 0; i < autoscan_inotify->size(); i++)
+    {
+        Ref<AutoscanDirectory> dir = autoscan_inotify->get(i);
+        if (dir != nil)
+            inotify->monitor(dir);
+    }
+    
+#endif
 }
 
 void ContentManager::timerNotify(int id)
@@ -226,10 +256,36 @@ void ContentManager::timerNotify(int id)
 
 void ContentManager::shutdown()
 {
+#ifdef HAVE_INOTIFY
+    inotify = nil;
+#endif
     log_debug("start\n");
     AUTOLOCK(mutex);
     log_debug("updating last_modified data for autoscan in database...\n");
     autoscan_timed->updateLMinDB();
+
+#ifdef HAVE_INOTIFY
+    for (int i = 0; i < autoscan_inotify->size(); i++)
+    {
+        Ref<AutoscanDirectory> dir = autoscan_inotify->get(i);
+        if (dir != nil)
+        {
+            try
+            {
+                dir->resetLMT();
+                dir->setCurrentLMT(check_path_ex(dir->getLocation(), true));
+                dir->updateLMT();
+            }
+            catch (Exception ex)
+            {
+                continue;
+            }
+        }
+    }
+    
+    autoscan_inotify->updateLMinDB();
+#endif
+
     shutdownFlag = true;
     log_debug("signalling...\n");
     signal();
@@ -339,7 +395,7 @@ int ContentManager::_addFile(String path, bool recursive, bool hidden, Ref<CMTas
     
     // never add the server configuration file
     if (ConfigManager::getInstance()->getConfigFilename() == path)
-        return INVALID_OBJECT_ID;;
+        return INVALID_OBJECT_ID;
 
     if (layout_enabled)
         initLayout();
@@ -522,7 +578,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
     DIR *dir = opendir(location.c_str());
     if (!dir)
     {
-        log_warning("Could not open %s: %s", location.c_str(), strerror(errno));
+        log_warning("Could not open %s: %s\n", location.c_str(), strerror(errno));
         if (adir->persistent())
         {
             removeObject(containerID, false);
@@ -633,7 +689,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
                 if (list != nil)
                     list->remove(objectID);
                 // add a task to rescan the directory that was found
-                rescanDirectory(objectID, scanID, scanMode, path + DIR_SEPARATOR);
+                rescanDirectory(objectID, scanID, scanMode, path + DIR_SEPARATOR, task->isCancellable());
             }
             else
             {
@@ -653,7 +709,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
                 }
                 
                 // add directory, recursive, async, hidden flag, low priority
-                addFileInternal(path, true, true, adir->getHidden(), true, thisTaskID);
+                addFileInternal(path, true, true, adir->getHidden(), true, thisTaskID, task->isCancellable());
             }
         }
     } // while
@@ -680,7 +736,6 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
 /* scans the given directory and adds everything recursively */
 void ContentManager::addRecursive(String path, bool hidden, Ref<CMTask> task, profiling_t *profiling)
 {
-
     if (hidden == false)
     {
         log_debug("Checking path %s\n", path.c_str());
@@ -1265,17 +1320,17 @@ void ContentManager::loadAccounting(bool async)
         _loadAccounting();
     }
 }
-int ContentManager::addFile(zmm::String path, bool recursive, bool async, bool hidden, bool lowPriority)
+int ContentManager::addFile(zmm::String path, bool recursive, bool async, bool hidden, bool lowPriority, bool cancellable)
 {
-    return addFileInternal(path, recursive, async, hidden, lowPriority);
+    return addFileInternal(path, recursive, async, hidden, lowPriority, 0, cancellable);
 }
 
 int ContentManager::addFileInternal(zmm::String path, bool recursive, bool async, 
-                                     bool hidden, bool lowPriority, unsigned int parentTaskID)
+                                     bool hidden, bool lowPriority, unsigned int parentTaskID, bool cancellable)
 {
     if (async)
     {
-        Ref<CMTask> task(new CMAddFileTask(path, recursive, hidden));
+        Ref<CMTask> task(new CMAddFileTask(path, recursive, hidden, cancellable));
         task->setDescription(_("Adding: ") + path);
         task->setParentID(parentTaskID);
         addTask(task, lowPriority);
@@ -1375,11 +1430,19 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
             int i;
 
             // make sure to remove possible child autoscan directories from the scanlist 
-            Ref<IntArray> rm_list = autoscan_timed->removeIfSubdir(path);
+            Ref<AutoscanList> rm_list = autoscan_timed->removeIfSubdir(path);
             for (i = 0; i < rm_list->size(); i++)
             {
-                Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), rm_list->get(i), true);
+                Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), rm_list->get(i)->getScanID(), true);
             }
+#ifdef HAVE_INOTIFY
+            rm_list = autoscan_inotify->removeIfSubdir(path);
+            for (i = 0; i < rm_list->size(); i++)
+            {
+                Ref<AutoscanDirectory> dir = rm_list->get(i);
+                inotify->unmonitor(dir);
+            }
+#endif
 
             AUTOLOCK(mutex);
             int qsize = taskQueue1->size();
@@ -1414,10 +1477,10 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
     }
 }
 
-void ContentManager::rescanDirectory(int objectID, int scanID, scan_mode_t scanMode, String descPath)
+void ContentManager::rescanDirectory(int objectID, int scanID, scan_mode_t scanMode, String descPath, bool cancellable)
 {
     // building container path for the description
-    Ref<CMTask> task(new CMRescanDirectoryTask(objectID, scanID, scanMode));
+    Ref<CMTask> task(new CMRescanDirectoryTask(objectID, scanID, scanMode, cancellable));
     Ref<AutoscanDirectory> dir = getAutoscanDirectory(scanID, scanMode);
     if (dir == nil)
         return;
@@ -1444,13 +1507,24 @@ Ref<AutoscanDirectory> ContentManager::getAutoscanDirectory(int scanID, scan_mod
         return autoscan_timed->get(scanID);
     }
 
+#if HAVE_INOTIFY
+    else if (scanMode == InotifyScanMode)
+    {
+        return autoscan_inotify->get(scanID);
+    }
+#endif
     return nil;
 }
 
 Ref<AutoscanDirectory> ContentManager::getAutoscanDirectory(String location)
 {
     // \todo change this when more scanmodes become available
-    return autoscan_timed->get(location);
+    Ref<AutoscanDirectory> dir = autoscan_timed->get(location);
+#if HAVE_INOTIFY
+    if (dir == nil)
+        dir = autoscan_inotify->get(location);
+#endif
+    return dir;
 }
 
 void ContentManager::removeAutoscanDirectory(int scanID, scan_mode_t scanMode)
@@ -1470,6 +1544,19 @@ void ContentManager::removeAutoscanDirectory(int scanID, scan_mode_t scanMode)
         Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), scanID, true);
 
     }
+#ifdef HAVE_INOTIFY
+    else if (scanMode == InotifyScanMode)
+    {
+        Ref<Storage> storage = Storage::getInstance();
+        Ref<AutoscanDirectory> adir = autoscan_inotify->get(scanID);
+        if (adir == nil)
+            throw _Exception(_("can not remove autoscan directory - was not an autoscan"));
+        autoscan_inotify->remove(scanID);
+        storage->removeAutoscanDirectory(adir->getStorageID());
+        SessionManager::getInstance()->containerChangedUI(adir->getObjectID());
+        inotify->unmonitor(adir);
+    }
+#endif
     
 }
 
@@ -1487,16 +1574,53 @@ void ContentManager::removeAutoscanDirectory(int objectID)
         SessionManager::getInstance()->containerChangedUI(objectID);
         Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), scanID, true);
     }
+#ifdef HAVE_INOTIFY
+    else if (adir->getScanMode() == InotifyScanMode)
+    {
+        autoscan_inotify->remove(adir->getLocation());
+        storage->removeAutoscanDirectoryByObjectID(objectID);
+        SessionManager::getInstance()->containerChangedUI(objectID);
+        inotify->unmonitor(adir);
+    }
+#endif
 }
 
 void ContentManager::removeAutoscanDirectory(String location)
 {
     /// \todo change this when more scanmodes become avaiable
     Ref<AutoscanDirectory> adir = autoscan_timed->get(location);
+#ifdef HAVE_INOTIFY
+    if (adir == nil)
+        adir = autoscan_inotify->get(location);
+#endif
     if (adir == nil)
         throw _Exception(_("can not remove autoscan directory - was not an autoscan"));
     
     removeAutoscanDirectory(adir->getObjectID());
+}
+
+void ContentManager::handlePeristentAutoscanRemove(int scanID, scan_mode_t scanMode)
+{
+    Ref<AutoscanDirectory> adir = getAutoscanDirectory(scanID, scanMode);
+    Ref<Storage> st = Storage::getInstance();
+    if (adir->persistent())
+    {
+        adir->setObjectID(INVALID_OBJECT_ID);
+        st->updateAutoscanDirectory(adir);
+    }
+    else
+    {
+        removeAutoscanDirectory(adir->getScanID(), adir->getScanMode());
+        st->removeAutoscanDirectory(adir->getStorageID());
+    }
+}
+
+void ContentManager::handlePersistentAutoscanRecreate(int scanID, scan_mode_t scanMode)
+{
+    Ref<AutoscanDirectory> adir = getAutoscanDirectory(scanID, scanMode);
+    int id = ensurePathExistence(adir->getLocation());
+    adir->setObjectID(id);
+    Storage::getInstance()->updateAutoscanDirectory(adir);
 }
 
 void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
@@ -1507,59 +1631,107 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
 
     // We will have to change this for other scan modes
     original = autoscan_timed->getByObjectID(dir->getObjectID());
+#ifdef HAVE_INOTIFY
+    if (original == nil)
+        original = autoscan_inotify->getByObjectID(dir->getObjectID());
+#endif
+
+    if (original != nil)
+        dir->setStorageID(original->getStorageID());
+
+    storage->checkOverlappingAutoscans(dir);
+
     // adding a new autoscan directory
     if (original == nil)
     {
+        Ref<CdsObject> obj = storage->loadObject(dir->getObjectID());
+        if (obj == nil
+                || ! IS_CDS_CONTAINER(obj->getObjectType())
+                || obj->isVirtual())
+            throw _Exception(_("tried to remove an illegal object (id) from the list of the autoscan directories"));
+
+        log_debug("location: %s\n", obj->getLocation().c_str());
+        if (!string_ok(obj->getLocation()))
+            throw _Exception(_("tried to add an illegal object as autoscan - no location information available!"));
+
+        dir->setLocation(obj->getLocation());
+        dir->resetLMT();
+        storage->addAutoscanDirectory(dir);
         if (dir->getScanMode() == TimedScanMode)
         {
-            Ref<CdsObject> obj = storage->loadObject(dir->getObjectID());
-            if (obj == nil
-                    || ! IS_CDS_CONTAINER(obj->getObjectType())
-                    || obj->isVirtual())
-                throw _Exception(_("tried to remove an illegal object (id) from the list of the autoscan directories"));
-            
-            log_debug("location: %s\n", obj->getLocation().c_str());
-            if (!string_ok(obj->getLocation()))
-                throw _Exception(_("tried to add an illegal object as autoscan - no location information available!"));
-
-            dir->setLocation(obj->getLocation());
-            dir->resetLMT();
-            storage->addAutoscanDirectory(dir);
             scanID = autoscan_timed->add(dir);
             timerNotify(scanID);
-            SessionManager::getInstance()->containerChangedUI(dir->getObjectID());
         }
+#ifdef HAVE_INOTIFY
+        else if (dir->getScanMode() == InotifyScanMode)
+        {
+            autoscan_inotify->add(dir);
+            inotify->monitor(dir);
+        }
+#endif
+        SessionManager::getInstance()->containerChangedUI(dir->getObjectID());
         return;
     }
 
-    Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), original->getScanID(), true);
+    if (original->getScanMode() == TimedScanMode)
+        Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), original->getScanID(), true);
+#ifdef HAVE_INOTIFY
+    else if (original->getScanMode() == InotifyScanMode)
+    {
+        inotify->unmonitor(original);
+    }
+#endif
+
+    Ref<AutoscanDirectory> copy(new AutoscanDirectory());
+    original->copyTo(copy);
 
     // changing from full scan to basic scan need to reset last modification time
-    if ((original->getScanLevel() == FullScanLevel) && (dir->getScanLevel() == BasicScanLevel))
+    if ((copy->getScanLevel() == FullScanLevel) && (dir->getScanLevel() == BasicScanLevel))
     {
-        original->setScanLevel(BasicScanLevel);
-        original->resetLMT();
+        copy->setScanLevel(BasicScanLevel);
+        copy->resetLMT();
     } 
-    else if (((original->getScanLevel() == FullScanLevel) &&
+    else if (((copy->getScanLevel() == FullScanLevel) &&
              (dir->getScanLevel() == FullScanLevel)) && 
-             (!original->getRecursive() && dir->getRecursive()))
+             (!copy->getRecursive() && dir->getRecursive()))
     {
-        original->resetLMT();
+        copy->resetLMT();
     }
 
-    original->setScanLevel(dir->getScanLevel());
-    original->setHidden(dir->getHidden());
-    original->setRecursive(dir->getRecursive());
-    original->setInterval(dir->getInterval());
+    copy->setScanLevel(dir->getScanLevel());
+    copy->setHidden(dir->getHidden());
+    copy->setRecursive(dir->getRecursive());
+    copy->setInterval(dir->getInterval());
+
+    if (copy->getScanMode() == TimedScanMode)
+    {
+        autoscan_timed->remove(copy->getScanID());
+    }
+#ifdef HAVE_INOTIFY
+    else if (copy->getScanMode() == InotifyScanMode)
+    {
+        autoscan_inotify->remove(copy->getScanID());
+    }
+#endif
+
+    copy->setScanMode(dir->getScanMode());
 
     if (dir->getScanMode() == TimedScanMode)
     {
-        autoscan_timed->remove(original->getScanID());
-        scanID = autoscan_timed->add(original);
+        scanID = autoscan_timed->add(copy);
         timerNotify(scanID);
     }
-    
-    storage->updateAutoscanDirectory(original);
+#ifdef HAVE_INOTIFY
+    else if (dir->getScanMode() == InotifyScanMode)
+    {
+        autoscan_inotify->add(copy);
+        inotify->monitor(copy);
+    }
+#endif
+
+    storage->updateAutoscanDirectory(copy);
+    if (original->getScanMode() != copy->getScanMode())
+        SessionManager::getInstance()->containerChangedUI(copy->getObjectID());
 }
 
 
@@ -1572,12 +1744,13 @@ CMTask::CMTask() : Object()
     parentTaskID = 0;
 }
 
-CMAddFileTask::CMAddFileTask(String path, bool recursive, bool hidden) : CMTask()
+CMAddFileTask::CMAddFileTask(String path, bool recursive, bool hidden, bool cancellable) : CMTask()
 {
     this->path = path;
     this->recursive = recursive;
     this->hidden = hidden;
     this->taskType = AddFile;
+    this->cancellable = cancellable;
 }
 
 String CMAddFileTask::getPath()
@@ -1604,12 +1777,13 @@ void CMRemoveObjectTask::run(Ref<ContentManager> cm)
     cm->_removeObject(objectID, all);
 }
 
-CMRescanDirectoryTask::CMRescanDirectoryTask(int objectID, int scanID, scan_mode_t scanMode) : CMTask()
+CMRescanDirectoryTask::CMRescanDirectoryTask(int objectID, int scanID, scan_mode_t scanMode, bool cancellable) : CMTask()
 {
     this->scanID = scanID;
     this->scanMode = scanMode;
     this->objectID = objectID;
     this->taskType = RescanDirectory;
+    this->cancellable = cancellable;
 }
 
 void CMRescanDirectoryTask::run(Ref<ContentManager> cm)
@@ -1624,7 +1798,8 @@ void CMRescanDirectoryTask::run(Ref<ContentManager> cm)
     if (dir->getTaskCount() == 0)
     {
         dir->updateLMT();
-        Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON_FROM_REF(cm), dir->getInterval(), dir->getScanID(), true);
+        if (dir->getScanMode() == TimedScanMode)
+            Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON_FROM_REF(cm), dir->getInterval(), dir->getScanID(), true);
     }
 }
 

@@ -645,6 +645,21 @@ void ConfigManager::validate(String serverhome)
     }
 #endif
 
+    tmpEl = getElement(_("/import/autoscan"));
+    Ref<AutoscanList> config_timed_list = createAutoscanListFromNodeset(tmpEl, TimedScanMode);
+    Ref<AutoscanList> config_inotify_list = createAutoscanListFromNodeset(tmpEl, InotifyScanMode);
+
+    for (int i = 0; i < config_inotify_list->size(); i++)
+    {
+        Ref<AutoscanDirectory> i_dir = config_inotify_list->get(i);
+        for (int j = 0; j < config_timed_list->size(); j++)
+        {
+            Ref<AutoscanDirectory> t_dir = config_timed_list->get(j);
+            if (i_dir->getLocation() == t_dir->getLocation())
+                throw _Exception(_("Error in config file: same path used in both inotify and timed scan modes"));
+        }
+    }
+
     log_info("Configuration check succeeded.\n");
 
     log_debug("Config file dump after validation: \n%s\n", root->print().c_str());
@@ -936,37 +951,62 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
             }
             
             temp = child->getAttribute(_("mode"));
-            if (!string_ok(temp) || (temp != "timed"))
+            if (!string_ok(temp) || ((temp != "timed") && (temp != "inotify")))
             {
                 log_warning("Skipping autoscan directory %s: mode attribute is missing or invalid\n", location.c_str());
                 continue;
             }
-            else
+            else if (temp == "timed")
             {
                 mode = TimedScanMode;
             }
+            else
+                mode = InotifyScanMode;
 
             if (mode != scanmode)
                 continue; // skip scan modes that we are not interested in (content manager needs one mode type per array)
-            
-            temp =  child->getAttribute(_("level"));
-            if (!string_ok(temp))
+
+            interval = 0;
+            if (mode == TimedScanMode)
             {
-                log_warning("Skipping autoscan directory %s: level attribute is missing or invalid\n", location.c_str());
-                continue;
-            }
-            else
-            {
-                if (temp == "basic")
-                    level = BasicScanLevel;
-                else if (temp == "full")
-                    level = FullScanLevel;
+                temp =  child->getAttribute(_("level"));
+                if (!string_ok(temp))
+                {
+                    log_warning("Skipping autoscan directory %s: level attribute is missing or invalid\n", location.c_str());
+                    continue;
+                }
                 else
                 {
-                    log_warning("Skipping autoscan directory %s: level attribute %s is invalid\n", location.c_str(), temp.c_str());
+                    if (temp == "basic")
+                        level = BasicScanLevel;
+                    else if (temp == "full")
+                        level = FullScanLevel;
+                    else
+                    {
+                        log_warning("Skipping autoscan directory %s: level attribute %s is invalid\n", location.c_str(), temp.c_str());
+                        continue;
+                    }
+                }
+
+                temp = child->getAttribute(_("interval"));
+                if (!string_ok(temp))
+                {
+                    log_warning("Skipping autoscan directory %s: interval attribute is required for timed mode\n", location.c_str());
+                    continue;
+                }
+
+                interval = temp.toUInt();
+
+                if (interval == 0)
+                {
+                    log_warning("Skipping autoscan directory %s: invalid interval attribute\n", location.c_str());
                     continue;
                 }
             }
+            // level is irrelevant for inotify scan, nevertheless we will set
+            // it to somthing valid
+            else
+                level = FullScanLevel;
 
             temp = child->getAttribute(_("recursive"));
             if (!string_ok(temp))

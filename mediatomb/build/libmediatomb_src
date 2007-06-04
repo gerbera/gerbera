@@ -3,6 +3,8 @@ libmediatomb_a_SOURCES = \
 ../src/action_request.h \
 ../src/autoscan.cc \
 ../src/autoscan.h \
+../src/autoscan_inotify.cc \
+../src/autoscan_inotify.h \
 ../src/cds_objects.cc \
 ../src/cds_objects.h \
 ../src/cds_resource.cc \
@@ -36,6 +38,7 @@ libmediatomb_a_SOURCES = \
 ../src/hash.h \
 ../src/io_handler.cc \
 ../src/io_handler.h \
+../src/inotify-nosys.h \
 ../src/jpeg_resolution.cc \
 ../src/layout/fallback_layout.cc \
 ../src/layout/fallback_layout.h \
@@ -63,6 +66,8 @@ libmediatomb_a_SOURCES = \
 ../src/metadata/libexif_handler.h \
 ../src/metadata/taglib_handler.cc \
 ../src/metadata/taglib_handler.h \
+../src/mt_inotify.h \
+../src/mt_inotify.cc \
 ../src/mxml/attribute.cc \
 ../src/mxml/attribute.h \
 ../src/mxml/context.cc \

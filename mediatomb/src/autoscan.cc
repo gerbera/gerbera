@@ -38,6 +38,15 @@
 
 using namespace zmm;
 
+AutoscanDirectory::AutoscanDirectory()
+{
+    taskCount = 0;
+    objectID = INVALID_OBJECT_ID;
+    storageID = INVALID_OBJECT_ID;
+    last_mod_previous_scan = 0;
+    last_mod_current_scan = 0;
+}
+
 AutoscanDirectory::AutoscanDirectory(String location, scan_mode_t mode,
         scan_level_t level, bool recursive, bool persistent,
         int id, unsigned int interval, bool hidden)
@@ -241,22 +250,27 @@ int AutoscanList::remove(String location)
     return INVALID_SCAN_ID;
 }
 
-Ref<IntArray> AutoscanList::removeIfSubdir(String parent, bool persistent)
+Ref<AutoscanList> AutoscanList::removeIfSubdir(String parent, bool persistent)
 {
     AUTOLOCK(mutex);
 
-    Ref<IntArray> rm_id_list(new IntArray());
+    Ref<AutoscanList> rm_id_list(new AutoscanList());
 
     for (int i = 0; i < list->size(); i++)
     {
         if (list->get(i) != nil && (list->get(i)->getLocation().startsWith(parent)))
         {
             Ref<AutoscanDirectory> dir = list->get(i);
+            if (dir == nil)
+                continue;
             if (dir->persistent() && (persistent == false))
             {
                 continue;
             }
-            rm_id_list->append(dir->getScanID());
+            Ref<AutoscanDirectory> copy(new AutoscanDirectory());
+            dir->copyTo(copy);
+            rm_id_list->add(copy);
+            copy->setScanID(dir->getScanID());
             dir->setScanID(INVALID_SCAN_ID);
             if (i == list->size()-1)
             {
@@ -350,6 +364,7 @@ String AutoscanDirectory::mapScanmode(scan_mode_t scanmode)
     switch (scanmode)
     {
         case TimedScanMode: scanmode_str = _("timed"); break;
+        case InotifyScanMode: scanmode_str = _("inotify"); break;
     }
     if (scanmode_str == nil)
         throw Exception(_("illegal scanmode given to mapScanmode(): ") + scanmode);
@@ -360,6 +375,8 @@ scan_mode_t AutoscanDirectory::remapScanmode(String scanmode)
 {
     if (scanmode == "timed")
         return TimedScanMode;
+    if (scanmode == "inotify")
+        return InotifyScanMode;
     else
         throw _Exception(_("illegal scanmode (") + scanmode + ") given to remapScanmode()");
 }
@@ -386,3 +403,43 @@ scan_level_t AutoscanDirectory::remapScanlevel(String scanlevel)
     else
         throw _Exception(_("illegal scanlevel (") + scanlevel + ") given to remapScanlevel()");
 }
+
+void AutoscanDirectory::copyTo(Ref<AutoscanDirectory> copy)
+{
+    copy->location = location;
+    copy->mode = mode;
+    copy->level = level;
+    copy->recursive = recursive;
+    copy->hidden = hidden;
+    copy->persistent_flag = persistent_flag;
+    copy->interval = interval;
+    copy->taskCount = taskCount;
+    copy->scanID = scanID;
+    copy->objectID = objectID;
+    copy->storageID = storageID;
+    copy->last_mod_previous_scan = last_mod_previous_scan;
+    copy->last_mod_current_scan = last_mod_current_scan;
+}
+
+/*
+bool AutoscanDirectory::equals(Ref<AutoscanDirectory> dir)
+{
+    if ((dir->location == location) &&
+         (dir->mode == mode) &&
+         (dir->level == level) &&
+         (dir->recursive == recursive) &&
+         (dir->hidden == hidden) &&
+         (dir->persistent_flag == persistent_flag) &&
+         (dir->interval == interval) &&
+         (dir->taskCount == taskCount) &&
+         (dir->scanID == scanID) &&
+         (dir->objectID == objectID) &&
+         (dir->storageID == storageID) &&
+         (dir->last_mod_previous_scan == last_mod_previous_scan) &&
+         (dir->last_mod_current_scan == last_mod_current_scan))
+        return true;
+    else
+        return false;
+
+}
+*/

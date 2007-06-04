@@ -42,6 +42,9 @@
     #include "scripting/playlist_parser_script.h"
 #endif
 #include "layout/layout.h"
+#ifdef HAVE_INOTIFY
+    #include "autoscan_inotify.h"
+#endif
 
 class ContentManager;
 
@@ -86,7 +89,8 @@ protected:
     bool recursive;
     bool hidden;
 public:
-    CMAddFileTask(zmm::String path, bool recursive=false, bool hidden=false);
+    CMAddFileTask(zmm::String path, bool recursive=false, bool hidden=false,
+                  bool cancellable = true);
     zmm::String getPath();
     virtual void run(zmm::Ref<ContentManager> cm);
 };
@@ -115,7 +119,7 @@ protected:
     int scanID;
     scan_mode_t scanMode;
 public:
-    CMRescanDirectoryTask(int objectID, int scanID, scan_mode_t scanMode);
+    CMRescanDirectoryTask(int objectID, int scanID, scan_mode_t scanMode, bool cancellable);
     virtual void run(zmm::Ref<ContentManager> cm);
 };
 
@@ -191,10 +195,10 @@ public:
     /// \param hidden true allows to import hidden files, false ignores them
     /// \param queue for immediate processing or in normal order
     /// \return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
-    int addFile(zmm::String path, bool recursive=true, bool async=true, bool hidden=false, bool lowPriority=false);
+    int addFile(zmm::String path, bool recursive=true, bool async=true, bool hidden=false, bool lowPriority=false, bool cancellable=true);
     int ensurePathExistence(zmm::String path);
     void removeObject(int objectID, bool async=true, bool all=false);
-//    void rescanDirectory(int objectID, scan_level_t scanLevel = BasicScan);   
+    void rescanDirectory(int objectID, int scanID, scan_mode_t scanMode, zmm::String descPath = nil, bool cancellable = true);
     
     /// \brief Updates an object in the database using the given parameters.
     /// \param objectID ID of the object to update
@@ -265,6 +269,11 @@ public:
     /// or add a new autoscan directory
     void setAutoscanDirectory(zmm::Ref<AutoscanDirectory> dir);
 
+    /// \brief handles the removal of a persistent autoscan directory
+    void handlePeristentAutoscanRemove(int scanID, scan_mode_t scanMode);
+
+    /// \brief handles the recreation of a persistent autoscan directory
+    void handlePersistentAutoscanRecreate(int scanID, scan_mode_t scanMode);
 
     /// \brief instructs ContentManager to reload scripting environment
     void reloadLayout();
@@ -286,18 +295,23 @@ protected:
     zmm::Ref<Dictionary> extension_mimetype_map;
     zmm::Ref<Dictionary> mimetype_upnpclass_map;
     zmm::Ref<AutoscanList> autoscan_timed;
-    
+#ifdef HAVE_INOTIFY
+    zmm::Ref<AutoscanList> autoscan_inotify;
+    zmm::Ref<AutoscanInotify> inotify;
+#endif
+   
     /* don't use these, use the above methods */
     void _loadAccounting();
 
-    int addFileInternal(zmm::String path, bool recursive=true, bool async=true, bool hidden=false, bool lowPriority=false, 
-                         unsigned int parentTaskID = 0);
+    int addFileInternal(zmm::String path, bool recursive=true,
+                        bool async=true, bool hidden=false,
+                        bool lowPriority=false, 
+                        unsigned int parentTaskID = 0,
+                        bool cancellable = true);
     int _addFile(zmm::String path, bool recursive=false, bool hidden=false, zmm::Ref<CMTask> task=nil);
     //void _addFile2(zmm::String path, bool recursive=0);
     void _removeObject(int objectID, bool all);
     
-    
-    void rescanDirectory(int objectID, int scanID, scan_mode_t scanMode, zmm::String descPath = nil); 
     void _rescanDirectory(int containerID, int scanID, scan_mode_t scanMode, scan_level_t scanLevel, zmm::Ref<CMTask> task=nil);
     /* for recursive addition */
     void addRecursive(zmm::String path, bool hidden, zmm::Ref<CMTask> task, profiling_t *profiling);

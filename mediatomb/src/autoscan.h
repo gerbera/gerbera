@@ -49,7 +49,8 @@ typedef enum scan_level_t
 ///\brief Scan mode - type of scan (timed, inotify, fam, etc.)
 typedef enum scan_mode_t
 {
-    TimedScanMode
+    TimedScanMode,
+    InotifyScanMode
 };
 
 class AutoscanDirectory;
@@ -91,7 +92,8 @@ public:
     /// \brief removes the AutoscanDirectory if it is a subdirectory of a given location.
     /// \param parent parent directory.
     /// \param persistent also remove persistent directories.
-    zmm::Ref<zmm::IntArray> removeIfSubdir(zmm::String parent, bool persistent = false);
+    /// \return AutoscanList of removed directories, where each directory object in the list is a copy and not the original reference.
+    zmm::Ref<AutoscanList> removeIfSubdir(zmm::String parent, bool persistent = false);
 
     /*
     /// \brief Add timer for each directory in the list.
@@ -129,6 +131,8 @@ protected:
 class AutoscanDirectory : public zmm::Object
 {
 public:
+    AutoscanDirectory();
+
     /// \brief Creates a new AutoscanDirectory object.
     /// \param location autoscan path
     /// \param mode scan mode
@@ -153,7 +157,7 @@ public:
 
     scan_mode_t getScanMode() { return mode; }
 
-//    void setScanMode(scan_mode_t mode) { this->mode = mode; }
+    void setScanMode(scan_mode_t mode) { this->mode = mode; }
 
     scan_level_t getScanLevel() { return level; }
 
@@ -217,7 +221,12 @@ public:
     void updateLMT() { last_mod_previous_scan = last_mod_current_scan; }
 
     void resetLMT() { last_mod_previous_scan = 0; last_mod_current_scan = 0; }
-    
+ 
+    /// \brief copies all properties to another object
+    void copyTo(zmm::Ref<AutoscanDirectory> copy);
+
+//    bool equals(Ref<AutoscanDirectory> dir);
+   
     /* helpers for autoscan stuff */
     static zmm::String mapScanmode(scan_mode_t scanmode);
     static scan_mode_t remapScanmode(zmm::String scanmode);
