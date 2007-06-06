@@ -524,6 +524,11 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js)
             item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), val);
         }
 
+        if (this->whoami() == S_PLAYLIST)
+        {
+            item->setTrackNumber(getIntProperty(js, _("playlistOrder"), 0));
+        }
+
         if (IS_CDS_ACTIVE_ITEM(objectType))
         {
             Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
