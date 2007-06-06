@@ -164,25 +164,32 @@ function addImage(obj)
     }
 }
 
-var arr = orig.mimetype.split('/');
-var mime = arr[0];
 
-// var obj = copyObject(orig);
+// main script part
+print("!!!!!!!!!!"+orig.mimetype+getPlaylistType(orig.mimetype));
 
-var obj = orig; 
-obj.refID = orig.id;
-
-if ((mime == 'audio') || (orig.mimetype == 'application/ogg'))
+if (getPlaylistType(orig.mimetype) == '')
 {
-    addAudio(obj);
-}
-
-if (mime == 'video')
-{
-    addVideo(obj);
-}
-
-if (mime == 'image')
-{
-    addImage(obj);
+    var arr = orig.mimetype.split('/');
+    var mime = arr[0];
+    
+    // var obj = copyObject(orig);
+    
+    var obj = orig; 
+    obj.refID = orig.id;
+    
+    if ((mime == 'audio') || (orig.mimetype == 'application/ogg'))
+    {
+        addAudio(obj);
+    }
+    
+    if (mime == 'video')
+    {
+        addVideo(obj);
+    }
+    
+    if (mime == 'image')
+    {
+        addImage(obj);
+    }
 }

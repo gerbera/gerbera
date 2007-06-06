@@ -48,3 +48,12 @@ function getYear(date)
     else
         return date;
 }
+
+function getPlaylistType(mimetype)
+{
+    if (mimetype == 'audio/x-mpegurl')
+        return 'm3u';
+    if (mimetype == 'audio/x-scpls')
+        return 'pls';
+    return '';
+}

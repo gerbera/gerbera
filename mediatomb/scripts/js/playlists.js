@@ -26,6 +26,8 @@
     $Id$
 */
 
+var playlistOrder = 1;
+
 function addPlaylistItem(location, title, playlistChain)
 {
     if (location.match(/^http/))
@@ -38,6 +40,7 @@ function addPlaylistItem(location, title, playlistChain)
         exturl.protocol = 'http-get';
         exturl.upnpclass = UPNP_CLASS_ITEM_MUSIC_TRACK;
         exturl.description = "Song from " + playlist.title;
+        exturl.playlistOrder = playlistOrder++;
         addCdsObject(exturl, playlistChain,  UPNP_CLASS_PLAYLIST_CONTAINER);
     }
     else
@@ -54,19 +57,18 @@ function addPlaylistItem(location, title, playlistChain)
                 item.title = location;
         }
         item.objectType = OBJECT_TYPE_ITEM;
+        item.playlistOrder = playlistOrder++;
         addCdsObject(item, playlistChain,  UPNP_CLASS_PLAYLIST_CONTAINER);
     }
 }
 
 print("Processing playlist: " + playlist.location);
 
-var type = '';
-if (playlist.mimetype == 'audio/x-mpegurl')
-    type = 'm3u';
-if (playlist.mimetype == 'audio/x-scpls')
-    type = 'pls';
+// the function getPlaylistType is defined in common.js
+var type = getPlaylistType(playlist.mimetype);
 
-var playlistChain = createContainerChain(new Array('Audio', 'Playlists', playlist.title));
+// the function createContainerChain is defined in common.js
+var playlistChain = createContainerChain(new Array('Playlists', playlist.title));
 
 if (type == '')
 {
