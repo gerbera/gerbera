@@ -73,7 +73,8 @@ void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
                             _("invalid browse flag: ") + BrowseFlag);
 
     Ref<CdsObject> parent = storage->loadObject(objectID);
-    if (parent->getClass() == UPNP_DEFAULT_CLASS_MUSIC_ALBUM)
+    if ((parent->getClass() == UPNP_DEFAULT_CLASS_MUSIC_ALBUM) ||
+        (parent->getClass() == UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER))
         flag |= BROWSE_TRACK_SORT;
 
     Ref<BrowseParam> param(new BrowseParam(objectID, flag));

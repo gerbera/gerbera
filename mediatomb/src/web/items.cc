@@ -75,7 +75,8 @@ void web::items::process()
     Ref<BrowseParam> param(new BrowseParam(parentID, BROWSE_DIRECT_CHILDREN | BROWSE_ITEMS));
     param->setRange(start, count);
 
-    if (obj->getClass() == UPNP_DEFAULT_CLASS_MUSIC_ALBUM)
+    if ((obj->getClass() == UPNP_DEFAULT_CLASS_MUSIC_ALBUM) ||
+        (obj->getClass() == UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER))
         param->setFlag(BROWSE_TRACK_SORT);
     
     Ref<Array<CdsObject> > arr;
