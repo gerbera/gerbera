@@ -401,14 +401,17 @@ function updateItems(ajaxRequest)
             editLink = true;
             autoscanLink = true;
         }
-        else if (lastNodeDb !== 'd0')
+        else
         {
             if (isVirtual)
             {
                 addLink = true;
                 editLink = true;
                 if (! isProtected)
+                {
+                    removeThisLink = true;
                     removeAllLink = true;
+                }
             }
             else
             if (! isProtected)

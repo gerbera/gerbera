@@ -166,7 +166,6 @@ function addImage(obj)
 
 
 // main script part
-print("!!!!!!!!!!"+orig.mimetype+getPlaylistType(orig.mimetype));
 
 if (getPlaylistType(orig.mimetype) == '')
 {

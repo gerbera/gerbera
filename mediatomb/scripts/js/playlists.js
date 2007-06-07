@@ -30,7 +30,7 @@ var playlistOrder = 1;
 
 function addPlaylistItem(location, title, playlistChain)
 {
-    if (location.match(/^http/))
+    if (location.match(/^.*:\/\//))
     {
         var exturl = new Object();
         exturl.mimetype = 'audio/mpeg';
@@ -45,6 +45,8 @@ function addPlaylistItem(location, title, playlistChain)
     }
     else
     {
+        if (location.substr(0,1) != '/')
+            location = playlistLocation + location;
         var item  = new Object();
         item.location = location;
         if (title)
@@ -63,6 +65,8 @@ function addPlaylistItem(location, title, playlistChain)
 }
 
 print("Processing playlist: " + playlist.location);
+
+var playlistLocation = playlist.location.substring(0, playlist.location.lastIndexOf('/') + 1);
 
 // the function getPlaylistType is defined in common.js
 var type = getPlaylistType(playlist.mimetype);
