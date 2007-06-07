@@ -116,11 +116,13 @@ ConfigManager::ConfigManager() : Singleton<ConfigManager>()
 #ifdef LOG_TOMBDEBUG
 //    dumpOptions();
 #endif
+    // now the XML is no longer needed we can destroy it
+    root = nil;
 }
 
 String ConfigManager::construct_path(String path)
 {
-    String home = getOption(_("/server/home"));
+    String home = getOption(CFG_SERVER_HOME);
 
     if (path.charAt(0) == '/')
         return path;
@@ -318,7 +320,10 @@ void ConfigManager::validate(String serverhome)
     // now go through the mandatory parameters, if something is missing
     // we will not start the server
 
+    /// \todo clean up the construct path / prepare path mess
     getOption(_("/server/home"), serverhome);
+    NEW_OPTION(getOption(_("/server/home")));
+    SET_OPTION(CFG_SERVER_HOME);
     prepare_path(_("/server/home"), true);
     NEW_OPTION(getOption(_("/server/home")));
     SET_OPTION(CFG_SERVER_HOME);
@@ -1074,8 +1079,7 @@ void ConfigManager::writeBookmark(String ip, String port)
     String  data; 
     int     size; 
   
-    String value = getOption(_("/server/ui/attribute::enabled"));
-    if (value != "yes")
+    if (!getBoolOption(CFG_SERVER_UI_ENABLED))
     {
         data = http_redirect_to(ip, port, _("disabled.html"));
     }
@@ -1084,7 +1088,7 @@ void ConfigManager::writeBookmark(String ip, String port)
         data = http_redirect_to(ip, port);
     }
 
-    filename = getOption(_("/server/bookmark"));
+    filename = getOption(CFG_SERVER_BOOKMARK_FILE);
     path = construct_path(filename);
     
         
