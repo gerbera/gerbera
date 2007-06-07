@@ -199,7 +199,7 @@ void Sqlite3Storage::threadProc()
     
     Ref<ConfigManager> config = ConfigManager::getInstance();
     
-    String dbFilePath = config->getOption(_("/server/storage/database-file"));
+    String dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
     
     int res = sqlite3_open(dbFilePath.c_str(), &db);
     if(res != SQLITE_OK)

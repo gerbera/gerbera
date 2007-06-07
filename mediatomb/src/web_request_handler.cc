@@ -118,8 +118,7 @@ Ref<IOHandler> WebRequestHandler::open(Ref<Dictionary> params, IN enum UpnpOpenF
     // processing page, creating output
     try
     {
-        String uiEnabledStr = ConfigManager::getInstance()->getOption(_("/server/ui/attribute::enabled"));
-        if (uiEnabledStr != "yes")
+        if(!ConfigManager::getInstance()->getBoolOption(CFG_SERVER_UI_ENABLED))
         {
             root->addAttribute(_("ui_disabled"), _("1"));
             log_warning("The UI is disabled in the configuration file. See README.\n");

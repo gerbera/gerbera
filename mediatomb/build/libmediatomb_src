@@ -14,6 +14,7 @@ libmediatomb_a_SOURCES = \
 ../src/common.h \
 ../src/config_manager.cc \
 ../src/config_manager.h \
+../src/config_options.h \
 ../src/content_manager.cc \
 ../src/content_manager.h \
 ../src/destroyer.cc \

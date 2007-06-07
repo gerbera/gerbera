@@ -475,7 +475,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
                 // add file/directory recursively and asynchronously
                 log_info("Adding %s\n", String(addFile->get(i)).c_str());
                 bool hidden = false;
-                String h = ConfigManager::getInstance()->getOption(_("/import/attribute::hidden-files"));
+                String h = ConfigManager::getInstance()->getOption(CFG_IMPORT_HIDDEN_FILES);
                 log_debug("Got %s for hidden value from config manager!\n", h.c_str());
                 if (h == "yes")
                     hidden = true;

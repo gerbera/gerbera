@@ -57,7 +57,7 @@ js_print(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
     for (i = 0; i < argc; i++) {
         str = JS_ValueToString(cx, argv[i]);
         if (!str)
-            return JS_FALSE;
+            return JS_TRUE;
         log_js("%s\n", JS_GetStringBytes(str));
     }
     return JS_TRUE;
@@ -76,9 +76,9 @@ js_copyObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval
     {
         arg = argv[0];
         if (!JSVAL_IS_OBJECT(arg))
-            return JS_FALSE;
+            return JS_TRUE;
         if (!JS_ValueToObject(cx, arg, &js_cds_obj))
-            return JS_FALSE;
+            return JS_TRUE;
 
         Ref<CdsObject> cds_obj = self->jsObject2cdsObject(js_cds_obj);
         js_cds_clone_obj = JS_NewObject(cx, NULL, NULL, NULL);
@@ -93,7 +93,7 @@ js_copyObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval
     {
         e.printStackTrace();
     }
-    return JS_FALSE;
+    return JS_TRUE;
 }
 
 JSBool
@@ -120,9 +120,9 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
 
         arg = argv[0];
         if (!JSVAL_IS_OBJECT(arg))
-            return JS_FALSE;
+            return JS_TRUE;
         if (!JS_ValueToObject(cx, arg, &js_cds_obj))
-            return JS_FALSE;
+            return JS_TRUE;
 
         str = JS_ValueToString(cx, argv[1]);
         if (!str)
@@ -146,16 +146,16 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         if (js_orig_obj == NULL)
         {
             log_debug("Could not retrieve orig/playlist object\n");
-            return JS_FALSE;
+            return JS_TRUE;
         }
 
         orig_object = self->jsObject2cdsObject(js_orig_obj);
         if (orig_object == nil)
-            return JS_FALSE;
+            return JS_TRUE;
 
         Ref<CdsObject> cds_obj = self->jsObject2cdsObject(js_cds_obj);
         if (cds_obj == nil)
-            return JS_FALSE;
+            return JS_TRUE;
 
         Ref<ContentManager> cm = ContentManager::getInstance();
 
@@ -163,7 +163,7 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
 
         if ((self->whoami() == S_PLAYLIST) &&
             (ConfigManager::getInstance()->
-             getOption(_("/import/scripting/playlist-script/attribute::create-link")) == "yes"))
+             getBoolOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS)))
             id = cm->addContainerChain(path, containerclass, 
                     orig_object->getID());
         else
@@ -181,7 +181,7 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
             {
                 int pcd_id = cm->addFile(cds_obj->getLocation(), false, false, true);
                 if (pcd_id == INVALID_OBJECT_ID)
-                    return JS_FALSE;
+                    return JS_TRUE;
 
                 cds_obj->setRefID(pcd_id);
             }
@@ -195,7 +195,7 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         {
             if ((self->whoami() == S_PLAYLIST) &&
             (ConfigManager::getInstance()->
-             getOption(_("/import/scripting/playlist-script/attribute::create-link")) == "yes"))
+             getOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS) == "yes"))
             {
                 cds_obj->setFlag(OBJECT_FLAG_PLAYLIST_REF);
                 cds_obj->setRefID(orig_object->getID());
@@ -210,7 +210,7 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
 
         JSString *str2 = JS_NewStringCopyN(cx, tmp.c_str(), tmp.length());
         if (!str2)
-            return JS_FALSE;
+            return JS_TRUE;
         *rval = STRING_TO_JSVAL(str2);
 
         return JS_TRUE;
@@ -219,7 +219,7 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
     {
         e.printStackTrace();
     }
-    return JS_FALSE;
+    return JS_TRUE;
 }
 
 } // extern "C"

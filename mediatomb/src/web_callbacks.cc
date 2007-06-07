@@ -108,7 +108,7 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
     else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" +
                              CONTENT_SERVE_HANDLER))
     {
-        if (string_ok(ConfigManager::getInstance()->getOption(_("/server/servedir"))))
+        if (string_ok(ConfigManager::getInstance()->getOption(CFG_SERVER_SERVEDIR)))
             ret = new ServeRequestHandler();
         else
             throw _Exception(_("Serving directories is not enabled in configuration"));

@@ -80,7 +80,7 @@ web::auth::auth() : WebRequestHandler()
 }
 void web::auth::process()
 {
-    int timeout = ConfigManager::getInstance()->getIntOption(_("/server/ui/accounts/attribute::session-timeout"));
+    int timeout = ConfigManager::getInstance()->getIntOption(CFG_SERVER_UI_SESSION_TIMEOUT);
    
     timeout = timeout * 60;
     
@@ -89,9 +89,25 @@ void web::auth::process()
         Ref<ConfigManager> cm = ConfigManager::getInstance();
         Ref<Element> config (new Element(_("config")));
         root->appendChild(config);
-        config->addAttribute(_("poll-when-idle"), cm->getOption(_("/server/ui/attribute::poll-when-idle")));
-        config->addAttribute(_("poll-interval"), cm->getOption(_("/server/ui/attribute::poll-interval")));
-        config->appendChild(cm->getElement(_("/server/ui/items-per-page")));
+        config->addAttribute(_("poll-when-idle"), 
+            (cm->getBoolOption(
+                          CFG_SERVER_UI_POLL_WHEN_IDLE) ? _("yes") : _("no")));
+        config->addAttribute(_("poll-interval"), 
+            String::from(cm->getIntOption(CFG_SERVER_UI_POLL_INTERVAL)));
+/// CREATE XML FRAGMENT FOR ITEMS PER PAGE
+        Ref<Element> ipp (new Element(_("items-per-page")));
+        ipp->addAttribute(_("default"), 
+          String::from(cm->getIntOption(CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE)));
+    
+        Ref<Array<StringBase> > menu_opts = 
+            cm->getStringArrayOption(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
+
+        for (int i = 0; i < menu_opts->size(); i++)
+        {
+            ipp->appendTextChild(_("option"), menu_opts->get(i));
+        }
+
+        config->appendChild(ipp);
 #ifdef HAVE_INOTIFYTOOLS
         config->addAttribute(_("have-inotify"), _("1"));
 #else

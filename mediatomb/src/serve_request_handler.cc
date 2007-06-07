@@ -79,7 +79,9 @@ void ServeRequestHandler::get_info(IN const char *filename, OUT struct File_Info
         throw _Exception(_("There is something wrong with the link ") + url_path);
     }
 
-    String path = ConfigManager::getInstance()->getOption(_("/server/servedir")) + url_path.substring(len, url_path.length()) + _("/") + parameters;
+    String path = ConfigManager::getInstance()->getOption(CFG_SERVER_SERVEDIR) 
+                    + url_path.substring(len, url_path.length()) + 
+                    _("/") + parameters;
    
     log_debug("Constructed new path: %s\n", path.c_str());
     
@@ -166,7 +168,9 @@ Ref<IOHandler> ServeRequestHandler::open(IN const char *filename, OUT struct Fil
                         url_path);
     }
 
-    String path = ConfigManager::getInstance()->getOption(_("/server/servedir")) + url_path.substring(len, url_path.length()) + _("/") + parameters;
+    String path = ConfigManager::getInstance()->getOption(CFG_SERVER_SERVEDIR) 
+                  + url_path.substring(len, url_path.length()) + 
+                    _("/") + parameters;
 
     log_debug("Constructed new path: %s\n", path.c_str());
     ret = stat(path.c_str(), &statbuf);

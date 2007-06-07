@@ -79,7 +79,7 @@ PlaylistParserScript::PlaylistParserScript(Ref<Runtime> runtime) : Script(runtim
     
     defineFunction(_("readln"), js_readln, 0);
     
-    String scriptPath = ConfigManager::getInstance()->getOption(_("/import/scripting/playlist-script")); 
+    String scriptPath = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT); 
     load(scriptPath);
 }
 

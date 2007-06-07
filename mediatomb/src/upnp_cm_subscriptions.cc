@@ -68,7 +68,7 @@ void ConnectionManagerService::process_subscription_request(zmm::Ref<Subscriptio
     }
 
     UpnpAcceptSubscriptionExt(Server::getInstance()->getDeviceHandle(),
-            ConfigManager::getInstance()->getOption(_("/server/udn")).c_str(),
+            ConfigManager::getInstance()->getOption(CFG_SERVER_UDN).c_str(),
             serviceID.c_str(), event, request->getSubscriptionID().c_str());
 
     ixmlDocument_free(event);
@@ -96,7 +96,7 @@ void ConnectionManagerService::subscription_update(String sourceProtocol_CSV)
     }
 
     UpnpNotifyExt(Server::getInstance()->getDeviceHandle(),
-            ConfigManager::getInstance()->getOption(_("/server/udn")).c_str(),
+            ConfigManager::getInstance()->getOption(CFG_SERVER_UDN).c_str(),
             serviceID.c_str(), event);
 
     ixmlDocument_free(event);

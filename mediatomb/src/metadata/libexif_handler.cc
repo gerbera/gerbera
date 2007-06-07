@@ -385,9 +385,7 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
     }
 
     Ref<ConfigManager> cm = ConfigManager::getInstance();
-    Ref<Element> e = cm->getElement(_("/import/library-options/libexif/auxdata"));
-    aux = cm->createArrayFromNodeset(e, _("add-data"), _("tag"));
-
+    aux = cm->getStringArrayOption(CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST);
     for (int i = 0; i < EXIF_IFD_COUNT; i++)
     {
         if (ed->ifd[i])

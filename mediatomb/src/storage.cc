@@ -75,7 +75,7 @@ Ref<Storage> Storage::createInstance()
     Ref<Storage> storage;
 
     Ref<ConfigManager> config = ConfigManager::getInstance();
-    type = config->getOption(_("/server/storage/attribute::driver"));
+    type = config->getOption(CFG_SERVER_STORAGE_DRIVER);
 
     do
     {

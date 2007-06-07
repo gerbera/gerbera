@@ -200,10 +200,17 @@ void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj)
     clone->setVirtual(1);
 
     String mimetype = RefCast(obj, CdsItem)->getMimeType();
+    Ref<Dictionary> mappings = 
+        ConfigManager::getInstance()->getDictionaryOption(
+                            CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    String content_type = mappings->get(mimetype);
+
     if (mimetype.startsWith(_("video")))
         addVideo(clone);
     else if (mimetype.startsWith(_("image")))
         addImage(clone);
-    else if (mimetype.startsWith(_("audio")) || (mimetype == "application/ogg"))
+    else if ((mimetype.startsWith(_("audio")) || 
+             (content_type == CONTENT_TYPE_OGG)) &&
+             (content_type != CONTENT_TYPE_PLAYLIST))
         addAudio(clone);
 }

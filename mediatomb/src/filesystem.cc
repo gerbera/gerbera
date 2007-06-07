@@ -71,6 +71,7 @@ Filesystem::Filesystem() : Object()
 {
     includeRules = Ref<Array<RExp> >(new Array<RExp>());
     Ref<ConfigManager> cm = ConfigManager::getInstance();
+/*    
     Ref<Element> rules = cm->getElement(_("filter"));
     if (rules == nil)
         return;
@@ -91,6 +92,7 @@ Filesystem::Filesystem() : Object()
             e.printStackTrace();
         }
     }
+    */
 }
 
 Ref<Array<FsObject> > Filesystem::readDirectory(String path, int mask,

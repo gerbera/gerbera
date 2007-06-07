@@ -90,8 +90,8 @@ void Server::init()
 
     Ref<ConfigManager> config = ConfigManager::getInstance();
     
-    serverUDN = config->getOption(_("/server/udn"));
-    alive_advertisement = config->getIntOption(_("/server/alive"));
+    serverUDN = config->getOption(CFG_SERVER_UDN);
+    alive_advertisement = config->getIntOption(CFG_SERVER_ALIVE_INTERVAL);
 }
 
 void Server::upnp_init(String iface, int port)
@@ -104,7 +104,7 @@ void Server::upnp_init(String iface, int port)
     Ref<ConfigManager> config = ConfigManager::getInstance();
 
     if (!string_ok(iface))
-        iface = config->getOption(_("/server/interface"));
+        iface = config->getOption(CFG_SERVER_NETWORK_INTERFACE);
 
     ip = interfaceToIP(iface);
 
@@ -116,7 +116,7 @@ void Server::upnp_init(String iface, int port)
 
     if (port < 0)
     {
-        port = config->getIntOption(_("/server/port"));
+        port = config->getIntOption(CFG_SERVER_PORT);
     }
 
     if (port < 0)
@@ -151,9 +151,8 @@ void Server::upnp_init(String iface, int port)
 
     virtual_url = _("http://") + ip + ":" + port + "/" + virtual_directory;
 
-    /// \todo who should construct absolute paths??? config_manage or the modules?
     // next set webroot directory
-    String web_root = config->getOption(_("/server/webroot"));
+    String web_root = config->getOption(CFG_SERVER_WEBROOT);
 
     if (!string_ok(web_root))
     {
@@ -168,10 +167,8 @@ void Server::upnp_init(String iface, int port)
 
     log_debug("webroot: %s\n", web_root.c_str()); 
 
-    Ref<Element> headers = config->getElement(_("/server/custom-http-headers"));
-    if (headers != nil)
-    {
-        Ref<Array<StringBase> > arr = config->createArrayFromNodeset(headers, _("add"), _("header"));
+        Ref<Array<StringBase> > arr = config->getStringArrayOption(CFG_SERVER_CUSTOM_HTTP_HEADERS);
+
         if (arr != nil)
         {
             String tmp;
@@ -189,7 +186,6 @@ void Server::upnp_init(String iface, int port)
                 }
             }
         }
-    }
 
     ret = UpnpAddVirtualDir(virtual_directory.c_str());
     if (ret != UPNP_E_SUCCESS)
@@ -203,7 +199,7 @@ void Server::upnp_init(String iface, int port)
         throw _UpnpException(ret, _("upnp_init: UpnpSetVirtualDirCallbacks failed"));
     }
 
-    String presentationURL =  config->getOption(_("/server/presentationURL"));
+    String presentationURL =  config->getOption(CFG_SERVER_PRESENTATION_URL);
     if (!string_ok(presentationURL))
     {
         presentationURL = _("http://") + ip + ":" + port + "/";
@@ -211,7 +207,7 @@ void Server::upnp_init(String iface, int port)
     else
     {
         String appendto = 
-           config->getOption(_("/server/presentationURL/attribute::append-to"));
+           config->getOption(CFG_SERVER_APPEND_PRESENTATION_URL_TO);
         if (appendto == "ip")
         {
             presentationURL = _("http://") + ip + ":" + presentationURL;

@@ -283,7 +283,7 @@ Script::Script(Ref<Runtime> runtime) : Object()
     
     defineFunctions(js_global_functions);
     
-    String common_scr_path = ConfigManager::getInstance()->getOption(_("/import/scripting/common-script"));
+    String common_scr_path = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT);
     
     if (!string_ok(common_scr_path))
         log_js("Common script disabled in configuration\n");

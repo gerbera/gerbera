@@ -344,9 +344,7 @@ void ExtractorHandler::fillMetadata(Ref<CdsItem> item)
         addResourceField((resource_attributes_t)i, keywords, item, sc);
 
     Ref<ConfigManager> cm = ConfigManager::getInstance();
-    Ref<Element> e = cm->getElement(_("/import/library-options/libextractor/auxdata"));
-    aux = cm->createArrayFromNodeset(e, _("add"), _("tag"));
-
+    aux = cm->getStringArrayOption(CFG_IMPORT_LIBOPTS_EXTRACTOR_AUXDATA_TAGS_LIST);
     if (aux != nil)
     {
         String value;

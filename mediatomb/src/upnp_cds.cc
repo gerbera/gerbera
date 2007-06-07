@@ -49,7 +49,7 @@ ContentDirectoryService::ContentDirectoryService() : Singleton<ContentDirectoryS
         throw _Exception(_("serviceType or serviceID not set!"));
     systemUpdateID = 0;
 
-    stringLimit = ConfigManager::getInstance()->getIntOption(_("/server/upnp-string-limit"));
+    stringLimit = ConfigManager::getInstance()->getIntOption(CFG_SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT);
 }
 
 ContentDirectoryService::~ContentDirectoryService()

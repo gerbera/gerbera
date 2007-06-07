@@ -54,7 +54,8 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
 #ifdef EXTEND_PROTOCOLINFO
     String prot;
     Ref<ConfigManager> config = ConfigManager::getInstance();
-    Ref<Dictionary> mappings = config->getMimeToContentTypeMappings();
+    Ref<Dictionary> mappings = config->getDictionaryOption(
+                            CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     String content_type = mappings->get(item->getMimeType());
 #endif
 
@@ -96,7 +97,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
             }
         }
 #ifdef EXTEND_PROTOCOLINFO
-            if (config->getOption(_("/server/protocolInfo/attribute::extend")) == "yes")
+            if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO))
             {
                 prot = res_attrs->get(MetadataHandler::getResAttrName(R_PROTOCOLINFO));
           

@@ -104,11 +104,11 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
     
     // loading extension - mimetype map  
     // we can always be sure to get a valid element because everything was prepared by the config manager
-    tmpEl = cm->getElement(_("/import/mappings/extension-mimetype"));
-    extension_mimetype_map = cm->createDictionaryFromNodeset(tmpEl, _("map"), _("from"), _("to"));
+    extension_mimetype_map = 
+        cm->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
 
-    String optIgnoreUnknown = cm->getOption(
-        _("/import/mappings/extension-mimetype/attribute::ignore-unknown"));
+    String optIgnoreUnknown = 
+                  cm->getOption(CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS);
     if (optIgnoreUnknown != nil && optIgnoreUnknown == "yes")
         ignore_unknown_extensions = 1;
 
@@ -119,12 +119,11 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
         ignore_unknown_extensions = 0;
     }
    
-    // loading mimetype - upnpclass map
-    tmpEl = cm->getElement(_("/import/mappings/mimetype-upnpclass"));
-    mimetype_upnpclass_map = cm->createDictionaryFromNodeset(tmpEl, _("map"), _("from"), _("to"));
+    mimetype_upnpclass_map = 
+       cm->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
    
-    tmpEl = cm->getElement(_("/import/autoscan"));
-    Ref<AutoscanList> config_timed_list = cm->createAutoscanListFromNodeset(tmpEl, TimedScanMode);
+    Ref<AutoscanList> config_timed_list = 
+        cm->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
 
     for (int i = 0; i < config_timed_list->size(); i++)
     {
@@ -144,7 +143,8 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
     autoscan_timed = storage->getAutoscanList(TimedScanMode);
 
 #ifdef HAVE_INOTIFY
-    Ref<AutoscanList> config_inotify_list = cm->createAutoscanListFromNodeset(tmpEl, InotifyScanMode);
+    Ref<AutoscanList> config_inotify_list = 
+        cm->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
 
     for (int i = 0; i < config_inotify_list->size(); i++)
     {
@@ -173,7 +173,7 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
         }
         else
         {
-            String magicFile = cm->getOption(_("/import/magic-file"));
+            String magicFile = cm->getOption(CFG_IMPORT_MAGIC_FILE);
             if (! string_ok(magicFile))
                 magicFile = nil;
             if (magic_load(ms, (magicFile == nil) ? NULL : magicFile.c_str()) == -1)
@@ -186,7 +186,8 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
     }
 #endif // HAVE_MAGIC
 
-    String layout_type = cm->getOption(_("/import/scripting/virtual-layout/attribute::type"));
+    String layout_type = 
+                       cm->getOption(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
     if ((layout_type == "builtin") || (layout_type == "js"))
         layout_enabled = true;
 }
@@ -428,7 +429,7 @@ int ContentManager::_addFile(String path, bool recursive, bool hidden, Ref<CMTas
                     if (playlist_parser_script != nil)
                     {
                         Ref<Dictionary> mappings = 
-                            ConfigManager::getInstance()->getMimeToContentTypeMappings();
+                            ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
                         String mimetype = RefCast(obj, CdsItem)->getMimeType();
                         String content_type = mappings->get(mimetype);
                         if (content_type == CONTENT_TYPE_PLAYLIST)
@@ -819,7 +820,7 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<CMTask> task, pr
 #ifdef HAVE_JS
                             if (playlist_parser_script != nil)
                             {
-                                Ref<Dictionary> mappings = ConfigManager::getInstance()->getMimeToContentTypeMappings();
+                                Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
                                 String mimetype = RefCast(obj, CdsItem)->getMimeType();
                                 String content_type = mappings->get(mimetype);
                                 if (content_type == CONTENT_TYPE_PLAYLIST)
@@ -1196,7 +1197,8 @@ void ContentManager::initLayout()
         if (layout == nil)
             try
             {
-                String layout_type = ConfigManager::getInstance()->getOption(_("/import/scripting/virtual-layout/attribute::type"));
+                String layout_type = 
+                    ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
                 if (layout_type == "js")
                 {
 #ifdef HAVE_JS

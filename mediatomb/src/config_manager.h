@@ -38,6 +38,83 @@
 #include "dictionary.h"
 #include "xpath.h"
 #include "autoscan.h"
+#include "config_options.h"
+
+typedef enum
+{
+    CFG_SERVER_PORT = 0,
+    CFG_SERVER_IP,
+    CFG_SERVER_NETWORK_INTERFACE,
+    CFG_SERVER_NAME,
+    CFG_SERVER_MANUFACTURER_URL,
+    CFG_SERVER_MODEL_NAME,
+    CFG_SERVER_MODEL_DESCRIPTION,
+    CFG_SERVER_MODEL_NUMBER,
+    CFG_SERVER_SERIAL_NUMBER,
+    CFG_SERVER_PRESENTATION_URL,
+    CFG_SERVER_APPEND_PRESENTATION_URL_TO,
+    CFG_SERVER_UDN,
+    CFG_SERVER_HOME,
+    CFG_SERVER_WEBROOT,
+    CFG_SERVER_SERVEDIR,
+    CFG_SERVER_ALIVE_INTERVAL,
+    CFG_SERVER_EXTEND_PROTOCOLINFO,
+    CFG_SERVER_BOOKMARK_FILE,
+    CFG_SERVER_CUSTOM_HTTP_HEADERS,
+    CFG_SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT,
+    CFG_SERVER_UI_ENABLED,
+    CFG_SERVER_UI_POLL_INTERVAL,
+    CFG_SERVER_UI_POLL_WHEN_IDLE,
+    CFG_SERVER_UI_ACCOUNTS_ENABLED,
+    CFG_SERVER_UI_ACCOUNT_LIST,
+    CFG_SERVER_UI_SESSION_TIMEOUT,
+    CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE,
+    CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN,
+    CFG_SERVER_STORAGE_DRIVER,
+#ifdef HAVE_SQLITE3
+    CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE,
+#endif
+#ifdef HAVE_MYSQL
+    CFG_SERVER_STORAGE_MYSQL_HOST,
+    CFG_SERVER_STORAGE_MYSQL_PORT,
+    CFG_SERVER_STORAGE_MYSQL_USERNAME,
+    CFG_SERVER_STORAGE_MYSQL_SOCKET,
+    CFG_SERVER_STORAGE_MYSQL_PASSWORD,
+    CFG_SERVER_STORAGE_MYSQL_DATABASE,
+#endif
+    CFG_IMPORT_HIDDEN_FILES,
+    CFG_IMPORT_FILESYSTEM_CHARSET,
+    CFG_IMPORT_METADATA_CHARSET,
+    CFG_IMPORT_PLAYLIST_CHARSET,
+#ifdef HAVE_JS
+    CFG_IMPORT_SCRIPTING_CHARSET,
+    CFG_IMPORT_SCRIPTING_COMMON_SCRIPT,
+    CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT,
+    CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS,
+    CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT,
+#endif
+    CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE,
+#ifdef HAVE_MAGIC
+    CFG_IMPORT_MAGIC_FILE,
+#endif
+    CFG_IMPORT_AUTOSCAN_TIMED_LIST,
+#ifdef HAVE_INOTIFY
+    CFG_IMPORT_AUTOSCAN_INOTIFY_LIST,
+#endif
+    CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS,
+    CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST,
+    CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST,
+    CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST,
+#ifdef HAVE_EXIF
+    CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST,
+#endif
+#ifdef HAVE_EXTRACTOR
+    CFG_IMPORT_LIBOPTS_EXTRACTOR_AUXDATA_TAGS_LIST,
+#endif
+    CFG_MAX
+} config_option_t;
+
+
 
 class ConfigManager : public Singleton<ConfigManager>
 {
@@ -50,7 +127,60 @@ public:
     inline zmm::String getConfigFilename() { return filename; }
     
     void load(zmm::String filename);
+  
+    /// \brief returns a config option of type String
+    /// \param option option to retrieve.
+    zmm::String getOption(config_option_t option);
+
+    /// \brief returns a config option of type int 
+    /// \param option option to retrieve.
+    int getIntOption(config_option_t option);
+
+    /// \brief returns a config option of type bool
+    /// \param option option to retrieve.
+    bool getBoolOption(config_option_t option);
     
+    /// \brief returns a config option of type Dictionary
+    /// \param option option to retrieve.
+    zmm::Ref<Dictionary> getDictionaryOption(config_option_t option);
+    
+    /// \brief returns a config option of type Array of StringBase
+    /// \param option option to retrieve.
+    zmm::Ref<zmm::Array<zmm::StringBase> > getStringArrayOption(config_option_t option);
+ 
+    /// \brief returns a config option of type AutoscanList
+    /// \param option to retrieve
+    zmm::Ref<AutoscanList> getAutoscanListOption(config_option_t option);
+
+    /// \brief sets static configuration parameters that will be used by
+    /// when the ConfigManager class initializes
+    static void setStaticArgs(zmm::String _filename, zmm::String _userhome, zmm::String _config_dir = _(DEFAULT_CONFIG_HOME));
+
+    /// \brief Creates a html file that is a redirector to the current server i
+    /// instance
+    void writeBookmark(zmm::String ip, zmm::String port);
+
+
+protected:
+    // creates a default config.xml file with the most necessary entries and returns the path
+    zmm::String createDefaultConfig(zmm::String userhome);
+    void save();
+    void save_text(zmm::String filename, zmm::String content);
+    void validate(zmm::String serverhome);
+    void prepare_udn();
+    zmm::String construct_path(zmm::String path);
+    void prepare_path(zmm::String path, bool needDir = false, bool existenceUnneeded = false);
+    
+    static zmm::String filename;
+    static zmm::String userhome;
+    static zmm::String config_dir;
+
+    zmm::Ref<mxml::Element> root;
+
+    zmm::Ref<Dictionary> mime_content;
+
+    zmm::Ref<zmm::Array<ConfigOption> > options;
+
     /// \brief Returns a config option with the given path, if option does not exist a default value is returned.
     /// \param xpath option xpath
     /// \param def default value if option not found
@@ -83,9 +213,6 @@ public:
     /// "/path/to/element" will return the text value of the given "element" element
     zmm::Ref<mxml::Element> getElement(zmm::String xpath);
             
-    /// \brief Creates a html file that is a redirector to the current server instance
-    void writeBookmark(zmm::String ip, zmm::String port);
-
     /// \brief Checks if the string returned by getOption is valid.
     /// \param xpath xpath expression to the XML node
     zmm::String checkOptionString(zmm::String xpath);
@@ -127,28 +254,8 @@ public:
     ///
     /// This function will create an array like that: ["data", "otherdata"]
     zmm::Ref<zmm::Array<zmm::StringBase> > createArrayFromNodeset(zmm::Ref<mxml::Element> element, zmm::String nodeName, zmm::String attrName); 
-    
-    static void setStaticArgs(zmm::String _filename, zmm::String _userhome, zmm::String _config_dir = _(DEFAULT_CONFIG_HOME));
    
-    zmm::Ref<Dictionary> getMimeToContentTypeMappings();
-
-protected:
-    // creates a default config.xml file with the most necessary entries and returns the path
-    zmm::String createDefaultConfig(zmm::String userhome);
-    void save();
-    void save_text(zmm::String filename, zmm::String content);
-    void validate(zmm::String serverhome);
-    void prepare_udn();
-    zmm::String construct_path(zmm::String path);
-    void prepare_path(zmm::String path, bool needDir = false, bool existenceUnneeded = false);
-    
-    static zmm::String filename;
-    static zmm::String userhome;
-    static zmm::String config_dir;
-
-    zmm::Ref<mxml::Element> root;
-
-    zmm::Ref<Dictionary> mime_content;
+    void dumpOptions();
 
 };
 

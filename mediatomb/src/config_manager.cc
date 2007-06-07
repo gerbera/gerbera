@@ -75,6 +75,8 @@ void ConfigManager::setStaticArgs(String _filename, String _userhome, String _co
 
 ConfigManager::ConfigManager() : Singleton<ConfigManager>()
 {
+    options = Ref<Array<ConfigOption> > (new Array<ConfigOption>(CFG_MAX));
+
     String home = userhome + DIR_SEPARATOR + config_dir;
     bool home_ok = true;
     
@@ -111,6 +113,9 @@ ConfigManager::ConfigManager() : Singleton<ConfigManager>()
     
     prepare_udn();
     validate(home);
+#ifdef LOG_TOMBDEBUG
+//    dumpOptions();
+#endif
 }
 
 String ConfigManager::construct_path(String path)
@@ -259,9 +264,46 @@ String ConfigManager::createDefaultConfig(String userhome)
     return config_filename;
 }
 
+#define NEW_OPTION(optval) opt =  Ref<Option> (new Option(optval));
+#define SET_OPTION(opttype) options->set(RefCast(opt, ConfigOption), opttype);
+
+#define NEW_INT_OPTION(optval) int_opt = \
+                         Ref<IntOption> (new IntOption(optval));
+#define SET_INT_OPTION(opttype) \
+                       options->set(RefCast(int_opt, ConfigOption), opttype);
+
+#define NEW_BOOL_OPTION(optval) bool_opt = \
+                         Ref<BoolOption> (new BoolOption(optval));
+#define SET_BOOL_OPTION(opttype) \
+                        options->set(RefCast(bool_opt, ConfigOption), opttype);
+
+#define NEW_DICT_OPTION(optval) dict_opt =  \
+                         Ref<DictionaryOption> (new DictionaryOption(optval));
+#define SET_DICT_OPTION(opttype) \
+                        options->set(RefCast(dict_opt, ConfigOption), opttype);
+
+#define NEW_STRARR_OPTION(optval) str_array_opt = \
+                         Ref<StringArrayOption> (new StringArrayOption(optval));
+#define SET_STRARR_OPTION(opttype) \
+                    options->set(RefCast(str_array_opt, ConfigOption), opttype);
+
+#define NEW_AUTOSCANLIST_OPTION(optval) alist_opt = \
+                       Ref<AutoscanListOption> (new AutoscanListOption(optval));
+#define SET_AUTOSCANLIST_OPTION(opttype) \
+                    options->set(RefCast(alist_opt, ConfigOption), opttype);
+
 void ConfigManager::validate(String serverhome)
 {
     String temp;
+    int temp_int;
+    Ref<Element> tmpEl;
+
+    Ref<Option> opt;
+    Ref<BoolOption> bool_opt;
+    Ref<IntOption> int_opt;
+    Ref<DictionaryOption> dict_opt;
+    Ref<StringArrayOption> str_array_opt;
+    Ref<AutoscanListOption> alist_opt;
 
     log_info("Checking configuration...\n");
    
@@ -274,58 +316,84 @@ void ConfigManager::validate(String serverhome)
         throw _Exception(_("Error in config file: <server> tag not found"));
 
     // now go through the mandatory parameters, if something is missing
-    // here we will not start the server
-//    temp = checkOption_("/server/home");
-//    check_path_ex(temp, true);
+    // we will not start the server
 
-    getOption(_("/server/home"), serverhome); 
-
+    getOption(_("/server/home"), serverhome);
     prepare_path(_("/server/home"), true);
-    
-//    temp = checkOption_("/server/webroot");
-//    check_path_ex(construct_path(temp), true);
+    NEW_OPTION(getOption(_("/server/home")));
+    SET_OPTION(CFG_SERVER_HOME);
 
     prepare_path(_("/server/webroot"), true);
+    NEW_OPTION(getOption(_("/server/webroot")));
+    SET_OPTION(CFG_SERVER_WEBROOT);
+
     
     if (string_ok(getOption(_("/server/servedir"), _(""))))
         prepare_path(_("/server/servedir"), true);
-    
+
+    NEW_OPTION(getOption(_("/server/servedir"))); 
+    SET_OPTION(CFG_SERVER_SERVEDIR);
+
     // udn should be already prepared
     checkOptionString(_("/server/udn"));
+    NEW_OPTION(getOption(_("/server/udn")));
+    SET_OPTION(CFG_SERVER_UDN);
 
     checkOptionString(_("/server/storage/attribute::driver"));
 
     String dbDriver = getOption(_("/server/storage/attribute::driver"));
 
     // checking database driver options
-    do
-    {
 #ifdef HAVE_SQLITE3
-        if (dbDriver == "sqlite3")
-        {
-            prepare_path(_("/server/storage/database-file"), false, true);
-            break;
-        }
+    prepare_path(_("/server/storage/database-file"), false, true);
+    NEW_OPTION(getOption(_("/server/storage/database-file")));
+    SET_OPTION(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
 #endif
 
 #ifdef HAVE_MYSQL
-        if (dbDriver == "mysql")
-        {
-            getOption(_("/server/storage/host"), _(DEFAULT_MYSQL_HOST));
-            getOption(_("/server/storage/database"), _(DEFAULT_MYSQL_DB));
-            getOption(_("/server/storage/username"), _(DEFAULT_MYSQL_USER));
-            getOption(_("/server/storage/port"), _("0"));
-            //getOption(_("/server/storage/socket")); - checked in mysql_storage.cc
-            //getOption(_("/server/storage/password")); - checked in mysql_storage.cc
-            break;
-        }
-#endif
-        // other database types...
-        throw _Exception(_("Unknown storage driver: ") + dbDriver);
-    }
-    while (false);
+    NEW_OPTION(getOption(_("/server/storage/host"), 
+                _(DEFAULT_MYSQL_HOST)));
+    SET_OPTION(CFG_SERVER_STORAGE_MYSQL_HOST);
 
-    
+    NEW_OPTION(getOption(_("/server/storage/database"), 
+                _(DEFAULT_MYSQL_DB)));
+    SET_OPTION(CFG_SERVER_STORAGE_MYSQL_DATABASE);
+
+    NEW_OPTION(getOption(_("/server/storage/username"), 
+                _(DEFAULT_MYSQL_USER)));
+    SET_OPTION(CFG_SERVER_STORAGE_MYSQL_USERNAME);
+
+    NEW_INT_OPTION(getIntOption(_("/server/storage/port"), 0));
+    SET_INT_OPTION(CFG_SERVER_STORAGE_MYSQL_PORT);
+
+    if (getElement(_("/server/storage/socket")) == nil)
+    {
+        NEW_OPTION(nil);
+    }
+    else
+    {
+        NEW_OPTION(getOption(_("/server/storage/socket")));
+    }
+
+    SET_OPTION(CFG_SERVER_STORAGE_MYSQL_SOCKET);
+
+    if (getElement(_("/server/storage/password")) == nil)
+    {
+        NEW_OPTION(nil);
+    }
+    else
+    {
+        NEW_OPTION(getOption(_("/server/storage/password")));
+    }
+    SET_OPTION(CFG_SERVER_STORAGE_MYSQL_PASSWORD);
+
+#endif
+    if ((dbDriver != "sqlite3") & (dbDriver != "mysql"))
+            throw _Exception(_("Unknown storage driver: ") + dbDriver);
+
+    NEW_OPTION(dbDriver);
+    SET_OPTION(CFG_SERVER_STORAGE_DRIVER);
+
 //    temp = checkOption_("/server/storage/database-file");
 //    check_path_ex(construct_path(temp));
 
@@ -334,41 +402,62 @@ void ConfigManager::validate(String serverhome)
     temp = getOption(_("/server/ui/attribute::enabled"),
                      _(DEFAULT_UI_EN_VALUE));
     if (!validateYesNo(temp))
-        throw _Exception(_("Error in config file: incorrect parameter for <ui enabled=\"\" /> attribute"));
+        throw _Exception(_("Error in config file: incorrect parameter "
+                           "for <ui enabled=\"\" /> attribute"));
+    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    SET_BOOL_OPTION(CFG_SERVER_UI_ENABLED);
 
     temp = getOption(_("/server/ui/attribute::poll-when-idle"),
-            _(DEFAULT_POLL_WHEN_IDLE_VALUE));
-
+                     _(DEFAULT_POLL_WHEN_IDLE_VALUE));
     if (!validateYesNo(temp))
-        throw _Exception(_("Error in config file: incorrect parameter for <ui poll-when-idle=\"\" /> attribute"));
+        throw _Exception(_("Error in config file: incorrect parameter "
+                           "for <ui poll-when-idle=\"\" /> attribute"));
+    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    SET_BOOL_OPTION(CFG_SERVER_UI_POLL_WHEN_IDLE);
 
-    int i = getIntOption(_("/server/ui/attribute::poll-interval"), DEFAULT_POLL_INTERVAL);
-    if (i < 1)
-        throw _Exception(_("Error in config file: incorrect parameter for <ui poll-interval=\"\" /> attribute"));
+    temp_int = getIntOption(_("/server/ui/attribute::poll-interval"), 
+                       DEFAULT_POLL_INTERVAL);
+    if (temp_int < 1)
+        throw _Exception(_("Error in config file: incorrect parameter for "
+                           "<ui poll-interval=\"\" /> attribute"));
+    NEW_INT_OPTION(temp_int);
+    SET_INT_OPTION(CFG_SERVER_UI_POLL_INTERVAL);
 
-
-    int ipp_default = getIntOption(_("/server/ui/items-per-page/attribute::default"), DEFAULT_ITEMS_PER_PAGE_2);
-    if (i < 1)
-        throw _Exception(_("Error in config file: incorrect parameter for <items-per-page default=\"\" /> attribute"));
+    temp_int = getIntOption(_("/server/ui/items-per-page/attribute::default"), 
+                           DEFAULT_ITEMS_PER_PAGE_2);
+    if (temp_int < 1)
+        throw _Exception(_("Error in config file: incorrect parameter for "
+                           "<items-per-page default=\"\" /> attribute"));
+    NEW_INT_OPTION(temp_int);
+    SET_INT_OPTION(CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE);
 
     // now get the option list for the drop down menu
     Ref<Element> element = getElement(_("/server/ui/items-per-page"));
     // create default structure
     if (element->childCount() == 0)
     {
-        if ((ipp_default != DEFAULT_ITEMS_PER_PAGE_1) && (ipp_default != DEFAULT_ITEMS_PER_PAGE_2) &&
-            (ipp_default != DEFAULT_ITEMS_PER_PAGE_3) && (ipp_default != DEFAULT_ITEMS_PER_PAGE_4))
+        if ((temp_int != DEFAULT_ITEMS_PER_PAGE_1) && 
+            (temp_int != DEFAULT_ITEMS_PER_PAGE_2) &&
+            (temp_int != DEFAULT_ITEMS_PER_PAGE_3) && 
+            (temp_int != DEFAULT_ITEMS_PER_PAGE_4))
         {
-            throw _Exception(_("Error in config file: you specified an <items-per-page default=\"\"> value that is not listed in the options"));
+            throw _Exception(_("Error in config file: you specified an "
+                               "<items-per-page default=\"\"> value that is "
+                               "not listed in the options"));
         }
 
-        element->appendTextChild(_("option"), String::from(DEFAULT_ITEMS_PER_PAGE_1));
-        element->appendTextChild(_("option"), String::from(DEFAULT_ITEMS_PER_PAGE_2));
-        element->appendTextChild(_("option"), String::from(DEFAULT_ITEMS_PER_PAGE_3));
-        element->appendTextChild(_("option"), String::from(DEFAULT_ITEMS_PER_PAGE_4));
+        element->appendTextChild(_("option"), 
+                                   String::from(DEFAULT_ITEMS_PER_PAGE_1));
+        element->appendTextChild(_("option"), 
+                                   String::from(DEFAULT_ITEMS_PER_PAGE_2));
+        element->appendTextChild(_("option"), 
+                                   String::from(DEFAULT_ITEMS_PER_PAGE_3));
+        element->appendTextChild(_("option"), 
+                                   String::from(DEFAULT_ITEMS_PER_PAGE_4));
     }
     else // validate user settings
     {
+        int i;
         bool default_found = false;
         for (int j = 0; j < element->childCount(); j++)
         {
@@ -377,47 +466,80 @@ void ConfigManager::validate(String serverhome)
             {
                 i = child->getText().toInt();
                 if (i < 1)
-                    throw _Exception(_("Error in config file: incorrect <option> value for <items-per-page>"));
+                    throw _Exception(_("Error in config file: incorrect "
+                                       "<option> value for <items-per-page>"));
 
-                if (i == ipp_default)
+                if (i == temp_int)
                     default_found = true;
             }
         }
 
         if (!default_found)
-            throw _Exception(_("Error in config file: at least one <option> under <items-per-page> must match the <items-per-page default=\"\" /> attribute"));
+            throw _Exception(_("Error in config file: at least one <option> "
+                               "under <items-per-page> must match the "
+                               "<items-per-page default=\"\" /> attribute"));
+
     }
 
-    temp = getOption(_("/server/ui/accounts/attribute::enabled"), 
-            _(DEFAULT_ACCOUNTS_EN_VALUE));
-
-    if (!validateYesNo(temp))
-        throw _Exception(_("Error in config file: incorrect parameter for <accounts enabled=\"\" /> attribute"));
-
-    i  = getIntOption(_("/server/ui/accounts/attribute::session-timeout"), DEFAULT_SESSION_TIMEOUT);
-    if (i < 1)
+    // create the array from either user or default settings
+    Ref<Array<StringBase> > menu_opts (new Array<StringBase>());
+    for (int j = 0; j < element->childCount(); j++)
     {
-        throw _Exception(_("Error in config file: invalid session-timeout %d (must be > 0)\n"));
+        Ref<Element> child = element->getChild(j);
+        if (child->getName() == "option")
+            menu_opts->append(child->getText());
     }
+    NEW_STRARR_OPTION(menu_opts);
+    SET_STRARR_OPTION(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
 
+ 
+    temp = getOption(_("/server/ui/accounts/attribute::enabled"), 
+                     _(DEFAULT_ACCOUNTS_EN_VALUE));
+    if (!validateYesNo(temp))
+        throw _Exception(_("Error in config file: incorrect parameter for "
+                           "<accounts enabled=\"\" /> attribute"));
+
+    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    SET_BOOL_OPTION(CFG_SERVER_UI_ACCOUNTS_ENABLED);
+
+    tmpEl = getElement(_("/server/ui/accounts"));
+    NEW_DICT_OPTION(createDictionaryFromNodeset(tmpEl, _("account"), _("user"), _("password")));
+    SET_DICT_OPTION(CFG_SERVER_UI_ACCOUNT_LIST);
+
+    temp_int = getIntOption(_("/server/ui/accounts/attribute::session-timeout"),
+                              DEFAULT_SESSION_TIMEOUT);
+    if (temp_int < 1)
+    {
+        throw _Exception(_("Error in config file: invalid session-timeout "
+                           "(must be > 0)\n"));
+    }
+    NEW_INT_OPTION(temp_int);
+    SET_INT_OPTION(CFG_SERVER_UI_SESSION_TIMEOUT);
+    
     temp = getOption(_("/import/attribute::hidden-files"),
                      _(DEFAULT_HIDDEN_FILES_VALUE));
     if (!validateYesNo(temp))
-        throw _Exception(_("Error in config file: incorrect parameter for <import hidden-files=\"\" /> attribute"));
+        throw _Exception(_("Error in config file: incorrect parameter for "
+                           "<import hidden-files=\"\" /> attribute"));
+    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    SET_BOOL_OPTION(CFG_IMPORT_HIDDEN_FILES);
 
-    getOption(_("/import/mappings/extension-mimetype/attribute::ignore-unknown"),
-              _(DEFAULT_IGNORE_UNKNOWN_EXTENSIONS));
+    temp = getOption(
+            _("/import/mappings/extension-mimetype/attribute::ignore-unknown"),
+            _(DEFAULT_IGNORE_UNKNOWN_EXTENSIONS));
+    NEW_OPTION(temp);
+    SET_OPTION(CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS);
 
-    Ref<Element> tmpEl;
+    tmpEl = getElement( _("/import/mappings/extension-mimetype"));
+    NEW_DICT_OPTION(createDictionaryFromNodeset(tmpEl, _("map"), 
+                                       _("from"), _("to")));
+    SET_DICT_OPTION(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
+
     tmpEl = getElement(_("/import/mappings/mimetype-contenttype"));
     if (tmpEl != nil)
     {
         mime_content = createDictionaryFromNodeset(tmpEl, _("treat"), 
                        _("mimetype"), _("as"));
-        if (mime_content == nil)
-        {
-            mime_content = Ref<Dictionary>(new Dictionary());
-        }
     }
     else
     {
@@ -429,6 +551,9 @@ void ConfigManager::validate(String serverhome)
         mime_content->put(_("audio/x-mpegurl"), _(CONTENT_TYPE_PLAYLIST));
         mime_content->put(_("audio/x-scpls"), _(CONTENT_TYPE_PLAYLIST));
     }
+
+    NEW_DICT_OPTION(mime_content);
+    SET_DICT_OPTION(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
 #if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
     if (setlocale(LC_ALL, "") != NULL)
@@ -460,10 +585,14 @@ void ConfigManager::validate(String serverhome)
     }
     catch (Exception e)
     {
-        throw _Exception(_("Error in config file: unsupported filesystem-charset specified: ") + charset);
+        throw _Exception(_("Error in config file: unsupported "
+                           "filesystem-charset specified: ") + charset);
     }
 
     log_info("Setting filesystem import charset to %s\n", charset.c_str());
+    NEW_OPTION(charset);
+    SET_OPTION(CFG_IMPORT_FILESYSTEM_CHARSET);
+
     charset = getOption(_("/import/metadata-charset"), temp);
     try
     {
@@ -472,10 +601,13 @@ void ConfigManager::validate(String serverhome)
     }
     catch (Exception e)
     {
-        throw _Exception(_("Error in config file: unsupported metadata-charset specified: ") + charset);
+        throw _Exception(_("Error in config file: unsupported "
+                           "metadata-charset specified: ") + charset);
     }
 
     log_info("Setting metadata import charset to %s\n", charset.c_str());
+    NEW_OPTION(charset);
+    SET_OPTION(CFG_IMPORT_METADATA_CHARSET);
 
     charset = getOption(_("/import/playlist-charset"), temp);
     try
@@ -489,83 +621,145 @@ void ConfigManager::validate(String serverhome)
     }
 
     log_info("Setting playlist charset to %s\n", charset.c_str());
+    NEW_OPTION(charset);
+    SET_OPTION(CFG_IMPORT_PLAYLIST_CHARSET);
 
 #ifdef EXTEND_PROTOCOLINFO
     temp = getOption(_("/server/protocolInfo/attribute::extend"),
                      _(DEFAULT_EXTEND_PROTOCOLINFO));
     if (!validateYesNo(temp))
-        throw _Exception(_("Error in config file: extend attribute of the protocolInfo tag must be either \"yes\" or \"no\""));
+        throw _Exception(_("Error in config file: extend attribute of the "
+                          "protocolInfo tag must be either \"yes\" or \"no\""));
+
+    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    SET_BOOL_OPTION(CFG_SERVER_EXTEND_PROTOCOLINFO);
 #endif
 
-    getOption(_("/server/interface"), _("")); // bind to any IP address
-    getOption(_("/server/bookmark"), _(DEFAULT_BOOKMARK_FILE));
-    getOption(_("/server/name"), _(DESC_FRIENDLY_NAME));
-    getOption(_("/server/modelName"), _(DESC_MODEL_NAME));
-    getOption(_("/server/modelDescription"), _(DESC_MODEL_DESCRIPTION));
-    getOption(_("/server/modelNumber"), _(DESC_MODEL_NUMBER));
-    getOption(_("/server/serialNumber"), _(DESC_SERIAL_NUMBER));
-    getOption(_("/server/manufacturerURL"), _(DESC_MANUFACTURER_URL));
-    getOption(_("/server/presentationURL"), _(""));
+    temp = getOption(_("/server/interface"), _(""));
+    NEW_OPTION(temp);
+    SET_OPTION(CFG_SERVER_NETWORK_INTERFACE);
+
+    temp = getOption(_("/server/ip"), _("")); // bind to any IP address
+    NEW_OPTION(temp);
+    SET_OPTION(CFG_SERVER_IP);
+
+    temp = getOption(_("/server/bookmark"), _(DEFAULT_BOOKMARK_FILE));
+    NEW_OPTION(temp);
+    SET_OPTION(CFG_SERVER_BOOKMARK_FILE);
+
+    temp = getOption(_("/server/name"), _(DESC_FRIENDLY_NAME));
+    NEW_OPTION(temp);
+    SET_OPTION(CFG_SERVER_NAME);
+
+    temp = getOption(_("/server/modelName"), _(DESC_MODEL_NAME));
+    NEW_OPTION(temp);
+    SET_OPTION(CFG_SERVER_MODEL_NAME);
+
+    temp = getOption(_("/server/modelDescription"), _(DESC_MODEL_DESCRIPTION));
+    NEW_OPTION(temp);
+    SET_OPTION(CFG_SERVER_MODEL_DESCRIPTION);
+
+    temp = getOption(_("/server/modelNumber"), _(DESC_MODEL_NUMBER));
+    NEW_OPTION(temp);
+    SET_OPTION(CFG_SERVER_MODEL_NUMBER);
+
+    temp = getOption(_("/server/serialNumber"), _(DESC_SERIAL_NUMBER));
+    NEW_OPTION(temp);
+    SET_OPTION(CFG_SERVER_SERIAL_NUMBER);
+    
+    temp = getOption(_("/server/manufacturerURL"), _(DESC_MANUFACTURER_URL));
+    NEW_OPTION(temp);
+    SET_OPTION(CFG_SERVER_MANUFACTURER_URL);
+
+    temp = getOption(_("/server/presentationURL"), _(""));
+    NEW_OPTION(temp);
+    SET_OPTION(CFG_SERVER_PRESENTATION_URL);
+
     temp = getOption(_("/server/presentationURL/attribute::append-to"), 
-            _(DEFAULT_PRES_URL_APPENDTO_ATTR));
+                     _(DEFAULT_PRES_URL_APPENDTO_ATTR));
 
     if ((temp != "none") && (temp != "ip") && (temp != "port"))
     {
-        throw _Exception(_("Error in config file: invalid \"append-to\" attribute value in <presentationURL> tag"));
+        throw _Exception(_("Error in config file: "
+                           "invalid \"append-to\" attribute value in "
+                           "<presentationURL> tag"));
     }
 
     if (((temp == "ip") || (temp == "port")) && 
          !string_ok(getOption(_("/server/presentationURL"))))
     {
-        throw _Exception(_("Error in config file: \"append-to\" attribute value in <presentationURL> tag is set to \"") + temp + _("\" but no URL is specified"));
+        throw _Exception(_("Error in config file: \"append-to\" attribute "
+                           "value in <presentationURL> tag is set to \"") + 
+                            temp + _("\" but no URL is specified"));
     }
+    NEW_OPTION(temp);
+    SET_OPTION(CFG_SERVER_APPEND_PRESENTATION_URL_TO);
 
-    i = getIntOption(_("/server/upnp-string-limit"), 
-            DEFAULT_UPNP_STRING_LIMIT);
-    if ((i != -1) && (i < 4))
+    temp_int = getIntOption(_("/server/upnp-string-limit"), 
+                              DEFAULT_UPNP_STRING_LIMIT);
+    if ((temp_int != -1) && (temp_int < 4))
     {
-        throw _Exception(_("Error in config file: invalid value for <upnp-string-limit>"));
+        throw _Exception(_("Error in config file: invalid value for "
+                           "<upnp-string-limit>"));
     }
+    NEW_INT_OPTION(temp_int);
+    SET_INT_OPTION(CFG_SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT);
 
-/// \todo Jin: finalize playlist script configuration once we know how we want it
 #ifdef HAVE_JS
-    String script_path = getOption(_("/import/scripting/playlist-script"), _(PACKAGE_DATADIR) +
+    temp = getOption(_("/import/scripting/playlist-script"), 
+            _(PACKAGE_DATADIR) +
             DIR_SEPARATOR +
             _(DEFAULT_JS_DIR) +
             DIR_SEPARATOR +
             _(DEFAULT_PLAYLISTS_SCRIPT));
-    if (!string_ok(script_path))
+    if (!string_ok(temp))
         throw _Exception(_("playlist script location invalid"));
     prepare_path(_("/import/scripting/playlist-script"));
+    NEW_OPTION(getOption(_("/import/scripting/playlist-script")));
+    SET_OPTION(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
 
-   script_path = getOption(_("/import/scripting/common-script"), 
+    temp = getOption(_("/import/scripting/common-script"), 
            _(PACKAGE_DATADIR) +
             DIR_SEPARATOR +
             _(DEFAULT_JS_DIR) +
             DIR_SEPARATOR +
             _(DEFAULT_COMMON_SCRIPT));
-    if (!string_ok(script_path))
+    if (!string_ok(temp))
         throw _Exception(_("common script location invalid"));
     prepare_path(_("/import/scripting/common-script"));
+    NEW_OPTION(getOption(_("/import/scripting/common-script")));
+    SET_OPTION(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT);
 
-    temp = getOption(_("/import/scripting/playlist-script/attribute::create-link"), _(DEFAULT_PLAYLIST_CREATE_LINK));
-    if ((temp != "yes") && (temp != "no"))
-        throw _Exception(_("Error in config file: invalid \"create-link\" attribute value in <playlist-script> tag"));
+    temp = getOption(
+            _("/import/scripting/playlist-script/attribute::create-link"), 
+            _(DEFAULT_PLAYLIST_CREATE_LINK));
 
+    if (!validateYesNo(temp))
+        throw _Exception(_("Error in config file: "
+                           "invalid \"create-link\" attribute value in "
+                           "<playlist-script> tag"));
 
+    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    SET_BOOL_OPTION(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS);
 #endif
 
-    temp = getOption(_("/import/scripting/virtual-layout/attribute::type"), _(DEFAULT_LAYOUT_TYPE));
+    temp = getOption(_("/import/scripting/virtual-layout/attribute::type"), 
+                     _(DEFAULT_LAYOUT_TYPE));
     if ((temp != "js") && (temp != "builtin") && (temp != "disabled"))
-        throw _Exception(_("Error in config file: invalid virtual layout type specified!"));
+        throw _Exception(_("Error in config file: invalid virtual layout "
+                           "type specified!"));
+    NEW_OPTION(temp);
+    SET_OPTION(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
+
 
 #ifndef HAVE_JS
     if (temp == "js")
-        throw _Exception(_("MediaTomb was compiled without js support, however you specified \"js\" to be used for the virtual-layout."));
+        throw _Exception(_("MediaTomb was compiled without js support, "
+                           "however you specified \"js\" to be used for the "
+                           "virtual-layout."));
 #else
-
-    // check js stuff
-    charset = getOption(_("/import/scripting/attribute::script-charset"), _(DEFAULT_JS_CHARSET));
+    charset = getOption(_("/import/scripting/attribute::script-charset"), 
+                        _(DEFAULT_JS_CHARSET));
     if (temp == "js") 
     {
         try
@@ -579,51 +773,78 @@ void ConfigManager::validate(String serverhome)
         }
     }
 
-    script_path = getOption(_("/import/scripting/virtual-layout/import-script"), _(PACKAGE_DATADIR) +
-                                                          DIR_SEPARATOR + 
-                                                        _(DEFAULT_JS_DIR) +
-                                                          DIR_SEPARATOR +
-                                                        _(DEFAULT_IMPORT_SCRIPT));
+    NEW_OPTION(charset);
+    SET_OPTION(CFG_IMPORT_SCRIPTING_CHARSET);
+
+    String script_path = getOption(
+                           _("/import/scripting/virtual-layout/import-script"), 
+                           _(PACKAGE_DATADIR) +
+                             DIR_SEPARATOR + 
+                           _(DEFAULT_JS_DIR) +
+                             DIR_SEPARATOR +
+                           _(DEFAULT_IMPORT_SCRIPT));
     if (temp == "js")
     {
         if (!string_ok(script_path))
-            throw _Exception(_("Error in config file: you specified \"js\" to be used for virtual layout, but script location is invalid."));
+            throw _Exception(_("Error in config file: you specified \"js\" to "
+                               "be used for virtual layout, but script "
+                               "location is invalid."));
+
         prepare_path(_("/import/scripting/virtual-layout/import-script"));
+        script_path = getOption(
+                        _("/import/scripting/virtual-layout/import-script"));
     }
+
+    NEW_OPTION(script_path);
+    SET_OPTION(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT);
 #endif
 
-    getIntOption(_("/server/port"), 0); // 0 means, that the SDK will any free port itself
-    getIntOption(_("/server/alive"), DEFAULT_ALIVE_INTERVAL);
+    // 0 means, that the SDK will any free port itself
+    temp_int = getIntOption(_("/server/port"), 0);
+    NEW_INT_OPTION(temp_int);
+    SET_INT_OPTION(CFG_SERVER_PORT);
+
+    temp_int = getIntOption(_("/server/alive"), DEFAULT_ALIVE_INTERVAL);
+    NEW_INT_OPTION(temp_int);
+    SET_INT_OPTION(CFG_SERVER_ALIVE_INTERVAL);
 
     Ref<Element> el = getElement(_("/import/mappings/mimetype-upnpclass"));
     if (el == nil)
     {
-//        Ref<Dictionary> dict = createDictionaryFromNodeset(el, "map", "from", "to");
         getOption(_("/import/mappings/mimetype-upnpclass"), _(""));
     }
-  
+    NEW_DICT_OPTION(createDictionaryFromNodeset(el, _("map"), 
+                                                    _("from"), _("to")));
+    SET_DICT_OPTION(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
+
     el = getElement(_("/import/autoscan"));
     if (el == nil)
     {
         getOption(_("/import/autoscan"), _(""));
     }
-      
+    NEW_AUTOSCANLIST_OPTION(createAutoscanListFromNodeset(el, TimedScanMode));
+    SET_AUTOSCANLIST_OPTION(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
+
+#ifdef HAVE_INOTIFY
+    NEW_AUTOSCANLIST_OPTION(createAutoscanListFromNodeset(el, InotifyScanMode));
+    SET_AUTOSCANLIST_OPTION(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
+#endif
+    
     el = getElement(_("/server/custom-http-headers"));
-    if (el == nil)
-    {
-        getOption(_("/server/custom-http-headers"), _(""));
-    }
+    NEW_STRARR_OPTION(createArrayFromNodeset(el, _("add"), _("header")));
+    SET_STRARR_OPTION(CFG_SERVER_CUSTOM_HTTP_HEADERS);
 
 #ifdef HAVE_EXIF    
 
     el = getElement(_("/import/library-options/libexif/auxdata"));
     if (el == nil)
     {
-    //    Ref<Array<StringBase> > arr = createArrayFromNodeset(el, "add-data", "tag");
         getOption(_("/import/library-options/libexif/auxdata"),
                   _(""));
         
     }
+    NEW_STRARR_OPTION(createArrayFromNodeset(el, _("add-data"), _("tag")));
+    SET_STRARR_OPTION(CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST);
 
 #endif // HAVE_EXIF
 
@@ -632,10 +853,11 @@ void ConfigManager::validate(String serverhome)
     el = getElement(_("/import/library-options/libextractor/auxdata"));
     if (el == nil)
     {
-    //    Ref<Array<StringBase> > arr = createArrayFromNodeset(el, "add-data", "tag");
         getOption(_("/import/library-options/libextractor/auxdata"),
                   _(""));
     }
+    NEW_STRARR_OPTION( createArrayFromNodeset(el, "add-data", "tag"));
+    options->set(strarr_opt, CFG_IMPORT_LIBOPTS_EXTRACTOR_AUXDATA_TAGS_LIST);
 #endif // HAVE_EXTRACTOR
 
 #ifdef HAVE_MAGIC
@@ -643,8 +865,11 @@ void ConfigManager::validate(String serverhome)
     {
         prepare_path(_("/import/magic-file"));
     }
+    NEW_OPTION(getOption(_("/import/magic-file")));
+    SET_OPTION(CFG_IMPORT_MAGIC_FILE);
 #endif
 
+#ifdef HAVE_INOTIFY
     tmpEl = getElement(_("/import/autoscan"));
     Ref<AutoscanList> config_timed_list = createAutoscanListFromNodeset(tmpEl, TimedScanMode);
     Ref<AutoscanList> config_inotify_list = createAutoscanListFromNodeset(tmpEl, InotifyScanMode);
@@ -659,6 +884,7 @@ void ConfigManager::validate(String serverhome)
                 throw _Exception(_("Error in config file: same path used in both inotify and timed scan modes"));
         }
     }
+#endif
 
     log_info("Configuration check succeeded.\n");
 
@@ -891,18 +1117,20 @@ Ref<Dictionary> ConfigManager::createDictionaryFromNodeset(Ref<Element> element,
     String key;
     String value;
 
-    for (int i = 0; i < element->childCount(); i++)
+    if (element != nil)
     {
-        Ref<Element> child = element->getChild(i);
-        if (child->getName() == nodeName)
+        for (int i = 0; i < element->childCount(); i++)
         {
-            key = child->getAttribute(keyAttr);
-            value = child->getAttribute(valAttr);
+            Ref<Element> child = element->getChild(i);
+            if (child->getName() == nodeName)
+            {
+                key = child->getAttribute(keyAttr);
+                value = child->getAttribute(valAttr);
 
-            if (string_ok(key) && string_ok(value))
-                dict->put(key, value);
+                if (string_ok(key) && string_ok(value))
+                    dict->put(key, value);
+            }
         }
-        
     }
 
     return dict;
@@ -918,7 +1146,10 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
     bool recursive;
     bool hidden;
     unsigned int interval;
-   
+  
+    if (element == nil)
+        return list;
+
     for (int i = 0; i < element->childCount(); i++)
     {
         hidden = false;
@@ -1078,28 +1309,85 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
     return list;
 }
 
+void ConfigManager::dumpOptions()
+{
+#ifdef LOG_TOMBDEBUG
+    log_debug("Dumping options!\n");
+    for (int i = 0; i < (int)CFG_MAX; i++)
+    {
+        try
+        {
+            log_debug("    Option %02d - %s\n", i,
+                    getOption((config_option_t)i).c_str());
+        }
+        catch (Exception e) {}
+        try
+        {
+            log_debug(" IntOption %02d - %d\n", i,
+                    getIntOption((config_option_t)i));
+        }
+        catch (Exception e) {}
+        try
+        {
+            log_debug("BoolOption %02d - %s\n", i,
+                    (getBoolOption((config_option_t)i) ? "true" : "false"));
+        }
+        catch (Exception e) {}
+    }
+#endif
+}
 
 Ref<Array<StringBase> > ConfigManager::createArrayFromNodeset(Ref<mxml::Element> element, String nodeName, String attrName)
 {
     String attrValue;
     Ref<Array<StringBase> > arr(new Array<StringBase>());
 
-    for (int i = 0; i < element->childCount(); i++)
+    if (element != nil)
     {
-        Ref<Element> child = element->getChild(i);
-        if (child->getName() == nodeName)
+        for (int i = 0; i < element->childCount(); i++)
         {
-            attrValue = child->getAttribute(attrName);
+            Ref<Element> child = element->getChild(i);
+            if (child->getName() == nodeName)
+            {
+                attrValue = child->getAttribute(attrName);
 
-            if (string_ok(attrValue))
-                arr->append(attrValue);
+                if (string_ok(attrValue))
+                    arr->append(attrValue);
+            }
         }
     }
 
     return arr;
 }
 
-Ref<Dictionary> ConfigManager::getMimeToContentTypeMappings()
+// The validate function ensures that the array is completely filled!
+// None of the options->get() calls will ever return nil!
+String ConfigManager::getOption(config_option_t option)
 {
-    return mime_content;
+    return options->get(option)->getOption();
+}
+
+int ConfigManager::getIntOption(config_option_t option)
+{
+    return options->get(option)->getIntOption();
+}
+
+bool ConfigManager::getBoolOption(config_option_t option)
+{
+    return options->get(option)->getBoolOption();
+}
+
+Ref<Dictionary> ConfigManager::getDictionaryOption(config_option_t option)
+{
+    return options->get(option)->getDictionaryOption();
+}
+
+Ref<Array<StringBase> > ConfigManager::getStringArrayOption(config_option_t option)
+{
+    return options->get(option)->getStringArrayOption();
+}
+
+Ref<AutoscanList> ConfigManager::getAutoscanListOption(config_option_t option)
+{
+    return options->get(option)->getAutoscanListOption();
 }

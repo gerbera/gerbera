@@ -125,22 +125,12 @@ void MysqlStorage::init()
     
     Ref<ConfigManager> config = ConfigManager::getInstance();
     
-    String dbHost = config->getOption(_("/server/storage/host"));
-    String dbName = config->getOption(_("/server/storage/database"));
-    String dbUser = config->getOption(_("/server/storage/username"));
-    String dbPort = config->getOption(_("/server/storage/port"));
-    String dbPass;
-    if (config->getElement(_("/server/storage/password")) == nil)
-        dbPass = nil;
-    else
-        dbPass = config->getOption(_("/server/storage/password"), _(""));
-    
-    
-    String dbSock;
-    if (config->getElement(_("/server/storage/socket")) == nil)
-        dbSock = nil;
-    else
-        dbSock = config->getOption(_("/server/storage/socket"), _(""));
+    String dbHost = config->getOption(CFG_SERVER_STORAGE_MYSQL_HOST);
+    String dbName = config->getOption(CFG_SERVER_STORAGE_MYSQL_DATABASE);
+    String dbUser = config->getOption(CFG_SERVER_STORAGE_MYSQL_USERNAME);
+    int dbPort = config->getIntOption(CFG_SERVER_STORAGE_MYSQL_PORT);
+    String dbPass = config->getOption(CFG_SERVER_STORAGE_MYSQL_PASSWORD);
+    String dbSock = config->getOption(CFG_SERVER_STORAGE_MYSQL_SOCKET);
     
     MYSQL *res_mysql;
     
@@ -157,7 +147,7 @@ void MysqlStorage::init()
         dbUser.c_str(),
         (dbPass == nil ? NULL : dbPass.c_str()),
         dbName.c_str(),
-        dbPort.toInt(), // port
+        dbPort, // port
         (dbSock == nil ? NULL : dbSock.c_str()), // socket
         0 // flags
     );

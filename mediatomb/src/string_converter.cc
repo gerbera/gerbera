@@ -175,22 +175,21 @@ zmm::String StringConverter::_convert(String str, bool validate)
 Ref<StringConverter> StringConverter::i2f()
 {
     Ref<StringConverter> conv(new StringConverter(
-        _(DEFAULT_INTERNAL_CHARSET), ConfigManager::getInstance()->getOption(_("/import/filesystem-charset"))));
+        _(DEFAULT_INTERNAL_CHARSET), ConfigManager::getInstance()->getOption(CFG_IMPORT_FILESYSTEM_CHARSET)));
 //        INTERNAL_CHARSET, ConfigManager::getInstance()->getFilesystemCharset()));
     return conv;
 }
 Ref<StringConverter> StringConverter::f2i()
 {
     Ref<StringConverter> conv(new StringConverter(
-        ConfigManager::getInstance()->getOption(_("/import/filesystem-charset")),
-                                                _(DEFAULT_INTERNAL_CHARSET)));
+        ConfigManager::getInstance()->getOption(CFG_IMPORT_FILESYSTEM_CHARSET), _(DEFAULT_INTERNAL_CHARSET)));
     return conv;
 }
 Ref<StringConverter> StringConverter::m2i()
 {
     Ref<StringConverter> conv(new StringConverter(
-        ConfigManager::getInstance()->getOption(_("/import/metadata-charset")),
-                                                _(DEFAULT_INTERNAL_CHARSET)));
+        ConfigManager::getInstance()->getOption(CFG_IMPORT_METADATA_CHARSET),
+        _(DEFAULT_INTERNAL_CHARSET)));
     return conv;
 }
 
@@ -198,16 +197,16 @@ Ref<StringConverter> StringConverter::m2i()
 Ref<StringConverter> StringConverter::j2i()
 {
     Ref<StringConverter> conv(new StringConverter(
-        ConfigManager::getInstance()->getOption(_("/import/scripting/attribute::script-charset")),
-                                                _(DEFAULT_INTERNAL_CHARSET)));
+        ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_CHARSET),
+        _(DEFAULT_INTERNAL_CHARSET)));
     return conv;
 }
 
 Ref<StringConverter> StringConverter::p2i()
 {
     Ref<StringConverter> conv(new StringConverter(
-        ConfigManager::getInstance()->getOption(_("/import/playlist-charset")),
-                                                _(DEFAULT_INTERNAL_CHARSET)));
+        ConfigManager::getInstance()->getOption(CFG_IMPORT_PLAYLIST_CHARSET),
+        _(DEFAULT_INTERNAL_CHARSET)));
     return conv;
 }
 

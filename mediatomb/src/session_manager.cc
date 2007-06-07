@@ -137,16 +137,8 @@ void Session::clearUpdateIDs()
 SessionManager::SessionManager() : TimerSubscriberSingleton<SessionManager>()
 {
     Ref<ConfigManager> configManager = ConfigManager::getInstance();
-    Ref<Element> accountsEl = configManager->getElement(_("/server/ui/accounts"));
-    if (accountsEl == nil)
-    {
-        log_debug("accounts tag not found in config\n");
-        accounts = Ref<Dictionary>(new Dictionary());
-    }
-    else
-    {
-        accounts = configManager->createDictionaryFromNodeset(accountsEl, _("account"), _("user"), _("password"));
-    }
+
+    accounts = configManager->getDictionaryOption(CFG_SERVER_UI_ACCOUNT_LIST);
     sessions = Ref<Array<Session> >(new Array<Session>());
     timerAdded = false;
 }

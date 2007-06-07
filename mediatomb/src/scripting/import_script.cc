@@ -43,7 +43,7 @@ using namespace zmm;
 
 ImportScript::ImportScript(Ref<Runtime> runtime) : Script(runtime)
 {
-    String scriptPath = ConfigManager::getInstance()->getOption(_("/import/scripting/virtual-layout/import-script")); 
+    String scriptPath = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT); 
     load(scriptPath);
 }
 

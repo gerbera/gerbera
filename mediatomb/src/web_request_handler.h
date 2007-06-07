@@ -117,7 +117,8 @@ protected:
     
     /// \brief check if accounts are enabled in the config
     /// \return true if accounts are enabled, false if not
-    bool accountsEnabled() { return (ConfigManager::getInstance()->getOption(_("/server/ui/accounts/attribute::enabled")) == "yes"); }
+    bool accountsEnabled() { return (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_UI_ACCOUNTS_ENABLED)); }
+
 public:
     /// \brief Constructor, currently empty.
     WebRequestHandler();
