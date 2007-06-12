@@ -58,15 +58,16 @@ public:
     virtual void init();
     
     
-    /// \brief Initializes UPnP portion.
-    /// \param interface to bind to.
+    /// \brief Initializes UPnP portion, only ip or interface can be given
+    /// \param interface to bind to
+    /// \param ip address to bind to
     /// \param port Port where the server will be listening for requests.
     ///
     /// Reads information from the config and creates a 
     /// device description document. Initializes the UPnP SDK,
     /// sets up the virutal web server directories and registers
     /// web callbacks. Starts the update manager task.
-    void upnp_init(zmm::String interface, int port);
+    void upnp_init(zmm::String interface, zmm::String ip_address, int port);
     
     /// \brief Cleanup routine to shutdown the server.
     ///

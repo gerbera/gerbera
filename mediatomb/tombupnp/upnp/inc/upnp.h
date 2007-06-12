@@ -1110,6 +1110,9 @@ EXPORT_SPEC int UpnpInit(
                                     IP address. */
     IN unsigned short DestPort, /** The destination port number to use.  0 
                                     will pick an arbitrary free port. */
+    IN int maxHTTPTimeoutRetries, /** maximum number of retries when select 
+                                      times out on sending data, use a 
+                                      negative value to disable this feature **/
     IN void *thread_cleanup  /** A user defined callback function that 
                                     will get triggered each time a thread dies
                                     (only for threads that were calling other
@@ -2785,3 +2788,4 @@ EXPORT_SPEC void UpnpFree(
 //@} The API
 
 #endif
+

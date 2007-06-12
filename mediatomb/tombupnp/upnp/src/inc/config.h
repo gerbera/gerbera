@@ -241,11 +241,11 @@
  *  shutdown flag was set. This ensures that we can always cleanly
  *  shutdown the server, and that UpnpFinish() will never hang waiting for
  *  threads which may be blocked by select()
- *  The default time is 5 seconds.
+ *  The default time is 3 seconds.
  */
 
 //@{
-#define WEB_SERVER_BLOCK_TIMEOUT 5
+#define WEB_SERVER_BLOCK_TIMEOUT 3
 //@}
 
 /** @name Module Exclusion

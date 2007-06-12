@@ -640,7 +640,15 @@ void ConfigManager::validate(String serverhome)
     SET_BOOL_OPTION(CFG_SERVER_EXTEND_PROTOCOLINFO);
 #endif
 
+    temp_int = getIntOption(_("/server/retries-on-timeout"), DEFAULT_TIMEOUT_RETRIES);
+    NEW_INT_OPTION(temp_int);
+    SET_INT_OPTION(CFG_SERVER_RETRIES_ON_TIMEOUT);
+
     temp = getOption(_("/server/interface"), _(""));
+
+    if (string_ok(temp) && string_ok(getOption(_("/server/ip"), _(""))))
+        throw _Exception(_("Error in config file: you can not specify interface and ip at the same time!"));
+
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_NETWORK_INTERFACE);
 

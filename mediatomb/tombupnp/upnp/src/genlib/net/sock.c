@@ -429,6 +429,7 @@ sock_write( IN SOCKINFO * info,
     ssize_t bytes_sent = 0;
     int num_bytes = 0;
     char* p_buffer = buffer;
+    int retry = 0;
 
     if (*timeoutSecs < 0)
     {
@@ -460,6 +461,13 @@ sock_write( IN SOCKINFO * info,
         {
             if (*timeoutSecs != 0)
                 return UPNP_E_TIMEDOUT;
+
+            if (gMaxHTTPTimeoutRetries > 0)
+            {
+                retry++;
+                if (retry >= gMaxHTTPTimeoutRetries)
+                    return UPNP_E_TIMEDOUT;
+            }
 
             FD_ZERO(&writeSet);
             FD_SET(sockfd, &writeSet);

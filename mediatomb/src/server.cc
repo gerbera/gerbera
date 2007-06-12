@@ -94,7 +94,7 @@ void Server::init()
     alive_advertisement = config->getIntOption(CFG_SERVER_ALIVE_INTERVAL);
 }
 
-void Server::upnp_init(String iface, int port)
+void Server::upnp_init(String iface, String ip_address, int port)
 {
     int ret = 0;        // general purpose error code
     String ip;
@@ -106,7 +106,17 @@ void Server::upnp_init(String iface, int port)
     if (!string_ok(iface))
         iface = config->getOption(CFG_SERVER_NETWORK_INTERFACE);
 
-    ip = interfaceToIP(iface);
+    if (!string_ok(ip_address))
+        ip = config->getOption(CFG_SERVER_IP);
+    else
+        ip = ip_address;
+
+    if (string_ok(ip) && string_ok(iface))
+        throw _Exception(_("You can not specify interface and IP at the same time!"));
+
+
+    if (!string_ok(ip))
+        ip = interfaceToIP(iface);
 
     if (string_ok(iface) && !string_ok(ip))
         throw _Exception(_("Could not find interface: ") + iface);
@@ -131,7 +141,7 @@ void Server::upnp_init(String iface, int port)
     if (storage->threadCleanupRequired())
         cb = (void *)static_cleanup_callback;
 
-    ret = UpnpInit(ip.c_str(), port, cb);
+    ret = UpnpInit(ip.c_str(), port, config->getIntOption(CFG_SERVER_RETRIES_ON_TIMEOUT), cb);
 
     if (ret != UPNP_E_SUCCESS)
     {

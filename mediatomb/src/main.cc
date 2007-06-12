@@ -67,7 +67,7 @@
 #include <limits.h>
 
 #ifdef HAVE_GETOPT_LONG
-    #define OPTSTR "i:p:c:m:f:u:g:a:l:P:dh"
+    #define OPTSTR "i:e:p:c:m:f:u:g:a:l:P:dh"
 #endif
 
 using namespace zmm;
@@ -93,7 +93,8 @@ int main(int argc, char **argv, char **envp)
     int      opt_index = 0;
     int      o;
     static struct option long_options[] = {
-        {"interface", 1, 0, 'i'},
+        {"ip", 1, 0, 'i'},
+        {"interface", 1, 0, 'e'},
         {"port", 1, 0, 'p'},
         {"config", 1, 0, 'c'},
         {"home", 1, 0, 'm'},
@@ -116,6 +117,7 @@ int main(int argc, char **argv, char **envp)
     String group;
     String pid_file;
     String interface;
+    String ip;
 
     Ref<Array<StringBase> > addFile(new Array<StringBase>());
 #ifdef HAVE_GETOPT_LONG   
@@ -127,6 +129,11 @@ int main(int argc, char **argv, char **envp)
         switch (o)
         {
             case 'i':
+                log_debug("Option interface with param %s\n", optarg);
+                ip = String(optarg);
+                break;
+
+            case 'e':
                 log_debug("Option interface with param %s\n", optarg);
                 interface = String(optarg);
                 break;
@@ -198,7 +205,8 @@ int main(int argc, char **argv, char **envp)
                 printf("Usage: mediatomb [options]\n\
                         \n\
 Supported options:\n\
-    --interface or -i  network interface to bind to\n\
+    --ip or -i         ip address to bind to\n\
+    --interface or -e  network interface to bind to\n\
     --port or -p       server port (the SDK only permits values => 49152)\n\
     --config or -c     configuration file to use\n\
     --daemon or -d     run server in background\n\
@@ -393,7 +401,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
     main_thread_id = pthread_self();
     // install signal handlers
     sigfillset(&mask_set);
-    sigprocmask(SIG_SETMASK, &mask_set, NULL);
+    pthread_sigmask(SIG_SETMASK, &mask_set, NULL);
 
     memset(&action, 0, sizeof(action));
     action.sa_handler = signal_handler;
@@ -427,13 +435,13 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
     try
     {
         server = Server::getInstance();
-        server->upnp_init(interface, port);
+        server->upnp_init(interface, ip, port);
     }
     catch(UpnpException upnp_e)
     {
 
         sigemptyset(&mask_set);
-        sigprocmask(SIG_SETMASK, &mask_set, NULL);
+        pthread_sigmask(SIG_SETMASK, &mask_set, NULL);
 
         upnp_e.printStackTrace();
         log_error("main: upnp error %d\n", upnp_e.getErrorCode());
@@ -491,7 +499,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
     }
     
     sigemptyset(&mask_set);
-    sigprocmask(SIG_SETMASK, &mask_set, NULL);
+    pthread_sigmask(SIG_SETMASK, &mask_set, NULL);
     
     // wait until signalled to terminate
     while (!shutdown_flag)
@@ -544,7 +552,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
                 
                 ///  \todo fix this for SIGHUP
                 server = Server::getInstance();
-                server->upnp_init(interface, port);
+                server->upnp_init(interface, ip, port);
                 
                 restart_flag = 0;
             }
@@ -553,7 +561,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
                 restart_flag = 0;
                 shutdown_flag = 1;
                 sigemptyset(&mask_set);
-                sigprocmask(SIG_SETMASK, &mask_set, NULL);
+                pthread_sigmask(SIG_SETMASK, &mask_set, NULL);
                 log_error("Could not restart MediaTomb\n");
 
             }

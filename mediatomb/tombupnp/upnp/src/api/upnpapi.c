@@ -157,7 +157,9 @@ off_t g_maxContentLength = DEFAULT_SOAP_CONTENT_LENGTH; // in bytes
  *
  * Parameters:		
  *	IN const char * HostIP: Local IP Address
- *	IN short DestPort: Local Port to listen for incoming connections
+ *	IN unsigned short DestPort: Local Port to listen for incoming connections
+ *  IN unsigned int maximum number of retries when select returns a timeout
+ *                  when sending data to the server.
  * Description:
  *	Initializes 
  *		- Mutex objects, 
@@ -178,6 +180,7 @@ off_t g_maxContentLength = DEFAULT_SOAP_CONTENT_LENGTH; // in bytes
  *****************************************************************************/
 int UpnpInit( IN const char *HostIP,
               IN unsigned short DestPort,
+              IN int maxHTTPTimeoutRetries,
               IN void *thread_cleanup
             )
 {
@@ -195,7 +198,7 @@ int UpnpInit( IN const char *HostIP,
     }
 
     gUpnpSdkShutdown = 0;
-
+    gMaxHTTPTimeoutRetries = maxHTTPTimeoutRetries;
 #ifdef WIN32
 	wVersionRequested = MAKEWORD( 2, 2 );
 

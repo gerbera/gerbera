@@ -200,6 +200,7 @@ extern WebServerState bWebServerState;
 
 int gUpnpSdkShutdown;
 
+int gMaxHTTPTimeoutRetries;
 #endif
 
 

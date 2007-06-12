@@ -214,6 +214,7 @@
 #define DEFAULT_ITEMS_PER_PAGE_4        100
 #define DEFAULT_LAYOUT_TYPE             "builtin" 
 #define DEFAULT_EXTEND_PROTOCOLINFO     NO
+#define DEFAULT_TIMEOUT_RETRIES         0
 #ifdef HAVE_SQLITE3
     #define DEFAULT_STORAGE_DRIVER      "sqlite3"
 #else

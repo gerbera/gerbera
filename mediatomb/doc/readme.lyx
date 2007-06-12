@@ -1,17 +1,25 @@
-#LyX 1.4.4 created this file. For more info see http://www.lyx.org/
-\lyxformat 245
+#LyX 1.5.0beta2 created this file. For more info see http://www.lyx.org/
+\lyxformat 263
 \begin_document
 \begin_header
 \textclass docbook
 \language english
 \inputencoding auto
-\fontscheme default
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
 \graphics default
 \paperfontsize default
 \spacing single
 \papersize a4paper
 \use_geometry true
 \use_amsmath 0
+\use_esint 0
 \cite_engine basic
 \use_bibtopic false
 \paperorientation portrait
@@ -28,7 +36,8 @@
 \papersides 1
 \paperpagestyle plain
 \tracking_changes false
-\output_changes true
+\output_changes false
+\author "Jin" 
 \end_header
 
 \begin_body
@@ -160,7 +169,9 @@ MediaTomb is an open source (GPL) UPnP MediaServer with a nice web user
 \begin_layout Standard
 MediaTomb implements the UPnP MediaServer V 1.0 specification that can be
  found on 
-\begin_inset LatexCommand \url[http://www.upnp.org/]{http://www.upnp.org/}
+\begin_inset LatexCommand url
+name "http://www.upnp.org/"
+target "http://www.upnp.org/"
 
 \end_inset
 
@@ -317,7 +328,9 @@ status open
 
 \begin_layout Standard
 sqlite (version > 3.x) 
-\begin_inset LatexCommand \url[http://www.sqlite.org/]{http://www.sqlite.org/}
+\begin_inset LatexCommand url
+name "http://www.sqlite.org/"
+target "http://www.sqlite.org/"
 
 \end_inset
 
@@ -342,7 +355,9 @@ status open
 
 \begin_layout Standard
 mysql client library (version > 4.0.x) 
-\begin_inset LatexCommand \url[http://mysql.org/]{http://mysql.org/}
+\begin_inset LatexCommand url
+name "http://mysql.org/"
+target "http://mysql.org/"
 
 \end_inset
 
@@ -367,7 +382,9 @@ status open
 
 \begin_layout Standard
 zlib 
-\begin_inset LatexCommand \url[http://www.zlib.net/]{http://www.zlib.net/}
+\begin_inset LatexCommand url
+name "http://www.zlib.net/"
+target "http://www.zlib.net/"
 
 \end_inset
 
@@ -427,7 +444,9 @@ status collapsed
 
 \begin_layout Standard
 js - SpiderMonkey JavaScript Engine 
-\begin_inset LatexCommand \url[http://www.mozilla.org/js/spidermonkey/]{http://www.mozilla.org/js/spidermonkey/}
+\begin_inset LatexCommand url
+name "http://www.mozilla.org/js/spidermonkey/"
+target "http://www.mozilla.org/js/spidermonkey/"
 
 \end_inset
 
@@ -466,7 +485,9 @@ status collapsed
 
 \begin_layout Standard
 taglib 
-\begin_inset LatexCommand \url[http://developer.kde.org/~wheeler/taglib.html]{http://developer.kde.org/~wheeler/taglib.html}
+\begin_inset LatexCommand url
+name "http://developer.kde.org/~wheeler/taglib.html"
+target "http://developer.kde.org/~wheeler/taglib.html"
 
 \end_inset
 
@@ -510,7 +531,9 @@ status collapsed
 
 \begin_layout Standard
 id3lib 
-\begin_inset LatexCommand \url[http://id3lib.sourceforge.net/]{http://id3lib.sourceforge.net/}
+\begin_inset LatexCommand url
+name "http://id3lib.sourceforge.net/"
+target "http://id3lib.sourceforge.net/"
 
 \end_inset
 
@@ -542,7 +565,9 @@ status collapsed
 
 \begin_layout Standard
 libexif 
-\begin_inset LatexCommand \url[http://libexif.sourceforge.net/]{http://libexif.sourceforge.net/}
+\begin_inset LatexCommand url
+name "http://libexif.sourceforge.net/"
+target "http://libexif.sourceforge.net/"
 
 \end_inset
 
@@ -575,7 +600,9 @@ status collapsed
 
 \begin_layout Standard
 libextractor 
-\begin_inset LatexCommand \url[http://gnunet.org/libextractor/]{http://gnunet.org/libextractor/}
+\begin_inset LatexCommand url
+name "http://gnunet.org/libextractor/"
+target "http://gnunet.org/libextractor/"
 
 \end_inset
 
@@ -1776,7 +1803,8 @@ This option is useful in two cases: when the home directory can not be retrieved
  in a non standard location (for example, when setting up daemon mode).
  In the latter case you can combine this parameter with the parameter described
  in 
-\begin_inset LatexCommand \ref{sec:Config-Directory}
+\begin_inset LatexCommand ref
+reference "sec:Config-Directory"
 
 \end_inset
 
@@ -1784,7 +1812,8 @@ This option is useful in two cases: when the home directory can not be retrieved
 \end_layout
 
 \begin_layout Subsection
-\begin_inset LatexCommand \label{sec:Config-Directory}
+\begin_inset LatexCommand label
+name "sec:Config-Directory"
 
 \end_inset
 
@@ -2026,11 +2055,50 @@ Default
 \emph default
 :
 \emph on
- first available interface.
+ ip of the first available interface.
 \end_layout
 
 \begin_layout Standard
 Specifies the IP address to bind to, by default one of the available interfaces
+ will be selected.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<interface>eth0</interface> 
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default
+\emph default
+:
+\emph on
+ first available interface.
+\end_layout
+
+\begin_layout Standard
+Specifies the interface to bind to, by default one of the available interfaces
  will be selected.
 \end_layout
 
@@ -2616,6 +2684,55 @@ status open
 \end_layout
 
 \begin_layout Code
+<retries-on-timeout>0<retries-on-timeout>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default:
+\emph default
+ 
+\emph on
+0 - disabled 
+\end_layout
+
+\begin_layout Standard
+This enables special error handling for the case that it is not possible
+ to write to the client socket, but no error is reported by select (select
+ keeps timing out).
+ In this situation we may run out of threads, the option above allows some
+ finetuning - we will shutdown the socket after a specific number of retries.
+ 
+\end_layout
+
+\begin_layout Description
+Note: don't enable this option if you are not experiencing this particular
+ problem, this was implemented as a workaround for some Playstation 3 related
+ error cases.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
 <bookmark>mediatomb.html</bookmark>
 \end_layout
 
@@ -2747,7 +2864,7 @@ status open
 \begin_layout Standard
 
 \emph on
-Optional
+Optioprotonal
 \end_layout
 
 \begin_layout Standard
@@ -3479,7 +3596,8 @@ driver="mysql"
 \end_layout
 
 \begin_layout Standard
-\begin_inset LatexCommand \label{config-mysql}
+\begin_inset LatexCommand label
+name "config-mysql"
 
 \end_inset
 
@@ -3518,6 +3636,40 @@ Default: "localhost"
 
 \begin_layout Standard
 This specifies the host where your MySQL database is running.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<port>0</port>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: 0
+\end_layout
+
+\begin_layout Standard
+This specifies the port where your MySQL database is running.
 \end_layout
 
 \begin_layout Standard
@@ -5580,7 +5732,9 @@ Note: Internet Explorer support is limited and not yet finished.
  It is very difficult to support this browser because of a huge number of
  bugs in its javascript implementation.
  If you don't believe us - just visit 
-\begin_inset LatexCommand \url[http://selfhtml.org/]{http://selfhtml.org/}
+\begin_inset LatexCommand url
+name "http://selfhtml.org/"
+target "http://selfhtml.org/"
 
 \end_inset
 
