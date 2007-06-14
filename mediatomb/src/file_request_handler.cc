@@ -159,10 +159,12 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
             slash_pos++;
 
 
-            header = header + _("Content-Disposition: attachment; filename=\"") + path.substring(slash_pos) + _("\"");
+            header = _("Content-Disposition: attachment; filename=\"") + 
+                     path.substring(slash_pos) + _("\"");
         }
     }
  
+    info->http_header = NULL;
     log_debug("fetching resource id %d\n", res_id);
     if ((res_id > 0) && (res_id < item->getResourceCount()))
     {
@@ -181,7 +183,6 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
         log_debug("setting content length to unknown\n");
         /// \todo we could figure out the content length...
         info->file_length = -1;
-        info->http_header = NULL;
         Ref<CdsResource> resource = item->getResource(res_id);
         Ref<MetadataHandler> h = MetadataHandler::createHandler(resource->getHandlerType());
 /*        Ref<IOHandler> io_handler = */ h->serveContent(item, res_id, &(info->file_length));
@@ -198,14 +199,16 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
         // seeking
         if (S_ISREG(statbuf.st_mode))
         {
-            header = _("Accept-Ranges: bytes\r\n");
+            if (string_ok(header))
+                header = header + _("\r\n");
+
+            header = header + _("Accept-Ranges: bytes");
         }
 
         //log_debug("sizeof off_t %d, statbuf.st_size %d\n", sizeof(off_t), sizeof(statbuf.st_size));
         //log_debug("get_info: file_length: " OFF_T_SPRINTF "\n", statbuf.st_size);
-        log_debug("Adding content disposition header: %s\n", header.c_str());
-        info->http_header = ixmlCloneDOMString(header.c_str());
-
+        if (string_ok(header))
+            info->http_header = ixmlCloneDOMString(header.c_str());
     }
         
     info->last_modified = statbuf.st_mtime;
@@ -384,13 +387,15 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
             slash_pos++;
 
 
-            header = header + _("Content-Disposition: attachment; filename=\"") + path.substring(slash_pos) + _("\"");
+            header = _("Content-Disposition: attachment; filename=\"") + 
+                     path.substring(slash_pos) + _("\"");
         }
     }
     log_debug("fetching resource id %d\n", res_id);
     // Per default and in case of a bad resource ID, serve the file
     // itself
 
+    info->http_header = NULL;
     if ((res_id > 0) && (res_id < item->getResourceCount()))
     {
         // http-get:*:image/jpeg:*
@@ -407,7 +412,6 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
 
         info->content_type = ixmlCloneDOMString(mimeType.c_str());
         info->file_length = -1;
-        info->http_header = NULL;
         Ref<CdsResource> resource = item->getResource(res_id);
         Ref<MetadataHandler> h = MetadataHandler::createHandler(resource->getHandlerType());
         Ref<IOHandler> io_handler = h->serveContent(item, res_id, &(info->file_length));
@@ -428,7 +432,10 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
         // seeking
         if (S_ISREG(statbuf.st_mode))
         {
-            header = header + _("Accept-Ranges: bytes\r\n");
+            if (string_ok(header))
+                header = header + _("\r\n");
+
+            header = header + _("Accept-Ranges: bytes");
         }
 
         if (string_ok(header))
