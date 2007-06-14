@@ -150,6 +150,19 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     }
 
     String header;
+    log_debug("path: %s\n", path.c_str());
+    int slash_pos = path.rindex(DIR_SEPARATOR);
+    if (slash_pos >= 0)
+    {
+        if (slash_pos < path.length()-1)
+        {
+            slash_pos++;
+
+
+            header = header + _("Content-Disposition: attachment; filename=\"") + path.substring(slash_pos) + _("\"");
+        }
+    }
+ 
     log_debug("fetching resource id %d\n", res_id);
     if ((res_id > 0) && (res_id < item->getResourceCount()))
     {
@@ -168,6 +181,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
         log_debug("setting content length to unknown\n");
         /// \todo we could figure out the content length...
         info->file_length = -1;
+        info->http_header = NULL;
         Ref<CdsResource> resource = item->getResource(res_id);
         Ref<MetadataHandler> h = MetadataHandler::createHandler(resource->getHandlerType());
 /*        Ref<IOHandler> io_handler = */ h->serveContent(item, res_id, &(info->file_length));
@@ -189,6 +203,9 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
 
         //log_debug("sizeof off_t %d, statbuf.st_size %d\n", sizeof(off_t), sizeof(statbuf.st_size));
         //log_debug("get_info: file_length: " OFF_T_SPRINTF "\n", statbuf.st_size);
+        log_debug("Adding content disposition header: %s\n", header.c_str());
+        info->http_header = ixmlCloneDOMString(header.c_str());
+
     }
         
     info->last_modified = statbuf.st_mtime;
@@ -196,21 +213,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
    
     info->content_type = ixmlCloneDOMString(mimeType.c_str());
 
-    log_debug("path: %s\n", path.c_str());
-    int slash_pos = path.rindex(DIR_SEPARATOR);
-    if (slash_pos >= 0)
-    {
-        if (slash_pos < path.length()-1)
-        {
-            slash_pos++;
-
-
-            header = header + _("Content-Disposition: attachment; filename=\"") + path.substring(slash_pos) + _("\"");
-            log_debug("Adding content disposition header: %s\n", header.c_str());
-            info->http_header = ixmlCloneDOMString(header.c_str());
-        }
-    }
-    //    log_debug("get_info: Requested %s, ObjectID: %s, Location: %s\n, MimeType: %s\n",
+   //    log_debug("get_info: Requested %s, ObjectID: %s, Location: %s\n, MimeType: %s\n",
 //          filename, object_id.c_str(), path.c_str(), info->content_type);
 
     log_debug("web_get_info(): end\n");
@@ -382,8 +385,6 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
 
 
             header = header + _("Content-Disposition: attachment; filename=\"") + path.substring(slash_pos) + _("\"");
-            log_debug("Adding content disposition header: %s\n", header.c_str());
-            info->http_header = ixmlCloneDOMString(header.c_str());
         }
     }
     log_debug("fetching resource id %d\n", res_id);
@@ -406,6 +407,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
 
         info->content_type = ixmlCloneDOMString(mimeType.c_str());
         info->file_length = -1;
+        info->http_header = NULL;
         Ref<CdsResource> resource = item->getResource(res_id);
         Ref<MetadataHandler> h = MetadataHandler::createHandler(resource->getHandlerType());
         Ref<IOHandler> io_handler = h->serveContent(item, res_id, &(info->file_length));
@@ -419,13 +421,20 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
 
         info->file_length = statbuf.st_size;
         info->content_type = ixmlCloneDOMString(mimeType.c_str());
-        // if we are dealing with a regular file we should add the
+
+        log_debug("Adding content disposition header: %s\n", header.c_str());
+            // if we are dealing with a regular file we should add the
         // Accept-Ranges: bytes header, in order to indicate that we support
         // seeking
         if (S_ISREG(statbuf.st_mode))
         {
-            header = _("Accept-Ranges: bytes\r\n");
+            header = header + _("Accept-Ranges: bytes\r\n");
         }
+
+        if (string_ok(header))
+             info->http_header = ixmlCloneDOMString(header.c_str());
+
+
         Ref<IOHandler> io_handler(new FileIOHandler(path));
         io_handler->open(mode);
         return io_handler;

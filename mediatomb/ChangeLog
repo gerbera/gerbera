@@ -6,6 +6,9 @@ MediaTomb - UPnP AV Mediaserver.
           update the database during the first launch)
         * added support for inotify based autoscan
         * playlist support
+		* added network interface option
+		* added workaround for a PS3 realted problem, where sockets where left
+		  open
 
 v0.9.1  Playstation 3 support
         * added support for Playstation 3

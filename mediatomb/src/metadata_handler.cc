@@ -70,7 +70,9 @@ mt_key MT_KEYS[] = {
     { "M_DATE", "dc:date" },
     { "M_GENRE", "upnp:genre" },
     { "M_DESCRIPTION", "dc:description" },
-    { "M_TRACKNUMBER", "upnp:originalTrackNumber"}
+    { "M_TRACKNUMBER", "upnp:originalTrackNumber"},
+    { "M_ALBUMARTURI", "upnp:albumArtURI"}
+
 };
 
 res_key RES_KEYS[] = {
@@ -188,6 +190,13 @@ Ref<MetadataHandler> MetadataHandler::createHandler(int handlerType)
 #ifdef HAVE_EXIF
         case CH_LIBEXIF:
             return Ref<MetadataHandler>(new LibExifHandler());
+#endif
+#ifdef HAVE_ID3
+        case CH_ID3:
+            return Ref<MetadataHandler>(new Id3Handler());
+#elif HAVE_TAGLIB
+        case CH_ID3:
+            return Ref<MetadataHandler>(new TagHandler());
 #endif
         default:
             throw _Exception(_("unknown content handler ID: ") + handlerType);

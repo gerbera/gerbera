@@ -41,7 +41,6 @@
 #include "config_manager.h"
 #include "mem_io_handler.h"
 
-#define RESOURCE_CONTENT_TYPE   "rct"
 // possible resource types
 #define EXIF_THUMBNAIL  "EX_TH"
 

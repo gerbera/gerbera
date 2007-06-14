@@ -1821,6 +1821,31 @@ if test "x$ID3_OK" = xyes; then
    AC_DEFINE([HAVE_ID3], [1], [id3lib presence])
    AC_SUBST(ID3_CXXFLAGS)
    AC_SUBST(ID3_LIBS)
+   CFLAGS="$CFLAGS $ID3_CXXFLAGS"
+   CXXFLAGS="$CXXFLAGS $ID3_CXXFLAGS"
+   LDFLAGS="$LDFLAGS $ID3_LIBS"
+   AC_LANG_SAVE
+   AC_LANG_CPLUSPLUS
+   AC_MSG_CHECKING([for album art support in id3lib])
+   AC_COMPILE_IFELSE(
+        [AC_LANG_PROGRAM(
+            [
+                #include <id3/tag.h>
+                #include <id3/misc_support.h>
+            ],
+            [
+                (void)ID3_HasPicture(0);
+            ]
+        )],
+        [
+            AC_MSG_RESULT([yes])
+            AC_DEFINE([HAVE_ID3_ALBUMART], [1], 
+                      [this version of id3lib has album art support])
+        ],
+        [
+            AC_MSG_RESULT([no])
+        ])
+   AC_LANG_RESTORE  
    TAGLIB_OK=disabled
 else
     if test "x$ID3_EN" = xyes; then

@@ -51,6 +51,7 @@
 #include "string_converter.h"
 #include "common.h"
 #include "tools.h"
+#include "mem_io_handler.h"
 
 using namespace zmm;
 
@@ -131,17 +132,15 @@ void Id3Handler::fillMetadata(Ref<CdsItem> item)
     ID3_Tag tag;
     const Mp3_Headerinfo* header;
     
-    tag.Link(item->getLocation().c_str()); // the location has already been checked by the setMetadata function
+    // the location has already been checked by the setMetadata function
+    if (tag.Link(item->getLocation().c_str()) == 0)
+        return;
 
     for (int i = 0; i < M_MAX; i++)
         addID3Field((metadata_fields_t) i, &tag, item);
 
     header = tag.GetMp3HeaderInfo();
-/*    if (header) 
-        log_debug(("Got mp3 header\n"));
-    else
-        log_debug(("Could not get mp3 header\n"));
-*/    
+    
     if (header)
     {
         int temp;
@@ -195,14 +194,74 @@ void Id3Handler::fillMetadata(Ref<CdsItem> item)
                                                String::from(temp));
         }
     }
-    
+
+#ifdef HAVE_ID3_ALBUMART
+    // get album art
+    // we have a bit of design problem here - the album art is actually not
+    // a resource, but our architecture is built that way that we can only
+    // serve resources, so we are going to bend this a little:
+    // the album art will be saved as a resource, but the CdsResourceManager
+    // will handle this special case and render the XML correctly...
+    // \todo discuss the album art approach with Leo
+    if (ID3_HasPicture(&tag))
+    {
+        ID3_Frame* frame = NULL;
+        frame = tag.Find(ID3FID_PICTURE);
+        if (frame != NULL)
+        {
+            ID3_Field* art = frame->GetField(ID3FN_DATA);
+            if (art != NULL)
+            {
+                
+                String art_mimetype = String(ID3_GetPictureMimeType(&tag));
+                if (!string_ok(art_mimetype))
+                    art_mimetype = _(MIMETYPE_DEFAULT);
+
+                Ref<CdsResource> resource(new CdsResource(CH_ID3));
+                resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(art_mimetype));
+                resource->addParameter(_(RESOURCE_CONTENT_TYPE), _(ID3_ALBUM_ART));
+                item->addResource(resource);
+
+            }
+        }
+    }
+#endif
     tag.Clear();
 }
 
 Ref<IOHandler> Id3Handler::serveContent(Ref<CdsItem> item, int resNum, off_t *data_size)
 {
-    *data_size = -1;
-    return nil;
+    ID3_Tag tag;
+    if (tag.Link(item->getLocation().c_str()) == 0)
+    {
+        throw _Exception(_("Id3Handler: could not open file: ") + item->getLocation());
+    }
+
+    Ref<CdsResource> res = item->getResource(resNum);
+
+    String ctype = res->getParameters()->get(_(RESOURCE_CONTENT_TYPE));
+
+    if (ctype != ID3_ALBUM_ART)
+        throw _Exception(_("Id3Handler: got unknown content type: ") + ctype);
+
+    if (!ID3_HasPicture(&tag))
+        throw _Exception(_("Id3Handler: resource has no album art information"));
+
+    ID3_Frame* frame = NULL;
+    frame = tag.Find(ID3FID_PICTURE);
+
+    if (frame == NULL)
+        throw _Exception(_("Id3Handler: could not server album art - empty frame"));
+
+    ID3_Field* art = frame->GetField(ID3FN_DATA);
+    if (art == NULL)
+        throw _Exception(_("Id3Handler: could not server album art - empty field"));
+
+    Ref<IOHandler> h(new MemIOHandler((void *)art->GetRawBinary(), art->Size()));
+    *data_size = art->Size();
+    tag.Clear();
+
+    return h;
 }
 
 #endif // HAVE_ID3

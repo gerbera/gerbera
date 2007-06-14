@@ -40,6 +40,7 @@
 // content handler Id's
 #define CH_DEFAULT 0
 #define CH_LIBEXIF 1
+#define CH_ID3     2
 
 #define CONTENT_TYPE_MP3        "mp3"
 #define CONTENT_TYPE_OGG        "ogg"
@@ -47,6 +48,11 @@
 #define CONTENT_TYPE_JPG        "jpg"
 #define CONTENT_TYPE_PLAYLIST   "playlist"
 #define CONTENT_TYPE_MPEG4VIDEO "mp4"
+
+#define RESOURCE_CONTENT_TYPE   "rct"
+
+#define ID3_ALBUM_ART "aa"
+
 
 typedef enum
 {
@@ -57,6 +63,7 @@ typedef enum
     M_GENRE,
     M_DESCRIPTION,
     M_TRACKNUMBER,
+    M_ALBUMARTURI,
     M_MAX
 } metadata_fields_t; 
 

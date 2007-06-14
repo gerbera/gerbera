@@ -66,6 +66,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
 /*        String mimeType = item->getMimeType();
         if (!string_ok(mimeType)) mimeType = DEFAULT_MIMETYPE; */
 
+        /// \todo currently resource is misused for album art
         Ref<Dictionary> res_attrs = item->getResource(i)->getAttributes();
         /// \todo who will sync mimetype that is part of the protocl info and
         /// that is lying in the resources with the information that is in the
@@ -77,9 +78,9 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
             tmp = urlBase->urlBase + i;
         else
             tmp = urlBase->urlBase;
-    
-        if ((!IS_CDS_ITEM_INTERNAL_URL(item->getObjectType())) &&
-            (!IS_CDS_ITEM_EXTERNAL_URL(item->getObjectType())))
+
+        if ((i == 0) && ((!IS_CDS_ITEM_INTERNAL_URL(item->getObjectType())) &&
+                (!IS_CDS_ITEM_EXTERNAL_URL(item->getObjectType()))))
         {
             // this is especially for the TG100, we need to add the file extension
             String location = item->getLocation();
@@ -92,28 +93,43 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                         && (extension.index(URL_ARG_SEPARATOR) == -1))
                 {
                     tmp = tmp + _(_URL_ARG_SEPARATOR) + _(URL_FILE_EXTENSION) + _("=") + extension;
-//                    log_debug("New URL: %s\n", tmp.c_str());
+                    //                    log_debug("New URL: %s\n", tmp.c_str());
                 }
             }
         }
-#ifdef EXTEND_PROTOCOLINFO
-            if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO))
+#ifdef HAVE_ID3_ALBUMART
+        // only add upnp:AlbumArtURI if we have an AA, skip the resource
+        if ((i > 0) && (item->getResource(i)->getHandlerType() == CH_ID3))
+        {
+            String rct = item->getResource(i)->getParameter(_(RESOURCE_CONTENT_TYPE));
+            if (rct == ID3_ALBUM_ART)
             {
-                prot = res_attrs->get(MetadataHandler::getResAttrName(R_PROTOCOLINFO));
-          
-                String extend;
-                if (content_type == CONTENT_TYPE_MP3)
-                    extend = _(D_PROFILE) + "=" + D_MP3 + ";";
-
-                extend = extend + D_DEFAULT_OPS + ";" + 
-                                  D_DEFAULT_CONVERSION_INDICATOR;
-                
-                prot = prot.substring(0, prot.rindex(':')+1) + extend;
-                log_debug("extended protocolInfo: %s\n", prot.c_str());
-
-                res_attrs->put(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
-                        prot);
+                element->appendTextChild(
+                        MetadataHandler::getMetaFieldName(M_ALBUMARTURI),
+                        tmp);
             }
+            continue;
+        }
+#endif
+
+#ifdef EXTEND_PROTOCOLINFO
+        if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO))
+        {
+            prot = res_attrs->get(MetadataHandler::getResAttrName(R_PROTOCOLINFO));
+
+            String extend;
+            if (content_type == CONTENT_TYPE_MP3)
+                extend = _(D_PROFILE) + "=" + D_MP3 + ";";
+
+            extend = extend + D_DEFAULT_OPS + ";" + 
+                D_DEFAULT_CONVERSION_INDICATOR;
+
+            prot = prot.substring(0, prot.rindex(':')+1) + extend;
+            log_debug("extended protocolInfo: %s\n", prot.c_str());
+
+            res_attrs->put(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
+                    prot);
+        }
 #endif
 
         element->appendChild(UpnpXML_DIDLRenderResource(tmp, res_attrs));
