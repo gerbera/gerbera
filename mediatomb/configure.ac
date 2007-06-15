@@ -1916,7 +1916,10 @@ if test "x$TAGLIB_OK" = xyes; then
     CPPFLAGS="$CPPFLAGS $TAGLIB_CFLAGS"
     CXXFLAGS="$CXXFLAGS $TAGLIB_CFLAGS"
     AC_CHECK_HEADERS([taglib.h fileref.h tag.h audioproperties.h tstring.h],
-        [],
+        [
+            AC_DEFINE([HAVE_ID3_ALBUMART], [1],
+                  [not aware of taglib versions that do not support album art])
+        ],
         [TAGLIB_OK=missing]
     )
 fi

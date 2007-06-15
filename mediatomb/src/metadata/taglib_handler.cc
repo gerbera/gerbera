@@ -39,13 +39,18 @@
 #include <taglib.h>
 #include <fileref.h>
 #include <tag.h>
+#include <id3v2tag.h>
+#include <mpegfile.h>
 #include <audioproperties.h>
+#include <attachedpictureframe.h>
 #include <tstring.h>
 
 #include "taglib_handler.h"
 #include "string_converter.h"
+#include "config_manager.h"
 #include "common.h"
 #include "tools.h"
+#include "mem_io_handler.h"
 
 using namespace zmm;
 
@@ -174,12 +179,65 @@ void TagHandler::fillMetadata(Ref<CdsItem> item)
         item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS),
                                            String::from(temp));
     }
+    
+    Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    String content_type = mappings->get(item->getMimeType());
+    // we are done here, album art can only be retrieved from id3v2
+    if (content_type != CONTENT_TYPE_MP3)
+        return;
+
+    // did not yet found a way on how to get to the picture from the file
+    // reference that we already have
+    TagLib::MPEG::File mp(item->getLocation().c_str());
+
+    if (!mp.isValid() || !mp.ID3v2Tag())
+        return;
+
+    TagLib::ID3v2::FrameList list = mp.ID3v2Tag()->frameList("APIC");
+    if (!list.isEmpty())
+    {
+        TagLib::ID3v2::AttachedPictureFrame *art =
+               static_cast<TagLib::ID3v2::AttachedPictureFrame *>(list.front());
+
+        if (art->picture().size() < 1)
+            return;
+
+        String art_mimetype = String(art->mimeType().toCString());
+        if (!string_ok(art_mimetype))
+            art_mimetype = _(MIMETYPE_DEFAULT);
+
+        Ref<CdsResource> resource(new CdsResource(CH_ID3));
+        resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(art_mimetype));
+        resource->addParameter(_(RESOURCE_CONTENT_TYPE), _(ID3_ALBUM_ART));
+        item->addResource(resource);
+    }
 }
 
 Ref<IOHandler> TagHandler::serveContent(Ref<CdsItem> item, int resNum, off_t *data_size)
 {
-    *data_size = -1;
-    return nil;
+    // we should only get mp3 files here
+    TagLib::MPEG::File f(item->getLocation().c_str());
+
+    if (!f.isValid())
+        throw _Exception(_("TagHandler: could not open file: ") + 
+                item->getLocation());
+
+
+    if (!f.ID3v2Tag())
+        throw _Exception(_("TagHandler: resource has no album information"));
+
+    TagLib::ID3v2::FrameList list = f.ID3v2Tag()->frameList("APIC");
+    if (list.isEmpty())
+        throw _Exception(_("TagHandler: resource has no album information"));
+
+    TagLib::ID3v2::AttachedPictureFrame *art =
+        static_cast<TagLib::ID3v2::AttachedPictureFrame *>(list.front());
+
+    Ref<IOHandler> h(new MemIOHandler((void *)art->picture().data(), 
+                art->picture().size()));
+
+    *data_size = art->picture().size();
+    return h;
 }
 
 #endif // HAVE_TAGLIB
