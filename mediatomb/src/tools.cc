@@ -853,21 +853,82 @@ int compareTimespecs(struct timespec *a,  struct timespec *b)
 String normalizePath(String path)
 {
     log_debug("Normalizing path: %s\n", path.c_str());
-    path = path.reduce(DIR_SEPARATOR);
-    if (path.charAt(path.length() - 1) == DIR_SEPARATOR) // cut off trailing slash
-        path = path.substring(0, path.length() - 1);
+    
+    int length = path.length();
+    
+    Ref<StringBase> result(new StringBase(length));
+    
+    int avarageExpectedSlashes = length/5;
+    if (avarageExpectedSlashes < 3)
+        avarageExpectedSlashes = 3;
+    Ref<BaseStack<int> > separatorLocations(new BaseStack<int>(avarageExpectedSlashes, -1));
+    char *str = result->data;
+    //int len = string.length();
+
 #ifndef __CYGWIN__
-    if (!path.startsWith(_("/")))
+    if (path.charAt(0) != DIR_SEPARATOR)
 #else
+    #warning !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! this function isn't finished for Cygwin
+    #warning !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! this function isn't finished for Cygwin
+    #warning !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! this function isn't finished for Cygwin
+    #warning !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! this function isn't finished for Cygwin
+    #warning !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! this function isn't finished for Cygwin
+    #warning !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! this function isn't finished for Cygwin
+    #warning !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! this function isn't finished for Cygwin
+    #warning !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! this function isn't finished for Cygwin
+    for (int i = 0; i < 20; i++)
+        print_backtrace();
+    /// \todo this doesn't seem to be correct...
     if ((!path.length() > 1) && (path.charAt(1) != ':'))
 #endif
         throw _Exception(_("Relative paths are not allowed!\n"));
     
-    if (path.find(_(_DIR_SEPARATOR) + ".." + _DIR_SEPARATOR) || (path.find(_(_DIR_SEPARATOR) + "..") == (path.length() - 3)))
-        throw _Exception(_("'..' not allowed in path!"));
-
-
-    return path;
+    int next = 1;
+    do
+    {
+        while (next < length && path.charAt(next) == DIR_SEPARATOR)
+            next++;
+        if (next >= length)
+            break;
+        
+        int next_sep = path.index(next, DIR_SEPARATOR);
+        if (next_sep < 0)
+            next_sep = length;
+        if (next_sep == next + 1 && path.charAt(next) == '.')
+        {
+            //  "." - can be ignored
+        }
+        else if (next_sep == next + 2 &&
+            next + 1 < length &&
+            path.charAt(next) == '.' &&
+            path.charAt(next + 1) == '.')
+        {
+            // ".."
+            // go back one part
+            int lastSepLocation = separatorLocations->pop();
+            if (lastSepLocation < 0)
+                lastSepLocation = 0;
+            str = result->data + lastSepLocation;
+        }
+        else
+        {
+            // normal part
+            separatorLocations->push(str - result->data);
+            *(str++) = DIR_SEPARATOR;
+            int cpLen = next_sep - next;
+            strncpy(str, path.charPtrAt(next), cpLen);
+            str += cpLen;
+        }
+        next = next_sep + 1;
+    }
+    while(next < length);
+    
+    if (str == result->data)
+        *(str++) = DIR_SEPARATOR;
+    
+    *str = 0;
+    
+    return String(result);
 }
 
 String interfaceToIP(String interface)

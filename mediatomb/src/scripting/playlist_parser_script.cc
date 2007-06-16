@@ -59,7 +59,7 @@ js_readln(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
     catch (Exception e)
     {
         e.printStackTrace();
-        return JS_FALSE;
+        return JS_TRUE;
     }
 
     JSString *jsline = JS_NewStringCopyZ(cx, line.c_str());

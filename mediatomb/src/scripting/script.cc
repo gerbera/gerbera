@@ -460,10 +460,6 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js)
         obj->setClass(val);
     }
 
-    // location must not be touched by character conversion!
-    val = getProperty(js, _("location"));
-    if (val != nil)
-        obj->setLocation(val);
     b = getBoolProperty(js, _("restricted"));
     if (b >= 0)
         obj->setRestricted(b);
@@ -529,6 +525,14 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js)
             item->setTrackNumber(getIntProperty(js, _("playlistOrder"), 0));
         }
 
+        // location must not be touched by character conversion!
+        val = getProperty(js, _("location"));
+        if (IS_CDS_PURE_ITEM(objectType) || IS_CDS_ACTIVE_ITEM(objectType))
+            val = normalizePath(val);
+        
+        if (val != nil)
+            obj->setLocation(val);
+        
         if (IS_CDS_ACTIVE_ITEM(objectType))
         {
             Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);

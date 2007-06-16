@@ -115,7 +115,7 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         if (self == NULL)
         {
             log_debug("Could not retrieve class instance from global object\n");
-            return FALSE;
+            return JS_FALSE;
         }
 
         arg = argv[0];
@@ -195,7 +195,7 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         {
             if ((self->whoami() == S_PLAYLIST) &&
             (ConfigManager::getInstance()->
-             getOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS) == "yes"))
+             getBoolOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS)))
             {
                 cds_obj->setFlag(OBJECT_FLAG_PLAYLIST_REF);
                 cds_obj->setRefID(orig_object->getID());
