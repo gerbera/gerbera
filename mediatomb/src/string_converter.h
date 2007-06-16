@@ -69,7 +69,8 @@ protected:
     iconv_t cd;
     bool dirty;
 
-    zmm::String _convert(zmm::String str, bool validate);
+    zmm::String _convert(zmm::String str, bool validate, 
+                         size_t *stoppedAt = NULL);
 };
 
 #endif // __STRING_CONVERTER_H__

@@ -9,8 +9,9 @@ MediaTomb - UPnP AV Mediaserver.
 		* added network interface option
 		* added workaround for a PS3 realted problem, where sockets where left
 		  open
+		* improved iconv handling of illegal characters
 
-v0.9.1  Playstation 3 support
+v0.9.1  28.05.2007	Playstation 3 support
         * added support for Playstation 3
         * added command line option that allows to tell the server where to
           put the configuration upon first startup
@@ -27,7 +28,7 @@ v0.9.1  Playstation 3 support
         * MySQL database version pumped to 2 (MediaTomb will automatically
           update the database during the first launch)
 
-v0.9.0  Major rework
+v0.9.0  25.03.2007	Major rework
         * the UI was completely rewritten from scratch; it uses AJAX for all
           requests
         * integrated libupnp (http://pupnp.sf.net/) into our source tree
@@ -118,7 +119,7 @@ v0.9.0  Major rework
           for NAS vendors to integrate the server into their web UI
         * made model number configurable
 
-v0.8.1
+v0.8.1	07.09.2005
         * added "serve" directory, any files there can be downloaded 
           like from a normal webserver
         * implemented keyword extraction for auxdata from libexif

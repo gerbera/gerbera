@@ -212,8 +212,8 @@ void Id3Handler::fillMetadata(Ref<CdsItem> item)
             ID3_Field* art = frame->GetField(ID3FN_DATA);
             if (art != NULL)
             {
-                
-                String art_mimetype = String(ID3_GetPictureMimeType(&tag));
+                Ref<StringConverter> sc = StringConverter::m2i(); 
+                String art_mimetype = sc->convert(String(ID3_GetPictureMimeType(&tag)));
                 if (!string_ok(art_mimetype))
                     art_mimetype = _(MIMETYPE_DEFAULT);
 

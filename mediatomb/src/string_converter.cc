@@ -58,7 +58,28 @@ StringConverter::~StringConverter()
 
 zmm::String StringConverter::convert(String str, bool validate)
 {
-    return _convert(str, validate);
+    size_t stoppedAt = 0;
+    String ret;
+
+    if (!string_ok(str))
+        return str;
+
+    do
+    {
+        ret = ret + _convert(str, validate, &stoppedAt);
+        if ((ret.length() > 0) && (stoppedAt == 0))
+            break;
+
+        ret = ret + "?";
+        if ((stoppedAt + 1) < (size_t)str.length())
+            str = str.substring(stoppedAt+1);
+        else
+            break;
+
+        stoppedAt = 0;
+    } while (true);
+
+    return ret;
 }
 
 bool StringConverter::validate(String str)
@@ -74,7 +95,8 @@ bool StringConverter::validate(String str)
     }
 }
 
-zmm::String StringConverter::_convert(String str, bool validate)
+zmm::String StringConverter::_convert(String str, bool validate,
+                                      size_t *stoppedAt)
 {
     String ret_str;
 
@@ -93,7 +115,7 @@ zmm::String StringConverter::_convert(String str, bool validate)
     
     char **input_ptr = &input_copy;
     char **output_ptr = &output_copy;
-    
+   
     size_t input_bytes = (size_t)str.length();
     size_t output_bytes = (size_t)buf_size;
 
@@ -123,25 +145,21 @@ zmm::String StringConverter::_convert(String str, bool validate)
         switch (errno)
         {
             case EILSEQ:
-                log_error("%s could not be converted to new encoding: invalid character sequence!\n", str.c_str());
-                err = _("iconv: Invalid character sequence");
+            case EINVAL:
+                if (errno == EILSEQ)
+                    log_error("iconv: %s could not be converted to new encoding: invalid character sequence!\n", str.c_str());
+                else
+                    log_error("iconv: Incomplete multibyte sequence");
                 if (validate)
                     throw _Exception(err);
 
+                if (stoppedAt)
+                    *stoppedAt = (size_t)str.length()-input_bytes;
                 ret_str = String(output, output_copy - output);
-                if (ret_str == nil)
-                    ret_str = _("");
-
-                    // pad rest with "?"
-                    for (int i = ret_str.length(); i < str.length(); i++)
-                    {
-                        ret_str = ret_str + _("?");
-                    }
-                    FREE(output);
-                    return ret_str;
-                break;
-            case EINVAL:
-                err = _("iconv: Incomplete multibyte sequence");
+                dirty = true;
+                *output_copy = 0;
+                FREE(output);
+                return ret_str;
                 break;
             case E2BIG:
                 /// \todo should encode the whole string anyway
@@ -167,7 +185,8 @@ zmm::String StringConverter::_convert(String str, bool validate)
 
     ret_str = String(output, output_copy - output);
     FREE(output);
-    
+    if (stoppedAt)
+        *stoppedAt = 0; // no error 
     return ret_str;
 }
 
