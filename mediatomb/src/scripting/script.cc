@@ -339,6 +339,17 @@ void Script::initGlobalObject()
     /* initialize the built-in JS objects and the global object */
     if (! JS_InitStandardClasses(cx, glob))
         throw _Exception(_("Scripting: JS_InitStandardClasses failed"));
+
+    JSClass *c;
+
+#ifdef JS_THREADSAFE
+    c = JS_GetClass(cx, glob);
+#else
+    c = JS_GetClass(glob);
+#endif
+
+    if (c)
+        c->flags |= JSCLASS_HAS_PRIVATE;
 }
 
 void Script::defineFunction(String name, JSNative function, int numParams)
