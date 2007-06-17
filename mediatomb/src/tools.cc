@@ -41,7 +41,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-
+#include <limits.h>
+#include <netdb.h>
 #ifndef SOLARIS
     #include <net/if.h>
 #else
@@ -933,6 +934,25 @@ String normalizePath(String path)
 
 String interfaceToIP(String interface)
 {
+#if defined(__CYGWIN__)
+    struct hostent *h=NULL;
+    struct sockaddr_in LocalAddr;
+    char *hostname = (char *)MALLOC(256);
+    if (!hostname)
+        return nil;
+
+    gethostname(hostname, 255);
+    hostname[255] = '\0';
+    h=gethostbyname(hostname);
+    free(hostname);
+    if (h != NULL)
+    {
+        memcpy(&LocalAddr.sin_addr, h->h_addr_list[0],4);
+        return String(inet_ntoa(LocalAddr.sin_addr));
+    }
+    return nil;
+#else
+
     struct if_nameindex *iflist = NULL;
     struct if_nameindex *iflist_free = NULL;
     struct ifreq if_request;
@@ -982,6 +1002,7 @@ String interfaceToIP(String interface)
     close(local_socket);
     if_freenameindex(iflist_free);
     return nil;
+#endif
 }
 
 bool validateYesNo(String value)
