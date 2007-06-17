@@ -1456,15 +1456,24 @@ if test "x$JS_OK" = xyes; then
     else
     LDFLAGS="$LDFLAGS_SAVE $ADD_PTHREAD_CFLAGS"
     AC_CHECK_LIB(js, JS_NewObject,
-        [MOZLIB=js],
+        [
+            MOZLIB=js
+            JS_LIBS="-ljs"
+        ],
         [
             unset ac_cv_lib_js_JS_NewObject
             AC_CHECK_LIB(smjs, JS_NewObject,
-                [MOZLIB=smjs],
+                [
+                    JS_LIBS="-lsmjs"
+                    MOZLIB=smjs
+                ],
                 [
                     unset ac_cv_lib_smjs_JS_NewObject
                     AC_CHECK_LIB(mozjs, JS_NewObject,
-                        [MOZLIB=mozjs],
+                        [
+                            MOZLIB=mozjs
+                            JS_LIBS="-lmozjs"
+                        ],
                         [
                             LDFLAGS="-L$SEARCH_DIR_LIBS $LDFLAGS_SAVE $ADD_PTHREAD_CFLAGS"
                             unset ac_cv_lib_js_JS_NewObject
@@ -1514,29 +1523,11 @@ if test "x$JS_OK" = xyes; then
     CFLAGS="$CFLAGS $JS_CXXFLAGS -DJS_THREADSAFE"
     CXXFLAGS="$CXXFLAGS $JS_CXXFLAGS -DJS_THREADSAFE"
 
-   AC_LANG_SAVE
-   AC_LANG_CPLUSPLUS
-   AC_MSG_CHECKING([if spidermonkey was compiled with JS_THREADSAFE])
-   AC_COMPILE_IFELSE(
-        [AC_LANG_PROGRAM(
+    AC_CHECK_LIB($MOZLIB, JS_ClearContextThread,
             [
-                #include <jsapi.h>
-            ],
-            [
-                (void)JS_SetContextThread(0);
-            ]
-        )],
-        [
-            AC_MSG_RESULT([yes])
-            AC_DEFINE([JS_THREADSAFE], [1],
-                      [this version of spidermonkey is threadsafe])
-        ],
-        [
-            AC_MSG_RESULT([no])
-        ])
-   AC_LANG_RESTORE
-
-
+                AC_DEFINE([JS_THREADSAFE], [1],
+                          [this version of spidermonkey is threadsafe])
+            ])
 else
     if test "x$JS_EN" = xyes; then
         AC_MSG_ERROR(unable to configure libjs support)
