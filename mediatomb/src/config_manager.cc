@@ -869,8 +869,8 @@ void ConfigManager::validate(String serverhome)
         getOption(_("/import/library-options/libextractor/auxdata"),
                   _(""));
     }
-    NEW_STRARR_OPTION( createArrayFromNodeset(el, "add-data", "tag"));
-    options->set(strarr_opt, CFG_IMPORT_LIBOPTS_EXTRACTOR_AUXDATA_TAGS_LIST);
+    NEW_STRARR_OPTION(createArrayFromNodeset(el, _("add-data"), _("tag")));
+    SET_STRARR_OPTION(CFG_IMPORT_LIBOPTS_EXTRACTOR_AUXDATA_TAGS_LIST);
 #endif // HAVE_EXTRACTOR
 
 #ifdef HAVE_MAGIC
