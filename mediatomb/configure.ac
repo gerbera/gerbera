@@ -128,7 +128,7 @@ AC_ARG_WITH(magic-h,
 )
 
 AC_ARG_WITH(magic-libs,
-        AC_HELP_STRING([--with-magic-libs=DIR], [search for filemagic headers in DIR]),
+        AC_HELP_STRING([--with-magic-libs=DIR], [search for filemagic libraries in DIR]),
         [
             MAGIC_SEARCH_LIBS="$withval"
         ]
