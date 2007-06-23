@@ -1820,7 +1820,7 @@ if test "x$ID3_OK" = xyes; then
                             ID3_LIBS="$Z_LIBS -L$SEARCH_DIR_LIBS -lid3"
                         ],
                         [
-                            MAGIC_OK=missing
+                            ID3_OK=missing
                         ]
                     )
                 ],
@@ -1836,7 +1836,7 @@ if test "x$ID3_OK" = xyes; then
                             ID3_LIBS="-L$SEARCH_DIR_LIBS -lid3"
                         ],
                         [
-                            MAGIC_OK=missing
+                            ID3_OK=missing
                         ]
                     )
                 ]
