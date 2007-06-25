@@ -1736,6 +1736,13 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
         SessionManager::getInstance()->containerChangedUI(copy->getObjectID());
 }
 
+#ifdef HAVE_MAGIC
+zmm::String ContentManager::getMimeTypeFromBuffer(void *buffer, size_t length)
+{
+    return get_mime_type_from_buffer(ms, reMimetype, buffer, length); 
+}
+#endif
+
 
 CMTask::CMTask() : Object()
 {

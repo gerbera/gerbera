@@ -277,7 +277,10 @@ public:
 
     /// \brief instructs ContentManager to reload scripting environment
     void reloadLayout();
-    
+   
+#ifdef HAVE_MAGIC
+    zmm::String getMimeTypeFromBuffer(void *buffer, size_t length);
+#endif
 protected:
     void initLayout();
     void destroyLayout();

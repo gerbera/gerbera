@@ -169,6 +169,10 @@ zmm::String secondsToHMS(int seconds);
 #ifdef HAVE_MAGIC
 /// \brief Extracts mimetype from a file using filemagic
 zmm::String get_mime_type(magic_set *ms, zmm::Ref<RExp> reMimetype, zmm::String file);
+/// \brief Extracts mimetype from a buffer using filemagic
+zmm::String get_mime_type_from_buffer(magic_set *ms, zmm::Ref<RExp> reMimetype,
+                                         void *buffer, size_t length);
+
 #endif // HAVE_MAGIC
 
 /// \brief Extracts resolution from a JPEG image

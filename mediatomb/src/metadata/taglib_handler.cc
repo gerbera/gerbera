@@ -52,6 +52,8 @@
 #include "tools.h"
 #include "mem_io_handler.h"
 
+#include "content_manager.h"
+
 using namespace zmm;
 
 TagHandler::TagHandler() : MetadataHandler()
@@ -203,8 +205,16 @@ void TagHandler::fillMetadata(Ref<CdsItem> item)
             return;
 
         String art_mimetype = String(art->mimeType().toCString());
-        if (!string_ok(art_mimetype))
+        // saw that simply "PNG" was used with some mp3's, so mimetype setting
+        // was probably invalid
+        if (!string_ok(art_mimetype) || (art_mimetype.index('/') == -1))
+        {
+#ifdef HAVE_MAGIC
+            art_mimetype =  ContentManager::getInstance()->getMimeTypeFromBuffer((void *)art->picture().data(), art->picture().size());
+            if (!string_ok(art_mimetype))
+#endif
             art_mimetype = _(MIMETYPE_DEFAULT);
+        }
 
         Ref<CdsResource> resource(new CdsResource(CH_ID3));
         resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(art_mimetype));

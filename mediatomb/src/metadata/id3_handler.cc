@@ -52,6 +52,7 @@
 #include "common.h"
 #include "tools.h"
 #include "mem_io_handler.h"
+#include "content_manager.h"
 
 using namespace zmm;
 
@@ -214,8 +215,16 @@ void Id3Handler::fillMetadata(Ref<CdsItem> item)
             {
                 Ref<StringConverter> sc = StringConverter::m2i(); 
                 String art_mimetype = sc->convert(String(ID3_GetPictureMimeType(&tag)));
-                if (!string_ok(art_mimetype))
-                    art_mimetype = _(MIMETYPE_DEFAULT);
+                if (!string_ok(art_mimetype) || (art_mimetype.index('/') == -1))
+                {
+#ifdef HAVE_MAGIC
+                    art_mimetype = ContentManager::getInstance()->getMimeTypeFromBuffer((void *)art->GetRawBinary(), art->Size());
+                    printf("----------> got mimetype: %s\n", art_mimetype.c_str());
+                    printf("data size: %d\n", art->Size());
+                    if (!string_ok(art_mimetype))
+#endif
+                       art_mimetype = _(MIMETYPE_DEFAULT);
+                }
 
                 Ref<CdsResource> resource(new CdsResource(CH_ID3));
                 resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(art_mimetype));

@@ -565,6 +565,29 @@ String get_mime_type(magic_set *ms, Ref<RExp> reMimetype, String file)
     return nil;
 }
 
+String get_mime_type_from_buffer(magic_set *ms, Ref<RExp> reMimetype, 
+                                 void *buffer, size_t length)
+{
+    if (ms == NULL)
+        return nil;
+
+    char *mt = (char *)magic_buffer(ms, buffer, length);
+    if (mt == NULL)
+    {
+        log_error("magic_file: %s\n", magic_error(ms));
+        return nil;
+    }
+
+    String mime_type(mt);
+
+    Ref<Matcher> matcher = reMimetype->matcher(mime_type, 2);
+    if (matcher->next())
+        return matcher->group(1);
+
+    log_warning("filemagic returned invalid mimetype for the given buffer%s\n",
+                mt);
+    return nil;
+}
 #endif 
 
 void set_jpeg_resolution_resource(Ref<CdsItem> item, int res_num)
