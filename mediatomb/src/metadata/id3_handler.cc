@@ -219,17 +219,20 @@ void Id3Handler::fillMetadata(Ref<CdsItem> item)
                 {
 #ifdef HAVE_MAGIC
                     art_mimetype = ContentManager::getInstance()->getMimeTypeFromBuffer((void *)art->GetRawBinary(), art->Size());
-                    printf("----------> got mimetype: %s\n", art_mimetype.c_str());
-                    printf("data size: %d\n", art->Size());
                     if (!string_ok(art_mimetype))
 #endif
                        art_mimetype = _(MIMETYPE_DEFAULT);
                 }
 
-                Ref<CdsResource> resource(new CdsResource(CH_ID3));
-                resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(art_mimetype));
-                resource->addParameter(_(RESOURCE_CONTENT_TYPE), _(ID3_ALBUM_ART));
-                item->addResource(resource);
+                // if we could not determine the mimetype, then there is no
+                // point to add the resource - it's probably garbage
+                if (art_mimetype != _(MIMETYPE_DEFAULT))
+                {
+                    Ref<CdsResource> resource(new CdsResource(CH_ID3));
+                    resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(art_mimetype));
+                    resource->addParameter(_(RESOURCE_CONTENT_TYPE), _(ID3_ALBUM_ART));
+                    item->addResource(resource);
+                }
 
             }
         }

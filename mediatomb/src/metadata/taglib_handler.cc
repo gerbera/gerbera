@@ -216,10 +216,15 @@ void TagHandler::fillMetadata(Ref<CdsItem> item)
             art_mimetype = _(MIMETYPE_DEFAULT);
         }
 
-        Ref<CdsResource> resource(new CdsResource(CH_ID3));
-        resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(art_mimetype));
-        resource->addParameter(_(RESOURCE_CONTENT_TYPE), _(ID3_ALBUM_ART));
-        item->addResource(resource);
+        // if we could not determine the mimetype, then there is no
+        // point to add the resource - it's probably garbage
+        if (art_mimetype != _(MIMETYPE_DEFAULT))
+        {
+            Ref<CdsResource> resource(new CdsResource(CH_ID3));
+            resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(art_mimetype));
+            resource->addParameter(_(RESOURCE_CONTENT_TYPE), _(ID3_ALBUM_ART));
+            item->addResource(resource);
+        }
     }
 }
 
