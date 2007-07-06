@@ -182,7 +182,14 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
                 int pcd_id = cm->addFile(cds_obj->getLocation(), false, false, true);
                 if (pcd_id == INVALID_OBJECT_ID)
                     return JS_TRUE;
-
+                Ref<CdsObject> mainObj = Storage::getInstance()->loadObject(pcd_id);
+                cds_obj->setClass(mainObj->getClass());
+                if (IS_CDS_ITEM(cds_obj->getObjectType()) && IS_CDS_ITEM(mainObj->getObjectType()))
+                {
+                    Ref<CdsItem> mainItem = RefCast(mainObj, CdsItem);
+                    Ref<CdsItem> cdsItem = RefCast(cds_obj, CdsItem);
+                    cdsItem->setMimeType(mainItem->getMimeType());
+                }
                 cds_obj->setRefID(pcd_id);
             }
             else
