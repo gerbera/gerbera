@@ -80,7 +80,7 @@ js_copyObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval
         if (!JS_ValueToObject(cx, arg, &js_cds_obj))
             return JS_TRUE;
 
-        Ref<CdsObject> cds_obj = self->jsObject2cdsObject(js_cds_obj);
+        Ref<CdsObject> cds_obj = self->jsObject2cdsObject(js_cds_obj, nil);
         js_cds_clone_obj = JS_NewObject(cx, NULL, NULL, NULL);
         self->cdsObject2jsObject(cds_obj, js_cds_clone_obj);
 
@@ -149,15 +149,45 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
             return JS_TRUE;
         }
 
-        orig_object = self->jsObject2cdsObject(js_orig_obj);
+        orig_object = self->jsObject2cdsObject(js_orig_obj, nil);
         if (orig_object == nil)
             return JS_TRUE;
 
-        Ref<CdsObject> cds_obj = self->jsObject2cdsObject(js_cds_obj);
+        Ref<CdsObject> cds_obj;
+        Ref<ContentManager> cm = ContentManager::getInstance();
+        int pcd_id = INVALID_OBJECT_ID;
+
+        if (self->whoami() == S_PLAYLIST)
+        {  
+            int otype = self->getIntProperty(js_cds_obj, _("objectType"), -1);
+            if (otype == -1)
+            {
+                log_error("missing objectType property\n");
+                return JS_TRUE;
+            }
+
+            if (!IS_CDS_ITEM_EXTERNAL_URL(otype) &&
+                !IS_CDS_ITEM_INTERNAL_URL(otype))
+            { 
+                String loc = self->getProperty(js_cds_obj, _("location"));
+                if (string_ok(loc) && 
+                   (IS_CDS_PURE_ITEM(otype) || IS_CDS_ACTIVE_ITEM(otype)))
+                    loc = normalizePath(loc);
+
+                pcd_id = cm->addFile(loc, false, false, true);
+                if (pcd_id == INVALID_OBJECT_ID)
+                    return JS_TRUE;
+
+                Ref<CdsObject> mainObj = Storage::getInstance()->loadObject(pcd_id);
+                cds_obj = self->jsObject2cdsObject(js_cds_obj, mainObj);
+            }
+            else
+                cds_obj = self->jsObject2cdsObject(js_cds_obj, nil);
+        }
+        else
+            cds_obj = self->jsObject2cdsObject(js_cds_obj, orig_object);
         if (cds_obj == nil)
             return JS_TRUE;
-
-        Ref<ContentManager> cm = ContentManager::getInstance();
 
         int id;
 
@@ -179,17 +209,8 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
 
             if (self->whoami() == S_PLAYLIST)
             {
-                int pcd_id = cm->addFile(cds_obj->getLocation(), false, false, true);
                 if (pcd_id == INVALID_OBJECT_ID)
                     return JS_TRUE;
-                Ref<CdsObject> mainObj = Storage::getInstance()->loadObject(pcd_id);
-                cds_obj->setClass(mainObj->getClass());
-                if (IS_CDS_ITEM(cds_obj->getObjectType()) && IS_CDS_ITEM(mainObj->getObjectType()))
-                {
-                    Ref<CdsItem> mainItem = RefCast(mainObj, CdsItem);
-                    Ref<CdsItem> cdsItem = RefCast(cds_obj, CdsItem);
-                    cdsItem->setMimeType(mainItem->getMimeType());
-                }
                 cds_obj->setRefID(pcd_id);
             }
             else

@@ -84,7 +84,7 @@ public:
     void load(zmm::String scriptPath);
     void load(zmm::String scriptText, zmm::String scriptPath);
     
-    zmm::Ref<CdsObject> jsObject2cdsObject(JSObject *js);
+    zmm::Ref<CdsObject> jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd);
     void cdsObject2jsObject(zmm::Ref<CdsObject> obj, JSObject *js);
     
     virtual script_class_t whoami() = 0;

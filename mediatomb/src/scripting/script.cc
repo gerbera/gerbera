@@ -416,7 +416,7 @@ void Script::execute()
     _execute(script);
 }
 
-Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js)
+Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
 {
     String val;
     int objectType;
@@ -461,6 +461,11 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js)
 
         obj->setTitle(val);
     }
+    else
+    {
+        if (pcd != nil)
+            obj->setTitle(pcd->getTitle());
+    }
 
     val = getProperty(js, _("upnpclass"));
     if (val != nil)
@@ -469,6 +474,11 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js)
             val = p2i->convert(val);
 
         obj->setClass(val);
+    }
+    else
+    {
+        if (pcd != nil)
+            obj->setClass(pcd->getClass());
     }
 
     b = getBoolProperty(js, _("restricted"));
@@ -510,6 +520,10 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js)
     if (IS_CDS_ITEM(objectType))
     {
         Ref<CdsItem> item = RefCast(obj, CdsItem);
+        Ref<CdsItem> pcd_item;
+
+        if (pcd != nil)
+            pcd_item = RefCast(pcd, CdsItem);
 
         val = getProperty(js, _("mimetype"));
         if (val != nil)
@@ -519,7 +533,11 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js)
 
             item->setMimeType(val);
         }
-
+        else
+        {
+            if (pcd != nil)
+                item->setMimeType(pcd_item->getMimeType());
+        }
         /// \todo check what this is doing here, wasn't it already handled
         /// in the MT_KEYS loop?
         val = getProperty(js, _("description"));
@@ -530,7 +548,12 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js)
 
             item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), val);
         }
-
+        else
+        {
+            if (pcd != nil)
+                item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION),
+                    pcd_item->getMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION)));
+        }
         if (this->whoami() == S_PLAYLIST)
         {
             item->setTrackNumber(getIntProperty(js, _("playlistOrder"), 0));
@@ -538,22 +561,41 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js)
 
         // location must not be touched by character conversion!
         val = getProperty(js, _("location"));
-        if (IS_CDS_PURE_ITEM(objectType) || IS_CDS_ACTIVE_ITEM(objectType))
+        if ((val != nil) && (IS_CDS_PURE_ITEM(objectType) || IS_CDS_ACTIVE_ITEM(objectType)))
             val = normalizePath(val);
         
-        if (val != nil)
+        if (string_ok(val))
             obj->setLocation(val);
-        
+        else
+        {
+            if (pcd != nil)
+                obj->setLocation(pcd->getLocation());
+        }
+
         if (IS_CDS_ACTIVE_ITEM(objectType))
         {
             Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
+            Ref<CdsActiveItem> pcd_aitem;
+            if (pcd != nil)
+                pcd_aitem = RefCast(pcd, CdsActiveItem);
             /// \todo what about character conversion for action and state fields?
             val = getProperty(js, _("action"));
             if (val != nil)
                 aitem->setAction(val);
+            else
+            {
+                if (pcd != nil)
+                    aitem->setAction(pcd_aitem->getAction());
+            }
+
             val = getProperty(js, _("state"));
             if (val != nil)
                 aitem->setState(val);
+            else
+            {
+                if (pcd != nil)
+                    aitem->setState(pcd_aitem->getState());
+            }
         }
 
         if (IS_CDS_ITEM_EXTERNAL_URL(objectType))
@@ -562,7 +604,7 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js)
 
             obj->setRestricted(true);
             Ref<CdsItemExternalURL> item = RefCast(obj, CdsItemExternalURL);
-           val = getProperty(js, _("protocol"));
+            val = getProperty(js, _("protocol"));
             if (val != nil)
             {
                 if (this->whoami() == S_PLAYLIST)
