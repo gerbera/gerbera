@@ -31,8 +31,6 @@ var autoscanId;
 var autoscanFromFs;
 var autoscanPersistent;
 
-/* not completely finished...
-
 function showAutoscanDirs()
 {
     setType('db');
@@ -55,35 +53,69 @@ function showAutoscanCallback(ajaxRequest)
     if (autoscans.length <= 0) return;
     
     var autoscanHTMLel = rightDocument.createElement("div");
-    autoscanHTMLel.setAttribute("class", "itemsTable");
+    autoscanHTMLel.setAttribute("class", "itemsEl");
+    var itemsTable = rightDocument.createElement("table");
+    itemsTable.setAttribute("width", "100%");
+    itemsTable.setAttribute("cellspacing", "0");
+    var itemsTableBody = rightDocument.createElement("tbody");
+    itemsTable.appendChild(itemsTableBody);
+    autoscanHTMLel.appendChild(itemsTable);
+    
     for (var i = 0; i < autoscans.length; i++)
     {
-        var autoscanHTMLrow = rightDocument.createElement("div");
-        autoscanHTMLrow.setAttribute("class", (i % 2 == 0 ? "itemRowA" : "itemRowB"));
+        var itemRow = rightDocument.createElement("tr");
+        itemRow.setAttribute("class", (i % 2 == 0 ? "itemRowA" : "itemRowB"));
         
-        var spaceCell = rightDocument.createElement("div");
-        spaceCell.setAttribute("class", "spaceCell");
+        var itemEntryTd = rightDocument.createElement("td");
+        itemEntryTd.setAttribute("class", "itemEntry");
         
-        var itemButtons = rightDocument.createElement("div");
-        itemButtons.setAttribute("class", "itemButtons");
-        
+        var itemEntry;
+        if (isMSIE)
+        {
+            itemEntry = rightDocument.createElement("div"); // another div only for IE...
+            itemEntry.setAttribute("class", "itemLeft");
+            itemEntryTd.appendChild(itemEntry);
+        }
+        else
+        {
+            itemEntry = itemEntryTd;
+        }
         var autoscanXMLel = autoscans[i];
         
-        var asEntry = rightDocument.createElement("div");
-        asEntry.setAttribute("class", "itemEntry");
-        //var linkEl = rightDocument.createElement("a");
-        //linkEl.setAttribute("href", "javascript:parent.selectNode('d"+autoscanXMLel.getAttribute("objectID")+"');");
-        var textEl = rightDocument.createTextNode(xmlGetElementText(autoscanXMLel, "location"));
-        asEntry.appendChild(textEl);
-        //linkEl.appendChild(textEl);
+        var autoscanMode = xmlGetElementText(autoscanXMLel, "scan_mode");
+        var autoscanFromConfig = xmlGetElementText(autoscanXMLel, "from_config") == "1";
         
-        autoscanHTMLrow.appendChild(asEntry);
-        autoscanHTMLrow.appendChild(spaceCell);
-        autoscanHTMLrow.appendChild(itemButtons);
+        var icon;
+        var altText;
+        if (autoscanMode == "timed")
+            appendImgNode(rightDocument, itemEntry, "Timed-Autoscan:", (autoscanFromConfig ? iconContainerAutoscanTimedConfig : iconContainerAutoscanTimed));
+        else if (autoscanMode == "inotify")
+            appendImgNode(rightDocument, itemEntry, "Inotify-Autoscan:", (autoscanFromConfig ? iconContainerAutoscanInotifyConfig : iconContainerAutoscanInotify));
         
-        _addLink(itemButtons, true, "javascript:parent.changeAutoscanDirectory('remove', '"+autoscanXMLel.getAttribute("objectID")+"', false);", "remove", iconRemoveThis);
+        var itemText = rightDocument.createTextNode(" " + xmlGetElementText(autoscanXMLel, "location"));
+        itemEntry.appendChild(itemText);
         
-        autoscanHTMLel.appendChild(autoscanHTMLrow);
+        var itemButtonsTd = rightDocument.createElement("td");
+        itemButtonsTd.setAttribute("class", "itemButtons");
+        itemButtonsTd.setAttribute("align", "right");
+        var itemButtons;
+        if (isMSIE)
+        {
+            itemButtons = rightDocument.createElement("div"); // another div only for IE...
+            itemButtons.setAttribute("class", "itemRight");
+            itemButtonsTd.appendChild(itemButtons);
+        }
+        else
+        {
+            itemButtons = itemButtonsTd;
+        }
+        
+        itemRow.appendChild(itemEntryTd);
+        itemRow.appendChild(itemButtonsTd);
+        
+        _addLink(rightDocument, itemButtons, true, "javascript:parent.editLoadAutoscanDirectory('"+autoscanXMLel.getAttribute("objectID")+"', false);", "edit", iconEditAutoscan);
+        
+        itemsTableBody.appendChild(itemRow);
     }
     
     Element.hide(itemRoot);
@@ -91,7 +123,6 @@ function showAutoscanCallback(ajaxRequest)
     itemRoot.replaceChild(autoscanHTMLel, itemRoot.firstChild);
     Element.show(itemRoot);
 }
-*/
 
 function editLoadAutoscanDirectory(objectId, fromFs)
 {

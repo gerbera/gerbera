@@ -76,6 +76,8 @@
                 <xs:element ref="modelDescription" minOccurs="0"/>
                 <xs:element ref="serialNumber" minOccurs="0"/>
                 <xs:element ref="protocolInfo" minOccurs="0"/>
+                <xs:element ref="pc-directory" minOccurs="0"/>
+                <xs:element ref="retries-on-timeout" minOccurs="0"/>
             </xs:all>
         </xs:complexType>
     </xs:element>
@@ -153,6 +155,14 @@
 
     <xs:element name="model" type="xs:string"/>
 
+    <xs:element name="pc-directory">
+        <xs:complexType>
+            <xs:attribute name="upnp-hide" type="boolean" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="retries-on-timeout" type="xs:integer"/>
+
     <xs:element name="ui">
         <xs:complexType>
             <xs:all>
@@ -228,10 +238,11 @@
     <xs:element name="import">
         <xs:complexType>
             <xs:all>
-                <xs:element ref="virtual-layout" minOccurs="0"/>
+                <xs:element ref="scripting" minOccurs="0"/>
                 <xs:element ref="mappings" minOccurs="0"/>
                 <xs:element ref="filesystem-charset" minOccurs="0"/>
                 <xs:element ref="metadata-charset" minOccurs="0"/>
+                <xs:element ref="playlist-charset" minOccurs="0"/>
                 <xs:element ref="autoscan" minOccurs="0"/>
                 <xs:element ref="library-options" minOccurs="0"/>
                 <xs:element ref="magic-file" minOccurs="0"/>
@@ -240,10 +251,25 @@
         </xs:complexType>
     </xs:element>
 
+    <xs:element name="scripting">
+        <xs:complexType>
+            <xs:all>
+                <xs:element ref="common-script" minOccurs="0"/>
+                <xs:element ref="playlist-script" minOccurs="0"/>
+                <xs:element ref="virtual-layout" minOccurs="0"/>
+            </xs:all>
+            <xs:attribute name="script-charset" type="xs:string" default="UTF-8"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="common-script" type="xs:string"/>
+
+    <xs:element name="playlist-script" type="xs:string"/>
+
     <xs:element name="virtual-layout">
         <xs:complexType>
             <xs:sequence>
-                <xs:element ref="script" minOccurs="0"/>
+                <xs:element ref="import-script" minOccurs="0"/>
             </xs:sequence>
             <xs:attribute name="type" default="builtin">
                 <xs:simpleType>
@@ -256,21 +282,14 @@
             </xs:attribute>
         </xs:complexType>
     </xs:element>
-    
-    
+
+    <xs:element name="import-script" type="xs:string"/>
+
     <xs:element name="filesystem-charset" type="xs:string"/>
 
     <xs:element name="metadata-charset" type="xs:string"/>
 
-    <xs:element name="script">
-        <xs:complexType>
-            <xs:simpleContent>
-                <xs:extension base="xs:string">
-                    <xs:attribute name="charset" type="xs:string" default="UTF-8"/>
-                </xs:extension>
-            </xs:simpleContent>
-        </xs:complexType>
-    </xs:element>
+    <xs:element name="playlist-charset" type="xs:string"/>
 
     <xs:element name="magic-file" type="xs:string"/>
 

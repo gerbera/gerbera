@@ -99,7 +99,7 @@ public:
     virtual void updateObject(zmm::Ref<CdsObject> object, int *changedContainer);
     
     virtual zmm::Ref<CdsObject> loadObject(int objectID);
-    virtual int getChildCount(int contId, bool containers, bool items);
+    virtual int getChildCount(int contId, bool containers, bool items, bool hideFsRoot);
     
     //virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param);
     

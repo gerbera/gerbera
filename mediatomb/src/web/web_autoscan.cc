@@ -41,6 +41,13 @@
 using namespace zmm;
 using namespace mxml;
 
+int WebAutoscanProcessListComparator(void *arg1, void *arg2)
+{
+    AutoscanDirectory *a1 = (AutoscanDirectory *)arg1;
+    AutoscanDirectory *a2 = (AutoscanDirectory *)arg2;
+    return strcmp(a1->getLocation().c_str(), a2->getLocation().c_str());
+}
+
 web::autoscan::autoscan() : WebRequestHandler()
 {
 }
@@ -143,11 +150,16 @@ void web::autoscan::process()
     }
     else if (action == "list")
     {
-        /// \todo use a method of ContentManager, should give back all autoscans
-        abort();
-        Ref<AutoscanList> autoscanList = storage->getAutoscanList(TimedScanMode);
-        
+        Ref<Array<AutoscanDirectory> > autoscanList = cm->getAutoscanDirectories();
         int size = autoscanList->size();
+        
+        // --- sorting autoscans
+        
+        quicksort((COMPARABLE *) autoscanList->getObjectArray(), autoscanList->size(),
+                WebAutoscanProcessListComparator);
+        
+        // ---
+        
         Ref<Element> autoscansEl (new Element(_("autoscans")));
         for (int i = 0; i < size; i++)
         {
@@ -155,6 +167,8 @@ void web::autoscan::process()
             Ref<Element> autoscanEl (new Element(_("autoscan")));
             autoscanEl->addAttribute(_("objectID"), String::from(autoscanDir->getObjectID()));
             autoscanEl->appendTextChild(_("location"), autoscanDir->getLocation());
+            autoscanEl->appendTextChild(_("scan_mode"), AutoscanDirectory::mapScanmode(autoscanDir->getScanMode()));
+            autoscanEl->appendTextChild(_("from_config"), autoscanDir->persistent() ? _("1") : _("0"));
             //autoscanEl->appendTextChild(_("scan_level"), AutoscanDirectory::mapScanlevel(autoscanDir->getScanLevel()));
             autoscansEl->appendChild(autoscanEl);
         }

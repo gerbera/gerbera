@@ -164,7 +164,7 @@ td.contEntry
     padding-left:5px;
 }
 
-td.contEntry img, td.itemButtons a, td.itemButtons img, span.contText
+td.contEntry img, td.itemButtons a, td.itemButtons img, span.contText, td.itemEntry img
 {
     vertical-align:middle;
 }

@@ -129,7 +129,7 @@ int main(int argc, char **argv, char **envp)
         switch (o)
         {
             case 'i':
-                log_debug("Option interface with param %s\n", optarg);
+                log_debug("Option ip with param %s\n", optarg);
                 ip = String(optarg);
                 break;
 
@@ -464,12 +464,14 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         }
         catch (Exception e)
         {
+            log_error("%s\n", e.getMessage().c_str());
             e.printStackTrace();
         }
         exit(EXIT_FAILURE);
     }
     catch (Exception e)
     {
+        log_error("%s\n", e.getMessage().c_str());
         e.printStackTrace();
         exit(EXIT_FAILURE);
     }

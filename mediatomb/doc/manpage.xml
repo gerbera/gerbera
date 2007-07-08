@@ -47,6 +47,11 @@
             </arg>
 
             <arg>
+                <option>-e <replaceable>interface</replaceable>
+                </option>
+            </arg>
+
+            <arg>
                 <option>-p <replaceable>port</replaceable>
                 </option>
             </arg>
@@ -121,6 +126,17 @@
                 <listitem>
                     <para>The server will bind to the given IP address, currently we can not bind to
                     multiple interfaces so binding to 0.0.0.0 will not be possible.</para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>
+                    <option>-e</option>,
+                    <option>--interface</option>
+                </term>
+                <listitem>
+                    <para>The server will bind to the given network interface, currently we can only bind
+                    to one interface at a time.</para>
                 </listitem>
             </varlistentry>
 

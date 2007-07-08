@@ -525,9 +525,11 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     row = nil;
     res = nil;
     
+    bool hideFsRoot = param->getFlag(BROWSE_HIDE_FS_ROOT);
+    
     if(param->getFlag(BROWSE_DIRECT_CHILDREN) && IS_CDS_CONTAINER(objectType))
     {
-        param->setTotalMatches(getChildCount(objectID, getContainers, getItems));
+        param->setTotalMatches(getChildCount(objectID, getContainers, getItems, hideFsRoot));
     }
     else
     {
@@ -560,6 +562,11 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
         }
         
         *qb << TQD('f',"parent_id") << '=' << objectID;
+        
+        if (objectID == CDS_ID_ROOT && hideFsRoot)
+            *qb << " AND " << TQD('f',"id") << "!="
+                << quote (CDS_ID_FS_ROOT);
+        
         if (! getContainers && ! getItems)
         {
             *qb << " AND 0=1";
@@ -590,7 +597,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     {
         *qb << TQD('f',"id") << '=' << objectID << " LIMIT 1";
     }
-    //log_debug("QUERY: %s\n", qb->toString().c_str());
+    log_debug("QUERY: %s\n", qb->toString().c_str());
     res = select(qb);
     
     Ref<Array<CdsObject> > arr(new Array<CdsObject>());
@@ -612,14 +619,14 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
         if (IS_CDS_CONTAINER(obj->getObjectType()))
         {
             Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
-            cont->setChildCount(getChildCount(cont->getID(), getContainers, getItems));
+            cont->setChildCount(getChildCount(cont->getID(), getContainers, getItems, hideFsRoot));
         }
     }
     
     return arr;
 }
 
-int SQLStorage::getChildCount(int contId, bool containers, bool items)
+int SQLStorage::getChildCount(int contId, bool containers, bool items, bool hideFsRoot)
 {
     if (! containers && ! items)
         return 0;
@@ -633,6 +640,10 @@ int SQLStorage::getChildCount(int contId, bool containers, bool items)
     else if (items && ! containers)
         *qb << " AND (" << TQ("object_type") << " & " << OBJECT_TYPE_ITEM
             << ") = " << OBJECT_TYPE_ITEM;
+    if (contId == CDS_ID_ROOT && hideFsRoot)
+    {
+        *qb << " AND " << TQ("id") << "!=" << quote (CDS_ID_FS_ROOT);
+    }
     res = select(qb);
     if (res != nil && (row = res->nextRow()) != nil)
     {

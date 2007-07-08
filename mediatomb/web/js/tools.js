@@ -95,7 +95,7 @@ function xmlGetAttribute(parent, name)
     return null;
 }
 
-function appendImgNode(document, node, alt, icon, width, height)
+function appendImgNode(document, node, alt, icon)
 {
     var img = document.createElement("img");
     img.setAttribute("src", icon.src);
