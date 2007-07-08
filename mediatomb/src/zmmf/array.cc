@@ -94,6 +94,7 @@ void ArrayBase::remove(int index, int count)
         Object *obj = arr[i];
         if(obj)
             obj->release();
+        arr[i] = NULL;
     }
     int move = siz - max;
     if (move) // if there is anything to shift
@@ -113,6 +114,7 @@ void ArrayBase::removeUnordered(int index)
     Object *obj = arr[index];
     obj->release();
     arr[index] = arr[--siz];
+    arr[siz] = NULL;
 }
 void ArrayBase::insert(int index, Object *obj)
 {
