@@ -64,7 +64,13 @@ public:
 
     /// \brief playlist to internal
     static zmm::Ref<StringConverter> p2i();
+
+    /// \brief safeguard - internal to internal - needed to catch some
+    /// scenarious where the user may have forgotten to add proper conversion
+    /// in the script.
+    static zmm::Ref<StringConverter> i2i();
 #endif
+
 protected:
     iconv_t cd;
     bool dirty;

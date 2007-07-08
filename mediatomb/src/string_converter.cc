@@ -229,4 +229,11 @@ Ref<StringConverter> StringConverter::p2i()
     return conv;
 }
 
+Ref<StringConverter> StringConverter::i2i()
+{
+    Ref<StringConverter> conv(new StringConverter(_(DEFAULT_INTERNAL_CHARSET),
+                                                  _(DEFAULT_INTERNAL_CHARSET)));
+    return conv;
+}
+
 #endif

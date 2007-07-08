@@ -77,6 +77,9 @@ void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
         (parent->getClass() == UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER))
         flag |= BROWSE_TRACK_SORT;
 
+    if (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_HIDE_PC_DIRECTORY))
+         flag |= BROWSE_HIDE_FS_ROOT;
+
     Ref<BrowseParam> param(new BrowseParam(objectID, flag));
 
     param->setStartingIndex(StartingIndex.toInt());

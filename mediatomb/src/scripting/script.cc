@@ -37,7 +37,6 @@
 
 #include "script.h"
 #include "tools.h"
-#include "string_converter.h"
 #include "metadata_handler.h"
 #include "js_functions.h"
 #include "config_manager.h"
@@ -48,6 +47,10 @@ static JSFunctionSpec js_global_functions[] = {
     {"print",           js_print,          0},
     {"addCdsObject",    js_addCdsObject,   3},
     {"copyObject",      js_copyObject,     1},
+    {"f2i",             js_f2i,            1},
+    {"m2i",             js_m2i,            1},
+    {"p2i",             js_m2i,            1},
+    {"j2i",             js_m2i,            1},
     {0}
 };
 
@@ -241,7 +244,13 @@ Script::Script(Ref<Runtime> runtime) : Object()
     
     glob = NULL;
     script = NULL;
-    
+   
+    _p2i = StringConverter::p2i();
+    _j2i = StringConverter::j2i();
+    _m2i = StringConverter::m2i();
+    _f2i = StringConverter::f2i();
+    _i2i = StringConverter::i2i();
+
     JS_SetErrorReporter(cx, js_error_reporter);
     initGlobalObject();
     
@@ -423,6 +432,7 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
     int b;
     int i;
     Ref<StringConverter> p2i;
+    Ref<StringConverter> i2i = StringConverter::i2i();
 
     if (this->whoami() == S_PLAYLIST)
     {
@@ -458,6 +468,10 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
     {
         if (this->whoami() == S_PLAYLIST)
             val = p2i->convert(val);
+        else
+            // user has to take care of conversion in the script
+            // this is important when location is being set or used
+            val = i2i->convert(val);
 
         obj->setTitle(val);
     }
@@ -472,6 +486,8 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
     {
         if (this->whoami() == S_PLAYLIST)
             val = p2i->convert(val);
+        else
+            val = i2i->convert(val);
 
         obj->setClass(val);
     }
@@ -509,6 +525,8 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
                 {
                     if (this->whoami() == S_PLAYLIST)
                         val = p2i->convert(val);
+                    else
+                        val = i2i->convert(val);
 
                     obj->setMetadata(String(MT_KEYS[i].upnp), val);
                 }
@@ -530,6 +548,8 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
         {
             if (this->whoami() == S_PLAYLIST)
                 val = p2i->convert(val);
+            else
+                val = i2i->convert(val);
 
             item->setMimeType(val);
         }
@@ -545,6 +565,8 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
         {
             if (this->whoami() == S_PLAYLIST)
                 val = p2i->convert(val);
+            else
+                val = i2i->convert(val);
 
             item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), val);
         }
@@ -578,7 +600,7 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
             Ref<CdsActiveItem> pcd_aitem;
             if (pcd != nil)
                 pcd_aitem = RefCast(pcd, CdsActiveItem);
-            /// \todo what about character conversion for action and state fields?
+          /// \todo what about character conversion for action and state fields?
             val = getProperty(js, _("action"));
             if (val != nil)
                 aitem->setAction(val);
@@ -609,6 +631,9 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
             {
                 if (this->whoami() == S_PLAYLIST)
                     val = p2i->convert(val);
+                else
+                    val = i2i->convert(val);
+
 
                 protocolInfo = renderProtocolInfo(item->getMimeType(), val);
             }
@@ -736,5 +761,23 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
     }
 }
 
+String Script::convertToCharset(String str, charset_convert_t chr)
+{
+    switch (chr)
+    {
+        case P2I:
+            return _p2i->convert(str);
+        case M2I:
+            return _m2i->convert(str);
+        case F2I:
+            return _f2i->convert(str);
+        case J2I:
+            return _j2i->convert(str);
+        default:
+            return _i2i->convert(str);
+    }
+
+    return nil;
+}
 
 #endif // HAVE_JS

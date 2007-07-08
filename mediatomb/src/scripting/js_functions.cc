@@ -91,6 +91,7 @@ js_copyObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval
     }
     catch (Exception e)
     {
+        log_error("%s\n", e.getMessage().c_str());
         e.printStackTrace();
     }
     return JS_TRUE;
@@ -245,9 +246,71 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
     }
     catch (Exception e)
     {
+        log_error("%s\n", e.getMessage().c_str());
         e.printStackTrace();
     }
     return JS_TRUE;
+}
+
+static JSBool convert_charset_generic(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval, charset_convert_t chr)
+{
+    try
+    {
+        JSString *str;
+        String result;
+
+        Script *self = (Script *)JS_GetPrivate(cx, obj);
+
+        if (self == NULL)
+        {
+            log_debug("Could not retrieve class instance from global object\n");
+            return JS_FALSE;
+        }
+
+        if (JSVAL_IS_STRING(argv[0]))
+        {
+            str = JS_ValueToString(cx, argv[0]);
+            if (str)
+                result = String(JS_GetStringBytes(str));
+        }
+
+        if (result != nil)
+        {
+            result = self->convertToCharset(result, chr);
+            JSString *str2 = JS_NewStringCopyN(cx, result.c_str(), result.length());
+            if (!str2)
+                return JS_TRUE;
+            *rval = STRING_TO_JSVAL(str2);
+        }
+    }
+    catch (Exception e)
+    {
+        log_error("%s\n", e.getMessage().c_str());
+        e.printStackTrace();
+    }
+
+    return JS_TRUE;
+}
+
+
+JSBool js_f2i(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
+{
+     return convert_charset_generic(cx, obj, argc, argv, rval, F2I);
+}
+
+JSBool js_m2i(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
+{
+     return convert_charset_generic(cx, obj, argc, argv, rval, M2I);
+}
+
+JSBool js_p2i(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
+{
+     return convert_charset_generic(cx, obj, argc, argv, rval, P2I);
+}
+
+JSBool js_j2i(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
+{
+     return convert_charset_generic(cx, obj, argc, argv, rval, J2I);
 }
 
 } // extern "C"

@@ -1546,6 +1546,7 @@ Ref<Array<AutoscanDirectory> > ContentManager::getAutoscanDirectories()
 #endif
     return all;
 }
+
 Ref<AutoscanDirectory> ContentManager::getAutoscanDirectory(String location)
 {
     // \todo change this when more scanmodes become available

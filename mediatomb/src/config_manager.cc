@@ -640,6 +640,15 @@ void ConfigManager::validate(String serverhome)
     SET_BOOL_OPTION(CFG_SERVER_EXTEND_PROTOCOLINFO);
 #endif
 
+    temp = getOption(_("/server/pc-directory/attribute::hide"),
+                     _(DEFAULT_HIDE_PC_DIRECTORY));
+    if (!validateYesNo(temp))
+        throw _Exception(_("Error in config file: hide attribute of the "
+                          "pc-directory tag must be either \"yes\" or \"no\""));
+
+    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    SET_BOOL_OPTION(CFG_SERVER_HIDE_PC_DIRECTORY);
+
     temp_int = getIntOption(_("/server/retries-on-timeout"), DEFAULT_TIMEOUT_RETRIES);
     NEW_INT_OPTION(temp_int);
     SET_INT_OPTION(CFG_SERVER_RETRIES_ON_TIMEOUT);

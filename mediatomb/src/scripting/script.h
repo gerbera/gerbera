@@ -42,12 +42,22 @@
 #include "common.h"
 #include "runtime.h"
 #include "cds_objects.h"
+#include "string_converter.h"
 
 typedef enum
 {
     S_IMPORT = 0,
     S_PLAYLIST
 } script_class_t;
+
+typedef enum
+{
+    M2I,
+    F2I,
+    J2I,
+    P2I,
+    I2I,
+} charset_convert_t;
 
 class Script : public zmm::Object
 {
@@ -88,6 +98,8 @@ public:
     void cdsObject2jsObject(zmm::Ref<CdsObject> obj, JSObject *js);
     
     virtual script_class_t whoami() = 0;
+
+    zmm::String convertToCharset(zmm::String str, charset_convert_t chr);
     
 protected:
     void execute();
@@ -96,6 +108,11 @@ private:
     void initGlobalObject();
     JSScript *_load(zmm::String scriptPath);
     void _execute(JSScript *scr);
+    zmm::Ref<StringConverter> _p2i;
+    zmm::Ref<StringConverter> _j2i;
+    zmm::Ref<StringConverter> _f2i;
+    zmm::Ref<StringConverter> _m2i;
+    zmm::Ref<StringConverter> _i2i;
 };
 
 #endif // __SCRIPTING_SCRIPT_H__

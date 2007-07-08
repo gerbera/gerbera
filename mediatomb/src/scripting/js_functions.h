@@ -52,6 +52,11 @@ JSBool js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, js
 /// \brief Makes a copy of an CDS object.
 JSBool js_copyObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval);
 
+JSBool js_f2i(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval);
+JSBool js_m2i(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval);
+JSBool js_p2i(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval);
+JSBool js_j2i(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval);
+
 } // extern "C"
 
 #endif//__SCRIPTING_JS_FUNCTIONS_H__
