@@ -1,15 +1,19 @@
 MediaTomb - UPnP AV Mediaserver.
-(after v0.9.1)
+v0.10.0	09.07.2007	Playlist and inotify autoscan support.
         * MySQL database version pumped to 3 (MediaTomb will automatically
           update the database during the first launch)
-        * Sqlute3 database version pumped to 2 (MediaTomb will automatically
+        * Sqlite3 database version pumped to 2 (MediaTomb will automatically
           update the database during the first launch)
         * added support for inotify based autoscan
-        * playlist support
+        * playlist support - parsing playlist via js is now possible
         * added network interface option
         * added workaround for a PS3 related problem, where sockets were left
 		  open
         * improved iconv handling of illegal characters
+		* added character conversion safeguards to make sure that non UTF-8
+		  strings do not make it into the database from js scripts
+		* made character conversion functions available to js
+		* added option to hide PC Directory from UPnP renderers
 
 v0.9.1  28.05.2007	Playstation 3 support
         * added support for Playstation 3

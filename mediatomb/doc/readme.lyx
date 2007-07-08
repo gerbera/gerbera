@@ -116,7 +116,8 @@ status open
 
 \begin_layout Standard
 
-<releaseinfo>This documentation is valid for MediaTomb version 0.9.0.</releaseinfo>
+<releaseinfo>This documentation is valid for MediaTomb version 0.10.0.</releaseinfo
+>
 \end_layout
 
 \end_inset
@@ -1729,6 +1730,19 @@ The server will bind to the given IP address, currently we can not bind
 \end_layout
 
 \begin_layout Subsection
+Interface
+\end_layout
+
+\begin_layout Code
+--interface or -e
+\end_layout
+
+\begin_layout Standard
+Interface to bind to, for example eth0, this can be specified instead of
+ the ip address.
+\end_layout
+
+\begin_layout Subsection
 Port
 \end_layout
 
@@ -2733,6 +2747,47 @@ status open
 \end_layout
 
 \begin_layout Code
+<pc-directory upnp-hide="no"/>
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: no
+\end_layout
+
+\begin_layout Standard
+Enabling this option will make the PC-Directory container invisible for
+ UPnP devices.
+\end_layout
+
+\begin_layout Description
+Note: independent of the above setting the container will be always visible
+ in the web UI!
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
 <bookmark>mediatomb.html</bookmark>
 \end_layout
 
@@ -2864,7 +2919,7 @@ status open
 \begin_layout Standard
 
 \emph on
-Optioprotonal
+Optional
 \end_layout
 
 \begin_layout Standard
@@ -3775,6 +3830,20 @@ Default: "mediatomb"
 
 \begin_layout Standard
 Name of the database that will be used by MediaTomb.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -5643,12 +5712,45 @@ Pinnacle
 ShowCenter 200
 \end_layout
 
+\begin_layout Itemize
+SoundBridge
+\end_layout
+
+\begin_layout Subsubsection
+Roku
+\end_layout
+
+\begin_layout Itemize
+SoundBridge M1001
+\end_layout
+
+\begin_layout Itemize
+SoundBridge M2000 
+\end_layout
+
 \begin_layout Subsubsection
 Siemens
 \end_layout
 
 \begin_layout Itemize
 Gigaset M740AV
+\end_layout
+
+\begin_layout Subsubsection
+Sony
+\end_layout
+
+\begin_layout Itemize
+Playstation 3
+\end_layout
+
+\begin_layout Standard
+Firmware 1.80 introduces UPnP/DLNA support, add the following to the <server>
+ section of your configuration file to enable MediaTomb PS3 compatibility:
+\end_layout
+
+\begin_layout Code
+<protocolInfo extend="yes"/> 
 \end_layout
 
 \begin_layout Subsubsection
@@ -5664,7 +5766,7 @@ The TG100 client has a problem browsing containers, where item titles exceed
  101 characters.
  We implemented a server-side workaround which allows you to limit the lengths
  of all titles and descriptions.
- Use the following settings in the server section of your configuration
+ Use the following settings in the <server> section of your configuration
  file:
 \end_layout
 
@@ -5701,6 +5803,10 @@ Buffalo
 \end_layout
 
 \begin_layout Itemize
+KuroBox-HG
+\end_layout
+
+\begin_layout Itemize
 LinkStation
 \end_layout
 
@@ -5710,6 +5816,14 @@ Excito
 
 \begin_layout Itemize
 Bubba Mini Server
+\end_layout
+
+\begin_layout Subsubsection
+Linksys
+\end_layout
+
+\begin_layout Itemize
+NSLU2
 \end_layout
 
 \begin_layout Section

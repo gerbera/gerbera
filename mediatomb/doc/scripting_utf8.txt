@@ -1,6 +1,6 @@
 MediaTomb Scripting
 
-This documentation is valid for MediaTomb version 0.9.0.
+This documentation is valid for MediaTomb version 0.10.0.
 
 Copyright   2005 Gena Batsyan, Sergey Bostandzhyan
 
@@ -18,16 +18,20 @@ Table of Contents
     2.1. Understanding Virtual Objects.
     2.2. Theory Of Operation
 
-3. The Import Script
+3. Global Variables And Constants
 
-    3.1. Global Variables And Constants
-    3.2. Available Server Functions
+    3.1. The Media Object
+    3.2. Constants
 
-4. Walkthrough
+4. Functions
 
-    4.1. Helper Functions
-    4.2. Content Handlers
-    4.3. Putting it all together
+    4.1. Native Server Functions
+    4.2. Helper Functions
+
+5. Walkthrough
+
+    5.1. Import Script
+    5.2. Playlist Script
 
 1. Introduction
 
@@ -55,6 +59,9 @@ possible scenarios:
 
 The scenarios described above and much more can be achieved with the help of an
 import script.
+
+Additionally, version 0.10.0 introduces a playlist parsing feature, which is
+also handled by scripting.
 
 2. How It Works
 
@@ -117,23 +124,26 @@ In the current implementation, if you modify the script then you will have to
 restart the server for the new logic to take effect. Note, that the script is
 only triggered when new objects are added to the database, also note that the
 script does not modify any objects that already exist in the database - it only
-processes new objects that are being added.
+processes new objects that are being added. When a playlist item is
+encountered, it is automatically fed as input to the playlist script. The
+playlist script attempts to parse the playlist and adds new item to the
+database, the item is then processed by the import script.
 
-3. The Import Script
+3. Global Variables And Constants
 
 In this section we will introduce the properties of the object that will be
 processed by the script, as well as functions that are offered by the server.
 
-3.1. Global Variables And Constants
-
-3.1.1. The 'orig' Object
+3.1. The Media Object
 
 As described in Section 2.2, each time an item is added to the database the
 import script is invoked. So, one script invocation processes exactly one non
 virtual item, and creates a number of virtual items and containers. The
-original item is made available in the form of the global variable 'orig'. It
-is usually a good idea to only read from this variable and to create and only
-modify local copies.
+original item is made available in the form of the global variable 'orig'.
+Additionally, when the object being imported is a playlist, it is made
+available to the playlist parser script in the form of the global variable
+'playlist'. It is usually a good idea to only read from these variables and to
+create and only modify local copies.
 
 Note:
 
@@ -283,7 +293,18 @@ lost.
     this array will hold the tags that you specified in your config.xml,
     allowing you to create your virtual structure according to your liking.
 
-3.1.2. Constants
+  ● obj.playlistOrder
+
+    RW
+
+    This property is only available if the object is being created by the
+    playlist script. It's similar to ID3 track number, but is used to set the
+    position of the newly created object inside a parsed playlist container.
+    Usually you will increment the number for each new object that you create
+    while parsing the playlist, thus ensuring that the resulting order is the
+    same as in the original playlist.
+
+3.2. Constants
 
 Actually there are no such things as constants in JS, so those are actually
 predefined global variables that are set during JS engine initialization. Do
@@ -324,6 +345,19 @@ using wrong values.
 
         this container class will be treated by the server in a special way,
         all music items in this container will be sorted by ID3 track number.
+
+  ● UPNP_CLASS_PLAYLIST_CONTAINER
+
+    Type: string
+
+    Value: object.container.playlistContainer
+
+    Note:
+
+        this container class will be treated by the server in a special way,
+        all items in this container will be sorted by the number specified in
+        the playlistOrder property (this is set when an object is created by
+        the playlist script).
 
   ● UPNP_CLASS_ITEM
 
@@ -367,10 +401,20 @@ using wrong values.
 
     Value: 16
 
-3.2. Available Server Functions
+4. Functions
+
+The server offers various native functions that can be called from the scripts,
+additionally there are some js helper functions that can be used.
+
+4.1. Native Server Functions
+
+The so called native functions are implemented in C++ in the server and can be
+called from the scripts.
+
+4.1.1. Native Functions Available To All Scripts
 
 The server offers three functions which can be called from within the import
-script:
+and/or the playlist script:
 
   ● addCdsObject(object, containerChain, lastContainerClass);
 
@@ -393,8 +437,7 @@ script:
         for example, a value of '/Audio/All Music' will add the object to the
         Audio, All Music container in the server hierarchy. Make sure to
         properly escape the slash characters in container names. You will find
-        more information on container chain escaping in Section 4.1, “Helper
-        Functions”.
+        more information on container chain escaping in ???.
 
       ○ lastContainerClass
 
@@ -415,69 +458,117 @@ script:
     This function is useful for debugging scripts, it simply prints to the
     standard output.
 
-4. Walkthrough
+  ● f2i(string)
 
-Now it is time to take a closer look at the default import script that is
-supplied with MediaTomb. Usually it is installed in the /usr/share/mediatomb/js
-/import.js directory, but you will also find it in scripts/js/import.js in the
-MediaTomb source tree.
+  ● m2i(string)
+
+  ● p2i(string)
+
+  ● j2i(string)
+
+    The above set of functions converts predefined characters sets to UTF-8.
+    The 'from' charsets can be defined in the server configuration:
+
+      ○ f2i: filesystem charset to internal
+
+      ○ m2i: metadata charset to internal
+
+      ○ j2i: js charset to internal
+
+      ○ p2i: playlist charset to internal
+
+4.1.2. Native Functions Available To The Playlist Script
+
+The following function is only available to the playlist script.
+
+  ● readln();
+
+    This function reads and returns exactly one line of text from the playlist
+    that is currently being processed, end of line is identified by carriage
+    return/line feed characters. Each subsequent call will return the next
+    line, there is no way to go back.
+
+    The idea is, that you can process your playlist line by line and gather the
+    required information to create new objects which can be added to the
+    database.
+
+4.2. Helper Functions
+
+There is a set of helper JavaScript functions which reside in the common.js
+script. They can be used by the import and by the playlist script.
+
+  ● function escapeSlash(name);
+
+
+    The first function escapes slash '/' characters in a string. This is
+    necessary, because the container chain is defined by a slash separated
+    string, where slash has a special meaning - it defines the container
+    hierarchy. That means, that slashes that appear in the object's title need
+    to be properly escaped.
+
+  ● 
+
+    The following function makes it easier to work with container chains; it
+    takes an array of container names as argument, makes sure that the names
+    are properly escaped and adds the slash separators as necessary. It returns
+    a string that is formatted to be used as a parameter for the addCdsObject
+    function.
+
+    function createContainerChain(arr)
+    {
+        var path = '';
+        for (var i = 0; i < arr.length; i++)
+        {
+            path = path + '/' + escapeSlash(arr[i]);
+        }
+        return path;
+    }
+
+  ● This function retrieves the year from a yyyy-mm-dd formatted string.
+
+    function getYear(date)
+    {
+        var matches = date.match(/^([0-9]{4})-/);
+        if (matches)
+            return matches[1];
+        else
+            return date;
+    }
+
+  ● This function identifies the type of the playlist by the mimetype, it is
+    used in the playlist script to select an appropriate parser.
+
+    function getPlaylistType(mimetype)
+    {
+        if (mimetype == 'audio/x-mpegurl')
+            return 'm3u';
+        if (mimetype == 'audio/x-scpls')
+            return 'pls';
+        return '';
+    }
+
+5. Walkthrough
+
+Now it is time to take a closer look at the default scripts that are supplied
+with MediaTomb. Usually it is installed in the /usr/share/mediatomb/js/
+directory, but you will also find it in scripts/js/ in the MediaTomb source
+tree.
 
 Note:
 
     this is not a JavaScript tutorial, if you are new to JS you should probably
     make yourself familiar with the language.
 
-4.1. Helper Functions
+5.1. Import Script
 
-At the beginning of the script we define a couple of helper functions that we
-will use later on.
+We start with a walkthrough of the default import script, it is called
+import.js in the MediaTomb distribution.
 
-The first function escapes slash '/' characters in a string. This is necessary,
-because the container chain is defined by a slash separated string, where slash
-has a special meaning - it defines the container hierarchy. That means, that
-slashes that appear in the object's title need to be properly escaped.
-
-function escapeSlash(name)
-{
-    name = name.replace(/\\/g, "\\\\");
-    name = name.replace(/\//g, "\\/");
-    return name;
-}
-
-
-The following function makes it easier to work with container chains; it takes
-an array of container names as argument, makes sure that the names are properly
-escaped and adds the slash separators as necessary. It returns a string that is
-formatted to be used as a parameter for the addCdsObject function.
-
-function createContainerChain(arr)
-{
-    var path = '';
-    for (var i = 0; i < arr.length; i++)
-    {
-        path = path + '/' + escapeSlash(arr[i]);
-    }
-    return path;
-}
-
-This function retrieves the year from a yyyy-mm-dd formatted string.
-
-function getYear(date)
-{
-    var matches = date.match(/^([0-9]{4})-/);
-    if (matches)
-        return matches[1];
-    else
-        return date;
-}
-
-4.2. Content Handlers
-
-Let's look at the functions that organize our content in the database by
-creating the virtual structure. Each media type - audio, image and video is
+Below are the import script functions that organize our content in the database
+by creating the virtual structure. Each media type - audio, image and video is
 handled by a separate function.
 
-4.2.1. Audio Content Handler
+5.1.1. Audio Content Handler
 
 The biggest one is the function that handles audio - the reason is simple: mp3
 files offer a lot of metadata like album, artist, genre, etc. information, this
@@ -614,7 +705,7 @@ set to UPNP_CLASS_CONTAINER_MUSIC_ALBUM.
     addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC);
 }
 
-4.2.2. Image Content Handler
+5.1.2. Image Content Handler
 
 This function takes care of images. Currently it does very little sorting, but
 could easily be extended - photos made by digital cameras provide lots of
@@ -644,7 +735,7 @@ function addImage(obj)
 Just like in the addAudio() function - we simply construct our container chain
 and add the object.
 
-4.2.3. Video Content Handler
+5.1.3. Video Content Handler
 
 Not much to say here... I think libextractor is capable of retrieving some
 information from video files, however I seldom encountered any video files
@@ -657,7 +748,7 @@ function addVideo(obj)
     addCdsObject(obj, createContainerChain(chain));
 }
 
-4.3. Putting it all together
+5.1.4. Putting it all together
 
 This is the main part of the script, it looks at the mimetype of the original
 object and feeds the object to the appropriate content handler.
@@ -686,6 +777,149 @@ if (mime == 'image')
 {
     addImage(obj);
 }
+
+5.2. Playlist Script
+
+The default playlist parsing script is called playlists.js, similar to the
+import script it works with a global object which is called 'playlist', the
+fields are similar to the 'orig' that is used in the import script with the
+exception of the playlistOrder field which is special to playlists.
+
+Another big difference between playlist and import scripts is, that playlist
+scripts can add new media to the database, while import scripts only process
+already existing objects (the ones found in PC Directory) and just add
+additional virtual items.
+
+The default playlist script implementation supports parsing of m3u and pls
+formats, but you can add support for parsing of any ASCII based playlist
+format.
+
+5.2.1. Adding Items
+
+We will first look at a helper function:
+
+addPlaylistItem(location, title, playlistChain);
+
+It is defined in playlists.js, it receives the location (path on disk or HTTP
+URL), the title and the desired position of the item in the database layout
+(remember the container chains used in the import script).
+
+The function first decides if we are dealing with an item that represents a
+resource on the web, or if we are dealing with a local file. After that it
+populates all item fields accordingly and calles the addCdsObject() that was
+introduced earlier. Note, that if the object that is being added by the
+playlist script is not yet in the database, the import script will be invoked.
+Below is the complete function with some comments:
+
+function addPlaylistItem(location, title, playlistChain)
+{
+
+Determine if the item that we got is an URL or a local file.
+
+    if (location.match(/^.*:\/\//))
+    {
+        var exturl = new Object();
+
+Setting the mimetype is crucial and tricky... if you get it wrong your renderer
+may show the item as unsupported and refuse to play it. Unfortunately most
+playlist formats do not provide any mimetype information.
+
+        exturl.mimetype = 'audio/mpeg';
+
+Make sure to correctly set the object type, then populate the remaining fields.
+
+        exturl.objectType = OBJECT_TYPE_ITEM_EXTERNAL_URL;
+        exturl.location = location;
+        exturl.title = (title ? title : location);
+        exturl.protocol = 'http-get';
+        exturl.upnpclass = UPNP_CLASS_ITEM_MUSIC_TRACK;
+        exturl.description = "Song from " + playlist.title;
+
+This is a special field which ensures that your playlist files will be
+displayed in the correct order inside a playlist container. It is similar to
+the id3 track number that is used to sort the media in album containers.
+
+        exturl.playlistOrder = playlistOrder++;
+
+Your item will be added to the container named by the playlist that you are
+currently parsing.
+
+        addCdsObject(exturl, playlistChain,  UPNP_CLASS_PLAYLIST_CONTAINER);
+    }
+
+Here we are dealing with a local file.
+
+    else
+    {
+        if (location.substr(0,1) != '/')
+            location = playlistLocation + location;
+        var item  = new Object();
+        item.location = location;
+        if (title)
+            item.title = title;
+        else
+         {
+            var locationParts = location.split('/');
+            item.title = locationParts[locationParts.length - 1];
+            if (! item.title)
+                item.title = location;
+        }
+        item.objectType = OBJECT_TYPE_ITEM;
+        item.playlistOrder = playlistOrder++;
+        addCdsObject(item, playlistChain,  UPNP_CLASS_PLAYLIST_CONTAINER);
+    }
+}
+
+5.2.2. Main Parsing
+
+The actual parsing is done in the main part of the script. First, the type of
+the playlist is determined (based on the playlist mimetype), then the correct
+parser is chosen. The parsing itself is a loop, where each call to readln()
+returns exactly one line of text from the playlist. There is no possibility to
+go back, each readln() invocation will retrieve the next line until end of file
+is reached.
+
+To keep things easy we will only list the m3u parsing here. Again, if you are
+not familiar with regular expressions, now is probably the time to take a
+closer look.
+
+...
+else if (type == 'm3u')
+{
+    var line;
+    var title = null;
+
+Here is hte do - while loop which will read the playlist line by line.
+
+    do
+    {
+
+Read the line:
+
+        line = readln();
+
+Perform m3u specific parsing:
+
+        if (line.match(/^#EXTINF:(\d+),(\S.+)$/i))
+        {
+            // duration = RegExp.$1; // currently unused
+            title = RegExp.$2;
+        }
+        else if (! line.match(/^(#|\s*$)/))
+        {
+
+Call the helper function to add the item once you gathered the data:
+
+            addPlaylistItem(line, title, playlistChain);
+            title = null;
+        }
+    }
+
+We will exit the loop when end of the playlist file is reached.
+
+    while (line);
+}
+...
 
 Happy scripting!
 

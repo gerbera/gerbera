@@ -1,16 +1,24 @@
-#LyX 1.4.4 created this file. For more info see http://www.lyx.org/
-\lyxformat 245
+#LyX 1.5.0beta2 created this file. For more info see http://www.lyx.org/
+\lyxformat 263
 \begin_document
 \begin_header
 \textclass docbook
 \language english
 \inputencoding auto
-\fontscheme default
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
 \graphics default
 \paperfontsize default
 \papersize default
 \use_geometry false
 \use_amsmath 0
+\use_esint 0
 \cite_engine basic
 \use_bibtopic false
 \paperorientation portrait
@@ -23,7 +31,8 @@
 \papersides 1
 \paperpagestyle default
 \tracking_changes false
-\output_changes true
+\output_changes false
+\author "Jin" 
 \end_header
 
 \begin_body
@@ -102,7 +111,8 @@ status open
 
 \begin_layout Standard
 
-<releaseinfo>This documentation is valid for MediaTomb version 0.9.0.</releaseinfo>
+<releaseinfo>This documentation is valid for MediaTomb version 0.10.0.</releaseinfo
+>
 \end_layout
 
 \end_inset
@@ -183,6 +193,12 @@ it's up to your imagination :)
 \begin_layout Standard
 The scenarios described above and much more can be achieved with the help
  of an import script.
+ 
+\end_layout
+
+\begin_layout Standard
+Additionally, version 0.10.0 introduces a playlist parsing feature, which
+ is also handled by scripting.
 \end_layout
 
 \begin_layout Section
@@ -287,10 +303,14 @@ In the current implementation, if you modify the script then you will have
  Note, that the script is only triggered when new objects are added to the
  database, also note that the script does not modify any objects that already
  exist in the database - it only processes new objects that are being added.
+ When a playlist item is encountered, it is automatically fed as input to
+ the playlist script.
+ The playlist script attempts to parse the playlist and adds new item to
+ the database, the item is then processed by the import script.
 \end_layout
 
 \begin_layout Section
-The Import Script
+Global Variables And Constants
 \end_layout
 
 \begin_layout Standard
@@ -300,11 +320,7 @@ In this section we will introduce the properties of the object that will
 \end_layout
 
 \begin_layout Subsection
-Global Variables And Constants
-\end_layout
-
-\begin_layout Subsubsection
-The 'orig' Object
+The Media Object
 \end_layout
 
 \begin_layout Standard
@@ -314,8 +330,12 @@ As described in Section 2.2, each time an item is added to the database the
  a number of virtual items and containers.
  The original item is made available in the form of the global variable
  'orig'.
- It is usually a good idea to only read from this variable and to create
+ Additionally, when the object being imported is a playlist, it is made
+ available to the playlist parser script in the form of the global variable
+ 'playlist'.
+ It is usually a good idea to only read from these variables and to create
  and only modify local copies.
+ 
 \end_layout
 
 \begin_layout Description
@@ -886,7 +906,7 @@ Description of the item, this corresponds to dc:description in the DIDL-Lite
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Standard
 
@@ -929,7 +949,7 @@ status open
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Standard
 
@@ -968,6 +988,40 @@ status open
 
 \begin_layout Standard
 
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+obj.playlistOrder
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+RW
+\end_layout
+
+\begin_layout Standard
+This property is only available if the object is being created by the playlist
+ script.
+ It's similar to ID3 track number, but is used to set the position of the
+ newly created object inside a parsed playlist container.
+ Usually you will increment the number for each new object that you create
+ while parsing the playlist, thus ensuring that the resulting order is the
+ same as in the original playlist.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
 </listitem></itemizedlist>
 \end_layout
 
@@ -976,7 +1030,7 @@ status open
 
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
 Constants
 \end_layout
 
@@ -1140,6 +1194,43 @@ Value: object.container.album.musicAlbum
 \begin_layout Description
 Note: this container class will be treated by the server in a special way,
  all music items in this container will be sorted by ID3 track number.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+UPNP_CLASS_PLAYLIST_CONTAINER
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Type: string
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Value: object.container.playlistContainer
+\end_layout
+
+\begin_layout Description
+Note: this container class will be treated by the server in a special way,
+ all items in this container will be sorted by the number specified in the
+ playlistOrder property (this is set when an object is created by the playlist
+ script).
 \end_layout
 
 \begin_layout Standard
@@ -1366,13 +1457,31 @@ status open
 
 \end_layout
 
+\begin_layout Section
+Functions
+\end_layout
+
+\begin_layout Standard
+The server offers various native functions that can be called from the scripts,
+ additionally there are some js helper functions that can be used.
+\end_layout
+
 \begin_layout Subsection
-Available Server Functions
+Native Server Functions
+\end_layout
+
+\begin_layout Standard
+The so called native functions are implemented in C++ in the server and
+ can be called from the scripts.
+\end_layout
+
+\begin_layout Subsubsection
+Native Functions Available To All Scripts
 \end_layout
 
 \begin_layout Standard
 The server offers three functions which can be called from within the import
- script:
+ and/or the playlist script:
 \end_layout
 
 \begin_layout Standard
@@ -1452,7 +1561,8 @@ A string, defining where the object will be added in the database hierarchy.
  container in the server hierarchy.
  Make sure to properly escape the slash characters in container names.
  You will find more information on container chain escaping in 
-\begin_inset LatexCommand \ref{escapeSlash}
+\begin_inset LatexCommand ref
+reference "escapeSlash"
 
 \end_inset
 
@@ -1553,6 +1663,99 @@ status open
 
 \begin_layout Standard
 
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+f2i(string)
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+m2i(string)
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+p2i(string)
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+j2i(string)
+\end_layout
+
+\begin_layout Standard
+The above set of functions converts predefined characters sets to UTF-8.
+ The 'from' charsets can be defined in the server configuration:
+\end_layout
+
+\begin_layout Itemize
+f2i: filesystem charset to internal
+\end_layout
+
+\begin_layout Itemize
+m2i: metadata charset to internal
+\end_layout
+
+\begin_layout Itemize
+j2i: js charset to internal
+\end_layout
+
+\begin_layout Itemize
+p2i: playlist charset to internal
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
 </listitem></itemizedlist>
 \end_layout
 
@@ -1561,21 +1764,57 @@ status open
 
 \end_layout
 
-\begin_layout Section
-Walkthrough
+\begin_layout Subsubsection
+Native Functions Available To The Playlist Script
 \end_layout
 
 \begin_layout Standard
-Now it is time to take a closer look at the default import script that is
- supplied with MediaTomb.
- Usually it is installed in the /usr/share/mediatomb/js/import.js directory,
- but you will also find it in scripts/js/import.js in the MediaTomb source
- tree.
+The following function is only available to the playlist script.
 \end_layout
 
-\begin_layout Description
-Note: this is not a JavaScript tutorial, if you are new to JS you should
- probably make yourself familiar with the language.
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+readln();
+\end_layout
+
+\begin_layout Standard
+This function reads and returns exactly one line of text from the playlist
+ that is currently being processed, end of line is identified by carriage
+ return/line feed characters.
+ Each subsequent call will return the next line, there is no way to go back.
+\end_layout
+
+\begin_layout Standard
+The idea is, that you can process your playlist line by line and gather
+ the required information to create new objects which can be added to the
+ database.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
@@ -1583,12 +1822,36 @@ Helper Functions
 \end_layout
 
 \begin_layout Standard
-At the beginning of the script we define a couple of helper functions that
- we will use later on.
+There is a set of helper JavaScript functions which reside in the common.js
+ script.
+ They can be used by the import and by the playlist script.
 \end_layout
 
 \begin_layout Standard
-\begin_inset LatexCommand \label{escapeSlash}
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+function escapeSlash(name);
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset LatexCommand label
+name "escapeSlash"
 
 \end_inset
 
@@ -1599,46 +1862,18 @@ The first function escapes slash '/' characters in a string.
  escaped.
 \end_layout
 
-\begin_layout Code
-function escapeSlash(name) 
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
 \end_layout
 
-\begin_layout Code
-{     
-\end_layout
+\end_inset
 
-\begin_layout Code
-    name = name.replace(/
-\backslash
 
-\backslash
-/g, "
-\backslash
-
-\backslash
-
-\backslash
-
-\backslash
-");
-\end_layout
-
-\begin_layout Code
-    name = name.replace(/
-\backslash
-//g, "
-\backslash
-
-\backslash
-/");
-\end_layout
-
-\begin_layout Code
-    return name; 
-\end_layout
-
-\begin_layout Code
-}
 \end_layout
 
 \begin_layout Code
@@ -1690,6 +1925,20 @@ function createContainerChain(arr)
 \end_layout
 
 \begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 This function retrieves the year from a yyyy-mm-dd formatted string.
 \end_layout
 
@@ -1725,13 +1974,99 @@ function getYear(date)
 }
 \end_layout
 
-\begin_layout Subsection
-Content Handlers
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-Let's look at the functions that organize our content in the database by
- creating the virtual structure.
+This function identifies the type of the playlist by the mimetype, it is
+ used in the playlist script to select an appropriate parser.
+\end_layout
+
+\begin_layout Code
+function getPlaylistType(mimetype) 
+\end_layout
+
+\begin_layout Code
+{
+\end_layout
+
+\begin_layout Code
+    if (mimetype == 'audio/x-mpegurl') 
+\end_layout
+
+\begin_layout Code
+        return 'm3u'; 
+\end_layout
+
+\begin_layout Code
+    if (mimetype == 'audio/x-scpls') 
+\end_layout
+
+\begin_layout Code
+        return 'pls'; 
+\end_layout
+
+\begin_layout Code
+    return ''; 
+\end_layout
+
+\begin_layout Code
+} 
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Walkthrough
+\end_layout
+
+\begin_layout Standard
+Now it is time to take a closer look at the default scripts that are supplied
+ with MediaTomb.
+ Usually it is installed in the /usr/share/mediatomb/js/ directory, but
+ you will also find it in scripts/js/ in the MediaTomb source tree.
+\end_layout
+
+\begin_layout Description
+Note: this is not a JavaScript tutorial, if you are new to JS you should
+ probably make yourself familiar with the language.
+\end_layout
+
+\begin_layout Subsection
+Import Script
+\end_layout
+
+\begin_layout Standard
+We start with a walkthrough of the default import script, it is called import.js
+ in the MediaTomb distribution.
+\end_layout
+
+\begin_layout Standard
+Below are the import script functions that organize our content in the database
+ by creating the virtual structure.
  Each media type - audio, image and video is handled by a separate function.
 \end_layout
 
@@ -1769,7 +2104,7 @@ function addAudio(obj)
 First we will gather all the metadata that is provided by our object, of
  course it is possible that some fields are empty - we will have to check
  that to make sure that we handle this case correctly.
-     
+    
 \end_layout
 
 \begin_layout Code
@@ -2287,7 +2622,7 @@ function addVideo(obj)
 }
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Subsubsection
 Putting it all together
 \end_layout
 
@@ -2379,6 +2714,368 @@ if (mime == 'image')
 
 \begin_layout Code
 }
+\end_layout
+
+\begin_layout Subsection
+Playlist Script
+\end_layout
+
+\begin_layout Standard
+The default playlist parsing script is called playlists.js, similar to the
+ import script it works with a global object which is called 'playlist',
+ the fields are similar to the 'orig' that is used in the import script
+ with the exception of the playlistOrder field which is special to playlists.
+\end_layout
+
+\begin_layout Standard
+Another big difference between playlist and import scripts is, that playlist
+ scripts can add new media to the database, while import scripts only process
+ already existing objects (the ones found in PC Directory) and just add
+ additional virtual items.
+\end_layout
+
+\begin_layout Standard
+The default playlist script implementation supports parsing of m3u and pls
+ formats, but you can add support for parsing of any ASCII based playlist
+ format.
+\end_layout
+
+\begin_layout Subsubsection
+Adding Items
+\end_layout
+
+\begin_layout Standard
+We will first look at a helper function:
+\end_layout
+
+\begin_layout Code
+addPlaylistItem(location, title, playlistChain);
+\end_layout
+
+\begin_layout Standard
+It is defined in playlists.js, it receives the location (path on disk or
+ HTTP URL), the title and the desired position of the item in the database
+ layout (remember the container chains used in the import script).
+\end_layout
+
+\begin_layout Standard
+The function first decides if we are dealing with an item that represents
+ a resource on the web, or if we are dealing with a local file.
+ After that it populates all item fields accordingly and calles the addCdsObject
+() that was introduced earlier.
+ Note, that if the object that is being added by the playlist script is
+ not yet in the database, the import script will be invoked.
+ Below is the complete function with some comments:
+\end_layout
+
+\begin_layout Code
+function addPlaylistItem(location, title, playlistChain) 
+\end_layout
+
+\begin_layout Code
+{
+\end_layout
+
+\begin_layout Standard
+Determine if the item that we got is an URL or a local file.
+\end_layout
+
+\begin_layout Code
+    if (location.match(/^.*:
+\backslash
+/
+\backslash
+//))
+\end_layout
+
+\begin_layout Code
+    {
+\end_layout
+
+\begin_layout Code
+        var exturl = new Object();
+\end_layout
+
+\begin_layout Standard
+Setting the mimetype is crucial and tricky...
+ if you get it wrong your renderer may show the item as unsupported and
+ refuse to play it.
+ Unfortunately most playlist formats do not provide any mimetype information.
+\end_layout
+
+\begin_layout Code
+        exturl.mimetype = 'audio/mpeg';
+\end_layout
+
+\begin_layout Standard
+Make sure to correctly set the object type, then populate the remaining
+ fields.
+\end_layout
+
+\begin_layout Code
+        exturl.objectType = OBJECT_TYPE_ITEM_EXTERNAL_URL;
+\end_layout
+
+\begin_layout Code
+        exturl.location = location;
+\end_layout
+
+\begin_layout Code
+        exturl.title = (title ? title : location);
+\end_layout
+
+\begin_layout Code
+        exturl.protocol = 'http-get';
+\end_layout
+
+\begin_layout Code
+        exturl.upnpclass = UPNP_CLASS_ITEM_MUSIC_TRACK;
+\end_layout
+
+\begin_layout Code
+        exturl.description = "Song from " + playlist.title;
+\end_layout
+
+\begin_layout Standard
+This is a special field which ensures that your playlist files will be displayed
+ in the correct order inside a playlist container.
+ It is similar to the id3 track number that is used to sort the media in
+ album containers.
+\end_layout
+
+\begin_layout Code
+        exturl.playlistOrder = playlistOrder++;
+\end_layout
+
+\begin_layout Standard
+Your item will be added to the container named by the playlist that you
+ are currently parsing.
+\end_layout
+
+\begin_layout Code
+        addCdsObject(exturl, playlistChain,  UPNP_CLASS_PLAYLIST_CONTAINER);
+\end_layout
+
+\begin_layout Code
+    }
+\end_layout
+
+\begin_layout Standard
+Here we are dealing with a local file.
+\end_layout
+
+\begin_layout Code
+    else
+\end_layout
+
+\begin_layout Code
+    {
+\end_layout
+
+\begin_layout Code
+        if (location.substr(0,1) != '/')
+\end_layout
+
+\begin_layout Code
+            location = playlistLocation + location;
+\end_layout
+
+\begin_layout Code
+        var item  = new Object();
+\end_layout
+
+\begin_layout Code
+        item.location = location;
+\end_layout
+
+\begin_layout Code
+        if (title)
+\end_layout
+
+\begin_layout Code
+            item.title = title;
+\end_layout
+
+\begin_layout Code
+        else
+\end_layout
+
+\begin_layout Code
+         {
+\end_layout
+
+\begin_layout Code
+            var locationParts = location.split('/');
+\end_layout
+
+\begin_layout Code
+            item.title = locationParts[locationParts.length - 1];
+\end_layout
+
+\begin_layout Code
+            if (! item.title)
+\end_layout
+
+\begin_layout Code
+                item.title = location;
+\end_layout
+
+\begin_layout Code
+        }
+\end_layout
+
+\begin_layout Code
+        item.objectType = OBJECT_TYPE_ITEM;
+\end_layout
+
+\begin_layout Code
+        item.playlistOrder = playlistOrder++;
+\end_layout
+
+\begin_layout Code
+        addCdsObject(item, playlistChain,  UPNP_CLASS_PLAYLIST_CONTAINER);
+\end_layout
+
+\begin_layout Code
+    }
+\end_layout
+
+\begin_layout Code
+} 
+\end_layout
+
+\begin_layout Subsubsection
+Main Parsing
+\end_layout
+
+\begin_layout Standard
+The actual parsing is done in the main part of the script.
+ First, the type of the playlist is determined (based on the playlist mimetype),
+ then the correct parser is chosen.
+ The parsing itself is a loop, where each call to readln() returns exactly
+ one line of text from the playlist.
+ There is no possibility to go back, each readln() invocation will retrieve
+ the next line until end of file is reached.
+\end_layout
+
+\begin_layout Standard
+To keep things easy we will only list the m3u parsing here.
+ Again, if you are not familiar with regular expressions, now is probably
+ the time to take a closer look.
+\end_layout
+
+\begin_layout Code
+...
+\end_layout
+
+\begin_layout Code
+else if (type == 'm3u')
+\end_layout
+
+\begin_layout Code
+{
+\end_layout
+
+\begin_layout Code
+    var line;
+\end_layout
+
+\begin_layout Code
+    var title = null;
+\end_layout
+
+\begin_layout Standard
+Here is hte do - while loop which will read the playlist line by line.
+\end_layout
+
+\begin_layout Code
+    do
+\end_layout
+
+\begin_layout Code
+    {
+\end_layout
+
+\begin_layout Standard
+Read the line:
+\end_layout
+
+\begin_layout Code
+        line = readln();
+\end_layout
+
+\begin_layout Standard
+Perform m3u specific parsing:
+\end_layout
+
+\begin_layout Code
+        if (line.match(/^#EXTINF:(
+\backslash
+d+),(
+\backslash
+S.+)$/i))
+\end_layout
+
+\begin_layout Code
+        {
+\end_layout
+
+\begin_layout Code
+            // duration = RegExp.$1; // currently unused
+\end_layout
+
+\begin_layout Code
+            title = RegExp.$2;
+\end_layout
+
+\begin_layout Code
+        }
+\end_layout
+
+\begin_layout Code
+        else if (! line.match(/^(#|
+\backslash
+s*$)/))
+\end_layout
+
+\begin_layout Code
+        {
+\end_layout
+
+\begin_layout Standard
+Call the helper function to add the item once you gathered the data:
+\end_layout
+
+\begin_layout Code
+            addPlaylistItem(line, title, playlistChain);
+\end_layout
+
+\begin_layout Code
+            title = null;
+\end_layout
+
+\begin_layout Code
+        }
+\end_layout
+
+\begin_layout Code
+    }
+\end_layout
+
+\begin_layout Standard
+We will exit the loop when end of the playlist file is reached.
+\end_layout
+
+\begin_layout Code
+    while (line);
+\end_layout
+
+\begin_layout Code
+}
+\end_layout
+
+\begin_layout Code
+...
 \end_layout
 
 \begin_layout Standard
