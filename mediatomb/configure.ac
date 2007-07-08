@@ -29,7 +29,7 @@
 #*MT*
 
 AC_PREREQ(2.59)
-AC_INIT([MediaTomb], [0.9.2], [jin@mediatomb.cc])
+AC_INIT([MediaTomb], [0.10.0], [jin@mediatomb.cc])
 AM_CONFIG_HEADER([autoconfig.h tombupnp/upnp/inc/upnpconfig.h])
 AC_CONFIG_AUX_DIR(configure_aux)
 AC_CONFIG_SRCDIR([src/common.h])
@@ -1362,11 +1362,11 @@ AC_ARG_ENABLE(libjs,
 XP_ADD=""
 
 if test "x$JS_OK" = xyes; then
-    if test $DARWIN_OS -eq 1 ; then
-        XP_ADD="-DXP_MAC"
-    else
+dnl    if test $DARWIN_OS -eq 1 ; then
+dnl        XP_ADD="-DXP_MAC"
+dnl    else
         XP_ADD="-DXP_UNIX"
-    fi
+dnl    fi
 
     CXXFLAGS="$CXXFLAGS $XP_ADD"
     CPPFLAGS="$CPPFLAGS $XP_ADD"

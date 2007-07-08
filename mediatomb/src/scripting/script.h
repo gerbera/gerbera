@@ -32,11 +32,7 @@
 #ifndef __SCRIPTING_SCRIPT_H__
 #define __SCRIPTING_SCRIPT_H__
 
-#ifdef __APPLE__
-    #define XP_MAC 1
-#else
-    #define XP_UNIX 1
-#endif
+#define XP_UNIX 1
 
 #include <jsapi.h>
 #include "common.h"
