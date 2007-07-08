@@ -28,7 +28,7 @@
 
 var playlistOrder = 1;
 
-function addPlaylistItem(location, title, playlistChain)
+function addPlaylistItem(location, title, playlistChain, order)
 {
     if (location.match(/^.*:\/\//))
     {
@@ -40,7 +40,7 @@ function addPlaylistItem(location, title, playlistChain)
         exturl.protocol = 'http-get';
         exturl.upnpclass = UPNP_CLASS_ITEM_MUSIC_TRACK;
         exturl.description = "Song from " + playlist.title;
-        exturl.playlistOrder = playlistOrder++;
+        exturl.playlistOrder = (order ? order : playlistOrder++);
         addCdsObject(exturl, playlistChain,  UPNP_CLASS_PLAYLIST_CONTAINER);
     }
     else
@@ -59,7 +59,7 @@ function addPlaylistItem(location, title, playlistChain)
                 item.title = location;
         }
         item.objectType = OBJECT_TYPE_ITEM;
-        item.playlistOrder = playlistOrder++;
+        item.playlistOrder = (order ? order : playlistOrder++);
         addCdsObject(item, playlistChain,  UPNP_CLASS_PLAYLIST_CONTAINER);
     }
 }
@@ -80,11 +80,10 @@ if (type == '')
 }
 else if (type == 'm3u')
 {
-    var line;
     var title = null;
+    var line = readln();
     do
     {
-        line = readln();
         if (line.match(/^#EXTINF:(\d+),(\S.+)$/i))
         {
             // duration = RegExp.$1; // currently unused
@@ -95,18 +94,19 @@ else if (type == 'm3u')
             addPlaylistItem(line, title, playlistChain);
             title = null;
         }
+        
+        line = readln();
     }
     while (line);
 }
 else if (type == 'pls')
 {
-    var line;
-    var data = new Array();
-    var duration = null;
     var title = null;
+    var file = null;
+    var lastId = -1;
+    var line = readln();
     do
     {
-        line = readln();
         if (line.match(/^\[playlist\]$/i))
         {
             // It seems to be a correct playlist, but we will try to parse it
@@ -122,26 +122,43 @@ else if (type == 'pls')
         }
         else if (line.match(/^File\s*(\d+)\s*=\s*(\S.+)$/i))
         {
-            if (! data[RegExp.$1])
-                data[RegExp.$1] = new Object();
-            data[RegExp.$1].file = RegExp.$2;
+            var thisFile = RegExp.$2;
+            var id = parseInt(RegExp.$1, 10);
+            if (lastId == -1)
+                lastId = id;
+            if (lastId != id)
+            {
+                if (file)
+                    addPlaylistItem(file, title, playlistChain, lastId);
+                title = null;
+                lastId = id;
+            }
+            file = thisFile
         }
         else if (line.match(/^Title\s*(\d+)\s*=\s*(\S.+)$/i))
         {
-            if (! data[RegExp.$1])
-                data[RegExp.$1] = new Object();
-            data[RegExp.$1].title = RegExp.$2;
+            var thisTitle = RegExp.$2;
+            var id = parseInt(RegExp.$1, 10);
+            if (lastId == -1)
+                lastId = id;
+            if (lastId != id)
+            {
+                if (file)
+                    addPlaylistItem(file, title, playlistChain, lastId);
+                file = null;
+                lastId = id;
+            }
+            title = thisTitle;
         }
         else if (line.match(/^Length\s*(\d+)\s*=\s*(\S.+)$/i))
         {
             // currently unused
         }
+        
+        line = readln();
     }
     while (line);
-    for (var i = 0; i < data.length; i++)
-    {
-        var item = data[i];
-        if (item && item.file)
-            addPlaylistItem(item.file, item.title, playlistChain);
-    }
+    
+    if (file)
+        addPlaylistItem(file, title, playlistChain, lastId);
 }
