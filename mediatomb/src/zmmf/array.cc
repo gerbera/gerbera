@@ -48,6 +48,7 @@ void ArrayBase::init(int capacity)
     this->capacity = capacity;
     siz = 0;
     arr = (Object **)MALLOC(capacity * sizeof(Object *));
+    memset(arr, 0, capacity * sizeof(Object *));
 }
 ArrayBase::~ArrayBase()
 {
