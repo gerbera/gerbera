@@ -108,7 +108,7 @@ void web::auth::process()
         }
 
         config->appendChild(ipp);
-#ifdef HAVE_INOTIFYTOOLS
+#ifdef HAVE_INOTIFY
         config->addAttribute(_("have-inotify"), _("1"));
 #else
         config->addAttribute(_("have-inotify"), _("0"));

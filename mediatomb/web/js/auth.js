@@ -188,7 +188,7 @@ function getConfigCallback(ajaxRequest)
                     viewItems = newDefaultViewItems;
             }
         }
-        var haveInotify = xmlGetAttribute(configEl, "have-inotify");
+        var haveInotify = (xmlGetAttribute(configEl, "have-inotify") == "1");
         if (haveInotify)
         {
             Element.show(frames["rightF"].document.getElementById("scan_mode_inotify"));
