@@ -640,7 +640,7 @@ void ConfigManager::validate(String serverhome)
     SET_BOOL_OPTION(CFG_SERVER_EXTEND_PROTOCOLINFO);
 #endif
 
-    temp = getOption(_("/server/pc-directory/attribute::hide"),
+    temp = getOption(_("/server/pc-directory/attribute::upnp-hide"),
                      _(DEFAULT_HIDE_PC_DIRECTORY));
     if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: hide attribute of the "
