@@ -46,6 +46,7 @@
 #define BROWSE_CONTAINERS           0x00000004
 #define BROWSE_EXACT_CHILDCOUNT     0x00000008
 #define BROWSE_TRACK_SORT           0x00000010
+#define BROWSE_HIDE_FS_ROOT         0x00000020
 
 class BrowseParam : public zmm::Object
 {
