@@ -278,6 +278,10 @@ public:
     /// \brief returns an array of autoscan directories for the given scan mode
     zmm::Ref<zmm::Array<AutoscanDirectory> > getAutoscanDirectories(scan_mode_t scanMode);
 
+    /// \brief returns an array of all autoscan directories 
+    zmm::Ref<zmm::Array<AutoscanDirectory> > getAutoscanDirectories();
+
+
     /// \brief instructs ContentManager to reload scripting environment
     void reloadLayout();
    

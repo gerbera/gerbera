@@ -1534,6 +1534,18 @@ Ref<Array<AutoscanDirectory> > ContentManager::getAutoscanDirectories(scan_mode_
     return nil;
 }
 
+Ref<Array<AutoscanDirectory> > ContentManager::getAutoscanDirectories()
+{
+    Ref<Array<AutoscanDirectory> > all = autoscan_timed->getArrayCopy();
+
+#if HAVE_INOTIFY
+    Ref<Array<AutoscanDirectory> > ino = autoscan_inotify->getArrayCopy();
+    if (ino != nil)
+        for (int i = 0; i < ino->size(); i ++)
+            all->append(ino->get(i));
+#endif
+    return all;
+}
 Ref<AutoscanDirectory> ContentManager::getAutoscanDirectory(String location)
 {
     // \todo change this when more scanmodes become available
