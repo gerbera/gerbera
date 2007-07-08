@@ -1,5 +1,5 @@
 MediaTomb - UPnP AV Mediaserver.
-v0.10.0	09.07.2007	Playlist and inotify autoscan support.
+v0.10.0	09.07.2007  Playlist and inotify autoscan support.
         * MySQL database version pumped to 3 (MediaTomb will automatically
           update the database during the first launch)
         * Sqlite3 database version pumped to 2 (MediaTomb will automatically
@@ -8,14 +8,16 @@ v0.10.0	09.07.2007	Playlist and inotify autoscan support.
         * playlist support - parsing playlist via js is now possible
         * added network interface option
         * added workaround for a PS3 related problem, where sockets were left
-		  open
+          open (bug #1732412)
         * improved iconv handling of illegal characters
-		* added character conversion safeguards to make sure that non UTF-8
-		  strings do not make it into the database from js scripts
-		* made character conversion functions available to js
-		* added option to hide PC Directory from UPnP renderers
+        * added character conversion safeguards to make sure that non UTF-8
+          strings do not make it into the database from js scripts
+        * made character conversion functions available to js
+        * added option to hide PC Directory from UPnP renderers
+        * added album art support, album art is extracted from ID3 tags
+          and offered to UPnP devices
 
-v0.9.1  28.05.2007	Playstation 3 support
+v0.9.1  28.05.2007  Playstation 3 support
         * added support for Playstation 3
         * added command line option that allows to tell the server where to
           put the configuration upon first startup
@@ -32,7 +34,7 @@ v0.9.1  28.05.2007	Playstation 3 support
         * MySQL database version pumped to 2 (MediaTomb will automatically
           update the database during the first launch)
 
-v0.9.0  25.03.2007	Major rework
+v0.9.0  25.03.2007  Major rework
         * the UI was completely rewritten from scratch; it uses AJAX for all
           requests
         * integrated libupnp (http://pupnp.sf.net/) into our source tree

@@ -1,6 +1,6 @@
 MediaTomb - UPnP MediaServer
 
-This documentation is valid for MediaTomb version 0.9.0.
+This documentation is valid for MediaTomb version 0.10.0.
 
 Copyright   2005 Gena Batsyan, Sergey Bostandzhyan
 
@@ -30,18 +30,19 @@ Table of Contents
 
 5. Command Line Options
 
-    5.1. Network Interface
-    5.2. Port
-    5.3. Configuration File
-    5.4. Daemon Mode
-    5.5. Home Directory
-    5.6. Config Directory
-    5.7. Write PID File
-    5.8. Run Under Different User Name
-    5.9. Run Under Different Group
-    5.10. Add Content
-    5.11. Log To File
-    5.12. Display Command Line Summary
+    5.1. IP Address
+    5.2. Interface
+    5.3. Port
+    5.4. Configuration File
+    5.5. Daemon Mode
+    5.6. Home Directory
+    5.7. Config Directory
+    5.8. Write PID File
+    5.9. Run Under Different User Name
+    5.10. Run Under Different Group
+    5.11. Add Content
+    5.12. Log To File
+    5.13. Display Command Line Summary
 
 6. Configuration File
 
@@ -610,7 +611,21 @@ drawback is - it is slow, especially slow on scanning big video files, so it
 slows down the import process considerably. For this reason this library is
 disabled by default.
 
-3.2.23. MediaTomb Debug Output
+3.2.23. Inotify Support
+
+--enable-inotify
+
+Default:
+
+    enabled
+
+Inotify is a kernel mechanism that allows monitoring of filesystem events. You
+need this if you want to use the Inotify Autoscan mode, contrary to the Timed
+mode which recsans given directories in specified intervals, Inotify mode will
+immedeately propagate changes in monitored directories on the filesystem to the
+database.
+
+3.2.24. MediaTomb Debug Output
 
 --enable-tombdebug
 
@@ -623,7 +638,7 @@ information which is mainly interesting to developers. Use this if you are
 trying to trace down a bug or a problem, the additional output may give you
 some clues.
 
-3.2.24. UPnP Library Debug Output
+3.2.25. UPnP Library Debug Output
 
 --enable-upnpdebug
 
@@ -634,7 +649,7 @@ Default:
 This option enables debug output of the UPnP SDK. You should not need it under
 normal circumstances.
 
-3.2.25. Log Output
+3.2.26. Log Output
 
 --disable-log
 
@@ -644,7 +659,7 @@ Default:
 
 This option allows you to suppress all log output from the server.
 
-3.2.26. Package Search Directory
+3.2.27. Package Search Directory
 
 --with-search=DIR
 
@@ -657,7 +672,7 @@ location, for example Darwinports on OSX get installed to /opt/local/. This
 option tells the configure script to additionally search for headers and
 libraries of various packages in DIR/include and DIR/lib.
 
-3.2.27. Specifying Header And Library Locations Of Various Packages
+3.2.28. Specifying Header And Library Locations Of Various Packages
 
 You can specify the exact location of particular headers and libraries. Some
 packages use extra programs that tell us the appropriate flags that are needed
@@ -680,12 +695,13 @@ are located.
 --with-id3lib-libs=DIR          search for id3lib libraries in DIR
 --with-zlib-h=DIR               search for zlib headers in DIR
 --with-zlib-libs=DIR            search for zlib libraries in DIR
---with-iconv-h=DIR              search for iconv headers in DIR
+--with-inotify-h=DIR            search for inotify header in DIR
+--with-iconv-h=DIR              search for iconv headers in DIR/sys
 --with-iconv-libs=DIR           search for iconv libraries in DIR
 --with-extractor-h=DIR          search for extractor headers in DIR
 --with-extractor-libs=DIR       search for extractor libraries in DIR
 
-3.2.28. The devconf Script
+3.2.29. The devconf Script
 
 If you are doing some development work and some debugging, you will probably
 want to compile with the -g flag and also disable optimization. The devconf
@@ -798,14 +814,21 @@ Note:
 
     the command line options override settings in the configuration file!
 
-5.1. Network Interface
+5.1. IP Address
 
---interface or -i
+--ip or -i
 
-The server will bind to the given network interface, currently we can only bind
-to one interface at a time.
+The server will bind to the given IP address, currently we can not bind to
+multiple interfaces so binding to 0.0.0.0 will not be possible.
 
-5.2. Port
+5.2. Interface
+
+--interface or -e
+
+Interface to bind to, for example eth0, this can be specified instead of the ip
+address.
+
+5.3. Port
 
 --port or -p
 
@@ -814,7 +837,7 @@ serving media and for UPnP requests, minimum allowed value is 49152. If this
 option is omitted a default port will be chosen, however, in this case it is
 possible that the port will change upon server restart.
 
-5.3. Configuration File
+5.4. Configuration File
 
  --config or -c
 
@@ -822,14 +845,14 @@ By default MediaTomb will search for a file named "config.xml" in the ~
 /.mediatomb directory. This option allows you to specify a config file by the
 name and location of your choice. The file name must be absolute.
 
-5.4. Daemon Mode
+5.5. Daemon Mode
 
 --daemon or -d
 
 Run the server in background, MediaTomb will shutdown on SIGTERM, SIGINT and
 restart on SIGHUP.
 
-5.5. Home Directory
+5.6. Home Directory
 
 --home or -m
 
@@ -844,9 +867,9 @@ retrieved from the environment (in this case you could also use -c to point
 MediaTomb to your configuration file or when you want to create a new
 configuration in a non standard location (for example, when setting up daemon
 mode). In the latter case you can combine this parameter with the parameter
-described in Section 5.6, "Config Directory"
+described in Section 5.7, "Config Directory"
 
-5.6. Config Directory
+5.7. Config Directory
 
 --cfgdir or -f
 
@@ -856,28 +879,28 @@ default directory naming. This is useful when you want to setup the server in a
 nonstandard location, but want that the default configuration to be written by
 the server.
 
-5.7. Write PID File
+5.8. Write PID File
 
 --pidfile or -P
 
 Specify a file that will hold the server process ID, the filename must be
 absolute.
 
-5.8. Run Under Different User Name
+5.9. Run Under Different User Name
 
 --user or -u
 
 Run MediaTomb under the specified user name, this is especially useful in
 combination with the daemon mode.
 
-5.9. Run Under Different Group
+5.10. Run Under Different Group
 
 --group or -g
 
 Run MediaTomb under the specified group, this is especially useful in
 combination with the daemon mode.
 
-5.10. Add Content
+5.11. Add Content
 
 --add or -a
 
@@ -886,14 +909,14 @@ interaction. The path must be absolute, if path is a directory then it will be
 added recursively. If path is a file, then only the given file will be
 imported.
 
-5.11. Log To File
+5.12. Log To File
 
 --logfile or -l
 
 Do not output log messages to stdout, but redirect everything to a specified
 file.
 
-5.12. Display Command Line Summary
+5.13. Display Command Line Summary
 
 --help or -h
 
@@ -949,9 +972,18 @@ Child tags:
 
     Optional
 
-    Default: first available interface.
+    Default: ip of the first available interface.
 
     Specifies the IP address to bind to, by default one of the available
+    interfaces will be selected.
+
+  * <interface>eth0</interface>
+
+    Optional
+
+    Default: first available interface.
+
+    Specifies the interface to bind to, by default one of the available
     interfaces will be selected.
 
   * <name>MediaTomb</name>
@@ -992,6 +1024,14 @@ Child tags:
     This tag sets the model number of a UPnP device, a custom setting may be
     necessary to trick some renderers in order to enable special features that
     otherwise are only active with the vendor implemented server.
+
+  * <serialNumber>1</serialNumber>
+
+    Optional
+
+    Default: 1
+
+    This tag sets the serial number of a UPnP device.
 
   * <presentationURL append-to="ip">80/index.html</presentationURL>
 
@@ -1100,6 +1140,38 @@ Child tags:
 
     Adds specific tags to the protocolInfo attribute, this is required to
     enable MP3 and MPEG4 playback on Playstation 3.
+
+  * <retries-on-timeout>0<retries-on-timeout>
+
+    Optional
+
+    Default: 0 - disabled
+
+    This enables special error handling for the case that it is not possible to
+    write to the client socket, but no error is reported by select (select
+    keeps timing out). In this situation we may run out of threads, the option
+    above allows some finetuning - we will shutdown the socket after a specific
+    number of retries.
+
+    Note:
+
+        don't enable this option if you are not experiencing this particular
+        problem, this was implemented as a workaround for some Playstation 3
+        related error cases.
+
+  * <pc-directory upnp-hide="no"/>
+
+    Optional
+
+    Default: no
+
+    Enabling this option will make the PC-Directory container invisible for
+    UPnP devices.
+
+    Note:
+
+        independent of the above setting the container will be always visible
+        in the web UI!
 
   * <bookmark>mediatomb.html</bookmark>
 
@@ -1324,33 +1396,43 @@ Child tags:
 
                 This specifies the host where your MySQL database is running.
 
-              * <username>root</username>
+                  o <port>0</port>
 
-                Optional
+                    Optional
 
-                Default: "mediatomb"
+                    Default: 0
 
-                This option sets the user name that will be used to connect to
-                the database.
+                    This specifies the port where your MySQL database is
+                    running.
 
-              * <password></password>
+                  o <username>root</username>
 
-                Optional
+                    Optional
 
-                Default: no password
+                    Default: "mediatomb"
 
-                Defines the password for the MySQL user. If the tag doesn't
-                exist MediaTomb will use no password, if the tag exists, but is
-                empty MediaTomb will use an empty password. MySQL has a
-                distinction between no password and an empty password.
+                    This option sets the user name that will be used to connect
+                    to the database.
 
-              * <database>mediatomb</database>
+                  o <password></password>
 
-                Optional
+                    Optional
 
-                Default: "mediatomb"
+                    Default: no password
 
-                Name of the database that will be used by MediaTomb.
+                    Defines the password for the MySQL user. If the tag doesn't
+                    exist MediaTomb will use no password, if the tag exists,
+                    but is empty MediaTomb will use an empty password. MySQL
+                    has a distinction between no password and an empty
+                    password.
+
+                  o <database>mediatomb</database>
+
+                    Optional
+
+                    Default: "mediatomb"
+
+                    Name of the database that will be used by MediaTomb.
 
 6.2. Import Settings
 
@@ -1470,8 +1552,8 @@ Child tags:
 
       o <directory location="/media" mode="timed" interval="3600"
             level="full" recursive="no" hidden-files="no"/>
-        <directory location="/audio" mode="timed" interval="1800"
-            level="basic" recursive="yes" hidden-files="no"/>
+        <directory location="/audio" mode="inotify"
+            recursive="yes" hidden-files="no"/>
         ...
 
         Optional
@@ -1490,8 +1572,10 @@ Child tags:
 
             Required
 
-            Scan mode, currently only "timed" is supported, future releases
-            will introduce other modes - like inotify.
+            Scan mode, currently "inotify" and "timed" are supported. Timed
+            mode rescans the given directory in specified intervals, inotify
+            mode uses the kernel inotify mechanism to watch for filesystem
+            events.
 
           - interval=...
 
@@ -1501,7 +1585,7 @@ Child tags:
 
           - level=...
 
-            Required
+            Required for "timed" mode
 
             Either "full" or "basic". Basic mode will only check if any files
             have been added or were deleted from the monitored directory, full
@@ -1835,22 +1919,39 @@ a U.S. DSM-320 unit running firmware version 1.09
 
   * ShowCenter 200
 
-7.1.11. Siemens
+  * SoundBridge
+
+7.1.11. Roku
+
+  * SoundBridge M1001
+
+  * SoundBridge M2000
+
+7.1.12. Siemens
 
   * Gigaset M740AV
 
-7.1.12. Telegent
+7.1.13. Sony
+
+  * Playstation 3
+
+Firmware 1.80 introduces UPnP/DLNA support, add the following to the <server>
+section of your configuration file to enable MediaTomb PS3 compatibility:
+
+<protocolInfo extend="yes"/>
+
+7.1.14. Telegent
 
   * TG100
 
 The TG100 client has a problem browsing containers, where item titles exceed
 101 characters. We implemented a server-side workaround which allows you to
 limit the lengths of all titles and descriptions. Use the following settings in
-the server section of your configuration file:
+the <server> section of your configuration file:
 
 <upnp-string-limit>101</upnp-string-limit>
 
-7.1.13. TerraTec
+7.1.15. TerraTec
 
   * NOXON iRadio
 
@@ -1866,11 +1967,17 @@ available on the market.
 
 7.2.1. Buffalo
 
+  * KuroBox-HG
+
   * LinkStation
 
 7.2.2. Excito
 
   * Bubba Mini Server
+
+7.2.3. Linksys
+
+  * NSLU2
 
 8. Running The Server
 
@@ -1946,10 +2053,10 @@ We are using the following code in our tree:
     renaming.
 
   * md5 implementation by L. Peter Deutsch <ghost at aladdin dot com>,
-    Copyright (C) 1999 Aladdin Enterprises. All rights reserved. (See source
+    Copyright (c) 1999 Aladdin Enterprises. All rights reserved. (See source
     headers for further details)
 
-  * md5 javascript implementation distributed under BSD License, Copyright (C)
+  * md5 javascript implementation distributed under BSD License, Copyright (c)
     Paul Johnston 1999 - 2002. http://pajhome.org.uk/crypt/md5
 
   * Prototype JavaScript Framework http://www.prototypejs.org/ (c) 2005-2007
@@ -1967,8 +2074,12 @@ We are using the following code in our tree:
     license.
 
   * ACX_PTHREAD autoconf script http://autoconf-archive.cryp.to/
-    acx_pthread.html (C) 2006 Steven G. Johnson <stevenj at alum dot mit dot
+    acx_pthread.html (c) 2006 Steven G. Johnson <stevenj at alum dot mit dot
     edu>
+
+  * The the Inotify::nextEvent() function is based on code from the inotify
+    tools package, http://inotify-tools.sf.net/, distributed under GPL v2, (c)
+    Rohan McGovern <rohan at mcgovern dot id dot au>
 
 11. Contributions
 
@@ -1978,6 +2089,6 @@ We are using the following code in our tree:
   * TagLib support patch was contributed by Benhur Stein <benhur.stein at gmail
     dot com>
 
-  * tombupnp is kept in sync with the latest pupnp patches, see documentation
-    in the tombupnp directory
+  * tombupnp is kept in sync with the latest pupnp (http://pupnp.sf.net/)
+    patches, see documentation in the tombupnp directory
 

@@ -806,7 +806,7 @@ URL), the title and the desired position of the item in the database layout
 
 The function first decides if we are dealing with an item that represents a
 resource on the web, or if we are dealing with a local file. After that it
-populates all item fields accordingly and calles the addCdsObject() that was
+populates all item fields accordingly and calls the addCdsObject() that was
 introduced earlier. Note, that if the object that is being added by the
 playlist script is not yet in the database, the import script will be invoked.
 Below is the complete function with some comments:
@@ -889,7 +889,7 @@ else if (type == 'm3u')
     var line;
     var title = null;
 
-Here is hte do - while loop which will read the playlist line by line.
+Here is the do - while loop which will read the playlist line by line.
 
     do
     {
