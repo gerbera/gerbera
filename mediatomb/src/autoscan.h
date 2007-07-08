@@ -116,6 +116,9 @@ public:
     /// \brief updates the last_modified data for all AutoscanDirectories.
     void updateLMinDB();
 
+    /// \brief returns a copy of the autoscan list in the form of an array
+    zmm::Ref<zmm::Array<AutoscanDirectory> > getArrayCopy();
+
 /*
     void dump();
 */

@@ -1518,6 +1518,22 @@ Ref<AutoscanDirectory> ContentManager::getAutoscanDirectory(int scanID, scan_mod
     return nil;
 }
 
+Ref<Array<AutoscanDirectory> > ContentManager::getAutoscanDirectories(scan_mode_t scanMode)
+{
+    if (scanMode == TimedScanMode)
+    {
+        return autoscan_timed->getArrayCopy();
+    }
+
+#if HAVE_INOTIFY
+    else if (scanMode == InotifyScanMode)
+    {
+        return autoscan_inotify->getArrayCopy();
+    }
+#endif
+    return nil;
+}
+
 Ref<AutoscanDirectory> ContentManager::getAutoscanDirectory(String location)
 {
     // \todo change this when more scanmodes become available

@@ -143,6 +143,16 @@ void AutoscanList::addList(zmm::Ref<AutoscanList> list)
     }
 }
 
+Ref<Array<AutoscanDirectory> > AutoscanList::getArrayCopy()
+{
+    AUTOLOCK(mutex);
+    Ref<Array<AutoscanDirectory> > copy(new Array<AutoscanDirectory>(list->size()));
+    for (int i = 0; i < list->size(); i++)
+        copy->append(list->get(i));
+
+    return copy;
+}
+
 Ref<AutoscanDirectory> AutoscanList::get(int id)
 {
     AUTOLOCK(mutex);
