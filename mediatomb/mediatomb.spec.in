@@ -40,6 +40,7 @@ rm -rf $RPM_BUILD_ROOT
 chkconfig --add mediatomb
 
 %preun
+service mediatomb stop > /dev/null 2>&1
 chkconfig --del mediatomb
 
 %files
