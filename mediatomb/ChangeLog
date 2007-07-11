@@ -1,5 +1,5 @@
 MediaTomb - UPnP AV Mediaserver.
-v0.10.0	09.07.2007  Playlist and inotify autoscan support.
+v0.10.0	11.07.2007  Playlist and inotify autoscan support.
         * MySQL database version pumped to 3 (MediaTomb will automatically
           update the database during the first launch)
         * Sqlite3 database version pumped to 2 (MediaTomb will automatically

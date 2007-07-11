@@ -2393,6 +2393,7 @@ AC_CONFIG_FILES([
     tombupnp/build/Makefile
     web/Makefile
     config/Makefile
+    mediatomb.spec
 ])
 
 AC_OUTPUT

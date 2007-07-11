@@ -139,6 +139,10 @@ static int web_get_info(IN const char *filename, OUT struct File_Info *info)
         Ref<RequestHandler> reqHandler = create_request_handler(filename);
         reqHandler->get_info(filename, info);
     }
+    catch (ServerShutdownException se)
+    {
+        return -1;
+    }
     catch (SubtitlesNotFoundException sex)
     {
         log_info("%s\n", sex.getMessage().c_str());
@@ -176,6 +180,10 @@ static UpnpWebFileHandle web_open(IN const char *filename, OUT struct File_Info 
         Ref<IOHandler> ioHandler = reqHandler->open(filename, info, mode);
         ioHandler->retain();
         return (UpnpWebFileHandle) ioHandler.getPtr();
+    }
+    catch (ServerShutdownException se)
+    {
+        return NULL;
     }
     catch (SubtitlesNotFoundException sex)
     {
