@@ -52,7 +52,9 @@ chkconfig --del mediatomb
 %{_initrddir}/mediatomb
 
 %changelog
-* Sun Mar 25 2007 Sergey Bostandzhyan <jin@mediatomb.cc> -0 0.9.0-1
+* Wed Jul 11 2007 Sergey Bostandzhyan <jin@mediatomb.cc>
+- Version is now filled in by the configure script.
+* Sun Mar 25 2007 Sergey Bostandzhyan <jin@mediatomb.cc> 
 - Synced with the new script naming and adjusted for the release,
   added man page.
 * Mon Feb 26 2007 Sergey Bostandzhyan <jin@mediatomb.cc>
