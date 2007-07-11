@@ -434,7 +434,7 @@ int ContentManager::_addFile(String path, bool recursive, bool hidden, Ref<CMTas
                         String content_type = mappings->get(mimetype);
                         if (content_type == CONTENT_TYPE_PLAYLIST)
                         {
-                            playlist_parser_script->processPlaylistObject(obj);
+                            playlist_parser_script->processPlaylistObject(obj, task);
                         }
                     }
 #endif
@@ -825,7 +825,7 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<CMTask> task, pr
                                 String content_type = mappings->get(mimetype);
                                 if (content_type == CONTENT_TYPE_PLAYLIST)
                                 {
-                                    playlist_parser_script->processPlaylistObject(obj);
+                                    playlist_parser_script->processPlaylistObject(obj, task);
                                 }
                             }
 #endif
@@ -1274,6 +1274,10 @@ void ContentManager::threadProc()
         {
             if (task->isValid())
                 task->run(this_ref);
+        }
+        catch (ServerShutdownException se)
+        {
+            shutdownFlag = true;
         }
         catch (Exception e)
         {

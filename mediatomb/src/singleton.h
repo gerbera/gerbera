@@ -62,12 +62,12 @@ public:
     static zmm::Ref<T> getInstance()
     {
         if (! singletonActive)
-            throw _Exception(_("singleton is currently inactive!"));
+            throw _ServerShutdownException(_("singleton is currently inactive!"));
         if (instance == nil)
         {
             AUTOLOCK(mutex);
             if (! singletonActive)
-                throw _Exception(_("singleton is currently inactive!"));
+                throw _ServerShutdownException(_("singleton is currently inactive!"));
             if (instance == nil) // check again, because there is a very small chance
                                  // that 2 threads tried to lock() concurrently
             {

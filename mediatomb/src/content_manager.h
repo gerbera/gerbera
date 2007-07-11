@@ -39,6 +39,10 @@
 #include "autoscan.h"
 #include "timer.h"
 #ifdef HAVE_JS
+    // this is somewhat not nice, the playlist header needs the cm header and
+    // vice versa
+    class CMTask;
+    class PlaylistParserScript;
     #include "scripting/playlist_parser_script.h"
 #endif
 #include "layout/layout.h"

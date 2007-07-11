@@ -35,19 +35,21 @@
 #include "common.h"
 #include "script.h"
 #include "cds_objects.h"
+#include "content_manager.h"
 
 class PlaylistParserScript : public Script
 {
 public:
     PlaylistParserScript(zmm::Ref<Runtime> runtime);
     zmm::String readln();
-    void processPlaylistObject(zmm::Ref<CdsObject> obj);
+    void processPlaylistObject(zmm::Ref<CdsObject> obj, zmm::Ref<CMTask> task);
     virtual script_class_t whoami() { return S_PLAYLIST; }
 
 private:
     FILE *currentHandle;
     int currentObjectID;
     char *currentLine;
+    zmm::Ref<CMTask> currentTask;
 };
 
 #endif // __SCRIPTING_PLAYLIST_PARSER_SCRIPT_H__

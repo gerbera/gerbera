@@ -56,6 +56,11 @@ js_readln(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
     {
         line = self->readln();
     }
+    catch (ServerShutdownException se)
+    {
+        log_warning("Aborting script execution due to server shutdown.\n");
+        return JS_FALSE;
+    }
     catch (Exception e)
     {
         e.printStackTrace();
@@ -88,13 +93,16 @@ String PlaylistParserScript::readln()
     if (!currentHandle)
         throw _Exception(_("Readline not yet setup for use"));
 
+    if ((currentTask == nil) || (!currentTask->isValid()))
+        return nil;
+
     if (fgets(currentLine, ONE_TEXTLINE_BYTES, currentHandle) == NULL)
         return nil;
     else
         return trim_string(String(currentLine));
 }
 
-void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj)
+void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<CMTask> task)
 {
 
    if ((currentObjectID != INVALID_OBJECT_ID) || (currentHandle != NULL) ||
@@ -106,11 +114,13 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj)
        throw _Exception(_("only allowed for pure items"));
    }
 
+   currentTask = task;
    currentObjectID = obj->getID();
    currentLine = (char *)MALLOC(ONE_TEXTLINE_BYTES);
    if (!currentLine)
    {
        currentObjectID = INVALID_OBJECT_ID;
+       currentTask = nil;
        throw _Exception(_("failed to allocate memory for playlist parsing!"));
    }
    currentLine[0] = '\0';
@@ -119,6 +129,7 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj)
    if (!currentHandle)
    {
        currentObjectID = INVALID_OBJECT_ID;
+       currentTask = nil;
        FREE(currentLine);
        throw _Exception(_("failed to open file: ") + obj->getLocation());
    }
@@ -132,6 +143,7 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj)
 
        execute();
    }
+
    catch (Exception e)
    {
        fclose(currentHandle);
@@ -141,6 +153,7 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj)
        currentLine = NULL;
 
        currentObjectID = INVALID_OBJECT_ID;
+       currentTask = nil;
 
        throw e;
    }
@@ -152,6 +165,7 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj)
    currentLine = NULL;
 
    currentObjectID = INVALID_OBJECT_ID;
+   currentTask = nil;
 }
 
 #endif // HAVE_JS

@@ -89,6 +89,11 @@ js_copyObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval
         return JS_TRUE;
 
     }
+    catch (ServerShutdownException se)
+    {
+        log_warning("Aborting script execution due to server shutdown.\n");
+        return JS_FALSE;
+    }
     catch (Exception e)
     {
         log_error("%s\n", e.getMessage().c_str());
@@ -244,6 +249,11 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
 
         return JS_TRUE;
     }
+    catch (ServerShutdownException se)
+    {
+        log_warning("Aborting script execution due to server shutdown.\n");
+        return JS_FALSE;
+    }
     catch (Exception e)
     {
         log_error("%s\n", e.getMessage().c_str());
@@ -282,6 +292,11 @@ static JSBool convert_charset_generic(JSContext *cx, JSObject *obj, uintN argc, 
                 return JS_TRUE;
             *rval = STRING_TO_JSVAL(str2);
         }
+    }
+    catch (ServerShutdownException se)
+    {
+        log_warning("Aborting script execution due to server shutdown.\n");
+        return JS_FALSE;
     }
     catch (Exception e)
     {
