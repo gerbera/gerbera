@@ -3,9 +3,9 @@
 .\" Generator: DocBook XSL Stylesheets v1.71.0 <http://docbook.sf.net/>
 .\"      Date: 2007.05.27
 .\"    Manual: User commands
-.\"    Source: MediaTomb 0.9.1
+.\"    Source: MediaTomb 0.10.0
 .\"
-.TH "MEDIATOMB" "1" "2007\-05\-27" "MediaTomb 0.9.1" "User commands"
+.TH "MEDIATOMB" "1" "2007\-05\-27" "MediaTomb 0.10.0" "User commands"
 .\" disable hyphenation
 .nh
 .\" disable justification (adjust text to left margin only)
@@ -14,7 +14,7 @@
 mediatomb \- UPnP MediaServer
 .SH "SYNOPSIS"
 .HP 10
-\fBmediatomb\fR [\fB\-i\ \fR\fB\fIIP\ address\fR\fR\fB\ \fR] [\fB\-p\ \fR\fB\fIport\fR\fR\fB\ \fR] [\fB\-c\ \fR\fB\fIconfig\ file\fR\fR\fB\ \fR] [\fB\-d\fR] [\fB\-m\ \fR\fB\fIhome\ dir\fR\fR\fB\ \fR] [\fB\-f\ \fR\fB\fIconfig\ dir\fR\fR\fB\ \fR] [\fB\-P\ \fR\fB\fIPID\ file\fR\fR\fB\ \fR] [\fB\-u\ \fR\fB\fIuser\fR\fR\fB\ \fR] [\fB\-g\ \fR\fB\fIgroup\fR\fR\fB\ \fR] [\fB\-a\ \fR\fB\fIpath\fR\fR\fB\ \fR] [\fB\-l\ \fR\fB\fIlogfile\fR\fR\fB\ \fR] [\fB\-h\fR]
+\fBmediatomb\fR [\fB\-i\ \fR\fB\fIIP\ address\fR\fR\fB\ \fR] [\fB\-e\ \fR\fB\fIinterface\fR\fR\fB\ \fR] [\fB\-p\ \fR\fB\fIport\fR\fR\fB\ \fR] [\fB\-c\ \fR\fB\fIconfig\ file\fR\fR\fB\ \fR] [\fB\-d\fR] [\fB\-m\ \fR\fB\fIhome\ dir\fR\fR\fB\ \fR] [\fB\-f\ \fR\fB\fIconfig\ dir\fR\fR\fB\ \fR] [\fB\-P\ \fR\fB\fIPID\ file\fR\fR\fB\ \fR] [\fB\-u\ \fR\fB\fIuser\fR\fR\fB\ \fR] [\fB\-g\ \fR\fB\fIgroup\fR\fR\fB\ \fR] [\fB\-a\ \fR\fB\fIpath\fR\fR\fB\ \fR] [\fB\-l\ \fR\fB\fIlogfile\fR\fR\fB\ \fR] [\fB\-h\fR]
 .SH "DESCRIPTION"
 .PP
 This manual page describes the command line parameters for MediaTomb. For a detailed documentation please see the README file which is distributed with MediaTomb or visit http://mediatomb.cc/.
@@ -23,6 +23,11 @@ This manual page describes the command line parameters for MediaTomb. For a deta
 \fB\-i\fR, \fB\-\-ip\fR
 .RS 3n
 The server will bind to the given IP address, currently we can not bind to multiple interfaces so binding to 0.0.0.0 will not be possible.
+.RE
+.PP
+\fB\-e\fR, \fB\-\-interface\fR
+.RS 3n
+The server will bind to the given network interface, currently we can only bind to one interface at a time.
 .RE
 .PP
 \fB\-p\fR, \fB\-\-port\fR
