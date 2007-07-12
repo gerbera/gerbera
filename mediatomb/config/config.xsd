@@ -32,8 +32,8 @@
 -->
 <xs:schema
         xmlns:xs="http://www.w3.org/2001/XMLSchema"
-        targetNamespace="http://mediatomb.cc/0.9.0/config"
-        xmlns="http://mediatomb.cc/0.9.0/config">
+        targetNamespace="http://mediatomb.cc/0.10.0/config"
+        xmlns="http://mediatomb.cc/0.10.0/config">
 
     <xs:simpleType name="boolean">
         <xs:restriction base="xs:string">
