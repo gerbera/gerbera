@@ -43,8 +43,7 @@ fi
 D_ARGS="-c /etc/mediatomb/config.xml -d -u $USER -g $GROUP -P $PIDFILE -l $LOGFILE"
 
 if [ "$INTERFACE" != "" ] ; then
-    IFACE_IP=`/sbin/ifconfig | grep -i "$INTERFACE" -A 1 | grep "inet addr" | cut -d " " -f 12 | cut -d ":" -f 2`
-    [ "$IFACE_IP" != "" ] && D_ARGS="$D_ARGS -i $IFACE_IP"
+    D_ARGS="$D_ARGS -e $INTERFACE"
 fi
 
 
