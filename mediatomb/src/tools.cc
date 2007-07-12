@@ -892,14 +892,14 @@ String normalizePath(String path)
 #ifndef __CYGWIN__
     if (path.charAt(0) != DIR_SEPARATOR)
 #else
-    #warning !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! this function isn't finished for Cygwin
-    #warning !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! this function isn't finished for Cygwin
-    #warning !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! this function isn't finished for Cygwin
-    #warning !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! this function isn't finished for Cygwin
-    #warning !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! this function isn't finished for Cygwin
-    #warning !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! this function isn't finished for Cygwin
-    #warning !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! this function isn't finished for Cygwin
-    #warning !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! this function isn't finished for Cygwin
+    #warning !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! this function is not finished for Cygwin
+    #warning !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! this function is not finished for Cygwin
+    #warning !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! this function is not finished for Cygwin
+    #warning !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! this function is not finished for Cygwin
+    #warning !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! this function is not finished for Cygwin
+    #warning !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! this function is not finished for Cygwin
+    #warning !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! this function is not finished for Cygwin
+    #warning !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! this function is not finished for Cygwin
     for (int i = 0; i < 20; i++)
         print_backtrace();
     /// \todo this doesn't seem to be correct...
