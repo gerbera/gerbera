@@ -349,12 +349,6 @@ void ConfigManager::validate(String serverhome)
     String dbDriver = getOption(_("/server/storage/attribute::driver"));
 
     // checking database driver options
-#ifdef HAVE_SQLITE3
-    prepare_path(_("/server/storage/database-file"), false, true);
-    NEW_OPTION(getOption(_("/server/storage/database-file")));
-    SET_OPTION(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
-#endif
-
 #ifdef HAVE_MYSQL
     NEW_OPTION(getOption(_("/server/storage/host"), 
                 _(DEFAULT_MYSQL_HOST)));
@@ -398,6 +392,16 @@ void ConfigManager::validate(String serverhome)
 
     NEW_OPTION(dbDriver);
     SET_OPTION(CFG_SERVER_STORAGE_DRIVER);
+
+#ifdef HAVE_SQLITE3
+    if (dbDriver == "sqlite3")
+    {
+        prepare_path(_("/server/storage/database-file"), false, true);
+        NEW_OPTION(getOption(_("/server/storage/database-file")));
+        SET_OPTION(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
+    }
+#endif
+
 
 //    temp = checkOption_("/server/storage/database-file");
 //    check_path_ex(construct_path(temp));
