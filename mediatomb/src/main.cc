@@ -31,7 +31,7 @@
 
 /// \mainpage Sourcecode Documentation.
 ///
-/// This documentation was generated using doxygen, you can repdoruce it by 
+/// This documentation was generated using doxygen, you can reproduce it by 
 /// running "doxygen doxygen.conf" from the mediatomb/doc/ directory.
 
 #ifdef HAVE_CONFIG_H
