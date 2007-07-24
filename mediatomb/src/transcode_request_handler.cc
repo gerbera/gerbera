@@ -24,14 +24,16 @@
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
     
-    $Id$
+    $Id: transcode_request_handler.cc $
 */
 
-/// \file file_request_handler.cc
+/// \file transcode_request_handler.cc
 
 #ifdef HAVE_CONFIG_H
     #include "autoconfig.h"
 #endif
+
+#ifdef TRANSCODING
 
 #include "server.h"
 #include <sys/types.h>
@@ -48,18 +50,18 @@
 #include "ixml.h"
 #include "file_io_handler.h"
 #include "dictionary.h"
-#include "file_request_handler.h"
+#include "transcode_request_handler.h"
 #include "metadata_handler.h"
 #include "tools.h"
 
 using namespace zmm;
 using namespace mxml;
 
-FileRequestHandler::FileRequestHandler() : RequestHandler()
+TranscodeRequestHandler::TranscodeRequestHandler() : RequestHandler()
 {
 }
 
-void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info *info)
+void TranscodeRequestHandler::get_info(IN const char *filename, OUT struct File_Info *info)
 {
     log_debug("start\n");
 
@@ -222,7 +224,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     log_debug("web_get_info(): end\n");
 }
 
-Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File_Info *info, IN enum UpnpOpenFileMode mode)
+Ref<IOHandler> TranscodeRequestHandler::open(IN const char *filename, OUT struct File_Info *info, IN enum UpnpOpenFileMode mode)
 {
     int objectID;
     String mimeType;
@@ -332,36 +334,31 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
 
     String path = item->getLocation();
 
-    // determining which resource to serve 
-    int res_id = 0;
-    String s_res_id = dict->get(_(URL_RESOURCE_ID));
-    if (s_res_id != nil)
-        res_id = s_res_id.toInt();
+    // ok, that's a little tricky... we are doing transcoding, so the
+    // resource id that we receive in the URL is not in the database
+    // 
+    // instead of using the res_id we have to look up the profile name in 
+    // the configuration and see if we can find a match, we will then put
+    // together our option string, setup the location of the data and launch
+    // the transoder
+    String p_name = dict->get(_(URL_PARAM_TRANSCODE_PROFILE_NAME));
+    if (!string_ok(p_name))
+        throw _Exception(_("Transcoding of file ") + path + 
+                         " requested, but no profile specified");
 
-    String ext = dict->get(_("ext"));
-    if (ext == ".srt")
-    {
-        int dot = path.rindex('.');
-        if (dot > -1)
-        {
-            path = path.substring(0, dot);
-        }
+    /// \todo make sure that blind .srt requests are processed correctly 
+    /// in the transcode handler
 
-        path = path + ext;
-        mimeType = _(MIMETYPE_TEXT);
-        // reset resource id
-        res_id = 0;
-        is_srt = true;
-    }
+    Ref<TranscodingProfile> tp = ConfigManager::getInstance()->getTranscodingProfileListOption(
+                        CFG_TRANSCODING_PROFILE_LIST)->getByName(p_name);
+    if (tp == nil)
+        throw _Exception(_("Transcoding of file ") + path +
+                           " but no profile matching the name " +
+                           p_name + " found");
 
     ret = stat(path.c_str(), &statbuf);
     if (ret != 0)
-    {
-        if (is_srt)
-            throw SubtitlesNotFoundException(_("Subtitle file ") + path + " is not available.");
-        else
-            throw _Exception(_("Failed to open ") + path + " - " + strerror(errno));
-    }
+        throw _Exception(_("Failed to open ") + path + " - " + strerror(errno));
 
     if (access(path.c_str(), R_OK) == 0)
     {
@@ -372,14 +369,14 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
         info->is_readable = 0;
     }
 
-    String header;
+//    String header;
 
     info->last_modified = statbuf.st_mtime;
     info->is_directory = S_ISDIR(statbuf.st_mode);
 
-
     log_debug("path: %s\n", path.c_str());
-    int slash_pos = path.rindex(DIR_SEPARATOR);
+    /// \todo what's up with content disposition header for transcoded streams?
+/*    int slash_pos = path.rindex(DIR_SEPARATOR);
     if (slash_pos >= 0)
     {
         if (slash_pos < path.length()-1)
@@ -391,59 +388,22 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
                      path.substring(slash_pos) + _("\"");
         }
     }
-    log_debug("fetching resource id %d\n", res_id);
-    // Per default and in case of a bad resource ID, serve the file
-    // itself
+    */
 
     info->http_header = NULL;
-    if ((res_id > 0) && (res_id < item->getResourceCount()))
-    {
-        // http-get:*:image/jpeg:*
-        String protocolInfo = item->getResource(res_id)->getAttributes()->get(_("protocolInfo"));
-        if (protocolInfo != nil)
-        {
-            Ref<Array<StringBase> > parts = split_string(protocolInfo, ':');
-            mimeType = parts->get(2);
-        }
-        else
-        {
-            mimeType = _(MIMETYPE_DEFAULT);
-        }
+    mimeType = tp->getTargetMimeType();
 
-        info->content_type = ixmlCloneDOMString(mimeType.c_str());
-        info->file_length = -1;
-        Ref<CdsResource> resource = item->getResource(res_id);
-        Ref<MetadataHandler> h = MetadataHandler::createHandler(resource->getHandlerType());
-        Ref<IOHandler> io_handler = h->serveContent(item, res_id, &(info->file_length));
-        io_handler->open(mode);
-        return io_handler;
-    }
-    else
-    {
-        if (mimeType == nil)
-            mimeType = item->getMimeType();
-
-        info->file_length = statbuf.st_size;
-        info->content_type = ixmlCloneDOMString(mimeType.c_str());
-
-        log_debug("Adding content disposition header: %s\n", header.c_str());
-            // if we are dealing with a regular file we should add the
-        // Accept-Ranges: bytes header, in order to indicate that we support
-        // seeking
-        if (S_ISREG(statbuf.st_mode))
-        {
-            if (string_ok(header))
-                header = header + _("\r\n");
-
-            header = header + _("Accept-Ranges: bytes");
-        }
-
-        if (string_ok(header))
-             info->http_header = ixmlCloneDOMString(header.c_str());
+    info->content_type = ixmlCloneDOMString(mimeType.c_str());
+    info->file_length = -1;
 
 
-        Ref<IOHandler> io_handler(new FileIOHandler(path));
-        io_handler->open(mode);
-        return io_handler;
-    }
+    // the real deal should proabbyl be here...
+    // I think we can use the FileIOHandler to read from the fifo
+    /// \todo define architecture for transcoding
+    
+    Ref<IOHandler> io_handler(new FileIOHandler(path));
+    io_handler->open(mode);
+    return io_handler;
 }
+
+#endif//TRANSCODING

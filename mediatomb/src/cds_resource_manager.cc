@@ -56,28 +56,66 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
     Ref<ConfigManager> config = ConfigManager::getInstance();
     Ref<Dictionary> mappings = config->getDictionaryOption(
                             CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+#ifndef TRANSCODING
     String content_type = mappings->get(item->getMimeType());
+#endif
+#endif
+
+#ifdef TRANSCODING
+    Ref<TranscodingProfileList> tlist = config->getTranscodingProfileListOption(
+            CFG_TRANSCODING_PROFILE_LIST);
+    Ref<TranscodingProfile> tp = tlist->get(item->getMimeType());
+    if (tp != nil)
+    {
+        Ref<CdsResource> t_res(new CdsResource(CH_TRANSCODE));
+        t_res->addParameter(_(URL_PARAM_TRANSCODE_PROFILE_NAME), tp->getName());
+        t_res->addParameter(_(URL_PARAM_TRANSCODE), _(D_CONVERSION));
+        t_res->addParameter(_(URL_PARAM_TRANSCODE_TARGET_MIMETYPE), tp->getTargetMimeType());
+        t_res->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), 
+renderProtocolInfo(tp->getTargetMimeType()));
+        // duration should be the same for transcoded media, so we can take
+        // the value from the original resource
+        String duration = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_DURATION));
+        if (string_ok(duration))
+            t_res->addAttribute(MetadataHandler::getResAttrName(R_DURATION),
+                    duration);
+        item->addResource(t_res);
+    }
 #endif
 
     int resCount = item->getResourceCount();
     for (int i = 0; i < resCount; i++)
     {
+       printf("--->PROCESSING RESOURCE %d\n", i);
         /// \todo what if the resource has a different mimetype than the item??
 /*        String mimeType = item->getMimeType();
         if (!string_ok(mimeType)) mimeType = DEFAULT_MIMETYPE; */
 
         /// \todo currently resource is misused for album art
         Ref<Dictionary> res_attrs = item->getResource(i)->getAttributes();
+        Ref<Dictionary> res_params = item->getResource(i)->getParameters();
         /// \todo who will sync mimetype that is part of the protocl info and
         /// that is lying in the resources with the information that is in the
         /// resource tags?
         
         //  res_attrs->put("protocolInfo", prot + mimeType + ":*");
+
+#ifdef TRANSCODING
+    String content_type = mappings->get(res_attrs->get(_(URL_PARAM_TRANSCODE_TARGET_MIMETYPE)));
+#endif
+ 
         String tmp;
         if (urlBase->addResID)
             tmp = urlBase->urlBase + i;
         else
             tmp = urlBase->urlBase;
+
+
+        if ((res_params != nil) && (res_params->size() > 0))
+        {
+            tmp = tmp + _(_URL_ARG_SEPARATOR);
+            tmp = tmp + res_params->encode(); 
+        }
 
         if ((i == 0) && ((!IS_CDS_ITEM_INTERNAL_URL(item->getObjectType())) &&
                 (!IS_CDS_ITEM_EXTERNAL_URL(item->getObjectType()))))
@@ -120,10 +158,18 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
             String extend;
             if (content_type == CONTENT_TYPE_MP3)
                 extend = _(D_PROFILE) + "=" + D_MP3 + ";";
+#ifdef TRANSCODING
+            String conv = res_params->get(_(URL_PARAM_TRANSCODE));
+            if (!string_ok(conv))
+                conv = _(D_NO_CONVERSION);
 
             extend = extend + D_DEFAULT_OPS + ";" + 
-                D_DEFAULT_CONVERSION_INDICATOR;
+                D_CONVERSION_INDICATOR + "=" + conv;
+#else
+            extend = extend + D_DEFAULT_OPS + ";" + 
+                D_CONVERSION_INDICATOR + "=" + D_NO_CONVERSION;
 
+#endif
             prot = prot.substring(0, prot.rindex(':')+1) + extend;
             log_debug("extended protocolInfo: %s\n", prot.c_str());
 

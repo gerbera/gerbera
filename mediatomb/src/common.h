@@ -62,8 +62,10 @@
 #define UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER "object.container.playlistContainer"
 
 #define D_PROFILE                       "DLNA.ORG_PN"
+#define D_CONVERSION_INDICATOR          "DLNA.ORG_CI"
 #define D_DEFAULT_OPS                   "DLNA.ORG_OP=01"
-#define D_DEFAULT_CONVERSION_INDICATOR  "DLNA.ORG_CI=0"
+#define D_NO_CONVERSION                 "0"
+#define D_CONVERSION                    "1"
 #define D_MP3                           "MP3"
 
 // fixed CdsObjectIDs
@@ -92,6 +94,9 @@
 #define CONTENT_MEDIA_HANDLER           "media"
 #define CONTENT_SERVE_HANDLER           "serve"
 #define CONTENT_UI_HANDLER              "interface"
+#define URL_PARAM_TRANSCODE_PROFILE_NAME "pr_name"
+#define URL_PARAM_TRANSCODE             "tr"
+#define URL_PARAM_TRANSCODE_TARGET_MIMETYPE "tmt"
 // REQUEST TYPES
 #define REQ_TYPE_BROWSE                 "browse"
 #define REQ_TYPE_LOGIN                  "login"

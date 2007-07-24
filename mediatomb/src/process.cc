@@ -56,7 +56,7 @@ void init_process()
     sprintf(output_template, "/tmp/mediaserver_out_%d_XXXXXX", getuid());
 }
 
-String run_process(String prog, String param, String input)
+String run_simple_process(String prog, String param, String input)
 {
     FILE *file;
     int fd;
@@ -101,4 +101,9 @@ String run_process(String prog, String param, String input)
     unlink(output_file);
 
     return output->toString();
+}
+
+
+void run_simple_process(String prog, String param)
+{
 }

@@ -39,6 +39,9 @@
 #include "xpath.h"
 #include "autoscan.h"
 #include "config_options.h"
+#ifdef TRANSCODING
+    #include "transcoding.h"
+#endif
 
 typedef enum
 {
@@ -115,6 +118,9 @@ typedef enum
 #ifdef HAVE_EXTRACTOR
     CFG_IMPORT_LIBOPTS_EXTRACTOR_AUXDATA_TAGS_LIST,
 #endif
+#ifdef TRANSCODING
+    CFG_TRANSCODING_PROFILE_LIST,
+#endif
     CFG_MAX
 } config_option_t;
 
@@ -155,6 +161,10 @@ public:
     /// \brief returns a config option of type AutoscanList
     /// \param option to retrieve
     zmm::Ref<AutoscanList> getAutoscanListOption(config_option_t option);
+
+    /// \brief returns a config option of type TranscodingProfileList
+    /// \param option to retrieve
+    zmm::Ref<TranscodingProfileList> getTranscodingProfileListOption(config_option_t option);
 
     /// \brief sets static configuration parameters that will be used by
     /// when the ConfigManager class initializes
@@ -243,7 +253,14 @@ protected:
     /// \param element starting element of the ndoeset.
     /// \param scanmode add only directories with the specified scanmode to the array
     zmm::Ref<AutoscanList> createAutoscanListFromNodeset(zmm::Ref<mxml::Element> element, scan_mode_t scanmode);
-    
+  
+#ifdef TRANSCODING
+    /// \brief Creates ab aray of TranscodingProfile objects from an XML 
+    /// nodeset.
+    /// \param element starting element of the nodeset.
+    zmm::Ref<TranscodingProfileList> createTranscodingProfileListFromNodeset(zmm::Ref<mxml::Element> element);
+#endif
+
     /// \brief Creates an array of strings from an XML nodeset.
     /// \param element starting element of the nodeset.
     /// \param nodeName name of each node in the set

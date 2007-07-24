@@ -49,6 +49,9 @@
 #include "io_handler.h"
 #include "request_handler.h"
 #include "file_request_handler.h"
+#ifdef TRANSCODING
+    #include "transcode_request_handler.h"
+#endif
 #include "web_request_handler.h"
 #include "serve_request_handler.h"
 #include "web/pages.h"
@@ -85,7 +88,18 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
     if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" +
                         CONTENT_MEDIA_HANDLER))
     {
-        ret = new FileRequestHandler();
+#ifdef TRANSCODING
+        RequestHandler::split_url(filename, URL_UI_PARAM_SEPARATOR, path,
+                parameters, false);
+        Ref<Dictionary> dict(new Dictionary());
+        dict->decode(parameters);
+       
+        String transcode = dict->get(_(URL_PARAM_TRANSCODE));
+        if (transcode == _(D_CONVERSION))
+            ret = new TranscodeRequestHandler();
+        else
+#endif
+            ret = new FileRequestHandler();
     }
     else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" +
                              CONTENT_UI_HANDLER))

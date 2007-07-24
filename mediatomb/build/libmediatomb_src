@@ -129,6 +129,10 @@ libmediatomb_a_SOURCES = \
 ../src/timer.h \
 ../src/tools.cc \
 ../src/tools.h \
+../src/transcoding.cc \
+../src/transcoding.h \
+../src/transcode_request_handler.cc \
+../src/transcode_request_handler.h \
 ../src/update_manager.cc \
 ../src/update_manager.h \
 ../src/upnp_cds_actions.cc \

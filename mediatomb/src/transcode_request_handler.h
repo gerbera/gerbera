@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    process.h - this file is part of MediaTomb.
+    file_request_handler.h - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -24,18 +24,26 @@
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
     
-    $Id$
+    $Id: transcode_request_handler.h $
 */
 
-/// \file process.h
+/// \file transcode_request_handler.h
+/// \brief Definition of the TranscodeRequestHandler class.
+#ifndef __TRANSCODE_REQUEST_HANDLER_H__
+#define __TRANSCODE_REQUEST_HANDLER_H__
 
-#ifndef __PROCESS_H__
-#define __PROCESS_H__
+#include "common.h"
+#include "request_handler.h"
+#include "dictionary.h"
 
-#include "zmmf/zmmf.h"
+class TranscodeRequestHandler : public RequestHandler
+{
+public:
+    TranscodeRequestHandler();
+    virtual void get_info(IN const char *filename, OUT struct File_Info *info);
+    virtual zmm::Ref<IOHandler> open(IN const char *filename, OUT struct File_Info *info, 
+            IN enum UpnpOpenFileMode mode);
+};
 
-void init_process();
-zmm::String run_simple_process(zmm::String prog, zmm::String param, zmm::String input);
 
-void run_process(zmm::String prog, zmm::String param);
-#endif // __PROCESS_H__
+#endif // __TRANSCODE_REQUEST_HANDLER_H__

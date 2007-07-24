@@ -37,6 +37,10 @@
 #include "exceptions.h"
 #include "autoscan.h"
 
+#ifdef TRANSCODING
+    #include "transcoding.h"
+#endif
+
 class ConfigOption : public zmm::Object
 {
 public:
@@ -76,8 +80,13 @@ public:
         assert(0);
         throw _Exception(_("Wrong option type"));
     };
-
-
+#ifdef TRANSCODING
+    virtual zmm::Ref<TranscodingProfileList> getTranscodingProfileListOption()
+    {
+        assert(0);
+        throw _Exception(_("Wrong option type"));
+    };
+#endif
 };
 
 class Option : public ConfigOption
@@ -157,5 +166,22 @@ protected:
     zmm::Ref<AutoscanList> option;
 };
 
+#ifdef TRANSCODING
+class TranscodingProfileListOption : public ConfigOption
+{
+public:
+    TranscodingProfileListOption(zmm::Ref<TranscodingProfileList> option)
+    {
+        this->option = option;
+    };
+
+    virtual zmm::Ref<TranscodingProfileList> getTranscodingProfileListOption()
+    {
+        return option;
+    };
+protected:
+    zmm::Ref<TranscodingProfileList> option;
+};
+#endif//TRANSCODING
 
 #endif // __CONFIG_MANAGER_H__

@@ -38,16 +38,17 @@
 #include "io_handler.h"
 
 // content handler Id's
-#define CH_DEFAULT 0
-#define CH_LIBEXIF 1
-#define CH_ID3     2
-
+#define CH_DEFAULT   0
+#define CH_LIBEXIF   1
+#define CH_ID3       2
+#define CH_TRANSCODE 3
 #define CONTENT_TYPE_MP3        "mp3"
 #define CONTENT_TYPE_OGG        "ogg"
 #define CONTENT_TYPE_FLAC       "flac"
 #define CONTENT_TYPE_JPG        "jpg"
 #define CONTENT_TYPE_PLAYLIST   "playlist"
 #define CONTENT_TYPE_MPEG4VIDEO "mp4"
+#define CONTENT_TYPE_PCM        "pcm"
 
 #define RESOURCE_CONTENT_TYPE   "rct"
 

@@ -49,7 +49,6 @@
     #include <locale.h>
 #endif
 
-
 using namespace zmm;
 using namespace mxml;
 
@@ -293,6 +292,12 @@ String ConfigManager::createDefaultConfig(String userhome)
                        Ref<AutoscanListOption> (new AutoscanListOption(optval));
 #define SET_AUTOSCANLIST_OPTION(opttype) \
                     options->set(RefCast(alist_opt, ConfigOption), opttype);
+#ifdef TRANSCODING
+#define NEW_TRANSCODING_PROFILELIST_OPTION(optval) trlist_opt = \
+   Ref<TranscodingProfileListOption> (new TranscodingProfileListOption(optval));
+#define SET_TRANSCODING_PROFILELIST_OPTION(opttype) \
+                    options->set(RefCast(trlist_opt, ConfigOption), opttype);
+#endif//TRANSCODING
 
 void ConfigManager::validate(String serverhome)
 {
@@ -306,6 +311,9 @@ void ConfigManager::validate(String serverhome)
     Ref<DictionaryOption> dict_opt;
     Ref<StringArrayOption> str_array_opt;
     Ref<AutoscanListOption> alist_opt;
+#ifdef TRANSCODING
+    Ref<TranscodingProfileListOption> trlist_opt;
+#endif
 
     log_info("Checking configuration...\n");
    
@@ -852,10 +860,20 @@ void ConfigManager::validate(String serverhome)
     SET_AUTOSCANLIST_OPTION(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
 
 #ifdef HAVE_INOTIFY
+    el = getElement(_("/transcoding"));
+    if (el == nil)
+    {
+        getOption(_("/transcoding"));
+    }
     NEW_AUTOSCANLIST_OPTION(createAutoscanListFromNodeset(el, InotifyScanMode));
     SET_AUTOSCANLIST_OPTION(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
 #endif
-    
+   
+#ifdef TRANSCODING
+    NEW_TRANSCODING_PROFILELIST_OPTION(createTranscodingProfileListFromNodeset(el));
+    SET_TRANSCODING_PROFILELIST_OPTION(CFG_TRANSCODING_PROFILE_LIST);
+#endif
+
     el = getElement(_("/server/custom-http-headers"));
     NEW_STRARR_OPTION(createArrayFromNodeset(el, _("add"), _("header")));
     SET_STRARR_OPTION(CFG_SERVER_CUSTOM_HTTP_HEADERS);
@@ -1161,6 +1179,64 @@ Ref<Dictionary> ConfigManager::createDictionaryFromNodeset(Ref<Element> element,
     return dict;
 }
 
+#ifdef TRANSCODING
+Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodeset(zmm::Ref<mxml::Element> element)
+{
+    zmm::String param;
+    Ref<TranscodingProfileList> list(new TranscodingProfileList());
+    if (element == nil)
+        return list;
+
+    for (int i = 0; i < element->childCount(); i++)
+    {
+        Ref<Element> child = element->getChild(i);
+        param = child->getAttribute(_("name"));
+        if (!string_ok(param))
+            throw _Exception(_("error in configuration: invalid transcoding profile name"));
+
+        Ref<TranscodingProfile> prof(new TranscodingProfile(param));
+        param = child->getAttribute(_("mimetype"));
+        if (!string_ok(param))
+            throw _Exception(_("error in configuration: invalid target mimetype in transcoding profile"));
+        prof->setTargetMimeType(param);
+
+        Ref<Element> tmp = child->getChild(_("accept"));
+        if (tmp == nil)
+            throw _Exception(_("error in configuration: transcoding profile ") +
+                    prof->getName() + " is missing the <accept> tag");
+
+        param = tmp->getAttribute(_("mimetype"));
+        if (!string_ok(param))
+            throw _Exception(_("error in configuration: transcoding profile ") +
+                    prof->getName() + 
+                    " has an invalid accepted mimetype setting");
+        prof->setAcceptedMimeType(param);
+
+        tmp = child->getChild(_("agent"));
+        if (tmp == nil)
+            throw _Exception(_("error in configuration: transcoding profile ") +
+                    prof->getName() + " is missing the <agent> tag");
+
+        param = tmp->getAttribute(_("command"));
+        if (!string_ok(param))
+            throw _Exception(_("error in configuration: transcoding profile ") +
+                    prof->getName() + 
+                    " has an invalid command setting");
+        prof->setCommand(param);
+
+        param = tmp->getAttribute(_("input-opts"));
+        prof->setInputOptions(param);
+
+        param = tmp->getAttribute(_("output-opts"));
+        prof->setOutputOptions(param);
+
+        list->add(prof);
+    }
+
+    return list;
+}
+#endif//TRANSCODING
+
 Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::Element> element, scan_mode_t scanmode)
 {
     Ref<AutoscanList> list(new AutoscanList());
@@ -1415,4 +1491,9 @@ Ref<Array<StringBase> > ConfigManager::getStringArrayOption(config_option_t opti
 Ref<AutoscanList> ConfigManager::getAutoscanListOption(config_option_t option)
 {
     return options->get(option)->getAutoscanListOption();
+}
+
+Ref<TranscodingProfileList> ConfigManager::getTranscodingProfileListOption(config_option_t option)
+{
+    return options->get(option)->getTranscodingProfileListOption();
 }
