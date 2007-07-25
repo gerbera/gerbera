@@ -1493,7 +1493,10 @@ Ref<AutoscanList> ConfigManager::getAutoscanListOption(config_option_t option)
     return options->get(option)->getAutoscanListOption();
 }
 
+#ifdef TRANSCODING
 Ref<TranscodingProfileList> ConfigManager::getTranscodingProfileListOption(config_option_t option)
 {
     return options->get(option)->getTranscodingProfileListOption();
 }
+#endif
+

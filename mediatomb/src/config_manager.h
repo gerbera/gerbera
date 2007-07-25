@@ -162,9 +162,11 @@ public:
     /// \param option to retrieve
     zmm::Ref<AutoscanList> getAutoscanListOption(config_option_t option);
 
+#ifdef TRANSCODING
     /// \brief returns a config option of type TranscodingProfileList
     /// \param option to retrieve
     zmm::Ref<TranscodingProfileList> getTranscodingProfileListOption(config_option_t option);
+#endif
 
     /// \brief sets static configuration parameters that will be used by
     /// when the ConfigManager class initializes
