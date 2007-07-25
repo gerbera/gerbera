@@ -86,7 +86,6 @@ renderProtocolInfo(tp->getTargetMimeType()));
     int resCount = item->getResourceCount();
     for (int i = 0; i < resCount; i++)
     {
-       printf("--->PROCESSING RESOURCE %d\n", i);
         /// \todo what if the resource has a different mimetype than the item??
 /*        String mimeType = item->getMimeType();
         if (!string_ok(mimeType)) mimeType = DEFAULT_MIMETYPE; */
