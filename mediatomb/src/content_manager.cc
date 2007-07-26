@@ -360,7 +360,7 @@ void ContentManager::_loadAccounting()
     acct->totalFiles = storage->getTotalFiles();
 }
 
-void ContentManager::addVirtualItem(Ref<CdsObject> obj)
+void ContentManager::addVirtualItem(Ref<CdsObject> obj, bool allow_fifo)
 {
     obj->validate();
     String path = obj->getLocation();
@@ -369,7 +369,7 @@ void ContentManager::addVirtualItem(Ref<CdsObject> obj)
     Ref<CdsObject> pcdir = storage->findObjectByPath(path);
     if (pcdir == nil)
     {
-        pcdir = createObjectFromFile(path);
+        pcdir = createObjectFromFile(path, true, allow_fifo);
         if (pcdir == nil)
         {
             throw _Exception(_("Could not add ") + path);
@@ -1089,7 +1089,7 @@ Ref<CdsObject> ContentManager::convertObject(Ref<CdsObject> oldObj, int newType)
 }
 
 // returns nil if file ignored due to configuration
-Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic)
+Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic, bool allow_fifo)
 {
     String filename = get_filename(path);
 
@@ -1103,7 +1103,7 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic)
     }
 
     Ref<CdsObject> obj;
-    if (S_ISREG(statbuf.st_mode)) // item
+    if (S_ISREG(statbuf.st_mode) || (allow_fifo && S_ISFIFO(statbuf.st_mode))) // item
     {
         /* retrieve information about item and decide
            if it should be included */

@@ -184,7 +184,9 @@ void web::addObject::process()
     Ref<CdsObject> obj = nil;
     
     Ref<Element> updateContainerEl;
-    
+   
+    bool allow_fifo = false;
+
     switch (obj_type.toInt())
     {
         case OBJECT_TYPE_CONTAINER:
@@ -199,6 +201,7 @@ void web::addObject::process()
             if (!string_ok(location)) throw _Exception(_("no location given"));
             if (!check_path(location, false)) throw _Exception(_("file not found"));
             obj = this->addItem(parentID, Ref<CdsItem> (new CdsItem()));
+            allow_fifo = true;
             break;
             
         case OBJECT_TYPE_ITEM | OBJECT_TYPE_ACTIVE_ITEM:
@@ -207,6 +210,7 @@ void web::addObject::process()
             if (!check_path(location, false))
                 throw _Exception(_("path not found"));
             obj = this->addActiveItem(parentID);
+            allow_fifo = true;
             break;
             
         case OBJECT_TYPE_ITEM | OBJECT_TYPE_ITEM_EXTERNAL_URL:
@@ -228,7 +232,7 @@ void web::addObject::process()
         obj->setVirtual(true);
         if (obj_type.toInt() == OBJECT_TYPE_ITEM)
         {
-            ContentManager::getInstance()->addVirtualItem(obj);
+            ContentManager::getInstance()->addVirtualItem(obj, allow_fifo);
         }
         else
         {
