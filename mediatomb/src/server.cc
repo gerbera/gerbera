@@ -121,6 +121,13 @@ void Server::upnp_init(String iface, String ip_address, int port)
     if (string_ok(iface) && !string_ok(ip))
         throw _Exception(_("Could not find interface: ") + iface);
 
+    // without this lod_debug coredumped on Solaris...
+    if (iface == nil)
+        iface = _("");
+
+    if (ip == nil)
+        ip = _("");
+    
     log_debug("interface: %s ip: %s\n", iface.c_str(), ip.c_str());
 
 
