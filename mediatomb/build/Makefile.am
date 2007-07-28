@@ -23,6 +23,7 @@ libmediatomb_a_CXXFLAGS = \
                      $(Z_CXXFLAGS) \
                      $(PTHREAD_CFLAGS) \
                      $(INOTIFY_CXXFLAGS)
+					 $(FFMPEG_CXXFLAGS)
 
 bin_PROGRAMS = mediatomb
 mediatomb_SOURCES = $(top_srcdir)/src/main.cc
@@ -44,6 +45,7 @@ mediatomb_CXXFLAGS = -I$(top_srcdir)/src \
                      $(Z_CXXFLAGS) \
                      $(PTHREAD_CFLAGS) \
                      $(INOTIFY_CXXFLAGS)
+					 $(FFMPEG_CXXFLAGS)
 
 mediatomb_LDADD = \
     libmediatomb.a \
@@ -61,5 +63,6 @@ mediatomb_LDADD = \
     $(Z_LIBS) \
     $(RT_LIBS) \
     $(PTHREAD_CFLAGS) \
-    $(PTHREAD_LIBS)
+    $(PTHREAD_LIBS) \
+	$(FFMPEG_LIBS)
 

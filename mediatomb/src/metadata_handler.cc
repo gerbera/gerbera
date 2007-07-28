@@ -52,6 +52,9 @@
 #endif // HAVE_TAGLIB
 
 
+#ifdef HAVE_FFMPEG
+#include "metadata/ffmpeg_handler.h"
+#endif
 
 #ifdef HAVE_EXTRACTOR
 #include "metadata/extractor_handler.h"
@@ -157,7 +160,14 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
 #endif // EXTRACTOR
         
 #endif // HAVE_EXIF
-        
+
+#ifdef HAVE_FFMPEG
+        {
+            handler = Ref<MetadataHandler>(new FfmpegHandler());
+            break;
+        }
+#endif // HAVE_FFMPEG
+ 
 #ifdef HAVE_EXTRACTOR
         {
             handler = Ref<MetadataHandler>(new ExtractorHandler());

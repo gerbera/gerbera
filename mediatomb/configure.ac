@@ -213,6 +213,22 @@ AC_ARG_WITH(iconv-libs,
         ]
 )
 
+AC_ARG_WITH(ffmpeg-h,
+        AC_HELP_STRING([--with-ffmpeg-h=DIR], [search for ffmpeg headers in DIR]),
+        [
+            FFMPEG_SEARCH_HEADERS="$withval"
+            AC_MSG_NOTICE([Will search for ffmpeg headers in $withval])
+        ]
+)
+
+AC_ARG_WITH(ffmpeg-libs,
+        AC_HELP_STRING([--with-ffmpeg-libs=DIR], [search for ffmpeg libraries in DIR]),
+        [
+            FFMPEG_SEARCH_LIBS="$withval"
+            AC_MSG_NOTICE([Will search for ffmpeg libraries in $withval])
+        ]
+)
+
 AC_ARG_WITH(extractor-h,
         AC_HELP_STRING([--with-extractor-h=DIR], [search for extractor headers in DIR]),
         [
@@ -497,7 +513,7 @@ AC_CHECK_HEADERS([syslog.h stddef.h unistd.h arpa/inet.h fcntl.h], [],
 AC_CHECK_HEADERS([limits.h netdb.h netinet/in.h stdlib.h string.h sys/file.h],
                  [],
                  [AC_MSG_ERROR(required header not found)]) 
-AC_CHECK_HEADERS([sys/ioctl.h sys/socket.h sys/time.h sys/types.h],
+AC_CHECK_HEADERS([sys/ioctl.h sys/socket.h sys/time.h sys/types.h sys/wait.h],
                  [],
                  [AC_MSG_ERROR(required header not found)]) 
 
@@ -1976,6 +1992,185 @@ CPPFLAGS="$CPPFLAGS_SAVE"
 CXXFLAGS="$CXXFLAGS_SAVE"
 LDFLAGS="$LDFLAGS_SAVE"
 
+######### extractor or ffmpeg
+
+FFMPEG_REQUESTED=no
+EXTRACTOR_REQUESTED=no
+
+AC_ARG_ENABLE(ffmpeg,
+        AC_HELP_STRING([--enable-ffmpeg], [compile with ffmpeg support (default: yes, preferred over extractor)]),
+  [
+     FFMPEG_EN=$enableval 
+     if test "x$enableval" = xno; then
+        FFMPEG_OK=disabled
+     else
+        FFMPEG_OK=yes
+        FFMPEG_REQUESTED=yes
+     fi
+  ],
+  [
+    FFMPEG_OK=yes
+  ]
+)
+
+AC_ARG_ENABLE(libextractor,
+        AC_HELP_STRING([--enable-libextractor], [compile with extractor support (default: yes, if ffmpeg is not available)])
+
+   [
+      EXTRACTOR_EN=$enableval
+      if test "x$enableval" = xno; then
+        EXTRACTOR_OK=disabled
+      else
+        EXTRACTOR_REQUESTED=yes
+        EXTRACTOR_OK=yes
+      fi
+   ],
+   [
+        EXTRACTOR_OK=yes
+   ]
+
+)
+
+if ((test "x$EXTRACTOR_REQUESTED" = xno) && (test "x$FFMPEG_REQUESTED" = xyes)) ; then
+    FFMPEG_OK=disabled
+    if test "x$EXTRACTOR_REQUESTED" = xyes; then
+        AC_MSG_WARN([libextractor disabled])
+    fi
+elif ((test "x$EXTRACTOR_REQUESTED" = xyes) && (test "x$FFMPEG_REQUESTED" = xno)) ; then
+    FFMPEG_OK=disabled
+    AC_MSG_WARN([ffmpeg disabled])
+elif ((test "x$EXTRACTOR_REQUESTED" = xyes) && (test "x$FFMPEG_REQUESTED" = xyes)) ; then
+    AC_MSG_ERROR([Please select either ffmpeg or libextractor, but not both.])
+fi
+
+######## ffmpeg
+
+AC_ARG_ENABLE(ffmpeg,
+        AC_HELP_STRING([--enable-ffmpeg], [compile with ffmpeg metadata extraction enabled (default: no)]),
+    [
+        FFMPEG_EN=$enableval 
+        if test "x$enableval" = xno; then
+            FFMPEG_OK=disabled
+        else
+            FFMPEG_OK=yes
+        fi
+    ],
+    [
+        FFMPEG_OK=disabled
+    ]
+)
+if test "x$FFMPEG_OK" = xyes; then
+    if test -n "$FFMPEG_SEARCH_HEADERS" ; then
+        CPPFLAGS="-I$FFMPEG_SEARCH_HEADERS"
+        AC_CHECK_HEADER($FFMPEG_SEARCH_HEADERS/ffmpeg/avformat.h,
+                [
+                    FFMPEG_CXXFLAGS="-I$FFMPEG_SEARCH_HEADERS"
+                ],
+                [
+                    AC_MSG_ERROR([ffmpeg headers not found in requested location $FFMPEG_SEARCH_HEADERS])
+                ],
+                [
+                    #define __STDC_CONSTANT_MACROS
+                    #include <stdint.h>
+                ]
+        )
+    else 
+        AC_CHECK_HEADER(ffmpeg/avformat.h,
+            [],
+            [
+                CPPFLAGS="-I$SEARCH_DIR_HEADERS"
+                unset ac_cv_header_ffmpeg_avformat_h
+                AC_CHECK_HEADER($SEARCH_DIR_HEADERS/ffmpeg/avformat.h,
+                    [
+                        FFMPEG_CXXFLAGS="-I$SEARCH_DIR_HEADERS"
+                    ],
+                    [
+                        FFMPEG_OK=missing
+                    ],
+                    [
+                        #define __STDC_CONSTANT_MACROS
+                        #include <stdint.h>
+                    ]
+                )
+            ],
+            [
+                #define __STDC_CONSTANT_MACROS
+                #include <stdint.h>
+            ]
+        )
+    fi
+fi
+ 
+LIBS_SAVE="$LIBS"
+unset LIBS
+if test "x$FFMPEG_OK" = xyes; then
+    if test -n "$FFMPEG_SEARCH_LIBS" ; then
+        LDFLAGS="-L$FFMPEG_SEARCH_LIBS"
+        AC_CHECK_LIB(avformat, av_register_all,
+                [
+                    FFMPEG_LIBS="-L$FFMPEG_SEARCH_LIBS -lavformat"
+                ],
+                [
+                    AC_MSG_ERROR([avformat libraries not found in requested path $FFMPEG_SEARCH_LIBS])
+                ]
+        )
+    else
+        AC_CHECK_LIB(avformat, av_register_all,
+            [],
+            [
+                LDFLAGS="-L$SEARCH_DIR_LIBS"
+                unset ac_cv_lib_avformat_av_register_all
+                AC_CHECK_LIB(avformat, av_register_all,
+                    [
+                        FFMPEG_LIBS="-L$SEARCH_DIR_LIBS -lavformat"
+                    ],
+                    [ FFMPEG_OK=missing ]
+                )
+            ]
+        )
+    fi
+fi
+
+# last check, my Fedora 7 is somehow broken, and allthough the above tests
+# succeed it still has unresolved symbols when linking
+
+if test "x$FFMPEG_OK" = xyes; then
+    AC_MSG_CHECKING([ffmpeg linking])
+    AC_LINK_IFELSE(
+        [AC_LANG_PROGRAM(
+            [
+                #define __STDC_CONSTANT_MACROS
+                #include <stdint.h>
+                #include <ffmpeg/avformat.h>
+            ],
+            [
+                av_register_all();
+            ]
+        )],
+        [
+            AC_MSG_RESULT([ok])
+        ],
+        [
+            AC_MSG_RESULT([failed, check your ffmpeg installation])
+            FFMPEG_OK=missing
+        ]
+   )
+fi
+
+LIBS="$LIBS_SAVE $LIBS"
+
+if test "x$FFMPEG_OK" = xyes; then
+    AC_DEFINE([HAVE_FFMPEG], [1], [FFMPEG library presence])
+    AC_SUBST(FFMPEG_CXXFLAGS)
+    AC_SUBST(FFMPEG_LIBS)
+else
+    if test "x$FFMPEG_EN" = xyes; then
+        AC_MSG_ERROR(unable to configure ffmpeg support)
+    fi
+fi
+
+LDFLAGS="$LDFLAGS_SAVE"
+CPPFLAGS="$CPPFLAGS_SAVE"
 
 ######## extractor
 
@@ -2411,6 +2606,7 @@ echo "inotify       : $INOTIFY_OK"
 echo "libexif       : $EXIF_OK"
 echo "id3lib        : $ID3_OK"
 echo "taglib        : $TAGLIB_OK"
+echo "ffmpeg        : $FFMPEG_OK"
 echo "libextractor  : $EXTRACTOR_OK"
 
 if  test $AUTOCREATE_PRINT != "0"; then
