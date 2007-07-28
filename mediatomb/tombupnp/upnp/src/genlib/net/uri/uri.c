@@ -640,10 +640,13 @@ parse_hostport( const char *in,
 #if defined(WIN32) || defined(__APPLE__) || defined(__CYGWIN__)
         h=gethostbyname(temp_host_name);
 #elif defined(SOLARIS)
-        errCode = gethostbyname_r( temp_host_name,
-                                   &h,
+        h = gethostbyname_r( temp_host_name,
+                                   &h_buf,
                                    temp_hostbyname_buff,
                                    BUFFER_SIZE, &errcode );
+        if ( h == NULL ) {
+            errCode = 1;
+        }
 #elif defined(HAVE_LIBLWRES)
         h = lwres_gethostbyname_r( temp_host_name,
                                    &h_buf,

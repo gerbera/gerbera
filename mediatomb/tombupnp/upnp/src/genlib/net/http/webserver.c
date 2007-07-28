@@ -1437,6 +1437,12 @@ process_request( IN http_message_t * req,
     if( ( err_code =
           CheckOtherHTTPHeaders( req, RespInstr,
                                  finfo.file_length ) ) != HTTP_OK ) {
+        if (using_virtual_dir && (req->method != HTTPMETHOD_POST) &&
+           (*Fp != NULL))
+        {
+            pVirtualDirCallback->close(*Fp);
+            *Fp = NULL;
+        }
         goto error_handler;
     }
 
