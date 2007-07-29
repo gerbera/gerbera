@@ -38,6 +38,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 
 #include <string.h>
 #include <errno.h>
@@ -107,3 +108,12 @@ String run_simple_process(String prog, String param, String input)
 void run_simple_process(String prog, String param)
 {
 }
+
+bool is_alive(pid_t pid)
+{
+    if (waitpid(pid, NULL, WNOHANG) == 0)
+        return true;
+
+    return false;
+}
+

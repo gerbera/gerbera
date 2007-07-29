@@ -89,13 +89,13 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
                         CONTENT_MEDIA_HANDLER))
     {
 #ifdef TRANSCODING
-        RequestHandler::split_url(filename, URL_UI_PARAM_SEPARATOR, path,
+        RequestHandler::split_url(filename, URL_PARAM_SEPARATOR, path,
                 parameters, false);
         Ref<Dictionary> dict(new Dictionary());
         dict->decode(parameters);
        
         String transcode = dict->get(_(URL_PARAM_TRANSCODE));
-        if (transcode == _(D_CONVERSION))
+        if (transcode == D_CONVERSION)
             ret = new TranscodeRequestHandler();
         else
 #endif

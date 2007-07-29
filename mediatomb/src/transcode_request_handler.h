@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    file_request_handler.h - this file is part of MediaTomb.
+    transcode_request_handler.h - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -43,6 +43,8 @@ public:
     virtual void get_info(IN const char *filename, OUT struct File_Info *info);
     virtual zmm::Ref<IOHandler> open(IN const char *filename, OUT struct File_Info *info, 
             IN enum UpnpOpenFileMode mode);
+protected:
+    pid_t   transcoding_process;
 };
 
 

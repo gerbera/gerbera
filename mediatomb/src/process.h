@@ -38,4 +38,6 @@ void init_process();
 zmm::String run_simple_process(zmm::String prog, zmm::String param, zmm::String input);
 
 void run_process(zmm::String prog, zmm::String param);
+
+bool is_alive(pid_t pid);
 #endif // __PROCESS_H__

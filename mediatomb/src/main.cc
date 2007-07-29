@@ -586,7 +586,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
     log_info("Server terminating\n");
     log_close();
     
-    return ret;
+    exit(ret);
 }
 
 void signal_handler(int signum)

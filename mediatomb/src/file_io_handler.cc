@@ -58,6 +58,7 @@ FileIOHandler::FileIOHandler(String filename) : IOHandler()
 
 void FileIOHandler::open(IN enum UpnpOpenFileMode mode)
 {
+    printf("%s: OPEN on file %s\n", __func__, this->filename.c_str());
     f = fopen(filename.c_str(), "rb");
     if (f == NULL)
     {
@@ -69,6 +70,7 @@ int FileIOHandler::read(OUT char *buf, IN size_t length)
 {
     int ret = 0;
 
+    printf("%s: READ on file %s\n", __func__, this->filename.c_str());
     ret = fread(buf, sizeof(char), length, f);
 
     if (ret <= 0)
@@ -82,6 +84,7 @@ int FileIOHandler::read(OUT char *buf, IN size_t length)
                                                                                                                                                                          
 void FileIOHandler::seek(IN off_t offset, IN int whence)
 {
+    printf("%s: SEEK on file %s\n", __func__, this->filename.c_str());
     if (fseeko(f, offset, whence) != 0)
     {
         throw _Exception(_("fseek failed"));
@@ -90,8 +93,10 @@ void FileIOHandler::seek(IN off_t offset, IN int whence)
 
 void FileIOHandler::close()
 {
+    printf("CLOSING FILE: %s\n", this->filename.c_str());
     if (fclose(f) != 0)
     {
         throw _Exception(_("fclose failed"));
     }
+    f = NULL;
 }

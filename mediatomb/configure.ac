@@ -449,6 +449,18 @@ AC_HELP_STRING([--enable-mrreg-service],
               ]
 )
 
+AC_ARG_ENABLE([transcoding],
+                      [
+AC_HELP_STRING([--enable-transcoding],
+[enable transcoding support (default: no, currently in development)])
+              ],
+              [
+                if test "x$enableval" = xyes; then
+                    AC_DEFINE([TRANSCODING], [1], [do not enable this yet, work in progress])
+                fi
+              ]
+)
+
 EXTEND_PROTINFO=1
 AC_ARG_ENABLE([protocolinfo-extension],
               [

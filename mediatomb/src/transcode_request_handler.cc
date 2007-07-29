@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    file_request_handler.cc - this file is part of MediaTomb.
+    transcode_request_handler.cc - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -38,6 +38,7 @@
 #include "server.h"
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
@@ -48,7 +49,7 @@
 #include "update_manager.h"
 #include "session_manager.h"
 #include "ixml.h"
-#include "file_io_handler.h"
+#include "transcode_process_io_handler.h"
 #include "dictionary.h"
 #include "transcode_request_handler.h"
 #include "metadata_handler.h"
@@ -106,37 +107,25 @@ void TranscodeRequestHandler::get_info(IN const char *filename, OUT struct File_
     Ref<CdsItem> item = RefCast(obj, CdsItem);
 
     String path = item->getLocation();
+
+    String p_name = dict->get(_(URL_PARAM_TRANSCODE_PROFILE_NAME));
+    if (!string_ok(p_name))
+        throw _Exception(_("Transcoding of file ") + path +
+                         " requested, but no profile specified");
+
+    /// \todo make sure that blind .srt requests are processed correctly 
+    /// in the transcode handler
+
+    Ref<TranscodingProfile> tp = ConfigManager::getInstance()->getTranscodingProfileListOption(
+                        CFG_TRANSCODING_PROFILE_LIST)->getByName(p_name);
+    if (tp == nil)
+        throw _Exception(_("Transcoding of file ") + path +
+                           " but no profile matching the name " +
+                           p_name + " found");
     
-    // determining which resource to serve 
-    int res_id = 0;
-    String s_res_id = dict->get(_(URL_RESOURCE_ID));
-    if (s_res_id != nil)
-        res_id = s_res_id.toInt();
-
-
-    String ext = dict->get(_("ext"));
-    if (ext == ".srt")
-    {
-        int dot = path.rindex('.');
-        if (dot > -1)
-        {
-            path = path.substring(0, dot);
-        }
-
-        path = path + ext;
-        mimeType = _(MIMETYPE_TEXT);
-
-        // reset resource id
-        res_id = 0;
-        is_srt = true;
-    }
-   
     ret = stat(path.c_str(), &statbuf);
     if (ret != 0)
     {
-        if (is_srt)
-            throw SubtitlesNotFoundException(_("Subtitle file ") + path + " is not available.");
-        else
             throw _Exception(_("Failed to open ") + path + " - " + strerror(errno));
 
     }
@@ -153,6 +142,8 @@ void TranscodeRequestHandler::get_info(IN const char *filename, OUT struct File_
 
     String header;
     log_debug("path: %s\n", path.c_str());
+    /// \todo what's up with the content disposition header for transcoded streams?
+/*
     int slash_pos = path.rindex(DIR_SEPARATOR);
     if (slash_pos >= 0)
     {
@@ -165,57 +156,13 @@ void TranscodeRequestHandler::get_info(IN const char *filename, OUT struct File_
                      path.substring(slash_pos) + _("\"");
         }
     }
- 
+*/
     info->http_header = NULL;
-    log_debug("fetching resource id %d\n", res_id);
-    if ((res_id > 0) && (res_id < item->getResourceCount()))
-    {
-        // http-get:*:image/jpeg:*
-        String protocolInfo = item->getResource(res_id)->getAttributes()->get(_("protocolInfo"));
-        if (protocolInfo != nil)
-        {
-            Ref<Array<StringBase> > parts = split_string(protocolInfo, ':');
-            mimeType = parts->get(2);
-        }
-        else
-        {
-            mimeType = _(MIMETYPE_DEFAULT);
-        }
+    mimeType = tp->getTargetMimeType();
       
-        log_debug("setting content length to unknown\n");
-        /// \todo we could figure out the content length...
-        info->file_length = -1;
-        Ref<CdsResource> resource = item->getResource(res_id);
-        Ref<MetadataHandler> h = MetadataHandler::createHandler(resource->getHandlerType());
-/*        Ref<IOHandler> io_handler = */ h->serveContent(item, res_id, &(info->file_length));
-        
-    }
-    else
-    {
-        if (mimeType == nil)
-            mimeType = item->getMimeType();
-
-        info->file_length = statbuf.st_size;
-        // if we are dealing with a regular file we should add the
-        // Accept-Ranges: bytes header, in order to indicate that we support
-        // seeking
-        if (S_ISREG(statbuf.st_mode))
-        {
-            if (string_ok(header))
-                header = header + _("\r\n");
-
-            header = header + _("Accept-Ranges: bytes");
-        }
-
-        //log_debug("sizeof off_t %d, statbuf.st_size %d\n", sizeof(off_t), sizeof(statbuf.st_size));
-        //log_debug("get_info: file_length: " OFF_T_SPRINTF "\n", statbuf.st_size);
-        if (string_ok(header))
-            info->http_header = ixmlCloneDOMString(header.c_str());
-    }
-        
+    info->file_length = -1;
     info->last_modified = statbuf.st_mtime;
     info->is_directory = S_ISDIR(statbuf.st_mode);
-   
     info->content_type = ixmlCloneDOMString(mimeType.c_str());
 
    //    log_debug("get_info: Requested %s, ObjectID: %s, Location: %s\n, MimeType: %s\n",
@@ -229,7 +176,7 @@ Ref<IOHandler> TranscodeRequestHandler::open(IN const char *filename, OUT struct
     int objectID;
     String mimeType;
     int ret;
-    bool is_srt = false;
+//    bool is_srt = false;
 
     log_debug("start\n");
     struct stat statbuf;
@@ -400,8 +347,87 @@ Ref<IOHandler> TranscodeRequestHandler::open(IN const char *filename, OUT struct
     // the real deal should proabbyl be here...
     // I think we can use the FileIOHandler to read from the fifo
     /// \todo define architecture for transcoding
-    
-    Ref<IOHandler> io_handler(new FileIOHandler(path));
+
+    String fifo_name = String(tempnam("/tmp/", "mt_tr"));
+    String param;
+    String temp;
+    String command;
+    char *argv[128];
+    Ref<Array<StringBase> > parts_out;
+    Ref<Array<StringBase> > parts_in;
+    int i;
+    int apos = 0;
+    printf("creating fifo: %s\n", fifo_name.c_str());
+    if (mkfifo(fifo_name.c_str(), O_RDWR) == -1) 
+    {
+        log_error("Failed to create fifo for the transcoding process!: %s\n", strerror(errno));
+        throw _Exception(_("Could not create fifo!\n"));
+    }
+
+    chmod(fifo_name.c_str(), S_IWOTH | S_IWGRP | S_IWUSR | S_IRUSR);
+
+    transcoding_process = fork();
+    switch (transcoding_process)
+    {
+        case -1:
+            throw _Exception(_("Fork failed when launching transcoding process!"));
+        case 0:
+            // "safe" version, code below does not work yet
+            // still checking in so Leo can have a look
+            printf("FORKING NOW!!!!!!!!!!!\n");
+            /// \todo this is only test code, to be removed !!
+            param = tp->getOutputOptions() + fifo_name.c_str();
+            command = tp->getCommand();
+            argv[0] = command.c_str();
+            apos = 0;
+            if (string_ok(param))
+            {
+                parts_out = split_string(param, ' ');
+                for (i = 0; i < parts_out->size(); i++)
+                {
+                    argv[++apos] = parts_out->get(i)->data; 
+                }
+            }
+            else
+            {
+                argv[++apos] = fifo_name.c_str();
+            }
+
+            param = tp->getInputOptions() + "\"" + path.c_str() + "\"";
+            if (string_ok(param))
+            {
+                parts_in = split_string(param, ' ');
+                for (i = 0; i  < parts_in->size(); i++)
+                {
+                    argv[++apos] = parts_in->get(i)->data; 
+                }
+            }
+            else
+                argv[++apos] = path.c_str();
+
+            argv[++apos] = NULL;
+
+            i = 0;
+            printf("ARGLIST: ");
+            do
+            {
+                printf("%s ", argv[i]);
+                i++;
+            }
+            while (argv[i] != NULL);
+          
+            printf("\n");
+            printf("EXECUTING COMMAND!\n");
+            execvp(command.c_str(), argv);
+        default:
+            break;
+    }
+
+    printf("TRANSCODING PROCESS: %d\n", transcoding_process);
+    // make sure we have at least one wait on the process
+    is_alive(transcoding_process);
+    Ref<IOHandler> io_handler(new TranscodeProcessIOHandler(fifo_name, 
+                transcoding_process));
     io_handler->open(mode);
     return io_handler;
 }
