@@ -415,7 +415,10 @@ http_SendMessage( IN SOCKINFO * info,
                             num_read = fread( file_buf, 1,
                                               amount_to_be_read, Fp );
                     }
-
+                    if (num_read < 0)
+                    {
+                        return  UPNP_E_FILE_READ_ERROR;
+                    }
                     amount_to_be_read = amount_to_be_read - num_read;
 
                     if( Instr->ReadSendSize < 0 ) {
