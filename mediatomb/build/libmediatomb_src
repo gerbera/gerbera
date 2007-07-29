@@ -37,9 +37,9 @@ libmediatomb_a_SOURCES = \
 ../src/hash/dsb_hash.h \
 ../src/hash/dso_hash.h \
 ../src/hash.h \
+../src/inotify-nosys.h \
 ../src/io_handler.cc \
 ../src/io_handler.h \
-../src/inotify-nosys.h \
 ../src/jpeg_resolution.cc \
 ../src/layout/fallback_layout.cc \
 ../src/layout/fallback_layout.h \
@@ -59,6 +59,8 @@ libmediatomb_a_SOURCES = \
 ../src/metadata/exiv2_handler.h \
 ../src/metadata/extractor_handler.cc \
 ../src/metadata/extractor_handler.h \
+../src/metadata/ffmpeg_handler.cc \
+../src/metadata/ffmpeg_handler.h \
 ../src/metadata_handler.cc \
 ../src/metadata_handler.h \
 ../src/metadata/id3_handler.cc \
@@ -67,8 +69,8 @@ libmediatomb_a_SOURCES = \
 ../src/metadata/libexif_handler.h \
 ../src/metadata/taglib_handler.cc \
 ../src/metadata/taglib_handler.h \
-../src/mt_inotify.h \
 ../src/mt_inotify.cc \
+../src/mt_inotify.h \
 ../src/mxml/attribute.cc \
 ../src/mxml/attribute.h \
 ../src/mxml/context.cc \
@@ -129,10 +131,10 @@ libmediatomb_a_SOURCES = \
 ../src/timer.h \
 ../src/tools.cc \
 ../src/tools.h \
-../src/transcoding.cc \
-../src/transcoding.h \
 ../src/transcode_request_handler.cc \
 ../src/transcode_request_handler.h \
+../src/transcoding.cc \
+../src/transcoding.h \
 ../src/update_manager.cc \
 ../src/update_manager.h \
 ../src/upnp_cds_actions.cc \
