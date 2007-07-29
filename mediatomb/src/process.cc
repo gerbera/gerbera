@@ -105,13 +105,9 @@ String run_simple_process(String prog, String param, String input)
 }
 
 
-void run_simple_process(String prog, String param)
+bool is_alive(pid_t pid, int *status)
 {
-}
-
-bool is_alive(pid_t pid)
-{
-    if (waitpid(pid, NULL, WNOHANG) == 0)
+    if (waitpid(pid, status, WNOHANG) == 0)
         return true;
 
     return false;

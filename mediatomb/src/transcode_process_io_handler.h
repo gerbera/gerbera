@@ -33,13 +33,22 @@
 #define __TRANSCODE_PROCESS_IO_HANDLER_H__
 
 #include "common.h"
-#include "file_io_handler.h"
+#include "io_handler.h"
 
-/// \brief Allows the web server to read from a file.
-class TranscodeProcessIOHandler : public FileIOHandler
+#define FIFO_READ_TIMEOUT 2
+/// \brief Allows the web server to read from a fifo.
+class TranscodeProcessIOHandler : public IOHandler
 {
 protected:
+    /// \brief pid of the process that is writing to the fifo
     pid_t kill_pid;
+
+    /// \brief name of the fifo
+    zmm::String filename;
+
+    /// \brief file descriptor
+    int fd;
+
 public:
     /// \brief Sets the filename to work with.
     /// \param filename

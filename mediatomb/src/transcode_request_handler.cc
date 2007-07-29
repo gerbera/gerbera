@@ -393,7 +393,8 @@ Ref<IOHandler> TranscodeRequestHandler::open(IN const char *filename, OUT struct
                 argv[++apos] = fifo_name.c_str();
             }
 
-            param = tp->getInputOptions() + "\"" + path.c_str() + "\"";
+            // this will fail if the file contains spaces
+            param = tp->getInputOptions() + path.c_str();
             if (string_ok(param))
             {
                 parts_in = split_string(param, ' ');
@@ -424,8 +425,6 @@ Ref<IOHandler> TranscodeRequestHandler::open(IN const char *filename, OUT struct
     }
 
     printf("TRANSCODING PROCESS: %d\n", transcoding_process);
-    // make sure we have at least one wait on the process
-    is_alive(transcoding_process);
     Ref<IOHandler> io_handler(new TranscodeProcessIOHandler(fifo_name, 
                 transcoding_process));
     io_handler->open(mode);

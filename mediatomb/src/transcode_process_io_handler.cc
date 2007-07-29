@@ -36,6 +36,8 @@
 #ifdef TRANSCODING
 
 #include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/fcntl.h>
 #include <signal.h>
 #include <unistd.h>
 #include "common.h"
@@ -44,38 +46,107 @@
 
 using namespace zmm;
 
-TranscodeProcessIOHandler::TranscodeProcessIOHandler(String filename, pid_t kill_pid) : FileIOHandler(filename)
+TranscodeProcessIOHandler::TranscodeProcessIOHandler(String filename, pid_t kill_pid) : IOHandler()
 {
-    if (kill_pid < 1)
+    int exit_status = EXIT_SUCCESS;
+
+    if (!is_alive(kill_pid, &exit_status))
     {
         unlink(filename.c_str());
-        throw _Exception(_("invalid pid specified for killing"));
-    }
-    if (!is_alive(kill_pid))
-    {
-        unlink(filename.c_str());
-        throw _Exception(_("transcoder terminated early"));
+        printf("%s: ------> EXIT STATUS %d\n", __func__, exit_status);
+        throw _Exception(_("transcoder terminated early with status: %d") + String::from(exit_status));
     }
     this->kill_pid = kill_pid;
+    this->filename = filename;
 }
 
 void TranscodeProcessIOHandler::open(IN enum UpnpOpenFileMode mode)
 {
-    if (!is_alive(kill_pid))
-        throw _Exception(_("transcoder terminated"));
+    int exit_status = EXIT_SUCCESS;
+    if (!is_alive(kill_pid, &exit_status))
+    {
+        printf("%s: ------> EXIT STATUS %d\n", __func__, exit_status);
+        throw _Exception(_("transcoder terminated with code: %d") + String::from(exit_status));
+    }
 
-    FileIOHandler::open(mode);
-
-    if (!is_alive(kill_pid))
-        throw _Exception(_("transcoder terminated"));
+    fd = ::open(filename.c_str(), O_RDONLY | O_NONBLOCK);
+    if (fd == -1)
+        throw _Exception(_("open: failed to open: ") + filename.c_str());
 }
 
 int TranscodeProcessIOHandler::read(OUT char *buf, IN size_t length)
 {
-    if (!is_alive(kill_pid))
-        return 0; /// \todo check exit status and return error if appropriate
+    fd_set readSet;
+    struct timeval timeout;
+    ssize_t bytes_read = 0;
+    int num_bytes = 0;
+    char* p_buffer = buf;
+    int exit_status = EXIT_SUCCESS;
+    int ret = 0;
 
-    return FileIOHandler::read(buf, length);
+    printf("%s: READ on file %s\n", __func__, this->filename.c_str());
+
+    FD_ZERO(&readSet);
+    FD_SET(fd, &readSet);
+
+    timeout.tv_sec = FIFO_READ_TIMEOUT;
+    timeout.tv_usec = 0;
+
+    while (true)
+    {
+        ret = select(fd + 1, &readSet, NULL, NULL, &timeout);
+        if (ret == -1)
+        {
+            if (errno == EINTR)
+                continue;
+        }
+
+        // timeout
+        if (ret == 0)
+        {
+            /// \todo check exit status and return error if appropriate
+            if (!is_alive(kill_pid, &exit_status))
+            {
+                printf("%s: ------> EXIT STATUS %d\n", __func__, exit_status);
+                if (exit_status == EXIT_SUCCESS)
+                    return 0; 
+                else
+                    return -1;
+            }
+        }
+
+        if (FD_ISSET(fd, &readSet))
+        {
+            timeout.tv_sec = FIFO_READ_TIMEOUT;
+            timeout.tv_usec = 0;
+
+            bytes_read = ::read(fd, p_buffer, length);
+            if (bytes_read == 0)
+                break;
+
+            if (bytes_read < 0)
+                return -1;
+
+            num_bytes = num_bytes + bytes_read;
+            length = length - bytes_read;
+
+            if (length <= 0)
+                break;
+
+            p_buffer = buf + num_bytes;
+        }
+    }
+
+    if (num_bytes < 0)
+    {
+        // not sure what we return here since no way of knowing about feof
+        // actually that will depend onthe ret code of the process
+//        if (feof(f)) return 0;
+//        if (ferror(f)) return -1;
+        return -1;
+    }
+
+    return num_bytes;
 }
 
 void TranscodeProcessIOHandler::seek(IN off_t offset, IN int whence)
@@ -83,6 +154,7 @@ void TranscodeProcessIOHandler::seek(IN off_t offset, IN int whence)
     // we know we can not seek in a fifo
     throw _Exception(_("fseek failed"));
 }
+
 void TranscodeProcessIOHandler::close()
 {
     int ret;
@@ -107,7 +179,7 @@ void TranscodeProcessIOHandler::close()
     }
 
     printf("CLOSING FILE: %s\n", this->filename.c_str());
-    fclose(f);
+    ::close(fd);
     unlink(filename.c_str());
 
     if (is_alive(kill_pid))
