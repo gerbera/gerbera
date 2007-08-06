@@ -1036,6 +1036,28 @@ bool validateYesNo(String value)
         return true;
 }
 
+Ref<Array<StringBase> > parseCommandLine(String line, String in, String out)
+{
+    Ref<Array<StringBase> > params = split_string(line, ' ');
+    for (int i = 0; i < params->size(); i++)
+    {
+
+        String param = params->get(i);
+
+        if (param == "\%in")
+        {
+            params->set(in, i);
+        }
+        else if (param == "\%out")
+        {
+            params->set(out, i);
+        }
+    }
+
+    return params;
+}
+
+
 #ifdef LOG_TOMBDEBUG
 
 void profiling_thread_check(struct profiling_t *data)

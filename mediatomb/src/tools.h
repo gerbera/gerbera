@@ -249,6 +249,16 @@ zmm::String interfaceToIP(zmm::String interface);
 /// returns false.
 bool validateYesNo(zmm::String value);
 
+
+/// \brief Parses a command line, splitting the arguments into an array and
+/// substitutes %in and %out tokens with given strings.
+///
+/// This function splits a string into array parts, where space is used as the 
+/// separator. In addition special %in and %out tokens are replaced by given
+/// strings.
+/// \todo add escaping
+zmm::Ref<zmm::Array<zmm::StringBase> > parseCommandLine(zmm::String line, zmm::String in, zmm::String out);
+
 #ifdef LOG_TOMBDEBUG
 
 struct profiling_t
