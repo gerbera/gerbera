@@ -50,6 +50,10 @@
     #include "autoscan_inotify.h"
 #endif
 
+#ifdef TRANSCODING
+    #include "process.h"
+#endif
+
 class ContentManager;
 
 typedef enum task_type_t
@@ -290,7 +294,25 @@ public:
 
     /// \brief instructs ContentManager to reload scripting environment
     void reloadLayout();
-   
+
+#ifdef TRANSCODING 
+    /// \brief register transcoding process
+    ///
+    /// When a transcoding process is launched we will register it's pid with
+    /// the content manager. This will ensure that we can kill all transcoders
+    /// when we shutdown the server while transcoding processes are running.
+    /// 
+    /// \param pid the process id of the transcoding process.
+    void registerTranscoder(pid_t pid);
+
+    /// \brief unregister transcoding process
+    /// 
+    /// When the the transcode io handler receives a close on a stream that is
+    /// currently being transcoded, it will kill the process. Additionally
+    /// it will call this function and remove the pid from the list.
+    void unregisterTranscoder(pid_t pid);
+#endif
+
 #ifdef HAVE_MAGIC
     zmm::String getMimeTypeFromBuffer(void *buffer, size_t length);
 #endif
@@ -315,8 +337,12 @@ protected:
     zmm::Ref<AutoscanList> autoscan_inotify;
     zmm::Ref<AutoscanInotify> inotify;
 #endif
-   
-    /* don't use these, use the above methods */
+ 
+#ifdef TRANSCODING
+    zmm::Ref<Mutex> tr_mutex;
+    zmm::Ref<zmm::Array<PIDWrapper> > transcoding_processes;
+#endif
+
     void _loadAccounting();
 
     int addFileInternal(zmm::String path, bool recursive=true,

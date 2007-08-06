@@ -113,3 +113,38 @@ bool is_alive(pid_t pid, int *status)
     return false;
 }
 
+bool kill_proc(pid_t kill_pid)
+{
+    if (is_alive(kill_pid))
+    {
+        log_debug("KILLING TERM PID: %d\n", kill_pid);
+        kill(kill_pid, SIGTERM);
+        sleep(1);
+    }
+    else
+        return true;
+
+    if (is_alive(kill_pid))
+    {
+        log_debug("KILLING INT PID: %d\n", kill_pid);
+        kill(kill_pid, SIGINT);
+        sleep(1);
+    }
+    else 
+        return true;
+
+    if (is_alive(kill_pid))
+    {
+        log_debug("KILLING KILL PID: %d\n", kill_pid);
+        kill(kill_pid, SIGKILL);
+        sleep(1);
+    }
+    else
+        return true;
+
+    if (is_alive(kill_pid))
+        return false;
+
+    return true;
+}
+

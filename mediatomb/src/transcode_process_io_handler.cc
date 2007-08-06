@@ -43,6 +43,7 @@
 #include "common.h"
 #include "transcode_process_io_handler.h"
 #include "process.h"
+#include "content_manager.h"
 
 using namespace zmm;
 
@@ -58,6 +59,7 @@ TranscodeProcessIOHandler::TranscodeProcessIOHandler(String filename, pid_t kill
     }
     this->kill_pid = kill_pid;
     this->filename = filename;
+    ContentManager::getInstance()->registerTranscoder(kill_pid);
 }
 
 void TranscodeProcessIOHandler::open(IN enum UpnpOpenFileMode mode)
@@ -157,32 +159,17 @@ void TranscodeProcessIOHandler::seek(IN off_t offset, IN int whence)
 
 void TranscodeProcessIOHandler::close()
 {
-    int ret;
-    if (is_alive(kill_pid))
-    {
-        printf("KILLING TERM PID: %d\n", kill_pid);
-        kill(kill_pid, SIGTERM);
-        sleep(1);
-    }
+    bool ret;
+   
 
-    if (is_alive(kill_pid))
-    {
-        printf("KILLING INT PID: %d\n", kill_pid);
-        kill(kill_pid, SIGINT);
-        sleep(1);
-    }
-
-    if (is_alive(kill_pid))
-    {
-        printf("KILLING KILL PID: %d\n", kill_pid);
-        kill(kill_pid, SIGKILL);
-    }
-
+    ContentManager::getInstance()->unregisterTranscoder(kill_pid);
+    ret = kill_proc(kill_pid);
+    
     printf("CLOSING FILE: %s\n", this->filename.c_str());
     ::close(fd);
     unlink(filename.c_str());
 
-    if (is_alive(kill_pid))
+    if (!ret)
         throw _Exception(_("failed to kill transcoding process!"));
 }
 

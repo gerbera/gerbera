@@ -243,7 +243,31 @@ void ContentManager::init()
     }
     
 #endif
+
+#ifdef TRANSCODING
+    tr_mutex = Ref<Mutex>(new Mutex(true));
+    transcoding_processes = Ref<Array<PIDWrapper> >(new Array<PIDWrapper>());
+#endif
 }
+
+#ifdef TRANSCODING
+void ContentManager::registerTranscoder(pid_t pid)
+{
+    AUTOLOCK(tr_mutex);
+    Ref<PIDWrapper>pw(new PIDWrapper(pid));
+    transcoding_processes->append(pw);
+}
+
+void ContentManager::unregisterTranscoder(pid_t pid)
+{
+    AUTOLOCK(tr_mutex);
+    for (int i = 0; i < transcoding_processes->size(); i++)
+    {
+        if (transcoding_processes->get(i)->pid == pid)
+            transcoding_processes->remove(i);
+    }
+}
+#endif
 
 void ContentManager::timerNotify(int id)
 {
@@ -288,13 +312,28 @@ void ContentManager::shutdown()
 #endif
 
     shutdownFlag = true;
+
+#ifdef TRANSCODING 
+    bool killed;
+    for (int i = 0; i < transcoding_processes->size(); i++)
+    {
+        killed = kill_proc(transcoding_processes->get(i)->pid);
+        if (!killed)
+            log_debug("failed to kill transcoding process\n");
+        else
+            log_debug("killed transcoding process\n");
+    }
+#endif
+
     log_debug("signalling...\n");
     signal();
     AUTOUNLOCK();
     log_debug("waiting for thread...\n");
+
     if (taskThread)
         pthread_join(taskThread, NULL);
     taskThread = 0;
+
 #ifdef HAVE_MAGIC
     if (ms)
     {
