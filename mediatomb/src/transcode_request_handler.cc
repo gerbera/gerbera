@@ -349,12 +349,12 @@ Ref<IOHandler> TranscodeRequestHandler::open(IN const char *filename, OUT struct
     /// \todo define architecture for transcoding
 
     String fifo_name = String(tempnam("/tmp/", "mt_tr"));
-    String param;
+    String arguments;
     String temp;
     String command;
-    char *argv[128];
-    Ref<Array<StringBase> > parts_out;
-    Ref<Array<StringBase> > parts_in;
+#define MAX_ARGS 128
+    char *argv[MAX_ARGS];
+    Ref<Array<StringBase> > arglist;
     int i;
     int apos = 0;
     printf("creating fifo: %s\n", fifo_name.c_str());
@@ -376,35 +376,17 @@ Ref<IOHandler> TranscodeRequestHandler::open(IN const char *filename, OUT struct
             // still checking in so Leo can have a look
             printf("FORKING NOW!!!!!!!!!!!\n");
             /// \todo this is only test code, to be removed !!
-            param = tp->getOutputOptions() + fifo_name.c_str();
+            arglist = parseCommandLine(tp->getArguments(), path, fifo_name);
             command = tp->getCommand();
             argv[0] = command.c_str();
             apos = 0;
-            if (string_ok(param))
-            {
-                parts_out = split_string(param, ' ');
-                for (i = 0; i < parts_out->size(); i++)
-                {
-                    argv[++apos] = parts_out->get(i)->data; 
-                }
-            }
-            else
-            {
-                argv[++apos] = fifo_name.c_str();
-            }
 
-            // this will fail if the file contains spaces
-            param = tp->getInputOptions() + path.c_str();
-            if (string_ok(param))
-            {
-                parts_in = split_string(param, ' ');
-                for (i = 0; i  < parts_in->size(); i++)
+                for (i = 0; i < arglist->size(); i++)
                 {
-                    argv[++apos] = parts_in->get(i)->data; 
+                    argv[++apos] = arglist->get(i)->data; 
+                    if (apos >= MAX_ARGS-1)
+                        break;
                 }
-            }
-            else
-                argv[++apos] = path.c_str();
 
             argv[++apos] = NULL;
 

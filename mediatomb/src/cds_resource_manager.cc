@@ -100,6 +100,9 @@ renderProtocolInfo(tp->getTargetMimeType()));
         //  res_attrs->put("protocolInfo", prot + mimeType + ":*");
 
 #ifdef TRANSCODING
+
+    /// \todo we could get that from the protocolInfo but we need an efficient
+    /// way to do that.
     String content_type = mappings->get(res_attrs->get(_(URL_PARAM_TRANSCODE_TARGET_MIMETYPE)));
 #endif
  

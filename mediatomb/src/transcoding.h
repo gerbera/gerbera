@@ -36,31 +36,52 @@
 #define __TRANSCODING_H__
 
 #include "zmmf/zmmf.h"
+#include "dictionary.h"
 
+/// \brief this class keeps all data associated with one transcoding profile.
 class TranscodingProfile : public zmm::Object
 {
 public:
     TranscodingProfile() { first_resource = false; }
     TranscodingProfile(zmm::String name) { this->name = name; }
 
+    /// \brief set name of the transcoding profile
     void setName(zmm::String name) { this->name = name; }
+
+    /// \brief get name of the transcoding profile
     zmm::String getName() { return name; }
 
+    /// \brief set target mimetype
+    ///
+    /// The so called "target mimetype" is the mimetype of the media that will
+    /// be produced by the transcoder and identifies the target format.
     void setTargetMimeType(zmm::String tm) { this->tm = tm; }
+
+    /// \brief get target mimetype
     zmm::String getTargetMimeType() { return tm; }
 
-    void setAcceptedMimeType(zmm::String am) { this->am = am; }
-    zmm::String getAcceptedMimeType() { return am; }
-
+    /// \brief sets the program name, i.e. the command line name of the
+    /// transcoder that will be executed.
     void setCommand(zmm::String command) { this->command = command; }
+
+    /// \brief gets the transcoders program name
     zmm::String getCommand() { return command; }
 
-    void setInputOptions(zmm::String in_opts) { this->in_opts = in_opts; }
-    zmm::String getInputOptions() { return in_opts; }
+    /// \brief sets the arguments that will be fed to the transcoder,
+    /// this is the string that comes right after the command.
+    /// 
+    /// The argument string must contain the special %out token and may contain
+    /// the special %in token. The %in token is replaced by the filename of the
+    /// appropriate item - this is the source media for the transcoder. The
+    /// %out token is replaced by the fifo name that is generated when the
+    /// transcoding process is launched. Transcoded data will be read by
+    /// the server from the fifo and served via HTTP to the renderer.
+    void setArguments(zmm::String args) { this->args = args; }
 
-    void setOutputOptions(zmm::String out_opts) { this->out_opts = out_opts; }
-    zmm::String getOutputOptions() { return out_opts; }
+    /// \brief retrieves the argument string
+    zmm::String getArguments() { return args; }
 
+    /// \brief identifies if the profile should be set as the first resource
     void setFirstResource(bool fr) { first_resource = fr; }
     bool firstResource() { return first_resource; }
     
@@ -68,13 +89,12 @@ public:
 protected:
     zmm::String name;
     zmm::String tm;
-    zmm::String am;
     zmm::String command;
-    zmm::String in_opts;
-    zmm::String out_opts;
+    zmm::String args;
     bool first_resource;
 };
 
+/// \brief this class allows access to available transcoding profiles.
 class TranscodingProfileList : public zmm::Object
 {
 public:
@@ -83,8 +103,12 @@ public:
     zmm::Ref<TranscodingProfile> get(zmm::String acceptedMimeType);
     zmm::Ref<TranscodingProfile> get(int index);
     zmm::Ref<TranscodingProfile> getByName(zmm::String name);
+//    void addMapping(zmm::String mimetype, zmm::String prname);
+    void setMappings(zmm::Ref<Dictionary> mappings);
+    inline int size() { return list->size(); }
 protected:
     zmm::Ref<zmm::Array<TranscodingProfile> > list;
+    zmm::Ref<Dictionary> mimetype_profile;
 };
 
 #endif//__TRANSCODING_H__

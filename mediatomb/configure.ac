@@ -1685,7 +1685,7 @@ LDFLGAS="$LDFLAGS_SAVE"
 ######### taglib or id3lib
 
 AC_ARG_ENABLE(id3lib,
-        AC_HELP_STRING([--enable-id3lib], [compile with taglib support (default: yes, preferred over taglib)]),
+        AC_HELP_STRING([--enable-id3lib], [compile with id3lib support (default: yes, preferred over taglib)]),
   [
      ID3_EN=$enableval 
      if test "x$enableval" = xno; then

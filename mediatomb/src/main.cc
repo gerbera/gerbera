@@ -70,6 +70,8 @@
     #define OPTSTR "i:e:p:c:m:f:u:g:a:l:P:dh"
 #endif
 
+#include "tools.cc"
+
 using namespace zmm;
 
 int shutdown_flag = 0;
@@ -120,6 +122,7 @@ int main(int argc, char **argv, char **envp)
     String ip;
 
     Ref<Array<StringBase> > addFile(new Array<StringBase>());
+
 #ifdef HAVE_GETOPT_LONG   
     while (1)
     {

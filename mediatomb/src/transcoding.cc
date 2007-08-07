@@ -37,12 +37,14 @@
 #ifdef TRANSCODING
 
 #include "transcoding.h"
+#include "tools.h"
 
 using namespace zmm;
 
 TranscodingProfileList::TranscodingProfileList()
 {
     list = Ref<Array<TranscodingProfile> > (new Array<TranscodingProfile>());
+    mimetype_profile = Ref<Dictionary> (new Dictionary());
 }
 
 void TranscodingProfileList::add(zmm::Ref<TranscodingProfile> prof)
@@ -52,12 +54,11 @@ void TranscodingProfileList::add(zmm::Ref<TranscodingProfile> prof)
 
 Ref<TranscodingProfile> TranscodingProfileList::get(zmm::String acceptedMimeType)
 {
-    for (int i = 0; i < list->size(); i++)
-    {
-        if (list->get(i) != nil && acceptedMimeType == list->get(i)->getAcceptedMimeType())
-                return list->get(i);
-    }
-    return nil;
+    String name = mimetype_profile->get(acceptedMimeType);
+    if (!string_ok(name))
+        return nil;
+
+    return getByName(name);
 }
 
 Ref<TranscodingProfile> TranscodingProfileList::getByName(zmm::String name)
@@ -76,6 +77,11 @@ Ref<TranscodingProfile> TranscodingProfileList::get(int index)
         return nil;
 
     return list->get(index);
+}
+
+void TranscodingProfileList::setMappings(zmm::Ref<Dictionary> mappings)
+{
+    mimetype_profile = mappings;
 }
 
 #endif//TRANSCODING

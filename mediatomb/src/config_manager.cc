@@ -860,16 +860,22 @@ void ConfigManager::validate(String serverhome)
     SET_AUTOSCANLIST_OPTION(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
 
 #ifdef HAVE_INOTIFY
-    el = getElement(_("/transcoding"));
+    el = getElement(_("/import/autoscan"));
     if (el == nil)
     {
-        getOption(_("/transcoding"));
+        getOption(_("/import/autoscan"));
     }
     NEW_AUTOSCANLIST_OPTION(createAutoscanListFromNodeset(el, InotifyScanMode));
     SET_AUTOSCANLIST_OPTION(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
 #endif
    
 #ifdef TRANSCODING
+    el = getElement(_("/transcoding"));
+    if (el == nil)
+    {
+        getOption(_("/transcoding"));
+    }
+    
     NEW_TRANSCODING_PROFILELIST_OPTION(createTranscodingProfileListFromNodeset(el));
     SET_TRANSCODING_PROFILELIST_OPTION(CFG_TRANSCODING_PROFILE_LIST);
 #endif
@@ -1180,16 +1186,31 @@ Ref<Dictionary> ConfigManager::createDictionaryFromNodeset(Ref<Element> element,
 }
 
 #ifdef TRANSCODING
-Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodeset(zmm::Ref<mxml::Element> element)
+Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodeset(Ref<Element> element)
 {
     zmm::String param;
     Ref<TranscodingProfileList> list(new TranscodingProfileList());
     if (element == nil)
         return list;
 
-    for (int i = 0; i < element->childCount(); i++)
+    Ref<Element> profiles = element->getChild(_("profiles"));
+    if (profiles == nil)
+        return list;
+
+    for (int i = 0; i < profiles->childCount(); i++)
     {
-        Ref<Element> child = element->getChild(i);
+        Ref<Element> child = profiles->getChild(i);
+        if (child->getName() != "profile")
+            continue;
+
+        param = child->getAttribute(_("enabled"));
+        if (!validateYesNo(param))
+            throw _Exception(_("Error in config file: incorrect parameter "
+                           "for <profile enabled=\"\" /> attribute"));
+
+        if (param == "no")
+            continue;
+
         param = child->getAttribute(_("name"));
         if (!string_ok(param))
             throw _Exception(_("error in configuration: invalid transcoding profile name"));
@@ -1200,19 +1221,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
             throw _Exception(_("error in configuration: invalid target mimetype in transcoding profile"));
         prof->setTargetMimeType(param);
 
-        Ref<Element> tmp = child->getChild(_("accept"));
-        if (tmp == nil)
-            throw _Exception(_("error in configuration: transcoding profile ") +
-                    prof->getName() + " is missing the <accept> tag");
-
-        param = tmp->getAttribute(_("mimetype"));
-        if (!string_ok(param))
-            throw _Exception(_("error in configuration: transcoding profile ") +
-                    prof->getName() + 
-                    " has an invalid accepted mimetype setting");
-        prof->setAcceptedMimeType(param);
-
-        tmp = child->getChild(_("agent"));
+        Ref<Element> tmp = child->getChild(_("agent"));
         if (tmp == nil)
             throw _Exception(_("error in configuration: transcoding profile ") +
                     prof->getName() + " is missing the <agent> tag");
@@ -1224,14 +1233,51 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                     " has an invalid command setting");
         prof->setCommand(param);
 
-        param = tmp->getAttribute(_("input-opts"));
-        prof->setInputOptions(param);
+        param = tmp->getAttribute(_("arguments"));
+        if (!string_ok(param))
+            throw _Exception(_("error in configuration: transcoding profile ") +
+                    prof->getName() + " has an empty argument string");
 
-        param = tmp->getAttribute(_("output-opts"));
-        prof->setOutputOptions(param);
+        prof->setArguments(param);
 
         list->add(prof);
     }
+
+    Ref<Element> mappings = element->getChild(_("mappings"));
+    if (mappings == nil)
+    {
+        printf("here\n");
+        if (list->size() > 0)
+            throw _Exception(_("error in configuration: transcoding profiles exist, but no mimetype to profile mappings specified"));
+        else
+            return list;
+    }
+   
+    Ref<Element> mtype_profile = mappings->getChild(_("mimetype-profile"));
+    Ref<Dictionary> mt_mappings = createDictionaryFromNodeset(mtype_profile, 
+            _("transcode"), _("mimetype"), _("using"));
+
+    if (mt_mappings->size() == 0)
+    {
+        printf("or here?\n");
+       if (list->size() > 0)
+            throw _Exception(_("error in configuration: transcoding profiles exist, but no mimetype to profile mappings specified"));
+        else
+            return list;
+    }
+
+    // now check for bogus profile names
+    Ref<Array<DictionaryElement> > dict_check = mt_mappings->getElements();
+    for (int j = 0; j < dict_check->size(); j++)
+    {
+        if (list->getByName(dict_check->get(j)->getValue()) == nil)
+            throw _Exception(_("error in configuration: you specified a mimetype to transcoding profile mapping, but no profile named \"") + 
+                    dict_check->get(j)->getValue() + 
+                    "\" exists");
+    }
+
+    if (list->size() > 0)
+        list->setMappings(mt_mappings);
 
     return list;
 }
