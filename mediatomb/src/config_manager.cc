@@ -873,7 +873,7 @@ void ConfigManager::validate(String serverhome)
     el = getElement(_("/transcoding"));
     if (el == nil)
     {
-        getOption(_("/transcoding"));
+        getOption(_("/transcoding"), _(""));
     }
     
     NEW_TRANSCODING_PROFILELIST_OPTION(createTranscodingProfileListFromNodeset(el));
