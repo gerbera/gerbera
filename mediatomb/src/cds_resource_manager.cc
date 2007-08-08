@@ -79,7 +79,10 @@ renderProtocolInfo(tp->getTargetMimeType()));
         if (string_ok(duration))
             t_res->addAttribute(MetadataHandler::getResAttrName(R_DURATION),
                     duration);
-        item->addResource(t_res);
+        if (tp->firstResource())
+            item->insertResource(0, t_res);
+        else
+            item->addResource(t_res);
     }
 #endif
 

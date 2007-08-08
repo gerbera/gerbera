@@ -249,7 +249,11 @@ public:
     /// \brief Add resource tag
     inline void addResource(zmm::Ref<CdsResource> resource)
     { resources->append(resource); } 
-    
+  
+    /// \brief Insert resource tag at index
+    inline void insertResource(int index, zmm::Ref<CdsResource> resource)
+    { resources->insert(index, resource); }
+
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
     virtual void copyTo(zmm::Ref<CdsObject> obj);

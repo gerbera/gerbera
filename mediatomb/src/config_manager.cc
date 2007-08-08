@@ -1229,6 +1229,16 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
             throw _Exception(_("error in configuration: invalid target mimetype in transcoding profile"));
         prof->setTargetMimeType(param);
 
+        param = child->getAttribute(_("first-resource"));
+        if (!validateYesNo(param))
+            throw _Exception(_("Error in config file: incorrect parameter "
+                        "for <profile first-resource=\"\" /> attribute"));
+
+        if (param == "yes")
+            prof->setFirstResource(true);
+        else
+            prof->setFirstResource(false);
+
         Ref<Element> tmp = child->getChild(_("agent"));
         if (tmp == nil)
             throw _Exception(_("error in configuration: transcoding profile ") +
