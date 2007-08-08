@@ -221,6 +221,9 @@
 #define DEFAULT_EXTEND_PROTOCOLINFO     NO
 #define DEFAULT_HIDE_PC_DIRECTORY       NO
 #define DEFAULT_TIMEOUT_RETRIES         0
+#ifdef TRANSCODING
+    #define DEFAULT_TRANSCODING_ENABLED NO
+#endif
 #ifdef HAVE_SQLITE3
     #define DEFAULT_STORAGE_DRIVER      "sqlite3"
 #else

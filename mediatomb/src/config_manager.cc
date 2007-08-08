@@ -870,12 +870,20 @@ void ConfigManager::validate(String serverhome)
 #endif
    
 #ifdef TRANSCODING
-    el = getElement(_("/transcoding"));
-    if (el == nil)
-    {
-        getOption(_("/transcoding"), _(""));
-    }
-    
+    temp = getOption(
+            _("/transcoding/attribute::enabled"), 
+            _(DEFAULT_TRANSCODING_ENABLED));
+
+    if (!validateYesNo(temp))
+        throw _Exception(_("Error in config file: incorrect parameter "
+                    "for <transcoding enabled=\"\" /> attribute"));
+
+
+    if (temp == "yes")
+        el = getElement(_("/transcoding"));
+    else
+        el = nil;
+
     NEW_TRANSCODING_PROFILELIST_OPTION(createTranscodingProfileListFromNodeset(el));
     SET_TRANSCODING_PROFILELIST_OPTION(CFG_TRANSCODING_PROFILE_LIST);
 #endif
@@ -1191,7 +1199,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
     zmm::String param;
     Ref<TranscodingProfileList> list(new TranscodingProfileList());
     if (element == nil)
-        return list;
+        return list;     
 
     Ref<Element> profiles = element->getChild(_("profiles"));
     if (profiles == nil)

@@ -120,7 +120,7 @@ void Server::upnp_init(String iface, String ip_address, int port)
 
     if (string_ok(iface) && !string_ok(ip))
         throw _Exception(_("Could not find interface: ") + iface);
-
+/*
     // without this lod_debug coredumped on Solaris...
     if (iface == nil)
         iface = _("");
@@ -130,7 +130,9 @@ void Server::upnp_init(String iface, String ip_address, int port)
     
     log_debug("interface: %s ip: %s\n", iface.c_str(), ip.c_str());
 
-
+    if (ip == "")
+        ip = nil;
+*/
     if (port < 0)
     {
         port = config->getIntOption(CFG_SERVER_PORT);
@@ -148,6 +150,7 @@ void Server::upnp_init(String iface, String ip_address, int port)
     if (storage->threadCleanupRequired())
         cb = (void *)static_cleanup_callback;
 
+    printf("UppnpInit: ip %s\n", ip.c_str());
     ret = UpnpInit(ip.c_str(), port, config->getIntOption(CFG_SERVER_RETRIES_ON_TIMEOUT), cb);
 
     if (ret != UPNP_E_SUCCESS)
