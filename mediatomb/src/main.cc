@@ -281,7 +281,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
     try
     {
         // if home is not given by the user, get it from the environment
-        if (!string_ok(home))
+        if (!string_ok(home) && (!string_ok(config_file)))
         {
 #ifndef __CYGWIN__
             char *h = getenv("HOME");
@@ -297,7 +297,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
 #endif  // __CYGWIN__
         }
 
-        if (!string_ok(home))
+        if (!string_ok(home) && (!string_ok(config_file)))
         {
             log_error("Could not determine users home directory\n");
             exit(EXIT_FAILURE);
