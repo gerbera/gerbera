@@ -967,6 +967,7 @@ CreateHTTPRangeResponseHeader( char *ByteRangeSpecifier,
 
     off_t FirstByte, LastByte;
     char *RangeInput, *Ptr;
+    int ret;
 
     Instr->IsRangeActive = 1;
     Instr->ReadSendSize = FileLength;
@@ -990,8 +991,15 @@ CreateHTTPRangeResponseHeader( char *ByteRangeSpecifier,
     Ptr = Ptr + 1;
 
     if( FileLength < 0 ) {
+        if ((*Ptr == '0') && (*(Ptr+1) == '-') && (*(Ptr+2) == '\0'))
+        {
+            Instr->IsRangeActive = 0;
+            ret = HTTP_OK;
+        }
+        else
+            ret = HTTP_REQUEST_RANGE_NOT_SATISFIABLE;
         free( RangeInput );
-        return HTTP_REQUEST_RANGE_NOT_SATISFIABLE;
+        return ret;
     }
 
     if( GetNextRange( &Ptr, &FirstByte, &LastByte ) != -1 ) {
