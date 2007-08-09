@@ -180,6 +180,7 @@ Ref<IOHandler> TranscodeRequestHandler::open(IN const char *filename, OUT struct
 
     log_debug("start\n");
     struct stat statbuf;
+    char fifo_template[]="/tmp/mt_transcode_XXXXXX";
 
     // Currently we explicitly do not support UPNP_WRITE
     // due to security reasons.
@@ -348,7 +349,7 @@ Ref<IOHandler> TranscodeRequestHandler::open(IN const char *filename, OUT struct
     // I think we can use the FileIOHandler to read from the fifo
     /// \todo define architecture for transcoding
 
-    String fifo_name = String(tempnam("/tmp/", "mt_tr"));
+    String fifo_name = tempName(fifo_template);
     String arguments;
     String temp;
     String command;

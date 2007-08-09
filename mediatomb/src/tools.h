@@ -259,6 +259,13 @@ bool validateYesNo(zmm::String value);
 /// \todo add escaping
 zmm::Ref<zmm::Array<zmm::StringBase> > parseCommandLine(zmm::String line, zmm::String in, zmm::String out);
 
+/// \brief this is the mkstemp routine from glibc, the only difference is that
+/// it does not return an fd but just the name that we could use.
+///
+/// The reason behind this is, that we need to open a pipe, while mkstemp will
+/// open a regular file.
+zmm::String tempName(char *tmpl);
+
 #ifdef LOG_TOMBDEBUG
 
 struct profiling_t

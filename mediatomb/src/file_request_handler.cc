@@ -203,6 +203,9 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
                 header = header + _("\r\n");
 
             header = header + _("Accept-Ranges: bytes");
+            /// \todo turned out that we are not always allowed to add this
+            /// header, since chunked encoding may be active and we do not
+            /// know that here
         }
 
         //log_debug("sizeof off_t %d, statbuf.st_size %d\n", sizeof(off_t), sizeof(statbuf.st_size));

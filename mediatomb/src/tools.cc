@@ -43,6 +43,8 @@
 #include <arpa/inet.h>
 #include <limits.h>
 #include <netdb.h>
+#include <string.h>
+
 #ifndef SOLARIS
     #include <net/if.h>
 #else
@@ -1057,6 +1059,89 @@ Ref<Array<StringBase> > parseCommandLine(String line, String in, String out)
     return params;
 }
 
+// The tempName() function is borrowed from gfileutils.c from the glibc package
+
+/* gfileutils.c - File utility functions
+ *
+ *  Copyright 2000 Red Hat, Inc.
+ *
+ * GLib is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2 of the
+ * License, or (at your option) any later version.
+ *
+ * GLib is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with GLib; see the file COPYING.LIB.  If not,
+ * write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ *   Boston, MA 02111-1307, USA.
+ */
+/*
+ * create_temp_file based on the mkstemp implementation from the GNU C library.
+ * Copyright (C) 1991,92,93,94,95,96,97,98,99 Free Software Foundation, Inc.
+ */
+// tempName is based on create_temp_file, see (C) above
+String tempName(char *tmpl)
+{
+    char *XXXXXX;
+    int count;
+    static const char letters[] =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    static const int NLETTERS = sizeof (letters) - 1;
+    long value;
+    struct timeval tv;
+    static int counter = 0;
+    struct stat statbuf;
+    int ret = 0;
+
+    /* find the last occurrence of "XXXXXX" */
+    XXXXXX = strstr (tmpl, "XXXXXX");
+
+    if (!XXXXXX || strncmp (XXXXXX, "XXXXXX", 6))
+    {
+        return nil;
+    }
+
+    /* Get some more or less random data.  */
+    gettimeofday(&tv, NULL);
+    value = (tv.tv_usec ^ tv.tv_sec) + counter++;
+
+    for (count = 0; count < 100; value += 7777, ++count)
+    {
+        long v = value;
+
+        /* Fill in the random bits.  */
+        XXXXXX[0] = letters[v % NLETTERS];
+        v /= NLETTERS;
+        XXXXXX[1] = letters[v % NLETTERS];
+        v /= NLETTERS;
+        XXXXXX[2] = letters[v % NLETTERS];
+        v /= NLETTERS;
+        XXXXXX[3] = letters[v % NLETTERS];
+        v /= NLETTERS;
+        XXXXXX[4] = letters[v % NLETTERS];
+        v /= NLETTERS;
+        XXXXXX[5] = letters[v % NLETTERS];
+
+
+        ret = stat(tmpl, &statbuf);
+        if (ret != 0)
+        {
+            if ((errno == ENOENT) ||
+                    (errno == ENOTDIR))
+                return String(tmpl);
+            else
+                return nil;
+        }
+    }
+
+    /* We got out of the loop because we ran out of combinations to try.  */
+    return nil;
+}
 
 #ifdef LOG_TOMBDEBUG
 
