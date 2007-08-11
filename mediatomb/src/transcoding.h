@@ -111,6 +111,22 @@ protected:
     zmm::Ref<Dictionary> mimetype_profile;
 };
 
+class TranscodingProcess : public zmm::Object
+{
+public:
+    TranscodingProcess(pid_t pid, zmm::String fname) 
+                       { this->pid = pid; this->fname = fname; }
+
+    pid_t getPID() { return pid; }
+    zmm::String getFName() { return fname; }
+
+protected:
+    pid_t pid;
+    zmm::String fname;
+};
+
+
+
 #endif//__TRANSCODING_H__
 
 #endif//TRANSCODING

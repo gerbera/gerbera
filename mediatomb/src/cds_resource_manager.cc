@@ -30,7 +30,7 @@
 /// \file cds_resource_manager.cc
 
 #ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
+#include "autoconfig.h"
 #endif
 
 #include "cds_resource_manager.h"
@@ -55,7 +55,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
     String prot;
     Ref<ConfigManager> config = ConfigManager::getInstance();
     Ref<Dictionary> mappings = config->getDictionaryOption(
-                            CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+            CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 #ifndef TRANSCODING
     String content_type = mappings->get(item->getMimeType());
 #endif
@@ -72,7 +72,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         t_res->addParameter(_(URL_PARAM_TRANSCODE), _(D_CONVERSION));
         t_res->addParameter(_(URL_PARAM_TRANSCODE_TARGET_MIMETYPE), tp->getTargetMimeType());
         t_res->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), 
-renderProtocolInfo(tp->getTargetMimeType()));
+                renderProtocolInfo(tp->getTargetMimeType()));
         // duration should be the same for transcoded media, so we can take
         // the value from the original resource
         String duration = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_DURATION));
@@ -90,8 +90,8 @@ renderProtocolInfo(tp->getTargetMimeType()));
     for (int i = 0; i < resCount; i++)
     {
         /// \todo what if the resource has a different mimetype than the item??
-/*        String mimeType = item->getMimeType();
-        if (!string_ok(mimeType)) mimeType = DEFAULT_MIMETYPE; */
+        /*        String mimeType = item->getMimeType();
+                  if (!string_ok(mimeType)) mimeType = DEFAULT_MIMETYPE; */
 
         /// \todo currently resource is misused for album art
         Ref<Dictionary> res_attrs = item->getResource(i)->getAttributes();
@@ -99,16 +99,17 @@ renderProtocolInfo(tp->getTargetMimeType()));
         /// \todo who will sync mimetype that is part of the protocl info and
         /// that is lying in the resources with the information that is in the
         /// resource tags?
-        
+
         //  res_attrs->put("protocolInfo", prot + mimeType + ":*");
 
 #ifdef TRANSCODING
 
-    /// \todo we could get that from the protocolInfo but we need an efficient
-    /// way to do that.
-    String content_type = mappings->get(res_attrs->get(_(URL_PARAM_TRANSCODE_TARGET_MIMETYPE)));
+        /// \todo we could get that from the protocolInfo but we need an efficient
+        /// way to do that.
+        String content_type = mappings->get(res_attrs->get(_(URL_PARAM_TRANSCODE_TARGET_MIMETYPE)));
+        String conv = res_params->get(_(URL_PARAM_TRANSCODE));
 #endif
- 
+
         String tmp;
         if (urlBase->addResID)
             tmp = urlBase->urlBase + i;
@@ -121,9 +122,14 @@ renderProtocolInfo(tp->getTargetMimeType()));
             tmp = tmp + _(_URL_ARG_SEPARATOR);
             tmp = tmp + res_params->encode(); 
         }
-
+#ifdef TRANSCODING
+        if (((!IS_CDS_ITEM_INTERNAL_URL(item->getObjectType())) &&
+                    (!IS_CDS_ITEM_EXTERNAL_URL(item->getObjectType()))) &&
+                (!string_ok(conv)))
+#else
         if ((i == 0) && ((!IS_CDS_ITEM_INTERNAL_URL(item->getObjectType())) &&
-                (!IS_CDS_ITEM_EXTERNAL_URL(item->getObjectType()))))
+                    (!IS_CDS_ITEM_EXTERNAL_URL(item->getObjectType()))))
+#endif
         {
             // this is especially for the TG100, we need to add the file extension
             String location = item->getLocation();
@@ -164,7 +170,9 @@ renderProtocolInfo(tp->getTargetMimeType()));
             if (content_type == CONTENT_TYPE_MP3)
                 extend = _(D_PROFILE) + "=" + D_MP3 + ";";
 #ifdef TRANSCODING
-            String conv = res_params->get(_(URL_PARAM_TRANSCODE));
+            // conv is set above and used as a flag to determine if we
+            // have to add the ext paramter or not
+//            String conv = res_params->get(_(URL_PARAM_TRANSCODE));
             if (!string_ok(conv))
                 conv = _(D_NO_CONVERSION);
 
@@ -190,20 +198,20 @@ renderProtocolInfo(tp->getTargetMimeType()));
 Ref<CdsResourceManager::UrlBase> CdsResourceManager::addResources_getUrlBase(Ref<CdsItem> item)
 {
     Ref<Element> res;
-    
+
     Ref<UrlBase> urlBase(new UrlBase);
     /// \todo resource options must be read from configuration files
-    
+
     Ref<Dictionary> dict(new Dictionary());
     dict->put(_(URL_OBJECT_ID), String::from(item->getID()));
-    
+
     urlBase->addResID = false;
     /// \todo move this down into the "for" loop and create different urls for each resource once the io handlers are ready
     int objectType = item->getObjectType();
     if (IS_CDS_ITEM_INTERNAL_URL(objectType))
     {
         urlBase->urlBase = Server::getInstance()->getVirtualURL() + _("/") + CONTENT_SERVE_HANDLER + 
-                  _("/") + item->getLocation();
+            _("/") + item->getLocation();
     }
     else if (IS_CDS_ITEM_EXTERNAL_URL(objectType))
     {
@@ -221,9 +229,10 @@ Ref<CdsResourceManager::UrlBase> CdsResourceManager::addResources_getUrlBase(Ref
 String CdsResourceManager::getFirstResource(Ref<CdsItem> item)
 {
     Ref<UrlBase> urlBase = addResources_getUrlBase(item);
-    
+
     if (urlBase->addResID)
         return urlBase->urlBase + 0;
     else
         return urlBase->urlBase;
 }
+

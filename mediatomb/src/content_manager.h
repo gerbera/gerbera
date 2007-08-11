@@ -51,7 +51,7 @@
 #endif
 
 #ifdef TRANSCODING
-    #include "process.h"
+    #include "transcoding.h"
 #endif
 
 class ContentManager;
@@ -303,7 +303,9 @@ public:
     /// when we shutdown the server while transcoding processes are running.
     /// 
     /// \param pid the process id of the transcoding process.
-    void registerTranscoder(pid_t pid);
+    /// \param associated fifo name - the fifo has to be removed after the 
+    ///  process is killed
+    void registerTranscoder(pid_t pid, zmm::String filename);
 
     /// \brief unregister transcoding process
     /// 
@@ -340,7 +342,7 @@ protected:
  
 #ifdef TRANSCODING
     zmm::Ref<Mutex> tr_mutex;
-    zmm::Ref<zmm::Array<PIDWrapper> > transcoding_processes;
+    zmm::Ref<zmm::Array<TranscodingProcess> > transcoding_processes;
 #endif
 
     void _loadAccounting();

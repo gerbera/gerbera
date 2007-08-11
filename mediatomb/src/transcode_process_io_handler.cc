@@ -54,12 +54,12 @@ TranscodeProcessIOHandler::TranscodeProcessIOHandler(String filename, pid_t kill
     if (!is_alive(kill_pid, &exit_status))
     {
         unlink(filename.c_str());
-        printf("%s: ------> EXIT STATUS %d\n", __func__, exit_status);
+        log_debug("transcoder exit status %d\n", exit_status);
         throw _Exception(_("transcoder terminated early with status: %d") + String::from(exit_status));
     }
     this->kill_pid = kill_pid;
     this->filename = filename;
-    ContentManager::getInstance()->registerTranscoder(kill_pid);
+    ContentManager::getInstance()->registerTranscoder(kill_pid, filename);
 }
 
 void TranscodeProcessIOHandler::open(IN enum UpnpOpenFileMode mode)
@@ -67,7 +67,7 @@ void TranscodeProcessIOHandler::open(IN enum UpnpOpenFileMode mode)
     int exit_status = EXIT_SUCCESS;
     if (!is_alive(kill_pid, &exit_status))
     {
-        printf("%s: ------> EXIT STATUS %d\n", __func__, exit_status);
+        log_debug("transcoder exit status %d\n", exit_status);
         throw _Exception(_("transcoder terminated with code: %d") + String::from(exit_status));
     }
 
@@ -85,8 +85,6 @@ int TranscodeProcessIOHandler::read(OUT char *buf, IN size_t length)
     char* p_buffer = buf;
     int exit_status = EXIT_SUCCESS;
     int ret = 0;
-
-    printf("%s: READ on file %s\n", __func__, this->filename.c_str());
 
     FD_ZERO(&readSet);
     FD_SET(fd, &readSet);
@@ -109,7 +107,7 @@ int TranscodeProcessIOHandler::read(OUT char *buf, IN size_t length)
             /// \todo check exit status and return error if appropriate
             if (!is_alive(kill_pid, &exit_status))
             {
-                printf("%s: ------> EXIT STATUS %d\n", __func__, exit_status);
+                log_debug("transcoder exited with status %d\n", exit_status);
                 if (exit_status == EXIT_SUCCESS)
                     return 0; 
                 else
@@ -127,7 +125,10 @@ int TranscodeProcessIOHandler::read(OUT char *buf, IN size_t length)
                 break;
 
             if (bytes_read < 0)
+            {
+                log_debug("aborting read!!!\n");
                 return -1;
+            }
 
             num_bytes = num_bytes + bytes_read;
             length = length - bytes_read;
@@ -145,6 +146,7 @@ int TranscodeProcessIOHandler::read(OUT char *buf, IN size_t length)
         // actually that will depend onthe ret code of the process
 //        if (feof(f)) return 0;
 //        if (ferror(f)) return -1;
+        log_debug("aborting read 2!!!!\n");
         return -1;
     }
 
@@ -162,10 +164,12 @@ void TranscodeProcessIOHandler::close()
     bool ret;
    
 
+    log_debug("terminating transcoder %d, closing %s\n", kill_pid,
+                this->filename.c_str());
+
     ContentManager::getInstance()->unregisterTranscoder(kill_pid);
     ret = kill_proc(kill_pid);
     
-    printf("CLOSING FILE: %s\n", this->filename.c_str());
     ::close(fd);
     unlink(filename.c_str());
 

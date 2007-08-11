@@ -214,7 +214,7 @@ Supported options:\n\
     --config or -c     configuration file to use\n\
     --daemon or -d     run server in background\n\
     --home or -m       define the home directory\n\
-    --cfgdir or -f    name of the directory that is holding the configuration\n\
+    --cfgdir or -f     name of the directory that is holding the configuration\n\
     --pidfile or -P    file to hold the process id\n\
     --user or -u       run server under specified username\n\
     --group or -g      run server under specified group\n\

@@ -358,7 +358,7 @@ Ref<IOHandler> TranscodeRequestHandler::open(IN const char *filename, OUT struct
     Ref<Array<StringBase> > arglist;
     int i;
     int apos = 0;
-    printf("creating fifo: %s\n", fifo_name.c_str());
+    log_debug("creating fifo: %s\n", fifo_name.c_str());
     if (mkfifo(fifo_name.c_str(), O_RDWR) == -1) 
     {
         log_error("Failed to create fifo for the transcoding process!: %s\n", strerror(errno));
@@ -375,7 +375,6 @@ Ref<IOHandler> TranscodeRequestHandler::open(IN const char *filename, OUT struct
         case 0:
             // "safe" version, code below does not work yet
             // still checking in so Leo can have a look
-            printf("FORKING NOW!!!!!!!!!!!\n");
             /// \todo this is only test code, to be removed !!
             arglist = parseCommandLine(tp->getArguments(), path, fifo_name);
             command = tp->getCommand();
@@ -390,9 +389,9 @@ Ref<IOHandler> TranscodeRequestHandler::open(IN const char *filename, OUT struct
                 }
 
             argv[++apos] = NULL;
-
+/*
             i = 0;
-            printf("ARGLIST: ");
+            log_debug("ARGLIST: ");
             do
             {
                 printf("%s ", argv[i]);
@@ -401,13 +400,14 @@ Ref<IOHandler> TranscodeRequestHandler::open(IN const char *filename, OUT struct
             while (argv[i] != NULL);
           
             printf("\n");
-            printf("EXECUTING COMMAND!\n");
+*/
+            log_debug("EXECUTING TRANSCODER: %s\n", command.c_str());
             execvp(command.c_str(), argv);
         default:
             break;
     }
 
-    printf("TRANSCODING PROCESS: %d\n", transcoding_process);
+    log_debug("Launched transcoding process, pid: %d\n", transcoding_process);
     Ref<IOHandler> io_handler(new TranscodeProcessIOHandler(fifo_name, 
                 transcoding_process));
     io_handler->open(mode);

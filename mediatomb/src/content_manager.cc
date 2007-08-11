@@ -55,6 +55,10 @@
     #include "layout/js_layout.h"
 #endif
 
+#ifdef TRANSCODING
+    #include "process.h"
+#endif
+
 #define DEFAULT_DIR_CACHE_CAPACITY  10
 #define CM_INITIAL_QUEUE_SIZE       20
 
@@ -246,16 +250,16 @@ void ContentManager::init()
 
 #ifdef TRANSCODING
     tr_mutex = Ref<Mutex>(new Mutex(true));
-    transcoding_processes = Ref<Array<PIDWrapper> >(new Array<PIDWrapper>());
+    transcoding_processes = Ref<Array<TranscodingProcess> >(new Array<TranscodingProcess>());
 #endif
 }
 
 #ifdef TRANSCODING
-void ContentManager::registerTranscoder(pid_t pid)
+void ContentManager::registerTranscoder(pid_t pid, String filename)
 {
     AUTOLOCK(tr_mutex);
-    Ref<PIDWrapper>pw(new PIDWrapper(pid));
-    transcoding_processes->append(pw);
+    Ref<TranscodingProcess>tproc(new TranscodingProcess(pid, filename));
+    transcoding_processes->append(tproc);
 }
 
 void ContentManager::unregisterTranscoder(pid_t pid)
@@ -263,7 +267,7 @@ void ContentManager::unregisterTranscoder(pid_t pid)
     AUTOLOCK(tr_mutex);
     for (int i = 0; i < transcoding_processes->size(); i++)
     {
-        if (transcoding_processes->get(i)->pid == pid)
+        if (transcoding_processes->get(i)->getPID() == pid)
             transcoding_processes->remove(i);
     }
 }
@@ -317,11 +321,16 @@ void ContentManager::shutdown()
     bool killed;
     for (int i = 0; i < transcoding_processes->size(); i++)
     {
-        killed = kill_proc(transcoding_processes->get(i)->pid);
+        killed = kill_proc(transcoding_processes->get(i)->getPID());
         if (!killed)
+        {
             log_debug("failed to kill transcoding process\n");
+        }
         else
+        {
             log_debug("killed transcoding process\n");
+        }
+        unlink(transcoding_processes->get(i)->getFName().c_str());
     }
 #endif
 

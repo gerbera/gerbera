@@ -44,12 +44,4 @@ bool is_alive(pid_t pid, int *exit_status = NULL);
 bool kill_proc(pid_t kill_pid);
 
 
-class PIDWrapper : public zmm::Object
-{
-public:
-    pid_t pid;
-    PIDWrapper(pid_t pid) { this->pid = pid; }
-};
-
-
 #endif // __PROCESS_H__

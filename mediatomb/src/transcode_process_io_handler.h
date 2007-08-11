@@ -35,7 +35,7 @@
 #include "common.h"
 #include "io_handler.h"
 
-#define FIFO_READ_TIMEOUT 2
+#define FIFO_READ_TIMEOUT 5
 /// \brief Allows the web server to read from a fifo.
 class TranscodeProcessIOHandler : public IOHandler
 {
