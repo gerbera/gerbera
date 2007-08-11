@@ -487,6 +487,20 @@ http_SendMessage( IN SOCKINFO * info,
                     }
                 }
             }                   //While
+            // patch from the maemo forums
+            // https://garage.maemo.org/tracker/index.php?func=detail&aid=88&group_id=74&atid=341
+            if( num_read != 0 ) // not really necessary
+            {
+                if( Instr && Instr->IsChunkActive) {
+                    num_written = sock_write( info,
+                                              "0\r\n\r\n",
+                                              strlen("0\r\n\r\n"),
+                                              TimeOut );
+                } else {
+                    RetVal = UPNP_E_FILE_READ_ERROR;
+                }
+            }
+            // --            
           Cleanup_File:
             va_end( argp );
             if( Instr && Instr->IsVirtualFile )
