@@ -264,6 +264,15 @@ void ContentManager::registerTranscoder(pid_t pid, String filename)
 
 void ContentManager::unregisterTranscoder(pid_t pid)
 {
+    // when shutting down we will kill the transcoding processes,
+    // which if given enough time will get a close in the io handler and
+    // will try to unregister themselves - this would mess up the
+    // transcoding_processes list
+    // since we are anyway shutting down we can ignore the unregister call
+    // and go through the list, ensuring that no zombie stays alive :>
+    if (shutdownFlag)
+        return;
+
     AUTOLOCK(tr_mutex);
     for (int i = 0; i < transcoding_processes->size(); i++)
     {
@@ -321,16 +330,24 @@ void ContentManager::shutdown()
     bool killed;
     for (int i = 0; i < transcoding_processes->size(); i++)
     {
-        killed = kill_proc(transcoding_processes->get(i)->getPID());
+        pid_t pid = transcoding_processes->get(i)->getPID();
+        killed = kill_proc(pid);
         if (!killed)
         {
-            log_debug("failed to kill transcoding process\n");
+            log_warning("failed to kill transcoding process %d\n", pid);
         }
         else
         {
-            log_debug("killed transcoding process\n");
+            log_debug("killed transcoding process %d\n", pid);
         }
-        unlink(transcoding_processes->get(i)->getFName().c_str());
+        String tmp_fifo = transcoding_processes->get(i)->getFName();
+        if (check_path(tmp_fifo))
+        {
+            if (unlink(tmp_fifo.c_str()) != 0)
+                log_warning("Failed to remove fifo %s for transcoding process %d: %s\n",
+                        tmp_fifo.c_str(), pid,
+                        strerror(errno));
+        }
     }
 #endif
 
