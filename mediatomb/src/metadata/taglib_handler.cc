@@ -72,7 +72,7 @@ static void addField(metadata_fields_t field, TagLib::Tag *tag, Ref<CdsItem> ite
     if (tag->isEmpty())
         return;
 
-    Ref<StringConverter> sc = StringConverter::m2i();
+    Ref<StringConverter> sc = StringConverter::i2i(); // sure is sure
     
     switch (field)
     {
@@ -118,7 +118,7 @@ static void addField(metadata_fields_t field, TagLib::Tag *tag, Ref<CdsItem> ite
     }
 
     if ((field != M_DATE) && (field != M_TRACKNUMBER))
-        value = String((char *)val.toCString());
+        value = String((char *)val.toCString(true));
 
     value = trim_string(value);
     
@@ -131,8 +131,6 @@ static void addField(metadata_fields_t field, TagLib::Tag *tag, Ref<CdsItem> ite
 
 void TagHandler::fillMetadata(Ref<CdsItem> item)
 {
-    log_debug("adding metadata for: %s\n", item->getLocation().c_str());
-   
     TagLib::FileRef f(item->getLocation().c_str());
 
     if (f.isNull() || (!f.tag()))
@@ -203,8 +201,8 @@ void TagHandler::fillMetadata(Ref<CdsItem> item)
 
         if (art->picture().size() < 1)
             return;
-
-        String art_mimetype = String(art->mimeType().toCString());
+        Ref<StringConverter> sc = StringConverter::i2i();
+        String art_mimetype = sc->convert(String(art->mimeType().toCString(true)));
         // saw that simply "PNG" was used with some mp3's, so mimetype setting
         // was probably invalid
         if (!string_ok(art_mimetype) || (art_mimetype.index('/') == -1))
