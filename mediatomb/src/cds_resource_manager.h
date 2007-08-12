@@ -75,8 +75,10 @@ protected:
     /// This function gets the baseUrl for the CdsItem and sets addResID
     /// to true if the resource id needs to be added to the URL.
     static zmm::Ref<UrlBase> addResources_getUrlBase(zmm::Ref<CdsItem> item);
-    
-    
+   
+    /// \brief renders an ext=.extension string, where the extension is 
+    /// determined either from content type or from the filename
+    static zmm::String renderExtension(zmm::String contentType, zmm::String location);
 };
 
 #endif // __CDS_RESOURCE_MANAGER_H__

@@ -172,13 +172,11 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
         String protocolInfo = item->getResource(res_id)->getAttributes()->get(_("protocolInfo"));
         if (protocolInfo != nil)
         {
-            Ref<Array<StringBase> > parts = split_string(protocolInfo, ':');
-            mimeType = parts->get(2);
+            mimeType = getMTFromProtocolInfo(protocolInfo);
         }
-        else
-        {
+
+        if (!string_ok(mimeType))
             mimeType = _(MIMETYPE_DEFAULT);
-        }
       
         log_debug("setting content length to unknown\n");
         /// \todo we could figure out the content length...
@@ -405,13 +403,12 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
         String protocolInfo = item->getResource(res_id)->getAttributes()->get(_("protocolInfo"));
         if (protocolInfo != nil)
         {
-            Ref<Array<StringBase> > parts = split_string(protocolInfo, ':');
-            mimeType = parts->get(2);
+            mimeType = getMTFromProtocolInfo(protocolInfo);
         }
-        else
-        {
+
+        if (!string_ok(mimeType))
             mimeType = _(MIMETYPE_DEFAULT);
-        }
+
 
         info->content_type = ixmlCloneDOMString(mimeType.c_str());
         info->file_length = -1;

@@ -567,6 +567,7 @@ void ConfigManager::validate(String serverhome)
         mime_content->put(_("image/jpeg"), _(CONTENT_TYPE_JPG));
         mime_content->put(_("audio/x-mpegurl"), _(CONTENT_TYPE_PLAYLIST));
         mime_content->put(_("audio/x-scpls"), _(CONTENT_TYPE_PLAYLIST));
+        mime_content->put(_("audio/x-wav"), _(CONTENT_TYPE_PCM));
     }
 
     NEW_DICT_OPTION(mime_content);

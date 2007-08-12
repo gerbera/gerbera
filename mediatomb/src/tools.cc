@@ -515,6 +515,15 @@ String renderProtocolInfo(String mimetype, String protocol, String extend)
         return _("http-get:*:*:*");
 }
 
+String getMTFromProtocolInfo(String protocol)
+{
+    Ref<Array<StringBase> > parts = split_string(protocol, ':');
+    if (parts->size() > 2)
+        return parts->get(2);
+    else
+        return nil;
+}
+
 String getProtocol(String protocolInfo)
 {
     String protocol;

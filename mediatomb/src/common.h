@@ -67,6 +67,7 @@
 #define D_NO_CONVERSION                 "0"
 #define D_CONVERSION                    "1"
 #define D_MP3                           "MP3"
+#define D_LPCM                          "LPCM"
 
 // fixed CdsObjectIDs
 #define CDS_ID_BLACKHOLE                -1
