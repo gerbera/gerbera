@@ -82,6 +82,11 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
     Ref<ConfigManager> config = ConfigManager::getInstance();
 
 #ifdef TRANSCODING
+    // this will be used to count only the "real" resources, omitting the
+    // transcoded ones
+    int realCount = 0;
+
+    // now get the profile
     Ref<TranscodingProfileList> tlist = config->getTranscodingProfileListOption(
             CFG_TRANSCODING_PROFILE_LIST);
     Ref<TranscodingProfile> tp = tlist->get(item->getMimeType());
@@ -109,7 +114,6 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                         CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
     int resCount = item->getResourceCount();
-
     for (int i = 0; i < resCount; i++)
     {
         /// \todo what if the resource has a different mimetype than the item??
@@ -122,17 +126,40 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         String mimeType = getMTFromProtocolInfo(protocolInfo);
         assert(string_ok(mimeType));
         String contentType = mappings->get(mimeType);
+        String url;
 
         /// \todo who will sync mimetype that is part of the protocl info and
         /// that is lying in the resources with the information that is in the
         /// resource tags?
 
-        String url;
+        // ok, here is the tricky part:
+        // we add transcoded resources dynamically, that means that when 
+        // the object is loaded from storage those resources are not there;
+        // this again means, that we have to add the res_id parameter
+        // accounting for those dynamic resources: i.e. the parameter should
+        // still only count the "real" resources, because that's what the
+        // file request handler will be getting.
+        // the for transcoded resources the res_id can be safely ignored,
+        // because a transcoded resource is identified by the profile name
+#ifdef TRANSCODING
+        // flag if we are dealing with the transcoded resource
+        bool transcoded = (res_params->get(_(URL_PARAM_TRANSCODE)) == D_CONVERSION);
+        if (!transcoded)
+        {
+            if (urlBase->addResID)
+            {
+                url = urlBase->urlBase + realCount;
+            }
+            realCount++;
+        }
+        else
+            url = urlBase->urlBase + (-1);
+#else
         if (urlBase->addResID)
             url = urlBase->urlBase + i;
         else
             url = urlBase->urlBase;
-
+#endif
         if ((res_params != nil) && (res_params->size() > 0))
         {
             url = url + _(_URL_ARG_SEPARATOR);
@@ -155,11 +182,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         }
 #endif
 
-
 #ifdef TRANSCODING
-        // flag if we are dealing with the transcoded resource, this will be
-        // handy later on when it comes to extending the protocol info
-        bool transcoded = (res_params->get(_(URL_PARAM_TRANSCODE)) == D_CONVERSION);
 
         // when transcoding is enabled the first (zero) resource can be the
         // transcoded stream, that means that we can only go with the
