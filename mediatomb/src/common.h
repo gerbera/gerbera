@@ -63,7 +63,7 @@
 
 #define D_PROFILE                       "DLNA.ORG_PN"
 #define D_CONVERSION_INDICATOR          "DLNA.ORG_CI"
-#define D_DEFAULT_OPS                   "DLNA.ORG_OP=01"
+#define D_OP                            "DLNA.ORG_OP"
 #define D_NO_CONVERSION                 "0"
 #define D_CONVERSION                    "1"
 #define D_MP3                           "MP3"
