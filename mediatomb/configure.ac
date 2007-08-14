@@ -480,6 +480,39 @@ if test $EXTEND_PROTINFO -eq 1; then
     AC_DEFINE([EXTEND_PROTOCOLINFO], [1], [This is required for Playstation 3 support, it adds certain tags to the protocolInfo attribute])
 fi
 
+YOUTUBE=0
+YOUTUBE_REQUESTED=0
+AC_ARG_ENABLE([youtube],
+              [
+AC_HELP_STRING([--enable-youtube],
+[Enable support for the YouTube service (default: yes)])
+              ],
+              [
+                if test "x$enableval" = xno; then
+                    YOUTUBE=0
+                else
+                    YOUTUBE_REQUESTED=0
+                    YOUTUBE=1
+                fi 
+              ]
+)
+
+if test $YOUTUBE -eq 1; then
+    AC_DEFINE([YOUTUBE], [1], [Enable support for the YouTube service])
+
+    AC_ARG_WITH([curl-cfg],
+            [
+                AC_HELP_STRING([--with-curl-cfg=curl-config],
+                    [absolute path/name of curl-config])
+            ],
+            [
+                CURL_SEARCH_CONFIG="$withval"
+                AC_MSG_NOTICE([Will search for curl-config in $withval])
+            ]
+    )
+fi
+
+
 SKIP_FSEEKO_TEST=0
 AC_ARG_ENABLE([fseeko-check],
               [
@@ -1999,6 +2032,91 @@ else
     fi
     TAGLIB_CFLAGS=
     TAGLIB_LIBS=
+fi
+CPPFLAGS="$CPPFLAGS_SAVE"
+CXXFLAGS="$CXXFLAGS_SAVE"
+LDFLAGS="$LDFLAGS_SAVE"
+
+######## curl
+
+CURL_PROG_FOUND=0
+CURL_LIBS=
+CURL_CFLAGS=
+CURL_OK=no
+if test $YOUTUBE -eq 1; then
+    AC_MSG_NOTICE([Checking for curl (needed for YouTube support)])
+    CURL_OK=yes
+    if test -n "$CURL_SEARCH_CONFIG"; then
+        AC_MSG_NOTICE([You specified $CURL_SEARCH_CONFIG for curl-config])
+        
+        if test -f "$CURL_SEARCH_CONFIG"; then 
+            curlconfig="$CURL_SEARCH_CONFIG"
+        else
+            curlconfig="no"
+        fi
+        
+        if test "x$curlconfig" = xno; then
+            AC_MSG_ERROR([$CURL_SEARCH_CONFIG not found])
+        else
+            CURL_TEST=`${curlconfig} --version 2>/dev/null`
+            if test -z "$CURL_TEST"; then
+                AC_MSG_ERROR([${curlconfig} could not be executed or returned invalid values])
+            fi
+            CURL_PROG_FOUND=1
+        fi
+    else
+        AC_PATH_PROG(curlconfig, curl-config, no)
+        if test "x$curlconfig" = xno; then
+            unset ac_cv_path_curlconfig
+            AC_PATH_PROG(curlconfig, curl-config, no, $SEARCH_DIR_PROGS)
+            if test "x$curlconfig" = xno; then
+                CURL_OK=missing
+                AC_MSG_RESULT([curl-config not found, please install the curl-devel package])
+            else
+                CURL_PROG_FOUND=1
+            fi
+        else
+            CURL_PROG_FOUND=1
+        fi
+   fi 
+
+   if test "$CURL_PROG_FOUND" -eq 1 ; then
+        AC_MSG_CHECKING(curl cflags)
+        CURL_CFLAGS=`${curlconfig} --cflags`
+        AC_MSG_RESULT($CURL_CFLAGS)
+
+        AC_MSG_CHECKING(curl libraries)
+        CURL_LIBS=`${curlconfig} --libs`
+        AC_MSG_RESULT($CURL_LIBS)
+    fi
+fi
+
+if test "x$CURL_OK" = xyes; then
+    CPPFLAGS="$CPPFLAGS $TAGLIB_CFLAGS"
+    CXXFLAGS="$CXXFLAGS $TAGLIB_CFLAGS"
+    AC_CHECK_HEADERS([curl/curl.h],
+        [],
+        [CURL_OK=missing]
+    )
+fi
+
+if test "x$CURL_OK" = xyes; then
+    LDFLAGS="$CURL_LIBS"
+    AC_CHECK_LIB(curl, curl_easy_init, [],
+        [CURL_OK=missing]
+    )
+fi
+
+if test "x$CURL_OK" = xyes; then
+    AC_DEFINE([HAVE_CURL], [1], [curl library presence])
+    AC_SUBST(CURL_CFLAGS)
+    AC_SUBST(CURL_LIBS)
+else
+    if test $YOUTUBE_REQUESTED -eq 1; then
+        AC_MSG_ERROR(unable to configure curl which is require for YouTube support)
+    fi
+    CURL_CFLAGS=
+    CURL_LIBS=
 fi
 CPPFLAGS="$CPPFLAGS_SAVE"
 CXXFLAGS="$CXXFLAGS_SAVE"

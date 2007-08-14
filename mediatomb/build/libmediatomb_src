@@ -187,6 +187,8 @@ libmediatomb_a_SOURCES = \
 ../src/web/web_update.cc \
 ../src/xpath.cc \
 ../src/xpath.h \
+../src/youtube_video_url.cc \
+../src/youtube_video_url.h \
 ../src/zmm/atomic.h \
 ../src/zmmf/array.cc \
 ../src/zmmf/array.h \
