@@ -228,6 +228,9 @@ Ref<StringConverter> StringConverter::p2i()
         _(DEFAULT_INTERNAL_CHARSET)));
     return conv;
 }
+#endif
+
+#if defined (HAVE_JS) || defined(HAVE_TAGLIB)
 
 Ref<StringConverter> StringConverter::i2i()
 {
@@ -237,3 +240,4 @@ Ref<StringConverter> StringConverter::i2i()
 }
 
 #endif
+

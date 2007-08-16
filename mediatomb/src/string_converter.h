@@ -65,6 +65,8 @@ public:
     /// \brief playlist to internal
     static zmm::Ref<StringConverter> p2i();
 
+#endif
+#if defined(HAVE_JS) || defined(HAVE_TAGLIB)
     /// \brief safeguard - internal to internal - needed to catch some
     /// scenarious where the user may have forgotten to add proper conversion
     /// in the script.

@@ -55,7 +55,7 @@ TranscodeProcessIOHandler::TranscodeProcessIOHandler(String filename, pid_t kill
     {
         unlink(filename.c_str());
         log_debug("transcoder exit status %d\n", exit_status);
-        throw _Exception(_("transcoder terminated early with status: %d") + String::from(exit_status));
+        throw _Exception(_("transcoder terminated early with status: ") + String::from(exit_status));
     }
     this->kill_pid = kill_pid;
     this->filename = filename;
@@ -68,7 +68,7 @@ void TranscodeProcessIOHandler::open(IN enum UpnpOpenFileMode mode)
     if (!is_alive(kill_pid, &exit_status))
     {
         log_debug("transcoder exit status %d\n", exit_status);
-        throw _Exception(_("transcoder terminated with code: %d") + String::from(exit_status));
+        throw _Exception(_("transcoder terminated with code: ") + String::from(exit_status));
     }
 
     fd = ::open(filename.c_str(), O_RDONLY | O_NONBLOCK);
