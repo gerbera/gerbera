@@ -50,8 +50,6 @@ using namespace zmm;
 
 YouTubeVideoURL::YouTubeVideoURL()
 {
-    /// \todo once more modules use curl we will need an own curl class
-    curl_global_init(CURL_GLOBAL_ALL);
     curl_handle = curl_easy_init();
     if (!curl_handle)
         throw _Exception(_("failed to initialize curl!\n"));
@@ -60,12 +58,16 @@ YouTubeVideoURL::YouTubeVideoURL()
     reVideoURLParams->compile(_(YOUTUBE_URL_PARAMS_REGEXP));
     redirectLocation = Ref<RExp>(new RExp());
     redirectLocation->compile(_(YOUTUBE_URL_LOCATION_REGEXP));
+
+    // this is a safeguard to ensure that this class is not called from
+    // multiple threads - it is not allowed to use the same curl handle
+    // from multiple threads
+    pid = pthread_self();
 }
     
 YouTubeVideoURL::~YouTubeVideoURL()
 {
     curl_easy_cleanup(curl_handle);
-    curl_global_cleanup();
 }
 
 String YouTubeVideoURL::getVideoURL(String video_id)
@@ -73,6 +75,10 @@ String YouTubeVideoURL::getVideoURL(String video_id)
     CURLcode res;
     long retcode; 
     char error_buffer[CURL_ERROR_SIZE] = {'\0'};
+
+    if (pid != pthread_self())
+        throw _Exception(_("Not allowed to call getVideoURL from different threads!"));
+
     Ref<StringBuffer> buffer(new StringBuffer(YOUTUBE_PAGESIZE));
    
     video_id = _(YOUTUBE_URL_WATCH) + video_id;

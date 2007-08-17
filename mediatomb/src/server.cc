@@ -33,6 +33,7 @@
     #include "autoconfig.h"
 #endif
 
+#include <curl/curl.h>
 #include "server.h"
 #include "web_callbacks.h"
 #include "content_manager.h"
@@ -92,6 +93,10 @@ void Server::init()
     
     serverUDN = config->getOption(CFG_SERVER_UDN);
     alive_advertisement = config->getIntOption(CFG_SERVER_ALIVE_INTERVAL);
+
+#if defined(YOUTUBE)
+    curl_global_init(CURL_GLOBAL_ALL);
+#endif
 }
 
 void Server::upnp_init(String iface, String ip_address, int port)
@@ -322,7 +327,11 @@ void Server::shutdown()
     {   
         throw _UpnpException(ret, _("upnp_cleanup: UpnpUnRegisterRootDevice failed"));
     }
-    
+
+#if defined(YOUTUBE)
+    curl_global_cleanup();
+#endif
+
     log_debug("now calling upnp finish\n");
     UpnpFinish();
     storage = nil;

@@ -28,7 +28,7 @@
 */
 
 /// \file youtube_video_url.h
-/// \brief Definitions of the Transcoding classes. 
+/// \brief Definition of the YouTubeVideoURL class.
 
 #ifdef YOUTUBE
 
@@ -58,6 +58,7 @@ public:
 protected:
     // the handle *must never be used from multiple threads*
     CURL *curl_handle;
+    pid_t pid;
     zmm::Ref<RExp> reVideoURLParams;
     zmm::Ref<RExp> redirectLocation;
 
