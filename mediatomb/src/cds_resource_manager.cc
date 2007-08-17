@@ -80,33 +80,45 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
 {
     Ref<UrlBase> urlBase = addResources_getUrlBase(item);
     Ref<ConfigManager> config = ConfigManager::getInstance();
+    bool skipURL = (IS_CDS_ITEM_INTERNAL_URL(item->getObjectType()) || 
+                    IS_CDS_ITEM_EXTERNAL_URL(item->getObjectType()) &&
+                    (!item->getFlag(OBJECT_FLAG_PROXY_URL)));
+
 
 #ifdef TRANSCODING
     // this will be used to count only the "real" resources, omitting the
     // transcoded ones
     int realCount = 0;
 
-    // now get the profile
-    Ref<TranscodingProfileList> tlist = config->getTranscodingProfileListOption(
-            CFG_TRANSCODING_PROFILE_LIST);
-    Ref<TranscodingProfile> tp = tlist->get(item->getMimeType());
-    if (tp != nil)
+
+    // once proxying is a feature that can be turned off or on in
+    // config manager we should use that setting 
+    //
+    // TODO: allow transcoding for proxied URLs
+    if (!skipURL)
     {
-        Ref<CdsResource> t_res(new CdsResource(CH_TRANSCODE));
-        t_res->addParameter(_(URL_PARAM_TRANSCODE_PROFILE_NAME), tp->getName());
-        t_res->addParameter(_(URL_PARAM_TRANSCODE), _(D_CONVERSION));
-        t_res->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
-                renderProtocolInfo(tp->getTargetMimeType()));
-        // duration should be the same for transcoded media, so we can take
-        // the value from the original resource
-        String duration = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_DURATION));
-        if (string_ok(duration))
-            t_res->addAttribute(MetadataHandler::getResAttrName(R_DURATION),
-                    duration);
-        if (tp->firstResource())
-            item->insertResource(0, t_res);
-        else
-            item->addResource(t_res);
+        // now get the profile
+        Ref<TranscodingProfileList> tlist = config->getTranscodingProfileListOption(
+                CFG_TRANSCODING_PROFILE_LIST);
+        Ref<TranscodingProfile> tp = tlist->get(item->getMimeType());
+        if (tp != nil)
+        {
+            Ref<CdsResource> t_res(new CdsResource(CH_TRANSCODE));
+            t_res->addParameter(_(URL_PARAM_TRANSCODE_PROFILE_NAME), tp->getName());
+            t_res->addParameter(_(URL_PARAM_TRANSCODE), _(D_CONVERSION));
+            t_res->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
+                    renderProtocolInfo(tp->getTargetMimeType()));
+            // duration should be the same for transcoded media, so we can take
+            // the value from the original resource
+            String duration = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_DURATION));
+            if (string_ok(duration))
+                t_res->addAttribute(MetadataHandler::getResAttrName(R_DURATION),
+                        duration);
+            if (tp->firstResource())
+                item->insertResource(0, t_res);
+            else
+                item->addResource(t_res);
+        }
     }
 #endif
 
@@ -150,10 +162,18 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
             {
                 url = urlBase->urlBase + realCount;
             }
+            else
+                url = urlBase->urlBase;
+
             realCount++;
         }
         else
-            url = urlBase->urlBase + (-1);
+        {
+            if (!skipURL)
+                url = urlBase->urlBase + (-1);
+            else 
+                url = urlBase->urlBase;
+        }
 #else
         if (urlBase->addResID)
             url = urlBase->urlBase + i;
@@ -188,8 +208,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         // transcoded stream, that means that we can only go with the
         // content type here and that we will not limit ourselves to the
         // first resource
-        if ((!IS_CDS_ITEM_INTERNAL_URL(item->getObjectType())) &&
-            (!IS_CDS_ITEM_EXTERNAL_URL(item->getObjectType())))
+        if (!skipURL)
         {
             if (transcoded)
                 url = url + renderExtension(contentType, nil);
@@ -201,9 +220,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         // resource, that seemed to be sufficient so far (mostly this paramter
         // is implemented for the TG100 renderer that will not play .avi files
         // otherwise
-        if ((i == 0) && 
-            (!IS_CDS_ITEM_INTERNAL_URL(item->getObjectType())) &&
-            (!IS_CDS_ITEM_EXTERNAL_URL(item->getObjectType())))
+        if ((i == 0) && (!skipURL))
         {
             url = url + renderExtension(contentType, item->getLocation());
         }
@@ -260,7 +277,8 @@ Ref<CdsResourceManager::UrlBase> CdsResourceManager::addResources_getUrlBase(Ref
         urlBase->urlBase = Server::getInstance()->getVirtualURL() + _("/") + CONTENT_SERVE_HANDLER + 
             _("/") + item->getLocation();
     }
-    else if (IS_CDS_ITEM_EXTERNAL_URL(objectType))
+    else if (IS_CDS_ITEM_EXTERNAL_URL(objectType) && 
+            (!item->getFlag(OBJECT_FLAG_PROXY_URL)))
     {
         urlBase->urlBase = item->getLocation();
     }

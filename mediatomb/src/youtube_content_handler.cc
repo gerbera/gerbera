@@ -186,7 +186,7 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
         }
 
         item->addResource(resource);
-
+        item->setFlag(OBJECT_FLAG_PROXY_URL);
         try
         {
             item->validate();
