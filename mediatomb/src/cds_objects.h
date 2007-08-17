@@ -55,7 +55,7 @@
 #define OBJECT_FLAG_USE_RESOURCE_REF      0x00000004
 #define OBJECT_FLAG_PERSISTENT_CONTAINER  0x00000008
 #define OBJECT_FLAG_PLAYLIST_REF          0x00000010
-//#define OBJECT_FLAG_XXX                 0x00000020
+#define OBJECT_FLAG_PROXY_URL             0x00000020
 //#define OBJECT_FLAG_XXX                 0x00000040
 //#define OBJECT_FLAG_XXX                 0x00000080
 //#define OBJECT_FLAG_XXX                 0x00000100
@@ -192,7 +192,7 @@ public:
     inline void changeFlag(unsigned int mask, bool value) { if (value) setFlag(mask); else clearFlag(mask); }
     
     /// \biref Clears a flag of the object.
-    inline void clearFlag(unsigned int mask) { objectFlags &= !mask; }
+    inline void clearFlag(unsigned int mask) { objectFlags &= ~mask; }
     
     /// \brief Query single metadata value.
     inline zmm::String getMetadata(zmm::String key)
