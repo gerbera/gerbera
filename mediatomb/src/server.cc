@@ -33,7 +33,10 @@
     #include "autoconfig.h"
 #endif
 
-#include <curl/curl.h>
+#ifdef YOUTUBE
+    #include <curl/curl.h>
+#endif
+
 #include "server.h"
 #include "web_callbacks.h"
 #include "content_manager.h"
