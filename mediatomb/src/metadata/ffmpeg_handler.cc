@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    id3_handler.cc - this file is part of MediaTomb.
+    ffmpeg_handler.cc - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -24,7 +24,7 @@
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
     
-    $Id: ffmpeg_handler.cc 1143 2007-02-18 23:40:51Z jin_eld $
+    $Id$
 */
 
 /// \file ffmpeg_handler.cc

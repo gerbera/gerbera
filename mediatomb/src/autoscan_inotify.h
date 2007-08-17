@@ -24,7 +24,7 @@
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
     
-    $Id: autoscan_inotify.h 89 2007-05-25 21:15:34Z leo $
+    $Id$
 */
 
 /// \file autoscan_inotify.h

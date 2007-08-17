@@ -24,7 +24,7 @@
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
     
-    $Id: mt_inotify.h 70 2007-05-23 12:52:53Z leo $
+    $Id$
 */
 
 /// \file mt_inotify.h

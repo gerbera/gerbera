@@ -24,10 +24,10 @@
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
     
-    $Id: config_manager.h 1294 2007-05-13 16:28:24Z lww $
+    $Id$
 */
 
-/// \file config_manager.h
+/// \file config_options.h
 ///\brief Definitions of the ConfigManager class. 
 
 #ifndef __CONFIG_OPTIONS_H__

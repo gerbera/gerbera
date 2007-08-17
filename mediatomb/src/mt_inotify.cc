@@ -24,7 +24,7 @@
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
     
-    $Id: mt_inotify.cc 106 2007-06-04 11:57:54Z leo $
+    $Id$
 */
 
 /*
