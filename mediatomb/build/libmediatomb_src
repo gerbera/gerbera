@@ -89,6 +89,7 @@ libmediatomb_a_SOURCES = \
 ../src/mxml/parser.h \
 ../src/mxml/stringinput.cc \
 ../src/mxml/stringinput.h \
+../src/online_service_content_handler.h \
 ../src/process.cc \
 ../src/process.h \
 ../src/request_handler.cc \
@@ -189,6 +190,8 @@ libmediatomb_a_SOURCES = \
 ../src/web/web_update.cc \
 ../src/xpath.cc \
 ../src/xpath.h \
+../src/youtube_content_handler.cc \
+../src/youtube_content_handler.h \
 ../src/youtube_video_url.cc \
 ../src/youtube_video_url.h \
 ../src/zmm/atomic.h \

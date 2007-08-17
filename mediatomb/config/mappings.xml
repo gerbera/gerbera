@@ -8,10 +8,11 @@
         <map from="wax" to="audio/x-ms-wax"/>
         <map from="wmv" to="video/x-ms-wmv"/>
         <map from="wvx" to="video/x-ms-wvx"/>
-        <map from="wm" to="video/x-ms-wm"/>
+        <map from="wm"  to="video/x-ms-wm"/>
         <map from="wmx" to="video/x-ms-wmx"/>
         <map from="m3u" to="audio/x-mpegurl"/>
         <map from="pls" to="audio/x-scpls"/>
+        <map from="flv" to="video/x-flv"/>
     </extension-mimetype>
     <mimetype-upnpclass>
         <map from="audio/*" to="object.item.audioItem.musicTrack"/>

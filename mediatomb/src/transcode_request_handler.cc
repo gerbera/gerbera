@@ -50,6 +50,7 @@
 #include "session_manager.h"
 #include "ixml.h"
 #include "transcode_process_io_handler.h"
+#include "buffered_io_handler.h"
 #include "dictionary.h"
 #include "transcode_request_handler.h"
 #include "metadata_handler.h"
@@ -408,8 +409,11 @@ Ref<IOHandler> TranscodeRequestHandler::open(IN const char *filename, OUT struct
     }
 
     log_debug("Launched transcoding process, pid: %d\n", transcoding_process);
-    Ref<IOHandler> io_handler(new TranscodeProcessIOHandler(fifo_name, 
-                transcoding_process));
+//    Ref<IOHandler> io_handler(new TranscodeProcessIOHandler(fifo_name, 
+//                transcoding_process));
+
+    Ref<IOHandler> io_handler(new BufferedIOHandler(Ref<IOHandler> (new TranscodeProcessIOHandler(fifo_name,transcoding_process)), 1024*1024*30, 1024*100));
+
     io_handler->open(mode);
     return io_handler;
 }

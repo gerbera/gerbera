@@ -34,7 +34,7 @@
 #endif
 
 #include "buffered_io_handler.h"
-
+#include <unistd.h>
 using namespace zmm;
 
 BufferedIOHandler::BufferedIOHandler(Ref<IOHandler> underlyingHandler, size_t bufSize, size_t maxChunkSize) : IOHandler()
@@ -67,6 +67,9 @@ void BufferedIOHandler::open(IN enum UpnpOpenFileMode mode)
     underlyingHandler->open(mode);
     startBufferThread();
     isOpen = true;
+
+    /// \todo remove this / make configurable
+    sleep(5);
 }
 
 int BufferedIOHandler::read(OUT char *buf, IN size_t length)
