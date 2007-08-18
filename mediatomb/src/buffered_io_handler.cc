@@ -34,15 +34,18 @@
 #endif
 
 #include "buffered_io_handler.h"
-#include <unistd.h>
+#include "tools.h"
+
 using namespace zmm;
 
-BufferedIOHandler::BufferedIOHandler(Ref<IOHandler> underlyingHandler, size_t bufSize, size_t maxChunkSize) : IOHandler()
+BufferedIOHandler::BufferedIOHandler(Ref<IOHandler> underlyingHandler, size_t bufSize, size_t maxChunkSize, size_t initialFillSize) : IOHandler()
 {
     if (bufSize <=0)
         throw _Exception(_("bufSize must be positive"));
-    if (maxChunkSize <= 0 || maxChunkSize > bufSize)
-        throw _Exception(_("maxChunkSize must be positive and not be greater than bufSize"));
+    if (maxChunkSize <= 0)
+        throw _Exception(_("maxChunkSize must be positive"));
+    if (initialFillSize < 0 || initialFillSize > bufSize)
+        throw _Exception(_("initialFillSize must be non-negative and must be lesser than or equal to the size of the buffer"));
     if (underlyingHandler == nil)
         throw _Exception(_("underlyingHandler must not be nil"));
     
@@ -52,6 +55,8 @@ BufferedIOHandler::BufferedIOHandler(Ref<IOHandler> underlyingHandler, size_t bu
     this->underlyingHandler = underlyingHandler;
     this->bufSize = bufSize;
     this->maxChunkSize = maxChunkSize;
+    this->initialFillSize = initialFillSize;
+    waitForInitialFillSize = (initialFillSize > 0);
     buffer = NULL;
     isOpen = false;
     threadShutdown = false;
@@ -67,24 +72,20 @@ void BufferedIOHandler::open(IN enum UpnpOpenFileMode mode)
     underlyingHandler->open(mode);
     startBufferThread();
     isOpen = true;
-
-    /// \todo remove this / make configurable
-    sleep(5);
 }
 
 int BufferedIOHandler::read(OUT char *buf, IN size_t length)
 {
-    //log_debug("buffered read\n");
     if (! isOpen)
         throw _Exception(_("read on closed BufferedIOHandler"));
     if (length <= 0)
         throw _Exception(_("length must be positive"));
     
     AUTOLOCK(mutex);
-    while (empty && ! (eof || readError))
+    while ((empty || waitForInitialFillSize) && ! (threadShutdown || eof || readError))
         cond->wait();
     
-    if (readError)
+    if (readError || threadShutdown)
         return -1;
     if (empty && eof)
         return 0;
@@ -114,6 +115,7 @@ int BufferedIOHandler::read(OUT char *buf, IN size_t length)
     
     if (wasFull)
         cond->signal();
+    //log_debug("read on buffer - requested %d; sent %d\n", length, doRead);
     return doRead;
 }
 
@@ -170,9 +172,34 @@ void BufferedIOHandler::threadProc()
 {
     int readBytes;
     size_t maxWrite;
+    
+#ifdef LOG_TOMBDEBUG
+    struct timespec last_log;
+    bool first_log = true;
+#endif
+    
     AUTOLOCK(mutex);
     do
     {
+        
+#ifdef LOG_TOMBDEBUG
+        if (first_log || getDeltaMillis(&last_log) > 1000)
+        {
+            if (first_log)
+                first_log = false;
+            getTimespecNow(&last_log);
+            float percentFillLevel = 0;
+            if (! empty)
+            {
+                int currentFillSize = b - a;
+                if (currentFillSize <= 0)
+                    currentFillSize += bufSize;
+                percentFillLevel = ((float)currentFillSize / (float)bufSize) * 100;
+            }
+            log_debug("buffer fill level: %3.2f%%  (bufSize: %d; a: %d; b: %d)\n", percentFillLevel, bufSize, a, b);
+        }
+#endif
+        
         size_t aLocal = a;
         maxWrite = (empty ? bufSize : (aLocal < b ? bufSize - b : aLocal - b));
         if (maxWrite == 0)
@@ -195,6 +222,18 @@ void BufferedIOHandler::threadProc()
                     empty = false;
                     cond->signal();
                 }
+                if (waitForInitialFillSize)
+                {
+                    size_t currentFillSize = b - a;
+                    if (currentFillSize <= 0)
+                        currentFillSize += bufSize;
+                    if (currentFillSize >= initialFillSize)
+                    {
+                        log_debug("buffer: initial fillsize reached\n");
+                        waitForInitialFillSize = false;
+                        cond->signal();
+                    }
+                }
             }
         }
     }
@@ -206,16 +245,6 @@ void BufferedIOHandler::threadProc()
         if (readBytes < 0)
             readError = true;
     }
+    // ensure that read() doesn't wait for me to fill the buffer
+    cond->signal();
 }
-
-/*
-int BufferedIOHandler::getBufferFillsize(int a, int b)
-{
-    if (empty)
-        return 0;
-    int size = b - a;
-    if (size <= 0)
-        size += bufSize;
-    return size;
-}
-*/

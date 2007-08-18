@@ -39,6 +39,7 @@
 
 /// \brief a IOHandler with buffer support
 /// the buffer is only for read(). write() is not supported
+/// the public functions of this class are *not* thread safe!
 class BufferedIOHandler : public IOHandler
 {
 public:
@@ -47,7 +48,10 @@ public:
     /// \param underlyingHandler the IOHandler from which the buffer should read
     /// \param bufSize the size of the buffer in bytes
     /// \param maxChunkSize the maximum size of the chunks which are read by the buffer
-    BufferedIOHandler(zmm::Ref<IOHandler> underlyingHandler, size_t bufSize, size_t maxChunkSize);
+    /// \param initialFillSize the number of bytes which have to be in the buffer
+    /// before the first read at the very beginning or after a seek returns;
+    /// 0 disables the delay
+    BufferedIOHandler(zmm::Ref<IOHandler> underlyingHandler, size_t bufSize, size_t maxChunkSize, size_t initialFillSize);
     
     // inherited from IOHandler
     virtual void open(enum UpnpOpenFileMode mode);
@@ -59,16 +63,17 @@ private:
     zmm::Ref<IOHandler> underlyingHandler;
     size_t bufSize;
     size_t maxChunkSize;
+    size_t initialFillSize;
     char* buffer;
     bool isOpen;
     bool eof;
     bool readError;
+    bool waitForInitialFillSize;
     
     // buffer stuff..
     bool empty;
     size_t a;
     size_t b;
-    //int getBufferFillsize(int a, int b);
     
     // thread stuff..
     void startBufferThread();
