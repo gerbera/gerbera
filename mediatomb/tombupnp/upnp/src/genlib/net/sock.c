@@ -436,14 +436,11 @@ sock_write( IN SOCKINFO * info,
         return UPNP_E_TIMEDOUT;
     }
 
-    FD_ZERO(&writeSet);
-    FD_SET(sockfd, &writeSet);
-
-    timeout.tv_sec = *timeoutSecs;
-    timeout.tv_usec = 0;
-
     while (TRUE)
     {
+        FD_ZERO(&writeSet);
+        FD_SET(sockfd, &writeSet);
+
         timeout.tv_sec = *timeoutSecs;
         timeout.tv_usec = 0;
 
@@ -468,9 +465,6 @@ sock_write( IN SOCKINFO * info,
                 if (retry >= gMaxHTTPTimeoutRetries)
                     return UPNP_E_TIMEDOUT;
             }
-
-            FD_ZERO(&writeSet);
-            FD_SET(sockfd, &writeSet);
 
             continue;
         }

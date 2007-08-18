@@ -69,10 +69,11 @@ void TranscodeRequestHandler::get_info(IN const char *filename, OUT struct File_
 
     String mimeType;
     int objectID;
+    bool isURL = false;
 
     struct stat statbuf;
     int ret = 0;
-    bool is_srt = false;
+//    bool is_srt = false;
 
     String url_path, parameters;
     split_url(filename, URL_PARAM_SEPARATOR, url_path, parameters);
@@ -111,7 +112,7 @@ void TranscodeRequestHandler::get_info(IN const char *filename, OUT struct File_
 
     String p_name = dict->get(_(URL_PARAM_TRANSCODE_PROFILE_NAME));
     if (!string_ok(p_name))
-        throw _Exception(_("Transcoding of file ") + path +
+        throw _Exception(_("Transcoding of ") + path +
                          " requested, but no profile specified");
 
     /// \todo make sure that blind .srt requests are processed correctly 
@@ -123,25 +124,34 @@ void TranscodeRequestHandler::get_info(IN const char *filename, OUT struct File_
         throw _Exception(_("Transcoding of file ") + path +
                            " but no profile matching the name " +
                            p_name + " found");
-    
-    ret = stat(path.c_str(), &statbuf);
-    if (ret != 0)
+   
+    if (!(IS_CDS_ITEM_INTERNAL_URL(item->getObjectType()) ||
+          IS_CDS_ITEM_EXTERNAL_URL(item->getObjectType())))
     {
-            throw _Exception(_("Failed to open ") + path + " - " + strerror(errno));
+        ret = stat(path.c_str(), &statbuf);
+        if (ret != 0)
+        {
+            throw _Exception(_("Failed to open ") + path + " - " + 
+                             strerror(errno));
+        }
 
-    }
+        if (access(path.c_str(), R_OK) == 0)
+            info->is_readable = 1;
+        else
+            info->is_readable = 0;
 
+        info->last_modified = statbuf.st_mtime;
+        info->is_directory = S_ISDIR(statbuf.st_mode);
 
-    if (access(path.c_str(), R_OK) == 0)
-    {
-        info->is_readable = 1;
     }
     else
     {
-        info->is_readable = 0;
+        info->is_readable = 1;
+        info->last_modified = 0;
+        info->is_directory = 0;
     }
 
-    String header;
+//    String header;
     log_debug("path: %s\n", path.c_str());
     /// \todo what's up with the content disposition header for transcoded streams?
 /*
@@ -162,8 +172,6 @@ void TranscodeRequestHandler::get_info(IN const char *filename, OUT struct File_
     mimeType = tp->getTargetMimeType();
       
     info->file_length = -1;
-    info->last_modified = statbuf.st_mtime;
-    info->is_directory = S_ISDIR(statbuf.st_mode);
     info->content_type = ixmlCloneDOMString(mimeType.c_str());
 
    //    log_debug("get_info: Requested %s, ObjectID: %s, Location: %s\n, MimeType: %s\n",
@@ -176,7 +184,8 @@ Ref<IOHandler> TranscodeRequestHandler::open(IN const char *filename, OUT struct
 {
     int objectID;
     String mimeType;
-    int ret;
+    int ret = 0;
+    bool isURL = false;
 //    bool is_srt = false;
 
     log_debug("start\n");
@@ -304,26 +313,35 @@ Ref<IOHandler> TranscodeRequestHandler::open(IN const char *filename, OUT struct
         throw _Exception(_("Transcoding of file ") + path +
                            " but no profile matching the name " +
                            p_name + " found");
+    
+    isURL = (IS_CDS_ITEM_INTERNAL_URL(item->getObjectType()) ||
+            IS_CDS_ITEM_EXTERNAL_URL(item->getObjectType()));
 
-    ret = stat(path.c_str(), &statbuf);
-    if (ret != 0)
-        throw _Exception(_("Failed to open ") + path + " - " + strerror(errno));
+    if (!isURL)
+    {
+        ret = stat(path.c_str(), &statbuf);
+        if (ret != 0)
+            throw _Exception(_("Failed to open ") + path + " - " + 
+                             strerror(errno));
 
-    if (access(path.c_str(), R_OK) == 0)
+        if (access(path.c_str(), R_OK) == 0)
+            info->is_readable = 1;
+        else
+            info->is_readable = 0;
+
+        info->last_modified = statbuf.st_mtime;
+        info->is_directory = S_ISDIR(statbuf.st_mode);
+    }
+    else 
     {
         info->is_readable = 1;
-    }
-    else
-    {
-        info->is_readable = 0;
+        info->last_modified = 0;
+        info->is_directory = 0;
     }
 
 //    String header;
 
-    info->last_modified = statbuf.st_mtime;
-    info->is_directory = S_ISDIR(statbuf.st_mode);
-
-    log_debug("path: %s\n", path.c_str());
+        log_debug("path: %s\n", path.c_str());
     /// \todo what's up with content disposition header for transcoded streams?
 /*    int slash_pos = path.rindex(DIR_SEPARATOR);
     if (slash_pos >= 0)
@@ -346,15 +364,14 @@ Ref<IOHandler> TranscodeRequestHandler::open(IN const char *filename, OUT struct
     info->file_length = -1;
 
 
-    // the real deal should proabbyl be here...
-    // I think we can use the FileIOHandler to read from the fifo
-    /// \todo define architecture for transcoding
+    /// \todo check if we need to proxy the stream or if we can 
+    /// give the URL directly to the transcoder
 
     String fifo_name = tempName(fifo_template);
     String arguments;
     String temp;
     String command;
-#define MAX_ARGS 128
+#define MAX_ARGS 255
     char *argv[MAX_ARGS];
     Ref<Array<StringBase> > arglist;
     int i;
@@ -390,9 +407,10 @@ Ref<IOHandler> TranscodeRequestHandler::open(IN const char *filename, OUT struct
                 }
 
             argv[++apos] = NULL;
-/*
+            log_debug("Executing transcoder: %s\n", command.c_str());
+#ifdef LOG_TOMBDEBUG
             i = 0;
-            log_debug("ARGLIST: ");
+            log_debug("Transcoder argument list: ");
             do
             {
                 printf("%s ", argv[i]);
@@ -401,17 +419,15 @@ Ref<IOHandler> TranscodeRequestHandler::open(IN const char *filename, OUT struct
             while (argv[i] != NULL);
           
             printf("\n");
-*/
-            log_debug("EXECUTING TRANSCODER: %s\n", command.c_str());
+#endif
             execvp(command.c_str(), argv);
         default:
             break;
     }
 
     log_debug("Launched transcoding process, pid: %d\n", transcoding_process);
-//    Ref<IOHandler> io_handler(new TranscodeProcessIOHandler(fifo_name, 
-//                transcoding_process));
 
+    /// \todo make the buffer and the readsize configurable!
     Ref<IOHandler> io_handler(new BufferedIOHandler(Ref<IOHandler> (new TranscodeProcessIOHandler(fifo_name,transcoding_process)), 1024*1024*30, 1024*100));
 
     io_handler->open(mode);

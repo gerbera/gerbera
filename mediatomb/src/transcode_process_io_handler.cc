@@ -86,14 +86,14 @@ int TranscodeProcessIOHandler::read(OUT char *buf, IN size_t length)
     int exit_status = EXIT_SUCCESS;
     int ret = 0;
 
-    FD_ZERO(&readSet);
-    FD_SET(fd, &readSet);
-
-    timeout.tv_sec = FIFO_READ_TIMEOUT;
-    timeout.tv_usec = 0;
-
     while (true)
     {
+        FD_ZERO(&readSet);
+        FD_SET(fd, &readSet);
+
+        timeout.tv_sec = FIFO_READ_TIMEOUT;
+        timeout.tv_usec = 0;
+
         ret = select(fd + 1, &readSet, NULL, NULL, &timeout);
         if (ret == -1)
         {
@@ -117,9 +117,6 @@ int TranscodeProcessIOHandler::read(OUT char *buf, IN size_t length)
 
         if (FD_ISSET(fd, &readSet))
         {
-            timeout.tv_sec = FIFO_READ_TIMEOUT;
-            timeout.tv_usec = 0;
-
             bytes_read = ::read(fd, p_buffer, length);
             if (bytes_read == 0)
                 break;

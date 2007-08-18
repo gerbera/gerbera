@@ -89,37 +89,40 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
     // this will be used to count only the "real" resources, omitting the
     // transcoded ones
     int realCount = 0;
-
+    
+    Ref<UrlBase> urlBase_tr;
 
     // once proxying is a feature that can be turned off or on in
     // config manager we should use that setting 
     //
-    // TODO: allow transcoding for proxied URLs
-    if (!skipURL)
+    // TODO: allow transcoding for URLs
+        
+    // now get the profile
+    Ref<TranscodingProfileList> tlist = config->getTranscodingProfileListOption(
+            CFG_TRANSCODING_PROFILE_LIST);
+    Ref<TranscodingProfile> tp = tlist->get(item->getMimeType());
+    if (tp != nil)
     {
-        // now get the profile
-        Ref<TranscodingProfileList> tlist = config->getTranscodingProfileListOption(
-                CFG_TRANSCODING_PROFILE_LIST);
-        Ref<TranscodingProfile> tp = tlist->get(item->getMimeType());
-        if (tp != nil)
-        {
-            Ref<CdsResource> t_res(new CdsResource(CH_TRANSCODE));
-            t_res->addParameter(_(URL_PARAM_TRANSCODE_PROFILE_NAME), tp->getName());
-            t_res->addParameter(_(URL_PARAM_TRANSCODE), _(D_CONVERSION));
-            t_res->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
-                    renderProtocolInfo(tp->getTargetMimeType()));
-            // duration should be the same for transcoded media, so we can take
-            // the value from the original resource
-            String duration = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_DURATION));
-            if (string_ok(duration))
-                t_res->addAttribute(MetadataHandler::getResAttrName(R_DURATION),
-                        duration);
-            if (tp->firstResource())
-                item->insertResource(0, t_res);
-            else
-                item->addResource(t_res);
-        }
+        Ref<CdsResource> t_res(new CdsResource(CH_TRANSCODE));
+        t_res->addParameter(_(URL_PARAM_TRANSCODE_PROFILE_NAME), tp->getName());
+        t_res->addParameter(_(URL_PARAM_TRANSCODE), _(D_CONVERSION));
+        t_res->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
+                renderProtocolInfo(tp->getTargetMimeType()));
+        // duration should be the same for transcoded media, so we can take
+        // the value from the original resource
+        String duration = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_DURATION));
+        if (string_ok(duration))
+            t_res->addAttribute(MetadataHandler::getResAttrName(R_DURATION),
+                    duration);
+        if (tp->firstResource())
+            item->insertResource(0, t_res);
+        else
+            item->addResource(t_res);
+
+        if (skipURL)
+            urlBase_tr = addResources_getUrlBase(item, true);
     }
+
 #endif
 
     Ref<Dictionary> mappings = config->getDictionaryOption(
@@ -171,8 +174,11 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         {
             if (!skipURL)
                 url = urlBase->urlBase + (-1);
-            else 
-                url = urlBase->urlBase;
+            else
+            {
+                assert(urlBase_tr != nil);
+                url = urlBase_tr->urlBase + (-1);
+            }
         }
 #else
         if (urlBase->addResID)
@@ -259,7 +265,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
     }
 }
 
-Ref<CdsResourceManager::UrlBase> CdsResourceManager::addResources_getUrlBase(Ref<CdsItem> item)
+Ref<CdsResourceManager::UrlBase> CdsResourceManager::addResources_getUrlBase(Ref<CdsItem> item, bool forceLocal)
 {
     Ref<Element> res;
 
@@ -270,24 +276,29 @@ Ref<CdsResourceManager::UrlBase> CdsResourceManager::addResources_getUrlBase(Ref
     dict->put(_(URL_OBJECT_ID), String::from(item->getID()));
 
     urlBase->addResID = false;
-    /// \todo move this down into the "for" loop and create different urls for each resource once the io handlers are ready
+    /// \todo move this down into the "for" loop and create different urls 
+    /// for each resource once the io handlers are ready
     int objectType = item->getObjectType();
     if (IS_CDS_ITEM_INTERNAL_URL(objectType))
     {
-        urlBase->urlBase = Server::getInstance()->getVirtualURL() + _("/") + CONTENT_SERVE_HANDLER + 
-            _("/") + item->getLocation();
+        urlBase->urlBase = Server::getInstance()->getVirtualURL() + _("/") + 
+                           CONTENT_SERVE_HANDLER + 
+                           _("/") + item->getLocation();
+        return urlBase;
     }
-    else if (IS_CDS_ITEM_EXTERNAL_URL(objectType) && 
-            (!item->getFlag(OBJECT_FLAG_PROXY_URL)))
+
+    if (IS_CDS_ITEM_EXTERNAL_URL(objectType) && 
+            (!item->getFlag(OBJECT_FLAG_PROXY_URL)) && (!forceLocal))
     {
         urlBase->urlBase = item->getLocation();
+        return urlBase;
     }
-    else
-    { 
-        urlBase->urlBase = Server::getInstance()->getVirtualURL() + _("/") +
-            CONTENT_MEDIA_HANDLER + _(_URL_PARAM_SEPARATOR) + dict->encode() + _(_URL_ARG_SEPARATOR) + _(URL_RESOURCE_ID) + _("=");
-        urlBase->addResID = true;
-    }
+        
+    urlBase->urlBase = Server::getInstance()->getVirtualURL() + _("/") +
+                       CONTENT_MEDIA_HANDLER + _(_URL_PARAM_SEPARATOR) + 
+                       dict->encode() + _(_URL_ARG_SEPARATOR) + 
+                       _(URL_RESOURCE_ID) + _("=");
+    urlBase->addResID = true;
     return urlBase;
 }
 
