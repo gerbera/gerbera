@@ -46,7 +46,7 @@ StringInput::StringInput(String str) : Input()
 
 int StringInput::readChar()
 {
-    char c = *ptr;
+    unsigned char c = *ptr;
     if(c)
     {
         ptr++;
