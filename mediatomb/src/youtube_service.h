@@ -36,6 +36,10 @@
 #define __YOUTUBE_SERVICE_H__
 
 #include "zmm/zmm.h"
+#include "mxml/mxml.h"
+#include "online_service.h"
+#include "get_url.h"
+#include "dictionary.h"
 
 /// \brief This is an interface for all online services, the function
 /// handles adding/refreshing content in the database.
@@ -46,19 +50,19 @@ public:
     ~YouTubeService();
     /// \brief Retrieves user specified content from the service and adds
     /// the items to the database.
-    virtual void refreshServiceData();
+    virtual void refreshServiceData(zmm::Ref<Layout> layout);
+
 protected:
     // the handle *must never be used from multiple threads*
     CURL *curl_handle;
     // safeguard to ensure the above
-    pid_t pid;
+    pthread_t pid;
+
+    // url retriever class
+    zmm::Ref<GetURL> url;
 
     /// \brief This function will retrieve the XML according to the parametrs
     zmm::Ref<mxml::Element> getData(zmm::Ref<Dictionary> params);
-
-    /// \brief This function is installed as a callback for libcurl, when
-    /// we download data from a remote site. 
-    static size_t dl(void *buf, size_t size, size_t nmemb, void *data);
 };
 
 #endif//__ONLINE_SERVICE_H__

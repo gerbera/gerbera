@@ -33,12 +33,20 @@
 #define __FALLBACK_LAYOUT_H__
 
 #include "layout.h"
+#include "cds_objects.h"
 
 class FallbackLayout : public Layout
 {
 public:
     FallbackLayout();
     virtual void processCdsObject(zmm::Ref<CdsObject> obj);
+protected:
+    void add(zmm::Ref<CdsObject> obj, int parentID, bool use_ref = true);
+    zmm::String esc(zmm::String str);
+    void addVideo(zmm::Ref<CdsObject> obj);
+    void addImage(zmm::Ref<CdsObject> obj);
+    void addAudio(zmm::Ref<CdsObject> obj);
+    void addYouTube(zmm::Ref<CdsObject> obj);
 };
 
 #endif // __FALLBACK_LAYOUT_H__

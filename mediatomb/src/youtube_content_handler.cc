@@ -41,13 +41,6 @@
 #include "metadata_handler.h"
 #include "cds_objects.h"
 
-#define YOUTUBE_AUXDATA_TAGS            "tags"
-#define YOUTUBE_AUXDATA_AVG_RATING      "rating"
-#define YOUTUBE_AUXDATA_AUTHOR          "author"
-#define YOUTUBE_AUXDATA_COMMENT_COUNT   "ccount"
-#define YOUTUBE_AUXDATA_VIEW_COUNT      "vcount"
-#define YOUTUBE_AUXDATA_RATING_COUNT    "rcount"
-
 using namespace zmm;
 using namespace mxml;
 
@@ -96,7 +89,7 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
         // we know what we are adding
         Ref<CdsItemExternalURL> item(new CdsItemExternalURL());
         Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
-        resource->addParameter(_(ONLINE_SERVICE), _(YOUTUBE_SERVICE));
+        resource->addParameter(_(ONLINE_SERVICE), _(YOUTUBE_SERVICE_ID));
 
         temp = video->getChildText(_("id"));
         if (!string_ok(temp))
@@ -107,7 +100,8 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
         resource->addParameter(_(YOUTUBE_VIDEO_ID), temp);
 
         // remove this
-        temp = video->getChildText(_("url"));
+//        temp = video->getChildText(_("url"));
+        /// \todo REMOVE THIS HACK!
         item->setURL(temp);
 
         temp = video->getChildText(_("title"));
@@ -185,8 +179,11 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
             item->setAuxData(_(YOUTUBE_AUXDATA_RATING_COUNT), temp);
         }
 
+        item->setAuxData(_(ONLINE_SERVICE), _(YOUTUBE_SERVICE));
+
         item->addResource(resource);
         item->setFlag(OBJECT_FLAG_PROXY_URL);
+        item->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
         try
         {
             item->validate();

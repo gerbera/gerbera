@@ -33,30 +33,32 @@
 #include "content_manager.h"
 #include "config_manager.h"
 #include "metadata_handler.h"
+#include "youtube_content_handler.h"
 
 using namespace zmm;
 
-static void add(zmm::Ref<CdsObject> obj, int parentID)
+void FallbackLayout::add(zmm::Ref<CdsObject> obj, int parentID, bool use_ref)
 {
     obj->setParentID(parentID);
-    obj->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
+    if (use_ref)
+        obj->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
     obj->setID(INVALID_OBJECT_ID);
 
     ContentManager::getInstance()->addObject(obj);
 }
 
-static zmm::String esc(zmm::String str)
+zmm::String FallbackLayout::esc(zmm::String str)
 {
     return escape(str, VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR);
 }
 
-static void addVideo(zmm::Ref<CdsObject> obj)
+void FallbackLayout::addVideo(zmm::Ref<CdsObject> obj)
 {
     int id = ContentManager::getInstance()->addContainerChain(_("/Video"));
     add(obj, id);
 }
 
-static void addImage(zmm::Ref<CdsObject> obj)
+void FallbackLayout::addImage(zmm::Ref<CdsObject> obj)
 {
     int id;
     
@@ -75,7 +77,7 @@ static void addImage(zmm::Ref<CdsObject> obj)
     }
 }
 
-static void addAudio(zmm::Ref<CdsObject> obj)
+void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
 {
     String desc;
     String chain;
@@ -188,6 +190,33 @@ static void addAudio(zmm::Ref<CdsObject> obj)
 
 }
 
+void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
+{
+    String chain;
+    String tags;
+
+    int id;
+    #define YT_VPATH "/Online Services/YouTube"
+    chain = _(YT_VPATH "/Author/") + 
+            esc(obj->getAuxData(_(YOUTUBE_AUXDATA_AUTHOR)));
+    id = ContentManager::getInstance()->addContainerChain(chain);
+    add(obj, id, false);
+
+    chain = _(YT_VPATH "/Rating/") + 
+            esc(obj->getAuxData(_(YOUTUBE_AUXDATA_AVG_RATING)));
+    id = ContentManager::getInstance()->addContainerChain(chain);
+    add(obj, id, false);
+
+    tags = obj->getAuxData(_(YOUTUBE_AUXDATA_TAGS));
+    Ref<Array<StringBase> > split_tags = split_string(tags, ' ');
+    for (int i = 0; i < split_tags->size(); i++)
+    {
+        chain = _(YT_VPATH "/Tags/") + esc(split_tags->get(i));
+        id = ContentManager::getInstance()->addContainerChain(chain);
+        add(obj, id, false);
+    }
+}
+
 FallbackLayout::FallbackLayout() : Layout()
 {
 }
@@ -195,22 +224,31 @@ FallbackLayout::FallbackLayout() : Layout()
 void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj)
 {
     log_debug("Process CDS Object: %s\n", obj->getTitle().c_str());
-    Ref<CdsObject> clone = CdsObject::createObject(OBJECT_TYPE_ITEM);
+    Ref<CdsObject> clone = CdsObject::createObject(obj->getObjectType());
     obj->copyTo(clone);
     clone->setVirtual(1);
 
-    String mimetype = RefCast(obj, CdsItem)->getMimeType();
-    Ref<Dictionary> mappings = 
-        ConfigManager::getInstance()->getDictionaryOption(
-                            CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-    String content_type = mappings->get(mimetype);
+    if (clone->getFlag(OBJECT_FLAG_ONLINE_SERVICE))
+    {
+        if (clone->getAuxData(_(ONLINE_SERVICE)) == YOUTUBE_SERVICE)
+            addYouTube(clone);
+    }
+    else
+    {
 
-    if (mimetype.startsWith(_("video")))
-        addVideo(clone);
-    else if (mimetype.startsWith(_("image")))
-        addImage(clone);
-    else if ((mimetype.startsWith(_("audio")) || 
-             (content_type == CONTENT_TYPE_OGG)) &&
-             (content_type != CONTENT_TYPE_PLAYLIST))
-        addAudio(clone);
+        String mimetype = RefCast(obj, CdsItem)->getMimeType();
+        Ref<Dictionary> mappings = 
+            ConfigManager::getInstance()->getDictionaryOption(
+                    CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+        String content_type = mappings->get(mimetype);
+
+        if (mimetype.startsWith(_("video")))
+            addVideo(clone);
+        else if (mimetype.startsWith(_("image")))
+            addImage(clone);
+        else if ((mimetype.startsWith(_("audio")) || 
+                    (content_type == CONTENT_TYPE_OGG)) &&
+                (content_type != CONTENT_TYPE_PLAYLIST))
+            addAudio(clone);
+    }
 }

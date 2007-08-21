@@ -222,6 +222,9 @@
 #define DEFAULT_EXTEND_PROTOCOLINFO     NO
 #define DEFAULT_HIDE_PC_DIRECTORY       NO
 #define DEFAULT_TIMEOUT_RETRIES         0
+#ifdef YOUTUBE
+    #define YOUTUBE_PAGESIZE            106496
+#endif
 #ifdef TRANSCODING
     #define DEFAULT_TRANSCODING_ENABLED NO
 #endif

@@ -69,6 +69,9 @@ BufferedIOHandler::BufferedIOHandler(Ref<IOHandler> underlyingHandler, size_t bu
 void BufferedIOHandler::open(IN enum UpnpOpenFileMode mode)
 {
     buffer = (char *)MALLOC(bufSize);
+    if (buffer == NULL)
+        throw _Exception(_("Failed to allocate memory for transcoding buffer!"));
+
     underlyingHandler->open(mode);
     startBufferThread();
     isOpen = true;

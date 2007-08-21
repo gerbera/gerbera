@@ -56,7 +56,7 @@
 #define OBJECT_FLAG_PERSISTENT_CONTAINER  0x00000008
 #define OBJECT_FLAG_PLAYLIST_REF          0x00000010
 #define OBJECT_FLAG_PROXY_URL             0x00000020
-//#define OBJECT_FLAG_XXX                 0x00000040
+#define OBJECT_FLAG_ONLINE_SERVICE        0x00000040
 //#define OBJECT_FLAG_XXX                 0x00000080
 //#define OBJECT_FLAG_XXX                 0x00000100
 //#define OBJECT_FLAG_XXX                 0x00000200

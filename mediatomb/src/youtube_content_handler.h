@@ -37,8 +37,17 @@
 
 #include "online_service_content_handler.h"
 
-#define YOUTUBE_SERVICE     "yt"
+#define YOUTUBE_SERVICE     "YouTube"
+#define YOUTUBE_SERVICE_ID   "yt"
 #define YOUTUBE_VIDEO_ID    "vid"
+
+#define YOUTUBE_AUXDATA_TAGS            "tags"
+#define YOUTUBE_AUXDATA_AVG_RATING      "rating"
+#define YOUTUBE_AUXDATA_AUTHOR          "author"
+#define YOUTUBE_AUXDATA_COMMENT_COUNT   "ccount"
+#define YOUTUBE_AUXDATA_VIEW_COUNT      "vcount"
+#define YOUTUBE_AUXDATA_RATING_COUNT    "rcount"
+
 
 #include "zmmf/zmmf.h"
 #include "mxml/mxml.h"

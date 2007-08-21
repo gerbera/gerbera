@@ -55,8 +55,12 @@ public:
     /// 
     /// \param curl_handle an initialized and ready to use curl handle
     /// \param URL
+    /// \param only_header set true if you only want the header and not the
+    /// body
+    /// \param vebose enable curl verbose option
     zmm::Ref<zmm::StringBuffer> download(CURL *curl_handle, zmm::String URL,
-                                    long *HTTP_retcode, bool only_header=false);
+                                    long *HTTP_retcode, bool only_header=false,
+                                    bool verbose=false);
 
 protected:
     size_t buffer_hint;

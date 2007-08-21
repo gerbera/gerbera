@@ -47,7 +47,8 @@ GetURL::GetURL(size_t buffer_hint)
 }
 
 Ref<StringBuffer> GetURL::download(CURL *curl_handle, String URL, 
-                                   long *HTTP_retcode, bool only_header)
+                                   long *HTTP_retcode, bool only_header, 
+                                   bool verbose)
 {
     CURLcode res;
     char error_buffer[CURL_ERROR_SIZE] = {'\0'};
@@ -61,7 +62,9 @@ Ref<StringBuffer> GetURL::download(CURL *curl_handle, String URL,
     Ref<StringBuffer> buffer(new StringBuffer(buffer_hint));
 
     curl_easy_reset(curl_handle);
-//    curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1);
+    if (verbose)
+        curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1);
+
     curl_easy_setopt(curl_handle, CURLOPT_URL, URL.c_str());
     curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, error_buffer);
 
@@ -90,7 +93,7 @@ Ref<StringBuffer> GetURL::download(CURL *curl_handle, String URL,
         log_error("%s\n", error_buffer);
         throw _Exception(String(error_buffer));
     }
-    
+
     return buffer;
 }
 

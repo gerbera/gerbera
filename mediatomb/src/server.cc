@@ -33,7 +33,7 @@
     #include "autoconfig.h"
 #endif
 
-#ifdef YOUTUBE
+#ifdef HAVE_CURL
     #include <curl/curl.h>
 #endif
 
@@ -97,7 +97,7 @@ void Server::init()
     serverUDN = config->getOption(CFG_SERVER_UDN);
     alive_advertisement = config->getIntOption(CFG_SERVER_ALIVE_INTERVAL);
 
-#if defined(YOUTUBE)
+#ifdef HAVE_CURL
     curl_global_init(CURL_GLOBAL_ALL);
 #endif
 }
@@ -158,7 +158,6 @@ void Server::upnp_init(String iface, String ip_address, int port)
     if (storage->threadCleanupRequired())
         cb = (void *)static_cleanup_callback;
 
-    printf("UppnpInit: ip %s\n", ip.c_str());
     ret = UpnpInit(ip.c_str(), port, config->getIntOption(CFG_SERVER_RETRIES_ON_TIMEOUT), cb);
 
     if (ret != UPNP_E_SUCCESS)
@@ -331,7 +330,7 @@ void Server::shutdown()
         throw _UpnpException(ret, _("upnp_cleanup: UpnpUnRegisterRootDevice failed"));
     }
 
-#if defined(YOUTUBE)
+#ifdef HAVE_CURL
     curl_global_cleanup();
 #endif
 

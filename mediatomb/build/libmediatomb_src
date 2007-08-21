@@ -31,6 +31,8 @@ libmediatomb_a_SOURCES = \
 ../src/file_request_handler.h \
 ../src/filesystem.cc \
 ../src/filesystem.h \
+../src/get_url.cc \
+../src/get_url.h \
 ../src/hash/dbb_hash.h \
 ../src/hash/db_hash.h \
 ../src/hash/dbo_hash.h \
@@ -90,6 +92,7 @@ libmediatomb_a_SOURCES = \
 ../src/mxml/stringinput.cc \
 ../src/mxml/stringinput.h \
 ../src/online_service_content_handler.h \
+../src/online_service.h \
 ../src/process.cc \
 ../src/process.h \
 ../src/request_handler.cc \
@@ -192,6 +195,8 @@ libmediatomb_a_SOURCES = \
 ../src/xpath.h \
 ../src/youtube_content_handler.cc \
 ../src/youtube_content_handler.h \
+../src/youtube_service.cc \
+../src/youtube_service.h \
 ../src/youtube_video_url.cc \
 ../src/youtube_video_url.h \
 ../src/zmm/atomic.h \

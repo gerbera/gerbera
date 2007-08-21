@@ -35,9 +35,10 @@
 
 #ifdef YOUTUBE // make sure to add more ifdefs when we get more services
 
-#include <curl/curl.h>
 #include "zmm/zmm.h"
 #include "youtube_service.h"
+#include "youtube_content_handler.h"
+#include "content_manager.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -73,20 +74,20 @@ using namespace mxml;
 // dev_id=dev_id& category_id=category_id &tag=tag&page=page&per_page=per_page
 #define REST_METHOD_LIST_BY_CAT_AND_TAG "youtube.videos.list_by_category_and_tag"
 // REST API parameters
-#define REST_PARAM_DEV_ID               "dev_id"
-#define REST_PARAM_TAG                  "tag"
-#define REST_PARAM_ITEMS_PER_PAGE       "per_page"
-#define REST_PARAM_PAGE_NUMBER          "page"
-#define REST_PARAM_USER                 "user"
-#define REST_PARAM_METHOD               "method"
-#define REST_PARAM_PLAYLIST_ID          "id"
-#define REST_PARAM_CATEGORY_ID          "category_id"
+#define REST_PARAM_DEV_ID                   "dev_id"
+#define REST_PARAM_TAG                      "tag"
+#define REST_PARAM_ITEMS_PER_PAGE           "per_page"
+#define REST_PARAM_PAGE_NUMBER              "page"
+#define REST_PARAM_USER                     "user"
+#define REST_PARAM_METHOD                   "method"
+#define REST_PARAM_PLAYLIST_ID              "id"
+#define REST_PARAM_CATEGORY_ID              "category_id"
 
 // REST API time range values
-#define REST_VALUE_TIME_RANGE_ALL       "all"
-#define REST_VALUE_TIME_RANGE_DAY       "day"
-#define REST_VALUE_TIME_RANGE_WEEK      "week"
-#define REST_VALUE_TIME_RANGE_MONTH     "month"
+#define REST_VALUE_TIME_RANGE_ALL           "all"
+#define REST_VALUE_TIME_RANGE_DAY           "day"
+#define REST_VALUE_TIME_RANGE_WEEK          "week"
+#define REST_VALUE_TIME_RANGE_MONTH         "month"
 
 // REST API available categories
 #define REST_VALUE_CAT_FILMS_AND_ANIMATION  "1"
@@ -103,19 +104,19 @@ using namespace mxml;
 #define REST_VALUE_CAT_GADGETS_AND_GAMES    "20"
 
 // REST API min/max items per page values
-#define REST_VALUE_PER_PAGE_MIN         "20"
-#define REST_VALUE_PER_PAGE_MAX         "100"
+#define REST_VALUE_PER_PAGE_MIN             "20"
+#define REST_VALUE_PER_PAGE_MAX             "100"
 
 // REST API error codes
-#define REST_ERROR_INTERNAL             "1"
-#define REST_ERROR_BAD_XMLRPC           "2"
-#define REST_ERROR_UNKOWN_PARAM         "3"
-#define REST_ERROR_MISSING_REQURED_PARAM "4"
-#define REST_ERROR_MISSING_METHOD       "5"
-#define REST_ERROR_UNKNOWN_METHOD       "6"
-#define REST_ERROR_MISSING_DEV_ID       "7"
-#define REST_ERROR_BAD_DEV_ID           "8"
-#define REST_ERROR_NO_SUCH_USER         "101"
+#define REST_ERROR_INTERNAL                 "1"
+#define REST_ERROR_BAD_XMLRPC               "2"
+#define REST_ERROR_UNKOWN_PARAM             "3"
+#define REST_ERROR_MISSING_REQURED_PARAM    "4"
+#define REST_ERROR_MISSING_METHOD           "5"
+#define REST_ERROR_UNKNOWN_METHOD           "6"
+#define REST_ERROR_MISSING_DEV_ID           "7"
+#define REST_ERROR_BAD_DEV_ID               "8"
+#define REST_ERROR_NO_SUCH_USER             "101"
 
 YouTubeService::YouTubeService()
 {
@@ -127,6 +128,8 @@ YouTubeService::YouTubeService()
     // multiple threads - it is not allowed to use the same curl handle
     // from multiple threads
     pid = pthread_self();
+
+    url = Ref<GetURL>(new GetURL());
 }
 
 YouTubeService::~YouTubeService()
@@ -137,49 +140,39 @@ YouTubeService::~YouTubeService()
 
 Ref<Element> YouTubeService::getData(Ref<Dictionary> params)
 {
-    CURLcode res;
     long retcode;
-    char error_buffer[CURL_ERROR_SIZE] = {'\0'};
+    Ref<StringConverter> sc = StringConverter::i2i();
 
-    if (pid != pthread_self())
-        throw _Exception(_("Not allowed to call getVideoURL from different threads!"));
-    
     // dev id is requied in each call
     params->put(_(REST_PARAM_DEV_ID), _(MT_DEV_ID));
     String URL = _(REST_BASE_URL) + params->encode();
 
-    curl_easy_reset(curl_handle);
-    curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1);
-    curl_easy_setopt(curl_handle, CURLOPT_URL, URL.c_str());
-    curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, YouTubeVideoURL::dl);
-    curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)buffer.getPtr());
-    curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, error_buffer);
-
-    res = curl_easy_perform(curl_handle);
-    if (res != CURLE_OK)
+    log_debug("Retrieving URL: %s\n", URL.c_str());
+   
+    Ref<StringBuffer> buffer;
+    try 
     {
-        log_error("%s\n", error_buffer);
-        throw _Exception(String(error_buffer));
+        log_debug("DOWNLOADING URL: %s\n", URL.c_str());
+        buffer = url->download(curl_handle, URL, &retcode, false, true);
     }
-
-    res = curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &retcode);
-    if (res != CURLE_OK)
+    catch (Exception ex)
     {
-        log_error("%s\n", error_buffer);
-        throw _Exception(String(error_buffer));
-    }
-
-    if (retcode != 200)
-    {
-        log_warning("Failed to get URL for video with id %s,http response %d\n",
-                video_id.c_str(), retcode);
+        log_error("Failed to download YouTube XML data\n");
         return nil;
     }
-    
+
+    if (buffer == nil)
+        return nil;
+
+    if (retcode != 200)
+        return nil;
+
+    log_debug("GOT BUFFER\n%s\n", buffer->toString().c_str()); 
+    write_text_file(_("/tmp/heli.xml"), buffer->toString()); 
     Ref<Parser> parser(new Parser());
     try
     {
-        return parser->parseString(buffer->toString());
+        return parser->parseString(sc->convert(buffer->toString()));
     }
     catch (ParseException pe)
     {
@@ -189,7 +182,7 @@ Ref<Element> YouTubeService::getData(Ref<Dictionary> params)
                pe.getMessage().c_str());
         return nil;
     }
-    catch (Exceptin ex)
+    catch (Exception ex)
     {
         log_error("Error parsing YouTube XML %s\n", ex.getMessage().c_str());
         return nil;
@@ -198,25 +191,73 @@ Ref<Element> YouTubeService::getData(Ref<Dictionary> params)
     return nil;
 }
 
-size_t YouTubeVideoURL::dl(void *buf, size_t size, size_t nmemb, void *data)
-{   
-    StringBuffer *buffer = (StringBuffer *)data;
-    if (buffer == NULL)
-        return 0;
-    
-    size_t s = size * nmemb;
-    *buffer << String((char *)buf, s);
-
-    return s;
-}
-
 // obviously the config.xml should provide a way to define what we want,
 // for testing purposes we will stat by importing the featured videos
-void YouTubeService::refreshServiceData()
+void YouTubeService::refreshServiceData(Ref<Layout> layout)
 {
+    log_debug("------------------------>> REFRESHING SERVICE << ----------\n");
+    // the layout is in full control of the service items
+    if (layout == nil)
+    {
+        log_debug("-- no layout given!!!!!!!!\n");
+        return;
+    }
+
+    // safeguard to make sure that our curl_handle is not used in multiple
+    // threads
     if (pid != pthread_self())
         throw _Exception(_("Not allowed to call refreshServiceData from different threads!"));
 
+
+    /// \todo define search rules in the configuration and use them here
+    Ref<Dictionary> params(new Dictionary());
+    params->put(_(REST_PARAM_METHOD), _(REST_METHOD_LIST_BY_TAG));
+    params->put(_(REST_PARAM_TAG), _("tank"));
+//    params->put(_(REST_PARAM_PAGE_NUMBER), _("1"));
+//    params->put(_(REST_PARAM_ITEMS_PER_PAGE), _("10"));
+
+    /// \todo get the total number and make sure we do not stop after the
+    /// first 100 items but fetch as much stuff as the user wants
+
+    Ref<Element> reply = getData(params);
+
+    Ref<YouTubeContentHandler> yt(new YouTubeContentHandler());
+    if (reply != nil)
+        yt->setServiceContent(reply);
+    else
+    {
+        log_debug("Failed to get XML content from YouTube service\n");
+        return;
+    }
+
+    /// \todo make sure the CdsResourceManager knows whats going on,
+    /// since those items do not contain valid links but need to be
+    /// processed later on (i.e. need to figure out the real link to the flv)
+    Ref<CdsObject> obj;
+    do
+    {
+        obj = yt->getNextObject();
+        if (obj == nil)
+            break;
+
+        obj->setVirtual(true);
+        /// \todo we need a function that would do a lookup on the special
+        /// service ID and tell is uf a particular object already exists
+        /// in the database
+//        Ref<CdsObject> old = Storage::getInstance()->findObjectByPath(obj->getLocation());
+        Ref<CdsObject> old;
+        if (old == nil)
+        {
+            log_debug("Found new object!!!!\n");
+            layout->processCdsObject(obj);
+        }
+        else
+        {
+            log_debug("NEED TO UPDATE EXISTING OBJECT WITH ID: %s\n",
+                    obj->getLocation());
+        }
+    }
+    while (obj != nil);
 }
 
 #endif//YOUTUBE

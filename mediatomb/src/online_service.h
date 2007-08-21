@@ -36,6 +36,7 @@
 #define __ONLINE_SERVICE_H__
 
 #include "zmm/zmm.h"
+#include "layout/layout.h"
 
 /// \brief This is an interface for all online services, the function
 /// handles adding/refreshing content in the database.
@@ -44,7 +45,7 @@ class OnlineService : public zmm::Object
 public:
     /// \brief Retrieves user specified content from the service and adds
     /// the items to the database.
-    virtual void refreshServiceData() = 0;
+    virtual void refreshServiceData(zmm::Ref<Layout> layout) = 0;
 
 };
 

@@ -58,13 +58,9 @@ public:
 protected:
     // the handle *must never be used from multiple threads*
     CURL *curl_handle;
-    pid_t pid;
+    pthread_t pid;
     zmm::Ref<RExp> reVideoURLParams;
     zmm::Ref<RExp> redirectLocation;
-
-    /// \brief This function is installed as a callback for libcurl, when
-    /// we download data from a remote site.
-    static size_t dl(void *buf, size_t size, size_t nmemb, void *data);
 };
 
 #endif//__YOUTUBE_VIDEO_URL_H__
