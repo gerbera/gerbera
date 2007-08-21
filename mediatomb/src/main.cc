@@ -70,7 +70,7 @@
     #define OPTSTR "i:e:p:c:m:f:u:g:a:l:P:dh"
 #endif
 
-#include "tools.cc"
+#include "tools.h"
 
 using namespace zmm;
 
