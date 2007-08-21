@@ -46,7 +46,9 @@ protected:
     void addVideo(zmm::Ref<CdsObject> obj);
     void addImage(zmm::Ref<CdsObject> obj);
     void addAudio(zmm::Ref<CdsObject> obj);
+#ifdef YOUTUBE
     void addYouTube(zmm::Ref<CdsObject> obj);
+#endif
 };
 
 #endif // __FALLBACK_LAYOUT_H__

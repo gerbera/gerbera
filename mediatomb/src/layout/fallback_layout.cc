@@ -28,6 +28,9 @@
 */
 
 /// \file fallback_layout.cc
+#ifdef HAVE_CONFIG_H
+    #include "autoconfig.h"
+#endif
 
 #include "fallback_layout.h"
 #include "content_manager.h"
@@ -189,7 +192,7 @@ void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
 
 
 }
-
+#ifdef YOUTUBE
 void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
 {
     String chain;
@@ -216,6 +219,7 @@ void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
         add(obj, id, false);
     }
 }
+#endif
 
 FallbackLayout::FallbackLayout() : Layout()
 {
@@ -228,6 +232,7 @@ void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj)
     obj->copyTo(clone);
     clone->setVirtual(1);
 
+#ifdef YOUTUBE
     if (clone->getFlag(OBJECT_FLAG_ONLINE_SERVICE))
     {
         if (clone->getAuxData(_(ONLINE_SERVICE)) == YOUTUBE_SERVICE)
@@ -235,6 +240,7 @@ void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj)
     }
     else
     {
+#endif
 
         String mimetype = RefCast(obj, CdsItem)->getMimeType();
         Ref<Dictionary> mappings = 
@@ -250,5 +256,7 @@ void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj)
                     (content_type == CONTENT_TYPE_OGG)) &&
                 (content_type != CONTENT_TYPE_PLAYLIST))
             addAudio(clone);
+#ifdef YOUTUBE
     }
+#endif
 }
