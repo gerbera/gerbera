@@ -54,6 +54,10 @@
     #include "transcoding.h"
 #endif
 
+#ifdef ONLINE_SERVICES 
+    #include "online_service.h"
+#endif
+
 class ContentManager;
 
 typedef enum task_type_t
@@ -62,7 +66,10 @@ typedef enum task_type_t
     AddFile,
     RemoveObject,
     LoadAccounting,
-    RescanDirectory
+    RescanDirectory,
+#ifdef ONLINE_SERVICES
+    FetchOnlineContent
+#endif
 };
 
 class CMTask : public zmm::Object
@@ -127,7 +134,8 @@ protected:
     int scanID;
     scan_mode_t scanMode;
 public:
-    CMRescanDirectoryTask(int objectID, int scanID, scan_mode_t scanMode, bool cancellable);
+    CMRescanDirectoryTask(int objectID, int scanID, scan_mode_t scanMode,
+                          bool cancellable);
     virtual void run(zmm::Ref<ContentManager> cm);
 };
 
@@ -138,6 +146,19 @@ public:
 public:
     int totalFiles;
 };
+
+#ifdef ONLINE_SERVICES
+class CMFetchOnlineContentTask : public CMTask
+{
+protected:
+    zmm::Ref<OnlineService> service;
+
+public:
+    CMFetchOnlineContentTask(zmm::Ref<OnlineService> service, 
+                             bool cancellable);
+    virtual void run(zmm::Ref<ContentManager> cm);
+};
+#endif
 
 /*
 class DirCacheEntry : public zmm::Object
@@ -203,17 +224,30 @@ public:
     /// \param hidden true allows to import hidden files, false ignores them
     /// \param queue for immediate processing or in normal order
     /// \return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
-    int addFile(zmm::String path, bool recursive=true, bool async=true, bool hidden=false, bool lowPriority=false, bool cancellable=true);
+    int addFile(zmm::String path, bool recursive=true, bool async=true, 
+                bool hidden=false, bool lowPriority=false, 
+                bool cancellable=true);
+
     int ensurePathExistence(zmm::String path);
     void removeObject(int objectID, bool async=true, bool all=false);
-    void rescanDirectory(int objectID, int scanID, scan_mode_t scanMode, zmm::String descPath = nil, bool cancellable = true);
-    
+    void rescanDirectory(int objectID, int scanID, scan_mode_t scanMode,
+                         zmm::String descPath = nil, bool cancellable = true);
+
     /// \brief Updates an object in the database using the given parameters.
     /// \param objectID ID of the object to update
     /// \param parameters key value pairs of fields to be updated
     void updateObject(int objectID, zmm::Ref<Dictionary> parameters);
 
-    zmm::Ref<CdsObject> createObjectFromFile(zmm::String path, bool magic=true, bool allow_fifo=false);
+    zmm::Ref<CdsObject> createObjectFromFile(zmm::String path, 
+                                             bool magic=true, 
+                                             bool allow_fifo=false);
+
+#ifdef ONLINE_SERVICES
+    /// \brief Creates a layout based from data that is obtained from an
+    /// online service (like YouTube, SopCast, etc.)
+    void fetchOnlineContent(service_type_t service, bool lowPriority=true, 
+                            bool cancellable=true);
+#endif
 
     /// \brief Adds a virtual item.
     /// \param obj item to add
@@ -368,6 +402,17 @@ protected:
     
     zmm::Ref<Layout> layout;
 
+#ifdef ONLINE_SERVICES 
+    zmm::Ref<OnlineServiceList> online_services;
+
+    void fetchOnlineContentInternal(service_type_t service,
+                                    bool lowPriority=true,
+                                    bool cancellable=true,
+                                    unsigned int parentTaskID = 0);
+
+    void _fetchOnlineContent(zmm::Ref<OnlineService>);
+#endif
+
 #ifdef HAVE_JS
     zmm::Ref<PlaylistParserScript> playlist_parser_script;
 #endif
@@ -400,6 +445,7 @@ protected:
     friend void CMAddFileTask::run(zmm::Ref<ContentManager> cm);
     friend void CMRemoveObjectTask::run(zmm::Ref<ContentManager> cm);
     friend void CMRescanDirectoryTask::run(zmm::Ref<ContentManager> cm);
+    friend void CMFetchOnlineContentTask::run(zmm::Ref<ContentManager> cm);
     friend void CMLoadAccountingTask::run(zmm::Ref<ContentManager> cm);
 };
 

@@ -39,7 +39,7 @@
 #include "mxml/mxml.h"
 #include "cds_objects.h"
 
-#define ONLINE_SERVICE  "ols"
+#define ONLINE_SERVICE_ID  "ols"
 
 /// \brief this class is an interface for parsing content data of various
 /// online services.

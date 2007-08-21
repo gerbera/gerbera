@@ -37,6 +37,7 @@
 #if defined(YOUTUBE)
 
 #include "youtube_content_handler.h"
+#include "online_service.h"
 #include "tools.h"
 #include "metadata_handler.h"
 #include "cds_objects.h"
@@ -89,7 +90,7 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
         // we know what we are adding
         Ref<CdsItemExternalURL> item(new CdsItemExternalURL());
         Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
-        resource->addParameter(_(ONLINE_SERVICE), _(YOUTUBE_SERVICE_ID));
+        resource->addParameter(_(ONLINE_SERVICE_ID), String::from(OS_YouTube));
 
         temp = video->getChildText(_("id"));
         if (!string_ok(temp))
@@ -179,7 +180,7 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
             item->setAuxData(_(YOUTUBE_AUXDATA_RATING_COUNT), temp);
         }
 
-        item->setAuxData(_(ONLINE_SERVICE), _(YOUTUBE_SERVICE));
+        item->setAuxData(_(ONLINE_SERVICE_ID), String::from(OS_YouTube));
 
         item->addResource(resource);
         item->setFlag(OBJECT_FLAG_PROXY_URL);

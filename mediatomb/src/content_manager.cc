@@ -59,6 +59,10 @@
     #include "process.h"
 #endif
 
+#ifdef YOUTUBE
+    #include "youtube_service.h"
+#endif
+
 #define DEFAULT_DIR_CACHE_CAPACITY  10
 #define CM_INITIAL_QUEUE_SIZE       20
 
@@ -194,6 +198,18 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
                        cm->getOption(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
     if ((layout_type == "builtin") || (layout_type == "js"))
         layout_enabled = true;
+
+#ifdef ONLINE_SERVICES
+    online_services = Ref<OnlineServiceList>(new OnlineServiceList());
+    /// \todo read this from config.xml
+#ifdef YOUTUBE
+    Ref<OnlineService> yt((OnlineService *)new YouTubeService());
+    online_services->registerService(yt);
+    /// \todo solve the timer id / service type issues
+//    Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), 10, yt->getServiceType()+30000, true);
+#endif //YOUTUBE
+
+#endif //ONLINE_SERVICES
 }
 
 ContentManager::~ContentManager()
@@ -282,14 +298,30 @@ void ContentManager::unregisterTranscoder(pid_t pid)
 }
 #endif
 
+/// \todo OK, this needs to be changed, an int ID is just not good enough
+/// since we can not really identify what is going on or which action the
+/// id actually belongs to; Leo - the timer is all yours :)
+///
+//  Ugly hack here, but without it I can't continue to work on the YT 
+//  implementation and I don't want to wait till the timer class is
+//  rewritten; so, all servic ID's start counting from 30000
+#define MIN_SERVICE_ID 30000
 void ContentManager::timerNotify(int id)
 {
-    Ref<AutoscanDirectory> dir = autoscan_timed->get(id);
-    if (dir == nil)
-        return;
-    
-    int objectID = dir->getObjectID();
-    rescanDirectory(objectID, dir->getScanID(), dir->getScanMode());
+    /// \todo REMOVE THIS ONCE TIMER CLASS HAS BEEN ADAPTED
+    if (id < MIN_SERVICE_ID)
+    {
+        Ref<AutoscanDirectory> dir = autoscan_timed->get(id);
+        if (dir == nil)
+            return;
+
+        int objectID = dir->getObjectID();
+        rescanDirectory(objectID, dir->getScanID(), dir->getScanMode());
+    }
+    else
+    {
+        fetchOnlineContent((service_type_t)(id-MIN_SERVICE_ID));
+    }
 }
 
 void ContentManager::shutdown()
@@ -1391,13 +1423,17 @@ void ContentManager::loadAccounting(bool async)
         _loadAccounting();
     }
 }
-int ContentManager::addFile(zmm::String path, bool recursive, bool async, bool hidden, bool lowPriority, bool cancellable)
+
+int ContentManager::addFile(zmm::String path, bool recursive, bool async, 
+                            bool hidden, bool lowPriority, bool cancellable)
 {
     return addFileInternal(path, recursive, async, hidden, lowPriority, 0, cancellable);
 }
 
-int ContentManager::addFileInternal(zmm::String path, bool recursive, bool async, 
-                                     bool hidden, bool lowPriority, unsigned int parentTaskID, bool cancellable)
+int ContentManager::addFileInternal(zmm::String path, bool recursive, 
+                                    bool async, bool hidden, bool lowPriority, 
+                                    unsigned int parentTaskID, 
+                                    bool cancellable)
 {
     if (async)
     {
@@ -1412,6 +1448,35 @@ int ContentManager::addFileInternal(zmm::String path, bool recursive, bool async
         return _addFile(path, recursive, hidden);
     }
 }
+
+#ifdef ONLINE_SERVICES
+void ContentManager::fetchOnlineContent(service_type_t service,
+                                        bool lowPriority, bool cancellable)
+{
+    fetchOnlineContentInternal(service, lowPriority, cancellable);
+}
+
+void ContentManager::fetchOnlineContentInternal(service_type_t service, 
+                                        bool lowPriority, bool cancellable,
+                                        unsigned int parentTaskID)
+{
+    Ref<OnlineService> os = online_services->getService(service);
+    Ref<CMTask> task(new CMFetchOnlineContentTask(os, cancellable));
+    task->setDescription(_("Updating content from ") + os->getServiceName());
+    task->setParentID(parentTaskID);
+    addTask(task, lowPriority);    
+}
+
+void ContentManager::_fetchOnlineContent(Ref<OnlineService> service)
+{
+    log_debug("Fetching online content!\n");
+    service->incTaskCount();
+    if (layout_enabled)
+        initLayout();
+
+    service->refreshServiceData(layout);
+}
+#endif
 
 void ContentManager::invalidateAddTask(Ref<CMTask> t, String path)
 {
@@ -1909,6 +1974,34 @@ void CMRescanDirectoryTask::run(Ref<ContentManager> cm)
             Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON_FROM_REF(cm), dir->getInterval(), dir->getScanID(), true);
     }
 }
+
+#ifdef ONLINE_SERVICES
+CMFetchOnlineContentTask::CMFetchOnlineContentTask(Ref<OnlineService> service,
+                                                   bool cancellable)
+{
+    this->service = service;
+    this->taskType = FetchOnlineContent;
+    this->cancellable = cancellable;
+}
+
+void CMFetchOnlineContentTask::run(Ref<ContentManager> cm)
+{
+    if (this->service == nil)
+    {
+        log_debug("Received invalid service!\n");
+        return;
+    }
+    cm->_fetchOnlineContent(service);
+    service->decTaskCount();
+    if (service->getTaskCount() == 0)
+    {
+        /// \todo FIX THE ID STUFF  FOR TIMER NOTIFY!!!!!!
+        Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON_FROM_REF(cm), 
+                service->getRefreshInterval(), 
+                service->getServiceType()+MIN_SERVICE_ID, true);
+    }
+}
+#endif
 
 CMLoadAccountingTask::CMLoadAccountingTask() : CMTask()
 {

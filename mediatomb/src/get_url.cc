@@ -43,7 +43,6 @@ using namespace zmm;
 GetURL::GetURL(size_t buffer_hint)
 {
     this->buffer_hint = buffer_hint;
-    pid = pthread_self();
 }
 
 Ref<StringBuffer> GetURL::download(CURL *curl_handle, String URL, 
@@ -55,9 +54,6 @@ Ref<StringBuffer> GetURL::download(CURL *curl_handle, String URL,
 
     if (curl_handle == NULL)
         throw _Exception(_("Invalid curl handle!\n"));
-
-    if (pid != pthread_self())
-        throw _Exception(_("Not allowed to call GetURL::download from different threads!"));
 
     Ref<StringBuffer> buffer(new StringBuffer(buffer_hint));
 

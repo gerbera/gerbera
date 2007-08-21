@@ -39,6 +39,7 @@
 #include "youtube_service.h"
 #include "youtube_content_handler.h"
 #include "content_manager.h"
+#include "string_converter.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -120,22 +121,31 @@ using namespace mxml;
 
 YouTubeService::YouTubeService()
 {
-   curl_handle = curl_easy_init();
-    if (!curl_handle)
-        throw _Exception(_("failed to initialize curl!\n"));
-
-    // this is a safeguard to ensure that this class is not called from
-    // multiple threads - it is not allowed to use the same curl handle
-    // from multiple threads
-    pid = pthread_self();
-
     url = Ref<GetURL>(new GetURL());
+    pid = 0;
+    curl_handle = NULL;
 }
 
 YouTubeService::~YouTubeService()
 {
     if (curl_handle)
         curl_easy_cleanup(curl_handle);
+}
+
+service_type_t YouTubeService::getServiceType()
+{
+    return OS_YouTube;
+}
+
+zmm::String YouTubeService::getServiceName()
+{
+    return _("YouTube");
+}
+
+int YouTubeService::getRefreshInterval()
+{
+    /// \todo get the value from config.xml
+    return 600;
 }
 
 Ref<Element> YouTubeService::getData(Ref<Dictionary> params)
@@ -157,7 +167,8 @@ Ref<Element> YouTubeService::getData(Ref<Dictionary> params)
     }
     catch (Exception ex)
     {
-        log_error("Failed to download YouTube XML data\n");
+        log_error("Failed to download YouTube XML data: %s\n", 
+                  ex.getMessage().c_str());
         return nil;
     }
 
@@ -199,9 +210,22 @@ void YouTubeService::refreshServiceData(Ref<Layout> layout)
     // the layout is in full control of the service items
     if (layout == nil)
     {
-        log_debug("-- no layout given!!!!!!!!\n");
+        log_debug("no layout given!!!!!!!!\n");
         return;
     }
+
+    if (curl_handle == NULL)
+    {
+        curl_handle = curl_easy_init();
+        if (!curl_handle)
+            throw _Exception(_("failed to initialize curl!\n"));
+    }
+
+    // this is a safeguard to ensure that this class is not called from
+    // multiple threads - it is not allowed to use the same curl handle
+    // from multiple threads
+    if (pid == 0)
+        pid = pthread_self();
 
     // safeguard to make sure that our curl_handle is not used in multiple
     // threads

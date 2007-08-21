@@ -51,7 +51,9 @@ public:
     /// \brief Retrieves user specified content from the service and adds
     /// the items to the database.
     virtual void refreshServiceData(zmm::Ref<Layout> layout);
-
+    virtual service_type_t getServiceType();
+    virtual zmm::String getServiceName();
+    virtual int getRefreshInterval();
 protected:
     // the handle *must never be used from multiple threads*
     CURL *curl_handle;

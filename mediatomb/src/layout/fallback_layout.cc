@@ -37,6 +37,7 @@
 #include "config_manager.h"
 #include "metadata_handler.h"
 #include "youtube_content_handler.h"
+#include "online_service.h"
 
 using namespace zmm;
 
@@ -235,7 +236,7 @@ void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj)
 #ifdef YOUTUBE
     if (clone->getFlag(OBJECT_FLAG_ONLINE_SERVICE))
     {
-        if (clone->getAuxData(_(ONLINE_SERVICE)) == YOUTUBE_SERVICE)
+        if (clone->getAuxData(_(ONLINE_SERVICE_ID)) == String::from(OS_YouTube))
             addYouTube(clone);
     }
     else
