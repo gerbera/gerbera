@@ -405,12 +405,13 @@ protected:
 #ifdef ONLINE_SERVICES 
     zmm::Ref<OnlineServiceList> online_services;
 
-    void fetchOnlineContentInternal(service_type_t service,
+    void fetchOnlineContentInternal(zmm::Ref<OnlineService> service,
                                     bool lowPriority=true,
                                     bool cancellable=true,
                                     unsigned int parentTaskID = 0);
 
-    void _fetchOnlineContent(zmm::Ref<OnlineService>);
+    void _fetchOnlineContent(zmm::Ref<OnlineService>, 
+                             unsigned int parentTaskID);
 #endif
 
 #ifdef HAVE_JS

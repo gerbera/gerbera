@@ -1455,28 +1455,34 @@ int ContentManager::addFileInternal(zmm::String path, bool recursive,
 void ContentManager::fetchOnlineContent(service_type_t service,
                                         bool lowPriority, bool cancellable)
 {
-    fetchOnlineContentInternal(service, lowPriority, cancellable);
+    Ref<OnlineService> os = online_services->getService(service);
+    if (os == nil)
+        throw _Exception(_("Service not found!"));
+
+    fetchOnlineContentInternal(os, lowPriority, cancellable);
 }
 
-void ContentManager::fetchOnlineContentInternal(service_type_t service, 
+void ContentManager::fetchOnlineContentInternal(Ref<OnlineService> service, 
                                         bool lowPriority, bool cancellable,
                                         unsigned int parentTaskID)
 {
-    Ref<OnlineService> os = online_services->getService(service);
-    Ref<CMTask> task(new CMFetchOnlineContentTask(os, cancellable));
-    task->setDescription(_("Updating content from ") + os->getServiceName());
+    Ref<CMTask> task(new CMFetchOnlineContentTask(service, cancellable));
+    task->setDescription(_("Updating content from ") + 
+                         service->getServiceName());
     task->setParentID(parentTaskID);
     addTask(task, lowPriority);    
 }
 
-void ContentManager::_fetchOnlineContent(Ref<OnlineService> service)
+void ContentManager::_fetchOnlineContent(Ref<OnlineService> service, 
+                                         unsigned int parentTaskID)
 {
     log_debug("Fetching online content!\n");
     service->incTaskCount();
     if (layout_enabled)
         initLayout();
 
-    service->refreshServiceData(layout);
+    if (service->refreshServiceData(layout) && (!shutdownFlag))
+        fetchOnlineContentInternal(service, true, true, parentTaskID);
 }
 #endif
 
@@ -1993,7 +1999,7 @@ void CMFetchOnlineContentTask::run(Ref<ContentManager> cm)
         log_debug("Received invalid service!\n");
         return;
     }
-    cm->_fetchOnlineContent(service);
+    cm->_fetchOnlineContent(service, getParentID());
     service->decTaskCount();
     if (service->getTaskCount() == 0)
     {

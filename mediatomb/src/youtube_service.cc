@@ -123,7 +123,9 @@ YouTubeService::YouTubeService()
 {
     url = Ref<GetURL>(new GetURL());
     pid = 0;
-    curl_handle = NULL;
+    curl_handle = curl_easy_init();
+    if (!curl_handle)
+        throw _Exception(_("failed to initialize curl!\n"));
 }
 
 YouTubeService::~YouTubeService()
@@ -204,31 +206,19 @@ Ref<Element> YouTubeService::getData(Ref<Dictionary> params)
 
 // obviously the config.xml should provide a way to define what we want,
 // for testing purposes we will stat by importing the featured videos
-void YouTubeService::refreshServiceData(Ref<Layout> layout)
+bool YouTubeService::refreshServiceData(Ref<Layout> layout)
 {
     log_debug("------------------------>> REFRESHING SERVICE << ----------\n");
     // the layout is in full control of the service items
-    if (layout == nil)
-    {
-        log_debug("no layout given!!!!!!!!\n");
-        return;
-    }
-
-    if (curl_handle == NULL)
-    {
-        curl_handle = curl_easy_init();
-        if (!curl_handle)
-            throw _Exception(_("failed to initialize curl!\n"));
-    }
-
+    
     // this is a safeguard to ensure that this class is not called from
     // multiple threads - it is not allowed to use the same curl handle
     // from multiple threads
+    // we do it here because the handle is initialized in a different thread
+    // which is OK
     if (pid == 0)
         pid = pthread_self();
 
-    // safeguard to make sure that our curl_handle is not used in multiple
-    // threads
     if (pid != pthread_self())
         throw _Exception(_("Not allowed to call refreshServiceData from different threads!"));
 
@@ -251,7 +241,7 @@ void YouTubeService::refreshServiceData(Ref<Layout> layout)
     else
     {
         log_debug("Failed to get XML content from YouTube service\n");
-        return;
+        throw _Exception(_("Failed to get XML content from YouTube service"));
     }
 
     /// \todo make sure the CdsResourceManager knows whats going on,
@@ -273,7 +263,8 @@ void YouTubeService::refreshServiceData(Ref<Layout> layout)
         if (old == nil)
         {
             log_debug("Found new object!!!!\n");
-            layout->processCdsObject(obj);
+            if (layout != nil)
+                layout->processCdsObject(obj);
         }
         else
         {
@@ -282,6 +273,8 @@ void YouTubeService::refreshServiceData(Ref<Layout> layout)
         }
     }
     while (obj != nil);
+
+    return false;
 }
 
 #endif//YOUTUBE

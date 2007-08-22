@@ -56,7 +56,16 @@ public:
 
     /// \brief Retrieves user specified content from the service and adds
     /// the items to the database.
-    virtual void refreshServiceData(zmm::Ref<Layout> layout) = 0;
+    ///
+    /// Depending on the service, the content may be retrieved in chunks,
+    /// thus allowing to split the retrieval into multiple tasks without
+    /// completely blocking other tasks for a longer period of time.
+    /// This function will return true if there are more chunks to get and
+    /// false if all chunks have been processed and there is no more data
+    /// to get. Another call to this function after it returned true will
+    /// reset the internal counters and thus make it fetch the content from
+    /// the beginning.
+    virtual bool refreshServiceData(zmm::Ref<Layout> layout) = 0;
 
     /// \brief returns the service type
     virtual service_type_t getServiceType() = 0;
