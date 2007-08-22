@@ -151,7 +151,7 @@ public:
     
     void containerChangedUI(zmm::Ref<zmm::IntArray> objectIDs);
     
-    virtual void timerNotify(int id);
+    virtual void timerNotify(zmm::Ref<zmm::Object> parameter);
 };
 
 #endif //  __SESSION_MANAGER_H__

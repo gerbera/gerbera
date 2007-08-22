@@ -204,9 +204,11 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
     /// \todo read this from config.xml
 #ifdef YOUTUBE
     Ref<OnlineService> yt((OnlineService *)new YouTubeService());
+    Ref<TimerParameter> yt_param(new TimerParameter(TimerParameter::IDOnlineContent, OS_YouTube));
+    yt->setTimerParameter(RefCast(yt_param, Object));
     online_services->registerService(yt);
     /// \todo solve the timer id / service type issues
-//    Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), 10, yt->getServiceType()+30000, true);
+    Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), 10, yt->getTimerParameter(), true);
 #endif //YOUTUBE
 
 #endif //ONLINE_SERVICES
@@ -305,13 +307,15 @@ void ContentManager::unregisterTranscoder(pid_t pid)
 //  Ugly hack here, but without it I can't continue to work on the YT 
 //  implementation and I don't want to wait till the timer class is
 //  rewritten; so, all servic ID's start counting from 30000
-#define MIN_SERVICE_ID 30000
-void ContentManager::timerNotify(int id)
+void ContentManager::timerNotify(Ref<Object> parameter)
 {
-    /// \todo REMOVE THIS ONCE TIMER CLASS HAS BEEN ADAPTED
-    if (id < MIN_SERVICE_ID)
+    if (parameter == nil)
+        return;
+    
+    Ref<TimerParameter> tp = RefCast(parameter, TimerParameter);
+    if (tp->whoami() == TimerParameter::IDAutoscan)
     {
-        Ref<AutoscanDirectory> dir = autoscan_timed->get(id);
+        Ref<AutoscanDirectory> dir = autoscan_timed->get(tp->getID());
         if (dir == nil)
             return;
 
@@ -319,9 +323,9 @@ void ContentManager::timerNotify(int id)
         rescanDirectory(objectID, dir->getScanID(), dir->getScanMode());
     }
 #ifdef ONLINE_SERVICES
-    else
+    else if (tp->whoami() == TimerParameter::IDOnlineContent)
     {
-        fetchOnlineContent((service_type_t)(id-MIN_SERVICE_ID));
+        fetchOnlineContent((service_type_t)(tp->getID()));
     }
 #endif
 }
@@ -1457,8 +1461,10 @@ void ContentManager::fetchOnlineContent(service_type_t service,
 {
     Ref<OnlineService> os = online_services->getService(service);
     if (os == nil)
+    {
+        log_debug("No surch service! %d\n", service);
         throw _Exception(_("Service not found!"));
-
+    }
     fetchOnlineContentInternal(os, lowPriority, cancellable);
 }
 
@@ -1577,7 +1583,7 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
             Ref<AutoscanList> rm_list = autoscan_timed->removeIfSubdir(path);
             for (i = 0; i < rm_list->size(); i++)
             {
-                Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), rm_list->get(i)->getScanID(), true);
+                Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), rm_list->get(i)->getTimerParameter(), true);
             }
 #ifdef HAVE_INOTIFY
             rm_list = autoscan_inotify->removeIfSubdir(path);
@@ -1714,7 +1720,7 @@ void ContentManager::removeAutoscanDirectory(int scanID, scan_mode_t scanMode)
         SessionManager::getInstance()->containerChangedUI(adir->getObjectID());
         
         // if 3rd parameter is true: won't fail if scanID doesn't exist
-        Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), scanID, true);
+        Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), adir->getTimerParameter(), true);
 
     }
 #ifdef HAVE_INOTIFY
@@ -1742,10 +1748,10 @@ void ContentManager::removeAutoscanDirectory(int objectID)
 
     if (adir->getScanMode() == TimedScanMode)
     {
-        int scanID = autoscan_timed->remove(adir->getLocation());
+        autoscan_timed->remove(adir->getLocation());
         storage->removeAutoscanDirectoryByObjectID(objectID);
         SessionManager::getInstance()->containerChangedUI(objectID);
-        Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), scanID, true);
+        Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), adir->getTimerParameter(), true);
     }
 #ifdef HAVE_INOTIFY
     else if (adir->getScanMode() == InotifyScanMode)
@@ -1833,7 +1839,7 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
         if (dir->getScanMode() == TimedScanMode)
         {
             scanID = autoscan_timed->add(dir);
-            timerNotify(scanID);
+            timerNotify(dir->getTimerParameter());
         }
 #ifdef HAVE_INOTIFY
         else if (dir->getScanMode() == InotifyScanMode)
@@ -1847,7 +1853,7 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
     }
 
     if (original->getScanMode() == TimedScanMode)
-        Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), original->getScanID(), true);
+        Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), original->getTimerParameter(), true);
 #ifdef HAVE_INOTIFY
     else if (original->getScanMode() == InotifyScanMode)
     {
@@ -1892,7 +1898,7 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
     if (dir->getScanMode() == TimedScanMode)
     {
         scanID = autoscan_timed->add(copy);
-        timerNotify(scanID);
+        timerNotify(copy->getTimerParameter());
     }
 #ifdef HAVE_INOTIFY
     else if (dir->getScanMode() == InotifyScanMode)
@@ -1979,7 +1985,7 @@ void CMRescanDirectoryTask::run(Ref<ContentManager> cm)
     {
         dir->updateLMT();
         if (dir->getScanMode() == TimedScanMode)
-            Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON_FROM_REF(cm), dir->getInterval(), dir->getScanID(), true);
+            Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON_FROM_REF(cm), dir->getInterval(), dir->getTimerParameter(), true);
     }
 }
 
@@ -2006,7 +2012,7 @@ void CMFetchOnlineContentTask::run(Ref<ContentManager> cm)
         /// \todo FIX THE ID STUFF  FOR TIMER NOTIFY!!!!!!
         Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON_FROM_REF(cm), 
                 service->getRefreshInterval(), 
-                service->getServiceType()+MIN_SERVICE_ID, true);
+                service->getTimerParameter(), true);
     }
 }
 #endif

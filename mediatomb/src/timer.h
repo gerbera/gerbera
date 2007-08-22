@@ -48,7 +48,7 @@ class TimerSubscriber
 {
 public:
     virtual ~TimerSubscriber() { log_debug("TS destroyed\n"); }
-    virtual void timerNotify(int id) = 0;
+    virtual void timerNotify(zmm::Ref<zmm::Object> parameter) = 0;
 //    void addTimerSubscriber(unsigned int notifyInterval, int id = 0, bool once = false);
 //    void removeTimerSubscriber(int id = 0, bool dontFail = false);
 };
@@ -74,14 +74,14 @@ public:
     virtual void shutdown();
     
     template <class T>
-    void addTimerSubscriber(zmm::Ref<T> timerSubscriber, unsigned int notifyInterval, int id = 0, bool once = false)
+    void addTimerSubscriber(zmm::Ref<T> timerSubscriber, unsigned int notifyInterval, zmm::Ref<zmm::Object> parameter = nil, bool once = false)
     {
         log_debug("adding subscriber...\n");
         if (notifyInterval <= 0)
             throw zmm::Exception(_("tried to add timer with illegal notifyInterval: ") + notifyInterval);
         AUTOLOCK(mutex);
         //timerSubscriber->timerNotify(id);
-        zmm::Ref<TimerSubscriberElement<T> > element(new TimerSubscriberElement<T>(timerSubscriber, notifyInterval, id, once));
+        zmm::Ref<TimerSubscriberElement<T> > element(new TimerSubscriberElement<T>(timerSubscriber, notifyInterval, parameter, once));
         for(int i = 0; i < getAppropriateSubscribers<T>()->size(); i++)
         {
             if (getAppropriateSubscribers<T>()->get(i)->equals(element))
@@ -94,11 +94,11 @@ public:
     }
     
     template <class T>
-    void removeTimerSubscriber(zmm::Ref<T> timerSubscriber, int id = 0, bool dontFail = false)
+    void removeTimerSubscriber(zmm::Ref<T> timerSubscriber, zmm::Ref<zmm::Object> parameter = nil, bool dontFail = false)
     {
         log_debug("removing subscriber...\n");
         AUTOLOCK(mutex);
-        zmm::Ref<TimerSubscriberElement<T> > element(new TimerSubscriberElement<T>(timerSubscriber, 0, id));
+        zmm::Ref<TimerSubscriberElement<T> > element(new TimerSubscriberElement<T>(timerSubscriber, 0, parameter));
         bool removed = false;
         for(int i = 0; i < getAppropriateSubscribers<T>()->size(); i++)
         {
@@ -125,11 +125,11 @@ protected:
     class TimerSubscriberElement : public zmm::Object
     {
     public:
-        TimerSubscriberElement(zmm::Ref<T> subscriber, unsigned int notifyInterval, int id, bool once = false)
+        TimerSubscriberElement(zmm::Ref<T> subscriber, unsigned int notifyInterval, zmm::Ref<zmm::Object> parameter, bool once = false)
         {
             this->subscriber = subscriber;
             this->notifyInterval = notifyInterval;
-            this->id = id;
+            this->parameter = parameter;
             this->once = once;
             notified();
         }
@@ -137,13 +137,13 @@ protected:
         inline zmm::Ref<T> getSubscriber() { return subscriber; }
         inline void notified() { getTimespecAfterMillis(notifyInterval * 1000, &nextNotify); }
         inline struct timespec *getNextNotify() { return &nextNotify; }
-        inline int getID() { return id; }
-        bool equals(zmm::Ref<TimerSubscriberElement> other) { return (subscriber == other->subscriber && id == other->id); }
+        inline zmm::Ref<zmm::Object> getParameter() { return parameter; }
+        bool equals(zmm::Ref<TimerSubscriberElement> other) { return (subscriber == other->subscriber && parameter == other->parameter); }
         bool isOnce() { return once; }
     protected:
         zmm::Ref<T> subscriber;
         unsigned int notifyInterval;
-        int id;
+        zmm::Ref<zmm::Object> parameter;
         struct timespec nextNotify;
         bool once;
     };
@@ -174,7 +174,7 @@ protected:
                 zmm::Ref<T> subscriber = element->getSubscriber();
                 try
                 {
-                    subscriber->timerNotify(element->getID());
+                    subscriber->timerNotify(element->getParameter());
                 }
                 catch (zmm::Exception e)
                 {

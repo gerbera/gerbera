@@ -35,6 +35,7 @@
 
 #include "autoscan.h"
 #include "storage.h"
+#include "content_manager.h"
 
 using namespace zmm;
 
@@ -45,6 +46,7 @@ AutoscanDirectory::AutoscanDirectory()
     storageID = INVALID_OBJECT_ID;
     last_mod_previous_scan = 0;
     last_mod_current_scan = 0;
+    timer_parameter = Ref<Object> ((Object *)new ContentManager::TimerParameter(ContentManager::TimerParameter::IDAutoscan, INVALID_SCAN_ID));
 }
 
 AutoscanDirectory::AutoscanDirectory(String location, scan_mode_t mode,
@@ -64,6 +66,7 @@ AutoscanDirectory::AutoscanDirectory(String location, scan_mode_t mode,
     storageID = INVALID_OBJECT_ID;
     last_mod_previous_scan = 0;
     last_mod_current_scan = 0;
+    timer_parameter = Ref<Object> ((Object *)new ContentManager::TimerParameter(ContentManager::TimerParameter::IDAutoscan, INVALID_SCAN_ID));
 }
 
 void AutoscanDirectory::setCurrentLMT(time_t lmt) 
@@ -322,8 +325,7 @@ void AutoscanList::notifyAll(Ref<TimerSubscriberSingleton<Object> > cm)
     {
         if (list->get(i) == nil)
             continue;
-        
-       cm->timerNotify(i);
+       cm->timerNotify(list->get(i)->getTimerParameter());
     }
 }
 
@@ -367,6 +369,13 @@ void AutoscanDirectory::setLocation(String location)
         throw _Exception(_("UNALLOWED LOCATION CHANGE!"));
 
 }
+
+void AutoscanDirectory::setScanID(int id) 
+{
+    scanID = id; 
+    RefCast(timer_parameter, ContentManager::TimerParameter)->setID(id); 
+} 
+
 
 String AutoscanDirectory::mapScanmode(scan_mode_t scanmode)
 {
@@ -429,7 +438,21 @@ void AutoscanDirectory::copyTo(Ref<AutoscanDirectory> copy)
     copy->storageID = storageID;
     copy->last_mod_previous_scan = last_mod_previous_scan;
     copy->last_mod_current_scan = last_mod_current_scan;
+    copy->timer_parameter = timer_parameter;
 }
+
+/*
+void AutoscanDirectory::setTimerParamter(Ref<Object> parameter)
+{
+    timer_parameter = parameter;
+}
+*/
+
+Ref<Object> AutoscanDirectory::getTimerParameter()
+{
+    return timer_parameter; 
+}
+
 
 /*
 bool AutoscanDirectory::equals(Ref<AutoscanDirectory> dir)

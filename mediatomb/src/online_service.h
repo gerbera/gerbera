@@ -91,9 +91,15 @@ public:
     int getTaskCount() { return taskCount; }
 
     void setTaskCount(int taskCount) { this->taskCount = taskCount; }
-    
+
+    /// Parameter that can be used by timerNotify
+    void setTimerParameter(zmm::Ref<zmm::Object> param) 
+                           { timer_parameter = param; }
+
+    zmm::Ref<Object> getTimerParameter() { return timer_parameter; }
 protected:
     int taskCount;
+    zmm::Ref<zmm::Object> timer_parameter;
 
 };
 

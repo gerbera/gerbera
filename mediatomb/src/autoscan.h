@@ -126,7 +126,6 @@ public:
 protected:
     zmm::Ref<Mutex> mutex;
     zmm::Ref<zmm::Array<AutoscanDirectory> > list;
-    
     int _add(zmm::Ref<AutoscanDirectory> dir);
 };
 
@@ -199,7 +198,7 @@ public:
     /// The task ID helps us to identify to which scan a particular task
     /// belongs. Recursive scans spawn new tasks - they all should have
     /// the same id.
-    void setScanID(int id) { scanID = id; }
+    void setScanID(int id);
 
     int getScanID() { return scanID; }
 
@@ -228,6 +227,13 @@ public:
     /// \brief copies all properties to another object
     void copyTo(zmm::Ref<AutoscanDirectory> copy);
 
+    /// \brief Set the parameter for timer notify that is associated with
+    /// the particular autoscan directory.
+//    void setTimerParamter(zmm::Ref<zmm::Object> parameter);
+
+    /// \brief Get the timer notify parameter associated with this directory.
+    zmm::Ref<zmm::Object> getTimerParameter();
+
 //    bool equals(Ref<AutoscanDirectory> dir);
    
     /* helpers for autoscan stuff */
@@ -250,7 +256,7 @@ protected:
     int storageID;
     time_t  last_mod_previous_scan; 
     time_t  last_mod_current_scan;
-    
+    zmm::Ref<zmm::Object> timer_parameter;
 };
 
 #endif

@@ -191,12 +191,40 @@ public:
 class ContentManager : public TimerSubscriberSingleton<ContentManager>
 {
 public:
+    /// \brief This is the parameter class for timerNotify
+    class TimerParameter : public zmm::Object
+    {
+    public:
+        typedef enum timer_param_t
+        {
+            IDAutoscan,
+#ifdef ONLINE_SERVICES
+            IDOnlineContent
+#endif
+        };
+
+        TimerParameter(timer_param_t param, int id) 
+        { 
+            this->param = param; 
+            this->id = id;
+        }
+
+        timer_param_t whoami()  { return param;  }
+        void setID(int id)       { this->id = id; }
+        int getID()             { return id;     }
+
+    protected:
+        timer_param_t param;
+        int id;
+    };
+
+
     ContentManager();
     virtual void init();
     virtual ~ContentManager();
     void shutdown();
     
-    virtual void timerNotify(int id);
+    virtual void timerNotify(zmm::Ref<zmm::Object> parameter);
     
     bool isBusy() { return working; }
     
