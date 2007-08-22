@@ -445,7 +445,9 @@ protected:
     friend void CMAddFileTask::run(zmm::Ref<ContentManager> cm);
     friend void CMRemoveObjectTask::run(zmm::Ref<ContentManager> cm);
     friend void CMRescanDirectoryTask::run(zmm::Ref<ContentManager> cm);
+#ifdef ONLINE_SERVICES
     friend void CMFetchOnlineContentTask::run(zmm::Ref<ContentManager> cm);
+#endif
     friend void CMLoadAccountingTask::run(zmm::Ref<ContentManager> cm);
 };
 
