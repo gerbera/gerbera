@@ -318,10 +318,12 @@ void ContentManager::timerNotify(int id)
         int objectID = dir->getObjectID();
         rescanDirectory(objectID, dir->getScanID(), dir->getScanMode());
     }
+#ifdef ONLINE_SERVICES
     else
     {
         fetchOnlineContent((service_type_t)(id-MIN_SERVICE_ID));
     }
+#endif
 }
 
 void ContentManager::shutdown()
