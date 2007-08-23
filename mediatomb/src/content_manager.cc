@@ -1489,7 +1489,16 @@ void ContentManager::_fetchOnlineContent(Ref<OnlineService> service,
         initLayout();
 
     if (service->refreshServiceData(layout) && (!shutdownFlag))
+    {
+        log_debug("Scheduling another task for online service: %s\n",
+                  service->getServiceName().c_str());
         fetchOnlineContentInternal(service, true, true, parentTaskID);
+    }
+    else
+    {
+        log_debug("Finished fetch cycle for service: %s\n",
+                  service->getServiceName().c_str());
+    }
 }
 #endif
 

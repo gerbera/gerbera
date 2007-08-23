@@ -40,6 +40,7 @@
 #include "youtube_content_handler.h"
 #include "content_manager.h"
 #include "string_converter.h"
+#include "config_manager.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -146,7 +147,7 @@ using namespace mxml;
 
 #define CFG_OPTION_USER                     "user"
 #define CFG_OPTION_TAG                      "tag"
-#define CFG_OPTION_STARTPAGE                "star-tpage"
+#define CFG_OPTION_STARTPAGE                "start-page"
 #define CFG_OPTION_AMOUNT                   "amount"
 #define CFG_OPTION_PLAYLIST_ID              "id"
 #define CFG_OPTION_TIME_RANGE               "time-range"
@@ -159,6 +160,8 @@ YouTubeService::YouTubeService()
     curl_handle = curl_easy_init();
     if (!curl_handle)
         throw _Exception(_("failed to initialize curl!\n"));
+
+    current_task = 0;
 }
 
 YouTubeService::~YouTubeService()
@@ -166,6 +169,15 @@ YouTubeService::~YouTubeService()
     if (curl_handle)
         curl_easy_cleanup(curl_handle);
 }
+
+YouTubeService::YouTubeTask::YouTubeTask()
+{
+    parameters = zmm::Ref<Dictionary>(new Dictionary());
+    parameters->put(_(REST_PARAM_DEV_ID), _(MT_DEV_ID));
+    method = YT_none;
+    amount = 0;
+}
+
 
 service_type_t YouTubeService::getServiceType()
 {
@@ -184,7 +196,7 @@ String YouTubeService::getCheckAttr(Ref<Element> xml, String attrname)
         return temp;
     else
         throw _Exception(_("Tag <") + xml->getName() +
-                         _("is missing the requred \"") + attrname + 
+                         _("> is missing the requred \"") + attrname + 
                          _("\" attribute!"));
     return nil;
 }
@@ -197,7 +209,7 @@ int YouTubeService::getCheckPosIntAttr(Ref<Element> xml, String attrname)
         itmp = temp.toInt();
     else
         throw _Exception(_("Tag <") + xml->getName() +
-                         _("is missing the requred \"") + attrname + 
+                         _("> is missing the requred \"") + attrname + 
                          _("\" attribute!"));
 
     if (itmp < 1)
@@ -367,7 +379,6 @@ Ref<Element> YouTubeService::getData(Ref<Dictionary> params)
     Ref<StringConverter> sc = StringConverter::i2i();
 
     // dev id is requied in each call
-    params->put(_(REST_PARAM_DEV_ID), _(MT_DEV_ID));
     String URL = _(REST_BASE_URL) + params->encode();
 
     log_debug("Retrieving URL: %s\n", URL.c_str());
@@ -392,7 +403,6 @@ Ref<Element> YouTubeService::getData(Ref<Dictionary> params)
         return nil;
 
     log_debug("GOT BUFFER\n%s\n", buffer->toString().c_str()); 
-    write_text_file(_("/tmp/heli.xml"), buffer->toString()); 
     Ref<Parser> parser(new Parser());
     try
     {
@@ -433,18 +443,17 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
     if (pid != pthread_self())
         throw _Exception(_("Not allowed to call refreshServiceData from different threads!"));
 
+    Ref<ConfigManager> config = ConfigManager::getInstance();
+    Ref<Array<Object> > tasklist = config->getObjectArrayOption(CFG_ONLINE_CONTENT_YOUTUBE_TASK_LIST);
 
-    /// \todo define search rules in the configuration and use them here
-    Ref<Dictionary> params(new Dictionary());
-    params->put(_(REST_PARAM_METHOD), _(REST_METHOD_LIST_BY_TAG));
-    params->put(_(REST_PARAM_TAG), _("tank"));
-//    params->put(_(REST_PARAM_PAGE_NUMBER), _("1"));
-//    params->put(_(REST_PARAM_ITEMS_PER_PAGE), _("10"));
+    if (tasklist->size() == 0)
+        throw _Exception(_("Not specified what content to fetch!"));
 
-    /// \todo get the total number and make sure we do not stop after the
-    /// first 100 items but fetch as much stuff as the user wants
+    Ref<YouTubeTask> task = RefCast(tasklist->get(current_task), YouTubeTask);
+    if (task == nil)
+        throw _Exception(_("Encountered invalid task!"));
 
-    Ref<Element> reply = getData(params);
+    Ref<Element> reply = getData(task->parameters);
 
     Ref<YouTubeContentHandler> yt(new YouTubeContentHandler());
     if (reply != nil)
@@ -485,7 +494,14 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
     }
     while (obj != nil);
 
-    return false;
+    current_task++;
+    if (current_task > tasklist->size())
+    {
+        current_task = 0;
+        return false;
+    }
+
+    return true;
 }
 
 #endif//YOUTUBE

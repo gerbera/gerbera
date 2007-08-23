@@ -164,6 +164,10 @@ public:
     /// \param option option to retrieve.
     zmm::Ref<zmm::Array<zmm::StringBase> > getStringArrayOption(config_option_t option);
  
+    /// \brief returns a config option of type Array of Object
+    /// \param option option to retrieve.
+    zmm::Ref<zmm::Array<zmm::Object> > getObjectArrayOption(config_option_t option);
+ 
     /// \brief returns a config option of type AutoscanList
     /// \param option to retrieve
     zmm::Ref<AutoscanList> getAutoscanListOption(config_option_t option);

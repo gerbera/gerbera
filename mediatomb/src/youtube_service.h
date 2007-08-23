@@ -67,6 +67,7 @@ protected:
     /// \brief This function will retrieve the XML according to the parametrs
     zmm::Ref<mxml::Element> getData(zmm::Ref<Dictionary> params);
 
+    /// \brief Methods available in the REST API
     enum methods_t
     {
         YT_none,
@@ -80,21 +81,30 @@ protected:
     };
 
 
+    /// \brief This class defines the so called "YouTube task", the task
+    /// holds various parameters that are needed to perform. A task means
+    /// the process of downloading, parsing service data and creating
+    /// CdsObjects.
     class YouTubeTask : public zmm::Object
     {
     public:
-        YouTubeTask() 
-        { 
-            parameters = zmm::Ref<Dictionary>(new Dictionary());
-            method = YT_none;
-            amount = 0;
-        }
+        YouTubeTask();
 
+        /// \brief Method identifier
         methods_t method;
+        
+        /// \brief parameter=value for the REST API URL
         zmm::Ref<Dictionary> parameters;
+        
+        /// \brief Amount of items that we are allowed to get.
         int amount;
     };
 
+    /// \brief task that we will be working with when refreshServiceData is
+    /// called.
+    int current_task;
+
+    // helper functions for parsing config.xml
     zmm::String getCheckAttr(zmm::Ref<mxml::Element> xml, zmm::String attrname);
     int getCheckPosIntAttr(zmm::Ref<mxml::Element> xml, zmm::String attrname);
     void addPagingParams(zmm::Ref<mxml::Element> xml, 

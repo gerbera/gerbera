@@ -303,7 +303,7 @@ String ConfigManager::createDefaultConfig(String userhome)
                     options->set(RefCast(trlist_opt, ConfigOption), opttype);
 #endif//TRANSCODING
 #ifdef ONLINE_SERVICES
-#define NEW_OBJARR_OPTION(optval) \
+#define NEW_OBJARR_OPTION(optval) obj_array_opt = \
     Ref<ObjectArrayOption> (new ObjectArrayOption(optval));
 #define SET_OBJARR_OPTION(opttype) \
                    options->set(RefCast(obj_array_opt, ConfigOption), opttype);
@@ -1601,6 +1601,11 @@ Ref<Dictionary> ConfigManager::getDictionaryOption(config_option_t option)
 Ref<Array<StringBase> > ConfigManager::getStringArrayOption(config_option_t option)
 {
     return options->get(option)->getStringArrayOption();
+}
+
+Ref<Array<Object> > ConfigManager::getObjectArrayOption(config_option_t option)
+{
+    return options->get(option)->getObjectArrayOption();
 }
 
 Ref<AutoscanList> ConfigManager::getAutoscanListOption(config_option_t option)
