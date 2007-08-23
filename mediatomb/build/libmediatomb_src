@@ -91,6 +91,7 @@ libmediatomb_a_SOURCES = \
 ../src/mxml/parser.h \
 ../src/mxml/stringinput.cc \
 ../src/mxml/stringinput.h \
+../src/online_service.cc \
 ../src/online_service_content_handler.h \
 ../src/online_service.h \
 ../src/process.cc \
