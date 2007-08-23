@@ -2115,6 +2115,7 @@ else
     if test $YOUTUBE_REQUESTED -eq 1; then
         AC_MSG_ERROR(unable to configure curl which is require for YouTube support)
     fi
+    YOUTUBE=0
     CURL_CFLAGS=
     CURL_LIBS=
 fi
@@ -2706,6 +2707,10 @@ fi
 eval PACKAGE_DATADIR="${datadir}/${PACKAGE}"
 eval PACKAGE_DATADIR="${PACKAGE_DATADIR}"
 AC_DEFINE_UNQUOTED(PACKAGE_DATADIR, "$PACKAGE_DATADIR", [MediaTomb data directory])
+
+if test $YOUTUBE -eq 1; then
+    AC_DEFINE(ONLINE_SERVICES, 1, [at least one online service is supported])
+fi
 
 ###############
 AC_CONFIG_FILES([
