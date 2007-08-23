@@ -37,6 +37,7 @@
 
 #include "zmm/zmm.h"
 #include "zmmf/zmmf.h"
+#include "mxml/mxml.h"
 #include "layout/layout.h"
 
 typedef enum service_type_t
@@ -67,15 +68,16 @@ public:
     /// the beginning.
     virtual bool refreshServiceData(zmm::Ref<Layout> layout) = 0;
 
-    /// \brief returns the service type
+    /// \brief Returns the service type
     virtual service_type_t getServiceType() = 0;
 
-    /// \brief returns the service name
+    /// \brief Returns the service name
     virtual zmm::String getServiceName() = 0;
 
-    /// \brief retrieves the service refresh interval in seconds
-    virtual int getRefreshInterval() = 0;
-
+    /// \brief Parses the service related line from config.xml and creates
+    /// a task object, which can be anything that helps the service to
+    /// identify what data it has to fetch.
+    virtual zmm::Ref<zmm::Object> defineServiceTask(zmm::Ref<mxml::Element> xmlopt) = 0;
     /// \brief Increments the task count. 
     ///
     /// When recursive autoscan is in progress, we only want to subcribe to
@@ -97,8 +99,16 @@ public:
                            { timer_parameter = param; }
 
     zmm::Ref<Object> getTimerParameter() { return timer_parameter; }
+
+    /// \brief sets the service refresh interval in seconds
+    void setRefreshInterval(int interval) {refresh_interval = interval; }
+
+    /// \brief Retrieves the service refresh interval in seconds
+    int getRefreshInterval() { return refresh_interval; }
+
 protected:
     int taskCount;
+    int refresh_interval;
     zmm::Ref<zmm::Object> timer_parameter;
 
 };

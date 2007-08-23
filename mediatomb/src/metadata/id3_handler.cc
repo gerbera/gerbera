@@ -94,7 +94,15 @@ static void addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsItem> item
             break;
         case M_GENRE:
             genre = ID3_GetGenreNum(tag);
-            value = String((char *)(ID3_V1GENRE2DESCRIPTION(genre)));
+            if (ID3_V1GENRE2DESCRIPTION(genre))
+            {
+                value = String((char *)(ID3_V1GENRE2DESCRIPTION(genre)));
+            }
+            else
+            {
+                ID3_retval = ID3_GetGenre(tag); 
+                value = String(ID3_retval);
+            }
             break;
         case M_DESCRIPTION:
             ID3_retval = ID3_GetComment(tag);

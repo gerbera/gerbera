@@ -83,6 +83,7 @@ using namespace mxml;
 #define REST_PARAM_METHOD                   "method"
 #define REST_PARAM_PLAYLIST_ID              "id"
 #define REST_PARAM_CATEGORY_ID              "category_id"
+#define REST_PARAM_TIME_RANGE               "time_range"
 
 // REST API time range values
 #define REST_VALUE_TIME_RANGE_ALL           "all"
@@ -99,7 +100,7 @@ using namespace mxml;
 #define REST_VALUE_CAT_NEWS_AND_POLITICS    "25"
 #define REST_VALUE_CAT_PEOPLE_AND_BLOGS     "22"
 #define REST_VALUE_CAT_PETS_AND_ANIMALS     "15"
-#define REST_VALUE_CAT_HOW_TO_AND_DIY       "26"
+#define REST_VALUE_CAT_HOWTO_AND_DIY        "26"
 #define REST_VALUE_CAT_SPORTS               "17"
 #define REST_VALUE_CAT_TRAVEL_AND_PLACES    "19"
 #define REST_VALUE_CAT_GADGETS_AND_GAMES    "20"
@@ -118,6 +119,38 @@ using namespace mxml;
 #define REST_ERROR_MISSING_DEV_ID           "7"
 #define REST_ERROR_BAD_DEV_ID               "8"
 #define REST_ERROR_NO_SUCH_USER             "101"
+
+#define AMOUNT_ALL                          (-333)
+
+// config.xml defines
+#define CFG_CAT_STRING_FILMS_AND_ANIM       "films_and_animation"
+#define CFG_CAT_STRING_AUTOS_AND_VEHICLES   "autos_and_vehicles"
+#define CFG_CAT_STRING_COMEDY               "comedy"
+#define CFG_CAT_STRING_ENTERTAINMENT        "entertainment"
+#define CFG_CAT_STRING_MUSIC                "music"
+#define CFG_CAT_STRING_NEWS_AND_POLITICS    "news_and_politics"
+#define CFG_CAT_STRING_PEOPLE_AND_BLOGS     "people_and_blogs"
+#define CFG_CAT_STRING_PETS_AND_ANIMALS     "pets_and_animals"
+#define CFG_CAT_STRING_HOWTO_AND_DIY        "howto_and_diy"
+#define CFG_CAT_STRING_SPORTS               "sports"
+#define CFG_CAT_STRING_TRAVEL_AND_PLACES    "travel_and_places"
+#define CFG_CAT_STRING_GADGETS_AND_GAMES    "gadgets_and_games"
+
+#define CFG_METHOD_FAVORITES                "favorites" 
+#define CFG_METHOD_TAG                      "tag"
+#define CFG_METHOD_USER                     "user"
+#define CFG_METHOD_FEATURED                 "featured"
+#define CFG_METHOD_PLAYLIST                 "playlist"
+#define CFG_METHOD_POPULAR                  "popular"
+#define CFG_METHOD_CATEGORY_AND_TAG         "category-and-tag"
+
+#define CFG_OPTION_USER                     "user"
+#define CFG_OPTION_TAG                      "tag"
+#define CFG_OPTION_STARTPAGE                "star-tpage"
+#define CFG_OPTION_AMOUNT                   "amount"
+#define CFG_OPTION_PLAYLIST_ID              "id"
+#define CFG_OPTION_TIME_RANGE               "time-range"
+#define CFG_OPTION_CATEGORY                 "category"
 
 YouTubeService::YouTubeService()
 {
@@ -139,15 +172,193 @@ service_type_t YouTubeService::getServiceType()
     return OS_YouTube;
 }
 
-zmm::String YouTubeService::getServiceName()
+String YouTubeService::getServiceName()
 {
     return _("YouTube");
 }
 
-int YouTubeService::getRefreshInterval()
+String YouTubeService::getCheckAttr(Ref<Element> xml, String attrname)
 {
-    /// \todo get the value from config.xml
-    return 600;
+    String temp = xml->getAttribute(attrname);
+    if (string_ok(temp))
+        return temp;
+    else
+        throw _Exception(_("Tag <") + xml->getName() +
+                         _("is missing the requred \"") + attrname + 
+                         _("\" attribute!"));
+    return nil;
+}
+
+int YouTubeService::getCheckPosIntAttr(Ref<Element> xml, String attrname)
+{
+    int itmp;
+    String temp = xml->getAttribute(attrname);
+    if (string_ok(temp))
+        itmp = temp.toInt();
+    else
+        throw _Exception(_("Tag <") + xml->getName() +
+                         _("is missing the requred \"") + attrname + 
+                         _("\" attribute!"));
+
+    if (itmp < 1)
+        throw _Exception(_("Invalid value in ") + attrname + _(" for <") + 
+                         xml->getName() + _("> tag"));
+
+    return itmp;
+}
+
+void YouTubeService::addPagingParams(Ref<Element> xml, Ref<YouTubeTask> task)
+{
+    String temp;
+    int itmp;
+    temp = getCheckAttr(xml, _(CFG_OPTION_AMOUNT));
+    if (temp == "all")
+        task->amount = AMOUNT_ALL;
+    else
+    {
+        itmp = getCheckPosIntAttr(xml, _(CFG_OPTION_AMOUNT));
+        if (itmp >= _(REST_VALUE_PER_PAGE_MAX).toInt())
+            task->parameters->put(_(REST_PARAM_ITEMS_PER_PAGE),
+                    _(REST_VALUE_PER_PAGE_MAX));
+        else
+            task->parameters->put(_(REST_PARAM_ITEMS_PER_PAGE),
+                    String::from(itmp));
+        task->amount = itmp;
+    }
+
+    itmp = getCheckPosIntAttr(xml, _(CFG_OPTION_STARTPAGE));
+    task->parameters->put(_(REST_PARAM_PAGE_NUMBER), 
+            String::from(itmp));
+}
+
+
+Ref<Object> YouTubeService::defineServiceTask(Ref<Element> xmlopt)
+{
+    Ref<YouTubeTask> task(new YouTubeTask());
+    String temp = xmlopt->getName();
+    
+    if (temp == CFG_METHOD_FAVORITES)
+        task->method = YT_list_favorite;
+    else if (temp == CFG_METHOD_TAG)
+        task->method = YT_list_by_tag;
+    else if (temp == CFG_METHOD_USER)
+        task->method = YT_list_by_user;
+    else if (temp == CFG_METHOD_FEATURED)
+        task->method = YT_list_featured;
+    else if (temp == CFG_METHOD_PLAYLIST)
+        task->method = YT_list_by_playlist;
+    else if (temp == CFG_METHOD_POPULAR)
+        task->method = YT_list_popular;
+    else if (temp == CFG_METHOD_CATEGORY_AND_TAG)
+        task->method = YT_list_by_category_and_tag;
+    else throw _Exception(_("Unsupported tag specified: ") + temp);
+
+    switch (task->method)
+    {
+        case YT_list_favorite:
+            task->parameters->put(_(REST_PARAM_METHOD),
+                                  _(REST_METHOD_LIST_FAVORITE));
+
+            task->parameters->put(_(REST_PARAM_USER), 
+                                  getCheckAttr(xmlopt, _(CFG_OPTION_USER)));
+            break;
+
+        case YT_list_by_tag:
+            task->parameters->put(_(REST_PARAM_METHOD),
+                                  _(REST_METHOD_LIST_BY_TAG));
+
+            task->parameters->put(_(REST_PARAM_TAG), 
+                                  getCheckAttr(xmlopt, _(CFG_OPTION_TAG)));
+
+            addPagingParams(xmlopt, task);
+            break;
+
+        case YT_list_by_user:
+            task->parameters->put(_(REST_PARAM_METHOD),
+                                  _(REST_METHOD_LIST_BY_USER));
+
+            task->parameters->put(_(REST_PARAM_USER), 
+                                  getCheckAttr(xmlopt, _(CFG_OPTION_USER)));
+
+            addPagingParams(xmlopt, task);
+            break;
+
+        case YT_list_featured:
+            task->parameters->put(_(REST_PARAM_METHOD),
+                                  _(REST_METHOD_LIST_FEATURED));
+            break;
+
+        case YT_list_by_playlist:
+            task->parameters->put(_(REST_PARAM_METHOD),
+                                  _(REST_METHOD_LIST_BY_PLAYLIST));
+            task->parameters->put(_(REST_PARAM_PLAYLIST_ID),
+                               getCheckAttr(xmlopt, _(CFG_OPTION_PLAYLIST_ID)));
+            addPagingParams(xmlopt, task); 
+            
+            break;
+        case YT_list_popular:
+            task->parameters->put(_(REST_PARAM_METHOD),
+                                  _(REST_METHOD_LIST_POPULAR));
+            temp = getCheckAttr(xmlopt, _(CFG_OPTION_TIME_RANGE));
+            if ((temp != REST_VALUE_TIME_RANGE_ALL) &&
+                (temp != REST_VALUE_TIME_RANGE_DAY) &&
+                (temp != REST_VALUE_TIME_RANGE_WEEK) &&
+                (temp != REST_VALUE_TIME_RANGE_MONTH))
+            {
+                throw _Exception(_("Invalid time range specified for <") +
+                                 xmlopt->getName() + _("< tag!"));
+            }
+            else 
+                task->parameters->put(_(REST_PARAM_TIME_RANGE), temp);
+            break;
+
+        case YT_list_by_category_and_tag:
+            task->parameters->put(_(REST_PARAM_METHOD),
+                                  _(REST_METHOD_LIST_BY_CAT_AND_TAG));
+            task->parameters->put(_(REST_PARAM_TAG),
+                                  getCheckAttr(xmlopt, _(CFG_OPTION_TAG)));
+           
+            temp = getCheckAttr(xmlopt, _(CFG_OPTION_CATEGORY));
+            if (temp == CFG_CAT_STRING_FILMS_AND_ANIM)
+                temp = _(REST_VALUE_CAT_FILMS_AND_ANIMATION);
+            else if (temp == CFG_CAT_STRING_AUTOS_AND_VEHICLES)
+                temp = _(REST_VALUE_CAT_AUTOS_AND_VEHICLES);
+            else if (temp == CFG_CAT_STRING_COMEDY)
+                temp = _(REST_VALUE_CAT_COMEDY);
+            else if (temp == CFG_CAT_STRING_ENTERTAINMENT)
+                temp = _(REST_VALUE_CAT_ENTERTAINMENT);
+            else if (temp == CFG_CAT_STRING_MUSIC)
+                temp = _(REST_VALUE_CAT_MUSIC);
+            else if (temp == CFG_CAT_STRING_NEWS_AND_POLITICS)
+                temp = _(REST_VALUE_CAT_NEWS_AND_POLITICS);
+            else if (temp == CFG_CAT_STRING_PEOPLE_AND_BLOGS)
+                temp = _(REST_VALUE_CAT_PEOPLE_AND_BLOGS);
+            else if (temp == CFG_CAT_STRING_PETS_AND_ANIMALS)
+                temp = _(REST_VALUE_CAT_PETS_AND_ANIMALS);
+            else if (temp == CFG_CAT_STRING_HOWTO_AND_DIY)
+                temp = _(REST_VALUE_CAT_HOWTO_AND_DIY);
+            else if (temp == CFG_CAT_STRING_SPORTS)
+                temp = _(REST_VALUE_CAT_SPORTS);
+            else if (temp == CFG_CAT_STRING_TRAVEL_AND_PLACES)
+                temp = _(REST_VALUE_CAT_TRAVEL_AND_PLACES);
+            else if (temp == CFG_CAT_STRING_GADGETS_AND_GAMES)
+                temp = _(REST_VALUE_CAT_GADGETS_AND_GAMES);
+            else
+            {
+                throw _Exception(_("Invalid category specified for <") +
+                        xmlopt->getName() + _("< tag!"));
+            }
+            task->parameters->put(_(REST_PARAM_CATEGORY_ID), temp);
+
+            addPagingParams(xmlopt, task);
+            break;
+
+        case YT_none:
+        default:
+            throw _Exception(_("Unsupported tag!"));
+            break;
+    } // switch
+    return RefCast(task, Object);
 }
 
 Ref<Element> YouTubeService::getData(Ref<Dictionary> params)
@@ -269,7 +480,7 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
         else
         {
             log_debug("NEED TO UPDATE EXISTING OBJECT WITH ID: %s\n",
-                    obj->getLocation());
+                    obj->getLocation().c_str());
         }
     }
     while (obj != nil);

@@ -95,6 +95,7 @@ static String get_filename(String path)
 
 ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
 {
+    int i;
     cond = Ref<Cond>(new Cond(mutex));
     ignore_unknown_extensions = 0;
    
@@ -133,7 +134,7 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
     Ref<AutoscanList> config_timed_list = 
         cm->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
 
-    for (int i = 0; i < config_timed_list->size(); i++)
+    for (i = 0; i < config_timed_list->size(); i++)
     {
         Ref<AutoscanDirectory> dir = config_timed_list->get(i);
         if (dir != nil)
@@ -154,7 +155,7 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
     Ref<AutoscanList> config_inotify_list = 
         cm->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
 
-    for (int i = 0; i < config_inotify_list->size(); i++)
+    for (i = 0; i < config_inotify_list->size(); i++)
     {
         Ref<AutoscanDirectory> dir = config_inotify_list->get(i);
         if (dir != nil)
@@ -201,14 +202,21 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
 
 #ifdef ONLINE_SERVICES
     online_services = Ref<OnlineServiceList>(new OnlineServiceList());
-    /// \todo read this from config.xml
 #ifdef YOUTUBE
-    Ref<OnlineService> yt((OnlineService *)new YouTubeService());
-    Ref<TimerParameter> yt_param(new TimerParameter(TimerParameter::IDOnlineContent, OS_YouTube));
-    yt->setTimerParameter(RefCast(yt_param, Object));
-    online_services->registerService(yt);
-    /// \todo solve the timer id / service type issues
-    Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), 10, yt->getTimerParameter(), true);
+    if (cm->getBoolOption(CFG_ONLINE_CONTENT_YOUTUBE_ENABLED))
+    {
+        Ref<OnlineService> yt((OnlineService *)new YouTubeService());
+
+        i = cm->getIntOption(CFG_ONLINE_CONTENT_YOUTUBE_REFRESH);
+        yt->setRefreshInterval(i);
+        if (cm->getBoolOption(CFG_ONLINE_CONTENT_YOUTUBE_UPDATE_AT_START))
+            i = CFG_DEFAULT_UPDATE_AT_START;
+
+        Ref<TimerParameter> yt_param(new TimerParameter(TimerParameter::IDOnlineContent, OS_YouTube));
+        yt->setTimerParameter(RefCast(yt_param, Object));
+        online_services->registerService(yt);
+        Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), i, yt->getTimerParameter(), true);
+    }
 #endif //YOUTUBE
 
 #endif //ONLINE_SERVICES
@@ -256,7 +264,7 @@ void ContentManager::init()
 
 #ifdef HAVE_INOTIFY
     inotify = Ref<AutoscanInotify>(new AutoscanInotify());
-    /// \todo change this for 0.9.1 (we need a new autoscan architecture)
+    /// \todo change this (we need a new autoscan architecture)
     for (int i = 0; i < autoscan_inotify->size(); i++)
     {
         Ref<AutoscanDirectory> dir = autoscan_inotify->get(i);
@@ -300,13 +308,6 @@ void ContentManager::unregisterTranscoder(pid_t pid)
 }
 #endif
 
-/// \todo OK, this needs to be changed, an int ID is just not good enough
-/// since we can not really identify what is going on or which action the
-/// id actually belongs to; Leo - the timer is all yours :)
-///
-//  Ugly hack here, but without it I can't continue to work on the YT 
-//  implementation and I don't want to wait till the timer class is
-//  rewritten; so, all servic ID's start counting from 30000
 void ContentManager::timerNotify(Ref<Object> parameter)
 {
     if (parameter == nil)
@@ -2009,7 +2010,6 @@ void CMFetchOnlineContentTask::run(Ref<ContentManager> cm)
     service->decTaskCount();
     if (service->getTaskCount() == 0)
     {
-        /// \todo FIX THE ID STUFF  FOR TIMER NOTIFY!!!!!!
         Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON_FROM_REF(cm), 
                 service->getRefreshInterval(), 
                 service->getTimerParameter(), true);

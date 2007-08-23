@@ -42,7 +42,9 @@
 #ifdef TRANSCODING
     #include "transcoding.h"
 #endif
-
+#ifdef ONLINE_SERVICES
+    #include "online_service.h"
+#endif
 typedef enum
 {
     CFG_SERVER_PORT = 0,
@@ -121,10 +123,14 @@ typedef enum
 #ifdef TRANSCODING
     CFG_TRANSCODING_PROFILE_LIST,
 #endif
+#ifdef YOUTUBE
+    CFG_ONLINE_CONTENT_YOUTUBE_ENABLED,
+    CFG_ONLINE_CONTENT_YOUTUBE_REFRESH,
+    CFG_ONLINE_CONTENT_YOUTUBE_UPDATE_AT_START,
+    CFG_ONLINE_CONTENT_YOUTUBE_TASK_LIST,
+#endif
     CFG_MAX
 } config_option_t;
-
-
 
 class ConfigManager : public Singleton<ConfigManager>
 {
@@ -279,6 +285,20 @@ protected:
     zmm::Ref<zmm::Array<zmm::StringBase> > createArrayFromNodeset(zmm::Ref<mxml::Element> element, zmm::String nodeName, zmm::String attrName); 
    
     void dumpOptions();
+
+#ifdef YOUTUBE
+    /// \brief This functions activates the YouTube class and retrieves
+    /// lets it parse the options. 
+    ///
+    /// Note that usually the config manager does all the parsing, however
+    /// in the case of online services the tasklist is something very generic
+    /// and only the service class knows how to organize it. Since an 
+    /// online service is controlled by an external authority, the API and
+    /// thus the options can change, for that reason we prefer keeping
+    /// absolutely all functionality related to the service inside the
+    /// service class.
+    zmm::Ref<zmm::Array<zmm::Object> > createServiceTaskList(service_type_t service, zmm::Ref<mxml::Element> element);
+#endif
 
 };
 

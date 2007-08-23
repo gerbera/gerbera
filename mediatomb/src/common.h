@@ -224,6 +224,10 @@
 #define DEFAULT_TIMEOUT_RETRIES         0
 #ifdef YOUTUBE
     #define YOUTUBE_PAGESIZE            106496
+    #define DEFAULT_YOUTUBE_ENABLED     NO
+#endif
+#ifdef ONLINE_SERVICES
+    #define CFG_DEFAULT_UPDATE_AT_START 10 // seconds
 #endif
 #ifdef TRANSCODING
     #define DEFAULT_TRANSCODING_ENABLED NO

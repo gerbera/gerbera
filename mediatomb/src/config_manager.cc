@@ -44,6 +44,10 @@
 #include "string_converter.h"
 #include "metadata_handler.h"
 
+#ifdef YOUTUBE
+    #include "youtube_service.h"
+#endif
+
 #if defined(HAVE_LANGINFO_H) && defined(HAVE_LOCALE_H)
     #include <langinfo.h>
     #include <locale.h>
@@ -298,7 +302,12 @@ String ConfigManager::createDefaultConfig(String userhome)
 #define SET_TRANSCODING_PROFILELIST_OPTION(opttype) \
                     options->set(RefCast(trlist_opt, ConfigOption), opttype);
 #endif//TRANSCODING
-
+#ifdef ONLINE_SERVICES
+#define NEW_OBJARR_OPTION(optval) \
+    Ref<ObjectArrayOption> (new ObjectArrayOption(optval));
+#define SET_OBJARR_OPTION(opttype) \
+                   options->set(RefCast(obj_array_opt, ConfigOption), opttype);
+#endif
 void ConfigManager::validate(String serverhome)
 {
     String temp;
@@ -313,6 +322,9 @@ void ConfigManager::validate(String serverhome)
     Ref<AutoscanListOption> alist_opt;
 #ifdef TRANSCODING
     Ref<TranscodingProfileListOption> trlist_opt;
+#endif
+#ifdef ONLINE_SERVICES
+    Ref<ObjectArrayOption> obj_array_opt;
 #endif
 
     log_info("Checking configuration...\n");
@@ -945,6 +957,44 @@ void ConfigManager::validate(String serverhome)
     }
 #endif
 
+#ifdef YOUTUBE
+    temp = getOption(_("/online-content/YouTube/attribute::enabled"), 
+                     _(DEFAULT_YOUTUBE_ENABLED));
+
+    if (!validateYesNo(temp))
+        throw _Exception(_("Error in config file: "
+                           "invalid \"enabled\" attribute value in "
+                           "<YouTube> tag"));
+
+    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    SET_BOOL_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_ENABLED);
+
+    temp_int = getIntOption(_("/online-content/YouTube/attribute::refresh"), 0);
+    NEW_INT_OPTION(temp_int);
+    SET_INT_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_REFRESH);
+
+    temp = getOption(_("/online-content/YouTube/attribute::update-at-start"),
+                     _(""));
+
+    if (!validateYesNo(temp))
+        throw _Exception(_("Error in config file: "
+                           "invalid \"update-at-start\" attribute value in "
+                           "<YouTube> tag"));
+
+    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    SET_BOOL_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_UPDATE_AT_START);
+
+    el = getElement(_("/online-content/YouTube"));
+    if (el == nil)
+    {
+        getOption(_("/online-content/YouTube"),
+                  _(""));
+    }
+    NEW_OBJARR_OPTION(createServiceTaskList(OS_YouTube, el));
+    SET_OBJARR_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_TASK_LIST);
+
+#endif
+
     log_info("Configuration check succeeded.\n");
 
     log_debug("Config file dump after validation: \n%s\n", root->print().c_str());
@@ -1562,6 +1612,29 @@ Ref<AutoscanList> ConfigManager::getAutoscanListOption(config_option_t option)
 Ref<TranscodingProfileList> ConfigManager::getTranscodingProfileListOption(config_option_t option)
 {
     return options->get(option)->getTranscodingProfileListOption();
+}
+#endif
+
+#ifdef ONLINE_SERVICES
+Ref<Array<Object> > ConfigManager::createServiceTaskList(service_type_t service,
+                                                         Ref<Element> element)
+{
+    Ref<Array<Object> > arr(new Array<Object>());
+
+    if (element == nil)
+        return arr;
+
+    if (service == OS_YouTube)
+    {
+        Ref<YouTubeService> yt(new YouTubeService());
+        for (int i = 0; i < element->childCount(); i++)
+        {
+            Ref<Object> option = yt->defineServiceTask(element->getChild(i));
+            arr->append(option);
+        }
+    }
+
+    return arr;
 }
 #endif
 

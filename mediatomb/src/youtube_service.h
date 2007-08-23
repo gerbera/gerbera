@@ -53,7 +53,8 @@ public:
     virtual bool refreshServiceData(zmm::Ref<Layout> layout);
     virtual service_type_t getServiceType();
     virtual zmm::String getServiceName();
-    virtual int getRefreshInterval();
+    virtual zmm::Ref<zmm::Object> defineServiceTask(zmm::Ref<mxml::Element> xmlopt);
+
 protected:
     // the handle *must never be used from multiple threads*
     CURL *curl_handle;
@@ -65,6 +66,39 @@ protected:
 
     /// \brief This function will retrieve the XML according to the parametrs
     zmm::Ref<mxml::Element> getData(zmm::Ref<Dictionary> params);
+
+    enum methods_t
+    {
+        YT_none,
+        YT_list_favorite,
+        YT_list_by_tag,
+        YT_list_by_user,
+        YT_list_featured,
+        YT_list_by_playlist,
+        YT_list_popular,
+        YT_list_by_category_and_tag
+    };
+
+
+    class YouTubeTask : public zmm::Object
+    {
+    public:
+        YouTubeTask() 
+        { 
+            parameters = zmm::Ref<Dictionary>(new Dictionary());
+            method = YT_none;
+            amount = 0;
+        }
+
+        methods_t method;
+        zmm::Ref<Dictionary> parameters;
+        int amount;
+    };
+
+    zmm::String getCheckAttr(zmm::Ref<mxml::Element> xml, zmm::String attrname);
+    int getCheckPosIntAttr(zmm::Ref<mxml::Element> xml, zmm::String attrname);
+    void addPagingParams(zmm::Ref<mxml::Element> xml, 
+                         zmm::Ref<YouTubeTask> task);
 };
 
 #endif//__ONLINE_SERVICE_H__

@@ -87,6 +87,13 @@ public:
         throw _Exception(_("Wrong option type"));
     };
 #endif
+#ifdef ONLINE_SERVICES
+    virtual zmm::Ref<zmm::Array<zmm::Object> > getObjectArrayOption()
+    {
+        assert(0);
+        throw _Exception(_("Wrong option type"));
+    }
+#endif
 };
 
 class Option : public ConfigOption
@@ -184,4 +191,24 @@ protected:
 };
 #endif//TRANSCODING
 
+#ifdef ONLINE_SERVICES
+class ObjectArrayOption : public ConfigOption
+{
+public:
+    ObjectArrayOption(zmm::Ref<zmm::Array<zmm::Object> > option) 
+    { 
+        this->option = option; 
+    };
+
+    virtual zmm::Ref<zmm::Array<zmm::Object> > getObjectArrayOption() 
+    { 
+        return option; 
+    };
+
+protected:
+    zmm::Ref<zmm::Array<zmm::Object> > option;
+};
+
+
+#endif
 #endif // __CONFIG_MANAGER_H__
