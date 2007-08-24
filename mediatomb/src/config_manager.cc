@@ -1603,10 +1603,12 @@ Ref<Array<StringBase> > ConfigManager::getStringArrayOption(config_option_t opti
     return options->get(option)->getStringArrayOption();
 }
 
+#ifdef ONLINE_SERVICES
 Ref<Array<Object> > ConfigManager::getObjectArrayOption(config_option_t option)
 {
     return options->get(option)->getObjectArrayOption();
 }
+#endif
 
 Ref<AutoscanList> ConfigManager::getAutoscanListOption(config_option_t option)
 {
