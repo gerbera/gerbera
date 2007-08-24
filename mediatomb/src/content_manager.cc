@@ -1477,6 +1477,7 @@ void ContentManager::fetchOnlineContentInternal(Ref<OnlineService> service,
     task->setDescription(_("Updating content from ") + 
                          service->getServiceName());
     task->setParentID(parentTaskID);
+    service->incTaskCount();
     addTask(task, lowPriority);    
 }
 
@@ -1484,7 +1485,6 @@ void ContentManager::_fetchOnlineContent(Ref<OnlineService> service,
                                          unsigned int parentTaskID)
 {
     log_debug("Fetching online content!\n");
-    service->incTaskCount();
     if (layout_enabled)
         initLayout();
 

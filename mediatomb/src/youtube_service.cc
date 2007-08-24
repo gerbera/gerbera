@@ -107,7 +107,9 @@ using namespace mxml;
 #define REST_VALUE_CAT_GADGETS_AND_GAMES    "20"
 
 // REST API min/max items per page values
-#define REST_VALUE_PER_PAGE_MIN             "20"
+#define REST_VALUE_PER_PAGE_MIN             "1" // allthouth the spec says 20,
+                                                // lower values also seem to 
+                                                // work
 #define REST_VALUE_PER_PAGE_MAX             "100"
 
 // REST API error codes
@@ -449,6 +451,8 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
     if (tasklist->size() == 0)
         throw _Exception(_("Not specified what content to fetch!"));
 
+    printf("--------------> TASK LIST SIZE: %d\n", tasklist->size());
+    printf("CURRENT TASK: %d\n", current_task);
     Ref<YouTubeTask> task = RefCast(tasklist->get(current_task), YouTubeTask);
     if (task == nil)
         throw _Exception(_("Encountered invalid task!"));
@@ -470,6 +474,8 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
     Ref<CdsObject> obj;
     do
     {
+        /// \todo add try/catch here and a possibility do find out if we
+        /// may request more stuff or if we are at the end of the list
         obj = yt->getNextObject();
         if (obj == nil)
             break;
@@ -495,7 +501,7 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
     while (obj != nil);
 
     current_task++;
-    if (current_task > tasklist->size())
+    if (current_task >= tasklist->size())
     {
         current_task = 0;
         return false;
