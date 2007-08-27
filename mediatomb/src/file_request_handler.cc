@@ -51,6 +51,9 @@
 #include "file_request_handler.h"
 #include "metadata_handler.h"
 #include "tools.h"
+#ifdef TRANSCODING
+    #include "transcode_handler.h"
+#endif
 
 using namespace zmm;
 using namespace mxml;
@@ -65,6 +68,9 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
 
     String mimeType;
     int objectID;
+#ifdef TRANSCODING
+    String tr_profile;
+#endif
 
     struct stat statbuf;
     int ret = 0;
@@ -100,7 +106,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     {
         throw _Exception(_("get_info: object is not an item"));
     }
-   
+     
     Ref<CdsItem> item = RefCast(obj, CdsItem);
 
     String path = item->getLocation();
@@ -164,7 +170,12 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
         }
     }
  
+#ifdef TRANSCODING
+    tr_profile = dict->get(_(URL_PARAM_TRANSCODE_PROFILE_NAME));
+#endif
+ 
     info->http_header = NULL;
+    // for transcoded resourecs res_id will always be negative
     log_debug("fetching resource id %d\n", res_id);
     if ((res_id > 0) && (res_id < item->getResourceCount()))
     {
@@ -188,23 +199,41 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     }
     else
     {
-        if (mimeType == nil)
-            mimeType = item->getMimeType();
-
-        info->file_length = statbuf.st_size;
-        // if we are dealing with a regular file we should add the
-        // Accept-Ranges: bytes header, in order to indicate that we support
-        // seeking
-        if (S_ISREG(statbuf.st_mode))
+#ifdef TRANSCODING
+        if (!is_srt && string_ok(tr_profile))
         {
-            if (string_ok(header))
-                header = header + _("\r\n");
 
-            header = header + _("Accept-Ranges: bytes");
-            /// \todo turned out that we are not always allowed to add this
-            /// header, since chunked encoding may be active and we do not
-            /// know that here
+            Ref<TranscodingProfile> tp = ConfigManager::getInstance()->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
+
+            if (tp == nil)
+                throw _Exception(_("Transcoding of file ") + path +
+                                 " but no profile matching the name " +
+                                 tr_profile + " found");
+
+            mimeType = tp->getTargetMimeType();
+            info->file_length = -1;
         }
+        else
+#endif
+        {
+            info->file_length = statbuf.st_size;
+            // if we are dealing with a regular file we should add the
+            // Accept-Ranges: bytes header, in order to indicate that we support
+            // seeking
+            if (S_ISREG(statbuf.st_mode))
+            {
+                if (string_ok(header))
+                    header = header + _("\r\n");
+
+                header = header + _("Accept-Ranges: bytes");
+                /// \todo turned out that we are not always allowed to add this
+                /// header, since chunked encoding may be active and we do not
+                /// know that here
+            }
+        }
+
+        if (!string_ok(mimeType))
+            mimeType = item->getMimeType();
 
         //log_debug("sizeof off_t %d, statbuf.st_size %d\n", sizeof(off_t), sizeof(statbuf.st_size));
         //log_debug("get_info: file_length: " OFF_T_SPRINTF "\n", statbuf.st_size);
@@ -229,6 +258,9 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
     String mimeType;
     int ret;
     bool is_srt = false;
+#ifdef TRANSCODING
+    String tr_profile;
+#endif
 
     log_debug("start\n");
     struct stat statbuf;
@@ -393,10 +425,13 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
         }
     }
     log_debug("fetching resource id %d\n", res_id);
-    // Per default and in case of a bad resource ID, serve the file
-    // itself
+#ifdef TRANSCODING
+    tr_profile = dict->get(_(URL_PARAM_TRANSCODE_PROFILE_NAME));
+#endif
 
     info->http_header = NULL;
+    // Per default and in case of a bad resource ID, serve the file
+    // itself
     if ((res_id > 0) && (res_id < item->getResourceCount()))
     {
         // http-get:*:image/jpeg:*
@@ -420,30 +455,41 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
     }
     else
     {
-        if (mimeType == nil)
-            mimeType = item->getMimeType();
-
-        info->file_length = statbuf.st_size;
-        info->content_type = ixmlCloneDOMString(mimeType.c_str());
-
-        log_debug("Adding content disposition header: %s\n", header.c_str());
-            // if we are dealing with a regular file we should add the
-        // Accept-Ranges: bytes header, in order to indicate that we support
-        // seeking
-        if (S_ISREG(statbuf.st_mode))
+#ifdef TRANSCODING
+        if (!is_srt && string_ok(tr_profile))
         {
-            if (string_ok(header))
-                header = header + _("\r\n");
-
-            header = header + _("Accept-Ranges: bytes");
+            Ref<TranscodeHandler> tr_h(new TranscodeHandler());
+            return tr_h->open(tr_profile, path, item->getObjectType(), info);
         }
+        else
+#endif
+        {
+            if (mimeType == nil)
+                mimeType = item->getMimeType();
 
-        if (string_ok(header))
-             info->http_header = ixmlCloneDOMString(header.c_str());
+            info->file_length = statbuf.st_size;
+            info->content_type = ixmlCloneDOMString(mimeType.c_str());
+
+            log_debug("Adding content disposition header: %s\n", 
+                    header.c_str());
+            // if we are dealing with a regular file we should add the
+            // Accept-Ranges: bytes header, in order to indicate that we support
+            // seeking
+            if (S_ISREG(statbuf.st_mode))
+            {
+                if (string_ok(header))
+                    header = header + _("\r\n");
+
+                header = header + _("Accept-Ranges: bytes");
+            }
+
+            if (string_ok(header))
+                info->http_header = ixmlCloneDOMString(header.c_str());
 
 
-        Ref<IOHandler> io_handler(new FileIOHandler(path));
-        io_handler->open(mode);
-        return io_handler;
+            Ref<IOHandler> io_handler(new FileIOHandler(path));
+            io_handler->open(mode);
+            return io_handler;
+        }
     }
 }

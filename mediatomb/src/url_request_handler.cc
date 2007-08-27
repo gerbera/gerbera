@@ -45,6 +45,9 @@
 #include "cds_objects.h"
 #include "online_service_helper.h"
 #include "url.h"
+#ifdef TRANSCODING
+    #include "transcode_handler.h"
+#endif
 
 using namespace zmm;
 using namespace mxml;
@@ -59,6 +62,9 @@ void URLRequestHandler::get_info(IN const char *filename, OUT struct File_Info *
 
     String mimeType;
     int objectID;
+#ifdef TRANSCODING
+    String tr_profile;
+#endif
 
     String url, parameters;
     split_url(filename, URL_PARAM_SEPARATOR, url, parameters);
@@ -90,43 +96,65 @@ void URLRequestHandler::get_info(IN const char *filename, OUT struct File_Info *
     {
         throw _Exception(_("get_info: object is not an external url item"));
     }
-   
-    Ref<CdsItemExternalURL> item = RefCast(obj, CdsItemExternalURL);
 
-    if (item->getFlag(OBJECT_FLAG_ONLINE_SERVICE))
-    {
-        /// \todo write a helper class that will handle various online
-        /// services
-        Ref<OnlineServiceHelper> helper (new OnlineServiceHelper());
-        url = helper->resolveURL(item);
-    }
-    else
-    {
-        url = item->getLocation();
-    }
+#ifdef TRANSCODING
+    tr_profile = dict->get(_(URL_PARAM_TRANSCODE_PROFILE_NAME));
 
-    log_debug("Online content url: %s\n", url.c_str());
-
-    Ref<URL> u(new URL(1024));
-    Ref<URL::Stat> st;
-    try
-    { 
-        st = u->getInfo(url);
-        info->file_length = st->getSize();
-    }
-    catch (Exception ex)
+    if (string_ok(tr_profile))
     {
-        log_warning("%s\n", ex.getMessage().c_str());
+        Ref<TranscodeHandler> tr_h(new TranscodeHandler());
+        Ref<TranscodingProfile> tp = ConfigManager::getInstance()->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
+
+        if (tp == nil)
+            throw _Exception(_("Transcoding requested but no profile "
+                               "matching the name ") + tr_profile + " found");
+
+        mimeType = tp->getTargetMimeType();
         info->file_length = -1;
     }
-    
+    else
+#endif
+    {
+        Ref<CdsItemExternalURL> item = RefCast(obj, CdsItemExternalURL);
+
+        if (item->getFlag(OBJECT_FLAG_ONLINE_SERVICE))
+        {
+            /// \todo write a helper class that will handle various online
+            /// services
+            Ref<OnlineServiceHelper> helper (new OnlineServiceHelper());
+            url = helper->resolveURL(item);
+        }
+        else
+        {
+            url = item->getLocation();
+        }
+
+        log_debug("Online content url: %s\n", url.c_str());
+        Ref<URL> u(new URL(1024));
+        Ref<URL::Stat> st;
+        try
+        { 
+            st = u->getInfo(url);
+            info->file_length = st->getSize();
+        }
+        catch (Exception ex)
+        {
+            log_warning("%s\n", ex.getMessage().c_str());
+            info->file_length = -1;
+        }
+
+        mimeType = item->getMimeType();
+    }
+
     info->is_readable = 1;
     info->last_modified = 0;
     info->is_directory = 0;
     info->http_header = NULL;
-    mimeType = item->getMimeType();
+
     info->content_type = ixmlCloneDOMString(mimeType.c_str());
     log_debug("web_get_info(): end\n");
+
+    /// \todo transcoding for get_info
 }
 
 Ref<IOHandler> URLRequestHandler::open(IN const char *filename, OUT struct File_Info *info, IN enum UpnpOpenFileMode mode)
@@ -134,6 +162,9 @@ Ref<IOHandler> URLRequestHandler::open(IN const char *filename, OUT struct File_
     int objectID;
     String mimeType;
     int ret = 0;
+#ifdef TRANSCODING
+    String tr_profile;
+#endif
 
     log_debug("start\n");
 
@@ -183,25 +214,44 @@ Ref<IOHandler> URLRequestHandler::open(IN const char *filename, OUT struct File_
 
     log_debug("Online content url: %s\n", url.c_str());
 
-    Ref<URL> u(new URL(1024));
-    Ref<URL::Stat> st;
-    try
-    {
-        st = u->getInfo(url);
-        info->file_length = st->getSize();
-    }
-    catch (Exception ex)
-    {
-        log_warning("%s\n", ex.getMessage().c_str());
-        info->file_length = -1;
-    }
-
     info->is_readable = 1;
     info->last_modified = 0;
     info->is_directory = 0;
     info->http_header = NULL;
-    mimeType = item->getMimeType();
-    info->content_type = ixmlCloneDOMString(mimeType.c_str());
+
+#ifdef TRANSCODING
+    tr_profile = dict->get(_(URL_PARAM_TRANSCODE_PROFILE_NAME));
+
+    if (string_ok(tr_profile))
+    {
+        Ref<TranscodingProfile> tp = ConfigManager::getInstance()->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
+
+        if (tp == nil)
+            throw _Exception(_("Transcoding of file ") + url +
+                    " but no profile matching the name " +
+                    tr_profile + " found");
+
+        Ref<TranscodeHandler> tr_h(new TranscodeHandler());
+        return tr_h->open(tr_profile, url, item->getObjectType(), info);
+    }
+    else
+#endif
+    {
+        Ref<URL> u(new URL(1024));
+        Ref<URL::Stat> st;
+        try
+        {
+            st = u->getInfo(url);
+            info->file_length = st->getSize();
+        }
+        catch (Exception ex)
+        {
+            log_warning("%s\n", ex.getMessage().c_str());
+            info->file_length = -1;
+        }
+        mimeType = item->getMimeType();
+        info->content_type = ixmlCloneDOMString(mimeType.c_str());
+    }
 
     /// \todo write an URL IO handler
 //    Ref<IOHandler> io_handler(new BufferedIOHandler(Ref<IOHandler> (new URLIOHandler(url)), 1024*1024*30, 1024*1024, 1024*1024*20));
