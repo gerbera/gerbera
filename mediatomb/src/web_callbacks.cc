@@ -52,6 +52,9 @@
 #ifdef TRANSCODING
     #include "transcode_request_handler.h"
 #endif
+#ifdef ONLINE_SERVICES
+    #include "url_request_handler.h"
+#endif
 #include "web_request_handler.h"
 #include "serve_request_handler.h"
 #include "web/pages.h"
@@ -127,6 +130,13 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
         else
             throw _Exception(_("Serving directories is not enabled in configuration"));
     }
+#ifdef ONLINE_SERVICES
+    else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" +
+                             CONTENT_ONLINE_HANDLER))
+    {
+        ret = new URLRequestHandler();
+    }
+#endif
     else
     {
         throw _Exception(_("no valid handler type in ") + filename);

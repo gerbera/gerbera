@@ -94,6 +94,7 @@
 #define SERVER_VIRTUAL_DIR              "content"
 #define CONTENT_MEDIA_HANDLER           "media"
 #define CONTENT_SERVE_HANDLER           "serve"
+#define CONTENT_ONLINE_HANDLER          "online"
 #define CONTENT_UI_HANDLER              "interface"
 #define URL_PARAM_TRANSCODE_PROFILE_NAME "pr_name"
 #define URL_PARAM_TRANSCODE             "tr"

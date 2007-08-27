@@ -31,8 +31,6 @@ libmediatomb_a_SOURCES = \
 ../src/file_request_handler.h \
 ../src/filesystem.cc \
 ../src/filesystem.h \
-../src/get_url.cc \
-../src/get_url.h \
 ../src/hash/dbb_hash.h \
 ../src/hash/db_hash.h \
 ../src/hash/dbo_hash.h \
@@ -94,6 +92,8 @@ libmediatomb_a_SOURCES = \
 ../src/online_service.cc \
 ../src/online_service_content_handler.h \
 ../src/online_service.h \
+../src/online_service_helper.cc \
+../src/online_service_helper.h \
 ../src/process.cc \
 ../src/process.h \
 ../src/request_handler.cc \
@@ -160,6 +160,10 @@ libmediatomb_a_SOURCES = \
 ../src/upnp_mrreg_subscriptions.cc \
 ../src/upnp_xml.cc \
 ../src/upnp_xml.h \
+../src/url.cc \
+../src/url.h \
+../src/url_request_handler.cc \
+../src/url_request_handler.h \
 ../src/uuid/clear.c \
 ../src/uuid/compare.c \
 ../src/uuid/copy.c \

@@ -38,16 +38,16 @@
 
 #include "youtube_video_url.h"
 #include "tools.h"
-#include "get_url.h"
+#include "url.h"
 
 using namespace zmm;
 
-#define YOUTUBE_URL_PARAMS_REGEXP   "player2\\.swf\\?([^\"]+)\""
+#define YOUTUBE_URL_PARAMS_REGEXP   "var swfArgs =.*t:'([^']+)"
 #define YOUTUBE_URL_LOCATION_REGEXP "\nLocation: (http://[^\n]+)\n"
 #define YOUTUBE_URL_WATCH           "http://www.youtube.com/watch?v="
 #define YOUTUBE_URL_GET             "http://www.youtube.com/get_video?" 
-
-
+#define YOUTUBE_URL_PARAM_VIDEO_ID  "video_id"
+#define YOUTUBE_URL_PARAM_T         "t"
 YouTubeVideoURL::YouTubeVideoURL()
 {
     curl_handle = curl_easy_init();
@@ -75,16 +75,27 @@ String YouTubeVideoURL::getVideoURL(String video_id)
 {
     long retcode; 
     String flv_location;
+    String watch;
+#ifdef LOG_TOMBDEBUG
+    bool verbose = true;
+#else
+    bool verbose = false;
+#endif
 
-    video_id = _(YOUTUBE_URL_WATCH) + video_id;
+    if (!string_ok(video_id))
+        throw _Exception(_("No video ID specified!"));
 
-    Ref<GetURL> url(new GetURL(YOUTUBE_PAGESIZE));
+    watch = _(YOUTUBE_URL_WATCH) + video_id;
 
-    Ref<StringBuffer> buffer = url->download(curl_handle, video_id, &retcode);
+    Ref<URL> url(new URL(YOUTUBE_PAGESIZE));
+
+    Ref<StringBuffer> buffer = url->download(watch, &retcode, curl_handle,
+                                             false, verbose);
     if (retcode != 200)
     {
-        log_error("Failed to get URL for video with id %s, http response %ld\n", video_id.c_str(), retcode);
-        return nil;
+        throw _Exception(_("Failed to get URL for video with id ")
+                         + watch + _("HTTP response code: ") + 
+                         String::from(retcode));
     }
 
     Ref<Matcher> matcher =  reVideoURLParams->matcher(buffer->toString());
@@ -95,29 +106,31 @@ String YouTubeVideoURL::getVideoURL(String video_id)
     }
     else
     {
-        log_error("Failed to get URL for video with id %s\n",
-                    video_id.c_str());
-        return nil;
+        throw _Exception(_("Failed to get URL for video with id ") + video_id);
     }
 
-    params = _(YOUTUBE_URL_GET) + params;
+    params = _(YOUTUBE_URL_GET) + YOUTUBE_URL_PARAM_VIDEO_ID + '=' + 
+             video_id + '&' + YOUTUBE_URL_PARAM_T + '=' + params;
 
-    buffer = url->download(curl_handle, params, &retcode, true);
+    buffer = url->download(params, &retcode, curl_handle, true, verbose);
 
     matcher = redirectLocation->matcher(buffer->toString());
     if (matcher->next())
     {
-        return trim_string(matcher->group(1));
+        if (string_ok(trim_string(matcher->group(1))))
+            return trim_string(matcher->group(1));
+        else
+            throw _Exception(_("Failed to get URL for video with id ") + 
+                             video_id);
     }
 
     if (retcode != 303)
     {
-        log_error("Unexpected YouTube reply: %ld", retcode);
-        return nil;
+        throw _Exception(_("Unexpected reply from YouTube: ") + 
+                         String::from(retcode));
     }
 
-    log_error("Could not retrieve YouTube video URL\n");
-    return nil;
+    throw _Exception(_("Could not retrieve YouTube video URL"));
 }
 
 #endif//YOUTUBE

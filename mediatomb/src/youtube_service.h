@@ -38,7 +38,7 @@
 #include "zmm/zmm.h"
 #include "mxml/mxml.h"
 #include "online_service.h"
-#include "get_url.h"
+#include "url.h"
 #include "dictionary.h"
 
 /// \brief This is an interface for all online services, the function
@@ -62,7 +62,7 @@ protected:
     pthread_t pid;
 
     // url retriever class
-    zmm::Ref<GetURL> url;
+    zmm::Ref<URL> url;
 
     /// \brief This function will retrieve the XML according to the parametrs
     zmm::Ref<mxml::Element> getData(zmm::Ref<Dictionary> params);

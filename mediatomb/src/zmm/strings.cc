@@ -35,7 +35,7 @@
 
 #include "memory.h"
 #include "strings.h"
-
+#include "../../upnp/src/inc/strtoofft.h"
 using namespace zmm;
 
 StringBase::StringBase(int capacity) : Object()
@@ -314,6 +314,27 @@ double String::toDouble()
     // TODO: throw exception
     return res;
 }
+
+
+off_t String::toOFF_T()
+{
+    if(! base)
+        return 0;
+
+    char *endptr;
+#if SIZEOF_OFF_T > 4
+    off_t res = strtoll(base->data, &endptr, 10);
+    if(*endptr)
+        return 0;
+
+    return res;
+    // TODO: throw exceptoin
+#else
+    return toLong();
+#endif    
+     
+}
+
 
 String String::substring(int from)
 {

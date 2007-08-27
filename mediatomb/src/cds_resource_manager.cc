@@ -287,11 +287,24 @@ Ref<CdsResourceManager::UrlBase> CdsResourceManager::addResources_getUrlBase(Ref
         return urlBase;
     }
 
-    if (IS_CDS_ITEM_EXTERNAL_URL(objectType) && 
-            (!item->getFlag(OBJECT_FLAG_PROXY_URL)) && (!forceLocal))
+    if (IS_CDS_ITEM_EXTERNAL_URL(objectType))
     {
-        urlBase->urlBase = item->getLocation();
-        return urlBase;
+        if (!item->getFlag(OBJECT_FLAG_PROXY_URL) && (!forceLocal))
+        {
+            urlBase->urlBase = item->getLocation();
+            return urlBase;
+        }
+
+        if (item->getFlag(OBJECT_FLAG_ONLINE_SERVICE) && 
+                item->getFlag(OBJECT_FLAG_PROXY_URL))
+        {
+            urlBase->urlBase = Server::getInstance()->getVirtualURL() + _("/") +
+                CONTENT_ONLINE_HANDLER + _(_URL_PARAM_SEPARATOR) +
+                dict->encode() + _(_URL_ARG_SEPARATOR) +
+                _(URL_RESOURCE_ID) + _("=");
+            urlBase->addResID = true;
+            return urlBase;
+        }
     }
         
     urlBase->urlBase = Server::getInstance()->getVirtualURL() + _("/") +

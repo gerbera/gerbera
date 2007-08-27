@@ -236,7 +236,7 @@ void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj)
 #ifdef YOUTUBE
     if (clone->getFlag(OBJECT_FLAG_ONLINE_SERVICE))
     {
-        if (clone->getAuxData(_(ONLINE_SERVICE_ID)) == String::from(OS_YouTube))
+        if (clone->getAuxData(_(ONLINE_SERVICE_AUX_ID)) == String::from(OS_YouTube))
             addYouTube(clone);
     }
     else

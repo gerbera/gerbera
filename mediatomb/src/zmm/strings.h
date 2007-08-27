@@ -164,6 +164,7 @@ public:
     int rindex(int end, char ch);
 
     long toLong();
+    off_t toOFF_T();
     inline int toInt() { return (int)toLong(); }
     inline unsigned int toUInt() { return (unsigned int)toLong(); }
     double toDouble();

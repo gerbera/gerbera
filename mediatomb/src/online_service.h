@@ -40,6 +40,8 @@
 #include "mxml/mxml.h"
 #include "layout/layout.h"
 
+#define ONLINE_SERVICE_AUX_ID "ols"
+
 typedef enum service_type_t
 {
 #ifdef YOUTUBE

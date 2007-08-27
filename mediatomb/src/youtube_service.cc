@@ -157,7 +157,7 @@ using namespace mxml;
 
 YouTubeService::YouTubeService()
 {
-    url = Ref<GetURL>(new GetURL());
+    url = Ref<URL>(new URL());
     pid = 0;
     curl_handle = curl_easy_init();
     if (!curl_handle)
@@ -389,7 +389,7 @@ Ref<Element> YouTubeService::getData(Ref<Dictionary> params)
     try 
     {
         log_debug("DOWNLOADING URL: %s\n", URL.c_str());
-        buffer = url->download(curl_handle, URL, &retcode, false, true);
+        buffer = url->download(URL, &retcode, curl_handle, false, true);
     }
     catch (Exception ex)
     {

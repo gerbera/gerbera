@@ -90,7 +90,8 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
         // we know what we are adding
         Ref<CdsItemExternalURL> item(new CdsItemExternalURL());
         Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
-        resource->addParameter(_(ONLINE_SERVICE_ID), String::from(OS_YouTube));
+        resource->addParameter(_(ONLINE_SERVICE_AUX_ID), 
+                               String::from(OS_YouTube));
 
         temp = video->getChildText(_("id"));
         if (!string_ok(temp))
@@ -180,7 +181,7 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
             item->setAuxData(_(YOUTUBE_AUXDATA_RATING_COUNT), temp);
         }
 
-        item->setAuxData(_(ONLINE_SERVICE_ID), String::from(OS_YouTube));
+        item->setAuxData(_(ONLINE_SERVICE_AUX_ID), String::from(OS_YouTube));
 
         item->addResource(resource);
         item->setFlag(OBJECT_FLAG_PROXY_URL);
