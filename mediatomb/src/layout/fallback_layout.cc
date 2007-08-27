@@ -36,8 +36,16 @@
 #include "content_manager.h"
 #include "config_manager.h"
 #include "metadata_handler.h"
-#include "youtube_content_handler.h"
+#ifdef ONLINE_SERVICES
+
+#ifdef YOUTUBE
+    #include "youtube_content_handler.h"
+    #include "youtube_service.h"
+#endif
+
 #include "online_service.h"
+
+#endif
 
 using namespace zmm;
 
@@ -216,6 +224,40 @@ void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
     for (int i = 0; i < split_tags->size(); i++)
     {
         chain = _(YT_VPATH "/Tags/") + esc(split_tags->get(i));
+        id = ContentManager::getInstance()->addContainerChain(chain);
+        add(obj, id, false);
+    }
+
+    /// \todo clean this up! 
+    tags = obj->getAuxData(_("method"));
+    if (string_ok(tags))
+    {
+        methods_t m = (methods_t)tags.toInt();
+        switch (m)
+        {
+            case YT_list_favorite:
+                tags = _("Favorites");
+                break;
+            case YT_list_featured:
+                tags = _("Featured");
+                break;
+            case YT_list_popular:
+                tags = _("Popular");
+                break;
+            case YT_none:
+            case YT_list_by_tag:
+            case YT_list_by_user:
+            case YT_list_by_playlist:
+            case YT_list_by_category_and_tag:
+            default:
+                tags = nil;
+                break;
+        }
+    }
+
+    if (string_ok(tags))
+    {
+        chain = _(YT_VPATH) + '/' + tags;
         id = ContentManager::getInstance()->addContainerChain(chain);
         add(obj, id, false);
     }

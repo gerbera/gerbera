@@ -41,6 +41,19 @@
 #include "url.h"
 #include "dictionary.h"
 
+typedef enum 
+{
+    YT_none,
+    YT_list_favorite,
+    YT_list_by_tag,
+    YT_list_by_user,
+    YT_list_featured,
+    YT_list_by_playlist,
+    YT_list_popular,
+    YT_list_by_category_and_tag
+} methods_t;
+
+
 /// \brief This is an interface for all online services, the function
 /// handles adding/refreshing content in the database.
 class YouTubeService : public OnlineService
@@ -55,6 +68,8 @@ public:
     virtual zmm::String getServiceName();
     virtual zmm::Ref<zmm::Object> defineServiceTask(zmm::Ref<mxml::Element> xmlopt);
 
+    /// \brief Methods available in the REST API
+
 protected:
     // the handle *must never be used from multiple threads*
     CURL *curl_handle;
@@ -66,20 +81,6 @@ protected:
 
     /// \brief This function will retrieve the XML according to the parametrs
     zmm::Ref<mxml::Element> getData(zmm::Ref<Dictionary> params);
-
-    /// \brief Methods available in the REST API
-    enum methods_t
-    {
-        YT_none,
-        YT_list_favorite,
-        YT_list_by_tag,
-        YT_list_by_user,
-        YT_list_featured,
-        YT_list_by_playlist,
-        YT_list_popular,
-        YT_list_by_category_and_tag
-    };
-
 
     /// \brief This class defines the so called "YouTube task", the task
     /// holds various parameters that are needed to perform. A task means

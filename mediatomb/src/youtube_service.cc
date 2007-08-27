@@ -489,6 +489,7 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
         if (old == nil)
         {
             log_debug("Found new object!!!!\n");
+            obj->setAuxData(_(REST_PARAM_METHOD), String::from(task->method));
             if (layout != nil)
                 layout->processCdsObject(obj);
         }
