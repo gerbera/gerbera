@@ -292,7 +292,7 @@ protected:
    
     void dumpOptions();
 
-#ifdef YOUTUBE
+#ifdef ONLINE_SERVICES
     /// \brief This functions activates the YouTube class and retrieves
     /// lets it parse the options. 
     ///
