@@ -974,7 +974,7 @@ void ConfigManager::validate(String serverhome)
     SET_INT_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_REFRESH);
 
     temp = getOption(_("/online-content/YouTube/attribute::update-at-start"),
-                     _(""));
+                     _(DEFAULT_YOUTUBE_UPDATE_AT_START));
 
     if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: "
