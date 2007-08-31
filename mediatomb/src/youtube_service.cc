@@ -33,7 +33,7 @@
     #include "autoconfig.h"
 #endif
 
-#ifdef YOUTUBE // make sure to add more ifdefs when we get more services
+#ifdef YOUTUBE 
 
 #include "zmm/zmm.h"
 #include "youtube_service.h"

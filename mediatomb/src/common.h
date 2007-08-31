@@ -226,6 +226,7 @@
 #ifdef YOUTUBE
     #define YOUTUBE_PAGESIZE            106496
     #define DEFAULT_YOUTUBE_ENABLED     NO
+    #define DEFAULT_YOUTUBE_UPDATE_AT_START NO
 #endif
 #ifdef ONLINE_SERVICES
     #define CFG_DEFAULT_UPDATE_AT_START 10 // seconds
