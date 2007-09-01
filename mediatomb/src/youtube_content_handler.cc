@@ -41,11 +41,12 @@
 #include "tools.h"
 #include "metadata_handler.h"
 #include "cds_objects.h"
+#include "config_manager.h"
 
 using namespace zmm;
 using namespace mxml;
 
-void YouTubeContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
+bool YouTubeContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
 {
     String temp;
 
@@ -55,8 +56,7 @@ void YouTubeContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
     temp = service->getAttribute(_("status"));
 
     if (temp != "ok")
-        throw _Exception(_("Error - response status of YouTube XML is not ok: ")
-                + temp);
+        return false;
 
     Ref<Element> video_list = service->getChild(_("video_list"));
     if (video_list == nil)
@@ -66,6 +66,15 @@ void YouTubeContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
 
     video_list_child_count = service_xml->childCount();
     current_video_node_index = 0;
+/*
+    Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+
+    thumb_mimetype = mappings->get(_(CONTENT_TYPE_JPG));
+    if (!string_ok(thumb_mimetype))
+        thumb_mimetype = _("image/jpeg");
+*/
+
+    return true;
 }
 
 Ref<CdsObject> YouTubeContentHandler::getNextObject()
@@ -100,10 +109,7 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
             continue;
         }
         resource->addParameter(_(YOUTUBE_VIDEO_ID), temp);
-
-        // remove this
-//        temp = video->getChildText(_("url"));
-        /// \todo REMOVE THIS HACK!
+        /// \todo remove this
         item->setURL(temp);
 
         temp = video->getChildText(_("title"));
@@ -184,6 +190,22 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
         item->setAuxData(_(ONLINE_SERVICE_AUX_ID), String::from(OS_YouTube));
 
         item->addResource(resource);
+/*
+        temp = video->getChildText(_("thumbnail_url"));
+        if (string_ok(temp))
+        {
+            item->setURL(temp);
+            Ref<CdsResource> thumbnail(new CdsResource(CH_DEFAULT));
+            thumbnail->
+                addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
+                             renderProtocolInfo(thumb_mimetype));
+            thumbnail->
+                addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), 
+                                _("130x97"));
+           item->addResource(thumbnail);
+ 
+        }
+*/
         item->setFlag(OBJECT_FLAG_PROXY_URL);
         item->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
         try

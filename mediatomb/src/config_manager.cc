@@ -1315,7 +1315,6 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
     Ref<Element> mappings = element->getChild(_("mappings"));
     if (mappings == nil)
     {
-        printf("here\n");
         if (list->size() > 0)
             throw _Exception(_("error in configuration: transcoding profiles exist, but no mimetype to profile mappings specified"));
         else
@@ -1328,7 +1327,6 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
 
     if (mt_mappings->size() == 0)
     {
-        printf("or here?\n");
        if (list->size() > 0)
             throw _Exception(_("error in configuration: transcoding profiles exist, but no mimetype to profile mappings specified"));
         else

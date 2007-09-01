@@ -99,11 +99,22 @@ protected:
         
         /// \brief Amount of items that we are allowed to get.
         int amount;
+
+        /// \brief Amount of items that have been fetched.
+        int amount_fetched;
+
+        /// \brief Current page for requests that require paging
+        int current_page;
+
+
     };
 
     /// \brief task that we will be working with when refreshServiceData is
     /// called.
     int current_task;
+
+    /// \brief utility function, returns true if method supports paging
+    bool hasPaging(methods_t method);
 
     // helper functions for parsing config.xml
     zmm::String getCheckAttr(zmm::Ref<mxml::Element> xml, zmm::String attrname);

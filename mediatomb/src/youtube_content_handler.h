@@ -35,8 +35,6 @@
 #ifndef __YOUTUBE_DATA_HANDLER_H__
 #define __YOUTUBE_DATA_HANDLER_H__
 
-#include "online_service_content_handler.h"
-
 #define YOUTUBE_SERVICE     "YouTube"
 #define YOUTUBE_SERVICE_ID   "yt"
 #define YOUTUBE_VIDEO_ID    "vid"
@@ -51,16 +49,16 @@
 
 #include "zmmf/zmmf.h"
 #include "mxml/mxml.h"
+#include "cds_objects.h"
 
-/// \brief this class is an interface for parsing content data of various 
-/// online services.
-class YouTubeContentHandler : public OnlineServiceContentHandler
+/// \brief this class is responsible for creating objects from the YouTube
+/// metadata XML.
+class YouTubeContentHandler : public zmm::Object
 {
 public:
     /// \brief Sets the service XML from which we will extract the objects.
-    ///
-    /// \todo specify rules of what to extarct (i.e. only a specific genre,etc)
-    virtual void setServiceContent(zmm::Ref<mxml::Element> service);
+    /// \return false if service XML contained an error status.
+    bool setServiceContent(zmm::Ref<mxml::Element> service);
 
     /// \brief retrieves an object from the service.
     ///
@@ -69,12 +67,14 @@ public:
     /// this function will return nil.
     ///
     /// \return CdsObject or nil if there are no more objects to parse.
-    virtual zmm::Ref<CdsObject> getNextObject();
+    zmm::Ref<CdsObject> getNextObject();
 
 
 protected:
+    zmm::Ref<mxml::Element> service_xml;
     int current_video_node_index;
     int video_list_child_count;
+    zmm::String thumb_mimetype;
 };
 
 #endif//__YOUTUBE_CONTENT_HANDLER_H__

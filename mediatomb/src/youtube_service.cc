@@ -112,6 +112,10 @@ using namespace mxml;
                                                 // work
 #define REST_VALUE_PER_PAGE_MAX             "100"
 
+#define AMOUNT_ALL                          (-333)
+#define PER_PAGE_MIN                        1
+#define PER_PAGE_MAX                        100
+
 // REST API error codes
 #define REST_ERROR_INTERNAL                 "1"
 #define REST_ERROR_BAD_XMLRPC               "2"
@@ -123,7 +127,6 @@ using namespace mxml;
 #define REST_ERROR_BAD_DEV_ID               "8"
 #define REST_ERROR_NO_SUCH_USER             "101"
 
-#define AMOUNT_ALL                          (-333)
 
 // config.xml defines
 #define CFG_CAT_STRING_FILMS_AND_ANIM       "films_and_animation"
@@ -178,6 +181,8 @@ YouTubeService::YouTubeTask::YouTubeTask()
     parameters->put(_(REST_PARAM_DEV_ID), _(MT_DEV_ID));
     method = YT_none;
     amount = 0;
+    amount_fetched = 0;
+    current_page = 0;
 }
 
 
@@ -227,7 +232,11 @@ void YouTubeService::addPagingParams(Ref<Element> xml, Ref<YouTubeTask> task)
     int itmp;
     temp = getCheckAttr(xml, _(CFG_OPTION_AMOUNT));
     if (temp == "all")
+    {
         task->amount = AMOUNT_ALL;
+        task->parameters->put(_(REST_PARAM_ITEMS_PER_PAGE),
+                                    _(REST_VALUE_PER_PAGE_MAX));
+    }
     else
     {
         itmp = getCheckPosIntAttr(xml, _(CFG_OPTION_AMOUNT));
@@ -266,6 +275,9 @@ Ref<Object> YouTubeService::defineServiceTask(Ref<Element> xmlopt)
     else if (temp == CFG_METHOD_CATEGORY_AND_TAG)
         task->method = YT_list_by_category_and_tag;
     else throw _Exception(_("Unsupported tag specified: ") + temp);
+
+    if (!hasPaging(task->method))
+        task->amount = AMOUNT_ALL;
 
     switch (task->method)
     {
@@ -427,6 +439,26 @@ Ref<Element> YouTubeService::getData(Ref<Dictionary> params)
     return nil;
 }
 
+bool YouTubeService::hasPaging(methods_t method)
+{
+    switch (method)
+    {
+        case YT_list_by_tag:
+        case YT_list_by_user:
+        case YT_list_by_playlist:
+        case YT_list_by_category_and_tag:
+            return true;
+
+        case YT_list_popular:
+        case YT_list_featured:
+        case YT_none:
+        case YT_list_favorite:
+        default:
+            return false;
+    }
+    return false;
+}
+
 // obviously the config.xml should provide a way to define what we want,
 // for testing purposes we will stat by importing the featured videos
 bool YouTubeService::refreshServiceData(Ref<Layout> layout)
@@ -451,21 +483,48 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
     if (tasklist->size() == 0)
         throw _Exception(_("Not specified what content to fetch!"));
 
-    printf("--------------> TASK LIST SIZE: %d\n", tasklist->size());
-    printf("CURRENT TASK: %d\n", current_task);
     Ref<YouTubeTask> task = RefCast(tasklist->get(current_task), YouTubeTask);
     if (task == nil)
         throw _Exception(_("Encountered invalid task!"));
 
+
+    if (hasPaging(task->method) && 
+       ((task->amount == AMOUNT_ALL) || (task->amount > PER_PAGE_MAX)))
+    {
+        task->current_page++;
+        task->parameters->put(_(REST_PARAM_PAGE_NUMBER),
+                              String::from(task->current_page));
+    }
+
     Ref<Element> reply = getData(task->parameters);
 
     Ref<YouTubeContentHandler> yt(new YouTubeContentHandler());
+    bool b = false;
     if (reply != nil)
-        yt->setServiceContent(reply);
+        b = yt->setServiceContent(reply);
     else
     {
         log_debug("Failed to get XML content from YouTube service\n");
         throw _Exception(_("Failed to get XML content from YouTube service"));
+    }
+
+    // no more items to fetch, reset paging and skip to next task
+    if (!b)
+    {
+        log_debug("End of pages\n");
+        if (hasPaging(task->method))
+        {
+            task->current_page = 0;
+            task->amount_fetched = 0;
+        }
+        current_task++;
+        if (current_task >= tasklist->size())
+        {
+            current_task = 0;
+            return false;
+        }
+   
+        return true;
     }
 
     /// \todo make sure the CdsResourceManager knows whats going on,
@@ -480,7 +539,7 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
         if (obj == nil)
             break;
 
-        obj->setVirtual(true);
+       obj->setVirtual(true);
         /// \todo we need a function that would do a lookup on the special
         /// service ID and tell is uf a particular object already exists
         /// in the database
@@ -498,14 +557,37 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
             log_debug("NEED TO UPDATE EXISTING OBJECT WITH ID: %s\n",
                     obj->getLocation().c_str());
         }
+
+        if (task->amount != AMOUNT_ALL)
+        {
+            task->amount_fetched++;
+            // max amount reached, reset paging and break to next task
+            if (task->amount_fetched >= task->amount)
+            {
+                task->amount_fetched = 0;
+                if (hasPaging(task->method))
+                {
+                    task->current_page = 0;
+                }
+                current_task++;
+                if (current_task >= tasklist->size())
+                {
+                    current_task = 0;
+                    return false;
+                }
+            }
+        }
     }
     while (obj != nil);
 
-    current_task++;
-    if (current_task >= tasklist->size())
+    if (!hasPaging(task->method))
     {
-        current_task = 0;
-        return false;
+        current_task++;
+        if (current_task >= tasklist->size())
+        {
+            current_task = 0;
+            return false;
+        }
     }
 
     return true;
