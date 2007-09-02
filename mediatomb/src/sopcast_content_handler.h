@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    youtube_content_handler.h - this file is part of MediaTomb.
+    sopcast_content_handler.h - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -27,35 +27,31 @@
     $Id$
 */
 
-/// \file youtube_content_handler.h
-/// \brief Definitions of the YouTubeContentHandler class.
+/// \file sopcast_content_handler.h
+/// \brief Definitions of the SopCastContentHandler class.
 
-#ifdef YOUTUBE
+#ifdef SOPCAST
 
-#ifndef __YOUTUBE_DATA_HANDLER_H__
-#define __YOUTUBE_DATA_HANDLER_H__
+#ifndef __SOPCAST_CONTENT_HANDLER_H__
+#define __SOPCAST_CONTENT_HANDLER_H__
 
-#define YOUTUBE_SERVICE                 "YouTube"
-#define YOUTUBE_SERVICE_ID              "yt"
-#define YOUTUBE_VIDEO_ID                "vid"
+#define SOPCAST_SERVICE                 "SopCast"
+#define SOPCAST_SERVICE_ID              "sc"
+#define SOPCAST_CHANNEL_ID              "cid"
 
-#define YOUTUBE_AUXDATA_TAGS            "tags"
-#define YOUTUBE_AUXDATA_AVG_RATING      "rating"
-#define YOUTUBE_AUXDATA_AUTHOR          "author"
-#define YOUTUBE_AUXDATA_COMMENT_COUNT   "ccount"
-#define YOUTUBE_AUXDATA_VIEW_COUNT      "vcount"
-#define YOUTUBE_AUXDATA_RATING_COUNT    "rcount"
-#define YOUTUBE_AUXDATA_REQUEST         "req"
-#define YOUTUBE_AUXDATA_CATEGORY        "cat"
-
+#define SOPCAST_AUXDATA_REGION          "reg"
+#define SOPCAST_AUXDATA_CHANNEL_NAME    "chn"
+#define SOPCAST_AUXDATA_LANGUAGE        "lng"
+#define SOPCAST_AUXDATA_KBPS            "kbps"
+#define SOPCAST_AUXDATA_GROUP           "grp"
 
 #include "zmmf/zmmf.h"
 #include "mxml/mxml.h"
 #include "cds_objects.h"
 
-/// \brief this class is responsible for creating objects from the YouTube
+/// \brief this class is responsible for creating objects from the SopCast
 /// metadata XML.
-class YouTubeContentHandler : public zmm::Object
+class SopCastContentHandler : public zmm::Object
 {
 public:
     /// \brief Sets the service XML from which we will extract the objects.
@@ -74,11 +70,11 @@ public:
 
 protected:
     zmm::Ref<mxml::Element> service_xml;
-    int current_video_node_index;
-    int video_list_child_count;
-    zmm::String thumb_mimetype;
+    int current_group_node_index;
+    int group_count;
+    int current_channel_count;
 };
 
-#endif//__YOUTUBE_CONTENT_HANDLER_H__
+#endif//__SOPCAST_CONTENT_HANDLER_H__
 
-#endif//YOUTUBE
+#endif//SOPCAST

@@ -251,26 +251,6 @@ String YouTubeService::getRequestName(yt_methods_t method)
     return temp;
 }
 
-#define CAT_NAME_FILM_AND_ANIM              "Film & Animation"
-#define CAT_NAME_AUTOS_AND_VEHICLES         "Autos & Vehicles"
-#define CAT_NAME_COMEDY                     "Comedy"
-#define CAT_NAME_ENTERTAINMENT              "Entertainment"
-#define CAT_NAME_MUSIC                      "Music"
-#define CAT_NAME_NEWS_AND_POLITICS          "News & Politics"
-#define CAT_NAME_PEOPLE_AND_BLOGS           "People & Blogs"
-#define CAT_NAME_PETS_AND_ANIMALS           "Pets & Animals"
-#define CAT_NAME_HOWTO_AND_DIY              "Howto & DIY" 
-#define CAT_NAME_SPORTS                     "Sports"
-#define CAT_NAME_TRAVEL_AND_PLACES          "Travel & Places"
-#define CAT_NAME_GADGETS_AND_GAMES          "Gadgets & Games"
-
-#define REQ_NAME_FAVORITES                  "Favorites"
-#define REQ_NAME_FEATURED                   "Featured"
-#define REQ_NAME_POPULAR                    "Popular"
-#define REQ_NAME_PLAYLIST                   "Playlists"
-#define REQ_NAME_CATEGORY_AND_TAG           "Categories"
-
-
 String YouTubeService::getCategoryName(yt_categories_t category)
 {
     String temp;
@@ -622,11 +602,9 @@ bool YouTubeService::hasPaging(yt_methods_t method)
     return false;
 }
 
-// obviously the config.xml should provide a way to define what we want,
-// for testing purposes we will stat by importing the featured videos
 bool YouTubeService::refreshServiceData(Ref<Layout> layout)
 {
-    log_debug("------------------------>> REFRESHING SERVICE << ----------\n");
+    log_debug("Refreshing YouTube service\n");
     // the layout is in full control of the service items
     
     // this is a safeguard to ensure that this class is not called from

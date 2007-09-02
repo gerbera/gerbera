@@ -119,6 +119,10 @@ libmediatomb_a_SOURCES = \
 ../src/session_manager.h \
 ../src/singleton.cc \
 ../src/singleton.h \
+../src/sopcast_content_handler.cc \
+../src/sopcast_content_handler.h \
+../src/sopcast_service.cc \
+../src/sopcast_service.h \
 ../src/storage.cc \
 ../src/storage.h \
 ../src/storage/mysql/mysql_create_sql.h \
