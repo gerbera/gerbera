@@ -43,7 +43,7 @@
 
 typedef enum 
 {
-    YT_none,
+    YT_list_none,
     YT_list_favorite,
     YT_list_by_tag,
     YT_list_by_user,
@@ -51,8 +51,24 @@ typedef enum
     YT_list_by_playlist,
     YT_list_popular,
     YT_list_by_category_and_tag
-} methods_t;
+} yt_methods_t;
 
+typedef enum
+{
+    YT_cat_none                     = 0,
+    YT_cat_film_and_animation       = 1,
+    YT_cat_autos_and_vehicles       = 2,
+    YT_cat_music                    = 10,
+    YT_cat_pets_and_animals         = 15,
+    YT_cat_sports                   = 17,
+    YT_cat_travel_and_places        = 19,
+    YT_cat_gadgets_and_games        = 20,
+    YT_cat_people_and_blogs         = 22,
+    YT_cat_comedy                   = 23,
+    YT_cat_entertainment            = 24,
+    YT_cat_news_and_politics        = 25,
+    YT_cat_howto_and_diy            = 26
+} yt_categories_t;
 
 /// \brief This is an interface for all online services, the function
 /// handles adding/refreshing content in the database.
@@ -64,11 +80,23 @@ public:
     /// \brief Retrieves user specified content from the service and adds
     /// the items to the database.
     virtual bool refreshServiceData(zmm::Ref<Layout> layout);
+
+    /// \brief Get the type of the service (i.e. YouTube, Shoutcast, etc.)
     virtual service_type_t getServiceType();
+
+    /// \brief Get the human readable name for the service
     virtual zmm::String getServiceName();
+
+    /// \brief Parse the xml fragment from the configuration and gather
+    /// the user settings in a service task structure.
     virtual zmm::Ref<zmm::Object> defineServiceTask(zmm::Ref<mxml::Element> xmlopt);
 
-    /// \brief Methods available in the REST API
+    /// \brief Get the human readable name of a particular request type, i.e.
+    /// did we request Favorites or Featured videos, etc.
+    static zmm::String getRequestName(yt_methods_t method);
+
+    /// \brief Get the human readable category name
+    static zmm::String getCategoryName(yt_categories_t category);
 
 protected:
     // the handle *must never be used from multiple threads*
@@ -92,7 +120,11 @@ protected:
         YouTubeTask();
 
         /// \brief Method identifier
-        methods_t method;
+        yt_methods_t method;
+
+        /// \brief Category identifier, only used with the
+        /// YT_list_by_category_and_tag method
+        yt_categories_t category;
         
         /// \brief parameter=value for the REST API URL
         zmm::Ref<Dictionary> parameters;
@@ -114,7 +146,7 @@ protected:
     int current_task;
 
     /// \brief utility function, returns true if method supports paging
-    bool hasPaging(methods_t method);
+    bool hasPaging(yt_methods_t method);
 
     // helper functions for parsing config.xml
     zmm::String getCheckAttr(zmm::Ref<mxml::Element> xml, zmm::String attrname);

@@ -65,6 +65,9 @@ bool YouTubeContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
     this->service_xml = video_list;
 
     video_list_child_count = service_xml->childCount();
+    if (video_list_child_count == 0)
+        return false;
+
     current_video_node_index = 0;
 /*
     Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);

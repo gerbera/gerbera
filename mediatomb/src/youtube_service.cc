@@ -41,6 +41,7 @@
 #include "content_manager.h"
 #include "string_converter.h"
 #include "config_manager.h"
+#include "server.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -93,7 +94,9 @@ using namespace mxml;
 #define REST_VALUE_TIME_RANGE_MONTH         "month"
 
 // REST API available categories
-#define REST_VALUE_CAT_FILMS_AND_ANIMATION  "1"
+// categories are now handled in the enum
+/*
+#define REST_VALUE_CAT_FILM_AND_ANIMATION   "1"
 #define REST_VALUE_CAT_AUTOS_AND_VEHICLES   "2"
 #define REST_VALUE_CAT_COMEDY               "23"
 #define REST_VALUE_CAT_ENTERTAINMENT        "24"
@@ -105,6 +108,7 @@ using namespace mxml;
 #define REST_VALUE_CAT_SPORTS               "17"
 #define REST_VALUE_CAT_TRAVEL_AND_PLACES    "19"
 #define REST_VALUE_CAT_GADGETS_AND_GAMES    "20"
+*/
 
 // REST API min/max items per page values
 #define REST_VALUE_PER_PAGE_MIN             "1" // allthouth the spec says 20,
@@ -127,9 +131,27 @@ using namespace mxml;
 #define REST_ERROR_BAD_DEV_ID               "8"
 #define REST_ERROR_NO_SUCH_USER             "101"
 
+#define CAT_NAME_FILM_AND_ANIM              "Film & Animation"
+#define CAT_NAME_AUTOS_AND_VEHICLES         "Autos & Vehicles"
+#define CAT_NAME_COMEDY                     "Comedy"
+#define CAT_NAME_ENTERTAINMENT              "Entertainment"
+#define CAT_NAME_MUSIC                      "Music"
+#define CAT_NAME_NEWS_AND_POLITICS          "News & Politics"
+#define CAT_NAME_PEOPLE_AND_BLOGS           "People & Blogs"
+#define CAT_NAME_PETS_AND_ANIMALS           "Pets & Animals"
+#define CAT_NAME_HOWTO_AND_DIY              "Howto & DIY" 
+#define CAT_NAME_SPORTS                     "Sports"
+#define CAT_NAME_TRAVEL_AND_PLACES          "Travel & Places"
+#define CAT_NAME_GADGETS_AND_GAMES          "Gadgets & Games"
+
+#define REQ_NAME_FAVORITES                  "Favorites"
+#define REQ_NAME_FEATURED                   "Featured"
+#define REQ_NAME_POPULAR                    "Popular"
+#define REQ_NAME_PLAYLIST                   "Playlists"
+#define REQ_NAME_CATEGORY_AND_TAG           "Categories"
 
 // config.xml defines
-#define CFG_CAT_STRING_FILMS_AND_ANIM       "films_and_animation"
+#define CFG_CAT_STRING_FILM_AND_ANIM       "films_and_animation"
 #define CFG_CAT_STRING_AUTOS_AND_VEHICLES   "autos_and_vehicles"
 #define CFG_CAT_STRING_COMEDY               "comedy"
 #define CFG_CAT_STRING_ENTERTAINMENT        "entertainment"
@@ -179,7 +201,8 @@ YouTubeService::YouTubeTask::YouTubeTask()
 {
     parameters = zmm::Ref<Dictionary>(new Dictionary());
     parameters->put(_(REST_PARAM_DEV_ID), _(MT_DEV_ID));
-    method = YT_none;
+    method = YT_list_none;
+    category = YT_cat_none;
     amount = 0;
     amount_fetched = 0;
     current_page = 0;
@@ -195,6 +218,110 @@ String YouTubeService::getServiceName()
 {
     return _("YouTube");
 }
+
+String YouTubeService::getRequestName(yt_methods_t method)
+{
+    String temp;
+
+    switch (method)
+    {
+        case YT_list_favorite:
+            temp = _(REQ_NAME_FAVORITES);
+            break;
+        case YT_list_featured:
+            temp = _(REQ_NAME_FEATURED);
+            break;
+        case YT_list_popular:
+            temp = _(REQ_NAME_POPULAR);
+            break;
+        case YT_list_by_playlist:
+            temp = _(REQ_NAME_PLAYLIST);
+            break;
+        case YT_list_by_category_and_tag:
+            temp = _(REQ_NAME_CATEGORY_AND_TAG);
+            break;
+        case YT_list_none:
+        case YT_list_by_tag:
+        case YT_list_by_user:
+        default:
+            temp = nil;
+            break;
+    }
+
+    return temp;
+}
+
+#define CAT_NAME_FILM_AND_ANIM              "Film & Animation"
+#define CAT_NAME_AUTOS_AND_VEHICLES         "Autos & Vehicles"
+#define CAT_NAME_COMEDY                     "Comedy"
+#define CAT_NAME_ENTERTAINMENT              "Entertainment"
+#define CAT_NAME_MUSIC                      "Music"
+#define CAT_NAME_NEWS_AND_POLITICS          "News & Politics"
+#define CAT_NAME_PEOPLE_AND_BLOGS           "People & Blogs"
+#define CAT_NAME_PETS_AND_ANIMALS           "Pets & Animals"
+#define CAT_NAME_HOWTO_AND_DIY              "Howto & DIY" 
+#define CAT_NAME_SPORTS                     "Sports"
+#define CAT_NAME_TRAVEL_AND_PLACES          "Travel & Places"
+#define CAT_NAME_GADGETS_AND_GAMES          "Gadgets & Games"
+
+#define REQ_NAME_FAVORITES                  "Favorites"
+#define REQ_NAME_FEATURED                   "Featured"
+#define REQ_NAME_POPULAR                    "Popular"
+#define REQ_NAME_PLAYLIST                   "Playlists"
+#define REQ_NAME_CATEGORY_AND_TAG           "Categories"
+
+
+String YouTubeService::getCategoryName(yt_categories_t category)
+{
+    String temp;
+
+    switch (category)
+    {
+        case YT_cat_film_and_animation:
+            temp = _(CAT_NAME_FILM_AND_ANIM);
+            break;
+        case YT_cat_autos_and_vehicles:
+            temp = _(CAT_NAME_AUTOS_AND_VEHICLES);
+            break;
+        case YT_cat_music:
+            temp = _(CAT_NAME_MUSIC);
+            break;
+        case YT_cat_pets_and_animals:
+            temp = _(CAT_NAME_PETS_AND_ANIMALS);
+            break;
+        case YT_cat_sports:
+            temp = _(CAT_NAME_SPORTS);
+            break;
+        case YT_cat_travel_and_places:
+            temp = _(CAT_NAME_TRAVEL_AND_PLACES);
+            break;
+        case YT_cat_gadgets_and_games:
+            temp = _(CAT_NAME_GADGETS_AND_GAMES);
+            break;
+        case YT_cat_people_and_blogs:
+            temp = _(CAT_NAME_PEOPLE_AND_BLOGS);
+            break;
+        case YT_cat_comedy:
+            temp = _(CAT_NAME_COMEDY);
+            break;
+        case YT_cat_entertainment:
+            temp = _(CAT_NAME_ENTERTAINMENT);
+            break;
+        case YT_cat_news_and_politics:
+            temp = _(CAT_NAME_NEWS_AND_POLITICS);
+            break;
+        case YT_cat_howto_and_diy:
+            temp = _(CAT_NAME_HOWTO_AND_DIY);
+            break;
+        case YT_cat_none:
+        default:
+            temp = nil;
+            break;
+    }
+
+    return temp;
+}
+
 
 String YouTubeService::getCheckAttr(Ref<Element> xml, String attrname)
 {
@@ -345,30 +472,66 @@ Ref<Object> YouTubeService::defineServiceTask(Ref<Element> xmlopt)
                                   getCheckAttr(xmlopt, _(CFG_OPTION_TAG)));
            
             temp = getCheckAttr(xmlopt, _(CFG_OPTION_CATEGORY));
-            if (temp == CFG_CAT_STRING_FILMS_AND_ANIM)
-                temp = _(REST_VALUE_CAT_FILMS_AND_ANIMATION);
+            if (temp == CFG_CAT_STRING_FILM_AND_ANIM)
+            {
+                task->category = YT_cat_film_and_animation;
+                temp = String::from(YT_cat_film_and_animation);
+            }
             else if (temp == CFG_CAT_STRING_AUTOS_AND_VEHICLES)
-                temp = _(REST_VALUE_CAT_AUTOS_AND_VEHICLES);
+            {
+                task->category = YT_cat_autos_and_vehicles;
+                temp = String::from(YT_cat_autos_and_vehicles);
+            }
             else if (temp == CFG_CAT_STRING_COMEDY)
-                temp = _(REST_VALUE_CAT_COMEDY);
+            {
+                task->category = YT_cat_comedy;
+                temp = String::from(YT_cat_comedy);
+            }
             else if (temp == CFG_CAT_STRING_ENTERTAINMENT)
-                temp = _(REST_VALUE_CAT_ENTERTAINMENT);
+            {
+                task->category = YT_cat_entertainment;
+                temp = String::from(YT_cat_entertainment);
+            }
             else if (temp == CFG_CAT_STRING_MUSIC)
-                temp = _(REST_VALUE_CAT_MUSIC);
+            {
+                task->category = YT_cat_music;
+                temp = String::from(YT_cat_music);
+            }
             else if (temp == CFG_CAT_STRING_NEWS_AND_POLITICS)
-                temp = _(REST_VALUE_CAT_NEWS_AND_POLITICS);
+            {
+                task->category = YT_cat_news_and_politics;
+                temp = String::from(YT_cat_news_and_politics);
+            }
             else if (temp == CFG_CAT_STRING_PEOPLE_AND_BLOGS)
-                temp = _(REST_VALUE_CAT_PEOPLE_AND_BLOGS);
+            {
+                task->category = YT_cat_people_and_blogs;
+                temp = String::from(YT_cat_people_and_blogs);
+            }
             else if (temp == CFG_CAT_STRING_PETS_AND_ANIMALS)
-                temp = _(REST_VALUE_CAT_PETS_AND_ANIMALS);
+            {
+                task->category = YT_cat_pets_and_animals;
+                temp = String::from(YT_cat_pets_and_animals);
+            }
             else if (temp == CFG_CAT_STRING_HOWTO_AND_DIY)
-                temp = _(REST_VALUE_CAT_HOWTO_AND_DIY);
+            {
+                task->category = YT_cat_howto_and_diy;
+                temp = String::from(YT_cat_howto_and_diy);
+            }
             else if (temp == CFG_CAT_STRING_SPORTS)
-                temp = _(REST_VALUE_CAT_SPORTS);
+            {
+                task->category = YT_cat_sports;
+                temp = String::from(YT_cat_sports);
+            }
             else if (temp == CFG_CAT_STRING_TRAVEL_AND_PLACES)
-                temp = _(REST_VALUE_CAT_TRAVEL_AND_PLACES);
+            {
+                task->category = YT_cat_travel_and_places;
+                temp = String::from(YT_cat_travel_and_places);
+            }
             else if (temp == CFG_CAT_STRING_GADGETS_AND_GAMES)
-                temp = _(REST_VALUE_CAT_GADGETS_AND_GAMES);
+            {
+                task->category = YT_cat_gadgets_and_games;
+                temp = String::from(YT_cat_gadgets_and_games);
+            }
             else
             {
                 throw _Exception(_("Invalid category specified for <") +
@@ -379,7 +542,7 @@ Ref<Object> YouTubeService::defineServiceTask(Ref<Element> xmlopt)
             addPagingParams(xmlopt, task);
             break;
 
-        case YT_none:
+        case YT_list_none:
         default:
             throw _Exception(_("Unsupported tag!"));
             break;
@@ -439,7 +602,7 @@ Ref<Element> YouTubeService::getData(Ref<Dictionary> params)
     return nil;
 }
 
-bool YouTubeService::hasPaging(methods_t method)
+bool YouTubeService::hasPaging(yt_methods_t method)
 {
     switch (method)
     {
@@ -451,7 +614,7 @@ bool YouTubeService::hasPaging(methods_t method)
 
         case YT_list_popular:
         case YT_list_featured:
-        case YT_none:
+        case YT_list_none:
         case YT_list_favorite:
         default:
             return false;
@@ -548,7 +711,15 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
         if (old == nil)
         {
             log_debug("Found new object!!!!\n");
-            obj->setAuxData(_(REST_PARAM_METHOD), String::from(task->method));
+            obj->setAuxData(_(YOUTUBE_AUXDATA_REQUEST), 
+                            String::from(task->method));
+
+            if (task->method == YT_list_by_category_and_tag)
+            {
+                obj->setAuxData(_(YOUTUBE_AUXDATA_CATEGORY),
+                        String::from(task->category));
+            }
+            
             if (layout != nil)
                 layout->processCdsObject(obj);
         }
@@ -577,6 +748,10 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
                 }
             }
         }
+
+        if (Server::getInstance()->getShutdownStatus())
+            return false;
+
     }
     while (obj != nil);
 

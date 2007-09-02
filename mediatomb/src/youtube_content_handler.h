@@ -35,9 +35,9 @@
 #ifndef __YOUTUBE_DATA_HANDLER_H__
 #define __YOUTUBE_DATA_HANDLER_H__
 
-#define YOUTUBE_SERVICE     "YouTube"
-#define YOUTUBE_SERVICE_ID   "yt"
-#define YOUTUBE_VIDEO_ID    "vid"
+#define YOUTUBE_SERVICE                 "YouTube"
+#define YOUTUBE_SERVICE_ID              "yt"
+#define YOUTUBE_VIDEO_ID                "vid"
 
 #define YOUTUBE_AUXDATA_TAGS            "tags"
 #define YOUTUBE_AUXDATA_AVG_RATING      "rating"
@@ -45,6 +45,8 @@
 #define YOUTUBE_AUXDATA_COMMENT_COUNT   "ccount"
 #define YOUTUBE_AUXDATA_VIEW_COUNT      "vcount"
 #define YOUTUBE_AUXDATA_RATING_COUNT    "rcount"
+#define YOUTUBE_AUXDATA_REQUEST         "req"
+#define YOUTUBE_AUXDATA_CATEGORY        "cat"
 
 
 #include "zmmf/zmmf.h"

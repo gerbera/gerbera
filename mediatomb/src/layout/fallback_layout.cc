@@ -204,62 +204,67 @@ void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
 #ifdef YOUTUBE
 void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
 {
-    String chain;
-    String tags;
-
-    int id;
     #define YT_VPATH "/Online Services/YouTube"
-    chain = _(YT_VPATH "/Author/") + 
-            esc(obj->getAuxData(_(YOUTUBE_AUXDATA_AUTHOR)));
-    id = ContentManager::getInstance()->addContainerChain(chain);
-    add(obj, id, false);
+    String chain;
+    String temp;
+    int id;
 
-    chain = _(YT_VPATH "/Rating/") + 
-            esc(obj->getAuxData(_(YOUTUBE_AUXDATA_AVG_RATING)));
-    id = ContentManager::getInstance()->addContainerChain(chain);
-    add(obj, id, false);
-
-    tags = obj->getAuxData(_(YOUTUBE_AUXDATA_TAGS));
-    Ref<Array<StringBase> > split_tags = split_string(tags, ' ');
-    for (int i = 0; i < split_tags->size(); i++)
+    temp = obj->getAuxData(_(YOUTUBE_AUXDATA_AUTHOR));
+    if (string_ok(temp))
     {
-        chain = _(YT_VPATH "/Tags/") + esc(split_tags->get(i));
+        chain = _(YT_VPATH "/Author/") + 
+            esc(temp);
         id = ContentManager::getInstance()->addContainerChain(chain);
         add(obj, id, false);
     }
 
-    /// \todo clean this up! 
-    tags = obj->getAuxData(_("method"));
-    if (string_ok(tags))
+
+    temp = obj->getAuxData(_(YOUTUBE_AUXDATA_AVG_RATING));
+    if (string_ok(temp))
     {
-        methods_t m = (methods_t)tags.toInt();
-        switch (m)
+        chain = _(YT_VPATH "/Rating/") + 
+            esc(String::from((int)temp.toDouble()));
+        id = ContentManager::getInstance()->addContainerChain(chain);
+        add(obj, id, false);
+    }
+
+    temp = obj->getAuxData(_(YOUTUBE_AUXDATA_TAGS));
+    if (string_ok(temp))
+    {
+        Ref<Array<StringBase> > split_temp = split_string(temp, ' ');
+        for (int i = 0; i < split_temp->size(); i++)
         {
-            case YT_list_favorite:
-                tags = _("Favorites");
-                break;
-            case YT_list_featured:
-                tags = _("Featured");
-                break;
-            case YT_list_popular:
-                tags = _("Popular");
-                break;
-            case YT_none:
-            case YT_list_by_tag:
-            case YT_list_by_user:
-            case YT_list_by_playlist:
-            case YT_list_by_category_and_tag:
-            default:
-                tags = nil;
-                break;
+            chain = _(YT_VPATH "/Tags/") + esc(split_temp->get(i));
+            id = ContentManager::getInstance()->addContainerChain(chain);
+            add(obj, id, false);
         }
     }
 
-    if (string_ok(tags))
+    temp = obj->getAuxData(_(YOUTUBE_AUXDATA_REQUEST));
+    if (string_ok(temp))
     {
-        chain = _(YT_VPATH) + '/' + tags;
-        id = ContentManager::getInstance()->addContainerChain(chain);
-        add(obj, id, false);
+        yt_methods_t m = (yt_methods_t)temp.toInt();
+        temp = YouTubeService::getRequestName(m);
+        if (string_ok(temp))
+        {
+            temp = esc(temp);
+            if (m == YT_list_by_category_and_tag)
+            {
+                 String ctmp = obj->getAuxData(_(YOUTUBE_AUXDATA_CATEGORY));
+                 if (string_ok(ctmp))
+                 {
+                     yt_categories_t c = (yt_categories_t)ctmp.toInt();
+                     ctmp = YouTubeService::getCategoryName(c);
+                     if (string_ok(ctmp))
+                     {
+                         temp = temp + '/' + esc(ctmp);
+                     }
+                 }
+            }
+            chain = _(YT_VPATH) + '/' + temp;
+            id = ContentManager::getInstance()->addContainerChain(chain);
+            add(obj, id, false);
+        }
     }
 }
 #endif
