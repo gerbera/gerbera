@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    transcode_process_io_handler.cc - this file is part of MediaTomb.
+    process_io_handler.cc - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -27,7 +27,7 @@
     $Id$
 */
 
-/// \file transcode_process_io_handler.cc
+/// \file process_io_handler.cc
 
 #ifdef HAVE_CONFIG_H
     #include "autoconfig.h"
@@ -41,34 +41,34 @@
 #include <signal.h>
 #include <unistd.h>
 #include "common.h"
-#include "transcode_process_io_handler.h"
+#include "process_io_handler.h"
 #include "process.h"
 #include "content_manager.h"
 
 using namespace zmm;
 
-TranscodeProcessIOHandler::TranscodeProcessIOHandler(String filename, pid_t kill_pid) : IOHandler()
+ProcessIOHandler::ProcessIOHandler(String filename, pid_t kill_pid) : IOHandler()
 {
     int exit_status = EXIT_SUCCESS;
 
     if (!is_alive(kill_pid, &exit_status))
     {
         unlink(filename.c_str());
-        log_debug("transcoder exit status %d\n", exit_status);
-        throw _Exception(_("transcoder terminated early with status: ") + String::from(exit_status));
+        log_debug("process exit status %d\n", exit_status);
+        throw _Exception(_("process terminated early with status: ") + String::from(exit_status));
     }
     this->kill_pid = kill_pid;
     this->filename = filename;
-    ContentManager::getInstance()->registerTranscoder(kill_pid, filename);
+    ContentManager::getInstance()->registerProcess(kill_pid, filename);
 }
 
-void TranscodeProcessIOHandler::open(IN enum UpnpOpenFileMode mode)
+void ProcessIOHandler::open(IN enum UpnpOpenFileMode mode)
 {
     int exit_status = EXIT_SUCCESS;
     if (!is_alive(kill_pid, &exit_status))
     {
-        log_debug("transcoder exit status %d\n", exit_status);
-        throw _Exception(_("transcoder terminated with code: ") + String::from(exit_status));
+        log_debug("process exit status %d\n", exit_status);
+        throw _Exception(_("process terminated with code: ") + String::from(exit_status));
     }
 
     fd = ::open(filename.c_str(), O_RDONLY | O_NONBLOCK);
@@ -76,7 +76,7 @@ void TranscodeProcessIOHandler::open(IN enum UpnpOpenFileMode mode)
         throw _Exception(_("open: failed to open: ") + filename.c_str());
 }
 
-int TranscodeProcessIOHandler::read(OUT char *buf, IN size_t length)
+int ProcessIOHandler::read(OUT char *buf, IN size_t length)
 {
     fd_set readSet;
     struct timeval timeout;
@@ -107,7 +107,7 @@ int TranscodeProcessIOHandler::read(OUT char *buf, IN size_t length)
             /// \todo check exit status and return error if appropriate
             if (!is_alive(kill_pid, &exit_status))
             {
-                log_debug("transcoder exited with status %d\n", exit_status);
+                log_debug("process exited with status %d\n", exit_status);
                 if (exit_status == EXIT_SUCCESS)
                     return 0; 
                 else
@@ -150,28 +150,28 @@ int TranscodeProcessIOHandler::read(OUT char *buf, IN size_t length)
     return num_bytes;
 }
 
-void TranscodeProcessIOHandler::seek(IN off_t offset, IN int whence)
+void ProcessIOHandler::seek(IN off_t offset, IN int whence)
 {   
     // we know we can not seek in a fifo
     throw _Exception(_("fseek failed"));
 }
 
-void TranscodeProcessIOHandler::close()
+void ProcessIOHandler::close()
 {
     bool ret;
    
 
-    log_debug("terminating transcoder %d, closing %s\n", kill_pid,
+    log_debug("terminating process %d, closing %s\n", kill_pid,
                 this->filename.c_str());
 
-    ContentManager::getInstance()->unregisterTranscoder(kill_pid);
+    ContentManager::getInstance()->unregisterProcess(kill_pid);
     ret = kill_proc(kill_pid);
     
     ::close(fd);
     unlink(filename.c_str());
 
     if (!ret)
-        throw _Exception(_("failed to kill transcoding process!"));
+        throw _Exception(_("failed to kill process!"));
 }
 
 #endif // TRANSCODING

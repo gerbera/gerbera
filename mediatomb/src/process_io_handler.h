@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    transcode_process_io_handler.h - this file is part of MediaTomb.
+    process_io_handler.h - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -27,17 +27,17 @@
     $Id$
 */
 
-/// \file transcode_process_io_handler.h
-/// \brief Definition of the TranscodeProcessIOHandler class.
-#ifndef __TRANSCODE_PROCESS_IO_HANDLER_H__
-#define __TRANSCODE_PROCESS_IO_HANDLER_H__
+/// \file process_io_handler.h
+/// \brief Definition of the ProcessIOHandler class.
+#ifndef __PROCESS_IO_HANDLER_H__
+#define __PROCESS_IO_HANDLER_H__
 
 #include "common.h"
 #include "io_handler.h"
 
 #define FIFO_READ_TIMEOUT 5
 /// \brief Allows the web server to read from a fifo.
-class TranscodeProcessIOHandler : public IOHandler
+class ProcessIOHandler : public IOHandler
 {
 protected:
     /// \brief pid of the process that is writing to the fifo
@@ -53,7 +53,7 @@ public:
     /// \brief Sets the filename to work with.
     /// \param filename
     /// \param kill_pid the pid to kill when close is called
-    TranscodeProcessIOHandler(zmm::String filename, pid_t kill_pid);
+    ProcessIOHandler(zmm::String filename, pid_t kill_pid);
     
     /// \brief Opens file for reading (writing is not supported)
     virtual void open(IN enum UpnpOpenFileMode mode);
@@ -78,4 +78,4 @@ public:
 };
 
 
-#endif // __TRANSCODE_PROCESS_IO_HANDLER_H__
+#endif // __PROCESS_IO_HANDLER_H__

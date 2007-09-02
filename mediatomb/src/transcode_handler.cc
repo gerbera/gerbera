@@ -49,7 +49,7 @@
 #include "update_manager.h"
 #include "session_manager.h"
 #include "ixml.h"
-#include "transcode_process_io_handler.h"
+#include "process_io_handler.h"
 #include "buffered_io_handler.h"
 #include "dictionary.h"
 #include "transcode_handler.h"
@@ -70,7 +70,6 @@ Ref<IOHandler> TranscodeHandler::open(String profile, String location,
 //    bool is_srt = false;
 
     log_debug("start\n");
-    struct stat statbuf;
     char fifo_template[]="/tmp/mt_transcode_XXXXXX";
 
     // ok, that's a little tricky... we are doing transcoding, so the
@@ -159,7 +158,7 @@ Ref<IOHandler> TranscodeHandler::open(String profile, String location,
     log_debug("Launched transcoding process, pid: %d\n", transcoding_process);
 
     /// \todo make the buffer, the readsize and the initialFillSize configurable!
-    Ref<IOHandler> io_handler(new BufferedIOHandler(Ref<IOHandler> (new TranscodeProcessIOHandler(fifo_name,transcoding_process)), 1024*1024*30, 1024*10, 1024*1024));
+    Ref<IOHandler> io_handler(new BufferedIOHandler(Ref<IOHandler> (new ProcessIOHandler(fifo_name,transcoding_process)), 1024*1024*30, 1024*10, 1024*1024));
 
     io_handler->open(UPNP_READ);
     return io_handler;

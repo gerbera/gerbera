@@ -357,24 +357,25 @@ public:
     /// \brief instructs ContentManager to reload scripting environment
     void reloadLayout();
 
-#ifdef TRANSCODING 
-    /// \brief register transcoding process
+#if defined(TRANSCODING) || defined(SOPCAST)
+    /// \brief register process
     ///
-    /// When a transcoding process is launched we will register it's pid with
-    /// the content manager. This will ensure that we can kill all transcoders
-    /// when we shutdown the server while transcoding processes are running.
+    /// When an external process is launched we will register it's pid with
+    /// the content manager. This will ensure that we can kill all processes
+    /// when we shutdown the server.
     /// 
-    /// \param pid the process id of the transcoding process.
+    /// \param pid the process id of the process.
     /// \param associated fifo name - the fifo has to be removed after the 
     ///  process is killed
-    void registerTranscoder(pid_t pid, zmm::String filename);
+    void registerProcess(pid_t pid, zmm::String filename);
 
-    /// \brief unregister transcoding process
+    /// \brief unregister process
     /// 
-    /// When the the transcode io handler receives a close on a stream that is
-    /// currently being transcoded, it will kill the process. Additionally
-    /// it will call this function and remove the pid from the list.
-    void unregisterTranscoder(pid_t pid);
+    /// When the the process io handler receives a close on a stream that is
+    /// currently being processed by an external process, it will kill it.
+    /// Additionally it will call this function and remove the pid from the 
+    /// list.
+    void unregisterProcess(pid_t pid);
 #endif
 
 #ifdef HAVE_MAGIC
@@ -402,7 +403,7 @@ protected:
     zmm::Ref<AutoscanInotify> inotify;
 #endif
  
-#ifdef TRANSCODING
+#if defined(TRANSCODING) || defined(SOPCAST)
     zmm::Ref<Mutex> tr_mutex;
     zmm::Ref<zmm::Array<TranscodingProcess> > transcoding_processes;
 #endif

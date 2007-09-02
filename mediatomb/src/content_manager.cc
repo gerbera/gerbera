@@ -280,15 +280,15 @@ void ContentManager::init()
 #endif
 }
 
-#ifdef TRANSCODING
-void ContentManager::registerTranscoder(pid_t pid, String filename)
+#if defined(TRANSCODING) || defined(SOPCAST)
+void ContentManager::registerProcess(pid_t pid, String filename)
 {
     AUTOLOCK(tr_mutex);
     Ref<TranscodingProcess>tproc(new TranscodingProcess(pid, filename));
     transcoding_processes->append(tproc);
 }
 
-void ContentManager::unregisterTranscoder(pid_t pid)
+void ContentManager::unregisterProcess(pid_t pid)
 {
     // when shutting down we will kill the transcoding processes,
     // which if given enough time will get a close in the io handler and
