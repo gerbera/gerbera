@@ -55,11 +55,14 @@ void web::containers::process()
         throw _Exception(_("web::containers: no parent_id given"));
     
     Ref<Storage> storage = Storage::getInstance();
-    
+
+        
     Ref<Element> containers (new Element(_("containers")));
     containers->addAttribute(_("ofId"), String::from(parentID));
     containers->addAttribute(_("type"), _("d"));
-    containers->addAttribute(_("select_it"), param(_("select_it")));
+
+    if (string_ok(param(_("select_it"))))
+        containers->addAttribute(_("select_it"), param(_("select_it")));
     root->appendChild(containers);
     
     Ref<BrowseParam> param(new BrowseParam(parentID, BROWSE_DIRECT_CHILDREN | BROWSE_CONTAINERS));

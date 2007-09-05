@@ -35,7 +35,13 @@
 #include "common.h"
 #include "dictionary.h"
 
-#define RESOURCE_PART_SEP '~'
+/// \brief name for external urls that can appear in object resources (i.e.
+/// a YouTube thumbnail)
+#define RESOURCE_OPTION_URL         "url"
+
+/// \brief if set, overrides the OBJECT_FLAG_PROXY_URL setting for the given
+/// resource
+#define RESOURCE_OPTION_PROXY_URL   "prx"
 
 class CdsResource : public zmm::Object
 {

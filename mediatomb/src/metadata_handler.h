@@ -42,6 +42,8 @@
 #define CH_LIBEXIF   1
 #define CH_ID3       2
 #define CH_TRANSCODE 3
+#define CH_EXTURL    4
+
 #define CONTENT_TYPE_MP3        "mp3"
 #define CONTENT_TYPE_OGG        "ogg"
 #define CONTENT_TYPE_FLAC       "flac"

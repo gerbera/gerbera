@@ -193,22 +193,22 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
         item->setAuxData(_(ONLINE_SERVICE_AUX_ID), String::from(OS_YouTube));
 
         item->addResource(resource);
-/*
+
         temp = video->getChildText(_("thumbnail_url"));
         if (string_ok(temp))
         {
-            item->setURL(temp);
-            Ref<CdsResource> thumbnail(new CdsResource(CH_DEFAULT));
+            Ref<CdsResource> thumbnail(new CdsResource(CH_EXTURL));
             thumbnail->
                 addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
-                             renderProtocolInfo(thumb_mimetype));
+                        renderProtocolInfo(thumb_mimetype));
             thumbnail->
                 addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), 
-                                _("130x97"));
-           item->addResource(thumbnail);
- 
+                        _("130x97"));
+            thumbnail->addOption(_(RESOURCE_OPTION_URL), temp);
+            thumbnail->addOption(_(RESOURCE_OPTION_PROXY_URL), _(FALSE));
+            item->addResource(thumbnail);
         }
-*/
+
         item->setFlag(OBJECT_FLAG_PROXY_URL);
         item->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
         try

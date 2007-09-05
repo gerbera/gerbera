@@ -36,6 +36,8 @@
 #include "tools.h"
 #include "cds_resource.h"
 
+#define RESOURCE_PART_SEP '~'
+
 using namespace zmm;
 
 CdsResource::CdsResource(int handlerType) : Object()
