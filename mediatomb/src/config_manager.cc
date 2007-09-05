@@ -1275,12 +1275,12 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
             throw _Exception(_("error in configuration: invalid transcoding profile name"));
 
         Ref<TranscodingProfile> prof(new TranscodingProfile(param));
-        param = child->getAttribute(_("mimetype"));
+        param = child->getChildText(_("mimetype"));
         if (!string_ok(param))
             throw _Exception(_("error in configuration: invalid target mimetype in transcoding profile"));
         prof->setTargetMimeType(param);
 
-        param = child->getAttribute(_("first-resource"));
+        param = child->getChildText(_("first-resource"));
         if (!validateYesNo(param))
             throw _Exception(_("Error in config file: incorrect parameter "
                         "for <profile first-resource=\"\" /> attribute"));
@@ -1290,19 +1290,15 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
         else
             prof->setFirstResource(false);
 
-        Ref<Element> tmp = child->getChild(_("agent"));
-        if (tmp == nil)
-            throw _Exception(_("error in configuration: transcoding profile ") +
-                    prof->getName() + " is missing the <agent> tag");
-
-        param = tmp->getAttribute(_("command"));
+        Ref<Element> agent = child->getChild(_("agent"));
+        param = agent->getAttribute(_("command"));
         if (!string_ok(param))
             throw _Exception(_("error in configuration: transcoding profile ") +
                     prof->getName() + 
                     " has an invalid command setting");
         prof->setCommand(param);
 
-        param = tmp->getAttribute(_("arguments"));
+        param = agent->getAttribute(_("arguments"));
         if (!string_ok(param))
             throw _Exception(_("error in configuration: transcoding profile ") +
                     prof->getName() + " has an empty argument string");
