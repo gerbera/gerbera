@@ -50,6 +50,8 @@ using namespace zmm;
 
 #define SQL_NULL             "NULL"
 
+#define RESOURCE_SEP '|'
+
 enum
 {
     _id = 0,

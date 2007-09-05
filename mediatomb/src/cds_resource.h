@@ -35,7 +35,6 @@
 #include "common.h"
 #include "dictionary.h"
 
-#define RESOURCE_SEP '|'
 #define RESOURCE_PART_SEP '~'
 
 class CdsResource : public zmm::Object
@@ -44,22 +43,53 @@ protected:
     int handlerType;
     zmm::Ref<Dictionary> attributes;
     zmm::Ref<Dictionary> parameters;
+    zmm::Ref<Dictionary> options;
 
 public:
+    /// \brief creates a new resource object.
+    ///
+    /// The CdsResource object represents a <res> tag in the DIDL-Lite XML.
+    ///
+    /// \param handler_type id of the associated handler
     CdsResource(int handlerType);
     CdsResource(int handlerType,
                 zmm::Ref<Dictionary> attributes,
-                zmm::Ref<Dictionary> parameters);
-    
+                zmm::Ref<Dictionary> parameters,
+                zmm::Ref<Dictionary> options);
+   
+    /// \brief Adds a resource attribute.
+    ///
+    /// This maps to an attribute of the <res> tag in the DIDL-Lite XML.
+    ///
+    /// \param name attribute name 
+    /// \param value attribute value
     void addAttribute(zmm::String name, zmm::String value);
+
+    /// \brief Adds a parameter (will be appended to the URL)
+    /// 
+    /// The parameters will be appended to the object URL in the DIDL-Lite XML.
+    /// This is useful for cases, where you need to identify specific options,
+    /// i.e. something that is only relevant to a particular metadata handler
+    /// and so on. The parameters will be automatically URL encoded.
+    ///
+    /// \param name parameter name
+    /// \param value parameter value
     void addParameter(zmm::String name, zmm::String value);
+
+    /// \brief Add an option to the resource.
+    /// 
+    /// The options are internal, they do not appear in the URL or in the
+    /// XML but can be used for any purpose.
+    void addOption(zmm::String name, zmm::String value);
 
     // urlencode into string
     int getHandlerType();
     zmm::Ref<Dictionary> getAttributes();
     zmm::Ref<Dictionary> getParameters();
+    zmm::Ref<Dictionary> getOptions();
     zmm::String getAttribute(zmm::String name);
     zmm::String getParameter(zmm::String name);
+    zmm::String getOption(zmm::String name);
 
     bool equals(zmm::Ref<CdsResource> other);
     zmm::Ref<CdsResource> clone();

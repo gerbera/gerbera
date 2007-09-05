@@ -43,44 +43,67 @@ CdsResource::CdsResource(int handlerType) : Object()
     this->handlerType = handlerType;
     this->attributes = Ref<Dictionary>(new Dictionary());
     this->parameters = Ref<Dictionary>(new Dictionary());
+    this->options = Ref<Dictionary>(new Dictionary());
 }
 CdsResource::CdsResource(int handlerType,
                          Ref<Dictionary> attributes,
-                         Ref<Dictionary> parameters)
+                         Ref<Dictionary> parameters,
+                         Ref<Dictionary> options)
 {
     this->handlerType = handlerType;
     this->attributes = attributes;
     this->parameters = parameters;
+    this->options = options;
 }
 
 void CdsResource::addAttribute(zmm::String name, zmm::String value)
 {
     attributes->put(name, value);
 }
+
 void CdsResource::addParameter(zmm::String name, zmm::String value)
 {
     parameters->put(name, value);
+}
+
+void CdsResource::addOption(zmm::String name, zmm::String value)
+{
+    options->put(name, value);
 }
 
 int CdsResource::getHandlerType() 
 {
     return handlerType;
 }
+
 Ref<Dictionary> CdsResource::getAttributes()
 {
     return attributes;
 }
+
 Ref<Dictionary> CdsResource::getParameters()
 {
     return parameters;
 }
+
+Ref<Dictionary> CdsResource::getOptions()
+{
+    return options;
+}
+
 String CdsResource::getAttribute(String name)
 {
     return attributes->get(name);
 }
+
 String CdsResource::getParameter(String name)
 {
     return parameters->get(name);
+}
+
+String CdsResource::getOption(String name)
+{
+    return options->get(name);
 }
 
 bool CdsResource::equals(Ref<CdsResource> other)
@@ -88,7 +111,8 @@ bool CdsResource::equals(Ref<CdsResource> other)
     return (
         handlerType == other->handlerType &&
         attributes->equals(other->attributes) &&
-        parameters->equals(other->parameters)
+        parameters->equals(other->parameters) &&
+        options->equals(other->options)
     );
 }
 
@@ -96,7 +120,8 @@ Ref<CdsResource> CdsResource::clone()
 {
     return Ref<CdsResource>(new CdsResource(handlerType,
                                             attributes,
-                                            parameters));
+                                            parameters,
+                                            options));
 }
 
 String CdsResource::encode()
@@ -108,6 +133,8 @@ String CdsResource::encode()
     *buf << attributes->encode();
     *buf << RESOURCE_PART_SEP;
     *buf << parameters->encode();
+    *buf << RESOURCE_PART_SEP;
+    *buf << options->encode();
     return buf->toString();
 }
 
@@ -115,7 +142,7 @@ Ref<CdsResource> CdsResource::decode(String serial)
 {
     Ref<Array<StringBase> > parts = split_string(serial, RESOURCE_PART_SEP);
     int size = parts->size();
-    if (size != 2 && size != 3)
+    if (size < 2 || size > 4)
         throw _Exception(_("CdsResource::decode: Could not parse resources"));
 
     int handlerType = String(parts->get(0)).toInt();
@@ -125,10 +152,15 @@ Ref<CdsResource> CdsResource::decode(String serial)
 
     Ref<Dictionary> par(new Dictionary());
 
-    if (size == 3)
+    if (size >= 3)
         par->decode(parts->get(2));
+
+    Ref<Dictionary> opt(new Dictionary());
+
+    if (size >= 4)
+        opt->decode(parts->get(3));
     
-    Ref<CdsResource> resource(new CdsResource(handlerType, attr, par));
+    Ref<CdsResource> resource(new CdsResource(handlerType, attr, par, opt));
     
     return resource;
 }
@@ -137,4 +169,6 @@ void CdsResource::optimize()
 {
     attributes->optimize();
     parameters->optimize();
+    options->optimize();
 }
+
