@@ -1341,6 +1341,10 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                     prof->getName() + " chunk size can not be negative");
         cs = i;
 
+        if (cs > bs)
+            throw _Exception(_("error in configuration: transcoding profile ") +
+                    prof->getName() + " chunk size can not be greater than buffer size");
+
         param = sub->getAttribute(_("fill-size"));
         if (!string_ok(param))
             throw _Exception(_("error in configuration: transcoding profile ") +
@@ -1350,6 +1354,10 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
             throw _Exception(_("error in configuration: transcoding profile ") +
                     prof->getName() + " fill size can not be negative");
         fs = i;
+
+        if (fs > bs)
+            throw _Exception(_("error in configuration: transcoding profile ") +
+                    prof->getName() + " fill size can not be greater than buffer size");
 
         prof->setBufferOptions(bs, cs, fs);
        
