@@ -89,6 +89,7 @@ int main(int argc, char **argv, char **envp)
     struct   sigaction action;
     sigset_t mask_set;
 
+    int      devnull;
     struct   passwd *pwd;
     struct   group  *grp;
 #ifdef HAVE_GETOPT_LONG
@@ -343,30 +344,35 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
 
         /* Fork off the parent process */
         pid = fork();
-        if (pid < 0) {
+        if (pid < 0) 
+        {
+            log_error("Failed to fork: %s\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
         /* If we got a good PID, then
            we can exit the parent process. */
-        if (pid > 0) {
+        if (pid > 0) 
+        {
             exit(EXIT_SUCCESS);
         }
 
         /* Change the file mode mask */
-        umask(0);
+        umask(0133);
 
         /* Open any logs here */        
 
         /* Create a new SID for the child process */
         sid = setsid();
-        if (sid < 0) {
-            /* Log the failure */
+        if (sid < 0) 
+        {
+            log_error("setsid failed: %s\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
 
         /* Change the current working directory */
-        if ((chdir("/")) < 0) {
-            /* Log the failure */
+        if ((chdir("/")) < 0) 
+        {
+            log_error("Failed to chdir to / : %s\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
 
@@ -374,6 +380,14 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         close(STDIN_FILENO);
         close(STDOUT_FILENO);
         close(STDERR_FILENO);
+
+        devnull = open("/dev/null", O_RDWR);
+        if (devnull == -1)
+        {
+            log_error("Failed to open /dev/null: %s\n", strerror(errno));
+        }
+        dup(devnull);
+        dup(devnull);
     }
 
     if (pid_file != nil)
@@ -414,20 +428,21 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
     {
         log_error("Could not register SIGINT handler!\n");
     }
+
     if (sigaction(SIGTERM, &action, NULL) < 0)
     {
         log_error("Could not register SIGTERM handler!\n");
     }
+
     if (sigaction(SIGHUP, &action, NULL) < 0)
     {
         log_error("Could not register SIGHUP handler!\n");
     }
+
     if (sigaction(SIGPIPE, &action, NULL) < 0)
     {
         log_error("Could not register SIGPIPE handler!\n");
     }
-
-
 
 
     // prepare to run processes
@@ -470,12 +485,16 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
             log_error("%s\n", e.getMessage().c_str());
             e.printStackTrace();
         }
+        if (daemon)
+            close(devnull);
         exit(EXIT_FAILURE);
     }
     catch (Exception e)
     {
         log_error("%s\n", e.getMessage().c_str());
         e.printStackTrace();
+        if (daemon)
+            close(devnull);
         exit(EXIT_FAILURE);
     }
 
@@ -494,6 +513,8 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
             catch (Exception e)
             {
                 e.printStackTrace();
+                if (daemon)
+                    close(devnull);
                 exit(EXIT_FAILURE);
             }
         }
@@ -546,6 +567,8 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
                     log_error("Error reloading configuration: %s\n", 
                               e.getMessage().c_str());
                     e.printStackTrace();
+                    if (daemon)
+                        close(devnull);
                     exit(EXIT_FAILURE);
                 }
                 
@@ -564,7 +587,6 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
                 sigemptyset(&mask_set);
                 pthread_sigmask(SIG_SETMASK, &mask_set, NULL);
                 log_error("Could not restart MediaTomb\n");
-
             }
         }
     }
@@ -588,7 +610,10 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
 
     log_info("Server terminating\n");
     log_close();
-    
+
+    if (daemon)
+        close(devnull);
+
     exit(ret);
 }
 
