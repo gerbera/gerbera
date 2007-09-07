@@ -41,6 +41,27 @@
 
 using namespace zmm;
 
+TranscodingProfile::TranscodingProfile()
+{
+    first_resource = false;
+    buffer_size = 0;
+    chunk_size = 0;
+    initial_fill_size = 0;
+}
+
+TranscodingProfile::TranscodingProfile(String name)
+{
+    TranscodingProfile();
+    this->name = name;
+}
+
+void TranscodingProfile::setBufferOptions(size_t bs, size_t cs, size_t ifs)
+{
+    buffer_size = bs;
+    chunk_size = cs;
+    initial_fill_size = ifs;
+}
+
 TranscodingProfileList::TranscodingProfileList()
 {
     list = Ref<Array<TranscodingProfile> > (new Array<TranscodingProfile>());

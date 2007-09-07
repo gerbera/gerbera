@@ -1247,6 +1247,11 @@ Ref<Dictionary> ConfigManager::createDictionaryFromNodeset(Ref<Element> element,
 #ifdef TRANSCODING
 Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodeset(Ref<Element> element)
 {
+    size_t bs;
+    size_t cs;
+    size_t fs;
+    int i;
+
     zmm::String param;
     Ref<TranscodingProfileList> list(new TranscodingProfileList());
     if (element == nil)
@@ -1290,21 +1295,64 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
         else
             prof->setFirstResource(false);
 
-        Ref<Element> agent = child->getChild(_("agent"));
-        param = agent->getAttribute(_("command"));
+        Ref<Element> sub = child->getChild(_("agent"));
+        if (sub == nil)
+            throw _Exception(_("error in configuration: transcoding profile ") +
+                    prof->getName() + 
+                    " is missing the <agent> option");
+
+        param = sub->getAttribute(_("command"));
         if (!string_ok(param))
             throw _Exception(_("error in configuration: transcoding profile ") +
                     prof->getName() + 
                     " has an invalid command setting");
         prof->setCommand(param);
 
-        param = agent->getAttribute(_("arguments"));
+        param = sub->getAttribute(_("arguments"));
         if (!string_ok(param))
             throw _Exception(_("error in configuration: transcoding profile ") +
                     prof->getName() + " has an empty argument string");
 
         prof->setArguments(param);
 
+        sub = child->getChild(_("buffer")); 
+        if (sub == nil)
+            throw _Exception(_("error in configuration: transcoding profile ") +
+                    prof->getName() + 
+                    " is missing the <buffer> option");
+
+        param = sub->getAttribute(_("size"));
+        if (!string_ok(param))
+            throw _Exception(_("error in configuration: transcoding profile ") +
+                    prof->getName() + " <buffer> tag is missing the size attribute");
+        i = param.toInt();
+        if (i < 0)
+            throw _Exception(_("error in configuration: transcoding profile ") +
+                    prof->getName() + " buffer size can not be negative");
+        bs = i;
+
+        param = sub->getAttribute(_("chunk-size"));
+        if (!string_ok(param))
+            throw _Exception(_("error in configuration: transcoding profile ") +
+                    prof->getName() + " <buffer> tag is missing the chunk-size attribute");
+        i = param.toInt();
+        if (i < 0)
+            throw _Exception(_("error in configuration: transcoding profile ") +
+                    prof->getName() + " chunk size can not be negative");
+        cs = i;
+
+        param = sub->getAttribute(_("fill-size"));
+        if (!string_ok(param))
+            throw _Exception(_("error in configuration: transcoding profile ") +
+                    prof->getName() + " <buffer> tag is missing the fill-size attribute");
+        i = param.toInt();
+        if (i < 0)
+            throw _Exception(_("error in configuration: transcoding profile ") +
+                    prof->getName() + " fill size can not be negative");
+        fs = i;
+
+        prof->setBufferOptions(bs, cs, fs);
+       
         list->add(prof);
     }
 

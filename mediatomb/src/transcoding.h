@@ -42,8 +42,8 @@
 class TranscodingProfile : public zmm::Object
 {
 public:
-    TranscodingProfile() { first_resource = false; }
-    TranscodingProfile(zmm::String name) { this->name = name; }
+    TranscodingProfile();
+    TranscodingProfile(zmm::String name);
 
     /// \brief set name of the transcoding profile
     void setName(zmm::String name) { this->name = name; }
@@ -66,6 +66,18 @@ public:
 
     /// \brief gets the transcoders program name
     zmm::String getCommand() { return command; }
+
+    /// \brief set buffering options
+    /// \param bs the size of the buffer in bytes
+    /// \param cs the maximum size of the chunks which are read by the buffer
+    /// \param ifs the number of bytes which have to be in the buffer
+    /// before the first read at the very beginning or after a seek returns;
+    /// 0 disables the delay
+    void setBufferOptions(size_t bs, size_t cs, size_t ifs);
+
+    size_t getBufferSize() { return buffer_size; }
+    size_t getBufferChunkSize() { return chunk_size; }
+    size_t getBufferInitialFillSize() { return initial_fill_size; }
 
     /// \brief sets the arguments that will be fed to the transcoder,
     /// this is the string that comes right after the command.
@@ -92,6 +104,9 @@ protected:
     zmm::String command;
     zmm::String args;
     bool first_resource;
+    size_t buffer_size;
+    size_t chunk_size;
+    size_t initial_fill_size;
 };
 
 /// \brief this class allows access to available transcoding profiles.
