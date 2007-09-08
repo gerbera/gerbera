@@ -1250,7 +1250,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
     size_t bs;
     size_t cs;
     size_t fs;
-    int i;
+    int itmp;
 
     zmm::String param;
     Ref<TranscodingProfileList> list(new TranscodingProfileList());
@@ -1325,21 +1325,21 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
         if (!string_ok(param))
             throw _Exception(_("error in configuration: transcoding profile ") +
                     prof->getName() + " <buffer> tag is missing the size attribute");
-        i = param.toInt();
-        if (i < 0)
+        itmp = param.toInt();
+        if (itmp < 0)
             throw _Exception(_("error in configuration: transcoding profile ") +
                     prof->getName() + " buffer size can not be negative");
-        bs = i;
+        bs = itmp;
 
         param = sub->getAttribute(_("chunk-size"));
         if (!string_ok(param))
             throw _Exception(_("error in configuration: transcoding profile ") +
                     prof->getName() + " <buffer> tag is missing the chunk-size attribute");
-        i = param.toInt();
-        if (i < 0)
+        itmp = param.toInt();
+        if (itmp < 0)
             throw _Exception(_("error in configuration: transcoding profile ") +
                     prof->getName() + " chunk size can not be negative");
-        cs = i;
+        cs = itmp;
 
         if (cs > bs)
             throw _Exception(_("error in configuration: transcoding profile ") +
@@ -1349,11 +1349,11 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
         if (!string_ok(param))
             throw _Exception(_("error in configuration: transcoding profile ") +
                     prof->getName() + " <buffer> tag is missing the fill-size attribute");
-        i = param.toInt();
+        itmp = param.toInt();
         if (i < 0)
             throw _Exception(_("error in configuration: transcoding profile ") +
                     prof->getName() + " fill size can not be negative");
-        fs = i;
+        fs = itmp;
 
         if (fs > bs)
             throw _Exception(_("error in configuration: transcoding profile ") +
@@ -1369,8 +1369,6 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
     {
         if (list->size() > 0)
             throw _Exception(_("error in configuration: transcoding profiles exist, but no mimetype to profile mappings specified"));
-        else
-            return list;
     }
    
     Ref<Element> mtype_profile = mappings->getChild(_("mimetype-profile"));
@@ -1381,8 +1379,6 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
     {
        if (list->size() > 0)
             throw _Exception(_("error in configuration: transcoding profiles exist, but no mimetype to profile mappings specified"));
-        else
-            return list;
     }
 
     // now check for bogus profile names
