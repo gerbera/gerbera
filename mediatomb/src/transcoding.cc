@@ -47,12 +47,15 @@ TranscodingProfile::TranscodingProfile()
     buffer_size = 0;
     chunk_size = 0;
     initial_fill_size = 0;
+    tr_type = TR_None;
 }
 
-TranscodingProfile::TranscodingProfile(String name)
+TranscodingProfile::TranscodingProfile(transcoding_type_t tr_type, String name)
 {
     TranscodingProfile();
     this->name = name;
+    this->tr_type = tr_type;
+
 }
 
 void TranscodingProfile::setBufferOptions(size_t bs, size_t cs, size_t ifs)
@@ -64,45 +67,40 @@ void TranscodingProfile::setBufferOptions(size_t bs, size_t cs, size_t ifs)
 
 TranscodingProfileList::TranscodingProfileList()
 {
-    list = Ref<Array<TranscodingProfile> > (new Array<TranscodingProfile>());
-    mimetype_profile = Ref<Dictionary> (new Dictionary());
+    list = Ref<ObjectDictionary<ObjectDictionary<TranscodingProfile> > >(new ObjectDictionary<ObjectDictionary<TranscodingProfile> >());
 }
 
-void TranscodingProfileList::add(zmm::Ref<TranscodingProfile> prof)
+void TranscodingProfileList::add(zmm::String sourceMimeType, zmm::Ref<TranscodingProfile> prof)
 {
-    list->append(prof);
+    Ref<ObjectDictionary<TranscodingProfile> > inner = list->get(sourceMimeType);
+
+    if (inner == nil)
+        inner = Ref<ObjectDictionary<TranscodingProfile> >(new ObjectDictionary<TranscodingProfile>());
+
+    inner->put(prof->getName(), prof);
+    list->put(sourceMimeType, inner);
 }
 
-Ref<TranscodingProfile> TranscodingProfileList::get(zmm::String acceptedMimeType)
+Ref<ObjectDictionary<TranscodingProfile> > TranscodingProfileList::get(zmm::String sourceMimeType)
 {
-    String name = mimetype_profile->get(acceptedMimeType);
-    if (!string_ok(name))
-        return nil;
-
-    return getByName(name);
+    return list->get(sourceMimeType);
 }
 
 Ref<TranscodingProfile> TranscodingProfileList::getByName(zmm::String name)
 {
-    for (int i = 0; i < list->size(); i++)
+    Ref<Array<ObjectDictionaryElement<ObjectDictionary<TranscodingProfile> > > > mt_list = list->getElements();
+
+    for (int i = 0; i < mt_list->size(); i++)
     {
-        if (list->get(i) != nil && name == list->get(i)->getName())
-                return list->get(i);
+        Ref<ObjectDictionary<TranscodingProfile> > names = mt_list->get(i)->getValue();
+        if (names != nil)
+        {
+            Ref<TranscodingProfile> tp = names->get(name);
+            if (tp != nil)
+                return tp;
+        }
     }
     return nil;
-}
-
-Ref<TranscodingProfile> TranscodingProfileList::get(int index)
-{
-    if ((index < 0) || (index >= list->size()))
-        return nil;
-
-    return list->get(index);
-}
-
-void TranscodingProfileList::setMappings(zmm::Ref<Dictionary> mappings)
-{
-    mimetype_profile = mappings;
 }
 
 #endif//TRANSCODING

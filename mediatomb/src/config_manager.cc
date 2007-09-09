@@ -1251,6 +1251,62 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
     size_t cs;
     size_t fs;
     int itmp;
+    transcoding_type_t tr_type;
+    Ref<Element> mtype_profile;
+    bool set = false;
+
+    Ref<Array<DictionaryElement> > mt_mappings(new Array<DictionaryElement>());
+
+    Ref<Element> mappings = element->getChild(_("mappings"));
+    if (mappings != nil)
+    {
+        mtype_profile = mappings->getChild(_("mimetype-profile"));
+
+        String mt;
+        String pname;
+
+        if (mtype_profile != nil)
+        {
+            for (int e = 0; e < mtype_profile->childCount(); e++)
+            {
+                Ref<Element> child = mtype_profile->getChild(e);
+                if (child->getName() == "transcode")
+                {
+                    mt = child->getAttribute(_("mimetype"));
+                    pname = child->getAttribute(_("using"));
+
+                    if (string_ok(mt) && string_ok(pname))
+                    {
+                        Ref<DictionaryElement> del(new DictionaryElement(mt, pname));
+                        mt_mappings->append(del);
+                    }
+                    else
+                    {
+                        throw _Exception(_("error in configuration: invalid mimetype to profile mapping"));
+                    }
+                }
+            }
+        }
+    }
+
+
+   /*
+    if (mt_mappings->size() == 0)
+    {
+       if (list->size() > 0)
+            throw _Exception(_("error in configuration: transcoding profiles exist, but no mimetype to profile mappings specified"));
+    }
+
+    // now check for bogus profile names
+    Ref<Array<DictionaryElement> > dict_check = mt_mappings->getElements();
+    for (int j = 0; j < dict_check->size(); j++)
+    {
+        if (list->getByName(dict_check->get(j)->getValue()) == nil)
+            throw _Exception(_("error in configuration: you specified a mimetype to transcoding profile mapping, but no profile named \"") + 
+                    dict_check->get(j)->getValue() + 
+                    "\" exists");
+    }
+*/
 
     zmm::String param;
     Ref<TranscodingProfileList> list(new TranscodingProfileList());
@@ -1275,11 +1331,26 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
         if (param == "no")
             continue;
 
+        param = child->getAttribute(_("type"));
+        if (!string_ok(param))
+             throw _Exception(_("error in configuration: missing transcoding type in profile"));
+
+        if (param == "external")
+            tr_type = TR_External;
+        /* for the future...
+        else if (param == "native")
+            tr_type = TR_Native;
+        else if (param == "remote")
+            tr_type = TR_Remote;
+         */
+        else
+            throw _Exception(_("error in configuration: invalid transcoding type ") + param + _(" in profile"));
+
         param = child->getAttribute(_("name"));
         if (!string_ok(param))
             throw _Exception(_("error in configuration: invalid transcoding profile name"));
 
-        Ref<TranscodingProfile> prof(new TranscodingProfile(param));
+        Ref<TranscodingProfile> prof(new TranscodingProfile(tr_type, param));
         param = child->getChildText(_("mimetype"));
         if (!string_ok(param))
             throw _Exception(_("error in configuration: invalid target mimetype in transcoding profile"));
@@ -1360,39 +1431,29 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                     prof->getName() + " fill size can not be greater than buffer size");
 
         prof->setBufferOptions(bs, cs, fs);
-       
-        list->add(prof);
-    }
 
-    Ref<Element> mappings = element->getChild(_("mappings"));
-    if (mappings == nil)
-    {
-        if (list->size() > 0)
+        if (mappings == nil)
+        {
             throw _Exception(_("error in configuration: transcoding profiles exist, but no mimetype to profile mappings specified"));
-    }
-   
-    Ref<Element> mtype_profile = mappings->getChild(_("mimetype-profile"));
-    Ref<Dictionary> mt_mappings = createDictionaryFromNodeset(mtype_profile, 
-            _("transcode"), _("mimetype"), _("using"));
+        }
 
-    if (mt_mappings->size() == 0)
-    {
-       if (list->size() > 0)
-            throw _Exception(_("error in configuration: transcoding profiles exist, but no mimetype to profile mappings specified"));
-    }
+        for (int k = 0; k < mt_mappings->size(); k++)
+        {
+            if (mt_mappings->get(k)->getValue() == prof->getName())
+            {
+                list->add(mt_mappings->get(k)->getKey(), prof);
+                set = true;
+            }
+        }
 
-    // now check for bogus profile names
-    Ref<Array<DictionaryElement> > dict_check = mt_mappings->getElements();
-    for (int j = 0; j < dict_check->size(); j++)
-    {
-        if (list->getByName(dict_check->get(j)->getValue()) == nil)
-            throw _Exception(_("error in configuration: you specified a mimetype to transcoding profile mapping, but no profile named \"") + 
-                    dict_check->get(j)->getValue() + 
-                    "\" exists");
+        if (!set)
+             throw _Exception(_("error in configuration: you specified" 
+                                "a mimetype to transcoding profile mapping, "
+                                "but no match for profile \"") + 
+                                prof->getName() + "\" exists");
+        else
+            set = false;
     }
-
-    if (list->size() > 0)
-        list->setMappings(mt_mappings);
 
     return list;
 }

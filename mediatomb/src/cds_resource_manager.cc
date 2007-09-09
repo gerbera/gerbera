@@ -35,6 +35,7 @@
 
 #include "cds_resource_manager.h"
 #include "dictionary.h"
+#include "object_dictionary.h"
 #include "server.h"
 #include "common.h"
 #include "tools.h"
@@ -100,27 +101,36 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
     // now get the profile
     Ref<TranscodingProfileList> tlist = config->getTranscodingProfileListOption(
             CFG_TRANSCODING_PROFILE_LIST);
-    Ref<TranscodingProfile> tp = tlist->get(item->getMimeType());
-    if (tp != nil)
+    Ref<ObjectDictionary<TranscodingProfile> > tp_mt = tlist->get(item->getMimeType());
+    if (tp_mt != nil)
     {
-        Ref<CdsResource> t_res(new CdsResource(CH_TRANSCODE));
-        t_res->addParameter(_(URL_PARAM_TRANSCODE_PROFILE_NAME), tp->getName());
-        t_res->addParameter(_(URL_PARAM_TRANSCODE), _(D_CONVERSION));
-        t_res->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
-                renderProtocolInfo(tp->getTargetMimeType()));
-        // duration should be the same for transcoded media, so we can take
-        // the value from the original resource
-        String duration = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_DURATION));
-        if (string_ok(duration))
-            t_res->addAttribute(MetadataHandler::getResAttrName(R_DURATION),
-                    duration);
-        if (tp->firstResource())
-            item->insertResource(0, t_res);
-        else
-            item->addResource(t_res);
+        Ref<Array<ObjectDictionaryElement<TranscodingProfile> > > profiles = tp_mt->getElements();
+        for (int p = 0; p < profiles->size(); p++)
+        {
+            Ref<TranscodingProfile> tp = profiles->get(p)->getValue();
 
-        if (skipURL)
-            urlBase_tr = addResources_getUrlBase(item, true);
+            if (tp == nil)
+                throw _Exception(_("Invalid profile encountered!"));
+
+            Ref<CdsResource> t_res(new CdsResource(CH_TRANSCODE));
+            t_res->addParameter(_(URL_PARAM_TRANSCODE_PROFILE_NAME), tp->getName());
+            t_res->addParameter(_(URL_PARAM_TRANSCODE), _(D_CONVERSION));
+            t_res->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
+                    renderProtocolInfo(tp->getTargetMimeType()));
+            // duration should be the same for transcoded media, so we can take
+            // the value from the original resource
+            String duration = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_DURATION));
+            if (string_ok(duration))
+                t_res->addAttribute(MetadataHandler::getResAttrName(R_DURATION),
+                        duration);
+            if (tp->firstResource())
+                item->insertResource(0, t_res);
+            else
+                item->addResource(t_res);
+
+            if (skipURL)
+                urlBase_tr = addResources_getUrlBase(item, true);
+        }
     }
 
 #endif

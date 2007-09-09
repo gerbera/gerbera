@@ -36,14 +36,22 @@
 #define __TRANSCODING_H__
 
 #include "zmmf/zmmf.h"
-#include "dictionary.h"
+#include "object_dictionary.h"
+
+typedef enum transcoding_type_t
+{
+    TR_None,
+    TR_External,
+    TR_Native,
+    TR_Remote
+};
+
 
 /// \brief this class keeps all data associated with one transcoding profile.
 class TranscodingProfile : public zmm::Object
 {
 public:
-    TranscodingProfile();
-    TranscodingProfile(zmm::String name);
+    TranscodingProfile(transcoding_type_t tr_type, zmm::String name);
 
     /// \brief set name of the transcoding profile
     void setName(zmm::String name) { this->name = name; }
@@ -107,6 +115,9 @@ protected:
     size_t buffer_size;
     size_t chunk_size;
     size_t initial_fill_size;
+    transcoding_type_t tr_type;
+
+    TranscodingProfile();
 };
 
 /// \brief this class allows access to available transcoding profiles.
@@ -114,16 +125,16 @@ class TranscodingProfileList : public zmm::Object
 {
 public:
     TranscodingProfileList();
-    void add(zmm::Ref<TranscodingProfile> prof);
-    zmm::Ref<TranscodingProfile> get(zmm::String acceptedMimeType);
-    zmm::Ref<TranscodingProfile> get(int index);
+    void add(zmm::String sourceMimeType, zmm::Ref<TranscodingProfile> prof);
+    zmm::Ref<ObjectDictionary<TranscodingProfile> > get(zmm::String sourceMimeType);
+    zmm::Ref<ObjectDictionary<TranscodingProfile> > get(int index);
     zmm::Ref<TranscodingProfile> getByName(zmm::String name);
-//    void addMapping(zmm::String mimetype, zmm::String prname);
-    void setMappings(zmm::Ref<Dictionary> mappings);
     inline int size() { return list->size(); }
 protected:
-    zmm::Ref<zmm::Array<TranscodingProfile> > list;
-    zmm::Ref<Dictionary> mimetype_profile;
+    // outer dictionary is keyed by the source mimetype, inner dictionary by 
+    // profile name; this whole construction is necessary to allow to transcode
+    // to the same output format but vary things like resolution, bitrate, etc.
+    zmm::Ref<ObjectDictionary<ObjectDictionary<TranscodingProfile> > > list;
 };
 
 class TranscodingProcess : public zmm::Object
