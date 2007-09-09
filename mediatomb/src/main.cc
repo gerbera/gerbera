@@ -154,8 +154,7 @@ int main(int argc, char **argv, char **envp)
 
                 if (port > USHRT_MAX)
                 {
-                    log_error("Invalid port value %d. Maximum allowed port value is %d\n",
-                                USHRT_MAX);
+                    log_error("Invalid port value %d. Maximum allowed port value is %d\n", port, USHRT_MAX);
                 }
                 log_debug("port set to: %d\n", port);
                 break;
