@@ -350,7 +350,7 @@ CreateServicePacket( IN int msg_type,
         ret_code = http_MakeMessage( &buf, 1, 1,
                                      "Q" "sssdc" "sdc" "ssc" "ssc" "ssc"
                                      "S" "ssc" "A" "c", HTTPMETHOD_NOTIFY, "*",
-                                     1, "HOST: ", SSDP_IP, ":", SSDP_PORT,
+                                     (size_t)1, "HOST: ", SSDP_IP, ":", SSDP_PORT,
                                      "CACHE-CONTROL: max-age=", duration,
                                      "LOCATION: ", location, "NT: ", nt,
                                      "NTS: ", nts, 

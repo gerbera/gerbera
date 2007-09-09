@@ -68,6 +68,7 @@
 
 #ifndef WIN32
  #include <unistd.h>
+ #include <inttypes.h>
 #endif
 #include <sys/stat.h>
 #include "ithread.h"
@@ -655,8 +656,8 @@ get_file_info( IN const char *filename,
     info->http_header = NULL;
 
     DBGONLY( UpnpPrintf( UPNP_INFO, HTTP, __FILE__, __LINE__,
-                         "file info: %s, length: " OFF_T_SPRINTF"d" ", last_mod=%s readable=%d\n",
-                         filename, info->file_length,
+                         "file info: %s, length: " "%"PRIx64 ", last_mod=%s readable=%d\n",
+                         filename, (int64_t)info->file_length,
                          asctime( gmtime( &info->last_modified ) ),
                          info->is_readable ); )
 
@@ -901,8 +902,8 @@ GetNextRange( char **SrcRangeStr,
     char *Ptr,
      *Tok;
     int i;
-    off_t F = -1;
-    off_t L = -1;
+    int64_t F = -1;
+    int64_t L = -1;
     off_t Is_Suffix_byte_Range = 1;
 
     if( *SrcRangeStr == NULL )
@@ -913,7 +914,7 @@ GetNextRange( char **SrcRangeStr,
     if( ( Ptr = strstr( Tok, "-" ) ) == NULL )
         return -1;
     *Ptr = ' ';
-    sscanf( Tok, OFF_T_SPRINTF"d" OFF_T_SPRINTF"d", &F, &L );
+    sscanf( Tok, "%"SCNd64"%"SCNd64, &F, &L );
 
     if( F == -1 || L == -1 ) {
         *Ptr = '-';
@@ -928,14 +929,14 @@ GetNextRange( char **SrcRangeStr,
         }
 
         if( Is_Suffix_byte_Range ) {
-            *FirstByte = L;
-            *LastByte = F;
+            *FirstByte = (off_t)L;
+            *LastByte = (off_t)F;
             return 1;
         }
     }
 
-    *FirstByte = F;
-    *LastByte = L;
+    *FirstByte = (off_t)F;
+    *LastByte = (off_t)L;
     return 1;
 
 }
@@ -1016,40 +1017,42 @@ CreateHTTPRangeResponseHeader( char *ByteRangeSpecifier,
             Instr->RangeOffset = FirstByte;
             Instr->ReadSendSize = LastByte - FirstByte + 1;
             sprintf( Instr->RangeHeader, "CONTENT-RANGE: bytes " 
-                                          OFF_T_SPRINTF"d" "-" 
-                                          OFF_T_SPRINTF"d" "/" 
-                                          OFF_T_SPRINTF"d" "\r\n", 
-                                          FirstByte, LastByte, 
-                                          FileLength );   //Data between two range.
+                                          "%"PRId64 "-" 
+                                          "%"PRId64 "/" 
+                                          "%"PRId64 "\r\n", 
+                                          (int64_t)FirstByte, 
+                                          (int64_t)LastByte, 
+                                          (int64_t)FileLength );   //Data between two range.
         } else if( FirstByte >= 0 && LastByte == -1
                    && FirstByte < FileLength ) {
             Instr->RangeOffset = FirstByte;
             Instr->ReadSendSize = FileLength - FirstByte;
             sprintf( Instr->RangeHeader,
                      "CONTENT-RANGE: bytes " 
-                     OFF_T_SPRINTF"d" "-"
-                     OFF_T_SPRINTF"d" "/"
-                     OFF_T_SPRINTF"d" "\r\n", FirstByte,
-                     FileLength - 1, FileLength );
+                     "%"PRId64 "-"
+                     "%"PRId64 "/"
+                     "%"PRId64 "\r\n", (int64_t)FirstByte,
+                     (int64_t)(FileLength - 1), (int64_t)FileLength );
         } else if( FirstByte == -1 && LastByte > 0 ) {
             if( LastByte >= FileLength ) {
                 Instr->RangeOffset = 0;
                 Instr->ReadSendSize = FileLength;
                 sprintf( Instr->RangeHeader,
                          "CONTENT-RANGE: bytes 0-"
-                         OFF_T_SPRINTF"d" "/"
-                         OFF_T_SPRINTF"d" "\r\n",
-                         FileLength - 1, FileLength );
+                         "%"PRId64 "/"
+                         "%"PRId64 "\r\n",
+                         (int64_t)(FileLength - 1), (int64_t)FileLength );
             } else {
                 Instr->RangeOffset = FileLength - LastByte;
                 Instr->ReadSendSize = LastByte;
                 sprintf( Instr->RangeHeader,
                          "CONTENT-RANGE: bytes "
-                         OFF_T_SPRINTF"d" "-"
-                         OFF_T_SPRINTF"d" "/"
-                         OFF_T_SPRINTF"d" "\r\n",
-                         FileLength - LastByte + 1, FileLength,
-                         FileLength );
+                         "%"PRId64 "-"
+                         "%"PRId64 "/"
+                         "%"PRId64 "\r\n",
+                         (int64_t)(FileLength - LastByte + 1), 
+                         (int64_t)FileLength,
+                         (int64_t)FileLength );
             }
         } else {
             free( RangeInput );
@@ -1799,13 +1802,13 @@ web_server_callback( IN http_parser_t * parser,
         switch ( rtype ) {
             case RESP_FILEDOC: // send file, I = further instruction to send data.
                 http_SendMessage( info, &timeout, "Ibf", &RespInstr,
-                                  headers.buf, headers.length,
+                                  headers.buf, (size_t)headers.length,
                                   filename.buf );
                 break;
 
             case RESP_XMLDOC:  // send xmldoc , I = further instruction to send data.
                 http_SendMessage( info, &timeout, "Ibb", &RespInstr,
-                                  headers.buf, headers.length,
+                                  headers.buf, (size_t)headers.length,
                                   xmldoc.doc.buf, xmldoc.doc.length );
                 alias_release( &xmldoc );
                 break;
@@ -1817,13 +1820,13 @@ web_server_callback( IN http_parser_t * parser,
                    filename.buf );  
                  */
                 http_SendMessage( info, &timeout, "Ibf", &RespInstr,
-                                  headers.buf, headers.length,
+                                  headers.buf, (size_t)headers.length,
                                   filename.buf, Fp );
                 break;
 
             case RESP_HEADERS: // headers only
                 http_SendMessage( info, &timeout, "b",
-                                  headers.buf, headers.length );
+                                  headers.buf, (size_t)headers.length );
 
                 break;
             case RESP_POST:    // headers only
@@ -1836,7 +1839,7 @@ web_server_callback( IN http_parser_t * parser,
                                   "text/html", gUserHTTPHeaders );
 
                 http_SendMessage( info, &timeout, "b", headers.buf,
-                                  headers.length );
+                                  (size_t)headers.length );
                 break;
 
             default:

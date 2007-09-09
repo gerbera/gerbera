@@ -251,7 +251,7 @@ notify_send_and_recv( IN uri_type * destination_url,
     // send msg (note +1 for propertyset; null-terminator is also sent)
     if( ( ret_code = http_SendMessage( &info, &timeout,
                                        "bb",
-                                       start_msg.buf, start_msg.length,
+                                       start_msg.buf, (size_t)start_msg.length,
                                        propertySet,
                                        strlen( propertySet ) + 1 ) ) !=
         0 ) {
@@ -590,7 +590,7 @@ genaInitNotify( IN UpnpDevice_Handle device_handle,
     }
 
     sprintf( headers, "CONTENT-TYPE: text/xml; charset=UTF-8\r\nCONTENT-LENGTH: "
-             "%d\r\nNT: upnp:event\r\nNTS: upnp:propchange\r\n",
+             "%zu\r\nNT: upnp:event\r\nNTS: upnp:propchange\r\n",
              strlen( propertySet ) + 1 );
 
     //schedule thread for initial notification
@@ -775,8 +775,8 @@ genaInitNotifyExt( IN UpnpDevice_Handle device_handle,
     }
 
     sprintf( headers, "CONTENT-TYPE: text/xml; charset=UTF-8\r\nCONTENT-LENGTH: "
-             OFF_T_SPRINTF"d" "\r\nNT: upnp:event\r\nNTS: upnp:propchange\r\n",
-             (off_t) strlen( propertySet ) + 1 );
+             "%ld" "\r\nNT: upnp:event\r\nNTS: upnp:propchange\r\n",
+             (long) strlen( propertySet ) + 1 );
 
     //schedule thread for initial notification
 
@@ -912,8 +912,8 @@ genaNotifyAllExt( IN UpnpDevice_Handle device_handle,
     //changed to add null terminator at end of content
     //content length = (length in bytes of property set) + null char
     sprintf( headers, "CONTENT-TYPE: text/xml; charset=UTF-8\r\nCONTENT-LENGTH: "
-             OFF_T_SPRINTF"d" "\r\nNT: upnp:event\r\nNTS: upnp:propchange\r\n",
-             (off_t) strlen( propertySet ) + 1 );
+             "%ld" "\r\nNT: upnp:event\r\nNTS: upnp:propchange\r\n",
+             (long) strlen( propertySet ) + 1 );
 
     HandleLock(  );
 
@@ -1073,9 +1073,9 @@ genaNotifyAll( IN UpnpDevice_Handle device_handle,
     }
     //changed to add null terminator at end of content
     //content length = (length in bytes of property set) + null char
-    sprintf( headers, "CONTENT-TYPE: text/xml; charset=UTF-8\r\nCONTENT-LENGTH: " OFF_T_SPRINTF"d" "\r\nNT:"
+    sprintf( headers, "CONTENT-TYPE: text/xml; charset=UTF-8\r\nCONTENT-LENGTH: " "%ld" "\r\nNT:"
              " upnp:event\r\nNTS: upnp:propchange\r\n",
-             (off_t) strlen( propertySet ) + 1 );
+             (long) strlen( propertySet ) + 1 );
 
     HandleLock(  );
 
@@ -1194,7 +1194,7 @@ respond_ok( IN SOCKINFO * info,
     }
 
     return_code = http_SendMessage( info, &upnp_timeout, "b",
-                                    response.buf, response.length );
+                                    response.buf, (size_t)response.length );
 
     membuffer_destroy( &response );
 

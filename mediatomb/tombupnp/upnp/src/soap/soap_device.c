@@ -261,7 +261,7 @@ send_error_response( IN SOCKINFO * info,
     }
     // send err msg
     http_SendMessage( info, &timeout_secs, "b",
-                      headers.buf, headers.length );
+                      headers.buf, (size_t)headers.length );
 
     membuffer_destroy( &headers );
 }
@@ -325,7 +325,7 @@ send_var_query_response( IN SOCKINFO * info,
     }
     // send msg
     http_SendMessage( info, &timeout_secs, "b",
-                      response.buf, response.length );
+                      response.buf, (size_t)response.length );
 
     membuffer_destroy( &response );
 }
@@ -745,7 +745,7 @@ send_action_response( IN SOCKINFO * info,
     }
     // send whole msg
     ret_code = http_SendMessage( info, &timeout_secs, "bbbb",
-                                 headers.buf, headers.length,
+                                 headers.buf, (size_t)headers.length,
                                  start_body, strlen( start_body ),
                                  xml_response, strlen( xml_response ),
                                  end_body, strlen( end_body ) );

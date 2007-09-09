@@ -677,9 +677,10 @@ SoapSendAction( IN char *action_url,
                           &url, (off_t)(xml_start_len + action_str_len + xml_end_len),   // content-length
                           ContentTypeHeader,
                           "SOAPACTION: \"", service_type, "#", name.buf,
-                          name.length, "\"", xml_start, xml_start_len,
-                          action_str, action_str_len, xml_end,
-                          xml_end_len ) != 0 ) {
+                          (size_t)name.length, "\"", 
+                          xml_start, (size_t)xml_start_len,
+                          action_str, (size_t)action_str_len, xml_end,
+                          (size_t)xml_end_len ) != 0 ) {
         goto error_handler;
     }
 
@@ -840,14 +841,14 @@ SoapSendActionEx( IN char *action_url,
                                         xml_end_len), // content-length
                           ContentTypeHeader,
                           "SOAPACTION: \"", service_type, "#", name.buf,
-                          name.length, "\"",
-                          xml_start, xml_start_len,
-                          xml_header_start, xml_header_start_len,
-                          xml_header_str, xml_header_str_len,
-                          xml_header_end, xml_header_end_len,
-                          xml_body_start, xml_body_start_len,
-                          action_str, action_str_len,
-                          xml_end, xml_end_len ) != 0 ) {
+                          (size_t)name.length, "\"",
+                          xml_start, (size_t)xml_start_len,
+                          xml_header_start, (size_t)xml_header_start_len,
+                          xml_header_str, (size_t)xml_header_str_len,
+                          xml_header_end, (size_t)xml_header_end_len,
+                          xml_body_start, (size_t)xml_body_start_len,
+                          action_str, (size_t)action_str_len,
+                          xml_end, (size_t)xml_end_len ) != 0 ) {
         goto error_handler;
     }
 
@@ -945,10 +946,10 @@ SoapGetServiceVarStatus( IN char *action_url,
     if( http_MakeMessage( &request, 1, 1, "Q" "sbc" "N" "s" "s" "U" "c" "sss", 
                           SOAPMETHOD_POST, 
                           path.buf, 
-                          path.length, 
+                          (size_t)path.length, 
                           "HOST: ", 
                           host.buf, 
-                          host.length, 
+                          (size_t)host.length, 
                           (off_t)(strlen( xml_start ) + strlen( var_name ) + strlen( xml_end )),   // content-length
                           ContentTypeHeader,
                           "SOAPACTION: \"urn:schemas"

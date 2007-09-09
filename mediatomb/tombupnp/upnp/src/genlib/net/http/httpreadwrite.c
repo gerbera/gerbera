@@ -70,6 +70,7 @@
  #include <unistd.h>
  #include <sys/utsname.h>
  #include <fcntl.h>
+ #include <inttypes.h>
 #else
  #include <winsock2.h>
  #include <malloc.h>
@@ -297,7 +298,7 @@ http_RecvMessage( IN SOCKINFO * info,
 *	IN const char* fmt parameter										
 *	fmt types:															
 *		'f':	arg = const char * file name							
-*		'm':	arg1 = const char * mem_buffer; arg2= size_t buf_length	
+*		'b':	arg1 = const char * mem_buffer; arg2= size_t buf_length	
 *	E.g.:																
 *		char *buf = "POST /xyz.cgi http/1.1\r\n\r\n";					
 *		char *filename = "foo.dat";										
@@ -446,7 +447,7 @@ http_SendMessage( IN SOCKINFO * info,
                     memcpy( file_buf + num_read, "\r\n", 2 );
 
                     //Hex length for the chunk size.
-                    sprintf( Chunk_Header, OFF_T_SPRINTF"x", num_read );
+                    sprintf( Chunk_Header, "%"PRIx64, (int64_t)num_read );
 
                     //itoa(num_read,Chunk_Header,16); 
                     strcat( Chunk_Header, "\r\n" );
@@ -590,7 +591,7 @@ http_RequestAndResponse( IN uri_type * destination,
     }
     // send request
     ret_code = http_SendMessage( &info, &timeout_secs, "b",
-                                 request, request_length );
+                                 request, (size_t)request_length );
     if( ret_code != 0 ) {
         sock_destroy( &info, SD_BOTH );
         parser_response_init( response, req_method );
@@ -677,13 +678,13 @@ http_Download( IN const char *url_str,
     *temp = '/';
     DBGONLY( UpnpPrintf
              ( UPNP_INFO, HTTP, __FILE__, __LINE__,
-               "HOSTNAME : %s Length : %d\n", hoststr, hostlen );
+               "HOSTNAME : %s Length : %zu\n", hoststr, hostlen );
          )
 
         ret_code = http_MakeMessage( &request, 1, 1, "QsbcDCUc",
                                      HTTPMETHOD_GET, url.pathquery.buff,
-                                     url.pathquery.size, "HOST: ", hoststr,
-                                     hostlen );
+                                     (size_t)url.pathquery.size, "HOST: ", 
+                                     hoststr, (size_t)hostlen );
     if( ret_code != 0 ) {
         DBGONLY( UpnpPrintf
                  ( UPNP_INFO, HTTP, __FILE__, __LINE__,
@@ -838,19 +839,19 @@ MakePostMessage( const char *url_str,
         if( contentLength >= 0 ) {
         ret_code = http_MakeMessage( request, 1, 1, "QsbcDCUTNc",
                                      HTTPMETHOD_POST, url->pathquery.buff,
-                                     url->pathquery.size, "HOST: ",
-                                     hoststr, hostlen, contentType,
+                                     (size_t)(url->pathquery.size), "HOST: ",
+                                     hoststr, (size_t)hostlen, contentType,
                                      contentLength );
     } else if( contentLength == UPNP_USING_CHUNKED ) {
         ret_code = http_MakeMessage( request, 1, 1, "QsbcDCUTKc",
                                      HTTPMETHOD_POST, url->pathquery.buff,
-                                     url->pathquery.size, "HOST: ",
-                                     hoststr, hostlen, contentType );
+                                     (size_t)(url->pathquery.size), "HOST: ",
+                                     hoststr, (size_t)hostlen, contentType );
     } else if( contentLength == UPNP_UNTIL_CLOSE ) {
         ret_code = http_MakeMessage( request, 1, 1, "QsbcDCUTc",
                                      HTTPMETHOD_POST, url->pathquery.buff,
-                                     url->pathquery.size, "HOST: ",
-                                     hoststr, hostlen, contentType );
+                                     (size_t)(url->pathquery.size), "HOST: ",
+                                     hoststr, (size_t)hostlen, contentType );
     } else {
         ret_code = UPNP_E_INVALID_PARAM;
     }
@@ -918,7 +919,7 @@ http_WriteHttpPost( IN void *Handle,
 
             if ( tempbuf == NULL) return UPNP_E_OUTOF_MEMORY;
 
-            sprintf( tempbuf, OFF_T_SPRINTF"x" "\r\n", ( *size ) );    //begin chunk
+            sprintf( tempbuf, "%"PRIx64 "\r\n", (int64_t)( *size ) );    //begin chunk
             tempSize = strlen( tempbuf );
             memcpy( tempbuf + tempSize, buf, ( *size ) );
             memcpy( tempbuf + tempSize + ( *size ), "\r\n", 2 );    //end of chunk
@@ -1082,7 +1083,7 @@ http_OpenHttpPost( IN const char *url_str,
     }
     // send request
     ret_code = http_SendMessage( &handle->sock_info, &timeout, "b",
-                                 request.buf, request.length );
+                                 request.buf, (size_t)request.length );
     if( ret_code != 0 ) {
         sock_destroy( &handle->sock_info, SD_BOTH );
     }
@@ -1172,8 +1173,8 @@ MakeGetMessage( const char *url_str,
     }
 
     ret_code = http_MakeMessage( request, 1, 1, "QsbcDCUc",
-                                 HTTPMETHOD_GET, querystr, querylen,
-                                 "HOST: ", hoststr, hostlen );
+                                 HTTPMETHOD_GET, querystr, (size_t)querylen,
+                                 "HOST: ", hoststr, (size_t)hostlen );
 
     if( ret_code != 0 ) {
         DBGONLY( UpnpPrintf( UPNP_INFO, HTTP, __FILE__, __LINE__,
@@ -1676,7 +1677,7 @@ http_OpenHttpGetProxy( IN const char *url_str,
     }
     // send request
     ret_code = http_SendMessage( &handle->sock_info, &timeout, "b",
-                                 request.buf, request.length );
+                                 request.buf, (size_t)request.length );
     if( ret_code != 0 ) {
         sock_destroy( &handle->sock_info, SD_BOTH );
         goto errorHandler;
@@ -1775,7 +1776,7 @@ http_SendStatusResponse( IN SOCKINFO * info,
     if( ret == 0 ) {
         timeout = HTTP_DEFAULT_TIMEOUT;
         ret = http_SendMessage( info, &timeout, "b",
-                                membuf.buf, membuf.length );
+                                membuf.buf, (size_t)membuf.length );
     }
 
     membuffer_destroy( &membuf );
@@ -1953,7 +1954,7 @@ http_MakeMessage( INOUT membuffer * buf,
         {
             bignum = ( off_t )va_arg( argp, off_t );
 
-            sprintf( tempbuf, OFF_T_SPRINTF"d", bignum );
+            sprintf( tempbuf, "%"PRId64, (int64_t)bignum );
 
             if( membuffer_append( buf, tempbuf, strlen( tempbuf ) ) != 0 ) {
                 goto error_handler;
@@ -2122,8 +2123,8 @@ http_MakeMessage( INOUT membuffer * buf,
 
             if( http_MakeMessage
                 ( buf, http_major_version, http_minor_version, "Q" "sbc",
-                  method, url.pathquery.buff, url.pathquery.size, "HOST: ",
-                  url.hostport.text.buff, url.hostport.text.size ) != 0 ) {
+                  method, url.pathquery.buff, (size_t)url.pathquery.size, "HOST: ",
+                  url.hostport.text.buff, (size_t)(url.hostport.text.size) ) != 0 ) {
                 goto error_handler;
             }
         }
@@ -2263,10 +2264,10 @@ MakeGetMessageEx( const char *url_str,
                                         "QsbcGDCUc",
                                         HTTPMETHOD_GET,
                                         url->pathquery.buff,
-                                        url->pathquery.size,
+                                        (size_t)(url->pathquery.size),
                                         "HOST: ",
                                         hoststr,
-                                        hostlen, pRangeSpecifier );
+                                        (size_t)hostlen, pRangeSpecifier );
 
         if( errCode != 0 ) {
             DBGONLY( UpnpPrintf( UPNP_INFO, HTTP, __FILE__, __LINE__,
@@ -2405,7 +2406,7 @@ http_OpenHttpGetEx( IN const char *url_str,
         // send request
         errCode = http_SendMessage( &handle->sock_info,
                                     &timeout,
-                                    "b", request.buf, request.length );
+                                    "b", request.buf, (size_t)request.length );
 
         if( errCode != UPNP_E_SUCCESS ) {
             sock_destroy( &handle->sock_info, SD_BOTH );
