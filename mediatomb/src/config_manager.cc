@@ -1254,6 +1254,11 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
     transcoding_type_t tr_type;
     Ref<Element> mtype_profile;
     bool set = false;
+    zmm::String param;
+
+    Ref<TranscodingProfileList> list(new TranscodingProfileList());
+    if (element == nil)
+        return list;     
 
     Ref<Array<DictionaryElement> > mt_mappings(new Array<DictionaryElement>());
 
@@ -1307,11 +1312,6 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                     "\" exists");
     }
 */
-
-    zmm::String param;
-    Ref<TranscodingProfileList> list(new TranscodingProfileList());
-    if (element == nil)
-        return list;     
 
     Ref<Element> profiles = element->getChild(_("profiles"));
     if (profiles == nil)
