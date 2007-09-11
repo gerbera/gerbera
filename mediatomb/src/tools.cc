@@ -392,7 +392,7 @@ String read_text_file(String path)
     }
     Ref<StringBuffer> buf(new StringBuffer()); 
     char *buffer = (char *)MALLOC(1024);
-    int bytesRead;    
+    size_t bytesRead;    
     while((bytesRead = fread(buffer, 1, 1024, f)) > 0)
     {
         *buf << String(buffer, bytesRead);
@@ -1151,6 +1151,47 @@ String tempName(char *tmpl)
     /* We got out of the loop because we ran out of combinations to try.  */
     return nil;
 }
+
+bool isTheora(String ogg_filename)
+{
+    FILE *f;
+    char buffer[7];
+    f = fopen(ogg_filename.c_str(), "rb");
+    
+    if (fread(buffer, 1, 4, f) != 4)
+    {
+        fclose(f);
+        throw _Exception(_("Error reading ") + ogg_filename);
+    }
+
+    if (memcmp(buffer, "OggS", 4) != 0)
+    {
+        fclose(f);
+        return false;
+    }
+
+    if (fseek(f, 28, SEEK_SET) != 0)
+    {
+        fclose(f);
+        throw _Exception(_("Incomplete file ") + ogg_filename);
+    }
+
+    if (fread(buffer, 1, 7, f) != 7)
+    {
+        fclose(f);
+        throw _Exception(_("Error reading ") + ogg_filename);
+    }
+
+    if (memcmp(buffer, "\x80theora", 7) != 0)
+    {
+        fclose(f);
+        return false;
+    }
+
+    fclose(f);
+    return true;
+}
+
 
 #ifdef LOG_TOMBDEBUG
 

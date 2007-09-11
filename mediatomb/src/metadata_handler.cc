@@ -116,7 +116,8 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
     {
 #ifdef HAVE_TAGLIB
         if ((content_type == CONTENT_TYPE_MP3) || 
-            (content_type == CONTENT_TYPE_OGG) || 
+           ((content_type == CONTENT_TYPE_OGG) && 
+             !isTheora(item->getLocation())) || 
             (content_type == CONTENT_TYPE_FLAC))
         {
             handler = Ref<MetadataHandler>(new TagHandler());
@@ -162,6 +163,11 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
 #endif // HAVE_EXIF
 
 #ifdef HAVE_FFMPEG
+        if ((content_type != CONTENT_TYPE_PLAYLIST) &&
+            ((content_type == CONTENT_TYPE_OGG) &&
+             isTheora(item->getLocation()) ||
+            (item->getMimeType().startsWith(_("video"))) ||
+            (item->getMimeType().startsWith(_("aidio")))))
         {
             handler = Ref<MetadataHandler>(new FfmpegHandler());
             break;

@@ -270,6 +270,9 @@ zmm::Ref<zmm::Array<zmm::StringBase> > parseCommandLine(zmm::String line, zmm::S
 /// open a regular file.
 zmm::String tempName(char *tmpl);
 
+/// \brief Determines if the particular ogg file contains a video (theora)
+bool isTheora(zmm::String ogg_filename);
+
 #ifdef LOG_TOMBDEBUG
 
 struct profiling_t
