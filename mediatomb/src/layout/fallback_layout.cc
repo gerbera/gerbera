@@ -300,10 +300,17 @@ void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj)
             addVideo(clone);
         else if (mimetype.startsWith(_("image")))
             addImage(clone);
-        else if ((mimetype.startsWith(_("audio")) || 
-                    (content_type == CONTENT_TYPE_OGG)) &&
-                (content_type != CONTENT_TYPE_PLAYLIST))
+        else if ((mimetype.startsWith(_("audio")) && 
+                    (content_type != CONTENT_TYPE_PLAYLIST)))
             addAudio(clone);
+        else if (content_type == CONTENT_TYPE_OGG)
+        {
+            if (obj->getResource(0)->getOption(_(CONTENT_TYPE_OGG)) == OGG_THEORA)
+                addVideo(clone);
+            else
+                addAudio(clone);
+        }
+
 #ifdef YOUTUBE
     }
 #endif

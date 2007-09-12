@@ -112,12 +112,18 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
     Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
     String content_type = mappings->get(mimetype);
+    
+    if (content_type == CONTENT_TYPE_OGG)
+    {
+        if (isTheora(item->getLocation()))
+            resource->addOption(_(CONTENT_TYPE_OGG), _(OGG_THEORA));
+    }
     do
     {
 #ifdef HAVE_TAGLIB
         if ((content_type == CONTENT_TYPE_MP3) || 
            ((content_type == CONTENT_TYPE_OGG) && 
-             !isTheora(item->getLocation())) || 
+            (resource->getOption(_(CONTENT_TYPE_OGG)) != OGG_THEORA)) ||
             (content_type == CONTENT_TYPE_FLAC))
         {
             handler = Ref<MetadataHandler>(new TagHandler());
@@ -165,7 +171,7 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
 #ifdef HAVE_FFMPEG
         if ((content_type != CONTENT_TYPE_PLAYLIST) &&
             ((content_type == CONTENT_TYPE_OGG) &&
-             isTheora(item->getLocation()) ||
+             (resource->getOption(_(CONTENT_TYPE_OGG)) == OGG_THEORA) ||
             (item->getMimeType().startsWith(_("video"))) ||
             (item->getMimeType().startsWith(_("aidio")))))
         {

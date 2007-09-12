@@ -52,6 +52,8 @@
 #define CONTENT_TYPE_MPEG4VIDEO "mp4"
 #define CONTENT_TYPE_PCM        "pcm"
 
+#define OGG_THEORA              "t"
+
 #define RESOURCE_CONTENT_TYPE   "rct"
 
 #define ID3_ALBUM_ART "aa"

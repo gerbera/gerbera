@@ -698,6 +698,12 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
     i = obj->isRestricted();
     setIntProperty(js, _("restricted"), i);
 
+    val = obj->getResource(0)->getOption(_(CONTENT_TYPE_OGG));
+    if ((val != nil) && (val == OGG_THEORA))
+        setIntProperty(js, _("theora"), 1);
+    else
+        setIntProperty(js, _("theora"), 0);
+
     // setting metadata
     {
         JSObject *meta_js = JS_NewObject(cx, NULL, NULL, js);
@@ -725,6 +731,7 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
         }
         setObjectProperty(js, _("aux"), aux_js);
     }
+
 
     /// \todo add resources
 

@@ -177,7 +177,7 @@ if (getPlaylistType(orig.mimetype) == '')
     var obj = orig; 
     obj.refID = orig.id;
     
-    if ((mime == 'audio') || (orig.mimetype == 'application/ogg'))
+    if (mime == 'audio')
     {
         addAudio(obj);
     }
@@ -190,5 +190,13 @@ if (getPlaylistType(orig.mimetype) == '')
     if (mime == 'image')
     {
         addImage(obj);
+    }
+
+    if (orig.mimetype == 'application/ogg')
+    {
+        if (orig.theora == 1)
+            addVideo(obj);
+        else
+            addAudio(obj);
     }
 }

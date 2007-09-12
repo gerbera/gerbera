@@ -1,4 +1,12 @@
 MediaTomb - UPnP AV Mediaserver.
+v0.11.0 External transcoding support
+        * implemented transcoding support that allows to plug in an arbitrary
+          application
+        * added new metadata extractor (using ffmpeg, patch submitted by 
+          Ingo Preiml
+		* added vorbis / theora detection for ogg containers, so video files
+		  should not end up in audio containers anymore
+
 v0.10.0	11.07.2007  Playlist and inotify autoscan support.
         * MySQL database version pumped to 3 (MediaTomb will automatically
           update the database during the first launch)
