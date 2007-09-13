@@ -68,7 +68,6 @@ FfmpegHandler::FfmpegHandler() : MetadataHandler()
 static int addFfmpegMetadataFields(Ref<CdsItem> item, AVFormatContext *pFormatCtx) {
 
 	Ref<StringConverter> sc = StringConverter::m2i();
-	int field = 0;
     
 	if (strlen(pFormatCtx->title) > 0) {
 	    //log_info("Added metadata title: %s\n", pFormatCtx->title);
@@ -163,7 +162,7 @@ static int addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext *pFormatCt
 		} 
 		if(st->codec->codec_type == CODEC_TYPE_AUDIO) {
 			// Increase number of audiochannels
-			audioch;
+			audioch++;
 			// Get the sample rate
 			if (audioset == false && st->codec->sample_rate > 0) {
 				samplefreq = st->codec->sample_rate;

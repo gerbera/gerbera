@@ -54,6 +54,8 @@ FILE *LOG_FILE = stderr;
 #define FLUSHIT
 #endif
 
+#define LOGCHECK if (!LOG_FILE) return;
+
 void log_open(char *filename)
 {
     LOG_FILE = fopen(filename, "a");
@@ -67,7 +69,10 @@ void log_open(char *filename)
 void log_close()
 {
     if (LOG_FILE)
+    {
         fclose(LOG_FILE);
+        LOG_FILE = NULL;
+    }
 }
 
 static void log_stamp(const char *type)
@@ -90,15 +95,16 @@ static void log_stamp(const char *type)
 void _log_info(const char *format, ...)
 {
     va_list ap;
+    LOGCHECK
     va_start(ap, format);
     log_stamp("INFO");
     vfprintf(LOG_FILE, format, ap);
-    FLUSHIT
     va_end(ap);
 }
 void _log_warning(const char *format, ...)
 {
     va_list ap;
+    LOGCHECK
     va_start(ap, format);
     log_stamp("WARNING");
     vfprintf(LOG_FILE, format, ap);
@@ -108,6 +114,7 @@ void _log_warning(const char *format, ...)
 void _log_error(const char *format, ...)
 {
     va_list ap;
+    LOGCHECK
     va_start(ap, format);
     log_stamp("ERROR");
     vfprintf(LOG_FILE, format, ap);
@@ -117,6 +124,7 @@ void _log_error(const char *format, ...)
 void _log_js(const char *format, ...)
 {
     va_list ap;
+    LOGCHECK
     va_start(ap, format);
     log_stamp("JS");
     vfprintf(LOG_FILE, format, ap);
@@ -126,6 +134,7 @@ void _log_js(const char *format, ...)
 void _log_debug(const char *format, const char *file, int line, const char *function, ...)
 {
     va_list ap;
+    LOGCHECK
     va_start(ap, function);
     log_stamp("DEBUG");
     fprintf(LOG_FILE, "[%s:%d] %s(): ", file, line, function);
