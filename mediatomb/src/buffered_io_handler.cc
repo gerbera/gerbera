@@ -68,6 +68,8 @@ BufferedIOHandler::BufferedIOHandler(Ref<IOHandler> underlyingHandler, size_t bu
 
 void BufferedIOHandler::open(IN enum UpnpOpenFileMode mode)
 {
+    if (isOpen)
+        throw _Exception(_("tried to reopen an open BufferedIOHandler"));
     buffer = (char *)MALLOC(bufSize);
     if (buffer == NULL)
         throw _Exception(_("Failed to allocate memory for transcoding buffer!"));
@@ -75,6 +77,12 @@ void BufferedIOHandler::open(IN enum UpnpOpenFileMode mode)
     underlyingHandler->open(mode);
     startBufferThread();
     isOpen = true;
+}
+
+BufferedIOHandler::~BufferedIOHandler()
+{
+    if (isOpen)
+        close();
 }
 
 int BufferedIOHandler::read(OUT char *buf, IN size_t length)
@@ -104,6 +112,10 @@ int BufferedIOHandler::read(OUT char *buf, IN size_t length)
     AUTORELOCK();
     bool wasFull = (a == bLocal);
     a += doRead;
+    
+    if (a > bufSize)
+        abort();
+    
     if (a == bufSize)
         a = 0;
     if (a == b)
@@ -218,6 +230,10 @@ void BufferedIOHandler::threadProc()
             if (readBytes > 0)
             {
                 b += readBytes;
+                
+                if (b > bufSize)
+                    abort();
+                
                 if (b == bufSize)
                     b = 0;
                 if (empty)

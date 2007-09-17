@@ -52,6 +52,7 @@ public:
     /// before the first read at the very beginning or after a seek returns;
     /// 0 disables the delay
     BufferedIOHandler(zmm::Ref<IOHandler> underlyingHandler, size_t bufSize, size_t maxChunkSize, size_t initialFillSize);
+    virtual ~BufferedIOHandler();
     
     // inherited from IOHandler
     virtual void open(enum UpnpOpenFileMode mode);
