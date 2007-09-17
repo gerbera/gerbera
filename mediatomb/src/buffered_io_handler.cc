@@ -112,16 +112,13 @@ int BufferedIOHandler::read(OUT char *buf, IN size_t length)
     AUTORELOCK();
     bool wasFull = (a == bLocal);
     a += doRead;
-    
-    if (a > bufSize)
-        abort();
-    
+    assert(a <= bufSize);
     if (a == bufSize)
         a = 0;
     if (a == b)
     {
         empty = true;
-        
+        cond->signal();
         // start at the beginning of the buffer
         // disabled because it needs to by synced with threadProc
         // which thinks that b won't be changed by anyone else
@@ -214,9 +211,9 @@ void BufferedIOHandler::threadProc()
             log_debug("buffer fill level: %3.2f%%  (bufSize: %d; a: %d; b: %d)\n", percentFillLevel, bufSize, a, b);
         }
 #endif
-        
-        size_t aLocal = a;
-        maxWrite = (empty ? bufSize : (aLocal < b ? bufSize - b : aLocal - b));
+        if (empty)
+            a = b = 0;
+        maxWrite = (empty ? bufSize: (a < b ? bufSize - b : a - b));
         if (maxWrite == 0)
         {
             cond->wait();
@@ -230,10 +227,7 @@ void BufferedIOHandler::threadProc()
             if (readBytes > 0)
             {
                 b += readBytes;
-                
-                if (b > bufSize)
-                    abort();
-                
+                assert(b <= bufSize);
                 if (b == bufSize)
                     b = 0;
                 if (empty)
