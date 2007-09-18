@@ -46,7 +46,7 @@
 #include "online_service_helper.h"
 #include "url.h"
 #ifdef TRANSCODING
-    #include "transcode_handler.h"
+    #include "transcoding/transcode_dispatcher.h"
 #endif
 
 using namespace zmm;
@@ -102,7 +102,6 @@ void URLRequestHandler::get_info(IN const char *filename, OUT struct File_Info *
 
     if (string_ok(tr_profile))
     {
-        Ref<TranscodeHandler> tr_h(new TranscodeHandler());
         Ref<TranscodingProfile> tp = ConfigManager::getInstance()->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
 
         if (tp == nil)
@@ -161,7 +160,6 @@ Ref<IOHandler> URLRequestHandler::open(IN const char *filename, OUT struct File_
 {
     int objectID;
     String mimeType;
-    int ret = 0;
 #ifdef TRANSCODING
     String tr_profile;
 #endif
@@ -231,8 +229,8 @@ Ref<IOHandler> URLRequestHandler::open(IN const char *filename, OUT struct File_
                     " but no profile matching the name " +
                     tr_profile + " found");
 
-        Ref<TranscodeHandler> tr_h(new TranscodeHandler());
-        return tr_h->open(tr_profile, url, item->getObjectType(), info);
+        Ref<TranscodeDispatcher> tr_d(new TranscodeDispatcher());
+        return tr_d->open(tp, url, item->getObjectType(), info);
     }
     else
 #endif

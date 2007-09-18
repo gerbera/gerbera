@@ -51,7 +51,7 @@
 #endif
 
 #ifdef TRANSCODING
-    #include "transcoding.h"
+    #include "transcoding/transcoding.h"
 #endif
 
 #ifdef ONLINE_SERVICES 

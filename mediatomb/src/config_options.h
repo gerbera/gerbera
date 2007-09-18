@@ -38,7 +38,7 @@
 #include "autoscan.h"
 
 #ifdef TRANSCODING
-    #include "transcoding.h"
+    #include "transcoding/transcoding.h"
 #endif
 
 class ConfigOption : public zmm::Object

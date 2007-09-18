@@ -52,7 +52,7 @@
 #include "metadata_handler.h"
 #include "tools.h"
 #ifdef TRANSCODING
-    #include "transcode_handler.h"
+    #include "transcoding/transcode_dispatcher.h"
 #endif
 
 using namespace zmm;
@@ -458,8 +458,9 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
 #ifdef TRANSCODING
         if (!is_srt && string_ok(tr_profile))
         {
-            Ref<TranscodeHandler> tr_h(new TranscodeHandler());
-            return tr_h->open(tr_profile, path, item->getObjectType(), info);
+            Ref<TranscodeDispatcher> tr_d(new TranscodeDispatcher());
+            Ref<TranscodingProfile> tp = ConfigManager::getInstance()->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
+            return tr_d->open(tp, path, item->getObjectType(), info);
         }
         else
 #endif

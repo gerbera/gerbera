@@ -1338,8 +1338,6 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
         if (param == "external")
             tr_type = TR_External;
         /* for the future...
-        else if (param == "native")
-            tr_type = TR_Native;
         else if (param == "remote")
             tr_type = TR_Remote;
          */
@@ -1356,6 +1354,14 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
             throw _Exception(_("error in configuration: invalid target mimetype in transcoding profile"));
         prof->setTargetMimeType(param);
 
+        if (child->getChild(_("resolution")) != nil)
+        {
+            param = child->getChildText(_("resolution"));
+            if (string_ok(param))
+            {
+//                prof->setAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), 
+            }
+        }
         param = child->getChildText(_("first-resource"));
         if (!validateYesNo(param))
             throw _Exception(_("Error in config file: incorrect parameter "

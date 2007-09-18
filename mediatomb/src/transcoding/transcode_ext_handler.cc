@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    transcode_handler.cc - this file is part of MediaTomb.
+    transcode_external_handler.cc - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -24,10 +24,10 @@
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
     
-    $Id: transcode_handler.cc 1440 2007-08-18 12:53:51Z lww $
+    $Id: transcode_external_handler.cc 1440 2007-08-18 12:53:51Z lww $
 */
 
-/// \file transcode_handler.cc
+/// \file transcode_external_handler.cc
 
 #ifdef HAVE_CONFIG_H
     #include "autoconfig.h"
@@ -35,6 +35,7 @@
 
 #ifdef TRANSCODING
 
+#include "transcode_ext_handler.h"
 #include "server.h"
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -52,19 +53,20 @@
 #include "process_io_handler.h"
 #include "buffered_io_handler.h"
 #include "dictionary.h"
-#include "transcode_handler.h"
 #include "metadata_handler.h"
 #include "tools.h"
 
+#include "file_io_handler.h"
 using namespace zmm;
-using namespace mxml;
 
-TranscodeHandler::TranscodeHandler()
+TranscodeExternalHandler::TranscodeExternalHandler() : TranscodeHandler()
 {
 }
 
-Ref<IOHandler> TranscodeHandler::open(String profile, String location, 
-                                      int objectType, struct File_Info *info)
+Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile, 
+                                              String location, 
+                                              int objectType, 
+                                              struct File_Info *info)
 {
     bool isURL = false;
 //    bool is_srt = false;
@@ -72,28 +74,14 @@ Ref<IOHandler> TranscodeHandler::open(String profile, String location,
     log_debug("start\n");
     char fifo_template[]="/tmp/mt_transcode_XXXXXX";
 
-    // ok, that's a little tricky... we are doing transcoding, so the
-    // resource id that we receive in the URL is not in the database
-    // 
-    // instead of using the res_id we have to look up the profile name in 
-    // the configuration and see if we can find a match, we will then put
-    // together our option string, setup the location of the data and launch
-    // the transoder
-    if (!string_ok(profile))
-        throw _Exception(_("Transcoding of file ") + location + 
-                         " requested, but no profile specified");
-
-    Ref<TranscodingProfile> tp = ConfigManager::getInstance()->getTranscodingProfileListOption(
-                        CFG_TRANSCODING_PROFILE_LIST)->getByName(profile);
-    if (tp == nil)
+    if (profile == nil)
         throw _Exception(_("Transcoding of file ") + location +
-                           " but no profile matching the name " +
-                           profile + " found");
+                           "requested but no profile given");
     
     isURL = (IS_CDS_ITEM_INTERNAL_URL(objectType) ||
             IS_CDS_ITEM_EXTERNAL_URL(objectType));
 
-    String mimeType = tp->getTargetMimeType();
+    String mimeType = profile->getTargetMimeType();
 
     info->content_type = ixmlCloneDOMString(mimeType.c_str());
     info->file_length = -1;
@@ -108,6 +96,7 @@ Ref<IOHandler> TranscodeHandler::open(String profile, String location,
     Ref<Array<StringBase> > arglist;
     int i;
     int apos = 0;
+
     log_debug("creating fifo: %s\n", fifo_name.c_str());
     if (mkfifo(fifo_name.c_str(), O_RDWR) == -1) 
     {
@@ -124,8 +113,8 @@ Ref<IOHandler> TranscodeHandler::open(String profile, String location,
             throw _Exception(_("Fork failed when launching transcoding process!"));
         case 0:
             /// \todo check if the transcoder accepts an URL
-            arglist = parseCommandLine(tp->getArguments(), location, fifo_name);
-            command = tp->getCommand();
+            arglist = parseCommandLine(profile->getArguments(), location, fifo_name);
+            command = profile->getCommand();
             argv[0] = command.c_str();
             apos = 0;
 
@@ -154,11 +143,11 @@ Ref<IOHandler> TranscodeHandler::open(String profile, String location,
         default:
             break;
     }
-
     log_debug("Launched transcoding process, pid: %d\n", transcoding_process);
 
-    /// \todo make the buffer, the readsize and the initialFillSize configurable!
-    Ref<IOHandler> io_handler(new BufferedIOHandler(Ref<IOHandler> (new ProcessIOHandler(fifo_name,transcoding_process)), tp->getBufferSize(), tp->getBufferChunkSize(), tp->getBufferInitialFillSize()));
+
+    
+    Ref<IOHandler> io_handler(new BufferedIOHandler(Ref<IOHandler> (new ProcessIOHandler(fifo_name,transcoding_process)), profile->getBufferSize(), profile->getBufferChunkSize(), profile->getBufferInitialFillSize()));
 
     io_handler->open(UPNP_READ);
     return io_handler;

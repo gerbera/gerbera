@@ -36,13 +36,13 @@
 #define __TRANSCODING_H__
 
 #include "zmmf/zmmf.h"
+#include "dictionary.h"
 #include "object_dictionary.h"
 
 typedef enum transcoding_type_t
 {
     TR_None,
     TR_External,
-    TR_Native,
     TR_Remote
 };
 
@@ -52,6 +52,9 @@ class TranscodingProfile : public zmm::Object
 {
 public:
     TranscodingProfile(transcoding_type_t tr_type, zmm::String name);
+
+    /// \brief returns the transcoding type.
+    transcoding_type_t getType() { return tr_type; }
 
     /// \brief set name of the transcoding profile
     void setName(zmm::String name) { this->name = name; }
@@ -104,7 +107,17 @@ public:
     /// \brief identifies if the profile should be set as the first resource
     void setFirstResource(bool fr) { first_resource = fr; }
     bool firstResource() { return first_resource; }
-    
+
+    /// \brief Adds a resource attribute.
+    ///
+    /// This maps to an attribute of the <res> tag in the DIDL-Lite XML.
+    ///
+    /// \param name attribute name 
+    /// \param value attribute value
+    void addAttribute(zmm::String name, zmm::String value);
+
+    zmm::Ref<Dictionary> getAttributes();
+ 
 
 protected:
     zmm::String name;
@@ -116,6 +129,7 @@ protected:
     size_t chunk_size;
     size_t initial_fill_size;
     transcoding_type_t tr_type;
+    zmm::Ref<Dictionary> attributes;
 
     TranscodingProfile();
 };

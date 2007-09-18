@@ -40,7 +40,7 @@
 #include "autoscan.h"
 #include "config_options.h"
 #ifdef TRANSCODING
-    #include "transcoding.h"
+    #include "transcoding/transcoding.h"
 #endif
 #ifdef ONLINE_SERVICES
     #include "online_service.h"

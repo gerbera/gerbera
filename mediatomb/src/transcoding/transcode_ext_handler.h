@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    transcode_handler.h - this file is part of MediaTomb.
+    transcode_ext_handler.h - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -24,25 +24,26 @@
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
     
-    $Id: transcode_handler.h 1436 2007-08-17 17:46:29Z lww $
+    $Id: transcode_ext_handler.h 1436 2007-08-17 17:46:29Z lww $
 */
 
-/// \file transcode_handler.h
+/// \file transcode_ext_handler.h
 /// \brief Definition of the TranscodeRequest class.
-#ifndef __TRANSCODE_HANDLER_H__
-#define __TRANSCODE_HANDLER_H__
+#ifndef __TRANSCODE_EXTERNAL_HANDLER_H__
+#define __TRANSCODE_EXTERNAL_HANDLER_H__
 
 #include "common.h"
-#include "io_handler.h"
+#include "transcode_handler.h"
 #include "upnp.h"
 
-class TranscodeHandler : public zmm::Object
+class TranscodeExternalHandler : public TranscodeHandler 
 {
 public:
-    TranscodeHandler();
-    zmm::Ref<IOHandler> open(zmm::String profile, zmm::String location,
-                             int objectType, struct File_Info *info);
+    TranscodeExternalHandler();
+    virtual zmm::Ref<IOHandler> open(zmm::Ref<TranscodingProfile> profile, 
+                                     zmm::String location,
+                                     int objectType, struct File_Info *info);
 };
 
 
-#endif // __TRANSCODE_HANDLER_H__
+#endif // __TRANSCODE_EXTERNAL_HANDLER_H__

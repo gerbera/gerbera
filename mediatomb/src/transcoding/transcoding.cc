@@ -48,6 +48,7 @@ TranscodingProfile::TranscodingProfile()
     chunk_size = 0;
     initial_fill_size = 0;
     tr_type = TR_None;
+    attributes = Ref<Dictionary>(new Dictionary());
 }
 
 TranscodingProfile::TranscodingProfile(transcoding_type_t tr_type, String name)
@@ -64,6 +65,17 @@ void TranscodingProfile::setBufferOptions(size_t bs, size_t cs, size_t ifs)
     chunk_size = cs;
     initial_fill_size = ifs;
 }
+
+void TranscodingProfile::addAttribute(zmm::String name, zmm::String value)
+{
+    attributes->put(name, value);
+}
+
+Ref<Dictionary> TranscodingProfile::getAttributes()
+{   
+    return attributes;
+}   
+
 
 TranscodingProfileList::TranscodingProfileList()
 {
