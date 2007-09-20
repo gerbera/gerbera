@@ -71,6 +71,9 @@ public:
     /// \param value attribute value
     void addAttribute(zmm::String name, zmm::String value);
 
+    /// \brief Merge existing attributes with new ones
+    void mergeAttributes(zmm::Ref<Dictionary> additional);
+
     /// \brief Adds a parameter (will be appended to the URL)
     /// 
     /// The parameters will be appended to the object URL in the DIDL-Lite XML.

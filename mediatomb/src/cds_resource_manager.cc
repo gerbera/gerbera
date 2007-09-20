@@ -123,6 +123,9 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
             if (string_ok(duration))
                 t_res->addAttribute(MetadataHandler::getResAttrName(R_DURATION),
                         duration);
+
+            t_res->mergeAttributes(tp->getAttributes());
+
             if (tp->firstResource())
                 item->insertResource(0, t_res);
             else

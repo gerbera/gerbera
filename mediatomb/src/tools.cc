@@ -620,6 +620,22 @@ void set_jpeg_resolution_resource(Ref<CdsItem> item, int res_num)
     }
 }
 
+bool check_resolution(String resolution)
+{
+    Ref<Array<StringBase> > parts = split_string(resolution, 'x');
+    if (parts->size() != 2)
+        return false;
+
+    if (string_ok(parts->get(0)) && 
+        string_ok(parts->get(1)) &&
+       (String(parts->get(0)->data).toInt() > 0) && 
+       (String(parts->get(1)->data).toInt() > 0))
+        return true;
+    else
+        return false;
+}
+
+
 String escape(String string, char escape_char, char to_escape)
 {
     Ref<StringBase> stringBase(new StringBase(string.length() * 2));

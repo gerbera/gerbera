@@ -53,10 +53,14 @@ TranscodingProfile::TranscodingProfile()
 
 TranscodingProfile::TranscodingProfile(transcoding_type_t tr_type, String name)
 {
-    TranscodingProfile();
     this->name = name;
     this->tr_type = tr_type;
-
+    first_resource = false;
+    buffer_size = 0;
+    chunk_size = 0;
+    initial_fill_size = 0;
+    tr_type = TR_None;
+    attributes = Ref<Dictionary>(new Dictionary());
 }
 
 void TranscodingProfile::setBufferOptions(size_t bs, size_t cs, size_t ifs)

@@ -96,6 +96,10 @@ public:
     /// \brief Makes a shallow copy of the dictionary
     zmm::Ref<Dictionary> clone();
 
+    /// \brief Merge dictionary with another dictionary. If keys with the same
+    /// name already exist, the existing ones will be overwritten.
+    void merge(zmm::Ref<Dictionary> other);
+
     /// \brief returns true if the dictionary is a subset of another dictionary.#
     bool isSubsetOf(zmm::Ref<Dictionary> other);
 

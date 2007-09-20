@@ -449,13 +449,16 @@ AC_HELP_STRING([--enable-mrreg-service],
               ]
 )
 
+TRANSCODING_OK=yes
 AC_ARG_ENABLE([transcoding],
                       [
-AC_HELP_STRING([--enable-transcoding],
-[enable transcoding support (default: no, currently in development)])
+AC_HELP_STRING([--disable-transcoding],
+[enable transcoding support (default: yes, currently in development)])
               ],
               [
-                if test "x$enableval" = xyes; then
+                if test "x$enableval" = xno; then
+                    TRANSCODING_OK=no
+                else
                     AC_DEFINE([TRANSCODING], [1], [do not enable this yet, work in progress])
                 fi
               ]
@@ -2744,6 +2747,7 @@ echo "id3lib        : $ID3_OK"
 echo "taglib        : $TAGLIB_OK"
 echo "ffmpeg        : $FFMPEG_OK"
 echo "libextractor  : $EXTRACTOR_OK"
+echo "transcoding   : $TRANSCODING_OK"
 
 if  test $AUTOCREATE_PRINT != "0"; then
     echo "db-autocreate : $AUTOCREATE_PRINT"

@@ -176,6 +176,20 @@ Ref<Dictionary> Dictionary::clone()
     return ret;
 }
 
+void Dictionary::merge(Ref<Dictionary> other)
+{
+    if (other == nil)
+        return;
+
+    Ref<Array<DictionaryElement> > other_el = other->getElements();
+    int len = other_el->size();
+    for (int i = 0; i < len; i++)
+    {
+        Ref<DictionaryElement> el = other_el->get(i);
+        this->put(el->getKey(), el->getValue());
+    }
+}
+
 bool Dictionary::isSubsetOf(Ref<Dictionary> other)
 {
     int len = elements->size();

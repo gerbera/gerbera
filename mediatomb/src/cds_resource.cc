@@ -58,17 +58,23 @@ CdsResource::CdsResource(int handlerType,
     this->options = options;
 }
 
-void CdsResource::addAttribute(zmm::String name, zmm::String value)
+void CdsResource::addAttribute(String name, String value)
 {
     attributes->put(name, value);
 }
 
-void CdsResource::addParameter(zmm::String name, zmm::String value)
+void CdsResource::mergeAttributes(Ref<Dictionary> additional)
+{
+    attributes->merge(additional);
+}
+
+
+void CdsResource::addParameter(String name, String value)
 {
     parameters->put(name, value);
 }
 
-void CdsResource::addOption(zmm::String name, zmm::String value)
+void CdsResource::addOption(String name, String value)
 {
     options->put(name, value);
 }

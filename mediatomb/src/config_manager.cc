@@ -1359,7 +1359,8 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
             param = child->getChildText(_("resolution"));
             if (string_ok(param))
             {
-//                prof->setAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), 
+                if (check_resolution(param))
+                    prof->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), param);
             }
         }
         param = child->getChildText(_("first-resource"));
