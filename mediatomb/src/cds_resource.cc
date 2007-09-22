@@ -148,7 +148,7 @@ String CdsResource::encode()
 
 Ref<CdsResource> CdsResource::decode(String serial)
 {
-    Ref<Array<StringBase> > parts = split_string(serial, RESOURCE_PART_SEP);
+    Ref<Array<StringBase> > parts = split_string(serial, RESOURCE_PART_SEP, true);
     int size = parts->size();
     if (size < 2 || size > 4)
         throw _Exception(_("CdsResource::decode: Could not parse resources"));

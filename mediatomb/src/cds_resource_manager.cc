@@ -85,6 +85,9 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                     IS_CDS_ITEM_EXTERNAL_URL(item->getObjectType()) &&
                     (!item->getFlag(OBJECT_FLAG_PROXY_URL)));
 
+    Ref<Dictionary> mappings = config->getDictionaryOption(
+                        CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+
 
 #ifdef TRANSCODING
     // this will be used to count only the "real" resources, omitting the
@@ -112,8 +115,23 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
             if (tp == nil)
                 throw _Exception(_("Invalid profile encountered!"));
 
+            if (mappings->get(item->getMimeType()) == CONTENT_TYPE_OGG) 
+            {
+                if (((item->getResource(0)->getOption(_(CONTENT_TYPE_OGG)) ==
+                     OGG_THEORA) && (!tp->isTheora())) ||
+                    ((item->getResource(0)->getOption(_(CONTENT_TYPE_OGG)) !=
+                                            OGG_THEORA) && (tp->isTheora())))
+                     {
+                         continue;
+                     }
+            }
+
             Ref<CdsResource> t_res(new CdsResource(CH_TRANSCODE));
             t_res->addParameter(_(URL_PARAM_TRANSCODE_PROFILE_NAME), tp->getName());
+            // after transcoding resource was added we can not rely on
+            // index 0, so we will make sure the ogg option is there
+            t_res->addOption(_(CONTENT_TYPE_OGG), 
+                         item->getResource(0)->getOption(_(CONTENT_TYPE_OGG)));
             t_res->addParameter(_(URL_PARAM_TRANSCODE), _(D_CONVERSION));
             t_res->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
                     renderProtocolInfo(tp->getTargetMimeType()));
@@ -137,9 +155,6 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
     }
 
 #endif
-
-    Ref<Dictionary> mappings = config->getDictionaryOption(
-                        CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
     int resCount = item->getResourceCount();
     for (int i = 0; i < resCount; i++)

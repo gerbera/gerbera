@@ -118,6 +118,7 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
         if (isTheora(item->getLocation()))
             resource->addOption(_(CONTENT_TYPE_OGG), _(OGG_THEORA));
     }
+
     do
     {
 #ifdef HAVE_TAGLIB

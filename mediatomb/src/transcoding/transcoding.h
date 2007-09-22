@@ -117,7 +117,16 @@ public:
     void addAttribute(zmm::String name, zmm::String value);
 
     zmm::Ref<Dictionary> getAttributes();
- 
+
+    /// \brief Override for theora content.
+    ///
+    /// I could not find a more generic way for this, I guess this could
+    /// be extended to a dictionary style options if more things like that
+    /// become necessary; we need a possibility to have a more fine grained
+    /// detection of content where mimetype alone is not enough.
+    void setTheora(bool theora) { this->theora = theora; }
+    bool isTheora() { return theora; }
+
 
 protected:
     zmm::String name;
@@ -125,6 +134,7 @@ protected:
     zmm::String command;
     zmm::String args;
     bool first_resource;
+    bool theora;
     size_t buffer_size;
     size_t chunk_size;
     size_t initial_fill_size;

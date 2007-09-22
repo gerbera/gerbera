@@ -194,7 +194,7 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext *pFormatC
 				samplefreq = st->codec->sample_rate;
 			    if (samplefreq > 0) 
                 {
-		    	    log_debug("Added sample frequency: %s Hz\n", samplefreq);
+		    	    log_debug("Added sample frequency: %d Hz\n", samplefreq);
 		        	item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), String::from(samplefreq));
 					audioset = true;
     			}

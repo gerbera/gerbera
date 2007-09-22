@@ -46,9 +46,12 @@ extern "C" {
 #endif
 
 /// \brief splits the given string into array of strings using a separator character.
+/// \param str String to split
 /// \param sep separator character
+/// \param treat subsequent separators as empty array elements
 /// \return array of strings
-zmm::Ref<zmm::Array<zmm::StringBase> > split_string(zmm::String str, char sep);
+zmm::Ref<zmm::Array<zmm::StringBase> > split_string(zmm::String str, char sep, 
+                                                    bool empty = false);
 
 /// \brief splits the given file path into the path to the file and the filename.
 /// \param str the path to split

@@ -63,7 +63,7 @@ using namespace zmm;
 
 static char *HEX_CHARS = "0123456789abcdef";
 
-Ref<Array<StringBase> > split_string(String str, char sep)
+Ref<Array<StringBase> > split_string(String str, char sep, bool empty)
 {
     Ref<Array<StringBase> > ret(new Array<StringBase>());
     char *data = str.c_str();
@@ -80,6 +80,8 @@ Ref<Array<StringBase> > split_string(String str, char sep)
         else if (pos == data)
         {
             data++;
+            if ((data < end) && empty)
+                ret->append(String(""));
         }
         else
         {

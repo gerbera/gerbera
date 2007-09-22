@@ -2713,7 +2713,10 @@ eval PACKAGE_DATADIR="${PACKAGE_DATADIR}"
 AC_DEFINE_UNQUOTED(PACKAGE_DATADIR, "$PACKAGE_DATADIR", [MediaTomb data directory])
 
 if test $YOUTUBE -eq 1; then
+    YOUTUBE_OK="yes"
     AC_DEFINE(ONLINE_SERVICES, 1, [at least one online service is supported])
+else
+    YOUTUBE_OK="disabled"
 fi
 
 ###############
@@ -2746,8 +2749,11 @@ echo "libexif       : $EXIF_OK"
 echo "id3lib        : $ID3_OK"
 echo "taglib        : $TAGLIB_OK"
 echo "ffmpeg        : $FFMPEG_OK"
-echo "libextractor  : $EXTRACTOR_OK"
 echo "transcoding   : $TRANSCODING_OK"
+echo "YouTube       : $YOUTUBE_OK"
+echo "libextractor  : $EXTRACTOR_OK"
+
+
 
 if  test $AUTOCREATE_PRINT != "0"; then
     echo "db-autocreate : $AUTOCREATE_PRINT"

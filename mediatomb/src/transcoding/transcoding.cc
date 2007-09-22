@@ -48,13 +48,15 @@ TranscodingProfile::TranscodingProfile()
     chunk_size = 0;
     initial_fill_size = 0;
     tr_type = TR_None;
+    theora = false;
     attributes = Ref<Dictionary>(new Dictionary());
 }
 
-TranscodingProfile::TranscodingProfile(transcoding_type_t tr_type, String name)
+TranscodingProfile::TranscodingProfile(transcoding_type_t tr_type, String name) 
 {
     this->name = name;
     this->tr_type = tr_type;
+    theora = false;
     first_resource = false;
     buffer_size = 0;
     chunk_size = 0;

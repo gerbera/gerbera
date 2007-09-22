@@ -43,6 +43,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
+#include <signal.h>
 #include "common.h"
 #include "storage.h"
 #include "cds_objects.h"
@@ -139,6 +140,9 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
           
             printf("\n");
 #endif
+            sigset_t mask_set;
+            pthread_sigmask(SIG_SETMASK, &mask_set, NULL);
+
             execvp(command.c_str(), argv);
         default:
             break;
