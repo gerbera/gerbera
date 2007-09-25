@@ -224,7 +224,9 @@ void FfmpegHandler::fillMetadata(Ref<CdsItem> item)
 	/*struct timeval start, end;
 	double cumTime = 0;
 	gettimeofday(&start, NULL);*/	
-    	
+
+    log_debug("Running ffmpeg handler\n");
+
 	AVFormatContext *pFormatCtx;
 	
 	// Suppress all log messages
