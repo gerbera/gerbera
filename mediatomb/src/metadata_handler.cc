@@ -174,7 +174,7 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
             ((content_type == CONTENT_TYPE_OGG) &&
              (resource->getOption(_(CONTENT_TYPE_OGG)) == OGG_THEORA) ||
             (item->getMimeType().startsWith(_("video"))) ||
-            (item->getMimeType().startsWith(_("aidio")))))
+            (item->getMimeType().startsWith(_("audio")))))
         {
             handler = Ref<MetadataHandler>(new FfmpegHandler());
             break;
