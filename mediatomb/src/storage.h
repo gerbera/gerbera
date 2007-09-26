@@ -203,6 +203,9 @@ public:
     /// \return changed container ids
     virtual zmm::Ref<ChangedContainers> removeObjects(zmm::Ref<DBRHash<int> > list, bool all = false) = 0;
     
+    /// \todo document
+    virtual zmm::Ref<CdsObject> loadObjectByServiceID(zmm::String serviceID) = 0;
+    
     /* accounting methods */
     virtual int getTotalFiles() = 0;
     

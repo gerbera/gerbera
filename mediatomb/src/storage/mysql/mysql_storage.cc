@@ -63,6 +63,11 @@
 #define MYSQL_UPDATE_2_3_3 "ALTER TABLE `mt_autoscan` ADD `path_ids` BLOB AFTER `location`"
 #define MYSQL_UPDATE_2_3_4 "UPDATE `mt_internal_setting` SET `value`='3' WHERE `key`='db_version' AND `value`='2'"
 
+// updates 3->4
+#define MYSQL_UPDATE_3_4_1 "ALTER TABLE `mt_cds_object` ADD `service_id` varchar(255) default NULL"
+#define MYSQL_UPDATE_3_4_2 "ALTER TABLE `mt_cds_object` ADD KEY `cds_object_service_id` (`service_id`)"
+#define MYSQL_UPDATE_3_4_3 "UPDATE `mt_internal_setting` SET `value`='4' WHERE `key`='db_version' AND `value`='3'"
+
 
 using namespace zmm;
 using namespace mxml;
@@ -250,9 +255,20 @@ void MysqlStorage::init()
         log_info("database upgrade successful.\n");
         dbVersion = _("3");
     }
+    
+    if (dbVersion == "3")
+    {
+        log_info("Doing an automatic database upgrade from database version 3 to version 4...\n");
+        _exec(MYSQL_UPDATE_3_4_1);
+        _exec(MYSQL_UPDATE_3_4_2);
+        _exec(MYSQL_UPDATE_3_4_3);
+        log_info("database upgrade successful.\n");
+        dbVersion = _("4");
+    }
+    
     /* --- --- ---*/
     
-    if (! string_ok(dbVersion) || dbVersion != "3")
+    if (! string_ok(dbVersion) || dbVersion != "4")
         throw _Exception(_("The database seems to be from a newer version (database version ") + dbVersion + ")!");
     
     AUTOUNLOCK();

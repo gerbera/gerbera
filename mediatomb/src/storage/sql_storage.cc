@@ -69,6 +69,7 @@ enum
     _mime_type,
     _flags,
     _track_number,
+    _service_id,
     _ref_upnp_class,
     _ref_location,
     _ref_metadata,
@@ -106,6 +107,7 @@ enum
     SEL_EQ_SP_FQ_DT_BQ "mime_type" \
     SEL_EQ_SP_FQ_DT_BQ "flags" \
     SEL_EQ_SP_FQ_DT_BQ "track_number" \
+    SEL_EQ_SP_FQ_DT_BQ "service_id" \
     SEL_EQ_SP_RFQ_DT_BQ "upnp_class" \
     SEL_EQ_SP_RFQ_DT_BQ "location" \
     SEL_EQ_SP_RFQ_DT_BQ "metadata" \
@@ -338,6 +340,16 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
                 cdsObjectSql->put(_("track_number"), _(SQL_NULL));
         }
         
+        if (string_ok(item->getServiceID()))
+        {
+            cdsObjectSql->put(_("service_id"), quote(item->getServiceID()));
+        }
+        else
+        {
+            if (isUpdate)
+                cdsObjectSql->put(_("service_id"), _(SQL_NULL));
+        }
+        
         cdsObjectSql->put(_("mime_type"), quote(item->getMimeType()));
     }
     if (IS_CDS_ACTIVE_ITEM(objectType))
@@ -495,6 +507,19 @@ Ref<CdsObject> SQLStorage::loadObject(int objectID)
         return createObjectFromRow(row);
     }
     throw _ObjectNotFoundException(_("Object not found: ") + objectID);
+}
+
+Ref<CdsObject> SQLStorage::loadObjectByServiceID(String serviceID)
+{
+    Ref<StringBuffer> qb(new StringBuffer());
+    *qb << SQL_QUERY << " WHERE " << TQD('f',"service_id") << '=' << quote(serviceID);
+    Ref<SQLResult> res = select(qb);
+    Ref<SQLRow> row;
+    if (res != nil && (row = res->nextRow()) != nil)
+    {
+        return createObjectFromRow(row);
+    }
+    throw _ObjectNotFoundException(_("Object not found by service ID: ") + serviceID);
 }
 
 Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
@@ -951,6 +976,8 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
         }
         
         item->setTrackNumber(row->col(_track_number).toInt());
+        
+        item->setServiceID(row->col(_service_id));
         
         matched_types++;
     }

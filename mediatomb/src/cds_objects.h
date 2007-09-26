@@ -104,6 +104,7 @@ protected:
     zmm::Ref<Dictionary> metadata;
     zmm::Ref<Dictionary> auxdata;
     zmm::Ref<zmm::Array<CdsResource> > resources;
+    
 
 public:
     /// \brief Constructor. Sets the default values.
@@ -233,8 +234,7 @@ public:
     inline void removeAuxData(zmm::String key)
     { auxdata->remove(key); }
     
-
-
+    
     /// \brief Get number of resource tags
     inline int getResourceCount() { return resources->size(); }
 
@@ -293,6 +293,9 @@ protected:
     zmm::String mimeType;
 
     int trackNumber;
+    
+    /// \brief unique service ID
+    zmm::String serviceID;
 
 public:
     /// \brief Constructor, sets the object type and default upnp:class (object.item)
@@ -322,6 +325,12 @@ public:
 
     /// \brief Returns the path to the object as it appears in the database tree.
     virtual zmm::String getVirtualPath();
+    
+    /// \brief Set the unique service ID.
+    inline void setServiceID(zmm::String serviceID) { this->serviceID = serviceID; }
+    
+    /// \brief Retrieve the unique service ID.
+    inline zmm::String getServiceID() { return serviceID; }
 };
 
 /// \brief An Active Item in the content directory.

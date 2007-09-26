@@ -162,6 +162,7 @@ CdsItem::CdsItem() : CdsObject()
     upnpClass = _("object.item");
     mimeType = _(MIMETYPE_DEFAULT);
     trackNumber = 0;
+    serviceID = nil;
 }
 
 void CdsItem::copyTo(Ref<CdsObject> obj)
@@ -173,14 +174,16 @@ void CdsItem::copyTo(Ref<CdsObject> obj)
 //    item->setDescription(description);
     item->setMimeType(mimeType);
     item->setTrackNumber(trackNumber);
+    item->setServiceID(serviceID);
 }
 int CdsItem::equals(Ref<CdsObject> obj, bool exactly)
 {
     Ref<CdsItem> item = RefCast(obj, CdsItem);
     if (! CdsObject::equals(obj, exactly))
         return 0;
-    return ((mimeType == item->getMimeType()) && 
-            (trackNumber == item->getTrackNumber()));
+    return (mimeType == item->getMimeType() && 
+            trackNumber == item->getTrackNumber() && 
+            serviceID == item->getServiceID());
 }
 
 void CdsItem::validate()

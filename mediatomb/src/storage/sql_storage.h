@@ -108,6 +108,8 @@ public:
     virtual zmm::Ref<ChangedContainers> removeObject(int objectID, bool all);
     virtual zmm::Ref<ChangedContainers> removeObjects(zmm::Ref<DBRHash<int> > list, bool all = false);
     
+    virtual zmm::Ref<CdsObject> loadObjectByServiceID(zmm::String serviceID);
+    
     /* accounting methods */
     virtual int getTotalFiles();
     

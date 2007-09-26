@@ -51,6 +51,11 @@
 #define SQLITE3_UPDATE_1_2_3 "ALTER TABLE \"mt_autoscan\" ADD \"path_ids\" text"
 #define SQLITE3_UPDATE_1_2_4 "UPDATE \"mt_internal_setting\" SET \"value\"='2' WHERE \"key\"='db_version' AND \"value\"='1'"
 
+// updates 2->3
+#define SQLITE3_UPDATE_2_3_1 "ALTER TABLE \"mt_cds_object\" ADD \"service_id\" varchar(255) default NULL"
+#define SQLITE3_UPDATE_2_3_2 "CREATE INDEX mt_cds_object_service_id ON mt_cds_object(service_id)"
+#define SQLITE3_UPDATE_2_3_3 "UPDATE \"mt_internal_setting\" SET \"value\"='3' WHERE \"key\"='db_version' AND \"value\"='2'"
+
 #define SL3_INITITAL_QUEUE_SIZE 20
 
 using namespace zmm;
@@ -137,9 +142,19 @@ void Sqlite3Storage::init()
         dbVersion = _("2");
     }
     
+    if (dbVersion == "2")
+    {
+        log_info("Doing an automatic database upgrade from database version 2 to version 3...\n");
+        _exec(SQLITE3_UPDATE_2_3_1);
+        _exec(SQLITE3_UPDATE_2_3_2);
+        _exec(SQLITE3_UPDATE_2_3_3);
+        log_info("database upgrade successful.\n");
+        dbVersion = _("3");
+    }
+    
     /* --- --- ---*/
     
-    if (! string_ok(dbVersion) || dbVersion != "2")
+    if (! string_ok(dbVersion) || dbVersion != "3")
         throw _Exception(_("The database seems to be from a newer version!"));
     
     //pthread_attr_destroy(&attr);

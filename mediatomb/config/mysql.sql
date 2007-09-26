@@ -22,19 +22,21 @@ CREATE TABLE `mt_cds_object` (
   `mime_type` varchar(40) default NULL,
   `flags` int(11) unsigned NOT NULL default '1',
   `track_number` int(11) default NULL,
+  `service_id` varchar(255) default NULL,
   PRIMARY KEY  (`id`),
   KEY `cds_object_ref_id` (`ref_id`),
   KEY `cds_object_parent_id` (`parent_id`,`object_type`,`dc_title`),
   KEY `cds_object_object_type` (`object_type`),
   KEY `location_parent` (`location_hash`,`parent_id`),
   KEY `cds_object_track_number` (`track_number`),
+  KEY `cds_object_service_id` (`service_id`),
   CONSTRAINT `mt_cds_object_ibfk_1` FOREIGN KEY (`ref_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `mt_cds_object_ibfk_2` FOREIGN KEY (`parent_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=MyISAM CHARSET=utf8;
-INSERT INTO `mt_cds_object` VALUES (-1,NULL,-1,0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,NULL,9,NULL);
-INSERT INTO `mt_cds_object` VALUES (0,NULL,-1,1,'object.container','Root',NULL,NULL,NULL,NULL,NULL,0,NULL,9,NULL);
+INSERT INTO `mt_cds_object` VALUES (-1,NULL,-1,0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,NULL,9,NULL,NULL);
+INSERT INTO `mt_cds_object` VALUES (0,NULL,-1,1,'object.container','Root',NULL,NULL,NULL,NULL,NULL,0,NULL,9,NULL,NULL);
 UPDATE `mt_cds_object` SET `id`='0' WHERE `id`='1';
-INSERT INTO `mt_cds_object` VALUES (1,NULL,0,1,'object.container','PC Directory',NULL,NULL,NULL,NULL,NULL,0,NULL,9,NULL);
+INSERT INTO `mt_cds_object` VALUES (1,NULL,0,1,'object.container','PC Directory',NULL,NULL,NULL,NULL,NULL,0,NULL,9,NULL,NULL);
 CREATE TABLE `mt_cds_active_item` (
   `id` int(11) NOT NULL,
   `action` varchar(255) NOT NULL,
@@ -47,7 +49,7 @@ CREATE TABLE `mt_internal_setting` (
   `value` varchar(255) NOT NULL,
   PRIMARY KEY  (`key`)
 ) ENGINE=MyISAM CHARSET=utf8;
-INSERT INTO `mt_internal_setting` VALUES ('db_version','3');
+INSERT INTO `mt_internal_setting` VALUES ('db_version','4');
 CREATE TABLE `mt_autoscan` (
   `id` int(11) NOT NULL auto_increment,
   `obj_id` int(11) default NULL,
