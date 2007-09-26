@@ -1365,10 +1365,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
         }
 
         if (child->getChild(_("theora")) != nil)
-        {
-            printf("Fount theora: %s\n", prof->getName().c_str());
             prof->setTheora(true);
-        }
 
         param = child->getChildText(_("first-resource"));
         if (!validateYesNo(param))
