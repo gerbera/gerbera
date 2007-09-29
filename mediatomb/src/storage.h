@@ -203,10 +203,12 @@ public:
     /// \return changed container ids
     virtual zmm::Ref<ChangedContainers> removeObjects(zmm::Ref<DBRHash<int> > list, bool all = false) = 0;
     
-    /// \todo document
+    /// \brief Loads an object given by the online service ID.
     virtual zmm::Ref<CdsObject> loadObjectByServiceID(zmm::String serviceID) = 0;
     
-    /// \todo document
+    /// \brief Return an array of object ID's for a particular service.
+    ///
+    /// In the database, the service is identified by a service id prefix.
     //virtual zmm::Ref<zmm::IntArray> getServiceObjectIDs(unsigned char servicePrefix) = 0;
     
     /* accounting methods */
