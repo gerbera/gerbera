@@ -111,6 +111,8 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
             log_warning("Failed to retrieve YouTube video ID\n");
             continue;
         }
+        temp = _("Y") + temp;
+        item->setServiceID(temp);
         resource->addParameter(_(YOUTUBE_VIDEO_ID), temp);
         /// \todo remove this
         item->setURL(temp);

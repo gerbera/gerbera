@@ -42,6 +42,7 @@
 #include "string_converter.h"
 #include "config_manager.h"
 #include "server.h"
+#include "storage.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -684,11 +685,11 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
         /// \todo we need a function that would do a lookup on the special
         /// service ID and tell is uf a particular object already exists
         /// in the database
-//        Ref<CdsObject> old = Storage::getInstance()->findObjectByPath(obj->getLocation());
-        Ref<CdsObject> old;
+        Ref<CdsObject> old = Storage::getInstance()->loadObjectByServiceID(RefCast(obj, CdsItem)->getServiceID());
+//        Ref<CdsObject> old;
         if (old == nil)
         {
-            log_debug("Found new object!!!!\n");
+            log_debug("Adding new YouTube object\n");
             obj->setAuxData(_(YOUTUBE_AUXDATA_REQUEST), 
                             String::from(task->method));
 
@@ -703,8 +704,10 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
         }
         else
         {
-            log_debug("NEED TO UPDATE EXISTING OBJECT WITH ID: %s\n",
-                    obj->getLocation().c_str());
+            log_debug("Updating existing YouTube object\n");
+            obj->setID(old->getID());
+            obj->setParentID(old->getParentID());
+            ContentManager::getInstance()->updateObject(obj);
         }
 
         if (task->amount != AMOUNT_ALL)
