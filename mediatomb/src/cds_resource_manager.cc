@@ -117,10 +117,10 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
 
             if (mappings->get(item->getMimeType()) == CONTENT_TYPE_OGG) 
             {
-                if (((item->getResource(0)->getOption(_(CONTENT_TYPE_OGG)) ==
-                     OGG_THEORA) && (!tp->isTheora())) ||
-                    ((item->getResource(0)->getOption(_(CONTENT_TYPE_OGG)) !=
-                                            OGG_THEORA) && (tp->isTheora())))
+                if (((item->getFlag(OBJECT_FLAG_OGG_THEORA)) && 
+                     (!tp->isTheora())) ||
+                    (!item->getFlag(OBJECT_FLAG_OGG_THEORA) && 
+                    (tp->isTheora())))
                      {
                          continue;
                      }

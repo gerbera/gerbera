@@ -698,8 +698,7 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
     i = obj->isRestricted();
     setIntProperty(js, _("restricted"), i);
 
-    val = obj->getResource(0)->getOption(_(CONTENT_TYPE_OGG));
-    if ((val != nil) && (val == OGG_THEORA))
+    if (obj->getFlag(OBJECT_FLAG_OGG_THEORA))
         setIntProperty(js, _("theora"), 1);
     else
         setIntProperty(js, _("theora"), 0);

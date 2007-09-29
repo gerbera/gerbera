@@ -305,7 +305,7 @@ void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj)
             addAudio(clone);
         else if (content_type == CONTENT_TYPE_OGG)
         {
-            if (obj->getResource(0)->getOption(_(CONTENT_TYPE_OGG)) == OGG_THEORA)
+            if (obj->getFlag(OBJECT_FLAG_OGG_THEORA))
                 addVideo(clone);
             else
                 addAudio(clone);

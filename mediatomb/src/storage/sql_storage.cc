@@ -519,7 +519,8 @@ Ref<CdsObject> SQLStorage::loadObjectByServiceID(String serviceID)
     {
         return createObjectFromRow(row);
     }
-    throw _ObjectNotFoundException(_("Object not found by service ID: ") + serviceID);
+    
+    return nil;
 }
 
 Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
