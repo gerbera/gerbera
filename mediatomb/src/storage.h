@@ -206,6 +206,9 @@ public:
     /// \todo document
     virtual zmm::Ref<CdsObject> loadObjectByServiceID(zmm::String serviceID) = 0;
     
+    /// \todo document
+    //virtual zmm::Ref<zmm::IntArray> getServiceObjectIDs(unsigned char servicePrefix) = 0;
+    
     /* accounting methods */
     virtual int getTotalFiles() = 0;
     
