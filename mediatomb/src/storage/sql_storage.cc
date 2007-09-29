@@ -523,6 +523,27 @@ Ref<CdsObject> SQLStorage::loadObjectByServiceID(String serviceID)
     return nil;
 }
 
+Ref<IntArray> SQLStorage::getServiceObjectIDs(unsigned char servicePrefix)
+{
+    Ref<IntArray> objectIDs(new IntArray());
+    Ref<StringBuffer> qb(new StringBuffer());
+    *qb << "SELECT " << TQ("id")
+        << " FROM " << TQ(CDS_OBJECT_TABLE)
+        << " WHERE " << TQ("service_id")
+        << '=' << quote(servicePrefix);
+    Ref<SQLResult> res = select(qb);
+    if (res == nil)
+        throw _Exception(_("db error"));
+    
+    Ref<SQLRow> row;
+    while((row = res->nextRow()) != nil)
+    {
+        objectIDs->append(row->col(0).toInt());
+    }
+    
+    return objectIDs;
+}
+
 Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
 {
     int objectID;
