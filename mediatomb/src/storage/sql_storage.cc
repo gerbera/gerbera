@@ -530,7 +530,7 @@ Ref<IntArray> SQLStorage::getServiceObjectIDs(unsigned char servicePrefix)
     *qb << "SELECT " << TQ("id")
         << " FROM " << TQ(CDS_OBJECT_TABLE)
         << " WHERE " << TQ("service_id")
-        << '=' << quote(servicePrefix);
+        << " LIKE " << quote(String::from(servicePrefix)+'%');
     Ref<SQLResult> res = select(qb);
     if (res == nil)
         throw _Exception(_("db error"));
