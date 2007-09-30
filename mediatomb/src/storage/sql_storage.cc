@@ -114,7 +114,8 @@ enum
     SEL_EQ_SP_RFQ_DT_BQ "metadata" \
     SEL_EQ_SP_RFQ_DT_BQ "auxdata" \
     SEL_EQ_SP_RFQ_DT_BQ "resources" \
-    SEL_EQ_SP_RFQ_DT_BQ "mime_type" << QTE \
+    SEL_EQ_SP_RFQ_DT_BQ "mime_type" \
+    SEL_EQ_SP_RFQ_DT_BQ "service_id" << QTE \
     << ',' << TQD("as","persistent")
     
 #define SQL_QUERY_FOR_STRINGBUFFER "SELECT " << SELECT_DATA_FOR_STRINGBUFFER << \
