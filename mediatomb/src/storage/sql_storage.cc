@@ -218,7 +218,16 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
             throw _Exception(_("tried to add or update a virtual object with illegal reference id and an illegal location"));
     }
     else if (obj->getRefID() > 0)
-        throw _Exception(_("refId set, but it makes no sense"));
+    {
+        if (obj->getFlag(OBJECT_FLAG_ONLINE_SERVICE))
+        {
+            refObj = loadObject(obj->getRefID());
+            if (refObj == nil)
+                throw _Exception(_("OBJECT_FLAG_ONLINE_SERVICE and refID set but refID doesn't point to an existing object"));
+        }
+        else
+            throw _Exception(_("refId set, but it makes no sense"));
+    }
     
     Ref<Array<AddUpdateTable> > returnVal(new Array<AddUpdateTable>(2));
     Ref<Dictionary> cdsObjectSql(new Dictionary());
