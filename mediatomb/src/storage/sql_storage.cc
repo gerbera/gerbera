@@ -222,6 +222,7 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
     {
         if (obj->getFlag(OBJECT_FLAG_ONLINE_SERVICE))
         {
+            hasReference = true;
             refObj = loadObject(obj->getRefID());
             if (refObj == nil)
                 throw _Exception(_("OBJECT_FLAG_ONLINE_SERVICE and refID set but refID doesn't point to an existing object"));
