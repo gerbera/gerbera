@@ -76,6 +76,7 @@ enum
     _ref_auxdata,
     _ref_resources,
     _ref_mime_type,
+    _ref_service_id,
     _as_persistent
 };
 
@@ -1009,7 +1010,10 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
         
         item->setTrackNumber(row->col(_track_number).toInt());
         
-        item->setServiceID(row->col(_service_id));
+        if (string_ok(row->col(_ref_service_id)))
+            item->setServiceID(row->col(_ref_service_id));
+        else
+            item->setServiceID(row->col(_service_id));
         
         matched_types++;
     }
