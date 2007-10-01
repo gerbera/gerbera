@@ -223,7 +223,7 @@ String YouTubeService::getServiceName()
 
 char YouTubeService::getStoragePrefix()
 {
-    return 'Y';
+    return OnlineService::getStoragePrefix(OS_YouTube);
 }
 
 

@@ -45,9 +45,7 @@
 
 typedef enum service_type_t
 {
-#ifdef YOUTUBE
     OS_YouTube = 0,
-#endif
     OS_Max
 };
 
@@ -77,8 +75,11 @@ public:
     /// \brief Returns the service name
     virtual zmm::String getServiceName() = 0;
 
-    /// \brief Get the storage service prefix
+    /// \brief Get the storage service prefix for a particular service
     virtual char getStoragePrefix() = 0;
+    
+    /// \brief Get the storage prefix for a given service type
+    static char getStoragePrefix(service_type_t service);
     
     /// \brief Parses the service related line from config.xml and creates
     /// a task object, which can be anything that helps the service to
@@ -116,6 +117,7 @@ protected:
     int taskCount;
     int refresh_interval;
     zmm::Ref<zmm::Object> timer_parameter;
+
 
 };
 

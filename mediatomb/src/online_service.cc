@@ -39,6 +39,8 @@
 
 using namespace zmm;
 
+char service_prefixes[] = { 'Y', NULL };
+
 OnlineServiceList::OnlineServiceList()
 {
     service_list = Ref<Array<OnlineService> > (new Array<OnlineService>(OS_Max));
@@ -63,6 +65,14 @@ Ref<OnlineService> OnlineServiceList::getService(service_type_t service)
         return nil;
 
     return service_list->get(service);
+}
+
+char OnlineService::getStoragePrefix(service_type_t service)
+{
+    if ((service < 0) || (service >= OS_Max))
+        throw _Exception(_("Illegal service requested\n"));
+
+    return service_prefixes[service];
 }
 
 #endif//ONLINE_SERVICES

@@ -114,7 +114,7 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
         }
         
         item->setURL(temp);
-        temp = _(YOUTUBE_SERVICE_ID) + temp;
+        temp = String(OnlineService::getStoragePrefix(OS_YouTube)) + temp;
         item->setServiceID(temp);
         resource->addParameter(_(YOUTUBE_VIDEO_ID), temp);
 
