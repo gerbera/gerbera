@@ -534,14 +534,15 @@ Ref<CdsObject> SQLStorage::loadObjectByServiceID(String serviceID)
     return nil;
 }
 
-Ref<IntArray> SQLStorage::getServiceObjectIDs(unsigned char servicePrefix)
+Ref<IntArray> SQLStorage::getServiceObjectIDs(char servicePrefix)
 {
     Ref<IntArray> objectIDs(new IntArray());
     Ref<StringBuffer> qb(new StringBuffer());
     *qb << "SELECT " << TQ("id")
         << " FROM " << TQ(CDS_OBJECT_TABLE)
         << " WHERE " << TQ("service_id")
-        << " LIKE " << quote(String::from(servicePrefix)+'%');
+        << " LIKE " << quote(String(servicePrefix)+'%');
+
     Ref<SQLResult> res = select(qb);
     if (res == nil)
         throw _Exception(_("db error"));

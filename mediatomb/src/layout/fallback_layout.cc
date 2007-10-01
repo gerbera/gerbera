@@ -75,7 +75,16 @@ void FallbackLayout::addImage(zmm::Ref<CdsObject> obj)
     int id;
     
     id = ContentManager::getInstance()->addContainerChain(_("/Photos/All Photos"));
-    add(obj, id);
+    if (obj->getID() != INVALID_OBJECT_ID)
+    {
+        obj->setRefID(obj->getID());
+        add(obj, id);
+    }
+    else
+    {
+        add(obj, id);
+        obj->setRefID(obj->getID());
+    }
 
     Ref<Dictionary> meta = obj->getMetadata();
 
@@ -157,7 +166,17 @@ void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
 
     id = ContentManager::getInstance()->addContainerChain(_("/Audio/All Audio"), _(UPNP_DEFAULT_CLASS_MUSIC_CONT));
     obj->setTitle(title);
-    add(obj, id);
+
+    if (obj->getID() != INVALID_OBJECT_ID)
+    {
+        obj->setRefID(obj->getID());
+        add(obj, id);
+    }
+    else
+    {
+        add(obj, id);
+        obj->setRefID(obj->getID());
+    }
 
     artist = esc(artist);
 
@@ -208,6 +227,14 @@ void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
     String chain;
     String temp;
     int id;
+    bool ref_set = false;
+
+    if (obj->getID() != INVALID_OBJECT_ID)
+    {
+        obj->setRefID(obj->getID());
+        ref_set = true;
+    }
+
 
     temp = obj->getAuxData(_(YOUTUBE_AUXDATA_AUTHOR));
     if (string_ok(temp))
@@ -215,7 +242,13 @@ void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
         chain = _(YT_VPATH "/Author/") + 
             esc(temp);
         id = ContentManager::getInstance()->addContainerChain(chain);
-        add(obj, id, false);
+        
+        add(obj, id, ref_set);
+        if (!ref_set)
+        {
+            obj->setRefID(obj->getID());
+            ref_set = true;
+        }
     }
 
 
@@ -225,7 +258,12 @@ void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
         chain = _(YT_VPATH "/Rating/") + 
             esc(String::from((int)temp.toDouble()));
         id = ContentManager::getInstance()->addContainerChain(chain);
-        add(obj, id, false);
+        add(obj, id, ref_set);
+        if (!ref_set)
+        {
+            obj->setRefID(obj->getID());
+            ref_set = true;
+        }
     }
 
     temp = obj->getAuxData(_(YOUTUBE_AUXDATA_TAGS));
@@ -236,7 +274,12 @@ void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
         {
             chain = _(YT_VPATH "/Tags/") + esc(split_temp->get(i));
             id = ContentManager::getInstance()->addContainerChain(chain);
-            add(obj, id, false);
+            add(obj, id, ref_set);
+            if (!ref_set)
+            {
+                obj->setRefID(obj->getID());
+                ref_set = true;
+            }
         }
     }
 
@@ -263,7 +306,7 @@ void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
             }
             chain = _(YT_VPATH) + '/' + temp;
             id = ContentManager::getInstance()->addContainerChain(chain);
-            add(obj, id, false);
+            add(obj, id, ref_set);
         }
     }
 }

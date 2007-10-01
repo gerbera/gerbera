@@ -36,7 +36,7 @@
 #define __YOUTUBE_DATA_HANDLER_H__
 
 #define YOUTUBE_SERVICE                 "YouTube"
-#define YOUTUBE_SERVICE_ID              "yt"
+#define YOUTUBE_SERVICE_ID              "Y"
 #define YOUTUBE_VIDEO_ID                "vid"
 
 #define YOUTUBE_AUXDATA_TAGS            "tags"

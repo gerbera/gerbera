@@ -41,6 +41,7 @@
 #include "layout/layout.h"
 
 #define ONLINE_SERVICE_AUX_ID "ols"
+#define ONLINE_SERVICE_LAST_UPDATE "lu"
 
 typedef enum service_type_t
 {
@@ -76,6 +77,9 @@ public:
     /// \brief Returns the service name
     virtual zmm::String getServiceName() = 0;
 
+    /// \brief Get the storage service prefix
+    virtual char getStoragePrefix() = 0;
+    
     /// \brief Parses the service related line from config.xml and creates
     /// a task object, which can be anything that helps the service to
     /// identify what data it has to fetch.

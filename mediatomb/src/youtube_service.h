@@ -87,6 +87,9 @@ public:
     /// \brief Get the human readable name for the service
     virtual zmm::String getServiceName();
 
+    /// \brief Get the storage service prefix
+    virtual char getStoragePrefix();
+
     /// \brief Parse the xml fragment from the configuration and gather
     /// the user settings in a service task structure.
     virtual zmm::Ref<zmm::Object> defineServiceTask(zmm::Ref<mxml::Element> xmlopt);

@@ -973,6 +973,16 @@ void ConfigManager::validate(String serverhome)
     NEW_INT_OPTION(temp_int);
     SET_INT_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_REFRESH);
 
+    temp_int = getIntOption(_("/online-content/YouTube/attribute::purge-after"), 0);
+    if (getIntOption(_("/online-content/YouTube/attribute::refresh")) >= temp_int)
+    {
+        if (temp_int != 0) 
+            throw _Exception(_("Error in config file: purge-after value must be greater than refresh interval"));
+    }
+
+    NEW_INT_OPTION(temp_int);
+    SET_INT_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_PURGE_AFTER);
+
     temp = getOption(_("/online-content/YouTube/attribute::update-at-start"),
                      _(DEFAULT_YOUTUBE_UPDATE_AT_START));
 

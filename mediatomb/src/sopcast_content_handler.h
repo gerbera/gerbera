@@ -72,7 +72,10 @@ protected:
     zmm::Ref<mxml::Element> service_xml;
     int current_group_node_index;
     int group_count;
-    int current_channel_count;
+    int current_channel_index;
+    int channel_count;
+
+    zmm::Ref<mxml::Element> current_group;
 };
 
 #endif//__SOPCAST_CONTENT_HANDLER_H__

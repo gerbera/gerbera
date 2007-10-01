@@ -56,10 +56,10 @@ bool SopCastContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
     this->service_xml = service;
 
     group_count = service_xml->childCount();
-    if (group_count == 0)
+    if (group_count < 1)
         return false;
 
-    current_groupe_node_index = 0;
+    current_group_node_index = 0;
 
     return true;
 }
@@ -71,9 +71,26 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
     time_t epoch;
     struct tm t;
     char datebuf[DATE_BUF_LEN];
-/*
-    while (current_video_node_index < video_list_child_count)
+
+    while (current_group_node_index < group_count)
     {
+        if (current_group == nil)
+        {
+            current_group = service_xml->getChild(current_group_node_index);
+            channel_count = current_group->getChildCount();
+            if (channel_count < 1)
+            {
+                current_group_node_index++;
+                current_group = nil;
+            }
+
+        continue;
+ 
+        }
+
+       
+        while (current_channel_index < channel_count)
+        {
         Ref<Element> video = service_xml->getChild(current_video_node_index);
         current_video_node_index++;
        
@@ -177,7 +194,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
         item->setAuxData(_(ONLINE_SERVICE_AUX_ID), String::from(OS_SopCast));
 
         item->addResource(resource);
-        */
+        
 /*
         temp = video->getChildText(_("thumbnail_url"));
         if (string_ok(temp))
@@ -194,7 +211,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
  
         }
 */
-            /*
+
         item->setFlag(OBJECT_FLAG_PROXY_URL);
         item->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
         try
@@ -211,7 +228,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
 
 
     } // while
-    */
+    }
     return nil;
 }
 

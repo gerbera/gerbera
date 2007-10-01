@@ -109,7 +109,7 @@ public:
     virtual zmm::Ref<ChangedContainers> removeObjects(zmm::Ref<DBRHash<int> > list, bool all = false);
     
     virtual zmm::Ref<CdsObject> loadObjectByServiceID(zmm::String serviceID);
-    virtual zmm::Ref<zmm::IntArray> getServiceObjectIDs(unsigned char servicePrefix);
+    virtual zmm::Ref<zmm::IntArray> getServiceObjectIDs(char servicePrefix);
     
     /* accounting methods */
     virtual int getTotalFiles();

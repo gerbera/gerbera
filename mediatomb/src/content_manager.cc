@@ -1498,6 +1498,35 @@ void ContentManager::_fetchOnlineContent(Ref<OnlineService> service,
     {
         log_debug("Finished fetch cycle for service: %s\n",
                   service->getServiceName().c_str());
+        Ref<Storage> storage = Storage::getInstance();
+        Ref<IntArray> ids = storage->getServiceObjectIDs(service->getStoragePrefix());
+       
+        struct timespec current, last;
+        getTimespecNow(&current);
+        last.tv_nsec = 0;
+        String temp;
+
+        for (int i = 0; i < ids->size(); i++)
+        {
+            int object_id = ids->get(i);
+            Ref<CdsObject> obj = storage->loadObject(object_id);
+            if (obj == nil)
+                continue;
+
+            temp = obj->getAuxData(_(ONLINE_SERVICE_LAST_UPDATE));
+            if (!string_ok(temp))
+                continue;
+
+            last.tv_sec = temp.toLong();
+            int purge = ConfigManager::getInstance()->getIntOption(CFG_ONLINE_CONTENT_YOUTUBE_PURGE_AFTER);
+
+            if ((purge > 0) && ((current.tv_sec - last.tv_sec) > purge))
+            {
+                log_debug("Purging old online service object %s\n", 
+                        obj->getTitle().c_str());
+                removeObject(object_id, false);
+            }
+        }
     }
 }
 #endif

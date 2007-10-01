@@ -87,6 +87,7 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
     time_t epoch;
     struct tm t;
     char datebuf[DATE_BUF_LEN];
+    struct timespec ts;
 
     while (current_video_node_index < video_list_child_count)
     {
@@ -111,11 +112,11 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
             log_warning("Failed to retrieve YouTube video ID\n");
             continue;
         }
-        temp = _("Y") + temp;
+        
+        item->setURL(temp);
+        temp = _(YOUTUBE_SERVICE_ID) + temp;
         item->setServiceID(temp);
         resource->addParameter(_(YOUTUBE_VIDEO_ID), temp);
-        /// \todo remove this
-        item->setURL(temp);
 
         temp = video->getChildText(_("title"));
         if (string_ok(temp))
@@ -210,6 +211,9 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
             thumbnail->addOption(_(RESOURCE_OPTION_PROXY_URL), _(FALSE));
             item->addResource(thumbnail);
         }
+
+        getTimespecNow(&ts);
+        item->setAuxData(_(ONLINE_SERVICE_LAST_UPDATE), String::from(ts.tv_sec));
 
         item->setFlag(OBJECT_FLAG_PROXY_URL);
         item->setFlag(OBJECT_FLAG_ONLINE_SERVICE);

@@ -209,7 +209,7 @@ public:
     /// \brief Return an array of object ID's for a particular service.
     ///
     /// In the database, the service is identified by a service id prefix.
-    virtual zmm::Ref<zmm::IntArray> getServiceObjectIDs(unsigned char servicePrefix) = 0;
+    virtual zmm::Ref<zmm::IntArray> getServiceObjectIDs(char servicePrefix) = 0;
     
     /* accounting methods */
     virtual int getTotalFiles() = 0;

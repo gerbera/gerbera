@@ -43,6 +43,7 @@
 #include "config_manager.h"
 #include "server.h"
 #include "storage.h"
+#include "tools.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -219,6 +220,12 @@ String YouTubeService::getServiceName()
 {
     return _("YouTube");
 }
+
+char YouTubeService::getStoragePrefix()
+{
+    return 'Y';
+}
+
 
 String YouTubeService::getRequestName(yt_methods_t method)
 {
@@ -681,7 +688,7 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
         if (obj == nil)
             break;
 
-       obj->setVirtual(true);
+        obj->setVirtual(true);
         /// \todo we need a function that would do a lookup on the special
         /// service ID and tell is uf a particular object already exists
         /// in the database
@@ -707,6 +714,11 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
             log_debug("Updating existing YouTube object\n");
             obj->setID(old->getID());
             obj->setParentID(old->getParentID());
+            struct timespec oldt, newt;
+            oldt.tv_nsec = 0;
+            oldt.tv_sec = old->getAuxData(_(ONLINE_SERVICE_LAST_UPDATE)).toLong();
+            newt.tv_nsec = 0;
+            newt.tv_sec = obj->getAuxData(_(ONLINE_SERVICE_LAST_UPDATE)).toLong();
             ContentManager::getInstance()->updateObject(obj);
         }
 
