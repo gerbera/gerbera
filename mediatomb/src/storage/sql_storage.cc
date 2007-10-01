@@ -331,8 +331,6 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
         }
         else 
         {
-            if (! IS_CDS_PURE_ITEM(objectType))
-                throw _Exception(_("tried to create or update a non-pure item with refID set"));
             if (isUpdate)
             {
                 cdsObjectSql->put(_("location"), _(SQL_NULL));
