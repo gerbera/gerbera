@@ -501,8 +501,6 @@ AC_HELP_STRING([--enable-youtube],
 )
 
 if test $YOUTUBE -eq 1; then
-    AC_DEFINE([YOUTUBE], [1], [Enable support for the YouTube service])
-
     AC_ARG_WITH([curl-cfg],
             [
                 AC_HELP_STRING([--with-curl-cfg=curl-config],
@@ -2715,6 +2713,7 @@ AC_DEFINE_UNQUOTED(PACKAGE_DATADIR, "$PACKAGE_DATADIR", [MediaTomb data director
 if test $YOUTUBE -eq 1; then
     YOUTUBE_OK="yes"
     AC_DEFINE(ONLINE_SERVICES, 1, [at least one online service is supported])
+    AC_DEFINE([YOUTUBE], [1], [Enable support for the YouTube service])
 else
     YOUTUBE_OK="disabled"
 fi
