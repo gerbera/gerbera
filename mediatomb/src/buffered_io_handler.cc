@@ -38,146 +38,28 @@
 
 using namespace zmm;
 
-BufferedIOHandler::BufferedIOHandler(Ref<IOHandler> underlyingHandler, size_t bufSize, size_t maxChunkSize, size_t initialFillSize) : IOHandler()
+BufferedIOHandler::BufferedIOHandler(Ref<IOHandler> underlyingHandler, size_t bufSize, size_t maxChunkSize, size_t initialFillSize) : IOHandlerBufferHelper(bufSize, initialFillSize)
 {
-    if (bufSize <=0)
-        throw _Exception(_("bufSize must be positive"));
-    if (maxChunkSize <= 0)
-        throw _Exception(_("maxChunkSize must be positive"));
-    if (initialFillSize < 0 || initialFillSize > bufSize)
-        throw _Exception(_("initialFillSize must be non-negative and must be lesser than or equal to the size of the buffer"));
     if (underlyingHandler == nil)
         throw _Exception(_("underlyingHandler must not be nil"));
-    
-    mutex = Ref<Mutex>(new Mutex());
-    cond = Ref<Cond>(new Cond(mutex));
-    
+    if (maxChunkSize <= 0)
+        throw _Exception(_("maxChunkSize must be positive"));
     this->underlyingHandler = underlyingHandler;
-    this->bufSize = bufSize;
     this->maxChunkSize = maxChunkSize;
-    this->initialFillSize = initialFillSize;
-    waitForInitialFillSize = (initialFillSize > 0);
-    buffer = NULL;
-    isOpen = false;
-    threadShutdown = false;
-    eof = false;
-    readError = false;
-    a = b = 0;
-    empty = true;
 }
 
 void BufferedIOHandler::open(IN enum UpnpOpenFileMode mode)
 {
-    if (isOpen)
-        throw _Exception(_("tried to reopen an open BufferedIOHandler"));
-    buffer = (char *)MALLOC(bufSize);
-    if (buffer == NULL)
-        throw _Exception(_("Failed to allocate memory for transcoding buffer!"));
-
+    // do the open here instead of threadProc() because it may throw an exception
     underlyingHandler->open(mode);
-    startBufferThread();
-    isOpen = true;
-}
-
-BufferedIOHandler::~BufferedIOHandler()
-{
-    if (isOpen)
-        close();
-}
-
-int BufferedIOHandler::read(OUT char *buf, IN size_t length)
-{
-    if (! isOpen)
-        throw _Exception(_("read on closed BufferedIOHandler"));
-    if (length <= 0)
-        throw _Exception(_("length must be positive"));
-    
-    AUTOLOCK(mutex);
-    while ((empty || waitForInitialFillSize) && ! (threadShutdown || eof || readError))
-        cond->wait();
-    
-    if (readError || threadShutdown)
-        return -1;
-    if (empty && eof)
-        return 0;
-    
-    size_t bLocal = b;
-    AUTOUNLOCK();
-    
-    // we ensured with the while above that the buffer isn't empty
-    size_t maxRead = (a < bLocal ? bLocal - a : bufSize - a);
-    size_t doRead = (maxRead > length ? length : maxRead);
-    memcpy(buf, buffer + a, doRead);
-    
-    AUTORELOCK();
-    bool wasFull = (a == bLocal);
-    a += doRead;
-    assert(a <= bufSize);
-    if (a == bufSize)
-        a = 0;
-    if (a == b)
-    {
-        empty = true;
-        cond->signal();
-        // start at the beginning of the buffer
-        // disabled because it needs to by synced with threadProc
-        // which thinks that b won't be changed by anyone else
-        //a = b = 0;
-    }
-    
-    if (wasFull)
-        cond->signal();
-    //log_debug("read on buffer - requested %d; sent %d\n", length, doRead);
-    return doRead;
-}
-
-void BufferedIOHandler::seek(IN off_t offset, IN int whence)
-{
-    throw _Exception(_("seek currently unimplemented for BufferedIOHandler"));
+    IOHandlerBufferHelper::open(mode);
 }
 
 void BufferedIOHandler::close()
 {
-    if (! isOpen)
-        throw _Exception(_("close called on closed BufferedIOHandler"));
-    isOpen = false;
-    stopBufferThread();
-    FREE(buffer);
-    buffer = NULL;
+    IOHandlerBufferHelper::close();
+    // do the close here instead of threadProc() because it may throw an exception
     underlyingHandler->close();
-}
-
-// thread stuff...
-
-void BufferedIOHandler::startBufferThread()
-{
-    pthread_create(
-        &bufferThread,
-        NULL, // attr
-        BufferedIOHandler::staticThreadProc,
-        this
-    );
-}
-
-void BufferedIOHandler::stopBufferThread()
-{
-    AUTOLOCK(mutex);
-    threadShutdown = true;
-    cond->signal();
-    AUTOUNLOCK();
-    if (bufferThread)
-        pthread_join(bufferThread, NULL);
-    bufferThread = 0;
-}
-
-void *BufferedIOHandler::staticThreadProc(void *arg)
-{
-    log_debug("starting buffer thread... thread: %d\n", pthread_self());
-    BufferedIOHandler *inst = (BufferedIOHandler *)arg;
-    inst->threadProc();
-    log_debug("buffer thread shut down. thread: %d\n", pthread_self());
-    pthread_exit(NULL);
-    return NULL;
 }
 
 void BufferedIOHandler::threadProc()

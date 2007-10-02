@@ -19,6 +19,8 @@ libmediatomb_a_SOURCES = \
 ../src/config_options.h \
 ../src/content_manager.cc \
 ../src/content_manager.h \
+../src/curl_io_handler.cc \
+../src/curl_io_handler.h \
 ../src/destroyer.cc \
 ../src/destroyer.h \
 ../src/dictionary.cc \
@@ -40,6 +42,8 @@ libmediatomb_a_SOURCES = \
 ../src/hash/dso_hash.h \
 ../src/hash.h \
 ../src/inotify-nosys.h \
+../src/io_handler_buffer_helper.cc \
+../src/io_handler_buffer_helper.h \
 ../src/io_handler.cc \
 ../src/io_handler.h \
 ../src/jpeg_resolution.cc \
