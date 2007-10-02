@@ -45,6 +45,7 @@
 #include "cds_objects.h"
 #include "online_service_helper.h"
 #include "url.h"
+#include "curl_io_handler.h"
 #ifdef TRANSCODING
     #include "transcoding/transcode_dispatcher.h"
 #endif
@@ -252,11 +253,11 @@ Ref<IOHandler> URLRequestHandler::open(IN const char *filename, OUT struct File_
     }
 
     /// \todo write an URL IO handler
-//    Ref<IOHandler> io_handler(new BufferedIOHandler(Ref<IOHandler> (new URLIOHandler(url)), 1024*1024*30, 1024*1024, 1024*1024*20));
-//
-//    io_handler->open(mode);
-//    return io_handler;
-    throw _Exception(_("url request handler implementation is not yet complete!"));
+    Ref<IOHandler> io_handler(new CurlIOHandler(url, NULL, 1024*1024, 0));
+
+    io_handler->open(mode);
+    return io_handler;
+//    throw _Exception(_("url request handler implementation is not yet complete!"));
 }
 
 #endif

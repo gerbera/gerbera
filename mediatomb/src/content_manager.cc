@@ -63,6 +63,10 @@
     #include "youtube_service.h"
 #endif
 
+#ifdef SOPCAST
+    #include "sopcast_service.h"
+#endif
+
 #define DEFAULT_DIR_CACHE_CAPACITY  10
 #define CM_INITIAL_QUEUE_SIZE       20
 
@@ -209,6 +213,10 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
 
         i = cm->getIntOption(CFG_ONLINE_CONTENT_YOUTUBE_REFRESH);
         yt->setRefreshInterval(i);
+
+        i = cm->getIntOption(CFG_ONLINE_CONTENT_YOUTUBE_PURGE_AFTER);
+        yt->setItemPurgeInterval(i);
+
         if (cm->getBoolOption(CFG_ONLINE_CONTENT_YOUTUBE_UPDATE_AT_START))
             i = CFG_DEFAULT_UPDATE_AT_START;
 
@@ -218,6 +226,28 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
         Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), i, yt->getTimerParameter(), true);
     }
 #endif //YOUTUBE
+
+#ifdef SOPCAST
+    if (cm->getBoolOption(CFG_ONLINE_CONTENT_SOPCAST_ENABLED))
+    {
+        Ref<OnlineService> sc((OnlineService *)new SopCastService());
+
+        i = cm->getIntOption(CFG_ONLINE_CONTENT_SOPCAST_REFRESH);
+        sc->setRefreshInterval(i);
+
+        i = cm->getIntOption(CFG_ONLINE_CONTENT_SOPCAST_PURGE_AFTER);
+        sc->setItemPurgeInterval(i);
+
+        if (cm->getBoolOption(CFG_ONLINE_CONTENT_SOPCAST_UPDATE_AT_START))
+            i = CFG_DEFAULT_UPDATE_AT_START;
+
+        Ref<TimerParameter> sc_param(new TimerParameter(TimerParameter::IDOnlineContent, OS_SopCast));
+        sc->setTimerParameter(RefCast(sc_param, Object));
+        online_services->registerService(sc);
+        Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), i, sc->getTimerParameter(), true);
+    }
+#endif //SOPCAST
+
 
 #endif //ONLINE_SERVICES
 }
@@ -1492,40 +1522,46 @@ void ContentManager::_fetchOnlineContent(Ref<OnlineService> service,
     {
         log_debug("Scheduling another task for online service: %s\n",
                   service->getServiceName().c_str());
-        fetchOnlineContentInternal(service, true, true, parentTaskID);
+
+        if (service->getRefreshInterval() > 0)
+            fetchOnlineContentInternal(service, true, true, parentTaskID);
     }
     else
     {
         log_debug("Finished fetch cycle for service: %s\n",
                   service->getServiceName().c_str());
-        Ref<Storage> storage = Storage::getInstance();
-        Ref<IntArray> ids = storage->getServiceObjectIDs(service->getStoragePrefix());
-       
-        struct timespec current, last;
-        getTimespecNow(&current);
-        last.tv_nsec = 0;
-        String temp;
 
-        for (int i = 0; i < ids->size(); i++)
+        if (service->getItemPurgeInterval() > 0)
         {
-            int object_id = ids->get(i);
-            Ref<CdsObject> obj = storage->loadObject(object_id);
-            if (obj == nil)
-                continue;
+            Ref<Storage> storage = Storage::getInstance();
+            Ref<IntArray> ids = storage->getServiceObjectIDs(service->getStoragePrefix());
 
-            temp = obj->getAuxData(_(ONLINE_SERVICE_LAST_UPDATE));
-            if (!string_ok(temp))
-                continue;
+            struct timespec current, last;
+            getTimespecNow(&current);
+            last.tv_nsec = 0;
+            String temp;
 
-            last.tv_sec = temp.toLong();
-            int purge = ConfigManager::getInstance()->getIntOption(CFG_ONLINE_CONTENT_YOUTUBE_PURGE_AFTER);
-
-            if ((purge > 0) && ((current.tv_sec - last.tv_sec) > purge))
+            for (int i = 0; i < ids->size(); i++)
             {
-                log_debug("Purging old online service object %s\n", 
-                        obj->getTitle().c_str());
-                removeObject(object_id, false);
-            }
+                int object_id = ids->get(i);
+                Ref<CdsObject> obj = storage->loadObject(object_id);
+                if (obj == nil)
+                    continue;
+
+                temp = obj->getAuxData(_(ONLINE_SERVICE_LAST_UPDATE));
+                if (!string_ok(temp))
+                    continue;
+
+                last.tv_sec = temp.toLong();
+
+                if ((service->getItemPurgeInterval() > 0) && 
+                    ((current.tv_sec - last.tv_sec) > service->getItemPurgeInterval()))
+                {
+                    log_debug("Purging old online service object %s\n", 
+                            obj->getTitle().c_str());
+                    removeObject(object_id, false);
+                }
+            } 
         }
     }
 }

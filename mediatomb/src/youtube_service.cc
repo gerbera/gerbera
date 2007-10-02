@@ -221,12 +221,6 @@ String YouTubeService::getServiceName()
     return _("YouTube");
 }
 
-char YouTubeService::getStoragePrefix()
-{
-    return OnlineService::getStoragePrefix(OS_YouTube);
-}
-
-
 String YouTubeService::getRequestName(yt_methods_t method)
 {
     String temp;
@@ -689,11 +683,8 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
             break;
 
         obj->setVirtual(true);
-        /// \todo we need a function that would do a lookup on the special
-        /// service ID and tell is uf a particular object already exists
-        /// in the database
+
         Ref<CdsObject> old = Storage::getInstance()->loadObjectByServiceID(RefCast(obj, CdsItem)->getServiceID());
-//        Ref<CdsObject> old;
         if (old == nil)
         {
             log_debug("Adding new YouTube object\n");

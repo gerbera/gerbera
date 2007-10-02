@@ -49,7 +49,7 @@ URL::URL(size_t buffer_hint)
 
 Ref<StringBuffer> URL::download(String URL, long *HTTP_retcode, 
                                 CURL *curl_handle, bool only_header, 
-                                bool verbose)
+                                bool verbose, bool redirect)
 {
     CURLcode res;
     bool cleanup = false;
@@ -85,6 +85,13 @@ Ref<StringBuffer> URL::download(String URL, long *HTTP_retcode,
         curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, 
                          (void *)buffer.getPtr());
     }
+
+    if (redirect)
+    {
+        curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1);
+        curl_easy_setopt(curl_handle, CURLOPT_MAXREDIRS, -1);
+    }
+
     res = curl_easy_perform(curl_handle);
     if (res != CURLE_OK)
     {

@@ -60,6 +60,7 @@
 #define UPNP_DEFAULT_CLASS_MUSIC_GENRE  "object.container.genre.musicGenre"
 #define UPNP_DEFAULT_CLASS_MUSIC_ARTIST "object.container.person.musicArtist"
 #define UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER "object.container.playlistContainer"
+#define UPNP_DEFAULT_CLASS_VIDEO_BROADCAST "object.item.videoItem.videoBroadcast"
 
 #define D_PROFILE                       "DLNA.ORG_PN"
 #define D_CONVERSION_INDICATOR          "DLNA.ORG_CI"
@@ -230,6 +231,11 @@
     #define YOUTUBE_PAGESIZE            106496
     #define DEFAULT_YOUTUBE_ENABLED     NO
     #define DEFAULT_YOUTUBE_UPDATE_AT_START NO
+#endif
+#ifdef SOPCAST
+    #define SOPCAST_PAGESIZE            224480
+    #define DEFAULT_SOPCAST_ENABLED     NO
+    #define DEFAULT_SOPCAST_UPDATE_AT_START NO
 #endif
 #ifdef ONLINE_SERVICES
     #define CFG_DEFAULT_UPDATE_AT_START 10 // seconds

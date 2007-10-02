@@ -37,7 +37,6 @@
 
 #define YOUTUBE_SERVICE                 "YouTube"
 #define YOUTUBE_SERVICE_ID              "Y"
-#define YOUTUBE_VIDEO_ID                "vid"
 
 #define YOUTUBE_AUXDATA_TAGS            "tags"
 #define YOUTUBE_AUXDATA_AVG_RATING      "rating"

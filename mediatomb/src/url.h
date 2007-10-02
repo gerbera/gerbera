@@ -84,7 +84,8 @@ public:
                                          long *HTTP_retcode, 
                                          CURL *curl_handle = NULL,
                                          bool only_header=false,
-                                         bool verbose=false);
+                                         bool verbose=false,
+                                         bool redirect=false);
 
     zmm::Ref<Stat> getInfo(zmm::String URL, CURL *curl_handle = NULL );
 protected:

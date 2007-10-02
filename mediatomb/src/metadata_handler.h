@@ -69,6 +69,7 @@ typedef enum
     M_DESCRIPTION,
     M_TRACKNUMBER,
     M_ALBUMARTURI,
+    M_REGION,
     M_MAX
 } metadata_fields_t; 
 

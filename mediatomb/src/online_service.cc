@@ -39,7 +39,7 @@
 
 using namespace zmm;
 
-char service_prefixes[] = { 'Y', NULL };
+char service_prefixes[] = { 'Y', 'S', '\0' };
 
 OnlineServiceList::OnlineServiceList()
 {
@@ -67,6 +67,13 @@ Ref<OnlineService> OnlineServiceList::getService(service_type_t service)
     return service_list->get(service);
 }
 
+OnlineService::OnlineService()
+{
+    taskCount = 0;
+    refresh_interval = 0;
+    purge_interval = 0;
+}
+
 char OnlineService::getStoragePrefix(service_type_t service)
 {
     if ((service < 0) || (service >= OS_Max))
@@ -74,5 +81,10 @@ char OnlineService::getStoragePrefix(service_type_t service)
 
     return service_prefixes[service];
 }
+
+char OnlineService::getStoragePrefix() 
+{ 
+    return getStoragePrefix(getServiceType()); 
+} 
 
 #endif//ONLINE_SERVICES

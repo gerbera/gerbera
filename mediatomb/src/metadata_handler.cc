@@ -74,7 +74,8 @@ mt_key MT_KEYS[] = {
     { "M_GENRE", "upnp:genre" },
     { "M_DESCRIPTION", "dc:description" },
     { "M_TRACKNUMBER", "upnp:originalTrackNumber"},
-    { "M_ALBUMARTURI", "upnp:albumArtURI"}
+    { "M_ALBUMARTURI", "upnp:albumArtURI"},
+    { "M_REGION", "upnp:region"}
 
 };
 

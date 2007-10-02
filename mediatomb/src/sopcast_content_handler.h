@@ -39,8 +39,7 @@
 #define SOPCAST_SERVICE_ID              "sc"
 #define SOPCAST_CHANNEL_ID              "cid"
 
-#define SOPCAST_AUXDATA_REGION          "reg"
-#define SOPCAST_AUXDATA_CHANNEL_NAME    "chn"
+#define SOPCAST_AUXDATA_CLASS           "cls"
 #define SOPCAST_AUXDATA_LANGUAGE        "lng"
 #define SOPCAST_AUXDATA_KBPS            "kbps"
 #define SOPCAST_AUXDATA_GROUP           "grp"
@@ -69,7 +68,7 @@ public:
 
 
 protected:
-    zmm::Ref<mxml::Element> service_xml;
+    zmm::Ref<mxml::Element> channels;
     int current_group_node_index;
     int group_count;
     int current_channel_index;

@@ -46,6 +46,7 @@
 typedef enum service_type_t
 {
     OS_YouTube = 0,
+    OS_SopCast = 1,
     OS_Max
 };
 
@@ -54,7 +55,7 @@ typedef enum service_type_t
 class OnlineService : public zmm::Object
 {
 public:
-    OnlineService() { taskCount = 0; }
+    OnlineService();
 
     /// \brief Retrieves user specified content from the service and adds
     /// the items to the database.
@@ -76,7 +77,7 @@ public:
     virtual zmm::String getServiceName() = 0;
 
     /// \brief Get the storage service prefix for a particular service
-    virtual char getStoragePrefix() = 0;
+    char getStoragePrefix();
     
     /// \brief Get the storage prefix for a given service type
     static char getStoragePrefix(service_type_t service);
@@ -107,15 +108,22 @@ public:
 
     zmm::Ref<Object> getTimerParameter() { return timer_parameter; }
 
-    /// \brief sets the service refresh interval in seconds
+    /// \brief Sets the service refresh interval in seconds
     void setRefreshInterval(int interval) {refresh_interval = interval; }
 
     /// \brief Retrieves the service refresh interval in seconds
     int getRefreshInterval() { return refresh_interval; }
 
+    /// \brief Sets the "purge after" interval in seconds
+    void setItemPurgeInterval(int interval) { purge_interval = interval; }
+
+    /// \brieg Retrieves the "purte after" interval in seconds
+    int getItemPurgeInterval() { return purge_interval; }
+
 protected:
     int taskCount;
     int refresh_interval;
+    int purge_interval;
     zmm::Ref<zmm::Object> timer_parameter;
 
 

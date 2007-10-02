@@ -37,6 +37,7 @@
 
 #include "zmm/zmm.h"
 #include "sopcast_service.h"
+#include "sopcast_content_handler.h"
 #include "content_manager.h"
 #include "string_converter.h"
 #include "config_manager.h"
@@ -54,8 +55,6 @@ SopCastService::SopCastService()
     curl_handle = curl_easy_init();
     if (!curl_handle)
         throw _Exception(_("failed to initialize curl!\n"));
-
-    current_task = 0;
 }
 
 SopCastService::~SopCastService()
@@ -89,7 +88,7 @@ Ref<Element> SopCastService::getData()
     {
         log_debug("DOWNLOADING URL: " SOPCAST_CHANNEL_URL);
         buffer = url->download(_(SOPCAST_CHANNEL_URL), &retcode, 
-                               curl_handle, false, true);
+                               curl_handle, false, true, true);
     }
     catch (Exception ex)
     {
@@ -145,7 +144,7 @@ bool SopCastService::refreshServiceData(Ref<Layout> layout)
 
     Ref<ConfigManager> config = ConfigManager::getInstance();
 
-    Ref<Element> reply = getData(task->parameters);
+    Ref<Element> reply = getData();
 
     Ref<SopCastContentHandler> sc(new SopCastContentHandler());
     if (reply != nil)
@@ -169,22 +168,26 @@ bool SopCastService::refreshServiceData(Ref<Layout> layout)
             break;
 
        obj->setVirtual(true);
-        /// \todo we need a function that would do a lookup on the special
-        /// service ID and tell is uf a particular object already exists
-        /// in the database
-//        Ref<CdsObject> old = Storage::getInstance()->findObjectByPath(obj->getLocation());
-        Ref<CdsObject> old;
+
+        Ref<CdsObject> old = Storage::getInstance()->loadObjectByServiceID(RefCast(obj, CdsItem)->getServiceID());
         if (old == nil)
         {
-            log_debug("Found new object!!!!\n");
+            log_debug("Adding new SopCast object\n");
             
             if (layout != nil)
                 layout->processCdsObject(obj);
         }
         else
         {
-            log_debug("NEED TO UPDATE EXISTING OBJECT WITH ID: %s\n",
-                    obj->getLocation().c_str());
+            log_debug("Updating existing SopCast object\n");
+            obj->setID(old->getID());
+            obj->setParentID(old->getParentID());
+            struct timespec oldt, newt;
+            oldt.tv_nsec = 0;
+            oldt.tv_sec = old->getAuxData(_(ONLINE_SERVICE_LAST_UPDATE)).toLong();
+            newt.tv_nsec = 0;
+            newt.tv_sec = obj->getAuxData(_(ONLINE_SERVICE_LAST_UPDATE)).toLong();
+            ContentManager::getInstance()->updateObject(obj);
         }
 
         if (Server::getInstance()->getShutdownStatus())

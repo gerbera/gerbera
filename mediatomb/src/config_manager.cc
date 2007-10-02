@@ -977,7 +977,7 @@ void ConfigManager::validate(String serverhome)
     if (getIntOption(_("/online-content/YouTube/attribute::refresh")) >= temp_int)
     {
         if (temp_int != 0) 
-            throw _Exception(_("Error in config file: purge-after value must be greater than refresh interval"));
+            throw _Exception(_("Error in config file: YouTube purge-after value must be greater than refresh interval"));
     }
 
     NEW_INT_OPTION(temp_int);
@@ -1004,6 +1004,45 @@ void ConfigManager::validate(String serverhome)
     SET_OBJARR_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_TASK_LIST);
 
 #endif
+
+#ifdef SOPCAST 
+    temp = getOption(_("/online-content/SopCast/attribute::enabled"), 
+                     _(DEFAULT_SOPCAST_ENABLED));
+
+    if (!validateYesNo(temp))
+        throw _Exception(_("Error in config file: "
+                           "invalid \"enabled\" attribute value in "
+                           "<SopCast> tag"));
+
+    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    SET_BOOL_OPTION(CFG_ONLINE_CONTENT_SOPCAST_ENABLED);
+
+    temp_int = getIntOption(_("/online-content/SopCast/attribute::refresh"), 0);
+    NEW_INT_OPTION(temp_int);
+    SET_INT_OPTION(CFG_ONLINE_CONTENT_SOPCAST_REFRESH);
+
+    temp_int = getIntOption(_("/online-content/SopCast/attribute::purge-after"), 0);
+    if (getIntOption(_("/online-content/SopCast/attribute::refresh")) >= temp_int)
+    {
+        if (temp_int != 0) 
+            throw _Exception(_("Error in config file: SopCast purge-after value must be greater than refresh interval"));
+    }
+
+    NEW_INT_OPTION(temp_int);
+    SET_INT_OPTION(CFG_ONLINE_CONTENT_SOPCAST_PURGE_AFTER);
+
+    temp = getOption(_("/online-content/SopCast/attribute::update-at-start"),
+                     _(DEFAULT_SOPCAST_UPDATE_AT_START));
+
+    if (!validateYesNo(temp))
+        throw _Exception(_("Error in config file: "
+                           "invalid \"update-at-start\" attribute value in "
+                           "<SopCast> tag"));
+
+    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    SET_BOOL_OPTION(CFG_ONLINE_CONTENT_SOPCAST_UPDATE_AT_START);
+#endif
+
 
     log_info("Configuration check succeeded.\n");
 

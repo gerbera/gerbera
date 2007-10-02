@@ -53,13 +53,16 @@ bool SopCastContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
     if (service->getName() != "channels")
         throw _Exception(_("Invalid XML for SopCast service received"));
 
-    this->service_xml = service;
+    channels = service;
 
-    group_count = service_xml->childCount();
+    group_count = channels->childCount();
     if (group_count < 1)
         return false;
 
     current_group_node_index = 0;
+    current_channel_index = 0;
+    channel_count = 0;
+    current_group = nil;
 
     return true;
 }
@@ -71,164 +74,121 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
     time_t epoch;
     struct tm t;
     char datebuf[DATE_BUF_LEN];
+    struct timespec ts;
+
 
     while (current_group_node_index < group_count)
     {
         if (current_group == nil)
         {
-            current_group = service_xml->getChild(current_group_node_index);
-            channel_count = current_group->getChildCount();
-            if (channel_count < 1)
+            current_group = channels->getChild(current_group_node_index);
+            current_group_node_index++;
+            channel_count = current_group->childCount();
+
+            if ((current_group->getName() != "group") ||
+                (channel_count < 1))
             {
-                current_group_node_index++;
                 current_group = nil;
+                continue;
             }
 
-        continue;
- 
+            current_channel_index = 0;
         }
 
-       
+        if (current_channel_index >= channel_count)
+        {
+            current_group = nil;
+            continue;
+        }
+
         while (current_channel_index < channel_count)
         {
-        Ref<Element> video = service_xml->getChild(current_video_node_index);
-        current_video_node_index++;
-       
-        if (video == nil)
-            continue;
+            Ref<Element> channel = current_group->getChild(current_channel_index);
+            current_channel_index++;
+            if (channel->getName() != "channel")
+                continue;
 
-        if (video->getName() != "video")
-            continue;
+            Ref<CdsItemExternalURL> item(new CdsItemExternalURL());
+            Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
+            resource->addParameter(_(ONLINE_SERVICE_AUX_ID),
+                    String::from(OS_SopCast));
 
-        // we know what we are adding
-        Ref<CdsItemExternalURL> item(new CdsItemExternalURL());
-        Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
-        resource->addParameter(_(ONLINE_SERVICE_AUX_ID), 
-                               String::from(OS_SopCast));
-
-        temp = video->getChildText(_("id"));
-        if (!string_ok(temp))
-        {
-            log_warning("Failed to retrieve SopCast video ID\n");
-            continue;
-        }
-        resource->addParameter(_(SOPCAST_VIDEO_ID), temp);
-        /// \todo remove this
-        item->setURL(temp);
-
-        temp = video->getChildText(_("title"));
-        if (string_ok(temp))
-            item->setTitle(temp);
-        else
-            item->setTitle(_("Unknown"));
-
-        item->setMimeType(_("video/x-flv"));
-        resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
-                renderProtocolInfo(_("video/x-flv")));
-        
-        temp = video->getChildText(_("length_in_seconds"));
-        if (string_ok(temp))
-        {
-            resource->addAttribute(MetadataHandler::getResAttrName(R_DURATION),
-                                   secondsToHMS(temp.toInt()));
-        }
-       
-        temp = video->getChildText(_("description"));
-        if (string_ok(temp))
-            item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION),
-                              temp);
-
-        temp = video->getChildText(_("upload_time"));
-        if (string_ok(temp))
-        {
-            epoch = (time_t)temp.toLong();
-            t = *gmtime(&epoch);
-            datebuf[0] = '\0';
-            if (strftime(datebuf, sizeof(datebuf), "%F", &t) != 0)
+            temp = channel->getAttribute(_("id"));
+            if (!string_ok(temp))
             {
-                datebuf[DATE_BUF_LEN-1] = '\0';
-                if (strlen(datebuf) > 0)
-                {
-                    item->setMetadata(MetadataHandler::getMetaFieldName(M_DATE),
-                            String(datebuf));
-                }
+                log_warning("Failed to retrieve SopCast channel ID\n");
+                continue;
+            }
+
+            temp = String(OnlineService::getStoragePrefix(OS_SopCast)) + temp;
+            item->setServiceID(temp);
+
+            Ref<Element> tmp_el = channel->getChild(_("sop_address"));
+            if (tmp_el == nil)
+            {
+                log_warning("Failed to retrieve SopCast channel URL\n");
+                continue;
+            }
+           
+            temp = tmp_el->getChildText(_("item"));
+            if (!string_ok(temp))
+            {
+                log_warning("Failed to retrieve SopCast channel URL\n");
+                continue;
+            }
+            item->setURL(temp);
+
+            tmp_el = channel->getChild(_("name"));
+            if (tmp_el == nil)
+            {
+                log_warning("Failed to retrieve SopCast channel name\n");
+                continue;
+            }
+
+            temp = tmp_el->getAttribute(_("en"));
+            if (string_ok(temp))
+                item->setTitle(temp);
+            else
+                item->setTitle(_("Unknown"));
+
+            tmp_el = channel->getChild(_("region"));
+            if (tmp_el != nil)
+            {
+                temp = tmp_el->getAttribute(_("en"));
+                if (string_ok(temp))
+                    item->setMetadata(MetadataHandler::getMetaFieldName(M_REGION), temp);
+            }
+
+            temp = channel->getChildText(_("description"));
+            if (string_ok(temp))
+                item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), temp);
+
+            temp = channel->getAttribute(_("language"));
+            if (string_ok(temp))
+                item->setAuxData(_(SOPCAST_AUXDATA_LANGUAGE), temp);
+
+            item->setClass(_(UPNP_DEFAULT_CLASS_VIDEO_BROADCAST));
+
+            getTimespecNow(&ts);
+            item->setAuxData(_(ONLINE_SERVICE_LAST_UPDATE), String::from(ts.tv_sec));
+
+            item->setFlag(OBJECT_FLAG_PROXY_URL);
+            item->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
+
+            try
+            {
+                item->validate();
+                return RefCast(item, CdsObject);
+            }
+            catch (Exception ex)
+            {
+                log_warning("Failed to validate newly created SopCast item: %s\n",
+                        ex.getMessage().c_str());
+                continue;
             }
         }
-
-        temp = video->getChildText(_("tags"));
-        if (string_ok(temp))
-        {
-            item->setAuxData(_(SOPCAST_AUXDATA_TAGS), temp);
-        }
-
-        temp = video->getChildText(_("rating_avg"));
-        if (string_ok(temp))
-        {
-            item->setAuxData(_(SOPCAST_AUXDATA_AVG_RATING), temp);
-        }
-
-        temp = video->getChildText(_("author"));
-        if (string_ok(temp))
-        {
-            item->setAuxData(_(SOPCAST_AUXDATA_AUTHOR), temp);
-        }
-
-        temp = video->getChildText(_("view_count"));
-        if (string_ok(temp))
-        {
-            item->setAuxData(_(SOPCAST_AUXDATA_VIEW_COUNT), temp);
-        }
-
-        temp = video->getChildText(_("comment_count"));
-        if (string_ok(temp))
-        {
-            item->setAuxData(_(SOPCAST_AUXDATA_COMMENT_COUNT), temp);
-        }
-
-        temp = video->getChildText(_("rating_count"));
-        if (string_ok(temp))
-        {
-            item->setAuxData(_(SOPCAST_AUXDATA_RATING_COUNT), temp);
-        }
-
-        item->setAuxData(_(ONLINE_SERVICE_AUX_ID), String::from(OS_SopCast));
-
-        item->addResource(resource);
-        
-/*
-        temp = video->getChildText(_("thumbnail_url"));
-        if (string_ok(temp))
-        {
-            item->setURL(temp);
-            Ref<CdsResource> thumbnail(new CdsResource(CH_DEFAULT));
-            thumbnail->
-                addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
-                             renderProtocolInfo(thumb_mimetype));
-            thumbnail->
-                addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), 
-                                _("130x97"));
-           item->addResource(thumbnail);
- 
-        }
-*/
-
-        item->setFlag(OBJECT_FLAG_PROXY_URL);
-        item->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
-        try
-        {
-            item->validate();
-            return RefCast(item, CdsObject);
-        }
-        catch (Exception ex)
-        {
-            log_warning("Failed to validate newly created SopCast item: %s\n",
-                        ex.getMessage().c_str());
-            continue;
-        }
-
-
-    } // while
     }
+
     return nil;
 }
 
