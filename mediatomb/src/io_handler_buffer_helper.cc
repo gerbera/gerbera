@@ -99,9 +99,21 @@ int IOHandlerBufferHelper::read(OUT char *buf, IN size_t length)
     AUTOUNLOCK();
     
     // we ensured with the while above that the buffer isn't empty
-    size_t maxRead = (a < bLocal ? bLocal - a : bufSize - a);
-    size_t doRead = (maxRead > length ? length : maxRead);
-    memcpy(buf, buffer + a, doRead);
+    size_t currentFillSize = bLocal - a;
+    if (currentFillSize <= 0)
+        currentFillSize += bufSize;
+    size_t maxRead1 = (a < bLocal ? bLocal - a : bufSize - a);
+    size_t read1 = (maxRead1 > length ? length : maxRead1);
+    size_t maxRead2 = currentFillSize - read1;
+    size_t read2 = (read1 < length ? length - read1 : 0);
+    if (read2 > maxRead2)
+        read2 = maxRead2;
+    
+    memcpy(buf, buffer + a, read1);
+    if (read2)
+        memcpy(buf + read1, buffer, read2);
+    
+    size_t didRead = read1+read2;
     
     AUTORELOCK();
     
@@ -113,17 +125,17 @@ int IOHandlerBufferHelper::read(OUT char *buf, IN size_t length)
         signalled = true;
     }
     
-    a += doRead;
-    assert(a <= bufSize);
-    if (a == bufSize)
-        a = 0;
+    a += didRead;
+    //assert(a <= bufSize);
+    if (a >= bufSize)
+        a -= bufSize;
     if (a == b)
     {
         empty = true;
         if (! signalled)
             cond->signal();
     }
-    return doRead;
+    return didRead;
 }
 
 void IOHandlerBufferHelper::seek(IN off_t offset, IN int whence)
