@@ -147,6 +147,20 @@ void StringBuffer::concat(Ref<StringBuffer> other, int offset)
     }
 }
 
+void StringBuffer::concat(char *str, int length)
+{
+    if(str && length)
+    {
+        int otherLen = (int)strlen(str);
+        if (otherLen < length)
+            length = otherLen;
+        addCapacity(length);
+        strncpy(data + len, str, length);
+        len += length;
+        *(data + len + 1) = 0;
+    }
+}
+
 int StringBuffer::length()
 {
     return len;

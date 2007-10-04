@@ -397,7 +397,7 @@ String read_text_file(String path)
     size_t bytesRead;    
     while((bytesRead = fread(buffer, 1, 1024, f)) > 0)
     {
-        *buf << String(buffer, bytesRead);
+        buf->concat(buffer, bytesRead);
     }
     fclose(f);
     FREE(buffer);

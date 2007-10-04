@@ -60,6 +60,7 @@ public:
     StringBuffer &operator<<(int x);
     StringBuffer &operator<<(unsigned int x);
     void concat(Ref<StringBuffer> other, int offset = 0);
+    void concat(char *str, int length);
     
     int length();
     int getCapacity() { return capacity; }
