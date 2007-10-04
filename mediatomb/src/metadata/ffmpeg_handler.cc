@@ -47,7 +47,17 @@
 // INT64_C is not defined in ffmpeg/avformat.h but is needed
 #define __STDC_CONSTANT_MACROS
 #include <stdint.h>
+
+#ifdef FFMPEG_NEEDS_EXTERN_C
+extern "C" 
+{
+#endif
+
 #include <ffmpeg/avformat.h>
+
+#ifdef FFMPEG_NEEDS_EXTERN_C
+} // extern "C"
+#endif
 
 #include "config_manager.h"
 #include "ffmpeg_handler.h"

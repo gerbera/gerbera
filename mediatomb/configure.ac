@@ -2283,9 +2283,27 @@ if test "x$FFMPEG_OK" = xyes; then
         [
             AC_MSG_RESULT([ok])
         ],
-        [
-            AC_MSG_RESULT([failed, check your ffmpeg installation])
-            FFMPEG_OK=missing
+        [AC_LINK_IFELSE(
+            [AC_LANG_PROGRAM(
+                [
+                    #define __STDC_CONSTANT_MACROS
+                    #include <stdint.h>
+                    extern "C" {
+                        #include <ffmpeg/avformat.h>
+                    }
+                ],
+                [
+                    av_register_all();
+                ]
+            )],
+            [
+                AC_MSG_RESULT([ok])
+                AC_DEFINE([FFMPEG_NEEDS_EXTERN_C], [1],[ffmpeg header include needs to be wrapped into extern "C"])
+            ],
+            [
+                AC_MSG_RESULT([failed, check your ffmpeg installation])
+                FFMPEG_OK=missing
+            ])
         ]
    )
 fi
