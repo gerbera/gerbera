@@ -23,7 +23,7 @@ CurlIOHandler::CurlIOHandler(String URL, CURL *curl_handle, size_t bufSize, size
     this->URL = URL;
     this->external_curl_handle = (curl_handle != NULL);
     this->curl_handle = curl_handle;
-    
+    //bytesCurl = 0;
     signalAfterEveryRead = true;
 }
 
@@ -84,13 +84,15 @@ size_t CurlIOHandler::curlCallback(void *ptr, size_t size, size_t nmemb, void *d
     CurlIOHandler * ego = (CurlIOHandler *) data;
     size_t wantWrite = size * nmemb;
     
-    log_debug("URL: %s; size: %d; nmemb: %d; wantWrite: %d\n", ego->URL.c_str(), size, nmemb, wantWrite);
+    assert(wantWrite <= ego->bufSize);
+    
+    //log_debug("URL: %s; size: %d; nmemb: %d; wantWrite: %d\n", ego->URL.c_str(), size, nmemb, wantWrite);
     
     AUTOLOCK(ego->mutex);
     
     bool first = true;
     
-    size_t bufFree;
+    int bufFree = 0;
     do
     {
         if (! first)
@@ -111,18 +113,26 @@ size_t CurlIOHandler::curlCallback(void *ptr, size_t size, size_t nmemb, void *d
         else
         {
             bufFree = ego->a - ego->b;
-            if (bufFree <= 0)
+            if (bufFree < 0)
                 bufFree += ego->bufSize;
         }
     }
     while (bufFree < wantWrite);
+    
+    
     size_t maxWrite = (ego->empty ? ego->bufSize : (ego->a < ego->b ? ego->bufSize - ego->b : ego->a - ego->b));
-    //AUTOUNLOCK(); - bLocal
     size_t write1 = (wantWrite > maxWrite ? maxWrite : wantWrite);
     size_t write2 = (write1 < wantWrite ? wantWrite - write1 : 0);
-    memcpy(ego->buffer + ego->b, ptr, write1);
+    
+    size_t bLocal = ego->b;
+    
+    AUTOUNLOCK();
+    
+    memcpy(ego->buffer + bLocal, ptr, write1);
     if (write2)
         memcpy(ego->buffer, (char *)ptr + maxWrite, write2);
+    
+    AUTORELOCK();
     
     ego->b += wantWrite;
     if (ego->b >= ego->bufSize)
@@ -134,7 +144,7 @@ size_t CurlIOHandler::curlCallback(void *ptr, size_t size, size_t nmemb, void *d
     }
     if (ego->waitForInitialFillSize)
     {
-        size_t currentFillSize = ego->b - ego->a;
+        int currentFillSize = ego->b - ego->a;
         if (currentFillSize <= 0)
             currentFillSize += ego->bufSize;
         if (currentFillSize >= ego->initialFillSize)
@@ -145,6 +155,7 @@ size_t CurlIOHandler::curlCallback(void *ptr, size_t size, size_t nmemb, void *d
         }
     }
     
+    //ego->bytesCurl += wantWrite;
     return wantWrite;
 }
 

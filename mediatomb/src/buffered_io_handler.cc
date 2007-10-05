@@ -119,7 +119,7 @@ void BufferedIOHandler::threadProc()
                 }
                 if (waitForInitialFillSize)
                 {
-                    size_t currentFillSize = b - a;
+                    int currentFillSize = b - a;
                     if (currentFillSize <= 0)
                         currentFillSize += bufSize;
                     if (currentFillSize >= initialFillSize)
