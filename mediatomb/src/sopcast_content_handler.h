@@ -75,6 +75,7 @@ protected:
     int channel_count;
 
     zmm::Ref<mxml::Element> current_group;
+    zmm::Ref<Dictionary> extension_mimetype_map;
 };
 
 #endif//__SOPCAST_CONTENT_HANDLER_H__

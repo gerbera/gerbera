@@ -49,6 +49,9 @@ protected:
 #ifdef YOUTUBE
     void addYouTube(zmm::Ref<CdsObject> obj);
 #endif
+#ifdef SOPCAST
+    void addSopCast(zmm::Ref<CdsObject> obj);
+#endif
 };
 
 #endif // __FALLBACK_LAYOUT_H__

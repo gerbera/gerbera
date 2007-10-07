@@ -312,6 +312,104 @@ void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
 }
 #endif
 
+#ifdef SOPCAST
+void FallbackLayout::addSopCast(zmm::Ref<CdsObject> obj)
+{
+    #define SP_VPATH "/Online Services/SopCast"
+    String chain;
+    String temp;
+    int id;
+    bool ref_set = false;
+
+    if (obj->getID() != INVALID_OBJECT_ID)
+    {
+        obj->setRefID(obj->getID());
+        ref_set = true;
+    }
+
+    chain = _(SP_VPATH "/") + esc(obj->getTitle());
+    id =  ContentManager::getInstance()->addContainerChain(chain);
+    add(obj, id, ref_set);
+
+/*
+    temp = obj->getAuxData(_(YOUTUBE_AUXDATA_AUTHOR));
+    if (string_ok(temp))
+    {
+        chain = _(YT_VPATH "/Author/") + 
+            esc(temp);
+        id = ContentManager::getInstance()->addContainerChain(chain);
+        
+        add(obj, id, ref_set);
+        if (!ref_set)
+        {
+            obj->setRefID(obj->getID());
+            ref_set = true;
+        }
+    }
+
+
+    temp = obj->getAuxData(_(YOUTUBE_AUXDATA_AVG_RATING));
+    if (string_ok(temp))
+    {
+        chain = _(YT_VPATH "/Rating/") + 
+            esc(String::from((int)temp.toDouble()));
+        id = ContentManager::getInstance()->addContainerChain(chain);
+        add(obj, id, ref_set);
+        if (!ref_set)
+        {
+            obj->setRefID(obj->getID());
+            ref_set = true;
+        }
+    }
+
+    temp = obj->getAuxData(_(YOUTUBE_AUXDATA_TAGS));
+    if (string_ok(temp))
+    {
+        Ref<Array<StringBase> > split_temp = split_string(temp, ' ');
+        for (int i = 0; i < split_temp->size(); i++)
+        {
+            chain = _(YT_VPATH "/Tags/") + esc(split_temp->get(i));
+            id = ContentManager::getInstance()->addContainerChain(chain);
+            add(obj, id, ref_set);
+            if (!ref_set)
+            {
+                obj->setRefID(obj->getID());
+                ref_set = true;
+            }
+        }
+    }
+
+    temp = obj->getAuxData(_(YOUTUBE_AUXDATA_REQUEST));
+    if (string_ok(temp))
+    {
+        yt_methods_t m = (yt_methods_t)temp.toInt();
+        temp = YouTubeService::getRequestName(m);
+        if (string_ok(temp))
+        {
+            temp = esc(temp);
+            if (m == YT_list_by_category_and_tag)
+            {
+                 String ctmp = obj->getAuxData(_(YOUTUBE_AUXDATA_CATEGORY));
+                 if (string_ok(ctmp))
+                 {
+                     yt_categories_t c = (yt_categories_t)ctmp.toInt();
+                     ctmp = YouTubeService::getCategoryName(c);
+                     if (string_ok(ctmp))
+                     {
+                         temp = temp + '/' + esc(ctmp);
+                     }
+                 }
+            }
+            chain = _(YT_VPATH) + '/' + temp;
+            id = ContentManager::getInstance()->addContainerChain(chain);
+            add(obj, id, ref_set);
+        }
+    }
+*/
+}
+#endif
+
+
 FallbackLayout::FallbackLayout() : Layout()
 {
 }
@@ -323,11 +421,28 @@ void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj)
     obj->copyTo(clone);
     clone->setVirtual(1);
 
-#ifdef YOUTUBE
+#ifdef ONLINE_SERVICES
     if (clone->getFlag(OBJECT_FLAG_ONLINE_SERVICE))
     {
-        if (clone->getAuxData(_(ONLINE_SERVICE_AUX_ID)) == String::from(OS_YouTube))
-            addYouTube(clone);
+        service_type_t service = (service_type_t)(clone->getAuxData(_(ONLINE_SERVICE_AUX_ID)).toInt());
+
+        switch (service)
+        {
+#ifdef YOUTUBE
+            case OS_YouTube:
+                addYouTube(clone);
+                break;
+#endif
+#ifdef SOPCAST
+            case OS_SopCast:
+                addSopCast(clone);
+                break;
+#endif
+            case OS_Max:
+            default:
+                log_warning("No handler for service type\n");
+                break;
+        }
     }
     else
     {

@@ -64,6 +64,9 @@ bool SopCastContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
     channel_count = 0;
     current_group = nil;
 
+    extension_mimetype_map =
+        ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
+
     return true;
 }
 
@@ -113,6 +116,9 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
             resource->addParameter(_(ONLINE_SERVICE_AUX_ID),
                     String::from(OS_SopCast));
 
+            item->setAuxData(_(ONLINE_SERVICE_AUX_ID),
+                    String::from(OS_SopCast));
+
             temp = channel->getAttribute(_("id"));
             if (!string_ok(temp))
             {
@@ -123,6 +129,34 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
             temp = String(OnlineService::getStoragePrefix(OS_SopCast)) + temp;
             item->setServiceID(temp);
 
+            temp = channel->getChildText(_("stream_type"));
+            if (!string_ok(temp))
+            {
+                log_warning("Failed to retrieve SopCast channel mimetype\n");
+                continue;
+            }
+            
+            // I wish they had a mimetype setting
+            String mt = extension_mimetype_map->get(temp);
+            // map was empty, we have to do construct the mimetype ourselves
+            if (!string_ok(mt))
+            {
+                if (temp == "wmv")
+                    mt = _("video/x-ms-wmv");
+                else if (temp == "mp3")
+                    mt = _("audio/mpeg");
+                else if (temp == "wma")
+                    mt = _("audio/x-ms-wma");
+                else
+                {
+                    log_warning("Could not determine mimetype for SopCast channel (stream_type: %s)\n", temp.c_str());
+                    mt = _("application/octet-stream");
+                }
+            }
+            resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
+                    renderProtocolInfo(mt));
+            item->addResource(resource);
+           
             Ref<Element> tmp_el = channel->getChild(_("sop_address"));
             if (tmp_el == nil)
             {
@@ -171,7 +205,6 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
 
             getTimespecNow(&ts);
             item->setAuxData(_(ONLINE_SERVICE_LAST_UPDATE), String::from(ts.tv_sec));
-
             item->setFlag(OBJECT_FLAG_PROXY_URL);
             item->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
 

@@ -33,6 +33,8 @@
     #include "autoconfig.h"
 #endif
 
+#ifndef HAVE_EXPAT
+
 #include "parser.h"
 
 using namespace zmm;
@@ -304,7 +306,7 @@ Ref<Element> Parser::parse(Ref<Context> ctx, Ref<Input> input, String parentTag,
                 {
                     Ref<Element> child;
                     int startState = XML_TAG_OPEN;
-                    while((child = parse(ctx, input, element->name, startState)) != nil)
+                    while((child = parse(ctx, input, element->getName(), startState)) != nil)
                     {
                         startState = XML_SKIP;
                         element->appendChild(child);
@@ -330,7 +332,7 @@ Ref<Element> Parser::parse(Ref<Context> ctx, Ref<Input> input, String parentTag,
                     element->setText(buf->toString());
                     buf->clear();
                     // trick to parse he rest of the tag
-                    parse(ctx, input, element->name, XML_TAG_OPEN);
+                    parse(ctx, input, element->getName(), XML_TAG_OPEN);
                     return element;
                 }
                 else
@@ -414,3 +416,5 @@ Ref<Element> Parser::parse(Ref<Context> ctx, Ref<Input> input, String parentTag,
     
     THROW_ERROR(_("unexpected end of input"));
 }
+
+#endif

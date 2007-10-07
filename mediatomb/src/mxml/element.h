@@ -41,7 +41,7 @@ namespace mxml
 
 class Element : public zmm::Object
 {
-public:
+protected:
     zmm::String name;
     zmm::String text;
     zmm::Ref<zmm::Array<Attribute> > attributes;
@@ -57,7 +57,7 @@ public:
     void setAttribute(zmm::String name, zmm::String value);
     zmm::String getText();
 
-    zmm::String getName();
+    inline zmm::String getName() { return name; }
     void setName(zmm::String name);
 
     int childCount();

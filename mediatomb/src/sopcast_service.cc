@@ -84,11 +84,13 @@ Ref<Element> SopCastService::getData()
     Ref<StringConverter> sc = StringConverter::i2i();
 
     Ref<StringBuffer> buffer;
+    
     try 
     {
-        log_debug("DOWNLOADING URL: " SOPCAST_CHANNEL_URL);
+        log_debug("DOWNLOADING URL: %s\n", SOPCAST_CHANNEL_URL);
         buffer = url->download(_(SOPCAST_CHANNEL_URL), &retcode, 
                                curl_handle, false, true, true);
+    
     }
     catch (Exception ex)
     {

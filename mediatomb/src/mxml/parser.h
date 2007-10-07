@@ -34,12 +34,20 @@
 
 #include "zmmf/zmmf.h"
 
+#ifdef HAVE_EXPAT
+#include <expat.h>
+#include "zmmf/object_stack.h"
+#endif
 namespace mxml
 {
 
 class Element;
+
 class Context;
-class Input;
+
+#ifndef HAVE_EXPAT
+    class Input;
+#endif
     
 class Parser : public zmm::Object
 {
@@ -47,9 +55,24 @@ public:
     Parser();
     zmm::Ref<Element> parseFile(zmm::String);
     zmm::Ref<Element> parseString(zmm::String);
+
 protected:
+
+#ifndef HAVE_EXPAT
     zmm::Ref<Element> parse(zmm::Ref<Context> ctx, zmm::Ref<Input> input,
                             zmm::String parentTag, int state);
+#else
+    zmm::Ref<Element> parse(zmm::Ref<Context> ctx, zmm::String input);
+
+    zmm::Ref<zmm::ObjectStack<Element> > elements;
+    zmm::Ref<Element> root;
+    zmm::Ref<Element> curEl;
+
+    static void XMLCALL element_start(void *userdata, const char *name, const char **attrs);
+    static void XMLCALL element_end(void *userdata, const char *name);
+    static void XMLCALL character_data(void *userdata, const XML_Char *s, int len);
+#endif
+
 };
 
 }

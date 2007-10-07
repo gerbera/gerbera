@@ -90,6 +90,7 @@ libmediatomb_a_SOURCES = \
 ../src/mxml/parseexception.cc \
 ../src/mxml/parseexception.h \
 ../src/mxml/parser.cc \
+../src/mxml/parser_expat.cc \
 ../src/mxml/parser.h \
 ../src/mxml/stringinput.cc \
 ../src/mxml/stringinput.h \

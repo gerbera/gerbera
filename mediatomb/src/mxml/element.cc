@@ -175,10 +175,13 @@ String Element::getChildText(String name)
     return el->getText();
 }
 
+/*
 String Element::getName()
 {
     return name;
 }
+*/
+
 void Element::setName(String name)
 {
     this->name = name;

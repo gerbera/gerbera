@@ -106,6 +106,9 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
         resource->addParameter(_(ONLINE_SERVICE_AUX_ID), 
                                String::from(OS_YouTube));
 
+        item->setAuxData(_(ONLINE_SERVICE_AUX_ID),
+                String::from(OS_YouTube));
+
         temp = video->getChildText(_("id"));
         if (!string_ok(temp))
         {

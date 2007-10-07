@@ -151,6 +151,23 @@ AC_ARG_WITH(exif-libs,
         ]
 )
 
+AC_ARG_WITH(expat-h,
+        AC_HELP_STRING([--with-expat-h=DIR], [search for expat headers in DIR]),
+        [
+            EXPAT_SEARCH_HEADERS="$withval"
+            AC_MSG_NOTICE([Will search for expat headers in $withval])
+        ]
+)
+
+AC_ARG_WITH(expat-libs,
+        AC_HELP_STRING([--with-expat-libs=DIR], [search for expat libraries in DIR]),
+        [
+            EXPAT_SEARCH_LIBS="$withval"
+            AC_MSG_NOTICE([Will search for libexif libraries in $withval])
+        ]
+)
+
+
 AC_ARG_WITH(taglib-cfg,
         AC_HELP_STRING([--with-taglib-cfg=taglib-config], [absolute path/name of taglib-config]),
         [
@@ -2394,7 +2411,6 @@ else
     fi
 fi
 
-
 ######## libexif
 
 AC_ARG_ENABLE(libexif,
@@ -2530,6 +2546,99 @@ if test "x$EXIF_OK" = xyes; then
 else
     if test "x$EXIF_EN" = xyes; then
         AC_MSG_ERROR(unable to configure libexif support)
+    fi
+fi
+
+LDFLAGS="$LDFLAGS_SAVE"
+CPPFLAGS="$CPPFLAGS_SAVE"
+
+
+######## expat
+
+AC_ARG_ENABLE(libexpat,
+        AC_HELP_STRING([--enable-libexpat], [compile with libexpat support (default: yes)]),
+    [
+        EXPAT_EN=$enableval 
+        if test "x$enableval" = xno; then
+            EXPAT_OK=disabled
+        else
+            EXPAT_OK=yes
+        fi
+    ],
+    [
+        EXPAT_OK=yes
+    ]
+)
+
+if test "x$EXPAT_OK" = xyes; then
+    if test -n "$EXPAT_SEARCH_HEADERS" ; then
+        CPPFLAGS="-I$EXPAT_SEARCH_HEADERS"
+        AC_CHECK_HEADER($EXPAT_SEARCH_HEADERS/expat.h,
+                [
+                    EXPAT_CXXFLAGS="-I$EXPAT_SEARCH_HEADERS"
+                ],
+                [
+                    AC_MSG_ERROR([libexpat headers not found in requested location $EXPAT_SEARCH_HEADERS])
+                ]
+        )
+    else 
+        AC_CHECK_HEADER(expat.h,
+            [],
+            [
+                CPPFLAGS="-I$SEARCH_DIR_HEADERS"
+                unset ac_cv_header_expat_h
+                AC_CHECK_HEADER($SEARCH_DIR_HEADERS/expat.h,
+                    [
+                        EXPAT_CXXFLAGS="-I$SEARCH_DIR_HEADERS"
+                    ],
+                    [
+                        EXPAT_OK=missing
+                    ]
+                )
+            ]
+        )
+    fi
+fi
+
+LIBS_SAVE="$LIBS"
+unset LIBS
+if test "x$EXPAT_OK" = xyes; then
+    if test -n "$EXPAT_SEARCH_LIBS" ; then
+        LDFLAGS="-L$EXPAT_SEARCH_LIBS"
+        AC_CHECK_LIB(expat, XML_ParserCreate,
+                [
+                    EXPAT_LIBS="-L$EXPAT_SEARCH_LIBS -lexpat"
+                ],
+                [
+                    AC_MSG_ERROR([libexpat libraries not found in requested path $EXPAT_SEARCH_LIBS])
+                ]
+        )
+    else
+        AC_CHECK_LIB(expat, XML_ParserCreate,
+            [],
+            [
+                LDFLAGS="-L$SEARCH_DIR_LIBS"
+                unset ac_cv_lib_expat_XML_ParserCreate
+                AC_CHECK_LIB(expat, XML_ParserCreate,
+                    [
+                        EXPAT_LIBS="-L$SEARCH_DIR_LIBS -lexpat"
+                    ],
+                    [ EXPAT_OK=missing ]
+                )
+            ]
+        )
+    fi
+fi
+
+LIBS="$LIBS_SAVE $LIBS"
+
+if test "x$EXPAT_OK" = xyes; then
+    AC_DEFINE([HAVE_EXPAT], [1], [expat library presence])
+    AC_SUBST(EXPAT_CXXFLAGS)
+    AC_SUBST(EXPAT_LIBS)
+else
+    if test "x$EXPAT_EN" = xyes; then
+        AC_MSG_ERROR(unable to configure expat support)
     fi
 fi
 
@@ -2763,6 +2872,7 @@ echo "libjs         : $JS_OK"
 echo "libmagic      : $MAGIC_OK"
 echo "inotify       : $INOTIFY_OK"
 echo "libexif       : $EXIF_OK"
+echo "expat         : $EXPAT_OK"
 echo "id3lib        : $ID3_OK"
 echo "taglib        : $TAGLIB_OK"
 echo "ffmpeg        : $FFMPEG_OK"
