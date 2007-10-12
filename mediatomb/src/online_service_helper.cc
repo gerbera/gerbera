@@ -71,8 +71,12 @@ String OnlineServiceHelper::resolveURL(Ref<CdsItemExternalURL> item)
 #ifdef YOUTUBE
         case OS_YouTube:
             yt_url = Ref<YouTubeVideoURL> (new YouTubeVideoURL());
-            log_debug("------> REQUESTING YT ID : %s\n", item->getURL().c_str());
-            url = yt_url->getVideoURL(item->getURL());
+            /// \todo why is this not returning anything meanigful, we did
+            /// use setURL() in the content handler
+//            log_debug("------> REQUESTING YT ID : %s\n", item->getURL().c_str());
+            log_debug("------> REQUESTING YT ID : %s\n", item->getServiceID().substring(1).c_str());
+            //url = yt_url->getVideoURL(item->getURL());
+            url = yt_url->getVideoURL(item->getServiceID().substring(1));
             break;
 #endif
         case OS_Max:
