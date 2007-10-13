@@ -57,7 +57,7 @@ Ref<IOHandler> TranscodeDispatcher::open(Ref<TranscodingProfile> profile,
         throw _Exception(_("Transcoding of file ") + location +
                            "requested but no profile given ");
    
-    check_path_ex(location);
+//    check_path_ex(location);
 
     if (profile->getType() == TR_External)
     {
