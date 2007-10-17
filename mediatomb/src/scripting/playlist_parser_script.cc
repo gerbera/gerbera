@@ -90,16 +90,22 @@ PlaylistParserScript::PlaylistParserScript(Ref<Runtime> runtime) : Script(runtim
 
 String PlaylistParserScript::readln()
 {
+    String ret;
     if (!currentHandle)
         throw _Exception(_("Readline not yet setup for use"));
 
     if ((currentTask == nil) || (!currentTask->isValid()))
         return nil;
 
-    if (fgets(currentLine, ONE_TEXTLINE_BYTES, currentHandle) == NULL)
-        return nil;
-    else
-        return trim_string(String(currentLine));
+    while (true)
+    {
+        if(fgets(currentLine, ONE_TEXTLINE_BYTES, currentHandle) == NULL)
+            return nil;
+
+        ret = trim_string(String(currentLine));
+        if (string_ok(ret))
+            return ret;
+    }
 }
 
 void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<CMTask> task)
