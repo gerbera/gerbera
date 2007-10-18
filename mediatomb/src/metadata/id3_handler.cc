@@ -95,10 +95,9 @@ static void addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsItem> item
         case M_GENRE:
             genre = ID3_GetGenreNum(tag);
             if (ID3_V1GENRE2DESCRIPTION(genre))
-            {
                 value = String((char *)(ID3_V1GENRE2DESCRIPTION(genre)));
-            }
-            else
+
+            if (!string_ok(value))
             {
                 ID3_retval = ID3_GetGenre(tag); 
                 value = String(ID3_retval);
@@ -142,8 +141,7 @@ void Id3Handler::fillMetadata(Ref<CdsItem> item)
     const Mp3_Headerinfo* header;
     
     // the location has already been checked by the setMetadata function
-    if (tag.Link(item->getLocation().c_str()) == 0)
-        return;
+    tag.Link(item->getLocation().c_str()); 
 
     for (int i = 0; i < M_MAX; i++)
         addID3Field((metadata_fields_t) i, &tag, item);
