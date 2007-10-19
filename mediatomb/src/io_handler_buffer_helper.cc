@@ -99,7 +99,7 @@ int IOHandlerBufferHelper::read(OUT char *buf, IN size_t length)
     AUTOUNLOCK();
     
     // we ensured with the while above that the buffer isn't empty
-    size_t currentFillSize = bLocal - a;
+    int currentFillSize = bLocal - a;
     if (currentFillSize <= 0)
         currentFillSize += bufSize;
     size_t maxRead1 = (a < bLocal ? bLocal - a : bufSize - a);

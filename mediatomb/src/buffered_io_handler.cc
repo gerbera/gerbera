@@ -122,7 +122,7 @@ void BufferedIOHandler::threadProc()
                     int currentFillSize = b - a;
                     if (currentFillSize <= 0)
                         currentFillSize += bufSize;
-                    if (currentFillSize >= initialFillSize)
+                    if ((size_t)currentFillSize >= initialFillSize)
                     {
                         log_debug("buffer: initial fillsize reached\n");
                         waitForInitialFillSize = false;
