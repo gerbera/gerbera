@@ -34,6 +34,7 @@
 #endif
 
 #include "io_handler_chainer.h"
+#include "exceptions.h"
 
 using namespace zmm;
 
@@ -48,7 +49,6 @@ IOHandlerChainer::IOHandlerChainer(Ref<IOHandler> readFrom, Ref<IOHandler> write
     this->readFrom = readFrom;
     this->writeTo = writeTo;
     readFrom->open(UPNP_READ);
-    writeTo->open(UPNP_WRITE);
     buf = (char *)MALLOC(chunkSize);
     startThread();
 }
@@ -57,6 +57,21 @@ void IOHandlerChainer::threadProc()
 {
     try
     {
+        bool again = false;
+        do
+        {
+            try
+            {
+                writeTo->open(UPNP_WRITE);
+                again = false;
+            }
+            catch (TryAgainException e)
+            {
+                again = true;
+            }
+        }
+        while (! threadShutdownCheck() && again);
+        
         bool stopLoop = false;
         while (! threadShutdownCheck() && ! stopLoop)
         {
@@ -86,12 +101,21 @@ void IOHandlerChainer::threadProc()
             }
         }
     }
-    catch (Exception)
+    catch (Exception e)
     {
+        log_debug("%s", e.getMessage().c_str());
         status = IOHC_EXCEPTION;
     }
-    if (threadShutdownCheck())
-        status = IOHC_FORCED_SHUTDOWN;
-    readFrom->close();
-    writeTo->close();
+    try
+    {
+        if (threadShutdownCheck())
+            status = IOHC_FORCED_SHUTDOWN;
+        readFrom->close();
+        writeTo->close();
+    }
+    catch (Exception e)
+    {
+        log_debug("%s", e.getMessage().c_str());
+        status = IOHC_EXCEPTION;
+    }
 }
