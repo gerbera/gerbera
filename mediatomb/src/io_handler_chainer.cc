@@ -68,6 +68,7 @@ void IOHandlerChainer::threadProc()
             catch (TryAgainException e)
             {
                 again = true;
+                sleep(1);
             }
         }
         while (! threadShutdownCheck() && again);
