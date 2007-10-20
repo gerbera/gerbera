@@ -58,11 +58,24 @@ FileIOHandler::FileIOHandler(String filename) : IOHandler()
 
 void FileIOHandler::open(IN enum UpnpOpenFileMode mode)
 {
-    f = fopen(filename.c_str(), "rb");
+    if (mode == UPNP_READ)
+    {
+        f = fopen(filename.c_str(), "rb");
+    }
+    else if (mode == UPNP_WRITE)
+    {
+        f = fopen(filename.c_str(), "wb");
+    }
+    else
+    {
+        throw _Exception(_("FileIOHandler::open: invdalid read/write mode"));
+    }
+
     if (f == NULL)
     {
         throw _Exception(_("FileIOHandler::open: failed to open: ") + filename.c_str());
     }
+
 }
 
 int FileIOHandler::read(OUT char *buf, IN size_t length)
@@ -78,8 +91,17 @@ int FileIOHandler::read(OUT char *buf, IN size_t length)
     }
 
     return ret;
- }
-                                                                                                                                                                         
+}
+
+int FileIOHandler::write(IN char *buf, IN size_t length)
+{
+    int ret = 0;
+
+    ret = fwrite(buf, sizeof(char), length, f);
+
+    return ret;
+}
+
 void FileIOHandler::seek(IN off_t offset, IN int whence)
 {
     if (fseeko(f, offset, whence) != 0)

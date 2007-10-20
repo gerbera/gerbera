@@ -55,6 +55,12 @@ public:
     /// \param buf Data from the file will be copied into this buffer.
     /// \param length Number of bytes to be copied into the buffer.
     virtual int read(OUT char *buf, IN size_t length);
+   
+    /// \brief Writes to a previously opened file.
+    /// \param buf Data from the buffer will be written to the file.
+    /// \param length Number of bytes to be written from the buffer.
+    /// \return number of bytes written.
+    virtual int write(OUT char *buf, IN size_t length);
 
     /// \brief Performs seek on an open file.
     /// \param offset Number of bytes to move in the file. For seeking forwards
