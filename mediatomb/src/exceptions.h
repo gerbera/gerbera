@@ -39,6 +39,7 @@
 #define _StorageException(usermsg, debugmsg) StorageException(usermsg, debugmsg, EXCEPTION_DATA)
 #define _ObjectNotFoundException(msg) ObjectNotFoundException(msg, EXCEPTION_DATA)
 #define _ServerShutdownException(msg) ServerShutdownException(msg, EXCEPTION_DATA)
+#define _TryAgainException(msg) TryAgainException(msg, EXCEPTION_DATA)
 
 class UpnpException : public zmm::Exception
 {
@@ -82,5 +83,12 @@ public:
     inline ServerShutdownException(zmm::String message) : zmm::Exception(message) {}
     inline ServerShutdownException(zmm::String message, const char *file, int line, const char* function) : zmm::Exception(message, file, line, function) {}
 };
-                                
+
+class TryAgainException : public zmm::Exception
+{
+public:
+    inline TryAgainException(zmm::String message) : zmm::Exception(message) {}
+    inline TryAgainException(zmm::String message, const char *file, int line, const char* function) : zmm::Exception(message, file, line, function) {}
+};
+
 #endif // __EXCEPTIONS_H__
