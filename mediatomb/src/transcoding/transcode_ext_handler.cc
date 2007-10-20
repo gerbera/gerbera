@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    transcode_external_handler.cc - this file is part of MediaTomb.
+    transcode_ext_handler.cc - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -24,10 +24,10 @@
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
     
-    $Id: transcode_external_handler.cc 1440 2007-08-18 12:53:51Z lww $
+    $Id$
 */
 
-/// \file transcode_external_handler.cc
+/// \file transcode_ext_handler.cc
 
 #ifdef HAVE_CONFIG_H
     #include "autoconfig.h"

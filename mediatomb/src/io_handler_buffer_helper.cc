@@ -27,7 +27,7 @@
     $Id$
 */
 
-/// \file io_handler_buffer_helper
+/// \file io_handler_buffer_helper.cc
 
 #ifdef HAVE_CONFIG_H
     #include "autoconfig.h"

@@ -24,7 +24,7 @@
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
     
-    $Id: transcode_handler.h 1436 2007-08-17 17:46:29Z lww $
+    $Id$
 */
 
 /// \file transcode_handler.h
