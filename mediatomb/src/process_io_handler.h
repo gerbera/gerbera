@@ -34,16 +34,33 @@
 
 #include "common.h"
 #include "io_handler.h"
+#include "executor.h"
 
 #define FIFO_READ_TIMEOUT 5
+
+class ProcListItem : public zmm::Object
+{
+public:
+    ProcListItem(zmm::Ref<Executor> exec, bool abortOnDeath = false);
+    zmm::Ref<Executor> getExecutor();
+    bool abortOnDeath();
+
+protected:
+    zmm::Ref<Executor> executor;
+    bool abort;
+};
+
 /// \brief Allows the web server to read from a fifo.
 class ProcessIOHandler : public IOHandler
 {
 protected:
-    /// \brief pid of the process that is writing to the fifo
-    pid_t kill_pid;
+    /// \brief List of associated processes.
+    zmm::Ref<zmm::Array<ProcListItem> > proclist;
 
-    /// \brief name of the fifo
+    /// \brief Main process used for reading
+    zmm::Ref<Executor> main_proc;
+
+    /// \brief name of the file or fifo to read the data from
     zmm::String filename;
 
     /// \brief file descriptor
@@ -51,9 +68,11 @@ protected:
 
 public:
     /// \brief Sets the filename to work with.
-    /// \param filename
-    /// \param kill_pid the pid to kill when close is called
-    ProcessIOHandler(zmm::String filename, pid_t kill_pid);
+    /// \param filename to read the data from
+    /// \param proclist associated processes that will be terminated once
+    /// they are no longer needed
+    ProcessIOHandler(zmm::String filename, zmm::Ref<Executor> main_proc,
+                     zmm::Ref<zmm::Array<ProcListItem> > proclist = nil);
     
     /// \brief Opens file for reading (writing is not supported)
     virtual void open(IN enum UpnpOpenFileMode mode);
@@ -75,6 +94,10 @@ public:
 
     /// \brief Close a previously opened file and kills the kill_pid process
     virtual void close();
+
+protected:
+    bool abort();
+    void killall();
 };
 
 

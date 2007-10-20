@@ -47,33 +47,88 @@
 
 using namespace zmm;
 
-ProcessIOHandler::ProcessIOHandler(String filename, pid_t kill_pid) : IOHandler()
+ProcListItem::ProcListItem(Ref<Executor> exec, bool abortOnDeath)
 {
-    int exit_status = EXIT_SUCCESS;
+    executor = exec;
+    abort = abortOnDeath;
+}
 
-    if (!is_alive(kill_pid, &exit_status))
+Ref<Executor> ProcListItem::getExecutor()
+{
+    return executor;
+}
+
+bool ProcListItem::abortOnDeath()
+{
+    return abort;
+}
+
+bool ProcessIOHandler::abort()
+{
+    bool abort = false;
+
+    if (proclist == nil)
+        return abort; 
+
+    for (int i = 0; i < proclist->size(); i++)
+    {
+        Ref<Executor> exec = proclist->get(i)->getExecutor();
+        if ((exec != nil) && (!exec->isAlive()))
+        {
+            if (proclist->get(i)->abortOnDeath())
+                abort = true;
+            break;
+        }
+    }
+
+    return abort;
+}
+
+void ProcessIOHandler::killall()
+{
+    if (proclist == nil)
+        return;
+
+    for (int i = 0; i < proclist->size(); i++)
+    {
+        Ref<Executor> exec = proclist->get(i)->getExecutor();
+        if (exec != nil)
+            exec->kill();
+    }
+}
+
+ProcessIOHandler::ProcessIOHandler(String filename, 
+                        zmm::Ref<Executor> main_proc,
+                        zmm::Ref<zmm::Array<ProcListItem> > proclist) : IOHandler()
+{
+    this->filename = filename;
+    this->proclist = proclist;
+    this->main_proc = main_proc;
+
+    if (!main_proc->isAlive() || abort())
     {
         unlink(filename.c_str());
-        log_debug("process exit status %d\n", exit_status);
-        throw _Exception(_("process terminated early with status: ") + String::from(exit_status));
+        killall();
+        throw _Exception(_("process terminated early"));
     }
-    this->kill_pid = kill_pid;
-    this->filename = filename;
-    ContentManager::getInstance()->registerProcess(kill_pid, filename);
+//    ContentManager::getInstance()->registerProcess(kill_pid, filename);
 }
 
 void ProcessIOHandler::open(IN enum UpnpOpenFileMode mode)
 {
-    int exit_status = EXIT_SUCCESS;
-    if (!is_alive(kill_pid, &exit_status))
+    if (!main_proc->isAlive() || abort())
     {
-        log_debug("process exit status %d\n", exit_status);
-        throw _Exception(_("process terminated with code: ") + String::from(exit_status));
+        killall();
+        throw _Exception(_("process terminated early"));
     }
 
     fd = ::open(filename.c_str(), O_RDONLY | O_NONBLOCK);
     if (fd == -1)
+    {
+        killall();
+        main_proc->kill();
         throw _Exception(_("open: failed to open: ") + filename.c_str());
+    }
 }
 
 int ProcessIOHandler::read(OUT char *buf, IN size_t length)
@@ -104,14 +159,25 @@ int ProcessIOHandler::read(OUT char *buf, IN size_t length)
         // timeout
         if (ret == 0)
         {
-            /// \todo check exit status and return error if appropriate
-            if (!is_alive(kill_pid, &exit_status))
+            bool main_ok = main_proc->isAlive();
+            if (!main_ok || abort())
             {
-                log_debug("process exited with status %d\n", exit_status);
-                if (exit_status == EXIT_SUCCESS)
-                    return 0; 
+                if (!main_ok)
+                {
+                    exit_status = main_proc->getStatus();
+                    log_debug("process exited with status %d\n", exit_status);
+                    killall();
+                    if (exit_status == EXIT_SUCCESS)
+                        return 0; 
+                    else
+                        return -1;
+                }
                 else
+                {
+                    main_proc->kill();
+                    killall();
                     return -1;
+                }
             }
         }
 
@@ -140,11 +206,21 @@ int ProcessIOHandler::read(OUT char *buf, IN size_t length)
     if (num_bytes < 0)
     {
         // not sure what we return here since no way of knowing about feof
-        // actually that will depend onthe ret code of the process
-//        if (feof(f)) return 0;
-//        if (ferror(f)) return -1;
-        log_debug("aborting read 2!!!!\n");
-        return -1;
+        // actually that will depend on the ret code of the process
+        ret = -1;
+
+        if (!main_proc->isAlive())
+        {
+            if (main_proc->getStatus() == EXIT_SUCCESS)
+                ret = 0;
+
+        }
+        else
+        {
+            main_proc->kill();
+        }
+        killall();
+        return ret;
     }
 
     return num_bytes;
@@ -161,11 +237,11 @@ void ProcessIOHandler::close()
     bool ret;
    
 
-    log_debug("terminating process %d, closing %s\n", kill_pid,
-                this->filename.c_str());
+    log_debug("terminating process, closing %s\n", this->filename.c_str());
 
-    ContentManager::getInstance()->unregisterProcess(kill_pid);
-    ret = kill_proc(kill_pid);
+//    ContentManager::getInstance()->unregisterProcess(kill_pid);
+    ret = main_proc->kill();
+    killall();
     
     ::close(fd);
     unlink(filename.c_str());

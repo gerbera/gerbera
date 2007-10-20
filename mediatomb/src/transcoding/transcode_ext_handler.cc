@@ -56,8 +56,9 @@
 #include "dictionary.h"
 #include "metadata_handler.h"
 #include "tools.h"
-
 #include "file_io_handler.h"
+#include "process_executor.h"
+
 using namespace zmm;
 
 TranscodeExternalHandler::TranscodeExternalHandler() : TranscodeHandler()
@@ -92,11 +93,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     String arguments;
     String temp;
     String command;
-#define MAX_ARGS 255
-    char *argv[MAX_ARGS];
     Ref<Array<StringBase> > arglist;
-    int i;
-    int apos = 0;
 /*
     if (!profile->acceptURL())
     {
@@ -122,51 +119,11 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     }
 
     chmod(fifo_name.c_str(), S_IWOTH | S_IWGRP | S_IWUSR | S_IRUSR);
-
-    pid_t transcoding_process = fork();
-    switch (transcoding_process)
-    {
-        case -1:
-            throw _Exception(_("Fork failed when launching transcoding process!"));
-        case 0:
-            arglist = parseCommandLine(profile->getArguments(), location, fifo_name);
-            command = profile->getCommand();
-            argv[0] = command.c_str();
-            apos = 0;
-
-                for (i = 0; i < arglist->size(); i++)
-                {
-                    argv[++apos] = arglist->get(i)->data; 
-                    if (apos >= MAX_ARGS-1)
-                        break;
-                }
-
-            argv[++apos] = NULL;
-            log_debug("Executing transcoder: %s\n", command.c_str());
-#ifdef LOG_TOMBDEBUG
-            i = 0;
-            log_debug("Transcoder argument list: ");
-            do
-            {
-                printf("%s ", argv[i]);
-                i++;
-            }
-            while (argv[i] != NULL);
-          
-            printf("\n");
-#endif
-            sigset_t mask_set;
-            pthread_sigmask(SIG_SETMASK, &mask_set, NULL);
-
-            execvp(command.c_str(), argv);
-        default:
-            break;
-    }
-    log_debug("Launched transcoding process, pid: %d\n", transcoding_process);
-
-
     
-    Ref<IOHandler> io_handler(new BufferedIOHandler(Ref<IOHandler> (new ProcessIOHandler(fifo_name, transcoding_process)), profile->getBufferSize(), profile->getBufferChunkSize(), profile->getBufferInitialFillSize()));
+    arglist = parseCommandLine(profile->getArguments(), location, fifo_name);
+    Ref<ProcessExecutor> main_proc(new ProcessExecutor(profile->getCommand(), arglist));
+    
+    Ref<IOHandler> io_handler(new BufferedIOHandler(Ref<IOHandler> (new ProcessIOHandler(fifo_name, RefCast(main_proc, Executor))), profile->getBufferSize(), profile->getBufferChunkSize(), profile->getBufferInitialFillSize()));
 
     io_handler->open(UPNP_READ);
     return io_handler;
