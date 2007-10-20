@@ -58,6 +58,8 @@
 #include "tools.h"
 #include "file_io_handler.h"
 #include "process_executor.h"
+#include "io_handler_chainer.h"
+#include "curl_io_handler.h"
 
 using namespace zmm;
 
@@ -94,10 +96,12 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     String temp;
     String command;
     Ref<Array<StringBase> > arglist;
-/*
+    Ref<Array<ProcListItem> > proc_list = nil; 
+
     if (!profile->acceptURL())
     {
         String url = location;
+        strcpy(fifo_template, "/tmp/mt_transcode_XXXXXX");
         location = tempName(fifo_template);
         log_debug("creating reader fifo: %s\n", location.c_str());
         if (mkfifo(location.c_str(), O_RDWR) == -1)
@@ -107,10 +111,16 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
         }
 
         chmod(location.c_str(), S_IWOTH | S_IWGRP | S_IWUSR | S_IRUSR);
-        /// \todo launch a thread that will be reading the remote content and 
-        // saving it to the fifo
+
+        Ref<IOHandler> c_ioh(new CurlIOHandler(url, NULL, 1024*1024, 0));
+        Ref<IOHandler> f_ioh(new FileIOHandler(location));
+        Ref<Executor> ch(new IOHandlerChainer(c_ioh, f_ioh, 10*1024));
+        proc_list = Ref<Array<ProcListItem> >(new Array<ProcListItem>(1));
+        Ref<ProcListItem> pr_item(new ProcListItem(ch));
+        proc_list->append(pr_item);
+
     }
-*/
+
     log_debug("creating fifo: %s\n", fifo_name.c_str());
     if (mkfifo(fifo_name.c_str(), O_RDWR) == -1) 
     {
@@ -123,7 +133,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     arglist = parseCommandLine(profile->getArguments(), location, fifo_name);
     Ref<ProcessExecutor> main_proc(new ProcessExecutor(profile->getCommand(), arglist));
     
-    Ref<IOHandler> io_handler(new BufferedIOHandler(Ref<IOHandler> (new ProcessIOHandler(fifo_name, RefCast(main_proc, Executor))), profile->getBufferSize(), profile->getBufferChunkSize(), profile->getBufferInitialFillSize()));
+    Ref<IOHandler> io_handler(new BufferedIOHandler(Ref<IOHandler> (new ProcessIOHandler(fifo_name, RefCast(main_proc, Executor), proc_list)), profile->getBufferSize(), profile->getBufferChunkSize(), profile->getBufferInitialFillSize()));
 
     io_handler->open(UPNP_READ);
     return io_handler;
