@@ -1006,7 +1006,7 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
         }
         else // URLs and active items
         {
-            item->setLocation(row->col(_location));
+            item->setLocation(fallbackString(row->col(_location), row->col(_ref_location)));
         }
         
         item->setTrackNumber(row->col(_track_number).toInt());
