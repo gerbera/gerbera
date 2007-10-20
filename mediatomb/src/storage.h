@@ -32,7 +32,6 @@
 #ifndef __STORAGE_H__
 #define __STORAGE_H__
 
-#include "autoconfig.h"
 #include "zmmf/zmmf.h"
 #include "singleton.h"
 #include "cds_objects.h"
