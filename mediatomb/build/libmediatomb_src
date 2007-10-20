@@ -27,6 +27,7 @@ libmediatomb_a_SOURCES = \
 ../src/dictionary.h \
 ../src/exceptions.cc \
 ../src/exceptions.h \
+../src/executor.h \
 ../src/file_io_handler.cc \
 ../src/file_io_handler.h \
 ../src/file_request_handler.cc \
@@ -45,6 +46,8 @@ libmediatomb_a_SOURCES = \
 ../src/io_handler_buffer_helper.cc \
 ../src/io_handler_buffer_helper.h \
 ../src/io_handler.cc \
+../src/io_handler_chainer.cc \
+../src/io_handler_chainer.h \
 ../src/io_handler.h \
 ../src/jpeg_resolution.cc \
 ../src/layout/fallback_layout.cc \
@@ -100,6 +103,8 @@ libmediatomb_a_SOURCES = \
 ../src/online_service_helper.cc \
 ../src/online_service_helper.h \
 ../src/process.cc \
+../src/process_executor.cc \
+../src/process_executor.h \
 ../src/process.h \
 ../src/process_io_handler.cc \
 ../src/process_io_handler.h \
@@ -145,6 +150,8 @@ libmediatomb_a_SOURCES = \
 ../src/subscription_request.h \
 ../src/sync.cc \
 ../src/sync.h \
+../src/thread_executor.cc \
+../src/thread_executor.h \
 ../src/timer.cc \
 ../src/timer.h \
 ../src/tools.cc \

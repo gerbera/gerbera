@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    thread_executor.cc - this file is part of MediaTomb.
+    io_handler_chainer.h - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -27,57 +27,34 @@
     $Id$
 */
 
-/// \file thread_executor.cc
+/// \file io_handler_chainer.h
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
+#ifndef __IO_HANDLER_CHAINER_H__
+#define __IO_HANDLER_CHAINER_H__
+
+#define IOHC_NORMAL_SHUTDOWN 1
+#define IOHC_FORCED_SHUTDOWN 2
+#define IOHC_READ_ERROR 3
+#define IOHC_WRITE_ERROR 4
+#define IOHC_EXCEPTION 5
+
 
 #include "thread_executor.h"
+#include "io_handler.h"
 
-using namespace zmm;
-
-ThreadExecutor::ThreadExecutor()
+class IOHandlerChainer : public ThreadExecutor
 {
-    mutex = Ref<Mutex>(new Mutex());
-    cond = Ref<Cond>(new Cond(mutex));
-    
-    threadShutdown = false;
-}
+public:
+    IOHandlerChainer(zmm::Ref<IOHandler> readFrom, zmm::Ref<IOHandler> writeTo, int chunkSize);
+    virtual int getStatus() { return status; }
+protected:
+    virtual void threadProc();
+private:
+    int status;
+    char* buf;
+    int chunkSize;
+    zmm::Ref<IOHandler> readFrom;
+    zmm::Ref<IOHandler> writeTo;
+};
 
-ThreadExecutor::~ThreadExecutor()
-{
-    kill();
-}
-
-void ThreadExecutor::startThread()
-{
-    threadRunning = true;
-    pthread_create(
-        &thread,
-        NULL, // attr
-        ThreadExecutor::staticThreadProc,
-        this
-    );
-}
-
-bool ThreadExecutor::kill()
-{
-    if (! threadRunning)
-        return true;
-    AUTOLOCK(mutex);
-    threadShutdown = true;
-    cond->signal();
-    AUTOUNLOCK();
-    if (thread)
-        pthread_join(thread, NULL);
-    return true;
-}
-
-void *ThreadExecutor::staticThreadProc(void *arg)
-{
-    ThreadExecutor *inst = (ThreadExecutor *)arg;
-    inst->threadProc();
-    pthread_exit(NULL);
-    return NULL;
-}
+#endif // __IO_HANDLER_CHAINER_H__

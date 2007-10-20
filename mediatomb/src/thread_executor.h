@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    thread_executor.cc - this file is part of MediaTomb.
+    thread_executor.h - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -27,57 +27,37 @@
     $Id$
 */
 
-/// \file thread_executor.cc
+/// \file thread_executor.h
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
+#ifndef __THREAD_EXECUTOR_H__
+#define __THREAD_EXECUTOR_H__
 
-#include "thread_executor.h"
+#include <pthread.h>
 
-using namespace zmm;
+#include "common.h"
+#include "executor.h"
+#include "sync.h"
 
-ThreadExecutor::ThreadExecutor()
+class ThreadExecutor : public Executor
 {
-    mutex = Ref<Mutex>(new Mutex());
-    cond = Ref<Cond>(new Cond(mutex));
+public:
+    ThreadExecutor();
+    virtual ~ThreadExecutor();
+    virtual bool isAlive() { return threadRunning; };
+    virtual bool kill();
+    virtual int getStatus() = 0;
+protected:
+    bool threadShutdown;
+    zmm::Ref<Cond> cond;
+    zmm::Ref<Mutex> mutex;
+    virtual void threadProc() = 0;
+    void startThread();
+    bool threadShutdownCheck() { return threadShutdown; };
     
-    threadShutdown = false;
-}
+private:
+    pthread_t thread;
+    bool threadRunning;
+    static void *staticThreadProc(void *arg);
+};
 
-ThreadExecutor::~ThreadExecutor()
-{
-    kill();
-}
-
-void ThreadExecutor::startThread()
-{
-    threadRunning = true;
-    pthread_create(
-        &thread,
-        NULL, // attr
-        ThreadExecutor::staticThreadProc,
-        this
-    );
-}
-
-bool ThreadExecutor::kill()
-{
-    if (! threadRunning)
-        return true;
-    AUTOLOCK(mutex);
-    threadShutdown = true;
-    cond->signal();
-    AUTOUNLOCK();
-    if (thread)
-        pthread_join(thread, NULL);
-    return true;
-}
-
-void *ThreadExecutor::staticThreadProc(void *arg)
-{
-    ThreadExecutor *inst = (ThreadExecutor *)arg;
-    inst->threadProc();
-    pthread_exit(NULL);
-    return NULL;
-}
+#endif // __THREAD_EXECUTOR_H__

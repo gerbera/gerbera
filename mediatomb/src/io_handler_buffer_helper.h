@@ -32,6 +32,8 @@
 #ifndef __IO_HANDLER_BUFFER_HELPER_H__
 #define __IO_HANDLER_BUFFER_HELPER_H__
 
+#include <pthread.h>
+
 #include "common.h"
 #include "upnp.h"
 #include "io_handler.h"
