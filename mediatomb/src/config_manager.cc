@@ -1398,6 +1398,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
             throw _Exception(_("error in configuration: invalid transcoding profile name"));
 
         Ref<TranscodingProfile> prof(new TranscodingProfile(tr_type, param));
+
         param = child->getChildText(_("mimetype"));
         if (!string_ok(param))
             throw _Exception(_("error in configuration: invalid target mimetype in transcoding profile"));
@@ -1411,6 +1412,18 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                 if (check_resolution(param))
                     prof->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), param);
             }
+        }
+
+        if (child->getChild(_("accept-url")) != nil)
+        {
+            param = child->getChildText(_("accept-url"));
+            if (!validateYesNo(param))
+                throw _Exception(_("Error in config file: incorrect parameter "
+                                   "for <accept-url> tag"));
+            if (param == "yes")
+                prof->setAcceptURL(true);
+            else
+                prof->setAcceptURL(false);
         }
 
         if (child->getChild(_("theora")) != nil)

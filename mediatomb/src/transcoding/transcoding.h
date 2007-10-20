@@ -127,6 +127,10 @@ public:
     void setTheora(bool theora) { this->theora = theora; }
     bool isTheora() { return theora; }
 
+    /// \brief Specifies if the transcoding profile directly accepts an URL
+    /// or if we should proxy the data.
+    void setAcceptURL(bool accept) { accept_url = accept; }
+    bool acceptURL() { return accept_url; }
 
 protected:
     zmm::String name;
@@ -135,6 +139,7 @@ protected:
     zmm::String args;
     bool first_resource;
     bool theora;
+    bool accept_url;
     size_t buffer_size;
     size_t chunk_size;
     size_t initial_fill_size;

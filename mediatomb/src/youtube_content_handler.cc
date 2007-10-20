@@ -115,8 +115,10 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
             log_warning("Failed to retrieve YouTube video ID\n");
             continue;
         }
-        
-        item->setURL(temp);
+ 
+        /// \todo create an own class for items that fetch the URL on request
+        /// and to not store it permanently
+        item->setURL(_(" "));
         temp = String(OnlineService::getStoragePrefix(OS_YouTube)) + temp;
         item->setServiceID(temp);
 

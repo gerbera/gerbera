@@ -257,7 +257,6 @@ Ref<IOHandler> URLRequestHandler::open(IN const char *filename, OUT struct File_
 
     io_handler->open(mode);
     return io_handler;
-//    throw _Exception(_("url request handler implementation is not yet complete!"));
 }
 
 #endif

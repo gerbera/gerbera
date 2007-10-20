@@ -97,7 +97,23 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     Ref<Array<StringBase> > arglist;
     int i;
     int apos = 0;
+/*
+    if (!profile->acceptURL())
+    {
+        String url = location;
+        location = tempName(fifo_template);
+        log_debug("creating reader fifo: %s\n", location.c_str());
+        if (mkfifo(location.c_str(), O_RDWR) == -1)
+        {
+            log_error("Failed to create fifo for the remote content reading thread: %s\n", strerror(errno));
+            throw _Exception(_("Could not create reader fifo!\n"));
+        }
 
+        chmod(location.c_str(), S_IWOTH | S_IWGRP | S_IWUSR | S_IRUSR);
+        /// \todo launch a thread that will be reading the remote content and 
+        // saving it to the fifo
+    }
+*/
     log_debug("creating fifo: %s\n", fifo_name.c_str());
     if (mkfifo(fifo_name.c_str(), O_RDWR) == -1) 
     {
@@ -113,7 +129,6 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
         case -1:
             throw _Exception(_("Fork failed when launching transcoding process!"));
         case 0:
-            /// \todo check if the transcoder accepts an URL
             arglist = parseCommandLine(profile->getArguments(), location, fifo_name);
             command = profile->getCommand();
             argv[0] = command.c_str();
@@ -151,7 +166,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
 
 
     
-    Ref<IOHandler> io_handler(new BufferedIOHandler(Ref<IOHandler> (new ProcessIOHandler(fifo_name,transcoding_process)), profile->getBufferSize(), profile->getBufferChunkSize(), profile->getBufferInitialFillSize()));
+    Ref<IOHandler> io_handler(new BufferedIOHandler(Ref<IOHandler> (new ProcessIOHandler(fifo_name, transcoding_process)), profile->getBufferSize(), profile->getBufferChunkSize(), profile->getBufferInitialFillSize()));
 
     io_handler->open(UPNP_READ);
     return io_handler;

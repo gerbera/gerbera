@@ -42,7 +42,6 @@
 
 #include "mysql_storage.h"
 #include "config_manager.h"
-#include "destroyer.h"
 
 #ifdef AUTO_CREATE_DATABASE
     #include "mysql_create_sql.h"
