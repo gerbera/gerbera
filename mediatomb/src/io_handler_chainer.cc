@@ -73,10 +73,11 @@ void IOHandlerChainer::threadProc()
             }
             else
             {
-                if (! threadShutdownCheck())
+                int numWritten = 0;
+                while (! threadShutdownCheck() && numWritten == 0 && ! stopLoop);
                 {
-                    int numWritten = writeTo->write(buf, numRead);
-                    if (numWritten != numRead)
+                    numWritten = writeTo->write(buf, numRead);
+                    if (numWritten != 0 && numWritten != numRead)
                     {
                         status = IOHC_WRITE_ERROR;
                         stopLoop = true;
