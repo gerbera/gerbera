@@ -74,7 +74,7 @@ void IOHandlerChainer::threadProc()
             else
             {
                 int numWritten = 0;
-                while (! threadShutdownCheck() && numWritten == 0 && ! stopLoop);
+                while (! threadShutdownCheck() && numWritten == 0 && ! stopLoop)
                 {
                     numWritten = writeTo->write(buf, numRead);
                     if (numWritten != 0 && numWritten != numRead)
