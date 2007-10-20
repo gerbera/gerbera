@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    executor.h - this file is part of MediaTomb.
+    executor.cc - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -27,20 +27,16 @@
     $Id$
 */
 
-/// \file executor.h
+/// \file executor.cc
 
-#ifndef __EXECUTOR_H__
-#define __EXECUTOR_H__
+#ifdef HAVE_CONFIG_H
+    #include "autoconfig.h"
+#endif
 
-#include "zmmf/zmmf.h"
+#include "executor.h"
 
-class Executor : public zmm::Object
+Executor::~Executor()
 {
-public:
-    virtual ~Executor();
-    virtual bool isAlive() = 0;
-    virtual bool kill() = 0;
-    virtual int getStatus() = 0;
-};
-
-#endif // __EXECUTOR_H__
+    if (isAlive())
+        kill();
+}
