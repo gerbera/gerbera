@@ -57,16 +57,19 @@ void IOHandlerChainer::threadProc()
 {
     try
     {
-        while (! threadShutdownCheck() && status == 0)
+        bool stopLoop = false;
+        while (! threadShutdownCheck() && ! stopLoop)
         {
             int numRead = readFrom->read(buf, chunkSize);
             if (numRead == 0)
             {
                 status = IOHC_NORMAL_SHUTDOWN;
+                stopLoop = true;
             }
             else if (numRead < 0)
             {
                 status = IOHC_READ_ERROR;
+                stopLoop = true;
             }
             else
             {
@@ -76,6 +79,7 @@ void IOHandlerChainer::threadProc()
                     if (numWritten != numRead)
                     {
                         status = IOHC_WRITE_ERROR;
+                        stopLoop = true;
                     }
                 }
             }

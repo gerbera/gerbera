@@ -42,9 +42,16 @@
 #include "thread_executor.h"
 #include "io_handler.h"
 
+/// \brief gets two IOHandler, starts a thread which reads from one IOHandler
+/// and writes the data to the other IOHandler
 class IOHandlerChainer : public ThreadExecutor
 {
 public:
+    /// \brief initialize the IOHandlerChainer
+    /// \param readFrom the IOHandler to read from
+    /// \param writeTo the IOHandler to write to
+    /// \param chunkSize the amount of bytes to read/write at once. a buffer of
+    /// this size will be allocated
     IOHandlerChainer(zmm::Ref<IOHandler> readFrom, zmm::Ref<IOHandler> writeTo, int chunkSize);
     virtual int getStatus() { return status; }
 protected:

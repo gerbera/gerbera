@@ -38,24 +38,41 @@
 #include "executor.h"
 #include "sync.h"
 
+/// \brief an executor which runs a thread
 class ThreadExecutor : public Executor
 {
 public:
+    
+    /// \brief initialize the mutex and the cond
     ThreadExecutor();
     virtual ~ThreadExecutor();
     virtual bool isAlive() { return threadRunning; };
+    
+    /// \brief kill the thread (pthread_join)
+    /// \return always true - this function only returns after the thread has died
     virtual bool kill();
+    
+    /// \brief the exit status of the thread - needs to be overridden
     virtual int getStatus() = 0;
 protected:
     bool threadShutdown;
     zmm::Ref<Cond> cond;
     zmm::Ref<Mutex> mutex;
+    
+    /// \brief abstract thread method, which needs to be overridden
     virtual void threadProc() = 0;
+    
+    /// \brief start the thread
     void startThread();
+    
+    /// \brief check if the thread should shutdown
+    /// should be called by the threadProc in short intervals
     bool threadShutdownCheck() { return threadShutdown; };
     
 private:
     pthread_t thread;
+    
+    /// \brief if the thread is currently running
     bool threadRunning;
     static void *staticThreadProc(void *arg);
 };
