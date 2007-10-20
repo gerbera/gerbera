@@ -39,6 +39,7 @@ class Executor : public zmm::Object
 public:
     virtual bool isAlive() = 0;
     virtual bool kill() = 0;
+    virtual int getStatus() = 0;
 };
 
 #endif // __EXECUTOR_H__
