@@ -98,7 +98,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     Ref<Array<StringBase> > arglist;
     Ref<Array<ProcListItem> > proc_list = nil; 
 
-    if (!profile->acceptURL())
+    if (isURL && (!profile->acceptURL()))
     {
         String url = location;
         strcpy(fifo_template, "/tmp/mt_transcode_XXXXXX");
@@ -112,9 +112,9 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
 
         chmod(location.c_str(), S_IWUSR | S_IRUSR);
 
-        Ref<IOHandler> c_ioh(new CurlIOHandler(url, NULL, 1024*1024, 0));
+        Ref<IOHandler> c_ioh(new CurlIOHandler(url, NULL, 1024*1024, 10*1024));
         Ref<IOHandler> p_ioh(new ProcessIOHandler(location, nil));
-        Ref<Executor> ch(new IOHandlerChainer(c_ioh, p_ioh, 10*1024));
+        Ref<Executor> ch(new IOHandlerChainer(c_ioh, p_ioh, 10240));
         proc_list = Ref<Array<ProcListItem> >(new Array<ProcListItem>(1));
         Ref<ProcListItem> pr_item(new ProcListItem(ch));
         proc_list->append(pr_item);
