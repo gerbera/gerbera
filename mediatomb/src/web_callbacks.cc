@@ -116,7 +116,7 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
         else
             throw _Exception(_("Serving directories is not enabled in configuration"));
     }
-#ifdef ONLINE_SERVICES
+#if defined(ONLINE_SERVICES) || defined(HAVE_CURL)
     else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" +
                              CONTENT_ONLINE_HANDLER))
     {

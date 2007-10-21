@@ -81,8 +81,8 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
 {
     Ref<UrlBase> urlBase = addResources_getUrlBase(item);
     Ref<ConfigManager> config = ConfigManager::getInstance();
-    bool skipURL = (IS_CDS_ITEM_INTERNAL_URL(item->getObjectType()) || 
-                    IS_CDS_ITEM_EXTERNAL_URL(item->getObjectType()) &&
+    bool skipURL = ((IS_CDS_ITEM_INTERNAL_URL(item->getObjectType()) || 
+                    IS_CDS_ITEM_EXTERNAL_URL(item->getObjectType())) &&
                     (!item->getFlag(OBJECT_FLAG_PROXY_URL)));
 
     Ref<Dictionary> mappings = config->getDictionaryOption(
@@ -148,10 +148,10 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                 item->insertResource(0, t_res);
             else
                 item->addResource(t_res);
-
-            if (skipURL)
-                urlBase_tr = addResources_getUrlBase(item, true);
         }
+
+        if (skipURL)
+            urlBase_tr = addResources_getUrlBase(item, true);
     }
 
 #endif
@@ -323,8 +323,8 @@ Ref<CdsResourceManager::UrlBase> CdsResourceManager::addResources_getUrlBase(Ref
             return urlBase;
         }
 
-        if (item->getFlag(OBJECT_FLAG_ONLINE_SERVICE) && 
-                item->getFlag(OBJECT_FLAG_PROXY_URL))
+        if ((item->getFlag(OBJECT_FLAG_ONLINE_SERVICE) && 
+                item->getFlag(OBJECT_FLAG_PROXY_URL)) || forceLocal)
         {
             urlBase->urlBase = Server::getInstance()->getVirtualURL() + _("/") +
                 CONTENT_ONLINE_HANDLER + _(_URL_PARAM_SEPARATOR) +

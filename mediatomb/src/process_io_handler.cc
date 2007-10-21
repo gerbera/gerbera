@@ -105,28 +105,52 @@ ProcessIOHandler::ProcessIOHandler(String filename,
     this->proclist = proclist;
     this->main_proc = main_proc;
 
-    if (!main_proc->isAlive() || abort())
+    if ((main_proc != nil) && ((!main_proc->isAlive() || abort())))
     {
-        unlink(filename.c_str());
         killall();
         throw _Exception(_("process terminated early"));
     }
+/*
+    if (mkfifo(filename.c_str(), O_RDWR) == -1)
+    {
+        log_error("Failed to create fifo: %s\n", strerror(errno));
+        killall();
+        if (main_proc != nil)
+            main_proc->kill();
+
+        throw _Exception(_("Could not create reader fifo!\n"));
+    }
+*/
 //    ContentManager::getInstance()->registerProcess(kill_pid, filename);
 }
 
 void ProcessIOHandler::open(IN enum UpnpOpenFileMode mode)
 {
-    if (!main_proc->isAlive() || abort())
+    if ((main_proc != nil) && ((!main_proc->isAlive() || abort())))
     {
         killall();
         throw _Exception(_("process terminated early"));
     }
 
-    fd = ::open(filename.c_str(), O_RDONLY | O_NONBLOCK);
+    if (mode == UPNP_READ)
+        fd = ::open(filename.c_str(), O_RDONLY | O_NONBLOCK);
+    else if (mode == UPNP_WRITE)
+        fd = ::open(filename.c_str(), O_WRONLY | O_NONBLOCK);
+    else 
+        fd = -1;
+
     if (fd == -1)
     {
+        if (errno == ENXIO)
+        {
+            printf("REPEATING!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+            throw _TryAgainException(_("open failed: ") + strerror(errno));
+        }
+
         killall();
-        main_proc->kill();
+        if (main_proc != nil)
+            main_proc->kill();
+        unlink(filename.c_str());
         throw _Exception(_("open: failed to open: ") + filename.c_str());
     }
 }
@@ -159,25 +183,33 @@ int ProcessIOHandler::read(OUT char *buf, IN size_t length)
         // timeout
         if (ret == 0)
         {
-            bool main_ok = main_proc->isAlive();
-            if (!main_ok || abort())
+            if (main_proc != nil)
             {
-                if (!main_ok)
+                bool main_ok = main_proc->isAlive();
+                if (!main_ok || abort())
                 {
-                    exit_status = main_proc->getStatus();
-                    log_debug("process exited with status %d\n", exit_status);
-                    killall();
-                    if (exit_status == EXIT_SUCCESS)
-                        return 0; 
+                    if (!main_ok)
+                    {
+                        exit_status = main_proc->getStatus();
+                        log_debug("process exited with status %d\n", exit_status);
+                        killall();
+                        if (exit_status == EXIT_SUCCESS)
+                            return 0; 
+                        else
+                            return -1;
+                    }
                     else
+                    {
+                        main_proc->kill();
+                        killall();
                         return -1;
+                    }
                 }
-                else
-                {
-                    main_proc->kill();
-                    killall();
-                    return -1;
-                }
+            }
+            else
+            {
+                killall();
+                return 0;
             }
         }
 
@@ -209,22 +241,136 @@ int ProcessIOHandler::read(OUT char *buf, IN size_t length)
         // actually that will depend on the ret code of the process
         ret = -1;
 
-        if (!main_proc->isAlive())
+        if (main_proc != nil)
         {
-            if (main_proc->getStatus() == EXIT_SUCCESS)
-                ret = 0;
+            if (!main_proc->isAlive())
+            {
+                if (main_proc->getStatus() == EXIT_SUCCESS)
+                    ret = 0;
 
+            }
+            else
+            {
+                main_proc->kill();
+            }
         }
         else
-        {
-            main_proc->kill();
-        }
+            ret = 0;
+
         killall();
         return ret;
     }
 
     return num_bytes;
 }
+
+int ProcessIOHandler::write(IN char *buf, IN size_t length)
+{
+    fd_set writeSet;
+    struct timeval timeout;
+    ssize_t bytes_written = 0;
+    int num_bytes = 0;
+    char* p_buffer = buf;
+    int exit_status = EXIT_SUCCESS;
+    int ret = 0;
+
+    while (true)
+    {
+        FD_ZERO(&writeSet);
+        FD_SET(fd, &writeSet);
+
+        timeout.tv_sec = FIFO_WRITE_TIMEOUT;
+        timeout.tv_usec = 0;
+
+        ret = select(fd + 1, NULL, &writeSet, NULL, &timeout);
+        if (ret == -1)
+        {
+            if (errno == EINTR)
+                continue;
+        }
+
+        // timeout
+        if (ret == 0)
+        {
+            if (main_proc != nil)
+            {
+                bool main_ok = main_proc->isAlive();
+                if (!main_ok || abort())
+                {
+                    if (!main_ok)
+                    {
+                        exit_status = main_proc->getStatus();
+                        log_debug("process exited with status %d\n", exit_status);
+                        killall();
+                        if (exit_status == EXIT_SUCCESS)
+                            return 0; 
+                        else
+                            return -1;
+                    }
+                    else
+                    {
+                        main_proc->kill();
+                        killall();
+                        return -1;
+                    }
+                }
+            }
+            else
+            {
+                killall();
+                return 0;
+            }
+        }
+
+        if (FD_ISSET(fd, &writeSet))
+        {
+            bytes_written= ::write(fd, p_buffer, length);
+            if (bytes_written == 0)
+                break;
+
+            if (bytes_written < 0)
+            {
+                log_debug("aborting write!!!\n");
+                return -1;
+            }
+
+            num_bytes = num_bytes + bytes_written;
+            length = length - bytes_written;
+            if (length <= 0)
+                break;
+
+            p_buffer = buf + num_bytes;
+        }
+    }
+
+    if (num_bytes < 0)
+    {
+        // not sure what we return here since no way of knowing about feof
+        // actually that will depend on the ret code of the process
+        ret = -1;
+
+        if (main_proc != nil)
+        {
+            if (!main_proc->isAlive())
+            {
+                if (main_proc->getStatus() == EXIT_SUCCESS)
+                    ret = 0;
+
+            }
+            else
+            {
+                main_proc->kill();
+            }
+        }
+        else
+            ret = 0;
+
+        killall();
+        return ret;
+    }
+    return num_bytes;
+}
+
 
 void ProcessIOHandler::seek(IN off_t offset, IN int whence)
 {   
@@ -239,15 +385,25 @@ void ProcessIOHandler::close()
 
     log_debug("terminating process, closing %s\n", this->filename.c_str());
 
-//    ContentManager::getInstance()->unregisterProcess(kill_pid);
-    ret = main_proc->kill();
+    //    ContentManager::getInstance()->unregisterProcess(kill_pid);
+    if (main_proc != nil)
+    {
+        ret = main_proc->kill();
+    }
+    else 
+        ret = true;
+
     killall();
     
     ::close(fd);
-    unlink(filename.c_str());
 
     if (!ret)
         throw _Exception(_("failed to kill process!"));
+}
+
+ProcessIOHandler::~ProcessIOHandler()
+{
+    unlink(filename.c_str());
 }
 
 #endif // TRANSCODING

@@ -110,11 +110,11 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
             throw _Exception(_("Could not create reader fifo!\n"));
         }
 
-        chmod(location.c_str(), S_IWOTH | S_IWGRP | S_IWUSR | S_IRUSR);
+        chmod(location.c_str(), S_IWUSR | S_IRUSR);
 
         Ref<IOHandler> c_ioh(new CurlIOHandler(url, NULL, 1024*1024, 0));
-        Ref<IOHandler> f_ioh(new FileIOHandler(location));
-        Ref<Executor> ch(new IOHandlerChainer(c_ioh, f_ioh, 10*1024));
+        Ref<IOHandler> p_ioh(new ProcessIOHandler(location, nil));
+        Ref<Executor> ch(new IOHandlerChainer(c_ioh, p_ioh, 10*1024));
         proc_list = Ref<Array<ProcListItem> >(new Array<ProcListItem>(1));
         Ref<ProcListItem> pr_item(new ProcListItem(ch));
         proc_list->append(pr_item);
@@ -127,8 +127,8 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
         log_error("Failed to create fifo for the transcoding process!: %s\n", strerror(errno));
         throw _Exception(_("Could not create fifo!\n"));
     }
-
-    chmod(fifo_name.c_str(), S_IWOTH | S_IWGRP | S_IWUSR | S_IRUSR);
+        
+    chmod(fifo_name.c_str(), S_IWUSR | S_IRUSR);
     
     arglist = parseCommandLine(profile->getArguments(), location, fifo_name);
     Ref<ProcessExecutor> main_proc(new ProcessExecutor(profile->getCommand(), arglist));

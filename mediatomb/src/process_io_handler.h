@@ -37,6 +37,7 @@
 #include "executor.h"
 
 #define FIFO_READ_TIMEOUT 5
+#define FIFO_WRITE_TIMEOUT 5
 
 class ProcListItem : public zmm::Object
 {
@@ -82,6 +83,12 @@ public:
     /// \param length Number of bytes to be copied into the buffer.
     virtual int read(OUT char *buf, IN size_t length);
 
+    /// \brief Writes to a previously opened file.
+    /// \param buf Data from the buffer will be written to the file.
+    /// \param length Number of bytes to be written from the buffer.
+    /// \return number of bytes written.
+    virtual int write(OUT char *buf, IN size_t length);
+
     /// \brief Performs seek on an open file.
     /// \param offset Number of bytes to move in the file. For seeking forwards
     /// positive values are used, for seeking backwards - negative. Offset must
@@ -94,6 +101,8 @@ public:
 
     /// \brief Close a previously opened file and kills the kill_pid process
     virtual void close();
+
+    ~ProcessIOHandler();
 
 protected:
     bool abort();

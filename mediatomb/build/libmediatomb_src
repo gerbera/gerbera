@@ -19,6 +19,7 @@ libmediatomb_a_SOURCES = \
 ../src/config_options.h \
 ../src/content_manager.cc \
 ../src/content_manager.h \
+../src/content_writer.h \
 ../src/curl_io_handler.cc \
 ../src/curl_io_handler.h \
 ../src/destroyer.cc \

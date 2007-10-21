@@ -88,6 +88,8 @@ void CurlIOHandler::threadProc()
     
     curl_easy_setopt(curl_handle, CURLOPT_URL, URL.c_str());
     curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);
+    curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1);
+    curl_easy_setopt(curl_handle, CURLOPT_MAXREDIRS, -1);
     //curl_easy_setopt(curl_handle, CURLOPT_CONNECTTIMEOUT,
     
     //proxy..

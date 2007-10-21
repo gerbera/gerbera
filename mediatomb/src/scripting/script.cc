@@ -558,6 +558,18 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
             if (pcd != nil)
                 item->setMimeType(pcd_item->getMimeType());
         }
+
+        val = getProperty(js, _("serviceID"));
+        if (val != nil)
+        {
+            if (this->whoami() == S_PLAYLIST)
+                val = p2i->convert(val);
+            else
+                val = i2i->convert(val);
+
+            item->setServiceID(val);
+        }
+
         /// \todo check what this is doing here, wasn't it already handled
         /// in the MT_KEYS loop?
         val = getProperty(js, _("description"));
@@ -741,6 +753,10 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
         val = item->getMimeType();
         if (val != nil)
             setProperty(js, _("mimetype"), val);
+
+        val = item->getServiceID();
+        if (val != nil)
+            setProperty(js, _("serviceID"), val);
 
         if (IS_CDS_ACTIVE_ITEM(objectType))
         {
