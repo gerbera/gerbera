@@ -93,6 +93,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
     // this will be used to count only the "real" resources, omitting the
     // transcoded ones
     int realCount = 0;
+    bool hide_original_resource = false;
     
     Ref<UrlBase> urlBase_tr;
 
@@ -143,6 +144,9 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                         duration);
 
             t_res->mergeAttributes(tp->getAttributes());
+
+            if (tp->hideOriginalResource())
+                hide_original_resource = true;
 
             if (tp->firstResource())
                 item->insertResource(0, t_res);
@@ -201,11 +205,11 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         else
         {
             if (!skipURL)
-                url = urlBase->urlBase + (-1);
+                url = urlBase->urlBase + _(URL_VALUE_TRANSCODE_NO_RES_ID);
             else
             {
                 assert(urlBase_tr != nil);
-                url = urlBase_tr->urlBase + (-1);
+                url = urlBase_tr->urlBase + _(URL_VALUE_TRANSCODE_NO_RES_ID);
             }
         }
 #else
@@ -289,7 +293,10 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         log_debug("extended protocolInfo: %s\n", protocolInfo.c_str());
         }
 #endif
-        element->appendChild(UpnpXML_DIDLRenderResource(url, res_attrs));
+#ifdef TRANSCODING
+        if (!hide_original_resource || transcoded)
+#endif
+            element->appendChild(UpnpXML_DIDLRenderResource(url, res_attrs));
     }
 }
 

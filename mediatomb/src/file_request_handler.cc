@@ -114,8 +114,10 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     // determining which resource to serve 
     int res_id = 0;
     String s_res_id = dict->get(_(URL_RESOURCE_ID));
-    if (s_res_id != nil)
+    if (string_ok(s_res_id) && (s_res_id != _(URL_VALUE_TRANSCODE_NO_RES_ID)))
         res_id = s_res_id.toInt();
+    else
+        res_id = -1;
 
 
     String ext = dict->get(_("ext"));
@@ -368,8 +370,10 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
     // determining which resource to serve 
     int res_id = 0;
     String s_res_id = dict->get(_(URL_RESOURCE_ID));
-    if (s_res_id != nil)
+    if (string_ok(s_res_id) && (s_res_id != _(URL_VALUE_TRANSCODE_NO_RES_ID)))
         res_id = s_res_id.toInt();
+    else
+        res_id = -1;
 
     String ext = dict->get(_("ext"));
     if (ext == ".srt")
@@ -427,6 +431,16 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
     log_debug("fetching resource id %d\n", res_id);
 #ifdef TRANSCODING
     tr_profile = dict->get(_(URL_PARAM_TRANSCODE_PROFILE_NAME));
+    if (string_ok(tr_profile))
+    {
+        if (res_id != (-1))
+            throw _Exception(_("Invalid resource ID given!"));
+    }
+    else
+    {
+        if (res_id == -1)
+            throw _Exception(_("Invalid resource ID given!"));
+    }
 #endif
 
     info->http_header = NULL;

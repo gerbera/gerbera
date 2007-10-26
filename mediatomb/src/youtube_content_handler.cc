@@ -69,13 +69,13 @@ bool YouTubeContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
         return false;
 
     current_video_node_index = 0;
-/*
+
     Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
     thumb_mimetype = mappings->get(_(CONTENT_TYPE_JPG));
     if (!string_ok(thumb_mimetype))
         thumb_mimetype = _("image/jpeg");
-*/
+
 
     return true;
 }

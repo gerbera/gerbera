@@ -103,6 +103,7 @@
 #define URL_PARAM_TRANSCODE_PROFILE_NAME "pr_name"
 #define URL_PARAM_TRANSCODE             "tr"
 #define URL_PARAM_TRANSCODE_TARGET_MIMETYPE "tmt"
+#define URL_VALUE_TRANSCODE_NO_RES_ID   "none"
 // REQUEST TYPES
 #define REQ_TYPE_BROWSE                 "browse"
 #define REQ_TYPE_LOGIN                  "login"

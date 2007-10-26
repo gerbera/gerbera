@@ -132,6 +132,11 @@ public:
     void setAcceptURL(bool accept) { accept_url = accept; }
     bool acceptURL() { return accept_url; }
 
+    /// \brief Specifies if the availability of this transcoding profile
+    /// should enforce hiding of all original resources in the browse XML
+    void setHideOriginalResource(bool hide) { hide_orig_res = hide; }
+    bool hideOriginalResource() { return hide_orig_res; }
+
 protected:
     zmm::String name;
     zmm::String tm;
@@ -140,6 +145,7 @@ protected:
     bool first_resource;
     bool theora;
     bool accept_url;
+    bool hide_orig_res;
     size_t buffer_size;
     size_t chunk_size;
     size_t initial_fill_size;

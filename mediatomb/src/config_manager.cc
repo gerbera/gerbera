@@ -1426,6 +1426,18 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                 prof->setAcceptURL(false);
         }
 
+        if (child->getChild(_("hide-original-resource")) != nil)
+        {
+            param = child->getChildText(_("hide-original-resource"));
+            if (!validateYesNo(param))
+                throw _Exception(_("Error in config file: incorrect parameter "
+                                   "for <hide-original-resource> tag"));
+            if (param == "yes")
+                prof->setHideOriginalResource(true);
+            else
+                prof->setHideOriginalResource(false);
+        }
+
         if (child->getChild(_("theora")) != nil)
             prof->setTheora(true);
 
