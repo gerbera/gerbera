@@ -46,16 +46,16 @@ StringBuffer::StringBuffer()
 {
     capacity = DEFAULT_STRINGBUFFER_CAPACITY;
     data = (char *)MALLOC((capacity + 1) * sizeof(char));
-    data[0] = 0;
     len = 0;
+    data[len] = 0;
 }
 
 StringBuffer::StringBuffer(int capacity)
 {
     this->capacity = capacity;
     data = (char *)MALLOC((capacity + 1) * sizeof(char));
-    data[0] = 0;
     len = 0;
+    data[len] = 0;
 }
 
 StringBuffer::~StringBuffer()
@@ -104,9 +104,9 @@ StringBuffer &StringBuffer::operator<<(signed char *str)
 StringBuffer &StringBuffer::operator<<(char chr)
 {
     addCapacity(1);
-    *(data + len) = chr;
-    *(data + len + 1) = 0;
+    data[len] = chr;
     len++;
+    data[len] = 0;
     return *this;
 }
 
@@ -151,13 +151,10 @@ void StringBuffer::concat(char *str, int length)
 {
     if(str && length)
     {
-        int otherLen = (int)strlen(str);
-        if (otherLen < length)
-            length = otherLen;
         addCapacity(length);
         strncpy(data + len, str, length);
         len += length;
-        *(data + len + 1) = 0;
+        data[len] = 0;
     }
 }
 
@@ -172,7 +169,7 @@ void StringBuffer::setLength(int newLength)
         ensureCapacity(newLength + 1);
     
     this->len = newLength;
-    data[len + 1] = 0;
+    data[len] = 0;
 }
 
 char *StringBuffer::c_str(int offset)
@@ -204,7 +201,7 @@ void StringBuffer::setCharAt(int index, char c)
 void StringBuffer::clear()
 {
     len = 0;
-    data[0] = 0;
+    data[len] = 0;
 }
 
 void StringBuffer::ensureCapacity(int neededCapacity)
