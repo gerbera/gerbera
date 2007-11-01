@@ -416,8 +416,23 @@ http_SendMessage( IN SOCKINFO * info,
                             num_read = fread( file_buf, 1,
                                               amount_to_be_read, Fp );
                     }
+                    // HACK: we don't want a read that will block
+                    // indefinetely, so we will return -666 in the callback
+                    // to indicate that this code should not write to the
+                    // socket but just check if the socket is still ok and
+                    // then read again
                     if (num_read < 0)
                     {
+                        if ((Instr->IsVirtualFile) && (num_read == -666))
+                        {
+                            if (sock_check_w(info) == 1)
+                            {
+                                printf("SOCKET IS OK!\n");
+                                continue;
+                                preintf("SOCKET IS NOT OK!\n");
+                            }
+                        }
+                            
                         return  UPNP_E_FILE_READ_ERROR;
                     }
                     amount_to_be_read = amount_to_be_read - num_read;

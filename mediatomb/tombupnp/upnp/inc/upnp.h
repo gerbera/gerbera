@@ -468,7 +468,6 @@
 #define UPNP_SOAP_E_OUT_OF_SYNC       403
 #define UPNP_SOAP_E_INVALID_VAR       404
 #define UPNP_SOAP_E_ACTION_FAILED     501
-
 //@}
 
 #ifndef OUT

@@ -398,6 +398,38 @@ sock_read( IN SOCKINFO * info,
     return num_bytes;
 }
 
+// checks if writing to the socket is possible
+int
+sock_check_w( IN SOCKINFO * info )
+{
+    fd_set writeSet;
+    struct timeval timeout;
+    int retCode;
+    int sockfd = info->socket;
+
+    FD_ZERO(&writeSet);
+    FD_SET(sockfd, &writeSet);
+
+    timeout.tv_sec = 1; // 1 second select, we do not care if it times out
+                        // we only look for an error
+    timeout.tv_usec = 0;
+
+    retCode = select(sockfd + 1, NULL, &writeSet, NULL, &timeout);
+
+    printf("sock_check select returned %d\n", retCode);
+    if (retCode == 0) // timeout
+        return 1;
+
+        
+    if (retCode == -1)
+    {
+        if(errno == EINTR)
+            return 1;
+    }
+
+    return 0;
+}
+
 /************************************************************************
 *	Function :	sock_write
 *

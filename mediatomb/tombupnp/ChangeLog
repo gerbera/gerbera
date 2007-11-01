@@ -1,3 +1,4 @@
+	* fixed AMD64 issues and got rid of all warnings
 	* added chunked encoding patch from Serge Nikitin
 	* added special PS3 hack to timeout on hanging sockets
 	* fixed warning in uri.c on Solaris

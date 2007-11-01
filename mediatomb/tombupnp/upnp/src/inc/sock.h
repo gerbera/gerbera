@@ -122,6 +122,10 @@ int sock_init_with_ip( OUT SOCKINFO* info, IN int sockfd,
 int sock_read( IN SOCKINFO *info, OUT char* buffer, IN size_t bufsize,
 		    		 INOUT int *timeoutSecs );
 
+
+// check is socket is ok for writing
+int sock_check_w( IN SOCKINFO * info );
+
 /************************************************************************
 *	Function :	sock_write
 *
