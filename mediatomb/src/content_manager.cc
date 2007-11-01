@@ -55,7 +55,7 @@
     #include "layout/js_layout.h"
 #endif
 
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
     #include "process.h"
 #endif
 
@@ -304,21 +304,20 @@ void ContentManager::init()
     
 #endif
 
-#ifdef TRANSCODING
-    tr_mutex = Ref<Mutex>(new Mutex(true));
-    transcoding_processes = Ref<Array<TranscodingProcess> >(new Array<TranscodingProcess>());
+#ifdef EXTERNAL_TRANSCODING
+    process_list = Ref<Array<Executor> >(new Array<Executor>());
 #endif
 }
 
-#if defined(TRANSCODING) || defined(SOPCAST)
-void ContentManager::registerProcess(pid_t pid, String filename)
+#if defined(EXTERNAL_TRANSCODING) || defined(SOPCAST)
+void ContentManager::registerExecutor(Ref<Executor> exec)
 {
-    AUTOLOCK(tr_mutex);
-    Ref<TranscodingProcess>tproc(new TranscodingProcess(pid, filename));
-    transcoding_processes->append(tproc);
+    AUTOLOCK(mutex);
+    printf("ADDING EXECUTOR!\n");
+    process_list->append(exec);
 }
 
-void ContentManager::unregisterProcess(pid_t pid)
+void ContentManager::unregisterExecutor(Ref<Executor> exec)
 {
     // when shutting down we will kill the transcoding processes,
     // which if given enough time will get a close in the io handler and
@@ -329,11 +328,13 @@ void ContentManager::unregisterProcess(pid_t pid)
     if (shutdownFlag)
         return;
 
-    AUTOLOCK(tr_mutex);
-    for (int i = 0; i < transcoding_processes->size(); i++)
+    AUTOLOCK(mutex);
+    for (int i = 0; i < process_list->size(); i++)
     {
-        if (transcoding_processes->get(i)->getPID() == pid)
-            transcoding_processes->remove(i);
+        if (process_list->get(i) == exec)
+            printf("REMOVING EXECUTOR!!!!!!!!!!\n");
+        if (process_list->get(i) == exec)
+            process_list->remove(i);
     }
 }
 #endif
@@ -395,20 +396,14 @@ void ContentManager::shutdown()
 
     shutdownFlag = true;
 
-#ifdef TRANSCODING 
+#ifdef EXTERNAL_TRANSCODING 
     bool killed;
-    for (int i = 0; i < transcoding_processes->size(); i++)
+    for (int i = 0; i < process_list->size(); i++)
     {
-        pid_t pid = transcoding_processes->get(i)->getPID();
-        killed = kill_proc(pid);
-        if (!killed)
-        {
-            log_warning("failed to kill transcoding process %d\n", pid);
-        }
-        else
-        {
-            log_debug("killed transcoding process %d\n", pid);
-        }
+        Ref<Executor> exec = process_list->get(i);
+        if (exec != nil)
+            exec->kill();
+        /*
         String tmp_fifo = transcoding_processes->get(i)->getFName();
         if (check_path(tmp_fifo))
         {
@@ -417,6 +412,7 @@ void ContentManager::shutdown()
                         tmp_fifo.c_str(), pid,
                         strerror(errno));
         }
+        */
     }
 #endif
 

@@ -50,12 +50,16 @@
     #include "autoscan_inotify.h"
 #endif
 
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
     #include "transcoding/transcoding.h"
 #endif
 
 #ifdef ONLINE_SERVICES 
     #include "online_service.h"
+#endif
+
+#if defined (EXTERNAL_TRANSCODING) || defined(SOPCAST)
+    #include "executor.h"
 #endif
 
 class ContentManager;
@@ -357,25 +361,22 @@ public:
     /// \brief instructs ContentManager to reload scripting environment
     void reloadLayout();
 
-#if defined(TRANSCODING) || defined(SOPCAST)
-    /// \brief register process
+#if defined(EXTERNAL_TRANSCODING) || defined(SOPCAST)
+    /// \brief register executor
     ///
-    /// When an external process is launched we will register it's pid with
+    /// When an external process is launched we will register the executor
     /// the content manager. This will ensure that we can kill all processes
     /// when we shutdown the server.
     /// 
-    /// \param pid the process id of the process.
-    /// \param associated fifo name - the fifo has to be removed after the 
-    ///  process is killed
-    void registerProcess(pid_t pid, zmm::String filename);
+    /// \param exec the Executor object of the process
+    void registerExecutor(zmm::Ref<Executor> exec);
 
     /// \brief unregister process
     /// 
     /// When the the process io handler receives a close on a stream that is
     /// currently being processed by an external process, it will kill it.
-    /// Additionally it will call this function and remove the pid from the 
-    /// list.
-    void unregisterProcess(pid_t pid);
+    /// The handler will then remove the executor from the list.
+    void unregisterExecutor(zmm::Ref<Executor> exec);
 #endif
 
 #ifdef HAVE_MAGIC
@@ -403,9 +404,9 @@ protected:
     zmm::Ref<AutoscanInotify> inotify;
 #endif
  
-#if defined(TRANSCODING) || defined(SOPCAST)
-    zmm::Ref<Mutex> tr_mutex;
-    zmm::Ref<zmm::Array<TranscodingProcess> > transcoding_processes;
+#if defined(EXTERNAL_TRANSCODING) || defined(SOPCAST)
+    zmm::Ref<Mutex> pr_mutex;
+    zmm::Ref<zmm::Array<Executor> > process_list;
 #endif
 
     void _loadAccounting();

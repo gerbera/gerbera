@@ -46,7 +46,7 @@
 #include "online_service_helper.h"
 #include "url.h"
 #include "curl_io_handler.h"
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
     #include "transcoding/transcode_dispatcher.h"
 #endif
 
@@ -63,7 +63,7 @@ void URLRequestHandler::get_info(IN const char *filename, OUT struct File_Info *
 
     String mimeType;
     int objectID;
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
     String tr_profile;
 #endif
 
@@ -98,7 +98,7 @@ void URLRequestHandler::get_info(IN const char *filename, OUT struct File_Info *
         throw _Exception(_("get_info: object is not an external url item"));
     }
 
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
     tr_profile = dict->get(_(URL_PARAM_TRANSCODE_PROFILE_NAME));
 
     if (string_ok(tr_profile))
@@ -161,7 +161,7 @@ Ref<IOHandler> URLRequestHandler::open(IN const char *filename, OUT struct File_
 {
     int objectID;
     String mimeType;
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
     String tr_profile;
 #endif
 
@@ -218,7 +218,7 @@ Ref<IOHandler> URLRequestHandler::open(IN const char *filename, OUT struct File_
     info->is_directory = 0;
     info->http_header = NULL;
 
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
     tr_profile = dict->get(_(URL_PARAM_TRANSCODE_PROFILE_NAME));
 
     if (string_ok(tr_profile))

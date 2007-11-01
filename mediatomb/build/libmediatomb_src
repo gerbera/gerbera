@@ -164,6 +164,8 @@ libmediatomb_a_SOURCES = \
 ../src/transcoding/transcode_handler.h \
 ../src/transcoding/transcoding.cc \
 ../src/transcoding/transcoding.h \
+../src/transcoding/transcoding_process_executor.cc \
+../src/transcoding/transcoding_process_executor.h \
 ../src/update_manager.cc \
 ../src/update_manager.h \
 ../src/upnp_cds_actions.cc \

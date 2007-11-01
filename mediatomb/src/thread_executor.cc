@@ -70,7 +70,10 @@ bool ThreadExecutor::kill()
     cond->signal();
     AUTOUNLOCK();
     if (thread)
+    {
+        threadRunning = false;
         pthread_join(thread, NULL);
+    }
     return true;
 }
 

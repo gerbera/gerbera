@@ -72,10 +72,13 @@ bool YouTubeContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
 
     Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
+    // this is somewhat a dilemma... we know that YT video thumbs are jpeg
+    // but we do not check that; we could probably do a HTTP HEAD request,
+    // however that would cause quite some network activity since there may
+    // be hundreds and thousands of those items
     thumb_mimetype = mappings->get(_(CONTENT_TYPE_JPG));
     if (!string_ok(thumb_mimetype))
         thumb_mimetype = _("image/jpeg");
-
 
     return true;
 }
@@ -208,6 +211,10 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
             thumbnail->
                 addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
                         renderProtocolInfo(thumb_mimetype));
+            // same as with thumb mimetype.. in most cases this resolution
+            // will be correct, we could omit it but then the renderers 
+            // would assume that this is a full image and thus not display
+            // it as thumbnail
             thumbnail->
                 addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), 
                         _("130x97"));

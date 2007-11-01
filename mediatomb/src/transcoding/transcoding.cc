@@ -34,7 +34,7 @@
     #include "autoconfig.h"
 #endif
 
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
 
 #include "transcoding.h"
 #include "tools.h"
@@ -125,4 +125,4 @@ Ref<TranscodingProfile> TranscodingProfileList::getByName(zmm::String name)
     return nil;
 }
 
-#endif//TRANSCODING
+#endif//EXTERNAL_TRANSCODING

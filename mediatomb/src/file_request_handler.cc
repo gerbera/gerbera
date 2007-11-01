@@ -51,7 +51,7 @@
 #include "file_request_handler.h"
 #include "metadata_handler.h"
 #include "tools.h"
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
     #include "transcoding/transcode_dispatcher.h"
 #endif
 
@@ -68,7 +68,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
 
     String mimeType;
     int objectID;
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
     String tr_profile;
 #endif
 
@@ -172,7 +172,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
         }
     }
  
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
     tr_profile = dict->get(_(URL_PARAM_TRANSCODE_PROFILE_NAME));
 #endif
  
@@ -201,7 +201,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     }
     else
     {
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
         if (!is_srt && string_ok(tr_profile))
         {
 
@@ -260,7 +260,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
     String mimeType;
     int ret;
     bool is_srt = false;
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
     String tr_profile;
 #endif
 
@@ -429,7 +429,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
         }
     }
     log_debug("fetching resource id %d\n", res_id);
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
     tr_profile = dict->get(_(URL_PARAM_TRANSCODE_PROFILE_NAME));
     if (string_ok(tr_profile))
     {
@@ -469,7 +469,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
     }
     else
     {
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
         if (!is_srt && string_ok(tr_profile))
         {
             Ref<TranscodeDispatcher> tr_d(new TranscodeDispatcher());

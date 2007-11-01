@@ -89,7 +89,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                         CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
 
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
     // this will be used to count only the "real" resources, omitting the
     // transcoded ones
     int realCount = 0;
@@ -188,7 +188,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         // file request handler will be getting.
         // the for transcoded resources the res_id can be safely ignored,
         // because a transcoded resource is identified by the profile name
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
         // flag if we are dealing with the transcoded resource
         bool transcoded = (res_params->get(_(URL_PARAM_TRANSCODE)) == D_CONVERSION);
         if (!transcoded)
@@ -240,7 +240,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         }
 #endif
 
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
 
         // when transcoding is enabled the first (zero) resource can be the
         // transcoded stream, that means that we can only go with the
@@ -274,7 +274,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                 extend = _(D_PROFILE) + "=" + D_LPCM + ";";
        
 
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
         // we do not support seeking at all, so 00
         // and the media is converted, so set CI to 1
         if (transcoded)
@@ -293,7 +293,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         log_debug("extended protocolInfo: %s\n", protocolInfo.c_str());
         }
 #endif
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
         if (!hide_original_resource || transcoded)
 #endif
             element->appendChild(UpnpXML_DIDLRenderResource(url, res_attrs));

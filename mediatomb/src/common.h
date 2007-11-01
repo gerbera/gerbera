@@ -241,7 +241,7 @@
 #ifdef ONLINE_SERVICES
     #define CFG_DEFAULT_UPDATE_AT_START 10 // seconds
 #endif
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
     #define DEFAULT_TRANSCODING_ENABLED NO
 #endif
 #ifdef HAVE_SQLITE3
@@ -256,6 +256,7 @@
 // misc
 #define INVALID_OBJECT_ID               (-333)
 #define INVALID_OBJECT_ID_2             (-666)
+#define CHECK_SOCKET                    (-666)
 
 #ifndef DEFAULT_JS_RUNTIME_MEM
     #define DEFAULT_JS_RUNTIME_MEM      (1L * 1024L * 1024L)

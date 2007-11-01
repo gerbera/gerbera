@@ -39,7 +39,7 @@
 #include "xpath.h"
 #include "autoscan.h"
 #include "config_options.h"
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
     #include "transcoding/transcoding.h"
 #endif
 #ifdef ONLINE_SERVICES
@@ -120,7 +120,7 @@ typedef enum
 #ifdef HAVE_EXTRACTOR
     CFG_IMPORT_LIBOPTS_EXTRACTOR_AUXDATA_TAGS_LIST,
 #endif
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
     CFG_TRANSCODING_PROFILE_LIST,
 #endif
 #ifdef YOUTUBE
@@ -181,7 +181,7 @@ public:
     /// \param option to retrieve
     zmm::Ref<AutoscanList> getAutoscanListOption(config_option_t option);
 
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
     /// \brief returns a config option of type TranscodingProfileList
     /// \param option to retrieve
     zmm::Ref<TranscodingProfileList> getTranscodingProfileListOption(config_option_t option);
@@ -275,7 +275,7 @@ protected:
     /// \param scanmode add only directories with the specified scanmode to the array
     zmm::Ref<AutoscanList> createAutoscanListFromNodeset(zmm::Ref<mxml::Element> element, scan_mode_t scanmode);
   
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
     /// \brief Creates ab aray of TranscodingProfile objects from an XML 
     /// nodeset.
     /// \param element starting element of the nodeset.

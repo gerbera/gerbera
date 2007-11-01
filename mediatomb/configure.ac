@@ -466,20 +466,27 @@ AC_HELP_STRING([--enable-mrreg-service],
               ]
 )
 
-TRANSCODING_OK=yes
-AC_ARG_ENABLE([transcoding],
+EXTERNAL_TRANSCODING=1
+AC_ARG_ENABLE([external-transcoding],
                       [
-AC_HELP_STRING([--disable-transcoding],
-[enable transcoding support (default: yes, currently in development)])
+AC_HELP_STRING([--disable-external-transcoding],
+[enable external transcoding support (default: yes)])
               ],
               [
                 if test "x$enableval" = xno; then
-                    TRANSCODING_OK=no
+                    EXTERNAL_TRANSCODING=0
                 else
-                    AC_DEFINE([TRANSCODING], [1], [do not enable this yet, work in progress])
+                    EXTERNAL_TRANSCODING=1
                 fi
               ]
 )
+
+if test $EXTERNAL_TRANSCODING -eq 1; then
+    AC_DEFINE([EXTERNAL_TRANSCODING], [1], [do not enable this yet, work in progress])
+    EXTERNAL_TRANSCODING_OK=yes
+else
+    EXTERNAL_TRANSCODING_OK=disabled
+fi
 
 EXTEND_PROTINFO=1
 AC_ARG_ENABLE([protocolinfo-extension],
@@ -511,13 +518,13 @@ AC_HELP_STRING([--enable-youtube],
                 if test "x$enableval" = xno; then
                     YOUTUBE=0
                 else
-                    YOUTUBE_REQUESTED=0
+                    YOUTUBE_REQUESTED=1
                     YOUTUBE=1
                 fi 
               ]
 )
 
-if test $YOUTUBE -eq 1; then
+if ((test $YOUTUBE -eq 1) || (test $EXTERNAL_TRANSCODING -eq 1)); then
     AC_ARG_WITH([curl-cfg],
             [
                 AC_HELP_STRING([--with-curl-cfg=curl-config],
@@ -2062,8 +2069,8 @@ CURL_PROG_FOUND=0
 CURL_LIBS=
 CURL_CFLAGS=
 CURL_OK=no
-if test $YOUTUBE -eq 1; then
-    AC_MSG_NOTICE([Checking for curl (needed for YouTube support)])
+if ((test $YOUTUBE -eq 1) || (test $EXTERNAL_TRANSCODING -eq 1)); then
+    AC_MSG_NOTICE([Checking for curl (needed for YouTube/extended external transcoding support)])
     CURL_OK=yes
     if test -n "$CURL_SEARCH_CONFIG"; then
         AC_MSG_NOTICE([You specified $CURL_SEARCH_CONFIG for curl-config])
@@ -2131,12 +2138,18 @@ if test "x$CURL_OK" = xyes; then
     AC_SUBST(CURL_CFLAGS)
     AC_SUBST(CURL_LIBS)
 else
+    YOUTUBE=0
     if test $YOUTUBE_REQUESTED -eq 1; then
         AC_MSG_ERROR(unable to configure curl which is require for YouTube support)
     fi
-    YOUTUBE=0
-    CURL_CFLAGS=
-    CURL_LIBS=
+    if test $EXTERNAL_TRANSCODING -eq 1; then
+        AC_MSG_WARN(unable to configure curl, external transcoding will have limited functionality)
+    fi
+
+    if (test $YOUTUBE -eq 0) && (test $EXTERNAL_TRANSCODING -eq 0); then
+        CURL_CFLAGS=
+        CURL_LIBS=
+    fi
 fi
 CPPFLAGS="$CPPFLAGS_SAVE"
 CXXFLAGS="$CXXFLAGS_SAVE"
@@ -2865,41 +2878,41 @@ echo
 echo "CONFIGURATION SUMMARY ----"
 #                        disabled
 echo
-echo "sqlite3       : $SQLITE3_OK"
-echo "mysql         : $MYSQL_OK"
-##echo "postgresql    : $PGSQL_OK"
-echo "libjs         : $JS_OK"
-echo "libmagic      : $MAGIC_OK"
-echo "inotify       : $INOTIFY_OK"
-echo "libexif       : $EXIF_OK"
-echo "expat         : $EXPAT_OK"
-echo "id3lib        : $ID3_OK"
-echo "taglib        : $TAGLIB_OK"
-echo "ffmpeg        : $FFMPEG_OK"
-echo "transcoding   : $TRANSCODING_OK"
-echo "YouTube       : $YOUTUBE_OK"
-echo "libextractor  : $EXTRACTOR_OK"
+echo "sqlite3               : $SQLITE3_OK"
+echo "mysql                 : $MYSQL_OK"
+##echo "postgresql          : $PGSQL_OK"
+echo "libjs                 : $JS_OK"
+echo "libmagic              : $MAGIC_OK"
+echo "inotify               : $INOTIFY_OK"
+echo "libexif               : $EXIF_OK"
+echo "expat                 : $EXPAT_OK"
+echo "id3lib                : $ID3_OK"
+echo "taglib                : $TAGLIB_OK"
+echo "ffmpeg                : $FFMPEG_OK"
+echo "external transcoding  : $EXTERNAL_TRANSCODING_OK"
+echo "YouTube               : $YOUTUBE_OK"
+echo "libextractor          : $EXTRACTOR_OK"
 
 
 
 if  test $AUTOCREATE_PRINT != "0"; then
-    echo "db-autocreate : $AUTOCREATE_PRINT"
+    echo "db-autocreate         : $AUTOCREATE_PRINT"
 fi
         
 if test "$LOG_OK" != "yes"; then
-    echo "log output    : $LOG_OK"
+    echo "log output            : $LOG_OK"
 fi
 
 if test "$LOGDEBUG_OK" != "disabled"; then
-    echo "debug log     : $LOGDEBUG_OK"
+    echo "debug log             : $LOGDEBUG_OK"
 fi
 
 if test "$UPNPDEBUG_OK" != "disabled"; then
-    echo "upnpdebug     : $UPNPDEBUG_OK"
+    echo "upnpdebug             : $UPNPDEBUG_OK"
 fi
 
 if test "$STATIC" = "yes"; then
-    echo "static build  : $STATIC"
+    echo "static build          : $STATIC"
 fi
 # echo "  libjpeg     : $LIBJPEG_OK"
 # echo "  exiv2       : $EXIV2_OK"

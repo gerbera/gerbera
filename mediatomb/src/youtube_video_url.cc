@@ -90,7 +90,7 @@ String YouTubeVideoURL::getVideoURL(String video_id)
     Ref<URL> url(new URL(YOUTUBE_PAGESIZE));
 
     Ref<StringBuffer> buffer = url->download(watch, &retcode, curl_handle,
-                                             false, verbose);
+                                             false, verbose, true);
     if (retcode != 200)
     {
         throw _Exception(_("Failed to get URL for video with id ")
@@ -112,7 +112,7 @@ String YouTubeVideoURL::getVideoURL(String video_id)
     params = _(YOUTUBE_URL_GET) + YOUTUBE_URL_PARAM_VIDEO_ID + '=' + 
              video_id + '&' + YOUTUBE_URL_PARAM_T + '=' + params;
 
-    buffer = url->download(params, &retcode, curl_handle, true, verbose);
+    buffer = url->download(params, &retcode, curl_handle, true, verbose, true);
 
     matcher = redirectLocation->matcher(buffer->toString());
     if (matcher->next())

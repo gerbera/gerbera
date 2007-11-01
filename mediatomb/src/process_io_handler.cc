@@ -33,7 +33,7 @@
     #include "autoconfig.h"
 #endif
 
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -44,6 +44,12 @@
 #include "process_io_handler.h"
 #include "process.h"
 #include "content_manager.h"
+
+// after MAX_TIMEOUTS we will tell libupnp to check the socket,
+// this will make sure that we do not block the read and allow libupnp to
+// call our close() callback
+
+#define MAX_TIMEOUTS    2  // maximum allowe consecutive timeouts
 
 using namespace zmm;
 
@@ -97,6 +103,38 @@ void ProcessIOHandler::killall()
     }
 }
 
+void ProcessIOHandler::registerAll()
+{
+    if (main_proc != nil)
+        ContentManager::getInstance()->registerExecutor(main_proc);
+
+    if (proclist == nil)
+        return;
+
+    for (int i = 0; i < proclist->size(); i++)
+    {
+        Ref<Executor> exec = proclist->get(i)->getExecutor();
+        if (exec != nil)
+            ContentManager::getInstance()->registerExecutor(exec);
+    }
+}
+
+void ProcessIOHandler::unregisterAll()
+{
+    if (main_proc != nil)
+        ContentManager::getInstance()->unregisterExecutor(main_proc);
+
+    if (proclist == nil)
+        return;
+
+    for (int i = 0; i < proclist->size(); i++)
+    {
+        Ref<Executor> exec = proclist->get(i)->getExecutor();
+        if (exec != nil)
+            ContentManager::getInstance()->unregisterExecutor(exec);
+    }
+}
+
 ProcessIOHandler::ProcessIOHandler(String filename, 
                         zmm::Ref<Executor> main_proc,
                         zmm::Ref<zmm::Array<ProcListItem> > proclist) : IOHandler()
@@ -121,7 +159,7 @@ ProcessIOHandler::ProcessIOHandler(String filename,
         throw _Exception(_("Could not create reader fifo!\n"));
     }
 */
-//    ContentManager::getInstance()->registerProcess(kill_pid, filename);
+    registerAll();
 }
 
 void ProcessIOHandler::open(IN enum UpnpOpenFileMode mode)
@@ -143,7 +181,6 @@ void ProcessIOHandler::open(IN enum UpnpOpenFileMode mode)
     {
         if (errno == ENXIO)
         {
-            printf("REPEATING!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
             throw _TryAgainException(_("open failed: ") + strerror(errno));
         }
 
@@ -164,6 +201,7 @@ int ProcessIOHandler::read(OUT char *buf, IN size_t length)
     char* p_buffer = buf;
     int exit_status = EXIT_SUCCESS;
     int ret = 0;
+    int timeout_count = 0;
 
     while (true)
     {
@@ -211,10 +249,18 @@ int ProcessIOHandler::read(OUT char *buf, IN size_t length)
                 killall();
                 return 0;
             }
+
+            timeout_count++;
+            if (timeout_count > MAX_TIMEOUTS)
+            {
+                log_debug("max timeouts!!!!! TODO: check socket!\n");
+//                return CHECK_SOCKET;
+            }
         }
 
         if (FD_ISSET(fd, &readSet))
         {
+            timeout_count = 0;
             bytes_read = ::read(fd, p_buffer, length);
             if (bytes_read == 0)
                 break;
@@ -286,7 +332,9 @@ int ProcessIOHandler::write(IN char *buf, IN size_t length)
         if (ret == -1)
         {
             if (errno == EINTR)
+            {
                 continue;
+            }
         }
 
         // timeout
@@ -368,6 +416,7 @@ int ProcessIOHandler::write(IN char *buf, IN size_t length)
         killall();
         return ret;
     }
+
     return num_bytes;
 }
 
@@ -384,8 +433,8 @@ void ProcessIOHandler::close()
    
 
     log_debug("terminating process, closing %s\n", this->filename.c_str());
+    unregisterAll();
 
-    //    ContentManager::getInstance()->unregisterProcess(kill_pid);
     if (main_proc != nil)
     {
         ret = main_proc->kill();
@@ -396,6 +445,8 @@ void ProcessIOHandler::close()
     killall();
     
     ::close(fd);
+    
+    unlink(filename.c_str());
 
     if (!ret)
         throw _Exception(_("failed to kill process!"));
@@ -403,8 +454,12 @@ void ProcessIOHandler::close()
 
 ProcessIOHandler::~ProcessIOHandler()
 {
-    unlink(filename.c_str());
+    try
+    {
+        close();
+    }
+    catch (Exception ex) {}
 }
 
-#endif // TRANSCODING
+#endif // EXTERNAL_TRANSCODING
 

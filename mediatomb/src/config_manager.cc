@@ -296,7 +296,7 @@ String ConfigManager::createDefaultConfig(String userhome)
                        Ref<AutoscanListOption> (new AutoscanListOption(optval));
 #define SET_AUTOSCANLIST_OPTION(opttype) \
                     options->set(RefCast(alist_opt, ConfigOption), opttype);
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
 #define NEW_TRANSCODING_PROFILELIST_OPTION(optval) trlist_opt = \
    Ref<TranscodingProfileListOption> (new TranscodingProfileListOption(optval));
 #define SET_TRANSCODING_PROFILELIST_OPTION(opttype) \
@@ -320,7 +320,7 @@ void ConfigManager::validate(String serverhome)
     Ref<DictionaryOption> dict_opt;
     Ref<StringArrayOption> str_array_opt;
     Ref<AutoscanListOption> alist_opt;
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
     Ref<TranscodingProfileListOption> trlist_opt;
 #endif
 #ifdef ONLINE_SERVICES
@@ -882,7 +882,7 @@ void ConfigManager::validate(String serverhome)
     SET_AUTOSCANLIST_OPTION(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
 #endif
    
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
     temp = getOption(
             _("/transcoding/attribute::enabled"), 
             _(DEFAULT_TRANSCODING_ENABLED));
@@ -1293,7 +1293,7 @@ Ref<Dictionary> ConfigManager::createDictionaryFromNodeset(Ref<Element> element,
     return dict;
 }
 
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
 Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodeset(Ref<Element> element)
 {
     size_t bs;
@@ -1807,7 +1807,7 @@ Ref<AutoscanList> ConfigManager::getAutoscanListOption(config_option_t option)
     return options->get(option)->getAutoscanListOption();
 }
 
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
 Ref<TranscodingProfileList> ConfigManager::getTranscodingProfileListOption(config_option_t option)
 {
     return options->get(option)->getTranscodingProfileListOption();

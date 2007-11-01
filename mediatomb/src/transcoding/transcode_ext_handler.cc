@@ -33,7 +33,7 @@
     #include "autoconfig.h"
 #endif
 
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
 
 #include "transcode_ext_handler.h"
 #include "server.h"
@@ -57,9 +57,12 @@
 #include "metadata_handler.h"
 #include "tools.h"
 #include "file_io_handler.h"
-#include "process_executor.h"
+#include "transcoding_process_executor.h"
 #include "io_handler_chainer.h"
-#include "curl_io_handler.h"
+
+#ifdef HAVE_CURL
+    #include "curl_io_handler.h"
+#endif
 
 using namespace zmm;
 
@@ -100,6 +103,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
 
     if (isURL && (!profile->acceptURL()))
     {
+#ifdef HAVE_CURL
         String url = location;
         strcpy(fifo_template, "/tmp/mt_transcode_XXXXXX");
         location = tempName(fifo_template);
@@ -110,14 +114,28 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
             throw _Exception(_("Could not create reader fifo!\n"));
         }
 
-        chmod(location.c_str(), S_IWUSR | S_IRUSR);
+        try
+        {
+            chmod(location.c_str(), S_IWUSR | S_IRUSR);
 
-        Ref<IOHandler> c_ioh(new CurlIOHandler(url, NULL, 1024*1024, 10*1024));
-        Ref<IOHandler> p_ioh(new ProcessIOHandler(location, nil));
-        Ref<Executor> ch(new IOHandlerChainer(c_ioh, p_ioh, 10240));
-        proc_list = Ref<Array<ProcListItem> >(new Array<ProcListItem>(1));
-        Ref<ProcListItem> pr_item(new ProcListItem(ch));
-        proc_list->append(pr_item);
+            /// \todo make input buffer configurable
+            Ref<IOHandler> c_ioh(new CurlIOHandler(url, NULL, 1024*1024, 10*1024));
+            //Ref<IOHandler> c_ioh(new CurlIOHandler(url, NULL, 1024*1024, 0));
+            Ref<IOHandler> p_ioh(new ProcessIOHandler(location, nil));
+            Ref<Executor> ch(new IOHandlerChainer(c_ioh, p_ioh, 10240));
+            proc_list = Ref<Array<ProcListItem> >(new Array<ProcListItem>(1));
+            Ref<ProcListItem> pr_item(new ProcListItem(ch));
+            proc_list->append(pr_item);
+        }
+        catch (Exception ex)
+        {
+            unlink(location.c_str());
+            throw ex;
+        }
+#else
+        throw _Exception(_("MediaTomb was compiled without libcurl support,"
+                           "data proxying is not available"));
+#endif
 
     }
 
@@ -131,7 +149,13 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     chmod(fifo_name.c_str(), S_IWUSR | S_IRUSR);
     
     arglist = parseCommandLine(profile->getArguments(), location, fifo_name);
-    Ref<ProcessExecutor> main_proc(new ProcessExecutor(profile->getCommand(), arglist));
+    Ref<TranscodingProcessExecutor> main_proc(new TranscodingProcessExecutor(profile->getCommand(), arglist));
+    main_proc->removeFile(fifo_name);
+    if (isURL && (!profile->acceptURL()))
+    {
+        printf("ALSO SETTING TO REMOVE %s\n", location.c_str());
+//        main_proc->removeFile(location);
+    }
     
     Ref<IOHandler> io_handler(new BufferedIOHandler(Ref<IOHandler> (new ProcessIOHandler(fifo_name, RefCast(main_proc, Executor), proc_list)), profile->getBufferSize(), profile->getBufferChunkSize(), profile->getBufferInitialFillSize()));
 
@@ -139,4 +163,4 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     return io_handler;
 }
 
-#endif//TRANSCODING
+#endif//EXTERNAL_TRANSCODING

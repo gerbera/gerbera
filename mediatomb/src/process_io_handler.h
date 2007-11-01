@@ -107,6 +107,8 @@ public:
 protected:
     bool abort();
     void killall();
+    void registerAll();
+    void unregisterAll();
 };
 
 

@@ -30,7 +30,7 @@
 /// \file transcoding.h
 /// \brief Definitions of the Transcoding classes. 
 
-#ifdef TRANSCODING
+#ifdef EXTERNAL_TRANSCODING
 
 #ifndef __TRANSCODING_H__
 #define __TRANSCODING_H__
