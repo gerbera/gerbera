@@ -73,7 +73,6 @@ bool ThreadExecutor::kill()
     {
         threadRunning = false;
         pthread_join(thread, NULL);
-        thread = NULL;
     }
     return true;
 }
