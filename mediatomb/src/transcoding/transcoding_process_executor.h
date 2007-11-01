@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    thread_executor.cc - this file is part of MediaTomb.
+    transcoding_process_executor.h - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -24,64 +24,36 @@
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
     
-    $Id$
+    $Id: transcoding_process_executor.h 1536 2007-10-20 17:06:05Z lww $
 */
 
-/// \file thread_executor.cc
+/// \file transcoding_process_executor.h
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
+#ifdef EXTERNAL_TRANSCODING
 
-#include "thread_executor.h"
+#ifndef __TRANSCODING_PROCESS_EXECUTOR_H__
+#define __TRANSCODING_PROCESS_EXECUTOR_H__
 
-using namespace zmm;
+#include "process_executor.h"
 
-ThreadExecutor::ThreadExecutor()
+class TranscodingProcessExecutor : public ProcessExecutor
 {
-    mutex = Ref<Mutex>(new Mutex());
-    cond = Ref<Cond>(new Cond(mutex));
-    
-    threadShutdown = false;
-}
+public:
+    TranscodingProcessExecutor(zmm::String command,
+                               zmm::Ref<zmm::Array<zmm::StringBase> > arglist);
+    /// \brief This function adds a filename to a list, files in that list
+    /// will be removed once the class is destroyed.
+    void removeFile(zmm::String filename);
 
-ThreadExecutor::~ThreadExecutor()
-{
-    kill();
-}
+    virtual ~TranscodingProcessExecutor();
 
-void ThreadExecutor::startThread()
-{
-    threadRunning = true;
-    pthread_create(
-        &thread,
-        NULL, // attr
-        ThreadExecutor::staticThreadProc,
-        this
-    );
-}
+protected:
+    /// \brief The files in this list will be removed once the class is no
+    /// longer in use.
+    zmm::Ref<zmm::Array<zmm::StringBase> > file_list;
+};
 
-bool ThreadExecutor::kill()
-{
-    if (! threadRunning)
-        return true;
-    AUTOLOCK(mutex);
-    threadShutdown = true;
-    cond->signal();
-    AUTOUNLOCK();
-    if (thread)
-    {
-        threadRunning = false;
-        pthread_join(thread, NULL);
-        thread = NULL;
-    }
-    return true;
-}
+#endif // __TRANSCODING_PROCESS_EXECUTOR_H__
 
-void *ThreadExecutor::staticThreadProc(void *arg)
-{
-    ThreadExecutor *inst = (ThreadExecutor *)arg;
-    inst->threadProc();
-    pthread_exit(NULL);
-    return NULL;
-}
+#endif//EXTERNAL_TRANSCODING
+

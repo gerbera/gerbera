@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    thread_executor.cc - this file is part of MediaTomb.
+    transcoding_process_executor.cc - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -24,64 +24,48 @@
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
     
-    $Id$
+    $Id: transcoding_process_executor.cc 1535 2007-10-20 17:05:24Z lww $
 */
 
-/// \file thread_executor.cc
+/// \file transcoding_process_executor.cc
 
 #ifdef HAVE_CONFIG_H
     #include "autoconfig.h"
 #endif
 
-#include "thread_executor.h"
+#ifdef EXTERNAL_TRANSCODING
+
+#include <unistd.h>
+#include "transcoding_process_executor.h"
 
 using namespace zmm;
 
-ThreadExecutor::ThreadExecutor()
+TranscodingProcessExecutor::TranscodingProcessExecutor(String command, Ref<Array<StringBase> > arglist) : ProcessExecutor(command, arglist)
 {
-    mutex = Ref<Mutex>(new Mutex());
-    cond = Ref<Cond>(new Cond(mutex));
-    
-    threadShutdown = false;
+};
+
+
+void TranscodingProcessExecutor::removeFile(String filename)
+{
+    if (file_list == nil)
+        file_list = Ref<Array<StringBase> >(new Array<StringBase>(2));
+
+    file_list->append(filename);
 }
 
-ThreadExecutor::~ThreadExecutor()
+TranscodingProcessExecutor::~TranscodingProcessExecutor()
 {
     kill();
-}
 
-void ThreadExecutor::startThread()
-{
-    threadRunning = true;
-    pthread_create(
-        &thread,
-        NULL, // attr
-        ThreadExecutor::staticThreadProc,
-        this
-    );
-}
-
-bool ThreadExecutor::kill()
-{
-    if (! threadRunning)
-        return true;
-    AUTOLOCK(mutex);
-    threadShutdown = true;
-    cond->signal();
-    AUTOUNLOCK();
-    if (thread)
+    if (file_list != nil)
     {
-        threadRunning = false;
-        pthread_join(thread, NULL);
-        thread = NULL;
+        for (int i = 0; i < file_list->size(); i++)
+        {
+            String name = file_list->get(i);
+            unlink(name.c_str());
+        }
     }
-    return true;
 }
 
-void *ThreadExecutor::staticThreadProc(void *arg)
-{
-    ThreadExecutor *inst = (ThreadExecutor *)arg;
-    inst->threadProc();
-    pthread_exit(NULL);
-    return NULL;
-}
+#endif//EXTERNAL TRANSCODING
+
