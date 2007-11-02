@@ -67,7 +67,7 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
 {
     String path, parameters;
 
-    String link = String((char *) filename);
+    String link = url_unescape(String((char *) filename));
 
     log_debug("Filename: %s, Path: %s\n", filename, path.c_str());
 //    log_debug("create_handler: got url parameters: [%s]\n", parameters.c_str());

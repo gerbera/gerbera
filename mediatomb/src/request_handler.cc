@@ -48,14 +48,14 @@ void RequestHandler::split_url(const char *url, char separator, String &path, St
     else
         url_s = String(url);
 
+    url_s = url_unescape(url_s);
+
     if (separator == '/')
         i1 = url_s.rindex(separator);
     else if (separator == '?')
         i1 = url_s.index(separator);
     else
         throw _Exception(_("Forbidden separator: " + separator));
-
-
 
     if (i1 < 0)
     {
