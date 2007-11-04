@@ -525,9 +525,9 @@ AC_HELP_STRING([--enable-youtube],
 )
 
 if ((test $YOUTUBE -eq 1) || (test $EXTERNAL_TRANSCODING -eq 1)); then
-    AC_ARG_WITH([curl-cfg],
+AC_ARG_WITH([curl-cfg],
             [
-                AC_HELP_STRING([--with-curl-cfg=curl-config],
+AC_HELP_STRING([--with-curl-cfg=curl-config],
                     [absolute path/name of curl-config])
             ],
             [
@@ -2177,21 +2177,18 @@ AC_ARG_ENABLE(ffmpeg,
 )
 
 AC_ARG_ENABLE(libextractor,
-        AC_HELP_STRING([--enable-libextractor], [compile with extractor support (default: yes, if ffmpeg is not available)])
-
-   [
-      EXTRACTOR_EN=$enableval
-      if test "x$enableval" = xno; then
+        AC_HELP_STRING([--enable-libextractor], [compile with libextractor support (default: no)]),
+  [
+     EXTRACTOR_EN=$enableval 
+     if test "x$enableval" = xno; then
         EXTRACTOR_OK=disabled
-      else
-        EXTRACTOR_REQUESTED=yes
+     else
         EXTRACTOR_OK=yes
-      fi
-   ],
-   [
-        EXTRACTOR_OK=yes
-   ]
-
+     fi
+  ],
+  [
+    EXTRACTOR_OK=disabled
+  ]
 )
 
 if ((test "x$EXTRACTOR_REQUESTED" = xno) && (test "x$FFMPEG_REQUESTED" = xyes)) ; then
@@ -2355,21 +2352,21 @@ CPPFLAGS="$CPPFLAGS_SAVE"
 
 ######## extractor
 
-AC_ARG_ENABLE(libextractor,
-        AC_HELP_STRING([--enable-libextractor], [compile with libextractor support (default: no)]),
-  [
-     EXTRACTOR_EN=$enableval 
-     if test "x$enableval" = xno; then
-        EXTRACTOR_OK=disabled
-     else
-        EXTRACTOR_OK=yes
-     fi
-  ],
-  [
-    EXTRACTOR_OK=disabled
-  ]
-
-)
+#AC_ARG_ENABLE(libextractor,
+#        AC_HELP_STRING([--enable-libextractor], [compile with libextractor support (default: no)]),
+#  [
+#     EXTRACTOR_EN=$enableval 
+#     if test "x$enableval" = xno; then
+#        EXTRACTOR_OK=disabled
+#     else
+#        EXTRACTOR_OK=yes
+#     fi
+#  ],
+#  [
+#    EXTRACTOR_OK=disabled
+#  ]
+#
+#)
 if test "x$EXTRACTOR_OK" = xyes; then
     if test -n "$EXTRACTOR_SEARCH_HEADERS" ; then
         AC_CHECK_HEADER($EXTRACTOR_SEARCH_HEADERS/extractor.h,
