@@ -2205,20 +2205,6 @@ fi
 
 ######## ffmpeg
 
-AC_ARG_ENABLE(ffmpeg,
-        AC_HELP_STRING([--enable-ffmpeg], [compile with ffmpeg metadata extraction enabled (default: no)]),
-    [
-        FFMPEG_EN=$enableval 
-        if test "x$enableval" = xno; then
-            FFMPEG_OK=disabled
-        else
-            FFMPEG_OK=yes
-        fi
-    ],
-    [
-        FFMPEG_OK=disabled
-    ]
-)
 if test "x$FFMPEG_OK" = xyes; then
     if test -n "$FFMPEG_SEARCH_HEADERS" ; then
         CPPFLAGS="-I$FFMPEG_SEARCH_HEADERS"
