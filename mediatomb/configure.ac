@@ -2184,6 +2184,7 @@ AC_ARG_ENABLE(libextractor,
         EXTRACTOR_OK=disabled
      else
         EXTRACTOR_OK=yes
+       EXTRACTOR_REQUESTED=yes
      fi
   ],
   [
@@ -2192,7 +2193,7 @@ AC_ARG_ENABLE(libextractor,
 )
 
 if ((test "x$EXTRACTOR_REQUESTED" = xno) && (test "x$FFMPEG_REQUESTED" = xyes)) ; then
-    FFMPEG_OK=disabled
+    EXTRACTOR_OK=disabled
     if test "x$EXTRACTOR_REQUESTED" = xyes; then
         AC_MSG_WARN([libextractor disabled])
     fi
