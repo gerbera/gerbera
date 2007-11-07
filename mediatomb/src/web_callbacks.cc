@@ -49,7 +49,7 @@
 #include "io_handler.h"
 #include "request_handler.h"
 #include "file_request_handler.h"
-#ifdef ONLINE_SERVICES
+#ifdef HAVE_CURL
     #include "url_request_handler.h"
 #endif
 #include "web_request_handler.h"
@@ -116,7 +116,8 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
         else
             throw _Exception(_("Serving directories is not enabled in configuration"));
     }
-#if defined(ONLINE_SERVICES) || defined(HAVE_CURL)
+    /// \todo add enable/disable curl to configure.ac, currently this is automatically triggered depending on youtube and external transcoding definitions
+#if defined(HAVE_CURL)
     else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" +
                              CONTENT_ONLINE_HANDLER))
     {

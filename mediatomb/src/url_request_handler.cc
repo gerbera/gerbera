@@ -33,7 +33,7 @@
     #include "autoconfig.h"
 #endif
 
-#ifdef ONLINE_SERVICES
+#ifdef HAVE_CURL
 
 #include "server.h"
 #include "common.h"
@@ -43,7 +43,9 @@
 #include "dictionary.h"
 #include "url_request_handler.h"
 #include "cds_objects.h"
-#include "online_service_helper.h"
+#ifdef ONLINE_SERVICES
+    #include "online_service_helper.h"
+#endif
 #include "url.h"
 #include "curl_io_handler.h"
 #ifdef EXTERNAL_TRANSCODING
@@ -117,6 +119,7 @@ void URLRequestHandler::get_info(IN const char *filename, OUT struct File_Info *
     {
         Ref<CdsItemExternalURL> item = RefCast(obj, CdsItemExternalURL);
 
+#ifdef ONLINE_SERVICES
         if (item->getFlag(OBJECT_FLAG_ONLINE_SERVICE))
         {
             /// \todo write a helper class that will handle various online
@@ -125,6 +128,7 @@ void URLRequestHandler::get_info(IN const char *filename, OUT struct File_Info *
             url = helper->resolveURL(item);
         }
         else
+#endif
         {
             url = item->getLocation();
         }
@@ -201,12 +205,14 @@ Ref<IOHandler> URLRequestHandler::open(IN const char *filename, OUT struct File_
 
     Ref<CdsItemExternalURL> item = RefCast(obj, CdsItemExternalURL);
 
+#ifdef ONLINE_SERVICES
     if (item->getFlag(OBJECT_FLAG_ONLINE_SERVICE))
     {
         Ref<OnlineServiceHelper> helper (new OnlineServiceHelper());
         url = helper->resolveURL(item);
     }
     else 
+#endif
     {
         url = item->getLocation();
     }
@@ -259,4 +265,5 @@ Ref<IOHandler> URLRequestHandler::open(IN const char *filename, OUT struct File_
     return io_handler;
 }
 
-#endif
+#endif // HAVE_CURL
+
