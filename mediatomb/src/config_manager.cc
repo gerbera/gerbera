@@ -53,6 +53,10 @@
     #include <locale.h>
 #endif
 
+#ifdef HAVE_CURL
+    #include <curl/curl.h>
+#endif
+
 using namespace zmm;
 using namespace mxml;
 
@@ -899,7 +903,33 @@ void ConfigManager::validate(String serverhome)
 
     NEW_TRANSCODING_PROFILELIST_OPTION(createTranscodingProfileListFromNodeset(el));
     SET_TRANSCODING_PROFILELIST_OPTION(CFG_TRANSCODING_PROFILE_LIST);
-#endif
+
+#ifdef HAVE_CURL
+    if (temp == "yes")
+    {
+        temp_int = getIntOption(
+                _("/transcoding/attribute::fetch-buffer-size"),
+                DEFAULT_CURL_BUFFER_SIZE);
+        if (temp_int < CURL_MAX_WRITE_SIZE)
+            throw _Exception(_("Error in config file: incorrect parameter "
+                        "for <transcoding fetch-buffer-size=\"\"> attribute, "
+                        "must be at least ") + CURL_MAX_WRITE_SIZE);
+        NEW_INT_OPTION(temp_int);
+        SET_INT_OPTION(CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE);
+
+        temp_int = getIntOption(
+                _("/transcoding/attribute::fetch-buffer-fill-size"),
+                DEFAULT_CURL_INITIAL_FILL_SIZE);
+        if (temp_int < 0)
+            throw _Exception(_("Error in config file: incorrect parameter "
+                    "for <transcoding fetch-buffer-fill-size=\"\"> attribute"));
+
+        NEW_INT_OPTION(temp_int);
+        SET_INT_OPTION(CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE);
+    }
+
+#endif//HAVE_CURL
+#endif//EXTERNAL_TRANSCODING
 
     el = getElement(_("/server/custom-http-headers"));
     NEW_STRARR_OPTION(createArrayFromNodeset(el, _("add"), _("header")));

@@ -267,4 +267,9 @@
 #define XML_XMLNS_XSI                     "http://www.w3.org/2001/XMLSchema-instance"
 #define XML_XSI_SCHEMA_LOCATION           "http://mediatomb.cc/" VERSION "/config http://mediatomb.cc/" VERSION "/config.xsd"
 
+#ifdef HAVE_CURL
+    #define DEFAULT_CURL_BUFFER_SIZE 262144
+    #define DEFAULT_CURL_INITIAL_FILL_SIZE 0 
+#endif
+
 #endif // __COMMON_H__

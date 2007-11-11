@@ -313,7 +313,6 @@ void ContentManager::init()
 void ContentManager::registerExecutor(Ref<Executor> exec)
 {
     AUTOLOCK(mutex);
-    printf("ADDING EXECUTOR!\n");
     process_list->append(exec);
 }
 
@@ -331,8 +330,6 @@ void ContentManager::unregisterExecutor(Ref<Executor> exec)
     AUTOLOCK(mutex);
     for (int i = 0; i < process_list->size(); i++)
     {
-        if (process_list->get(i) == exec)
-            printf("REMOVING EXECUTOR!!!!!!!!!!\n");
         if (process_list->get(i) == exec)
             process_list->remove(i);
     }
@@ -397,22 +394,11 @@ void ContentManager::shutdown()
     shutdownFlag = true;
 
 #ifdef EXTERNAL_TRANSCODING 
-    bool killed;
     for (int i = 0; i < process_list->size(); i++)
     {
         Ref<Executor> exec = process_list->get(i);
         if (exec != nil)
             exec->kill();
-        /*
-        String tmp_fifo = transcoding_processes->get(i)->getFName();
-        if (check_path(tmp_fifo))
-        {
-            if (unlink(tmp_fifo.c_str()) != 0)
-                log_warning("Failed to remove fifo %s for transcoding process %d: %s\n",
-                        tmp_fifo.c_str(), pid,
-                        strerror(errno));
-        }
-        */
     }
 #endif
 

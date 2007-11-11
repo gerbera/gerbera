@@ -258,7 +258,7 @@ Ref<IOHandler> URLRequestHandler::open(IN const char *filename, OUT struct File_
         info->content_type = ixmlCloneDOMString(mimeType.c_str());
     }
 
-    /// \todo write an URL IO handler
+    printf("TODO: make curl io handler configurable for url request handler\n");
     Ref<IOHandler> io_handler(new CurlIOHandler(url, NULL, 1024*1024, 0));
 
     io_handler->open(mode);

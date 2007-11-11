@@ -118,12 +118,13 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
         {
             chmod(location.c_str(), S_IWUSR | S_IRUSR);
 
-            /// \todo make input buffer configurable
-            printf("TODO: make curl io handler buffer configurable\n");
-            Ref<IOHandler> c_ioh(new CurlIOHandler(url, NULL, 1024*1024, 512*1024));
-            //Ref<IOHandler> c_ioh(new CurlIOHandler(url, NULL, 1024*1024, 0));
+            Ref<ConfigManager> cfg = ConfigManager::getInstance();
+            Ref<IOHandler> c_ioh(new CurlIOHandler(url, NULL, 
+                  cfg->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE),
+                  cfg->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE)));
+            
             Ref<IOHandler> p_ioh(new ProcessIOHandler(location, nil));
-            Ref<Executor> ch(new IOHandlerChainer(c_ioh, p_ioh, 10240));
+            Ref<Executor> ch(new IOHandlerChainer(c_ioh, p_ioh, 16384));
             proc_list = Ref<Array<ProcListItem> >(new Array<ProcListItem>(1));
             Ref<ProcListItem> pr_item(new ProcListItem(ch));
             proc_list->append(pr_item);
@@ -148,13 +149,20 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     }
         
     chmod(fifo_name.c_str(), S_IWUSR | S_IRUSR);
-    
+   
+    log_debug("Arguments: %s\n", profile->getArguments().c_str());
     arglist = parseCommandLine(profile->getArguments(), location, fifo_name);
+
+/*    
+    for (int khr = 0; khr < arglist->size(); khr++)
+    {
+        printf("%s\n", arglist->get(khr)->data);
+    }
+*/
     Ref<TranscodingProcessExecutor> main_proc(new TranscodingProcessExecutor(profile->getCommand(), arglist));
     main_proc->removeFile(fifo_name);
     if (isURL && (!profile->acceptURL()))
     {
-        printf("ALSO SETTING TO REMOVE %s\n", location.c_str());
         main_proc->removeFile(location);
     }
     
