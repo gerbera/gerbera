@@ -468,11 +468,10 @@ String String::replace(String needle, String replacement)
     int pos = find(needle);
     if (pos < 0)
         return *this; 
-    int change = replacement.base->len - needle.base->len;
-    String res(base->len + change);
+    String res(base->len + replacement.base->len - needle.base->len);
     strncpy(res.base->data, base->data, pos);
     strncpy(res.base->data + pos, replacement.base->data, replacement.base->len);
     strncpy(res.base->data + pos + replacement.base->len, base->data + pos + needle.base->len, base->len - pos - needle.base->len);
-    res.base[res.base->len] = 0;
+    res.base->data[res.base->len] = 0;
     return res;
 }
