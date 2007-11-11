@@ -48,11 +48,7 @@
 
 FILE *LOG_FILE = stderr;
 
-#ifdef LOG_FLUSH
 #define FLUSHIT fflush(LOG_FILE);
-#else
-#define FLUSHIT
-#endif
 
 #define LOGCHECK if (!LOG_FILE) return;
 
