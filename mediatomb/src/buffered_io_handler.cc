@@ -133,6 +133,7 @@ void BufferedIOHandler::threadProc()
             else if (readBytes == CHECK_SOCKET)
             {
                 checkSocket = true;
+                cond->signal();
             }
         }
     }
