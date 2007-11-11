@@ -1,0 +1,5 @@
+?package(mediatomb):needs="X11" \
+  section="Applications/Sound" \
+  title="MediaTomb" command="/usr/bin/x-www-browser /var/lib/mediatomb/mediatomb.html" \
+  longtitle="MediaTomb UPnP MediaServer web user interface." \
+  icon="/usr/share/pixmaps/mediatomb.xpm"

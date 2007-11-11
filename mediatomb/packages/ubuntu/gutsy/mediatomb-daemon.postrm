@@ -1,0 +1,17 @@
+#!/bin/sh -e
+
+if [ "$1" = "remove" ] ; then
+	rm -rf /var/lib/mediatomb
+fi
+
+if [ "$1" = "purge" ] ; then
+    rm -rf /var/log/mediatomb /var/run/mediatomb.pid /var/lib/mediatomb
+    deluser mediatomb || true
+    delgroup mediatomb || true
+    dpkg-statoverride --remove /etc/mediatomb/config.xml
+    dpkg-statoverride --remove /var/lib/mediatomb
+fi
+
+#DEBHELPER#
+
+exit 0
