@@ -1070,17 +1070,11 @@ Ref<Array<StringBase> > parseCommandLine(String line, String in, String out)
     Ref<Array<StringBase> > params = split_string(line, ' ');
     for (int i = 0; i < params->size(); i++)
     {
-
         String param = params->get(i);
-
-        if (param == "\%in")
-        {
-            params->set(in, i);
-        }
-        else if (param == "\%out")
-        {
-            params->set(out, i);
-        }
+        String newParam = param.replace(_("%in"), in);
+        newParam = newParam.replace(_("%out"), out);
+        if (param != newParam)
+            params->set(newParam, i);
     }
 
     return params;

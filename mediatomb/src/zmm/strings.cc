@@ -437,14 +437,15 @@ String String::reduce(char ch)
     } while (pos);
     if ((base->data)+(base->len)-pos3)
         strncpy(pos2, pos3, (base->data)+(base->len)-pos3);
-    pos2[(base->data)+(base->len)-pos3] = '\0';
+    pos2[(base->data)+(base->len)-pos3] = 0;
     res.updateLength();
     return res;
 }
+
 int String::find(const char *needle)
 {
     if (!base)
-        return 0;
+        return -1;
     
     char *pos = strstr(base->data, needle);
     if (pos)
@@ -452,10 +453,26 @@ int String::find(const char *needle)
         return (pos-(base->data));
     }
     else
-        return 0;
+        return -1;
 
 }
 int String::find(String needle)
 {
     return find(needle.base->data);
+}
+
+String String::replace(String needle, String replacement)
+{
+    if (! replacement.base || ! needle.base)
+        return nil;
+    int pos = find(needle);
+    if (pos < 0)
+        return *this; 
+    int change = replacement.base->len - needle.base->len;
+    String res(base->len + change);
+    strncpy(res.base->data, base->data, pos);
+    strncpy(res.base->data + pos, replacement.base->data, replacement.base->len);
+    strncpy(res.base->data + pos + replacement.base->len, base->data + pos + needle.base->len, base->len - pos - needle.base->len);
+    res.base[res.base->len] = 0;
+    return res;
 }

@@ -166,7 +166,7 @@ int StringBuffer::length()
 void StringBuffer::setLength(int newLength)
 {
     if (newLength > len)
-        ensureCapacity(newLength + 1);
+        ensureCapacity(newLength);
     
     this->len = newLength;
     data[len] = 0;
@@ -212,6 +212,6 @@ void StringBuffer::ensureCapacity(int neededCapacity)
         if(neededCapacity > newCapacity)
             newCapacity = neededCapacity;
         capacity = newCapacity;
-        data = (char *)REALLOC(data, capacity);
+        data = (char *)REALLOC(data, (capacity + 1) * sizeof(char));
     }
 }

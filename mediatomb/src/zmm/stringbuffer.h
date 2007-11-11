@@ -73,7 +73,7 @@ public:
     void setCharAt(int index, char c);
     
 protected:
-    inline void addCapacity(int increment) { ensureCapacity(len + increment + 1); }
+    inline void addCapacity(int increment) { ensureCapacity(len + increment); }
 };
 
 } // namespace
