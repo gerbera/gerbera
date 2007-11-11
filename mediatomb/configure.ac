@@ -2140,7 +2140,7 @@ if test "x$CURL_OK" = xyes; then
 else
     YOUTUBE=0
     if test $YOUTUBE_REQUESTED -eq 1; then
-        AC_MSG_ERROR(unable to configure curl which is require for YouTube support)
+        AC_MSG_ERROR(unable to configure curl which is required for YouTube support)
     fi
     if test $EXTERNAL_TRANSCODING -eq 1; then
         AC_MSG_WARN(unable to configure curl, external transcoding will have limited functionality)
