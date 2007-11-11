@@ -24,7 +24,7 @@
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
     
-    $Id: transcoding_process_executor.h 1536 2007-10-20 17:06:05Z lww $
+    $Id$
 */
 
 /// \file transcoding_process_executor.h

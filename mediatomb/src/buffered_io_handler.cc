@@ -130,9 +130,13 @@ void BufferedIOHandler::threadProc()
                     }
                 }
             }
+            else if (readBytes == CHECK_SOCKET)
+            {
+                checkSocket = true;
+            }
         }
     }
-    while((maxWrite == 0 || readBytes > 0) && ! threadShutdown);
+    while((maxWrite == 0 || readBytes > 0 || readBytes == CHECK_SOCKET) && ! threadShutdown);
     if (! threadShutdown)
     {
         if (readBytes == 0)

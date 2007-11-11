@@ -59,6 +59,7 @@ IOHandlerBufferHelper::IOHandlerBufferHelper(size_t bufSize, size_t initialFillS
     a = b = 0;
     empty = true;
     signalAfterEveryRead = false;
+    checkSocket = false;
 }
 
 void IOHandlerBufferHelper::open(IN enum UpnpOpenFileMode mode)
@@ -87,8 +88,17 @@ int IOHandlerBufferHelper::read(OUT char *buf, IN size_t length)
     assert(length > 0);
     
     AUTOLOCK(mutex);
+    
     while ((empty || waitForInitialFillSize) && ! (threadShutdown || eof || readError))
-        cond->wait();
+    {
+        if (checkSocket)
+        {
+            checkSocket = false;
+            return CHECK_SOCKET;
+        }
+        else
+            cond->wait();
+    }
     
     if (readError || threadShutdown)
         return -1;
