@@ -36,8 +36,8 @@
 #include "io_handler.h"
 #include "executor.h"
 
-#define FIFO_READ_TIMEOUT 5
-#define FIFO_WRITE_TIMEOUT 5
+#define FIFO_READ_TIMEOUT 2
+#define FIFO_WRITE_TIMEOUT 2
 
 class ProcListItem : public zmm::Object
 {

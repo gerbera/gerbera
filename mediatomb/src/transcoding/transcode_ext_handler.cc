@@ -119,7 +119,8 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
             chmod(location.c_str(), S_IWUSR | S_IRUSR);
 
             /// \todo make input buffer configurable
-            Ref<IOHandler> c_ioh(new CurlIOHandler(url, NULL, 1024*1024, 10*1024));
+            printf("TODO: make curl io handler buffer configurable\n");
+            Ref<IOHandler> c_ioh(new CurlIOHandler(url, NULL, 1024*1024, 512*1024));
             //Ref<IOHandler> c_ioh(new CurlIOHandler(url, NULL, 1024*1024, 0));
             Ref<IOHandler> p_ioh(new ProcessIOHandler(location, nil));
             Ref<Executor> ch(new IOHandlerChainer(c_ioh, p_ioh, 10240));
@@ -154,7 +155,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     if (isURL && (!profile->acceptURL()))
     {
         printf("ALSO SETTING TO REMOVE %s\n", location.c_str());
-//        main_proc->removeFile(location);
+        main_proc->removeFile(location);
     }
     
     Ref<IOHandler> io_handler(new BufferedIOHandler(Ref<IOHandler> (new ProcessIOHandler(fifo_name, RefCast(main_proc, Executor), proc_list)), profile->getBufferSize(), profile->getBufferChunkSize(), profile->getBufferInitialFillSize()));

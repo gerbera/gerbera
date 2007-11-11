@@ -1441,15 +1441,18 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
         if (child->getChild(_("theora")) != nil)
             prof->setTheora(true);
 
-        param = child->getChildText(_("first-resource"));
-        if (!validateYesNo(param))
-            throw _Exception(_("Error in config file: incorrect parameter "
-                        "for <profile first-resource=\"\" /> attribute"));
+        if (child->getChild(_("first-resource")) != nil)
+        {
+            param = child->getChildText(_("first-resource"));
+            if (!validateYesNo(param))
+                throw _Exception(_("Error in config file: incorrect parameter "
+                            "for <profile first-resource=\"\" /> attribute"));
 
-        if (param == "yes")
-            prof->setFirstResource(true);
-        else
-            prof->setFirstResource(false);
+            if (param == "yes")
+                prof->setFirstResource(true);
+            else
+                prof->setFirstResource(false);
+        }
 
         Ref<Element> sub = child->getChild(_("agent"));
         if (sub == nil)

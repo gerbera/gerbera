@@ -253,8 +253,8 @@ int ProcessIOHandler::read(OUT char *buf, IN size_t length)
             timeout_count++;
             if (timeout_count > MAX_TIMEOUTS)
             {
-                log_debug("max timeouts!!!!! TODO: check socket!\n");
-//                return CHECK_SOCKET;
+                log_debug("max timeouts, checking socket!\n");
+                return CHECK_SOCKET;
             }
         }
 

@@ -427,13 +427,14 @@ http_SendMessage( IN SOCKINFO * info,
                         {
                             if (sock_check_w(info) == 1)
                             {
-                                printf("SOCKET IS OK!\n");
+//                                printf("SOCKET IS OK!\n");
                                 continue;
-                                preintf("SOCKET IS NOT OK!\n");
                             }
+                        
+//                            printf("SOCKET IS NOT OK!\n");
                         }
-                            
-                        return  UPNP_E_FILE_READ_ERROR;
+                        RetVal = UPNP_E_FILE_READ_ERROR; 
+                        goto Cleanup_File;
                     }
                     amount_to_be_read = amount_to_be_read - num_read;
 

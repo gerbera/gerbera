@@ -57,6 +57,7 @@
 #include <errno.h>
 #include <time.h>
 #include <string.h>
+#include <poll.h>
 
 #include "sock.h"
 #include "upnp.h"
@@ -402,25 +403,32 @@ sock_read( IN SOCKINFO * info,
 int
 sock_check_w( IN SOCKINFO * info )
 {
-    fd_set writeSet;
+    fd_set readSet;
+    fd_set exceptSet;
     struct timeval timeout;
+
     int retCode;
     int sockfd = info->socket;
 
-    FD_ZERO(&writeSet);
-    FD_SET(sockfd, &writeSet);
+    FD_ZERO(&readSet);
+    FD_ZERO(&exceptSet);
+    FD_SET(sockfd, &readSet);
+    FD_SET(sockfd, &exceptSet);
 
     timeout.tv_sec = 1; // 1 second select, we do not care if it times out
                         // we only look for an error
     timeout.tv_usec = 0;
 
-    retCode = select(sockfd + 1, NULL, &writeSet, NULL, &timeout);
+    retCode = select(sockfd + 1, &readSet, NULL, &exceptSet, &timeout);
+    
+    if (FD_ISSET(sockfd, &readSet) || FD_ISSET(sockfd, &exceptSet))
+    {
+        return 0;
+    }
 
-    printf("sock_check select returned %d\n", retCode);
-    if (retCode == 0) // timeout
+    if (retCode >= 0) // timeout or fd ready for writing
         return 1;
 
-        
     if (retCode == -1)
     {
         if(errno == EINTR)
