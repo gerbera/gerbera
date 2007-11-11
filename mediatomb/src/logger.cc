@@ -95,6 +95,7 @@ void _log_info(const char *format, ...)
     va_start(ap, format);
     log_stamp("INFO");
     vfprintf(LOG_FILE, format, ap);
+    FLUSHIT
     va_end(ap);
 }
 void _log_warning(const char *format, ...)
