@@ -4282,6 +4282,82 @@ status open
 \end_layout
 
 \begin_layout Code
+<scripting script-charset="UTF-8">
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+Defines the scripting section.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+script-charset=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: UTF-8
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Below are the available scripting options:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
 <virtual-layout type="builtin">
 \end_layout
 
@@ -4370,6 +4446,11 @@ status open
 \end_layout
 
 \begin_layout Standard
+The virtual layout can be adjusted using an import script which is defined
+ as follows:
+\end_layout
+
+\begin_layout Standard
 \begin_inset ERT
 status open
 
@@ -4384,7 +4465,7 @@ status open
 \end_layout
 
 \begin_layout Code
-<script charset="UTF-8">/path/to/my/import/script.js</script>
+<import-script>/path/to/my/import-script.js</script>
 \end_layout
 
 \begin_layout Standard
@@ -4416,45 +4497,7 @@ ${prefix}/share/mediatomb/js/import.js, where ${prefix} is your installation
 
 \begin_layout Standard
 Points to the script invoked upon media import.
- For more details read doc/scripting-intro.txt
-\end_layout
-
-\begin_layout Standard
-Attributes:
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-<itemizedlist><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-charset=...
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Optional
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Default: UTF-8
-\end_layout
-
-\begin_layout Standard
-Specifies the import script encoding.
+ For more details read doc/scripting.txt
 \end_layout
 
 \begin_layout Standard
@@ -4469,6 +4512,90 @@ status open
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<common-script>/path/to/my/common-script.js</common-script>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default:
+\emph default
+ 
+\emph on
+${prefix}/share/mediatomb/js/common.js, where ${prefix} is your installation
+ prefix directory.
+\end_layout
+
+\begin_layout Standard
+Points to the so called common script - think of it as a custom library
+ of js helper functions, functions added there can be used in your import
+ and in your playlist scripts.
+ For more details read doc/scripting.txt
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<playlist-script>/path/to/my/playlist-script.js</playlist-script>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default:
+\emph default
+ 
+\emph on
+${prefix}/share/mediatomb/js/playlists.js, where ${prefix} is your installation
+ prefix directory.
+\end_layout
+
+\begin_layout Standard
+Points to the script that is parsing various playlists, by default parsing
+ of pls and m3u playlists is implemented, however the script can be adapted
+ to parse almost any kind of text based playlist.
+ For more details read doc/scripting.txt
 \end_layout
 
 \begin_layout Standard
