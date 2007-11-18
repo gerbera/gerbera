@@ -44,14 +44,14 @@
 using namespace zmm;
 
 static JSFunctionSpec js_global_functions[] = {
-    {"print",           js_print,          0},
-    {"addCdsObject",    js_addCdsObject,   3},
-    {"copyObject",      js_copyObject,     1},
-    {"f2i",             js_f2i,            1},
-    {"m2i",             js_m2i,            1},
-    {"p2i",             js_m2i,            1},
-    {"j2i",             js_m2i,            1},
-    {0}
+    {"print",           js_print,          0, 0, 0},
+    {"addCdsObject",    js_addCdsObject,   3, 0, 0},
+    {"copyObject",      js_copyObject,     1, 0, 0},
+    {"f2i",             js_f2i,            1, 0, 0},
+    {"m2i",             js_m2i,            1, 0, 0},
+    {"p2i",             js_m2i,            1, 0, 0},
+    {"j2i",             js_m2i,            1, 0, 0},
+    {0,0,0,0,0}
 };
 
 String Script::getProperty(JSObject *obj, String name)
