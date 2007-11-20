@@ -8,6 +8,8 @@
 	  error things went terribly wrong
 	* made sure that range requests specified as "bytes=0-" do not trigger
 	  a 416 response on media with unknown filesize
+	* added a special check where read can return a special value to indicate
+	  that we should check if the remote socket is still alive
 
 2006-08-08  Sergey Bostandzhyan <jin(at)mediatomb.org>
     * integration - moved libupnp 1.4.1 into the MediaTomb environment

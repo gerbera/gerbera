@@ -8468,6 +8468,14 @@ MusicPal
 \end_layout
 
 \begin_layout Subsubsection
+Häger
+\end_layout
+
+\begin_layout Itemize
+OnAir (also known as BT Internet Radio)
+\end_layout
+
+\begin_layout Subsubsection
 HP
 \end_layout
 
@@ -8641,6 +8649,42 @@ NOXON iRadio
 
 \begin_layout Itemize
 NOXON 2 Audio 
+\end_layout
+
+\begin_layout Subsubsection
+ZyXEL
+\end_layout
+
+\begin_layout Itemize
+DMA-1000
+\end_layout
+
+\begin_layout Standard
+Some users reported problems where the DMA will show an error 
+\begin_inset Quotes sld
+\end_inset
+
+Failed to retrieve list
+\begin_inset Quotes srd
+\end_inset
+
+ and the DMA disconnecting from the server.
+ Incresing the alive interval seems to solve the problem - add the following
+ option to the <server> section of your configuration file:
+\end_layout
+
+\begin_layout Code
+<alive>600</alive>
+\end_layout
+
+\begin_layout Standard
+Additionally, the DMA expects that avi files are serverd with the mime type
+ of video/avi, so add the following to the <extensoin-mimetype> section
+ in your configuration file:
+\end_layout
+
+\begin_layout Code
+<map from="avi" to="video/avi"/>
 \end_layout
 
 \begin_layout Subsection

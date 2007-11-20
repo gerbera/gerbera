@@ -6,6 +6,24 @@ v0.11.0 External transcoding support
           Ingo Preiml
 		* added vorbis / theora detection for ogg containers, so video files
 		  should not end up in audio containers anymore
+		* implemented YouTube service support
+		* fixed bug where database-file option was still checked even when
+		  MySQL was selected in the configuration
+		* fixed a bug where check of the home directory was enforced even if 
+		  the configuration file was specified on command line
+		* UTF-8 fix suggested by piman - taglib should handle UTF-8 correctly, 
+		  so we will request an UTF-8 string from taglib and do not do the 
+		  conversion ourselves
+		* added default mapping for flv files since they are not correctly
+		  recognized by libmagic
+		* fixed a bug where we could get crashed by a missing URL parameter
+		  sent to the UI
+		* fixed 64bit related issues in the UPnP SDK
+		* fixed a problem where ID3 tags were not detected with id3lib
+		* fixed off by one errors in StringBuffer class, thanks to stigpo for
+		  the patch
+		* fixed bug #1824216 - encoded URLs were not treated properly
+		* made sure that log output is always flushed
 
 v0.10.0	11.07.2007  Playlist and inotify autoscan support.
         * MySQL database version pumped to 3 (MediaTomb will automatically

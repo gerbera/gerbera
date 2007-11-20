@@ -1,0 +1,553 @@
+#LyX 1.5.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 276
+\begin_document
+\begin_header
+\textclass docbook
+\language english
+\inputencoding auto
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\paperfontsize default
+\spacing single
+\papersize a4paper
+\use_geometry true
+\use_amsmath 0
+\use_esint 0
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\leftmargin 1cm
+\topmargin 1cm
+\rightmargin 1cm
+\bottommargin 1cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation skip
+\defskip medskip
+\quotes_language swedish
+\papercolumns 1
+\papersides 1
+\paperpagestyle plain
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Transcoding Content With MediaTomb
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+<copyright>
+\end_layout
+
+\begin_layout Standard
+
+  <year>2005</year>
+\end_layout
+
+\begin_layout Standard
+
+  <holder>Gena Batsyan</holder>
+\end_layout
+
+\begin_layout Standard
+
+  <holder>Sergey Bostandzhyan</holder>
+\end_layout
+
+\begin_layout Standard
+
+</copyright>
+\end_layout
+
+\begin_layout Standard
+
+<copyright>
+\end_layout
+
+\begin_layout Standard
+
+  <year>2006-2007</year>
+\end_layout
+
+\begin_layout Standard
+
+  <holder>Gena Batsyan</holder>
+\end_layout
+
+\begin_layout Standard
+
+  <holder>Sergey Bostandzhyan</holder>
+\end_layout
+
+\begin_layout Standard
+
+  <holder>Leonhard Wimmer</holder>
+\end_layout
+
+\begin_layout Standard
+
+</copyright>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<releaseinfo>This documentation is valid for MediaTomb version 0.11.0.</releaseinfo
+>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+<legalnotice>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY! USE AT YOUR OWN RISK!
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</legalnotice>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Standard
+MediaTomb version 0.11.0 introduces a new feature - transcoding.
+ It allows you to perform format conversion of your content on the fly allowing
+ you to view media that is otherwise not supported by your player.
+ 
+\end_layout
+
+\begin_layout Standard
+For example, you might have your music collection stored in the OGG format,
+ but your player only supports MP3 or you have your movies stored in DivX
+ format, but your player only supports MPEG2 and MPEG4.
+ Of course you could sit down and convert everything before viewing, but
+ that is usually a time consuming procedure, besides, you often you want
+ to keep your original data untouched and end up storing both, the converted
+ and the original content - wasting space on your harddisk.
+ That's where on the fly transcoding comes into play.
+\end_layout
+
+\begin_layout Standard
+Another usecase is online content - it is often presented in flv or asf
+ formats, you may get mms or rtp streams which your player can not handle.
+ The transcoding feature makes it possible to access such content.
+\end_layout
+
+\begin_layout Standard
+Last but not least - subtitles.
+ Only a few devices provide subtitle support, usually it's a proprietary
+ solution not covered by UPnP.
+ Using transcoding you can enable subtitles independent of the player device.
+\end_layout
+
+\begin_layout Section
+Theory Of Operation
+\end_layout
+
+\begin_layout Standard
+This chapter describes the idea behind the current transcoding implementation.
+\end_layout
+
+\begin_layout Subsection
+What Happens On The User Level
+\end_layout
+
+\begin_layout Standard
+So how does this work? First, let's look at the normal situation where you
+ are playing content that is natively supported by your player, let's say
+ a DivX movie.
+ You add it to the server, browse the content on your device, hit play and
+ start streaming the content.
+ Content that the player can not handle is usually greyed out in the on
+ screen display or marked as unsupported.
+\end_layout
+
+\begin_layout Standard
+Now, what happens if transcoding is in place?
+\end_layout
+
+\begin_layout Standard
+First, you define transcoding profiles, specifying which formats should
+ be converted, let's assume that you have some music stored in the FLAC
+ format, but your device only supports MP3 and WAV.
+ So, you can define that all FLAC media should be transcoded to WAV.
+ You then start MediaTomb and browse the content as usual on your device,
+ if everything was set up correctly you should see that your FLAC files
+ are marked as playable now.
+ You hit play, just like usual, and you will see that your device starts
+ playback.
+ 
+\end_layout
+
+\begin_layout Standard
+Here is what happens in the background: when you browse MediaTomb, we will
+ look at the transcoding profile that you specified and, assuming the example
+ above, tell your player that each FLAC file is actually a WAV file.
+ Remember, we assumed that the player is capable of playing WAV content,
+ so it will display the items as playable.
+ As soon as you press play, we will use the options defined in the transcoding
+ profile to launch the transcoder, we will feed it the original FLAC file
+ and serve the transcoded WAV output directly to your player.
+ The transcoding is done on the fly, the files are not stored on disk and
+ do not require additional disk space.
+\end_layout
+
+\begin_layout Subsection
+Technical Background
+\end_layout
+
+\begin_layout Standard
+The current implementation allows to plug in any application to do the transcodi
+ng.
+ The only important thing is, that the application is capable of writing
+ the output to a FIFO.
+ Additionally, if the application is not capable of accessing online content
+ directly we can proxy the online data and provide a FIFO for reading.
+\end_layout
+
+\begin_layout Standard
+The application can be any executable and is launched as a process with
+ a set of given parameters that are defined in the profile configuration.
+ The special command line tokes %in and %out that are used in the profile
+ will be substituted by the input file name or input URL and the output
+ FIFO name.
+\end_layout
+
+\begin_layout Standard
+So, the parameters tell the transcoding application: read content from this
+ file, transcode it, and write the output to this FIFO.
+ MediaTomb will read the output from the FIFO and serve the transcoded stream
+ to the player device.
+\end_layout
+
+\begin_layout Standard
+Buffering is implemented to allow smooth playback and compensate for high
+ bitrate scenes that may require more CPU power in the transcoding process.
+\end_layout
+
+\begin_layout Standard
+Once you press stop or once you reach end of file we will make sure that
+ the transcoding process is killed and we will clean up the FIFOs.
+\end_layout
+
+\begin_layout Standard
+The chosen approach is extremely flexible and gives you maximum freedom
+ of choice - you can also use this framework view mms and rtp streams even
+ if this is originally not supported by your player, blend in subtitles
+ or even listen to text documents using a text to speech processor.
+\end_layout
+
+\begin_layout Description
+Note: it is possible and may be more convinient to call a wrapper script
+ and not the transcoding application directly, however, in this case make
+ sure that your shell script uses exec when calling the transcoder.
+ Otherwise we will not be able to kill it.
+\end_layout
+
+\begin_layout Section
+Sample Configuration
+\end_layout
+
+\begin_layout Standard
+We will not go through all possible configuration tags here, they are described
+ in detail in the main documentation.
+ Instead, we will show an sample configuration and describe the creation
+ process.
+\end_layout
+
+\begin_layout Standard
+First of all you need to decide what content has to be transcoded.
+ It makes no sens to transcode something that can be played natively by
+ your device.
+ Next, you have to figure out how smart your device is - UPnP defines a
+ way in which it is possible to provide several resources (or several format
+ representations) of the same content, however most devices only look at
+ the first resource and ignore the rest.
+ We implemented options to overcome this, however it may get tricky if you
+ have several devices around and if each of them needs different settings.
+\end_layout
+
+\begin_layout Standard
+All settings apply to your config.xml.
+\end_layout
+
+\begin_layout Subsection
+Profile Selection
+\end_layout
+
+\begin_layout Standard
+What do we want to transcode? Let's assume that you have some .flv files
+ on your drive or that you want to watch YouTube videos on your device using
+ MediaTomb.
+ I have not yet heard of a UPnP player device that natively supports flash
+ video, so let's tell MediaTomb what we want to transcode all .flv content
+ to something that our device understands.
+\end_layout
+
+\begin_layout Standard
+This can be done in the mimetype-profile section under transcoding, mappings:
+\end_layout
+
+\begin_layout Code
+<transcode mimetype="video/x-flv" using="vlcprof"/>
+\end_layout
+
+\begin_layout Standard
+So, we told MediaTomb to transcode all video/x-flv content using the profile
+ named 
+\begin_inset Quotes sld
+\end_inset
+
+vlcprof
+\begin_inset Quotes srd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Profile Definition
+\end_layout
+
+\begin_layout Standard
+We define vlcprof in the profiles section:
+\end_layout
+
+\begin_layout Code
+<profile name="vlcprof" enabled="yes" type="external">
+\end_layout
+
+\begin_layout Code
+  <mimetype>video/mpeg</mimetype>
+\end_layout
+
+\begin_layout Code
+  <agent command="vlc" arguments="-I dummy %in --sout #transcode{venc=ffmpeg,vco
+dec=mp2v,vb=4096,fps=25,aenc=ffmpeg,acodec=mpga,ab=192,samplerate=44100,channels
+=2}:standard{access=file,mux=ps,dst=%out} vlc:quit"/>
+\end_layout
+
+\begin_layout Code
+  <buffer size="10485760" chunk-size="131072" fill-size="2621440"/>
+\end_layout
+
+\begin_layout Code
+  <accept-url>yes</accept-url>
+\end_layout
+
+\begin_layout Code
+  <first-resource>yes</first-resource>
+\end_layout
+
+\begin_layout Code
+</profile>
+\end_layout
+
+\begin_layout Standard
+Let's have a closer look:
+\end_layout
+
+\begin_layout Code
+<profile name="vlcprof" enabled="yes" type="external">
+\end_layout
+
+\begin_layout Standard
+The profile tag defines the name of the profile - in our example it's 
+\begin_inset Quotes sld
+\end_inset
+
+vlcprof
+\begin_inset Quotes srd
+\end_inset
+
+, it allows you to quickly switch the profile on and off by setting the
+ enabled parameter to 
+\begin_inset Quotes sld
+\end_inset
+
+yes
+\begin_inset Quotes srd
+\end_inset
+
+ or 
+\begin_inset Quotes sld
+\end_inset
+
+no
+\begin_inset Quotes srd
+\end_inset
+
+ and also defines the profile type.
+ Currently only one transcoding type is supported - 
+\begin_inset Quotes sld
+\end_inset
+
+external
+\begin_inset Quotes srd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection
+Specifying The Target Mime Type
+\end_layout
+
+\begin_layout Standard
+We need to define which mime type we are transcoding to - that's what the
+ player device will see.
+ It must be something it supports and there are also some other limitations:
+ the output format must be streamable - meaning, it must be a format which
+ can be played back without the need of seeking in the stream.
+ AVI is a good example - it contains the index at the end of the file, so
+ the player needs to seek (or use HTTP range requests) to read the index.
+ Because of that you will not be able to transcode to AVI on the fly.
+ A good target format is MPEG2 - it does not require the player to seek
+ in the stream and it can be encoded on the fly with reasonable CPU power.
+\end_layout
+
+\begin_layout Standard
+So, let's specify our target mime type:
+\end_layout
+
+\begin_layout Code
+  <mimetype>video/mpeg</mimetype>
+\end_layout
+
+\begin_layout Standard
+Bear in mind that this line only tells your player device about the content
+ format, it does not tell anything to the transcoder application.
+\end_layout
+
+\begin_layout Subsubsection
+Choosing The Transcoder
+\end_layout
+
+\begin_layout Standard
+Now it is time to look at the agent parameter - this tells us which application
+ to execute and it also provides the necessary command line options for
+ it:
+\end_layout
+
+\begin_layout Code
+<agent command="vlc" arguments="-I dummy %in --sout #transcode{venc=ffmpeg,vcode
+c=mp2v,vb=4096,fps=25,aenc=ffmpeg,acodec=mpga,ab=192,samplerate=44100,channels=2
+}:standard{access=file,mux=ps,dst=%out} vlc:quit"/>
+\end_layout
+
+\begin_layout Standard
+In the above example the command to be executed is 
+\begin_inset Quotes sld
+\end_inset
+
+vlc, it will be called with parameter specified in the arguments attribute.
+ Note the special 
+\emph on
+%in
+\emph default
+ and 
+\emph on
+%out
+\emph default
+ tokens - they are not part of the vlc command line but have a special meaning
+ in MediaTomb.
+ The 
+\emph on
+%in
+\emph default
+ token will be replaced by the input file name (i.e.
+ the file that needs to be transcoded) and the 
+\emph on
+%out
+\emph default
+ token will be replaced by the output FIFO name, from where the transcoded
+ content will be read by MediaTomb and sent to the player.
+\end_layout
+
+\begin_layout Standard
+Just to make it clearer:
+\end_layout
+
+\begin_layout Code
+<agent command="executable name" arguments="command line %in %out/>
+\end_layout
+
+\begin_layout Standard
+So, an agent tag defines the command which is an executable (make sure that
+ it is in $PATH and that you have permissions to run it), and arguments
+ which are the command line options and where 
+\emph on
+%in
+\emph default
+ and 
+\emph on
+%out
+\emph default
+ tokens are used in the place of the input and output file names.
+\end_layout
+
+\begin_layout Description
+Note: the output format produced by the transcoder must match the target
+ mime type setting.
+\end_layout
+
+\begin_layout Standard
+Allthough you can probably try the defaults it makes sense to adapt the
+ buffer settings which depend on the performance of your system.
+\end_layout
+
+\end_body
+\end_document

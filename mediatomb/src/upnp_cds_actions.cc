@@ -156,7 +156,7 @@ void ContentDirectoryService::upnp_action_GetSystemUpdateID(Ref<ActionRequest> r
 
     Ref<Element> response;
     response = UpnpXML_CreateResponse(request->getActionName(), serviceType);
-    response->appendTextChild(_("Id"), _("") + systemUpdateID);
+    response->appendTextChild(_("Id"), String::from(systemUpdateID));
 
     request->setResponse(response);
     
