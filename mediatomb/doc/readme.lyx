@@ -8460,11 +8460,25 @@ It is still being investigated, but we were able to get subtitles working
 \end_layout
 
 \begin_layout Subsubsection
+Freecom
+\end_layout
+
+\begin_layout Itemize
+MusicPal
+\end_layout
+
+\begin_layout Subsubsection
 HP
 \end_layout
 
 \begin_layout Itemize
 MediaSmart TV
+\end_layout
+
+\begin_layout Standard
+Users reported that after a firmwre upgrade the device stopped working properly.
+ It seems that it does not sue the UPnP Browse action anymore, but now uses
+ the optional Search action which is not implemented in MediaTomb.
 \end_layout
 
 \begin_layout Subsubsection
