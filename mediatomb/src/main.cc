@@ -241,7 +241,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         printf("MediaTomb is free software, covered by the GNU General Public License version 2\n\n");
     }
 
-// check if user and/or group parameter was specified and try to run the server
+    // check if user and/or group parameter was specified and try to run the server
     // under the given user and/or group name
     if (group != nil)
     {
@@ -251,23 +251,37 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
             log_error("Group %s not found!\n", group.c_str());
             exit(EXIT_FAILURE);
         }
-
+        
         if (setgid(grp->gr_gid) < 0)
         {
             log_error("setgid failed %s\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
+        
+        // remove supplementary groups
+        if (setgroups(0, NULL) < 0)
+        {
+            log_error("setgroups failed %s\n", strerror(errno));
+            exit(EXIT_FAILURE);
+        }
     }
-
+    
     if (user != nil)
     {
-        pwd = getpwnam(user.c_str()); 
+        pwd = getpwnam(user.c_str());
         if (pwd == NULL)
         {
             log_error("User %s not found!\n", user.c_str());
             exit(EXIT_FAILURE);
         }
-
+        
+        // set supplementary groups
+        if (initgroups(user.c_str(), getegid()) < 0)
+        {
+            log_error("initgroups failed %s\n", strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+        
         if (setuid(pwd->pw_uid) < 0)
         {
             log_error("setuid failed %s\n", strerror(errno));
