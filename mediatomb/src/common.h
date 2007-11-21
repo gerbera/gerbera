@@ -245,6 +245,14 @@
     #define DEFAULT_TRANSCODING_ENABLED NO
 #endif
 #ifdef HAVE_SQLITE3
+    #define SQLITE_SYNC_FULL            2
+    #define SQLITE_SYNC_NORMAL          1 
+    #define SQLITE_SYNC_OFF             0
+    #define DEFAULT_SQLITE_SYNC         "off"
+    #define DEFAULT_SQLITE_RESTORE      "restore"
+    #define DEFAULT_SQLITE_BACKUP_ENABLED NO
+    #define DEFAULT_SQLITE_BACKUP_INTERVAL 600
+
     #define DEFAULT_STORAGE_DRIVER      "sqlite3"
 #else
     #define DEFAULT_STORAGE_DRIVER      "mysql"

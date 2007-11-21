@@ -190,14 +190,20 @@ String ConfigManager::createDefaultConfig(String userhome)
                                                  _(DEFAULT_WEB_DIR));
     
     Ref<Element> storage(new Element(_("storage")));
-    storage->addAttribute(_("driver"), _(DEFAULT_STORAGE_DRIVER));
 #ifdef HAVE_SQLITE3
-    storage->appendTextChild(_("database-file"), _(DEFAULT_SQLITE3_DB_FILENAME));
+    Ref<Element> sqlite3(new Element(_("sqlite3")));
+    sqlite3->addAttribute(_("enabled"), _("yes"));
+    sqlite3->appendTextChild(_("database-file"), _(DEFAULT_SQLITE3_DB_FILENAME));
+    storage->appendChild(sqlite3);
 #else
-    storage->appendTextChild(_("host"), _(DEFAULT_MYSQL_HOST));
-    storage->appendTextChild(_("username"), _(DEFAULT_MYSQL_USER));
+    Ref<Element>mysql(new Element(_("mysql")));
+    mysql->addAttribute(_("enabled"), _("yes"));
+    mysql->appendTextChild(_("host"), _(DEFAULT_MYSQL_HOST));
+    mysql->appendTextChild(_("username"), _(DEFAULT_MYSQL_USER));
 //    storage->appendTextChild(_("password"), _(DEFAULT_MYSQL_PASSWORD));
-    storage->appendTextChild(_("database"), _(DEFAULT_MYSQL_DB));
+    mysql->appendTextChild(_("database"), _(DEFAULT_MYSQL_DB));
+
+    storage->appendChild(mysql);
     mysql_flag = true;
 #endif
     server->appendChild(storage);
@@ -368,63 +374,148 @@ void ConfigManager::validate(String serverhome)
     NEW_OPTION(getOption(_("/server/udn")));
     SET_OPTION(CFG_SERVER_UDN);
 
-    checkOptionString(_("/server/storage/attribute::driver"));
-
-    String dbDriver = getOption(_("/server/storage/attribute::driver"));
-
     // checking database driver options
+    String mysql_en;
+    String sqlite3_en;
+
+    tmpEl = getElement(_("/server/storage"));
+    if (tmpEl == nil)
+        throw _Exception(_("Error in config file: <storage> tag not found"));
+
 #ifdef HAVE_MYSQL
-    NEW_OPTION(getOption(_("/server/storage/host"), 
-                _(DEFAULT_MYSQL_HOST)));
-    SET_OPTION(CFG_SERVER_STORAGE_MYSQL_HOST);
-
-    NEW_OPTION(getOption(_("/server/storage/database"), 
-                _(DEFAULT_MYSQL_DB)));
-    SET_OPTION(CFG_SERVER_STORAGE_MYSQL_DATABASE);
-
-    NEW_OPTION(getOption(_("/server/storage/username"), 
-                _(DEFAULT_MYSQL_USER)));
-    SET_OPTION(CFG_SERVER_STORAGE_MYSQL_USERNAME);
-
-    NEW_INT_OPTION(getIntOption(_("/server/storage/port"), 0));
-    SET_INT_OPTION(CFG_SERVER_STORAGE_MYSQL_PORT);
-
-    if (getElement(_("/server/storage/socket")) == nil)
+    tmpEl = getElement(_("/server/storage/mysql"));
+    if (tmpEl != nil)
     {
-        NEW_OPTION(nil);
-    }
-    else
-    {
-        NEW_OPTION(getOption(_("/server/storage/socket")));
+        mysql_en = getOption(_("/server/storage/mysql/attribute::enabled"));
+        if (!validateYesNo(mysql_en))
+            throw _Exception(_("Invalid <mysql enabled=\"\"> value"));
     }
 
-    SET_OPTION(CFG_SERVER_STORAGE_MYSQL_SOCKET);
+    if (mysql_en == "yes")
+    {
+        NEW_OPTION(getOption(_("/server/storage/mysql/host"), 
+                    _(DEFAULT_MYSQL_HOST)));
+        SET_OPTION(CFG_SERVER_STORAGE_MYSQL_HOST);
 
-    if (getElement(_("/server/storage/password")) == nil)
-    {
-        NEW_OPTION(nil);
+        NEW_OPTION(getOption(_("/server/storage/mysql/database"), 
+                    _(DEFAULT_MYSQL_DB)));
+        SET_OPTION(CFG_SERVER_STORAGE_MYSQL_DATABASE);
+
+        NEW_OPTION(getOption(_("/server/storage/mysql/username"), 
+                    _(DEFAULT_MYSQL_USER)));
+        SET_OPTION(CFG_SERVER_STORAGE_MYSQL_USERNAME);
+
+        NEW_INT_OPTION(getIntOption(_("/server/storage/mysql/port"), 0));
+        SET_INT_OPTION(CFG_SERVER_STORAGE_MYSQL_PORT);
+
+        if (getElement(_("/server/storage/mysql/socket")) == nil)
+        {
+            NEW_OPTION(nil);
+        }
+        else
+        {
+            NEW_OPTION(getOption(_("/server/storage/mysql/socket")));
+        }
+
+        SET_OPTION(CFG_SERVER_STORAGE_MYSQL_SOCKET);
+
+        if (getElement(_("/server/storage/mysql/password")) == nil)
+        {
+            NEW_OPTION(nil);
+        }
+        else
+        {
+            NEW_OPTION(getOption(_("/server/storage/mysql/password")));
+        }
+        SET_OPTION(CFG_SERVER_STORAGE_MYSQL_PASSWORD);
     }
-    else
-    {
-        NEW_OPTION(getOption(_("/server/storage/password")));
-    }
-    SET_OPTION(CFG_SERVER_STORAGE_MYSQL_PASSWORD);
 
 #endif
-    if ((dbDriver != "sqlite3") & (dbDriver != "mysql"))
-            throw _Exception(_("Unknown storage driver: ") + dbDriver);
+
+#ifdef HAVE_SQLITE3
+    tmpEl = getElement(_("/server/storage/sqlite3"));
+    if (tmpEl != nil)
+    {
+        sqlite3_en = getOption(_("/server/storage/sqlite3/attribute::enabled"));
+        if (!validateYesNo(sqlite3_en))
+            throw _Exception(_("Invalid <sqlite3 enabled=\"\"> value"));
+    }
+ 
+    if (sqlite3_en == "yes")
+    {
+        prepare_path(_("/server/storage/sqlite3/database-file"), false, true);
+        NEW_OPTION(getOption(_("/server/storage/sqlite3/database-file")));
+        SET_OPTION(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
+
+        temp = getOption(_("/server/storage/sqlite3/synchronous"), 
+                _(DEFAULT_SQLITE_SYNC));
+
+        temp_int = 0;
+
+        if (temp == "off")
+            temp_int = SQLITE_SYNC_OFF;
+        else if (temp == "normal")
+            temp_int = SQLITE_SYNC_NORMAL;
+        else if (temp == "full")
+            temp_int = SQLITE_SYNC_FULL;
+        else
+            throw _Exception(_("Invalid <synchronious> value in sqlite3 "
+                               "section"));
+
+        NEW_INT_OPTION(temp_int);
+        SET_INT_OPTION(CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS);
+
+        temp = getOption(_("/server/storage/sqlite3/on-error"),
+                _(DEFAULT_SQLITE_RESTORE));
+
+        bool tmp_bool = true;
+
+        if (temp == "restore")
+            tmp_bool = true;
+        else if (temp == "fail")
+            tmp_bool = false;
+        else
+            throw _Exception(_("Invalid <on-error> value in sqlite3 "
+                               "section"));
+
+        NEW_BOOL_OPTION(tmp_bool);
+        SET_BOOL_OPTION(CFG_SERVER_STORAGE_SQLITE_RESTORE);
+
+        temp = getOption(_("/server/storage/sqlite3/backup/attribute::enabled"),
+                _(DEFAULT_SQLITE_BACKUP_ENABLED));
+        if (!validateYesNo(temp))
+            throw _Exception(_("Error in config file: incorrect parameter "
+                        "for <backup enabled=\"\" /> attribute"));
+        NEW_BOOL_OPTION(temp == "yes" ? true : false);
+        SET_BOOL_OPTION(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED);
+
+        temp_int = getIntOption(_("/server/ui/sqlite3/backup/attribute::interval"),
+                DEFAULT_POLL_INTERVAL);
+        if (temp_int < 1)
+            throw _Exception(_("Error in config file: incorrect parameter for "
+                        "<backup interval=\"\" /> attribute"));
+        NEW_INT_OPTION(temp_int);
+        SET_INT_OPTION(CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL);
+    }
+#endif
+    if ((sqlite3_en == "yes") && (mysql_en == "yes"))
+        throw _Exception(_("You enabled both, sqlite3 and mysql but "
+                           "only one database driver may be active at "
+                           "a time!"));
+
+    if ((sqlite3_en == "no") && (mysql_en == "no"))
+        throw _Exception(_("You disabled both, sqlite3 and mysql but "
+                           "one database driver must be active!"));
+
+    String dbDriver;
+    if (sqlite3_en == "yes")
+        dbDriver = _("sqlite3");
+    
+    if (mysql_en == "yes")
+        dbDriver = _("mysql");
 
     NEW_OPTION(dbDriver);
     SET_OPTION(CFG_SERVER_STORAGE_DRIVER);
-
-#ifdef HAVE_SQLITE3
-    if (dbDriver == "sqlite3")
-    {
-        prepare_path(_("/server/storage/database-file"), false, true);
-        NEW_OPTION(getOption(_("/server/storage/database-file")));
-        SET_OPTION(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
-    }
-#endif
 
 
 //    temp = checkOption_("/server/storage/database-file");
