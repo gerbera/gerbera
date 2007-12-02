@@ -345,8 +345,6 @@ AC_HELP_STRING([--enable-iconv-lib],
             ]
 )
 
-
-
 ATOMIC_X86_SMP=0
 ATOMIC_X86_SMP_REQ=0
 X86=0
@@ -739,6 +737,47 @@ fi
 
 AC_SUBST(ICONV_CXXFLAGS)
 AC_SUBST(ICONV_LIBS)
+
+
+dnl This is a bit weird, actually I wanted to use iconv.m4 but for some
+dnl reason configure complained about a missing config.rpath
+dnl I have no idea why and I could not figure this out or fix it, so I 
+dnl ended up with copying the code for the check we need to our configure.ac
+
+dnl The code snippled below is taken from:
+# iconv.m4 serial AM4 (gettext-0.11.3)
+dnl Copyright (C) 2000-2002 Free Software Foundation, Inc.
+dnl This file is free software; the Free Software Foundation
+dnl gives unlimited permission to copy and/or distribute it,
+dnl with or without modifications, as long as this notice is preserved.
+
+dnl From Bruno Haible.
+
+AC_MSG_CHECKING([if iconv declarationi requires const])
+
+AC_TRY_COMPILE([
+#include <stdlib.h>
+#include <iconv.h>
+extern
+#ifdef __cplusplus
+"C"
+#endif
+#if defined(__STDC__) || defined(__cplusplus)
+size_t iconv (iconv_t cd, char * *inbuf, size_t *inbytesleft, char * *outbuf, size_t *outbytesleft);
+#else
+size_t iconv();
+#endif
+], 
+        [], 
+        [
+            AC_MSG_RESULT([no])
+        ], 
+        [
+            AC_MSG_RESULT([yes])
+            AC_DEFINE([ICONV_CONST], [1], [iconv needs const char cast])
+        ]
+)
+
 
 CXXFLAGS="$CXXFLAGS_SAVE"
 LDFLAGS="$LDFLAGS_SAVE"
