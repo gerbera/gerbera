@@ -232,9 +232,19 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
             String rct = item->getResource(i)->getParameter(_(RESOURCE_CONTENT_TYPE));
             if (rct == ID3_ALBUM_ART)
             {
-                element->appendTextChild(
-                        MetadataHandler::getMetaFieldName(M_ALBUMARTURI),
-                        url);
+                Ref<Element> aa(new Element(MetadataHandler::getMetaFieldName(M_ALBUMARTURI)));
+                aa->setText(url);
+#ifdef EXTEND_PROTOCOLINFO
+                if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO))
+                {
+                    /// \todo clean this up, make sure to check the mimetype and
+                    /// provide the profile correctly
+                    aa->addAttribute(_("xmlns:dlna"), 
+                                     _("urn:schemas-dlna-org:metadata-1-0"));
+                    aa->addAttribute(_("dlna:profileID"), _("JPEG_TN"));
+                }
+#endif
+                element->appendChild(aa);
             }
             continue;
         }
