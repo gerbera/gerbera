@@ -116,6 +116,9 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         JSObject *js_orig_obj;
         Ref<CdsObject> orig_object;
 
+        Ref<StringConverter> p2i;
+        Ref<StringConverter> i2i;
+
         Script *self = (Script *)JS_GetPrivate(cx, obj);
 
         if (self == NULL)
@@ -124,6 +127,15 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
             return JS_FALSE;
         }
 
+        if (self->whoami() == S_PLAYLIST)
+        {
+            p2i = StringConverter::p2i();
+        }
+        else
+        {
+            i2i = StringConverter::i2i();
+        }
+ 
         arg = argv[0];
         if (!JSVAL_IS_OBJECT(arg))
             return JS_TRUE;
@@ -200,10 +212,16 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         if ((self->whoami() == S_PLAYLIST) &&
             (ConfigManager::getInstance()->
              getBoolOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS)))
+        {
+            path = p2i->convert(path);
             id = cm->addContainerChain(path, containerclass, 
                     orig_object->getID());
+        }
         else
+        {
+            path = i2i->convert(path);
             id = cm->addContainerChain(path, containerclass);
+        }
 
         cds_obj->setParentID(id);
         if (!IS_CDS_ITEM_EXTERNAL_URL(cds_obj->getObjectType()) &&
