@@ -180,7 +180,7 @@ time_t check_path_ex(String path, bool needDir, bool existenceUnneeded)
         if (existenceUnneeded && (errno == ENOENT))
             return 0;
         
-        throw _Exception(path + " : " + errno + (int)existenceUnneeded+ " x " + strerror(errno));
+        throw _Exception(path + " : " + errno + (int)existenceUnneeded+ " x " + mt_strerror(errno));
     }
 
     if (needDir && (!S_ISDIR(statbuf.st_mode)))
@@ -384,13 +384,25 @@ String mime_types_to_CSV(Ref<Array<StringBase> > mimeTypes)
     return buf->toString();
 }
 
+String mt_strerror(int mt_errno)
+{
+    /*
+    char *buffer = (char *)MALLOC(512);
+    char *err_str = strerror_r(errno, buffer, 512);
+    String errStr(err_str);
+    FREE(buffer);
+    return errStr;
+    */
+    return String(strerror(errno));
+}
+
 String read_text_file(String path)
 {
     FILE *f = fopen(path.c_str(), "r");
     if (!f)
     {
         throw _Exception(_("read_text_file: could not open ") +
-                        path + " : " + strerror(errno));
+                        path + " : " + mt_strerror(errno));
     }
     Ref<StringBuffer> buf(new StringBuffer()); 
     char *buffer = (char *)MALLOC(1024);
@@ -410,7 +422,7 @@ void write_text_file(String path, String contents)
     if (!f)
     {
         throw _Exception(_("write_text_file: could not open ") +
-                        path + " : " + strerror(errno));
+                        path + " : " + mt_strerror(errno));
     }
     
     bytesWritten = fwrite(contents.c_str(), 1, contents.length(), f);
@@ -422,11 +434,43 @@ void write_text_file(String path, String contents)
                             path + " : ");
         else
             throw _Exception(_("write_text_file: error writing to ") +
-                            path + " : " + strerror(errno));
+                            path + " : " + mt_strerror(errno));
     }
     fclose(f);
 }
 
+void copy_file(String from, String to)
+{
+    FILE *f = fopen(from.c_str(), "r");
+    if (!f)
+    {
+        throw _Exception(_("copy_file: could not open ") +
+                        from + " for read: " + mt_strerror(errno));
+    }
+    FILE *t = fopen(to.c_str(), "w");
+    if (!t)
+    {
+        fclose(f);
+        throw _Exception(_("copy_file: could not open ") +
+                        to + " for write: " + mt_strerror(errno));
+    }
+    char *buffer = (char *)MALLOC(1024);
+    size_t bytesRead = 0;
+    size_t bytesWritten = 0;
+    while(bytesRead == bytesWritten && ! feof(f) && ! ferror(f) && ! ferror(t)
+        && (bytesRead = fread(buffer, 1, 1024, f)) > 0)
+    {
+        bytesWritten = fwrite(buffer, 1, bytesRead, t);
+    }
+    if (ferror(f) || ferror(t))
+    {
+        fclose(f);
+        fclose(t);
+        throw _Exception(_("copy_file: error while copying ") + from + " to " +
+                        to + ": " + mt_strerror(errno));
+    }
+    FREE(buffer);
+}
 
 /* sorting */
 int StringBaseComparator(void *arg1, void *arg2)

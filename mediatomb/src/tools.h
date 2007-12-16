@@ -137,11 +137,21 @@ zmm::String url_unescape(zmm::String str);
 /// \return string containing the CSV list
 zmm::String mime_types_to_CSV(zmm::Ref<zmm::Array<zmm::StringBase> > mimeTypes);
 
+/// \brief a wrapper for the reentrant strerror_r() function
+/// \param mt_errno the errno to get the error string from
+/// \return the error string
+zmm::String mt_strerror(int mt_errno);
+
 /// \brief Reads the entire contents of a text file and returns it as a string.
 zmm::String read_text_file(zmm::String path);
 
 /// \brief writes a string into a text file
 void write_text_file(zmm::String path, zmm::String contents);
+
+/// \brief copies a file
+/// \param from the path to the file to copy from 
+/// \param to the path to the file to copy to
+void copy_file(zmm::String from, zmm::String to);
 
 typedef int (*COMPARATOR) (void *, void *);
 typedef void * COMPARABLE;
