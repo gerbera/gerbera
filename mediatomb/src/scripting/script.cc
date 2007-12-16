@@ -40,6 +40,13 @@
 #include "metadata_handler.h"
 #include "js_functions.h"
 #include "config_manager.h"
+#ifdef ONLINE_SERVICES
+    #include "online_service.h"
+#endif
+
+#ifdef YOUTUBE
+    #include "youtube_content_handler.h"
+#endif
 
 using namespace zmm;
 
@@ -267,7 +274,34 @@ Script::Script(Ref<Runtime> runtime) : Object()
                           OBJECT_TYPE_ITEM_EXTERNAL_URL);
     setIntProperty(glob, _("OBJECT_TYPE_ITEM_INTERNAL_URL"),
                           OBJECT_TYPE_ITEM_INTERNAL_URL);
-    
+#ifdef ONLINE_SERVICES 
+    setIntProperty(glob, _("ONLINE_SERVICE_NONE"), OS_None);
+#ifdef YOUTUBE
+    setIntProperty(glob, _("ONLINE_SERVICE_YOUTUBE"), OS_YouTube);
+
+    setProperty(glob, _("YOUTUBE_AUXDATA_TAGS"), 
+                       _(YOUTUBE_AUXDATA_TAGS));
+    setProperty(glob, _("YOUTUBE_AUXDATA_AVG_RATING"), 
+                      _(YOUTUBE_AUXDATA_AVG_RATING));
+    setProperty(glob, _("YOUTUBE_AUXDATA_AUTHOR"), 
+                      _(YOUTUBE_AUXDATA_AUTHOR));
+    setProperty(glob, _("YOUTUBE_AUXDATA_COMMENT_COUNT"), 
+                      _(YOUTUBE_AUXDATA_COMMENT_COUNT));
+    setProperty(glob, _("YOUTUBE_AUXDATA_VIEW_COUNT"), 
+                      _(YOUTUBE_AUXDATA_VIEW_COUNT));
+    setProperty(glob, _("YOUTUBE_AUXDATA_RATING_COUNT"), 
+                      _(YOUTUBE_AUXDATA_RATING_COUNT));
+    setProperty(glob, _("YOUTUBE_AUXDATA_REQUEST"), 
+                      _(YOUTUBE_AUXDATA_REQUEST));
+    setProperty(glob, _("YOUTUBE_AUXDATA_CATEGORY"), 
+                      _(YOUTUBE_AUXDATA_CATEGORY));
+#endif
+#ifdef SOPCAST
+    setIntProperty(glob, _("ONLINE_SERVICE_SOPCAST"), OS_SopCast);
+#endif
+#else
+    setIntProperty(glob, _("ONLINE_SERVICE_NONE"), 0);
+#endif//ONLINE_SERVICES
 
     for (int i = 0; i < M_MAX; i++)
     {
@@ -714,6 +748,16 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
         setIntProperty(js, _("theora"), 1);
     else
         setIntProperty(js, _("theora"), 0);
+
+#ifdef ONLINE_SERVICES
+    if (obj->getFlag(OBJECT_FLAG_ONLINE_SERVICE))
+    {
+         service_type_t service = (service_type_t)(obj->getAuxData(_(ONLINE_SERVICE_AUX_ID)).toInt());
+        setIntProperty(js, _("onlineservice"), (int)service);
+    }
+    else
+#endif
+        setIntProperty(js, _("onlineservice"), 0);
 
     // setting metadata
     {

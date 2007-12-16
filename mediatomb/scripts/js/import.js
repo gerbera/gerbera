@@ -164,6 +164,22 @@ function addImage(obj)
     }
 }
 
+function addYouTube(obj)
+{
+    var temp = parseInt(obj.aux[YOUTUBE_AUXDATA_AVG_RATING], 10);
+    if (temp != Number.NaN)
+    {
+        temp = Math.round(temp);
+        if (temp > 0)
+        {
+            var chain = new Array('Online Services', 'YouTube', 'Rating', 
+                                  temp.toString());
+            addCdsObject(obj, createContainerChain(chain));
+        }
+    }
+
+//    temp = obj.aux[YOUTUBE_AUXDATA_REQUEST]; 
+}
 
 // main script part
 
@@ -184,7 +200,10 @@ if (getPlaylistType(orig.mimetype) == '')
     
     if (mime == 'video')
     {
-        addVideo(obj);
+        if (obj.onlineservice == ONLINE_SERVICE_NONE)
+            addVideo(obj);
+        else if (obj.onlineservice == ONLINE_SERVICE_YOUTUBE)
+            addYouTube(obj);
     }
     
     if (mime == 'image')

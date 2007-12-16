@@ -45,8 +45,9 @@
 
 typedef enum service_type_t
 {
-    OS_YouTube = 0,
-    OS_SopCast = 1,
+    OS_None    = 0,
+    OS_YouTube = 1,
+    OS_SopCast = 2,
     OS_Max
 };
 

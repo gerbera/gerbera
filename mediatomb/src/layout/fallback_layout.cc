@@ -235,7 +235,7 @@ void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
         ref_set = true;
     }
 
-
+/*
     temp = obj->getAuxData(_(YOUTUBE_AUXDATA_AUTHOR));
     if (string_ok(temp))
     {
@@ -250,7 +250,7 @@ void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
             ref_set = true;
         }
     }
-
+*/
 
     temp = obj->getAuxData(_(YOUTUBE_AUXDATA_AVG_RATING));
     if (string_ok(temp))
