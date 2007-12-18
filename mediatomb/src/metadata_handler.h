@@ -70,6 +70,9 @@ typedef enum
     M_TRACKNUMBER,
     M_ALBUMARTURI,
     M_REGION,
+    M_AUTHOR,
+    M_DIRECTOR,
+//    M_OPUS,
     M_MAX
 } metadata_fields_t; 
 

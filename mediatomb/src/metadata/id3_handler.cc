@@ -59,6 +59,17 @@ using namespace zmm;
 Id3Handler::Id3Handler() : MetadataHandler()
 {
 }
+
+char* ID3_GetFrameContent(const ID3_Tag *tag, ID3_FrameID frameID)
+{
+    char *content = NULL;
+    ID3_Frame *frame = NULL;
+    if (tag != NULL && (frame = tag->Find(frameID)) != NULL) 
+    {
+	    content = ID3_GetString(frame, ID3FN_TEXT);
+    }
+    return content;
+}
        
 static void addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsItem> item)
 {
@@ -116,6 +127,15 @@ static void addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsItem> item
             else
                 return;
             break;
+        case M_AUTHOR:
+            ID3_retval = ID3_GetFrameContent(tag, ID3FID_COMPOSER);
+            break;
+        case M_DIRECTOR:
+            ID3_retval = ID3_GetFrameContent(tag, ID3FID_CONDUCTOR);
+            break;
+//        case M_OPUS:
+//            ID3_retval = ID3_GetFrameContent(tag, ID3FID_CONTENTGROUP);
+//            break;
         default:
             return;
     }
