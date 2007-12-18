@@ -95,7 +95,7 @@ void ActionRequest::update()
         if (ret != IXML_SUCCESS)
         {
             log_error("ActionRequest::update(): could not convert to iXML\n");
-            //log_debug(("Dump:\n%s\n", xml.c_str()));
+            log_debug("Dump:\n%s\n", xml.c_str());
             upnp_request->ErrCode = UPNP_E_ACTION_FAILED;    
         } 
         else
