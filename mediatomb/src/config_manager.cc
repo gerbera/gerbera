@@ -1121,7 +1121,14 @@ void ConfigManager::validate(String serverhome)
         getOption(_("/online-content/YouTube"),
                   _(""));
     }
-    NEW_OBJARR_OPTION(createServiceTaskList(OS_YouTube, el));
+    Ref<Array<Object> > yt_opts = createServiceTaskList(OS_YouTube, el);
+    if (getBoolOption(CFG_ONLINE_CONTENT_YOUTUBE_ENABLED) && 
+            (yt_opts->size() == 0))
+        throw _Exception(_("Error in config file: "
+                           "YouTube service enabled but no imports "
+                           "specified."));
+                           
+    NEW_OBJARR_OPTION(yt_opts);
     SET_OBJARR_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_TASK_LIST);
 
 #endif

@@ -209,27 +209,41 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
 #ifdef YOUTUBE
     if (cm->getBoolOption(CFG_ONLINE_CONTENT_YOUTUBE_ENABLED))
     {
-        Ref<OnlineService> yt((OnlineService *)new YouTubeService());
+        try 
+        {
+            Ref<OnlineService> yt((OnlineService *)new YouTubeService());
 
-        i = cm->getIntOption(CFG_ONLINE_CONTENT_YOUTUBE_REFRESH);
-        yt->setRefreshInterval(i);
+            i = cm->getIntOption(CFG_ONLINE_CONTENT_YOUTUBE_REFRESH);
+            yt->setRefreshInterval(i);
 
-        i = cm->getIntOption(CFG_ONLINE_CONTENT_YOUTUBE_PURGE_AFTER);
-        yt->setItemPurgeInterval(i);
+            i = cm->getIntOption(CFG_ONLINE_CONTENT_YOUTUBE_PURGE_AFTER);
+            yt->setItemPurgeInterval(i);
 
-        if (cm->getBoolOption(CFG_ONLINE_CONTENT_YOUTUBE_UPDATE_AT_START))
-            i = CFG_DEFAULT_UPDATE_AT_START;
+            if (cm->getBoolOption(CFG_ONLINE_CONTENT_YOUTUBE_UPDATE_AT_START))
+                i = CFG_DEFAULT_UPDATE_AT_START;
 
-        Ref<TimerParameter> yt_param(new TimerParameter(TimerParameter::IDOnlineContent, OS_YouTube));
-        yt->setTimerParameter(RefCast(yt_param, Object));
-        online_services->registerService(yt);
-        Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), i, yt->getTimerParameter(), true);
+            Ref<TimerParameter> yt_param(new TimerParameter(TimerParameter::IDOnlineContent, OS_YouTube));
+            yt->setTimerParameter(RefCast(yt_param, Object));
+            online_services->registerService(yt);
+            
+            if (i > 0)
+            {
+                Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), i, yt->getTimerParameter(), true);
+            }
+        }
+        catch (Exception ex)
+        {
+            log_error("Could not setup YouTube: %s\n", 
+                    ex.getMessage().c_str());
+        }
     }
 #endif //YOUTUBE
 
 #ifdef SOPCAST
     if (cm->getBoolOption(CFG_ONLINE_CONTENT_SOPCAST_ENABLED))
     {
+        try
+        {
         Ref<OnlineService> sc((OnlineService *)new SopCastService());
 
         i = cm->getIntOption(CFG_ONLINE_CONTENT_SOPCAST_REFRESH);
@@ -244,7 +258,16 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
         Ref<TimerParameter> sc_param(new TimerParameter(TimerParameter::IDOnlineContent, OS_SopCast));
         sc->setTimerParameter(RefCast(sc_param, Object));
         online_services->registerService(sc);
-        Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), i, sc->getTimerParameter(), true);
+        if (i > 0)
+        {
+            Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), i, sc->getTimerParameter(), true);
+        }
+        }
+        catch (Exception ex)
+        {
+            log_error("Could not setup SopCast: %s\n",
+                    ex.getMessage().c_str());
+        }
     }
 #endif //SOPCAST
 
