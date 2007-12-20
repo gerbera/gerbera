@@ -458,8 +458,16 @@ void Script::_execute(JSScript *scr)
 {
     jsval ret_val;
 
+    JSObject *script_obj = JS_NewScriptObject(cx, script);
+    JS_AddNamedRoot(cx, &script_obj, "mtscript");
+
     if (!JS_ExecuteScript(cx, glob, scr, &ret_val))
+    {
+        JS_RemoveRoot(cx, &script_obj);
         throw _Exception(_("Script: failed to execute script"));
+    }
+        
+    JS_RemoveRoot(cx, &script_obj);
 }
 
 void Script::execute()
