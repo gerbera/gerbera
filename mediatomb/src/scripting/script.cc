@@ -248,7 +248,9 @@ Script::Script(Ref<Runtime> runtime) : Object()
     cx = JS_NewContext(rt, 8192);
     if (! cx)
         throw _Exception(_("Scripting: could not initialize js context"));
-    
+   
+    JS_SetGCZeal(cx, 2);
+
     glob = NULL;
     script = NULL;
    
@@ -374,8 +376,24 @@ JSContext *Script::getContext()
 
 void Script::initGlobalObject()
 {
+    /* define characteristics of the global class */
+    static JSClass global_class =
+    {
+        "global",                                   /* name */
+        JSCLASS_HAS_PRIVATE,                    /* flags */
+        JS_PropertyStub,                            /* add property */
+        JS_PropertyStub,                            /* del property */
+        JS_PropertyStub,                            /* get property */
+        JS_PropertyStub,                            /* set property */
+        JS_EnumerateStandardClasses,                /* enumerate */
+        JS_ResolveStub,                             /* resolve */
+        JS_ConvertStub,                             /* convert */
+        JS_FinalizeStub,                            /* finalize */
+        JSCLASS_NO_OPTIONAL_MEMBERS
+    };
+
     /* create the global object here */
-    glob = JS_NewObject(cx, /* global_class */ NULL, NULL, NULL);
+    glob = JS_NewObject(cx, &global_class, NULL, NULL);
     if (! glob)
         throw _Exception(_("Scripting: could not initialize glboal class"));
 
@@ -383,16 +401,6 @@ void Script::initGlobalObject()
     if (! JS_InitStandardClasses(cx, glob))
         throw _Exception(_("Scripting: JS_InitStandardClasses failed"));
 
-    JSClass *c;
-
-#ifdef JS_THREADSAFE
-    c = JS_GetClass(cx, glob);
-#else
-    c = JS_GetClass(glob);
-#endif
-
-    if (c)
-        c->flags |= JSCLASS_HAS_PRIVATE;
 }
 
 void Script::defineFunction(String name, JSNative function, int numParams)
