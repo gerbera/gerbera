@@ -778,6 +778,7 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
     // setting metadata
     {
         JSObject *meta_js = JS_NewObject(cx, NULL, NULL, js);
+        setObjectProperty(js, _("meta"), meta_js);
         Ref<Dictionary> meta = obj->getMetadata();
         Ref<Array<DictionaryElement> > elements = meta->getElements();
         int len = elements->size();
@@ -786,12 +787,12 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
             Ref<DictionaryElement> el = elements->get(i);
             setProperty(meta_js, el->getKey(), el->getValue());
         }
-        setObjectProperty(js, _("meta"), meta_js);
     }
 
     // setting auxdata
     {
         JSObject *aux_js = JS_NewObject(cx, NULL, NULL, js);
+        setObjectProperty(js, _("aux"), aux_js);
         Ref<Dictionary> aux = obj->getAuxData();
         Ref<Array<DictionaryElement> > elements = aux->getElements();
         int len = elements->size();
@@ -800,7 +801,6 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
             Ref<DictionaryElement> el = elements->get(i);
             setProperty(aux_js, el->getKey(), el->getValue());
         }
-        setObjectProperty(js, _("aux"), aux_js);
     }
 
 
