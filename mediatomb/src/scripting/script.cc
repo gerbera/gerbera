@@ -249,7 +249,7 @@ Script::Script(Ref<Runtime> runtime) : Object()
     if (! cx)
         throw _Exception(_("Scripting: could not initialize js context"));
    
-    JS_SetGCZeal(cx, 2);
+//    JS_SetGCZeal(cx, 2);
 
     glob = NULL;
     script = NULL;
