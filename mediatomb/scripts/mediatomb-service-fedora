@@ -2,7 +2,7 @@
 #
 # mediatomb This script starts and stops the mediatomb daemon
 #
-# chkconfig: - 95 30
+# chkconfig: 2345 95 30
 # processname: mediatomb
 # description: mediatomb is a daemon process which provides a UPnP service
 # config: /etc/mediatomb
@@ -38,8 +38,6 @@ the MT_INTERFACE variable to your network device (eth0, eth1, etc.)" && exit 0
 
 PATH=$PATH:/usr/bin:/usr/local/bin
 
-IFACE_IP=`ifconfig | grep -i "$MT_INTERFACE" -A 1|grep "inet addr"|cut -d " " -f 12|cut -d ":" -f 2`
-
 # By default it's all good
 RETVAL=0
 
@@ -59,7 +57,7 @@ case "$1" in
     
     echo -n "Starting mediatomb: "
     
-    daemon $NICELEVEL mediatomb $MEDIATOMB -i $IFACE_IP $MT_OPTIONS
+    daemon $NICELEVEL mediatomb $MEDIATOMB -e $MT_INTERFACE $MT_OPTIONS
     
     RETVAL=$?
         echo
