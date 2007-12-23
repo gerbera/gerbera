@@ -142,7 +142,7 @@ void Sqlite3Storage::init()
             if (dbVersion == nil)
             {
 #ifdef AUTO_CREATE_DATABASE
-                log_info("no sqlite3 backup is available. automatically creating database...\n");
+                log_info("no sqlite3 backup is available or backup is corrupt. automatically creating database...\n");
                 Ref<SLInitTask> ptask (new SLInitTask());
                 addTask(RefCast(ptask, SLTask));
                 try
@@ -411,6 +411,17 @@ void SLTask::waitForTask()
 
 void SLInitTask::run(sqlite3 *db, Sqlite3Storage *sl)
 {
+    String dbFilePath = ConfigManager::getInstance()->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
+    
+    sqlite3_close(db);
+    
+    if (unlink(dbFilePath.c_str()) != 0)
+        throw _StorageException(nil, _("error while autocreating sqlite3 database: could not unlink old database file: ") + mt_strerror(errno));
+    
+    int res = sqlite3_open(dbFilePath.c_str(), &db);
+    if (res != SQLITE_OK)
+        throw _StorageException(nil, _("error while autocreating sqlite3 database: could not create new database"));
+    
     unsigned char buf[SL3_CREATE_SQL_INFLATED_SIZE + 1]; // +1 for '\0' at the end of the string
     unsigned long uncompressed_size = SL3_CREATE_SQL_INFLATED_SIZE;
     int ret = uncompress(buf, &uncompressed_size, sqlite3_create_sql, SL3_CREATE_SQL_DEFLATED_SIZE);
@@ -450,7 +461,7 @@ SLSelectTask::SLSelectTask(const char *query) : SLTask()
 void SLSelectTask::run(sqlite3 *db, Sqlite3Storage *sl)
 {
     
-    pres = Ref<Sqlite3Result>(new Sqlite3Result()); 
+    pres = Ref<Sqlite3Result>(new Sqlite3Result());
     
     char *err;
     int ret = sqlite3_get_table(
