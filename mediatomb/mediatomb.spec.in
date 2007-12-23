@@ -1,38 +1,50 @@
 %define name mediatomb 
 %define version @VERSION@
-%define release 1
+%define release 1%{?dist}
 
 Version: %{version}
-Summary: UPnP AV MediaServer 
+Summary: UPnP AV MediaServer for Linux
 Name: %{name}
 Release: %{release}
-License: GPL
+License: GPLv2
 Group: Applications/Multimedia
-Source: %{name}-%{version}.tar.gz
+Source: http://downloads.sourceforge.net/mediatomb/%{name}-%{version}.tar.gz
 URL: http://mediatomb.cc
-Buildroot: %{_tmppath}/%{name}-%{version}-buildroot 
-BuildRequires: sqlite-devel => 3
-BuildRequires: file
+Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n) 
+BuildRequires: sqlite-devel, mysql-devel, libexif-devel, id3lib-devel, file-devel, js-devel, zlib-devel
+Requires: mysql, id3lib, file, sqlite, js
 
 %description
-MediaTomb - UPnP AV Mediaserver for Linux.
+MediaTomb is an open source (GPL) UPnP MediaServer with a nice web user 
+interface, it allows you to stream your digital media through your home
+network and listen to/watch it on a variety of UPnP compatible devices.
 
+MediaTomb implements the UPnP MediaServer V 1.0 specification that can 
+be found on http://www.upnp.org/.
 %prep 
-
 %setup -q
 
 %build
 %configure
+make %{?_smp_mflags}
 
-make
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
 install -D -m0755 scripts/mediatomb-service-fedora %{buildroot}%{_initrddir}/mediatomb
-install -D -m0755 config/mediatomb-conf-fedora %{buildroot}%{_sysconfdir}/mediatomb.conf
+install -D -m0644 config/mediatomb-conf-fedora %{buildroot}%{_sysconfdir}/mediatomb.conf
+make install DESTDIR=$RPM_BUILD_ROOT
 
-%makeinstall
+%{__mkdir_p}  %{buildroot}%{_sysconfdir}/logrotate.d
+%{__cat} > %{buildroot}%{_sysconfdir}/logrotate.d/%{name} << 'EOF'
+/var/log/mediatomb {
+        create 644 root root
+        monthly
+        compress
+        missingok
+}
+EOF
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -45,16 +57,20 @@ service mediatomb stop > /dev/null 2>&1
 chkconfig --del mediatomb
 
 %files
-%defattr(-,root,root)
+%defattr(-,root,root,-)
 %doc README README.UTF_8 AUTHORS ChangeLog COPYING INSTALL doc/doxygen.conf
 %doc doc/scripting.txt doc/scripting_utf8.txt
-%attr(0600,root,root) %config(noreplace) %{_sysconfdir}/mediatomb.conf
+%config(noreplace) %{_sysconfdir}/mediatomb.conf
+%{_sysconfdir}/logrotate.d/%{name}
 %{_bindir}/mediatomb
 %{_datadir}/%{name}/
 %{_mandir}/man1/*
 %{_initrddir}/mediatomb
 
 %changelog
+* Sun Dec 23 2007 Marc Wiriadisastra <marc@mwiriadi.id.au> 0.10.0-1
+- Altered spec file for inclusion into Fedora.
+  Added logrotate configuration.
 * Wed Jul 11 2007 Sergey Bostandzhyan <jin@mediatomb.cc> 0.10.0-1
 - Version is now filled in by the configure script.
 * Sun May 27 2007 Sergey Bostandzhyan <jin@mediatomb.cc> 0.9.1-1
