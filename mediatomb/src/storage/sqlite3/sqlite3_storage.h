@@ -53,7 +53,7 @@ public:
     
     /// \brief run the sqlite3 task
     /// \param sl The instance of Sqlite3Storage to do the queries with.
-    virtual void run(sqlite3 *db, Sqlite3Storage *sl) = 0;
+    virtual void run(sqlite3 **db, Sqlite3Storage *sl) = 0;
     
     /// \brief returns true if the task is not completed
     /// \return true if the task is not completed yet, false if the task is finished and the results are ready.
@@ -85,7 +85,7 @@ class SLInitTask : public SLTask
 public:
     /// \brief Constructor for the sqlite3 init task
     SLInitTask() : SLTask() {}
-    virtual void run(sqlite3 *db, Sqlite3Storage *sl);
+    virtual void run(sqlite3 **db, Sqlite3Storage *sl);
 };
 #endif
 
@@ -97,7 +97,7 @@ public:
     /// \brief Constructor for the sqlite3 select task
     /// \param query The SQL query string
     SLSelectTask(const char *query);
-    virtual void run(sqlite3 *db, Sqlite3Storage *sl);
+    virtual void run(sqlite3 **db, Sqlite3Storage *sl);
     inline zmm::Ref<SQLResult> getResult() { return RefCast(pres, SQLResult); };
 protected:
     /// \brief The SQL query string
@@ -113,7 +113,7 @@ public:
     /// \brief Constructor for the sqlite3 exec task
     /// \param query The SQL query string
     SLExecTask(const char *query, bool getLastInsertId);
-    virtual void run(sqlite3 *db, Sqlite3Storage *sl);
+    virtual void run(sqlite3 **db, Sqlite3Storage *sl);
     inline int getLastInsertId() { return lastInsertId; }
 protected:
     /// \brief The SQL query string
@@ -129,7 +129,7 @@ class SLBackupTask : public SLTask
 public:
     /// \brief Constructor for the sqlite3 backup task
     SLBackupTask(bool restore) { this->restore = restore; };
-    virtual void run(sqlite3 *db, Sqlite3Storage *sl);
+    virtual void run(sqlite3 **db, Sqlite3Storage *sl);
 protected:
     bool restore;
 };

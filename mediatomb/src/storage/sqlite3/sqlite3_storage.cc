@@ -306,7 +306,7 @@ void Sqlite3Storage::threadProc()
         AUTOUNLOCK();
         try
         {
-            task->run(db, this);
+            task->run(&db, this);
             task->sendSignal();
         }
         catch (Exception e)
@@ -409,16 +409,16 @@ void SLTask::waitForTask()
 #ifdef AUTO_CREATE_DATABASE
 /* SLInitTask */
 
-void SLInitTask::run(sqlite3 *db, Sqlite3Storage *sl)
+void SLInitTask::run(sqlite3 **db, Sqlite3Storage *sl)
 {
     String dbFilePath = ConfigManager::getInstance()->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
     
-    sqlite3_close(db);
+    sqlite3_close(*db);
     
     if (unlink(dbFilePath.c_str()) != 0)
         throw _StorageException(nil, _("error while autocreating sqlite3 database: could not unlink old database file: ") + mt_strerror(errno));
     
-    int res = sqlite3_open(dbFilePath.c_str(), &db);
+    int res = sqlite3_open(dbFilePath.c_str(), db);
     if (res != SQLITE_OK)
         throw _StorageException(nil, _("error while autocreating sqlite3 database: could not create new database"));
     
@@ -431,7 +431,7 @@ void SLInitTask::run(sqlite3 *db, Sqlite3Storage *sl)
     
     char *err = NULL;
     ret = sqlite3_exec(
-        db,
+        *db,
         (char *)buf,
         NULL,
         NULL,
@@ -445,7 +445,7 @@ void SLInitTask::run(sqlite3 *db, Sqlite3Storage *sl)
     }
     if(ret != SQLITE_OK)
     {
-        throw _StorageException(nil, sl->getError(String((char *)buf), error, db));
+        throw _StorageException(nil, sl->getError(String((char *)buf), error, *db));
     }
 }
 
@@ -458,14 +458,14 @@ SLSelectTask::SLSelectTask(const char *query) : SLTask()
     this->query = query;
 }
 
-void SLSelectTask::run(sqlite3 *db, Sqlite3Storage *sl)
+void SLSelectTask::run(sqlite3 **db, Sqlite3Storage *sl)
 {
     
     pres = Ref<Sqlite3Result>(new Sqlite3Result());
     
     char *err;
     int ret = sqlite3_get_table(
-        db,
+        *db,
         query,
         &pres->table,
         &pres->nrow,
@@ -480,7 +480,7 @@ void SLSelectTask::run(sqlite3 *db, Sqlite3Storage *sl)
     }
     if(ret != SQLITE_OK)
     {
-        throw _StorageException(nil, sl->getError(String(query), error, db));
+        throw _StorageException(nil, sl->getError(String(query), error, *db));
     }
     
     pres->row = pres->table;
@@ -495,12 +495,12 @@ SLExecTask::SLExecTask(const char *query, bool getLastInsertId) : SLTask()
     this->getLastInsertIdFlag = getLastInsertId;
 }
 
-void SLExecTask::run(sqlite3 *db, Sqlite3Storage *sl)
+void SLExecTask::run(sqlite3 **db, Sqlite3Storage *sl)
 {
     //log_debug("%s\n", query);
     char *err;
     int res = sqlite3_exec(
-        db,
+        *db,
         query,
         NULL,
         NULL,
@@ -514,15 +514,15 @@ void SLExecTask::run(sqlite3 *db, Sqlite3Storage *sl)
     }
     if(res != SQLITE_OK)
     {
-        throw _StorageException(nil, sl->getError(String(query), error, db));
+        throw _StorageException(nil, sl->getError(String(query), error, *db));
     }
     if (getLastInsertIdFlag)
-        lastInsertId = sqlite3_last_insert_rowid(db);
+        lastInsertId = sqlite3_last_insert_rowid(*db);
 }
 
 /* SLBackupTask */
 
-void SLBackupTask::run(sqlite3 *db, Sqlite3Storage *sl)
+void SLBackupTask::run(sqlite3 **db, Sqlite3Storage *sl)
 {
     
     String dbFilePath = ConfigManager::getInstance()->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
@@ -544,7 +544,7 @@ void SLBackupTask::run(sqlite3 *db, Sqlite3Storage *sl)
     else
     {
         log_info("trying to restore sqlite3 database from backup...\n");
-        sqlite3_close(db);
+        sqlite3_close(*db);
         try
         {
             copy_file(
@@ -557,7 +557,7 @@ void SLBackupTask::run(sqlite3 *db, Sqlite3Storage *sl)
         {
             throw _StorageException(nil, _("error while restoring sqlite3 backup: ") + e.getMessage());
         }
-        int res = sqlite3_open(dbFilePath.c_str(), &db);
+        int res = sqlite3_open(dbFilePath.c_str(), db);
         if (res != SQLITE_OK)
         {
             throw _StorageException(nil, _("error while restoring sqlite3 backup: could not reopen sqlite3 database after restore"));
