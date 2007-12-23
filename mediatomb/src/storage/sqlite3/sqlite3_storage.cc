@@ -84,6 +84,14 @@ void Sqlite3Storage::init()
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
     */
     
+    String dbFilePath = ConfigManager::getInstance()->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
+    
+    // check for db-file
+    if (access(dbFilePath.c_str(), R_OK | W_OK) != 0 && errno != ENOENT)
+        throw _StorageException(nil, _("Error while accessing sqlite database file (") + dbFilePath +"): " + mt_strerror(errno));
+    
+    
+    
     taskQueue = Ref<ObjectQueue<SLTask> >(new ObjectQueue<SLTask>(SL3_INITITAL_QUEUE_SIZE));
     taskQueueOpen = true;
     
@@ -94,10 +102,12 @@ void Sqlite3Storage::init()
         this
     );
     
+    // wait for sqlite3 thread to become ready
     cond->wait();
     AUTOUNLOCK();
     if (startupError != nil)
         throw _StorageException(nil, startupError);
+    
     
     String dbVersion = nil;
     try
@@ -106,27 +116,75 @@ void Sqlite3Storage::init()
     }
     catch (Exception)
     {
+        log_error("Sqlite3 database seems to be corrupt or doesn't exist yet.\n");
+        // database seems to be corrupt or nonexistent
+        if (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_STORAGE_SQLITE_RESTORE))
+        {
+            // try to restore database
+            
+            // checking for backup file
+            String dbFilePathbackup = dbFilePath + ".backup";
+            if (access(dbFilePathbackup.c_str(), R_OK) == 0)
+            {
+                try
+                {
+                    // trying to copy backup file
+                    Ref<SLBackupTask> btask (new SLBackupTask(true));
+                    this->addTask(RefCast(btask, SLTask));
+                    btask->waitForTask();
+                    dbVersion = getInternalSetting(_("db_version"));
+                }
+                catch (Exception)
+                {
+                }
+            }
+            
+            if (dbVersion == nil)
+            {
+#ifdef AUTO_CREATE_DATABASE
+                log_info("no sqlite3 backup is available. automatically creating database...\n");
+                Ref<SLInitTask> ptask (new SLInitTask());
+                addTask(RefCast(ptask, SLTask));
+                try
+                {
+                    ptask->waitForTask();
+                    dbVersion = getInternalSetting(_("db_version"));
+                }
+                catch (Exception e)
+                {
+                    shutdown();
+                    throw _Exception(_("error while creating database: ") + e.getMessage());
+                }
+                log_info("database created successfully.\n");
+#else
+                shutdown();
+                throw _Exception(_("database doesn't seem to exist yet and autocreation wasn't compiled in"));
+#endif
+            }
+        }
+        else
+        {
+            // fail because restore option is false
+            shutdown();
+            throw _Exception(_("sqlite3 database seems to be corrupt and the 'on-error' option is set to 'fail'"));
+        }
     }
     
     if (dbVersion == nil)
     {
-#ifdef AUTO_CREATE_DATABASE
-        log_info("database doesn't seem to exist. automatically creating database...\n");
-        Ref<SLInitTask> ptask (new SLInitTask());
-        addTask(RefCast(ptask, SLTask));
-        ptask->waitForTask();
-        dbVersion = getInternalSetting(_("db_version"));
-        if (dbVersion == nil)
-        {
-            shutdown();
-            throw _Exception(_("error while creating database"));
-        }
-        log_info("database created successfully.\n");
-#else
         shutdown();
-        throw _Exception(_("database doesn't seem to exist yet and autocreation wasn't compiled in"));
-#endif
+        throw _Exception(_("sqlite3 database seems to be corrupt and restoring from backup failed"));
     }
+    
+    
+    _exec("PRAGMA locking_mode = EXCLUSIVE");
+    int synchronousOption = ConfigManager::getInstance()->getIntOption(CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS);
+    Ref<StringBuffer> buf(new StringBuffer());
+    *buf << "PRAGMA synchronous = " << synchronousOption;
+    SQLStorage::exec(buf);
+    
+    
+    
     log_debug("db_version: %s\n", dbVersion.c_str());
     
     /* --- database upgrades --- */
@@ -157,7 +215,19 @@ void Sqlite3Storage::init()
     if (! string_ok(dbVersion) || dbVersion != "3")
         throw _Exception(_("The database seems to be from a newer version!"));
     
-    //pthread_attr_destroy(&attr);
+    
+    // add timer for backups
+    if (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED))
+    {
+        int backupInterval = ConfigManager::getInstance()->getIntOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL);
+        Ref<TimerSubscriberObject> backupTimerSubscriber(new Sqlite3BackupTimerSubscriber());
+        Timer::getInstance()->addTimerSubscriber(backupTimerSubscriber, backupInterval, Ref<Object>(this));
+        
+        // do a backup now
+        Ref<SLBackupTask> btask (new SLBackupTask(false));
+        this->addTask(RefCast(btask, SLTask));
+        btask->waitForTask();
+    }
 }
 
 void Sqlite3Storage::_exec(const char *query)
@@ -212,17 +282,17 @@ void Sqlite3Storage::threadProc()
     
     sqlite3 *db;
     
-    Ref<ConfigManager> config = ConfigManager::getInstance();
-    
-    String dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
+    String dbFilePath = ConfigManager::getInstance()->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
     
     int res = sqlite3_open(dbFilePath.c_str(), &db);
     if(res != SQLITE_OK)
     {
         startupError = _("Sqlite3Storage.init: could not open ") +
             dbFilePath;
+        return;
     }
     AUTOLOCK(sqliteMutex);
+    // tell init() that we are ready
     cond->signal();
     
     while(! shutdownFlag)
@@ -288,7 +358,7 @@ void Sqlite3Storage::storeInternalSetting(String key, String value)
     Ref<StringBuffer> q(new StringBuffer());
     *q << "INSERT OR REPLACE INTO " << QTB << INTERNAL_SETTINGS_TABLE << QTE << " (" << QTB << "key" << QTE << ", " << QTB << "value" << QTE << ") "
     "VALUES (" << quote(key) << ", "<< quote(value) << ") ";
-    this->execSB(q);
+    SQLStorage::exec(q);
 }
 
 /* SLTask */
@@ -416,6 +486,7 @@ SLExecTask::SLExecTask(const char *query, bool getLastInsertId) : SLTask()
 
 void SLExecTask::run(sqlite3 *db, Sqlite3Storage *sl)
 {
+    //log_debug("%s\n", query);
     char *err;
     int res = sqlite3_exec(
         db,
@@ -437,6 +508,54 @@ void SLExecTask::run(sqlite3 *db, Sqlite3Storage *sl)
     if (getLastInsertIdFlag)
         lastInsertId = sqlite3_last_insert_rowid(db);
 }
+
+/* SLBackupTask */
+
+void SLBackupTask::run(sqlite3 *db, Sqlite3Storage *sl)
+{
+    
+    String dbFilePath = ConfigManager::getInstance()->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
+    
+    if (! restore)
+    {
+        try
+        {
+            copy_file(
+                dbFilePath,
+                dbFilePath + ".backup"
+            );
+        }
+        catch (Exception e)
+        {
+            log_error("error while making sqlite3 backup: %s\n", e.getMessage().c_str());
+        }
+    }
+    else
+    {
+        log_info("trying to restore sqlite3 database from backup...\n");
+        sqlite3_close(db);
+        try
+        {
+            copy_file(
+                dbFilePath + ".backup",
+                dbFilePath
+            );
+            
+        }
+        catch (Exception e)
+        {
+            throw _StorageException(nil, _("error while restoring sqlite3 backup: ") + e.getMessage());
+        }
+        int res = sqlite3_open(dbFilePath.c_str(), &db);
+        if (res != SQLITE_OK)
+        {
+            throw _StorageException(nil, _("error while restoring sqlite3 backup: could not reopen sqlite3 database after restore"));
+        }
+        log_info("sqlite3 database successfully restored from backup.\n");   
+    }
+    
+}
+
 
 /* Sqlite3Result */
 
@@ -478,4 +597,14 @@ Sqlite3Row::Sqlite3Row(char **row, Ref<SQLResult> sqlResult) : SQLRow(sqlResult)
     this->row = row;
 }
 
-#endif // HAVE_SQlITE3
+/* Sqlite3BackupTimerSubscriber */
+
+void Sqlite3BackupTimerSubscriber::timerNotify(Ref<Object> sqlite3storage)
+{
+    Sqlite3Storage *storage = (Sqlite3Storage*)(sqlite3storage.getPtr());
+    
+    Ref<SLBackupTask> btask (new SLBackupTask(false));
+    storage->addTask(RefCast(btask, SLTask));
+}
+
+#endif // HAVE_SQLITE3

@@ -440,18 +440,18 @@ void ConfigManager::validate(String serverhome)
         if (!validateYesNo(sqlite3_en))
             throw _Exception(_("Invalid <sqlite3 enabled=\"\"> value"));
     }
- 
+    
     if (sqlite3_en == "yes")
     {
         prepare_path(_("/server/storage/sqlite3/database-file"), false, true);
         NEW_OPTION(getOption(_("/server/storage/sqlite3/database-file")));
         SET_OPTION(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
-
+        
         temp = getOption(_("/server/storage/sqlite3/synchronous"), 
                 _(DEFAULT_SQLITE_SYNC));
-
+                
         temp_int = 0;
-
+        
         if (temp == "off")
             temp_int = SQLITE_SYNC_OFF;
         else if (temp == "normal")
@@ -489,8 +489,8 @@ void ConfigManager::validate(String serverhome)
         NEW_BOOL_OPTION(temp == "yes" ? true : false);
         SET_BOOL_OPTION(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED);
 
-        temp_int = getIntOption(_("/server/ui/sqlite3/backup/attribute::interval"),
-                DEFAULT_POLL_INTERVAL);
+        temp_int = getIntOption(_("/server/storage/sqlite3/backup/attribute::interval"),
+                DEFAULT_SQLITE_BACKUP_INTERVAL);
         if (temp_int < 1)
             throw _Exception(_("Error in config file: incorrect parameter for "
                         "<backup interval=\"\" /> attribute"));

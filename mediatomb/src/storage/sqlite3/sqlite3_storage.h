@@ -39,6 +39,7 @@
 
 #include "storage/sql_storage.h"
 #include "sync.h"
+#include "timer.h"
 
 class Sqlite3Storage;
 class Sqlite3Result;
@@ -122,6 +123,17 @@ protected:
     bool getLastInsertIdFlag;
 };
 
+/// \brief A task for the sqlite3 thread to do a SQL exec.
+class SLBackupTask : public SLTask
+{
+public:
+    /// \brief Constructor for the sqlite3 backup task
+    SLBackupTask(bool restore) { this->restore = restore; };
+    virtual void run(sqlite3 *db, Sqlite3Storage *sl);
+protected:
+    bool restore;
+};
+
 /// \brief The Storage class for using SQLite3
 class Sqlite3Storage : private SQLStorage
 {
@@ -172,6 +184,7 @@ private:
     friend class SLSelectTask;
     friend class SLExecTask;
     friend class SLInitTask;
+    friend class Sqlite3BackupTimerSubscriber;
 };
 
 /// \brief Represents a result of a sqlite3 select
@@ -206,6 +219,12 @@ private:
     zmm::Ref<Sqlite3Result> res;
     
     friend class Sqlite3Result;
+};
+
+class Sqlite3BackupTimerSubscriber : public TimerSubscriberObject
+{
+    /// \brief for making backups in regulary intervals - see TimerSubscriber
+    virtual void timerNotify(zmm::Ref<zmm::Object> sqlite3storage);
 };
 
 #endif // __SQLITE3_STORAGE_H__

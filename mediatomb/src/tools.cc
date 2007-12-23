@@ -462,14 +462,18 @@ void copy_file(String from, String to)
     {
         bytesWritten = fwrite(buffer, 1, bytesRead, t);
     }
+    FREE(buffer);
     if (ferror(f) || ferror(t))
     {
+        int my_errno = errno;
         fclose(f);
         fclose(t);
         throw _Exception(_("copy_file: error while copying ") + from + " to " +
-                        to + ": " + mt_strerror(errno));
+                        to + ": " + mt_strerror(my_errno));
     }
-    FREE(buffer);
+    
+    fclose(f);
+    fclose(t);
 }
 
 /* sorting */

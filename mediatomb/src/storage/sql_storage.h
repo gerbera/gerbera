@@ -89,12 +89,6 @@ public:
     int exec(zmm::Ref<zmm::StringBuffer> buf, bool getLastInsertId = false)
         { return exec(buf->c_str(), buf->length(), getLastInsertId); }
     
-    /// \todo get rid of this wrapper - MysqlStorage and Sqlite3Storage won't find the above one. why?
-    int execSB(zmm::Ref<zmm::StringBuffer> buf, bool getLastInsertId = false)
-        { return exec(buf, getLastInsertId); }
-    //virtual int execi(zmm::Ref<zmm::StringBuffer> buf, bool getLastInsertId = false)
-    //    { return exec(buf->c_str(), buf->length(), getLastInsertId); }
-    
     virtual void addObject(zmm::Ref<CdsObject> object, int *changedContainer);
     virtual void updateObject(zmm::Ref<CdsObject> object, int *changedContainer);
     

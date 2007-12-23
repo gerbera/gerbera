@@ -371,7 +371,7 @@ void MysqlStorage::storeInternalSetting(String key, String value)
     *q << "INSERT INTO " << QTB << INTERNAL_SETTINGS_TABLE << QTE << " (`key`, `value`) "
     "VALUES (" << quote(key) << ", "<< quotedValue << ") "
     "ON DUPLICATE KEY UPDATE `value` = " << quotedValue;
-    execSB(q);
+    SQLStorage::exec(q);
 }
 
 void MysqlStorage::_exec(const char *query)
