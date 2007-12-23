@@ -35,7 +35,7 @@
 
 #ifdef HAVE_MYSQL
 
-#define MYSQL_SET_NAMES "/*!40101 SET NAMES utf8 */"
+//#define MYSQL_SET_NAMES "/*!40101 SET NAMES utf8 */"
 
 //#define MYSQL_SELECT_DEBUG
 //#define MYSQL_EXEC_DEBUG
@@ -146,6 +146,13 @@ void MysqlStorage::init()
     
     mysql_init_key_initialized = true;
     
+    mysql_options(&db, MYSQL_SET_CHARSET_NAME, "utf8");
+    
+    #ifdef HAVE_MYSQL_OPT_RECONNECT
+        my_bool my_bool_var = true;
+        mysql_options(&db, MYSQL_OPT_RECONNECT, &my_bool_var);
+    #endif
+    
     res_mysql = mysql_real_connect(&db,
         dbHost.c_str(),
         dbUser.c_str(),
@@ -160,17 +167,15 @@ void MysqlStorage::init()
         throw _Exception(_("The connection to the MySQL database has failed: ") + getError(&db));
     }
     
+    /*
     int res = mysql_real_query(&db, MYSQL_SET_NAMES, strlen(MYSQL_SET_NAMES));
     if(res)
     {
         String myError = getError(&db);
         throw _StorageException(nil, _("MySQL query 'SET NAMES' failed!"));
     }
+    */
     
-    #ifdef HAVE_MYSQL_OPT_RECONNECT
-        my_bool my_bool_var = true;
-        mysql_options(&db, MYSQL_OPT_RECONNECT, &my_bool_var);
-    #endif
     
     mysql_connection = true;
     
