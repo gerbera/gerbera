@@ -2294,7 +2294,13 @@ if test "x$FFMPEG_OK" = xyes; then
         LDFLAGS="-L$FFMPEG_SEARCH_LIBS"
         AC_CHECK_LIB(avformat, av_register_all,
                 [
-                    FFMPEG_LIBS="-L$FFMPEG_SEARCH_LIBS -lavformat"
+                    AC_CHECK_LIB(avutil, av_log_set_callback,
+                        [
+                            FFMPEG_LIBS="-L$FFMPEG_SEARCH_LIBS -lavformat -lavutil"
+                        ],
+                        [
+                            AC_MSG_ERROR([avutil libraries not found in requested path $FFMPEG_SEARCH_LIBS])
+                        ])
                 ],
                 [
                     AC_MSG_ERROR([avformat libraries not found in requested path $FFMPEG_SEARCH_LIBS])
@@ -2302,13 +2308,36 @@ if test "x$FFMPEG_OK" = xyes; then
         )
     else
         AC_CHECK_LIB(avformat, av_register_all,
-            [],
+            [
+                AC_CHECK_LIB(avutil, av_log_set_callback,
+                    [
+                        FFMPEG_LIBS="-lavformat -lavutil"
+                    ],
+                    [
+                        LDFLAGS="-L$SEARCH_DIR_LIBS"
+                        unset ac_cv_lib_avutil_av_log_set_callback
+                        AC_CHECK_LIB(avutil, av_log_set_callback,
+                            [
+                                FFMPEG_LIBS="-L$SEARCH_DIR_LIBS -lavformat -lavutil"
+                            ],
+                            [
+                               FFMPEG_OK=missing
+                            ])
+                    ])
+            ],
             [
                 LDFLAGS="-L$SEARCH_DIR_LIBS"
                 unset ac_cv_lib_avformat_av_register_all
                 AC_CHECK_LIB(avformat, av_register_all,
                     [
-                        FFMPEG_LIBS="-L$SEARCH_DIR_LIBS -lavformat"
+                        unset ac_cv_lib_avutil_av_log_set_callback
+                        AC_CHECK_LIB(avutil, av_log_set_callback,
+                            [
+                                FFMPEG_LIBS="-L$SEARCH_DIR_LIBS -lavformat -lavutil"
+                            ],
+                            [
+                               FFMPEG_OK=missing
+                            ])
                     ],
                     [ FFMPEG_OK=missing ]
                 )
