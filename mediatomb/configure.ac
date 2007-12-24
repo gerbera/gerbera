@@ -2349,6 +2349,9 @@ fi
 # last check, my Fedora 7 is somehow broken, and allthough the above tests
 # succeed it still has unresolved symbols when linking
 
+CXXFLAGS="$CXXFLAGS $FFMPEG_CXXFLAGS"
+LDFLAGS="$LDFLAGS $FFMPEG_LIBS"
+
 if test "x$FFMPEG_OK" = xyes; then
     AC_MSG_CHECKING([ffmpeg linking])
     AC_LINK_IFELSE(
@@ -2402,6 +2405,7 @@ else
     fi
 fi
 
+CXXFLAGS="$CXXFLAGS_SAVE"
 LDFLAGS="$LDFLAGS_SAVE"
 CPPFLAGS="$CPPFLAGS_SAVE"
 
