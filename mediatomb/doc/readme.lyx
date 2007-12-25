@@ -8416,6 +8416,10 @@ DSM-320RD
 \end_layout
 
 \begin_layout Itemize
+DSM-510
+\end_layout
+
+\begin_layout Itemize
 DSM-520
 \end_layout
 
@@ -8457,6 +8461,16 @@ Further, the DSM-320 behaves differently if it thinks that it is dealing
 It is still being investigated, but we were able to get subtitles working
  with a U.S.
  DSM-320 unit running firmware version 1.09
+\end_layout
+
+\begin_layout Standard
+Also, the DSM-510 (probably also valid for other models) will only play
+ avi files if the mimetype is set to video/avi, you may want to add a mapping
+ for that to the extension-mimetype section in your config.xml:
+\end_layout
+
+\begin_layout Code
+<map from="avi" to="video/avi"/>
 \end_layout
 
 \begin_layout Subsubsection
@@ -8699,6 +8713,11 @@ We provide a bitbake metadata file for the OpenEmbedded environment, it
  based NAS products that are available on the market.
 \end_layout
 
+\begin_layout Standard
+So far two devices are shipped with a preinstalled version of MediaTomb,
+ community firmware versions are available for the rest.
+\end_layout
+
 \begin_layout Subsubsection
 Buffalo
 \end_layout
@@ -8733,6 +8752,22 @@ Linksys
 
 \begin_layout Itemize
 NSLU2
+\end_layout
+
+\begin_layout Subsubsection
+Maxtor
+\end_layout
+
+\begin_layout Itemize
+Shared Storage
+\end_layout
+
+\begin_layout Subsubsection
+Western Digital
+\end_layout
+
+\begin_layout Itemize
+MyBook
 \end_layout
 
 \begin_layout Section
