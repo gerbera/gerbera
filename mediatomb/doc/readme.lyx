@@ -3683,7 +3683,7 @@ status open
 \end_layout
 
 \begin_layout Code
-<storage driver="..."> 
+<storage> 
 \end_layout
 
 \begin_layout Standard
@@ -3693,12 +3693,9 @@ Required
 \end_layout
 
 \begin_layout Standard
-Specifies the storage driver, currently sqlite3 and mysql are supported.
+Defines the storage section - database selection is done here.
+ Currently sqlite3 and mysql are supported.
  Each storage driver has it's own configuration parameters.
-\end_layout
-
-\begin_layout Standard
-Attributes:
 \end_layout
 
 \begin_layout Standard
@@ -3716,19 +3713,13 @@ status open
 \end_layout
 
 \begin_layout Code
-driver=...
+<sqlite enabled="yes>
 \end_layout
 
 \begin_layout Standard
 
 \emph on
-Required
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Default: sqlite3
+Required if MySQL is not defined
 \end_layout
 
 \begin_layout Standard
@@ -3766,11 +3757,31 @@ status open
 \end_layout
 
 \begin_layout Code
-driver="sqlite3"
+enabled="yes"
 \end_layout
 
 \begin_layout Standard
-There is only one child tag for sqlite:
+
+\emph on
+Required
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Below are the sqlite driver options:
 \end_layout
 
 \begin_layout Standard
@@ -3818,6 +3829,178 @@ status open
 
 \begin_layout Standard
 
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<synchronous>off</synchronous>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: off
+\end_layout
+
+\begin_layout Standard
+Possible values are off, normal, full.
+\end_layout
+
+\begin_layout Standard
+TODO: Leo - please describe :)
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<on-error>restore</on-error>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: restore
+\end_layout
+
+\begin_layout Standard
+Possible values are restore and fail.
+\end_layout
+
+\begin_layout Standard
+TODO: Leo - please describe :)
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<backup enabled="no" interval="6000"/>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+Backup parameters:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+enabled=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: no
+\end_layout
+
+\begin_layout Standard
+Enables or disables database backup.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+interval=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: 600
+\end_layout
+
+\begin_layout Standard
+Defines the backup interval in seconds.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
 </listitem></itemizedlist>
 \end_layout
 
@@ -3841,7 +4024,59 @@ status open
 \end_layout
 
 \begin_layout Code
-driver="mysql"
+<mysql enabled="no"/>
+\end_layout
+
+\begin_layout Standard
+Defines the MySQL storage driver section.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+enabled=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: no
+\end_layout
+
+\begin_layout Standard
+Enables or disables the MySQL driver.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
