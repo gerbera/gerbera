@@ -480,7 +480,9 @@ AC_HELP_STRING([--disable-external-transcoding],
 )
 
 if test $EXTERNAL_TRANSCODING -eq 1; then
-    AC_DEFINE([EXTERNAL_TRANSCODING], [1], [do not enable this yet, work in progress])
+    AC_CHECK_FUNCS([mkfifo],[],
+            [AC_MSG_ERROR([mkfifo is required by the external transcoding feature])])
+    AC_DEFINE([EXTERNAL_TRANSCODING], [1], [external transcoding feature])
     EXTERNAL_TRANSCODING_OK=yes
 else
     EXTERNAL_TRANSCODING_OK=disabled
@@ -567,6 +569,7 @@ AC_DEFINE_UNQUOTED([UPNP_VERSION_PATCH], $upnppatch, [see upnpconfig.h])
 AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_RANLIB
+AC_PROG_GCC_TRADITIONAL
 AC_HEADER_DIRENT
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
@@ -586,11 +589,19 @@ AC_CHECK_HEADERS([sys/ioctl.h sys/socket.h sys/time.h sys/types.h sys/wait.h],
                  [],
                  [AC_MSG_ERROR(required header not found)]) 
 
+AC_CHECK_HEADERS([malloc.h],
+                 [],
+                 [AC_MSG_ERROR(required header not found)]) 
+
+
 AC_CHECK_HEADERS([langinfo.h locale.h],[],[AC_MSG_WARN(Header that is required to retrieve system locale not found, will use default value)])
 
 AC_CHECK_HEADERS([sched.h],[],[])
 AC_CHECK_FUNCS([sched_getparam sched_setparam],[],[])
-    
+   
+AC_CHECK_FUNCS([mkdir], [],
+              [AC_MSG_ERROR(required function not found)])
+
 AC_CHECK_HEADERS([getopt.h],
         [
             AC_CHECK_FUNCS([getopt_long],[],
@@ -813,9 +824,13 @@ AC_CHECK_FUNCS(backtrace backtrace_symbols,[],[])
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_C_INLINE
+AC_C_VOLATILE
 AC_TYPE_SIGNAL
 AC_TYPE_PID_T
 AC_TYPE_SIZE_T
+AC_TYPE_INT64_T
+AC_TYPE_SSIZE_T
+AC_TYPE_UINT32_T
 AC_STRUCT_TM
 
 AC_ARG_ENABLE(rpl-malloc, 
@@ -844,6 +859,8 @@ AC_FUNC_SELECT_ARGTYPES
 AC_FUNC_STAT
 AC_FUNC_STRTOD
 AC_FUNC_VPRINTF
+AC_FUNC_STRERROR_R
+AC_FUNC_STRFTIME
 
 AC_LANG_CPLUSPLUS
 
