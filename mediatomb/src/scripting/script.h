@@ -101,6 +101,8 @@ protected:
     void execute();
     
 private:
+    JSObject *common_root;
+
     void initGlobalObject();
     JSScript *_load(zmm::String scriptPath);
     void _execute(JSScript *scr);

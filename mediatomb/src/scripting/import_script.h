@@ -41,8 +41,11 @@ class ImportScript : public Script
 {
 public:
     ImportScript(zmm::Ref<Runtime> runtime);
+    ~ImportScript();
     void processCdsObject(zmm::Ref<CdsObject> obj);
     virtual script_class_t whoami() { return S_IMPORT; }
+private:
+    JSObject *root;
 };
 
 #endif // __SCRIPTING_IMPORT_SCRIPT_H__

@@ -243,17 +243,17 @@ Script::Script(Ref<Runtime> runtime) : Object()
 {
     this->runtime = runtime;
     rt = runtime->getRT();
-    
+
     /* create a context and associate it with the JS run time */
     cx = JS_NewContext(rt, 8192);
     if (! cx)
         throw _Exception(_("Scripting: could not initialize js context"));
-   
+
 //    JS_SetGCZeal(cx, 2);
 
     glob = NULL;
     script = NULL;
-   
+
     _p2i = StringConverter::p2i();
     _j2i = StringConverter::j2i();
     _m2i = StringConverter::m2i();
@@ -262,41 +262,41 @@ Script::Script(Ref<Runtime> runtime) : Object()
 
     JS_SetErrorReporter(cx, js_error_reporter);
     initGlobalObject();
-    
+
     JS_SetPrivate(cx, glob, this);
-    
+
     /* initialize contstants */
     setIntProperty(glob, _("OBJECT_TYPE_CONTAINER"),
-                          OBJECT_TYPE_CONTAINER);
+            OBJECT_TYPE_CONTAINER);
     setIntProperty(glob, _("OBJECT_TYPE_ITEM"),
-                          OBJECT_TYPE_ITEM);
+            OBJECT_TYPE_ITEM);
     setIntProperty(glob, _("OBJECT_TYPE_ACTIVE_ITEM"),
-                          OBJECT_TYPE_ACTIVE_ITEM);
+            OBJECT_TYPE_ACTIVE_ITEM);
     setIntProperty(glob, _("OBJECT_TYPE_ITEM_EXTERNAL_URL"),
-                          OBJECT_TYPE_ITEM_EXTERNAL_URL);
+            OBJECT_TYPE_ITEM_EXTERNAL_URL);
     setIntProperty(glob, _("OBJECT_TYPE_ITEM_INTERNAL_URL"),
-                          OBJECT_TYPE_ITEM_INTERNAL_URL);
+            OBJECT_TYPE_ITEM_INTERNAL_URL);
 #ifdef ONLINE_SERVICES 
     setIntProperty(glob, _("ONLINE_SERVICE_NONE"), OS_None);
 #ifdef YOUTUBE
     setIntProperty(glob, _("ONLINE_SERVICE_YOUTUBE"), OS_YouTube);
 
     setProperty(glob, _("YOUTUBE_AUXDATA_TAGS"), 
-                       _(YOUTUBE_AUXDATA_TAGS));
+            _(YOUTUBE_AUXDATA_TAGS));
     setProperty(glob, _("YOUTUBE_AUXDATA_AVG_RATING"), 
-                      _(YOUTUBE_AUXDATA_AVG_RATING));
+            _(YOUTUBE_AUXDATA_AVG_RATING));
     setProperty(glob, _("YOUTUBE_AUXDATA_AUTHOR"), 
-                      _(YOUTUBE_AUXDATA_AUTHOR));
+            _(YOUTUBE_AUXDATA_AUTHOR));
     setProperty(glob, _("YOUTUBE_AUXDATA_COMMENT_COUNT"), 
-                      _(YOUTUBE_AUXDATA_COMMENT_COUNT));
+            _(YOUTUBE_AUXDATA_COMMENT_COUNT));
     setProperty(glob, _("YOUTUBE_AUXDATA_VIEW_COUNT"), 
-                      _(YOUTUBE_AUXDATA_VIEW_COUNT));
+            _(YOUTUBE_AUXDATA_VIEW_COUNT));
     setProperty(glob, _("YOUTUBE_AUXDATA_RATING_COUNT"), 
-                      _(YOUTUBE_AUXDATA_RATING_COUNT));
+            _(YOUTUBE_AUXDATA_RATING_COUNT));
     setProperty(glob, _("YOUTUBE_AUXDATA_REQUEST"), 
-                      _(YOUTUBE_AUXDATA_REQUEST));
+            _(YOUTUBE_AUXDATA_REQUEST));
     setProperty(glob, _("YOUTUBE_AUXDATA_CATEGORY"), 
-                      _(YOUTUBE_AUXDATA_CATEGORY));
+            _(YOUTUBE_AUXDATA_CATEGORY));
 #endif
 #ifdef SOPCAST
     setIntProperty(glob, _("ONLINE_SERVICE_SOPCAST"), OS_SopCast);
@@ -309,27 +309,27 @@ Script::Script(Ref<Runtime> runtime) : Object()
     {
         setProperty(glob, _(MT_KEYS[i].sym), _(MT_KEYS[i].upnp));
     }
-    
+
     setProperty(glob, _("UPNP_CLASS_CONTAINER_MUSIC"), 
-                       _(UPNP_DEFAULT_CLASS_MUSIC_CONT));
+            _(UPNP_DEFAULT_CLASS_MUSIC_CONT));
     setProperty(glob, _("UPNP_CLASS_CONTAINER_MUSIC_ALBUM"),
-                       _(UPNP_DEFAULT_CLASS_MUSIC_ALBUM));
+            _(UPNP_DEFAULT_CLASS_MUSIC_ALBUM));
     setProperty(glob, _("UPNP_CLASS_CONTAINER_MUSIC_ARTIST"),
-                      _(UPNP_DEFAULT_CLASS_MUSIC_ARTIST));
+            _(UPNP_DEFAULT_CLASS_MUSIC_ARTIST));
     setProperty(glob, _("UPNP_CLASS_CONTAINER_MUSIC_GENRE"),
-                       _(UPNP_DEFAULT_CLASS_MUSIC_GENRE));
+            _(UPNP_DEFAULT_CLASS_MUSIC_GENRE));
     setProperty(glob, _("UPNP_CLASS_CONTAINER"),
-                      _(UPNP_DEFAULT_CLASS_CONTAINER));
+            _(UPNP_DEFAULT_CLASS_CONTAINER));
     setProperty(glob, _("UPNP_CLASS_ITEM"), _(UPNP_DEFAULT_CLASS_ITEM));
     setProperty(glob, _("UPNP_CLASS_ITEM_MUSIC_TRACK"),
-                       _(UPNP_DEFAULT_CLASS_MUSIC_TRACK));
+            _(UPNP_DEFAULT_CLASS_MUSIC_TRACK));
     setProperty(glob, _("UPNP_CLASS_PLAYLIST_CONTAINER"),
-                       _(UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER));
-    
+            _(UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER));
+
     defineFunctions(js_global_functions);
-    
+
     String common_scr_path = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT);
-    
+
     if (!string_ok(common_scr_path))
         log_js("Common script disabled in configuration\n");
     else
@@ -337,6 +337,8 @@ Script::Script(Ref<Runtime> runtime) : Object()
         try
         {
             common_script = _load(common_scr_path);
+            common_root = JS_NewScriptObject(cx, common_script);
+            JS_AddNamedRoot(cx, &common_root, "common-script");
             _execute(common_script);
         }
         catch (Exception e)
@@ -349,15 +351,23 @@ Script::Script(Ref<Runtime> runtime) : Object()
 
 Script::~Script()
 {
-    if (script)
-        JS_DestroyScript(cx, script);
-    
+    if (common_root)
+        JS_RemoveRoot(cx, &common_root);
+
+/*
+ * scripts are unrooted and will be cleaned up by GC
     if (common_script)
         JS_DestroyScript(cx, common_script);
-    
+
+    if (script)
+        JS_DestroyScript(cx, script);
+
+*/        
     if (cx)
+    {
         JS_DestroyContext(cx);
-    cx = NULL;
+        cx = NULL;
+    }
 }
 
 void Script::setGlobalObject(JSObject *glob)
@@ -380,7 +390,7 @@ void Script::initGlobalObject()
     static JSClass global_class =
     {
         "global",                                   /* name */
-        JSCLASS_HAS_PRIVATE,                    /* flags */
+        JSCLASS_HAS_PRIVATE,                        /* flags */
         JS_PropertyStub,                            /* add property */
         JS_PropertyStub,                            /* del property */
         JS_PropertyStub,                            /* get property */
@@ -438,7 +448,7 @@ JSScript *Script::_load(zmm::String scriptPath)
     }
 
     scr = JS_CompileScript(cx, glob, scriptText.c_str(), scriptText.length(),
-                              scriptPath.c_str(), 1);
+            scriptPath.c_str(), 1);
     if (! scr)
         throw _Exception(_("Scripting: failed to compile ") + scriptPath);
 
@@ -458,16 +468,17 @@ void Script::_execute(JSScript *scr)
 {
     jsval ret_val;
 
-    JSObject *script_obj = JS_NewScriptObject(cx, script);
-    JS_AddNamedRoot(cx, &script_obj, "mtscript");
+//    JSObject *script_obj = JS_NewScriptObject(cx, script);
+//    String temp = String::from(nam);
+//    JS_AddNamedRoot(cx, &script_obj, temp.c_str());
 
     if (!JS_ExecuteScript(cx, glob, scr, &ret_val))
     {
-        JS_RemoveRoot(cx, &script_obj);
+//        JS_RemoveRoot(cx, &script_obj);
         throw _Exception(_("Script: failed to execute script"));
     }
-        
-    JS_RemoveRoot(cx, &script_obj);
+
+    //    JS_RemoveRoot(cx, &script_obj);
 }
 
 void Script::execute()

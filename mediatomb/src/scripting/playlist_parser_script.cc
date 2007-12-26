@@ -86,6 +86,8 @@ PlaylistParserScript::PlaylistParserScript(Ref<Runtime> runtime) : Script(runtim
     
     String scriptPath = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT); 
     load(scriptPath);
+    root = JS_NewScriptObject(cx, script);
+    JS_AddNamedRoot(cx, &root, "PlaylistScript");
 }
 
 String PlaylistParserScript::readln()
@@ -174,4 +176,10 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<CM
    currentTask = nil;
 }
 
+
+PlaylistParserScript::~ PlaylistParserScript()
+{
+    if (root)
+        JS_RemoveRoot(cx, &root);
+}
 #endif // HAVE_JS

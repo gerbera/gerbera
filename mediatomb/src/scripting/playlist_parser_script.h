@@ -41,6 +41,7 @@ class PlaylistParserScript : public Script
 {
 public:
     PlaylistParserScript(zmm::Ref<Runtime> runtime);
+    ~PlaylistParserScript();
     zmm::String readln();
     void processPlaylistObject(zmm::Ref<CdsObject> obj, zmm::Ref<CMTask> task);
     virtual script_class_t whoami() { return S_PLAYLIST; }
@@ -50,6 +51,7 @@ private:
     int currentObjectID;
     char *currentLine;
     zmm::Ref<CMTask> currentTask;
+    JSObject *root;
 };
 
 #endif // __SCRIPTING_PLAYLIST_PARSER_SCRIPT_H__

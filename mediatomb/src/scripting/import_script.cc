@@ -45,6 +45,8 @@ ImportScript::ImportScript(Ref<Runtime> runtime) : Script(runtime)
 {
     String scriptPath = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT); 
     load(scriptPath);
+    root = JS_NewScriptObject(cx, script);
+    JS_AddNamedRoot(cx, &root, "ImportScript");
 }
 
 void ImportScript::processCdsObject(Ref<CdsObject> obj)
@@ -53,6 +55,12 @@ void ImportScript::processCdsObject(Ref<CdsObject> obj)
    setObjectProperty(glob, _("orig"), orig);
    cdsObject2jsObject(obj, orig);
    execute();
+}
+
+ImportScript::~ImportScript()
+{
+    if (root)
+        JS_RemoveRoot(cx, &root);
 }
 
 #endif // HAVE_JS
