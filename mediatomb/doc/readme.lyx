@@ -1,4 +1,4 @@
-#LyX 1.5.2 created this file. For more info see http://www.lyx.org/
+#LyX 1.5.1 created this file. For more info see http://www.lyx.org/
 \lyxformat 276
 \begin_document
 \begin_header
@@ -3854,11 +3854,52 @@ Default: off
 \end_layout
 
 \begin_layout Standard
-Possible values are off, normal, full.
+Possible values are 
+\begin_inset Quotes sld
+\end_inset
+
+off
+\begin_inset Quotes srd
+\end_inset
+
+, 
+\begin_inset Quotes sld
+\end_inset
+
+normal
+\begin_inset Quotes srd
+\end_inset
+
+ and 
+\begin_inset Quotes srd
+\end_inset
+
+full
+\begin_inset Quotes srd
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
-TODO: Leo - please describe :)
+This option sets the SQLite pragma 
+\begin_inset Quotes sld
+\end_inset
+
+synchronous
+\begin_inset Quotes srd
+\end_inset
+
+.
+ This setting will affect the performance of the database write operations.
+ For more information about this option see the SQLite documentation: 
+\begin_inset LatexCommand url
+name "http://www.sqlite.org/pragma.html#pragma_synchronous"
+target "http://www.sqlite.org/pragma.html#pragma_synchronous"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3892,11 +3933,50 @@ Default: restore
 \end_layout
 
 \begin_layout Standard
-Possible values are restore and fail.
+Possible values are 
+\begin_inset Quotes sld
+\end_inset
+
+restore
+\begin_inset Quotes srd
+\end_inset
+
+ and 
+\begin_inset Quotes sld
+\end_inset
+
+fail
+\begin_inset Quotes srd
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
-TODO: Leo - please describe :)
+This option tells MediaTomb what to do if an SQLite error occurs (no database
+ or a corrupt database).
+ If it is set to 
+\begin_inset Quotes sld
+\end_inset
+
+restore
+\begin_inset Quotes srd
+\end_inset
+
+ it will try to restore the database from a backup file (if one exists)
+ or try to recreate a new database from scratch.
+\end_layout
+
+\begin_layout Standard
+If the option is set to 
+\begin_inset Quotes sld
+\end_inset
+
+fail
+\begin_inset Quotes srd
+\end_inset
+
+, MediaTomb will abort on an SQLite error.
 \end_layout
 
 \begin_layout Standard
