@@ -180,7 +180,7 @@ void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
 
     artist = esc(artist);
 
-    chain = _("/Audio/Artists/") + artist + "/All songs";
+    chain = _("/Audio/Artists/") + artist + "/All Songs";
 
     id = ContentManager::getInstance()->addContainerChain(chain, _(UPNP_DEFAULT_CLASS_MUSIC_CONT));
     add(obj, id);

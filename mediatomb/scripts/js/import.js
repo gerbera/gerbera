@@ -108,11 +108,11 @@ function addAudio(obj)
     // comment the following line out if you uncomment the stuff above  :)
     var track = '';
 
-    var chain = new Array('Audio', 'All audio');
+    var chain = new Array('Audio', 'All Audio');
     obj.title = title;
     addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC);
     
-    chain = new Array('Audio', 'Artists', artist, 'All songs');
+    chain = new Array('Audio', 'Artists', artist, 'All Songs');
     addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC);
     
     chain = new Array('Audio', 'All - full name');
