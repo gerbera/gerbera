@@ -287,7 +287,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
 #ifdef EXTERNAL_TRANSCODING
         // we do not support seeking at all, so 00
         // and the media is converted, so set CI to 1
-        if (transcoded)
+        if ((transcoded) && (!config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_CL_HACK)))
             extend = extend + D_OP + "=00;" + 
                      D_CONVERSION_INDICATOR + "=" D_CONVERSION;
         else
