@@ -34,6 +34,7 @@
 #endif
 
 #include "io_handler_buffer_helper.h"
+#include "config_manager.h"
 #include "tools.h"
 
 using namespace zmm;
@@ -151,7 +152,10 @@ int IOHandlerBufferHelper::read(OUT char *buf, IN size_t length)
 
 void IOHandlerBufferHelper::seek(IN off_t offset, IN int whence)
 {
-    throw _Exception(_("seek currently unimplemented for IOHandlerBufferHelper"));
+#ifdef EXTEND_PROTOCOLINFO
+    if (!ConfigManager::getInstance()->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_CL_HACK))
+#endif
+        throw _Exception(_("seek currently unimplemented for IOHandlerBufferHelper"));
 }
 
 void IOHandlerBufferHelper::close()
