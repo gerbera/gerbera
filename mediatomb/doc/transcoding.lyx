@@ -176,12 +176,12 @@ For example, you might have your music collection stored in the OGG format,
  Of course you could sit down and convert everything before viewing, but
  that is usually a time consuming procedure, besides, you often you want
  to keep your original data untouched and end up storing both, the converted
- and the original content - wasting space on your harddisk.
+ and the original content - wasting space on your hard disk.
  That's where on the fly transcoding comes into play.
 \end_layout
 
 \begin_layout Standard
-Another usecase is online content - it is often presented in flv or asf
+Another use case is online content - it is often presented in flv or asf
  formats, you may get mms or rtp streams which your player can not handle.
  The transcoding feature makes it possible to access such content.
 \end_layout
@@ -211,7 +211,7 @@ So how does this work? First, let's look at the normal situation where you
  a DivX movie.
  You add it to the server, browse the content on your device, hit play and
  start streaming the content.
- Content that the player can not handle is usually greyed out in the on
+ Content that the player can not handle is usually grayed out in the on
  screen display or marked as unsupported.
 \end_layout
 
@@ -291,7 +291,7 @@ The chosen approach is extremely flexible and gives you maximum freedom
 \end_layout
 
 \begin_layout Description
-Note: it is possible and may be more convinient to call a wrapper script
+Note: it is possible and may be more convenient to call a wrapper script
  and not the transcoding application directly, however, in this case make
  sure that your shell script uses exec when calling the transcoder.
  Otherwise we will not be able to kill it.
@@ -544,9 +544,364 @@ Note: the output format produced by the transcoder must match the target
  mime type setting.
 \end_layout
 
+\begin_layout Subsubsection
+Buffer Settings
+\end_layout
+
 \begin_layout Standard
-Allthough you can probably try the defaults it makes sense to adapt the
- buffer settings which depend on the performance of your system.
+There are no defaults for the buffer settings, they need to be tuned to
+ the performance of your system and also to the type of transcoded media
+ if you want to achieve the best result.
+\end_layout
+
+\begin_layout Standard
+The idea behind buffering is the following: let's assume that you are transcodin
+g a high quality video, the source format has a variable bitrate.
+ Your CPU can handle most scenes in real time, but occasionally some scenes
+ have a higher bitrate which require more processing power.
+ Without buffering you would not have a fluent playback - you would see
+ stuttering during those high bitrate scenes.
+ That's where buffering comes into play.
+ Before sending the data to your player for the very first time, we will
+ delay the start of the playback until the buffer is filled to a certain
+ amount.
+ This should give you enough slack to overcome those higher bitrate scenes
+ and watch the movie without any stuttering or dropouts.
+ Also, your CPU will not transcode the stream as fast as it is being played
+ (i.e.
+ real time), but work as fast as it can, filling up the buffer during lower
+ bitrate scenes and thus giving you the chance to overcome even long scenes
+ with high bitrate.
+\end_layout
+
+\begin_layout Standard
+The buffer accepts three parameters and is defined like this:
+\end_layout
+
+\begin_layout Code
+<buffer size="5242880" chunk-size="102400" fill-size="1048576"/>
+\end_layout
+
+\begin_layout Standard
+Size is the total size of the buffer, fill-size is the amount that has to
+ be filled before sending out data from the buffer for the first time.
+ Chunk-size is somewhat tricky, as you know we read the transcoded stream
+ from a FIFO, we then put it into the buffer from where it gets served to
+ the player.
+ We read the data from the transcoder in chunks, once we fill up the chunk
+ we put it into the buffer, so this setting is defining the size of those
+ chunks.
+ Lower values will make the buffer feel more responsive (i.e.
+ it will be filled at a more fluent rate), however too low values will decrease
+ performance.
+ Also, do not set a too high value here since it may prevent smooth playback
+ - data from the buffer is being played out, if you wait for a too big chunk
+ at the same time you may empty the buffer.
+\end_layout
+
+\begin_layout Subsubsection
+Accepting Or Proxying Online Content
+\end_layout
+
+\begin_layout Standard
+With MediaTomb it is possible to add items that are not pointing to local
+ content, but to online resources.
+ It can be an mp3 stream, a YouTube video or some photos stored on the web.
+ In case that the online media is stored in a format that is not supported
+ by your player, you can use transcoding to convert it.
+ Some transcoding applications, like VLC, handle online content pretty well,
+ so you can give a URL directly to the transcoder and it will handle the
+ data download itself.
+ You can even use that to stream mms or rtsp streams, even if they are not
+ directly supported by your player device.
+ Some transcoders however, can not access online content directly but can
+ only work with local data.
+ For this situation we offer a special option:
+\end_layout
+
+\begin_layout Code
+<accept-url>no</accept-url>
+\end_layout
+
+\begin_layout Standard
+If this option is set to 
+\begin_inset Quotes sld
+\end_inset
+
+no
+\begin_inset Quotes srd
+\end_inset
+
+ MediaTomb will handle the download of the content and will feed the input
+ to the transcoder via a FIFO.
+ Of course the transcoding application must be capable of handling input
+ from a FIFO.
+ This only works for the HTTP protocol, we do not handle RTSP or MMS streams,
+ use VLC is you want to handle those.
+ When this option is set to 
+\begin_inset Quotes sld
+\end_inset
+
+yes
+\begin_inset Quotes srd
+\end_inset
+
+ we will give the URL to the transcoder.
+\end_layout
+
+\begin_layout Subsubsection
+Resource Index
+\end_layout
+
+\begin_layout Standard
+What is a resource? In this case it's the <res> tag in the XML that is being
+ sent to the player when it browses the server.
+ Each item can have one or more resources, each resource describes the type
+ of the content by specifying it's mime type and also tells the player how
+ and where to get the content.
+ So, resources within the item point to same content, but allow to present
+ it in different formats.
+ In case of transcoding we will offer the original data as well as the transcode
+d data by using the resource tags.
+ A well implemented player will look at all resources that are available
+ for the given item and choose the one that it supports.
+ Unfortunately most players only look at the first resource and ignore the
+ rest, this feature tells us to place the transcoded resource at the first
+ position so that those renderers will see and take it.
+\end_layout
+
+\begin_layout Code
+<first-resource>yes</first-resource>
+\end_layout
+
+\begin_layout Subsubsection
+Hiding Original Resource
+\end_layout
+
+\begin_layout Standard
+Sometimes it may be required that you only present the transcoded resource
+ (read the previous section for explanation about resources) to the player.
+ This option allows to do so:
+\end_layout
+
+\begin_layout Code
+<hide-original-resource>yes</hide-original-resource>
+\end_layout
+
+\begin_layout Section
+Testing And Troubleshooting
+\end_layout
+
+\begin_layout Standard
+The external transcoding feature is very flexible, however there is a price
+ for flexibility: a lot of things can go wrong.
+ This section will try to cover the most common problems and present some
+ methods on how things can be tested outside of MediaTomb.
+\end_layout
+
+\begin_layout Subsection
+Testing The Transcoder
+\end_layout
+
+\begin_layout Standard
+It's a good idea to test your transcoding application before putting together
+ a profile.
+ As described in the previous sections we get the transcoded stream via
+ a FIFO, so it's important that the transcoder is capable of writing the
+ output to a FIFO.
+ This can be easily tested in the Linux command prompt.
+\end_layout
+
+\begin_layout Standard
+Open a terminal and issue the following command:
+\end_layout
+
+\begin_layout Code
+mkfifo /tmp/tr-test
+\end_layout
+
+\begin_layout Standard
+This will create a FIFO called tr-test in the /tmp directory.
+ Open a second terminal, we will use one terminal to run the transcoder,
+ and another one to examine the output.
+\end_layout
+
+\begin_layout Standard
+For this test we will assume that we want to transcode an OGG file to WAV,
+ the easiest way to do so is to use the ogg123 program which is part of
+ the vorbis-tools package.
+ Running ogg123 with the -d wav -f outfile parameter is exactly what we
+ want, just remember that our outfile is the FIFO.
+ So, run the following command, replacing some audio file with an OGG file
+ that is available on your system, in one of the terminals:
+\end_layout
+
+\begin_layout Code
+ogg123 -d wav -f /tmp/tr-test /some/audio/file.ogg
+\end_layout
+
+\begin_layout Standard
+The program will start and will appear to be hanging - it's blocked because
+ noone is reading from the FIFO.
+ While ogg123 is hanging, go to the second terminal and try playing directly
+ from the FIFO (in this example we will use VLC to do that):
+\end_layout
+
+\begin_layout Code
+vlc /tmp/tr-test
+\end_layout
+
+\begin_layout Standard
+If all goes well you should see that ogg123 is coming to life and you should
+ hear the output from VLC - it should play the transcoded WAV stream.
+\end_layout
+
+\begin_layout Subsection
+Troubleshooting
+\end_layout
+
+\begin_layout Standard
+This section will try to cover the most common problems related to the external
+ transcoding feature.
+\end_layout
+
+\begin_layout Subsubsection
+Media Is Unplayable
+\end_layout
+
+\begin_layout Standard
+What if the resulting stream is unplayable? 
+\end_layout
+
+\begin_layout Standard
+This can be the case with some media formats and contaeinrs.
+ A good example is the AVI container - it contains the index at the very
+ end of the file, meaning, that a player needs to seek to the end to get
+ the index before rendering the video.
+ Since seeking is not possible in transcoded streams you will not be able
+ to transcode something to AVI and watch it from the FIFO.
+\end_layout
+
+\begin_layout Subsubsection
+Transcoding Does Not Start
+\end_layout
+
+\begin_layout Standard
+As explained in the previous sections, transcoding only starts when your
+ player issues an HTTP GET request to the server.
+ Further, the request must be made to the transcoding URL.
+\end_layout
+
+\begin_layout Standard
+Most common cases are:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+wrong mime type mapping: are you sure that you specified the source mime
+ type correctly? Recheck the settings in the <mimetype-profile> section.
+ If you are not sure about the source mime type of your media you can always
+ check that via the web UI - just pick one of the files in question and
+ click on the Edit icon.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+wrong output mime type: make sure that the mime type specified in the profile
+ matches the media format that is produced by your transcoder.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+no permissions to execute the transcoding application: check that the user
+ under which MediaTomb is running has sufficient permissions to run the
+ transcoding script or application.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+transcoding script is not executable or is not in $PATH: if you use a wrapper
+ script around your transcoder, make sure that it is executable and can
+ be found in $PATH (unless you specified an absolute name)
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Problem Transcoding Online Streams
+\end_layout
+
+\begin_layout Standard
+Some transcoding applications do not accept online content directly or have
+ problems transcoding online media.
+ If this is the case, set the <accept-url> option appropriately (currently
+ MediaTomb only supports proxying of HTTP streams).
+ This will put the transcoder between two FIFOs, the online content will
+ be downloaded by MediaTomb and fed to the transcoder via a FIFO.
 \end_layout
 
 \end_body
