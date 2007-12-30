@@ -198,6 +198,7 @@
 #endif
 #define DEFAULT_SYSTEM_HOME             "mediatomb"
 #define DEFAULT_ETC                     "etc"
+//#define DEFAULT_TMPDIR                  "/tmp"
 #define DEFAULT_CONFIG_NAME             "config.xml"
 #define DEFAULT_UI_EN_VALUE             YES
 #define DEFAULT_POLL_WHEN_IDLE_VALUE    NO
@@ -226,6 +227,7 @@
 #define DEFAULT_ITEMS_PER_PAGE_4        100
 #define DEFAULT_LAYOUT_TYPE             "builtin" 
 #define DEFAULT_EXTEND_PROTOCOLINFO     NO
+#define DEFAULT_EXTEND_PROTOCOLINFO_CL_HACK     NO
 #define DEFAULT_HIDE_PC_DIRECTORY       NO
 #define DEFAULT_TIMEOUT_RETRIES         0
 #ifdef YOUTUBE

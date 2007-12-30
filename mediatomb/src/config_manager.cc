@@ -766,6 +766,16 @@ void ConfigManager::validate(String serverhome)
 
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
     SET_BOOL_OPTION(CFG_SERVER_EXTEND_PROTOCOLINFO);
+
+    temp = getOption(_("/server/protocolInfo/attribute::ps3-hack"),
+                     _(DEFAULT_EXTEND_PROTOCOLINFO_CL_HACK));
+    if (!validateYesNo(temp))
+        throw _Exception(_("Error in config file: ps3-hack attribute of the "
+                          "protocolInfo tag must be either \"yes\" or \"no\""));
+
+    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    SET_BOOL_OPTION(CFG_SERVER_EXTEND_PROTOCOLINFO_CL_HACK);
+
 #endif
 
     temp = getOption(_("/server/pc-directory/attribute::upnp-hide"),

@@ -833,6 +833,31 @@ AC_TYPE_SSIZE_T
 AC_TYPE_UINT32_T
 AC_STRUCT_TM
 
+dnl This needs improvement!
+AC_CHECK_DECL(LONG_MAX,
+        [
+            AC_DEFINE([HAVE_LONG_MAX], [1], [LONG_MAX definition available])
+            have_long_max=1
+        ], , [#include <limits.h>])
+
+
+AC_CHECK_DECL(LLONG_MAX,
+        [
+            AC_DEFINE([MAXLLONG], [LLONG_MAX], [LLONG_MAX definition])
+        ],
+        [
+            AC_CHECK_DECL(__LONG_LONG_MAX__, 
+                [
+                    AC_DEFINE([MAXLLONG], [__LONG_LONG_MAX__], 
+                    [LLONG_MAX definition])],
+                [
+                    if test "$have_long_max" -eq 1; then
+                        AC_DEFINE([MAXLLONG], [LONG_MAX], [LLONG_MAX not available])
+                    fi
+                ], [#include <limits.h>])
+        ]
+        , [#include <limits.h>])
+
 AC_ARG_ENABLE(rpl-malloc, 
         AC_HELP_STRING([--disable-rpl-malloc], [disable redefinition of malloc to rpl_malloc and realloc to rpl_realloc. Use this if you are sure that you are compiling for the GNU C library (default: enabled)]),
         [

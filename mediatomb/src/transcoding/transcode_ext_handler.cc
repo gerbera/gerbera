@@ -95,8 +95,8 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     if (profile->fakeContentLength())
     {
 
-#ifdef SIZEOF_OFF_T > 4
-        info->file_length = LLONG_MAX; // this crashes wget :)
+#if SIZEOF_OFF_T > 4
+        info->file_length = MAXLLONG; // this crashes wget :)
 #else
         info->file_length = LONG_MAX;
 #endif
