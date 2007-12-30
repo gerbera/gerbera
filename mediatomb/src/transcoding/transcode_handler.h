@@ -45,6 +45,8 @@ public:
                                      zmm::String location,
                                      int objectType, 
                                      struct File_Info *info) = 0;
+protected:
+    enum { UNKNOWN_CONTENT_LENGTH = -1 };
 };
 
 

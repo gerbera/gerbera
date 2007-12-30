@@ -137,11 +137,13 @@ void ProcessIOHandler::unregisterAll()
 
 ProcessIOHandler::ProcessIOHandler(String filename, 
                         zmm::Ref<Executor> main_proc,
-                        zmm::Ref<zmm::Array<ProcListItem> > proclist) : IOHandler()
+                        zmm::Ref<zmm::Array<ProcListItem> > proclist,
+                        bool ignoreSeek) : IOHandler()
 {
     this->filename = filename;
     this->proclist = proclist;
     this->main_proc = main_proc;
+    this->ignore_seek = ignoreSeek;
 
     if ((main_proc != nil) && ((!main_proc->isAlive() || abort())))
     {
@@ -423,8 +425,9 @@ int ProcessIOHandler::write(IN char *buf, IN size_t length)
 
 void ProcessIOHandler::seek(IN off_t offset, IN int whence)
 {   
-    // we know we can not seek in a fifo
-    throw _Exception(_("fseek failed"));
+    // we know we can not seek in a fifo, but the PS3 asks for a hack...
+    if (!ignore_seek)
+        throw _Exception(_("fseek failed"));
 }
 
 void ProcessIOHandler::close()

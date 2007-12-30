@@ -44,6 +44,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <signal.h>
+#include <limits.h>
 #include "common.h"
 #include "storage.h"
 #include "cds_objects.h"
@@ -91,7 +92,18 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     String mimeType = profile->getTargetMimeType();
 
     info->content_type = ixmlCloneDOMString(mimeType.c_str());
-    info->file_length = -1;
+    if (profile->fakeContentLength())
+    {
+
+#ifdef SIZEOF_OFF_T > 4
+        info->file_length = LLONG_MAX; // this crashes wget :)
+#else
+        info->file_length = LONG_MAX;
+#endif
+
+    }
+    else
+        info->file_length = UNKNOWN_CONTENT_LENGTH;
 
 
     String fifo_name = tempName(fifo_template);
@@ -166,7 +178,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
         main_proc->removeFile(location);
     }
     
-    Ref<IOHandler> io_handler(new BufferedIOHandler(Ref<IOHandler> (new ProcessIOHandler(fifo_name, RefCast(main_proc, Executor), proc_list)), profile->getBufferSize(), profile->getBufferChunkSize(), profile->getBufferInitialFillSize()));
+    Ref<IOHandler> io_handler(new BufferedIOHandler(Ref<IOHandler> (new ProcessIOHandler(fifo_name, RefCast(main_proc, Executor), proc_list, profile->fakeContentLength())), profile->getBufferSize(), profile->getBufferChunkSize(), profile->getBufferInitialFillSize()));
 
     io_handler->open(UPNP_READ);
     return io_handler;

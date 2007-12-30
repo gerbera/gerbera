@@ -54,26 +54,14 @@ protected:
 /// \brief Allows the web server to read from a fifo.
 class ProcessIOHandler : public IOHandler
 {
-protected:
-    /// \brief List of associated processes.
-    zmm::Ref<zmm::Array<ProcListItem> > proclist;
-
-    /// \brief Main process used for reading
-    zmm::Ref<Executor> main_proc;
-
-    /// \brief name of the file or fifo to read the data from
-    zmm::String filename;
-
-    /// \brief file descriptor
-    int fd;
-
 public:
     /// \brief Sets the filename to work with.
     /// \param filename to read the data from
     /// \param proclist associated processes that will be terminated once
     /// they are no longer needed
     ProcessIOHandler(zmm::String filename, zmm::Ref<Executor> main_proc,
-                     zmm::Ref<zmm::Array<ProcListItem> > proclist = nil);
+                     zmm::Ref<zmm::Array<ProcListItem> > proclist = nil, 
+                     bool ignoreSeek = false);
     
     /// \brief Opens file for reading (writing is not supported)
     virtual void open(IN enum UpnpOpenFileMode mode);
@@ -105,6 +93,22 @@ public:
     ~ProcessIOHandler();
 
 protected:
+    /// \brief List of associated processes.
+    zmm::Ref<zmm::Array<ProcListItem> > proclist;
+
+    /// \brief Main process used for reading
+    zmm::Ref<Executor> main_proc;
+
+    /// \brief name of the file or fifo to read the data from
+    zmm::String filename;
+
+    /// \brief file descriptor
+    int fd;
+
+    /// \brief if this flag is set seek on a fifo will not return an error
+    bool ignore_seek;
+
+
     bool abort();
     void killall();
     void registerAll();

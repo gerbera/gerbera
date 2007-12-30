@@ -51,6 +51,7 @@ TranscodingProfile::TranscodingProfile()
     theora = false;
     accept_url = true;
     hide_orig_res = false;
+    fake_length = false;
     attributes = Ref<Dictionary>(new Dictionary());
 }
 
@@ -62,6 +63,7 @@ TranscodingProfile::TranscodingProfile(transcoding_type_t tr_type, String name)
     first_resource = false;
     accept_url = true;
     hide_orig_res = false;
+    fake_length = false;
     buffer_size = 0;
     chunk_size = 0;
     initial_fill_size = 0;

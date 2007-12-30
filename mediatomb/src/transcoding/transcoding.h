@@ -132,6 +132,9 @@ public:
     void setAcceptURL(bool accept) { accept_url = accept; }
     bool acceptURL() { return accept_url; }
 
+    void setFakeContentLength(bool fake) { fake_length = fake; }
+    bool fakeContentLength() { return fake_length; }
+
     /// \brief Specifies if the availability of this transcoding profile
     /// should enforce hiding of all original resources in the browse XML
     void setHideOriginalResource(bool hide) { hide_orig_res = hide; }
@@ -146,6 +149,7 @@ protected:
     bool theora;
     bool accept_url;
     bool hide_orig_res;
+    bool fake_length;
     size_t buffer_size;
     size_t chunk_size;
     size_t initial_fill_size;

@@ -361,7 +361,15 @@ void ConfigManager::validate(String serverhome)
     prepare_path(_("/server/webroot"), true);
     NEW_OPTION(getOption(_("/server/webroot")));
     SET_OPTION(CFG_SERVER_WEBROOT);
-
+/*
+    temp = getOption(_("/server/tmpdir"), _(DEFAULT_TMPDIR));
+    if (!check_path(temp, true))
+    {
+        throw _Exception(_("Temporary directory ") + temp + " does not exist!");
+    }
+    NEW_OPTION(temp);
+    SET_OPTION(CFG_SERVER_TMPDIR);
+*/
     
     if (string_ok(getOption(_("/server/servedir"), _(""))))
         prepare_path(_("/server/servedir"), true);
@@ -1564,6 +1572,18 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                 prof->setHideOriginalResource(true);
             else
                 prof->setHideOriginalResource(false);
+        }
+
+        if (child->getChild(_("fake-content-length")) != nil)
+        {
+            param = child->getChildText(_("fake-content-length"));
+            if (!validateYesNo(param))
+                throw _Exception(_("Error in config file: incorrect parameter "
+                                   "for <fake-content-length> tag"));
+            if (param == "yes")
+                prof->setFakeContentLength(true);
+            else
+                prof->setFakeContentLength(false);
         }
 
         if (child->getChild(_("theora")) != nil)
