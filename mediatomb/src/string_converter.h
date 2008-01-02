@@ -66,7 +66,7 @@ public:
     static zmm::Ref<StringConverter> p2i();
 
 #endif
-#if defined(HAVE_JS) || defined(HAVE_TAGLIB) || defined(YOUTUBE)
+#if defined(HAVE_JS) || defined(HAVE_TAGLIB) || defined(YOUTUBE) || defined(HAVE_EXTRACTOR)
     /// \brief safeguard - internal to internal - needed to catch some
     /// scenarious where the user may have forgotten to add proper conversion
     /// in the script.

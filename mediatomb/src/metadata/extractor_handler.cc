@@ -325,7 +325,7 @@ void ExtractorHandler::fillMetadata(Ref<CdsItem> item)
     if (load_libraries_failed)
         return;
     Ref<Array<StringBase> > aux;
-    Ref<StringConverter> sc = StringConverter::m2i();
+    Ref<StringConverter> sc = StringConverter::i2i();
         
     if (! extractors)
     {
