@@ -12,9 +12,9 @@ MT_OPTIONS=""
 ## MediaTomb will be started on port 50500
 MT_PORT="50500"
 
-## MediaTomb will run as nobody
-MT_USER="nobody"
-MT_GROUP="nobody"
+## MediaTomb will run as mediatomb
+MT_USER="mediatomb"
+MT_GROUP="mediatomb"
 
 ## Location of the PID file
 MT_PIDFILE="/var/run/mediatomb.pid"
