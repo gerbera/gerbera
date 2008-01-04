@@ -1,9 +1,9 @@
 %define name mediatomb 
 %define version @VERSION@
-%define release 1%{?dist}
+%define release 8%{?dist}
 
 Version: %{version}
-Summary: UPnP AV MediaServer for Linux
+Summary: MediaTomb - UPnP AV Mediaserver for Linux
 Name: %{name}
 Release: %{release}
 License: GPLv2
@@ -11,8 +11,12 @@ Group: Applications/Multimedia
 Source: http://downloads.sourceforge.net/mediatomb/%{name}-%{version}.tar.gz
 URL: http://mediatomb.cc
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n) 
-BuildRequires: sqlite-devel, mysql-devel, libexif-devel, id3lib-devel, file-devel, js-devel, zlib-devel
-Requires: mysql, id3lib, file, sqlite, js
+BuildRequires: sqlite-devel, mysql-devel, libexif-devel, taglib-devel, file-devel, js-devel, zlib-devel
+Requires: mysql
+Requires(pre): shadow-utils
+Requires(post): /sbin/chkconfig
+Requires(preun): /sbin/chkconfig
+Requires(preun): /sbin/service
 
 %description
 MediaTomb is an open source (GPL) UPnP MediaServer with a nice web user 
@@ -25,52 +29,90 @@ be found on http://www.upnp.org/.
 %setup -q
 
 %build
-%configure
-make %{?_smp_mflags}
+%configure --enable-taglib
+%{__make} %{?_smp_mflags}
 
 
 %install
-rm -rf $RPM_BUILD_ROOT
+%{__rm} -rf $RPM_BUILD_ROOT
 
-install -D -m0755 scripts/mediatomb-service-fedora %{buildroot}%{_initrddir}/mediatomb
-install -D -m0644 config/mediatomb-conf-fedora %{buildroot}%{_sysconfdir}/mediatomb.conf
-make install DESTDIR=$RPM_BUILD_ROOT
+%{__install} -p -D -m0755 scripts/mediatomb-service-fedora $RPM_BUILD_ROOT%{_initrddir}/mediatomb
+%{__install} -p -D -m0644 config/mediatomb-conf-fedora $RPM_BUILD_ROOT%{_sysconfdir}/mediatomb.conf
+make install DESTDIR=$RPM_BUILD_ROOT INSTALL="install -p"
 
-%{__mkdir_p}  %{buildroot}%{_sysconfdir}/logrotate.d
-%{__cat} > %{buildroot}%{_sysconfdir}/logrotate.d/%{name} << 'EOF'
+# make all files under %%_sysconfdir/mediatomb are owned by
+# this package
+%{__mkdir_p} $RPM_BUILD_ROOT%{_sysconfdir}/mediatomb
+touch $RPM_BUILD_ROOT%{_sysconfdir}/mediatomb/{config.xml,mediatomb.db,mediatomb.html}
+%{__mkdir_p}  $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d
+
+%{__cat} > $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d/%{name} << 'EOF'
 /var/log/mediatomb {
-        create 644 root root
-        monthly
+create 644 root root
+	monthly
         compress
         missingok
 }
 EOF
 
 %clean
-rm -rf $RPM_BUILD_ROOT
+%{__rm} -rf $RPM_BUILD_ROOT
+
+%pre
+getent group mediatomb >/dev/null || groupadd -r mediatomb
+getent passwd mediatomb >/dev/null || \
+useradd -r -g mediatomb -d %{_sysconfdir}/mediatomb -s /sbin/nologin \
+    -c "To run Mediatomb" mediatomb
+exit 0
 
 %post
-chkconfig --add mediatomb
+/sbin/chkconfig --add mediatomb
 
 %preun
-service mediatomb stop > /dev/null 2>&1
-chkconfig --del mediatomb
+if [ $1 = 0 ]; then
+        /sbin/service mediatomb stop >/dev/null 2>&1
+        /sbin/chkconfig --del mediatomb
+fi
 
 %files
 %defattr(-,root,root,-)
-%doc README README.UTF_8 AUTHORS ChangeLog COPYING INSTALL doc/doxygen.conf
+%doc README README.UTF_8 AUTHORS ChangeLog COPYING doc/doxygen.conf
 %doc doc/scripting.txt doc/scripting_utf8.txt
-%config(noreplace) %{_sysconfdir}/mediatomb.conf
-%{_sysconfdir}/logrotate.d/%{name}
+%attr(-,mediatomb,mediatomb)%config(noreplace) %{_sysconfdir}/mediatomb.conf
+%attr(-,mediatomb,mediatomb)%dir %{_sysconfdir}/%{name}/
+%attr(-,mediatomb,mediatomb)%ghost %{_sysconfdir}/%{name}/*
+%config(noreplace) %{_sysconfdir}/logrotate.d/%{name}
 %{_bindir}/mediatomb
-%{_datadir}/%{name}/
+%{_datadir}/%{name}/*
 %{_mandir}/man1/*
 %{_initrddir}/mediatomb
 
 %changelog
-* Sun Dec 23 2007 Marc Wiriadisastra <marc@mwiriadi.id.au> 0.10.0-1
-- Altered spec file for inclusion into Fedora.
-  Added logrotate configuration.
+* Fri Jan 4 2008 Sergey Bostandzhyan <jin@mediatomb.cc> 0.10.0-8
+- Removed libextractor and enabled taglib instead of id3lib
+
+* Thu Jan 3 2008 Marc Wiriadisastra <marc@mwiriadi.id.au> 0.10.0-7
+- Added mysql-devel to build requires
+
+* Thu Jan 3 2008 Marc Wiriadisastra <marc@mwiriadi.id.au> 0.10.0-6
+- Cleaned up spec file
+
+* Wed Jan 2 2008 Marc Wiriadisastra <marc@mwiriadi.id.au> 0.10.0-5
+- Added mysql-libs for build requires instead of mysql-devel
+
+* Wed Jan 2 2008 Marc Wiriadisastra <marc@mwiriadi.id.au> 0.10.0-4
+- Actually added the patches to the file.
+- Added the ownership changes (Mamoru Tasaka)
+- Libextractor enabled
+
+* Wed Jan 2 2008 Marc Wiriadisastra <marc@mwiriadi.id.au> 0.10.0-3
+- Added patchs to patch ownership of /etc/mediatomb.conf and /etc/mediatomb
+- Adjusted pre and post scripts and add user and group mediatomb
+- Changed attributes so files are owned by mediatomb
+- Cleaned Requires and added two files for build-requires
+
+* Sun Dec 23 2007 Marc Wiriadisastra <marc@mwiriadi.id.au> 0.10.0-2
+- Altered spec file for inclusion into Fedora
 * Wed Jul 11 2007 Sergey Bostandzhyan <jin@mediatomb.cc> 0.10.0-1
 - Version is now filled in by the configure script.
 * Sun May 27 2007 Sergey Bostandzhyan <jin@mediatomb.cc> 0.9.1-1
