@@ -53,7 +53,7 @@ using namespace zmm;
 static JSFunctionSpec js_global_functions[] = {
     {"print",           js_print,          0, 0, 0},
     {"addCdsObject",    js_addCdsObject,   3, 0, 0},
-    {"copyObject",      js_copyObject,     1, 0, 0},
+    {"copyObject",      js_copyObject,     2, 0, 0},
     {"f2i",             js_f2i,            1, 0, 0},
     {"m2i",             js_m2i,            1, 0, 0},
     {"p2i",             js_m2i,            1, 0, 0},
@@ -74,6 +74,7 @@ String Script::getProperty(JSObject *obj, String name)
         return nil;
     return String(JS_GetStringBytes(str));
 }
+
 int Script::getBoolProperty(JSObject *obj, String name)
 {
     jsval val;
@@ -87,6 +88,7 @@ int Script::getBoolProperty(JSObject *obj, String name)
         return -1;
     return (boolVal ? 1 : 0);
 }
+
 int Script::getIntProperty(JSObject *obj, String name, int def)
 {
     jsval val;
@@ -375,10 +377,12 @@ void Script::setGlobalObject(JSObject *glob)
     this->glob = glob;
     JS_SetGlobalObject(cx, glob);
 }
+
 JSObject *Script::getGlobalObject()
 {
     return glob;
 }
+
 JSContext *Script::getContext()
 {
     return cx;
@@ -561,10 +565,11 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
     b = getBoolProperty(js, _("restricted"));
     if (b >= 0)
         obj->setRestricted(b);
-    
+   
     JSObject *js_meta = getObjectProperty(js, _("meta"));
     if (js_meta)
     {
+        JS_AddNamedRoot(cx, &js_meta, "meta");
         /// \todo: only metadata enumerated in MT_KEYS is taken
         for (int i = 0; i < M_MAX; i++)
         {
@@ -593,6 +598,7 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
                 }
             }
         }
+        JS_RemoveRoot(cx, &js_meta);
     }
 
     // CdsItem
@@ -736,7 +742,6 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
     }
 
     return obj;
-
 }
 
 void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
@@ -761,12 +766,15 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
     val = obj->getTitle();
     if (val != nil)
         setProperty(js, _("title"), val);
+
     val = obj->getClass();
     if (val != nil)
         setProperty(js, _("upnpclass"), val);
+
     val = obj->getLocation();
     if (val != nil)
         setProperty(js, _("location"), val);
+
     // TODO: boolean type
     i = obj->isRestricted();
     setIntProperty(js, _("restricted"), i);

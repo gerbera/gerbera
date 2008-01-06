@@ -54,10 +54,12 @@ js_print(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
     uintN i;
     JSString *str;
 
-    for (i = 0; i < argc; i++) {
+    for (i = 0; i < argc; i++) 
+    {
         str = JS_ValueToString(cx, argv[i]);
         if (!str)
             return JS_TRUE;
+        argv[i] = STRING_TO_JSVAL(str);
         log_js("%s\n", JS_GetStringBytes(str));
     }
     return JS_TRUE;
@@ -77,11 +79,16 @@ js_copyObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval
         arg = argv[0];
         if (!JSVAL_IS_OBJECT(arg))
             return JS_TRUE;
+
         if (!JS_ValueToObject(cx, arg, &js_cds_obj))
             return JS_TRUE;
 
+        argv[0] = OBJECT_TO_JSVAL(js_cds_obj);
+
         Ref<CdsObject> cds_obj = self->jsObject2cdsObject(js_cds_obj, nil);
         js_cds_clone_obj = JS_NewObject(cx, NULL, NULL, NULL);
+        argv[1] = OBJECT_TO_JSVAL(js_cds_clone_obj);
+
         self->cdsObject2jsObject(cds_obj, js_cds_clone_obj);
 
         *rval = OBJECT_TO_JSVAL(js_cds_clone_obj);
@@ -142,6 +149,9 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         if (!JS_ValueToObject(cx, arg, &js_cds_obj))
             return JS_TRUE;
 
+        // root it
+        argv[0] = OBJECT_TO_JSVAL(js_cds_obj);
+
         str = JS_ValueToString(cx, argv[1]);
         if (!str)
             path = _("/");
@@ -166,6 +176,9 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
             log_debug("Could not retrieve orig/playlist object\n");
             return JS_TRUE;
         }
+
+        // root it
+        argv[1] = OBJECT_TO_JSVAL(js_orig_obj);
 
         orig_object = self->jsObject2cdsObject(js_orig_obj, nil);
         if (orig_object == nil)
@@ -321,7 +334,6 @@ static JSBool convert_charset_generic(JSContext *cx, JSObject *obj, uintN argc, 
         log_error("%s\n", e.getMessage().c_str());
         e.printStackTrace();
     }
-
     return JS_TRUE;
 }
 
