@@ -50,6 +50,7 @@
 
 using namespace zmm;
 
+/*
 static JSFunctionSpec js_global_functions[] = {
     {"print",           js_print,          0, 0, 0},
     {"addCdsObject",    js_addCdsObject,   3, 0, 0},
@@ -60,6 +61,7 @@ static JSFunctionSpec js_global_functions[] = {
     {"j2i",             js_m2i,            1, 0, 0},
     {0,0,0,0,0}
 };
+*/
 
 String Script::getProperty(JSObject *obj, String name)
 {
@@ -328,7 +330,26 @@ Script::Script(Ref<Runtime> runtime) : Object()
     setProperty(glob, _("UPNP_CLASS_PLAYLIST_CONTAINER"),
             _(UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER));
 
-    defineFunctions(js_global_functions);
+//    defineFunctions(js_global_functions);
+/* JS_DefineFunctions does not work with the js packge shipped by Ubuntu
+static JSFunctionSpec js_global_functions[] = {
+    {"print",           js_print,          0, 0, 0},
+    {"addCdsObject",    js_addCdsObject,   3, 0, 0},
+    {"copyObject",      js_copyObject,     2, 0, 0},
+    {"f2i",             js_f2i,            1, 0, 0},
+    {"m2i",             js_m2i,            1, 0, 0},
+    {"p2i",             js_m2i,            1, 0, 0},
+    {"j2i",             js_m2i,            1, 0, 0},
+    {0,0,0,0,0}
+};
+*/
+    defineFunction(_("print"),          js_print,           0);
+    defineFunction(_("addCdsObject"),   js_addCdsObject,    3);
+    defineFunction(_("copyObject"),     js_copyObject,      2);
+    defineFunction(_("f2i"),            js_f2i,             1);
+    defineFunction(_("m2i"),            js_m2i,             1);
+    defineFunction(_("p2i"),            js_p2i,             1);
+    defineFunction(_("j2i"),            js_j2i,             1);
 
     String common_scr_path = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT);
 
@@ -804,6 +825,8 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
         for (int i = 0; i < len; i++)
         {
             Ref<DictionaryElement> el = elements->get(i);
+            printf("setting properties: %s - %s\n", el->getKey().c_str(),
+                    el->getValue().c_str());
             setProperty(meta_js, el->getKey(), el->getValue());
         }
     }

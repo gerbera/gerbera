@@ -177,7 +177,7 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<CM
 }
 
 
-PlaylistParserScript::~ PlaylistParserScript()
+PlaylistParserScript::~PlaylistParserScript()
 {
     if (root)
         JS_RemoveRoot(cx, &root);
