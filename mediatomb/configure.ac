@@ -589,11 +589,6 @@ AC_CHECK_HEADERS([sys/ioctl.h sys/socket.h sys/time.h sys/types.h sys/wait.h],
                  [],
                  [AC_MSG_ERROR(required header not found)]) 
 
-AC_CHECK_HEADERS([malloc.h],
-                 [],
-                 [AC_MSG_ERROR(required header not found)]) 
-
-
 AC_CHECK_HEADERS([langinfo.h locale.h],[],[AC_MSG_WARN(Header that is required to retrieve system locale not found, will use default value)])
 
 AC_CHECK_HEADERS([sched.h],[],[])
