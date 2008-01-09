@@ -253,7 +253,7 @@ Script::Script(Ref<Runtime> runtime) : Object()
     if (! cx)
         throw _Exception(_("Scripting: could not initialize js context"));
 
-//    JS_SetGCZeal(cx, 2);
+    JS_SetGCZeal(cx, 2);
 
     glob = NULL;
     script = NULL;
@@ -366,11 +366,21 @@ static JSFunctionSpec js_global_functions[] = {
         }
         catch (Exception e)
         {
+            if (common_root)
+                JS_RemoveRoot(cx, &common_root);
+
             log_js("Unable to load %s: %s\n", common_scr_path.c_str(), 
                     e.getMessage().c_str());
         }
     }
 }
+
+/*
+static intN map(void *rp, const char *name, void *data)
+{
+    return JS_MAP_GCROOT_NEXT;
+}
+*/
 
 Script::~Script()
 {
@@ -384,8 +394,9 @@ Script::~Script()
 
     if (script)
         JS_DestroyScript(cx, script);
+*/       
+//    JS_MapGCRoots(rt, &map, NULL); // debug stuff
 
-*/        
     if (cx)
     {
         JS_DestroyContext(cx);
@@ -493,17 +504,8 @@ void Script::_execute(JSScript *scr)
 {
     jsval ret_val;
 
-//    JSObject *script_obj = JS_NewScriptObject(cx, script);
-//    String temp = String::from(nam);
-//    JS_AddNamedRoot(cx, &script_obj, temp.c_str());
-
     if (!JS_ExecuteScript(cx, glob, scr, &ret_val))
-    {
-//        JS_RemoveRoot(cx, &script_obj);
         throw _Exception(_("Script: failed to execute script"));
-    }
-
-    //    JS_RemoveRoot(cx, &script_obj);
 }
 
 void Script::execute()
@@ -825,8 +827,6 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
         for (int i = 0; i < len; i++)
         {
             Ref<DictionaryElement> el = elements->get(i);
-            printf("setting properties: %s - %s\n", el->getKey().c_str(),
-                    el->getValue().c_str());
             setProperty(meta_js, el->getKey(), el->getValue());
         }
     }
