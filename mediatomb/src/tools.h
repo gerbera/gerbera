@@ -77,7 +77,7 @@ bool check_path(zmm::String path, bool needDir = false);
 /// that this function throws an exception if a path or directory
 /// was not found or was not the desired type. Additionally this function
 /// returns the last modification time of the file or directory.
-time_t check_path_ex(zmm::String path, bool needDir = false, bool existenceUnneeded = false);
+time_t check_path_ex(zmm::String path, bool needDir = false, bool existenceUnneeded = false, off_t *filesize = NULL);
     
 /// \brief Checks if the string contains any data.
 /// \param str String to be checked.

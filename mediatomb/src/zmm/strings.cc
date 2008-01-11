@@ -223,6 +223,20 @@ String String::from(double x)
     b->len = sprintf(b->data, "%lf", x);
     return (String(b));
 }
+String String::from(long long x)
+{
+    StringBase *b = new StringBase(MAX_LONG_LONG_STRING_LENGTH);
+    b->len = sprintf(b->data, "%lld", x);
+    return (String(b));
+}
+/*
+String String::from(int64_t x)
+{
+    StringBase *b = new StringBase(MAX_INT64_T_STRING_LENGTH);
+    b->len = sprintf(b->data, "%"PRIx64, x);
+    return (String(b));
+}
+*/
 String String::allocate(int size)
 {
     return String(new StringBase(size));

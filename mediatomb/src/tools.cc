@@ -167,14 +167,16 @@ bool check_path(String path, bool needDir)
     return true;
 }
 
-time_t check_path_ex(String path, bool needDir, bool existenceUnneeded)
+time_t check_path_ex(String path, bool needDir, bool existenceUnneeded, 
+        off_t *filesize)
 {
     int ret = 0;
     struct stat statbuf;
 
+    if (filesize != NULL)
+        *filesize = 0;
+
     ret = stat(path.c_str(), &statbuf);
-    log_debug("path: %s, ret: %d; errno: %d\n", path.c_str(), ret, errno);
-    
     if (ret != 0)
     {
         if (existenceUnneeded && (errno == ENOENT))
@@ -188,6 +190,9 @@ time_t check_path_ex(String path, bool needDir, bool existenceUnneeded)
     
     if (!needDir && (S_ISDIR(statbuf.st_mode)))
         throw _Exception(_("Not a file: ") + path);
+
+    if ((filesize != NULL) && S_ISREG(statbuf.st_mode))
+        *filesize = statbuf.st_size;
 
     return statbuf.st_mtime;
 }

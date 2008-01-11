@@ -49,6 +49,10 @@
 
 #define MAX_DOUBLE_STRING_LENGTH 24
 
+#define MAX_LONG_LONG_STRING_LENGTH 24
+
+#define MAX_INT64_T_STRING_LENGTH 24
+
 namespace zmm
 {
         
@@ -195,6 +199,7 @@ public:
     static String from(long x);
     static String from(unsigned long x);
     static String from(double x);
+    static String from(long long x);
     
     static String allocate(int size);
     static String take(const char *data, int length);

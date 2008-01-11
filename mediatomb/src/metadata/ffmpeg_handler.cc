@@ -138,6 +138,9 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext *pFormatC
     duration[0] = 0;
     resolution[0] = 0; 
 
+    // size should be done by the metadata_handler itself, we do not need
+    // extra libraries for that
+#if 0    
 	// size
 	if (pFormatCtx->file_size > 0) 
     {
@@ -154,7 +157,7 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext *pFormatC
 	        item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_SIZE), String(filesize));
 		}
 	} 
-
+#endif
 	// duration
     secs = pFormatCtx->duration / AV_TIME_BASE;
     us = pFormatCtx->duration % AV_TIME_BASE;

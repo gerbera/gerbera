@@ -100,15 +100,19 @@ MetadataHandler::MetadataHandler() : Object()
 void MetadataHandler::setMetadata(Ref<CdsItem> item)
 {
     String location = item->getLocation();
+    off_t filesize;
 
     string_ok_ex(location);
-    check_path_ex(location);
+    check_path_ex(location, false, false, &filesize);
 
     String mimetype = item->getMimeType();
 
     Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
-    resource->addAttribute(String(RES_KEYS[R_PROTOCOLINFO].upnp),
+    resource->addAttribute(getResAttrName(R_PROTOCOLINFO),
                            renderProtocolInfo(mimetype));
+    resource->addAttribute(getResAttrName(R_SIZE),
+            String::from(filesize));
+    
     item->addResource(resource);
 
     Ref<MetadataHandler> handler;
