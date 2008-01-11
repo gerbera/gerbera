@@ -131,33 +131,12 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext *pFormatC
     int hours, mins, secs, us;
     int audioch = 0, samplefreq = 0;
     bool audioset, videoset;
-    char filesize[30], duration[15], resolution[25];
+    char duration[15], resolution[25];
 
     // Initialize the buffers
-    filesize[0] = 0;
     duration[0] = 0;
     resolution[0] = 0; 
 
-    // size should be done by the metadata_handler itself, we do not need
-    // extra libraries for that
-#if 0    
-	// size
-	if (pFormatCtx->file_size > 0) 
-    {
-		int len;
-		len = sprintf(filesize, "%Ld", pFormatCtx->file_size);
-		// Check if there was a buffer overflow
-		if (len > 30) 
-        { 
-			filesize[0] = 0;
-		} 
-        else 
-        {
-	        log_debug("Added filesize: %s bytes\n", filesize);
-	        item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_SIZE), String(filesize));
-		}
-	} 
-#endif
 	// duration
     secs = pFormatCtx->duration / AV_TIME_BASE;
     us = pFormatCtx->duration % AV_TIME_BASE;
