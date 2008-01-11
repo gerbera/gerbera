@@ -28,7 +28,7 @@
 #
 #*MT*
 
-AC_PREREQ(2.59)
+AC_PREREQ(2.61)
 AC_INIT([MediaTomb], [0.11.0-pre], [jin@mediatomb.cc])
 AM_CONFIG_HEADER([autoconfig.h tombupnp/upnp/inc/upnpconfig.h])
 AC_CONFIG_AUX_DIR(configure_aux)
@@ -744,47 +744,33 @@ fi
 AC_SUBST(ICONV_CXXFLAGS)
 AC_SUBST(ICONV_LIBS)
 
+CFLAGS="$CFLAGS $ICONV_CXXFLAGS -Werror"
+AC_MSG_CHECKING([if iconv declaration requires const char cast])
+AC_COMPILE_IFELSE(
+     [AC_LANG_PROGRAM(
+         [
+             #include <stdlib.h>
+             #include <iconv.h>
+         ],
+         [
+            char **ptr;
+            size_t len;
+            iconv_t cd;
+            (void)iconv(cd, ptr, &len, ptr, &len);
+         ]
+     )],
+     [
+         AC_MSG_RESULT([no])
+     ],
+     [
+         AC_DEFINE([ICONV_CONST], [1], 
+                   [iconv needs const char cast])
 
-dnl This is a bit weird, actually I wanted to use iconv.m4 but for some
-dnl reason configure complained about a missing config.rpath
-dnl I have no idea why and I could not figure this out or fix it, so I 
-dnl ended up with copying the code for the check we need to our configure.ac
-
-dnl The code snippled below is taken from:
-# iconv.m4 serial AM4 (gettext-0.11.3)
-dnl Copyright (C) 2000-2002 Free Software Foundation, Inc.
-dnl This file is free software; the Free Software Foundation
-dnl gives unlimited permission to copy and/or distribute it,
-dnl with or without modifications, as long as this notice is preserved.
-
-dnl From Bruno Haible.
-
-AC_MSG_CHECKING([if iconv declarationi requires const])
-
-AC_TRY_COMPILE([
-#include <stdlib.h>
-#include <iconv.h>
-extern
-#ifdef __cplusplus
-"C"
-#endif
-#if defined(__STDC__) || defined(__cplusplus)
-size_t iconv (iconv_t cd, char * *inbuf, size_t *inbytesleft, char * *outbuf, size_t *outbytesleft);
-#else
-size_t iconv();
-#endif
-], 
-        [], 
-        [
-            AC_MSG_RESULT([no])
-        ], 
-        [
-            AC_MSG_RESULT([yes])
-            AC_DEFINE([ICONV_CONST], [1], [iconv needs const char cast])
-        ]
-)
+         AC_MSG_RESULT([yes])
+     ])
 
 
+CFLAGS="$CFLAGS_SAVE"
 CXXFLAGS="$CXXFLAGS_SAVE"
 LDFLAGS="$LDFLAGS_SAVE"
 
