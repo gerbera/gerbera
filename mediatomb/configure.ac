@@ -753,9 +753,9 @@ AC_COMPILE_IFELSE(
              #include <iconv.h>
          ],
          [
-            char **ptr;
+            char **ptr = NULL;
             size_t len;
-            iconv_t cd;
+            iconv_t cd = NULL;
             (void)iconv(cd, ptr, &len, ptr, &len);
          ]
      )],
