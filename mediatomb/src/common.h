@@ -62,14 +62,21 @@
 #define UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER "object.container.playlistContainer"
 #define UPNP_DEFAULT_CLASS_VIDEO_BROADCAST "object.item.videoItem.videoBroadcast"
 
-#define D_PROFILE                       "DLNA.ORG_PN"
-#define D_CONVERSION_INDICATOR          "DLNA.ORG_CI"
-#define D_OP                            "DLNA.ORG_OP"
-#define D_NO_CONVERSION                 "0"
-#define D_CONVERSION                    "1"
-#define D_MP3                           "MP3"
-#define D_LPCM                          "LPCM"
-
+#ifdef EXTEND_PROTOCOLINFO
+    #define D_PROFILE                   "DLNA.ORG_PN"
+    #define D_CONVERSION_INDICATOR      "DLNA.ORG_CI"
+    #define D_OP                        "DLNA.ORG_OP"
+    #define D_NO_CONVERSION             "0"
+    #define D_CONVERSION                "1"
+    #define D_MP3                       "MP3"
+    #define D_LPCM                      "LPCM"
+    #define D_JPEG_SM                   "JPEG_SM"
+    #define D_JPEG_MED                  "JPEG_MED"
+    #define D_JPEG_LRG                  "JPEG_LRG"
+    #define D_JPEG_TN                   "JPEG_TN"
+    #define D_JPEG_SM_ICO               "JPEG_SM_ICO"
+    #define D_JPEG_LRG_ICO              "JPEG_LRG_ICO"
+#endif
 // fixed CdsObjectIDs
 #define CDS_ID_BLACKHOLE                -1
 #define CDS_ID_ROOT                     0

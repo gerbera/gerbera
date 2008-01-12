@@ -57,7 +57,7 @@
 #define RESOURCE_CONTENT_TYPE   "rct"
 
 #define ID3_ALBUM_ART "aa"
-
+#define EXIF_THUMBNAIL  "EX_TH"
 
 typedef enum
 {
@@ -70,6 +70,7 @@ typedef enum
     M_TRACKNUMBER,
     M_ALBUMARTURI,
     M_REGION,
+    /// \todo make sure that those are only used with appropriate upnp classes
     M_AUTHOR,
     M_DIRECTOR,
 //    M_OPUS,

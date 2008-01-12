@@ -282,7 +282,29 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                 extend = _(D_PROFILE) + "=" + D_MP3 + ";";
             else if (contentType == CONTENT_TYPE_PCM)
                 extend = _(D_PROFILE) + "=" + D_LPCM + ";";
-       
+            else if (contentType == CONTENT_TYPE_JPG)
+            {
+                String resolution = res_attrs->get(MetadataHandler::getResAttrName(R_RESOLUTION));
+                int x;
+                int y;
+                if (string_ok(resolution) && 
+                    check_resolution(resolution, &x, &y))
+                {
+
+          if ((i > 0) && 
+              (item->getResource(i)->getHandlerType() == CH_LIBEXIF) && 
+              (item->getResource(i)->getParameter(_(RESOURCE_CONTENT_TYPE)) 
+                     == EXIF_THUMBNAIL) &&
+              (x <= 160) && (y <= 160))
+                        extend = _(D_PROFILE) + "=" + D_JPEG_TN+";";
+                    else if ((x <= 640) && (y <= 420))
+                        extend = _(D_PROFILE) + "=" + D_JPEG_SM+";";
+                    else if ((x <= 1024) && (y <=768))
+                        extend = _(D_PROFILE) + "=" + D_JPEG_MED+";";
+                    else if ((x <= 4096) && (y <=4096))
+                        extend = _(D_PROFILE) + "=" + D_JPEG_LRG+";";
+                }
+            }
 
 #ifdef EXTERNAL_TRANSCODING
         // we do not support seeking at all, so 00

@@ -201,6 +201,7 @@ void TagHandler::fillMetadata(Ref<CdsItem> item)
 
         if (art->picture().size() < 1)
             return;
+
         Ref<StringConverter> sc = StringConverter::i2i();
         String art_mimetype = sc->convert(String(art->mimeType().toCString(true)));
         // saw that simply "PNG" was used with some mp3's, so mimetype setting

@@ -41,9 +41,6 @@
 #include "config_manager.h"
 #include "mem_io_handler.h"
 
-// possible resource types
-#define EXIF_THUMBNAIL  "EX_TH"
-
 using namespace zmm;
 using namespace mxml;
 

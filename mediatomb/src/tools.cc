@@ -675,19 +675,37 @@ void set_jpeg_resolution_resource(Ref<CdsItem> item, int res_num)
     }
 }
 
-bool check_resolution(String resolution)
+bool check_resolution(String resolution, int *x, int *y)
 {
+    if (x != NULL)
+        *x = 0;
+
+    if (y != NULL)
+        *y = 0;
+
     Ref<Array<StringBase> > parts = split_string(resolution, 'x');
     if (parts->size() != 2)
         return false;
 
     if (string_ok(parts->get(0)) && 
-        string_ok(parts->get(1)) &&
-       (String(parts->get(0)->data).toInt() > 0) && 
-       (String(parts->get(1)->data).toInt() > 0))
-        return true;
-    else
-        return false;
+        string_ok(parts->get(1)))
+        {
+            int _x = String(parts->get(0)->data).toInt();
+            int _y = String(parts->get(1)->data).toInt();
+
+            if ((_x > 0) && (_y > 0))
+            {
+                if (x != NULL)
+                    *x = _x;
+
+                if (y != NULL)
+                    *y = _y;
+
+                return true;
+            }
+        }
+        
+    return false;
 }
 
 
