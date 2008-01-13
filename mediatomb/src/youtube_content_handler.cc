@@ -65,8 +65,15 @@ bool YouTubeContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
     this->service_xml = video_list;
 
     video_list_child_count = service_xml->childCount();
+    
     if (video_list_child_count == 0)
         return false;
+
+    if (video_list_child_count == 1)
+    {
+        if (service_xml->getFirstChild()->getName() == _("total"))
+            return false;
+    }
 
     current_video_node_index = 0;
 

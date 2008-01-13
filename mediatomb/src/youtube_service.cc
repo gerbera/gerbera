@@ -182,6 +182,7 @@ using namespace mxml;
 #define CFG_OPTION_STARTPAGE                "start-page"
 #define CFG_OPTION_AMOUNT                   "amount"
 #define CFG_OPTION_PLAYLIST_ID              "id"
+#define CFG_OPTION_PLAYLIST_NAME            "name"
 #define CFG_OPTION_TIME_RANGE               "time-range"
 #define CFG_OPTION_CATEGORY                 "category"
 
@@ -436,7 +437,10 @@ Ref<Object> YouTubeService::defineServiceTask(Ref<Element> xmlopt)
             task->parameters->put(_(REST_PARAM_PLAYLIST_ID),
                                getCheckAttr(xmlopt, _(CFG_OPTION_PLAYLIST_ID)));
             addPagingParams(xmlopt, task); 
-            
+          
+            task->playlist_name = 
+                getCheckAttr(xmlopt, _(CFG_OPTION_PLAYLIST_NAME));
+
             break;
         case YT_list_popular:
             task->parameters->put(_(REST_PARAM_METHOD),
@@ -711,9 +715,8 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
             else if (task->method == YT_list_by_playlist)
             {
                 obj->setAuxData(_(YOUTUBE_AUXDATA_REQUEST_SUBNAME), 
-                        task->parameters->get(_(REST_PARAM_PLAYLIST_ID)));
+                        task->playlist_name);
             }
-
             
             if (layout != nil)
                 layout->processCdsObject(obj);

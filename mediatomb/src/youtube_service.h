@@ -138,7 +138,9 @@ protected:
         /// \brief Current page for requests that require paging
         int current_page;
 
-
+        /// \brief Playlist name defined by the user (only set if method
+        /// equals YT_list_by_playlist)
+        zmm::String playlist_name;
     };
 
     /// \brief task that we will be working with when refreshServiceData is
