@@ -1177,7 +1177,7 @@ Ref<Array<StringBase> > parseCommandLine(String line, String in, String out)
  * Copyright (C) 1991,92,93,94,95,96,97,98,99 Free Software Foundation, Inc.
  */
 // tempName is based on create_temp_file, see (C) above
-String tempName(char *tmpl)
+String tempName(String leadPath, char *tmpl)
 {
     char *XXXXXX;
     int count;
@@ -1219,13 +1219,13 @@ String tempName(char *tmpl)
         v /= NLETTERS;
         XXXXXX[5] = letters[v % NLETTERS];
 
-
-        ret = stat(tmpl, &statbuf);
+        String check =  leadPath + tmpl;
+        ret = stat(check.c_str(), &statbuf);
         if (ret != 0)
         {
             if ((errno == ENOENT) ||
                     (errno == ENOTDIR))
-                return String(tmpl);
+                return check;
             else
                 return nil;
         }

@@ -361,15 +361,16 @@ void ConfigManager::validate(String serverhome)
     prepare_path(_("/server/webroot"), true);
     NEW_OPTION(getOption(_("/server/webroot")));
     SET_OPTION(CFG_SERVER_WEBROOT);
-/*
+
     temp = getOption(_("/server/tmpdir"), _(DEFAULT_TMPDIR));
     if (!check_path(temp, true))
     {
         throw _Exception(_("Temporary directory ") + temp + " does not exist!");
     }
+    temp = temp + _("/");
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_TMPDIR);
-*/
+
     
     if (string_ok(getOption(_("/server/servedir"), _(""))))
         prepare_path(_("/server/servedir"), true);
@@ -383,8 +384,8 @@ void ConfigManager::validate(String serverhome)
     SET_OPTION(CFG_SERVER_UDN);
 
     // checking database driver options
-    String mysql_en;
-    String sqlite3_en;
+    String mysql_en = _("no");
+    String sqlite3_en = _("no");
 
     tmpEl = getElement(_("/server/storage"));
     if (tmpEl == nil)
@@ -467,7 +468,7 @@ void ConfigManager::validate(String serverhome)
         else if (temp == "full")
             temp_int = SQLITE_SYNC_FULL;
         else
-            throw _Exception(_("Invalid <synchronious> value in sqlite3 "
+            throw _Exception(_("Invalid <synchronous> value in sqlite3 "
                                "section"));
 
         NEW_INT_OPTION(temp_int);
@@ -1108,47 +1109,50 @@ void ConfigManager::validate(String serverhome)
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
     SET_BOOL_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_ENABLED);
 
-    temp_int = getIntOption(_("/online-content/YouTube/attribute::refresh"), 0);
-    NEW_INT_OPTION(temp_int);
-    SET_INT_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_REFRESH);
-
-    temp_int = getIntOption(_("/online-content/YouTube/attribute::purge-after"), 0);
-    if (getIntOption(_("/online-content/YouTube/attribute::refresh")) >= temp_int)
+    // check other options only if the service is enabled
+    if (temp == "yes")
     {
-        if (temp_int != 0) 
-            throw _Exception(_("Error in config file: YouTube purge-after value must be greater than refresh interval"));
+        temp_int = getIntOption(_("/online-content/YouTube/attribute::refresh"), 0);
+        NEW_INT_OPTION(temp_int);
+        SET_INT_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_REFRESH);
+
+        temp_int = getIntOption(_("/online-content/YouTube/attribute::purge-after"), 0);
+        if (getIntOption(_("/online-content/YouTube/attribute::refresh")) >= temp_int)
+        {
+            if (temp_int != 0) 
+                throw _Exception(_("Error in config file: YouTube purge-after value must be greater than refresh interval"));
+        }
+
+        NEW_INT_OPTION(temp_int);
+        SET_INT_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_PURGE_AFTER);
+
+        temp = getOption(_("/online-content/YouTube/attribute::update-at-start"),
+                _(DEFAULT_YOUTUBE_UPDATE_AT_START));
+
+        if (!validateYesNo(temp))
+            throw _Exception(_("Error in config file: "
+                        "invalid \"update-at-start\" attribute value in "
+                        "<YouTube> tag"));
+
+        NEW_BOOL_OPTION(temp == "yes" ? true : false);
+        SET_BOOL_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_UPDATE_AT_START);
+
+        el = getElement(_("/online-content/YouTube"));
+        if (el == nil)
+        {
+            getOption(_("/online-content/YouTube"),
+                    _(""));
+        }
+        Ref<Array<Object> > yt_opts = createServiceTaskList(OS_YouTube, el);
+        if (getBoolOption(CFG_ONLINE_CONTENT_YOUTUBE_ENABLED) && 
+                (yt_opts->size() == 0))
+            throw _Exception(_("Error in config file: "
+                        "YouTube service enabled but no imports "
+                        "specified."));
+
+        NEW_OBJARR_OPTION(yt_opts);
+        SET_OBJARR_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_TASK_LIST);
     }
-
-    NEW_INT_OPTION(temp_int);
-    SET_INT_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_PURGE_AFTER);
-
-    temp = getOption(_("/online-content/YouTube/attribute::update-at-start"),
-                     _(DEFAULT_YOUTUBE_UPDATE_AT_START));
-
-    if (!validateYesNo(temp))
-        throw _Exception(_("Error in config file: "
-                           "invalid \"update-at-start\" attribute value in "
-                           "<YouTube> tag"));
-
-    NEW_BOOL_OPTION(temp == "yes" ? true : false);
-    SET_BOOL_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_UPDATE_AT_START);
-
-    el = getElement(_("/online-content/YouTube"));
-    if (el == nil)
-    {
-        getOption(_("/online-content/YouTube"),
-                  _(""));
-    }
-    Ref<Array<Object> > yt_opts = createServiceTaskList(OS_YouTube, el);
-    if (getBoolOption(CFG_ONLINE_CONTENT_YOUTUBE_ENABLED) && 
-            (yt_opts->size() == 0))
-        throw _Exception(_("Error in config file: "
-                           "YouTube service enabled but no imports "
-                           "specified."));
-                           
-    NEW_OBJARR_OPTION(yt_opts);
-    SET_OBJARR_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_TASK_LIST);
-
 #endif
 
 #ifdef SOPCAST 

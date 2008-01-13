@@ -205,7 +205,7 @@
 #endif
 #define DEFAULT_SYSTEM_HOME             "mediatomb"
 #define DEFAULT_ETC                     "etc"
-//#define DEFAULT_TMPDIR                  "/tmp"
+#define DEFAULT_TMPDIR                  "/tmp/"
 #define DEFAULT_CONFIG_NAME             "config.xml"
 #define DEFAULT_UI_EN_VALUE             YES
 #define DEFAULT_POLL_WHEN_IDLE_VALUE    NO
