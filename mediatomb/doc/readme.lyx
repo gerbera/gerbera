@@ -8054,7 +8054,7 @@ status open
 \end_layout
 
 \begin_layout Code
-<playlist id="2132" start-page="1" amount="52"/>
+<playlist id="2132" start-page="1" amount="52" name="My Playlist"/>
 \end_layout
 
 \begin_layout Standard
@@ -8164,6 +8164,42 @@ all
 \begin_layout Description
 Note: YouTube will only serve meta data for a maximum of 1000 items per
  request.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+name=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Required
+\end_layout
+
+\begin_layout Standard
+Name of the playlist - this is how it will be presented on the server.
+ This is useful because the playlist ID is just some numeric value, the
+ playlists on YouTube do not have names.
+ 
+\end_layout
+
+\begin_layout Standard
+This is a local setting, set this to any string that will describe the particula
+r playlist.
 \end_layout
 
 \begin_layout Standard
