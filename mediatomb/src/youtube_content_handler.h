@@ -45,6 +45,7 @@
 #define YOUTUBE_AUXDATA_VIEW_COUNT      "vcount"
 #define YOUTUBE_AUXDATA_RATING_COUNT    "rcount"
 #define YOUTUBE_AUXDATA_REQUEST         "req"
+#define YOUTUBE_AUXDATA_REQUEST_SUBNAME "sreq"
 #define YOUTUBE_AUXDATA_CATEGORY        "cat"
 
 

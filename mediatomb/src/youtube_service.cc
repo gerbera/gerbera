@@ -151,6 +151,9 @@ using namespace mxml;
 #define REQ_NAME_POPULAR                    "Popular"
 #define REQ_NAME_PLAYLIST                   "Playlists"
 #define REQ_NAME_CATEGORY_AND_TAG           "Categories"
+// custom names
+#define REQ_NAME_BY_USER                    "User"
+#define REQ_NAME_BY_TAG                     "Tag"
 
 // config.xml defines
 #define CFG_CAT_STRING_FILM_AND_ANIM       "films_and_animation"
@@ -242,9 +245,13 @@ String YouTubeService::getRequestName(yt_methods_t method)
         case YT_list_by_category_and_tag:
             temp = _(REQ_NAME_CATEGORY_AND_TAG);
             break;
-        case YT_list_none:
         case YT_list_by_tag:
+            temp = _(REQ_NAME_BY_TAG);
+            break;
         case YT_list_by_user:
+            temp = _(REQ_NAME_BY_USER);
+            break;
+        case YT_list_none:
         default:
             temp = nil;
             break;
@@ -693,9 +700,20 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
 
             if (task->method == YT_list_by_category_and_tag)
             {
-                obj->setAuxData(_(YOUTUBE_AUXDATA_CATEGORY),
+                obj->setAuxData(_(YOUTUBE_AUXDATA_REQUEST_SUBNAME),
                         String::from(task->category));
             }
+            else if (task->method == YT_list_by_user)
+            {
+                obj->setAuxData(_(YOUTUBE_AUXDATA_REQUEST_SUBNAME), 
+                        task->parameters->get(_(REST_PARAM_USER)));
+            }
+            else if (task->method == YT_list_by_playlist)
+            {
+                obj->setAuxData(_(YOUTUBE_AUXDATA_REQUEST_SUBNAME), 
+                        task->parameters->get(_(REST_PARAM_PLAYLIST_ID)));
+            }
+
             
             if (layout != nil)
                 layout->processCdsObject(obj);

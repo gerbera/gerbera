@@ -38,6 +38,9 @@
 #include "import_script.h"
 #include "config_manager.h"
 #include "js_functions.h"
+#ifdef YOUTUBE
+    #include "youtube_service.h"
+#endif
 
 using namespace zmm;
 
@@ -51,10 +54,10 @@ ImportScript::ImportScript(Ref<Runtime> runtime) : Script(runtime)
 
 void ImportScript::processCdsObject(Ref<CdsObject> obj)
 {
-   JSObject *orig = JS_NewObject(cx, NULL, NULL, glob);
-   setObjectProperty(glob, _("orig"), orig);
-   cdsObject2jsObject(obj, orig);
-   execute();
+    JSObject *orig = JS_NewObject(cx, NULL, NULL, glob);
+    setObjectProperty(glob, _("orig"), orig);
+    cdsObject2jsObject(obj, orig);
+    execute();
 }
 
 ImportScript::~ImportScript()

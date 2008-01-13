@@ -45,6 +45,7 @@
 #endif
 
 #ifdef YOUTUBE
+    #include "youtube_service.h"
     #include "youtube_content_handler.h"
 #endif
 
@@ -281,9 +282,9 @@ Script::Script(Ref<Runtime> runtime) : Object()
     setIntProperty(glob, _("OBJECT_TYPE_ITEM_INTERNAL_URL"),
             OBJECT_TYPE_ITEM_INTERNAL_URL);
 #ifdef ONLINE_SERVICES 
-    setIntProperty(glob, _("ONLINE_SERVICE_NONE"), OS_None);
+    setIntProperty(glob, _("ONLINE_SERVICE_NONE"), (int)OS_None);
 #ifdef YOUTUBE
-    setIntProperty(glob, _("ONLINE_SERVICE_YOUTUBE"), OS_YouTube);
+    setIntProperty(glob, _("ONLINE_SERVICE_YOUTUBE"), (int)OS_YouTube);
 
     setProperty(glob, _("YOUTUBE_AUXDATA_TAGS"), 
             _(YOUTUBE_AUXDATA_TAGS));
@@ -301,9 +302,22 @@ Script::Script(Ref<Runtime> runtime) : Object()
             _(YOUTUBE_AUXDATA_REQUEST));
     setProperty(glob, _("YOUTUBE_AUXDATA_CATEGORY"), 
             _(YOUTUBE_AUXDATA_CATEGORY));
+    setProperty(glob, _("YOUTUBE_AUXDATA_REQUEST_SUBNAME"), 
+            _(YOUTUBE_AUXDATA_REQUEST_SUBNAME));
+
+    setIntProperty(glob, _("YOUTUBE_REQUEST_NONE"), (int)YT_list_none);
+    setIntProperty(glob, _("YOUTUBE_REQUEST_FAVORITE"), (int)YT_list_favorite);
+    setIntProperty(glob, _("YOUTUBE_REQUEST_BY_TAG"), (int)YT_list_by_tag);
+    setIntProperty(glob, _("YOUTUBE_REQUEST_BY_USER"), (int)YT_list_by_user);
+    setIntProperty(glob, _("YOUTUBE_REQUEST_FEATURED"), (int)YT_list_featured);
+    setIntProperty(glob, _("YOUTUBE_REQUEST_BY_PLAYLIST"), 
+                   (int)YT_list_by_playlist);
+    setIntProperty(glob, _("YOUTUBE_REQUEST_POPULAR"), (int)YT_list_popular);
+    setIntProperty(glob, _("YOUTUBE_REQUEST_BY_CATEGORY_AND_TAG"), 
+                   (int)YT_list_by_category_and_tag);
 #endif
 #ifdef SOPCAST
-    setIntProperty(glob, _("ONLINE_SERVICE_SOPCAST"), OS_SopCast);
+    setIntProperty(glob, _("ONLINE_SERVICE_SOPCAST"), (int)OS_SopCast);
 #endif
 #else
     setIntProperty(glob, _("ONLINE_SERVICE_NONE"), 0);
@@ -836,6 +850,35 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
         JSObject *aux_js = JS_NewObject(cx, NULL, NULL, js);
         setObjectProperty(js, _("aux"), aux_js);
         Ref<Dictionary> aux = obj->getAuxData();
+#ifdef YOUTUBE
+        int yt_request = (int)YT_list_none;
+        // put in meaningful names for YouTube specific enum values
+        String tmp = aux->get(_(YOUTUBE_AUXDATA_REQUEST));
+        if (string_ok(tmp))
+        {
+            yt_methods_t m = (yt_methods_t)tmp.toInt();
+            tmp = YouTubeService::getRequestName(m);
+            if (string_ok(tmp))
+            {
+                yt_request = (int)m;
+                aux->put(_(YOUTUBE_AUXDATA_REQUEST), tmp);
+
+                if (m == YT_list_by_category_and_tag)
+                {
+                    tmp = aux->get(_(YOUTUBE_AUXDATA_REQUEST_SUBNAME));
+                    if (string_ok(tmp))
+                    {
+                        yt_categories_t c = (yt_categories_t)tmp.toInt();
+                        tmp = YouTubeService::getCategoryName(c);
+                        if (string_ok(tmp))
+                            aux->put(_(YOUTUBE_AUXDATA_REQUEST_SUBNAME), tmp);
+                    }
+                }
+            }
+
+            setIntProperty(js, _("yt_request"), yt_request);
+        }
+#endif
         Ref<Array<DictionaryElement> > elements = aux->getElements();
         int len = elements->size();
         for (int i = 0; i < len; i++)

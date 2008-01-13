@@ -164,13 +164,15 @@ function addImage(obj)
     }
 }
 
+
 function addYouTube(obj)
 {
+    var chain;
     var temp = parseInt(obj.aux[YOUTUBE_AUXDATA_AVG_RATING], 10);
     if (temp != Number.NaN)
     {
         temp = Math.round(temp);
-        if (temp > 0)
+        if (temp > 3)
         {
             var chain = new Array('Online Services', 'YouTube', 'Rating', 
                                   temp.toString());
@@ -178,7 +180,21 @@ function addYouTube(obj)
         }
     }
 
-//    temp = obj.aux[YOUTUBE_AUXDATA_REQUEST]; 
+    if (obj.yt_request != YOUTUBE_REQUEST_BY_TAG)
+    {
+        temp = obj.aux[YOUTUBE_AUXDATA_REQUEST];
+        if (temp)
+        {
+            var subName = (obj.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME]);
+
+            if (subName)
+                chain = new Array('Online Services', 'YouTube', temp, subName);
+            else
+                chain = new Array('Online Services', 'YouTube', temp);
+ 
+            addCdsObject(obj, createContainerChain(chain));
+        }
+    }
 }
 
 // main script part

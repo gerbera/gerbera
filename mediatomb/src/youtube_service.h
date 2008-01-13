@@ -43,7 +43,7 @@
 
 typedef enum 
 {
-    YT_list_none,
+    YT_list_none = 0,
     YT_list_favorite,
     YT_list_by_tag,
     YT_list_by_user,
