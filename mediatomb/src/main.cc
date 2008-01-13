@@ -455,10 +455,6 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         log_error("Could not register SIGPIPE handler!\n");
     }
 
-
-    // prepare to run processes
-    init_process();
-    
     Ref<SingletonManager> singletonManager = SingletonManager::getInstance();
     Ref<Server> server;
     try
@@ -582,8 +578,6 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
                         close(devnull);
                     exit(EXIT_FAILURE);
                 }
-                
-                init_process();
                 
                 ///  \todo fix this for SIGHUP
                 server = Server::getInstance();

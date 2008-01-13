@@ -1,4 +1,4 @@
-#LyX 1.5.1 created this file. For more info see http://www.lyx.org/
+#LyX 1.5.2 created this file. For more info see http://www.lyx.org/
 \lyxformat 276
 \begin_document
 \begin_header
@@ -2965,6 +2965,41 @@ Enabling this option will make the PC-Directory container invisible for
 \begin_layout Description
 Note: independent of the above setting the container will be always visible
  in the web UI!
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<tmpdir>/tmp/</tmpdir>
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: /tmp/
+\end_layout
+
+\begin_layout Standard
+Selects the temporary directory that will be used by the server.
 \end_layout
 
 \begin_layout Standard

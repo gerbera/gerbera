@@ -38,25 +38,19 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <signal.h>
 #include <sys/wait.h>
 
 #include <string.h>
 #include <errno.h>
 
+#include "config_manager.h"
+
 using namespace zmm;
 
 #define BUF_SIZE 256
-#define MAX_TEMPLATE 64
-
-char input_template[MAX_TEMPLATE];
-char output_template[MAX_TEMPLATE];
-
-void init_process()
-{
-    sprintf(input_template, "/tmp/mediaserver_in_%d_XXXXXX", getuid());
-    sprintf(output_template, "/tmp/mediaserver_out_%d_XXXXXX", getuid());
-}
 
 String run_simple_process(String prog, String param, String input)
 {
@@ -64,16 +58,18 @@ String run_simple_process(String prog, String param, String input)
     int fd;
 
     /* creating input file */
-    char input_file[MAX_TEMPLATE];
-    strcpy(input_file, input_template);
-    fd = mkstemp(input_file);
+    char temp_in[] = "mt_in_XXXXXX";
+    char temp_out[] = "mt_out_XXXXXX";
+        
+    Ref<ConfigManager> cfg = ConfigManager::getInstance();
+    String input_file = tempName(cfg->getOption(CFG_SERVER_TMPDIR), temp_in);
+    fd = open(input_file.c_str(), O_RDWR);
     int ret = write(fd, input.c_str(), input.length());
     close(fd);
     
     /* touching output file */
-    char output_file[MAX_TEMPLATE];
-    strcpy(output_file, output_template);
-    fd = mkstemp(output_file);
+    String output_file = tempName(cfg->getOption(CFG_SERVER_TMPDIR), temp_out);
+    fd = open(output_file.c_str(), O_RDWR);
     close(fd);
    
     /* executing script */
@@ -83,7 +79,7 @@ String run_simple_process(String prog, String param, String input)
     ret = system(command.c_str());
 
     /* reading output file */
-    file = fopen(output_file, "r");
+    file = fopen(output_file.c_str(), "r");
     Ref<StringBuffer> output(new StringBuffer());
 
     int bytesRead;
@@ -99,8 +95,8 @@ String run_simple_process(String prog, String param, String input)
     fclose(file);
 
     /* removing input and output files */
-    unlink(input_file);
-    unlink(output_file);
+    unlink(input_file.c_str());
+    unlink(output_file.c_str());
 
     return output->toString();
 }

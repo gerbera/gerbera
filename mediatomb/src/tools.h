@@ -284,7 +284,7 @@ zmm::Ref<zmm::Array<zmm::StringBase> > parseCommandLine(zmm::String line, zmm::S
 ///
 /// The reason behind this is, that we need to open a pipe, while mkstemp will
 /// open a regular file.
-zmm::String tempName(char *tmpl);
+zmm::String tempName(zmm::String leadPath, char *tmpl);
 
 /// \brief Determines if the particular ogg file contains a video (theora)
 bool isTheora(zmm::String ogg_filename);

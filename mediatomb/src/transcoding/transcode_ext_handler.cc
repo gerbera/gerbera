@@ -80,7 +80,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
 //    bool is_srt = false;
 
     log_debug("start\n");
-    char fifo_template[]="/tmp/mt_transcode_XXXXXX";
+    char fifo_template[]="mt_transcode_XXXXXX";
 
     if (profile == nil)
         throw _Exception(_("Transcoding of file ") + location +
@@ -106,7 +106,10 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
         info->file_length = UNKNOWN_CONTENT_LENGTH;
 
 
-    String fifo_name = tempName(fifo_template);
+    Ref<ConfigManager> cfg = ConfigManager::getInstance();
+   
+    String fifo_name = tempName(cfg->getOption(CFG_SERVER_TMPDIR), 
+                                fifo_template);
     String arguments;
     String temp;
     String command;
@@ -117,8 +120,8 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     {
 #ifdef HAVE_CURL
         String url = location;
-        strcpy(fifo_template, "/tmp/mt_transcode_XXXXXX");
-        location = tempName(fifo_template);
+        strcpy(fifo_template, "mt_transcode_XXXXXX");
+        location = tempName(cfg->getOption(CFG_SERVER_TMPDIR), fifo_template);
         log_debug("creating reader fifo: %s\n", location.c_str());
         if (mkfifo(location.c_str(), O_RDWR) == -1)
         {
@@ -130,7 +133,6 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
         {
             chmod(location.c_str(), S_IWUSR | S_IRUSR);
 
-            Ref<ConfigManager> cfg = ConfigManager::getInstance();
             Ref<IOHandler> c_ioh(new CurlIOHandler(url, NULL, 
                   cfg->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE),
                   cfg->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE)));
