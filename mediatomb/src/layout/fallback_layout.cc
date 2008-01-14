@@ -255,14 +255,17 @@ void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
     temp = obj->getAuxData(_(YOUTUBE_AUXDATA_AVG_RATING));
     if (string_ok(temp))
     {
-        chain = _(YT_VPATH "/Rating/") + 
-            esc(String::from((int)temp.toDouble()));
-        id = ContentManager::getInstance()->addContainerChain(chain);
-        add(obj, id, ref_set);
-        if (!ref_set)
+        int rating = (int)temp.toDouble();
+        if (rating > 3)
         {
-            obj->setRefID(obj->getID());
-            ref_set = true;
+            chain = _(YT_VPATH "/Rating/") + esc(String::from(rating));
+            id = ContentManager::getInstance()->addContainerChain(chain);
+            add(obj, id, ref_set);
+            if (!ref_set)
+            {
+                obj->setRefID(obj->getID());
+                ref_set = true;
+            }
         }
     }
 
@@ -294,20 +297,32 @@ void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
             temp = esc(temp);
             if (m == YT_list_by_category_and_tag)
             {
-                 String ctmp = obj->getAuxData(_(YOUTUBE_AUXDATA_CATEGORY));
+                 String ctmp = 
+                     obj->getAuxData(_(YOUTUBE_AUXDATA_REQUEST_SUBNAME));
                  if (string_ok(ctmp))
                  {
                      yt_categories_t c = (yt_categories_t)ctmp.toInt();
                      ctmp = YouTubeService::getCategoryName(c);
                      if (string_ok(ctmp))
-                     {
                          temp = temp + '/' + esc(ctmp);
-                     }
                  }
             }
-            chain = _(YT_VPATH) + '/' + temp;
-            id = ContentManager::getInstance()->addContainerChain(chain);
-            add(obj, id, ref_set);
+            else if ((m == YT_list_by_user) || (m == YT_list_by_user) ||
+                     (m == YT_list_favorite) || (m == YT_list_by_playlist))
+
+            {
+                String subtmp = 
+                        obj->getAuxData(_(YOUTUBE_AUXDATA_REQUEST_SUBNAME));
+                if (string_ok(subtmp))
+                    temp = temp + '/' + esc(subtmp);
+            }
+
+            if (m != YT_list_by_tag)
+            {
+                chain = _(YT_VPATH) + '/' + temp;
+                id = ContentManager::getInstance()->addContainerChain(chain);
+                add(obj, id, ref_set);
+            }
         }
     }
 }

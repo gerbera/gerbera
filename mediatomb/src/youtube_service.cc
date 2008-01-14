@@ -712,6 +712,11 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
                 obj->setAuxData(_(YOUTUBE_AUXDATA_REQUEST_SUBNAME), 
                         task->parameters->get(_(REST_PARAM_USER)));
             }
+            else if (task->method == YT_list_favorite)
+            {
+                obj->setAuxData(_(YOUTUBE_AUXDATA_REQUEST_SUBNAME),
+                        task->parameters->get(_(REST_PARAM_USER)));
+            }
             else if (task->method == YT_list_by_playlist)
             {
                 obj->setAuxData(_(YOUTUBE_AUXDATA_REQUEST_SUBNAME), 

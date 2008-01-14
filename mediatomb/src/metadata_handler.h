@@ -67,6 +67,7 @@ typedef enum
     M_DATE,
     M_GENRE,
     M_DESCRIPTION,
+    M_LONGDESCRIPTION,
     M_TRACKNUMBER,
     M_ALBUMARTURI,
     M_REGION,

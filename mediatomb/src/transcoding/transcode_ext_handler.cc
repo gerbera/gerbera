@@ -167,12 +167,6 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     log_debug("Arguments: %s\n", profile->getArguments().c_str());
     arglist = parseCommandLine(profile->getArguments(), location, fifo_name);
 
-/*    
-    for (int khr = 0; khr < arglist->size(); khr++)
-    {
-        printf("%s\n", arglist->get(khr)->data);
-    }
-*/
     Ref<TranscodingProcessExecutor> main_proc(new TranscodingProcessExecutor(profile->getCommand(), arglist));
     main_proc->removeFile(fifo_name);
     if (isURL && (!profile->acceptURL()))
