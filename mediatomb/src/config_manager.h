@@ -202,7 +202,9 @@ public:
 
     /// \brief sets static configuration parameters that will be used by
     /// when the ConfigManager class initializes
-    static void setStaticArgs(zmm::String _filename, zmm::String _userhome, zmm::String _config_dir = _(DEFAULT_CONFIG_HOME));
+    static void setStaticArgs(zmm::String _filename, zmm::String _userhome, 
+                              zmm::String _config_dir = _(DEFAULT_CONFIG_HOME),
+                              zmm::String _prefix_dir = _(PACKAGE_DATADIR));
 
     /// \brief Creates a html file that is a redirector to the current server i
     /// instance
@@ -222,6 +224,7 @@ protected:
     static zmm::String filename;
     static zmm::String userhome;
     static zmm::String config_dir;
+    static zmm::String prefix_dir;
 
     zmm::Ref<mxml::Element> root;
 

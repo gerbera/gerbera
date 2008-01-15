@@ -65,19 +65,23 @@ SINGLETON_MUTEX(ConfigManager, false);
 String ConfigManager::filename = nil;
 String ConfigManager::userhome = nil;
 String ConfigManager::config_dir = _(DEFAULT_CONFIG_HOME);
+String ConfigManager::prefix_dir = _("");
 
 ConfigManager::~ConfigManager()
 {
     filename = nil;
     userhome = nil;
     config_dir = _(DEFAULT_CONFIG_HOME);
+    prefix_dir = _("");
 }
 
-void ConfigManager::setStaticArgs(String _filename, String _userhome, String _config_dir)
+void ConfigManager::setStaticArgs(String _filename, String _userhome, 
+                                  String _config_dir, String _prefix_dir)
 {
     filename = _filename;
     userhome = _userhome;
     config_dir = _config_dir;
+    prefix_dir = _prefix_dir;
 }
 
 ConfigManager::ConfigManager() : Singleton<ConfigManager>()
@@ -185,7 +189,7 @@ String ConfigManager::createDefaultConfig(String userhome)
     server->appendChild(udn);
 
     server->appendTextChild(_("home"), homepath);
-    server->appendTextChild(_("webroot"), String(_(PACKAGE_DATADIR)) + 
+    server->appendTextChild(_("webroot"), prefix_dir + 
                                                  DIR_SEPARATOR +  
                                                  _(DEFAULT_WEB_DIR));
     
@@ -219,20 +223,20 @@ String ConfigManager::createDefaultConfig(String userhome)
     Ref<Element> layout(new Element(_("virtual-layout")));
     layout->addAttribute(_("type"), _(DEFAULT_LAYOUT_TYPE));
 #ifdef HAVE_JS
-    layout->appendTextChild(_("import-script"), String(_(PACKAGE_DATADIR)) +
+    layout->appendTextChild(_("import-script"), prefix_dir +
                                                 DIR_SEPARATOR + 
                                                 _(DEFAULT_JS_DIR) +
                                                 DIR_SEPARATOR +
                                                 _(DEFAULT_IMPORT_SCRIPT));
     scripting->appendTextChild(_("common-script"), 
-                String(_(PACKAGE_DATADIR)) + 
+                prefix_dir + 
                 DIR_SEPARATOR + 
                 _(DEFAULT_JS_DIR) + 
                 DIR_SEPARATOR +
                 _(DEFAULT_COMMON_SCRIPT));
 
     scripting->appendTextChild(_("playlist-script"),
-                String(_(PACKAGE_DATADIR)) +
+                prefix_dir +
                 DIR_SEPARATOR +
                 _(DEFAULT_JS_DIR) +
                 DIR_SEPARATOR +
@@ -241,7 +245,7 @@ String ConfigManager::createDefaultConfig(String userhome)
 #endif
     scripting->appendChild(layout);
 
-    String map_file = _(PACKAGE_DATADIR) + DIR_SEPARATOR + CONFIG_MAPPINGS_TEMPLATE;
+    String map_file = prefix_dir + DIR_SEPARATOR + CONFIG_MAPPINGS_TEMPLATE;
 
     try
     {
@@ -868,7 +872,7 @@ void ConfigManager::validate(String serverhome)
 
 #ifdef HAVE_JS
     temp = getOption(_("/import/scripting/playlist-script"), 
-            _(PACKAGE_DATADIR) +
+            prefix_dir +
             DIR_SEPARATOR +
             _(DEFAULT_JS_DIR) +
             DIR_SEPARATOR +
@@ -880,7 +884,7 @@ void ConfigManager::validate(String serverhome)
     SET_OPTION(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
 
     temp = getOption(_("/import/scripting/common-script"), 
-           _(PACKAGE_DATADIR) +
+           prefix_dir +
             DIR_SEPARATOR +
             _(DEFAULT_JS_DIR) +
             DIR_SEPARATOR +
@@ -939,7 +943,7 @@ void ConfigManager::validate(String serverhome)
 
     String script_path = getOption(
                            _("/import/scripting/virtual-layout/import-script"), 
-                           _(PACKAGE_DATADIR) +
+                           prefix_dir +
                              DIR_SEPARATOR + 
                            _(DEFAULT_JS_DIR) +
                              DIR_SEPARATOR +

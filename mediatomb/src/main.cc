@@ -119,6 +119,7 @@ int main(int argc, char **argv, char **envp)
     String pid_file;
     String interface;
     String ip;
+    String prefix;
 
     Ref<Array<StringBase> > addFile(new Array<StringBase>());
 
@@ -318,14 +319,14 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         if (!string_ok(confdir))
             confdir = _(DEFAULT_CONFIG_HOME);
 
-/*        if ((config_file == nil) && (home == nil))
-        {
-            log_info("No configuration specified and no user home directory set.\n");
-            exit(EXIT_FAILURE);
-        }
-        
-*/
-        ConfigManager::setStaticArgs(config_file, home, confdir);
+        char *pref = getenv("MEDIATOMB_DATADIR");
+        if (pref != NULL)
+            prefix = String(pref);
+
+        if (!string_ok(prefix))
+            prefix = _(PACKAGE_DATADIR);
+
+        ConfigManager::setStaticArgs(config_file, home, confdir, prefix);
         ConfigManager::getInstance();
     }
     catch (mxml::ParseException pe)
