@@ -120,6 +120,7 @@ int main(int argc, char **argv, char **envp)
     String interface;
     String ip;
     String prefix;
+    String magic;
 
     Ref<Array<StringBase> > addFile(new Array<StringBase>());
 
@@ -326,7 +327,14 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         if (!string_ok(prefix))
             prefix = _(PACKAGE_DATADIR);
 
-        ConfigManager::setStaticArgs(config_file, home, confdir, prefix);
+        char *mgc = getenv("MEDIATOMB_MAGIC_FILE");
+        if (mgc != NULL)
+            magic = String(mgc);
+
+        if (!string_ok(magic))
+            magic = nil;
+
+        ConfigManager::setStaticArgs(config_file, home, confdir, prefix, magic);
         ConfigManager::getInstance();
     }
     catch (mxml::ParseException pe)
@@ -556,7 +564,8 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
                 
                 try
                 {
-                    ConfigManager::setStaticArgs(config_file, home, confdir);
+                    ConfigManager::setStaticArgs(config_file, home, confdir, 
+                                                 prefix, magic);
                     ConfigManager::getInstance();
                 }
                 catch (mxml::ParseException pe)

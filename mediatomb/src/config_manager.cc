@@ -65,23 +65,27 @@ SINGLETON_MUTEX(ConfigManager, false);
 String ConfigManager::filename = nil;
 String ConfigManager::userhome = nil;
 String ConfigManager::config_dir = _(DEFAULT_CONFIG_HOME);
-String ConfigManager::prefix_dir = _("");
+String ConfigManager::prefix_dir = _(PACKAGE_DATADIR);
+String ConfigManager::magic = nil;
 
 ConfigManager::~ConfigManager()
 {
     filename = nil;
     userhome = nil;
     config_dir = _(DEFAULT_CONFIG_HOME);
-    prefix_dir = _("");
+    prefix_dir = _(PACKAGE_DATADIR);
+    magic = nil;
 }
 
 void ConfigManager::setStaticArgs(String _filename, String _userhome, 
-                                  String _config_dir, String _prefix_dir)
+                                  String _config_dir, String _prefix_dir,
+                                  String _magic)
 {
     filename = _filename;
     userhome = _userhome;
     config_dir = _config_dir;
     prefix_dir = _prefix_dir;
+    magic = _magic;
 }
 
 ConfigManager::ConfigManager() : Singleton<ConfigManager>()
@@ -1076,11 +1080,20 @@ void ConfigManager::validate(String serverhome)
 #endif // HAVE_EXTRACTOR
 
 #ifdef HAVE_MAGIC
-    if (string_ok(getOption(_("/import/magic-file"), _(""))))
+    String magic_file;
+    if (!string_ok(magic))
     {
-        prepare_path(_("/import/magic-file"));
+        if (string_ok(getOption(_("/import/magic-file"), _(""))))
+        {
+            prepare_path(_("/import/magic-file"));
+        }
+
+        magic_file = getOption(_("/import/magic-file"));
     }
-    NEW_OPTION(getOption(_("/import/magic-file")));
+    else
+        magic_file = magic;
+
+    NEW_OPTION(magic_file);
     SET_OPTION(CFG_IMPORT_MAGIC_FILE);
 #endif
 

@@ -204,7 +204,8 @@ public:
     /// when the ConfigManager class initializes
     static void setStaticArgs(zmm::String _filename, zmm::String _userhome, 
                               zmm::String _config_dir = _(DEFAULT_CONFIG_HOME),
-                              zmm::String _prefix_dir = _(PACKAGE_DATADIR));
+                              zmm::String _prefix_dir = _(PACKAGE_DATADIR), 
+                              zmm::String _magic = nil);
 
     /// \brief Creates a html file that is a redirector to the current server i
     /// instance
@@ -225,6 +226,7 @@ protected:
     static zmm::String userhome;
     static zmm::String config_dir;
     static zmm::String prefix_dir;
+    static zmm::String magic;
 
     zmm::Ref<mxml::Element> root;
 
