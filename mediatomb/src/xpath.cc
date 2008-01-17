@@ -98,7 +98,7 @@ Ref<Element> XPath::elementAtPath(String path)
     for (int i = 0; i < parts->size(); i++)
     {
         String part = parts->get(i);
-        cur = cur->getChild(part);
+        cur = cur->getChildByName(part);
         if (cur == nil)
             break;
     }

@@ -250,8 +250,8 @@ void Server::upnp_init(String iface, String ip_address, int port)
     String device_description = 
         _("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") +
          UpnpXML_RenderDeviceDescription(presentationURL)->print();
-
-//    log_debug("DEVICE DESCRIPTION: \n%s\n", device_description.c_str());
+         
+    //log_debug("DEVICE DESCRIPTION: \n%s\n", device_description.c_str());
 
     // register root device with the library
     ret = UpnpRegisterRootDevice2(UPNPREG_BUF_DESC, device_description.c_str(), 

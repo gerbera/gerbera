@@ -40,12 +40,14 @@
 using namespace zmm;
 using namespace mxml;
 
-Element::Element(String name) : Object()
+Element::Element(String name) : Node()
 {
+    type = mxml_node_element;
     this->name = name;
 }
-Element::Element(String name, Ref<Context> context) : Object()
+Element::Element(String name, Ref<Context> context) : Node()
 {
+    type = mxml_node_element;
     this->name = name;
     this->context = context;
 }
@@ -94,14 +96,18 @@ void Element::setAttribute(String name, String value)
 
 String Element::getText()
 {
-    return text;
-}
-
-int Element::childCount()
-{
-    if (children == nil)
-        return 0;
-    return children->size();
+    Ref<StringBuffer> buf(new StringBuffer());
+    Ref<Text> text;
+    int i = 0;
+    bool someText = false;
+    while ((text = RefCast(getChild(i++, mxml_node_text), Text)) != nil)
+    {
+        someText = true;
+        *buf << text->getText();
+    }
+    if (! someText)
+        return nil;
+    return buf->toString();
 }
 
 int Element::attributeCount()
@@ -109,15 +115,6 @@ int Element::attributeCount()
     if (attributes == nil)
         return 0;
     return attributes->size();
-}
-
-Ref<Element> Element::getChild(int index)
-{
-    if (children == nil)
-        return nil;
-    if (index >= children->size())
-        return nil;
-    return children->get(index);
 }
 
 Ref<Attribute> Element::getAttribute(int index)
@@ -129,78 +126,67 @@ Ref<Attribute> Element::getAttribute(int index)
     return attributes->get(index);
 }
 
-
-
-Ref<Element> Element::getFirstChild()
+void Element::setText(String str)
 {
-    return children->get(0);
-}
-
-void Element::appendChild(Ref<Element> child)
-{
-    if(children == nil)
-        children = Ref<Array<Element> >(new Array<Element>());
-    children->append(child);
-}
-void Element::setText(String text)
-{
-    this->text = text;
+    if (childCount() > 1)
+        throw _Exception(_("Element::setText() cannot be called on an element which has more than one child"));
+    
+    if (childCount() == 1)
+    {
+        Ref<Node> child = getChild(0);
+        if (child == nil || child->getType() != mxml_node_text)
+            throw _Exception(_("Element::setText() cannot be called on an element which has a non-text child"));
+        Ref<Text> text = RefCast(child, Text);
+        text->setText(str);
+    }
+    else
+    {
+        Ref<Text> text(new Text(str));
+        appendChild(RefCast(text, Node));
+    }
 }
 
 void Element::appendTextChild(String name, String text)
 {
     Ref<Element> el = Ref<Element>(new Element(name));
     el->setText(text);
-    appendChild(el);
+    appendElementChild(el);
 }
 
-Ref<Element> Element::getChild(String name)
+Ref<Element> Element::getChildByName(String name)
 {
     if(children == nil)
         return nil;
     for(int i = 0; i < children->size(); i++)
     {
-        Ref<Element> el = children->get(i);
-        if(el->name == name)
-            return el;
+        Ref<Node> nd = children->get(i);
+        if (nd->getType() == mxml_node_element)
+        {
+            Ref<Element> el = RefCast(nd, Element);
+            if (name == nil || el->name == name)
+                return el;
+        }
     }
     return nil;
 }
 
 String Element::getChildText(String name)
 {
-    Ref<Element> el = getChild(name);
+    Ref<Element> el = getChildByName(name);
     if(el == nil)
         return nil;
     return el->getText();
 }
 
-/*
-String Element::getName()
+void Element::print_internal(Ref<StringBuffer> buf, int indent)
 {
-    return name;
-}
-*/
-
-void Element::setName(String name)
-{
-    this->name = name;
-}
-
-String Element::print()
-{
-    Ref<StringBuffer> buf(new StringBuffer());
-    print(buf, 0);
-    return buf->toString();
-}
-
-void Element::print(Ref<StringBuffer> buf, int indent)
-{
+    /*
     static char *ind_str = "                                                               ";
     static char *ind = ind_str + strlen(ind_str);
     char *ptr = ind - indent * 2;
     *buf << ptr;
-
+    */
+    
     int i;
     
     *buf << "<" << name;
@@ -213,18 +199,17 @@ void Element::print(Ref<StringBuffer> buf, int indent)
             *buf << attr->name << "=\"" << escape(attr->value) << '"';
         }
     }
-    if(text != nil)
+    
+    if(children != nil && children->size())
     {
-        *buf << '>' << escape(text) << "</" << name << ">\n";
-    }
-    else if(children != nil && children->size())
-    {
-        *buf << ">\n";
+        *buf << ">";
+        
         for(i = 0; i < children->size(); i++)
         {
-            children->get(i)->print(buf, indent + 1);
+            children->get(i)->print_internal(buf, indent + 1);
         }
-        *buf << ptr << "</" << name << ">\n";
+        
+        *buf << "</" << name << ">";
     }
     else
     {
@@ -232,32 +217,3 @@ void Element::print(Ref<StringBuffer> buf, int indent)
     }
 }
 
-
-String Element::escape(String str)
-{
-    Ref<StringBuffer> buf(new StringBuffer(str.length()));
-    signed char *ptr = (signed char *)str.c_str();
-    while (*ptr)
-    {
-        switch (*ptr)
-        {
-            case '<' : *buf << "&lt;"; break;
-            case '>' : *buf << "&gt;"; break;
-            case '&' : *buf << "&amp;"; break;
-            case '"' : *buf << "&quot;"; break;
-            case '\'' : *buf << "&apos;"; break;
-                       // handle control codes
-            default  : if (((*ptr >= 0x00) && (*ptr <= 0x1f) && 
-                            (*ptr != 0x09) && (*ptr != 0x0d) && 
-                            (*ptr != 0x0a)) || (*ptr == 0x7f))
-                       {
-                           *buf << '.';
-                       }
-                       else
-                           *buf << *ptr;
-                       break;
-        }
-        ptr++;
-    }
-    return buf->toString();
-}

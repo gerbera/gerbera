@@ -58,20 +58,20 @@ bool YouTubeContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
     if (temp != "ok")
         return false;
 
-    Ref<Element> video_list = service->getChild(_("video_list"));
+    Ref<Element> video_list = service->getChildByName(_("video_list"));
     if (video_list == nil)
         throw _Exception(_("Invalid XML for YouTube service received - video_list not found!"));
 
     this->service_xml = video_list;
 
-    video_list_child_count = service_xml->childCount();
+    video_list_child_count = service_xml->elementChildCount();
     
     if (video_list_child_count == 0)
         return false;
 
     if (video_list_child_count == 1)
     {
-        if (service_xml->getFirstChild()->getName() == _("total"))
+        if (service_xml->getFirstElementChild()->getName() == _("total"))
             return false;
     }
 
@@ -101,7 +101,7 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
 
     while (current_video_node_index < video_list_child_count)
     {
-        Ref<Element> video = service_xml->getChild(current_video_node_index);
+        Ref<Element> video = service_xml->getElementChild(current_video_node_index);
         current_video_node_index++;
        
         if (video == nil)

@@ -55,7 +55,7 @@ void ConnectionManagerService::process_subscription_request(zmm::Ref<Subscriptio
 
 
     propset = UpnpXML_CreateEventPropertySet();
-    property = propset->getFirstChild();
+    property = propset->getFirstElementChild();
     property->appendTextChild(_("CurrentConnectionIDs"), _("0"));
     property->appendTextChild(_("SinkProtocolInfo"), _(""));
     property->appendTextChild(_("SourceProtocolInfo"), CSV);
@@ -82,7 +82,7 @@ void ConnectionManagerService::subscription_update(String sourceProtocol_CSV)
     Ref<Element> propset, property;
 
     propset = UpnpXML_CreateEventPropertySet();
-    property = propset->getFirstChild();
+    property = propset->getFirstElementChild();
     property->appendTextChild(_("SourceProtocolInfo"), sourceProtocol_CSV);
 
     String xml = propset->print();

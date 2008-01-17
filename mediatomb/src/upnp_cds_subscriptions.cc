@@ -52,7 +52,7 @@ void ContentDirectoryService::process_subscription_request(zmm::Ref<Subscription
     log_debug("start\n");
    
     propset = UpnpXML_CreateEventPropertySet();
-    property = propset->getFirstChild();
+    property = propset->getFirstElementChild();
     property->appendTextChild(_("SystemUpdateID"), _("") + systemUpdateID);
     Ref<CdsObject> obj = Storage::getInstance()->loadObject(0);
     Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
@@ -84,7 +84,7 @@ void ContentDirectoryService::subscription_update(String containerUpdateIDs_CSV)
     systemUpdateID++;
 
     propset = UpnpXML_CreateEventPropertySet();
-    property = propset->getFirstChild();
+    property = propset->getFirstElementChild();
     property->appendTextChild(_("ContainerUpdateIDs"), containerUpdateIDs_CSV); 
     property->appendTextChild(_("SystemUpdateID"), _("") + systemUpdateID);
 

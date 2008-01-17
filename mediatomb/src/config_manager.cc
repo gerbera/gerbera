@@ -184,13 +184,13 @@ String ConfigManager::createDefaultConfig(String userhome)
     Ref<Element>accounts(new Element(_("accounts")));
     accounts->addAttribute(_("enabled"), _(DEFAULT_ACCOUNTS_EN_VALUE));
     accounts->addAttribute(_("session-timeout"), String::from(DEFAULT_SESSION_TIMEOUT));
-    ui->appendChild(accounts);
+    ui->appendElementChild(accounts);
     
-    server->appendChild(ui);
+    server->appendElementChild(ui);
     server->appendTextChild(_("name"), _(PACKAGE_NAME));
     
     Ref<Element> udn(new Element(_("udn")));
-    server->appendChild(udn);
+    server->appendElementChild(udn);
 
     server->appendTextChild(_("home"), homepath);
     server->appendTextChild(_("webroot"), prefix_dir + 
@@ -202,7 +202,7 @@ String ConfigManager::createDefaultConfig(String userhome)
     Ref<Element> sqlite3(new Element(_("sqlite3")));
     sqlite3->addAttribute(_("enabled"), _("yes"));
     sqlite3->appendTextChild(_("database-file"), _(DEFAULT_SQLITE3_DB_FILENAME));
-    storage->appendChild(sqlite3);
+    storage->appendElementChild(sqlite3);
 #else
     Ref<Element>mysql(new Element(_("mysql")));
     mysql->addAttribute(_("enabled"), _("yes"));
@@ -214,15 +214,15 @@ String ConfigManager::createDefaultConfig(String userhome)
     storage->appendChild(mysql);
     mysql_flag = true;
 #endif
-    server->appendChild(storage);
-    config->appendChild(server);
+    server->appendElementChild(storage);
+    config->appendElementChild(server);
 
     Ref<Element> import(new Element(_("import")));
     import->addAttribute(_("hidden-files"), _(DEFAULT_HIDDEN_FILES_VALUE));
 
     Ref<Element> scripting(new Element(_("scripting")));
     scripting->addAttribute(_("script-charset"), _(DEFAULT_JS_CHARSET));
-    import->appendChild(scripting);
+    import->appendElementChild(scripting);
 
     Ref<Element> layout(new Element(_("virtual-layout")));
     layout->addAttribute(_("type"), _(DEFAULT_LAYOUT_TYPE));
@@ -247,7 +247,7 @@ String ConfigManager::createDefaultConfig(String userhome)
                 _(DEFAULT_PLAYLISTS_SCRIPT));
 
 #endif
-    scripting->appendChild(layout);
+    scripting->appendElementChild(layout);
 
     String map_file = prefix_dir + DIR_SEPARATOR + CONFIG_MAPPINGS_TEMPLATE;
 
@@ -256,7 +256,7 @@ String ConfigManager::createDefaultConfig(String userhome)
         Ref<Parser> parser(new Parser());
         Ref<Element> mappings(new Element(_("mappings")));
         mappings = parser->parseFile(map_file);
-        import->appendChild(mappings);
+        import->appendElementChild(mappings);
     }
     catch (ParseException pe)
     {
@@ -272,7 +272,7 @@ String ConfigManager::createDefaultConfig(String userhome)
         log_error("Could not import mapping template file from %s\n",
                 map_file.c_str());
     }
-    config->appendChild(import);
+    config->appendElementChild(import);
 
     save_text(config_filename, config->print());
     log_info("MediaTomb configuration was created in: %s\n", 
@@ -352,7 +352,7 @@ void ConfigManager::validate(String serverhome)
     if (root->getName() != "config")
         throw _Exception(_("Error in config file: <config> tag not found"));
 
-    if (root->getChild(_("server")) == nil)
+    if (root->getChildByName(_("server")) == nil)
         throw _Exception(_("Error in config file: <server> tag not found"));
 
     // now go through the mandatory parameters, if something is missing
@@ -602,7 +602,7 @@ void ConfigManager::validate(String serverhome)
         bool default_found = false;
         for (int j = 0; j < element->childCount(); j++)
         {
-            Ref<Element> child = element->getChild(j);
+            Ref<Element> child = RefCast(element->getChild(j), Element);
             if (child->getName() == "option")
             {
                 i = child->getText().toInt();
@@ -626,7 +626,7 @@ void ConfigManager::validate(String serverhome)
     Ref<Array<StringBase> > menu_opts (new Array<StringBase>());
     for (int j = 0; j < element->childCount(); j++)
     {
-        Ref<Element> child = element->getChild(j);
+        Ref<Element> child = RefCast(element->getChild(j), Element);
         if (child->getName() == "option")
             menu_opts->append(child->getText());
     }
@@ -1223,11 +1223,11 @@ void ConfigManager::prepare_udn()
     if (root->getName() != "config")
         return;
 
-    Ref<Element> server = root->getChild(_("server"));
+    Ref<Element> server = root->getChildByName(_("server"));
     if (server == nil)
         return;
 
-    Ref<Element> element = server->getChild(_("udn"));
+    Ref<Element> element = server->getChildByName(_("udn"));
     if (element == nil || element->getText() == nil || element->getText() == "")
     {
         char   uuid_str[37];
@@ -1324,7 +1324,7 @@ String ConfigManager::getOption(String xpath, String def)
     for (i = 0; i < parts->size(); i++)
     {
         String part = parts->get(i);
-        child = cur->getChild(part);
+        child = cur->getChildByName(part);
         if (child == nil)
             break;
         cur = child;
@@ -1334,7 +1334,7 @@ String ConfigManager::getOption(String xpath, String def)
     {
         String part = parts->get(i);
         child = Ref<Element>(new Element(part));
-        cur->appendChild(child);
+        cur->appendElementChild(child);
         cur = child;
     }
     
@@ -1445,7 +1445,7 @@ Ref<Dictionary> ConfigManager::createDictionaryFromNodeset(Ref<Element> element,
     {
         for (int i = 0; i < element->childCount(); i++)
         {
-            Ref<Element> child = element->getChild(i);
+            Ref<Element> child = RefCast(element->getChild(i), Element);
             if (child->getName() == nodeName)
             {
                 key = child->getAttribute(keyAttr);
@@ -1478,10 +1478,10 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
 
     Ref<Array<DictionaryElement> > mt_mappings(new Array<DictionaryElement>());
 
-    Ref<Element> mappings = element->getChild(_("mappings"));
+    Ref<Element> mappings = element->getChildByName(_("mappings"));
     if (mappings != nil)
     {
-        mtype_profile = mappings->getChild(_("mimetype-profile"));
+        mtype_profile = mappings->getChildByName(_("mimetype-profile"));
 
         String mt;
         String pname;
@@ -1490,7 +1490,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
         {
             for (int e = 0; e < mtype_profile->childCount(); e++)
             {
-                Ref<Element> child = mtype_profile->getChild(e);
+                Ref<Element> child = RefCast(mtype_profile->getChild(e), Element);
                 if (child->getName() == "transcode")
                 {
                     mt = child->getAttribute(_("mimetype"));
@@ -1529,13 +1529,13 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
     }
 */
 
-    Ref<Element> profiles = element->getChild(_("profiles"));
+    Ref<Element> profiles = element->getChildByName(_("profiles"));
     if (profiles == nil)
         return list;
 
     for (int i = 0; i < profiles->childCount(); i++)
     {
-        Ref<Element> child = profiles->getChild(i);
+        Ref<Element> child = RefCast(profiles->getChild(i), Element);
         if (child->getName() != "profile")
             continue;
 
@@ -1571,7 +1571,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
             throw _Exception(_("error in configuration: invalid target mimetype in transcoding profile"));
         prof->setTargetMimeType(param);
 
-        if (child->getChild(_("resolution")) != nil)
+        if (child->getChildByName(_("resolution")) != nil)
         {
             param = child->getChildText(_("resolution"));
             if (string_ok(param))
@@ -1581,7 +1581,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
             }
         }
 
-        if (child->getChild(_("accept-url")) != nil)
+        if (child->getChildByName(_("accept-url")) != nil)
         {
             param = child->getChildText(_("accept-url"));
             if (!validateYesNo(param))
@@ -1593,7 +1593,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                 prof->setAcceptURL(false);
         }
 
-        if (child->getChild(_("hide-original-resource")) != nil)
+        if (child->getChildByName(_("hide-original-resource")) != nil)
         {
             param = child->getChildText(_("hide-original-resource"));
             if (!validateYesNo(param))
@@ -1605,7 +1605,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                 prof->setHideOriginalResource(false);
         }
 
-        if (child->getChild(_("fake-content-length")) != nil)
+        if (child->getChildByName(_("fake-content-length")) != nil)
         {
             param = child->getChildText(_("fake-content-length"));
             if (!validateYesNo(param))
@@ -1616,11 +1616,11 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
             else
                 prof->setFakeContentLength(false);
         }
-
-        if (child->getChild(_("theora")) != nil)
+        
+        if (child->getChildByName(_("theora")) != nil)
             prof->setTheora(true);
 
-        if (child->getChild(_("first-resource")) != nil)
+        if (child->getChildByName(_("first-resource")) != nil)
         {
             param = child->getChildText(_("first-resource"));
             if (!validateYesNo(param))
@@ -1633,7 +1633,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                 prof->setFirstResource(false);
         }
 
-        Ref<Element> sub = child->getChild(_("agent"));
+        Ref<Element> sub = child->getChildByName(_("agent"));
         if (sub == nil)
             throw _Exception(_("error in configuration: transcoding profile ") +
                     prof->getName() + 
@@ -1653,7 +1653,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
 
         prof->setArguments(param);
 
-        sub = child->getChild(_("buffer")); 
+        sub = child->getChildByName(_("buffer")); 
         if (sub == nil)
             throw _Exception(_("error in configuration: transcoding profile ") +
                     prof->getName() + 
@@ -1745,7 +1745,7 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
         hidden = false;
         recursive = false;
 
-        Ref<Element> child = element->getChild(i);
+        Ref<Element> child = RefCast(element->getChild(i), Element);
         if (child->getName() == "directory")
         {
             location = child->getAttribute(_("location"));
@@ -1936,7 +1936,7 @@ Ref<Array<StringBase> > ConfigManager::createArrayFromNodeset(Ref<mxml::Element>
     {
         for (int i = 0; i < element->childCount(); i++)
         {
-            Ref<Element> child = element->getChild(i);
+            Ref<Element> child = RefCast(element->getChild(i), Element);
             if (child->getName() == nodeName)
             {
                 attrValue = child->getAttribute(attrName);
@@ -2010,7 +2010,7 @@ Ref<Array<Object> > ConfigManager::createServiceTaskList(service_type_t service,
         Ref<YouTubeService> yt(new YouTubeService());
         for (int i = 0; i < element->childCount(); i++)
         {
-            Ref<Object> option = yt->defineServiceTask(element->getChild(i));
+            Ref<Object> option = yt->defineServiceTask(RefCast(element->getChild(i), Element));
             arr->append(option);
         }
     }

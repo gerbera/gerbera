@@ -88,7 +88,7 @@ void web::auth::process()
     {
         Ref<ConfigManager> cm = ConfigManager::getInstance();
         Ref<Element> config (new Element(_("config")));
-        root->appendChild(config);
+        root->appendElementChild(config);
         config->addAttribute(_("poll-when-idle"), 
             (cm->getBoolOption(
                           CFG_SERVER_UI_POLL_WHEN_IDLE) ? _("yes") : _("no")));
@@ -107,7 +107,7 @@ void web::auth::process()
             ipp->appendTextChild(_("option"), menu_opts->get(i));
         }
 
-        config->appendChild(ipp);
+        config->appendElementChild(ipp);
 #ifdef HAVE_INOTIFY
         config->addAttribute(_("have-inotify"), _("1"));
 #else

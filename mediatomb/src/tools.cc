@@ -391,14 +391,25 @@ String mime_types_to_CSV(Ref<Array<StringBase> > mimeTypes)
 
 String mt_strerror(int mt_errno)
 {
-    /*
+#ifdef DONT_USE_YET_HAVE_STRERROR_R
     char *buffer = (char *)MALLOC(512);
-    char *err_str = strerror_r(errno, buffer, 512);
+    char *err_str;
+    #ifdef STRERROR_R_CHAR_P
+        err_str = strerror_r(errno, buffer, 512);
+        if (err_str == NULL)
+            err_str = buffer;
+    #else
+        int ret = strerror_r(errno, buffer, 512);
+        if (ret < 0)
+            return _("cannot get error string: error while calling XSI-compliant strerror_r");
+        err_str = buffer;
+    #endif
     String errStr(err_str);
     FREE(buffer);
     return errStr;
-    */
+#else
     return String(strerror(errno));
+#endif
 }
 
 String read_text_file(String path)

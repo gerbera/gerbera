@@ -61,7 +61,7 @@ void web::items::process()
     Ref<Storage> storage = Storage::getInstance();
     Ref<Element> items (new Element(_("items")));
     items->addAttribute(_("ofId"), String::from(parentID));
-    root->appendChild(items);
+    root->appendElementChild(items);
     Ref<CdsObject> obj;
     try
     {
@@ -149,7 +149,7 @@ void web::items::process()
         item->appendTextChild(_("title"), obj->getTitle());
         item->appendTextChild(_("res"), CdsResourceManager::getFirstResource(RefCast(obj, CdsItem)));
         item->appendTextChild(_("virtual"), obj->isVirtual() ? _("1") : _("0"));
-        items->appendChild(item);
+        items->appendElementChild(item);
         //}
     }
 }

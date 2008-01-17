@@ -63,7 +63,7 @@ void web::containers::process()
 
     if (string_ok(param(_("select_it"))))
         containers->addAttribute(_("select_it"), param(_("select_it")));
-    root->appendChild(containers);
+    root->appendElementChild(containers);
     
     Ref<BrowseParam> param(new BrowseParam(parentID, BROWSE_DIRECT_CHILDREN | BROWSE_CONTAINERS));
     Ref<Array<CdsObject> > arr;
@@ -104,7 +104,7 @@ void web::containers::process()
         }
         ce->addAttribute(_("autoscanMode"), String::from(autoscanMode));
         ce->setText(cont->getTitle());
-        containers->appendChild(ce);
+        containers->appendElementChild(ce);
         //}
     }
 }

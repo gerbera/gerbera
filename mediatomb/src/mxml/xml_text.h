@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    mxml.h - this file is part of MediaTomb.
+    xml_text.h - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -27,23 +27,34 @@
     $Id$
 */
 
-/// \file mxml.h
+/// \file xml_text.h
 
-#ifndef __MXML_H__
-#define __MXML_H__
+#ifndef __MXML_XML_TEXT_H__
+#define __MXML_XML_TEXT_H__
 
 #include "zmmf/zmmf.h"
 
-#include "attribute.h"
-#include "context.h"
-#include "node.h"
-#include "element.h"
-#include "xml_text.h"
-#include "comment.h"
-#include "fileinput.h"
-#include "input.h"
-#include "parseexception.h"
-#include "parser.h"
-#include "stringinput.h"
+#include "mxml.h"
 
-#endif // __MXML_H__
+#include "node.h"
+
+namespace mxml
+{
+
+class Text : public Node
+{
+protected:
+    zmm::String text;
+
+public:
+    Text(zmm::String text);
+    inline zmm::String getText() { return text; }
+    inline void setText(zmm::String text) { this->text = text; }
+
+protected:
+    virtual void print_internal(zmm::Ref<zmm::StringBuffer> buf, int indent);
+};
+
+} // namespace
+
+#endif // __MXML_XML_TEXT_H__

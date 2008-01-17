@@ -56,7 +56,7 @@ void XMLCALL Parser::element_start(void *userdata, const char *name, const char 
         parser->root = el;
     else
     {
-        parser->curEl->appendChild(el);
+        parser->curEl->appendElementChild(el);
         parser->elements->push(parser->curEl);
     }
     parser->curEl = el;
@@ -72,10 +72,21 @@ void XMLCALL Parser::character_data(void *userdata, const XML_Char *s, int len)
 {
     Parser *parser = (Parser *)userdata;
     String text = String(s, len);
-    if (string_ok(trim_string(text)))
+    if (string_ok(text))
     {
-        text = parser->curEl->getText() + String(s, len);
-        parser->curEl->setText(text);
+        Ref<Text> textEl(new Text(text));
+        parser->curEl->appendChild(RefCast(textEl, Node));
+    }
+}
+
+void XMLCALL Parser::comment_callback(void *userdata, const XML_Char *s)
+{
+    Parser *parser = (Parser *)userdata;
+    String text = String(s);
+    if (string_ok(text))
+    {
+        Ref<Comment> cm(new Comment(text));
+        parser->curEl->appendChild(RefCast(cm, Node));
     }
 }
 
@@ -105,6 +116,7 @@ Ref<Element> Parser::parse(Ref<Context> ctx, String input)
     XML_SetUserData(parser, this);
     XML_SetElementHandler(parser, Parser::element_start, Parser::element_end);
     XML_SetCharacterDataHandler(parser, Parser::character_data);
+    XML_SetCommentHandler(parser, Parser::comment_callback);
 
     elements = Ref<ObjectStack<Element> >(new ObjectStack<Element>(8));
 

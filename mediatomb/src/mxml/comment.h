@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    element.h - this file is part of MediaTomb.
+    comment.h - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -27,10 +27,10 @@
     $Id$
 */
 
-/// \file element.h
+/// \file comment.h
 
-#ifndef __MXML_ELEMENT_H__
-#define __MXML_ELEMENT_H__
+#ifndef __MXML_COMMENT_H__
+#define __MXML_COMMENT_H__
 
 #include "zmmf/zmmf.h"
 
@@ -41,44 +41,22 @@
 namespace mxml
 {
 
-class Element : public Node
+class Comment : public Node
 {
 protected:
     zmm::String name;
+    zmm::String text;
     zmm::Ref<zmm::Array<Attribute> > attributes;
 
 public:
-    Element(zmm::String name);
-    Element(zmm::String name, zmm::Ref<Context> context);
-    zmm::String getAttribute(zmm::String name);
-    void addAttribute(zmm::Ref<Attribute> attr);
-    void addAttribute(zmm::String name, zmm::String value);
-    void setAttribute(zmm::String name, zmm::String value);
-    zmm::String getText();
+    Comment(zmm::String text);
+    inline zmm::String getText() { return text; }
+    inline void setText(zmm::String text) { this->text = text; }
 
-    inline zmm::String getName() { return name; }
-    void setName(zmm::String name) { this->name = name; }
-
-    int attributeCount();
-    zmm::Ref<Attribute> getAttribute(int index);
-        
-    void setText(zmm::String text);
-
-    zmm::Ref<Element> getFirstElementChild() { return getElementChild(0); }
-    zmm::Ref<Element> getElementChild(int index) { return RefCast(getChild(index, mxml_node_element), Element); }
-    int elementChildCount() { return childCount(mxml_node_element); }
-    
-    void appendElementChild(zmm::Ref<Element> child) { appendChild(RefCast(child, Node)); };
-    void appendTextChild(zmm::String name, zmm::String text);
-
-    zmm::Ref<Element> getChildByName(zmm::String name);
-    zmm::String getChildText(zmm::String name);
-    
 protected:
     virtual void print_internal(zmm::Ref<zmm::StringBuffer> buf, int indent);
 };
 
-
 } // namespace
 
-#endif // __MXML_ELEMENT_H__
+#endif // __MXML_COMMENT_H__

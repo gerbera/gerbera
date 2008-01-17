@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    parser.h - this file is part of MediaTomb.
+    node.h - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -27,55 +27,56 @@
     $Id$
 */
 
-/// \file parser.h
+/// \file node.h
 
-#ifndef __MXML_PARSER_H__
-#define __MXML_PARSER_H__
+#ifndef __MXML_NODE_H__
+#define __MXML_NODE_H__
 
 #include "zmmf/zmmf.h"
 
-#ifdef HAVE_EXPAT
-#include <expat.h>
-#include "zmmf/object_stack.h"
-#endif
+#include "mxml.h"
+
+
 namespace mxml
 {
 
-class Element;
-
-class Context;
-
-#ifndef HAVE_EXPAT
-    class Input;
-#endif
-    
-class Parser : public zmm::Object
+typedef enum mxml_node_types
 {
-public:
-    Parser();
-    zmm::Ref<Element> parseFile(zmm::String);
-    zmm::Ref<Element> parseString(zmm::String);
-
-protected:
-
-#ifndef HAVE_EXPAT
-    zmm::Ref<Element> parse(zmm::Ref<Context> ctx, zmm::Ref<Input> input,
-                            zmm::String parentTag, int state);
-#else
-    zmm::Ref<Element> parse(zmm::Ref<Context> ctx, zmm::String input);
-
-    zmm::Ref<zmm::ObjectStack<Element> > elements;
-    zmm::Ref<Element> root;
-    zmm::Ref<Element> curEl;
-
-    static void XMLCALL element_start(void *userdata, const char *name, const char **attrs);
-    static void XMLCALL element_end(void *userdata, const char *name);
-    static void XMLCALL character_data(void *userdata, const XML_Char *s, int len);
-    static void XMLCALL comment_callback(void *userdata, const XML_Char *s);
-#endif
-
+    mxml_node_all,
+    mxml_node_element,
+    mxml_node_text,
+    mxml_node_comment
 };
 
-}
+class Node : public zmm::Object
+{
+protected:
+    zmm::Ref<zmm::Array<Node> > children;
+    zmm::Ref<Context> context;
+    enum mxml_node_types type;
 
-#endif // __MXML_PARSER_H__
+public:
+    
+    enum mxml_node_types getType() { return type; }
+    //virtual ~Node() {};
+    
+    int childCount(enum mxml_node_types type = mxml_node_all);
+    zmm::Ref<Node> getChild(int index, enum mxml_node_types type = mxml_node_all);
+    zmm::Ref<Node> getFirstChild(enum mxml_node_types type = mxml_node_all) { return getChild(0, type); }
+
+    
+    virtual void appendChild(zmm::Ref<Node> child);
+
+    virtual zmm::String print();
+    
+
+//protected:
+    virtual void print_internal(zmm::Ref<zmm::StringBuffer> buf, int indent) = 0;
+protected:
+    static zmm::String escape(zmm::String str);
+};
+
+
+} // namespace
+
+#endif // __MXML_NODE_H__

@@ -62,7 +62,7 @@ void web::directories::process()
     containers->addAttribute(_("ofId"), parentID);
     containers->addAttribute(_("select_it"), param(_("select_it")));
     containers->addAttribute(_("type"), _("f"));
-    root->appendChild(containers);
+    root->appendElementChild(containers);
     
     Ref<Filesystem> fs(new Filesystem());
     
@@ -100,6 +100,6 @@ void web::directories::process()
 
         Ref<StringConverter> f2i = StringConverter::f2i();
         ce->setText(f2i->convert(filename));
-        containers->appendChild(ce);
+        containers->appendElementChild(ce);
     }
 }

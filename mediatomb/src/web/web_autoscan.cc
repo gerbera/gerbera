@@ -68,7 +68,7 @@ void web::autoscan::process()
     {
         bool fromFs = boolParam(_("from_fs"));
         Ref<Element> autoscan (new Element(_("autoscan")));
-        root->appendChild(autoscan);
+        root->appendElementChild(autoscan);
         if (fromFs)
         {
             autoscan->appendTextChild(_("from_fs"), _("1"));
@@ -170,9 +170,9 @@ void web::autoscan::process()
             autoscanEl->appendTextChild(_("scan_mode"), AutoscanDirectory::mapScanmode(autoscanDir->getScanMode()));
             autoscanEl->appendTextChild(_("from_config"), autoscanDir->persistent() ? _("1") : _("0"));
             //autoscanEl->appendTextChild(_("scan_level"), AutoscanDirectory::mapScanlevel(autoscanDir->getScanLevel()));
-            autoscansEl->appendChild(autoscanEl);
+            autoscansEl->appendElementChild(autoscanEl);
         }
-        root->appendChild(autoscansEl);
+        root->appendElementChild(autoscansEl);
     }
     else
         throw _Exception(_("web:autoscan called with illegal action"));

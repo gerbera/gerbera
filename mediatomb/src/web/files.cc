@@ -61,7 +61,7 @@ void web::files::process()
     Ref<Element> files(new Element(_("files")));
     files->addAttribute(_("ofId"), parentID);
     files->addAttribute(_("location"), path);
-    root->appendChild(files);
+    root->appendElementChild(files);
     
     Ref<Filesystem> fs(new Filesystem());
     Ref<Array<FsObject> > arr;
@@ -92,6 +92,6 @@ void web::files::process()
         
         Ref<StringConverter> f2i = StringConverter::f2i();
         fe->setText(f2i->convert(filename));
-        files->appendChild(fe);
+        files->appendElementChild(fe);
     }
 }

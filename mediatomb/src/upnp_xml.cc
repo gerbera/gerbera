@@ -188,7 +188,7 @@ Ref<Element> UpnpXML_CreateEventPropertySet()
 
     Ref<Element> property(new Element(_("e:property")));
 
-    propset->appendChild(property);
+    propset->appendElementChild(property);
     return propset;
 }
 
@@ -205,7 +205,7 @@ Ref<Element> UpnpXML_RenderDeviceDescription(String presentationURL)
     specVersion->appendTextChild(_("major"), _(DESC_SPEC_VERSION_MAJOR));
     specVersion->appendTextChild(_("minor"), _(DESC_SPEC_VERSION_MINOR));
 
-    root->appendChild(specVersion);
+    root->appendElementChild(specVersion);
 
 //    root->appendTextChild("URLBase", "");
 
@@ -240,7 +240,7 @@ Ref<Element> UpnpXML_RenderDeviceDescription(String presentationURL)
     icon120_png->appendTextChild(_("height"), _("120"));
     icon120_png->appendTextChild(_("depth"), _("24"));
     icon120_png->appendTextChild(_("url"), _(DESC_ICON120_PNG));
-    iconList->appendChild(icon120_png);
+    iconList->appendElementChild(icon120_png);
 
     Ref<Element> icon120_bmp(new Element(_("icon")));
     icon120_bmp->appendTextChild(_("mimetype"), _(DESC_ICON_BMP_MIMETYPE));
@@ -248,7 +248,7 @@ Ref<Element> UpnpXML_RenderDeviceDescription(String presentationURL)
     icon120_bmp->appendTextChild(_("height"), _("120"));
     icon120_bmp->appendTextChild(_("depth"), _("24"));
     icon120_bmp->appendTextChild(_("url"), _(DESC_ICON120_BMP));
-    iconList->appendChild(icon120_bmp);
+    iconList->appendElementChild(icon120_bmp);
 
     Ref<Element> icon120_jpg(new Element(_("icon")));
     icon120_jpg->appendTextChild(_("mimetype"), _(DESC_ICON_JPG_MIMETYPE));
@@ -256,7 +256,7 @@ Ref<Element> UpnpXML_RenderDeviceDescription(String presentationURL)
     icon120_jpg->appendTextChild(_("height"), _("120"));
     icon120_jpg->appendTextChild(_("depth"), _("24"));
     icon120_jpg->appendTextChild(_("url"), _(DESC_ICON120_JPG));
-    iconList->appendChild(icon120_jpg);
+    iconList->appendElementChild(icon120_jpg);
 
     Ref<Element> icon48_png(new Element(_("icon")));
     icon48_png->appendTextChild(_("mimetype"), _(DESC_ICON_PNG_MIMETYPE));
@@ -264,7 +264,7 @@ Ref<Element> UpnpXML_RenderDeviceDescription(String presentationURL)
     icon48_png->appendTextChild(_("height"), _("48"));
     icon48_png->appendTextChild(_("depth"), _("24"));
     icon48_png->appendTextChild(_("url"), _(DESC_ICON48_PNG));
-    iconList->appendChild(icon48_png);
+    iconList->appendElementChild(icon48_png);
 
     Ref<Element> icon48_bmp(new Element(_("icon")));
     icon48_bmp->appendTextChild(_("mimetype"), _(DESC_ICON_BMP_MIMETYPE));
@@ -272,7 +272,7 @@ Ref<Element> UpnpXML_RenderDeviceDescription(String presentationURL)
     icon48_bmp->appendTextChild(_("height"), _("48"));
     icon48_bmp->appendTextChild(_("depth"), _("24"));
     icon48_bmp->appendTextChild(_("url"), _(DESC_ICON48_BMP));
-    iconList->appendChild(icon48_bmp);
+    iconList->appendElementChild(icon48_bmp);
 
     Ref<Element> icon48_jpg(new Element(_("icon")));
     icon48_jpg->appendTextChild(_("mimetype"), _(DESC_ICON_JPG_MIMETYPE));
@@ -280,7 +280,7 @@ Ref<Element> UpnpXML_RenderDeviceDescription(String presentationURL)
     icon48_jpg->appendTextChild(_("height"), _("48"));
     icon48_jpg->appendTextChild(_("depth"), _("24"));
     icon48_jpg->appendTextChild(_("url"), _(DESC_ICON48_JPG));
-    iconList->appendChild(icon48_jpg);
+    iconList->appendElementChild(icon48_jpg);
 
     Ref<Element> icon32_png(new Element(_("icon")));
     icon32_png->appendTextChild(_("mimetype"), _(DESC_ICON_PNG_MIMETYPE));
@@ -288,7 +288,7 @@ Ref<Element> UpnpXML_RenderDeviceDescription(String presentationURL)
     icon32_png->appendTextChild(_("height"), _("32"));
     icon32_png->appendTextChild(_("depth"), _("8"));
     icon32_png->appendTextChild(_("url"), _(DESC_ICON32_PNG));
-    iconList->appendChild(icon32_png);
+    iconList->appendElementChild(icon32_png);
 
     Ref<Element> icon32_bmp(new Element(_("icon")));
     icon32_bmp->appendTextChild(_("mimetype"), _(DESC_ICON_BMP_MIMETYPE));
@@ -296,7 +296,7 @@ Ref<Element> UpnpXML_RenderDeviceDescription(String presentationURL)
     icon32_bmp->appendTextChild(_("height"), _("32"));
     icon32_bmp->appendTextChild(_("depth"), _("8"));
     icon32_bmp->appendTextChild(_("url"), _(DESC_ICON32_BMP));
-    iconList->appendChild(icon32_bmp);
+    iconList->appendElementChild(icon32_bmp);
 
     Ref<Element> icon32_jpg(new Element(_("icon")));
     icon32_jpg->appendTextChild(_("mimetype"), _(DESC_ICON_JPG_MIMETYPE));
@@ -304,9 +304,9 @@ Ref<Element> UpnpXML_RenderDeviceDescription(String presentationURL)
     icon32_jpg->appendTextChild(_("height"), _("32"));
     icon32_jpg->appendTextChild(_("depth"), _("8"));
     icon32_jpg->appendTextChild(_("url"), _(DESC_ICON32_JPG));
-    iconList->appendChild(icon32_jpg);
+    iconList->appendElementChild(icon32_jpg);
 
-    device->appendChild(iconList);
+    device->appendElementChild(iconList);
 
     Ref<Element> serviceList(new Element(_("serviceList")));
 
@@ -317,7 +317,7 @@ Ref<Element> UpnpXML_RenderDeviceDescription(String presentationURL)
     serviceCM->appendTextChild(_("controlURL"), _(DESC_CM_CONTROL_URL));
     serviceCM->appendTextChild(_("eventSubURL"), _(DESC_CM_EVENT_URL));
 
-    serviceList->appendChild(serviceCM);
+    serviceList->appendElementChild(serviceCM);
 
     Ref<Element> serviceCDS(new Element(_("service")));
     serviceCDS->appendTextChild(_("serviceType"), _(DESC_CDS_SERVICE_TYPE));
@@ -326,7 +326,7 @@ Ref<Element> UpnpXML_RenderDeviceDescription(String presentationURL)
     serviceCDS->appendTextChild(_("controlURL"), _(DESC_CDS_CONTROL_URL));
     serviceCDS->appendTextChild(_("eventSubURL"), _(DESC_CDS_EVENT_URL));
 
-    serviceList->appendChild(serviceCDS);
+    serviceList->appendElementChild(serviceCDS);
 
 #if defined(ENABLE_MRREG)
     // media receiver registrar service for the Xbox 360
@@ -337,12 +337,12 @@ Ref<Element> UpnpXML_RenderDeviceDescription(String presentationURL)
     serviceMRREG->appendTextChild(_("controlURL"), _(DESC_MRREG_CONTROL_URL));
     serviceMRREG->appendTextChild(_("eventSubURL"), _(DESC_MRREG_EVENT_URL));
 
-    serviceList->appendChild(serviceMRREG);
+    serviceList->appendElementChild(serviceMRREG);
 #endif    
     
-    device->appendChild(serviceList);
+    device->appendElementChild(serviceList);
 
-    root->appendChild(device);
+    root->appendElementChild(device);
 
     return root;
 }

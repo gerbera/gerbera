@@ -82,6 +82,8 @@ libmediatomb_a_SOURCES = \
 ../src/mt_inotify.h \
 ../src/mxml/attribute.cc \
 ../src/mxml/attribute.h \
+../src/mxml/comment.cc \
+../src/mxml/comment.h \
 ../src/mxml/context.cc \
 ../src/mxml/context.h \
 ../src/mxml/element.cc \
@@ -90,6 +92,8 @@ libmediatomb_a_SOURCES = \
 ../src/mxml/fileinput.h \
 ../src/mxml/input.h \
 ../src/mxml/mxml.h \
+../src/mxml/node.cc \
+../src/mxml/node.h \
 ../src/mxml/parseexception.cc \
 ../src/mxml/parseexception.h \
 ../src/mxml/parser.cc \
@@ -97,6 +101,8 @@ libmediatomb_a_SOURCES = \
 ../src/mxml/parser.h \
 ../src/mxml/stringinput.cc \
 ../src/mxml/stringinput.h \
+../src/mxml/xml_text.cc \
+../src/mxml/xml_text.h \
 ../src/object_dictionary.h \
 ../src/online_service.cc \
 ../src/online_service.h \

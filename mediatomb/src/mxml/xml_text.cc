@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    tasks.cc - this file is part of MediaTomb.
+    xml_text.cc - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -27,45 +27,26 @@
     $Id$
 */
 
-/// \file tasks.cc
+/// \file xml_text.cc
 
 #ifdef HAVE_CONFIG_H
     #include "autoconfig.h"
 #endif
 
-#include "pages.h"
-#include "common.h"
-#include "content_manager.h"
+#include "mxml.h"
+#include "xml_text.h"
 
 using namespace zmm;
 using namespace mxml;
 
-void web::tasks::process()
+Text::Text(String text) : Node()
 {
-    check_request();
-    String action = param(_("action"));
-    if (! string_ok(action))
-        throw _Exception(_("web:tasks called with illegal action"));
-    Ref<ContentManager> cm = ContentManager::getInstance();
-    
-    if (action == "list")
-    {
-        Ref<Element> tasksEl (new Element(_("tasks")));
-        root->appendElementChild(tasksEl); // inherited from WebRequestHandler
-        Ref<Array<CMTask> > taskList = cm->getTasklist();
-        if (taskList == nil)
-            return;
-        int count = taskList->size();
-        for (int i = 0; i < count; i++)
-        {
-            appendTask(tasksEl, taskList->get(i));
-        }
-    }
-    else if (action == "cancel")
-    {
-        int taskID = intParam(_("taskID"));
-        cm->invalidateTask(taskID);
-    }
-    else
-        throw _Exception(_("web:tasks called with illegal action"));
+    type = mxml_node_text;
+    this->text = text;
 }
+
+void Text::print_internal(Ref<StringBuffer> buf, int indent)
+{
+    *buf << escape(text);
+}
+

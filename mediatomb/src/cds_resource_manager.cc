@@ -244,7 +244,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                     aa->addAttribute(_("dlna:profileID"), _("JPEG_TN"));
                 }
 #endif
-                element->appendChild(aa);
+                element->appendElementChild(aa);
             }
             continue;
         }
@@ -328,7 +328,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
 #ifdef EXTERNAL_TRANSCODING
         if (!hide_original_resource || transcoded)
 #endif
-            element->appendChild(UpnpXML_DIDLRenderResource(url, res_attrs));
+            element->appendElementChild(UpnpXML_DIDLRenderResource(url, res_attrs));
     }
 }
 

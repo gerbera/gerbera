@@ -109,7 +109,7 @@ void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
         Ref<CdsObject> obj = arr->get(i);
         Ref<Element> didl_object = UpnpXML_DIDLRenderObject(obj, false, stringLimit);
 
-        didl_lite->appendChild(didl_object);
+        didl_lite->appendElementChild(didl_object);
     }
 
     Ref<Element> response;

@@ -200,7 +200,7 @@ void WebRequestHandler::handleUpdateIDs()
         else
         {
             Ref<Element> updateIDs(new Element(_("updateIDs")));
-            root->appendChild(updateIDs);
+            root->appendElementChild(updateIDs);
             if (session->hasUIUpdateIDs())
             {
 //                log_debug("UI updates pending...\n");
@@ -217,7 +217,7 @@ void WebRequestHandler::handleUpdateIDs()
 void WebRequestHandler::addUpdateIDs(Ref<Element> root, Ref<Session> session)
 {
     Ref<Element> updateIDsEl(new Element(_("updateIDs")));
-    root->appendChild(updateIDsEl);
+    root->appendElementChild(updateIDsEl);
     
     String updateIDs = session->getUIUpdateIDs();
     if (string_ok(updateIDs))
@@ -236,5 +236,5 @@ void WebRequestHandler::appendTask(Ref<Element> el, Ref<CMTask> task)
     taskEl->addAttribute(_("id"), String::from(task->getID()));
     taskEl->addAttribute(_("cancellable"), task->isCancellable() ? _("1") : _("0"));
     taskEl->setText(task->getDescription());
-    el->appendChild(taskEl);
+    el->appendElementChild(taskEl);
 }
