@@ -1,5 +1,5 @@
-#LyX 1.5.0beta2 created this file. For more info see http://www.lyx.org/
-\lyxformat 263
+#LyX 1.5.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 276
 \begin_document
 \begin_header
 \textclass docbook
@@ -32,7 +32,8 @@
 \paperpagestyle default
 \tracking_changes false
 \output_changes false
-\author "Jin" 
+\author "" 
+\author "" 
 \end_header
 
 \begin_body
@@ -111,7 +112,7 @@ status open
 
 \begin_layout Standard
 
-<releaseinfo>This documentation is valid for MediaTomb version 0.10.0.</releaseinfo
+<releaseinfo>This documentation is valid for MediaTomb version 0.11.0.</releaseinfo
 >
 \end_layout
 
@@ -344,6 +345,10 @@ Note: modifying the properties of the orig object will not propagate the
  add the object.
 \end_layout
 
+\begin_layout Subsubsection
+General Properties
+\end_layout
+
 \begin_layout Standard
 Here is a list of properties of an object, you can set them you create a
  new object or when you modify a copy of the 'orig' object.
@@ -481,7 +486,7 @@ OBJECT_TYPE_ITEM_EXTERNAL_URL
 \end_layout
 
 \begin_layout Standard
-Object is a link to a resource on the internet.
+Object is a link to a resource on the Internet.
 \end_layout
 
 \begin_layout Standard
@@ -625,7 +630,7 @@ status collapsed
 \end_layout
 
 \begin_layout Code
-orig.class
+orig.upnpclass
 \end_layout
 
 \begin_layout Standard
@@ -636,7 +641,7 @@ RW
 \end_layout
 
 \begin_layout Standard
-The upnp class of the item, this corresponds to upnp:class in the DIDL-Lite
+The UPnP class of the item, this corresponds to upnp:class in the DIDL-Lite
  XML.
 \end_layout
 
@@ -667,6 +672,128 @@ RO
 
 \begin_layout Standard
 Location on disk, given by the absolute path and file name.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.theora
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\emph on
+RO
+\end_layout
+
+\begin_layout Standard
+This property is a boolean value, it is non zero if the particular item
+ is of type OGG Theora.
+ This is useful to allow proper sorting of media and thus placing OGG Vorbis
+ into the Audio container and OGG Theora into the Video container.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.onlineservice
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\emph on
+RO
+\end_layout
+
+\begin_layout Standard
+Identifies if the item belongs to an online service and thus has extended
+ properties.
+ Following types are available:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+ONLINE_SERVICE_NONE
+\end_layout
+
+\begin_layout Standard
+The item does not belong to an online service and does not have extended
+ properties.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+ONLINE_SERVICE_YOUTUBE
+\end_layout
+
+\begin_layout Standard
+The item belongs to the YouTube service and has extended properties.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -919,6 +1046,35 @@ status open
 \end_layout
 
 \begin_layout Code
+orig.meta[M_REGION]
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+RW
+\end_layout
+
+\begin_layout Standard
+Region description of the item, this corresponds to upnp:region in the DIDL-Lite
+ XML.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
 orig.meta[M_TRACKNUMBER]
 \end_layout
 
@@ -931,6 +1087,63 @@ RW
 \begin_layout Standard
 Track number of the item, this corresponds to upnp:originalTrackNumber in
  the DIDL-Lite XML.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.meta[M_AUTHOR]
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+RW
+\end_layout
+
+\begin_layout Standard
+Author of the media, this corresponds to upnp:author in the DIDL-Lite XML.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.meta[M_DIRECTOR]
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+RW
+\end_layout
+
+\begin_layout Standard
+Director of the media, this corresponds to upnp:director in the DIDL-Lite
+ XML.
 \end_layout
 
 \begin_layout Standard
@@ -997,7 +1210,7 @@ status open
 \end_layout
 
 \begin_layout Code
-obj.playlistOrder
+orig.playlistOrder
 \end_layout
 
 \begin_layout Standard
@@ -1014,6 +1227,672 @@ This property is only available if the object is being created by the playlist
  Usually you will increment the number for each new object that you create
  while parsing the playlist, thus ensuring that the resulting order is the
  same as in the original playlist.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+YouTube Properties
+\end_layout
+
+\begin_layout Standard
+When the obj.onlineservice variable equals ONLINE_SERVICE_YOUTUBE the item
+ has the following additional properties:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.yt_request
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+RO
+\end_layout
+
+\begin_layout Standard
+Identifies the YouTube request type, following types are available:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+YOUTUBE_REQUEST_NONE
+\end_layout
+
+\begin_layout Standard
+No request.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+YOUTUBE_REQUEST_FAVORITE
+\end_layout
+
+\begin_layout Standard
+The item was created as a result of a favorites request.
+\end_layout
+
+\begin_layout Description
+Note: for this request orig.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME] will contain
+ the name of the associated user.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+YOUTUBE_REQUEST_BY_TAG
+\end_layout
+
+\begin_layout Standard
+The item was created as a result of a by tag request.
+\end_layout
+
+\begin_layout Description
+Note: for this request orig.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME] will contain
+ the name of the tags that were used when searching for the item.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+YOUTUBE_REQUEST_BY_USER
+\end_layout
+
+\begin_layout Standard
+The item was created as a result of a by user request.
+\end_layout
+
+\begin_layout Description
+Note: for this request orig.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME] will contain
+ the name of the associated user.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+YOUTUBE_REQUEST_FEATURED
+\end_layout
+
+\begin_layout Standard
+The item was created as a result of a featured request.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+YOUTUBE_REQUEST_BY_PLAYLIST
+\end_layout
+
+\begin_layout Standard
+The item was created as a result of a by playlist request.
+\end_layout
+
+\begin_layout Description
+Note: for this request orig.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME] will contain
+ the name of the playlist as specified in the server configuration.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+YOUTUBE_REQUEST_POPULAR
+\end_layout
+
+\begin_layout Standard
+The item was created as a result of a popular request.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+YOUTUBE_REQUEST_BY_CATEGORY_AND_TAG
+\end_layout
+
+\begin_layout Standard
+The item was created as a result of a by category and tag request.
+\end_layout
+
+\begin_layout Description
+Note: for this request orig.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME] will contain
+ the name of the category as defined by YouTube.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The following aux keys can be used to retrieve additional information about
+ the item, the data is stored in the form of strings.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.aux[YOUTUBE_AUXDATA_TAGS]
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+RO
+\end_layout
+
+\begin_layout Standard
+Contains a space separated list of tags for the particular item.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.aux[YOUTUBE_AUXDATA_AVG_RATING]
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+RO
+\end_layout
+
+\begin_layout Standard
+Contains the average rating value.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.aux[YOUTUBE_AUXDATA_AUTHOR]
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+RO
+\end_layout
+
+\begin_layout Standard
+Contains the author name.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.aux[YOUTUBE_AUXDATA_COMMENT_COUNT]
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+RO
+\end_layout
+
+\begin_layout Standard
+Contains the number of comments for the particular video on the YouTube
+ website.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.aux[YOUTUBE_AUXDATA_VIEW_COUNT]
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+RO
+\end_layout
+
+\begin_layout Standard
+Contains the view count of the video on the YouTube website.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.aux[YOUTUBE_AUXDATA_RATING_COUNT]
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+RO
+\end_layout
+
+\begin_layout Standard
+Contains the rating count of the video on the YouTube website.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.aux[YOUTUBE_AUXDATA_REQUEST]
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+RO
+\end_layout
+
+\begin_layout Standard
+Contains the name of the request that produced this item (i.e.
+ Favorites, Popular, etc.), this is the human readable representation of
+ the orig.yt_request property.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME]
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+RO
+\end_layout
+
+\begin_layout Standard
+Contains the additional name that accompanies the request, it is only set
+ for the following requests:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+YOUTUBE_REQUEST_FAVORITE
+\end_layout
+
+\begin_layout Standard
+Subname will contain the name of the associated user.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+YOUTUBE_REQUEST_BY_CATEGORY_AND_TAG
+\end_layout
+
+\begin_layout Standard
+Subname will contain the name of the category as defined by YouTube.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+YOUTUBE_REQUEST_BY_USER
+\end_layout
+
+\begin_layout Standard
+Subname will contain the name of the user.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+YOUTUBE_REQUEST_BY_PLAYLIST
+\end_layout
+
+\begin_layout Standard
+Subname will contain the name of the playlist as defined in the server configura
+tion.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+YOUTUBE_REQUEST_BY_TAG
+\end_layout
+
+\begin_layout Standard
+Subname will contain the tags as specified in the server configuration.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.aux[YOUTUBE_AUXDATA_CATEGORY]
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+RO
+\end_layout
+
+\begin_layout Standard
+Contains the name of the category of the item.
 \end_layout
 
 \begin_layout Standard
@@ -1560,13 +2439,8 @@ A string, defining where the object will be added in the database hierarchy.
  a value of '/Audio/All Music' will add the object to the Audio, All Music
  container in the server hierarchy.
  Make sure to properly escape the slash characters in container names.
- You will find more information on container chain escaping in 
-\begin_inset LatexCommand ref
-reference "escapeSlash"
-
-\end_inset
-
-.
+ You will find more information on container chain escaping later in this
+ chapter.
 \end_layout
 
 \begin_layout Standard
@@ -1850,11 +2724,6 @@ function escapeSlash(name);
 \end_layout
 
 \begin_layout Standard
-\begin_inset LatexCommand label
-name "escapeSlash"
-
-\end_inset
-
 The first function escapes slash '/' characters in a string.
  This is necessary, because the container chain is defined by a slash separated
  string, where slash has a special meaning - it defines the container hierarchy.
@@ -2599,7 +3468,8 @@ Video Content Handler
 Not much to say here...
  I think libextractor is capable of retrieving some information from video
  files, however I seldom encountered any video files populated with metadata.
- So for now we just put everything into the 'All Video' container.
+ You could also try ffmpeg to get more information, however by default we
+ keep it very simple - we just put everything into the 'All Video' container.
 \end_layout
 
 \begin_layout Code
@@ -2623,6 +3493,153 @@ function addVideo(obj)
 \end_layout
 
 \begin_layout Subsubsection
+YouTube Content Handler
+\end_layout
+
+\begin_layout Standard
+This helper function processes items that are imported from the YouTube
+ service; these items have extended properties that were described in detail
+ earlier in this document.
+ Let's have a look at how they are used:
+\end_layout
+
+\begin_layout Code
+function addYouTube(obj)
+\end_layout
+
+\begin_layout Code
+{
+\end_layout
+
+\begin_layout Code
+   var chain;
+\end_layout
+
+\begin_layout Standard
+First, we want to sort the content by average rating.
+ Remember - all properties in the obj.aux array are strings, so we will do
+ an extra conversion because we want to round the rating.
+\end_layout
+
+\begin_layout Code
+   var temp = parseInt(obj.aux[YOUTUBE_AUXDATA_AVG_RATING], 10);
+\end_layout
+
+\begin_layout Standard
+Make sure to check that we got a number.
+\end_layout
+
+\begin_layout Code
+   if (temp != Number.NaN)
+\end_layout
+
+\begin_layout Code
+   {
+\end_layout
+
+\begin_layout Code
+       temp = Math.round(temp);
+\end_layout
+
+\begin_layout Standard
+Here is the place if you want to have a different range of ratings in your
+ tree structure:
+\end_layout
+
+\begin_layout Code
+       if (temp > 3)
+\end_layout
+
+\begin_layout Code
+       {
+\end_layout
+
+\begin_layout Code
+           var chain = new Array('Online Services', 'YouTube',
+\end_layout
+
+\begin_layout Code
+                                  'Rating', temp.toString());
+\end_layout
+
+\begin_layout Code
+           addCdsObject(obj, createContainerChain(chain));
+\end_layout
+
+\begin_layout Code
+       }
+\end_layout
+
+\begin_layout Code
+   }
+\end_layout
+
+\begin_layout Standard
+Next, we process the so called request, i.e.
+ - description of the request to the YouTube service created the item.
+ Some requests may contain an additional level of refinement which can be
+ retrieved by querying the request subname key of the aux array, we will
+ make use of that.
+\end_layout
+
+\begin_layout Code
+    temp = obj.aux[YOUTUBE_AUXDATA_REQUEST];
+\end_layout
+
+\begin_layout Code
+    if (temp)
+\end_layout
+
+\begin_layout Code
+    {
+\end_layout
+
+\begin_layout Code
+        var subName = (obj.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME]);
+\end_layout
+
+\begin_layout Standard
+Make sure to check that the subname is not empty since it is only available
+ for a number of specific requests.
+\end_layout
+
+\begin_layout Code
+        if (subName)
+\end_layout
+
+\begin_layout Code
+            chain = new Array('Online Services', 'YouTube', temp, 
+\end_layout
+
+\begin_layout Code
+                              subName);
+\end_layout
+
+\begin_layout Code
+        else
+\end_layout
+
+\begin_layout Code
+            chain = new Array('Online Services', 'YouTube', temp);
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+        addCdsObject(obj, createContainerChain(chain));
+\end_layout
+
+\begin_layout Code
+    }
+\end_layout
+
+\begin_layout Code
+}
+\end_layout
+
+\begin_layout Subsubsection
 Putting it all together
 \end_layout
 
@@ -2632,11 +3649,19 @@ This is the main part of the script, it looks at the mimetype of the original
 \end_layout
 
 \begin_layout Code
-var arr = orig.mimetype.split('/'); 
+if (getPlaylistType(orig.mimetype) == '')
 \end_layout
 
 \begin_layout Code
-var mime = arr[0];
+{
+\end_layout
+
+\begin_layout Code
+    var arr = orig.mimetype.split('/'); 
+\end_layout
+
+\begin_layout Code
+    var mime = arr[0];
 \end_layout
 
 \begin_layout Code
@@ -2644,7 +3669,7 @@ var mime = arr[0];
 \end_layout
 
 \begin_layout Code
-var obj = orig;
+    var obj = orig;
 \end_layout
 
 \begin_layout Standard
@@ -2653,7 +3678,7 @@ All virtual objects are references to objects in the PC-Directory, so make
 \end_layout
 
 \begin_layout Code
-obj.refID = orig.id;
+    obj.refID = orig.id;
 \end_layout
 
 \begin_layout Code
@@ -2661,39 +3686,19 @@ obj.refID = orig.id;
 \end_layout
 
 \begin_layout Code
-if ((mime == 'audio') || (orig.mimetype == 'application/ogg')) 
+    if ((mime == 'audio')) 
 \end_layout
 
 \begin_layout Code
-{
+    {
 \end_layout
 
 \begin_layout Code
-    addAudio(obj); 
+        addAudio(obj); 
 \end_layout
 
 \begin_layout Code
-}
-\end_layout
-
-\begin_layout Code
-
-\end_layout
-
-\begin_layout Code
-if (mime == 'video') 
-\end_layout
-
-\begin_layout Code
-{
-\end_layout
-
-\begin_layout Code
-    addVideo(obj);
-\end_layout
-
-\begin_layout Code
-}
+    }
 \end_layout
 
 \begin_layout Code
@@ -2701,15 +3706,88 @@ if (mime == 'video')
 \end_layout
 
 \begin_layout Code
-if (mime == 'image') 
+    if (mime == 'video') 
 \end_layout
 
 \begin_layout Code
-{
+    {
+\end_layout
+
+\begin_layout Standard
+Currently we support the YouTube service which offers video items, so we
+ will do an extra check to sort it properly.
 \end_layout
 
 \begin_layout Code
-    addImage(obj); 
+        if (obj.onlineservice == ONLINE_SERVICE_NONE)
+\end_layout
+
+\begin_layout Code
+            addVideo(obj);
+\end_layout
+
+\begin_layout Code
+        else if (obj.onlineservice == ONLINE_SERVICE_YOUTUBE)
+\end_layout
+
+\begin_layout Code
+            addYouTube(obj);
+\end_layout
+
+\begin_layout Code
+    }
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+    if (mime == 'image') 
+\end_layout
+
+\begin_layout Code
+    {
+\end_layout
+
+\begin_layout Code
+         addImage(obj); 
+\end_layout
+
+\begin_layout Code
+    }
+\end_layout
+
+\begin_layout Standard
+We now also have OGG Theora recognition, so we can ensure that Vorbis 
+\end_layout
+
+\begin_layout Code
+    if (orig.mimetype == 'application/ogg')
+\end_layout
+
+\begin_layout Code
+    {
+\end_layout
+
+\begin_layout Code
+    if (obj.theora == 1)
+\end_layout
+
+\begin_layout Code
+            addVideo(obj);
+\end_layout
+
+\begin_layout Code
+        else
+\end_layout
+
+\begin_layout Code
+            addAudio(obj);
+\end_layout
+
+\begin_layout Code
+    }
 \end_layout
 
 \begin_layout Code
