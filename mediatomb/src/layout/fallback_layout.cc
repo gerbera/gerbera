@@ -269,24 +269,6 @@ void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
         }
     }
 
-/*
-    temp = obj->getAuxData(_(YOUTUBE_AUXDATA_TAGS));
-    if (string_ok(temp))
-    {
-        Ref<Array<StringBase> > split_temp = split_string(temp, ' ');
-        for (int i = 0; i < split_temp->size(); i++)
-        {
-            chain = _(YT_VPATH "/Tags/") + esc(split_temp->get(i));
-            id = ContentManager::getInstance()->addContainerChain(chain);
-            add(obj, id, ref_set);
-            if (!ref_set)
-            {
-                obj->setRefID(obj->getID());
-                ref_set = true;
-            }
-        }
-    }
-*/
     temp = obj->getAuxData(_(YOUTUBE_AUXDATA_REQUEST));
     if (string_ok(temp))
     {
@@ -308,7 +290,8 @@ void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
                  }
             }
             else if ((m == YT_list_by_user) || (m == YT_list_by_user) ||
-                     (m == YT_list_favorite) || (m == YT_list_by_playlist))
+                     (m == YT_list_favorite) || (m == YT_list_by_playlist) ||
+                     (m == YT_list_by_tag))
 
             {
                 String subtmp = 
@@ -317,12 +300,9 @@ void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
                     temp = temp + '/' + esc(subtmp);
             }
 
-            if (m != YT_list_by_tag)
-            {
-                chain = _(YT_VPATH) + '/' + temp;
-                id = ContentManager::getInstance()->addContainerChain(chain);
-                add(obj, id, ref_set);
-            }
+            chain = _(YT_VPATH) + '/' + temp;
+            id = ContentManager::getInstance()->addContainerChain(chain);
+            add(obj, id, ref_set);
         }
     }
 }

@@ -180,20 +180,17 @@ function addYouTube(obj)
         }
     }
 
-    if (obj.yt_request != YOUTUBE_REQUEST_BY_TAG)
+    temp = obj.aux[YOUTUBE_AUXDATA_REQUEST];
+    if (temp)
     {
-        temp = obj.aux[YOUTUBE_AUXDATA_REQUEST];
-        if (temp)
-        {
-            var subName = (obj.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME]);
+        var subName = (obj.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME]);
 
-            if (subName)
-                chain = new Array('Online Services', 'YouTube', temp, subName);
-            else
-                chain = new Array('Online Services', 'YouTube', temp);
- 
-            addCdsObject(obj, createContainerChain(chain));
-        }
+        if (subName)
+            chain = new Array('Online Services', 'YouTube', temp, subName);
+        else
+            chain = new Array('Online Services', 'YouTube', temp);
+
+        addCdsObject(obj, createContainerChain(chain));
     }
 }
 

@@ -722,6 +722,11 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
                 obj->setAuxData(_(YOUTUBE_AUXDATA_REQUEST_SUBNAME), 
                         task->playlist_name);
             }
+            else if (task->method == YT_list_by_tag)
+            {
+                obj->setAuxData(_(YOUTUBE_AUXDATA_REQUEST_SUBNAME),
+                        task->parameters->get(_(REST_PARAM_TAG)));
+            }
             
             if (layout != nil)
                 layout->processCdsObject(obj);

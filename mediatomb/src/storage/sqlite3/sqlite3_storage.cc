@@ -116,7 +116,7 @@ void Sqlite3Storage::init()
     }
     catch (Exception)
     {
-        log_error("Sqlite3 database seems to be corrupt or doesn't exist yet.\n");
+        log_warning("Sqlite3 database seems to be corrupt or doesn't exist yet.\n");
         // database seems to be corrupt or nonexistent
         if (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_STORAGE_SQLITE_RESTORE))
         {
