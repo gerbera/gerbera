@@ -105,9 +105,10 @@ String Element::getText()
         someText = true;
         *buf << text->getText();
     }
-    if (! someText)
+    if (someText)
+        return buf->toString();
+    else
         return nil;
-    return buf->toString();
 }
 
 int Element::attributeCount()

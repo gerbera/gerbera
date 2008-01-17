@@ -2008,9 +2008,9 @@ Ref<Array<Object> > ConfigManager::createServiceTaskList(service_type_t service,
     if (service == OS_YouTube)
     {
         Ref<YouTubeService> yt(new YouTubeService());
-        for (int i = 0; i < element->childCount(); i++)
+        for (int i = 0; i < element->elementChildCount(); i++)
         {
-            Ref<Object> option = yt->defineServiceTask(RefCast(element->getChild(i), Element));
+            Ref<Object> option = yt->defineServiceTask(element->getElementChild(i));
             arr->append(option);
         }
     }
