@@ -56,21 +56,9 @@ protected:
     enum mxml_node_types type;
 
 public:
-    
     enum mxml_node_types getType() { return type; }
-    //virtual ~Node() {};
-    
-    int childCount(enum mxml_node_types type = mxml_node_all);
-    zmm::Ref<Node> getChild(int index, enum mxml_node_types type = mxml_node_all);
-    zmm::Ref<Node> getFirstChild(enum mxml_node_types type = mxml_node_all) { return getChild(0, type); }
-
-    
-    virtual void appendChild(zmm::Ref<Node> child);
-
     virtual zmm::String print();
-    
 
-//protected:
     virtual void print_internal(zmm::Ref<zmm::StringBuffer> buf, int indent) = 0;
 protected:
     static zmm::String escape(zmm::String str);

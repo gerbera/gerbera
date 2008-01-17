@@ -1213,6 +1213,8 @@ void ConfigManager::validate(String serverhome)
 
     log_info("Configuration check succeeded.\n");
 
+    root->indent();
+    
     log_debug("Config file dump after validation: \n%s\n", root->print().c_str());
 }
 
@@ -1264,6 +1266,7 @@ void ConfigManager::prepare_path(String xpath, bool needDir, bool existenceUnnee
 
 void ConfigManager::save()
 {
+    root->indent();
     save_text(filename, root->print());
 }
 
@@ -1295,6 +1298,7 @@ void ConfigManager::load(String filename)
     this->filename = filename;
     Ref<Parser> parser(new Parser());
     root = parser->parseFile(filename);
+    
     if (root == nil)
     {
         throw _Exception(_("Unable to parse server configuration!"));

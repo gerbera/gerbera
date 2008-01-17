@@ -47,11 +47,6 @@ Comment::Comment(String text) : Node()
 
 void Comment::print_internal(Ref<StringBuffer> buf, int indent)
 {
-    static char *ind_str = "                                                               ";
-    static char *ind = ind_str + strlen(ind_str);
-    char *ptr = ind - indent * 2;
-    *buf << ptr;
-    
-    *buf << "<!-- " << text << " -->";
+    *buf << "<!--" << text << "-->";
 }
 

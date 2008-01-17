@@ -40,59 +40,6 @@
 using namespace zmm;
 using namespace mxml;
 
-int Node::childCount(enum mxml_node_types type)
-{
-    if (children == nil)
-        return 0;
-    
-    if (type == mxml_node_all)
-        return children->size();
-    
-    int countElements = 0;
-    for(int i = 0; i < children->size(); i++)
-    {
-        Ref<Node> nd = children->get(i);
-        if (nd->getType() == type)
-        {
-            countElements++;
-        }
-    }
-    return countElements;
-}
-
-Ref<Node> Node::getChild(int index, enum mxml_node_types type)
-{
-    if (children == nil)
-        return nil;
-    int countElements = 0;
-    
-    if (type == mxml_node_all)
-    {
-        if (index >= children->size())
-            return nil;
-        else
-            return children->get(index);
-    }
-    
-    for(int i = 0; i < children->size(); i++)
-    {
-        Ref<Node> nd = children->get(i);
-        if (nd->getType() == type)
-        {
-            if (countElements++ == index)
-                return nd;
-        }
-    }
-    return nil;
-}
-
-void Node::appendChild(Ref<Node> child)
-{
-    if(children == nil)
-        children = Ref<Array<Node> >(new Array<Node>());
-    children->append(child);
-}
-
 String Node::print()
 {
     Ref<StringBuffer> buf(new StringBuffer());
@@ -138,3 +85,4 @@ void Node::print_internal(Ref<StringBuffer> buf, int indent)
     *buf << ptr;
 }
 */
+

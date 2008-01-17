@@ -64,6 +64,16 @@ public:
         
     void setText(zmm::String text);
 
+    int childCount(enum mxml_node_types type = mxml_node_all);
+    zmm::Ref<Node> getChild(int index, enum mxml_node_types type = mxml_node_all);
+    zmm::Ref<Node> getFirstChild(enum mxml_node_types type = mxml_node_all) { return getChild(0, type); }
+    void removeChild(int index);
+    void appendChild(zmm::Ref<Node> child);
+    void insertChild(int index, zmm::Ref<Node> child);
+    
+    void removeWhitespace();
+    void indent(int level = 0);
+    
     zmm::Ref<Element> getFirstElementChild() { return getElementChild(0); }
     zmm::Ref<Element> getElementChild(int index) { return RefCast(getChild(index, mxml_node_element), Element); }
     int elementChildCount() { return childCount(mxml_node_element); }

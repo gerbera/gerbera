@@ -72,7 +72,7 @@ void XMLCALL Parser::character_data(void *userdata, const XML_Char *s, int len)
 {
     Parser *parser = (Parser *)userdata;
     String text = String(s, len);
-    if (string_ok(text))
+    if (text != nil)
     {
         Ref<Text> textEl(new Text(text));
         parser->curEl->appendChild(RefCast(textEl, Node));
@@ -83,7 +83,7 @@ void XMLCALL Parser::comment_callback(void *userdata, const XML_Char *s)
 {
     Parser *parser = (Parser *)userdata;
     String text = String(s);
-    if (string_ok(text))
+    if (text != nil)
     {
         Ref<Comment> cm(new Comment(text));
         parser->curEl->appendChild(RefCast(cm, Node));

@@ -34,6 +34,7 @@
 #endif
 
 #include "element.h"
+#include "tools.h"
 
 #include <string.h>
 
@@ -92,6 +93,152 @@ void Element::setAttribute(String name, String value)
         }
     }
     addAttribute(name, value);
+}
+
+int Element::childCount(enum mxml_node_types type)
+{
+    if (children == nil)
+        return 0;
+    
+    if (type == mxml_node_all)
+        return children->size();
+    
+    int countElements = 0;
+    for(int i = 0; i < children->size(); i++)
+    {
+        Ref<Node> nd = children->get(i);
+        if (nd->getType() == type)
+        {
+            countElements++;
+        }
+    }
+    return countElements;
+}
+
+Ref<Node> Element::getChild(int index, enum mxml_node_types type)
+{
+    if (children == nil)
+        return nil;
+    int countElements = 0;
+    
+    if (type == mxml_node_all)
+    {
+        if (index >= children->size())
+            return nil;
+        else
+            return children->get(index);
+    }
+    
+    for(int i = 0; i < children->size(); i++)
+    {
+        Ref<Node> nd = children->get(i);
+        if (nd->getType() == type)
+        {
+            if (countElements++ == index)
+                return nd;
+        }
+    }
+    return nil;
+}
+
+void Element::appendChild(Ref<Node> child)
+{
+    if(children == nil)
+        children = Ref<Array<Node> >(new Array<Node>());
+    children->append(child);
+}
+
+void Element::insertChild(int index, Ref<Node> child)
+{
+    if (children == nil)
+        children = Ref<Array<Node> >(new Array<Node>());
+    children->insert(index, child);
+}
+
+void Element::removeChild(int index)
+{
+    children->remove(index);
+}
+
+void Element::removeWhitespace()
+{
+    int numChildren = childCount();
+    for (int i = 0; i < numChildren; i++)
+    {
+        Ref<Node> node = getChild(i);
+        if (node->getType() == mxml_node_text)
+        {
+            Ref<Text> text = RefCast(node, Text);
+            String trimmed = trim_string(text->getText());
+            if (string_ok(trimmed))
+            {
+                text->setText(trimmed);
+            }
+            else
+            {
+                if (numChildren != 1)
+                {
+                    removeChild(i--);
+                    --numChildren;
+                }
+            }
+        }
+        else if (node->getType() == mxml_node_element)
+        {
+            Ref<Element> el = RefCast(node, Element);
+            el->removeWhitespace();
+        }
+    }
+}
+
+void Element::indent(int level)
+{
+    assert(level >= 0);
+    
+    removeWhitespace();
+    
+    int numChildren = childCount();
+    if (! numChildren)
+        return;
+    
+    bool noTextChildren = true;
+    for (int i = 0; i < numChildren; i++)
+    {
+        Ref<Node> node = getChild(i);
+        if (node->getType() == mxml_node_element)
+        {
+            Ref<Element> el = RefCast(node, Element);
+            el->indent(level+1);
+        }
+        else if (node->getType() == mxml_node_text)
+        {
+            noTextChildren = false;
+        }
+    }
+    
+    if (noTextChildren)
+    {
+        static char *ind_str = "                                                               ";
+        static char *ind = ind_str + strlen(ind_str);
+        char *ptr = ind - (level + 1) * 2;
+        if (ptr < ind_str)
+            ptr = ind_str;
+        
+        for (int i = 0; i < numChildren; i++)
+        {
+            if (getChild(i)->getType() != mxml_node_comment)
+            {
+                Ref<Text> indentText(new Text(_("\n")+String(ptr)));
+                insertChild(i++,RefCast(indentText, Node));
+                numChildren++;
+            }
+        }
+        
+        ptr += 2;
+        
+        Ref<Text> indentTextAfter(new Text(_("\n")+String(ptr)));
+        appendChild(RefCast(indentTextAfter, Node));
+    }
 }
 
 String Element::getText()
@@ -191,7 +338,7 @@ void Element::print_internal(Ref<StringBuffer> buf, int indent)
     int i;
     
     *buf << "<" << name;
-    if(attributes != nil)
+    if (attributes != nil)
     {
         for(i = 0; i < attributes->size(); i++)
         {
@@ -201,7 +348,7 @@ void Element::print_internal(Ref<StringBuffer> buf, int indent)
         }
     }
     
-    if(children != nil && children->size())
+    if (children != nil && children->size())
     {
         *buf << ">";
         
@@ -214,7 +361,7 @@ void Element::print_internal(Ref<StringBuffer> buf, int indent)
     }
     else
     {
-        *buf << "/>\n";
+        *buf << "/>";
     }
 }
 
