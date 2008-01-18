@@ -53,7 +53,7 @@ void MRRegistrarService::process_subscription_request(zmm::Ref<SubscriptionReque
     Ref<Element> propset, property;
 
     propset = UpnpXML_CreateEventPropertySet();
-    property = propset->getFirstChild();
+    property = propset->getFirstElementChild();
     property->appendTextChild(_("ValidationRevokedUpdateID"), _("0"));
     property->appendTextChild(_("ValidationSucceededUpdateID"), _("0"));
     property->appendTextChild(_("AuthorizationDeniedUpdateID"), _("0"));
