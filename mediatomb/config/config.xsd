@@ -142,7 +142,6 @@
     <xs:element name="protocolInfo">
         <xs:complexType>
             <xs:attribute name="extend" type="boolean" default="no"/>
-            <xs:attribute name="ps3-hack" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
 
@@ -535,6 +534,14 @@
     
     <xs:element name="profiles">
         <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="profile" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    
+    <xs:element name="profile">
+        <xs:complexType>
             <xs:all>
                 <xs:element ref="mimetype"/>
                 <xs:element ref="accept-url" minOccurs="0"/>
@@ -611,7 +618,7 @@
             <xs:attribute name="enabled" type="boolean" default="no"/>
             <xs:attribute name="refresh" type="xs:nonNegativeInteger" default="0"/>
             <xs:attribute name="purge-after" type="xs:nonNegativeInteger" default="0"/>
-            <xs:attribute name="update-at-start" type="xs:nonNegativeInteger" default="0"/>
+            <xs:attribute name="update-at-start" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
     
@@ -643,7 +650,7 @@
     
     <xs:element name="playlist">
         <xs:complexType>
-            <xs:attribute name="id" type="xs:nonNegativeInteger" use="required"/>
+            <xs:attribute name="id" type="xs:string" use="required"/>
             <xs:attribute name="start-page" type="xs:nonNegativeInteger" use="required"/>
             <!-- to be done better; can be a number or "all" -->
             <xs:attribute name="amount" type="xs:string" use="required"/>
