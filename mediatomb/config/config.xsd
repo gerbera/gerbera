@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE xs:schema PUBLIC
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!-- <!DOCTYPE xs:schema PUBLIC
         "-//W3C//DTD XMLSCHEMA 200102//EN"
-        "http://www.w3.org/2001/XMLSchema.dtd">
+        "http://www.w3.org/2001/XMLSchema.dtd">  -->
 <!--*MT*
     
     MediaTomb - http://www.mediatomb.cc/
@@ -30,10 +30,7 @@
     
     $Id$
 -->
-<xs:schema
-        xmlns:xs="http://www.w3.org/2001/XMLSchema"
-        targetNamespace="http://mediatomb.cc/0.10.0/config"
-        xmlns="http://mediatomb.cc/0.10.0/config">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://mediatomb.cc/0.11.0/config" xmlns="http://mediatomb.cc/0.11.0/config">
 
     <xs:simpleType name="boolean">
         <xs:restriction base="xs:string">
@@ -47,6 +44,8 @@
             <xs:all>
                 <xs:element ref="server"/>
                 <xs:element ref="import" minOccurs="0"/>
+                <xs:element ref="transcoding" minOccurs="0"/>
+                <xs:element ref="online-content" minOccurs="0"/>
             </xs:all>
         </xs:complexType>
     </xs:element>
@@ -66,6 +65,9 @@
                 <xs:element ref="storage"/>
                 <xs:element ref="servedir" minOccurs="0"/>
                 <xs:element ref="ip" minOccurs="0"/>
+                <xs:element ref="interface" minOccurs="0"/>
+                <xs:element ref="modelName" minOccurs="0"/>
+                <xs:element ref="modelNumber" minOccurs="0"/>
                 <xs:element ref="bookmark" minOccurs="0"/>
                 <xs:element ref="model" minOccurs="0"/>
                 <xs:element ref="manufacturerURL" minOccurs="0"/>
@@ -77,23 +79,25 @@
                 <xs:element ref="serialNumber" minOccurs="0"/>
                 <xs:element ref="protocolInfo" minOccurs="0"/>
                 <xs:element ref="pc-directory" minOccurs="0"/>
+                <xs:element ref="tmpdir" minOccurs="0"/>
                 <xs:element ref="retries-on-timeout" minOccurs="0"/>
             </xs:all>
         </xs:complexType>
     </xs:element>
 
-    <xs:element name="port">
-        <xs:simpleType>
-            <xs:restriction base="xs:positiveInteger">
-                <xs:minInclusive value="49152"/>
-                <xs:maxInclusive value="65535"/>
-            </xs:restriction>
-        </xs:simpleType>
-    </xs:element>
+    <xs:element name="port" type="xs:nonNegativeInteger"/>
 
     <xs:element name="ip" type="xs:string"/>
 
+    <xs:element name="interface" type="xs:string"/>
+
     <xs:element name="name" type="xs:string" default="MediaTomb"/>
+
+    <xs:element name="modelName" type="xs:string" default="MediaTomb"/>
+
+    <xs:element name="modelNumber" type="xs:string"/>
+
+    <xs:element name="modelDescription" type="xs:string"/>
 
     <xs:element name="manufacturerURL" type="xs:string" default="http://mediatomb.cc/"/>
 
@@ -133,13 +137,12 @@
         </xs:complexType>
     </xs:element>
 
-    <xs:element name="modelDescription" type="xs:string"/>
-
     <xs:element name="serialNumber" type="xs:string"/>
 
     <xs:element name="protocolInfo">
         <xs:complexType>
             <xs:attribute name="extend" type="boolean" default="no"/>
+            <xs:attribute name="ps3-hack" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
 
@@ -160,6 +163,8 @@
             <xs:attribute name="upnp-hide" type="boolean" use="required"/>
         </xs:complexType>
     </xs:element>
+
+    <xs:element name="tmpdir" type="xs:string"/>
 
     <xs:element name="retries-on-timeout" type="xs:integer"/>
 
@@ -202,38 +207,103 @@
     </xs:element>
 
     <xs:element name="option" type="xs:positiveInteger"/>
-
-
+    
+    <!--  Storage -->
 
     <xs:element name="storage">
         <xs:complexType>
-            <xs:choice>
+            <xs:all>
+                <xs:element ref="sqlite3" minOccurs="0"/>
+                <xs:element ref="mysql" minOccurs="0"/>
+            </xs:all>
+        </xs:complexType>
+    </xs:element>
+    
+
+    <xs:element name="sqlite3">
+        <xs:complexType>
+            <xs:all>
                 <xs:element ref="database-file" minOccurs="0"/>
+                <xs:element ref="synchronous" minOccurs="0"/>
+                <xs:element ref="on-error" minOccurs="0"/>
+                <xs:element ref="backup" minOccurs="0"/>
+            </xs:all>
+            <xs:attribute name="enabled" type="boolean" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="database-file" type="xs:string" default="mediatomb.db"/>
+    
+    <xs:element name="synchronous" default="off">
+        <xs:simpleType>
+            <xs:restriction base="xs:string">
+                <xs:enumeration value="off"/>
+                <xs:enumeration value="normal"/>
+                <xs:enumeration value="full"/>
+            </xs:restriction>
+        </xs:simpleType>
+    </xs:element>
+
+    <xs:element name="on-error" default="restore">
+        <xs:simpleType>
+            <xs:restriction base="xs:string">
+                <xs:enumeration value="restore"/>
+                <xs:enumeration value="fail"/>
+            </xs:restriction>
+        </xs:simpleType>
+    </xs:element>
+    <xs:element name="backup">
+        <xs:complexType>
+            <xs:attribute name="enabled" type="boolean" default="no"/>
+            <xs:attribute name="interval" type="xs:positiveInteger" default="600"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="mysql">
+        <xs:complexType>
+            <xs:all>
+                <xs:element ref="host" minOccurs="0"/>
+                <xs:element ref="port" minOccurs="0"/>
+                <xs:element ref="username" minOccurs="0"/>
+                <xs:element ref="password" minOccurs="0"/>
+                <xs:element ref="database" minOccurs="0"/>
+            </xs:all>
+            <xs:attribute name="enabled" type="boolean" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="host" type="xs:string" default="localhost"/>
+    <xs:element name="username" type="xs:string" default="mediatomb"/>
+    <xs:element name="password" type="xs:string"/>
+    <xs:element name="database" type="xs:string" default="localhost"/>
+    
+    <!-- 
                 <xs:sequence>
                     <xs:element ref="host" minOccurs="0"/>
+                    <xs:element ref="port" minOccurs="0"/>
                     <xs:element ref="username" minOccurs="0"/>
                     <xs:element ref="password" minOccurs="0"/>
                     <xs:element ref="database" minOccurs="0"/>
                 </xs:sequence>
             </xs:choice>
-            <xs:attribute name="driver" default="sqlite3">
+        </xs:complexType>
+    </xs:element>
+
+    
+    <xs:element name="database-file" type="xs:string" default="mediatomb.db"/>
+
+    -->
+    
+    <!-- <xs:attribute name="driver" default="sqlite3">
                 <xs:simpleType>
                     <xs:restriction base="xs:string">
                         <xs:enumeration value="sqlite3"/>
                         <xs:enumeration value="mysql"/>
                     </xs:restriction>
                 </xs:simpleType>
-            </xs:attribute>
-        </xs:complexType>
-    </xs:element>
-
-    <xs:element name="database-file" type="xs:string" default="mediatomb.db"/>
-
-    <xs:element name="host" type="xs:string" default="localhost"/>
-    <xs:element name="username" type="xs:string" default="mediatomb"/>
-    <xs:element name="password" type="xs:string"/>
-    <xs:element name="database" type="xs:string" default="localhost"/>
-
+            </xs:attribute> -->
+    
+    <!-- Import -->
 
     <xs:element name="import">
         <xs:complexType>
@@ -264,7 +334,15 @@
 
     <xs:element name="common-script" type="xs:string"/>
 
-    <xs:element name="playlist-script" type="xs:string"/>
+    <xs:element name="playlist-script">
+        <xs:complexType>
+            <xs:simpleContent>
+                <xs:extension base="xs:string">
+                    <xs:attribute name="create-link" type="boolean" default="yes"/>
+                </xs:extension>
+            </xs:simpleContent>
+        </xs:complexType>
+    </xs:element>
 
     <xs:element name="virtual-layout">
         <xs:complexType>
@@ -356,14 +434,14 @@
             <xs:attribute name="ignore-unknown" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="treat">
         <xs:complexType>
             <xs:attribute name="mimetype" type="xs:string" use="required"/>
             <xs:attribute name="as" type="xs:string" use="required"/>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="mimetype-upnpclass">
         <xs:complexType>
             <xs:sequence>
@@ -418,4 +496,184 @@
         </xs:complexType>
     </xs:element>
 
+    <!-- Transcoding -->
+    
+    <xs:element name="transcoding">
+        <xs:complexType>
+            <xs:all>
+                <xs:element ref="transcoding-mappings" minOccurs="0"/>
+                <xs:element ref="profiles" minOccurs="0"/>
+            </xs:all>
+            <xs:attribute name="enabled" type="boolean" default="yes"/>
+            <xs:attribute name="fetch-buffer-size" type="xs:positiveInteger" default="262144"/>
+            <xs:attribute name="fetch-buffer-fill-size" type="xs:nonNegativeInteger" default="0"/>
+        </xs:complexType>
+    </xs:element>
+    
+    <xs:element name="transcoding-mappings">
+        <xs:complexType>
+            <xs:all>
+                <xs:element ref="mimetype-profile" minOccurs="0"/>
+            </xs:all>
+        </xs:complexType>
+    </xs:element>
+    
+    <xs:element name="mimetype-profile">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="transcode" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    
+    <xs:element name="transcode">
+        <xs:complexType>
+            <xs:attribute name="mimetype" type="xs:string" use="required"/>
+            <xs:attribute name="using" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    
+    <xs:element name="profiles">
+        <xs:complexType>
+            <xs:all>
+                <xs:element ref="mimetype"/>
+                <xs:element ref="accept-url" minOccurs="0"/>
+                <xs:element ref="first-resource" minOccurs="0"/>
+                <xs:element ref="hide-original-resource" minOccurs="0"/>
+                <xs:element ref="theora" minOccurs="0"/>
+                <xs:element ref="agent"/>
+                <xs:element ref="buffer"/>
+                <xs:element ref="resolution" minOccurs="0"/>
+            </xs:all>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="enabled" type="boolean" use="required"/>
+            <xs:attribute name="type" use="required">
+                <xs:simpleType name="boolean">
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="external"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+    
+    <xs:element name="mimetype" type="xs:string"/>
+    
+    <xs:element name="accept-url" type="boolean" default="yes"/>
+    
+    <xs:element name="first-resource" type="boolean" default="no"/>
+    
+    <xs:element name="hide-original-resource" type="boolean" default="no"/>
+    
+    <xs:element name="theora"/>
+    
+    <xs:element name="agent">
+        <xs:complexType>
+            <xs:attribute name="command" type="xs:string" use="required"/>
+            <xs:attribute name="arguments" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    
+    <xs:element name="buffer">
+        <xs:complexType>
+            <xs:attribute name="size" type="xs:positiveInteger" use="required"/>
+            <xs:attribute name="chunk-size" type="xs:positiveInteger" use="required"/>
+            <xs:attribute name="fill-size" type="xs:nonNegativeInteger" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    
+    <xs:element name="resolution" type="xs:string"/>
+    
+    
+    <!-- online-content -->
+    
+    <xs:element name="online-content">
+        <xs:complexType>
+            <xs:all>
+                <xs:element ref="YouTube" minOccurs="0"/>
+            </xs:all>
+            <xs:attribute name="fetch-buffer-size" type="xs:positiveInteger" default="262144"/>
+            <xs:attribute name="fetch-buffer-fill-size" type="xs:nonNegativeInteger" default="0"/>
+        </xs:complexType>
+    </xs:element>
+    
+    <xs:element name="YouTube">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="favorites" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="featured" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="tag" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="user" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="playlist" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="popular" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="category-and-tag" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="enabled" type="boolean" default="no"/>
+            <xs:attribute name="refresh" type="xs:nonNegativeInteger" default="0"/>
+            <xs:attribute name="purge-after" type="xs:nonNegativeInteger" default="0"/>
+            <xs:attribute name="update-at-start" type="xs:nonNegativeInteger" default="0"/>
+        </xs:complexType>
+    </xs:element>
+    
+    <xs:element name="favorites">
+        <xs:complexType>
+            <xs:attribute name="user" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    
+    <xs:element name="featured"/>
+    
+    <xs:element name="tag">
+        <xs:complexType>
+            <xs:attribute name="tag" type="xs:string" use="required"/>
+            <xs:attribute name="start-page" type="xs:nonNegativeInteger" use="required"/>
+            <!-- to be done better; can be a number or "all" -->
+            <xs:attribute name="amount" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    
+    <xs:element name="user">
+        <xs:complexType>
+            <xs:attribute name="user" type="xs:string" use="required"/>
+            <xs:attribute name="start-page" type="xs:nonNegativeInteger" use="required"/>
+            <!-- to be done better; can be a number or "all" -->
+            <xs:attribute name="amount" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    
+    <xs:element name="playlist">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:nonNegativeInteger" use="required"/>
+            <xs:attribute name="start-page" type="xs:nonNegativeInteger" use="required"/>
+            <!-- to be done better; can be a number or "all" -->
+            <xs:attribute name="amount" type="xs:string" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    
+    <xs:element name="popular">
+        <xs:complexType>
+            <xs:attribute name="time-range" use="required">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="all"/>
+                        <xs:enumeration value="day"/>
+                        <xs:enumeration value="week"/>
+                        <xs:enumeration value="month"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+    
+    <xs:element name="category-and-tag">
+        <xs:complexType>
+            <xs:attribute name="category" type="xs:string" use="required"/>
+            <xs:attribute name="tag" type="xs:string" use="required"/>
+            <xs:attribute name="start-page" type="xs:nonNegativeInteger" use="required"/>
+            <!-- to be done better; can be a number or "all" -->
+            <xs:attribute name="amount" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    
 </xs:schema>
