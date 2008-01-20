@@ -197,6 +197,50 @@ time_t check_path_ex(String path, bool needDir, bool existenceUnneeded,
     return statbuf.st_mtime;
 }
 
+bool is_executable(String path)
+{
+    return false;
+}
+
+String find_in_path(String exec)
+{
+    String PATH = String(getenv("PATH"));
+    if (!string_ok(PATH))
+        return nil;
+
+    Ref<StringTokenizer> st(new StringTokenizer(PATH));
+    String path = nil;
+    String next;
+    do
+    {
+        if (path == nil)
+            path = st->nextToken(_(":"));
+        next = st->nextToken(_(":"));
+
+        if (path == nil)
+            break;
+
+        if ((next != nil) && !next.startsWith(_("/")))
+        {
+            path = path + _(":") + next;
+            next = nil;
+        }
+
+        String check = path + _("/") + exec;
+        if (check_path(check))
+            return check;
+
+        if (next != nil)
+            path = next;
+        else
+            path = nil;
+
+
+    } while (path != nil);
+
+    return nil;
+}
+
 bool string_ok(String str)
 {
     if ((str == nil) || (str == ""))

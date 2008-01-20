@@ -71,14 +71,22 @@ bool check_path(zmm::String path, bool needDir = false);
 /// \brief Checks existance of the specified file or path.
 /// \param path file or directory to be checked.
 /// \param needDir true when checked item has to be a directory.
+/// \param existenceUnneeded do not throw exception if file was not found
+/// \param filesize returns the size of the file
 /// \return last modification time of the path or directory
 ///
 /// More or less the same as check_path, the only difference is,
 /// that this function throws an exception if a path or directory
 /// was not found or was not the desired type. Additionally this function
-/// returns the last modification time of the file or directory.
+/// returns the last modification time of the file or directory and, if 
+/// needed, also the filesize.
 time_t check_path_ex(zmm::String path, bool needDir = false, bool existenceUnneeded = false, off_t *filesize = NULL);
-    
+
+/// \brief Checks if the given executable exists in $PATH
+/// \param exec filename of the executable that needs to be checked
+/// \return aboslute path to the given executable or nil of it was not found
+zmm::String find_in_path(zmm::String exec);
+
 /// \brief Checks if the string contains any data.
 /// \param str String to be checked.
 /// \return true if ok

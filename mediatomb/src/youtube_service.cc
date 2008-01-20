@@ -391,7 +391,7 @@ Ref<Object> YouTubeService::defineServiceTask(Ref<Element> xmlopt)
         task->method = YT_list_popular;
     else if (temp == CFG_METHOD_CATEGORY_AND_TAG)
         task->method = YT_list_by_category_and_tag;
-    else throw _Exception(_("Unsupported tag specified: ") + temp);
+    else throw _Exception(_("Unsupported tag while parsing YouTube options: ") + temp);
 
     if (!hasPaging(task->method))
         task->amount = AMOUNT_ALL;
