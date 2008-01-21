@@ -479,15 +479,6 @@ AC_HELP_STRING([--disable-external-transcoding],
               ]
 )
 
-if test $EXTERNAL_TRANSCODING -eq 1; then
-    AC_CHECK_FUNCS([mkfifo],[],
-            [AC_MSG_ERROR([mkfifo is required by the external transcoding feature])])
-    AC_DEFINE([EXTERNAL_TRANSCODING], [1], [external transcoding feature])
-    EXTERNAL_TRANSCODING_OK=yes
-else
-    EXTERNAL_TRANSCODING_OK=disabled
-fi
-
 EXTEND_PROTINFO=1
 AC_ARG_ENABLE([protocolinfo-extension],
               [
@@ -617,6 +608,18 @@ CPPFLAGS_SAVE="$CPPFLAGS"
 CFLAGS_SAVE="$CFLAGS"
 CXXFLAGS_SAVE="$CXXFLAGS"
 LDFLAGS_SAVE="$LDFLAGS"
+
+if test $EXTERNAL_TRANSCODING -eq 1; then
+    AC_CHECK_FUNCS([mkfifo],[],
+                   [
+                        AC_MSG_ERROR([mkfifo is required by the external transcoding feature])
+                   ]
+    )
+    AC_DEFINE([EXTERNAL_TRANSCODING], [1], [external transcoding feature])
+    EXTERNAL_TRANSCODING_OK=yes
+else
+    EXTERNAL_TRANSCODING_OK=disabled
+fi
 
 ICONV_CXXFLAGS=
 ICONV_LIBS=
