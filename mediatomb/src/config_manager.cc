@@ -220,6 +220,15 @@ String ConfigManager::createDefaultConfig(String userhome)
     Ref<Element> import(new Element(_("import")));
     import->addAttribute(_("hidden-files"), _(DEFAULT_HIDDEN_FILES_VALUE));
 
+#ifdef HAVE_MAGIC
+    if (string_ok(magic))
+    {
+        Ref<Element> magicfile(new Element(_("magic-file")));
+        magicfile->setText(magic);
+        import->appendElementChild(magicfile);
+    }
+#endif
+
     Ref<Element> scripting(new Element(_("scripting")));
     scripting->addAttribute(_("script-charset"), _(DEFAULT_JS_CHARSET));
     import->appendElementChild(scripting);
