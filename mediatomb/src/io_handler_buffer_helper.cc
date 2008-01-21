@@ -152,9 +152,6 @@ int IOHandlerBufferHelper::read(OUT char *buf, IN size_t length)
 
 void IOHandlerBufferHelper::seek(IN off_t offset, IN int whence)
 {
-#ifdef EXTEND_PROTOCOLINFO
-    if (!ConfigManager::getInstance()->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_CL_HACK))
-#endif
         throw _Exception(_("seek currently unimplemented for IOHandlerBufferHelper"));
 }
 

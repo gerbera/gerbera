@@ -776,6 +776,7 @@ void ConfigManager::validate(String serverhome)
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
     SET_BOOL_OPTION(CFG_SERVER_EXTEND_PROTOCOLINFO);
 
+/*
     temp = getOption(_("/server/protocolInfo/attribute::ps3-hack"),
                      _(DEFAULT_EXTEND_PROTOCOLINFO_CL_HACK));
     if (!validateYesNo(temp))
@@ -784,7 +785,7 @@ void ConfigManager::validate(String serverhome)
 
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
     SET_BOOL_OPTION(CFG_SERVER_EXTEND_PROTOCOLINFO_CL_HACK);
-
+*/
 #endif
 
     temp = getOption(_("/server/pc-directory/attribute::upnp-hide"),
@@ -1609,18 +1610,6 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                 prof->setHideOriginalResource(false);
         }
 
-        if (child->getChildByName(_("fake-content-length")) != nil)
-        {
-            param = child->getChildText(_("fake-content-length"));
-            if (!validateYesNo(param))
-                throw _Exception(_("Error in config file: incorrect parameter "
-                                   "for <fake-content-length> tag"));
-            if (param == "yes")
-                prof->setFakeContentLength(true);
-            else
-                prof->setFakeContentLength(false);
-        }
-        
         if (child->getChildByName(_("theora")) != nil)
             prof->setTheora(true);
 
