@@ -211,7 +211,7 @@ String ConfigManager::createDefaultConfig(String userhome)
 //    storage->appendTextChild(_("password"), _(DEFAULT_MYSQL_PASSWORD));
     mysql->appendTextChild(_("database"), _(DEFAULT_MYSQL_DB));
 
-    storage->appendChild(mysql);
+    storage->appendElementChild(mysql);
     mysql_flag = true;
 #endif
     server->appendElementChild(storage);
