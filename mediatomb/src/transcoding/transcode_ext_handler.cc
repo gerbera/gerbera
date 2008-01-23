@@ -144,6 +144,30 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
 
     }
 
+    String check;
+    if (profile->getCommand().startsWith(_(_DIR_SEPARATOR)))
+    {
+        if (!check_path(profile->getCommand()))
+            throw _Exception(_("Could not find transcoder: ") + 
+                    profile->getCommand());
+
+        check = profile->getCommand();
+    }
+    else
+    {
+        check = find_in_path(profile->getCommand());
+
+        if (!string_ok(check))
+            throw _Exception(_("Could not find transcoder ") + 
+                        profile->getCommand() + " in $PATH");
+
+    }
+
+    int err = 0;
+    if (!is_executable(check, &err))
+        throw _Exception(_("Transcoder ") + profile->getCommand() + 
+                " is not executable: " + strerror(err));
+
     log_debug("creating fifo: %s\n", fifo_name.c_str());
     if (mkfifo(fifo_name.c_str(), O_RDWR) == -1) 
     {
@@ -153,9 +177,9 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
         
     chmod(fifo_name.c_str(), S_IWUSR | S_IRUSR);
    
-    log_debug("Arguments: %s\n", profile->getArguments().c_str());
     arglist = parseCommandLine(profile->getArguments(), location, fifo_name);
 
+    log_info("Arguments: %s\n", profile->getArguments().c_str());
     Ref<TranscodingProcessExecutor> main_proc(new TranscodingProcessExecutor(profile->getCommand(), arglist));
     main_proc->removeFile(fifo_name);
     if (isURL && (!profile->acceptURL()))

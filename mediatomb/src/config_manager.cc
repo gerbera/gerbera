@@ -1322,7 +1322,7 @@ String ConfigManager::getOption(String xpath, String def)
     if (string_ok(value))
         return trim_string(value);
 
-    log_info("Config: option not found: %s using default value: %s\n",
+    log_debug("Config: option not found: %s using default value: %s\n",
            xpath.c_str(), def.c_str());
     
     String pathPart = XPath::getPathPart(xpath);
@@ -1637,16 +1637,42 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
 
         Ref<Element> sub = child->getChildByName(_("agent"));
         if (sub == nil)
-            throw _Exception(_("error in configuration: transcoding profile ") +
-                    prof->getName() + 
-                    " is missing the <agent> option");
+            throw _Exception(_("error in configuration: transcoding "
+                               "profile \"") + prof->getName() + 
+                               "\" is missing the <agent> option");
 
         param = sub->getAttribute(_("command"));
         if (!string_ok(param))
-            throw _Exception(_("error in configuration: transcoding profile ") +
-                    prof->getName() + 
-                    " has an invalid command setting");
+            throw _Exception(_("error in configuration: transcoding " 
+                               "profile \"") + prof->getName() + 
+                               "\" has an invalid command setting");
         prof->setCommand(param);
+
+        String tmp_path;
+        if (param.startsWith(_(_DIR_SEPARATOR)))
+        {
+            if (!check_path(param))
+                throw _Exception(_("error in configuration, transcoding "
+                                   "profile \"") + prof->getName() +
+                              "\" could not find transcoding command " + param);
+            tmp_path = param;
+        }
+        else
+        {
+            tmp_path = find_in_path(param);
+            if (!string_ok(tmp_path))
+                throw _Exception(_("error in configuration, transcoding "
+                                   "profile \"") + prof->getName() + 
+                      "\" could not find transcoding command " + param +
+                      " in $PATH");
+        }
+
+        int err = 0;
+        if (!is_executable(tmp_path, &err))
+            throw _Exception(_("error in configuration, transcoding "
+                               "profile ") + prof->getName() + 
+                               ": transcoder " + param + 
+                               "is not executable - " + strerror(err));
 
         param = sub->getAttribute(_("arguments"));
         if (!string_ok(param))
@@ -1657,53 +1683,67 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
 
         sub = child->getChildByName(_("buffer")); 
         if (sub == nil)
-            throw _Exception(_("error in configuration: transcoding profile ") +
-                    prof->getName() + 
-                    " is missing the <buffer> option");
+            throw _Exception(_("error in configuration: transcoding "
+                               "profile \"") + prof->getName() + 
+                               "\" is missing the <buffer> option");
 
         param = sub->getAttribute(_("size"));
         if (!string_ok(param))
-            throw _Exception(_("error in configuration: transcoding profile ") +
-                    prof->getName() + " <buffer> tag is missing the size attribute");
+            throw _Exception(_("error in configuration: transcoding "
+                               "profile \"") + prof->getName() + 
+                               "\" <buffer> tag is missing the size attribute");
         itmp = param.toInt();
         if (itmp < 0)
-            throw _Exception(_("error in configuration: transcoding profile ") +
-                    prof->getName() + " buffer size can not be negative");
+            throw _Exception(_("error in configuration: transcoding "
+                               "profile \"") + prof->getName() + 
+                               "\" buffer size can not be negative");
         bs = itmp;
 
         param = sub->getAttribute(_("chunk-size"));
         if (!string_ok(param))
-            throw _Exception(_("error in configuration: transcoding profile ") +
-                    prof->getName() + " <buffer> tag is missing the chunk-size attribute");
+            throw _Exception(_("error in configuration: transcoding "
+                               "profile \"") + prof->getName() + 
+                               "\" <buffer> tag is missing the chunk-size " 
+                               "attribute");
         itmp = param.toInt();
         if (itmp < 0)
-            throw _Exception(_("error in configuration: transcoding profile ") +
-                    prof->getName() + " chunk size can not be negative");
+            throw _Exception(_("error in configuration: transcoding "
+                               "profile \"") + prof->getName() + 
+                               "\" chunk size can not be negative");
         cs = itmp;
 
         if (cs > bs)
-            throw _Exception(_("error in configuration: transcoding profile ") +
-                    prof->getName() + " chunk size can not be greater than buffer size");
+            throw _Exception(_("error in configuration: transcoding "
+                               "profile \"") + prof->getName() + 
+                               "\" chunk size can not be greater than "
+                               "buffer size");
 
         param = sub->getAttribute(_("fill-size"));
         if (!string_ok(param))
-            throw _Exception(_("error in configuration: transcoding profile ") +
-                    prof->getName() + " <buffer> tag is missing the fill-size attribute");
+            throw _Exception(_("error in configuration: transcoding "
+                               "profile \"") + prof->getName() + 
+                               "\" <buffer> tag is missing the fill-size "
+                               "attribute");
         itmp = param.toInt();
         if (i < 0)
-            throw _Exception(_("error in configuration: transcoding profile ") +
-                    prof->getName() + " fill size can not be negative");
+            throw _Exception(_("error in configuration: transcoding "
+                               "profile \"") + prof->getName() + 
+                               "\" fill size can not be negative");
         fs = itmp;
 
         if (fs > bs)
-            throw _Exception(_("error in configuration: transcoding profile ") +
-                    prof->getName() + " fill size can not be greater than buffer size");
+            throw _Exception(_("error in configuration: transcoding "
+                               "profile \"") + prof->getName() + 
+                               "\" fill size can not be greater than "
+                               "buffer size");
 
         prof->setBufferOptions(bs, cs, fs);
 
         if (mappings == nil)
         {
-            throw _Exception(_("error in configuration: transcoding profiles exist, but no mimetype to profile mappings specified"));
+            throw _Exception(_("error in configuration: transcoding "
+                               "profiles exist, but no mimetype to profile "
+                               "mappings specified"));
         }
 
         for (int k = 0; k < mt_mappings->size(); k++)

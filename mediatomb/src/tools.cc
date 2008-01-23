@@ -197,9 +197,16 @@ time_t check_path_ex(String path, bool needDir, bool existenceUnneeded,
     return statbuf.st_mtime;
 }
 
-bool is_executable(String path)
+bool is_executable(String path, int *err)
 {
-    return false;
+    int ret = access(path.c_str(), R_OK | X_OK);
+    if (err != NULL)
+        *err = errno;
+
+    if (ret == 0)
+        return true;
+    else 
+        return false;
 }
 
 String find_in_path(String exec)

@@ -82,6 +82,13 @@ bool check_path(zmm::String path, bool needDir = false);
 /// needed, also the filesize.
 time_t check_path_ex(zmm::String path, bool needDir = false, bool existenceUnneeded = false, off_t *filesize = NULL);
 
+/// \brief Checks if the given binary is executable by our process
+/// \param path absolute path of the binary
+/// \param err if not NULL err will contain the errno result of the check
+/// \return true if the given binary is executable by our process, otherwise
+/// false
+bool is_executable(zmm::String path, int *err = NULL);
+
 /// \brief Checks if the given executable exists in $PATH
 /// \param exec filename of the executable that needs to be checked
 /// \return aboslute path to the given executable or nil of it was not found
