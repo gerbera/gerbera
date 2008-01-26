@@ -42,7 +42,7 @@
 
 using namespace zmm;
 
-#define YOUTUBE_URL_PARAMS_REGEXP   "var swfArgs =.*t:'([^']+)"
+#define YOUTUBE_URL_PARAMS_REGEXP   "var swfArgs =.*\"t\": \"([^x\"]+)\""
 #define YOUTUBE_URL_LOCATION_REGEXP "\nLocation: (http://[^\n]+)\n"
 #define YOUTUBE_URL_WATCH           "http://www.youtube.com/watch?v="
 #define YOUTUBE_URL_GET             "http://www.youtube.com/get_video?" 
@@ -97,6 +97,8 @@ String YouTubeVideoURL::getVideoURL(String video_id)
                          + watch + _("HTTP response code: ") + 
                          String::from(retcode));
     }
+
+    log_debug("------> GOT BUFFER %s\n", buffer->toString().c_str());
 
     Ref<Matcher> matcher =  reVideoURLParams->matcher(buffer->toString());
     String params;
