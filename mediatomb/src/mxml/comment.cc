@@ -39,10 +39,11 @@
 using namespace zmm;
 using namespace mxml;
 
-Comment::Comment(String text) : Node()
+Comment::Comment(String text, bool LFbefore) : Node()
 {
     type = mxml_node_comment;
     this->text = text;
+    this->LFbefore = LFbefore;
 }
 
 void Comment::print_internal(Ref<StringBuffer> buf, int indent)
