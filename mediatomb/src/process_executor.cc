@@ -35,6 +35,7 @@
 
 #include "process_executor.h"
 #include "process.h"
+#include <pthread.h>
 #include <signal.h>
 
 using namespace zmm;
