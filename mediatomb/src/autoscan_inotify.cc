@@ -223,7 +223,7 @@ void AutoscanInotify::threadProc()
                 int wd = event->wd;
                 int mask = event->mask;
                 String name(event->name);
-                log_debug("inotify event: %d %d %s\n", wd, mask, name.c_str());
+                log_debug("inotify event: %d %x %s\n", wd, mask, name.c_str());
                 
                 Ref<Wd> wdObj = watches->get(wd);
                 if (wdObj == nil)
@@ -316,6 +316,9 @@ void AutoscanInotify::threadProc()
                         log_debug("adding %s\n", path.c_str());
                         // path, recursive, async, hidden, low priority, cancellable
                         cm->addFile(fullPath, adir->getRecursive(), true, adir->getHidden(), true, false);
+                        
+                        if (mask & IN_ISDIR)
+                            monitorUnmonitorRecursive(path, false, adir, watchAs->getNormalizedAutoscanPath(), false);
                     }
                 }
                 if (mask & IN_IGNORED)
