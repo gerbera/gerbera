@@ -155,6 +155,14 @@ String ConfigManager::construct_path(String path)
         return home + DIR_SEPARATOR + path;
 }
 
+Ref<Element> ConfigManager::map_from_to(String from, String to)
+{
+    Ref<Element> map(new Element(_("map")));
+    map->addAttribute(_("from"), from);
+    map->addAttribute(_("to"), to);
+    return map;
+}
+
 String ConfigManager::createDefaultConfig(String userhome)
 {
     bool mysql_flag = false;
@@ -177,13 +185,19 @@ String ConfigManager::createDefaultConfig(String userhome)
     config->addAttribute(_("xmlns:xsi"), _(XML_XMLNS_XSI));
     config->addAttribute(_("xsi:schemaLocation"), _(XML_XSI_SCHEMA_LOCATION));
     Ref<Element> server(new Element(_("server")));
-    
+   
     Ref<Element> ui(new Element(_("ui")));
     ui->addAttribute(_("enabled"), _(DEFAULT_UI_EN_VALUE));
 
     Ref<Element>accounts(new Element(_("accounts")));
     accounts->addAttribute(_("enabled"), _(DEFAULT_ACCOUNTS_EN_VALUE));
     accounts->addAttribute(_("session-timeout"), String::from(DEFAULT_SESSION_TIMEOUT));
+
+    Ref<Element> account(new Element(_("account")));
+    account->addAttribute(_("user"), _("mediatomb"));
+    account->addAttribute(_("password"), _("mediatomb"));
+    accounts->appendElementChild(account);
+
     ui->appendElementChild(accounts);
     
     server->appendElementChild(ui);
@@ -203,18 +217,57 @@ String ConfigManager::createDefaultConfig(String userhome)
     sqlite3->addAttribute(_("enabled"), _("yes"));
     sqlite3->appendTextChild(_("database-file"), _(DEFAULT_SQLITE3_DB_FILENAME));
     storage->appendElementChild(sqlite3);
-#else
+#endif
+#ifdef HAVE_MYSQL
     Ref<Element>mysql(new Element(_("mysql")));
+#ifndef HAVE_SQLITE3
     mysql->addAttribute(_("enabled"), _("yes"));
+    mysql_flag = true;
+#else
+    mysql->addAttribute(_("enabled"), _("no"));
+#endif
     mysql->appendTextChild(_("host"), _(DEFAULT_MYSQL_HOST));
     mysql->appendTextChild(_("username"), _(DEFAULT_MYSQL_USER));
 //    storage->appendTextChild(_("password"), _(DEFAULT_MYSQL_PASSWORD));
     mysql->appendTextChild(_("database"), _(DEFAULT_MYSQL_DB));
 
     storage->appendElementChild(mysql);
-    mysql_flag = true;
 #endif
     server->appendElementChild(storage);
+
+    Ref<Element> protocolinfo(new Element(_("protocolInfo")));
+    protocolinfo->addAttribute(_("extend"), _(NO));
+
+    server->appendElementChild(protocolinfo);
+   
+    Ref<Comment> ps3protinfo(new Comment(_(" For PS3 support change to \"yes\" ")));
+    server->appendChild(RefCast(ps3protinfo, Node));
+    
+    Ref<Comment> redinfo(new Comment(_("\n\
+       Uncomment the lines below to get rid of jerky avi playback on the\n\
+       DSM320 or to enable subtitles support on the DSM units\n\
+    "), true));
+
+    Ref<Comment> redsonic(new Comment(_("\n\
+    <custom-http-headers>\n\
+      <add header=\"X-User-Agent: redsonic\"/>\n\
+    </custom-http-headers>\n\
+\n\
+    <manufacturerURL>redsonic.com</manufacturerURL>\n\
+    <modelNumber>105</modelNumber>\n\
+    "), true));
+
+    Ref<Comment> tg100info(new Comment(_(" Uncomment the line below if you have a Telegent TG100 "), true));
+    Ref<Comment> tg100(new Comment(_("\n\
+       <upnp-string-limit>101</upnp-string-limit>\n\
+    "), true));
+
+    server->appendChild(RefCast(redinfo, Node));
+    server->appendChild(RefCast(redsonic, Node));
+    server->appendChild(RefCast(tg100info, Node));
+    server->appendChild(RefCast(tg100, Node));
+
+
     config->appendElementChild(server);
 
     Ref<Element> import(new Element(_("import")));
@@ -260,29 +313,38 @@ String ConfigManager::createDefaultConfig(String userhome)
 
     String map_file = prefix_dir + DIR_SEPARATOR + CONFIG_MAPPINGS_TEMPLATE;
 
-    try
-    {
-        Ref<Parser> parser(new Parser());
-        Ref<Element> mappings(new Element(_("mappings")));
-        mappings = parser->parseFile(map_file);
-        import->appendElementChild(mappings);
-    }
-    catch (ParseException pe)
-    {
-        log_error("Error parsing template file: %s line %d:\n%s\n",
-                pe.context->location.c_str(),
-                pe.context->line,
-                pe.getMessage().c_str());
-        exit(EXIT_FAILURE);
-    }
+    Ref<Element> mappings(new Element(_("mappings")));
+    Ref<Element> ext2mt(new Element(_("extension-mimetype")));
+    ext2mt->addAttribute(_("ignore-unknown"), _(DEFAULT_IGNORE_UNKNOWN_EXTENSIONS));
+    ext2mt->appendElementChild(map_from_to(_("mp3"), _("audio/mpeg")));
+    ext2mt->appendElementChild(map_from_to(_("ogg"), _("application/ogg")));
+    ext2mt->appendElementChild(map_from_to(_("asf"), _("video/x-ms-asf")));
+    ext2mt->appendElementChild(map_from_to(_("asx"), _("video/x-ms-asf")));
+    ext2mt->appendElementChild(map_from_to(_("wma"), _("audio/x-ms-wma")));
+    ext2mt->appendElementChild(map_from_to(_("wax"), _("audio/x-ms-wax")));
+    ext2mt->appendElementChild(map_from_to(_("wmv"), _("video/x-ms-wmv")));
+    ext2mt->appendElementChild(map_from_to(_("wvx"), _("video/x-ms-wvx")));
+    ext2mt->appendElementChild(map_from_to(_("wm"),  _("video/x-ms-wm")));
+    ext2mt->appendElementChild(map_from_to(_("wmx"), _("video/x-ms-wmx")));
+    ext2mt->appendElementChild(map_from_to(_("m3u"), _("audio/x-mpegurl")));
+    ext2mt->appendElementChild(map_from_to(_("pls"), _("audio/x-scpls")));
+    ext2mt->appendElementChild(map_from_to(_("flv"), _("video/x-flv")));
+    
+    Ref<Comment> ps3info(new Comment(_(" Uncomment the line below for PS3 divx support "), true));
+    Ref<Comment> ps3avi(new Comment(_(" <map from=\"avi\" to=\"video/divx\"/> "), true));
+    ext2mt->appendChild(RefCast(ps3info, Node));
+    ext2mt->appendChild(RefCast(ps3avi, Node));
 
-    catch (Exception ex)
-    {
-        log_error("Could not import mapping template file from %s\n",
-                map_file.c_str());
-    }
+    Ref<Comment> dsmzinfo(new Comment(_(" Uncomment the line below for D-Link DSM / ZyXEL DMA-1000 "), true));
+    Ref<Comment> dsmzavi(new Comment(_(" <map from=\"avi\" to=\"video/avi\"/> "), true));
+    ext2mt->appendChild(RefCast(dsmzinfo, Node));
+    ext2mt->appendChild(RefCast(dsmzavi, Node));
+        
+    mappings->appendElementChild(ext2mt);
+    import->appendElementChild(mappings);
     config->appendElementChild(import);
 
+    config->indent();
     save_text(config_filename, config->print());
     log_info("MediaTomb configuration was created in: %s\n", 
             config_filename.c_str());
@@ -948,7 +1010,7 @@ void ConfigManager::validate(String serverhome)
         }
         catch (Exception e)
         {
-            throw _Exception(_("Error in config file: unsupported import script cahrset specified: ") + charset);
+            throw _Exception(_("Error in config file: unsupported import script charset specified: ") + charset);
         }
     }
 
@@ -1223,7 +1285,7 @@ void ConfigManager::validate(String serverhome)
 
     log_info("Configuration check succeeded.\n");
 
-    root->indent();
+    //root->indent();
     
     log_debug("Config file dump after validation: \n%s\n", root->print().c_str());
 }
@@ -1276,7 +1338,6 @@ void ConfigManager::prepare_path(String xpath, bool needDir, bool existenceUnnee
 
 void ConfigManager::save()
 {
-    root->indent();
     save_text(filename, root->print());
 }
 

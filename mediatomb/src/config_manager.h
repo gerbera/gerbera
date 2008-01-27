@@ -213,6 +213,8 @@ public:
 
 
 protected:
+    // helper for extension to mimetype kind of mappings
+    zmm::Ref<mxml::Element> map_from_to(zmm::String from, zmm::String to);
     // creates a default config.xml file with the most necessary entries and returns the path
     zmm::String createDefaultConfig(zmm::String userhome);
     void save();
