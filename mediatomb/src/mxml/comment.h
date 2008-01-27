@@ -47,13 +47,14 @@ protected:
     zmm::String name;
     zmm::String text;
     zmm::Ref<zmm::Array<Attribute> > attributes;
-    bool LFbefore;
+    bool indentWithLFbefore;
 
 public:
-    Comment(zmm::String text, bool LFbefore = true);
+    Comment(zmm::String text, bool indentWithLFbefore = false);
     inline zmm::String getText() { return text; }
-    inline void setText(zmm::String text, bool LFbefore = true) 
-    { this->text = text; }
+    inline void setText(zmm::String text) { this->text = text; }
+    inline bool getIndentWithLFbefore() { return indentWithLFbefore; }
+    inline void setIndentWithLFbefore(bool indentWithLFbefore) { this->indentWithLFbefore = indentWithLFbefore; }
 
 protected:
     virtual void print_internal(zmm::Ref<zmm::StringBuffer> buf, int indent);

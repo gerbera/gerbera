@@ -226,7 +226,13 @@ void Element::indent(int level)
         
         for (int i = 0; i < numChildren; i++)
         {
-            if (getChild(i)->getType() != mxml_node_comment)
+            bool newlineBefore = true;
+            if (getChild(i)->getType() == mxml_node_comment)
+            {
+                Ref<Comment> comment = RefCast(getChild(i), Comment);
+                newlineBefore = comment->getIndentWithLFbefore();
+            }
+            if (newlineBefore)
             {
                 Ref<Text> indentText(new Text(_("\n")+String(ptr)));
                 insertChild(i++,RefCast(indentText, Node));
