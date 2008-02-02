@@ -1,4 +1,4 @@
-#LyX 1.5.2 created this file. For more info see http://www.lyx.org/
+#LyX 1.5.3 created this file. For more info see http://www.lyx.org/
 \lyxformat 276
 \begin_document
 \begin_header
@@ -3735,7 +3735,7 @@ Defines the storage section - database selection is done here.
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -3779,7 +3779,7 @@ mysql
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -3798,12 +3798,18 @@ enabled="yes"
 \begin_layout Standard
 
 \emph on
-Required
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: yes
 \end_layout
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -4130,6 +4136,20 @@ status open
 
 \begin_layout Standard
 
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
 </listitem><listitem>
 \end_layout
 
@@ -4173,7 +4193,7 @@ Optional
 \begin_layout Standard
 
 \emph on
-Default: no
+Default: yes
 \end_layout
 
 \begin_layout Standard
@@ -4243,7 +4263,7 @@ status open
 
 \begin_layout Standard
 
-<itemizedlist><listitem>
+</listitem><listitem>
 \end_layout
 
 \end_inset
@@ -4374,34 +4394,6 @@ Default: "mediatomb"
 
 \begin_layout Standard
 Name of the database that will be used by MediaTomb.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem></itemizedlist>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem></itemizedlist>
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -4921,7 +4913,8 @@ status open
 \end_layout
 
 \begin_layout Code
-<playlist-script>/path/to/my/playlist-script.js</playlist-script>
+<playlist-script create-link="yes">/path/to/my/playlist-script.js</playlist-scrip
+t>
 \end_layout
 
 \begin_layout Standard
@@ -4946,6 +4939,57 @@ Points to the script that is parsing various playlists, by default parsing
  of pls and m3u playlists is implemented, however the script can be adapted
  to parse almost any kind of text based playlist.
  For more details read doc/scripting.txt
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+create-link=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: yes
+\end_layout
+
+\begin_layout Standard
+Links the playlist to the virtual container which contains the expanded
+ playlist items.
+ This means, that if the actual playlist file is removed from the database,
+ the virtual container corresponding to the playlist will also be removed.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -6210,1074 +6254,13 @@ status open
 
 \end_layout
 
-\begin_layout Subsection
-Transcoding Settings
-\end_layout
-
-\begin_layout Standard
-The transcoding section allows to define ways on how to transcode content.
-\end_layout
-
-\begin_layout Code
-<transcoding enabled="yes" fetch-buffer-size="262144" fetch-buffer-fill-size="0"
->
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Optional
-\end_layout
-
-\begin_layout Standard
-This tag defines the transcoding section.
-\end_layout
-
-\begin_layout Standard
-Attributes:
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-<itemizedlist><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-enabled=...
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Optional
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Default: yes
-\end_layout
-
-\begin_layout Standard
-This attribute defines if transcoding is enabled as a whole, possible values
- are 
-\begin_inset Quotes sld
-\end_inset
-
-yes
-\begin_inset Quotes srd
-\end_inset
-
- or 
-\begin_inset Quotes sld
-\end_inset
-
-no
-\begin_inset Quotes srd
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-fetch-buffer-size=...
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Optional
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Default: 262144
-\end_layout
-
-\begin_layout Standard
-In case you have transcoders that can not handle online content directly
- (see the accept-url parameter below), it is possible to put the transcoder
- between two FIFOs, in this case MediaTomb will fetch the online content.
- This setting defines the buffer size in bytes, that will be used when fetching
- content from the web.
- The value must not be less than allowed by the curl library (usually 16384
- bytes).
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-fetch-buffer-fill-size=...
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Optional
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Default: 0 (disabled)
-\end_layout
-
-\begin_layout Standard
-This setting allows to prebuffer a certain amount of data before sending
- it to the transcoder, this should ensure a constant data flow in case of
- slow connections.
- Usually this setting is not needed, because most transcoders will just
- patiently wait for data and we anyway buffer on the output end.
- However, we observed that ffmpeg will fail to transcode flv files if it
- encounters buffer underruns - this setting helps to avoid this situation.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem></itemizedlist>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Child tags:
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-<itemizedlist><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-<mappings>
-\end_layout
-
-\begin_layout Standard
-Currently only one type of mappings is supported:
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-<itemizedlist><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-<mimetype-profile>
-\end_layout
-
-\begin_layout Standard
-The mime type to profile mappings define which mime type is handled by which
- profile.
- 
-\end_layout
-
-\begin_layout Standard
-Different mime types can map to the same profile in case that the transcoder
- in use supports various input formats.
- The same mime type can also map to several profiles, in this case multiple
- resources in the XML will be generated, allowing the player to decide which
- one to take.
-\end_layout
-
-\begin_layout Standard
-The mappings are defined in the following manner:
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-<itemizedlist><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-<transcode mimetype="audio/x-flac" using="oggflac-pcm"/>
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Optional
-\end_layout
-
-\begin_layout Standard
-In this example we want to transcode our flac audio files (they have the
- mimetype audio/x-flac) using the 
-\begin_inset Quotes sld
-\end_inset
-
-oggflac-pcm
-\begin_inset Quotes srd
-\end_inset
-
- profile which is defined below.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-<itemizedlist><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-mimetype=...
-\end_layout
-
-\begin_layout Standard
-Selects the mime type of the source media that should be transcoded.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-using=...
-\end_layout
-
-\begin_layout Standard
-Selects the transcoding profile that will handle the mime type above.
- Information on how to define transcoding profiles can be found below.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem></itemizedlist>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem></itemizedlist>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem></itemizedlist>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-<profiles>
-\end_layout
-
-\begin_layout Standard
-This section defines the various transcoding profiles.
- 
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-<itemizedlist><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-<profile name="oggflag-pcm" enabled="yes" type="external">
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Optional
-\end_layout
-
-\begin_layout Standard
-Definition of a transcoding profile.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-<itemizedlist><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-name=...
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Required
-\end_layout
-
-\begin_layout Standard
-Name of the transcoding profile, this is the name that is specified in the
- mime type to profile mappings.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-enabled=...
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Required
-\end_layout
-
-\begin_layout Standard
-Enables or disables the profile, allowed values are 
-\begin_inset Quotes sld
-\end_inset
-
-yes
-\begin_inset Quotes srd
-\end_inset
-
- or 
-\begin_inset Quotes sld
-\end_inset
-
-no
-\begin_inset Quotes srd
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-type=...
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Required
-\end_layout
-
-\begin_layout Standard
-Defines the profile type, currently only 
-\begin_inset Quotes sld
-\end_inset
-
-external
-\begin_inset Quotes srd
-\end_inset
-
- is supported, this will change in the future.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-<itemizedlist><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-<mimetype>audio/x-wav</mimetype>
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Required
-\end_layout
-
-\begin_layout Standard
-Defines the mime type of the transcoding result (i.e.
- of the transcoded stream).
- In the above example we transcode to PCM.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-<accept-url>yes</accept-url>
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Optional
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Default: yes
-\end_layout
-
-\begin_layout Standard
-Some transcoders are able to handle non local content, i.e.
- instead giving a local file name you can pass an URL to the transcoder.
- However, some transcoders can only deal with local files, for this case
- set the value to 
-\begin_inset Quotes sld
-\end_inset
-
-no
-\begin_inset Quotes srd
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-<first-resource>no</first-resource>
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Optional
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Default: no
-\end_layout
-
-\begin_layout Standard
-It is possible to offer more than one resource in the browse result, a good
- player implementation will go through all resources and pick the one that
- it can handle best.
- Unfortunately most players only look at the first resource and ignore the
- rest.
- When you add a transcoding profile for a particular media type it will
- show up as an additional resource in the browse result, using this parameter
- you can make sure that the transcoded resource appears first in the list.
-\end_layout
-
-\begin_layout Description
-Note: if more than one transcoding profile is applied on one source media
- type (i.e.
- you transcode an OGG file to MP3 and to PCM), and the first-resource parameter
- is specified in both profiles, then the resource positions are undefined.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-<hide-original-resource>no</hide-original-resource>
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Optional
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Default: no
-\end_layout
-
-\begin_layout Standard
-This parameter will hide the resource of the original media when sending
- the browse result to the player, this can be useful if your device gets
- confused by multiple resources and allows you to send only the transcoded
- one.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-<theora/>
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Optional
-\end_layout
-
-\begin_layout Standard
-As you may know, OGG is just a container, the content could be Vorbis or
- Theora while the mime type is 
-\begin_inset Quotes sld
-\end_inset
-
-application/ogg
-\begin_inset Quotes srd
-\end_inset
-
-.
- For transcoding we need to identify if we are dealing with audio or video
- content, specifying this tag in the profile will make sure that only OGG
- files containing Theora will be processed.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-<agent command="ogg123" arguments="-d wav -f %out %in/>
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Required
-\end_layout
-
-\begin_layout Standard
-Defines the transcoding agent and the parameters, in the example above we
- use ogg123 to convert ogg or flac to wav.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-<itemizedlist><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-command=...
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Required
-\end_layout
-
-\begin_layout Standard
-Defines the transcoder binary that will be executed by MediaTomb upon a
- transcode request, the binary must be in $PATH.
- It is very important that the transcoder is capable of writing the output
- to a FIFO, some applications, for example ffmpeg, have problems with that.
- The command line arguments are specified separately (see below).
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-arguments=...
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Required
-\end_layout
-
-\begin_layout Standard
-Specifies the command line arguments that will be given to the transcoder
- application upon execution.
- There are two special tokens:
-\end_layout
-
-\begin_layout Code
-%in
-\end_layout
-
-\begin_layout Code
-%out
-\end_layout
-
-\begin_layout Standard
-Those tokens get substituted by the input file name and the output FIFO
- name before execution.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem></itemizedlist>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-<buffer size="1048576" chunk-size="131072" fill-size="262144"/>
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Required
-\end_layout
-
-\begin_layout Standard
-These settings help you to achieve a smooth playback of transcoded media.
- The actual values need to be tuned and depend on the speed of your system.
- The general idea is to buffer the data before sending it out to the player,
- it is also possible to delay first playback until the buffer is filled
- to a certain amount.
- The prefill should give you enough space to overcome some high bitrate
- scenes in case your system can not transcode them in real time.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-<itemizedlist><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-size=...
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Required
-\end_layout
-
-\begin_layout Standard
-Size of the buffer in bytes.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-chunk-size=...
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Required
-\end_layout
-
-\begin_layout Standard
-Size of chunks in bytes, that are read by the buffer from the transcoder.
- Smaller chunks will produce a more constant buffer fill ratio, however
- too small chunks may slow things down.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-fill-size=...
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Required
-\end_layout
-
-\begin_layout Standard
-Initial fill size - number of bytes that have to be in the buffer before
- the first read (i.e.
- before sending the data to the player for the first time).
- Set this to 0 (zero) if you want to disable prefilling.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem></itemizedlist>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-<resolution>320x240</resolution>
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Optional
-\end_layout
-
-\begin_layout Standard
-Allows you to tell the resolution of the transcoded media to your player.
- This may be helpful if you want to generate thumbnails for your photos,
- or if your player has the ability to pick video streams in a particular
- resolution.
- Of course the setting should match the real resolution of the transcoded
- media.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem></itemizedlist>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem></itemizedlist>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem></itemizedlist>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem></itemizedlist>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Subsection
+\begin_layout Subsubsection
 Online Content Settings
 \end_layout
 
 \begin_layout Standard
-This section defines options for various supported online services.
+This section resides under import and defines options for various supported
+ online services.
 \end_layout
 
 \begin_layout Code
@@ -8620,6 +7603,34 @@ status open
 \end_layout
 
 \begin_layout Code
+tag=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Required
+\end_layout
+
+\begin_layout Standard
+Tag string of the desired video.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
 start-page=...
 \end_layout
 
@@ -8674,6 +7685,1038 @@ all
 \begin_layout Description
 Note: YouTube will only serve meta data for a maximum of 1000 items per
  request.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Transcoding Settings
+\end_layout
+
+\begin_layout Standard
+The transcoding section allows to define ways on how to transcode content.
+\end_layout
+
+\begin_layout Code
+<transcoding enabled="yes" fetch-buffer-size="262144" fetch-buffer-fill-size="0"
+>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+This tag defines the transcoding section.
+\end_layout
+
+\begin_layout Standard
+Attributes:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+enabled=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: yes
+\end_layout
+
+\begin_layout Standard
+This attribute defines if transcoding is enabled as a whole, possible values
+ are 
+\begin_inset Quotes sld
+\end_inset
+
+yes
+\begin_inset Quotes srd
+\end_inset
+
+ or 
+\begin_inset Quotes sld
+\end_inset
+
+no
+\begin_inset Quotes srd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+fetch-buffer-size=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: 262144
+\end_layout
+
+\begin_layout Standard
+In case you have transcoders that can not handle online content directly
+ (see the accept-url parameter below), it is possible to put the transcoder
+ between two FIFOs, in this case MediaTomb will fetch the online content.
+ This setting defines the buffer size in bytes, that will be used when fetching
+ content from the web.
+ The value must not be less than allowed by the curl library (usually 16384
+ bytes).
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+fetch-buffer-fill-size=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: 0 (disabled)
+\end_layout
+
+\begin_layout Standard
+This setting allows to prebuffer a certain amount of data before sending
+ it to the transcoder, this should ensure a constant data flow in case of
+ slow connections.
+ Usually this setting is not needed, because most transcoders will just
+ patiently wait for data and we anyway buffer on the output end.
+ However, we observed that ffmpeg will fail to transcode flv files if it
+ encounters buffer underruns - this setting helps to avoid this situation.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Child tags:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<mimetype-profile-mappings>
+\end_layout
+
+\begin_layout Standard
+The mime type to profile mappings define which mime type is handled by which
+ profile.
+ 
+\end_layout
+
+\begin_layout Standard
+Different mime types can map to the same profile in case that the transcoder
+ in use supports various input formats.
+ The same mime type can also map to several profiles, in this case multiple
+ resources in the XML will be generated, allowing the player to decide which
+ one to take.
+\end_layout
+
+\begin_layout Standard
+The mappings under mimetype-profile are defined in the following manner:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<transcode mimetype="audio/x-flac" using="oggflac-pcm"/>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+In this example we want to transcode our flac audio files (they have the
+ mimetype audio/x-flac) using the 
+\begin_inset Quotes sld
+\end_inset
+
+oggflac-pcm
+\begin_inset Quotes srd
+\end_inset
+
+ profile which is defined below.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+mimetype=...
+\end_layout
+
+\begin_layout Standard
+Selects the mime type of the source media that should be transcoded.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+using=...
+\end_layout
+
+\begin_layout Standard
+Selects the transcoding profile that will handle the mime type above.
+ Information on how to define transcoding profiles can be found below.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<profiles>
+\end_layout
+
+\begin_layout Standard
+This section defines the various transcoding profiles.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<profile name="oggflag-pcm" enabled="yes" type="external">
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+Definition of a transcoding profile.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+name=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Required
+\end_layout
+
+\begin_layout Standard
+Name of the transcoding profile, this is the name that is specified in the
+ mime type to profile mappings.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+enabled=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Required
+\end_layout
+
+\begin_layout Standard
+Enables or disables the profile, allowed values are 
+\begin_inset Quotes sld
+\end_inset
+
+yes
+\begin_inset Quotes srd
+\end_inset
+
+ or 
+\begin_inset Quotes sld
+\end_inset
+
+no
+\begin_inset Quotes srd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+type=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Required
+\end_layout
+
+\begin_layout Standard
+Defines the profile type, currently only 
+\begin_inset Quotes sld
+\end_inset
+
+external
+\begin_inset Quotes srd
+\end_inset
+
+ is supported, this will change in the future.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<mimetype>audio/x-wav</mimetype>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Required
+\end_layout
+
+\begin_layout Standard
+Defines the mime type of the transcoding result (i.e.
+ of the transcoded stream).
+ In the above example we transcode to PCM.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<accept-url>yes</accept-url>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: yes
+\end_layout
+
+\begin_layout Standard
+Some transcoders are able to handle non local content, i.e.
+ instead giving a local file name you can pass an URL to the transcoder.
+ However, some transcoders can only deal with local files, for this case
+ set the value to 
+\begin_inset Quotes sld
+\end_inset
+
+no
+\begin_inset Quotes srd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<first-resource>no</first-resource>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: no
+\end_layout
+
+\begin_layout Standard
+It is possible to offer more than one resource in the browse result, a good
+ player implementation will go through all resources and pick the one that
+ it can handle best.
+ Unfortunately most players only look at the first resource and ignore the
+ rest.
+ When you add a transcoding profile for a particular media type it will
+ show up as an additional resource in the browse result, using this parameter
+ you can make sure that the transcoded resource appears first in the list.
+\end_layout
+
+\begin_layout Description
+Note: if more than one transcoding profile is applied on one source media
+ type (i.e.
+ you transcode an OGG file to MP3 and to PCM), and the first-resource parameter
+ is specified in both profiles, then the resource positions are undefined.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<hide-original-resource>no</hide-original-resource>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: no
+\end_layout
+
+\begin_layout Standard
+This parameter will hide the resource of the original media when sending
+ the browse result to the player, this can be useful if your device gets
+ confused by multiple resources and allows you to send only the transcoded
+ one.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<accept-ogg-theora>no</accept-org-theora>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: no
+\end_layout
+
+\begin_layout Standard
+As you may know, OGG is just a container, the content could be Vorbis or
+ Theora while the mime type is 
+\begin_inset Quotes sld
+\end_inset
+
+application/ogg
+\begin_inset Quotes srd
+\end_inset
+
+.
+ For transcoding we need to identify if we are dealing with audio or video
+ content, specifying yes in this tag in the profile will make sure that
+ only OGG files containing Theora will be processed.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<agent command="ogg123" arguments="-d wav -f %out %in/>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Required
+\end_layout
+
+\begin_layout Standard
+Defines the transcoding agent and the parameters, in the example above we
+ use ogg123 to convert ogg or flac to wav.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+command=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Required
+\end_layout
+
+\begin_layout Standard
+Defines the transcoder binary that will be executed by MediaTomb upon a
+ transcode request, the binary must be in $PATH.
+ It is very important that the transcoder is capable of writing the output
+ to a FIFO, some applications, for example ffmpeg, have problems with that.
+ The command line arguments are specified separately (see below).
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+arguments=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Required
+\end_layout
+
+\begin_layout Standard
+Specifies the command line arguments that will be given to the transcoder
+ application upon execution.
+ There are two special tokens:
+\end_layout
+
+\begin_layout Code
+%in
+\end_layout
+
+\begin_layout Code
+%out
+\end_layout
+
+\begin_layout Standard
+Those tokens get substituted by the input file name and the output FIFO
+ name before execution.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<buffer size="1048576" chunk-size="131072" fill-size="262144"/>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Required
+\end_layout
+
+\begin_layout Standard
+These settings help you to achieve a smooth playback of transcoded media.
+ The actual values need to be tuned and depend on the speed of your system.
+ The general idea is to buffer the data before sending it out to the player,
+ it is also possible to delay first playback until the buffer is filled
+ to a certain amount.
+ The prefill should give you enough space to overcome some high bitrate
+ scenes in case your system can not transcode them in real time.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+size=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Required
+\end_layout
+
+\begin_layout Standard
+Size of the buffer in bytes.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+chunk-size=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Required
+\end_layout
+
+\begin_layout Standard
+Size of chunks in bytes, that are read by the buffer from the transcoder.
+ Smaller chunks will produce a more constant buffer fill ratio, however
+ too small chunks may slow things down.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+fill-size=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Required
+\end_layout
+
+\begin_layout Standard
+Initial fill size - number of bytes that have to be in the buffer before
+ the first read (i.e.
+ before sending the data to the player for the first time).
+ Set this to 0 (zero) if you want to disable prefilling.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<resolution>320x240</resolution>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+Allows you to tell the resolution of the transcoded media to your player.
+ This may be helpful if you want to generate thumbnails for your photos,
+ or if your player has the ability to pick video streams in a particular
+ resolution.
+ Of course the setting should match the real resolution of the transcoded
+ media.
 \end_layout
 
 \begin_layout Standard

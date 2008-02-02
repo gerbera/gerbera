@@ -163,6 +163,14 @@ Ref<Element> ConfigManager::map_from_to(String from, String to)
     return map;
 }
 
+Ref<Element> ConfigManager::treat_as(String mimetype, String as)
+{
+    Ref<Element> treat(new Element(_("treat")));
+    treat->addAttribute(_("mimetype"), mimetype);
+    treat->addAttribute(_("as"), as);
+    return treat;
+}
+
 String ConfigManager::createDefaultConfig(String userhome)
 {
     bool mysql_flag = false;
@@ -341,8 +349,90 @@ String ConfigManager::createDefaultConfig(String userhome)
     ext2mt->appendChild(RefCast(dsmzavi, Node));
         
     mappings->appendElementChild(ext2mt);
+
+    Ref<Element> mtupnp(new Element(_("mimetype-upnpclass")));
+    mtupnp->appendElementChild(map_from_to(_("audio/*"), 
+                               _(UPNP_DEFAULT_CLASS_MUSIC_TRACK)));
+    mtupnp->appendElementChild(map_from_to(_("video/*"), 
+                               _(UPNP_DEFAULT_CLASS_VIDEO_ITEM)));
+    mtupnp->appendElementChild(map_from_to(_("image/*"), 
+                               _("object.item.imageItem")));
+
+    mappings->appendElementChild(mtupnp);
+
+    Ref<Element> mtcontent(new Element(_("mimetype-contenttype")));
+    mtcontent->appendElementChild(treat_as(_("audio/mpeg"), _("mp3")));
+    mtcontent->appendElementChild(treat_as(_("application/ogg"), _("ogg")));
+    mtcontent->appendElementChild(treat_as(_("audio/x-flac"), _("flac")));
+    mtcontent->appendElementChild(treat_as(_("image/jpeg"), _("jpg")));
+    mtcontent->appendElementChild(treat_as(_("audio/x-mpegurl"),_("playlist")));
+    mtcontent->appendElementChild(treat_as(_("audio/x-scpls"), _("playlist")));
+    mtcontent->appendElementChild(treat_as(_("audio/x-wav"), _("pcm")));
+
+    mappings->appendElementChild(mtcontent);
     import->appendElementChild(mappings);
+
+#ifdef ONLINE_SERVICES
+    Ref<Element> onlinecontent(new Element(_("online-content")));
+#ifdef YOUTUBE
+    Ref<Comment> ytinfo(new Comment(_(" Make sure to setup a transcoding profile for flv "), true));
+    onlinecontent->appendChild(RefCast(ytinfo, Node));
+
+    Ref<Element> yt(new Element(_("YouTube")));
+    yt->addAttribute(_("enabled"), _(DEFAULT_YOUTUBE_ENABLED));
+    yt->addAttribute(_("refresh"), _("28800")); // 8 hours refresh cycle
+    yt->addAttribute(_("update-at-start"), _(YES));
+    // items that were not updated for 4 days will be purged
+    yt->addAttribute(_("purge-after"), _("604800"));
+   
+    Ref<Element> favs(new Element(_("favorites")));
+    favs->addAttribute(_("user"), _("mediatomb"));
+    yt->appendElementChild(favs);
+    
+    Ref<Element> popular(new Element(_("popular")));
+    popular->addAttribute(_("time-range"), _("month"));
+    yt->appendElementChild(popular);
+
+    Ref<Element> playlist(new Element(_("playlist")));
+    playlist->addAttribute(_("id"), _("CF03127692F9D803"));
+    playlist->addAttribute(_("name"), _("MediaTomb Playlist"));
+    playlist->addAttribute(_("start-page"), _("1"));
+    playlist->addAttribute(_("amount"), _("all"));
+    yt->appendElementChild(playlist);
+
+    Ref<Element> ytuser(new Element(_("user")));
+    ytuser->addAttribute(_("user"), _("mediatomb"));
+    ytuser->addAttribute(_("start-page"), _("1"));
+    ytuser->addAttribute(_("amount"), _("all"));
+    yt->appendElementChild(ytuser);
+
+    Ref<Element> ytct(new Element(_("category-and-tag")));
+    ytct->addAttribute(_("category"), _("music"));
+    ytct->addAttribute(_("tag"), _("Six Feed Under"));
+    ytct->addAttribute(_("start-page"), _("1"));
+    ytct->addAttribute(_("amount"), _("10"));
+    yt->appendElementChild(ytct);
+
+    Ref<Element> yttag(new Element(_("tag")));
+    yttag->addAttribute(_("tag"), _("Военное Дело"));
+    yttag->addAttribute(_("start-page"), _("1"));
+    yttag->addAttribute(_("amount"), _("all"));
+    yt->appendElementChild(yttag);
+
+    Ref<Element> ytfeatured(new Element(_("featured")));
+    yt->appendElementChild(ytfeatured);
+
+    onlinecontent->appendElementChild(yt);
+#endif
+    import->appendElementChild(onlinecontent);
+#endif
+
     config->appendElementChild(import);
+
+#ifdef EXTERNAL_TRANSCODING
+    Ref<Element> transcoding(new Element(_("transcoding")));
+    transcoding->addAttribute(_("enabled"), _("no"));
+#endif
 
     config->indent();
     save_text(config_filename, config->print());
@@ -474,7 +564,8 @@ void ConfigManager::validate(String serverhome)
     tmpEl = getElement(_("/server/storage/mysql"));
     if (tmpEl != nil)
     {
-        mysql_en = getOption(_("/server/storage/mysql/attribute::enabled"));
+        mysql_en = getOption(_("/server/storage/mysql/attribute::enabled"),
+                _(DEFAULT_MYSQL_ENABLED));
         if (!validateYesNo(mysql_en))
             throw _Exception(_("Invalid <mysql enabled=\"\"> value"));
     }
@@ -524,7 +615,8 @@ void ConfigManager::validate(String serverhome)
     tmpEl = getElement(_("/server/storage/sqlite3"));
     if (tmpEl != nil)
     {
-        sqlite3_en = getOption(_("/server/storage/sqlite3/attribute::enabled"));
+        sqlite3_en = getOption(_("/server/storage/sqlite3/attribute::enabled"),
+                _(DEFAULT_SQLITE_ENABLED));
         if (!validateYesNo(sqlite3_en))
             throw _Exception(_("Invalid <sqlite3 enabled=\"\"> value"));
     }
@@ -1553,33 +1645,28 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
 
     Ref<Array<DictionaryElement> > mt_mappings(new Array<DictionaryElement>());
 
-    Ref<Element> mappings = element->getChildByName(_("mappings"));
-    if (mappings != nil)
+    String mt;
+    String pname;
+
+    mtype_profile = mappings->getChildByName(_("mimetype-profile-mappings"));
+    if (mtype_profile != nil)
     {
-        mtype_profile = mappings->getChildByName(_("mimetype-profile"));
-
-        String mt;
-        String pname;
-
-        if (mtype_profile != nil)
+        for (int e = 0; e < mtype_profile->childCount(); e++)
         {
-            for (int e = 0; e < mtype_profile->childCount(); e++)
+            Ref<Element> child = RefCast(mtype_profile->getChild(e), Element);
+            if (child->getName() == "transcode")
             {
-                Ref<Element> child = RefCast(mtype_profile->getChild(e), Element);
-                if (child->getName() == "transcode")
-                {
-                    mt = child->getAttribute(_("mimetype"));
-                    pname = child->getAttribute(_("using"));
+                mt = child->getAttribute(_("mimetype"));
+                pname = child->getAttribute(_("using"));
 
-                    if (string_ok(mt) && string_ok(pname))
-                    {
-                        Ref<DictionaryElement> del(new DictionaryElement(mt, pname));
-                        mt_mappings->append(del);
-                    }
-                    else
-                    {
-                        throw _Exception(_("error in configuration: invalid mimetype to profile mapping"));
-                    }
+                if (string_ok(mt) && string_ok(pname))
+                {
+                    Ref<DictionaryElement> del(new DictionaryElement(mt, pname));
+                    mt_mappings->append(del);
+                }
+                else
+                {
+                    throw _Exception(_("error in configuration: invalid mimetype to profile mapping"));
                 }
             }
         }
@@ -1680,8 +1767,17 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                 prof->setHideOriginalResource(false);
         }
 
-        if (child->getChildByName(_("theora")) != nil)
-            prof->setTheora(true);
+        if (child->getChildByName(_("accept-ogg-theora")) != nil)
+        {
+            param = child->getChildText(_("accept-ogg-theora"));
+            if (!validateYesNo(param))
+                throw _Exception(_("Error in config file: incorrect parameter "
+                                   "for <accept-ogg-theora> tag"));
+            if (param == "yes")
+                prof->setTheora(true);
+            else
+                prof->setTheora(false);
+        }
 
         if (child->getChildByName(_("first-resource")) != nil)
         {

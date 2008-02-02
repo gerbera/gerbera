@@ -2650,20 +2650,24 @@ CPPFLAGS="$CPPFLAGS_SAVE"
 
 ######## expat
 
-AC_ARG_ENABLE(libexpat,
-        AC_HELP_STRING([--enable-libexpat], [compile with libexpat support (default: yes)]),
-    [
-        EXPAT_EN=$enableval 
-        if test "x$enableval" = xno; then
-            EXPAT_OK=disabled
-        else
-            EXPAT_OK=yes
-        fi
-    ],
-    [
-        EXPAT_OK=yes
-    ]
-)
+dnl AC_ARG_ENABLE(libexpat,
+dnl        AC_HELP_STRING([--enable-libexpat], [compile with libexpat support (default: yes)]),
+dnl    [
+dnl        EXPAT_EN=$enableval 
+dnl        if test "x$enableval" = xno; then
+dnl            EXPAT_OK=disabled
+dnl        else
+dnl            EXPAT_OK=yes
+dnl        fi
+dnl    ],
+dnl    [
+dnl        EXPAT_OK=yes
+dnl    ]
+dnl)
+
+# expat is now required
+EXPAT_OK=yes
+EXPAT_EN=yes
 
 if test "x$EXPAT_OK" = xyes; then
     if test -n "$EXPAT_SEARCH_HEADERS" ; then
