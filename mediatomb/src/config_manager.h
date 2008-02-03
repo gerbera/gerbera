@@ -34,11 +34,13 @@
 #define __CONFIG_MANAGER_H__
 
 #include "common.h"
+#include "mxml/mxml.h"
 #include "singleton.h"
 #include "dictionary.h"
 #include "xpath.h"
 #include "autoscan.h"
 #include "config_options.h"
+
 #ifdef EXTERNAL_TRANSCODING
     #include "transcoding/transcoding.h"
 #endif
