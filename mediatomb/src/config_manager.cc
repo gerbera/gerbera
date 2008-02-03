@@ -202,8 +202,8 @@ String ConfigManager::createDefaultConfig(String userhome)
     accounts->addAttribute(_("session-timeout"), String::from(DEFAULT_SESSION_TIMEOUT));
 
     Ref<Element> account(new Element(_("account")));
-    account->addAttribute(_("user"), _("mediatomb"));
-    account->addAttribute(_("password"), _("mediatomb"));
+    account->addAttribute(_("user"), _(DEFAULT_ACCOUNT_USER));
+    account->addAttribute(_("password"), _(DEFAULT_ACCOUNT_PASSWORD));
     accounts->appendElementChild(account);
 
     ui->appendElementChild(accounts);
@@ -222,14 +222,14 @@ String ConfigManager::createDefaultConfig(String userhome)
     Ref<Element> storage(new Element(_("storage")));
 #ifdef HAVE_SQLITE3
     Ref<Element> sqlite3(new Element(_("sqlite3")));
-    sqlite3->addAttribute(_("enabled"), _("yes"));
+    sqlite3->addAttribute(_("enabled"), _(DEFAULT_SQLITE_ENABLED));
     sqlite3->appendTextChild(_("database-file"), _(DEFAULT_SQLITE3_DB_FILENAME));
     storage->appendElementChild(sqlite3);
 #endif
 #ifdef HAVE_MYSQL
     Ref<Element>mysql(new Element(_("mysql")));
 #ifndef HAVE_SQLITE3
-    mysql->addAttribute(_("enabled"), _("yes"));
+    mysql->addAttribute(_("enabled"), _(DEFAULT_MYSQL_ENABLED));
     mysql_flag = true;
 #else
     mysql->addAttribute(_("enabled"), _("no"));
@@ -244,7 +244,7 @@ String ConfigManager::createDefaultConfig(String userhome)
     server->appendElementChild(storage);
 
     Ref<Element> protocolinfo(new Element(_("protocolInfo")));
-    protocolinfo->addAttribute(_("extend"), _(NO));
+    protocolinfo->addAttribute(_("extend"), _(DEFAULT_EXTEND_PROTOCOLINFO));
 
     server->appendElementChild(protocolinfo);
    
@@ -380,10 +380,12 @@ String ConfigManager::createDefaultConfig(String userhome)
 
     Ref<Element> yt(new Element(_("YouTube")));
     yt->addAttribute(_("enabled"), _(DEFAULT_YOUTUBE_ENABLED));
-    yt->addAttribute(_("refresh"), _("28800")); // 8 hours refresh cycle
-    yt->addAttribute(_("update-at-start"), _(YES));
+    // 8 hours refresh cycle
+    yt->addAttribute(_("refresh"), String::from(DEFAULT_YOUTUBE_REFRESH)); 
+    yt->addAttribute(_("update-at-start"), _(DEFAULT_YOUTUBE_UPDATE_AT_START));
     // items that were not updated for 4 days will be purged
-    yt->addAttribute(_("purge-after"), _("604800"));
+    yt->addAttribute(_("purge-after"), 
+            String::from(DEFAULT_YOUTUBE_PURGE_AFTER));
    
     Ref<Element> favs(new Element(_("favorites")));
     favs->addAttribute(_("user"), _("mediatomb"));
@@ -394,29 +396,32 @@ String ConfigManager::createDefaultConfig(String userhome)
     yt->appendElementChild(popular);
 
     Ref<Element> playlist(new Element(_("playlist")));
-    playlist->addAttribute(_("id"), _("CF03127692F9D803"));
-    playlist->addAttribute(_("name"), _("MediaTomb Playlist"));
+    playlist->addAttribute(_("id"), _(DEFAULT_YOUTUBE_PLAYLIST_ID));
+    playlist->addAttribute(_("name"), _(DEFAULT_YOUTUBE_PLAYLIST_NAME));
     playlist->addAttribute(_("start-page"), _("1"));
     playlist->addAttribute(_("amount"), _("all"));
     yt->appendElementChild(playlist);
 
     Ref<Element> ytuser(new Element(_("user")));
     ytuser->addAttribute(_("user"), _("mediatomb"));
-    ytuser->addAttribute(_("start-page"), _("1"));
-    ytuser->addAttribute(_("amount"), _("all"));
+    ytuser->addAttribute(_("start-page"), 
+            String::from(DEFAULT_YOUTUBE_PLAYLIST_START_PAGE));
+    ytuser->addAttribute(_("amount"), _(DEFAULT_YOUTUBE_PLAYLIST_AMOUNT));
     yt->appendElementChild(ytuser);
 
     Ref<Element> ytct(new Element(_("category-and-tag")));
-    ytct->addAttribute(_("category"), _("music"));
-    ytct->addAttribute(_("tag"), _("Six Feed Under"));
-    ytct->addAttribute(_("start-page"), _("1"));
-    ytct->addAttribute(_("amount"), _("10"));
+    ytct->addAttribute(_("category"), _(DEFAULT_YOUTUBE_CNT_CATEGORY));
+    ytct->addAttribute(_("tag"), _(DEFAULT_YOUTUBE_CNT_TAG));
+    ytct->addAttribute(_("start-page"), 
+            String::from(DEFAULT_YOUTUBE_CNT_START_PAGE));
+    ytct->addAttribute(_("amount"), String::from(DEFAULT_YOUTUBE_CNT_AMOUNT));
     yt->appendElementChild(ytct);
 
     Ref<Element> yttag(new Element(_("tag")));
-    yttag->addAttribute(_("tag"), _("Военное Дело"));
-    yttag->addAttribute(_("start-page"), _("1"));
-    yttag->addAttribute(_("amount"), _("all"));
+    yttag->addAttribute(_("tag"), _(DEFAULT_YOUTUBE_TAG));
+    yttag->addAttribute(_("start-page"), 
+            String::from(DEFAULT_YOUTUBE_TAG_START_PAGE));
+    yttag->addAttribute(_("amount"), _(DEFAULT_YOUTUBE_TAG_AMOUNT));
     yt->appendElementChild(yttag);
 
     Ref<Element> ytfeatured(new Element(_("featured")));
@@ -431,7 +436,7 @@ String ConfigManager::createDefaultConfig(String userhome)
 
 #ifdef EXTERNAL_TRANSCODING
     Ref<Element> transcoding(new Element(_("transcoding")));
-    transcoding->addAttribute(_("enabled"), _("no"));
+    transcoding->addAttribute(_("enabled"), _(DEFAULT_TRANSCODING_ENABLED));
 #endif
 
     config->indent();
@@ -1279,7 +1284,7 @@ void ConfigManager::validate(String serverhome)
 #endif
 
 #ifdef YOUTUBE
-    temp = getOption(_("/online-content/YouTube/attribute::enabled"), 
+    temp = getOption(_("/import/online-content/YouTube/attribute::enabled"), 
                      _(DEFAULT_YOUTUBE_ENABLED));
 
     if (!validateYesNo(temp))
@@ -1293,12 +1298,12 @@ void ConfigManager::validate(String serverhome)
     // check other options only if the service is enabled
     if (temp == "yes")
     {
-        temp_int = getIntOption(_("/online-content/YouTube/attribute::refresh"), 0);
+        temp_int = getIntOption(_("/import/online-content/YouTube/attribute::refresh"), 0);
         NEW_INT_OPTION(temp_int);
         SET_INT_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_REFRESH);
 
-        temp_int = getIntOption(_("/online-content/YouTube/attribute::purge-after"), 0);
-        if (getIntOption(_("/online-content/YouTube/attribute::refresh")) >= temp_int)
+        temp_int = getIntOption(_("/import/online-content/YouTube/attribute::purge-after"), 0);
+        if (getIntOption(_("/import/online-content/YouTube/attribute::refresh")) >= temp_int)
         {
             if (temp_int != 0) 
                 throw _Exception(_("Error in config file: YouTube purge-after value must be greater than refresh interval"));
@@ -1307,7 +1312,7 @@ void ConfigManager::validate(String serverhome)
         NEW_INT_OPTION(temp_int);
         SET_INT_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_PURGE_AFTER);
 
-        temp = getOption(_("/online-content/YouTube/attribute::update-at-start"),
+        temp = getOption(_("/import/online-content/YouTube/attribute::update-at-start"),
                 _(DEFAULT_YOUTUBE_UPDATE_AT_START));
 
         if (!validateYesNo(temp))
@@ -1318,10 +1323,10 @@ void ConfigManager::validate(String serverhome)
         NEW_BOOL_OPTION(temp == "yes" ? true : false);
         SET_BOOL_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_UPDATE_AT_START);
 
-        el = getElement(_("/online-content/YouTube"));
+        el = getElement(_("/import/online-content/YouTube"));
         if (el == nil)
         {
-            getOption(_("/online-content/YouTube"),
+            getOption(_("/import/online-content/YouTube"),
                     _(""));
         }
         Ref<Array<Object> > yt_opts = createServiceTaskList(OS_YouTube, el);
@@ -1337,7 +1342,7 @@ void ConfigManager::validate(String serverhome)
 #endif
 
 #ifdef SOPCAST 
-    temp = getOption(_("/online-content/SopCast/attribute::enabled"), 
+    temp = getOption(_("/import/online-content/SopCast/attribute::enabled"), 
                      _(DEFAULT_SOPCAST_ENABLED));
 
     if (!validateYesNo(temp))
@@ -1348,12 +1353,12 @@ void ConfigManager::validate(String serverhome)
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
     SET_BOOL_OPTION(CFG_ONLINE_CONTENT_SOPCAST_ENABLED);
 
-    temp_int = getIntOption(_("/online-content/SopCast/attribute::refresh"), 0);
+    temp_int = getIntOption(_("/import/online-content/SopCast/attribute::refresh"), 0);
     NEW_INT_OPTION(temp_int);
     SET_INT_OPTION(CFG_ONLINE_CONTENT_SOPCAST_REFRESH);
 
-    temp_int = getIntOption(_("/online-content/SopCast/attribute::purge-after"), 0);
-    if (getIntOption(_("/online-content/SopCast/attribute::refresh")) >= temp_int)
+    temp_int = getIntOption(_("/import/online-content/SopCast/attribute::purge-after"), 0);
+    if (getIntOption(_("/import/online-content/SopCast/attribute::refresh")) >= temp_int)
     {
         if (temp_int != 0) 
             throw _Exception(_("Error in config file: SopCast purge-after value must be greater than refresh interval"));
@@ -1362,7 +1367,7 @@ void ConfigManager::validate(String serverhome)
     NEW_INT_OPTION(temp_int);
     SET_INT_OPTION(CFG_ONLINE_CONTENT_SOPCAST_PURGE_AFTER);
 
-    temp = getOption(_("/online-content/SopCast/attribute::update-at-start"),
+    temp = getOption(_("/import/online-content/SopCast/attribute::update-at-start"),
                      _(DEFAULT_SOPCAST_UPDATE_AT_START));
 
     if (!validateYesNo(temp))
@@ -1648,7 +1653,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
     String mt;
     String pname;
 
-    mtype_profile = mappings->getChildByName(_("mimetype-profile-mappings"));
+    mtype_profile = element->getChildByName(_("mimetype-profile-mappings"));
     if (mtype_profile != nil)
     {
         for (int e = 0; e < mtype_profile->childCount(); e++)
@@ -1896,7 +1901,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
 
         prof->setBufferOptions(bs, cs, fs);
 
-        if (mappings == nil)
+        if (mtype_profile == nil)
         {
             throw _Exception(_("error in configuration: transcoding "
                                "profiles exist, but no mimetype to profile "

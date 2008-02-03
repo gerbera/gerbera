@@ -53,6 +53,7 @@
 // UPnP default classes
 #define UPNP_DEFAULT_CLASS_CONTAINER    "object.container"
 #define UPNP_DEFAULT_CLASS_ITEM         "object.item"
+#define UPNP_DEFAULT_CLASS_VIDEO_ITEM   "object.item.videoItem"
 #define UPNP_DEFAULT_CLASS_ACTIVE_ITEM  "object.item.activeItem"
 #define UPNP_DEFAULT_CLASS_MUSIC_ALBUM  "object.container.album.musicAlbum"
 #define UPNP_DEFAULT_CLASS_MUSIC_TRACK  "object.item.audioItem.musicTrack"
@@ -195,6 +196,7 @@
 // default values
 #define DEFAULT_INTERNAL_CHARSET        "UTF-8"
 #define DEFAULT_FILESYSTEM_CHARSET      "ISO-8859-1"
+#define DEFAULT_METADATA_CHARSET        "ISO-8859-1"
 #define DEFAULT_FALLBACK_CHARSET        "US-ASCII"
 #define DEFAULT_JS_CHARSET              "UTF-8"
 
@@ -211,6 +213,8 @@
 #define DEFAULT_POLL_WHEN_IDLE_VALUE    NO
 #define DEFAULT_POLL_INTERVAL           2 
 #define DEFAULT_ACCOUNTS_EN_VALUE       NO
+#define DEFAULT_ACCOUNT_USER            "mediatomb"
+#define DEFAULT_ACCOUNT_PASSWORD        "mediatomb"
 #define DEFAULT_ALIVE_INTERVAL          180 // seconds
 #define DEFAULT_BOOKMARK_FILE           "mediatomb.html"
 #define DEFAULT_IGNORE_UNKNOWN_EXTENSIONS NO
@@ -218,9 +222,6 @@
 #define DEFAULT_PLAYLISTS_SCRIPT        "playlists.js"
 #define DEFAULT_PLAYLIST_CREATE_LINK    YES
 #define DEFAULT_COMMON_SCRIPT           "common.js"
-#define DEFAULT_MYSQL_HOST              "localhost"
-#define DEFAULT_MYSQL_DB                "mediatomb"
-#define DEFAULT_MYSQL_USER              "mediatomb"
 #define DEFAULT_WEB_DIR                 "web"
 #define DEFAULT_JS_DIR                  "js"
 #define DEFAULT_HIDDEN_FILES_VALUE      NO
@@ -241,6 +242,22 @@
     #define YOUTUBE_PAGESIZE            106496
     #define DEFAULT_YOUTUBE_ENABLED     NO
     #define DEFAULT_YOUTUBE_UPDATE_AT_START NO
+    #define DEFAULT_YOUTUBE_REFRESH     28800
+    #define DEFAULT_YOUTUBE_PURGE_AFTER 604800
+    #define DEFAULT_YOUTUBE_PLAYLIST_ID         "CF03127692F9D803"
+    #define DEFAULT_YOUTUBE_PLAYLIST_NAME       "MediaTomb Playlist"
+    #define DEFAULT_YOUTUBE_PLAYLIST_START_PAGE 1
+    #define DEFAULT_YOUTUBE_PLAYLIST_AMOUNT     "all"
+
+    #define DEFAULT_YOUTUBE_CNT_CATEGORY        "music"
+    #define DEFAULT_YOUTUBE_CNT_TAG             "Six Feet Under"
+    #define DEFAULT_YOUTUBE_CNT_START_PAGE      1
+    #define DEFAULT_YOUTUBE_CNT_AMOUNT          10
+    
+    #define DEFAULT_YOUTUBE_TAG                 "Военное Дело"
+    #define DEFAULT_YOUTUBE_TAG_START_PAGE      1
+    #define DEFAULT_YOUTUBE_TAG_AMOUNT          "all"
+
 #endif
 #ifdef SOPCAST
     #define SOPCAST_PAGESIZE            224480
@@ -261,10 +278,17 @@
     #define DEFAULT_SQLITE_RESTORE      "restore"
     #define DEFAULT_SQLITE_BACKUP_ENABLED NO
     #define DEFAULT_SQLITE_BACKUP_INTERVAL 600
-
+    #define DEFAULT_SQLITE_ENABLED      YES
     #define DEFAULT_STORAGE_DRIVER      "sqlite3"
 #else
     #define DEFAULT_STORAGE_DRIVER      "mysql"
+#endif
+
+#ifdef HAVE_MYSQL
+    #define DEFAULT_MYSQL_HOST          "localhost"
+    #define DEFAULT_MYSQL_DB            "mediatomb"
+    #define DEFAULT_MYSQL_USER          "mediatomb"
+    #define DEFAULT_MYSQL_ENABLED       YES
 #endif
 
 #define DEFAULT_SQLITE3_DB_FILENAME     "mediatomb.db"
