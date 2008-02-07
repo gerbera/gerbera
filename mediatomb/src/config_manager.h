@@ -222,6 +222,7 @@ protected:
     zmm::String createDefaultConfig(zmm::String userhome);
     void save();
     void save_text(zmm::String filename, zmm::String content);
+    void migrate();
     void validate(zmm::String serverhome);
     void prepare_udn();
     zmm::String construct_path(zmm::String path);

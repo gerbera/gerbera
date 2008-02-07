@@ -42,6 +42,8 @@
 #include "zmmf/zmmf.h"
 #include "exceptions.h"
 
+#define CONFIG_XML_VERSION              1
+
 // ERROR CODES                                                                                 
 /// \brief UPnP specific error code.
 #define UPNP_E_ACTION_FAILED            501
@@ -269,6 +271,13 @@
 #endif
 #ifdef EXTERNAL_TRANSCODING
     #define DEFAULT_TRANSCODING_ENABLED NO
+    #define DEFAULT_AUDIO_BUFFER_SIZE   1048576
+    #define DEFAULT_AUDIO_CHUNK_SIZE    131072
+    #define DEFAULT_AUDIO_FILL_SIZE     262144
+
+    #define DEFAULT_VIDEO_BUFFER_SIZE   14400000
+    #define DEFAULT_VIDEO_CHUNK_SIZE    512000
+    #define DEFAULT_VIDEO_FILL_SIZE     120000
 #endif
 #ifdef HAVE_SQLITE3
     #define SQLITE_SYNC_FULL            2

@@ -189,6 +189,7 @@ String ConfigManager::createDefaultConfig(String userhome)
     String config_filename = homepath + DIR_SEPARATOR + DEFAULT_CONFIG_NAME;
 
     Ref<Element> config(new Element(_("config")));
+    config->addAttribute(_("version"), String::from(CONFIG_XML_VERSION));
     config->addAttribute(_("xmlns"), _(XML_XMLNS));
     config->addAttribute(_("xmlns:xsi"), _(XML_XMLNS_XSI));
     config->addAttribute(_("xsi:schemaLocation"), _(XML_XSI_SCHEMA_LOCATION));
@@ -481,9 +482,12 @@ String ConfigManager::createDefaultConfig(String userhome)
     oggflac->appendElementChild(oggflac_agent);
 
     Ref<Element> oggflac_buffer(new Element(_("buffer")));
-    oggflac_buffer->addAttribute(_("size"), _("1048576"));
-    oggflac_buffer->addAttribute(_("chunk-size"), _("131072"));
-    oggflac_buffer->addAttribute(_("fill-size"), _("262144"));
+    oggflac_buffer->addAttribute(_("size"), 
+            String::from(DEFAULT_AUDIO_BUFFER_SIZE));
+    oggflac_buffer->addAttribute(_("chunk-size"), 
+            String::from(DEFAULT_AUDIO_CHUNK_SIZE));
+    oggflac_buffer->addAttribute(_("fill-size"), 
+            String::from(DEFAULT_AUDIO_FILL_SIZE));
     oggflac->appendElementChild(oggflac_buffer);
 
     profiles->appendElementChild(oggflac);
@@ -504,9 +508,12 @@ String ConfigManager::createDefaultConfig(String userhome)
     vlcmpeg->appendElementChild(vlcmpeg_agent);
 
     Ref<Element> vlcmpeg_buffer(new Element(_("buffer")));
-    vlcmpeg_buffer->addAttribute(_("size"), _("14400000"));
-    vlcmpeg_buffer->addAttribute(_("chunk-size"), _("51200"));
-    vlcmpeg_buffer->addAttribute(_("fill-size"), _("120000"));
+    vlcmpeg_buffer->addAttribute(_("size"), 
+            String::from(DEFAULT_VIDEO_BUFFER_SIZE));
+    vlcmpeg_buffer->addAttribute(_("chunk-size"), 
+            String::from(DEFAULT_VIDEO_CHUNK_SIZE));
+    vlcmpeg_buffer->addAttribute(_("fill-size"),
+            String::from(DEFAULT_VIDEO_FILL_SIZE));
     vlcmpeg->appendElementChild(vlcmpeg_buffer);
 
     profiles->appendElementChild(vlcmpeg);
@@ -527,6 +534,91 @@ String ConfigManager::createDefaultConfig(String userhome)
     }
 
     return config_filename;
+}
+
+void ConfigManager::migrate()
+{
+    // pre 0.10.* to 0.11.0 -> storage layout has changed
+    if (root->getAttribute(_("version")) == nil)
+    {
+        log_info("Migrating server configuration\n");
+        root->setAttribute(_("version"), String::from(CONFIG_XML_VERSION));
+        root->setAttribute(_("version"), String::from(CONFIG_XML_VERSION));
+        root->setAttribute(_("xmlns"), _(XML_XMLNS));
+        root->setAttribute(_("xmlns:xsi"), _(XML_XMLNS_XSI));
+        root->setAttribute(_("xsi:schemaLocation"), _(XML_XSI_SCHEMA_LOCATION));
+
+        Ref<Element> server = root->getChildByName(_("server"));
+        if (server == nil)
+            throw _Exception(_("Migration failed! Could not find <server> tag!"));
+
+        checkOptionString(_("/server/storage/attribute::driver"));
+        String dbDriver = getOption(_("/server/storage/attribute::driver"));
+        Ref<Element> storage(new Element(_("storage")));
+#ifdef HAVE_SQLITE3
+        if (dbDriver == "sqlite3")
+        {
+            String dbFile = getOption(_("/server/storage/database-file"));
+
+            Ref<Element> sqlite3(new Element(_("sqlite3")));
+            sqlite3->addAttribute(_("enabled"), _(YES));
+            sqlite3->appendTextChild(_("database-file"), dbFile);
+            storage->appendElementChild(sqlite3);
+        }
+#endif
+#ifdef HAVE_MYSQL
+        else if (dbDriver == "mysql")
+        {
+            String host = getOption(_("/server/storage/host"));
+            String db = getOption(_("/server/storage/database"));
+            String username = getOption(_("/server/storage/username"));
+            int port = -1;
+
+            if (server->getChildByName(_("storage"))->getChildByName(_("port")) != nil)
+                port = getIntOption(_("/server/storage/port"));
+
+            String socket = nil;;
+            if (server->getChildByName(_("storage"))->getChildByName(_("socket")) != nil)
+                socket = getOption(_("/server/storage/socket"));
+
+            String password = nil;
+            if (server->getChildByName(_("storage"))->getChildByName(_("password")) != nil)
+                password = getOption(_("/server/storage/password"));
+
+            Ref<Element>mysql(new Element(_("mysql")));
+            mysql->addAttribute(_("enabled"), _(YES));
+
+            mysql->appendTextChild(_("host"), host);
+
+            if (port != -1)
+                mysql->appendTextChild(_("port"), String::from(port));
+
+            if (socket != nil)
+                storage->appendTextChild(_("socket"), socket);
+
+            mysql->appendTextChild(_("username"), username);
+            if (password != nil)
+                storage->appendTextChild(_("password"), password);
+
+            mysql->appendTextChild(_("database"), db);
+            storage->appendElementChild(mysql);
+        }
+#endif
+        /// \todo Add a mxml method for removing nodes.
+        for (int i = 0; i < server->childCount(); i++)
+        {
+            Ref<Node> child = server->getChild(i);
+            if ((child != nil) && (child->getType() == mxml_node_element))
+                if (RefCast(child, Element)->getName() == "storage")
+                    server->removeChild(i);
+        }
+
+        server->appendElementChild(storage);
+        root->indent();
+        save();
+        log_info("Migration of configuration successfull\n");
+    }
+
 }
 
 #define NEW_OPTION(optval) opt =  Ref<Option> (new Option(optval));
@@ -596,6 +688,15 @@ void ConfigManager::validate(String serverhome)
 
     if (root->getChildByName(_("server")) == nil)
         throw _Exception(_("Error in config file: <server> tag not found"));
+
+    String version = root->getAttribute(_("version"));
+    // unfortunately we did not introduce a version attr before, so we assume
+    // that a config without a version is older
+    if (!string_ok(version))
+        migrate();
+
+    if (version.toInt() > CONFIG_XML_VERSION)
+        throw _Exception(_("Config version \"") + version + "\" does not yet exist!");
 
     // now go through the mandatory parameters, if something is missing
     // we will not start the server
