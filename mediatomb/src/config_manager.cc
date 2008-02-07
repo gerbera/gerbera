@@ -437,6 +437,82 @@ String ConfigManager::createDefaultConfig(String userhome)
 #ifdef EXTERNAL_TRANSCODING
     Ref<Element> transcoding(new Element(_("transcoding")));
     transcoding->addAttribute(_("enabled"), _(DEFAULT_TRANSCODING_ENABLED));
+    
+    Ref<Element> mt_prof_map(new Element(_("mimetype-profile-mappings")));
+
+    Ref<Element> prof_flv(new Element(_("transcode")));
+    prof_flv->addAttribute(_("mimetype"), _("video/x-flv"));
+    prof_flv->addAttribute(_("using"), _("vlcmpeg"));
+
+    mt_prof_map->appendElementChild(prof_flv);
+
+    Ref<Element> prof_theora(new Element(_("transcode")));
+    prof_theora->addAttribute(_("mimetype"), _("application/ogg"));
+    prof_theora->addAttribute(_("using"), _("vlcmpeg"));
+    mt_prof_map->appendElementChild(prof_theora);
+
+    Ref<Element> prof_ogg(new Element(_("transcode")));
+    prof_ogg->addAttribute(_("mimetype"), _("application/ogg"));
+    prof_ogg->addAttribute(_("using"), _("ogglfac2raw"));
+    mt_prof_map->appendElementChild(prof_ogg);
+
+    Ref<Element> prof_flac(new Element(_("transcode")));
+    prof_flac->addAttribute(_("mimetype"), _("audio/x-flac"));
+    prof_flac->addAttribute(_("using"), _("ogglfac2wav"));
+    mt_prof_map->appendElementChild(prof_flac);
+
+    transcoding->appendElementChild(mt_prof_map);
+
+    Ref<Element> profiles(new Element(_("profiles")));
+
+    Ref<Element> oggflac(new Element(_("profile")));
+    oggflac->addAttribute(_("name"), _("oggflac2raw"));
+    oggflac->addAttribute(_("enabled"), _(NO));
+    oggflac->addAttribute(_("type"), _("external"));
+
+    oggflac->appendTextChild(_("mimetype"), _("audio/L16"));
+    oggflac->appendTextChild(_("accept-url"), _(NO));
+    oggflac->appendTextChild(_("first-resource"), _(YES));
+    oggflac->appendTextChild(_("accept-ogg"), _("vorbis"));
+
+    Ref<Element> oggflac_agent(new Element(_("agent")));
+    oggflac_agent->addAttribute(_("command"), _("ogg123"));
+    oggflac_agent->addAttribute(_("arguments"), _("-d raw -f %out %in"));
+    oggflac->appendElementChild(oggflac_agent);
+
+    Ref<Element> oggflac_buffer(new Element(_("buffer")));
+    oggflac_buffer->addAttribute(_("size"), _("1048576"));
+    oggflac_buffer->addAttribute(_("chunk-size"), _("131072"));
+    oggflac_buffer->addAttribute(_("fill-size"), _("262144"));
+    oggflac->appendElementChild(oggflac_buffer);
+
+    profiles->appendElementChild(oggflac);
+
+    Ref<Element> vlcmpeg(new Element(_("profile")));
+    vlcmpeg->addAttribute(_("name"), _("vlcmpeg"));
+    vlcmpeg->addAttribute(_("enabled"), _(NO));
+    vlcmpeg->addAttribute(_("type"), _("external"));
+
+    vlcmpeg->appendTextChild(_("mimetype"), _("video/mpeg"));
+    vlcmpeg->appendTextChild(_("accept-url"), _(YES));
+    vlcmpeg->appendTextChild(_("first-resource"), _(YES));
+    vlcmpeg->appendTextChild(_("accept-ogg"), _("theora"));
+
+    Ref<Element> vlcmpeg_agent(new Element(_("agent")));
+    vlcmpeg_agent->addAttribute(_("command"), _("vlc"));
+    vlcmpeg_agent->addAttribute(_("arguments"), _("-I dummy %in --sout #transcode{venc=ffmpeg,vcodec=mp2v,vb=4096,fps=25,aenc=ffmpeg,acodec=mpga,ab=192,samplerate=44100,channels=2}:standard{access=file,mux=ps,dst=%out} vlc:quit"));
+    vlcmpeg->appendElementChild(vlcmpeg_agent);
+
+    Ref<Element> vlcmpeg_buffer(new Element(_("buffer")));
+    vlcmpeg_buffer->addAttribute(_("size"), _("14400000"));
+    vlcmpeg_buffer->addAttribute(_("chunk-size"), _("51200"));
+    vlcmpeg_buffer->addAttribute(_("fill-size"), _("120000"));
+    vlcmpeg->appendElementChild(vlcmpeg_buffer);
+
+    profiles->appendElementChild(vlcmpeg);
+
+    transcoding->appendElementChild(profiles);
+    config->appendElementChild(transcoding);
 #endif
 
     config->indent();
