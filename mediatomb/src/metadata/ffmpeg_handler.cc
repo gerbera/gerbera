@@ -168,17 +168,17 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext *pFormatC
 		AVStream *st = pFormatCtx->streams[i];
 		if((videoset == false) && (st->codec->codec_type == CODEC_TYPE_VIDEO))
         {
-            if (st->codec->stream_codec_tag > 0)
+            if (st->codec->codec_tag > 0)
             {
                 char fourcc[5];
-                fourcc[0] = st->codec->stream_codec_tag;
-                fourcc[1] = st->codec->stream_codec_tag >> 8;
-                fourcc[2] = st->codec->stream_codec_tag >> 16;
-                fourcc[3] = st->codec->stream_codec_tag >> 24;
+                fourcc[0] = st->codec->codec_tag;
+                fourcc[1] = st->codec->codec_tag >> 8;
+                fourcc[2] = st->codec->codec_tag >> 16;
+                fourcc[3] = st->codec->codec_tag >> 24;
                 fourcc[4] = '\0';
 
                 log_debug("FourCC: %x = %s\n", 
-                                        st->codec->stream_codec_tag, fourcc);
+                                        st->codec->codec_tag, fourcc);
                 String fcc = String(fourcc);
                 if (string_ok(fcc))
                     item->getResource(0)->addOption(_(RESOURCE_OPTION_FOURCC), 

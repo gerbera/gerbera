@@ -8621,11 +8621,11 @@ status open
 \end_layout
 
 \begin_layout Code
-<fourcc>divx</fourcc>
+<fourcc>XVID</fourcc>
 \end_layout
 
 \begin_layout Code
-<fourcc>xvid</fourcc>
+<fourcc>DX50</fourcc>
 \end_layout
 
 \begin_layout Standard
