@@ -46,6 +46,12 @@ typedef enum transcoding_type_t
     TR_Remote
 };
 
+typedef enum avi_fourcc_listmode_t
+{
+    FCC_None,
+    FCC_Process,
+    FCC_Ignore
+};
 
 /// \brief this class keeps all data associated with one transcoding profile.
 class TranscodingProfile : public zmm::Object
@@ -137,6 +143,22 @@ public:
     void setHideOriginalResource(bool hide) { hide_orig_res = hide; }
     bool hideOriginalResource() { return hide_orig_res; }
 
+    /// \brief If the profile handles source content in the AVI container,
+    /// we can specify a list of fourcc's; the list can be either processed
+    /// (i.e. the profile will process only AVI files that have a fourcc which
+    /// matches an entry in the list), or we can specify that the AVIs that
+    /// match a fourcc in the list are ignored and not transcoded.
+    ///
+    /// \param list List of FourCC entries.
+    /// \param mode Specifies if the FourCCs in the list are accepted or ignored
+    void setAVIFourCCList(zmm::Ref<zmm::Array<zmm::StringBase> > list,
+                          avi_fourcc_listmode_t mode = FCC_Ignore);
+
+    /// \brief Retrieves the FourCC list
+    zmm::Ref<zmm::Array<zmm::StringBase> > getAVIFourCCList();
+    /// \brief Provides information on the mode of the list
+    avi_fourcc_listmode_t getAVIFourCCListMode() { return fourcc_mode; }
+
 protected:
     zmm::String name;
     zmm::String tm;
@@ -151,7 +173,8 @@ protected:
     size_t initial_fill_size;
     transcoding_type_t tr_type;
     zmm::Ref<Dictionary> attributes;
-
+    zmm::Ref<zmm::Array<zmm::StringBase> > fourcc_list;
+    avi_fourcc_listmode_t fourcc_mode;
     TranscodingProfile();
 };
 

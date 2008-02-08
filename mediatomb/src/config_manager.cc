@@ -369,6 +369,7 @@ String ConfigManager::createDefaultConfig(String userhome)
     mtcontent->appendElementChild(treat_as(_("audio/x-mpegurl"),_("playlist")));
     mtcontent->appendElementChild(treat_as(_("audio/x-scpls"), _("playlist")));
     mtcontent->appendElementChild(treat_as(_("audio/x-wav"), _("pcm")));
+    mtcontent->appendElementChild(treat_as(_("video/x-msvideo"), _("avi")));
 
     mappings->appendElementChild(mtcontent);
     import->appendElementChild(mappings);
@@ -474,7 +475,7 @@ String ConfigManager::createDefaultConfig(String userhome)
     oggflac->appendTextChild(_("mimetype"), _("audio/L16"));
     oggflac->appendTextChild(_("accept-url"), _(NO));
     oggflac->appendTextChild(_("first-resource"), _(YES));
-    oggflac->appendTextChild(_("accept-ogg"), _("vorbis"));
+    oggflac->appendTextChild(_("accept-ogg-theora"), _(NO));
 
     Ref<Element> oggflac_agent(new Element(_("agent")));
     oggflac_agent->addAttribute(_("command"), _("ogg123"));
@@ -500,7 +501,7 @@ String ConfigManager::createDefaultConfig(String userhome)
     vlcmpeg->appendTextChild(_("mimetype"), _("video/mpeg"));
     vlcmpeg->appendTextChild(_("accept-url"), _(YES));
     vlcmpeg->appendTextChild(_("first-resource"), _(YES));
-    vlcmpeg->appendTextChild(_("accept-ogg"), _("theora"));
+    vlcmpeg->appendTextChild(_("accept-ogg-theora"), _(YES));
 
     Ref<Element> vlcmpeg_agent(new Element(_("agent")));
     vlcmpeg_agent->addAttribute(_("command"), _("vlc"));
@@ -1037,6 +1038,7 @@ void ConfigManager::validate(String serverhome)
         mime_content->put(_("audio/x-mpegurl"), _(CONTENT_TYPE_PLAYLIST));
         mime_content->put(_("audio/x-scpls"), _(CONTENT_TYPE_PLAYLIST));
         mime_content->put(_("audio/x-wav"), _(CONTENT_TYPE_PCM));
+        mime_content->put(_("video/x-msvideo"), _(CONTENT_TYPE_AVI));
     }
 
     NEW_DICT_OPTION(mime_content);
@@ -1854,25 +1856,6 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
         }
     }
 
-
-   /*
-    if (mt_mappings->size() == 0)
-    {
-       if (list->size() > 0)
-            throw _Exception(_("error in configuration: transcoding profiles exist, but no mimetype to profile mappings specified"));
-    }
-
-    // now check for bogus profile names
-    Ref<Array<DictionaryElement> > dict_check = mt_mappings->getElements();
-    for (int j = 0; j < dict_check->size(); j++)
-    {
-        if (list->getByName(dict_check->get(j)->getValue()) == nil)
-            throw _Exception(_("error in configuration: you specified a mimetype to transcoding profile mapping, but no profile named \"") + 
-                    dict_check->get(j)->getValue() + 
-                    "\" exists");
-    }
-*/
-
     Ref<Element> profiles = element->getChildByName(_("profiles"));
     if (profiles == nil)
         return list;
@@ -1922,6 +1905,46 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
             {
                 if (check_resolution(param))
                     prof->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), param);
+            }
+        }
+
+        Ref<Element> avi_fcc = child->getChildByName(_("avi-fourcc-list"));
+        if (avi_fcc != nil)
+        {
+            String mode = avi_fcc->getAttribute(_("mode"));
+            if (!string_ok(mode))
+                throw _Exception(_("error in configuration: avi-fourcc-list requires a valid \"mode\" attribute"));
+
+            avi_fourcc_listmode_t fcc_mode; 
+            if (mode == "ignore")
+                fcc_mode = FCC_Ignore;
+            else if (mode == "process")
+                fcc_mode = FCC_Process;
+            else if (mode == "disabled")
+                fcc_mode = FCC_None;
+            else
+                throw _Exception(_("error in configuration: invalid mode given for avi-fourcc-list: \"") + mode + _("\""));
+
+            if (fcc_mode != FCC_None)
+            {
+                Ref<Array<StringBase> > fcc_list(new Array<StringBase>());
+                for (int f = 0; f < avi_fcc->childCount(); f++)
+                {
+                    Ref<Node> child_node = avi_fcc->getChild(f);
+                    if (child_node->getType() == mxml_node_element)
+                    {
+                        Ref<Element> fourcc = RefCast(child_node, Element);
+                        if (fourcc->getName() != "fourcc")
+                            continue;
+
+                        String fcc = fourcc->getText();
+                        if (!string_ok(fcc))
+                            throw _Exception(_("error in configuration: empty fourcc specified!"));
+                        fcc_list->append(fcc);
+                    }
+                }
+
+                prof->setAVIFourCCList(fcc_list, fcc_mode);
             }
         }
 

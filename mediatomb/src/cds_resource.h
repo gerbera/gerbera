@@ -43,6 +43,8 @@
 /// resource
 #define RESOURCE_OPTION_PROXY_URL   "prx"
 
+#define RESOURCE_OPTION_FOURCC      "4cc"
+
 class CdsResource : public zmm::Object
 {
 protected:

@@ -52,6 +52,8 @@ TranscodingProfile::TranscodingProfile()
     accept_url = true;
     hide_orig_res = false;
     attributes = Ref<Dictionary>(new Dictionary());
+    fourcc_list = Ref<Array<StringBase> >(new Array<StringBase>());
+    fourcc_mode = FCC_None;
 }
 
 TranscodingProfile::TranscodingProfile(transcoding_type_t tr_type, String name) 
@@ -67,6 +69,8 @@ TranscodingProfile::TranscodingProfile(transcoding_type_t tr_type, String name)
     initial_fill_size = 0;
     tr_type = TR_None;
     attributes = Ref<Dictionary>(new Dictionary());
+    fourcc_list = Ref<Array<StringBase> >(new Array<StringBase>());
+    fourcc_mode = FCC_None;
 }
 
 void TranscodingProfile::setBufferOptions(size_t bs, size_t cs, size_t ifs)
@@ -85,6 +89,19 @@ Ref<Dictionary> TranscodingProfile::getAttributes()
 {   
     return attributes;
 }   
+
+
+void TranscodingProfile::setAVIFourCCList(Ref<Array<StringBase> > list,
+                                          avi_fourcc_listmode_t mode)
+{
+    fourcc_list = list;
+    fourcc_mode = mode;
+}
+
+Ref<Array<StringBase> > TranscodingProfile::getAVIFourCCList()
+{
+    return fourcc_list;
+}
 
 
 TranscodingProfileList::TranscodingProfileList()

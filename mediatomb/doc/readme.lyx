@@ -8446,6 +8446,221 @@ status open
 \end_layout
 
 \begin_layout Code
+<avi-fourcc-list mode="ignore">
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: disabled
+\end_layout
+
+\begin_layout Standard
+This option allows to specify a particular list of AVI fourcc strings that
+ can be either set to be ignored or processed by the profile.
+\end_layout
+
+\begin_layout Description
+Note: this option has no effect on non AVI content.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+mode=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Required
+\end_layout
+
+\begin_layout Standard
+Specifies how the list should be handled by the transcoding engine, possible
+ values are:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+"disabled"
+\end_layout
+
+\begin_layout Standard
+The option is completely disabled, fourcc list is not being processed.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+"process"
+\end_layout
+
+\begin_layout Standard
+Only the fourcc strings that are listed will be processed by the transcoding
+ profile, AVI files with other fourcc strings will be ignored.
+ Setting this is useful if you want to transcode only some specific fourcc's
+ and not transcode the rest.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+"ignore"
+\end_layout
+
+\begin_layout Standard
+The fourcc strings listed will not be transcoded, all other codecs will
+ be transcoded.
+ Setting this might be useful if you want to prevent a limited number of
+ codecs from being transcoded, but want to apply transcoding on the rest
+ (i.e.
+ - do not transcode divx and xvid, but want to transcode mjpg and whatever
+ else might be in the AVI container).
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The list of fourcc strings is enclosed in the avi-fourcc-list section:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<fourcc>divx</fourcc>
+\end_layout
+
+\begin_layout Code
+<fourcc>xvid</fourcc>
+\end_layout
+
+\begin_layout Standard
+etc...
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
 <agent command="ogg123" arguments="-d wav -f %out %in/>
 \end_layout
 

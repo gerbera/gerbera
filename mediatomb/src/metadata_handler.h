@@ -51,6 +51,7 @@
 #define CONTENT_TYPE_PLAYLIST   "playlist"
 #define CONTENT_TYPE_MPEG4VIDEO "mp4"
 #define CONTENT_TYPE_PCM        "pcm"
+#define CONTENT_TYPE_AVI        "avi"
 
 #define OGG_THEORA              "t"
 

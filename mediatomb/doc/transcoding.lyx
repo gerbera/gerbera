@@ -1,4 +1,4 @@
-#LyX 1.5.2 created this file. For more info see http://www.lyx.org/
+#LyX 1.5.3 created this file. For more info see http://www.lyx.org/
 \lyxformat 276
 \begin_document
 \begin_header
@@ -686,6 +686,49 @@ Sometimes it may be required that you only present the transcoded resource
 
 \begin_layout Code
 <hide-original-resource>yes</hide-original-resource>
+\end_layout
+
+\begin_layout Subsection
+Advanced Settings
+\end_layout
+
+\begin_layout Standard
+Sometimes you encounter a container format but want to transcode it only
+ if it has a specific codec inside.
+ Provided that MediaTomb was compiled with ffmpeg support we offer fourcc
+ based transcoding settings for AVI files.
+ A sample configuration for a profile with fourcc specific settings would
+ look like that:
+\end_layout
+
+\begin_layout Code
+<avi-fourcc-list mode="ignore">
+\end_layout
+
+\begin_layout Code
+    <fourcc>divx</fourcc>
+\end_layout
+
+\begin_layout Code
+    <fourcc>xvid</fourcc>
+\end_layout
+
+\begin_layout Code
+</avi-fourcc-list>
+\end_layout
+
+\begin_layout Standard
+Please refer to the main documentation on more information regarding the
+ options.
+\end_layout
+
+\begin_layout Standard
+We also provide a way to specify that a profile should only process the
+ Theora codec if an OGG container is encountered:
+\end_layout
+
+\begin_layout Code
+<accept-ogg-theora>yes</accept-ogg-theora>
 \end_layout
 
 \begin_layout Section

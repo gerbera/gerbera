@@ -116,7 +116,8 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
             if (tp == nil)
                 throw _Exception(_("Invalid profile encountered!"));
 
-            if (mappings->get(item->getMimeType()) == CONTENT_TYPE_OGG) 
+            String ct = mappings->get(item->getMimeType());
+            if (ct == CONTENT_TYPE_OGG) 
             {
                 if (((item->getFlag(OBJECT_FLAG_OGG_THEORA)) && 
                      (!tp->isTheora())) ||
@@ -125,6 +126,46 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                      {
                          continue;
                      }
+            }
+            // check user fourcc settings
+            else if (ct == CONTENT_TYPE_AVI)
+            {
+                avi_fourcc_listmode_t fcc_mode = tp->getAVIFourCCListMode();
+
+                Ref<Array<StringBase> > fcc_list = tp->getAVIFourCCList();
+                // mode is either process or ignore, so we will have to take a
+                // look at the settings
+                if (fcc_mode != FCC_None)
+                {
+                    String current_fcc = item->getResource(0)->getOption(_(RESOURCE_OPTION_FOURCC));
+                    // we can not do much if the item has no fourcc info,
+                    // so we will transcode it anyway
+                    if (!string_ok(current_fcc))
+                    {
+                        // the process mode specifies that we will transcode
+                        // ONLY if the fourcc matches the list; since an invalid
+                        // fourcc can not match anything we will skip the item
+                        if (fcc_mode == FCC_Process)
+                            continue;
+                    }
+                    // we have the current and hopefully valid fcc string
+                    // let's have a look if it matches the list
+                    else
+                    {
+                        bool fcc_match = false;
+                        for (int f = 0; f < fcc_list->size(); f++)
+                        {
+                            if (current_fcc == fcc_list->get(f)->data)
+                                fcc_match = true;
+                        }
+                       
+                        if (!fcc_match && (fcc_mode == FCC_Process))
+                            continue;
+
+                        if (fcc_match && (fcc_mode == FCC_Ignore))
+                            continue;
+                    }
+                }
             }
 
             Ref<CdsResource> t_res(new CdsResource(CH_TRANSCODE));
