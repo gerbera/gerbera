@@ -42,7 +42,7 @@
 
 using namespace zmm;
 
-#define YOUTUBE_URL_PARAMS_REGEXP   "var swfArgs =.*\"t\": \"([^x\"]+)\""
+#define YOUTUBE_URL_PARAMS_REGEXP   "var swfArgs =.*\"t\": \"([^\"]+)\""
 #define YOUTUBE_URL_LOCATION_REGEXP "\nLocation: (http://[^\n]+)\n"
 #define YOUTUBE_URL_WATCH           "http://www.youtube.com/watch?v="
 #define YOUTUBE_URL_GET             "http://www.youtube.com/get_video?" 
@@ -108,7 +108,7 @@ String YouTubeVideoURL::getVideoURL(String video_id)
     }
     else
     {
-        throw _Exception(_("Failed to get URL for video with id ") + video_id);
+        throw _Exception(_("Failed to get URL for video with id (step 1)") + video_id);
     }
 
     params = _(YOUTUBE_URL_GET) + YOUTUBE_URL_PARAM_VIDEO_ID + '=' + 
@@ -122,7 +122,7 @@ String YouTubeVideoURL::getVideoURL(String video_id)
         if (string_ok(trim_string(matcher->group(1))))
             return trim_string(matcher->group(1));
         else
-            throw _Exception(_("Failed to get URL for video with id ") + 
+            throw _Exception(_("Failed to get URL for video with id (step 2)")+ 
                              video_id);
     }
 
