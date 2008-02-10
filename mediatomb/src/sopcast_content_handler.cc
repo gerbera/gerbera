@@ -55,7 +55,7 @@ bool SopCastContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
 
     channels = service;
 
-    group_count = channels->childCount();
+    group_count = channels->elementChildCount();
     if (group_count < 1)
         return false;
 
@@ -84,7 +84,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
     {
         if (current_group == nil)
         {
-            current_group = channels->getChild(current_group_node_index);
+            current_group = channels->getElementChild(current_group_node_index);
             current_group_node_index++;
             channel_count = current_group->childCount();
 
@@ -106,7 +106,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
 
         while (current_channel_index < channel_count)
         {
-            Ref<Element> channel = current_group->getChild(current_channel_index);
+            Ref<Element> channel = current_group->getElementChild(current_channel_index);
             current_channel_index++;
             if (channel->getName() != "channel")
                 continue;
@@ -157,7 +157,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
                     renderProtocolInfo(mt));
             item->addResource(resource);
            
-            Ref<Element> tmp_el = channel->getChild(_("sop_address"));
+            Ref<Element> tmp_el = channel->getElementChild(_("sop_address"));
             if (tmp_el == nil)
             {
                 log_warning("Failed to retrieve SopCast channel URL\n");
@@ -172,7 +172,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
             }
             item->setURL(temp);
 
-            tmp_el = channel->getChild(_("name"));
+            tmp_el = channel->getElementChild(_("name"));
             if (tmp_el == nil)
             {
                 log_warning("Failed to retrieve SopCast channel name\n");
@@ -185,7 +185,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
             else
                 item->setTitle(_("Unknown"));
 
-            tmp_el = channel->getChild(_("region"));
+            tmp_el = channel->getElementChild(_("region"));
             if (tmp_el != nil)
             {
                 temp = tmp_el->getAttribute(_("en"));

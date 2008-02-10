@@ -962,7 +962,7 @@ void ConfigManager::validate(String serverhome)
     // now get the option list for the drop down menu
     Ref<Element> element = getElement(_("/server/ui/items-per-page"));
     // create default structure
-    if (element->childCount() == 0)
+    if (element->elementChildCount() == 0)
     {
         if ((temp_int != DEFAULT_ITEMS_PER_PAGE_1) && 
             (temp_int != DEFAULT_ITEMS_PER_PAGE_2) &&
@@ -987,9 +987,9 @@ void ConfigManager::validate(String serverhome)
     {
         int i;
         bool default_found = false;
-        for (int j = 0; j < element->childCount(); j++)
+        for (int j = 0; j < element->elementChildCount(); j++)
         {
-            Ref<Element> child = RefCast(element->getChild(j), Element);
+            Ref<Element> child = element->getElementChild(j);
             if (child->getName() == "option")
             {
                 i = child->getText().toInt();
@@ -1011,9 +1011,9 @@ void ConfigManager::validate(String serverhome)
 
     // create the array from either user or default settings
     Ref<Array<StringBase> > menu_opts (new Array<StringBase>());
-    for (int j = 0; j < element->childCount(); j++)
+    for (int j = 0; j < element->elementChildCount(); j++)
     {
-        Ref<Element> child = RefCast(element->getChild(j), Element);
+        Ref<Element> child = element->getElementChild(j);
         if (child->getName() == "option")
             menu_opts->append(child->getText());
     }
