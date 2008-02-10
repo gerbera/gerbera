@@ -65,9 +65,9 @@ public:
     void setText(zmm::String text);
 
     int childCount(enum mxml_node_types type = mxml_node_all);
-    zmm::Ref<Node> getChild(int index, enum mxml_node_types type = mxml_node_all);
+    zmm::Ref<Node> getChild(int index, enum mxml_node_types type = mxml_node_all, bool remove = false);
     zmm::Ref<Node> getFirstChild(enum mxml_node_types type = mxml_node_all) { return getChild(0, type); }
-    void removeChild(int index);
+    void removeChild(int index, enum mxml_node_types type = mxml_node_all);
     void appendChild(zmm::Ref<Node> child);
     void insertChild(int index, zmm::Ref<Node> child);
     
@@ -78,9 +78,13 @@ public:
     zmm::Ref<Element> getElementChild(int index) { return RefCast(getChild(index, mxml_node_element), Element); }
     int elementChildCount() { return childCount(mxml_node_element); }
     
+    void removeElementChild(int index) { removeChild(index, mxml_node_element); }
+    bool removeElementChild(zmm::String name, bool removeAll);
+    
     void appendElementChild(zmm::Ref<Element> child) { appendChild(RefCast(child, Node)); };
     void appendTextChild(zmm::String name, zmm::String text);
 
+    int getChildIdByName(zmm::String name);
     zmm::Ref<Element> getChildByName(zmm::String name);
     zmm::String getChildText(zmm::String name);
     

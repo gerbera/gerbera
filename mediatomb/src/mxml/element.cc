@@ -115,7 +115,7 @@ int Element::childCount(enum mxml_node_types type)
     return countElements;
 }
 
-Ref<Node> Element::getChild(int index, enum mxml_node_types type)
+Ref<Node> Element::getChild(int index, enum mxml_node_types type, bool remove)
 {
     if (children == nil)
         return nil;
@@ -126,7 +126,12 @@ Ref<Node> Element::getChild(int index, enum mxml_node_types type)
         if (index >= children->size())
             return nil;
         else
-            return children->get(index);
+        {
+            Ref<Node> node = children->get(index);
+            if (remove)
+                children->remove(index);
+            return node;
+        }
     }
     
     for(int i = 0; i < children->size(); i++)
@@ -135,10 +140,28 @@ Ref<Node> Element::getChild(int index, enum mxml_node_types type)
         if (nd->getType() == type)
         {
             if (countElements++ == index)
+            {
+                if (remove)
+                    children->remove(i);
                 return nd;
+            }
         }
     }
     return nil;
+}
+
+bool Element::removeElementChild(String name, bool removeAll)
+{
+    int id = getChildIdByName(name);
+    if (id < 0)
+        return false;
+    Ref<Node> child = getChild(id, mxml_node_all, true);
+    if (child == nil)
+        return false;
+    if (! removeAll)
+        return true;
+    removeElementChild(name, true);
+    return true;
 }
 
 void Element::appendChild(Ref<Node> child)
@@ -155,9 +178,14 @@ void Element::insertChild(int index, Ref<Node> child)
     children->insert(index, child);
 }
 
-void Element::removeChild(int index)
+void Element::removeChild(int index, enum mxml_node_types type)
 {
-    children->remove(index);
+    if (type == mxml_node_all)
+        children->remove(index);
+    else
+    {
+        getChild(index, type, true);
+    }
 }
 
 void Element::removeWhitespace()
@@ -307,10 +335,12 @@ void Element::appendTextChild(String name, String text)
     appendElementChild(el);
 }
 
-Ref<Element> Element::getChildByName(String name)
+
+
+int Element::getChildIdByName(String name)
 {
     if(children == nil)
-        return nil;
+        return -1;
     for(int i = 0; i < children->size(); i++)
     {
         Ref<Node> nd = children->get(i);
@@ -318,10 +348,18 @@ Ref<Element> Element::getChildByName(String name)
         {
             Ref<Element> el = RefCast(nd, Element);
             if (name == nil || el->name == name)
-                return el;
+                return i;
         }
     }
-    return nil;
+    return -1;
+}
+
+Ref<Element> Element::getChildByName(String name)
+{
+    int id = getChildIdByName(name);
+    if (id < 0)
+        return nil;
+    return RefCast(getChild(id), Element);
 }
 
 String Element::getChildText(String name)
