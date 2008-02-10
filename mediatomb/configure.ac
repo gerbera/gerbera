@@ -1807,9 +1807,11 @@ fi
 LDFLGAS="$LDFLAGS_SAVE"
 
 ######### taglib or id3lib
+TAGLIB_REQUESTED=no
+ID3_REQUESTED=no
 
 AC_ARG_ENABLE(id3lib,
-        AC_HELP_STRING([--enable-id3lib], [compile with id3lib support (default: yes, preferred over taglib)]),
+        AC_HELP_STRING([--enable-id3lib], [compile with id3lib support (default: yes, if taglib is not available)]),
   [
      ID3_EN=$enableval 
      if test "x$enableval" = xno; then
@@ -1824,10 +1826,8 @@ AC_ARG_ENABLE(id3lib,
   ]
 )
 
-TAGLIB_REQUESTED=no
-ID3_REQUESTED=no
 AC_ARG_ENABLE(taglib,
-        AC_HELP_STRING([--enable-taglib], [compile with taglib support (default: yes, if id3lib is not available)]),
+        AC_HELP_STRING([--enable-taglib], [compile with taglib support (default: yes, preferred over id3lib)]),
    [
       TAGLIB_EN=$enableval
       if test "x$enableval" = xno; then
@@ -1840,7 +1840,6 @@ AC_ARG_ENABLE(taglib,
    [
         TAGLIB_OK=yes
    ]
-
 )
 
 if ((test "x$TAGLIB_REQUESTED" = xno) && (test "x$ID3_REQUESTED" = xyes)) ; then
@@ -1853,7 +1852,95 @@ elif ((test "x$TAGLIB_REQUESTED" = xyes) && (test "x$ID3_REQUESTED" = xyes)) ; t
     AC_MSG_ERROR([Please select either taglib or id3lib, but not both.])
 fi
 
-######### id3tag
+######## taglib
+
+TAGLIB_PROG_FOUND=0
+TAGLIB_LIBS=
+TAGLIB_CFLAGS=
+if test "x$TAGLIB_OK" = xyes; then
+    if test -n "$TAGLIB_SEARCH_CONFIG"; then
+        AC_MSG_NOTICE([You specified $TAGLIB_SEARCH_CONFIG for taglib-config])
+        
+        if test -f "$TAGLIB_SEARCH_CONFIG"; then 
+            taglibconfig="$TAGLIB_SEARCH_CONFIG"
+        else
+            taglibconfig="no"
+        fi
+        
+        if test "x$taglibconfig" = xno; then
+            AC_MSG_ERROR([$TAGLIB_SEARCH_CONFIG not found])
+        else
+            TAGLIB_TEST=`${taglibconfig} --version 2>/dev/null`
+            if test -z "$TAGLIB_TEST"; then
+                AC_MSG_ERROR([${taglibconfig} could not be executed or returned invalid values])
+            fi
+            TAGLIB_PROG_FOUND=1
+        fi
+    else
+        AC_PATH_PROG(taglibconfig, taglib-config, no)
+        if test "x$taglibconfig" = xno; then
+            unset ac_cv_path_taglibconfig
+            AC_PATH_PROG(taglibconfig, taglib-config, no, $SEARCH_DIR_PROGS)
+            if test "x$taglibconfig" = xno; then
+                TAGLIB_OK=missing
+                AC_MSG_RESULT([taglib-config not found, please install the taglib-devel package])
+            else
+                TAGLIB_PROG_FOUND=1
+            fi
+        else
+            TAGLIB_PROG_FOUND=1
+        fi
+   fi 
+
+   if test "$TAGLIB_PROG_FOUND" -eq 1 ; then
+        AC_MSG_CHECKING(taglib cflags)
+        TAGLIB_CFLAGS=`${taglibconfig} --cflags`
+        AC_MSG_RESULT($TAGLIB_CFLAGS)
+
+        AC_MSG_CHECKING(taglib libraries)
+        TAGLIB_LIBS=`${taglibconfig} --libs`
+        AC_MSG_RESULT($TAGLIB_LIBS)
+        TAGLIB_LIBS="$TAGLIB_LIBS $Z_LIBS"
+    fi
+fi
+
+if test "x$TAGLIB_OK" = xyes; then
+    CPPFLAGS="$CPPFLAGS $TAGLIB_CFLAGS"
+    CXXFLAGS="$CXXFLAGS $TAGLIB_CFLAGS"
+    AC_CHECK_HEADERS([taglib.h fileref.h tag.h audioproperties.h tstring.h textidentificationframe.h attachedpictureframe.h],
+        [
+            AC_DEFINE([HAVE_ID3_ALBUMART], [1],
+                  [not aware of taglib versions that do not support album art])
+        ],
+        [TAGLIB_OK=missing]
+    )
+fi
+
+if test "x$TAGLIB_OK" = xyes; then
+    LDFLAGS="$TAGLIB_LIBS"
+    AC_CHECK_LIB(tag, main, [],
+        [TAGLIB_OK=missing]
+    )
+fi
+
+if test "x$TAGLIB_OK" = xyes; then
+    ID3_OK=disabled
+    AC_DEFINE([HAVE_TAGLIB], [1], [taglib library presence])
+    AC_SUBST(TAGLIB_CFLAGS)
+    AC_SUBST(TAGLIB_LIBS)
+else
+    if test "x$TAGLIB_EN" = xyes; then
+        AC_MSG_ERROR(unable to configure taglib support)
+    fi
+    TAGLIB_CFLAGS=
+    TAGLIB_LIBS=
+fi
+CPPFLAGS="$CPPFLAGS_SAVE"
+CXXFLAGS="$CXXFLAGS_SAVE"
+LDFLAGS="$LDFLAGS_SAVE"
+
+
+######### id3lib
 
 #AC_ARG_ENABLE(id3lib,
 #  [  --enable-id3lib          id3lib support],
@@ -2042,92 +2129,6 @@ fi
 LDFLAGS="$LDFLAGS_SAVE"
 CXXFLAGS="$CXXFLAGS_SAVE"
 CPPFLAGS="$CPPFLAGS_SAVE"
-######## taglib
-
-TAGLIB_PROG_FOUND=0
-TAGLIB_LIBS=
-TAGLIB_CFLAGS=
-if test "x$TAGLIB_OK" = xyes; then
-    if test -n "$TAGLIB_SEARCH_CONFIG"; then
-        AC_MSG_NOTICE([You specified $TAGLIB_SEARCH_CONFIG for taglib-config])
-        
-        if test -f "$TAGLIB_SEARCH_CONFIG"; then 
-            taglibconfig="$TAGLIB_SEARCH_CONFIG"
-        else
-            taglibconfig="no"
-        fi
-        
-        if test "x$taglibconfig" = xno; then
-            AC_MSG_ERROR([$TAGLIB_SEARCH_CONFIG not found])
-        else
-            TAGLIB_TEST=`${taglibconfig} --version 2>/dev/null`
-            if test -z "$TAGLIB_TEST"; then
-                AC_MSG_ERROR([${taglibconfig} could not be executed or returned invalid values])
-            fi
-            TAGLIB_PROG_FOUND=1
-        fi
-    else
-        AC_PATH_PROG(taglibconfig, taglib-config, no)
-        if test "x$taglibconfig" = xno; then
-            unset ac_cv_path_taglibconfig
-            AC_PATH_PROG(taglibconfig, taglib-config, no, $SEARCH_DIR_PROGS)
-            if test "x$taglibconfig" = xno; then
-                TAGLIB_OK=missing
-                AC_MSG_RESULT([taglib-config not found, please install the taglib-devel package])
-            else
-                TAGLIB_PROG_FOUND=1
-            fi
-        else
-            TAGLIB_PROG_FOUND=1
-        fi
-   fi 
-
-   if test "$TAGLIB_PROG_FOUND" -eq 1 ; then
-        AC_MSG_CHECKING(taglib cflags)
-        TAGLIB_CFLAGS=`${taglibconfig} --cflags`
-        AC_MSG_RESULT($TAGLIB_CFLAGS)
-
-        AC_MSG_CHECKING(taglib libraries)
-        TAGLIB_LIBS=`${taglibconfig} --libs`
-        AC_MSG_RESULT($TAGLIB_LIBS)
-        TAGLIB_LIBS="$TAGLIB_LIBS $Z_LIBS"
-    fi
-fi
-
-if test "x$TAGLIB_OK" = xyes; then
-    CPPFLAGS="$CPPFLAGS $TAGLIB_CFLAGS"
-    CXXFLAGS="$CXXFLAGS $TAGLIB_CFLAGS"
-    AC_CHECK_HEADERS([taglib.h fileref.h tag.h audioproperties.h tstring.h],
-        [
-            AC_DEFINE([HAVE_ID3_ALBUMART], [1],
-                  [not aware of taglib versions that do not support album art])
-        ],
-        [TAGLIB_OK=missing]
-    )
-fi
-
-if test "x$TAGLIB_OK" = xyes; then
-    LDFLAGS="$TAGLIB_LIBS"
-    AC_CHECK_LIB(tag, main, [],
-        [TAGLIB_OK=missing]
-    )
-fi
-
-if test "x$TAGLIB_OK" = xyes; then
-    AC_DEFINE([HAVE_TAGLIB], [1], [taglib library presence])
-    AC_SUBST(TAGLIB_CFLAGS)
-    AC_SUBST(TAGLIB_LIBS)
-else
-    if test "x$TAGLIB_EN" = xyes; then
-        AC_MSG_ERROR(unable to configure taglib support)
-    fi
-    TAGLIB_CFLAGS=
-    TAGLIB_LIBS=
-fi
-CPPFLAGS="$CPPFLAGS_SAVE"
-CXXFLAGS="$CXXFLAGS_SAVE"
-LDFLAGS="$LDFLAGS_SAVE"
-
 ######## curl
 
 CURL_PROG_FOUND=0

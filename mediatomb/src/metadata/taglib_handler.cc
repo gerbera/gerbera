@@ -43,6 +43,7 @@
 #include <mpegfile.h>
 #include <audioproperties.h>
 #include <attachedpictureframe.h>
+#include <textidentificationframe.h>
 #include <tstring.h>
 
 #include "taglib_handler.h"
@@ -131,6 +132,9 @@ static void addField(metadata_fields_t field, TagLib::Tag *tag, Ref<CdsItem> ite
 
 void TagHandler::fillMetadata(Ref<CdsItem> item)
 {
+    Ref<Array<StringBase> > aux;
+    Ref<StringConverter> sc = StringConverter::i2i();
+
     TagLib::FileRef f(item->getLocation().c_str());
 
     if (f.isNull() || (!f.tag()))
@@ -141,7 +145,7 @@ void TagHandler::fillMetadata(Ref<CdsItem> item)
 
     for (int i = 0; i < M_MAX; i++)
         addField((metadata_fields_t) i, tag, item);
-    
+
     int temp;
     
     TagLib::AudioProperties *audioProps = f.audioProperties();
@@ -179,7 +183,7 @@ void TagHandler::fillMetadata(Ref<CdsItem> item)
         item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS),
                                            String::from(temp));
     }
-    
+
     Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     String content_type = mappings->get(item->getMimeType());
     // we are done here, album art can only be retrieved from id3v2
@@ -193,6 +197,48 @@ void TagHandler::fillMetadata(Ref<CdsItem> item)
     if (!mp.isValid() || !mp.ID3v2Tag())
         return;
 
+    //log_debug("Tag contains %i frame(s)\n", mp.ID3v2Tag()->frameListMap().size());
+    Ref<ConfigManager> cm = ConfigManager::getInstance();
+    aux = cm->getStringArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
+    if (aux != nil) 
+    {
+        for (int j = 0; j < aux->size(); j++) 
+        {
+            String desiredFrame = aux->get(j);
+            if (string_ok(desiredFrame)) 
+            {
+                const TagLib::ID3v2::FrameList& allFrames = mp.ID3v2Tag()->frameList();
+                if (!allFrames.isEmpty()) 
+                {
+                    TagLib::ID3v2::FrameList::ConstIterator it = allFrames.begin();
+                    for (; it != allFrames.end(); it++) 
+                    {
+                        TagLib::String frameID((*it)->frameID(), TagLib::String::Latin1);
+                        //log_debug("Found frame: %s\n", frameID.toCString(true));
+
+                        TagLib::ID3v2::TextIdentificationFrame *textFrame =
+                            dynamic_cast<TagLib::ID3v2::TextIdentificationFrame *>(*it);
+
+                        if (textFrame) 
+                        {
+                            //log_debug("We have a TextIdentificationFrame\n");
+
+                            if (frameID == desiredFrame.c_str()) 
+                            {
+                                TagLib::String frameContents = textFrame->toString();
+                                //log_debug("We have a match!!!!: %s\n", frameContents.toCString(true));
+                                String value(frameContents.toCString(true), frameContents.size());
+                                value = sc->convert(value);
+                                log_debug("Adding frame: %s with value %s\n", desiredFrame.c_str(), value.c_str());
+                                item->setAuxData(desiredFrame, value);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     TagLib::ID3v2::FrameList list = mp.ID3v2Tag()->frameList("APIC");
     if (!list.isEmpty())
     {
@@ -202,7 +248,6 @@ void TagHandler::fillMetadata(Ref<CdsItem> item)
         if (art->picture().size() < 1)
             return;
 
-        Ref<StringConverter> sc = StringConverter::i2i();
         String art_mimetype = sc->convert(String(art->mimeType().toCString(true)));
         // saw that simply "PNG" was used with some mp3's, so mimetype setting
         // was probably invalid

@@ -138,6 +138,11 @@ public:
     void setAcceptURL(bool accept) { accept_url = accept; }
     bool acceptURL() { return accept_url; }
 
+    /// \brief Specifies if the output of the profile is a thumbnail,
+    /// this will add appropriate DLNA tags to the XML.
+    void setThumbnail(bool th) { thumbnail = th; }
+    bool isThumbnail() { return thumbnail; }
+
     /// \brief Specifies if the availability of this transcoding profile
     /// should enforce hiding of all original resources in the browse XML
     void setHideOriginalResource(bool hide) { hide_orig_res = hide; }
@@ -168,6 +173,7 @@ protected:
     bool theora;
     bool accept_url;
     bool hide_orig_res;
+    bool thumbnail;
     size_t buffer_size;
     size_t chunk_size;
     size_t initial_fill_size;

@@ -53,6 +53,7 @@
 #include "tools.h"
 #include "mem_io_handler.h"
 #include "content_manager.h"
+#include "config_manager.h"
 
 using namespace zmm;
 
@@ -159,6 +160,8 @@ void Id3Handler::fillMetadata(Ref<CdsItem> item)
 {
     ID3_Tag tag;
     const Mp3_Headerinfo* header;
+    Ref<Array<StringBase> > aux;
+    Ref<StringConverter> sc = StringConverter::m2i();
     
     // the location has already been checked by the setMetadata function
     tag.Link(item->getLocation().c_str()); 
@@ -166,8 +169,55 @@ void Id3Handler::fillMetadata(Ref<CdsItem> item)
     for (int i = 0; i < M_MAX; i++)
         addID3Field((metadata_fields_t) i, &tag, item);
 
+    Ref<ConfigManager> cm = ConfigManager::getInstance();
+    aux = cm->getStringArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
+    if (aux != nil)
+    {
+        const char *temp = NULL;
+        
+        for (int j = 0; j < aux->size(); j++)
+        {
+
+            String desiredFrame(aux->get(j));
+            if (string_ok(desiredFrame))
+            {
+                ID3_Tag::Iterator* frameIter = tag.CreateIterator();
+                ID3_Frame* id3Frame = NULL;
+                while (NULL != (id3Frame = frameIter->GetNext())) 
+                {
+                    String frameName(id3Frame->GetTextID());
+                    if (string_ok(frameName) && (frameName == desiredFrame)) 
+                    {
+                        ID3_Frame::Iterator* fieldIter = id3Frame->CreateIterator();
+                        ID3_Field* id3Field = NULL;
+                        while (NULL != (id3Field = fieldIter->GetNext())) 
+                        {
+                            if (id3Field->GetType() == ID3FTY_TEXTSTRING) 
+                            {
+                                temp = id3Field->GetRawText();
+
+                                if (temp != NULL)
+                                {
+                                    String value(temp);
+                                    if (string_ok(value))
+                                    {
+                                        value = sc->convert(value);
+                                        log_debug("Adding frame: %s with value %s\n", desiredFrame.c_str(), value.c_str());
+                                        item->setAuxData(desiredFrame, value);
+                                    }
+                                }
+                            }
+                        }
+                        delete fieldIter;
+                    }
+                }
+                delete frameIter;
+            }
+        }
+    }
+
+
     header = tag.GetMp3HeaderInfo();
-    
     if (header)
     {
         int temp;

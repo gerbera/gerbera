@@ -51,6 +51,7 @@ TranscodingProfile::TranscodingProfile()
     theora = false;
     accept_url = true;
     hide_orig_res = false;
+    thumbnail = false;
     attributes = Ref<Dictionary>(new Dictionary());
     fourcc_list = Ref<Array<StringBase> >(new Array<StringBase>());
     fourcc_mode = FCC_None;
@@ -64,6 +65,7 @@ TranscodingProfile::TranscodingProfile(transcoding_type_t tr_type, String name)
     first_resource = false;
     accept_url = true;
     hide_orig_res = false;
+    thumbnail = false;
     buffer_size = 0;
     chunk_size = 0;
     initial_fill_size = 0;

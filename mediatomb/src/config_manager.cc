@@ -1468,6 +1468,16 @@ void ConfigManager::validate(String serverhome)
     SET_STRARR_OPTION(CFG_IMPORT_LIBOPTS_EXTRACTOR_AUXDATA_TAGS_LIST);
 #endif // HAVE_EXTRACTOR
 
+#if defined(HAVE_ID3) || defined(HAVE_TAGLIB)
+    el = getElement(_("/import/library-options/id3/auxdata"));
+    if (el == nil)
+    {
+        getOption(_("/import/library-options/id3/auxdata"), _(""));
+    }
+    NEW_STRARR_OPTION(createArrayFromNodeset(el, _("add-data"), _("tag")));
+    SET_STRARR_OPTION(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
+#endif
+
 #ifdef HAVE_MAGIC
     String magic_file;
     if (!string_ok(magic))
@@ -2019,6 +2029,18 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                 prof->setTheora(true);
             else
                 prof->setTheora(false);
+        }
+
+        if (child->getChildByName(_("thumbnail")) != nil)
+        {
+            param = child->getChildText(_("thumbnail"));
+            if (!validateYesNo(param))
+                throw _Exception(_("Error in config file: incorrect parameter "
+                                   "for <thumbnail> tag"));
+            if (param == "yes")
+                prof->setThumbnail(true);
+            else
+                prof->setThumbnail(false);
         }
 
         if (child->getChildByName(_("first-resource")) != nil)
