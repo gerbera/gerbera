@@ -566,10 +566,8 @@ void ConfigManager::migrate()
             sqlite3->appendTextChild(_("database-file"), dbFile);
             storage->appendElementChild(sqlite3);
         }
-#ifdef HAVE_MYSQL
-        else
-#endif // HAVE_MYSQL
 #endif // HAVE_SQLITE3
+
 #ifdef HAVE_MYSQL
         if (dbDriver == "mysql")
         {
