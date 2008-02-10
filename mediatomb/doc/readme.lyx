@@ -6110,6 +6110,175 @@ status open
 \end_layout
 
 \begin_layout Code
+<id3>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+These options apply to id3lib or taglib libraries.
+\end_layout
+
+\begin_layout Standard
+Child tags:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<auxdata>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+Currently only adding keywords to auxdata is supported.
+ The keywords are those defined in the id3 specification, we do not perform
+ any extra checking, so you could try to use any string as a keyword - if
+ it does not exist in the tag nothing bad will happen.
+ 
+\end_layout
+
+\begin_layout Standard
+Here is a list of possible keywords:
+\end_layout
+
+\begin_layout Standard
+TALB, TBPM, TCOM, TCON, TCOP, TDAT, TDLY, TENC, TEXT, TFLT, TIME, TIT1,
+ TIT2, TIT3, TKEY, TLAN, TLEN, TMED, TOAL, TOFN, TOLY, TOPE, TORY, TOWN,
+ TPE1, TPE2, TPE3, TPE4, TPOS, TPUB, TRCK, TRDA, TRSN, TRSO, TSIZ, TSRC,
+ TSSE, TYER, TXXX 
+\end_layout
+
+\begin_layout Standard
+Child tags:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<add-data tag="TCOM"/>
+\end_layout
+
+\begin_layout Code
+<add-data tag="TENC"/>
+\end_layout
+
+\begin_layout Code
+...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+If the library was able to extract the data according to the given keyword,
+ it will be added to auxdata.
+ You can then use that data in your import scripts.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+A sample configuration for the example described above would be:
+\end_layout
+
+\begin_layout Code
+<id3>
+\end_layout
+
+\begin_layout Code
+    <auxdata>
+\end_layout
+
+\begin_layout Code
+        <add-data tag="TENC"/>
+\end_layout
+
+\begin_layout Code
+    </auxdata>
+\end_layout
+
+\begin_layout Code
+</id3> 
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
 <libextractor>
 \end_layout
 
@@ -8940,6 +9109,49 @@ status open
 
 \begin_layout Standard
 
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<thumbnail>yes</thumbnail>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Description
+Note: this is an experimental option, the implementation will be refined
+ in the future releases.
+\end_layout
+
+\begin_layout Standard
+This is a special option which was added for the PS3 users.
+ If the resolution option (see above) was set, then, depending on the resolution
+ an special DLNA tag will be added, marking the resource as a thumbnail.
+ This is useful if you have a transcoding script that extracts an image
+ out of the video and presents it as a thumbnail.
+\end_layout
+
+\begin_layout Standard
+Use the option with caution, no extra checking is being done if the resulting
+ mimetype represents an image, also, it is will only work if the output
+ of the profile is a JPG image.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
 </listitem></itemizedlist>
 \end_layout
 
@@ -9603,6 +9815,16 @@ Initial version of the MediaTomb start up script was contributed by Iain
 \begin_layout Itemize
 TagLib support patch was contributed by Benhur Stein <benhur.stein at gmail
  dot com>
+\end_layout
+
+\begin_layout Itemize
+ffmpeg metadata handler was contributed by Ingo Preiml <ipreiml at edu dot
+ uni-klu dot ac dot at>
+\end_layout
+
+\begin_layout Itemize
+ID3 keyword extraction patch was contributed by Gabriel Burca <gburca-mediatomb
+ at ebixio dot com>
 \end_layout
 
 \begin_layout Itemize

@@ -184,6 +184,9 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                 t_res->addAttribute(MetadataHandler::getResAttrName(R_DURATION),
                         duration);
 
+            if (tp->isThumbnail())
+                t_res->addOption(_(RESOURCE_CONTENT_TYPE), _(EXIF_THUMBNAIL));
+
             t_res->mergeAttributes(tp->getAttributes());
 
             if (tp->hideOriginalResource())
@@ -333,9 +336,11 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                 {
 
           if ((i > 0) && 
-              (item->getResource(i)->getHandlerType() == CH_LIBEXIF) && 
-              (item->getResource(i)->getParameter(_(RESOURCE_CONTENT_TYPE)) 
-                     == EXIF_THUMBNAIL) &&
+              (((item->getResource(i)->getHandlerType() == CH_LIBEXIF) && 
+               (item->getResource(i)->getParameter(_(RESOURCE_CONTENT_TYPE)) 
+                     == EXIF_THUMBNAIL)) || 
+               (item->getResource(i)->getOption(_(RESOURCE_CONTENT_TYPE)) 
+                     == EXIF_THUMBNAIL)) &&
               (x <= 160) && (y <= 160))
                         extend = _(D_PROFILE) + "=" + D_JPEG_TN+";";
                     else if ((x <= 640) && (y <= 420))
