@@ -2,6 +2,8 @@ MediaTomb - UPnP AV Mediaserver.
 v0.11.0 External transcoding support
         * implemented transcoding support that allows to plug in an arbitrary
           application
+		* added fourcc detection for AVI files and transcoding options to 
+		  limit transcoding to certain fourcc's
         * added new metadata extractor (using ffmpeg, patch submitted by 
           Ingo Preiml
 		* added vorbis / theora detection for ogg containers, so video files
