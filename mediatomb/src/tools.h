@@ -304,6 +304,14 @@ zmm::String tempName(zmm::String leadPath, char *tmpl);
 /// \brief Determines if the particular ogg file contains a video (theora)
 bool isTheora(zmm::String ogg_filename);
 
+#ifndef HAVE_FFMPEG
+/// \brief Fallback code to retrieve the used fourcc from an AVI file.
+///
+/// This code is based on offsets, so we will use it only if ffmpeg is not
+/// available.
+zmm::String getAVIFourCC(zmm::String avi_filename);
+#endif
+
 #ifdef LOG_TOMBDEBUG
 
 struct profiling_t

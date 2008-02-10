@@ -1337,6 +1337,56 @@ bool isTheora(String ogg_filename)
     return true;
 }
 
+#ifndef HAVE_FFMPEG
+String getAVIFourCC(zmm::String avi_filename)
+{
+#define FCC_OFFSET  0xbc
+    char *buffer;
+    FILE *f = fopen(avi_filename.c_str(), "rb");
+    if (!f)
+        throw _Exception(_("could not open file ") + avi_filename + " : " +
+                          mt_strerror(errno));
+
+    buffer = (char *)MALLOC(FCC_OFFSET+6);
+    if (buffer == NULL)
+    {
+        fclose(f);
+        throw _Exception(_("Out of memory when allocating buffer for file ") +
+                          avi_filename);
+    }
+
+    size_t rb = fread(buffer, 1, FCC_OFFSET+4, f);
+    fclose(f);
+    if (rb != FCC_OFFSET+4)
+    {
+        free(buffer);
+        throw _Exception(_("could not read header of ") + avi_filename +  
+                          " : " + mt_strerror(errno));
+    }
+
+    buffer[FCC_OFFSET+5] = '\0';
+
+    if (strncmp(buffer, "RIFF", 4) != 0)
+    {
+        free(buffer);
+        return nil;
+    }
+
+    if (strncmp(buffer+8, "AVI ", 4) != 0)
+    {
+        free(buffer);
+        return nil;
+    }
+
+    String fourcc = String(buffer+FCC_OFFSET, 4);
+    free(buffer);
+
+    if (string_ok(fourcc))
+        return fourcc;
+    else
+        return nil;
+}
+#endif
 
 #ifdef LOG_TOMBDEBUG
 

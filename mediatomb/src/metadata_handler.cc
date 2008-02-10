@@ -184,6 +184,18 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
             handler = Ref<MetadataHandler>(new FfmpegHandler());
             break;
         }
+#else
+        if (content_type == CONTENT_TYPE_AVI)
+        {
+            String fourcc = getAVIFourCC(item->getLocation());
+            if (string_ok(fourcc))
+            {
+                printf("----------------> %s\n", fourcc.c_str());
+                item->getResource(0)->addOption(_(RESOURCE_OPTION_FOURCC),
+                                                fourcc);
+            }
+        }
+
 #endif // HAVE_FFMPEG
  
 #ifdef HAVE_EXTRACTOR
