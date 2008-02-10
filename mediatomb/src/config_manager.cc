@@ -171,6 +171,161 @@ Ref<Element> ConfigManager::treat_as(String mimetype, String as)
     return treat;
 }
 
+#ifdef EXTERNAL_TRANSCODING
+Ref<Element> ConfigManager::renderTranscodingSection()
+{
+    Ref<Element> transcoding(new Element(_("transcoding")));
+    transcoding->addAttribute(_("enabled"), _(DEFAULT_TRANSCODING_ENABLED));
+    
+    Ref<Element> mt_prof_map(new Element(_("mimetype-profile-mappings")));
+
+    Ref<Element> prof_flv(new Element(_("transcode")));
+    prof_flv->addAttribute(_("mimetype"), _("video/x-flv"));
+    prof_flv->addAttribute(_("using"), _("vlcmpeg"));
+
+    mt_prof_map->appendElementChild(prof_flv);
+
+    Ref<Element> prof_theora(new Element(_("transcode")));
+    prof_theora->addAttribute(_("mimetype"), _("application/ogg"));
+    prof_theora->addAttribute(_("using"), _("vlcmpeg"));
+    mt_prof_map->appendElementChild(prof_theora);
+
+    Ref<Element> prof_ogg(new Element(_("transcode")));
+    prof_ogg->addAttribute(_("mimetype"), _("application/ogg"));
+    prof_ogg->addAttribute(_("using"), _("oggflac2raw"));
+    mt_prof_map->appendElementChild(prof_ogg);
+
+    Ref<Element> prof_flac(new Element(_("transcode")));
+    prof_flac->addAttribute(_("mimetype"), _("audio/x-flac"));
+    prof_flac->addAttribute(_("using"), _("oggflac2raw"));
+    mt_prof_map->appendElementChild(prof_flac);
+
+    transcoding->appendElementChild(mt_prof_map);
+
+    Ref<Element> profiles(new Element(_("profiles")));
+
+    Ref<Element> oggflac(new Element(_("profile")));
+    oggflac->addAttribute(_("name"), _("oggflac2raw"));
+    oggflac->addAttribute(_("enabled"), _(NO));
+    oggflac->addAttribute(_("type"), _("external"));
+
+    oggflac->appendTextChild(_("mimetype"), _("audio/L16"));
+    oggflac->appendTextChild(_("accept-url"), _(NO));
+    oggflac->appendTextChild(_("first-resource"), _(YES));
+    oggflac->appendTextChild(_("accept-ogg-theora"), _(NO));
+
+    Ref<Element> oggflac_agent(new Element(_("agent")));
+    oggflac_agent->addAttribute(_("command"), _("ogg123"));
+    oggflac_agent->addAttribute(_("arguments"), _("-d raw -f %out %in"));
+    oggflac->appendElementChild(oggflac_agent);
+
+    Ref<Element> oggflac_buffer(new Element(_("buffer")));
+    oggflac_buffer->addAttribute(_("size"), 
+            String::from(DEFAULT_AUDIO_BUFFER_SIZE));
+    oggflac_buffer->addAttribute(_("chunk-size"), 
+            String::from(DEFAULT_AUDIO_CHUNK_SIZE));
+    oggflac_buffer->addAttribute(_("fill-size"), 
+            String::from(DEFAULT_AUDIO_FILL_SIZE));
+    oggflac->appendElementChild(oggflac_buffer);
+
+    profiles->appendElementChild(oggflac);
+
+    Ref<Element> vlcmpeg(new Element(_("profile")));
+    vlcmpeg->addAttribute(_("name"), _("vlcmpeg"));
+    vlcmpeg->addAttribute(_("enabled"), _(NO));
+    vlcmpeg->addAttribute(_("type"), _("external"));
+
+    vlcmpeg->appendTextChild(_("mimetype"), _("video/mpeg"));
+    vlcmpeg->appendTextChild(_("accept-url"), _(YES));
+    vlcmpeg->appendTextChild(_("first-resource"), _(YES));
+    vlcmpeg->appendTextChild(_("accept-ogg-theora"), _(YES));
+
+    Ref<Element> vlcmpeg_agent(new Element(_("agent")));
+    vlcmpeg_agent->addAttribute(_("command"), _("vlc"));
+    vlcmpeg_agent->addAttribute(_("arguments"), _("-I dummy %in --sout #transcode{venc=ffmpeg,vcodec=mp2v,vb=4096,fps=25,aenc=ffmpeg,acodec=mpga,ab=192,samplerate=44100,channels=2}:standard{access=file,mux=ps,dst=%out} vlc:quit"));
+    vlcmpeg->appendElementChild(vlcmpeg_agent);
+
+    Ref<Element> vlcmpeg_buffer(new Element(_("buffer")));
+    vlcmpeg_buffer->addAttribute(_("size"), 
+            String::from(DEFAULT_VIDEO_BUFFER_SIZE));
+    vlcmpeg_buffer->addAttribute(_("chunk-size"), 
+            String::from(DEFAULT_VIDEO_CHUNK_SIZE));
+    vlcmpeg_buffer->addAttribute(_("fill-size"),
+            String::from(DEFAULT_VIDEO_FILL_SIZE));
+    vlcmpeg->appendElementChild(vlcmpeg_buffer);
+
+    profiles->appendElementChild(vlcmpeg);
+
+    transcoding->appendElementChild(profiles);
+
+    return transcoding;
+}
+#endif
+
+#ifdef ONLINE_SERVICES
+Ref<Element> ConfigManager::renderOnlineSection()
+{
+    Ref<Element> onlinecontent(new Element(_("online-content")));
+#ifdef YOUTUBE
+    Ref<Comment> ytinfo(new Comment(_(" Make sure to setup a transcoding profile for flv "), true));
+    onlinecontent->appendChild(RefCast(ytinfo, Node));
+
+    Ref<Element> yt(new Element(_("YouTube")));
+    yt->addAttribute(_("enabled"), _(DEFAULT_YOUTUBE_ENABLED));
+    // 8 hours refresh cycle
+    yt->addAttribute(_("refresh"), String::from(DEFAULT_YOUTUBE_REFRESH)); 
+    yt->addAttribute(_("update-at-start"), _(DEFAULT_YOUTUBE_UPDATE_AT_START));
+    // items that were not updated for 4 days will be purged
+    yt->addAttribute(_("purge-after"), 
+            String::from(DEFAULT_YOUTUBE_PURGE_AFTER));
+   
+    Ref<Element> favs(new Element(_("favorites")));
+    favs->addAttribute(_("user"), _("mediatomb"));
+    yt->appendElementChild(favs);
+    
+    Ref<Element> popular(new Element(_("popular")));
+    popular->addAttribute(_("time-range"), _("month"));
+    yt->appendElementChild(popular);
+
+    Ref<Element> playlist(new Element(_("playlist")));
+    playlist->addAttribute(_("id"), _(DEFAULT_YOUTUBE_PLAYLIST_ID));
+    playlist->addAttribute(_("name"), _(DEFAULT_YOUTUBE_PLAYLIST_NAME));
+    playlist->addAttribute(_("start-page"), _("1"));
+    playlist->addAttribute(_("amount"), _("all"));
+    yt->appendElementChild(playlist);
+
+    Ref<Element> ytuser(new Element(_("user")));
+    ytuser->addAttribute(_("user"), _("mediatomb"));
+    ytuser->addAttribute(_("start-page"), 
+            String::from(DEFAULT_YOUTUBE_PLAYLIST_START_PAGE));
+    ytuser->addAttribute(_("amount"), _(DEFAULT_YOUTUBE_PLAYLIST_AMOUNT));
+    yt->appendElementChild(ytuser);
+
+    Ref<Element> ytct(new Element(_("category-and-tag")));
+    ytct->addAttribute(_("category"), _(DEFAULT_YOUTUBE_CNT_CATEGORY));
+    ytct->addAttribute(_("tag"), _(DEFAULT_YOUTUBE_CNT_TAG));
+    ytct->addAttribute(_("start-page"), 
+            String::from(DEFAULT_YOUTUBE_CNT_START_PAGE));
+    ytct->addAttribute(_("amount"), String::from(DEFAULT_YOUTUBE_CNT_AMOUNT));
+    yt->appendElementChild(ytct);
+
+    Ref<Element> yttag(new Element(_("tag")));
+    yttag->addAttribute(_("tag"), _(DEFAULT_YOUTUBE_TAG));
+    yttag->addAttribute(_("start-page"), 
+            String::from(DEFAULT_YOUTUBE_TAG_START_PAGE));
+    yttag->addAttribute(_("amount"), _(DEFAULT_YOUTUBE_TAG_AMOUNT));
+    yt->appendElementChild(yttag);
+
+    Ref<Element> ytfeatured(new Element(_("featured")));
+    yt->appendElementChild(ytfeatured);
+
+    onlinecontent->appendElementChild(yt);
+#endif
+    return onlinecontent;
+}
+
+#endif
+
 String ConfigManager::createDefaultConfig(String userhome)
 {
     bool mysql_flag = false;
@@ -375,154 +530,15 @@ String ConfigManager::createDefaultConfig(String userhome)
     import->appendElementChild(mappings);
 
 #ifdef ONLINE_SERVICES
-    Ref<Element> onlinecontent(new Element(_("online-content")));
-#ifdef YOUTUBE
-    Ref<Comment> ytinfo(new Comment(_(" Make sure to setup a transcoding profile for flv "), true));
-    onlinecontent->appendChild(RefCast(ytinfo, Node));
-
-    Ref<Element> yt(new Element(_("YouTube")));
-    yt->addAttribute(_("enabled"), _(DEFAULT_YOUTUBE_ENABLED));
-    // 8 hours refresh cycle
-    yt->addAttribute(_("refresh"), String::from(DEFAULT_YOUTUBE_REFRESH)); 
-    yt->addAttribute(_("update-at-start"), _(DEFAULT_YOUTUBE_UPDATE_AT_START));
-    // items that were not updated for 4 days will be purged
-    yt->addAttribute(_("purge-after"), 
-            String::from(DEFAULT_YOUTUBE_PURGE_AFTER));
-   
-    Ref<Element> favs(new Element(_("favorites")));
-    favs->addAttribute(_("user"), _("mediatomb"));
-    yt->appendElementChild(favs);
-    
-    Ref<Element> popular(new Element(_("popular")));
-    popular->addAttribute(_("time-range"), _("month"));
-    yt->appendElementChild(popular);
-
-    Ref<Element> playlist(new Element(_("playlist")));
-    playlist->addAttribute(_("id"), _(DEFAULT_YOUTUBE_PLAYLIST_ID));
-    playlist->addAttribute(_("name"), _(DEFAULT_YOUTUBE_PLAYLIST_NAME));
-    playlist->addAttribute(_("start-page"), _("1"));
-    playlist->addAttribute(_("amount"), _("all"));
-    yt->appendElementChild(playlist);
-
-    Ref<Element> ytuser(new Element(_("user")));
-    ytuser->addAttribute(_("user"), _("mediatomb"));
-    ytuser->addAttribute(_("start-page"), 
-            String::from(DEFAULT_YOUTUBE_PLAYLIST_START_PAGE));
-    ytuser->addAttribute(_("amount"), _(DEFAULT_YOUTUBE_PLAYLIST_AMOUNT));
-    yt->appendElementChild(ytuser);
-
-    Ref<Element> ytct(new Element(_("category-and-tag")));
-    ytct->addAttribute(_("category"), _(DEFAULT_YOUTUBE_CNT_CATEGORY));
-    ytct->addAttribute(_("tag"), _(DEFAULT_YOUTUBE_CNT_TAG));
-    ytct->addAttribute(_("start-page"), 
-            String::from(DEFAULT_YOUTUBE_CNT_START_PAGE));
-    ytct->addAttribute(_("amount"), String::from(DEFAULT_YOUTUBE_CNT_AMOUNT));
-    yt->appendElementChild(ytct);
-
-    Ref<Element> yttag(new Element(_("tag")));
-    yttag->addAttribute(_("tag"), _(DEFAULT_YOUTUBE_TAG));
-    yttag->addAttribute(_("start-page"), 
-            String::from(DEFAULT_YOUTUBE_TAG_START_PAGE));
-    yttag->addAttribute(_("amount"), _(DEFAULT_YOUTUBE_TAG_AMOUNT));
-    yt->appendElementChild(yttag);
-
-    Ref<Element> ytfeatured(new Element(_("featured")));
-    yt->appendElementChild(ytfeatured);
-
-    onlinecontent->appendElementChild(yt);
-#endif
-    import->appendElementChild(onlinecontent);
+    import->appendElementChild(renderOnlineSection());
 #endif
 
     config->appendElementChild(import);
 
 #ifdef EXTERNAL_TRANSCODING
-    Ref<Element> transcoding(new Element(_("transcoding")));
-    transcoding->addAttribute(_("enabled"), _(DEFAULT_TRANSCODING_ENABLED));
-    
-    Ref<Element> mt_prof_map(new Element(_("mimetype-profile-mappings")));
-
-    Ref<Element> prof_flv(new Element(_("transcode")));
-    prof_flv->addAttribute(_("mimetype"), _("video/x-flv"));
-    prof_flv->addAttribute(_("using"), _("vlcmpeg"));
-
-    mt_prof_map->appendElementChild(prof_flv);
-
-    Ref<Element> prof_theora(new Element(_("transcode")));
-    prof_theora->addAttribute(_("mimetype"), _("application/ogg"));
-    prof_theora->addAttribute(_("using"), _("vlcmpeg"));
-    mt_prof_map->appendElementChild(prof_theora);
-
-    Ref<Element> prof_ogg(new Element(_("transcode")));
-    prof_ogg->addAttribute(_("mimetype"), _("application/ogg"));
-    prof_ogg->addAttribute(_("using"), _("ogglfac2raw"));
-    mt_prof_map->appendElementChild(prof_ogg);
-
-    Ref<Element> prof_flac(new Element(_("transcode")));
-    prof_flac->addAttribute(_("mimetype"), _("audio/x-flac"));
-    prof_flac->addAttribute(_("using"), _("ogglfac2wav"));
-    mt_prof_map->appendElementChild(prof_flac);
-
-    transcoding->appendElementChild(mt_prof_map);
-
-    Ref<Element> profiles(new Element(_("profiles")));
-
-    Ref<Element> oggflac(new Element(_("profile")));
-    oggflac->addAttribute(_("name"), _("oggflac2raw"));
-    oggflac->addAttribute(_("enabled"), _(NO));
-    oggflac->addAttribute(_("type"), _("external"));
-
-    oggflac->appendTextChild(_("mimetype"), _("audio/L16"));
-    oggflac->appendTextChild(_("accept-url"), _(NO));
-    oggflac->appendTextChild(_("first-resource"), _(YES));
-    oggflac->appendTextChild(_("accept-ogg-theora"), _(NO));
-
-    Ref<Element> oggflac_agent(new Element(_("agent")));
-    oggflac_agent->addAttribute(_("command"), _("ogg123"));
-    oggflac_agent->addAttribute(_("arguments"), _("-d raw -f %out %in"));
-    oggflac->appendElementChild(oggflac_agent);
-
-    Ref<Element> oggflac_buffer(new Element(_("buffer")));
-    oggflac_buffer->addAttribute(_("size"), 
-            String::from(DEFAULT_AUDIO_BUFFER_SIZE));
-    oggflac_buffer->addAttribute(_("chunk-size"), 
-            String::from(DEFAULT_AUDIO_CHUNK_SIZE));
-    oggflac_buffer->addAttribute(_("fill-size"), 
-            String::from(DEFAULT_AUDIO_FILL_SIZE));
-    oggflac->appendElementChild(oggflac_buffer);
-
-    profiles->appendElementChild(oggflac);
-
-    Ref<Element> vlcmpeg(new Element(_("profile")));
-    vlcmpeg->addAttribute(_("name"), _("vlcmpeg"));
-    vlcmpeg->addAttribute(_("enabled"), _(NO));
-    vlcmpeg->addAttribute(_("type"), _("external"));
-
-    vlcmpeg->appendTextChild(_("mimetype"), _("video/mpeg"));
-    vlcmpeg->appendTextChild(_("accept-url"), _(YES));
-    vlcmpeg->appendTextChild(_("first-resource"), _(YES));
-    vlcmpeg->appendTextChild(_("accept-ogg-theora"), _(YES));
-
-    Ref<Element> vlcmpeg_agent(new Element(_("agent")));
-    vlcmpeg_agent->addAttribute(_("command"), _("vlc"));
-    vlcmpeg_agent->addAttribute(_("arguments"), _("-I dummy %in --sout #transcode{venc=ffmpeg,vcodec=mp2v,vb=4096,fps=25,aenc=ffmpeg,acodec=mpga,ab=192,samplerate=44100,channels=2}:standard{access=file,mux=ps,dst=%out} vlc:quit"));
-    vlcmpeg->appendElementChild(vlcmpeg_agent);
-
-    Ref<Element> vlcmpeg_buffer(new Element(_("buffer")));
-    vlcmpeg_buffer->addAttribute(_("size"), 
-            String::from(DEFAULT_VIDEO_BUFFER_SIZE));
-    vlcmpeg_buffer->addAttribute(_("chunk-size"), 
-            String::from(DEFAULT_VIDEO_CHUNK_SIZE));
-    vlcmpeg_buffer->addAttribute(_("fill-size"),
-            String::from(DEFAULT_VIDEO_FILL_SIZE));
-    vlcmpeg->appendElementChild(vlcmpeg_buffer);
-
-    profiles->appendElementChild(vlcmpeg);
-
-    transcoding->appendElementChild(profiles);
-    config->appendElementChild(transcoding);
+    config->appendElementChild(renderTranscodingSection());
 #endif
-
+    
     config->indent();
     save_text(config_filename, config->print());
     log_info("MediaTomb configuration was created in: %s\n", 
@@ -606,16 +622,40 @@ void ConfigManager::migrate()
             storage->appendElementChild(mysql);
         }
 #endif
-        /// \todo Add a mxml method for removing nodes.
-        for (int i = 0; i < server->childCount(); i++)
-        {
-            Ref<Node> child = server->getChild(i);
-            if ((child != nil) && (child->getType() == mxml_node_element))
-                if (RefCast(child, Element)->getName() == "storage")
-                    server->removeChild(i);
-        }
+        server->removeElementChild(_("storage"), true);
 
         server->appendElementChild(storage);
+#ifdef EXTERNAL_TRANSCODING
+        if (root->getChildByName(_("transcoding")) == nil)
+            root->appendElementChild(renderTranscodingSection());
+#endif
+
+        Ref<Element> import = root->getChildByName(_("import"));
+        if (import != nil)
+        {
+#ifdef ONLINE_SERVICES
+            if (import->getChildByName(_("online-content")) == nil)
+                import->appendElementChild(renderOnlineSection());
+#endif
+            Ref<Element> map = import->getChildByName(_("mappings"));
+            if (map != nil)
+            {
+                Ref<Element> mtct = map->getChildByName(_("mimetype-contenttype"));
+                if ((mtct != nil) && (mtct->elementChildCount() > 0))
+                {
+                    bool add_avi = true;
+                    for (int mc = 0; mc < mtct->elementChildCount(); mc++)
+                    {
+                        Ref<Element> treat = mtct->getElementChild(mc);
+                        if (treat->getAttribute(_("as")) == "avi")
+                            add_avi = false;
+                    }
+                    if (add_avi)
+                        mtct->appendElementChild(treat_as(_("video/x-msvideo"),
+                                                          _("avi")));
+                }
+            }
+        }
         root->indent();
         save();
         log_info("Migration of configuration successfull\n");
@@ -1795,9 +1835,9 @@ Ref<Dictionary> ConfigManager::createDictionaryFromNodeset(Ref<Element> element,
 
     if (element != nil)
     {
-        for (int i = 0; i < element->childCount(); i++)
+        for (int i = 0; i < element->elementChildCount(); i++)
         {
-            Ref<Element> child = RefCast(element->getChild(i), Element);
+            Ref<Element> child = element->getElementChild(i);
             if (child->getName() == nodeName)
             {
                 key = child->getAttribute(keyAttr);
@@ -1836,9 +1876,9 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
     mtype_profile = element->getChildByName(_("mimetype-profile-mappings"));
     if (mtype_profile != nil)
     {
-        for (int e = 0; e < mtype_profile->childCount(); e++)
+        for (int e = 0; e < mtype_profile->elementChildCount(); e++)
         {
-            Ref<Element> child = RefCast(mtype_profile->getChild(e), Element);
+            Ref<Element> child = mtype_profile->getElementChild(e);
             if (child->getName() == "transcode")
             {
                 mt = child->getAttribute(_("mimetype"));
@@ -1861,9 +1901,9 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
     if (profiles == nil)
         return list;
 
-    for (int i = 0; i < profiles->childCount(); i++)
+    for (int i = 0; i < profiles->elementChildCount(); i++)
     {
-        Ref<Element> child = RefCast(profiles->getChild(i), Element);
+        Ref<Element> child = profiles->getElementChild(i);
         if (child->getName() != "profile")
             continue;
 
@@ -1929,20 +1969,16 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
             if (fcc_mode != FCC_None)
             {
                 Ref<Array<StringBase> > fcc_list(new Array<StringBase>());
-                for (int f = 0; f < avi_fcc->childCount(); f++)
+                for (int f = 0; f < avi_fcc->elementChildCount(); f++)
                 {
-                    Ref<Node> child_node = avi_fcc->getChild(f);
-                    if (child_node->getType() == mxml_node_element)
-                    {
-                        Ref<Element> fourcc = RefCast(child_node, Element);
-                        if (fourcc->getName() != "fourcc")
-                            continue;
+                    Ref<Element> fourcc = avi_fcc->getElementChild(f);
+                    if (fourcc->getName() != "fourcc")
+                        continue;
 
-                        String fcc = fourcc->getText();
-                        if (!string_ok(fcc))
-                            throw _Exception(_("error in configuration: empty fourcc specified!"));
-                        fcc_list->append(fcc);
-                    }
+                    String fcc = fourcc->getText();
+                    if (!string_ok(fcc))
+                        throw _Exception(_("error in configuration: empty fourcc specified!"));
+                    fcc_list->append(fcc);
                 }
 
                 prof->setAVIFourCCList(fcc_list, fcc_mode);
@@ -2145,12 +2181,12 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
     if (element == nil)
         return list;
 
-    for (int i = 0; i < element->childCount(); i++)
+    for (int i = 0; i < element->elementChildCount(); i++)
     {
         hidden = false;
         recursive = false;
 
-        Ref<Element> child = RefCast(element->getChild(i), Element);
+        Ref<Element> child = element->getElementChild(i);
         if (child->getName() == "directory")
         {
             location = child->getAttribute(_("location"));
@@ -2339,9 +2375,9 @@ Ref<Array<StringBase> > ConfigManager::createArrayFromNodeset(Ref<mxml::Element>
 
     if (element != nil)
     {
-        for (int i = 0; i < element->childCount(); i++)
+        for (int i = 0; i < element->elementChildCount(); i++)
         {
-            Ref<Element> child = RefCast(element->getChild(i), Element);
+            Ref<Element> child = element->getElementChild(i);
             if (child->getName() == nodeName)
             {
                 attrValue = child->getAttribute(attrName);
