@@ -110,10 +110,6 @@
 #define CONTENT_SERVE_HANDLER           "serve"
 #define CONTENT_ONLINE_HANDLER          "online"
 #define CONTENT_UI_HANDLER              "interface"
-#define URL_PARAM_TRANSCODE_PROFILE_NAME "pr_name"
-#define URL_PARAM_TRANSCODE             "tr"
-#define URL_PARAM_TRANSCODE_TARGET_MIMETYPE "tmt"
-#define URL_VALUE_TRANSCODE_NO_RES_ID   "none"
 // REQUEST TYPES
 #define REQ_TYPE_BROWSE                 "browse"
 #define REQ_TYPE_LOGIN                  "login"
@@ -278,6 +274,13 @@
     #define DEFAULT_VIDEO_BUFFER_SIZE   14400000
     #define DEFAULT_VIDEO_CHUNK_SIZE    512000
     #define DEFAULT_VIDEO_FILL_SIZE     120000
+
+    #define URL_PARAM_TRANSCODE_PROFILE_NAME "pr_name"
+    #define URL_PARAM_TRANSCODE             "tr"
+    #define URL_PARAM_TRANSCODE_TARGET_MIMETYPE "tmt"
+    #define URL_VALUE_TRANSCODE_NO_RES_ID   "none"
+
+    #define URL_VALUE_TRANSCODE              "1"
 #endif
 #ifdef HAVE_SQLITE3
     #define SQLITE_SYNC_FULL            2

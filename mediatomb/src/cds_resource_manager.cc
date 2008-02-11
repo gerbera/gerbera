@@ -174,7 +174,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
             // index 0, so we will make sure the ogg option is there
             t_res->addOption(_(CONTENT_TYPE_OGG), 
                          item->getResource(0)->getOption(_(CONTENT_TYPE_OGG)));
-            t_res->addParameter(_(URL_PARAM_TRANSCODE), _(D_CONVERSION));
+            t_res->addParameter(_(URL_PARAM_TRANSCODE), _(URL_VALUE_TRANSCODE));
             t_res->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
                     renderProtocolInfo(tp->getTargetMimeType()));
             // duration should be the same for transcoded media, so we can take
@@ -234,7 +234,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         // because a transcoded resource is identified by the profile name
 #ifdef EXTERNAL_TRANSCODING
         // flag if we are dealing with the transcoded resource
-        bool transcoded = (res_params->get(_(URL_PARAM_TRANSCODE)) == D_CONVERSION);
+        bool transcoded = (res_params->get(_(URL_PARAM_TRANSCODE)) == URL_VALUE_TRANSCODE);
         if (!transcoded)
         {
             if (urlBase->addResID)
