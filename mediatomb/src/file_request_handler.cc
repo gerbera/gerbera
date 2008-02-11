@@ -114,7 +114,11 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     // determining which resource to serve 
     int res_id = 0;
     String s_res_id = dict->get(_(URL_RESOURCE_ID));
+#ifdef EXTERNAL_TRANSCODING
     if (string_ok(s_res_id) && (s_res_id != _(URL_VALUE_TRANSCODE_NO_RES_ID)))
+#else
+    if (string_ok(s_res_id))
+#endif
         res_id = s_res_id.toInt();
     else
         res_id = -1;
@@ -370,7 +374,11 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
     // determining which resource to serve 
     int res_id = 0;
     String s_res_id = dict->get(_(URL_RESOURCE_ID));
+#ifdef EXTERNAL_TRANSCODING
     if (string_ok(s_res_id) && (s_res_id != _(URL_VALUE_TRANSCODE_NO_RES_ID)))
+#else
+    if (string_ok(s_res_id))
+#endif
         res_id = s_res_id.toInt();
     else
         res_id = -1;
