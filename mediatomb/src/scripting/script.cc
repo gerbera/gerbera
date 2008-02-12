@@ -254,6 +254,10 @@ Script::Script(Ref<Runtime> runtime) : Object()
     if (! cx)
         throw _Exception(_("Scripting: could not initialize js context"));
 
+#ifdef JS_THREADSAFE
+    JS_SetContextThread(cx);
+    JS_BeginRequest(cx);
+#endif
 //    JS_SetGCZeal(cx, 2);
 
     glob = NULL;
@@ -387,6 +391,10 @@ static JSFunctionSpec js_global_functions[] = {
                     e.getMessage().c_str());
         }
     }
+#ifdef JS_THREADSAFE
+    JS_EndRequest(cx);
+    JS_ClearContextThread(cx);
+#endif
 }
 
 /*
@@ -398,6 +406,10 @@ static intN map(void *rp, const char *name, void *data)
 
 Script::~Script()
 {
+#ifdef JS_THREADSAFE
+    JS_SetContextThread(cx);
+    JS_BeginRequest(cx);
+#endif
     if (common_root)
         JS_RemoveRoot(cx, &common_root);
 
@@ -410,7 +422,10 @@ Script::~Script()
         JS_DestroyScript(cx, script);
 */       
 //    JS_MapGCRoots(rt, &map, NULL); // debug stuff
-
+#ifdef JS_THREADSAFE
+    JS_EndRequest(cx);
+//    JS_ClearContextThread(cx);
+#endif
     if (cx)
     {
         JS_DestroyContext(cx);

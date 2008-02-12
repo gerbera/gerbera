@@ -81,13 +81,33 @@ PlaylistParserScript::PlaylistParserScript(Ref<Runtime> runtime) : Script(runtim
     currentHandle = NULL;
     currentObjectID = INVALID_OBJECT_ID;
     currentLine = NULL;
-    
-    defineFunction(_("readln"), js_readln, 0);
-    
-    String scriptPath = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT); 
-    load(scriptPath);
-    root = JS_NewScriptObject(cx, script);
-    JS_AddNamedRoot(cx, &root, "PlaylistScript");
+ 
+#ifdef JS_THREADSAFE
+    JS_SetContextThread(cx);
+    JS_BeginRequest(cx);
+#endif
+  
+    try
+    {
+        defineFunction(_("readln"), js_readln, 0);
+
+        String scriptPath = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT); 
+        load(scriptPath);
+        root = JS_NewScriptObject(cx, script);
+        JS_AddNamedRoot(cx, &root, "PlaylistScript");
+    }
+    catch (Exception ex)
+    {
+#ifdef JS_THREADSAFE
+        JS_EndRequest(cx);
+        JS_ClearContextThread(cx);
+#endif
+        throw ex;
+    }
+#ifdef JS_THREADSAFE
+        JS_EndRequest(cx);
+        JS_ClearContextThread(cx);
+#endif
 }
 
 String PlaylistParserScript::readln()
@@ -112,74 +132,118 @@ String PlaylistParserScript::readln()
 
 void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<CMTask> task)
 {
+#ifdef JS_THREADSAFE
+    JS_SetContextThread(cx);
+    JS_BeginRequest(cx);
+#endif
+    if ((currentObjectID != INVALID_OBJECT_ID) || (currentHandle != NULL) ||
+            (currentLine != NULL))
+    {
+#ifdef JS_THREADSAFE
+        JS_EndRequest(cx);
+        JS_ClearContextThread(cx);
+#endif
+        throw _Exception(_("recursion not allowed!"));
+    }
 
-   if ((currentObjectID != INVALID_OBJECT_ID) || (currentHandle != NULL) ||
-       (currentLine != NULL))
-       throw _Exception(_("recursion not allowed!"));
+    if (!IS_CDS_PURE_ITEM(obj->getObjectType()))
+    {
+#ifdef JS_THREADSAFE
+        JS_EndRequest(cx);
+        JS_ClearContextThread(cx);
+#endif
+        throw _Exception(_("only allowed for pure items"));
+    }
 
-   if (!IS_CDS_PURE_ITEM(obj->getObjectType()))
-   {
-       throw _Exception(_("only allowed for pure items"));
-   }
+    currentTask = task;
+    currentObjectID = obj->getID();
+    currentLine = (char *)MALLOC(ONE_TEXTLINE_BYTES);
+    if (!currentLine)
+    {
+        currentObjectID = INVALID_OBJECT_ID;
+        currentTask = nil;
+#ifdef JS_THREADSAFE
+        JS_EndRequest(cx);
+        JS_ClearContextThread(cx);
+#endif
+        throw _Exception(_("failed to allocate memory for playlist parsing!"));
+    }
 
-   currentTask = task;
-   currentObjectID = obj->getID();
-   currentLine = (char *)MALLOC(ONE_TEXTLINE_BYTES);
-   if (!currentLine)
-   {
-       currentObjectID = INVALID_OBJECT_ID;
-       currentTask = nil;
-       throw _Exception(_("failed to allocate memory for playlist parsing!"));
-   }
-   currentLine[0] = '\0';
+    currentLine[0] = '\0';
 
-   currentHandle = fopen(obj->getLocation().c_str(), "r");
-   if (!currentHandle)
-   {
-       currentObjectID = INVALID_OBJECT_ID;
-       currentTask = nil;
-       FREE(currentLine);
-       throw _Exception(_("failed to open file: ") + obj->getLocation());
-   }
+    currentHandle = fopen(obj->getLocation().c_str(), "r");
+    if (!currentHandle)
+    {
+        currentObjectID = INVALID_OBJECT_ID;
+        currentTask = nil;
+        FREE(currentLine);
+#ifdef JS_THREADSAFE
+        JS_EndRequest(cx);
+        JS_ClearContextThread(cx);
+#endif
+        throw _Exception(_("failed to open file: ") + obj->getLocation());
+    }
 
-   JSObject *playlist = JS_NewObject(cx, NULL, NULL, glob);
+    JSObject *playlist = JS_NewObject(cx, NULL, NULL, glob);
 
-   try
-   {
-       setObjectProperty(glob, _("playlist"), playlist);
-       cdsObject2jsObject(obj, playlist);
+    try
+    {
+        setObjectProperty(glob, _("playlist"), playlist);
+        cdsObject2jsObject(obj, playlist);
 
-       execute();
-   }
+        execute();
+    }
 
-   catch (Exception e)
-   {
-       fclose(currentHandle);
-       currentHandle = NULL;
+    catch (Exception e)
+    {
+        fclose(currentHandle);
+        currentHandle = NULL;
 
-       FREE(currentLine);
-       currentLine = NULL;
+        FREE(currentLine);
+        currentLine = NULL;
 
-       currentObjectID = INVALID_OBJECT_ID;
-       currentTask = nil;
+        currentObjectID = INVALID_OBJECT_ID;
+        currentTask = nil;
 
-       throw e;
-   }
+#ifdef JS_THREADSAFE
+        JS_EndRequest(cx);
+        JS_ClearContextThread(cx);
+#endif
+        throw e;
+    }
 
-   fclose(currentHandle);
-   currentHandle = NULL;
+    fclose(currentHandle);
+    currentHandle = NULL;
 
-   FREE(currentLine);
-   currentLine = NULL;
+    FREE(currentLine);
+    currentLine = NULL;
 
-   currentObjectID = INVALID_OBJECT_ID;
-   currentTask = nil;
+    currentObjectID = INVALID_OBJECT_ID;
+    currentTask = nil;
+
+#ifdef JS_THREADSAFE
+    JS_EndRequest(cx);
+    JS_ClearContextThread(cx);
+#endif
+
 }
 
 
 PlaylistParserScript::~PlaylistParserScript()
 {
+#ifdef JS_THREADSAFE
+    JS_SetContextThread(cx);
+    JS_BeginRequest(cx);
+#endif
+
     if (root)
         JS_RemoveRoot(cx, &root);
+
+#ifdef JS_THREADSAFE
+    JS_EndRequest(cx);
+    JS_ClearContextThread(cx);
+#endif
+
 }
 #endif // HAVE_JS
+

@@ -47,23 +47,74 @@ using namespace zmm;
 ImportScript::ImportScript(Ref<Runtime> runtime) : Script(runtime)
 {
     String scriptPath = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT); 
-    load(scriptPath);
-    root = JS_NewScriptObject(cx, script);
-    JS_AddNamedRoot(cx, &root, "ImportScript");
+
+#ifdef JS_THREADSAFE
+    JS_SetContextThread(cx);
+    JS_BeginRequest(cx);
+#endif
+
+    try 
+    {
+        load(scriptPath);
+        root = JS_NewScriptObject(cx, script);
+        JS_AddNamedRoot(cx, &root, "ImportScript");
+    }
+    catch (Exception ex)
+    {
+#ifdef JS_THREADSAFE
+        JS_EndRequest(cx);
+        JS_ClearContextThread(cx);
+#endif
+        throw ex;
+    }
+#ifdef JS_THREADSAFE
+        JS_EndRequest(cx);
+        JS_ClearContextThread(cx);
+#endif
 }
 
 void ImportScript::processCdsObject(Ref<CdsObject> obj)
 {
-    JSObject *orig = JS_NewObject(cx, NULL, NULL, glob);
-    setObjectProperty(glob, _("orig"), orig);
-    cdsObject2jsObject(obj, orig);
-    execute();
+#ifdef JS_THREADSAFE
+    JS_SetContextThread(cx);
+    JS_BeginRequest(cx);
+#endif
+    try 
+    {
+        JSObject *orig = JS_NewObject(cx, NULL, NULL, glob);
+        setObjectProperty(glob, _("orig"), orig);
+        cdsObject2jsObject(obj, orig);
+        execute();
+    }
+    catch (Exception ex)
+    {
+#ifdef JS_THREADSAFE
+        JS_EndRequest(cx);
+        JS_ClearContextThread(cx);
+#endif
+        throw ex;
+    }
+#ifdef JS_THREADSAFE
+    JS_EndRequest(cx);
+    JS_ClearContextThread(cx);
+#endif
 }
 
 ImportScript::~ImportScript()
 {
+#ifdef JS_THREADSAFE
+    JS_SetContextThread(cx);
+    JS_BeginRequest(cx);
+#endif
+    
     if (root)
         JS_RemoveRoot(cx, &root);
+
+#ifdef JS_THREADSAFE
+    JS_EndRequest(cx);
+    JS_ClearContextThread(cx);
+#endif
+
 }
 
 #endif // HAVE_JS
