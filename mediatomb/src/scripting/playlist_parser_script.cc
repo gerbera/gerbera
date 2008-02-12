@@ -104,6 +104,7 @@ PlaylistParserScript::PlaylistParserScript(Ref<Runtime> runtime) : Script(runtim
 #endif
         throw ex;
     }
+    
 #ifdef JS_THREADSAFE
         JS_EndRequest(cx);
         JS_ClearContextThread(cx);
@@ -220,6 +221,13 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<CM
 
     currentObjectID = INVALID_OBJECT_ID;
     currentTask = nil;
+
+    gc_counter++;
+    if (gc_counter > JS_CALL_GC_AFTER_NUM)
+    {
+        JS_MaybeGC(cx);
+        gc_counter = 0;
+    }
 
 #ifdef JS_THREADSAFE
     JS_EndRequest(cx);

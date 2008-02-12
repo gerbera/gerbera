@@ -40,6 +40,9 @@
 #include "cds_objects.h"
 #include "string_converter.h"
 
+// perform garbage collection after script has been run for x times
+#define JS_CALL_GC_AFTER_NUM    (1000)
+
 typedef enum
 {
     S_IMPORT = 0,
@@ -99,6 +102,7 @@ public:
     
 protected:
     void execute();
+    int gc_counter;
     
 private:
     JSObject *common_root;

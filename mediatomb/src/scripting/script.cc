@@ -246,6 +246,8 @@ js_error_reporter(JSContext *cx, const char *message, JSErrorReport *report)
 
 Script::Script(Ref<Runtime> runtime) : Object()
 {
+    gc_counter = 0;
+
     this->runtime = runtime;
     rt = runtime->getRT();
 

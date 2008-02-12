@@ -94,6 +94,13 @@ void ImportScript::processCdsObject(Ref<CdsObject> obj)
 #endif
         throw ex;
     }
+
+    gc_counter++;
+    if (gc_counter > JS_CALL_GC_AFTER_NUM)
+    {
+        JS_MaybeGC(cx);
+        gc_counter = 0;
+    }
 #ifdef JS_THREADSAFE
     JS_EndRequest(cx);
     JS_ClearContextThread(cx);
