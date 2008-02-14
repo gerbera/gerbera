@@ -151,6 +151,8 @@ public:
         return Ref<StringBase>(base);
     }
 
+    int equals(String other, bool ignoreCase = false);
+
 
     String substring(int from);
     String substring(int from, int count);

@@ -306,6 +306,22 @@ String& String::operator=(String other)
     return *this;
 }
 
+int String::equals(String other, bool ignoreCase)
+{
+    if(! base && ! other.base)
+        return 1;
+    
+    if (ignoreCase)
+    {
+        if(base && other.base)
+            return ( ! strcasecmp(base->data, other.base->data) );
+    }
+    else
+        return (operator==(other));
+
+    return 0;
+}
+
 long String::toLong()
 {
     if(! base)
