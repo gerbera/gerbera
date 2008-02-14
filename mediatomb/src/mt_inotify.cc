@@ -46,6 +46,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <assert.h>
+#include <tools.h>
 
 #include "mt_inotify.h"
 
@@ -76,7 +77,15 @@ Inotify::~Inotify()
 
 int Inotify::addWatch(String path, int events)
 {
-    return inotify_add_watch(inotify_fd, path.c_str(), events);
+    int wd = inotify_add_watch(inotify_fd, path.c_str(), events);
+    if (wd < 0 && errno != ENOENT)
+    {
+        if (errno == ENOSPC)
+            throw _Exception(_("The user limit on the total number of inotify watches was reached or the kernel failed to allocate a needed resource."));
+        else
+            throw _Exception(mt_strerror(errno));
+    }
+    return wd;
 }
 
 void Inotify::removeWatch(int wd)
