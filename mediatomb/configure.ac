@@ -2838,10 +2838,10 @@ dnl information.
                        ),
                 [
                     AC_MSG_RESULT([yes]); 
-                    AC_DEFINE([SYS_INOTIFY_H_OK],[1],[sys/inotify.h exists and works correctly])],
+                    AC_DEFINE([SYS_INOTIFY_H_OK],[1],[sys/inotify.h exists and works on this system])],
                 [
                     AC_MSG_RESULT([no, using own inotify headers])
-                    AC_MSG_CHECKING([whether inotify-nosys.h works])
+                    AC_MSG_CHECKING([whether inotify-nosys.h works on this system])
                     AC_RUN_IFELSE(
                         AC_LANG_PROGRAM([[#include "src/inotify-nosys.h"]],
                          [[return (-1 == inotify_init());]]
@@ -2851,7 +2851,11 @@ dnl information.
                             INOTIFY_OK=yes
                         ],
                         [
-                            AC_MSG_RESULT([no, disabling inotify support])
+                            if test "x$INOTIFY_EN" != xyes; then
+                                AC_MSG_RESULT([no, disabling inotify support])
+                            else
+                                AC_MSG_RESULT([no])
+                            fi
                             INOTIFY_OK=missing
                         ])
 
