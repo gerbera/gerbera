@@ -2863,7 +2863,14 @@ if test "x$INOTIFY_OK" = xyes; then
     AC_SUBST(INOTIFY_CXXFLAGS)
 else
     if test "x$INOTIFY_EN" = xyes; then
-        AC_MSG_ERROR(unable to configure inotify support)
+        AC_MSG_NOTICE([enabling runtime inotify detection])
+        # if system inotify header exists, go with it, otherwise take our own
+        if test "x$ac_cv_header_sys_inotify_h" = xyes; then
+             AC_DEFINE([SYS_INOTIFY_H_OK],[1],[sys/inotify.h exists])
+        fi
+        AC_DEFINE([HAVE_INOTIFY], [1], [inotify presence])
+        AC_SUBST(INOTIFY_CXXFLAGS)
+        INOTIFY_OK=yes
     fi
 fi
 

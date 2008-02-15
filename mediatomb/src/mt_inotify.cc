@@ -74,6 +74,17 @@ Inotify::~Inotify()
         close(inotify_fd);
 }
 
+bool Inotify::supported()
+{
+    int test_fd = inotify_init();
+    if (test_fd < 0)
+        return false;
+    else
+    {
+        close(test_fd);
+        return true;
+    }
+}
 
 int Inotify::addWatch(String path, int events)
 {

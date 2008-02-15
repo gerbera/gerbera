@@ -67,6 +67,9 @@ public:
     /// \brief Unblock the next_event function.
     void stop();
 
+    /// \brief Checks if inotify is supported on the system.
+    static bool supported();
+
 private:
     int inotify_fd;
     int stop_fds_pipe[2];

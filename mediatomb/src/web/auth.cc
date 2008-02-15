@@ -109,7 +109,10 @@ void web::auth::process()
 
         config->appendElementChild(ipp);
 #ifdef HAVE_INOTIFY
-        config->addAttribute(_("have-inotify"), _("1"));
+        if (cm->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
+            config->addAttribute(_("have-inotify"), _("1"));
+        else
+            config->addAttribute(_("have-inotify"), _("0"));
 #else
         config->addAttribute(_("have-inotify"), _("0"));
 #endif

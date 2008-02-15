@@ -156,24 +156,31 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
     autoscan_timed = storage->getAutoscanList(TimedScanMode);
 
 #ifdef HAVE_INOTIFY
-    Ref<AutoscanList> config_inotify_list = 
-        cm->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
-
-    for (i = 0; i < config_inotify_list->size(); i++)
+    if (cm->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
     {
-        Ref<AutoscanDirectory> dir = config_inotify_list->get(i);
-        if (dir != nil)
+        Ref<AutoscanList> config_inotify_list = 
+            cm->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
+
+        for (i = 0; i < config_inotify_list->size(); i++)
         {
-            String path = dir->getLocation();
-            if (check_path(path, true))
+            Ref<AutoscanDirectory> dir = config_inotify_list->get(i);
+            if (dir != nil)
             {
-                dir->setObjectID(ensurePathExistence(path));
+                String path = dir->getLocation();
+                if (check_path(path, true))
+                {
+                    dir->setObjectID(ensurePathExistence(path));
+                }
             }
         }
-    }
 
-    storage->updateAutoscanPersistentList(InotifyScanMode, config_inotify_list);
-    autoscan_inotify = storage->getAutoscanList(InotifyScanMode);
+        storage->updateAutoscanPersistentList(InotifyScanMode, 
+                                              config_inotify_list);
+        autoscan_inotify = storage->getAutoscanList(InotifyScanMode);
+    }
+    else
+        // make an empty list so we do not have to do extra checks on shutdown 
+        autoscan_inotify = Ref<AutoscanList>(new AutoscanList());
 #endif
     /* init filemagic */
 #ifdef HAVE_MAGIC
@@ -316,15 +323,17 @@ void ContentManager::init()
     autoscan_timed->notifyAll(AS_TIMER_SUBSCRIBER_SINGLETON(this));
 
 #ifdef HAVE_INOTIFY
-    inotify = Ref<AutoscanInotify>(new AutoscanInotify());
-    /// \todo change this (we need a new autoscan architecture)
-    for (int i = 0; i < autoscan_inotify->size(); i++)
+    if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
     {
-        Ref<AutoscanDirectory> dir = autoscan_inotify->get(i);
-        if (dir != nil)
-            inotify->monitor(dir);
+        inotify = Ref<AutoscanInotify>(new AutoscanInotify());
+        /// \todo change this (we need a new autoscan architecture)
+        for (int i = 0; i < autoscan_inotify->size(); i++)
+        {
+            Ref<AutoscanDirectory> dir = autoscan_inotify->get(i);
+            if (dir != nil)
+                inotify->monitor(dir);
+        }
     }
-    
 #endif
 
 #ifdef EXTERNAL_TRANSCODING
@@ -1666,11 +1675,14 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
                 Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), rm_list->get(i)->getTimerParameter(), true);
             }
 #ifdef HAVE_INOTIFY
-            rm_list = autoscan_inotify->removeIfSubdir(path);
-            for (i = 0; i < rm_list->size(); i++)
+            if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
             {
-                Ref<AutoscanDirectory> dir = rm_list->get(i);
-                inotify->unmonitor(dir);
+                rm_list = autoscan_inotify->removeIfSubdir(path);
+                for (i = 0; i < rm_list->size(); i++)
+                {
+                    Ref<AutoscanDirectory> dir = rm_list->get(i);
+                    inotify->unmonitor(dir);
+                }
             }
 #endif
 
@@ -1804,16 +1816,19 @@ void ContentManager::removeAutoscanDirectory(int scanID, scan_mode_t scanMode)
 
     }
 #ifdef HAVE_INOTIFY
-    else if (scanMode == InotifyScanMode)
+    if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
     {
-        Ref<Storage> storage = Storage::getInstance();
-        Ref<AutoscanDirectory> adir = autoscan_inotify->get(scanID);
-        if (adir == nil)
-            throw _Exception(_("can not remove autoscan directory - was not an autoscan"));
-        autoscan_inotify->remove(scanID);
-        storage->removeAutoscanDirectory(adir->getStorageID());
-        SessionManager::getInstance()->containerChangedUI(adir->getObjectID());
-        inotify->unmonitor(adir);
+        if (scanMode == InotifyScanMode)
+        {
+            Ref<Storage> storage = Storage::getInstance();
+            Ref<AutoscanDirectory> adir = autoscan_inotify->get(scanID);
+            if (adir == nil)
+                throw _Exception(_("can not remove autoscan directory - was not an autoscan"));
+            autoscan_inotify->remove(scanID);
+            storage->removeAutoscanDirectory(adir->getStorageID());
+            SessionManager::getInstance()->containerChangedUI(adir->getObjectID());
+            inotify->unmonitor(adir);
+        }
     }
 #endif
     
@@ -1834,12 +1849,15 @@ void ContentManager::removeAutoscanDirectory(int objectID)
         Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), adir->getTimerParameter(), true);
     }
 #ifdef HAVE_INOTIFY
-    else if (adir->getScanMode() == InotifyScanMode)
+    if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
     {
-        autoscan_inotify->remove(adir->getLocation());
-        storage->removeAutoscanDirectoryByObjectID(objectID);
-        SessionManager::getInstance()->containerChangedUI(objectID);
-        inotify->unmonitor(adir);
+        if (adir->getScanMode() == InotifyScanMode)
+        {
+            autoscan_inotify->remove(adir->getLocation());
+            storage->removeAutoscanDirectoryByObjectID(objectID);
+            SessionManager::getInstance()->containerChangedUI(objectID);
+            inotify->unmonitor(adir);
+        }
     }
 #endif
 }
@@ -1849,8 +1867,11 @@ void ContentManager::removeAutoscanDirectory(String location)
     /// \todo change this when more scanmodes become avaiable
     Ref<AutoscanDirectory> adir = autoscan_timed->get(location);
 #ifdef HAVE_INOTIFY
-    if (adir == nil)
-        adir = autoscan_inotify->get(location);
+    if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
+    {
+        if (adir == nil)
+            adir = autoscan_inotify->get(location);
+    }
 #endif
     if (adir == nil)
         throw _Exception(_("can not remove autoscan directory - was not an autoscan"));
@@ -1891,8 +1912,11 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
     // We will have to change this for other scan modes
     original = autoscan_timed->getByObjectID(dir->getObjectID());
 #ifdef HAVE_INOTIFY
-    if (original == nil)
-        original = autoscan_inotify->getByObjectID(dir->getObjectID());
+    if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
+    {
+        if (original == nil)
+            original = autoscan_inotify->getByObjectID(dir->getObjectID());
+    }
 #endif
 
     if (original != nil)
@@ -1922,10 +1946,13 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
             timerNotify(dir->getTimerParameter());
         }
 #ifdef HAVE_INOTIFY
-        else if (dir->getScanMode() == InotifyScanMode)
+        if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
         {
-            autoscan_inotify->add(dir);
-            inotify->monitor(dir);
+            if (dir->getScanMode() == InotifyScanMode)
+            {
+                autoscan_inotify->add(dir);
+                inotify->monitor(dir);
+            }
         }
 #endif
         SessionManager::getInstance()->containerChangedUI(dir->getObjectID());
@@ -1935,9 +1962,12 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
     if (original->getScanMode() == TimedScanMode)
         Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), original->getTimerParameter(), true);
 #ifdef HAVE_INOTIFY
-    else if (original->getScanMode() == InotifyScanMode)
+    if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
     {
-        inotify->unmonitor(original);
+        if (original->getScanMode() == InotifyScanMode)
+        {
+            inotify->unmonitor(original);
+        }
     }
 #endif
 
@@ -1967,9 +1997,12 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
         autoscan_timed->remove(copy->getScanID());
     }
 #ifdef HAVE_INOTIFY
-    else if (copy->getScanMode() == InotifyScanMode)
+    if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
     {
-        autoscan_inotify->remove(copy->getScanID());
+        if (copy->getScanMode() == InotifyScanMode)
+        {
+            autoscan_inotify->remove(copy->getScanID());
+        }
     }
 #endif
 
@@ -1981,10 +2014,13 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
         timerNotify(copy->getTimerParameter());
     }
 #ifdef HAVE_INOTIFY
-    else if (dir->getScanMode() == InotifyScanMode)
+    if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
     {
-        autoscan_inotify->add(copy);
-        inotify->monitor(copy);
+        if (dir->getScanMode() == InotifyScanMode)
+        {
+            autoscan_inotify->add(copy);
+            inotify->monitor(copy);
+        }
     }
 #endif
 

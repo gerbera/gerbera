@@ -5055,7 +5055,7 @@ status open
 \end_layout
 
 \begin_layout Code
-<autoscan>
+<autoscan use-inotify="auto">
 \end_layout
 
 \begin_layout Standard
@@ -5076,6 +5076,58 @@ This section defines persistent autoscan directories.
  Even if the directory gets removed on disk, the server will try to monitor
  the specified location and will re add the removed directory if it becomes
  available/gets created again.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+use-inotify=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: auto
+\end_layout
+
+\begin_layout Standard
+Specifies if the inotify autoscan feature should be enabled.
+ The default value is "auto", which means that availability of inotify support
+ on the system will be detected automatically, it will then be used if available.
+ Setting the option to 'no' will disable inotify even if it is available.
+ Allowed values: "yes", "no", "auto"
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -5183,15 +5235,7 @@ Required
 \end_layout
 
 \begin_layout Standard
-Scan mode, currently 
-\begin_inset Quotes sld
-\end_inset
-
-inotify
-\begin_inset Quotes srd
-\end_inset
-
- and "timed" are supported.
+Scan mode, currently "inotify" and "timed" are supported.
  Timed mode rescans the given directory in specified intervals, inotify
  mode uses the kernel inotify mechanism to watch for filesystem events.
 \end_layout

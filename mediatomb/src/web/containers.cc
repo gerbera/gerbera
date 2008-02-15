@@ -97,9 +97,12 @@ void web::containers::process()
         {
             autoscanMode = 1;
 #ifdef HAVE_INOTIFY
-            Ref<AutoscanDirectory> adir = storage->getAutoscanDirectory(cont->getID());
-            if ((adir != nil) && (adir->getScanMode() == InotifyScanMode))
-                autoscanMode = 2;
+            if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
+            {
+                Ref<AutoscanDirectory> adir = storage->getAutoscanDirectory(cont->getID());
+                if ((adir != nil) && (adir->getScanMode() == InotifyScanMode))
+                    autoscanMode = 2;
+            }
 #endif
         }
         ce->addAttribute(_("autoscanMode"), String::from(autoscanMode));

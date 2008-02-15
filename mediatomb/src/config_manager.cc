@@ -44,6 +44,10 @@
 #include "string_converter.h"
 #include "metadata_handler.h"
 
+#ifdef HAVE_INOTIFY
+    #include "mt_inotify.h"
+#endif
+
 #ifdef YOUTUBE
     #include "youtube_service.h"
 #endif
@@ -1375,24 +1379,61 @@ void ConfigManager::validate(String serverhome)
                                                     _("from"), _("to")));
     SET_DICT_OPTION(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
 
+    temp = getOption(_("/import/autoscan/attribute::use-inotify"), _("auto"));
+    if ((temp != "auto") && !validateYesNo(temp))
+        throw _Exception(_("Error in config file: incorrect parameter for "
+                           "\"<autoscan use-inotify=\" attribute"));
+
     el = getElement(_("/import/autoscan"));
-    if (el == nil)
-    {
-        getOption(_("/import/autoscan"), _(""));
-    }
+
     NEW_AUTOSCANLIST_OPTION(createAutoscanListFromNodeset(el, TimedScanMode));
     SET_AUTOSCANLIST_OPTION(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
 
+    bool inotify_supported = false;
+
 #ifdef HAVE_INOTIFY
-    el = getElement(_("/import/autoscan"));
-    if (el == nil)
-    {
-        getOption(_("/import/autoscan"));
-    }
-    NEW_AUTOSCANLIST_OPTION(createAutoscanListFromNodeset(el, InotifyScanMode));
-    SET_AUTOSCANLIST_OPTION(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
+    inotify_supported = Inotify::supported();
 #endif
+
+    if (temp == _(YES))
+    {
+#ifdef HAVE_INOTIFY
+        if (!inotify_supported)
+            throw _Exception(_("You specified " 
+                               "\"yes\" in \"<autoscan use-inotify=\""
+                               " however your system does not have " 
+                               "inotify support"));
+#else
+        throw _Exception(_("You specified \"yes\" in \"<autoscan use-inotify=\""
+                           " however this version of MediaTomb was compiled "
+                           "without inotify support"));
+#endif
+    } 
    
+#ifdef HAVE_INOTIFY
+    if (temp == _("auto") || (temp == _(YES)))
+    {
+        if (inotify_supported)
+        {
+            NEW_AUTOSCANLIST_OPTION(createAutoscanListFromNodeset(el, InotifyScanMode));
+            SET_AUTOSCANLIST_OPTION(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
+
+            NEW_BOOL_OPTION(true);
+            SET_BOOL_OPTION(CFG_IMPORT_AUTOSCAN_USE_INOTIFY);
+        }
+        else
+        {
+            NEW_BOOL_OPTION(false);
+            SET_BOOL_OPTION(CFG_IMPORT_AUTOSCAN_USE_INOTIFY);
+        }
+    }
+    else
+    {
+        NEW_BOOL_OPTION(false);
+        SET_BOOL_OPTION(CFG_IMPORT_AUTOSCAN_USE_INOTIFY);
+    }
+#endif
+
 #ifdef EXTERNAL_TRANSCODING
     temp = getOption(
             _("/transcoding/attribute::enabled"), 

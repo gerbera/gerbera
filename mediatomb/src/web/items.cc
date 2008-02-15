@@ -110,29 +110,31 @@ void web::items::process()
         autoscanMode = 1;
 
 #ifdef HAVE_INOTIFY
-    int startpoint_id = INVALID_OBJECT_ID;
-    if (autoscanType == 0)
+    if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
     {
-        startpoint_id = storage->isAutoscanChild(parentID);
-    }
-    else
-    {
-        startpoint_id = parentID;
-    }
-    
-    if (startpoint_id != INVALID_OBJECT_ID)
-    {
-        Ref<AutoscanDirectory> adir = storage->getAutoscanDirectory(startpoint_id);
-        if ((adir != nil) && (adir->getScanMode() == InotifyScanMode))
+        int startpoint_id = INVALID_OBJECT_ID;
+        if (autoscanType == 0)
         {
-            protectItems = 1;
-            if (autoscanType == 0 || adir->persistent())
-                protectContainer = 1;
+            startpoint_id = storage->isAutoscanChild(parentID);
+        }
+        else
+        {
+            startpoint_id = parentID;
+        }
 
-            autoscanMode = 2;
+        if (startpoint_id != INVALID_OBJECT_ID)
+        {
+            Ref<AutoscanDirectory> adir = storage->getAutoscanDirectory(startpoint_id);
+            if ((adir != nil) && (adir->getScanMode() == InotifyScanMode))
+            {
+                protectItems = 1;
+                if (autoscanType == 0 || adir->persistent())
+                    protectContainer = 1;
+
+                autoscanMode = 2;
+            }
         }
     }
-
 #endif
 
     items->addAttribute(_("protectContainer"), String::from(protectContainer));
