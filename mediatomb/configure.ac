@@ -1212,6 +1212,7 @@ fi
 LDFLAGS="$LDFLAGS_SAVE"
 CPPFLAGS="$CPPFLAGS_SAVE"
 CXXFLAGS="$CXXFLAGS_SAVE"
+
 ########## MySQL
 
 AC_ARG_ENABLE(mysql, 
@@ -1304,6 +1305,9 @@ if test "x$MYSQL_OK" = xyes; then
     fi
 fi
 
+LIBS_SAVE="$LIBS"
+LIBS="$LIBS $MYSQL_LIBS"
+
 dnl we are not doing an extra search in $SEARCH_DIR because the
 dnl mysql_config set the correct flags already, if not - something
 dnl is anyway wrong with the mysql installation
@@ -1362,6 +1366,7 @@ CPPFLAGS="$CPPFLAGS_SAVE"
 CXXFLAGS="$CXXFLAGS_SAVE"
 CFLAGS="$CFLAGS_SAVE"
 LDFLAGS="$LDFLAGS_SAVE"
+LIBS="$LIBS_SAVE"
 
 ######### PostgreSQL
 ##AC_ARG_ENABLE(postgresql, 
