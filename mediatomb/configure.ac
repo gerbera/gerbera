@@ -2277,6 +2277,9 @@ fi
 
 ######## ffmpeg
 
+AC_LANG_SAVE
+AC_LANG_C
+
 if test "x$FFMPEG_OK" = xyes; then
     if test -n "$FFMPEG_SEARCH_HEADERS" ; then
         CPPFLAGS="-I$FFMPEG_SEARCH_HEADERS"
@@ -2328,15 +2331,17 @@ if test "x$FFMPEG_OK" = xyes; then
                 [
                     AC_CHECK_LIB(avutil, av_log_set_callback,
                         [
-                            FFMPEG_LIBS="-L$FFMPEG_SEARCH_LIBS -lavformat -lavutil"
+                            FFMPEG_LIBS="-L$FFMPEG_SEARCH_LIBS -lavformat -lavutil -lz"
                         ],
                         [
                             AC_MSG_ERROR([avutil libraries not found in requested path $FFMPEG_SEARCH_LIBS])
-                        ])
+                        ],
+                        [ -lavcodec -lavutil -lz ])
                 ],
                 [
                     AC_MSG_ERROR([avformat libraries not found in requested path $FFMPEG_SEARCH_LIBS])
-                ]
+                ],
+                [ -lavcodec -lavutil -lz ]
         )
     else
         AC_CHECK_LIB(avformat, av_register_all,
@@ -2350,11 +2355,12 @@ if test "x$FFMPEG_OK" = xyes; then
                         unset ac_cv_lib_avutil_av_log_set_callback
                         AC_CHECK_LIB(avutil, av_log_set_callback,
                             [
-                                FFMPEG_LIBS="-L$SEARCH_DIR_LIBS -lavformat -lavutil"
+                                FFMPEG_LIBS="-L$SEARCH_DIR_LIBS -lavformat -lavutil -lz"
                             ],
                             [
                                FFMPEG_OK=missing
-                            ])
+                            ],
+                            [ -lavcodec -lavutil -lz ])
                     ])
             ],
             [
@@ -2365,15 +2371,18 @@ if test "x$FFMPEG_OK" = xyes; then
                         unset ac_cv_lib_avutil_av_log_set_callback
                         AC_CHECK_LIB(avutil, av_log_set_callback,
                             [
-                                FFMPEG_LIBS="-L$SEARCH_DIR_LIBS -lavformat -lavutil"
+                                FFMPEG_LIBS="-L$SEARCH_DIR_LIBS -lavformat -lavutil -lz"
                             ],
                             [
                                FFMPEG_OK=missing
-                            ])
+                            ],
+                            [ -lavcodec -lavutil -lz ])
                     ],
-                    [ FFMPEG_OK=missing ]
+                    [ FFMPEG_OK=missing ],
+                    [ -lavcodec -lavutil -lz ]
                 )
-            ]
+            ],
+            [ -lavcodec -lavutil -lz ]
         )
     fi
 fi
@@ -2383,6 +2392,7 @@ fi
 
 CXXFLAGS="$CXXFLAGS $FFMPEG_CXXFLAGS"
 LDFLAGS="$LDFLAGS $FFMPEG_LIBS"
+LIBS="$LIBS $FFMPEG_LIBS"
 
 if test "x$FFMPEG_OK" = xyes; then
     AC_MSG_CHECKING([ffmpeg linking])
@@ -2426,6 +2436,8 @@ if test "x$FFMPEG_OK" = xyes; then
 fi
 
 LIBS="$LIBS_SAVE $LIBS"
+
+AC_LANG_RESTORE
 
 if test "x$FFMPEG_OK" = xyes; then
     AC_DEFINE([HAVE_FFMPEG], [1], [FFMPEG library presence])
