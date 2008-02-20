@@ -44,7 +44,11 @@ void RequestHandler::split_url(const char *url, char separator, String &path, St
 
     String url_s;
     if (force_amp_unescape)
+    {
+        // Noxon V1 sends us double encoded xml crap in the url
         url_s = unescape_amp(String(url));
+        url_s = unescape_amp(String(url_s));
+    }
     else
         url_s = String(url);
 
