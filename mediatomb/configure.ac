@@ -2394,8 +2394,10 @@ CXXFLAGS="$CXXFLAGS $FFMPEG_CXXFLAGS"
 LDFLAGS="$LDFLAGS $FFMPEG_LIBS"
 LIBS="$LIBS $FFMPEG_LIBS"
 
+AC_LANG_RESTORE
+
 if test "x$FFMPEG_OK" = xyes; then
-    AC_MSG_CHECKING([ffmpeg linking])
+    AC_MSG_CHECKING([ffmpeg linking / if extern "C" is needed])
     AC_LINK_IFELSE(
         [AC_LANG_PROGRAM(
             [
@@ -2437,7 +2439,6 @@ fi
 
 LIBS="$LIBS_SAVE $LIBS"
 
-AC_LANG_RESTORE
 
 if test "x$FFMPEG_OK" = xyes; then
     AC_DEFINE([HAVE_FFMPEG], [1], [FFMPEG library presence])
