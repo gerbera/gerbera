@@ -5,8 +5,8 @@
     <refentryinfo>
         <title>User commands</title>
         <productname>MediaTomb</productname>
-        <productnumber>0.10.0</productnumber>
-        <date>2007-05-27</date>
+        <productnumber>0.11.0</productnumber>
+        <date>2008-02-23</date>
         <address>contact@mediatomb.cc</address>
         <authorgroup>
             <collab><collabname>Sergey Bostandzhyan</collabname></collab>
@@ -18,7 +18,7 @@
             <holder>Sergey Bostandzhyan</holder>
         </copyright>
         <copyright>
-            <year>2006-2007</year>
+            <year>2006-2008</year>
             <holder>Gena Batsyan</holder>
             <holder>Sergey Bostandzhyan</holder>
             <holder>Leonhard Wimmer</holder>

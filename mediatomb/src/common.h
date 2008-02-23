@@ -138,7 +138,7 @@
 #define DESC_SPEC_VERSION_MAJOR         "1"
 #define DESC_SPEC_VERSION_MINOR         "0"
 #define DESC_FRIENDLY_NAME              PACKAGE_NAME 
-#define DESC_MANUFACTURER               "(c) 2004-2007 Gena Batyan <bgeradz@mediatomb.cc>, Sergey Bostandzhyan <jin@mediatomb.cc>, Leonhard Wimmer <leo@mediatomb.cc>"
+#define DESC_MANUFACTURER               "(c) 2005-2008 Gena Batyan <bgeradz@mediatomb.cc>, Sergey Bostandzhyan <jin@mediatomb.cc>, Leonhard Wimmer <leo@mediatomb.cc>"
 #define DESC_MANUFACTURER_URL           "http://mediatomb.cc/"
 #define DESC_MODEL_DESCRIPTION          "Free UPnP AV MediaServer, GNU GPL"
 #define DESC_MODEL_NAME                 PACKAGE_NAME

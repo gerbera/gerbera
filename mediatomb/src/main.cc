@@ -255,7 +255,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         printf("\nMediaTomb UPnP Server version %s - %s\n\n", VERSION, 
                 DESC_MANUFACTURER_URL);
         printf("===============================================================================\n");
-        printf("Copyright 2005-2007 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer.\n");
+        printf("Copyright 2005-2008 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer.\n");
         printf("MediaTomb is free software, covered by the GNU General Public License version 2\n\n");
     }
 
