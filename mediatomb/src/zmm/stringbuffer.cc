@@ -82,7 +82,7 @@ StringBuffer &StringBuffer::operator<<(Ref<StringBuffer> other)
 }
 
 
-StringBuffer &StringBuffer::operator<<(char *str)
+StringBuffer &StringBuffer::operator<<(const char *str)
 {
     if(! str)
         return *this;

@@ -246,9 +246,9 @@ void Element::indent(int level)
     
     if (noTextChildren)
     {
-        static char *ind_str = "                                                               ";
-        static char *ind = ind_str + strlen(ind_str);
-        char *ptr = ind - (level + 1) * 2;
+        static const char *ind_str = "                                                               ";
+        static const char *ind = ind_str + strlen(ind_str);
+        const char *ptr = ind - (level + 1) * 2;
         if (ptr < ind_str)
             ptr = ind_str;
         

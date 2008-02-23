@@ -82,8 +82,8 @@ typedef enum
 typedef struct mt_key mt_key;
 struct mt_key
 {
-    char *sym;
-    char *upnp;
+    const char *sym;
+    const char *upnp;
 };
 
 extern mt_key MT_KEYS[];
@@ -105,8 +105,8 @@ typedef enum
 typedef struct res_key res_key;
 struct res_key
 {   
-    char *sym;
-    char *upnp;
+    const char *sym;
+    const char *upnp;
 };
 
 extern res_key RES_KEYS[];

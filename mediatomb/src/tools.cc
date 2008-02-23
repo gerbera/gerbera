@@ -61,7 +61,7 @@
 
 using namespace zmm;
 
-static char *HEX_CHARS = "0123456789abcdef";
+static const char *HEX_CHARS = "0123456789abcdef";
 
 Ref<Array<StringBase> > split_string(String str, char sep, bool empty)
 {
