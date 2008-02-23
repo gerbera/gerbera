@@ -13,6 +13,10 @@ while (<>)
     s/“/"/g;
     s/”/"/g;
     s/ / /g;
+    s/ä/ae/g;
+    s/ü/ue/g;
+    s/ö/oe/g;
+    s/ß/ss/g;
     
     my $converted = $converter->convert($_);
     if ($converted)

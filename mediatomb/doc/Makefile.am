@@ -3,7 +3,11 @@ _DIST_FILES_CONF = \
     doxygen.conf \
     scripting.txt \
     scripting_utf8.txt \
-	manpage.xml
+    transcoding.txt \
+    transcoding_utf8.txt \
+    ui.txt \
+    ui_utf8.txt \
+    manpage.xml
 
 man1_MANS=mediatomb.1
 

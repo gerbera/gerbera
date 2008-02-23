@@ -1,6 +1,6 @@
 MediaTomb Scripting
 
-This documentation is valid for MediaTomb version 0.10.0.
+This documentation is valid for MediaTomb version 0.11.0.
 
 Copyright   2005 Gena Batsyan, Sergey Bostandzhyan
 
@@ -151,6 +151,8 @@ Note:
     to the database, only a call to the addCdsObject() will permanently add the
     object.
 
+3.1.1. General Properties
+
 Here is a list of properties of an object, you can set them you create a new
 object or when you modify a copy of the 'orig' object.
 
@@ -180,7 +182,7 @@ lost.
 
       o OBJECT_TYPE_ITEM_EXTERNAL_URL
 
-        Object is a link to a resource on the internet.
+        Object is a link to a resource on the Internet.
 
       o OBJECT_TYPE_ITEM_INTERNAL_URL
 
@@ -207,11 +209,11 @@ lost.
 
     The object ID of the parent container.
 
-  * orig.class
+  * orig.upnpclass
 
     RW
 
-    The upnp class of the item, this corresponds to upnp:class in the DIDL-Lite
+    The UPnP class of the item, this corresponds to upnp:class in the DIDL-Lite
     XML.
 
   * orig.location
@@ -219,6 +221,31 @@ lost.
     RO
 
     Location on disk, given by the absolute path and file name.
+
+  * orig.theora
+
+    RO
+
+    This property is a boolean value, it is non zero if the particular item is
+    of type OGG Theora. This is useful to allow proper sorting of media and
+    thus placing OGG Vorbis into the Audio container and OGG Theora into the
+    Video container.
+
+  * orig.onlineservice
+
+    RO
+
+    Identifies if the item belongs to an online service and thus has extended
+    properties. Following types are available:
+
+      o ONLINE_SERVICE_NONE
+
+        The item does not belong to an online service and does not have
+        extended properties.
+
+      o ONLINE_SERVICE_YOUTUBE
+
+        The item belongs to the YouTube service and has extended properties.
 
   * orig.mimetype
 
@@ -274,12 +301,33 @@ lost.
         Description of the item, this corresponds to dc:description in the
         DIDL-Lite XML.
 
+      o orig.meta[M_REGION]
+
+        RW
+
+        Region description of the item, this corresponds to upnp:region in the
+        DIDL-Lite XML.
+
       o orig.meta[M_TRACKNUMBER]
 
         RW
 
         Track number of the item, this corresponds to upnp:originalTrackNumber
         in the DIDL-Lite XML.
+
+      o orig.meta[M_AUTHOR]
+
+        RW
+
+        Author of the media, this corresponds to upnp:author in the DIDL-Lite
+        XML.
+
+      o orig.meta[M_DIRECTOR]
+
+        RW
+
+        Director of the media, this corresponds to upnp:director in the
+        DIDL-Lite XML.
 
   * orig.aux
 
@@ -293,7 +341,7 @@ lost.
     this array will hold the tags that you specified in your config.xml,
     allowing you to create your virtual structure according to your liking.
 
-  * obj.playlistOrder
+  * orig.playlistOrder
 
     RW
 
@@ -303,6 +351,158 @@ lost.
     Usually you will increment the number for each new object that you create
     while parsing the playlist, thus ensuring that the resulting order is the
     same as in the original playlist.
+
+3.1.2. YouTube Properties
+
+When the obj.onlineservice variable equals ONLINE_SERVICE_YOUTUBE the item has
+the following additional properties:
+
+  * orig.yt_request
+
+    RO
+
+    Identifies the YouTube request type, following types are available:
+
+      o YOUTUBE_REQUEST_NONE
+
+        No request.
+
+      o YOUTUBE_REQUEST_FAVORITE
+
+        The item was created as a result of a favorites request.
+
+        Note:
+
+            for this request orig.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME] will
+            contain the name of the associated user.
+
+      o YOUTUBE_REQUEST_BY_TAG
+
+        The item was created as a result of a by tag request.
+
+        Note:
+
+            for this request orig.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME] will
+            contain the name of the tags that were used when searching for the
+            item.
+
+      o YOUTUBE_REQUEST_BY_USER
+
+        The item was created as a result of a by user request.
+
+        Note:
+
+            for this request orig.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME] will
+            contain the name of the associated user.
+
+      o YOUTUBE_REQUEST_FEATURED
+
+        The item was created as a result of a featured request.
+
+      o YOUTUBE_REQUEST_BY_PLAYLIST
+
+        The item was created as a result of a by playlist request.
+
+        Note:
+
+            for this request orig.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME] will
+            contain the name of the playlist as specified in the server
+            configuration.
+
+      o YOUTUBE_REQUEST_POPULAR
+
+        The item was created as a result of a popular request.
+
+      o YOUTUBE_REQUEST_BY_CATEGORY_AND_TAG
+
+        The item was created as a result of a by category and tag request.
+
+        Note:
+
+            for this request orig.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME] will
+            contain the name of the category as defined by YouTube.
+
+The following aux keys can be used to retrieve additional information about the
+item, the data is stored in the form of strings.
+
+  * orig.aux[YOUTUBE_AUXDATA_TAGS]
+
+    RO
+
+    Contains a space separated list of tags for the particular item.
+
+  * orig.aux[YOUTUBE_AUXDATA_AVG_RATING]
+
+    RO
+
+    Contains the average rating value.
+
+  * orig.aux[YOUTUBE_AUXDATA_AUTHOR]
+
+    RO
+
+    Contains the author name.
+
+  * orig.aux[YOUTUBE_AUXDATA_COMMENT_COUNT]
+
+    RO
+
+    Contains the number of comments for the particular video on the YouTube
+    website.
+
+  * orig.aux[YOUTUBE_AUXDATA_VIEW_COUNT]
+
+    RO
+
+    Contains the view count of the video on the YouTube website.
+
+  * orig.aux[YOUTUBE_AUXDATA_RATING_COUNT]
+
+    RO
+
+    Contains the rating count of the video on the YouTube website.
+
+  * orig.aux[YOUTUBE_AUXDATA_REQUEST]
+
+    RO
+
+    Contains the name of the request that produced this item (i.e. Favorites,
+    Popular, etc.), this is the human readable representation of the
+    orig.yt_request property.
+
+  * orig.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME]
+
+    RO
+
+    Contains the additional name that accompanies the request, it is only set
+    for the following requests:
+
+      o YOUTUBE_REQUEST_FAVORITE
+
+        Subname will contain the name of the associated user.
+
+      o YOUTUBE_REQUEST_BY_CATEGORY_AND_TAG
+
+        Subname will contain the name of the category as defined by YouTube.
+
+      o YOUTUBE_REQUEST_BY_USER
+
+        Subname will contain the name of the user.
+
+      o YOUTUBE_REQUEST_BY_PLAYLIST
+
+        Subname will contain the name of the playlist as defined in the server
+        configuration.
+
+      o YOUTUBE_REQUEST_BY_TAG
+
+        Subname will contain the tags as specified in the server configuration.
+
+  * orig.aux[YOUTUBE_AUXDATA_CATEGORY]
+
+    RO
+
+    Contains the name of the category of the item.
 
 3.2. Constants
 
@@ -437,7 +637,7 @@ and/or the playlist script:
         for example, a value of '/Audio/All Music' will add the object to the
         Audio, All Music container in the server hierarchy. Make sure to
         properly escape the slash characters in container names. You will find
-        more information on container chain escaping in ???.
+        more information on container chain escaping later in this chapter.
 
       o lastContainerClass
 
@@ -546,6 +746,7 @@ script. They can be used by the import and by the playlist script.
             return 'pls';
         return '';
     }
+
 
 5. Walkthrough
 
@@ -739,8 +940,9 @@ and add the object.
 
 Not much to say here... I think libextractor is capable of retrieving some
 information from video files, however I seldom encountered any video files
-populated with metadata. So for now we just put everything into the 'All Video'
-container.
+populated with metadata. You could also try ffmpeg to get more information,
+however by default we keep it very simple - we just put everything into the
+'All Video' container.
 
 function addVideo(obj)
 {
@@ -748,34 +950,110 @@ function addVideo(obj)
     addCdsObject(obj, createContainerChain(chain));
 }
 
-5.1.4. Putting it all together
+5.1.4. YouTube Content Handler
+
+This helper function processes items that are imported from the YouTube
+service; these items have extended properties that were described in detail
+earlier in this document. Let's have a look at how they are used:
+
+function addYouTube(obj)
+{
+   var chain;
+
+First, we want to sort the content by average rating. Remember - all properties
+in the obj.aux array are strings, so we will do an extra conversion because we
+want to round the rating.
+
+   var temp = parseInt(obj.aux[YOUTUBE_AUXDATA_AVG_RATING], 10);
+
+Make sure to check that we got a number.
+
+   if (temp != Number.NaN)
+   {
+       temp = Math.round(temp);
+
+Here is the place if you want to have a different range of ratings in your tree
+structure:
+
+       if (temp > 3)
+       {
+           var chain = new Array('Online Services', 'YouTube',
+                                  'Rating', temp.toString());
+           addCdsObject(obj, createContainerChain(chain));
+       }
+   }
+
+Next, we process the so called request, i.e. - description of the request to
+the YouTube service created the item. Some requests may contain an additional
+level of refinement which can be retrieved by querying the request subname key
+of the aux array, we will make use of that.
+
+    temp = obj.aux[YOUTUBE_AUXDATA_REQUEST];
+    if (temp)
+    {
+        var subName = (obj.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME]);
+
+Make sure to check that the subname is not empty since it is only available for
+a number of specific requests.
+
+        if (subName)
+            chain = new Array('Online Services', 'YouTube', temp,
+                              subName);
+        else
+            chain = new Array('Online Services', 'YouTube', temp);
+
+        addCdsObject(obj, createContainerChain(chain));
+    }
+}
+
+5.1.5. Putting it all together
 
 This is the main part of the script, it looks at the mimetype of the original
 object and feeds the object to the appropriate content handler.
 
-var arr = orig.mimetype.split('/');
-var mime = arr[0];
+if (getPlaylistType(orig.mimetype) == '')
+{
+    var arr = orig.mimetype.split('/');
+    var mime = arr[0];
 
-var obj = orig;
+    var obj = orig;
 
 All virtual objects are references to objects in the PC-Directory, so make sure
 to correctly set the reference ID!
 
-obj.refID = orig.id;
+    obj.refID = orig.id;
 
-if ((mime == 'audio') || (orig.mimetype == 'application/ogg'))
-{
-    addAudio(obj);
-}
+    if ((mime == 'audio'))
+    {
+        addAudio(obj);
+    }
 
-if (mime == 'video')
-{
-    addVideo(obj);
-}
+    if (mime == 'video')
+    {
 
-if (mime == 'image')
-{
-    addImage(obj);
+Currently we support the YouTube service which offers video items, so we will
+do an extra check to sort it properly.
+
+        if (obj.onlineservice == ONLINE_SERVICE_NONE)
+            addVideo(obj);
+        else if (obj.onlineservice == ONLINE_SERVICE_YOUTUBE)
+            addYouTube(obj);
+    }
+
+    if (mime == 'image')
+    {
+         addImage(obj);
+    }
+
+We now also have OGG Theora recognition, so we can ensure that Vorbis
+
+    if (orig.mimetype == 'application/ogg')
+    {
+    if (obj.theora == 1)
+            addVideo(obj);
+        else
+            addAudio(obj);
+    }
 }
 
 5.2. Playlist Script

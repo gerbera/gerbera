@@ -4,8 +4,8 @@
 gen_readme () {
 
 if [ -e $FILENAME.lyx ]; then
-    rm -f $FILENAME.xml && \
-    lyx -e docbook-xml $FILENAME.lyx && \
+    #rm -f $FILENAME.xml && \
+    #lyx -e docbook-xml $FILENAME.lyx && \
     xmlto xhtml-nochunks -m sections.xsl $FILENAME.xml && \
     perl ../scripts/readme_xhtml_div_extract.pl < ${FILENAME}.html > ${FILENAME}_part.html && \
     xmlto txt -m sections.xsl $FILENAME.xml && \

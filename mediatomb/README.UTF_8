@@ -1,6 +1,6 @@
 MediaTomb - UPnP MediaServer
 
-This documentation is valid for MediaTomb version 0.10.0.
+This documentation is valid for MediaTomb version 0.11.0.
 
 Copyright   2005 Gena Batsyan, Sergey Bostandzhyan
 
@@ -48,6 +48,7 @@ Table of Contents
 
     6.1. Server Settings
     6.2. Import Settings
+    6.3. Transcoding Settings
 
 7. Supported Devices
 
@@ -158,6 +159,12 @@ In order to compile MediaTomb you will have to install the following packages.:
   ● mysql client library (version > 4.0.x) http://mysql.org/ REQUIRED (if
     sqlite is not available)
 
+  ● expat http://expat.sourceforge.net/ OPTIONAL, RECOMMENDED
+
+    Expat is a very good and robust XML parser, so far we have been using our
+    own, but ran into problems from time to time. So from now on eXpat is the
+    preferred for parsing XML in MediaTomb.
+
   ● zlib http://www.zlib.net/ OPTIONAL, HIGHLY RECOMMENDED
 
     Zlib is a compression library that is available on most systems, we need it
@@ -182,7 +189,6 @@ In order to compile MediaTomb you will have to install the following packages.:
     and modified - it allows you to create the layout that you want.
 
   ● taglib http://developer.kde.org/~wheeler/taglib.html OPTIONAL, RECOMMENDED
-    (if id3lib is not available)
 
     This library retrieves metadata from mp3, ogg and flac files. You will need
     it if you want to have virtual objects for those files (i.e. nice content
@@ -191,12 +197,12 @@ In order to compile MediaTomb you will have to install the following packages.:
     Note:
 
         It makes no sense to use taglib and id3lib at the same time, the
-        configure script will first look for id3lib, if id3lib detection fails
-        it will search for taglib. You can also force the script to take the
-        library of your choice, overriding the default setting.
+        configure script will first look for TagLib, if TagLib detection fails
+        it will search for id3lib. You can also force the configure script to
+        take the library of your choice, overriding the default setting.
 
   ● id3lib http://id3lib.sourceforge.net/ (at least version 3.8.3) OPTIONAL,
-    RECOMMENDED
+    RECOMMENDED (if TagLib is not available)
 
     This library retrieves id3 tags from mp3 files.
 
@@ -207,6 +213,13 @@ In order to compile MediaTomb you will have to install the following packages.:
     various attributes like Date, etc. It also enables thumbnail support: if
     EXIF thumbnails are present in your images they will also be offered via
     UPnP.
+
+  ● curl http://curl.haxx.se/ OPTIONAL, REQUIRED FOR YOUTUBE AND SOPCAST
+    SUPPORT
+
+    curl is a library that allows to easily fetch content from the web, if you
+    want to compile MediaTomb with YouTube and/or SopCast support then curl is
+    required.
 
   ● libextractor http://gnunet.org/libextractor/ OPTIONAL
 
@@ -219,6 +232,11 @@ In order to compile MediaTomb you will have to install the following packages.:
     from your media prior to enabling this feature in MediaTomb. By default
     libextractor is disabled, use ./configure --enable-libextractor to activate
     it.
+
+  ● ffmpeg http://ffmpeg.mplayerhq.hu/ OPTIONAL
+
+    Currently ffmpeg is used to gather additional metadata from audio and video
+    files.
 
 In order to use the web UI you will need to have javascript enabled in your web
 browser.
@@ -427,6 +445,11 @@ X_MS_MediaReceiverRegistrar UPnP service, this was implemented for future Xbox
 360 support. If you have a renderer that requires this service, you can safely
 enable it. It will always return true to IsValidated and IsAuthorized requests.
 
+Note:
+
+    eventhough this service is implemented there is still no Xbox 360 support
+    in MediaTomb, more work needs to be done.
+
 3.2.11. Playstation 3 Support
 
 --enable-protocolinfo-extension
@@ -625,7 +648,55 @@ mode which recsans given directories in specified intervals, Inotify mode will
 immedeately propagate changes in monitored directories on the filesystem to the
 database.
 
-3.2.24. MediaTomb Debug Output
+3.2.24. YouTube Service Support
+
+--enable-youtube
+
+Default:
+
+    enabled
+
+This option enabled support of the YouTube service, it allows to gather
+information about content on the YouTube site and offers the content via UPnP,
+thus enabling you to watch your favorite YouTube videos on your UPnP player
+device. The feature only makes sense in combination with transcoding, since
+most devices do not support playback of flv files natively.
+
+3.2.25. External Transcoding
+
+--enable-external-transcoding
+
+Default:
+
+    enabled
+
+3.2.26. Ffmpeg Support
+
+--enable-ffmpeg
+
+Default:
+
+    enabled
+
+Currently the ffmpeg library is used to extract additional information from
+audio and video files. It is also capable of reading out the tag information
+from theora content. It is not yet used for transcoding, so this feature only
+gathers additional metadata.
+
+3.2.27. libexpat Support
+
+--enable-expat
+
+Default:
+
+    enabled
+
+Expat is a very good XML parser, until now we were doing the parsing ourselves
+and occaisonally ran into problems. Turning this feature on will ensure that
+expat is used instead of our internal parser, thus making the parsing more
+robust.
+
+3.2.28. MediaTomb Debug Output
 
 --enable-tombdebug
 
@@ -638,7 +709,7 @@ information which is mainly interesting to developers. Use this if you are
 trying to trace down a bug or a problem, the additional output may give you
 some clues.
 
-3.2.25. UPnP Library Debug Output
+3.2.29. UPnP Library Debug Output
 
 --enable-upnpdebug
 
@@ -649,7 +720,7 @@ Default:
 This option enables debug output of the UPnP SDK. You should not need it under
 normal circumstances.
 
-3.2.26. Log Output
+3.2.30. Log Output
 
 --disable-log
 
@@ -659,7 +730,7 @@ Default:
 
 This option allows you to suppress all log output from the server.
 
-3.2.27. Package Search Directory
+3.2.31. Package Search Directory
 
 --with-search=DIR
 
@@ -672,7 +743,7 @@ location, for example Darwinports on OSX get installed to /opt/local/. This
 option tells the configure script to additionally search for headers and
 libraries of various packages in DIR/include and DIR/lib.
 
-3.2.28. Specifying Header And Library Locations Of Various Packages
+3.2.32. Specifying Header And Library Locations Of Various Packages
 
 You can specify the exact location of particular headers and libraries. Some
 packages use extra programs that tell us the appropriate flags that are needed
@@ -690,6 +761,8 @@ are located.
 --with-magic-libs=DIR           search for filemagic headers in DIR
 --with-exif-h=DIR               search for libexif headers in DIR
 --with-exif-libs=DIR            search for libexif libraries in DIR
+--with-expat-h=DIR              search for expat headers in DIR
+--with-expat-libs=DIR           search for expat libraries in DIR
 --with-taglib-cfg=taglib-config absolute path/name of taglib-config
 --with-id3lib-h=DIR             search for id3lib headers in DIR
 --with-id3lib-libs=DIR          search for id3lib libraries in DIR
@@ -700,8 +773,11 @@ are located.
 --with-iconv-libs=DIR           search for iconv libraries in DIR
 --with-extractor-h=DIR          search for extractor headers in DIR
 --with-extractor-libs=DIR       search for extractor libraries in DIR
+--with-ffmpeg-h=DIR             search for ffmpeg headers in DIR
+--with-ffmpeg-libs=DIR          search for ffmpeg libraries in DIR
+--with-curl-cfg=curl-config     absolute path/name of curl-config script
 
-3.2.29. The devconf Script
+3.2.33. The devconf Script
 
 If you are doing some development work and some debugging, you will probably
 want to compile with the -g flag and also disable optimization. The devconf
@@ -1173,6 +1249,14 @@ Child tags:
         independent of the above setting the container will be always visible
         in the web UI!
 
+  ● <tmpdir>/tmp/</tmpdir>
+
+    Optional
+
+    Default: /tmp/
+
+    Selects the temporary directory that will be used by the server.
+
   ● <bookmark>mediatomb.html</bookmark>
 
     Optional
@@ -1352,87 +1436,146 @@ Child tags:
                 default value of 25, then one of the <option> tags must also
                 list this value.
 
-  ● <storage driver="...">
+  ● <storage>
 
     Required
 
-    Specifies the storage driver, currently sqlite3 and mysql are supported.
-    Each storage driver has it's own configuration parameters.
+    Defines the storage section - database selection is done here. Currently
+    sqlite3 and mysql are supported. Each storage driver has it's own
+    configuration parameters.
 
-    Attributes:
+      ○ <sqlite enabled="yes>
 
-      ○ driver=...
-
-        Required
-
-        Default: sqlite3
+        Required if MySQL is not defined
 
         Allowed values are “sqlite3” or “mysql”, the available options depend
         on the selected driver.
 
-          □ driver="sqlite3"
+          □ enabled="yes"
 
-            There is only one child tag for sqlite:
+            Optional
 
-              ● <database-file>mediatomb.db</database-file>
+            Default: yes
+
+        Below are the sqlite driver options:
+
+          □ <database-file>mediatomb.db</database-file>
+
+            Optional
+
+            Default: mediatomb.db
+
+            The database location is relative to the server's home, if the
+            sqlite database does not exist it will be created automatically.
+
+          □ <synchronous>off</synchronous>
+
+            Optional
+
+            Default: off
+
+            Possible values are “off”, “normal” and ”full”.
+
+            This option sets the SQLite pragma “synchronous”. This setting will
+            affect the performance of the database write operations. For more
+            information about this option see the SQLite documentation: http://
+            www.sqlite.org/pragma.html#pragma_synchronous
+
+          □ <on-error>restore</on-error>
+
+            Optional
+
+            Default: restore
+
+            Possible values are “restore” and “fail”.
+
+            This option tells MediaTomb what to do if an SQLite error occurs
+            (no database or a corrupt database). If it is set to “restore” it
+            will try to restore the database from a backup file (if one exists)
+            or try to recreate a new database from scratch.
+
+            If the option is set to “fail”, MediaTomb will abort on an SQLite
+            error.
+
+          □ <backup enabled="no" interval="6000"/>
+
+            Optional
+
+            Backup parameters:
+
+              ● enabled=...
 
                 Optional
 
-                Default: mediatomb.db
+                Default: no
 
-                The database location is relative to the server's home, if the
-                sqlite database does not exist it will be created
-                automatically.
+                Enables or disables database backup.
 
-          □ driver="mysql"
-
-            Below are the child tags for MySQL:
-
-              ● <host>localhost</host>
+              ● interval=...
 
                 Optional
 
-                Default: "localhost"
+                Default: 600
 
-                This specifies the host where your MySQL database is running.
+                Defines the backup interval in seconds.
 
-                  ○ <port>0</port>
+      ○ <mysql enabled="no"/>
 
-                    Optional
+        Defines the MySQL storage driver section.
 
-                    Default: 0
+          □ enabled=...
 
-                    This specifies the port where your MySQL database is
-                    running.
+            Optional
 
-                  ○ <username>root</username>
+            Default: yes
 
-                    Optional
+            Enables or disables the MySQL driver.
 
-                    Default: "mediatomb"
+        Below are the child tags for MySQL:
 
-                    This option sets the user name that will be used to connect
-                    to the database.
+          □ <host>localhost</host>
 
-                  ○ <password></password>
+            Optional
 
-                    Optional
+            Default: "localhost"
 
-                    Default: no password
+            This specifies the host where your MySQL database is running.
 
-                    Defines the password for the MySQL user. If the tag doesn't
-                    exist MediaTomb will use no password, if the tag exists,
-                    but is empty MediaTomb will use an empty password. MySQL
-                    has a distinction between no password and an empty
-                    password.
+          □ <port>0</port>
 
-                  ○ <database>mediatomb</database>
+            Optional
 
-                    Optional
+            Default: 0
 
-                    Default: "mediatomb"
+            This specifies the port where your MySQL database is running.
 
-                    Name of the database that will be used by MediaTomb.
+          □ <username>root</username>
+
+            Optional
+
+            Default: "mediatomb"
+
+            This option sets the user name that will be used to connect to the
+            database.
+
+          □ <password></password>
+
+            Optional
+
+            Default: no password
+
+            Defines the password for the MySQL user. If the tag doesn't exist
+            MediaTomb will use no password, if the tag exists, but is empty
+            MediaTomb will use an empty password. MySQL has a distinction
+            between no password and an empty password.
+
+          □ <database>mediatomb</database>
+
+            Optional
+
+            Default: "mediatomb"
+
+            Name of the database that will be used by MediaTomb.
 
 6.2. Import Settings
 
@@ -1480,51 +1623,93 @@ Child tags:
     Same as above, but defines the charset of the metadata (i.e. id3 tags, Exif
     information, etc.)
 
-  ● <virtual-layout type="builtin">
+  ● <scripting script-charset="UTF-8">
 
     Optional
 
-    Defines options for the virtual container layout; the so called “virtual
-    container layout” is the way how the server organizes the media according
-    to the extracted metadata. For example, it allows sorting audio files by
-    Album, Artist, Year and so on.
+    Defines the scripting section.
 
-      ○ type=...
+      ○ script-charset=...
 
         Optional
 
-        Default: builtin
+        Default: UTF-8
 
-        Specifies what will be used to create the virtual layout, possible
-        values are:
+    Below are the available scripting options:
 
-          □ builtin: a default layout will be created by the server
+      ○ <virtual-layout type="builtin">
 
-          □ js: a user customizable javascript will be used (MediaTomb must be
-            compiled with js support)
+        Optional
 
-          □ disabled: only PC-Directory structure will be created, i.e. no
-            virtual layout
+        Defines options for the virtual container layout; the so called
+        “virtual container layout” is the way how the server organizes the
+        media according to the extracted metadata. For example, it allows
+        sorting audio files by Album, Artist, Year and so on.
 
-      ○ <script charset="UTF-8">/path/to/my/import/script.js</script>
-
-        Required if virtual layout type is “js”
-
-        Default: ${prefix}/share/mediatomb/js/import.js, where ${prefix} is
-        your installation prefix directory.
-
-        Points to the script invoked upon media import. For more details read
-        doc/scripting-intro.txt
-
-        Attributes:
-
-          □ charset=...
+          □ type=...
 
             Optional
 
-            Default: UTF-8
+            Default: builtin
 
-            Specifies the import script encoding.
+            Specifies what will be used to create the virtual layout, possible
+            values are:
+
+              ● builtin: a default layout will be created by the server
+
+              ● js: a user customizable javascript will be used (MediaTomb must
+                be compiled with js support)
+
+              ● disabled: only PC-Directory structure will be created, i.e. no
+                virtual layout
+
+        The virtual layout can be adjusted using an import script which is
+        defined as follows:
+
+          □ <import-script>/path/to/my/import-script.js</script>
+
+            Required if virtual layout type is “js”
+
+            Default: ${prefix}/share/mediatomb/js/import.js, where ${prefix} is
+            your installation prefix directory.
+
+            Points to the script invoked upon media import. For more details
+            read doc/scripting.txt
+
+      ○ <common-script>/path/to/my/common-script.js</common-script>
+
+        Optional
+
+        Default: ${prefix}/share/mediatomb/js/common.js, where ${prefix} is
+        your installation prefix directory.
+
+        Points to the so called common script - think of it as a custom library
+        of js helper functions, functions added there can be used in your
+        import and in your playlist scripts. For more details read doc/
+        scripting.txt
+
+      ○ <playlist-script create-link="yes">/path/to/my/playlist-script.js</playlist-script>
+
+        Optional
+
+        Default: ${prefix}/share/mediatomb/js/playlists.js, where ${prefix} is
+        your installation prefix directory.
+
+        Points to the script that is parsing various playlists, by default
+        parsing of pls and m3u playlists is implemented, however the script can
+        be adapted to parse almost any kind of text based playlist. For more
+        details read doc/scripting.txt
+
+          □ create-link=...
+
+            Optional
+
+            Default: yes
+
+            Links the playlist to the virtual container which contains the
+            expanded playlist items. This means, that if the actual playlist
+            file is removed from the database, the virtual container
+            corresponding to the playlist will also be removed.
 
   ● <magic-file>/path/to/my/magic-file</magic-file>
 
@@ -1535,7 +1720,7 @@ Child tags:
     Specifies an alternative file for filemagic, containing mime type
     information.
 
-  ● <autoscan>
+  ● <autoscan use-inotify="auto">
 
     Optional
 
@@ -1547,6 +1732,18 @@ Child tags:
     UI. Even if the directory gets removed on disk, the server will try to
     monitor the specified location and will re add the removed directory if it
     becomes available/gets created again.
+
+      ○ use-inotify=...
+
+        Optional
+
+        Default: auto
+
+        Specifies if the inotify autoscan feature should be enabled. The
+        default value is "auto", which means that availability of inotify
+        support on the system will be detected automatically, it will then be
+        used if available. Setting the option to 'no' will disable inotify even
+        if it is available. Allowed values: "yes", "no", "auto"
 
     Child tags:
 
@@ -1572,7 +1769,7 @@ Child tags:
 
             Required
 
-            Scan mode, currently “inotify” and "timed" are supported. Timed
+            Scan mode, currently "inotify" and "timed" are supported. Timed
             mode rescans the given directory in specified intervals, inotify
             mode uses the kernel inotify mechanism to watch for filesystem
             events.
@@ -1622,7 +1819,7 @@ Child tags:
     extension. It is also helpful if you want to override auto detected mime
     types or simply skip filemagic processing for known file types.
 
-      ○ <extension-mimetype ignore-unknown="no">
+      ○ <extension-mimetype ignore-unknown="no" case-sensitive="no">
 
         Optional
 
@@ -1638,6 +1835,15 @@ Child tags:
 
             If ignore-unknown is set to "yes", then only the extensions that
             are listed in this section are imported.
+
+          □ case-sensitive=...
+
+            Optional
+
+            Default: no
+
+            Specifies if extensions listed in this section are case sensitive,
+            allowed values are "yes" or "no".
 
         Child tags:
 
@@ -1803,6 +2009,50 @@ Child tags:
             </auxdata>
         </libexif>
 
+      ○ <id3>
+
+        Optional
+
+        These options apply to id3lib or taglib libraries.
+
+        Child tags:
+
+          □ <auxdata>
+
+            Optional
+
+            Currently only adding keywords to auxdata is supported. The
+            keywords are those defined in the id3 specification, we do not
+            perform any extra checking, so you could try to use any string as a
+            keyword - if it does not exist in the tag nothing bad will happen.
+
+            Here is a list of possible keywords:
+
+            TALB, TBPM, TCOM, TCON, TCOP, TDAT, TDLY, TENC, TEXT, TFLT, TIME,
+            TIT1, TIT2, TIT3, TKEY, TLAN, TLEN, TMED, TOAL, TOFN, TOLY, TOPE,
+            TORY, TOWN, TPE1, TPE2, TPE3, TPE4, TPOS, TPUB, TRCK, TRDA, TRSN,
+            TRSO, TSIZ, TSRC, TSSE, TYER, TXXX
+
+            Child tags:
+
+              ● <add-data tag="TCOM"/>
+                <add-data tag="TENC"/>
+                ...
+
+                Optional
+
+                If the library was able to extract the data according to the
+                given keyword, it will be added to auxdata. You can then use
+                that data in your import scripts.
+
+        A sample configuration for the example described above would be:
+
+        <id3>
+            <auxdata>
+                <add-data tag="TENC"/>
+            </auxdata>
+        </id3>
+
       ○ <libextractor>
 
         Optional
@@ -1830,6 +2080,667 @@ Child tags:
                 given keyword, it will be added to auxdata. You can then use
                 that data in your import scripts.
 
+6.2.1. Online Content Settings
+
+This section resides under import and defines options for various supported
+online services.
+
+<online-content fetch-buffer-size="262144" fetch-buffer-fill-size="0">
+
+Optional
+
+This tag defines the online content section.
+
+Attributes:
+
+  ● fetch-buffer-size=...
+
+    Optional
+
+    Default: 262144
+
+    Often, online content can be directly accessed by the player - we will just
+    give it the URL. However, sometimes it may be necessary to proxy the
+    content through MediaTomb. This setting defines the buffer size in bytes,
+    that will be used when fetching content from the web. The value must not be
+    less than allowed by the curl library (usually 16384 bytes).
+
+  ● fetch-buffer-fill-size=...
+
+    Optional
+
+    Default: 0 (disabled)
+
+    This setting allows to prebuffer a certain amount of data, given in bytes,
+    before sending it to the player, this should ensure a constant data flow in
+    case of slow connections. Usually this setting is not needed, because most
+    players will anyway have some kind of buffering, however if the connection
+    is particularly slow you may want to try enable this setting.
+
+Below are the settings for supported services.
+
+6.2.2. YouTube Service
+
+MediaTomb allows you to watch YouTube videos using your UPnP device, you can
+specify what content you are interested in, we will import the meta data and
+present it in the database, so you can browse the content on your player just
+like you do it with your local data.
+
+Note:
+
+    we do not download/mirror the actual videos, we only get description of the
+    content and present it in the database. The actual video is only streamed
+    when you press play on your device. So, when we use the term “retrieve
+    videos” we actually mean retrieving the video name, description and
+    associated meta data, not the actual flv file.
+
+Note:
+
+    so far we have not yet seen any devices that will natively support the .flv
+    format, you will need to setup appropriate transcoding profiles to make use
+    of the YouTube feature.
+
+  ● <YouTube enabled="no" refresh="12600" update-at-start="yes" purge-after="1200000">
+
+    Optional
+
+    Options and setting for YouTube service support, the attributes are:
+
+      ○ enabled=...
+
+        Optional
+
+        Default: no
+
+        Enables or disables the service, allowed values are “yes” or “no”.
+
+      ○ refresh=...
+
+        Optional
+
+        Default: 0 (disabled)
+
+        Refresh interval in seconds, each time the interval elapses we will
+        contact the YouTube server and fetch new meta data, presenting the
+        changes in the database view. This allows you to stay up to date with
+        what is available on YouTube, you probably should not need to update
+        more than once per day, so specify a reasonably high value here.
+
+      ○ purge-after=...
+
+        Optional
+
+        Default: 0 (disabled)
+
+        Time amount in seconds when data that has not been updated is
+        considered old and can be purged from the database. This setting helps
+        to prevent an endless filling of the database with YouTube meta data,
+        the idea is the following: each video has a unique ID, during a refresh
+        cycle the video meta data will be imported into the database and a time
+        stamp will be added. Each refresh cycle we may encounter same content
+        (i.e. nothing changed on the YouTube site), we will update the time
+        stamp. However, if a particular video is no longer available on YouTube
+        it will not be refreshed, once the time stamp exceeds the purge-after
+        value we will remove the meta data for this particular video from the
+        database.
+
+      ○ update-at-start=...
+
+        Optional
+
+        Default: no
+
+        This option defines if we will contact the service right after
+        MediaTomb was started (about 10 seconds after start up) or if data
+        should be fetched when the first refresh cycle kicks in. It may be
+        useful if you frequently restart the server and do not want the content
+        to be updated each time. Allowed values are “yes” or “no”.
+
+        Below are various options that allow you to define what content you are
+        interested in.
+
+        Note:
+
+            all tags are optional and can occur more then once.
+
+          □ <favorites user="mediatomb"/>
+
+            Optional
+
+            The favorites tag tells us to retrieve favorite videos of a
+            particular user. It can appear more than once, each tag must
+            contain one user attribute:
+
+              ● user=...
+
+                Required
+
+                Name of the YouTube user whose favorite videos you are
+                interested in.
+
+          □ <featured/>
+
+            Optional
+
+            Tells us to retrieve featured videos.
+
+          □ <tag tag="russian data recovery" start-page="1" amount="10"/>
+
+            Optional
+
+            Retrieves videos given by tag. This option can appear more than
+            once with different tag, start-page and amount values.
+
+              ● tag=...
+
+                Required
+
+                String, representing the video tag as used on YouTube.
+
+              ● start-page=...
+
+                Required
+
+                YouTube presents the content in pages, you can specify the
+                first page number from where you want to start fetching the
+                data.
+
+              ● amount=...
+
+                Required
+
+                Maximum number of items that should be processed for this
+                request. Use the special keyword “all” to retrieve as much data
+                as possible.
+
+                Note:
+
+                    YouTube will only serve meta data data for a maximum of
+                    1000 items per request.
+
+          □ <user user="mediatomb" start-page="1" amount="52"/>
+
+            Optional
+
+            Retrieve videos from a particular user, if you want to import
+            content from various users simply add more tags with appropriate
+            user settings.
+
+              ● user=...
+
+                Required
+
+                Name of the user as defined by the YouTube account.
+
+              ● start-page=...
+
+                Required
+
+                YouTube presents the content in pages, you can specify the
+                first page number from where you want to start fetching the
+                data.
+
+              ● amount=...
+
+                Required
+
+                Maximum number of items that should be processed for this
+                request. Use the special keyword “all” to retrieve as much data
+                as possible.
+
+                Note:
+
+                    YouTube will only serve meta data data for a maximum of
+                    1000 items per request.
+
+          □ <playlist id="2132" start-page="1" amount="52" name="My Playlist"/>
+
+            Optional
+
+            Retrieve playlist given by the id.
+
+              ● id=...
+
+                Required
+
+                ID of the playlist.
+
+              ● start-page=...
+
+                Required
+
+                YouTube presents the content in pages, you can specify the
+                first page number from where you want to start fetching the
+                data.
+
+              ● amount=...
+
+                Required
+
+                Maximum number of items that should be processed for this
+                request. Use the special keyword “all” to retrieve as much data
+                as possible.
+
+                Note:
+
+                    YouTube will only serve meta data for a maximum of 1000
+                    items per request.
+
+              ● name=...
+
+                Required
+
+                Name of the playlist - this is how it will be presented on the
+                server. This is useful because the playlist ID is just some
+                numeric value, the playlists on YouTube do not have names.
+
+                This is a local setting, set this to any string that will
+                describe the particular playlist.
+
+          □ <popular time-range="month"/>
+
+            Optional
+
+            Retrieve popular videos.
+
+              ● time-range=...
+
+                Required
+
+                Specify the time range as defined by YouTube, possible values
+                are “all”, “day”, “week”, “month”
+
+          □ <category-and-tag category="sports" tag="Safin breaks racket" start-page="1" amount="100"/>
+
+            Optional
+
+            Use this tag to retrieve videos based on a certain category and
+            tag.
+
+              ● category=...
+
+                Required
+
+                Video category as defined by YouTube, possible values are:
+
+                  ○ films_and_animation
+
+                  ○ autos_and_vehicles
+
+                  ○ comedy
+
+                  ○ entertainment
+
+                  ○ music
+
+                  ○ news_and_politics
+
+                  ○ people_and_blogs
+
+                  ○ pets_and_animals
+
+                  ○ howto_and_diy
+
+                  ○ sports
+
+                  ○ travel_and_places
+
+                  ○ gadgets_and_games
+
+              ● tag=...
+
+                Required
+
+                Tag string of the desired video.
+
+              ● start-page=...
+
+                Required
+
+                YouTube presents the content in pages, you can specify the
+                first page number from where you want to start fetching the
+                data.
+
+              ● amount=...
+
+                Required
+
+                Maximum number of items that should be processed for this
+                request. Use the special keyword “all” to retrieve as much data
+                as possible.
+
+                Note:
+
+                    YouTube will only serve meta data for a maximum of 1000
+                    items per request.
+
+6.3. Transcoding Settings
+
+The transcoding section allows to define ways on how to transcode content.
+
+<transcoding enabled="yes" fetch-buffer-size="262144" fetch-buffer-fill-size="0">
+
+Optional
+
+This tag defines the transcoding section.
+
+Attributes:
+
+  ● enabled=...
+
+    Optional
+
+    Default: yes
+
+    This attribute defines if transcoding is enabled as a whole, possible
+    values are “yes” or “no”.
+
+  ● fetch-buffer-size=...
+
+    Optional
+
+    Default: 262144
+
+    In case you have transcoders that can not handle online content directly
+    (see the accept-url parameter below), it is possible to put the transcoder
+    between two FIFOs, in this case MediaTomb will fetch the online content.
+    This setting defines the buffer size in bytes, that will be used when
+    fetching content from the web. The value must not be less than allowed by
+    the curl library (usually 16384 bytes).
+
+  ● fetch-buffer-fill-size=...
+
+    Optional
+
+    Default: 0 (disabled)
+
+    This setting allows to prebuffer a certain amount of data before sending it
+    to the transcoder, this should ensure a constant data flow in case of slow
+    connections. Usually this setting is not needed, because most transcoders
+    will just patiently wait for data and we anyway buffer on the output end.
+    However, we observed that ffmpeg will fail to transcode flv files if it
+    encounters buffer underruns - this setting helps to avoid this situation.
+
+Child tags:
+
+  ● <mimetype-profile-mappings>
+
+    The mime type to profile mappings define which mime type is handled by
+    which profile.
+
+    Different mime types can map to the same profile in case that the
+    transcoder in use supports various input formats. The same mime type can
+    also map to several profiles, in this case multiple resources in the XML
+    will be generated, allowing the player to decide which one to take.
+
+    The mappings under mimetype-profile are defined in the following manner:
+
+      ○ <transcode mimetype="audio/x-flac" using="oggflac-pcm"/>
+
+        Optional
+
+        In this example we want to transcode our flac audio files (they have
+        the mimetype audio/x-flac) using the “oggflac-pcm” profile which is
+        defined below.
+
+          □ mimetype=...
+
+            Selects the mime type of the source media that should be
+            transcoded.
+
+          □ using=...
+
+            Selects the transcoding profile that will handle the mime type
+            above. Information on how to define transcoding profiles can be
+            found below.
+
+  ● <profiles>
+
+    This section defines the various transcoding profiles.
+
+      ○ <profile name="oggflag-pcm" enabled="yes" type="external">
+
+        Optional
+
+        Definition of a transcoding profile.
+
+          □ name=...
+
+            Required
+
+            Name of the transcoding profile, this is the name that is specified
+            in the mime type to profile mappings.
+
+          □ enabled=...
+
+            Required
+
+            Enables or disables the profile, allowed values are “yes” or “no”.
+
+          □ type=...
+
+            Required
+
+            Defines the profile type, currently only “external” is supported,
+            this will change in the future.
+
+              ● <mimetype>audio/x-wav</mimetype>
+
+                Required
+
+                Defines the mime type of the transcoding result (i.e. of the
+                transcoded stream). In the above example we transcode to PCM.
+
+              ● <accept-url>yes</accept-url>
+
+                Optional
+
+                Default: yes
+
+                Some transcoders are able to handle non local content, i.e.
+                instead giving a local file name you can pass an URL to the
+                transcoder. However, some transcoders can only deal with local
+                files, for this case set the value to “no”.
+
+              ● <first-resource>no</first-resource>
+
+                Optional
+
+                Default: no
+
+                It is possible to offer more than one resource in the browse
+                result, a good player implementation will go through all
+                resources and pick the one that it can handle best.
+                Unfortunately most players only look at the first resource and
+                ignore the rest. When you add a transcoding profile for a
+                particular media type it will show up as an additional resource
+                in the browse result, using this parameter you can make sure
+                that the transcoded resource appears first in the list.
+
+                Note:
+
+                    if more than one transcoding profile is applied on one
+                    source media type (i.e. you transcode an OGG file to MP3
+                    and to PCM), and the first-resource parameter is specified
+                    in both profiles, then the resource positions are
+                    undefined.
+
+              ● <hide-original-resource>no</hide-original-resource>
+
+                Optional
+
+                Default: no
+
+                This parameter will hide the resource of the original media
+                when sending the browse result to the player, this can be
+                useful if your device gets confused by multiple resources and
+                allows you to send only the transcoded one.
+
+              ● <accept-ogg-theora>no</accept-org-theora>
+
+                Optional
+
+                Default: no
+
+                As you may know, OGG is just a container, the content could be
+                Vorbis or Theora while the mime type is “application/ogg”. For
+                transcoding we need to identify if we are dealing with audio or
+                video content, specifying yes in this tag in the profile will
+                make sure that only OGG files containing Theora will be
+                processed.
+
+              ● <avi-fourcc-list mode="ignore">
+
+                Optional
+
+                Default: disabled
+
+                This option allows to specify a particular list of AVI fourcc
+                strings that can be either set to be ignored or processed by
+                the profile.
+
+                Note:
+
+                    this option has no effect on non AVI content.
+
+                  ○ mode=...
+
+                    Required
+
+                    Specifies how the list should be handled by the transcoding
+                    engine, possible values are:
+
+                      □ "disabled"
+
+                        The option is completely disabled, fourcc list is not
+                        being processed.
+
+                      □ "process"
+
+                        Only the fourcc strings that are listed will be
+                        processed by the transcoding profile, AVI files with
+                        other fourcc strings will be ignored. Setting this is
+                        useful if you want to transcode only some specific
+                        fourcc's and not transcode the rest.
+
+                      □ "ignore"
+
+                        The fourcc strings listed will not be transcoded, all
+                        other codecs will be transcoded. Setting this might be
+                        useful if you want to prevent a limited number of
+                        codecs from being transcoded, but want to apply
+                        transcoding on the rest (i.e. - do not transcode divx
+                        and xvid, but want to transcode mjpg and whatever else
+                        might be in the AVI container).
+
+                The list of fourcc strings is enclosed in the avi-fourcc-list
+                section:
+
+                  ○ <fourcc>XVID</fourcc>
+                    <fourcc>DX50</fourcc>
+
+                    etc...
+
+              ● <agent command="ogg123" arguments="-d wav -f %out %in/>
+
+                Required
+
+                Defines the transcoding agent and the parameters, in the
+                example above we use ogg123 to convert ogg or flac to wav.
+
+                  ○ command=...
+
+                    Required
+
+                    Defines the transcoder binary that will be executed by
+                    MediaTomb upon a transcode request, the binary must be in
+                    $PATH. It is very important that the transcoder is capable
+                    of writing the output to a FIFO, some applications, for
+                    example ffmpeg, have problems with that. The command line
+                    arguments are specified separately (see below).
+
+                  ○ arguments=...
+
+                    Required
+
+                    Specifies the command line arguments that will be given to
+                    the transcoder application upon execution. There are two
+                    special tokens:
+
+                    %in
+                    %out
+
+                    Those tokens get substituted by the input file name and the
+                    output FIFO name before execution.
+
+              ● <buffer size="1048576" chunk-size="131072" fill-size="262144"/>
+
+                Required
+
+                These settings help you to achieve a smooth playback of
+                transcoded media. The actual values need to be tuned and depend
+                on the speed of your system. The general idea is to buffer the
+                data before sending it out to the player, it is also possible
+                to delay first playback until the buffer is filled to a certain
+                amount. The prefill should give you enough space to overcome
+                some high bitrate scenes in case your system can not transcode
+                them in real time.
+
+                  ○ size=...
+
+                    Required
+
+                    Size of the buffer in bytes.
+
+                  ○ chunk-size=...
+
+                    Required
+
+                    Size of chunks in bytes, that are read by the buffer from
+                    the transcoder. Smaller chunks will produce a more constant
+                    buffer fill ratio, however too small chunks may slow things
+                    down.
+
+                  ○ fill-size=...
+
+                    Required
+
+                    Initial fill size - number of bytes that have to be in the
+                    buffer before the first read (i.e. before sending the data
+                    to the player for the first time). Set this to 0 (zero) if
+                    you want to disable prefilling.
+
+              ● <resolution>320x240</resolution>
+
+                Optional
+
+                Allows you to tell the resolution of the transcoded media to
+                your player. This may be helpful if you want to generate
+                thumbnails for your photos, or if your player has the ability
+                to pick video streams in a particular resolution. Of course the
+                setting should match the real resolution of the transcoded
+                media.
+
+              ● <thumbnail>yes</thumbnail>
+
+                Optional
+
+                Note:
+
+                    this is an experimental option, the implementation will be
+                    refined in the future releases.
+
+                This is a special option which was added for the PS3 users. If
+                the resolution option (see above) was set, then, depending on
+                the resolution an special DLNA tag will be added, marking the
+                resource as a thumbnail. This is useful if you have a
+                transcoding script that extracts an image out of the video and
+                presents it as a thumbnail.
+
+                Use the option with caution, no extra checking is being done if
+                the resulting mimetype represents an image, also, it is will
+                only work if the output of the profile is a JPG image.
+
 7. Supported Devices
 
 Attention Hardware Manufacturers:
@@ -1854,15 +2765,21 @@ fix the issues and will add the device to the list.
 
   ● AT3705-MGW
 
-7.1.2. Denon
+7.1.2. Conceptronic
+
+  ● C54WMP
+
+7.1.3. Denon
 
   ● AVR 4306
 
-7.1.3. D-Link
+7.1.4. D-Link
 
   ● DSM-320
 
   ● DSM-320RD
+
+  ● DSM-510
 
   ● DSM-520
 
@@ -1885,27 +2802,47 @@ configuration to enable srt subtitle support:
 It is still being investigated, but we were able to get subtitles working with
 a U.S. DSM-320 unit running firmware version 1.09
 
-7.1.4. HP
+Also, the DSM-510 (probably also valid for other models) will only play avi
+files if the mimetype is set to video/avi, you may want to add a mapping for
+that to the extension-mimetype section in your config.xml:
+
+<map from="avi" to="video/avi"/>
+
+7.1.5. Freecom
+
+  ● MusicPal
+
+7.1.6. Häger
+
+  ● OnAir (also known as BT Internet Radio)
+
+7.1.7. HP
 
   ● MediaSmart TV
 
-7.1.5. I-O Data
+Users reported that after a firmwre upgrade the device stopped working
+properly. It seems that it does not sue the UPnP Browse action anymore, but now
+uses the optional Search action which is not implemented in MediaTomb.
+
+7.1.8. I-O Data
 
   ● AVeL LinkPlayer2 AVLP2/DVDLA
 
-7.1.6. Linksys
+7.1.9. Linksys
 
   ● WMLS11B (Wireless-B Music System)
 
-7.1.7. NeoDigits
+  ● KiSS 1600
+
+7.1.10. NeoDigits
 
   ● HELIOS X3000
 
-7.1.8. Netgear
+7.1.11. Netgear
 
   ● EVA700
 
-7.1.9. Philips
+7.1.12. Philips
 
   ● Streamium SL-300i
 
@@ -1913,25 +2850,33 @@ a U.S. DSM-320 unit running firmware version 1.09
 
   ● Streamium MX-6000i
 
+  ● SLA-5500
+
   ● SLA-5520
 
-7.1.10. Pinnacle
+7.1.13. Pinnacle
 
   ● ShowCenter 200
 
   ● SoundBridge
 
-7.1.11. Roku
+7.1.14. Pioneer
+
+  ● BDP-HD50-K
+
+  ● BDP-94HD
+
+7.1.15. Roku
 
   ● SoundBridge M1001
 
   ● SoundBridge M2000
 
-7.1.12. Siemens
+7.1.16. Siemens
 
   ● Gigaset M740AV
 
-7.1.13. Sony
+7.1.17. Sony
 
   ● Playstation 3
 
@@ -1940,7 +2885,11 @@ section of your configuration file to enable MediaTomb PS3 compatibility:
 
 <protocolInfo extend="yes"/>
 
-7.1.14. Telegent
+7.1.18. T+A
+
+  ● T+A Music Player
+
+7.1.19. Telegent
 
   ● TG100
 
@@ -1951,11 +2900,28 @@ the <server> section of your configuration file:
 
 <upnp-string-limit>101</upnp-string-limit>
 
-7.1.15. TerraTec
+7.1.20. TerraTec
 
   ● NOXON iRadio
 
   ● NOXON 2 Audio
+
+7.1.21. ZyXEL
+
+  ● DMA-1000
+
+Some users reported problems where the DMA will show an error “Failed to
+retrieve list” and the DMA disconnecting from the server. Incresing the alive
+interval seems to solve the problem - add the following option to the <server>
+section of your configuration file:
+
+<alive>600</alive>
+
+Additionally, the DMA expects that avi files are serverd with the mime type of
+video/avi, so add the following to the <extensoin-mimetype> section in your
+configuration file:
+
+<map from="avi" to="video/avi"/>
 
 7.2. Network Attached Storage Devices
 
@@ -1965,6 +2931,9 @@ tested MediaTomb on ARM and MIPSel based devices, so it should be possible to
 install and run the server on various Linux based NAS products that are
 available on the market.
 
+So far two devices are shipped with a preinstalled version of MediaTomb,
+community firmware versions are available for the rest.
+
 7.2.1. Buffalo
 
   ● KuroBox-HG
@@ -1973,11 +2942,23 @@ available on the market.
 
 7.2.2. Excito
 
-  ● Bubba Mini Server
+  ● Bubba Mini Server (preinstalled)
 
-7.2.3. Linksys
+7.2.3. Iomega
+
+  ● StorCenter (preinstalled)
+
+7.2.4. Linksys
 
   ● NSLU2
+
+7.2.5. Maxtor
+
+  ● Shared Storage
+
+7.2.6. Western Digital
+
+  ● MyBook
 
 8. Running The Server
 
@@ -2023,7 +3004,7 @@ Gena Batyan <bgeradz at mediatomb dot cc>
 
 Sergey Bostandzhyan <jin at mediatomb dot cc>
 
-Copyright (C) 2006-2007
+Copyright (C) 2006-2008
 
 Gena Batyan <bgeradz at mediatomb dot cc>
 
@@ -2088,6 +3069,12 @@ We are using the following code in our tree:
 
   ● TagLib support patch was contributed by Benhur Stein <benhur.stein at gmail
     dot com>
+
+  ● ffmpeg metadata handler was contributed by Ingo Preiml <ipreiml at edu dot
+    uni-klu dot ac dot at>
+
+  ● ID3 keyword extraction patch was contributed by Gabriel Burca
+    <gburca-mediatomb at ebixio dot com>
 
   ● tombupnp is kept in sync with the latest pupnp (http://pupnp.sf.net/)
     patches, see documentation in the tombupnp directory
