@@ -2988,6 +2988,7 @@ AC_CONFIG_FILES([
     tombupnp/build/Makefile
     web/Makefile
     config/Makefile
+    artwork/Makefile
     mediatomb.spec
 ])
 
