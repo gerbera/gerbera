@@ -11,6 +11,7 @@ foreach (@ARGV)
     my $id_keyword = '$'.'Id'.'$';
     
     $filename =~ s/\.sql\.tmpl\.h/_create_sql\.h/;
+    my $current = '2008';
     
     my $new_header_main = 
 '    MediaTomb - http://www.mediatomb.cc/
@@ -20,7 +21,7 @@ foreach (@ARGV)
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey \'Jin\' Bostandzhyan <jin@mediatomb.cc>
     
-    Copyright (C) 2006-2008 Gena Batyan <bgeradz@mediatomb.cc>,
+    Copyright (C) 2006-'.$current.' Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey \'Jin\' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
     
@@ -42,7 +43,7 @@ foreach (@ARGV)
     my $new_header_tombupnp = 
 '    TombUPnP - a library for developing UPnP applications.
     
-    Copyright (C) 2006-2008 Sergey \'Jin\' Bostandzhyan <jin@mediatomb.cc>
+    Copyright (C) 2006-'.$current.' Sergey \'Jin\' Bostandzhyan <jin@mediatomb.cc>
     
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -64,7 +65,7 @@ foreach (@ARGV)
     
     '.$filename.' - this file is part of MediaTomb.
     
-    Copyright (C) 2006-2008 Gena Batyan <bgeradz@mediatomb.cc>,
+    Copyright (C) 2006-'.$current.' Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey \'Jin\' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
     
@@ -77,7 +78,29 @@ foreach (@ARGV)
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
     
     '.$id_keyword;
+
+    my $new_header_jan =
+'    MediaTomb - http://www.mediatomb.cc/
     
+    '.$filename.' - this file is part of MediaTomb.
+    
+    Copyright (C) 2007-'.$current.' Jan Habermann <jan.habermann@gmail.com>
+    
+    MediaTomb is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License version 2
+    as published by the Free Software Foundation.
+    
+    MediaTomb is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    
+    You should have received a copy of the GNU General Public License
+    version 2 along with MediaTomb; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
+    
+    '.$id_keyword;
+
     my $new_header_c =
 '/*MT*
     
@@ -112,6 +135,20 @@ foreach (@ARGV)
 '.$new_header_tombupnp.'
 */';
     
+
+    my $new_header_jan_c = 
+'/*MT_J*
+    
+'.$new_header_jan.'
+*/';
+
+my $new_header_jan_sgml =
+'<!--*MT_J*
+    
+'.$new_header_jan.'
+-->';
+
+
     print $full_path.": ";
     open (FILE, '<', $full_path);
     my $data = join('', <FILE>);
@@ -143,6 +180,16 @@ foreach (@ARGV)
     {
         print "/*MT_F*...";
         $data =~ s|/\*MT_F\*(.*?\*)??/|$new_header_free_c|s;
+    }
+    elsif ($data =~ m|/\*MT_J\*|)
+    {
+        print "/*MT_J*...";
+        $data =~ s|/\*MT_J\*(.*?\*)??/|$new_header_jan_c|s;
+    }
+    elsif ($data =~ /<!--\*MT_J\*/)
+    {
+        print "<!--*MT_J*...";
+        $data =~ s/<!--\*MT_J\*.*?->/$new_header_jan_sgml/s;
     }
 #    elsif ($data =~ m|/\*.*this file is part of MediaTomb\.|)
 #    {

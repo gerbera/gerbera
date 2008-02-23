@@ -7,7 +7,7 @@
     
     import.js - this file is part of MediaTomb.
     
-    Copyright (C) 2006-2007 Gena Batyan <bgeradz@mediatomb.cc>,
+    Copyright (C) 2006-2008 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
     
