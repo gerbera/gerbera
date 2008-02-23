@@ -296,7 +296,7 @@ uuid_create_from_name( uuid_upnp * uid, /* resulting UUID */
                        int namelen  /* the length of the name */
      )
 {
-    MD5_CTX c;
+    struct MD5Context c;
     unsigned char hash[16];
     uuid_upnp net_nsid;         /* context UUID in network byte order */
 

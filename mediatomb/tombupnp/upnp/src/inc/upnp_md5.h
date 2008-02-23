@@ -1,38 +1,47 @@
-/* MD5.H - header file for MD5C.C */
+/*
+ * This is the header file for the MD5 message-digest algorithm.
+ * The algorithm is due to Ron Rivest.  This code was
+ * written by Colin Plumb in 1993, no copyright is claimed.
+ * This code is in the public domain; do with it what you wish.
+ *
+ * Equivalent code is available from RSA Data Security, Inc.
+ * This code has been tested against that, and is equivalent,
+ * except that you don't need to include two pages of legalese
+ * with every copy.
+ *
+ * To compute the message digest of a chunk of bytes, declare an
+ * MD5Context structure, pass it to MD5Init, call MD5Update as
+ * needed on buffers full of bytes, and then call MD5Final, which
+ * will fill a supplied 16-byte array with the digest.
+ *
+ * Changed so as no longer to depend on Colin Plumb's `usual.h'
+ * header definitions; now uses stuff from dpkg's config.h
+ *  - Ian Jackson <ian@chiark.greenend.org.uk>.
+ * Still in the public domain.
+ */
 
+#ifndef MD5_H
+#define MD5_H
 
-/*  Copyright (C) 1991-2, RSA Data Security, Inc. Created 1991. All
-    rights reserved.
+#define md5byte unsigned char
 
-    License to copy and use this software is granted provided that it
-    is identified as the &quot;RSA Data Security, Inc. MD5 Message-Digest
-    Algorithm&quot; in all material mentioning or referencing this software
-    or this function.
+#if SIZEOF_UNSIGNED_LONG==4
+# define UWORD32 unsigned long
+#elif SIZEOF_UNSIGNED_INT==4
+# define UWORD32 unsigned int
+#else
+# error I do not know what to use for a UWORD32.
+#endif
 
-    License is also granted to make and use derivative works provided
-    that such works are identified as &quot;derived from the RSA Data
-    Security, Inc. MD5 Message-Digest Algorithm&quot; in all material
-    mentioning or referencing the derived work.
+struct MD5Context {
+       UWORD32 buf[4];
+       UWORD32 bytes[2];
+       UWORD32 in[16];
+};
 
-    RSA Data Security, Inc. makes no representations concerning either
-    the merchantability of this software or the suitability of this
-    software for any particular purpose. It is provided &quot;as is&quot;
-    without express or implied warranty of any kind.
+void MD5Init(struct MD5Context *context);
+void MD5Update(struct MD5Context *context, md5byte const *buf, unsigned len);
+void MD5Final(unsigned char digest[16], struct MD5Context *context);
+void MD5Transform(UWORD32 buf[4], UWORD32 const in[16]);
 
-    These notices must be retained in any copies of any part of this
-    documentation and/or software.
-*/
-
-
-/* MD5 context. */
-typedef struct {
-
-  UINT4 state[4];                                   /* state (ABCD) */
-  UINT4 count[2];        /* number of bits, modulo 2^64 (lsb first) */
-  unsigned char buffer[64];                         /* input buffer */
-
-} MD5_CTX;
-
-void MD5Init PROTO_LIST ((MD5_CTX *));
-void MD5Update PROTO_LIST ((MD5_CTX *, unsigned char *, unsigned int));
-void MD5Final PROTO_LIST ((unsigned char [16], MD5_CTX *));
+#endif /* !MD5_H */

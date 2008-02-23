@@ -35,7 +35,7 @@
 void
 get_ieee_node_identifier( uuid_node_t * node )
 {
-    char seed[16];
+    unsigned char seed[16];
     static int inited = 0;
     static uuid_node_t saved_node;
 
@@ -83,9 +83,9 @@ get_system_time( uuid_time_t * uuid_time )
 
 /*-----------------------------------------------------------------------------*/
 void
-get_random_info( char seed[16] )
+get_random_info( unsigned char seed[16] )
 {
-    MD5_CTX c;
+    struct MD5Context c;
     typedef struct {
         MEMORYSTATUS m;
         SYSTEM_INFO s;
@@ -145,9 +145,9 @@ get_system_time( uuid_time_t * uuid_time )
 
 /*-----------------------------------------------------------------------------*/
 void
-get_random_info( char seed[16] )
+get_random_info( unsigned char seed[16] )
 {
-    MD5_CTX c;
+    struct MD5Context c;
     typedef struct {
 //        struct sysinfo s;
         struct timeval t;
@@ -159,7 +159,7 @@ get_random_info( char seed[16] )
 
     gettimeofday( &r.t, ( struct timezone * )0 );
     gethostname( r.hostname, 256 );
-    MD5Update( &c, &r, sizeof( randomness ) );
+    MD5Update( &c, (unsigned char *)&r, sizeof( randomness ) );
     MD5Final( seed, &c );
 };
 

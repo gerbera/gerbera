@@ -803,6 +803,8 @@ fi
 AC_CHECK_SIZEOF(off_t, 4)
 AC_CHECK_SIZEOF(size_t, 4)
 AC_CHECK_SIZEOF(time_t, 4)
+AC_CHECK_SIZEOF(unsigned int)
+AC_CHECK_SIZEOF(unsigned long)
 AC_CHECK_FUNCS(strtoll nl_langinfo setlocale,[],[])
 AC_CHECK_FUNCS(backtrace backtrace_symbols,[],[])
 # Checks for typedefs, structures, and compiler characteristics.
@@ -816,6 +818,7 @@ AC_TYPE_INT64_T
 AC_TYPE_SSIZE_T
 AC_TYPE_UINT32_T
 AC_STRUCT_TM
+AC_C_BIGENDIAN
 
 dnl This needs improvement!
 AC_CHECK_DECL(LONG_MAX,
