@@ -349,9 +349,9 @@ String ConfigManager::createDefaultConfig(String userhome)
 
     Ref<Element> config(new Element(_("config")));
     config->addAttribute(_("version"), String::from(CONFIG_XML_VERSION));
-    config->addAttribute(_("xmlns"), _(XML_XMLNS));
+    config->addAttribute(_("xmlns"), _(XML_XMLNS) + CONFIG_XML_VERSION);
     config->addAttribute(_("xmlns:xsi"), _(XML_XMLNS_XSI));
-    config->addAttribute(_("xsi:schemaLocation"), _(XML_XSI_SCHEMA_LOCATION));
+    config->addAttribute(_("xsi:schemaLocation"), _(XML_XMLNS) + CONFIG_XML_VERSION + " " + XML_XMLNS + CONFIG_XML_VERSION + ".xsd");
     Ref<Element> server(new Element(_("server")));
    
     Ref<Element> ui(new Element(_("ui")));
@@ -565,10 +565,10 @@ void ConfigManager::migrate()
         log_info("Migrating server configuration\n");
         root->setAttribute(_("version"), String::from(CONFIG_XML_VERSION));
         root->setAttribute(_("version"), String::from(CONFIG_XML_VERSION));
-        root->setAttribute(_("xmlns"), _(XML_XMLNS));
+        root->addAttribute(_("xmlns"), _(XML_XMLNS) + CONFIG_XML_VERSION);
         root->setAttribute(_("xmlns:xsi"), _(XML_XMLNS_XSI));
-        root->setAttribute(_("xsi:schemaLocation"), _(XML_XSI_SCHEMA_LOCATION));
-
+        root->addAttribute(_("xsi:schemaLocation"), _(XML_XMLNS) + CONFIG_XML_VERSION + " " + XML_XMLNS + CONFIG_XML_VERSION + ".xsd");
+        
         Ref<Element> server = root->getChildByName(_("server"));
         if (server == nil)
             throw _Exception(_("Migration failed! Could not find <server> tag!"));

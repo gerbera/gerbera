@@ -318,8 +318,7 @@
 
 #define XML_HEADER                      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 #define XML_XMLNS_XSI                     "http://www.w3.org/2001/XMLSchema-instance"
-#define XML_XMLNS                         "http://mediatomb.cc/config/" CONFIG_XML_VERSION
-#define XML_XSI_SCHEMA_LOCATION           "http://mediatomb.cc/config" CONFIG_XML_VERSION " http://mediatomb.cc/config/" CONFIG_XML_VERSION ".xsd"
+#define XML_XMLNS                         "http://mediatomb.cc/config/"
 
 #ifdef HAVE_CURL
     #define DEFAULT_CURL_BUFFER_SIZE 262144
