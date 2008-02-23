@@ -1411,9 +1411,9 @@ void ConfigManager::validate(String serverhome)
     NEW_AUTOSCANLIST_OPTION(createAutoscanListFromNodeset(el, TimedScanMode));
     SET_AUTOSCANLIST_OPTION(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
 
-    bool inotify_supported = false;
 
 #ifdef HAVE_INOTIFY
+    bool inotify_supported = false;
     inotify_supported = Inotify::supported();
 #endif
 
