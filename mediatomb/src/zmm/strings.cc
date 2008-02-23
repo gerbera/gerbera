@@ -379,8 +379,8 @@ off_t String::toOFF_T()
     if(! base)
         return 0;
 
-    char *endptr;
 #if SIZEOF_OFF_T > 4
+    char *endptr;
     off_t res = strtoll(base->data, &endptr, 10);
     if(*endptr)
         return 0;
