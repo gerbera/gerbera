@@ -582,7 +582,7 @@ AC_CHECK_HEADERS([sys/ioctl.h sys/socket.h sys/time.h sys/types.h sys/wait.h],
 
 AC_CHECK_HEADERS([langinfo.h locale.h],[],[AC_MSG_WARN(Header that is required to retrieve system locale not found, will use default value)])
 
-AC_CHECK_HEADERS([sched.h],[],[])
+AC_CHECK_HEADERS([sched.h ctype.h],[],[])
 AC_CHECK_FUNCS([sched_getparam sched_setparam],[],[])
    
 AC_CHECK_FUNCS([mkdir], [],
@@ -888,7 +888,7 @@ AC_CHECK_FUNCS([strrchr strstr strtol strtoul uname], [],
 AC_CHECK_FUNCS([sigaction sigprocmask],[],
                [AC_MSG_ERROR(required library function not found)]) 
  
-AC_CHECK_FUNCS([ioctl],[],
+AC_CHECK_FUNCS([ioctl tolower toupper],[],
                [AC_MSG_ERROR(required library function not found)]) 
                
 AC_CACHE_SAVE

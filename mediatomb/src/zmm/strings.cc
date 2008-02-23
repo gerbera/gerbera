@@ -33,6 +33,8 @@
     #include "autoconfig.h"
 #endif
 
+#include <ctype.h>
+
 #include "memory.h"
 #include "strings.h"
 #include "../../upnp/src/inc/strtoofft.h"
@@ -320,6 +322,32 @@ int String::equals(String other, bool ignoreCase)
         return (operator==(other));
 
     return 0;
+}
+
+String String::toLower()
+{
+    if (!base)
+        return nil;
+
+    for (int i = 0; i < base->len; i++)
+    {
+        base->data[i] = tolower(base->data[i]);
+    }
+
+    return String(base);
+}
+
+String String::toUpper()
+{
+    if (!base)
+        return nil;
+
+    for (int i = 0; i < base->len; i++)
+    {
+        base->data[i] = toupper(base->data[i]);
+    }
+
+    return String(base);
 }
 
 long String::toLong()

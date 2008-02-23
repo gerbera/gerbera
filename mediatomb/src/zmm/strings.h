@@ -152,7 +152,8 @@ public:
     }
 
     int equals(String other, bool ignoreCase = false);
-
+    String toLower();
+    String toUpper();
 
     String substring(int from);
     String substring(int from, int count);

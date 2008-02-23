@@ -528,7 +528,7 @@ target "http://developer.kde.org/~wheeler/taglib.html"
 
  
 \emph on
-OPTIONAL, RECOMMENDED (if id3lib is not available)
+OPTIONAL, RECOMMENDED
 \end_layout
 
 \begin_layout Standard
@@ -544,10 +544,10 @@ This library retrieves metadata from mp3, ogg and flac files.
 Note: 
 \series default
 It makes no sense to use taglib and id3lib at the same time, the configure
- script will first look for id3lib, if id3lib detection fails it will search
- for taglib.
- You can also force the script to take the library of your choice, overriding
- the default setting.
+ script will first look for TagLib, if TagLib detection fails it will search
+ for id3lib.
+ You can also force the configure script to take the library of your choice,
+ overriding the default setting.
 \end_layout
 
 \begin_layout Standard
@@ -577,7 +577,7 @@ target "http://id3lib.sourceforge.net/"
  
 \shape default
 \emph on
-OPTIONAL, RECOMMENDED
+OPTIONAL, RECOMMENDED (if TagLib is not available)
 \end_layout
 
 \begin_layout Standard
@@ -5473,7 +5473,7 @@ status open
 \end_layout
 
 \begin_layout Code
-<extension-mimetype ignore-unknown="no"> 
+<extension-mimetype ignore-unknown="no" case-sensitive="no"> 
 \end_layout
 
 \begin_layout Standard
@@ -5528,6 +5528,41 @@ no
 If ignore-unknown is set to "yes", then only the extensions that are listed
  in this section are imported.
  
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+case-sensitive=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: no
+\end_layout
+
+\begin_layout Standard
+Specifies if extensions listed in this section are case sensitive, allowed
+ values are "yes" or "no".
 \end_layout
 
 \begin_layout Standard

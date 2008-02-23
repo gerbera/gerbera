@@ -216,6 +216,7 @@
 #define DEFAULT_ALIVE_INTERVAL          180 // seconds
 #define DEFAULT_BOOKMARK_FILE           "mediatomb.html"
 #define DEFAULT_IGNORE_UNKNOWN_EXTENSIONS NO
+#define DEFAULT_CASE_SENSITIVE_EXTENSION_MAPPINGS NO
 #define DEFAULT_IMPORT_SCRIPT           "import.js"
 #define DEFAULT_PLAYLISTS_SCRIPT        "playlists.js"
 #define DEFAULT_PLAYLIST_CREATE_LINK    YES

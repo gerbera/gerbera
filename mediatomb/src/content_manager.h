@@ -395,7 +395,9 @@ protected:
     
     zmm::Ref<RExp> reMimetype;
 
-    int ignore_unknown_extensions;
+    bool ignore_unknown_extensions;
+    bool extension_map_case_sensitive;
+
     zmm::Ref<Dictionary> extension_mimetype_map;
     zmm::Ref<Dictionary> mimetype_upnpclass_map;
     zmm::Ref<AutoscanList> autoscan_timed;

@@ -1059,12 +1059,34 @@ void ConfigManager::validate(String serverhome)
     temp = getOption(
             _("/import/mappings/extension-mimetype/attribute::ignore-unknown"),
             _(DEFAULT_IGNORE_UNKNOWN_EXTENSIONS));
-    NEW_OPTION(temp);
-    SET_OPTION(CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS);
+
+    if (!validateYesNo(temp))
+        throw _Exception(_("Error in config file: incorrect parameter for "
+                       "<extension-mimetype ignore-unknown=\"\" /> attribute"));
+ 
+    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    SET_BOOL_OPTION(CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS);
+
+    temp = getOption(
+            _("/import/mappings/extension-mimetype/attribute::case-sensitive"),
+            _(DEFAULT_CASE_SENSITIVE_EXTENSION_MAPPINGS));
+
+    if (!validateYesNo(temp))
+        throw _Exception(_("Error in config file: incorrect parameter for "
+                       "<extension-mimetype case-sensitive=\"\" /> attribute"));
+
+    bool csens = false;
+
+    if (temp == "yes")
+        csens = true;
+
+
+    NEW_BOOL_OPTION(csens);
+    SET_BOOL_OPTION(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_CASE_SENSITIVE);
 
     tmpEl = getElement( _("/import/mappings/extension-mimetype"));
     NEW_DICT_OPTION(createDictionaryFromNodeset(tmpEl, _("map"), 
-                                       _("from"), _("to")));
+                                       _("from"), _("to"), !csens));
     SET_DICT_OPTION(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
 
     tmpEl = getElement(_("/import/mappings/mimetype-contenttype"));
@@ -1882,7 +1904,7 @@ String ConfigManager::checkOptionString(String xpath)
     return temp;
 }
 
-Ref<Dictionary> ConfigManager::createDictionaryFromNodeset(Ref<Element> element, String nodeName, String keyAttr, String valAttr)
+Ref<Dictionary> ConfigManager::createDictionaryFromNodeset(Ref<Element> element, String nodeName, String keyAttr, String valAttr, bool tolower)
 {
     Ref<Dictionary> dict(new Dictionary());
     String key;
@@ -1899,7 +1921,13 @@ Ref<Dictionary> ConfigManager::createDictionaryFromNodeset(Ref<Element> element,
                 value = child->getAttribute(valAttr);
 
                 if (string_ok(key) && string_ok(value))
+                {
+                    if (tolower)
+                    {
+                        key = key.toLower();
+                    }
                     dict->put(key, value);
+                }
             }
         }
     }

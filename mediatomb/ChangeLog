@@ -64,7 +64,8 @@ v0.11.0 External transcoding support
 		* added runtime inotify detection
 		* added a workaround for the Noxon V1 which for some reasons sends 
 		  us a double encoded ampersand XML sequences in the URL
-
+		* implemented feature request #1771561, extension to mimetype mappings
+		  can now be case insensitive
 
 v0.10.0	11.07.2007  Playlist and inotify autoscan support.
         * MySQL database version pumped to 3 (MediaTomb will automatically

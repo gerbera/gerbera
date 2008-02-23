@@ -123,6 +123,7 @@ typedef enum
     CFG_IMPORT_AUTOSCAN_INOTIFY_LIST,
 #endif
     CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS,
+    CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_CASE_SENSITIVE,
     CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST,
     CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST,
     CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST,
@@ -298,7 +299,7 @@ protected:
     /// 
     /// This function will create a dictionary with the following
     /// key:value paris: "1":"2", "3":"4"
-    zmm::Ref<Dictionary> createDictionaryFromNodeset(zmm::Ref<mxml::Element> element, zmm::String nodeName, zmm::String keyAttr, zmm::String valAttr);
+    zmm::Ref<Dictionary> createDictionaryFromNodeset(zmm::Ref<mxml::Element> element, zmm::String nodeName, zmm::String keyAttr, zmm::String valAttr, bool tolower = false);
  
     /// \brief Creates an aray of AutoscanDirectory objects from
     /// an XML nodeset.

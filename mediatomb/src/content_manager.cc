@@ -101,7 +101,8 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
 {
     int i;
     cond = Ref<Cond>(new Cond(mutex));
-    ignore_unknown_extensions = 0;
+    ignore_unknown_extensions = false;
+    extension_map_case_sensitive = false;
    
     taskID = 1;
     working = false;
@@ -120,18 +121,17 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
     extension_mimetype_map = 
         cm->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
 
-    String optIgnoreUnknown = 
-                  cm->getOption(CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS);
-    if (optIgnoreUnknown != nil && optIgnoreUnknown == "yes")
-        ignore_unknown_extensions = 1;
+    ignore_unknown_extensions = cm->getBoolOption(CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS);
 
     if (ignore_unknown_extensions && (extension_mimetype_map->size() == 0))
     {
         log_warning("Ignore unknown extensions set, but no mappings specified\n");
         log_warning("Please review your configuration!\n");
-        ignore_unknown_extensions = 0;
+        ignore_unknown_extensions = false;
     }
-   
+  
+    extension_map_case_sensitive = cm->getBoolOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_CASE_SENSITIVE);
+
     mimetype_upnpclass_map = 
        cm->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
    
@@ -1320,6 +1320,10 @@ String ContentManager::extension2mimetype(String extension)
 {
     if (extension_mimetype_map == nil)
         return nil;
+
+    if (!extension_map_case_sensitive)
+        extension = extension.toLower();
+
     return extension_mimetype_map->get(extension);
 }
 String ContentManager::mimetype2upnpclass(String mimeType)
