@@ -27,6 +27,18 @@ v0.11.0 External transcoding support
 		* fixed bug #1824216 - encoded URLs were not treated properly
 		* made sure that log output is always flushed
 		* made temporary directory configurable
+        * using expat as XML parser
+        * new XML generator - support for comments
+        * added migration for old config.xml
+        * speed up sqlite3 by setting synchronous=off by default
+        * adding automatic database backup for sqlite3
+        * adding automatic backup restore on sqlite3 database corruption
+        * fix permission problem: supplementary groups weren't set by
+          initgroups()
+        * fixed js (spidermonkey) related crashes
+        * fix mysql reconnect issue - charset was lost after reconnect
+        * added check to avoid coredump when max number of inotify watches
+          has been reached
 
 v0.10.0	11.07.2007  Playlist and inotify autoscan support.
         * MySQL database version pumped to 3 (MediaTomb will automatically
