@@ -125,6 +125,21 @@ int main(int argc, char **argv, char **envp)
 
     Ref<Array<StringBase> > addFile(new Array<StringBase>());
 
+#ifdef SOLARIS
+    String ld_preload;
+    char *preload = getenv("LD_PRELOAD");
+    if (preload != NULL)
+        ld_preload = String(preload);
+
+    if ((preload == NULL) || (ld_preload.find("0@0") != -1))
+    {
+        printf("MediaTomb: Solaris check failed!\n");
+        printf("Please set the environment to match glibc behaviour!\n");
+        printf("LD_PRELOAD=/usr/lib/0@0.so.1\n");
+        exit(EXIT_FAILURE);
+    }
+#endif
+
 #ifdef HAVE_GETOPT_LONG   
     while (1)
     {
