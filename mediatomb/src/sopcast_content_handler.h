@@ -43,6 +43,7 @@
 #define SOPCAST_AUXDATA_LANGUAGE        "lng"
 #define SOPCAST_AUXDATA_KBPS            "kbps"
 #define SOPCAST_AUXDATA_GROUP           "grp"
+#define SOPCAST_AUXDATA_GROUP_NAME      "grn" 
 
 #include "zmmf/zmmf.h"
 #include "mxml/mxml.h"

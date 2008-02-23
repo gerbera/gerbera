@@ -38,9 +38,6 @@
 #include "import_script.h"
 #include "config_manager.h"
 #include "js_functions.h"
-#ifdef YOUTUBE
-    #include "youtube_service.h"
-#endif
 
 using namespace zmm;
 

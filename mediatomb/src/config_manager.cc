@@ -1400,11 +1400,12 @@ void ConfigManager::validate(String serverhome)
 #ifdef HAVE_INOTIFY
         if (!inotify_supported)
             throw _Exception(_("You specified " 
-                               "\"yes\" in \"<autoscan use-inotify=\""
+                               "\"yes\" in \"<autoscan use-inotify=\"\">"
                                " however your system does not have " 
                                "inotify support"));
 #else
-        throw _Exception(_("You specified \"yes\" in \"<autoscan use-inotify=\""
+        throw _Exception(_("You specified"
+                           " \"yes\" in \"<autoscan use-inotify=\"\">"
                            " however this version of MediaTomb was compiled "
                            "without inotify support"));
 #endif
@@ -1441,7 +1442,7 @@ void ConfigManager::validate(String serverhome)
 
     if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: incorrect parameter "
-                    "for <transcoding enabled=\"\" /> attribute"));
+                    "for <transcoding enabled=\"\"> attribute"));
 
 
     if (temp == "yes")
@@ -2258,8 +2259,7 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
             location = child->getAttribute(_("location"));
             if (!string_ok(location))
             {
-                log_warning("Skipping autoscan directory with invalid location!\n");
-                continue;
+                throw _Exception(_("autoscan directory with invalid location!\n"));
             }
 
             try
@@ -2268,21 +2268,21 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
             }
             catch (Exception e)
             {
-                log_warning("Skipping autoscan directory \"%s\": %s\n", location.c_str(), e.getMessage().c_str());
-                continue;
+                throw _Exception(_("autoscan directory \"") + 
+                        location + "\": " +  e.getMessage());
             }
 
             if (check_path(location, false))
             {
-                log_warning("Skipping %s - not a directory!\n", location.c_str());
-                continue;
+                throw _Exception(_("autoscan ") + location + 
+                                  " - not a directory!");
             }
             
             temp = child->getAttribute(_("mode"));
             if (!string_ok(temp) || ((temp != "timed") && (temp != "inotify")))
             {
-                log_warning("Skipping autoscan directory %s: mode attribute is missing or invalid\n", location.c_str());
-                continue;
+                throw _Exception(_("autoscan directory ") + location + 
+                        ": mode attribute is missing or invalid");
             }
             else if (temp == "timed")
             {
@@ -2300,8 +2300,9 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
                 temp =  child->getAttribute(_("level"));
                 if (!string_ok(temp))
                 {
-                    log_warning("Skipping autoscan directory %s: level attribute is missing or invalid\n", location.c_str());
-                    continue;
+                    throw _Exception(_("autoscan directory ") + 
+                            location + 
+                            ": level attribute is missing or invalid");
                 }
                 else
                 {
@@ -2311,23 +2312,26 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
                         level = FullScanLevel;
                     else
                     {
-                        log_warning("Skipping autoscan directory %s: level attribute %s is invalid\n", location.c_str(), temp.c_str());
-                        continue;
+                        throw _Exception(_("autoscan directory ")
+                                         + location + ": level attribute " +
+                                         temp + "is invalid");
                     }
                 }
 
                 temp = child->getAttribute(_("interval"));
                 if (!string_ok(temp))
                 {
-                    log_warning("Skipping autoscan directory %s: interval attribute is required for timed mode\n", location.c_str());
-                    continue;
+                    throw _Exception(_("autoscan directory ") 
+                            + location +
+                           ": interval attribute is required for timed mode");
                 }
 
                 interval = temp.toUInt();
 
                 if (interval == 0)
                 {
-                    log_warning("Skipping autoscan directory %s: invalid interval attribute\n", location.c_str());
+                    throw _Exception(_("autoscan directory ") + 
+                            location + ": invalid interval attribute");
                     continue;
                 }
             }
@@ -2339,8 +2343,8 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
             temp = child->getAttribute(_("recursive"));
             if (!string_ok(temp))
             {
-                log_warning("Skipping autoscan directory %s: recursive attribute is missing or invalid\n", location.c_str());
-                continue;
+                throw _Exception(_("autoscan directory ") + location +
+                        ": recursive attribute is missing or invalid");
             }
             else
             {
@@ -2350,8 +2354,8 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
                    recursive = false;
                else
                {
-                   log_warning("Skipping autoscan directory %s: recusrive attribute %s is invalid\n", location.c_str(), temp.c_str());
-                   continue;
+                   throw _Exception(_("autoscan directory ") + location
+                          + ": recusrive attribute " + temp + " is invalid");
                }
             }
 
@@ -2367,8 +2371,8 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
                 hidden = false;
             else
             {
-                log_warning("Skipping autoscan directory %s: hidden attribute %s is invalid\n", location.c_str(), temp.c_str());
-                continue;
+                throw _Exception(_("autoscan directory ") + location +
+                            ": hidden attribute " + temp + " is invalid");
             }
 
             temp = child->getAttribute(_("interval"));
@@ -2377,16 +2381,17 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
             {
                 if (!string_ok(temp))
                 {
-                    log_warning("Skipping autoscan directory %s: interval attribute is required for timed mode\n", location.c_str());
-                    continue;
+                    throw _Exception(_("autoscan directory ") 
+                            + location +
+                           ": interval attribute is required for timed mode");
                 }
 
                 interval = temp.toUInt();
 
                 if (interval == 0)
                 {
-                    log_warning("Skipping autoscan directory %s: invalid interval attribute\n", location.c_str());
-                    continue;
+                    throw _Exception(_("autoscan directory ") + 
+                            location + ": invalid interval attribute");
                 }
             }
             
@@ -2397,8 +2402,8 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
             }
             catch (Exception e)
             {
-                log_error("Could not add %s: %s\n", location.c_str(), e.getMessage().c_str());
-                continue;
+                throw _Exception(_("Could not add ") + location + ": "
+                        + e.getMessage());
             }
         }
     }

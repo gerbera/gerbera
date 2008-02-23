@@ -78,7 +78,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
     struct tm t;
     char datebuf[DATE_BUF_LEN];
     struct timespec ts;
-
+    String current_group_name;
 
     while (current_group_node_index < group_count)
     {
@@ -92,7 +92,14 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
                 (channel_count < 1))
             {
                 current_group = nil;
+                current_group_name = nil;
                 continue;
+            }
+            else
+            {
+                current_group_name = current_group->getAttribute(_("en"));
+                if (!string_ok(current_group_name))
+                    curreng_group_name = _("Unknown");
             }
 
             current_channel_index = 0;
@@ -118,6 +125,8 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
 
             item->setAuxData(_(ONLINE_SERVICE_AUX_ID),
                     String::from(OS_SopCast));
+
+            item->setAuxData(_(SOPCAST_GROUP_NAME), current_group_name);
 
             temp = channel->getAttribute(_("id"));
             if (!string_ok(temp))
@@ -157,7 +166,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
                     renderProtocolInfo(mt));
             item->addResource(resource);
            
-            Ref<Element> tmp_el = channel->getElementChild(_("sop_address"));
+            Ref<Element> tmp_el = channel->getChildByName(_("sop_address"));
             if (tmp_el == nil)
             {
                 log_warning("Failed to retrieve SopCast channel URL\n");
@@ -172,7 +181,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
             }
             item->setURL(temp);
 
-            tmp_el = channel->getElementChild(_("name"));
+            tmp_el = channel->getChildByName(_("name"));
             if (tmp_el == nil)
             {
                 log_warning("Failed to retrieve SopCast channel name\n");
@@ -185,7 +194,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
             else
                 item->setTitle(_("Unknown"));
 
-            tmp_el = channel->getElementChild(_("region"));
+            tmp_el = channel->getChildByName(_("region"));
             if (tmp_el != nil)
             {
                 temp = tmp_el->getAttribute(_("en"));
