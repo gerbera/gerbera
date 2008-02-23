@@ -1709,10 +1709,7 @@ void ConfigManager::prepare_udn()
     }
     
     if (need_to_save)
-    {
-        root->indent();
         save();
-    }
 }
 
 void ConfigManager::prepare_path(String xpath, bool needDir, bool existenceUnneeded)
