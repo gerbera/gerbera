@@ -32,3 +32,9 @@ FILENAME=ui
 FILENAME_ASCII=ui.txt
 FILENAME_UTF_8=ui_utf8.txt
 gen_readme
+
+FILENAME=transcoding
+FILENAME_ASCII=transcoding.txt
+FILENAME_UTF_8=transcoding_utf8.txt
+gen_readme
+
