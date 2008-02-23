@@ -70,7 +70,7 @@ _DIST_FILES_JS = \
 ./js/items.js \
 ./js/icons.js \
 ./js/nanotree.js \
-./js/pngbehavior.htc
+./js/iepngfix.htc
 
 _DIST_FILES_WEB = \
 ./disabled.html \

@@ -35,10 +35,10 @@ body
     padding:0;
 }
 
-/* IE PNG fix from http://webfx.eae.net/dhtml/pngbehavior/pngbehavior.html */
+/* IE PNG fix from http://www.twinhelix.com/css/iepngfix/ */
 img
 {
-   behavior: url("js/pngbehavior.htc");
+   behavior: url("js/iepngfix.htc")
 }
 
 input

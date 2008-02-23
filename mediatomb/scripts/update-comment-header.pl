@@ -8,6 +8,7 @@ foreach (@ARGV)
 #my $tmpfile = $_."tmp_update-comment-header";
     my @full_fn = split('/', $full_path);
     my $filename = pop(@full_fn);
+    my $id_keyword = '$'.'Id'.'$';
     
     $filename =~ s/\.sql\.tmpl\.h/_create_sql\.h/;
     
@@ -19,7 +20,7 @@ foreach (@ARGV)
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey \'Jin\' Bostandzhyan <jin@mediatomb.cc>
     
-    Copyright (C) 2006-2007 Gena Batyan <bgeradz@mediatomb.cc>,
+    Copyright (C) 2006-2008 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey \'Jin\' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
     
@@ -36,12 +37,12 @@ foreach (@ARGV)
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
     
-    $Id$';
+    '.$id_keyword;
     
     my $new_header_tombupnp = 
 '    TombUPnP - a library for developing UPnP applications.
     
-    Copyright (C) 2006-2007 Sergey \'Jin\' Bostandzhyan <jin@mediatomb.cc>
+    Copyright (C) 2006-2008 Sergey \'Jin\' Bostandzhyan <jin@mediatomb.cc>
     
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -54,14 +55,16 @@ foreach (@ARGV)
     
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.';
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
+    
+    '.$id_keyword;
     
     my $new_header_free = 
 '    MediaTomb - http://www.mediatomb.cc/
     
     '.$filename.' - this file is part of MediaTomb.
     
-    Copyright (C) 2006-2007 Gena Batyan <bgeradz@mediatomb.cc>,
+    Copyright (C) 2006-2008 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey \'Jin\' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
     
@@ -73,7 +76,7 @@ foreach (@ARGV)
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
     
-    $Id$';
+    '.$id_keyword;
     
     my $new_header_c =
 '/*MT*

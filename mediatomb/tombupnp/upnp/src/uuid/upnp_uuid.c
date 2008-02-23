@@ -310,7 +310,7 @@ uuid_create_from_name( uuid_upnp * uid, /* resulting UUID */
     net_nsid.time_hi_and_version = htons( net_nsid.time_hi_and_version );
 
     MD5Init( &c );
-    MD5Update( &c, &net_nsid, sizeof( uuid_upnp ) );
+    MD5Update( &c, (unsigned char *)&net_nsid, sizeof( uuid_upnp ) );
     MD5Update( &c, name, namelen );
     MD5Final( hash, &c );
 
