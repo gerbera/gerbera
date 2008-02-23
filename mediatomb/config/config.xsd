@@ -30,7 +30,7 @@
     
     $Id$
 -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://mediatomb.cc/0.11.0/config" xmlns="http://mediatomb.cc/0.11.0/config">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://mediatomb.cc/config/1" xmlns="http://mediatomb.cc/config/1">
 
     <xs:simpleType name="boolean">
         <xs:restriction base="xs:string">
@@ -45,8 +45,8 @@
                 <xs:element ref="server"/>
                 <xs:element ref="import" minOccurs="0"/>
                 <xs:element ref="transcoding" minOccurs="0"/>
-                <xs:element ref="online-content" minOccurs="0"/>
             </xs:all>
+            <xs:attribute name="version" type="xs:positiveInteger" fixed="1"/>
         </xs:complexType>
     </xs:element>
 
@@ -227,7 +227,7 @@
                 <xs:element ref="on-error" minOccurs="0"/>
                 <xs:element ref="backup" minOccurs="0"/>
             </xs:all>
-            <xs:attribute name="enabled" type="boolean" use="required"/>
+            <xs:attribute name="enabled" type="boolean" default="yes"/>
         </xs:complexType>
     </xs:element>
 
@@ -267,7 +267,7 @@
                 <xs:element ref="password" minOccurs="0"/>
                 <xs:element ref="database" minOccurs="0"/>
             </xs:all>
-            <xs:attribute name="enabled" type="boolean" use="required"/>
+            <xs:attribute name="enabled" type="boolean" default="yes"/>
         </xs:complexType>
     </xs:element>
 
@@ -289,6 +289,7 @@
                 <xs:element ref="autoscan" minOccurs="0"/>
                 <xs:element ref="library-options" minOccurs="0"/>
                 <xs:element ref="magic-file" minOccurs="0"/>
+                <xs:element ref="online-content" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="hidden-files" type="boolean" default="no"/>
         </xs:complexType>
@@ -396,6 +397,7 @@
                 <xs:element ref="map" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
             <xs:attribute name="ignore-unknown" type="boolean" default="no"/>
+            <xs:attribute name="case-sensitive" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
 
@@ -435,6 +437,7 @@
             <xs:all>
                 <xs:element ref="libexif" minOccurs="0"/>
                 <xs:element ref="libextractor" minOccurs="0"/>
+                <xs:element ref="id3" minOccurs="0"/>
             </xs:all>
         </xs:complexType>
     </xs:element>
@@ -448,6 +451,14 @@
     </xs:element>
 
     <xs:element name="libextractor">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="auxdata" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    
+    <xs:element name="id3">
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="auxdata" minOccurs="0"/>
@@ -474,7 +485,7 @@
     <xs:element name="transcoding">
         <xs:complexType>
             <xs:all>
-                <xs:element ref="transcoding-mappings" minOccurs="0"/>
+                <xs:element ref="mimetype-profile-mappings" minOccurs="0"/>
                 <xs:element ref="profiles" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="enabled" type="boolean" default="yes"/>
@@ -483,15 +494,7 @@
         </xs:complexType>
     </xs:element>
 
-    <xs:element name="transcoding-mappings">
-        <xs:complexType>
-            <xs:all>
-                <xs:element ref="mimetype-profile" minOccurs="0"/>
-            </xs:all>
-        </xs:complexType>
-    </xs:element>
-
-    <xs:element name="mimetype-profile">
+    <xs:element name="mimetype-profile-mappings">
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="transcode" minOccurs="0" maxOccurs="unbounded"/>
@@ -521,10 +524,11 @@
                 <xs:element ref="accept-url" minOccurs="0"/>
                 <xs:element ref="first-resource" minOccurs="0"/>
                 <xs:element ref="hide-original-resource" minOccurs="0"/>
-                <xs:element ref="theora" minOccurs="0"/>
+                <xs:element ref="accept-ogg-theora" minOccurs="0"/>
                 <xs:element ref="agent"/>
                 <xs:element ref="buffer"/>
                 <xs:element ref="resolution" minOccurs="0"/>
+                <xs:element ref="thumbnail" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="name" type="xs:string" use="required"/>
             <xs:attribute name="enabled" type="boolean" use="required"/>
@@ -546,7 +550,7 @@
 
     <xs:element name="hide-original-resource" type="boolean" default="no"/>
 
-    <xs:element name="theora"/>
+    <xs:element name="accept-ogg-theora" type="boolean" default="no"/>
 
     <xs:element name="agent">
         <xs:complexType>
@@ -565,6 +569,7 @@
 
     <xs:element name="resolution" type="xs:string"/>
     
+    <xs:element name="thumbnail" type="boolean"/>
     
     <!-- online-content -->
 
