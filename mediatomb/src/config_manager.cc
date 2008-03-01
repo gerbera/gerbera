@@ -162,16 +162,16 @@ String ConfigManager::construct_path(String path)
 Ref<Element> ConfigManager::map_from_to(String from, String to)
 {
     Ref<Element> map(new Element(_("map")));
-    map->addAttribute(_("from"), from);
-    map->addAttribute(_("to"), to);
+    map->setAttribute(_("from"), from);
+    map->setAttribute(_("to"), to);
     return map;
 }
 
 Ref<Element> ConfigManager::treat_as(String mimetype, String as)
 {
     Ref<Element> treat(new Element(_("treat")));
-    treat->addAttribute(_("mimetype"), mimetype);
-    treat->addAttribute(_("as"), as);
+    treat->setAttribute(_("mimetype"), mimetype);
+    treat->setAttribute(_("as"), as);
     return treat;
 }
 
@@ -179,29 +179,29 @@ Ref<Element> ConfigManager::treat_as(String mimetype, String as)
 Ref<Element> ConfigManager::renderTranscodingSection()
 {
     Ref<Element> transcoding(new Element(_("transcoding")));
-    transcoding->addAttribute(_("enabled"), _(DEFAULT_TRANSCODING_ENABLED));
+    transcoding->setAttribute(_("enabled"), _(DEFAULT_TRANSCODING_ENABLED));
     
     Ref<Element> mt_prof_map(new Element(_("mimetype-profile-mappings")));
 
     Ref<Element> prof_flv(new Element(_("transcode")));
-    prof_flv->addAttribute(_("mimetype"), _("video/x-flv"));
-    prof_flv->addAttribute(_("using"), _("vlcmpeg"));
+    prof_flv->setAttribute(_("mimetype"), _("video/x-flv"));
+    prof_flv->setAttribute(_("using"), _("vlcmpeg"));
 
     mt_prof_map->appendElementChild(prof_flv);
 
     Ref<Element> prof_theora(new Element(_("transcode")));
-    prof_theora->addAttribute(_("mimetype"), _("application/ogg"));
-    prof_theora->addAttribute(_("using"), _("vlcmpeg"));
+    prof_theora->setAttribute(_("mimetype"), _("application/ogg"));
+    prof_theora->setAttribute(_("using"), _("vlcmpeg"));
     mt_prof_map->appendElementChild(prof_theora);
 
     Ref<Element> prof_ogg(new Element(_("transcode")));
-    prof_ogg->addAttribute(_("mimetype"), _("application/ogg"));
-    prof_ogg->addAttribute(_("using"), _("oggflac2raw"));
+    prof_ogg->setAttribute(_("mimetype"), _("application/ogg"));
+    prof_ogg->setAttribute(_("using"), _("oggflac2raw"));
     mt_prof_map->appendElementChild(prof_ogg);
 
     Ref<Element> prof_flac(new Element(_("transcode")));
-    prof_flac->addAttribute(_("mimetype"), _("audio/x-flac"));
-    prof_flac->addAttribute(_("using"), _("oggflac2raw"));
+    prof_flac->setAttribute(_("mimetype"), _("audio/x-flac"));
+    prof_flac->setAttribute(_("using"), _("oggflac2raw"));
     mt_prof_map->appendElementChild(prof_flac);
 
     transcoding->appendElementChild(mt_prof_map);
@@ -209,9 +209,9 @@ Ref<Element> ConfigManager::renderTranscodingSection()
     Ref<Element> profiles(new Element(_("profiles")));
 
     Ref<Element> oggflac(new Element(_("profile")));
-    oggflac->addAttribute(_("name"), _("oggflac2raw"));
-    oggflac->addAttribute(_("enabled"), _(NO));
-    oggflac->addAttribute(_("type"), _("external"));
+    oggflac->setAttribute(_("name"), _("oggflac2raw"));
+    oggflac->setAttribute(_("enabled"), _(NO));
+    oggflac->setAttribute(_("type"), _("external"));
 
     oggflac->appendTextChild(_("mimetype"), _("audio/L16"));
     oggflac->appendTextChild(_("accept-url"), _(NO));
@@ -219,25 +219,25 @@ Ref<Element> ConfigManager::renderTranscodingSection()
     oggflac->appendTextChild(_("accept-ogg-theora"), _(NO));
 
     Ref<Element> oggflac_agent(new Element(_("agent")));
-    oggflac_agent->addAttribute(_("command"), _("ogg123"));
-    oggflac_agent->addAttribute(_("arguments"), _("-d raw -f %out %in"));
+    oggflac_agent->setAttribute(_("command"), _("ogg123"));
+    oggflac_agent->setAttribute(_("arguments"), _("-d raw -f %out %in"));
     oggflac->appendElementChild(oggflac_agent);
 
     Ref<Element> oggflac_buffer(new Element(_("buffer")));
-    oggflac_buffer->addAttribute(_("size"), 
+    oggflac_buffer->setAttribute(_("size"), 
             String::from(DEFAULT_AUDIO_BUFFER_SIZE));
-    oggflac_buffer->addAttribute(_("chunk-size"), 
+    oggflac_buffer->setAttribute(_("chunk-size"), 
             String::from(DEFAULT_AUDIO_CHUNK_SIZE));
-    oggflac_buffer->addAttribute(_("fill-size"), 
+    oggflac_buffer->setAttribute(_("fill-size"), 
             String::from(DEFAULT_AUDIO_FILL_SIZE));
     oggflac->appendElementChild(oggflac_buffer);
 
     profiles->appendElementChild(oggflac);
 
     Ref<Element> vlcmpeg(new Element(_("profile")));
-    vlcmpeg->addAttribute(_("name"), _("vlcmpeg"));
-    vlcmpeg->addAttribute(_("enabled"), _(NO));
-    vlcmpeg->addAttribute(_("type"), _("external"));
+    vlcmpeg->setAttribute(_("name"), _("vlcmpeg"));
+    vlcmpeg->setAttribute(_("enabled"), _(NO));
+    vlcmpeg->setAttribute(_("type"), _("external"));
 
     vlcmpeg->appendTextChild(_("mimetype"), _("video/mpeg"));
     vlcmpeg->appendTextChild(_("accept-url"), _(YES));
@@ -245,16 +245,16 @@ Ref<Element> ConfigManager::renderTranscodingSection()
     vlcmpeg->appendTextChild(_("accept-ogg-theora"), _(YES));
 
     Ref<Element> vlcmpeg_agent(new Element(_("agent")));
-    vlcmpeg_agent->addAttribute(_("command"), _("vlc"));
-    vlcmpeg_agent->addAttribute(_("arguments"), _("-I dummy %in --sout #transcode{venc=ffmpeg,vcodec=mp2v,vb=4096,fps=25,aenc=ffmpeg,acodec=mpga,ab=192,samplerate=44100,channels=2}:standard{access=file,mux=ps,dst=%out} vlc:quit"));
+    vlcmpeg_agent->setAttribute(_("command"), _("vlc"));
+    vlcmpeg_agent->setAttribute(_("arguments"), _("-I dummy %in --sout #transcode{venc=ffmpeg,vcodec=mp2v,vb=4096,fps=25,aenc=ffmpeg,acodec=mpga,ab=192,samplerate=44100,channels=2}:standard{access=file,mux=ps,dst=%out} vlc:quit"));
     vlcmpeg->appendElementChild(vlcmpeg_agent);
 
     Ref<Element> vlcmpeg_buffer(new Element(_("buffer")));
-    vlcmpeg_buffer->addAttribute(_("size"), 
+    vlcmpeg_buffer->setAttribute(_("size"), 
             String::from(DEFAULT_VIDEO_BUFFER_SIZE));
-    vlcmpeg_buffer->addAttribute(_("chunk-size"), 
+    vlcmpeg_buffer->setAttribute(_("chunk-size"), 
             String::from(DEFAULT_VIDEO_CHUNK_SIZE));
-    vlcmpeg_buffer->addAttribute(_("fill-size"),
+    vlcmpeg_buffer->setAttribute(_("fill-size"),
             String::from(DEFAULT_VIDEO_FILL_SIZE));
     vlcmpeg->appendElementChild(vlcmpeg_buffer);
 
@@ -275,49 +275,49 @@ Ref<Element> ConfigManager::renderOnlineSection()
     onlinecontent->appendChild(RefCast(ytinfo, Node));
 
     Ref<Element> yt(new Element(_("YouTube")));
-    yt->addAttribute(_("enabled"), _(DEFAULT_YOUTUBE_ENABLED));
+    yt->setAttribute(_("enabled"), _(DEFAULT_YOUTUBE_ENABLED));
     // 8 hours refresh cycle
-    yt->addAttribute(_("refresh"), String::from(DEFAULT_YOUTUBE_REFRESH)); 
-    yt->addAttribute(_("update-at-start"), _(DEFAULT_YOUTUBE_UPDATE_AT_START));
+    yt->setAttribute(_("refresh"), String::from(DEFAULT_YOUTUBE_REFRESH)); 
+    yt->setAttribute(_("update-at-start"), _(DEFAULT_YOUTUBE_UPDATE_AT_START));
     // items that were not updated for 4 days will be purged
-    yt->addAttribute(_("purge-after"), 
+    yt->setAttribute(_("purge-after"), 
             String::from(DEFAULT_YOUTUBE_PURGE_AFTER));
    
     Ref<Element> favs(new Element(_("favorites")));
-    favs->addAttribute(_("user"), _("mediatomb"));
+    favs->setAttribute(_("user"), _("mediatomb"));
     yt->appendElementChild(favs);
     
     Ref<Element> popular(new Element(_("popular")));
-    popular->addAttribute(_("time-range"), _("month"));
+    popular->setAttribute(_("time-range"), _("month"));
     yt->appendElementChild(popular);
 
     Ref<Element> playlist(new Element(_("playlist")));
-    playlist->addAttribute(_("id"), _(DEFAULT_YOUTUBE_PLAYLIST_ID));
-    playlist->addAttribute(_("name"), _(DEFAULT_YOUTUBE_PLAYLIST_NAME));
-    playlist->addAttribute(_("start-page"), _("1"));
-    playlist->addAttribute(_("amount"), _("all"));
+    playlist->setAttribute(_("id"), _(DEFAULT_YOUTUBE_PLAYLIST_ID));
+    playlist->setAttribute(_("name"), _(DEFAULT_YOUTUBE_PLAYLIST_NAME));
+    playlist->setAttribute(_("start-page"), _("1"));
+    playlist->setAttribute(_("amount"), _("all"));
     yt->appendElementChild(playlist);
 
     Ref<Element> ytuser(new Element(_("user")));
-    ytuser->addAttribute(_("user"), _("mediatomb"));
-    ytuser->addAttribute(_("start-page"), 
+    ytuser->setAttribute(_("user"), _("mediatomb"));
+    ytuser->setAttribute(_("start-page"), 
             String::from(DEFAULT_YOUTUBE_PLAYLIST_START_PAGE));
-    ytuser->addAttribute(_("amount"), _(DEFAULT_YOUTUBE_PLAYLIST_AMOUNT));
+    ytuser->setAttribute(_("amount"), _(DEFAULT_YOUTUBE_PLAYLIST_AMOUNT));
     yt->appendElementChild(ytuser);
 
     Ref<Element> ytct(new Element(_("category-and-tag")));
-    ytct->addAttribute(_("category"), _(DEFAULT_YOUTUBE_CNT_CATEGORY));
-    ytct->addAttribute(_("tag"), _(DEFAULT_YOUTUBE_CNT_TAG));
-    ytct->addAttribute(_("start-page"), 
+    ytct->setAttribute(_("category"), _(DEFAULT_YOUTUBE_CNT_CATEGORY));
+    ytct->setAttribute(_("tag"), _(DEFAULT_YOUTUBE_CNT_TAG));
+    ytct->setAttribute(_("start-page"), 
             String::from(DEFAULT_YOUTUBE_CNT_START_PAGE));
-    ytct->addAttribute(_("amount"), String::from(DEFAULT_YOUTUBE_CNT_AMOUNT));
+    ytct->setAttribute(_("amount"), String::from(DEFAULT_YOUTUBE_CNT_AMOUNT));
     yt->appendElementChild(ytct);
 
     Ref<Element> yttag(new Element(_("tag")));
-    yttag->addAttribute(_("tag"), _(DEFAULT_YOUTUBE_TAG));
-    yttag->addAttribute(_("start-page"), 
+    yttag->setAttribute(_("tag"), _(DEFAULT_YOUTUBE_TAG));
+    yttag->setAttribute(_("start-page"), 
             String::from(DEFAULT_YOUTUBE_TAG_START_PAGE));
-    yttag->addAttribute(_("amount"), _(DEFAULT_YOUTUBE_TAG_AMOUNT));
+    yttag->setAttribute(_("amount"), _(DEFAULT_YOUTUBE_TAG_AMOUNT));
     yt->appendElementChild(yttag);
 
     Ref<Element> ytfeatured(new Element(_("featured")));
@@ -348,22 +348,22 @@ String ConfigManager::createDefaultConfig(String userhome)
     String config_filename = homepath + DIR_SEPARATOR + DEFAULT_CONFIG_NAME;
 
     Ref<Element> config(new Element(_("config")));
-    config->addAttribute(_("version"), String::from(CONFIG_XML_VERSION));
-    config->addAttribute(_("xmlns"), _(XML_XMLNS) + CONFIG_XML_VERSION);
-    config->addAttribute(_("xmlns:xsi"), _(XML_XMLNS_XSI));
-    config->addAttribute(_("xsi:schemaLocation"), _(XML_XMLNS) + CONFIG_XML_VERSION + " " + XML_XMLNS + CONFIG_XML_VERSION + ".xsd");
+    config->setAttribute(_("version"), String::from(CONFIG_XML_VERSION));
+    config->setAttribute(_("xmlns"), _(XML_XMLNS) + CONFIG_XML_VERSION);
+    config->setAttribute(_("xmlns:xsi"), _(XML_XMLNS_XSI));
+    config->setAttribute(_("xsi:schemaLocation"), _(XML_XMLNS) + CONFIG_XML_VERSION + " " + XML_XMLNS + CONFIG_XML_VERSION + ".xsd");
     Ref<Element> server(new Element(_("server")));
    
     Ref<Element> ui(new Element(_("ui")));
-    ui->addAttribute(_("enabled"), _(DEFAULT_UI_EN_VALUE));
+    ui->setAttribute(_("enabled"), _(DEFAULT_UI_EN_VALUE));
 
     Ref<Element>accounts(new Element(_("accounts")));
-    accounts->addAttribute(_("enabled"), _(DEFAULT_ACCOUNTS_EN_VALUE));
-    accounts->addAttribute(_("session-timeout"), String::from(DEFAULT_SESSION_TIMEOUT));
+    accounts->setAttribute(_("enabled"), _(DEFAULT_ACCOUNTS_EN_VALUE));
+    accounts->setAttribute(_("session-timeout"), String::from(DEFAULT_SESSION_TIMEOUT));
 
     Ref<Element> account(new Element(_("account")));
-    account->addAttribute(_("user"), _(DEFAULT_ACCOUNT_USER));
-    account->addAttribute(_("password"), _(DEFAULT_ACCOUNT_PASSWORD));
+    account->setAttribute(_("user"), _(DEFAULT_ACCOUNT_USER));
+    account->setAttribute(_("password"), _(DEFAULT_ACCOUNT_PASSWORD));
     accounts->appendElementChild(account);
 
     ui->appendElementChild(accounts);
@@ -382,17 +382,17 @@ String ConfigManager::createDefaultConfig(String userhome)
     Ref<Element> storage(new Element(_("storage")));
 #ifdef HAVE_SQLITE3
     Ref<Element> sqlite3(new Element(_("sqlite3")));
-    sqlite3->addAttribute(_("enabled"), _(DEFAULT_SQLITE_ENABLED));
+    sqlite3->setAttribute(_("enabled"), _(DEFAULT_SQLITE_ENABLED));
     sqlite3->appendTextChild(_("database-file"), _(DEFAULT_SQLITE3_DB_FILENAME));
     storage->appendElementChild(sqlite3);
 #endif
 #ifdef HAVE_MYSQL
     Ref<Element>mysql(new Element(_("mysql")));
 #ifndef HAVE_SQLITE3
-    mysql->addAttribute(_("enabled"), _(DEFAULT_MYSQL_ENABLED));
+    mysql->setAttribute(_("enabled"), _(DEFAULT_MYSQL_ENABLED));
     mysql_flag = true;
 #else
-    mysql->addAttribute(_("enabled"), _("no"));
+    mysql->setAttribute(_("enabled"), _("no"));
 #endif
     mysql->appendTextChild(_("host"), _(DEFAULT_MYSQL_HOST));
     mysql->appendTextChild(_("username"), _(DEFAULT_MYSQL_USER));
@@ -404,7 +404,7 @@ String ConfigManager::createDefaultConfig(String userhome)
     server->appendElementChild(storage);
 
     Ref<Element> protocolinfo(new Element(_("protocolInfo")));
-    protocolinfo->addAttribute(_("extend"), _(DEFAULT_EXTEND_PROTOCOLINFO));
+    protocolinfo->setAttribute(_("extend"), _(DEFAULT_EXTEND_PROTOCOLINFO));
 
     server->appendElementChild(protocolinfo);
    
@@ -439,7 +439,7 @@ String ConfigManager::createDefaultConfig(String userhome)
     config->appendElementChild(server);
 
     Ref<Element> import(new Element(_("import")));
-    import->addAttribute(_("hidden-files"), _(DEFAULT_HIDDEN_FILES_VALUE));
+    import->setAttribute(_("hidden-files"), _(DEFAULT_HIDDEN_FILES_VALUE));
 
 #ifdef HAVE_MAGIC
     if (string_ok(magic))
@@ -451,11 +451,11 @@ String ConfigManager::createDefaultConfig(String userhome)
 #endif
 
     Ref<Element> scripting(new Element(_("scripting")));
-    scripting->addAttribute(_("script-charset"), _(DEFAULT_JS_CHARSET));
+    scripting->setAttribute(_("script-charset"), _(DEFAULT_JS_CHARSET));
     import->appendElementChild(scripting);
 
     Ref<Element> layout(new Element(_("virtual-layout")));
-    layout->addAttribute(_("type"), _(DEFAULT_LAYOUT_TYPE));
+    layout->setAttribute(_("type"), _(DEFAULT_LAYOUT_TYPE));
 #ifdef HAVE_JS
     layout->appendTextChild(_("import-script"), prefix_dir +
                                                 DIR_SEPARATOR + 
@@ -483,7 +483,7 @@ String ConfigManager::createDefaultConfig(String userhome)
 
     Ref<Element> mappings(new Element(_("mappings")));
     Ref<Element> ext2mt(new Element(_("extension-mimetype")));
-    ext2mt->addAttribute(_("ignore-unknown"), _(DEFAULT_IGNORE_UNKNOWN_EXTENSIONS));
+    ext2mt->setAttribute(_("ignore-unknown"), _(DEFAULT_IGNORE_UNKNOWN_EXTENSIONS));
     ext2mt->appendElementChild(map_from_to(_("mp3"), _("audio/mpeg")));
     ext2mt->appendElementChild(map_from_to(_("ogg"), _("application/ogg")));
     ext2mt->appendElementChild(map_from_to(_("asf"), _("video/x-ms-asf")));
@@ -564,10 +564,9 @@ void ConfigManager::migrate()
     {
         log_info("Migrating server configuration\n");
         root->setAttribute(_("version"), String::from(CONFIG_XML_VERSION));
-        root->setAttribute(_("version"), String::from(CONFIG_XML_VERSION));
-        root->addAttribute(_("xmlns"), _(XML_XMLNS) + CONFIG_XML_VERSION);
+        root->setAttribute(_("xmlns"), _(XML_XMLNS) + CONFIG_XML_VERSION);
         root->setAttribute(_("xmlns:xsi"), _(XML_XMLNS_XSI));
-        root->addAttribute(_("xsi:schemaLocation"), _(XML_XMLNS) + CONFIG_XML_VERSION + " " + XML_XMLNS + CONFIG_XML_VERSION + ".xsd");
+        root->setAttribute(_("xsi:schemaLocation"), _(XML_XMLNS) + CONFIG_XML_VERSION + " " + XML_XMLNS + CONFIG_XML_VERSION + ".xsd");
         
         Ref<Element> server = root->getChildByName(_("server"));
         if (server == nil)
@@ -582,7 +581,7 @@ void ConfigManager::migrate()
             String dbFile = getOption(_("/server/storage/database-file"));
 
             Ref<Element> sqlite3(new Element(_("sqlite3")));
-            sqlite3->addAttribute(_("enabled"), _(YES));
+            sqlite3->setAttribute(_("enabled"), _(YES));
             sqlite3->appendTextChild(_("database-file"), dbFile);
             storage->appendElementChild(sqlite3);
         }
@@ -608,7 +607,7 @@ void ConfigManager::migrate()
                 password = getOption(_("/server/storage/password"));
 
             Ref<Element>mysql(new Element(_("mysql")));
-            mysql->addAttribute(_("enabled"), _(YES));
+            mysql->setAttribute(_("enabled"), _(YES));
 
             mysql->appendTextChild(_("host"), host);
 
