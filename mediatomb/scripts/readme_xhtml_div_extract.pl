@@ -24,7 +24,11 @@ my $parser = new XML::DOM::Parser;
 #my $doc = $parser->parsefile ("readme.html");
 my $doc = $parser->parse(\*STDIN);
 
-my @res = $doc->xql('//div[h1/@class="title"]');
+my @res = $doc->xql('//div[h2/@class="title"]');
+if (! @res)
+{
+    @res = $doc->xql('//div[h1/@class="title"]');
+}
 
 $res[0]->getParentNode()->removeChild($res[0]);
 
