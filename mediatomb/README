@@ -110,6 +110,8 @@ Note:
   * sophisticated web UI with a tree view of the database and the file system,
     allowing to add/remove/edit/browse your media
 
+  * highly flexible transcoding media format transcoding via plugins / scripts
+
   * support for external URLs (create links to internet content and serve them
     via UPnP to your renderer)
 
@@ -214,12 +216,12 @@ In order to compile MediaTomb you will have to install the following packages.:
     EXIF thumbnails are present in your images they will also be offered via
     UPnP.
 
-  * curl http://curl.haxx.se/ OPTIONAL, REQUIRED FOR YOUTUBE AND SOPCAST
-    SUPPORT
+  * curl http://curl.haxx.se/ OPTIONAL
 
-    curl is a library that allows to easily fetch content from the web, if you
-    want to compile MediaTomb with YouTube and/or SopCast support then curl is
-    required.
+    curl is a library that allows to easily fetch content from the web,
+    combined with the external transcoding it offers some additional
+    functionality and enables the use of plugins that have no builtin online
+    content support.
 
   * libextractor http://gnunet.org/libextractor/ OPTIONAL
 
@@ -270,6 +272,13 @@ $ make install
 
 This should compile and install MediaTomb, the resulting binary is ready to
 run.
+
+Note:
+
+    if you checked out the sources from SVN the configure script will not be
+    available, you will have to create it with the following command:
+
+autoreconf -i
 
 3.2. Configure Options
 
@@ -582,7 +591,7 @@ the mime type information of an imported object manually via the web UI.
 
 Default:
 
-    enabled, preferred over taglib
+    disabled, used if taglib is not available
 
 This library will parse id3 tags of your MP3 files, the gathered information
 will be saved in the database and provided via UPnP. Further, the gathered
@@ -595,7 +604,7 @@ metadata will be used by the import script to create a nice container layout
 
 Default:
 
-    disabled if id3lib is available
+    enabled, preffered over id3lib
 
 This library will parse id3 tags of your MP3 files as well as information
 provided with flac files. It claims to be faster than id3lib, but it also seems
@@ -640,7 +649,7 @@ disabled by default.
 
 Default:
 
-    enabled
+    auto
 
 Inotify is a kernel mechanism that allows monitoring of filesystem events. You
 need this if you want to use the Inotify Autoscan mode, contrary to the Timed
@@ -648,27 +657,30 @@ mode which recsans given directories in specified intervals, Inotify mode will
 immedeately propagate changes in monitored directories on the filesystem to the
 database.
 
-3.2.24. YouTube Service Support
+If you do not specify this option configure will check if inotify works on the
+build system and compile it in only if the check succeeds. If you specify this
+option, the functionality will be compiled in even if the build system does not
+support inotify - the availability of inotify will then be checked at server
+runtime.
 
---enable-youtube
-
-Default:
-
-    enabled
-
-This option enabled support of the YouTube service, it allows to gather
-information about content on the YouTube site and offers the content via UPnP,
-thus enabling you to watch your favorite YouTube videos on your UPnP player
-device. The feature only makes sense in combination with transcoding, since
-most devices do not support playback of flv files natively.
-
-3.2.25. External Transcoding
+3.2.24. External Transcoding
 
 --enable-external-transcoding
 
 Default:
 
     enabled
+
+3.2.25. Curl
+
+--enable-curl
+
+Default:
+
+    enabled if external transcoding feature is turned on
+
+It only makes sense to enable the curl library if External Transcoding is
+turned on.
 
 3.2.26. Ffmpeg Support
 
@@ -1907,6 +1919,12 @@ Child tags:
 
             Tells the server what content the specified mimetype actually is.
 
+            Note:
+
+                it makes no sense to define 'as' values that are not below, the
+                server only needs to know the content type of the ones
+                specified, otherwise it does not matter.
+
             The 'as' attribute can have following values:
 
               * mp3
@@ -1936,6 +1954,26 @@ Child tags:
 
                 The content is a jpeg image and should be processed by libexif
                 (if available).
+
+              * playlist
+
+                Default mimetype: audio/x-mpegurl or audio/x-scpls
+
+                The content is a playlist and should be processed by the
+                playlist parser script.
+
+              * pcm
+
+                Default mimetype: audio/L16 or audio/x-wav
+
+                The content is a PCM file.
+
+              * avi
+
+                Default mimetype: video/x-msvideo
+
+                The content is an AVI container, FourCC extraction will be
+                attempted.
 
   * <library-options>
 
@@ -2118,301 +2156,6 @@ Attributes:
     is particularly slow you may want to try enable this setting.
 
 Below are the settings for supported services.
-
-6.2.2. YouTube Service
-
-MediaTomb allows you to watch YouTube videos using your UPnP device, you can
-specify what content you are interested in, we will import the meta data and
-present it in the database, so you can browse the content on your player just
-like you do it with your local data.
-
-Note:
-
-    we do not download/mirror the actual videos, we only get description of the
-    content and present it in the database. The actual video is only streamed
-    when you press play on your device. So, when we use the term "retrieve
-    videos" we actually mean retrieving the video name, description and
-    associated meta data, not the actual flv file.
-
-Note:
-
-    so far we have not yet seen any devices that will natively support the .flv
-    format, you will need to setup appropriate transcoding profiles to make use
-    of the YouTube feature.
-
-  * <YouTube enabled="no" refresh="12600" update-at-start="yes" purge-after="1200000">
-
-    Optional
-
-    Options and setting for YouTube service support, the attributes are:
-
-      o enabled=...
-
-        Optional
-
-        Default: no
-
-        Enables or disables the service, allowed values are "yes" or "no".
-
-      o refresh=...
-
-        Optional
-
-        Default: 0 (disabled)
-
-        Refresh interval in seconds, each time the interval elapses we will
-        contact the YouTube server and fetch new meta data, presenting the
-        changes in the database view. This allows you to stay up to date with
-        what is available on YouTube, you probably should not need to update
-        more than once per day, so specify a reasonably high value here.
-
-      o purge-after=...
-
-        Optional
-
-        Default: 0 (disabled)
-
-        Time amount in seconds when data that has not been updated is
-        considered old and can be purged from the database. This setting helps
-        to prevent an endless filling of the database with YouTube meta data,
-        the idea is the following: each video has a unique ID, during a refresh
-        cycle the video meta data will be imported into the database and a time
-        stamp will be added. Each refresh cycle we may encounter same content
-        (i.e. nothing changed on the YouTube site), we will update the time
-        stamp. However, if a particular video is no longer available on YouTube
-        it will not be refreshed, once the time stamp exceeds the purge-after
-        value we will remove the meta data for this particular video from the
-        database.
-
-      o update-at-start=...
-
-        Optional
-
-        Default: no
-
-        This option defines if we will contact the service right after
-        MediaTomb was started (about 10 seconds after start up) or if data
-        should be fetched when the first refresh cycle kicks in. It may be
-        useful if you frequently restart the server and do not want the content
-        to be updated each time. Allowed values are "yes" or "no".
-
-        Below are various options that allow you to define what content you are
-        interested in.
-
-        Note:
-
-            all tags are optional and can occur more then once.
-
-          - <favorites user="mediatomb"/>
-
-            Optional
-
-            The favorites tag tells us to retrieve favorite videos of a
-            particular user. It can appear more than once, each tag must
-            contain one user attribute:
-
-              * user=...
-
-                Required
-
-                Name of the YouTube user whose favorite videos you are
-                interested in.
-
-          - <featured/>
-
-            Optional
-
-            Tells us to retrieve featured videos.
-
-          - <tag tag="russian data recovery" start-page="1" amount="10"/>
-
-            Optional
-
-            Retrieves videos given by tag. This option can appear more than
-            once with different tag, start-page and amount values.
-
-              * tag=...
-
-                Required
-
-                String, representing the video tag as used on YouTube.
-
-              * start-page=...
-
-                Required
-
-                YouTube presents the content in pages, you can specify the
-                first page number from where you want to start fetching the
-                data.
-
-              * amount=...
-
-                Required
-
-                Maximum number of items that should be processed for this
-                request. Use the special keyword "all" to retrieve as much data
-                as possible.
-
-                Note:
-
-                    YouTube will only serve meta data data for a maximum of
-                    1000 items per request.
-
-          - <user user="mediatomb" start-page="1" amount="52"/>
-
-            Optional
-
-            Retrieve videos from a particular user, if you want to import
-            content from various users simply add more tags with appropriate
-            user settings.
-
-              * user=...
-
-                Required
-
-                Name of the user as defined by the YouTube account.
-
-              * start-page=...
-
-                Required
-
-                YouTube presents the content in pages, you can specify the
-                first page number from where you want to start fetching the
-                data.
-
-              * amount=...
-
-                Required
-
-                Maximum number of items that should be processed for this
-                request. Use the special keyword "all" to retrieve as much data
-                as possible.
-
-                Note:
-
-                    YouTube will only serve meta data data for a maximum of
-                    1000 items per request.
-
-          - <playlist id="2132" start-page="1" amount="52" name="My Playlist"/>
-
-            Optional
-
-            Retrieve playlist given by the id.
-
-              * id=...
-
-                Required
-
-                ID of the playlist.
-
-              * start-page=...
-
-                Required
-
-                YouTube presents the content in pages, you can specify the
-                first page number from where you want to start fetching the
-                data.
-
-              * amount=...
-
-                Required
-
-                Maximum number of items that should be processed for this
-                request. Use the special keyword "all" to retrieve as much data
-                as possible.
-
-                Note:
-
-                    YouTube will only serve meta data for a maximum of 1000
-                    items per request.
-
-              * name=...
-
-                Required
-
-                Name of the playlist - this is how it will be presented on the
-                server. This is useful because the playlist ID is just some
-                numeric value, the playlists on YouTube do not have names.
-
-                This is a local setting, set this to any string that will
-                describe the particular playlist.
-
-          - <popular time-range="month"/>
-
-            Optional
-
-            Retrieve popular videos.
-
-              * time-range=...
-
-                Required
-
-                Specify the time range as defined by YouTube, possible values
-                are "all", "day", "week", "month"
-
-          - <category-and-tag category="sports" tag="Safin breaks racket" start-page="1" amount="100"/>
-
-            Optional
-
-            Use this tag to retrieve videos based on a certain category and
-            tag.
-
-              * category=...
-
-                Required
-
-                Video category as defined by YouTube, possible values are:
-
-                  o films_and_animation
-
-                  o autos_and_vehicles
-
-                  o comedy
-
-                  o entertainment
-
-                  o music
-
-                  o news_and_politics
-
-                  o people_and_blogs
-
-                  o pets_and_animals
-
-                  o howto_and_diy
-
-                  o sports
-
-                  o travel_and_places
-
-                  o gadgets_and_games
-
-              * tag=...
-
-                Required
-
-                Tag string of the desired video.
-
-              * start-page=...
-
-                Required
-
-                YouTube presents the content in pages, you can specify the
-                first page number from where you want to start fetching the
-                data.
-
-              * amount=...
-
-                Required
-
-                Maximum number of items that should be processed for this
-                request. Use the special keyword "all" to retrieve as much data
-                as possible.
-
-                Note:
-
-                    YouTube will only serve meta data for a maximum of 1000
-                    items per request.
 
 6.3. Transcoding Settings
 

@@ -243,10 +243,6 @@ lost.
         The item does not belong to an online service and does not have
         extended properties.
 
-      o ONLINE_SERVICE_YOUTUBE
-
-        The item belongs to the YouTube service and has extended properties.
-
   * orig.mimetype
 
     RW
@@ -351,158 +347,6 @@ lost.
     Usually you will increment the number for each new object that you create
     while parsing the playlist, thus ensuring that the resulting order is the
     same as in the original playlist.
-
-3.1.2. YouTube Properties
-
-When the obj.onlineservice variable equals ONLINE_SERVICE_YOUTUBE the item has
-the following additional properties:
-
-  * orig.yt_request
-
-    RO
-
-    Identifies the YouTube request type, following types are available:
-
-      o YOUTUBE_REQUEST_NONE
-
-        No request.
-
-      o YOUTUBE_REQUEST_FAVORITE
-
-        The item was created as a result of a favorites request.
-
-        Note:
-
-            for this request orig.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME] will
-            contain the name of the associated user.
-
-      o YOUTUBE_REQUEST_BY_TAG
-
-        The item was created as a result of a by tag request.
-
-        Note:
-
-            for this request orig.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME] will
-            contain the name of the tags that were used when searching for the
-            item.
-
-      o YOUTUBE_REQUEST_BY_USER
-
-        The item was created as a result of a by user request.
-
-        Note:
-
-            for this request orig.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME] will
-            contain the name of the associated user.
-
-      o YOUTUBE_REQUEST_FEATURED
-
-        The item was created as a result of a featured request.
-
-      o YOUTUBE_REQUEST_BY_PLAYLIST
-
-        The item was created as a result of a by playlist request.
-
-        Note:
-
-            for this request orig.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME] will
-            contain the name of the playlist as specified in the server
-            configuration.
-
-      o YOUTUBE_REQUEST_POPULAR
-
-        The item was created as a result of a popular request.
-
-      o YOUTUBE_REQUEST_BY_CATEGORY_AND_TAG
-
-        The item was created as a result of a by category and tag request.
-
-        Note:
-
-            for this request orig.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME] will
-            contain the name of the category as defined by YouTube.
-
-The following aux keys can be used to retrieve additional information about the
-item, the data is stored in the form of strings.
-
-  * orig.aux[YOUTUBE_AUXDATA_TAGS]
-
-    RO
-
-    Contains a space separated list of tags for the particular item.
-
-  * orig.aux[YOUTUBE_AUXDATA_AVG_RATING]
-
-    RO
-
-    Contains the average rating value.
-
-  * orig.aux[YOUTUBE_AUXDATA_AUTHOR]
-
-    RO
-
-    Contains the author name.
-
-  * orig.aux[YOUTUBE_AUXDATA_COMMENT_COUNT]
-
-    RO
-
-    Contains the number of comments for the particular video on the YouTube
-    website.
-
-  * orig.aux[YOUTUBE_AUXDATA_VIEW_COUNT]
-
-    RO
-
-    Contains the view count of the video on the YouTube website.
-
-  * orig.aux[YOUTUBE_AUXDATA_RATING_COUNT]
-
-    RO
-
-    Contains the rating count of the video on the YouTube website.
-
-  * orig.aux[YOUTUBE_AUXDATA_REQUEST]
-
-    RO
-
-    Contains the name of the request that produced this item (i.e. Favorites,
-    Popular, etc.), this is the human readable representation of the
-    orig.yt_request property.
-
-  * orig.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME]
-
-    RO
-
-    Contains the additional name that accompanies the request, it is only set
-    for the following requests:
-
-      o YOUTUBE_REQUEST_FAVORITE
-
-        Subname will contain the name of the associated user.
-
-      o YOUTUBE_REQUEST_BY_CATEGORY_AND_TAG
-
-        Subname will contain the name of the category as defined by YouTube.
-
-      o YOUTUBE_REQUEST_BY_USER
-
-        Subname will contain the name of the user.
-
-      o YOUTUBE_REQUEST_BY_PLAYLIST
-
-        Subname will contain the name of the playlist as defined in the server
-        configuration.
-
-      o YOUTUBE_REQUEST_BY_TAG
-
-        Subname will contain the tags as specified in the server configuration.
-
-  * orig.aux[YOUTUBE_AUXDATA_CATEGORY]
-
-    RO
-
-    Contains the name of the category of the item.
 
 3.2. Constants
 
@@ -747,7 +591,6 @@ script. They can be used by the import and by the playlist script.
         return '';
     }
 
-
 5. Walkthrough
 
 Now it is time to take a closer look at the default scripts that are supplied
@@ -950,63 +793,7 @@ function addVideo(obj)
     addCdsObject(obj, createContainerChain(chain));
 }
 
-5.1.4. YouTube Content Handler
-
-This helper function processes items that are imported from the YouTube
-service; these items have extended properties that were described in detail
-earlier in this document. Let's have a look at how they are used:
-
-function addYouTube(obj)
-{
-   var chain;
-
-First, we want to sort the content by average rating. Remember - all properties
-in the obj.aux array are strings, so we will do an extra conversion because we
-want to round the rating.
-
-   var temp = parseInt(obj.aux[YOUTUBE_AUXDATA_AVG_RATING], 10);
-
-Make sure to check that we got a number.
-
-   if (temp != Number.NaN)
-   {
-       temp = Math.round(temp);
-
-Here is the place if you want to have a different range of ratings in your tree
-structure:
-
-       if (temp > 3)
-       {
-           var chain = new Array('Online Services', 'YouTube',
-                                  'Rating', temp.toString());
-           addCdsObject(obj, createContainerChain(chain));
-       }
-   }
-
-Next, we process the so called request, i.e. - description of the request to
-the YouTube service created the item. Some requests may contain an additional
-level of refinement which can be retrieved by querying the request subname key
-of the aux array, we will make use of that.
-
-    temp = obj.aux[YOUTUBE_AUXDATA_REQUEST];
-    if (temp)
-    {
-        var subName = (obj.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME]);
-
-Make sure to check that the subname is not empty since it is only available for
-a number of specific requests.
-
-        if (subName)
-            chain = new Array('Online Services', 'YouTube', temp,
-                              subName);
-        else
-            chain = new Array('Online Services', 'YouTube', temp);
-
-        addCdsObject(obj, createContainerChain(chain));
-    }
-}
-
-5.1.5. Putting it all together
+5.1.4. Putting it all together
 
 This is the main part of the script, it looks at the mimetype of the original
 object and feeds the object to the appropriate content handler.
@@ -1030,14 +817,7 @@ to correctly set the reference ID!
 
     if (mime == 'video')
     {
-
-Currently we support the YouTube service which offers video items, so we will
-do an extra check to sort it properly.
-
-        if (obj.onlineservice == ONLINE_SERVICE_NONE)
-            addVideo(obj);
-        else if (obj.onlineservice == ONLINE_SERVICE_YOUTUBE)
-            addYouTube(obj);
+        addVideo(obj);
     }
 
     if (mime == 'image')

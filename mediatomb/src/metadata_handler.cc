@@ -190,7 +190,6 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
             String fourcc = getAVIFourCC(item->getLocation());
             if (string_ok(fourcc))
             {
-                printf("----------------> %s\n", fourcc.c_str());
                 item->getResource(0)->addOption(_(RESOURCE_OPTION_FOURCC),
                                                 fourcc);
             }

@@ -95,7 +95,6 @@ int IOHandlerBufferHelper::read(OUT char *buf, IN size_t length)
         if (checkSocket)
         {
             checkSocket = false;
-            printf("============> returning check socket to SDK!\n");
             return CHECK_SOCKET;
         }
         else
