@@ -598,6 +598,7 @@
             <xs:attribute name="refresh" type="xs:nonNegativeInteger" default="0"/>
             <xs:attribute name="purge-after" type="xs:nonNegativeInteger" default="0"/>
             <xs:attribute name="update-at-start" type="boolean" default="no"/>
+            <xs:attribute name="dev-id" type="xs:string" use="required"/>
         </xs:complexType>
     </xs:element>
 
