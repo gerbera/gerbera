@@ -2225,8 +2225,8 @@ if (((test $YOUTUBE -eq 1) || (test $EXTERNAL_TRANSCODING -eq 1)) && (test $USE_
 fi
 
 if test "x$CURL_OK" = xyes; then
-    CPPFLAGS="$CPPFLAGS $TAGLIB_CFLAGS"
-    CXXFLAGS="$CXXFLAGS $TAGLIB_CFLAGS"
+    CPPFLAGS="$CPPFLAGS $CURL_CFLAGS"
+    CXXFLAGS="$CXXFLAGS $CURL_CFLAGS"
     AC_CHECK_HEADERS([curl/curl.h],
         [],
         [CURL_OK=missing]
