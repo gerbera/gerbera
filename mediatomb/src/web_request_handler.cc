@@ -120,7 +120,7 @@ Ref<IOHandler> WebRequestHandler::open(Ref<Dictionary> params, IN enum UpnpOpenF
     {
         if(!ConfigManager::getInstance()->getBoolOption(CFG_SERVER_UI_ENABLED))
         {
-            root->addAttribute(_("ui_disabled"), _("1"));
+            root->setAttribute(_("ui_disabled"), _("1"));
             log_warning("The UI is disabled in the configuration file. See README.\n");
         }
         else
@@ -204,7 +204,7 @@ void WebRequestHandler::handleUpdateIDs()
             if (session->hasUIUpdateIDs())
             {
 //                log_debug("UI updates pending...\n");
-                updateIDs->addAttribute(_("pending"), _("1"));
+                updateIDs->setAttribute(_("pending"), _("1"));
             }
             else
             {
@@ -224,7 +224,7 @@ void WebRequestHandler::addUpdateIDs(Ref<Element> root, Ref<Session> session)
     {
         log_debug("UI: sending update ids: %s\n", updateIDs.c_str());
         updateIDsEl->setText(updateIDs);
-        updateIDsEl->addAttribute(_("updates"), _("1"));
+        updateIDsEl->setAttribute(_("updates"), _("1"));
     }
 }
 
@@ -233,8 +233,8 @@ void WebRequestHandler::appendTask(Ref<Element> el, Ref<CMTask> task)
     if (task == nil || el == nil)
         return;
     Ref<Element> taskEl (new Element(_("task")));
-    taskEl->addAttribute(_("id"), String::from(task->getID()));
-    taskEl->addAttribute(_("cancellable"), task->isCancellable() ? _("1") : _("0"));
+    taskEl->setAttribute(_("id"), String::from(task->getID()));
+    taskEl->setAttribute(_("cancellable"), task->isCancellable() ? _("1") : _("0"));
     taskEl->setText(task->getDescription());
     el->appendElementChild(taskEl);
 }

@@ -47,7 +47,7 @@ Ref<Element> UpnpXML_CreateResponse(String actionName, String serviceType)
 {
     Ref<Element> response(new Element(_("u:") + actionName +
                                       "Response"));
-    response->addAttribute(_("xmlns:u"), serviceType);
+    response->setAttribute(_("xmlns:u"), serviceType);
 
     return response; 
 }
@@ -56,9 +56,9 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions, in
 {
     Ref<Element> result(new Element(_("")));
     
-    result->addAttribute(_("id"), String::from(obj->getID()));
-    result->addAttribute(_("parentID"), String::from(obj->getParentID()));
-    result->addAttribute(_("restricted"), obj->isRestricted() ? _("1") : _("0"));
+    result->setAttribute(_("id"), String::from(obj->getID()));
+    result->setAttribute(_("parentID"), String::from(obj->getParentID()));
+    result->setAttribute(_("restricted"), obj->isRestricted() ? _("1") : _("0"));
    
     String tmp = obj->getTitle();
 
@@ -123,7 +123,7 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions, in
         result->setName(_("container"));
         int childCount = cont->getChildCount();
         if (childCount >= 0)
-            result->addAttribute(_("childCount"), String::from(childCount));
+            result->setAttribute(_("childCount"), String::from(childCount));
         
     }
     
@@ -184,7 +184,7 @@ void UpnpXML_DIDLUpdateObject(Ref<CdsObject> obj, String text)
 Ref<Element> UpnpXML_CreateEventPropertySet()
 {
     Ref<Element> propset(new Element(_("e:propertyset")));
-    propset->addAttribute(_("xmlns:e"), _("urn:schemas-upnp-org:event-1-0"));
+    propset->setAttribute(_("xmlns:e"), _("urn:schemas-upnp-org:event-1-0"));
 
     Ref<Element> property(new Element(_("e:property")));
 
@@ -199,7 +199,7 @@ Ref<Element> UpnpXML_RenderDeviceDescription(String presentationURL)
     Ref<ConfigManager> config = ConfigManager::getInstance();
 
     Ref<Element> root(new Element(_("root"))); 
-    root->addAttribute(_("xmlns"), _(DESC_DEVICE_NAMESPACE));
+    root->setAttribute(_("xmlns"), _(DESC_DEVICE_NAMESPACE));
      
     Ref<Element> specVersion(new Element(_("specVersion")));
     specVersion->appendTextChild(_("major"), _(DESC_SPEC_VERSION_MAJOR));
@@ -362,7 +362,7 @@ Ref<Element> UpnpXML_DIDLRenderResource(String URL, Ref<Dictionary> attributes)
     {
         Ref<DictionaryElement> el = elements->get(i);
         attribute = el->getKey();
-        res->addAttribute(attribute, el->getValue());
+        res->setAttribute(attribute, el->getValue());
     }
 
     return res;

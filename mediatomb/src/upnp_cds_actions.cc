@@ -97,11 +97,11 @@ void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
     }
 
     Ref<Element> didl_lite (new Element(_("DIDL-Lite")));
-    didl_lite->addAttribute(_(XML_NAMESPACE_ATTR), 
+    didl_lite->setAttribute(_(XML_NAMESPACE_ATTR), 
                             _(XML_DIDL_LITE_NAMESPACE));
-    didl_lite->addAttribute(_(XML_DC_NAMESPACE_ATTR), 
+    didl_lite->setAttribute(_(XML_DC_NAMESPACE_ATTR), 
                             _(XML_DC_NAMESPACE));
-    didl_lite->addAttribute(_(XML_UPNP_NAMESPACE_ATTR), 
+    didl_lite->setAttribute(_(XML_UPNP_NAMESPACE_ATTR), 
                             _(XML_UPNP_NAMESPACE));
     
     for(int i = 0; i < arr->size(); i++)

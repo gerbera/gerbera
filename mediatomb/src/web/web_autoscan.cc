@@ -165,7 +165,7 @@ void web::autoscan::process()
         {
             Ref<AutoscanDirectory> autoscanDir = autoscanList->get(i);
             Ref<Element> autoscanEl (new Element(_("autoscan")));
-            autoscanEl->addAttribute(_("objectID"), String::from(autoscanDir->getObjectID()));
+            autoscanEl->setAttribute(_("objectID"), String::from(autoscanDir->getObjectID()));
             autoscanEl->appendTextChild(_("location"), autoscanDir->getLocation());
             autoscanEl->appendTextChild(_("scan_mode"), AutoscanDirectory::mapScanmode(autoscanDir->getScanMode()));
             autoscanEl->appendTextChild(_("from_config"), autoscanDir->persistent() ? _("1") : _("0"));

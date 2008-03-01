@@ -73,12 +73,12 @@ void web::edit_load::process()
     
     Ref<Element> title (new Element(_("title")));
     title->setText(obj->getTitle());
-    title->addAttribute(_("editable"), obj->isVirtual() || objectID == CDS_ID_FS_ROOT ? _("1") : _("0"));
+    title->setAttribute(_("editable"), obj->isVirtual() || objectID == CDS_ID_FS_ROOT ? _("1") : _("0"));
     item->appendElementChild(title);
     
     Ref<Element> classEl (new Element(_("class")));
     classEl->setText(obj->getClass());
-    classEl->addAttribute(_("editable"), _("1"));
+    classEl->setAttribute(_("editable"), _("1"));
     item->appendElementChild(classEl);
     
     int objectType = obj->getObjectType();
@@ -90,27 +90,27 @@ void web::edit_load::process()
         
         Ref<Element> description (new Element(_("description")));
         description->setText(objItem->getMetadata(_("dc:description")));
-        description->addAttribute(_("editable"), _("1"));
+        description->setAttribute(_("editable"), _("1"));
         item->appendElementChild(description);
         
         Ref<Element> location (new Element(_("location")));
         location->setText(objItem->getLocation());
         if (IS_CDS_PURE_ITEM(objectType) || ! objItem->isVirtual())
-            location->addAttribute(_("editable"),_("0"));
+            location->setAttribute(_("editable"),_("0"));
         else
-            location->addAttribute(_("editable"),_("1"));
+            location->setAttribute(_("editable"),_("1"));
         item->appendElementChild(location);
         
         Ref<Element> mimeType (new Element(_("mime-type")));
         mimeType->setText(objItem->getMimeType());
-        mimeType->addAttribute(_("editable"), _("1"));
+        mimeType->setAttribute(_("editable"), _("1"));
         item->appendElementChild(mimeType);
         
         if (IS_CDS_ITEM_EXTERNAL_URL(objectType))
         {
             Ref<Element> protocol (new Element(_("protocol")));
             protocol->setText(getProtocol(objItem->getResource(0)->getAttribute(_("protocolInfo"))));
-            protocol->addAttribute(_("editable"), _("1"));
+            protocol->setAttribute(_("editable"), _("1"));
             item->appendElementChild(protocol);
         }
         else if (IS_CDS_ACTIVE_ITEM(objectType))
@@ -119,12 +119,12 @@ void web::edit_load::process()
             
             Ref<Element> action (new Element(_("action")));
             action->setText(objActiveItem->getAction());
-            action->addAttribute(_("editable"), _("1"));
+            action->setAttribute(_("editable"), _("1"));
             item->appendElementChild(action);
             
             Ref<Element> state (new Element(_("state")));
             state->setText(objActiveItem->getState());
-            state->addAttribute(_("editable"), _("1"));
+            state->setAttribute(_("editable"), _("1"));
             item->appendElementChild(state);
         }
     }

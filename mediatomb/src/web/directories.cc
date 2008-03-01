@@ -59,9 +59,9 @@ void web::directories::process()
         path = hex_decode_string(parentID);
     
     Ref<Element> containers (new Element(_("containers")));
-    containers->addAttribute(_("ofId"), parentID);
-    containers->addAttribute(_("select_it"), param(_("select_it")));
-    containers->addAttribute(_("type"), _("f"));
+    containers->setAttribute(_("ofId"), parentID);
+    containers->setAttribute(_("select_it"), param(_("select_it")));
+    containers->setAttribute(_("type"), _("f"));
     root->appendElementChild(containers);
     
     Ref<Filesystem> fs(new Filesystem());
@@ -74,10 +74,10 @@ void web::directories::process()
     }
     catch (Exception e)
     {
-        containers->addAttribute(_("success"), _("0"));
+        containers->setAttribute(_("success"), _("0"));
         return;
     }
-    containers->addAttribute(_("success"), _("1"));
+    containers->setAttribute(_("success"), _("1"));
     
 
     for (int i = 0; i < arr->size(); i++)
@@ -94,9 +94,9 @@ void web::directories::process()
         
         /// \todo replace hex_encode with base64_encode?
         String id = hex_encode(filepath.c_str(), filepath.length());
-        ce->addAttribute(_("id"), id);
+        ce->setAttribute(_("id"), id);
         if (obj->hasContent)
-            ce->addAttribute(_("childCount"), String::from(1));
+            ce->setAttribute(_("childCount"), String::from(1));
 
         Ref<StringConverter> f2i = StringConverter::f2i();
         ce->setText(f2i->convert(filename));

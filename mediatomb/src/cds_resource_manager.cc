@@ -283,9 +283,9 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                 {
                     /// \todo clean this up, make sure to check the mimetype and
                     /// provide the profile correctly
-                    aa->addAttribute(_("xmlns:dlna"), 
+                    aa->setAttribute(_("xmlns:dlna"), 
                                      _("urn:schemas-dlna-org:metadata-1-0"));
-                    aa->addAttribute(_("dlna:profileID"), _("JPEG_TN"));
+                    aa->setAttribute(_("dlna:profileID"), _("JPEG_TN"));
                 }
 #endif
                 element->appendElementChild(aa);

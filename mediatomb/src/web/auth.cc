@@ -89,14 +89,14 @@ void web::auth::process()
         Ref<ConfigManager> cm = ConfigManager::getInstance();
         Ref<Element> config (new Element(_("config")));
         root->appendElementChild(config);
-        config->addAttribute(_("poll-when-idle"), 
+        config->setAttribute(_("poll-when-idle"), 
             (cm->getBoolOption(
                           CFG_SERVER_UI_POLL_WHEN_IDLE) ? _("yes") : _("no")));
-        config->addAttribute(_("poll-interval"), 
+        config->setAttribute(_("poll-interval"), 
             String::from(cm->getIntOption(CFG_SERVER_UI_POLL_INTERVAL)));
 /// CREATE XML FRAGMENT FOR ITEMS PER PAGE
         Ref<Element> ipp (new Element(_("items-per-page")));
-        ipp->addAttribute(_("default"), 
+        ipp->setAttribute(_("default"), 
           String::from(cm->getIntOption(CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE)));
     
         Ref<Array<StringBase> > menu_opts = 
@@ -110,11 +110,11 @@ void web::auth::process()
         config->appendElementChild(ipp);
 #ifdef HAVE_INOTIFY
         if (cm->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
-            config->addAttribute(_("have-inotify"), _("1"));
+            config->setAttribute(_("have-inotify"), _("1"));
         else
-            config->addAttribute(_("have-inotify"), _("0"));
+            config->setAttribute(_("have-inotify"), _("0"));
 #else
-        config->addAttribute(_("have-inotify"), _("0"));
+        config->setAttribute(_("have-inotify"), _("0"));
 #endif
     }
     else if (param(_("checkSID")) != nil)
@@ -138,7 +138,7 @@ void web::auth::process()
             if (sid == nil || (session = sessionManager->getSession(sid)) == nil)
             {
                 session = sessionManager->createSession(timeout);
-                root->addAttribute(_("sid"), session->getID());
+                root->setAttribute(_("sid"), session->getID());
             }
             if (! session->isLoggedIn())
                 session->logIn();
@@ -161,7 +161,7 @@ void web::auth::process()
     {
         Ref<SessionManager> sessionManager = SessionManager::getInstance();
         Ref<Session> session = sessionManager->createSession(timeout);
-        root->addAttribute(_("sid"), session->getID());
+        root->setAttribute(_("sid"), session->getID());
         
         // sending token
         String token = generate_token();

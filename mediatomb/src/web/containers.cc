@@ -58,11 +58,11 @@ void web::containers::process()
 
         
     Ref<Element> containers (new Element(_("containers")));
-    containers->addAttribute(_("ofId"), String::from(parentID));
-    containers->addAttribute(_("type"), _("d"));
+    containers->setAttribute(_("ofId"), String::from(parentID));
+    containers->setAttribute(_("type"), _("d"));
 
     if (string_ok(param(_("select_it"))))
-        containers->addAttribute(_("select_it"), param(_("select_it")));
+        containers->setAttribute(_("select_it"), param(_("select_it")));
     root->appendElementChild(containers);
     
     Ref<BrowseParam> param(new BrowseParam(parentID, BROWSE_DIRECT_CHILDREN | BROWSE_CONTAINERS));
@@ -73,10 +73,10 @@ void web::containers::process()
     }
     catch (Exception e)
     {
-        containers->addAttribute(_("success"), _("0"));
+        containers->setAttribute(_("success"), _("0"));
         return;
     }
-    containers->addAttribute(_("success"), _("1"));
+    containers->setAttribute(_("success"), _("1"));
     
     for (int i = 0; i < arr->size(); i++)
     {
@@ -85,12 +85,12 @@ void web::containers::process()
         //{
         Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
         Ref<Element> ce(new Element(_("container")));
-        ce->addAttribute(_("id"), String::from(cont->getID()));
+        ce->setAttribute(_("id"), String::from(cont->getID()));
         int childCount = cont->getChildCount();
         if (childCount)
-            ce->addAttribute(_("childCount"), String::from(childCount));
+            ce->setAttribute(_("childCount"), String::from(childCount));
         int autoscanType = cont->getAutoscanType();
-        ce->addAttribute(_("autoscanType"), String::from(autoscanType));
+        ce->setAttribute(_("autoscanType"), String::from(autoscanType));
         
         int autoscanMode = 0;
         if (autoscanType > 0)
@@ -105,7 +105,7 @@ void web::containers::process()
             }
 #endif
         }
-        ce->addAttribute(_("autoscanMode"), String::from(autoscanMode));
+        ce->setAttribute(_("autoscanMode"), String::from(autoscanMode));
         ce->setText(cont->getTitle());
         containers->appendElementChild(ce);
         //}

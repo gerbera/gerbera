@@ -60,7 +60,7 @@ void web::items::process()
     
     Ref<Storage> storage = Storage::getInstance();
     Ref<Element> items (new Element(_("items")));
-    items->addAttribute(_("ofId"), String::from(parentID));
+    items->setAttribute(_("ofId"), String::from(parentID));
     root->appendElementChild(items);
     Ref<CdsObject> obj;
     try
@@ -69,7 +69,7 @@ void web::items::process()
     }
     catch (ObjectNotFoundException e)
     {
-        items->addAttribute(_("success"), _("0"));
+        items->setAttribute(_("success"), _("0"));
         return;
     }
     Ref<BrowseParam> param(new BrowseParam(parentID, BROWSE_DIRECT_CHILDREN | BROWSE_ITEMS));
@@ -86,21 +86,21 @@ void web::items::process()
     }
     catch (ObjectNotFoundException e)
     {
-        items->addAttribute(_("success"), _("0"));
+        items->setAttribute(_("success"), _("0"));
         return;
     }
-    items->addAttribute(_("success"), _("1"));
+    items->setAttribute(_("success"), _("1"));
     
     String location = obj->getVirtualPath(); 
     if (string_ok(location))
-        items->addAttribute(_("location"), location);
-    items->addAttribute(_("virtual"), (obj->isVirtual() ? _("1") : _("0")));
+        items->setAttribute(_("location"), location);
+    items->setAttribute(_("virtual"), (obj->isVirtual() ? _("1") : _("0")));
 
     int autoscanType = storage->getAutoscanDirectoryType(parentID);
-    items->addAttribute(_("autoscanType"), String::from(autoscanType));
-    items->addAttribute(_("start"), String::from(start));
-    //items->addAttribute(_("returned"), String::from(arr->size()));
-    items->addAttribute(_("totalMatches"), String::from(param->getTotalMatches()));
+    items->setAttribute(_("autoscanType"), String::from(autoscanType));
+    items->setAttribute(_("start"), String::from(start));
+    //items->setAttribute(_("returned"), String::from(arr->size()));
+    items->setAttribute(_("totalMatches"), String::from(param->getTotalMatches()));
 
     int protectContainer = 0;
     int protectItems = 0;
@@ -137,9 +137,9 @@ void web::items::process()
     }
 #endif
 
-    items->addAttribute(_("protectContainer"), String::from(protectContainer));
-    items->addAttribute(_("protectItems"), String::from(protectItems));
-    items->addAttribute(_("autoscanMode"), String::from(autoscanMode));
+    items->setAttribute(_("protectContainer"), String::from(protectContainer));
+    items->setAttribute(_("protectItems"), String::from(protectItems));
+    items->setAttribute(_("autoscanMode"), String::from(autoscanMode));
 
     for (int i = 0; i < arr->size(); i++)
     {
@@ -147,7 +147,7 @@ void web::items::process()
         //if (IS_CDS_ITEM(obj->getObjectType()))
         //{
         Ref<Element> item (new Element(_("item")));
-        item->addAttribute(_("id"), String::from(obj->getID()));
+        item->setAttribute(_("id"), String::from(obj->getID()));
         item->appendTextChild(_("title"), obj->getTitle());
         item->appendTextChild(_("res"), CdsResourceManager::getFirstResource(RefCast(obj, CdsItem)));
         item->appendTextChild(_("virtual"), obj->isVirtual() ? _("1") : _("0"));

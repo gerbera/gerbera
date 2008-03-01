@@ -46,13 +46,13 @@ class Element : public Node
 protected:
     zmm::String name;
     zmm::Ref<zmm::Array<Attribute> > attributes;
-
+    void addAttribute(zmm::Ref<Attribute> attr);
+    void addAttribute(zmm::String name, zmm::String value);
+    
 public:
     Element(zmm::String name);
     Element(zmm::String name, zmm::Ref<Context> context);
     zmm::String getAttribute(zmm::String name);
-    void addAttribute(zmm::Ref<Attribute> attr);
-    void addAttribute(zmm::String name, zmm::String value);
     void setAttribute(zmm::String name, zmm::String value);
     zmm::String getText();
 
@@ -90,6 +90,8 @@ public:
     
 protected:
     virtual void print_internal(zmm::Ref<zmm::StringBuffer> buf, int indent);
+    
+    friend class Parser;
 };
 
 
