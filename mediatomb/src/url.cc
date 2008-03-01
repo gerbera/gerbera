@@ -35,6 +35,7 @@
 
 #ifdef HAVE_CURL
 
+#include <pthread.h>
 #include "common.h"
 #include "rexp.h"
 #include "url.h"

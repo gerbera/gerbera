@@ -36,6 +36,8 @@
 
 #ifdef YOUTUBE
 
+#include <pthread.h>
+
 #include "youtube_video_url.h"
 #include "tools.h"
 #include "url.h"
