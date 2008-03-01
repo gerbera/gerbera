@@ -804,6 +804,15 @@ This should compile and install MediaTomb, the resulting binary is ready
  to run.
 \end_layout
 
+\begin_layout Description
+Note: if you checked out the sources from SVN the configure script will
+ not be available, you will have to create it with the following command:
+\end_layout
+
+\begin_layout Code
+autoreconf -i
+\end_layout
+
 \begin_layout Subsection
 Configure Options
 \end_layout
@@ -1272,7 +1281,7 @@ Id3lib Support
 \end_layout
 
 \begin_layout Description
-Default: enabled, preferred over taglib
+Default: disabled, used if taglib is not available
 \end_layout
 
 \begin_layout Standard
@@ -1291,7 +1300,7 @@ Taglib Support
 \end_layout
 
 \begin_layout Description
-Default: disabled if id3lib is available
+Default: enabled, preffered over id3lib
 \end_layout
 
 \begin_layout Standard
@@ -1358,7 +1367,7 @@ Inotify Support
 \end_layout
 
 \begin_layout Description
-Default: enabled
+Default: auto
 \end_layout
 
 \begin_layout Standard
@@ -1367,6 +1376,15 @@ Inotify is a kernel mechanism that allows monitoring of filesystem events.
  the Timed mode which recsans given directories in specified intervals,
  Inotify mode will immedeately propagate changes in monitored directories
  on the filesystem to the database.
+ 
+\end_layout
+
+\begin_layout Standard
+If you do not specify this option configure will check if inotify works
+ on the build system and compile it in only if the check succeeds.
+ If you specify this option, the functionality will be compiled in even
+ if the build system does not support inotify - the availability of inotify
+ will then be checked at server runtime.
 \end_layout
 
 \begin_layout Subsubsection
@@ -1400,6 +1418,25 @@ External Transcoding
 
 \begin_layout Description
 Default: enabled
+\end_layout
+
+\begin_layout Subsubsection
+Curl
+\end_layout
+
+\begin_layout Code
+--enable-curl
+\end_layout
+
+\begin_layout Description
+Default: enabled if external transcoding or YouTube features are turned
+ on
+\end_layout
+
+\begin_layout Standard
+It only makes sense to enable the curl library if YouTube and External Transcodi
+ng are turned on.
+ YouTube requires curl, but it's optional for External Transcoding.
 \end_layout
 
 \begin_layout Subsubsection
@@ -5785,6 +5822,12 @@ Optional
 Tells the server what content the specified mimetype actually is.
 \end_layout
 
+\begin_layout Description
+Note: it makes no sense to define 'as' values that are not below, the server
+ only needs to know the content type of the ones specified, otherwise it
+ does not matter.
+\end_layout
+
 \begin_layout Standard
 The 'as' attribute can have following values:
 \end_layout
@@ -5900,6 +5943,91 @@ Default mimetype: image/jpeg
 
 \begin_layout Standard
 The content is a jpeg image and should be processed by libexif (if available).
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+playlist
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default mimetype: audio/x-mpegurl or audio/x-scpls
+\end_layout
+
+\begin_layout Standard
+The content is a playlist and should be processed by the playlist parser
+ script.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+pcm
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default mimetype: audio/L16 or audio/x-wav
+\end_layout
+
+\begin_layout Standard
+The content is a PCM file.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+avi
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default mimetype: video/x-msvideo
+\end_layout
+
+\begin_layout Standard
+The content is an AVI container, FourCC extraction will be attempted.
 \end_layout
 
 \begin_layout Standard
