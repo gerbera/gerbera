@@ -276,6 +276,7 @@ Ref<Element> ConfigManager::renderOnlineSection()
 
     Ref<Element> yt(new Element(_("YouTube")));
     yt->setAttribute(_("enabled"), _(DEFAULT_YOUTUBE_ENABLED));
+    yt->setAttribute(_("dev-id"), _(""));
     // 8 hours refresh cycle
     yt->setAttribute(_("refresh"), String::from(DEFAULT_YOUTUBE_REFRESH)); 
     yt->setAttribute(_("update-at-start"), _(DEFAULT_YOUTUBE_UPDATE_AT_START));
@@ -528,6 +529,7 @@ String ConfigManager::createDefaultConfig(String userhome)
     mtcontent->appendElementChild(treat_as(_("audio/x-mpegurl"),_("playlist")));
     mtcontent->appendElementChild(treat_as(_("audio/x-scpls"), _("playlist")));
     mtcontent->appendElementChild(treat_as(_("audio/x-wav"), _("pcm")));
+    mtcontent->appendElementChild(treat_as(_("audio/L16"), _("pcm")));
     mtcontent->appendElementChild(treat_as(_("video/x-msvideo"), _("avi")));
 
     mappings->appendElementChild(mtcontent);
@@ -1104,6 +1106,7 @@ void ConfigManager::validate(String serverhome)
         mime_content->put(_("audio/x-mpegurl"), _(CONTENT_TYPE_PLAYLIST));
         mime_content->put(_("audio/x-scpls"), _(CONTENT_TYPE_PLAYLIST));
         mime_content->put(_("audio/x-wav"), _(CONTENT_TYPE_PCM));
+        mime_content->put(_("audio/L16"), _(CONTENT_TYPE_PCM));
         mime_content->put(_("video/x-msvideo"), _(CONTENT_TYPE_AVI));
     }
 
@@ -1591,6 +1594,17 @@ void ConfigManager::validate(String serverhome)
     // check other options only if the service is enabled
     if (temp == "yes")
     {
+        temp = getOption(_("/import/online-content/YouTube/attribute::dev-id"),
+                         _(""));
+
+        if (!string_ok(temp))
+        {
+            throw _Exception(_("Invalid dev-id for YouTube service!\nYou can get a developer ID by registering at http://youtube.com/\nPlease check http://www.youtube.com/t/terms\nBy using this feature you may violate YouTube service terms and conditions!"));
+        }
+
+        NEW_OPTION(temp);
+        SET_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_DEV_ID);
+
         temp_int = getIntOption(_("/import/online-content/YouTube/attribute::refresh"), 0);
         NEW_INT_OPTION(temp_int);
         SET_INT_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_REFRESH);
@@ -1631,6 +1645,8 @@ void ConfigManager::validate(String serverhome)
 
         NEW_OBJARR_OPTION(yt_opts);
         SET_OBJARR_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_TASK_LIST);
+
+        log_warning("Please check http://www.youtube.com/t/terms\nBy using this feature you may violate YouTube service terms and conditions!");
     }
 #endif
 

@@ -50,10 +50,6 @@ using namespace mxml;
 
 // REST API defines
 
-// Please do not use our deveoper ID elsewhere/in other projects.
-// If you need to create your own, you can easily do so at http://youtube.com/
-#define MT_DEV_ID                       "jyNuyIwi30E"
-
 // Base request URL
 #define REST_BASE_URL                   "http://www.youtube.com/api2_rest?"
 
@@ -206,7 +202,7 @@ YouTubeService::~YouTubeService()
 YouTubeService::YouTubeTask::YouTubeTask()
 {
     parameters = zmm::Ref<Dictionary>(new Dictionary());
-    parameters->put(_(REST_PARAM_DEV_ID), _(MT_DEV_ID));
+//    parameters->put(_(REST_PARAM_DEV_ID), ConfigManager::getInstance()->getOption(CFG_ONLINE_CONTENT_YOUTUBE_DEV_ID));
     method = YT_list_none;
     category = YT_cat_none;
     amount = 0;
@@ -641,6 +637,7 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
     if (task == nil)
         throw _Exception(_("Encountered invalid task!"));
 
+    task->parameters->put(_(REST_PARAM_DEV_ID), ConfigManager::getInstance()->getOption(CFG_ONLINE_CONTENT_YOUTUBE_DEV_ID));
 
     if (hasPaging(task->method) && 
        ((task->amount == AMOUNT_ALL) || (task->amount > PER_PAGE_MAX)))

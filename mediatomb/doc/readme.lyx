@@ -240,6 +240,10 @@ sophisticated web UI with a tree view of the database and the file system,
 \end_layout
 
 \begin_layout Itemize
+highly flexible transcoding media format transcoding via plugins / scripts
+\end_layout
+
+\begin_layout Itemize
 support for external URLs (create links to internet content and serve them
  via UPnP to your renderer)
 \end_layout
@@ -6767,6 +6771,17 @@ MediaTomb allows you to watch YouTube videos using your UPnP device, you
 \end_layout
 
 \begin_layout Description
+WANING: by using this feature you may be violating the YouTube service terms
+ and conditions: 
+\begin_inset LatexCommand url
+target "http://www.youtube.com/t/terms"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Description
 Note: we do not download/mirror the actual videos, we only get description
  of the content and present it in the database.
  The actual video is only streamed when you press play on your device.
@@ -6803,8 +6818,8 @@ status open
 \end_layout
 
 \begin_layout Code
-<YouTube enabled="no" refresh="12600" update-at-start="yes" purge-after="1200000
-">
+<YouTube enabled="no" dev-id="" refresh="12600" update-at-start="yes" purge-afte
+r="1200000">
 \end_layout
 
 \begin_layout Standard
@@ -6865,6 +6880,43 @@ no
 \end_inset
 
 .
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+dev-id=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: not available
+\end_layout
+
+\begin_layout Standard
+Currently we implement the old REST interface, it required a developer id
+ to operate.
+ The dev-id can be requested at http://youtube.com/ The new interface does
+ not require the dev id anymore, we will be updating our code soon.
 \end_layout
 
 \begin_layout Standard
