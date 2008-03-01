@@ -1003,7 +1003,7 @@ else
     ACX_PTHREAD(,AC_MSG_ERROR(POSIX threads missing))
 
     if test $FREEBSD_OS -eq 1; then
-        ADD_PTHREAD_CFLAGS="$PTHREAD_CFLAGS"
+        ADD_PTHREAD_CFLAGS="$PTHREAD_CFLAGS $PTHREAD_LIBS"
     fi
 
     AC_SUBST(PTHREAD_LIBS)
