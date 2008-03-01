@@ -34,10 +34,13 @@
 
 #include "zmmf/zmmf.h"
 
-#ifdef HAVE_EXPAT
+#ifndef HAVE_EXPAT
+    #error Expat is needed to compile MediaTomb!
+#endif
+
 #include <expat.h>
 #include "zmmf/object_stack.h"
-#endif
+
 namespace mxml
 {
 
@@ -45,10 +48,6 @@ class Element;
 
 class Context;
 
-#ifndef HAVE_EXPAT
-    class Input;
-#endif
-    
 class Parser : public zmm::Object
 {
 public:
@@ -58,10 +57,6 @@ public:
 
 protected:
 
-#ifndef HAVE_EXPAT
-    zmm::Ref<Element> parse(zmm::Ref<Context> ctx, zmm::Ref<Input> input,
-                            zmm::String parentTag, int state);
-#else
     zmm::Ref<Element> parse(zmm::Ref<Context> ctx, zmm::String input);
 
     zmm::Ref<zmm::ObjectStack<Element> > elements;
@@ -72,7 +67,6 @@ protected:
     static void XMLCALL element_end(void *userdata, const char *name);
     static void XMLCALL character_data(void *userdata, const XML_Char *s, int len);
     static void XMLCALL comment_callback(void *userdata, const XML_Char *s);
-#endif
 
 };
 

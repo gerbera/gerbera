@@ -40,10 +40,7 @@
 #include "element.h"
 #include "xml_text.h"
 #include "comment.h"
-#include "fileinput.h"
-#include "input.h"
 #include "parseexception.h"
 #include "parser.h"
-#include "stringinput.h"
 
 #endif // __MXML_H__
