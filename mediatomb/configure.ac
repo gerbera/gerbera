@@ -2214,7 +2214,7 @@ if (((test $YOUTUBE -eq 1) || (test $EXTERNAL_TRANSCODING -eq 1)) && (test $USE_
         fi
    fi 
 
-   if test "$CURL_PROG_FOUND" -eq 1 ; then
+   if test $CURL_PROG_FOUND -eq 1 ; then
         AC_MSG_CHECKING(curl cflags)
         CURL_CFLAGS=`${curlconfig} --cflags`
         AC_MSG_RESULT($CURL_CFLAGS)
@@ -2251,9 +2251,14 @@ else
         AC_MSG_ERROR([unable to configure curl which is required for YouTube support!])
     fi
     if test $EXTERNAL_TRANSCODING -eq 1; then
-        if ((test $USE_CURL -eq 1) && (test $CURL_REQUESTE -eq 0)); then
+        if ((test $USE_CURL -eq 1) && (test $CURL_REQUESTED -eq 0)); then
             AC_MSG_WARN([unable to configure curl, external transcoding will have limited functionality!])
         fi
+
+        if ((test $USE_CURL -eq 1) && (test $CURL_REQUESTED -eq 1)); then
+            AC_MSG_ERROR([You enabled curl support but the curl library could not be configured])
+        fi
+
     fi
 
     if (test $YOUTUBE -eq 0) && (test $EXTERNAL_TRANSCODING -eq 0); then
