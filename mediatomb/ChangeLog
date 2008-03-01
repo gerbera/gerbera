@@ -8,7 +8,6 @@ v0.11.0 External transcoding support
           Ingo Preiml
 		* added vorbis / theora detection for ogg containers, so video files
 		  should not end up in audio containers anymore
-		* implemented YouTube service support
 		* fixed bug where database-file option was still checked even when
 		  MySQL was selected in the configuration
 		* fixed a bug where check of the home directory was enforced even if 
