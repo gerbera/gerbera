@@ -164,36 +164,6 @@ function addImage(obj)
     }
 }
 
-
-function addYouTube(obj)
-{
-    var chain;
-    var temp = parseInt(obj.aux[YOUTUBE_AUXDATA_AVG_RATING], 10);
-    if (temp != Number.NaN)
-    {
-        temp = Math.round(temp);
-        if (temp > 3)
-        {
-            var chain = new Array('Online Services', 'YouTube', 'Rating', 
-                                  temp.toString());
-            addCdsObject(obj, createContainerChain(chain));
-        }
-    }
-
-    temp = obj.aux[YOUTUBE_AUXDATA_REQUEST];
-    if (temp)
-    {
-        var subName = (obj.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME]);
-
-        if (subName)
-            chain = new Array('Online Services', 'YouTube', temp, subName);
-        else
-            chain = new Array('Online Services', 'YouTube', temp);
-
-        addCdsObject(obj, createContainerChain(chain));
-    }
-}
-
 // main script part
 
 if (getPlaylistType(orig.mimetype) == '')
@@ -213,10 +183,7 @@ if (getPlaylistType(orig.mimetype) == '')
     
     if (mime == 'video')
     {
-        if (obj.onlineservice == ONLINE_SERVICE_NONE)
-            addVideo(obj);
-        else if (obj.onlineservice == ONLINE_SERVICE_YOUTUBE)
-            addYouTube(obj);
+        addVideo(obj);
     }
     
     if (mime == 'image')
