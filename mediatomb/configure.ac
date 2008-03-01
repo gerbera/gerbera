@@ -515,7 +515,25 @@ AC_HELP_STRING([--enable-youtube],
               ]
 )
 
-if ((test $YOUTUBE -eq 1) || (test $EXTERNAL_TRANSCODING -eq 1)); then
+
+USE_CURL=1
+CURL_REQUESTED=0
+AC_ARG_ENABLE([curl],
+              [
+AC_HELP_STRING([--enable-curl],
+[Enable curl support (required for YouTube (default: auto)])
+              ],
+              [
+                if test "x$enableval" = xno; then
+                    USE_CURL=0
+                    CURL_REQUESTED=1
+                else
+                    CURL_REQUESTED=1
+                    USE_CURL=1
+                fi 
+              ]
+)
+
 AC_ARG_WITH([curl-cfg],
             [
 AC_HELP_STRING([--with-curl-cfg=curl-config],
@@ -525,8 +543,7 @@ AC_HELP_STRING([--with-curl-cfg=curl-config],
                 CURL_SEARCH_CONFIG="$withval"
                 AC_MSG_NOTICE([Will search for curl-config in $withval])
             ]
-    )
-fi
+)
 
 
 SKIP_FSEEKO_TEST=0
@@ -2143,7 +2160,23 @@ CURL_PROG_FOUND=0
 CURL_LIBS=
 CURL_CFLAGS=
 CURL_OK=no
-if ((test $YOUTUBE -eq 1) || (test $EXTERNAL_TRANSCODING -eq 1)); then
+
+if ((test $YOUTUBE -eq 1) && (test $YOUTUBE_REQUESTED -eq 1) && (test $USE_CURL -eq 0) && (test $CURL_REQUESTED -eq 1)); then
+    AC_MSG_ERROR([You enabled YouTube but disabled curl, however curl is required by the YouTube feature])
+fi
+
+if ((test $YOUTUBE -eq 0) && (test $EXTERNAL_TRANSCODING -eq 0)); then
+    if test $USE_CURL -eq 1; then
+        if test $CURL_REQUESTED -eq 1; then
+            AC_MSG_ERROR([You enabled curl support but YouTube and external transcoding features are disabled - curl is not needed without these features])
+        else
+            CURL_OK=no
+            USE_CURL=0
+        fi
+    fi
+fi
+
+if (((test $YOUTUBE -eq 1) || (test $EXTERNAL_TRANSCODING -eq 1)) && (test $USE_CURL -eq 1)); then
     AC_MSG_NOTICE([Checking for curl (needed for YouTube/extended external transcoding support)])
     CURL_OK=yes
     if test -n "$CURL_SEARCH_CONFIG"; then
@@ -2214,10 +2247,12 @@ if test "x$CURL_OK" = xyes; then
 else
     YOUTUBE=0
     if test $YOUTUBE_REQUESTED -eq 1; then
-        AC_MSG_ERROR(unable to configure curl which is required for YouTube support)
+        AC_MSG_ERROR([unable to configure curl which is required for YouTube support!])
     fi
     if test $EXTERNAL_TRANSCODING -eq 1; then
-        AC_MSG_WARN(unable to configure curl, external transcoding will have limited functionality)
+        if ((test $USE_CURL -eq 1) && (test $CURL_REQUESTE -eq 0)); then
+            AC_MSG_WARN([unable to configure curl, external transcoding will have limited functionality!])
+        fi
     fi
 
     if (test $YOUTUBE -eq 0) && (test $EXTERNAL_TRANSCODING -eq 0); then
