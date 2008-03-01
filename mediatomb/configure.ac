@@ -2364,7 +2364,7 @@ LIBS_SAVE="$LIBS"
 unset LIBS
 if test "x$FFMPEG_OK" = xyes; then
     if test -n "$FFMPEG_SEARCH_LIBS" ; then
-        LDFLAGS="-L$FFMPEG_SEARCH_LIBS"
+        LDFLAGS="-L$FFMPEG_SEARCH_LIBS $ADD_PTHREAD_CFLAGS"
         AC_CHECK_LIB(avformat, av_register_all,
                 [
                     AC_CHECK_LIB(avutil, av_log_set_callback,
@@ -2374,12 +2374,12 @@ if test "x$FFMPEG_OK" = xyes; then
                         [
                             AC_MSG_ERROR([avutil libraries not found in requested path $FFMPEG_SEARCH_LIBS])
                         ],
-                        [ -lavcodec -lavutil -lz ])
+                        [ -lavcodec -lavutil -lz $ADD_PTHREAD_CFLAGS ])
                 ],
                 [
                     AC_MSG_ERROR([avformat libraries not found in requested path $FFMPEG_SEARCH_LIBS])
                 ],
-                [ -lavcodec -lavutil -lz ]
+                [ -lavcodec -lavutil -lz $ADD_PTHREAD_CFLAGS ]
         )
     else
         AC_CHECK_LIB(avformat, av_register_all,
@@ -2398,11 +2398,11 @@ if test "x$FFMPEG_OK" = xyes; then
                             [
                                FFMPEG_OK=missing
                             ],
-                            [ -lavcodec -lavutil -lz ])
+                            [ -lavcodec -lavutil -lz $ADD_PTHREAD_CFLAGS ])
                     ])
             ],
             [
-                LDFLAGS="-L$SEARCH_DIR_LIBS"
+                LDFLAGS="-L$SEARCH_DIR_LIBS $ADD_PTHREAD_CFLAGS"
                 unset ac_cv_lib_avformat_av_register_all
                 AC_CHECK_LIB(avformat, av_register_all,
                     [
@@ -2414,13 +2414,13 @@ if test "x$FFMPEG_OK" = xyes; then
                             [
                                FFMPEG_OK=missing
                             ],
-                            [ -lavcodec -lavutil -lz ])
+                            [ -lavcodec -lavutil -lz $ADD_PTHREAD_CFLAGS ])
                     ],
                     [ FFMPEG_OK=missing ],
-                    [ -lavcodec -lavutil -lz ]
+                    [ -lavcodec -lavutil -lz $ADD_PTHREAD_CFLAGS ]
                 )
             ],
-            [ -lavcodec -lavutil -lz ]
+            [ -lavcodec -lavutil -lz $ADD_PTHREAD_CFLAGS ]
         )
     fi
 fi
