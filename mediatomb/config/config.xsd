@@ -289,6 +289,7 @@
                 <xs:element ref="autoscan" minOccurs="0"/>
                 <xs:element ref="library-options" minOccurs="0"/>
                 <xs:element ref="magic-file" minOccurs="0"/>
+                <xs:element ref="online-content" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="hidden-files" type="boolean" default="no"/>
         </xs:complexType>
@@ -569,5 +570,97 @@
     <xs:element name="resolution" type="xs:string"/>
     
     <xs:element name="thumbnail" type="boolean"/>
+    
+    <!-- online-content -->
+
+    <xs:element name="online-content">
+        <xs:complexType>
+            <xs:all>
+                <xs:element ref="YouTube" minOccurs="0"/>
+            </xs:all>
+            <xs:attribute name="fetch-buffer-size" type="xs:positiveInteger" default="262144"/>
+            <xs:attribute name="fetch-buffer-fill-size" type="xs:nonNegativeInteger" default="0"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="YouTube">
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element ref="favorites"/>
+                <xs:element ref="featured"/>
+                <xs:element ref="tag"/>
+                <xs:element ref="user"/>
+                <xs:element ref="playlist"/>
+                <xs:element ref="popular"/>
+                <xs:element ref="category-and-tag"/>
+            </xs:choice>
+            <xs:attribute name="enabled" type="boolean" default="no"/>
+            <xs:attribute name="refresh" type="xs:nonNegativeInteger" default="0"/>
+            <xs:attribute name="purge-after" type="xs:nonNegativeInteger" default="0"/>
+            <xs:attribute name="update-at-start" type="boolean" default="no"/>
+            <xs:attribute name="dev-id" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="favorites">
+        <xs:complexType>
+            <xs:attribute name="user" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="featured"/>
+
+    <xs:element name="tag">
+        <xs:complexType>
+            <xs:attribute name="tag" type="xs:string" use="required"/>
+            <xs:attribute name="start-page" type="xs:nonNegativeInteger" use="required"/>
+            <!-- to be done better; can be a number or "all" -->
+            <xs:attribute name="amount" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="user">
+        <xs:complexType>
+            <xs:attribute name="user" type="xs:string" use="required"/>
+            <xs:attribute name="start-page" type="xs:nonNegativeInteger" use="required"/>
+            <!-- to be done better; can be a number or "all" -->
+            <xs:attribute name="amount" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="playlist">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:string" use="required"/>
+            <xs:attribute name="start-page" type="xs:nonNegativeInteger" use="required"/>
+            <!-- to be done better; can be a number or "all" -->
+            <xs:attribute name="amount" type="xs:string" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="popular">
+        <xs:complexType>
+            <xs:attribute name="time-range" use="required">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="all"/>
+                        <xs:enumeration value="day"/>
+                        <xs:enumeration value="week"/>
+                        <xs:enumeration value="month"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="category-and-tag">
+        <xs:complexType>
+            <xs:attribute name="category" type="xs:string" use="required"/>
+            <xs:attribute name="tag" type="xs:string" use="required"/>
+            <xs:attribute name="start-page" type="xs:nonNegativeInteger" use="required"/>
+            <!-- to be done better; can be a number or "all" -->
+            <xs:attribute name="amount" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
 
 </xs:schema>
