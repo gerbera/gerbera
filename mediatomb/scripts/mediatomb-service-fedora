@@ -2,7 +2,7 @@
 #
 # mediatomb This script starts and stops the mediatomb daemon
 #
-# chkconfig: 2345 95 30
+# chkconfig: - 95 30
 # processname: mediatomb
 # description: mediatomb is a daemon process which provides a UPnP service
 # config: /etc/mediatomb
