@@ -1,8 +1,0 @@
-#!/bin/sh -e
-
-chown mediatomb:mediatomb /etc/mediatomb/config.xml
-chown mediatomb:mediatomb /var/lib/mediatomb
-
-#DEBHELPER#
-
-exit 0
