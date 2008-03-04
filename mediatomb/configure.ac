@@ -500,21 +500,21 @@ fi
 
 YOUTUBE=0
 YOUTUBE_REQUESTED=0
-dnl
-dnl AC_ARG_ENABLE([youtube],
-dnl               [
-dnl AC_HELP_STRING([--enable-youtube],
-dnl [Enable support for the YouTube service (default: yes)])
-dnl               ],
-dnl              [
-dnl                if test "x$enableval" = xno; then
-dnl                    YOUTUBE=0
-dnl                else
-dnl                    YOUTUBE_REQUESTED=1
-dnl                    YOUTUBE=1
-dnl                fi 
-dnl              ]
-dnl )
+
+AC_ARG_ENABLE([youtube],
+              [
+AC_HELP_STRING([--enable-youtube],
+[Enable support for the YouTube service (default: yes)])
+              ],
+             [
+               if test "x$enableval" = xyes; then
+                   YOUTUBE_REQUESTED=1
+                   YOUTUBE=1
+               else
+                   YOUTUBE=0
+               fi 
+             ]
+)
 
 
 USE_CURL=1
@@ -522,7 +522,7 @@ CURL_REQUESTED=0
 AC_ARG_ENABLE([curl],
               [
 AC_HELP_STRING([--enable-curl],
-[Enable curl support (provides additional functionality for the external transcoding feature (default: auto)])
+[Enable curl support (required for YouTube support, provides additional functionality for the external transcoding feature (default: auto)])
               ],
               [
                 if test "x$enableval" = xno; then
@@ -2169,7 +2169,7 @@ fi
 if ((test $YOUTUBE -eq 0) && (test $EXTERNAL_TRANSCODING -eq 0)); then
     if test $USE_CURL -eq 1; then
         if test $CURL_REQUESTED -eq 1; then
-            AC_MSG_ERROR([You enabled curl support but the external transcoding features is disabled - curl is not needed without it])
+            AC_MSG_ERROR([You enabled curl support but the external transcoding and YouTube features are disabled - curl is not needed without it])
         else
             CURL_OK=no
             USE_CURL=0
@@ -2178,7 +2178,7 @@ if ((test $YOUTUBE -eq 0) && (test $EXTERNAL_TRANSCODING -eq 0)); then
 fi
 
 if (((test $YOUTUBE -eq 1) || (test $EXTERNAL_TRANSCODING -eq 1)) && (test $USE_CURL -eq 1)); then
-    AC_MSG_NOTICE([Checking for curl (needed for extended external transcoding support)])
+    AC_MSG_NOTICE([Checking for curl (needed for extended external transcoding and YouTube support)])
     CURL_OK=yes
     if test -n "$CURL_SEARCH_CONFIG"; then
         AC_MSG_NOTICE([You specified $CURL_SEARCH_CONFIG for curl-config])
@@ -2919,8 +2919,26 @@ dnl information.
                                 AC_MSG_RESULT([no])
                             fi
                             INOTIFY_OK=missing
+                        ],
+                        [
+                            if test "x$INOTIFY_EN" = xyes; then
+                                AC_MSG_RESULT([selecting yes for cross compiling]) 
+                                INOTIFY_OK=yes
+                            else
+                                AC_MSG_RESULT([selecting no for cross compiling]) 
+                                INOTIFY_OK=no
+                            fi
                         ])
 
+                ],
+                [
+                    if test "x$INOTIFY_EN" = xyes; then
+                        AC_MSG_RESULT([selecting yes for cross compiling]) 
+                        INOTIFY_OK=yes
+                    else
+                        AC_MSG_RESULT([selecting no for cross compiling]) 
+                        INOTIFY_OK=no
+                    fi
                 ])
 fi
 
@@ -3051,7 +3069,7 @@ echo "id3lib                : $ID3_OK"
 echo "taglib                : $TAGLIB_OK"
 echo "ffmpeg                : $FFMPEG_OK"
 echo "external transcoding  : $EXTERNAL_TRANSCODING_OK"
-# echo "YouTube               : $YOUTUBE_OK"
+#echo "YouTube               : $YOUTUBE_OK"
 echo "libextractor          : $EXTRACTOR_OK"
 
 
