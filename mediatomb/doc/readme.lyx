@@ -1425,6 +1425,23 @@ Default: enabled
 \end_layout
 
 \begin_layout Subsubsection
+Sqlite Backup Defaults
+\end_layout
+
+\begin_layout Code
+--enable-sqlite-backup-defaults
+\end_layout
+
+\begin_layout Description
+Default: disabled
+\end_layout
+
+\begin_layout Standard
+Enables backup option for sqlite as the default setting, might be useful
+ for NAS builds.
+\end_layout
+
+\begin_layout Subsubsection
 Curl
 \end_layout
 

@@ -1,4 +1,8 @@
 MediaTomb - UPnP AV Mediaserver.
+v0.12.0
+        * added configure settings to enable sqlite backups by default
+        * added cross compile defaults for the inotify check to configure
+
 v0.11.0 01.03.2008  External transcoding support
         * implemented transcoding support that allows to plug in an arbitrary
           transcoding application

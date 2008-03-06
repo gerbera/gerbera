@@ -385,6 +385,13 @@ String ConfigManager::createDefaultConfig(String userhome)
     Ref<Element> sqlite3(new Element(_("sqlite3")));
     sqlite3->setAttribute(_("enabled"), _(DEFAULT_SQLITE_ENABLED));
     sqlite3->appendTextChild(_("database-file"), _(DEFAULT_SQLITE3_DB_FILENAME));
+#ifdef SQLITE_BACKUP_ENABLED
+//    <backup enabled="no" interval="6000"/>
+    Ref<Element> backup(new Element(_("backup")));
+    backup->setAttribute(_("enabled"), _(YES));
+    backup->setAttribute(_("interval"), String::from(DEFAULT_SQLITE_BACKUP_INTERVAL));
+    sqlite3->appendElementChild(backup);
+#endif
     storage->appendElementChild(sqlite3);
 #endif
 #ifdef HAVE_MYSQL
@@ -889,9 +896,13 @@ void ConfigManager::validate(String serverhome)
 
         NEW_BOOL_OPTION(tmp_bool);
         SET_BOOL_OPTION(CFG_SERVER_STORAGE_SQLITE_RESTORE);
-
+#ifndef SQLITE_BACKUP_ENABLED
+        temp = getOption(_("/server/storage/sqlite3/backup/attribute::enabled"),
+                _(YES));
+#else
         temp = getOption(_("/server/storage/sqlite3/backup/attribute::enabled"),
                 _(DEFAULT_SQLITE_BACKUP_ENABLED));
+#endif
         if (!validateYesNo(temp))
             throw _Exception(_("Error in config file: incorrect parameter "
                         "for <backup enabled=\"\" /> attribute"));

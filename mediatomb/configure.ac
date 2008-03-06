@@ -471,10 +471,23 @@ AC_HELP_STRING([--disable-external-transcoding],
 [enable external transcoding support (default: yes)])
               ],
               [
-                if test "x$enableval" = xno; then
-                    EXTERNAL_TRANSCODING=0
-                else
+                if test "x$enableval" = xyes; then
                     EXTERNAL_TRANSCODING=1
+                else
+                    EXTERNAL_TRANSCODING=0
+                fi
+              ]
+)
+
+SQLITE_BACKUP_ENABLED=0
+AC_ARG_ENABLE([sqlite-backup-defaults],
+                      [
+AC_HELP_STRING([--enable-sqlite-backup-defaults],
+[enable sqlite database backup settings in config.xml by default (default: no)])
+              ],
+              [
+                if test "x$enableval" = xyes; then
+                    SQLITE_BACKUP_ENABLED=1
                 fi
               ]
 )
@@ -1224,10 +1237,19 @@ if test "x$SQLITE3_OK" = xyes; then
     AC_DEFINE([HAVE_SQLITE3], [1], [sqlite3 library presence])
     AC_SUBST(SQLITE3_CXXFLAGS)
     AC_SUBST(SQLITE3_LIBS)
+
+    if test $SQLITE_BACKUP_ENABLED -eq 1; then
+        AC_DEFINE([SQLITE_BACKUP_ENABLED], [1], [enable sqlite db backup settings in config.xml by default])
+    fi
 else
     if test "x$SQLITE3_EN" = xyes; then
         AC_MSG_ERROR(unable to configure sqlite3 support)
     fi
+
+    if test $SQLITE_BACKUP_ENABLED -eq 1; then
+        AC_MSG_ERROR(You specified the option to use sqlite backup settings but the sqlite library is not available)
+    fi
+
 fi
 
 LDFLAGS="$LDFLAGS_SAVE"
