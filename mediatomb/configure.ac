@@ -1943,7 +1943,7 @@ if test "x$TAGLIB_OK" = xyes; then
 fi
 
 if test "x$TAGLIB_OK" = xyes; then
-    LDFLAGS="$TAGLIB_LIBS"
+    LDFLAGS="$LDFLAGS $TAGLIB_LIBS"
     AC_CHECK_LIB(tag, main, [],
         [TAGLIB_OK=missing]
     )
