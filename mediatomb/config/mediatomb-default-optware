@@ -1,0 +1,8 @@
+# defaults file for the mediatomb daemon mode
+
+# start mediatomb daemon mode from init.d script?
+# allowed values are "true" and "false"
+
+MT_ENABLE=false
+
+# further mediatomb daemon configuration is done in /opt/etc/mediatomb.conf
