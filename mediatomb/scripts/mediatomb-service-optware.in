@@ -31,8 +31,7 @@ case "$1" in
 
     # Check if MT is already running
     if [ -e @prefix@/var/lock/mediatomb ] ; then
-        echo "mediatomb is already running"
-        exit 0
+        $0 stop
     fi
 
     # Start daemon.
@@ -60,7 +59,7 @@ case "$1" in
         echo -n "Shutting down mediatomb: "
 
     if [ -f ${MT_PIDFILE} ] ; then
-        kill `cat ${MT_PIDFILE}`
+        kill `cat ${MT_PIDFILE}` 2>/dev/null
     else
         killall mediatomb 2>/dev/null
     fi
