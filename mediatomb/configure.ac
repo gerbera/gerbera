@@ -3065,6 +3065,7 @@ AC_CONFIG_FILES([
     doc/Makefile
     scripts/Makefile
     scripts/js/Makefile
+    scripts/mediatomb-service-optware
     tombupnp/Makefile
     tombupnp/build/Makefile
     web/Makefile
@@ -3091,6 +3092,7 @@ echo "id3lib                : $ID3_OK"
 echo "taglib                : $TAGLIB_OK"
 echo "ffmpeg                : $FFMPEG_OK"
 echo "external transcoding  : $EXTERNAL_TRANSCODING_OK"
+echo "curl                  : $CURL_OK"
 #echo "YouTube               : $YOUTUBE_OK"
 echo "libextractor          : $EXTRACTOR_OK"
 

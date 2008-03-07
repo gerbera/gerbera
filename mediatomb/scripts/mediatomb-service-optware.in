@@ -1,0 +1,67 @@
+#!/bin/sh
+#
+# mediatomb This script starts and stops the mediatomb daemon
+#
+# chkconfig: - 95 30
+# processname: mediatomb
+# description: mediatomb is a daemon process which provides a UPnP service
+# config: @prefix@/etc/mediatomb
+# config: @prefix@/etc/mediatomb/config.xml
+# pidfile: @prefix@/var/run/mediatomb.pid
+
+# Source default mediatomb configuration
+. @prefix@/etc/mediatomb.conf
+
+MEDIATOMB="-d -u $MT_USER -g $MT_GROUP -P $MT_PIDFILE -l $MT_LOGFILE -m $MT_HOME -f $MT_CFGDIR -p $MT_PORT"
+
+[ -f @prefix@/bin/mediatomb ] || exit 0
+
+# By default it's all good
+RETVAL=0
+
+# See how we were called.
+case "$1" in
+  start)
+    # Start daemon.
+    touch $MT_PIDFILE
+    chown $MT_USER.$MT_GROUP $MT_PIDFILE
+
+    mkdir -p "/$MT_HOME/$MT_CFGDIR"
+    chown  $MT_USER.$MT_GROUP "/$MT_HOME/$MT_CFGDIR"
+    
+    echo -n "Starting mediatomb: "
+    
+    @prefix@/bin/mediatomb $MEDIATOMB $MT_OPTIONS
+    
+    RETVAL=$?
+        echo
+        [ $RETVAL = 0 ] && touch /var/lock/mediatomb
+        ;;
+  stop)
+        # Stop daemons.
+        echo -n "Shutting down mediatomb: "
+
+    if [ -f ${MT_PIDFILE} ] ; then
+        kill `cat ${MT_PIDFILE}`
+    else
+        killall mediatomb
+    fi
+        RETVAL=$?
+        echo
+        [ $RETVAL = 0 ] && rm -f /var/lock/mediatomb && rm -f ${MT_PIDFILE} 
+        
+        ;;
+  restart)
+        $0 stop
+        $0 start
+        ;;
+  condrestart)
+       [ -e /var/lock/mediatomb ] && $0 restart
+       ;;
+  *)
+    echo "Usage: $0 {start|stop|restart|condrestart}"
+    RETVAL=1
+    ;;
+esac
+
+exit $RETVAL
