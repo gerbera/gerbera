@@ -1302,6 +1302,12 @@ bool isTheora(String ogg_filename)
     FILE *f;
     char buffer[7];
     f = fopen(ogg_filename.c_str(), "rb");
+
+    if (!f)
+    {
+        throw _Exception(_("Error opening ") + ogg_filename + _(" : ") + 
+                    mt_strerror(errno));
+    }
     
     if (fread(buffer, 1, 4, f) != 4)
     {
