@@ -131,7 +131,7 @@ int main(int argc, char **argv, char **envp)
     if (preload != NULL)
         ld_preload = String(preload);
 
-    if ((preload == NULL) || (ld_preload.find("0@0") != -1))
+    if ((preload == NULL) || (ld_preload.find("0@0") == -1))
     {
         printf("MediaTomb: Solaris check failed!\n");
         printf("Please set the environment to match glibc behaviour!\n");
