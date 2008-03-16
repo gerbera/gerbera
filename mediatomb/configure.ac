@@ -1843,6 +1843,40 @@ if test "x$MAGIC_OK" = xyes; then
 fi
 
 if test "x$MAGIC_OK" = xyes; then
+    AC_MSG_CHECKING([if libmagic is broken (Slackware check)])
+    CFLAGS="$CFLAGS $MAGIC_CXXLAGS"
+    CXXFLAGS="$CXXFLAGS $MAGIC_CXXFLAGS"
+    LDFLAGS="$LDFLAGS $MAGIC_LIBS"
+    AC_LANG_SAVE
+    AC_LANG_C
+    AC_RUN_IFELSE(
+        AC_LANG_PROGRAM([[ #include <magic.h> ]],
+         [[
+            struct magic_set *ms;
+            ms = magic_open(MAGIC_MIME);
+            if (ms == 0)
+                return 0;
+            magic_load(ms, 0);
+            magic_close(ms);
+            return 0;
+         ]]
+        ),
+        [
+            AC_MSG_RESULT([no]);
+        ],
+        [
+            AC_MSG_RESULT([yes])
+            MAGIC_OK=broken
+            AC_MSG_WARN([your magic library is broken, if you are using Slackware install the 'file' package manually])
+        ],
+        [
+            AC_MSG_RESULT([passing for cross compiling])
+        ])
+
+   AC_LANG_RESTORE
+fi
+
+if test "x$MAGIC_OK" = xyes; then
     AC_DEFINE([HAVE_MAGIC], [1], [filemagic library presence])
     AC_SUBST(MAGIC_CXXFLAGS)
     AC_SUBST(MAGIC_LIBS)
@@ -1852,6 +1886,8 @@ else
     fi
 fi
 
+CFLAGS="$CFLAGS_SAVE"
+CXXFLAGS="$CXXFLAGS_SAVE"
 LDFLGAS="$LDFLAGS_SAVE"
 
 ######### taglib or id3lib
