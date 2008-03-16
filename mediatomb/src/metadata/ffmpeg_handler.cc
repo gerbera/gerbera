@@ -147,7 +147,7 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext *pFormatC
     secs %= 60;
     hours = mins / 60;
     mins %= 60;
-    if (hours > 0 && mins > 0 && secs > 0) 
+    if ((hours + mins + secs) > 0) 
     { 
     	sprintf(duration, "%02d:%02d:%02d.%01d", hours, mins,
                 secs, (10 * us) / AV_TIME_BASE);
