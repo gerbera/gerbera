@@ -167,6 +167,21 @@ AC_ARG_WITH(expat-libs,
         ]
 )
 
+AC_ARG_WITH(libmp4v2-h,
+        AC_HELP_STRING([--with-libmp4v2-h=DIR], [search for libmp4v2 headers in DIR]),
+        [
+            LIBMP4V2_SEARCH_HEADERS="$withval"
+            AC_MSG_NOTICE([Will search for libmp4v2 headers in $withval])
+        ]
+)
+
+AC_ARG_WITH(libmp4v2-libs,
+        AC_HELP_STRING([--with-libmp4v2-libs=DIR], [search for libmp4v2 libraries in DIR]),
+        [
+            LIBMP4V2_SEARCH_LIBS="$withval"
+            AC_MSG_NOTICE([Will search for libmp4v2 libraries in $withval])
+        ]
+)
 
 AC_ARG_WITH(taglib-cfg,
         AC_HELP_STRING([--with-taglib-cfg=taglib-config], [absolute path/name of taglib-config]),

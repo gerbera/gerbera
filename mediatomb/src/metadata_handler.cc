@@ -51,6 +51,9 @@
 #endif // HAVE_ID3
 #endif // HAVE_TAGLIB
 
+#ifdef HAVE_LIBMP4V2
+#include "metadata/libmp4v2_handler.h"
+#endif
 
 #ifdef HAVE_FFMPEG
 #include "metadata/ffmpeg_handler.h"
@@ -173,6 +176,14 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
 #endif // EXTRACTOR
         
 #endif // HAVE_EXIF
+
+#ifdef HAVE_LIBMP4V2
+        if (content_type == CONTENT_TYPE_MP4)
+        {
+            handler = Ref<MetadataHandler>(new LibMP4V2Handler());
+            break;
+        }
+#endif
 
 #ifdef HAVE_FFMPEG
         if ((content_type != CONTENT_TYPE_PLAYLIST) &&

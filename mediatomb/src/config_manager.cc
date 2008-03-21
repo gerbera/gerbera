@@ -538,6 +538,8 @@ String ConfigManager::createDefaultConfig(String userhome)
     mtcontent->appendElementChild(treat_as(_("audio/x-wav"), _("pcm")));
     mtcontent->appendElementChild(treat_as(_("audio/L16"), _("pcm")));
     mtcontent->appendElementChild(treat_as(_("video/x-msvideo"), _("avi")));
+    mtcontent->appendElementChild(treat_as(_("video/mp4"), _("mp4")));
+    mtcontent->appendElementChild(treat_as(_("audio/mp4"), _("mp4")));
 
     mappings->appendElementChild(mtcontent);
     import->appendElementChild(mappings);
@@ -1111,6 +1113,8 @@ void ConfigManager::validate(String serverhome)
     {
         mime_content = Ref<Dictionary>(new Dictionary());
         mime_content->put(_("audio/mpeg"), _(CONTENT_TYPE_MP3));
+        mime_content->put(_("audio/mp4"), _(CONTENT_TYPE_MP4));
+        mime_content->put(_("video/mp4"), _(CONTENT_TYPE_MP4));
         mime_content->put(_("application/ogg"), _(CONTENT_TYPE_OGG));
         mime_content->put(_("audio/x-flac"), _(CONTENT_TYPE_FLAC));
         mime_content->put(_("image/jpeg"), _(CONTENT_TYPE_JPG));
