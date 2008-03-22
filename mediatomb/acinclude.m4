@@ -231,3 +231,129 @@ else
 fi
 AC_LANG_RESTORE
 ])dnl ACX_PTHREAD
+
+# sets the search path which is used by MT_HAVE_PACKAGE
+AC_DEFUN([MT_SET_SEARCHPATH],
+[
+    AC_REQUIRE([AC_CANONICAL_HOST])
+
+    mt_searchpath="/usr/local"
+    case $host in
+        *-*-darwin*)
+            mt_searchpath="/opt/local"
+        ;;
+    esac
+
+    AC_ARG_WITH(search,
+        AC_HELP_STRING([--with-search=DIR], [Additionally search for packages in DIR]),
+        [
+            mt_searchpath=$withval
+            AC_MSG_NOTICE([Will also search for packages in ${mt_searchpath}])
+        ]
+    )
+
+])
+
+# $1 package name
+# $2 required/optional
+# $3 enable/disable
+# $4 enable/disable help string
+# $5 header
+
+AC_DEFUN([MT_HAVE_PACKAGE], 
+[
+    mt_$1_required=0
+    mt_$1_arg_default=yes
+    mt_$1_ok=yes
+    mt_$1_requested=no
+    mt_$1_enabled=yes
+
+    LIBS_SAVE=$LIBS
+    LDFLAGS_SAVE=$LDFLAGS
+    CFLAGS_SAVE=$CFLAGS
+    CXXFLAGS_SAVE=$CXXFLAGS
+    CPPFLAGS_SAVE=$CPPFLAGS
+
+    AC_ARG_WITH($1-h,
+        AC_HELP_STRING([--with-$1-h=DIR], [search for $1 headers in DIR]),
+        [
+            mt_$1_search_headers="$withval"
+            AC_MSG_NOTICE([Will search for $1 headers in $withval])
+        ]
+    )
+
+    AC_ARG_WITH($1-libs,
+        AC_HELP_STRING([--with-$1-libs=DIR], [search for $1 libraries in DIR]),
+        [
+            mt_$1_search_libs="$withval"
+            AC_MSG_NOTICE([Will search for $1 libs in $withval])
+        ]
+    )
+
+    if (test -n "$2") && (test "$2" = "required"); then
+        mt_$1_required=1
+    fi
+
+
+    if test -z "$3"; then
+        AC_MSG_ERROR([MT Package macro requires default enable/disable parameter])
+    fi
+
+    if test ${mt_$1_required} -eq 0; then
+        AC_ARG_ENABLE([$1],
+            AC_HELP_STRING([--$3-$1], [$4]),
+            [
+                mt_$1_enabled=$enableval
+                mt_$1_requested=yes
+                if test "x$enableval" = xno; then
+                    mt_$1_ok=disabled
+                fi
+            ]
+        )
+    fi
+
+    if test "x$mt_$1_ok" = xyes; then
+        if test "$mt_$1_search_headers" ; then
+            CFLAGS="$CFLAGS -I${mt_$1_search_headers}"
+            CXXFLAGS="$CXXFLAGS -I${mt_$1_search_headers}"
+            CPPFLAGS="$CPPFLAGS -I${mt_$1_search_headers}"
+            AC_CHECK_HEADER($mt_$1_search_headers/$5,
+                    [
+                        translit($1, `a-z', `A-Z')_CXXFLAGS="-I${mt_$1_search_headers}"
+                    ],
+                    [
+                        AC_MSG_ERROR([$1 headers not found in requested location $mt_$1_search_headers])
+                    ]
+           )
+        fi
+
+    fi
+
+
+    AC_SUBST(translit($1, `a-z', `A-Z')_CXXFLAGS)
+
+    LIBS=$LIBS_SAVE
+    LDFLAGS=$LDFLAGS_SAVE
+    CFLAGS=$CFLAGS_SAVE
+    CXXFLAGS=$CXXFLAGS_SAVE
+    CPPFLAGS=$CPPFLAGS_SAVE
+])
+
+dnl
+ dnl   if ${mt_$1_required} -eq 0; then
+ dnl       AC_ARG_ENABLE([$1],
+ dnl           AC_HELP_STRING([--enable-$1], [compile with $1 support (default: yes)]),
+ dnl  [
+ dnl      EXPAT_EN=$enableval 
+ dnl      if test "x$enableval" = xno; then
+ dnl          EXPAT_OK=disabled
+ dnl      else
+ dnl          EXPAT_OK=yes
+ dnl      fi
+ dnl  ],
+ dnl  [
+ dnl      EXPAT_OK=yes
+ dnl  ]
+ dnl   )
+ dnl   fi
+
