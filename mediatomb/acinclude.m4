@@ -237,36 +237,46 @@ AC_DEFUN([MT_SET_SEARCHPATH],
 [
     AC_REQUIRE([AC_CANONICAL_HOST])
 
-    mt_searchpath="/usr/local"
+    MT_SEARCHPATH="/usr/local"
     case $host in
         *-*-darwin*)
-            mt_searchpath="/opt/local"
+            MT_SEARCHPATH="/opt/local"
         ;;
     esac
 
     AC_ARG_WITH(search,
         AC_HELP_STRING([--with-search=DIR], [Additionally search for packages in DIR]),
         [
-            mt_searchpath=$withval
-            AC_MSG_NOTICE([Will also search for packages in ${mt_searchpath}])
+            MT_SEARCHPATH=$withval
+            AC_MSG_NOTICE([Will also search for packages in ${MT_SEARCHPATH}])
         ]
     )
 
+    MT_SEARCHPATH_HEADERS="${MT_SEARCHPATH}/include"
+    MT_SEARCHPATH_LIBS="${MT_SEARCHPATH}/lib"
+    MT_SEARCHPATH_PROGS="${MT_SEARCHPATH}/bin"
+
+    AC_SUBST(MT_SEARCHPATH)
+    AC_SUBST(MT_SEARCHPATH_HEADERS)
+    AC_SUBST(MT_SEARCHPATH_LIBS)
+    AC_SUBST(MT_SEARCHPATH_PROGS)
 ])
 
 # $1 package name
 # $2 required/optional
 # $3 enable/disable
 # $4 enable/disable help string
-# $5 header
+# $5 header name (without .h)
+# $6 library name
+# $7 functoin name
 
-AC_DEFUN([MT_HAVE_PACKAGE], 
+AC_DEFUN([MT_CHECK_PACKAGE], 
 [
     mt_$1_required=0
     mt_$1_arg_default=yes
     mt_$1_ok=yes
-    mt_$1_requested=no
-    mt_$1_enabled=yes
+    mt_$1_enabled=no
+    mt_$1_required=0
 
     LIBS_SAVE=$LIBS
     LDFLAGS_SAVE=$LDFLAGS
@@ -304,12 +314,13 @@ AC_DEFUN([MT_HAVE_PACKAGE],
             AC_HELP_STRING([--$3-$1], [$4]),
             [
                 mt_$1_enabled=$enableval
-                mt_$1_requested=yes
                 if test "x$enableval" = xno; then
                     mt_$1_ok=disabled
                 fi
             ]
         )
+    else
+        mt_$1_enabled=yes
     fi
 
     if test "x$mt_$1_ok" = xyes; then
@@ -317,20 +328,84 @@ AC_DEFUN([MT_HAVE_PACKAGE],
             CFLAGS="$CFLAGS -I${mt_$1_search_headers}"
             CXXFLAGS="$CXXFLAGS -I${mt_$1_search_headers}"
             CPPFLAGS="$CPPFLAGS -I${mt_$1_search_headers}"
-            AC_CHECK_HEADER($mt_$1_search_headers/$5,
-                    [
-                        translit($1, `a-z', `A-Z')_CXXFLAGS="-I${mt_$1_search_headers}"
-                    ],
-                    [
-                        AC_MSG_ERROR([$1 headers not found in requested location $mt_$1_search_headers])
-                    ]
-           )
+            AC_CHECK_HEADER($mt_$1_search_headers/$5.h,
+                [
+                    mt_$1_cxxflags="-I${mt_$1_search_headers}"
+                ],
+                [
+                    AC_MSG_ERROR([$1 headers not found in requested location $mt_$1_search_headers])
+                ]
+            )
+        else
+            AC_CHECK_HEADER($5.h,
+                [],
+                [
+                    CFLAGS="$CFLAGS -I$MT_SEARCHPATH_HEADERS"
+                    CXXFLAGS="$CXXFLAGS -I$MT_SEARCHPATH_HEADERS"
+                    CPPFLAGS="$CPPFLAGS -I$MT_SEARCHPATH_HEADERS"
+                    unset ac_cv_header_$5_h
+                    AC_CHECK_HEADER($MT_SEARCHPATH_HEADERS/$5.h,
+                        [
+                            mt_$1_cxxflags="-I${MT_SEARCHPATH_HEADERS}"
+                        ],
+                        [
+                            mt_$1_ok=missing
+                        ]
+                    )
+                ]
+            )
         fi
 
     fi
 
+    unset LIBS
+
+    if test "x$mt_$1_ok" = xyes; then
+        if test "$mt_$1_search_libs" ; then
+            LDFLAGS="-L$mt_$1_search_libs"
+            AC_CHECK_LIB($6, $7,
+                [
+                    mt_$1_libs="-L$mt_$1_search_libs -l$6"
+                ],
+                [
+                    AC_MSG_ERROR([$1 libraries not found in requested location $mt_$1_search_libs])
+                ]
+            )
+        else
+            AC_CHECK_LIB($6, $7,
+                [],
+                [
+                    LDFLAGS="-L$MT_SEARCHPATH_LIBS"
+                    unset ac_cv_lib_$6_$7
+                    AC_CHECK_LIB($6, $7,
+                        [
+                            mt_$1_libs="-L$MT_SEARCHPATH_LIBS -l$6"
+                        ],
+                        [
+                            mt_$1_ok=missing
+                        ]
+                    )
+                ]
+            )
+        fi
+    fi
+
+
+    translit($1, `a-z', `A-Z')_STATUS=${mt_$1_ok}
+    
+    if test "x$mt_$1_ok" = xyes; then
+        translit($1, `a-z', `A-Z')_CXXFLAGS=${mt_$1_cxxflags}
+        translit($1, `a-z', `A-Z')_LIBS=${mt_$1_libs}
+        AC_DEFINE(translit(HAVE_$1, `a-z', `A-Z'), [1], [$1 library presence])
+    else
+        if test "x$mt_$1_enabled" = xyes; then
+            AC_MSG_ERROR(unable to configure $1 support)
+        fi
+    fi
 
     AC_SUBST(translit($1, `a-z', `A-Z')_CXXFLAGS)
+    AC_SUBST(translit($1, `a-z', `A-Z')_LIBS)
+    AC_SUBST(translit($1, `a-z', `A-Z')_STATUS)
 
     LIBS=$LIBS_SAVE
     LDFLAGS=$LDFLAGS_SAVE
