@@ -1803,8 +1803,7 @@ AC_ARG_ENABLE(libmagic,
             fi
         ],
         [
-#  MAGIC_OK=yes
-            MAGIC_OK=no
+            MAGIC_OK=yes
         ]
 )
 
@@ -3161,7 +3160,7 @@ echo "mysql                 : $MYSQL_OK"
 echo "libjs                 : $JS_OK"
 echo "libmagic              : $MAGIC_OK"
 echo "inotify               : $INOTIFY_OK"
-echo "libexif               : $EXIF_OK"
+echo "libexif               : $LIBEXIF_STATUS"
 echo "expat                 : $EXPAT_OK"
 echo "id3lib                : $ID3_OK"
 echo "taglib                : $TAGLIB_OK"
