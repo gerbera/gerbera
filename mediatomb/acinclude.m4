@@ -373,7 +373,9 @@ AC_DEFUN([MT_CHECK_PACKAGE],
             )
         else
             AC_CHECK_LIB($6, $7,
-                [],
+                [
+                    mt_$1_libs="-l$6"
+                ],
                 [
                     LDFLAGS="-L$MT_SEARCHPATH_LIBS"
                     unset ac_cv_lib_$6_$7

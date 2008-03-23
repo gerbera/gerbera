@@ -63,7 +63,7 @@
 #include "metadata/extractor_handler.h"
 #endif
 
-#ifdef HAVE_EXIF
+#ifdef HAVE_LIBEXIF
 #include "metadata/libexif_handler.h"
 #endif
 
@@ -160,7 +160,7 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
 */
 #endif
 
-#ifdef HAVE_EXIF
+#ifdef HAVE_LIBEXIF
         if (content_type == CONTENT_TYPE_JPG)
         {
             handler = Ref<MetadataHandler>(new LibExifHandler());
@@ -175,7 +175,7 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
         }
 #endif // EXTRACTOR
         
-#endif // HAVE_EXIF
+#endif // HAVE_LIBEXIF
 
 #ifdef HAVE_LIBMP4V2
         if (content_type == CONTENT_TYPE_MP4)
@@ -237,7 +237,7 @@ Ref<MetadataHandler> MetadataHandler::createHandler(int handlerType)
 {
     switch(handlerType)
     {
-#ifdef HAVE_EXIF
+#ifdef HAVE_LIBEXIF
         case CH_LIBEXIF:
             return Ref<MetadataHandler>(new LibExifHandler());
 #endif

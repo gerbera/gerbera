@@ -1523,7 +1523,7 @@ void ConfigManager::validate(String serverhome)
     NEW_STRARR_OPTION(createArrayFromNodeset(el, _("add"), _("header")));
     SET_STRARR_OPTION(CFG_SERVER_CUSTOM_HTTP_HEADERS);
 
-#ifdef HAVE_EXIF    
+#ifdef HAVE_LIBEXIF    
 
     el = getElement(_("/import/library-options/libexif/auxdata"));
     if (el == nil)
@@ -1535,7 +1535,7 @@ void ConfigManager::validate(String serverhome)
     NEW_STRARR_OPTION(createArrayFromNodeset(el, _("add-data"), _("tag")));
     SET_STRARR_OPTION(CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST);
 
-#endif // HAVE_EXIF
+#endif // HAVE_LIBEXIF
 
 #ifdef HAVE_EXTRACTOR
 

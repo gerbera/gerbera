@@ -19,7 +19,7 @@ libmediatomb_a_CXXFLAGS = \
                      $(ICONV_CXXFLAGS) \
                      $(MAGIC_CXXFLAGS) \
                      $(ID3_CXXFLAGS) \
-                     $(EXIF_CXXFLAGS) \
+                     $(LIBEXIF_CXXFLAGS) \
                      $(Z_CXXFLAGS) \
                      $(PTHREAD_CFLAGS) \
                      $(INOTIFY_CXXFLAGS) \
@@ -43,7 +43,7 @@ mediatomb_CXXFLAGS = -I$(top_srcdir)/src \
                      $(ICONV_CXXFLAGS) \
                      $(MAGIC_CXXFLAGS) \
                      $(ID3_CXXFLAGS) \
-                     $(EXIF_CXXFLAGS) \
+                     $(LIBEXIF_CXXFLAGS) \
                      $(Z_CXXFLAGS) \
                      $(PTHREAD_CFLAGS) \
                      $(INOTIFY_CXXFLAGS) \
@@ -63,7 +63,7 @@ mediatomb_LDADD = \
     $(JS_LIBS) \
     $(MAGIC_LIBS) \
     $(ID3_LIBS) \
-    $(EXIF_LIBS) \
+    $(LIBEXIF_LIBS) \
     $(Z_LIBS) \
     $(RT_LIBS) \
     $(PTHREAD_CFLAGS) \

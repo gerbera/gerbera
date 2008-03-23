@@ -34,7 +34,7 @@
     #include "autoconfig.h"
 #endif
 
-#ifdef HAVE_EXIF
+#ifdef HAVE_LIBEXIF
 
 #include "libexif_handler.h"
 #include "tools.h"
@@ -447,4 +447,4 @@ Ref<IOHandler> LibExifHandler::serveContent(Ref<CdsItem> item, int resNum, off_t
     return h;
 }
 
-#endif // HAVE_EXIF
+#endif // HAVE_LIBEXIF
