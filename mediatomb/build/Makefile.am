@@ -54,6 +54,10 @@ mediatomb_CXXFLAGS = -I$(top_srcdir)/src \
 mediatomb_LDADD = \
     libmediatomb.a \
     $(top_srcdir)/tombupnp/build/libtombupnp.a \
+	$(LIBEXIF_LDFLAGS) \
+	$(ZLIB_LDFLAGS) \
+	$(EXPAT_LDFLAGS) \
+	$(RT_LDFLAGS) \
     $(ICONV_LIBS) \
     $(SQLITE3_LIBS) \
     $(MYSQL_LIBS) \
