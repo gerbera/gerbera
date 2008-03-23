@@ -136,39 +136,6 @@ AC_ARG_WITH(magic-libs,
         ]
 )
 
-
-AC_ARG_WITH(exif-h,
-        AC_HELP_STRING([--with-exif-h=DIR], [search for libexif headers in DIR]),
-        [
-            EXIF_SEARCH_HEADERS="$withval"
-            AC_MSG_NOTICE([Will search for libexif headers in $withval])
-        ]
-)
-
-AC_ARG_WITH(exif-libs,
-        AC_HELP_STRING([--with-exif-libs=DIR], [search for libexif libraries in DIR]),
-        [
-            EXIF_SEARCH_LIBS="$withval"
-            AC_MSG_NOTICE([Will search for libexif libraries in $withval])
-        ]
-)
-
-AC_ARG_WITH(expat-h,
-        AC_HELP_STRING([--with-expat-h=DIR], [search for expat headers in DIR]),
-        [
-            EXPAT_SEARCH_HEADERS="$withval"
-            AC_MSG_NOTICE([Will search for expat headers in $withval])
-        ]
-)
-
-AC_ARG_WITH(expat-libs,
-        AC_HELP_STRING([--with-expat-libs=DIR], [search for expat libraries in DIR]),
-        [
-            EXPAT_SEARCH_LIBS="$withval"
-            AC_MSG_NOTICE([Will search for libexif libraries in $withval])
-        ]
-)
-
 AC_ARG_WITH(libmp4v2-h,
         AC_HELP_STRING([--with-libmp4v2-h=DIR], [search for libmp4v2 headers in DIR]),
         [
@@ -206,20 +173,6 @@ AC_ARG_WITH(id3lib-libs,
         [
             ID3_SEARCH_LIBS="$withval"
             AC_MSG_NOTICE([Will search for id3 libraries in $withval])
-        ]
-)
-
-AC_ARG_WITH(zlib-h,
-        AC_HELP_STRING([--with-zlib-h=DIR], [search for zlib headers in DIR]),
-        [
-            Z_SEARCH_HEADERS="$withval"
-        ]
-)
-
-AC_ARG_WITH(zlib-libs,
-        AC_HELP_STRING([--with-zlib-libs=DIR], [search for zlib libraries in DIR]),
-        [
-            Z_SEARCH_LIBS="$withval"
         ]
 )
 
@@ -1078,115 +1031,24 @@ fi
 
 LIBS_SAVE="$LIBS"
 unset LIBS
-    
-# check librt stuff - clock_gettime
-AC_CHECK_FUNC([clock_gettime],
-        [
-            AC_DEFINE([HAVE_CLOCK_GETTIME], [1], [clock_gettime presense])
-# we sill might need -lrt for sqlite3, so let's check for it
-            if test "x$SQLITE3_OK" = xyes; then
-            AC_CHECK_LIB(rt, clock_gettime,
-                [
-                    RT_LIBS="-lrt"
-                ],
-                [
-                    LDFLAGS="-L$SEARCH_DIR_LIBS"
-                    unset ac_cv_lib_rt_clock_gettime
-                    AC_CHECK_LIB(rt, clock_gettime,
-                        [
-                            RT_LIBS="-L$SEARCH_DIR_LIBS -lrt"
-                        ]
-                    )
-                ]
-            )
-            fi
-        ],
-        [
-            AC_CHECK_LIB(rt, clock_gettime,
-                [
-                    RT_LIBS="-lrt"
-                    AC_DEFINE([HAVE_CLOCK_GETTIME], [1], [clock_gettime presense])
-                ],
-                [
-                    LDFLAGS="-L$SEARCH_DIR_LIBS"
-                    unset ac_cv_lib_rt_clock_gettime
-                    AC_CHECK_LIB(rt, clock_gettime,
-                        [
-                            RT_LIBS="-L$SEARCH_DIR_LIBS -lrt"
-                            AC_DEFINE([HAVE_CLOCK_GETTIME], [1], [clock_gettime presense])
-                        ]
-                    )
-                ]
-            )
-        ]
-)
 
-LIBS="$LIBS_SAVE"
-LDFLAGS="$LDFLAGS_SAVE"
-AC_SUBST(RT_LIBS)
+# we might need librt for sqlite
+MT_CHECK_LIBRARY([rt], [clock_gettime])
 
-    
-ZLIB_OK=yes
-Z_CXXFLAGS=
-Z_LIBS=
-if test -n "$Z_SEARCH_HEADERS" ; then
-    AC_MSG_NOTICE([Will search for zlib headers in $Z_SEARCH_HEADERS])
-    AC_CHECK_HEADER([$Z_SEARCH_HEADERS/zlib.h],
-            [
-                Z_CXXFLAGS="-I$Z_SEARCH_HEADERS"
-            ],
-            [
-                AC_MSG_ERROR([zlib.h not found in requested location $Z_SEARCH_HEADERS])
-            ]
-    )
-else
-   AC_CHECK_HEADER([zlib.h], [], 
-           [
-                unset ac_cv_header_zlib_h
-                AC_CHECK_HEADER([$SEARCH_DIR_HEADERS/zlib.h],
-                    [
-                        Z_CXXFLAGS="-I$SEARCH_DIR_HEADERS"
-                    ],
-                    [
-                        ZLIB_OK=missing
-                    ])
-           ])
+if test "x$RT_STATUS" != xyes; then
+    AC_CHECK_FUNC(clock_gettime)
 fi
 
-if test -n "$Z_SEARCH_LIBS" ; then     
-    AC_MSG_NOTICE([Will search for zlib libraries in $Z_SEARCH_LIBS])
-    LDFLAGS="-L$Z_SEARCH_LIBS"
-    AC_CHECK_LIB(z, uncompress,
-            [
-                Z_LIBS="-L$Z_SEARCH_LIBS -lz"
-            ],
-            [
-                AC_MSG_ERROR([zlib libraries not found in requested location $Z_SEARCH_LIBS])
-            ]
-    )
-else
-    AC_CHECK_LIB(z,uncompress,
-            [],
-            [
-                LDFLAGS="-L$SEARCH_DIR_LIBS"
-                unset ac_cv_lib_z_uncompress
-                AC_CHECK_LIB(z, uncompress,
-                    [
-                        Z_LIBS="-L$SEARCH_DIR_LIBS -lz"
-                    ],
-                    [
-                        ZLIB_OK=missing
-                    ]
-                )
-                    
-            ]
-    )
-fi
+############ zlib
 
-if test "x$ZLIB_OK" = xyes; then
-    AC_SUBST(Z_CXXFLAGS)
-    AC_SUBST(Z_LIBS)
+MT_CHECK_PACKAGE([zlib], [optional], [enable],
+                 [compile with zlib for automated database creation support],
+                 [zlib],
+                 [z],
+                 [uncompress])
+    
 
+if test "x$ZLIB_STATUS" = xyes; then
     if test $AUTOCREATE -eq 1; then
         AC_DEFINE([AUTO_CREATE_DATABASE], [1], [create database automatically if it does not exist])
     fi
@@ -1249,11 +1111,11 @@ fi
 
 if test "x$SQLITE3_OK" = xyes; then
     if test -n "$SQLITE3_SEARCH_LIBS"; then
-        LDFLAGS="$LDFLAGS_SAVE -L$SQLITE3_SEARCH_LIBS $RT_LIBS $ADD_PTHREAD_CFLAGS"
+        LDFLAGS="$LDFLAGS_SAVE -L$SQLITE3_SEARCH_LIBS $RT_LDFLAGS $RT_LIBS $ADD_PTHREAD_CFLAGS"
         AC_MSG_NOTICE([Will search for sqlite3 libraries in $SQLITE3_SEARCH_LIBS])
         AC_CHECK_LIB(sqlite3, sqlite3_open,
                 [
-                    SQLITE3_LIBS="-L$SQLITE3_SEARCH_LIBS $RT_LIBS -lsqlite3"
+                    SQLITE3_LIBS="-L$SQLITE3_SEARCH_LIBS $RT_LDFLAGS $RT_LIBS -lsqlite3"
                     SQLITE3_OK=yes
                 ],
                 [
@@ -1261,17 +1123,17 @@ if test "x$SQLITE3_OK" = xyes; then
                 ]
         )
     else
-    LDFLAGS="$LDFLAGS_SAVE $RT_LIBS $ADD_PTHREAD_CFLAGS"
+    LDFLAGS="$LDFLAGS_SAVE  $RT_LDFLAGS $RT_LIBS $ADD_PTHREAD_CFLAGS"
     AC_CHECK_LIB(sqlite3, sqlite3_open, [],
         [
             SQLITE3_OK=missing
             for sqlite3_path in $SEARCH_DIR_LIBS; do
                 if test "x$ac_cv_lib_sqlite3_sqlite3_open" != xyes ; then
                     unset ac_cv_lib_sqlite3_sqlite3_open
-                    LDFLAGS="$LDFLAGS_SAVE -L$sqlite3_path $RT_LIBS $ADD_PTHREAD_CFLAGS"
+                    LDFLAGS="$LDFLAGS_SAVE -L$sqlite3_path $RT_LDFLAGS $RT_LIBS $ADD_PTHREAD_CFLAGS"
                     AC_CHECK_LIB(sqlite3, sqlite3_open,
                         [
-                            SQLITE3_LIBS="-L$sqlite3_path $RT_LIBS -lsqlite3"
+                            SQLITE3_LIBS="-L$sqlite3_path $RT_LDFLAGS $RT_LIBS -lsqlite3"
                             SQLITE3_OK=yes
                         ],
                         [
@@ -2747,131 +2609,10 @@ CXXFLAGS="$CXXFLAGS_SAVE"
 
 ######## expat
 
-dnl AC_ARG_ENABLE(libexpat,
-dnl        AC_HELP_STRING([--enable-libexpat], [compile with libexpat support (default: yes)]),
-dnl    [
-dnl        EXPAT_EN=$enableval 
-dnl        if test "x$enableval" = xno; then
-dnl            EXPAT_OK=disabled
-dnl        else
-dnl            EXPAT_OK=yes
-dnl        fi
-dnl    ],
-dnl    [
-dnl        EXPAT_OK=yes
-dnl    ]
-dnl)
-
-# expat is now required
-EXPAT_OK=yes
-EXPAT_EN=yes
-
-if test "x$EXPAT_OK" = xyes; then
-    if test -n "$EXPAT_SEARCH_HEADERS" ; then
-        CPPFLAGS="-I$EXPAT_SEARCH_HEADERS"
-        AC_CHECK_HEADER($EXPAT_SEARCH_HEADERS/expat.h,
-                [
-                    EXPAT_CXXFLAGS="-I$EXPAT_SEARCH_HEADERS"
-                ],
-                [
-                    AC_MSG_ERROR([libexpat headers not found in requested location $EXPAT_SEARCH_HEADERS])
-                ]
-        )
-    else 
-        AC_CHECK_HEADER(expat.h,
-            [],
-            [
-                CPPFLAGS="-I$SEARCH_DIR_HEADERS"
-                unset ac_cv_header_expat_h
-                AC_CHECK_HEADER($SEARCH_DIR_HEADERS/expat.h,
-                    [
-                        EXPAT_CXXFLAGS="-I$SEARCH_DIR_HEADERS"
-                    ],
-                    [
-                        EXPAT_OK=missing
-                    ]
-                )
-            ]
-        )
-    fi
-fi
-
-LIBS_SAVE="$LIBS"
-unset LIBS
-if test "x$EXPAT_OK" = xyes; then
-    if test -n "$EXPAT_SEARCH_LIBS" ; then
-        LDFLAGS="-L$EXPAT_SEARCH_LIBS"
-        AC_CHECK_LIB(expat, XML_ParserCreate,
-                [
-                    EXPAT_LIBS="-L$EXPAT_SEARCH_LIBS -lexpat"
-                ],
-                [
-                    AC_MSG_ERROR([libexpat libraries not found in requested path $EXPAT_SEARCH_LIBS])
-                ]
-        )
-    else
-        AC_CHECK_LIB(expat, XML_ParserCreate,
-            [],
-            [
-                LDFLAGS="-L$SEARCH_DIR_LIBS"
-                unset ac_cv_lib_expat_XML_ParserCreate
-                AC_CHECK_LIB(expat, XML_ParserCreate,
-                    [
-                        EXPAT_LIBS="-L$SEARCH_DIR_LIBS -lexpat"
-                    ],
-                    [ EXPAT_OK=missing ]
-                )
-            ]
-        )
-    fi
-fi
-
-LIBS="$LIBS_SAVE $LIBS"
-
-if test "x$EXPAT_OK" = xyes; then
-    AC_DEFINE([HAVE_EXPAT], [1], [expat library presence])
-    AC_SUBST(EXPAT_CXXFLAGS)
-    AC_SUBST(EXPAT_LIBS)
-else
-    if test "x$EXPAT_EN" = xyes; then
-        AC_MSG_ERROR(unable to configure expat support)
-    fi
-fi
-
-LDFLAGS="$LDFLAGS_SAVE"
-CPPFLAGS="$CPPFLAGS_SAVE"
-
-######## exiv2
-# TEMPORARILY DISABLED BECAUSE EXIV2 HAS MEMORY LEAKS
-
-#EXIV2_OK="disabled (force with --enable-exiv2)"
-#AC_ARG_ENABLE(exiv2,
-#  [  --enable-exiv2           exiv2 support],
-#  [
-#     EXIV2_EN=$enableval 
-#     if test "x$enableval" = xno; then
-#        EXIV2_OK=disabled
-#     fi
-#     if test "x$enableval" = xyes; then
-#        EXIV2_OK=yes
-#     fi
-#  ]
-#)
-#if test "x$EXIV2_OK" = xyes; then
-#    AC_CHECK_HEADER(exiv2/exif.hpp,
-#        [],
-#        [EXIV2_OK=missing],
-#        /* checking for exiv2/exif.h */
-#    )
-#fi
-#if test "x$EXIV2_OK" = xyes; then
-#   LDFLAGS="$LDFLAGS -lexiv2"
-#   AC_DEFINE(HAVE_EXIV2)
-#else
-#    if test "x$EXIV2_EN" = xyes; then
-#        AC_MSG_ERROR(unable to configure exiv2 support)
-#    fi
-#fi
+MT_CHECK_PACKAGE(expat, [required], , ,
+                [expat],
+                [expat],
+                [XML_ParserCreate])
 
 ########## INOTIFY TOOLS
 
@@ -3161,7 +2902,7 @@ echo "libjs                 : $JS_OK"
 echo "libmagic              : $MAGIC_OK"
 echo "inotify               : $INOTIFY_OK"
 echo "libexif               : $LIBEXIF_STATUS"
-echo "expat                 : $EXPAT_OK"
+echo "expat                 : $EXPAT_STATUS"
 echo "id3lib                : $ID3_OK"
 echo "taglib                : $TAGLIB_OK"
 echo "ffmpeg                : $FFMPEG_OK"
@@ -3191,7 +2932,6 @@ fi
 if test "$STATIC" = "yes"; then
     echo "static build          : $STATIC"
 fi
-# echo "  libjpeg     : $LIBJPEG_OK"
-# echo "  exiv2       : $EXIV2_OK"
+
 echo
 

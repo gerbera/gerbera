@@ -262,6 +262,84 @@ AC_DEFUN([MT_SET_SEARCHPATH],
     AC_SUBST(MT_SEARCHPATH_PROGS)
 ])
 
+
+# $1 library name
+# $2 function name
+
+AC_DEFUN([MT_CHECK_LIBRARY],
+[
+    mt_$1_arg_default=yes
+    mt_$1_ok=yes
+
+    LIBS_SAVE=$LIBS
+    LDFLAGS_SAVE=$LDFLAGS
+    CFLAGS_SAVE=$CFLAGS
+    CXXFLAGS_SAVE=$CXXFLAGS
+    CPPFLAGS_SAVE=$CPPFLAGS
+
+    AC_ARG_WITH($1-libs,
+        AC_HELP_STRING([--with-$1-libs=DIR], [search for $1 libraries in DIR]),
+        [
+            mt_$1_search_libs="$withval"
+            AC_MSG_NOTICE([Will search for $1 libs in $withval])
+        ]
+    )
+
+    unset LIBS
+
+    if test "x$mt_$1_ok" = xyes; then
+        if test "$mt_$1_search_libs" ; then
+            LDFLAGS="-L$mt_$1_search_libs"
+            AC_CHECK_LIB($1, $2,
+                [
+                    mt_$1_libs="-l$1"
+                    mt_$1_ldflags="-L$mt_$1_search_libs"
+                ],
+                [
+                    AC_MSG_ERROR([$1 library not found in requested location $mt_$1_search_libs])
+                ]
+            )
+        else
+            AC_CHECK_LIB($1, $2,
+                [
+                    mt_$1_libs="-l$1"
+                ],
+                [
+                    LDFLAGS="-L$MT_SEARCHPATH_LIBS"
+                    unset ac_cv_lib_$1_$2
+                    AC_CHECK_LIB($1, $2,
+                        [
+                            mt_$1_libs="-l$1"
+                            mt_$1_ldflags="-L$MT_SEARCHPATH_LIBS" 
+                        ],
+                        [
+                            mt_$1_ok=missing
+                        ]
+                    )
+                ]
+            )
+        fi
+    fi
+
+    translit($1, `a-z', `A-Z')_STATUS=${mt_$1_ok}
+    
+    if test "x$mt_$1_ok" = xyes; then
+        translit($1, `a-z', `A-Z')_LIBS=${mt_$1_libs}
+        translit($1, `a-z', `A-Z')_LDFLAGS=${mt_$1_ldflags}
+        AC_DEFINE(translit(HAVE_$1, `a-z', `A-Z'), [1], [$1 library presence])
+    fi
+
+    AC_SUBST(translit($1, `a-z', `A-Z')_LIBS)
+    AC_SUBST(translit($1, `a-z', `A-Z')_LDFLAGS)
+    AC_SUBST(translit($1, `a-z', `A-Z')_STATUS)
+
+    LIBS=$LIBS_SAVE
+    LDFLAGS=$LDFLAGS_SAVE
+    CFLAGS=$CFLAGS_SAVE
+    CXXFLAGS=$CXXFLAGS_SAVE
+    CPPFLAGS=$CPPFLAGS_SAVE
+])
+
 # $1 package name
 # $2 required/optional
 # $3 enable/disable
@@ -302,11 +380,10 @@ AC_DEFUN([MT_CHECK_PACKAGE],
 
     if (test -n "$2") && (test "$2" = "required"); then
         mt_$1_required=1
-    fi
-
-
-    if test -z "$3"; then
-        AC_MSG_ERROR([MT Package macro requires default enable/disable parameter])
+    else
+        if test -z "$3"; then
+            AC_MSG_ERROR([MT Package macro requires default enable/disable parameter])
+        fi
     fi
 
     if test ${mt_$1_required} -eq 0; then
@@ -365,7 +442,8 @@ AC_DEFUN([MT_CHECK_PACKAGE],
             LDFLAGS="-L$mt_$1_search_libs"
             AC_CHECK_LIB($6, $7,
                 [
-                    mt_$1_libs="-L$mt_$1_search_libs -l$6"
+                    mt_$1_libs="-l$6"
+                    mt_$1_ldflags="-L$mt_$1_search_libs"
                 ],
                 [
                     AC_MSG_ERROR([$1 libraries not found in requested location $mt_$1_search_libs])
@@ -381,7 +459,8 @@ AC_DEFUN([MT_CHECK_PACKAGE],
                     unset ac_cv_lib_$6_$7
                     AC_CHECK_LIB($6, $7,
                         [
-                            mt_$1_libs="-L$MT_SEARCHPATH_LIBS -l$6"
+                            mt_$1_libs="-l$6"
+                            mt_$1_ldflags="-L$MT_SEARCHPATH_LIBS" 
                         ],
                         [
                             mt_$1_ok=missing
@@ -398,6 +477,7 @@ AC_DEFUN([MT_CHECK_PACKAGE],
     if test "x$mt_$1_ok" = xyes; then
         translit($1, `a-z', `A-Z')_CXXFLAGS=${mt_$1_cxxflags}
         translit($1, `a-z', `A-Z')_LIBS=${mt_$1_libs}
+        translit($1, `a-z', `A-Z')_LDFLAGS=${mt_$1_ldflags}
         AC_DEFINE(translit(HAVE_$1, `a-z', `A-Z'), [1], [$1 library presence])
     else
         if test "x$mt_$1_enabled" = xyes; then
@@ -407,6 +487,7 @@ AC_DEFUN([MT_CHECK_PACKAGE],
 
     AC_SUBST(translit($1, `a-z', `A-Z')_CXXFLAGS)
     AC_SUBST(translit($1, `a-z', `A-Z')_LIBS)
+    AC_SUBST(translit($1, `a-z', `A-Z')_LDFLAGS)
     AC_SUBST(translit($1, `a-z', `A-Z')_STATUS)
 
     LIBS=$LIBS_SAVE
