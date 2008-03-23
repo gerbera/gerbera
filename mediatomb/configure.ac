@@ -63,13 +63,15 @@ case $host in
 	;;
 esac
 
-AC_ARG_WITH(search, 
-        AC_HELP_STRING([--with-search=DIR], [Additionally search for packages in DIR]),
-        [
-            SEARCH_DIR=$withval
-            AC_MSG_NOTICE([Will also search for packages in $SEARCH_DIR])
-        ]
-)
+MT_SET_SEARCHPATH
+
+#AC_ARG_WITH(search, 
+#        AC_HELP_STRING([--with-search=DIR], [Additionally search for packages in DIR]),
+#        [
+#            SEARCH_DIR=$withval
+#            AC_MSG_NOTICE([Will also search for packages in $SEARCH_DIR])
+#        ]
+#)
 
 SEARCH_DIR_HEADERS="$SEARCH_DIR/include"
 SEARCH_DIR_LIBS="$SEARCH_DIR/lib"
@@ -493,6 +495,41 @@ AC_HELP_STRING([--disable-external-transcoding],
                 fi
               ]
 )
+
+FFMPEG_THUMBNAILER=yes
+FFMPEG_THUMBNAILER_REQUESTED=0
+AC_ARG_ENABLE([ffmpegthumbnailer],
+                      [
+AC_HELP_STRING([--disable-ffmpegthumbnailer],
+[enable use of libffmpegthumbnailer (default: yes)])
+              ],
+              [
+                if test "x$enableval" = xyes; then
+                    FFMPEG_THUMBNAILER=yes
+                    FFMPEG_THUMBNAILER_REQUESTED=1
+                else
+                    FFMPEG_THUMBNAILER=disabled
+                fi
+              ]
+)
+
+AC_ARG_WITH(ffmpegthumbnailer-h,
+        AC_HELP_STRING([--with-ffmpegthumbnailer-h=DIR], [search for ffmpegthumbnailer headers in DIR]),
+        [
+            FFMPEG_THUMBNAILER_SEARCH_HEADERS="$withval"
+            AC_MSG_NOTICE([Will search for ffmpegthumbnailer headers in $withval])
+        ]
+)
+
+AC_ARG_WITH(ffmpegthumbnailer-libs,
+        AC_HELP_STRING([--with-ffmpegthumbnailer-libs=DIR], [search for ffmpegthumbnailer libraries in DIR]),
+        [
+            FFMPEG_THUMBNAILER_SEARCH_LIBS="$withval"
+            AC_MSG_NOTICE([Will search for ffmpegthumbnailer libraries in $withval])
+        ]
+)
+
+
 
 SQLITE_BACKUP_ENABLED=0
 AC_ARG_ENABLE([sqlite-backup-defaults],
@@ -1766,7 +1803,8 @@ AC_ARG_ENABLE(libmagic,
             fi
         ],
         [
-            MAGIC_OK=yes
+#  MAGIC_OK=yes
+            MAGIC_OK=no
         ]
 )
 
@@ -1903,6 +1941,7 @@ fi
 
 CFLAGS="$CFLAGS_SAVE"
 CXXFLAGS="$CXXFLAGS_SAVE"
+CPPFLAFS="$CPPFLAFS_SAVE"
 LDFLGAS="$LDFLAGS_SAVE"
 
 ######### taglib or id3lib
@@ -2644,82 +2683,17 @@ fi
 
 ######## libexif
 
-AC_ARG_ENABLE(libexif,
-        AC_HELP_STRING([--enable-libexif], [compile with libexif support (default: yes)]),
-    [
-        EXIF_EN=$enableval 
-        if test "x$enableval" = xno; then
-            EXIF_OK=disabled
-        else
-            EXIF_OK=yes
-        fi
-    ],
-    [
-        EXIF_OK=yes
-    ]
-)
+MT_CHECK_PACKAGE(libexif, [optional], [enable], 
+             [compile with libexif for exif thumbnail and metadata extraction], 
+                [libexif/exif-content],
+                [exif],
+                [exif_data_new_from_file])
 
-if test "x$EXIF_OK" = xyes; then
-    if test -n "$EXIF_SEARCH_HEADERS" ; then
-        CPPFLAGS="-I$EXIF_SEARCH_HEADERS"
-        AC_CHECK_HEADER($EXIF_SEARCH_HEADERS/libexif/exif-content.h,
-                [
-                    EXIF_CXXFLAGS="-I$EXIF_SEARCH_HEADERS"
-                ],
-                [
-                    AC_MSG_ERROR([libexif headers not found in requested location $EXIF_SEARCH_HEADERS])
-                ]
-        )
-    else 
-        AC_CHECK_HEADER(libexif/exif-content.h,
-            [],
-            [
-                CPPFLAGS="-I$SEARCH_DIR_HEADERS"
-                unset ac_cv_header_libexif_exif_content_h
-                AC_CHECK_HEADER($SEARCH_DIR_HEADERS/libexif/exif-content.h,
-                    [
-                        EXIF_CXXFLAGS="-I$SEARCH_DIR_HEADERS"
-                    ],
-                    [
-                        EXIF_OK=missing
-                    ]
-                )
-            ]
-        )
-    fi
-fi
+if test "x$LIBEXIF_STATUS" = xyes; then
+    CFLAGS="$CFLAGS $EXIF_CXXFLAGS"
+    CXXFLAGS="$CXXFLAGS $EXIF_CXXFLAGS"
+    LDFLAGS="$LDFLAGS $EXIF_LDFLAGS"
 
-LIBS_SAVE="$LIBS"
-unset LIBS
-if test "x$EXIF_OK" = xyes; then
-    if test -n "$EXIF_SEARCH_LIBS" ; then
-        LDFLAGS="-L$EXIF_SEARCH_LIBS"
-        AC_CHECK_LIB(exif, exif_data_new_from_file,
-                [
-                    EXIF_LIBS="-L$EXIF_SEARCH_LIBS -lexif"
-                ],
-                [
-                    AC_MSG_ERROR([libexif libraries not found in requested path $EXIF_SEARCH_LIBS])
-                ]
-        )
-    else
-        AC_CHECK_LIB(exif, exif_data_new_from_file,
-            [],
-            [
-                LDFLAGS="-L$SEARCH_DIR_LIBS"
-                unset ac_cv_lib_exif_exif_data_new_from_file
-                AC_CHECK_LIB(exif, exif_data_new_from_file,
-                    [
-                        EXIF_LIBS="-L$SEARCH_DIR_LIBS -lexif"
-                    ],
-                    [ EXIF_OK=missing ]
-                )
-            ]
-        )
-    fi
-fi
-
-if test "x$EXIF_OK" = xyes; then
     # try 1 argument signature
     AC_MSG_CHECKING([exif_entry_get_value signature])
     AC_COMPILE_IFELSE(
@@ -2760,29 +2734,17 @@ if test "x$EXIF_OK" = xyes; then
         ]
     )
 
-fi
-
-LIBS="$LIBS_SAVE $LIBS"
-
-if test "x$EXIF_OK" = xyes; then
-    AC_DEFINE([HAVE_EXIF], [1], [EXIF library presence])
-    AC_SUBST(EXIF_CXXFLAGS)
-    AC_SUBST(EXIF_LIBS)
     if test "x$EXIF_EGV_1" = xyes; then
         AC_DEFINE([EXIF_EGV_1], [1], [exif_entry_get_value() has 1 parameter])
     fi
     if test "x$EXIF_EGV_3" = xyes; then
         AC_DEFINE([EXIF_EGV_3], [1], [exif_entry_get_value() has 3 parameters])
     fi
-else
-    if test "x$EXIF_EN" = xyes; then
-        AC_MSG_ERROR(unable to configure libexif support)
-    fi
 fi
 
 LDFLAGS="$LDFLAGS_SAVE"
-CPPFLAGS="$CPPFLAGS_SAVE"
-
+CFLAGS="$CFLAGS_SAVE"
+CXXFLAGS="$CXXFLAGS_SAVE"
 
 ######## expat
 
@@ -3034,6 +2996,68 @@ fi
 LDFLAGS="$LDFLAGS_SAVE"
 CPPFLAGS="$CPPFLAGS_SAVE"
 CXXFLAGS="$CXXFLAGS_SAVE"
+
+FFMPEG_THUMBNAILER_PKGCONFIG_FOUND=0
+if test "x$FFMPEG_THUMBNAILER" = xyes; then
+    if test -n "$FFMPEG_THUMBNAILER_SEARCH_HEADERS" ; then
+        CPPFLAGS="-I$FFMPEG_THUMBNAILER_SEARCH_HEADERS"
+        AC_CHECK_HEADER($FFMPEG_THUMBNAILER_SEARCH_HEADERS/libffmpegthumbnailer/videothumbnailerc.h,
+                [
+                    FFMPEG_THUMBNAILER_CXXFLAGS="-I$EXIF_SEARCH_HEADERS"
+                ],
+                [
+                    AC_MSG_ERROR([ffmpegthumbnailer headers not found in requested location $FFMPEG_THUMBNAILER_SEARCH_HEADERS])
+                ]
+        )
+    else 
+        PKG_PROG_PKG_CONFIG
+        if test -n "$PKG_CONFIG" ; then
+            PKG_CHECK_MODULES(FFMPEG_THUMBNAILER, libffmpegthumbnailer,
+                    [
+                        FFMPEG_THUMBNAILER_PKGCONFIG_FOUND=1
+                        AC_MSG_NOTICE([ffmpegthumbnailer cflags $FFMPEG_THUMBNAILER_CFLAGS])
+                        AC_MSG_NOTICE([ffmpegthumbnailer libs $FFMPEG_THUMBNAILER_CFLAGS])
+                    ],
+                    [
+                        FFMPEG_THUMBNAILER_PKGCONFIG_FOUND=0
+                    ])
+        fi
+    fi
+fi
+
+if test "x$FFMPEG_THUMBNAILER" = xyes; then
+    if test $FFMPEG_THUMBNAILER_PKGCONFIG_FOUND -eq 1; then
+            CFLAGS="$CFLAGS $FFMPEG_THUMBNAILER_CFLAGS"
+            CPPFLAGS="$CFLAGS $FFMPEG_THUMBNAILER_CFLAGS"
+            AC_CHECK_HEADER(libffmpegthumbnailer/videothumbnailerc.h,
+                [
+                    LDFLAGS="$LDFLAGS $FFMPEG_THUMBNAILER_LDFLAGS"
+                    AC_CHECK_LIB(ffmpegthumbnailer, create_thumbnailer,
+                        [],
+                        [
+                            AC_MSG_WARN([could not check libffmpegthumbnailer using pkg-config values])
+                        ])
+
+                ],
+                [
+                    AC_MSG_WARN([could not check videothumbnailerc.h header using pkg-config values])
+                ])
+    fi
+            AC_CHECK_HEADER(libffmpegthumbnailer/videothumbnailerc.h,
+                [],
+                [
+                    unset ac_cv_header_libffmpegthumbnailer_videothumbnailerc_h
+                    CPPFLAGS="-I$SEARCH_DIR_HEADERS"
+                    AC_CHECK_HEADER(libffmpegthumbnailer/videothumbnailerc.h,
+                        [
+                            FFMPEG_THUMBNAILER_CXXFLAGS = "-I$SEARCH_DIR_HEADERS"
+                        ],
+                        [
+                            FFMPEG_THUMBNAILER=missing
+                        ]) 
+                ])
+
+fi
 
 AC_ARG_ENABLE(tombdebug,
         AC_HELP_STRING([--enable-tombdebug], [enable debug output for MediaTomb (default: no)]),
