@@ -52,7 +52,7 @@ LibMP4V2Handler::LibMP4V2Handler() : MetadataHandler()
 {
 }
 
-static void addMetaField(metadata_fields_t field, MP4FileHandle *mp4, Ref<CdsItem> item)
+static void addMetaField(metadata_fields_t field, MP4FileHandle mp4, Ref<CdsItem> item)
 {
     String value;
     char*  mp4_retval = NULL;
@@ -125,120 +125,122 @@ void LibMP4V2Handler::fillMetadata(Ref<CdsItem> item)
     MP4FileHandle mp4;
     Ref<StringConverter> sc = StringConverter::i2i();
     int temp;
-    
+
     // the location has already been checked by the setMetadata function
     mp4 = MP4Read(item->getLocation().c_str()); 
+    if (mp4 == MP4_INVALID_FILE_HANDLE)
+    {
+        log_error("Skipping metadata extraction for file %s\n", 
+                  item->getLocation().c_str());
+        return;
+    }
 
-    for (int i = 0; i < M_MAX; i++)
-        addMetaField((metadata_fields_t) i, &mp4, item);
+    try
+    {
+        for (int i = 0; i < M_MAX; i++)
+            addMetaField((metadata_fields_t) i, mp4, item);
 
-    Ref<ConfigManager> cm = ConfigManager::getInstance();
+        Ref<ConfigManager> cm = ConfigManager::getInstance();
 
-/*
-        int temp;
+        /*
+           int temp;
 
         // note: UPnP requres bytes/second
         if ((header->vbr_bitrate) > 0)
         {
-            temp = (header->vbr_bitrate) / 8; 
+        temp = (header->vbr_bitrate) / 8; 
         }
         else
         {
-            temp = (header->bitrate) / 8;
+        temp = (header->bitrate) / 8;
         }
 
         if (temp > 0)
         {
-            item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_BITRATE),
-                                               String::from(temp)); 
-        }
-*/
-//  MP4GetTimeScale returns the time scale in units of ticks per second for
-//  the mp4 file. Caveat: tracks may use the same time scale as  the  movie
-//  or may use their own time scale.
-    u_int32_t timescale = MP4GetTimeScale(mp4);
-//  MP4GetDuration  returns  the  maximum duration of all the tracks in the
-//  specified mp4 file.
-//
-//  Caveat: the duration is the movie (file) time scale units.
-    MP4Duration duration = MP4GetDuration(mp4);
-    
-    duration = duration / timescale;
-    if (duration > 0)
-        item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_DURATION),
-                                           secondsToHMS(duration));
-/*
-        if ((header->frequency) > 0)
-        {
-            item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), 
-                                               String::from((int)(header->frequency)));
+        item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_BITRATE),
+        String::from(temp)); 
         }
         */
+        //  MP4GetTimeScale returns the time scale in units of ticks per second for
+        //  the mp4 file. Caveat: tracks may use the same time scale as  the  movie
+        //  or may use their own time scale.
+        u_int32_t timescale = MP4GetTimeScale(mp4);
+        //  MP4GetDuration  returns  the  maximum duration of all the tracks in the
+        //  specified mp4 file.
+        //
+        //  Caveat: the duration is the movie (file) time scale units.
+        MP4Duration duration = MP4GetDuration(mp4);
+
+        duration = duration / timescale;
+        if (duration > 0)
+            item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_DURATION),
+                    secondsToHMS(duration));
+        /*
+           if ((header->frequency) > 0)
+           {
+           item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), 
+           String::from((int)(header->frequency)));
+           }
+           */
 
 
-    MP4TrackId tid = MP4FindTrackId(mp4, 0, MP4_AUDIO_TRACK_TYPE);
-    if (tid != MP4_INVALID_TRACK_ID)
-    {
-        temp = MP4GetTrackAudioChannels(mp4, tid);
-        if (temp > 0)
+        MP4TrackId tid = MP4FindTrackId(mp4, 0, MP4_AUDIO_TRACK_TYPE);
+        if (tid != MP4_INVALID_TRACK_ID)
         {
-            item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS),
-                                               String::from(temp));
-        }
-    }
-
-#if 0    
-//#ifdef HAVE_ID3_ALBUMART
-    // get album art
-    // we have a bit of design problem here - the album art is actually not
-    // a resource, but our architecture is built that way that we can only
-    // serve resources, so we are going to bend this a little:
-    // the album art will be saved as a resource, but the CdsResourceManager
-    // will handle this special case and render the XML correctly...
-    // \todo discuss the album art approach with Leo
-    if (ID3_HasPicture(&tag))
-    {
-        ID3_Frame* frame = NULL;
-        frame = tag.Find(ID3FID_PICTURE);
-        if (frame != NULL)
-        {
-            ID3_Field* art = frame->GetField(ID3FN_DATA);
-            if (art != NULL)
+            temp = MP4GetTrackAudioChannels(mp4, tid);
+            if (temp > 0)
             {
-                Ref<StringConverter> sc = StringConverter::m2i(); 
-                String art_mimetype = sc->convert(String(ID3_GetPictureMimeType(&tag)));
-                if (!string_ok(art_mimetype) || (art_mimetype.index('/') == -1))
-                {
+                item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS),
+                        String::from(temp));
+            }
+        }
+
 #ifdef HAVE_MAGIC
-                    art_mimetype = ContentManager::getInstance()->getMimeTypeFromBuffer((void *)art->GetRawBinary(), art->Size());
+        u_int8_t *art_data;
+        u_int32_t art_data_len;
+        String art_mimetype;
+        if (MP4GetMetadataCoverArtCount(mp4) && 
+            MP4GetMetadataCoverArt(mp4, &art_data, &art_data_len))
+        {
+            if (art_data)
+            {
+                try
+                {
+                    art_mimetype = ContentManager::getInstance()->getMimeTypeFromBuffer((void *)art_data, art_data_len);
                     if (!string_ok(art_mimetype))
-#endif
-                       art_mimetype = _(MIMETYPE_DEFAULT);
+                        art_mimetype = _(MIMETYPE_DEFAULT);
+
+                }
+                catch (Exception ex)
+                {
+                    free(art_data);
+                    throw ex;
                 }
 
-                // if we could not determine the mimetype, then there is no
-                // point to add the resource - it's probably garbage
+                free(art_data);
                 if (art_mimetype != _(MIMETYPE_DEFAULT))
                 {
-                    Ref<CdsResource> resource(new CdsResource(CH_ID3));
+                    Ref<CdsResource> resource(new CdsResource(CH_MP4));
                     resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(art_mimetype));
                     resource->addParameter(_(RESOURCE_CONTENT_TYPE), _(ID3_ALBUM_ART));
                     item->addResource(resource);
                 }
-
             }
         }
-    }
 #endif
-//    tag.Clear();
-    MP4Close(mp4);
+        MP4Close(mp4);
+    }
+    catch (Exception ex)
+    {
+        MP4Close(mp4);
+        throw ex;
+    }
 }
 
 Ref<IOHandler> LibMP4V2Handler::serveContent(Ref<CdsItem> item, int resNum, off_t *data_size)
 {
-    /*
-    ID3_Tag tag;
-    if (tag.Link(item->getLocation().c_str()) == 0)
+    MP4FileHandle mp4 = MP4Read(item->getLocation().c_str());
+    if (mp4 == MP4_INVALID_FILE_HANDLE)
     {
         throw _Exception(_("LibMP4V2Handler: could not open file: ") + item->getLocation());
     }
@@ -250,27 +252,25 @@ Ref<IOHandler> LibMP4V2Handler::serveContent(Ref<CdsItem> item, int resNum, off_
     if (ctype != ID3_ALBUM_ART)
         throw _Exception(_("LibMP4V2Handler: got unknown content type: ") + ctype);
 
-    if (!ID3_HasPicture(&tag))
+    if (!MP4GetMetadataCoverArtCount(mp4))
         throw _Exception(_("LibMP4V2Handler: resource has no album art information"));
 
-    ID3_Frame* frame = NULL;
-    frame = tag.Find(ID3FID_PICTURE);
-
-    if (frame == NULL)
-        throw _Exception(_("LibMP4V2Handler: could not server album art - empty frame"));
-
-    ID3_Field* art = frame->GetField(ID3FN_DATA);
-    if (art == NULL)
-        throw _Exception(_("LibMP4V2Handler: could not server album art - empty field"));
-
-    Ref<IOHandler> h(new MemIOHandler((void *)art->GetRawBinary(), art->Size()));
-    *data_size = art->Size();
-    tag.Clear();
-
-    return h;
-    */
-    *data_size = -1;
-    return nil;
+    u_int8_t *art_data;
+    u_int32_t art_data_len;
+    if (MP4GetMetadataCoverArt(mp4, &art_data, &art_data_len))
+    {
+        if (art_data)
+        {
+            *data_size = (off_t)art_data_len;
+            Ref<IOHandler> h(new MemIOHandler((void *)art_data, art_data_len));
+            free(art_data);
+            return h;
+        }
+    }
+        
+    throw _Exception(_("LibMP4V2Handler: could not serve album art "
+                           "for file") + item->getLocation() + 
+                           " - embedded image not found");
 }
 
 #endif // HAVE_LIBMP4V2

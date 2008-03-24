@@ -271,7 +271,8 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         /// \todo currently resource is misused for album art
 #ifdef HAVE_ID3_ALBUMART
         // only add upnp:AlbumArtURI if we have an AA, skip the resource
-        if ((i > 0) && (item->getResource(i)->getHandlerType() == CH_ID3))
+        if ((i > 0) && ((item->getResource(i)->getHandlerType() == CH_ID3) ||
+                        (item->getResource(i)->getHandlerType() == CH_MP4)))
         {
             String rct = item->getResource(i)->getParameter(_(RESOURCE_CONTENT_TYPE));
             if (rct == ID3_ALBUM_ART)

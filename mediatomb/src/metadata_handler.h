@@ -43,6 +43,7 @@
 #define CH_ID3       2
 #define CH_TRANSCODE 3
 #define CH_EXTURL    4
+#define CH_MP4       5
 
 #define CONTENT_TYPE_MP3        "mp3"
 #define CONTENT_TYPE_OGG        "ogg"

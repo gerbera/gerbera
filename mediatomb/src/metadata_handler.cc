@@ -248,6 +248,10 @@ Ref<MetadataHandler> MetadataHandler::createHandler(int handlerType)
         case CH_ID3:
             return Ref<MetadataHandler>(new TagHandler());
 #endif
+#ifdef HAVE_LIBMP4V2
+        case CH_MP4:
+            return Ref<MetadataHandler>(new LibMP4V2Handler());
+#endif
         default:
             throw _Exception(_("unknown content handler ID: ") + handlerType);
     }
