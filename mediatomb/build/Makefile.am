@@ -25,7 +25,8 @@ libmediatomb_a_CXXFLAGS = \
                      $(INOTIFY_CXXFLAGS) \
                      $(FFMPEG_CXXFLAGS) \
                      $(CURL_CFLAGS) \
-                     $(EXPAT_CXXFLAGS)
+                     $(EXPAT_CXXFLAGS) \
+					 $(LIBMP4V2_CXXFLAGS)
 
 bin_PROGRAMS = mediatomb
 mediatomb_SOURCES = $(top_srcdir)/src/main.cc
@@ -49,7 +50,8 @@ mediatomb_CXXFLAGS = -I$(top_srcdir)/src \
                      $(INOTIFY_CXXFLAGS) \
                      $(FFMPEG_CXXFLAGS) \
                      $(CURL_CFLAGS) \
-                     $(EXPAT_CXXFLAGS)
+                     $(EXPAT_CXXFLAGS) \
+					 $(LIBMP4V2_CXXFLAGS)
 
 mediatomb_LDADD = \
     libmediatomb.a \
@@ -58,6 +60,7 @@ mediatomb_LDADD = \
 	$(ZLIB_LDFLAGS) \
 	$(EXPAT_LDFLAGS) \
 	$(RT_LDFLAGS) \
+	$(LIBMP4V2_LDFLAGS) \
     $(ICONV_LIBS) \
     $(SQLITE3_LIBS) \
     $(MYSQL_LIBS) \
@@ -74,6 +77,7 @@ mediatomb_LDADD = \
     $(PTHREAD_LIBS) \
     $(FFMPEG_LIBS) \
     $(CURL_LIBS) \
-    $(EXPAT_LIBS)
+    $(EXPAT_LIBS) \
+	$(LIBMP4V2_LIBS)
     
 

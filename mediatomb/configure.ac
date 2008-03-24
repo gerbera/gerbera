@@ -136,22 +136,6 @@ AC_ARG_WITH(magic-libs,
         ]
 )
 
-AC_ARG_WITH(libmp4v2-h,
-        AC_HELP_STRING([--with-libmp4v2-h=DIR], [search for libmp4v2 headers in DIR]),
-        [
-            LIBMP4V2_SEARCH_HEADERS="$withval"
-            AC_MSG_NOTICE([Will search for libmp4v2 headers in $withval])
-        ]
-)
-
-AC_ARG_WITH(libmp4v2-libs,
-        AC_HELP_STRING([--with-libmp4v2-libs=DIR], [search for libmp4v2 libraries in DIR]),
-        [
-            LIBMP4V2_SEARCH_LIBS="$withval"
-            AC_MSG_NOTICE([Will search for libmp4v2 libraries in $withval])
-        ]
-)
-
 AC_ARG_WITH(taglib-cfg,
         AC_HELP_STRING([--with-taglib-cfg=taglib-config], [absolute path/name of taglib-config]),
         [
@@ -2609,10 +2593,19 @@ CXXFLAGS="$CXXFLAGS_SAVE"
 
 ######## expat
 
-MT_CHECK_PACKAGE(expat, [required], , ,
+MT_CHECK_PACKAGE(expat, required, , ,
                 [expat],
                 [expat],
                 [XML_ParserCreate])
+
+####### libmp4v2
+
+MT_CHECK_PACKAGE([libmp4v2], [optional], [disable],
+                 [compile with libmp4v2 for mp4 metadata extraction],
+                 [mp4],
+                 [mp4v2],
+                 [MP4Read])
+
 
 ########## INOTIFY TOOLS
 
@@ -2906,6 +2899,7 @@ echo "expat                 : $EXPAT_STATUS"
 echo "id3lib                : $ID3_OK"
 echo "taglib                : $TAGLIB_OK"
 echo "ffmpeg                : $FFMPEG_OK"
+echo "libmp4v2              : $LIBMP4V2_STATUS"
 echo "external transcoding  : $EXTERNAL_TRANSCODING_OK"
 echo "curl                  : $CURL_OK"
 #echo "YouTube               : $YOUTUBE_OK"

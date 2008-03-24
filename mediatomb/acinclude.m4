@@ -346,7 +346,7 @@ AC_DEFUN([MT_CHECK_LIBRARY],
 # $4 enable/disable help string
 # $5 header name (without .h)
 # $6 library name
-# $7 functoin name
+# $7 function name
 
 AC_DEFUN([MT_CHECK_PACKAGE], 
 [
@@ -386,7 +386,10 @@ AC_DEFUN([MT_CHECK_PACKAGE],
         fi
     fi
 
+    AC_MSG_NOTICE([!!!!!!!! PACKAGE $1 is REQUIRED? ${mt_$1_required}])
+
     if test ${mt_$1_required} -eq 0; then
+        AC_MSG_NOTICE([!!!!!!!! -> arg enable for package $1 ])
         AC_ARG_ENABLE([$1],
             AC_HELP_STRING([--$3-$1], [$4]),
             [
