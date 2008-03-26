@@ -1017,7 +1017,7 @@ LIBS_SAVE="$LIBS"
 unset LIBS
 
 # we might need librt for sqlite
-MT_CHECK_LIBRARY([rt], [clock_gettime])
+ MT_CHECK_LIBRARY([rt], [clock_gettime])
 
 if test "x$RT_STATUS" != xyes; then
     AC_CHECK_FUNC(clock_gettime)
@@ -1025,11 +1025,9 @@ fi
 
 ############ zlib
 
-MT_CHECK_PACKAGE([zlib], [optional], [enable],
+MT_CHECK_OPTIONAL_PACKAGE([zlib], [disable],
                  [compile with zlib for automated database creation support],
-                 [zlib],
-                 [z],
-                 [uncompress])
+                 [zlib], [z], [uncompress])
     
 
 if test "x$ZLIB_STATUS" = xyes; then
@@ -2528,11 +2526,9 @@ fi
 
 ######## libexif
 
-MT_CHECK_PACKAGE(libexif, [optional], [enable], 
+MT_CHECK_OPTIONAL_PACKAGE([libexif], [disable], 
              [compile with libexif for exif thumbnail and metadata extraction], 
-                [libexif/exif-content],
-                [exif],
-                [exif_data_new_from_file])
+             [libexif/exif-content], [exif], [exif_data_new_from_file])
 
 if test "x$LIBEXIF_STATUS" = xyes; then
     CFLAGS="$CFLAGS $EXIF_CXXFLAGS"
@@ -2593,19 +2589,13 @@ CXXFLAGS="$CXXFLAGS_SAVE"
 
 ######## expat
 
-MT_CHECK_PACKAGE(expat, required, , ,
-                [expat],
-                [expat],
-                [XML_ParserCreate])
+MT_CHECK_REQUIRED_PACKAGE([expat], [expat], [expat], [XML_ParserCreate])
 
 ####### libmp4v2
 
-MT_CHECK_PACKAGE([libmp4v2], [optional], [disable],
+MT_CHECK_OPTIONAL_PACKAGE([libmp4v2], [disable],
                  [compile with libmp4v2 for mp4 metadata extraction],
-                 [mp4],
-                 [mp4v2],
-                 [MP4Read])
-
+                 [mp4], [mp4v2], [MP4Read]) 
 
 ########## INOTIFY TOOLS
 
