@@ -427,13 +427,13 @@ AC_DEFUN([MT_CHECK_PACKAGE_INTERNAL],
     
     if test "x$mt_$1_package_status" = xyes; then
         MT_CHECK_LIBRARY_INTERNAL($3, $4)
-        mt_$1_package_status=${mt_$1_library_status}
+        mt_$1_package_status=${mt_$3_library_status}
     fi
     
     if test "x$mt_$1_package_status" = xyes; then
         translit($1, `a-z', `A-Z')_CXXFLAGS=${mt_$1_cxxflags}
-        translit($1, `a-z', `A-Z')_LIBS=${mt_$1_libs}
-        translit($1, `a-z', `A-Z')_LDFLAGS=${mt_$1_ldflags}
+        translit($1, `a-z', `A-Z')_LIBS=${mt_$3_libs}
+        translit($1, `a-z', `A-Z')_LDFLAGS=${mt_$3_ldflags}
         AC_DEFINE(translit(HAVE_$1, `a-z', `A-Z'), [1], [$1 library presence])
     fi 
 ])
