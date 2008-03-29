@@ -46,9 +46,9 @@
 #ifdef HAVE_TAGLIB
 #include "metadata/taglib_handler.h"
 #else
-#ifdef HAVE_ID3 // we only want ID3 if taglib was not found
+#ifdef HAVE_ID3LIB // we only want ID3 if taglib was not found
 #include "metadata/id3_handler.h"
-#endif // HAVE_ID3
+#endif // HAVE_ID3LIB
 #endif // HAVE_TAGLIB
 
 #ifdef HAVE_LIBMP4V2
@@ -139,13 +139,13 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
             break;
         }
 #else
-#ifdef HAVE_ID3
+#ifdef HAVE_ID3LIB
         if (content_type == CONTENT_TYPE_MP3)
         {
             handler = Ref<MetadataHandler>(new Id3Handler());
             break;
         }
-#endif // HAVE_ID3
+#endif // HAVE_ID3LIB
 #endif // HAVE_TAGLIB
 
 
@@ -241,7 +241,7 @@ Ref<MetadataHandler> MetadataHandler::createHandler(int handlerType)
         case CH_LIBEXIF:
             return Ref<MetadataHandler>(new LibExifHandler());
 #endif
-#ifdef HAVE_ID3
+#ifdef HAVE_ID3LIB
         case CH_ID3:
             return Ref<MetadataHandler>(new Id3Handler());
 #elif HAVE_TAGLIB

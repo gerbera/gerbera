@@ -1549,7 +1549,7 @@ void ConfigManager::validate(String serverhome)
     SET_STRARR_OPTION(CFG_IMPORT_LIBOPTS_EXTRACTOR_AUXDATA_TAGS_LIST);
 #endif // HAVE_EXTRACTOR
 
-#if defined(HAVE_ID3) || defined(HAVE_TAGLIB)
+#if defined(HAVE_ID3LIB) || defined(HAVE_TAGLIB)
     el = getElement(_("/import/library-options/id3/auxdata"));
     if (el == nil)
     {

@@ -263,8 +263,9 @@ AC_DEFUN([MT_SET_SEARCHPATH],
 ])
 
 
-# $1 library name
-# $2 function name
+# $1 with parameter/package name
+# $2 library name
+# $3 function name
 # 
 # returns:
 #   mt_$1_library_status
@@ -294,9 +295,9 @@ AC_DEFUN([MT_CHECK_LIBRARY_INTERNAL],
 
     if test "$mt_$1_search_libs" ; then
         LDFLAGS="-L$mt_$1_search_libs"
-        AC_CHECK_LIB($1, $2,
+        AC_CHECK_LIB($2, $3,
             [
-                mt_$1_libs="-l$1"
+                mt_$1_libs="-l$2"
                 mt_$1_ldflags="-L$mt_$1_search_libs"
             ],
             [
@@ -304,16 +305,16 @@ AC_DEFUN([MT_CHECK_LIBRARY_INTERNAL],
             ]
         )
     else
-        AC_CHECK_LIB($1, $2,
+        AC_CHECK_LIB($2, $3,
             [
-                mt_$1_libs="-l$1"
+                mt_$1_libs="-l$2"
             ],
             [
                 LDFLAGS="-L$MT_SEARCHPATH_LIBS"
-                unset ac_cv_lib_$1_$2
-                AC_CHECK_LIB($1, $2,
+                unset ac_cv_lib_$2_$3
+                AC_CHECK_LIB($2, $3,
                     [
-                        mt_$1_libs="-l$1"
+                        mt_$1_libs="-l$2"
                         mt_$1_ldflags="-L$MT_SEARCHPATH_LIBS" 
                     ],
                     [
@@ -418,23 +419,18 @@ AC_DEFUN([MT_CHECK_HEADER_INTERNAL],
    
 AC_DEFUN([MT_CHECK_PACKAGE_INTERNAL],
 [
-    mt_$1_package_status=yes
-
-    if test "x$mt_$1_package_status" = xyes; then
-        MT_CHECK_HEADER_INTERNAL($1, $2)
-        mt_$1_package_status=${mt_$1_header_status}
-    fi
+    MT_CHECK_HEADER_INTERNAL($1, $2)
+    mt_$1_package_status=${mt_$1_header_status}
     
     if test "x$mt_$1_package_status" = xyes; then
-        MT_CHECK_LIBRARY_INTERNAL($3, $4)
-        mt_$1_package_status=${mt_$3_library_status}
+        MT_CHECK_LIBRARY_INTERNAL($1, $3, $4)
+        mt_$1_package_status=${mt_$1_library_status}
     fi
     
     if test "x$mt_$1_package_status" = xyes; then
         translit($1, `a-z', `A-Z')_CXXFLAGS=${mt_$1_cxxflags}
-        translit($1, `a-z', `A-Z')_LIBS=${mt_$3_libs}
-        translit($1, `a-z', `A-Z')_LDFLAGS=${mt_$3_ldflags}
-        AC_DEFINE(translit(HAVE_$1, `a-z', `A-Z'), [1], [$1 library presence])
+        translit($1, `a-z', `A-Z')_LIBS=${mt_$1_libs}
+        translit($1, `a-z', `A-Z')_LDFLAGS=${mt_$1_ldflags}
     fi 
 ])
 
@@ -444,7 +440,6 @@ AC_DEFUN([MT_CHECK_PACKAGE_INTERNAL],
 # $4 header name (without .h)
 # $5 library name
 # $6 function name
-#
 # returns substed:
 #   $1_STATUS
 #   $1_LDFLAGS
@@ -482,6 +477,10 @@ AC_DEFUN([MT_CHECK_OPTIONAL_PACKAGE],
         AC_MSG_ERROR([unable to configure $1 support])
     fi
 
+    if test "x$mt_$1_status" = xyes; then
+        AC_DEFINE(translit(HAVE_$1, `a-z', `A-Z'), [1], [$1 library presence])
+    fi
+    
     translit($1, `a-z', `A-Z')_STATUS=${mt_$1_status}
 
     AC_SUBST(translit($1, `a-z', `A-Z')_CXXFLAGS)
@@ -508,6 +507,8 @@ AC_DEFUN([MT_CHECK_REQUIRED_PACKAGE],
     if test "x$mt_$1_package_status" != xyes; then
         AC_MSG_ERROR([unable to configure required package $1])
     fi
+
+    AC_DEFINE(translit(HAVE_$1, `a-z', `A-Z'), [1], [$1 library presence])
     
     translit($1, `a-z', `A-Z')_STATUS=${mt_$1_package_status}
 
@@ -521,7 +522,7 @@ AC_DEFUN([MT_CHECK_REQUIRED_PACKAGE],
 # $2 function to check
 AC_DEFUN([MT_CHECK_LIBRARY],
 [
-    MT_CHECK_LIBRARY_INTERNAL($1, $2)
+    MT_CHECK_LIBRARY_INTERNAL($1, $1, $2)
 
     translit($1, `a-z', `A-Z')_LIBS=${mt_$1_libs}
     translit($1, `a-z', `A-Z')_LDFLAGS=${mt_$1_ldflags}
@@ -531,3 +532,261 @@ AC_DEFUN([MT_CHECK_LIBRARY],
     AC_SUBST(translit($1, `a-z', `A-Z')_LDFLAGS)
     AC_SUBST(translit($1, `a-z', `A-Z')_STATUS)
 ])
+
+# $1 package name
+# $2 config file name
+# $3 headers
+# $4 library name
+# $5 function name
+# 
+#  returns substed:
+#    $mt_$1_package_status
+#    $1_LDFLAGS
+#    $1_LIBS
+#    $1_CXXFLAGS
+
+AC_DEFUN([MT_CHECK_BINCONFIG_INTERNAL],
+[
+    LIBS_SAVE=$LIBS
+    LDFLAGS_SAVE=$LDFLAGS
+    CFLAGS_SAVE=$CFLAGS
+    CXXFLAGS_SAVE=$CXXFLAGS
+    CPPFLAGS_SAVE=$CPPFLAGS
+
+
+    mt_$1_config=none
+    mt_$1_package_status=yes
+
+    AC_ARG_WITH($1-cfg,
+        AC_HELP_STRING([--with-$1-cfg=$2], [absolute path/name of $2]),
+        [
+            mt_$1_search_config="$withval"
+            AC_MSG_NOTICE([Will search for $1 config in $withval])
+        ]
+    )
+
+    if test -n "$mt_$1_search_config"; then
+        AC_MSG_NOTICE([You specified ${mt_$1_search_config} for $2])
+        if test -f "$mt_$1_search_config"; then
+            mt_$1_config=${mt_$1_search_config}
+        else
+            AC_MSG_ERROR([${mt_$1_search_config} not found])
+        fi
+
+        mt_$1_version=`${mt_$1_config} --version 2>/dev/null`
+        if test -z "$mt_$1_config_version"; then
+            AC_MSG_ERROR([${mt_$1_search_config} could not be executed or returned invalid values])
+        fi
+    else
+        AC_PATH_PROG(mt_$1_config, $2, none)
+        if test "x$mt_$1_config" = xnone; then
+            unset ac_cv_path_mt_$1_config
+            AC_PATH_PROG(mt_$1_config, $2, none, $MT_SEARCHPATH_PROGS)
+            if test "x$mt_$1_config" = xnone; then
+                mt_$1_package_status=missing
+                AC_MSG_RESULT([$2 not found, please install the $1 devel package])
+            fi
+        fi
+        
+        mt_$1_version=`${mt_$1_config} --version 2>/dev/null`
+        if test -z "$mt_$1_version"; then
+            AC_MSG_NOTICE([${mt_$1_config} could not be executed or returned invalid values])
+            mt_$1_package_status=missing
+        fi
+    fi
+    if test "x$mt_$1_package_status" = xyes; then
+        AC_MSG_CHECKING([$1 cflags])
+        mt_$1_cxxflags=`${mt_$1_config} --cflags`
+        AC_MSG_RESULT([$mt_$1_cxxflags])
+
+        AC_MSG_CHECKING([$1 libs])
+        mt_$1_libs=`${mt_$1_config} --libs`
+        AC_MSG_RESULT([$mt_$1_libs])
+    fi
+
+    if test "x$mt_$1_package_status" = xyes; then
+        CPPFLAGS="$CPPFLAGS $mt_$1_cxxflags"
+        CXXFLAGS="$CXXFLAGS $mt_$1_cxxflags"
+        CFLAGS="$CFLAGS $mt_$1_cxxflags"
+        AC_CHECK_HEADERS($3, [], [mt_$1_package_status=missing])
+    fi
+
+    if test "x$mt_$1_package_status" = xyes; then
+        LDFLAGS="$LDFLAGS $mt_$1_libs"
+        AC_CHECK_LIB($4, $5, [], [mt_$1_package_status=missing])
+    fi
+
+    if test "x$mt_$1_package_status" = xyes; then
+        translit($1, `a-z', `A-Z')_CXXFLAGS=${mt_$1_cxxflags}
+        translit($1, `a-z', `A-Z')_LIBS=${mt_$1_libs}
+        translit($1, `a-z', `A-Z')_VERSION=${mt_$1_version}
+    fi 
+
+
+    LIBS=$LIBS_SAVE
+    LDFLAGS=$LDFLAGS_SAVE
+    CFLAGS=$CFLAGS_SAVE
+    CXXFLAGS=$CXXFLAGS_SAVE
+    CPPFLAGS=$CPPFLAGS_SAVE
+])
+
+# $1 package name
+# $2 enable/disable
+# $3 enable/disable help string
+# $4 config file name
+# $5 headers
+# $6 library name
+# $7 function namea
+#
+# returns:
+#   mt_$1_package_status
+#   $1_CXXFLAGS
+#   $1_LIBS
+#   $1_VERSION
+
+AC_DEFUN([MT_CHECK_OPTIONAL_PACKAGE_CFG],
+[
+    mt_$1_status=yes
+    mt_$1_requested=no
+
+    if test x"$2" = xenable; then
+        mt_$1_status=disabled
+    fi
+
+    AC_ARG_ENABLE([$1],
+        AC_HELP_STRING([--$2-$1], [$3]),
+        [
+            mt_$1_enabled=$enableval
+            if test "x$enableval" = xno; then
+                mt_$1_status=disabled
+            elif test "x$enableval" = xyes; then
+                mt_$1_requested=yes
+            fi
+        ]
+    )
+
+    if test "x$mt_$1_status" = xyes; then
+        MT_CHECK_BINCONFIG_INTERNAL($1, $4, $5, $6, $7)
+        mt_$1_status=${mt_$1_package_status}
+    fi
+    
+    if ((test "x$mt_$1_requested" = xyes) &&
+        (test "x$mt_$1_status" != xyes)); then
+        AC_MSG_ERROR([unable to configure $1 support])
+    fi
+
+    if test "x$mt_$1_status" = xyes; then
+        AC_DEFINE(translit(HAVE_$1, `a-z', `A-Z'), [1], [$1 library presence])
+    fi
+
+    translit($1, `a-z', `A-Z')_STATUS=${mt_$1_status}
+
+    AC_SUBST(translit($1, `a-z', `A-Z')_CXXFLAGS)
+    AC_SUBST(translit($1, `a-z', `A-Z')_LIBS)
+    AC_SUBST(translit($1, `a-z', `A-Z')_VERSION)
+    AC_SUBST(translit($1, `a-z', `A-Z')_STATUS)
+
+
+#    AS_IF([test x"$mt_$1_status" = xyes], [$8], [$9])[]dnl
+])
+
+# $1 package name
+# $2 config file name
+# $3 headers
+# $4 library name
+# $5 function name
+#
+#  returns substed:
+#    $mt_$1_package_status
+#    $1_LDFLAGS
+#    $1_LIBS
+#    $1_CXXFLAGS
+
+AC_DEFUN([MT_CHECK_REQUIRED_PACKAGE_CFG],
+[
+    MT_CHECK_BINCONFIG_INTERNAL($1, $2, $3, $4, $5)
+    if test "x$mt_$1_package_status" != xyes; then
+        AC_MSG_ERROR([unable to configure required package $1])
+    fi
+    
+    translit($1, `a-z', `A-Z')_STATUS=${mt_$1_package_status}
+        
+    AC_DEFINE(translit(HAVE_$1, `a-z', `A-Z'), [1], [$1 library presence])
+
+    AC_SUBST(translit($1, `a-z', `A-Z')_CXXFLAGS)
+    AC_SUBST(translit($1, `a-z', `A-Z')_LIBS)
+    AC_SUBST(translit($1, `a-z', `A-Z')_VERSION)
+    AC_SUBST(translit($1, `a-z', `A-Z')_STATUS)
+])
+
+# $1 package name
+# $2 config file name
+# $3 headers
+# $4 library name
+# $5 function name
+#
+#  returns substed:
+#    $mt_$1_package_status
+#    $1_LDFLAGS
+#    $1_LIBS
+#    $1_CXXFLAGS
+
+
+AC_DEFUN([MT_CHECK_PACKAGE_CFG],
+[
+    mt_$1_status=yes
+
+    if test "x$mt_$1_status" = xyes; then
+        MT_CHECK_BINCONFIG_INTERNAL($1, $2, $3, $4, $5)
+        mt_$1_status=${mt_$1_package_status}
+    fi
+    
+    if test "x$mt_$1_status" = xyes; then
+        AC_DEFINE(translit(HAVE_$1, `a-z', `A-Z'), [1], [$1 library presence])
+    fi
+
+    translit($1, `a-z', `A-Z')_STATUS=${mt_$1_status}
+
+    AC_SUBST(translit($1, `a-z', `A-Z')_CXXFLAGS)
+    AC_SUBST(translit($1, `a-z', `A-Z')_LIBS)
+    AC_SUBST(translit($1, `a-z', `A-Z')_VERSION)
+    AC_SUBST(translit($1, `a-z', `A-Z')_STATUS)
+])
+
+# $1 package name
+# $2 headers
+# $3 library name
+# $4 function name
+#
+#  returns substed:
+#    $mt_$1_package_status
+#    $1_LDFLAGS
+#    $1_LIBS
+#    $1_CXXFLAGS
+
+
+AC_DEFUN([MT_CHECK_PACKAGE],
+[
+    mt_$1_status=yes
+
+    if test "x$mt_$1_status" = xyes; then
+        MT_CHECK_PACKAGE_INTERNAL($1, $2, $3, $4)
+        mt_$1_status=${mt_$1_package_status}
+    fi
+
+    if test "x$mt_$1_status" = xyes; then
+        AC_DEFINE(translit(HAVE_$1, `a-z', `A-Z'), [1], [$1 library presence])
+    fi
+
+    translit($1, `a-z', `A-Z')_STATUS=${mt_$1_status}
+
+    AC_SUBST(translit($1, `a-z', `A-Z')_CXXFLAGS)
+    AC_SUBST(translit($1, `a-z', `A-Z')_LIBS)
+    AC_SUBST(translit($1, `a-z', `A-Z')_VERSION)
+    AC_SUBST(translit($1, `a-z', `A-Z')_STATUS)
+])
+
+#AC_DEFUN([MT_YES_NO],
+#[
+#    AS_IF([test $1 = yes], [$2], [$3])[]dnl
+#])

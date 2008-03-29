@@ -136,30 +136,6 @@ AC_ARG_WITH(magic-libs,
         ]
 )
 
-AC_ARG_WITH(taglib-cfg,
-        AC_HELP_STRING([--with-taglib-cfg=taglib-config], [absolute path/name of taglib-config]),
-        [
-            TAGLIB_SEARCH_CONFIG="$withval"
-            AC_MSG_NOTICE([Will search for taglib-config in $withval])
-        ]
-)
-
-AC_ARG_WITH(id3lib-h,
-        AC_HELP_STRING([--with-id3lib-h=DIR], [search for id3lib headers in DIR]),
-        [
-            ID3_SEARCH_HEADERS="$withval"
-            AC_MSG_NOTICE([Will search for id3lib headers in $withval])
-        ]
-)
-
-AC_ARG_WITH(id3lib-libs,
-        AC_HELP_STRING([--with-id3lib-libs=DIR], [search for id3lib libraries in DIR]),
-        [
-            ID3_SEARCH_LIBS="$withval"
-            AC_MSG_NOTICE([Will search for id3 libraries in $withval])
-        ]
-)
-
 AC_ARG_WITH(inotify-h,
         AC_HELP_STRING([--with-inotify-h=DIR], [search for inotify header in DIR/sys]),
         [
@@ -1017,7 +993,7 @@ LIBS_SAVE="$LIBS"
 unset LIBS
 
 # we might need librt for sqlite
- MT_CHECK_LIBRARY([rt], [clock_gettime])
+MT_CHECK_LIBRARY([rt], [clock_gettime])
 
 if test "x$RT_STATUS" != xyes; then
     AC_CHECK_FUNC(clock_gettime)
@@ -1787,293 +1763,101 @@ CXXFLAGS="$CXXFLAGS_SAVE"
 CPPFLAFS="$CPPFLAFS_SAVE"
 LDFLGAS="$LDFLAGS_SAVE"
 
-######### taglib or id3lib
+######### taglib or id3lib selection
+
 TAGLIB_REQUESTED=no
-ID3_REQUESTED=no
+TAGLIB_STATUS=yes
+
+ID3LIB_REQUESTED=no
+ID3LIB_STATUS=no
 
 AC_ARG_ENABLE(id3lib,
-        AC_HELP_STRING([--enable-id3lib], [compile with id3lib support (default: yes, if taglib is not available)]),
-  [
-     ID3_EN=$enableval 
-     if test "x$enableval" = xno; then
-        ID3_OK=disabled
-     else
-        ID3_OK=yes
-        ID3_REQUESTED=yes
-     fi
-  ],
-  [
-    ID3_OK=yes
-  ]
+    AC_HELP_STRING([--enable-id3lib], [compile with id3lib support for id3 metadata extraction]),
+    [
+        ID3LIB_EN=$enableval 
+        if test "x$enableval" = xno; then
+            ID3LIB_STATUS=disabled
+        else
+            ID3LIB_STATUS=yes
+            ID3LIB_REQUESTED=yes
+        fi
+    ]
 )
 
 AC_ARG_ENABLE(taglib,
-        AC_HELP_STRING([--enable-taglib], [compile with taglib support (default: yes, preferred over id3lib)]),
-   [
-      TAGLIB_EN=$enableval
-      if test "x$enableval" = xno; then
-        TAGLIB_OK=disabled
-      else
-        TAGLIB_REQUESTED=yes
-        TAGLIB_OK=yes
-      fi
-   ],
-   [
-        TAGLIB_OK=yes
-   ]
+    AC_HELP_STRING([--disable-taglib], [compile with taglib support for id3 metadata extraction)]),
+    [
+        TAGLIB_EN=$enableval
+        if test "x$enableval" = xno; then
+            TAGLIB_STATUS=disabled
+        else
+            TAGLIB_REQUESTED=yes
+            TAGLIB_STATUS=yes
+        fi
+    ]
 )
 
-if ((test "x$TAGLIB_REQUESTED" = xno) && (test "x$ID3_REQUESTED" = xyes)) ; then
-    TAGLIB_OK=disabled
+if ((test "x$TAGLIB_REQUESTED" = xno) && (test "x$ID3LIB_REQUESTED" = xyes)) ; then
+    TAGLIB_STATUS=disabled
     AC_MSG_WARN([taglib disabled])
-elif ((test "x$TAGLIB_REQUESTED" = xyes) && (test "x$ID3_REQUESTED" = xno)) ; then
-    ID3_OK=disabled
+elif ((test "x$TAGLIB_REQUESTED" = xyes) && (test "x$ID3LIB_REQUESTED" = xno)) ; then
+    ID3LIB_STATUS=disabled
     AC_MSG_WARN([id3lib disabled])
 elif ((test "x$TAGLIB_REQUESTED" = xyes) && (test "x$ID3_REQUESTED" = xyes)) ; then
     AC_MSG_ERROR([Please select either taglib or id3lib, but not both.])
 fi
 
-######## taglib
-
-TAGLIB_PROG_FOUND=0
-TAGLIB_LIBS=
-TAGLIB_CFLAGS=
-if test "x$TAGLIB_OK" = xyes; then
-    if test -n "$TAGLIB_SEARCH_CONFIG"; then
-        AC_MSG_NOTICE([You specified $TAGLIB_SEARCH_CONFIG for taglib-config])
-        
-        if test -f "$TAGLIB_SEARCH_CONFIG"; then 
-            taglibconfig="$TAGLIB_SEARCH_CONFIG"
-        else
-            taglibconfig="no"
-        fi
-        
-        if test "x$taglibconfig" = xno; then
-            AC_MSG_ERROR([$TAGLIB_SEARCH_CONFIG not found])
-        else
-            TAGLIB_TEST=`${taglibconfig} --version 2>/dev/null`
-            if test -z "$TAGLIB_TEST"; then
-                AC_MSG_ERROR([${taglibconfig} could not be executed or returned invalid values])
-            fi
-            TAGLIB_PROG_FOUND=1
-        fi
-    else
-        AC_PATH_PROG(taglibconfig, taglib-config, no)
-        if test "x$taglibconfig" = xno; then
-            unset ac_cv_path_taglibconfig
-            AC_PATH_PROG(taglibconfig, taglib-config, no, $SEARCH_DIR_PROGS)
-            if test "x$taglibconfig" = xno; then
-                TAGLIB_OK=missing
-                AC_MSG_RESULT([taglib-config not found, please install the taglib-devel package])
-            else
-                TAGLIB_PROG_FOUND=1
-            fi
-        else
-            TAGLIB_PROG_FOUND=1
-        fi
-   fi 
-
-   if test "$TAGLIB_PROG_FOUND" -eq 1 ; then
-        AC_MSG_CHECKING(taglib cflags)
-        TAGLIB_CFLAGS=`${taglibconfig} --cflags`
-        AC_MSG_RESULT($TAGLIB_CFLAGS)
-
-        AC_MSG_CHECKING(taglib libraries)
-        TAGLIB_LIBS=`${taglibconfig} --libs`
-        AC_MSG_RESULT($TAGLIB_LIBS)
-        TAGLIB_LIBS="$TAGLIB_LIBS $Z_LIBS"
-    fi
+if test "x$TAGLIB_STATUS" = xyes; then
+    MT_CHECK_PACKAGE_CFG([taglib],  
+                         [taglib-config], 
+                         [taglib.h fileref.h tag.h audioproperties.h tstring.h textidentificationframe.h attachedpictureframe.h],
+                         [tag], [main])
 fi
 
-if test "x$TAGLIB_OK" = xyes; then
-    CPPFLAGS="$CPPFLAGS $TAGLIB_CFLAGS"
-    CXXFLAGS="$CXXFLAGS $TAGLIB_CFLAGS"
-    AC_CHECK_HEADERS([taglib.h fileref.h tag.h audioproperties.h tstring.h textidentificationframe.h attachedpictureframe.h],
-        [
-            AC_DEFINE([HAVE_ID3_ALBUMART], [1],
-                  [not aware of taglib versions that do not support album art])
-        ],
-        [TAGLIB_OK=missing]
-    )
-fi
-
-if test "x$TAGLIB_OK" = xyes; then
-    LDFLAGS="$LDFLAGS $TAGLIB_LIBS"
-    AC_CHECK_LIB(tag, main, [],
-        [TAGLIB_OK=missing]
-    )
-fi
-
-if test "x$TAGLIB_OK" = xyes; then
-    ID3_OK=disabled
-    AC_DEFINE([HAVE_TAGLIB], [1], [taglib library presence])
-    AC_SUBST(TAGLIB_CFLAGS)
-    AC_SUBST(TAGLIB_LIBS)
+if test "x$TAGLIB_STATUS" = xyes; then
+    AC_DEFINE([HAVE_ID3_ALBUMART], [1], [not aware of taglib versions that do not support album art])
+    ID3LIB_STATUS=disabled
 else
-    if test "x$TAGLIB_EN" = xyes; then
-        AC_MSG_ERROR(unable to configure taglib support)
+    if test "x$TAGLIB_REQUESTED" = xyes; then
+        AC_MSG_ERROR([unable to configure taglib support])
     fi
-    TAGLIB_CFLAGS=
-    TAGLIB_LIBS=
+    ID3LIB_STATUS=yes
 fi
-CPPFLAGS="$CPPFLAGS_SAVE"
-CXXFLAGS="$CXXFLAGS_SAVE"
-LDFLAGS="$LDFLAGS_SAVE"
-
 
 ######### id3lib
 
-#AC_ARG_ENABLE(id3lib,
-#  [  --enable-id3lib          id3lib support],
-#  [
-#     ID3_EN=$enableval 
-#     if test "x$enableval" = xno; then
-#        ID3_OK=disabled
-#     fi
-#  ]
-#)
+if test "x$ID3LIB_STATUS" = xyes; then
+    MT_CHECK_PACKAGE([id3lib], [id3/tag], [id3], [main])
 
-if test "x$ID3_OK" = xyes; then
-    if test -n "$ID3_SEARCH_HEADERS" ; then
-     CPPFLAGS="-I$ID3_SEARCH_HEADERS"
-     AC_CHECK_HEADER($ID3_SEARCH_HEADERS/id3/tag.h,
-        [
-            ID3_CXXFLAGS="-I$ID3_SEARCH_HEADERS"
-        ],
-        [
-            AC_MSG_ERROR([id3lib headers not found in requested location $ID3_SEARCH_HEADERS])
-        ]
-    )
-   else
-    AC_CHECK_HEADER(id3/tag.h,
-        [],
-        [
-            unset ac_cv_header_id3_tag_h
-            CPPFLAGS="-I$SEARCH_DIR_HEADERS"
-            AC_CHECK_HEADER(id3/tag.h,
-                [
-                    ID3_CXXFLAGS="-I$SEARCH_DIR_HEADERS"
-                ],
-                [
-                    ID3_OK=missing
-                ]
-            )
-                
-        ]
-    )
+    if test "x$ID3LIB_STATUS" != xyes; then
+        if test "x$ZLIB_STATUS" != xyes; then
+            MT_CHECK_LIBRARY([z], [compress])
+            LDFLAGS="$LDFLAGS $Z_LDFLAGS $Z_LIBS"
+            AC_MSG_NOTICE([retrying id3lib check with zlib flags])
+            MT_CHECK_PACKAGE([id3lib], [id3/tag], [id3], [main])
+            if test "x$ID3LIB_STATUS" = xyes; then
+                ID3LIB_LIBS="$ID3LIB_LIBS $Z_LIBS"
+                ID3LIB_LDFLAGS="$ID3LIB_LDFLAGS $Z_LDFLAGS"
+            fi
+        else
+            LDFLAGS="$LDFLAGS $ZLIB_LDFLAGS $ZLIB_LIBS"
+            AC_MSG_NOTICE([retrying id3lib check with zlib flags])
+            MT_CHECK_PACKAGE([id3lib], [id3/tag], [id3], [main])
+            if test "x$ID3LIB_STATUS" = xyes; then
+                ID3LIB_LIBS="$ID3LIB_LIBS $ZLIB_LIBS"
+                ID3LIB_LDFLAGS="$ID3LIB_LDFLAGS $ZLIB_LDFLAGS"
+            fi
+        fi
+
+        AC_SUBST(ID3LIB_LIBS)
+        AC_SUBST(ID3LIB_LDFLAGS)
     fi
 fi
 
-if test "x$ID3_OK" = xyes; then
-    if test -n "$ID3_SEARCH_HEADERS" ; then
-     CPPFLAGS="-I$ID3_SEARCH_HEADERS"
-     AC_CHECK_HEADER(id3/misc_support.h,
-        [
-            ID3_CXXFLAGS="-I$ID3_SEARCH_HEADERS"
-        ],
-        [
-            AC_MSG_ERROR([id3lib headers not found in requested location $ID3_SEARCH_HEADERS])
-        ]
-    )
-   else
-    AC_CHECK_HEADER(id3/misc_support.h,
-        [],
-        [
-            unset ac_cv_header_id3_misc_support_h
-            CPPFLAGS="-I$SEARCH_DIR_HEADERS"
-            AC_CHECK_HEADER(id3/misc_support.h,
-                [
-                    ID3_CXXFLAGS="-I$SEARCH_DIR_HEADERS"
-                ],
-                [
-                    ID3_OK=missing
-                ]
-            )
-                
-        ]
-    )
-    fi
-fi
-
-if test "x$ID3_OK" = xyes; then
-    if test -n "$ID3_SEARCH_LIBS" ; then
-        LDFLAGS="$LDFLAGS $Z_LIBS"
-        AC_CHECK_LIB(z,compress,
-           [
-              LDFLAGS="-L$ID3_SEARCH_LIBS $Z_LIBS"
-              AC_MSG_NOTICE([Will search for id3lib libraries in $ID3_SEARCH_LIBS])
-              AC_CHECK_LIB(id3, main,
-                  [
-                      ID3_LIBS="-L$ID3_SEARCH_LIBS $Z_LIBS -lid3 "
-                  ],
-                  [
-                      AC_MSG_ERROR([id3lib libraries not found in requested location $ID3_SEARCH_LIBS])
-                  ],
-                  [-lz]
-              )
-           ],
-           [
-              LDFLAGS="-L$ID_SEARCH_LIBS"
-              AC_CHECK_LIB(id3, main,
-                  [
-                      ID3_LIBS="-L$ID3_SEARCH_LIBS -lid3"
-                  ],
-                  [
-                      AC_MSG_ERROR([id3lib libraries not found in requested location $ID3_SEARCH_LIBS])
-                  ]
-              )
-           ]
-       )
-    else
-    LDFLAGS="$LDFLAGS $Z_LIBS"
-    AC_CHECK_LIB(z,compress,
-         [
-            AC_CHECK_LIB(id3, main,
-                [
-                    ID3_LIBS="$Z_LIBS -lid3"
-                ],
-                [
-                    LDFLAGS="$LDFLAGS -L$SEARCH_DIR_LIBS"
-                    unset ac_cv_lib_id3_main
-                    AC_CHECK_LIB(id3, main,
-                        [
-                            ID3_LIBS="$Z_LIBS -L$SEARCH_DIR_LIBS -lid3"
-                        ],
-                        [
-                            ID3_OK=missing
-                        ]
-                    )
-                ],
-                [-lz])
-         ],
-         [
-            AC_CHECK_LIB(id3,main,[],
-                [
-                    LDFLAGS="-L$SEARCH_DIR_LIBS"
-                    unset ac_cv_lib_id3_main
-                    AC_CHECK_LIB(id3, main,
-                        [
-                            ID3_LIBS="-L$SEARCH_DIR_LIBS -lid3"
-                        ],
-                        [
-                            ID3_OK=missing
-                        ]
-                    )
-                ]
-            )
-         ] 
-     )
-    fi
-    
-fi
-
-if test "x$ID3_OK" = xyes; then
-   AC_DEFINE([HAVE_ID3], [1], [id3lib presence])
-   AC_SUBST(ID3_CXXFLAGS)
-   AC_SUBST(ID3_LIBS)
+if test "x$ID3LIB_STATUS" = xyes; then
    CFLAGS="$CFLAGS $ID3_CXXFLAGS"
    CXXFLAGS="$CXXFLAGS $ID3_CXXFLAGS"
-   LDFLAGS="$LDFLAGS $ID3_LIBS"
+   LDFLAGS="$LDFLAGS $ID3LIB_LDFLAGS $ID3LIB_LIBS"
    AC_LANG_SAVE
    AC_LANG_CPLUSPLUS
    AC_MSG_CHECKING([for album art support in id3lib])
@@ -2096,9 +1880,9 @@ if test "x$ID3_OK" = xyes; then
             AC_MSG_RESULT([no])
         ])
    AC_LANG_RESTORE  
-   TAGLIB_OK=disabled
+   TAGLIB_STATUS=disabled
 else
-    if test "x$ID3_EN" = xyes; then
+    if test "x$ID3LIB_REQUESTED" = xyes; then
         if test "x$TAGLIB_OK" = xyes; then
             AC_MSG_ERROR([Please select either taglib or id3lib, but not both.])
         else
@@ -2108,6 +1892,7 @@ else
 fi
 
 LDFLAGS="$LDFLAGS_SAVE"
+LIBS="$LIBS_SAVE"
 CXXFLAGS="$CXXFLAGS_SAVE"
 CPPFLAGS="$CPPFLAGS_SAVE"
 ######## curl
@@ -2531,9 +2316,9 @@ MT_CHECK_OPTIONAL_PACKAGE([libexif], [disable],
              [libexif/exif-content], [exif], [exif_data_new_from_file])
 
 if test "x$LIBEXIF_STATUS" = xyes; then
-    CFLAGS="$CFLAGS $EXIF_CXXFLAGS"
-    CXXFLAGS="$CXXFLAGS $EXIF_CXXFLAGS"
-    LDFLAGS="$LDFLAGS $EXIF_LDFLAGS"
+    CFLAGS="$CFLAGS $LIBEXIF_CXXFLAGS"
+    CXXFLAGS="$CXXFLAGS $LIBEXIF_CXXFLAGS"
+    LDFLAGS="$LDFLAGS $LIBEXIF_LDFLAGS $LIBEXIF_LIBS"
 
     # try 1 argument signature
     AC_MSG_CHECKING([exif_entry_get_value signature])
@@ -2886,8 +2671,8 @@ echo "libmagic              : $MAGIC_OK"
 echo "inotify               : $INOTIFY_OK"
 echo "libexif               : $LIBEXIF_STATUS"
 echo "expat                 : $EXPAT_STATUS"
-echo "id3lib                : $ID3_OK"
-echo "taglib                : $TAGLIB_OK"
+echo "id3lib                : $ID3LIB_STATUS"
+echo "taglib                : $TAGLIB_STATUS"
 echo "ffmpeg                : $FFMPEG_OK"
 echo "libmp4v2              : $LIBMP4V2_STATUS"
 echo "external transcoding  : $EXTERNAL_TRANSCODING_OK"

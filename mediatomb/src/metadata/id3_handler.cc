@@ -34,7 +34,7 @@
     #include "autoconfig.h"
 #endif
 
-#ifdef HAVE_ID3
+#ifdef HAVE_ID3LIB
 
 #ifdef HAVE_CONFIG_H
     #undef HAVE_CONFIG_H // else utils.h from the id3 library tries to import "config.h"
@@ -272,7 +272,7 @@ void Id3Handler::fillMetadata(Ref<CdsItem> item)
         }
     }
 
-#ifdef HAVE_ID3_ALBUMART
+#ifdef HAVE_ID3LIB_ALBUMART
     // get album art
     // we have a bit of design problem here - the album art is actually not
     // a resource, but our architecture is built that way that we can only
@@ -352,4 +352,4 @@ Ref<IOHandler> Id3Handler::serveContent(Ref<CdsItem> item, int resNum, off_t *da
     return h;
 }
 
-#endif // HAVE_ID3
+#endif // HAVE_ID3LIB
