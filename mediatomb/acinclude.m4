@@ -294,6 +294,7 @@ AC_DEFUN([MT_CHECK_LIBRARY_INTERNAL],
     unset LIBS
 
     if test "$mt_$1_search_libs" ; then
+        unset ac_cv_lib_$2_$3
         LDFLAGS="-L$mt_$1_search_libs"
         AC_CHECK_LIB($2, $3,
             [
@@ -305,6 +306,7 @@ AC_DEFUN([MT_CHECK_LIBRARY_INTERNAL],
             ]
         )
     else
+        unset ac_cv_lib_$2_$3
         AC_CHECK_LIB($2, $3,
             [
                 mt_$1_libs="-l$2"
@@ -363,6 +365,7 @@ AC_DEFUN([MT_CHECK_HEADER_INTERNAL],
     )
 
     if test "$mt_$1_search_headers" ; then
+        unset translit(ac_cv_header_$2_h, `/.-', `___')
         CFLAGS="$CFLAGS -I${mt_$1_search_headers}"
         CXXFLAGS="$CXXFLAGS -I${mt_$1_search_headers}"
         CPPFLAGS="$CPPFLAGS -I${mt_$1_search_headers}"
@@ -375,13 +378,14 @@ AC_DEFUN([MT_CHECK_HEADER_INTERNAL],
             ]
         )
     else
+        unset translit(ac_cv_header_$2_h, `/.-', `___')
         AC_CHECK_HEADER($2.h,
             [],
             [
                 CFLAGS="$CFLAGS -I$MT_SEARCHPATH_HEADERS"
                 CXXFLAGS="$CXXFLAGS -I$MT_SEARCHPATH_HEADERS"
                 CPPFLAGS="$CPPFLAGS -I$MT_SEARCHPATH_HEADERS"
-                unset ac_cv_header_$2_h
+                unset translit(ac_cv_header_$2_h, `/.-', `___')
                 AC_CHECK_HEADER($MT_SEARCHPATH_HEADERS/$2.h,
                     [
                         mt_$1_cxxflags="-I${MT_SEARCHPATH_HEADERS}"
@@ -608,11 +612,15 @@ AC_DEFUN([MT_CHECK_BINCONFIG_INTERNAL],
         CPPFLAGS="$CPPFLAGS $mt_$1_cxxflags"
         CXXFLAGS="$CXXFLAGS $mt_$1_cxxflags"
         CFLAGS="$CFLAGS $mt_$1_cxxflags"
+        for mt_u_header in translit($3, `/.-', `___'); do
+            unset ac_cv_header_${mt_u_header}
+        done
         AC_CHECK_HEADERS($3, [], [mt_$1_package_status=missing])
     fi
 
     if test "x$mt_$1_package_status" = xyes; then
         LDFLAGS="$LDFLAGS $mt_$1_libs"
+        unset ac_cv_lib_$4_$5
         AC_CHECK_LIB($4, $5, [], [mt_$1_package_status=missing])
     fi
 
