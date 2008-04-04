@@ -92,22 +92,6 @@ AC_ARG_WITH(sqlite3-libs,
         ]
 )
 
-AC_ARG_WITH(mysql-cfg,
-        AC_HELP_STRING([--with-mysql-cfg=mysql_config], [absolute path/name of mysql_config]),
-        [
-            MYSQL_SEARCH_CONFIG="$withval"
-        ]
-)
-
-# AC_ARG_WITH(pg-cfg,
-#       AC_HELP_STRING([--with-pg-cfg=pg_config], [absolute path/name of pg_config (for the PostgreSQL database)]),
-#        [
-#            PGSQL_SEARCH_CONFIG="$withval"
-#        ]
-#)
-
-
-
 AC_ARG_WITH(js-h,
         AC_HELP_STRING([--with-js-h=DIR], [search for js (spidermonkey) headers in DIR]),
         [
@@ -192,58 +176,26 @@ AC_ARG_WITH(extractor-libs,
         ]
 )
 
-STATIC="no"
+MT_OPTION([static], [enable],
+          [build a static version of MediaTomb],
+          [
+            CFLAGS="$CFLAGS -static"
+            CXXFLAGS="$CXXFLAGS -static"
+            AC_MSG_NOTICE([Building a static executable.])
+          ],
+          [])
 
-AC_ARG_ENABLE(static, 
-        AC_HELP_STRING([--enable-static], [build a static version of MediaTomb (default: no)]),
-        [
-            if test "x$enableval" = xyes; then
-                CFLAGS="$CFLAGS -static"
-                CXXFLAGS="$CXXFLAGS -static"
-                AC_MSG_NOTICE([Building a static executable.])
-                STATIC="yes"
-            fi
-        ]
-)
+AUTOCREATE_STATUS=yes
+MT_OPTION([db-autocreate], [disable],
+          [automatic creation of the database],[],[AUTOCREATE_STATUS=disabled])
 
-AUTOCREATE=1
-AUTOCREATE_PRINT="0"
-AUTOCREATE_REQUESTED=0
-AC_ARG_ENABLE(db-autocreate,
-        AC_HELP_STRING([--enable-db-autocreate], [enable automatic creation of the media database (default: yes)]),
-        [
-            if test "x$enableval" = xno; then
-                AUTOCREATE=0
-                AUTOCREATE_PRINT="disabled"
-            else
-                AUTOCREATE_REQUESTED=1
-                AUTOCREATE_PRINT="yes"
-                AUTOCREATE=1
-            fi
-        ],
-        [
-            AUTOCREATE=1
-        ]
-)
-
-DEBUG_MALLOC_0=0
-AC_ARG_ENABLE([debug-malloc0],
-              [
-AC_HELP_STRING([--enable-debug-malloc0],
-[only for debugging purposes: abort when we try to call malloc or realloc with a value of zero (default: no)])
-            ],
-            [
-                if test "x$enableval" = xno; then
-                    DEBUG_MALLOC_0=0
-                else
-                    DEBUG_MALLOC_0=1
-                fi
-            ]
-)
-
-if test $DEBUG_MALLOC_0 -eq 1; then
-    AC_DEFINE([DEBUG_MALLOC_0], [1], [debug: abort on malloc/realloc of zero bytes])
-fi
+MT_OPTION([debug-malloc0], [enable],
+          [only for debugging purposes: abort when we try to call malloc or realloc with a value of zero],
+          [
+            AC_DEFINE([DEBUG_MALLOC_0], [1], 
+                      [debug: abort on malloc/realloc of zero bytes])
+          ],
+          [])
 
 PTHREAD_FORCE_LIB=0
 AC_ARG_ENABLE([pthread-lib],
@@ -382,99 +334,25 @@ if test $SIGHUP -eq 1; then
     AC_DEFINE([ENABLE_SIGHUP], [1], [enable SIGHUP handling])
 fi
 
-AC_ARG_ENABLE([mrreg-service],
-              [
-AC_HELP_STRING([--enable-mrreg-service],
-[Enable the X_MS_MediaReceiverRegistrar UPnP service. This is for future XBox 360 support, other renderers will probably not need it (default: no)])
-              ],
-              [
-                if test "x$enableval" = xyes; then
-                    AC_DEFINE([ENABLE_MRREG], [1], [Enable the X_MS_MediaReceiverRegistrar UPnP service. This is for future XBox 360 support, other renderers will probably not need it])
-                fi 
-              ]
-)
+MT_OPTION([mrreg-service], [enable],
+          [Enable the X_MS_MediaReceiverRegistrar UPnP service. This is for future XBox 360 support, other renderers will probably not need it],
+          [
+            AC_DEFINE([ENABLE_MRREG], [1], [Enable the X_MS_MediaReceiverRegistrar UPnP service. This is for future XBox 360 support, other renderers will probably not need it])
+          ],[])
 
-EXTERNAL_TRANSCODING=1
-AC_ARG_ENABLE([external-transcoding],
-                      [
-AC_HELP_STRING([--disable-external-transcoding],
-[enable external transcoding support (default: yes)])
-              ],
-              [
-                if test "x$enableval" = xyes; then
-                    EXTERNAL_TRANSCODING=1
-                else
-                    EXTERNAL_TRANSCODING=0
-                fi
-              ]
-)
+MT_OPTION([external-transcoding], [disable],
+          [external transcoding support],
+          [],[EXTERNAL_TRANSCODING_OPTION_ENABLED=disabled])
 
-FFMPEG_THUMBNAILER=yes
-FFMPEG_THUMBNAILER_REQUESTED=0
-AC_ARG_ENABLE([ffmpegthumbnailer],
-                      [
-AC_HELP_STRING([--disable-ffmpegthumbnailer],
-[enable use of libffmpegthumbnailer (default: yes)])
-              ],
-              [
-                if test "x$enableval" = xyes; then
-                    FFMPEG_THUMBNAILER=yes
-                    FFMPEG_THUMBNAILER_REQUESTED=1
-                else
-                    FFMPEG_THUMBNAILER=disabled
-                fi
-              ]
-)
+MT_OPTION([sqlite-backup-defaults], [enable],
+          [enable sqlite database backup settings in config.xml by default],
+          [],[])
 
-AC_ARG_WITH(ffmpegthumbnailer-h,
-        AC_HELP_STRING([--with-ffmpegthumbnailer-h=DIR], [search for ffmpegthumbnailer headers in DIR]),
-        [
-            FFMPEG_THUMBNAILER_SEARCH_HEADERS="$withval"
-            AC_MSG_NOTICE([Will search for ffmpegthumbnailer headers in $withval])
-        ]
-)
-
-AC_ARG_WITH(ffmpegthumbnailer-libs,
-        AC_HELP_STRING([--with-ffmpegthumbnailer-libs=DIR], [search for ffmpegthumbnailer libraries in DIR]),
-        [
-            FFMPEG_THUMBNAILER_SEARCH_LIBS="$withval"
-            AC_MSG_NOTICE([Will search for ffmpegthumbnailer libraries in $withval])
-        ]
-)
-
-
-
-SQLITE_BACKUP_ENABLED=0
-AC_ARG_ENABLE([sqlite-backup-defaults],
-                      [
-AC_HELP_STRING([--enable-sqlite-backup-defaults],
-[enable sqlite database backup settings in config.xml by default (default: no)])
-              ],
-              [
-                if test "x$enableval" = xyes; then
-                    SQLITE_BACKUP_ENABLED=1
-                fi
-              ]
-)
-
-EXTEND_PROTINFO=1
-AC_ARG_ENABLE([protocolinfo-extension],
-              [
-AC_HELP_STRING([--enable-protocolinfo-extension],
-[This is required for Playstation 3 support, it adds certain tags to the protocolInfo attribute (default: yes)])
-              ],
-              [
-                if test "x$enableval" = xno; then
-                    EXTEND_PROTINFO=0
-                else
-                    EXTEND_PROTINFO=1
-                fi 
-              ]
-)
-
-if test $EXTEND_PROTINFO -eq 1; then
-    AC_DEFINE([EXTEND_PROTOCOLINFO], [1], [This is required for Playstation 3 support, it adds certain tags to the protocolInfo attribute])
-fi
+MT_OPTION([protocolinfo-extension], [disable],
+          [This is required for Playstation 3 support, it adds certain tags to the protocolInfo attribute],
+          [
+            AC_DEFINE([EXTEND_PROTOCOLINFO], [1], [This is required for Playstation 3 support, it adds certain tags to the protocolInfo attribute])
+          ],[])
 
 YOUTUBE=0
 YOUTUBE_REQUESTED=0
@@ -524,20 +402,9 @@ AC_HELP_STRING([--with-curl-cfg=curl-config],
             ]
 )
 
-
-SKIP_FSEEKO_TEST=0
-AC_ARG_ENABLE([fseeko-check],
-              [
-AC_HELP_STRING([--disable-fseeko-check],
-[This is a workaround for a bug on some Debian distros, use this if configure fails complaining about off_t (default: no)])
-            ],
-            [
-                if test "x$enableval" = xno; then
-                    SKIP_FSEEKO_TEST=1     
-                fi
-            ]
-)
-
+MT_OPTION([fseeko-check], [disable],
+          [This is a workaround for a bug on some Debian distros, use this if configure fails complaining about off_t],
+          [],[])
 
 ###############################################################################
 # The following block is derived from the configure.ac script from the 
@@ -605,16 +472,21 @@ CFLAGS_SAVE="$CFLAGS"
 CXXFLAGS_SAVE="$CXXFLAGS"
 LDFLAGS_SAVE="$LDFLAGS"
 
-if test $EXTERNAL_TRANSCODING -eq 1; then
-    AC_CHECK_FUNCS([mkfifo],[],
-                   [
-                        AC_MSG_ERROR([mkfifo is required by the external transcoding feature])
-                   ]
+if test "x$EXTERNAL_TRANSCODING_OPTION_ENABLED" = xyes; then
+    AC_CHECK_FUNCS([mkfifo],
+       [
+            AC_DEFINE([EXTERNAL_TRANSCODING], [1], [external transcoding feature])
+       ],
+       [
+           if test "x$EXTERNAL_TRANSCODING_OPTION_REQUESTED" = xyes; then
+               AC_MSG_ERROR([mkfifo is required by the external transcoding feature])
+           else
+               AC_MSG_WARN([mkfifo is required by the external transcoding feature])
+               EXTERNAL_TRANSCODING_OPTION_ENABLED=disabled
+
+           fi
+       ]
     )
-    AC_DEFINE([EXTERNAL_TRANSCODING], [1], [external transcoding feature])
-    EXTERNAL_TRANSCODING_OK=yes
-else
-    EXTERNAL_TRANSCODING_OK=disabled
 fi
 
 ICONV_CXXFLAGS=
@@ -784,7 +656,7 @@ AC_TYPE_OFF_T
 AC_TYPE_SIZE_T
 #AC_CHECK_TYPES([ssize_t], [], [], [#include <sys/types.h>])
 
-if test "$SKIP_FSEEKO_TEST" -eq 0; then
+if test "x$FSEEKO_CHECK_OPTION_ENABLED" = xyes; then
     AC_FUNC_FSEEKO
 
     if test "$ac_cv_func_fseeko" = no || test "$ac_cv_sys_largefile_source" = unknown; then
@@ -985,6 +857,13 @@ else
         ADD_PTHREAD_CFLAGS="$PTHREAD_CFLAGS $PTHREAD_LIBS"
     fi
 
+    if test "x$STATIC_OPTION_ENABLED" = xyes; then
+        CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
+        LIBS="$LIBS $PTHREAD_LIBS"
+        CFLAGS_SAVE="$CFLAGS_SAVE $PTHREAD_CFLAGS"
+        LIBS_SAVE="$LIBS_SAVE $PTHREAD_LIBS"
+    fi
+
     AC_SUBST(PTHREAD_LIBS)
     AC_SUBST(PTHREAD_CFLAGS)
 fi
@@ -993,7 +872,7 @@ LIBS_SAVE="$LIBS"
 unset LIBS
 
 # we might need librt for sqlite
-MT_CHECK_LIBRARY([rt], [clock_gettime])
+MT_CHECK_LIBRARY([rt], [rt], [clock_gettime])
 
 if test "x$RT_STATUS" != xyes; then
     AC_CHECK_FUNC(clock_gettime)
@@ -1007,12 +886,17 @@ MT_CHECK_OPTIONAL_PACKAGE([zlib], [disable],
     
 
 if test "x$ZLIB_STATUS" = xyes; then
-    if test $AUTOCREATE -eq 1; then
+    if test "x$AUTOCREATE_OPTION_ENABLED" = xyes; then
         AC_DEFINE([AUTO_CREATE_DATABASE], [1], [create database automatically if it does not exist])
     fi
 else
-    if test $AUTOCREATE_REQUESTED -eq 1; then
-        AC_MSG_ERROR([Automatic database creation not possible due to missing zlib headers/libraries])
+    if test "x$AUTOCREATE_OPTION_ENABLED" = xyes; then
+        if test "x$AUTOCREATE_OPTION_REQUESTED" = xyes; then
+            AC_MSG_ERROR([Automatic database creation not possible due to missing zlib headers/libraries])
+        else
+            AC_MSG_WARN([Automatic database creation not possible due to missing zlib headers/libraries])
+            AUTOCREATE_STATUS=disabled
+        fi
     fi
 fi
 
@@ -1110,7 +994,7 @@ if test "x$SQLITE3_OK" = xyes; then
     AC_SUBST(SQLITE3_CXXFLAGS)
     AC_SUBST(SQLITE3_LIBS)
 
-    if test $SQLITE_BACKUP_ENABLED -eq 1; then
+    if test "x$SQLITE_BACKUP_OPTION_ENABLED" = xyes; then
         AC_DEFINE([SQLITE_BACKUP_ENABLED], [1], [enable sqlite db backup settings in config.xml by default])
     fi
 else
@@ -1118,7 +1002,8 @@ else
         AC_MSG_ERROR(unable to configure sqlite3 support)
     fi
 
-    if test $SQLITE_BACKUP_ENABLED -eq 1; then
+    if (test "x$SQLITE_BACKUP_OPTION_ENABLED" = xyes) &&
+       (test "x$SQLITE_BACKUP_OPTION_REQUESTED" = xyes); then
         AC_MSG_ERROR(You specified the option to use sqlite backup settings but the sqlite library is not available)
     fi
 
@@ -1147,105 +1032,34 @@ AC_ARG_ENABLE(mysql,
 
 MYSQL_PROG_FOUND=0
 
-if test "x$MYSQL_OK" = xyes; then
-    if test -n "$MYSQL_SEARCH_CONFIG"; then
-        AC_MSG_NOTICE([You specified $MYSQL_SEARCH_CONFIG for mysql_config])
-        
-        if test -f "$MYSQL_SEARCH_CONFIG"; then 
-            mysqlconfig="$MYSQL_SEARCH_CONFIG"
-        else
-            mysqlconfig="no"
-        fi
-        
-        if test "x$mysqlconfig" = xno; then
-            AC_MSG_ERROR([$MYSQL_SEARCH_CONFIG not found])
-        else
-            MYSQL_TEST=`${mysqlconfig} --version 2>/dev/null`
-            if test -z "$MYSQL_TEST"; then
-                AC_MSG_ERROR([${mysqlconfig} could not be executed or returned invalid values])
-            fi
+MT_CHECK_OPTIONAL_PACKAGE_CFG([mysql], 
+                              [disable],
+                              [mysql database support],
+                              [mysql_config],
+                              [mysql.h],
+                              [], [mysql_init],[--libs_r])
 
-            MYSQL_PROG_FOUND=1
-        fi
-    else
-        AC_PATH_PROG(mysqlconfig, mysql_config, no)
-        if test "x$mysqlconfig" = xno; then
-            unset ac_cv_path_mysqlconfig
-            
-            AC_PATH_PROG(mysqlconfig, mysql_config, no, $SEARCH_DIR_PROGS)
-            if test "x$mysqlconfig" = xno; then
-                MYSQL_OK=missing
-                AC_MSG_RESULT([mysql_config script not found])
-            else
-                MYSQL_PROG_FOUND=1
-            fi
-        else
-            MYSQL_PROG_FOUND=1
-        fi
-    fi
- 
-    if test $MYSQL_PROG_FOUND -eq 1 ; then 
-        AC_MSG_CHECKING(mysql version)
-        MYSQL_VERSION_MAJOR=`${mysqlconfig} --version 2>/dev/null | sed 's/^\([[0-9]]\{1,\}\)\.\([[0-9]]\{1,\}\).\([[0-9]]\{1,\}\).*$/\1/'`
-        MYSQL_VERSION_MINOR=`${mysqlconfig} --version 2>/dev/null | sed 's/^\([[0-9]]\{1,\}\)\.\([[0-9]]\{1,\}\).\([[0-9]]\{1,\}\).*$/\2/'` 
-        
-        MYSQL_PRINT_VERSION=`${mysqlconfig} --version`
-        AC_MSG_RESULT([$MYSQL_PRINT_VERSION])
-
-        if test -z $MYSQL_VERSION_MAJOR || test -z $MYSQL_VERSION_MINOR; then
-            AC_MSG_WARN(${mysqlconfig} could not be executed or returned invalid values)
-            MYSQL_OK=missing
-        elif test $MYSQL_VERSION_MAJOR -le 3 ; then
-                AC_MSG_WARN(MySQL version too old, we only support version 4.0.x or later)
-                MYSQL_OK=missing
-        else
-            if test "$MYSQL_VERSION_MAJOR" -gt 3 ; then
-                AC_MSG_CHECKING(mysql includes)
-                MYSQL_CFLAGS=`${mysqlconfig} --include`
-                AC_MSG_RESULT($MYSQL_CFLAGS)
- 
-                AC_MSG_CHECKING(mysql libraries)
-                MYSQL_LIBS=`${mysqlconfig} --libs_r`
-                AC_MSG_RESULT($MYSQL_LIBS)
-            else
-                AC_MSG_WARN(Unsupported mysql version)
-                MYSQL_OK=missing
-            fi
-        fi
- 
-        CXXFLAGS="$CXXFLAGS $MYSQL_CFLAGS"
-        CFLAGS="$CFLAGS $MYSQL_CFLAGS"
-        CPPFLAGS="$CPPFLAGS $MYSQL_CFLAGS"
-        LDFLAGS="$LDFLAGS $MYSQL_LIBS"
+if test "x$MYSQL_STATUS" = xyes; then
+    AC_MSG_CHECKING(mysql version)
+    MYSQL_VERSION_MAJOR=`echo $MYSQL_VERSION | sed 's/^\([[0-9]]\{1,\}\)\.\([[0-9]]\{1,\}\).\([[0-9]]\{1,\}\).*$/\1/'`
+    MYSQL_VERSION_MINOR=`echo $MYSQL_VERSION | sed 's/^\([[0-9]]\{1,\}\)\.\([[0-9]]\{1,\}\).\([[0-9]]\{1,\}\).*$/\2/'`
+    AC_MSG_RESULT($MYSQL_VERSION)
+    if test -z $MYSQL_VERSION_MAJOR || test -z $MYSQL_VERSION_MINOR; then
+        AC_MSG_WARN([could not parse mysql version string])
+        MYSQL_STATUS=missing
+    elif test $MYSQL_VERSION_MAJOR -le 3 ; then
+       AC_MSG_WARN(MySQL version too old, we only support version 4.0.x or later)
+       MYSQL_STATUS=missing
     fi
 fi
 
-LIBS_SAVE="$LIBS"
+LDFLAGS="$LDFLAGS_SAVE"
 LIBS="$LIBS $MYSQL_LIBS"
+CFLAGS="$CFLAGS $MYSQL_CXXFLAGS"
+CXXFLAGS="$CXXFLAGS $MYSQL_CXXFLAGS"
+CPPFLAGS="$CFLAGS $MYSQL_CXXFLAGS"
 
-dnl we are not doing an extra search in $SEARCH_DIR because the
-dnl mysql_config set the correct flags already, if not - something
-dnl is anyway wrong with the mysql installation
-dnl we will however accept custom user flags
-if test "x$MYSQL_OK" = xyes; then
-    AC_CHECK_HEADER(mysql.h,
-        [],
-        [
-            AC_MSG_RESULT(mysql.h failed)
-            MYSQL_OK=missing
-        ]
-    )
-fi
-if test "x$MYSQL_OK" = xyes; then
-    AC_CHECK_FUNCS(mysql_init,
-        [],
-        [
-            MYSQL_OK=missing
-            AC_MSG_RESULT(mysqlclient link failed)
-        ]
-    )
-fi
-if test "x$MYSQL_OK" = xyes; then
+if test "x$MYSQL_STATUS" = xyes; then
     AC_DEFINE([HAVE_MYSQL], [1], [MySQL library presence])
     AC_SUBST(MYSQL_LIBS)
     AC_SUBST(MYSQL_CFLAGS)
@@ -1270,10 +1084,7 @@ if test "x$MYSQL_OK" = xyes; then
         ]
     )
 else
-    if test "x$MYSQL_EN" = xyes; then
-        AC_MSG_ERROR(unable to configure mysql support)
-    fi
-    MYSQL_CFLAGS=
+    MYSQL_CXXFLAGS=
     MYSQL_LIBS=
 fi
 
@@ -1765,79 +1576,64 @@ LDFLGAS="$LDFLAGS_SAVE"
 
 ######### taglib or id3lib selection
 
-TAGLIB_REQUESTED=no
-TAGLIB_STATUS=yes
+TAGLIB_STATUS=
+ID3LIB_STATUS=
 
-ID3LIB_REQUESTED=no
-ID3LIB_STATUS=no
+MT_OPTION([id3lib], [enable],
+          [id3 metadata extraction with the help of id3lib],[],[])
 
-AC_ARG_ENABLE(id3lib,
-    AC_HELP_STRING([--enable-id3lib], [compile with id3lib support for id3 metadata extraction]),
-    [
-        ID3LIB_EN=$enableval 
-        if test "x$enableval" = xno; then
-            ID3LIB_STATUS=disabled
-        else
-            ID3LIB_STATUS=yes
-            ID3LIB_REQUESTED=yes
-        fi
-    ]
-)
+MT_OPTION([taglib], [disable],
+          [id3 metadata extraction with the help of taglib],[],[])
 
-AC_ARG_ENABLE(taglib,
-    AC_HELP_STRING([--disable-taglib], [compile with taglib support for id3 metadata extraction)]),
-    [
-        TAGLIB_EN=$enableval
-        if test "x$enableval" = xno; then
-            TAGLIB_STATUS=disabled
-        else
-            TAGLIB_REQUESTED=yes
-            TAGLIB_STATUS=yes
-        fi
-    ]
-)
-
-if ((test "x$TAGLIB_REQUESTED" = xno) && (test "x$ID3LIB_REQUESTED" = xyes)) ; then
+if ((test "x$TAGLIB_OPTION_ENABLED" = xno) && (test "x$ID3LIB_OPTION_ENABLED" = xyes)) ; then
     TAGLIB_STATUS=disabled
+    TAGLIB_OPTION_ENABLED=no
     AC_MSG_WARN([taglib disabled])
-elif ((test "x$TAGLIB_REQUESTED" = xyes) && (test "x$ID3LIB_REQUESTED" = xno)) ; then
+elif ((test "x$TAGLIB_OPTION_ENABLED" = xyes) && (test "x$ID3LIB_OPTION_ENABLED" = xno)) ; then
     ID3LIB_STATUS=disabled
+    ID3LIB_OPTION_ENABLED=no
     AC_MSG_WARN([id3lib disabled])
-elif ((test "x$TAGLIB_REQUESTED" = xyes) && (test "x$ID3_REQUESTED" = xyes)) ; then
+elif ((test "x$TAGLIB_OPTION_ENABLED" = xyes) && (test "x$ID3LIB_OPTION_ENABLED" = xyes)) ; then
     AC_MSG_ERROR([Please select either taglib or id3lib, but not both.])
 fi
 
-if test "x$TAGLIB_STATUS" = xyes; then
+if test "x$TAGLIB_OPTION_ENABLED" = xyes; then
     MT_CHECK_PACKAGE_CFG([taglib],  
                          [taglib-config], 
                          [taglib.h fileref.h tag.h audioproperties.h tstring.h textidentificationframe.h attachedpictureframe.h],
                          [tag], [main])
+else
+    TAGLIB_STATUS=disabled
+    if test "x$ID3_OPTION_REQUESTED" = no; then
+        ID3_OPTION_ENABLED=yes
+    fi
 fi
 
 if test "x$TAGLIB_STATUS" = xyes; then
     AC_DEFINE([HAVE_ID3_ALBUMART], [1], [not aware of taglib versions that do not support album art])
     ID3LIB_STATUS=disabled
+    ID3LIB_OPTION_ENABLED=no
 else
-    if test "x$TAGLIB_REQUESTED" = xyes; then
+    if (test "x$TAGLIB_OPTION_REQUESTED" = xyes) && 
+       (test "x$TAGLIB_OPTION_ENABLED" = xyes); then
         AC_MSG_ERROR([unable to configure taglib support])
     fi
-    ID3LIB_STATUS=yes
 fi
 
 ######### id3lib
 
-if test "x$ID3LIB_STATUS" = xyes; then
+if test "x$ID3LIB_OPTION_ENABLED" = xyes; then
     MT_CHECK_PACKAGE([id3lib], [id3/tag], [id3], [main])
 
     if test "x$ID3LIB_STATUS" != xyes; then
         if test "x$ZLIB_STATUS" != xyes; then
-            MT_CHECK_LIBRARY([z], [compress])
-            LDFLAGS="$LDFLAGS $Z_LDFLAGS $Z_LIBS"
+            MT_CHECK_LIBRARY([zlib], [z], [compress])
+            LDFLAGS="$LDFLAGS $ZLIB_LDFLAGS $ZLIB_LIBS"
             AC_MSG_NOTICE([retrying id3lib check with zlib flags])
             MT_CHECK_PACKAGE([id3lib], [id3/tag], [id3], [main])
             if test "x$ID3LIB_STATUS" = xyes; then
-                ID3LIB_LIBS="$ID3LIB_LIBS $Z_LIBS"
-                ID3LIB_LDFLAGS="$ID3LIB_LDFLAGS $Z_LDFLAGS"
+                ID3LIB_LIBS="$ID3LIB_LIBS $ZLIB_LIBS"
+                ID3LIB_LDFLAGS="$ID3LIB_LDFLAGS $ZLIB_LDFLAGS"
             fi
         else
             LDFLAGS="$LDFLAGS $ZLIB_LDFLAGS $ZLIB_LIBS"
@@ -1879,15 +1675,17 @@ if test "x$ID3LIB_STATUS" = xyes; then
         [
             AC_MSG_RESULT([no])
         ])
-   AC_LANG_RESTORE  
-   TAGLIB_STATUS=disabled
+   AC_LANG_RESTORE
 else
-    if test "x$ID3LIB_REQUESTED" = xyes; then
-        if test "x$TAGLIB_OK" = xyes; then
+    if (test "x$ID3LIB_OPTION_REQUESTED" = xyes) &&
+       (test "x$ID3LIB_OPEION_ENABLED" = xyes); then
+        if test "x$TAGLIB_STATUS" = xyes; then
             AC_MSG_ERROR([Please select either taglib or id3lib, but not both.])
         else
             AC_MSG_ERROR(unable to configure id3lib support)
         fi
+    else
+        ID3LIB_STATUS=disabled
     fi
 fi
 
@@ -1906,7 +1704,7 @@ if ((test $YOUTUBE -eq 1) && (test $YOUTUBE_REQUESTED -eq 1) && (test $USE_CURL 
     AC_MSG_ERROR([You enabled YouTube but disabled curl, however curl is required by the YouTube feature])
 fi
 
-if ((test $YOUTUBE -eq 0) && (test $EXTERNAL_TRANSCODING -eq 0)); then
+if ((test $YOUTUBE -eq 0) && (test "x$EXTERNAL_TRANSCODING_OPTION" = xyes)); then
     if test $USE_CURL -eq 1; then
         if test $CURL_REQUESTED -eq 1; then
             AC_MSG_ERROR([You enabled curl support but the external transcoding and YouTube features are disabled - curl is not needed without it])
@@ -1917,7 +1715,7 @@ if ((test $YOUTUBE -eq 0) && (test $EXTERNAL_TRANSCODING -eq 0)); then
     fi
 fi
 
-if (((test $YOUTUBE -eq 1) || (test $EXTERNAL_TRANSCODING -eq 1)) && (test $USE_CURL -eq 1)); then
+if (((test $YOUTUBE -eq 1) || (test "x$EXTERNAL_TRANSCODING_OPTION" = xyes)) && (test $USE_CURL -eq 1)); then
     AC_MSG_NOTICE([Checking for curl (needed for extended external transcoding and YouTube support)])
     CURL_OK=yes
     if test -n "$CURL_SEARCH_CONFIG"; then
@@ -1990,7 +1788,7 @@ else
     if test $YOUTUBE_REQUESTED -eq 1; then
         AC_MSG_ERROR([unable to configure curl which is required for YouTube support!])
     fi
-    if test $EXTERNAL_TRANSCODING -eq 1; then
+    if test "x$EXTERNAL_TRANSCODING_OPTION" = xyes; then
         if ((test $USE_CURL -eq 1) && (test $CURL_REQUESTED -eq 0)); then
             AC_MSG_WARN([unable to configure curl, external transcoding will have limited functionality!])
         fi
@@ -2001,7 +1799,7 @@ else
 
     fi
 
-    if (test $YOUTUBE -eq 0) && (test $EXTERNAL_TRANSCODING -eq 0); then
+    if (test $YOUTUBE -eq 0) && (test "x$EXTERNAL_TRANSCODING_OPTION" = xyes); then
         CURL_CFLAGS=
         CURL_LIBS=
     fi
@@ -2610,24 +2408,11 @@ if (test "x$LOGDEBUG_OK" != xyes) && (test "x$UPNPDEBUG_OK" != xyes); then
     AC_DEFINE(NDEBUG, 1, [make sure there are no asserts in the retail build])
 fi
 
-AC_ARG_ENABLE(log,
-        AC_HELP_STRING([--disable-log], [disable all output from MediaTomb (default: no)]),
-  [
-     LOG_OK_EN=$enableval 
-     if test "x$enableval" = xno; then
-        LOG_OK=disabled
-     else
-        LOG_OK=yes
-     fi
-  ],
-  [
-      LOG_OK=yes
-  ]
-)
-
-if test "x$LOG_OK" = xyes; then
-    AC_DEFINE(LOG_ENABLED, 1, [if defined compile with log output])
-fi
+MT_OPTION([log], [disable], [disable all console output],
+          [
+            AC_DEFINE(LOG_ENABLED, 1, [if defined compile with log output])
+          ],
+          [])
 
 eval PACKAGE_DATADIR="${datadir}/${PACKAGE}"
 eval PACKAGE_DATADIR="${PACKAGE_DATADIR}"
@@ -2664,7 +2449,7 @@ echo "CONFIGURATION SUMMARY ----"
 #                        disabled
 echo
 echo "sqlite3               : $SQLITE3_OK"
-echo "mysql                 : $MYSQL_OK"
+echo "mysql                 : $MYSQL_STATUS"
 ##echo "postgresql          : $PGSQL_OK"
 echo "libjs                 : $JS_OK"
 echo "libmagic              : $MAGIC_OK"
@@ -2675,21 +2460,12 @@ echo "id3lib                : $ID3LIB_STATUS"
 echo "taglib                : $TAGLIB_STATUS"
 echo "ffmpeg                : $FFMPEG_OK"
 echo "libmp4v2              : $LIBMP4V2_STATUS"
-echo "external transcoding  : $EXTERNAL_TRANSCODING_OK"
+echo "external transcoding  : $EXTERNAL_TRANSCODING_OPTION_ENABLED"
 echo "curl                  : $CURL_OK"
 #echo "YouTube               : $YOUTUBE_OK"
 echo "libextractor          : $EXTRACTOR_OK"
-
-
-
-if  test $AUTOCREATE_PRINT != "0"; then
-    echo "db-autocreate         : $AUTOCREATE_PRINT"
-fi
+echo "db-autocreate         : $AUTOCREATE_STATUS"
         
-if test "$LOG_OK" != "yes"; then
-    echo "log output            : $LOG_OK"
-fi
-
 if test "$LOGDEBUG_OK" != "disabled"; then
     echo "debug log             : $LOGDEBUG_OK"
 fi
@@ -2698,8 +2474,8 @@ if test "$UPNPDEBUG_OK" != "disabled"; then
     echo "upnpdebug             : $UPNPDEBUG_OK"
 fi
 
-if test "$STATIC" = "yes"; then
-    echo "static build          : $STATIC"
+if test "$STATIC_OPTION_ENABLED" = "yes"; then
+    echo "static build          : $STATIC_OPTION_ENABLED"
 fi
 
 echo

@@ -522,11 +522,12 @@ AC_DEFUN([MT_CHECK_REQUIRED_PACKAGE],
     AC_SUBST(translit($1, `a-z', `A-Z')_STATUS)
 ])
 
-# $1 library name
-# $2 function to check
+# $1 with parameter name
+# $2 library name
+# $3 function to check
 AC_DEFUN([MT_CHECK_LIBRARY],
 [
-    MT_CHECK_LIBRARY_INTERNAL($1, $1, $2)
+    MT_CHECK_LIBRARY_INTERNAL($1, $2, $3)
 
     translit($1, `a-z', `A-Z')_LIBS=${mt_$1_libs}
     translit($1, `a-z', `A-Z')_LDFLAGS=${mt_$1_ldflags}
@@ -542,7 +543,8 @@ AC_DEFUN([MT_CHECK_LIBRARY],
 # $3 headers
 # $4 library name
 # $5 function name
-# 
+# $6 optional library command
+#
 #  returns substed:
 #    $mt_$1_package_status
 #    $1_LDFLAGS
@@ -602,9 +604,13 @@ AC_DEFUN([MT_CHECK_BINCONFIG_INTERNAL],
         AC_MSG_CHECKING([$1 cflags])
         mt_$1_cxxflags=`${mt_$1_config} --cflags`
         AC_MSG_RESULT([$mt_$1_cxxflags])
-
+        mt_$1_libs=
         AC_MSG_CHECKING([$1 libs])
-        mt_$1_libs=`${mt_$1_config} --libs`
+        if test -z $6;  then
+            mt_$1_libs=`${mt_$1_config} --libs`
+        else
+            mt_$1_libs=`${mt_$1_config} $6`
+        fi
         AC_MSG_RESULT([$mt_$1_libs])
     fi
 
@@ -619,9 +625,14 @@ AC_DEFUN([MT_CHECK_BINCONFIG_INTERNAL],
     fi
 
     if test "x$mt_$1_package_status" = xyes; then
-        LDFLAGS="$LDFLAGS $mt_$1_libs"
-        unset ac_cv_lib_$4_$5
-        AC_CHECK_LIB($4, $5, [], [mt_$1_package_status=missing])
+        LIBS="$mt_$1_libs $LIBS"
+        if test -z $4; then
+            unset ac_cv_func_$5
+            AC_CHECK_FUNCS($5, [], [mt_$1_package_status=missing])
+        else
+            unset ac_cv_lib_$4_$5
+            AC_CHECK_LIB($4, $5, [], [mt_$1_package_status=missing])
+        fi
     fi
 
     if test "x$mt_$1_package_status" = xyes; then
@@ -644,7 +655,8 @@ AC_DEFUN([MT_CHECK_BINCONFIG_INTERNAL],
 # $4 config file name
 # $5 headers
 # $6 library name
-# $7 function namea
+# $7 function name
+# $8 custom lib parameter
 #
 # returns:
 #   mt_$1_package_status
@@ -674,7 +686,7 @@ AC_DEFUN([MT_CHECK_OPTIONAL_PACKAGE_CFG],
     )
 
     if test "x$mt_$1_status" = xyes; then
-        MT_CHECK_BINCONFIG_INTERNAL($1, $4, $5, $6, $7)
+        MT_CHECK_BINCONFIG_INTERNAL($1, $4, $5, $6, $7, $8)
         mt_$1_status=${mt_$1_package_status}
     fi
     
@@ -794,7 +806,40 @@ AC_DEFUN([MT_CHECK_PACKAGE],
     AC_SUBST(translit($1, `a-z', `A-Z')_STATUS)
 ])
 
-#AC_DEFUN([MT_YES_NO],
-#[
-#    AS_IF([test $1 = yes], [$2], [$3])[]dnl
-#])
+# $1 option name
+# $2 enable/disable
+# $3 help text
+# $4 action if enabled
+# $5 action if disabled
+#
+# returns:
+#   $1_OPTION_ENABLED
+#   $1_OPTION_REQUESTED
+
+AC_DEFUN([MT_OPTION],
+[
+
+    translit(mt_$1_option_enabled, `/.-', `___')=
+    translit(mt_$1_option_requested, `/.-', `___')=no
+    if test "x$2" = xdisable; then
+        translit(mt_$1_option_enabled, `/.-', `___')=yes
+    else
+        translit(mt_$1_option_enabled, `/.-', `___')=no
+    fi
+
+    AC_ARG_ENABLE([$1],
+        AC_HELP_STRING([--$2-$1], [$3]),
+        [
+            translit(mt_$1_option_enabled, `/.-', `___')=$enableval
+            translit(mt_$1_option_requested, `/.-', `___')=yes
+        ]
+    )
+
+    translit($1, `a-z/.-', `A-Z___')_OPTION_ENABLED=${translit(mt_$1_option_enabled,`/.-', `___')}
+    translit($1, `a-z/.-', `A-Z___')_OPTION_REQUESTED=${translit(mt_$1_option_requested, `/.-', `___')}
+
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_OPTION_ENABLED)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_OPTION_REQUESTED)
+
+    AS_IF([test "x${translit(mt_$1_option_enabled,`/.-', `___')}" = xyes], [$4], [$5])[]dnl
+])

@@ -11,7 +11,7 @@ libmediatomb_a_CXXFLAGS = \
                      -I$(top_srcdir)/tombupnp/upnp/inc \
                      -I$(top_srcdir) \
                      $(SQLITE3_CXXFLAGS) \
-                     $(MYSQL_CFLAGS) \
+                     $(MYSQL_CXXFLAGS) \
                      $(PGSQL_CFLAGS) \
                      $(JS_CXXFLAGS) \
                      $(TAGLIB_CXXFLAGS) \
@@ -36,7 +36,7 @@ mediatomb_CXXFLAGS = -I$(top_srcdir)/src \
                      -I$(top_srcdir)/tombupnp/upnp/inc \
                      -I$(top_srcdir) \
                      $(SQLITE3_CXXFLAGS) \
-                     $(MYSQL_CFLAGS) \
+                     $(MYSQL_CXXFLAGS) \
                      $(PGSQL_CFLAGS) \
                      $(JS_CXXFLAGS) \
                      $(TAGLIB_CXXFLAGS) \
