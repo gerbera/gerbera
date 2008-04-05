@@ -106,28 +106,6 @@ AC_ARG_WITH(js-libs,
         ]
 )
 
-AC_ARG_WITH(magic-h,
-        AC_HELP_STRING([--with-magic-h=DIR], [search for filemagic headers in DIR]),
-        [
-            MAGIC_SEARCH_HEADERS="$withval"
-        ]
-)
-
-AC_ARG_WITH(magic-libs,
-        AC_HELP_STRING([--with-magic-libs=DIR], [search for filemagic libraries in DIR]),
-        [
-            MAGIC_SEARCH_LIBS="$withval"
-        ]
-)
-
-AC_ARG_WITH(inotify-h,
-        AC_HELP_STRING([--with-inotify-h=DIR], [search for inotify header in DIR/sys]),
-        [
-            INOTIFY_SEARCH_HEADERS="$withval"
-            AC_MSG_NOTICE([Will search for inotify header in $withval/sys])
-        ]
-)
-
 AC_ARG_WITH(iconv-h,
         AC_HELP_STRING([--with-iconv-h=DIR], [search for iconv headers in DIR]),
         [
@@ -185,9 +163,8 @@ MT_OPTION([static], [enable],
           ],
           [])
 
-AUTOCREATE_STATUS=yes
 MT_OPTION([db-autocreate], [disable],
-          [automatic creation of the database],[],[AUTOCREATE_STATUS=disabled])
+          [automatic creation of the database],[],[])
 
 MT_OPTION([debug-malloc0], [enable],
           [only for debugging purposes: abort when we try to call malloc or realloc with a value of zero],
@@ -881,21 +858,21 @@ fi
 ############ zlib
 
 MT_CHECK_OPTIONAL_PACKAGE([zlib], [disable],
-                 [compile with zlib for automated database creation support],
+                 [zlib support required for automated database creation],
                  [zlib], [z], [uncompress])
     
 
 if test "x$ZLIB_STATUS" = xyes; then
-    if test "x$AUTOCREATE_OPTION_ENABLED" = xyes; then
+    if test "x$DB_AUTOCREATE_OPTION_ENABLED" = xyes; then
         AC_DEFINE([AUTO_CREATE_DATABASE], [1], [create database automatically if it does not exist])
     fi
 else
-    if test "x$AUTOCREATE_OPTION_ENABLED" = xyes; then
-        if test "x$AUTOCREATE_OPTION_REQUESTED" = xyes; then
+    if test "x$DB_AUTOCREATE_OPTION_ENABLED" = xyes; then
+        if test "x$DB_AUTOCREATE_OPTION_REQUESTED" = xyes; then
             AC_MSG_ERROR([Automatic database creation not possible due to missing zlib headers/libraries])
         else
             AC_MSG_WARN([Automatic database creation not possible due to missing zlib headers/libraries])
-            AUTOCREATE_STATUS=disabled
+            DB_AUTOCREATE_OPTION_ENABLED=disabled
         fi
     fi
 fi
@@ -905,7 +882,7 @@ AC_CACHE_SAVE
 ######### SQLite3
 
 AC_ARG_ENABLE(sqlite3, 
-        AC_HELP_STRING([--enable-sqlite3], [compile with sqlite3 support (default: yes)]),
+        AC_HELP_STRING([--enable-sqlite3], [sqlite3 support (default: yes)]),
         [
             SQLITE3_EN=$enableval
             if test "x$enableval" = xno; then
@@ -1016,7 +993,7 @@ CXXFLAGS="$CXXFLAGS_SAVE"
 ########## MySQL
 
 AC_ARG_ENABLE(mysql, 
-              AC_HELP_STRING([--enable-mysql], [compile with mysql support (default: yes)]),
+              AC_HELP_STRING([--enable-mysql], [mysql support (default: yes)]),
               [
                 MYSQL_EN=$enableval 
                 if test "x$enableval" = xno; then
@@ -1422,114 +1399,42 @@ CPPFLAGS="$CPPFLAGS_SAVE"
 LDFLAGS="$LDFLAGS_SAVE"
 
 ########### libmagic
+MT_OPTION([libmagic], [disable],
+          [filemagic for automatic mimetype recognition],[],[])
 
-AC_ARG_ENABLE(libmagic,
-        AC_HELP_STRING([--enable-libmagic], [compile with filemagic support (default: yes)]),
-        [
-            MAGIC_EN=$enableval 
-            if test "x$enableval" = xno; then
-                MAGIC_OK=disabled
-            else
-                MAGIC_OK=yes
+if test "x$LIBMAGIC_OPTION_ENABLED" = xyes; then
+    MT_CHECK_PACKAGE([libmagic], [magic], [magic], [magic_load])
+
+    if test "x$LIBMAGIC_STATUS" != xyes; then
+        if test "x$ZLIB_STATUS" != xyes; then
+            MT_CHECK_LIBRARY([zlib], [z], [compress])
+            LDFLAGS="$LDFLAGS $ZLIB_LDFLAGS $ZLIB_LIBS"
+            AC_MSG_NOTICE([retrying libmagic check with zlib flags])
+            MT_CHECK_PACKAGE([libmagic], [magic], [magic], [magic_load])
+            if test "x$LIBMAGIC_STATUS" = xyes; then
+                LIBMAGIC_LIBS="$LIBMAGIC_LIBS $ZLIB_LIBS"
+                LIBMAGIC_LDFLAGS="$LIBMAGIC_LDFLAGS $ZLIB_LDFLAGS"
             fi
-        ],
-        [
-            MAGIC_OK=yes
-        ]
-)
+        else
+            LDFLAGS="$LDFLAGS $ZLIB_LDFLAGS $ZLIB_LIBS"
+            AC_MSG_NOTICE([retrying libmagic check with zlib flags])
+            MT_CHECK_PACKAGE([libmagic], [magic], [magic], [magic_load])
+            if test "x$LIBMAGIC_STATUS" = xyes; then
+                LIBMAGIC_LIBS="$LIBMAGIC_LIBS $ZLIB_LIBS"
+                LIBMAGIC_LDFLAGS="$LIBMAGIC_LDFLAGS $ZLIB_LDFLAGS"
+            fi
+        fi
 
-if test "x$MAGIC_OK" = xyes; then
-    if test -n "$MAGIC_SEARCH_HEADERS" ; then
-        AC_MSG_NOTICE([Will search for filemagic headers in $MAGIC_SEARCH_HEADERS])
-        AC_CHECK_HEADER($MAGIC_SEARCH_HEADERS/magic.h,
-                [
-                    MAGIC_CXXFLAGS="-I$MAGIC_SEARCH_HEADERS"
-                ],
-                [
-                    AC_MSG_ERROR([filemagic headers not found in requested location $MAGIC_SEARCH_HEADERS])
-                ]
-        )
-    else
-    AC_CHECK_HEADER(magic.h,
-        [],
-        [
-            unset ac_cv_header_magic_h
-            AC_CHECK_HEADER($SEARCH_DIR_HEADERS/magic.h,
-                [
-                    MAGIC_CXXFLAGS="-I$SEARCH_DIR_HEADERS"
-                ],
-                [MAGIC_OK=missing]
-            )
-        ]
-    )
+        AC_SUBST(LIBMAGIC_LIBS)
+        AC_SUBST(LIBMAGIC_LDFLAGS)
     fi
 fi
 
-if test "x$MAGIC_OK" = xyes; then
-    if test -n "$MAGIC_SEARCH_LIBS" ; then
-        LDFLAGS="$LDFLAGS $Z_LIBS"
-        AC_CHECK_LIB(z,compress,
-           [  
-              LDFLAGS="-L$MAGIC_SEARCH_LIBS $Z_LIBS"
-              AC_MSG_NOTICE([Will search for filemagic libraries in $MAGIC_SEARCH_LIBS])
-              AC_CHECK_LIB(magic,magic_load,
-                  [
-                      MAGIC_LIBS="-L$MAGIC_SEARCH_LIBS -lmagic $Z_LIBS"
-                  ],
-                  [
-                      AC_MSG_ERROR([filemagic libraries not found in requested location $MAGIC_SEARCH_LIBS])
-                  ],
-                  [-lz]
-              )
-           ],
-           [
-              LDFLAGS="-L$MAGIC_SEARCH_LIBS"
-              AC_CHECK_LIB(magic,magic_load,
-                  [
-                      MAGIC_LIBS="-L$MAGIC_SEARCH_LIBS -lmagic"
-                  ],
-                  [
-                      AC_MSG_ERROR([filemagic libraries not found in requested location $MAGIC_SEARCH_LIBS])
-                  ]
-              )
-           ]
-       )
-    else
-    LDFLAGS="$LDFLAGS $Z_LIBS"
-    AC_CHECK_LIB(z,compress,
-         [
-            AC_CHECK_LIB(magic,magic_load,
-                [MAGIC_LIBS="$Z_LIBS -lmagic"],
-                [
-                    LDFLAGS="$LDFLAGS -L$SEARCH_DIR_LIBS"
-                    unset ac_cv_lib_magic_magic_load
-                    AC_CHECK_LIB(magic,magic_load,
-                    [MAGIC_LIBS="-L$SEARCH_DIR_LIBS $Z_LIBS -lmagic"],
-                    [MAGIC_OK=missing],[-lz])
-                ],[-lz]
-            )
-         ],
-         [
-            AC_CHECK_LIB(magic,magic_load,
-                [],
-                [
-                    LDFLAGS="-L$SEARCH_DIR_LIBS"
-                    unset ac_cv_lib_magic_magic_load
-                    AC_CHECK_LIB(magic,magic_load,
-                    [MAGIC_LIBS="-L$SEARCH_DIR_LIBS -lmagic"],
-                    [MAGIC_OK=missing])
-                ]
-            )
-        ] 
-     )
-    fi
-fi
-
-if test "x$MAGIC_OK" = xyes; then
+if test "x$LIBMAGIC_STATUS" = xyes; then
     AC_MSG_CHECKING([if libmagic is broken (Slackware check)])
-    CFLAGS="$CFLAGS $MAGIC_CXXLAGS"
-    CXXFLAGS="$CXXFLAGS $MAGIC_CXXFLAGS"
-    LDFLAGS="$LDFLAGS $MAGIC_LIBS"
+    CFLAGS="$CFLAGS $LIBMAGIC_CXXLAGS"
+    CXXFLAGS="$CXXFLAGS $LIBMAGIC_CXXFLAGS"
+    LDFLAGS="$LDFLAGS $LIBMAGIC_LDFLAGS $LIBMAGIC_LIBS"
     AC_LANG_SAVE
     AC_LANG_C
     AC_RUN_IFELSE(
@@ -1559,12 +1464,11 @@ if test "x$MAGIC_OK" = xyes; then
    AC_LANG_RESTORE
 fi
 
-if test "x$MAGIC_OK" = xyes; then
+if test "x$LIBMAGIC_STATUS" = xyes; then
     AC_DEFINE([HAVE_MAGIC], [1], [filemagic library presence])
-    AC_SUBST(MAGIC_CXXFLAGS)
-    AC_SUBST(MAGIC_LIBS)
 else
-    if test "x$MAGIC_EN" = xyes; then
+    if (test "x$LIBMAGIC_OPTION_REQUESTED" = xyes) && 
+       (test "x$LIBMAGIC_OPTION_ENABLED" = xyes); then
         AC_MSG_ERROR(unable to configure libmagic support)
     fi
 fi
@@ -2177,63 +2081,28 @@ MT_CHECK_REQUIRED_PACKAGE([expat], [expat], [expat], [XML_ParserCreate])
 ####### libmp4v2
 
 MT_CHECK_OPTIONAL_PACKAGE([libmp4v2], [disable],
-                 [compile with libmp4v2 for mp4 metadata extraction],
+                 [libmp4v2 support for mp4 metadata extraction],
                  [mp4], [mp4v2], [MP4Read]) 
 
 ########## INOTIFY TOOLS
 
-AC_ARG_ENABLE(inotify,
-        AC_HELP_STRING([--enable-inotify], [compile with inotify support (default: yes)]),
-        [
-            INOTIFY_EN=$enableval
-            if test "x$enableval" = xno; then
-                INOTIFY_OK=disabled
-            else
-                INOTIFY_OK=yes
-            fi
-        ],
-        [
-            INOTIFY_OK=yes      
-        ]
-)
+MT_OPTION([inotify], [disable], [inotify support for imporved autoscan], [], 
+          [INOTIFY_STATUS=disabled])
 
-if test "x$INOTIFY_OK" = xyes; then
-    if test -n "$INOTIFY_SEARCH_HEADERS"; then
-        AC_MSG_NOTICE([Will search for inotify header in $INOTIFY_SEARCH_HEADERS])
-        AC_CHECK_HEADER([$INOTIFY_SEARCH_HEADERS/sys/inotify.h],
-                [
-                            INOTIFY_CXXFLAGS="-I$INOTIFY_SEARCH_HEADERS"
-                            INOTIFY_OK=yes
-                ],
-                [
-                    AC_MSG_ERROR(inotify.h not found in requested location $INOTIFY_SEARCH_HEADERS)
-                ]
-        )
-    else
-        inotify_path= 
-        AC_CHECK_HEADER(sys/inotify.h, [], 
-            [
-                INOTIFY_OK=missing
-                for inotify_path in $SEARCH_DIR_HEADERS; do
-                    if test "x$ac_cv_header_sys_inotify_h" != xyes ; then
-                        unset ac_cv_header_sys_inotify_h
-                        AC_CHECK_HEADER($inotify_path/sys/inotify.h, 
-                            [
-                                INOTIFY_CXXFLAGS="-I$inotify_path"
-                                INOTIFY_OK=yes
-                            ]
-                        )
-                    fi
-                done
-            ])
-    fi
+if test "x$INOTIFY_OPTION_ENABLED" = xyes; then
+    MT_CHECK_HEADER([inotify], [sys/inotify])
 fi
 
-if test "x$INOTIFY_EN" != xno; then
+if test "x$INOTIFY_STATUS" = xyes; then
+    AC_CHECK_FUNCS([inotify_init], [], [INOTIFY_STATUS=missing])
+fi
+
+if test "x$INOTIFY_STATUS" = xyes; then
 dnl The check below was inspired by configure.ac from the inotify tools
 dnl package, see the "Acknowledgements" section in our README file for more 
 dnl information.
     CXXFLAGS="$CXXFLAGS $INOTIFY_CXXFLAGS"
+    CFLAGS="$CFLAGS $INOTIFY_CXXFLAGS"
     AC_MSG_CHECKING([whether sys/inotify.h works])
     AC_RUN_IFELSE(
         AC_LANG_PROGRAM([[#include <sys/inotify.h>]],
@@ -2251,43 +2120,47 @@ dnl information.
                         ),
                         [
                             AC_MSG_RESULT([yes]);
-                            INOTIFY_OK=yes
                         ],
                         [
-                            if test "x$INOTIFY_EN" != xyes; then
+                            if ((test "x$INOTIFY_OPTION_REQUESTED" != xyes) &&
+                                (test "x$INOTIFY_OPTIEON_ENABLED" = xyes)); then
                                 AC_MSG_RESULT([no, disabling inotify support])
-                            else
+                            elif ((test "x$INOTIFY_OPTION_REQUESTED" != xyes) &&
+                               (test "x$INOTIFY_OPTIEON_ENABLED" != xyes)); then
                                 AC_MSG_RESULT([no])
                             fi
-                            INOTIFY_OK=missing
+                                INOTIFY_STATUS=no
                         ],
                         [
-                            if test "x$INOTIFY_EN" = xyes; then
+                            if ((test "x$INOTIFY_OPTION_REQUESTED" = xyes) &&
+                                (test "x$INOTIFY_OPTIEON_ENABLED" = xyes)); then
                                 AC_MSG_RESULT([selecting yes for cross compiling]) 
-                                INOTIFY_OK=yes
+                                INOTIFY_STATUS=yes
                             else
                                 AC_MSG_RESULT([selecting no for cross compiling]) 
-                                INOTIFY_OK=no
+                                INOTIFY_STATUS=no
                             fi
                         ])
 
                 ],
                 [
-                    if test "x$INOTIFY_EN" = xyes; then
-                        AC_MSG_RESULT([selecting yes for cross compiling]) 
-                        INOTIFY_OK=yes
+                    if ((test "x$INOTIFY_OPTION_REQUESTED" = xyes) &&
+                        (test "x$INOTIFY_OPTIEON_ENABLED" = xyes)); then
+                       AC_MSG_RESULT([selecting yes for cross compiling]) 
+                       INOTIFY_STATUS=yes
                     else
-                        AC_MSG_RESULT([selecting no for cross compiling]) 
-                        INOTIFY_OK=no
+                       AC_MSG_RESULT([selecting no for cross compiling]) 
+                       INOTIFY_STATUS=no
                     fi
                 ])
 fi
 
-if test "x$INOTIFY_OK" = xyes; then
+if test "x$INOTIFY_STATUS" = xyes; then
     AC_DEFINE([HAVE_INOTIFY], [1], [inotify presence])
     AC_SUBST(INOTIFY_CXXFLAGS)
 else
-    if test "x$INOTIFY_EN" = xyes; then
+    if ((test "x$INOTIFY_OPTION_REQUESTED" = xyes) &&
+        (test "x$INOTIFY_OPTIEON_ENABLED" = xyes)); then
         AC_MSG_NOTICE([enabling runtime inotify detection])
         # if system inotify header exists, go with it, otherwise take our own
         if test "x$ac_cv_header_sys_inotify_h" = xyes; then
@@ -2295,7 +2168,7 @@ else
         fi
         AC_DEFINE([HAVE_INOTIFY], [1], [inotify presence])
         AC_SUBST(INOTIFY_CXXFLAGS)
-        INOTIFY_OK=yes
+        INOTIFY_STATUS=yes
     fi
 fi
 
@@ -2365,46 +2238,21 @@ if test "x$FFMPEG_THUMBNAILER" = xyes; then
 
 fi
 
-AC_ARG_ENABLE(tombdebug,
-        AC_HELP_STRING([--enable-tombdebug], [enable debug output for MediaTomb (default: no)]),
-  [
-     LOGDEBUG_EN=$enableval 
-     if test "x$enableval" = xno; then
-        LOGDEBUG_OK=disabled
-     else
-        LOGDEBUG_OK=yes
-     fi
-  ],
-  [
-     LOGDEBUG_OK=disabled
-  ]
-)
-if test "x$LOGDEBUG_OK" = xyes; then
-    AC_DEFINE(LOG_TOMBDEBUG, 1, [if defined compile with debug log output])
-fi
+MT_OPTION([tombdebug], [enable], [enable debug output for MediaTomb],
+          [
+            AC_DEFINE(LOG_TOMBDEBUG, 1, [if defined compile with debug log output])
+          ],
+          [])
 
+MT_OPTION([upnpdebug], [enable], [enable debug output for TombUPnP/libupnp],
+          [
+            AC_DEFINE(UPNP_HAVE_DEBUG, 1, [see upnpconfig.h])
+            AC_DEFINE(DEBUG, 1, [Define to 1 to compile debug code])
+          ],
+          [])
 
-AC_ARG_ENABLE(upnpdebug,
-        AC_HELP_STRING([--enable-upnpdebug], [enable debug output for TombUPnP (default: no)]),
-  [
-     UPNPDEBUG_EN=$enableval 
-     if test "x$enableval" = xno; then
-        UPNPDEBUG_OK=disabled
-     else
-        UPNPDEBUG_OK=yes
-     fi
-  ],
-  [
-    UPNPDEBUG_OK=disabled
-  ]
-)
-
-if test "x$UPNPDEBUG_OK" = xyes; then
-    AC_DEFINE(UPNP_HAVE_DEBUG, 1, [see upnpconfig.h])
-    AC_DEFINE(DEBUG, 1, [Define to 1 to compile debug code])
-fi
-
-if (test "x$LOGDEBUG_OK" != xyes) && (test "x$UPNPDEBUG_OK" != xyes); then
+if (test "x$TOMBDEBUG_OPTION_ENABLED" != xyes) && 
+   (test "x$UPNPDEBUG_OPTION_ENABLED" != xyes); then
     AC_DEFINE(NDEBUG, 1, [make sure there are no asserts in the retail build])
 fi
 
@@ -2452,8 +2300,8 @@ echo "sqlite3               : $SQLITE3_OK"
 echo "mysql                 : $MYSQL_STATUS"
 ##echo "postgresql          : $PGSQL_OK"
 echo "libjs                 : $JS_OK"
-echo "libmagic              : $MAGIC_OK"
-echo "inotify               : $INOTIFY_OK"
+echo "libmagic              : $LIBMAGIC_STATUS"
+echo "inotify               : $INOTIFY_STATUS"
 echo "libexif               : $LIBEXIF_STATUS"
 echo "expat                 : $EXPAT_STATUS"
 echo "id3lib                : $ID3LIB_STATUS"
@@ -2464,17 +2312,17 @@ echo "external transcoding  : $EXTERNAL_TRANSCODING_OPTION_ENABLED"
 echo "curl                  : $CURL_OK"
 #echo "YouTube               : $YOUTUBE_OK"
 echo "libextractor          : $EXTRACTOR_OK"
-echo "db-autocreate         : $AUTOCREATE_STATUS"
+echo "db-autocreate         : $DB_AUTOCREATE_OPTION_ENABLED"
         
-if test "$LOGDEBUG_OK" != "disabled"; then
-    echo "debug log             : $LOGDEBUG_OK"
+if test "x$TOMBDEBUG_OPTION_ENABLED" = xyes; then
+    echo "debug log             : $TOMBDEBUG_OPTION_ENABLED"
 fi
 
-if test "$UPNPDEBUG_OK" != "disabled"; then
-    echo "upnpdebug             : $UPNPDEBUG_OK"
+if test "x$UPNPDEBUG_OPTIEON_ENABLED" = xyes; then
+    echo "upnpdebug             : $UPNPDEBUG_OPTION_ENABLED"
 fi
 
-if test "$STATIC_OPTION_ENABLED" = "yes"; then
+if test "x$STATIC_OPTION_ENABLED" = xyes; then
     echo "static build          : $STATIC_OPTION_ENABLED"
 fi
 

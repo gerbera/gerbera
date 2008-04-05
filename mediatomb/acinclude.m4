@@ -425,17 +425,55 @@ AC_DEFUN([MT_CHECK_PACKAGE_INTERNAL],
 [
     MT_CHECK_HEADER_INTERNAL($1, $2)
     mt_$1_package_status=${mt_$1_header_status}
-    
-    if test "x$mt_$1_package_status" = xyes; then
-        MT_CHECK_LIBRARY_INTERNAL($1, $3, $4)
+  
+    if test "x$mt_$1_package_status" = xyes; then 
+        MT_CHECK_LIBRARY_INTERNAL([$1], [$3], [$4])
         mt_$1_package_status=${mt_$1_library_status}
     fi
     
     if test "x$mt_$1_package_status" = xyes; then
-        translit($1, `a-z', `A-Z')_CXXFLAGS=${mt_$1_cxxflags}
-        translit($1, `a-z', `A-Z')_LIBS=${mt_$1_libs}
-        translit($1, `a-z', `A-Z')_LDFLAGS=${mt_$1_ldflags}
+        translit($1, `a-z/.-', `A-Z___')_CXXFLAGS=${mt_$1_cxxflags}
+        translit($1, `a-z/.-', `A-Z___')_LIBS=${mt_$1_libs}
+        translit($1, `a-z/.-', `A-Z___')_LDFLAGS=${mt_$1_ldflags}
     fi 
+])
+
+# $1 option name
+# $2 enable/disable
+# $3 help text
+# $4 action if enabled
+# $5 action if disabled
+#
+# returns:
+#   $1_OPTION_ENABLED
+#   $1_OPTION_REQUESTED
+
+AC_DEFUN([MT_OPTION],
+[
+
+    translit(mt_$1_option_enabled, `/.-', `___')=
+    translit(mt_$1_option_requested, `/.-', `___')=no
+    if test "x$2" = xdisable; then
+        translit(mt_$1_option_enabled, `/.-', `___')=yes
+    else
+        translit(mt_$1_option_enabled, `/.-', `___')=no
+    fi
+
+    AC_ARG_ENABLE([$1],
+        AC_HELP_STRING([--$2-$1], [$3]),
+        [
+            translit(mt_$1_option_enabled, `/.-', `___')=$enableval
+            translit(mt_$1_option_requested, `/.-', `___')=yes
+        ]
+    )
+
+    translit($1, `a-z/.-', `A-Z___')_OPTION_ENABLED=${translit(mt_$1_option_enabled,`/.-', `___')}
+    translit($1, `a-z/.-', `A-Z___')_OPTION_REQUESTED=${translit(mt_$1_option_requested, `/.-', `___')}
+
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_OPTION_ENABLED)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_OPTION_REQUESTED)
+
+    AS_IF([test "x${translit(mt_$1_option_enabled,`/.-', `___')}" = xyes], [$4], [$5])[]dnl
 ])
 
 # $1 package name
@@ -453,44 +491,32 @@ AC_DEFUN([MT_CHECK_PACKAGE_INTERNAL],
 AC_DEFUN([MT_CHECK_OPTIONAL_PACKAGE], 
 [
     mt_$1_status=yes
-    mt_$1_requested=no
 
-    if test x"$2" = xenable; then
+    MT_OPTION([$1], [$2], [$3],[],[])
+
+    if test "x${translit($1, `a-z/.-', `A-Z___')_OPTION_ENABLED}" = xyes; then
+        MT_CHECK_PACKAGE_INTERNAL([$1], [$4], [$5], [$6])
+        mt_$1_status=${mt_$1_package_status}
+    else
         mt_$1_status=disabled
     fi
-
-    AC_ARG_ENABLE([$1],
-        AC_HELP_STRING([--$2-$1], [$3]),
-        [
-            mt_$1_enabled=$enableval
-            if test "x$enableval" = xno; then
-                mt_$1_status=disabled
-            elif test "x$enableval" = xyes; then
-                mt_$1_requested=yes
-            fi
-        ]
-    )
-
-    if test "x$mt_$1_status" = xyes; then
-        MT_CHECK_PACKAGE_INTERNAL($1, $4, $5, $6)
-        mt_$1_status=${mt_$1_package_status}
-    fi
     
-    if ((test "x$mt_$1_requested" = xyes) && 
+    if ((test "x${translit($1, `a-z/.-', `A-Z___')_OPTION_ENABLED}" = xyes) &&
+        (test "x${translit($1, `a-z/.-', `A-Z___')_OPTION_REQUESTED}" = xyes) &&
         (test "x$mt_$1_status" != xyes)); then
         AC_MSG_ERROR([unable to configure $1 support])
     fi
 
     if test "x$mt_$1_status" = xyes; then
-        AC_DEFINE(translit(HAVE_$1, `a-z', `A-Z'), [1], [$1 library presence])
+        AC_DEFINE(translit(HAVE_$1, `a-z/.-', `A-Z___'), [1], [$1 library presence])
     fi
     
-    translit($1, `a-z', `A-Z')_STATUS=${mt_$1_status}
+    translit($1, `a-z/.-', `A-Z___')_STATUS=${mt_$1_status}
 
-    AC_SUBST(translit($1, `a-z', `A-Z')_CXXFLAGS)
-    AC_SUBST(translit($1, `a-z', `A-Z')_LIBS)
-    AC_SUBST(translit($1, `a-z', `A-Z')_LDFLAGS)
-    AC_SUBST(translit($1, `a-z', `A-Z')_STATUS)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_LIBS)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_LDFLAGS)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_CXXFLAGS)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_STATUS)
 ])
 
 # $1 package name
@@ -512,14 +538,14 @@ AC_DEFUN([MT_CHECK_REQUIRED_PACKAGE],
         AC_MSG_ERROR([unable to configure required package $1])
     fi
 
-    AC_DEFINE(translit(HAVE_$1, `a-z', `A-Z'), [1], [$1 library presence])
+    AC_DEFINE(translit(HAVE_$1, `a-z/.-', `A-Z___'), [1], [$1 library presence])
     
-    translit($1, `a-z', `A-Z')_STATUS=${mt_$1_package_status}
+    translit($1, `a-z/.-', `A-Z___')_STATUS=${mt_$1_package_status}
 
-    AC_SUBST(translit($1, `a-z', `A-Z')_CXXFLAGS)
-    AC_SUBST(translit($1, `a-z', `A-Z')_LIBS)
-    AC_SUBST(translit($1, `a-z', `A-Z')_LDFLAGS)
-    AC_SUBST(translit($1, `a-z', `A-Z')_STATUS)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_CXXFLAGS)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_LIBS)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_LDFLAGS)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_STATUS)
 ])
 
 # $1 with parameter name
@@ -527,15 +553,28 @@ AC_DEFUN([MT_CHECK_REQUIRED_PACKAGE],
 # $3 function to check
 AC_DEFUN([MT_CHECK_LIBRARY],
 [
-    MT_CHECK_LIBRARY_INTERNAL($1, $2, $3)
+    MT_CHECK_LIBRARY_INTERNAL([$1], [$2], [$3])
 
-    translit($1, `a-z', `A-Z')_LIBS=${mt_$1_libs}
-    translit($1, `a-z', `A-Z')_LDFLAGS=${mt_$1_ldflags}
-    translit($1, `a-z', `A-Z')_STATUS=${mt_$1_library_status}
+    translit($1, `a-z/.-', `A-Z___')_LIBS=${mt_$1_libs}
+    translit($1, `a-z/.-', `A-Z___')_LDFLAGS=${mt_$1_ldflags}
+    translit($1, `a-z/.-', `A-Z___')_STATUS=${mt_$1_library_status}
     
-    AC_SUBST(translit($1, `a-z', `A-Z')_LIBS)
-    AC_SUBST(translit($1, `a-z', `A-Z')_LDFLAGS)
-    AC_SUBST(translit($1, `a-z', `A-Z')_STATUS)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_LIBS)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_LDFLAGS)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_STATUS)
+])
+
+# $1 with parameter name
+# $2 header to check
+AC_DEFUN([MT_CHECK_HEADER],
+[
+    MT_CHECK_HEADER_INTERNAL($1, $2)
+    
+    translit($1, `a-z/.-', `A-Z___')_CXXFLAGS=${mt_$1_CXXFLAGS}
+    translit($1, `a-z/.-', `A-Z___')_STATUS=${mt_$1_header_status}
+
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_CXXFLAGS)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_STATUS)
 ])
 
 # $1 package name
@@ -606,7 +645,7 @@ AC_DEFUN([MT_CHECK_BINCONFIG_INTERNAL],
         AC_MSG_RESULT([$mt_$1_cxxflags])
         mt_$1_libs=
         AC_MSG_CHECKING([$1 libs])
-        if test -z $6;  then
+        if test -z "$6";  then
             mt_$1_libs=`${mt_$1_config} --libs`
         else
             mt_$1_libs=`${mt_$1_config} $6`
@@ -626,7 +665,7 @@ AC_DEFUN([MT_CHECK_BINCONFIG_INTERNAL],
 
     if test "x$mt_$1_package_status" = xyes; then
         LIBS="$mt_$1_libs $LIBS"
-        if test -z $4; then
+        if test -z "$4"; then
             unset ac_cv_func_$5
             AC_CHECK_FUNCS($5, [], [mt_$1_package_status=missing])
         else
@@ -636,9 +675,9 @@ AC_DEFUN([MT_CHECK_BINCONFIG_INTERNAL],
     fi
 
     if test "x$mt_$1_package_status" = xyes; then
-        translit($1, `a-z', `A-Z')_CXXFLAGS=${mt_$1_cxxflags}
-        translit($1, `a-z', `A-Z')_LIBS=${mt_$1_libs}
-        translit($1, `a-z', `A-Z')_VERSION=${mt_$1_version}
+        translit($1, `a-z/.-', `A-Z___')_CXXFLAGS=${mt_$1_cxxflags}
+        translit($1, `a-z/.-', `A-Z___')_LIBS=${mt_$1_libs}
+        translit($1, `a-z/.-', `A-Z___')_VERSION=${mt_$1_version}
     fi 
 
 
@@ -669,42 +708,31 @@ AC_DEFUN([MT_CHECK_OPTIONAL_PACKAGE_CFG],
     mt_$1_status=yes
     mt_$1_requested=no
 
-    if test x"$2" = xenable; then
-        mt_$1_status=disabled
-    fi
+    MT_OPTION([$1], [$2], [$3],[],[])
 
-    AC_ARG_ENABLE([$1],
-        AC_HELP_STRING([--$2-$1], [$3]),
-        [
-            mt_$1_enabled=$enableval
-            if test "x$enableval" = xno; then
-                mt_$1_status=disabled
-            elif test "x$enableval" = xyes; then
-                mt_$1_requested=yes
-            fi
-        ]
-    )
-
-    if test "x$mt_$1_status" = xyes; then
+    if test "x${translit($1, `a-z/.-', `A-Z___')_OPTION_ENABLED}" = xyes; then
         MT_CHECK_BINCONFIG_INTERNAL($1, $4, $5, $6, $7, $8)
         mt_$1_status=${mt_$1_package_status}
+    else
+        mt_$1_status=disabled
     fi
-    
-    if ((test "x$mt_$1_requested" = xyes) &&
+ 
+    if ((test "x${translit($1, `a-z/.-', `A-Z___')_OPTION_ENABLED}" = xyes) &&
+        (test "x${translit($1, `a-z/.-', `A-Z___')_OPTION_REQUESTED}" = xyes) &&
         (test "x$mt_$1_status" != xyes)); then
         AC_MSG_ERROR([unable to configure $1 support])
     fi
-
+   
     if test "x$mt_$1_status" = xyes; then
-        AC_DEFINE(translit(HAVE_$1, `a-z', `A-Z'), [1], [$1 library presence])
+        AC_DEFINE(translit(HAVE_$1, `a-z/.-', `A-Z___'), [1], [$1 library presence])
     fi
 
-    translit($1, `a-z', `A-Z')_STATUS=${mt_$1_status}
+    translit($1, `a-z/.-', `A-Z___')_STATUS=${mt_$1_status}
 
-    AC_SUBST(translit($1, `a-z', `A-Z')_CXXFLAGS)
-    AC_SUBST(translit($1, `a-z', `A-Z')_LIBS)
-    AC_SUBST(translit($1, `a-z', `A-Z')_VERSION)
-    AC_SUBST(translit($1, `a-z', `A-Z')_STATUS)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_CXXFLAGS)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_LIBS)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_VERSION)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_STATUS)
 
 
 #    AS_IF([test x"$mt_$1_status" = xyes], [$8], [$9])[]dnl
@@ -729,14 +757,14 @@ AC_DEFUN([MT_CHECK_REQUIRED_PACKAGE_CFG],
         AC_MSG_ERROR([unable to configure required package $1])
     fi
     
-    translit($1, `a-z', `A-Z')_STATUS=${mt_$1_package_status}
+    translit($1, `a-z/.-', `A-Z___')_STATUS=${mt_$1_package_status}
         
-    AC_DEFINE(translit(HAVE_$1, `a-z', `A-Z'), [1], [$1 library presence])
+    AC_DEFINE(translit(HAVE_$1, `a-z/.-', `A-Z___'), [1], [$1 library presence])
 
-    AC_SUBST(translit($1, `a-z', `A-Z')_CXXFLAGS)
-    AC_SUBST(translit($1, `a-z', `A-Z')_LIBS)
-    AC_SUBST(translit($1, `a-z', `A-Z')_VERSION)
-    AC_SUBST(translit($1, `a-z', `A-Z')_STATUS)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_CXXFLAGS)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_LIBS)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_VERSION)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_STATUS)
 ])
 
 # $1 package name
@@ -762,15 +790,15 @@ AC_DEFUN([MT_CHECK_PACKAGE_CFG],
     fi
     
     if test "x$mt_$1_status" = xyes; then
-        AC_DEFINE(translit(HAVE_$1, `a-z', `A-Z'), [1], [$1 library presence])
+        AC_DEFINE(translit(HAVE_$1, `a-z/.-', `A-Z___'), [1], [$1 library presence])
     fi
 
-    translit($1, `a-z', `A-Z')_STATUS=${mt_$1_status}
+    translit($1, `a-z/.-', `A-Z___')_STATUS=${mt_$1_status}
 
-    AC_SUBST(translit($1, `a-z', `A-Z')_CXXFLAGS)
-    AC_SUBST(translit($1, `a-z', `A-Z')_LIBS)
-    AC_SUBST(translit($1, `a-z', `A-Z')_VERSION)
-    AC_SUBST(translit($1, `a-z', `A-Z')_STATUS)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_CXXFLAGS)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_LIBS)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_VERSION)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_STATUS)
 ])
 
 # $1 package name
@@ -795,51 +823,15 @@ AC_DEFUN([MT_CHECK_PACKAGE],
     fi
 
     if test "x$mt_$1_status" = xyes; then
-        AC_DEFINE(translit(HAVE_$1, `a-z', `A-Z'), [1], [$1 library presence])
+        AC_DEFINE(translit(HAVE_$1, `a-z/.-', `A-Z___'), [1], [$1 library presence])
     fi
 
-    translit($1, `a-z', `A-Z')_STATUS=${mt_$1_status}
+    translit($1, `a-z/.-', `A-Z___')_STATUS=${mt_$1_status}
 
-    AC_SUBST(translit($1, `a-z', `A-Z')_CXXFLAGS)
-    AC_SUBST(translit($1, `a-z', `A-Z')_LIBS)
-    AC_SUBST(translit($1, `a-z', `A-Z')_VERSION)
-    AC_SUBST(translit($1, `a-z', `A-Z')_STATUS)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_CXXFLAGS)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_LIBS)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_VERSION)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_STATUS)
 ])
 
-# $1 option name
-# $2 enable/disable
-# $3 help text
-# $4 action if enabled
-# $5 action if disabled
-#
-# returns:
-#   $1_OPTION_ENABLED
-#   $1_OPTION_REQUESTED
 
-AC_DEFUN([MT_OPTION],
-[
-
-    translit(mt_$1_option_enabled, `/.-', `___')=
-    translit(mt_$1_option_requested, `/.-', `___')=no
-    if test "x$2" = xdisable; then
-        translit(mt_$1_option_enabled, `/.-', `___')=yes
-    else
-        translit(mt_$1_option_enabled, `/.-', `___')=no
-    fi
-
-    AC_ARG_ENABLE([$1],
-        AC_HELP_STRING([--$2-$1], [$3]),
-        [
-            translit(mt_$1_option_enabled, `/.-', `___')=$enableval
-            translit(mt_$1_option_requested, `/.-', `___')=yes
-        ]
-    )
-
-    translit($1, `a-z/.-', `A-Z___')_OPTION_ENABLED=${translit(mt_$1_option_enabled,`/.-', `___')}
-    translit($1, `a-z/.-', `A-Z___')_OPTION_REQUESTED=${translit(mt_$1_option_requested, `/.-', `___')}
-
-    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_OPTION_ENABLED)
-    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_OPTION_REQUESTED)
-
-    AS_IF([test "x${translit(mt_$1_option_enabled,`/.-', `___')}" = xyes], [$4], [$5])[]dnl
-])
