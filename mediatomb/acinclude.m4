@@ -417,7 +417,7 @@ AC_DEFUN([MT_CHECK_HEADER_INTERNAL],
 #
 # returns:
 #   mt_$1_package_status
-#   $1_CXXFLAGS
+#   $1_CFLAGS
 #   $1_LIBS
 #   $1_LDFLAGS
    
@@ -432,7 +432,7 @@ AC_DEFUN([MT_CHECK_PACKAGE_INTERNAL],
     fi
     
     if test "x$mt_$1_package_status" = xyes; then
-        translit($1, `a-z/.-', `A-Z___')_CXXFLAGS=${mt_$1_cxxflags}
+        translit($1, `a-z/.-', `A-Z___')_CFLAGS=${mt_$1_cxxflags}
         translit($1, `a-z/.-', `A-Z___')_LIBS=${mt_$1_libs}
         translit($1, `a-z/.-', `A-Z___')_LDFLAGS=${mt_$1_ldflags}
     fi 
@@ -486,7 +486,7 @@ AC_DEFUN([MT_OPTION],
 #   $1_STATUS
 #   $1_LDFLAGS
 #   $1_LIBS
-#   $1_CXXFLAGS
+#   $1_CFLAGS
 
 AC_DEFUN([MT_CHECK_OPTIONAL_PACKAGE], 
 [
@@ -515,7 +515,7 @@ AC_DEFUN([MT_CHECK_OPTIONAL_PACKAGE],
 
     AC_SUBST(translit($1, `a-z/.-', `A-Z___')_LIBS)
     AC_SUBST(translit($1, `a-z/.-', `A-Z___')_LDFLAGS)
-    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_CXXFLAGS)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_CFLAGS)
     AC_SUBST(translit($1, `a-z/.-', `A-Z___')_STATUS)
 ])
 
@@ -528,7 +528,7 @@ AC_DEFUN([MT_CHECK_OPTIONAL_PACKAGE],
 #   $1_STATUS
 #   $1_LDFLAGS
 #   $1_LIBS
-#   $1_CXXFLAGS
+#   $1_CFLAGS
 
 
 AC_DEFUN([MT_CHECK_REQUIRED_PACKAGE],
@@ -542,7 +542,7 @@ AC_DEFUN([MT_CHECK_REQUIRED_PACKAGE],
     
     translit($1, `a-z/.-', `A-Z___')_STATUS=${mt_$1_package_status}
 
-    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_CXXFLAGS)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_CFLAGS)
     AC_SUBST(translit($1, `a-z/.-', `A-Z___')_LIBS)
     AC_SUBST(translit($1, `a-z/.-', `A-Z___')_LDFLAGS)
     AC_SUBST(translit($1, `a-z/.-', `A-Z___')_STATUS)
@@ -570,10 +570,10 @@ AC_DEFUN([MT_CHECK_HEADER],
 [
     MT_CHECK_HEADER_INTERNAL($1, $2)
     
-    translit($1, `a-z/.-', `A-Z___')_CXXFLAGS=${mt_$1_CXXFLAGS}
+    translit($1, `a-z/.-', `A-Z___')_CFLAGS=${mt_$1_cxxflags}
     translit($1, `a-z/.-', `A-Z___')_STATUS=${mt_$1_header_status}
 
-    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_CXXFLAGS)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_CFLAGS)
     AC_SUBST(translit($1, `a-z/.-', `A-Z___')_STATUS)
 ])
 
@@ -588,7 +588,7 @@ AC_DEFUN([MT_CHECK_HEADER],
 #    $mt_$1_package_status
 #    $1_LDFLAGS
 #    $1_LIBS
-#    $1_CXXFLAGS
+#    $1_CFLAGS
 
 AC_DEFUN([MT_CHECK_BINCONFIG_INTERNAL],
 [
@@ -675,7 +675,7 @@ AC_DEFUN([MT_CHECK_BINCONFIG_INTERNAL],
     fi
 
     if test "x$mt_$1_package_status" = xyes; then
-        translit($1, `a-z/.-', `A-Z___')_CXXFLAGS=${mt_$1_cxxflags}
+        translit($1, `a-z/.-', `A-Z___')_CFLAGS=${mt_$1_cxxflags}
         translit($1, `a-z/.-', `A-Z___')_LIBS=${mt_$1_libs}
         translit($1, `a-z/.-', `A-Z___')_VERSION=${mt_$1_version}
     fi 
@@ -699,7 +699,7 @@ AC_DEFUN([MT_CHECK_BINCONFIG_INTERNAL],
 #
 # returns:
 #   mt_$1_package_status
-#   $1_CXXFLAGS
+#   $1_CFLAGS
 #   $1_LIBS
 #   $1_VERSION
 
@@ -729,7 +729,7 @@ AC_DEFUN([MT_CHECK_OPTIONAL_PACKAGE_CFG],
 
     translit($1, `a-z/.-', `A-Z___')_STATUS=${mt_$1_status}
 
-    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_CXXFLAGS)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_CFLAGS)
     AC_SUBST(translit($1, `a-z/.-', `A-Z___')_LIBS)
     AC_SUBST(translit($1, `a-z/.-', `A-Z___')_VERSION)
     AC_SUBST(translit($1, `a-z/.-', `A-Z___')_STATUS)
@@ -748,7 +748,7 @@ AC_DEFUN([MT_CHECK_OPTIONAL_PACKAGE_CFG],
 #    $mt_$1_package_status
 #    $1_LDFLAGS
 #    $1_LIBS
-#    $1_CXXFLAGS
+#    $1_CFLAGS
 
 AC_DEFUN([MT_CHECK_REQUIRED_PACKAGE_CFG],
 [
@@ -761,7 +761,7 @@ AC_DEFUN([MT_CHECK_REQUIRED_PACKAGE_CFG],
         
     AC_DEFINE(translit(HAVE_$1, `a-z/.-', `A-Z___'), [1], [$1 library presence])
 
-    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_CXXFLAGS)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_CFLAGS)
     AC_SUBST(translit($1, `a-z/.-', `A-Z___')_LIBS)
     AC_SUBST(translit($1, `a-z/.-', `A-Z___')_VERSION)
     AC_SUBST(translit($1, `a-z/.-', `A-Z___')_STATUS)
@@ -777,7 +777,7 @@ AC_DEFUN([MT_CHECK_REQUIRED_PACKAGE_CFG],
 #    $mt_$1_package_status
 #    $1_LDFLAGS
 #    $1_LIBS
-#    $1_CXXFLAGS
+#    $1_CFLAGS
 
 
 AC_DEFUN([MT_CHECK_PACKAGE_CFG],
@@ -795,7 +795,7 @@ AC_DEFUN([MT_CHECK_PACKAGE_CFG],
 
     translit($1, `a-z/.-', `A-Z___')_STATUS=${mt_$1_status}
 
-    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_CXXFLAGS)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_CFLAGS)
     AC_SUBST(translit($1, `a-z/.-', `A-Z___')_LIBS)
     AC_SUBST(translit($1, `a-z/.-', `A-Z___')_VERSION)
     AC_SUBST(translit($1, `a-z/.-', `A-Z___')_STATUS)
@@ -810,7 +810,7 @@ AC_DEFUN([MT_CHECK_PACKAGE_CFG],
 #    $mt_$1_package_status
 #    $1_LDFLAGS
 #    $1_LIBS
-#    $1_CXXFLAGS
+#    $1_CFLAGS
 
 
 AC_DEFUN([MT_CHECK_PACKAGE],
@@ -828,7 +828,7 @@ AC_DEFUN([MT_CHECK_PACKAGE],
 
     translit($1, `a-z/.-', `A-Z___')_STATUS=${mt_$1_status}
 
-    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_CXXFLAGS)
+    AC_SUBST(translit($1, `a-z/.-', `A-Z___')_CFLAGS)
     AC_SUBST(translit($1, `a-z/.-', `A-Z___')_LIBS)
     AC_SUBST(translit($1, `a-z/.-', `A-Z___')_VERSION)
     AC_SUBST(translit($1, `a-z/.-', `A-Z___')_STATUS)

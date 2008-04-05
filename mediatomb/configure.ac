@@ -174,20 +174,9 @@ MT_OPTION([debug-malloc0], [enable],
           ],
           [])
 
-PTHREAD_FORCE_LIB=0
-AC_ARG_ENABLE([pthread-lib],
-              [
-AC_HELP_STRING([--enable-pthread-lib],
-[if this option is set we will try to link with -lpthread, else the flag for pthread will be autodetected (default: no)])
-            ],
-            [
-                if test "x$enableval" = xno; then
-                    PTHREAD_FORCE_LIB=0
-                else
-                    PTHREAD_FORCE_LIB=1
-                fi
-            ]
-)
+
+MT_OPTION([pthread-lib], [enable],
+          [if this option is set we will try to link with -lpthread, else the flag for pthread will be autodetected], [], [])
 
 ICONV_FORCE_LIB=0
 AC_ARG_ENABLE([iconv-lib],
@@ -821,12 +810,11 @@ AC_DEFINE([UPNP_HAVE_WEBSERVER], [1], [Compile internal web server])
 ADD_PTHREAD_CFLAGS=
 
 # see acinclude.m4 for the definition of ACX_PTHREAD
-if test $PTHREAD_FORCE_LIB -eq 1; then
-    AC_CHECK_LIB(pthread, pthread_create,[],
-            [
-                AC_MSG_ERROR([pthread library not found, try running configure without the --enable-pthread-lib option])
-            ]
-    )
+if test "x$PTHREAD_LIB_OPTION_ENABLED" = xyes; then
+    MT_CHECK_LIBRARY([pthread], [pthread], [pthread_create])
+    if test "x$PTHREAD_STATUS" != xyes; then
+        AC_MSG_ERROR([pthread library not found, try running configure without the --enable-pthread-lib option])
+    fi
 else
     ACX_PTHREAD(,AC_MSG_ERROR(POSIX threads missing))
 
@@ -881,107 +869,29 @@ AC_CACHE_SAVE
 
 ######### SQLite3
 
-AC_ARG_ENABLE(sqlite3, 
-        AC_HELP_STRING([--enable-sqlite3], [sqlite3 support (default: yes)]),
-        [
-            SQLITE3_EN=$enableval
-            if test "x$enableval" = xno; then
-                SQLITE3_OK=disabled
-            else
-                SQLITE3_OK=yes
-            fi
-        ],
-        [
-            SQLITE3_OK=yes      
-        ]
-)
-
-if test "x$SQLITE3_OK" = xyes; then
-    if test -n "$SQLITE3_SEARCH_HEADERS"; then
-        AC_MSG_NOTICE([Will search for sqlite3 headers in $SQLITE3_SEARCH_HEADERS])
-        AC_CHECK_HEADER([$SQLITE3_SEARCH_HEADERS/sqlite3.h],
-                [
-                    SQLITE3_CXXFLAGS="-I$SQLITE3_SEARCH_HEADERS"
-                    SQLITE3_OK=yes
-                ],
-                [
-                    AC_MSG_ERROR(sqlite3.h not found in requested locatoin $SQLITE3_SEARCH_HEADERS)
-                ]
-        )
-    else
-    
-    AC_CHECK_HEADER(sqlite3.h, [], 
-            [
-                SQLITE3_OK=missing
-                for sqlite3_path in $SEARCH_DIR_HEADERS; do
-                    if test "x$ac_cv_header_sqlite3_h" != xyes ; then
-                        unset ac_cv_header_sqlite3_h
-                        AC_CHECK_HEADER($sqlite3_path/sqlite3.h, 
-                            [
-                                SQLITE3_CXXFLAGS="-I$sqlite3_path"
-                                SQLITE3_OK=yes
-                            ]
-                        )
-                    fi
-                done
-            ])
-    fi
+if test "x$RT_STATUS" = xyes; then
+    LDFLAGS="$LDFLAGS $RT_LDFLAGS $RT_LIBS"
 fi
 
-if test "x$SQLITE3_OK" = xyes; then
-    if test -n "$SQLITE3_SEARCH_LIBS"; then
-        LDFLAGS="$LDFLAGS_SAVE -L$SQLITE3_SEARCH_LIBS $RT_LDFLAGS $RT_LIBS $ADD_PTHREAD_CFLAGS"
-        AC_MSG_NOTICE([Will search for sqlite3 libraries in $SQLITE3_SEARCH_LIBS])
-        AC_CHECK_LIB(sqlite3, sqlite3_open,
-                [
-                    SQLITE3_LIBS="-L$SQLITE3_SEARCH_LIBS $RT_LDFLAGS $RT_LIBS -lsqlite3"
-                    SQLITE3_OK=yes
-                ],
-                [
-                    AC_MSG_ERROR(sqlite3 library not found in requested location $SQLITE3_SEARCH_LIBS)
-                ]
-        )
-    else
-    LDFLAGS="$LDFLAGS_SAVE  $RT_LDFLAGS $RT_LIBS $ADD_PTHREAD_CFLAGS"
-    AC_CHECK_LIB(sqlite3, sqlite3_open, [],
-        [
-            SQLITE3_OK=missing
-            for sqlite3_path in $SEARCH_DIR_LIBS; do
-                if test "x$ac_cv_lib_sqlite3_sqlite3_open" != xyes ; then
-                    unset ac_cv_lib_sqlite3_sqlite3_open
-                    LDFLAGS="$LDFLAGS_SAVE -L$sqlite3_path $RT_LDFLAGS $RT_LIBS $ADD_PTHREAD_CFLAGS"
-                    AC_CHECK_LIB(sqlite3, sqlite3_open,
-                        [
-                            SQLITE3_LIBS="-L$sqlite3_path $RT_LDFLAGS $RT_LIBS -lsqlite3"
-                            SQLITE3_OK=yes
-                        ],
-                        [
-                            SQLITE3_OK=missing
-                        ]
-                     )
-                fi
-            done
-        ]
-    )
-    fi
-fi 
+MT_CHECK_OPTIONAL_PACKAGE([sqlite3], [disable], [sqlite3 database supprot],
+                          [sqlite3], [sqlite3], [sqlite3_open])
 
-if test "x$SQLITE3_OK" = xyes; then
-    AC_DEFINE([HAVE_SQLITE3], [1], [sqlite3 library presence])
-    AC_SUBST(SQLITE3_CXXFLAGS)
+if test "x$SQLITE3_STATUS" = xyes; then
+    if "x$RT_STATUS" = xyes; then
+        SQLITE_LDFLAGS="$SQLITE_LDFLAGS $RT_LDFLAGS"
+        SQLITE_LIBS="$SQLITE_LIBS $RT_LIBS"
+    fi
+
+    AC_SUBST(SQLITE3_LDFLAGS)
     AC_SUBST(SQLITE3_LIBS)
 
     if test "x$SQLITE_BACKUP_OPTION_ENABLED" = xyes; then
         AC_DEFINE([SQLITE_BACKUP_ENABLED], [1], [enable sqlite db backup settings in config.xml by default])
     fi
 else
-    if test "x$SQLITE3_EN" = xyes; then
-        AC_MSG_ERROR(unable to configure sqlite3 support)
-    fi
-
     if (test "x$SQLITE_BACKUP_OPTION_ENABLED" = xyes) &&
        (test "x$SQLITE_BACKUP_OPTION_REQUESTED" = xyes); then
-        AC_MSG_ERROR(You specified the option to use sqlite backup settings but the sqlite library is not available)
+        AC_MSG_ERROR(You specified the option to use sqlite backup settings but the sqlite support could not be configured)
     fi
 
 fi
@@ -991,23 +901,6 @@ CPPFLAGS="$CPPFLAGS_SAVE"
 CXXFLAGS="$CXXFLAGS_SAVE"
 
 ########## MySQL
-
-AC_ARG_ENABLE(mysql, 
-              AC_HELP_STRING([--enable-mysql], [mysql support (default: yes)]),
-              [
-                MYSQL_EN=$enableval 
-                if test "x$enableval" = xno; then
-                    MYSQL_OK=disabled
-                else
-                    MYSQL_OK=yes
-                fi
-              ],
-              [
-                MYSQL_OK=yes
-              ]
-)
-
-MYSQL_PROG_FOUND=0
 
 MT_CHECK_OPTIONAL_PACKAGE_CFG([mysql], 
                               [disable],
@@ -1032,9 +925,9 @@ fi
 
 LDFLAGS="$LDFLAGS_SAVE"
 LIBS="$LIBS $MYSQL_LIBS"
-CFLAGS="$CFLAGS $MYSQL_CXXFLAGS"
-CXXFLAGS="$CXXFLAGS $MYSQL_CXXFLAGS"
-CPPFLAGS="$CFLAGS $MYSQL_CXXFLAGS"
+CFLAGS="$CFLAGS $MYSQL_CFLAGS"
+CXXFLAGS="$CXXFLAGS $MYSQL_CFLAGS"
+CPPFLAGS="$CFLAGS $MYSQL_CFLAGS"
 
 if test "x$MYSQL_STATUS" = xyes; then
     AC_DEFINE([HAVE_MYSQL], [1], [MySQL library presence])
@@ -1061,7 +954,7 @@ if test "x$MYSQL_STATUS" = xyes; then
         ]
     )
 else
-    MYSQL_CXXFLAGS=
+    MYSQL_CFLAGS=
     MYSQL_LIBS=
 fi
 
@@ -1071,136 +964,11 @@ CFLAGS="$CFLAGS_SAVE"
 LDFLAGS="$LDFLAGS_SAVE"
 LIBS="$LIBS_SAVE"
 
-######### PostgreSQL
-##AC_ARG_ENABLE(postgresql, 
-##              AC_HELP_STRING([--enable-postgresql], [compile with postgresql support (default: yes)]),
-##              [
-##                PGSQL_EN=$enableval 
-##                if test "x$enableval" = xno; then
-##                    PGSQL_OK=disabled
-##                else
-##                    PGSQL_OK=yes
-##                fi
-##              ],
-##              [
-##                PGSQL_OK=yes
-##              ]
-##)
-##
-##
-##PGSQL_PROG_FOUND=0
-##if test "x$PGSQL_OK" = xyes; then
-##    if test -n "$PGSQL_SEARCH_CONFIG"; then
-##        AC_MSG_NOTICE([You specified $PGSQL_SEARCH_CONFIG for pg_config])
-##        
-##        if test -f "$PGSQL_SEARCH_CONFIG"; then 
-##            pgconfig="$PGSQL_SEARCH_CONFIG"
-##        else
-##            pgconfig="no"
-##        fi
-##        
-##        if test "x$pgconfig" = xno; then
-##            AC_MSG_ERROR([$PGSQL_SEARCH_CONFIG not found])
-##        else
-##            PGSQL_TEST=`${pgconfig} --version 2>/dev/null`
-##            if test -z "$PGSQL_TEST"; then
-##                AC_MSG_ERROR([${pgconfig} could not be executed or returned invalid values])
-##            fi
-##            PGSQL_PROG_FOUND=1
-##        fi
-##    else
-##        AC_PATH_PROG(pgconfig, pg_config, no)
-##        if test "x$pgconfig" = xno; then
-##            unset ac_cv_path_pgconfig
-##            AC_PATH_PROG(pgconfig, pg_config, no, $SEARCH_DIR_PROGS)
-##            if test "x$pgconfig" = xno; then
-##                PGSQL_OK=missing
-##                AC_MSG_RESULT([pg_config not found, please install the postgresql-devel package])
-##            else
-##                PGSQL_PROG_FOUND=1
-##            fi
-##        else
-##            PGSQL_PROG_FOUND=1
-##        fi
-##   fi 
-##
-##   if test "$PGSQL_PROG_FOUND" -eq 1 ; then
-##        AC_MSG_CHECKING(if postgresql version is threadsafe)
-##        PGSQL_THREADSAFE=`${pgconfig} --configure | grep -- '--enable-thread-safety'`
-##    
-##       if test -z "$PGSQL_THREADSAFE"; then
-##            if test "x$PGSQL_EN" = xyes; then
-##                AC_MSG_ERROR([this PostgreSQL version is not thread safe!])
-##            else
-##                PGSQL_OK=disabled
-##            fi
-##        fi
-##
-##        if test "x$PGSQL_OK" = xyes; then
-##            AC_MSG_RESULT(yes)
-##            AC_MSG_CHECKING(postgresql cflags)
-##            PGSQL_CFLAGS=`${pgconfig} --includedir`
-##            PGSQL_CFLAGS="-I${PGSQL_CFLAGS}"
-##            AC_MSG_RESULT($PGSQL_CFLAGS)
-##
-##            AC_MSG_CHECKING(postgresql libraries)
-##            PGSQL_LIBS=`${pgconfig} --libdir`
-##            PGSQL_LIBS="-L${PGSQL_LIBS} -lpq"
-##            AC_MSG_RESULT($PGSQL_LIBS)
-##        else
-##            AC_MSG_RESULT([no, disabling])
-##        fi
-##   fi
-##fi
-##
-##if test "x$PGSQL_OK" = xyes; then
-##    CPPFLAGS="$CPPFLAGS $PGSQL_CFLAGS"
-##    CXXFLAGS="$CXXFLAGS $PGSQL_CFLAGS"
-##    AC_CHECK_HEADERS([libpq-fe.h],
-##        [],
-##        [PGSQL_OK=missing]
-##    )
-##fi
-##
-##if test "x$PGSQL_OK" = xyes; then
-##    LDFLAGS="$PGSQL_LIBS"
-##    AC_CHECK_LIB(pq, PQconnectdb, [],
-##        [PGSQL_OK=missing]
-##    )
-##fi
-##
-##if test "x$PGSQL_OK" = xyes; then
-##    LDFLAGS="$PGSQL_LIBS"
-##    AC_CHECK_LIB(pq, PQisthreadsafe, [AC_DEFINE([HAVE_PQISTHREADSAFE], [1], [PQisthreadsafe function availability])],
-##            [])
-##fi
-##
-##if test "x$PGSQL_OK" = xyes; then
-##    AC_DEFINE([HAVE_PGSQL], [1], [PostgreSQL library presence])
-##    AC_SUBST(PGSQL_CFLAGS)
-##    AC_SUBST(PGSQL_LIBS)
-##else
-##    if test "x$PGSQL_EN" = xyes; then
-##        AC_MSG_ERROR(unable to configure PostgreSQL support)
-##    fi
-##fi
-##CPPFLAGS="$CPPFLAGS_SAVE"
-##CXXFLAGS="$CXXFLAGS_SAVE"
-##LDFLAGS="$LDFLAGS_SAVE"
-
-
-
-
 #########  check if at least one database available
 
-##if ((test "x$SQLITE3_OK" != xyes) && (test "x$MYSQL_OK" != xyes) && (test "x$PGSQL_OK" != xyes)); then
-##    AC_MSG_ERROR(Support of at least one of mysql, postgresql or sqlite3 must be configured)
-##fi
-if ((test "x$SQLITE3_OK" != xyes) && (test "x$MYSQL_OK" != xyes)); then
+if ((test "x$SQLITE3_STATUS" != xyes) && (test "x$MYSQL_STATUS" != xyes)); then
     AC_MSG_ERROR(Support of at least one of mysql or sqlite3 must be configured)
 fi
-
-
 
 ######### javascript
 
@@ -1433,7 +1201,7 @@ fi
 if test "x$LIBMAGIC_STATUS" = xyes; then
     AC_MSG_CHECKING([if libmagic is broken (Slackware check)])
     CFLAGS="$CFLAGS $LIBMAGIC_CXXLAGS"
-    CXXFLAGS="$CXXFLAGS $LIBMAGIC_CXXFLAGS"
+    CXXFLAGS="$CXXFLAGS $LIBMAGIC_CFLAGS"
     LDFLAGS="$LDFLAGS $LIBMAGIC_LDFLAGS $LIBMAGIC_LIBS"
     AC_LANG_SAVE
     AC_LANG_C
@@ -1555,8 +1323,8 @@ if test "x$ID3LIB_OPTION_ENABLED" = xyes; then
 fi
 
 if test "x$ID3LIB_STATUS" = xyes; then
-   CFLAGS="$CFLAGS $ID3_CXXFLAGS"
-   CXXFLAGS="$CXXFLAGS $ID3_CXXFLAGS"
+   CFLAGS="$CFLAGS $ID3_CFLAGS"
+   CXXFLAGS="$CXXFLAGS $ID3_CFLAGS"
    LDFLAGS="$LDFLAGS $ID3LIB_LDFLAGS $ID3LIB_LIBS"
    AC_LANG_SAVE
    AC_LANG_CPLUSPLUS
@@ -2018,8 +1786,8 @@ MT_CHECK_OPTIONAL_PACKAGE([libexif], [disable],
              [libexif/exif-content], [exif], [exif_data_new_from_file])
 
 if test "x$LIBEXIF_STATUS" = xyes; then
-    CFLAGS="$CFLAGS $LIBEXIF_CXXFLAGS"
-    CXXFLAGS="$CXXFLAGS $LIBEXIF_CXXFLAGS"
+    CFLAGS="$CFLAGS $LIBEXIF_CFLAGS"
+    CXXFLAGS="$CXXFLAGS $LIBEXIF_CFLAGS"
     LDFLAGS="$LDFLAGS $LIBEXIF_LDFLAGS $LIBEXIF_LIBS"
 
     # try 1 argument signature
@@ -2101,8 +1869,8 @@ if test "x$INOTIFY_STATUS" = xyes; then
 dnl The check below was inspired by configure.ac from the inotify tools
 dnl package, see the "Acknowledgements" section in our README file for more 
 dnl information.
-    CXXFLAGS="$CXXFLAGS $INOTIFY_CXXFLAGS"
-    CFLAGS="$CFLAGS $INOTIFY_CXXFLAGS"
+    CXXFLAGS="$CXXFLAGS $INOTIFY_CFLAGS"
+    CFLAGS="$CFLAGS $INOTIFY_CFLAGS"
     AC_MSG_CHECKING([whether sys/inotify.h works])
     AC_RUN_IFELSE(
         AC_LANG_PROGRAM([[#include <sys/inotify.h>]],
@@ -2157,7 +1925,7 @@ fi
 
 if test "x$INOTIFY_STATUS" = xyes; then
     AC_DEFINE([HAVE_INOTIFY], [1], [inotify presence])
-    AC_SUBST(INOTIFY_CXXFLAGS)
+    AC_SUBST(INOTIFY_CFLAGS)
 else
     if ((test "x$INOTIFY_OPTION_REQUESTED" = xyes) &&
         (test "x$INOTIFY_OPTIEON_ENABLED" = xyes)); then
@@ -2167,7 +1935,7 @@ else
              AC_DEFINE([SYS_INOTIFY_H_OK],[1],[sys/inotify.h exists])
         fi
         AC_DEFINE([HAVE_INOTIFY], [1], [inotify presence])
-        AC_SUBST(INOTIFY_CXXFLAGS)
+        AC_SUBST(INOTIFY_CFLAGS)
         INOTIFY_STATUS=yes
     fi
 fi
@@ -2296,7 +2064,7 @@ echo
 echo "CONFIGURATION SUMMARY ----"
 #                        disabled
 echo
-echo "sqlite3               : $SQLITE3_OK"
+echo "sqlite3               : $SQLITE3_STATUS"
 echo "mysql                 : $MYSQL_STATUS"
 ##echo "postgresql          : $PGSQL_OK"
 echo "libjs                 : $JS_OK"

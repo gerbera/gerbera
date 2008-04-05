@@ -898,7 +898,7 @@ void ConfigManager::validate(String serverhome)
 
         NEW_BOOL_OPTION(tmp_bool);
         SET_BOOL_OPTION(CFG_SERVER_STORAGE_SQLITE_RESTORE);
-#ifndef SQLITE_BACKUP_ENABLED
+#ifdef SQLITE_BACKUP_ENABLED
         temp = getOption(_("/server/storage/sqlite3/backup/attribute::enabled"),
                 _(YES));
 #else
