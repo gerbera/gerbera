@@ -242,6 +242,7 @@ private:
     
     bool insertBufferOn;
     bool insertBufferEmpty;
+    int insertBufferCount;
     zmm::Ref<zmm::StringBuffer> insertBuffer;
     zmm::Ref<Mutex> insertBufferMutex;
 };

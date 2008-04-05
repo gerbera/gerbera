@@ -152,6 +152,7 @@ void SQLStorage::init()
     insertBuffer = nil;
     insertBufferEmpty = true;
     insertBufferMutex = Ref<Mutex>(new Mutex());
+    insertBufferCount = 0;
     
     //log_debug("using SQL: %s\n", this->sql_query.c_str());
     
@@ -2288,6 +2289,7 @@ void SQLStorage::addToInsertBuffer(Ref<StringBuffer> query)
     #warning implement for MySQL
     
     insertBufferEmpty = false;
+    insertBufferCount++;
     *insertBuffer << query << ';';
     if (insertBuffer->length() > 102400)
         flushInsertBuffer(true);
@@ -2303,7 +2305,9 @@ void SQLStorage::flushInsertBuffer(bool dontLock)
         return;
     *insertBuffer << "COMMIT;";
     exec(insertBuffer);
+    log_debug("flushing insert buffer (%d statements)\n", insertBufferCount);
     insertBuffer->clear();
     *insertBuffer << "BEGIN TRANSACTION;";
     insertBufferEmpty = true;
+    insertBufferCount = 0;
 }
