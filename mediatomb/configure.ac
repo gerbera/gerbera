@@ -165,20 +165,10 @@ MT_OPTION([debug-malloc0], [enable],
 MT_OPTION([pthread-lib], [enable],
           [if this option is set we will try to link with -lpthread, else the flag for pthread will be autodetected], [], [])
 
-ICONV_FORCE_LIB=0
-AC_ARG_ENABLE([iconv-lib],
-              [
-AC_HELP_STRING([--enable-iconv-lib],
-[if this option is set we will try to link with -liconv, else we will first try to use iconv built into glibc and only then search for libiconv (default: no)])
-            ],
-            [
-                if test "x$enableval" = xno; then
-                    ICONV_FORCE_LIB=0
-                else
-                    ICONV_FORCE_LIB=1
-                fi
-            ]
-)
+MT_OPTION([iconv-lib], [enable],
+          [if this option is set we will try to link with -liconv, else we will first try to use iconv built into glibc and only then search for libiconv],
+          [],[])
+
 
 ATOMIC_X86_SMP=0
 ATOMIC_X86_SMP_REQ=0
@@ -188,27 +178,25 @@ case $host_cpu in
         ATOMIC_X86_SMP=1
         X86=1
     ;;
+    *86*64)
+        ATOMIC_X86_SMP=1
+        X86=1
+    ;;
 esac
 
 ATOMIC_X86=0
-AC_ARG_ENABLE([atomic-x86-single],
-              [
-AC_HELP_STRING([--enable-atomic-x86-single],
-[use x86 singleprocessor code for atomic arithmetic operations, this will increase performance but you must not use the compiled binary on an SMP system. Doing so might result in crashes and unexpected behaviour (default: no)])
-            ],
-            [
-                if test "x$enableval" = xno; then
-                    ATOMIC_X86=0 
-                else
-                    if test "$X86" -eq 1; then
-                        ATOMIC_X86=1
-                        ATOMIC_X86_SMP=0
-                    else
-                        AC_MSG_ERROR([Tried to activate x86 specific option for a non x86 host!])
-                    fi
-                fi
-            ]
-)
+
+MT_OPTION([atomic-x86-single], [enable], 
+          [use x86 singleprocessor code for atomic arithmetic operations, this will increase performance but you must not use the compiled binary on an SMP system. Doing so might result in crashes and unexpected behaviour],
+          [
+              if test "$X86" -eq 1; then
+                    ATOMIC_X86=1
+                    ATOMIC_X86_SMP=0
+              else
+                    AC_MSG_ERROR([Tried to activate x86 specific option for a non x86 host!])
+              fi
+          ],
+          [])
 
 AC_ARG_ENABLE([atomic-pthread],
               [
@@ -220,7 +208,6 @@ AC_HELP_STRING([--enable-atomic-pthread],
                     if test "$ATOMIC_X86" -eq 1; then
                         AC_MSG_ERROR([You can not use atomic-x86-single and atomic-pthread code at the same time!])
                     else
-
                         ATOMIC_X86=0 
                         ATOMIC_X86_SMP=0 
                     fi
@@ -228,24 +215,15 @@ AC_HELP_STRING([--enable-atomic-pthread],
             ]
 )
 
-
-AC_ARG_ENABLE([atomic],
-              [
-AC_HELP_STRING([--disable-atomic],
-[NEVER use this! This is only for devel/debugging - disables all atomic arithmetics code (default: no)])
-            ],
-            [
-                if test "x$enableval" = xno; then
-                        ATOMIC_X86=0
-                        ATOMIC_X86_SMP=0
-
-                        AC_MSG_WARN(You disabled the use of atomic arithmetics! You have been warned!)
-                        AC_DEFINE([ATOMIC_TORTURE], [1], [NEVER use this! This is only for devel/debugging - disables all atomic arithmetics code.])
-                fi
-            ]
-)
-
-
+MT_OPTION([atomic], [disable],
+          [NEVER disable this! This is only for devel/debugging - disables all atomic arithmetics code],
+          [],
+          [
+              ATOMIC_X86=0
+              ATOMIC_X86_SMP=0
+              AC_MSG_WARN(You disabled the use of atomic arithmetics! You have been warned!)
+               AC_DEFINE([ATOMIC_TORTURE], [1], [NEVER use this! This is only for devel/debugging - disables all atomic arithmetics code.])
+          ])
 
 if ((test $ATOMIC_X86_SMP -eq 1) && (test $ATOMIC_X86 -eq 1)); then
     AC_MSG_ERROR([Cannot use atomic-x86-smp and atomic-x86 options at the same time!])
@@ -486,7 +464,7 @@ fi
 
 LIBICONV=0
 if test -n "$ICONV_SEARCH_LIBS"; then
-    if test $ICONV_FORCE_LIB -eq 0; then
+    if test "x$ICONV_LIB_OPTION_ENABLED" = xno; then
         LDFLAGS="-L$ICONV_SEARCH_LIBS"
         AC_CHECK_FUNC([iconv],
             [
@@ -522,7 +500,7 @@ if test -n "$ICONV_SEARCH_LIBS"; then
         )
     fi
 else
-    if test $ICONV_FORCE_LIB -eq 0; then
+    if test "x$ICONV_LIB_OPTION_ENABLED" = xno; then
         AC_CHECK_FUNC([iconv],
             [
                 ICONV_LIBS="$LDFLAGS"
