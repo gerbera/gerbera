@@ -1445,17 +1445,12 @@ void profiling_end(struct profiling_t *data)
     }
     else
     {
-        sum->tv_nsec -= 1000000000;
-        sum->tv_nsec += last_start->tv_nsec - now.tv_nsec;
-    }
-    if (sum->tv_nsec < 0)
-    {
-        sum->tv_nsec += 1000000000;
+        sum->tv_nsec += 1000000000L - last_start->tv_nsec + now.tv_nsec;
         sum->tv_sec --;
     }
-    else if (sum->tv_nsec >= 1000000000)
+    if(sum->tv_nsec >= 1000000000L)
     {
-        sum->tv_nsec -= 1000000000;
+        sum->tv_nsec -= 1000000000L;
         sum->tv_sec ++;
     }
     
