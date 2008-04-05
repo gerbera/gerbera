@@ -49,18 +49,23 @@ public:
     DSOHash(int capacity) : DHashBase<zmm::String, struct dso_hash_slot<VT> >(capacity)
     {
         this->zero();
+        deletedKey = new zmm::StringBase("");
     }
     virtual ~DSOHash()
     {
         releaseData();
+        deletedKey->release();
     }
 protected:
+    
+    zmm::StringBase *deletedKey;
+    
     void releaseData()
     {
         for (int i = 0; i < this->capacity; i++)
         {
             dso_hash_slot<VT> *slot = this->data + i;
-            if (slot->key)
+            if (slot->key && slot->key != deletedKey)
             {
                 slot->key->release();
                 slot->value->release();
@@ -71,7 +76,7 @@ public:
     /* virtual methods */
     virtual int hashCode(zmm::String key)
     {
-        return stringHash(key);
+        return this->baseTypeHashCode(stringHash(key));
     }
     virtual bool match(zmm::String key, struct dso_hash_slot<VT> *slot)
     {
@@ -81,6 +86,10 @@ public:
     {
         return (slot->key == NULL);
     }
+    virtual bool isDeletedSlot(struct dso_hash_slot<VT> *slot)
+    {
+        return (slot->key == deletedKey);
+    }
     
     void clear()
     {
@@ -88,7 +97,6 @@ public:
         this->zero();
     }
     
-    /* #error need to use deleted key
     inline bool remove(zmm::String key)
     {
         struct dso_hash_slot<VT> *slot;
@@ -96,11 +104,10 @@ public:
             return false;
         slot->key->release();
         slot->value->release();
-        slot->key = NULL;
+        slot->key = deletedKey;
         this->count--;
         return true;
     }
-    */
     
     inline void put(zmm::String key, zmm::Ref<VT> value)
     {
@@ -111,7 +118,7 @@ public:
     void put(zmm::String key, hash_slot_t destSlot, zmm::Ref<VT> value)
     {
         struct dso_hash_slot<VT> *slot = (struct dso_hash_slot<VT> *)destSlot;
-        if (slot->key != NULL)
+        if (slot->key != NULL && slot->key != deletedKey)
         {
             VT *valuePtr = value.getPtr();
             valuePtr->retain();

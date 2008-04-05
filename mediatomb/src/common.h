@@ -312,6 +312,13 @@
 #define INVALID_OBJECT_ID_2             (-666)
 #define CHECK_SOCKET                    (-666)
 
+// storage
+#define LOC_DIR_PREFIX      'D'
+#define LOC_FILE_PREFIX     'F'
+#define LOC_VIRT_PREFIX     'V'
+#define LOC_ILLEGAL_PREFIX  'X'
+
+
 #ifndef DEFAULT_JS_RUNTIME_MEM
     #define DEFAULT_JS_RUNTIME_MEM      (1L * 1024L * 1024L)
 #endif

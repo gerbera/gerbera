@@ -6,6 +6,7 @@
     #include "autoconfig.h"
 #endif
 
+#include "common.h"
 #include "cache_object.h"
 
 using namespace zmm;
@@ -31,13 +32,15 @@ void CacheObject::setObject(Ref<CdsObject> obj)
     setObjectType(obj->getObjectType());
     knowHasChildren = false;
     
-    /*
-    if (IS_CDS_CONTAINER(obj->getObjectType()))
+    if (IS_CDS_CONTAINER(objectType))
     {
-        Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
-        setHasChildren(cont->getChildCount() > 0);
+        location = String(obj->isVirtual() ? LOC_VIRT_PREFIX : LOC_FILE_PREFIX) + obj->getLocation();
     }
-    */
+    else if (IS_CDS_ITEM(objectType))
+    {
+        if (IS_CDS_PURE_ITEM(objectType) && ! obj->isVirtual())
+            location = String(LOC_FILE_PREFIX) + obj->getLocation();
+    }
 }
 
 void CacheObject::setHasChildren(bool hasChildren)

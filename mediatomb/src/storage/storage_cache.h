@@ -20,9 +20,12 @@ public:
     StorageCache();
     
     zmm::Ref<CacheObject> getObject(int id);
-    zmm::Ref<CacheObject> getObjectDefinitly(int id);
+    zmm::Ref<CacheObject> getObjectDefinitely(int id);
     bool removeObject(int id);
     void clear();
+    
+    zmm::Ref<zmm::Array<CacheObject> > getObjects(zmm::String location);
+    void checkLocation(zmm::Ref<CacheObject> obj);
     
     zmm::Ref<Mutex> getMutex() { return mutex; }
     
@@ -33,7 +36,8 @@ private:
     
     void ensureFillLevelOk();
     
-    zmm::Ref<DBOHash<int,CacheObject> > hash;
+    zmm::Ref<DBOHash<int,CacheObject> > idHash;
+    zmm::Ref<DSOHash<zmm::Array<CacheObject> > > locationHash;
     zmm::Ref<Mutex> mutex;
 };
 

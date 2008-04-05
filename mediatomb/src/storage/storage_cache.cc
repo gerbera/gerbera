@@ -14,29 +14,37 @@ StorageCache::StorageCache()
 {
     capacity = STORAGE_CACHE_CAPACITY;
     maxfill = STORAGE_CACHE_MAXFILL;
-    hash = Ref<DBOHash<int,CacheObject> >(new DBOHash<int,CacheObject>(capacity, INVALID_OBJECT_ID, INVALID_OBJECT_ID_2));
+    idHash = Ref<DBOHash<int,CacheObject> >(new DBOHash<int,CacheObject>(capacity, INVALID_OBJECT_ID, INVALID_OBJECT_ID_2));
+    locationHash = Ref<DSOHash<Array<CacheObject> > >(new DSOHash<Array<CacheObject> >(capacity));
     mutex = Ref<Mutex> (new Mutex());
 }
 
 void StorageCache::clear()
 {
     AUTOLOCK(mutex);
-    hash->clear();
+    idHash->clear();
+    locationHash->clear();
 }
 
 Ref<CacheObject> StorageCache::getObject(int id)
 {
-    return hash->get(id);
+#ifdef LOG_TOMBDEBUG
+    assert(mutex->isLocked());
+#endif
+    return idHash->get(id);
 }
 
-Ref<CacheObject> StorageCache::getObjectDefinitly(int id)
+Ref<CacheObject> StorageCache::getObjectDefinitely(int id)
 {
-    Ref<CacheObject> obj = hash->get(id);
+#ifdef LOG_TOMBDEBUG
+    assert(mutex->isLocked());
+#endif
+    Ref<CacheObject> obj = idHash->get(id);
     if (obj == nil)
     {
         ensureFillLevelOk();
         obj = Ref<CacheObject>(new CacheObject());
-        hash->put(id, obj);
+        idHash->put(id, obj);
     }
     return obj;
 }
@@ -44,18 +52,61 @@ Ref<CacheObject> StorageCache::getObjectDefinitly(int id)
 bool StorageCache::removeObject(int id)
 {
     AUTOLOCK(mutex);
-    return hash->remove(id);
+    Ref<CacheObject> obj = getObject(id);
+    if (obj == nil)
+        return false;
+    if (obj->knowsLocation())
+        locationHash->remove(obj->getLocation());
+    return idHash->remove(id);
 }
 
+Ref<Array<CacheObject> > StorageCache::getObjects(String location)
+{
+#ifdef LOG_TOMBDEBUG
+    assert(mutex->isLocked());
+#endif
+    return locationHash->get(location);
+}
 
-/* privates */
+void StorageCache::checkLocation(Ref<CacheObject> obj)
+{
+#ifdef LOG_TOMBDEBUG
+    assert(mutex->isLocked());
+#endif
+    if (! obj->knowsLocation())
+        return;
+    String location = obj->getLocation();
+    Ref<Array<CacheObject> > objects = locationHash->get(location);
+    if (objects == nil)
+    {
+        objects = Ref<Array<CacheObject> >(new Array<CacheObject>());
+        locationHash->put(location, objects);
+    }
+    else
+    {
+        for (int i=0;i<objects->size();i++)
+        {
+            if (objects->get(i) == obj)
+                return;
+        }
+    }
+    objects->append(obj);
+}
+
+/* private */
 
 void StorageCache::ensureFillLevelOk()
 {
+#ifdef LOG_TOMBDEBUG
+    assert(mutex->isLocked());
+#endif
     // TODO - much better...
-    // for now just clear cache if it get too full
-    if (hash->size() + 1 > maxfill)
-        hash->clear();
+    // for now just clear cache if it gets too full
+    if (idHash->size() >= maxfill || locationHash->size() >= maxfill)
+    {
+        idHash->clear();
+        locationHash->clear();
+    }
 }
 
 

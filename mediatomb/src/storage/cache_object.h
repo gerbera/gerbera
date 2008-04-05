@@ -34,6 +34,10 @@ public:
     int getObjectType() { return objectType; }
     bool knowsObjectType() { return knowObjectType; }
     
+    void setLocation(zmm::String location) { this->location = location; }
+    zmm::String getLocation() { return location; }
+    bool knowsLocation() { return location!=nil; }
+    
 private:
     
     int parentID;
@@ -44,6 +48,8 @@ private:
     bool hasChildren;
     int objectType;
     bool knowObjectType;
+    
+    zmm::String location;
 };
 
 #endif // __CACHE_OBJECT_H_

@@ -92,7 +92,9 @@ protected:
     inline pthread_t getLockingThread() { return locking_thread; }
     void doLock(bool cond);
     void doUnlock(bool cond);
+public:
     inline bool isLocked() { return lock_level > 0; }
+protected:
     inline void lockAutolock() { lock(); autolock = true; }
     void unlockAutolock();
     int lock_level;

@@ -177,7 +177,7 @@ private:
     zmm::Ref<CdsObject> createObjectFromRow(zmm::Ref<SQLRow> row);
     
     /* helper for findObjectByPath and findObjectIDByPath */ 
-    zmm::Ref<SQLRow> _findObjectByPath(zmm::String fullpath);
+    zmm::Ref<CdsObject> _findObjectByPath(zmm::String fullpath);
     
     int _ensurePathExistence(zmm::String path, int *changedContainer);
     
@@ -234,7 +234,7 @@ private:
     
     zmm::Ref<StorageCache> cache;
     inline bool cacheOn() { return cache != nil; }
-    void addObjectToCache(zmm::Ref<CdsObject> object);
+    void addObjectToCache(zmm::Ref<CdsObject> object, bool dontLock = false);
     
     inline bool doInsertBuffering() { return insertBufferOn; }
     void addToInsertBuffer(zmm::Ref<zmm::StringBuffer> query);

@@ -41,10 +41,6 @@
 
 using namespace zmm;
 
-#define LOC_DIR_PREFIX      'D'
-#define LOC_FILE_PREFIX     'F'
-#define LOC_VIRT_PREFIX     'V'
-#define LOC_ILLEGAL_PREFIX  'X'
 #define MAX_REMOVE_SIZE     10000
 #define MAX_REMOVE_RECURSION 500
 
@@ -499,8 +495,8 @@ void SQLStorage::addObject(Ref<CdsObject> obj, int *changedContainer)
     if (cacheOn())
     {
         AUTOLOCK(cache->getMutex());
-        cache->getObjectDefinitly(obj->getParentID())->setHasChildren(true);
-        cache->getObjectDefinitly(obj->getID())->setObject(obj);
+        cache->getObjectDefinitely(obj->getParentID())->setHasChildren(true);
+        addObjectToCache(obj, true);
     }
     /* ------------ */
 }
@@ -554,11 +550,7 @@ void SQLStorage::updateObject(zmm::Ref<CdsObject> obj, int *changedContainer)
         exec(qb);
     }
     /* add to cache */
-    if (cacheOn())
-    {
-        AUTOLOCK(cache->getMutex());
-        cache->getObjectDefinitly(obj->getID())->setObject(obj);
-    }
+    addObjectToCache(obj);
     /* ------------ */
 }
 
@@ -687,7 +679,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
             if (cacheOn())
             {
                 AUTOLOCK(cache->getMutex());
-                cache->getObjectDefinitly(objectID)->setObjectType(objectType);
+                cache->getObjectDefinitely(objectID)->setObjectType(objectType);
             }
             /* ------------ */
         }
@@ -842,7 +834,7 @@ int SQLStorage::getChildCount(int contId, bool containers, bool items, bool hide
         if (cacheOn() && containers && items && ! (contId == CDS_ID_ROOT && hideFsRoot))
         {
             AUTOLOCK(cache->getMutex());
-            cache->getObjectDefinitly(contId)->setHasChildren(childCount>0);
+            cache->getObjectDefinitely(contId)->setHasChildren(childCount>0);
         }
         /* ------------ */
         
@@ -876,7 +868,7 @@ Ref<Array<StringBase> > SQLStorage::getMimeTypes()
     return arr;
 }
 
-Ref<SQLRow> SQLStorage::_findObjectByPath(String fullpath)
+Ref<CdsObject> SQLStorage::_findObjectByPath(String fullpath)
 {
     //log_debug("fullpath: %s\n", fullpath.c_str());
     fullpath = fullpath.reduce(DIR_SEPARATOR);
@@ -885,17 +877,38 @@ Ref<SQLRow> SQLStorage::_findObjectByPath(String fullpath)
     String path = pathAr->get(0);
     String filename = pathAr->get(1);
     
-    Ref<StringBuffer> qb(new StringBuffer());
     bool file = string_ok(filename);
     
     String dbLocation;
     if (file)
     {
-        flushInsertBuffer();
+        //flushInsertBuffer(); - not needed if correctly in cache (see below)
         dbLocation = addLocationPrefix(LOC_FILE_PREFIX, fullpath);
     }
     else
         dbLocation = addLocationPrefix(LOC_DIR_PREFIX, path);
+    
+    
+    /* check cache */
+    if (cacheOn())
+    {
+        AUTOLOCK(cache->getMutex());
+        Ref<Array<CacheObject> > objects = cache->getObjects(dbLocation);
+        if (objects != nil)
+        {
+            for (int i = 0; i < objects->size(); i++)
+            {
+                Ref<CacheObject> cObj = objects->get(i);
+                if (cObj->knowsObject())
+                {
+                    return cObj->getObject();
+                }
+            }
+        }
+    }
+    /* ----------- */
+    
+    Ref<StringBuffer> qb(new StringBuffer());
     *qb << SQL_QUERY
             << " WHERE " << TQD('f',"location_hash") << '=' << quote(stringHash(dbLocation))
             << " AND " << TQD('f',"location") << '=' << quote(dbLocation)
@@ -905,23 +918,25 @@ Ref<SQLRow> SQLStorage::_findObjectByPath(String fullpath)
     Ref<SQLResult> res = select(qb);
     if (res == nil)
         throw _Exception(_("error while doing select: ") + qb->toString());
-    return res->nextRow();
-}
-
-Ref<CdsObject> SQLStorage::findObjectByPath(String fullpath)
-{
-    Ref<SQLRow> row = _findObjectByPath(fullpath);
+    
+    
+    Ref<SQLRow> row = res->nextRow();
     if (row == nil)
         return nil;
     return createObjectFromRow(row);
 }
 
+Ref<CdsObject> SQLStorage::findObjectByPath(String fullpath)
+{
+    return _findObjectByPath(fullpath);
+}
+
 int SQLStorage::findObjectIDByPath(String fullpath)
 {
-    Ref<SQLRow> row = _findObjectByPath(fullpath);
-    if (row == nil)
+    Ref<CdsObject> obj = _findObjectByPath(fullpath);
+    if (obj == nil)
         return INVALID_OBJECT_ID;
-    return row->col(_id).toInt();
+    return obj->getID();
 }
 
 int SQLStorage::ensurePathExistence(String path, int *changedContainer)
@@ -2268,17 +2283,23 @@ void SQLStorage::loadLastID()
         throw _Exception(_("could not load correct lastID (db not initialized?)"));
 }
 
-void SQLStorage::addObjectToCache(Ref<CdsObject> object)
+void SQLStorage::addObjectToCache(Ref<CdsObject> object, bool dontLock)
 {
     if (cacheOn() && object != nil)
     {
-        AUTOLOCK(cache->getMutex());
-        cache->getObjectDefinitly(object->getID())->setObject(object);
+        AUTOLOCK_DEFINE_ONLY();
+        if (! dontLock)
+            AUTOLOCK_NO_DEFINE(cache->getMutex());
+        Ref<CacheObject> cObj = cache->getObjectDefinitely(object->getID());
+        cObj->setObject(object);
+        cache->checkLocation(cObj);
     }
 }
 
 void SQLStorage::addToInsertBuffer(Ref<StringBuffer> query)
 {
+    assert(doInsertBuffering());
+    
     AUTOLOCK(insertBufferMutex);
     if (insertBuffer == nil)
     {
@@ -2297,6 +2318,8 @@ void SQLStorage::addToInsertBuffer(Ref<StringBuffer> query)
 
 void SQLStorage::flushInsertBuffer(bool dontLock)
 {
+    if (! doInsertBuffering())
+        return;
     //print_backtrace();
     AUTOLOCK_DEFINE_ONLY();
     if (! dontLock)
