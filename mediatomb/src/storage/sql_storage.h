@@ -38,6 +38,7 @@
 #include "storage.h"
 #include "hash.h"
 #include "sync.h"
+#include "storage_cache.h"
 
 #define QTB                 table_quote_begin
 #define QTE                 table_quote_end
@@ -221,6 +222,11 @@ private:
     void setFsRootName(zmm::String rootName = nil);
     
     zmm::String fsRootName;
+    
+    zmm::Ref<StorageCache> cache;
+    inline bool cacheOn() { return cache != nil; }
+    void addObjectToCache(zmm::Ref<CdsObject> object);
+    
 };
 
 #endif // __SQL_STORAGE_H__

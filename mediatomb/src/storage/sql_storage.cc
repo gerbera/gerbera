@@ -142,6 +142,10 @@ void SQLStorage::init()
     Ref<StringBuffer> buf(new StringBuffer());
     *buf << SQL_QUERY_FOR_STRINGBUFFER;
     this->sql_query = buf->toString();
+    
+    cache = nil;
+    //cache = Ref<StorageCache>(new StorageCache());
+    
     //log_debug("using SQL: %s\n", this->sql_query.c_str());
     
     //objectTitleCache = Ref<DSOHash<CdsObject> >(new DSOHash<CdsObject>(OBJECT_CACHE_CAPACITY));
@@ -447,6 +451,14 @@ void SQLStorage::addObject(Ref<CdsObject> obj, int *changedContainer)
         }
         else exec(qb);
     }
+    
+    /* add to cache */
+    if (cacheOn())
+    {
+        cache->getObjectDefinitly(obj->getParentID())->setHasChildren(true);
+        cache->getObjectDefinitly(obj->getID())->setObject(obj);
+    }
+    /* ------------ */
 }
 
 void SQLStorage::updateObject(zmm::Ref<CdsObject> obj, int *changedContainer)
@@ -495,10 +507,29 @@ void SQLStorage::updateObject(zmm::Ref<CdsObject> obj, int *changedContainer)
         
         exec(qb);
     }
+    /* add to cache */
+    if (cacheOn())
+    {
+        cache->getObjectDefinitly(obj->getID())->setObject(obj);
+    }
+    /* ------------ */
 }
 
 Ref<CdsObject> SQLStorage::loadObject(int objectID)
 {
+    
+    /* check cache */
+    if (cacheOn())
+    {
+        Ref<CacheObject> cObj = cache->getObject(objectID);
+        if (cObj != nil)
+        {
+            if (cObj->knowsObject())
+                return cObj->getObject();
+        }
+    }
+    /* ----------- */
+    
 /*
     Ref<CdsObject> obj = objectIDCache->get(objectID);
     if (obj != nil)
@@ -569,22 +600,46 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     Ref<SQLResult> res;
     Ref<SQLRow> row;
     
-    Ref<StringBuffer> qb(new StringBuffer());
-    *qb << "SELECT " << TQ("object_type")
-        << " FROM " << TQ(CDS_OBJECT_TABLE)
-        << " WHERE " << TQ("id") << '=' << objectID;
-    res = select(qb);
-    if(res != nil && (row = res->nextRow()) != nil)
+    bool haveObjectType = false;
+    
+    /* check cache */
+    if (cacheOn())
     {
-        objectType = row->col(0).toInt();
+        Ref<CacheObject> cObj = cache->getObject(objectID);
+        if (cObj != nil && cObj->knowsObjectType())
+        {
+            objectType = cObj->getObjectType();
+            haveObjectType = true;
+        }
     }
-    else
+    /* ----------- */
+    
+    Ref<StringBuffer> qb(new StringBuffer());
+    if (! haveObjectType)
     {
-        throw _ObjectNotFoundException(_("Object not found: ") + objectID);
+        *qb << "SELECT " << TQ("object_type")
+            << " FROM " << TQ(CDS_OBJECT_TABLE)
+            << " WHERE " << TQ("id") << '=' << objectID;
+        res = select(qb);
+        if(res != nil && (row = res->nextRow()) != nil)
+        {
+            objectType = row->col(0).toInt();
+            haveObjectType = true;
+            
+            /* add to cache */
+            if (cacheOn())
+                cache->getObjectDefinitly(objectID)->setObjectType(objectType);
+            /* ------------ */
+        }
+        else
+        {
+            throw _ObjectNotFoundException(_("Object not found: ") + objectID);
+        }
+        
+        row = nil;
+        res = nil;
     }
     
-    row = nil;
-    res = nil;
     
     bool hideFsRoot = param->getFlag(BROWSE_HIDE_FS_ROOT);
     
@@ -596,9 +651,6 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     {
         param->setTotalMatches(1);
     }
-    
-    row = nil;
-    res = nil;
     
     // order by code..
     qb->clear();
@@ -691,6 +743,19 @@ int SQLStorage::getChildCount(int contId, bool containers, bool items, bool hide
 {
     if (! containers && ! items)
         return 0;
+    
+    /* check cache */
+    if (cacheOn() && containers && items && ! (contId == CDS_ID_ROOT && hideFsRoot))
+    {
+        Ref<CacheObject> cObj = cache->getObject(contId);
+        if (cObj != nil)
+        {
+            if (cObj->knowsHasChildren())
+                return cObj->getHasChildren();
+        }
+    }
+    /* ----------- */
+
     Ref<SQLRow> row;
     Ref<SQLResult> res;
     Ref<StringBuffer> qb(new StringBuffer());
@@ -708,7 +773,14 @@ int SQLStorage::getChildCount(int contId, bool containers, bool items, bool hide
     res = select(qb);
     if (res != nil && (row = res->nextRow()) != nil)
     {
-        return row->col(0).toInt();
+        int childCount = row->col(0).toInt();
+        
+        /* add to cache */
+        if (cacheOn() && containers && items && ! (contId == CDS_ID_ROOT && hideFsRoot))
+            cache->getObjectDefinitly(contId)->setHasChildren(childCount>0);
+        /* ------------ */
+        
+        return childCount;
     }
     return 0;
 }
@@ -1044,6 +1116,8 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
     {
         throw _StorageException(nil, _("unknown object type: ")+ objectType);
     }
+    
+    addObjectToCache(obj);
     return obj;
 }
 
@@ -1567,6 +1641,12 @@ Ref<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(Ref<ChangedCon
     }
     log_debug("end; changedContainers (upnp): %s\n", changedContainers->upnp->toCSV().c_str());
     log_debug("end; changedContainers (ui): %s\n", changedContainers->ui->toCSV().c_str());
+    
+    /* clear cache (for now) */
+    if (cacheOn())
+        cache->clear();
+    /* --------------------- */
+    
     return changedContainers;
 }
 
@@ -2069,4 +2149,10 @@ void SQLStorage::setFsRootName(String rootName)
         Ref<CdsObject> fsRootObj = loadObject(CDS_ID_FS_ROOT);
         fsRootName = fsRootObj->getTitle();
     }
+}
+
+void SQLStorage::addObjectToCache(Ref<CdsObject> object)
+{
+    if (cacheOn() && object != nil)
+        cache->getObjectDefinitly(object->getID())->setObject(object);
 }
