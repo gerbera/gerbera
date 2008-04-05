@@ -142,31 +142,12 @@ void LibMP4V2Handler::fillMetadata(Ref<CdsItem> item)
 
         Ref<ConfigManager> cm = ConfigManager::getInstance();
 
-        /*
-           int temp;
-
-        // note: UPnP requres bytes/second
-        if ((header->vbr_bitrate) > 0)
-        {
-        temp = (header->vbr_bitrate) / 8; 
-        }
-        else
-        {
-        temp = (header->bitrate) / 8;
-        }
-
-        if (temp > 0)
-        {
-        item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_BITRATE),
-        String::from(temp)); 
-        }
-        */
         //  MP4GetTimeScale returns the time scale in units of ticks per 
         //  second for the mp4 file. Caveat: tracks may use the same time 
         //  scale as  the  movie or may use their own time scale.
         u_int32_t timescale = MP4GetTimeScale(mp4);
-        //  MP4GetDuration  returns  the  maximum duration of all the tracks in the
-        //  specified mp4 file.
+        //  MP4GetDuration  returns the maximum duration of all the tracks in 
+        //  the specified mp4 file.
         //
         //  Caveat: the duration is the movie (file) time scale units.
         MP4Duration duration = MP4GetDuration(mp4);
@@ -188,6 +169,14 @@ void LibMP4V2Handler::fillMetadata(Ref<CdsItem> item)
                 timescale =  MP4GetTrackTimeScale(mp4, tid);
                 if (timescale > 0)
                     item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), String::from((unsigned int)timescale));
+            }
+
+            // note: UPnP requres bytes/second
+            timescale = MP4GetTrackBitRate(mp4, tid);
+            if (timescale > 0)
+            {
+                timescale = timescale / 8;
+                item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_BITRATE), String::from(timescale));
             }
         }
 
