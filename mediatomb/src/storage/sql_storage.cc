@@ -132,6 +132,7 @@ SQLStorage::SQLStorage() : Storage()
 {
     table_quote_begin = '\0';
     table_quote_end = '\0';
+    lastID = INVALID_OBJECT_ID;
 }
 
 void SQLStorage::init()
@@ -145,6 +146,12 @@ void SQLStorage::init()
     
     cache = nil;
     //cache = Ref<StorageCache>(new StorageCache());
+    
+    insertBufferOn = false;
+    
+    insertBuffer = nil;
+    insertBufferEmpty = true;
+    insertBufferMutex = Ref<Mutex>(new Mutex());
     
     //log_debug("using SQL: %s\n", this->sql_query.c_str());
     
@@ -168,6 +175,18 @@ void SQLStorage::init()
     }
     log_debug(("PRELOADING OBJECTS DONE\n"));
 */
+}
+
+void SQLStorage::dbReady()
+{
+    nextIDMutex = Ref<Mutex>(new Mutex());;
+    loadLastID();
+}
+
+void SQLStorage::shutdown()
+{
+    flushInsertBuffer();
+    shutdownDriver();
 }
 
 /*
@@ -194,6 +213,8 @@ Ref<CdsObject> SQLStorage::checkRefID(Ref<CdsObject> obj)
         }
         catch (Exception e)
         {
+            //abort();
+            throw _Exception(_("illegal refID was set"));
         }
     }
     
@@ -378,6 +399,8 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
         cdsActiveItemSql->put(_("state"), quote(aitem->getState()));
     }
     
+    
+    #warning check for problem with caching
     // check for a duplicate (virtual) object
     if (hasReference && ! isUpdate)
     {
@@ -421,6 +444,7 @@ void SQLStorage::addObject(Ref<CdsObject> obj, int *changedContainer)
         
         Ref<StringBuffer> fields(new StringBuffer(128));
         Ref<StringBuffer> values(new StringBuffer(128));
+        
         for (int j = 0; j < dataElements->size(); j++)
         {
             Ref<DictionaryElement> element = dataElements->get(j);
@@ -438,23 +462,42 @@ void SQLStorage::addObject(Ref<CdsObject> obj, int *changedContainer)
             *values << element->getValue();
         }
         
+        /* manually generate ID */
+        if (lastInsertID == INVALID_OBJECT_ID && tableName == _(CDS_OBJECT_TABLE))
+        {
+            lastInsertID = getNextID();
+            obj->setID(lastInsertID);
+            *fields << ',' << TQ("id");
+            *values << ',' << quote(lastInsertID);
+        }
+        /* -------------------- */
+        
         Ref<StringBuffer> qb(new StringBuffer(256));
         *qb << "INSERT INTO " << TQ(tableName) << " (" << fields->toString() <<
                 ") VALUES (" << values->toString() << ')';
                 
         log_debug("insert_query: %s\n", qb->toString().c_str());
         
-        if ( lastInsertID == INVALID_OBJECT_ID && tableName == _(CDS_OBJECT_TABLE))
+        /*
+        if (lastInsertID == INVALID_OBJECT_ID && tableName == _(CDS_OBJECT_TABLE))
         {
             lastInsertID = exec(qb, true);
             obj->setID(lastInsertID);
         }
-        else exec(qb);
+        else
+            exec(qb);
+        */
+        
+        if (! doInsertBuffering())
+            exec(qb);
+        else
+            addToInsertBuffer(qb);
     }
     
     /* add to cache */
     if (cacheOn())
     {
+        AUTOLOCK(cache->getMutex());
         cache->getObjectDefinitly(obj->getParentID())->setHasChildren(true);
         cache->getObjectDefinitly(obj->getID())->setObject(obj);
     }
@@ -463,6 +506,8 @@ void SQLStorage::addObject(Ref<CdsObject> obj, int *changedContainer)
 
 void SQLStorage::updateObject(zmm::Ref<CdsObject> obj, int *changedContainer)
 {
+    flushInsertBuffer();
+    
     Ref<Array<AddUpdateTable> > data;
     if (obj->getID() == CDS_ID_FS_ROOT)
     {
@@ -510,6 +555,7 @@ void SQLStorage::updateObject(zmm::Ref<CdsObject> obj, int *changedContainer)
     /* add to cache */
     if (cacheOn())
     {
+        AUTOLOCK(cache->getMutex());
         cache->getObjectDefinitly(obj->getID())->setObject(obj);
     }
     /* ------------ */
@@ -521,6 +567,7 @@ Ref<CdsObject> SQLStorage::loadObject(int objectID)
     /* check cache */
     if (cacheOn())
     {
+        AUTOLOCK(cache->getMutex());
         Ref<CacheObject> cObj = cache->getObject(objectID);
         if (cObj != nil)
         {
@@ -529,6 +576,8 @@ Ref<CdsObject> SQLStorage::loadObject(int objectID)
         }
     }
     /* ----------- */
+    
+    flushInsertBuffer();
     
 /*
     Ref<CdsObject> obj = objectIDCache->get(objectID);
@@ -553,6 +602,8 @@ Ref<CdsObject> SQLStorage::loadObject(int objectID)
 
 Ref<CdsObject> SQLStorage::loadObjectByServiceID(String serviceID)
 {
+    flushInsertBuffer();
+    
     Ref<StringBuffer> qb(new StringBuffer());
     *qb << SQL_QUERY << " WHERE " << TQD('f',"service_id") << '=' << quote(serviceID);
     Ref<SQLResult> res = select(qb);
@@ -567,6 +618,8 @@ Ref<CdsObject> SQLStorage::loadObjectByServiceID(String serviceID)
 
 Ref<IntArray> SQLStorage::getServiceObjectIDs(char servicePrefix)
 {
+    flushInsertBuffer();
+    
     Ref<IntArray> objectIDs(new IntArray());
     Ref<StringBuffer> qb(new StringBuffer());
     *qb << "SELECT " << TQ("id")
@@ -589,6 +642,8 @@ Ref<IntArray> SQLStorage::getServiceObjectIDs(char servicePrefix)
 
 Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
 {
+    flushInsertBuffer();
+    
     int objectID;
     int objectType;
     
@@ -605,6 +660,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     /* check cache */
     if (cacheOn())
     {
+        AUTOLOCK(cache->getMutex());
         Ref<CacheObject> cObj = cache->getObject(objectID);
         if (cObj != nil && cObj->knowsObjectType())
         {
@@ -628,7 +684,10 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
             
             /* add to cache */
             if (cacheOn())
+            {
+                AUTOLOCK(cache->getMutex());
                 cache->getObjectDefinitly(objectID)->setObjectType(objectType);
+            }
             /* ------------ */
         }
         else
@@ -747,6 +806,7 @@ int SQLStorage::getChildCount(int contId, bool containers, bool items, bool hide
     /* check cache */
     if (cacheOn() && containers && items && ! (contId == CDS_ID_ROOT && hideFsRoot))
     {
+        AUTOLOCK(cache->getMutex());
         Ref<CacheObject> cObj = cache->getObject(contId);
         if (cObj != nil)
         {
@@ -755,7 +815,9 @@ int SQLStorage::getChildCount(int contId, bool containers, bool items, bool hide
         }
     }
     /* ----------- */
-
+    
+    flushInsertBuffer();
+    
     Ref<SQLRow> row;
     Ref<SQLResult> res;
     Ref<StringBuffer> qb(new StringBuffer());
@@ -777,7 +839,10 @@ int SQLStorage::getChildCount(int contId, bool containers, bool items, bool hide
         
         /* add to cache */
         if (cacheOn() && containers && items && ! (contId == CDS_ID_ROOT && hideFsRoot))
+        {
+            AUTOLOCK(cache->getMutex());
             cache->getObjectDefinitly(contId)->setHasChildren(childCount>0);
+        }
         /* ------------ */
         
         return childCount;
@@ -787,6 +852,8 @@ int SQLStorage::getChildCount(int contId, bool containers, bool items, bool hide
 
 Ref<Array<StringBase> > SQLStorage::getMimeTypes()
 {
+    flushInsertBuffer();
+    
     Ref<Array<StringBase> > arr(new Array<StringBase>());
     
     Ref<StringBuffer> qb(new StringBuffer());
@@ -822,7 +889,10 @@ Ref<SQLRow> SQLStorage::_findObjectByPath(String fullpath)
     
     String dbLocation;
     if (file)
+    {
+        flushInsertBuffer();
         dbLocation = addLocationPrefix(LOC_FILE_PREFIX, fullpath);
+    }
     else
         dbLocation = addLocationPrefix(LOC_DIR_PREFIX, path);
     *qb << SQL_QUERY
@@ -892,10 +962,14 @@ int SQLStorage::createContainer(int parentID, String name, String path, bool isV
             throw _Exception(_("tried to create container with refID set, but refID doesn't point to an existing object"));
     }
     String dbLocation = addLocationPrefix((isVirtual ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX), path);
+    
+    int newID = getNextID();
+    
     Ref<StringBuffer> qb(new StringBuffer());
     *qb << "INSERT INTO " 
         << TQ(CDS_OBJECT_TABLE)
         << " ("
+        << TQ("id") << ','
         << TQ("parent_id") << ','
         << TQ("object_type") << ','
         << TQ("upnp_class") << ','
@@ -903,6 +977,7 @@ int SQLStorage::createContainer(int parentID, String name, String path, bool isV
         << TQ("location") << ','
         << TQ("location_hash") << ','
         << TQ("ref_id") << ") VALUES ("
+        << newID << ','
         << parentID << ','
         << OBJECT_TYPE_CONTAINER << ','
         << (string_ok(upnpClass) ? quote(upnpClass) : quote(_(UPNP_DEFAULT_CLASS_CONTAINER))) << ',' 
@@ -912,7 +987,10 @@ int SQLStorage::createContainer(int parentID, String name, String path, bool isV
         << (refID > 0 ? quote(refID) : _(SQL_NULL))
         << ')';
         
-    return exec(qb, true);
+    exec(qb);
+    return newID;
+    
+    //return exec(qb, true);
     
 }
 
@@ -1123,6 +1201,8 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
 
 int SQLStorage::getTotalFiles()
 {
+    flushInsertBuffer();
+    
     Ref<StringBuffer> query(new StringBuffer());
     *query << "SELECT COUNT(*) FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE "
            << TQ("object_type") << " != " << quote(OBJECT_TYPE_CONTAINER);
@@ -1207,6 +1287,8 @@ Ref<Array<CdsObject> > SQLStorage::selectObjects(Ref<SelectParam> param)
 
 Ref<DBRHash<int> > SQLStorage::getObjects(int parentID, bool withoutContainer)
 {
+    flushInsertBuffer();
+    
     Ref<StringBuffer> q(new StringBuffer());
     *q << "SELECT " << TQ("id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";
     if (withoutContainer)
@@ -1235,6 +1317,8 @@ Ref<DBRHash<int> > SQLStorage::getObjects(int parentID, bool withoutContainer)
 
 Ref<Storage::ChangedContainers> SQLStorage::removeObjects(zmm::Ref<DBRHash<int> > list, bool all)
 {
+    flushInsertBuffer();
+    
     hash_data_array_t<int> hash_data_array;
     list->getAll(&hash_data_array);
     int count = hash_data_array.size;
@@ -1340,6 +1424,8 @@ void SQLStorage::_removeObjects(Ref<StringBuffer> objectIDs, int offset)
 
 Ref<Storage::ChangedContainers> SQLStorage::removeObject(int objectID, bool all)
 {
+    flushInsertBuffer();
+    
     Ref<StringBuffer> q(new StringBuffer());
     *q << "SELECT " << TQ("object_type") << ',' << TQ("ref_id")
         << " FROM " << TQ(CDS_OBJECT_TABLE)
@@ -2108,6 +2194,8 @@ Ref<IntArray> SQLStorage::_checkOverlappingAutoscans(Ref<AutoscanDirectory> adir
 
 Ref<IntArray> SQLStorage::getPathIDs(int objectID)
 {
+    flushInsertBuffer();
+    
     if (objectID == INVALID_OBJECT_ID)
         return nil;
     Ref<IntArray> pathIDs(new IntArray());
@@ -2151,8 +2239,71 @@ void SQLStorage::setFsRootName(String rootName)
     }
 }
 
+int SQLStorage::getNextID()
+{
+    if (lastID < CDS_ID_FS_ROOT)
+        throw _Exception(_("SQLStorage::getNextID() called, but lastID hasn't been loaded correctly yet"));
+    AUTOLOCK(nextIDMutex);
+    return ++lastID;
+}
+
+void SQLStorage::loadLastID()
+{
+    // we don't rely on automatic db generated ids, because of our caching
+    
+    Ref<StringBuffer> qb(new StringBuffer());
+    *qb << "SELECT MAX(" << TQ("id") << ')'
+        << " FROM " << TQ(CDS_OBJECT_TABLE);
+    Ref<SQLResult> res = select(qb);
+    if (res == nil)
+        throw _Exception(_("could not load lastID (res==nil)"));
+    
+    Ref<SQLRow> row = res->nextRow();
+    if (row == nil)
+        throw _Exception(_("could not load lastID (row==nil)"));
+    
+    lastID = row->col(0).toInt();
+    if (lastID < CDS_ID_FS_ROOT)
+        throw _Exception(_("could not load correct lastID (db not initialized?)"));
+}
+
 void SQLStorage::addObjectToCache(Ref<CdsObject> object)
 {
     if (cacheOn() && object != nil)
+    {
+        AUTOLOCK(cache->getMutex());
         cache->getObjectDefinitly(object->getID())->setObject(object);
+    }
+}
+
+void SQLStorage::addToInsertBuffer(Ref<StringBuffer> query)
+{
+    AUTOLOCK(insertBufferMutex);
+    if (insertBuffer == nil)
+    {
+        insertBuffer = Ref<StringBuffer>(new StringBuffer());
+        *insertBuffer << "BEGIN TRANSACTION;";
+    }
+    
+    #warning implement for MySQL
+    
+    insertBufferEmpty = false;
+    *insertBuffer << query << ';';
+    if (insertBuffer->length() > 102400)
+        flushInsertBuffer(true);
+}
+
+void SQLStorage::flushInsertBuffer(bool dontLock)
+{
+    //print_backtrace();
+    AUTOLOCK_DEFINE_ONLY();
+    if (! dontLock)
+        AUTOLOCK_NO_DEFINE(mutex);
+    if (insertBuffer == nil || insertBufferEmpty)
+        return;
+    *insertBuffer << "COMMIT;";
+    exec(insertBuffer);
+    insertBuffer->clear();
+    *insertBuffer << "BEGIN TRANSACTION;";
+    insertBufferEmpty = true;
 }

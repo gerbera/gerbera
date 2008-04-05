@@ -278,6 +278,8 @@ void MysqlStorage::init()
     AUTOUNLOCK();
     
     log_debug("end\n");
+    
+    dbReady();
 }
 
 String MysqlStorage::quote(String value)
@@ -356,7 +358,7 @@ int MysqlStorage::exec(const char *query, int length, bool getLastInsertId)
     
 }
 
-void MysqlStorage::shutdown()
+void MysqlStorage::shutdownDriver()
 {
     AUTOLOCK(mysqlMutex);    // just to ensure, that we don't close while another thread 
                     // is executing a query

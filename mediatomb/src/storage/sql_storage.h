@@ -84,6 +84,8 @@ public:
     virtual zmm::Ref<SQLResult> select(const char *query, int length) = 0;
     virtual int exec(const char *query, int length, bool getLastInsertId = false) = 0;
     
+    void dbReady();
+    
     /* wrapper functions for select and exec */
     zmm::Ref<SQLResult> select(zmm::Ref<zmm::StringBuffer> buf)
         { return select(buf->c_str(), buf->length()); }
@@ -138,7 +140,8 @@ public:
     
     virtual zmm::Ref<zmm::IntArray> getPathIDs(int objectID);
     
-    virtual void shutdown() = 0;
+    virtual void shutdown();
+    virtual void shutdownDriver() = 0;
     
     virtual int ensurePathExistence(zmm::String path, int *changedContainer);
     
@@ -223,10 +226,24 @@ private:
     
     zmm::String fsRootName;
     
+    int lastID;
+    
+    int getNextID();
+    void loadLastID();
+    zmm::Ref<Mutex> nextIDMutex;
+    
     zmm::Ref<StorageCache> cache;
     inline bool cacheOn() { return cache != nil; }
     void addObjectToCache(zmm::Ref<CdsObject> object);
     
+    inline bool doInsertBuffering() { return insertBufferOn; }
+    void addToInsertBuffer(zmm::Ref<zmm::StringBuffer> query);
+    void flushInsertBuffer(bool dontLock = false);
+    
+    bool insertBufferOn;
+    bool insertBufferEmpty;
+    zmm::Ref<zmm::StringBuffer> insertBuffer;
+    zmm::Ref<Mutex> insertBufferMutex;
 };
 
 #endif // __SQL_STORAGE_H__

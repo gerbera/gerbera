@@ -8,6 +8,7 @@
 #include "zmmf/zmmf.h"
 #include "common.h"
 #include "hash.h"
+#include "sync.h"
 #include "cache_object.h"
 
 #define STORAGE_CACHE_CAPACITY 29989
@@ -23,6 +24,8 @@ public:
     bool removeObject(int id);
     void clear();
     
+    zmm::Ref<Mutex> getMutex() { return mutex; }
+    
 private:
     
     int capacity;
@@ -31,6 +34,7 @@ private:
     void ensureFillLevelOk();
     
     zmm::Ref<DBOHash<int,CacheObject> > hash;
+    zmm::Ref<Mutex> mutex;
 };
 
 #endif // __STORAGE_CACHE_H__

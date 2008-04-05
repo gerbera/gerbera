@@ -15,10 +15,12 @@ StorageCache::StorageCache()
     capacity = STORAGE_CACHE_CAPACITY;
     maxfill = STORAGE_CACHE_MAXFILL;
     hash = Ref<DBOHash<int,CacheObject> >(new DBOHash<int,CacheObject>(capacity, INVALID_OBJECT_ID, INVALID_OBJECT_ID_2));
+    mutex = Ref<Mutex> (new Mutex());
 }
 
 void StorageCache::clear()
 {
+    AUTOLOCK(mutex);
     hash->clear();
 }
 
@@ -41,6 +43,7 @@ Ref<CacheObject> StorageCache::getObjectDefinitly(int id)
 
 bool StorageCache::removeObject(int id)
 {
+    AUTOLOCK(mutex);
     return hash->remove(id);
 }
 
@@ -54,4 +57,5 @@ void StorageCache::ensureFillLevelOk()
     if (hash->size() + 1 > maxfill)
         hash->clear();
 }
+
 

@@ -29,12 +29,15 @@ void CacheObject::setObject(Ref<CdsObject> obj)
     setParentID(obj->getParentID());
     setRefID(obj->getRefID());
     setObjectType(obj->getObjectType());
+    knowHasChildren = false;
     
+    /*
     if (IS_CDS_CONTAINER(obj->getObjectType()))
     {
         Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
         setHasChildren(cont->getChildCount() > 0);
     }
+    */
 }
 
 void CacheObject::setHasChildren(bool hasChildren)

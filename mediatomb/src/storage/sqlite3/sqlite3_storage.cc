@@ -228,6 +228,8 @@ void Sqlite3Storage::init()
         this->addTask(RefCast(btask, SLTask));
         btask->waitForTask();
     }
+    
+    dbReady();
 }
 
 void Sqlite3Storage::_exec(const char *query)
@@ -252,6 +254,8 @@ String Sqlite3Storage::getError(String query, String error, sqlite3 *db)
 
 Ref<SQLResult> Sqlite3Storage::select(const char *query, int length)
 {
+    fprintf(stdout, "%s\n",query);
+    fflush(stdout);
     Ref<SLSelectTask> ptask (new SLSelectTask(query));
     addTask(RefCast(ptask, SLTask));
     ptask->waitForTask();
@@ -260,6 +264,8 @@ Ref<SQLResult> Sqlite3Storage::select(const char *query, int length)
 
 int Sqlite3Storage::exec(const char *query, int length, bool getLastInsertId)
 {
+    fprintf(stdout, "%s\n",query);
+    fflush(stdout);
     Ref<SLExecTask> ptask (new SLExecTask(query, getLastInsertId));
     addTask(RefCast(ptask, SLTask));
     ptask->waitForTask();
@@ -338,7 +344,7 @@ void Sqlite3Storage::addTask(zmm::Ref<SLTask> task)
     signal();
 }
 
-void Sqlite3Storage::shutdown()
+void Sqlite3Storage::shutdownDriver()
 {
     log_debug("start\n");
     AUTOLOCK(sqliteMutex);

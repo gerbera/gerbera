@@ -141,7 +141,7 @@ private:
     Sqlite3Storage();
     friend zmm::Ref<Storage> Storage::createInstance();
     virtual void init();
-    virtual void shutdown();
+    virtual void shutdownDriver();
     
     virtual zmm::String quote(zmm::String str);
     virtual inline zmm::String quote(int val) { return zmm::String::from(val); }
