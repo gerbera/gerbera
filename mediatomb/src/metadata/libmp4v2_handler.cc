@@ -161,9 +161,9 @@ void LibMP4V2Handler::fillMetadata(Ref<CdsItem> item)
         String::from(temp)); 
         }
         */
-        //  MP4GetTimeScale returns the time scale in units of ticks per second for
-        //  the mp4 file. Caveat: tracks may use the same time scale as  the  movie
-        //  or may use their own time scale.
+        //  MP4GetTimeScale returns the time scale in units of ticks per 
+        //  second for the mp4 file. Caveat: tracks may use the same time 
+        //  scale as  the  movie or may use their own time scale.
         u_int32_t timescale = MP4GetTimeScale(mp4);
         //  MP4GetDuration  returns  the  maximum duration of all the tracks in the
         //  specified mp4 file.
@@ -175,14 +175,7 @@ void LibMP4V2Handler::fillMetadata(Ref<CdsItem> item)
         if (duration > 0)
             item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_DURATION),
                     secondsToHMS(duration));
-        /*
-           if ((header->frequency) > 0)
-           {
-           item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), 
-           String::from((int)(header->frequency)));
-           }
-           */
-
+ 
 
         MP4TrackId tid = MP4FindTrackId(mp4, 0, MP4_AUDIO_TRACK_TYPE);
         if (tid != MP4_INVALID_TRACK_ID)
@@ -190,8 +183,11 @@ void LibMP4V2Handler::fillMetadata(Ref<CdsItem> item)
             temp = MP4GetTrackAudioChannels(mp4, tid);
             if (temp > 0)
             {
-                item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS),
-                        String::from(temp));
+                item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), String::from(temp));
+
+                timescale =  MP4GetTrackTimeScale(mp4, tid);
+                if (timescale > 0)
+                    item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), String::from((unsigned int)timescale));
             }
         }
 
