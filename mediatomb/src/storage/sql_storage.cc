@@ -570,8 +570,6 @@ Ref<CdsObject> SQLStorage::loadObject(int objectID)
     }
     /* ----------- */
     
-    flushInsertBuffer();
-    
 /*
     Ref<CdsObject> obj = objectIDCache->get(objectID);
     if (obj != nil)
