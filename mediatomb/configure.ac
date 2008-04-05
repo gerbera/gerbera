@@ -78,19 +78,6 @@ SEARCH_DIR_LIBS="$SEARCH_DIR/lib"
 SEARCH_DIR_PROGS="$SEARCH_DIR/bin"
     
 # per package header and library search paths
-AC_ARG_WITH(sqlite3-h, 
-        AC_HELP_STRING([--with-sqlite3-h=DIR], [search for sqlite3 headers only in DIR]),
-        [
-            SQLITE3_SEARCH_HEADERS="$withval"
-        ]
-)
-
-AC_ARG_WITH(sqlite3-libs, 
-        AC_HELP_STRING([--with-sqlite3-libs=DIR], [search for sqlite3 libraries only in DIR]),
-        [
-            SQLITE3_SEARCH_LIBS="$withval"
-        ]
-)
 
 AC_ARG_WITH(js-h,
         AC_HELP_STRING([--with-js-h=DIR], [search for js (spidermonkey) headers in DIR]),
