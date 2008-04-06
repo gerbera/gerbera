@@ -842,7 +842,7 @@ MT_CHECK_OPTIONAL_PACKAGE([sqlite3], [disable], [sqlite3 database supprot],
                           [sqlite3], [sqlite3], [sqlite3_open])
 
 if test "x$SQLITE3_STATUS" = xyes; then
-    if "x$RT_STATUS" = xyes; then
+    if test "x$RT_STATUS" = xyes; then
         SQLITE_LDFLAGS="$SQLITE_LDFLAGS $RT_LDFLAGS"
         SQLITE_LIBS="$SQLITE_LIBS $RT_LIBS"
     fi
