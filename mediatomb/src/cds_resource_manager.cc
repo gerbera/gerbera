@@ -85,6 +85,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                     IS_CDS_ITEM_EXTERNAL_URL(item->getObjectType())) &&
                     (!item->getFlag(OBJECT_FLAG_PROXY_URL)));
 
+    bool isExtThumbnail = false; // this sucks
     Ref<Dictionary> mappings = config->getDictionaryOption(
                         CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
@@ -230,7 +231,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         // accounting for those dynamic resources: i.e. the parameter should
         // still only count the "real" resources, because that's what the
         // file request handler will be getting.
-        // the for transcoded resources the res_id can be safely ignored,
+        // for transcoded resources the res_id can be safely ignored,
         // because a transcoded resource is identified by the profile name
 #ifdef EXTERNAL_TRANSCODING
         // flag if we are dealing with the transcoded resource
@@ -268,6 +269,19 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
             url = url + res_params->encode();
         }
 
+        // ok this really sucks, I guess another rewrite of the resource manager
+        // is necessary
+        if ((i > 0) && (item->getResource(i)->getHandlerType() == CH_EXTURL) &&
+           (item->getResource(i)->getOption(_(RESOURCE_CONTENT_TYPE)) == 
+            THUMBNAIL))
+        {
+            url = item->getResource(i)->getOption(_(RESOURCE_OPTION_URL));
+            if (!string_ok(url))
+                throw _Exception(_("missing thumbnail URL!"));
+
+            isExtThumbnail = true;
+        }
+
         /// \todo currently resource is misused for album art
 #ifdef HAVE_ID3_ALBUMART
         // only add upnp:AlbumArtURI if we have an AA, skip the resource
@@ -294,20 +308,20 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
             continue;
         }
 #endif
-
-#ifdef EXTERNAL_TRANSCODING
-
-        // when transcoding is enabled the first (zero) resource can be the
-        // transcoded stream, that means that we can only go with the
-        // content type here and that we will not limit ourselves to the
-        // first resource
-        if (!skipURL)
+        if (!isExtThumbnail)
         {
-            if (transcoded)
-                url = url + renderExtension(contentType, nil);
-            else
-                url = url + renderExtension(contentType, item->getLocation()); 
-        }
+#ifdef EXTERNAL_TRANSCODING
+            // when transcoding is enabled the first (zero) resource can be the
+            // transcoded stream, that means that we can only go with the
+            // content type here and that we will not limit ourselves to the
+            // first resource
+            if (!skipURL)
+            {
+                if (transcoded)
+                    url = url + renderExtension(contentType, nil);
+                else
+                    url = url + renderExtension(contentType, item->getLocation()); 
+            }
 #else
         // for non transcoded item we will only do this for the first
         // resource, that seemed to be sufficient so far (mostly this paramter
@@ -317,8 +331,9 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         {
             url = url + renderExtension(contentType, item->getLocation());
         }
-#endif
 
+#endif
+        }
 #ifdef EXTEND_PROTOCOLINFO
         if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO))
         {
@@ -341,7 +356,9 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                (item->getResource(i)->getParameter(_(RESOURCE_CONTENT_TYPE)) 
                      == EXIF_THUMBNAIL)) || 
                (item->getResource(i)->getOption(_(RESOURCE_CONTENT_TYPE)) 
-                     == EXIF_THUMBNAIL)) &&
+                     == EXIF_THUMBNAIL) || 
+               (item->getResource(i)->getOption(_(RESOURCE_CONTENT_TYPE))
+                                              == THUMBNAIL)) &&
               (x <= 160) && (y <= 160))
                         extend = _(D_PROFILE) + "=" + D_JPEG_TN+";";
                     else if ((x <= 640) && (y <= 420))
@@ -356,7 +373,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
 #ifdef EXTERNAL_TRANSCODING
         // we do not support seeking at all, so 00
         // and the media is converted, so set CI to 1
-        if (transcoded)
+        if (!isExtThumbnail && transcoded)
             extend = extend + D_OP + "=00;" + 
                      D_CONVERSION_INDICATOR + "=" D_CONVERSION;
         else

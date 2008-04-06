@@ -60,6 +60,7 @@
 
 #define ID3_ALBUM_ART "aa"
 #define EXIF_THUMBNAIL  "EX_TH"
+#define THUMBNAIL     "th" // thumbnail without need for special handling
 
 typedef enum
 {

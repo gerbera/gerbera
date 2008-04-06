@@ -48,20 +48,44 @@
 using namespace zmm;
 using namespace mxml;
 
-// REST API defines
-
 // Base request URL
-#define REST_BASE_URL                   "http://www.youtube.com/api2_rest?"
+#define GDATA_API_YT_BASE_URL           "http://gdata.youtube.com/feeds/api/"
 
-// REST API methods
-// dev_id=dev_id&user=user
-#define REST_METHOD_LIST_FAVORITE       "youtube.users.list_favorite_videos"
+// /users/USERNAME/favorites
+#define GDATA_REQUEST_FAVORITES         "/users/%s/favorites"
 
-// dev_id=dev_id&tag=tag&page=page&per_page=per_page
-#define REST_METHOD_LIST_BY_TAG         "youtube.videos.list_by_tag"
+// /feeds/api/videos?vq="SEARCH TERMS"
+#define GDATA_REQUEST_SEARCH_BY_TAG     "/videos"
 
-// dev_id=dev_id&user=user&page=page&per_page=per_page
-#define REST_METHOD_LIST_BY_USER        "youtube.videos.list_by_user"
+// /feeds/api/users/USERNAME/uploads
+#define GDATA_REQUEST_LIST_BY_USER      "/users/%s/uploads"
+
+// all stdfeeds:  "/standardfeeds/REGION_ID/feed"
+#define GDATA_REQUEST_STDFEED_BASE              "standardfeeds"
+
+#define GDATA_REQUEST_STDFEED_TOP_RATED         "top_rated"
+#define GDATA_REQUEST_STDFEED_TOP_FAVORITES     "top_favorites"
+#define GDATA_REQUEST_STDFEED_MOST_VIEWED       "most_viewed"
+#define GDATA_REQUEST_STDFEED_MOST_RECENT       "most_recent"
+#define GDATA_REQUEST_STDFEED_MOST_DISCUSSED    "most_discussed"
+#define GDATA_REQUEST_STDFEED_MOST_LINKED       "most_linked"
+#define GDATA_REQUEST_STDFEED_MOST_RESPONDED    "most_responded"
+#define GDATA_REQUEST_STDFEED_RECENTLY_FEATURED "recently_featured"
+#define GDATA_REQUEST_STDFEED_WATCH_ON_MOBILE   "watch_on_mobile"
+
+static char *YT_stdfeeds[] = 
+{
+    GDATA_REQUEST_STDFEED_TOP_RATED, 
+    GDATA_REQUEST_STDFEED_TOP_FAVORITES,
+    GDATA_REQUEST_STDFEED_MOST_VIEWED,
+    GDATA_REQUEST_STDFEED_MOST_RECENT,
+    GDATA_REQUEST_STDFEED_MOST_DISCUSSED,
+    GDATA_REQUEST_STDFEED_MOST_LINKED,
+    GDATA_REQUEST_STDFEED_MOST_RESPONDED,
+    GDATA_REQUEST_STDFEED_RECENTLY_FEATURED,
+    GDATA_REQUEST_STDFEED_WATCH_ON_MOBILE,
+    NULL,
+};
 
 // dev_id=dev_id
 #define REST_METHOD_LIST_FEATURED       "youtube.videos.list_featured"
@@ -85,27 +109,55 @@ using namespace mxml;
 #define REST_PARAM_CATEGORY_ID              "category_id"
 #define REST_PARAM_TIME_RANGE               "time_range"
 
+// gdata default parameters
+//http://code.google.com/apis/youtube/reference.html#Query_parameter_definitions
+#define GDATA_PARAM_FEED_FORMAT             "alt"
+#define GDATA_PARAM_AUTHOR                  "author"
+#define GDATA_PARAM_MAX_RESULTS             "max-results"
+#define GDATA_PARAM_START_INDEX             "start-index"
+
+// additional YT specific parameters
+#define GDATA_YT_PARAM_SEARCH_TERM          "vq" // value must be url escaped
+#define GDATA_YT_PARAM_ORDERBY              "orderby"
+#define GDATA_YT_PARAM_FORMAT               "format"
+#define GDATA_YT_PARAM_RESTRICT_LANGUAGE    "lr"
+#define GDATA_YT_PARAM_RESTRICTED_CONTENT   "racy"
+#define GDATA_YT_PARAM_COUNTRY_RESTRICTION  "restriction"
+#define GDATA_YT_PARAM_TIME                 "time"
+
+// allowed parameter values
+#define GDATA_VALUE_FEED_FORMAT_RSS         "rss"
+
+#define GDATA_YT_VALUE_ORDERBY_RELEVANCE    "relevance"
+#define GDATA_YT_VALUE_ORDERBY_PUBLISHED    "published"
+#define GDATA_YT_VALUE_ORDERBY_VIEWCOUNT    "viewCount"
+#define GDATA_YT_VALUE_ORDERBY_RATING       "rating"
+/// \todo relevance_lang_languageCode
+
+#define GDATA_YT_VALUE_FORMAT_SWF           "5"
+/// \todo do we need rtsp stuff? resolution is quite small there
+
 // REST API time range values
-#define REST_VALUE_TIME_RANGE_ALL           "all"
-#define REST_VALUE_TIME_RANGE_DAY           "day"
-#define REST_VALUE_TIME_RANGE_WEEK          "week"
-#define REST_VALUE_TIME_RANGE_MONTH         "month"
+#define GDATA_YT_VALUE_TIME_RANGE_ALL       "all_time"
+#define GDATA_YT_VALUE_TIME_RANGE_DAY       "today"
+#define GDATA_YT_VALUE_TIME_RANGE_WEEK      "this_week"
+#define GDATA_YT_VALUE_TIME_RANGE_MONTH     "this_month"
 
 // REST API available categories
 // categories are now handled in the enum
 /*
-#define REST_VALUE_CAT_FILM_AND_ANIMATION   "1"
-#define REST_VALUE_CAT_AUTOS_AND_VEHICLES   "2"
+#define REST_VALUE_CAT_FILMATION   "1"
+#define REST_VALUE_CAT_AUTOS   "2"
 #define REST_VALUE_CAT_COMEDY               "23"
 #define REST_VALUE_CAT_ENTERTAINMENT        "24"
 #define REST_VALUE_CAT_MUSIC                "10"
-#define REST_VALUE_CAT_NEWS_AND_POLITICS    "25"
-#define REST_VALUE_CAT_PEOPLE_AND_BLOGS     "22"
-#define REST_VALUE_CAT_PETS_AND_ANIMALS     "15"
-#define REST_VALUE_CAT_HOWTO_AND_DIY        "26"
+#define REST_VALUE_CAT_NEWS    "25"
+#define REST_VALUE_CAT_PEOPLE     "22"
+#define REST_VALUE_CAT_ANIMALS     "15"
+#define REST_VALUE_CAT_HOWTO        "26"
 #define REST_VALUE_CAT_SPORTS               "17"
-#define REST_VALUE_CAT_TRAVEL_AND_PLACES    "19"
-#define REST_VALUE_CAT_GADGETS_AND_GAMES    "20"
+#define REST_VALUE_CAT_TRAVEL    "19"
+#define REST_VALUE_CAT_GADGETS    "20"
 */
 
 // REST API min/max items per page values
@@ -118,29 +170,22 @@ using namespace mxml;
 #define PER_PAGE_MIN                        1
 #define PER_PAGE_MAX                        100
 
-// REST API error codes
-#define REST_ERROR_INTERNAL                 "1"
-#define REST_ERROR_BAD_XMLRPC               "2"
-#define REST_ERROR_UNKOWN_PARAM             "3"
-#define REST_ERROR_MISSING_REQURED_PARAM    "4"
-#define REST_ERROR_MISSING_METHOD           "5"
-#define REST_ERROR_UNKNOWN_METHOD           "6"
-#define REST_ERROR_MISSING_DEV_ID           "7"
-#define REST_ERROR_BAD_DEV_ID               "8"
-#define REST_ERROR_NO_SUCH_USER             "101"
-
-#define CAT_NAME_FILM_AND_ANIM              "Film & Animation"
-#define CAT_NAME_AUTOS_AND_VEHICLES         "Autos & Vehicles"
+#define CAT_NAME_FILM                       "Film & Animation"
+#define CAT_NAME_AUTOS                      "Autos & Vehicles"
 #define CAT_NAME_COMEDY                     "Comedy"
 #define CAT_NAME_ENTERTAINMENT              "Entertainment"
 #define CAT_NAME_MUSIC                      "Music"
-#define CAT_NAME_NEWS_AND_POLITICS          "News & Politics"
-#define CAT_NAME_PEOPLE_AND_BLOGS           "People & Blogs"
-#define CAT_NAME_PETS_AND_ANIMALS           "Pets & Animals"
-#define CAT_NAME_HOWTO_AND_DIY              "Howto & DIY" 
+#define CAT_NAME_NEWS                       "News & Politics"
+#define CAT_NAME_PEOPLE                     "People & Blogs"
+#define CAT_NAME_ANIMALS                    "Pets & Animals"
+#define CAT_NAME_HOWTO                      "Howto & Style" 
 #define CAT_NAME_SPORTS                     "Sports"
-#define CAT_NAME_TRAVEL_AND_PLACES          "Travel & Places"
-#define CAT_NAME_GADGETS_AND_GAMES          "Gadgets & Games"
+#define CAT_NAME_TRAVEL                     "Travel & Events"
+#define CAT_NAME_GADGETS                    "Gadgets & Games"
+#define CAT_NAME_SHORT_MOVIES               "Short Movies"
+#define CAT_NAME_VIDEOBLOG                  "Videoblogging"
+#define CAT_NAME_EDUCATION                  "Education"
+#define CAT_NAME_NONPROFIT                  "Nonprofits & Activism"
 
 #define REQ_NAME_FAVORITES                  "Favorites"
 #define REQ_NAME_FEATURED                   "Featured"
@@ -152,26 +197,25 @@ using namespace mxml;
 #define REQ_NAME_BY_TAG                     "Tag"
 
 // config.xml defines
-#define CFG_CAT_STRING_FILM_AND_ANIM       "films_and_animation"
-#define CFG_CAT_STRING_AUTOS_AND_VEHICLES   "autos_and_vehicles"
-#define CFG_CAT_STRING_COMEDY               "comedy"
-#define CFG_CAT_STRING_ENTERTAINMENT        "entertainment"
-#define CFG_CAT_STRING_MUSIC                "music"
-#define CFG_CAT_STRING_NEWS_AND_POLITICS    "news_and_politics"
-#define CFG_CAT_STRING_PEOPLE_AND_BLOGS     "people_and_blogs"
-#define CFG_CAT_STRING_PETS_AND_ANIMALS     "pets_and_animals"
-#define CFG_CAT_STRING_HOWTO_AND_DIY        "howto_and_diy"
-#define CFG_CAT_STRING_SPORTS               "sports"
-#define CFG_CAT_STRING_TRAVEL_AND_PLACES    "travel_and_places"
-#define CFG_CAT_STRING_GADGETS_AND_GAMES    "gadgets_and_games"
+#define CFG_CAT_TERM_FILM                   "Film"
+#define CFG_CAT_TERM_AUTOS                  "Autos"
+#define CFG_CAT_TERM_MUSIC                  "Music"
+#define CFG_CAT_TERM_ANIMALS                "Animals"
+#define CFG_CAT_TERM_SPORTS                 "Sports"
+#define CFG_CAT_TERM_TRAVEL                 "Travel"
+#define CFG_CAT_TERM_SHORT_MOVIES           "Shortmov"
+#define CFG_CAT_TERM_VIDEOBLOG              "Videoblog"
+#define CFG_CAT_TERM_GADGETS                "Games"
+#define CFG_CAT_TERM_COMEDY                 "Comedy"
+#define CFG_CAT_TERM_PEOPLE                 "People"
+#define CFG_CAT_TERM_NEWS                   "News"
+#define CFG_CAT_TERM_ENTERTAINMENT          "Entertainment"
+#define CFG_CAT_TERM_EDUCATION              "Education"
+#define CFG_CAT_TERM_HOWTO                  "Howto"
+#define CFG_CAT_TERM_NONPROFIT              "Nonprofit"
+#define CFG_CAT_TERM_TECH                   "Tech"
 
-#define CFG_METHOD_FAVORITES                "favorites" 
-#define CFG_METHOD_TAG                      "tag"
-#define CFG_METHOD_USER                     "user"
-#define CFG_METHOD_FEATURED                 "featured"
-#define CFG_METHOD_PLAYLIST                 "playlist"
-#define CFG_METHOD_POPULAR                  "popular"
-#define CFG_METHOD_CATEGORY_AND_TAG         "category-and-tag"
+#define CFG_REQUEST_STDFEED                 "standardfeed"
 
 #define CFG_OPTION_USER                     "user"
 #define CFG_OPTION_TAG                      "tag"
@@ -181,6 +225,53 @@ using namespace mxml;
 #define CFG_OPTION_PLAYLIST_NAME            "name"
 #define CFG_OPTION_TIME_RANGE               "time-range"
 #define CFG_OPTION_CATEGORY                 "category"
+
+#define CFG_OPTION_STDFEED                  "feed"
+#define CFG_OPTION_REGION_ID                "region-id"
+
+#define CFG_OPTION_REGION_AUSTRALIA         "au"
+#define CFG_OPTION_REGION_BRAZIL            "br"
+#define CFG_OPTION_REGION_CANADA            "ca"
+#define CFG_OPTION_REGION_FRANCE            "fr"
+#define CFG_OPTION_REGION_GERMANY           "de"
+#define CFG_OPTION_REGION_GREAT_BRITAIN     "gb"
+#define CFG_OPTION_REGION_HOLLAND           "nl"
+#define CFG_OPTION_REGION_HONG_KONG         "hk"
+#define CFG_OPTION_REGION_IRELAND           "ie"
+#define CFG_OPTION_REGION_ITALY             "it"
+#define CFG_OPTION_REGION_JAPAN             "jp"
+#define CFG_OPTION_REGION_MEXICO            "mx"
+#define CFG_OPTION_REGION_NEW_ZEALAND       "nz"
+#define CFG_OPTION_REGION_POLAND            "pl"
+#define CFG_OPTION_RUSSIA                   "ru"
+#define CFG_OPTION_SOUTH_KOREA              "kr"
+#define CFG_OPTION_SPAIN                    "es"
+#define CFG_OPTION_TAIWAN                   "tw"
+#define CFG_OPTION_UNITED_STATES            "us"
+
+static char *YT_regions[] = 
+{    
+    CFG_OPTION_REGION_AUSTRALIA,
+    CFG_OPTION_REGION_BRAZIL,
+    CFG_OPTION_REGION_CANADA,
+    CFG_OPTION_REGION_FRANCE,
+    CFG_OPTION_REGION_GERMANY,
+    CFG_OPTION_REGION_GREAT_BRITAIN,
+    CFG_OPTION_REGION_HOLLAND,
+    CFG_OPTION_REGION_HONG_KONG,
+    CFG_OPTION_REGION_IRELAND,
+    CFG_OPTION_REGION_ITALY,
+    CFG_OPTION_REGION_JAPAN,
+    CFG_OPTION_REGION_MEXICO,
+    CFG_OPTION_REGION_NEW_ZEALAND,
+    CFG_OPTION_REGION_POLAND,
+    CFG_OPTION_RUSSIA,
+    CFG_OPTION_SOUTH_KOREA,
+    CFG_OPTION_SPAIN,
+    CFG_OPTION_TAIWAN,
+    CFG_OPTION_UNITED_STATES,
+    NULL,
+};
 
 YouTubeService::YouTubeService()
 {
@@ -202,8 +293,9 @@ YouTubeService::~YouTubeService()
 YouTubeService::YouTubeTask::YouTubeTask()
 {
     parameters = zmm::Ref<Dictionary>(new Dictionary());
+#warning ДОДЕЛАТЬ YT!
 //    parameters->put(_(REST_PARAM_DEV_ID), ConfigManager::getInstance()->getOption(CFG_ONLINE_CONTENT_YOUTUBE_DEV_ID));
-    method = YT_list_none;
+    request = YT_request_none;
     category = YT_cat_none;
     amount = 0;
     amount_fetched = 0;
@@ -221,8 +313,12 @@ String YouTubeService::getServiceName()
     return _("YouTube");
 }
 
-String YouTubeService::getRequestName(yt_methods_t method)
+String YouTubeService::getRequestName(yt_requests_t request)
 {
+    return nil;
+#warning ДОДЕЛАТЬ YT!
+
+#if 0
     String temp;
 
     switch (method)
@@ -255,37 +351,42 @@ String YouTubeService::getRequestName(yt_methods_t method)
     }
 
     return temp;
+#endif
 }
 
 String YouTubeService::getCategoryName(yt_categories_t category)
 {
+    return nil;
+#warning ДОДЕЛАТЬ YT!
+
+#if 0
     String temp;
 
     switch (category)
     {
         case YT_cat_film_and_animation:
-            temp = _(CAT_NAME_FILM_AND_ANIM);
+            temp = _(CAT_NAME_FILM);
             break;
         case YT_cat_autos_and_vehicles:
-            temp = _(CAT_NAME_AUTOS_AND_VEHICLES);
+            temp = _(CAT_NAME_AUTOS);
             break;
         case YT_cat_music:
             temp = _(CAT_NAME_MUSIC);
             break;
         case YT_cat_pets_and_animals:
-            temp = _(CAT_NAME_PETS_AND_ANIMALS);
+            temp = _(CAT_NAME_ANIMALS);
             break;
         case YT_cat_sports:
             temp = _(CAT_NAME_SPORTS);
             break;
         case YT_cat_travel_and_places:
-            temp = _(CAT_NAME_TRAVEL_AND_PLACES);
+            temp = _(CAT_NAME_TRAVEL);
             break;
         case YT_cat_gadgets_and_games:
-            temp = _(CAT_NAME_GADGETS_AND_GAMES);
+            temp = _(CAT_NAME_GADGETS);
             break;
         case YT_cat_people_and_blogs:
-            temp = _(CAT_NAME_PEOPLE_AND_BLOGS);
+            temp = _(CAT_NAME_PEOPLE);
             break;
         case YT_cat_comedy:
             temp = _(CAT_NAME_COMEDY);
@@ -294,10 +395,10 @@ String YouTubeService::getCategoryName(yt_categories_t category)
             temp = _(CAT_NAME_ENTERTAINMENT);
             break;
         case YT_cat_news_and_politics:
-            temp = _(CAT_NAME_NEWS_AND_POLITICS);
+            temp = _(CAT_NAME_NEWS);
             break;
         case YT_cat_howto_and_diy:
-            temp = _(CAT_NAME_HOWTO_AND_DIY);
+            temp = _(CAT_NAME_HOWTO);
             break;
         case YT_cat_none:
         default:
@@ -306,6 +407,7 @@ String YouTubeService::getCategoryName(yt_categories_t category)
     }
 
     return temp;
+#endif
 }
 
 
@@ -316,8 +418,8 @@ String YouTubeService::getCheckAttr(Ref<Element> xml, String attrname)
         return temp;
     else
         throw _Exception(_("Tag <") + xml->getName() +
-                         _("> is missing the requred \"") + attrname + 
-                         _("\" attribute!"));
+                _("> is missing the requred \"") + attrname + 
+                _("\" attribute!"));
     return nil;
 }
 
@@ -329,12 +431,12 @@ int YouTubeService::getCheckPosIntAttr(Ref<Element> xml, String attrname)
         itmp = temp.toInt();
     else
         throw _Exception(_("Tag <") + xml->getName() +
-                         _("> is missing the requred \"") + attrname + 
-                         _("\" attribute!"));
+                _("> is missing the requred \"") + attrname + 
+                _("\" attribute!"));
 
     if (itmp < 1)
         throw _Exception(_("Invalid value in ") + attrname + _(" for <") + 
-                         xml->getName() + _("> tag"));
+                xml->getName() + _("> tag"));
 
     return itmp;
 }
@@ -348,7 +450,7 @@ void YouTubeService::addPagingParams(Ref<Element> xml, Ref<YouTubeTask> task)
     {
         task->amount = AMOUNT_ALL;
         task->parameters->put(_(REST_PARAM_ITEMS_PER_PAGE),
-                                    _(REST_VALUE_PER_PAGE_MAX));
+                _(REST_VALUE_PER_PAGE_MAX));
     }
     else
     {
@@ -368,76 +470,69 @@ void YouTubeService::addPagingParams(Ref<Element> xml, Ref<YouTubeTask> task)
 }
 
 
+String YouTubeService::getRegion(Ref<Element> xml)
+{
+    String region = xml->getAttribute(_(CFG_OPTION_REGION_ID));
+    if (!string_ok(region))
+        return nil;
+
+    int count = 0;
+    while (YT_regions[count] != NULL)
+    {
+        if (region == YT_regions[count])
+            return region;
+        count++;
+    }
+
+    throw _Exception(_("<") + xml->getName() + _("> tag has an invalid region setting: ") + region);
+
+}
+
+String YouTubeService::getFeed(Ref<Element> xml)
+{
+    String feed = xml->getAttribute(_(CFG_OPTION_STDFEED));
+    if (!string_ok(feed))
+        throw _Exception(_("<") + xml->getName() + _("> tag is missing the required feed setting!"));
+
+    int count = 0;
+    while (YT_stdfeeds[count] != NULL)
+    {
+        if (feed == YT_stdfeeds[count])
+            return feed;
+        count++;
+    }
+
+    throw _Exception(_("<") + xml->getName() + _("> tag has an invalid feed setting: ") + feed);
+
+}
 Ref<Object> YouTubeService::defineServiceTask(Ref<Element> xmlopt)
 {
     Ref<YouTubeTask> task(new YouTubeTask());
     String temp = xmlopt->getName();
     
-    if (temp == CFG_METHOD_FAVORITES)
-        task->method = YT_list_favorite;
-    else if (temp == CFG_METHOD_TAG)
-        task->method = YT_list_by_tag;
-    else if (temp == CFG_METHOD_USER)
-        task->method = YT_list_by_user;
-    else if (temp == CFG_METHOD_FEATURED)
-        task->method = YT_list_featured;
-    else if (temp == CFG_METHOD_PLAYLIST)
-        task->method = YT_list_by_playlist;
-    else if (temp == CFG_METHOD_POPULAR)
-        task->method = YT_list_popular;
-    else if (temp == CFG_METHOD_CATEGORY_AND_TAG)
-        task->method = YT_list_by_category_and_tag;
+    if (temp == CFG_REQUEST_STDFEED)
+        task->request = YT_request_stdfeed;
     else throw _Exception(_("Unsupported tag while parsing YouTube options: ") + temp);
 
-    if (!hasPaging(task->method))
+    if (!hasPaging(task->request))
         task->amount = AMOUNT_ALL;
 
-    switch (task->method)
+    task->parameters->put(_(GDATA_PARAM_FEED_FORMAT), 
+                          _(GDATA_VALUE_FEED_FORMAT_RSS));
+    task->parameters->put(_(GDATA_YT_PARAM_FORMAT),
+                          _(GDATA_YT_VALUE_FORMAT_SWF));
+    switch (task->request)
     {
-        case YT_list_favorite:
-            task->parameters->put(_(REST_PARAM_METHOD),
-                                  _(REST_METHOD_LIST_FAVORITE));
+        case YT_request_stdfeed:
+            task->url_part = _(GDATA_REQUEST_STDFEED_BASE) + _("/");
+            temp = getRegion(xmlopt);
+            if (string_ok(temp))
+                task->url_part = task->url_part + temp + _("/");
 
-            task->parameters->put(_(REST_PARAM_USER), 
-                                  getCheckAttr(xmlopt, _(CFG_OPTION_USER)));
+            task->url_part = task->url_part + getFeed(xmlopt);
             break;
 
-        case YT_list_by_tag:
-            task->parameters->put(_(REST_PARAM_METHOD),
-                                  _(REST_METHOD_LIST_BY_TAG));
-
-            task->parameters->put(_(REST_PARAM_TAG), 
-                                  getCheckAttr(xmlopt, _(CFG_OPTION_TAG)));
-
-            addPagingParams(xmlopt, task);
-            break;
-
-        case YT_list_by_user:
-            task->parameters->put(_(REST_PARAM_METHOD),
-                                  _(REST_METHOD_LIST_BY_USER));
-
-            task->parameters->put(_(REST_PARAM_USER), 
-                                  getCheckAttr(xmlopt, _(CFG_OPTION_USER)));
-
-            addPagingParams(xmlopt, task);
-            break;
-
-        case YT_list_featured:
-            task->parameters->put(_(REST_PARAM_METHOD),
-                                  _(REST_METHOD_LIST_FEATURED));
-            break;
-
-        case YT_list_by_playlist:
-            task->parameters->put(_(REST_PARAM_METHOD),
-                                  _(REST_METHOD_LIST_BY_PLAYLIST));
-            task->parameters->put(_(REST_PARAM_PLAYLIST_ID),
-                               getCheckAttr(xmlopt, _(CFG_OPTION_PLAYLIST_ID)));
-            addPagingParams(xmlopt, task); 
-          
-            task->playlist_name = 
-                getCheckAttr(xmlopt, _(CFG_OPTION_PLAYLIST_NAME));
-
-            break;
+#if 0
         case YT_list_popular:
             task->parameters->put(_(REST_PARAM_METHOD),
                                   _(REST_METHOD_LIST_POPULAR));
@@ -461,62 +556,62 @@ Ref<Object> YouTubeService::defineServiceTask(Ref<Element> xmlopt)
                                   getCheckAttr(xmlopt, _(CFG_OPTION_TAG)));
            
             temp = getCheckAttr(xmlopt, _(CFG_OPTION_CATEGORY));
-            if (temp == CFG_CAT_STRING_FILM_AND_ANIM)
+            if (temp == CFG_CAT_TERM_FILM)
             {
                 task->category = YT_cat_film_and_animation;
                 temp = String::from(YT_cat_film_and_animation);
             }
-            else if (temp == CFG_CAT_STRING_AUTOS_AND_VEHICLES)
+            else if (temp == CFG_CAT_TERM_AUTOS)
             {
                 task->category = YT_cat_autos_and_vehicles;
                 temp = String::from(YT_cat_autos_and_vehicles);
             }
-            else if (temp == CFG_CAT_STRING_COMEDY)
+            else if (temp == CFG_CAT_TERM_COMEDY)
             {
                 task->category = YT_cat_comedy;
                 temp = String::from(YT_cat_comedy);
             }
-            else if (temp == CFG_CAT_STRING_ENTERTAINMENT)
+            else if (temp == CFG_CAT_TERM_ENTERTAINMENT)
             {
                 task->category = YT_cat_entertainment;
                 temp = String::from(YT_cat_entertainment);
             }
-            else if (temp == CFG_CAT_STRING_MUSIC)
+            else if (temp == CFG_CAT_TERM_MUSIC)
             {
                 task->category = YT_cat_music;
                 temp = String::from(YT_cat_music);
             }
-            else if (temp == CFG_CAT_STRING_NEWS_AND_POLITICS)
+            else if (temp == CFG_CAT_TERM_NEWS)
             {
                 task->category = YT_cat_news_and_politics;
                 temp = String::from(YT_cat_news_and_politics);
             }
-            else if (temp == CFG_CAT_STRING_PEOPLE_AND_BLOGS)
+            else if (temp == CFG_CAT_TERM_PEOPLE)
             {
                 task->category = YT_cat_people_and_blogs;
                 temp = String::from(YT_cat_people_and_blogs);
             }
-            else if (temp == CFG_CAT_STRING_PETS_AND_ANIMALS)
+            else if (temp == CFG_CAT_TERM_ANIMALS)
             {
                 task->category = YT_cat_pets_and_animals;
                 temp = String::from(YT_cat_pets_and_animals);
             }
-            else if (temp == CFG_CAT_STRING_HOWTO_AND_DIY)
+            else if (temp == CFG_CAT_TERM_HOWTO)
             {
                 task->category = YT_cat_howto_and_diy;
                 temp = String::from(YT_cat_howto_and_diy);
             }
-            else if (temp == CFG_CAT_STRING_SPORTS)
+            else if (temp == CFG_CAT_TERM_SPORTS)
             {
                 task->category = YT_cat_sports;
                 temp = String::from(YT_cat_sports);
             }
-            else if (temp == CFG_CAT_STRING_TRAVEL_AND_PLACES)
+            else if (temp == CFG_CAT_TERM_TRAVEL)
             {
                 task->category = YT_cat_travel_and_places;
                 temp = String::from(YT_cat_travel_and_places);
             }
-            else if (temp == CFG_CAT_STRING_GADGETS_AND_GAMES)
+            else if (temp == CFG_CAT_TERM_GADGETS)
             {
                 task->category = YT_cat_gadgets_and_games;
                 temp = String::from(YT_cat_gadgets_and_games);
@@ -530,8 +625,8 @@ Ref<Object> YouTubeService::defineServiceTask(Ref<Element> xmlopt)
 
             addPagingParams(xmlopt, task);
             break;
-
-        case YT_list_none:
+#endif
+        case YT_request_none:
         default:
             throw _Exception(_("Unsupported tag!"));
             break;
@@ -539,13 +634,12 @@ Ref<Object> YouTubeService::defineServiceTask(Ref<Element> xmlopt)
     return RefCast(task, Object);
 }
 
-Ref<Element> YouTubeService::getData(Ref<Dictionary> params)
+Ref<Element> YouTubeService::getData(String url_part, Ref<Dictionary> params)
 {
     long retcode;
     Ref<StringConverter> sc = StringConverter::i2i();
 
-    // dev id is requied in each call
-    String URL = _(REST_BASE_URL) + params->encode();
+    String URL = _(GDATA_API_YT_BASE_URL) + url_part + _("?") + params->encode();
 
     log_debug("Retrieving URL: %s\n", URL.c_str());
    
@@ -591,8 +685,9 @@ Ref<Element> YouTubeService::getData(Ref<Dictionary> params)
     return nil;
 }
 
-bool YouTubeService::hasPaging(yt_methods_t method)
+bool YouTubeService::hasPaging(yt_requests_t request)
 {
+    /*
     switch (method)
     {
         case YT_list_by_tag:
@@ -608,6 +703,7 @@ bool YouTubeService::hasPaging(yt_methods_t method)
         default:
             return false;
     }
+    */
     return false;
 }
 
@@ -637,9 +733,9 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
     if (task == nil)
         throw _Exception(_("Encountered invalid task!"));
 
-    task->parameters->put(_(REST_PARAM_DEV_ID), ConfigManager::getInstance()->getOption(CFG_ONLINE_CONTENT_YOUTUBE_DEV_ID));
+//    task->parameters->put(_(REST_PARAM_DEV_ID), ConfigManager::getInstance()->getOption(CFG_ONLINE_CONTENT_YOUTUBE_DEV_ID));
 
-    if (hasPaging(task->method) && 
+    if (hasPaging(task->request) && 
        ((task->amount == AMOUNT_ALL) || (task->amount > PER_PAGE_MAX)))
     {
         task->current_page++;
@@ -647,7 +743,7 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
                               String::from(task->current_page));
     }
 
-    Ref<Element> reply = getData(task->parameters);
+    Ref<Element> reply = getData(task->url_part, task->parameters);
 
     Ref<YouTubeContentHandler> yt(new YouTubeContentHandler());
     bool b = false;
@@ -663,7 +759,7 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
     if (!b)
     {
         log_debug("End of pages\n");
-        if (hasPaging(task->method))
+        if (hasPaging(task->request))
         {
             task->current_page = 0;
             task->amount_fetched = 0;
@@ -697,8 +793,9 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
         {
             log_debug("Adding new YouTube object\n");
             obj->setAuxData(_(YOUTUBE_AUXDATA_REQUEST), 
-                            String::from(task->method));
-
+                            String::from(task->request));
+#warning ДОДЕЛАТЬ YT
+#if 0
             if (task->method == YT_list_by_category_and_tag)
             {
                 obj->setAuxData(_(YOUTUBE_AUXDATA_REQUEST_SUBNAME),
@@ -724,9 +821,14 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
                 obj->setAuxData(_(YOUTUBE_AUXDATA_REQUEST_SUBNAME),
                         task->parameters->get(_(REST_PARAM_TAG)));
             }
-            
+#endif
             if (layout != nil)
+            {
+                printf("Нашел объект!!!!!!!!!!!!\n");
                 layout->processCdsObject(obj);
+            }
+            else
+                printf("---------------> NO OBJECTS PARSED!\n");
         }
         else
         {
@@ -748,7 +850,7 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
             if (task->amount_fetched >= task->amount)
             {
                 task->amount_fetched = 0;
-                if (hasPaging(task->method))
+                if (hasPaging(task->request))
                 {
                     task->current_page = 0;
                 }
@@ -767,7 +869,7 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
     }
     while (obj != nil);
 
-    if (!hasPaging(task->method))
+    if (!hasPaging(task->request))
     {
         current_task++;
         if (current_task >= tasklist->size())

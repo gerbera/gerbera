@@ -167,11 +167,18 @@ void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
     id = ContentManager::getInstance()->addContainerChain(_("/Audio/All Audio"), _(UPNP_DEFAULT_CLASS_MUSIC_CONT));
     obj->setTitle(title);
 
+    // we get the main object here, so the object that we will add below
+    // will be a reference of the main object, that's why we set the ref
+    // id to the object id - the add function will clear out the object
+    // id
     if (obj->getID() != INVALID_OBJECT_ID)
     {
         obj->setRefID(obj->getID());
         add(obj, id);
     }
+    // the object is not yet in the database (probably we got it from a
+    // playlist script, so we set the ref id after adding - it will be used
+    // for all consequent virtual objects
     else
     {
         add(obj, id);
@@ -268,7 +275,12 @@ void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
             }
         }
     }
-
+#warning ДОДЕЛАТЬ YT!!!!!
+#warning ДОДЕЛАТЬ YT!!!!!
+#warning ДОДЕЛАТЬ YT!!!!!
+#warning ДОДЕЛАТЬ YT!!!!!
+#warning ДОДЕЛАТЬ YT!!!!!
+#if 0
     temp = obj->getAuxData(_(YOUTUBE_AUXDATA_REQUEST));
     if (string_ok(temp))
     {
@@ -305,6 +317,7 @@ void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
             add(obj, id, ref_set);
         }
     }
+#endif
 }
 #endif
 

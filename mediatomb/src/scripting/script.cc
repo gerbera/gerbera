@@ -292,25 +292,35 @@ Script::Script(Ref<Runtime> runtime) : Object()
 #ifdef YOUTUBE
     setIntProperty(glob, _("ONLINE_SERVICE_YOUTUBE"), (int)OS_YouTube);
 
-    setProperty(glob, _("YOUTUBE_AUXDATA_TAGS"), 
-            _(YOUTUBE_AUXDATA_TAGS));
+    setProperty(glob, _("YOUTUBE_AUXDATA_KEYWORDS"), 
+            _(YOUTUBE_AUXDATA_KEYWORDS));
     setProperty(glob, _("YOUTUBE_AUXDATA_AVG_RATING"), 
             _(YOUTUBE_AUXDATA_AVG_RATING));
     setProperty(glob, _("YOUTUBE_AUXDATA_AUTHOR"), 
             _(YOUTUBE_AUXDATA_AUTHOR));
-    setProperty(glob, _("YOUTUBE_AUXDATA_COMMENT_COUNT"), 
-            _(YOUTUBE_AUXDATA_COMMENT_COUNT));
+    setProperty(glob, _("YOUTUBE_AUXDATA_FEED"), 
+            _(YOUTUBE_AUXDATA_FEED));
     setProperty(glob, _("YOUTUBE_AUXDATA_VIEW_COUNT"), 
             _(YOUTUBE_AUXDATA_VIEW_COUNT));
+    setProperty(glob, _("YOUTUBE_AUXDATA_FAVORITE_COUNT"), 
+            _(YOUTUBE_AUXDATA_FAVORITE_COUNT));
     setProperty(glob, _("YOUTUBE_AUXDATA_RATING_COUNT"), 
             _(YOUTUBE_AUXDATA_RATING_COUNT));
-    setProperty(glob, _("YOUTUBE_AUXDATA_REQUEST"), 
-            _(YOUTUBE_AUXDATA_REQUEST));
     setProperty(glob, _("YOUTUBE_AUXDATA_CATEGORY"), 
             _(YOUTUBE_AUXDATA_CATEGORY));
     setProperty(glob, _("YOUTUBE_AUXDATA_REQUEST_SUBNAME"), 
             _(YOUTUBE_AUXDATA_REQUEST_SUBNAME));
+    setProperty(glob, _("YOUTUBE_AUXDATA_REQUEST"), 
+            _(YOUTUBE_AUXDATA_REQUEST));
 
+
+#warning ДОДЕЛАТЬ YT!!!!!
+#warning ДОДЕЛАТЬ YT!!!!!
+#warning ДОДЕЛАТЬ YT!!!!!
+#warning ДОДЕЛАТЬ YT!!!!!
+#warning ДОДЕЛАТЬ YT!!!!!
+
+#if 0
     setIntProperty(glob, _("YOUTUBE_REQUEST_NONE"), (int)YT_list_none);
     setIntProperty(glob, _("YOUTUBE_REQUEST_FAVORITE"), (int)YT_list_favorite);
     setIntProperty(glob, _("YOUTUBE_REQUEST_BY_TAG"), (int)YT_list_by_tag);
@@ -321,6 +331,7 @@ Script::Script(Ref<Runtime> runtime) : Object()
     setIntProperty(glob, _("YOUTUBE_REQUEST_POPULAR"), (int)YT_list_popular);
     setIntProperty(glob, _("YOUTUBE_REQUEST_BY_CATEGORY_AND_TAG"), 
                    (int)YT_list_by_category_and_tag);
+#endif
 #endif
 #ifdef SOPCAST
     setIntProperty(glob, _("ONLINE_SERVICE_SOPCAST"), (int)OS_SopCast);
@@ -867,6 +878,13 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
         JSObject *aux_js = JS_NewObject(cx, NULL, NULL, js);
         setObjectProperty(js, _("aux"), aux_js);
         Ref<Dictionary> aux = obj->getAuxData();
+#warning ДОДЕЛАТЬ YT!!!!!
+#warning ДОДЕЛАТЬ YT!!!!!
+#warning ДОДЕЛАТЬ YT!!!!!
+#warning ДОДЕЛАТЬ YT!!!!!
+#warning ДОДЕЛАТЬ YT!!!!!
+
+#if 0
 #ifdef YOUTUBE
         int yt_request = (int)YT_list_none;
         // put in meaningful names for YouTube specific enum values
@@ -895,6 +913,7 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
 
             setIntProperty(js, _("yt_request"), yt_request);
         }
+#endif
 #endif
         Ref<Array<DictionaryElement> > elements = aux->getElements();
         int len = elements->size();

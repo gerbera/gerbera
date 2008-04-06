@@ -38,14 +38,15 @@
 #define YOUTUBE_SERVICE                 "YouTube"
 #define YOUTUBE_SERVICE_ID              "Y"
 
-#define YOUTUBE_AUXDATA_TAGS            "tags"
-#define YOUTUBE_AUXDATA_AVG_RATING      "rating"
-#define YOUTUBE_AUXDATA_AUTHOR          "author"
-#define YOUTUBE_AUXDATA_COMMENT_COUNT   "ccount"
-#define YOUTUBE_AUXDATA_VIEW_COUNT      "vcount"
+#define YOUTUBE_AUXDATA_KEYWORDS        "kwd"
+#define YOUTUBE_AUXDATA_AVG_RATING      "avr"
+#define YOUTUBE_AUXDATA_AUTHOR          "aut"
+#define YOUTUBE_AUXDATA_FAVORITE_COUNT  "fcnt"
+#define YOUTUBE_AUXDATA_VIEW_COUNT      "vcnt"
 #define YOUTUBE_AUXDATA_RATING_COUNT    "rcount"
-#define YOUTUBE_AUXDATA_REQUEST         "req"
+#define YOUTUBE_AUXDATA_FEED            "feed"
 #define YOUTUBE_AUXDATA_REQUEST_SUBNAME "sreq"
+#define YOUTUBE_AUXDATA_REQUEST         "req"
 #define YOUTUBE_AUXDATA_CATEGORY        "cat"
 
 
@@ -74,9 +75,10 @@ public:
 
 protected:
     zmm::Ref<mxml::Element> service_xml;
-    int current_video_node_index;
-    int video_list_child_count;
+    int current_node_index;
+    int channel_child_count;
     zmm::String thumb_mimetype;
+    zmm::String feed_name;
 };
 
 #endif//__YOUTUBE_CONTENT_HANDLER_H__

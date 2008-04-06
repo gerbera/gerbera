@@ -43,6 +43,8 @@
 #include "cds_objects.h"
 #include "config_manager.h"
 
+#define YT_SWF_TYPE "application/x-shockwave-flash"
+
 using namespace zmm;
 using namespace mxml;
 
@@ -50,42 +52,44 @@ bool YouTubeContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
 {
     String temp;
 
-    if (service->getName() != "ut_response")
+    if (service->getName() != "rss")
         throw _Exception(_("Invalid XML for YouTube service received"));
 
-    temp = service->getAttribute(_("status"));
+    Ref<Element> channel = service->getChildByName(_("channel"));
+    if (channel == nil)
+        throw _Exception(_("Invalid XML for YouTube service received - channel not found!"));
 
-    if (temp != "ok")
-        return false;
+    this->service_xml = channel;
 
-    Ref<Element> video_list = service->getChildByName(_("video_list"));
-    if (video_list == nil)
-        throw _Exception(_("Invalid XML for YouTube service received - video_list not found!"));
+    feed_name = channel->getChildText(_("title"));
 
-    this->service_xml = video_list;
+    if (!string_ok(feed_name))
+        throw _Exception(_("Invalid XML for YouTube service, received - missing feed title!"));
 
-    video_list_child_count = service_xml->elementChildCount();
+    channel_child_count = service_xml->childCount();
     
-    if (video_list_child_count == 0)
+    if (channel_child_count == 0)
         return false;
 
-    if (video_list_child_count == 1)
-    {
-        if (service_xml->getFirstElementChild()->getName() == _("total"))
-            return false;
-    }
+#warning find out when to abort!
+#warning find out when to abort!
+#warning find out when to abort!
 
-    current_video_node_index = 0;
+    current_node_index = 0;
 
     Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
     // this is somewhat a dilemma... we know that YT video thumbs are jpeg
     // but we do not check that; we could probably do a HTTP HEAD request,
     // however that would cause quite some network activity since there may
-    // be hundreds and thousands of those items
+    // be hundreds and thousands of those items, we will have a look at the
+    // extension of the URL, this should be enough.
     thumb_mimetype = mappings->get(_(CONTENT_TYPE_JPG));
     if (!string_ok(thumb_mimetype))
         thumb_mimetype = _("image/jpeg");
+
+    printf("---------> начало - channel_child_count = %d\n", 
+            channel_child_count);
 
     return true;
 }
@@ -94,142 +98,197 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
 {
 #define DATE_BUF_LEN 12
     String temp;
-    time_t epoch;
     struct tm t;
     char datebuf[DATE_BUF_LEN];
     struct timespec ts;
 
-    while (current_video_node_index < video_list_child_count)
+    while (current_node_index < channel_child_count)
     {
-        Ref<Element> video = service_xml->getElementChild(current_video_node_index);
-        current_video_node_index++;
-       
-        if (video == nil)
+        Ref<Node> n = service_xml->getChild(current_node_index);
+
+        printf("processing node %d\n", current_node_index);
+
+        current_node_index++;
+      
+        if (n == nil)
+            return nil;
+
+        printf("n не nil\n");
+
+        if (n->getType() != mxml_node_element)
             continue;
 
-        if (video->getName() != "video")
+        printf("n елемент\n");
+       
+        Ref<Element> channel_item = RefCast(n, Element);
+        if (channel_item->getName() != "item")
             continue;
 
         // we know what we are adding
         Ref<CdsItemExternalURL> item(new CdsItemExternalURL());
         Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
+        item->addResource(resource);
         resource->addParameter(_(ONLINE_SERVICE_AUX_ID), 
-                               String::from(OS_YouTube));
-
-        item->setAuxData(_(ONLINE_SERVICE_AUX_ID),
                 String::from(OS_YouTube));
 
-        temp = video->getChildText(_("id"));
+        item->setAuxData(_(ONLINE_SERVICE_AUX_ID), String::from(OS_YouTube));
+
+        temp = channel_item->getChildText(_("guid"));
         if (!string_ok(temp))
         {
             log_warning("Failed to retrieve YouTube video ID\n");
             continue;
         }
 
+        int slash = temp.rindex('/');
+        if (slash > 0)
+            temp = temp.substring(slash + 1);
+
         item->setClass(_("object.item.videoItem"));
         /// \todo create an own class for items that fetch the URL on request
         /// and to not store it permanently
         item->setURL(_(" "));
+
         temp = String(OnlineService::getStoragePrefix(OS_YouTube)) + temp;
         item->setServiceID(temp);
 
-        temp = video->getChildText(_("title"));
-        if (string_ok(temp))
-            item->setTitle(temp);
-        else
-            item->setTitle(_("Unknown"));
-
-        item->setMimeType(_("video/x-flv"));
-        resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
-                renderProtocolInfo(_("video/x-flv")));
-        
-        temp = video->getChildText(_("length_in_seconds"));
+        temp = channel_item->getChildText(_("pubDate"));
         if (string_ok(temp))
         {
-            resource->addAttribute(MetadataHandler::getResAttrName(R_DURATION),
-                                   secondsToHMS(temp.toInt()));
-        }
-       
-        temp = video->getChildText(_("description"));
-        if (string_ok(temp))
-            item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION),
-                              temp);
-
-        temp = video->getChildText(_("upload_time"));
-        if (string_ok(temp))
-        {
-            epoch = (time_t)temp.toLong();
-            t = *gmtime(&epoch);
             datebuf[0] = '\0';
-            if (strftime(datebuf, sizeof(datebuf), "%F", &t) != 0)
+            // Tue, 18 Jul 2006 17:43:47 +0000
+            if (strptime(temp.c_str(),  "%a, %d %b %Y %T +000", &t) != NULL)
             {
-                datebuf[DATE_BUF_LEN-1] = '\0';
-                if (strlen(datebuf) > 0)
+                if (strftime(datebuf, sizeof(datebuf), "%F", &t) != 0)
                 {
-                    item->setMetadata(MetadataHandler::getMetaFieldName(M_DATE),
+                    datebuf[DATE_BUF_LEN-1] = '\0';
+                    if (strlen(datebuf) > 0)
+                    {
+                        item->setMetadata(MetadataHandler::getMetaFieldName(M_DATE),
                             String(datebuf));
+                    }
                 }
             }
         }
 
-        temp = video->getChildText(_("tags"));
-        if (string_ok(temp))
-        {
-            item->setAuxData(_(YOUTUBE_AUXDATA_TAGS), temp);
-        }
-
-        temp = video->getChildText(_("rating_avg"));
-        if (string_ok(temp))
-        {
-            item->setAuxData(_(YOUTUBE_AUXDATA_AVG_RATING), temp);
-        }
-
-        temp = video->getChildText(_("author"));
+        temp = channel_item->getChildText(_("author"));
         if (string_ok(temp))
         {
             item->setAuxData(_(YOUTUBE_AUXDATA_AUTHOR), temp);
         }
 
-        temp = video->getChildText(_("view_count"));
-        if (string_ok(temp))
+
+        Ref<Element> mediagroup = channel_item->getChildByName(_("media:group"));
+        if (mediagroup == nil)
+            continue;
+
+        // media:group uses a couple of elements with the same name, so
+        // we will cycle through adn fill it that way
+        
+        bool content_set = false;
+
+        int mediagroup_child_count = mediagroup->elementChildCount();
+        for (int mcc = 0; mcc < mediagroup_child_count; mcc++)
         {
+            Ref<Element> el = mediagroup->getElementChild(mcc);
+            if (el->getName() == "media:title")
+            {
+                temp = el->getText();
+                if (string_ok(temp))
+                    item->setTitle(temp);
+                else
+                    item->setTitle(_("Unknown"));
+            }
+            else if (el->getName() == "media:description")
+            {
+                temp = el->getText();
+                if (string_ok(temp))
+                    item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), temp);
+            }
+            else if (el->getName() == "media:keywords")
+            {
+                temp = el->getText();
+                if (string_ok(temp))
+                    item->setAuxData(_(YOUTUBE_AUXDATA_KEYWORDS), temp);
+            }
+            else if (el->getName() == "media:category")
+            {
+                temp = el->getText();
+                if (string_ok(temp))
+                    item->setAuxData(_(YOUTUBE_AUXDATA_CATEGORY), temp);
+            }
+            else if (el->getName() == "media:content")
+            {
+                if (content_set)
+                    continue;
+
+                temp = el->getAttribute(_("type"));
+                if (temp != YT_SWF_TYPE)
+                    continue;
+
+                item->setMimeType(_("video/x-flv"));
+                resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(_("video/x-flv")));
+
+                content_set = true;
+ 
+                temp = el->getAttribute(_("duration"));
+                if (string_ok(temp))
+                {
+                    resource->addAttribute(MetadataHandler::getResAttrName(R_DURATION), secondsToHMS(temp.toInt()));
+                }
+            }
+            else if (el->getName() == "media:thumbnail")
+            {
+                temp = el->getAttribute(_("url"));
+                if (!string_ok(temp))
+                    continue;
+
+                if (temp.substring(temp.length()-3) != "jpg")
+                {
+                    log_warning("Found new YouTube thumbnail image type, please report this to contact at mediatomb dot cc! [%s]\n", temp.c_str());
+                    continue;
+                }
+
+                Ref<CdsResource> thumbnail(new CdsResource(CH_EXTURL));
+                thumbnail->addOption(_(RESOURCE_CONTENT_TYPE), _(THUMBNAIL));
+                thumbnail->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(thumb_mimetype));
+                thumbnail->addOption(_(RESOURCE_OPTION_URL), temp);
+            
+                String temp2 = el->getAttribute(_("width"));
+                temp = el->getAttribute(_("height"));
+
+                if (string_ok(temp) && string_ok(temp2))
+                {
+                    thumbnail->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), temp2 + "x" + temp);
+                }
+                else
+                    continue;
+
+                thumbnail->addOption(_(RESOURCE_OPTION_PROXY_URL), _(FALSE));
+                item->addResource(thumbnail);
+            }
+
+        }
+      
+        Ref<Element> stats = channel_item->getChildByName(_("yt:statistics"));
+        temp = stats->getAttribute(_("viewCount"));
+        if (string_ok(temp))
             item->setAuxData(_(YOUTUBE_AUXDATA_VIEW_COUNT), temp);
-        }
 
-        temp = video->getChildText(_("comment_count"));
+        temp = stats->getAttribute(_("favoriteCount"));
         if (string_ok(temp))
-        {
-            item->setAuxData(_(YOUTUBE_AUXDATA_COMMENT_COUNT), temp);
-        }
+            item->setAuxData(_(YOUTUBE_AUXDATA_FAVORITE_COUNT), temp);
 
-        temp = video->getChildText(_("rating_count"));
+        Ref<Element> rating = channel_item->getChildByName(_("gd:rating"));
+        temp = rating->getAttribute(_("average"));
         if (string_ok(temp))
-        {
+            item->setAuxData(_(YOUTUBE_AUXDATA_AVG_RATING), temp);
+
+        temp = rating->getAttribute(_("numRaters"));
+        if (string_ok(temp))
             item->setAuxData(_(YOUTUBE_AUXDATA_RATING_COUNT), temp);
-        }
-
-        item->setAuxData(_(ONLINE_SERVICE_AUX_ID), String::from(OS_YouTube));
-
-        item->addResource(resource);
-
-        temp = video->getChildText(_("thumbnail_url"));
-        if (string_ok(temp))
-        {
-            Ref<CdsResource> thumbnail(new CdsResource(CH_EXTURL));
-            thumbnail->
-                addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
-                        renderProtocolInfo(thumb_mimetype));
-            // same as with thumb mimetype.. in most cases this resolution
-            // will be correct, we could omit it but then the renderers 
-            // would assume that this is a full image and thus not display
-            // it as thumbnail
-            thumbnail->
-                addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), 
-                        _("130x97"));
-            thumbnail->addOption(_(RESOURCE_OPTION_URL), temp);
-            thumbnail->addOption(_(RESOURCE_OPTION_PROXY_URL), _(FALSE));
-            item->addResource(thumbnail);
-        }
+        
+        item->setAuxData(_(YOUTUBE_AUXDATA_FEED), feed_name);
 
         getTimespecNow(&ts);
         item->setAuxData(_(ONLINE_SERVICE_LAST_UPDATE), String::from(ts.tv_sec));
@@ -247,8 +306,6 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
                         ex.getMessage().c_str());
             continue;
         }
-
-
     } // while
     return nil;
 }

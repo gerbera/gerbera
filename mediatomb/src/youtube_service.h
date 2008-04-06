@@ -43,31 +43,34 @@
 
 typedef enum 
 {
-    YT_list_none = 0,
-    YT_list_favorite,
-    YT_list_by_tag,
-    YT_list_by_user,
-    YT_list_featured,
-    YT_list_by_playlist,
-    YT_list_popular,
-    YT_list_by_category_and_tag
-} yt_methods_t;
+    YT_request_none = 0,
+    YT_request_videos,
+    YT_request_stdfeed,
+    YT_request_user_favorites,
+    YT_request_user_playlists,
+    YT_request_user_subscriptions,
+    YT_request_popular,
+} yt_requests_t;
 
 typedef enum
 {
-    YT_cat_none                     = 0,
-    YT_cat_film_and_animation       = 1,
-    YT_cat_autos_and_vehicles       = 2,
-    YT_cat_music                    = 10,
-    YT_cat_pets_and_animals         = 15,
-    YT_cat_sports                   = 17,
-    YT_cat_travel_and_places        = 19,
-    YT_cat_gadgets_and_games        = 20,
-    YT_cat_people_and_blogs         = 22,
-    YT_cat_comedy                   = 23,
-    YT_cat_entertainment            = 24,
-    YT_cat_news_and_politics        = 25,
-    YT_cat_howto_and_diy            = 26
+    YT_cat_none = 0,
+    YT_cat_film,
+    YT_cat_autos,
+    YT_cat_animals,
+    YT_cat_sports,
+    YT_cat_travel,
+    YT_cat_short_movies,
+    YT_cat_videoblog,
+    YT_cat_gadgets,
+    YT_cat_comedy,
+    YT_cat_people,
+    YT_cat_news,
+    YT_cat_entertainment,
+    YT_cat_education,
+    YT_cat_howto,
+    YT_cat_nonprofit,
+    YT_cat_tech,
 } yt_categories_t;
 
 /// \brief This is an interface for all online services, the function
@@ -93,7 +96,7 @@ public:
 
     /// \brief Get the human readable name of a particular request type, i.e.
     /// did we request Favorites or Featured videos, etc.
-    static zmm::String getRequestName(yt_methods_t method);
+    static zmm::String getRequestName(yt_requests_t request);
 
     /// \brief Get the human readable category name
     static zmm::String getCategoryName(yt_categories_t category);
@@ -108,7 +111,7 @@ protected:
     zmm::Ref<URL> url;
 
     /// \brief This function will retrieve the XML according to the parametrs
-    zmm::Ref<mxml::Element> getData(zmm::Ref<Dictionary> params);
+    zmm::Ref<mxml::Element> getData(zmm::String url_part, zmm::Ref<Dictionary> params);
 
     /// \brief This class defines the so called "YouTube task", the task
     /// holds various parameters that are needed to perform. A task means
@@ -120,13 +123,18 @@ protected:
         YouTubeTask();
 
         /// \brief Method identifier
-        yt_methods_t method;
+        yt_requests_t request;
 
         /// \brief Category identifier, only used with the
         /// YT_list_by_category_and_tag method
         yt_categories_t category;
+
+        /// \brief Constructed URL that will be prepended with the base and
+        /// appended with parameters.
+        zmm::String url_part;
         
-        /// \brief parameter=value for the REST API URL
+        /// \brief It was so nice when using with the REST API, now we will 
+        /// have to convert the parameters to a specific string.
         zmm::Ref<Dictionary> parameters;
         
         /// \brief Amount of items that we are allowed to get.
@@ -138,8 +146,8 @@ protected:
         /// \brief Current page for requests that require paging
         int current_page;
 
-        /// \brief Playlist name defined by the user (only set if method
-        /// equals YT_list_by_playlist)
+        /// \brief Playlist name defined by the user (only set when retrieving
+        /// playlists)
         zmm::String playlist_name;
     };
 
@@ -148,13 +156,15 @@ protected:
     int current_task;
 
     /// \brief utility function, returns true if method supports paging
-    bool hasPaging(yt_methods_t method);
+    bool hasPaging(yt_requests_t request);
 
     // helper functions for parsing config.xml
     zmm::String getCheckAttr(zmm::Ref<mxml::Element> xml, zmm::String attrname);
     int getCheckPosIntAttr(zmm::Ref<mxml::Element> xml, zmm::String attrname);
     void addPagingParams(zmm::Ref<mxml::Element> xml, 
                          zmm::Ref<YouTubeTask> task);
+    zmm::String getRegion(zmm::Ref<mxml::Element> xml);
+    zmm::String getFeed(zmm::Ref<mxml::Element> xml);
 };
 
 #endif//__ONLINE_SERVICE_H__

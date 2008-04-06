@@ -149,7 +149,7 @@ zmm::String StringConverter::_convert(String str, bool validate,
                 if (errno == EILSEQ)
                     log_error("iconv: %s could not be converted to new encoding: invalid character sequence!\n", str.c_str());
                 else
-                    log_error("iconv: Incomplete multibyte sequence");
+                    log_error("iconv: Incomplete multibyte sequence\n");
                 if (validate)
                     throw _Exception(err);
 
