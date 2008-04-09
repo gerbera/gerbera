@@ -75,7 +75,7 @@ Ref<StringBuffer> URL::download(String URL, long *HTTP_retcode,
 
     if (only_header)
     {
-        curl_easy_setopt(curl_handle, CURLOPT_NOBODY);
+        curl_easy_setopt(curl_handle, CURLOPT_NOBODY, 1);
         curl_easy_setopt(curl_handle, CURLOPT_HEADERFUNCTION, URL::dl);
         curl_easy_setopt(curl_handle, CURLOPT_HEADERDATA, 
                          (void *)buffer.getPtr());
