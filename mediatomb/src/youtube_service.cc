@@ -75,13 +75,13 @@ using namespace mxml;
 
 static char *YT_stdfeeds[] = 
 {
-    GDATA_REQUEST_STDFEED_TOP_RATED, 
-    GDATA_REQUEST_STDFEED_TOP_FAVORITES,
-    GDATA_REQUEST_STDFEED_MOST_VIEWED,
-    GDATA_REQUEST_STDFEED_MOST_RECENT,
-    GDATA_REQUEST_STDFEED_MOST_DISCUSSED,
-    GDATA_REQUEST_STDFEED_MOST_LINKED,
-    GDATA_REQUEST_STDFEED_MOST_RESPONDED,
+    GDATA_REQUEST_STDFEED_TOP_RATED,        // has time
+    GDATA_REQUEST_STDFEED_TOP_FAVORITES,    // has time
+    GDATA_REQUEST_STDFEED_MOST_VIEWED,      // has time
+    GDATA_REQUEST_STDFEED_MOST_RECENT,      
+    GDATA_REQUEST_STDFEED_MOST_DISCUSSED,   // has time
+    GDATA_REQUEST_STDFEED_MOST_LINKED,      // has time
+    GDATA_REQUEST_STDFEED_MOST_RESPONDED,   // has time
     GDATA_REQUEST_STDFEED_RECENTLY_FEATURED,
     GDATA_REQUEST_STDFEED_WATCH_ON_MOBILE,
     NULL,
@@ -435,6 +435,23 @@ void YouTubeService::getPagingParams(Ref<Element> xml, Ref<YouTubeTask> task)
     task->start_index = itmp;
 }
 
+void YouTubeService::addTimeParams(Ref<Element> xml, Ref<YouTubeTask> task)
+{
+    String temp;
+    
+    temp = xml->getAttribute(_(CFG_OPTION_TIME_RANGE));
+    if (!string_ok(temp))
+        return;
+
+    if ((temp != GDATA_YT_VALUE_TIME_RANGE_ALL) &&
+        (temp != GDATA_YT_VALUE_TIME_RANGE_DAY) &&
+        (temp != GDATA_YT_VALUE_TIME_RANGE_WEEK) &&
+        (temp != GDATA_YT_VALUE_TIME_RANGE_MONTH))
+        throw _Exception(_("Invalid time range parameter \"") + temp + 
+                _("\" in <") + xml->getName() + _("> tag"));
+
+    task->parameters->put(_(GDATA_YT_PARAM_TIME), temp);
+}
 
 String YouTubeService::getRegion(Ref<Element> xml)
 {
@@ -475,6 +492,7 @@ Ref<Object> YouTubeService::defineServiceTask(Ref<Element> xmlopt)
 {
     Ref<YouTubeTask> task(new YouTubeTask());
     String temp = xmlopt->getName();
+    String temp2;
     
     if (temp == CFG_REQUEST_STDFEED)
         task->request = YT_request_stdfeed;
@@ -490,12 +508,24 @@ Ref<Object> YouTubeService::defineServiceTask(Ref<Element> xmlopt)
     switch (task->request)
     {
         case YT_request_stdfeed:
+            temp2 = getFeed(xmlopt);
             task->url_part = _(GDATA_REQUEST_STDFEED_BASE) + _("/");
-            temp = getRegion(xmlopt);
-            if (string_ok(temp))
-                task->url_part = task->url_part + temp + _("/");
 
-            task->url_part = task->url_part + getFeed(xmlopt);
+            if (temp2 != GDATA_REQUEST_STDFEED_WATCH_ON_MOBILE)
+            {
+                temp = getRegion(xmlopt);
+                if (string_ok(temp))
+                    task->url_part = task->url_part + temp + _("/");
+            }
+
+            task->url_part = task->url_part + temp2;
+            if ((temp2 != GDATA_REQUEST_STDFEED_MOST_RECENT) &&
+                (temp2 != GDATA_REQUEST_STDFEED_RECENTLY_FEATURED) &&
+                (temp2 != GDATA_REQUEST_STDFEED_WATCH_ON_MOBILE))
+            {
+                addTimeParams(xmlopt, task);
+            }
+
             getPagingParams(xmlopt, task);
             break;
 

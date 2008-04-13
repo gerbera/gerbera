@@ -166,6 +166,7 @@ protected:
     int getCheckPosIntAttr(zmm::Ref<mxml::Element> xml, zmm::String attrname);
     void getPagingParams(zmm::Ref<mxml::Element> xml, 
                          zmm::Ref<YouTubeTask> task);
+    void addTimeParams(zmm::Ref<mxml::Element> xml, zmm::Ref<YouTubeTask> task);
     zmm::String getRegion(zmm::Ref<mxml::Element> xml);
     zmm::String getFeed(zmm::Ref<mxml::Element> xml);
 };

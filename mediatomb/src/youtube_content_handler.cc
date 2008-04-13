@@ -78,9 +78,10 @@ bool YouTubeContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
     while (item_node_index < channel_child_count)
     {
         Ref<Node> n = service_xml->getChild(item_node_index);
-        item_node_index++;
         if (n == nil)
             return false;
+        
+        item_node_index++;
 
         if (n->getType() != mxml_node_element)
             continue;
@@ -214,6 +215,9 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
         for (int mcc = 0; mcc < mediagroup_child_count; mcc++)
         {
             Ref<Element> el = mediagroup->getElementChild(mcc);
+            if (el == nil)
+                continue;
+
             if (el->getName() == "media:title")
             {
                 temp = el->getText();
@@ -294,23 +298,29 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
         }
       
         Ref<Element> stats = channel_item->getChildByName(_("yt:statistics"));
-        temp = stats->getAttribute(_("viewCount"));
-        if (string_ok(temp))
-            item->setAuxData(_(YOUTUBE_AUXDATA_VIEW_COUNT), temp);
+        if (stats != nil)
+        {
+            temp = stats->getAttribute(_("viewCount"));
+            if (string_ok(temp))
+                item->setAuxData(_(YOUTUBE_AUXDATA_VIEW_COUNT), temp);
 
-        temp = stats->getAttribute(_("favoriteCount"));
-        if (string_ok(temp))
-            item->setAuxData(_(YOUTUBE_AUXDATA_FAVORITE_COUNT), temp);
+            temp = stats->getAttribute(_("favoriteCount"));
+            if (string_ok(temp))
+                item->setAuxData(_(YOUTUBE_AUXDATA_FAVORITE_COUNT), temp);
+        }
 
         Ref<Element> rating = channel_item->getChildByName(_("gd:rating"));
-        temp = rating->getAttribute(_("average"));
-        if (string_ok(temp))
-            item->setAuxData(_(YOUTUBE_AUXDATA_AVG_RATING), temp);
+        if (rating != nil)
+        {
+            temp = rating->getAttribute(_("average"));
+            if (string_ok(temp))
+                item->setAuxData(_(YOUTUBE_AUXDATA_AVG_RATING), temp);
 
-        temp = rating->getAttribute(_("numRaters"));
-        if (string_ok(temp))
-            item->setAuxData(_(YOUTUBE_AUXDATA_RATING_COUNT), temp);
-        
+            temp = rating->getAttribute(_("numRaters"));
+            if (string_ok(temp))
+                item->setAuxData(_(YOUTUBE_AUXDATA_RATING_COUNT), temp);
+        }
+
         item->setAuxData(_(YOUTUBE_AUXDATA_FEED), feed_name);
 
         getTimespecNow(&ts);
