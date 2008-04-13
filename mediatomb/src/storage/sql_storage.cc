@@ -149,7 +149,7 @@ void SQLStorage::init()
     insertBufferEmpty = true;
     insertBufferMutex = Ref<Mutex>(new Mutex());
     insertBufferCount = 0;
-    
+   
     //log_debug("using SQL: %s\n", this->sql_query.c_str());
     
     //objectTitleCache = Ref<DSOHash<CdsObject> >(new DSOHash<CdsObject>(OBJECT_CACHE_CAPACITY));
@@ -2297,7 +2297,7 @@ void SQLStorage::addObjectToCache(Ref<CdsObject> object, bool dontLock)
 void SQLStorage::addToInsertBuffer(Ref<StringBuffer> query)
 {
     assert(doInsertBuffering());
-    
+
     AUTOLOCK(insertBufferMutex);
     if (insertBuffer == nil)
     {

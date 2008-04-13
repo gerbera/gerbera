@@ -146,7 +146,7 @@ public:
     virtual int ensurePathExistence(zmm::String path, int *changedContainer);
     
     virtual zmm::String getFsRootName();
-    
+
 protected:
     SQLStorage();
     //virtual ~SQLStorage();

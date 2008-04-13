@@ -143,8 +143,11 @@ protected:
         /// \brief Amount of items that have been fetched.
         int amount_fetched;
 
-        /// \brief Current page for requests that require paging
-        int current_page;
+        /// \brief Starting index of the item to fetch
+        int start_index;
+
+        /// \brief Starging index as specified in the configuration by the user
+        int cfg_start_index;
 
         /// \brief Playlist name defined by the user (only set when retrieving
         /// playlists)
@@ -161,7 +164,7 @@ protected:
     // helper functions for parsing config.xml
     zmm::String getCheckAttr(zmm::Ref<mxml::Element> xml, zmm::String attrname);
     int getCheckPosIntAttr(zmm::Ref<mxml::Element> xml, zmm::String attrname);
-    void addPagingParams(zmm::Ref<mxml::Element> xml, 
+    void getPagingParams(zmm::Ref<mxml::Element> xml, 
                          zmm::Ref<YouTubeTask> task);
     zmm::String getRegion(zmm::Ref<mxml::Element> xml);
     zmm::String getFeed(zmm::Ref<mxml::Element> xml);

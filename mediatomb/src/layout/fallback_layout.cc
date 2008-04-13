@@ -280,15 +280,21 @@ void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
 #warning ДОДЕЛАТЬ YT!!!!!
 #warning ДОДЕЛАТЬ YT!!!!!
 #warning ДОДЕЛАТЬ YT!!!!!
-#if 0
+
     temp = obj->getAuxData(_(YOUTUBE_AUXDATA_REQUEST));
     if (string_ok(temp))
     {
-        yt_methods_t m = (yt_methods_t)temp.toInt();
-        temp = YouTubeService::getRequestName(m);
+        yt_requests_t req = (yt_requests_t)temp.toInt();
+        temp = YouTubeService::getRequestName(req);
         if (string_ok(temp))
         {
             temp = esc(temp);
+            if (req == YT_request_stdfeed)
+            {
+                String feed_title = obj->getAuxData(_(YOUTUBE_AUXDATA_FEED));
+                temp = temp + '/' + esc(feed_title);
+            }
+#if 0
             if (m == YT_list_by_category_and_tag)
             {
                  String ctmp = 
@@ -311,13 +317,12 @@ void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
                 if (string_ok(subtmp))
                     temp = temp + '/' + esc(subtmp);
             }
-
+#endif
             chain = _(YT_VPATH) + '/' + temp;
             id = ContentManager::getInstance()->addContainerChain(chain);
             add(obj, id, ref_set);
         }
     }
-#endif
 }
 #endif
 
@@ -421,11 +426,17 @@ void FallbackLayout::addSopCast(zmm::Ref<CdsObject> obj)
 
 FallbackLayout::FallbackLayout() : Layout()
 {
+#ifdef ENABLE_PROFILING
+    PROF_INIT_GLOBAL(layout_profiling, "fallback layout");
+#endif
 }
 
 void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj)
 {
     log_debug("Process CDS Object: %s\n", obj->getTitle().c_str());
+#ifdef ENABLE_PROFILING
+    PROF_START(&layout_profiling);
+#endif
     Ref<CdsObject> clone = CdsObject::createObject(obj->getObjectType());
     obj->copyTo(clone);
     clone->setVirtual(1);
@@ -481,4 +492,14 @@ void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj)
 #ifdef YOUTUBE
     }
 #endif
+#ifdef ENABLE_PROFILING
+    PROF_END(&layout_profiling);
+#endif
 }
+
+#ifdef ENABLE_PROFILING
+FallbackLayout::~FallbackLayout()
+{
+    PROF_PRINT(&layout_profiling);
+}
+#endif

@@ -91,4 +91,12 @@ public:
     inline TryAgainException(zmm::String message, const char *file, int line, const char* function) : zmm::Exception(message, file, line, function) {}
 };
 
+class SingletonException : public zmm::Exception
+{
+public:
+    inline SingletonException(zmm::String message) : zmm::Exception(message) {}
+    inline SingletonException(zmm::String message, const char *file, int line, const char* function) : zmm::Exception(message, file, line, function) {}
+};
+
+
 #endif // __EXCEPTIONS_H__

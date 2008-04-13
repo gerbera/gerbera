@@ -71,9 +71,31 @@ bool YouTubeContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
     if (channel_child_count == 0)
         return false;
 
-#warning find out when to abort!
-#warning find out when to abort!
-#warning find out when to abort!
+    // doh... I liked the old rest API a lot more.. nevertheless, we need
+    // to figure out when to stop fetching stuff
+    bool has_items = false;
+    int item_node_index = 0;
+    while (item_node_index < channel_child_count)
+    {
+        Ref<Node> n = service_xml->getChild(item_node_index);
+        item_node_index++;
+        if (n == nil)
+            return false;
+
+        if (n->getType() != mxml_node_element)
+            continue;
+
+        Ref<Element> channel_item = RefCast(n, Element);
+        if (channel_item->getName() == "item")
+        {
+            has_items = true;
+            break;
+        }
+    }
+
+    // no item tags found, so on more videos here - we are done
+    if (!has_items)
+        return false;
 
     current_node_index = 0;
 
@@ -145,10 +167,6 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
             temp = temp.substring(slash + 1);
 
         item->setClass(_("object.item.videoItem"));
-        /// \todo create an own class for items that fetch the URL on request
-        /// and to not store it permanently
-        item->setURL(_(" "));
-
         temp = String(OnlineService::getStoragePrefix(OS_YouTube)) + temp;
         item->setServiceID(temp);
 
@@ -171,12 +189,17 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
             }
         }
 
+        temp = channel_item->getChildText(_("link")); 
+        /// \todo create an own class for items that fetch the URL on request
+        /// and to not store it permanently
+        if (string_ok(temp))
+            item->setURL(temp);
+        else
+            item->setURL(_(" "));
+
         temp = channel_item->getChildText(_("author"));
         if (string_ok(temp))
-        {
             item->setAuxData(_(YOUTUBE_AUXDATA_AUTHOR), temp);
-        }
-
 
         Ref<Element> mediagroup = channel_item->getChildByName(_("media:group"));
         if (mediagroup == nil)

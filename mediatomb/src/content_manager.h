@@ -424,7 +424,7 @@ protected:
     
     void _rescanDirectory(int containerID, int scanID, scan_mode_t scanMode, scan_level_t scanLevel, zmm::Ref<CMTask> task=nil);
     /* for recursive addition */
-    void addRecursive(zmm::String path, bool hidden, zmm::Ref<CMTask> task, profiling_t *profiling);
+    void addRecursive(zmm::String path, bool hidden, zmm::Ref<CMTask> task);
     //void addRecursive2(zmm::Ref<DirCache> dirCache, zmm::String filename, bool recursive);
     
     zmm::String extension2mimetype(zmm::String extension);
@@ -474,7 +474,7 @@ protected:
     zmm::Ref<CMTask> currentTask;
 
     unsigned int taskID;
-    
+
     friend void CMAddFileTask::run(zmm::Ref<ContentManager> cm);
     friend void CMRemoveObjectTask::run(zmm::Ref<ContentManager> cm);
     friend void CMRescanDirectoryTask::run(zmm::Ref<ContentManager> cm);

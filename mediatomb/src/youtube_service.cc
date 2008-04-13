@@ -87,34 +87,12 @@ static char *YT_stdfeeds[] =
     NULL,
 };
 
-// dev_id=dev_id
-#define REST_METHOD_LIST_FEATURED       "youtube.videos.list_featured"
-
-// dev_id=dev_id&id=id&page=page&per_page=per_page
-#define REST_METHOD_LIST_BY_PLAYLIST    "youtube.videos.list_by_playlist"
-
-// dev_id=dev_id&time_range=time_range
-#define REST_METHOD_LIST_POPULAR        "youtube.videos.list_popular"
-
-// dev_id=dev_id& category_id=category_id &tag=tag&page=page&per_page=per_page
-#define REST_METHOD_LIST_BY_CAT_AND_TAG "youtube.videos.list_by_category_and_tag"
-// REST API parameters
-#define REST_PARAM_DEV_ID                   "dev_id"
-#define REST_PARAM_TAG                      "tag"
-#define REST_PARAM_ITEMS_PER_PAGE           "per_page"
-#define REST_PARAM_PAGE_NUMBER              "page"
-#define REST_PARAM_USER                     "user"
-#define REST_PARAM_METHOD                   "method"
-#define REST_PARAM_PLAYLIST_ID              "id"
-#define REST_PARAM_CATEGORY_ID              "category_id"
-#define REST_PARAM_TIME_RANGE               "time_range"
-
 // gdata default parameters
 //http://code.google.com/apis/youtube/reference.html#Query_parameter_definitions
 #define GDATA_PARAM_FEED_FORMAT             "alt"
 #define GDATA_PARAM_AUTHOR                  "author"
-#define GDATA_PARAM_MAX_RESULTS             "max-results"
-#define GDATA_PARAM_START_INDEX             "start-index"
+//#define GDATA_PARAM_MAX_RESULTS             "max-results"
+//#define GDATA_PARAM_START_INDEX             "start-index"
 
 // additional YT specific parameters
 #define GDATA_YT_PARAM_SEARCH_TERM          "vq" // value must be url escaped
@@ -124,6 +102,9 @@ static char *YT_stdfeeds[] =
 #define GDATA_YT_PARAM_RESTRICTED_CONTENT   "racy"
 #define GDATA_YT_PARAM_COUNTRY_RESTRICTION  "restriction"
 #define GDATA_YT_PARAM_TIME                 "time"
+
+#define GDATA_YT_PARAM_START_INDEX          "start-index"
+#define GDATA_YT_PARAM_MAX_RESULTS_PER_REQ  "max-results"
 
 // allowed parameter values
 #define GDATA_VALUE_FEED_FORMAT_RSS         "rss"
@@ -137,38 +118,16 @@ static char *YT_stdfeeds[] =
 #define GDATA_YT_VALUE_FORMAT_SWF           "5"
 /// \todo do we need rtsp stuff? resolution is quite small there
 
-// REST API time range values
+// time range values
 #define GDATA_YT_VALUE_TIME_RANGE_ALL       "all_time"
 #define GDATA_YT_VALUE_TIME_RANGE_DAY       "today"
 #define GDATA_YT_VALUE_TIME_RANGE_WEEK      "this_week"
 #define GDATA_YT_VALUE_TIME_RANGE_MONTH     "this_month"
 
-// REST API available categories
-// categories are now handled in the enum
-/*
-#define REST_VALUE_CAT_FILMATION   "1"
-#define REST_VALUE_CAT_AUTOS   "2"
-#define REST_VALUE_CAT_COMEDY               "23"
-#define REST_VALUE_CAT_ENTERTAINMENT        "24"
-#define REST_VALUE_CAT_MUSIC                "10"
-#define REST_VALUE_CAT_NEWS    "25"
-#define REST_VALUE_CAT_PEOPLE     "22"
-#define REST_VALUE_CAT_ANIMALS     "15"
-#define REST_VALUE_CAT_HOWTO        "26"
-#define REST_VALUE_CAT_SPORTS               "17"
-#define REST_VALUE_CAT_TRAVEL    "19"
-#define REST_VALUE_CAT_GADGETS    "20"
-*/
-
 // REST API min/max items per page values
-#define REST_VALUE_PER_PAGE_MIN             "1" // allthouth the spec says 20,
-                                                // lower values also seem to 
-                                                // work
-#define REST_VALUE_PER_PAGE_MAX             "100"
-
+#define GDATA_YT_VALUE_START_INDEX_MIN      "1"
+#define GDATA_YT_VALUE_PER_PAGE_MAX         "50"
 #define AMOUNT_ALL                          (-333)
-#define PER_PAGE_MIN                        1
-#define PER_PAGE_MAX                        100
 
 #define CAT_NAME_FILM                       "Film & Animation"
 #define CAT_NAME_AUTOS                      "Autos & Vehicles"
@@ -186,6 +145,8 @@ static char *YT_stdfeeds[] =
 #define CAT_NAME_VIDEOBLOG                  "Videoblogging"
 #define CAT_NAME_EDUCATION                  "Education"
 #define CAT_NAME_NONPROFIT                  "Nonprofits & Activism"
+
+#define REQ_NAME_STDFEEDS                   "Standard Feeds"
 
 #define REQ_NAME_FAVORITES                  "Favorites"
 #define REQ_NAME_FEATURED                   "Featured"
@@ -219,7 +180,7 @@ static char *YT_stdfeeds[] =
 
 #define CFG_OPTION_USER                     "user"
 #define CFG_OPTION_TAG                      "tag"
-#define CFG_OPTION_STARTPAGE                "start-page"
+#define CFG_OPTION_STARTINDEX               "start-index"
 #define CFG_OPTION_AMOUNT                   "amount"
 #define CFG_OPTION_PLAYLIST_ID              "id"
 #define CFG_OPTION_PLAYLIST_NAME            "name"
@@ -299,7 +260,8 @@ YouTubeService::YouTubeTask::YouTubeTask()
     category = YT_cat_none;
     amount = 0;
     amount_fetched = 0;
-    current_page = 0;
+    start_index = 1;
+    cfg_start_index = 1;
 }
 
 
@@ -315,14 +277,14 @@ String YouTubeService::getServiceName()
 
 String YouTubeService::getRequestName(yt_requests_t request)
 {
-    return nil;
-#warning ДОДЕЛАТЬ YT!
-
-#if 0
     String temp;
 
-    switch (method)
+    switch (request)
     {
+        case YT_request_stdfeed:
+            temp = _(REQ_NAME_STDFEEDS);
+            break;
+#if 0
         case YT_list_favorite:
             temp = _(REQ_NAME_FAVORITES);
             break;
@@ -345,13 +307,13 @@ String YouTubeService::getRequestName(yt_requests_t request)
             temp = _(REQ_NAME_BY_USER);
             break;
         case YT_list_none:
+#endif
         default:
             temp = nil;
             break;
     }
 
     return temp;
-#endif
 }
 
 String YouTubeService::getCategoryName(yt_categories_t category)
@@ -441,32 +403,36 @@ int YouTubeService::getCheckPosIntAttr(Ref<Element> xml, String attrname)
     return itmp;
 }
 
-void YouTubeService::addPagingParams(Ref<Element> xml, Ref<YouTubeTask> task)
+void YouTubeService::getPagingParams(Ref<Element> xml, Ref<YouTubeTask> task)
 {
     String temp;
     int itmp;
-    temp = getCheckAttr(xml, _(CFG_OPTION_AMOUNT));
+    temp = xml->getAttribute(_(CFG_OPTION_AMOUNT));
+    if (!string_ok(temp))
+        temp = _("all");
+
     if (temp == "all")
-    {
         task->amount = AMOUNT_ALL;
-        task->parameters->put(_(REST_PARAM_ITEMS_PER_PAGE),
-                _(REST_VALUE_PER_PAGE_MAX));
-    }
     else
     {
         itmp = getCheckPosIntAttr(xml, _(CFG_OPTION_AMOUNT));
-        if (itmp >= _(REST_VALUE_PER_PAGE_MAX).toInt())
-            task->parameters->put(_(REST_PARAM_ITEMS_PER_PAGE),
-                    _(REST_VALUE_PER_PAGE_MAX));
-        else
-            task->parameters->put(_(REST_PARAM_ITEMS_PER_PAGE),
-                    String::from(itmp));
         task->amount = itmp;
     }
 
-    itmp = getCheckPosIntAttr(xml, _(CFG_OPTION_STARTPAGE));
-    task->parameters->put(_(REST_PARAM_PAGE_NUMBER), 
-            String::from(itmp));
+    temp = xml->getAttribute(_(CFG_OPTION_STARTINDEX));
+    if (!string_ok(temp))
+        itmp = 1;
+    else
+    {
+        itmp = getCheckPosIntAttr(xml, _(CFG_OPTION_STARTINDEX));
+        if (itmp <= 0)
+        {
+            throw _Exception(_("Tag <") + xml->getName() + _("> ") + 
+                    _(CFG_OPTION_STARTINDEX) + _(" must be at least 1!"));
+        }
+    }
+    task->cfg_start_index = itmp;
+    task->start_index = itmp;
 }
 
 
@@ -530,6 +496,7 @@ Ref<Object> YouTubeService::defineServiceTask(Ref<Element> xmlopt)
                 task->url_part = task->url_part + temp + _("/");
 
             task->url_part = task->url_part + getFeed(xmlopt);
+            getPagingParams(xmlopt, task);
             break;
 
 #if 0
@@ -704,7 +671,7 @@ bool YouTubeService::hasPaging(yt_requests_t request)
             return false;
     }
     */
-    return false;
+    return true;
 }
 
 bool YouTubeService::refreshServiceData(Ref<Layout> layout)
@@ -733,14 +700,27 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
     if (task == nil)
         throw _Exception(_("Encountered invalid task!"));
 
-//    task->parameters->put(_(REST_PARAM_DEV_ID), ConfigManager::getInstance()->getOption(CFG_ONLINE_CONTENT_YOUTUBE_DEV_ID));
-
     if (hasPaging(task->request) && 
-       ((task->amount == AMOUNT_ALL) || (task->amount > PER_PAGE_MAX)))
+       ((task->amount == AMOUNT_ALL) || (task->amount < task->amount_fetched)))
     {
-        task->current_page++;
-        task->parameters->put(_(REST_PARAM_PAGE_NUMBER),
-                              String::from(task->current_page));
+        // yt start index begins at 1
+        task->start_index = task->cfg_start_index + task->amount_fetched;
+        task->parameters->put(_(GDATA_YT_PARAM_START_INDEX),
+                              String::from(task->start_index));
+
+        if ((task->amount == AMOUNT_ALL) || 
+            ((task->amount - task->amount_fetched) > 
+             _(GDATA_YT_VALUE_PER_PAGE_MAX).toInt()))
+        {
+           task->parameters->put(_(GDATA_YT_PARAM_MAX_RESULTS_PER_REQ),
+                                 _(GDATA_YT_VALUE_PER_PAGE_MAX));
+        }
+        else if ((task->amount - task->amount_fetched) < 
+                _(GDATA_YT_VALUE_PER_PAGE_MAX).toInt())
+        {
+            task->parameters->put(_(GDATA_YT_PARAM_MAX_RESULTS_PER_REQ),
+                    String::from(task->amount - task->amount_fetched));
+        }
     }
 
     Ref<Element> reply = getData(task->url_part, task->parameters);
@@ -761,7 +741,7 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
         log_debug("End of pages\n");
         if (hasPaging(task->request))
         {
-            task->current_page = 0;
+            task->start_index = task->cfg_start_index;
             task->amount_fetched = 0;
         }
         current_task++;
@@ -843,16 +823,16 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
             ContentManager::getInstance()->updateObject(obj);
         }
 
+        task->amount_fetched++;
         if (task->amount != AMOUNT_ALL)
         {
-            task->amount_fetched++;
             // max amount reached, reset paging and break to next task
             if (task->amount_fetched >= task->amount)
             {
                 task->amount_fetched = 0;
                 if (hasPaging(task->request))
                 {
-                    task->current_page = 0;
+                    task->start_index = task->cfg_start_index;
                 }
                 current_task++;
                 if (current_task >= tasklist->size())

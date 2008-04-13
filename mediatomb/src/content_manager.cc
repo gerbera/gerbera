@@ -103,7 +103,7 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
     cond = Ref<Cond>(new Cond(mutex));
     ignore_unknown_extensions = false;
     extension_map_case_sensitive = false;
-   
+
     taskID = 1;
     working = false;
     shutdownFlag = false;
@@ -534,7 +534,6 @@ void ContentManager::addVirtualItem(Ref<CdsObject> obj, bool allow_fifo)
 
 int ContentManager::_addFile(String path, bool recursive, bool hidden, Ref<CMTask> task)
 {
-    PROF_INIT(profiling);
     if (hidden == false)
     {
         String filename = get_filename(path);
@@ -569,7 +568,6 @@ int ContentManager::_addFile(String path, bool recursive, bool hidden, Ref<CMTas
             addObject(obj);
             if (layout != nil)
             {
-                PROF_START(&profiling);
                 try
                 {
                     layout->processCdsObject(obj);
@@ -589,20 +587,16 @@ int ContentManager::_addFile(String path, bool recursive, bool hidden, Ref<CMTas
                 }
                 catch (Exception e)
                 {
-                    PROF_END(&profiling);
                     throw e;
                 }
-                PROF_END(&profiling);
             }
         }
     }
         
     if (recursive && IS_CDS_CONTAINER(obj->getObjectType()))
     {
-        addRecursive(path, hidden, task, &profiling);
+        addRecursive(path, hidden, task);
     }
-    PROF_PRINT(&profiling);
-
     return obj->getID();
 }
 
@@ -883,7 +877,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
 }
 
 /* scans the given directory and adds everything recursively */
-void ContentManager::addRecursive(String path, bool hidden, Ref<CMTask> task, profiling_t *profiling)
+void ContentManager::addRecursive(String path, bool hidden, Ref<CMTask> task)
 {
     if (hidden == false)
     {
@@ -961,7 +955,6 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<CMTask> task, pr
                 {
                     if (layout != nil)
                     {
-                        PROF_START(profiling);
                         try
                         {
                             layout->processCdsObject(obj);
@@ -980,10 +973,8 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<CMTask> task, pr
                         }
                         catch (Exception e)
                         {
-                            PROF_END(profiling);
                             throw e;
                         }
-                        PROF_END(profiling);
                     }
                     
                     /// \todo Why was this statement here??? - It seems to be unnecessary
@@ -992,7 +983,7 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<CMTask> task, pr
 //#endif
                 if (IS_CDS_CONTAINER(obj->getObjectType()))
                 {
-                    addRecursive(newPath, hidden, task, profiling);
+                    addRecursive(newPath, hidden, task);
                 }
             }
         }

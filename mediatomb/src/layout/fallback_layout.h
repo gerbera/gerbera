@@ -35,11 +35,17 @@
 #include "layout.h"
 #include "cds_objects.h"
 
+#ifdef ENABLE_PROFILING
+    #include "tools.h"
+#endif
 class FallbackLayout : public Layout
 {
 public:
     FallbackLayout();
     virtual void processCdsObject(zmm::Ref<CdsObject> obj);
+#ifdef ENABLE_PROFILING
+    virtual ~FallbackLayout();
+#endif
 protected:
     void add(zmm::Ref<CdsObject> obj, int parentID, bool use_ref = true);
     zmm::String esc(zmm::String str);
@@ -51,6 +57,10 @@ protected:
 #endif
 #ifdef SOPCAST
     void addSopCast(zmm::Ref<CdsObject> obj);
+#endif
+#ifdef ENABLE_PROFILING
+    bool profiling_initialized;
+    profiling_t layout_profiling;
 #endif
 };
 
