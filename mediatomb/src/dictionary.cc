@@ -119,19 +119,29 @@ void Dictionary::remove(String key)
     }
 }
 
-String Dictionary::encode()
+String Dictionary::_encode(char sep1, char sep2)
 {
     Ref<StringBuffer> buf(new StringBuffer());
     int len = elements->size();
     for (int i = 0; i < len; i++)
     {
         if(i > 0)
-            *buf << '&';
+            *buf << sep1;
         Ref<DictionaryElement> el = elements->get(i);
-        *buf << url_escape(el->getKey()) << '='
+        *buf << url_escape(el->getKey()) << sep2
              << url_escape(el->getValue());
     }
     return buf->toString();
+}
+
+String Dictionary::encode()
+{
+    return _encode('&', '=');
+}
+
+String Dictionary::encodeSimple()
+{
+    return _encode('/', '/');
 }
 
 void Dictionary::decode(String url)
@@ -157,6 +167,34 @@ void Dictionary::decode(String url)
         }
         data = ampPos + 1;
     }
+}
+
+// this is somewhat tricky as we need an exact amount of pairs
+// object_id=720&res_id=0
+void Dictionary::decodeSimple(String url)
+{
+    String encoded;
+    int pos;
+    int last_pos = 0;
+    do
+    {
+        pos = url.index(last_pos, '/');
+        if (pos < last_pos + 1)
+            break;
+
+        String key = url_unescape(url.substring(last_pos, pos - last_pos));
+        last_pos = pos + 1;
+        pos = url.index(last_pos, '/');
+        if (pos == -1)
+            pos = url.length();
+        if (pos < last_pos + 1)
+            break;
+
+        String value = url_unescape(url.substring(last_pos, pos - last_pos));
+        last_pos = pos + 1;
+        put(key, value);
+    }
+    while (last_pos < url.length());
 }
 
 void Dictionary::clear()

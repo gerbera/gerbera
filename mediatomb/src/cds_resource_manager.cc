@@ -50,7 +50,8 @@ CdsResourceManager::CdsResourceManager() : Object()
 
 String CdsResourceManager::renderExtension(String contentType, String location)
 {
-    String ext = String(_URL_ARG_SEPARATOR) + _(URL_FILE_EXTENSION) + _("=");
+    String ext = String(_URL_PARAM_SEPARATOR) + _(URL_FILE_EXTENSION) + 
+                _(_URL_PARAM_SEPARATOR) + _("file");
 
     if (string_ok(contentType) && (contentType != CONTENT_TYPE_PLAYLIST))
     {
@@ -67,7 +68,7 @@ String CdsResourceManager::renderExtension(String contentType, String location)
             // make sure that the extension does not contain the separator character
             if (string_ok(extension) && 
                (extension.index(URL_PARAM_SEPARATOR) == -1) &&
-               (extension.index(URL_ARG_SEPARATOR) == -1))
+               (extension.index(URL_PARAM_SEPARATOR) == -1))
             {
                 ext = ext + extension;
                 return ext;
@@ -265,8 +266,8 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
 #endif
         if ((res_params != nil) && (res_params->size() > 0))
         {
-            url = url + _(_URL_ARG_SEPARATOR);
-            url = url + res_params->encode();
+            url = url + _(_URL_PARAM_SEPARATOR);
+            url = url + res_params->encodeSimple();
         }
 
         // ok this really sucks, I guess another rewrite of the resource manager
@@ -412,9 +413,10 @@ Ref<CdsResourceManager::UrlBase> CdsResourceManager::addResources_getUrlBase(Ref
     int objectType = item->getObjectType();
     if (IS_CDS_ITEM_INTERNAL_URL(objectType))
     {
-        urlBase->urlBase = Server::getInstance()->getVirtualURL() + _("/") + 
+        urlBase->urlBase = Server::getInstance()->getVirtualURL() + 
+                           _(_URL_PARAM_SEPARATOR) + 
                            CONTENT_SERVE_HANDLER + 
-                           _("/") + item->getLocation();
+                           _(_URL_PARAM_SEPARATOR) + item->getLocation();
         return urlBase;
     }
 
@@ -429,19 +431,21 @@ Ref<CdsResourceManager::UrlBase> CdsResourceManager::addResources_getUrlBase(Ref
         if ((item->getFlag(OBJECT_FLAG_ONLINE_SERVICE) && 
                 item->getFlag(OBJECT_FLAG_PROXY_URL)) || forceLocal)
         {
-            urlBase->urlBase = Server::getInstance()->getVirtualURL() + _("/") +
+            urlBase->urlBase = Server::getInstance()->getVirtualURL() + 
+                _(_URL_PARAM_SEPARATOR) +
                 CONTENT_ONLINE_HANDLER + _(_URL_PARAM_SEPARATOR) +
-                dict->encode() + _(_URL_ARG_SEPARATOR) +
-                _(URL_RESOURCE_ID) + _("=");
+                dict->encodeSimple() + _(_URL_PARAM_SEPARATOR) +
+                _(URL_RESOURCE_ID) + _(_URL_PARAM_SEPARATOR);
             urlBase->addResID = true;
             return urlBase;
         }
     }
         
-    urlBase->urlBase = Server::getInstance()->getVirtualURL() + _("/") +
+    urlBase->urlBase = Server::getInstance()->getVirtualURL() +
+                       _(_URL_PARAM_SEPARATOR) +
                        CONTENT_MEDIA_HANDLER + _(_URL_PARAM_SEPARATOR) + 
-                       dict->encode() + _(_URL_ARG_SEPARATOR) + 
-                       _(URL_RESOURCE_ID) + _("=");
+                       dict->encodeSimple() + _(_URL_PARAM_SEPARATOR) + 
+                       _(URL_RESOURCE_ID) + _(_URL_PARAM_SEPARATOR);
     urlBase->addResID = true;
     return urlBase;
 }

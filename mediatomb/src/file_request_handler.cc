@@ -76,14 +76,14 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     int ret = 0;
     bool is_srt = false;
 
-    String url_path, parameters;
-    split_url(filename, URL_PARAM_SEPARATOR, url_path, parameters);
+    String parameters;
+    parameters = String(filename + strlen(LINK_FILE_REQUEST_HANDLER));
     
     Ref<Dictionary> dict(new Dictionary());
-    dict->decode(parameters);
+    dict->decodeSimple(parameters);
 
-    log_debug("full url (filename): %s, url_path: %s, parameters: %s\n",
-               filename, url_path.c_str(), parameters.c_str());
+    log_debug("full url (filename): %s, parameters: %s\n",
+               filename, parameters.c_str());
     
     String objID = dict->get(_("object_id"));
     if (objID == nil)
@@ -277,12 +277,13 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
         throw _Exception(_("UPNP_WRITE unsupported"));
 
     String url_path, parameters;
-    split_url(filename, URL_PARAM_SEPARATOR, url_path, parameters);
+    
+    parameters = String(filename + strlen(LINK_FILE_REQUEST_HANDLER));
 
     Ref<Dictionary> dict(new Dictionary());
-    dict->decode(parameters);
-    log_debug("full url (filename): %s, url_path: %s, parameters: %s\n",
-               filename, url_path.c_str(), parameters.c_str());
+    dict->decodeSimple(parameters);
+    log_debug("full url (filename): %s, parameters: %s\n",
+               filename, parameters.c_str());
 
     String objID = dict->get(_("object_id"));
     if (objID == nil)

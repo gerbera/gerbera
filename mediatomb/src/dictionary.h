@@ -67,6 +67,8 @@ class Dictionary : public zmm::Object
 protected:
     /// \brief Array of DictionaryElements, representing our Dictionary.
     zmm::Ref<zmm::Array<DictionaryElement> > elements;
+    /// \brief Allow to specify encoding separators
+    zmm::String _encode(char sep1, char sep2);
 public:
 
     /// \brief Constructor, initializes the dictionary.
@@ -87,11 +89,18 @@ public:
     /// \brief Returns an url encoded version of the whole dictionary.
     zmm::String encode();
 
+    /// \brief It seems that a lot of devices can not cope with a param=value
+    /// encoded URL, so we will use a simplified encoding scheme.
+    zmm::String encodeSimple();
+
     /// \brief Removes all elements from the dictionary.
     void clear();
     
     /// \brief Makes a dictionary out of url encoded data.
     void decode(zmm::String url);
+
+    /// \brief Makes a dictionary out of simplified url encoded data.
+    void decodeSimple(zmm::String url);
 
     /// \brief Makes a shallow copy of the dictionary
     zmm::Ref<Dictionary> clone();

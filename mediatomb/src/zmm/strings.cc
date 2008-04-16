@@ -533,3 +533,20 @@ String String::replace(String needle, String replacement)
     res.base->data[res.base->len] = 0;
     return res;
 }
+
+String String::replaceChar(char needle , char replacement)
+{
+    if ((needle == NULL) || (replacement == NULL))
+        return *this;
+
+    String res(base->len);
+    for (int i = 0; i < res.base->len; i++)
+    {
+        if (base->data[i] == needle)
+            res.base->data[i] = replacement;
+        else
+            res.base->data[i] = base->data[i];
+    }
+    res.base->data[res.base->len] = 0;
+    return res;
+}

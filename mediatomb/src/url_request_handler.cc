@@ -70,13 +70,13 @@ void URLRequestHandler::get_info(IN const char *filename, OUT struct File_Info *
 #endif
 
     String url, parameters;
-    split_url(filename, URL_PARAM_SEPARATOR, url, parameters);
+    parameters = String(filename + strlen(LINK_URL_REQUEST_HANDLER));
     
     Ref<Dictionary> dict(new Dictionary());
-    dict->decode(parameters);
+    dict->decodeSimple(parameters);
 
-    log_debug("full url (filename): %s, url: %s, parameters: %s\n",
-               filename, url.c_str(), parameters.c_str());
+    log_debug("full url (filename): %s, parameters: %s\n",
+               filename, parameters.c_str());
     
     String objID = dict->get(_("object_id"));
     if (objID == nil)
@@ -177,12 +177,12 @@ Ref<IOHandler> URLRequestHandler::open(IN const char *filename, OUT struct File_
         throw _Exception(_("UPNP_WRITE unsupported"));
 
     String url, parameters;
-    split_url(filename, URL_PARAM_SEPARATOR, url, parameters);
+    parameters = String(filename + strlen(LINK_URL_REQUEST_HANDLER));
 
     Ref<Dictionary> dict(new Dictionary());
-    dict->decode(parameters);
-    log_debug("full url (filename): %s, url: %s, parameters: %s\n",
-               filename, url.c_str(), parameters.c_str());
+    dict->decodeSimple(parameters);
+    log_debug("full url (filename): %s, parameters: %s\n",
+               filename, parameters.c_str());
 
     String objID = dict->get(_("object_id"));
     if (objID == nil)

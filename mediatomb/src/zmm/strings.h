@@ -196,7 +196,8 @@ public:
     int find(const char *needle);
     int find(String needle);
     String replace(String needle, String replacement);
-    
+    String replaceChar(char needle , char replacement);
+
     static String from(int x);
     static String from(unsigned int x);
     static String from(long x);

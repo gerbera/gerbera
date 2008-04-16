@@ -332,4 +332,13 @@
     #define DEFAULT_CURL_INITIAL_FILL_SIZE 0 
 #endif
 
+#define LINK_FILE_REQUEST_HANDLER         "/" SERVER_VIRTUAL_DIR "/" \
+                                          CONTENT_MEDIA_HANDLER  "/"
+#define LINK_WEB_REQUEST_HANDLER          "/" SERVER_VIRTUAL_DIR "/" \
+                                          CONTENT_UI_HANDLER     "/"
+#define LINK_SERVE_REQUEST_HANDLER        "/" SERVER_VIRTUAL_DIR "/" \
+                                          CONTENT_SERVE_HANDLER  "/"
+#define LINK_URL_REQUEST_HANDLER          "/" SERVER_VIRTUAL_DIR "/" \
+                                          CONTENT_ONLINE_HANDLER "/"
 #endif // __COMMON_H__
+
