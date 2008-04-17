@@ -123,9 +123,12 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     else
         res_id = -1;
 
-
     String ext = dict->get(_("ext"));
-    if (ext == ".srt")
+    int edot = ext.rindex('.');
+    if (edot > -1)
+        ext = ext.substring(edot);
+    if ((ext == ".srt") || (ext == ".ssa") ||
+        (ext == ".smi") || (ext == ".sub"))
     {
         int dot = path.rindex('.');
         if (dot > -1)
@@ -385,7 +388,11 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
         res_id = -1;
 
     String ext = dict->get(_("ext"));
-    if (ext == ".srt")
+    int edot = ext.rindex('.');
+    if (edot > -1)
+        ext = ext.substring(edot);
+    if ((ext == ".srt") || (ext == ".ssa") ||
+        (ext == ".smi") || (ext == ".sub"))
     {
         int dot = path.rindex('.');
         if (dot > -1)
