@@ -7933,22 +7933,8 @@ status open
 
 \end_layout
 
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
 \begin_layout Code
-<featured/>
+<subscriptions user="mediatomb"/>
 \end_layout
 
 \begin_layout Standard
@@ -7958,37 +7944,7 @@ Optional
 \end_layout
 
 \begin_layout Standard
-Tells us to retrieve featured videos.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-<tag tag="russian data recovery" start-page="1" amount="10"/>
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Optional
-\end_layout
-
-\begin_layout Standard
-Retrieves videos given by tag.
- This option can appear more than once with different tag, start-page and
- amount values.
+Retrieves all subscriptions of the given user.
 \end_layout
 
 \begin_layout Standard
@@ -8006,7 +7962,7 @@ status open
 \end_layout
 
 \begin_layout Code
-tag=...
+user=...
 \end_layout
 
 \begin_layout Standard
@@ -8016,78 +7972,7 @@ Required
 \end_layout
 
 \begin_layout Standard
-String, representing the video tag as used on YouTube.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-start-page=...
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Required
-\end_layout
-
-\begin_layout Standard
-YouTube presents the content in pages, you can specify the first page number
- from where you want to start fetching the data.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-amount=...
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Required
-\end_layout
-
-\begin_layout Standard
-Maximum number of items that should be processed for this request.
- Use the special keyword 
-\begin_inset Quotes sld
-\end_inset
-
-all
-\begin_inset Quotes srd
-\end_inset
-
- to retrieve as much data as possible.
-\end_layout
-
-\begin_layout Description
-Note: YouTube will only serve meta data data for a maximum of 1000 items
- per request.
+Name of the YouTube user whose subscriptions should be fetched.
 \end_layout
 
 \begin_layout Standard
@@ -10499,6 +10384,31 @@ BDP-94HD
 \end_layout
 
 \begin_layout Subsubsection
+Roberts
+\end_layout
+
+\begin_layout Itemize
+WM201 WiFi Radio
+\end_layout
+
+\begin_layout Standard
+Playing OGG audio files requres a custom mimetype, add the following to
+ the <extension-mimetype> section and reimport your OGGs:
+\end_layout
+
+\begin_layout Code
+<map from="ogg" to="audio/ogg"/>
+\end_layout
+
+\begin_layout Standard
+Also, add this to the <mimetype-contenttype> section:
+\end_layout
+
+\begin_layout Code
+<treat mimetype="audio/ogg" as="ogg"/>
+\end_layout
+
+\begin_layout Subsubsection
 Roku
 \end_layout
 
@@ -10612,6 +10522,14 @@ Additionally, the DMA expects that avi files are serverd with the mime type
 <map from="avi" to="video/avi"/>
 \end_layout
 
+\begin_layout Standard
+Also, add this to the <mimetype-contenttype> section:
+\end_layout
+
+\begin_layout Code
+<treat mimetype="video/avi" as="avi"/>
+\end_layout
+
 \begin_layout Subsection
 Network Attached Storage Devices
 \end_layout
@@ -10627,6 +10545,19 @@ We provide a bitbake metadata file for the OpenEmbedded environment, it
 \begin_layout Standard
 So far two devices are shipped with a preinstalled version of MediaTomb,
  community firmware versions are available for the rest.
+\end_layout
+
+\begin_layout Subsubsection
+Asus
+\end_layout
+
+\begin_layout Itemize
+WL500g
+\end_layout
+
+\begin_layout Standard
+Use the statically linked mips32el binary package that is provided on our
+ download site.
 \end_layout
 
 \begin_layout Subsubsection
@@ -10665,12 +10596,34 @@ Linksys
 NSLU2
 \end_layout
 
+\begin_layout Standard
+Available via Optware.
+\end_layout
+
 \begin_layout Subsubsection
 Maxtor
 \end_layout
 
 \begin_layout Itemize
-Shared Storage
+MSS-I
+\end_layout
+
+\begin_layout Standard
+Either use the Optware feeds or the statically linked mips2el binary package
+ that is provided on our download site.
+\end_layout
+
+\begin_layout Subsubsection
+Raidsonic
+\end_layout
+
+\begin_layout Itemize
+IB-NAS4200-B
+\end_layout
+
+\begin_layout Standard
+Use the statically linked binary armv4 package that is provided on our download
+ site.
 \end_layout
 
 \begin_layout Subsubsection

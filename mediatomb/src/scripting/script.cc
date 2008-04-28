@@ -345,8 +345,6 @@ Script::Script(Ref<Runtime> runtime) : Object()
         setProperty(glob, _(MT_KEYS[i].sym), _(MT_KEYS[i].upnp));
     }
 
-    setProperty(glob, _("UPNP_CLASS_CONTAINER_MUSIC"), 
-            _(UPNP_DEFAULT_CLASS_MUSIC_CONT));
     setProperty(glob, _("UPNP_CLASS_CONTAINER_MUSIC_ALBUM"),
             _(UPNP_DEFAULT_CLASS_MUSIC_ALBUM));
     setProperty(glob, _("UPNP_CLASS_CONTAINER_MUSIC_ARTIST"),

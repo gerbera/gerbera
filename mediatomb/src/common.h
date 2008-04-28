@@ -59,7 +59,6 @@
 #define UPNP_DEFAULT_CLASS_ACTIVE_ITEM  "object.item.activeItem"
 #define UPNP_DEFAULT_CLASS_MUSIC_ALBUM  "object.container.album.musicAlbum"
 #define UPNP_DEFAULT_CLASS_MUSIC_TRACK  "object.item.audioItem.musicTrack"
-#define UPNP_DEFAULT_CLASS_MUSIC_CONT   "object.container.musicContainer"
 #define UPNP_DEFAULT_CLASS_MUSIC_GENRE  "object.container.genre.musicGenre"
 #define UPNP_DEFAULT_CLASS_MUSIC_ARTIST "object.container.person.musicArtist"
 #define UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER "object.container.playlistContainer"

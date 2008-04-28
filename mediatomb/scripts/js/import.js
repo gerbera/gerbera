@@ -110,10 +110,10 @@ function addAudio(obj)
 
     var chain = new Array('Audio', 'All Audio');
     obj.title = title;
-    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC);
+    addCdsObject(obj, createContainerChain(chain));
     
     chain = new Array('Audio', 'Artists', artist, 'All Songs');
-    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC);
+    addCdsObject(obj, createContainerChain(chain));
     
     chain = new Array('Audio', 'All - full name');
     var temp = '';
@@ -124,10 +124,10 @@ function addAudio(obj)
         temp = temp + ' - ' + album_full + ' - ';
     
     obj.title = temp + title;
-    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC);
+    addCdsObject(obj, createContainerChain(chain));
     
     chain = new Array('Audio', 'Artists', artist, 'All - full name');
-    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC);
+    addCdsObject(obj, createContainerChain(chain));
     
     chain = new Array('Audio', 'Artists', artist, album);
     obj.title = track + title;
@@ -141,7 +141,7 @@ function addAudio(obj)
     addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_GENRE);
     
     chain = new Array('Audio', 'Year', date);
-    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC);
+    addCdsObject(obj, createContainerChain(chain));
 }
 
 // currently no video metadata supported
