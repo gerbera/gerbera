@@ -66,6 +66,10 @@ bool YouTubeContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
     if (!string_ok(feed_name))
         throw _Exception(_("Invalid XML for YouTube service, received - missing feed title!"));
 
+    temp = service_xml->getChildText(_("openSearch:totalResults")); 
+    if (temp.toInt() == 0)
+        return false;
+
     channel_child_count = service_xml->childCount();
     
     if (channel_child_count == 0)
@@ -115,6 +119,51 @@ bool YouTubeContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
             channel_child_count);
 
     return true;
+}
+
+Ref<YouTubeSubFeed> YouTubeContentHandler::getSubFeed(Ref<Element> feedxml)
+{
+    String temp;
+     Ref<YouTubeSubFeed> subfeed(new YouTubeSubFeed());
+
+    if (feedxml->getName() != "rss")
+        throw _Exception(_("Invalid XML for YouTube feed received"));
+
+    Ref<Element> channel = feedxml->getChildByName(_("channel"));
+    if (channel == nil)
+        throw _Exception(_("Invalid XML for YouTube service received - channel not found!"));
+   
+    subfeed->title = channel->getChildText(_("title"));
+    if (!string_ok(subfeed->title))
+        throw _Exception(_("Invalid XML for YouTube service, received - missing feed title!"));
+
+    temp = channel->getChildText(_("openSearch:totalResults"));
+    if (temp.toInt() == 0)
+        return subfeed;
+
+
+    // now cycle through all items and put the links into the array
+    for (int i = 0; i < channel->childCount(); i++)
+    {
+        Ref<Node> n = channel->getChild(i);
+        if (n->getType() != mxml_node_element)
+            continue;
+
+        Ref<Element> channel_item = RefCast(n, Element);
+        if (channel_item->getName() != "item")
+            continue;
+
+        Ref<Element> link = channel_item->getChildByName(_("gd:feedLink"));
+        if (link == nil)
+            continue;
+        temp = link->getAttribute(_("href"));
+        if (!string_ok(temp))
+            continue;
+
+        subfeed->links->append(temp);
+    }
+
+    return subfeed;
 }
 
 Ref<CdsObject> YouTubeContentHandler::getNextObject()
@@ -343,4 +392,11 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
     return nil;
 }
 
+YouTubeSubFeed::YouTubeSubFeed()
+{
+    links = Ref<Array<StringBase> >(new Array<StringBase>());
+    title = nil;
+}
+
 #endif//YOUTUBE
+

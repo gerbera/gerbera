@@ -40,16 +40,18 @@
 #include "online_service.h"
 #include "url.h"
 #include "dictionary.h"
+#include "youtube_content_handler.h"
 
 typedef enum 
 {
     YT_request_none = 0,
-    YT_request_videos,
+    YT_request_video_search,
     YT_request_stdfeed,
     YT_request_user_favorites,
     YT_request_user_playlists,
     YT_request_user_subscriptions,
     YT_request_popular,
+    YT_subrequest,
 } yt_requests_t;
 
 typedef enum
@@ -111,7 +113,7 @@ protected:
     zmm::Ref<URL> url;
 
     /// \brief This function will retrieve the XML according to the parametrs
-    zmm::Ref<mxml::Element> getData(zmm::String url_part, zmm::Ref<Dictionary> params);
+    zmm::Ref<mxml::Element> getData(zmm::String url_part, zmm::Ref<Dictionary> params, bool construct_url = true);
 
     /// \brief This class defines the so called "YouTube task", the task
     /// holds various parameters that are needed to perform. A task means
@@ -152,11 +154,21 @@ protected:
         /// \brief Playlist name defined by the user (only set when retrieving
         /// playlists)
         zmm::String playlist_name;
+
+        /// \brief Special requests have a subfeed
+        zmm::Ref<YouTubeSubFeed> subfeed;
+        int subfeed_index;
+
+        /// \brief Task must be removed from the tasklist after one time
+        /// execution
+        bool kill;
     };
 
     /// \brief task that we will be working with when refreshServiceData is
     /// called.
     int current_task;
+
+
 
     /// \brief utility function, returns true if method supports paging
     bool hasPaging(yt_requests_t request);
@@ -167,8 +179,10 @@ protected:
     void getPagingParams(zmm::Ref<mxml::Element> xml, 
                          zmm::Ref<YouTubeTask> task);
     void addTimeParams(zmm::Ref<mxml::Element> xml, zmm::Ref<YouTubeTask> task);
+    void addRacyParams(zmm::Ref<mxml::Element> xml, zmm::Ref<YouTubeTask> task);
     zmm::String getRegion(zmm::Ref<mxml::Element> xml);
     zmm::String getFeed(zmm::Ref<mxml::Element> xml);
+    void killOneTimeTasks(zmm::Ref<zmm::Array<zmm::Object> > tasklist);
 };
 
 #endif//__ONLINE_SERVICE_H__

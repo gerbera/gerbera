@@ -54,6 +54,19 @@
 #include "mxml/mxml.h"
 #include "cds_objects.h"
 
+/// \brief This class holds the subfeed data for special requests
+class YouTubeSubFeed : public zmm::Object
+{
+public:
+    YouTubeSubFeed();
+    /// \brief Some requests return a list of items which point to 
+    /// further requests (i.e. subscriptions point to an XML which 
+    /// only contains the links which have to be used in subsequent 
+    /// requests before the actual video data can be retrieved
+    zmm::Ref<zmm::Array<zmm::StringBase> > links;
+    zmm::String title;
+};
+
 /// \brief this class is responsible for creating objects from the YouTube
 /// metadata XML.
 class YouTubeContentHandler : public zmm::Object
@@ -72,6 +85,15 @@ public:
     /// \return CdsObject or nil if there are no more objects to parse.
     zmm::Ref<CdsObject> getNextObject();
 
+    /// \brief Retrieves a list of feed URLs from a subscription request along
+    /// with the feeds name.
+    /// 
+    /// Some requests, like subscriptions, do not return the video metadata,
+    /// but return an XML which holds URLs to further requests, only these
+    /// further requests give us the actual video data. So, we will gather
+    /// the request links in an array and then walk the array via the
+    /// above setServiceContent/getNextObject methods.
+    zmm::Ref<YouTubeSubFeed> getSubFeed(zmm::Ref<mxml::Element> feedxml);
 
 protected:
     zmm::Ref<mxml::Element> service_xml;

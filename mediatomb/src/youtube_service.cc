@@ -37,7 +37,6 @@
 
 #include "zmm/zmm.h"
 #include "youtube_service.h"
-#include "youtube_content_handler.h"
 #include "content_manager.h"
 #include "string_converter.h"
 #include "config_manager.h"
@@ -52,10 +51,12 @@ using namespace mxml;
 #define GDATA_API_YT_BASE_URL           "http://gdata.youtube.com/feeds/api/"
 
 // /users/USERNAME/favorites
-#define GDATA_REQUEST_FAVORITES         "/users/%s/favorites"
+#define GDATA_REQUEST_USERS                    "users/"
+#define GDATA_REQUEST_FAVORITES                "/favorites"
+#define GDATA_REQUEST_SUBSCRIPTIONS            "/subscriptions"
 
 // /feeds/api/videos?vq="SEARCH TERMS"
-#define GDATA_REQUEST_SEARCH_BY_TAG     "/videos"
+#define GDATA_REQUEST_SEARCH            "/videos"
 
 // /feeds/api/users/USERNAME/uploads
 #define GDATA_REQUEST_LIST_BY_USER      "/users/%s/uploads"
@@ -89,19 +90,18 @@ static char *YT_stdfeeds[] =
 
 // gdata default parameters
 //http://code.google.com/apis/youtube/reference.html#Query_parameter_definitions
-#define GDATA_PARAM_FEED_FORMAT             "alt"
-#define GDATA_PARAM_AUTHOR                  "author"
-//#define GDATA_PARAM_MAX_RESULTS             "max-results"
-//#define GDATA_PARAM_START_INDEX             "start-index"
+#define GDATA_PARAM_FEED_FORMAT          "alt"
 
 // additional YT specific parameters
-#define GDATA_YT_PARAM_SEARCH_TERM          "vq" // value must be url escaped
+#define GDATA_YT_PARAM_VIDEO_QUERY          "vq" // value must be url escaped
 #define GDATA_YT_PARAM_ORDERBY              "orderby"
 #define GDATA_YT_PARAM_FORMAT               "format"
 #define GDATA_YT_PARAM_RESTRICT_LANGUAGE    "lr"
 #define GDATA_YT_PARAM_RESTRICTED_CONTENT   "racy"
 #define GDATA_YT_PARAM_COUNTRY_RESTRICTION  "restriction"
 #define GDATA_YT_PARAM_TIME                 "time"
+#define GDATA_YT_PARAM_RACY                 "racy"
+#define GDATA_YT_PARAM_AUTHOR               "author"
 
 #define GDATA_YT_PARAM_START_INDEX          "start-index"
 #define GDATA_YT_PARAM_MAX_RESULTS_PER_REQ  "max-results"
@@ -127,6 +127,10 @@ static char *YT_stdfeeds[] =
 // REST API min/max items per page values
 #define GDATA_YT_VALUE_START_INDEX_MIN      "1"
 #define GDATA_YT_VALUE_PER_PAGE_MAX         "50"
+
+#define GDATA_YT_VALUE_RACY_ON              "include"
+#define GDATA_YT_VALUE_RACY_OFF             "exclude"
+
 #define AMOUNT_ALL                          (-333)
 
 #define CAT_NAME_FILM                       "Film & Animation"
@@ -177,6 +181,9 @@ static char *YT_stdfeeds[] =
 #define CFG_CAT_TERM_TECH                   "Tech"
 
 #define CFG_REQUEST_STDFEED                 "standardfeed"
+#define CFG_REQUEST_VIDEOSEARCH             "search"
+#define CFG_REQUEST_FAVORITES               "favorites"
+#define CFG_REQUEST_SUBSCRIPTIONS           "subscriptions"
 
 #define CFG_OPTION_USER                     "user"
 #define CFG_OPTION_TAG                      "tag"
@@ -186,9 +193,12 @@ static char *YT_stdfeeds[] =
 #define CFG_OPTION_PLAYLIST_NAME            "name"
 #define CFG_OPTION_TIME_RANGE               "time-range"
 #define CFG_OPTION_CATEGORY                 "category"
+#define CFG_OPTION_AUTHOR                   "author"
+#define CFG_OPTION_RACY                     "racy"
 
 #define CFG_OPTION_STDFEED                  "feed"
 #define CFG_OPTION_REGION_ID                "region-id"
+#define CFG_OPTION_SEARCH_QUERY             "query"
 
 #define CFG_OPTION_REGION_AUSTRALIA         "au"
 #define CFG_OPTION_REGION_BRAZIL            "br"
@@ -254,16 +264,15 @@ YouTubeService::~YouTubeService()
 YouTubeService::YouTubeTask::YouTubeTask()
 {
     parameters = zmm::Ref<Dictionary>(new Dictionary());
-#warning ДОДЕЛАТЬ YT!
-//    parameters->put(_(REST_PARAM_DEV_ID), ConfigManager::getInstance()->getOption(CFG_ONLINE_CONTENT_YOUTUBE_DEV_ID));
     request = YT_request_none;
     category = YT_cat_none;
     amount = 0;
     amount_fetched = 0;
     start_index = 1;
     cfg_start_index = 1;
+    subfeed_index = 0;
+    kill = false;
 }
-
 
 service_type_t YouTubeService::getServiceType()
 {
@@ -453,6 +462,21 @@ void YouTubeService::addTimeParams(Ref<Element> xml, Ref<YouTubeTask> task)
     task->parameters->put(_(GDATA_YT_PARAM_TIME), temp);
 }
 
+void YouTubeService::addRacyParams(Ref<Element> xml, Ref<YouTubeTask> task)
+{
+    String temp = xml->getAttribute(_(CFG_OPTION_RACY));
+    if (string_ok(temp))
+    {
+        if ((temp != GDATA_YT_VALUE_RACY_ON) &&
+            (temp != GDATA_YT_VALUE_RACY_OFF))
+            throw _Exception(_("Invalid racy attribute value \"") + 
+                    temp + _("\" in <") + xml->getName() + 
+                    _("> tag"));
+
+        task->parameters->put(_(GDATA_YT_PARAM_RACY), temp);
+    }
+}
+
 String YouTubeService::getRegion(Ref<Element> xml)
 {
     String region = xml->getAttribute(_(CFG_OPTION_REGION_ID));
@@ -496,6 +520,12 @@ Ref<Object> YouTubeService::defineServiceTask(Ref<Element> xmlopt)
     
     if (temp == CFG_REQUEST_STDFEED)
         task->request = YT_request_stdfeed;
+    else if (temp == CFG_REQUEST_VIDEOSEARCH)
+        task->request = YT_request_video_search;
+    else if (temp == CFG_REQUEST_FAVORITES)
+        task->request = YT_request_user_favorites;
+    else if (temp == CFG_REQUEST_SUBSCRIPTIONS)
+        task->request = YT_request_user_subscriptions;
     else throw _Exception(_("Unsupported tag while parsing YouTube options: ") + temp);
 
     if (!hasPaging(task->request))
@@ -503,11 +533,12 @@ Ref<Object> YouTubeService::defineServiceTask(Ref<Element> xmlopt)
 
     task->parameters->put(_(GDATA_PARAM_FEED_FORMAT), 
                           _(GDATA_VALUE_FEED_FORMAT_RSS));
-    task->parameters->put(_(GDATA_YT_PARAM_FORMAT),
-                          _(GDATA_YT_VALUE_FORMAT_SWF));
     switch (task->request)
     {
         case YT_request_stdfeed:
+            task->parameters->put(_(GDATA_YT_PARAM_FORMAT),
+                                  _(GDATA_YT_VALUE_FORMAT_SWF));
+
             temp2 = getFeed(xmlopt);
             task->url_part = _(GDATA_REQUEST_STDFEED_BASE) + _("/");
 
@@ -526,9 +557,47 @@ Ref<Object> YouTubeService::defineServiceTask(Ref<Element> xmlopt)
                 addTimeParams(xmlopt, task);
             }
 
+            addRacyParams(xmlopt, task); 
             getPagingParams(xmlopt, task);
+
             break;
 
+        case YT_request_video_search:
+            task->parameters->put(_(GDATA_YT_PARAM_FORMAT),
+                                  _(GDATA_YT_VALUE_FORMAT_SWF));
+            /// \todo check if this request supports region settings
+            task->url_part = _(GDATA_REQUEST_SEARCH);
+            /// \todo  check if this needs additional URL escaping
+            temp = getCheckAttr(xmlopt, _(CFG_OPTION_SEARCH_QUERY));
+            task->parameters->put(_(GDATA_YT_PARAM_VIDEO_QUERY), temp);
+            
+            temp = xmlopt->getAttribute(_(CFG_OPTION_AUTHOR));
+            if (string_ok(temp))
+                task->parameters->put(_(GDATA_YT_PARAM_AUTHOR), temp);
+           
+            addRacyParams(xmlopt, task); 
+            getPagingParams(xmlopt, task);
+
+            break;
+        case YT_request_user_favorites:
+            task->parameters->put(_(GDATA_YT_PARAM_FORMAT),
+                                  _(GDATA_YT_VALUE_FORMAT_SWF));
+            temp = getCheckAttr(xmlopt, _(CFG_OPTION_USER));
+            task->url_part = _(GDATA_REQUEST_USERS) + temp + 
+                             _(GDATA_REQUEST_FAVORITES);
+     
+            if (string_ok(temp))
+                task->parameters->put(_(GDATA_YT_PARAM_AUTHOR), temp);
+            addRacyParams(xmlopt, task); 
+            getPagingParams(xmlopt, task);
+            break;
+        case YT_request_user_subscriptions:
+            temp = getCheckAttr(xmlopt, _(CFG_OPTION_USER));
+            task->url_part = _(GDATA_REQUEST_USERS) + temp +
+                             _(GDATA_REQUEST_SUBSCRIPTIONS);
+            task->amount = AMOUNT_ALL;
+            //getPagingParams(xmlopt, task);
+            break;
 #if 0
         case YT_list_popular:
             task->parameters->put(_(REST_PARAM_METHOD),
@@ -631,12 +700,22 @@ Ref<Object> YouTubeService::defineServiceTask(Ref<Element> xmlopt)
     return RefCast(task, Object);
 }
 
-Ref<Element> YouTubeService::getData(String url_part, Ref<Dictionary> params)
+Ref<Element> YouTubeService::getData(String url_part, Ref<Dictionary> params, bool construct_url)
 {
     long retcode;
+    String URL;
     Ref<StringConverter> sc = StringConverter::i2i();
 
-    String URL = _(GDATA_API_YT_BASE_URL) + url_part + _("?") + params->encode();
+    if (construct_url)
+        URL = _(GDATA_API_YT_BASE_URL) + url_part;
+    else
+        URL = url_part;
+    
+    if ((params != nil) && (params->size() > 0))
+        if (URL.index('?') > 0)
+            URL = URL + _("&") + params->encode();
+        else
+            URL = URL + _("?") + params->encode();
 
     log_debug("Retrieving URL: %s\n", URL.c_str());
    
@@ -684,24 +763,47 @@ Ref<Element> YouTubeService::getData(String url_part, Ref<Dictionary> params)
 
 bool YouTubeService::hasPaging(yt_requests_t request)
 {
-    /*
-    switch (method)
+#warning ДОДЕЛАТЬ YT!!!
+#if 0
+    switch (request)
     {
-        case YT_list_by_tag:
-        case YT_list_by_user:
-        case YT_list_by_playlist:
-        case YT_list_by_category_and_tag:
-            return true;
-
-        case YT_list_popular:
-        case YT_list_featured:
-        case YT_list_none:
-        case YT_list_favorite:
-        default:
+        case YT_request_user_subscriptions:
             return false;
+
+        default:
+            return true;
     }
-    */
+#endif
     return true;
+}
+
+void YouTubeService::killOneTimeTasks(Ref<Array<Object> > tasklist)
+{
+    int current = 0;
+
+    for (int i = 0; i < tasklist->size(); i++)
+    {
+        Ref<YouTubeTask> task = RefCast(tasklist->get(i), YouTubeTask);
+        printf("--------> task array: %d", task->request);
+    }
+    printf("\n");
+    while (true)
+    {
+        Ref<YouTubeTask> task = RefCast(tasklist->get(current), YouTubeTask);
+        if ((task != nil) && (task->kill))
+            tasklist->removeUnordered(current);
+        else
+            current++;
+
+        if (current >= tasklist->size())
+            break;
+    }
+    for (int i = 0; i < tasklist->size(); i++)
+    {
+        Ref<YouTubeTask> task = RefCast(tasklist->get(i), YouTubeTask);
+        printf("--------> task array: %d", task->request);
+    }
+    printf("\n");
 }
 
 bool YouTubeService::refreshServiceData(Ref<Layout> layout)
@@ -753,10 +855,52 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
         }
     }
 
-    Ref<Element> reply = getData(task->url_part, task->parameters);
 
-    Ref<YouTubeContentHandler> yt(new YouTubeContentHandler());
     bool b = false;
+    bool construct_url = true;
+
+    Ref<Element> reply;
+    Ref<YouTubeContentHandler> yt(new YouTubeContentHandler());
+
+    if (task->request == YT_request_user_subscriptions)
+    {
+       reply = getData(task->url_part, task->parameters, true);
+       if (reply == nil)
+           throw _Exception(_("Failed to retrieve YouTube subfeed"));
+
+       task->subfeed = yt->getSubFeed(reply);
+
+        // create new tasks
+        for (int f = 0; f < task->subfeed->links->size(); f++)
+        {
+            Ref<YouTubeTask> subtask(new YouTubeTask());
+            subtask->kill = true; // autoremove after one time execution
+            subtask->request = YT_subrequest;
+            subtask->url_part = task->subfeed->links->get(f);
+            subtask->amount = AMOUNT_ALL;
+            subtask->parameters->put(_(GDATA_YT_PARAM_FORMAT),
+                                     _(GDATA_YT_VALUE_FORMAT_SWF));
+            subtask->parameters->put(_(GDATA_PARAM_FEED_FORMAT),
+                                     _(GDATA_VALUE_FEED_FORMAT_RSS));
+
+            tasklist->append(RefCast(subtask, Object));
+        }
+
+        current_task++;
+        if (current_task >= tasklist->size())
+        {
+            current_task = 0;
+            killOneTimeTasks(tasklist);
+            return false;
+        }
+        return true;
+    }
+
+    if (task->request == YT_subrequest)
+        construct_url = false;
+
+    reply = getData(task->url_part, task->parameters, construct_url);
+
     if (reply != nil)
         b = yt->setServiceContent(reply);
     else
@@ -778,6 +922,7 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
         if (current_task >= tasklist->size())
         {
             current_task = 0;
+            killOneTimeTasks(tasklist);
             return false;
         }
    
@@ -868,6 +1013,7 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
                 if (current_task >= tasklist->size())
                 {
                     current_task = 0;
+                    killOneTimeTasks(tasklist);
                     return false;
                 }
             }
@@ -885,6 +1031,7 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
         if (current_task >= tasklist->size())
         {
             current_task = 0;
+            killOneTimeTasks(tasklist);
             return false;
         }
     }

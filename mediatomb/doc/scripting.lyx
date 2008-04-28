@@ -1,4 +1,4 @@
-#LyX 1.5.3 created this file. For more info see http://www.lyx.org/
+#LyX 1.5.4 created this file. For more info see http://www.lyx.org/
 \lyxformat 276
 \begin_document
 \begin_header
@@ -1948,36 +1948,6 @@ Type: string
 
 \emph on
 Value: object.container
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status collapsed
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-UPNP_CLASS_CONTAINER_MUSIC
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Type: string
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Value: object.container.musicContainer
 \end_layout
 
 \begin_layout Standard
