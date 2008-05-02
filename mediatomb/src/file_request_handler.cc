@@ -104,7 +104,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
 
     if (!IS_CDS_ITEM(objectType))
     {
-        throw _Exception(_("get_info: object is not an item"));
+        throw _Exception(_("requested object is not an item"));
     }
      
     Ref<CdsItem> item = RefCast(obj, CdsItem);
@@ -305,7 +305,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
 
     if (!IS_CDS_ITEM(objectType))
     {
-        throw _Exception(_("object is not an item"));
+        throw _Exception(_("requested object is not an item"));
     }
 
     // update item info by running action
