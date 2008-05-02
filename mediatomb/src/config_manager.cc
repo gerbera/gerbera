@@ -871,11 +871,11 @@ void ConfigManager::validate(String serverhome)
         temp_int = 0;
         
         if (temp == "off")
-            temp_int = SQLITE_SYNC_OFF;
+            temp_int = MT_SQLITE_SYNC_OFF;
         else if (temp == "normal")
-            temp_int = SQLITE_SYNC_NORMAL;
+            temp_int = MT_SQLITE_SYNC_NORMAL;
         else if (temp == "full")
-            temp_int = SQLITE_SYNC_FULL;
+            temp_int = MT_SQLITE_SYNC_FULL;
         else
             throw _Exception(_("Invalid <synchronous> value in sqlite3 "
                                "section"));

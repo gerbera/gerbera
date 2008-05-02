@@ -120,7 +120,7 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         String containerclass;
 
         JSObject *js_cds_obj;
-        JSObject *js_orig_obj;
+        JSObject *js_orig_obj = NULL;
         Ref<CdsObject> orig_object;
 
         Ref<StringConverter> p2i;

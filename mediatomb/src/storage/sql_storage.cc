@@ -643,7 +643,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     flushInsertBuffer();
     
     int objectID;
-    int objectType;
+    int objectType = 0;
     
     bool getContainers = param->getFlag(BROWSE_CONTAINERS);
     bool getItems = param->getFlag(BROWSE_ITEMS);
@@ -1134,7 +1134,7 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
     }
     
     if ( (obj->getRefID() && IS_CDS_PURE_ITEM(objectType)) ||
-        IS_CDS_ITEM(objectType) && ! IS_CDS_PURE_ITEM(objectType) )
+        (IS_CDS_ITEM(objectType) && ! IS_CDS_PURE_ITEM(objectType)) )
         obj->setVirtual(true);
     else
         obj->setVirtual(false); // gets set to true for virtual containers below

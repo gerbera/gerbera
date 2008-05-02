@@ -88,7 +88,7 @@ int main(int argc, char **argv, char **envp)
     struct   sigaction action;
     sigset_t mask_set;
 
-    int      devnull;
+    int      devnull = -1; 
     struct   passwd *pwd;
     struct   group  *grp;
 #ifdef HAVE_GETOPT_LONG

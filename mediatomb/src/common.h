@@ -284,9 +284,9 @@
     #define URL_VALUE_TRANSCODE              "1"
 #endif
 #ifdef HAVE_SQLITE3
-    #define SQLITE_SYNC_FULL            2
-    #define SQLITE_SYNC_NORMAL          1 
-    #define SQLITE_SYNC_OFF             0
+    #define MT_SQLITE_SYNC_FULL            2
+    #define MT_SQLITE_SYNC_NORMAL          1 
+    #define MT_SQLITE_SYNC_OFF             0
     #define DEFAULT_SQLITE_SYNC         "off"
     #define DEFAULT_SQLITE_RESTORE      "restore"
     #define DEFAULT_SQLITE_BACKUP_ENABLED NO

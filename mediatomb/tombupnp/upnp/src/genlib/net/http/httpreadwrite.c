@@ -328,7 +328,7 @@ http_SendMessage( IN SOCKINFO * info,
     char *filename = NULL;
     UpnpWebFileHandle *Fh = NULL;
     FILE *Fp = NULL;
-    off_t num_read,
+    off_t num_read = -1,
       num_written,
       amount_to_be_read = 0;
     va_list argp;
