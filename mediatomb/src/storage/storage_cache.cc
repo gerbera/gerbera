@@ -113,6 +113,7 @@ void StorageCache::ensureFillLevelOk()
     // for now just clear cache if it gets too full
     if (idHash->size() >= maxfill || locationHash->size() >= maxfill)
     {
+        hasBeenFlushed = true;
         idHash->clear();
         locationHash->clear();
     }
