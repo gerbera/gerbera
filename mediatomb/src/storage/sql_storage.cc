@@ -904,7 +904,7 @@ Ref<CdsObject> SQLStorage::_findObjectByPath(String fullpath)
             for (int i = 0; i < objects->size(); i++)
             {
                 Ref<CacheObject> cObj = objects->get(i);
-                if (cObj->knowsObject() && cObj->knowsVirtual() && cObj->getVirtual())
+                if (cObj->knowsObject() && cObj->knowsVirtual() && !cObj->getVirtual())
                     return cObj->getObject();
             }
         }
