@@ -69,6 +69,7 @@ Sqlite3Storage::Sqlite3Storage() : SQLStorage()
     startupError = nil;
     sqliteMutex = Ref<Mutex>(new Mutex());
     cond = Ref<Cond>(new Cond(sqliteMutex));
+    insertBuffer = nil;
 }
 
 void Sqlite3Storage::init()
@@ -254,8 +255,8 @@ String Sqlite3Storage::getError(String query, String error, sqlite3 *db)
 
 Ref<SQLResult> Sqlite3Storage::select(const char *query, int length)
 {
-    //fprintf(stdout, "%s\n",query);
-    //fflush(stdout);
+    fprintf(stdout, "%s\n",query);
+    fflush(stdout);
     Ref<SLSelectTask> ptask (new SLSelectTask(query));
     addTask(RefCast(ptask, SLTask));
     ptask->waitForTask();
@@ -264,8 +265,8 @@ Ref<SQLResult> Sqlite3Storage::select(const char *query, int length)
 
 int Sqlite3Storage::exec(const char *query, int length, bool getLastInsertId)
 {
-    //fprintf(stdout, "%s\n",query);
-    //fflush(stdout);
+    fprintf(stdout, "%s\n",query);
+    fflush(stdout);
     Ref<SLExecTask> ptask (new SLExecTask(query, getLastInsertId));
     addTask(RefCast(ptask, SLTask));
     ptask->waitForTask();
@@ -365,6 +366,27 @@ void Sqlite3Storage::storeInternalSetting(String key, String value)
     *q << "INSERT OR REPLACE INTO " << QTB << INTERNAL_SETTINGS_TABLE << QTE << " (" << QTB << "key" << QTE << ", " << QTB << "value" << QTE << ") "
     "VALUES (" << quote(key) << ", "<< quote(value) << ") ";
     SQLStorage::exec(q);
+}
+
+void Sqlite3Storage::_addToInsertBuffer(Ref<StringBuffer> query)
+{
+    if (insertBuffer == nil)
+    {
+        insertBuffer = Ref<StringBuffer>(new StringBuffer());
+        *insertBuffer << "BEGIN TRANSACTION;";
+    }
+    
+    *insertBuffer << query << ';';
+}
+
+void Sqlite3Storage::_flushInsertBuffer()
+{
+    if (insertBuffer == nil)
+        return;
+    *insertBuffer << "COMMIT;";
+    SQLStorage::exec(insertBuffer);
+    insertBuffer->clear();
+    *insertBuffer << "BEGIN TRANSACTION;";
 }
 
 /* SLTask */

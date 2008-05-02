@@ -181,6 +181,10 @@ private:
     
     inline void signal() { cond->signal(); }
     
+    zmm::Ref<zmm::StringBuffer> insertBuffer;
+    virtual void _addToInsertBuffer(zmm::Ref<zmm::StringBuffer> query);
+    virtual void _flushInsertBuffer();
+    
     friend class SLSelectTask;
     friend class SLExecTask;
     friend class SLInitTask;

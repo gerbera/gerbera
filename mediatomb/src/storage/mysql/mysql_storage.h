@@ -59,7 +59,7 @@ private:
     virtual int exec(const char *query, int length, bool getLastInsertId = false);
     virtual void storeInternalSetting(zmm::String key, zmm::String value);
     
-    void _exec(const char *query);
+    void _exec(const char *query, int lenth = -1);
     
     MYSQL db;
     
@@ -76,6 +76,10 @@ private:
     bool mysql_init_key_initialized;
     
     void checkMysqlThreadInit();
+    
+    zmm::Ref<zmm::Array<zmm::StringBase> > insertBuffer;
+    virtual void _addToInsertBuffer(zmm::Ref<zmm::StringBuffer> query);
+    virtual void _flushInsertBuffer();
 };
 
 class MysqlResult : private SQLResult

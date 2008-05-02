@@ -50,6 +50,7 @@ public:
     Object *get(int index);
     void remove(int index, int count);
     void removeUnordered(int index);
+    void clear();
     void insert(int index, Object *el);
     inline int size() { return siz; }
     void optimize();
@@ -106,6 +107,10 @@ public:
     inline int size()
     {
         return base.size();
+    }
+    inline void clear()
+    {
+        return base.clear();
     }
     inline void optimize()
     {

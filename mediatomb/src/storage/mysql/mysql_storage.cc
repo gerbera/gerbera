@@ -78,6 +78,7 @@ MysqlStorage::MysqlStorage() : SQLStorage()
     mysqlMutex = Ref<Mutex> (new Mutex(true));
     table_quote_begin = '`';
     table_quote_end = '`';
+    insertBuffer = nil;
 }
 MysqlStorage::~MysqlStorage()
 {
@@ -381,14 +382,43 @@ void MysqlStorage::storeInternalSetting(String key, String value)
     SQLStorage::exec(q);
 }
 
-void MysqlStorage::_exec(const char *query)
+void MysqlStorage::_exec(const char *query, int length)
 {
-    if (mysql_real_query(&db, query, strlen(query)))
+    if (mysql_real_query(&db, query, (length > 0 ? length : strlen(query))))
     {
         String myError = getError(&db);
         throw _StorageException(myError, _("Mysql: error while updating db: ") + myError);
     }
 }
+
+void MysqlStorage::_addToInsertBuffer(Ref<StringBuffer> query)
+{
+    if (insertBuffer == nil)
+    {
+        insertBuffer = Ref<Array<StringBase> >(new Array<StringBase>());
+        insertBuffer->append(_("BEGIN TRANSACTION"));
+    }
+    Ref<StringBase> sb (new StringBase(query->c_str()));
+    insertBuffer->append(sb);
+}
+
+void MysqlStorage::_flushInsertBuffer()
+{
+    if (insertBuffer == nil)
+        return;
+    insertBuffer->append(_("COMMIT"));
+    
+    checkMysqlThreadInit();
+    AUTOLOCK(mysqlMutex);
+    for (int i=0; i < insertBuffer->size(); i++)
+    {
+        _exec(insertBuffer->get(i)->data, insertBuffer->get(i)->len);
+    }
+    AUTOUNLOCK();
+    insertBuffer->clear();
+    insertBuffer->append(_("BEGIN TRANSACTION"));
+}
+
 
 /* MysqlResult */
 

@@ -147,3 +147,14 @@ void ArrayBase::resize(int requiredSize)
         arr = (Object **)REALLOC(arr, capacity * sizeof(Object *));
     }
 }
+
+void ArrayBase::clear()
+{
+    for(int i=0; i<siz; i++)
+    {
+        Object *obj = arr[i];
+        obj->release();
+    }
+    siz = 0;
+    memset(arr, 0, siz * sizeof(Object *));
+}

@@ -38,6 +38,10 @@ public:
     zmm::String getLocation() { return location; }
     bool knowsLocation() { return location!=nil; }
     
+    void setVirtual(bool virtualObj) { knowVirtualObj = true; this->virtualObj = virtualObj; }
+    bool getVirtual() { return virtualObj; }
+    bool knowsVirtual() { return knowVirtualObj; }
+    
 private:
     
     int parentID;
@@ -48,6 +52,8 @@ private:
     bool hasChildren;
     int objectType;
     bool knowObjectType;
+    bool virtualObj;
+    bool knowVirtualObj;
     
     zmm::String location;
 };

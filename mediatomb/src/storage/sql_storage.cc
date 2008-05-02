@@ -144,12 +144,13 @@ void SQLStorage::init()
     //cache = Ref<StorageCache>(new StorageCache());
     
     insertBufferOn = false;
+    //insertBufferOn = true;
     
-    insertBuffer = nil;
     insertBufferEmpty = true;
     insertBufferMutex = Ref<Mutex>(new Mutex());
-    insertBufferCount = 0;
-   
+    insertBufferStatementCount = 0;
+    insertBufferByteCount = 0;
+    
     //log_debug("using SQL: %s\n", this->sql_query.c_str());
     
     //objectTitleCache = Ref<DSOHash<CdsObject> >(new DSOHash<CdsObject>(OBJECT_CACHE_CAPACITY));
@@ -897,10 +898,8 @@ Ref<CdsObject> SQLStorage::_findObjectByPath(String fullpath)
             for (int i = 0; i < objects->size(); i++)
             {
                 Ref<CacheObject> cObj = objects->get(i);
-                if (cObj->knowsObject())
-                {
+                if (cObj->knowsObject() && cObj->knowsVirtual() && cObj->getVirtual())
                     return cObj->getObject();
-                }
             }
         }
     }
@@ -2297,20 +2296,14 @@ void SQLStorage::addObjectToCache(Ref<CdsObject> object, bool dontLock)
 void SQLStorage::addToInsertBuffer(Ref<StringBuffer> query)
 {
     assert(doInsertBuffering());
-
-    AUTOLOCK(insertBufferMutex);
-    if (insertBuffer == nil)
-    {
-        insertBuffer = Ref<StringBuffer>(new StringBuffer());
-        *insertBuffer << "BEGIN TRANSACTION;";
-    }
     
-    #warning implement for MySQL
+    _addToInsertBuffer(query);
     
     insertBufferEmpty = false;
-    insertBufferCount++;
-    *insertBuffer << query << ';';
-    if (insertBuffer->length() > 102400)
+    insertBufferStatementCount++;
+    insertBufferByteCount += query->length();
+    
+    if (insertBufferByteCount > 102400)
         flushInsertBuffer(true);
 }
 
@@ -2322,13 +2315,11 @@ void SQLStorage::flushInsertBuffer(bool dontLock)
     AUTOLOCK_DEFINE_ONLY();
     if (! dontLock)
         AUTOLOCK_NO_DEFINE(mutex);
-    if (insertBuffer == nil || insertBufferEmpty)
+    if (insertBufferEmpty)
         return;
-    *insertBuffer << "COMMIT;";
-    exec(insertBuffer);
-    log_debug("flushing insert buffer (%d statements)\n", insertBufferCount);
-    insertBuffer->clear();
-    *insertBuffer << "BEGIN TRANSACTION;";
+    _flushInsertBuffer();
+    log_debug("flushing insert buffer (%d statements)\n", insertBufferStatementCount);
     insertBufferEmpty = true;
-    insertBufferCount = 0;
+    insertBufferStatementCount = 0;
+    insertBufferByteCount = 0;
 }
