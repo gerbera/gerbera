@@ -211,10 +211,14 @@ Ref<CdsObject> SQLStorage::checkRefID(Ref<CdsObject> obj)
         }
         catch (Exception e)
         {
-            //abort();
+            // this should never happen - but fail softly if compiled without debugging
+            assert(0);
             throw _Exception(_("illegal refID was set"));
         }
     }
+    
+    // this should never happen - but fail softly if compiled without debugging
+    assert(0);
     
     return findObjectByPath(location);
 }
