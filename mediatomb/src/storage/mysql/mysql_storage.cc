@@ -396,7 +396,7 @@ void MysqlStorage::_addToInsertBuffer(Ref<StringBuffer> query)
     if (insertBuffer == nil)
     {
         insertBuffer = Ref<Array<StringBase> >(new Array<StringBase>());
-        insertBuffer->append(_("BEGIN TRANSACTION"));
+        insertBuffer->append(_("BEGIN"));
     }
     Ref<StringBase> sb (new StringBase(query->c_str()));
     insertBuffer->append(sb);
@@ -416,7 +416,7 @@ void MysqlStorage::_flushInsertBuffer()
     }
     AUTOUNLOCK();
     insertBuffer->clear();
-    insertBuffer->append(_("BEGIN TRANSACTION"));
+    insertBuffer->append(_("BEGIN"));
 }
 
 
