@@ -255,8 +255,8 @@ String Sqlite3Storage::getError(String query, String error, sqlite3 *db)
 
 Ref<SQLResult> Sqlite3Storage::select(const char *query, int length)
 {
-    fprintf(stdout, "%s\n",query);
-    fflush(stdout);
+    //fprintf(stdout, "%s\n",query);
+    //fflush(stdout);
     Ref<SLSelectTask> ptask (new SLSelectTask(query));
     addTask(RefCast(ptask, SLTask));
     ptask->waitForTask();
@@ -265,8 +265,8 @@ Ref<SQLResult> Sqlite3Storage::select(const char *query, int length)
 
 int Sqlite3Storage::exec(const char *query, int length, bool getLastInsertId)
 {
-    fprintf(stdout, "%s\n",query);
-    fflush(stdout);
+    //fprintf(stdout, "%s\n",query);
+    //fflush(stdout);
     Ref<SLExecTask> ptask (new SLExecTask(query, getLastInsertId));
     addTask(RefCast(ptask, SLTask));
     ptask->waitForTask();
