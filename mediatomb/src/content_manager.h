@@ -64,7 +64,7 @@
 
 class ContentManager;
 
-typedef enum task_type_t
+enum task_type_t
 {
     Invalid,
     AddFile,
@@ -199,7 +199,7 @@ public:
     class TimerParameter : public zmm::Object
     {
     public:
-        typedef enum timer_param_t
+        enum timer_param_t
         {
             IDAutoscan,
 #ifdef ONLINE_SERVICES

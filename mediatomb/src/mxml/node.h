@@ -40,7 +40,7 @@
 namespace mxml
 {
 
-typedef enum mxml_node_types
+enum mxml_node_types
 {
     mxml_node_all,
     mxml_node_element,

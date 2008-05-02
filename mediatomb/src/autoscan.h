@@ -40,14 +40,14 @@
 #define INVALID_SCAN_ID -1
 
 ///\brief Scan level - the way how exactly directories should be scanned.
-typedef enum scan_level_t
+enum scan_level_t
 {
     BasicScanLevel, // file was added or removed from the directory
     FullScanLevel   // file was modified/added/removed
 };
 
 ///\brief Scan mode - type of scan (timed, inotify, fam, etc.)
-typedef enum scan_mode_t
+enum scan_mode_t
 {
     TimedScanMode,
     InotifyScanMode

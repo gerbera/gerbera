@@ -40,7 +40,7 @@
 #define INOTIFY_ROOT -1
 #define INOTIFY_UNKNOWN_PARENT_WD -2
 
-typedef enum inotify_watch_type_t
+enum inotify_watch_type_t
 {
     InotifyWatchTypeNonexisting,
     InotifyWatchTypeAutoscan
@@ -81,7 +81,7 @@ private:
     // event mask with events to watch for (set by constructor);
     int events;
     
-    typedef enum watch_type_t
+    enum watch_type_t
     {
         WatchAutoscanType,
         WatchMoveType

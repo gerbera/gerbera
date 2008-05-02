@@ -39,14 +39,14 @@
 #include "dictionary.h"
 #include "object_dictionary.h"
 
-typedef enum transcoding_type_t
+enum transcoding_type_t
 {
     TR_None,
     TR_External,
     TR_Remote
 };
 
-typedef enum avi_fourcc_listmode_t
+enum avi_fourcc_listmode_t
 {
     FCC_None,
     FCC_Process,
