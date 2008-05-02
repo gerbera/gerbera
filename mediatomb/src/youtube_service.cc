@@ -54,6 +54,7 @@ using namespace mxml;
 #define GDATA_REQUEST_USERS                    "users/"
 #define GDATA_REQUEST_FAVORITES                "/favorites"
 #define GDATA_REQUEST_SUBSCRIPTIONS            "/subscriptions"
+#define GDATA_REQUEST_PLAYLISTS                "/playlists"
 
 // /feeds/api/videos?vq="SEARCH TERMS"
 #define GDATA_REQUEST_SEARCH            "/videos"
@@ -100,7 +101,6 @@ static char *YT_stdfeeds[] =
 #define GDATA_YT_PARAM_RESTRICTED_CONTENT   "racy"
 #define GDATA_YT_PARAM_COUNTRY_RESTRICTION  "restriction"
 #define GDATA_YT_PARAM_TIME                 "time"
-#define GDATA_YT_PARAM_RACY                 "racy"
 #define GDATA_YT_PARAM_AUTHOR               "author"
 
 #define GDATA_YT_PARAM_START_INDEX          "start-index"
@@ -184,6 +184,7 @@ static char *YT_stdfeeds[] =
 #define CFG_REQUEST_VIDEOSEARCH             "search"
 #define CFG_REQUEST_FAVORITES               "favorites"
 #define CFG_REQUEST_SUBSCRIPTIONS           "subscriptions"
+#define CFG_REQUEST_PLAYLISTS               "playlists"
 
 #define CFG_OPTION_USER                     "user"
 #define CFG_OPTION_TAG                      "tag"
@@ -194,7 +195,6 @@ static char *YT_stdfeeds[] =
 #define CFG_OPTION_TIME_RANGE               "time-range"
 #define CFG_OPTION_CATEGORY                 "category"
 #define CFG_OPTION_AUTHOR                   "author"
-#define CFG_OPTION_RACY                     "racy"
 
 #define CFG_OPTION_STDFEED                  "feed"
 #define CFG_OPTION_REGION_ID                "region-id"
@@ -462,21 +462,6 @@ void YouTubeService::addTimeParams(Ref<Element> xml, Ref<YouTubeTask> task)
     task->parameters->put(_(GDATA_YT_PARAM_TIME), temp);
 }
 
-void YouTubeService::addRacyParams(Ref<Element> xml, Ref<YouTubeTask> task)
-{
-    String temp = xml->getAttribute(_(CFG_OPTION_RACY));
-    if (string_ok(temp))
-    {
-        if ((temp != GDATA_YT_VALUE_RACY_ON) &&
-            (temp != GDATA_YT_VALUE_RACY_OFF))
-            throw _Exception(_("Invalid racy attribute value \"") + 
-                    temp + _("\" in <") + xml->getName() + 
-                    _("> tag"));
-
-        task->parameters->put(_(GDATA_YT_PARAM_RACY), temp);
-    }
-}
-
 String YouTubeService::getRegion(Ref<Element> xml)
 {
     String region = xml->getAttribute(_(CFG_OPTION_REGION_ID));
@@ -512,11 +497,12 @@ String YouTubeService::getFeed(Ref<Element> xml)
     throw _Exception(_("<") + xml->getName() + _("> tag has an invalid feed setting: ") + feed);
 
 }
-Ref<Object> YouTubeService::defineServiceTask(Ref<Element> xmlopt)
+Ref<Object> YouTubeService::defineServiceTask(Ref<Element> xmlopt, Ref<Object> params)
 {
     Ref<YouTubeTask> task(new YouTubeTask());
     String temp = xmlopt->getName();
     String temp2;
+    Ref<Option> racy = RefCast(params, Option);
     
     if (temp == CFG_REQUEST_STDFEED)
         task->request = YT_request_stdfeed;
@@ -526,6 +512,8 @@ Ref<Object> YouTubeService::defineServiceTask(Ref<Element> xmlopt)
         task->request = YT_request_user_favorites;
     else if (temp == CFG_REQUEST_SUBSCRIPTIONS)
         task->request = YT_request_user_subscriptions;
+    else if (temp == CFG_REQUEST_PLAYLISTS)
+        task->request = YT_request_user_playlists;
     else throw _Exception(_("Unsupported tag while parsing YouTube options: ") + temp);
 
     if (!hasPaging(task->request))
@@ -557,7 +545,9 @@ Ref<Object> YouTubeService::defineServiceTask(Ref<Element> xmlopt)
                 addTimeParams(xmlopt, task);
             }
 
-            addRacyParams(xmlopt, task); 
+            task->parameters->put(_(GDATA_YT_PARAM_RESTRICTED_CONTENT),
+                                  racy->getOption());
+
             getPagingParams(xmlopt, task);
 
             break;
@@ -575,7 +565,10 @@ Ref<Object> YouTubeService::defineServiceTask(Ref<Element> xmlopt)
             if (string_ok(temp))
                 task->parameters->put(_(GDATA_YT_PARAM_AUTHOR), temp);
            
-            addRacyParams(xmlopt, task); 
+            task->parameters->put(_(GDATA_YT_PARAM_RESTRICTED_CONTENT),
+                                  racy->getOption());
+
+
             getPagingParams(xmlopt, task);
 
             break;
@@ -588,7 +581,10 @@ Ref<Object> YouTubeService::defineServiceTask(Ref<Element> xmlopt)
      
             if (string_ok(temp))
                 task->parameters->put(_(GDATA_YT_PARAM_AUTHOR), temp);
-            addRacyParams(xmlopt, task); 
+           
+            task->parameters->put(_(GDATA_YT_PARAM_RESTRICTED_CONTENT),
+                                  racy->getOption());
+
             getPagingParams(xmlopt, task);
             break;
         case YT_request_user_subscriptions:
@@ -596,102 +592,13 @@ Ref<Object> YouTubeService::defineServiceTask(Ref<Element> xmlopt)
             task->url_part = _(GDATA_REQUEST_USERS) + temp +
                              _(GDATA_REQUEST_SUBSCRIPTIONS);
             task->amount = AMOUNT_ALL;
-            //getPagingParams(xmlopt, task);
             break;
-#if 0
-        case YT_list_popular:
-            task->parameters->put(_(REST_PARAM_METHOD),
-                                  _(REST_METHOD_LIST_POPULAR));
-            temp = getCheckAttr(xmlopt, _(CFG_OPTION_TIME_RANGE));
-            if ((temp != REST_VALUE_TIME_RANGE_ALL) &&
-                (temp != REST_VALUE_TIME_RANGE_DAY) &&
-                (temp != REST_VALUE_TIME_RANGE_WEEK) &&
-                (temp != REST_VALUE_TIME_RANGE_MONTH))
-            {
-                throw _Exception(_("Invalid time range specified for <") +
-                                 xmlopt->getName() + _("< tag!"));
-            }
-            else 
-                task->parameters->put(_(REST_PARAM_TIME_RANGE), temp);
+        case YT_request_user_playlists:
+            temp = getCheckAttr(xmlopt, _(CFG_OPTION_USER));
+            task->url_part = _(GDATA_REQUEST_USERS) + temp +
+                             _(GDATA_REQUEST_PLAYLISTS);
+            task->amount = AMOUNT_ALL;
             break;
-
-        case YT_list_by_category_and_tag:
-            task->parameters->put(_(REST_PARAM_METHOD),
-                                  _(REST_METHOD_LIST_BY_CAT_AND_TAG));
-            task->parameters->put(_(REST_PARAM_TAG),
-                                  getCheckAttr(xmlopt, _(CFG_OPTION_TAG)));
-           
-            temp = getCheckAttr(xmlopt, _(CFG_OPTION_CATEGORY));
-            if (temp == CFG_CAT_TERM_FILM)
-            {
-                task->category = YT_cat_film_and_animation;
-                temp = String::from(YT_cat_film_and_animation);
-            }
-            else if (temp == CFG_CAT_TERM_AUTOS)
-            {
-                task->category = YT_cat_autos_and_vehicles;
-                temp = String::from(YT_cat_autos_and_vehicles);
-            }
-            else if (temp == CFG_CAT_TERM_COMEDY)
-            {
-                task->category = YT_cat_comedy;
-                temp = String::from(YT_cat_comedy);
-            }
-            else if (temp == CFG_CAT_TERM_ENTERTAINMENT)
-            {
-                task->category = YT_cat_entertainment;
-                temp = String::from(YT_cat_entertainment);
-            }
-            else if (temp == CFG_CAT_TERM_MUSIC)
-            {
-                task->category = YT_cat_music;
-                temp = String::from(YT_cat_music);
-            }
-            else if (temp == CFG_CAT_TERM_NEWS)
-            {
-                task->category = YT_cat_news_and_politics;
-                temp = String::from(YT_cat_news_and_politics);
-            }
-            else if (temp == CFG_CAT_TERM_PEOPLE)
-            {
-                task->category = YT_cat_people_and_blogs;
-                temp = String::from(YT_cat_people_and_blogs);
-            }
-            else if (temp == CFG_CAT_TERM_ANIMALS)
-            {
-                task->category = YT_cat_pets_and_animals;
-                temp = String::from(YT_cat_pets_and_animals);
-            }
-            else if (temp == CFG_CAT_TERM_HOWTO)
-            {
-                task->category = YT_cat_howto_and_diy;
-                temp = String::from(YT_cat_howto_and_diy);
-            }
-            else if (temp == CFG_CAT_TERM_SPORTS)
-            {
-                task->category = YT_cat_sports;
-                temp = String::from(YT_cat_sports);
-            }
-            else if (temp == CFG_CAT_TERM_TRAVEL)
-            {
-                task->category = YT_cat_travel_and_places;
-                temp = String::from(YT_cat_travel_and_places);
-            }
-            else if (temp == CFG_CAT_TERM_GADGETS)
-            {
-                task->category = YT_cat_gadgets_and_games;
-                temp = String::from(YT_cat_gadgets_and_games);
-            }
-            else
-            {
-                throw _Exception(_("Invalid category specified for <") +
-                        xmlopt->getName() + _("< tag!"));
-            }
-            task->parameters->put(_(REST_PARAM_CATEGORY_ID), temp);
-
-            addPagingParams(xmlopt, task);
-            break;
-#endif
         case YT_request_none:
         default:
             throw _Exception(_("Unsupported tag!"));
@@ -862,7 +769,8 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
     Ref<Element> reply;
     Ref<YouTubeContentHandler> yt(new YouTubeContentHandler());
 
-    if (task->request == YT_request_user_subscriptions)
+    if ((task->request == YT_request_user_subscriptions) ||
+        (task->request == YT_request_user_playlists)) 
     {
        reply = getData(task->url_part, task->parameters, true);
        if (reply == nil)

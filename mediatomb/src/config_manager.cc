@@ -1609,16 +1609,17 @@ void ConfigManager::validate(String serverhome)
     // check other options only if the service is enabled
     if (temp == "yes")
     {
-        temp = getOption(_("/import/online-content/YouTube/attribute::dev-id"),
-                         _(""));
+        temp = getOption(_("/import/online-content/YouTube/attribute::racy-content"),
+                         _(DEFAULT_YOUTUBE_RACY_CONTENT));
 
-        if (!string_ok(temp))
+        if ((temp != "include") && (temp != "exclude"))
         {
-            throw _Exception(_("Invalid dev-id for YouTube service!\nYou can get a developer ID by registering at http://youtube.com/\nPlease check http://www.youtube.com/t/terms\nBy using this feature you may violate YouTube service terms and conditions!"));
+            throw _Exception(_("Error in config file: "
+                               "invalid racy-content value in <YouTube> tag"));
         }
 
         NEW_OPTION(temp);
-        SET_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_DEV_ID);
+        SET_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_RACY);
 
         temp_int = getIntOption(_("/import/online-content/YouTube/attribute::refresh"), 0);
         NEW_INT_OPTION(temp_int);
@@ -2577,7 +2578,7 @@ Ref<Array<Object> > ConfigManager::createServiceTaskList(service_type_t service,
         Ref<YouTubeService> yt(new YouTubeService());
         for (int i = 0; i < element->elementChildCount(); i++)
         {
-            Ref<Object> option = yt->defineServiceTask(element->getElementChild(i));
+            Ref<Object> option = yt->defineServiceTask(element->getElementChild(i), RefCast(options->get(CFG_ONLINE_CONTENT_YOUTUBE_RACY), Object));
             arr->append(option);
         }
     }

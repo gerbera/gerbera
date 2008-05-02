@@ -86,7 +86,8 @@ public:
     /// \brief Parses the service related line from config.xml and creates
     /// a task object, which can be anything that helps the service to
     /// identify what data it has to fetch.
-    virtual zmm::Ref<zmm::Object> defineServiceTask(zmm::Ref<mxml::Element> xmlopt) = 0;
+    virtual zmm::Ref<zmm::Object> defineServiceTask(zmm::Ref<mxml::Element> xmlopt, zmm::Ref<zmm::Object> params) = 0;
+
     /// \brief Increments the task count. 
     ///
     /// When recursive autoscan is in progress, we only want to subcribe to

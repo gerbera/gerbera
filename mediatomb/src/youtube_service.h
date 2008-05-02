@@ -94,7 +94,7 @@ public:
 
     /// \brief Parse the xml fragment from the configuration and gather
     /// the user settings in a service task structure.
-    virtual zmm::Ref<zmm::Object> defineServiceTask(zmm::Ref<mxml::Element> xmlopt);
+    virtual zmm::Ref<zmm::Object> defineServiceTask(zmm::Ref<mxml::Element> xmlopt, zmm::Ref<zmm::Object> params);
 
     /// \brief Get the human readable name of a particular request type, i.e.
     /// did we request Favorites or Featured videos, etc.
@@ -179,7 +179,6 @@ protected:
     void getPagingParams(zmm::Ref<mxml::Element> xml, 
                          zmm::Ref<YouTubeTask> task);
     void addTimeParams(zmm::Ref<mxml::Element> xml, zmm::Ref<YouTubeTask> task);
-    void addRacyParams(zmm::Ref<mxml::Element> xml, zmm::Ref<YouTubeTask> task);
     zmm::String getRegion(zmm::Ref<mxml::Element> xml);
     zmm::String getFeed(zmm::Ref<mxml::Element> xml);
     void killOneTimeTasks(zmm::Ref<zmm::Array<zmm::Object> > tasklist);

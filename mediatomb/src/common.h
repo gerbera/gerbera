@@ -255,6 +255,7 @@
     #define DEFAULT_YOUTUBE_TAG                 "Военное Дело"
     #define DEFAULT_YOUTUBE_TAG_START_PAGE      1
     #define DEFAULT_YOUTUBE_TAG_AMOUNT          "all"
+    #define DEFAULT_YOUTUBE_RACY_CONTENT        "exclude" 
 
 #endif
 #ifdef SOPCAST
