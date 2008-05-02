@@ -497,6 +497,8 @@ void SQLStorage::addObject(Ref<CdsObject> obj, int *changedContainer)
     {
         AUTOLOCK(cache->getMutex());
         cache->getObjectDefinitely(obj->getParentID())->setHasChildren(true);
+        if (cache->flushed())
+            flushInsertBuffer();
         addObjectToCache(obj, true);
     }
     /* ------------ */
@@ -679,6 +681,8 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
             {
                 AUTOLOCK(cache->getMutex());
                 cache->getObjectDefinitely(objectID)->setObjectType(objectType);
+                if (cache->flushed())
+                    flushInsertBuffer();
             }
             /* ------------ */
         }
@@ -834,6 +838,8 @@ int SQLStorage::getChildCount(int contId, bool containers, bool items, bool hide
         {
             AUTOLOCK(cache->getMutex());
             cache->getObjectDefinitely(contId)->setHasChildren(childCount>0);
+            if (cache->flushed())
+                    flushInsertBuffer();
         }
         /* ------------ */
         
@@ -2288,6 +2294,8 @@ void SQLStorage::addObjectToCache(Ref<CdsObject> object, bool dontLock)
         if (! dontLock)
             AUTOLOCK_NO_DEFINE(cache->getMutex());
         Ref<CacheObject> cObj = cache->getObjectDefinitely(object->getID());
+        if (cache->flushed())
+            flushInsertBuffer();
         cObj->setObject(object);
         cache->checkLocation(cObj);
     }

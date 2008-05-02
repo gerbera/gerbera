@@ -128,6 +128,7 @@ void *AutoscanInotify::staticThreadProc(void *arg)
     log_debug("started inotify thread.\n");
     AutoscanInotify *inst = (AutoscanInotify *)arg;
     inst->threadProc();
+    Storage::getInstance()->threadCleanup();
     log_debug("exiting inotify thread...\n");
     pthread_exit(NULL);
     return NULL;

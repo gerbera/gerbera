@@ -16,6 +16,7 @@ StorageCache::StorageCache()
     maxfill = STORAGE_CACHE_MAXFILL;
     idHash = Ref<DBOHash<int,CacheObject> >(new DBOHash<int,CacheObject>(capacity, INVALID_OBJECT_ID, INVALID_OBJECT_ID_2));
     locationHash = Ref<DSOHash<Array<CacheObject> > >(new DSOHash<Array<CacheObject> >(capacity));
+    hasBeenFlushed = false;
     mutex = Ref<Mutex> (new Mutex());
 }
 
@@ -91,6 +92,14 @@ void StorageCache::checkLocation(Ref<CacheObject> obj)
         }
     }
     objects->append(obj);
+}
+
+bool StorageCache::flushed()
+{
+    if (! hasBeenFlushed)
+        return false;
+    hasBeenFlushed = false;
+    return true;
 }
 
 /* private */

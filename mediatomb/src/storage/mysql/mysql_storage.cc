@@ -82,6 +82,17 @@ MysqlStorage::MysqlStorage() : SQLStorage()
 }
 MysqlStorage::~MysqlStorage()
 {
+    AUTOLOCK(mysqlMutex);    // just to ensure, that we don't close while another thread 
+                    // is executing a query
+    
+    if(mysql_connection)
+    {
+        mysql_close(&db);
+        mysql_connection = false;
+    }
+    log_debug("calling mysql_server_end...\n");
+    mysql_server_end();
+    log_debug("...ok\n");
 }
 
 void MysqlStorage::checkMysqlThreadInit()
@@ -99,6 +110,7 @@ void MysqlStorage::checkMysqlThreadInit()
 
 void MysqlStorage::threadCleanup()
 {
+    log_info("thread cleanup; thread_id=%d\n", pthread_self());
     if (pthread_getspecific(mysql_init_key) != NULL)
     {
         mysql_thread_end();
@@ -361,15 +373,6 @@ int MysqlStorage::exec(const char *query, int length, bool getLastInsertId)
 
 void MysqlStorage::shutdownDriver()
 {
-    AUTOLOCK(mysqlMutex);    // just to ensure, that we don't close while another thread 
-                    // is executing a query
-    
-    if(mysql_connection)
-    {
-        mysql_close(&db);
-        mysql_connection = false;
-    }
-    mysql_server_end();
 }
 
 void MysqlStorage::storeInternalSetting(String key, String value)

@@ -27,12 +27,15 @@ public:
     zmm::Ref<zmm::Array<CacheObject> > getObjects(zmm::String location);
     void checkLocation(zmm::Ref<CacheObject> obj);
     
+    bool flushed();
+    
     zmm::Ref<Mutex> getMutex() { return mutex; }
     
 private:
     
     int capacity;
     int maxfill;
+    bool hasBeenFlushed;
     
     void ensureFillLevelOk();
     

@@ -291,6 +291,8 @@ void *UpdateManager::staticThreadProc(void *arg)
     log_debug("starting update thread... thread: %d\n", pthread_self());
     UpdateManager *inst = (UpdateManager *)arg;
     inst->threadProc();
+    Storage::getInstance()->threadCleanup();
+    
     log_debug("update thread shut down. thread: %d\n", pthread_self());
     pthread_exit(NULL);
     return NULL;
