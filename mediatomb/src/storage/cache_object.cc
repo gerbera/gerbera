@@ -34,6 +34,7 @@ void CacheObject::setObject(Ref<CdsObject> obj)
     setObjectType(obj->getObjectType());
     knowHasChildren = false;
     
+    knowVirtualObj = true;
     setVirtual(obj->isVirtual());
     
     if (IS_CDS_CONTAINER(objectType))
@@ -43,7 +44,7 @@ void CacheObject::setObject(Ref<CdsObject> obj)
     else if (IS_CDS_ITEM(objectType))
     {
         if (IS_CDS_PURE_ITEM(objectType))
-        location = String(LOC_FILE_PREFIX) + obj->getLocation();
+            location = String(LOC_FILE_PREFIX) + obj->getLocation();
     }
 }
 
