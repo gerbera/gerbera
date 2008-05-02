@@ -534,9 +534,9 @@ String String::replace(String needle, String replacement)
     return res;
 }
 
-String String::replaceChar(char needle , char replacement)
+String String::replaceChar(char needle, char replacement)
 {
-    if ((needle == NULL) || (replacement == NULL))
+    if ((needle == '\0') || (replacement == '\0'))
         return *this;
 
     String res(base->len);
