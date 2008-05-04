@@ -279,12 +279,22 @@ void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
     if (string_ok(temp))
     {
         yt_requests_t req = (yt_requests_t)temp.toInt();
-        temp = YouTubeService::getRequestName(req);
-        if (string_ok(temp))
+
+        // subrequest has no name so check that HERE
+        
+        if (req == YT_subrequest)
         {
-            temp = esc(temp);
-            if (req == YT_request_stdfeed)
+            String main_request = obj->getAuxData(_(YOUTUBE_AUXDATA_MAIN_REQUEST_NAME));
+            temp = esc(main_request);
+            String feed_title = obj->getAuxData(_(YOUTUBE_AUXDATA_FEED));
+            temp = temp + '/' + esc(feed_title);
+        }
+        else
+        {
+            temp = YouTubeService::getRequestName(req);
+            if (string_ok(temp))
             {
+                temp = esc(temp);
                 String feed_title = obj->getAuxData(_(YOUTUBE_AUXDATA_FEED));
                 temp = temp + '/' + esc(feed_title);
             }
@@ -312,10 +322,16 @@ void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
                     temp = temp + '/' + esc(subtmp);
             }
 #endif
-            chain = _(YT_VPATH) + '/' + temp;
-            id = ContentManager::getInstance()->addContainerChain(chain);
-            add(obj, id, ref_set);
         }
+
+        if (string_ok(temp))
+            chain = _(YT_VPATH) + '/' + temp;
+        else
+            chain = _(YT_VPATH) + "/Uncategorized";
+        
+        id = ContentManager::getInstance()->addContainerChain(chain);
+        add(obj, id, ref_set);
+
     }
 }
 #endif

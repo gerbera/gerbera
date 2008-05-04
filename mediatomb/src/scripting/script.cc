@@ -308,30 +308,24 @@ Script::Script(Ref<Runtime> runtime) : Object()
             _(YOUTUBE_AUXDATA_RATING_COUNT));
     setProperty(glob, _("YOUTUBE_AUXDATA_CATEGORY"), 
             _(YOUTUBE_AUXDATA_CATEGORY));
-    setProperty(glob, _("YOUTUBE_AUXDATA_REQUEST_SUBNAME"), 
-            _(YOUTUBE_AUXDATA_REQUEST_SUBNAME));
+    setProperty(glob, _("YOUTUBE_AUXDATA_MAIN_REQUEST_NAME"), 
+            _(YOUTUBE_AUXDATA_MAIN_REQUEST_NAME));
     setProperty(glob, _("YOUTUBE_AUXDATA_REQUEST"), 
             _(YOUTUBE_AUXDATA_REQUEST));
 
-
-#warning ДОДЕЛАТЬ YT!!!!!
-#warning ДОДЕЛАТЬ YT!!!!!
-#warning ДОДЕЛАТЬ YT!!!!!
-#warning ДОДЕЛАТЬ YT!!!!!
-#warning ДОДЕЛАТЬ YT!!!!!
-
-#if 0
-    setIntProperty(glob, _("YOUTUBE_REQUEST_NONE"), (int)YT_list_none);
-    setIntProperty(glob, _("YOUTUBE_REQUEST_FAVORITE"), (int)YT_list_favorite);
-    setIntProperty(glob, _("YOUTUBE_REQUEST_BY_TAG"), (int)YT_list_by_tag);
-    setIntProperty(glob, _("YOUTUBE_REQUEST_BY_USER"), (int)YT_list_by_user);
-    setIntProperty(glob, _("YOUTUBE_REQUEST_FEATURED"), (int)YT_list_featured);
-    setIntProperty(glob, _("YOUTUBE_REQUEST_BY_PLAYLIST"), 
-                   (int)YT_list_by_playlist);
-    setIntProperty(glob, _("YOUTUBE_REQUEST_POPULAR"), (int)YT_list_popular);
-    setIntProperty(glob, _("YOUTUBE_REQUEST_BY_CATEGORY_AND_TAG"), 
-                   (int)YT_list_by_category_and_tag);
-#endif
+    setIntProperty(glob, _("YOUTUBE_REQUEST_NONE"), (int)YT_request_none);
+    setIntProperty(glob, _("YOUTUBE_REQUEST_VIDEO_SEARCH"), 
+                  (int)YT_request_video_search);
+    setIntProperty(glob, _("YOUTUBE_REQUEST_STANDARD_FEED"), 
+                  (int)YT_request_stdfeed);
+    setIntProperty(glob, _("YOUTUBE_REQUEST_USER_FAVORITES"), 
+                  (int)YT_request_user_favorites);
+    setIntProperty(glob, _("YOUTUBE_REQUEST_USER_PLAYLISTS"), 
+                  (int)YT_request_user_playlists);
+    setIntProperty(glob, _("YOUTUBE_REQUEST_USER_SUBSCRIPTIONS"), 
+                   (int)YT_request_user_subscriptions);
+    setIntProperty(glob, _("YOUTUBE_REQUEST_POPULAR"), (int)YT_request_popular);
+    setIntProperty(glob, _("YOUTUBE_SUBREQUEST"), YT_subrequest);
 #endif
 #ifdef SOPCAST
     setIntProperty(glob, _("ONLINE_SERVICE_SOPCAST"), (int)OS_SopCast);

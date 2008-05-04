@@ -50,30 +50,34 @@ typedef enum
     YT_request_user_favorites,
     YT_request_user_playlists,
     YT_request_user_subscriptions,
+    YT_request_user_uploads,
     YT_request_popular,
     YT_subrequest,
 } yt_requests_t;
 
 typedef enum
 {
-    YT_cat_none = 0,
-    YT_cat_film,
-    YT_cat_autos,
-    YT_cat_animals,
-    YT_cat_sports,
-    YT_cat_travel,
-    YT_cat_short_movies,
-    YT_cat_videoblog,
-    YT_cat_gadgets,
-    YT_cat_comedy,
-    YT_cat_people,
-    YT_cat_news,
-    YT_cat_entertainment,
-    YT_cat_education,
-    YT_cat_howto,
-    YT_cat_nonprofit,
-    YT_cat_tech,
-} yt_categories_t;
+    YT_region_au = 0,
+    YT_region_br,
+    YT_region_ca,
+    YT_region_fr,
+    YT_region_de,
+    YT_region_gb,
+    YT_region_nl,
+    YT_region_hk,
+    YT_region_ie,
+    YT_region_it,
+    YT_region_jp,
+    YT_region_mx,
+    YT_region_nz,
+    YT_region_pl,
+    YT_region_ru,
+    YT_region_kr,
+    YT_region_es,
+    YT_region_tw,
+    YT_region_us,
+    YT_region_none,
+} yt_regions_t;
 
 /// \brief This is an interface for all online services, the function
 /// handles adding/refreshing content in the database.
@@ -101,7 +105,7 @@ public:
     static zmm::String getRequestName(yt_requests_t request);
 
     /// \brief Get the human readable category name
-    static zmm::String getCategoryName(yt_categories_t category);
+    static zmm::String getRegionName(yt_regions_t region_code);
 
 protected:
     // the handle *must never be used from multiple threads*
@@ -127,10 +131,6 @@ protected:
         /// \brief Method identifier
         yt_requests_t request;
 
-        /// \brief Category identifier, only used with the
-        /// YT_list_by_category_and_tag method
-        yt_categories_t category;
-
         /// \brief Constructed URL that will be prepended with the base and
         /// appended with parameters.
         zmm::String url_part;
@@ -151,9 +151,9 @@ protected:
         /// \brief Starging index as specified in the configuration by the user
         int cfg_start_index;
 
-        /// \brief Playlist name defined by the user (only set when retrieving
-        /// playlists)
-        zmm::String playlist_name;
+        /// \brief Name of the top request in case the task is a result of a 
+        /// subrequest
+        zmm::String main_request_name;
 
         /// \brief Special requests have a subfeed
         zmm::Ref<YouTubeSubFeed> subfeed;

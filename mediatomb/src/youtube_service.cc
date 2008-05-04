@@ -55,12 +55,9 @@ using namespace mxml;
 #define GDATA_REQUEST_FAVORITES                "/favorites"
 #define GDATA_REQUEST_SUBSCRIPTIONS            "/subscriptions"
 #define GDATA_REQUEST_PLAYLISTS                "/playlists"
-
+#define GDATA_REQUEST_UPLOADS                  "/uploads"
 // /feeds/api/videos?vq="SEARCH TERMS"
-#define GDATA_REQUEST_SEARCH            "/videos"
-
-// /feeds/api/users/USERNAME/uploads
-#define GDATA_REQUEST_LIST_BY_USER      "/users/%s/uploads"
+#define GDATA_REQUEST_SEARCH                   "videos"
 
 // all stdfeeds:  "/standardfeeds/REGION_ID/feed"
 #define GDATA_REQUEST_STDFEED_BASE              "standardfeeds"
@@ -105,6 +102,7 @@ static char *YT_stdfeeds[] =
 
 #define GDATA_YT_PARAM_START_INDEX          "start-index"
 #define GDATA_YT_PARAM_MAX_RESULTS_PER_REQ  "max-results"
+#define GDATA_YT_MAXIMUM_ALLOWED_RESULTS    1000
 
 // allowed parameter values
 #define GDATA_VALUE_FEED_FORMAT_RSS         "rss"
@@ -131,7 +129,7 @@ static char *YT_stdfeeds[] =
 #define GDATA_YT_VALUE_RACY_ON              "include"
 #define GDATA_YT_VALUE_RACY_OFF             "exclude"
 
-#define AMOUNT_ALL                          (-333)
+#define AMOUNT_ALL                          (1000) // max items that we can get
 
 #define CAT_NAME_FILM                       "Film & Animation"
 #define CAT_NAME_AUTOS                      "Autos & Vehicles"
@@ -151,15 +149,12 @@ static char *YT_stdfeeds[] =
 #define CAT_NAME_NONPROFIT                  "Nonprofits & Activism"
 
 #define REQ_NAME_STDFEEDS                   "Standard Feeds"
-
+#define REQ_NAME_VIDEO_SEARCH               "Video Queries"
 #define REQ_NAME_FAVORITES                  "Favorites"
-#define REQ_NAME_FEATURED                   "Featured"
-#define REQ_NAME_POPULAR                    "Popular"
-#define REQ_NAME_PLAYLIST                   "Playlists"
-#define REQ_NAME_CATEGORY_AND_TAG           "Categories"
-// custom names
-#define REQ_NAME_BY_USER                    "User"
-#define REQ_NAME_BY_TAG                     "Tag"
+#define REQ_NAME_PLAYLISTS                  "Playlists"
+#define REQ_NAME_SUBSCRIPTIONS              "Subscriptions"
+#define REQ_NAME_POPULAR                    "Popular Videos"
+#define REQ_NAME_UPLOADS                    "User Videos"
 
 // config.xml defines
 #define CFG_CAT_TERM_FILM                   "Film"
@@ -185,6 +180,7 @@ static char *YT_stdfeeds[] =
 #define CFG_REQUEST_FAVORITES               "favorites"
 #define CFG_REQUEST_SUBSCRIPTIONS           "subscriptions"
 #define CFG_REQUEST_PLAYLISTS               "playlists"
+#define CFG_REQUEST_UPLOADS                 "uploads"
 
 #define CFG_OPTION_USER                     "user"
 #define CFG_OPTION_TAG                      "tag"
@@ -193,7 +189,6 @@ static char *YT_stdfeeds[] =
 #define CFG_OPTION_PLAYLIST_ID              "id"
 #define CFG_OPTION_PLAYLIST_NAME            "name"
 #define CFG_OPTION_TIME_RANGE               "time-range"
-#define CFG_OPTION_CATEGORY                 "category"
 #define CFG_OPTION_AUTHOR                   "author"
 
 #define CFG_OPTION_STDFEED                  "feed"
@@ -220,28 +215,35 @@ static char *YT_stdfeeds[] =
 #define CFG_OPTION_TAIWAN                   "tw"
 #define CFG_OPTION_UNITED_STATES            "us"
 
-static char *YT_regions[] = 
+typedef struct regions regions;
+struct regions
+{
+    const char *region_code;
+    const char *country;
+};
+
+regions YT_regions[] = 
 {    
-    CFG_OPTION_REGION_AUSTRALIA,
-    CFG_OPTION_REGION_BRAZIL,
-    CFG_OPTION_REGION_CANADA,
-    CFG_OPTION_REGION_FRANCE,
-    CFG_OPTION_REGION_GERMANY,
-    CFG_OPTION_REGION_GREAT_BRITAIN,
-    CFG_OPTION_REGION_HOLLAND,
-    CFG_OPTION_REGION_HONG_KONG,
-    CFG_OPTION_REGION_IRELAND,
-    CFG_OPTION_REGION_ITALY,
-    CFG_OPTION_REGION_JAPAN,
-    CFG_OPTION_REGION_MEXICO,
-    CFG_OPTION_REGION_NEW_ZEALAND,
-    CFG_OPTION_REGION_POLAND,
-    CFG_OPTION_RUSSIA,
-    CFG_OPTION_SOUTH_KOREA,
-    CFG_OPTION_SPAIN,
-    CFG_OPTION_TAIWAN,
-    CFG_OPTION_UNITED_STATES,
-    NULL,
+    { CFG_OPTION_REGION_AUSTRALIA,      "Australia"       },
+    { CFG_OPTION_REGION_BRAZIL,         "Brazil"          },
+    { CFG_OPTION_REGION_CANADA,         "Canada"          },
+    { CFG_OPTION_REGION_FRANCE,         "France"          },
+    { CFG_OPTION_REGION_GERMANY,        "Germany"         },
+    { CFG_OPTION_REGION_GREAT_BRITAIN,  "Great Britain"   },
+    { CFG_OPTION_REGION_HOLLAND,        "Holland"         },
+    { CFG_OPTION_REGION_HONG_KONG,      "Hong Kong"       },
+    { CFG_OPTION_REGION_IRELAND,        "Ireland"         },
+    { CFG_OPTION_REGION_ITALY,          "Italy"           },
+    { CFG_OPTION_REGION_JAPAN,          "Japan"           },
+    { CFG_OPTION_REGION_MEXICO,         "Mexico"          },
+    { CFG_OPTION_REGION_NEW_ZEALAND,    "New Zealand"     },
+    { CFG_OPTION_REGION_POLAND,         "Poland"          },
+    { CFG_OPTION_RUSSIA,                "Russia"          },
+    { CFG_OPTION_SOUTH_KOREA,           "South Korea"     },
+    { CFG_OPTION_SPAIN,                 "Spain"           },
+    { CFG_OPTION_TAIWAN,                "Taiwan"          },
+    { CFG_OPTION_UNITED_STATES,         "United States"   },
+    { NULL , NULL },
 };
 
 YouTubeService::YouTubeService()
@@ -265,7 +267,6 @@ YouTubeService::YouTubeTask::YouTubeTask()
 {
     parameters = zmm::Ref<Dictionary>(new Dictionary());
     request = YT_request_none;
-    category = YT_cat_none;
     amount = 0;
     amount_fetched = 0;
     start_index = 1;
@@ -293,30 +294,26 @@ String YouTubeService::getRequestName(yt_requests_t request)
         case YT_request_stdfeed:
             temp = _(REQ_NAME_STDFEEDS);
             break;
-#if 0
-        case YT_list_favorite:
+        case YT_request_video_search:
+            temp = _(REQ_NAME_VIDEO_SEARCH);
+            break;
+        case YT_request_user_favorites:
             temp = _(REQ_NAME_FAVORITES);
             break;
-        case YT_list_featured:
-            temp = _(REQ_NAME_FEATURED);
+        case YT_request_user_playlists:
+            temp = _(REQ_NAME_PLAYLISTS);
             break;
-        case YT_list_popular:
+        case YT_request_user_subscriptions:
+            temp = _(REQ_NAME_SUBSCRIPTIONS);
+            break;
+        case YT_request_user_uploads:
+            temp = _(REQ_NAME_UPLOADS);
+            break;
+        case YT_request_popular:
             temp = _(REQ_NAME_POPULAR);
             break;
-        case YT_list_by_playlist:
-            temp = _(REQ_NAME_PLAYLIST);
-            break;
-        case YT_list_by_category_and_tag:
-            temp = _(REQ_NAME_CATEGORY_AND_TAG);
-            break;
-        case YT_list_by_tag:
-            temp = _(REQ_NAME_BY_TAG);
-            break;
-        case YT_list_by_user:
-            temp = _(REQ_NAME_BY_USER);
-            break;
-        case YT_list_none:
-#endif
+        case YT_request_none:
+        case YT_subrequest:
         default:
             temp = nil;
             break;
@@ -325,60 +322,12 @@ String YouTubeService::getRequestName(yt_requests_t request)
     return temp;
 }
 
-String YouTubeService::getCategoryName(yt_categories_t category)
+String YouTubeService::getRegionName(yt_regions_t region_code)
 {
-    return nil;
-#warning ДОДЕЛАТЬ YT!
-
-#if 0
-    String temp;
-
-    switch (category)
-    {
-        case YT_cat_film_and_animation:
-            temp = _(CAT_NAME_FILM);
-            break;
-        case YT_cat_autos_and_vehicles:
-            temp = _(CAT_NAME_AUTOS);
-            break;
-        case YT_cat_music:
-            temp = _(CAT_NAME_MUSIC);
-            break;
-        case YT_cat_pets_and_animals:
-            temp = _(CAT_NAME_ANIMALS);
-            break;
-        case YT_cat_sports:
-            temp = _(CAT_NAME_SPORTS);
-            break;
-        case YT_cat_travel_and_places:
-            temp = _(CAT_NAME_TRAVEL);
-            break;
-        case YT_cat_gadgets_and_games:
-            temp = _(CAT_NAME_GADGETS);
-            break;
-        case YT_cat_people_and_blogs:
-            temp = _(CAT_NAME_PEOPLE);
-            break;
-        case YT_cat_comedy:
-            temp = _(CAT_NAME_COMEDY);
-            break;
-        case YT_cat_entertainment:
-            temp = _(CAT_NAME_ENTERTAINMENT);
-            break;
-        case YT_cat_news_and_politics:
-            temp = _(CAT_NAME_NEWS);
-            break;
-        case YT_cat_howto_and_diy:
-            temp = _(CAT_NAME_HOWTO);
-            break;
-        case YT_cat_none:
-        default:
-            temp = nil;
-            break;
-    }
-
-    return temp;
-#endif
+    if ((region_code < 0) || (region_code >= YT_region_none))
+        return nil;
+    else
+        return String(YT_regions[region_code].country);
 }
 
 
@@ -425,6 +374,11 @@ void YouTubeService::getPagingParams(Ref<Element> xml, Ref<YouTubeTask> task)
     else
     {
         itmp = getCheckPosIntAttr(xml, _(CFG_OPTION_AMOUNT));
+        if (itmp > AMOUNT_ALL)
+        {
+            log_warning("Maximum amount of items to fetch can not exceed 1000\n");
+            itmp = AMOUNT_ALL;
+        }
         task->amount = itmp;
     }
 
@@ -469,9 +423,9 @@ String YouTubeService::getRegion(Ref<Element> xml)
         return nil;
 
     int count = 0;
-    while (YT_regions[count] != NULL)
+    while (YT_regions[count].region_code != NULL)
     {
-        if (region == YT_regions[count])
+        if (region == YT_regions[count].region_code)
             return region;
         count++;
     }
@@ -514,6 +468,8 @@ Ref<Object> YouTubeService::defineServiceTask(Ref<Element> xmlopt, Ref<Object> p
         task->request = YT_request_user_subscriptions;
     else if (temp == CFG_REQUEST_PLAYLISTS)
         task->request = YT_request_user_playlists;
+    else if (temp == CFG_REQUEST_UPLOADS)
+        task->request = YT_request_user_uploads;
     else throw _Exception(_("Unsupported tag while parsing YouTube options: ") + temp);
 
     if (!hasPaging(task->request))
@@ -579,9 +535,6 @@ Ref<Object> YouTubeService::defineServiceTask(Ref<Element> xmlopt, Ref<Object> p
             task->url_part = _(GDATA_REQUEST_USERS) + temp + 
                              _(GDATA_REQUEST_FAVORITES);
      
-            if (string_ok(temp))
-                task->parameters->put(_(GDATA_YT_PARAM_AUTHOR), temp);
-           
             task->parameters->put(_(GDATA_YT_PARAM_RESTRICTED_CONTENT),
                                   racy->getOption());
 
@@ -598,6 +551,18 @@ Ref<Object> YouTubeService::defineServiceTask(Ref<Element> xmlopt, Ref<Object> p
             task->url_part = _(GDATA_REQUEST_USERS) + temp +
                              _(GDATA_REQUEST_PLAYLISTS);
             task->amount = AMOUNT_ALL;
+            break;
+        case YT_request_user_uploads:
+            task->parameters->put(_(GDATA_YT_PARAM_FORMAT),
+                                  _(GDATA_YT_VALUE_FORMAT_SWF));
+            temp = getCheckAttr(xmlopt, _(CFG_OPTION_USER));
+            task->url_part = _(GDATA_REQUEST_USERS) + temp + 
+                             _(GDATA_REQUEST_UPLOADS);
+     
+            task->parameters->put(_(GDATA_YT_PARAM_RESTRICTED_CONTENT),
+                                  racy->getOption());
+
+            getPagingParams(xmlopt, task);
             break;
         case YT_request_none:
         default:
@@ -645,7 +610,7 @@ Ref<Element> YouTubeService::getData(String url_part, Ref<Dictionary> params, bo
     if (retcode != 200)
         return nil;
 
-    log_debug("GOT BUFFER\n%s\n", buffer->toString().c_str()); 
+//    log_debug("GOT BUFFER\n%s\n", buffer->toString().c_str()); 
     Ref<Parser> parser(new Parser());
     try
     {
@@ -739,17 +704,15 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
     if (task == nil)
         throw _Exception(_("Encountered invalid task!"));
 
-    if (hasPaging(task->request) && 
-       ((task->amount == AMOUNT_ALL) || (task->amount < task->amount_fetched)))
+    if (hasPaging(task->request) && (task->amount_fetched < task->amount))
     {
         // yt start index begins at 1
         task->start_index = task->cfg_start_index + task->amount_fetched;
         task->parameters->put(_(GDATA_YT_PARAM_START_INDEX),
                               String::from(task->start_index));
 
-        if ((task->amount == AMOUNT_ALL) || 
-            ((task->amount - task->amount_fetched) > 
-             _(GDATA_YT_VALUE_PER_PAGE_MAX).toInt()))
+        if ((task->amount - task->amount_fetched) > 
+             _(GDATA_YT_VALUE_PER_PAGE_MAX).toInt())
         {
            task->parameters->put(_(GDATA_YT_PARAM_MAX_RESULTS_PER_REQ),
                                  _(GDATA_YT_VALUE_PER_PAGE_MAX));
@@ -786,6 +749,7 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
             subtask->request = YT_subrequest;
             subtask->url_part = task->subfeed->links->get(f);
             subtask->amount = AMOUNT_ALL;
+            subtask->main_request_name = task->subfeed->title;
             subtask->parameters->put(_(GDATA_YT_PARAM_FORMAT),
                                      _(GDATA_YT_VALUE_FORMAT_SWF));
             subtask->parameters->put(_(GDATA_PARAM_FEED_FORMAT),
@@ -857,41 +821,19 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
             log_debug("Adding new YouTube object\n");
             obj->setAuxData(_(YOUTUBE_AUXDATA_REQUEST), 
                             String::from(task->request));
-#warning ДОДЕЛАТЬ YT
-#if 0
-            if (task->method == YT_list_by_category_and_tag)
+
+            if (task->request == YT_subrequest)
             {
-                obj->setAuxData(_(YOUTUBE_AUXDATA_REQUEST_SUBNAME),
-                        String::from(task->category));
+                obj->setAuxData(_(YOUTUBE_AUXDATA_MAIN_REQUEST_NAME),
+                        task->main_request_name);
             }
-            else if (task->method == YT_list_by_user)
-            {
-                obj->setAuxData(_(YOUTUBE_AUXDATA_REQUEST_SUBNAME), 
-                        task->parameters->get(_(REST_PARAM_USER)));
-            }
-            else if (task->method == YT_list_favorite)
-            {
-                obj->setAuxData(_(YOUTUBE_AUXDATA_REQUEST_SUBNAME),
-                        task->parameters->get(_(REST_PARAM_USER)));
-            }
-            else if (task->method == YT_list_by_playlist)
-            {
-                obj->setAuxData(_(YOUTUBE_AUXDATA_REQUEST_SUBNAME), 
-                        task->playlist_name);
-            }
-            else if (task->method == YT_list_by_tag)
-            {
-                obj->setAuxData(_(YOUTUBE_AUXDATA_REQUEST_SUBNAME),
-                        task->parameters->get(_(REST_PARAM_TAG)));
-            }
-#endif
+            
             if (layout != nil)
-            {
-                printf("Нашел объект!!!!!!!!!!!!\n");
                 layout->processCdsObject(obj);
-            }
             else
-                printf("---------------> NO OBJECTS PARSED!\n");
+            {
+                log_warning("Your virtual layout is disabled, YouTube objects will not be added\n");
+            }
         }
         else
         {
@@ -907,23 +849,20 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
         }
 
         task->amount_fetched++;
-        if (task->amount != AMOUNT_ALL)
+        // max amount reached, reset paging and break to next task
+        if (task->amount_fetched >= task->amount)
         {
-            // max amount reached, reset paging and break to next task
-            if (task->amount_fetched >= task->amount)
+            task->amount_fetched = 0;
+            if (hasPaging(task->request))
             {
-                task->amount_fetched = 0;
-                if (hasPaging(task->request))
-                {
-                    task->start_index = task->cfg_start_index;
-                }
-                current_task++;
-                if (current_task >= tasklist->size())
-                {
-                    current_task = 0;
-                    killOneTimeTasks(tasklist);
-                    return false;
-                }
+                task->start_index = task->cfg_start_index;
+            }
+            current_task++;
+            if (current_task >= tasklist->size())
+            {
+                current_task = 0;
+                killOneTimeTasks(tasklist);
+                return false;
             }
         }
 

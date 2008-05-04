@@ -35,19 +35,19 @@
 #ifndef __YOUTUBE_DATA_HANDLER_H__
 #define __YOUTUBE_DATA_HANDLER_H__
 
-#define YOUTUBE_SERVICE                 "YouTube"
-#define YOUTUBE_SERVICE_ID              "Y"
+#define YOUTUBE_SERVICE                     "YouTube"
+#define YOUTUBE_SERVICE_ID                  "Y"
 
-#define YOUTUBE_AUXDATA_KEYWORDS        "kwd"
-#define YOUTUBE_AUXDATA_AVG_RATING      "avr"
-#define YOUTUBE_AUXDATA_AUTHOR          "aut"
-#define YOUTUBE_AUXDATA_FAVORITE_COUNT  "fcnt"
-#define YOUTUBE_AUXDATA_VIEW_COUNT      "vcnt"
-#define YOUTUBE_AUXDATA_RATING_COUNT    "rcount"
-#define YOUTUBE_AUXDATA_FEED            "feed"
-#define YOUTUBE_AUXDATA_REQUEST_SUBNAME "sreq"
-#define YOUTUBE_AUXDATA_REQUEST         "req"
-#define YOUTUBE_AUXDATA_CATEGORY        "cat"
+#define YOUTUBE_AUXDATA_KEYWORDS            "kwd"
+#define YOUTUBE_AUXDATA_AVG_RATING          "avr"
+#define YOUTUBE_AUXDATA_AUTHOR              "aut"
+#define YOUTUBE_AUXDATA_FAVORITE_COUNT      "fcnt"
+#define YOUTUBE_AUXDATA_VIEW_COUNT          "vcnt"
+#define YOUTUBE_AUXDATA_RATING_COUNT        "rcount"
+#define YOUTUBE_AUXDATA_FEED                "feed"
+#define YOUTUBE_AUXDATA_MAIN_REQUEST_NAME   "mreq"
+#define YOUTUBE_AUXDATA_REQUEST             "req"
+#define YOUTUBE_AUXDATA_CATEGORY            "cat"
 
 
 #include "zmmf/zmmf.h"
