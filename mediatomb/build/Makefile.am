@@ -54,14 +54,14 @@ mediatomb_CXXFLAGS = -I$(top_srcdir)/src \
 mediatomb_LDADD = \
     libmediatomb.a \
     $(top_srcdir)/tombupnp/build/libtombupnp.a \
-	$(LIBEXIF_LDFLAGS) \
-	$(ZLIB_LDFLAGS) \
-	$(EXPAT_LDFLAGS) \
-	$(RT_LDFLAGS) \
-	$(SQLITE3_LDFLAGS) \
-	$(LIBMP4V2_LDFLAGS) \
-	$(LIBMAGIC_LDFLAGS) \
-	$(PTHREAD_LDFLAGS) \
+    $(LIBEXIF_LDFLAGS) \
+    $(ZLIB_LDFLAGS) \
+    $(EXPAT_LDFLAGS) \
+    $(RT_LDFLAGS) \
+    $(SQLITE3_LDFLAGS) \
+    $(LIBMP4V2_LDFLAGS) \
+    $(LIBMAGIC_LDFLAGS) \
+    $(PTHREAD_LDFLAGS) \
     $(ICONV_LIBS) \
     $(SQLITE3_LIBS) \
     $(MYSQL_LIBS) \
@@ -78,6 +78,8 @@ mediatomb_LDADD = \
     $(FFMPEG_LIBS) \
     $(CURL_LIBS) \
     $(EXPAT_LIBS) \
-	$(LIBMP4V2_LIBS)
+    $(LIBMP4V2_LIBS) \
+    $(NSL_LIBS) \
+    $(LWRES_LIBS)
     
 

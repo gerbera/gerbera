@@ -45,6 +45,8 @@ DARWIN_OS=0
 CYGWIN_OS=0
 FREEBSD_OS=0
 
+LIBS_SAVE="$LIBS"
+
 AC_CANONICAL_HOST
 
 case $host in
@@ -733,7 +735,13 @@ AC_CHECK_FUNCS([gethostbyname_r],[],
         [
             AC_CHECK_HEADERS([lwres/netdb.h],
                 [
-                    AC_CHECK_LIB(lwres, lwres_gethostbyname_r,[],[AC_MSG_ERROR(required library function not found)])
+                    AC_CHECK_LIB(lwres, lwres_gethostbyname_r,
+                                 [
+                                    LWRES_LIBS="-llwres"
+                                    AC_DEFINE(HAVE_LIBLWRES, 1, [lwres library presence])
+                                    AC_SUBST(LWRES_LIBS)
+                                 ],
+                                 [AC_MSG_ERROR(required library function not found)])
                 ],
                 [
                     if ((test $DARWIN_OS -eq 0) && (test $CYGWIN_OS -eq 0)) ; then
@@ -744,7 +752,11 @@ AC_CHECK_FUNCS([gethostbyname_r],[],
 
 AC_CHECK_FUNCS([if_nameindex],[],
         [
-            AC_CHECK_LIB(nsl, if_nameindex,[],
+            AC_CHECK_LIB(nsl, if_nameindex,
+                [
+                    NSL_LIBS="-lnsl"
+                    AC_SUBST(NSL_LIBS)
+                ],
                 [
                     if test $CYGWIN_OS -eq 0; then
                         AC_MSG_ERROR(required library function not found)
@@ -798,7 +810,6 @@ else
     AC_SUBST(PTHREAD_CFLAGS)
 fi
 
-LIBS_SAVE="$LIBS"
 unset LIBS
 
 # we might need librt for sqlite
@@ -1541,7 +1552,6 @@ if test "x$FFMPEG_OK" = xyes; then
     fi
 fi
  
-LIBS_SAVE="$LIBS"
 unset LIBS
 if test "x$FFMPEG_OK" = xyes; then
     if test -n "$FFMPEG_SEARCH_LIBS" ; then
