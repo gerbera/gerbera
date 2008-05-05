@@ -287,42 +287,20 @@ void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
             String main_request = obj->getAuxData(_(YOUTUBE_AUXDATA_MAIN_REQUEST_NAME));
             temp = esc(main_request);
             String feed_title = obj->getAuxData(_(YOUTUBE_AUXDATA_FEED));
-            temp = temp + '/' + esc(feed_title);
+            if (string_ok(feed_title))
+                temp = temp + '/' + esc(feed_title);
         }
-        else
+        else if (req != YT_request_stdfeed)
         {
             temp = YouTubeService::getRequestName(req);
             if (string_ok(temp))
             {
                 temp = esc(temp);
                 String feed_title = obj->getAuxData(_(YOUTUBE_AUXDATA_FEED));
-                temp = temp + '/' + esc(feed_title);
+                if (string_ok(feed_title))
+                    temp = temp + '/' + esc(feed_title);
             }
-#if 0
-            if (m == YT_list_by_category_and_tag)
-            {
-                 String ctmp = 
-                     obj->getAuxData(_(YOUTUBE_AUXDATA_REQUEST_SUBNAME));
-                 if (string_ok(ctmp))
-                 {
-                     yt_categories_t c = (yt_categories_t)ctmp.toInt();
-                     ctmp = YouTubeService::getCategoryName(c);
-                     if (string_ok(ctmp))
-                         temp = temp + '/' + esc(ctmp);
-                 }
-            }
-            else if ((m == YT_list_by_user) || (m == YT_list_by_user) ||
-                     (m == YT_list_favorite) || (m == YT_list_by_playlist) ||
-                     (m == YT_list_by_tag))
 
-            {
-                String subtmp = 
-                        obj->getAuxData(_(YOUTUBE_AUXDATA_REQUEST_SUBNAME));
-                if (string_ok(subtmp))
-                    temp = temp + '/' + esc(subtmp);
-            }
-#endif
-        }
 
         if (string_ok(temp))
             chain = _(YT_VPATH) + '/' + temp;
@@ -332,7 +310,31 @@ void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
         id = ContentManager::getInstance()->addContainerChain(chain);
         add(obj, id, ref_set);
 
-    }
+        } 
+        else if (req == YT_request_stdfeed)
+        {
+            String region = obj->getAuxData(_(YOUTUBE_AUXDATA_REGION));
+            temp = YouTubeService::getRequestName(req);
+            if (string_ok(region) && (string_ok(temp)))
+            {
+                yt_regions_t reg = (yt_regions_t)region.toInt();
+                region = YouTubeService::getRegionName(reg);
+                if (string_ok(region))
+                {
+                    String feed_title = obj->getAuxData(_(YOUTUBE_AUXDATA_FEED));
+                    if (string_ok(feed_title))
+                        temp = temp + '/' + esc(region + " - " + feed_title);
+                    else
+                        temp = temp + '/' + esc(region);
+
+                    chain = _(YT_VPATH) + '/' + temp;
+                    id = ContentManager::getInstance()->addContainerChain(chain);
+                    add(obj, id, ref_set);
+
+                } // region name resolved
+            } // region and request name ok
+        } // stdfeed
+    } // valid request name
 }
 #endif
 

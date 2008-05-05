@@ -128,8 +128,11 @@ protected:
     public:
         YouTubeTask();
 
-        /// \brief Method identifier
+        /// \brief Request identifier
         yt_requests_t request;
+
+        /// \brief Region setting 
+        yt_regions_t region;
 
         /// \brief Constructed URL that will be prepended with the base and
         /// appended with parameters.
@@ -179,7 +182,7 @@ protected:
     void getPagingParams(zmm::Ref<mxml::Element> xml, 
                          zmm::Ref<YouTubeTask> task);
     void addTimeParams(zmm::Ref<mxml::Element> xml, zmm::Ref<YouTubeTask> task);
-    zmm::String getRegion(zmm::Ref<mxml::Element> xml);
+    yt_regions_t getRegion(zmm::Ref<mxml::Element> xml);
     zmm::String getFeed(zmm::Ref<mxml::Element> xml);
     void killOneTimeTasks(zmm::Ref<zmm::Array<zmm::Object> > tasklist);
 };

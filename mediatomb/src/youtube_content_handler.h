@@ -48,7 +48,7 @@
 #define YOUTUBE_AUXDATA_MAIN_REQUEST_NAME   "mreq"
 #define YOUTUBE_AUXDATA_REQUEST             "req"
 #define YOUTUBE_AUXDATA_CATEGORY            "cat"
-
+#define YOUTUBE_AUXDATA_REGION              "reg"
 
 #include "zmmf/zmmf.h"
 #include "mxml/mxml.h"

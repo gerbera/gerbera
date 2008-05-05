@@ -218,32 +218,33 @@ static char *YT_stdfeeds[] =
 typedef struct regions regions;
 struct regions
 {
+    yt_regions_t region;
     const char *region_code;
     const char *country;
 };
 
 regions YT_regions[] = 
 {    
-    { CFG_OPTION_REGION_AUSTRALIA,      "Australia"       },
-    { CFG_OPTION_REGION_BRAZIL,         "Brazil"          },
-    { CFG_OPTION_REGION_CANADA,         "Canada"          },
-    { CFG_OPTION_REGION_FRANCE,         "France"          },
-    { CFG_OPTION_REGION_GERMANY,        "Germany"         },
-    { CFG_OPTION_REGION_GREAT_BRITAIN,  "Great Britain"   },
-    { CFG_OPTION_REGION_HOLLAND,        "Holland"         },
-    { CFG_OPTION_REGION_HONG_KONG,      "Hong Kong"       },
-    { CFG_OPTION_REGION_IRELAND,        "Ireland"         },
-    { CFG_OPTION_REGION_ITALY,          "Italy"           },
-    { CFG_OPTION_REGION_JAPAN,          "Japan"           },
-    { CFG_OPTION_REGION_MEXICO,         "Mexico"          },
-    { CFG_OPTION_REGION_NEW_ZEALAND,    "New Zealand"     },
-    { CFG_OPTION_REGION_POLAND,         "Poland"          },
-    { CFG_OPTION_RUSSIA,                "Russia"          },
-    { CFG_OPTION_SOUTH_KOREA,           "South Korea"     },
-    { CFG_OPTION_SPAIN,                 "Spain"           },
-    { CFG_OPTION_TAIWAN,                "Taiwan"          },
-    { CFG_OPTION_UNITED_STATES,         "United States"   },
-    { NULL , NULL },
+    { YT_region_au, CFG_OPTION_REGION_AUSTRALIA,      "Australia"       },
+    { YT_region_br, CFG_OPTION_REGION_BRAZIL,         "Brazil"          },
+    { YT_region_ca, CFG_OPTION_REGION_CANADA,         "Canada"          },
+    { YT_region_fr, CFG_OPTION_REGION_FRANCE,         "France"          },
+    { YT_region_de, CFG_OPTION_REGION_GERMANY,        "Germany"         },
+    { YT_region_gb, CFG_OPTION_REGION_GREAT_BRITAIN,  "Great Britain"   },
+    { YT_region_nl, CFG_OPTION_REGION_HOLLAND,        "Holland"         },
+    { YT_region_hk, CFG_OPTION_REGION_HONG_KONG,      "Hong Kong"       },
+    { YT_region_ie, CFG_OPTION_REGION_IRELAND,        "Ireland"         },
+    { YT_region_it, CFG_OPTION_REGION_ITALY,          "Italy"           },
+    { YT_region_jp, CFG_OPTION_REGION_JAPAN,          "Japan"           },
+    { YT_region_mx, CFG_OPTION_REGION_MEXICO,         "Mexico"          },
+    { YT_region_nz, CFG_OPTION_REGION_NEW_ZEALAND,    "New Zealand"     },
+    { YT_region_pl, CFG_OPTION_REGION_POLAND,         "Poland"          },
+    { YT_region_ru, CFG_OPTION_RUSSIA,                "Russia"          },
+    { YT_region_kr, CFG_OPTION_SOUTH_KOREA,           "South Korea"     },
+    { YT_region_es, CFG_OPTION_SPAIN,                 "Spain"           },
+    { YT_region_tw, CFG_OPTION_TAIWAN,                "Taiwan"          },
+    { YT_region_us, CFG_OPTION_UNITED_STATES,         "United States"   },
+    { YT_region_none, NULL , NULL },
 };
 
 YouTubeService::YouTubeService()
@@ -267,6 +268,7 @@ YouTubeService::YouTubeTask::YouTubeTask()
 {
     parameters = zmm::Ref<Dictionary>(new Dictionary());
     request = YT_request_none;
+    region = YT_region_none;
     amount = 0;
     amount_fetched = 0;
     start_index = 1;
@@ -416,17 +418,17 @@ void YouTubeService::addTimeParams(Ref<Element> xml, Ref<YouTubeTask> task)
     task->parameters->put(_(GDATA_YT_PARAM_TIME), temp);
 }
 
-String YouTubeService::getRegion(Ref<Element> xml)
+yt_regions_t YouTubeService::getRegion(Ref<Element> xml)
 {
     String region = xml->getAttribute(_(CFG_OPTION_REGION_ID));
     if (!string_ok(region))
-        return nil;
+        return YT_region_none;
 
     int count = 0;
     while (YT_regions[count].region_code != NULL)
     {
         if (region == YT_regions[count].region_code)
-            return region;
+            return YT_regions[count].region;
         count++;
     }
 
@@ -488,9 +490,13 @@ Ref<Object> YouTubeService::defineServiceTask(Ref<Element> xmlopt, Ref<Object> p
 
             if (temp2 != GDATA_REQUEST_STDFEED_WATCH_ON_MOBILE)
             {
-                temp = getRegion(xmlopt);
-                if (string_ok(temp))
-                    task->url_part = task->url_part + temp + _("/");
+                yt_regions_t r = getRegion(xmlopt);
+                if (r < YT_region_none)
+                {
+                    task->url_part = task->url_part + 
+                          YT_regions[r].region_code + _("/");
+                    task->region = r;
+                }
             }
 
             task->url_part = task->url_part + temp2;
@@ -511,7 +517,6 @@ Ref<Object> YouTubeService::defineServiceTask(Ref<Element> xmlopt, Ref<Object> p
         case YT_request_video_search:
             task->parameters->put(_(GDATA_YT_PARAM_FORMAT),
                                   _(GDATA_YT_VALUE_FORMAT_SWF));
-            /// \todo check if this request supports region settings
             task->url_part = _(GDATA_REQUEST_SEARCH);
             /// \todo  check if this needs additional URL escaping
             temp = getCheckAttr(xmlopt, _(CFG_OPTION_SEARCH_QUERY));
@@ -826,6 +831,11 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
             {
                 obj->setAuxData(_(YOUTUBE_AUXDATA_MAIN_REQUEST_NAME),
                         task->main_request_name);
+            } 
+            else if (task->request == YT_request_stdfeed)
+            {
+                 obj->setAuxData(_(YOUTUBE_AUXDATA_REGION), 
+                     String::from((int)task->region));
             }
             
             if (layout != nil)
