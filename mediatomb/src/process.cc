@@ -62,24 +62,58 @@ String run_simple_process(String prog, String param, String input)
     char temp_out[] = "mt_out_XXXXXX";
         
     Ref<ConfigManager> cfg = ConfigManager::getInstance();
-    String input_file = tempName(cfg->getOption(CFG_SERVER_TMPDIR), temp_in);
-    fd = open(input_file.c_str(), O_RDWR);
-    int ret = write(fd, input.c_str(), input.length());
+    String input_file = normalizePath(tempName(cfg->getOption(CFG_SERVER_TMPDIR), temp_in));
+    fd = open(input_file.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+    if (fd == -1)
+    {
+        log_debug("Failed to open input file %s: %s\n", input_file.c_str(),
+                  strerror(errno));
+        throw _Exception(_("Failed to open input file ") + input_file +_(" ") + 
+                         strerror(errno));
+    }
+    ssize_t ret = write(fd, input.c_str(), input.length());
     close(fd);
+    if (ret < input.length())
+    {
+
+        log_debug("Failed to write to %s: %s\n", input.c_str(), 
+                   strerror(errno));
+        throw _Exception(_("Failed to write to ") + input + ": " + 
+                         strerror(errno));
+    }
     
     /* touching output file */
-    String output_file = tempName(cfg->getOption(CFG_SERVER_TMPDIR), temp_out);
-    fd = open(output_file.c_str(), O_RDWR);
+    String output_file = normalizePath(tempName(cfg->getOption(CFG_SERVER_TMPDIR), temp_out));
+    fd = open(output_file.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+    if (fd == -1)
+    {
+        log_debug("Failed to open output file %s: %s\n", output_file.c_str(),
+                  strerror(errno));
+        throw _Exception(_("Failed to open output file ")+ input_file +_(" ") + 
+                         strerror(errno));
+    }
     close(fd);
    
     /* executing script */
     String command = prog + " " + param + " < " + input_file +
         " > " + output_file;
     log_debug("running %s\n", command.c_str());
-    ret = system(command.c_str());
+    int sysret = system(command.c_str());
+    if (sysret == -1)
+    {
+        log_debug("Failed to execute: %s\n", command.c_str());
+        throw _Exception(_("Failed to execute: ") + command);
+    }
 
     /* reading output file */
     file = fopen(output_file.c_str(), "r");
+    if (!file)
+    {
+        log_debug("Could not open output file %s: %s\n", output_file.c_str(),
+                strerror(errno));
+        throw _Exception(_("Failed to open output file ")+output_file +_(" ") + 
+                strerror(errno));
+    }
     Ref<StringBuffer> output(new StringBuffer());
 
     int bytesRead;
