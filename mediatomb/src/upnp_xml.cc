@@ -156,11 +156,12 @@ void UpnpXML_DIDLUpdateObject(Ref<CdsObject> obj, String text)
             aitem->setTitle(title);
 
         /// \todo description should be taken from the dictionary      
-/*        String description = root->getChildText("dc:description");
+        String description = root->getChildText(_("dc:description"));
         if (description == nil)
-            description = "";
-        aitem->setDescription(description);
-*/
+            description = _("");
+        aitem->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION),
+                    description);
+
         String location = root->getChildText(_("location"));
         if (location != nil && location != "")
             aitem->setLocation(location);

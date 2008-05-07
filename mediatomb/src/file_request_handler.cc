@@ -308,8 +308,21 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
         throw _Exception(_("requested object is not an item"));
     }
 
+    // determining which resource to serve 
+    int res_id = 0;
+    String s_res_id = dict->get(_(URL_RESOURCE_ID));
+#ifdef EXTERNAL_TRANSCODING
+    if (string_ok(s_res_id) && (s_res_id != _(URL_VALUE_TRANSCODE_NO_RES_ID)))
+#else
+    if (string_ok(s_res_id))
+#endif
+        res_id = s_res_id.toInt();
+    else
+        res_id = -1;
+
+
     // update item info by running action
-    if (IS_CDS_ACTIVE_ITEM(objectType)) // check - if thumbnails, then no action, just show
+    if (IS_CDS_ACTIVE_ITEM(objectType) && (res_id == 0)) // check - if thumbnails, then no action, just show
     {
         Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
 
@@ -374,18 +387,6 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
     Ref<CdsItem> item = RefCast(obj, CdsItem);
 
     String path = item->getLocation();
-
-    // determining which resource to serve 
-    int res_id = 0;
-    String s_res_id = dict->get(_(URL_RESOURCE_ID));
-#ifdef EXTERNAL_TRANSCODING
-    if (string_ok(s_res_id) && (s_res_id != _(URL_VALUE_TRANSCODE_NO_RES_ID)))
-#else
-    if (string_ok(s_res_id))
-#endif
-        res_id = s_res_id.toInt();
-    else
-        res_id = -1;
 
     String ext = dict->get(_("ext"));
     int edot = ext.rindex('.');

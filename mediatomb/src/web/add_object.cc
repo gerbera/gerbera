@@ -104,9 +104,16 @@ Ref<CdsObject> web::addObject::addActiveItem(int parentID)
         item->setState(tmp);
 
     item->setParentID(parentID);
-    
-    item->setTitle(param(_("title")));
     item->setLocation(param(_("location")));
+ 
+    tmp = param(_("mime-type"));
+    if (!string_ok(tmp))
+        tmp = _(MIMETYPE_DEFAULT);
+    item->setMimeType(tmp);
+  
+    MetadataHandler::setMetadata(RefCast(item, CdsItem));
+
+    item->setTitle(param(_("title")));
     item->setClass(param(_("class")));
     
     tmp = param(_("description"));
@@ -114,12 +121,9 @@ Ref<CdsObject> web::addObject::addActiveItem(int parentID)
         item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), tmp);
     
     /// \todo is there a default setting? autoscan? import settings?
-    tmp = param(_("mime-type"));
-    if (!string_ok(tmp))
-        tmp = _(MIMETYPE_DEFAULT);
-    item->setMimeType(tmp);
 
-    Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
+//    Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
+    Ref<CdsResource> resource = item->getResource(0); // added by m-handler
     resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
                            renderProtocolInfo(tmp));
     item->addResource(resource);

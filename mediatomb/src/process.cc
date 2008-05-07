@@ -62,7 +62,7 @@ String run_simple_process(String prog, String param, String input)
     char temp_out[] = "mt_out_XXXXXX";
         
     Ref<ConfigManager> cfg = ConfigManager::getInstance();
-    String input_file = normalizePath(tempName(cfg->getOption(CFG_SERVER_TMPDIR), temp_in));
+    String input_file = tempName(cfg->getOption(CFG_SERVER_TMPDIR), temp_in);
     fd = open(input_file.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
     if (fd == -1)
     {
@@ -83,7 +83,7 @@ String run_simple_process(String prog, String param, String input)
     }
     
     /* touching output file */
-    String output_file = normalizePath(tempName(cfg->getOption(CFG_SERVER_TMPDIR), temp_out));
+    String output_file = tempName(cfg->getOption(CFG_SERVER_TMPDIR), temp_out);
     fd = open(output_file.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
     if (fd == -1)
     {
@@ -93,11 +93,12 @@ String run_simple_process(String prog, String param, String input)
                          strerror(errno));
     }
     close(fd);
-   
+
     /* executing script */
-    String command = prog + " " + param + " < " + input_file +
-        " > " + output_file;
+    String command = prog + " " + param + " < " + input_file + 
+                                          " > " + output_file;
     log_debug("running %s\n", command.c_str());
+    printf("WTF?!!!!!!!! %s\n", command.c_str());
     int sysret = system(command.c_str());
     if (sysret == -1)
     {
@@ -121,6 +122,7 @@ String run_simple_process(String prog, String param, String input)
     while (1)
     {
         bytesRead = fread(buf, 1, BUF_SIZE, file);
+        printf("buffer part read-------> %s\n", String(buf, BUF_SIZE).c_str());
         if(bytesRead > 0)
             *output << String(buf, bytesRead);
         else
