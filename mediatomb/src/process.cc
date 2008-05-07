@@ -98,7 +98,6 @@ String run_simple_process(String prog, String param, String input)
     String command = prog + " " + param + " < " + input_file + 
                                           " > " + output_file;
     log_debug("running %s\n", command.c_str());
-    printf("WTF?!!!!!!!! %s\n", command.c_str());
     int sysret = system(command.c_str());
     if (sysret == -1)
     {
@@ -122,7 +121,6 @@ String run_simple_process(String prog, String param, String input)
     while (1)
     {
         bytesRead = fread(buf, 1, BUF_SIZE, file);
-        printf("buffer part read-------> %s\n", String(buf, BUF_SIZE).c_str());
         if(bytesRead > 0)
             *output << String(buf, bytesRead);
         else
