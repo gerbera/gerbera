@@ -67,7 +67,6 @@ zmm::String FallbackLayout::esc(zmm::String str)
 void FallbackLayout::addVideo(zmm::Ref<CdsObject> obj)
 {
     int id = ContentManager::getInstance()->addContainerChain(_("/Video"));
-    add(obj, id);
 
     if (obj->getID() != INVALID_OBJECT_ID)
     {
