@@ -599,7 +599,6 @@ Ref<Element> YouTubeService::getData(String url_part, Ref<Dictionary> params, bo
     Ref<StringBuffer> buffer;
     try 
     {
-        log_debug("DOWNLOADING URL: %s\n", URL.c_str());
         buffer = url->download(URL, &retcode, curl_handle, false, true);
     }
     catch (Exception ex)
@@ -661,9 +660,7 @@ void YouTubeService::killOneTimeTasks(Ref<Array<Object> > tasklist)
     for (int i = 0; i < tasklist->size(); i++)
     {
         Ref<YouTubeTask> task = RefCast(tasklist->get(i), YouTubeTask);
-        printf("--------> task array: %d", task->request);
     }
-    printf("\n");
     while (true)
     {
         Ref<YouTubeTask> task = RefCast(tasklist->get(current), YouTubeTask);
@@ -678,9 +675,7 @@ void YouTubeService::killOneTimeTasks(Ref<Array<Object> > tasklist)
     for (int i = 0; i < tasklist->size(); i++)
     {
         Ref<YouTubeTask> task = RefCast(tasklist->get(i), YouTubeTask);
-        printf("--------> task array: %d", task->request);
     }
-    printf("\n");
 }
 
 bool YouTubeService::refreshServiceData(Ref<Layout> layout)
