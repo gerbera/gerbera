@@ -117,7 +117,7 @@ status open
 
 \begin_layout Standard
 
-<releaseinfo>This documentation is valid for MediaTomb version 0.11.0.</releaseinfo
+<releaseinfo>This documentation is valid for MediaTomb version 0.12.0.</releaseinfo
 >
 \end_layout
 
@@ -6820,20 +6820,6 @@ Note: so far we have not yet seen many devices that will natively support
  to make use of the YouTube feature.
 \end_layout
 
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-<itemizedlist><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
 \begin_layout Code
 <YouTube enabled="no" refresh="12600" update-at-start="yes" purge-after="1200000
 " racy-content="exclude">
@@ -7074,6 +7060,20 @@ Specifies if restricted content should be inclueded in the search results.
 \end_layout
 
 \begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 Below are various options that allow you to define what content you are
  interested in.
 \end_layout
@@ -7108,8 +7108,9 @@ Optional
 \end_layout
 
 \begin_layout Standard
-The favorites tag tells us to retrieve favorite videos of a particular user.
- It can appear more than once, each tag must contain one user attribute:
+This tag tells us to retrieve one of the standard video feeds.
+ It can appear more than once with different options (i.e.
+ different feed and region settings).
 \end_layout
 
 \begin_layout Standard
@@ -7969,6 +7970,20 @@ status open
 
 \end_layout
 
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Code
 <subscriptions user="mediatomb"/>
 \end_layout
@@ -8101,12 +8116,26 @@ status open
 
 \begin_layout Standard
 
-</listitem></itemizedlist>
+</listitem><listitem>
 \end_layout
 
 \end_inset
 
 
+\end_layout
+
+\begin_layout Code
+<uploads user="mediatomb" start-index="1" amount="all"/>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Required
+\end_layout
+
+\begin_layout Standard
+Retrieves videos that were uploaded by a specified user.
 \end_layout
 
 \begin_layout Standard
@@ -8115,12 +8144,78 @@ status open
 
 \begin_layout Standard
 
-</listitem></itemizedlist>
+<itemizedlist><listitem>
 \end_layout
 
 \end_inset
 
 
+\end_layout
+
+\begin_layout Code
+user=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Required
+\end_layout
+
+\begin_layout Standard
+Name of the YouTube user whose playlists should be fetched.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+start-index=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+Starting index of the item in the list, useful if you want to skip the first
+ xxx results, must be an integer value >= 1.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+amount=...
+\end_layout
+
+\begin_layout Standard
+Amount of items to fetch, can be either an integer value or the keyword
+ "all".
 \end_layout
 
 \begin_layout Standard
