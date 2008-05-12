@@ -1180,6 +1180,9 @@ int ContentManager::addContainerChain(String chain, String lastClass, int lastRe
     Ref<Storage> storage = Storage::getInstance();
     int updateID = INVALID_OBJECT_ID;
     int containerID;
+
+    if (!string_ok(chain))
+        throw _Exception(_("addContainerChain() called with empty chain parameter"));
     
     log_debug("received chain: %s\n", chain.c_str());
     storage->addContainerChain(chain, lastClass, lastRefID,
