@@ -115,9 +115,6 @@ bool YouTubeContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
     if (!string_ok(thumb_mimetype))
         thumb_mimetype = _("image/jpeg");
 
-    printf("---------> начало - channel_child_count = %d\n", 
-            channel_child_count);
-
     return true;
 }
 
@@ -178,20 +175,14 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
     {
         Ref<Node> n = service_xml->getChild(current_node_index);
 
-        printf("processing node %d\n", current_node_index);
-
         current_node_index++;
       
         if (n == nil)
             return nil;
 
-        printf("n не nil\n");
-
         if (n->getType() != mxml_node_element)
             continue;
 
-        printf("n елемент\n");
-       
         Ref<Element> channel_item = RefCast(n, Element);
         if (channel_item->getName() != "item")
             continue;

@@ -303,9 +303,11 @@ String YouTubeService::getRequestName(yt_requests_t request)
             temp = _(REQ_NAME_FAVORITES);
             break;
         case YT_request_user_playlists:
+        case YT_subrequest_playlists:
             temp = _(REQ_NAME_PLAYLISTS);
             break;
         case YT_request_user_subscriptions:
+        case YT_subrequest_subscriptions:
             temp = _(REQ_NAME_SUBSCRIPTIONS);
             break;
         case YT_request_user_uploads:
@@ -315,7 +317,6 @@ String YouTubeService::getRequestName(yt_requests_t request)
             temp = _(REQ_NAME_POPULAR);
             break;
         case YT_request_none:
-        case YT_subrequest:
         default:
             temp = nil;
             break;
@@ -746,10 +747,16 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
         {
             Ref<YouTubeTask> subtask(new YouTubeTask());
             subtask->kill = true; // autoremove after one time execution
-            subtask->request = YT_subrequest;
+            if (task->request == YT_request_user_subscriptions)
+                subtask->request = YT_subrequest_subscriptions;
+            else if (task->request == YT_request_user_playlists)
+                subtask->request = YT_subrequest_playlists;
+            else
+                subtask->request = YT_request_none;
+
             subtask->url_part = task->subfeed->links->get(f);
             subtask->amount = AMOUNT_ALL;
-            subtask->main_request_name = task->subfeed->title;
+            subtask->sub_request_name = task->subfeed->title;
             subtask->parameters->put(_(GDATA_YT_PARAM_FORMAT),
                                      _(GDATA_YT_VALUE_FORMAT_SWF));
             subtask->parameters->put(_(GDATA_PARAM_FEED_FORMAT),
@@ -768,7 +775,8 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
         return true;
     }
 
-    if (task->request == YT_subrequest)
+    if ((task->request == YT_subrequest_subscriptions) ||
+       (task->request == YT_subrequest_playlists))
         construct_url = false;
 
     reply = getData(task->url_part, task->parameters, construct_url);
@@ -822,15 +830,17 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
             obj->setAuxData(_(YOUTUBE_AUXDATA_REQUEST), 
                             String::from(task->request));
 
-            if (task->request == YT_subrequest)
+            if ((task->request == YT_subrequest_playlists) ||
+                (task->request == YT_subrequest_subscriptions))
             {
-                obj->setAuxData(_(YOUTUBE_AUXDATA_MAIN_REQUEST_NAME),
-                        task->main_request_name);
+                obj->setAuxData(_(YOUTUBE_AUXDATA_SUBREQUEST_NAME),
+                        task->sub_request_name);
             } 
             else if (task->request == YT_request_stdfeed)
             {
-                 obj->setAuxData(_(YOUTUBE_AUXDATA_REGION), 
-                     String::from((int)task->region));
+                if (task->region != YT_region_none)
+                     obj->setAuxData(_(YOUTUBE_AUXDATA_REGION), 
+                         String::from((int)task->region));
             }
             
             if (layout != nil)

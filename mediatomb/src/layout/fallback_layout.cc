@@ -268,78 +268,38 @@ void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
             }
         }
     }
-#warning ДОДЕЛАТЬ YT!!!!!
-#warning ДОДЕЛАТЬ YT!!!!!
-#warning ДОДЕЛАТЬ YT!!!!!
-#warning ДОДЕЛАТЬ YT!!!!!
-#warning ДОДЕЛАТЬ YT!!!!!
 
     temp = obj->getAuxData(_(YOUTUBE_AUXDATA_REQUEST));
     if (string_ok(temp))
     {
         yt_requests_t req = (yt_requests_t)temp.toInt();
+        temp = YouTubeService::getRequestName(req);
 
-        // subrequest has no name so check that HERE
-        //
-        printf("REQUEST IS: %d\n", (int)req);
-        
-        if (req == YT_subrequest)
-        {
-            String main_request = obj->getAuxData(_(YOUTUBE_AUXDATA_MAIN_REQUEST_NAME));
-            temp = esc(main_request);
-            String feed_title = obj->getAuxData(_(YOUTUBE_AUXDATA_FEED));
-            if (string_ok(feed_title))
-                temp = temp + '/' + esc(feed_title);
+        String subName = obj->getAuxData(_(YOUTUBE_AUXDATA_SUBREQUEST_NAME));
+        String feedName = obj->getAuxData(_(YOUTUBE_AUXDATA_FEED));
+        String region = obj->getAuxData(_(YOUTUBE_AUXDATA_REGION));
 
-            chain = _(YT_VPATH) + '/' + temp;
-            id = ContentManager::getInstance()->addContainerChain(chain);
-            add(obj, id, ref_set);
-        }
-        else if (req != YT_request_stdfeed)
-        {
-            temp = YouTubeService::getRequestName(req);
-            if (string_ok(temp))
+        chain = _(YT_VPATH) + '/' + esc(temp);
+
+        if (string_ok(subName))
+            chain = chain + '/' + esc(subName);
+
+        if (string_ok(feedName))
+            chain = chain + '/' + esc(feedName);
+
+        if (string_ok(region))
+        {   yt_regions_t reg = (yt_regions_t)region.toInt();
+            if (reg != YT_region_none)
             {
-                temp = esc(temp);
-                String feed_title = obj->getAuxData(_(YOUTUBE_AUXDATA_FEED));
-                if (string_ok(feed_title))
-                    temp = temp + '/' + esc(feed_title);
-            }
-
-
-            if (string_ok(temp))
-                chain = _(YT_VPATH) + '/' + temp;
-            else
-                chain = _(YT_VPATH) + "/Uncategorized";
-
-            id = ContentManager::getInstance()->addContainerChain(chain);
-            add(obj, id, ref_set);
-
-        } 
-        else if (req == YT_request_stdfeed)
-        {
-            String region = obj->getAuxData(_(YOUTUBE_AUXDATA_REGION));
-            temp = YouTubeService::getRequestName(req);
-            if (string_ok(region) && (string_ok(temp)))
-            {
-                yt_regions_t reg = (yt_regions_t)region.toInt();
                 region = YouTubeService::getRegionName(reg);
-                if (string_ok(region))
-                {
-                    String feed_title = obj->getAuxData(_(YOUTUBE_AUXDATA_FEED));
-                    if (string_ok(feed_title))
-                        temp = temp + '/' + esc(region + " - " + feed_title);
-                    else
-                        temp = temp + '/' + esc(region);
+                if (string_ok(region));
+                    chain = chain + '/' + esc(region);
+            }
+        }
 
-                    chain = _(YT_VPATH) + '/' + temp;
-                    id = ContentManager::getInstance()->addContainerChain(chain);
-                    add(obj, id, ref_set);
-
-                } // region name resolved
-            } // region and request name ok
-        } // stdfeed
-    } // valid request name
+        id = ContentManager::getInstance()->addContainerChain(chain);
+        add(obj, id, ref_set);
+    }
 }
 #endif
 
@@ -361,82 +321,6 @@ void FallbackLayout::addSopCast(zmm::Ref<CdsObject> obj)
     chain = _(SP_VPATH "/") + esc(obj->getTitle());
     id =  ContentManager::getInstance()->addContainerChain(chain);
     add(obj, id, ref_set);
-
-/*
-    temp = obj->getAuxData(_(YOUTUBE_AUXDATA_AUTHOR));
-    if (string_ok(temp))
-    {
-        chain = _(YT_VPATH "/Author/") + 
-            esc(temp);
-        id = ContentManager::getInstance()->addContainerChain(chain);
-        
-        add(obj, id, ref_set);
-        if (!ref_set)
-        {
-            obj->setRefID(obj->getID());
-            ref_set = true;
-        }
-    }
-
-
-    temp = obj->getAuxData(_(YOUTUBE_AUXDATA_AVG_RATING));
-    if (string_ok(temp))
-    {
-        chain = _(YT_VPATH "/Rating/") + 
-            esc(String::from((int)temp.toDouble()));
-        id = ContentManager::getInstance()->addContainerChain(chain);
-        add(obj, id, ref_set);
-        if (!ref_set)
-        {
-            obj->setRefID(obj->getID());
-            ref_set = true;
-        }
-    }
-
-    temp = obj->getAuxData(_(YOUTUBE_AUXDATA_TAGS));
-    if (string_ok(temp))
-    {
-        Ref<Array<StringBase> > split_temp = split_string(temp, ' ');
-        for (int i = 0; i < split_temp->size(); i++)
-        {
-            chain = _(YT_VPATH "/Tags/") + esc(split_temp->get(i));
-            id = ContentManager::getInstance()->addContainerChain(chain);
-            add(obj, id, ref_set);
-            if (!ref_set)
-            {
-                obj->setRefID(obj->getID());
-                ref_set = true;
-            }
-        }
-    }
-
-    temp = obj->getAuxData(_(YOUTUBE_AUXDATA_REQUEST));
-    if (string_ok(temp))
-    {
-        yt_methods_t m = (yt_methods_t)temp.toInt();
-        temp = YouTubeService::getRequestName(m);
-        if (string_ok(temp))
-        {
-            temp = esc(temp);
-            if (m == YT_list_by_category_and_tag)
-            {
-                 String ctmp = obj->getAuxData(_(YOUTUBE_AUXDATA_CATEGORY));
-                 if (string_ok(ctmp))
-                 {
-                     yt_categories_t c = (yt_categories_t)ctmp.toInt();
-                     ctmp = YouTubeService::getCategoryName(c);
-                     if (string_ok(ctmp))
-                     {
-                         temp = temp + '/' + esc(ctmp);
-                     }
-                 }
-            }
-            chain = _(YT_VPATH) + '/' + temp;
-            id = ContentManager::getInstance()->addContainerChain(chain);
-            add(obj, id, ref_set);
-        }
-    }
-*/
 }
 #endif
 

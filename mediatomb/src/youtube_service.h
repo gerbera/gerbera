@@ -52,7 +52,8 @@ typedef enum
     YT_request_user_subscriptions,
     YT_request_user_uploads,
     YT_request_popular,
-    YT_subrequest,
+    YT_subrequest_playlists,
+    YT_subrequest_subscriptions,
 } yt_requests_t;
 
 typedef enum
@@ -157,6 +158,9 @@ protected:
         /// \brief Name of the top request in case the task is a result of a 
         /// subrequest
         zmm::String main_request_name;
+
+        /// \brief Name of the actual subrequest
+        zmm::String sub_request_name;
 
         /// \brief Special requests have a subfeed
         zmm::Ref<YouTubeSubFeed> subfeed;

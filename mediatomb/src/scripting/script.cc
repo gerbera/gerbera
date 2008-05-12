@@ -308,10 +308,12 @@ Script::Script(Ref<Runtime> runtime) : Object()
             _(YOUTUBE_AUXDATA_RATING_COUNT));
     setProperty(glob, _("YOUTUBE_AUXDATA_CATEGORY"), 
             _(YOUTUBE_AUXDATA_CATEGORY));
-    setProperty(glob, _("YOUTUBE_AUXDATA_MAIN_REQUEST_NAME"), 
-            _(YOUTUBE_AUXDATA_MAIN_REQUEST_NAME));
+    setProperty(glob, _("YOUTUBE_AUXDATA_SUBREQUEST_NAME"), 
+            _(YOUTUBE_AUXDATA_SUBREQUEST_NAME));
     setProperty(glob, _("YOUTUBE_AUXDATA_REQUEST"), 
             _(YOUTUBE_AUXDATA_REQUEST));
+    setProperty(glob, _("YOUTUBE_AUXDATA_REGION"),
+            _(YOUTUBE_AUXDATA_REGION));
 
     setIntProperty(glob, _("YOUTUBE_REQUEST_NONE"), (int)YT_request_none);
     setIntProperty(glob, _("YOUTUBE_REQUEST_VIDEO_SEARCH"), 
@@ -325,7 +327,8 @@ Script::Script(Ref<Runtime> runtime) : Object()
     setIntProperty(glob, _("YOUTUBE_REQUEST_USER_SUBSCRIPTIONS"), 
                    (int)YT_request_user_subscriptions);
     setIntProperty(glob, _("YOUTUBE_REQUEST_POPULAR"), (int)YT_request_popular);
-    setIntProperty(glob, _("YOUTUBE_SUBREQUEST"), YT_subrequest);
+    setIntProperty(glob, _("YOUTUBE_SUBREQUEST_PLAYLISTS"), YT_subrequest_playlists);
+    setIntProperty(glob, _("YOUTUBE_SUBREQUEST_SUBSCRIPTIONS"), YT_subrequest_subscriptions);
 #endif
 #ifdef SOPCAST
     setIntProperty(glob, _("ONLINE_SERVICE_SOPCAST"), (int)OS_SopCast);
@@ -870,43 +873,68 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
         JSObject *aux_js = JS_NewObject(cx, NULL, NULL, js);
         setObjectProperty(js, _("aux"), aux_js);
         Ref<Dictionary> aux = obj->getAuxData();
-#warning ДОДЕЛАТЬ YT!!!!!
-#warning ДОДЕЛАТЬ YT!!!!!
-#warning ДОДЕЛАТЬ YT!!!!!
-#warning ДОДЕЛАТЬ YT!!!!!
-#warning ДОДЕЛАТЬ YT!!!!!
 
-#if 0
 #ifdef YOUTUBE
-        int yt_request = (int)YT_list_none;
         // put in meaningful names for YouTube specific enum values
-        String tmp = aux->get(_(YOUTUBE_AUXDATA_REQUEST));
+        String tmp = obj->getAuxData(_(YOUTUBE_AUXDATA_AVG_RATING));
+        if (string_ok(tmp))
+            aux->put(_(YOUTUBE_AUXDATA_AVG_RATING), tmp);
+
+        tmp = obj->getAuxData(_(YOUTUBE_AUXDATA_KEYWORDS));
+        if (string_ok(tmp))
+            aux->put(_(YOUTUBE_AUXDATA_KEYWORDS), tmp);
+
+        tmp = obj->getAuxData(_(YOUTUBE_AUXDATA_AUTHOR));
+        if (string_ok(tmp))
+            aux->put(_(YOUTUBE_AUXDATA_AUTHOR), tmp);
+
+        tmp = obj->getAuxData(_(YOUTUBE_AUXDATA_FAVORITE_COUNT));
+        if (string_ok(tmp))
+            aux->put(_(YOUTUBE_AUXDATA_FAVORITE_COUNT), tmp);
+
+        tmp = obj->getAuxData(_(YOUTUBE_AUXDATA_VIEW_COUNT));
+        if (string_ok(tmp))
+            aux->put(_(YOUTUBE_AUXDATA_VIEW_COUNT), tmp);
+
+        tmp = obj->getAuxData(_(YOUTUBE_AUXDATA_RATING_COUNT));
+        if (string_ok(tmp))
+            aux->put(_(YOUTUBE_AUXDATA_RATING_COUNT), tmp);
+
+        tmp = obj->getAuxData(_(YOUTUBE_AUXDATA_FEED));
+        if (string_ok(tmp))
+            aux->put(_(YOUTUBE_AUXDATA_FEED), tmp);
+
+        tmp = obj->getAuxData(_(YOUTUBE_AUXDATA_SUBREQUEST_NAME));
+        if (string_ok(tmp))
+            aux->put(_(YOUTUBE_AUXDATA_SUBREQUEST_NAME), tmp);
+
+        tmp = obj->getAuxData(_(YOUTUBE_AUXDATA_CATEGORY));
+        if (string_ok(tmp))
+            aux->put(_(YOUTUBE_AUXDATA_CATEGORY), tmp);
+
+        tmp = obj->getAuxData(_(YOUTUBE_AUXDATA_REQUEST));
         if (string_ok(tmp))
         {
-            yt_methods_t m = (yt_methods_t)tmp.toInt();
-            tmp = YouTubeService::getRequestName(m);
+            yt_requests_t req = (yt_requests_t)tmp.toInt();
+            setIntProperty(js, _("yt_request"), (int)req);
+            tmp = YouTubeService::getRequestName(req);
             if (string_ok(tmp))
-            {
-                yt_request = (int)m;
                 aux->put(_(YOUTUBE_AUXDATA_REQUEST), tmp);
-
-                if (m == YT_list_by_category_and_tag)
-                {
-                    tmp = aux->get(_(YOUTUBE_AUXDATA_REQUEST_SUBNAME));
-                    if (string_ok(tmp))
-                    {
-                        yt_categories_t c = (yt_categories_t)tmp.toInt();
-                        tmp = YouTubeService::getCategoryName(c);
-                        if (string_ok(tmp))
-                            aux->put(_(YOUTUBE_AUXDATA_REQUEST_SUBNAME), tmp);
-                    }
-                }
-            }
-
-            setIntProperty(js, _("yt_request"), yt_request);
         }
-#endif
-#endif
+
+        tmp = obj->getAuxData(_(YOUTUBE_AUXDATA_REGION));
+        if (string_ok(tmp))
+        {
+            yt_regions_t reg = (yt_regions_t)tmp.toInt();
+            if (reg != YT_region_none)
+            {
+                tmp = YouTubeService::getRegionName(reg);
+                if (string_ok(tmp))
+                    aux->put(_(YOUTUBE_AUXDATA_REGION), tmp);
+            }
+        }
+#endif // YouTube
+
         Ref<Array<DictionaryElement> > elements = aux->getElements();
         int len = elements->size();
         for (int i = 0; i < len; i++)

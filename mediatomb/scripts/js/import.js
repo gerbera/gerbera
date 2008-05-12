@@ -183,12 +183,20 @@ function addYouTube(obj)
     temp = obj.aux[YOUTUBE_AUXDATA_REQUEST];
     if (temp)
     {
-        var subName = (obj.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME]);
+        var subName = (obj.aux[YOUTUBE_AUXDATA_SUBREQUEST_NAME]);
+        var feedName = (obj.aux[YOUTUBE_AUXDATA_FEED]);
+        var region = (obj.aux[YOUTUBE_AUXDATA_REGION]);
 
+            
+        chain = new Array('Online Services', 'YouTube', temp);
         if (subName)
-            chain = new Array('Online Services', 'YouTube', temp, subName);
-        else
-            chain = new Array('Online Services', 'YouTube', temp);
+            chain.push(subName);
+
+        if (feedName)
+            chain.push(feedName);
+
+        if (region)
+            chain.push(region);
 
         addCdsObject(obj, createContainerChain(chain));
     }
