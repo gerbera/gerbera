@@ -276,52 +276,34 @@ Ref<Element> ConfigManager::renderOnlineSection()
 
     Ref<Element> yt(new Element(_("YouTube")));
     yt->setAttribute(_("enabled"), _(DEFAULT_YOUTUBE_ENABLED));
-    yt->setAttribute(_("dev-id"), _(""));
     // 8 hours refresh cycle
     yt->setAttribute(_("refresh"), String::from(DEFAULT_YOUTUBE_REFRESH)); 
     yt->setAttribute(_("update-at-start"), _(DEFAULT_YOUTUBE_UPDATE_AT_START));
     // items that were not updated for 4 days will be purged
     yt->setAttribute(_("purge-after"), 
             String::from(DEFAULT_YOUTUBE_PURGE_AFTER));
+    yt->setAttribute(_("racy-content"), _(DEFAULT_YOUTUBE_RACY_CONTENT));
    
     Ref<Element> favs(new Element(_("favorites")));
     favs->setAttribute(_("user"), _("mediatomb"));
     yt->appendElementChild(favs);
     
-    Ref<Element> popular(new Element(_("popular")));
-    popular->setAttribute(_("time-range"), _("month"));
-    yt->appendElementChild(popular);
+    Ref<Element> most_viewed(new Element(_("standardfeed")));
+    most_viewed->setAttribute(_("feed"), _("most_viewed"));
+    most_viewed->setAttribute(_("time-range"), _("today"));
+    yt->appendElementChild(most_viewed);
 
-    Ref<Element> playlist(new Element(_("playlist")));
-    playlist->setAttribute(_("id"), _(DEFAULT_YOUTUBE_PLAYLIST_ID));
-    playlist->setAttribute(_("name"), _(DEFAULT_YOUTUBE_PLAYLIST_NAME));
-    playlist->setAttribute(_("start-page"), _("1"));
-    playlist->setAttribute(_("amount"), _("all"));
+    Ref<Element> playlist(new Element(_("playlists")));
+    playlist->setAttribute(_("user"), _("mediatomb"));
     yt->appendElementChild(playlist);
 
-    Ref<Element> ytuser(new Element(_("user")));
+    Ref<Element> ytuser(new Element(_("uploads")));
     ytuser->setAttribute(_("user"), _("mediatomb"));
-    ytuser->setAttribute(_("start-page"), 
-            String::from(DEFAULT_YOUTUBE_PLAYLIST_START_PAGE));
-    ytuser->setAttribute(_("amount"), _(DEFAULT_YOUTUBE_PLAYLIST_AMOUNT));
     yt->appendElementChild(ytuser);
 
-    Ref<Element> ytct(new Element(_("category-and-tag")));
-    ytct->setAttribute(_("category"), _(DEFAULT_YOUTUBE_CNT_CATEGORY));
-    ytct->setAttribute(_("tag"), _(DEFAULT_YOUTUBE_CNT_TAG));
-    ytct->setAttribute(_("start-page"), 
-            String::from(DEFAULT_YOUTUBE_CNT_START_PAGE));
-    ytct->setAttribute(_("amount"), String::from(DEFAULT_YOUTUBE_CNT_AMOUNT));
-    yt->appendElementChild(ytct);
-
-    Ref<Element> yttag(new Element(_("tag")));
-    yttag->setAttribute(_("tag"), _(DEFAULT_YOUTUBE_TAG));
-    yttag->setAttribute(_("start-page"), 
-            String::from(DEFAULT_YOUTUBE_TAG_START_PAGE));
-    yttag->setAttribute(_("amount"), _(DEFAULT_YOUTUBE_TAG_AMOUNT));
-    yt->appendElementChild(yttag);
-
-    Ref<Element> ytfeatured(new Element(_("featured")));
+    Ref<Element> ytfeatured(new Element(_("standardfeed")));
+    ytfeatured->setAttribute(_("feed"), _("recently_featured"));
+    ytfeatured->setAttribute(_("time-range"), _("today"));
     yt->appendElementChild(ytfeatured);
 
     onlinecontent->appendElementChild(yt);
