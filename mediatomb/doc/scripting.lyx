@@ -112,7 +112,7 @@ status open
 
 \begin_layout Standard
 
-<releaseinfo>This documentation is valid for MediaTomb version 0.11.0.</releaseinfo
+<releaseinfo>This documentation is valid for MediaTomb version 0.12.0.</releaseinfo
 >
 \end_layout
 
@@ -209,6 +209,19 @@ How It Works
 \begin_layout Standard
 This section will give you some overview on how virtual objects work and
  on how they are related to scripting.
+\end_layout
+
+\begin_layout Description
+NOTE: In order to use the import scripting feature you have to change the
+ layout type from 
+\emph on
+builtin
+\emph default
+ to 
+\emph on
+js
+\emph default
+ in config.xml !
 \end_layout
 
 \begin_layout Subsection
@@ -1299,7 +1312,7 @@ YOUTUBE_REQUEST_NONE
 \end_layout
 
 \begin_layout Standard
-No request.
+No request/invalid.
 \end_layout
 
 \begin_layout Standard
@@ -1317,16 +1330,33 @@ status collapsed
 \end_layout
 
 \begin_layout Code
-YOUTUBE_REQUEST_FAVORITE
+YOUTUBE_REQUEST_USER_FAVORITES
 \end_layout
 
 \begin_layout Standard
 The item was created as a result of a favorites request.
 \end_layout
 
-\begin_layout Description
-Note: for this request orig.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME] will contain
- the name of the associated user.
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+YOUTUBE_REQUEST_VIDEO_SEARCH
+\end_layout
+
+\begin_layout Standard
+The item was created as a result of a search request.
 \end_layout
 
 \begin_layout Standard
@@ -1344,16 +1374,12 @@ status collapsed
 \end_layout
 
 \begin_layout Code
-YOUTUBE_REQUEST_BY_TAG
+YOUTUBE_REQUEST_USER_UPLOADS
 \end_layout
 
 \begin_layout Standard
-The item was created as a result of a by tag request.
-\end_layout
-
-\begin_layout Description
-Note: for this request orig.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME] will contain
- the name of the tags that were used when searching for the item.
+The item was created as a result of a request for videos that were uploaded
+ by a particular user.
 \end_layout
 
 \begin_layout Standard
@@ -1371,16 +1397,11 @@ status collapsed
 \end_layout
 
 \begin_layout Code
-YOUTUBE_REQUEST_BY_USER
+YOUTUBE_REQUEST_STANDARD_FEED
 \end_layout
 
 \begin_layout Standard
-The item was created as a result of a by user request.
-\end_layout
-
-\begin_layout Description
-Note: for this request orig.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME] will contain
- the name of the associated user.
+The item was created as a result of a request for one of the standard feeds.
 \end_layout
 
 \begin_layout Standard
@@ -1398,38 +1419,11 @@ status collapsed
 \end_layout
 
 \begin_layout Code
-YOUTUBE_REQUEST_FEATURED
+YOUTUBE_REQUEST_USER_PLAYLISTS
 \end_layout
 
 \begin_layout Standard
-The item was created as a result of a featured request.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status collapsed
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-YOUTUBE_REQUEST_BY_PLAYLIST
-\end_layout
-
-\begin_layout Standard
-The item was created as a result of a by playlist request.
-\end_layout
-
-\begin_layout Description
-Note: for this request orig.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME] will contain
- the name of the playlist as specified in the server configuration.
+The item was created as a result of a request for users playlists.
 \end_layout
 
 \begin_layout Standard
@@ -1447,38 +1441,11 @@ status collapsed
 \end_layout
 
 \begin_layout Code
-YOUTUBE_REQUEST_POPULAR
+YOUTUBE_REQUEST_USER_SUBSCRIPTIONS
 \end_layout
 
 \begin_layout Standard
-The item was created as a result of a popular request.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status collapsed
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-YOUTUBE_REQUEST_BY_CATEGORY_AND_TAG
-\end_layout
-
-\begin_layout Standard
-The item was created as a result of a by category and tag request.
-\end_layout
-
-\begin_layout Description
-Note: for this request orig.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME] will contain
- the name of the category as defined by YouTube.
+The item was created as a result of for users subscriptions.
 \end_layout
 
 \begin_layout Standard
@@ -1512,6 +1479,8 @@ status open
 \begin_layout Standard
 The following aux keys can be used to retrieve additional information about
  the item, the data is stored in the form of strings.
+ Note, that depending on the requests some tags may not be set and will
+ return empty values.
 \end_layout
 
 \begin_layout Standard
@@ -1529,7 +1498,7 @@ status open
 \end_layout
 
 \begin_layout Code
-orig.aux[YOUTUBE_AUXDATA_TAGS]
+orig.aux[YOUTUBE_AUXDATA_KEYWORDS]
 \end_layout
 
 \begin_layout Standard
@@ -1539,7 +1508,7 @@ RO
 \end_layout
 
 \begin_layout Standard
-Contains a space separated list of tags for the particular item.
+Contains a space separated list of keywords for the particular item.
 \end_layout
 
 \begin_layout Standard
@@ -1613,7 +1582,7 @@ status collapsed
 \end_layout
 
 \begin_layout Code
-orig.aux[YOUTUBE_AUXDATA_COMMENT_COUNT]
+orig.aux[YOUTUBE_AUXDATA_FEED]
 \end_layout
 
 \begin_layout Standard
@@ -1623,8 +1592,7 @@ RO
 \end_layout
 
 \begin_layout Standard
-Contains the number of comments for the particular video on the YouTube
- website.
+Contains the name of the feed.
 \end_layout
 
 \begin_layout Standard
@@ -1653,6 +1621,34 @@ RO
 
 \begin_layout Standard
 Contains the view count of the video on the YouTube website.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.aux[YOUTUBE_AUXDATA_REGION]
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+RO
+\end_layout
+
+\begin_layout Standard
+Contains the name of the region.
 \end_layout
 
 \begin_layout Standard
@@ -1728,7 +1724,7 @@ status collapsed
 \end_layout
 
 \begin_layout Code
-orig.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME]
+orig.aux[YOUTUBE_AUXDATA_SUBREQUEST_NAME]
 \end_layout
 
 \begin_layout Standard
@@ -1739,132 +1735,7 @@ RO
 
 \begin_layout Standard
 Contains the additional name that accompanies the request, it is only set
- for the following requests:
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-<itemizedlist><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-YOUTUBE_REQUEST_FAVORITE
-\end_layout
-
-\begin_layout Standard
-Subname will contain the name of the associated user.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status collapsed
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-YOUTUBE_REQUEST_BY_CATEGORY_AND_TAG
-\end_layout
-
-\begin_layout Standard
-Subname will contain the name of the category as defined by YouTube.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status collapsed
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-YOUTUBE_REQUEST_BY_USER
-\end_layout
-
-\begin_layout Standard
-Subname will contain the name of the user.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status collapsed
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-YOUTUBE_REQUEST_BY_PLAYLIST
-\end_layout
-
-\begin_layout Standard
-Subname will contain the name of the playlist as defined in the server configura
-tion.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status collapsed
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-YOUTUBE_REQUEST_BY_TAG
-\end_layout
-
-\begin_layout Standard
-Subname will contain the tags as specified in the server configuration.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem></itemizedlist>
-\end_layout
-
-\end_inset
-
-
+ for the playlist and subcription requests.
 \end_layout
 
 \begin_layout Standard
@@ -3545,11 +3416,9 @@ Here is the place if you want to have a different range of ratings in your
 \end_layout
 
 \begin_layout Standard
-Next, we process the so called request, i.e.
- - description of the request to the YouTube service created the item.
- Some requests may contain an additional level of refinement which can be
- retrieved by querying the request subname key of the aux array, we will
- make use of that.
+Next, we process the request, i.e.
+ - description of the request to the YouTube service that created the item.
+ Some requests may contain additional information like the name of the region.
 \end_layout
 
 \begin_layout Code
@@ -3565,32 +3434,39 @@ Next, we process the so called request, i.e.
 \end_layout
 
 \begin_layout Code
-        var subName = (obj.aux[YOUTUBE_AUXDATA_REQUEST_SUBNAME]);
+        var subName = (obj.aux[YOUTUBE_AUXDATA_SUBREQUEST_NAME]);
+\end_layout
+
+\begin_layout Code
+        var feedName = (obj.aux[YOUTUBE_AUXDATA_FEED]);
+\end_layout
+
+\begin_layout Code
+        var region = (obj.aux[YOUTUBE_AUXDATA_REGION]);
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+        chain = new Array('Online Services', 'YouTube', temp);
 \end_layout
 
 \begin_layout Standard
-Make sure to check that the subname is not empty since it is only available
- for a number of specific requests.
+All items will go to /Online Services/YouTube/RequestName/, below we will
+ do additional refinement.
+ Do not forget to check if the values are valid, some requests may not have
+ all of the tags set (for example - if no specific region was defined in
+ the config, then the associated request will not provide the REGION auxdata)
 \end_layout
 
 \begin_layout Code
-        if (subName)
+       if (subName)
 \end_layout
 
 \begin_layout Code
-            chain = new Array('Online Services', 'YouTube', temp, 
-\end_layout
-
-\begin_layout Code
-                              subName);
-\end_layout
-
-\begin_layout Code
-        else
-\end_layout
-
-\begin_layout Code
-            chain = new Array('Online Services', 'YouTube', temp);
+           chain.push(subName);
 \end_layout
 
 \begin_layout Code
@@ -3598,7 +3474,31 @@ Make sure to check that the subname is not empty since it is only available
 \end_layout
 
 \begin_layout Code
-        addCdsObject(obj, createContainerChain(chain));
+       if (feedName)
+\end_layout
+
+\begin_layout Code
+           chain.push(feedName);
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+       if (region)
+\end_layout
+
+\begin_layout Code
+           chain.push(region); 
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+       addCdsObject(obj, createContainerChain(chain));
 \end_layout
 
 \begin_layout Code

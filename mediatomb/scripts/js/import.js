@@ -168,13 +168,14 @@ function addImage(obj)
 function addYouTube(obj)
 {
     var chain;
+
     var temp = parseInt(obj.aux[YOUTUBE_AUXDATA_AVG_RATING], 10);
     if (temp != Number.NaN)
     {
         temp = Math.round(temp);
         if (temp > 3)
         {
-            var chain = new Array('Online Services', 'YouTube', 'Rating', 
+            chain = new Array('Online Services', 'YouTube', 'Rating', 
                                   temp.toString());
             addCdsObject(obj, createContainerChain(chain));
         }
@@ -189,6 +190,7 @@ function addYouTube(obj)
 
             
         chain = new Array('Online Services', 'YouTube', temp);
+
         if (subName)
             chain.push(subName);
 
