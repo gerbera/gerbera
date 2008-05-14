@@ -1424,9 +1424,14 @@ if test "x$CURL_OK" = xyes; then
     AC_SUBST(CURL_CFLAGS)
     AC_SUBST(CURL_LIBS)
 else
-    if test "x$YOUTUBE_OPTION_REQUESTED" = xyes; then
+    if (test "x$YOUTUBE_OPTION_ENABLED" = xyes) && (test "x$YOUTUBE_OPTION_REQUESTED" = xyes); then
         AC_MSG_ERROR([unable to configure curl which is required for YouTube support!])
     fi
+
+    if (test "x$SOPCAST_OPTION_ENABLED" = xyes) && (test "x$SOPCAST_OPTION_REQUESTED" = xyes); then
+        AC_MSG_ERROR([unable to configure curl which is required for SopCast support!])
+    fi
+
     if test "x$EXTERNAL_TRANSCODING_OPTION" = xyes; then
         if ((test $USE_CURL -eq 1) && (test $CURL_REQUESTED -eq 0)); then
             AC_MSG_WARN([unable to configure curl, external transcoding will have limited functionality!])
