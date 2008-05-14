@@ -40,6 +40,7 @@
 #include "online_service.h"
 #include "url.h"
 #include "dictionary.h"
+#include <curl/curl.h>
 
 
 /// \brief This is an interface for all online services, the function
@@ -61,7 +62,7 @@ public:
 
     /// \brief Parse the xml fragment from the configuration and gather
     /// the user settings in a service task structure.
-    virtual zmm::Ref<zmm::Object> defineServiceTask(zmm::Ref<mxml::Element> xmlopt);
+    virtual zmm::Ref<zmm::Object> defineServiceTask(zmm::Ref<mxml::Element> xmlopt, zmm::Ref<zmm::Object> params);
 
 protected:
     // the handle *must never be used from multiple threads*

@@ -99,7 +99,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
             {
                 current_group_name = current_group->getAttribute(_("en"));
                 if (!string_ok(current_group_name))
-                    curreng_group_name = _("Unknown");
+                    current_group_name = _("Unknown");
             }
 
             current_channel_index = 0;
@@ -126,7 +126,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
             item->setAuxData(_(ONLINE_SERVICE_AUX_ID),
                     String::from(OS_SopCast));
 
-            item->setAuxData(_(SOPCAST_GROUP_NAME), current_group_name);
+            item->setAuxData(_(SOPCAST_AUXDATA_GROUP_NAME), current_group_name);
 
             temp = channel->getAttribute(_("id"));
             if (!string_ok(temp))

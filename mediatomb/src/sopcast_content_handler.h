@@ -36,14 +36,15 @@
 #define __SOPCAST_CONTENT_HANDLER_H__
 
 #define SOPCAST_SERVICE                 "SopCast"
-#define SOPCAST_SERVICE_ID              "sc"
+#define SOPCAST_SERVICE_ID              "S"
 #define SOPCAST_CHANNEL_ID              "cid"
 
-#define SOPCAST_AUXDATA_CLASS           "cls"
-#define SOPCAST_AUXDATA_LANGUAGE        "lng"
-#define SOPCAST_AUXDATA_KBPS            "kbps"
-#define SOPCAST_AUXDATA_GROUP           "grp"
-#define SOPCAST_AUXDATA_GROUP_NAME      "grn" 
+
+#define SOPCAST_AUXDATA_CLASS           SOPCAST_SERVICE_ID "1"
+#define SOPCAST_AUXDATA_LANGUAGE        SOPCAST_SERVICE_ID "2"
+#define SOPCAST_AUXDATA_KBPS            SOPCAST_SERVICE_ID "3"
+#define SOPCAST_AUXDATA_GROUP           SOPCAST_SERVICE_ID "4"
+#define SOPCAST_AUXDATA_GROUP_NAME      SOPCAST_SERVICE_ID "5" 
 
 #include "zmmf/zmmf.h"
 #include "mxml/mxml.h"

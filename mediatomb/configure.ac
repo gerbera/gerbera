@@ -277,6 +277,17 @@ MT_OPTION([external-transcoding], [disable],
           [external transcoding support],
           [],[EXTERNAL_TRANSCODING_OPTION_ENABLED=disabled])
 
+MT_OPTION([sopcast], [enable],
+          [SopCast service support],
+          [
+            AC_DEFINE([SOPCAST], [1], [SopCast service support])
+          ],[SOPCAST_OPTION_ENABLED=disabled])
+
+
+MT_OPTION([youtube], [disable],
+          [YouTube service support],
+          [],[YOUTUBE_OPTION_ENABLED=disabled])
+
 MT_OPTION([sqlite-backup-defaults], [enable],
           [enable sqlite database backup settings in config.xml by default],
           [],[])
@@ -286,25 +297,6 @@ MT_OPTION([protocolinfo-extension], [disable],
           [
             AC_DEFINE([EXTEND_PROTOCOLINFO], [1], [This is required for Playstation 3 support, it adds certain tags to the protocolInfo attribute])
           ],[])
-
-YOUTUBE=0
-YOUTUBE_REQUESTED=0
-
-AC_ARG_ENABLE([youtube],
-              [
-AC_HELP_STRING([--enable-youtube],
-[Enable support for the YouTube service (default: yes)])
-              ],
-             [
-               if test "x$enableval" = xyes; then
-                   YOUTUBE_REQUESTED=1
-                   YOUTUBE=1
-               else
-                   YOUTUBE=0
-               fi 
-             ]
-)
-
 
 USE_CURL=1
 CURL_REQUESTED=0
@@ -1348,14 +1340,14 @@ CURL_LIBS=
 CURL_CFLAGS=
 CURL_OK=no
 
-if ((test $YOUTUBE -eq 1) && (test $YOUTUBE_REQUESTED -eq 1) && (test $USE_CURL -eq 0) && (test $CURL_REQUESTED -eq 1)); then
+if ((test "x$YOUTUBE_OPTION_ENABLED" = xyes) && (test "x$YOUTUBE_OPTION_REQUESTED" = xyes) && (test $USE_CURL -eq 0) && (test $CURL_REQUESTED -eq 1)); then
     AC_MSG_ERROR([You enabled YouTube but disabled curl, however curl is required by the YouTube feature])
 fi
 
-if ((test $YOUTUBE -eq 0) && (test "x$EXTERNAL_TRANSCODING_OPTION" = xyes)); then
+if ((test "x$YOUTUBE_OPTION_ENABLED" != xyes) && (test "x$SOPCAST_OPTION_ENABLED" != xyes) && (test "x$EXTERNAL_TRANSCODING_OPTION" != xyes)); then
     if test $USE_CURL -eq 1; then
         if test $CURL_REQUESTED -eq 1; then
-            AC_MSG_ERROR([You enabled curl support but the external transcoding and YouTube features are disabled - curl is not needed without it])
+            AC_MSG_ERROR([You enabled curl support but the external transcoding, YouTube and SopCast features are disabled - curl is not needed without it])
         else
             CURL_OK=no
             USE_CURL=0
@@ -1363,8 +1355,8 @@ if ((test $YOUTUBE -eq 0) && (test "x$EXTERNAL_TRANSCODING_OPTION" = xyes)); the
     fi
 fi
 
-if (((test $YOUTUBE -eq 1) || (test "x$EXTERNAL_TRANSCODING_OPTION" = xyes)) && (test $USE_CURL -eq 1)); then
-    AC_MSG_NOTICE([Checking for curl (needed for extended external transcoding and YouTube support)])
+if (((test "x$YOUTUBE_OPTION_ENABLED" = xyes) || (test "x$SOPCAST_OPTION_ENABLED" = xyes) || (test "x$EXTERNAL_TRANSCODING_OPTION" = xyes)) && (test $USE_CURL -eq 1)); then
+    AC_MSG_NOTICE([Checking for curl (needed for extended external transcoding/YouTube/SopCast support)])
     CURL_OK=yes
     if test -n "$CURL_SEARCH_CONFIG"; then
         AC_MSG_NOTICE([You specified $CURL_SEARCH_CONFIG for curl-config])
@@ -1432,8 +1424,7 @@ if test "x$CURL_OK" = xyes; then
     AC_SUBST(CURL_CFLAGS)
     AC_SUBST(CURL_LIBS)
 else
-    YOUTUBE=0
-    if test $YOUTUBE_REQUESTED -eq 1; then
+    if test "x$YOUTUBE_OPTION_REQUESTED" = xyes; then
         AC_MSG_ERROR([unable to configure curl which is required for YouTube support!])
     fi
     if test "x$EXTERNAL_TRANSCODING_OPTION" = xyes; then
@@ -1447,7 +1438,7 @@ else
 
     fi
 
-    if (test $YOUTUBE -eq 0) && (test "x$EXTERNAL_TRANSCODING_OPTION" = xyes); then
+    if (test "x$YOUTUBE_OPTION_ENABLED" != xyes) && (test "x$EXTERNAL_TRANSCODING_OPTION" = !xyes) && (test "x$SOPCAST_OPTION_ENABLED" != xyes); then
         CURL_CFLAGS=
         CURL_LIBS=
     fi
@@ -2009,12 +2000,16 @@ eval PACKAGE_DATADIR="${datadir}/${PACKAGE}"
 eval PACKAGE_DATADIR="${PACKAGE_DATADIR}"
 AC_DEFINE_UNQUOTED(PACKAGE_DATADIR, "$PACKAGE_DATADIR", [MediaTomb data directory])
 
-if test $YOUTUBE -eq 1; then
-    YOUTUBE_OK="yes"
+if (test "x$YOUTUBE_OPTION_ENABLED" = xyes) || (test "x$SOPCAST_OPTION_ENABLED" = xyes); then
     AC_DEFINE(ONLINE_SERVICES, 1, [at least one online service is supported])
+fi
+
+if (test "x$YOUTUBE_OPTION_ENABLED" = xyes); then
     AC_DEFINE([YOUTUBE], [1], [Enable support for the YouTube service])
-else
-    YOUTUBE_OK="disabled"
+fi
+
+if (test "x$SOPCAST_OPTION_ENABLED" = xyes); then
+    AC_DEFINE([SOPCAST], [1], [Enable support for the SopCast service])
 fi
 
 ###############
@@ -2053,7 +2048,8 @@ echo "ffmpeg                : $FFMPEG_OK"
 echo "libmp4v2              : $LIBMP4V2_STATUS"
 echo "external transcoding  : $EXTERNAL_TRANSCODING_OPTION_ENABLED"
 echo "curl                  : $CURL_OK"
-#echo "YouTube               : $YOUTUBE_OK"
+echo "YouTube               : $YOUTUBE_OPTION_ENABLED"
+echo "SopCast               : $SOPCAST_OPTION_ENABLED"
 echo "libextractor          : $EXTRACTOR_OK"
 echo "db-autocreate         : $DB_AUTOCREATE_OPTION_ENABLED"
         

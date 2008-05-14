@@ -251,24 +251,24 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
     {
         try
         {
-        Ref<OnlineService> sc((OnlineService *)new SopCastService());
+            Ref<OnlineService> sc((OnlineService *)new SopCastService());
 
-        i = cm->getIntOption(CFG_ONLINE_CONTENT_SOPCAST_REFRESH);
-        sc->setRefreshInterval(i);
+            i = cm->getIntOption(CFG_ONLINE_CONTENT_SOPCAST_REFRESH);
+            sc->setRefreshInterval(i);
 
-        i = cm->getIntOption(CFG_ONLINE_CONTENT_SOPCAST_PURGE_AFTER);
-        sc->setItemPurgeInterval(i);
+            i = cm->getIntOption(CFG_ONLINE_CONTENT_SOPCAST_PURGE_AFTER);
+            sc->setItemPurgeInterval(i);
 
-        if (cm->getBoolOption(CFG_ONLINE_CONTENT_SOPCAST_UPDATE_AT_START))
-            i = CFG_DEFAULT_UPDATE_AT_START;
+            if (cm->getBoolOption(CFG_ONLINE_CONTENT_SOPCAST_UPDATE_AT_START))
+                i = CFG_DEFAULT_UPDATE_AT_START;
 
-        Ref<TimerParameter> sc_param(new TimerParameter(TimerParameter::IDOnlineContent, OS_SopCast));
-        sc->setTimerParameter(RefCast(sc_param, Object));
-        online_services->registerService(sc);
-        if (i > 0)
-        {
-            Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), i, sc->getTimerParameter(), true);
-        }
+            Ref<TimerParameter> sc_param(new TimerParameter(TimerParameter::IDOnlineContent, OS_SopCast));
+            sc->setTimerParameter(RefCast(sc_param, Object));
+            online_services->registerService(sc);
+            if (i > 0)
+            {
+                Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), i, sc->getTimerParameter(), true);
+            }
         }
         catch (Exception ex)
         {

@@ -73,7 +73,7 @@ String SopCastService::getServiceName()
     return _("SopCast");
 }
 
-Ref<Object> SopCastService::defineServiceTask(Ref<Element> xmlopt)
+Ref<Object> SopCastService::defineServiceTask(Ref<Element> xmlopt, Ref<Object> params)
 {
     return nil;
 }
