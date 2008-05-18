@@ -51,7 +51,6 @@ typedef enum
     YT_request_user_playlists,
     YT_request_user_subscriptions,
     YT_request_user_uploads,
-    YT_request_popular,
     YT_subrequest_playlists,
     YT_subrequest_subscriptions,
 } yt_requests_t;
@@ -155,10 +154,6 @@ protected:
         /// \brief Starging index as specified in the configuration by the user
         int cfg_start_index;
 
-        /// \brief Name of the top request in case the task is a result of a 
-        /// subrequest
-        zmm::String main_request_name;
-
         /// \brief Name of the actual subrequest
         zmm::String sub_request_name;
 
@@ -176,10 +171,6 @@ protected:
     int current_task;
 
 
-
-    /// \brief utility function, returns true if method supports paging
-    bool hasPaging(yt_requests_t request);
-
     // helper functions for parsing config.xml
     zmm::String getCheckAttr(zmm::Ref<mxml::Element> xml, zmm::String attrname);
     int getCheckPosIntAttr(zmm::Ref<mxml::Element> xml, zmm::String attrname);
@@ -188,6 +179,9 @@ protected:
     void addTimeParams(zmm::Ref<mxml::Element> xml, zmm::Ref<YouTubeTask> task);
     yt_regions_t getRegion(zmm::Ref<mxml::Element> xml);
     zmm::String getFeed(zmm::Ref<mxml::Element> xml);
+
+    // subrequests are spawned as one time tasks, they are removed from the 
+    // task list after one time execution - this function takes care of it
     void killOneTimeTasks(zmm::Ref<zmm::Array<zmm::Object> > tasklist);
 };
 

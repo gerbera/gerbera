@@ -629,6 +629,7 @@ get_file_info( IN const char *filename,
     int rc = 0;
 
     info->content_type = NULL;
+    info->force_chunked = FALSE;
 
     code = stat( filename, &s );
     if( code == -1 ) {
@@ -733,6 +734,7 @@ get_alias( IN const char *request_file,
         info->file_length = alias->doc.length;
         info->is_readable = TRUE;
         info->is_directory = FALSE;
+        info->force_chunked = FALSE;
         info->last_modified = alias->last_modified;
         info->http_header = NULL;
     }
@@ -1445,6 +1447,8 @@ process_request( IN http_message_t * req,
     }
 
     RespInstr->ReadSendSize = finfo.file_length;
+    if (finfo.force_chunked == TRUE)
+        RespInstr->IsChunkActive = TRUE;
 
     //Check other header field.
     if( ( err_code =

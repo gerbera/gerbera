@@ -911,6 +911,10 @@ struct File_Info
    * a non-zero value. If unreadable, it should be set to 0. */
   int is_readable;
 
+  /** set to 1 if the data should be sent out using chunked encoding, otherwise
+   * set to zero **/
+  int force_chunked;
+
   /** The content type of the file. This string needs to be allocated 
    *  by the caller using {\bf ixmlCloneDOMString}.  When finished 
    *  with it, the SDK frees the {\bf DOMString}. */

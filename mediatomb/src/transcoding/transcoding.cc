@@ -50,6 +50,7 @@ TranscodingProfile::TranscodingProfile()
     tr_type = TR_None;
     theora = false;
     accept_url = true;
+    force_chunked = true;
     hide_orig_res = false;
     thumbnail = false;
     attributes = Ref<Dictionary>(new Dictionary());
@@ -64,6 +65,7 @@ TranscodingProfile::TranscodingProfile(transcoding_type_t tr_type, String name)
     theora = false;
     first_resource = false;
     accept_url = true;
+    force_chunked = true;
     hide_orig_res = false;
     thumbnail = false;
     buffer_size = 0;

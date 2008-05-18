@@ -2139,6 +2139,19 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                 prof->setFirstResource(false);
         }
 
+        if (child->getChildByName(_("use-chunked-encoding")) != nil)
+        {
+            param = child->getChildText(_("use-chunked-encoding"));
+            if (!validateYesNo(param))
+                throw _Exception(_("Error in config file: incorrect parameter "
+                            "for use-chunked-encoding tag"));
+
+            if (param == "yes")
+                prof->setChunked(true);
+            else
+                prof->setChunked(false);
+        }
+
         Ref<Element> sub = child->getChildByName(_("agent"));
         if (sub == nil)
             throw _Exception(_("error in configuration: transcoding "

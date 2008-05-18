@@ -164,6 +164,10 @@ public:
     /// \brief Provides information on the mode of the list
     avi_fourcc_listmode_t getAVIFourCCListMode() { return fourcc_mode; }
 
+    /// \brief Send out the data in chunked encoding
+    void setChunked(bool chunked) { force_chunked = chunked; }
+    bool getChunked() { return force_chunked; }
+
 protected:
     zmm::String name;
     zmm::String tm;
@@ -174,6 +178,7 @@ protected:
     bool accept_url;
     bool hide_orig_res;
     bool thumbnail;
+    bool force_chunked;
     size_t buffer_size;
     size_t chunk_size;
     size_t initial_fill_size;

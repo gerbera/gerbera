@@ -94,6 +94,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     info->content_type = ixmlCloneDOMString(mimeType.c_str());
     
     info->file_length = UNKNOWN_CONTENT_LENGTH;
+    info->force_chunked = (int)profile->getChunked();
 
     Ref<ConfigManager> cfg = ConfigManager::getInstance();
    

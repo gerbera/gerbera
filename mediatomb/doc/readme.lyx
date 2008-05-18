@@ -9452,6 +9452,36 @@ status open
 \end_layout
 
 \begin_layout Code
+<use-chunked-encoding>yes</use-chunked-encoding>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+Specifies that the content should be sent out using chunked HTTP encoding,
+ this is the default setting for transcoded streams, because the content
+ length of the data is not known.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
 <thumbnail>yes</thumbnail>
 \end_layout
 

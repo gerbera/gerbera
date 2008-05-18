@@ -153,7 +153,6 @@ static char *YT_stdfeeds[] =
 #define REQ_NAME_FAVORITES                  "Favorites"
 #define REQ_NAME_PLAYLISTS                  "Playlists"
 #define REQ_NAME_SUBSCRIPTIONS              "Subscriptions"
-#define REQ_NAME_POPULAR                    "Popular Videos"
 #define REQ_NAME_UPLOADS                    "User Videos"
 
 // config.xml defines
@@ -312,9 +311,6 @@ String YouTubeService::getRequestName(yt_requests_t request)
             break;
         case YT_request_user_uploads:
             temp = _(REQ_NAME_UPLOADS);
-            break;
-        case YT_request_popular:
-            temp = _(REQ_NAME_POPULAR);
             break;
         case YT_request_none:
         default:
@@ -475,8 +471,7 @@ Ref<Object> YouTubeService::defineServiceTask(Ref<Element> xmlopt, Ref<Object> p
         task->request = YT_request_user_uploads;
     else throw _Exception(_("Unsupported tag while parsing YouTube options: ") + temp);
 
-    if (!hasPaging(task->request))
-        task->amount = AMOUNT_ALL;
+    task->amount = AMOUNT_ALL;
 
     task->parameters->put(_(GDATA_PARAM_FEED_FORMAT), 
                           _(GDATA_VALUE_FEED_FORMAT_RSS));
@@ -638,22 +633,6 @@ Ref<Element> YouTubeService::getData(String url_part, Ref<Dictionary> params, bo
     return nil;
 }
 
-bool YouTubeService::hasPaging(yt_requests_t request)
-{
-#warning ДОДЕЛАТЬ YT!!!
-#if 0
-    switch (request)
-    {
-        case YT_request_user_subscriptions:
-            return false;
-
-        default:
-            return true;
-    }
-#endif
-    return true;
-}
-
 void YouTubeService::killOneTimeTasks(Ref<Array<Object> > tasklist)
 {
     int current = 0;
@@ -705,7 +684,7 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
     if (task == nil)
         throw _Exception(_("Encountered invalid task!"));
 
-    if (hasPaging(task->request) && (task->amount_fetched < task->amount))
+    if (task->amount_fetched < task->amount)
     {
         // yt start index begins at 1
         task->start_index = task->cfg_start_index + task->amount_fetched;
@@ -793,11 +772,9 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
     if (!b)
     {
         log_debug("End of pages\n");
-        if (hasPaging(task->request))
-        {
-            task->start_index = task->cfg_start_index;
-            task->amount_fetched = 0;
-        }
+        task->start_index = task->cfg_start_index;
+        task->amount_fetched = 0;
+        
         current_task++;
         if (current_task >= tasklist->size())
         {
@@ -868,10 +845,8 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
         if (task->amount_fetched >= task->amount)
         {
             task->amount_fetched = 0;
-            if (hasPaging(task->request))
-            {
-                task->start_index = task->cfg_start_index;
-            }
+            task->start_index = task->cfg_start_index;
+            
             current_task++;
             if (current_task >= tasklist->size())
             {
@@ -887,15 +862,12 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
     }
     while (obj != nil);
 
-    if (!hasPaging(task->request))
+    current_task++;
+    if (current_task >= tasklist->size())
     {
-        current_task++;
-        if (current_task >= tasklist->size())
-        {
-            current_task = 0;
-            killOneTimeTasks(tasklist);
-            return false;
-        }
+        current_task = 0;
+        killOneTimeTasks(tasklist);
+        return false;
     }
 
     return true;

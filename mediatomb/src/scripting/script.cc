@@ -326,9 +326,8 @@ Script::Script(Ref<Runtime> runtime) : Object()
                   (int)YT_request_user_playlists);
     setIntProperty(glob, _("YOUTUBE_REQUEST_USER_SUBSCRIPTIONS"), 
                    (int)YT_request_user_subscriptions);
-    setIntProperty(glob, _("YOUTUBE_REQUEST_POPULAR"), (int)YT_request_popular);
-    setIntProperty(glob, _("YOUTUBE_SUBREQUEST_PLAYLISTS"), YT_subrequest_playlists);
-    setIntProperty(glob, _("YOUTUBE_SUBREQUEST_SUBSCRIPTIONS"), YT_subrequest_subscriptions);
+    setIntProperty(glob, _("YOUTUBE_REQUEST_USER_UPLOADS"), 
+                   (int)YT_request_user_uploads);
 #endif
 #ifdef SOPCAST
     setIntProperty(glob, _("ONLINE_SERVICE_SOPCAST"), (int)OS_SopCast);
@@ -916,6 +915,14 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
         if (string_ok(tmp))
         {
             yt_requests_t req = (yt_requests_t)tmp.toInt();
+
+            // since subrequests do not actually produce any items they
+            // should not be visible to js
+            if (req == YT_subrequest_playlists)
+                req = YT_request_user_playlists;
+            else if (req == YT_subrequest_subscriptions)
+                req = YT_request_user_subscriptions;
+
             setIntProperty(js, _("yt_request"), (int)req);
             tmp = YouTubeService::getRequestName(req);
             if (string_ok(tmp))
