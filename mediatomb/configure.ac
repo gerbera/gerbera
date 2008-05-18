@@ -1428,8 +1428,18 @@ else
         AC_MSG_ERROR([unable to configure curl which is required for YouTube support!])
     fi
 
+    if (test "x$YOUTUBE_OPTION_ENABLED" = xyes) && (test "x$YOUTUBE_OPTION_REQUESTED" != xyes); then
+        AC_MSG_WARN([curl not found, disabling YouTube])
+        YOUTUBE_OPTION_ENABLED="missing"
+    fi
+
     if (test "x$SOPCAST_OPTION_ENABLED" = xyes) && (test "x$SOPCAST_OPTION_REQUESTED" = xyes); then
         AC_MSG_ERROR([unable to configure curl which is required for SopCast support!])
+    fi
+
+    if (test "x$SOPCAST_OPTION_ENABLED" = xyes) && (test "x$SOPCAST_OPTION_REQUESTED" != xyes); then
+        AC_MSG_WARN([curl not found, disabling SopCast])
+        SOPCAST_OPTION_ENABLED="missing"
     fi
 
     if test "x$EXTERNAL_TRANSCODING_OPTION" = xyes; then
@@ -1440,7 +1450,6 @@ else
         if ((test $USE_CURL -eq 1) && (test $CURL_REQUESTED -eq 1)); then
             AC_MSG_ERROR([You enabled curl support but the curl library could not be configured])
         fi
-
     fi
 
     if (test "x$YOUTUBE_OPTION_ENABLED" != xyes) && (test "x$EXTERNAL_TRANSCODING_OPTION" = !xyes) && (test "x$SOPCAST_OPTION_ENABLED" != xyes); then
