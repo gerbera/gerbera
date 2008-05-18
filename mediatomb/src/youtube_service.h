@@ -41,6 +41,7 @@
 #include "url.h"
 #include "dictionary.h"
 #include "youtube_content_handler.h"
+#include <curl/curl.h>
 
 typedef enum 
 {
