@@ -50,7 +50,7 @@ TranscodeDispatcher::TranscodeDispatcher() : TranscodeHandler()
 
 Ref<IOHandler> TranscodeDispatcher::open(Ref<TranscodingProfile> profile, 
                                          String location, 
-                                         int objectType, 
+                                         Ref<CdsObject> obj, 
                                          struct File_Info *info)
 {
     if (profile == nil)
@@ -62,7 +62,7 @@ Ref<IOHandler> TranscodeDispatcher::open(Ref<TranscodingProfile> profile,
     if (profile->getType() == TR_External)
     {
         Ref<TranscodeExternalHandler> tr_ext(new TranscodeExternalHandler());
-        return tr_ext->open(profile, location, objectType, info);
+        return tr_ext->open(profile, location, obj, info);
     }
     else
         throw _Exception(_("Unknown transcoding type for profile ") + 

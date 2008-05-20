@@ -491,7 +491,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
         {
             Ref<TranscodeDispatcher> tr_d(new TranscodeDispatcher());
             Ref<TranscodingProfile> tp = ConfigManager::getInstance()->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
-            return tr_d->open(tp, path, item->getObjectType(), info);
+            return tr_d->open(tp, path, RefCast(item, CdsObject), info);
         }
         else
 #endif

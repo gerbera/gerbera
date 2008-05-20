@@ -237,7 +237,7 @@ Ref<IOHandler> URLRequestHandler::open(IN const char *filename, OUT struct File_
                     tr_profile + " found");
 
         Ref<TranscodeDispatcher> tr_d(new TranscodeDispatcher());
-        return tr_d->open(tp, url, item->getObjectType(), info);
+        return tr_d->open(tp, url, RefCast(item, CdsObject), info);
     }
     else
 #endif

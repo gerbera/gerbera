@@ -73,7 +73,7 @@ TranscodeExternalHandler::TranscodeExternalHandler() : TranscodeHandler()
 
 Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile, 
                                               String location, 
-                                              int objectType, 
+                                              Ref<CdsObject> obj, 
                                               struct File_Info *info)
 {
     bool isURL = false;
@@ -86,10 +86,26 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
         throw _Exception(_("Transcoding of file ") + location +
                            "requested but no profile given");
     
-    isURL = (IS_CDS_ITEM_INTERNAL_URL(objectType) ||
-            IS_CDS_ITEM_EXTERNAL_URL(objectType));
+    isURL = (IS_CDS_ITEM_INTERNAL_URL(obj->getObjectType()) ||
+            IS_CDS_ITEM_EXTERNAL_URL(obj->getObjectType()));
 
     String mimeType = profile->getTargetMimeType();
+
+    if (IS_CDS_ITEM(obj->getObjectType()))
+    {
+        Ref<CdsItem> it = RefCast(obj, CdsItem);
+        Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(
+                CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+
+        if (mappings->get(mimeType) == CONTENT_TYPE_PCM)
+        {
+            String freq = it->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY));
+            String nrch = it->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS));
+
+            if (string_ok(freq) && string_ok(nrch));
+                mimeType = mimeType + _(";rate=") + freq + _(";channels=") + nrch;
+        }
+    }
 
     info->content_type = ixmlCloneDOMString(mimeType.c_str());
     

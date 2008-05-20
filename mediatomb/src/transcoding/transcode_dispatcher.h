@@ -41,7 +41,8 @@ public:
     TranscodeDispatcher();
     virtual zmm::Ref<IOHandler> open(zmm::Ref<TranscodingProfile> profile, 
                                      zmm::String location,
-                                     int objectType, struct File_Info *info);
+                                     zmm::Ref<CdsObject> obj, 
+                                     struct File_Info *info);
 };
 
 
