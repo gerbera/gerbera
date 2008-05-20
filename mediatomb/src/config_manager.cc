@@ -339,6 +339,7 @@ String ConfigManager::createDefaultConfig(String userhome)
    
     Ref<Element> ui(new Element(_("ui")));
     ui->setAttribute(_("enabled"), _(DEFAULT_UI_EN_VALUE));
+    ui->setAttribute(_("show-tooltips"), _(DEFAULT_UI_SHOW_TOOLTIPS_VALUE));
 
     Ref<Element>accounts(new Element(_("accounts")));
     accounts->setAttribute(_("enabled"), _(DEFAULT_ACCOUNTS_EN_VALUE));
@@ -934,6 +935,14 @@ void ConfigManager::validate(String serverhome)
                            "for <ui enabled=\"\" /> attribute"));
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
     SET_BOOL_OPTION(CFG_SERVER_UI_ENABLED);
+
+    temp = getOption(_("/server/ui/attribute::show-tooltips"),
+                     _(DEFAULT_UI_SHOW_TOOLTIPS_VALUE));
+    if (!validateYesNo(temp))
+        throw _Exception(_("Error in config file: incorrect parameter "
+                           "for <ui show-tooltips=\"\" /> attribute"));
+    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    SET_BOOL_OPTION(CFG_SERVER_UI_SHOW_TOOLTIPS);
 
     temp = getOption(_("/server/ui/attribute::poll-when-idle"),
                      _(DEFAULT_POLL_WHEN_IDLE_VALUE));

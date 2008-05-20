@@ -100,6 +100,9 @@ function appendImgNode(document, node, alt, icon)
     var img = document.createElement("img");
     img.setAttribute("src", icon.src);
     img.setAttribute("alt", alt);
+    if (showTooltips) {
+        img.setAttribute("title", alt);
+    }
     img.setAttribute("border", "0");
     img.setAttribute("width", icon.width);
     img.setAttribute("height", icon.height);

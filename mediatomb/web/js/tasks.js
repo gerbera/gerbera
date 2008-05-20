@@ -47,6 +47,7 @@ var pollInterval;
 // will be set by getConfigCallback() (auth.js)
 var pollWhenIdle = false;
 var pollIntervalTime = 2000;
+var showTooltips = true;
 
 function updateCurrentTask(taskEl)
 {

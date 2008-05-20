@@ -207,6 +207,7 @@
 #define DEFAULT_TMPDIR                  "/tmp/"
 #define DEFAULT_CONFIG_NAME             "config.xml"
 #define DEFAULT_UI_EN_VALUE             YES
+#define DEFAULT_UI_SHOW_TOOLTIPS_VALUE  YES
 #define DEFAULT_POLL_WHEN_IDLE_VALUE    NO
 #define DEFAULT_POLL_INTERVAL           2 
 #define DEFAULT_ACCOUNTS_EN_VALUE       NO

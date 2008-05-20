@@ -89,6 +89,9 @@ void web::auth::process()
         Ref<ConfigManager> cm = ConfigManager::getInstance();
         Ref<Element> config (new Element(_("config")));
         root->appendElementChild(config);
+        config->setAttribute(_("show-tooltips"),
+                (cm->getBoolOption(
+                          CFG_SERVER_UI_SHOW_TOOLTIPS) ? _("yes") : _("no")));
         config->setAttribute(_("poll-when-idle"), 
             (cm->getBoolOption(
                           CFG_SERVER_UI_POLL_WHEN_IDLE) ? _("yes") : _("no")));

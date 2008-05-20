@@ -158,6 +158,7 @@ function getConfigCallback(ajaxRequest)
     {
         pollIntervalTime = xmlGetAttribute(configEl, "poll-interval") * 1000;
         pollWhenIdle = (xmlGetAttribute(configEl, "poll-when-idle") == "yes");
+        showTooltips = (xmlGetAttribute(configEl, "show-tooltips") == "yes");
         if (pollWhenIdle)
             startPollInterval();
         var itemsPerPageOptionsEl = xmlGetElement(configEl, "items-per-page");
