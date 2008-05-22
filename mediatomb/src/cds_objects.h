@@ -241,6 +241,10 @@ public:
     /// \brief Query resources
     inline zmm::Ref<zmm::Array<CdsResource> > getResources()
     { return resources; }
+ 
+    /// \brief Set resources
+    inline void setResources(zmm::Ref<zmm::Array<CdsResource> > res) 
+    { resources = res; }
     
     /// \brief Query resource tag with the given index
     inline zmm::Ref<CdsResource> getResource(int index)

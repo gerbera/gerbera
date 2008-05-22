@@ -39,7 +39,7 @@
 
 using namespace zmm;
 
-char service_prefixes[] = { 'Y', 'S', '\0' };
+char service_prefixes[] = { '\0', 'Y', 'S', '\0' };
 
 OnlineServiceList::OnlineServiceList()
 {

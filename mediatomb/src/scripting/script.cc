@@ -587,6 +587,7 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
     i = getIntProperty(js, _("parentID"), INVALID_OBJECT_ID);
     if (i != INVALID_OBJECT_ID)
         obj->setParentID(i);
+
     val = getProperty(js, _("title"));
     if (val != nil)
     {
@@ -658,6 +659,14 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
             }
         }
         JS_RemoveRoot(cx, &js_meta);
+    }
+    
+    // stuff that has not been exported to js
+    if (pcd != nil)
+    {
+        obj->setFlags(pcd->getFlags());
+        obj->setResources(pcd->getResources());
+        obj->setAuxData(pcd->getAuxData());
     }
 
     // CdsItem
@@ -777,13 +786,17 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
             }
             else
             {
-                protocolInfo = renderProtocolInfo(item->getMimeType(), _(MIMETYPE_DEFAULT));
+                protocolInfo = renderProtocolInfo(item->getMimeType(), _(PROTOCOL));
             }
-            Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
-            resource->addAttribute(MetadataHandler::getResAttrName(
-                        R_PROTOCOLINFO), protocolInfo);
 
-            item->addResource(resource);
+            if (item->getResourceCount() == 0)
+            {
+                Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
+                resource->addAttribute(MetadataHandler::getResAttrName(
+                            R_PROTOCOLINFO), protocolInfo);
+
+                item->addResource(resource);
+            }
         }
     }
 
@@ -833,6 +846,7 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
     val = obj->getLocation();
     if (val != nil)
         setProperty(js, _("location"), val);
+
 
     // TODO: boolean type
     i = obj->isRestricted();
@@ -1008,6 +1022,11 @@ String Script::convertToCharset(String str, charset_convert_t chr)
     }
 
     return nil;
+}
+
+Ref<CdsObject> Script::getProcessedObject()
+{
+    return processed;
 }
 
 #endif // HAVE_JS

@@ -180,7 +180,7 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         // root it
         argv[1] = OBJECT_TO_JSVAL(js_orig_obj);
 
-        orig_object = self->jsObject2cdsObject(js_orig_obj, nil);
+        orig_object = self->jsObject2cdsObject(js_orig_obj, self->getProcessedObject());
         if (orig_object == nil)
             return JS_TRUE;
 
@@ -213,10 +213,11 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
                 cds_obj = self->jsObject2cdsObject(js_cds_obj, mainObj);
             }
             else
-                cds_obj = self->jsObject2cdsObject(js_cds_obj, nil);
+                cds_obj = self->jsObject2cdsObject(js_cds_obj, self->getProcessedObject());
         }
         else
             cds_obj = self->jsObject2cdsObject(js_cds_obj, orig_object);
+        
         if (cds_obj == nil)
             return JS_TRUE;
 

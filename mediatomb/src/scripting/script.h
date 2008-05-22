@@ -98,11 +98,17 @@ public:
     
     virtual script_class_t whoami() = 0;
 
+    zmm::Ref<CdsObject> getProcessedObject(); 
+
     zmm::String convertToCharset(zmm::String str, charset_convert_t chr);
     
 protected:
     void execute();
     int gc_counter;
+
+    // object that is currently being processed by the script (set in import
+    // script)
+    zmm::Ref<CdsObject> processed;
     
 private:
     JSObject *common_root;

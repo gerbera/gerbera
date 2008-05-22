@@ -76,6 +76,7 @@ void ImportScript::processCdsObject(Ref<CdsObject> obj)
     JS_SetContextThread(cx);
     JS_BeginRequest(cx);
 #endif
+    processed = obj;
     try 
     {
         JSObject *orig = JS_NewObject(cx, NULL, NULL, glob);
@@ -85,12 +86,15 @@ void ImportScript::processCdsObject(Ref<CdsObject> obj)
     }
     catch (Exception ex)
     {
+        processed = nil;
 #ifdef JS_THREADSAFE
         JS_EndRequest(cx);
         JS_ClearContextThread(cx);
 #endif
         throw ex;
     }
+
+    processed = nil;
 
     gc_counter++;
     if (gc_counter > JS_CALL_GC_AFTER_NUM)
