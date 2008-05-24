@@ -136,9 +136,6 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
             Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
             item->addResource(resource);
 
-            resource->addParameter(_(ONLINE_SERVICE_AUX_ID),
-                    String::from(OS_SopCast));
-
             item->setAuxData(_(ONLINE_SERVICE_AUX_ID),
                     String::from(OS_SopCast));
 
