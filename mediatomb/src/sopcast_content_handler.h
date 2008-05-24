@@ -39,12 +39,10 @@
 #define SOPCAST_SERVICE_ID              "S"
 #define SOPCAST_CHANNEL_ID              "cid"
 
+#define SOPCAST_PROTOCOL                "sop"
 
-#define SOPCAST_AUXDATA_CLASS           SOPCAST_SERVICE_ID "1"
-#define SOPCAST_AUXDATA_LANGUAGE        SOPCAST_SERVICE_ID "2"
-#define SOPCAST_AUXDATA_KBPS            SOPCAST_SERVICE_ID "3"
-#define SOPCAST_AUXDATA_GROUP           SOPCAST_SERVICE_ID "4"
-#define SOPCAST_AUXDATA_GROUP_NAME      SOPCAST_SERVICE_ID "5" 
+#define SOPCAST_AUXDATA_LANGUAGE        SOPCAST_SERVICE_ID "1"
+#define SOPCAST_AUXDATA_GROUP           SOPCAST_SERVICE_ID "2"
 
 #include "zmmf/zmmf.h"
 #include "mxml/mxml.h"
@@ -75,6 +73,7 @@ protected:
     int group_count;
     int current_channel_index;
     int channel_count;
+    zmm::String current_group_name;
 
     zmm::Ref<mxml::Element> current_group;
     zmm::Ref<Dictionary> extension_mimetype_map;

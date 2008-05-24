@@ -2123,9 +2123,12 @@ void CMFetchOnlineContentTask::run(Ref<ContentManager> cm)
     service->decTaskCount();
     if (service->getTaskCount() == 0)
     {
-        Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON_FROM_REF(cm), 
-                service->getRefreshInterval(), 
-                service->getTimerParameter(), true);
+        if (service->getRefreshInterval() > 0)
+        {
+            Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON_FROM_REF(cm), 
+                    service->getRefreshInterval(), 
+                    service->getTimerParameter(), true);
+        }
     }
 }
 #endif

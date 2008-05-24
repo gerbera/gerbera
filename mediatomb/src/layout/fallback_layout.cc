@@ -38,12 +38,16 @@
 #include "metadata_handler.h"
 #ifdef ONLINE_SERVICES
 
+#include "online_service.h"
+
 #ifdef YOUTUBE
     #include "youtube_content_handler.h"
     #include "youtube_service.h"
 #endif
 
-#include "online_service.h"
+#ifdef SOPCAST
+    #include "sopcast_content_handler.h"
+#endif
 
 #endif
 
@@ -318,9 +322,22 @@ void FallbackLayout::addSopCast(zmm::Ref<CdsObject> obj)
         ref_set = true;
     }
 
-    chain = _(SP_VPATH "/") + esc(obj->getTitle());
+    chain = _(SP_VPATH "/" "All Channels");
     id =  ContentManager::getInstance()->addContainerChain(chain);
     add(obj, id, ref_set);
+    if (!ref_set)
+    {
+        obj->setRefID(obj->getID());
+        ref_set = true;
+    }
+
+    temp = obj->getAuxData(_(SOPCAST_AUXDATA_GROUP));
+    if (string_ok(temp))
+    {
+        chain = _(SP_VPATH "/" "Groups" "/") + esc(temp);
+        id =  ContentManager::getInstance()->addContainerChain(chain);
+        add(obj, id, ref_set);
+    }
 }
 #endif
 

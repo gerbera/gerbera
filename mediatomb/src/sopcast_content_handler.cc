@@ -55,7 +55,7 @@ bool SopCastContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
 
     channels = service;
 
-    group_count = channels->elementChildCount();
+    group_count = channels->childCount();
     if (group_count < 1)
         return false;
 
@@ -74,18 +74,22 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
 {
 #define DATE_BUF_LEN 12
     String temp;
-    time_t epoch;
-    struct tm t;
-    char datebuf[DATE_BUF_LEN];
     struct timespec ts;
-    String current_group_name;
 
     while (current_group_node_index < group_count)
     {
         if (current_group == nil)
         {
-            current_group = channels->getElementChild(current_group_node_index);
+            Ref<Node> n = channels->getChild(current_group_node_index);
             current_group_node_index++;
+
+            if (n == nil)
+                continue;
+
+            if (n->getType() != mxml_node_element)
+                continue;
+
+            current_group = RefCast(n, Element);
             channel_count = current_group->childCount();
 
             if ((current_group->getName() != "group") ||
@@ -97,9 +101,13 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
             }
             else
             {
-                current_group_name = current_group->getAttribute(_("en"));
+                current_group_name = current_group->getText();
                 if (!string_ok(current_group_name))
-                    current_group_name = _("Unknown");
+                {
+                    current_group_name = current_group->getAttribute(_("en"));
+                    if (!string_ok(current_group_name))
+                        current_group_name = _("Unknown");
+                }
             }
 
             current_channel_index = 0;
@@ -113,20 +121,28 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
 
         while (current_channel_index < channel_count)
         {
-            Ref<Element> channel = current_group->getElementChild(current_channel_index);
+            Ref<Node> n = current_group->getChild(current_channel_index);
             current_channel_index++;
+
+            if ((n == nil) || (n->getType() != mxml_node_element))
+                continue;
+
+            Ref<Element> channel = RefCast(n, Element);
+
             if (channel->getName() != "channel")
                 continue;
 
             Ref<CdsItemExternalURL> item(new CdsItemExternalURL());
             Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
+            item->addResource(resource);
+
             resource->addParameter(_(ONLINE_SERVICE_AUX_ID),
                     String::from(OS_SopCast));
 
             item->setAuxData(_(ONLINE_SERVICE_AUX_ID),
                     String::from(OS_SopCast));
 
-            item->setAuxData(_(SOPCAST_AUXDATA_GROUP_NAME), current_group_name);
+            item->setAuxData(_(SOPCAST_AUXDATA_GROUP), current_group_name);
 
             temp = channel->getAttribute(_("id"));
             if (!string_ok(temp))
@@ -163,8 +179,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
                 }
             }
             resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
-                    renderProtocolInfo(mt));
-            item->addResource(resource);
+                    renderProtocolInfo(mt, _(SOPCAST_PROTOCOL)));
            
             Ref<Element> tmp_el = channel->getChildByName(_("sop_address"));
             if (tmp_el == nil)
@@ -214,7 +229,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
 
             getTimespecNow(&ts);
             item->setAuxData(_(ONLINE_SERVICE_LAST_UPDATE), String::from(ts.tv_sec));
-            item->setFlag(OBJECT_FLAG_PROXY_URL);
+//            item->setFlag(OBJECT_FLAG_PROXY_URL);
             item->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
 
             try

@@ -76,6 +76,11 @@ String OnlineServiceHelper::resolveURL(Ref<CdsItemExternalURL> item)
             url = yt_url->getVideoURL(item->getServiceID().substring(1));
             break;
 #endif
+#ifdef SOPCAST
+        case OS_SopCast:
+            url = item->getLocation();
+            break;
+#endif
         case OS_Max:
         default:
             throw _Exception(_("No handler for this service!"));
