@@ -2099,6 +2099,43 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                 prof->setAcceptURL(false);
         }
 
+        if (child->getChildByName(_("sample-frequency")) != nil)
+        {
+            param = child->getChildText(_("sample-frequency"));
+            if (param == "source")
+                prof->setSampleFreq(SOURCE);
+            else if (param == "off")
+                prof->setSampleFreq(OFF);
+            else
+            {
+                int freq = param.toInt();
+                if (freq <= 0)
+                    throw _Exception(_("Error in config file: incorrect "
+                                       "parameter for <sample-frequency> "
+                                       "tag"));
+
+                prof->setSampleFreq(freq);
+            }
+        }
+
+        if (child->getChildByName(_("audio-channels")) != nil)
+        {
+            param = child->getChildText(_("audio-channels"));
+            if (param == "source")
+                prof->setNumChannels(SOURCE);
+            else if (param == "off")
+                prof->setNumChannels(OFF);
+            else
+            {
+                int chan = param.toInt();
+                if (chan <= 0)
+                    throw _Exception(_("Error in config file: incorrect "
+                                       "parameter for <number-of-channels> "
+                                       "tag"));
+                prof->setNumChannels(chan);
+            }
+        }
+
         if (child->getChildByName(_("hide-original-resource")) != nil)
         {
             param = child->getChildText(_("hide-original-resource"));

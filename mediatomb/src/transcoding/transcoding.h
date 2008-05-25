@@ -39,6 +39,9 @@
 #include "dictionary.h"
 #include "object_dictionary.h"
 
+#define SOURCE  (-1)
+#define OFF       0
+
 enum transcoding_type_t
 {
     TR_None,
@@ -168,6 +171,14 @@ public:
     void setChunked(bool chunked) { force_chunked = chunked; }
     bool getChunked() { return force_chunked; }
 
+    /// \brief Sample frequency handling
+    void setSampleFreq(int freq) { sample_frequency = freq; }
+    int getSampleFreq() { return sample_frequency; }
+
+    /// \brief Number of channels
+    void setNumChannels(int chans) { number_of_channels = chans; }
+    int getNumChannels() { return number_of_channels; }
+
 protected:
     zmm::String name;
     zmm::String tm;
@@ -183,6 +194,8 @@ protected:
     size_t chunk_size;
     size_t initial_fill_size;
     transcoding_type_t tr_type;
+    int number_of_channels;
+    int sample_frequency;
     zmm::Ref<Dictionary> attributes;
     zmm::Ref<zmm::Array<zmm::StringBase> > fourcc_list;
     avi_fourcc_listmode_t fourcc_mode;

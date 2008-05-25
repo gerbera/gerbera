@@ -186,6 +186,30 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                 t_res->addAttribute(MetadataHandler::getResAttrName(R_DURATION),
                         duration);
 
+            int freq = tp->getSampleFreq();
+            if (freq == SOURCE)
+            {
+                String frequency = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY));
+                if (string_ok(frequency))
+                     t_res->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), frequency);
+            }
+            else if (freq != OFF)
+            {
+                t_res->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), String::from(freq));
+            }
+
+            int chan = tp->getNumChannels();
+            if (chan == SOURCE)
+            {
+                String nchannels = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS));
+                if (string_ok(nchannels))
+                     t_res->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), nchannels);
+            }
+            else if (chan != OFF)
+            {
+                t_res->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), String::from(chan));
+            }
+
             if (tp->isThumbnail())
                 t_res->addOption(_(RESOURCE_CONTENT_TYPE), _(EXIF_THUMBNAIL));
 

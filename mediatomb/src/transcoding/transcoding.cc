@@ -53,6 +53,8 @@ TranscodingProfile::TranscodingProfile()
     force_chunked = true;
     hide_orig_res = false;
     thumbnail = false;
+    sample_frequency = SOURCE; // keep original
+    number_of_channels = SOURCE;
     attributes = Ref<Dictionary>(new Dictionary());
     fourcc_list = Ref<Array<StringBase> >(new Array<StringBase>());
     fourcc_mode = FCC_None;
@@ -68,6 +70,8 @@ TranscodingProfile::TranscodingProfile(transcoding_type_t tr_type, String name)
     force_chunked = true;
     hide_orig_res = false;
     thumbnail = false;
+    sample_frequency = SOURCE; // keep original
+    number_of_channels = SOURCE;
     buffer_size = 0;
     chunk_size = 0;
     initial_fill_size = 0;

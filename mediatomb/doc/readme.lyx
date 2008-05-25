@@ -1,4 +1,4 @@
-#LyX 1.5.3 created this file. For more info see http://www.lyx.org/
+#LyX 1.5.4 created this file. For more info see http://www.lyx.org/
 \lyxformat 276
 \begin_document
 \begin_header
@@ -9463,6 +9463,12 @@ Optional
 \end_layout
 
 \begin_layout Standard
+
+\emph on
+Default: not specified
+\end_layout
+
+\begin_layout Standard
 Allows you to tell the resolution of the transcoded media to your player.
  This may be helpful if you want to generate thumbnails for your photos,
  or if your player has the ability to pick video streams in a particular
@@ -9496,9 +9502,122 @@ Optional
 \end_layout
 
 \begin_layout Standard
+
+\emph on
+Default: yes
+\end_layout
+
+\begin_layout Standard
 Specifies that the content should be sent out using chunked HTTP encoding,
  this is the default setting for transcoded streams, because the content
  length of the data is not known.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<sample-frequency>source</sample-frequency>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: source
+\end_layout
+
+\begin_layout Standard
+Specifies the sample frequency of the transcoded media, this information
+ is passed to the player and is particularly important when streaming PCM
+ data.
+ Possible values are: 
+\emph on
+source 
+\emph default
+(automatically set the same frequency as the frequency of the source content,
+ which is useful if you are not doing any resampling)
+\emph on
+, off 
+\emph default
+(do not provide this information to the player)
+\emph on
+, frequency 
+\emph default
+(specify a fixed value, where 
+\emph on
+frequency
+\emph default
+ is a numeric value > 0)
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<audio-channels>source</audio-channels>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: source
+\end_layout
+
+\begin_layout Standard
+Specifies the number of audio channels in the transcoded media, this information
+ is passed to the player and is particularly important when streaming PCM
+ data.
+ Possible values are: 
+\emph on
+source 
+\emph default
+(automatically set the same number of audio channels as in the source content)
+\emph on
+, off 
+\emph default
+(do not provide this information to the player)
+\emph on
+, number 
+\emph default
+(specify a fixed value, where 
+\emph on
+number
+\emph default
+ is a numeric value > 0)
 \end_layout
 
 \begin_layout Standard
@@ -9523,6 +9642,12 @@ status open
 
 \emph on
 Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: no
 \end_layout
 
 \begin_layout Description
