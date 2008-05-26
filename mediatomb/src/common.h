@@ -56,6 +56,7 @@
 #define UPNP_DEFAULT_CLASS_CONTAINER    "object.container"
 #define UPNP_DEFAULT_CLASS_ITEM         "object.item"
 #define UPNP_DEFAULT_CLASS_VIDEO_ITEM   "object.item.videoItem"
+#define UPNP_DEFAULT_CLASS_IMAGE_ITEM   "object.item.imageItem"
 #define UPNP_DEFAULT_CLASS_ACTIVE_ITEM  "object.item.activeItem"
 #define UPNP_DEFAULT_CLASS_MUSIC_ALBUM  "object.container.album.musicAlbum"
 #define UPNP_DEFAULT_CLASS_MUSIC_TRACK  "object.item.audioItem.musicTrack"

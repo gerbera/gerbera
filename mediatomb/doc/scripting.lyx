@@ -2028,6 +2028,66 @@ status open
 \end_layout
 
 \begin_layout Code
+UPNP_CLASS_ITEM_VIDEO
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Type: string
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Value: object.item.videoItem
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+UPNP_CLASS_ITEM_IMAGE
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Type: string
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Value: object.item.imageItem
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
 OBJECT_TYPE_CONTAINER
 \end_layout
 

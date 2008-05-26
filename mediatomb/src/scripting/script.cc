@@ -352,6 +352,10 @@ Script::Script(Ref<Runtime> runtime) : Object()
     setProperty(glob, _("UPNP_CLASS_ITEM"), _(UPNP_DEFAULT_CLASS_ITEM));
     setProperty(glob, _("UPNP_CLASS_ITEM_MUSIC_TRACK"),
             _(UPNP_DEFAULT_CLASS_MUSIC_TRACK));
+    setProperty(glob, _("UPNP_CLASS_ITEM_VIDEO"),
+            _(UPNP_DEFAULT_CLASS_VIDEO_ITEM));
+    setProperty(glob, _("UPNP_CLASS_ITEM_IMAGE"), 
+            _(UPNP_DEFAULT_CLASS_IMAGE_ITEM));
     setProperty(glob, _("UPNP_CLASS_PLAYLIST_CONTAINER"),
             _(UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER));
 
