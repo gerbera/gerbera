@@ -291,11 +291,9 @@ AC_DEFUN([MT_CHECK_LIBRARY_INTERNAL],
         ]
     )
 
-    unset LIBS
-
     if test "$mt_$1_search_libs" ; then
         unset ac_cv_lib_$2_$3
-        LDFLAGS="-L$mt_$1_search_libs"
+        LDFLAGS="$LDFLAGS -L$mt_$1_search_libs"
         AC_CHECK_LIB($2, $3,
             [
                 mt_$1_libs="-l$2"
@@ -312,7 +310,7 @@ AC_DEFUN([MT_CHECK_LIBRARY_INTERNAL],
                 mt_$1_libs="-l$2"
             ],
             [
-                LDFLAGS="-L$MT_SEARCHPATH_LIBS"
+                LDFLAGS="$LDFLAGS -L$MT_SEARCHPATH_LIBS"
                 unset ac_cv_lib_$2_$3
                 AC_CHECK_LIB($2, $3,
                     [
