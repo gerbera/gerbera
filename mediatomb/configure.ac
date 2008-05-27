@@ -1144,7 +1144,8 @@ if test "x$LIBMAGIC_OPTION_ENABLED" = xyes; then
     if test "x$LIBMAGIC_STATUS" != xyes; then
         if test "x$ZLIB_STATUS" != xyes; then
             MT_CHECK_LIBRARY([zlib], [z], [compress])
-            LDFLAGS="$LDFLAGS $ZLIB_LDFLAGS $ZLIB_LIBS"
+            LDFLAGS="$LDFLAGS $ZLIB_LDFLAGS"
+            LIBS="$LIBS $ZLIB_LIBS"
             AC_MSG_NOTICE([retrying libmagic check with zlib flags])
             MT_CHECK_PACKAGE([libmagic], [magic], [magic], [magic_load])
             if test "x$LIBMAGIC_STATUS" = xyes; then
@@ -1152,7 +1153,8 @@ if test "x$LIBMAGIC_OPTION_ENABLED" = xyes; then
                 LIBMAGIC_LDFLAGS="$LIBMAGIC_LDFLAGS $ZLIB_LDFLAGS"
             fi
         else
-            LDFLAGS="$LDFLAGS $ZLIB_LDFLAGS $ZLIB_LIBS"
+            LDFLAGS="$LDFLAGS $ZLIB_LDFLAGS"
+            LIBS="$LIBS $ZLIB_LIBS"
             AC_MSG_NOTICE([retrying libmagic check with zlib flags])
             MT_CHECK_PACKAGE([libmagic], [magic], [magic], [magic_load])
             if test "x$LIBMAGIC_STATUS" = xyes; then
@@ -1268,7 +1270,8 @@ if test "x$ID3LIB_OPTION_ENABLED" = xyes; then
     if test "x$ID3LIB_STATUS" != xyes; then
         if test "x$ZLIB_STATUS" != xyes; then
             MT_CHECK_LIBRARY([zlib], [z], [compress])
-            LDFLAGS="$LDFLAGS $ZLIB_LDFLAGS $ZLIB_LIBS"
+            LDFLAGS="$LDFLAGS $ZLIB_LDFLAGS"
+            LIBS="$LIBS $ZLIB_LIBS"
             AC_MSG_NOTICE([retrying id3lib check with zlib flags])
             MT_CHECK_PACKAGE([id3lib], [id3/tag], [id3], [main])
             if test "x$ID3LIB_STATUS" = xyes; then
@@ -1276,7 +1279,8 @@ if test "x$ID3LIB_OPTION_ENABLED" = xyes; then
                 ID3LIB_LDFLAGS="$ID3LIB_LDFLAGS $ZLIB_LDFLAGS"
             fi
         else
-            LDFLAGS="$LDFLAGS $ZLIB_LDFLAGS $ZLIB_LIBS"
+            LDFLAGS="$LDFLAGS $ZLIB_LDFLAGS"
+            LIBS="$LIBS $ZLIB_LIBS"
             AC_MSG_NOTICE([retrying id3lib check with zlib flags])
             MT_CHECK_PACKAGE([id3lib], [id3/tag], [id3], [main])
             if test "x$ID3LIB_STATUS" = xyes; then
