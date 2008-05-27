@@ -369,7 +369,7 @@ AC_DEFUN([MT_CHECK_HEADER_INTERNAL],
         CFLAGS="$CFLAGS -I${mt_$1_search_headers}"
         CXXFLAGS="$CXXFLAGS -I${mt_$1_search_headers}"
         CPPFLAGS="$CPPFLAGS -I${mt_$1_search_headers}"
-        AC_CHECK_HEADER($mt_$1_search_headers/$5.h,
+        AC_CHECK_HEADER($mt_$1_search_headers/$2.h,
             [
                 mt_$1_cxxflags="-I${mt_$1_search_headers}"
             ],
@@ -423,7 +423,7 @@ AC_DEFUN([MT_CHECK_HEADER_INTERNAL],
    
 AC_DEFUN([MT_CHECK_PACKAGE_INTERNAL],
 [
-    MT_CHECK_HEADER_INTERNAL($1, $2)
+    MT_CHECK_HEADER_INTERNAL([$1], [$2])
     mt_$1_package_status=${mt_$1_header_status}
   
     if test "x$mt_$1_package_status" = xyes; then 
