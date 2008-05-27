@@ -1875,17 +1875,17 @@ dnl information.
                         ],
                         [
                             if ((test "x$INOTIFY_OPTION_REQUESTED" != xyes) &&
-                                (test "x$INOTIFY_OPTIEON_ENABLED" = xyes)); then
+                                (test "x$INOTIFY_OPTION_ENABLED" = xyes)); then
                                 AC_MSG_RESULT([no, disabling inotify support])
                             elif ((test "x$INOTIFY_OPTION_REQUESTED" != xyes) &&
-                               (test "x$INOTIFY_OPTIEON_ENABLED" != xyes)); then
+                               (test "x$INOTIFY_OPTION_ENABLED" != xyes)); then
                                 AC_MSG_RESULT([no])
                             fi
                                 INOTIFY_STATUS=no
                         ],
                         [
                             if ((test "x$INOTIFY_OPTION_REQUESTED" = xyes) &&
-                                (test "x$INOTIFY_OPTIEON_ENABLED" = xyes)); then
+                                (test "x$INOTIFY_OPTION_ENABLED" = xyes)); then
                                 AC_MSG_RESULT([selecting yes for cross compiling]) 
                                 INOTIFY_STATUS=yes
                             else
@@ -1897,7 +1897,7 @@ dnl information.
                 ],
                 [
                     if ((test "x$INOTIFY_OPTION_REQUESTED" = xyes) &&
-                        (test "x$INOTIFY_OPTIEON_ENABLED" = xyes)); then
+                        (test "x$INOTIFY_OPTION_ENABLED" = xyes)); then
                        AC_MSG_RESULT([selecting yes for cross compiling]) 
                        INOTIFY_STATUS=yes
                     else
@@ -1912,7 +1912,7 @@ if test "x$INOTIFY_STATUS" = xyes; then
     AC_SUBST(INOTIFY_CFLAGS)
 else
     if ((test "x$INOTIFY_OPTION_REQUESTED" = xyes) &&
-        (test "x$INOTIFY_OPTIEON_ENABLED" = xyes)); then
+        (test "x$INOTIFY_OPTION_ENABLED" = xyes)); then
         AC_MSG_NOTICE([enabling runtime inotify detection])
         # if system inotify header exists, go with it, otherwise take our own
         if test "x$ac_cv_header_sys_inotify_h" = xyes; then
@@ -2075,7 +2075,7 @@ if test "x$TOMBDEBUG_OPTION_ENABLED" = xyes; then
     echo "debug log             : $TOMBDEBUG_OPTION_ENABLED"
 fi
 
-if test "x$UPNPDEBUG_OPTIEON_ENABLED" = xyes; then
+if test "x$UPNPDEBUG_OPTION_ENABLED" = xyes; then
     echo "upnpdebug             : $UPNPDEBUG_OPTION_ENABLED"
 fi
 
