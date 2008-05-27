@@ -617,7 +617,7 @@ AC_DEFUN([MT_CHECK_BINCONFIG_INTERNAL],
         fi
 
         mt_$1_version=`${mt_$1_config} --version 2>/dev/null`
-        if test -z "$mt_$1_config_version"; then
+        if test -z "$mt_$1_version"; then
             AC_MSG_ERROR([${mt_$1_search_config} could not be executed or returned invalid values])
         fi
     else
@@ -630,7 +630,7 @@ AC_DEFUN([MT_CHECK_BINCONFIG_INTERNAL],
                 AC_MSG_RESULT([$2 not found, please install the $1 devel package])
             fi
         fi
-        
+       
         mt_$1_version=`${mt_$1_config} --version 2>/dev/null`
         if test -z "$mt_$1_version"; then
             AC_MSG_NOTICE([${mt_$1_config} could not be executed or returned invalid values])
