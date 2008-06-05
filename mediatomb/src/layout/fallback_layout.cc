@@ -212,6 +212,8 @@ void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
 
     if (string_ok(album_full))
         temp = temp + " - " + album_full + " - ";
+    else
+        temp = temp + " - ";
 
     album = esc(album);
     chain = _("/Audio/Artists/") +  artist + _("/") + album;

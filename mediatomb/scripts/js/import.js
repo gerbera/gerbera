@@ -122,7 +122,9 @@ function addAudio(obj)
     
     if (album_full)
         temp = temp + ' - ' + album_full + ' - ';
-    
+    else
+        temp = temp + ' - ';
+   
     obj.title = temp + title;
     addCdsObject(obj, createContainerChain(chain));
     
@@ -223,10 +225,10 @@ if (getPlaylistType(orig.mimetype) == '')
     
     if (mime == 'video')
     {
-        if (obj.onlineservice == ONLINE_SERVICE_NONE)
-            addVideo(obj);
-        else if (obj.onlineservice == ONLINE_SERVICE_YOUTUBE)
+        if (obj.onlineservice == ONLINE_SERVICE_YOUTUBE)
             addYouTube(obj);
+        else
+            addVideo(obj);
     }
     
     if (mime == 'image')
