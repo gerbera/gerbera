@@ -122,44 +122,76 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     Ref<Array<StringBase> > arglist;
     Ref<Array<ProcListItem> > proc_list = nil; 
 
-    if (isURL && (!profile->acceptURL()))
+#ifdef SOPCAST
+    service_type_t service = OS_None;
+    if (obj->getFlag(OBJECT_FLAG_ONLINE_SERVICE))
     {
+        service = (service_type_t)(obj->getAuxData(_(ONLINE_SERVICE_AUX_ID)).toInt());
+    }
+    
+    if (service == OS_SopCast)
+    {
+        Ref<Array<StringBase> > sop_args;
+        int p1 = find_local_port(45000,65500);
+        int p2 = find_local_port(45000,65500);
+        sop_args = parseCommandLine(location + " " + String::from(p1) + " " +
+                   String::from(p2), nil, nil);
+        Ref<ProcessExecutor> spsc(new ProcessExecutor(_("sp-sc-auth"), 
+                                                      sop_args));
+        printf("-------> command will be: sp-sc-atuh %s\n", String(location + " " + String::from(p1) + " " + String::from(p2)).c_str());
+        proc_list = Ref<Array<ProcListItem> >(new Array<ProcListItem>(1));
+        Ref<ProcListItem> pr_item(new ProcListItem(RefCast(spsc, Executor)));
+        proc_list->append(pr_item);
+        location = _("http://localhost:") + String::from(p2) + "/tv.asf";
+#warning check if socket is ready 
+        sleep(15); 
+    }
+#warning check if we can use "accept url" with sopcast
+    else
+    {
+#endif
+        if (isURL && (!profile->acceptURL()))
+        {
 #ifdef HAVE_CURL
-        String url = location;
-        strcpy(fifo_template, "mt_transcode_XXXXXX");
-        location = tempName(cfg->getOption(CFG_SERVER_TMPDIR), fifo_template);
-        log_debug("creating reader fifo: %s\n", location.c_str());
-        if (mkfifo(location.c_str(), O_RDWR) == -1)
-        {
-            log_error("Failed to create fifo for the remote content reading thread: %s\n", strerror(errno));
-            throw _Exception(_("Could not create reader fifo!\n"));
-        }
+            String url = location;
+            strcpy(fifo_template, "mt_transcode_XXXXXX");
+            location = tempName(cfg->getOption(CFG_SERVER_TMPDIR), fifo_template);
+            log_debug("creating reader fifo: %s\n", location.c_str());
+            if (mkfifo(location.c_str(), O_RDWR) == -1)
+            {
+                log_error("Failed to create fifo for the remote content "
+                          "reading thread: %s\n", strerror(errno));
+                throw _Exception(_("Could not create reader fifo!\n"));
+            }
 
-        try
-        {
-            chmod(location.c_str(), S_IWUSR | S_IRUSR);
+            try
+            {
+                chmod(location.c_str(), S_IWUSR | S_IRUSR);
 
-            Ref<IOHandler> c_ioh(new CurlIOHandler(url, NULL, 
-                  cfg->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE),
-                  cfg->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE)));
-            
-            Ref<IOHandler> p_ioh(new ProcessIOHandler(location, nil));
-            Ref<Executor> ch(new IOHandlerChainer(c_ioh, p_ioh, 16384));
-            proc_list = Ref<Array<ProcListItem> >(new Array<ProcListItem>(1));
-            Ref<ProcListItem> pr_item(new ProcListItem(ch));
-            proc_list->append(pr_item);
-        }
-        catch (Exception ex)
-        {
-            unlink(location.c_str());
-            throw ex;
-        }
+                Ref<IOHandler> c_ioh(new CurlIOHandler(url, NULL, 
+                   cfg->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE),
+                   cfg->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE)));
+
+                Ref<IOHandler> p_ioh(new ProcessIOHandler(location, nil));
+                Ref<Executor> ch(new IOHandlerChainer(c_ioh, p_ioh, 16384));
+                proc_list = Ref<Array<ProcListItem> >(new Array<ProcListItem>(1));
+                Ref<ProcListItem> pr_item(new ProcListItem(ch));
+                proc_list->append(pr_item);
+            }
+            catch (Exception ex)
+            {
+                unlink(location.c_str());
+                throw ex;
+            }
 #else
-        throw _Exception(_("MediaTomb was compiled without libcurl support,"
-                           "data proxying is not available"));
+            throw _Exception(_("MediaTomb was compiled without libcurl support,"
+                               "data proxying is not available"));
 #endif
 
+        }
+#ifdef SOPCAST
     }
+#endif
 
     String check;
     if (profile->getCommand().startsWith(_(_DIR_SEPARATOR)))

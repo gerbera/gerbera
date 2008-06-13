@@ -159,24 +159,26 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
             }
             
             // I wish they had a mimetype setting
-            String mt = extension_mimetype_map->get(temp);
+            //String mt = extension_mimetype_map->get(temp);
+            String mt;
             // map was empty, we have to do construct the mimetype ourselves
             if (!string_ok(mt))
             {
                 if (temp == "wmv")
-                    mt = _("video/x-ms-wmv");
+                    mt = _("video/sopcast-x-ms-wmv");
                 else if (temp == "mp3")
-                    mt = _("audio/mpeg");
+                    mt = _("audio/sopcast-mpeg");
                 else if (temp == "wma")
-                    mt = _("audio/x-ms-wma");
+                    mt = _("audio/sopcast-x-ms-wma");
                 else
                 {
                     log_warning("Could not determine mimetype for SopCast channel (stream_type: %s)\n", temp.c_str());
-                    mt = _("application/octet-stream");
+                    mt = _("application/sopcast-stream");
                 }
             }
             resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
                     renderProtocolInfo(mt, _(SOPCAST_PROTOCOL)));
+            item->setMimeType(mt);
            
             Ref<Element> tmp_el = channel->getChildByName(_("sop_address"));
             if (tmp_el == nil)
@@ -226,7 +228,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
 
             getTimespecNow(&ts);
             item->setAuxData(_(ONLINE_SERVICE_LAST_UPDATE), String::from(ts.tv_sec));
-//            item->setFlag(OBJECT_FLAG_PROXY_URL);
+            item->setFlag(OBJECT_FLAG_PROXY_URL);
             item->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
 
             try

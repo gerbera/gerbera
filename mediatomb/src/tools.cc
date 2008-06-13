@@ -1201,6 +1201,9 @@ bool validateYesNo(String value)
 Ref<Array<StringBase> > parseCommandLine(String line, String in, String out)
 {
     Ref<Array<StringBase> > params = split_string(line, ' ');
+    if ((in == nil) && (out == nil))
+        return params;
+
     for (int i = 0; i < params->size(); i++)
     {
         String param = params->get(i);
@@ -1471,3 +1474,63 @@ void profiling_print(struct profiling_t *data)
 }
 
 #endif
+
+#ifdef SOPCAST
+/// \brief 
+int find_local_port(unsigned short range_min, unsigned short range_max)
+{
+    int fd;
+    int retry_count = 0;
+    int port;
+    struct sockaddr_in server_addr;
+    struct hostent *server;
+
+    if (range_min > range_max)
+    {
+        log_error("min port range > max port range!\n");
+        return -1;
+    }
+
+    
+    do
+    {
+        port =  rand () % (range_max - range_min) + range_min;
+
+        fd = socket(AF_INET, SOCK_STREAM, 0);
+        if (fd < 0)
+        {
+            log_error("could not determine free port: "
+                      "error creating socket (%s)\n", mt_strerror(errno).c_str());
+            return -1;
+        }
+
+        server = gethostbyname("127.0.0.1");
+        if (server == NULL)
+        {
+            log_error("could not resolve localhost\n");
+            close(fd);
+            return -1;
+        }
+
+        memset(&server_addr, 0, sizeof(server_addr));
+        server_addr.sin_family = AF_INET;
+        memcpy(&server_addr.sin_addr.s_addr, server->h_addr, server->h_length);
+        server_addr.sin_port = htons(port);
+
+        if (connect(fd, (struct sockaddr *)&server_addr, 
+            sizeof(server_addr)) == -1)
+        {
+            close(fd);
+            return port;
+        }
+
+        retry_count++;
+
+    } while (retry_count < USHRT_MAX);
+
+    log_error("Could not find free port on localhost\n");
+
+    return -1;
+}
+#endif
+

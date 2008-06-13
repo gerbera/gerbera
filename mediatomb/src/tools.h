@@ -207,6 +207,11 @@ zmm::String get_mime_type_from_buffer(magic_set *ms, zmm::Ref<RExp> reMimetype,
 
 #endif // HAVE_MAGIC
 
+#ifdef SOPCAST
+/// \brief Finds a free port between range_min and range_max on localhost.
+int find_local_port(unsigned short range_min, 
+                              unsigned short range_max);
+#endif
 /// \brief Extracts resolution from a JPEG image
 zmm::String get_jpeg_resolution(zmm::Ref<IOHandler> ioh);
 
