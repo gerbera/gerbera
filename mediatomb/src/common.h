@@ -263,6 +263,12 @@
     #define DEFAULT_SOPCAST_ENABLED     NO
     #define DEFAULT_SOPCAST_UPDATE_AT_START NO
 #endif
+#ifdef WEBORAMA 
+    #define WEBORAMA_PAGESIZE            224480
+    #define DEFAULT_WEBORAMA_ENABLED     NO
+    #define DEFAULT_WEBORAMA_UPDATE_AT_START NO
+#endif
+
 #ifdef ONLINE_SERVICES
     #define CFG_DEFAULT_UPDATE_AT_START 10 // seconds
 #endif

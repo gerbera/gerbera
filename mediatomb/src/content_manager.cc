@@ -67,6 +67,10 @@
     #include "sopcast_service.h"
 #endif
 
+#ifdef WEBORAMA
+    #include "weborama_service.h"
+#endif
+
 #define DEFAULT_DIR_CACHE_CAPACITY  10
 #define CM_INITIAL_QUEUE_SIZE       20
 
@@ -278,6 +282,36 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
     }
 #endif //SOPCAST
 
+#ifdef WEBORAMA
+    if (cm->getBoolOption(CFG_ONLINE_CONTENT_WEBORAMA_ENABLED))
+    {
+        try
+        {
+            Ref<OnlineService> wb((OnlineService *)new WeboramaService());
+            i = cm->getIntOption(CFG_ONLINE_CONTENT_WEBORAMA_REFRESH);
+            wb->setRefreshInterval(i);
+
+            i = cm->getIntOption(CFG_ONLINE_CONTENT_WEBORAMA_PURGE_AFTER);
+            wb->setItemPurgeInterval(i);
+
+            if (cm->getBoolOption(CFG_ONLINE_CONTENT_WEBORAMA_UPDATE_AT_START))
+                i = CFG_DEFAULT_UPDATE_AT_START;
+
+            Ref<TimerParameter> wb_param(new TimerParameter(TimerParameter::IDOnlineContent, OS_Weborama));
+            wb->setTimerParameter(RefCast(wb_param, Object));
+            online_services->registerService(wb);
+            if (i > 0)
+            {
+                Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), i, wb->getTimerParameter(), true);
+            }
+        }
+        catch (Exception ex)
+        {
+            log_error("Could not setup Weborama: %s\n",
+                    ex.getMessage().c_str());
+        }
+    }
+#endif //WEBORAMA
 
 #endif //ONLINE_SERVICES
 }

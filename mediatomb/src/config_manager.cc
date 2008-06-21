@@ -52,6 +52,10 @@
     #include "youtube_service.h"
 #endif
 
+#ifdef WEBORAMA
+    #include "weborama_service.h"
+#endif
+
 #if defined(HAVE_LANGINFO_H) && defined(HAVE_LOCALE_H)
     #include <langinfo.h>
     #include <locale.h>
@@ -1695,6 +1699,58 @@ void ConfigManager::validate(String serverhome)
     SET_BOOL_OPTION(CFG_ONLINE_CONTENT_SOPCAST_UPDATE_AT_START);
 #endif
 
+#ifdef WEBORAMA 
+    temp = getOption(_("/import/online-content/Weborama/attribute::enabled"), 
+                     _(DEFAULT_WEBORAMA_ENABLED));
+
+    if (!validateYesNo(temp))
+        throw _Exception(_("Error in config file: "
+                           "invalid \"enabled\" attribute value in "
+                           "<Weborama> tag"));
+
+    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    SET_BOOL_OPTION(CFG_ONLINE_CONTENT_WEBORAMA_ENABLED);
+
+    if (temp == "yes")
+    {
+        el = getElement(_("/import/online-content/Weborama"));
+        Ref<Array<Object> > wb_opts = createServiceTaskList(OS_Weborama, el);
+        if (wb_opts->size() == 0)
+            throw _Exception(_("Error in config file: "
+                        "Weborama service enabled but no imports "
+                        "specified."));
+
+        NEW_OBJARR_OPTION(wb_opts);
+        SET_OBJARR_OPTION(CFG_ONLINE_CONTENT_WEBORAMA_TASK_LIST);
+    }
+
+
+    temp_int = getIntOption(_("/import/online-content/Weborama/attribute::refresh"), 0);
+    NEW_INT_OPTION(temp_int);
+    SET_INT_OPTION(CFG_ONLINE_CONTENT_WEBORAMA_REFRESH);
+
+    temp_int = getIntOption(_("/import/online-content/Weborama/attribute::purge-after"), 0);
+    if (getIntOption(_("/import/online-content/Weborama/attribute::refresh")) >= temp_int)
+    {
+        if (temp_int != 0) 
+            throw _Exception(_("Error in config file: Weborama purge-after value must be greater than refresh interval"));
+    }
+
+    NEW_INT_OPTION(temp_int);
+    SET_INT_OPTION(CFG_ONLINE_CONTENT_WEBORAMA_PURGE_AFTER);
+
+    temp = getOption(_("/import/online-content/Weborama/attribute::update-at-start"),
+                     _(DEFAULT_WEBORAMA_UPDATE_AT_START));
+
+    if (!validateYesNo(temp))
+        throw _Exception(_("Error in config file: "
+                           "invalid \"update-at-start\" attribute value in "
+                           "<Weborama> tag"));
+
+    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    SET_BOOL_OPTION(CFG_ONLINE_CONTENT_WEBORAMA_UPDATE_AT_START);
+#endif
+
 
     log_info("Configuration check succeeded.\n");
 
@@ -2613,7 +2669,7 @@ Ref<Array<Object> > ConfigManager::createServiceTaskList(service_type_t service,
 
     if (element == nil)
         return arr;
-
+#ifdef YOUTUBE
     if (service == OS_YouTube)
     {
         Ref<YouTubeService> yt(new YouTubeService());
@@ -2623,7 +2679,18 @@ Ref<Array<Object> > ConfigManager::createServiceTaskList(service_type_t service,
             arr->append(option);
         }
     }
-
+#endif
+#ifdef WEBORAMA
+    if (service == OS_Weborama)
+    {
+        Ref<WeboramaService> wb(new WeboramaService());
+        for (int i = 0; i < element->elementChildCount(); i++)
+        {
+            Ref<Object> option = wb->defineServiceTask(element->getElementChild(i), nil);
+            arr->append(option);
+        }
+    }
+#endif
     return arr;
 }
 #endif
