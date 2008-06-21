@@ -196,16 +196,21 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
 
         item->setAuxData(_(ONLINE_SERVICE_AUX_ID), String::from(OS_YouTube));
 
-        temp = channel_item->getChildText(_("guid"));
+        temp = channel_item->getChildText(_("link")); 
+        /// \todo create an own class for items that fetch the URL on request
+        /// and to not store it permanently
         if (!string_ok(temp))
         {
             log_warning("Failed to retrieve YouTube video ID\n");
             continue;
         }
+            
+        item->setURL(temp);
 
-        int slash = temp.rindex('/');
-        if (slash > 0)
-            temp = temp.substring(slash + 1);
+        int eq = temp.rindex('=');
+        if (eq > 0)
+            temp = temp.substring(eq + 1);
+
 
         item->setClass(_("object.item.videoItem"));
         temp = String(OnlineService::getStoragePrefix(OS_YouTube)) + temp;
@@ -230,13 +235,6 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
             }
         }
 
-        temp = channel_item->getChildText(_("link")); 
-        /// \todo create an own class for items that fetch the URL on request
-        /// and to not store it permanently
-        if (string_ok(temp))
-            item->setURL(temp);
-        else
-            item->setURL(_(" "));
 
         temp = channel_item->getChildText(_("author"));
         if (string_ok(temp))
