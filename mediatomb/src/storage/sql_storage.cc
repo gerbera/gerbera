@@ -255,6 +255,11 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
             if (refObj == nil)
                 throw _Exception(_("OBJECT_FLAG_ONLINE_SERVICE and refID set but refID doesn't point to an existing object"));
         }
+        else if (IS_CDS_CONTAINER(objectType))
+        {
+            // in this case it's a playlist-container. that's ok
+            // we don't need to do anything
+        }
         else
             throw _Exception(_("refId set, but it makes no sense"));
     }

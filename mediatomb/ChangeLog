@@ -5,6 +5,10 @@ v0.12.0
         * added configure check for broken libmagic on Slackware
         * added libmp4v2 metadata handler to get tags and cover art from mp4
           files
+        * got rid of several compiler warnings
+        * added storage cache
+        * added storage insert buffering
+        * fixed mysql "threads didn't exit" issue
         * implemented YouTube service support which allows to watch YouTube 
           videos on your UPnP player (in combination with trnascoding)
         * added fixes to allow PCM playback on the PS3 and other devices,
@@ -12,6 +16,7 @@ v0.12.0
           OGG and FLAC media to the PS3.
         * added option to enable tooltips for the web UI, thanks to cweiske
           for the patch
+        * fixed bug #1986789 - Error when renaming a playlist container
 
 v0.11.0 01.03.2008  External transcoding support
         * implemented transcoding support that allows to plug in an arbitrary
