@@ -1,4 +1,4 @@
-#LyX 1.5.4 created this file. For more info see http://www.lyx.org/
+#LyX 1.5.5 created this file. For more info see http://www.lyx.org/
 \lyxformat 276
 \begin_document
 \begin_header
@@ -244,6 +244,10 @@ highly flexible media format transcoding via plugins / scripts
 \end_layout
 
 \begin_layout Itemize
+allows to watch YouTube(tm) videos on your UPnP player device
+\end_layout
+
+\begin_layout Itemize
 support for external URLs (create links to internet content and serve them
  via UPnP to your renderer)
 \end_layout
@@ -268,22 +272,6 @@ support for Linux, FreeBSD, Mac OS X
 
 \begin_layout Itemize
 runs on x86, Alpha, ARM, MIPS, Sparc, PowerPC
-\end_layout
-
-\begin_layout Subsection
-Planned Features
-\end_layout
-
-\begin_layout Itemize
-transcoding of audio and video
-\end_layout
-
-\begin_layout Itemize
-playlist support
-\end_layout
-
-\begin_layout Itemize
-various UPnP improvements
 \end_layout
 
 \begin_layout Section
@@ -396,13 +384,12 @@ target "http://expat.sourceforge.net/"
 
  
 \emph on
-OPTIONAL, RECOMMENDED
+REQUIRED
 \end_layout
 
 \begin_layout Standard
-Expat is a very good and robust XML parser, so far we have been using our
- own, but ran into problems from time to time.
- So from now on eXpat is the preferred for parsing XML in MediaTomb.
+Expat is a very good and robust XML parser, since most of UPnP is based
+ on XML this package is a requirement.
 \end_layout
 
 \begin_layout Standard
@@ -1552,6 +1539,20 @@ This option allows you to suppress all log output from the server.
 \end_layout
 
 \begin_layout Subsubsection
+Debug Log Output
+\end_layout
+
+\begin_layout Description
+Default: enabled
+\end_layout
+
+\begin_layout Standard
+This option allows you to compile the server with debug messages.
+ If enabled, switching between verbose and normal output during runtime
+ becomes possible.
+\end_layout
+
+\begin_layout Subsubsection
 Package Search Directory
 \end_layout
 
@@ -1606,19 +1607,19 @@ You can specify the exact location of particular headers and libraries.
 \end_layout
 
 \begin_layout Code
---with-magic-h=DIR              search for filemagic headers in DIR
+--with-libmagic-h=DIR              search for filemagic headers in DIR
 \end_layout
 
 \begin_layout Code
---with-magic-libs=DIR           search for filemagic headers in DIR
+--with-libmagic-libs=DIR           search for filemagic headers in DIR
 \end_layout
 
 \begin_layout Code
---with-exif-h=DIR               search for libexif headers in DIR
+--with-libexif-h=DIR               search for libexif headers in DIR
 \end_layout
 
 \begin_layout Code
---with-exif-libs=DIR            search for libexif libraries in DIR
+--with-libexif-libs=DIR            search for libexif libraries in DIR
 \end_layout
 
 \begin_layout Code
@@ -1679,6 +1680,26 @@ You can specify the exact location of particular headers and libraries.
 
 \begin_layout Code
 --with-curl-cfg=curl-config     absolute path/name of curl-config script
+\end_layout
+
+\begin_layout Code
+--with-libmp4v2-h=DIR           search for libmp4v2 headers in DIR
+\end_layout
+
+\begin_layout Code
+--with-libmp4v2-libs=DIR        search for libmp4v2 libraries in DIR
+\end_layout
+
+\begin_layout Code
+--with-rt-libs=DIR              search for rt libraries in DIR
+\end_layout
+
+\begin_layout Code
+--with-pthread-libs=DIR         search for pthread libraries in DIR 
+\end_layout
+
+\begin_layout Code
+
 \end_layout
 
 \begin_layout Subsubsection
@@ -2166,6 +2187,43 @@ Do not output log messages to stdout, but redirect everything to a specified
 \end_layout
 
 \begin_layout Subsection
+Debug Output
+\end_layout
+
+\begin_layout Code
+--debug or -D
+\end_layout
+
+\begin_layout Standard
+Enable debug log output.
+\end_layout
+
+\begin_layout Subsection
+Compile Info
+\end_layout
+
+\begin_layout Code
+--compile-info
+\end_layout
+
+\begin_layout Standard
+Print the configuration summary (used libraries and enabled features) and
+ exit.
+\end_layout
+
+\begin_layout Subsection
+Version Information
+\end_layout
+
+\begin_layout Code
+--version
+\end_layout
+
+\begin_layout Standard
+Print version information and exit.
+\end_layout
+
+\begin_layout Subsection
 Display Command Line Summary
 \end_layout
 
@@ -2198,8 +2256,10 @@ tion was specified on the command line, MediaTomb will generate a default
 \begin_layout Itemize
 "
 \series bold
+\emph on
 Required
 \series default
+\emph default
 " means that the server will not start if the tag is missing in the configuratio
 n.
 \end_layout
@@ -2207,8 +2267,10 @@ n.
 \begin_layout Itemize
 "
 \series bold
+\emph on
 Optional
 \series default
+\emph default
 " means that the tag can be left out of the configuration file.
 \end_layout
 

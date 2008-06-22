@@ -2014,6 +2014,13 @@ MT_OPTION([log], [disable], [disable all console output],
           ],
           [])
 
+MT_OPTION([debug-log], [disable], [compile without debug messages],
+          [
+            AC_DEFINE(DEBUG_LOG_ENABLED, 1, [compile with debug messages])
+          ],
+          [])
+
+
 eval PACKAGE_DATADIR="${datadir}/${PACKAGE}"
 eval PACKAGE_DATADIR="${PACKAGE_DATADIR}"
 AC_DEFINE_UNQUOTED(PACKAGE_DATADIR, "$PACKAGE_DATADIR", [MediaTomb data directory])
@@ -2029,6 +2036,8 @@ fi
 if (test "x$SOPCAST_OPTION_ENABLED" = xyes); then
     AC_DEFINE([SOPCAST], [1], [Enable support for the SopCast service])
 fi
+
+AC_DEFINE_UNQUOTED([COMPILE_INFO], "compile host: $host; sqlite3: $SQLITE3_STATUS; mysql: $MYSQL_STATUS libjs: $JS_OK; libmagic: $LIBMAGIC_STATUS; inotify: $INOTIFY_STATUS; libexif: $LIBEXIF_STATUS; id3lib: $ID3LIB_STATUS; taglib: $TAGLIB_STATUS; ffmpeg: $FFMPEG_OK; libmp4v2: $LIBMP4V2_STATUS; external transcoding: $EXTERNAL_TRANSCODING_OPTION_ENABLED; curl: $CURL_OK; YouTube: $YOUTUBE_OPTION_ENABLED; SopCast: $SOPCAST_OPTION_ENABLED; libextractor: $EXTRACTOR_OK; db-autocreate: $DB_AUTOCREATE_OPTION_ENABLED; debug log: $DEBUG_LOG_OPTION_ENABLED; protocol info extensions: $PROTOCOLINFO_EXTENSION_OPTION_ENABLED; data directory: $PACKAGE_DATADIR", [compile option summary])
 
 ###############
 AC_CONFIG_FILES([
@@ -2059,7 +2068,7 @@ echo "libjs                 : $JS_OK"
 echo "libmagic              : $LIBMAGIC_STATUS"
 echo "inotify               : $INOTIFY_STATUS"
 echo "libexif               : $LIBEXIF_STATUS"
-echo "expat                 : $EXPAT_STATUS"
+#echo "expat                 : $EXPAT_STATUS"
 echo "id3lib                : $ID3LIB_STATUS"
 echo "taglib                : $TAGLIB_STATUS"
 echo "ffmpeg                : $FFMPEG_OK"
