@@ -221,7 +221,10 @@ public:
     static void setStaticArgs(zmm::String _filename, zmm::String _userhome, 
                               zmm::String _config_dir = _(DEFAULT_CONFIG_HOME),
                               zmm::String _prefix_dir = _(PACKAGE_DATADIR), 
-                              zmm::String _magic = nil);
+                              zmm::String _magic = nil,
+                              bool _debug_logging = false);
+    
+    static bool isDebugLogging() { return debug_logging; };
 
     /// \brief Creates a html file that is a redirector to the current server i
     /// instance
@@ -250,6 +253,7 @@ protected:
     static zmm::String config_dir;
     static zmm::String prefix_dir;
     static zmm::String magic;
+    static bool debug_logging;
 
     zmm::Ref<mxml::Element> root;
 

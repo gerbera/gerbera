@@ -72,7 +72,7 @@ using namespace mxml;
 #define GDATA_REQUEST_STDFEED_RECENTLY_FEATURED "recently_featured"
 #define GDATA_REQUEST_STDFEED_WATCH_ON_MOBILE   "watch_on_mobile"
 
-static char *YT_stdfeeds[] = 
+static const char *YT_stdfeeds[] = 
 {
     GDATA_REQUEST_STDFEED_TOP_RATED,        // has time
     GDATA_REQUEST_STDFEED_TOP_FAVORITES,    // has time

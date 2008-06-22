@@ -1,6 +1,6 @@
 .\"     Title: MEDIATOMB
 .\"    Author: <collabname>Sergey Bostandzhyan</collabname>
-.\" Generator: DocBook XSL Stylesheets v1.72.0 <http://docbook.sf.net/>
+.\" Generator: DocBook XSL Stylesheets v1.73.2 <http://docbook.sf.net/>
 .\"      Date: 2008-02-23
 .\"    Manual: User commands
 .\"    Source: MediaTomb 0.11.0
@@ -11,80 +11,95 @@
 .\" disable justification (adjust text to left margin only)
 .ad l
 .SH "NAME"
-mediatomb \- UPnP MediaServer
+mediatomb - UPnP MediaServer
 .SH "SYNOPSIS"
 .HP 10
-\fBmediatomb\fR [\fB\-i\ \fR\fB\fIIP\ address\fR\fR\fB\ \fR] [\fB\-e\ \fR\fB\fIinterface\fR\fR\fB\ \fR] [\fB\-p\ \fR\fB\fIport\fR\fR\fB\ \fR] [\fB\-c\ \fR\fB\fIconfig\ file\fR\fR\fB\ \fR] [\fB\-d\fR] [\fB\-m\ \fR\fB\fIhome\ dir\fR\fR\fB\ \fR] [\fB\-f\ \fR\fB\fIconfig\ dir\fR\fR\fB\ \fR] [\fB\-P\ \fR\fB\fIPID\ file\fR\fR\fB\ \fR] [\fB\-u\ \fR\fB\fIuser\fR\fR\fB\ \fR] [\fB\-g\ \fR\fB\fIgroup\fR\fR\fB\ \fR] [\fB\-a\ \fR\fB\fIpath\fR\fR\fB\ \fR] [\fB\-l\ \fR\fB\fIlogfile\fR\fR\fB\ \fR] [\fB\-h\fR]
+\fBmediatomb\fR [\fB\-i\ \fR\fB\fIIP\ address\fR\fR\fB\ \fR] [\fB\-e\ \fR\fB\fIinterface\fR\fR\fB\ \fR] [\fB\-p\ \fR\fB\fIport\fR\fR\fB\ \fR] [\fB\-c\ \fR\fB\fIconfig\ file\fR\fR\fB\ \fR] [\fB\-d\fR] [\fB\-m\ \fR\fB\fIhome\ dir\fR\fR\fB\ \fR] [\fB\-f\ \fR\fB\fIconfig\ dir\fR\fR\fB\ \fR] [\fB\-P\ \fR\fB\fIPID\ file\fR\fR\fB\ \fR] [\fB\-u\ \fR\fB\fIuser\fR\fR\fB\ \fR] [\fB\-g\ \fR\fB\fIgroup\fR\fR\fB\ \fR] [\fB\-a\ \fR\fB\fIpath\fR\fR\fB\ \fR] [\fB\-l\ \fR\fB\fIlogfile\fR\fR\fB\ \fR] [\fB\-D\fR] [\fB\-\-compile\-info\fR] [\fB\-\-version\fR] [\fB\-h\fR]
 .SH "DESCRIPTION"
 .PP
-This manual page describes the command line parameters for MediaTomb. For a detailed documentation please see the README file which is distributed with MediaTomb or visit http://mediatomb.cc/.
+This manual page describes the command line parameters for MediaTomb\. For a detailed documentation please see the README file which is distributed with MediaTomb or visit http://mediatomb\.cc/\.
 .SH "OPTIONS"
 .PP
 \fB\-i\fR, \fB\-\-ip\fR
 .RS 4
-The server will bind to the given IP address, currently we can not bind to multiple interfaces so binding to 0.0.0.0 will not be possible.
+The server will bind to the given IP address, currently we can not bind to multiple interfaces so binding to 0\.0\.0\.0 will not be possible\.
 .RE
 .PP
 \fB\-e\fR, \fB\-\-interface\fR
 .RS 4
-The server will bind to the given network interface, currently we can only bind to one interface at a time.
+The server will bind to the given network interface, currently we can only bind to one interface at a time\.
 .RE
 .PP
 \fB\-p\fR, \fB\-\-port\fR
 .RS 4
-Specify the server port that will be used for the web user interface, for serving media and for UPnP requests, minimum allowed value is 49152. If this option is omitted a default port will be chosen, however, in this case it is possible that the port will change upon server restart.
+Specify the server port that will be used for the web user interface, for serving media and for UPnP requests, minimum allowed value is 49152\. If this option is omitted a default port will be chosen, however, in this case it is possible that the port will change upon server restart\.
 .RE
 .PP
 \fB\-c\fR, \fB\-\-config\fR
 .RS 4
-By default MediaTomb will search for a file named "config.xml" in the ~/.mediatomb directory. This option allows you to specify a config file by the name and location of your choice. The file name must be absolute.
+By default MediaTomb will search for a file named "config\.xml" in the ~/\.mediatomb directory\. This option allows you to specify a config file by the name and location of your choice\. The file name must be absolute\.
 .RE
 .PP
 \fB\-d\fR, \fB\-\-daemon\fR
 .RS 4
-Run the server in background, MediaTomb will shutdown on SIGTERM, SIGINT and restart on SIGHUP.
+Run the server in background, MediaTomb will shutdown on SIGTERM, SIGINT and restart on SIGHUP\.
 .RE
 .PP
 \fB\-m\fR, \fB\-\-home\fR
 .RS 4
-Specify an alternative home directory. By default MediaTomb will try to retrieve the users home directory from the environment, then it will look for a .mediatomb directory in users home. If .mediatomb was found we will try to find the default configuration file (config.xml), if not found we will create both, the .mediatomb directory and the default config file.
+Specify an alternative home directory\. By default MediaTomb will try to retrieve the users home directory from the environment, then it will look for a \.mediatomb directory in users home\. If \.mediatomb was found we will try to find the default configuration file (config\.xml), if not found we will create both, the \.mediatomb directory and the default config file\.
 .sp
-This option is useful in two cases: when the home directory can not be retrieved from the environment (in this case you could also use \-c to point MediaTomb to your configuration file or when you want to create a new configuration in a non standard location (for example, when setting up daemon mode). In the latter case you can combine this parameter with the parameter described in Section 5.6, "Config Directory"
+This option is useful in two cases: when the home directory can not be retrieved from the environment (in this case you could also use \-c to point MediaTomb to your configuration file or when you want to create a new configuration in a non standard location (for example, when setting up daemon mode)\. In the latter case you can combine this parameter with the parameter described in Section 5\.6, "Config Directory"
 .RE
 .PP
 \fB\-f\fR, \fB\-\-cfgdir\fR
 .RS 4
-The default configuration directory is combined out of the users home and the default that equals to .mediatomb, this option allows you to override the default directory naming. This is useful when you want to setup the server in a nonstandard location, but want that the default configuration to be written by the server.
+The default configuration directory is combined out of the users home and the default that equals to \.mediatomb, this option allows you to override the default directory naming\. This is useful when you want to setup the server in a nonstandard location, but want that the default configuration to be written by the server\.
 .RE
 .PP
 \fB\-P\fR, \fB\-\-pidfile\fR
 .RS 4
-Specify a file that will hold the server process ID, the filename must be absolute.
+Specify a file that will hold the server process ID, the filename must be absolute\.
 .RE
 .PP
 \fB\-u\fR, \fB\-\-user\fR
 .RS 4
-Run MediaTomb under the specified user name, this is especially useful in combination with the daemon mode.
+Run MediaTomb under the specified user name, this is especially useful in combination with the daemon mode\.
 .RE
 .PP
 \fB\-g\fR, \fB\-\-group\fR
 .RS 4
-Run MediaTomb under the specified group, this is especially useful in combination with the daemon mode.
+Run MediaTomb under the specified group, this is especially useful in combination with the daemon mode\.
 .RE
 .PP
 \fB\-a\fR, \fB\-\-add\fR
 .RS 4
-Add the specified directory or file name to the database without UI interaction. The path must be absolute, if path is a directory then it will be added recursively. If path is a file, then only the given file will be imported.
+Add the specified directory or file name to the database without UI interaction\. The path must be absolute, if path is a directory then it will be added recursively\. If path is a file, then only the given file will be imported\.
 .RE
 .PP
 \fB\-l\fR, \fB\-\-logfile\fR
 .RS 4
-Do not output log messages to stdout, but redirect everything to a specified file.
+Do not output log messages to stdout, but redirect everything to a specified file\.
+.RE
+.PP
+\fB\-D\fR, \fB\-\-debug\fR
+.RS 4
+Enable debug log output\.
+.RE
+.PP
+\fB\-\-compile\-info\fR
+.RS 4
+Print the configuration summary (used libraried and enabled features) and exit\.
+.RE
+.PP
+\fB\-\-version\fR
+.RS 4
+Print version information and exit\.
 .RE
 .PP
 \fB\-h\fR, \fB\-\-help\fR
 .RS 4
-Print a summary about the available command line options.
+Print a summary about the available command line options\.
 .RE
 .SH "AUTHORS"
 .PP
@@ -94,12 +109,12 @@ Print a summary about the available command line options.
 .SH "COPYRIGHT"
 Copyright \(co 2005 Gena Batsyan, Sergey Bostandzhyan
 .br
-Copyright \(co 2006\-2008 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer
+Copyright \(co 2006-2008 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer
 .br
 .PP
-This manual page is part of MediaTomb.
+This manual page is part of MediaTomb\.
 .PP
 Permission is granted to copy, distribute and/or modify this document under the terms of the
 GNU
-General Public License version 2 as published by the Free Software Foundation.
-.br
+General Public License version 2 as published by the Free Software Foundation\.
+.sp

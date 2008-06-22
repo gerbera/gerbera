@@ -68,7 +68,7 @@
 #include <limits.h>
 
 #ifdef HAVE_GETOPT_LONG
-    #define OPTSTR "i:e:p:c:m:f:u:g:a:l:P:dh"
+    #define OPTSTR "i:e:p:c:m:f:u:g:a:l:P:dhD"
 #endif
 
 using namespace zmm;
@@ -95,20 +95,23 @@ int main(int argc, char **argv, char **envp)
     int      opt_index = 0;
     int      o;
     static struct option long_options[] = {
-        {"ip", 1, 0, 'i'},
-        {"interface", 1, 0, 'e'},
-        {"port", 1, 0, 'p'},
-        {"config", 1, 0, 'c'},
-        {"home", 1, 0, 'm'},
-        {"cfgdir", 1, 0, 'f'},
-        {"user", 1, 0, 'u'},
-        {"group", 1, 0, 'g'},
-        {"daemon", 0, 0, 'd'},
-        {"pidfile", 1, 0, 'P'},
-        {"add", 1, 0, 'a'},
-        {"logfile", 1, 0, 'l'},
-        {"help", 0, 0, 'h'},
-        {0, 0, 0, 0}
+        {"ip", 1, 0, 'i'},          // 0
+        {"interface", 1, 0, 'e'},   // 1
+        {"port", 1, 0, 'p'},        // 2
+        {"config", 1, 0, 'c'},      // 3
+        {"home", 1, 0, 'm'},        // 4
+        {"cfgdir", 1, 0, 'f'},      // 5
+        {"user", 1, 0, 'u'},        // 6
+        {"group", 1, 0, 'g'},       // 7
+        {"daemon", 0, 0, 'd'},      // 8
+        {"pidfile", 1, 0, 'P'},     // 9
+        {"add", 1, 0, 'a'},         // 10
+        {"logfile", 1, 0, 'l'},     // 11
+        {"debug", 0, 0, 'D'},       // 12
+        {"compile-info", 0, 0, 0},  // 13
+        {"version", 0, 0, 0},       // 14
+        {"help", 0, 0, 'h'},        // 15
+        {0, 0, 0, 0}                
     };
 #endif
 
@@ -122,6 +125,8 @@ int main(int argc, char **argv, char **envp)
     String ip;
     String prefix;
     String magic;
+    bool debug_logging = false;
+    bool print_version = false;
 
     Ref<Array<StringBase> > addFile(new Array<StringBase>());
 
@@ -219,6 +224,16 @@ int main(int argc, char **argv, char **envp)
                 log_debug("Confdir setting: %s\n", optarg);
                 confdir = String(optarg);
                 break;
+                
+            case 'D':
+                
+#ifndef DEBUG_LOG_ENABLED
+                printf("ERROR: MediaTomb wasn't compiled with debug output, but was run with -D/--debug.\n");
+                exit(EXIT_FAILURE);
+#endif
+                log_debug("enabling debug output\n");
+                debug_logging = true;
+                break;
             case '?':
             case 'h':
                 printf("Usage: mediatomb [options]\n\
@@ -236,12 +251,27 @@ Supported options:\n\
     --group or -g      run server under specified group\n\
     --add or -a        add the given file/directory\n\
     --logfile or -l    log to specified file\n\
+    --debug or -D      enable debug output\n\
+    --compile-info     print configuration summary and exit\n\
+    --version          print version information and exit\n\
     --help or -h       this help message\n\
 \n\
 For more information visit " DESC_MANUFACTURER_URL "\n\n");
 
                 exit(EXIT_FAILURE);
-
+                break;
+            case 0:
+                switch (opt_index)
+                {
+                case 13: // --compile-info
+                    printf("Compile info: %s\n", COMPILE_INFO);
+                    exit(EXIT_FAILURE);
+                    break;
+                case 14: // --version
+                    print_version = true;
+                    break;
+                }
+                break;
             default:
                 break;
          }
@@ -250,13 +280,16 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
     log_warning("No getopt_long() support, all command line options disabled");
 #endif
 
-    if (!daemon)
+    if (print_version || ! daemon)
     {
         printf("\nMediaTomb UPnP Server version %s - %s\n\n", VERSION, 
                 DESC_MANUFACTURER_URL);
         printf("===============================================================================\n");
         printf("Copyright 2005-2008 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer.\n");
         printf("MediaTomb is free software, covered by the GNU General Public License version 2\n\n");
+        
+        if (print_version)
+            exit(EXIT_FAILURE);
     }
 
     // check if user and/or group parameter was specified and try to run the server
@@ -350,7 +383,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         if (!string_ok(magic))
             magic = nil;
 
-        ConfigManager::setStaticArgs(config_file, home, confdir, prefix, magic);
+        ConfigManager::setStaticArgs(config_file, home, confdir, prefix, magic, debug_logging);
         ConfigManager::getInstance();
     }
     catch (mxml::ParseException pe)

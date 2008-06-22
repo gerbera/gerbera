@@ -17,6 +17,9 @@ v0.12.0
         * added option to enable tooltips for the web UI, thanks to cweiske
           for the patch
         * fixed bug #1986789 - Error when renaming a playlist container
+        * added parameter -D/--debug (enable debug output)
+        * added parameter --version (prints version information
+        * added parameter --compile-info (prints compile information)
 
 v0.11.0 01.03.2008  External transcoding support
         * implemented transcoding support that allows to plug in an arbitrary

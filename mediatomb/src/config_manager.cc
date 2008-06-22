@@ -75,6 +75,7 @@ String ConfigManager::userhome = nil;
 String ConfigManager::config_dir = _(DEFAULT_CONFIG_HOME);
 String ConfigManager::prefix_dir = _(PACKAGE_DATADIR);
 String ConfigManager::magic = nil;
+bool ConfigManager::debug_logging = false;
 
 ConfigManager::~ConfigManager()
 {
@@ -87,13 +88,14 @@ ConfigManager::~ConfigManager()
 
 void ConfigManager::setStaticArgs(String _filename, String _userhome, 
                                   String _config_dir, String _prefix_dir,
-                                  String _magic)
+                                  String _magic, bool _debug_logging)
 {
     filename = _filename;
     userhome = _userhome;
     config_dir = _config_dir;
     prefix_dir = _prefix_dir;
     magic = _magic;
+    debug_logging = _debug_logging;
 }
 
 ConfigManager::ConfigManager() : Singleton<ConfigManager>()

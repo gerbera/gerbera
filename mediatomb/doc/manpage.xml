@@ -99,7 +99,19 @@
                 <option>-l <replaceable>logfile</replaceable>
                 </option>
             </arg>
-
+            
+            <arg>
+                <option>-D</option>
+            </arg>
+            
+            <arg>
+                <option>--compile-info</option>
+            </arg>
+            
+            <arg>
+                <option>--version</option>
+            </arg>
+            
             <arg>
                 <option>-h</option>
             </arg>
@@ -265,6 +277,34 @@
                 <listitem>
                     <para>Do not output log messages to stdout, but redirect everything to a specified
                     file.</para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-D</option>,
+                    <option>--debug</option>
+                </term>
+                <listitem>
+                    <para>Enable debug log output.</para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--compile-info</option>
+                </term>
+                <listitem>
+                    <para>Print the configuration summary (used libraried and enabled features) and exit.</para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--version</option>
+                </term>
+                <listitem>
+                    <para>Print version information and exit.</para>
                 </listitem>
             </varlistentry>
 

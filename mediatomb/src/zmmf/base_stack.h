@@ -88,7 +88,9 @@ namespace zmm
                 if(requiredSize > capacity)
                     capacity = requiredSize;
                 data = (T *)REALLOC(data, capacity * sizeof(T));
+#ifdef LOG_TOMBDEBUG
                 log_debug("resizing %d -> %d\n", oldCapacity, capacity);
+#endif
             }
         }
         
