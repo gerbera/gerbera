@@ -84,7 +84,7 @@ else if (type == 'm3u')
     var line = readln();
     do
     {
-        if (line.match(/^#EXTINF:(\d+),(\S.+)$/i))
+        if (line.match(/^#EXTINF:(-?\d+),(\S.+)$/i))
         {
             // duration = RegExp.$1; // currently unused
             title = RegExp.$2;
