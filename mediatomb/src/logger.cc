@@ -133,7 +133,7 @@ void _log_debug(const char *format, const char *file, int line, const char *func
 {
     bool enabled;
 #ifdef LOG_TOMBDEBUG
-    enabled = true;
+    enabled = !ConfigManager::isDebugLogging();
 #else
     enabled = ConfigManager::isDebugLogging();
 #endif
@@ -156,7 +156,7 @@ void _print_backtrace(FILE* file)
 
     bool enabled;
 #ifdef LOG_TOMBDEBUG
-    enabled = true;
+    enabled = !ConfigManager::isDebugLogging();
 #else
     enabled = ConfigManager::isDebugLogging();
 #endif

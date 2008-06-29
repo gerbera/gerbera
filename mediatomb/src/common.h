@@ -289,6 +289,7 @@
 
     #define URL_VALUE_TRANSCODE              "1"
 #endif
+#define DEFAULT_STORAGE_CACHING_ENABLED YES
 #ifdef HAVE_SQLITE3
     #define MT_SQLITE_SYNC_FULL            2
     #define MT_SQLITE_SYNC_NORMAL          1 
