@@ -20,6 +20,7 @@ v0.12.0
         * added parameter -D/--debug (enable debug output)
         * added parameter --version (prints version information
         * added parameter --compile-info (prints compile information)
+        * fixed problem "Negative duration in .m3u files" (SF forum)
 
 v0.11.0 01.03.2008  External transcoding support
         * implemented transcoding support that allows to plug in an arbitrary
