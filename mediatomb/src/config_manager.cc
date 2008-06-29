@@ -787,6 +787,16 @@ void ConfigManager::validate(String serverhome)
     if (tmpEl == nil)
         throw _Exception(_("Error in config file: <storage> tag not found"));
 
+
+    temp = getOption(_("/server/storage/attribute::caching"),
+            _(DEFAULT_STORAGE_CACHING_ENABLED));
+    if (!validateYesNo(temp))
+        throw _Exception(_("Error in config file: incorrect parameter "
+                    "for <storage caching=\"\" /> attribute"));
+    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    SET_BOOL_OPTION(CFG_SERVER_STORAGE_CACHING_ENABLED);
+
+
 #ifdef HAVE_MYSQL
     tmpEl = getElement(_("/server/storage/mysql"));
     if (tmpEl != nil)

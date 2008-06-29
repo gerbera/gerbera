@@ -3872,7 +3872,7 @@ status open
 \end_layout
 
 \begin_layout Code
-<storage> 
+<storage caching="yes"> 
 \end_layout
 
 \begin_layout Standard
@@ -3885,6 +3885,54 @@ Required
 Defines the storage section - database selection is done here.
  Currently sqlite3 and mysql are supported.
  Each storage driver has it's own configuration parameters.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+caching="yes"
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: yes
+\end_layout
+
+\begin_layout Standard
+Enables caching, this feature should improve the overall import speed.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard

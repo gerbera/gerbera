@@ -38,6 +38,7 @@
 #include "tools.h"
 #include "update_manager.h"
 #include "string_converter.h"
+#include "config_manager.h"
 
 using namespace zmm;
 
@@ -139,12 +140,17 @@ void SQLStorage::init()
     Ref<StringBuffer> buf(new StringBuffer());
     *buf << SQL_QUERY_FOR_STRINGBUFFER;
     this->sql_query = buf->toString();
-    
-    cache = nil;
-    //cache = Ref<StorageCache>(new StorageCache());
-    
-    insertBufferOn = false;
-    //insertBufferOn = true;
+   
+    if (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_STORAGE_CACHING_ENABLED))
+    {
+        cache = Ref<StorageCache>(new StorageCache());
+        insertBufferOn = true;
+    }
+    else
+    {
+        cache = nil;
+        insertBufferOn = false;
+    }
     
     insertBufferEmpty = true;
     insertBufferMutex = Ref<Mutex>(new Mutex());
