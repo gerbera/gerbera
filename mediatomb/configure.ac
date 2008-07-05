@@ -44,6 +44,7 @@ SEARCH_DIR="/usr/local"
 DARWIN_OS=0
 CYGWIN_OS=0
 FREEBSD_OS=0
+OPENBSD_OS=0
 
 LIBS_SAVE="$LIBS"
 
@@ -62,7 +63,10 @@ case $host in
         ;;
     *-*-freebsd*)
         FREEBSD_OS=1
-	;;
+        ;;
+    *-*-openbsd*)
+        OPENBSD_OS=1
+        ;;
 esac
 
 MT_SET_SEARCHPATH
@@ -371,7 +375,7 @@ AC_CHECK_HEADERS([sys/ioctl.h sys/socket.h sys/time.h sys/types.h sys/wait.h],
 AC_CHECK_HEADERS([langinfo.h locale.h],[],[AC_MSG_WARN(Header that is required to retrieve system locale not found, will use default value)])
 
 AC_CHECK_HEADERS([sched.h ctype.h],[],[])
-AC_CHECK_FUNCS([sched_getparam sched_setparam],[],[])
+AC_CHECK_FUNCS([sched_getparam sched_setparam sched_get_priority_min sched_get_priority_max],[],[])
    
 AC_CHECK_FUNCS([mkdir], [],
               [AC_MSG_ERROR(required function not found)])
@@ -736,7 +740,7 @@ AC_CHECK_FUNCS([gethostbyname_r],[],
                                  [AC_MSG_ERROR(required library function not found)])
                 ],
                 [
-                    if ((test $DARWIN_OS -eq 0) && (test $CYGWIN_OS -eq 0)) ; then
+                    if ((test $DARWIN_OS -eq 0) && (test $CYGWIN_OS -eq 0) && (test $OPENBSD_OS -eq 0)) ; then
                         AC_MSG_ERROR([required header not found])
                     fi
                 ])
@@ -762,7 +766,7 @@ AC_CHECK_FUNCS([if_freenameindex],[],
         [
             AC_CHECK_LIB(nsl, if_freenameindex,[],
                 [
-                    if test $CYGWIN_OS -eq 0; then
+                    if ((test $CYGWIN_OS -eq 0) && (test $OPENBSD_OS -eq 0)); then
                         AC_MSG_ERROR(required library function not found)
                     fi
                 ]
@@ -1990,9 +1994,15 @@ if test "x$FFMPEG_THUMBNAILER" = xyes; then
 
 fi
 
-MT_OPTION([tombdebug], [enable], [enable debug output for MediaTomb],
+
+MT_CHECK_OPTIONAL_PACKAGE([libdvdread], [disable],
+             [compile with libdvdread support for extended DVD image parsing],
+             [dvdread/dvd_reader], [dvdread], [DVDOpen])
+
+
+MT_OPTION([tombdebug], [enable], [enable debug code for MediaTomb],
           [
-            AC_DEFINE(LOG_TOMBDEBUG, 1, [if defined compile with debug log output])
+            AC_DEFINE(TOMBDEBUG, 1, [if defined compile with debug log output])
           ],
           [])
 
@@ -2037,7 +2047,7 @@ if (test "x$SOPCAST_OPTION_ENABLED" = xyes); then
     AC_DEFINE([SOPCAST], [1], [Enable support for the SopCast service])
 fi
 
-AC_DEFINE_UNQUOTED([COMPILE_INFO], "host: $host; sqlite3: $SQLITE3_STATUS; mysql: $MYSQL_STATUS libjs: $JS_OK; libmagic: $LIBMAGIC_STATUS; inotify: $INOTIFY_STATUS; libexif: $LIBEXIF_STATUS; id3lib: $ID3LIB_STATUS; taglib: $TAGLIB_STATUS; ffmpeg: $FFMPEG_OK; libmp4v2: $LIBMP4V2_STATUS; external transcoding: $EXTERNAL_TRANSCODING_OPTION_ENABLED; curl: $CURL_OK; YouTube: $YOUTUBE_OPTION_ENABLED; SopCast: $SOPCAST_OPTION_ENABLED; libextractor: $EXTRACTOR_OK; db-autocreate: $DB_AUTOCREATE_OPTION_ENABLED; debug log: $DEBUG_LOG_OPTION_ENABLED; protocol info extensions: $PROTOCOLINFO_EXTENSION_OPTION_ENABLED; data directory: $PACKAGE_DATADIR", [compile option summary])
+AC_DEFINE_UNQUOTED([COMPILE_INFO], "host: $host; sqlite3: $SQLITE3_STATUS; mysql: $MYSQL_STATUS libjs: $JS_OK; libmagic: $LIBMAGIC_STATUS; inotify: $INOTIFY_STATUS; libexif: $LIBEXIF_STATUS; id3lib: $ID3LIB_STATUS; taglib: $TAGLIB_STATUS; ffmpeg: $FFMPEG_OK; libmp4v2: $LIBMP4V2_STATUS; external transcoding: $EXTERNAL_TRANSCODING_OPTION_ENABLED; curl: $CURL_OK; YouTube: $YOUTUBE_OPTION_ENABLED; SopCast: $SOPCAST_OPTION_ENABLED; libextractor: $EXTRACTOR_OK; db-autocreate: $DB_AUTOCREATE_OPTION_ENABLED; debug log: $DEBUG_LOG_OPTION_ENABLED; protocol info extensions: $PROTOCOLINFO_EXTENSION_OPTION_ENABLED; data directory: $PACKAGE_DATADIR: libdvdread: $LIBDVDREAD_STATUS", [compile option summary])
 
 ###############
 AC_CONFIG_FILES([
@@ -2071,8 +2081,9 @@ echo "libexif               : $LIBEXIF_STATUS"
 #echo "expat                 : $EXPAT_STATUS"
 echo "id3lib                : $ID3LIB_STATUS"
 echo "taglib                : $TAGLIB_STATUS"
-echo "ffmpeg                : $FFMPEG_OK"
 echo "libmp4v2              : $LIBMP4V2_STATUS"
+echo "libdvdread            : $LIBDVDREAD_STATUS"
+echo "ffmpeg                : $FFMPEG_OK"
 echo "external transcoding  : $EXTERNAL_TRANSCODING_OPTION_ENABLED"
 echo "curl                  : $CURL_OK"
 echo "YouTube               : $YOUTUBE_OPTION_ENABLED"

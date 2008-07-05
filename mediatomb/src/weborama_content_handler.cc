@@ -113,7 +113,7 @@ Ref<CdsObject> WeboramaContentHandler::getNextObject()
 
         item->setAuxData(_(ONLINE_SERVICE_AUX_ID), String::from(OS_Weborama));
 
-        track->getChildText(_("title"));
+        temp = track->getChildText(_("title"));
         if (!string_ok(temp))
             item->setTitle(_("Unknown"));
         else

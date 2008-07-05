@@ -55,7 +55,7 @@ protected:
     KT emptyKey;
     KT deletedKey;
     KT *data_array;
-#ifdef LOG_TOMBDEBUG
+#ifdef TOMBDEBUG
     int realCapacity;
 #endif
 public:
@@ -64,7 +64,7 @@ public:
     /// WARNING: the number of stored entries MUST be <= realCapacity at all times!
     DBRHash(int hashCapacity, int realCapacity, KT emptyKey, KT deletedKey) : DHashBase<KT, struct dbr_hash_slot<KT> >(hashCapacity)
     {
-#ifdef LOG_TOMBDEBUG
+#ifdef TOMBDEBUG
         if (realCapacity <=0)
             throw zmm::Exception(_("illegal realCapacity (") + realCapacity + ")");
         this->realCapacity = realCapacity;
@@ -148,7 +148,7 @@ public:
         struct dbr_hash_slot<KT> *slot;
         if (! search(key, &slot))
         {
-#ifdef LOG_TOMBDEBUG
+#ifdef TOMBDEBUG
             if (this->count >= realCapacity)
                 throw zmm::Exception(_("count (") + this->count + ") reached realCapacity (" + realCapacity + ")!\n");
 #endif

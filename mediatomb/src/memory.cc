@@ -81,7 +81,7 @@ void *rpl_realloc(void *p, size_t size)
 /* Allocate and zero-fill an NxS-byte block of memory from the heap.
    If N or S is zero, allocate and zero-fill a 1-byte block.  */
 
-#if defined(LOG_TOMBDEBUG) && ! defined (MEMPROF)
+#if defined(TOMBDEBUG) && ! defined (MEMPROF)
 #include "logger.h"
 #endif
 
@@ -169,7 +169,7 @@ void FREE(void *ptr)
 
 #else
 
-#ifdef LOG_TOMBDEBUG
+#ifdef TOMBDEBUG
 void *MALLOC(size_t size)
 {
 #ifdef DEBUG_MALLOC_0    
@@ -195,6 +195,6 @@ void *REALLOC(void *ptr, size_t size)
     return realloc(ptr, size);
 }
 
-#endif // LOG_TOMBDEBUG
+#endif // TOMBDEBUG
 
 #endif // MEMPROF

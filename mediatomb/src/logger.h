@@ -56,7 +56,7 @@ void log_close();
     #define log_debug(format, ...) _log_debug(format, __FILE__, __LINE__, __func__, ## __VA_ARGS__)
     #define print_backtrace() _print_backtrace()
 #else
-#ifdef LOG_TOMBDEBUG
+#ifdef TOMBDEBUG
     #define log_debug(format, ...) _log_debug(format, __FILE__, __LINE__, __func__, ## __VA_ARGS__)
     #define print_backtrace() _print_backtrace()
 #else

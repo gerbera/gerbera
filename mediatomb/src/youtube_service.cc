@@ -329,7 +329,7 @@ String YouTubeService::getRegionName(yt_regions_t region_code)
         return String(YT_regions[region_code].country);
 }
 
-
+#if 0
 String YouTubeService::getCheckAttr(Ref<Element> xml, String attrname)
 {
     String temp = xml->getAttribute(attrname);
@@ -359,6 +359,8 @@ int YouTubeService::getCheckPosIntAttr(Ref<Element> xml, String attrname)
 
     return itmp;
 }
+
+#endif
 
 void YouTubeService::getPagingParams(Ref<Element> xml, Ref<YouTubeTask> task)
 {

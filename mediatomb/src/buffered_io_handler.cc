@@ -67,7 +67,7 @@ void BufferedIOHandler::threadProc()
     int readBytes;
     size_t maxWrite;
     
-#ifdef LOG_TOMBDEBUG
+#ifdef TOMBDEBUG
     struct timespec last_log;
     bool first_log = true;
 #endif
@@ -76,7 +76,7 @@ void BufferedIOHandler::threadProc()
     do
     {
         
-#ifdef LOG_TOMBDEBUG
+#ifdef TOMBDEBUG
         if (first_log || getDeltaMillis(&last_log) > 1000)
         {
             if (first_log)

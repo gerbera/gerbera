@@ -59,7 +59,7 @@
 
 #ifndef MEMPROF
 
-#ifdef LOG_TOMBDEBUG
+#ifdef TOMBDEBUG
     void *MALLOC(size_t size);
     void *REALLOC(void *ptr, size_t size);
 #else

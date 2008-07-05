@@ -41,7 +41,7 @@ using namespace zmm;
 
 Mutex::Mutex(bool recursive) : Object()
 {
-#ifdef LOG_TOMBDEBUG
+#ifdef TOMBDEBUG
     this->recursive = recursive;
     lock_level = 0;
     
@@ -71,7 +71,7 @@ Mutex::~Mutex()
     pthread_mutex_destroy(&mutex_struct);
 }
 
-#ifdef LOG_TOMBDEBUG
+#ifdef TOMBDEBUG
 void Mutex::lock()
 {
     pthread_mutex_lock(&mutex_struct);
@@ -129,7 +129,7 @@ void Mutex::doUnlock(bool cond)
         errorExit(_("unlocked a thread somehow, but it wasn't locked. cond: ") + cond);
 }
 
-#endif // LOG_TOMBDEBUG
+#endif // TOMBDEBUG
 
 /* Cond */
 
@@ -144,7 +144,7 @@ Cond::~Cond()
     pthread_cond_destroy(&cond_struct);
 }
 
-#ifdef LOG_TOMBDEBUG
+#ifdef TOMBDEBUG
 void Cond::wait()
 {
     bool autolock_save = mutex->autolock;
@@ -175,13 +175,13 @@ void Cond::checkwait()
         mutex->errorExit(_("tried to do a cond_wait with a mutex locked by another thread"));
 }
 */
-#endif // LOG_TOMBDEBUG
+#endif // TOMBDEBUG
 
 
 MutexAutolock::MutexAutolock(Ref<Mutex> mutex, bool unlocked)
 {
     this->mutex = mutex;
-#ifdef LOG_TOMBDEBUG
+#ifdef TOMBDEBUG
     if (! unlocked)
         mutex->lockAutolock();
 #else
@@ -192,7 +192,7 @@ MutexAutolock::MutexAutolock(Ref<Mutex> mutex, bool unlocked)
     locked = ! unlocked;
 }
 
-#ifdef LOG_TOMBDEBUG
+#ifdef TOMBDEBUG
 MutexAutolock::~MutexAutolock()
 {
     if (locked)

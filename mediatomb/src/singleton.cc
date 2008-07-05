@@ -62,7 +62,7 @@ SingletonManager::SingletonManager() : Object()
 void SingletonManager::registerSingleton(Ref<Singleton<Object> > object)
 {
     AUTOLOCK(mutex);
-#ifdef LOG_TOMBDEBUG
+#ifdef TOMBDEBUG
     if (singletonStack->size() >= SINGLETON_CUR_MAX)
     {
         printf("%d singletons are active (SINGLETON_CUR_MAX=%d) and tried to add another singleton - check this!\n", singletonStack->size(), SINGLETON_CUR_MAX);

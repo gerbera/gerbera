@@ -36,8 +36,10 @@
 #ifdef ONLINE_SERVICES
 
 #include "online_service.h"
+#include "tools.h"
 
 using namespace zmm;
+using namespace mxml;
 
 char service_prefixes[] = { '\0', 'Y', 'S', '\0' };
 
@@ -86,5 +88,36 @@ char OnlineService::getStoragePrefix()
 { 
     return getStoragePrefix(getServiceType()); 
 } 
+
+String OnlineService::getCheckAttr(Ref<Element> xml, String attrname)
+{
+    String temp = xml->getAttribute(attrname);
+    if (string_ok(temp))
+        return temp;
+    else
+        throw _Exception(getServiceName() + _(": Tag <") + xml->getName() +
+                _("> is missing the requred \"") + attrname +
+                _("\" attribute!"));
+    return nil;
+}
+
+int OnlineService::getCheckPosIntAttr(Ref<Element> xml, String attrname)
+{
+    int itmp;
+    String temp = xml->getAttribute(attrname);
+    if (string_ok(temp))
+        itmp = temp.toInt();
+    else
+        throw _Exception(getServiceName() + _(": Tag <") + xml->getName() +
+                _("> is missing the requred \"") + attrname +
+                _("\" attribute!"));
+
+    if (itmp < 1)
+        throw _Exception(_("Invalid value in ") + attrname + _(" for <") +
+                xml->getName() + _("> tag"));
+
+    return itmp;
+}
+
 
 #endif//ONLINE_SERVICES

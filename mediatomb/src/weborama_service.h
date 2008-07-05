@@ -45,15 +45,16 @@
 
 typedef enum
 {
-    WR_mood_dull_lively = 0,
-    WR_mood_lively,
-    WR_mood_active_lively,
-    WR_mood_dull,
+    WR_mood_calm_positive = 0,
+    WR_mood_positive,
+    WR_mood_energetic_positive,
+    WR_mood_calm,
     WR_mood_neutral,
-    WR_mood_active,
-    WR_mood_dull_sad,
-    WR_mood_sad,
-    WR_mood_sad_active,
+    WR_mood_energetic,
+    WR_mood_calm_dark,
+    WR_mood_dark,
+    WR_mood_energetic_dark,
+    WR_mood_none,
 } wr_mood_t;
 
 /// \brief This is an interface for all online services, the function
@@ -112,6 +113,8 @@ protected:
         /// \brief Starging index as specified in the configuration by the user
         int cfg_start_index;
     };
+
+    wr_mood_t getMood(zmm::Ref<mxml::Element> xml);
 
 
 };

@@ -41,12 +41,13 @@
 #include "content_manager.h"
 #include "string_converter.h"
 #include "config_manager.h"
+#include "config_options.h"
 #include "server.h"
 
 using namespace zmm;
 using namespace mxml;
 
-#define WEBORAMA_SERVICE_URL            "http://beta.weborama.ru/modules/index_xspf.php"
+#define WEBORAMA_SERVICE_URL            "undefined"
 #define MAX_PER_TASK_AMOUNT             (100)
 
 // Weborama defines
@@ -64,6 +65,9 @@ using namespace mxml;
 #define PARAM_COVER_SIZE                "coverSize"
 #define PARAM_FILTER                    "filter"
 #define PARAM_TYPE                      "type"
+#define PARAM_MOOD                      "mood"
+#define PARAM_ACTION                    "action"
+#define PARAM_ID                        "id"
 
 #define VALUE_COVER_SIZE_DLNA           "160"
 #define VALUE_TYPE_PLAYLIST             "playlist"
@@ -71,8 +75,41 @@ using namespace mxml;
 
 // config.xml defines
 #define CFG_REQUEST_FAVORITES           "favorites"
+#define CFG_REQUEST_BY_MOOD             "mood"
 
 #define CFG_OPTION_USER                 "user"
+
+#define CFG_OPTION_MOOD_0               "calm-positive"     
+#define CFG_OPTION_MOOD_1               "positive"
+#define CFG_OPTION_MOOD_2               "energetic-positive"
+#define CFG_OPTION_MOOD_3               "calm"
+#define CFG_OPTION_MOOD_4               "neutral"
+#define CFG_OPTION_MOOD_5               "energetic"
+#define CFG_OPTION_MOOD_6               "calm-dark"
+#define CFG_OPTION_MOOD_7               "dark"
+#define CFG_OPTION_MOOD_8               "energetic-dark"
+
+typedef struct wr_mood wr_mood;
+struct wr_mood
+{
+    wr_mood_t mood;
+    const char *cfg_name;
+    const char *aux_name;
+};
+
+wr_mood WR_mood[] = 
+{
+    { WR_mood_calm_positive,        CFG_OPTION_MOOD_0, "Calm-Positive"      },
+    { WR_mood_positive,             CFG_OPTION_MOOD_1, "Positive"           },
+    { WR_mood_energetic_positive,   CFG_OPTION_MOOD_2, "Energetic-Positive" },
+    { WR_mood_calm,                 CFG_OPTION_MOOD_3, "Calm"               },
+    { WR_mood_neutral,              CFG_OPTION_MOOD_4, "Neutral"            },
+    { WR_mood_energetic,            CFG_OPTION_MOOD_5, "Energetic"          },
+    { WR_mood_calm_dark,            CFG_OPTION_MOOD_6, "Calm-Dark"          },
+    { WR_mood_dark,                 CFG_OPTION_MOOD_7, "Dark"               },
+    { WR_mood_energetic_dark,       CFG_OPTION_MOOD_8, "Energetic-Dark"     },
+    { WR_mood_none, NULL, NULL },
+};
 
 WeboramaService::WeboramaService()
 {
@@ -111,20 +148,35 @@ String WeboramaService::getServiceName()
     return _("Weborama");
 }
 
+wr_mood_t WeboramaService::getMood(Ref<Element> xml)
+{
+    String temp = xml->getAttribute(_("mood"));
+    if (!string_ok(temp))
+        return WR_mood_none;
+
+    int i = temp.toInt();
+    if ((i < 0) || (i >= WR_mood_none))
+        throw _Exception(_("Weborama: invalid mood specified for tag <") + 
+                         xml->getName() + ">");
+
+    return WR_mood[i].mood;
+}
+
 Ref<Object> WeboramaService::defineServiceTask(Ref<Element> xmlopt, Ref<Object> params)
 {
     Ref<WeboramaTask> task(new WeboramaTask());
     String temp = xmlopt->getName();
     String temp2;
+        
+    task->parameters->put(_(PARAM_COVER_SIZE), _(VALUE_COVER_SIZE_DLNA));
+    task->parameters->put(_(PARAM_ID), RefCast(params, Option)->getOption());
+    task->amount = MAX_PER_TASK_AMOUNT;
 
     if (temp == CFG_REQUEST_FAVORITES)
     {
-        task->parameters->put(_(PARAM_COVER_SIZE), _(VALUE_COVER_SIZE_DLNA));
         task->parameters->put(_(PARAM_TYPE), _(VALUE_TYPE_PLAYLIST));
 
-        temp2 = xmlopt->getAttribute(_("user"));
-        if (!string_ok(temp))
-            throw _Exception(_("Weborama: Missing \"user\" attribute for the <favorites> tag!"));
+        temp2 = getCheckAttr(xmlopt, _("user"));
 
         temp2 = _(FILTER_OPTION_USERID) + _(FILTER_SEPARATOR) + temp2 + 
                 _(FILTER_SEPARATOR) + _(FILTER_OPTION_FAVORITE);
@@ -140,9 +192,19 @@ Ref<Object> WeboramaService::defineServiceTask(Ref<Element> xmlopt, Ref<Object> 
 
             task->amount = amount;
         }
-        else
             task->amount = MAX_PER_TASK_AMOUNT;
+
+        wr_mood_t mood = getMood(xmlopt);
+        if (mood != WR_mood_none)
+            task->parameters->put(_(PARAM_MOOD), String::from((int)mood));
     } 
+    else if (temp == CFG_REQUEST_BY_MOOD)
+    {
+        task->parameters->put(_(PARAM_TYPE), _(VALUE_TYPE_PLAYLIST));
+        wr_mood_t mood = getMood(xmlopt);
+        if (mood != WR_mood_none)
+            task->parameters->put(_(PARAM_MOOD), String::from((int)mood));
+    }
     else
         return nil;
 

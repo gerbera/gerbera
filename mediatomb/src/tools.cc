@@ -981,15 +981,13 @@ String intArrayToCSV(int *array, int size)
 
 void getTimespecNow(struct timespec *ts)
 {
-#ifdef HAVE_CLOCK_GETTIME 
-    clock_gettime(CLOCK_REALTIME, ts);
-#else
-    
     struct timeval tv;
-    gettimeofday(&tv, NULL);
+    int ret = gettimeofday(&tv, NULL);
+    if (ret != 0)
+        throw _Exception(_("gettimeofday failed: ") + mt_strerror(errno));
+    
     ts->tv_sec = tv.tv_sec;
     ts->tv_nsec = tv.tv_usec * 1000;
-#endif
 }
 
 long getDeltaMillis(struct timespec *first)
@@ -1390,7 +1388,7 @@ String getAVIFourCC(zmm::String avi_filename)
 }
 #endif
 
-#ifdef LOG_TOMBDEBUG
+#ifdef TOMBDEBUG
 
 void profiling_thread_check(struct profiling_t *data)
 {

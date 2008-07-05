@@ -138,7 +138,7 @@ ConfigManager::ConfigManager() : Singleton<ConfigManager>()
     
     prepare_udn();
     validate(home);
-#ifdef LOG_TOMBDEBUG
+#ifdef TOMBDEBUG
 //    dumpOptions();
 #endif
     // now the XML is no longer needed we can destroy it
@@ -1725,6 +1725,11 @@ void ConfigManager::validate(String serverhome)
 
     if (temp == "yes")
     {
+        temp = getOption(_("/import/online-content/Weborama/attribute::userid"));
+        if (!string_ok(temp))
+            throw _Exception(_("Error in config file: "
+                               "missing global userid for Weborama service"));
+
         el = getElement(_("/import/online-content/Weborama"));
         Ref<Array<Object> > wb_opts = createServiceTaskList(OS_Weborama, el);
         if (wb_opts->size() == 0)
@@ -2578,7 +2583,7 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
 
 void ConfigManager::dumpOptions()
 {
-#ifdef LOG_TOMBDEBUG
+#ifdef TOMBDEBUG
     log_debug("Dumping options!\n");
     for (int i = 0; i < (int)CFG_MAX; i++)
     {
@@ -2698,7 +2703,10 @@ Ref<Array<Object> > ConfigManager::createServiceTaskList(service_type_t service,
         Ref<WeboramaService> wb(new WeboramaService());
         for (int i = 0; i < element->elementChildCount(); i++)
         {
-            Ref<Object> option = wb->defineServiceTask(element->getElementChild(i), nil);
+            // existence is checked in validate
+            Ref<Option> stropt(new Option(element->getAttribute(_("userid"))));
+            
+            Ref<Object> option = wb->defineServiceTask(element->getElementChild(i), RefCast(stropt, Object));
             arr->append(option);
         }
     }

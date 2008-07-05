@@ -337,12 +337,12 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
         log_debug("Script input: %s\n", input.c_str());
         if(strncmp(action.c_str(), "http://", 7))
         {
-#ifdef LOG_TOMBDEBUG
+#ifdef TOMBDEBUG
             struct timespec before;
             getTimespecNow(&before);
 #endif
             output = run_simple_process(action, _("run"), input);
-#ifdef LOG_TOMBDEBUG
+#ifdef TOMBDEBUG
             long delta = getDeltaMillis(&before);
             log_debug("script executed in %ld milliseconds\n", delta);
 #endif

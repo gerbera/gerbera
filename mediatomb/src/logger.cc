@@ -132,7 +132,7 @@ void _log_js(const char *format, ...)
 void _log_debug(const char *format, const char *file, int line, const char *function, ...)
 {
     bool enabled;
-#ifdef LOG_TOMBDEBUG
+#ifdef TOMBDEBUG
     enabled = !ConfigManager::isDebugLogging();
 #else
     enabled = ConfigManager::isDebugLogging();
@@ -155,7 +155,7 @@ void _print_backtrace(FILE* file)
 #if defined HAVE_BACKTRACE && defined HAVE_BACKTRACE_SYMBOLS
 
     bool enabled;
-#ifdef LOG_TOMBDEBUG
+#ifdef TOMBDEBUG
     enabled = !ConfigManager::isDebugLogging();
 #else
     enabled = ConfigManager::isDebugLogging();

@@ -78,7 +78,7 @@ String YouTubeVideoURL::getVideoURL(String video_id)
     long retcode; 
     String flv_location;
     String watch;
-#ifdef LOG_TOMBDEBUG
+#ifdef TOMBDEBUG
     bool verbose = true;
 #else
     bool verbose = false;

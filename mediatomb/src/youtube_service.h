@@ -173,8 +173,8 @@ protected:
 
 
     // helper functions for parsing config.xml
-    zmm::String getCheckAttr(zmm::Ref<mxml::Element> xml, zmm::String attrname);
-    int getCheckPosIntAttr(zmm::Ref<mxml::Element> xml, zmm::String attrname);
+//    zmm::String getCheckAttr(zmm::Ref<mxml::Element> xml, zmm::String attrname);
+//    int getCheckPosIntAttr(zmm::Ref<mxml::Element> xml, zmm::String attrname);
     void getPagingParams(zmm::Ref<mxml::Element> xml, 
                          zmm::Ref<YouTubeTask> task);
     void addTimeParams(zmm::Ref<mxml::Element> xml, zmm::Ref<YouTubeTask> task);

@@ -58,6 +58,9 @@ protected:
 #ifdef SOPCAST
     void addSopCast(zmm::Ref<CdsObject> obj);
 #endif
+#ifdef WEBORAMA
+    void addWeborama(zmm::Ref<CdsObject> obj);
+#endif
 #ifdef ENABLE_PROFILING
     bool profiling_initialized;
     profiling_t layout_profiling;

@@ -317,7 +317,7 @@ bool isTheora(zmm::String ogg_filename);
 zmm::String getAVIFourCC(zmm::String avi_filename);
 #endif
 
-#ifdef LOG_TOMBDEBUG
+#ifdef TOMBDEBUG
 
 struct profiling_t
 {

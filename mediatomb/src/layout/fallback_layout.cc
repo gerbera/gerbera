@@ -343,6 +343,32 @@ void FallbackLayout::addSopCast(zmm::Ref<CdsObject> obj)
 }
 #endif
 
+#ifdef WEBORAMA
+void FallbackLayout::addWeborama(zmm::Ref<CdsObject> obj)
+{
+    #define WB_VPATH "/Online Services/Weborama"
+    String chain;
+    String temp;
+    int id;
+    bool ref_set = false;
+
+    if (obj->getID() != INVALID_OBJECT_ID)
+    {
+        obj->setRefID(obj->getID());
+        ref_set = true;
+    }
+
+    chain = _(WB_VPATH "/" "All Audio");
+    id = ContentManager::getInstance()->addContainerChain(chain);
+    add(obj, id, ref_set);
+    if (!ref_set)
+    {
+        obj->setRefID(obj->getID());
+        ref_set = true;
+    }
+}
+
+#endif
 
 FallbackLayout::FallbackLayout() : Layout()
 {
@@ -376,6 +402,11 @@ void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj)
 #ifdef SOPCAST
             case OS_SopCast:
                 addSopCast(clone);
+                break;
+#endif
+#ifdef WEBORAMA
+            case OS_Weborama:
+                addWeborama(clone);
                 break;
 #endif
             case OS_Max:

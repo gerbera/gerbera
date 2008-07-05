@@ -98,7 +98,7 @@ Ref<Array<StringBase> > Exception::getStackTrace()
     return stackTrace;
 }
 
-#ifdef LOG_TOMBDEBUG
+#ifdef TOMBDEBUG
 void Exception::printStackTrace(FILE *file)
 {
     if (line >= 0)
@@ -119,4 +119,4 @@ void Exception::printStackTrace(FILE *file)
     }
 #endif // __CYGWIN__
 }
-#endif // LOG_TOMBDEBUG
+#endif // TOMBDEBUG

@@ -29,7 +29,7 @@ void StorageCache::clear()
 
 Ref<CacheObject> StorageCache::getObject(int id)
 {
-#ifdef LOG_TOMBDEBUG
+#ifdef TOMBDEBUG
     assert(mutex->isLocked());
 #endif
     return idHash->get(id);
@@ -37,7 +37,7 @@ Ref<CacheObject> StorageCache::getObject(int id)
 
 Ref<CacheObject> StorageCache::getObjectDefinitely(int id)
 {
-#ifdef LOG_TOMBDEBUG
+#ifdef TOMBDEBUG
     assert(mutex->isLocked());
 #endif
     Ref<CacheObject> obj = idHash->get(id);
@@ -63,7 +63,7 @@ bool StorageCache::removeObject(int id)
 
 Ref<Array<CacheObject> > StorageCache::getObjects(String location)
 {
-#ifdef LOG_TOMBDEBUG
+#ifdef TOMBDEBUG
     assert(mutex->isLocked());
 #endif
     return locationHash->get(location);
@@ -71,7 +71,7 @@ Ref<Array<CacheObject> > StorageCache::getObjects(String location)
 
 void StorageCache::checkLocation(Ref<CacheObject> obj)
 {
-#ifdef LOG_TOMBDEBUG
+#ifdef TOMBDEBUG
     assert(mutex->isLocked());
 #endif
     if (! obj->knowsLocation())
@@ -106,7 +106,7 @@ bool StorageCache::flushed()
 
 void StorageCache::ensureFillLevelOk()
 {
-#ifdef LOG_TOMBDEBUG
+#ifdef TOMBDEBUG
     assert(mutex->isLocked());
 #endif
     // TODO - much better...

@@ -129,7 +129,10 @@ protected:
     int purge_interval;
     zmm::Ref<zmm::Object> timer_parameter;
 
-
+    /// \brief retrieves a required attribute given by the name
+    zmm::String getCheckAttr(zmm::Ref<mxml::Element> xml, zmm::String attrname);
+    /// \brief retrieves a required positive integer attribute given by the name
+    int getCheckPosIntAttr(zmm::Ref<mxml::Element> xml, zmm::String attrname);
 };
 
 class OnlineServiceList : public zmm::Object
