@@ -141,7 +141,7 @@ SetPolicyType( PolicyType in )
 static int
 SetPriority( ThreadPriority priority )
 {
-
+#if defined(HAVE_SCHED_GET_PRIORITY_MIN) && defined(HAVE_SCHED_GET_PRIORITY_MAX)
     int currentPolicy;
     int minPriority = 0;
     int maxPriority = 0;
@@ -151,6 +151,7 @@ SetPriority( ThreadPriority priority )
 
     pthread_getschedparam( ithread_self(  ), &currentPolicy,
                            &newPriority );
+
     minPriority = sched_get_priority_min( currentPolicy );
     maxPriority = sched_get_priority_max( currentPolicy );
     midPriority = ( maxPriority - minPriority ) / 2;
@@ -170,10 +171,11 @@ SetPriority( ThreadPriority priority )
     };
 
     newPriority.sched_priority = actPriority;
-
     return pthread_setschedparam( ithread_self(  ), currentPolicy,
                                   &newPriority );
-
+#else
+    return 0;
+#endif
 }
 
 /****************************************************************************
