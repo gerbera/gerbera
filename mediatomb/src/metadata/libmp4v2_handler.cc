@@ -191,12 +191,16 @@ void LibMP4V2Handler::fillMetadata(Ref<CdsItem> item)
             }
         }
 
-#if defined(HAVE_MAGIC) && defined(HAVE_MP4_ALBUMART)
+#if defined(HAVE_MAGIC)
         u_int8_t *art_data;
         u_int32_t art_data_len;
         String art_mimetype;
+#ifdef HAVE_MP4_GET_METADATA_COVER_ART_COUNT
         if (MP4GetMetadataCoverArtCount(mp4) && 
             MP4GetMetadataCoverArt(mp4, &art_data, &art_data_len))
+#else
+            MP4GetMetadataCoverArt(mp4, &art_data, &art_data_len);
+#endif
         {
             if (art_data)
             {
@@ -235,7 +239,6 @@ void LibMP4V2Handler::fillMetadata(Ref<CdsItem> item)
 
 Ref<IOHandler> LibMP4V2Handler::serveContent(Ref<CdsItem> item, int resNum, off_t *data_size)
 {
-#ifdef HAVE_MP4_ALBUMART
     MP4FileHandle mp4 = MP4Read(item->getLocation().c_str());
     if (mp4 == MP4_INVALID_FILE_HANDLE)
     {
@@ -248,10 +251,10 @@ Ref<IOHandler> LibMP4V2Handler::serveContent(Ref<CdsItem> item, int resNum, off_
 
     if (ctype != ID3_ALBUM_ART)
         throw _Exception(_("LibMP4V2Handler: got unknown content type: ") + ctype);
-
+#ifdef HAVE_MP4_GET_METADATA_COVER_ART_COUNT
     if (!MP4GetMetadataCoverArtCount(mp4))
         throw _Exception(_("LibMP4V2Handler: resource has no album art information"));
-
+#endif
     u_int8_t *art_data;
     u_int32_t art_data_len;
     if (MP4GetMetadataCoverArt(mp4, &art_data, &art_data_len))
@@ -268,10 +271,6 @@ Ref<IOHandler> LibMP4V2Handler::serveContent(Ref<CdsItem> item, int resNum, off_
     throw _Exception(_("LibMP4V2Handler: could not serve album art "
                            "for file") + item->getLocation() + 
                            " - embedded image not found");
-#else
-    *data_size = -1;
-    return nil;
-#endif
 }
 
 #endif // HAVE_LIBMP4V2

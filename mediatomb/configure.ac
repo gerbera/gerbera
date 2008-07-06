@@ -1846,7 +1846,7 @@ if test "x$LIBMP4V2_STATUS" = xyes; then
    LDFLAGS="$LDFLAGS $LIBMP4V2_LDFLAGS $LIBMP4V2_LIBS"
    AC_LANG_SAVE
    AC_LANG_CPLUSPLUS
-   AC_MSG_CHECKING([for album art support in libmp4v2])
+   AC_MSG_CHECKING([for MP4GetMetadataCoverArtCount() libmp4v2])
    AC_COMPILE_IFELSE(
         [AC_LANG_PROGRAM(
             [
@@ -1854,19 +1854,18 @@ if test "x$LIBMP4V2_STATUS" = xyes; then
             ],
             [
                 (void)MP4GetMetadataCoverArtCount(0);
-                (void)MP4GetMetadataCoverArt(0, 0, 0);
             ]
         )],
         [
             AC_MSG_RESULT([yes])
-            AC_DEFINE([HAVE_MP4_ALBUMART], [1],
-                      [this version of libmp4 has album art support])
+            AC_DEFINE([HAVE_MP4_GET_METADATA_COVER_ART_COUNT], [1],
+                      [this version of libmp4v2 has MP4GetMetadataCoverArtCount() support])
         ],
         [
             AC_MSG_RESULT([no])
         ])
 
-   AC_MSG_CHECKING([MP4GetTrackAudioChannels in libmp4v2])
+   AC_MSG_CHECKING([for MP4GetTrackAudioChannels() in libmp4v2])
    AC_COMPILE_IFELSE(
         [AC_LANG_PROGRAM(
             [
