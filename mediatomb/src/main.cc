@@ -67,8 +67,6 @@
 #include <grp.h>
 #include <limits.h>
 
-#include "dvd_read.h"
-
 #ifdef HAVE_GETOPT_LONG
     #define OPTSTR "i:e:p:c:m:f:u:g:a:l:P:dhD"
 #endif
@@ -129,29 +127,7 @@ int main(int argc, char **argv, char **envp)
     String magic;
     bool debug_logging = false;
     bool print_version = false;
-#if 0
-    Ref<DVDReader> dvd(new DVDReader(_("/home/jin/Work/UPnP/MediaTomb/DVD/dvd.iso")));
-    for (int title = 0; title < dvd->titleCount(); title++)
-    {
-        printf("Title %d\n", title);
-        for (int chapter = 0; chapter < dvd->chapterCount(title); chapter++)
-            printf("Chapter %d\n", chapter);
-    }
 
-    dvd->dumpVMG();
-
-    dvd = Ref<DVDReader>(new DVDReader(_("/home/jin/Work/UPnP/MediaTomb/DVD/Jumper.2008.R5.LiNE.DVDR.MULTiSUBS-FDSCR.iso")));
-    for (int title = 0; title < dvd->titleCount(); title++)
-    {
-        printf("Title %d\n", title);
-        for (int chapter = 0; chapter < dvd->chapterCount(title); chapter++)
-            printf("Chapter %d\n", chapter);
-    }
-
-    dvd->dumpVMG();
-
-    return 0;
-#endif
     Ref<Array<StringBase> > addFile(new Array<StringBase>());
 
 #ifdef SOLARIS
