@@ -1840,6 +1840,54 @@ MT_CHECK_OPTIONAL_PACKAGE([libmp4v2], [disable],
                  [libmp4v2 support for mp4 metadata extraction],
                  [mp4], [mp4v2], [MP4Read]) 
 
+if test "x$LIBMP4V2_STATUS" = xyes; then
+   CFLAGS="$CFLAGS $LIBMP4V2_CFLAGS"
+   CXXFLAGS="$CXXFLAGS $LIBMP4V2_CFLAGS"
+   LDFLAGS="$LDFLAGS $LIBMP4V2_LDFLAGS $LIBMP4V2_LIBS"
+   AC_LANG_SAVE
+   AC_LANG_CPLUSPLUS
+   AC_MSG_CHECKING([for album art support in libmp4v2])
+   AC_COMPILE_IFELSE(
+        [AC_LANG_PROGRAM(
+            [
+                #include <mp4.h>
+            ],
+            [
+                (void)MP4GetMetadataCoverArtCount(0);
+                (void)MP4GetMetadataCoverArt(0, 0, 0);
+            ]
+        )],
+        [
+            AC_MSG_RESULT([yes])
+            AC_DEFINE([HAVE_MP4_ALBUMART], [1],
+                      [this version of libmp4 has album art support])
+        ],
+        [
+            AC_MSG_RESULT([no])
+        ])
+
+   AC_MSG_CHECKING([MP4GetTrackAudioChannels in libmp4v2])
+   AC_COMPILE_IFELSE(
+        [AC_LANG_PROGRAM(
+            [
+                #include <mp4.h>
+            ],
+            [
+                (void)MP4GetTrackAudioChannels(0, 0);
+            ]
+        )],
+        [
+            AC_MSG_RESULT([yes])
+            AC_DEFINE([HAVE_MP4_GET_TRACK_AUDIO_CHANNELS], [1],
+                      [this version of libmp4 has MP4GetTrackAudioChannels support])
+        ],
+        [
+            AC_MSG_RESULT([no])
+        ])
+
+   AC_LANG_RESTORE
+fi
+
 ########## INOTIFY TOOLS
 
 MT_OPTION([inotify], [disable], [inotify support for imporved autoscan], [], 

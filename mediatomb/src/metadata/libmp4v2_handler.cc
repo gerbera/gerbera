@@ -36,8 +36,6 @@
 
 #ifdef HAVE_LIBMP4V2
 
-#include <mp4.h>
-
 #include "libmp4v2_handler.h"
 #include "string_converter.h"
 #include "common.h"
@@ -45,6 +43,18 @@
 #include "mem_io_handler.h"
 #include "content_manager.h"
 #include "config_manager.h"
+
+// why does crap like that alsways happens with some Ubuntu package?
+#undef PACKAGE
+#undef PACKAGE_BUGREPORT
+#undef PACKAGE_NAME
+#undef PACKAGE_STRING
+#undef PACKAGE_TARNAME
+#undef VERSION
+#undef TRUE
+#undef FALSE
+
+#include <mp4.h>
 
 using namespace zmm;
 
@@ -161,6 +171,7 @@ void LibMP4V2Handler::fillMetadata(Ref<CdsItem> item)
         MP4TrackId tid = MP4FindTrackId(mp4, 0, MP4_AUDIO_TRACK_TYPE);
         if (tid != MP4_INVALID_TRACK_ID)
         {
+#ifdef HAVE_MP4_GET_TRACK_AUDIO_CHANNELS
             temp = MP4GetTrackAudioChannels(mp4, tid);
             if (temp > 0)
             {
@@ -170,7 +181,7 @@ void LibMP4V2Handler::fillMetadata(Ref<CdsItem> item)
                 if (timescale > 0)
                     item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), String::from((unsigned int)timescale));
             }
-
+#endif
             // note: UPnP requres bytes/second
             timescale = MP4GetTrackBitRate(mp4, tid);
             if (timescale > 0)
@@ -180,7 +191,7 @@ void LibMP4V2Handler::fillMetadata(Ref<CdsItem> item)
             }
         }
 
-#ifdef HAVE_MAGIC
+#if defined(HAVE_MAGIC) && defined(HAVE_MP4_ALBUMART)
         u_int8_t *art_data;
         u_int32_t art_data_len;
         String art_mimetype;
@@ -224,6 +235,7 @@ void LibMP4V2Handler::fillMetadata(Ref<CdsItem> item)
 
 Ref<IOHandler> LibMP4V2Handler::serveContent(Ref<CdsItem> item, int resNum, off_t *data_size)
 {
+#ifdef HAVE_MP4_ALBUMART
     MP4FileHandle mp4 = MP4Read(item->getLocation().c_str());
     if (mp4 == MP4_INVALID_FILE_HANDLE)
     {
@@ -256,6 +268,10 @@ Ref<IOHandler> LibMP4V2Handler::serveContent(Ref<CdsItem> item, int resNum, off_
     throw _Exception(_("LibMP4V2Handler: could not serve album art "
                            "for file") + item->getLocation() + 
                            " - embedded image not found");
+#else
+    *data_size = -1;
+    return nil;
+#endif
 }
 
 #endif // HAVE_LIBMP4V2
