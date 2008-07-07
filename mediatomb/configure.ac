@@ -1469,225 +1469,39 @@ CPPFLAGS="$CPPFLAGS_SAVE"
 CXXFLAGS="$CXXFLAGS_SAVE"
 LDFLAGS="$LDFLAGS_SAVE"
 
-######### extractor or ffmpeg
-
-FFMPEG_REQUESTED=no
-EXTRACTOR_REQUESTED=no
-
-AC_ARG_ENABLE(ffmpeg,
-        AC_HELP_STRING([--enable-ffmpeg], [compile with ffmpeg support (default: yes, preferred over extractor)]),
-  [
-     FFMPEG_EN=$enableval 
-     if test "x$enableval" = xno; then
-        FFMPEG_OK=disabled
-     else
-        FFMPEG_OK=yes
-        FFMPEG_REQUESTED=yes
-     fi
-  ],
-  [
-    FFMPEG_OK=yes
-  ]
-)
-
-AC_ARG_ENABLE(libextractor,
-        AC_HELP_STRING([--enable-libextractor], [compile with libextractor support (default: no)]),
-  [
-     EXTRACTOR_EN=$enableval 
-     if test "x$enableval" = xno; then
-        EXTRACTOR_OK=disabled
-     else
-        EXTRACTOR_OK=yes
-       EXTRACTOR_REQUESTED=yes
-     fi
-  ],
-  [
-    EXTRACTOR_OK=disabled
-  ]
-)
-
-if ((test "x$EXTRACTOR_REQUESTED" = xno) && (test "x$FFMPEG_REQUESTED" = xyes)) ; then
-    EXTRACTOR_OK=disabled
-    if test "x$EXTRACTOR_REQUESTED" = xyes; then
-        AC_MSG_WARN([libextractor disabled])
-    fi
-elif ((test "x$EXTRACTOR_REQUESTED" = xyes) && (test "x$FFMPEG_REQUESTED" = xno)) ; then
-    FFMPEG_OK=disabled
-    AC_MSG_WARN([ffmpeg disabled])
-elif ((test "x$EXTRACTOR_REQUESTED" = xyes) && (test "x$FFMPEG_REQUESTED" = xyes)) ; then
-    AC_MSG_ERROR([Please select either ffmpeg or libextractor, but not both.])
-fi
-
 ######## ffmpeg
 
-AC_LANG_SAVE
-AC_LANG_C
+MT_OPTION([ffmpeg], [disable],
+          [ffmpeg for even more metadata extraction],[],[])
 
-if test "x$FFMPEG_OK" = xyes; then
-    if test -n "$FFMPEG_SEARCH_HEADERS" ; then
-        CPPFLAGS="-I$FFMPEG_SEARCH_HEADERS"
-        AC_CHECK_HEADER($FFMPEG_SEARCH_HEADERS/ffmpeg/avformat.h,
-                [
-                    FFMPEG_CXXFLAGS="-I$FFMPEG_SEARCH_HEADERS"
-                ],
-                [
-                    AC_MSG_ERROR([ffmpeg headers not found in requested location $FFMPEG_SEARCH_HEADERS])
-                ],
-                [
-                    #define __STDC_CONSTANT_MACROS
-                    #include <stdint.h>
-                ]
-        )
-    else 
-        AC_CHECK_HEADER(ffmpeg/avformat.h,
-            [],
-            [
-                CPPFLAGS="-I$SEARCH_DIR_HEADERS"
-                unset ac_cv_header_ffmpeg_avformat_h
-                AC_CHECK_HEADER($SEARCH_DIR_HEADERS/ffmpeg/avformat.h,
-                    [
-                        FFMPEG_CXXFLAGS="-I$SEARCH_DIR_HEADERS"
-                    ],
-                    [
-                        FFMPEG_OK=missing
-                    ],
-                    [
-                        #define __STDC_CONSTANT_MACROS
-                        #include <stdint.h>
-                    ]
-                )
-            ],
-            [
-                #define __STDC_CONSTANT_MACROS
-                #include <stdint.h>
-            ]
-        )
-    fi
-fi
- 
-unset LIBS
-if test "x$FFMPEG_OK" = xyes; then
-    if test -n "$FFMPEG_SEARCH_LIBS" ; then
-        LDFLAGS="-L$FFMPEG_SEARCH_LIBS $ADD_PTHREAD_CFLAGS"
-        AC_CHECK_LIB(avformat, av_register_all,
-                [
-                    AC_CHECK_LIB(avutil, av_log_set_callback,
-                        [
-                            FFMPEG_LIBS="-L$FFMPEG_SEARCH_LIBS -lavformat -lavutil -lz"
-                        ],
-                        [
-                            AC_MSG_ERROR([avutil libraries not found in requested path $FFMPEG_SEARCH_LIBS])
-                        ],
-                        [ -lavcodec -lavutil -lz $ADD_PTHREAD_CFLAGS ])
-                ],
-                [
-                    AC_MSG_ERROR([avformat libraries not found in requested path $FFMPEG_SEARCH_LIBS])
-                ],
-                [ -lavcodec -lavutil -lz $ADD_PTHREAD_CFLAGS ]
-        )
+if test "x$FFMPEG_OPTION_ENABLED" = xyes; then
+       AC_LANG_SAVE
+       AC_LANG_C
+
+    # the header location of the older and newer ffmpeg version is different
+    MT_CHECK_HEADER([ffmpeg], [ffmpeg/avformat], [pass])
+    if test "x$FFMPEG_STATUS" != xyes; then
+        MT_CHECK_HEADER([ffmpeg], [libavformat/avformat])
+        if test "x$FFMPEG_STATUS" = xyes; then
+            AC_DEFINE_UNQUOTED([AVFORMAT_INCLUDE], [<libavformat/avformat.h>], [libavformat/avformat.h])
+        fi
     else
-        AC_CHECK_LIB(avformat, av_register_all,
-            [
-                AC_CHECK_LIB(avutil, av_log_set_callback,
-                    [
-                        FFMPEG_LIBS="-lavformat -lavutil"
-                    ],
-                    [
-                        LDFLAGS="-L$SEARCH_DIR_LIBS"
-                        unset ac_cv_lib_avutil_av_log_set_callback
-                        AC_CHECK_LIB(avutil, av_log_set_callback,
-                            [
-                                FFMPEG_LIBS="-L$SEARCH_DIR_LIBS -lavformat -lavutil -lz"
-                            ],
-                            [
-                               FFMPEG_OK=missing
-                            ],
-                            [ -lavcodec -lavutil -lz $ADD_PTHREAD_CFLAGS ])
-                    ])
-            ],
-            [
-                LDFLAGS="-L$SEARCH_DIR_LIBS $ADD_PTHREAD_CFLAGS"
-                unset ac_cv_lib_avformat_av_register_all
-                AC_CHECK_LIB(avformat, av_register_all,
-                    [
-                        unset ac_cv_lib_avutil_av_log_set_callback
-                        AC_CHECK_LIB(avutil, av_log_set_callback,
-                            [
-                                FFMPEG_LIBS="-L$SEARCH_DIR_LIBS -lavformat -lavutil -lz"
-                            ],
-                            [
-                               FFMPEG_OK=missing
-                            ],
-                            [ -lavcodec -lavutil -lz $ADD_PTHREAD_CFLAGS ])
-                    ],
-                    [ FFMPEG_OK=missing ],
-                    [ -lavcodec -lavutil -lz $ADD_PTHREAD_CFLAGS ]
-                )
-            ],
-            [ -lavcodec -lavutil -lz $ADD_PTHREAD_CFLAGS ]
-        )
+       AC_DEFINE_UNQUOTED([AVFORMAT_INCLUDE], [<ffmpeg/avformat.h>], [ffmpeg/avformat.h])
     fi
+
+    if test "x$FFMPEG_STATUS" = xyes; then
+        MT_CHECK_LIBRARY([ffmpeg], [avformat], [av_register_all])
+    fi
+    AC_LANG_RESTORE
 fi
 
-# last check, my Fedora 7 is somehow broken, and allthough the above tests
-# succeed it still has unresolved symbols when linking
-
-CXXFLAGS="$CXXFLAGS $FFMPEG_CXXFLAGS"
-LDFLAGS="$LDFLAGS $FFMPEG_LIBS"
-LIBS="$LIBS $FFMPEG_LIBS"
-
-AC_LANG_RESTORE
-
-if test "x$FFMPEG_OK" = xyes; then
-    AC_MSG_CHECKING([ffmpeg linking / if extern "C" is needed])
-    AC_LINK_IFELSE(
-        [AC_LANG_PROGRAM(
-            [
-                #define __STDC_CONSTANT_MACROS
-                #include <stdint.h>
-                #include <ffmpeg/avformat.h>
-            ],
-            [
-                av_register_all();
-            ]
-        )],
-        [
-            AC_MSG_RESULT([ok])
-        ],
-        [AC_LINK_IFELSE(
-            [AC_LANG_PROGRAM(
-                [
-                    #define __STDC_CONSTANT_MACROS
-                    #include <stdint.h>
-                    extern "C" {
-                        #include <ffmpeg/avformat.h>
-                    }
-                ],
-                [
-                    av_register_all();
-                ]
-            )],
-            [
-                AC_MSG_RESULT([ok])
-                AC_DEFINE([FFMPEG_NEEDS_EXTERN_C], [1],[ffmpeg header include needs to be wrapped into extern "C"])
-            ],
-            [
-                AC_MSG_RESULT([failed, check your ffmpeg installation])
-                FFMPEG_OK=missing
-            ])
-        ]
-   )
-fi
-
-LIBS="$LIBS_SAVE $LIBS"
-
-
-if test "x$FFMPEG_OK" = xyes; then
+if test "x$FFMPEG_STATUS" = xyes; then
     AC_DEFINE([HAVE_FFMPEG], [1], [FFMPEG library presence])
-    AC_SUBST(FFMPEG_CXXFLAGS)
+    AC_SUBST(FFMPEG_CFLAGS)
+    AC_SUBST(FFMPEG_LDFLAGS)
     AC_SUBST(FFMPEG_LIBS)
 else
-    if test "x$FFMPEG_EN" = xyes; then
+    if test "x$FFMPEG_OPTIEON_REQUESTED" = xyes; then
         AC_MSG_ERROR(unable to configure ffmpeg support)
     fi
 fi
@@ -2130,7 +1944,7 @@ echo "id3lib                : $ID3LIB_STATUS"
 echo "taglib                : $TAGLIB_STATUS"
 echo "libmp4v2              : $LIBMP4V2_STATUS"
 echo "libdvdread            : $LIBDVDREAD_STATUS"
-echo "ffmpeg                : $FFMPEG_OK"
+echo "ffmpeg                : $FFMPEG_STATUS"
 echo "external transcoding  : $EXTERNAL_TRANSCODING_OPTION_ENABLED"
 echo "curl                  : $CURL_OK"
 echo "YouTube               : $YOUTUBE_OPTION_ENABLED"

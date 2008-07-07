@@ -133,8 +133,6 @@ static void addMetaField(metadata_fields_t field, MP4FileHandle mp4, Ref<CdsItem
 void LibMP4V2Handler::fillMetadata(Ref<CdsItem> item)
 {
     MP4FileHandle mp4;
-    Ref<StringConverter> sc = StringConverter::i2i();
-    int temp;
 
     // the location has already been checked by the setMetadata function
     mp4 = MP4Read(item->getLocation().c_str()); 
@@ -172,7 +170,7 @@ void LibMP4V2Handler::fillMetadata(Ref<CdsItem> item)
         if (tid != MP4_INVALID_TRACK_ID)
         {
 #ifdef HAVE_MP4_GET_TRACK_AUDIO_CHANNELS
-            temp = MP4GetTrackAudioChannels(mp4, tid);
+            int temp = MP4GetTrackAudioChannels(mp4, tid);
             if (temp > 0)
             {
                 item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), String::from(temp));

@@ -25,6 +25,8 @@ libmediatomb_a_SOURCES = \
 ../src/destroyer.h \
 ../src/dictionary.cc \
 ../src/dictionary.h \
+../src/dvd_read.cc \
+../src/dvd_read.h \
 ../src/exceptions.cc \
 ../src/exceptions.h \
 ../src/executor.h \

@@ -51,16 +51,16 @@
 #define __STDC_CONSTANT_MACROS
 #include <stdint.h>
 
-#ifdef FFMPEG_NEEDS_EXTERN_C
+//#ifdef FFMPEG_NEEDS_EXTERN_C
 extern "C" 
 {
-#endif
+//#endif
 
-#include <ffmpeg/avformat.h>
+#include AVFORMAT_INCLUDE
 
-#ifdef FFMPEG_NEEDS_EXTERN_C
+//#ifdef FFMPEG_NEEDS_EXTERN_C
 } // extern "C"
-#endif
+//#endif
 
 #include "config_manager.h"
 #include "ffmpeg_handler.h"
