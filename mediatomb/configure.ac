@@ -1469,10 +1469,38 @@ CPPFLAGS="$CPPFLAGS_SAVE"
 CXXFLAGS="$CXXFLAGS_SAVE"
 LDFLAGS="$LDFLAGS_SAVE"
 
-######## ffmpeg
+######## ffmpeg or extractor?
+
+FFMPEG_STATUS=
+LIBEXTRACTOR_STATUS=
+
+MT_OPTION([libextractor], [enable],
+          [metadata extraction with the help of libextractor],[],[])
 
 MT_OPTION([ffmpeg], [disable],
-          [ffmpeg for even more metadata extraction],[],[])
+          [metadata extraction with the help of ffmpeg],[],[])
+
+if ((test "x$FFMPEG_OPTION_ENABLED" = xno) && (test "x$LIBEXTRACTOR_OPTION_ENABLED" = xyes)) ; then
+    FFMPEG_STATUS=disabled
+    FFMPEG_OPTION_ENABLED=no
+    AC_MSG_WARN([ffmpeg disabled])
+elif ((test "x$FFMPEG_OPTION_ENABLED" = xyes) && (test "x$LIBEXTRACTOR_OPTION_ENABLED" = xno)) ; then
+    LIBEXTRACTOR_STATUS=disabled
+    LIBEXTRACTOR_OPTION_ENABLED=no
+elif ((test "x$FFMPEG_OPTION_ENABLED" = xyes) && (test "x$LIBEXTRACTOR_OPTION_ENABLED" = xyes)) ; then
+    if ((test "x$FFMPEG_OPTION_REQUESTED" = xyes) && (test "x$LIBEXTRACTOR_OPTION_REQUESTED" = xyes)); then
+    AC_MSG_ERROR([Please select either ffmpeg or libextractor, but not both.])
+    elif ((test "x$FFMPEG_OPTION_REQUESTED" = xyes) && (test "x$LIBEXTRACTOR_OPTION_REQUESTED" = xno)); then
+       LIBEXTRACTOR_STATUS=disabled
+       LIBEXTRACTOR_OPTION_ENABLED=no
+    elif ((test "x$FFMPEG_OPTION_REQUESTED" = xno) && (test "x$LIBEXTRACTOR_OPTION_REQUESTED" = xyes)); then
+       FFMPEG_STATUS=disabled
+       FFMPEG_OPTION_ENABLED=no
+       AC_MSG_WARN([ffmpeg disabled])
+    fi
+fi
+
+######## ffmpeg
 
 if test "x$FFMPEG_OPTION_ENABLED" = xyes; then
        AC_LANG_SAVE
@@ -1512,72 +1540,17 @@ CPPFLAGS="$CPPFLAGS_SAVE"
 
 ######## extractor
 
-#AC_ARG_ENABLE(libextractor,
-#        AC_HELP_STRING([--enable-libextractor], [compile with libextractor support (default: no)]),
-#  [
-#     EXTRACTOR_EN=$enableval 
-#     if test "x$enableval" = xno; then
-#        EXTRACTOR_OK=disabled
-#     else
-#        EXTRACTOR_OK=yes
-#     fi
-#  ],
-#  [
-#    EXTRACTOR_OK=disabled
-#  ]
-#
-#)
-if test "x$EXTRACTOR_OK" = xyes; then
-    if test -n "$EXTRACTOR_SEARCH_HEADERS" ; then
-        AC_CHECK_HEADER($EXTRACTOR_SEARCH_HEADERS/extractor.h,
-                [ EXTRACTOR_CXXFLAGS="-I$EXTRACTOR_SEARCH_HEADERS" ],
-                [ AC_MSG_ERROR([extractor headers not found in requested location $EXTRACTOR_SEARCH_HEADERS])]
-        )
-    else
-        AC_CHECK_HEADER(extractor.h,
-            [],
-            [
-                unset ac_cv_header_extractor_h
-                AC_CHECK_HEADER($SEARCH_DIR_HEADERS/extractor.h,
-                    [ EXTRACTOR_CXXFLAGS="-I$SEARCH_DIR_HEADERS" ],
-                    [ EXTRACTOR_OK=missing ]
-                )
-            ]
-        )
-    fi
+if test "x$LIBEXTRACTOR_OPTION_ENABLED" = xyes; then
+    MT_CHECK_PACKAGE([libextractor], [extractor], [extractor], [EXTRACTOR_getKeywords])
 fi
 
-if test "x$EXTRACTOR_OK" = xyes; then
-    if test -n "$EXTRACTOR_SEARCH_HEADERS" ; then
-        LDFLAGS="-L$EXTRACTOR_SEARCH_LIBS"
-        AC_CHECK_LIB(extractor, EXTRACTOR_getKeywords,
-                [ EXTRACTOR_LIBS="-L$EXTRACTOR_SEARCH_LIBS -lextractor" ],
-                [
-                    AC_MSG_ERROR([extractor libraries not found in requested location $EXTRACTOR_SEARCH_LIBS])
-                ]
-        )
-    else
-        AC_CHECK_LIB(extractor, EXTRACTOR_getKeywords,
-            [], 
-            [
-                LDFLAGS="-L$SEARCH_DIR_LIBS"
-                unset ac_cv_lib_extractor_EXTRACTOR_getKeywords
-                AC_CHECK_LIB(extractor, EXTRACTOR_getKeywords,
-                    [ EXTRACTOR_LIBS="-L$SEARCH_DIR_LIBS -lextractor" ],
-                    [ EXTRACTOR_OK=missing ]
-                )
-            ]
-        )
-    fi
-fi
-
-if test "x$EXTRACTOR_OK" = xyes; then
-    AC_DEFINE([HAVE_EXTRACTOR], [1], [libextractor library presence])
-    AC_SUBST(EXTRACTOR_CXXFLAGS)
-    AC_SUBST(EXTRACTOR_LIBS)
+if test "x$LIBEXTRACTOR_STATUS" = xyes; then
+    FFMPEG_STATUS=disabled
+    FFMPEG_OPTION_ENABLED=no
 else
-    if test "x$EXTRACTOR_EN" = xyes; then
-        AC_MSG_ERROR(unable to configure libextractor support)
+    if (test "x$LIBEXTRACTOR_OPTION_REQUESTED" = xyes) &&
+       (test "x$LIBEXTRACTOR_OPTION_ENABLED" = xyes); then
+        AC_MSG_ERROR([unable to configure libextractor support])
     fi
 fi
 
@@ -1908,7 +1881,7 @@ if (test "x$SOPCAST_OPTION_ENABLED" = xyes); then
     AC_DEFINE([SOPCAST], [1], [Enable support for the SopCast service])
 fi
 
-AC_DEFINE_UNQUOTED([COMPILE_INFO], "host: $host; sqlite3: $SQLITE3_STATUS; mysql: $MYSQL_STATUS libjs: $JS_OK; libmagic: $LIBMAGIC_STATUS; inotify: $INOTIFY_STATUS; libexif: $LIBEXIF_STATUS; id3lib: $ID3LIB_STATUS; taglib: $TAGLIB_STATUS; ffmpeg: $FFMPEG_OK; libmp4v2: $LIBMP4V2_STATUS; external transcoding: $EXTERNAL_TRANSCODING_OPTION_ENABLED; curl: $CURL_OK; YouTube: $YOUTUBE_OPTION_ENABLED; SopCast: $SOPCAST_OPTION_ENABLED; libextractor: $EXTRACTOR_OK; db-autocreate: $DB_AUTOCREATE_OPTION_ENABLED; debug log: $DEBUG_LOG_OPTION_ENABLED; protocol info extensions: $PROTOCOLINFO_EXTENSION_OPTION_ENABLED; data directory: $PACKAGE_DATADIR: libdvdread: $LIBDVDREAD_STATUS", [compile option summary])
+AC_DEFINE_UNQUOTED([COMPILE_INFO], "host: $host; sqlite3: $SQLITE3_STATUS; mysql: $MYSQL_STATUS libjs: $JS_OK; libmagic: $LIBMAGIC_STATUS; inotify: $INOTIFY_STATUS; libexif: $LIBEXIF_STATUS; id3lib: $ID3LIB_STATUS; taglib: $TAGLIB_STATUS; ffmpeg: $FFMPEG_STATUS; libmp4v2: $LIBMP4V2_STATUS; external transcoding: $EXTERNAL_TRANSCODING_OPTION_ENABLED; curl: $CURL_OK; YouTube: $YOUTUBE_OPTION_ENABLED; SopCast: $SOPCAST_OPTION_ENABLED; libextractor: $LIBEXTRACTOR_STATUS; db-autocreate: $DB_AUTOCREATE_OPTION_ENABLED; debug log: $DEBUG_LOG_OPTION_ENABLED; protocol info extensions: $PROTOCOLINFO_EXTENSION_OPTION_ENABLED; data directory: $PACKAGE_DATADIR: libdvdread: $LIBDVDREAD_STATUS", [compile option summary])
 
 ###############
 AC_CONFIG_FILES([
@@ -1949,7 +1922,7 @@ echo "external transcoding  : $EXTERNAL_TRANSCODING_OPTION_ENABLED"
 echo "curl                  : $CURL_OK"
 echo "YouTube               : $YOUTUBE_OPTION_ENABLED"
 echo "SopCast               : $SOPCAST_OPTION_ENABLED"
-echo "libextractor          : $EXTRACTOR_OK"
+echo "libextractor          : $LIBEXTRACTOR_STATUS"
 echo "db-autocreate         : $DB_AUTOCREATE_OPTION_ENABLED"
         
 if test "x$TOMBDEBUG_OPTION_ENABLED" = xyes; then

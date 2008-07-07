@@ -59,7 +59,7 @@
 #include "metadata/ffmpeg_handler.h"
 #endif
 
-#ifdef HAVE_EXTRACTOR
+#ifdef HAVE_LIBEXTRACTOR
 #include "metadata/extractor_handler.h"
 #endif
 
@@ -168,12 +168,12 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
         }
 #else
         
-#ifndef HAVE_EXTRACTOR
+#ifndef HAVE_LIBEXTRACTOR
         if (content_type == CONTENT_TYPE_JPG)
         {
             set_jpeg_resolution_resource(item, 0);
         }
-#endif // EXTRACTOR
+#endif // LIBEXTRACTOR
         
 #endif // HAVE_LIBEXIF
 
@@ -208,12 +208,12 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
 
 #endif // HAVE_FFMPEG
  
-#ifdef HAVE_EXTRACTOR
+#ifdef HAVE_LIBEXTRACTOR
         {
             handler = Ref<MetadataHandler>(new ExtractorHandler());
             break;
         }
-#endif // HAVE_EXTRACTOR
+#endif // HAVE_LIBEXTRACTOR
 
     }
     while (false);

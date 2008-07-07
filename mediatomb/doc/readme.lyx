@@ -1663,11 +1663,11 @@ You can specify the exact location of particular headers and libraries.
 \end_layout
 
 \begin_layout Code
---with-extractor-h=DIR          search for extractor headers in DIR
+--with-libextractor-h=DIR       search for extractor headers in DIR
 \end_layout
 
 \begin_layout Code
---with-extractor-libs=DIR       search for extractor libraries in DIR
+--with-libextractor-libs=DIR    search for extractor libraries in DIR
 \end_layout
 
 \begin_layout Code

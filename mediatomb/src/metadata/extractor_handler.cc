@@ -34,7 +34,7 @@
     #include "autoconfig.h"
 #endif
 
-#ifdef HAVE_EXTRACTOR
+#ifdef HAVE_LIBEXTRACTOR
 
 #include <extractor.h>
 
