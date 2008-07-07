@@ -338,7 +338,8 @@ AC_DEFUN([MT_CHECK_LIBRARY_INTERNAL],
 ])
 
 # $1 with parameter / library name
-# #2 header without .h extension
+# $2 header without .h extension
+# $3 fail / pass
 #
 # returns:
 #   mt_$1_header_status
@@ -372,7 +373,12 @@ AC_DEFUN([MT_CHECK_HEADER_INTERNAL],
                 mt_$1_cxxflags="-I${mt_$1_search_headers}"
             ],
             [
-                AC_MSG_ERROR([$1 headers not found in requested location $mt_$1_search_headers])
+                mt_$1_header_status=missing
+                if test "$3" = "pass"; then
+                    AC_MSG_NOTICE([$1 headers not found in requested location $mt_$1_search_headers])
+                else
+                    AC_MSG_ERROR([$1 headers not found in requested location $mt_$1_search_headers])
+                fi
             ]
         )
     else
@@ -564,9 +570,11 @@ AC_DEFUN([MT_CHECK_LIBRARY],
 
 # $1 with parameter name
 # $2 header to check
+# $3 fail or pass in case a path parameter was specified and the header missing
+#    empty: fail
 AC_DEFUN([MT_CHECK_HEADER],
 [
-    MT_CHECK_HEADER_INTERNAL($1, $2)
+    MT_CHECK_HEADER_INTERNAL($1, $2, $3)
     
     translit($1, `a-z/.-', `A-Z___')_CFLAGS=${mt_$1_cxxflags}
     translit($1, `a-z/.-', `A-Z___')_STATUS=${mt_$1_header_status}
