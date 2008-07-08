@@ -88,7 +88,9 @@ int main(int argc, char **argv, char **envp)
     struct   sigaction action;
     sigset_t mask_set;
 
-    int      devnull = -1; 
+    int      devnull = -1;
+    int      redirect1 = -1;
+    int      redirect2 = -1;
     struct   passwd *pwd;
     struct   group  *grp;
 #ifdef HAVE_GETOPT_LONG
@@ -454,9 +456,26 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         if (devnull == -1)
         {
             log_error("Failed to open /dev/null: %s\n", strerror(errno));
+            exit(EXIT_FAILURE);
         }
-        dup(devnull);
-        dup(devnull);
+
+        redirect1 = dup(devnull);
+        if (redirect1 == -1)
+        {
+            log_error("Failed to redirect output: %s\n", strerror(errno));
+            close(devnull);
+            exit(EXIT_FAILURE);
+        }
+
+        redirect2 = dup(devnull);
+        if (redirect2 == -1)
+        {
+            log_error("Failed to redirect output: %s\n", strerror(errno));
+            close(devnull);
+            close(redirect1);
+            exit(EXIT_FAILURE);
+        }
+
     }
 
     if (pid_file != nil)
@@ -551,7 +570,11 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
             e.printStackTrace();
         }
         if (daemon)
+        {
             close(devnull);
+            close(redirect1);
+            close(redirect2);
+        }
         exit(EXIT_FAILURE);
     }
     catch (Exception e)
@@ -579,7 +602,11 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
             {
                 e.printStackTrace();
                 if (daemon)
+                {
                     close(devnull);
+                    close(redirect1);
+                    close(redirect2);
+                }
                 exit(EXIT_FAILURE);
             }
         }
@@ -634,7 +661,11 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
                               e.getMessage().c_str());
                     e.printStackTrace();
                     if (daemon)
+                    {
                         close(devnull);
+                        close(redirect1);
+                        close(redirect2);
+                    }
                     exit(EXIT_FAILURE);
                 }
                 
@@ -676,7 +707,11 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
     log_close();
 
     if (daemon)
+    {
         close(devnull);
+        close(redirect1);
+        close(redirect2);
+    }
 
     exit(ret);
 }
