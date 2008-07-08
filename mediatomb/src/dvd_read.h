@@ -32,6 +32,12 @@
 #ifndef __DVD_READ_H__
 #define __DVD_READ_H__
 
+#ifdef HAVE_INTTYPES_H
+    #include <inttypes.h>
+#else
+    #include <stdint.h>
+#endif
+
 #include <dvdread/dvd_reader.h>
 #include <dvdread/ifo_read.h>
 
