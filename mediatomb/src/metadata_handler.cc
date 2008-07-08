@@ -252,6 +252,10 @@ Ref<MetadataHandler> MetadataHandler::createHandler(int handlerType)
         case CH_MP4:
             return Ref<MetadataHandler>(new LibMP4V2Handler());
 #endif
+#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
+        case CH_FFTH:
+            return Ref<MetadataHandler>(new FfmpegHandler());
+#endif
         default:
             throw _Exception(_("unknown content handler ID: ") + handlerType);
     }

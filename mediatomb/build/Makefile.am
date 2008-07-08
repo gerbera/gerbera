@@ -23,6 +23,7 @@ libmediatomb_a_CXXFLAGS = \
                      $(PTHREAD_CFLAGS) \
                      $(INOTIFY_CFLAGS) \
                      $(FFMPEG_CFLAGS) \
+                     $(FFMPEGTHUMBNAILER_CFLAGS) \
                      $(CURL_CFLAGS) \
                      $(EXPAT_CFLAGS) \
                      $(LIBMP4V2_CFLAGS) \
@@ -48,6 +49,7 @@ mediatomb_CXXFLAGS = -I$(top_srcdir)/src \
                      $(PTHREAD_CFLAGS) \
                      $(INOTIFY_CFLAGS) \
                      $(FFMPEG_CFLAGS) \
+                     $(FFMPEGTHUMBNAILER_CFLAGS) \
                      $(CURL_CFLAGS) \
                      $(EXPAT_CFLAGS) \
                      $(LIBMP4V2_CFLAGS) \
@@ -67,6 +69,7 @@ mediatomb_LDADD = \
     $(LIBDVDREAD_LDFLAGS) \
     $(LIBEXTRACTOR_LDFLAGS) \
     $(FFMPEG_LDFLAGS) \
+    $(FFMPEGTHUMBNAILER_LDFLAGS) \
     $(ICONV_LIBS) \
     $(SQLITE3_LIBS) \
     $(MYSQL_LIBS) \
@@ -81,6 +84,7 @@ mediatomb_LDADD = \
     $(PTHREAD_CFLAGS) \
     $(PTHREAD_LIBS) \
     $(FFMPEG_LIBS) \
+    $(FFMPEGTHUMBNAILER_LIBS) \
     $(CURL_LIBS) \
     $(EXPAT_LIBS) \
     $(LIBMP4V2_LIBS) \

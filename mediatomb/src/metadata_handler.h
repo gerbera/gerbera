@@ -44,6 +44,7 @@
 #define CH_TRANSCODE 3
 #define CH_EXTURL    4
 #define CH_MP4       5
+#define CH_FFTH      6
 
 #define CONTENT_TYPE_MP3        "mp3"
 #define CONTENT_TYPE_OGG        "ogg"
@@ -58,9 +59,9 @@
 
 #define RESOURCE_CONTENT_TYPE   "rct"
 
-#define ID3_ALBUM_ART "aa"
-#define EXIF_THUMBNAIL  "EX_TH"
-#define THUMBNAIL     "th" // thumbnail without need for special handling
+#define ID3_ALBUM_ART           "aa"
+#define EXIF_THUMBNAIL          "EX_TH"
+#define THUMBNAIL               "th" // thumbnail without need for special handling
 
 typedef enum
 {

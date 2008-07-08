@@ -62,16 +62,22 @@ extern "C"
 } // extern "C"
 //#endif
 
+#ifdef HAVE_FFMPEGTHUMBNAILER
+    #include <libffmpegthumbnailer/videothumbnailerc.h>
+#endif
+
 #include "config_manager.h"
 #include "ffmpeg_handler.h"
 #include "string_converter.h"
 #include "common.h"
 #include "tools.h"
 #include "rexp.h"
-#include "mxml/mxml.h"
+//#include "mxml/mxml.h"
+#include "mem_io_handler.h"
+
 
 using namespace zmm;
-using namespace mxml;
+//using namespace mxml;
 
 // Default constructor
 FfmpegHandler::FfmpegHandler() : MetadataHandler()
@@ -248,14 +254,16 @@ void FfmpegHandler::fillMetadata(Ref<CdsItem> item)
     av_register_all();
 
     // Open video file
-    if(av_open_input_file(&pFormatCtx, 
+    if (av_open_input_file(&pFormatCtx, 
                           item->getLocation().c_str(), NULL, 0, NULL) != 0)
         return; // Couldn't open file
 
     // Retrieve stream information
-    if(av_find_stream_info(pFormatCtx)<0)
+    if (av_find_stream_info(pFormatCtx) < 0)
+    {
+        av_close_input_file(pFormatCtx);
         return; // Couldn't find stream information
-        
+    }   
 	// Add metadata using ffmpeg library calls
 	addFfmpegMetadataFields(item, pFormatCtx);
 	// Add resources using ffmpeg library calls
@@ -264,15 +272,46 @@ void FfmpegHandler::fillMetadata(Ref<CdsItem> item)
     // Close the video file
     av_close_input_file(pFormatCtx);
 
-	/*gettimeofday(&end, NULL);
-	cumTime = time_to_double(end)-time_to_double(start);	
-	printf("Rrun time: %lf s\n", cumTime);*/
+#ifdef HAVE_FFMPEGTHUMBNAILER
+    Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    String thumb_mimetype = mappings->get(_(CONTENT_TYPE_JPG));
+    if (!string_ok(thumb_mimetype))
+        thumb_mimetype = _("image/jpeg");
+
+    // we assume that we can generate a thumbnails for any video, checking
+    // this during import would significantly slow down things
+    Ref<CdsResource> resource(new CdsResource(CH_FFTH));
+    resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(thumb_mimetype));
+    resource->addParameter(_(RESOURCE_CONTENT_TYPE), _(THUMBNAIL));
+    item->addResource(resource);
+#endif
+
 }
 
 Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum, off_t *data_size)
 {
+#ifdef HAVE_FFMPEGTHUMBNAILER
+    video_thumbnailer *th = create_thumbnailer();
+    image_data *img = create_image_data();
+
+    th->seek_percentage        = 15;
+    th->overlay_film_strip     = 1;
+    th->thumbnail_size         = 256;
+    th->thumbnail_image_type   = Jpeg;
+
+    if (generate_thumbnail_to_buffer(th, item->getLocation().c_str(), img) != 0)
+        throw _Exception(_("Could not generate thumbnail for ") + item->getLocation());
+
+    *data_size = (off_t)img->image_data_size;
+    Ref<IOHandler> h(new MemIOHandler((void *)img->image_data_ptr, 
+                                              img->image_data_size));
+    destroy_image_data(img);
+    destroy_thumbnailer(th);
+    return h;
+#else
     *data_size = -1;
     return nil;
+#endif
 }
 
 #endif // HAVE_FFMPEG

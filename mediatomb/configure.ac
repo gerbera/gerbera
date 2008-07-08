@@ -1766,68 +1766,10 @@ LDFLAGS="$LDFLAGS_SAVE"
 CPPFLAGS="$CPPFLAGS_SAVE"
 CXXFLAGS="$CXXFLAGS_SAVE"
 
-FFMPEG_THUMBNAILER_PKGCONFIG_FOUND=0
-if test "x$FFMPEG_THUMBNAILER" = xyes; then
-    if test -n "$FFMPEG_THUMBNAILER_SEARCH_HEADERS" ; then
-        CPPFLAGS="-I$FFMPEG_THUMBNAILER_SEARCH_HEADERS"
-        AC_CHECK_HEADER($FFMPEG_THUMBNAILER_SEARCH_HEADERS/libffmpegthumbnailer/videothumbnailerc.h,
-                [
-                    FFMPEG_THUMBNAILER_CXXFLAGS="-I$EXIF_SEARCH_HEADERS"
-                ],
-                [
-                    AC_MSG_ERROR([ffmpegthumbnailer headers not found in requested location $FFMPEG_THUMBNAILER_SEARCH_HEADERS])
-                ]
-        )
-    else 
-        PKG_PROG_PKG_CONFIG
-        if test -n "$PKG_CONFIG" ; then
-            PKG_CHECK_MODULES(FFMPEG_THUMBNAILER, libffmpegthumbnailer,
-                    [
-                        FFMPEG_THUMBNAILER_PKGCONFIG_FOUND=1
-                        AC_MSG_NOTICE([ffmpegthumbnailer cflags $FFMPEG_THUMBNAILER_CFLAGS])
-                        AC_MSG_NOTICE([ffmpegthumbnailer libs $FFMPEG_THUMBNAILER_CFLAGS])
-                    ],
-                    [
-                        FFMPEG_THUMBNAILER_PKGCONFIG_FOUND=0
-                    ])
-        fi
-    fi
-fi
-
-if test "x$FFMPEG_THUMBNAILER" = xyes; then
-    if test $FFMPEG_THUMBNAILER_PKGCONFIG_FOUND -eq 1; then
-            CFLAGS="$CFLAGS $FFMPEG_THUMBNAILER_CFLAGS"
-            CPPFLAGS="$CFLAGS $FFMPEG_THUMBNAILER_CFLAGS"
-            AC_CHECK_HEADER(libffmpegthumbnailer/videothumbnailerc.h,
-                [
-                    LDFLAGS="$LDFLAGS $FFMPEG_THUMBNAILER_LDFLAGS"
-                    AC_CHECK_LIB(ffmpegthumbnailer, create_thumbnailer,
-                        [],
-                        [
-                            AC_MSG_WARN([could not check libffmpegthumbnailer using pkg-config values])
-                        ])
-
-                ],
-                [
-                    AC_MSG_WARN([could not check videothumbnailerc.h header using pkg-config values])
-                ])
-    fi
-            AC_CHECK_HEADER(libffmpegthumbnailer/videothumbnailerc.h,
-                [],
-                [
-                    unset ac_cv_header_libffmpegthumbnailer_videothumbnailerc_h
-                    CPPFLAGS="-I$SEARCH_DIR_HEADERS"
-                    AC_CHECK_HEADER(libffmpegthumbnailer/videothumbnailerc.h,
-                        [
-                            FFMPEG_THUMBNAILER_CXXFLAGS = "-I$SEARCH_DIR_HEADERS"
-                        ],
-                        [
-                            FFMPEG_THUMBNAILER=missing
-                        ]) 
-                ])
-
-fi
-
+MT_CHECK_OPTIONAL_PACKAGE([ffmpegthumbnailer], [disable], 
+        [compile with ffmpegthumbnailer support for video thumbnail generation],
+        [libffmpegthumbnailer/videothumbnailerc], 
+        [ffmpegthumbnailer], [create_thumbnailer])
 
 MT_CHECK_OPTIONAL_PACKAGE([libdvdread], [enable],
              [compile with libdvdread support for extended DVD image parsing],
@@ -1881,7 +1823,7 @@ if (test "x$SOPCAST_OPTION_ENABLED" = xyes); then
     AC_DEFINE([SOPCAST], [1], [Enable support for the SopCast service])
 fi
 
-AC_DEFINE_UNQUOTED([COMPILE_INFO], "host: $host; sqlite3: $SQLITE3_STATUS; mysql: $MYSQL_STATUS libjs: $JS_OK; libmagic: $LIBMAGIC_STATUS; inotify: $INOTIFY_STATUS; libexif: $LIBEXIF_STATUS; id3lib: $ID3LIB_STATUS; taglib: $TAGLIB_STATUS; ffmpeg: $FFMPEG_STATUS; libmp4v2: $LIBMP4V2_STATUS; external transcoding: $EXTERNAL_TRANSCODING_OPTION_ENABLED; curl: $CURL_OK; YouTube: $YOUTUBE_OPTION_ENABLED; SopCast: $SOPCAST_OPTION_ENABLED; libextractor: $LIBEXTRACTOR_STATUS; db-autocreate: $DB_AUTOCREATE_OPTION_ENABLED; debug log: $DEBUG_LOG_OPTION_ENABLED; protocol info extensions: $PROTOCOLINFO_EXTENSION_OPTION_ENABLED; data directory: $PACKAGE_DATADIR: ", [compile option summary])
+AC_DEFINE_UNQUOTED([COMPILE_INFO], "host: $host; sqlite3: $SQLITE3_STATUS; mysql: $MYSQL_STATUS libjs: $JS_OK; libmagic: $LIBMAGIC_STATUS; inotify: $INOTIFY_STATUS; libexif: $LIBEXIF_STATUS; id3lib: $ID3LIB_STATUS; taglib: $TAGLIB_STATUS; ffmpeg: $FFMPEG_STATUS; libmp4v2: $LIBMP4V2_STATUS; external transcoding: $EXTERNAL_TRANSCODING_OPTION_ENABLED; curl: $CURL_OK; YouTube: $YOUTUBE_OPTION_ENABLED; SopCast: $SOPCAST_OPTION_ENABLED; libextractor: $LIBEXTRACTOR_STATUS; db-autocreate: $DB_AUTOCREATE_OPTION_ENABLED; debug log: $DEBUG_LOG_OPTION_ENABLED; protocol info extensions: $PROTOCOLINFO_EXTENSION_OPTION_ENABLED; data directory: $PACKAGE_DATADIR; ffmpegthumbnailer: $FFMPEGTHUMBNAILER_STATUS", [compile option summary])
 
 # libdvdread: $LIBDVDREAD_STATUS
 
@@ -1920,6 +1862,7 @@ echo "taglib                : $TAGLIB_STATUS"
 echo "libmp4v2              : $LIBMP4V2_STATUS"
 #echo "libdvdread            : $LIBDVDREAD_STATUS"
 echo "ffmpeg                : $FFMPEG_STATUS"
+echo "ffmpegthumbnailer     : $FFMPEGTHUMBNAILER_STATUS"
 echo "external transcoding  : $EXTERNAL_TRANSCODING_OPTION_ENABLED"
 echo "curl                  : $CURL_OK"
 echo "YouTube               : $YOUTUBE_OPTION_ENABLED"
