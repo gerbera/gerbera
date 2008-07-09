@@ -115,38 +115,6 @@ AC_ARG_WITH(iconv-libs,
         ]
 )
 
-AC_ARG_WITH(ffmpeg-h,
-        AC_HELP_STRING([--with-ffmpeg-h=DIR], [search for ffmpeg headers in DIR]),
-        [
-            FFMPEG_SEARCH_HEADERS="$withval"
-            AC_MSG_NOTICE([Will search for ffmpeg headers in $withval])
-        ]
-)
-
-AC_ARG_WITH(ffmpeg-libs,
-        AC_HELP_STRING([--with-ffmpeg-libs=DIR], [search for ffmpeg libraries in DIR]),
-        [
-            FFMPEG_SEARCH_LIBS="$withval"
-            AC_MSG_NOTICE([Will search for ffmpeg libraries in $withval])
-        ]
-)
-
-AC_ARG_WITH(extractor-h,
-        AC_HELP_STRING([--with-extractor-h=DIR], [search for extractor headers in DIR]),
-        [
-            EXTRACTOR_SEARCH_HEADERS="$withval"
-            AC_MSG_NOTICE([Will search for extractor headers in $withval])
-        ]
-)
-
-AC_ARG_WITH(extractor-libs,
-        AC_HELP_STRING([--with-extractor-libs=DIR], [search for extractor libraries in DIR]),
-        [
-            EXTRACTOR_SEARCH_LIBS="$withval"
-            AC_MSG_NOTICE([Will search for extractor libraries in $withval])
-        ]
-)
-
 MT_OPTION([static], [enable],
           [build a static version of MediaTomb],
           [
@@ -1534,6 +1502,20 @@ else
     fi
 fi
 
+MT_CHECK_OPTIONAL_PACKAGE([ffmpegthumbnailer], [disable], 
+        [compile with ffmpegthumbnailer support for video thumbnail generation],
+        [libffmpegthumbnailer/videothumbnailerc], 
+        [ffmpegthumbnailer], [create_thumbnailer])
+
+if ((test "x$FFMPEG_STATUS" != xyes) && (test "x$FFMPEGTHUMBNAILER_STATUS" = xyes)); then
+    if test "x$FFMPEGTHUMBNAILER_OPTION_REQUESTED" = xyes; then
+      AC_MSG_ERROR([ffmpeg libraries are required in order to use ffmpegthumbnailer])
+    else
+      AC_MSG_WARN([ffmpegthumbnailer disabled: ffmpeg libraries required])
+      FFMPEGTHUMBNAILER_STATUS="disabled"
+    fi
+
+fi
 CXXFLAGS="$CXXFLAGS_SAVE"
 LDFLAGS="$LDFLAGS_SAVE"
 CPPFLAGS="$CPPFLAGS_SAVE"
@@ -1551,6 +1533,9 @@ else
     if (test "x$LIBEXTRACTOR_OPTION_REQUESTED" = xyes) &&
        (test "x$LIBEXTRACTOR_OPTION_ENABLED" = xyes); then
         AC_MSG_ERROR([unable to configure libextractor support])
+        FFMPEGTHUMBNAILER_CFLAGS=""
+        FFMPEGTHUMBNAILER_LDFLAGS=""
+        FFMPEGTHUMBNAILER_LIBS=""
     fi
 fi
 
@@ -1766,10 +1751,6 @@ LDFLAGS="$LDFLAGS_SAVE"
 CPPFLAGS="$CPPFLAGS_SAVE"
 CXXFLAGS="$CXXFLAGS_SAVE"
 
-MT_CHECK_OPTIONAL_PACKAGE([ffmpegthumbnailer], [disable], 
-        [compile with ffmpegthumbnailer support for video thumbnail generation],
-        [libffmpegthumbnailer/videothumbnailerc], 
-        [ffmpegthumbnailer], [create_thumbnailer])
 
 MT_CHECK_OPTIONAL_PACKAGE([libdvdread], [enable],
              [compile with libdvdread support for extended DVD image parsing],

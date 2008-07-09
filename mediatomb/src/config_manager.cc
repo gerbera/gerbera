@@ -1566,7 +1566,7 @@ void ConfigManager::validate(String serverhome)
     SET_STRARR_OPTION(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
 #endif
 
-#ifdef HAVE_FFMPEGTHUMBNAILER
+#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
     temp = getOption(_("/import/library-options/ffmpegthumbnailer/"
                        "attribute::enabled"),
                      _(DEFAULT_FFMPEGTHUMBNAILER_ENABLED));
