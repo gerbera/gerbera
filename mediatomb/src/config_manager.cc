@@ -1566,6 +1566,70 @@ void ConfigManager::validate(String serverhome)
     SET_STRARR_OPTION(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
 #endif
 
+#ifdef HAVE_FFMPEGTHUMBNAILER
+    temp = getOption(_("/import/library-options/ffmpegthumbnailer/"
+                       "attribute::enabled"),
+                     _(DEFAULT_FFMPEGTHUMBNAILER_ENABLED));
+
+    if (!validateYesNo(temp))
+        throw _Exception(_("Error in config file: "
+                           "invalid \"enabled\" attribute value in "
+                           "<ffmpegthumbnailer> tag"));
+
+    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    SET_BOOL_OPTION(CFG_IMPORT_LIBOPTS_FFMPEGTHUMBNAILER_ENABLED);
+
+    if (temp == YES)
+    {
+        temp_int = getIntOption(_("/import/library-options/ffmpegthumbnailer/"
+                                  "thumbnail-size"), 
+                                   DEFAULT_FFMPEGTHUMBNAILER_THUMBSIZE);
+
+        if (temp_int <= 0)
+            throw _Exception(_("Error in config file: ffmpegthumbnailer - "
+                               "invalid value attribute value in "
+                               "<thumbnail-size> tag"));
+
+        NEW_INT_OPTION(temp_int);
+        SET_INT_OPTION(CFG_IMPORT_LIBOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
+
+        temp_int = getIntOption(_("/import/library-options/ffmpegthumbnailer/"
+                                  "seek-percentage"), 
+                                   DEFAULT_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE);
+
+        if (temp_int < 0)
+            throw _Exception(_("Error in config file: ffmpegthumbnailer - "
+                               "invalid value attribute value in "
+                               "<seek-percentage> tag"));
+
+        NEW_INT_OPTION(temp_int);
+        SET_INT_OPTION(CFG_IMPORT_LIBOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE);
+
+        temp = getOption(_("/import/library-options/ffmpegthumbnailer/"
+                              "filmstrip-overlay"),
+                             _(DEFAULT_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY));
+
+        if (!validateYesNo(temp))
+            throw _Exception(_("Error in config file: ffmpegthumbnailer - "
+                               "invalid value in <filmstrip-overlay> tag"));
+
+
+        NEW_BOOL_OPTION(temp == YES ? true : false);
+        SET_BOOL_OPTION(CFG_IMPORT_LIBOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY);
+
+        temp = getOption(_("/import/library-options/ffmpegthumbnailer/"
+                              "workaround-bugs"),
+                             _(DEFAULT_FFMPEGTHUMBNAILER_WORKAROUND_BUGS));
+
+        if (!validateYesNo(temp))
+            throw _Exception(_("Error in config file: ffmpegthumbnailer - "
+                               "invalid value in <workaround-bugs> tag"));
+
+        NEW_BOOL_OPTION(temp == YES ? true : false);
+        SET_BOOL_OPTION(CFG_IMPORT_LIBOPTS_FFMPEGTHUMBNAILER_WORKAROUND_BUGS);
+    }
+#endif
+
 #ifdef HAVE_MAGIC
     String magic_file;
     if (!string_ok(magic))

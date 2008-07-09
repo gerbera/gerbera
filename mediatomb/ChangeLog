@@ -1,6 +1,8 @@
 MediaTomb - UPnP AV Mediaserver.
 v0.12.0
-        * added configure settings to enable sqlite backups by default
+		* added video thumbnail generation using libffmpegthumbnailer
+        * added configure settings which allow to enable sqlite backups by 
+          default
         * added cross compile defaults for the inotify check to configure
         * added configure check for broken libmagic on Slackware
         * added libmp4v2 metadata handler to get tags and cover art from mp4

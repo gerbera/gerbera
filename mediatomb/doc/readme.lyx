@@ -706,12 +706,47 @@ target "http://ffmpeg.mplayerhq.hu/"
 
 \end_inset
 
- OPTIONAL
+ 
+\emph on
+OPTIONAL
 \end_layout
 
 \begin_layout Standard
 Currently ffmpeg is used to gather additional metadata from audio and video
  files.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+libffmpegthumbnailer 
+\begin_inset LatexCommand url
+name "http://code.google.com/p/ffmpegthumbnailer/"
+target "http://code.google.com/p/ffmpegthumbnailer/"
+
+\end_inset
+
+ 
+\emph on
+OPTIONAL
+\end_layout
+
+\begin_layout Standard
+ffmpegthumbnailer is used to generate video thumbnails on the fly.
+ If your device supports video thumbnails it would be worth to compile MediaTomb
+ with this library.
 \end_layout
 
 \begin_layout Standard
@@ -1468,11 +1503,11 @@ Currently the ffmpeg library is used to extract additional information from
 \end_layout
 
 \begin_layout Subsubsection
-libexpat Support
+Ffmpeg Thumbnailer Support
 \end_layout
 
 \begin_layout Code
---enable-expat
+--enable-ffmpegthumbnailer
 \end_layout
 
 \begin_layout Description
@@ -1480,10 +1515,9 @@ Default: enabled
 \end_layout
 
 \begin_layout Standard
-Expat is a very good XML parser, until now we were doing the parsing ourselves
- and occaisonally ran into problems.
- Turning this feature on will ensure that expat is used instead of our internal
- parser, thus making the parsing more robust.
+Compiling with ffmpegthumbnailer support is only possible if you also compile
+ with ffmpeg support.
+ The library allows to generate thumbnails for the videos on the fly.
 \end_layout
 
 \begin_layout Subsubsection
@@ -1585,25 +1619,26 @@ You can specify the exact location of particular headers and libraries.
 \end_layout
 
 \begin_layout Code
---with-sqlite3-h=DIR            search for sqlite3 headers only in DIR
+--with-sqlite3-h=DIR               search for sqlite3 headers only in DIR
 \end_layout
 
 \begin_layout Code
---with-sqlite3-libs=DIR         search for sqlite3 libraries only in DIR
-\end_layout
-
-\begin_layout Code
---with-mysql-cfg=mysql_config   absolute path/name of mysql_config
-\end_layout
-
-\begin_layout Code
---with-js-h=DIR                 search for js (spidermonkey) headers in
+--with-sqlite3-libs=DIR            search for sqlite3 libraries only in
  DIR
 \end_layout
 
 \begin_layout Code
---with-js-libs=DIR              search for js (spidermonkey) libraries in
- DIR
+--with-mysql-cfg=mysql_config      absolute path/name of mysql_config
+\end_layout
+
+\begin_layout Code
+--with-js-h=DIR                    search for js (spidermonkey) headers
+ in DIR
+\end_layout
+
+\begin_layout Code
+--with-js-libs=DIR                 search for js (spidermonkey) libraries
+ in DIR
 \end_layout
 
 \begin_layout Code
@@ -1623,79 +1658,85 @@ You can specify the exact location of particular headers and libraries.
 \end_layout
 
 \begin_layout Code
---with-expat-h=DIR              search for expat headers in DIR
+--with-expat-h=DIR                 search for expat headers in DIR
 \end_layout
 
 \begin_layout Code
---with-expat-libs=DIR           search for expat libraries in DIR 
+--with-expat-libs=DIR              search for expat libraries in DIR 
 \end_layout
 
 \begin_layout Code
---with-taglib-cfg=taglib-config absolute path/name of taglib-config
+--with-taglib-cfg=taglib-config    absolute path/name of taglib-config
 \end_layout
 
 \begin_layout Code
---with-id3lib-h=DIR             search for id3lib headers in DIR
+--with-id3lib-h=DIR                search for id3lib headers in DIR
 \end_layout
 
 \begin_layout Code
---with-id3lib-libs=DIR          search for id3lib libraries in DIR
+--with-id3lib-libs=DIR             search for id3lib libraries in DIR
 \end_layout
 
 \begin_layout Code
---with-zlib-h=DIR               search for zlib headers in DIR
+--with-zlib-h=DIR                  search for zlib headers in DIR
 \end_layout
 
 \begin_layout Code
---with-zlib-libs=DIR            search for zlib libraries in DIR
+--with-zlib-libs=DIR               search for zlib libraries in DIR
 \end_layout
 
 \begin_layout Code
---with-inotify-h=DIR            search for inotify header in DIR
+--with-inotify-h=DIR               search for inotify header in DIR
 \end_layout
 
 \begin_layout Code
---with-iconv-h=DIR              search for iconv headers in DIR/sys
+--with-iconv-h=DIR                 search for iconv headers in DIR/sys
 \end_layout
 
 \begin_layout Code
---with-iconv-libs=DIR           search for iconv libraries in DIR
+--with-iconv-libs=DIR              search for iconv libraries in DIR
 \end_layout
 
 \begin_layout Code
---with-libextractor-h=DIR       search for extractor headers in DIR
+--with-libextractor-h=DIR          search for extractor headers in DIR
 \end_layout
 
 \begin_layout Code
---with-libextractor-libs=DIR    search for extractor libraries in DIR
+--with-libextractor-libs=DIR       search for extractor libraries in DIR
 \end_layout
 
 \begin_layout Code
---with-ffmpeg-h=DIR             search for ffmpeg headers in DIR
+--with-ffmpeg-h=DIR                search for ffmpeg headers in DIR
 \end_layout
 
 \begin_layout Code
---with-ffmpeg-libs=DIR          search for ffmpeg libraries in DIR
+--with-ffmpeg-libs=DIR             search for ffmpeg libraries in DIR  --with-ff
+mpegthumbnailer-h=DIR     search for ffmpegthumbnailer headers in DIR
 \end_layout
 
 \begin_layout Code
---with-curl-cfg=curl-config     absolute path/name of curl-config script
+--with-ffmpegthumbnailer-libs=DIR  search for ffmpegthumbnailer libraries
+ in DIR
 \end_layout
 
 \begin_layout Code
---with-libmp4v2-h=DIR           search for libmp4v2 headers in DIR
+--with-curl-cfg=curl-config        absolute path/name of curl-config script
 \end_layout
 
 \begin_layout Code
---with-libmp4v2-libs=DIR        search for libmp4v2 libraries in DIR
+--with-libmp4v2-h=DIR              search for libmp4v2 headers in DIR
 \end_layout
 
 \begin_layout Code
---with-rt-libs=DIR              search for rt libraries in DIR
+--with-libmp4v2-libs=DIR           search for libmp4v2 libraries in DIR
 \end_layout
 
 \begin_layout Code
---with-pthread-libs=DIR         search for pthread libraries in DIR 
+--with-rt-libs=DIR                 search for rt libraries in DIR
+\end_layout
+
+\begin_layout Code
+--with-pthread-libs=DIR            search for pthread libraries in DIR 
 \end_layout
 
 \begin_layout Code
@@ -6263,13 +6304,20 @@ Optional
 
 \begin_layout Standard
 This section holds options for the various supported import libraries, it
- is useful in conjunction with virtual container scripting.
+ is useful in conjunction with virtual container scripting, but also allows
+ to tune some other features as well.
 \end_layout
 
 \begin_layout Standard
-UPnP defines certain tags to pass along metadata of the media (like title,
- artist, year, etc.), however some media provides more metadata and exceeds
- the scope of UPnP.
+Currently the library-options allow additional extraction of the so called
+ auxilary data (explained below) and provide control over the video thumbnail
+ generation.
+\end_layout
+
+\begin_layout Standard
+Here is some information on the auxdata: UPnP defines certain tags to pass
+ along metadata of the media (like title, artist, year, etc.), however some
+ media provides more metadata and exceeds the scope of UPnP.
  This additional metadata can be used to fine tune the server layout, it
  allows the user to create a more complex container structure using a customized
  import script.
@@ -6751,6 +6799,219 @@ status open
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<ffmpegthumbnailer enabled="no">
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: no
+\end_layout
+
+\begin_layout Standard
+Ffmpegthumbnailer is a nice, easy to use library that allows to generate
+ thumbnails from video files.
+ Some DLNA compliant devices support video thumbnails, if you think that
+ your device may be one of those you can try enabling this option.
+ It would also make sense to enable the protocolInfo option, since it will
+ add specific DLNA tags to tell your device that a video thumbnail is being
+ offered by the server.
+\end_layout
+
+\begin_layout Description
+Note: thumbnails are not cached and not stored anywhere, they will be generated
+ on the fly in memory and released afterwards.
+ If your device supports video thumbnails and requests them from the server
+ in large amounts, the performance when browsing video containers will depend
+ on the speed of your machine.
+ A feature to allow caching of thumbnails is planned for future releases.
+\end_layout
+
+\begin_layout Standard
+The following options allow to control the ffmpegthumbnailer library (these
+ are basically the same options as the ones offered by the ffmpegthumbnailer
+ command line application).
+ All tags below are optional and have sane default values.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<thumbnail-size>128</thumbnail-size>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: 128
+\end_layout
+
+\begin_layout Standard
+The thumbnail size should not exceed 160x160 pixels, higher values can be
+ used but will mostprobably not be supported by DLNA devices.
+ The value of zero or less is not allowed.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<seek-percentage>5</seek-percentage>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: 5
+\end_layout
+
+\begin_layout Standard
+Time to seek to in the movie (percentage), values less than zero are not
+ allowed.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<filmstrip-overlay>yes</filmstrip-overlay>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: yes
+\end_layout
+
+\begin_layout Standard
+Creates a filmstrip like border around the image, turn this option off if
+ you want pure images.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<workaround-bugs>no</workaround-bugs>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: no
+\end_layout
+
+\begin_layout Standard
+Accodring to ffmpegthumbnailer documentation, this option will enable workaround
+s for bugs in older ffmpeg versions.
+ You can try enabling it if you experience unexpected behaviour, like hangups
+ during thumbnail generation, crashes and alike.
 \end_layout
 
 \begin_layout Standard

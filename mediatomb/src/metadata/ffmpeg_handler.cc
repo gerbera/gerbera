@@ -134,17 +134,20 @@ static void addFfmpegMetadataFields(Ref<CdsItem> item, AVFormatContext *pFormatC
 }
 
 // ffmpeg library calls
-static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext *pFormatCtx) 
+static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext *pFormatCtx, int *x, int *y) 
 {
     unsigned int i;
     int hours, mins, secs, us;
     int audioch = 0, samplefreq = 0;
     bool audioset, videoset;
-    char duration[15], resolution[25];
+    String resolution;
+    char duration[15];
 
     // Initialize the buffers
     duration[0] = 0;
-    resolution[0] = 0; 
+
+    *x = 0;
+    *y = 0;
 
 	// duration
     secs = pFormatCtx->duration / AV_TIME_BASE;
@@ -196,10 +199,14 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext *pFormatC
 
 			if ((st->codec->width > 0) && (st->codec->height > 0)) 
             {
-				sprintf(resolution, "%dx%d", st->codec->width, st->codec->height);
-				log_debug("Added resolution: %s pixel\n", resolution);
-		        item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), String(resolution));
+                resolution = String::from(st->codec->width) + "x" + 
+                                    String::from(st->codec->height);
+
+				log_debug("Added resolution: %s pixel\n", resolution.c_str());
+		        item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), resolution);
 				videoset = true;
+                *x = st->codec->width;
+                *y = st->codec->height;
 			}
 		} 
 		if(st->codec->codec_type == CODEC_TYPE_AUDIO) 
@@ -239,11 +246,10 @@ void FfmpegNoOutputStub(void* ptr, int level, const char* fmt, va_list vl)
 
 void FfmpegHandler::fillMetadata(Ref<CdsItem> item)
 {
-	/*struct timeval start, end;
-	double cumTime = 0;
-	gettimeofday(&start, NULL);*/	
-
     log_debug("Running ffmpeg handler\n");
+
+    int x = 0;
+    int y = 0;
 
 	AVFormatContext *pFormatCtx;
 	
@@ -267,13 +273,14 @@ void FfmpegHandler::fillMetadata(Ref<CdsItem> item)
 	// Add metadata using ffmpeg library calls
 	addFfmpegMetadataFields(item, pFormatCtx);
 	// Add resources using ffmpeg library calls
-	addFfmpegResourceFields(item, pFormatCtx);
+	addFfmpegResourceFields(item, pFormatCtx, &x, &y);
 	
     // Close the video file
     av_close_input_file(pFormatCtx);
 
 #ifdef HAVE_FFMPEGTHUMBNAILER
-    Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    Ref<ConfigManager> cfg = ConfigManager::getInstance();
+    Ref<Dictionary> mappings = cfg->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     String thumb_mimetype = mappings->get(_(CONTENT_TYPE_JPG));
     if (!string_ok(thumb_mimetype))
         thumb_mimetype = _("image/jpeg");
@@ -281,8 +288,17 @@ void FfmpegHandler::fillMetadata(Ref<CdsItem> item)
     // we assume that we can generate a thumbnails for any video, checking
     // this during import would significantly slow down things
     Ref<CdsResource> resource(new CdsResource(CH_FFTH));
-    resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(thumb_mimetype));
-    resource->addParameter(_(RESOURCE_CONTENT_TYPE), _(THUMBNAIL));
+    resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), 
+                           renderProtocolInfo(thumb_mimetype));
+    resource->addOption(_(RESOURCE_CONTENT_TYPE), _(THUMBNAIL));
+
+    y = cfg->getIntOption(CFG_IMPORT_LIBOPTS_FFMPEGTHUMBNAILER_THUMBSIZE) * y / x;
+    x = cfg->getIntOption(CFG_IMPORT_LIBOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
+   
+    String resolution = String::from(x) + "x" + String::from(y);
+    resource->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), 
+                           resolution);
+ 
     item->addResource(resource);
 #endif
 
@@ -291,12 +307,19 @@ void FfmpegHandler::fillMetadata(Ref<CdsItem> item)
 Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum, off_t *data_size)
 {
 #ifdef HAVE_FFMPEGTHUMBNAILER
+    Ref<ConfigManager> cfg = ConfigManager::getInstance();
+
     video_thumbnailer *th = create_thumbnailer();
     image_data *img = create_image_data();
 
-    th->seek_percentage        = 15;
-    th->overlay_film_strip     = 1;
-    th->thumbnail_size         = 256;
+    th->seek_percentage        = cfg->getIntOption(CFG_IMPORT_LIBOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE);
+
+    if (cfg->getBoolOption(CFG_IMPORT_LIBOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY))
+        th->overlay_film_strip = 1;
+    else
+        th->overlay_film_strip = 0;
+
+    th->thumbnail_size = cfg->getIntOption(CFG_IMPORT_LIBOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
     th->thumbnail_image_type   = Jpeg;
 
     if (generate_thumbnail_to_buffer(th, item->getLocation().c_str(), img) != 0)
