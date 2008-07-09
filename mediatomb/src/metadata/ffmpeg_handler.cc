@@ -322,6 +322,7 @@ Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum, off_t 
     th->thumbnail_size = cfg->getIntOption(CFG_IMPORT_LIBOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
     th->thumbnail_image_type   = Jpeg;
 
+    log_debug("Generating thumbnail for file: %s\n", item->getLocation().c_str());
     if (generate_thumbnail_to_buffer(th, item->getLocation().c_str(), img) != 0)
         throw _Exception(_("Could not generate thumbnail for ") + item->getLocation());
 
