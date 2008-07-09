@@ -1513,6 +1513,9 @@ if ((test "x$FFMPEG_STATUS" != xyes) && (test "x$FFMPEGTHUMBNAILER_STATUS" = xye
     else
       AC_MSG_WARN([ffmpegthumbnailer disabled: ffmpeg libraries required])
       FFMPEGTHUMBNAILER_STATUS="disabled"
+      FFMPEGTHUMBNAILER_CFLAGS=""
+      FFMPEGTHUMBNAILER_LDFLAGS=""
+      FFMPEGTHUMBNAILER_LIBS=""
     fi
 
 fi
@@ -1533,9 +1536,6 @@ else
     if (test "x$LIBEXTRACTOR_OPTION_REQUESTED" = xyes) &&
        (test "x$LIBEXTRACTOR_OPTION_ENABLED" = xyes); then
         AC_MSG_ERROR([unable to configure libextractor support])
-        FFMPEGTHUMBNAILER_CFLAGS=""
-        FFMPEGTHUMBNAILER_LDFLAGS=""
-        FFMPEGTHUMBNAILER_LIBS=""
     fi
 fi
 
