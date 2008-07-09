@@ -745,8 +745,8 @@ OPTIONAL
 
 \begin_layout Standard
 ffmpegthumbnailer is used to generate video thumbnails on the fly.
- If your device supports video thumbnails it would be worth to compile MediaTomb
- with this library.
+ If your device (like DSM-510 or PlayStation 3) supports video thumbnails
+ it would be worth to compile MediaTomb with this library.
 \end_layout
 
 \begin_layout Standard
