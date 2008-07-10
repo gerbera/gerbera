@@ -85,11 +85,10 @@ mediatomb_LDADD = \
     $(PTHREAD_LIBS) \
     $(FFMPEG_LIBS) \
     $(FFMPEGTHUMBNAILER_LIBS) \
-    $(CURL_LIBS) \
     $(EXPAT_LIBS) \
     $(LIBMP4V2_LIBS) \
     $(NSL_LIBS) \
     $(LWRES_LIBS) \
-	$(LIBDVDREAD_LIBS)
+    $(LIBDVDREAD_LIBS) \
+    $(CURL_LIBS)
     
-

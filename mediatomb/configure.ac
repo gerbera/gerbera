@@ -1475,24 +1475,34 @@ if test "x$FFMPEG_OPTION_ENABLED" = xyes; then
        AC_LANG_C
 
     # the header location of the older and newer ffmpeg version is different
-    MT_CHECK_HEADER([ffmpeg], [ffmpeg/avformat], [pass])
-    if test "x$FFMPEG_STATUS" != xyes; then
-        MT_CHECK_HEADER([ffmpeg], [libavformat/avformat])
-        if test "x$FFMPEG_STATUS" = xyes; then
+    MT_CHECK_HEADER([avformat], [ffmpeg/avformat], [pass])
+    if test "x$AVFORMAT_STATUS" != xyes; then
+        MT_CHECK_HEADER([avformat], [libavformat/avformat])
+        if test "x$AVFORMAT_STATUS" = xyes; then
             AC_DEFINE_UNQUOTED([AVFORMAT_INCLUDE], [<libavformat/avformat.h>], [libavformat/avformat.h])
         fi
     else
        AC_DEFINE_UNQUOTED([AVFORMAT_INCLUDE], [<ffmpeg/avformat.h>], [ffmpeg/avformat.h])
     fi
 
-    if test "x$FFMPEG_STATUS" = xyes; then
-        MT_CHECK_LIBRARY([ffmpeg], [avformat], [av_register_all])
+    if test "x$AVFORMAT_STATUS" = xyes; then
+        MT_CHECK_LIBRARY([avformat], [avformat], [av_register_all])
+        MT_CHECK_LIBRARY([avutil], [avutil], [av_log_set_callback])
     fi
     AC_LANG_RESTORE
+
+    if ((test "x$AVFORMAT_STATUS" = xyes) && (test "x$AVUTIL_STATUS" = xyes)); then
+        FFMPEG_STATUS=yes
+    else
+        FFMPEG_STATUS=missing
+    fi
 fi
 
 if test "x$FFMPEG_STATUS" = xyes; then
     AC_DEFINE([HAVE_FFMPEG], [1], [FFMPEG library presence])
+    FFMPEG_CFLAGS="$AVFORMAT_CFLAGS $AVUTIL_CFLAGS"
+    FFMPEG_LDFLAGS="$AVFORMAT_LDFLAGS $AVUTIL_LDFLAGS"
+    FFMPEG_LIBS="$AVFORMAT_LIBS $AVUTIL_LIBS"
     AC_SUBST(FFMPEG_CFLAGS)
     AC_SUBST(FFMPEG_LDFLAGS)
     AC_SUBST(FFMPEG_LIBS)
