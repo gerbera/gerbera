@@ -280,6 +280,9 @@ void FfmpegHandler::fillMetadata(Ref<CdsItem> item)
 
 #ifdef HAVE_FFMPEGTHUMBNAILER
     Ref<ConfigManager> cfg = ConfigManager::getInstance();
+    if (!cfg->getBoolOption(CFG_IMPORT_LIBOPTS_FFMPEGTHUMBNAILER_ENABLED))
+        return;
+
     Ref<Dictionary> mappings = cfg->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     String thumb_mimetype = mappings->get(_(CONTENT_TYPE_JPG));
     if (!string_ok(thumb_mimetype))
@@ -306,8 +309,12 @@ void FfmpegHandler::fillMetadata(Ref<CdsItem> item)
 
 Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum, off_t *data_size)
 {
+    *data_size = -1;
 #ifdef HAVE_FFMPEGTHUMBNAILER
     Ref<ConfigManager> cfg = ConfigManager::getInstance();
+
+    if (!cfg->getBoolOption(CFG_IMPORT_LIBOPTS_FFMPEGTHUMBNAILER_ENABLED))
+        return nil;
 
     video_thumbnailer *th = create_thumbnailer();
     image_data *img = create_image_data();
@@ -333,7 +340,6 @@ Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum, off_t 
     destroy_thumbnailer(th);
     return h;
 #else
-    *data_size = -1;
     return nil;
 #endif
 }
