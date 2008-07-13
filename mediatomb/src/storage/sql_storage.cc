@@ -1022,6 +1022,17 @@ int SQLStorage::createContainer(int parentID, String name, String path, bool isV
         << ')';
         
     exec(qb);
+    
+    /* inform cache */
+    if (cacheOn())
+    {
+        AUTOLOCK(cache->getMutex());
+        cache->addChild(parentID);
+        if (cache->flushed())
+            flushInsertBuffer();
+    }
+    /* ------------ */
+    
     return newID;
     
     //return exec(qb, true);

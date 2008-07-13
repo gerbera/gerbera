@@ -54,7 +54,7 @@ public:
     bool knowsObject() { return obj != nil; }
     
     void setNumChildren(int numChildren) { this->numChildren = numChildren; knowNumChildren = true; }
-    bool getNumChildren() { return numChildren; }
+    int getNumChildren() { return numChildren; }
     bool knowsNumChildren() { return knowNumChildren; }
     
     void setObjectType(int objectType) { this->objectType = objectType; knowObjectType = true; }
@@ -63,7 +63,7 @@ public:
     
     void setLocation(zmm::String location) { this->location = location; }
     zmm::String getLocation() { return location; }
-    bool knowsLocation() { return location!=nil; }
+    bool knowsLocation() { return location != nil; }
     
     void setVirtual(bool virtualObj) { this->virtualObj = virtualObj; knowVirtualObj = true; }
     bool getVirtual() { return virtualObj; }
