@@ -511,7 +511,7 @@ void SQLStorage::addObject(Ref<CdsObject> obj, int *changedContainer)
     if (cacheOn())
     {
         AUTOLOCK(cache->getMutex());
-        cache->getObjectDefinitely(obj->getParentID())->setHasChildren(true);
+        cache->addChild(obj->getParentID());
         if (cache->flushed())
             flushInsertBuffer();
         addObjectToCache(obj, true);
@@ -821,8 +821,8 @@ int SQLStorage::getChildCount(int contId, bool containers, bool items, bool hide
         Ref<CacheObject> cObj = cache->getObject(contId);
         if (cObj != nil)
         {
-            if (cObj->knowsHasChildren())
-                return cObj->getHasChildren();
+            if (cObj->knowsNumChildren())
+                return cObj->getNumChildren();
         }
     }
     /* ----------- */
@@ -852,9 +852,9 @@ int SQLStorage::getChildCount(int contId, bool containers, bool items, bool hide
         if (cacheOn() && containers && items && ! (contId == CDS_ID_ROOT && hideFsRoot))
         {
             AUTOLOCK(cache->getMutex());
-            cache->getObjectDefinitely(contId)->setHasChildren(childCount>0);
+            cache->getObjectDefinitely(contId)->setNumChildren(childCount);
             if (cache->flushed())
-                    flushInsertBuffer();
+                flushInsertBuffer();
         }
         /* ------------ */
         
