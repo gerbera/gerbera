@@ -101,6 +101,8 @@ libmediatomb_a_SOURCES = \
 ../src/mxml/parser.h \
 ../src/mxml/xml_text.cc \
 ../src/mxml/xml_text.h \
+../src/mxml/xml_to_json.cc \
+../src/mxml/xml_to_json.h \
 ../src/object_dictionary.h \
 ../src/online_service.cc \
 ../src/online_service.h \

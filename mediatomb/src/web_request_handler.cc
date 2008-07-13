@@ -48,6 +48,7 @@ using namespace mxml;
 WebRequestHandler::WebRequestHandler() : RequestHandler()
 {
     checkRequestCalled = false;
+    params = Ref<Dictionary>(new Dictionary());
 }
 
 int WebRequestHandler::intParam(String name, int invalid)
@@ -101,16 +102,20 @@ void WebRequestHandler::get_info(IN const char *filename, OUT struct File_Info *
     
     String contentType;
     
-    contentType = _(MIMETYPE_XML) + "; charset=" + DEFAULT_INTERNAL_CHARSET;
+    String mimetype;
+    if (boolParam(_("json")))
+        mimetype = _(MIMETYPE_JSON);
+    else
+        mimetype = _(MIMETYPE_XML);
+    
+    contentType = mimetype + "; charset=" + DEFAULT_INTERNAL_CHARSET;
     
     info->content_type = ixmlCloneDOMString(contentType.c_str());
     info->http_header = ixmlCloneDOMString("Cache-Control: no-cache, must-revalidate");
 }
 
-Ref<IOHandler> WebRequestHandler::open(Ref<Dictionary> params, IN enum UpnpOpenFileMode mode)
+Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
 {
-    this->params = params;
-    
     root = Ref<Element>(new Element(_("root")));
     out = Ref<StringBuffer>(new StringBuffer());
     
@@ -157,7 +162,25 @@ Ref<IOHandler> WebRequestHandler::open(Ref<Dictionary> params, IN enum UpnpOpenF
         String errmsg = _("Error: ") + e.getMessage();
         root->appendTextChild(_("error"), errmsg);
     }
-    output = renderXMLHeader() + root->print();
+    
+    if (boolParam(_("json")))
+        output = XML2JSON::getJSON(root);
+    else
+        output = renderXMLHeader() + root->print();
+    
+    
+    /*
+    try
+    {
+        printf("%s\n", output.c_str());
+        String json = XML2JSON::getJSON(root);
+        printf("%s\n",json.c_str());
+    }
+    catch (Exception e)
+    {
+        e.printStackTrace();
+    }
+    */
     
     //root = nil;
     
@@ -177,10 +200,10 @@ Ref<IOHandler> WebRequestHandler::open(IN const char *filename,
     String path, parameters;
     split_url(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
 
-    Ref<Dictionary> params = Ref<Dictionary>(new Dictionary());
     params->decode(parameters);
+    
     get_info(NULL, info);
-    return open(params, mode);
+    return open(mode);
 }
 
 void WebRequestHandler::handleUpdateIDs()

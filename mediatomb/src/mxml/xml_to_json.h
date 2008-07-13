@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    mxml.h - this file is part of MediaTomb.
+    xml_to_json.h - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -27,21 +27,25 @@
     $Id$
 */
 
-/// \file mxml.h
+/// \file xml_to_json.h
 
-#ifndef __MXML_H__
-#define __MXML_H__
+#ifndef __MXML_XML_TO_JSON_H__
+#define __MXML_XML_TO_JSON_H__
 
 #include "zmmf/zmmf.h"
 
-#include "attribute.h"
-#include "context.h"
-#include "node.h"
-#include "element.h"
-#include "xml_text.h"
-#include "comment.h"
-#include "parseexception.h"
-#include "parser.h"
-#include "xml_to_json.h"
+#include "mxml.h"
 
-#endif // __MXML_H__
+namespace mxml
+{
+
+class XML2JSON : public zmm::Object
+{
+public:
+    static zmm::String getJSON(zmm::Ref<Element> root);
+    static void handleElement(zmm::Ref<zmm::StringBuffer> buf, zmm::Ref<Element> el);
+};
+
+} // namespace
+
+#endif // __MXML_XML_TO_JSON_H__

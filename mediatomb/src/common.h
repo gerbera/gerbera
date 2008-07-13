@@ -123,13 +123,14 @@
 #define MIMETYPE_XML                   "text/xml"
 #define MIMETYPE_HTML                  "text/html"
 #define MIMETYPE_TEXT                  "text/plain"
+#define MIMETYPE_JSON                  "application/json"  // RFC 4627
 // default mime types for items in the cds
 #define MIMETYPE_DEFAULT               "application/octet-stream"
 
 // regexp for mimetype matching
 #define MIMETYPE_REGEXP                 "^([a-z0-9_-]+/[a-z0-9_-]+)"
 
-// default protocol 
+// default protocol
 #define PROTOCOL                        "http-get"
 
 // device description defaults

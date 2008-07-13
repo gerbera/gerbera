@@ -98,7 +98,7 @@ protected:
     /// \brief Prepares the output buffer and calls the process function.
     /// \return IOHandler
     /// \todo Genych, chto tut proishodit, ya tolkom che to ne wrubaus?? 
-    zmm::Ref<IOHandler> open(zmm::Ref<Dictionary>, IN enum UpnpOpenFileMode mode);
+    zmm::Ref<IOHandler> open(IN enum UpnpOpenFileMode mode);
     
     /// \brief add the ui update ids from the given session as xml tags to the given root element
     /// \param root the xml element to add the elements to
@@ -118,6 +118,8 @@ protected:
     /// \brief check if accounts are enabled in the config
     /// \return true if accounts are enabled, false if not
     bool accountsEnabled() { return (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_UI_ACCOUNTS_ENABLED)); }
+    
+    
 
 public:
     /// \brief Constructor, currently empty.
