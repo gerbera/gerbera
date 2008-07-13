@@ -239,7 +239,7 @@ size_t DVDReader::readSector(unsigned char *buffer, size_t length)
         }
         
         while (this->current_pack < 
-                      this->pgc->cell_playback[this->current_cell].last_sector)
+                  (int)this->pgc->cell_playback[this->current_cell].last_sector)
         {
             dsi_t dsi_pack;
             unsigned int next_vobu, next_ilvu_start, cur_output_size;
@@ -261,7 +261,7 @@ size_t DVDReader::readSector(unsigned char *buffer, size_t length)
             //  Parse the contained dsi packet.
             navRead_DSI(&dsi_pack, &(buffer[DSI_START_BYTE]));
 
-            if (this->current_pack != dsi_pack.dsi_gi.nv_pck_lbn)
+            if (this->current_pack != (int)dsi_pack.dsi_gi.nv_pck_lbn)
                 throw _Exception(_("Failed to parse dsi pack!"));
 
             // Determine where we go next.  These values are the ones we mostly
