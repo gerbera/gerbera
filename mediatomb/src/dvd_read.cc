@@ -125,7 +125,7 @@ int DVDReader::titleCount()
 
 int DVDReader::chapterCount(int title_idx)
 {
-    if ((title_idx < 0) || (title_idx > titleCount()))
+    if ((title_idx < 0) || (title_idx >= titleCount()))
         throw _Exception(_("Requested title number exceeds available titles "
                            "for DVD ") + dvd_path);
 
@@ -134,7 +134,7 @@ int DVDReader::chapterCount(int title_idx)
 
 int DVDReader::angleCount(int title_idx)
 {
-    if ((title_idx < 0) || (title_idx > titleCount()))
+    if ((title_idx < 0) || (title_idx >= titleCount()))
         throw _Exception(_("Requested title number exceeds available titles "
                            "for DVD ") + dvd_path);
 
@@ -143,13 +143,13 @@ int DVDReader::angleCount(int title_idx)
 
 void DVDReader::selectPGC(int title_idx, int chapter_idx, int angle_idx)
 {
-    if ((title_idx < 0) || (title_idx > titleCount()))
+    if ((title_idx < 0) || (title_idx >= titleCount()))
         throw _Exception(_("Attmpted to select invalid title!"));
 
-    if ((chapter_idx < 0) || (chapter_idx > chapterCount(title_idx)))
+    if ((chapter_idx < 0) || (chapter_idx >= chapterCount(title_idx)))
         throw _Exception(_("Attmpted to select invalid chapter!"));
 
-    if ((angle_idx < 0) || (angle_idx > angleCount(title_idx)))
+    if ((angle_idx < 0) || (angle_idx >= angleCount(title_idx)))
         throw _Exception(_("Attmpted to select invalid angle!"));
 
     AUTOLOCK(mutex);
