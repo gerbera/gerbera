@@ -45,8 +45,22 @@
 #include <dvdread/nav_types.h>
 
 #include "common.h"
+#include "sync.h"
 
-/// \brief Allows the web server to read from a file.
+/// \brief Allows to read selected streams from a DVD image.
+///
+/// There are some constraints on the usage of this class:
+/// First of all - you *must* call the selectPGC() function before you 
+/// attempt to read data or get the stream length.
+///
+/// You must call selectPGC() each time when you want to reset read; calling
+/// read consequently will return the stream data and advance further in the
+/// stream.
+/// 
+/// The class is thread safe, meaning that locks are in place, however it's
+/// design does not suggest multithreaded usage. selectPGC(), read(), 
+/// getLength() will not work in parallel but block if one of the functions
+/// is running.
 class DVDReader : public zmm::Object
 {
 public:
@@ -81,8 +95,7 @@ public:
     /// \param title_idx index of the title
     /// \param chapter_idx index of the chapter from where we start
     /// \param angle_idx index of the angle
-    /// \return number of bytes in the stream
-    off_t selectPGC(int title_idx, int chapter_idx, int angle_idx);
+    void selectPGC(int title_idx, int chapter_idx, int angle_idx);
 
     /// \brief Reads the stream, specified by selectPGC from the DVD.
     ///
@@ -91,6 +104,12 @@ public:
     /// \return number of bytes read (can be shorter than buffer length), value
     ///  of 0 indicates end of stream.
     size_t readSector(unsigned char *buffer, size_t length);  
+
+    /// \brief Calculates the length of the currently selected PGC
+    /// 
+    /// In order to get the length we have to parse the DVD meaning that 
+    /// this call may take a little while.
+    off_t length();
 
 protected:
     /// \brief Name of the DVD file.
@@ -111,8 +130,7 @@ protected:
     /// \brief Currently selected Title
     dvd_file_t *title;
 
-    /// \brief Sets the global variables to the next cell.
-    int nextCell();
+    zmm::Ref<Mutex> mutex;
 
     int title_index;
     int chapter_index;
@@ -122,38 +140,28 @@ protected:
     int current_cell;
     int current_pack;
 
+    /// \brief flag that indicates that we continue with the current sector
+    /// when reading.
     bool cont_sector;
 
-    bool initialized;
 
-    // libdvdread has a bunch of weird variable names in the structs which tend
-    // to scare you away, most of them are in ifo_types.h 
-    //
-    // Know your enemy:
-    //
-    // VOB          Video Object
-    // VTS          Video Title Set
-    // VMG          Video Manager
-    // VMGI         Video Manager Information
-    // VMGM         Video Manager Menu
-    // VMGI_MAT     Video Manager Information Management Table
-    // TT_SRPT      Title Search Pointer Table
-    // VMGM_PGCI_UT Video Manager Menu Program Chain Information Unit Table
-    // VTS_PTT_SRPT Video Title Set "Part Of Title" Search Pointer Table
-    // VTS_PGCIT    Video Title Set Program Chain Information Table
-    // VTS_ATRT     Video Title Set Attribute Table
-    // VTS_TTN      Video Title Set Title Number
-    // PGC          Program Chain
-    // PGCN         Program Chain Number
-    // PGCI         Program Chain Information
-    // PGN          Program Number
-    // PTT          Part Of Title
-    // PTTN         Part Of Title Number
-    // TTN          Title Number
-    // ILVU         Interleaved Unit
-    // SML_AGLI     Angle Information For Seamless
-    // DSI          Data Search Information
-    // DSI_GI       DSI General Information
+    /// \brief selectPGC will set these variables to the initial values,
+    /// they will then be used by the length calculation function which is
+    /// independant of the read function.
+    int nc_len;
+    int cc_len;
+    int cp_len;
+    bool cs_len;
+
+    /// \brief Internal read function which is also used for calculating the
+    /// length of the selected stream.
+    ///
+    /// \param read when set to false only packets which are needed to
+    /// follow the stream are read, the contents of the buffer are unusable
+    /// on return, however the length of the simulated read is returned
+    /// correctly.
+    /// \return number of bytes read, 0 for EOF
+    size_t readSectorInternal(unsigned char *buffer, size_t length, bool read);
 };
 
 

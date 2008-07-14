@@ -69,8 +69,6 @@ DVDReader::DVDReader(String path)
     current_pack = 0;
     start_cell = 0;
     next_cell = 0;
-    initialized = false;
-
 
 /*
  * Threads: this function uses chdir() and getcwd().
@@ -100,6 +98,8 @@ DVDReader::DVDReader(String path)
     DVDUDFCacheLevel(dvd, 0);
 
     log_debug("Opened DVD %s\n", dvd_path.c_str());
+    
+    mutex = Ref<Mutex>(new Mutex(true));
 }
 
 DVDReader::~DVDReader()
@@ -141,7 +141,7 @@ int DVDReader::angleCount(int title_idx)
     return vmg->tt_srpt->title[title_idx].nr_of_angles;
 }
 
-off_t DVDReader::selectPGC(int title_idx, int chapter_idx, int angle_idx)
+void DVDReader::selectPGC(int title_idx, int chapter_idx, int angle_idx)
 {
     if ((title_idx < 0) || (title_idx > titleCount()))
         throw _Exception(_("Attmpted to select invalid title!"));
@@ -151,6 +151,8 @@ off_t DVDReader::selectPGC(int title_idx, int chapter_idx, int angle_idx)
 
     if ((angle_idx < 0) || (angle_idx > angleCount(title_idx)))
         throw _Exception(_("Attmpted to select invalid angle!"));
+
+    AUTOLOCK(mutex);
 
     // check if the current vts is valid, otherwise close the old one and load 
     // the vts info for the title set of our requested title
@@ -188,17 +190,68 @@ off_t DVDReader::selectPGC(int title_idx, int chapter_idx, int angle_idx)
 
     if (!this->title)
         throw _Exception(_("Could not open title VOBS for title ") + title_index);
+    
+    // we do not know when the length() function will be called, however we
+    // always want it to return the full length for the stream of the 
+    // currently selected PGC; so we will have to save the initial values
+    // that are otherwise altered by read.
+    nc_len = this->next_cell;
+    cc_len = this->current_cell;
+    cp_len = this->current_pack;
+    cs_len = this->cont_sector;
+}
 
-#warning calculate nr of bytes
-    off_t byte_count = 2048*2048;
-    return byte_count;
+off_t DVDReader::length()
+{
+    off_t len = 0;
+
+    AUTOLOCK(mutex);
+
+    // save all global variables
+    int nc = this->next_cell;
+    int cc = this->current_cell;
+    int cp = this->current_pack;
+    bool cs = this->cont_sector;
+    unsigned char buf[DVD_VIDEO_LB_LEN+1];
+
+    this->next_cell = nc_len;
+    this->current_cell = cc_len;
+    this->current_pack = cp_len;
+    this->cont_sector = cs_len;
+
+    size_t readlen = 0;
+    do
+    {
+        readlen = readSectorInternal(buf, DVD_VIDEO_LB_LEN+1, false);
+        len += readlen;
+    } while (readlen > 0);
+
+    this->next_cell = nc;
+    this->current_cell = cc;
+    this->current_pack = cp;
+    this->cont_sector = cs;
+
+    return len;
 }
 
 size_t DVDReader::readSector(unsigned char *buffer, size_t length)
 {
+    AUTOLOCK(mutex);
+    return readSectorInternal(buffer, length, true);
+}
+
+size_t DVDReader::readSectorInternal(unsigned char *buffer, size_t length, 
+                                     bool read)
+{
 
     if (!this->pgc || !this->title || !this->vts || !this->dvd)
         throw _Exception(_("DVD Reader class not initialized"));
+
+    // for dummy reads we need at least the size of DVD_VIDEO_LB_LEN for the
+    // NAV packet
+    if (length < ((size_t)(DVD_VIDEO_LB_LEN)))
+        throw _Exception(_("Insufficient buffer for read operation"));
+
 
     while (this->next_cell < this->pgc->nr_of_cells)
     {
@@ -292,14 +345,18 @@ size_t DVDReader::readSector(unsigned char *buffer, size_t length)
             this->current_pack++;
 
             // Read in and output cursize packs.
-            len = DVDReadBlocks(this->title, this->current_pack, 
-                               (size_t)cur_output_size, buffer);
-            if (len != (int)cur_output_size)
+            if (read)
             {
-                throw _Exception(_("Failed to read ") + cur_output_size + 
-                                 _("blocks at ") + this->current_pack);
+                if (length < ((size_t)(cur_output_size*DVD_VIDEO_LB_LEN)))
+                    throw _Exception(_("Insufficient buffer for read operation"));
+                len = DVDReadBlocks(this->title, this->current_pack, 
+                        (size_t)cur_output_size, buffer);
+                if (len != (int)cur_output_size)
+                {
+                    throw _Exception(_("Failed to read ") + cur_output_size + 
+                            _("blocks at ") + this->current_pack);
+                }
             }
-            
             this->current_pack = next_vobu;
             this->cont_sector = true;
 
