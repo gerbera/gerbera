@@ -224,6 +224,8 @@ Ref<CdsObject> SQLStorage::checkRefID(Ref<CdsObject> obj)
     }
     
     // this should never happen - but fail softly if compiled without debugging
+    // we do this assert to find code while debugging, that doesn't set the
+    // refID correctly
     assert(0);
     
     return findObjectByPath(location);

@@ -559,6 +559,7 @@ void ContentManager::addVirtualItem(Ref<CdsObject> obj, bool allow_fifo)
         if (IS_CDS_ITEM(pcdir->getObjectType()))
         {
             this->addObject(pcdir);
+            obj->setRefID(pcdir->getID());
         }
     }
 
