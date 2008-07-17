@@ -123,6 +123,7 @@ int main(int argc, char **argv, char **envp)
     String user;
     String group;
     String pid_file;
+    FILE* pid_fd = NULL;
     String interface;
     String ip;
     String prefix;
@@ -292,6 +293,17 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         
         if (print_version)
             exit(EXIT_FAILURE);
+    }
+
+   // create pid file before dropping privileges
+    if (pid_file != nil)
+    {
+        pid_fd = fopen(pid_file.c_str(), "w");
+        if (pid_fd == NULL)
+        {
+            log_error("Could not write pid file %s : %s\n",
+                       pid_file.c_str(), strerror(errno));
+        }
     }
 
     // check if user and/or group parameter was specified and try to run the server
@@ -478,7 +490,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
 
     }
 
-    if (pid_file != nil)
+    if (pid_fd != NULL)
     {
         pid_t cur_pid;
         FILE    *f;
@@ -487,20 +499,12 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         cur_pid = getpid();
         String pid = String::from(cur_pid);
 
-        f = fopen(pid_file.c_str(), "w");
-        if (f == NULL)
-        {                    
-            log_error("Could not write pid file %s : %s\n", pid_file.c_str(), strerror(errno));
-        }
-        else
-        {
-            size = fwrite(pid.c_str(), sizeof(char), pid.length(), f);
-            fclose(f);
+        size = fwrite(pid.c_str(), sizeof(char), pid.length(), pid_fd);
+        fclose(pid_fd);
 
-            if (size < pid.length())
-                log_error("Error when writing pid file %s : %s\n", pid_file.c_str(), strerror(errno));
-        }
-
+        if (size < pid.length())
+            log_error("Error when writing pid file %s : %s\n",
+                      pid_file.c_str(), strerror(errno));
     }
 
     main_thread_id = pthread_self();
