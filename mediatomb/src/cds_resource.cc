@@ -63,6 +63,11 @@ void CdsResource::addAttribute(String name, String value)
     attributes->put(name, value);
 }
 
+void CdsResource::removeAttribute(String name)
+{
+    attributes->remove(name);
+}
+
 void CdsResource::mergeAttributes(Ref<Dictionary> additional)
 {
     attributes->merge(additional);

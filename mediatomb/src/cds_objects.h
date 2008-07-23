@@ -58,7 +58,7 @@
 #define OBJECT_FLAG_PROXY_URL             0x00000020
 #define OBJECT_FLAG_ONLINE_SERVICE        0x00000040
 #define OBJECT_FLAG_OGG_THEORA            0x00000080
-//#define OBJECT_FLAG_XXX                 0x00000100
+#define OBJECT_FLAG_DVD_IMAGE             0x00000100
 //#define OBJECT_FLAG_XXX                 0x00000200
 
 #define OBJECT_AUTOSCAN_NONE    0

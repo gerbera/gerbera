@@ -222,7 +222,7 @@ struct regions
     const char *country;
 };
 
-regions YT_regions[] = 
+static regions YT_regions[] = 
 {    
     { YT_region_au, CFG_OPTION_REGION_AUSTRALIA,      "Australia"       },
     { YT_region_br, CFG_OPTION_REGION_BRAZIL,         "Brazil"          },
@@ -326,7 +326,7 @@ String YouTubeService::getRegionName(yt_regions_t region_code)
     if ((region_code < 0) || (region_code >= YT_region_none))
         return nil;
     else
-        return String(YT_regions[region_code].country);
+        return _(YT_regions[region_code].country);
 }
 
 #if 0

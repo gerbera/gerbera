@@ -32,18 +32,14 @@
 #ifndef __DVD_READ_H__
 #define __DVD_READ_H__
 
-#ifdef HAVE_INTTYPES_H
-    #include <inttypes.h>
-#else
-    #include <stdint.h>
-#endif
+#define __STDC_CONSTANT_MACROS
+#define __STDC_LIMIT_MACROS
+#include <stdint.h>
 
 #include <sys/types.h>
-
 #include <dvdread/dvd_reader.h>
 #include <dvdread/ifo_read.h>
 #include <dvdread/nav_types.h>
-
 #include "common.h"
 #include "sync.h"
 
@@ -79,6 +75,9 @@ public:
     /// \brief returns the number of angles for a given title
     int angleCount(int title_idx);
 
+    /// \brief Returns the number of audio streams for the selected PGC
+    int audioTrackCount();
+
     void dumpVMG();
 
     /// \brief Selects the title, chapter and angle to play, returns the
@@ -109,7 +108,45 @@ public:
     /// 
     /// In order to get the length we have to parse the DVD meaning that 
     /// this call may take a little while.
-    off_t length();
+    /// 
+    /// There are two approaches, one determines the exact size of the stream,
+    /// however it comes at a high cost. We have to simulate reading and parse
+    /// the NAV packets so we can determine the correct angle. This is what
+    /// the precise parameter is doing - expect delays up to 10 seconds and
+    /// more.
+    /// Setting precise to false will deliver an approximate length - without
+    /// angle calculations, meaning that the length can be off by some amount.
+    /// We will try to make sure that this amount is still greater than the
+    /// actual length, the worst that can happen will be a seek beyond end of
+    /// stream which should not be too bad. The approximate length calculation
+    /// is quite fast.
+    ///
+    /// \param precise if true turns on precise length calculation which is slow
+    off_t length(bool precise = true);
+
+    /// \brief Retrieves the length of a given chapter.
+    off_t chapterLength(int chapter_idx, bool precise);
+
+    /// \brief Returns the duration in seconds for the currently selected PGC.
+    int duration();
+
+    /// \brief Returns the duration in seconds of the entire title
+    int titleDuration();
+
+    /// \brief Returns the duration in seconds of the selected chapter
+    int chapterDuration(int chapter_idx);
+
+    /// \brief Returns a human readable language string of the audio stream
+    zmm::String audioLanguage(int stream_idx);
+
+    /// \brief Returns the sampling frequency of the given audio stream
+    int audioSampleFrequency(int stream_idx);
+
+    /// \brief Returns the number of channels for the given audio stream
+    int audioChannels(int stream_idx);
+
+    /// \brief Returns a human readable name of the audio format
+    zmm::String audioFormat(int stream_idx);
 
 protected:
     /// \brief Name of the DVD file.
@@ -139,6 +176,7 @@ protected:
     int next_cell;
     int current_cell;
     int current_pack;
+    //int last_pack;
 
     /// \brief flag that indicates that we continue with the current sector
     /// when reading.
@@ -160,8 +198,29 @@ protected:
     /// follow the stream are read, the contents of the buffer are unusable
     /// on return, however the length of the simulated read is returned
     /// correctly.
+    ///
+    /// \param chapter_idx if not -1 then we will only read the data till the
+    /// end of the given chapter
     /// \return number of bytes read, 0 for EOF
-    size_t readSectorInternal(unsigned char *buffer, size_t length, bool read);
+    size_t readSectorInternal(unsigned char *buffer, size_t length, bool read,
+                              bool till_eof = true);
+
+    /// \brief Calculates the length of the stream, expect delays up to 10
+    /// seconds and more.
+    off_t calculateExactLength();
+
+    /// \brief Calculates the length of the stream but ignores angles and
+    /// does not follow the cells correctly, this fast and the result is
+    /// good enough, but the returned length will not be the exact value.
+    off_t calculateApproxLength();
+
+    long dvdtime2msec(dvd_time_t *dt);
+
+    zmm::String getLanguage(char *code);
+
+#ifdef TOMBDEBUG
+    void dumpGlobalVars();
+#endif
 };
 
 

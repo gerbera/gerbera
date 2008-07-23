@@ -67,6 +67,10 @@
 #include "metadata/libexif_handler.h"
 #endif
 
+#ifdef HAVE_LIBDVDREAD
+#include "metadata/dvd_handler.h"
+#endif
+
 using namespace zmm;
 
 mt_key MT_KEYS[] = {
@@ -123,7 +127,7 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
     Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
     String content_type = mappings->get(mimetype);
-    
+   
     if ((content_type == CONTENT_TYPE_OGG) && (isTheora(item->getLocation())))
             item->setFlag(OBJECT_FLAG_OGG_THEORA);
 
@@ -177,8 +181,11 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
         
 #endif // HAVE_LIBEXIF
 
-#ifdef HAVE_LIBMP4V2
+#if defined(HAVE_LIBMP4V2) && !defined(HAVE_FFMPEG)
         if (content_type == CONTENT_TYPE_MP4)
+#elif defined(HAVE_LIBMPV2) && defined(HAVE_FFMPEG)
+        if ((content_type == CONTENT_TYPE_MP4) && 
+            (!item->getMimeType().startsWith(_("video"))))
         {
             handler = Ref<MetadataHandler>(new LibMP4V2Handler());
             break;
@@ -207,13 +214,22 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
         }
 
 #endif // HAVE_FFMPEG
- 
+
+#ifdef HAVE_LIBDVDREAD
+        if (content_type == CONTENT_TYPE_DVD)
+        {
+            handler = Ref<MetadataHandler>(new DVDHandler());
+            break;
+        }
+#endif
+
 #ifdef HAVE_LIBEXTRACTOR
         {
             handler = Ref<MetadataHandler>(new ExtractorHandler());
             break;
         }
 #endif // HAVE_LIBEXTRACTOR
+
 
     }
     while (false);

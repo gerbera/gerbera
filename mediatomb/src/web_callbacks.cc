@@ -124,6 +124,13 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
         ret = new URLRequestHandler();
     }
 #endif
+#if defined(HAVE_LIBDVDREAD_DISABLED)
+    else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + 
+                CONTENT_DVD_HANDLER))
+    {
+        ret = new DVDRequestHandler();
+    }
+#endif
     else
     {
         throw _Exception(_("no valid handler type in ") + filename);

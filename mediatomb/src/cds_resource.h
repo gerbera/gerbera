@@ -73,6 +73,11 @@ public:
     /// \param value attribute value
     void addAttribute(zmm::String name, zmm::String value);
 
+    /// \brief Removes a resource attribute.
+    /// 
+    /// \param name attribute name
+    void removeAttribute(zmm::String name);
+
     /// \brief Merge existing attributes with new ones
     void mergeAttributes(zmm::Ref<Dictionary> additional);
 

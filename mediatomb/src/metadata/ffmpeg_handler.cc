@@ -49,6 +49,7 @@
 // ffmpeg needs the following sources
 // INT64_C is not defined in ffmpeg/avformat.h but is needed
 #define __STDC_CONSTANT_MACROS
+#define __STDC_LIMIT_MACROS
 #include <stdint.h>
 
 //#ifdef FFMPEG_NEEDS_EXTERN_C

@@ -54,6 +54,8 @@
 #define CONTENT_TYPE_MP4        "mp4"
 #define CONTENT_TYPE_PCM        "pcm"
 #define CONTENT_TYPE_AVI        "avi"
+#define CONTENT_TYPE_MPEG       "mpeg"
+#define CONTENT_TYPE_DVD        "dvd"
 
 #define OGG_THEORA              "t"
 

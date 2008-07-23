@@ -464,6 +464,19 @@ Ref<CdsResourceManager::UrlBase> CdsResourceManager::addResources_getUrlBase(Ref
             return urlBase;
         }
     }
+
+#ifdef HAVE_LIBDVDREAD_DISABLED
+    if (IS_CDS_ITEM(objectType) && (item->getFlag(OBJECT_FLAG_DVD_IMAGE)))
+    {
+        urlBase->urlBase = Server::getInstance()->getVirtualURL() +
+                          _(_URL_PARAM_SEPARATOR) +
+                           CONTENT_DVD_IMAGE_HANDLER + _(_URL_PARAM_SEPARATOR) +
+                           dict->encodeSimple() + _(_URL_PARAM_SEPARATOR) +
+                           _(URL_RESOURCE_ID) + _(_URL_PARAM_SEPARATOR);
+        urlBase->addResID = true;
+        return urlBase;
+    }
+#endif
         
     urlBase->urlBase = Server::getInstance()->getVirtualURL() +
                        _(_URL_PARAM_SEPARATOR) +
