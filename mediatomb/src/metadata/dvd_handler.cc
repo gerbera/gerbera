@@ -54,6 +54,7 @@ using namespace zmm;
 #define DVD_DURATION                "d"
 #define DVD_REST_DURATION           "r"
 #define DVD_FORMAT                  "f"
+#define DVD_STREAM_ID               "i"
 #define DVD_COUNT                   "c"
 #define DVD_CHANNELS                "l"
 #define DVD_SAMPLE_FREQUENCY        "q"
@@ -108,6 +109,10 @@ String DVDHandler::renderKey(dvd_aux_key_names_t name, int title_idx,
             key = _(DVD_TITLE) + title_idx + _(DVD_AUDIO_TRACK) + 
                    audio_track_idx + _(DVD_FORMAT);
             break;
+        case DVD_AudioTrackStreamID:
+            key = _(DVD_TITLE) + title_idx + _(DVD_AUDIO_TRACK) + 
+                   audio_track_idx + _(DVD_STREAM_ID);
+            break;
         case DVD_AudioTrackChannels:
             key = _(DVD_TITLE) + title_idx + _(DVD_AUDIO_TRACK) +
                   audio_track_idx + _(DVD_CHANNELS);
@@ -129,61 +134,70 @@ String DVDHandler::renderKey(dvd_aux_key_names_t name, int title_idx,
 
 void DVDHandler::fillMetadata(Ref<CdsItem> item)
 {
-    Ref<DVDReader> dvd(new DVDReader(item->getLocation()));
-
-    item->setFlag(OBJECT_FLAG_DVD_IMAGE);
-
-    int titles = dvd->titleCount();
-    item->setAuxData(renderKey(DVD_TitleCount), String::from(titles));
-
-    for (int i = 0; i < titles; i++)
+    try
     {
-        dvd->selectPGC(i, 0, 0);
-        item->setAuxData(renderKey(DVD_ChapterCount, i), 
-                         String::from(dvd->chapterCount(i)));
-        if (dvd->titleDuration() > 0)
-            item->setAuxData(renderKey(DVD_TitleDuration, i), 
-                             secondsToHMS(dvd->titleDuration()));
-        item->setAuxData(renderKey(DVD_AudioTrackCount, i), 
-                         String::from(dvd->audioTrackCount()));
+        Ref<DVDReader> dvd(new DVDReader(item->getLocation()));
 
-        for (int a = 0; a < dvd->audioTrackCount(); a++)
+        item->setFlag(OBJECT_FLAG_DVD_IMAGE);
+
+        int titles = dvd->titleCount();
+        item->setAuxData(renderKey(DVD_TitleCount), String::from(titles));
+
+        for (int i = 0; i < titles; i++)
         {
-            item->setAuxData(renderKey(DVD_AudioTrackFormat, i, 0, a),
-                             dvd->audioFormat(a));
-            item->setAuxData(renderKey(DVD_AudioTrackChannels, i, 0, a),
-                             String::from(dvd->audioChannels(a)));
-            item->setAuxData(renderKey(DVD_AudioTrackSampleFreq, i, 0, a),
-                             String::from(dvd->audioSampleFrequency(a)));
-            item->setAuxData(renderKey(DVD_AudioTrackLanguage, i, 0, a),
-                             dvd->audioLanguage(a));
-        }
+            dvd->selectPGC(i, 0, 0);
+            item->setAuxData(renderKey(DVD_ChapterCount, i), 
+                    String::from(dvd->chapterCount(i)));
+            if (dvd->titleDuration() > 0)
+                item->setAuxData(renderKey(DVD_TitleDuration, i), 
+                        secondsToHMS(dvd->titleDuration()));
+            item->setAuxData(renderKey(DVD_AudioTrackCount, i), 
+                    String::from(dvd->audioTrackCount()));
 
-        int secs = 0;
-        for (int c = dvd->chapterCount(i)-1; c >= 0; c--)
-        {
-            int chap_secs = dvd->chapterDuration(c);
-            secs = secs + chap_secs;
-            log_debug("Chapter seconds: %d rest seconds: %d\n", chap_secs,
-                    secs);
-            if (chap_secs > 0)
-                item->setAuxData(renderKey(DVD_ChapterDuration, i, c), 
-                                 secondsToHMS(chap_secs));
-            if (secs > 0)
-                item->setAuxData(renderKey(DVD_ChapterRestDuration, i, c), 
-                        secondsToHMS(secs));
-        }
-    } // for titles
+            for (int a = 0; a < dvd->audioTrackCount(); a++)
+            {
+                item->setAuxData(renderKey(DVD_AudioTrackFormat, i, 0, a),
+                        dvd->audioFormat(a));
+                item->setAuxData(renderKey(DVD_AudioTrackStreamID, i, 0, a),
+                        String::from(dvd->audioStreamID(a)));
+                item->setAuxData(renderKey(DVD_AudioTrackChannels, i, 0, a),
+                        String::from(dvd->audioChannels(a)));
+                item->setAuxData(renderKey(DVD_AudioTrackSampleFreq, i, 0, a),
+                        String::from(dvd->audioSampleFrequency(a)));
+                item->setAuxData(renderKey(DVD_AudioTrackLanguage, i, 0, a),
+                        dvd->audioLanguage(a));
+            }
 
-    Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-    String mpeg_mimetype = mappings->get(_(CONTENT_TYPE_MPEG));
-    if (!string_ok(mpeg_mimetype))
-        mpeg_mimetype = _("video/mpeg");
+            int secs = 0;
+            for (int c = dvd->chapterCount(i)-1; c >= 0; c--)
+            {
+                int chap_secs = dvd->chapterDuration(c);
+                secs = secs + chap_secs;
+                log_debug("Chapter seconds: %d rest seconds: %d\n", chap_secs,
+                        secs);
+                if (chap_secs > 0)
+                    item->setAuxData(renderKey(DVD_ChapterDuration, i, c), 
+                            secondsToHMS(chap_secs));
+                if (secs > 0)
+                    item->setAuxData(renderKey(DVD_ChapterRestDuration, i, c), 
+                            secondsToHMS(secs));
+            }
+        } // for titles
 
-    item->setAuxData(renderKey(DVD_MimeType), mpeg_mimetype);
+        Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+        String mpeg_mimetype = mappings->get(_(CONTENT_TYPE_MPEG));
+        if (!string_ok(mpeg_mimetype))
+            mpeg_mimetype = _("video/mpeg");
 
-    log_debug("DVD image %s has %d titles\n", item->getLocation().c_str(), 
-              titles);
+        item->setAuxData(renderKey(DVD_MimeType), mpeg_mimetype);
+
+        log_debug("DVD image %s has %d titles\n", item->getLocation().c_str(), 
+                titles);
+    }
+    catch (Exception ex)
+    {
+        log_warning("Parsing ISO image failed (not a DVD?): %s\n", ex.getMessage().c_str());
+    }
 }
 
 

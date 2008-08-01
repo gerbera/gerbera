@@ -1569,7 +1569,7 @@ void ConfigManager::validate(String serverhome)
 #endif
 
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
-    temp = getOption(_("/import/library-options/ffmpegthumbnailer/"
+    temp = getOption(_("/server/extended-runtime-options/ffmpegthumbnailer/"
                        "attribute::enabled"),
                      _(DEFAULT_FFMPEGTHUMBNAILER_ENABLED));
 
@@ -1579,11 +1579,11 @@ void ConfigManager::validate(String serverhome)
                            "<ffmpegthumbnailer> tag"));
 
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
-    SET_BOOL_OPTION(CFG_IMPORT_LIBOPTS_FFMPEGTHUMBNAILER_ENABLED);
+    SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED);
 
     if (temp == YES)
     {
-        temp_int = getIntOption(_("/import/library-options/ffmpegthumbnailer/"
+        temp_int = getIntOption(_("/server/extended-runtime-options/ffmpegthumbnailer/"
                                   "thumbnail-size"), 
                                    DEFAULT_FFMPEGTHUMBNAILER_THUMBSIZE);
 
@@ -1593,9 +1593,9 @@ void ConfigManager::validate(String serverhome)
                                "<thumbnail-size> tag"));
 
         NEW_INT_OPTION(temp_int);
-        SET_INT_OPTION(CFG_IMPORT_LIBOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
+        SET_INT_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
 
-        temp_int = getIntOption(_("/import/library-options/ffmpegthumbnailer/"
+        temp_int = getIntOption(_("/server/extended-runtime-options/ffmpegthumbnailer/"
                                   "seek-percentage"), 
                                    DEFAULT_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE);
 
@@ -1605,9 +1605,9 @@ void ConfigManager::validate(String serverhome)
                                "<seek-percentage> tag"));
 
         NEW_INT_OPTION(temp_int);
-        SET_INT_OPTION(CFG_IMPORT_LIBOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE);
+        SET_INT_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE);
 
-        temp = getOption(_("/import/library-options/ffmpegthumbnailer/"
+        temp = getOption(_("/server/extended-runtime-options/ffmpegthumbnailer/"
                               "filmstrip-overlay"),
                              _(DEFAULT_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY));
 
@@ -1617,9 +1617,9 @@ void ConfigManager::validate(String serverhome)
 
 
         NEW_BOOL_OPTION(temp == YES ? true : false);
-        SET_BOOL_OPTION(CFG_IMPORT_LIBOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY);
+        SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY);
 
-        temp = getOption(_("/import/library-options/ffmpegthumbnailer/"
+        temp = getOption(_("/server/extended-runtime-options/ffmpegthumbnailer/"
                               "workaround-bugs"),
                              _(DEFAULT_FFMPEGTHUMBNAILER_WORKAROUND_BUGS));
 
@@ -1628,7 +1628,7 @@ void ConfigManager::validate(String serverhome)
                                "invalid value in <workaround-bugs> tag"));
 
         NEW_BOOL_OPTION(temp == YES ? true : false);
-        SET_BOOL_OPTION(CFG_IMPORT_LIBOPTS_FFMPEGTHUMBNAILER_WORKAROUND_BUGS);
+        SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_WORKAROUND_BUGS);
     }
 #endif
 

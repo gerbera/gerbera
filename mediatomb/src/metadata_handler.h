@@ -60,6 +60,7 @@
 #define OGG_THEORA              "t"
 
 #define RESOURCE_CONTENT_TYPE   "rct"
+#define RESOURCE_HANDLER        "rh"
 
 #define ID3_ALBUM_ART           "aa"
 #define EXIF_THUMBNAIL          "EX_TH"
@@ -134,6 +135,7 @@ public:
     
     virtual void fillMetadata(zmm::Ref<CdsItem> item) = 0;
     virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum, off_t *data_size) = 0;
+    virtual zmm::String getMimeType();
 };
 
 #endif // __METADATA_HANDLER_H__

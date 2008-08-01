@@ -142,6 +142,7 @@ language[] = {
 
 static char *audio_format[7] = 
                         {"ac3", "?", "mpeg1", "mpeg2", "lpcm ", "sdds ", "dts"};
+static int   audio_id[7]     = {0x80, 0, 0xC0, 0xC0, 0xA0, 0, 0x88};
 
 DVDReader::DVDReader(String path)
 {
@@ -713,5 +714,15 @@ String DVDReader::audioFormat(int stream_idx)
     audio_attr_t *audio_attr = &vts->vtsi_mat->vts_audio_attr[stream_idx];
     return _(audio_format[audio_attr->audio_format]);
 }
+
+int DVDReader::audioStreamID(int stream_idx)
+{
+    if ((stream_idx < 0) || (stream_idx >= audioTrackCount()))
+        throw _Exception(_("Attmpted to select invalid audio stream!"));
+
+    audio_attr_t *audio_attr = &vts->vtsi_mat->vts_audio_attr[stream_idx];
+    return audio_id[audio_attr->audio_format]+stream_idx;
+}
+
 #endif//HAVE_LIBDVDREAD
 

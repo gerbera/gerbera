@@ -145,6 +145,9 @@ public:
     /// \brief Returns the number of channels for the given audio stream
     int audioChannels(int stream_idx);
 
+    /// \brief Returns the id of the audio stream
+    int audioStreamID(int stream_idx);
+
     /// \brief Returns a human readable name of the audio format
     zmm::String audioFormat(int stream_idx);
 

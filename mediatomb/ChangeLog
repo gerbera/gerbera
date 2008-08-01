@@ -12,7 +12,7 @@ v0.12.0
         * added storage insert buffering
         * fixed mysql "threads didn't exit" issue
         * implemented YouTube service support which allows to watch YouTube 
-          videos on your UPnP player (in combination with trnascoding)
+          videos on your UPnP player (in combination with transcoding)
         * added fixes to allow PCM playback on the PS3 and other devices,
           thanks to mru for his findings. This allows streaming transcoded
           OGG and FLAC media to the PS3.

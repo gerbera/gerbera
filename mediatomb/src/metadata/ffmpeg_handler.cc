@@ -278,34 +278,6 @@ void FfmpegHandler::fillMetadata(Ref<CdsItem> item)
 	
     // Close the video file
     av_close_input_file(pFormatCtx);
-
-#ifdef HAVE_FFMPEGTHUMBNAILER
-    Ref<ConfigManager> cfg = ConfigManager::getInstance();
-    if (!cfg->getBoolOption(CFG_IMPORT_LIBOPTS_FFMPEGTHUMBNAILER_ENABLED))
-        return;
-
-    Ref<Dictionary> mappings = cfg->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-    String thumb_mimetype = mappings->get(_(CONTENT_TYPE_JPG));
-    if (!string_ok(thumb_mimetype))
-        thumb_mimetype = _("image/jpeg");
-
-    // we assume that we can generate a thumbnails for any video, checking
-    // this during import would significantly slow down things
-    Ref<CdsResource> resource(new CdsResource(CH_FFTH));
-    resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), 
-                           renderProtocolInfo(thumb_mimetype));
-    resource->addOption(_(RESOURCE_CONTENT_TYPE), _(THUMBNAIL));
-
-    y = cfg->getIntOption(CFG_IMPORT_LIBOPTS_FFMPEGTHUMBNAILER_THUMBSIZE) * y / x;
-    x = cfg->getIntOption(CFG_IMPORT_LIBOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
-   
-    String resolution = String::from(x) + "x" + String::from(y);
-    resource->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), 
-                           resolution);
- 
-    item->addResource(resource);
-#endif
-
 }
 
 Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum, off_t *data_size)
@@ -314,20 +286,20 @@ Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum, off_t 
 #ifdef HAVE_FFMPEGTHUMBNAILER
     Ref<ConfigManager> cfg = ConfigManager::getInstance();
 
-    if (!cfg->getBoolOption(CFG_IMPORT_LIBOPTS_FFMPEGTHUMBNAILER_ENABLED))
+    if (!cfg->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED))
         return nil;
 
     video_thumbnailer *th = create_thumbnailer();
     image_data *img = create_image_data();
 
-    th->seek_percentage        = cfg->getIntOption(CFG_IMPORT_LIBOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE);
+    th->seek_percentage        = cfg->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE);
 
-    if (cfg->getBoolOption(CFG_IMPORT_LIBOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY))
+    if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY))
         th->overlay_film_strip = 1;
     else
         th->overlay_film_strip = 0;
 
-    th->thumbnail_size = cfg->getIntOption(CFG_IMPORT_LIBOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
+    th->thumbnail_size = cfg->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
     th->thumbnail_image_type   = Jpeg;
 
     log_debug("Generating thumbnail for file: %s\n", item->getLocation().c_str());
@@ -345,4 +317,15 @@ Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum, off_t 
 #endif
 }
 
+String FfmpegHandler::getMimeType()
+{
+    Ref<ConfigManager> cfg = ConfigManager::getInstance();
+
+    Ref<Dictionary> mappings = cfg->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    String thumb_mimetype = mappings->get(_(CONTENT_TYPE_JPG));
+    if (!string_ok(thumb_mimetype))
+        thumb_mimetype = _("image/jpeg");
+    
+    return thumb_mimetype;
+}
 #endif // HAVE_FFMPEG

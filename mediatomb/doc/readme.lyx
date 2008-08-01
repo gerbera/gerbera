@@ -128,7 +128,7 @@ status open
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Standard
 
@@ -146,7 +146,7 @@ THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY! USE AT YOUR OWN RISK!
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Standard
 
@@ -429,7 +429,7 @@ Zlib is a compression library that is available on most systems, we need
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Standard
 
@@ -456,7 +456,7 @@ This is the 'file' package, it is used to determine the mime type of the
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Standard
 
@@ -497,7 +497,7 @@ This package is necessary to allow the user defined creation of virtual
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Standard
 
@@ -543,7 +543,7 @@ It makes no sense to use taglib and id3lib at the same time, the configure
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Standard
 
@@ -577,7 +577,7 @@ This library retrieves id3 tags from mp3 files.
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Standard
 
@@ -612,7 +612,7 @@ You will need this library if you want to extract metadata from images,
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Standard
 
@@ -645,7 +645,7 @@ curl is a library that allows to easily fetch content from the web, if you
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Standard
 
@@ -686,7 +686,7 @@ This library tries to gather metadata from all kinds of files (also .avi
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Standard
 
@@ -718,7 +718,7 @@ Currently ffmpeg is used to gather additional metadata from audio and video
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Standard
 
@@ -749,9 +749,14 @@ ffmpegthumbnailer is used to generate video thumbnails on the fly.
  it would be worth to compile MediaTomb with this library.
 \end_layout
 
+\begin_layout Description
+Note: ffmpegthumbnailer support is only provided if MediaTomb is compiled
+ with ffmpeg support.
+\end_layout
+
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Standard
 
@@ -3978,7 +3983,7 @@ status open
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Standard
 
@@ -4022,7 +4027,7 @@ mysql
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Standard
 
@@ -4052,7 +4057,7 @@ Default: yes
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Standard
 
@@ -4681,6 +4686,257 @@ status open
 
 \end_layout
 
+\begin_layout Subsubsection
+Extended Runtime Options
+\end_layout
+
+\begin_layout Code
+<extended-runtime-options>
+\end_layout
+
+\begin_layout Standard
+These options reside under the server tag and allow to additinally control
+ the so called "runtime options".
+ The difference to the import options is:
+\end_layout
+
+\begin_layout Standard
+Import options are only triggered when data is being imported into the database,
+ this means that if you want new settings to be applied to already imported
+ data, you will have to reimport it.
+ Runtime options can be switched on and off without the need to reimport
+ any media.
+ Unfortunately you still need to restart the server so that these options
+ take effect, however after that they are immediately active.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<ffmpegthumbnailer enabled="no">
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: no
+\end_layout
+
+\begin_layout Standard
+Ffmpegthumbnailer is a nice, easy to use library that allows to generate
+ thumbnails from video files.
+ Some DLNA compliant devices support video thumbnails, if you think that
+ your device may be one of those you can try enabling this option.
+ It would also make sense to enable the protocolInfo option, since it will
+ add specific DLNA tags to tell your device that a video thumbnail is being
+ offered by the server.
+\end_layout
+
+\begin_layout Description
+Note: thumbnails are not cached and not stored anywhere, they will be generated
+ on the fly in memory and released afterwards.
+ If your device supports video thumbnails and requests them from the server
+ in large amounts, the performance when browsing video containers will depend
+ on the speed of your machine.
+ A feature to allow caching of thumbnails is planned for future releases.
+\end_layout
+
+\begin_layout Standard
+The following options allow to control the ffmpegthumbnailer library (these
+ are basically the same options as the ones offered by the ffmpegthumbnailer
+ command line application).
+ All tags below are optional and have sane default values.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<thumbnail-size>128</thumbnail-size>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: 128
+\end_layout
+
+\begin_layout Standard
+The thumbnail size should not exceed 160x160 pixels, higher values can be
+ used but will mostprobably not be supported by DLNA devices.
+ The value of zero or less is not allowed.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<seek-percentage>5</seek-percentage>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: 5
+\end_layout
+
+\begin_layout Standard
+Time to seek to in the movie (percentage), values less than zero are not
+ allowed.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<filmstrip-overlay>yes</filmstrip-overlay>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: yes
+\end_layout
+
+\begin_layout Standard
+Creates a filmstrip like border around the image, turn this option off if
+ you want pure images.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<workaround-bugs>no</workaround-bugs>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: no
+\end_layout
+
+\begin_layout Standard
+Accodring to ffmpegthumbnailer documentation, this option will enable workaround
+s for bugs in older ffmpeg versions.
+ You can try enabling it if you experience unexpected behaviour, like hangups
+ during thumbnail generation, crashes and alike.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection
 Import Settings
 \end_layout
@@ -4814,7 +5070,7 @@ Defines the charset of the filesystem.
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Standard
 
@@ -6799,219 +7055,6 @@ status open
 \end_inset
 
 
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem></itemizedlist>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-<ffmpegthumbnailer enabled="no">
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Optional
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Default: no
-\end_layout
-
-\begin_layout Standard
-Ffmpegthumbnailer is a nice, easy to use library that allows to generate
- thumbnails from video files.
- Some DLNA compliant devices support video thumbnails, if you think that
- your device may be one of those you can try enabling this option.
- It would also make sense to enable the protocolInfo option, since it will
- add specific DLNA tags to tell your device that a video thumbnail is being
- offered by the server.
-\end_layout
-
-\begin_layout Description
-Note: thumbnails are not cached and not stored anywhere, they will be generated
- on the fly in memory and released afterwards.
- If your device supports video thumbnails and requests them from the server
- in large amounts, the performance when browsing video containers will depend
- on the speed of your machine.
- A feature to allow caching of thumbnails is planned for future releases.
-\end_layout
-
-\begin_layout Standard
-The following options allow to control the ffmpegthumbnailer library (these
- are basically the same options as the ones offered by the ffmpegthumbnailer
- command line application).
- All tags below are optional and have sane default values.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-<itemizedlist><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-<thumbnail-size>128</thumbnail-size>
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Optional
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Default: 128
-\end_layout
-
-\begin_layout Standard
-The thumbnail size should not exceed 160x160 pixels, higher values can be
- used but will mostprobably not be supported by DLNA devices.
- The value of zero or less is not allowed.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-<seek-percentage>5</seek-percentage>
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Optional
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Default: 5
-\end_layout
-
-\begin_layout Standard
-Time to seek to in the movie (percentage), values less than zero are not
- allowed.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-<filmstrip-overlay>yes</filmstrip-overlay>
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Optional
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Default: yes
-\end_layout
-
-\begin_layout Standard
-Creates a filmstrip like border around the image, turn this option off if
- you want pure images.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-<workaround-bugs>no</workaround-bugs>
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Optional
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Default: no
-\end_layout
-
-\begin_layout Standard
-Accodring to ffmpegthumbnailer documentation, this option will enable workaround
-s for bugs in older ffmpeg versions.
- You can try enabling it if you experience unexpected behaviour, like hangups
- during thumbnail generation, crashes and alike.
 \end_layout
 
 \begin_layout Standard

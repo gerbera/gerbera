@@ -35,6 +35,12 @@
 
 #include "metadata_handler.h"
 
+#define DVD_AUXDATA_TITLE_COUNT           "DVD_TITLES"
+#define DVD_AUXDATA_CHAPTERS              "DVD_CHAPTERS"
+#define DVD_AUXDATA_AUDIO_TRACKS          "DVD_AUDIO_TRACKS"
+
+
+
 typedef enum
 {
     DVD_MimeType,
@@ -51,6 +57,7 @@ typedef enum
     DVD_AudioTrack,
     DVD_AudioTrackCount,
     DVD_AudioTrackFormat,
+    DVD_AudioTrackStreamID,
     DVD_AudioTrackChannels,
     DVD_AudioTrackSampleFreq,
     DVD_AudioTrackLanguage,

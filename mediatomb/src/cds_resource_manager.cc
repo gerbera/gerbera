@@ -90,12 +90,45 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
     Ref<Dictionary> mappings = config->getDictionaryOption(
                         CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
+#ifdef HAVE_FFMPEGTHUMBNAILER
+    if (config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED) && 
+       (item->getMimeType().startsWith(_("video")) || 
+        item->getFlag(OBJECT_FLAG_OGG_THEORA)))
+    {
+        String videoresolution = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_RESOLUTION));
+        int x;
+        int y;
+
+        if (string_ok(videoresolution) && 
+            check_resolution(videoresolution, &x, &y))
+        {
+            String thumb_mimetype = mappings->get(_(CONTENT_TYPE_JPG));
+            if (!string_ok(thumb_mimetype))
+                thumb_mimetype = _("image/jpeg");
+
+            Ref<CdsResource> ffres(new CdsResource(CH_FFTH));
+            ffres->addParameter(_(RESOURCE_HANDLER), String::from(CH_FFTH));
+            ffres->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
+                    renderProtocolInfo(thumb_mimetype));
+            ffres->addOption(_(RESOURCE_CONTENT_TYPE), _(THUMBNAIL));
+
+            y = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE) * y / x;
+            x = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
+            String resolution = String::from(x) + "x" + String::from(y);
+            ffres->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION),
+                    resolution);
+            item->addResource(ffres);
+            log_debug("Adding resource for video thumbnail\n");
+        }
+    }
+#endif // FFMPEGTHUMBNAILER
 
 #ifdef EXTERNAL_TRANSCODING
     // this will be used to count only the "real" resources, omitting the
     // transcoded ones
     int realCount = 0;
     bool hide_original_resource = false;
+    int original_resource = 0;
     
     Ref<UrlBase> urlBase_tr;
 
@@ -219,7 +252,10 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                 hide_original_resource = true;
 
             if (tp->firstResource())
+            {
                 item->insertResource(0, t_res);
+                original_resource++;
+            }
             else
                 item->addResource(t_res);
         }
@@ -228,7 +264,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
             urlBase_tr = addResources_getUrlBase(item, true);
     }
 
-#endif
+#endif // EXTERNAL_TRANSCODING
 
     int resCount = item->getResourceCount();
     for (int i = 0; i < resCount; i++)
@@ -415,7 +451,8 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         }
 #endif
 #ifdef EXTERNAL_TRANSCODING
-        if (!hide_original_resource || transcoded)
+        if (!hide_original_resource || transcoded || 
+           (hide_original_resource && (original_resource != i)))
 #endif
             element->appendElementChild(UpnpXML_DIDLRenderResource(url, res_attrs));
     }
