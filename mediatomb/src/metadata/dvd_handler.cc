@@ -82,6 +82,9 @@ String DVDHandler::renderKey(dvd_aux_key_names_t name, int title_idx,
         case DVD_AudioTrack:
             key = _(DVD DVD_AUDIO_TRACK);
             break;
+        case DVD_AudioStreamID:
+            key = _(DVD DVD_STREAM_ID);
+            break;
         case DVD_MimeType:
             key = _(DVD_MIMETYPE);
             break;

@@ -65,13 +65,52 @@ void PESIOHandler::open(IN enum UpnpOpenFileMode mode)
     io_handler->open(mode);
 }
 
+// The code in the read function was contributed by 
+// Bernhard Ömer <Bernhard.Oemer@arcs.ac.at>
 int PESIOHandler::read(OUT char *buf, IN size_t length)
 {
     int bytes_read = 0;
-    unsigned char* p;
+    unsigned char *p;
+    unsigned char *pend;
+    unsigned char *q;
+    unsigned char *r;
     unsigned char *buffer = (unsigned char *)buf;
     int index = 0;
 
+    if (length & 0x7ff) 
+        throw _Exception(_("Buffer must be multiple of 2048 bytes"));
+
+    // aditionally checking 2048-byte alignment with tell might be in order
+    bytes_read = io_handler->read(buf,length);
+
+    p = buffer;
+    pend = buffer + length;
+
+    for (p = buffer ;p < pend-3; p++)
+    {
+        if(p[0] || p[1] || p[2] != 0x01 || p[3] < 0xbd || p[3] >= 0xf0) 
+            continue;
+        
+        unsigned char *pnext= p < pend-5 ? p+6+((p[4]<<8)|p[5]) : pend;
+        if (pnext > pend) 
+            pnext=pend;
+
+        if ((p[3]&0xe0) == 0xc0 && p[3] != 0xc0+audio_stream_id || 
+             p[3] == 0xbd && p < pend - 8 && 
+             (p[6]&0xc0) == 0x80 && (q = p+9+p[8]) < pend && 
+              q[0]>=0x80 && q[0] != audio_stream_id) 
+        {
+                        
+            p[3]=0xbe;  /* change SID to 0xBE (padding stream) */
+            for (r = p+6; r < pnext; r++) *r=0xff;   /* blank stream with 1s */
+                                            
+        }
+        p = pnext - 1;
+    }
+    return bytes_read;
+
+
+#if 0
     if (length < MAX_PS_PACKET_SIZE)
         throw _Exception(_("Buffer must be at least 2048 bytes"));
 
@@ -184,6 +223,7 @@ int PESIOHandler::read(OUT char *buf, IN size_t length)
             }
         }
         return bytes_read;
+#endif
 }
    
 int PESIOHandler::write(OUT char *buf, IN size_t length)

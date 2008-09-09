@@ -53,7 +53,8 @@ typedef enum
     DVD_ChapterCount,
     DVD_ChapterDuration,
     DVD_ChapterRestDuration,
-    
+   
+    DVD_AudioStreamID,
     DVD_AudioTrack,
     DVD_AudioTrackCount,
     DVD_AudioTrackFormat,

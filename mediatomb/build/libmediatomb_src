@@ -112,6 +112,8 @@ libmediatomb_a_SOURCES = \
 ../src/online_service.h \
 ../src/online_service_helper.cc \
 ../src/online_service_helper.h \
+../src/pes_io_handler.cc \
+../src/pes_io_handler.h \
 ../src/process.cc \
 ../src/process_executor.cc \
 ../src/process_executor.h \

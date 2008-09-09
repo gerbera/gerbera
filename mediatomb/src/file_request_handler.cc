@@ -55,6 +55,7 @@
 #ifdef HAVE_LIBDVDREAD
 #include "dvd_io_handler.h"
 #include "metadata/dvd_handler.h"
+#include "pes_io_handler.h"
 #endif
 
 #ifdef EXTERNAL_TRANSCODING
@@ -195,7 +196,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     String rh = dict->get(_(RESOURCE_HANDLER));
 
     if (((res_id > 0) && (res_id < item->getResourceCount())) ||
-        ((res_id > 0) && string_ok(rh)))
+            ((res_id > 0) && string_ok(rh)))
     {
 
         log_debug("setting content length to unknown\n");
@@ -258,15 +259,15 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
                 int chapter = tmp.toInt();
                 if (chapter < 0)
                     throw _Exception(_("DVD Image - requested invalid chapter!"));
-#if 0
-                tmp = dict->get(DVDHandler::renderKey(DVD_AudioTrack));
+
+                // actually we are retrieving the stream id here
+                tmp = dict->get(DVDHandler::renderKey(DVD_AudioStreamID));
                 if (!string_ok(tmp))
                     throw _Exception(_("DVD Image requested but audio track parameter is missing!"));
                 int audio_track = tmp.toInt();
                 if (audio_track < 0)
-                    throw _Exception(_("DVD Image - requested audio track parameter!"));
+                    throw _Exception(_("DVD Image - requested invalid audio stream ID!"));
 
-#endif
                 /// \todo make sure we can seek in the streams
                 info->file_length = -1;
                 header = nil;
@@ -574,15 +575,15 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
                 int chapter = tmp.toInt();
                 if (chapter < 0)
                     throw _Exception(_("DVD Image - requested invalid chapter!"));
-#if 0
-                tmp = dict->get(DVDHandler::renderKey(DVD_AudioTrack));
+
+                // actually we are retrieving the audio stream id here
+                tmp = dict->get(DVDHandler::renderKey(DVD_AudioStreamID));
                 if (!string_ok(tmp))
                     throw _Exception(_("DVD Image requested but audio track parameter is missing!"));
                 int audio_track = tmp.toInt();
                 if (audio_track < 0)
-                    throw _Exception(_("DVD Image - requested audio track parameter!"));
+                    throw _Exception(_("DVD Image - requested invalid audio stream ID!"));
 
-#endif
                 /// \todo make sure we can seek in the streams
                 info->file_length = -1;
                 header = nil;
@@ -593,9 +594,10 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
                 log_debug("Serving dvd image %s Title: %d Chapter: %d\n",
                         path.c_str(), title, chapter);
                 /// \todo add angle support
-                Ref<IOHandler> io_handler(new DVDIOHandler(path, title, chapter, 0));
-                io_handler->open(mode);
-                return io_handler;
+                Ref<IOHandler> dvd_io_handler(new DVDIOHandler(path, title, chapter, 0));
+                Ref<IOHandler> pes_io_handler(new PESIOHandler(dvd_io_handler, audio_track));
+                pes_io_handler->open(mode);
+                return pes_io_handler;
             }
             else
 #endif
