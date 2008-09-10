@@ -167,7 +167,7 @@ void FallbackLayout::addDVD(Ref<CdsObject> obj)
         for (int a = 0; a < audio_track_count; a++)
         {
             // set common audio track resource attributes
-            obj->getResource(0)->addParameter(DVDHandler::renderKey(DVD_AudioTrack), String::from(a));
+            obj->getResource(0)->addParameter(DVDHandler::renderKey(DVD_AudioStreamID), obj->getAuxData(DVDHandler::renderKey(DVD_AudioTrackStreamID, t, 0, a)));
 
             String tmp = obj->getAuxData(DVDHandler::renderKey(DVD_AudioTrackChannels, t, 0, a));
             if (string_ok(tmp))
