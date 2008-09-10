@@ -5306,7 +5306,7 @@ status open
 \end_layout
 
 \begin_layout Code
-<import-script>/path/to/my/import-script.js</script>
+<import-script>/path/to/my/import-script.js</import-script>
 \end_layout
 
 \begin_layout Standard
