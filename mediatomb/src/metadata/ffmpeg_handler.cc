@@ -179,7 +179,7 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext *pFormatC
 	for(i=0; i<pFormatCtx->nb_streams; i++) 
     {
 		AVStream *st = pFormatCtx->streams[i];
-		if((videoset == false) && (st->codec->codec_type == CODEC_TYPE_VIDEO))
+		if((st != NULL) && (videoset == false) && (st->codec->codec_type == CODEC_TYPE_VIDEO))
         {
             if (st->codec->codec_tag > 0)
             {
