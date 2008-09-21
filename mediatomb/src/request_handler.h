@@ -57,8 +57,7 @@ public:
     /// path = "content/media"
     /// parameters = "object_id=12345&transcode=wav"
     static void split_url(const char *url, char separator, 
-                          zmm::String &path, zmm::String &parameters,
-                          bool force_amp_unescape = true);
+                          zmm::String &path, zmm::String &parameters);
 };
 
 

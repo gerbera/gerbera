@@ -94,7 +94,7 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
                              CONTENT_UI_HANDLER))
     {  
         RequestHandler::split_url(filename, URL_UI_PARAM_SEPARATOR, path, 
-                parameters, false);
+                parameters);
         Ref<Dictionary> dict(new Dictionary());
         dict->decode(parameters);
         

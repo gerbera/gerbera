@@ -38,21 +38,11 @@
 
 using namespace zmm;
 
-void RequestHandler::split_url(const char *url, char separator, String &path, String &parameters, bool force_amp_unescape)
+void RequestHandler::split_url(const char *url, char separator, String &path, String &parameters)
 {
     int i1;
 
-    String url_s;
-    if (force_amp_unescape)
-    {
-        // Noxon V1 sends us double encoded xml crap in the url
-        url_s = unescape_amp(String(url));
-        url_s = unescape_amp(String(url_s));
-    }
-    else
-        url_s = String(url);
-
-    url_s = url_unescape(url_s);
+    String url_s = String(url);
 
     if (separator == '/')
         i1 = url_s.rindex(separator);
