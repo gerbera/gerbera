@@ -117,7 +117,7 @@ String PlaylistParserScript::readln()
     if (!currentHandle)
         throw _Exception(_("Readline not yet setup for use"));
 
-    if ((currentTask == nil) || (!currentTask->isValid()))
+    if ((currentTask != nil) && (!currentTask->isValid()))
         return nil;
 
     while (true)
