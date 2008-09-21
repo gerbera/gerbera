@@ -23,6 +23,11 @@ v0.12.0
         * added parameter --version (prints version information
         * added parameter --compile-info (prints compile information)
         * fixed problem "Negative duration in .m3u files" (SF forum)
+        * fixed bug #2078017 - Playlist inital import fails in autoscan
+          directories
+		* fixed bug #1890657 - transcoding tmp file using 2 //
+        * fixed bug #1978210 - compile error with newer libcurl
+        * fixed bug #1934649 - typo in --help text
 
 v0.11.0 01.03.2008  External transcoding support
         * implemented transcoding support that allows to plug in an arbitrary
