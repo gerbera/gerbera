@@ -1,4 +1,4 @@
-#LyX 1.5.3 created this file. For more info see http://www.lyx.org/
+#LyX 1.5.5 created this file. For more info see http://www.lyx.org/
 \lyxformat 276
 \begin_document
 \begin_header
@@ -168,6 +168,11 @@ MediaTomb comes with an AJAX driven web user interface that allows to add
  It also provides the means of selecting various Autoscan options.
  The UI is constantly improving, our goal is to offer a wide range of features
  to allow the user to easily control the server.
+\end_layout
+
+\begin_layout Description
+Note: the link to the Web UI is printed upon server startup in the console.
+ Consult the main docs for more information.
 \end_layout
 
 \begin_layout Section
