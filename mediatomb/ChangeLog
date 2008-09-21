@@ -1,6 +1,6 @@
 MediaTomb - UPnP AV Mediaserver.
 v0.12.0
-		* added video thumbnail generation using libffmpegthumbnailer
+        * added video thumbnail generation using libffmpegthumbnailer
         * added configure settings which allow to enable sqlite backups by 
           default
         * added cross compile defaults for the inotify check to configure
@@ -25,9 +25,10 @@ v0.12.0
         * fixed problem "Negative duration in .m3u files" (SF forum)
         * fixed bug #2078017 - Playlist inital import fails in autoscan
           directories
-		* fixed bug #1890657 - transcoding tmp file using 2 //
+        * fixed bug #1890657 - transcoding tmp file using 2 //
         * fixed bug #1978210 - compile error with newer libcurl
         * fixed bug #1934649 - typo in --help text
+        * fixed bugs #1986709 and #1996046 - cannot rename item with & in name
 
 v0.11.0 01.03.2008  External transcoding support
         * implemented transcoding support that allows to plug in an arbitrary

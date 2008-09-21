@@ -37,6 +37,7 @@
 #include "storage.h"
 #include "autoscan.h"
 #include "content_manager.h"
+#include "filesystem.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -64,30 +65,39 @@ void web::autoscan::process()
     Ref<ContentManager> cm = ContentManager::getInstance();
     Ref<Storage> storage = Storage::getInstance();
     
+    
+    bool fromFs = boolParam(_("from_fs"));
+    String path;
+    String objID = param(_("object_id"));
+    if (fromFs)
+    {
+        if (! string_ok(objID) || objID == "0")
+            path = _(FS_ROOT_DIRECTORY);
+        else
+            path = hex_decode_string(objID);
+    }
+    
     if (action == "as_edit_load")
     {
-        bool fromFs = boolParam(_("from_fs"));
         Ref<Element> autoscan (new Element(_("autoscan")));
         root->appendElementChild(autoscan);
         if (fromFs)
         {
             autoscan->appendTextChild(_("from_fs"), _("1"));
-            autoscan->appendTextChild(_("object_id"), param(_("object_id")));
-            Ref<AutoscanDirectory> adir = cm->getAutoscanDirectory(hex_decode_string(param(_("object_id"))));
+            autoscan->appendTextChild(_("object_id"), objID);
+            Ref<AutoscanDirectory> adir = cm->getAutoscanDirectory(path);
             autoscan2XML(autoscan, adir);
         }
         else
         {
             autoscan->appendTextChild(_("from_fs"), _("0"));
-            autoscan->appendTextChild(_("object_id"), param(_("object_id")));
+            autoscan->appendTextChild(_("object_id"), objID);
             Ref<AutoscanDirectory> adir = storage->getAutoscanDirectory(intParam(_("object_id")));
             autoscan2XML(autoscan, adir);
         }
     }
     else if (action == "as_edit_save")
     {
-        bool fromFs = boolParam(_("from_fs"));
-        
         String scan_mode_str = param(_("scan_mode"));
         if (scan_mode_str == "none")
         {
@@ -95,7 +105,7 @@ void web::autoscan::process()
             try
             {
                 if (fromFs)
-                    cm->removeAutoscanDirectory(hex_decode_string(param(_("object_id"))));
+                    cm->removeAutoscanDirectory(path);
                 else
                     cm->removeAutoscanDirectory(intParam(_("object_id")));
             }
@@ -118,17 +128,11 @@ void web::autoscan::process()
             if (scan_mode == TimedScanMode && interval <= 0)
                 throw _Exception(_("illegal interval given"));
             
-            String location;
             int objectID = INVALID_OBJECT_ID;
             if (fromFs)
-            {
-                location = hex_decode_string(param(_("object_id")));
-                objectID = cm->ensurePathExistence(location);
-            }
+                objectID = cm->ensurePathExistence(path);
             else
-            {
                 objectID = intParam(_("object_id"));
-            }
             
             //log_debug("adding autoscan: location=%s, scan_mode=%s, scan_level=%s, recursive=%d, interval=%d, hidden=%d\n", 
             //    location.c_str(), AutoscanDirectory::mapScanmode(scan_mode).c_str(),

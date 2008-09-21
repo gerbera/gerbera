@@ -50,6 +50,7 @@
 #include "session_manager.h"
 #include "timer.h"
 #include "layout/fallback_layout.h"
+#include "filesystem.h"
 
 #ifdef HAVE_JS
     #include "layout/js_layout.h"
@@ -698,7 +699,10 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
             {
                 throw _Exception(_("Not a container"));
             }
-            location = obj->getLocation();
+            if (containerID == CDS_ID_FS_ROOT)
+                location = _(FS_ROOT_DIRECTORY);
+            else
+                location = obj->getLocation();
         }
         catch (Exception e)
         {
@@ -1960,17 +1964,24 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
     // adding a new autoscan directory
     if (original == nil)
     {
-        Ref<CdsObject> obj = storage->loadObject(dir->getObjectID());
-        if (obj == nil
-                || ! IS_CDS_CONTAINER(obj->getObjectType())
-                || obj->isVirtual())
-            throw _Exception(_("tried to remove an illegal object (id) from the list of the autoscan directories"));
-
-        log_debug("location: %s\n", obj->getLocation().c_str());
-        if (!string_ok(obj->getLocation()))
-            throw _Exception(_("tried to add an illegal object as autoscan - no location information available!"));
-
-        dir->setLocation(obj->getLocation());
+        if (dir->getObjectID() == CDS_ID_FS_ROOT)
+            dir->setLocation(_(FS_ROOT_DIRECTORY));
+        else
+        {
+            log_debug("objectID: %d\n", dir->getObjectID());
+            Ref<CdsObject> obj = storage->loadObject(dir->getObjectID());
+            if (obj == nil
+                    || ! IS_CDS_CONTAINER(obj->getObjectType())
+                    || obj->isVirtual())
+                throw _Exception(_("tried to remove an illegal object (id) from the list of the autoscan directories"));
+            
+            log_debug("location: %s\n", obj->getLocation().c_str());
+            
+            if (!string_ok(obj->getLocation()))
+                throw _Exception(_("tried to add an illegal object as autoscan - no location information available!"));
+    
+            dir->setLocation(obj->getLocation());
+        }
         dir->resetLMT();
         storage->addAutoscanDirectory(dir);
         if (dir->getScanMode() == TimedScanMode)

@@ -39,6 +39,7 @@
 #include "pages.h"
 #include "tools.h"
 #include "content_manager.h"
+#include "filesystem.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -55,11 +56,10 @@ void web::add::process()
     
     String path;
     String objID = param(_("object_id"));
-    if (objID == nil || objID == "")
-        throw _Exception(_("web::add::process(): missing parameters: object id must be specified"));
+    if (! string_ok(objID) || objID == "0")
+        path = _(FS_ROOT_DIRECTORY);
     else
         path = hex_decode_string(objID);
-    
     if (path == nil) throw _Exception(_("web::add::process(): illegal path"));
 
     Ref<ContentManager> cm = ContentManager::getInstance();

@@ -39,6 +39,7 @@
 #include "update_manager.h"
 #include "string_converter.h"
 #include "config_manager.h"
+#include "filesystem.h"
 
 using namespace zmm;
 
@@ -1959,7 +1960,11 @@ void SQLStorage::addAutoscanDirectory(Ref<AutoscanDirectory> adir)
         throw _Exception(_("addAutoscanDirectory called with adir==nil"));
     if (adir->getStorageID() >= 0)
         throw _Exception(_("tried to add autoscan directory with a storage id set"));
-    int objectID = findObjectIDByPath(adir->getLocation() + DIR_SEPARATOR);
+    int objectID;
+    if (adir->getLocation() == FS_ROOT_DIRECTORY)
+        objectID = CDS_ID_FS_ROOT;
+    else
+        objectID = findObjectIDByPath(adir->getLocation() + DIR_SEPARATOR);
     if (! adir->persistent() && objectID < 0)
         throw _Exception(_("tried to add non-persistent autoscan directory with an illegal objectID or location"));
     
