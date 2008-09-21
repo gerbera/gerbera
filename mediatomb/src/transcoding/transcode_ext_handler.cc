@@ -114,8 +114,8 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
 
     Ref<ConfigManager> cfg = ConfigManager::getInstance();
    
-    String fifo_name = tempName(cfg->getOption(CFG_SERVER_TMPDIR), 
-                                fifo_template);
+    String fifo_name = normalizePath(tempName(cfg->getOption(CFG_SERVER_TMPDIR),
+                                     fifo_template));
     String arguments;
     String temp;
     String command;
@@ -155,7 +155,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
 #ifdef HAVE_CURL
             String url = location;
             strcpy(fifo_template, "mt_transcode_XXXXXX");
-            location = tempName(cfg->getOption(CFG_SERVER_TMPDIR), fifo_template);
+            location = normalizePath(tempName(cfg->getOption(CFG_SERVER_TMPDIR), fifo_template));
             log_debug("creating reader fifo: %s\n", location.c_str());
             if (mkfifo(location.c_str(), O_RDWR) == -1)
             {
