@@ -55,22 +55,24 @@ CacheObject::CacheObject()
 
 void CacheObject::setObject(Ref<CdsObject> obj)
 {
-    this->obj = obj;
-    setParentID(obj->getParentID());
-    setRefID(obj->getRefID());
-    setObjectType(obj->getObjectType());
+    Ref<CdsObject> nObj = CdsObject::createObject(obj->getObjectType());
+    obj->copyTo(nObj);
+    this->obj = nObj;
+    setParentID(nObj->getParentID());
+    setRefID(nObj->getRefID());
+    setObjectType(nObj->getObjectType());
     knowNumChildren = false;
     
     knowVirtualObj = true;
-    setVirtual(obj->isVirtual());
+    setVirtual(nObj->isVirtual());
     
     if (IS_CDS_CONTAINER(objectType))
     {
-        location = String(obj->isVirtual() ? LOC_VIRT_PREFIX : LOC_FILE_PREFIX) + obj->getLocation();
+        location = String(nObj->isVirtual() ? LOC_VIRT_PREFIX : LOC_FILE_PREFIX) + nObj->getLocation();
     }
     else if (IS_CDS_ITEM(objectType))
     {
         if (IS_CDS_PURE_ITEM(objectType))
-            location = String(LOC_FILE_PREFIX) + obj->getLocation();
+            location = String(LOC_FILE_PREFIX) + nObj->getLocation();
     }
 }
