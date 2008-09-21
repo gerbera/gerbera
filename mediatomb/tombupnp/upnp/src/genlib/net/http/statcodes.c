@@ -34,6 +34,10 @@
 * messages and functions to manipulate those buffers					*
 ************************************************************************/
 
+#ifdef HAVE_CONFIG_H
+    #include "autoconfig.h"
+#endif
+
 #include "config.h"
 #include <stdio.h>
 #include <string.h>

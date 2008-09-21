@@ -49,6 +49,10 @@
     
     $Id$
 */
+#ifdef HAVE_CONFIG_H
+    #include "autoconfig.h"
+#endif
+
 
 #include "config.h"
 #ifdef INCLUDE_CLIENT_APIS

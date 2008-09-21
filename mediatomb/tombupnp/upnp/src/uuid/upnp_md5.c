@@ -19,6 +19,11 @@
  *  - Ian Jackson <ian@chiark.greenend.org.uk>.
  * Still in the public domain.
  */
+#ifdef HAVE_CONFIG_H
+    #include "autoconfig.h"
+#endif
+
+
 #include "config.h"
 
 #include <string.h>            /* for memcpy() */

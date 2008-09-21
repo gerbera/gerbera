@@ -34,6 +34,11 @@
 * an http message and then matches the data with XML data.				*
 ************************************************************************/
 
+#ifdef HAVE_CONFIG_H
+    #include "autoconfig.h"
+#endif
+
+
 #include "config.h"
 #include <assert.h>
 #include "util.h"

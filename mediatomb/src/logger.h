@@ -32,9 +32,6 @@
 #ifndef __LOGGER_H__
 #define __LOGGER_H__
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
 #include <stdio.h>
 
 extern FILE *LOG_FILE;

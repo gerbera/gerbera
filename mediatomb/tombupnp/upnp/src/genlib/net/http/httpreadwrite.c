@@ -55,6 +55,10 @@
 * It defines functions to receive messages, process messages, send 
 * messages
 ************************************************************************/
+#ifdef HAVE_CONFIG_H
+    #include "autoconfig.h"
+#endif
+
 
 #include "config.h"
 

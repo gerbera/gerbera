@@ -32,7 +32,6 @@
 #ifndef __MEMORY_H__
 #define __MEMORY_H__
 
-#include "autoconfig.h"
 #include <stdlib.h>
 
 #if (!defined(HAVE_MALLOC)) || (!defined(HAVE_REALLOC)) 

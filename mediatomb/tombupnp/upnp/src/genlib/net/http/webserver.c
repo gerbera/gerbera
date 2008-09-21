@@ -53,6 +53,10 @@
 * Purpose: This file defines the Web Server and has functions to carry out 
 * operations of the Web Server.										
 ************************************************************************/
+#ifdef HAVE_CONFIG_H
+    #include "autoconfig.h"
+#endif
+
 
 #include "config.h"
 #include <assert.h>

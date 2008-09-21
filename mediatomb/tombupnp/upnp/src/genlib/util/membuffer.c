@@ -34,6 +34,10 @@
 *	buffers, allocation, re-allocation, and modification of the memory 
 ************************************************************************/
 
+#ifdef HAVE_CONFIG_H
+    #include "autoconfig.h"
+#endif
+
 #include "config.h"
 #include <assert.h>
 #include <stdlib.h>

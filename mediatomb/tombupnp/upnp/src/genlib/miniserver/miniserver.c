@@ -55,6 +55,11 @@
 * used by the Miniserver module.
 ************************************************************************/
 
+#ifdef HAVE_CONFIG_H
+    #include "autoconfig.h"
+#endif
+
+
 #include "config.h"
 #ifndef WIN32
  #include <arpa/inet.h>

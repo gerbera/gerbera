@@ -49,6 +49,10 @@
     
     $Id$
 */
+#ifdef HAVE_CONFIG_H
+    #include "autoconfig.h"
+#endif
+
 
 #include "config.h"
 #if EXCLUDE_GENA == 0

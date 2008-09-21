@@ -32,8 +32,6 @@
 #ifndef __DVD_READ_H__
 #define __DVD_READ_H__
 
-#define __STDC_CONSTANT_MACROS
-#define __STDC_LIMIT_MACROS
 #include <stdint.h>
 
 #include <sys/types.h>

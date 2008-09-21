@@ -9,8 +9,6 @@
 #ifndef _LINUX_INOTIFY_H
 #define _LINUX_INOTIFY_H
 
-#define __STDC_CONSTANT_MACROS
-#define __STDC_LIMIT_MACROS
 #include <stdint.h>
 #include <sys/syscall.h>
 #include <unistd.h>

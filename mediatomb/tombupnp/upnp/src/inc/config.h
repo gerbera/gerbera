@@ -53,10 +53,6 @@
 #ifndef INTERNAL_CONFIG_H
 #define INTERNAL_CONFIG_H 
 
-#if defined(HAVE_CONFIG_H)
-    #include "autoconfig.h"
-#endif
-
 /** @name Compile time configuration options
  *  The Linux SDK for UPnP Devices contains some compile-time parameters 
  *  that effect the behavior of the SDK.  All configuration options are 

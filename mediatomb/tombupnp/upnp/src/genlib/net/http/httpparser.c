@@ -54,6 +54,10 @@
 * Purpose: This file contains functions for scanner and parser for http 
 * messages.
 ************************************************************************/
+#ifdef HAVE_CONFIG_H
+    #include "autoconfig.h"
+#endif
+
 
 #include "config.h"
 #include <assert.h>

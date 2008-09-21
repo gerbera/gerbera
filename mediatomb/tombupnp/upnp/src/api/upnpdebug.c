@@ -33,6 +33,11 @@
 
 #if UPNP_HAVE_DEBUG
 
+#ifdef HAVE_CONFIG_H
+    #include "autoconfig.h"
+#endif
+
+
 #include "config.h"
 #include "upnpdebug.h"
 #include <stdlib.h>

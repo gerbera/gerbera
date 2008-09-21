@@ -28,10 +28,6 @@
 */
 
 /// \file common.h
-#if defined(HAVE_CONFIG_H)
-    #include "autoconfig.h"
-#endif
-
 #ifndef __COMMON_H__
 #define __COMMON_H__
 

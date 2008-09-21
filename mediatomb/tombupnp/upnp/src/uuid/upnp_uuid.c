@@ -16,6 +16,10 @@
    ** Corporation makes any representations about the suitability of
    ** this software for any purpose.
    */
+#ifdef HAVE_CONFIG_H
+    #include "autoconfig.h"
+#endif
+
 
 #include "config.h"
 #include <string.h>

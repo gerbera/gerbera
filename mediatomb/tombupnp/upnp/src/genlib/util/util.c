@@ -34,6 +34,11 @@
 * different options.
 ************************************************************************/
 
+#ifdef HAVE_CONFIG_H
+    #include "autoconfig.h"
+#endif
+
+
 #include "config.h"
 #include "upnp.h"
 #include "util.h"
