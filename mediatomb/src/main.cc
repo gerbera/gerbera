@@ -244,7 +244,7 @@ int main(int argc, char **argv, char **envp)
 Supported options:\n\
     --ip or -i         ip address to bind to\n\
     --interface or -e  network interface to bind to\n\
-    --port or -p       server port (the SDK only permits values => 49152)\n\
+    --port or -p       server port (the SDK only permits values >= 49152)\n\
     --config or -c     configuration file to use\n\
     --daemon or -d     run server in background\n\
     --home or -m       define the home directory\n\
@@ -493,7 +493,6 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
     if (pid_fd != NULL)
     {
         pid_t cur_pid;
-        FILE    *f;
         int     size;
 
         cur_pid = getpid();
