@@ -140,7 +140,7 @@ language[] = {
     { "\0", "Unknown" } 
 };
 
-static char *audio_format[7] = 
+static const char *audio_format[7] = 
                         {"ac3", "?", "mpeg1", "mpeg2", "lpcm ", "sdds ", "dts"};
 static int   audio_id[7]     = {0x80, 0, 0xC0, 0xC0, 0xA0, 0, 0x88};
 
