@@ -49,6 +49,10 @@
     #include "youtube_content_handler.h"
 #endif
 
+#ifdef HAVE_LIBDVDREAD
+    #include "metadata/dvd_handler.h"
+#endif
+
 using namespace zmm;
 
 /*
@@ -336,6 +340,11 @@ Script::Script(Ref<Runtime> runtime) : Object()
     setIntProperty(glob, _("ONLINE_SERVICE_NONE"), 0);
 #endif//ONLINE_SERVICES
 
+#ifdef HAVE_LIBDVDREAD
+    //setProperty(glob, _("DVD_AUXDATA_TITLES"), _(DVD_AUXDATA_TITLES));
+    setProperty(glob, _("DVD_AUXDATA_CHAPTERS"), _(DVD_AUXDATA_CHAPTERS));
+    setProperty(glob, _("DVD_AUXDATA_AUDIO_TRACKS"), _(DVD_AUXDATA_AUDIO_TRACKS));
+#endif
     for (int i = 0; i < M_MAX; i++)
     {
         setProperty(glob, _(MT_KEYS[i].sym), _(MT_KEYS[i].upnp));
@@ -559,13 +568,14 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
     int objectType;
     int b;
     int i;
-    Ref<StringConverter> p2i;
-    Ref<StringConverter> i2i = StringConverter::i2i();
+    Ref<StringConverter> sc;
 
     if (this->whoami() == S_PLAYLIST)
     {
-        p2i = StringConverter::p2i();
+        sc = StringConverter::p2i();
     }
+    else
+        sc = StringConverter::i2i();
 
     objectType = getIntProperty(js, _("objectType"), -1);
     if (objectType == -1)
@@ -595,13 +605,7 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
     val = getProperty(js, _("title"));
     if (val != nil)
     {
-        if (this->whoami() == S_PLAYLIST)
-            val = p2i->convert(val);
-        else
-            // user has to take care of conversion in the script
-            // this is important when location is being set or used
-            val = i2i->convert(val);
-
+        val = sc->convert(val);
         obj->setTitle(val);
     }
     else
@@ -613,11 +617,7 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
     val = getProperty(js, _("upnpclass"));
     if (val != nil)
     {
-        if (this->whoami() == S_PLAYLIST)
-            val = p2i->convert(val);
-        else
-            val = i2i->convert(val);
-
+        val = sc->convert(val);
         obj->setClass(val);
     }
     else
@@ -653,11 +653,7 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
                 }
                 else
                 {
-                    if (this->whoami() == S_PLAYLIST)
-                        val = p2i->convert(val);
-                    else
-                        val = i2i->convert(val);
-
+                    val = sc->convert(val);
                     obj->setMetadata(String(MT_KEYS[i].upnp), val);
                 }
             }
@@ -685,11 +681,7 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
         val = getProperty(js, _("mimetype"));
         if (val != nil)
         {
-            if (this->whoami() == S_PLAYLIST)
-                val = p2i->convert(val);
-            else
-                val = i2i->convert(val);
-
+            val = sc->convert(val);
             item->setMimeType(val);
         }
         else
@@ -701,11 +693,7 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
         val = getProperty(js, _("serviceID"));
         if (val != nil)
         {
-            if (this->whoami() == S_PLAYLIST)
-                val = p2i->convert(val);
-            else
-                val = i2i->convert(val);
-
+            val = sc->convert(val);
             item->setServiceID(val);
         }
 
@@ -714,11 +702,7 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
         val = getProperty(js, _("description"));
         if (val != nil)
         {
-            if (this->whoami() == S_PLAYLIST)
-                val = p2i->convert(val);
-            else
-                val = i2i->convert(val);
-
+            val = sc->convert(val);
             item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), val);
         }
         else
@@ -780,12 +764,7 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
             val = getProperty(js, _("protocol"));
             if (val != nil)
             {
-                if (this->whoami() == S_PLAYLIST)
-                    val = p2i->convert(val);
-                else
-                    val = i2i->convert(val);
-
-
+                val = sc->convert(val);
                 protocolInfo = renderProtocolInfo(item->getMimeType(), val);
             }
             else
@@ -891,6 +870,70 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
         setObjectProperty(js, _("aux"), aux_js);
         Ref<Dictionary> aux = obj->getAuxData();
 
+#ifdef HAVE_LIBDVDREAD
+        if (obj->getFlag(OBJECT_FLAG_DVD_IMAGE))
+        {
+            JSObject *aux_dvd = JS_NewObject(cx, NULL, NULL, js);
+            setObjectProperty(aux_js, _("DVD"), aux_dvd);
+
+            int title_count = obj->getAuxData(
+                                DVDHandler::renderKey(DVD_TitleCount)).toInt();
+
+//            setIntProperty(aux_dvd, _("count"), title_count);
+
+            JSObject *titles = JS_NewArrayObject(cx, 0, NULL);
+            setObjectProperty(aux_dvd, _("titles"), titles);
+
+            for (int t = 0; t < title_count; t++)
+            {
+                JSObject *title = JS_NewObject(cx, NULL, NULL, js);
+                jsval val = OBJECT_TO_JSVAL(title);
+                JS_SetElement(cx, titles, t, &val);
+
+                setProperty(title, _("duration"), 
+                        obj->getAuxData(DVDHandler::renderKey(DVD_TitleDuration,
+                                        t)));
+
+                JSObject *audio_tracks = JS_NewArrayObject(cx, 0, NULL);
+                setObjectProperty(title, _("audio_tracks"), audio_tracks);
+
+                int audio_track_count = obj->getAuxData(
+                        DVDHandler::renderKey(DVD_AudioTrackCount, t)).toInt();
+
+                for (int a = 0; a < audio_track_count; a++)
+                {
+                    JSObject *track = JS_NewObject(cx, NULL, NULL, js);
+                    jsval val = OBJECT_TO_JSVAL(track);
+                    JS_SetElement(cx, audio_tracks, a, &val);
+
+                    setProperty(track, _("language"), obj->getAuxData(
+                                DVDHandler::renderKey(DVD_AudioTrackLanguage,
+                                    t, 0, a)));
+
+                    setProperty(track, _("format"), obj->getAuxData(
+                                DVDHandler::renderKey(DVD_AudioTrackFormat, 
+                                    t, 0, a)));
+                }
+
+                JSObject *chapters = JS_NewArrayObject(cx, 0, NULL);
+                setObjectProperty(title, _("chapters"), chapters);
+
+                int chapter_count = obj->getAuxData(DVDHandler::renderKey(DVD_ChapterCount, t)).toInt();
+
+                for (int c = 0; c < chapter_count; c++)
+                {
+                    JSObject *chapter = JS_NewObject(cx, NULL, NULL, js);
+                    jsval val = OBJECT_TO_JSVAL(chapter);
+                    JS_SetElement(cx, chapters, c, &val);
+
+                    setProperty(chapter, _("duration"), obj->getAuxData(
+                                DVDHandler::renderKey(DVD_ChapterRestDuration,
+                                    t, c)));
+                }
+            }
+        }
+
+#endif
 #ifdef YOUTUBE
         // put in meaningful names for YouTube specific enum values
         String tmp = obj->getAuxData(_(YOUTUBE_AUXDATA_AVG_RATING));
