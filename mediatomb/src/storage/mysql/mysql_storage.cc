@@ -137,7 +137,6 @@ void MysqlStorage::init()
         throw _Exception(_("could not create pthread_key"));
     }
     mysql_server_init(0, NULL, NULL);
-    my_init();
     pthread_setspecific(mysql_init_key, (void *) 1);
     
     Ref<ConfigManager> config = ConfigManager::getInstance();
