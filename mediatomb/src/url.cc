@@ -212,7 +212,7 @@ Ref<URL::Stat> URL::getInfo(String URL, CURL *curl_handle)
     else
         mt = String(ct);
     
-    log_debug("Extracted content length: %ld\n", cl);
+    log_debug("Extracted content length: %lld\n", (long long)cl);
 
     Ref<Stat> st(new Stat((off_t)cl, mt));
 
