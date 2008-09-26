@@ -181,16 +181,18 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
         
 #endif // HAVE_LIBEXIF
 
-#if defined(HAVE_LIBMP4V2) && !defined(HAVE_FFMPEG)
+#if defined(HAVE_LIBMP4V2)
+#if !defined(HAVE_FFMPEG)
         if (content_type == CONTENT_TYPE_MP4)
-#elif defined(HAVE_LIBMPV2) && defined(HAVE_FFMPEG)
+#else // FFMPEG available 
         if ((content_type == CONTENT_TYPE_MP4) && 
             (!item->getMimeType().startsWith(_("video"))))
+#endif // !defined(HAVE_FFMPEG)            
         {
             handler = Ref<MetadataHandler>(new LibMP4V2Handler());
             break;
         }
-#endif
+#endif // defined(HAVE_LIBMP4V2)
 
 #ifdef HAVE_FFMPEG
         if (content_type != CONTENT_TYPE_PLAYLIST &&
