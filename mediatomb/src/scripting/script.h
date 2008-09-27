@@ -46,7 +46,8 @@
 typedef enum
 {
     S_IMPORT = 0,
-    S_PLAYLIST
+    S_PLAYLIST,
+    S_DVD
 } script_class_t;
 
 typedef enum

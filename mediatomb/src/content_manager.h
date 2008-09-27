@@ -44,6 +44,11 @@
     class CMTask;
     class PlaylistParserScript;
     #include "scripting/playlist_parser_script.h"
+#ifdef HAVE_LIBDVDREAD
+    class DVDImportScript;
+    #include "scripting/dvd_image_import_script.h"
+#endif
+
 #endif
 #include "layout/layout.h"
 #ifdef HAVE_INOTIFY
@@ -448,6 +453,9 @@ protected:
 
 #ifdef HAVE_JS
     zmm::Ref<PlaylistParserScript> playlist_parser_script;
+#ifdef HAVE_LIBDVDREAD
+    zmm::Ref<DVDImportScript> dvd_import_script;
+#endif
 #endif
 
     bool layout_enabled;

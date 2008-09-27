@@ -340,16 +340,11 @@ Script::Script(Ref<Runtime> runtime) : Object()
     setIntProperty(glob, _("ONLINE_SERVICE_NONE"), 0);
 #endif//ONLINE_SERVICES
 
-#ifdef HAVE_LIBDVDREAD
-    //setProperty(glob, _("DVD_AUXDATA_TITLES"), _(DVD_AUXDATA_TITLES));
-    setProperty(glob, _("DVD_AUXDATA_CHAPTERS"), _(DVD_AUXDATA_CHAPTERS));
-    setProperty(glob, _("DVD_AUXDATA_AUDIO_TRACKS"), _(DVD_AUXDATA_AUDIO_TRACKS));
-#endif
     for (int i = 0; i < M_MAX; i++)
     {
         setProperty(glob, _(MT_KEYS[i].sym), _(MT_KEYS[i].upnp));
     }
-
+ 
     setProperty(glob, _("UPNP_CLASS_CONTAINER_MUSIC_ALBUM"),
             _(UPNP_DEFAULT_CLASS_MUSIC_ALBUM));
     setProperty(glob, _("UPNP_CLASS_CONTAINER_MUSIC_ARTIST"),
@@ -878,8 +873,6 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
 
             int title_count = obj->getAuxData(
                                 DVDHandler::renderKey(DVD_TitleCount)).toInt();
-
-//            setIntProperty(aux_dvd, _("count"), title_count);
 
             JSObject *titles = JS_NewArrayObject(cx, 0, NULL);
             setObjectProperty(aux_dvd, _("titles"), titles);

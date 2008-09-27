@@ -1407,6 +1407,29 @@ void ConfigManager::validate(String serverhome)
 
     NEW_OPTION(script_path);
     SET_OPTION(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT);
+#ifdef HAVE_LIBDVDREAD
+    // add dvd script and make sure scripts can be enabled and disabled
+    script_path = getOption(_("/import/scripting/virtual-layout/dvd-script"),
+                            prefix_dir + DIR_SEPARATOR + _(DEFAULT_JS_DIR) +
+                            DIR_SEPARATOR + _(DEFAULT_DVD_SCRIPT));
+
+    if (temp == "js")
+    {
+        if (!string_ok(script_path))
+            throw _Exception(_("Error in config file: you specified \"js\" to "
+                               "be used for virtual layout, but dvd script "
+                               "location is invalid."));
+
+        prepare_path(_("/import/scripting/virtual-layout/dvd-script"));
+        script_path = getOption(
+                        _("/import/scripting/virtual-layout/dvd-script"));
+ 
+    }
+
+    NEW_OPTION(script_path);
+    SET_OPTION(CFG_IMPORT_SCRIPTING_DVD_SCRIPT);
+#endif
+
 #endif
 
     // 0 means, that the SDK will any free port itself

@@ -124,6 +124,8 @@ libmediatomb_a_SOURCES = \
 ../src/request_handler.h \
 ../src/rexp.cc \
 ../src/rexp.h \
+../src/scripting/dvd_image_import_script.cc \
+../src/scripting/dvd_image_import_script.h \
 ../src/scripting/import_script.cc \
 ../src/scripting/import_script.h \
 ../src/scripting/js_functions.cc \

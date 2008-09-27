@@ -217,6 +217,7 @@
 #define DEFAULT_IGNORE_UNKNOWN_EXTENSIONS NO
 #define DEFAULT_CASE_SENSITIVE_EXTENSION_MAPPINGS NO
 #define DEFAULT_IMPORT_SCRIPT           "import.js"
+#define DEFAULT_DVD_SCRIPT              "import-dvd.js"
 #define DEFAULT_PLAYLISTS_SCRIPT        "playlists.js"
 #define DEFAULT_PLAYLIST_CREATE_LINK    YES
 #define DEFAULT_COMMON_SCRIPT           "common.js"

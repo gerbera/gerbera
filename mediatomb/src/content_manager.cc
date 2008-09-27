@@ -607,19 +607,21 @@ int ContentManager::_addFile(String path, bool recursive, bool hidden, Ref<CMTas
                 try
                 {
                     layout->processCdsObject(obj);
+                    
+                    Ref<Dictionary> mappings = 
+                        ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+                    String mimetype = RefCast(obj, CdsItem)->getMimeType();
+                    String content_type = mappings->get(mimetype);
 #ifdef HAVE_JS
-                    if (playlist_parser_script != nil)
-                    {
-                        Ref<Dictionary> mappings = 
-                            ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-                        String mimetype = RefCast(obj, CdsItem)->getMimeType();
-                        String content_type = mappings->get(mimetype);
-                        if (content_type == CONTENT_TYPE_PLAYLIST)
-                        {
+                    if ((playlist_parser_script != nil) &&
+                        (content_type == CONTENT_TYPE_PLAYLIST))
                             playlist_parser_script->processPlaylistObject(obj, task);
-                        }
-                    }
-#endif
+#ifdef HAVE_LIBDVDREAD
+                    if ((dvd_import_script != nil) &&
+                        (content_type == CONTENT_TYPE_DVD))
+                           dvd_import_script->processDVDObject(obj);
+#endif // DVD
+#endif // JS
                 }
                 catch (Exception e)
                 {
@@ -998,17 +1000,20 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<CMTask> task)
                         {
                             layout->processCdsObject(obj);
 #ifdef HAVE_JS
-                            if (playlist_parser_script != nil)
-                            {
-                                Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-                                String mimetype = RefCast(obj, CdsItem)->getMimeType();
-                                String content_type = mappings->get(mimetype);
-                                if (content_type == CONTENT_TYPE_PLAYLIST)
-                                {
-                                    playlist_parser_script->processPlaylistObject(obj, task);
-                                }
-                            }
-#endif
+                            Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+                            String mimetype = RefCast(obj, CdsItem)->getMimeType();
+                            String content_type = mappings->get(mimetype);
+                           
+                            if ((playlist_parser_script != nil) &&
+                                (content_type == CONTENT_TYPE_PLAYLIST))
+                                playlist_parser_script->processPlaylistObject(obj, task);
+#ifdef HAVE_LIBDVDREAD
+                            if ((dvd_import_script != nil) &&
+                                (content_type == CONTENT_TYPE_DVD))
+                                    dvd_import_script->processDVDObject(obj);
+#endif // DVD
+
+#endif // JS
                         }
                         catch (Exception e)
                         {
@@ -1411,14 +1416,23 @@ void ContentManager::initJS()
     if (playlist_parser_script == nil)
         playlist_parser_script = Ref<PlaylistParserScript>(new PlaylistParserScript(Runtime::getInstance()));
 
+#ifdef HAVE_LIBDVDREAD
+    if ((ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE) == "js") && (dvd_import_script == nil))
+    {
+        dvd_import_script = Ref<DVDImportScript>(new DVDImportScript(Runtime::getInstance()));
+    }
+#endif
 }
 
 void ContentManager::destroyJS()
 {
     playlist_parser_script = nil;
+#ifdef HAVE_LIBDVDREAD
+    dvd_import_script = nil;
+#endif
 }
 
-#endif
+#endif // HAVE_JS
 
 void ContentManager::destroyLayout()
 {

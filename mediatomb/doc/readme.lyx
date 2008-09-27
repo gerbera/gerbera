@@ -5347,6 +5347,58 @@ status open
 
 \begin_layout Standard
 
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<dvd-script>/path/to/my/import-dvd.js</dvd-script>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional, only has effect when layout type is 
+\begin_inset Quotes sld
+\end_inset
+
+js
+\emph default
+
+\begin_inset Quotes srd
+\end_inset
+
+
+\emph on
+ and if MediaTomb was compiled with libdvdread support.
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default:
+\emph default
+ 
+\emph on
+${prefix}/share/mediatomb/js/import-dvd.js, where ${prefix} is your installation
+ prefix directory.
+\end_layout
+
+\begin_layout Standard
+Points to the script invoked upon import of DVD iso images.
+ For more details read doc/scripting.txt
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
 </listitem></itemizedlist>
 \end_layout
 
