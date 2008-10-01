@@ -56,6 +56,7 @@ protected:
     zmm::Ref<CdsObject> prepareChapter(zmm::Ref<CdsObject> obj, int title_idx,
                                        int chapter_idx);
     void addDVD(zmm::Ref<CdsObject> obj);
+    zmm::String mpeg_mimetype;
 #endif
 #ifdef YOUTUBE
     void addYouTube(zmm::Ref<CdsObject> obj);

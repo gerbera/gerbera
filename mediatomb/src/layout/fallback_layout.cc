@@ -153,7 +153,7 @@ void FallbackLayout::addDVD(Ref<CdsObject> obj)
 
     int title_count = obj->getAuxData(DVDHandler::renderKey(DVD_TitleCount)).toInt();
     // set common item attributes 
-    RefCast(obj, CdsItem)->setMimeType(obj->getAuxData(DVDHandler::renderKey(DVD_MimeType)));
+    RefCast(obj, CdsItem)->setMimeType(mpeg_mimetype);
     obj->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(RefCast(obj, CdsItem)->getMimeType()));
     obj->setClass(_(UPNP_DEFAULT_CLASS_VIDEO_ITEM));
     /// \todo this has to be changed once we add seeking
@@ -544,6 +544,13 @@ FallbackLayout::FallbackLayout() : Layout()
 {
 #ifdef ENABLE_PROFILING
     PROF_INIT_GLOBAL(layout_profiling, "fallback layout");
+#endif
+
+#ifdef HAVE_LIBDVDREAD
+    Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    mpeg_mimetype = mappings->get(_(CONTENT_TYPE_MPEG));
+    if (!string_ok(mpeg_mimetype))
+        mpeg_mimetype = _("video/mpeg");
 #endif
 }
 

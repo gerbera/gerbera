@@ -43,8 +43,6 @@
 
 typedef enum
 {
-    DVD_MimeType,
-
     DVD_Title,
     DVD_TitleDuration,
     DVD_TitleCount,

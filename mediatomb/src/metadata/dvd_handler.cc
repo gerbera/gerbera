@@ -85,9 +85,6 @@ String DVDHandler::renderKey(dvd_aux_key_names_t name, int title_idx,
         case DVD_AudioStreamID:
             key = _(DVD DVD_STREAM_ID);
             break;
-        case DVD_MimeType:
-            key = _(DVD_MIMETYPE);
-            break;
         case DVD_TitleCount:
             key = _(DVD_TITLE) + _(DVD_COUNT);
             break;
@@ -186,13 +183,6 @@ void DVDHandler::fillMetadata(Ref<CdsItem> item)
                             secondsToHMS(secs));
             }
         } // for titles
-
-        Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-        String mpeg_mimetype = mappings->get(_(CONTENT_TYPE_MPEG));
-        if (!string_ok(mpeg_mimetype))
-            mpeg_mimetype = _("video/mpeg");
-
-        item->setAuxData(renderKey(DVD_MimeType), mpeg_mimetype);
 
         log_debug("DVD image %s has %d titles\n", item->getLocation().c_str(), 
                 titles);

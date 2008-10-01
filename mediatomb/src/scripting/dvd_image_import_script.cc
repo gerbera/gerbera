@@ -69,7 +69,6 @@ static JSBool js_addDVDObject(JSContext *cx, JSObject *obj, uintN argc,
             return JS_TRUE;
         }
 
-
         arg = argv[0];
         if (!JSVAL_IS_OBJECT(arg))
         {
@@ -105,7 +104,7 @@ static JSBool js_addDVDObject(JSContext *cx, JSObject *obj, uintN argc,
         }
 
         str = JS_ValueToString(cx, argv[4]);
-        if (str)
+        if (!str)
         {
             log_error("addDVDObject: Invalid DVD container chain given!\n");
             return JS_TRUE;
@@ -175,13 +174,16 @@ void DVDImportScript::addDVDObject(Ref<CdsObject> obj, int title,
 
     obj->setRefID(processed->getID());
     obj->setID(INVALID_OBJECT_ID);
+    obj->setVirtual(1);
+    obj->clearFlag(OBJECT_FLAG_USE_RESOURCE_REF);
+
     Ref<ContentManager> cm = ContentManager::getInstance();
 
     int id = cm->addContainerChain(chain, containerclass, processed->getID());
     obj->setParentID(id);
 
-    RefCast(obj, CdsItem)->setMimeType(processed->getAuxData(DVDHandler::renderKey(DVD_MimeType)));
-    obj->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(RefCast(processed, CdsItem)->getMimeType()));
+    RefCast(obj, CdsItem)->setMimeType(mimetype);
+    obj->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(mimetype));
     
     /// \todo this has to be changed once we add seeking
     obj->getResource(0)->removeAttribute(MetadataHandler::getResAttrName(R_SIZE));
@@ -208,6 +210,9 @@ void DVDImportScript::addDVDObject(Ref<CdsObject> obj, int title,
     if (string_ok(tmp))
         obj->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_DURATION), tmp);
 
+    obj->getResource(0)->addParameter(DVDHandler::renderKey(DVD_Title, title),
+            String::from(title));
+
     cm->addObject(obj);
 }
 
@@ -221,7 +226,7 @@ DVDImportScript::DVDImportScript(Ref<Runtime> runtime) : Script(runtime)
 
     try 
     {
-        defineFunction(_("addDVDObject"), js_addDVDObject, 6);
+        defineFunction(_("addDVDObject"), js_addDVDObject, 7);
     
         setProperty(glob, _("DVD"), _("DVD"));
 
@@ -230,6 +235,14 @@ DVDImportScript::DVDImportScript(Ref<Runtime> runtime) : Script(runtime)
         root = JS_NewScriptObject(cx, script);
         JS_AddNamedRoot(cx, &root, "DVDImportScript");
         log_info("Loaded %s\n", scriptPath.c_str());
+
+         Ref<Dictionary> mappings =
+                         ConfigManager::getInstance()->getDictionaryOption(
+                              CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+
+         mimetype = mappings->get(_(CONTENT_TYPE_MPEG));
+         if (!string_ok(mimetype))
+             mimetype = _("video/mpeg");
     }
     catch (Exception ex)
     {

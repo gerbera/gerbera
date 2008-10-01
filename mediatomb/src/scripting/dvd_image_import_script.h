@@ -42,6 +42,11 @@ class DVDImportScript : public Script
 public:
     DVDImportScript(zmm::Ref<Runtime> runtime);
     ~DVDImportScript();
+    /// \brief Adds a DVD object to the database
+    /// 
+    /// \param title DVD title number
+    /// \param chapter DVD chapter 
+    /// \param audio track DVD audio track
     void addDVDObject(zmm::Ref<CdsObject> obj, int title, int chapter, 
                       int audio_track, zmm::String chain, 
                       zmm::String containerclass);
@@ -52,6 +57,7 @@ private:
     int currentObjectID;
     zmm::Ref<CMTask> currentTask;
     JSObject *root;
+    zmm::String mimetype;
 
 };
 
