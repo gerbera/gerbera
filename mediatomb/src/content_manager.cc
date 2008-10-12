@@ -814,7 +814,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
         ret = stat(path.c_str(), &statbuf);
         if (ret != 0)
         {
-            log_error("Failed to stat %s\n", path.c_str());
+            log_error("Failed to stat %s, %s\n", path.c_str(), mt_strerror(errno).c_str());
             continue;
         }
 
@@ -1285,7 +1285,7 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic, boo
     ret = stat(path.c_str(), &statbuf);
     if (ret != 0)
     {
-        throw _Exception(_("Failed to stat ") + path);
+        throw _Exception(_("Failed to stat ") + path + _(" , ") + mt_strerror(errno));
     }
 
     Ref<CdsObject> obj;
