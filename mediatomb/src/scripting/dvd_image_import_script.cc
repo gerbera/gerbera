@@ -210,7 +210,7 @@ void DVDImportScript::addDVDObject(Ref<CdsObject> obj, int title,
     if (string_ok(tmp))
         obj->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_DURATION), tmp);
 
-    obj->getResource(0)->addParameter(DVDHandler::renderKey(DVD_Title, title),
+    obj->getResource(0)->addParameter(DVDHandler::renderKey(DVD_Title),
             String::from(title));
 
     cm->addObject(obj);

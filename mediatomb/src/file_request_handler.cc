@@ -560,75 +560,75 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
         else
 #endif
 #ifdef HAVE_LIBDVDREAD
-            if (!is_srt && item->getFlag(OBJECT_FLAG_DVD_IMAGE))
-            {
-                String tmp = dict->get(DVDHandler::renderKey(DVD_Title));
-                if (!string_ok(tmp))
-                    throw _Exception(_("DVD Image requested but title parameter is missing!"));
-                int title = tmp.toInt();
-                if (title < 0)
-                    throw _Exception(_("DVD Image - requested invalid title!"));
+        if (!is_srt && item->getFlag(OBJECT_FLAG_DVD_IMAGE))
+        {
+            String tmp = dict->get(DVDHandler::renderKey(DVD_Title));
+            if (!string_ok(tmp))
+                throw _Exception(_("DVD Image requested but title parameter is missing!"));
+            int title = tmp.toInt();
+            if (title < 0)
+                throw _Exception(_("DVD Image - requested invalid title!"));
 
-                tmp = dict->get(DVDHandler::renderKey(DVD_Chapter));
-                if (!string_ok(tmp))
-                    throw _Exception(_("DVD Image requested but chapter parameter is missing!"));
-                int chapter = tmp.toInt();
-                if (chapter < 0)
-                    throw _Exception(_("DVD Image - requested invalid chapter!"));
+            tmp = dict->get(DVDHandler::renderKey(DVD_Chapter));
+            if (!string_ok(tmp))
+                throw _Exception(_("DVD Image requested but chapter parameter is missing!"));
+            int chapter = tmp.toInt();
+            if (chapter < 0)
+                throw _Exception(_("DVD Image - requested invalid chapter!"));
 
-                // actually we are retrieving the audio stream id here
-                tmp = dict->get(DVDHandler::renderKey(DVD_AudioStreamID));
-                if (!string_ok(tmp))
-                    throw _Exception(_("DVD Image requested but audio track parameter is missing!"));
-                int audio_track = tmp.toInt();
-                if (audio_track < 0)
-                    throw _Exception(_("DVD Image - requested invalid audio stream ID!"));
+            // actually we are retrieving the audio stream id here
+            tmp = dict->get(DVDHandler::renderKey(DVD_AudioStreamID));
+            if (!string_ok(tmp))
+                throw _Exception(_("DVD Image requested but audio track parameter is missing!"));
+            int audio_track = tmp.toInt();
+            if (audio_track < 0)
+                throw _Exception(_("DVD Image - requested invalid audio stream ID!"));
 
-                /// \todo make sure we can seek in the streams
-                info->file_length = -1;
-                header = nil;
-                if (mimeType == nil)
-                    mimeType = item->getMimeType();
+            /// \todo make sure we can seek in the streams
+            info->file_length = -1;
+            header = nil;
+            if (mimeType == nil)
+                mimeType = item->getMimeType();
 
-                info->content_type = ixmlCloneDOMString(mimeType.c_str());
-                log_debug("Serving dvd image %s Title: %d Chapter: %d\n",
-                        path.c_str(), title, chapter);
-                /// \todo add angle support
-                Ref<IOHandler> dvd_io_handler(new DVDIOHandler(path, title, chapter, 0));
-                Ref<IOHandler> pes_io_handler(new PESIOHandler(dvd_io_handler, audio_track));
-                pes_io_handler->open(mode);
-                return pes_io_handler;
-            }
-            else
+            info->content_type = ixmlCloneDOMString(mimeType.c_str());
+            log_debug("Serving dvd image %s Title: %d Chapter: %d\n",
+                    path.c_str(), title, chapter);
+            /// \todo add angle support
+            Ref<IOHandler> dvd_io_handler(new DVDIOHandler(path, title, chapter, 0));
+            Ref<IOHandler> pes_io_handler(new PESIOHandler(dvd_io_handler, audio_track));
+            pes_io_handler->open(mode);
+            return pes_io_handler;
+        }
+        else
 #endif
 
+        {
+            if (mimeType == nil)
+                mimeType = item->getMimeType();
+
+            info->file_length = statbuf.st_size;
+            info->content_type = ixmlCloneDOMString(mimeType.c_str());
+
+            log_debug("Adding content disposition header: %s\n", 
+                    header.c_str());
+            // if we are dealing with a regular file we should add the
+            // Accept-Ranges: bytes header, in order to indicate that we support
+            // seeking
+            if (S_ISREG(statbuf.st_mode))
             {
-                if (mimeType == nil)
-                    mimeType = item->getMimeType();
-
-                info->file_length = statbuf.st_size;
-                info->content_type = ixmlCloneDOMString(mimeType.c_str());
-
-                log_debug("Adding content disposition header: %s\n", 
-                        header.c_str());
-                // if we are dealing with a regular file we should add the
-                // Accept-Ranges: bytes header, in order to indicate that we support
-                // seeking
-                if (S_ISREG(statbuf.st_mode))
-                {
-                    if (string_ok(header))
-                        header = header + _("\r\n");
-
-                    header = header + _("Accept-Ranges: bytes");
-                }
-
                 if (string_ok(header))
-                    info->http_header = ixmlCloneDOMString(header.c_str());
+                    header = header + _("\r\n");
 
-
-                Ref<IOHandler> io_handler(new FileIOHandler(path));
-                io_handler->open(mode);
-                return io_handler;
+                header = header + _("Accept-Ranges: bytes");
             }
+
+            if (string_ok(header))
+                info->http_header = ixmlCloneDOMString(header.c_str());
+
+
+            Ref<IOHandler> io_handler(new FileIOHandler(path));
+            io_handler->open(mode);
+            return io_handler;
+        }
     }
 }

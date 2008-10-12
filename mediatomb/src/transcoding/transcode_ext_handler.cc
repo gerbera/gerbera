@@ -65,6 +65,12 @@
     #include "curl_io_handler.h"
 #endif
 
+#ifdef HAVE_LIBDVDREAD
+    #include "dvd_io_handler.h"
+    #include "metadata/dvd_handler.h"
+    #include "pes_io_handler.h"
+#endif
+
 using namespace zmm;
 
 TranscodeExternalHandler::TranscodeExternalHandler() : TranscodeHandler()
@@ -138,7 +144,6 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
                    String::from(p2), nil, nil);
         Ref<ProcessExecutor> spsc(new ProcessExecutor(_("sp-sc-auth"), 
                                                       sop_args));
-        printf("-------> command will be: sp-sc-atuh %s\n", String(location + " " + String::from(p1) + " " + String::from(p2)).c_str());
         proc_list = Ref<Array<ProcListItem> >(new Array<ProcListItem>(1));
         Ref<ProcListItem> pr_item(new ProcListItem(RefCast(spsc, Executor)));
         proc_list->append(pr_item);
@@ -193,6 +198,63 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     }
 #endif
 
+#ifdef HAVE_LIBDVDREAD
+    if (obj->getFlag(OBJECT_FLAG_DVD_IMAGE))
+    {
+        strcpy(fifo_template, "mt_transcode_XXXXXX");
+        location = normalizePath(tempName(cfg->getOption(CFG_SERVER_TMPDIR), fifo_template));
+        log_debug("creating reader fifo: %s\n", location.c_str());
+        if (mkfifo(location.c_str(), O_RDWR) == -1)
+        {
+            log_error("Failed to create fifo for the DVD image "
+                    "reading thread: %s\n", strerror(errno));
+            throw _Exception(_("Could not create reader fifo!\n"));
+        }
+
+       
+        try
+        {
+            String tmp = obj->getResource(0)->getParameter(DVDHandler::renderKey(DVD_Title));
+            if (!string_ok(tmp))
+                throw _Exception(_("DVD Image requested but title parameter is missing!"));
+            int title = tmp.toInt();
+            if (title < 0)
+                throw _Exception(_("DVD Image - requested invalid title!"));
+
+            tmp = obj->getResource(0)->getParameter(DVDHandler::renderKey(DVD_Chapter));
+            if (!string_ok(tmp))
+                throw _Exception(_("DVD Image requested but chapter parameter is missing!"));
+            int chapter = tmp.toInt();
+            if (chapter < 0)
+                throw _Exception(_("DVD Image - requested invalid chapter!"));
+
+            // actually we are retrieving the audio stream id here
+            tmp = obj->getResource(0)->getParameter(DVDHandler::renderKey(DVD_AudioStreamID));
+            if (!string_ok(tmp))
+                throw _Exception(_("DVD Image requested but audio track parameter is missing!"));
+            int audio_track = tmp.toInt();
+            if (audio_track < 0)
+                throw _Exception(_("DVD Image - requested invalid audio stream ID!"));
+
+            chmod(location.c_str(), S_IWUSR | S_IRUSR);
+            
+            Ref<IOHandler> dvd_io_handler(new DVDIOHandler(obj->getLocation(), title, chapter, 0));
+            Ref<IOHandler> pes_ioh(new PESIOHandler(dvd_io_handler, audio_track));
+
+            Ref<IOHandler> p_ioh(new ProcessIOHandler(location, nil));
+            Ref<Executor> ch(new IOHandlerChainer(pes_ioh, p_ioh, 131072));
+            proc_list = Ref<Array<ProcListItem> >(new Array<ProcListItem>(1));
+            Ref<ProcListItem> pr_item(new ProcListItem(ch));
+            proc_list->append(pr_item);
+        }
+        catch (Exception ex)
+        {
+            unlink(location.c_str());
+            throw ex;
+        }
+    }
+#endif
+
     String check;
     if (profile->getCommand().startsWith(_(_DIR_SEPARATOR)))
     {
@@ -235,7 +297,12 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     {
         main_proc->removeFile(location);
     }
-    
+#ifdef HAVE_LIBDVDREAD
+    if (obj->getFlag(OBJECT_FLAG_DVD_IMAGE))
+    {
+        main_proc->removeFile(location);
+    }
+#endif    
     Ref<IOHandler> io_handler(new BufferedIOHandler(Ref<IOHandler> (new ProcessIOHandler(fifo_name, RefCast(main_proc, Executor), proc_list)), profile->getBufferSize(), profile->getBufferChunkSize(), profile->getBufferInitialFillSize()));
 
     io_handler->open(UPNP_READ);
