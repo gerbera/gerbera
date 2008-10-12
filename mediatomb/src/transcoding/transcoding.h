@@ -42,19 +42,19 @@
 #define SOURCE  (-1)
 #define OFF       0
 
-enum transcoding_type_t
+typedef enum 
 {
     TR_None,
     TR_External,
     TR_Remote
-};
+} transcoding_type_t;
 
-enum avi_fourcc_listmode_t
+typedef enum 
 {
     FCC_None,
     FCC_Process,
     FCC_Ignore
-};
+} avi_fourcc_listmode_t;
 
 /// \brief this class keeps all data associated with one transcoding profile.
 class TranscodingProfile : public zmm::Object
@@ -179,6 +179,10 @@ public:
     void setNumChannels(int chans) { number_of_channels = chans; }
     int getNumChannels() { return number_of_channels; }
 
+    /// \brief transcode or ignore streams extracted from a DVD image
+    void setOnlyDVD(bool accept) { dvd_only = accept; }
+    bool onlyDVD() { return dvd_only; }
+
 protected:
     zmm::String name;
     zmm::String tm;
@@ -187,6 +191,7 @@ protected:
     bool first_resource;
     bool theora;
     bool accept_url;
+    bool dvd_only;
     bool hide_orig_res;
     bool thumbnail;
     bool force_chunked;

@@ -2155,7 +2155,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                 }
                 else
                 {
-                    throw _Exception(_("error in configuration: invalid mimetype to profile mapping"));
+                    throw _Exception(_("error in configuration: invalid or missing mimetype to profile mapping"));
                 }
             }
         }
@@ -2310,16 +2310,29 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                 prof->setHideOriginalResource(false);
         }
 
-        if (child->getChildByName(_("accept-ogg-theora")) != nil)
+        if (child->getChildByName(_("dvd-only")) != nil)
         {
-            param = child->getChildText(_("accept-ogg-theora"));
+            param = child->getChildText(_("dvd-only"));
             if (!validateYesNo(param))
                 throw _Exception(_("Error in config file: incorrect parameter "
-                                   "for <accept-ogg-theora> tag"));
+                                   "for <dvd-only> tag"));
+            if (param == "yes")
+                prof->setOnlyDVD(true);
+            else
+                prof->setOnlyDVD(false);
+        }
+
+        if (child->getChildByName(_("accept-dvd-mpeg")) != nil)
+        {
+            param = child->getChildText(_("accept-dvd-mpeg"));
+            if (!validateYesNo(param))
+                throw _Exception(_("Error in config file: incorrect parameter "
+                                   "for <accept-dvd-mpeg> tag"));
             if (param == "yes")
                 prof->setTheora(true);
             else
                 prof->setTheora(false);
+ 
         }
 
         if (child->getChildByName(_("thumbnail")) != nil)

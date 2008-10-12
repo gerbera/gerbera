@@ -50,6 +50,7 @@ TranscodingProfile::TranscodingProfile()
     tr_type = TR_None;
     theora = false;
     accept_url = true;
+    dvd_only = false;
     force_chunked = true;
     hide_orig_res = false;
     thumbnail = false;
@@ -67,6 +68,7 @@ TranscodingProfile::TranscodingProfile(transcoding_type_t tr_type, String name)
     theora = false;
     first_resource = false;
     accept_url = true;
+    dvd_only = false;
     force_chunked = true;
     hide_orig_res = false;
     thumbnail = false;

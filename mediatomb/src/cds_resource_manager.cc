@@ -203,6 +203,9 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                 }
             }
 
+            if (item->getFlag(OBJECT_FLAG_DVD_IMAGE) && (!tp->onlyDVD()))
+                continue;
+
             Ref<CdsResource> t_res(new CdsResource(CH_TRANSCODE));
             t_res->addParameter(_(URL_PARAM_TRANSCODE_PROFILE_NAME), tp->getName());
             // after transcoding resource was added we can not rely on
