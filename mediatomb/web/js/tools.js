@@ -156,11 +156,15 @@ function errorCheck(xml, noredirect)
     if (updateIDsEl)
         handleUIUpdates(updateIDsEl);
     
-    var error = xmlGetElementText(xml, 'error');
-    if (error)
+    var errorEl = xmlGetElement(xml, 'error');
+    if (errorEl)
     {
-        alert(error);
-        return false;
+        var code = errorEl.getAttribute('code');
+        if (Math.floor(code / 100) != 3)
+        {
+            alert(errorEl.getText());
+            return false;
+        }
     }
     return true;
 }

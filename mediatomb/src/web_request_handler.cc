@@ -145,18 +145,22 @@ Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
             }
         }
     }
+    catch (ObjectNotFoundException e)
+    {
+        error_code = 300;
+        error = e.getMessage();;
+    }
     catch (SessionException se)
     {
-        //String url = _("/content/interface?req_type=login&slt=") +
-        //                    generate_random_id();
-        
+        error = _("no valid session");
+        error_code = 500;
         root->appendTextChild(_("redirect"), _("/"));
     }
     catch (StorageException e)
     {
         e.printStackTrace();
         error = e.getUserMessage();
-        error_code = 300;
+        error_code = 600;
     }
     catch (Exception e)
     {
@@ -165,7 +169,7 @@ Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
         // par->put("message", e.getMessage());
         // output = subrequest("error", par);
         error = _("Error: ") + e.getMessage();
-        error_code = 400;
+        error_code = 900;
     }
     
     if (! string_ok(error))
@@ -186,13 +190,29 @@ Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
     if (string_ok(returnType) && returnType == "xml")
     {
 #ifdef TOMBDEBUG
-        // make sure we can generate JSON w/o exceptions
-        XML2JSON::getJSON(root);
+        try
+        {
+            // make sure we can generate JSON w/o exceptions
+            XML2JSON::getJSON(root);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
 #endif
-        output = renderXMLHeader() + root->print();
+            output = renderXMLHeader() + root->print();
     }
     else
-        output = XML2JSON::getJSON(root);
+    {
+        try
+        {
+            output = XML2JSON::getJSON(root);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
     
     /*
     try
@@ -270,6 +290,7 @@ void WebRequestHandler::appendTask(Ref<Element> el, Ref<CMTask> task)
     Ref<Element> taskEl (new Element(_("task")));
     taskEl->setAttribute(_("id"), String::from(task->getID()), mxml_int_type);
     taskEl->setAttribute(_("cancellable"), task->isCancellable() ? _("1") : _("0"), mxml_bool_type);
+    taskEl->setTextKey(_("text"));
     taskEl->setText(task->getDescription());
     el->appendElementChild(taskEl);
 }
