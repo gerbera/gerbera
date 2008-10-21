@@ -59,7 +59,7 @@ void web::files::process()
         path = hex_decode_string(parentID);
     
     Ref<Element> files(new Element(_("files")));
-    files->setAttribute(_("of_id"), parentID);
+    files->setAttribute(_("parent_id"), parentID);
     files->setAttribute(_("location"), path);
     root->appendElementChild(files);
     

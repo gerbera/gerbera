@@ -59,7 +59,7 @@ void web::directories::process()
         path = hex_decode_string(parentID);
     
     Ref<Element> containers (new Element(_("containers")));
-    containers->setAttribute(_("of_id"), parentID);
+    containers->setAttribute(_("parent_id"), parentID);
     if (string_ok(param(_("select_it"))))
         containers->setAttribute(_("select_it"), param(_("select_it")));
     containers->setAttribute(_("type"), _("filesystem"));

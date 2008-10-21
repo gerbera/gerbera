@@ -126,7 +126,7 @@ function updateItems(ajaxRequest)
         childrenTag = "file";
     }
     
-    var ofId = items.getAttribute("of_id");
+    var ofId = items.getAttribute("parent_id");
     var success = xmlGetElement(xml, 'root').getAttribute("success");
     //alert(success);
     //alert(xml);

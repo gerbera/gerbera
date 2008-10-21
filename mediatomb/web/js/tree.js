@@ -303,7 +303,7 @@ function updateTree(ajaxRequest)
         type = 'f';
     else if (type == 'database')
         type = 'd';
-    var ofId = xmlGetAttribute(containers, "of_id");
+    var ofId = xmlGetAttribute(containers, "parent_id");
     var parentId = type+ofId;
     
     var node = getTreeNode(parentId);

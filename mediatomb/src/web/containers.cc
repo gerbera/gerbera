@@ -58,7 +58,7 @@ void web::containers::process()
 
         
     Ref<Element> containers (new Element(_("containers")));
-    containers->setAttribute(_("of_id"), String::from(parentID), mxml_int_type);
+    containers->setAttribute(_("parent_id"), String::from(parentID), mxml_int_type);
     containers->setAttribute(_("type"), _("database"));
 
     if (string_ok(param(_("select_it"))))
