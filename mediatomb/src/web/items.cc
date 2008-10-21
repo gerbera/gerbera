@@ -60,6 +60,7 @@ void web::items::process()
     
     Ref<Storage> storage = Storage::getInstance();
     Ref<Element> items (new Element(_("items")));
+    items->setArrayName(_("item"));
     items->setAttribute(_("parent_id"), String::from(parentID), mxml_int_type);
     root->appendElementChild(items);
     Ref<CdsObject> obj;

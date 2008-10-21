@@ -72,11 +72,13 @@ void web::edit_load::process()
     item->setAttribute(_("object_id"), objID, mxml_int_type);
     
     Ref<Element> title (new Element(_("title")));
+    title->setTextKey(_("value"));
     title->setText(obj->getTitle());
     title->setAttribute(_("editable"), obj->isVirtual() || objectID == CDS_ID_FS_ROOT ? _("1") : _("0"), mxml_bool_type);
     item->appendElementChild(title);
     
     Ref<Element> classEl (new Element(_("class")));
+    classEl->setTextKey(_("value"));
     classEl->setText(obj->getClass());
     classEl->setAttribute(_("editable"), _("1"), mxml_bool_type);
     item->appendElementChild(classEl);
@@ -89,11 +91,13 @@ void web::edit_load::process()
         Ref<CdsItem> objItem = RefCast(obj, CdsItem);
         
         Ref<Element> description (new Element(_("description")));
+        description->setTextKey(_("value"));
         description->setText(objItem->getMetadata(_("dc:description")));
         description->setAttribute(_("editable"), _("1"), mxml_bool_type);
         item->appendElementChild(description);
         
         Ref<Element> location (new Element(_("location")));
+        location->setTextKey(_("value"));
         location->setText(objItem->getLocation());
         if (IS_CDS_PURE_ITEM(objectType) || ! objItem->isVirtual())
             location->setAttribute(_("editable"),_("0"), mxml_bool_type);
@@ -102,6 +106,7 @@ void web::edit_load::process()
         item->appendElementChild(location);
         
         Ref<Element> mimeType (new Element(_("mime-type")));
+        mimeType->setTextKey(_("value"));
         mimeType->setText(objItem->getMimeType());
         mimeType->setAttribute(_("editable"), _("1"), mxml_bool_type);
         item->appendElementChild(mimeType);
@@ -109,6 +114,7 @@ void web::edit_load::process()
         if (IS_CDS_ITEM_EXTERNAL_URL(objectType))
         {
             Ref<Element> protocol (new Element(_("protocol")));
+            protocol->setTextKey(_("value"));
             protocol->setText(getProtocol(objItem->getResource(0)->getAttribute(_("protocolInfo"))));
             protocol->setAttribute(_("editable"), _("1"), mxml_bool_type);
             item->appendElementChild(protocol);
@@ -118,11 +124,13 @@ void web::edit_load::process()
             Ref<CdsActiveItem> objActiveItem = RefCast(objItem, CdsActiveItem);
             
             Ref<Element> action (new Element(_("action")));
+            action->setTextKey(_("value"));
             action->setText(objActiveItem->getAction());
             action->setAttribute(_("editable"), _("1"), mxml_bool_type);
             item->appendElementChild(action);
             
             Ref<Element> state (new Element(_("state")));
+            state->setTextKey(_("value"));
             state->setText(objActiveItem->getState());
             state->setAttribute(_("editable"), _("1"), mxml_bool_type);
             item->appendElementChild(state);

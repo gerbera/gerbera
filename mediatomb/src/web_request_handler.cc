@@ -176,6 +176,7 @@ Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
     {
         root->setAttribute(_("success"), _("0"), mxml_bool_type);
         Ref<Element> errorEl(new Element(_("error")));
+        errorEl->setTextKey(_("text"));
         errorEl->setText(error);
         errorEl->setAttribute(_("code"), String::from(error_code));
         root->appendElementChild(errorEl);
@@ -256,6 +257,7 @@ void WebRequestHandler::addUpdateIDs(Ref<Element> updateIDsEl, Ref<Session> sess
     if (string_ok(updateIDs))
     {
         log_debug("UI: sending update ids: %s\n", updateIDs.c_str());
+        updateIDsEl->setTextKey(_("ids"));
         updateIDsEl->setText(updateIDs);
         updateIDsEl->setAttribute(_("updates"), _("1"), mxml_bool_type);
     }

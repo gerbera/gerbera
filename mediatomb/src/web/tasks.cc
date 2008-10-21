@@ -51,6 +51,7 @@ void web::tasks::process()
     if (action == "list")
     {
         Ref<Element> tasksEl (new Element(_("tasks")));
+        tasksEl->setArrayName(_("task"));
         root->appendElementChild(tasksEl); // inherited from WebRequestHandler
         Ref<Array<CMTask> > taskList = cm->getTasklist();
         if (taskList == nil)

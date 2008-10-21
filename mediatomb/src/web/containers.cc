@@ -58,6 +58,7 @@ void web::containers::process()
 
         
     Ref<Element> containers (new Element(_("containers")));
+    containers->setArrayName(_("container"));
     containers->setAttribute(_("parent_id"), String::from(parentID), mxml_int_type);
     containers->setAttribute(_("type"), _("database"));
 
@@ -96,6 +97,7 @@ void web::containers::process()
 #endif
         }
         ce->setAttribute(_("autoscan_mode"), autoscanMode);
+        ce->setTextKey(_("title"));
         ce->setText(cont->getTitle());
         containers->appendElementChild(ce);
         //}

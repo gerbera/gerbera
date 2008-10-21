@@ -68,8 +68,18 @@ void XML2JSON::handleElement(Ref<StringBuffer> buf, Ref<Element> el)
     
     int childCount = el->childCount();
     
-    bool array = false;
+    bool array = el->isArrayType();
     String nodeName = nil;
+    
+    if (array)
+    {
+        nodeName = el->getArrayName();
+        if (! string_ok(nodeName))
+            throw _Exception(_("XML2JSON: Element ") + el->getName() + " was of arrayType, but had no arrayName set");
+        *buf << '"' << escape(nodeName, '\\', '"') << "\":";
+        *buf << '[';
+        firstChild = false;
+    }
     
     for (int i = 0; i < childCount; i++)
     {
@@ -83,7 +93,12 @@ void XML2JSON::handleElement(Ref<StringBuffer> buf, Ref<Element> el)
                     *buf << ',';
                 else
                     firstChild = false;
-                *buf << "\"value\":" << getValue(el->getText(), el->getVTypeText());
+                String key = el->getTextKey();
+                if (! string_ok(key))
+                    throw _Exception(_("XML2JSON: Element ") + el->getName() + " had a text child, but had no textKey set");
+                    //key = _("value");
+                
+                *buf << '"' << key << "\":" << getValue(el->getText(), el->getVTypeText());
             }
             else
                 throw _Exception(_("XML2JSON cannot handle an element which consists of text AND element children - element: ") + el->getName() + "; has type: " + type);
@@ -99,6 +114,7 @@ void XML2JSON::handleElement(Ref<StringBuffer> buf, Ref<Element> el)
             else
                 firstChild = false;
             
+            /*
             if (i == 0)
             {
                 if (childCount > 1)
@@ -110,17 +126,8 @@ void XML2JSON::handleElement(Ref<StringBuffer> buf, Ref<Element> el)
                     if (nextChildEl->getName() == childEl->getName())
                         array = true;
                 }
-                //else
-                //    array = true;
-                
-                if (array)
-                {
-                    nodeName = childEl->getName();
-                    *buf << '"' << escape(childEl->getName(), '\\', '"') << "\":";
-                    *buf << '[';
-                    firstChild = false;
-                }
             }
+            */
             
             if (array)
             {

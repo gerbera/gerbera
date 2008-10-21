@@ -107,6 +107,7 @@ void web::auth::process()
             String::from(cm->getIntOption(CFG_SERVER_UI_POLL_INTERVAL)), mxml_int_type);
 /// CREATE XML FRAGMENT FOR ITEMS PER PAGE
         Ref<Element> ipp (new Element(_("items-per-page")));
+        ipp->setArrayName(_("option"));
         ipp->setAttribute(_("default"), 
           String::from(cm->getIntOption(CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE)), mxml_int_type);
     

@@ -165,6 +165,7 @@ void web::autoscan::process()
         // ---
         
         Ref<Element> autoscansEl (new Element(_("autoscans")));
+        autoscansEl->setArrayName(_("autoscan"));
         for (int i = 0; i < size; i++)
         {
             Ref<AutoscanDirectory> autoscanDir = autoscanList->get(i);

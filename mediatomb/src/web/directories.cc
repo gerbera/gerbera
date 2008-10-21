@@ -59,6 +59,7 @@ void web::directories::process()
         path = hex_decode_string(parentID);
     
     Ref<Element> containers (new Element(_("containers")));
+    containers->setArrayName(_("container"));
     containers->setAttribute(_("parent_id"), parentID);
     if (string_ok(param(_("select_it"))))
         containers->setAttribute(_("select_it"), param(_("select_it")));
@@ -92,6 +93,7 @@ void web::directories::process()
             ce->setAttribute(_("child_count"), String::from(0), mxml_int_type);
 
         Ref<StringConverter> f2i = StringConverter::f2i();
+        ce->setTextKey(_("title"));
         ce->setText(f2i->convert(filename));
         containers->appendElementChild(ce);
     }

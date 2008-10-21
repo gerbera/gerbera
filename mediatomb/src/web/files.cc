@@ -59,6 +59,7 @@ void web::files::process()
         path = hex_decode_string(parentID);
     
     Ref<Element> files(new Element(_("files")));
+    files->setArrayName(_("file"));
     files->setAttribute(_("parent_id"), parentID);
     files->setAttribute(_("location"), path);
     root->appendElementChild(files);
@@ -78,6 +79,7 @@ void web::files::process()
         fe->setAttribute(_("id"), id);
         
         Ref<StringConverter> f2i = StringConverter::f2i();
+        fe->setTextKey(_("filename"));
         fe->setText(f2i->convert(filename));
         files->appendElementChild(fe);
     }

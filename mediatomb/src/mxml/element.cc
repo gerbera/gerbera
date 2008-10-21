@@ -45,12 +45,18 @@ Element::Element(String name) : Node()
 {
     type = mxml_node_element;
     this->name = name;
+    arrayType = false;
+    arrayName = nil;
+    textKey = nil;
 }
 Element::Element(String name, Ref<Context> context) : Node()
 {
     type = mxml_node_element;
     this->name = name;
     this->context = context;
+    arrayType = false;
+    arrayName = nil;
+    textKey = nil;
 }
 String Element::getAttribute(String name)
 {

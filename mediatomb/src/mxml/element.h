@@ -48,6 +48,9 @@ protected:
     zmm::Ref<zmm::Array<Attribute> > attributes;
     void addAttribute(zmm::Ref<Attribute> attr);
     void addAttribute(zmm::String name, zmm::String value, enum mxml_value_type type = mxml_string_type);
+    bool arrayType; // for JSON support
+    zmm::String arrayName; // for JSON support
+    zmm::String textKey; // for JSON support
     
 public:
     Element(zmm::String name);
@@ -88,6 +91,15 @@ public:
     int getChildIdByName(zmm::String name);
     zmm::Ref<Element> getChildByName(zmm::String name);
     zmm::String getChildText(zmm::String name);
+    
+    bool isArrayType() { return arrayType; }
+    //void setArrayType(bool arrayType) { this->arrayType = arrayType; }
+    
+    zmm::String getArrayName() { return arrayName; }
+    void setArrayName(zmm::String arrayName) { arrayType = true; this->arrayName = arrayName; }
+    
+    zmm::String getTextKey() { return textKey; }
+    void setTextKey(zmm::String textKey) { this->textKey = textKey; }
     
 protected:
     virtual void print_internal(zmm::Ref<zmm::StringBuffer> buf, int indent);
