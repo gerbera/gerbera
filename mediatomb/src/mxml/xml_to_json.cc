@@ -66,8 +66,6 @@ void XML2JSON::handleElement(Ref<StringBuffer> buf, Ref<Element> el)
         }
     }
     
-    int childCount = el->childCount();
-    
     bool array = el->isArrayType();
     String nodeName = nil;
     
@@ -76,10 +74,15 @@ void XML2JSON::handleElement(Ref<StringBuffer> buf, Ref<Element> el)
         nodeName = el->getArrayName();
         if (! string_ok(nodeName))
             throw _Exception(_("XML2JSON: Element ") + el->getName() + " was of arrayType, but had no arrayName set");
+        
+        if (! firstChild)
+            *buf << ',';
         *buf << '"' << escape(nodeName, '\\', '"') << "\":";
         *buf << '[';
-        firstChild = false;
+        firstChild = true;
     }
+    
+    int childCount = el->childCount();
     
     for (int i = 0; i < childCount; i++)
     {
@@ -105,10 +108,6 @@ void XML2JSON::handleElement(Ref<StringBuffer> buf, Ref<Element> el)
         }
         else
         {
-            Ref<Element> childEl = RefCast(node, Element);
-            int childAttributeCount = childEl->attributeCount();
-            int childElementCount = childEl->elementChildCount();
-            
             if (! firstChild)
                 *buf << ',';
             else
@@ -129,6 +128,7 @@ void XML2JSON::handleElement(Ref<StringBuffer> buf, Ref<Element> el)
             }
             */
             
+            /*
             if (array)
             {
                 if (i > 1) // we got the name from 0 and already checked with 1
@@ -137,10 +137,23 @@ void XML2JSON::handleElement(Ref<StringBuffer> buf, Ref<Element> el)
                         throw _Exception(_("XML2JSON: if there are multiple elements of the same name (->array), there are no other elements allowed"));
                 }
             }
+            */
+            
+            
+            
+            Ref<Element> childEl = RefCast(node, Element);
+            int childAttributeCount = childEl->attributeCount();
+            int childElementCount = childEl->elementChildCount();
+            
+            if (array)
+            {
+                if (nodeName != childEl->getName())
+                    throw _Exception(_("XML2JSON: if an element is of arrayType, all children have to have the same name"));
+            }
             else
                 *buf << '"' << escape(childEl->getName(), '\\', '"') << "\":";
             
-            if (childAttributeCount > 0 || childElementCount > 0)
+            if (childAttributeCount > 0 || childElementCount > 0 || childEl->isArrayType())
             {
                 *buf << '{';
                 handleElement(buf, childEl);
