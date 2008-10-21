@@ -34,6 +34,17 @@
 
 #include "zmmf/zmmf.h"
 
+namespace mxml
+{
+enum mxml_value_type
+{
+    mxml_string_type,
+    mxml_bool_type,
+    mxml_null_type,
+    mxml_int_type
+};
+}
+
 #include "attribute.h"
 #include "context.h"
 #include "node.h"

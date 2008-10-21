@@ -45,11 +45,15 @@ class Text : public Node
 {
 protected:
     zmm::String text;
+    enum mxml_value_type vtype;
 
 public:
     Text(zmm::String text);
+    Text(zmm::String text, enum mxml_value_type vtype);
     inline zmm::String getText() { return text; }
     inline void setText(zmm::String text) { this->text = text; }
+    inline enum mxml_value_type getVType() { return vtype; }
+    inline void setVType(enum mxml_value_type vtype) { this->vtype = vtype; }
 
 protected:
     virtual void print_internal(zmm::Ref<zmm::StringBuffer> buf, int indent);

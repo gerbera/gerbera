@@ -119,7 +119,8 @@ protected:
     /// \return true if accounts are enabled, false if not
     bool accountsEnabled() { return (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_UI_ACCOUNTS_ENABLED)); }
     
-    
+    zmm::String mapAutoscanType(int type);
+    int remapAutoscanType(zmm::String type);
 
 public:
     /// \brief Constructor, currently empty.

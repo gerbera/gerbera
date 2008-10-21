@@ -83,14 +83,14 @@ void web::autoscan::process()
         root->appendElementChild(autoscan);
         if (fromFs)
         {
-            autoscan->appendTextChild(_("from_fs"), _("1"));
+            autoscan->appendTextChild(_("from_fs"), _("1"), mxml_bool_type);
             autoscan->appendTextChild(_("object_id"), objID);
             Ref<AutoscanDirectory> adir = cm->getAutoscanDirectory(path);
             autoscan2XML(autoscan, adir);
         }
         else
         {
-            autoscan->appendTextChild(_("from_fs"), _("0"));
+            autoscan->appendTextChild(_("from_fs"), _("0"), mxml_bool_type);
             autoscan->appendTextChild(_("object_id"), objID);
             Ref<AutoscanDirectory> adir = storage->getAutoscanDirectory(intParam(_("object_id")));
             autoscan2XML(autoscan, adir);
@@ -172,7 +172,7 @@ void web::autoscan::process()
             autoscanEl->setAttribute(_("objectID"), String::from(autoscanDir->getObjectID()));
             autoscanEl->appendTextChild(_("location"), autoscanDir->getLocation());
             autoscanEl->appendTextChild(_("scan_mode"), AutoscanDirectory::mapScanmode(autoscanDir->getScanMode()));
-            autoscanEl->appendTextChild(_("from_config"), autoscanDir->persistent() ? _("1") : _("0"));
+            autoscanEl->appendTextChild(_("from_config"), autoscanDir->persistent() ? _("1") : _("0"), mxml_bool_type);
             //autoscanEl->appendTextChild(_("scan_level"), AutoscanDirectory::mapScanlevel(autoscanDir->getScanLevel()));
             autoscansEl->appendElementChild(autoscanEl);
         }
@@ -188,18 +188,18 @@ void web::autoscan::autoscan2XML(Ref<Element> element, Ref<AutoscanDirectory> ad
     {
         element->appendTextChild(_("scan_mode"), _("none"));
         element->appendTextChild(_("scan_level"), _("full"));
-        element->appendTextChild(_("recursive"), _("0"));
-        element->appendTextChild(_("hidden"), _("0"));
-        element->appendTextChild(_("interval"), _("1800"));
-        element->appendTextChild(_("persistent"), _("0"));
+        element->appendTextChild(_("recursive"), _("0"), mxml_bool_type);
+        element->appendTextChild(_("hidden"), _("0"), mxml_bool_type);
+        element->appendTextChild(_("interval"), _("1800"), mxml_int_type);
+        element->appendTextChild(_("persistent"), _("0"), mxml_bool_type);
     }
     else
     {
         element->appendTextChild(_("scan_mode"), AutoscanDirectory::mapScanmode(adir->getScanMode()));
         element->appendTextChild(_("scan_level"), AutoscanDirectory::mapScanlevel(adir->getScanLevel()));
-        element->appendTextChild(_("recursive"), (adir->getRecursive() ? _("1") : _("0") ));
-        element->appendTextChild(_("hidden"), (adir->getHidden() ? _("1") : _("0") ));
-        element->appendTextChild(_("interval"), String::from(adir->getInterval()));
-        element->appendTextChild(_("persistent"), (adir->persistent() ? _("1") : _("0") ));
+        element->appendTextChild(_("recursive"), (adir->getRecursive() ? _("1") : _("0") ), mxml_bool_type);
+        element->appendTextChild(_("hidden"), (adir->getHidden() ? _("1") : _("0") ), mxml_bool_type);
+        element->appendTextChild(_("interval"), String::from(adir->getInterval()), mxml_int_type);
+        element->appendTextChild(_("persistent"), (adir->persistent() ? _("1") : _("0") ), mxml_bool_type);
     }
 }

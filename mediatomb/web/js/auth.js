@@ -31,7 +31,7 @@ function authenticate()
 {
     
     // fetch authentication token
-    var url = link('auth');
+    var url = link('auth', {action: 'get_token'});
     
     var myAjax = new Ajax.Request(
         url,
@@ -62,7 +62,7 @@ function gotToken(ajaxRequest)
     // create authentication password
     password = hex_md5(token + password);
     // try to login
-    var url = link('auth', {auth: 1, username: username, password: password});
+    var url = link('auth', {action: 'login', username: username, password: password});
     var myAjax = new Ajax.Request(
         url,
         {
@@ -94,7 +94,7 @@ function checkLogin(ajaxRequest)
 
 function checkSID()
 {
-    var url = link('auth', {checkSID: 1});
+    var url = link('auth', {action: 'check_sid'});
     var myAjax = new Ajax.Request(
         url,
         {
@@ -121,7 +121,7 @@ function checkSIDcallback(ajaxRequest)
 
 function logout()
 {
-    var url = link('auth', {logout: 1});
+    var url = link('auth', {action: 'logout'});
     var myAjax = new Ajax.Request(
         url,
         {
@@ -138,7 +138,7 @@ function handleLogout(ajaxRequest)
 
 function getConfig()
 {
-    var url = link('auth', {getConfig: 1});
+    var url = link('auth', {action: 'get_config'});
     var myAjax = new Ajax.Request(
         url,
         {

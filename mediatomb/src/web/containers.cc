@@ -58,8 +58,8 @@ void web::containers::process()
 
         
     Ref<Element> containers (new Element(_("containers")));
-    containers->setAttribute(_("ofId"), String::from(parentID));
-    containers->setAttribute(_("type"), _("d"));
+    containers->setAttribute(_("of_id"), String::from(parentID), mxml_int_type);
+    containers->setAttribute(_("type"), _("database"));
 
     if (string_ok(param(_("select_it"))))
         containers->setAttribute(_("select_it"), param(_("select_it")));
@@ -67,16 +67,7 @@ void web::containers::process()
     
     Ref<BrowseParam> param(new BrowseParam(parentID, BROWSE_DIRECT_CHILDREN | BROWSE_CONTAINERS));
     Ref<Array<CdsObject> > arr;
-    try
-    {
-        arr = storage->browse(param);
-    }
-    catch (Exception e)
-    {
-        containers->setAttribute(_("success"), _("0"));
-        return;
-    }
-    containers->setAttribute(_("success"), _("1"));
+    arr = storage->browse(param);
     
     for (int i = 0; i < arr->size(); i++)
     {
@@ -85,27 +76,26 @@ void web::containers::process()
         //{
         Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
         Ref<Element> ce(new Element(_("container")));
-        ce->setAttribute(_("id"), String::from(cont->getID()));
+        ce->setAttribute(_("id"), String::from(cont->getID()), mxml_int_type);
         int childCount = cont->getChildCount();
-        if (childCount)
-            ce->setAttribute(_("childCount"), String::from(childCount));
+        ce->setAttribute(_("child_count"), String::from(childCount), mxml_int_type);
         int autoscanType = cont->getAutoscanType();
-        ce->setAttribute(_("autoscanType"), String::from(autoscanType));
+        ce->setAttribute(_("autoscan_type"), mapAutoscanType(autoscanType));
         
-        int autoscanMode = 0;
+        String autoscanMode = _("none");
         if (autoscanType > 0)
         {
-            autoscanMode = 1;
+            autoscanMode = _("timed");
 #ifdef HAVE_INOTIFY
             if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
             {
                 Ref<AutoscanDirectory> adir = storage->getAutoscanDirectory(cont->getID());
                 if ((adir != nil) && (adir->getScanMode() == InotifyScanMode))
-                    autoscanMode = 2;
+                    autoscanMode = _("inotify");
             }
 #endif
         }
-        ce->setAttribute(_("autoscanMode"), String::from(autoscanMode));
+        ce->setAttribute(_("autoscan_mode"), autoscanMode);
         ce->setText(cont->getTitle());
         containers->appendElementChild(ce);
         //}

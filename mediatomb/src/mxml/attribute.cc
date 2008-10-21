@@ -33,6 +33,7 @@
     #include "autoconfig.h"
 #endif
 
+#include "mxml.h"
 #include "attribute.h"
 
 using namespace mxml;
@@ -43,10 +44,18 @@ Attribute::Attribute(String name, String value) : Object()
 {
     this->name = name;
     this->value = value;
+    vtype = mxml_string_type;
 }
 Attribute::Attribute(String name) : Object()
 {
     this->name = name;
+    vtype = mxml_string_type;
+}
+Attribute::Attribute(String name, String value, enum mxml_value_type vtype) : Object()
+{
+    this->name = name;
+    this->value = value;
+    this->vtype = vtype;
 }
 void Attribute::setValue(String value)
 {

@@ -174,7 +174,7 @@ void web::addObject::process()
 {
     check_request();
     
-    String obj_type = param(_("objType"));
+    String obj_type = param(_("obj_type"));
     String location = param(_("location"));
     
     if (!string_ok(param(_("title"))))
@@ -191,46 +191,45 @@ void web::addObject::process()
    
     bool allow_fifo = false;
 
-    switch (obj_type.toInt())
+    if (obj_type == STRING_OBJECT_TYPE_CONTAINER)
     {
-        case OBJECT_TYPE_CONTAINER:
-            this->addContainer(parentID);
-            //updateContainerEl = Ref<Element>(new Element(_("updateContainer")));
-            //updateContainerEl->setText(parID);
-            //updateContainerEl->addAttribute(_("add"), _("1"));
-            //root->appendChild(updateContainerEl);
-            break;
-            
-        case OBJECT_TYPE_ITEM:
-            if (!string_ok(location)) throw _Exception(_("no location given"));
-            if (!check_path(location, false)) throw _Exception(_("file not found"));
-            obj = this->addItem(parentID, Ref<CdsItem> (new CdsItem()));
-            allow_fifo = true;
-            break;
-            
-        case OBJECT_TYPE_ITEM | OBJECT_TYPE_ACTIVE_ITEM:
-            if (!string_ok(param(_("action")))) throw _Exception(_("no action given"));
-            if (!string_ok(location)) throw _Exception(_("no location given"));
-            if (!check_path(location, false))
-                throw _Exception(_("path not found"));
-            obj = this->addActiveItem(parentID);
-            allow_fifo = true;
-            break;
-            
-        case OBJECT_TYPE_ITEM | OBJECT_TYPE_ITEM_EXTERNAL_URL:
-            if (!string_ok(location)) throw _Exception(_("No URL given"));
-            obj = this->addUrl(parentID, Ref<CdsItemExternalURL> (new CdsItemExternalURL()), true);
-            break;
-            
-        case OBJECT_TYPE_ITEM | OBJECT_TYPE_ITEM_EXTERNAL_URL | OBJECT_TYPE_ITEM_INTERNAL_URL:
-            if (!string_ok(location)) throw _Exception(_("No URL given"));
-            obj = this->addUrl(parentID, Ref<CdsItemExternalURL> (new CdsItemInternalURL()), false);
-            break;
-            
-        default:
-            throw _Exception(_("unknown object type: ") + obj_type.c_str());
-            break;
+        this->addContainer(parentID);
+        //updateContainerEl = Ref<Element>(new Element(_("updateContainer")));
+        //updateContainerEl->setText(parID);
+        //updateContainerEl->addAttribute(_("add"), _("1"));
+        //root->appendChild(updateContainerEl);
     }
+    else if (obj_type == STRING_OBJECT_TYPE_ITEM)
+    {
+        if (!string_ok(location)) throw _Exception(_("no location given"));
+        if (!check_path(location, false)) throw _Exception(_("file not found"));
+        obj = this->addItem(parentID, Ref<CdsItem> (new CdsItem()));
+        allow_fifo = true;
+    }
+    else if (obj_type == STRING_OBJECT_TYPE_ACTIVE_ITEM)
+    {
+        if (!string_ok(param(_("action")))) throw _Exception(_("no action given"));
+        if (!string_ok(location)) throw _Exception(_("no location given"));
+        if (!check_path(location, false))
+            throw _Exception(_("path not found"));
+        obj = this->addActiveItem(parentID);
+        allow_fifo = true;
+    }
+    else if (obj_type == STRING_OBJECT_TYPE_EXTERNAL_URL)
+    {
+        if (!string_ok(location)) throw _Exception(_("No URL given"));
+        obj = this->addUrl(parentID, Ref<CdsItemExternalURL> (new CdsItemExternalURL()), true);
+    }
+    else if (obj_type == STRING_OBJECT_TYPE_INTERNAL_URL)
+    {
+        if (!string_ok(location)) throw _Exception(_("No URL given"));
+        obj = this->addUrl(parentID, Ref<CdsItemExternalURL> (new CdsItemInternalURL()), false);
+    }
+    else
+    {
+        throw _Exception(_("unknown object type: ") + obj_type.c_str());
+    }
+    
     if (obj != nil)
     {
         obj->setVirtual(true);

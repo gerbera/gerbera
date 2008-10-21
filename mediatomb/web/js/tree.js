@@ -299,11 +299,16 @@ function updateTree(ajaxRequest)
         return;
     }
     var type = xmlGetAttribute(containers, "type");
-    var ofId = xmlGetAttribute(containers, "ofId");
+    if (type == 'filesystem')
+        type = 'f';
+    else if (type == 'database')
+        type = 'd';
+    var ofId = xmlGetAttribute(containers, "of_id");
     var parentId = type+ofId;
     
     var node = getTreeNode(parentId);
-    var success = containers.getAttribute("success");
+    var success = xmlGetElement(xml, 'root').getAttribute("success");
+    //alert(success);
     if (! success || success != "1")
     {
         if (ofId == '0')
@@ -344,26 +349,26 @@ function updateTree(ajaxRequest)
         var id = type + xmlGetAttribute(c, "id");
         
         //TODO: childCount unnecessary? - hasChildren instead?
-        var childCount = xmlGetAttribute(c, "childCount");
+        var childCount = xmlGetAttribute(c, "child_count");
         if (childCount)
             childCount = parseInt(childCount);
         var expandable = childCount ? true : false;
         
-        var autoscanType = xmlGetAttribute(c, "autoscanType");
-        var autoscanMode = xmlGetAttribute(c, "autoscanMode");
+        var autoscanType = xmlGetAttribute(c, "autoscan_type");
+        var autoscanMode = xmlGetAttribute(c, "autoscan_mode");
         
         var thisIconArray = iconArray;
-        if (autoscanType == '1')
+        if (autoscanType == 'ui')
         {
-            if (autoscanMode == '2')
+            if (autoscanMode == 'inotify')
                 thisIconArray = autoscanInotifyIconArray;
             else
                 thisIconArray = autoscanTimedIconArray;
         }
         
-        if (autoscanType == '2')
+        if (autoscanType == 'persistent')
         {
-            if (autoscanMode == '2')
+            if (autoscanMode == 'inotify')
                 thisIconArray = autoscanInotifyConfigIconArray;
             else
                 thisIconArray = autoscanTimedConfigIconArray;

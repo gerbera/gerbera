@@ -44,14 +44,21 @@ function genericCallback(ajaxRequest)
 
 function link(req_type, param, get_update_ids)
 {
-    var url = "/content/interface?req_type="+ encodeURIComponent(req_type) +"&sid="+ SID;
+    var url = "/content/interface?req_type="+ encodeURIComponent(req_type) +"&return_type=xml&sid="+ SID;
+    var got_update_param = false;
     if (param)
         for (var key in param)
         {
+            if (key == 'updates')
+            {
+                got_update_param = true;
+                if (! isTypeDb() || ! dbStuff.treeShown)
+                    continue;
+            }
             url += "&" + encodeURIComponent(key) +"="+ encodeURIComponent(param[key]);
         }
-    if (get_update_ids && isTypeDb() && dbStuff.treeShown)
-        url += "&get_update_ids=1";
+    if (! got_update_param && get_update_ids && isTypeDb() && dbStuff.treeShown)
+        url += "&updates=check";
     return url;
 }
 
@@ -145,7 +152,7 @@ function errorCheck(xml, noredirect)
     // clears current task if no task element
     updateCurrentTask(xmlGetElement(xml, 'task'));
     
-    var updateIDsEl = xmlGetElement(xml, 'updateIDs');
+    var updateIDsEl = xmlGetElement(xml, 'update_ids');
     if (updateIDsEl)
         handleUIUpdates(updateIDsEl);
     
@@ -362,7 +369,7 @@ function getUpdates(force)
 {
     if (loggedIn)
     {
-        var url = link('update', {force_update: (force ? '1' : '0')}, true);
+        var url = link('void', {updates: (force ? 'get' : 'check')});
         var myAjax = new Ajax.Request(
             url,
             {

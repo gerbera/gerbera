@@ -81,26 +81,34 @@ web::auth::auth() : WebRequestHandler()
 void web::auth::process()
 {
     int timeout = ConfigManager::getInstance()->getIntOption(CFG_SERVER_UI_SESSION_TIMEOUT);
-   
+    
     timeout = timeout * 60;
     
-    if (param(_("getConfig")) != nil)
+    String action = param(_("action"));
+    
+    if (! string_ok(action))
+    {
+        root->appendTextChild(_("error"), _("req_type auth: no action given"));
+        return;
+    }
+    
+    if (action == "get_config")
     {
         Ref<ConfigManager> cm = ConfigManager::getInstance();
         Ref<Element> config (new Element(_("config")));
         root->appendElementChild(config);
         config->setAttribute(_("show-tooltips"),
                 (cm->getBoolOption(
-                          CFG_SERVER_UI_SHOW_TOOLTIPS) ? _("yes") : _("no")));
+                          CFG_SERVER_UI_SHOW_TOOLTIPS) ? _("1") : _("0")), mxml_bool_type);
         config->setAttribute(_("poll-when-idle"), 
             (cm->getBoolOption(
-                          CFG_SERVER_UI_POLL_WHEN_IDLE) ? _("yes") : _("no")));
+                          CFG_SERVER_UI_POLL_WHEN_IDLE) ? _("1") : _("0")), mxml_bool_type);
         config->setAttribute(_("poll-interval"), 
-            String::from(cm->getIntOption(CFG_SERVER_UI_POLL_INTERVAL)));
+            String::from(cm->getIntOption(CFG_SERVER_UI_POLL_INTERVAL)), mxml_int_type);
 /// CREATE XML FRAGMENT FOR ITEMS PER PAGE
         Ref<Element> ipp (new Element(_("items-per-page")));
         ipp->setAttribute(_("default"), 
-          String::from(cm->getIntOption(CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE)));
+          String::from(cm->getIntOption(CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE)), mxml_int_type);
     
         Ref<Array<StringBase> > menu_opts = 
             cm->getStringArrayOption(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
@@ -113,14 +121,14 @@ void web::auth::process()
         config->appendElementChild(ipp);
 #ifdef HAVE_INOTIFY
         if (cm->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
-            config->setAttribute(_("have-inotify"), _("1"));
+            config->setAttribute(_("have-inotify"), _("1"), mxml_bool_type);
         else
-            config->setAttribute(_("have-inotify"), _("0"));
+            config->setAttribute(_("have-inotify"), _("0"), mxml_bool_type);
 #else
-        config->setAttribute(_("have-inotify"), _("0"));
+        config->setAttribute(_("have-inotify"), _("0"), mxml_bool_type);
 #endif
     }
-    else if (param(_("checkSID")) != nil)
+    else if (action == "check_sid")
     {
         log_debug("checking sid...\n");
         Ref<SessionManager> sessionManager = SessionManager::getInstance();
@@ -128,7 +136,7 @@ void web::auth::process()
         String sid = param(_("sid"));
         if (accountsEnabled())
         {
-            root->appendTextChild(_("accounts"), _("1"));
+            root->appendTextChild(_("accounts"), _("1"), mxml_bool_type);
             if (string_ok(sid))
             {
                 session = sessionManager->getSession(sid);
@@ -137,7 +145,7 @@ void web::auth::process()
         }
         else
         {
-            root->appendTextChild(_("accounts"), _("0"));
+            root->appendTextChild(_("accounts"), _("0"), mxml_bool_type);
             if (sid == nil || (session = sessionManager->getSession(sid)) == nil)
             {
                 session = sessionManager->createSession(timeout);
@@ -149,7 +157,7 @@ void web::auth::process()
         if (session != nil)
             session->clearUpdateIDs();
     }
-    else if (param(_("logout")) != nil)
+    else if (action == "logout")
     {
         check_request();
         String sid = param(_("sid"));
@@ -160,7 +168,7 @@ void web::auth::process()
         sessionManager->removeSession(sid);
         root->appendTextChild(_("redirect"), _("/"));
     }
-    else if (param(_("auth")) == nil)
+    else if (action == "get_token")
     {
         Ref<SessionManager> sessionManager = SessionManager::getInstance();
         Ref<Session> session = sessionManager->createSession(timeout);
@@ -171,9 +179,8 @@ void web::auth::process()
         session->put(_("token"), token);
         root->appendTextChild(_("token"), token);
     }
-    else
+    else if (action == "login")
     {
-        // login
         try
         {
             check_request(false);

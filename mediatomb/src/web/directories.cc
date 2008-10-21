@@ -59,27 +59,18 @@ void web::directories::process()
         path = hex_decode_string(parentID);
     
     Ref<Element> containers (new Element(_("containers")));
-    containers->setAttribute(_("ofId"), parentID);
-    containers->setAttribute(_("select_it"), param(_("select_it")));
-    containers->setAttribute(_("type"), _("f"));
+    containers->setAttribute(_("of_id"), parentID);
+    if (string_ok(param(_("select_it"))))
+        containers->setAttribute(_("select_it"), param(_("select_it")));
+    containers->setAttribute(_("type"), _("filesystem"));
     root->appendElementChild(containers);
     
     Ref<Filesystem> fs(new Filesystem());
     
     Ref<Array<FsObject> > arr;
-    try
-    {
-        arr = fs->readDirectory(path, FS_MASK_DIRECTORIES,
+    arr = fs->readDirectory(path, FS_MASK_DIRECTORIES,
                                                       FS_MASK_DIRECTORIES);
-    }
-    catch (Exception e)
-    {
-        containers->setAttribute(_("success"), _("0"));
-        return;
-    }
-    containers->setAttribute(_("success"), _("1"));
     
-
     for (int i = 0; i < arr->size(); i++)
     {
         Ref<FsObject> obj = arr->get(i);
@@ -96,7 +87,9 @@ void web::directories::process()
         String id = hex_encode(filepath.c_str(), filepath.length());
         ce->setAttribute(_("id"), id);
         if (obj->hasContent)
-            ce->setAttribute(_("childCount"), String::from(1));
+            ce->setAttribute(_("child_count"), String::from(1), mxml_int_type);
+        else
+            ce->setAttribute(_("child_count"), String::from(0), mxml_int_type);
 
         Ref<StringConverter> f2i = StringConverter::f2i();
         ce->setText(f2i->convert(filename));

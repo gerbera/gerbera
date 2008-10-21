@@ -65,9 +65,9 @@ String Element::getAttribute(String name)
     }
     return nil;
 }
-void Element::addAttribute(String name, String value)
+void Element::addAttribute(String name, String value, enum mxml_value_type type)
 {
-    Ref<Attribute> attr = Ref<Attribute>(new Attribute(name, value));
+    Ref<Attribute> attr = Ref<Attribute>(new Attribute(name, value, type));
     addAttribute(attr);
 }
 
@@ -78,7 +78,7 @@ void Element::addAttribute(Ref<Attribute> attr)
     attributes->append(attr);
 }
 
-void Element::setAttribute(String name, String value)
+void Element::setAttribute(String name, String value, enum mxml_value_type type)
 {
     if (attributes == nil)
         attributes = Ref<Array<Attribute> >(new Array<Attribute>());
@@ -89,10 +89,11 @@ void Element::setAttribute(String name, String value)
         if(attr->name == name)
         {
             attr->setValue(value);
+            attr->setVType(type);
             return;
         }
     }
-    addAttribute(name, value);
+    addAttribute(name, value, type);
 }
 
 int Element::childCount(enum mxml_node_types type)
@@ -292,6 +293,28 @@ String Element::getText()
         return nil;
 }
 
+enum mxml_value_type Element::getVTypeText()
+{
+    Ref<Text> text;
+    int i = 0;
+    bool someText = false;
+    enum mxml_value_type vtype = mxml_string_type;
+    while ((text = RefCast(getChild(i++, mxml_node_text), Text)) != nil)
+    {
+        if (! someText)
+        {
+            someText = true;
+            vtype = text->getVType();
+        }
+        else
+        {
+            if (vtype != text->getVType())
+                vtype = mxml_string_type;
+        }
+    }
+    return vtype;
+}
+
 int Element::attributeCount()
 {
     if (attributes == nil)
@@ -308,7 +331,7 @@ Ref<Attribute> Element::getAttribute(int index)
     return attributes->get(index);
 }
 
-void Element::setText(String str)
+void Element::setText(String str, enum mxml_value_type type)
 {
     if (childCount() > 1)
         throw _Exception(_("Element::setText() cannot be called on an element which has more than one child"));
@@ -323,15 +346,15 @@ void Element::setText(String str)
     }
     else
     {
-        Ref<Text> text(new Text(str));
+        Ref<Text> text(new Text(str, type));
         appendChild(RefCast(text, Node));
     }
 }
 
-void Element::appendTextChild(String name, String text)
+void Element::appendTextChild(String name, String text, enum mxml_value_type type)
 {
     Ref<Element> el = Ref<Element>(new Element(name));
-    el->setText(text);
+    el->setText(text, type);
     appendElementChild(el);
 }
 

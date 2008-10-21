@@ -59,23 +59,13 @@ void web::files::process()
         path = hex_decode_string(parentID);
     
     Ref<Element> files(new Element(_("files")));
-    files->setAttribute(_("ofId"), parentID);
+    files->setAttribute(_("of_id"), parentID);
     files->setAttribute(_("location"), path);
     root->appendElementChild(files);
     
     Ref<Filesystem> fs(new Filesystem());
     Ref<Array<FsObject> > arr;
-    try
-    {
-        arr = fs->readDirectory(path, FS_MASK_FILES);
-    }
-    catch (Exception e)
-    {
-        files->setAttribute(_("success"), _("0"));
-        return;
-    }
-    files->setAttribute(_("success"), _("1"));
-    
+    arr = fs->readDirectory(path, FS_MASK_FILES);
     
     for (int i = 0; i < arr->size(); i++)
     {
@@ -86,9 +76,6 @@ void web::files::process()
         String filepath = path + _("/") + filename;
         String id = hex_encode(filepath.c_str(), filepath.length());
         fe->setAttribute(_("id"), id);
-        int childCount = 1;
-        if (childCount)
-            fe->setAttribute(_("childCount"), String::from(childCount));
         
         Ref<StringConverter> f2i = StringConverter::f2i();
         fe->setText(f2i->convert(filename));

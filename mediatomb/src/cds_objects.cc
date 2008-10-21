@@ -366,3 +366,33 @@ String CdsItem::getVirtualPath()
 
     return location;
 }
+
+String CdsObject::mapObjectType(int type)
+{
+    if (IS_CDS_CONTAINER(type))
+        return _(STRING_OBJECT_TYPE_CONTAINER);
+    if (IS_CDS_PURE_ITEM(type))
+        return _(STRING_OBJECT_TYPE_ITEM);
+    if (IS_CDS_ACTIVE_ITEM(type))
+        return _(STRING_OBJECT_TYPE_ACTIVE_ITEM);
+    if (IS_CDS_ITEM_EXTERNAL_URL(type))
+        return _(STRING_OBJECT_TYPE_EXTERNAL_URL);
+    if (IS_CDS_ITEM_INTERNAL_URL(type))
+        return _(STRING_OBJECT_TYPE_INTERNAL_URL);
+    throw Exception(_("illegal objectType: ") + type);
+}
+
+int CdsObject::remapObjectType(String objectType)
+{
+    if (objectType == STRING_OBJECT_TYPE_CONTAINER)
+        return OBJECT_TYPE_CONTAINER;
+    if (objectType == STRING_OBJECT_TYPE_ITEM)
+        return OBJECT_TYPE_ITEM;
+    if (objectType == STRING_OBJECT_TYPE_ACTIVE_ITEM)
+        return OBJECT_TYPE_ITEM | OBJECT_TYPE_ACTIVE_ITEM;
+    if (objectType == STRING_OBJECT_TYPE_EXTERNAL_URL)
+        return OBJECT_TYPE_ITEM | OBJECT_TYPE_ITEM_EXTERNAL_URL;
+    if (objectType == STRING_OBJECT_TYPE_INTERNAL_URL)
+        return OBJECT_TYPE_ITEM | OBJECT_TYPE_ITEM_EXTERNAL_URL | OBJECT_TYPE_ITEM_INTERNAL_URL;
+    throw Exception(_("illegal objectType: ") + objectType);
+}

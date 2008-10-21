@@ -41,13 +41,7 @@
 using namespace zmm;
 using namespace mxml;
 
-/*
-web::autoscan::autoscan() : WebRequestHandler()
-{
-}
-*/
-
-void web::update::process()
+void web::voidType::process()
 {
     check_request();
 }

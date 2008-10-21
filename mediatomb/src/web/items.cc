@@ -60,54 +60,36 @@ void web::items::process()
     
     Ref<Storage> storage = Storage::getInstance();
     Ref<Element> items (new Element(_("items")));
-    items->setAttribute(_("ofId"), String::from(parentID));
+    items->setAttribute(_("of_id"), String::from(parentID), mxml_int_type);
     root->appendElementChild(items);
     Ref<CdsObject> obj;
-    try
-    {
-        obj = storage->loadObject(parentID);
-    }
-    catch (ObjectNotFoundException e)
-    {
-        items->setAttribute(_("success"), _("0"));
-        return;
-    }
+    obj = storage->loadObject(parentID);
     Ref<BrowseParam> param(new BrowseParam(parentID, BROWSE_DIRECT_CHILDREN | BROWSE_ITEMS));
     param->setRange(start, count);
-
+    
     if ((obj->getClass() == UPNP_DEFAULT_CLASS_MUSIC_ALBUM) ||
         (obj->getClass() == UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER))
         param->setFlag(BROWSE_TRACK_SORT);
     
     Ref<Array<CdsObject> > arr;
-    try
-    {
-        arr = storage->browse(param);
-    }
-    catch (ObjectNotFoundException e)
-    {
-        items->setAttribute(_("success"), _("0"));
-        return;
-    }
-    items->setAttribute(_("success"), _("1"));
+    arr = storage->browse(param);
     
     String location = obj->getVirtualPath(); 
     if (string_ok(location))
         items->setAttribute(_("location"), location);
-    items->setAttribute(_("virtual"), (obj->isVirtual() ? _("1") : _("0")));
-
-    int autoscanType = storage->getAutoscanDirectoryType(parentID);
-    items->setAttribute(_("autoscanType"), String::from(autoscanType));
-    items->setAttribute(_("start"), String::from(start));
+    items->setAttribute(_("virtual"), (obj->isVirtual() ? _("1") : _("0")), mxml_bool_type);
+    
+    items->setAttribute(_("start"), String::from(start), mxml_int_type);
     //items->setAttribute(_("returned"), String::from(arr->size()));
-    items->setAttribute(_("totalMatches"), String::from(param->getTotalMatches()));
-
+    items->setAttribute(_("total_matches"), String::from(param->getTotalMatches()), mxml_int_type);
+    
     int protectContainer = 0;
     int protectItems = 0;
-    int autoscanMode = 0;
-
+    String autoscanMode = _("none");
+    
+    int autoscanType = storage->getAutoscanDirectoryType(parentID);
     if (autoscanType > 0)
-        autoscanMode = 1;
+        autoscanMode = _("timed");
 
 #ifdef HAVE_INOTIFY
     if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
@@ -131,15 +113,15 @@ void web::items::process()
                 if (autoscanType == 0 || adir->persistent())
                     protectContainer = 1;
 
-                autoscanMode = 2;
+                autoscanMode = _("inotify");
             }
         }
     }
 #endif
-
-    items->setAttribute(_("protectContainer"), String::from(protectContainer));
-    items->setAttribute(_("protectItems"), String::from(protectItems));
-    items->setAttribute(_("autoscanMode"), String::from(autoscanMode));
+    items->setAttribute(_("autoscan_mode"), autoscanMode);
+    items->setAttribute(_("autoscan_type"), mapAutoscanType(autoscanType));
+    items->setAttribute(_("protect_container"), String::from(protectContainer), mxml_bool_type);
+    items->setAttribute(_("protect_items"), String::from(protectItems), mxml_bool_type);
 
     for (int i = 0; i < arr->size(); i++)
     {
@@ -147,7 +129,7 @@ void web::items::process()
         //if (IS_CDS_ITEM(obj->getObjectType()))
         //{
         Ref<Element> item (new Element(_("item")));
-        item->setAttribute(_("id"), String::from(obj->getID()));
+        item->setAttribute(_("id"), String::from(obj->getID()), mxml_int_type);
         item->appendTextChild(_("title"), obj->getTitle());
         /// \todo clean this up, should have more generic options for online
         /// services
@@ -160,8 +142,9 @@ void web::items::process()
         else
 #endif
             item->appendTextChild(_("res"), CdsResourceManager::getFirstResource(RefCast(obj, CdsItem)));
-        item->appendTextChild(_("virtual"), obj->isVirtual() ? _("1") : _("0"));
+        //item->appendTextChild(_("virtual"), obj->isVirtual() ? _("1") : _("0"), mxml_bool_type);
         items->appendElementChild(item);
         //}
     }
+    
 }

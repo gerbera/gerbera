@@ -43,6 +43,12 @@
 #define OBJECT_TYPE_ITEM_EXTERNAL_URL   0x00000008
 #define OBJECT_TYPE_ITEM_INTERNAL_URL   0x00000010
 
+#define STRING_OBJECT_TYPE_CONTAINER    "container"
+#define STRING_OBJECT_TYPE_ITEM         "item"
+#define STRING_OBJECT_TYPE_ACTIVE_ITEM  "active_item"
+#define STRING_OBJECT_TYPE_EXTERNAL_URL "external_url"
+#define STRING_OBJECT_TYPE_INTERNAL_URL "internal_url"
+
 #define IS_CDS_CONTAINER(type) (type & OBJECT_TYPE_CONTAINER)
 #define IS_CDS_ITEM(type) (type & OBJECT_TYPE_ITEM)
 #define IS_CDS_ACTIVE_ITEM(type) (type & OBJECT_TYPE_ACTIVE_ITEM)
@@ -285,6 +291,9 @@ public:
 
     /// \brief Returns the path to the object as it appears in the database tree.
     virtual zmm::String getVirtualPath() = 0; 
+    
+    static zmm::String mapObjectType(int objectType);
+    static int remapObjectType(zmm::String objectType);
     
     friend int CdsObjectTitleComparator(void *arg1, void *arg2);
 };

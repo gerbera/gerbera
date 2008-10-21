@@ -103,10 +103,11 @@ void WebRequestHandler::get_info(IN const char *filename, OUT struct File_Info *
     String contentType;
     
     String mimetype;
-    if (boolParam(_("json")))
-        mimetype = _(MIMETYPE_JSON);
-    else
+    String returnType = param(_("return_type"));
+    if (string_ok(returnType) && returnType == "xml")
         mimetype = _(MIMETYPE_XML);
+    else
+        mimetype = _(MIMETYPE_JSON);
     
     contentType = mimetype + "; charset=" + DEFAULT_INTERNAL_CHARSET;
     
@@ -119,13 +120,16 @@ Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
     root = Ref<Element>(new Element(_("root")));
     out = Ref<StringBuffer>(new StringBuffer());
     
+    String error = nil;
+    int error_code = 0;
+    
     String output;
     // processing page, creating output
     try
     {
         if(!ConfigManager::getInstance()->getBoolOption(CFG_SERVER_UI_ENABLED))
         {
-            root->setAttribute(_("ui_disabled"), _("1"));
+            root->setAttribute(_("ui_disabled"), _("1"), mxml_bool_type);
             log_warning("The UI is disabled in the configuration file. See README.\n");
         }
         else
@@ -151,7 +155,8 @@ Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
     catch (StorageException e)
     {
         e.printStackTrace();
-        root->appendTextChild(_("error"), e.getUserMessage());
+        error = e.getUserMessage();
+        error_code = 300;
     }
     catch (Exception e)
     {
@@ -159,15 +164,34 @@ Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
         // Ref<Dictionary> par(new Dictionary());
         // par->put("message", e.getMessage());
         // output = subrequest("error", par);
-        String errmsg = _("Error: ") + e.getMessage();
-        root->appendTextChild(_("error"), errmsg);
+        error = _("Error: ") + e.getMessage();
+        error_code = 400;
     }
     
-    if (boolParam(_("json")))
-        output = XML2JSON::getJSON(root);
+    if (! string_ok(error))
+    {
+        root->setAttribute(_("success"), _("1"), mxml_bool_type);
+    }
     else
-        output = renderXMLHeader() + root->print();
+    {
+        root->setAttribute(_("success"), _("0"), mxml_bool_type);
+        Ref<Element> errorEl(new Element(_("error")));
+        errorEl->setText(error);
+        errorEl->setAttribute(_("code"), String::from(error_code));
+        root->appendElementChild(errorEl);
+    }
     
+    String returnType = param(_("return_type"));
+    if (string_ok(returnType) && returnType == "xml")
+    {
+#ifdef TOMBDEBUG
+        // make sure we can generate JSON w/o exceptions
+        XML2JSON::getJSON(root);
+#endif
+        output = renderXMLHeader() + root->print();
+    }
+    else
+        output = XML2JSON::getJSON(root);
     
     /*
     try
@@ -210,44 +234,30 @@ void WebRequestHandler::handleUpdateIDs()
 {
     // session will be filled by check_request
     
-    String uiUpdate = param(_("get_update_ids"));
-    if ((string_ok(uiUpdate) && uiUpdate == _("1")))
+    String updates = param(_("updates"));
+    if (string_ok(updates))
     {
-//        log_debug("UI wants updates.\n");
-        String forceUpdate = param(_("force_update"));
-        if ((string_ok(forceUpdate) && forceUpdate ==_("1")))
+        Ref<Element> updateIDs(new Element(_("update_ids")));
+        root->appendElementChild(updateIDs);
+        if (updates == "check")
         {
-//            log_debug("UI forces updates.\n");
-            addUpdateIDs(root, session);
+            updateIDs->setAttribute(_("pending"), session->hasUIUpdateIDs() ? _("1") : _("0"), mxml_bool_type);
         }
-        else
+        else if (updates == "get")
         {
-            Ref<Element> updateIDs(new Element(_("updateIDs")));
-            root->appendElementChild(updateIDs);
-            if (session->hasUIUpdateIDs())
-            {
-//                log_debug("UI updates pending...\n");
-                updateIDs->setAttribute(_("pending"), _("1"));
-            }
-            else
-            {
-//                log_debug("no UI updates.\n");
-            }
+            addUpdateIDs(updateIDs, session);
         }
     }
 }
 
-void WebRequestHandler::addUpdateIDs(Ref<Element> root, Ref<Session> session)
+void WebRequestHandler::addUpdateIDs(Ref<Element> updateIDsEl, Ref<Session> session)
 {
-    Ref<Element> updateIDsEl(new Element(_("updateIDs")));
-    root->appendElementChild(updateIDsEl);
-    
     String updateIDs = session->getUIUpdateIDs();
     if (string_ok(updateIDs))
     {
         log_debug("UI: sending update ids: %s\n", updateIDs.c_str());
         updateIDsEl->setText(updateIDs);
-        updateIDsEl->setAttribute(_("updates"), _("1"));
+        updateIDsEl->setAttribute(_("updates"), _("1"), mxml_bool_type);
     }
 }
 
@@ -256,8 +266,28 @@ void WebRequestHandler::appendTask(Ref<Element> el, Ref<CMTask> task)
     if (task == nil || el == nil)
         return;
     Ref<Element> taskEl (new Element(_("task")));
-    taskEl->setAttribute(_("id"), String::from(task->getID()));
-    taskEl->setAttribute(_("cancellable"), task->isCancellable() ? _("1") : _("0"));
+    taskEl->setAttribute(_("id"), String::from(task->getID()), mxml_int_type);
+    taskEl->setAttribute(_("cancellable"), task->isCancellable() ? _("1") : _("0"), mxml_bool_type);
     taskEl->setText(task->getDescription());
     el->appendElementChild(taskEl);
+}
+
+String WebRequestHandler::mapAutoscanType(int type)
+{
+    if (type == 1)
+        return _("ui");
+    else if (type == 2)
+        return _("persistent");
+    else
+        return _("none");
+}
+
+int WebRequestHandler::remapAutoscanType(String type)
+{
+    if (type == "ui")
+        return 1;
+    else if (type == "persistent")
+        return 2;
+    else
+        return 0;
 }

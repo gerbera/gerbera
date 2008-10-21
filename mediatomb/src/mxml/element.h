@@ -47,14 +47,15 @@ protected:
     zmm::String name;
     zmm::Ref<zmm::Array<Attribute> > attributes;
     void addAttribute(zmm::Ref<Attribute> attr);
-    void addAttribute(zmm::String name, zmm::String value);
+    void addAttribute(zmm::String name, zmm::String value, enum mxml_value_type type = mxml_string_type);
     
 public:
     Element(zmm::String name);
     Element(zmm::String name, zmm::Ref<Context> context);
     zmm::String getAttribute(zmm::String name);
-    void setAttribute(zmm::String name, zmm::String value);
+    void setAttribute(zmm::String name, zmm::String value, enum mxml_value_type type = mxml_string_type);
     zmm::String getText();
+    enum mxml_value_type getVTypeText();
 
     inline zmm::String getName() { return name; }
     void setName(zmm::String name) { this->name = name; }
@@ -62,7 +63,7 @@ public:
     int attributeCount();
     zmm::Ref<Attribute> getAttribute(int index);
         
-    void setText(zmm::String text);
+    void setText(zmm::String text, enum mxml_value_type type = mxml_string_type);
 
     int childCount(enum mxml_node_types type = mxml_node_all);
     zmm::Ref<Node> getChild(int index, enum mxml_node_types type = mxml_node_all, bool remove = false);
@@ -82,7 +83,7 @@ public:
     bool removeElementChild(zmm::String name, bool removeAll);
     
     void appendElementChild(zmm::Ref<Element> child) { appendChild(RefCast(child, Node)); };
-    void appendTextChild(zmm::String name, zmm::String text);
+    void appendTextChild(zmm::String name, zmm::String text, enum mxml_value_type type = mxml_string_type);
 
     int getChildIdByName(zmm::String name);
     zmm::Ref<Element> getChildByName(zmm::String name);

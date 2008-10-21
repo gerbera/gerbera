@@ -136,8 +136,8 @@ protected:
     void autoscan2XML(zmm::Ref<mxml::Element> element, zmm::Ref<AutoscanDirectory> adir);
 };
 
-/// \brief UI updates
-class update : public WebRequestHandler
+/// \brief nothing :)
+class voidType : public WebRequestHandler
 {
 public:
     virtual void process();

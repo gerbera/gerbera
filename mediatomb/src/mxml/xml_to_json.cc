@@ -62,7 +62,7 @@ void XML2JSON::handleElement(Ref<StringBuffer> buf, Ref<Element> el)
                 *buf << ',';
             else
                 firstChild = false;
-            *buf << '"' << escape(at->name, '\\', '"') << "\":\"" << escape(at->value, '\\', '"') << '"';
+            *buf << '"' << escape(at->name, '\\', '"') << "\":" << getValue(at->value, at->getVType());
         }
     }
     
@@ -83,7 +83,7 @@ void XML2JSON::handleElement(Ref<StringBuffer> buf, Ref<Element> el)
                     *buf << ',';
                 else
                     firstChild = false;
-                *buf << "\"value\":\"" << escape(el->getText(), '\\', '"') << '"';
+                *buf << "\"value\":" << getValue(el->getText(), el->getVTypeText());
             }
             else
                 throw _Exception(_("XML2JSON cannot handle an element which consists of text AND element children - element: ") + el->getName() + "; has type: " + type);
@@ -116,6 +116,7 @@ void XML2JSON::handleElement(Ref<StringBuffer> buf, Ref<Element> el)
                 if (array)
                 {
                     nodeName = childEl->getName();
+                    *buf << '"' << escape(childEl->getName(), '\\', '"') << "\":";
                     *buf << '[';
                     firstChild = false;
                 }
@@ -130,7 +131,7 @@ void XML2JSON::handleElement(Ref<StringBuffer> buf, Ref<Element> el)
                 }
             }
             else
-                *buf << '"' << escape(el->getName(), '\\', '"') << "\":";
+                *buf << '"' << escape(childEl->getName(), '\\', '"') << "\":";
             
             if (childAttributeCount > 0 || childElementCount > 0)
             {
@@ -140,7 +141,7 @@ void XML2JSON::handleElement(Ref<StringBuffer> buf, Ref<Element> el)
             }
             else
             {
-                *buf << '"' << escape(el->getText(), '\\', '"') << '"';
+                *buf << getValue(childEl->getText(), childEl->getVTypeText());
             }
         }
     }
@@ -148,4 +149,28 @@ void XML2JSON::handleElement(Ref<StringBuffer> buf, Ref<Element> el)
     if (array)
         *buf << ']';
     
+}
+
+String XML2JSON::getValue(String text, enum mxml_value_type type)
+{
+    if (type == mxml_string_type)
+        return _("\"") + escape(text, '\\', '"') + '"';
+    if (type == mxml_bool_type)
+    {
+        assert(string_ok(text)); // must be real string
+        assert(text == "0" || text == "1");  // must be bool type
+        return text == "0" ? _("false") : _("true");
+    }
+    if (type == mxml_null_type)
+    {
+        assert(! string_ok(text)); // must not contain text
+        return _("null");
+    }
+    
+    if (type == mxml_int_type)
+    {
+        /// \todo should we check if really int?
+        return text;
+    }
+    return nil;
 }

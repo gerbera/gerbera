@@ -43,6 +43,14 @@ Text::Text(String text) : Node()
 {
     type = mxml_node_text;
     this->text = text;
+    vtype = mxml_string_type;
+}
+
+Text::Text(String text, enum mxml_value_type vtype) : Node()
+{
+    type = mxml_node_text;
+    this->text = text;
+    this->vtype = vtype;
 }
 
 void Text::print_internal(Ref<StringBuffer> buf, int indent)

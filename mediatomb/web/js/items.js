@@ -126,8 +126,10 @@ function updateItems(ajaxRequest)
         childrenTag = "file";
     }
     
-    var ofId = items.getAttribute("ofId");
-    var success = items.getAttribute("success");
+    var ofId = items.getAttribute("of_id");
+    var success = xmlGetElement(xml, 'root').getAttribute("success");
+    //alert(success);
+    //alert(xml);
     if (! success || success != "1")
     {
         if (ofId == '0')
@@ -147,13 +149,13 @@ function updateItems(ajaxRequest)
     }
     
     var isVirtual = (items.getAttribute("virtual") == '1');
-    var autoscanType = items.getAttribute("autoscanType");
-    var autoscanMode = items.getAttribute("autoscanMode");
+    var autoscanType = items.getAttribute("autoscan_type");
+    var autoscanMode = items.getAttribute("autoscan_mode");
     var path = items.getAttribute("location");
     var loadItemId = (useFiles ? 'f' : 'd') + ofId;
-    var totalMatches = parseInt(items.getAttribute("totalMatches"));
-    var isProtected = (items.getAttribute("protectContainer") == '1');
-    var itemsProtected = (items.getAttribute("protectItems") == '1');
+    var totalMatches = parseInt(items.getAttribute("total_matches"));
+    var isProtected = (items.getAttribute("protect_container") == '1');
+    var itemsProtected = (items.getAttribute("protect_items") == '1');
     var totalPages = Math.ceil(totalMatches / viewItems);
     var start = parseInt(items.getAttribute("start"));
     var thisPage = Math.abs(start / viewItems);
@@ -361,17 +363,17 @@ function updateItems(ajaxRequest)
     else
     {
         var iconSrc = iconContainer;
-        if (autoscanType == '1')
+        if (autoscanType == 'ui')
         {
-            if (autoscanMode == '2')
+            if (autoscanMode == 'inotify')
                 iconSrc = iconContainerAutoscanInotify;
             else
                 iconSrc = iconContainerAutoscanTimed;
         }
         
-        if (autoscanType == '2')
+        if (autoscanType == 'persistent')
         {
-            if (autoscanMode == '2')
+            if (autoscanMode == 'inotify')
                 iconSrc = iconContainerAutoscanInotifyConfig;
             else
                 iconSrc = iconContainerAutoscanTimedConfig;
@@ -421,7 +423,7 @@ function updateItems(ajaxRequest)
             }
         }
         
-        if (autoscanType > 0)
+        if (autoscanType != 'none')
             autoscanLink = true;
         
         if (addLink)
@@ -682,14 +684,14 @@ function updateItemAddEditFields(editItem)
         selectEl.disabled = false;
         submitEl.value = 'Add item...';
         currentTypeOption = selectEl.value;
-        if (!currentTypeOption) currentTypeOption = '1';
+        if (!currentTypeOption) currentTypeOption = 'container';
         form.action = 'javascript:parent.itemAddEditSubmit();';
     }
     else
     {
         selectEl.disabled = true;
         submitEl.value = 'Update item...';
-        currentTypeOption = xmlGetElementText(editItem, 'objType');
+        currentTypeOption = xmlGetElementText(editItem, 'obj_type');
         var objectId = editItem.getAttribute('object_id');
         selectEl.value = currentTypeOption;
         form.action = 'javascript:parent.itemAddEditSubmit('+objectId+');';
@@ -700,15 +702,15 @@ function updateItemAddEditFields(editItem)
         // ATTENTION: These values need to be changed in src/cds_objects.h too.
         // Note: 'Active Item', 'External Link (URL)', 'Internal Link (Local URL)'
         // are also 'Items', so they have the item flag set too.
-        var objTypeOptions = new Array('Container', 'Item', 'Active Item', 'External Link (URL)', 'Internal Link (Local URL)');
-        var objTypeOptionsIds = new Array('1', '2', '6', '10', '26');
+        var objTypeOptionsText = new Array('Container', 'Item', 'Active Item', 'External Link (URL)', 'Internal Link (Local URL)');
+        var objTypeOptionsValue = new Array('container', 'item', 'active_item', 'external_url', 'internal_url');
         
-        for (var i = 0; i < objTypeOptions.length; ++i)
+        for (var i = 0; i < objTypeOptionsValue.length; ++i)
             selectEl.options[i] = new Option(
-                objTypeOptions[i],
-                objTypeOptionsIds[i],
+                objTypeOptionsText[i],
+                objTypeOptionsValue[i],
                 false, 
-                (currentTypeOption && objTypeOptionsIds[i] == currentTypeOption)
+                (currentTypeOption && objTypeOptionsValue[i] == currentTypeOption)
                 );
     }
     
@@ -717,31 +719,31 @@ function updateItemAddEditFields(editItem)
     var defaultsAr;
     
     // using "if" instead of "switch" for compatibility reasons...
-    if (currentTypeOption == '1')
+    if (currentTypeOption == 'container')
     {
         fieldAr = new Array('Title', 'Class');
         fieldNameAr = new Array('title', 'class');
         defaultsAr = new Array('', 'object.container');
     }
-    else if (currentTypeOption == '2')
+    else if (currentTypeOption == 'item')
     {
         fieldAr = new Array('Title', 'Location', 'Class', 'Description', 'Mimetype');
         fieldNameAr = new Array('title', 'location', 'class', 'description', 'mime-type');
         defaultsAr = new Array('', '', 'object.item', '', '');
     }
-    else if (currentTypeOption == '6')
+    else if (currentTypeOption == 'active_item')
     {
         fieldAr = new Array('Title', 'Location', 'Class', 'Description', 'Mimetype', 'Action Script', 'State');
         fieldNameAr = new Array('title', 'location', 'class', 'description', 'mime-type', 'action', 'state');
         defaultsAr = new Array('', '', 'object.item.activeItem', '', '', '', '');
     }
-    else if (currentTypeOption == '10')
+    else if (currentTypeOption == 'external_url')
     {
         fieldAr = new Array('Title', 'URL', 'Protocol', 'Class', 'Description', 'Mimetype');
         fieldNameAr = new Array('title', 'location', 'protocol', 'class', 'description', 'mime-type');
         defaultsAr = new Array('', '', 'http-get', 'object.item', '', '');
     }
-    else if (currentTypeOption == '26')
+    else if (currentTypeOption == 'internal_url')
     {
         fieldAr = new Array('Title', 'URL', 'Class', 'Description', 'Mimetype');
         fieldNameAr = new Array('title', 'location', 'class', 'description', 'mime-type');
