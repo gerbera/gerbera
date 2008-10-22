@@ -49,12 +49,6 @@ function gotToken(ajaxRequest)
     var rootEl = xmlGetElement(xml, "root");
     
     var token = xmlGetElementText(rootEl, "token");
-    SID = xmlGetAttribute(rootEl, "sid");
-    
-    if (!SID)
-        alert('could not obtain session id');
-    else
-        setCookie("SID", SID);
     
     var username = frames["rightF"].document.login_form.username.value;
     var password = frames["rightF"].document.login_form.password.value;
@@ -94,7 +88,7 @@ function checkLogin(ajaxRequest)
 
 function checkSID()
 {
-    var url = link('auth', {action: 'check_sid'});
+    var url = link('auth', {action: 'get_sid'});
     var myAjax = new Ajax.Request(
         url,
         {
@@ -109,14 +103,17 @@ function checkSIDcallback(ajaxRequest)
     var xml = ajaxRequest.responseXML;
     errorCheck(xml, true);
     var rootEl = xmlGetElement(xml, "root");
-    var newSID = xmlGetAttribute(rootEl, "sid");
-    if (newSID)
+    var sidWasValid = xmlGetAttribute(rootEl, "sid_was_valid") == "1";
+    if (! sidWasValid)
     {
-        SID = newSID;
-        setCookie("SID", SID);
+        var newSID = xmlGetAttribute(rootEl, "sid");
+        if (newSID)
+        {
+            SID = newSID;
+            setCookie("SID", SID);
+        }
     }
-    var accountsStr = xmlGetElementText(rootEl, "accounts");
-    ACCOUNTS = (accountsStr && accountsStr == "1");
+    LOGGED_IN = xmlGetAttribute(rootEl, "logged_in") == "1";
 }
 
 function logout()
@@ -134,6 +131,12 @@ function logout()
 function handleLogout(ajaxRequest)
 {
     errorCheck(ajaxRequest.responseXML);
+    var now = new Date();
+    var expire = new Date();
+    expire.setTime(now.getTime() - 3600000 * 24 * 360);
+    setCookie('SID', null, expire);
+    SID = null;
+    window.location = '/';
 }
 
 function getConfig()
@@ -156,6 +159,8 @@ function getConfigCallback(ajaxRequest)
     var configEl = xmlGetElement(rootEl, "config");
     if (configEl)
     {
+        accountsStr = xmlGetAttribute(configEl, "accounts");
+        ACCOUNTS = (accountsStr && accountsStr == "1");
         pollIntervalTime = xmlGetAttribute(configEl, "poll-interval") * 1000;
         pollWhenIdle = (xmlGetAttribute(configEl, "poll-when-idle") == "yes");
         showTooltips = (xmlGetAttribute(configEl, "show-tooltips") == "yes");

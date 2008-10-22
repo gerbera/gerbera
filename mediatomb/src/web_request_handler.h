@@ -46,6 +46,12 @@ public:
     SessionException(zmm::String message) : zmm::Exception(message) {}
 };
 
+class LoginException : public zmm::Exception
+{
+public:
+    LoginException(zmm::String message) : zmm::Exception(message) {}
+};
+
 /// \brief This class is responsible for processing requests that come to the user interface.
 class WebRequestHandler : public RequestHandler
 {

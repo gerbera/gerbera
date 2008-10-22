@@ -44,6 +44,8 @@ namespace web
 /// \brief Authentication handler (used over AJAX)
 class auth : public WebRequestHandler
 {
+protected:
+    int timeout;
 public:
     auth();
     virtual void process();

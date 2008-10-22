@@ -677,7 +677,7 @@ function updateItemAddEditFields(editItem)
 {
     var currentTypeOption;
     var form = rightDocument.forms['addEditItem'];
-    var selectEl = form.elements['objType'];
+    var selectEl = form.elements['obj_type'];
     var submitEl = form.elements['submit'];
     if (!editItem)
     {

@@ -127,14 +127,36 @@ function errorCheck(xml, noredirect)
     }
     var rootEl = xmlGetElement(xml, 'root');
     
-    var uiDisabled = xmlGetAttribute(rootEl, 'ui_disabled');
+    var errorEl = xmlGetElement(xml, 'error');
+    var error = false;
+    var redirect = false;
+    var uiDisabled = false;
+    if (errorEl)
+    {
+        var code = errorEl.getAttribute('code');
+        var mainCode = Math.floor(code / 100);
+        
+        // 2xx - object not found
+        // 3xx - login exception (not logged in or login error)
+        // 4xx - session error (no valid session)
+        // 5xx - storage exception
+        // 8xx - general error (no more accurate code available (yet))
+        // 900 - UI disabled
+        
+        if (mainCode == 4)
+            redirect = '/';
+        else if (mainCode == 9)
+            uiDisabled = true;
+        else if (mainCode != 2)
+            error = xmlGetText(errorEl);
+    }
+    
     if (uiDisabled)
     {
         window.location = "/disabled.html";
         return false;
     }
     
-    var redirect = xmlGetElementText(xml, 'redirect');
     if (redirect)
     {
         var now = new Date();
@@ -156,15 +178,10 @@ function errorCheck(xml, noredirect)
     if (updateIDsEl)
         handleUIUpdates(updateIDsEl);
     
-    var errorEl = xmlGetElement(xml, 'error');
-    if (errorEl)
+    if (error)
     {
-        var code = errorEl.getAttribute('code');
-        if (Math.floor(code / 100) != 3)
-        {
-            alert(errorEl.getText());
-            return false;
-        }
+        alert(error);
+        return false;
     }
     return true;
 }

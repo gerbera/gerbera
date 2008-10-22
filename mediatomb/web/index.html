@@ -48,6 +48,7 @@
             var SID;      // session id
             var TYPE;     // database or filesystem
             var ACCOUNTS; // accounts enabled or disabled
+            var LOGGED_IN;// logged in?
                           // is set by checkSID();
             var loggedIn = false;
             var isMSIE = /MSIE/.test(navigator.userAgent);
@@ -81,6 +82,7 @@
                 if (TYPE!="db" && TYPE!="fs") TYPE="db";
                 
                 //if (SID && SID != null && SID != 'null')
+                getConfig();    
                 checkSID();
                 var topDocument = frames["topF"].document;
                 var rightDocument = frames["rightF"].document;
@@ -94,7 +96,7 @@
                     Element.hide(logoutLinkEl);
                 */
                     
-                if (!SID || SID == null)
+                if (!SID || SID == null || ! LOGGED_IN)
                 {
                     Element.show(rightDocument.getElementById("loginDiv"));
                     Element.show(leftDocument.getElementById("leftLoginDiv"));
@@ -144,7 +146,6 @@
             
             function initLoggedIn()
             {
-                getConfig();
                 itemInit();
                 treeInit();
                 Element.addClassName(frames["topleftF"].document.getElementById('type_' + TYPE), 'selected');

@@ -83,7 +83,7 @@ void WebRequestHandler::check_request(bool checkLogin)
         throw SessionException(_("invalid session id"));
     
     if (checkLogin && ! session->isLoggedIn())
-        throw SessionException(_("not logged in"));
+        throw LoginException(_("not logged in"));
     session->access();
 }
 
@@ -129,8 +129,9 @@ Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
     {
         if(!ConfigManager::getInstance()->getBoolOption(CFG_SERVER_UI_ENABLED))
         {
-            root->setAttribute(_("ui_disabled"), _("1"), mxml_bool_type);
             log_warning("The UI is disabled in the configuration file. See README.\n");
+            error = _("The UI is disabled in the configuration file. See README.");
+            error_code = 900;
         }
         else
         {
@@ -145,31 +146,32 @@ Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
             }
         }
     }
+    catch (LoginException e)
+    {
+        error = e.getMessage();
+        error_code = 300;
+    }
     catch (ObjectNotFoundException e)
     {
-        error_code = 300;
         error = e.getMessage();;
+        error_code = 200;
     }
-    catch (SessionException se)
+    catch (SessionException e)
     {
-        error = _("no valid session");
-        error_code = 500;
-        root->appendTextChild(_("redirect"), _("/"));
+        error = e.getMessage();
+        error_code = 400;
     }
     catch (StorageException e)
     {
-        e.printStackTrace();
         error = e.getUserMessage();
-        error_code = 600;
+        error_code = 500;
+        e.printStackTrace();
     }
     catch (Exception e)
     {
-        e.printStackTrace();
-        // Ref<Dictionary> par(new Dictionary());
-        // par->put("message", e.getMessage());
-        // output = subrequest("error", par);
         error = _("Error: ") + e.getMessage();
-        error_code = 900;
+        error_code = 800;
+        e.printStackTrace();
     }
     
     if (! string_ok(error))
@@ -182,6 +184,9 @@ Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
         Ref<Element> errorEl(new Element(_("error")));
         errorEl->setTextKey(_("text"));
         errorEl->setText(error);
+        
+        if (error_code == 0)
+            error_code = 899;
         errorEl->setAttribute(_("code"), String::from(error_code));
         root->appendElementChild(errorEl);
     }
@@ -194,6 +199,7 @@ Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
         {
             // make sure we can generate JSON w/o exceptions
             XML2JSON::getJSON(root);
+            //log_debug("JSON-----------------------\n\n\n%s\n\n\n\n", XML2JSON::getJSON(root).c_str());
         }
         catch(Exception e)
         {

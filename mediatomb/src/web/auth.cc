@@ -43,12 +43,6 @@ using namespace mxml;
 
 #define LOGIN_TIMEOUT 10 // in seconds
 
-class LoginException : public zmm::Exception
-{
-public:
-    LoginException(zmm::String message) : zmm::Exception(message) {}
-};
-
 static long get_time()
 {
     struct timeval tv;
@@ -77,14 +71,12 @@ static bool check_token(String token, String password, String encPassword)
 
 web::auth::auth() : WebRequestHandler()
 {
+    timeout = 60 * ConfigManager::getInstance()->getIntOption(CFG_SERVER_UI_SESSION_TIMEOUT);
 }
 void web::auth::process()
 {
-    int timeout = ConfigManager::getInstance()->getIntOption(CFG_SERVER_UI_SESSION_TIMEOUT);
-    
-    timeout = timeout * 60;
-    
     String action = param(_("action"));
+    Ref<SessionManager> sessionManager = SessionManager::getInstance();
     
     if (! string_ok(action))
     {
@@ -97,6 +89,7 @@ void web::auth::process()
         Ref<ConfigManager> cm = ConfigManager::getInstance();
         Ref<Element> config (new Element(_("config")));
         root->appendElementChild(config);
+        config->setAttribute(_("accounts"), accountsEnabled() ? _("1") : _("0"), mxml_bool_type);
         config->setAttribute(_("show-tooltips"),
                 (cm->getBoolOption(
                           CFG_SERVER_UI_SHOW_TOOLTIPS) ? _("1") : _("0")), mxml_bool_type);
@@ -116,7 +109,7 @@ void web::auth::process()
 
         for (int i = 0; i < menu_opts->size(); i++)
         {
-            ipp->appendTextChild(_("option"), menu_opts->get(i));
+            ipp->appendTextChild(_("option"), menu_opts->get(i), mxml_int_type);
         }
 
         config->appendElementChild(ipp);
@@ -129,51 +122,43 @@ void web::auth::process()
         config->setAttribute(_("have-inotify"), _("0"), mxml_bool_type);
 #endif
     }
-    else if (action == "check_sid")
+    else if (action == "get_sid")
     {
-        log_debug("checking sid...\n");
-        Ref<SessionManager> sessionManager = SessionManager::getInstance();
+        log_debug("checking/getting sid...\n");
         Ref<Session> session = nil;
         String sid = param(_("sid"));
-        if (accountsEnabled())
+        
+        if (sid == nil || (session = sessionManager->getSession(sid)) == nil)
         {
-            root->appendTextChild(_("accounts"), _("1"), mxml_bool_type);
-            if (string_ok(sid))
-            {
-                session = sessionManager->getSession(sid);
-                check_request();
-            }
+            session = sessionManager->createSession(timeout);
+            root->setAttribute(_("sid_was_valid"), _("0"), mxml_bool_type);
         }
         else
         {
-            root->appendTextChild(_("accounts"), _("0"), mxml_bool_type);
-            if (sid == nil || (session = sessionManager->getSession(sid)) == nil)
-            {
-                session = sessionManager->createSession(timeout);
-                root->setAttribute(_("sid"), session->getID());
-            }
-            if (! session->isLoggedIn())
-                session->logIn();
-        }
-        if (session != nil)
             session->clearUpdateIDs();
+            root->setAttribute(_("sid_was_valid"), _("1"), mxml_bool_type);
+        }
+        root->setAttribute(_("sid"), session->getID());
+        
+        if (! session->isLoggedIn() && ! accountsEnabled())
+        {
+            session->logIn();
+            //throw SessionException(_("not logged in"));
+        }
+        root->setAttribute(_("logged_in"), session->isLoggedIn() ? _("1") : _("0"), mxml_bool_type);
     }
     else if (action == "logout")
     {
         check_request();
         String sid = param(_("sid"));
-        Ref<SessionManager> sessionManager = SessionManager::getInstance();
         Ref<Session> session = SessionManager::getInstance()->getSession(sid);
         if (session == nil)
             throw _Exception(_("illegal session id"));
         sessionManager->removeSession(sid);
-        root->appendTextChild(_("redirect"), _("/"));
     }
     else if (action == "get_token")
     {
-        Ref<SessionManager> sessionManager = SessionManager::getInstance();
-        Ref<Session> session = sessionManager->createSession(timeout);
-        root->setAttribute(_("sid"), session->getID());
+        check_request(false);
         
         // sending token
         String token = generate_token();
@@ -182,39 +167,27 @@ void web::auth::process()
     }
     else if (action == "login")
     {
-        try
-        {
-            check_request(false);
-            
-            // authentication
-            String username = param(_("username"));
-            String encPassword = param(_("password"));
-            String sid = param(_("sid"));
-            
-            if (! string_ok(username) || ! string_ok(encPassword))
-                throw LoginException(_("Missing username or password"));
-            
-            Ref<SessionManager> sessionManager = SessionManager::getInstance();
-            Ref<Session> session = sessionManager->getSession(sid);
-            if (session == nil)
-                throw _Exception(_("illegal session id"));
-            
-            //Ref<Array<StringBase> > parts = split_string(password, ':');
-            //if (parts->size() != 2)
-            //    throw LoginException(_("Invalid password"));
-            //String token = parts->get(0);
-            //String encPassword = parts->get(1);
-            
-            String correctPassword = sessionManager->getUserPassword(username);
-            
-            if (! string_ok(correctPassword) || ! check_token(session->get(_("token")), correctPassword, encPassword))
-                throw LoginException(_("Invalid username or password"));
-            
-            session->logIn();
-        }
-        catch (LoginException le)
-        {
-            root->appendTextChild(_("error"), le.getMessage());
-        }
+        check_request(false);
+        
+        // authentication
+        String username = param(_("username"));
+        String encPassword = param(_("password"));
+        String sid = param(_("sid"));
+        
+        if (! string_ok(username) || ! string_ok(encPassword))
+            throw LoginException(_("Missing username or password"));
+        
+        Ref<Session> session = sessionManager->getSession(sid);
+        if (session == nil)
+            throw _Exception(_("illegal session id"));
+        
+        String correctPassword = sessionManager->getUserPassword(username);
+        
+        if (! string_ok(correctPassword) || ! check_token(session->get(_("token")), correctPassword, encPassword))
+            throw LoginException(_("Invalid username or password"));
+        
+        session->logIn();
     }
+    else
+        throw _Exception(_("illegal action given to req_type auth"));
 }
