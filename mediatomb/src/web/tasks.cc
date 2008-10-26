@@ -64,7 +64,7 @@ void web::tasks::process()
     }
     else if (action == "cancel")
     {
-        int taskID = intParam(_("taskID"));
+        int taskID = intParam(_("task_id"));
         cm->invalidateTask(taskID);
     }
     else

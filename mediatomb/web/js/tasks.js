@@ -130,7 +130,7 @@ function cancelCurrentTask()
 
 function cancelTask(taskID)
 {
-    var url = link('tasks', {action: 'cancel', taskID: taskID}, false);
+    var url = link('tasks', {action: 'cancel', task_id: taskID}, false);
     var myAjax = new Ajax.Request(
         url,
         {
