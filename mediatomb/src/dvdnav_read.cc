@@ -190,8 +190,7 @@ int DVDNavReader::chapterCount(int title_idx)
 {
     int32_t c;
 
-    printf("----> Counting chapterrs for title: %d count is %d\n", title_idx, 
-            titleCount());
+    title_idx++;
 
     if ((title_idx < 1) || (title_idx > titleCount()))
         throw _Exception(_("Requested title number exceeds available titles "
@@ -204,15 +203,16 @@ int DVDNavReader::chapterCount(int title_idx)
     return c;
 }
 
-void DVDNavReader::selectPGC(int title_idx, int chapter_idx, int angle_idx)
+void DVDNavReader::selectPGC(int title_idx, int chapter_idx)
 {
-    printf("----> selecting title: %d count is %d\n", title_idx, titleCount());
+    title_idx++;
+    chapter_idx++;
 
     if ((title_idx < 1) || (title_idx > titleCount()))
         throw _Exception(_("Attmpted to select invalid title!"));
 
-    if ((chapter_idx < 1) || (chapter_idx > chapterCount(title_idx)))
-        throw _Exception(_("Attmpted to select invalid chapter!"));
+    if ((chapter_idx < 1) || (chapter_idx > chapterCount(title_idx-1)))
+        throw _Exception(_("Attempted to select invalid chapter!"));
 
     AUTOLOCK(mutex);
 
@@ -225,26 +225,9 @@ void DVDNavReader::selectPGC(int title_idx, int chapter_idx, int angle_idx)
    EOT = false;
 }
 
-off_t DVDNavReader::length(bool precise)
-{
-    return -1;
-}
-
-off_t DVDNavReader::chapterLength(int chapter_idx, bool precise)
-{
-//    if (chapter_idx > chapterCount(this->title_index))
-//        throw _Exception(_("Attempted to select invalid chapter!"));
-
-    off_t len = -1;
-
-    return len;
-}
-
 size_t DVDNavReader::readSector(unsigned char *buffer, size_t length)
 {
     AUTOLOCK(mutex);
-
-    uint8_t mem[DVD_VIDEO_LB_LEN];
 
     unsigned char *p = buffer;
     size_t consumed = 0;
@@ -255,8 +238,6 @@ size_t DVDNavReader::readSector(unsigned char *buffer, size_t length)
     while (!EOT)
     {
         int result, event, len;
-//        uint8_t *buf = mem;
-
 
         result = dvdnav_get_next_block(dvd, (uint8_t *)p, &event, &len);
         if (result == DVDNAV_STATUS_ERR)
@@ -268,7 +249,6 @@ size_t DVDNavReader::readSector(unsigned char *buffer, size_t length)
         switch (event)
         {
             case DVDNAV_BLOCK_OK:
-//                memcpy(p, buf, DVD_VIDEO_LB_LEN);
                 consumed = consumed + DVD_VIDEO_LB_LEN;
                 if ((consumed + DVD_VIDEO_LB_LEN) > length)
                     return consumed;
@@ -289,7 +269,6 @@ size_t DVDNavReader::readSector(unsigned char *buffer, size_t length)
             case DVDNAV_CELL_CHANGE:
                 {
                     int32_t tt = 0, ptt = 0;
-                    unsigned int pos, len;
                     dvdnav_current_title_info(dvd, &tt, &ptt);
                     if (tt == 0)
                     {
@@ -313,7 +292,7 @@ size_t DVDNavReader::readSector(unsigned char *buffer, size_t length)
             case DVDNAV_HOP_CHANNEL:
                 break;
             default:
-                printf("Uknown event!\n");
+                log_error("Uknown event when playing DVD %s\n", dvd_path.c_str());
                 EOT = true;
                 return -1;
                 break;
@@ -327,11 +306,9 @@ int DVDNavReader::audioTrackCount()
     AUTOLOCK(mutex);
 
     uint8_t count = 0;
-    int8_t ret = 0;
     while (true)
     {
-        ret = dvdnav_get_audio_logical_stream(dvd, count);
-        if (ret < 0)
+        if(dvdnav_get_audio_logical_stream(dvd, count) < 0)
             break;
 
         // afaik only 8 streams are supported?
@@ -343,43 +320,6 @@ int DVDNavReader::audioTrackCount()
     }
 
     return (int)count;
-}
-
-int DVDNavReader::duration()
-{
-    return 0;
-}
-
-int DVDNavReader::titleDuration()
-{
-    AUTOLOCK(mutex);
-    return 0;
-}
-
-int DVDNavReader::chapterDuration(int chapter_idx)
-{
-    chapter_idx++;
-
-//    if ((chapter_idx < 0) || (chapter_idx > chapterCount(this->title_index)))
-//        throw _Exception(_("Attmpted to select invalid chapter!"));
-
-    AUTOLOCK(mutex);
-    return (int)0;
-}
-
-// this function was taken from lsdvd
-long DVDNavReader::dvdtime2msec(dvd_time_t *dt)
-{
-    double fps = frames_per_s[(dt->frame_u & 0xc0) >> 6];
-    long   ms;
-    ms  = (((dt->hour &   0xf0) >> 3) * 5 + (dt->hour   & 0x0f)) * 3600000;
-    ms += (((dt->minute & 0xf0) >> 3) * 5 + (dt->minute & 0x0f)) * 60000;
-    ms += (((dt->second & 0xf0) >> 3) * 5 + (dt->second & 0x0f)) * 1000;
-
-    if(fps > 0)
-    ms += (long)(((dt->frame_u & 0x30) >> 3) * 5 + (dt->frame_u & 0x0f) * 1000.0 / fps);
-
-    return ms;
 }
 
 // from lsdvd
@@ -395,13 +335,13 @@ String DVDNavReader::audioLanguage(int stream_idx)
     char code[3];
     audio_attr_t audio_attr;
 
-    printf("stream idx: %d, count: %d\n", stream_idx, audioTrackCount());
-    if ((stream_idx < 0) || (stream_idx >= audioTrackCount()))
+    stream_idx++;
+    if ((stream_idx < 1) || (stream_idx > audioTrackCount()))
         throw _Exception(_("Attempted to select invalid audio stream!"));
 
     AUTOLOCK(mutex);
 
-    if (dvdnav_get_audio_attr(dvd, stream_idx, &audio_attr) != DVDNAV_STATUS_OK)
+    if (dvdnav_get_audio_attr(dvd, stream_idx-1, &audio_attr) != DVDNAV_STATUS_OK)
         throw _Exception(_("Error error retrieving audio language from DVD ") +
                            dvd_path + " : " + 
                            String(dvdnav_err_to_string(dvd)));
@@ -422,8 +362,9 @@ int DVDNavReader::audioSampleFrequency(int stream_idx)
 {
     audio_attr_t audio_attr;
 
-    printf("stream idx: %d, count: %d\n", stream_idx, audioTrackCount());
-    if ((stream_idx < 0) || (stream_idx >= audioTrackCount()))
+    stream_idx++;
+
+    if ((stream_idx < 1) || (stream_idx > audioTrackCount()))
         throw _Exception(_("Attmpted to select invalid audio stream!"));
 
     if (dvdnav_get_audio_attr(dvd, stream_idx, &audio_attr) != DVDNAV_STATUS_OK)
@@ -440,9 +381,9 @@ int DVDNavReader::audioSampleFrequency(int stream_idx)
 int DVDNavReader::audioChannels(int stream_idx)
 {
     audio_attr_t audio_attr;
-    
-    printf("stream idx: %d, count: %d\n", stream_idx, audioTrackCount());
-    if ((stream_idx < 0) || (stream_idx >= audioTrackCount()))
+   
+    stream_idx++;
+    if ((stream_idx < 1) || (stream_idx > audioTrackCount()))
         throw _Exception(_("Attmpted to select invalid audio stream!"));
 
     if (dvdnav_get_audio_attr(dvd, stream_idx, &audio_attr) != DVDNAV_STATUS_OK)
@@ -457,8 +398,8 @@ String DVDNavReader::audioFormat(int stream_idx)
 {
     audio_attr_t audio_attr;
 
-    printf("stream idx: %d, count: %d\n", stream_idx, audioTrackCount());
-    if ((stream_idx < 0) || (stream_idx >= audioTrackCount()))
+    stream_idx++;
+    if ((stream_idx < 1) || (stream_idx > audioTrackCount()))
         throw _Exception(_("Attempted to select invalid audio stream!"));
 
     if (dvdnav_get_audio_attr(dvd, stream_idx, &audio_attr) != DVDNAV_STATUS_OK)
@@ -473,9 +414,9 @@ int DVDNavReader::audioStreamID(int stream_idx)
 {
     audio_attr_t audio_attr;
 
-    printf("stream idx: %d, count: %d\n", stream_idx, audioTrackCount());
+    stream_idx++;
 
-    if ((stream_idx < 0) || (stream_idx >= audioTrackCount()))
+    if ((stream_idx < 1) || (stream_idx > audioTrackCount()))
         throw _Exception(_("Attempted to select invalid audio stream!"));
 
     AUTOLOCK(mutex);
@@ -485,7 +426,7 @@ int DVDNavReader::audioStreamID(int stream_idx)
                            dvd_path + " : " +
                            String(dvdnav_err_to_string(dvd)));
 
-    return audio_id[audio_attr.audio_format]+stream_idx;
+    return audio_id[audio_attr.audio_format]+(stream_idx-1);
 }
 
 #endif//HAVE_LIBDVDREAD
