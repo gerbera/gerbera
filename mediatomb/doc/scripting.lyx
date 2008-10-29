@@ -1,4 +1,4 @@
-#LyX 1.5.4 created this file. For more info see http://www.lyx.org/
+#LyX 1.5.5 created this file. For more info see http://www.lyx.org/
 \lyxformat 276
 \begin_document
 \begin_header
@@ -198,8 +198,9 @@ The scenarios described above and much more can be achieved with the help
 \end_layout
 
 \begin_layout Standard
-Additionally, version 0.10.0 introduces a playlist parsing feature, which
- is also handled by scripting.
+Version 0.10.0 introduces a playlist parsing feature, which is also handled
+ by scripting and version 0.12.0 adds a script for creating a virtual layout
+ out of a DVD iso image.
 \end_layout
 
 \begin_layout Section
@@ -1780,6 +1781,238 @@ status open
 
 \end_layout
 
+\begin_layout Subsubsection
+DVD Properties
+\end_layout
+
+\begin_layout Standard
+Version 0.12.0 introduces an additional import script for DVD images.
+ The DVD image is parsed with the help of libdvdread, the information about
+ the available titles, chapters, languages, etc.
+ is gathered and provided to the DVD import script.
+ The usual object properties apply here as well, however the dvd object
+ offers several extensions that can be accessed via the aux property:
+\end_layout
+
+\begin_layout Code
+dvd.aux[DVD]
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+dvd.aux[DVD].titles
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+RO
+\end_layout
+
+\begin_layout Standard
+This is an array that contains information about titles that are found on
+ the DVD.
+ The length of the array (and thus the number of available titles can be
+ retrieved by:
+\end_layout
+
+\begin_layout Code
+dvd.aux[DVD].titles.length
+\end_layout
+
+\begin_layout Standard
+Further, being a normal JavaScript array it supports all associated JS functions.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+dvd.aux[DVD].titles[t_index].audio_tracks
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+RO
+\end_layout
+
+\begin_layout Standard
+Each title object in the titles array provides information about available
+ audio tracks, the audio_tracks is an array as well.
+ The t_index variable is only used as an example in this case and represents
+ an integer index value in the range:
+\end_layout
+
+\begin_layout Code
+dvd.aux[DVD].titles.length > t_index >= 0
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+dvd.aux[DVD].titles[t_index].audio_tracks[a_index].format
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+RO
+\end_layout
+
+\begin_layout Standard
+A string, containing the format name of the audio track (i.e.
+ ac3, dts, etc.).
+ The a_index variable is only used as an example, it represents an integer
+ index value in the range:
+\end_layout
+
+\begin_layout Code
+dvd.aux[DVD].titles[t_index].audio_tracks.length > a_index >= 0
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+dvd.aux[DVD].titles[t_index].audio_tracks[a_index].language
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+RO
+\end_layout
+
+\begin_layout Standard
+A string, containing the name of the language of the audio track.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+dvd.aux[DVD].titles[t_index].chapters
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+RO
+\end_layout
+
+\begin_layout Standard
+This property is an array which contains chapter information for the particular
+ title.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+dvd.aux[DVD].titles[t_index].chapters[c_index].duration
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+RO
+\end_layout
+
+\begin_layout Standard
+Duration from the start of the chapter to the end of the movie.
+ Chapter at index 0 will always have the duration of the whole title.
+ The c_index variable is only used as an example, it represents an integer
+ index value in the range:
+\end_layout
+
+\begin_layout Code
+dvd.aux[DVD].titles[t_index].chapters.length > c_index >= 0
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection
 Constants
 \end_layout
@@ -2563,6 +2796,210 @@ status open
 
 \begin_layout Code
 readln();
+\end_layout
+
+\begin_layout Standard
+This function reads and returns exactly one line of text from the playlist
+ that is currently being processed, end of line is identified by carriage
+ return/line feed characters.
+ Each subsequent call will return the next line, there is no way to go back.
+\end_layout
+
+\begin_layout Standard
+The idea is, that you can process your playlist line by line and gather
+ the required information to create new objects which can be added to the
+ database.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Native Functions Available To The DVD Import Script
+\end_layout
+
+\begin_layout Standard
+The following function is only available to the DVD import script.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+addCdsObject(object, containerChain, lastContainerClass);
+\end_layout
+
+\begin_layout Standard
+This function adds a virtual object to the server database, the path in
+ the database is defined by the containerChain parameter.
+ The third argument is optional, it allows to set the upnp:class of the
+ last container in the chain.
+\end_layout
+
+\begin_layout Standard
+Parameters:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+object
+\end_layout
+
+\begin_layout Standard
+A virtual object that is either a copy of or a reference to 'orig', see
+ Section 3.2 for a list of properties.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+containerChain
+\end_layout
+
+\begin_layout Standard
+A string, defining where the object will be added in the database hierarchy.
+ The containers in the chain are separated by a slash '/', for example,
+ a value of '/Audio/All Music' will add the object to the Audio, All Music
+ container in the server hierarchy.
+ Make sure to properly escape the slash characters in container names.
+ You will find more information on container chain escaping later in this
+ chapter.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+lastContainerClass
+\end_layout
+
+\begin_layout Standard
+A string, defining the upnp:class of the container that appears last in
+ the chain.
+ This parameter can be omitted, in this case the default value 'object.container'
+ will be taken.
+ Setting specific upnp container classes is useful to define the special
+ meaning of a particular container; for example, the server will always
+ sort songs by track number if upnp class of a container is set to 'object.contai
+ner.album.musicAlbum'.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+addDVDObject(dvd, t, c, a, createContainerChain(chain));
 \end_layout
 
 \begin_layout Standard
@@ -4084,6 +4521,397 @@ We will exit the loop when end of the playlist file is reached.
 
 \begin_layout Code
 ...
+\end_layout
+
+\begin_layout Subsection
+DVD Import Script
+\end_layout
+
+\begin_layout Standard
+The DVD import script receives an object that represents a DVD image.
+ The object provides information about the number of titles, chapters, audio
+ tracks and about languages that are available in the image.
+ You can not play the ISO directly (most players will not support this),
+ so we weill create special virtual DVD objects, which will deliver an MPEG
+ PES stream for the selected Title/Audio Track/Chapter.
+\end_layout
+
+\begin_layout Standard
+The DVD import script is separated from the main script, the script that
+ is shipped with the default installation is called import-dvd.js.
+\end_layout
+
+\begin_layout Standard
+Let's have a closer look!
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Standard
+The title of the DVD will be set to the file name of the ISO image, we want
+ to get rid of the .iso extension:
+\end_layout
+
+\begin_layout Code
+var title = dvd.title;
+\end_layout
+
+\begin_layout Code
+var index = title.lastIndexOf('.'); 
+\end_layout
+
+\begin_layout Code
+if (index > 1)
+\end_layout
+
+\begin_layout Code
+    title = title.substring(0, index);
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Standard
+Since the object that we receive is the original ISO it will not have the
+ correct video UPnP class, so we have to set it ourselves:
+\end_layout
+
+\begin_layout Code
+dvd.upnpclass = UPNP_CLASS_ITEM_VIDEO;
+\end_layout
+
+\begin_layout Standard
+Now we will get the number of titles and loop through them, creating a virtual
+ structure for the chapters, languages and audio formats:
+\end_layout
+
+\begin_layout Code
+var title_count = dvd.aux[DVD].titles.length;
+\end_layout
+
+\begin_layout Code
+for (var t = 0; t < title_count; t++) 
+\end_layout
+
+\begin_layout Code
+{
+\end_layout
+
+\begin_layout Code
+    var title_name = 'Title';
+\end_layout
+
+\begin_layout Standard
+Since the sorting is based on the titles we need a leading zero.
+ Also note the (t + 1) part, the very first position in the array has an
+ index of zero, however we want that the title count starts with one in
+ the UI:
+\end_layout
+
+\begin_layout Code
+    if (t < 9)
+\end_layout
+
+\begin_layout Code
+        title_name = title_name + ' 0' + (t + 1);
+\end_layout
+
+\begin_layout Code
+    else
+\end_layout
+
+\begin_layout Code
+        title_name = title_name + ' ' + (t + 1);
+\end_layout
+
+\begin_layout Standard
+Get the number of chapters and audio tracks for this title and loop through
+ them:
+\end_layout
+
+\begin_layout Code
+    var chapter_count = dvd.aux[DVD].titles[t].chapters.length;
+\end_layout
+
+\begin_layout Code
+    var audio_track_count = dvd.aux[DVD].titles[t].audio_tracks.length;
+\end_layout
+
+\begin_layout Code
+    for (var a = 0; a < audio_track_count; a++)
+\end_layout
+
+\begin_layout Code
+    {
+\end_layout
+
+\begin_layout Code
+        var chain;
+\end_layout
+
+\begin_layout Standard
+Again, note the (a + 1) part, we want the first track in the UI to show
+ as Track 01 and not Track 00:
+\end_layout
+
+\begin_layout Code
+        var audio_name = ' - Audio Track ' + (a + 1);
+\end_layout
+
+\begin_layout Standard
+We will create a structure, sorting the media by audio languages and formats:
+\end_layout
+
+\begin_layout Code
+        var audio_language = dvd.aux[DVD].titles[t].audio_tracks[a].language;
+\end_layout
+
+\begin_layout Code
+        var audio_format = dvd.aux[DVD].titles[t].audio_tracks[a].format;
+\end_layout
+
+\begin_layout Code
+        if (audio_format != '')
+\end_layout
+
+\begin_layout Code
+        {
+\end_layout
+
+\begin_layout Code
+            if (audio_language != '')
+\end_layout
+
+\begin_layout Code
+                audio_name = audio_name + ' - ' + audio_language;
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+            chain = new Array('Video', 'DVD', title, 'Audio Formats',
+\end_layout
+
+\begin_layout Code
+                              audio_format, title_name + audio_name);
+\end_layout
+
+\begin_layout Standard
+The code above was only dealing with containers, this loop will create the
+ actual playable items: 
+\end_layout
+
+\begin_layout Code
+            for (var c = 0; c < chapter_count; c++)
+\end_layout
+
+\begin_layout Code
+            {
+\end_layout
+
+\begin_layout Code
+                if (c < 9)
+\end_layout
+
+\begin_layout Code
+                    dvd.title = "Chapter 0" + (c + 1);
+\end_layout
+
+\begin_layout Code
+                else
+\end_layout
+
+\begin_layout Code
+                    dvd.title = "Chapter " + (c + 1);
+\end_layout
+
+\begin_layout Standard
+When attempted to play, the item created below will deliver the MPEG PES
+ with title index t, chapter index c and audio track index a - we created
+ the chain appropriately so that the audio index matches the language and
+ audio format that we used in the container names:
+\end_layout
+
+\begin_layout Code
+                addDVDObject(dvd, t, c, a, createContainerChain(chain));
+\end_layout
+
+\begin_layout Code
+            }
+\end_layout
+
+\begin_layout Code
+        }
+\end_layout
+
+\begin_layout Standard
+Same for the language:
+\end_layout
+
+\begin_layout Code
+        if (audio_language != '')
+\end_layout
+
+\begin_layout Code
+        {
+\end_layout
+
+\begin_layout Code
+            chain = new Array('Video', 'DVD', title, 'Languages',
+\end_layout
+
+\begin_layout Code
+                              audio_language);
+\end_layout
+
+\begin_layout Code
+            if (audio_format != '')
+\end_layout
+
+\begin_layout Code
+                chain.push(title_name + audio_name + ' - ' + audio_format);
+\end_layout
+
+\begin_layout Code
+            else
+\end_layout
+
+\begin_layout Code
+                chain.push(title_name + audio_name);
+\end_layout
+
+\begin_layout Code
+            for (var c = 0; c < chapter_count; c++)
+\end_layout
+
+\begin_layout Code
+            {
+\end_layout
+
+\begin_layout Code
+                if (c < 9)
+\end_layout
+
+\begin_layout Code
+                    dvd.title = "Chapter 0" + (c + 1);
+\end_layout
+
+\begin_layout Code
+                else
+\end_layout
+
+\begin_layout Code
+                    dvd.title = "Chapter " + (c + 1);
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+                addDVDObject(dvd, t, c, a, createContainerChain(chain));
+\end_layout
+
+\begin_layout Code
+            }
+\end_layout
+
+\begin_layout Code
+        }
+\end_layout
+
+\begin_layout Standard
+And we also want a list of titles with appropriate format and language informati
+on:
+\end_layout
+
+\begin_layout Code
+        chain = new Array('Video', 'DVD', title, 'Titles');
+\end_layout
+
+\begin_layout Code
+        var titles = title_name + ' - Audio Track ' + (a + 1);
+\end_layout
+
+\begin_layout Code
+        if (audio_format != '')
+\end_layout
+
+\begin_layout Code
+            titles = titles + ' - ' + audio_format;
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+        if (audio_language != '')
+\end_layout
+
+\begin_layout Code
+            titles = titles + ' - ' + audio_language;
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+        chain.push(titles);
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+        for (var c = 0; c < chapter_count; c++)
+\end_layout
+
+\begin_layout Code
+        {
+\end_layout
+
+\begin_layout Code
+            if (c < 9)
+\end_layout
+
+\begin_layout Code
+                dvd.title = "Chapter 0" + (c + 1);
+\end_layout
+
+\begin_layout Code
+            else
+\end_layout
+
+\begin_layout Code
+                dvd.title = "Chapter " + (c + 1);
+\end_layout
+
+\begin_layout Code
+
+\end_layout
+
+\begin_layout Code
+            addDVDObject(dvd, t, c, a, createContainerChain(chain));
+\end_layout
+
+\begin_layout Code
+        }
+\end_layout
+
+\begin_layout Code
+    }
+\end_layout
+
+\begin_layout Code
+} 
 \end_layout
 
 \begin_layout Standard
