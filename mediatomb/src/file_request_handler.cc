@@ -52,7 +52,7 @@
 #include "metadata_handler.h"
 #include "tools.h"
 
-#ifdef HAVE_LIBDVDREAD
+#ifdef HAVE_LIBDVDNAV
 #include "dvd_io_handler.h"
 #include "metadata/dvd_handler.h"
 #include "pes_io_handler.h"
@@ -243,7 +243,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
         }
         else
 #endif
-#ifdef HAVE_LIBDVDREAD
+#ifdef HAVE_LIBDVDNAV
             if (!is_srt && item->getFlag(OBJECT_FLAG_DVD_IMAGE))
             {
                 String tmp = dict->get(DVDHandler::renderKey(DVD_Title));
@@ -559,7 +559,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
         }
         else
 #endif
-#ifdef HAVE_LIBDVDREAD
+#ifdef HAVE_LIBDVDNAV
         if (!is_srt && item->getFlag(OBJECT_FLAG_DVD_IMAGE))
         {
             String tmp = dict->get(DVDHandler::renderKey(DVD_Title));
@@ -594,7 +594,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
             log_debug("Serving dvd image %s Title: %d Chapter: %d\n",
                     path.c_str(), title, chapter);
             /// \todo add angle support
-            Ref<IOHandler> dvd_io_handler(new DVDIOHandler(path, title, chapter, 0));
+            Ref<IOHandler> dvd_io_handler(new DVDIOHandler(path, title, chapter));
             Ref<IOHandler> pes_io_handler(new PESIOHandler(dvd_io_handler, audio_track));
             pes_io_handler->open(mode);
             return pes_io_handler;

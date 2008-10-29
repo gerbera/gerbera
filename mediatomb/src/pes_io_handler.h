@@ -75,8 +75,6 @@ protected:
     int audio_stream_id;
     zmm::Ref<IOHandler> io_handler;
     unsigned char *buffer;
-#define STREAMS 32
-    int streams[STREAMS];
 };
 
 #endif // __PES_IO_HANDLER_H__

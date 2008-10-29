@@ -505,7 +505,7 @@ Ref<CdsResourceManager::UrlBase> CdsResourceManager::addResources_getUrlBase(Ref
         }
     }
 
-#ifdef HAVE_LIBDVDREAD_DISABLED
+#ifdef HAVE_LIBDVDNAV_DISABLED
     if (IS_CDS_ITEM(objectType) && (item->getFlag(OBJECT_FLAG_DVD_IMAGE)))
     {
         urlBase->urlBase = Server::getInstance()->getVirtualURL() +

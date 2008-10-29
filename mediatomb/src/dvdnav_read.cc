@@ -334,14 +334,10 @@ String DVDNavReader::audioLanguage(int stream_idx)
 {
     char code[3];
     audio_attr_t audio_attr;
-
-    stream_idx++;
-    if ((stream_idx < 1) || (stream_idx > audioTrackCount()))
-        throw _Exception(_("Attempted to select invalid audio stream!"));
-
+    
     AUTOLOCK(mutex);
 
-    if (dvdnav_get_audio_attr(dvd, stream_idx-1, &audio_attr) != DVDNAV_STATUS_OK)
+    if (dvdnav_get_audio_attr(dvd, stream_idx, &audio_attr) != DVDNAV_STATUS_OK)
         throw _Exception(_("Error error retrieving audio language from DVD ") +
                            dvd_path + " : " + 
                            String(dvdnav_err_to_string(dvd)));
@@ -361,12 +357,9 @@ String DVDNavReader::audioLanguage(int stream_idx)
 int DVDNavReader::audioSampleFrequency(int stream_idx)
 {
     audio_attr_t audio_attr;
-
-    stream_idx++;
-
-    if ((stream_idx < 1) || (stream_idx > audioTrackCount()))
-        throw _Exception(_("Attmpted to select invalid audio stream!"));
-
+    
+    AUTOLOCK(mutex);
+    
     if (dvdnav_get_audio_attr(dvd, stream_idx, &audio_attr) != DVDNAV_STATUS_OK)
         throw _Exception(_("Error error retrieving audio language from DVD ") +
                            dvd_path + " : " + 
@@ -382,9 +375,7 @@ int DVDNavReader::audioChannels(int stream_idx)
 {
     audio_attr_t audio_attr;
    
-    stream_idx++;
-    if ((stream_idx < 1) || (stream_idx > audioTrackCount()))
-        throw _Exception(_("Attmpted to select invalid audio stream!"));
+    AUTOLOCK(mutex);
 
     if (dvdnav_get_audio_attr(dvd, stream_idx, &audio_attr) != DVDNAV_STATUS_OK)
         throw _Exception(_("Error error retrieving audio language from DVD ") +
@@ -397,16 +388,13 @@ int DVDNavReader::audioChannels(int stream_idx)
 String DVDNavReader::audioFormat(int stream_idx)
 {
     audio_attr_t audio_attr;
-
-    stream_idx++;
-    if ((stream_idx < 1) || (stream_idx > audioTrackCount()))
-        throw _Exception(_("Attempted to select invalid audio stream!"));
-
+    
+    AUTOLOCK(mutex);
+    
     if (dvdnav_get_audio_attr(dvd, stream_idx, &audio_attr) != DVDNAV_STATUS_OK)
         throw _Exception(_("Error error retrieving audio language from DVD ") +
                            dvd_path + " : " +
                            String(dvdnav_err_to_string(dvd)));
-
     return _(audio_format[audio_attr.audio_format]);
 }
 
@@ -414,20 +402,15 @@ int DVDNavReader::audioStreamID(int stream_idx)
 {
     audio_attr_t audio_attr;
 
-    stream_idx++;
-
-    if ((stream_idx < 1) || (stream_idx > audioTrackCount()))
-        throw _Exception(_("Attempted to select invalid audio stream!"));
-
     AUTOLOCK(mutex);
-
+    
     if (dvdnav_get_audio_attr(dvd, stream_idx, &audio_attr) != DVDNAV_STATUS_OK)
         throw _Exception(_("Error error retrieving audio language from DVD ") +
                            dvd_path + " : " +
                            String(dvdnav_err_to_string(dvd)));
 
-    return audio_id[audio_attr.audio_format]+(stream_idx-1);
+    return audio_id[audio_attr.audio_format]+stream_idx;
 }
 
-#endif//HAVE_LIBDVDREAD
+#endif//HAVE_LIBDVDNAV
 

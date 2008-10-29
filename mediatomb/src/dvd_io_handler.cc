@@ -33,7 +33,7 @@
     #include "autoconfig.h"
 #endif
 
-#ifdef HAVE_LIBDVDREAD
+#ifdef HAVE_LIBDVDNAV
 
 #include "server.h"
 #include <sys/types.h>
@@ -42,17 +42,16 @@
 #include <string.h>
 #include <stdio.h>
 #include "common.h"
-#include "dvd_read.h"
 #include "dvd_io_handler.h"
 
 using namespace zmm;
 using namespace mxml;
 
-DVDIOHandler::DVDIOHandler(String dvdname, int track, int chapter, int angle) : IOHandler()
+DVDIOHandler::DVDIOHandler(String dvdname, int track, int chapter) : IOHandler()
 {
     this->dvdname = dvdname;
-    dvd = Ref<DVDReader>(new DVDReader(dvdname));
-    dvd->selectPGC(track, chapter, angle);
+    dvd = Ref<DVDNavReader>(new DVDNavReader(dvdname));
+    dvd->selectPGC(track, chapter);
 }
 
 void DVDIOHandler::open(IN enum UpnpOpenFileMode mode)
@@ -82,7 +81,7 @@ void DVDIOHandler::close()
 
 off_t DVDIOHandler::length()
 {
-    return dvd->length();
+    return -1;
 }
 
-#endif//HAVE_LIBDVDREAD
+#endif//HAVE_LIBDVDNAV

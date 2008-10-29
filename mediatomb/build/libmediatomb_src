@@ -27,8 +27,8 @@ libmediatomb_a_SOURCES = \
 ../src/dictionary.h \
 ../src/dvd_io_handler.cc \
 ../src/dvd_io_handler.h \
-../src/dvd_read.cc \
-../src/dvd_read.h \
+../src/dvdnav_read.cc \
+../src/dvdnav_read.h \
 ../src/exceptions.cc \
 ../src/exceptions.h \
 ../src/executor.h \

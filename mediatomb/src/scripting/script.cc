@@ -49,7 +49,7 @@
     #include "youtube_content_handler.h"
 #endif
 
-#ifdef HAVE_LIBDVDREAD
+#ifdef HAVE_LIBDVDNAV
     #include "metadata/dvd_handler.h"
 #endif
 
@@ -865,7 +865,7 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
         setObjectProperty(js, _("aux"), aux_js);
         Ref<Dictionary> aux = obj->getAuxData();
 
-#ifdef HAVE_LIBDVDREAD
+#ifdef HAVE_LIBDVDNAV
         if (obj->getFlag(OBJECT_FLAG_DVD_IMAGE))
         {
             JSObject *aux_dvd = JS_NewObject(cx, NULL, NULL, js);

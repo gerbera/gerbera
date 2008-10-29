@@ -34,7 +34,7 @@
 
 #include "common.h"
 #include "io_handler.h"
-#include "dvd_read.h"
+#include "dvdnav_read.h"
 
 /// \brief Allows the web server to read from a dvd.
 class DVDIOHandler : public IOHandler
@@ -44,13 +44,13 @@ protected:
     zmm::String dvdname;
 
     /// \brief Handle of the DVD.
-    zmm::Ref<DVDReader> dvd;
+    zmm::Ref<DVDNavReader> dvd;
 
     off_t total_size;
 
 public:
     /// \brief Sets the dvdname to work with.
-    DVDIOHandler(zmm::String dvdname, int track, int chapter, int angle);
+    DVDIOHandler(zmm::String dvdname, int track, int chapter);
 
     /// \brief Opens dvd for reading (writing is not supported)
     virtual void open(IN enum UpnpOpenFileMode mode);

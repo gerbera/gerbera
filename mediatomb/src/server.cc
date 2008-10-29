@@ -37,10 +37,6 @@
     #include <curl/curl.h>
 #endif
 
-#ifdef HAVE_LIBDVDREAD
-    #include <dvdread/dvd_reader.h>
-#endif
-
 #include "server.h"
 #include "web_callbacks.h"
 #include "content_manager.h"
@@ -103,10 +99,6 @@ void Server::init()
 
 #ifdef HAVE_CURL
     curl_global_init(CURL_GLOBAL_ALL);
-#endif
-
-#ifdef HAVE_LIBDVDREAD
-    DVDInit();
 #endif
 }
 
@@ -342,10 +334,6 @@ void Server::shutdown()
     curl_global_cleanup();
 #endif
 
-#ifdef HAVE_LIBDVDREAD
-    DVDFinish();
-#endif
-    
     log_debug("now calling upnp finish\n");
     UpnpFinish();
     storage = nil;

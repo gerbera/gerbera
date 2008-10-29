@@ -27,7 +27,7 @@ libmediatomb_a_CXXFLAGS = \
                      $(CURL_CFLAGS) \
                      $(EXPAT_CFLAGS) \
                      $(LIBMP4V2_CFLAGS) \
-                     $(LIBDVDREAD_CFLAGS)
+                     $(LIBDVDNAV_CFLAGS)
 
 bin_PROGRAMS = mediatomb
 mediatomb_SOURCES = $(top_srcdir)/src/main.cc
@@ -53,7 +53,7 @@ mediatomb_CXXFLAGS = -I$(top_srcdir)/src \
                      $(CURL_CFLAGS) \
                      $(EXPAT_CFLAGS) \
                      $(LIBMP4V2_CFLAGS) \
-                     $(LIBDVDREAD_CFLAGS)
+                     $(LIBDVDNAV_CFLAGS)
 
 mediatomb_LDADD = \
     libmediatomb.a \
@@ -66,7 +66,7 @@ mediatomb_LDADD = \
     $(LIBMP4V2_LDFLAGS) \
     $(LIBMAGIC_LDFLAGS) \
     $(PTHREAD_LDFLAGS) \
-    $(LIBDVDREAD_LDFLAGS) \
+    $(LIBDVDNAV_LDFLAGS) \
     $(LIBEXTRACTOR_LDFLAGS) \
     $(FFMPEG_LDFLAGS) \
     $(FFMPEGTHUMBNAILER_LDFLAGS) \
@@ -89,6 +89,6 @@ mediatomb_LDADD = \
     $(LIBMP4V2_LIBS) \
     $(NSL_LIBS) \
     $(LWRES_LIBS) \
-    $(LIBDVDREAD_LIBS) \
+    $(LIBDVDNAV_LIBS) \
     $(CURL_LIBS)
     

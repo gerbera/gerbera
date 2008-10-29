@@ -1762,9 +1762,9 @@ CPPFLAGS="$CPPFLAGS_SAVE"
 CXXFLAGS="$CXXFLAGS_SAVE"
 
 
-MT_CHECK_OPTIONAL_PACKAGE([libdvdread], [enable],
-             [compile with libdvdread support for extended DVD image parsing],
-             [dvdread/dvd_reader], [dvdread], [DVDOpen])
+MT_CHECK_OPTIONAL_PACKAGE([libdvdnav], [enable],
+             [compile with libdvdnav support for extended DVD image parsing],
+             [dvdnav/dvdnav], [dvdnav], [dvdnav_get_audio_attr])
 
 
 MT_OPTION([tombdebug], [enable], [enable debug code for MediaTomb],
@@ -1819,7 +1819,7 @@ AC_DEFINE([__STDC_LIMIT_MACROS], [1], [needed for stdint.h])
 
 AC_DEFINE_UNQUOTED([COMPILE_INFO], "host: $host; sqlite3: $SQLITE3_STATUS; mysql: $MYSQL_STATUS libjs: $JS_OK; libmagic: $LIBMAGIC_STATUS; inotify: $INOTIFY_STATUS; libexif: $LIBEXIF_STATUS; id3lib: $ID3LIB_STATUS; taglib: $TAGLIB_STATUS; ffmpeg: $FFMPEG_STATUS; libmp4v2: $LIBMP4V2_STATUS; external transcoding: $EXTERNAL_TRANSCODING_OPTION_ENABLED; curl: $CURL_OK; YouTube: $YOUTUBE_OPTION_ENABLED; SopCast: $SOPCAST_OPTION_ENABLED; libextractor: $LIBEXTRACTOR_STATUS; db-autocreate: $DB_AUTOCREATE_OPTION_ENABLED; debug log: $DEBUG_LOG_OPTION_ENABLED; protocol info extensions: $PROTOCOLINFO_EXTENSION_OPTION_ENABLED; data directory: $PACKAGE_DATADIR; ffmpegthumbnailer: $FFMPEGTHUMBNAILER_STATUS", [compile option summary])
 
-# libdvdread: $LIBDVDREAD_STATUS
+# libdvdnav: $LIBDVDNAV_STATUS
 
 ###############
 AC_CONFIG_FILES([
@@ -1854,7 +1854,7 @@ echo "libexif               : $LIBEXIF_STATUS"
 echo "id3lib                : $ID3LIB_STATUS"
 echo "taglib                : $TAGLIB_STATUS"
 echo "libmp4v2              : $LIBMP4V2_STATUS"
-#echo "libdvdread            : $LIBDVDREAD_STATUS"
+#echo "libdvdnav            : $LIBDVDNAV_STATUS"
 echo "ffmpeg                : $FFMPEG_STATUS"
 echo "ffmpegthumbnailer     : $FFMPEGTHUMBNAILER_STATUS"
 echo "external transcoding  : $EXTERNAL_TRANSCODING_OPTION_ENABLED"

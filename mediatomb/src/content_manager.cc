@@ -616,7 +616,7 @@ int ContentManager::_addFile(String path, bool recursive, bool hidden, Ref<CMTas
                     if ((playlist_parser_script != nil) &&
                         (content_type == CONTENT_TYPE_PLAYLIST))
                             playlist_parser_script->processPlaylistObject(obj, task);
-#ifdef HAVE_LIBDVDREAD
+#ifdef HAVE_LIBDVDNAV
                     if ((dvd_import_script != nil) &&
                         (content_type == CONTENT_TYPE_DVD))
                            dvd_import_script->processDVDObject(obj);
@@ -1007,7 +1007,7 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<CMTask> task)
                             if ((playlist_parser_script != nil) &&
                                 (content_type == CONTENT_TYPE_PLAYLIST))
                                 playlist_parser_script->processPlaylistObject(obj, task);
-#ifdef HAVE_LIBDVDREAD
+#ifdef HAVE_LIBDVDNAV
                             if ((dvd_import_script != nil) &&
                                 (content_type == CONTENT_TYPE_DVD))
                                     dvd_import_script->processDVDObject(obj);
@@ -1416,7 +1416,7 @@ void ContentManager::initJS()
     if (playlist_parser_script == nil)
         playlist_parser_script = Ref<PlaylistParserScript>(new PlaylistParserScript(Runtime::getInstance()));
 
-#ifdef HAVE_LIBDVDREAD
+#ifdef HAVE_LIBDVDNAV
     if ((ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE) == "js") && (dvd_import_script == nil))
     {
         dvd_import_script = Ref<DVDImportScript>(new DVDImportScript(Runtime::getInstance()));
@@ -1427,7 +1427,7 @@ void ContentManager::initJS()
 void ContentManager::destroyJS()
 {
     playlist_parser_script = nil;
-#ifdef HAVE_LIBDVDREAD
+#ifdef HAVE_LIBDVDNAV
     dvd_import_script = nil;
 #endif
 }

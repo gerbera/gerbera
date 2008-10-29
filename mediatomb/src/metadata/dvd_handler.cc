@@ -34,7 +34,7 @@
     #include "autoconfig.h"
 #endif
 
-#ifdef HAVE_LIBDVDREAD
+#ifdef HAVE_LIBDVDNAV
 
 #include "dvd_handler.h"
 #include "string_converter.h"
@@ -43,7 +43,7 @@
 #include "content_manager.h"
 #include "config_manager.h"
 
-#include "dvd_read.h"
+#include "dvdnav_read.h"
 
 using namespace zmm;
 
@@ -136,7 +136,7 @@ void DVDHandler::fillMetadata(Ref<CdsItem> item)
 {
     try
     {
-        Ref<DVDReader> dvd(new DVDReader(item->getLocation()));
+        Ref<DVDNavReader> dvd(new DVDNavReader(item->getLocation()));
 
         item->setFlag(OBJECT_FLAG_DVD_IMAGE);
 
@@ -145,12 +145,12 @@ void DVDHandler::fillMetadata(Ref<CdsItem> item)
 
         for (int i = 0; i < titles; i++)
         {
-            dvd->selectPGC(i, 0, 0);
+            dvd->selectPGC(i, 0);
             item->setAuxData(renderKey(DVD_ChapterCount, i), 
                     String::from(dvd->chapterCount(i)));
-            if (dvd->titleDuration() > 0)
-                item->setAuxData(renderKey(DVD_TitleDuration, i), 
-                        secondsToHMS(dvd->titleDuration()));
+//            if (dvd->titleDuration() > 0)
+//                item->setAuxData(renderKey(DVD_TitleDuration, i), 
+//                        secondsToHMS(dvd->titleDuration()));
             item->setAuxData(renderKey(DVD_AudioTrackCount, i), 
                     String::from(dvd->audioTrackCount()));
 
@@ -167,7 +167,7 @@ void DVDHandler::fillMetadata(Ref<CdsItem> item)
                 item->setAuxData(renderKey(DVD_AudioTrackLanguage, i, 0, a),
                         dvd->audioLanguage(a));
             }
-
+#if 0
             int secs = 0;
             for (int c = dvd->chapterCount(i)-1; c >= 0; c--)
             {
@@ -182,6 +182,7 @@ void DVDHandler::fillMetadata(Ref<CdsItem> item)
                     item->setAuxData(renderKey(DVD_ChapterRestDuration, i, c), 
                             secondsToHMS(secs));
             }
+#endif
         } // for titles
 
         log_debug("DVD image %s has %d titles\n", item->getLocation().c_str(), 

@@ -37,7 +37,7 @@
 #include "config_manager.h"
 #include "metadata_handler.h"
 
-#ifdef HAVE_LIBDVDREAD
+#ifdef HAVE_LIBDVDNAV
     #include "metadata/dvd_handler.h"
 #endif
 
@@ -89,7 +89,7 @@ void FallbackLayout::addVideo(zmm::Ref<CdsObject> obj)
     }
 }
 
-#ifdef HAVE_LIBDVDREAD
+#ifdef HAVE_LIBDVDNAV
 
 Ref<CdsObject> FallbackLayout::prepareChapter(Ref<CdsObject> obj, int title_idx,
                                               int chapter_idx)
@@ -105,10 +105,10 @@ Ref<CdsObject> FallbackLayout::prepareChapter(Ref<CdsObject> obj, int title_idx,
         chapter_name = chapter_name + (chapter_idx + 1);
 
     obj->setTitle(chapter_name);
-    String tmp = obj->getAuxData(DVDHandler::renderKey(DVD_ChapterRestDuration,
-                                 title_idx, chapter_idx));
-    if (string_ok(tmp))
-        obj->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_DURATION), tmp);
+//    String tmp = obj->getAuxData(DVDHandler::renderKey(DVD_ChapterRestDuration,
+//                                 title_idx, chapter_idx));
+//    if (string_ok(tmp))
+//        obj->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_DURATION), tmp);
 
     return obj;
 }
@@ -116,6 +116,8 @@ Ref<CdsObject> FallbackLayout::prepareChapter(Ref<CdsObject> obj, int title_idx,
 void FallbackLayout::addDVD(Ref<CdsObject> obj)
 {
     #define DVD_VPATH "/Video/DVD/"
+
+    printf("AAAAAAAAADDDING DVD!\n");
 
     int dot = obj->getTitle().rindex('.');
     int pcd_id = obj->getID();
@@ -546,7 +548,7 @@ FallbackLayout::FallbackLayout() : Layout()
     PROF_INIT_GLOBAL(layout_profiling, "fallback layout");
 #endif
 
-#ifdef HAVE_LIBDVDREAD
+#ifdef HAVE_LIBDVDNAV
     Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     mpeg_mimetype = mappings->get(_(CONTENT_TYPE_MPEG));
     if (!string_ok(mpeg_mimetype))
@@ -616,7 +618,7 @@ void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj)
             else
                 addAudio(clone);
         }
-#ifdef HAVE_LIBDVDREAD
+#ifdef HAVE_LIBDVDNAV
         else if (content_type == CONTENT_TYPE_DVD)
             addDVD(clone);
 #endif

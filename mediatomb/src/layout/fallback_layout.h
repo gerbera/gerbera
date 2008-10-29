@@ -52,7 +52,7 @@ protected:
     void addVideo(zmm::Ref<CdsObject> obj);
     void addImage(zmm::Ref<CdsObject> obj);
     void addAudio(zmm::Ref<CdsObject> obj);
-#ifdef HAVE_LIBDVDREAD
+#ifdef HAVE_LIBDVDNAV
     zmm::Ref<CdsObject> prepareChapter(zmm::Ref<CdsObject> obj, int title_idx,
                                        int chapter_idx);
     void addDVD(zmm::Ref<CdsObject> obj);

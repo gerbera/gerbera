@@ -33,7 +33,7 @@
     #include "autoconfig.h"
 #endif
 
-#if defined(HAVE_JS) && defined(HAVE_LIBDVDREAD)
+#if defined(HAVE_JS) && defined(HAVE_LIBDVDNAV)
 
 #include "dvd_image_import_script.h"
 #include "config_manager.h"
@@ -205,10 +205,10 @@ void DVDImportScript::addDVDObject(Ref<CdsObject> obj, int title,
     obj->getResource(0)->addParameter(DVDHandler::renderKey(DVD_Chapter),
             String::from(chapter));
 
-    tmp = processed->getAuxData(DVDHandler::renderKey(DVD_ChapterRestDuration,
-                title, chapter));
-    if (string_ok(tmp))
-        obj->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_DURATION), tmp);
+//    tmp = processed->getAuxData(DVDHandler::renderKey(DVD_ChapterRestDuration,
+//                title, chapter));
+//    if (string_ok(tmp))
+//        obj->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_DURATION), tmp);
 
     obj->getResource(0)->addParameter(DVDHandler::renderKey(DVD_Title),
             String::from(title));

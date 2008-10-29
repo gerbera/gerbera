@@ -67,7 +67,7 @@
 #include "metadata/libexif_handler.h"
 #endif
 
-#ifdef HAVE_LIBDVDREAD
+#ifdef HAVE_LIBDVDNAV
 #include "metadata/dvd_handler.h"
 #endif
 
@@ -217,7 +217,7 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
 
 #endif // HAVE_FFMPEG
 
-#ifdef HAVE_LIBDVDREAD
+#ifdef HAVE_LIBDVDNAV
         if (content_type == CONTENT_TYPE_DVD)
         {
             handler = Ref<MetadataHandler>(new DVDHandler());

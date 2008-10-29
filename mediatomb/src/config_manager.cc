@@ -1407,7 +1407,7 @@ void ConfigManager::validate(String serverhome)
 
     NEW_OPTION(script_path);
     SET_OPTION(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT);
-#ifdef HAVE_LIBDVDREAD
+#ifdef HAVE_LIBDVDNAV
     // add dvd script and make sure scripts can be enabled and disabled
     script_path = getOption(_("/import/scripting/virtual-layout/dvd-script"),
                             prefix_dir + DIR_SEPARATOR + _(DEFAULT_JS_DIR) +
