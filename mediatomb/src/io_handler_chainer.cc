@@ -76,7 +76,6 @@ void IOHandlerChainer::threadProc()
         bool stopLoop = false;
         while (! threadShutdownCheck() && ! stopLoop)
         {
-            printf("----> Reading with chunk size: %d\n", chunkSize);
             int numRead = readFrom->read(buf, chunkSize);
             if (numRead == 0)
             {
