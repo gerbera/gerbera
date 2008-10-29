@@ -35,7 +35,7 @@
 #include <stdint.h>
 
 #include <sys/types.h>
-#include <dvdnav/dvdnav.h>
+#include <dvdnav.h>
 #include "common.h"
 #include "sync.h"
 

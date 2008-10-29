@@ -1762,9 +1762,10 @@ CPPFLAGS="$CPPFLAGS_SAVE"
 CXXFLAGS="$CXXFLAGS_SAVE"
 
 
-MT_CHECK_OPTIONAL_PACKAGE([libdvdnav], [enable],
+MT_CHECK_OPTIONAL_PACKAGE_CFG([libdvdnav], [enable],
              [compile with libdvdnav support for extended DVD image parsing],
-             [dvdnav/dvdnav], [dvdnav], [dvdnav_get_audio_attr])
+             [dvdnav-config],
+             [dvdnav.h], [dvdnav], [dvdnav_get_audio_attr], [])
 
 
 MT_OPTION([tombdebug], [enable], [enable debug code for MediaTomb],
