@@ -117,8 +117,6 @@ void FallbackLayout::addDVD(Ref<CdsObject> obj)
 {
     #define DVD_VPATH "/Video/DVD/"
 
-    printf("AAAAAAAAADDDING DVD!\n");
-
     int dot = obj->getTitle().rindex('.');
     int pcd_id = obj->getID();
     String dvd_name;
