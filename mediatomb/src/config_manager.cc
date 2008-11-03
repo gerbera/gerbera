@@ -226,7 +226,7 @@ Ref<Element> ConfigManager::renderTranscodingSection()
 
     Ref<Element> oggflac_agent(new Element(_("agent")));
     oggflac_agent->setAttribute(_("command"), _("ogg123"));
-    oggflac_agent->setAttribute(_("arguments"), _("-d raw -f %out %in"));
+    oggflac_agent->setAttribute(_("arguments"), _("-d raw -o byteorder:big -f %out %in"));
     oggflac->appendElementChild(oggflac_agent);
 
     Ref<Element> oggflac_buffer(new Element(_("buffer")));
