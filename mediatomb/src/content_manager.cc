@@ -620,7 +620,15 @@ int ContentManager::_addFile(String path, bool recursive, bool hidden, Ref<CMTas
                     if ((dvd_import_script != nil) &&
                         (content_type == CONTENT_TYPE_DVD))
                            dvd_import_script->processDVDObject(obj);
+#else
+                    if ((dvd_import_script != nil) &&
+                        (content_type == CONTENT_TYPE_DVD))
+                        log_warning("DVD Image %s will not be parsed: MediaTomb was compiled without libdvdnav  support!\n", obj->get->locatino().c_str());
 #endif // DVD
+#else
+                    if ((playlist_parser_script != nil) &&
+                        (content_type == CONTENT_TYPE_PLAYLIST))
+                        log_warning("Playlist %s will not be parsed: MediaTomb was compiled without JS support!\n", obj->getLocation().c_str());
 #endif // JS
                 }
                 catch (Exception e)
