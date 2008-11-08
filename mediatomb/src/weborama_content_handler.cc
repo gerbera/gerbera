@@ -51,11 +51,16 @@ bool WeboramaContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
     String temp;
 
     if (service->getName() != "playlist")
-        throw _Exception(_("Invalid XML for Weborama service received"));
+        throw _Exception(_("Recieved invalid XML for Weborama service"));
+
+    if (service->getAttribute(_("version")) != "1")
+        throw _Exception(_("Recieved unsupported playlist version from Weborama"
+                           " service"));
 
     Ref<Element> trackList = service->getChildByName(_("trackList"));
     if (trackList == nil)
-        throw _Exception(_("Invalid XML for Weborama service received - track list not found!"));
+        throw _Exception(_("Received invalid XML for Weborama service: "
+                           "track list not found!"));
 
     String mood = service->getChildText(_("mood"));
     if (string_ok(mood))
@@ -101,28 +106,32 @@ Ref<CdsObject> WeboramaContentHandler::getNextObject()
         Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
         item->addResource(resource);
 
-        temp = track->getAttribute(_("mimeType"));
-        if (string_ok(temp))
-        {
-            item->setMimeType(temp);
-            resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(temp));
-        }
-
-        resource->addParameter(_(ONLINE_SERVICE_AUX_ID), 
-                String::from(OS_Weborama));
-
-        item->setAuxData(_(ONLINE_SERVICE_AUX_ID), String::from(OS_Weborama));
-
         temp = track->getChildText(_("title"));
         if (!string_ok(temp))
             item->setTitle(_("Unknown"));
         else
             item->setTitle(temp);
 
+        temp = track->getAttribute(_("mimeType"));
+        if (string_ok(temp))
+        {
+            item->setMimeType(temp);
+            resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(temp));
+        }
+        else
+        {
+            log_warning("Could not retrieve mime type for %s, skipping...\n",
+                        item->getTitle().c_str());
+            continue;
+        }
+
+        item->setAuxData(_(ONLINE_SERVICE_AUX_ID), String::from(OS_Weborama));
+
         temp = track->getChildText(_("identifier"));
         if (!string_ok(temp))
         {
-            log_warning("Failed to retrieve Weborama track ID\n");
+            log_warning("Failed to retrieve Weborama track ID for %s\n",
+                        item->getTitle().c_str());
             continue;
         }
 
@@ -144,7 +153,8 @@ Ref<CdsObject> WeboramaContentHandler::getNextObject()
 
         temp = track->getChildText(_("creator"));
         if (string_ok(temp))
-            item->setAuxData(_(WEBORAMA_AUXDATA_CREATOR), temp);
+            item->setMetadata(MetadataHandler::getMetaFieldName(M_ARTIST), temp);
+      //      item->setAuxData(_(WEBORAMA_AUXDATA_CREATOR), temp);
 
         temp = track->getChildText(_("album"));
         if (string_ok(temp))
@@ -203,7 +213,6 @@ Ref<CdsObject> WeboramaContentHandler::getNextObject()
                     item->addResource(albumart);
                 }
             }
-
         }
 
         item->setAuxData(_(WEBORAMA_AUXDATA_MOOD), mood);

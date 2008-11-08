@@ -260,6 +260,11 @@ MT_OPTION([youtube], [disable],
           [YouTube service support],
           [],[YOUTUBE_OPTION_ENABLED=disabled])
 
+MT_OPTION([weborama], [enable],
+          [Weborama service support],
+          [],[WEBORAMA_OPTION_ENABLED=disabled])
+
+
 MT_OPTION([sqlite-backup-defaults], [enable],
           [enable sqlite database backup settings in config.xml by default],
           [],[])
@@ -1320,7 +1325,12 @@ if ((test "x$YOUTUBE_OPTION_ENABLED" = xyes) && (test "x$YOUTUBE_OPTION_REQUESTE
     AC_MSG_ERROR([You enabled YouTube but disabled curl, however curl is required by the YouTube feature])
 fi
 
-if ((test "x$YOUTUBE_OPTION_ENABLED" != xyes) && (test "x$SOPCAST_OPTION_ENABLED" != xyes) && (test "x$EXTERNAL_TRANSCODING_OPTION" != xyes)); then
+    if ((test "x$WEBORAMA_OPTION_ENABLED" = xyes) && (test "x$WEBORAMA_OPTION_REQUESTED" = xyes) && (test $USE_CURL -eq 0) && (test $CURL_REQUESTED -eq 1)); then
+    AC_MSG_ERROR([You enabled Weborama but disabled curl, however curl is required by the Weborama feature])
+fi
+
+
+if ((test "x$YOUTUBE_OPTION_ENABLED" != xyes) && (test "x$SOPCAST_OPTION_ENABLED" != xyes) && (test "x$EXTERNAL_TRANSCODING_OPTION" != xyes) && (test "x$WEBORAMA_OPTION_ENABLED" != xyes)); then
     if test $USE_CURL -eq 1; then
         if test $CURL_REQUESTED -eq 1; then
             AC_MSG_ERROR([You enabled curl support but the external transcoding, YouTube and SopCast features are disabled - curl is not needed without it])
@@ -1331,7 +1341,7 @@ if ((test "x$YOUTUBE_OPTION_ENABLED" != xyes) && (test "x$SOPCAST_OPTION_ENABLED
     fi
 fi
 
-if (((test "x$YOUTUBE_OPTION_ENABLED" = xyes) || (test "x$SOPCAST_OPTION_ENABLED" = xyes) || (test "x$EXTERNAL_TRANSCODING_OPTION" = xyes)) && (test $USE_CURL -eq 1)); then
+if (((test "x$YOUTUBE_OPTION_ENABLED" = xyes) || (test "x$SOPCAST_OPTION_ENABLED" = xyes) || (test "x$WEBORAMA_OPTION_ENABLED" = xyes) || (test "x$EXTERNAL_TRANSCODING_OPTION" = xyes)) && (test $USE_CURL -eq 1)); then
     AC_MSG_NOTICE([Checking for curl (needed for extended external transcoding/YouTube/SopCast support)])
     CURL_OK=yes
     if test -n "$CURL_SEARCH_CONFIG"; then
@@ -1409,6 +1419,15 @@ else
         YOUTUBE_OPTION_ENABLED="missing"
     fi
 
+    if (test "x$WEBORAMA_OPTION_ENABLED" = xyes) && (test "x$WEBORAMA_OPTION_REQUESTED" = xyes); then
+        AC_MSG_ERROR([unable to configure curl which is required for Weborama support!])
+    fi
+
+    if (test "x$WEBORAMA_OPTION_ENABLED" = xyes) && (test "x$WEBORAMA_OPTION_REQUESTED" != xyes); then
+        AC_MSG_WARN([curl not found, disabling Weborama])
+        WEBORAMA_OPTION_ENABLED="missing"
+    fi
+
     if (test "x$SOPCAST_OPTION_ENABLED" = xyes) && (test "x$SOPCAST_OPTION_REQUESTED" = xyes); then
         AC_MSG_ERROR([unable to configure curl which is required for SopCast support!])
     fi
@@ -1428,7 +1447,7 @@ else
         fi
     fi
 
-    if (test "x$YOUTUBE_OPTION_ENABLED" != xyes) && (test "x$EXTERNAL_TRANSCODING_OPTION" = !xyes) && (test "x$SOPCAST_OPTION_ENABLED" != xyes); then
+    if (test "x$YOUTUBE_OPTION_ENABLED" != xyes) && (test "x$WEBORAMA_OPTION_ENABLED" != xyes) && (test "x$EXTERNAL_TRANSCODING_OPTION" = !xyes) && (test "x$SOPCAST_OPTION_ENABLED" != xyes); then
         CURL_CFLAGS=
         CURL_LIBS=
     fi
@@ -1762,7 +1781,7 @@ CPPFLAGS="$CPPFLAGS_SAVE"
 CXXFLAGS="$CXXFLAGS_SAVE"
 
 
-MT_CHECK_OPTIONAL_PACKAGE_CFG([libdvdnav], [enable],
+MT_CHECK_OPTIONAL_PACKAGE_CFG([libdvdnav], [disable],
              [compile with libdvdnav support for extended DVD image parsing],
              [dvdnav-config],
              [dvdnav.h], [dvdnav], [dvdnav_get_audio_attr], [])
@@ -1803,12 +1822,16 @@ eval PACKAGE_DATADIR="${datadir}/${PACKAGE}"
 eval PACKAGE_DATADIR="${PACKAGE_DATADIR}"
 AC_DEFINE_UNQUOTED(PACKAGE_DATADIR, "$PACKAGE_DATADIR", [MediaTomb data directory])
 
-if (test "x$YOUTUBE_OPTION_ENABLED" = xyes) || (test "x$SOPCAST_OPTION_ENABLED" = xyes); then
+if (test "x$YOUTUBE_OPTION_ENABLED" = xyes) || (test "x$WEBORAMA_OPTION_ENABLED" = xyes) || (test "x$SOPCAST_OPTION_ENABLED" = xyes); then
     AC_DEFINE(ONLINE_SERVICES, 1, [at least one online service is supported])
 fi
 
 if (test "x$YOUTUBE_OPTION_ENABLED" = xyes); then
     AC_DEFINE([YOUTUBE], [1], [Enable support for the YouTube service])
+fi
+
+if (test "x$WEBORAMA_OPTION_ENABLED" = xyes); then
+    AC_DEFINE([WEBORAMA], [1], [Enable support for the Weborama service])
 fi
 
 if (test "x$SOPCAST_OPTION_ENABLED" = xyes); then
@@ -1818,9 +1841,7 @@ fi
 AC_DEFINE([__STDC_CONSTANT_MACROS], [1], [needed for stdint.h])
 AC_DEFINE([__STDC_LIMIT_MACROS], [1], [needed for stdint.h])
 
-AC_DEFINE_UNQUOTED([COMPILE_INFO], "host: $host; sqlite3: $SQLITE3_STATUS; mysql: $MYSQL_STATUS libjs: $JS_OK; libmagic: $LIBMAGIC_STATUS; inotify: $INOTIFY_STATUS; libexif: $LIBEXIF_STATUS; id3lib: $ID3LIB_STATUS; taglib: $TAGLIB_STATUS; ffmpeg: $FFMPEG_STATUS; libmp4v2: $LIBMP4V2_STATUS; external transcoding: $EXTERNAL_TRANSCODING_OPTION_ENABLED; curl: $CURL_OK; YouTube: $YOUTUBE_OPTION_ENABLED; SopCast: $SOPCAST_OPTION_ENABLED; libextractor: $LIBEXTRACTOR_STATUS; db-autocreate: $DB_AUTOCREATE_OPTION_ENABLED; debug log: $DEBUG_LOG_OPTION_ENABLED; protocol info extensions: $PROTOCOLINFO_EXTENSION_OPTION_ENABLED; data directory: $PACKAGE_DATADIR; ffmpegthumbnailer: $FFMPEGTHUMBNAILER_STATUS", [compile option summary])
-
-# libdvdnav: $LIBDVDNAV_STATUS
+AC_DEFINE_UNQUOTED([COMPILE_INFO], "host: $host; sqlite3: $SQLITE3_STATUS; mysql: $MYSQL_STATUS libjs: $JS_OK; libmagic: $LIBMAGIC_STATUS; inotify: $INOTIFY_STATUS; libexif: $LIBEXIF_STATUS; id3lib: $ID3LIB_STATUS; taglib: $TAGLIB_STATUS; ffmpeg: $FFMPEG_STATUS; libmp4v2: $LIBMP4V2_STATUS; external transcoding: $EXTERNAL_TRANSCODING_OPTION_ENABLED; curl: $CURL_OK; YouTube: $YOUTUBE_OPTION_ENABLED; SopCast: $SOPCAST_OPTION_ENABLED; Weborama: $WEBORAMA_OPTION_ENABLED; libdvdnav: $LIBDVDNAV_STATUS; libextractor: $LIBEXTRACTOR_STATUS; db-autocreate: $DB_AUTOCREATE_OPTION_ENABLED; debug log: $DEBUG_LOG_OPTION_ENABLED; protocol info extensions: $PROTOCOLINFO_EXTENSION_OPTION_ENABLED; data directory: $PACKAGE_DATADIR; ffmpegthumbnailer: $FFMPEGTHUMBNAILER_STATUS", [compile option summary])
 
 ###############
 AC_CONFIG_FILES([
@@ -1855,12 +1876,13 @@ echo "libexif               : $LIBEXIF_STATUS"
 echo "id3lib                : $ID3LIB_STATUS"
 echo "taglib                : $TAGLIB_STATUS"
 echo "libmp4v2              : $LIBMP4V2_STATUS"
-#echo "libdvdnav            : $LIBDVDNAV_STATUS"
+echo "libdvdnav             : $LIBDVDNAV_STATUS"
 echo "ffmpeg                : $FFMPEG_STATUS"
 echo "ffmpegthumbnailer     : $FFMPEGTHUMBNAILER_STATUS"
 echo "external transcoding  : $EXTERNAL_TRANSCODING_OPTION_ENABLED"
 echo "curl                  : $CURL_OK"
 echo "YouTube               : $YOUTUBE_OPTION_ENABLED"
+echo "Weborama              : $WEBORAMA_OPTION_ENABLED"
 echo "SopCast               : $SOPCAST_OPTION_ENABLED"
 echo "libextractor          : $LIBEXTRACTOR_STATUS"
 echo "db-autocreate         : $DB_AUTOCREATE_OPTION_ENABLED"

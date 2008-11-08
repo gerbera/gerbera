@@ -47,7 +47,7 @@
 using namespace zmm;
 using namespace mxml;
 
-#define WEBORAMA_SERVICE_URL            "undefined"
+#define WEBORAMA_SERVICE_URL            "beta.weborama.ru/modules/player/index_xspf.php"
 #define MAX_PER_TASK_AMOUNT             (100)
 
 // Weborama defines

@@ -50,6 +50,10 @@
     #include "youtube_service.h"
 #endif
 
+#ifdef WEBORAMA
+    #include "weborama_content_handler.h"
+#endif
+
 #ifdef SOPCAST
     #include "sopcast_content_handler.h"
 #endif
@@ -535,6 +539,14 @@ void FallbackLayout::addWeborama(zmm::Ref<CdsObject> obj)
     {
         obj->setRefID(obj->getID());
         ref_set = true;
+    }
+
+    temp = obj->getAuxData(_(WEBORAMA_AUXDATA_MOOD));
+    if (string_ok(temp))
+    {
+        chain = _(WB_VPATH "/" "Mood" "/") + esc(temp);
+        id = ContentManager::getInstance()->addContainerChain(chain);
+        add(obj, id, ref_set);
     }
 }
 

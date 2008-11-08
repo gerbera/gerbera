@@ -336,8 +336,10 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         // ok this really sucks, I guess another rewrite of the resource manager
         // is necessary
         if ((i > 0) && (item->getResource(i)->getHandlerType() == CH_EXTURL) &&
-           (item->getResource(i)->getOption(_(RESOURCE_CONTENT_TYPE)) == 
-            THUMBNAIL))
+           ((item->getResource(i)->getOption(_(RESOURCE_CONTENT_TYPE)) == 
+            THUMBNAIL) || 
+            (item->getResource(i)->getOption(_(RESOURCE_CONTENT_TYPE)) ==
+                            ID3_ALBUM_ART)))
         {
             url = item->getResource(i)->getOption(_(RESOURCE_OPTION_URL));
             if (!string_ok(url))
@@ -350,9 +352,14 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
 #ifdef HAVE_ID3_ALBUMART
         // only add upnp:AlbumArtURI if we have an AA, skip the resource
         if ((i > 0) && ((item->getResource(i)->getHandlerType() == CH_ID3) ||
-                        (item->getResource(i)->getHandlerType() == CH_MP4)))
+                        (item->getResource(i)->getHandlerType() == CH_MP4) ||
+                        (item->getResource(i)->getHandlerType() == CH_EXTURL)))
         {
-            String rct = item->getResource(i)->getParameter(_(RESOURCE_CONTENT_TYPE));
+            String rct;
+            if (item->getResource(i)->getHandlerType() == CH_EXTURL)
+                rct = item->getResource(i)->getOption(_(RESOURCE_CONTENT_TYPE));
+            else    
+                rct = item->getResource(i)->getParameter(_(RESOURCE_CONTENT_TYPE));
             if (rct == ID3_ALBUM_ART)
             {
                 Ref<Element> aa(new Element(MetadataHandler::getMetaFieldName(M_ALBUMARTURI)));
@@ -368,8 +375,8 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                 }
 #endif
                 element->appendElementChild(aa);
+                continue;
             }
-            continue;
         }
 #endif
         if (!isExtThumbnail)
