@@ -213,8 +213,9 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
             t_res->addOption(_(CONTENT_TYPE_OGG), 
                          item->getResource(0)->getOption(_(CONTENT_TYPE_OGG)));
             t_res->addParameter(_(URL_PARAM_TRANSCODE), _(URL_VALUE_TRANSCODE));
-            t_res->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
-                    renderProtocolInfo(tp->getTargetMimeType()));
+
+            String targetMimeType = tp->getTargetMimeType();
+
             // duration should be the same for transcoded media, so we can take
             // the value from the original resource
             String duration = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_DURATION));
@@ -227,11 +228,16 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
             {
                 String frequency = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY));
                 if (string_ok(frequency))
+                {
                      t_res->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), frequency);
+                     targetMimeType = targetMimeType + _(";rate=") + frequency;
+                }
             }
             else if (freq != OFF)
             {
                 t_res->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), String::from(freq));
+                targetMimeType = targetMimeType + _(";rate=") + 
+                                 String::from(freq);
             }
 
             int chan = tp->getNumChannels();
@@ -239,12 +245,21 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
             {
                 String nchannels = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS));
                 if (string_ok(nchannels))
+                {
                      t_res->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), nchannels);
+                     targetMimeType = targetMimeType + _(";channels=") + 
+                                      nchannels;
+                }
             }
             else if (chan != OFF)
             {
                 t_res->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), String::from(chan));
+                targetMimeType = targetMimeType + _(";channels=") + 
+                                      String::from(chan);
             }
+
+            t_res->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
+                    renderProtocolInfo(targetMimeType));
 
             if (tp->isThumbnail())
                 t_res->addOption(_(RESOURCE_CONTENT_TYPE), _(EXIF_THUMBNAIL));

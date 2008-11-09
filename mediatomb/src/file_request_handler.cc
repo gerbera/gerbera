@@ -239,6 +239,19 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
                         tr_profile + " found");
 
             mimeType = tp->getTargetMimeType();
+            
+            Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+            if (mappings->get(mimeType) == CONTENT_TYPE_PCM)
+            {
+                String freq = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY));
+                String nrch = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS));
+
+                if (string_ok(freq))
+                    mimeType = mimeType + _(";rate=") + freq;
+                if (string_ok(nrch))
+                    mimeType = mimeType + _(";channels=") + nrch;
+            }
+
             info->file_length = -1;
         }
         else

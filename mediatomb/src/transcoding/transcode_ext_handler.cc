@@ -108,8 +108,10 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
             String freq = it->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY));
             String nrch = it->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS));
 
-            if (string_ok(freq) && string_ok(nrch));
-                mimeType = mimeType + _(";rate=") + freq + _(";channels=") + nrch;
+            if (string_ok(freq)) 
+                mimeType = mimeType + _(";rate=") + freq;
+            if (string_ok(nrch))
+                mimeType = mimeType + _(";channels=") + nrch;
         }
     }
 
