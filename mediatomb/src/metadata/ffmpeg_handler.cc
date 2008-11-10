@@ -246,7 +246,7 @@ void FfmpegNoOutputStub(void* ptr, int level, const char* fmt, va_list vl)
 
 void FfmpegHandler::fillMetadata(Ref<CdsItem> item)
 {
-    log_debug("Running ffmpeg handler\n");
+    log_debug("Running ffmpeg handler on %s\n", item->getLocation().c_str());
 
     int x = 0;
     int y = 0;
