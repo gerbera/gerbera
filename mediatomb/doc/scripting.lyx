@@ -602,7 +602,7 @@ The object ID, make sure to set all refID's (reference IDs) of your virtual
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Standard
 
@@ -631,7 +631,7 @@ The object ID of the parent container.
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Standard
 
@@ -661,7 +661,7 @@ The UPnP class of the item, this corresponds to upnp:class in the DIDL-Lite
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Standard
 
@@ -690,7 +690,7 @@ Location on disk, given by the absolute path and file name.
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Standard
 
@@ -722,7 +722,7 @@ This property is a boolean value, it is non zero if the particular item
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Standard
 
@@ -812,7 +812,7 @@ status collapsed
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Standard
 
@@ -872,7 +872,7 @@ Array holding the metadata that was extracted from the object (i.e.
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -903,7 +903,7 @@ Extracted title (for example the id3 title if the object is an mp3 file),
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -931,7 +931,7 @@ Artist information, this corresponds to upnp:artist in the DIDL-Lite XML.
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -960,7 +960,7 @@ Album information, this corresponds to upnp:album in the DIDL-Lite XML.
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -989,7 +989,7 @@ Date, must be in the format of YYYY-MM-DD (required by the UPnP spec), this
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -1018,7 +1018,7 @@ Genre of the item, this corresponds to upnp:genre in the DIDL-Lite XML.
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -1047,7 +1047,7 @@ Description of the item, this corresponds to dc:description in the DIDL-Lite
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -1076,7 +1076,7 @@ Region description of the item, this corresponds to upnp:region in the DIDL-Lite
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -1105,7 +1105,7 @@ Track number of the item, this corresponds to upnp:originalTrackNumber in
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -1133,7 +1133,7 @@ Author of the media, this corresponds to upnp:author in the DIDL-Lite XML.
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -1162,7 +1162,7 @@ Director of the media, this corresponds to upnp:director in the DIDL-Lite
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -1296,7 +1296,7 @@ Identifies the YouTube request type, following types are available:
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -1451,7 +1451,7 @@ The item was created as a result of for users subscriptions.
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -2218,7 +2218,7 @@ Value: object.item
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -2248,7 +2248,7 @@ Value: object.item.audioItem.musicTrack
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -2278,7 +2278,7 @@ Value: object.item.videoItem
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -2308,7 +2308,7 @@ Value: object.item.imageItem
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -2338,7 +2338,7 @@ Value: 1
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -2368,7 +2368,7 @@ Value: 2
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -2398,7 +2398,7 @@ Value: 4
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -2428,7 +2428,7 @@ Value: 8
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -2528,7 +2528,7 @@ Parameters:
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -2551,7 +2551,7 @@ A virtual object that is either a copy of or a reference to 'orig', see
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -2579,7 +2579,7 @@ A string, defining where the object will be added in the database hierarchy.
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -2608,7 +2608,7 @@ ner.album.musicAlbum'.
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -2622,7 +2622,7 @@ status open
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -2644,7 +2644,7 @@ This function returns a copy of the virtual object.
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -2667,7 +2667,7 @@ This function is useful for debugging scripts, it simply prints to the standard
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -2685,7 +2685,7 @@ f2i(string)
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -2703,7 +2703,7 @@ m2i(string)
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -2721,7 +2721,7 @@ p2i(string)
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -2887,7 +2887,7 @@ A virtual object that is either a copy of or a reference to 'orig', see
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -2915,7 +2915,7 @@ A string, defining where the object will be added in the database hierarchy.
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Standard
 
@@ -2963,34 +2963,6 @@ status open
 \begin_layout Standard
 
 </listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem></itemizedlist>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-<itemizedlist><listitem>
 \end_layout
 
 \end_inset
