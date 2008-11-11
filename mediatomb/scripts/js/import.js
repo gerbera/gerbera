@@ -153,6 +153,16 @@ function addVideo(obj)
     addCdsObject(obj, createContainerChain(chain));
 }
 
+function addWeborama(obj)
+{
+    var req_name = obj.aux[WEBORAMA_AUXDATA_REQUEST_NAME];
+    if (req_name)
+    {
+        var chain = new Array('Online Services', 'Weborama', req_name);
+        addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_PLAYLIST_CONTAINER);
+    }
+}
+
 function addImage(obj)
 {
     var chain = new Array('Photos', 'All Photos');
@@ -220,7 +230,10 @@ if (getPlaylistType(orig.mimetype) == '')
     
     if (mime == 'audio')
     {
-        addAudio(obj);
+        if (obj.onlineservice == ONLINE_SERVICE_WEBORAMA)
+            addWeborama(obj);
+        else
+            addAudio(obj);
     }
     
     if (mime == 'video')
