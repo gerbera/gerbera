@@ -1814,11 +1814,6 @@ void ConfigManager::validate(String serverhome)
 
     if (temp == "yes")
     {
-        temp = getOption(_("/import/online-content/Weborama/attribute::userid"));
-        if (!string_ok(temp))
-            throw _Exception(_("Error in config file: "
-                               "missing global userid for Weborama service"));
-
         el = getElement(_("/import/online-content/Weborama"));
         Ref<Array<Object> > wb_opts = createServiceTaskList(OS_Weborama, el);
         if (wb_opts->size() == 0)

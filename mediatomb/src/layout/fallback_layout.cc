@@ -532,22 +532,18 @@ void FallbackLayout::addWeborama(zmm::Ref<CdsObject> obj)
         ref_set = true;
     }
 
-    chain = _(WB_VPATH "/" "All Audio");
-    id = ContentManager::getInstance()->addContainerChain(chain);
-    add(obj, id, ref_set);
-    if (!ref_set)
+    temp = obj->getAuxData(_(WEBORAMA_AUXDATA_REQUEST_NAME));
+    if (!string_ok(temp))
     {
-        obj->setRefID(obj->getID());
-        ref_set = true;
+        log_warning("Skipping Weborama item %s: missing playlist name\n", 
+                    obj->getTitle().c_str());
+        return;
     }
 
-    temp = obj->getAuxData(_(WEBORAMA_AUXDATA_MOOD));
-    if (string_ok(temp))
-    {
-        chain = _(WB_VPATH "/" "Mood" "/") + esc(temp);
-        id = ContentManager::getInstance()->addContainerChain(chain);
-        add(obj, id, ref_set);
-    }
+    chain = _(WB_VPATH "/") + esc(temp);
+    id = ContentManager::getInstance()->addContainerChain(chain, 
+                                      _(UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER));
+    add(obj, id, ref_set);
 }
 
 #endif

@@ -48,17 +48,23 @@ using namespace zmm;
 using namespace mxml;
 
 #define WEBORAMA_SERVICE_URL            "beta.weborama.ru/modules/player/index_xspf.php"
-#define MAX_PER_TASK_AMOUNT             (100)
 
+/// \todo ask Nick if this value makes sense
+#define DEFAULT_PER_TASK_AMOUNT         (200)
+
+#define WEBORAMA_VALUE_PER_REQUEST_MAX  (40)
 // Weborama defines
 #define FILTER_OPTION_FAVORITE          "favourite"
 #define FILTER_OPTION_FRIENDS           "friends"
 #define FILTER_OPTION_USERID            "userId"
 #define FILTER_OPTION_UPLOADED          "uploaded"
-#define FILTER_OPTION_USER_COUNT        "user_count"
-#define FILTER_OPTION_USER_LAST         "user_last"
+//#define FILTER_OPTION_USER_COUNT        "user_count"
+#define FILTER_OPTION_USER_LAST         "used_last"
 #define FILTER_OPTION_ALL               "all"
-#define FILTER_SEPARATOR                ":"
+#define FILTER_OPTION_GENREID           "genreId"
+#define FILTER_OPTION_SORT              "sort"
+#define FILTER_SEPARATOR                ";"
+#define FILTER_VALUE_SEPARATOR          ":"
 
 #define PARAM_LIMIT                     "limit"
 #define PARAM_OFFSET                    "offset"
@@ -74,20 +80,71 @@ using namespace mxml;
 #define VALUE_TYPE_AUDIO                "audio"
 
 // config.xml defines
-#define CFG_REQUEST_FAVORITES           "favorites"
-#define CFG_REQUEST_BY_MOOD             "mood"
+#define CFG_REQUEST_PLAYLIST            "playlist"
 
-#define CFG_OPTION_USER                 "user"
+#define CFG_SECTION_FILTER              "filter"
+#define CFG_SECTION_GENRES              "genres"
+#define CFG_SECTION_SORT                "sort"
 
-#define CFG_OPTION_MOOD_0               "calm-positive"     
-#define CFG_OPTION_MOOD_1               "positive"
-#define CFG_OPTION_MOOD_2               "energetic-positive"
-#define CFG_OPTION_MOOD_3               "calm"
-#define CFG_OPTION_MOOD_4               "neutral"
-#define CFG_OPTION_MOOD_5               "energetic"
-#define CFG_OPTION_MOOD_6               "calm-dark"
-#define CFG_OPTION_MOOD_7               "dark"
-#define CFG_OPTION_MOOD_8               "energetic-dark"
+#define CFG_SORT_FAVORITE        "favorite"
+#define CFG_SORT_FRIENDS         "friends"
+#define CFG_SORT_UPLOADED        "uploaded"
+#define CFG_SORT_USED_LAST       "used_last"
+#define CFG_SORT_ALL             "all"
+
+#define CFG_OPTION_PLAYLIST_NAME        "name"
+
+#define CFG_MOOD_0               "calm-positive"     
+#define CFG_MOOD_1               "positive"
+#define CFG_MOOD_2               "energetic-positive"
+#define CFG_MOOD_3               "calm"
+#define CFG_MOOD_4               "neutral"
+#define CFG_MOOD_5               "energetic"
+#define CFG_MOOD_6               "calm-dark"
+#define CFG_MOOD_7               "dark"
+#define CFG_MOOD_8               "energetic-dark"
+
+#define CFG_TYPE_AUDIO           "audio"
+#define CFG_TYPE_PLAYLIST        "playlist"
+#define CFG_TYPE_ALBUM           "album"
+
+/*
+Электронная — 24
+Русская попса — 132
+Альтернатива — 32
+Саундтрек — 129
+Джаз — 42
+Русский рок — 131
+Металл — 47
+Ретро — 130
+Поп — 51
+Панк — 54
+Ритм энд блюз — 56
+Рэп — 57
+Рэгги — 59
+Рок — 61
+Классическая — 128
+Шансон — 133
+Фолк — 134
+*/
+
+#define CFG_GENRE_24             "electronic"
+#define CFG_GENRE_32             "alternative"
+#define CFG_GENRE_42             "jazz"
+#define CFG_GENRE_47             "metal"
+#define CFG_GENRE_51             "pop"
+#define CFG_GENRE_54             "punk"
+#define CFG_GENRE_56             "rhytm_and_blues"
+#define CFG_GENRE_57             "rap"
+#define CFG_GENRE_59             "reggae"
+#define CFG_GENRE_61             "rock"
+#define CFG_GENRE_128            "classic"
+#define CFG_GENRE_129            "soundtrack"
+#define CFG_GENRE_130            "retro"
+#define CFG_GENRE_131            "russian_rock"
+#define CFG_GENRE_132            "russian_pop"
+#define CFG_GENRE_133            "chanson"
+#define CFG_GENRE_134            "folk"
 
 typedef struct wr_mood wr_mood;
 struct wr_mood
@@ -99,16 +156,47 @@ struct wr_mood
 
 wr_mood WR_mood[] = 
 {
-    { WR_mood_calm_positive,        CFG_OPTION_MOOD_0, "Calm-Positive"      },
-    { WR_mood_positive,             CFG_OPTION_MOOD_1, "Positive"           },
-    { WR_mood_energetic_positive,   CFG_OPTION_MOOD_2, "Energetic-Positive" },
-    { WR_mood_calm,                 CFG_OPTION_MOOD_3, "Calm"               },
-    { WR_mood_neutral,              CFG_OPTION_MOOD_4, "Neutral"            },
-    { WR_mood_energetic,            CFG_OPTION_MOOD_5, "Energetic"          },
-    { WR_mood_calm_dark,            CFG_OPTION_MOOD_6, "Calm-Dark"          },
-    { WR_mood_dark,                 CFG_OPTION_MOOD_7, "Dark"               },
-    { WR_mood_energetic_dark,       CFG_OPTION_MOOD_8, "Energetic-Dark"     },
+    { WR_mood_calm_positive,         CFG_MOOD_0, "Calm-Positive"      },
+    { WR_mood_positive,              CFG_MOOD_1, "Positive"           },
+    { WR_mood_energetic_positive,    CFG_MOOD_2, "Energetic-Positive" },
+    { WR_mood_calm,                  CFG_MOOD_3, "Calm"               },
+    { WR_mood_neutral,               CFG_MOOD_4, "Neutral"            },
+    { WR_mood_energetic,             CFG_MOOD_5, "Energetic"          },
+    { WR_mood_calm_dark,             CFG_MOOD_6, "Calm-Dark"          },
+    { WR_mood_dark,                  CFG_MOOD_7, "Dark"               },
+    { WR_mood_energetic_dark,        CFG_MOOD_8, "Energetic-Dark"     },
     { WR_mood_none, NULL, NULL },
+};
+
+typedef struct wr_genre wr_genre;
+struct wr_genre
+{
+    wr_genre_t genre;
+    int id;
+    const char *cfg_name;
+    const char *aux_name;
+};
+
+wr_genre WR_genre[] = 
+{   
+    { WR_genre_electronic,      24,  CFG_GENRE_24,  "Electronic"      },
+    { WR_genre_alternative,     32,  CFG_GENRE_32,  "Alternative"     },
+    { WR_genre_jazz,            42,  CFG_GENRE_42,  "Jazz"            }, 
+    { WR_genre_metal,           47,  CFG_GENRE_47,  "Metal"           },
+    { WR_genre_pop,             51,  CFG_GENRE_51,  "Pop"             },
+    { WR_genre_punk,            54,  CFG_GENRE_54,  "Punk"            },
+    { WR_genre_rhytm_and_blues, 56,  CFG_GENRE_56,  "Rhytm And Blues" },
+    { WR_genre_rap,             57,  CFG_GENRE_57,  "Rap"             },
+    { WR_genre_reggae,          59,  CFG_GENRE_59,  "Reggae"          },
+    { WR_genre_rock,            61,  CFG_GENRE_61,  "Rock"            },
+    { WR_genre_classic,         128, CFG_GENRE_128, "Classic"         },
+    { WR_genre_soundtrack,      129, CFG_GENRE_129, "Soundtrack"      },
+    { WR_genre_retro,           130, CFG_GENRE_130, "Retro"           },
+    { WR_genre_russian_rock,    131, CFG_GENRE_131, "Russian Rock"    },
+    { WR_genre_russian_pop,     132, CFG_GENRE_132, "Russian Pop"     },
+    { WR_genre_chanson,         133, CFG_GENRE_133, "Chanson"         },
+    { WR_genre_folk,            134, CFG_GENRE_134, "Folk"            },
+    { WR_genre_none, -1, NULL, NULL },                           
 };
 
 WeboramaService::WeboramaService()
@@ -134,7 +222,6 @@ WeboramaService::WeboramaTask::WeboramaTask()
     amount = 0;
     amount_fetched = 0;
     start_index = 0;
-    cfg_start_index = 0;
 }
 
 
@@ -162,49 +249,129 @@ wr_mood_t WeboramaService::getMood(Ref<Element> xml)
     return WR_mood[i].mood;
 }
 
+wr_genre_t WeboramaService::getGenre(String genre)
+{
+    if (!string_ok(genre))
+        return WR_genre_none;
+
+    for (int i = (int)WR_genre_electronic; i < (int)WR_genre_none; i++)
+    {
+        if (genre == WR_genre[i].cfg_name)
+            return WR_genre[i].genre;
+    }
+
+    return WR_genre_none;
+}
+
+int WeboramaService::getGenreID(wr_genre_t genre)
+{
+    if (((int)genre < 0) || ((int)genre > WR_genre_none))
+        return -1;
+
+    return WR_genre[genre].id;
+}
+
 Ref<Object> WeboramaService::defineServiceTask(Ref<Element> xmlopt, Ref<Object> params)
 {
     Ref<WeboramaTask> task(new WeboramaTask());
     String temp = xmlopt->getName();
-    String temp2;
         
     task->parameters->put(_(PARAM_COVER_SIZE), _(VALUE_COVER_SIZE_DLNA));
-    task->parameters->put(_(PARAM_ID), RefCast(params, Option)->getOption());
-    task->amount = MAX_PER_TASK_AMOUNT;
+    task->amount = DEFAULT_PER_TASK_AMOUNT;
 
-    if (temp == CFG_REQUEST_FAVORITES)
+    if (temp == CFG_REQUEST_PLAYLIST)
     {
-        task->parameters->put(_(PARAM_TYPE), _(VALUE_TYPE_PLAYLIST));
+        task->name = getCheckAttr(xmlopt, _(CFG_OPTION_PLAYLIST_NAME));
 
-        temp2 = getCheckAttr(xmlopt, _("user"));
+        // we have to evaluate the id parameter depending on the "type" value
+        String id = xmlopt->getAttribute(_("id"));
 
-        temp2 = _(FILTER_OPTION_USERID) + _(FILTER_SEPARATOR) + temp2 + 
-                _(FILTER_SEPARATOR) + _(FILTER_OPTION_FAVORITE);
-
-        task->parameters->put(_(PARAM_FILTER), temp2);
-
-        temp2 = xmlopt->getAttribute(_("amount"));
-        if (string_ok(temp2))
+        temp = xmlopt->getAttribute(_("type"));
+        if (string_ok(temp))
         {
-            int amount = temp2.toInt();
+            if ((temp != CFG_TYPE_ALBUM) && (temp != CFG_TYPE_AUDIO) &&
+                (temp != CFG_TYPE_PLAYLIST))
+                throw _Exception(_("Weborama: ") + temp + 
+                                 _(" type is invalid!"));
+
+            if (((temp == CFG_TYPE_ALBUM) || (temp == CFG_TYPE_AUDIO))
+                && (!string_ok(id) || id == "0"))
+            {
+                throw _Exception(_("Weborama: ") + temp + _(" type requires a"
+                                   "valid id parameter!"));
+            }
+
+            task->parameters->put(_(PARAM_TYPE), temp);
+            if (string_ok(id))
+                task->parameters->put(_(PARAM_ID), id);
+        }
+
+        wr_mood_t mood = getMood(xmlopt);
+        if (mood != WR_mood_none)
+            task->parameters->put(_(PARAM_MOOD), String::from((int)mood));
+        
+
+        Ref<Element> filter = xmlopt->getChildByName(_(CFG_SECTION_FILTER));
+        if (filter != nil)
+        {
+            String filters;
+            String genres = filter->getChildText(_(CFG_SECTION_GENRES));
+            if (string_ok(genres))
+            {
+                String g;
+                Ref<Array<StringBase> > parts = split_string(genres, ',');
+                for (int i = 0; i < parts->size(); i++)
+                {
+                    wr_genre_t genre = getGenre(parts->get(i));
+                    if (genre == WR_genre_none)
+                        continue;
+
+                    g = g + String::from(getGenreID(genre)) + _(",");
+                }
+
+                if (string_ok(g))
+                    filters = _(FILTER_OPTION_GENREID) + 
+                              _(FILTER_VALUE_SEPARATOR) + 
+                              g.substring(0, g.length()-1);
+            }
+
+            String sort = filter->getChildText(_(CFG_SECTION_SORT));
+            if (string_ok(sort))
+            {
+                if ((sort != CFG_SORT_FAVORITE) &&
+                    (sort != CFG_SORT_FRIENDS) && (sort != CFG_SORT_UPLOADED) &&
+                    (sort != CFG_SORT_USED_LAST) && (sort != CFG_SORT_ALL))
+                    throw _Exception(_("Weborama: ") + sort + _(" sort is "
+                                                                "invalid!"));
+
+                // ok, this is a little hack'ish, but so far the config 
+                // names match nicely with the actual parameters... all but one
+                if (sort == CFG_SORT_FAVORITE) 
+                    sort = _(FILTER_OPTION_FAVORITE);
+
+                if (string_ok(filters))
+                    filters = filters + _(FILTER_SEPARATOR);
+
+                filters = filters + _(FILTER_OPTION_SORT) + 
+                         _(FILTER_VALUE_SEPARATOR) + sort;
+            }
+
+            if (string_ok(filters))
+                task->parameters->put(_(PARAM_FILTER), filters);
+        }
+
+        temp = xmlopt->getAttribute(_("amount"));
+        if (string_ok(temp))
+        {
+            int amount = temp.toInt();
             if (amount < 0)
                 throw _Exception(_("Weborama: invalid amount specified for task ") + xmlopt->getName());
 
             task->amount = amount;
         }
-            task->amount = MAX_PER_TASK_AMOUNT;
-
-        wr_mood_t mood = getMood(xmlopt);
-        if (mood != WR_mood_none)
-            task->parameters->put(_(PARAM_MOOD), String::from((int)mood));
+        else
+            task->amount = DEFAULT_PER_TASK_AMOUNT;
     } 
-    else if (temp == CFG_REQUEST_BY_MOOD)
-    {
-        task->parameters->put(_(PARAM_TYPE), _(VALUE_TYPE_PLAYLIST));
-        wr_mood_t mood = getMood(xmlopt);
-        if (mood != WR_mood_none)
-            task->parameters->put(_(PARAM_MOOD), String::from((int)mood));
-    }
     else
         return nil;
 
@@ -287,8 +454,24 @@ bool WeboramaService::refreshServiceData(Ref<Layout> layout)
     if (task ==  nil)
         throw _Exception(_("Encountered invalid task!"));
 
+    if (task->amount_fetched < task->amount)
+    {
+        task->start_index = task->amount_fetched;
+        task->parameters->put(_(PARAM_OFFSET), String::from(task->start_index));
+        if ((task->amount - task->amount_fetched) >=
+                WEBORAMA_VALUE_PER_REQUEST_MAX)
+        {
+            task->parameters->put(_(PARAM_LIMIT), 
+                                  String::from(WEBORAMA_VALUE_PER_REQUEST_MAX));
+        }
+        else if ((task->amount - task->amount_fetched) <
+                 WEBORAMA_VALUE_PER_REQUEST_MAX)
+        {
+             task->parameters->put(_(PARAM_LIMIT), 
+                     String::from(task->amount - task->amount_fetched));
+        }
+    }
     bool b = false;
-
 
     Ref<Element> reply = getData(task->parameters);
 
@@ -305,6 +488,7 @@ bool WeboramaService::refreshServiceData(Ref<Layout> layout)
     {
         log_debug("End of pages\n");
         task->amount_fetched = 0;
+        task->start_index = 0;
 
         current_task++;
         if (current_task >= tasklist->size())
@@ -322,13 +506,18 @@ bool WeboramaService::refreshServiceData(Ref<Layout> layout)
     Ref<CdsObject> obj;
     do
     {
-        /// \todo add try/catch here and a possibility do find out if we
-        /// may request more stuff or if we are at the end of the list
         obj = sc->getNextObject();
         if (obj == nil)
-            break;
+        {
+            if (task->amount_fetched < task->amount)
+                return true;
+            else
+                break;
+        }
 
-       obj->setVirtual(true);
+        obj->setVirtual(true);
+        obj->setAuxData(_(WEBORAMA_AUXDATA_REQUEST_NAME), task->name);
+        RefCast(obj, CdsItemExternalURL)->setTrackNumber(task->amount_fetched);
 
         Ref<CdsObject> old = Storage::getInstance()->loadObjectByServiceID(RefCast(obj, CdsItem)->getServiceID());
         if (old == nil)
@@ -355,6 +544,7 @@ bool WeboramaService::refreshServiceData(Ref<Layout> layout)
         if (task->amount_fetched >= task->amount)
         {
             task->amount_fetched = 0;
+            task->start_index = 0;
 
             current_task++;
             if (current_task >= tasklist->size())

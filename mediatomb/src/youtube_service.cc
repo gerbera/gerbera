@@ -693,7 +693,7 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
         task->parameters->put(_(GDATA_YT_PARAM_START_INDEX),
                               String::from(task->start_index));
 
-        if ((task->amount - task->amount_fetched) > 
+        if ((task->amount - task->amount_fetched) >=
              _(GDATA_YT_VALUE_PER_PAGE_MAX).toInt())
         {
            task->parameters->put(_(GDATA_YT_PARAM_MAX_RESULTS_PER_REQ),

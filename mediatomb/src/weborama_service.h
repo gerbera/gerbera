@@ -57,6 +57,28 @@ typedef enum
     WR_mood_none,
 } wr_mood_t;
 
+typedef enum
+{
+    WR_genre_electronic = 0,
+    WR_genre_alternative,
+    WR_genre_jazz,
+    WR_genre_metal,
+    WR_genre_pop,
+    WR_genre_punk,
+    WR_genre_rhytm_and_blues,
+    WR_genre_rap,
+    WR_genre_reggae,
+    WR_genre_rock,
+    WR_genre_classic,
+    WR_genre_soundtrack,
+    WR_genre_retro,
+    WR_genre_russian_rock,
+    WR_genre_russian_pop,
+    WR_genre_chanson,
+    WR_genre_folk,
+    WR_genre_none,
+} wr_genre_t;
+
 /// \brief This is an interface for all online services, the function
 /// handles adding/refreshing content in the database.
 class WeboramaService : public OnlineService
@@ -98,6 +120,10 @@ protected:
     {
     public:
         WeboramaTask();
+
+        /// \brief Name of the task as defined by the user.
+        zmm::String name;
+
         /// \brief Weborama API URL parameters
         zmm::Ref<Dictionary> parameters;
 
@@ -109,14 +135,11 @@ protected:
 
         /// \brief Starting index of the item to fetch
         int start_index;
-
-        /// \brief Starging index as specified in the configuration by the user
-        int cfg_start_index;
     };
 
     wr_mood_t getMood(zmm::Ref<mxml::Element> xml);
-
-
+    wr_genre_t getGenre(zmm::String genre);
+    int getGenreID(wr_genre_t genre);
 };
 
 #endif//__ONLINE_SERVICE_H__
