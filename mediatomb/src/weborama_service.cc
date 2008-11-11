@@ -517,7 +517,8 @@ bool WeboramaService::refreshServiceData(Ref<Layout> layout)
 
         obj->setVirtual(true);
         obj->setAuxData(_(WEBORAMA_AUXDATA_REQUEST_NAME), task->name);
-        RefCast(obj, CdsItemExternalURL)->setTrackNumber(task->amount_fetched);
+        RefCast(obj, 
+                CdsItemExternalURL)->setTrackNumber(task->amount_fetched+1);
 
         Ref<CdsObject> old = Storage::getInstance()->loadObjectByServiceID(RefCast(obj, CdsItem)->getServiceID());
         if (old == nil)
