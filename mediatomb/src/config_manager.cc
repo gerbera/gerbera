@@ -314,6 +314,31 @@ Ref<Element> ConfigManager::renderOnlineSection()
 
     onlinecontent->appendElementChild(yt);
 #endif
+#ifdef WEBORAMA
+    Ref<Element> wb(new Element(_("Weborama")));
+    wb->setAttribute(_("enabled"), _(DEFAULT_WEBORAMA_ENABLED));
+    wb->setAttribute(_("refresh"), String::from(DEFAULT_WEBORAMA_REFRESH));
+    wb->setAttribute(_("update-at-start"), _(DEFAULT_WEBORAMA_UPDATE_AT_START));
+
+    Ref<Element> play1(new Element(_("playlist")));
+    play1->setAttribute(_("name"), _("Active"));
+    play1->setAttribute(_("type"), _("playlist"));
+    play1->setAttribute(_("mood"), _("active"));
+    wb->appendElementChild(play1);
+
+    Ref<Element> play2(new Element(_("playlist")));
+    play2->setAttribute(_("name"), _("Metal"));
+    play2->setAttribute(_("type"), _("playlist"));
+
+    Ref<Element> filter(new Element(_("filter")));
+    Ref<Element> genres(new Element(_("genres")));
+    genres->setText(_("metal"));
+    filter->appendElementChild(genres);
+    play2->appendElementChild(filter);
+    wb->appendElementChild(play2);
+
+    onlinecontent->appendElementChild(wb);
+#endif
     return onlinecontent;
 }
 
