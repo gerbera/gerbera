@@ -22,7 +22,6 @@
     $Id$
 */
 
-var title_count = dvd.aux[DVD].titles.length;
 var title = dvd.title;
 var index = title.lastIndexOf('.');
 if (index > 1)
@@ -31,6 +30,7 @@ if (index > 1)
 // we got the ISO here but our virtual items should have the video class
 dvd.upnpclass = UPNP_CLASS_ITEM_VIDEO;
 
+var title_count = dvd.aux[DVD].titles.length;
 for (var t = 0; t < title_count; t++)
 {
     var title_name = 'Title';
@@ -40,9 +40,8 @@ for (var t = 0; t < title_count; t++)
     else
         title_name = title_name + ' ' + (t + 1);
 
-    var audio_track_count = dvd.aux[DVD].titles[t].audio_tracks.length;
     var chapter_count = dvd.aux[DVD].titles[t].chapters.length;
-
+    var audio_track_count = dvd.aux[DVD].titles[t].audio_tracks.length;
     for (var a = 0; a < audio_track_count; a++)
     {
         var chain;
