@@ -49,6 +49,10 @@
     #include "youtube_content_handler.h"
 #endif
 
+#ifdef WEBORAMA
+    #include "weborama_content_handler.h"
+#endif
+
 #ifdef HAVE_LIBDVDNAV
     #include "metadata/dvd_handler.h"
 #endif
@@ -336,8 +340,14 @@ Script::Script(Ref<Runtime> runtime) : Object()
 #ifdef SOPCAST
     setIntProperty(glob, _("ONLINE_SERVICE_SOPCAST"), (int)OS_SopCast);
 #endif
+#ifdef WEBORAMA
+    setProperty(glob, _("WEBORAMA_AUXDATA_REQUEST_NAME"),
+                      _(WEBORAMA_AUXDATA_REQUEST_NAME));
+    setIntProperty(glob, _("ONLINE_SERVICE_WEBORAMA"), (int)OS_Weborama);
+#endif
 #else
     setIntProperty(glob, _("ONLINE_SERVICE_NONE"), 0);
+
 #endif//ONLINE_SERVICES
 
     for (int i = 0; i < M_MAX; i++)
@@ -857,6 +867,9 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
             Ref<DictionaryElement> el = elements->get(i);
             setProperty(meta_js, el->getKey(), el->getValue());
         }
+
+        if (RefCast(obj, CdsItem)->getTrackNumber() > 0)
+            setProperty(meta_js, MetadataHandler::getMetaFieldName(M_TRACKNUMBER), String::from(RefCast(obj, CdsItem)->getTrackNumber())); 
     }
 
     // setting auxdata
