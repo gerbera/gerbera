@@ -2185,7 +2185,14 @@ void CMFetchOnlineContentTask::run(Ref<ContentManager> cm)
         log_debug("Received invalid service!\n");
         return;
     }
-    cm->_fetchOnlineContent(service, getParentID());
+    try
+    {
+        cm->_fetchOnlineContent(service, getParentID());
+    }
+    catch (Exception ex)
+    {
+        log_error("%s\n", ex.getMessage().c_str());
+    }
     service->decTaskCount();
     if (service->getTaskCount() == 0)
     {

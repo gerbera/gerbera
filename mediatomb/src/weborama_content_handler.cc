@@ -132,7 +132,7 @@ Ref<CdsObject> WeboramaContentHandler::getNextObject()
         temp = track->getChildText(_("identifier"));
         if (!string_ok(temp))
         {
-            log_warning("Failed to retrieve Weborama track ID for %s\n",
+            log_warning("Failed to retrieve Weborama track ID for \"%s\", skipping...\n",
                         item->getTitle().c_str());
             continue;
         }
