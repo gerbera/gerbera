@@ -162,14 +162,14 @@ Ref<CdsObject> WeboramaContentHandler::getNextObject()
         if (string_ok(temp))
             item->setMetadata(MetadataHandler::getMetaFieldName(M_ALBUM), temp);
 
-        temp = track->getChildText(_("duration"));
+        temp = track->getChildText(_("duration")); // milliseconds
         if (string_ok(temp))
         {
             int d = temp.toInt();
             if (d > 0)
                 resource->addAttribute(MetadataHandler::getResAttrName(
                                                                 R_DURATION),
-                                       secondsToHMS(d));
+                                       secondsToHMS(d/1000));
         }
 
         temp = track->getChildText(_("bitrate"));
