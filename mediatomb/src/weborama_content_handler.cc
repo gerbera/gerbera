@@ -62,9 +62,11 @@ bool WeboramaContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
         throw _Exception(_("Received invalid XML for Weborama service: "
                            "track list not found!"));
 
+/*    
     String mood = service->getChildText(_("mood"));
     if (string_ok(mood))
         this->mood = mood;
+*/
 
     this->service_xml = trackList;
 
@@ -215,7 +217,7 @@ Ref<CdsObject> WeboramaContentHandler::getNextObject()
             }
         }
 
-        item->setAuxData(_(WEBORAMA_AUXDATA_MOOD), mood);
+//        item->setAuxData(_(WEBORAMA_AUXDATA_MOOD), mood);
 
         getTimespecNow(&ts);
         item->setAuxData(_(ONLINE_SERVICE_LAST_UPDATE), 

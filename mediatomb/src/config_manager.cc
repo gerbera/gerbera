@@ -1717,11 +1717,11 @@ void ConfigManager::validate(String serverhome)
         NEW_OPTION(temp);
         SET_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_RACY);
 
-        temp_int = getIntOption(_("/import/online-content/YouTube/attribute::refresh"), 0);
+        temp_int = getIntOption(_("/import/online-content/YouTube/attribute::refresh"), DEFAULT_YOUTUBE_REFRESH);
         NEW_INT_OPTION(temp_int);
         SET_INT_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_REFRESH);
 
-        temp_int = getIntOption(_("/import/online-content/YouTube/attribute::purge-after"), 0);
+        temp_int = getIntOption(_("/import/online-content/YouTube/attribute::purge-after"), DEFAULT_YOUTUBE_PURGE_AFTER);
         if (getIntOption(_("/import/online-content/YouTube/attribute::refresh")) >= temp_int)
         {
             if (temp_int != 0) 
@@ -1826,18 +1826,9 @@ void ConfigManager::validate(String serverhome)
     }
 
 
-    temp_int = getIntOption(_("/import/online-content/Weborama/attribute::refresh"), 0);
+    temp_int = getIntOption(_("/import/online-content/Weborama/attribute::refresh"), DEFAULT_WEBORAMA_REFRESH);
     NEW_INT_OPTION(temp_int);
     SET_INT_OPTION(CFG_ONLINE_CONTENT_WEBORAMA_REFRESH);
-
-    temp_int = getIntOption(_("/import/online-content/Weborama/attribute::purge-after"), 0);
-    if (getIntOption(_("/import/online-content/Weborama/attribute::refresh")) >= temp_int)
-    {
-        if (temp_int != 0) 
-            throw _Exception(_("Error in config file: Weborama purge-after value must be greater than refresh interval"));
-    }
-
-    NEW_INT_OPTION(temp_int);
     SET_INT_OPTION(CFG_ONLINE_CONTENT_WEBORAMA_PURGE_AFTER);
 
     temp = getOption(_("/import/online-content/Weborama/attribute::update-at-start"),

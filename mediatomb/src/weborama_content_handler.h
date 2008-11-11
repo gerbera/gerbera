@@ -39,8 +39,6 @@
 #define WEBORAMA_SERVICE_ID                  "W"
 
 #define WEBORAMA_AUXDATA_REQUEST_NAME       WEBORAMA_SERVICE_ID "0"
-#define WEBORAMA_AUXDATA_MOOD               WEBORAMA_SERVICE_ID "1"
-#define WEBORAMA_AUXDATA_CREATOR            WEBORAMA_SERVICE_ID "2"
 
 #include "zmmf/zmmf.h"
 #include "mxml/mxml.h"

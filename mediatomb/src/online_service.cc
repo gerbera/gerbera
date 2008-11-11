@@ -41,7 +41,9 @@
 using namespace zmm;
 using namespace mxml;
 
-char service_prefixes[] = { '\0', 'Y', 'S', '\0' };
+// DO NOT FORGET TO ADD SERVICE STORAGE PREFIXES TO THIS ARRAY WHEN ADDING
+// NEW SERVICES!
+char service_prefixes[] = { '\0', 'Y', 'S', 'W', '\0' };
 
 OnlineServiceList::OnlineServiceList()
 {

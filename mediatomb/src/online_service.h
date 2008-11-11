@@ -43,6 +43,7 @@
 #define ONLINE_SERVICE_AUX_ID "ols"
 #define ONLINE_SERVICE_LAST_UPDATE "lu"
 
+// make sure to add the storage prefixes when adding new services
 typedef enum service_type_t
 {
     OS_None     = 0,
