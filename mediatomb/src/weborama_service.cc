@@ -109,42 +109,42 @@ using namespace mxml;
 #define CFG_TYPE_ALBUM           "album"
 
 /*
-Электронная — 24
-Русская попса — 132
-Альтернатива — 32
-Саундтрек — 129
-Джаз — 42
-Русский рок — 131
-Металл — 47
-Ретро — 130
-Поп — 51
-Панк — 54
-Ритм энд блюз — 56
-Рэп — 57
-Рэгги — 59
-Рок — 61
-Классическая — 128
-Шансон — 133
-Фолк — 134
+24                Электронная          67
+132              Русская попса      400
+32                Альтернатива        60
+129              Саундтрек             353
+42                Джаз                     65
+131              Русский рок          315
+47                Металл                 272
+130              Ретро                   568
+51                Поп                      69
+54                Панк                    388
+56                Ритм энд блюз     738
+57                Рэп                      593
+59                Регги                   699
+61                Рок                      68
+128              Классическая      976
+133              Шансон               566
+134              Фолк                   63
 */
 
-#define CFG_GENRE_24             "electronic"
-#define CFG_GENRE_32             "alternative"
-#define CFG_GENRE_42             "jazz"
-#define CFG_GENRE_47             "metal"
-#define CFG_GENRE_51             "pop"
-#define CFG_GENRE_54             "punk"
-#define CFG_GENRE_56             "rhytm_and_blues"
-#define CFG_GENRE_57             "rap"
-#define CFG_GENRE_59             "reggae"
-#define CFG_GENRE_61             "rock"
-#define CFG_GENRE_128            "classic"
-#define CFG_GENRE_129            "soundtrack"
-#define CFG_GENRE_130            "retro"
-#define CFG_GENRE_131            "russian_rock"
-#define CFG_GENRE_132            "russian_pop"
-#define CFG_GENRE_133            "chanson"
-#define CFG_GENRE_134            "folk"
+#define CFG_GENRE_ELECT          "electronic"
+#define CFG_GENRE_ALT            "alternative"
+#define CFG_GENRE_JAZZ           "jazz"
+#define CFG_GENRE_METAL          "metal"
+#define CFG_GENRE_POP            "pop"
+#define CFG_GENRE_PUNK           "punk"
+#define CFG_GENRE_RNB            "rhytm_and_blues"
+#define CFG_GENRE_RAP            "rap"
+#define CFG_GENRE_REG            "reggae"
+#define CFG_GENRE_ROCK           "rock"
+#define CFG_GENRE_CLAS           "classic"
+#define CFG_GENRE_ST             "soundtrack"
+#define CFG_GENRE_RETRO          "retro"
+#define CFG_GENRE_RUSROCK        "russian_rock"
+#define CFG_GENRE_RUSPOP         "russian_pop"
+#define CFG_GENRE_CHAN           "chanson"
+#define CFG_GENRE_FOLK           "folk"
 
 typedef struct wr_mood wr_mood;
 struct wr_mood
@@ -179,23 +179,23 @@ struct wr_genre
 
 wr_genre WR_genre[] = 
 {   
-    { WR_genre_electronic,      24,  CFG_GENRE_24,  "Electronic"      },
-    { WR_genre_alternative,     32,  CFG_GENRE_32,  "Alternative"     },
-    { WR_genre_jazz,            42,  CFG_GENRE_42,  "Jazz"            }, 
-    { WR_genre_metal,           47,  CFG_GENRE_47,  "Metal"           },
-    { WR_genre_pop,             51,  CFG_GENRE_51,  "Pop"             },
-    { WR_genre_punk,            54,  CFG_GENRE_54,  "Punk"            },
-    { WR_genre_rhytm_and_blues, 56,  CFG_GENRE_56,  "Rhytm And Blues" },
-    { WR_genre_rap,             57,  CFG_GENRE_57,  "Rap"             },
-    { WR_genre_reggae,          59,  CFG_GENRE_59,  "Reggae"          },
-    { WR_genre_rock,            61,  CFG_GENRE_61,  "Rock"            },
-    { WR_genre_classic,         128, CFG_GENRE_128, "Classic"         },
-    { WR_genre_soundtrack,      129, CFG_GENRE_129, "Soundtrack"      },
-    { WR_genre_retro,           130, CFG_GENRE_130, "Retro"           },
-    { WR_genre_russian_rock,    131, CFG_GENRE_131, "Russian Rock"    },
-    { WR_genre_russian_pop,     132, CFG_GENRE_132, "Russian Pop"     },
-    { WR_genre_chanson,         133, CFG_GENRE_133, "Chanson"         },
-    { WR_genre_folk,            134, CFG_GENRE_134, "Folk"            },
+    { WR_genre_electronic,      67,  CFG_GENRE_ELECT,   "Electronic"      },
+    { WR_genre_alternative,     60,  CFG_GENRE_ALT,     "Alternative"     },
+    { WR_genre_jazz,            65,  CFG_GENRE_JAZZ,    "Jazz"            }, 
+    { WR_genre_metal,           272, CFG_GENRE_METAL,   "Metal"           },
+    { WR_genre_pop,             69,  CFG_GENRE_POP,     "Pop"             },
+    { WR_genre_punk,            388, CFG_GENRE_PUNK,    "Punk"            },
+    { WR_genre_rhytm_and_blues, 738, CFG_GENRE_RNB,     "Rhytm And Blues" },
+    { WR_genre_rap,             593, CFG_GENRE_RAP,     "Rap"             },
+    { WR_genre_reggae,          699, CFG_GENRE_REG,     "Reggae"          },
+    { WR_genre_rock,            68,  CFG_GENRE_ROCK,    "Rock"            },
+    { WR_genre_classic,         976, CFG_GENRE_CLAS,    "Classic"         },
+    { WR_genre_soundtrack,      353, CFG_GENRE_ST,      "Soundtrack"      },
+    { WR_genre_retro,           568, CFG_GENRE_RETRO,   "Retro"           },
+    { WR_genre_russian_rock,    315, CFG_GENRE_RUSROCK, "Russian Rock"    },
+    { WR_genre_russian_pop,     400, CFG_GENRE_RUSPOP,  "Russian Pop"     },
+    { WR_genre_chanson,         566, CFG_GENRE_CHAN,    "Chanson"         },
+    { WR_genre_folk,            63,  CFG_GENRE_FOLK,    "Folk"            },
     { WR_genre_none, -1, NULL, NULL },                           
 };
 
