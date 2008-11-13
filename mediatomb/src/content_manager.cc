@@ -139,7 +139,9 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
 
     mimetype_upnpclass_map = 
        cm->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
-   
+  
+    mimetype_contenttype_map = 
+      cm->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     Ref<AutoscanList> config_timed_list = 
         cm->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
 
@@ -608,10 +610,8 @@ int ContentManager::_addFile(String path, bool recursive, bool hidden, Ref<CMTas
                 {
                     layout->processCdsObject(obj);
                     
-                    Ref<Dictionary> mappings = 
-                        ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
                     String mimetype = RefCast(obj, CdsItem)->getMimeType();
-                    String content_type = mappings->get(mimetype);
+                    String content_type = mimetype_contenttype_map->get(mimetype);
 #ifdef HAVE_JS
                     if ((playlist_parser_script != nil) &&
                         (content_type == CONTENT_TYPE_PLAYLIST))
@@ -1324,6 +1324,18 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic, boo
             upnp_class = mimetype2upnpclass(mimetype);
         }
 
+        if (!string_ok(upnp_class))
+        {
+            String content_type = mimetype_contenttype_map->get(mimetype);
+            if (content_type == CONTENT_TYPE_OGG)
+            {
+                if (isTheora(path))
+                    upnp_class = _(UPNP_DEFAULT_CLASS_VIDEO_ITEM);
+                else
+                    upnp_class = _(UPNP_DEFAULT_CLASS_MUSIC_TRACK);
+            }
+        }
+
         Ref<CdsItem> item(new CdsItem());
         obj = RefCast(item, CdsObject);
         item->setLocation(path);
@@ -1370,6 +1382,7 @@ String ContentManager::extension2mimetype(String extension)
 
     return extension_mimetype_map->get(extension);
 }
+
 String ContentManager::mimetype2upnpclass(String mimeType)
 {
     if (mimetype_upnpclass_map == nil)

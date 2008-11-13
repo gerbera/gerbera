@@ -396,8 +396,6 @@ protected:
     void destroyJS();
 #endif
     
-    //pthread_mutex_t last_modified_mutex;
-    
     zmm::Ref<RExp> reMimetype;
 
     bool ignore_unknown_extensions;
@@ -405,6 +403,8 @@ protected:
 
     zmm::Ref<Dictionary> extension_mimetype_map;
     zmm::Ref<Dictionary> mimetype_upnpclass_map;
+    zmm::Ref<Dictionary> mimetype_contenttype_map;
+
     zmm::Ref<AutoscanList> autoscan_timed;
 #ifdef HAVE_INOTIFY
     zmm::Ref<AutoscanList> autoscan_inotify;
