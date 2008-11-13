@@ -50,9 +50,9 @@ using namespace mxml;
 #define WEBORAMA_SERVICE_URL            "beta.weborama.ru/modules/player/index_xspf.php"
 
 /// \todo ask Nick if this value makes sense
-#define DEFAULT_PER_TASK_AMOUNT         (200)
+#define DEFAULT_PER_TASK_AMOUNT         (1000)
 
-#define WEBORAMA_VALUE_PER_REQUEST_MAX  (40)
+#define WEBORAMA_VALUE_PER_REQUEST_MAX  (100)
 // Weborama defines
 #define FILTER_OPTION_FAVORITE          "favourite"
 #define FILTER_OPTION_FRIENDS           "friends"
@@ -85,6 +85,7 @@ using namespace mxml;
 #define CFG_SECTION_FILTER              "filter"
 #define CFG_SECTION_GENRES              "genres"
 #define CFG_SECTION_SORT                "sort"
+#define CFG_SECTION_TYPE                "type"
 
 #define CFG_SORT_FAVORITE        "favorite"
 #define CFG_SORT_FRIENDS         "friends"
@@ -109,23 +110,23 @@ using namespace mxml;
 #define CFG_TYPE_ALBUM           "album"
 
 /*
-24                Электронная          67
-132              Русская попса      400
-32                Альтернатива        60
-129              Саундтрек             353
-42                Джаз                     65
-131              Русский рок          315
-47                Металл                 272
-130              Ретро                   568
-51                Поп                      69
-54                Панк                    388
-56                Ритм энд блюз     738
-57                Рэп                      593
-59                Регги                   699
-61                Рок                      68
-128              Классическая      976
-133              Шансон               566
-134              Фолк                   63
+Электронная       67
+Русская попса     400
+Альтернатива      60
+Саундтрек         353
+Джаз              65
+Русский рок       315
+Металл            272
+Ретро             568
+Поп               69
+Панк              388
+Ритм энд блюз     738
+Рэп               593
+Регги             699
+Рок               68
+Классическая      976
+Шансон            566
+Фолк              63
 */
 
 #define CFG_GENRE_ELECT          "electronic"
@@ -134,15 +135,15 @@ using namespace mxml;
 #define CFG_GENRE_METAL          "metal"
 #define CFG_GENRE_POP            "pop"
 #define CFG_GENRE_PUNK           "punk"
-#define CFG_GENRE_RNB            "rhytm_and_blues"
+#define CFG_GENRE_RNB            "rhytm-and-blues"
 #define CFG_GENRE_RAP            "rap"
 #define CFG_GENRE_REG            "reggae"
 #define CFG_GENRE_ROCK           "rock"
 #define CFG_GENRE_CLAS           "classic"
 #define CFG_GENRE_ST             "soundtrack"
 #define CFG_GENRE_RETRO          "retro"
-#define CFG_GENRE_RUSROCK        "russian_rock"
-#define CFG_GENRE_RUSPOP         "russian_pop"
+#define CFG_GENRE_RUSROCK        "russian-rock"
+#define CFG_GENRE_RUSPOP         "russian-pop"
 #define CFG_GENRE_CHAN           "chanson"
 #define CFG_GENRE_FOLK           "folk"
 
@@ -283,27 +284,30 @@ Ref<Object> WeboramaService::defineServiceTask(Ref<Element> xmlopt, Ref<Object> 
     {
         task->name = getCheckAttr(xmlopt, _(CFG_OPTION_PLAYLIST_NAME));
 
-        // we have to evaluate the id parameter depending on the "type" value
-        String id = xmlopt->getAttribute(_("id"));
-
-        temp = xmlopt->getAttribute(_("type"));
-        if (string_ok(temp))
+        Ref<Element> type = xmlopt->getChildByName(_(CFG_SECTION_TYPE));
+        if (type != nil)
         {
-            if ((temp != CFG_TYPE_ALBUM) && (temp != CFG_TYPE_AUDIO) &&
-                (temp != CFG_TYPE_PLAYLIST))
-                throw _Exception(_("Weborama: ") + temp + 
-                                 _(" type is invalid!"));
+            String id = type->getAttribute(_("id"));
 
-            if (((temp == CFG_TYPE_ALBUM) || (temp == CFG_TYPE_AUDIO))
-                && (!string_ok(id) || id == "0"))
+            temp = type->getText();
+            if (string_ok(temp))
             {
-                throw _Exception(_("Weborama: ") + temp + _(" type requires a"
-                                   "valid id parameter!"));
-            }
+                if ((temp != CFG_TYPE_ALBUM) && (temp != CFG_TYPE_AUDIO) &&
+                    (temp != CFG_TYPE_PLAYLIST))
+                    throw _Exception(_("Weborama: ") + temp + 
+                            _(" type is invalid!"));
 
-            task->parameters->put(_(PARAM_TYPE), temp);
-            if (string_ok(id))
-                task->parameters->put(_(PARAM_ID), id);
+                if (((temp == CFG_TYPE_ALBUM) || (temp == CFG_TYPE_AUDIO))
+                        && (!string_ok(id) || id == "0"))
+                {
+                    throw _Exception(_("Weborama: ") + temp + 
+                                     _(" type requires a valid id parameter!"));
+                }
+
+                task->parameters->put(_(PARAM_TYPE), temp);
+                if (string_ok(id))
+                    task->parameters->put(_(PARAM_ID), id);
+            }
         }
 
         wr_mood_t mood = getMood(xmlopt);
@@ -335,25 +339,39 @@ Ref<Object> WeboramaService::defineServiceTask(Ref<Element> xmlopt, Ref<Object> 
                               g.substring(0, g.length()-1);
             }
 
-            String sort = filter->getChildText(_(CFG_SECTION_SORT));
-            if (string_ok(sort))
+            Ref<Element> sort_tag = filter->getChildByName(_("sort"));
+            if (sort_tag != nil)
             {
-                if ((sort != CFG_SORT_FAVORITE) &&
-                    (sort != CFG_SORT_FRIENDS) && (sort != CFG_SORT_UPLOADED) &&
-                    (sort != CFG_SORT_USED_LAST) && (sort != CFG_SORT_ALL))
-                    throw _Exception(_("Weborama: ") + sort + _(" sort is "
-                                                                "invalid!"));
+                String user_id = sort_tag->getAttribute(_("user-id"));
+                String sort = sort_tag->getText();
+                if (string_ok(sort))
+                {
+                    if (!string_ok(user_id))
+                        throw _Exception(_("Weborama: sort option requires a "
+                                           "valid user-id setting!"));
 
-                // ok, this is a little hack'ish, but so far the config 
-                // names match nicely with the actual parameters... all but one
-                if (sort == CFG_SORT_FAVORITE) 
-                    sort = _(FILTER_OPTION_FAVORITE);
+                    if ((sort != CFG_SORT_FAVORITE)  &&
+                        (sort != CFG_SORT_FRIENDS)   && 
+                        (sort != CFG_SORT_UPLOADED)  &&
+                        (sort != CFG_SORT_USED_LAST) && 
+                        (sort != CFG_SORT_ALL))
+                        throw _Exception(_("Weborama: ") + sort + 
+                                         _(" sort is invalid!"));
 
-                if (string_ok(filters))
-                    filters = filters + _(FILTER_SEPARATOR);
+                        // ok, this is a little hack'ish, but so far the config 
+                        // names match nicely with the actual parameters... 
+                        // all but one
+                    if (sort == CFG_SORT_FAVORITE) 
+                        sort = _(FILTER_OPTION_FAVORITE);
 
-                filters = filters + _(FILTER_OPTION_SORT) + 
-                         _(FILTER_VALUE_SEPARATOR) + sort;
+                    if (string_ok(filters))
+                        filters = filters + _(FILTER_SEPARATOR);
+
+                    filters = filters + _(FILTER_OPTION_SORT) + 
+                             _(FILTER_VALUE_SEPARATOR) + sort +
+                             _(FILTER_SEPARATOR) +
+                             _(FILTER_OPTION_USERID) + user_id;
+                }
             }
 
             if (string_ok(filters))
