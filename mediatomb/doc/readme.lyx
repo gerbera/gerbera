@@ -8485,6 +8485,76 @@ status open
 \end_layout
 
 \begin_layout Code
+<favorites user="mediatomb"/>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+Retrieves all favorites of the given user.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+user=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Required
+\end_layout
+
+\begin_layout Standard
+Name of the YouTube user whose favorites should be fetched.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
 <subscriptions user="mediatomb"/>
 \end_layout
 
