@@ -216,46 +216,50 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
 
             String targetMimeType = tp->getTargetMimeType();
 
-            // duration should be the same for transcoded media, so we can take
-            // the value from the original resource
-            String duration = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_DURATION));
-            if (string_ok(duration))
-                t_res->addAttribute(MetadataHandler::getResAttrName(R_DURATION),
-                        duration);
+            if (!tp->isThumbnail())
+            {
+                // duration should be the same for transcoded media, so we can 
+                // take the value from the original resource
+                String duration = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_DURATION));
+                if (string_ok(duration))
+                    t_res->addAttribute(MetadataHandler::getResAttrName(R_DURATION),
+                            duration);
 
-            int freq = tp->getSampleFreq();
-            if (freq == SOURCE)
-            {
-                String frequency = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY));
-                if (string_ok(frequency))
+                int freq = tp->getSampleFreq();
+                if (freq == SOURCE)
                 {
-                     t_res->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), frequency);
-                     targetMimeType = targetMimeType + _(";rate=") + frequency;
+                    String frequency = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY));
+                    if (string_ok(frequency))
+                    {
+                        t_res->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), frequency);
+                        targetMimeType = targetMimeType + _(";rate=") + 
+                                         frequency;
+                    }
                 }
-            }
-            else if (freq != OFF)
-            {
-                t_res->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), String::from(freq));
-                targetMimeType = targetMimeType + _(";rate=") + 
-                                 String::from(freq);
-            }
+                else if (freq != OFF)
+                {
+                    t_res->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), String::from(freq));
+                    targetMimeType = targetMimeType + _(";rate=") + 
+                                     String::from(freq);
+                }
 
-            int chan = tp->getNumChannels();
-            if (chan == SOURCE)
-            {
-                String nchannels = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS));
-                if (string_ok(nchannels))
+                int chan = tp->getNumChannels();
+                if (chan == SOURCE)
                 {
-                     t_res->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), nchannels);
-                     targetMimeType = targetMimeType + _(";channels=") + 
-                                      nchannels;
+                    String nchannels = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS));
+                    if (string_ok(nchannels))
+                    {
+                        t_res->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), nchannels);
+                        targetMimeType = targetMimeType + _(";channels=") + 
+                                         nchannels;
+                    }
                 }
-            }
-            else if (chan != OFF)
-            {
-                t_res->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), String::from(chan));
-                targetMimeType = targetMimeType + _(";channels=") + 
-                                      String::from(chan);
+                else if (chan != OFF)
+                {
+                    t_res->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), String::from(chan));
+                    targetMimeType = targetMimeType + _(";channels=") + 
+                                     String::from(chan);
+                }
             }
 
             t_res->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
