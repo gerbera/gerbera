@@ -44,14 +44,14 @@
 #define ONLINE_SERVICE_LAST_UPDATE "lu"
 
 // make sure to add the storage prefixes when adding new services
-typedef enum service_type_t
+typedef enum 
 {
     OS_None     = 0,
     OS_YouTube  = 1,
     OS_SopCast  = 2,
     OS_Weborama = 3,
     OS_Max
-};
+} service_type_t;
 
 /// \brief This is an interface for all online services, the function
 /// handles adding/refreshing content in the database.
