@@ -1157,6 +1157,7 @@ void ConfigManager::validate(String serverhome)
         mime_content->put(_("video/x-msvideo"), _(CONTENT_TYPE_AVI));
         mime_content->put(_("video/mpeg"), _(CONTENT_TYPE_MPEG));
         mime_content->put(_("application/x-iso9660"), _(CONTENT_TYPE_DVD));
+        mime_content->put(_("application/x-iso9660-image"), _(CONTENT_TYPE_DVD));
     }
 
     NEW_DICT_OPTION(mime_content);
