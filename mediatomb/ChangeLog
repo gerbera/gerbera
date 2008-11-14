@@ -20,7 +20,8 @@ v0.12.0
           for the patch
         * fixed bug #1986789 - Error when renaming a playlist container
         * added parameter -D/--debug (enable debug output)
-        * added parameter --version (prints version information
+        * closed feature request #1934646 - added parameter --version 
+          (prints version information
         * added parameter --compile-info (prints compile information)
         * fixed problem "Negative duration in .m3u files" (SF forum)
         * fixed bug #2078017 - Playlist inital import fails in autoscan
@@ -30,6 +31,9 @@ v0.12.0
         * fixed bug #1934649 - typo in --help text
         * fixed bugs #1986709 and #1996046 - cannot rename item with & in name
         * fixed bug #2122696 - build error with MySQL 5.1
+        * fixed bug #1978210 - compile error with newer libcurl
+        * fixed bug #1973930 - Incorrect UPnP class assigned to Vorbis and
+          Theora items
 
 v0.11.0 01.03.2008  External transcoding support
         * implemented transcoding support that allows to plug in an arbitrary
