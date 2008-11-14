@@ -543,17 +543,32 @@ String ConfigManager::createDefaultConfig(String userhome)
     mappings->appendElementChild(mtupnp);
 
     Ref<Element> mtcontent(new Element(_("mimetype-contenttype")));
-    mtcontent->appendElementChild(treat_as(_("audio/mpeg"), _("mp3")));
-    mtcontent->appendElementChild(treat_as(_("application/ogg"), _("ogg")));
-    mtcontent->appendElementChild(treat_as(_("audio/x-flac"), _("flac")));
-    mtcontent->appendElementChild(treat_as(_("image/jpeg"), _("jpg")));
-    mtcontent->appendElementChild(treat_as(_("audio/x-mpegurl"),_("playlist")));
-    mtcontent->appendElementChild(treat_as(_("audio/x-scpls"), _("playlist")));
-    mtcontent->appendElementChild(treat_as(_("audio/x-wav"), _("pcm")));
-    mtcontent->appendElementChild(treat_as(_("audio/L16"), _("pcm")));
-    mtcontent->appendElementChild(treat_as(_("video/x-msvideo"), _("avi")));
-    mtcontent->appendElementChild(treat_as(_("video/mp4"), _("mp4")));
-    mtcontent->appendElementChild(treat_as(_("audio/mp4"), _("mp4")));
+    mtcontent->appendElementChild(treat_as(_("audio/mpeg"), 
+                                           _(CONTENT_TYPE_MP3)));
+    mtcontent->appendElementChild(treat_as(_("application/ogg"), 
+                                           _(CONTENT_TYPE_OGG)));
+    mtcontent->appendElementChild(treat_as(_("audio/x-flac"), 
+                                           _(CONTENT_TYPE_FLAC)));
+    mtcontent->appendElementChild(treat_as(_("image/jpeg"), 
+                                           _(CONTENT_TYPE_JPG)));
+    mtcontent->appendElementChild(treat_as(_("audio/x-mpegurl"),
+                                           _(CONTENT_TYPE_PLAYLIST)));
+    mtcontent->appendElementChild(treat_as(_("audio/x-scpls"), 
+                                           _(CONTENT_TYPE_PLAYLIST)));
+    mtcontent->appendElementChild(treat_as(_("audio/x-wav"), 
+                                           _(CONTENT_TYPE_PCM)));
+    mtcontent->appendElementChild(treat_as(_("audio/L16"), 
+                                           _(CONTENT_TYPE_PCM)));
+    mtcontent->appendElementChild(treat_as(_("video/x-msvideo"), 
+                                           _(CONTENT_TYPE_AVI)));
+    mtcontent->appendElementChild(treat_as(_("video/mp4"), 
+                                           _(CONTENT_TYPE_MP4)));
+    mtcontent->appendElementChild(treat_as(_("audio/mp4"), 
+                                           _(CONTENT_TYPE_MP4)));
+    mtcontent->appendElementChild(treat_as(_("application/x-iso9660"), 
+                                           _(CONTENT_TYPE_DVD)));
+    mtcontent->appendElementChild(treat_as(_("application/x-iso9660-image"), 
+                                           _(CONTENT_TYPE_DVD)));
 
     mappings->appendElementChild(mtcontent);
     import->appendElementChild(mappings);
