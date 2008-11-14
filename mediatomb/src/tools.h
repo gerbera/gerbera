@@ -309,6 +309,11 @@ zmm::String tempName(zmm::String leadPath, char *tmpl);
 /// \brief Determines if the particular ogg file contains a video (theora)
 bool isTheora(zmm::String ogg_filename);
 
+/// \brief Gets an absolute filename as a parameter and returns the last parent
+///
+/// "/some/path/to/file.txt" -> "to"
+zmm::String get_last_path(zmm::String location);
+
 #ifndef HAVE_FFMPEG
 /// \brief Fallback code to retrieve the used fourcc from an AVI file.
 ///

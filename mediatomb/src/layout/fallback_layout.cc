@@ -36,6 +36,7 @@
 #include "content_manager.h"
 #include "config_manager.h"
 #include "metadata_handler.h"
+#include "tools.h"
 
 #ifdef HAVE_LIBDVDNAV
     #include "metadata/dvd_handler.h"
@@ -79,7 +80,7 @@ zmm::String FallbackLayout::esc(zmm::String str)
 
 void FallbackLayout::addVideo(zmm::Ref<CdsObject> obj)
 {
-    int id = ContentManager::getInstance()->addContainerChain(_("/Video"));
+    int id = ContentManager::getInstance()->addContainerChain(_("/Video/All Video"));
 
     if (obj->getID() != INVALID_OBJECT_ID)
     {
@@ -90,6 +91,13 @@ void FallbackLayout::addVideo(zmm::Ref<CdsObject> obj)
     {
         add(obj, id);
         obj->setRefID(obj->getID());
+    }
+
+    String dir = get_last_path(obj->getLocation());
+    if (string_ok(dir))
+    {
+        id = ContentManager::getInstance()->addContainerChain(_("/Video/Directories/") + esc(dir));
+        add(obj, id);
     }
 }
 
@@ -284,6 +292,14 @@ void FallbackLayout::addImage(Ref<CdsObject> obj)
         id = ContentManager::getInstance()->addContainerChain(chain);
         add(obj, id);
     }
+
+    String dir = get_last_path(obj->getLocation());
+    if (string_ok(dir))
+    {
+        id = ContentManager::getInstance()->addContainerChain(_("/Photos/Directories/") + esc(dir));
+        add(obj, id);
+    }
+    
 }
 
 void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)

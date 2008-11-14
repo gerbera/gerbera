@@ -57,3 +57,13 @@ function getPlaylistType(mimetype)
         return 'pls';
     return '';
 }
+
+function getLastPath(location)
+{
+    var path = location.split('/');
+    if ((path.length > 1) && (path[path.length - 2]))
+        return path[path.length - 2];
+    else
+        return '';
+}
+

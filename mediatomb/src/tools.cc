@@ -1337,6 +1337,22 @@ bool isTheora(String ogg_filename)
     return true;
 }
 
+String get_last_path(String location)
+{
+    String path;
+
+    int last_slash = location.rindex(DIR_SEPARATOR);
+    if (last_slash > 0)
+    {
+        path = location.substring(0, last_slash);
+        int slash = path.rindex(DIR_SEPARATOR);
+        if ((slash >= 0) && ((slash + 1) < path.length()))
+            path = path.substring(slash+1);
+    }
+
+    return path;
+}
+
 #ifndef HAVE_FFMPEG
 String getAVIFourCC(zmm::String avi_filename)
 {

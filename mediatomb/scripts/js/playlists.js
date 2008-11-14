@@ -72,7 +72,18 @@ var playlistLocation = playlist.location.substring(0, playlist.location.lastInde
 var type = getPlaylistType(playlist.mimetype);
 
 // the function createContainerChain is defined in common.js
-var playlistChain = createContainerChain(new Array('Playlists', playlist.title));
+var playlist_title = playlist.title
+var dot_index = playlist_title.lastIndexOf('.');
+if (dot_index > 1)
+        playlist_title = playlist_title.substring(0, dot_index);
+
+var playlistChain = createContainerChain(new Array('Playlists', 'All Playlists', playlist_title));
+
+var playlistDirChain;
+
+var last_path = getLastPath(playlist.location);
+if (last_path)
+    playlistDirChain = createContainerChain(new Array('Playlists', 'Directories', last_path, playlist_title));
 
 if (type == '')
 {
@@ -92,6 +103,9 @@ else if (type == 'm3u')
         else if (! line.match(/^(#|\s*$)/))
         {
             addPlaylistItem(line, title, playlistChain);
+            if (playlistDirChain)
+                addPlaylistItem(line, title, playlistDirChain);
+
             title = null;
         }
         
@@ -129,7 +143,12 @@ else if (type == 'pls')
             if (lastId != id)
             {
                 if (file)
+                {
                     addPlaylistItem(file, title, playlistChain, lastId);
+                    if (playlistDirChain)
+                        addPlaylistItem(file, title, playlistDirChain, lastId);
+                }
+
                 title = null;
                 lastId = id;
             }
@@ -144,7 +163,12 @@ else if (type == 'pls')
             if (lastId != id)
             {
                 if (file)
+                {
                     addPlaylistItem(file, title, playlistChain, lastId);
+                    if (playlistDirChain)
+                        addPlaylistItem(file, title, playlistDirChain, lastId);
+                }
+
                 file = null;
                 lastId = id;
             }
@@ -160,5 +184,9 @@ else if (type == 'pls')
     while (line);
     
     if (file)
+    {
         addPlaylistItem(file, title, playlistChain, lastId);
+        if (playlistDirChain)
+            addPlaylistItem(file, title, playlistDirChain, lastId);
+    }
 }

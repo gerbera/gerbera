@@ -146,11 +146,17 @@ function addAudio(obj)
     addCdsObject(obj, createContainerChain(chain));
 }
 
-// currently no video metadata supported
 function addVideo(obj)
 {
-    var chain = new Array('Video');
+    var chain = new Array('Video', 'All Video');
     addCdsObject(obj, createContainerChain(chain));
+
+    var last_path = getLastPath(obj.location);
+    if (last_path)
+    {
+        chain = new Array('Video', 'Directories', last_path);
+        addCdsObject(obj, createContainerChain(chain));
+    }
 }
 
 function addWeborama(obj)
@@ -173,6 +179,13 @@ function addImage(obj)
     {
         chain = new Array('Photos', 'Date', date);
         addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER);
+    }
+
+    var last_path = getLastPath(obj.location);
+    if (last_path)
+    {
+        chain = new Array('Photos', 'Directories', last_path);
+        addCdsObject(obj, createContainerChain(chain));
     }
 }
 
