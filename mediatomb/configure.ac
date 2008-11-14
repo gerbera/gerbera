@@ -1786,7 +1786,7 @@ AC_DEFINE([__STDC_LIMIT_MACROS], [1], [needed for stdint.h])
 MT_CHECK_OPTIONAL_PACKAGE_CFG([libdvdnav], [disable],
              [compile with libdvdnav support for extended DVD image parsing],
              [dvdnav-config],
-             [dvdnav.h], [dvdnav], [dvdnav_get_audio_attr], [])
+             [dvdnav/dvdnav.h], [dvdnav], [dvdnav_get_audio_attr], [])
 
 
 MT_OPTION([tombdebug], [enable], [enable debug code for MediaTomb],
