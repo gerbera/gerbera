@@ -458,7 +458,7 @@ String ConfigManager::createDefaultConfig(String userhome)
     server->appendChild(RefCast(tg100, Node));
 
     Ref<Element> extended(new Element(_("extended-runtime-options")));
-#if defined(FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
+#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
     Ref<Element> ffth(new Element(_("ffmpegthumbnailer")));
     ffth->setAttribute(_("enabled"), _(DEFAULT_FFMPEGTHUMBNAILER_ENABLED));
     
@@ -471,7 +471,7 @@ String ConfigManager::createDefaultConfig(String userhome)
     ffth->appendTextChild(_("workaround-bugs"),
                           _(DEFAULT_FFMPEGTHUMBNAILER_WORKAROUND_BUGS));
 
-    extended->appendChild(ffth);
+    extended->appendElementChild(ffth);
 #endif
 
     Ref<Element> mark(new Element(_("mark-played-items")));
