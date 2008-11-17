@@ -90,7 +90,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
     Ref<Dictionary> mappings = config->getDictionaryOption(
                         CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
-#ifdef HAVE_FFMPEGTHUMBNAILER
+#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
     if (config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED) && 
        (item->getMimeType().startsWith(_("video")) || 
         item->getFlag(OBJECT_FLAG_OGG_THEORA)))
