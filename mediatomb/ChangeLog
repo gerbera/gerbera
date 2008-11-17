@@ -35,6 +35,7 @@ v0.12.0
         * fixed bug #1973930 - Incorrect UPnP class assigned to Vorbis and
           Theora items
         * added a "Directories" view in the default layout for Photos and Video 
+        * added a feature that allows to mark played items
 
 v0.11.0 01.03.2008  External transcoding support
         * implemented transcoding support that allows to plug in an arbitrary
