@@ -51,6 +51,7 @@
 #include "file_request_handler.h"
 #include "metadata_handler.h"
 #include "tools.h"
+#include "play_hook.h"
 
 #ifdef HAVE_LIBDVDNAV
 #include "dvd_io_handler.h"
@@ -610,6 +611,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
             Ref<IOHandler> dvd_io_handler(new DVDIOHandler(path, title, chapter));
             Ref<IOHandler> pes_io_handler(new PESIOHandler(dvd_io_handler, audio_track));
             pes_io_handler->open(mode);
+            PlayHook::getInstance()->trigger(obj);
             return pes_io_handler;
         }
         else
@@ -641,6 +643,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
 
             Ref<IOHandler> io_handler(new FileIOHandler(path));
             io_handler->open(mode);
+            PlayHook::getInstance()->trigger(obj);
             return io_handler;
         }
     }

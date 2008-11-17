@@ -103,10 +103,24 @@ void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
                             _(XML_DC_NAMESPACE));
     didl_lite->setAttribute(_(XML_UPNP_NAMESPACE_ATTR), 
                             _(XML_UPNP_NAMESPACE));
-    
+
+    Ref<ConfigManager> cfg = ConfigManager::getInstance();
+
     for(int i = 0; i < arr->size(); i++)
     {
         Ref<CdsObject> obj = arr->get(i);
+        if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) &&
+            obj->getFlag(OBJECT_FLAG_PLAYED))
+        {
+            String title = obj->getTitle();
+            if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
+                title = cfg->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING) + title;
+            else
+                title = title + cfg->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING);
+
+            obj->setTitle(title);
+        }
+
         Ref<Element> didl_object = UpnpXML_DIDLRenderObject(obj, false, stringLimit);
 
         didl_lite->appendElementChild(didl_object);
