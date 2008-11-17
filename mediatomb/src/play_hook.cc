@@ -47,7 +47,7 @@ void PlayHook::trigger(zmm::Ref<CdsObject> obj)
 {
     Ref<ConfigManager> cfg = ConfigManager::getInstance();
 
-    if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED))
+    if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && !obj->getFlag(OBJECT_FLAG_PLAYED))
     {
         obj->setFlag(OBJECT_FLAG_PLAYED);
 
