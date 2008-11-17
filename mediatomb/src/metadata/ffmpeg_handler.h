@@ -35,8 +35,8 @@
 /// \brief Definition of the FfmpegHandler class - getting metadata via 
 /// ffmpeg library calls.
 
-#ifndef FFMPEG_HANDLER_H_
-#define FFMPEG_HANDLER_H_
+#ifndef __FFMPEG_HANDLER_H__
+#define __FFMPEG_HANDLER_H__
 
 #include "metadata_handler.h"
 
@@ -50,4 +50,4 @@ public:
     virtual zmm::String getMimeType();
 };
 
-#endif /*FFMPEG_HANDLER_H_*/
+#endif//__FFMPEG_HANDLER_H__
