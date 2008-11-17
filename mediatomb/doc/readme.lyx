@@ -4880,6 +4880,240 @@ status open
 
 \begin_layout Standard
 
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<mark-played-items enabled="no" suppress-cds-updates="yes">
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+The attributes of the tag have the following meaning:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+enabled=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: no
+\end_layout
+
+\begin_layout Standard
+Enables or disables the marking of played items, seto to "yes" to enable
+ the feature.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+suppress-cds-updates=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: yes
+\end_layout
+
+\begin_layout Standard
+This is an advanced feature, leave the default setting if unsure.
+ Usually, when items are modified we send out container updates as specified
+ in the Content Directory Service.
+ This notifies the player that data in a particular container has changed,
+ players that support CDS updates will rebrowse the container and refresh
+ the view.
+ However, in this case we probably do not want it (this actually depends
+ on the particular player implementation).
+ For example, if we update the list of currently playing items, the player
+ could interrupt playback and rebrowse the current container - clearly an
+ unwatned behaviour.
+ Because of this, we provide an option to suppress and not send out container
+ updates - only for the case where the item is marked as "played".
+ In order to see the changes you will have to get out of the current container
+ and enter it again - then the view on your player should get updated.
+\end_layout
+
+\begin_layout Description
+Note: some players (i.e.
+ PS3) cache a lot of data, for those players it may be necessary to leave
+ the server view or restart the player in order to update content (same
+ as when adding new data).
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The following tag defines how played items should be marked:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<string mode="prepend">* </string>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: * 
+\end_layout
+
+\begin_layout Standard
+Specifies what string should be appended or prepended to the title of the
+ object that will be marked as "played".
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+mode=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: prepend
+\end_layout
+
+\begin_layout Standard
+Specifies how a string should be added to the object's title, allowed values
+ are "append" and "prepend".
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
 </listitem></itemizedlist>
 \end_layout
 
@@ -10856,14 +11090,10 @@ Default: no
 
 \begin_layout Standard
 This is a special option which is related to DVD image support that is offered
- via libdvdread.
- I do not think that you would ever have to transcode an MPEG stream...
- unless you have a PS3.
- For some reason the PS3 will not play the MPEG PES stream that we extract
- from the DVD image.
- This may be related to audio track selection feature which modifies the
- stream, however we were not able to figure out why it refuses to play it.
- Other players have no problems playing it.
+ via libdvdnav.
+ We encountered a problem that some devices fail to play the stream that
+ we get from libdvdnav, for those devices remuxing to TS may be required.
+ 
 \end_layout
 
 \begin_layout Standard
