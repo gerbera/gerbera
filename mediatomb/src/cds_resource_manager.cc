@@ -203,7 +203,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                 }
             }
 
-            if (item->getFlag(OBJECT_FLAG_DVD_IMAGE) && (!tp->onlyDVD()))
+            if (!item->getFlag(OBJECT_FLAG_DVD_IMAGE) && (tp->onlyDVD()))
                 continue;
 
             Ref<CdsResource> t_res(new CdsResource(CH_TRANSCODE));
