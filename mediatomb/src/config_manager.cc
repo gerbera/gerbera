@@ -457,6 +457,32 @@ String ConfigManager::createDefaultConfig(String userhome)
     server->appendChild(RefCast(tg100info, Node));
     server->appendChild(RefCast(tg100, Node));
 
+    Ref<Element> extended(new Element(_("extended-runtime-options")));
+#if defined(FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
+    Ref<Element> ffth(new Element(_("ffmpegthumbnailer")));
+    ffth->setAttribute(_("enabled"), _(DEFAULT_FFMPEGTHUMBNAILER_ENABLED));
+    
+    ffth->appendTextChild(_("thumbnail-size"), 
+                          String::from(DEFAULT_FFMPEGTHUMBNAILER_THUMBSIZE));
+    ffth->appendTextChild(_("seek-percentage"),
+                       String::from(DEFAULT_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE));
+    ffth->appendTextChild(_("filmstrip-overlay"),
+                          _(DEFAULT_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY));
+    ffth->appendTextChild(_("workaround-bugs"),
+                          _(DEFAULT_FFMPEGTHUMBNAILER_WORKAROUND_BUGS));
+
+    extended->appendChild(ffth);
+#endif
+
+    Ref<Element> mark(new Element(_("mark-played-items")));
+    mark->setAttribute(_("enabled"), _(DEFAULT_MARK_PLAYED_ITEMS_ENABLED));
+    Ref<Element> mark_string(new Element(_("string")));
+    mark_string->setAttribute(_("mode"), 
+                              _(DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE));
+    mark->appendElementChild(mark_string);
+    extended->appendElementChild(mark);
+
+    server->appendElementChild(extended);
 
     config->appendElementChild(server);
 
@@ -1642,7 +1668,7 @@ void ConfigManager::validate(String serverhome)
                            "invalid \"enabled\" attribute value in "
                            "<ffmpegthumbnailer> tag"));
 
-    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    NEW_BOOL_OPTION(temp == YES ? true : false);
     SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED);
 
     if (temp == YES)
@@ -1695,6 +1721,54 @@ void ConfigManager::validate(String serverhome)
         SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_WORKAROUND_BUGS);
     }
 #endif
+
+    temp = getOption(_("/server/extended-runtime-options/mark-played-items/"
+                       "attribute::enabled"),
+                     _(DEFAULT_MARK_PLAYED_ITEMS_ENABLED));
+
+    if (!validateYesNo(temp))
+        throw _Exception(_("Error in config file: "
+                           "invalid \"enabled\" attribute value in "
+                           "<mark-played-items> tag"));
+
+    NEW_BOOL_OPTION(temp == YES ? true : false);
+    SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED);
+
+    if (temp == YES)
+    {
+        temp = getOption(_("/server/extended-runtime-options/mark-played-items/"
+                           "attribute::supress-cds-updates"),
+                           _(DEFAULT_MARK_PLAYED_ITEMS_SUPRESS_CDS_UPDATES));
+        if (!validateYesNo(temp))
+            throw _Exception(_("Error in config file: "
+                               "invalid \":supress-cds-updates\" attribute "
+                               "value in <mark-played-items> tag"));
+
+        NEW_BOOL_OPTION(temp == YES ? true : false);
+        SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPRESS_CDS_UPDATES);
+
+        temp = getOption(_("/server/extended-runtime-options/mark-played-items/"
+                           "string/attribute::mode"),
+                         _(DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE));
+
+        if ((temp != "prepend") && (temp != "append"))
+            throw _Exception(_("Error in config file: "
+                               "invalid \"mode\" attribute value in "
+                               "<string> tag in the <mark-played-items> section"));
+
+        NEW_BOOL_OPTION(temp == DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE ? true : false);
+        SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND);
+
+        temp = getOption(_("/server/extended-runtime-options/mark-played-items/"
+                           "string"), 
+                         _(DEFAULT_MARK_PLAYED_ITEMS_STRING));
+        if (!string_ok(temp))
+            throw _Exception(_("Error in config file: "
+                               "empty string given for the <string> tag in the "
+                               "<mark-played-items> section"));
+        NEW_OPTION(temp);
+        SET_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING);
+    }
 
 #ifdef HAVE_MAGIC
     String magic_file;

@@ -43,6 +43,8 @@
 #include "dictionary.h"
 #include "url_request_handler.h"
 #include "cds_objects.h"
+#include "play_hook.h"
+
 #ifdef ONLINE_SERVICES
     #include "online_service_helper.h"
 #endif
@@ -262,6 +264,8 @@ Ref<IOHandler> URLRequestHandler::open(IN const char *filename, OUT struct File_
     Ref<IOHandler> io_handler(new CurlIOHandler(url, NULL, 1024*1024, 0));
 
     io_handler->open(mode);
+    
+    PlayHook::getInstance()->trigger(obj);
     return io_handler;
 }
 

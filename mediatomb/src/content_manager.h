@@ -322,7 +322,7 @@ public:
     
     /// \brief Updates an object in the database.
     /// \param obj the object to update
-    void updateObject(zmm::Ref<CdsObject> obj);
+    void updateObject(zmm::Ref<CdsObject> obj, bool send_updates = true);
 
     /// \brief Updates an object in the database using the given parameters.
     /// \param objectID ID of the object to update

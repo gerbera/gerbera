@@ -347,6 +347,11 @@
     #define DEFAULT_FFMPEGTHUMBNAILER_WORKAROUND_BUGS   NO
 #endif
 
+#define DEFAULT_MARK_PLAYED_ITEMS_ENABLED               NO
+#define DEFAULT_MARK_PLAYED_ITEMS_SUPRESS_CDS_UPDATES   YES
+#define DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE           "prepend"
+#define DEFAULT_MARK_PLAYED_ITEMS_STRING                "* "
+
 #define LINK_FILE_REQUEST_HANDLER         "/" SERVER_VIRTUAL_DIR "/" \
                                           CONTENT_MEDIA_HANDLER  "/"
 #define LINK_WEB_REQUEST_HANDLER          "/" SERVER_VIRTUAL_DIR "/" \

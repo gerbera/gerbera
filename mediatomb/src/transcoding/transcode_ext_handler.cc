@@ -60,6 +60,7 @@
 #include "file_io_handler.h"
 #include "transcoding_process_executor.h"
 #include "io_handler_chainer.h"
+#include "play_hook.h"
 
 #ifdef HAVE_CURL
     #include "curl_io_handler.h"
@@ -308,6 +309,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     Ref<IOHandler> io_handler(new BufferedIOHandler(Ref<IOHandler> (new ProcessIOHandler(fifo_name, RefCast(main_proc, Executor), proc_list)), profile->getBufferSize(), profile->getBufferChunkSize(), profile->getBufferInitialFillSize()));
 
     io_handler->open(UPNP_READ);
+    PlayHook::getInstance()->trigger(obj);
     return io_handler;
 }
 

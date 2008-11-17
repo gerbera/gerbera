@@ -1245,21 +1245,26 @@ int ContentManager::addContainerChain(String chain, String lastClass, int lastRe
     return containerID;
 }
 
-void ContentManager::updateObject(Ref<CdsObject> obj)
+void ContentManager::updateObject(Ref<CdsObject> obj, bool send_updates)
 {
     obj->validate();
     Ref<Storage> storage = Storage::getInstance();
-    Ref<UpdateManager> um = UpdateManager::getInstance();
-    Ref<SessionManager> sm = SessionManager::getInstance();
-    
+   
     int containerChanged = INVALID_OBJECT_ID;
     storage->updateObject(obj, &containerChanged);
-    um->containerChanged(containerChanged);
-    sm->containerChangedUI(containerChanged);
-    
-    um->containerChanged(obj->getParentID());
-    if (IS_CDS_CONTAINER(obj->getObjectType()))
-        sm->containerChangedUI(obj->getParentID());
+
+    if (send_updates)
+    {
+        Ref<UpdateManager> um = UpdateManager::getInstance();
+        Ref<SessionManager> sm = SessionManager::getInstance();
+
+        um->containerChanged(containerChanged);
+        sm->containerChangedUI(containerChanged);
+
+        um->containerChanged(obj->getParentID());
+        if (IS_CDS_CONTAINER(obj->getObjectType()))
+            sm->containerChangedUI(obj->getParentID());
+    }
 }
 
 Ref<CdsObject> ContentManager::convertObject(Ref<CdsObject> oldObj, int newType)
