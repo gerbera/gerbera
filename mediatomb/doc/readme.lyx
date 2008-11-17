@@ -3058,55 +3058,6 @@ status open
 \end_layout
 
 \begin_layout Code
-<retries-on-timeout>0<retries-on-timeout>
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Optional
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Default:
-\emph default
- 
-\emph on
-0 - disabled 
-\end_layout
-
-\begin_layout Standard
-This enables special error handling for the case that it is not possible
- to write to the client socket, but no error is reported by select (select
- keeps timing out).
- In this situation we may run out of threads, the option above allows some
- finetuning - we will shutdown the socket after a specific number of retries.
- 
-\end_layout
-
-\begin_layout Description
-Note: don't enable this option if you are not experiencing this particular
- problem, this was implemented as a workaround for some Playstation 3 related
- error cases.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Standard
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
 <pc-directory upnp-hide="no"/>
 \end_layout
 

@@ -158,7 +158,7 @@ void Server::upnp_init(String iface, String ip_address, int port)
     if (storage->threadCleanupRequired())
         cb = (void *)static_cleanup_callback;
 
-    ret = UpnpInit(ip.c_str(), port, config->getIntOption(CFG_SERVER_RETRIES_ON_TIMEOUT), cb);
+    ret = UpnpInit(ip.c_str(), port, 0, cb);
 
     if (ret != UPNP_E_SUCCESS)
     {

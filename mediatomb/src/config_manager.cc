@@ -476,6 +476,8 @@ String ConfigManager::createDefaultConfig(String userhome)
 
     Ref<Element> mark(new Element(_("mark-played-items")));
     mark->setAttribute(_("enabled"), _(DEFAULT_MARK_PLAYED_ITEMS_ENABLED));
+    mark->setAttribute(_("suppress-cds-updates"), 
+                        _(DEFAULT_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES));
     Ref<Element> mark_string(new Element(_("string")));
     mark_string->setAttribute(_("mode"), 
                               _(DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE));
@@ -1304,10 +1306,6 @@ void ConfigManager::validate(String serverhome)
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
     SET_BOOL_OPTION(CFG_SERVER_HIDE_PC_DIRECTORY);
 
-    temp_int = getIntOption(_("/server/retries-on-timeout"), DEFAULT_TIMEOUT_RETRIES);
-    NEW_INT_OPTION(temp_int);
-    SET_INT_OPTION(CFG_SERVER_RETRIES_ON_TIMEOUT);
-
     temp = getOption(_("/server/interface"), _(""));
 
     if (string_ok(temp) && string_ok(getOption(_("/server/ip"), _(""))))
@@ -1737,15 +1735,15 @@ void ConfigManager::validate(String serverhome)
     if (temp == YES)
     {
         temp = getOption(_("/server/extended-runtime-options/mark-played-items/"
-                           "attribute::supress-cds-updates"),
-                           _(DEFAULT_MARK_PLAYED_ITEMS_SUPRESS_CDS_UPDATES));
+                           "attribute::suppress-cds-updates"),
+                           _(DEFAULT_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES));
         if (!validateYesNo(temp))
             throw _Exception(_("Error in config file: "
-                               "invalid \":supress-cds-updates\" attribute "
+                               "invalid \":suppress-cds-updates\" attribute "
                                "value in <mark-played-items> tag"));
 
         NEW_BOOL_OPTION(temp == YES ? true : false);
-        SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPRESS_CDS_UPDATES);
+        SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES);
 
         temp = getOption(_("/server/extended-runtime-options/mark-played-items/"
                            "string/attribute::mode"),

@@ -51,7 +51,7 @@ void PlayHook::trigger(zmm::Ref<CdsObject> obj)
     {
         obj->setFlag(OBJECT_FLAG_PLAYED);
 
-        bool supress = cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPRESS_CDS_UPDATES);
+        bool supress = cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES);
 
         Ref<ContentManager> cm = ContentManager::getInstance();
         cm->updateObject(obj, !supress);
