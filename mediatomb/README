@@ -1,10 +1,10 @@
 MediaTomb - UPnP MediaServer
 
-This documentation is valid for MediaTomb version 0.11.0.
+This documentation is valid for MediaTomb version 0.12.0.
 
 Copyright   2005 Gena Batsyan, Sergey Bostandzhyan
 
-Copyright   2006-2007 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer
+Copyright   2006-2008 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer
 
 THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY! USE AT YOUR OWN RISK!
 
@@ -15,7 +15,6 @@ Table of Contents
 1. Introduction
 
     1.1. Currently Supported Features
-    1.2. Planned Features
 
 2. Requirements
 3. Compiling From Source
@@ -42,7 +41,10 @@ Table of Contents
     5.10. Run Under Different Group
     5.11. Add Content
     5.12. Log To File
-    5.13. Display Command Line Summary
+    5.13. Debug Output
+    5.14. Compile Info
+    5.15. Version Information
+    5.16. Display Command Line Summary
 
 6. Configuration File
 
@@ -110,7 +112,9 @@ Note:
   * sophisticated web UI with a tree view of the database and the file system,
     allowing to add/remove/edit/browse your media
 
-  * highly flexible transcoding media format transcoding via plugins / scripts
+  * highly flexible media format transcoding via plugins / scripts
+
+  * allows to watch YouTube(tm) videos on your UPnP player device
 
   * support for external URLs (create links to internet content and serve them
     via UPnP to your renderer)
@@ -126,14 +130,6 @@ Note:
   * support for Linux, FreeBSD, Mac OS X
 
   * runs on x86, Alpha, ARM, MIPS, Sparc, PowerPC
-
-1.2. Planned Features
-
-  * transcoding of audio and video
-
-  * playlist support
-
-  * various UPnP improvements
 
 2. Requirements
 
@@ -161,11 +157,10 @@ In order to compile MediaTomb you will have to install the following packages.:
   * mysql client library (version > 4.0.x) http://mysql.org/ REQUIRED (if
     sqlite is not available)
 
-  * expat http://expat.sourceforge.net/ OPTIONAL, RECOMMENDED
+  * expat http://expat.sourceforge.net/ REQUIRED
 
-    Expat is a very good and robust XML parser, so far we have been using our
-    own, but ran into problems from time to time. So from now on eXpat is the
-    preferred for parsing XML in MediaTomb.
+    Expat is a very good and robust XML parser, since most of UPnP is based on
+    XML this package is a requirement.
 
   * zlib http://www.zlib.net/ OPTIONAL, HIGHLY RECOMMENDED
 
@@ -181,7 +176,7 @@ In order to compile MediaTomb you will have to install the following packages.:
     type mappings manually in your config file.
 
   * js - SpiderMonkey JavaScript Engine http://www.mozilla.org/js/spidermonkey/
-    OPTIONAL, RECOMMENDED
+    OPTIONAL, RECOMMENDED, REQUIRED FOR PLAYLIST SUPPORT
 
     This package is necessary to allow the user defined creation of virtual
     containers. The import.js script defines the layout of your media, the
@@ -216,12 +211,12 @@ In order to compile MediaTomb you will have to install the following packages.:
     EXIF thumbnails are present in your images they will also be offered via
     UPnP.
 
-  * curl http://curl.haxx.se/ OPTIONAL
+  * curl http://curl.haxx.se/ OPTIONAL, REQUIRED FOR YOUTUBE AND SOPCAST
+    SUPPORT
 
-    curl is a library that allows to easily fetch content from the web,
-    combined with the external transcoding it offers some additional
-    functionality and enables the use of plugins that have no builtin online
-    content support.
+    curl is a library that allows to easily fetch content from the web, if you
+    want to compile MediaTomb with YouTube and/or SopCast support then curl is
+    required.
 
   * libextractor http://gnunet.org/libextractor/ OPTIONAL
 
@@ -239,6 +234,17 @@ In order to compile MediaTomb you will have to install the following packages.:
 
     Currently ffmpeg is used to gather additional metadata from audio and video
     files.
+
+  * libffmpegthumbnailer http://code.google.com/p/ffmpegthumbnailer/ OPTIONAL
+
+    ffmpegthumbnailer is used to generate video thumbnails on the fly. If your
+    device (like DSM-510 or PlayStation 3) supports video thumbnails it would
+    be worth to compile MediaTomb with this library.
+
+    Note:
+
+        ffmpegthumbnailer support is only provided if MediaTomb is compiled
+        with ffmpeg support.
 
 In order to use the web UI you will need to have javascript enabled in your web
 browser.
@@ -663,7 +669,21 @@ option, the functionality will be compiled in even if the build system does not
 support inotify - the availability of inotify will then be checked at server
 runtime.
 
-3.2.24. External Transcoding
+3.2.24. YouTube Service Support
+
+--enable-youtube
+
+Default:
+
+    enabled
+
+This option enabled support of the YouTube service, it allows to gather
+information about content on the YouTube site and offers the content via UPnP,
+thus enabling you to watch your favorite YouTube videos on your UPnP player
+device. The feature only makes sense in combination with transcoding, since
+most devices do not support playback of flv files natively.
+
+3.2.25. External Transcoding
 
 --enable-external-transcoding
 
@@ -671,18 +691,30 @@ Default:
 
     enabled
 
-3.2.25. Curl
+3.2.26. Sqlite Backup Defaults
+
+--enable-sqlite-backup-defaults
+
+Default:
+
+    disabled
+
+Enables backup option for sqlite as the default setting, might be useful for
+NAS builds.
+
+3.2.27. Curl
 
 --enable-curl
 
 Default:
 
-    enabled if external transcoding feature is turned on
+    enabled if external transcoding or YouTube features are turned on
 
-It only makes sense to enable the curl library if External Transcoding is
-turned on.
+It only makes sense to enable the curl library if YouTube and External
+Transcoding are turned on. YouTube requires curl, but it's optional for
+External Transcoding.
 
-3.2.26. Ffmpeg Support
+3.2.28. Ffmpeg Support
 
 --enable-ffmpeg
 
@@ -695,20 +727,19 @@ audio and video files. It is also capable of reading out the tag information
 from theora content. It is not yet used for transcoding, so this feature only
 gathers additional metadata.
 
-3.2.27. libexpat Support
+3.2.29. Ffmpeg Thumbnailer Support
 
---enable-expat
+--enable-ffmpegthumbnailer
 
 Default:
 
     enabled
 
-Expat is a very good XML parser, until now we were doing the parsing ourselves
-and occaisonally ran into problems. Turning this feature on will ensure that
-expat is used instead of our internal parser, thus making the parsing more
-robust.
+Compiling with ffmpegthumbnailer support is only possible if you also compile
+with ffmpeg support. The library allows to generate thumbnails for the videos
+on the fly.
 
-3.2.28. MediaTomb Debug Output
+3.2.30. MediaTomb Debug Output
 
 --enable-tombdebug
 
@@ -721,7 +752,7 @@ information which is mainly interesting to developers. Use this if you are
 trying to trace down a bug or a problem, the additional output may give you
 some clues.
 
-3.2.29. UPnP Library Debug Output
+3.2.31. UPnP Library Debug Output
 
 --enable-upnpdebug
 
@@ -732,7 +763,7 @@ Default:
 This option enables debug output of the UPnP SDK. You should not need it under
 normal circumstances.
 
-3.2.30. Log Output
+3.2.32. Log Output
 
 --disable-log
 
@@ -742,7 +773,16 @@ Default:
 
 This option allows you to suppress all log output from the server.
 
-3.2.31. Package Search Directory
+3.2.33. Debug Log Output
+
+Default:
+
+    enabled
+
+This option allows you to compile the server with debug messages. If enabled,
+switching between verbose and normal output during runtime becomes possible.
+
+3.2.34. Package Search Directory
 
 --with-search=DIR
 
@@ -755,7 +795,7 @@ location, for example Darwinports on OSX get installed to /opt/local/. This
 option tells the configure script to additionally search for headers and
 libraries of various packages in DIR/include and DIR/lib.
 
-3.2.32. Specifying Header And Library Locations Of Various Packages
+3.2.35. Specifying Header And Library Locations Of Various Packages
 
 You can specify the exact location of particular headers and libraries. Some
 packages use extra programs that tell us the appropriate flags that are needed
@@ -764,32 +804,38 @@ those programs. The parameters are self explanatory, in case of headers and
 libraries the DIR parameter is the directory where those headers and libraries
 are located.
 
---with-sqlite3-h=DIR            search for sqlite3 headers only in DIR
---with-sqlite3-libs=DIR         search for sqlite3 libraries only in DIR
---with-mysql-cfg=mysql_config   absolute path/name of mysql_config
---with-js-h=DIR                 search for js (spidermonkey) headers in DIR
---with-js-libs=DIR              search for js (spidermonkey) libraries in DIR
---with-magic-h=DIR              search for filemagic headers in DIR
---with-magic-libs=DIR           search for filemagic headers in DIR
---with-exif-h=DIR               search for libexif headers in DIR
---with-exif-libs=DIR            search for libexif libraries in DIR
---with-expat-h=DIR              search for expat headers in DIR
---with-expat-libs=DIR           search for expat libraries in DIR
---with-taglib-cfg=taglib-config absolute path/name of taglib-config
---with-id3lib-h=DIR             search for id3lib headers in DIR
---with-id3lib-libs=DIR          search for id3lib libraries in DIR
---with-zlib-h=DIR               search for zlib headers in DIR
---with-zlib-libs=DIR            search for zlib libraries in DIR
---with-inotify-h=DIR            search for inotify header in DIR
---with-iconv-h=DIR              search for iconv headers in DIR/sys
---with-iconv-libs=DIR           search for iconv libraries in DIR
---with-extractor-h=DIR          search for extractor headers in DIR
---with-extractor-libs=DIR       search for extractor libraries in DIR
---with-ffmpeg-h=DIR             search for ffmpeg headers in DIR
---with-ffmpeg-libs=DIR          search for ffmpeg libraries in DIR
---with-curl-cfg=curl-config     absolute path/name of curl-config script
+--with-sqlite3-h=DIR               search for sqlite3 headers only in DIR
+--with-sqlite3-libs=DIR            search for sqlite3 libraries only in DIR
+--with-mysql-cfg=mysql_config      absolute path/name of mysql_config
+--with-js-h=DIR                    search for js (spidermonkey) headers in DIR
+--with-js-libs=DIR                 search for js (spidermonkey) libraries in DIR
+--with-libmagic-h=DIR              search for filemagic headers in DIR
+--with-libmagic-libs=DIR           search for filemagic headers in DIR
+--with-libexif-h=DIR               search for libexif headers in DIR
+--with-libexif-libs=DIR            search for libexif libraries in DIR
+--with-expat-h=DIR                 search for expat headers in DIR
+--with-expat-libs=DIR              search for expat libraries in DIR
+--with-taglib-cfg=taglib-config    absolute path/name of taglib-config
+--with-id3lib-h=DIR                search for id3lib headers in DIR
+--with-id3lib-libs=DIR             search for id3lib libraries in DIR
+--with-zlib-h=DIR                  search for zlib headers in DIR
+--with-zlib-libs=DIR               search for zlib libraries in DIR
+--with-inotify-h=DIR               search for inotify header in DIR
+--with-iconv-h=DIR                 search for iconv headers in DIR/sys
+--with-iconv-libs=DIR              search for iconv libraries in DIR
+--with-libextractor-h=DIR          search for extractor headers in DIR
+--with-libextractor-libs=DIR       search for extractor libraries in DIR
+--with-ffmpeg-h=DIR                search for ffmpeg headers in DIR
+--with-ffmpeg-libs=DIR             search for ffmpeg libraries in DIR  --with-ffmpegthumbnailer-h=DIR     search for ffmpegthumbnailer headers in DIR
+--with-ffmpegthumbnailer-libs=DIR  search for ffmpegthumbnailer libraries in DIR
+--with-curl-cfg=curl-config        absolute path/name of curl-config script
+--with-libmp4v2-h=DIR              search for libmp4v2 headers in DIR
+--with-libmp4v2-libs=DIR           search for libmp4v2 libraries in DIR
+--with-rt-libs=DIR                 search for rt libraries in DIR
+--with-pthread-libs=DIR            search for pthread libraries in DIR
 
-3.2.33. The devconf Script
+
+3.2.36. The devconf Script
 
 If you are doing some development work and some debugging, you will probably
 want to compile with the -g flag and also disable optimization. The devconf
@@ -1004,7 +1050,25 @@ imported.
 Do not output log messages to stdout, but redirect everything to a specified
 file.
 
-5.13. Display Command Line Summary
+5.13. Debug Output
+
+--debug or -D
+
+Enable debug log output.
+
+5.14. Compile Info
+
+--compile-info
+
+Print the configuration summary (used libraries and enabled features) and exit.
+
+5.15. Version Information
+
+--version
+
+Print version information and exit.
+
+5.16. Display Command Line Summary
 
 --help or -h
 
@@ -1229,24 +1293,6 @@ Child tags:
     Adds specific tags to the protocolInfo attribute, this is required to
     enable MP3 and MPEG4 playback on Playstation 3.
 
-  * <retries-on-timeout>0<retries-on-timeout>
-
-    Optional
-
-    Default: 0 - disabled
-
-    This enables special error handling for the case that it is not possible to
-    write to the client socket, but no error is reported by select (select
-    keeps timing out). In this situation we may run out of threads, the option
-    above allows some finetuning - we will shutdown the socket after a specific
-    number of retries.
-
-    Note:
-
-        don't enable this option if you are not experiencing this particular
-        problem, this was implemented as a workaround for some Playstation 3
-        related error cases.
-
   * <pc-directory upnp-hide="no"/>
 
     Optional
@@ -1344,6 +1390,14 @@ Child tags:
         Default: yes
 
         Enables ("yes") or disables ("no") the web user interface.
+
+      o show-tooltips=...
+
+        Optional
+
+        Default: yes
+
+        This setting specifies if icon tooltips should be shown in the web UI.
 
       o poll-interval=...
 
@@ -1448,13 +1502,21 @@ Child tags:
                 default value of 25, then one of the <option> tags must also
                 list this value.
 
-  * <storage>
+  * <storage caching="yes">
 
     Required
 
     Defines the storage section - database selection is done here. Currently
     sqlite3 and mysql are supported. Each storage driver has it's own
     configuration parameters.
+
+      o caching="yes"
+
+        Optional
+
+        Default: yes
+
+        Enables caching, this feature should improve the overall import speed.
 
       o <sqlite enabled="yes>
 
@@ -1589,6 +1651,148 @@ Child tags:
 
             Name of the database that will be used by MediaTomb.
 
+6.1.1. Extended Runtime Options
+
+<extended-runtime-options>
+
+These options reside under the server tag and allow to additinally control the
+so called "runtime options". The difference to the import options is:
+
+Import options are only triggered when data is being imported into the
+database, this means that if you want new settings to be applied to already
+imported data, you will have to reimport it. Runtime options can be switched on
+and off without the need to reimport any media. Unfortunately you still need to
+restart the server so that these options take effect, however after that they
+are immediately active.
+
+  * <ffmpegthumbnailer enabled="no">
+
+    Optional
+
+    Default: no
+
+    Ffmpegthumbnailer is a nice, easy to use library that allows to generate
+    thumbnails from video files. Some DLNA compliant devices support video
+    thumbnails, if you think that your device may be one of those you can try
+    enabling this option. It would also make sense to enable the protocolInfo
+    option, since it will add specific DLNA tags to tell your device that a
+    video thumbnail is being offered by the server.
+
+    Note:
+
+        thumbnails are not cached and not stored anywhere, they will be
+        generated on the fly in memory and released afterwards. If your device
+        supports video thumbnails and requests them from the server in large
+        amounts, the performance when browsing video containers will depend on
+        the speed of your machine. A feature to allow caching of thumbnails is
+        planned for future releases.
+
+    The following options allow to control the ffmpegthumbnailer library (these
+    are basically the same options as the ones offered by the ffmpegthumbnailer
+    command line application). All tags below are optional and have sane
+    default values.
+
+      o <thumbnail-size>128</thumbnail-size>
+
+        Optional
+
+        Default: 128
+
+        The thumbnail size should not exceed 160x160 pixels, higher values can
+        be used but will mostprobably not be supported by DLNA devices. The
+        value of zero or less is not allowed.
+
+      o <seek-percentage>5</seek-percentage>
+
+        Optional
+
+        Default: 5
+
+        Time to seek to in the movie (percentage), values less than zero are
+        not allowed.
+
+      o <filmstrip-overlay>yes</filmstrip-overlay>
+
+        Optional
+
+        Default: yes
+
+        Creates a filmstrip like border around the image, turn this option off
+        if you want pure images.
+
+      o <workaround-bugs>no</workaround-bugs>
+
+        Optional
+
+        Default: no
+
+        Accodring to ffmpegthumbnailer documentation, this option will enable
+        workarounds for bugs in older ffmpeg versions. You can try enabling it
+        if you experience unexpected behaviour, like hangups during thumbnail
+        generation, crashes and alike.
+
+  * <mark-played-items enabled="no" suppress-cds-updates="yes">
+
+    Optional
+
+    The attributes of the tag have the following meaning:
+
+      o enabled=...
+
+        Optional
+
+        Default: no
+
+        Enables or disables the marking of played items, seto to "yes" to
+        enable the feature.
+
+      o suppress-cds-updates=...
+
+        Optional
+
+        Default: yes
+
+        This is an advanced feature, leave the default setting if unsure.
+        Usually, when items are modified we send out container updates as
+        specified in the Content Directory Service. This notifies the player
+        that data in a particular container has changed, players that support
+        CDS updates will rebrowse the container and refresh the view. However,
+        in this case we probably do not want it (this actually depends on the
+        particular player implementation). For example, if we update the list
+        of currently playing items, the player could interrupt playback and
+        rebrowse the current container - clearly an unwatned behaviour. Because
+        of this, we provide an option to suppress and not send out container
+        updates - only for the case where the item is marked as "played". In
+        order to see the changes you will have to get out of the current
+        container and enter it again - then the view on your player should get
+        updated.
+
+        Note:
+
+            some players (i.e. PS3) cache a lot of data, for those players it
+            may be necessary to leave the server view or restart the player in
+            order to update content (same as when adding new data).
+
+    The following tag defines how played items should be marked:
+
+      o <string mode="prepend">* </string>
+
+        Optional
+
+        Default: *
+
+        Specifies what string should be appended or prepended to the title of
+        the object that will be marked as "played".
+
+          - mode=...
+
+            Optional
+
+            Default: prepend
+
+            Specifies how a string should be added to the object's title,
+            allowed values are "append" and "prepend".
+
 6.2. Import Settings
 
 The import settings define various options on how to aggregate the content.
@@ -1678,7 +1882,7 @@ Child tags:
         The virtual layout can be adjusted using an import script which is
         defined as follows:
 
-          - <import-script>/path/to/my/import-script.js</script>
+          - <import-script>/path/to/my/import-script.js</import-script>
 
             Required if virtual layout type is "js"
 
@@ -1687,6 +1891,17 @@ Child tags:
 
             Points to the script invoked upon media import. For more details
             read doc/scripting.txt
+
+          - <dvd-script>/path/to/my/import-dvd.js</dvd-script>
+
+            Optional, only has effect when layout type is "js" and if MediaTomb
+            was compiled with libdvdread support.
+
+            Default: ${prefix}/share/mediatomb/js/import-dvd.js, where $
+            {prefix} is your installation prefix directory.
+
+            Points to the script invoked upon import of DVD iso images. For
+            more details read doc/scripting.txt
 
       o <common-script>/path/to/my/common-script.js</common-script>
 
@@ -1980,23 +2195,28 @@ Child tags:
     Optional
 
     This section holds options for the various supported import libraries, it
-    is useful in conjunction with virtual container scripting.
+    is useful in conjunction with virtual container scripting, but also allows
+    to tune some other features as well.
 
-    UPnP defines certain tags to pass along metadata of the media (like title,
-    artist, year, etc.), however some media provides more metadata and exceeds
-    the scope of UPnP. This additional metadata can be used to fine tune the
-    server layout, it allows the user to create a more complex container
-    structure using a customized import script. The metadata that can be
-    extracted depends on the library, currently we support libebexif and
-    libextractor, the libraries provide a default set of keys that can be
-    passed in the options below. The data according to those keys will the be
-    extracted from the media and imported into the database along with the
-    item. When processing the item, the import script will have full access to
-    the gathered metadata, thus allowing the user to organize the data with the
-    use of the extracted information. A practical example would be: if have
-    more than one digital camera in your family you could extract the camera
-    model from the Exif tags and sort your photos in a structure of your
-    choice, like:
+    Currently the library-options allow additional extraction of the so called
+    auxilary data (explained below) and provide control over the video
+    thumbnail generation.
+
+    Here is some information on the auxdata: UPnP defines certain tags to pass
+    along metadata of the media (like title, artist, year, etc.), however some
+    media provides more metadata and exceeds the scope of UPnP. This additional
+    metadata can be used to fine tune the server layout, it allows the user to
+    create a more complex container structure using a customized import script.
+    The metadata that can be extracted depends on the library, currently we
+    support libebexif and libextractor, the libraries provide a default set of
+    keys that can be passed in the options below. The data according to those
+    keys will the be extracted from the media and imported into the database
+    along with the item. When processing the item, the import script will have
+    full access to the gathered metadata, thus allowing the user to organize
+    the data with the use of the extracted information. A practical example
+    would be: if have more than one digital camera in your family you could
+    extract the camera model from the Exif tags and sort your photos in a
+    structure of your choice, like:
 
     Photos/MyCamera1/All Photos
 
@@ -2156,6 +2376,532 @@ Attributes:
     is particularly slow you may want to try enable this setting.
 
 Below are the settings for supported services.
+
+6.2.2. YouTube Service
+
+MediaTomb allows you to watch YouTube videos using your UPnP device, you can
+specify what content you are interested in, we will import the meta data and
+present it in the database, so you can browse the content on your player just
+like you do it with your local data.
+
+WANING:
+
+    by using this feature you may be violating the YouTube service terms and
+    conditions: http://www.youtube.com/t/terms
+
+Note:
+
+    we do not download/mirror the actual videos, we only get description of the
+    content and present it in the database. The actual video is only streamed
+    when you press play on your device. So, when we use the term "retrieve
+    videos" we actually mean retrieving the video name, description and
+    associated meta data, not the actual flv file.
+
+Note:
+
+    so far we have not yet seen many devices that will natively support the
+    .flv format, you will need to setup appropriate transcoding profiles to
+    make use of the YouTube feature.
+
+<YouTube enabled="no" refresh="12600" update-at-start="yes" purge-after="1200000" racy-content="exclude">
+
+Optional
+
+Options and setting for YouTube service support, the attributes are:
+
+  * enabled=...
+
+    Optional
+
+    Default: no
+
+    Enables or disables the service, allowed values are "yes" or "no".
+
+  * refresh=...
+
+    Optional
+
+    Default: 0 (disabled)
+
+    Refresh interval in seconds, each time the interval elapses we will contact
+    the YouTube server and fetch new meta data, presenting the changes in the
+    database view. This allows you to stay up to date with what is available on
+    YouTube, you probably should not need to update more than once per day, so
+    specify a reasonably high value here.
+
+  * purge-after=...
+
+    Optional
+
+    Default: 0 (disabled)
+
+    Time amount in seconds when data that has not been updated is considered
+    old and can be purged from the database. This setting helps to prevent an
+    endless filling of the database with YouTube meta data, the idea is the
+    following: each video has a unique ID, during a refresh cycle the video
+    meta data will be imported into the database and a time stamp will be
+    added. Each refresh cycle we may encounter same content (i.e. nothing
+    changed on the YouTube site), we will update the time stamp. However, if a
+    particular video is no longer available on YouTube it will not be
+    refreshed, once the time stamp exceeds the purge-after value we will remove
+    the meta data for this particular video from the database.
+
+  * update-at-start=...
+
+    Optional
+
+    Default: no
+
+    This option defines if we will contact the service right after MediaTomb
+    was started (about 10 seconds after start up) or if data should be fetched
+    when the first refresh cycle kicks in. It may be useful if you frequently
+    restart the server and do not want the content to be updated each time.
+    Allowed values are "yes" or "no".
+
+  * racy-content=...
+
+    Optional
+
+    Default: exclude
+
+    Specifies if restricted content should be inclueded in the search results.
+    The option will automatically be used with YouTube requests that support.
+    By default restricted content is not included.
+
+Below are various options that allow you to define what content you are
+interested in.
+
+Note:
+
+    all tags are optional and can occur more then once.
+
+  * <standardfeed feed="top_rated" region-id="ru" time-range="today" start-index="1" amount="all"/>
+
+    Optional
+
+    This tag tells us to retrieve one of the standard video feeds. It can
+    appear more than once with different options (i.e. different feed and
+    region settings).
+
+      o feed=...
+
+        Required
+
+        Definition of the standard feed that you are interested in, the allowed
+        values are:
+
+          - top_rated
+
+          - top_favorites
+
+          - most_viewed
+
+          - most_recent
+
+          - most_discussed
+
+          - most_linked
+
+          - most_responded
+
+          - recently_featured
+
+          - watch_on_mobile
+
+      o region-id=...
+
+        Optional
+
+        Allows to get a standard feed for a specific region, the option is
+        ignored for the watch_on_mobile standard feed.
+
+        Currently, the following region id's are supported:
+
+          - au
+
+            Australia
+
+          - br
+
+            Brazil
+
+          - ca
+
+            Canada
+
+          - fr
+
+            France
+
+          - de
+
+            Germany
+
+          - gb
+
+            Great Britain
+
+          - nl
+
+            Holland
+
+          - hk
+
+            Hong Kong
+
+          - ie
+
+            Ireland
+
+          - it
+
+            Italy
+
+          - jp
+
+            Japan
+
+          - mx
+
+            Mexico
+
+          - nz
+
+            New Zealand
+
+          - pl
+
+            Poland
+
+          - ru
+
+            Russia
+
+          - kr
+
+            South Korea
+
+          - es
+
+            Spain
+
+          - tw
+
+            Taiwan
+
+          - us
+
+            United States
+
+      o time-range=...
+
+        Optional
+
+        Allows to specify a certain time range when retrieving the feed
+        content. The time-range option is only supported for the following
+        standard feeds: top_rated, top_favorites, most_viewed, most_discussed,
+        most_linked and most_responded.
+
+        Following values are supported:
+
+          - all_time
+
+          - today
+
+          - this_week
+
+          - this_month
+
+      o start-index=...
+
+        Optional
+
+        Starting index of the item in the list, useful if you want to skip the
+        first xxx results, must be an integer value >= 1.
+
+      o amount=...
+
+        Amount of items to fetch, can be either an integer value or the keyword
+        "all".
+
+  * <favorites user="mediatomb"/>
+
+    Optional
+
+    Retrieves all favorites of the given user.
+
+      o user=...
+
+        Required
+
+        Name of the YouTube user whose favorites should be fetched.
+
+  * <subscriptions user="mediatomb"/>
+
+    Optional
+
+    Retrieves all subscriptions of the given user.
+
+      o user=...
+
+        Required
+
+        Name of the YouTube user whose subscriptions should be fetched.
+
+  * <playlists user="mediatomb"/>
+
+    Optional
+
+    Retrieve all playlists of the given user.
+
+      o user=...
+
+        Required
+
+        Name of the YouTube user whose playlists should be fetched.
+
+  * <uploads user="mediatomb" start-index="1" amount="all"/>
+
+    Required
+
+    Retrieves videos that were uploaded by a specified user.
+
+      o user=...
+
+        Required
+
+        Name of the YouTube user whose playlists should be fetched.
+
+      o start-index=...
+
+        Optional
+
+        Starting index of the item in the list, useful if you want to skip the
+        first xxx results, must be an integer value >= 1.
+
+      o amount=...
+
+        Amount of items to fetch, can be either an integer value or the keyword
+        "all".
+
+6.2.3. Weborama Service
+
+MediaTomb allows you to access Weborama content and to play it on your device.
+
+Note:
+
+    we do not download/mirror the actual audio files, we only get description
+    of the content and present it in the database. The actual media is only
+    streamed when you press play on your device. So, when we use the term
+    "retrieve media" we actually mean retrieving the song name, description and
+    associated meta data, not the actual audio file.
+
+<Weborama enabled="no" refresh="12600" update-at-start="yes">
+
+Optional
+
+Options and setting for Weborama service support, the attributes are:
+
+  * enabled=...
+
+    Optional
+
+    Default: no
+
+    Enables or disables the service, allowed values are "yes" or "no".
+
+  * refresh=...
+
+    Optional
+
+    Default: 0 (disabled)
+
+    Refresh interval in seconds, each time the interval elapses we will contact
+    the Weborama server and fetch new meta data, presenting the changes in the
+    database view. This allows you to get new playlists and update the content
+    that you want to play from Weborama.
+
+  * update-at-start=...
+
+    Optional
+
+    Default: no
+
+    This option defines if we will contact the service right after MediaTomb
+    was started (about 10 seconds after start up) or if data should be fetched
+    when the first refresh cycle kicks in. It may be useful if you frequently
+    restart the server and do not want the content to be updated each time.
+    Allowed values are "yes" or "no".
+
+The request for fetching particular content is described using the following
+tag:
+
+<playlist name="Dark" mood="dark" amount="5">
+
+The attributes have the following meaning:
+
+  * name=...
+
+    Required
+
+    Name of the request, this name will be used in the virtual layout when
+    presenting the content.
+
+  * mood=...
+
+    Optional
+
+    Defines the mood of the user, the returned content is filtered accordingly.
+    Possible values are:
+
+      o calm-positive
+
+      o positive
+
+      o energetic-positive
+
+      o calm
+
+      o neutral
+
+      o energetic
+
+      o calm-dark
+
+      o dark
+
+      o energetic-dark
+
+  * amount=...
+
+    Optional
+
+    Default: 200
+
+    Integer value, defining the number of songs that should be fetched for this
+    request.
+
+  * <type id="0">playlist</type>
+
+    Optional
+
+    Type of the generated content.
+
+      o id=
+
+        Optional
+
+        Default: 0
+
+        The value of the id parameter is tightly coupled to the type parameter
+        which is described above.
+
+          - <type id="0">playlist</type>
+
+            Id value of zero generates a random playlist.
+
+          - <type id="playlist id">playlist</type>
+
+            Requests a playlist wich is identified by the playlist id which is
+            passed via the id parameter.
+
+          - <type id="song hash">audio</type>
+
+            Requests a particular song which is identified by the hash which is
+            passed via the id parameter.
+
+          - <type id="album id">album</type>
+
+            Requests a particular album which is identified by the album id
+            which is passed via the id parameter.
+
+    The allowed type values are:
+
+      o audio
+
+        The request delivers only one song, identified by the id parameter.
+
+      o playlist
+
+        The request delivers a users playlist, identified by the id parameter.
+        If id is zero, then the request delivers content which is specified
+        using the mood and filter parameters.
+
+      o album
+
+        The request delivers songs from a particular album, identified by the
+        id parameter.
+
+  * <filter>
+
+    Optional
+
+    Allows to filter the returned content, this is especially useful when
+    generating random playlists. Allowed subtags are:
+
+      o <genres>genre1,genre2,genre3</genres>
+
+        Optional
+
+        Allows to filter by one or more genres, multiple genres are separated
+        by a comma. The list of supported genres is:
+
+          - electronic
+
+          - alternative
+
+          - jazz
+
+          - metal
+
+          - pop
+
+          - punk
+
+          - rhytm-and-blues
+
+          - rap
+
+          - reggae
+
+          - rock
+
+          - classic
+
+          - soundtrack
+
+          - retro
+
+          - russian-rock
+
+          - russian-pop
+
+          - chanson
+
+          - folk
+
+      o <sort user-id="username">all</sort>
+
+        Optional
+
+        Additional criteria for content selection which is valued for a given
+        user id.
+
+          - user-id=...
+
+            Weborama user id.
+
+        The allowed sort parameters are:
+
+          - all
+
+          - favorite
+
+          - friends
+
+          - uploaded
+
+          - used_last
 
 6.3. Transcoding Settings
 
@@ -2332,6 +3078,23 @@ Child tags:
                 make sure that only OGG files containing Theora will be
                 processed.
 
+              * <dvd-only>no<dvd-only>
+
+                Optional
+
+                Default: no
+
+                This is a special option which is related to DVD image support
+                that is offered via libdvdnav. We encountered a problem that
+                some devices fail to play the stream that we get from
+                libdvdnav, for those devices remuxing to TS may be required.
+
+                This option allows to setup a transcoding profile that will
+                only transcode streams coming from the DVD image. The option is
+                needed to prevent transcoding of normal mpeg streams, without
+                it those streams would also get transcoded because the settings
+                are based on the mime type.
+
               * <avi-fourcc-list mode="ignore">
 
                 Optional
@@ -2457,6 +3220,8 @@ Child tags:
 
                 Optional
 
+                Default: not specified
+
                 Allows you to tell the resolution of the transcoded media to
                 your player. This may be helpful if you want to generate
                 thumbnails for your photos, or if your player has the ability
@@ -2464,9 +3229,50 @@ Child tags:
                 setting should match the real resolution of the transcoded
                 media.
 
+              * <use-chunked-encoding>yes</use-chunked-encoding>
+
+                Optional
+
+                Default: yes
+
+                Specifies that the content should be sent out using chunked
+                HTTP encoding, this is the default setting for transcoded
+                streams, because the content length of the data is not known.
+
+              * <sample-frequency>source</sample-frequency>
+
+                Optional
+
+                Default: source
+
+                Specifies the sample frequency of the transcoded media, this
+                information is passed to the player and is particularly
+                important when streaming PCM data. Possible values are: source 
+                (automatically set the same frequency as the frequency of the
+                source content, which is useful if you are not doing any
+                resampling), off (do not provide this information to the
+                player), frequency (specify a fixed value, where frequency is a
+                numeric value > 0)
+
+              * <audio-channels>source</audio-channels>
+
+                Optional
+
+                Default: source
+
+                Specifies the number of audio channels in the transcoded media,
+                this information is passed to the player and is particularly
+                important when streaming PCM data. Possible values are: source 
+                (automatically set the same number of audio channels as in the
+                source content), off (do not provide this information to the
+                player), number (specify a fixed value, where number is a
+                numeric value > 0)
+
               * <thumbnail>yes</thumbnail>
 
                 Optional
+
+                Default: no
 
                 Note:
 
@@ -2609,17 +3415,30 @@ uses the optional Search action which is not implemented in MediaTomb.
 
   * BDP-94HD
 
-7.1.15. Roku
+7.1.15. Roberts
+
+  * WM201 WiFi Radio
+
+Playing OGG audio files requres a custom mimetype, add the following to the
+<extension-mimetype> section and reimport your OGGs:
+
+<map from="ogg" to="audio/ogg"/>
+
+Also, add this to the <mimetype-contenttype> section:
+
+<treat mimetype="audio/ogg" as="ogg"/>
+
+7.1.16. Roku
 
   * SoundBridge M1001
 
   * SoundBridge M2000
 
-7.1.16. Siemens
+7.1.17. Siemens
 
   * Gigaset M740AV
 
-7.1.17. Sony
+7.1.18. Sony
 
   * Playstation 3
 
@@ -2628,11 +3447,11 @@ section of your configuration file to enable MediaTomb PS3 compatibility:
 
 <protocolInfo extend="yes"/>
 
-7.1.18. T+A
+7.1.19. T+A
 
   * T+A Music Player
 
-7.1.19. Telegent
+7.1.20. Telegent
 
   * TG100
 
@@ -2643,13 +3462,13 @@ the <server> section of your configuration file:
 
 <upnp-string-limit>101</upnp-string-limit>
 
-7.1.20. TerraTec
+7.1.21. TerraTec
 
   * NOXON iRadio
 
   * NOXON 2 Audio
 
-7.1.21. ZyXEL
+7.1.22. ZyXEL
 
   * DMA-1000
 
@@ -2666,6 +3485,10 @@ configuration file:
 
 <map from="avi" to="video/avi"/>
 
+Also, add this to the <mimetype-contenttype> section:
+
+<treat mimetype="video/avi" as="avi"/>
+
 7.2. Network Attached Storage Devices
 
 We provide a bitbake metadata file for the OpenEmbedded environment, it allows
@@ -2677,29 +3500,48 @@ available on the market.
 So far two devices are shipped with a preinstalled version of MediaTomb,
 community firmware versions are available for the rest.
 
-7.2.1. Buffalo
+7.2.1. Asus
+
+  * WL500g
+
+Use the statically linked mips32el binary package that is provided on our
+download site.
+
+7.2.2. Buffalo
 
   * KuroBox-HG
 
   * LinkStation
 
-7.2.2. Excito
+7.2.3. Excito
 
   * Bubba Mini Server (preinstalled)
 
-7.2.3. Iomega
+7.2.4. Iomega
 
   * StorCenter (preinstalled)
 
-7.2.4. Linksys
+7.2.5. Linksys
 
   * NSLU2
 
-7.2.5. Maxtor
+Available via Optware.
 
-  * Shared Storage
+7.2.6. Maxtor
 
-7.2.6. Western Digital
+  * MSS-I
+
+Either use the Optware feeds or the statically linked mips2el binary package
+that is provided on our download site.
+
+7.2.7. Raidsonic
+
+  * IB-NAS4200-B
+
+Use the statically linked binary armv4 package that is provided on our download
+site.
+
+7.2.8. Western Digital
 
   * MyBook
 
