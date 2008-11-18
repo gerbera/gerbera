@@ -64,7 +64,6 @@ int PESIOHandler::read(OUT char *buf, IN size_t length)
     unsigned char *q;
     unsigned char *r;
     unsigned char *buffer = (unsigned char *)buf;
-    int index = 0;
 
     if (length & 0x7ff) 
         throw _Exception(_("Buffer must be multiple of 2048 bytes"));
