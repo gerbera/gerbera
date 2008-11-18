@@ -481,6 +481,7 @@ String ConfigManager::createDefaultConfig(String userhome)
     Ref<Element> mark_string(new Element(_("string")));
     mark_string->setAttribute(_("mode"), 
                               _(DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE));
+    mark_string->setText(_(DEFAULT_MARK_PLAYED_ITEMS_STRING));
     mark->appendElementChild(mark_string);
     extended->appendElementChild(mark);
 

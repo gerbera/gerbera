@@ -4987,9 +4987,9 @@ This is an advanced feature, leave the default setting if unsure.
 
 \begin_layout Description
 Note: some players (i.e.
- PS3) cache a lot of data, for those players it may be necessary to leave
- the server view or restart the player in order to update content (same
- as when adding new data).
+ PS3) cache a lot of data and do not react to container updates, for those
+ players it may be necessary to leave the server view or restart the player
+ in order to update content (same as when adding new data).
 \end_layout
 
 \begin_layout Standard
