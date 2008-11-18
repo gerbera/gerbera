@@ -230,7 +230,7 @@ static regions YT_regions[] =
     { YT_region_fr, CFG_OPTION_REGION_FRANCE,         "France"          },
     { YT_region_de, CFG_OPTION_REGION_GERMANY,        "Germany"         },
     { YT_region_gb, CFG_OPTION_REGION_GREAT_BRITAIN,  "Great Britain"   },
-    { YT_region_nl, CFG_OPTION_REGION_HOLLAND,        "Holland"         },
+    { YT_region_nl, CFG_OPTION_REGION_HOLLAND,        "Netherlands"     },
     { YT_region_hk, CFG_OPTION_REGION_HONG_KONG,      "Hong Kong"       },
     { YT_region_ie, CFG_OPTION_REGION_IRELAND,        "Ireland"         },
     { YT_region_it, CFG_OPTION_REGION_ITALY,          "Italy"           },
