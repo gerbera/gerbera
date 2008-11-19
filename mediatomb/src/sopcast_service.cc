@@ -144,8 +144,6 @@ bool SopCastService::refreshServiceData(Ref<Layout> layout)
     if (pid != pthread_self())
         throw _Exception(_("Not allowed to call refreshServiceData from different threads!"));
 
-    Ref<ConfigManager> config = ConfigManager::getInstance();
-
     Ref<Element> reply = getData();
 
     Ref<SopCastContentHandler> sc(new SopCastContentHandler());
@@ -157,9 +155,6 @@ bool SopCastService::refreshServiceData(Ref<Layout> layout)
         throw _Exception(_("Failed to get XML content from SopCast service"));
     }
 
-    /// \todo make sure the CdsResourceManager knows whats going on,
-    /// since those items do not contain valid links but need to be
-    /// processed later on (i.e. need to figure out the real link to the flv)
     Ref<CdsObject> obj;
     do
     {
