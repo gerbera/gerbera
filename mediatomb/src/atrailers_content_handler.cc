@@ -62,8 +62,8 @@ bool ATrailersContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
 
     current_trailer_index = 0;
 
-    Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-    trailer_mimetype = mappings->get(_(CONTENT_TYPE_QUICKTIME));
+    Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
+    trailer_mimetype = mappings->get(_("mov"));
     if (!string_ok(trailer_mimetype))
         trailer_mimetype = _("video/quicktime");
 
@@ -156,6 +156,10 @@ Ref<CdsObject> ATrailersContentHandler::getNextObject()
         if (string_ok(temp))
             item->setMetadata(MetadataHandler::getMetaFieldName(M_DIRECTOR), 
                               temp);
+
+        temp = info->getChildText(_("postdate"));
+        if (string_ok(temp))
+            item->setAuxData(_(ATRAILERS_AUXDATA_POST_DATE), temp);
 
         temp = info->getChildText(_("releasedate"));
         if (string_ok(temp))

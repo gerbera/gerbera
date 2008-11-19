@@ -348,6 +348,10 @@ Script::Script(Ref<Runtime> runtime) : Object()
     setProperty(glob, _("WEBORAMA_AUXDATA_REQUEST_NAME"),
                       _(WEBORAMA_AUXDATA_REQUEST_NAME));
 #endif
+#ifdef ATRAILERS
+    setProperty(glob, _("APPLE_TRAILERS_AUXDATA_POST_DATE"),
+                      _(ATRAILERS_AUXDATA_POST_DATE));
+#endif
 #else
     setIntProperty(glob, _("ONLINE_SERVICE_NONE"), 0);
 #endif//ONLINE_SERVICES
@@ -1010,6 +1014,11 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
             }
         }
 #endif // YouTube
+#ifdef HAVE_ATRAILERSSSS
+        tmp = obj->getAuxData(_(ATRAILERS_AUXDATA_POST_DATE));
+        if (string_ok(tmp))
+            aux->put(_(ATRAILERS_AUXDATA_POST_DATE), tmp);
+#endif
 
         Ref<Array<DictionaryElement> > elements = aux->getElements();
         int len = elements->size();

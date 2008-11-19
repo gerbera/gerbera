@@ -255,6 +255,14 @@ function addTrailer(obj)
                           reldate.slice(0, 7));
         addCdsObject(obj, createContainerChain(chain));
     }
+
+    var postdate = obj.aux[APPLE_TRAILERS_AUXDATA_POST_DATE];
+    if ((postdate) && (postdate.length >= 7))
+    {
+        chain = new Array('Online Services', 'Apple Trailers', 'Post Date',
+                          postdate.slice(0, 7));
+        addCdsObject(obj, createContainerChain(chain));
+    }
 }
 
 // main script part

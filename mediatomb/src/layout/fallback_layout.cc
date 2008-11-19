@@ -626,6 +626,14 @@ void FallbackLayout::addATrailers(zmm::Ref<CdsObject> obj)
                     "/Release Date/") + esc(temp.substring(0, 7)));
         add(obj, id);
     }
+
+    temp = obj->getAuxData(_(ATRAILERS_AUXDATA_POST_DATE));
+    if (string_ok(temp) && temp.length() >= 7)
+    {
+        id = ContentManager::getInstance()->addContainerChain(_(AT_VPATH
+                    "/Post Date/") + esc(temp.substring(0, 7)));
+        add(obj, id);
+    }
 }
 #endif
 
