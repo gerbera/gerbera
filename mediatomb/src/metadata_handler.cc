@@ -85,8 +85,11 @@ mt_key MT_KEYS[] = {
     { "M_ALBUMARTURI", "upnp:albumArtURI"},
     { "M_REGION", "upnp:region"},
     { "M_AUTHOR", "upnp:author"},
-    { "M_DIRECTOR", "upnp:director"}
-//    , { "M_OPUS", "upnp:opus"}
+    { "M_DIRECTOR", "upnp:director"},
+    { "M_PUBLISHER", "dc:publisher"},
+    { "M_RATING", "upnp:rating"},
+    { "M_ACTOR", "upnp:actor"},
+    { "M_PRODUCER", "upnp:producer"},
 };
 
 res_key RES_KEYS[] = {

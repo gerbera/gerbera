@@ -56,6 +56,7 @@
 #define CONTENT_TYPE_AVI        "avi"
 #define CONTENT_TYPE_MPEG       "mpeg"
 #define CONTENT_TYPE_DVD        "dvd"
+#define CONTENT_TYPE_QUICKTIME  "quicktime"
 
 #define OGG_THEORA              "t"
 
@@ -81,7 +82,11 @@ typedef enum
     /// \todo make sure that those are only used with appropriate upnp classes
     M_AUTHOR,
     M_DIRECTOR,
-//    M_OPUS,
+    M_PUBLISHER,
+    M_RATING,
+    M_ACTOR,
+    M_PRODUCER,
+
     M_MAX
 } metadata_fields_t; 
 
