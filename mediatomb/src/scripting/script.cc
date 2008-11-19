@@ -53,6 +53,10 @@
     #include "weborama_content_handler.h"
 #endif
 
+#ifdef ATRAILERS
+    #include "atrailers_content_handler.h"
+#endif
+
 #ifdef HAVE_LIBDVDNAV
     #include "metadata/dvd_handler.h"
 #endif
@@ -297,8 +301,11 @@ Script::Script(Ref<Runtime> runtime) : Object()
             OBJECT_TYPE_ITEM_INTERNAL_URL);
 #ifdef ONLINE_SERVICES 
     setIntProperty(glob, _("ONLINE_SERVICE_NONE"), (int)OS_None);
-#ifdef YOUTUBE
     setIntProperty(glob, _("ONLINE_SERVICE_YOUTUBE"), (int)OS_YouTube);
+    setIntProperty(glob, _("ONLINE_SERVICE_SOPCAST"), (int)OS_SopCast);
+    setIntProperty(glob, _("ONLINE_SERVICE_WEBORAMA"), (int)OS_Weborama);
+    setIntProperty(glob, _("ONLINE_SERVICE_APPLE_TRAILERS"), (int)OS_ATrailers);
+#ifdef YOUTUBE
 
     setProperty(glob, _("YOUTUBE_AUXDATA_KEYWORDS"), 
             _(YOUTUBE_AUXDATA_KEYWORDS));
@@ -337,17 +344,12 @@ Script::Script(Ref<Runtime> runtime) : Object()
     setIntProperty(glob, _("YOUTUBE_REQUEST_USER_UPLOADS"), 
                    (int)YT_request_user_uploads);
 #endif
-#ifdef SOPCAST
-    setIntProperty(glob, _("ONLINE_SERVICE_SOPCAST"), (int)OS_SopCast);
-#endif
 #ifdef WEBORAMA
     setProperty(glob, _("WEBORAMA_AUXDATA_REQUEST_NAME"),
                       _(WEBORAMA_AUXDATA_REQUEST_NAME));
-    setIntProperty(glob, _("ONLINE_SERVICE_WEBORAMA"), (int)OS_Weborama);
 #endif
 #else
     setIntProperty(glob, _("ONLINE_SERVICE_NONE"), 0);
-
 #endif//ONLINE_SERVICES
 
     for (int i = 0; i < M_MAX; i++)

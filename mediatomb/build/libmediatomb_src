@@ -1,6 +1,10 @@
 libmediatomb_a_SOURCES = \
 ../src/action_request.cc \
 ../src/action_request.h \
+../src/atrailers_content_handler.cc \
+../src/atrailers_content_handler.h \
+../src/atrailers_service.cc \
+../src/atrailers_service.h \
 ../src/autoscan.cc \
 ../src/autoscan.h \
 ../src/autoscan_inotify.cc \

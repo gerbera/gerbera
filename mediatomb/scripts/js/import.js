@@ -229,6 +229,34 @@ function addYouTube(obj)
     }
 }
 
+function addTrailer(obj)
+{
+    var chain;
+
+    chain = new Array('Online Services', 'Apple Trailers', 'All Trailers');
+    addCdsObject(obj, createContainerChain(chain));
+
+    var genre = obj.meta[M_GENRE];
+    if (genre)
+    {
+        genres = genre.split(', ');
+        for (var i = 0; i < genres.length; i++)
+        {
+            chain = new Array('Online Services', 'Apple Trailers', 'Genres',
+                              genres[i]);
+            addCdsObject(obj, createContainerChain(chain));
+        }
+    }
+
+    var reldate = obj.meta[M_DATE];
+    if ((reldate) && (reldate.length >= 7))
+    {
+        chain = new Array('Online Services', 'Apple Trailers', 'Release Date',
+                          reldate.slice(0, 7));
+        addCdsObject(obj, createContainerChain(chain));
+    }
+}
+
 // main script part
 
 if (getPlaylistType(orig.mimetype) == '')
@@ -253,6 +281,8 @@ if (getPlaylistType(orig.mimetype) == '')
     {
         if (obj.onlineservice == ONLINE_SERVICE_YOUTUBE)
             addYouTube(obj);
+        else if (obj.onlineservice == ONLINE_SERVICE_APPLE_TRAILERS)
+            addTrailer(obj);
         else
             addVideo(obj);
     }

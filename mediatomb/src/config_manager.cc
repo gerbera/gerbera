@@ -339,6 +339,15 @@ Ref<Element> ConfigManager::renderOnlineSection()
 
     onlinecontent->appendElementChild(wb);
 #endif
+
+#ifdef ATRAILERS
+    Ref<Element> at(new Element(_("AppleTrailers")));
+    at->setAttribute(_("enabled"), _(DEFAULT_ATRAILERS_ENABLED));
+    at->setAttribute(_("refresh"), String::from(DEFAULT_ATRAILERS_REFRESH));
+    at->setAttribute(_("update-at-start"), _(DEFAULT_ATRAILERS_UPDATE_AT_START));
+    at->setAttribute(_("resolution"), String::from(DEFAULT_ATRAILERS_RESOLUTION));
+    onlinecontent->appendElementChild(at);
+#endif
     return onlinecontent;
 }
 
@@ -1956,6 +1965,49 @@ void ConfigManager::validate(String serverhome)
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
     SET_BOOL_OPTION(CFG_ONLINE_CONTENT_WEBORAMA_UPDATE_AT_START);
 #endif
+
+#ifdef ATRAILERS
+    temp = getOption(_("/import/online-content/AppleTrailers/attribute::enabled"), 
+                     _(DEFAULT_ATRAILERS_ENABLED));
+
+    if (!validateYesNo(temp))
+        throw _Exception(_("Error in config file: "
+                           "invalid \"enabled\" attribute value in "
+                           "<AppleTrailers> tag"));
+
+    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    SET_BOOL_OPTION(CFG_ONLINE_CONTENT_ATRAILERS_ENABLED);
+
+    temp_int = getIntOption(_("/import/online-content/AppleTrailers/attribute::refresh"), DEFAULT_ATRAILERS_REFRESH);
+    NEW_INT_OPTION(temp_int);
+    SET_INT_OPTION(CFG_ONLINE_CONTENT_ATRAILERS_REFRESH);
+    SET_INT_OPTION(CFG_ONLINE_CONTENT_ATRAILERS_PURGE_AFTER);
+
+    temp = getOption(_("/import/online-content/AppleTrailers/attribute::update-at-start"),
+                     _(DEFAULT_ATRAILERS_UPDATE_AT_START));
+
+    if (!validateYesNo(temp))
+        throw _Exception(_("Error in config file: "
+                           "invalid \"update-at-start\" attribute value in "
+                           "<AppleTrailers> tag"));
+
+    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    SET_BOOL_OPTION(CFG_ONLINE_CONTENT_ATRAILERS_UPDATE_AT_START);
+
+    temp = getOption(_("/import/online-content/AppleTrailers/attribute::resolution"),
+                                 String::from(DEFAULT_ATRAILERS_RESOLUTION));
+    if ((temp != "640") && (temp != "720p"))
+    {
+        throw _Exception(_("Error in config file: "
+                           "invalid \"resolution\" attribute value in "
+                           "<AppleTrailers> tag, only \"640\" and \"720p\" is "
+                           "supported"));
+    }
+
+    NEW_OPTION(temp);
+    SET_OPTION(CFG_ONLINE_CONTENT_ATRAILERS_RESOLUTION);
+#endif
+
 
 
     log_info("Configuration check succeeded.\n");

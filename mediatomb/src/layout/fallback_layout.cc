@@ -59,7 +59,11 @@
     #include "sopcast_content_handler.h"
 #endif
 
+#ifdef ATRAILERS
+    #include "atrailers_content_handler.h"
 #endif
+
+#endif//ONLINE_SERVICES
 
 using namespace zmm;
 
@@ -561,7 +565,68 @@ void FallbackLayout::addWeborama(zmm::Ref<CdsObject> obj)
                                       _(UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER));
     add(obj, id, ref_set);
 }
+#endif
 
+#ifdef ATRAILERS
+void FallbackLayout::addATrailers(zmm::Ref<CdsObject> obj)
+{
+    #define AT_VPATH "/Online Services/Apple Trailers"
+    String chain;
+    String temp;
+
+    int id = ContentManager::getInstance()->addContainerChain(_(AT_VPATH 
+                                                              "/All Trailers"));
+
+    if (obj->getID() != INVALID_OBJECT_ID)
+    {
+        obj->setRefID(obj->getID());
+        add(obj, id);
+    }
+    else
+    {
+        add(obj, id);
+        obj->setRefID(obj->getID());
+    }
+
+    Ref<Dictionary> meta = obj->getMetadata();
+
+    temp = meta->get(MetadataHandler::getMetaFieldName(M_GENRE));
+    if (string_ok(temp))
+    {
+        Ref<StringTokenizer> st(new StringTokenizer(temp));
+        String genre;
+        String next;
+        do
+        {
+            if (!string_ok(genre))
+                genre = st->nextToken(_(","));
+            next = st->nextToken(_(","));
+
+            genre = trim_string(genre);
+
+            if (!string_ok(genre))
+                break;
+
+            id = ContentManager::getInstance()->addContainerChain(_(AT_VPATH
+                        "/Genres/") + esc(genre));
+            add(obj, id);
+
+            if (string_ok(next))
+                genre = next;
+            else
+                genre = nil;
+                    
+        } while (genre != nil);
+    }
+
+    temp = meta->get(MetadataHandler::getMetaFieldName(M_DATE));
+    if (string_ok(temp) && temp.length() >= 7)
+    {
+        id = ContentManager::getInstance()->addContainerChain(_(AT_VPATH
+                    "/Release Date/") + esc(temp.substring(0, 7)));
+        add(obj, id);
+    }
+}
 #endif
 
 FallbackLayout::FallbackLayout() : Layout()
@@ -608,6 +673,11 @@ void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj)
 #ifdef WEBORAMA
             case OS_Weborama:
                 addWeborama(clone);
+                break;
+#endif
+#ifdef ATRAILERS
+            case OS_ATrailers:
+                addATrailers(clone);
                 break;
 #endif
             case OS_Max:

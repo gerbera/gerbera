@@ -72,6 +72,10 @@
     #include "weborama_service.h"
 #endif
 
+#ifdef ATRAILERS
+    #include "atrailers_service.h"
+#endif
+
 #define DEFAULT_DIR_CACHE_CAPACITY  10
 #define CM_INITIAL_QUEUE_SIZE       20
 
@@ -315,6 +319,36 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
         }
     }
 #endif //WEBORAMA
+
+#ifdef ATRAILERS
+    if (cm->getBoolOption(CFG_ONLINE_CONTENT_ATRAILERS_ENABLED))
+    {
+        try
+        {
+            Ref<OnlineService> at((OnlineService *)new ATrailersService());
+            i = cm->getIntOption(CFG_ONLINE_CONTENT_ATRAILERS_REFRESH);
+            at->setRefreshInterval(i);
+
+            i = cm->getIntOption(CFG_ONLINE_CONTENT_ATRAILERS_PURGE_AFTER);
+            at->setItemPurgeInterval(i);
+            if (cm->getBoolOption(CFG_ONLINE_CONTENT_ATRAILERS_UPDATE_AT_START))
+                i = CFG_DEFAULT_UPDATE_AT_START;
+
+            Ref<TimerParameter> at_param(new TimerParameter(TimerParameter::IDOnlineContent, OS_ATrailers));
+            at->setTimerParameter(RefCast(at_param, Object));
+            online_services->registerService(at);
+            if (i > 0)
+            {
+                Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), i, at->getTimerParameter(), true);
+            }
+        }
+        catch (Exception ex)
+        {
+            log_error("Could not setup Apple Trailers: %s\n",
+                    ex.getMessage().c_str());
+        }
+    }
+#endif//ATRAILERS
 
 #endif //ONLINE_SERVICES
 }
