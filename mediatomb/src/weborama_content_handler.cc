@@ -77,8 +77,6 @@ bool WeboramaContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
 
     current_track_index = 0;
 
-    Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-
     return true;
 }
 
