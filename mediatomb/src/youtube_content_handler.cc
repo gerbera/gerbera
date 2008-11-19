@@ -104,14 +104,14 @@ bool YouTubeContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
 
     current_node_index = 0;
 
-    Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
 
     // this is somewhat a dilemma... we know that YT video thumbs are jpeg
     // but we do not check that; we could probably do a HTTP HEAD request,
     // however that would cause quite some network activity since there may
     // be hundreds and thousands of those items, we will have a look at the
     // extension of the URL, this should be enough.
-    thumb_mimetype = mappings->get(_(CONTENT_TYPE_JPG));
+    thumb_mimetype = mappings->get(_("jpg"));
     if (!string_ok(thumb_mimetype))
         thumb_mimetype = _("image/jpeg");
 
