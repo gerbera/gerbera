@@ -1769,9 +1769,10 @@ are immediately active.
 
         Note:
 
-            some players (i.e. PS3) cache a lot of data, for those players it
-            may be necessary to leave the server view or restart the player in
-            order to update content (same as when adding new data).
+            some players (i.e. PS3) cache a lot of data and do not react to
+            container updates, for those players it may be necessary to leave
+            the server view or restart the player in order to update content
+            (same as when adding new data).
 
     The following tag defines how played items should be marked:
 
@@ -2421,13 +2422,14 @@ Options and setting for YouTube service support, the attributes are:
 
     Optional
 
-    Default: 0 (disabled)
+    Default: 28800
 
     Refresh interval in seconds, each time the interval elapses we will contact
     the YouTube server and fetch new meta data, presenting the changes in the
     database view. This allows you to stay up to date with what is available on
     YouTube, you probably should not need to update more than once per day, so
-    specify a reasonably high value here.
+    specify a reasonably high value here. Setting the option to 0 (zero)
+    disables automatic refreshing.
 
   ● purge-after=...
 
@@ -2543,7 +2545,7 @@ Note:
 
           □ nl
 
-            Holland
+            The Netherlands
 
           □ hk
 
@@ -2693,14 +2695,14 @@ Note:
     we do not download/mirror the actual audio files, we only get description
     of the content and present it in the database. The actual media is only
     streamed when you press play on your device. So, when we use the term
-    “retrieve media” we actually mean retrieving the song name, description and
+    "retrieve media" we actually mean retrieving the song name, description and
     associated meta data, not the actual audio file.
 
-<Weborama enabled="no" refresh="12600" update-at-start="yes">
+<Weborama enabled="no" refresh="12600" update-at-start="no">
 
 Optional
 
-Options and setting for Weborama service support, the attributes are:
+Options and settings for Weborama service support:
 
   ● enabled=...
 
@@ -2708,18 +2710,19 @@ Options and setting for Weborama service support, the attributes are:
 
     Default: no
 
-    Enables or disables the service, allowed values are “yes” or “no”.
+    Enables or disables the service, allowed values are "yes" or "no".
 
   ● refresh=...
 
     Optional
 
-    Default: 0 (disabled)
+    Default: 28800
 
     Refresh interval in seconds, each time the interval elapses we will contact
     the Weborama server and fetch new meta data, presenting the changes in the
     database view. This allows you to get new playlists and update the content
-    that you want to play from Weborama.
+    that you want to play from Weborama. Setting the option to 0 (zero)
+    disables automatic refreshing.
 
   ● update-at-start=...
 
@@ -2731,7 +2734,7 @@ Options and setting for Weborama service support, the attributes are:
     was started (about 10 seconds after start up) or if data should be fetched
     when the first refresh cycle kicks in. It may be useful if you frequently
     restart the server and do not want the content to be updated each time.
-    Allowed values are “yes” or “no”.
+    Allowed values are "yes" or "no".
 
 The request for fetching particular content is described using the following
 tag:
@@ -2902,6 +2905,58 @@ The attributes have the following meaning:
           □ uploaded
 
           □ used_last
+
+6.2.4. Apple Trailers Service
+
+MediaTomb allows you to access Apple trailers content, depending on your device
+you may also need to enable transcoding - the trailers are provided as h264 in
+a quicktime container.
+
+Note:
+
+    we do not download/mirror the actual video files, we only get description
+    of the content and present it in the database. The actual media is only
+    streamed when you press play on your device. So, when we use the term
+    "retrieve media" we actually mean retrieving the media name, description
+    and associated meta data, not the actual file.
+
+<AppleTrailers enabled="no" refresh="43200" update-at-start="no">
+
+Optional
+
+Options and settings for Apple Trailers support:
+
+  ● enabled=...
+
+    Optional
+
+    Default: no
+
+    Enables or disables the service, allowed values are "yes" or "no".
+
+  ● refresh=...
+
+    Optional
+
+    Default: 43200 (every 12 hours)
+
+    Refresh interval in seconds, each time the interval elapses we will contact
+    the Apple trailers server and fetch new meta data, presenting the changes
+    in the database view. This allows you to update the content that you want
+    to play from this service. Setting the option to 0 (zero) disables
+    automatic refreshing.
+
+  ● update-at-start=...
+
+    Optional
+
+    Default: no
+
+    This option defines if we will contact the service right after MediaTomb
+    was started (about 10 seconds after start up) or if data should be fetched
+    when the first refresh cycle kicks in. It may be useful if you frequently
+    restart the server and do not want the content to be updated each time.
+    Allowed values are "yes" or "no".
 
 6.3. Transcoding Settings
 

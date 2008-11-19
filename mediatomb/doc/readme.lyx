@@ -7597,7 +7597,7 @@ Optional
 \begin_layout Standard
 
 \emph on
-Default: 0 (disabled)
+Default: 28800
 \end_layout
 
 \begin_layout Standard
@@ -7607,6 +7607,7 @@ Refresh interval in seconds, each time the interval elapses we will contact
  This allows you to stay up to date with what is available on YouTube, you
  probably should not need to update more than once per day, so specify a
  reasonably high value here.
+ Setting the option to 0 (zero) disables automatic refreshing.
 \end_layout
 
 \begin_layout Standard
@@ -8187,7 +8188,7 @@ nl
 \end_layout
 
 \begin_layout Standard
-Holland
+The Netherlands
 \end_layout
 
 \begin_layout Standard
@@ -9013,20 +9014,12 @@ MediaTomb allows you to access Weborama content and to play it on your device.
 Note: we do not download/mirror the actual audio files, we only get description
  of the content and present it in the database.
  The actual media is only streamed when you press play on your device.
- So, when we use the term 
-\begin_inset Quotes sld
-\end_inset
-
-retrieve media
-\begin_inset Quotes srd
-\end_inset
-
- we actually mean retrieving the song name, description and associated meta
- data, not the actual audio file.
+ So, when we use the term "retrieve media" we actually mean retrieving the
+ song name, description and associated meta data, not the actual audio file.
 \end_layout
 
 \begin_layout Code
-<Weborama enabled="no" refresh="12600" update-at-start="yes">
+<Weborama enabled="no" refresh="12600" update-at-start="no">
 \end_layout
 
 \begin_layout Standard
@@ -9036,7 +9029,7 @@ Optional
 \end_layout
 
 \begin_layout Standard
-Options and setting for Weborama service support, the attributes are:
+Options and settings for Weborama service support:
 \end_layout
 
 \begin_layout Standard
@@ -9070,23 +9063,7 @@ Default: no
 \end_layout
 
 \begin_layout Standard
-Enables or disables the service, allowed values are 
-\begin_inset Quotes sld
-\end_inset
-
-yes
-\begin_inset Quotes srd
-\end_inset
-
- or 
-\begin_inset Quotes sld
-\end_inset
-
-no
-\begin_inset Quotes srd
-\end_inset
-
-.
+Enables or disables the service, allowed values are "yes" or "no".
 \end_layout
 
 \begin_layout Standard
@@ -9116,7 +9093,7 @@ Optional
 \begin_layout Standard
 
 \emph on
-Default: 0 (disabled)
+Default: 28800
 \end_layout
 
 \begin_layout Standard
@@ -9125,6 +9102,7 @@ Refresh interval in seconds, each time the interval elapses we will contact
  the database view.
  This allows you to get new playlists and update the content that you want
  to play from Weborama.
+ Setting the option to 0 (zero) disables automatic refreshing.
 \end_layout
 
 \begin_layout Standard
@@ -9163,23 +9141,7 @@ This option defines if we will contact the service right after MediaTomb
  when the first refresh cycle kicks in.
  It may be useful if you frequently restart the server and do not want the
  content to be updated each time.
- Allowed values are 
-\begin_inset Quotes sld
-\end_inset
-
-yes
-\begin_inset Quotes srd
-\end_inset
-
- or 
-\begin_inset Quotes sld
-\end_inset
-
-no
-\begin_inset Quotes srd
-\end_inset
-
-.
+ Allowed values are "yes" or "no".
 \end_layout
 
 \begin_layout Standard
@@ -10354,6 +10316,163 @@ status open
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Apple Trailers Service
+\end_layout
+
+\begin_layout Standard
+MediaTomb allows you to access Apple trailers content, depending on your
+ device you may also need to enable transcoding - the trailers are provided
+ as h264 in a quicktime container.
+\end_layout
+
+\begin_layout Description
+Note: we do not download/mirror the actual video files, we only get description
+ of the content and present it in the database.
+ The actual media is only streamed when you press play on your device.
+ So, when we use the term "retrieve media" we actually mean retrieving the
+ media name, description and associated meta data, not the actual file.
+\end_layout
+
+\begin_layout Code
+<AppleTrailers enabled="no" refresh="43200" update-at-start="no">
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+Options and settings for Apple Trailers support:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+enabled=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: no
+\end_layout
+
+\begin_layout Standard
+Enables or disables the service, allowed values are "yes" or "no".
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+refresh=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: 43200 (every 12 hours)
+\end_layout
+
+\begin_layout Standard
+Refresh interval in seconds, each time the interval elapses we will contact
+ the Apple trailers server and fetch new meta data, presenting the changes
+ in the database view.
+ This allows you to update the content that you want to play from this service.
+ Setting the option to 0 (zero) disables automatic refreshing.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+update-at-start=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: no
+\end_layout
+
+\begin_layout Standard
+This option defines if we will contact the service right after MediaTomb
+ was started (about 10 seconds after start up) or if data should be fetched
+ when the first refresh cycle kicks in.
+ It may be useful if you frequently restart the server and do not want the
+ content to be updated each time.
+ Allowed values are "yes" or "no".
 \end_layout
 
 \begin_layout Standard
