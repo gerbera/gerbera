@@ -46,9 +46,13 @@
 #include <unistd.h>
 #include <errno.h>
 #include <assert.h>
-#include <tools.h>
+
+#ifdef HAVE_SYS_UTSNAME_H
+    #include <sys/utsname.h>
+#endif
 
 #include "mt_inotify.h"
+#include "tools.h"
 
 #define MAX_EVENTS 4096
 #define MAX_STRLEN 4096
@@ -76,6 +80,24 @@ Inotify::~Inotify()
 
 bool Inotify::supported()
 {
+#if defined(HAVE_UNAME) && defined(HAVE_SYS_UTSNAME_H)
+    struct utsname info;
+
+    if (uname(&info) == 0)
+    {
+        // 2.6.13 is the first kernel version that has inotify support
+        Ref<Array<StringBase> > kversion = split_string(_(info.release), '.');
+        if (kversion->size() >= 3)
+        {
+            int major = String(kversion->get(0)->data).toInt();
+            int minor = String(kversion->get(1)->data).toInt();
+            int patch = String(kversion->get(2)->data).toInt();
+
+            if ((major < 2) && (minor < 6) && (patch < 13))
+                return false;
+        }
+    }
+#endif   
     int test_fd = inotify_init();
     if (test_fd < 0)
         return false;

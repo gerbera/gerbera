@@ -350,6 +350,8 @@ AC_CHECK_HEADERS([sys/ioctl.h sys/socket.h sys/time.h sys/types.h sys/wait.h],
 
 AC_CHECK_HEADERS([langinfo.h locale.h],[],[AC_MSG_WARN(Header that is required to retrieve system locale not found, will use default value)])
 
+AC_CHECK_HEADERS([sys/utsname.h])
+
 AC_CHECK_HEADERS([sched.h ctype.h],[],[])
 AC_CHECK_FUNCS([sched_getparam sched_setparam sched_get_priority_min sched_get_priority_max],[],[])
    
