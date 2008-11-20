@@ -802,6 +802,50 @@ status collapsed
 
 \begin_layout Standard
 
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+ONLINE_SERVICE_WEBORAMA
+\end_layout
+
+\begin_layout Standard
+The item belongs to the Weborama service and has extended properties.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+ONLINE_SERVICE_APPLE_TRAILERS
+\end_layout
+
+\begin_layout Standard
+The item belongs to the Apple Trailers service and has extended properties.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
 </listitem></itemizedlist>
 \end_layout
 
@@ -1157,6 +1201,121 @@ RW
 
 \begin_layout Standard
 Director of the media, this corresponds to upnp:director in the DIDL-Lite
+ XML.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.meta[M_PUBLISHER]
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+RW
+\end_layout
+
+\begin_layout Standard
+Director of the media, this corresponds to dc:publisher in the DIDL-Lite
+ XML.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.meta[M_RATING]
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+RW
+\end_layout
+
+\begin_layout Standard
+Director of the media, this corresponds to upnp:rating in the DIDL-Lite
+ XML.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.meta[M_ACTOR]
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+RW
+\end_layout
+
+\begin_layout Standard
+Director of the media, this corresponds to upnp:actor in the DIDL-Lite XML.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+orig.meta[M_PRODUCER]
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+RW
+\end_layout
+
+\begin_layout Standard
+Director of the media, this corresponds to upnp:producer in the DIDL-Lite
  XML.
 \end_layout
 
@@ -1779,6 +1938,52 @@ status open
 \end_inset
 
 
+\end_layout
+
+\begin_layout Subsubsection
+Weborama Properties
+\end_layout
+
+\begin_layout Standard
+When the obj.onlineservice variable equals ONLINE_SERVICE_WEBORAMA the item
+ has the following additional aux property:
+\end_layout
+
+\begin_layout Code
+orig.aux[WEBORAMA_AUXDATA_REQUEST_NAME]
+\end_layout
+
+\begin_layout Standard
+This property holds the name of the request that generated this object,
+ it is the name that you specify in the config.xml file, i.e.
+ in the below example the value of orig.aux[WEBORAMA_AUXDATA_REQUEST_NAME]
+ will be 'My Playlist':
+\end_layout
+
+\begin_layout Code
+<playlist name="My Playlist" type="playlist" mood="dark"/>
+\end_layout
+
+\begin_layout Subsubsection
+Apple Trailers Properties
+\end_layout
+
+\begin_layout Standard
+When the obj.onlineservice variable equals ONLINE_SERVICE_APPLE_TRAILERS
+ the item has the following additional aux property:
+\end_layout
+
+\begin_layout Code
+orig.aux[APPLE_TRAILERS_AUXDATA_POST_DATE]
+\end_layout
+
+\begin_layout Standard
+This property holds the date when the trailer was posted, the date format
+ is YYYY-MM-DD.
+\end_layout
+
+\begin_layout Description
+Note: the orig.meta[M_DATE] property holds the release date of the movie.
 \end_layout
 
 \begin_layout Subsubsection
@@ -3699,6 +3904,53 @@ NRE);
 \end_layout
 
 \begin_layout Subsubsection
+Weborama Content Handler
+\end_layout
+
+\begin_layout Standard
+Weborama content handler is really simple, the service aims at providing
+ 'radio on demand', so everything here maps to a search query that you specified
+ in the config.xml:
+\end_layout
+
+\begin_layout Code
+function addWeborama(obj)
+\end_layout
+
+\begin_layout Code
+{
+\end_layout
+
+\begin_layout Code
+    var req_name = obj.aux[WEBORAMA_AUXDATA_REQUEST_NAME];
+\end_layout
+
+\begin_layout Code
+    if (req_name)
+\end_layout
+
+\begin_layout Code
+    {
+\end_layout
+
+\begin_layout Code
+        var chain = new Array('Online Services', 'Weborama', req_name);
+\end_layout
+
+\begin_layout Code
+        addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_PLAYLIST_CONTA
+INER);
+\end_layout
+
+\begin_layout Code
+    }
+\end_layout
+
+\begin_layout Code
+} 
+\end_layout
+
+\begin_layout Subsubsection
 Image Content Handler
 \end_layout
 
@@ -3979,6 +4231,173 @@ All items will go to /Online Services/YouTube/RequestName/, below we will
 \end_layout
 
 \begin_layout Subsubsection
+Apple Trailers Content Handler
+\end_layout
+
+\begin_layout Standard
+This function processes items that are importent via the Apple Trailers
+ feature.
+ We will organize the trailers by genre, post date and release date, additionall
+y we will also add a container holding all trailers.
+\end_layout
+
+\begin_layout Code
+function addTrailer(obj)
+\end_layout
+
+\begin_layout Code
+{
+\end_layout
+
+\begin_layout Code
+    var chain;
+\end_layout
+
+\begin_layout Standard
+First we will add the item to the 'All Trailers' container, so that we get
+ a nice long playlist:
+\end_layout
+
+\begin_layout Code
+    chain = new Array('Online Services', 'Apple Trailers', 'All Trailers');
+\end_layout
+
+\begin_layout Code
+    addCdsObject(obj, createContainerChain(chain));
+\end_layout
+
+\begin_layout Standard
+We also want to sort the trailers by genre, however we need to take some
+ extra care here: the genre property here is a comma separated value list,
+ so one trailer can have several matching genres that will be returned as
+ one string.
+ We will split that string and create individual genre containers.
+\end_layout
+
+\begin_layout Code
+    var genre = obj.meta[M_GENRE];
+\end_layout
+
+\begin_layout Code
+    if (genre)
+\end_layout
+
+\begin_layout Code
+    {
+\end_layout
+
+\begin_layout Standard
+A genre string "Science Fiction, Thriller" will be split to "Science Fiction"
+ and "Thriller" respectively.
+\end_layout
+
+\begin_layout Code
+        genres = genre.split(', ');
+\end_layout
+
+\begin_layout Code
+        for (var i = 0; i < genres.length; i++)
+\end_layout
+
+\begin_layout Code
+        {
+\end_layout
+
+\begin_layout Code
+            chain = new Array('Online Services', 'Apple Trailers', 'Genres',
+\end_layout
+
+\begin_layout Code
+                              genres[i]);
+\end_layout
+
+\begin_layout Code
+            addCdsObject(obj, createContainerChain(chain));
+\end_layout
+
+\begin_layout Code
+        }
+\end_layout
+
+\begin_layout Code
+    }
+\end_layout
+
+\begin_layout Standard
+The release date is offered in a YYYY-MM-DD format, we won't do too much
+ extra checking regading validity, however we only want to group the trailers
+ by year and month:
+\end_layout
+
+\begin_layout Code
+    var reldate = obj.meta[M_DATE];
+\end_layout
+
+\begin_layout Code
+    if ((reldate) && (reldate.length >= 7))
+\end_layout
+
+\begin_layout Code
+    {
+\end_layout
+
+\begin_layout Code
+        chain = new Array('Online Services', 'Apple Trailers', 'Release
+ Date',
+\end_layout
+
+\begin_layout Code
+                          reldate.slice(0, 7));
+\end_layout
+
+\begin_layout Code
+        addCdsObject(obj, createContainerChain(chain));
+\end_layout
+
+\begin_layout Code
+    }
+\end_layout
+
+\begin_layout Standard
+We also want to group the trailers by the date when they were originally
+ posted, the post date is available via the aux array.
+ Similar to the release date, we will cut off the day and create our containres
+ in the YYYY-MM format.
+\end_layout
+
+\begin_layout Code
+    var postdate = obj.aux[APPLE_TRAILERS_AUXDATA_POST_DATE];
+\end_layout
+
+\begin_layout Code
+    if ((postdate) && (postdate.length >= 7))
+\end_layout
+
+\begin_layout Code
+    {
+\end_layout
+
+\begin_layout Code
+        chain = new Array('Online Services', 'Apple Trailers', 'Post Date',
+\end_layout
+
+\begin_layout Code
+                          postdate.slice(0, 7));
+\end_layout
+
+\begin_layout Code
+        addCdsObject(obj, createContainerChain(chain));
+\end_layout
+
+\begin_layout Code
+    }
+\end_layout
+
+\begin_layout Code
+} 
+\end_layout
+
+\begin_layout Subsubsection
 Putting it all together
 \end_layout
 
@@ -4032,8 +4451,25 @@ All virtual objects are references to objects in the PC-Directory, so make
     {
 \end_layout
 
+\begin_layout Standard
+We support the Weborama online radio service, so we will do some extra handling
+ for those items:
+\end_layout
+
 \begin_layout Code
-        addAudio(obj); 
+        if (obj.onlineservice == ONLINE_SERVICE_WEBORAMA)
+\end_layout
+
+\begin_layout Code
+            addWeborama(obj);
+\end_layout
+
+\begin_layout Code
+        else
+\end_layout
+
+\begin_layout Code
+            addAudio(obj); 
 \end_layout
 
 \begin_layout Code
@@ -4053,24 +4489,24 @@ All virtual objects are references to objects in the PC-Directory, so make
 \end_layout
 
 \begin_layout Standard
-Currently we support the YouTube service which offers video items, so we
- will do an extra check to sort it properly.
+We support the YouTube service which offers video items, so we will do an
+ extra check to sort it properly:
 \end_layout
 
 \begin_layout Code
-        if (obj.onlineservice == ONLINE_SERVICE_NONE)
-\end_layout
-
-\begin_layout Code
-            addVideo(obj);
-\end_layout
-
-\begin_layout Code
-        else if (obj.onlineservice == ONLINE_SERVICE_YOUTUBE)
+        if (obj.onlineservice == ONLINE_SERVICE_YOUTUBE)
 \end_layout
 
 \begin_layout Code
             addYouTube(obj);
+\end_layout
+
+\begin_layout Code
+        else
+\end_layout
+
+\begin_layout Code
+            addVideo(obj);
 \end_layout
 
 \begin_layout Code
