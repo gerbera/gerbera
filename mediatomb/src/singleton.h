@@ -35,7 +35,7 @@
 #include "sync.h"
 #include "zmmf/zmmf.h"
 
-#define SINGLETON_CUR_MAX 10
+#define SINGLETON_CUR_MAX 15
 
 template <class T> class Singleton;
 
