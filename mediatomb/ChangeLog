@@ -36,6 +36,8 @@ v0.12.0
           Theora items
         * added a "Directories" view in the default layout for Photos and Video 
         * added a feature that allows to mark played items
+        * added support for online Apple trailers
+		* improved inotify check which was failing with 2.4 kernels
 
 v0.11.0 01.03.2008  External transcoding support
         * implemented transcoding support that allows to plug in an arbitrary
