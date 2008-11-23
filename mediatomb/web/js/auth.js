@@ -162,8 +162,8 @@ function getConfigCallback(ajaxRequest)
         accountsStr = xmlGetAttribute(configEl, "accounts");
         ACCOUNTS = (accountsStr && accountsStr == "1");
         pollIntervalTime = xmlGetAttribute(configEl, "poll-interval") * 1000;
-        pollWhenIdle = (xmlGetAttribute(configEl, "poll-when-idle") == "yes");
-        showTooltips = (xmlGetAttribute(configEl, "show-tooltips") == "yes");
+        pollWhenIdle = (xmlGetAttribute(configEl, "poll-when-idle") == 1);
+        showTooltips = (xmlGetAttribute(configEl, "show-tooltips") == 1);
         if (pollWhenIdle)
             startPollInterval();
         var itemsPerPageOptionsEl = xmlGetElement(configEl, "items-per-page");
