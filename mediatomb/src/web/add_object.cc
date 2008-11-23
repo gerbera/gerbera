@@ -233,7 +233,7 @@ void web::addObject::process()
     if (obj != nil)
     {
         obj->setVirtual(true);
-        if (obj_type.toInt() == OBJECT_TYPE_ITEM)
+        if (obj_type == STRING_OBJECT_TYPE_ITEM)
         {
             ContentManager::getInstance()->addVirtualItem(obj, allow_fifo);
         }
