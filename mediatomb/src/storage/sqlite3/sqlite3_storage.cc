@@ -70,6 +70,7 @@ Sqlite3Storage::Sqlite3Storage() : SQLStorage()
     sqliteMutex = Ref<Mutex>(new Mutex());
     cond = Ref<Cond>(new Cond(sqliteMutex));
     insertBuffer = nil;
+    dirty = false;
 }
 
 void Sqlite3Storage::init()
@@ -314,6 +315,10 @@ void Sqlite3Storage::threadProc()
         try
         {
             task->run(&db, this);
+            if (task->didContamination())
+                dirty = true;
+            else if (task->didDecontamination())
+                dirty = false;
             task->sendSignal();
         }
         catch (Exception e)
@@ -332,7 +337,7 @@ void Sqlite3Storage::threadProc()
         sqlite3_close(db);
 }
 
-void Sqlite3Storage::addTask(zmm::Ref<SLTask> task)
+void Sqlite3Storage::addTask(zmm::Ref<SLTask> task, bool onlyIfDirty)
 {
     if (! taskQueueOpen)
         throw _Exception(_("sqlite3 task queue is already closed"));
@@ -341,8 +346,11 @@ void Sqlite3Storage::addTask(zmm::Ref<SLTask> task)
     {
         throw _Exception(_("sqlite3 task queue is already closed"));
     }
-    taskQueue->enqueue(task);
-    signal();
+    if (! onlyIfDirty || dirty)
+    {
+        taskQueue->enqueue(task);
+        signal();
+    }
 }
 
 void Sqlite3Storage::shutdownDriver()
@@ -397,6 +405,8 @@ SLTask::SLTask() : Object()
     mutex = Ref<Mutex>(new Mutex());
     cond = Ref<Cond>(new Cond(mutex));
     error = nil;
+    contamination = false;
+    decontamination = false;
 }
 bool SLTask::is_running()
 {
@@ -475,6 +485,7 @@ void SLInitTask::run(sqlite3 **db, Sqlite3Storage *sl)
     {
         throw _StorageException(nil, sl->getError(String((char *)buf), error, *db));
     }
+    contamination = true;
 }
 
 #endif
@@ -546,6 +557,7 @@ void SLExecTask::run(sqlite3 **db, Sqlite3Storage *sl)
     }
     if (getLastInsertIdFlag)
         lastInsertId = sqlite3_last_insert_rowid(*db);
+    contamination = true;
 }
 
 /* SLBackupTask */
@@ -563,6 +575,8 @@ void SLBackupTask::run(sqlite3 **db, Sqlite3Storage *sl)
                 dbFilePath,
                 dbFilePath + ".backup"
             );
+            log_debug("sqlite3 backup successful\n");
+            decontamination = true;
         }
         catch (Exception e)
         {
@@ -643,7 +657,7 @@ void Sqlite3BackupTimerSubscriber::timerNotify(Ref<Object> sqlite3storage)
     Sqlite3Storage *storage = (Sqlite3Storage*)(sqlite3storage.getPtr());
     
     Ref<SLBackupTask> btask (new SLBackupTask(false));
-    storage->addTask(RefCast(btask, SLTask));
+    storage->addTask(RefCast(btask, SLTask), true);
 }
 
 #endif // HAVE_SQLITE3

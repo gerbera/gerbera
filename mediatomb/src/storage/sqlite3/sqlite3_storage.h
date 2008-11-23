@@ -66,6 +66,9 @@ public:
     
     void waitForTask();
     
+    bool didContamination() { return contamination; }
+    bool didDecontamination() { return decontamination; }
+    
     zmm::String getError() { return error; }
     
 protected:
@@ -73,6 +76,13 @@ protected:
     ///
     /// The value is set by the constructor to true and then to false be sendSignal()
     bool running;
+    
+    /// \brief true if this task has changed the db (in comparison to the backup)
+    bool contamination;
+    
+    /// \brief true if this task has backuped the db
+    bool decontamination;
+    
     zmm::Ref<Cond> cond;
     zmm::Ref<Mutex> mutex;
     zmm::String error;
@@ -163,7 +173,7 @@ private:
     static void *staticThreadProc(void *arg);
     void threadProc();
     
-    void addTask(zmm::Ref<SLTask> task);
+    void addTask(zmm::Ref<SLTask> task, bool onlyIfDirty = false);
     
     pthread_t sqliteThread;
     zmm::Ref<Cond> cond;
@@ -184,6 +194,8 @@ private:
     zmm::Ref<zmm::StringBuffer> insertBuffer;
     virtual void _addToInsertBuffer(zmm::Ref<zmm::StringBuffer> query);
     virtual void _flushInsertBuffer();
+    
+    bool dirty;
     
     friend class SLSelectTask;
     friend class SLExecTask;
