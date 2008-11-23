@@ -826,6 +826,7 @@ int SQLStorage::getChildCount(int contId, bool containers, bool items, bool hide
         {
             if (cObj->knowsNumChildren())
                 return cObj->getNumChildren();
+            //cObj->debug();
         }
     }
     /* ----------- */
@@ -1033,6 +1034,13 @@ int SQLStorage::createContainer(int parentID, String name, String path, bool isV
         cache->addChild(parentID);
         if (cache->flushed())
             flushInsertBuffer();
+        Ref<CacheObject> cObj = cache->getObjectDefinitely(newID);
+        if (cache->flushed())
+            flushInsertBuffer();
+        cObj->setParentID(parentID);
+        cObj->setNumChildren(0);
+        cObj->setObjectType(OBJECT_TYPE_CONTAINER);
+        cObj->setLocation(path);
     }
     /* ------------ */
     

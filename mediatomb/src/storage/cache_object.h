@@ -41,6 +41,8 @@ class CacheObject : public zmm::Object
 public:
     CacheObject();
     
+    void debug();
+    
     void setParentID(int parentID) { this->parentID = parentID; }
     int getParentID() { return parentID; }
     bool knowsParentID() { return parentID != INVALID_OBJECT_ID; }
