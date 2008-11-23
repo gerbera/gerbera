@@ -2372,3 +2372,19 @@ void SQLStorage::flushInsertBuffer(bool dontLock)
     insertBufferStatementCount = 0;
     insertBufferByteCount = 0;
 }
+
+void SQLStorage::clearFlagInDB(int flag)
+{
+    Ref<StringBuffer> qb(new StringBuffer(256));
+    *qb << "UPDATE "
+        << TQ(CDS_OBJECT_TABLE)
+        << " SET "
+        << TQ("flags")
+        << " = ("
+        << TQ("flags")
+        << "&~" << flag
+        << ") WHERE "
+        << TQ("flags")
+        << "&" << flag;
+    exec(qb);
+}

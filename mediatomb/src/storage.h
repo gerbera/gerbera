@@ -268,6 +268,9 @@ public:
     /// \return objectID of the container given by path
     virtual int ensurePathExistence(zmm::String path, int *changedContainer) = 0;
     
+    /// \brief clears the given flag in all objects in the DB
+    virtual void clearFlagInDB(int flag) = 0;
+    
     virtual zmm::String getFsRootName() = 0;
     
     virtual void threadCleanup() = 0;

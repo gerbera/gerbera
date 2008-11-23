@@ -146,6 +146,8 @@ public:
     virtual int ensurePathExistence(zmm::String path, int *changedContainer);
     
     virtual zmm::String getFsRootName();
+    
+    virtual void clearFlagInDB(int flag);
 
 protected:
     SQLStorage();
