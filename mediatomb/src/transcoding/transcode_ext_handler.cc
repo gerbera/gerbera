@@ -69,7 +69,6 @@
 #ifdef HAVE_LIBDVDNAV
     #include "dvd_io_handler.h"
     #include "metadata/dvd_handler.h"
-    #include "pes_io_handler.h"
 #endif
 
 using namespace zmm;
@@ -241,11 +240,9 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
 
             chmod(location.c_str(), S_IWUSR | S_IRUSR);
             
-            Ref<IOHandler> dvd_io_handler(new DVDIOHandler(obj->getLocation(), title, chapter));
-            Ref<IOHandler> pes_ioh(new PESIOHandler(dvd_io_handler, audio_track));
-
+            Ref<IOHandler> dvd_ioh(new DVDIOHandler(obj->getLocation(), title, chapter, audio_track));
             Ref<IOHandler> p_ioh(new ProcessIOHandler(location, nil));
-            Ref<Executor> ch(new IOHandlerChainer(pes_ioh, p_ioh, 2097152));
+            Ref<Executor> ch(new IOHandlerChainer(dvd_ioh, p_ioh, 2097152));
             proc_list = Ref<Array<ProcListItem> >(new Array<ProcListItem>(1));
             Ref<ProcListItem> pr_item(new ProcListItem(ch));
             proc_list->append(pr_item);

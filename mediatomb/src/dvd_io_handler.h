@@ -50,7 +50,8 @@ protected:
 
 public:
     /// \brief Sets the dvdname to work with.
-    DVDIOHandler(zmm::String dvdname, int track, int chapter);
+    DVDIOHandler(zmm::String dvdname, int track, int chapter, 
+                 int audio_stream_id);
 
     /// \brief Opens dvd for reading (writing is not supported)
     virtual void open(IN enum UpnpOpenFileMode mode);

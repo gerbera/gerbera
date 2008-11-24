@@ -54,13 +54,12 @@
 #include "play_hook.h"
 
 #ifdef HAVE_LIBDVDNAV
-#include "dvd_io_handler.h"
-#include "metadata/dvd_handler.h"
-#include "pes_io_handler.h"
+    #include "dvd_io_handler.h"
+    #include "metadata/dvd_handler.h"
 #endif
 
 #ifdef EXTERNAL_TRANSCODING
-#include "transcoding/transcode_dispatcher.h"
+    #include "transcoding/transcode_dispatcher.h"
 #endif
 
 using namespace zmm;
@@ -600,6 +599,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
 
             /// \todo make sure we can seek in the streams
             info->file_length = -1;
+            info->force_chunked = 1;
             header = nil;
             if (mimeType == nil)
                 mimeType = item->getMimeType();
@@ -608,11 +608,11 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
             log_debug("Serving dvd image %s Title: %d Chapter: %d\n",
                     path.c_str(), title, chapter);
             /// \todo add angle support
-            Ref<IOHandler> dvd_io_handler(new DVDIOHandler(path, title, chapter));
-            Ref<IOHandler> pes_io_handler(new PESIOHandler(dvd_io_handler, audio_track));
-            pes_io_handler->open(mode);
+            Ref<IOHandler> dvd_io_handler(new DVDIOHandler(path, title, chapter,
+                           audio_track));
+            dvd_io_handler->open(mode);
             PlayHook::getInstance()->trigger(obj);
-            return pes_io_handler;
+            return dvd_io_handler;
         }
         else
 #endif
