@@ -270,8 +270,7 @@ size_t DVDNavReader::readSector(unsigned char *buffer, size_t length)
             case DVDNAV_BLOCK_OK:
                 {
                     size_t parsed = 0;
-                    parsed = parseDVDblock(block, DVD_VIDEO_LB_LEN, p, 
-                                           length - consumed);
+                    parsed = parseDVDblock(block, len, p, length - consumed);
 
                     consumed = consumed + parsed;
 
