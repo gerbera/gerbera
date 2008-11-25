@@ -723,7 +723,7 @@ void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj)
             addDVD(clone);
 #endif
 
-#ifdef YOUTUBE
+#ifdef ONLINE_SERVICES
     }
 #endif
 #ifdef ENABLE_PROFILING
