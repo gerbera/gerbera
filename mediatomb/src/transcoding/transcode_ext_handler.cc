@@ -242,7 +242,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
             
             Ref<IOHandler> dvd_ioh(new DVDIOHandler(obj->getLocation(), title, chapter, audio_track));
             Ref<IOHandler> p_ioh(new ProcessIOHandler(location, nil));
-            Ref<Executor> ch(new IOHandlerChainer(dvd_ioh, p_ioh, 2097152));
+            Ref<Executor> ch(new IOHandlerChainer(dvd_ioh, p_ioh, 16384));
             proc_list = Ref<Array<ProcListItem> >(new Array<ProcListItem>(1));
             Ref<ProcListItem> pr_item(new ProcListItem(ch));
             proc_list->append(pr_item);
