@@ -145,7 +145,7 @@ void DVDHandler::fillMetadata(Ref<CdsItem> item)
 
         for (int i = 0; i < titles; i++)
         {
-            dvd->selectPGC(i, 0, 0);
+            dvd->selectPGC(i, 0);
             item->setAuxData(renderKey(DVD_ChapterCount, i), 
                     String::from(dvd->chapterCount(i)));
 //            if (dvd->titleDuration() > 0)

@@ -84,7 +84,7 @@ public:
     ///
     /// \param title_idx index of the title
     /// \param chapter_idx index of the chapter from where we start
-    void selectPGC(int title_idx, int chapter_idx, int audio_stream_id);
+    void selectPGC(int title_idx, int chapter_idx);
 
     /// \brief Reads the stream, specified by selectPGC from the DVD.
     ///
@@ -122,12 +122,6 @@ protected:
     zmm::Ref<Mutex> mutex;
 
     zmm::String getLanguage(char *code);
-    bool PESblock(uint32_t sc, uint8_t *buf, size_t len);
-    size_t parseDVDblock(uint8_t *buf, size_t len, 
-                         uint8_t *outbuffer, size_t out_len);
-
-    int req_audio_stream;
-    int req_spu_stream;
 };
 
 

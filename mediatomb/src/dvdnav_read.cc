@@ -36,9 +36,6 @@
     The dvdtime2msec() function as well as some other parts which are marked
     by comments were taken from lsdvd, (C)  2003 by Chris Phillips, 
     Henk Vergonet, licensed under GPL version 2.
-
-    The stream stripping code, in particular the PESblock() and
-    parseDVDblock() functions, was contributed by Andreas Öman.
  */
 
 /// \file dvd_read.cc 
@@ -55,14 +52,9 @@
 
 #include "tools.h"
 
-#define PROGRAM_STREAM_MAP 0x1bc
-#define PRIVATE_STREAM_1   0x1bd
-#define PADDING_STREAM     0x1be
-#define PRIVATE_STREAM_2   0x1bf
-
 using namespace zmm;
 
-//static double frames_per_s[4] = {-1.0, 25.00, -1.0, 29.97};
+static double frames_per_s[4] = {-1.0, 25.00, -1.0, 29.97};
 
 static struct { char code[3]; char name[20]; }
 // from lsdvd, ISO-639
@@ -174,9 +166,6 @@ DVDNavReader::DVDNavReader(String path)
 
     mutex = Ref<Mutex>(new Mutex(true));
 
-    req_audio_stream = 0;
-    req_spu_stream = -1;
-
     EOT = true;
 }
 
@@ -214,8 +203,7 @@ int DVDNavReader::chapterCount(int title_idx)
     return c;
 }
 
-void DVDNavReader::selectPGC(int title_idx, int chapter_idx, 
-                             int audio_stream_id)
+void DVDNavReader::selectPGC(int title_idx, int chapter_idx)
 {
     title_idx++;
     chapter_idx++;
@@ -234,10 +222,6 @@ void DVDNavReader::selectPGC(int title_idx, int chapter_idx,
                          String(dvdnav_err_to_string(dvd)));
    }
 
-   req_audio_stream = audio_stream_id & 0x1f;
-   log_debug("Will keep audio stream with ID %d, index %x\n", audio_stream_id,
-             req_audio_stream);
-
    EOT = false;
 }
 
@@ -246,9 +230,6 @@ size_t DVDNavReader::readSector(unsigned char *buffer, size_t length)
     AUTOLOCK(mutex);
 
     unsigned char *p = buffer;
-
-    uint8_t block[DVD_VIDEO_LB_LEN];
-
     size_t consumed = 0;
 
     if (length < DVD_VIDEO_LB_LEN)
@@ -258,7 +239,7 @@ size_t DVDNavReader::readSector(unsigned char *buffer, size_t length)
     {
         int result, event, len;
 
-        result = dvdnav_get_next_block(dvd, block, &event, &len);
+        result = dvdnav_get_next_block(dvd, (uint8_t *)p, &event, &len);
         if (result == DVDNAV_STATUS_ERR)
         {
             throw _Exception(_("Error getting next block for DVD ") + dvd_path +
@@ -268,17 +249,11 @@ size_t DVDNavReader::readSector(unsigned char *buffer, size_t length)
         switch (event)
         {
             case DVDNAV_BLOCK_OK:
-                {
-                    size_t parsed = 0;
-                    parsed = parseDVDblock(block, len, p, length - consumed);
-
-                    consumed = consumed + parsed;
-
-                    if ((consumed + DVD_VIDEO_LB_LEN) > length)
-                        return consumed;
+                consumed = consumed + len;
+                if ((consumed + DVD_VIDEO_LB_LEN) > length)
+                    return consumed;
                     
-                    p = p + parsed;
-                }
+                p = p + len;
                 break;
             case DVDNAV_STILL_FRAME:
                 {
@@ -324,130 +299,6 @@ size_t DVDNavReader::readSector(unsigned char *buffer, size_t length)
         }
     }
     return 0;
-}
-
-bool DVDNavReader::PESblock(uint32_t sc, uint8_t *buf, size_t len)
-{
-    uint8_t flags, hlen;
-
-    if (len < 3)
-        return false;
-
-    if ((buf[0] & 0xc0) != 0x80)
-        return false;
-
-    flags = buf[1];
-    hlen  = buf[2];
-
-    buf += 3;
-    len -= 3;
-
-    if(len < hlen)
-        return false;
-
-    buf += hlen;
-    len -= hlen;
-
-    if (sc == PRIVATE_STREAM_1) 
-    {
-        if(len < 1)
-            return false;
-
-        sc = buf[0];
-    }
-
-    if (sc >= 0x1e0 && sc <= 0x1ef) 
-    {
-        /* Video */
-        return true;
-    }
-
-    if ((sc >= 0x80 && sc <= 0x9f) || (sc >= 0x1c0 && sc <= 0x1df)) 
-    {
-        /* Audio */
-        return (int)(sc & 0xf) == req_audio_stream;
-    }
-
-    if (sc >= 0x20 && sc <= 0x3f) 
-    {
-        /* Subtitles */
-        return (int)(sc & 0x1f) == req_spu_stream;
-    }
-
-    return false;
-}
-
-size_t DVDNavReader::parseDVDblock(uint8_t *buf, size_t len, uint8_t *outbuffer,
-                                 size_t out_len)
-{
-    uint32_t startcode;
-    unsigned int pes_len;
-    size_t bytes_filled = 0;
-    uint8_t *out_pos = outbuffer;
-
-    if (buf[0] != 0x00 || buf[1] != 0x00 || buf[2] != 0x01 || buf[3] != 0xba)
-        return 0; /* Pack start code */
-
-    if ((buf[13] & 7) != 0)
-        return 0; /* Stuffing is not supported */
-
-//    output(buf, 14); /* Forward pack header */
-    if (out_len > 14)
-    {
-        memcpy(out_pos, buf, 14);
-        out_pos += 14;
-        bytes_filled += 14;
-    }
-    else
-        throw _Exception(_("Insufficiend space in output buffer!"));
-
-    buf += 14;
-    len -= 14;
-
-    while (len > 5) 
-    {
-
-        startcode = (buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | buf[3];
-        pes_len   = (buf[4] << 8) | buf[5];
-        len -= 6;
-
-        if (pes_len > len)
-            break;
-
-        switch (startcode) 
-        {
-            case PADDING_STREAM:
-                len -= pes_len;
-                buf += pes_len + 6;
-                break;
-
-            case PRIVATE_STREAM_1:
-            case PRIVATE_STREAM_2:
-            case 0x1c0 ... 0x1df:
-            case 0x1e0 ... 0x1ef:
-
-                if (PESblock(startcode, buf + 6, pes_len))
-                {
-                    if (out_len > pes_len + 6)
-                    {
-                        // output(buf, pes_len + 6);
-                        memcpy(out_pos, buf, pes_len + 6);
-                        out_pos += pes_len + 6;
-                        bytes_filled += pes_len + 6;
-                    }
-                    else
-                        throw _Exception(_("Insufficiend space in output buffer!"));
-                }
-
-                len -= pes_len;
-                buf += pes_len + 6;
-                break;
-
-            default:
-                return bytes_filled;
-        }
-    }
-    return bytes_filled;
 }
 
 int DVDNavReader::audioTrackCount()

@@ -52,7 +52,7 @@ DVDIOHandler::DVDIOHandler(String dvdname, int track, int chapter,
 {
     this->dvdname = dvdname;
     dvd = Ref<DVDNavReader>(new DVDNavReader(dvdname));
-    dvd->selectPGC(track, chapter, audio_stream_id);
+    dvd->selectPGC(track, chapter);
 }
 
 void DVDIOHandler::open(IN enum UpnpOpenFileMode mode)
