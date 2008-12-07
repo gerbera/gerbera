@@ -69,6 +69,8 @@
 #ifdef HAVE_LIBDVDNAV
     #include "dvd_io_handler.h"
     #include "metadata/dvd_handler.h"
+    #include "fd_io_handler.h"
+    #include "mpegremux_processor.h"
 #endif
 
 using namespace zmm;
@@ -241,11 +243,42 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
             chmod(location.c_str(), S_IWUSR | S_IRUSR);
             
             Ref<IOHandler> dvd_ioh(new DVDIOHandler(obj->getLocation(), title, chapter, audio_track));
+
+            int from_dvd_fd[2];
+            if (pipe(from_dvd_fd) == -1)
+                throw _Exception(_("Failed to create DVD input pipe!"));
+
+            int from_remux_fd[2];
+            if (pipe(from_remux_fd) == -1)
+            {
+                close(from_dvd_fd[0]);
+                close(from_dvd_fd[1]);
+                throw _Exception(_("Failed to create remux output pipe!"));
+            }
+
+            Ref<IOHandler> fd_writer(new FDIOHandler(from_dvd_fd[1]));
+            Ref<Executor> from_dvd(new IOHandlerChainer(dvd_ioh,
+                                                        fd_writer, 16384));
+
+            Ref<IOHandler> fd_reader(new FDIOHandler(from_remux_fd[0]));
+
+            Ref<MPEGRemuxProcessor> remux(new MPEGRemuxProcessor(from_dvd_fd[0],
+                                          from_remux_fd[1],
+                                          (unsigned char)audio_track));
+
+            RefCast(fd_reader, FDIOHandler)->addReference(RefCast(remux, Object));
+            RefCast(fd_reader, FDIOHandler)->addReference(RefCast(from_dvd, Object));
+            RefCast(fd_reader, FDIOHandler)->addReference(RefCast(fd_writer, Object));
+            RefCast(fd_reader, FDIOHandler)->closeOther(fd_writer);
+            
+
             Ref<IOHandler> p_ioh(new ProcessIOHandler(location, nil));
-            Ref<Executor> ch(new IOHandlerChainer(dvd_ioh, p_ioh, 16384));
-            proc_list = Ref<Array<ProcListItem> >(new Array<ProcListItem>(1));
+            Ref<Executor> ch(new IOHandlerChainer(fd_reader, p_ioh, 16384));
+            proc_list = Ref<Array<ProcListItem> >(new Array<ProcListItem>(2));
             Ref<ProcListItem> pr_item(new ProcListItem(ch));
             proc_list->append(pr_item);
+            Ref<ProcListItem> pr2_item(new ProcListItem(from_dvd));
+            proc_list->append(pr2_item);
         }
         catch (Exception ex)
         {
