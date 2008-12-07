@@ -55,7 +55,11 @@
 
 #ifdef HAVE_LIBDVDNAV
     #include "dvd_io_handler.h"
+    #include "fd_io_handler.h"
     #include "metadata/dvd_handler.h"
+    #include "mpegremux_processor.h"
+    #include "thread_executor.h"
+    #include "io_handler_chainer.h"
 #endif
 
 #ifdef EXTERNAL_TRANSCODING
@@ -610,9 +614,37 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
             /// \todo add angle support
             Ref<IOHandler> dvd_io_handler(new DVDIOHandler(path, title, chapter,
                            audio_track));
-            dvd_io_handler->open(mode);
+
+            int from_dvd_fd[2];
+            if (pipe(from_dvd_fd) == -1)
+                throw _Exception(_("Failed to create DVD input pipe!"));
+
+            int from_remux_fd[2];
+            if (pipe(from_remux_fd) == -1)
+            {
+                close(from_dvd_fd[0]);
+                close(from_dvd_fd[1]);
+                throw _Exception(_("Failed to create remux output pipe!"));
+            }
+
+            Ref<IOHandler> fd_writer(new FDIOHandler(from_dvd_fd[1]));
+            Ref<ThreadExecutor> from_dvd(new IOHandlerChainer(dvd_io_handler, 
+                                                        fd_writer, 16384));
+
+            Ref<IOHandler> fd_reader(new FDIOHandler(from_remux_fd[0]));
+            fd_reader->open(mode);
+            
+            Ref<MPEGRemuxProcessor> remux(new MPEGRemuxProcessor(from_dvd_fd[0],
+                                          from_remux_fd[1], 
+                                          (unsigned char)audio_track));
+
+            RefCast(fd_reader, FDIOHandler)->addReference(RefCast(remux, Object));
+            RefCast(fd_reader, FDIOHandler)->addReference(RefCast(from_dvd, Object));
+            RefCast(fd_reader, FDIOHandler)->addReference(RefCast(fd_writer, Object));
+            RefCast(fd_reader, FDIOHandler)->closeOther(fd_writer);
+
             PlayHook::getInstance()->trigger(obj);
-            return dvd_io_handler;
+            return fd_reader;
         }
         else
 #endif

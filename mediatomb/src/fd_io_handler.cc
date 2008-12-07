@@ -1,0 +1,160 @@
+/*MT*
+    
+    MediaTomb - http://www.mediatomb.cc/
+    
+    fd_io_handler.cc - this file is part of MediaTomb.
+    
+    Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
+                       Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
+    
+    Copyright (C) 2006-2008 Gena Batyan <bgeradz@mediatomb.cc>,
+                            Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
+                            Leonhard Wimmer <leo@mediatomb.cc>
+    
+    MediaTomb is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License version 2
+    as published by the Free Software Foundation.
+    
+    MediaTomb is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    
+    You should have received a copy of the GNU General Public License
+    version 2 along with MediaTomb; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
+    
+    $Id: fd_io_handler.cc 1698 2008-02-23 20:48:30Z lww $
+*/
+
+/// \file fd_io_handler.cc
+
+#ifdef HAVE_CONFIG_H
+    #include "autoconfig.h"
+#endif
+
+#include "server.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdio.h>
+#include "common.h"
+#include "fd_io_handler.h"
+
+using namespace zmm;
+using namespace mxml;
+
+FDIOHandler::FDIOHandler(String filename) : IOHandler()
+{
+    this->filename = filename;
+    this->fd = -1;
+    this->other = nil;
+    this->reference_list = Ref<Array<Object> >(new Array<Object >(4));
+    this->closed = false;
+}
+
+FDIOHandler::FDIOHandler(int fd) : IOHandler()
+{
+    this->filename = nil;
+    this->fd = fd;
+    this->other = nil;
+    this->reference_list = Ref<Array<Object> >(new Array<Object >(4));
+    this->closed = false;
+}
+
+void FDIOHandler::addReference(Ref<Object> reference)
+{
+    reference_list->append(reference);
+}
+
+void FDIOHandler::closeOther(Ref<IOHandler> other)
+{
+    this->other = other;
+}
+
+void FDIOHandler::open(IN enum UpnpOpenFileMode mode)
+{
+
+    if (fd != -1)
+    {
+        log_debug("Assuming valid fd %d\n", fd);
+        return;
+    }
+
+    if (!string_ok(filename))
+        throw _Exception(_("Missing filename!"));
+
+    if (mode == UPNP_READ)
+    {
+        fd = ::open(filename.c_str(), O_RDONLY);
+    }
+    else if (mode == UPNP_WRITE)
+    {
+        fd = ::open(filename.c_str(), O_WRONLY | O_CREAT);
+    }
+    else
+    {
+        throw _Exception(_("FDIOHandler::open: invdalid read/write mode"));
+    }
+
+    if (fd == -1)
+    {
+        throw _Exception(_("FDIOHandler::open: failed to open: ") + filename.c_str());
+    }
+
+}
+
+int FDIOHandler::read(OUT char *buf, IN size_t length)
+{
+    int ret = 0;
+
+    ret = ::read(fd, buf, length);
+
+    return ret;
+}
+
+int FDIOHandler::write(IN char *buf, IN size_t length)
+{
+    int ret = 0;
+
+    ret = ::write(fd, buf, length);
+
+    return ret;
+}
+
+void FDIOHandler::seek(IN off_t offset, IN int whence)
+{
+    if (lseek(fd, offset, whence) != 0)
+    {
+        throw _Exception(_("fseek failed"));
+    }
+}
+
+void FDIOHandler::close()
+{
+    
+    if (closed)
+        return;
+
+    log_debug("Closing...\n");
+    try
+    {
+        if (other != nil)
+            other->close();
+    }
+    catch (Exception ex)
+    {
+        log_debug("Error closing \"other\" handler: %s\n", ex.getMessage().c_str());
+    }
+
+    // protect from multiple close calls
+    if (::close(fd) != 0)
+    {
+        throw _Exception(_("fclose failed"));
+    }
+    fd = -1;
+    closed = true;
+}
+

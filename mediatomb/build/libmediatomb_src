@@ -36,6 +36,8 @@ libmediatomb_a_SOURCES = \
 ../src/exceptions.cc \
 ../src/exceptions.h \
 ../src/executor.h \
+../src/fd_io_handler.cc \
+../src/fd_io_handler.h \
 ../src/file_io_handler.cc \
 ../src/file_io_handler.h \
 ../src/file_request_handler.cc \
@@ -90,6 +92,17 @@ libmediatomb_a_SOURCES = \
 ../src/metadata/libmp4v2_handler.h \
 ../src/metadata/taglib_handler.cc \
 ../src/metadata/taglib_handler.h \
+../src/mpegdemux/buffer.c \
+../src/mpegdemux/buffer.h \
+../src/mpegdemux/mpegdemux.c \
+../src/mpegdemux/mpegdemux.h \
+../src/mpegdemux/mpegdemux_internal.h \
+../src/mpegdemux/mpeg_parse.c \
+../src/mpegdemux/mpeg_parse.h \
+../src/mpegdemux/mpeg_remux.c \
+../src/mpegdemux/mpeg_remux.h \
+../src/mpegremux_processor.cc \
+../src/mpegremux_processor.h \
 ../src/mt_inotify.cc \
 ../src/mt_inotify.h \
 ../src/mxml/attribute.cc \

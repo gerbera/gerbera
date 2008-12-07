@@ -56,6 +56,9 @@ public:
     virtual int getStatus() = 0;
 protected:
     bool threadShutdown;
+    /// \brief if the thread is currently running
+    bool threadRunning;
+
     zmm::Ref<Cond> cond;
     zmm::Ref<Mutex> mutex;
     
@@ -72,8 +75,6 @@ protected:
 private:
     pthread_t thread;
     
-    /// \brief if the thread is currently running
-    bool threadRunning;
     static void *staticThreadProc(void *arg);
 };
 
