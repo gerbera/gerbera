@@ -92,7 +92,7 @@ void FDIOHandler::open(IN enum UpnpOpenFileMode mode)
     }
     else if (mode == UPNP_WRITE)
     {
-        fd = ::open(filename.c_str(), O_WRONLY | O_CREAT);
+        fd = ::open(filename.c_str(), O_WRONLY | O_CREAT, S_IWUSR | S_IRUSR);
     }
     else
     {
