@@ -48,11 +48,16 @@ protected:
 
     off_t total_size;
 
+    unsigned char *small_buffer;
+    unsigned char *small_buffer_pos;
+    bool last_read;
+
 public:
     /// \brief Sets the dvdname to work with.
     DVDIOHandler(zmm::String dvdname, int track, int chapter, 
                  int audio_stream_id);
 
+    ~DVDIOHandler();
     /// \brief Opens dvd for reading (writing is not supported)
     virtual void open(IN enum UpnpOpenFileMode mode);
 
