@@ -301,11 +301,8 @@ Script::Script(Ref<Runtime> runtime) : Object()
             OBJECT_TYPE_ITEM_INTERNAL_URL);
 #ifdef ONLINE_SERVICES 
     setIntProperty(glob, _("ONLINE_SERVICE_NONE"), (int)OS_None);
-    setIntProperty(glob, _("ONLINE_SERVICE_YOUTUBE"), (int)OS_YouTube);
-    setIntProperty(glob, _("ONLINE_SERVICE_SOPCAST"), (int)OS_SopCast);
-    setIntProperty(glob, _("ONLINE_SERVICE_WEBORAMA"), (int)OS_Weborama);
-    setIntProperty(glob, _("ONLINE_SERVICE_APPLE_TRAILERS"), (int)OS_ATrailers);
 #ifdef YOUTUBE
+    setIntProperty(glob, _("ONLINE_SERVICE_YOUTUBE"), (int)OS_YouTube);
 
     setProperty(glob, _("YOUTUBE_AUXDATA_KEYWORDS"), 
             _(YOUTUBE_AUXDATA_KEYWORDS));
@@ -343,17 +340,38 @@ Script::Script(Ref<Runtime> runtime) : Object()
                    (int)YT_request_user_subscriptions);
     setIntProperty(glob, _("YOUTUBE_REQUEST_USER_UPLOADS"), 
                    (int)YT_request_user_uploads);
-#endif
+#else
+    setIntProperty(glob, _("ONLINE_SERVICE_YOUTUBE"), -1);
+#endif//YOUTUBE
+
 #ifdef WEBORAMA
+    setIntProperty(glob, _("ONLINE_SERVICE_WEBORAMA"), (int)OS_Weborama);
     setProperty(glob, _("WEBORAMA_AUXDATA_REQUEST_NAME"),
                       _(WEBORAMA_AUXDATA_REQUEST_NAME));
-#endif
+#else
+    setIntProperty(glob, _("ONLINE_SERVICE_WEBORAMA"), -1);
+#endif//WEBORAMAa
+
 #ifdef ATRAILERS
+    setIntProperty(glob, _("ONLINE_SERVICE_APPLE_TRAILERS"), (int)OS_ATrailers);
     setProperty(glob, _("APPLE_TRAILERS_AUXDATA_POST_DATE"),
                       _(ATRAILERS_AUXDATA_POST_DATE));
-#endif
 #else
+    setIntProperty(glob, _("ONLINE_SERVICE_APPLE_TRAILERS"), -1);
+#endif//ATRAILERS
+
+#ifdef SOPCAST
+    setIntProperty(glob, _("ONLINE_SERVICE_SOPCAST"), (int)OS_SopCast);
+#else
+    setIntProperty(glob, _("ONLINE_SERVICE_SOPCAST"), -1);
+#endif//SOPCAST
+
+#else // ONLINE SERVICES
     setIntProperty(glob, _("ONLINE_SERVICE_NONE"), 0);
+    setIntProperty(glob, _("ONLINE_SERVICE_YOUTUBE"), -1);
+    setIntProperty(glob, _("ONLINE_SERVICE_WEBORAMA"), -1);
+    setIntProperty(glob, _("ONLINE_SERVICE_SOPCAST"), -1);
+    setIntProperty(glob, _("ONLINE_SERVICE_APPLE_TRAILERS"), -1);
 #endif//ONLINE_SERVICES
 
     for (int i = 0; i < M_MAX; i++)
