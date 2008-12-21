@@ -587,10 +587,12 @@ Ref<Element> YouTubeService::getData(String url_part, Ref<Dictionary> params, bo
         URL = url_part;
     
     if ((params != nil) && (params->size() > 0))
+    {
         if (URL.index('?') > 0)
             URL = URL + _("&") + params->encode();
         else
             URL = URL + _("?") + params->encode();
+    }
 
     log_debug("Retrieving URL: %s\n", URL.c_str());
    
