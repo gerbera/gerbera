@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    pages.cc - this file is part of MediaTomb.
+    action.cc - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -27,7 +27,7 @@
     $Id$
 */
 
-/// \file pages.cc
+/// \file action.cc
 
 #ifdef HAVE_CONFIG_H
     #include "autoconfig.h"
@@ -36,23 +36,19 @@
 #include "pages.h"
 
 using namespace zmm;
+using namespace mxml;
 
-WebRequestHandler *create_web_request_handler(String page)
+web::action::action() : WebRequestHandler()
 {
-    if (page == "add") return new web::add();
-    if (page == "remove") return new web::remove();
-    if (page == "add_object") return new web::addObject();
-    if (page == "auth") return new web::auth();
-    if (page == "containers") return new web::containers();
-    if (page == "directories") return new web::directories();
-    if (page == "files") return new web::files();
-    if (page == "items") return new web::items();
-    if (page == "edit_load") return new web::edit_load();
-    if (page == "edit_save") return new web::edit_save();
-    if (page == "autoscan") return new web::autoscan();
-    if (page == "void") return new web::voidType();
-    if (page == "tasks") return new web::tasks();
-    if (page == "action") return new web::action();
+}
+
+void web::action::process()
+{
+    log_debug("action: start\n");
+    check_request();
     
-    throw _Exception(_("Unknown page: ") + page);
+    String action = param(_("action"));
+    log_debug("action: %s\n", action.c_str());
+    
+    log_debug("action: returning\n");
 }

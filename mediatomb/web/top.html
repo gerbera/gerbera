@@ -60,15 +60,19 @@
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="2" id="currentTaskTd" style="display:none;vertical-align:middle;">
-                        <a id="cancelCurrentTask" href="javascript:parent.cancelCurrentTask();">
-                            <img src="/icons/remove_this.png" width="30" height="20" alt="cancel task" border="0" style="vertical-align:middle;">
-                        </a>
-                        <img id="cancelCurrentTaskPlaceholder" src="/icons/blank.png" width="30" height="20" alt="" border="0" style="vertical-align:middle;display:none;">
-                        <span style="vertical-align:middle;" id="currentTaskText">&nbsp;</span>
+                    <td colspan="2" style="vertical-align:middle;">
+                        <div id="currentTaskTd" style="display:none;">
+                            <a id="cancelCurrentTask" href="javascript:parent.cancelCurrentTask();">
+                                <img src="/icons/remove_this.png" width="30" height="20" alt="cancel task" border="0" style="vertical-align:middle;">
+                            </a>
+                            <img id="cancelCurrentTaskPlaceholder" src="/icons/blank.png" width="30" height="20" alt="" border="0" style="vertical-align:middle;display:none;">
+                            <span style="vertical-align:middle;" id="currentTaskText">&nbsp;</span>
+                        </div>
                     </td>
                     <td align="right"><!-- other Tasks | Autoscans -->
                     <!-- <a href="javascript:parent.showAutoscanDirs();">autoscan</a> -->
+                        <a id="action_fokel1" style="display:none; margin-right:2em;" href="javascript:parent.action('fokel1')">fokel1</a>
+                        <a id="action_fokel2" style="display:none; margin-right:2em;" href="javascript:parent.action('fokel2')">fokel2</a>
                     </td>
                 </tr>
              </table>

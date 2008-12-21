@@ -447,3 +447,15 @@ function clearUpdateTimer()
         timer = false;
     }
 }
+
+function action(action)
+{
+    var url = link('action', {action: action});
+    
+    var myAjax = new Ajax.Request(
+        url,
+        {
+            method: 'get'
+            //onComplete: 
+        });
+}

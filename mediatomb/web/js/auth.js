@@ -200,5 +200,19 @@ function getConfigCallback(ajaxRequest)
             Element.show(frames["rightF"].document.getElementById("scan_mode_inotify"));
             Element.show(frames["rightF"].document.getElementById("scan_mode_inotify_label"));
         }
+        var actionsEl = xmlGetElement(configEl, "actions");
+        if (actionsEl)
+        {
+            var actions = actionsEl.getElementsByTagName("action");
+            for (var i = 0; i < actions.length; i++)
+            {
+                var action = actions[i].firstChild.nodeValue;
+                var actionEl = frames["topF"].document.getElementById("action_"+action);
+                if (actionEl)
+                {
+                    Element.show(actionEl);
+                }
+            }
+        }
     }
 }

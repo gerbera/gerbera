@@ -152,6 +152,13 @@ public:
     virtual void process();
 };
 
+/// \brief UI action button
+class action : public WebRequestHandler
+{
+public:
+    action();
+    virtual void process();
+};
 
 } // namespace
 

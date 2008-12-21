@@ -121,6 +121,15 @@ void web::auth::process()
 #else
         config->setAttribute(_("have-inotify"), _("0"), mxml_bool_type);
 #endif
+        
+        
+        Ref<Element> actions (new Element(_("actions")));
+        actions->setArrayName(_("action"));
+        
+        //actions->appendTextChild(_("action"), _("fokel1"));
+        //actions->appendTextChild(_("action"), _("fokel2"));
+        
+        config->appendElementChild(actions);
     }
     else if (action == "get_sid")
     {
