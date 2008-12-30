@@ -254,8 +254,10 @@
     #define DEFAULT_YOUTUBE_TAG_START_PAGE      1
     #define DEFAULT_YOUTUBE_TAG_AMOUNT          "all"
     #define DEFAULT_YOUTUBE_RACY_CONTENT        "exclude" 
-    #define DEFAULT_YOUTUBE_FORMAT              "mp4"
+    #define DEFAULT_YOUTUBE_FORMAT              "flv" // mp4
     #define DEFAULT_YOUTUBE_HD                  "no"
+
+    #define UI_ACTION_REFRESH_YOUTUBE           "refresh_yt"
 #endif
 #ifdef SOPCAST
     #define DEFAULT_SOPCAST_ENABLED     NO
