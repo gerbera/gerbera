@@ -50,6 +50,7 @@ using namespace zmm;
 #define YOUTUBE_URL_GET             "http://www.youtube.com/get_video?" 
 #define YOUTUBE_URL_PARAM_VIDEO_ID  "video_id"
 #define YOUTUBE_URL_PARAM_T         "t"
+#define YOUTUBE_IS_HD_AVAILABLE     "isHDAvailable *= *([^ ]*);"
 YouTubeVideoURL::YouTubeVideoURL()
 {
     curl_handle = curl_easy_init();
@@ -60,6 +61,8 @@ YouTubeVideoURL::YouTubeVideoURL()
     reVideoURLParams->compile(_(YOUTUBE_URL_PARAMS_REGEXP));
     redirectLocation = Ref<RExp>(new RExp());
     redirectLocation->compile(_(YOUTUBE_URL_LOCATION_REGEXP));
+    HD = Ref<RExp>(new RExp());
+    HD->compile(_(YOUTUBE_IS_HD_AVAILABLE));
 
     // this is a safeguard to ensure that this class is not called from
     // multiple threads - it is not allowed to use the same curl handle
@@ -73,7 +76,7 @@ YouTubeVideoURL::~YouTubeVideoURL()
         curl_easy_cleanup(curl_handle);
 }
 
-String YouTubeVideoURL::getVideoURL(String video_id)
+String YouTubeVideoURL::getVideoURL(String video_id, bool mp4, bool hd)
 {
     long retcode; 
     String flv_location;
@@ -100,7 +103,7 @@ String YouTubeVideoURL::getVideoURL(String video_id)
                          String::from(retcode));
     }
 
-    log_debug("------> GOT BUFFER %s\n", buffer->toString().c_str());
+//    log_debug("------> GOT BUFFER %s\n", buffer->toString().c_str());
 
     Ref<Matcher> matcher =  reVideoURLParams->matcher(buffer->toString());
     String params;
@@ -115,6 +118,23 @@ String YouTubeVideoURL::getVideoURL(String video_id)
 
     params = _(YOUTUBE_URL_GET) + YOUTUBE_URL_PARAM_VIDEO_ID + '=' + 
              video_id + '&' + YOUTUBE_URL_PARAM_T + '=' + params;
+
+    if (mp4)
+    {
+        String format = _("&fmt=18");
+        
+        if (hd)
+        {
+            matcher = HD->matcher(buffer->toString());
+            if (matcher->next())
+            {
+                if (trim_string(matcher->group(1)) == "true")
+                    format = _("&fmt=22");
+            }
+        }
+                    
+        params = params + format;
+    }
 
     buffer = url->download(params, &retcode, curl_handle, true, verbose, true);
 

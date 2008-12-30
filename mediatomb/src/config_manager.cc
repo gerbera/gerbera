@@ -289,6 +289,8 @@ Ref<Element> ConfigManager::renderOnlineSection()
     yt->setAttribute(_("purge-after"), 
             String::from(DEFAULT_YOUTUBE_PURGE_AFTER));
     yt->setAttribute(_("racy-content"), _(DEFAULT_YOUTUBE_RACY_CONTENT));
+    yt->setAttribute(_("format"), _(DEFAULT_YOUTUBE_FORMAT));
+    yt->setAttribute(_("hd"), _(DEFAULT_YOUTUBE_HD));
    
     Ref<Element> favs(new Element(_("favorites")));
     favs->setAttribute(_("user"), _("mediatomb"));
@@ -1845,6 +1847,31 @@ void ConfigManager::validate(String serverhome)
 
         NEW_OPTION(temp);
         SET_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_RACY);
+   
+        temp = getOption(_("/import/online-content/YouTube/attribute::format"),
+                         _(DEFAULT_YOUTUBE_FORMAT));
+
+        if ((temp != "mp4") && (temp != "flv"))
+        {
+            throw _Exception(_("Error in config file: "
+                               "invalid format value in <YouTube> tag"));
+        }
+        bool mp4 = (temp == "mp4" ? true : false);
+        NEW_BOOL_OPTION(mp4);
+        SET_BOOL_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_FORMAT_MP4);
+
+        temp = getOption(_("/import/online-content/YouTube/attribute::hd"),
+                         _(DEFAULT_YOUTUBE_HD));
+
+        if (!validateYesNo(temp))
+            throw _Exception(_("Error in config file: "
+                               "invalid hd value in <YouTube> tag"));
+
+        if ((temp == "yes") && (!mp4))
+            log_warning("HD preference for YouTube content is only available for mp4 format selection!");
+
+        NEW_BOOL_OPTION(temp == "yes" ? true : false);
+        SET_BOOL_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_PREFER_HD);
 
         temp_int = getIntOption(_("/import/online-content/YouTube/attribute::refresh"), DEFAULT_YOUTUBE_REFRESH);
         NEW_INT_OPTION(temp_int);
@@ -1887,7 +1914,7 @@ void ConfigManager::validate(String serverhome)
         NEW_OBJARR_OPTION(yt_opts);
         SET_OBJARR_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_TASK_LIST);
 
-        log_warning("Please check http://www.youtube.com/t/terms\nBy using this feature you may violate YouTube service terms and conditions!");
+        log_warning("You enabled the YouTube feature, which allows you to watch YouTube videos on your UPnP device!\nPlease check http://www.youtube.com/t/terms\nBy using this feature you may be violating YouTube service terms and conditions!");
     }
 #endif
 

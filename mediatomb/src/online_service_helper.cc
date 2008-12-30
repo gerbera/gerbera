@@ -41,6 +41,7 @@
 #include "mxml/mxml.h"
 #include "online_service.h"
 #include "online_service_helper.h"
+#include "config_manager.h"
 
 #ifdef YOUTUBE
     #include "youtube_video_url.h"
@@ -71,9 +72,10 @@ String OnlineServiceHelper::resolveURL(Ref<CdsItemExternalURL> item)
 #ifdef YOUTUBE
         case OS_YouTube:
             yt_url = Ref<YouTubeVideoURL> (new YouTubeVideoURL());
-            log_debug("------> REQUESTING YT ID : %s\n", item->getServiceID().substring(1).c_str());
+//            log_debug("------> REQUESTING YT ID : %s\n", item->getServiceID().substring(1).c_str());
             //url = yt_url->getVideoURL(item->getURL());
-            url = yt_url->getVideoURL(item->getServiceID().substring(1));
+            url = yt_url->getVideoURL(item->getServiceID().substring(1),
+                  ConfigManager::getInstance()->getBoolOption(CFG_ONLINE_CONTENT_YOUTUBE_FORMAT_MP4), ConfigManager::getInstance()->getBoolOption(CFG_ONLINE_CONTENT_YOUTUBE_PREFER_HD));
             break;
 #endif
 #ifdef SOPCAST

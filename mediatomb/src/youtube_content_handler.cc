@@ -44,6 +44,7 @@
 #include "config_manager.h"
 
 #define YT_SWF_TYPE "application/x-shockwave-flash"
+#define YT_MP4_TYPE "video/mp4"
 
 using namespace zmm;
 using namespace mxml;
@@ -114,6 +115,10 @@ bool YouTubeContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
     thumb_mimetype = mappings->get(_("jpg"));
     if (!string_ok(thumb_mimetype))
         thumb_mimetype = _("image/jpeg");
+
+    mp4_mimetype = mappings->get(_("mp4"));
+    if (!string_ok(mp4_mimetype))
+        mp4_mimetype = _("video/mp4");
 
     return true;
 }
@@ -288,11 +293,19 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
                     continue;
 
                 temp = el->getAttribute(_("type"));
-                if (temp != YT_SWF_TYPE)
+                if ((temp != YT_SWF_TYPE) && (temp != YT_MP4_TYPE))
                     continue;
 
-                item->setMimeType(_("video/x-flv"));
-                resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(_("video/x-flv")));
+                String mt;
+                if (ConfigManager::getInstance()->getBoolOption(CFG_ONLINE_CONTENT_YOUTUBE_FORMAT_MP4))
+                {
+                    mt = mp4_mimetype;
+                }
+                else
+                    mt = _("video/x-flv");
+
+                    item->setMimeType(mt);
+                    resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(mt));
 
                 content_set = true;
  

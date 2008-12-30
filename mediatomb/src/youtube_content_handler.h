@@ -45,7 +45,7 @@
 #define YOUTUBE_AUXDATA_VIEW_COUNT          YOUTUBE_SERVICE_ID "5"
 #define YOUTUBE_AUXDATA_RATING_COUNT        YOUTUBE_SERVICE_ID "6"
 #define YOUTUBE_AUXDATA_FEED                YOUTUBE_SERVICE_ID "7"
-#define YOUTUBE_AUXDATA_SUBREQUEST_NAME   YOUTUBE_SERVICE_ID "8"
+#define YOUTUBE_AUXDATA_SUBREQUEST_NAME     YOUTUBE_SERVICE_ID "8"
 #define YOUTUBE_AUXDATA_REQUEST             YOUTUBE_SERVICE_ID "9"
 #define YOUTUBE_AUXDATA_CATEGORY            YOUTUBE_SERVICE_ID "10"
 #define YOUTUBE_AUXDATA_REGION              YOUTUBE_SERVICE_ID "11"
@@ -100,6 +100,7 @@ protected:
     int current_node_index;
     int channel_child_count;
     zmm::String thumb_mimetype;
+    zmm::String mp4_mimetype;
     zmm::String feed_name;
 };
 
