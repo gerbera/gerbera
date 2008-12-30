@@ -1611,7 +1611,8 @@ int ContentManager::addFileInternal(zmm::String path, bool recursive,
 
 #ifdef ONLINE_SERVICES
 void ContentManager::fetchOnlineContent(service_type_t service,
-                                        bool lowPriority, bool cancellable)
+                                        bool lowPriority, bool cancellable,
+                                        bool unscheduled_refresh)
 {
     Ref<OnlineService> os = online_services->getService(service);
     if (os == nil)
@@ -1619,14 +1620,17 @@ void ContentManager::fetchOnlineContent(service_type_t service,
         log_debug("No surch service! %d\n", service);
         throw _Exception(_("Service not found!"));
     }
-    fetchOnlineContentInternal(os, lowPriority, cancellable);
+    fetchOnlineContentInternal(os, lowPriority, cancellable, 0,
+                               unscheduled_refresh);
 }
 
 void ContentManager::fetchOnlineContentInternal(Ref<OnlineService> service, 
                                         bool lowPriority, bool cancellable,
-                                        unsigned int parentTaskID)
+                                        unsigned int parentTaskID, 
+                                        bool unscheduled_refresh)
 {
-    Ref<CMTask> task(new CMFetchOnlineContentTask(service, cancellable));
+    Ref<CMTask> task(new CMFetchOnlineContentTask(service, cancellable, 
+                                                  unscheduled_refresh));
     task->setDescription(_("Updating content from ") + 
                          service->getServiceName());
     task->setParentID(parentTaskID);
@@ -1635,7 +1639,8 @@ void ContentManager::fetchOnlineContentInternal(Ref<OnlineService> service,
 }
 
 void ContentManager::_fetchOnlineContent(Ref<OnlineService> service, 
-                                         unsigned int parentTaskID)
+                                         unsigned int parentTaskID, 
+                                         bool unscheduled_refresh)
 {
     log_debug("Fetching online content!\n");
     if (layout_enabled)
@@ -1646,8 +1651,9 @@ void ContentManager::_fetchOnlineContent(Ref<OnlineService> service,
         log_debug("Scheduling another task for online service: %s\n",
                   service->getServiceName().c_str());
 
-        if (service->getRefreshInterval() > 0)
-            fetchOnlineContentInternal(service, true, true, parentTaskID);
+        if ((service->getRefreshInterval() > 0) || unscheduled_refresh)
+            fetchOnlineContentInternal(service, true, true, parentTaskID, 
+                                       unscheduled_refresh);
     }
     else
     {
@@ -2223,11 +2229,13 @@ void CMRescanDirectoryTask::run(Ref<ContentManager> cm)
 
 #ifdef ONLINE_SERVICES
 CMFetchOnlineContentTask::CMFetchOnlineContentTask(Ref<OnlineService> service,
-                                                   bool cancellable)
+                                                   bool cancellable,
+                                                   bool unscheduled_refresh)
 {
     this->service = service;
     this->taskType = FetchOnlineContent;
     this->cancellable = cancellable;
+    this->unscheduled_refresh = unscheduled_refresh;
 }
 
 void CMFetchOnlineContentTask::run(Ref<ContentManager> cm)
@@ -2239,7 +2247,7 @@ void CMFetchOnlineContentTask::run(Ref<ContentManager> cm)
     }
     try
     {
-        cm->_fetchOnlineContent(service, getParentID());
+        cm->_fetchOnlineContent(service, getParentID(), unscheduled_refresh);
     }
     catch (Exception ex)
     {
@@ -2248,7 +2256,7 @@ void CMFetchOnlineContentTask::run(Ref<ContentManager> cm)
     service->decTaskCount();
     if (service->getTaskCount() == 0)
     {
-        if (service->getRefreshInterval() > 0)
+        if ((service->getRefreshInterval() > 0) && !unscheduled_refresh)
         {
             Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON_FROM_REF(cm), 
                     service->getRefreshInterval(), 

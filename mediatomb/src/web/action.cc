@@ -34,6 +34,7 @@
 #endif
 
 #include "pages.h"
+#include "content_manager.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -48,7 +49,17 @@ void web::action::process()
     check_request();
     
     String action = param(_("action"));
+    if (!string_ok(action))
+        throw _Exception(_("No action given!"))
+            ;
     log_debug("action: %s\n", action.c_str());
-    
+
+#ifdef YOUTUBE
+    if (action == UI_ACTION_REFRESH_YOUTUBE)
+    {
+        ContentManager::getInstance()->fetchOnlineContent(OS_YouTube, true, true, true);
+    }
+#endif
+
     log_debug("action: returning\n");
 }

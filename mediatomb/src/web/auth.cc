@@ -125,7 +125,12 @@ void web::auth::process()
         
         Ref<Element> actions (new Element(_("actions")));
         actions->setArrayName(_("action"));
-        
+#ifdef YOUTUBE
+        if (cm->getBoolOption(CFG_ONLINE_CONTENT_YOUTUBE_ENABLED))
+        {
+            actions->appendTextChild(_("action"), _(UI_ACTION_REFRESH_YOUTUBE));
+        }
+#endif
         //actions->appendTextChild(_("action"), _("fokel1"));
         //actions->appendTextChild(_("action"), _("fokel2"));
         

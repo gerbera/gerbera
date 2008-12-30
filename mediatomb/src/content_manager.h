@@ -161,10 +161,11 @@ class CMFetchOnlineContentTask : public CMTask
 {
 protected:
     zmm::Ref<OnlineService> service;
+    bool unscheduled_refresh;
 
 public:
     CMFetchOnlineContentTask(zmm::Ref<OnlineService> service, 
-                             bool cancellable);
+                             bool cancellable, bool unscheduled_refresh);
     virtual void run(zmm::Ref<ContentManager> cm);
 };
 #endif
@@ -283,7 +284,8 @@ public:
     /// \brief Creates a layout based from data that is obtained from an
     /// online service (like YouTube, SopCast, etc.)
     void fetchOnlineContent(service_type_t service, bool lowPriority=true, 
-                            bool cancellable=true);
+                            bool cancellable=true, 
+                            bool unscheduled_refresh = false);
 #endif
 
     /// \brief Adds a virtual item.
@@ -445,10 +447,12 @@ protected:
     void fetchOnlineContentInternal(zmm::Ref<OnlineService> service,
                                     bool lowPriority=true,
                                     bool cancellable=true,
-                                    unsigned int parentTaskID = 0);
+                                    unsigned int parentTaskID = 0,
+                                    bool unscheduled_refresh = false);
 
     void _fetchOnlineContent(zmm::Ref<OnlineService>, 
-                             unsigned int parentTaskID);
+                             unsigned int parentTaskID, 
+                             bool unscheduled_refresh);
 #endif
 
 #ifdef HAVE_JS
