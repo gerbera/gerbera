@@ -61,6 +61,9 @@ IOHandlerBufferHelper::IOHandlerBufferHelper(size_t bufSize, size_t initialFillS
     empty = true;
     signalAfterEveryRead = false;
     checkSocket = false;
+    
+    seekEnabled = false;
+    doSeek = false;
 }
 
 void IOHandlerBufferHelper::open(IN enum UpnpOpenFileMode mode)
@@ -137,7 +140,6 @@ int IOHandlerBufferHelper::read(OUT char *buf, IN size_t length)
     }
     
     a += didRead;
-    //assert(a <= bufSize);
     if (a >= bufSize)
         a -= bufSize;
     if (a == b)
@@ -151,7 +153,35 @@ int IOHandlerBufferHelper::read(OUT char *buf, IN size_t length)
 
 void IOHandlerBufferHelper::seek(IN off_t offset, IN int whence)
 {
-        throw _Exception(_("seek currently unimplemented for IOHandlerBufferHelper"));
+    log_debug("seek called: %lld %d\n", offset, whence);
+    if (! seekEnabled)
+        throw _Exception(_("seek currently disabled in this IOHandlerBufferHelper"));
+    
+    assert(isOpen);
+    
+    // check for valid input
+    assert(whence == SEEK_SET || whence == SEEK_CUR || whence == SEEK_END);
+    assert(whence != SEEK_SET || offset >= 0);
+    assert(whence != SEEK_END || offset <= 0);
+    
+    // do nothing in this case
+    if (whence == SEEK_CUR && offset == 0)
+        return;
+    
+    AUTOLOCK(mutex);
+    
+    // if another seek isn't processed yet - well we don't care as this new seek
+    // will change the position anyway
+    doSeek = true;
+    seekOffset = offset;
+    seekWhence = whence;
+    
+    // tell the probably sleeping thread to process our seek
+    cond->signal();
+    
+    // wait until the seek has been processed
+    while(doSeek && ! (threadShutdown || eof || readError))
+        cond->wait();
 }
 
 void IOHandlerBufferHelper::close()

@@ -46,6 +46,9 @@ BufferedIOHandler::BufferedIOHandler(Ref<IOHandler> underlyingHandler, size_t bu
         throw _Exception(_("maxChunkSize must be positive"));
     this->underlyingHandler = underlyingHandler;
     this->maxChunkSize = maxChunkSize;
+    
+    // test it first!
+    //seekEnabled = true;
 }
 
 void BufferedIOHandler::open(IN enum UpnpOpenFileMode mode)
@@ -95,7 +98,56 @@ void BufferedIOHandler::threadProc()
 #endif
         if (empty)
             a = b = 0;
-        maxWrite = (empty ? bufSize: (a < b ? bufSize - b : a - b));
+        
+        if (doSeek && ! empty && seekWhence == SEEK_CUR && seekOffset > 0)
+        {
+            int currentFillSize = b - a;
+            if (currentFillSize <= 0)
+                currentFillSize += bufSize;
+            
+            if (seekOffset <= currentFillSize)
+            { // we have everything we need in the buffer already
+                a += seekOffset;
+                if (a >= bufSize)
+                    a -= bufSize;
+                if (a == b)
+                {
+                    empty = true;
+                    a = b = 0;
+                }
+                
+                /// \todo do we need to wait for initialFillSize again?
+                
+                doSeek = false;
+                cond->signal();
+            }
+        }
+        
+        // note: seeking could be optimized some more (backward seeking;
+        // absolute seeking..) but this should suffice for now
+        
+        if (doSeek)
+        { // seek not been processed yet
+            try
+            {
+                underlyingHandler->seek(seekOffset, seekWhence);
+                empty = true;
+                a = b = 0;
+            }
+            catch (Exception e)
+            {
+                log_error("Error while seeking in buffer: %s\n", e.getMessage().c_str());
+                e.printStackTrace();
+            }
+            
+            /// \todo should we do that?
+            waitForInitialFillSize = (initialFillSize > 0);
+            
+            doSeek = false;
+            cond->signal();
+        }
+        
+        maxWrite = (empty ? bufSize : (a < b ? bufSize - b : a - b));
         if (maxWrite == 0)
         {
             cond->wait();
@@ -148,3 +200,4 @@ void BufferedIOHandler::threadProc()
     // ensure that read() doesn't wait for me to fill the buffer
     cond->signal();
 }
+

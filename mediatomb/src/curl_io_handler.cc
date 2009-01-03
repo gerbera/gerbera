@@ -50,8 +50,14 @@ CurlIOHandler::CurlIOHandler(String URL, CURL *curl_handle, size_t bufSize, size
     this->URL = URL;
     this->external_curl_handle = (curl_handle != NULL);
     this->curl_handle = curl_handle;
-    //bytesCurl = 0;
+    bytesCurl = 0;
     signalAfterEveryRead = true;
+    
+    // test it first!
+    // still todo:
+    // * calculate relative seek correctly
+    // * optimize seek if data already in buffer
+    //seekEnabled = true;
 }
 
 void CurlIOHandler::open(IN enum UpnpOpenFileMode mode)
@@ -90,6 +96,11 @@ void CurlIOHandler::threadProc()
     curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);
     curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1);
     curl_easy_setopt(curl_handle, CURLOPT_MAXREDIRS, -1);
+    
+#ifdef TOMBDEBUG
+    curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1);
+#endif
+
     //curl_easy_setopt(curl_handle, CURLOPT_CONNECTTIMEOUT,
     
     //proxy..
@@ -97,7 +108,35 @@ void CurlIOHandler::threadProc()
     curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, CurlIOHandler::curlCallback);
     curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)this);
     
-    res = curl_easy_perform(curl_handle);
+    AUTOLOCK_NOLOCK(mutex);
+    do
+    {
+        AUTORELOCK();
+        if (doSeek)
+        {
+            log_debug("SEEK: %lld %d\n", seekOffset, seekWhence);
+            
+            if (seekWhence == SEEK_SET)
+                curl_easy_setopt(curl_handle, CURLOPT_RESUME_FROM_LARGE, seekOffset);
+            else if (seekWhence == SEEK_CUR)
+            {
+                #warning is this position correct?
+                bytesCurl += seekOffset;
+                curl_easy_setopt(curl_handle, CURLOPT_RESUME_FROM_LARGE, bytesCurl);
+            }
+            else
+            {
+                log_error("CurlIOHandler currently does not support SEEK_END\n");
+                assert(1);
+            }
+            doSeek = false;
+            cond->signal();
+        }
+        AUTOUNLOCK();
+        res = curl_easy_perform(curl_handle);
+    }
+    while (doSeek);
+    
     if (res != CURLE_OK)
         readError = true;
     else
@@ -124,6 +163,13 @@ size_t CurlIOHandler::curlCallback(void *ptr, size_t size, size_t nmemb, void *d
     int bufFree = 0;
     do
     {
+        if (ego->doSeek)
+        {
+            ego->a = ego->b = 0;
+            ego->empty = true;
+            return 0;
+        }
+        
         if (! first)
         {
             ego->cond->wait();
@@ -163,6 +209,7 @@ size_t CurlIOHandler::curlCallback(void *ptr, size_t size, size_t nmemb, void *d
     
     AUTORELOCK();
     
+    ego->bytesCurl += wantWrite;
     ego->b += wantWrite;
     if (ego->b >= ego->bufSize)
         ego->b -= ego->bufSize;
@@ -184,7 +231,6 @@ size_t CurlIOHandler::curlCallback(void *ptr, size_t size, size_t nmemb, void *d
         }
     }
     
-    //ego->bytesCurl += wantWrite;
     return wantWrite;
 }
 

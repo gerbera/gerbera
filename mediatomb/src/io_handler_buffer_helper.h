@@ -77,6 +77,12 @@ protected:
     size_t a;
     size_t b;
     
+    // seek stuff...
+    bool seekEnabled;
+    bool doSeek;
+    off_t seekOffset;
+    int seekWhence;
+    
     // thread stuff..
     void startBufferThread();
     void stopBufferThread();
