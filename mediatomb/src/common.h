@@ -212,7 +212,7 @@
 #define DEFAULT_ACCOUNTS_EN_VALUE       NO
 #define DEFAULT_ACCOUNT_USER            "mediatomb"
 #define DEFAULT_ACCOUNT_PASSWORD        "mediatomb"
-#define DEFAULT_ALIVE_INTERVAL          180 // seconds
+#define DEFAULT_ALIVE_INTERVAL          1800 // seconds
 #define DEFAULT_BOOKMARK_FILE           "mediatomb.html"
 #define DEFAULT_IGNORE_UNKNOWN_EXTENSIONS NO
 #define DEFAULT_CASE_SENSITIVE_EXTENSION_MAPPINGS NO
