@@ -1141,14 +1141,14 @@ String interfaceToIP(String interface)
     local_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (local_socket < 0)
     {
-        log_error("Could not create local socket\n");
+        log_error("Could not create local socket: %s\n", mt_strerror(errno));
         return nil;
     }
 
     iflist = iflist_free = if_nameindex();
     if (iflist == NULL)
     {
-        log_error("Could not get interface list\n");
+        log_error("Could not get interface list: %s\n", mt_strerror(errno));
         close(local_socket);
         return nil;
     }
@@ -1160,7 +1160,8 @@ String interfaceToIP(String interface)
             strncpy(if_request.ifr_name, iflist->if_name, IF_NAMESIZE);
             if (ioctl(local_socket, SIOCGIFADDR, &if_request) != 0)
             {
-                log_error("Could not determine interface address\n");
+                log_error("Could not determine interface address: %s\n", 
+                          mt_strerror(errno));
                 close(local_socket);
                 if_freenameindex(iflist_free);
                 return nil;
