@@ -137,6 +137,7 @@ libmediatomb_a_SOURCES = \
 ../src/process.h \
 ../src/process_io_handler.cc \
 ../src/process_io_handler.h \
+../src/reentrant_array.h \
 ../src/request_handler.cc \
 ../src/request_handler.h \
 ../src/rexp.cc \
