@@ -338,7 +338,7 @@ AC_HEADER_STAT
 AC_LANG_C
 AM_PROG_CC_C_O
 
-AC_CHECK_HEADERS([syslog.h stddef.h unistd.h arpa/inet.h fcntl.h], [],
+AC_CHECK_HEADERS([time.h syslog.h stddef.h unistd.h arpa/inet.h fcntl.h], [],
                  [AC_MSG_ERROR(required header not found)]) 
 
 AC_CHECK_HEADERS([limits.h netdb.h netinet/in.h stdlib.h string.h sys/file.h],

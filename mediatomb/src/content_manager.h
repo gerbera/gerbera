@@ -61,7 +61,16 @@
 
 #ifdef ONLINE_SERVICES 
     #include "online_service.h"
+#ifdef YOUTUBE
+    #include "cached_url.h"
+    #include "reentrant_array.h"
+    #define  MAX_CACHED_URLS            20
+    #define URL_CACHE_CHECK_INTERVAL    300
+    //#define URL_CACHE_CHECK_INTERVAL 30
+    //#define URL_CACHE_LIFETIME          60
+    #define URL_CACHE_LIFETIME          600
 #endif
+#endif//ONLINE_SERVICES
 
 #if defined (EXTERNAL_TRANSCODING) || defined(SOPCAST)
     #include "executor.h"
@@ -209,7 +218,11 @@ public:
         {
             IDAutoscan,
 #ifdef ONLINE_SERVICES
-            IDOnlineContent
+            IDOnlineContent,
+#ifdef YOUTUBE
+            IDURLCache
+#endif
+
 #endif
         };
 
@@ -286,7 +299,13 @@ public:
     void fetchOnlineContent(service_type_t service, bool lowPriority=true, 
                             bool cancellable=true, 
                             bool unscheduled_refresh = false);
+#ifdef YOUTUBE
+    /// \brief Adds a URL to the cache.
+    void cacheURL(zmm::Ref<CachedURL> url);
+    /// \brief Retrieves an URL from the cache.
+    zmm::String getCachedURL(int objectID);
 #endif
+#endif//ONLINE_SERVICES
 
     /// \brief Adds a virtual item.
     /// \param obj item to add
@@ -453,7 +472,15 @@ protected:
     void _fetchOnlineContent(zmm::Ref<OnlineService>, 
                              unsigned int parentTaskID, 
                              bool unscheduled_refresh);
+
+#ifdef YOUTUBE
+    zmm::Ref<Mutex> urlcache_mutex;
+    zmm::Ref<ReentrantArray<CachedURL> > cached_urls;
+    /// \brief Removes old URLs from the cache.
+    void checkCachedURLs();
 #endif
+
+#endif //ONLINE_SERVICES 
 
 #ifdef HAVE_JS
     zmm::Ref<PlaylistParserScript> playlist_parser_script;

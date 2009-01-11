@@ -11,6 +11,8 @@ libmediatomb_a_SOURCES = \
 ../src/autoscan_inotify.h \
 ../src/buffered_io_handler.cc \
 ../src/buffered_io_handler.h \
+../src/cached_url.h \
+../src/cached_url.cc \
 ../src/cds_objects.cc \
 ../src/cds_objects.h \
 ../src/cds_resource.cc \

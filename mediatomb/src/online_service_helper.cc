@@ -46,6 +46,8 @@
 #ifdef YOUTUBE
     #include "youtube_video_url.h"
     #include "youtube_content_handler.h"
+    #include "cached_url.h"
+    #include "content_manager.h"
 #endif
 
 using namespace zmm;
@@ -64,18 +66,25 @@ String OnlineServiceHelper::resolveURL(Ref<CdsItemExternalURL> item)
         throw _Exception(_("Invalid service id!"));
 
     String url;
-#ifdef YOUTUBE
-     Ref<YouTubeVideoURL> yt_url;
-#endif
+    
     switch (service)
     {
 #ifdef YOUTUBE
         case OS_YouTube:
-            yt_url = Ref<YouTubeVideoURL> (new YouTubeVideoURL());
-//            log_debug("------> REQUESTING YT ID : %s\n", item->getServiceID().substring(1).c_str());
-            //url = yt_url->getVideoURL(item->getURL());
-            url = yt_url->getVideoURL(item->getServiceID().substring(1),
-                  ConfigManager::getInstance()->getBoolOption(CFG_ONLINE_CONTENT_YOUTUBE_FORMAT_MP4), ConfigManager::getInstance()->getBoolOption(CFG_ONLINE_CONTENT_YOUTUBE_PREFER_HD));
+            {
+                url = ContentManager::getInstance()->getCachedURL(item->getID());
+                if (string_ok(url))
+                    break;
+
+                Ref<YouTubeVideoURL> yt_url;
+                yt_url = Ref<YouTubeVideoURL> (new YouTubeVideoURL());
+                //            log_debug("------> REQUESTING YT ID : %s\n", item->getServiceID().substring(1).c_str());
+                //url = yt_url->getVideoURL(item->getURL());
+                url = yt_url->getVideoURL(item->getServiceID().substring(1),
+                        ConfigManager::getInstance()->getBoolOption(CFG_ONLINE_CONTENT_YOUTUBE_FORMAT_MP4), ConfigManager::getInstance()->getBoolOption(CFG_ONLINE_CONTENT_YOUTUBE_PREFER_HD));
+                Ref<CachedURL> cached(new CachedURL(item->getID(), url));
+                ContentManager::getInstance()->cacheURL(cached);
+            }
             break;
 #endif
 #ifdef SOPCAST

@@ -62,6 +62,7 @@
 
 #ifdef YOUTUBE
     #include "youtube_service.h"
+    #include <time.h>
 #endif
 
 #ifdef SOPCAST
@@ -254,6 +255,10 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
             log_error("Could not setup YouTube: %s\n", 
                     ex.getMessage().c_str());
         }
+     
+        cached_urls = Ref<ReentrantArray<CachedURL> >
+                              (new ReentrantArray<CachedURL>(MAX_CACHED_URLS));
+        urlcache_mutex = Ref<Mutex>(new Mutex(false));
     }
 #endif //YOUTUBE
 
@@ -459,7 +464,14 @@ void ContentManager::timerNotify(Ref<Object> parameter)
     {
         fetchOnlineContent((service_type_t)(tp->getID()));
     }
+#ifdef YOUTUBE
+    else if (tp->whoami() == TimerParameter::IDURLCache)
+    {
+        checkCachedURLs();
+    }
 #endif
+#endif//ONLINE_SERVICES
+
 }
 
 void ContentManager::shutdown()
@@ -2158,6 +2170,145 @@ zmm::String ContentManager::getMimeTypeFromBuffer(void *buffer, size_t length)
 }
 #endif
 
+#ifdef YOUTUBE
+void ContentManager::checkCachedURLs()
+{
+    AUTOLOCK(urlcache_mutex);
+
+    time_t now = time(NULL);
+
+    log_debug("Checking cached URLs..stored: %d\n", cached_urls->size());
+    int count = 0;
+    int i = 0;
+
+    while (count < cached_urls->size())
+    {
+        Ref<CachedURL> cached = cached_urls->get(i);
+        if (cached != nil)
+        {
+            // do not increment index because remove unordered places the
+            // last array element into the removed slot
+            if ((cached->getLastAccessTime() + URL_CACHE_LIFETIME) < now)
+            {
+                log_debug("URL of object: %d, url: %s exceeds "
+                          "lifetime (%lld < %lld), purging...\n", 
+                          cached_urls->get(i)->getObjectID(), 
+                          cached_urls->get(i)->getURL().c_str(), 
+                        (long long)(cached->getLastAccessTime() + 
+                            URL_CACHE_LIFETIME), 
+                        (long long)now);
+                cached_urls->removeUnordered(i);
+            }
+            else
+                i++;
+        }
+        count++; 
+    }
+
+    log_debug("URL Cache check complete, remaining items: %d\n",
+            cached_urls->size());
+
+    if (cached_urls->size() > 0)
+    {
+        Ref<TimerParameter> url_cache_check(new 
+                TimerParameter(TimerParameter::IDURLCache, -1));
+
+        Timer::getInstance()->addTimerSubscriber(
+                AS_TIMER_SUBSCRIBER_SINGLETON(this), 
+                URL_CACHE_CHECK_INTERVAL, 
+                RefCast(url_cache_check, Object), true);
+    }
+}
+
+void ContentManager::cacheURL(zmm::Ref<CachedURL> url)
+{
+    AUTOLOCK(urlcache_mutex);
+    time_t oldest = time(NULL); 
+    int oldest_index = -1;
+    bool added = false;
+    int old_size = cached_urls->size();
+
+    log_debug("Request to cache id %d, URL %s\n", url->getObjectID(),
+              url->getURL().c_str());
+    for (int i = 0; i < cached_urls->size(); i++)
+    {
+        Ref<CachedURL> cached = cached_urls->get(i);
+        if (cached != nil)
+        {
+            // get time of the first replacement candidate
+            if (cached->getLastAccessTime() < oldest)
+            {
+                oldest = cached->getLastAccessTime();
+                oldest_index = i;
+            }
+
+            // this is an update for the same object 
+            if (url->getObjectID() == cached->getObjectID())
+            {
+                log_debug("Updating cache for object %d\n", url->getObjectID());
+                cached_urls->set(url, i);
+                added = true;
+                break;
+            }
+        }
+    }
+
+    if (!added)
+    {
+        // if our storage capacity is exceeded, we will purge an existing item
+        if (cached_urls->size() >= MAX_CACHED_URLS)
+        {
+            log_debug("Checking if we need to remove something old...");
+            if ((oldest_index > -1) && (oldest_index <= MAX_CACHED_URLS))
+            {
+                log_debug("Removing old url from cache of object %d\n", 
+                        cached_urls->get(oldest_index)->getObjectID());
+                cached_urls->removeUnordered(oldest_index);
+            }
+            else
+            {
+                throw _Exception(_("Index exceeds URL cache size: ") +
+                                 String::from(oldest_index));
+            }
+        }
+           
+        log_debug("Appeinding url to the cache: %d\n", url->getObjectID());
+        cached_urls->append(url);
+    }
+
+    if ((cached_urls->size() > 0) && (old_size == 0)) 
+    {
+        log_debug("URL Cache is not empty, adding invalidation timer!\n");
+        Ref<TimerParameter> url_cache_check(new 
+                TimerParameter(TimerParameter::IDURLCache, -1));
+
+        Timer::getInstance()->addTimerSubscriber(
+                AS_TIMER_SUBSCRIBER_SINGLETON(this), 
+                URL_CACHE_CHECK_INTERVAL, 
+                RefCast(url_cache_check, Object), true);
+    }
+}
+
+String ContentManager::getCachedURL(int objectID)
+{
+    AUTOLOCK(urlcache_mutex);
+    log_debug("Asked for an url from cache...\n");
+    for (int i = 0; i < cached_urls->size(); i++)
+    {
+        Ref<CachedURL> cached = cached_urls->get(i);
+        if (cached != nil)
+        {
+            if (cached->getObjectID() == objectID)
+            {
+                log_debug("Found URL in cache for object ID %d, URL: %s\n",
+                        objectID, cached->getURL().c_str());
+                return cached->getURL();
+            }
+        }
+    }
+    return nil;
+}
+#endif
 
 CMTask::CMTask() : Object()
 {

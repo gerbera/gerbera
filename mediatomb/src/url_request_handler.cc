@@ -144,6 +144,7 @@ void URLRequestHandler::get_info(IN const char *filename, OUT struct File_Info *
             st = u->getInfo(url);
             info->file_length = st->getSize();
             header = _("Accept-Ranges: bytes");
+            log_debug("URL used for request: %s\n", st->getURL().c_str());
         }
         catch (Exception ex)
         {
@@ -259,6 +260,7 @@ Ref<IOHandler> URLRequestHandler::open(IN const char *filename, OUT struct File_
             st = u->getInfo(url);
             info->file_length = st->getSize();
             header = _("Accept-Ranges: bytes");
+            log_debug("URL used for request: %s\n", st->getURL().c_str());
         }
         catch (Exception ex)
         {
