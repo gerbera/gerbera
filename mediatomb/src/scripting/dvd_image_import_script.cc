@@ -2,12 +2,12 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    import_script.cc - this file is part of MediaTomb.
+    dvd_image_import_script.cc - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
     
-    Copyright (C) 2006-2008 Gena Batyan <bgeradz@mediatomb.cc>,
+    Copyright (C) 2006-2009 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
     
@@ -24,10 +24,10 @@
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
     
-    $Id: import_script.cc 1818 2008-05-22 22:22:28Z jin_eld $
+    $Id$
 */
 
-/// \file import_script.cc
+/// \file dvd_image_import_script.cc
 
 #ifdef HAVE_CONFIG_H
     #include "autoconfig.h"

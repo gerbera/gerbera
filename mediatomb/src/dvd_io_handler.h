@@ -2,12 +2,12 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    dvd_io_handler.h - this dvd is part of MediaTomb.
+    dvd_io_handler.h - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
     
-    Copyright (C) 2006-2008 Gena Batyan <bgeradz@mediatomb.cc>,
+    Copyright (C) 2006-2009 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
     
@@ -24,10 +24,11 @@
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
     
-    $Id: dvd_io_handler.h 1698 2008-02-23 20:48:30Z lww $
+    $Id$
 */
 
-/// \dvd dvd_io_handler.h
+/// \file dvd_io_handler.h
+
 /// \brief Definition of the DVDIOHandler class.
 #ifndef __DVD_IO_HANDLER_H__
 #define __DVD_IO_HANDLER_H__

@@ -7,7 +7,7 @@
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
     
-    Copyright (C) 2006-2008 Gena Batyan <bgeradz@mediatomb.cc>,
+    Copyright (C) 2006-2009 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
     
@@ -24,7 +24,7 @@
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
     
-    $Id: dvdnav_read.cc 1698 2008-02-23 20:48:30Z lww $
+    $Id$
 */
 
 /*
@@ -38,7 +38,7 @@
     Henk Vergonet, licensed under GPL version 2.
  */
 
-/// \file dvd_read.cc 
+/// \file dvdnav_read.cc
 
 
 #ifdef HAVE_CONFIG_H

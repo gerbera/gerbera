@@ -2,12 +2,12 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    weborama_service.h - this file is part of MediaTomb.
+    atrailers_service.h - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
     
-    Copyright (C) 2006-2008 Gena Batyan <bgeradz@mediatomb.cc>,
+    Copyright (C) 2006-2009 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
     
@@ -24,10 +24,10 @@
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
     
-    $Id: weborama_service.h 1811 2008-05-14 16:48:32Z jin_eld $
+    $Id$
 */
 
-/// \file weborama_service.h
+/// \file atrailers_service.h
 /// \brief Definition of the ATrailersService class.
 
 #ifdef ATRAILERS

@@ -11,7 +11,7 @@ foreach (@ARGV)
     my $id_keyword = '$'.'Id'.'$';
     
     $filename =~ s/\.sql\.tmpl\.h/_create_sql\.h/;
-    my $current = '2008';
+    my $current = '2009';
     
     my $new_header_main = 
 '    MediaTomb - http://www.mediatomb.cc/
