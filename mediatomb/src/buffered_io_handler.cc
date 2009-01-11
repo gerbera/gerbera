@@ -99,15 +99,25 @@ void BufferedIOHandler::threadProc()
         if (empty)
             a = b = 0;
         
-        if (doSeek && ! empty && seekWhence == SEEK_CUR && seekOffset > 0)
+        if (doSeek && ! empty && 
+                (
+                    seekWhence == SEEK_SET ||
+                    (seekWhence == SEEK_CUR && seekOffset > 0)
+                )
+            )
         {
             int currentFillSize = b - a;
             if (currentFillSize <= 0)
                 currentFillSize += bufSize;
             
-            if (seekOffset <= currentFillSize)
+            int relSeek = seekOffset;
+            if (seekWhence == SEEK_SET)
+                relSeek -= posRead;
+            
+            if (relSeek <= currentFillSize)
             { // we have everything we need in the buffer already
-                a += seekOffset;
+                a += relSeek;
+                posRead += relSeek;
                 if (a >= bufSize)
                     a -= bufSize;
                 if (a == b)
@@ -123,8 +133,8 @@ void BufferedIOHandler::threadProc()
             }
         }
         
-        // note: seeking could be optimized some more (backward seeking;
-        // absolute seeking..) but this should suffice for now
+        // note: seeking could be optimized some more (backward seeking)
+        // but this should suffice for now
         
         if (doSeek)
         { // seek not been processed yet

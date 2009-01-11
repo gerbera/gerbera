@@ -50,19 +50,16 @@ CurlIOHandler::CurlIOHandler(String URL, CURL *curl_handle, size_t bufSize, size
     this->URL = URL;
     this->external_curl_handle = (curl_handle != NULL);
     this->curl_handle = curl_handle;
-    bytesCurl = 0;
+    //bytesCurl = 0;
     signalAfterEveryRead = true;
     
-    // test it first!
     // still todo:
-    // * calculate relative seek correctly
     // * optimize seek if data already in buffer
-    //seekEnabled = true;
+    seekEnabled = true;
 }
 
 void CurlIOHandler::open(IN enum UpnpOpenFileMode mode)
 {
-    
     if (curl_handle == NULL)
     {
         curl_handle = curl_easy_init();
@@ -97,10 +94,15 @@ void CurlIOHandler::threadProc()
     curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1);
     curl_easy_setopt(curl_handle, CURLOPT_MAXREDIRS, -1);
     
+    bool logEnabled;
 #ifdef TOMBDEBUG
-    curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1);
+    logEnabled = !ConfigManager::isDebugLogging();
+#else
+    logEnabled = ConfigManager::isDebugLogging();
 #endif
-
+    if (logEnabled)
+        curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1);
+    
     //curl_easy_setopt(curl_handle, CURLOPT_CONNECTTIMEOUT,
     
     //proxy..
@@ -117,18 +119,24 @@ void CurlIOHandler::threadProc()
             log_debug("SEEK: %lld %d\n", seekOffset, seekWhence);
             
             if (seekWhence == SEEK_SET)
+            {
+                posRead = seekOffset;
                 curl_easy_setopt(curl_handle, CURLOPT_RESUME_FROM_LARGE, seekOffset);
+            }
             else if (seekWhence == SEEK_CUR)
             {
-                #warning is this position correct?
-                bytesCurl += seekOffset;
-                curl_easy_setopt(curl_handle, CURLOPT_RESUME_FROM_LARGE, bytesCurl);
+                posRead += seekOffset;
+                curl_easy_setopt(curl_handle, CURLOPT_RESUME_FROM_LARGE, posRead);
             }
             else
             {
                 log_error("CurlIOHandler currently does not support SEEK_END\n");
                 assert(1);
             }
+            
+            /// \todo should we do that?
+            waitForInitialFillSize = (initialFillSize > 0);
+            
             doSeek = false;
             cond->signal();
         }
@@ -163,10 +171,49 @@ size_t CurlIOHandler::curlCallback(void *ptr, size_t size, size_t nmemb, void *d
     int bufFree = 0;
     do
     {
-        if (ego->doSeek)
+        if (ego->doSeek && ! ego->empty && 
+                (
+                    ego->seekWhence == SEEK_SET ||
+                    (ego->seekWhence == SEEK_CUR && ego->seekOffset > 0)
+                )
+            )
         {
+            int currentFillSize = ego->b - ego->a;
+            if (currentFillSize <= 0)
+                currentFillSize += ego->bufSize;
+            
+            int relSeek = ego->seekOffset;
+            if (ego->seekWhence == SEEK_SET)
+                relSeek -= ego->posRead;
+            
+            if (relSeek <= currentFillSize)
+            { // we have everything we need in the buffer already
+                ego->a += relSeek;
+                ego->posRead += relSeek;
+                if (ego->a >= ego->bufSize)
+                    ego->a -= ego->bufSize;
+                if (ego->a == ego->b)
+                {
+                    ego->empty = true;
+                    ego->a = ego->b = 0;
+                }
+                /// \todo do we need to wait for initialFillSize again?
+            
+                ego->doSeek = false;
+                ego->cond->signal();
+            }
+        }
+        
+        // note: seeking could be optimized some more (backward seeking)
+        // but this should suffice for now
+        
+        if (ego->doSeek)
+        { // seek not been processed yet
             ego->a = ego->b = 0;
             ego->empty = true;
+            
+            // terminate this request, because we need a new request
+            // after the seek
             return 0;
         }
         
@@ -209,7 +256,7 @@ size_t CurlIOHandler::curlCallback(void *ptr, size_t size, size_t nmemb, void *d
     
     AUTORELOCK();
     
-    ego->bytesCurl += wantWrite;
+    //ego->bytesCurl += wantWrite;
     ego->b += wantWrite;
     if (ego->b >= ego->bufSize)
         ego->b -= ego->bufSize;

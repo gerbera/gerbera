@@ -52,7 +52,7 @@ private:
     CURL *curl_handle;
     bool external_curl_handle;
     zmm::String URL;
-    off_t bytesCurl;
+    //off_t bytesCurl;
     
     static size_t curlCallback(void *ptr, size_t size, size_t nmemb, void *stream);
     virtual void threadProc();

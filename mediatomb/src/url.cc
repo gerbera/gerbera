@@ -67,8 +67,18 @@ Ref<StringBuffer> URL::download(String URL, long *HTTP_retcode,
     Ref<StringBuffer> buffer(new StringBuffer(buffer_hint));
 
     curl_easy_reset(curl_handle);
+    
     if (verbose)
-        curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1);
+    {
+        bool logEnabled;
+#ifdef TOMBDEBUG
+        logEnabled = !ConfigManager::isDebugLogging();
+#else
+        logEnabled = ConfigManager::isDebugLogging();
+#endif
+        if (logEnabled)
+            curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1);
+    }
 
     curl_easy_setopt(curl_handle, CURLOPT_URL, URL.c_str());
     curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, error_buffer);
@@ -135,7 +145,7 @@ Ref<URL::Stat> URL::getInfo(String URL, CURL *curl_handle)
             throw _Exception(_("Invalid curl handle!\n"));
     }
 
-    Ref<StringBuffer> buffer = download(URL, &retcode, curl_handle, true);
+    Ref<StringBuffer> buffer = download(URL, &retcode, curl_handle, true, true, true);
     if (retcode != 200)
     {
         if (cleanup)

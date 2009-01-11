@@ -57,7 +57,7 @@ IOHandlerBufferHelper::IOHandlerBufferHelper(size_t bufSize, size_t initialFillS
     threadShutdown = false;
     eof = false;
     readError = false;
-    a = b = 0;
+    a = b = posRead = 0;
     empty = true;
     signalAfterEveryRead = false;
     checkSocket = false;
@@ -148,6 +148,8 @@ int IOHandlerBufferHelper::read(OUT char *buf, IN size_t length)
         if (! signalled)
             cond->signal();
     }
+    
+    posRead += didRead;
     return didRead;
 }
 

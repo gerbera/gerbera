@@ -76,6 +76,7 @@ protected:
     bool empty;
     size_t a;
     size_t b;
+    off_t posRead;
     
     // seek stuff...
     bool seekEnabled;
