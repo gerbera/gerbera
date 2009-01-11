@@ -64,7 +64,8 @@ URLRequestHandler::URLRequestHandler() : RequestHandler()
 void URLRequestHandler::get_info(IN const char *filename, OUT struct File_Info *info)
 {
     log_debug("start\n");
-
+        
+    String header;
     String mimeType;
     int objectID;
 #ifdef EXTERNAL_TRANSCODING
@@ -142,6 +143,7 @@ void URLRequestHandler::get_info(IN const char *filename, OUT struct File_Info *
         { 
             st = u->getInfo(url);
             info->file_length = st->getSize();
+            header = _("Accept-Ranges: bytes");
         }
         catch (Exception ex)
         {
@@ -155,7 +157,11 @@ void URLRequestHandler::get_info(IN const char *filename, OUT struct File_Info *
     info->is_readable = 1;
     info->last_modified = 0;
     info->is_directory = 0;
-    info->http_header = NULL;
+
+    if (string_ok(header))
+        info->http_header = ixmlCloneDOMString(header.c_str());
+    else
+        info->http_header = NULL;
 
     info->content_type = ixmlCloneDOMString(mimeType.c_str());
     log_debug("web_get_info(): end\n");
@@ -167,6 +173,7 @@ Ref<IOHandler> URLRequestHandler::open(IN const char *filename, OUT struct File_
 {
     int objectID;
     String mimeType;
+    String header;
 #ifdef EXTERNAL_TRANSCODING
     String tr_profile;
 #endif
@@ -219,6 +226,7 @@ Ref<IOHandler> URLRequestHandler::open(IN const char *filename, OUT struct File_
         url = item->getLocation();
     }
 
+
     log_debug("Online content url: %s\n", url.c_str());
 
     info->is_readable = 1;
@@ -250,6 +258,7 @@ Ref<IOHandler> URLRequestHandler::open(IN const char *filename, OUT struct File_
         {
             st = u->getInfo(url);
             info->file_length = st->getSize();
+            header = _("Accept-Ranges: bytes");
         }
         catch (Exception ex)
         {
@@ -259,6 +268,9 @@ Ref<IOHandler> URLRequestHandler::open(IN const char *filename, OUT struct File_
         mimeType = item->getMimeType();
         info->content_type = ixmlCloneDOMString(mimeType.c_str());
     }
+
+    if (string_ok(header))
+        info->http_header = ixmlCloneDOMString(header.c_str());
 
     ///\todo make curl io handler configurable for url request handler
     Ref<IOHandler> io_handler(new CurlIOHandler(url, NULL, 1024*1024, 0));
