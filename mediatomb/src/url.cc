@@ -40,6 +40,7 @@
 #include "rexp.h"
 #include "url.h"
 #include "tools.h"
+#include "config_manager.h"
 
 using namespace zmm;
 
