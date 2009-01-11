@@ -42,7 +42,7 @@ class ReentrantArray : public zmm::Array<T>
 public:
     ReentrantArray() : zmm::Array<T>()
     {
-        mutex = zmm::Ref<Mutex>(new Mutex(true));
+        mutex = zmm::Ref<Mutex>(new Mutex());
     }
     inline void append(zmm::Ref<T> el)
     {
