@@ -44,6 +44,10 @@ public:
     {
         mutex = zmm::Ref<Mutex>(new Mutex());
     }
+    ReentrantArray(int capacity) : zmm::Array<T>(capacity)
+    {
+        mutex = zmm::Ref<Mutex>(new Mutex());
+    }
     inline void append(zmm::Ref<T> el)
     {
         mutex->lock();
