@@ -52,15 +52,17 @@ public:
         ///
         /// \param size size of the media in bytes
         /// \param mimetype mime type of the media
-        Stat(off_t size, zmm::String mimetype)
+        Stat(zmm::String url, off_t size, zmm::String mimetype)
         {
-            this->size = size; this->mimetype = mimetype; 
+            this->url = url; this->size = size; this->mimetype = mimetype; 
         }
 
+        zmm::String getURL()        { return url; }
         off_t getSize()             { return size; }
         zmm::String getMimeType()   { return mimetype; }
     
     protected:
+        zmm::String url;
         off_t size;
         zmm::String mimetype;
     };

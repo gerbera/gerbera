@@ -84,6 +84,8 @@ Ref<StringBuffer> URL::download(String URL, long *HTTP_retcode,
     curl_easy_setopt(curl_handle, CURLOPT_URL, URL.c_str());
     curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, error_buffer);
 
+    /// \todo it would be a good idea to allow both variants, i.e. retrieve
+    /// the headers and data in one go when needed
     if (only_header)
     {
         curl_easy_setopt(curl_handle, CURLOPT_NOBODY, 1);
@@ -135,8 +137,10 @@ Ref<URL::Stat> URL::getInfo(String URL, CURL *curl_handle)
     CURLcode res;
     double cl;
     char *ct;
+    char *c_url;
     char error_buffer[CURL_ERROR_SIZE] = {'\0'};
     String mt;
+    String used_url;
 
     if (curl_handle == NULL)
     {
@@ -225,7 +229,21 @@ Ref<URL::Stat> URL::getInfo(String URL, CURL *curl_handle)
     
     log_debug("Extracted content length: %lld\n", (long long)cl);
 
-    Ref<Stat> st(new Stat((off_t)cl, mt));
+    res = curl_easy_getinfo(curl_handle, CURLINFO_EFFECTIVE_URL, &c_url);
+    if (res != CURLE_OK)
+    {
+        log_error("%s\n", error_buffer);
+        if (cleanup)
+            curl_easy_cleanup(curl_handle);
+        throw _Exception(String(error_buffer));
+    }
+
+    if (c_url == NULL)
+        used_url = URL;
+    else
+        used_url = String(c_url);
+
+    Ref<Stat> st(new Stat(used_url, (off_t)cl, mt));
 
     if (cleanup)
         curl_easy_cleanup(curl_handle);
