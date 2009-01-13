@@ -300,6 +300,8 @@ int String::operator==(char c)
 
 String& String::operator=(String other)
 {
+    if (this == &other)
+        return *this;
     if(base)
         base->release();
     base = other.base;
