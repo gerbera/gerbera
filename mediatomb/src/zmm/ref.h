@@ -64,6 +64,8 @@ public:
 
     Ref& operator=(const Ref& other)
     {
+        if (this == &other)
+            return *this;
         if(_ptr)
             _ptr->release();
         _ptr = other._ptr;
