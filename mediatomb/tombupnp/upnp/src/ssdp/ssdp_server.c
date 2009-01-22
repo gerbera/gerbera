@@ -966,7 +966,7 @@ get_ssdp_sockets( MiniServerSockArray * out )
         return UPNP_E_SOCKET_ERROR;
     }
     
-    #ifdef __FreeBSD__
+    #if defined(__FreeBSD__) || defined(__NetBSD__)
     if( setsockopt( ssdpSock, SOL_SOCKET, SO_REUSEPORT,
                     ( char * )&onOff, sizeof( onOff ) ) != 0 ) {
 

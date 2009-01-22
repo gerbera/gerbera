@@ -61,7 +61,7 @@
 #include "config.h"
 #include "uri.h"
 
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__NetBSD__)
     #ifdef HAVE_LWRES_NETDB_H
         #include <lwres/netdb.h>
     #endif

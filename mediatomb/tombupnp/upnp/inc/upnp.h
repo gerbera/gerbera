@@ -58,7 +58,7 @@
 //@{
 
 #include <stdio.h>
-#if defined(__FreeBSD__) || defined(__APPLE__)
+#if defined(__FreeBSD__) || defined(__APPLE__) || defined(__NetBSD__)
 #include <time.h>
 #include <sys/types.h>
 #endif

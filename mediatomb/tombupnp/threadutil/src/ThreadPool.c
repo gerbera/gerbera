@@ -372,7 +372,7 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
     gettimeofday( &t, NULL );
 #if defined(WIN32)
     srand( ( unsigned int )(t.tv_usec/1000) + (unsigned int)ithread_get_current_thread_id(  ).p );
-#elif defined(__FreeBSD__) || defined (__APPLE__) || defined(__OpenBSD__)
+#elif defined(__FreeBSD__) || defined (__APPLE__) || defined(__OpenBSD__) || defined(__NetBSD__)
     srand( ( unsigned int )(t.tv_usec/1000) + (unsigned int)ithread_get_current_thread_id(  ) );
 #else
     srand( ( unsigned int )(t.tv_usec/1000) + ithread_get_current_thread_id(  ) );
