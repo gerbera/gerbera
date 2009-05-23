@@ -303,8 +303,8 @@ String hex_decode_string(String encoded)
     Ref<StringBuffer> buf(new StringBuffer(len / 2));
     for (int i = 0; i < len; i += 2)
     {
-        char *chi = strchr(HEX_CHARS, ptr[i]);
-        char *clo = strchr(HEX_CHARS, ptr[i + 1]);
+        const char *chi = strchr(HEX_CHARS, ptr[i]);
+        const char *clo = strchr(HEX_CHARS, ptr[i + 1]);
         int hi, lo;
         
         if (chi)
@@ -397,7 +397,7 @@ String url_unescape(String str)
             char clo = data[i++];
             int hi, lo;
 
-            char *pos;
+            const char *pos;
 
             pos = strchr(hex, chi);
             if (!pos)
