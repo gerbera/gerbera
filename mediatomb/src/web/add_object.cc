@@ -123,10 +123,11 @@ Ref<CdsObject> web::addObject::addActiveItem(int parentID)
     /// \todo is there a default setting? autoscan? import settings?
 
 //    Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
-    Ref<CdsResource> resource = item->getResource(0); // added by m-handler
-    resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
-                           renderProtocolInfo(tmp));
-    item->addResource(resource);
+
+//    Ref<CdsResource> resource = item->getResource(0); // added by m-handler
+//    resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
+//                           renderProtocolInfo(tmp));
+//    item->addResource(resource);
 
     return RefCast(item, CdsObject);
 }
