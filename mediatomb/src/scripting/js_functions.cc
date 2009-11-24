@@ -233,7 +233,11 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         }
         else
         {
-            path = i2i->convert(path);
+            if (self->whoami() == S_PLAYLIST)
+                path = p2i->convert(path);
+            else
+                path = i2i->convert(path);
+            
             id = cm->addContainerChain(path, containerclass);
         }
 
@@ -249,6 +253,7 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
             {
                 if (pcd_id == INVALID_OBJECT_ID)
                     return JS_TRUE;
+                cds_obj->setFlag(OBJECT_FLAG_PLAYLIST_REF);
                 cds_obj->setRefID(pcd_id);
             }
             else
