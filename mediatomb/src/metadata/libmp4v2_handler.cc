@@ -54,7 +54,7 @@
 #undef TRUE
 #undef FALSE
 
-#include <mp4.h>
+#include LIBMP4V2_INCLUDE
 
 using namespace zmm;
 

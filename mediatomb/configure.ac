@@ -1513,9 +1513,14 @@ if test "x$FFMPEG_OPTION_ENABLED" = xyes; then
     # the header location of the older and newer ffmpeg version is different
     MT_CHECK_HEADER([avformat], [ffmpeg/avformat], [pass])
     if test "x$AVFORMAT_STATUS" != xyes; then
-        MT_CHECK_HEADER([avformat], [libavformat/avformat])
+        MT_CHECK_HEADER([avformat], [libavformat/avformat], [pass])
         if test "x$AVFORMAT_STATUS" = xyes; then
             AC_DEFINE_UNQUOTED([AVFORMAT_INCLUDE], [<libavformat/avformat.h>], [libavformat/avformat.h])
+        else
+            MT_CHECK_HEADER([avformat], [ffmpeg/libavformat/avformat])
+            if test "x$AVFORMAT_STATUS" = xyes; then
+              AC_DEFINE_UNQUOTED([AVFORMAT_INCLUDE], [<ffmpeg/libavformat/avformat.h>], [ffmpeg/libavformat/avformat.h])
+            fi
         fi
     else
        AC_DEFINE_UNQUOTED([AVFORMAT_INCLUDE], [<ffmpeg/avformat.h>], [ffmpeg/avformat.h])
@@ -1654,21 +1659,33 @@ MT_CHECK_REQUIRED_PACKAGE([expat], [expat], [expat], [XML_ParserCreate])
 
 ####### libmp4v2
 
+MP4_HEADER="mp4"
+
+# prefer newer mp4v2
+MT_CHECK_HEADER([libmp4v2], [mp4v2], [pass])
+
+if test "x$LIBMP4V2_STATUS" = xyes; then
+    MP4_HEADER="mp4v2"
+fi
+
+LIBMP4V2_STATUS=
+
 MT_CHECK_OPTIONAL_PACKAGE([libmp4v2], [disable],
                  [libmp4v2 support for mp4 metadata extraction],
-                 [mp4], [mp4v2], [MP4Read]) 
+                 [$MP4_HEADER], [mp4v2], [MP4Read]) 
 
 if test "x$LIBMP4V2_STATUS" = xyes; then
    CFLAGS="$CFLAGS $LIBMP4V2_CFLAGS"
    CXXFLAGS="$CXXFLAGS $LIBMP4V2_CFLAGS"
    LDFLAGS="$LDFLAGS $LIBMP4V2_LDFLAGS $LIBMP4V2_LIBS"
+   AC_DEFINE_UNQUOTED([LIBMP4V2_INCLUDE], [<$MP4_HEADER.h>], [$MP4_HEADER.h])
    AC_LANG_SAVE
    AC_LANG_CPLUSPLUS
-   AC_MSG_CHECKING([for MP4GetMetadataCoverArtCount() libmp4v2])
+   AC_MSG_CHECKING([for MP4GetMetadataCoverArtCount() in libmp4v2])
    AC_COMPILE_IFELSE(
         [AC_LANG_PROGRAM(
             [
-                #include <mp4.h>
+                #include <$MP4_HEADER.h>
             ],
             [
                 (void)MP4GetMetadataCoverArtCount(0);
@@ -1687,7 +1704,7 @@ if test "x$LIBMP4V2_STATUS" = xyes; then
    AC_COMPILE_IFELSE(
         [AC_LANG_PROGRAM(
             [
-                #include <mp4.h>
+                #include <$MP4_HEADER.h>
             ],
             [
                 (void)MP4GetTrackAudioChannels(0, 0);
