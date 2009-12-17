@@ -1662,10 +1662,10 @@ MT_CHECK_REQUIRED_PACKAGE([expat], [expat], [expat], [XML_ParserCreate])
 MP4_HEADER="mp4"
 
 # prefer newer mp4v2
-MT_CHECK_HEADER([libmp4v2], [mp4v2], [pass])
+MT_CHECK_HEADER([libmp4v2], [mp4v2/mp4v2], [pass])
 
 if test "x$LIBMP4V2_STATUS" = xyes; then
-    MP4_HEADER="mp4v2"
+    MP4_HEADER="mp4v2/mp4v2"
 fi
 
 LIBMP4V2_STATUS=
