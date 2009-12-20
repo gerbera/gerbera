@@ -78,6 +78,14 @@ int restart_flag = 0;
 pthread_t main_thread_id;
 Ref<Timer> timer = nil;
 
+void print_copyright()
+{
+    printf("\nMediaTomb UPnP Server version %s - %s\n\n", VERSION, 
+            DESC_MANUFACTURER_URL);
+    printf("===============================================================================\n");
+    printf("Copyright 2005-2008 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer.\n");
+    printf("MediaTomb is free software, covered by the GNU General Public License version 2\n\n");
+}
 void signal_handler(int signum);
 
 int main(int argc, char **argv, char **envp)
@@ -231,6 +239,7 @@ int main(int argc, char **argv, char **envp)
             case 'D':
                 
 #ifndef DEBUG_LOG_ENABLED
+                print_copyright();
                 printf("ERROR: MediaTomb wasn't compiled with debug output, but was run with -D/--debug.\n");
                 exit(EXIT_FAILURE);
 #endif
@@ -239,6 +248,7 @@ int main(int argc, char **argv, char **envp)
                 break;
             case '?':
             case 'h':
+                print_copyright();
                 printf("Usage: mediatomb [options]\n\
                         \n\
 Supported options:\n\
@@ -267,8 +277,11 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
                 switch (opt_index)
                 {
                 case 13: // --compile-info
-                    printf("Compile info: %s\n", COMPILE_INFO);
-                    exit(EXIT_FAILURE);
+                    print_copyright();
+                    printf("Compile info:\n");
+                    printf("-------------\n");
+                    printf("%s\n\n", COMPILE_INFO);
+                    exit(EXIT_SUCCESS);
                     break;
                 case 14: // --version
                     print_version = true;
@@ -285,12 +298,8 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
 
     if (print_version || ! daemon)
     {
-        printf("\nMediaTomb UPnP Server version %s - %s\n\n", VERSION, 
-                DESC_MANUFACTURER_URL);
-        printf("===============================================================================\n");
-        printf("Copyright 2005-2008 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer.\n");
-        printf("MediaTomb is free software, covered by the GNU General Public License version 2\n\n");
-        
+        print_copyright();
+       
         if (print_version)
             exit(EXIT_FAILURE);
     }
