@@ -1265,6 +1265,7 @@ process_request( IN http_message_t * req,
     request_doc = NULL;
     finfo.content_type = NULL;
     finfo.http_header = NULL;
+    finfo.force_chunked = FALSE;
     *Fp = NULL;
     //membuffer_init( &content_type );
     alias_grabbed = FALSE;
