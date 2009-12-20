@@ -110,7 +110,7 @@ void MysqlStorage::checkMysqlThreadInit()
 
 void MysqlStorage::threadCleanup()
 {
-    log_info("thread cleanup; thread_id=%d\n", pthread_self());
+    log_debug("thread cleanup; thread_id=%d\n", pthread_self());
     if (pthread_getspecific(mysql_init_key) != NULL)
     {
         mysql_thread_end();
