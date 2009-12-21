@@ -481,6 +481,8 @@ String ConfigManager::createDefaultConfig(String userhome)
                           _(DEFAULT_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY));
     ffth->appendTextChild(_("workaround-bugs"),
                           _(DEFAULT_FFMPEGTHUMBNAILER_WORKAROUND_BUGS));
+    ffth->appendTextChild(_("image-quality"),
+                         String::from(DEFAULT_FFMPEGTHUMBNAILER_IMAGE_QUALITY));
 
     extended->appendElementChild(ffth);
 #endif
@@ -1735,6 +1737,23 @@ void ConfigManager::validate(String serverhome)
 
         NEW_BOOL_OPTION(temp == YES ? true : false);
         SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_WORKAROUND_BUGS);
+
+        temp_int = getIntOption(_("/server/extended-runtime-options/"
+                                  "ffmpegthumbnailer/image-quality"), 
+                                   DEFAULT_FFMPEGTHUMBNAILER_IMAGE_QUALITY);
+
+        if (temp_int < 0)
+            throw _Exception(_("Error in config file: ffmpegthumbnailer - "
+                               "invalid value attribute value in "
+                               "<image-quality> tag, allowed values: 0-10"));
+
+        if (temp_int > 10)
+            throw _Exception(_("Error in config file: ffmpegthumbnailer - "
+                               "invalid value attribute value in "
+                               "<image-quality> tag, allowed values: 0-10"));
+
+        NEW_INT_OPTION(temp_int);
+        SET_INT_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_QUALITY);
     }
 #endif
 

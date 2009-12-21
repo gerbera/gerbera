@@ -1,8 +1,9 @@
-#LyX 1.5.5 created this file. For more info see http://www.lyx.org/
-\lyxformat 276
+#LyX 1.6.4 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
 \begin_document
 \begin_header
 \textclass docbook
+\use_default_options false
 \language english
 \inputencoding auto
 \font_roman default
@@ -13,9 +14,11 @@
 \font_osf false
 \font_sf_scale 100
 \font_tt_scale 100
+
 \graphics default
 \paperfontsize default
 \spacing single
+\use_hyperref false
 \papersize a4paper
 \use_geometry true
 \use_amsmath 0
@@ -51,57 +54,57 @@ MediaTomb - UPnP MediaServer
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <copyright>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
   <year>2005</year>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
   <holder>Gena Batsyan</holder>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
   <holder>Sergey Bostandzhyan</holder>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </copyright>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <copyright>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
   <year>2006-2008</year>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
   <holder>Gena Batsyan</holder>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
   <holder>Sergey Bostandzhyan</holder>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
   <holder>Leonhard Wimmer</holder>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </copyright>
 \end_layout
@@ -115,7 +118,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <releaseinfo>This documentation is valid for MediaTomb version 0.12.0.</releaseinfo
 >
@@ -130,7 +133,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <legalnotice>
 \end_layout
@@ -148,7 +151,7 @@ THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY! USE AT YOUR OWN RISK!
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </legalnotice>
 \end_layout
@@ -171,7 +174,8 @@ MediaTomb is an open source (GPL) UPnP MediaServer with a nice web user
 \begin_layout Standard
 MediaTomb implements the UPnP MediaServer V 1.0 specification that can be
  found on 
-\begin_inset LatexCommand url
+\begin_inset CommandInset href
+LatexCommand href
 name "http://www.upnp.org/"
 target "http://www.upnp.org/"
 
@@ -310,7 +314,7 @@ In order to compile MediaTomb you will have to install the following packages.:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -322,7 +326,8 @@ status open
 
 \begin_layout Standard
 sqlite (version > 3.x) 
-\begin_inset LatexCommand url
+\begin_inset CommandInset href
+LatexCommand href
 name "http://www.sqlite.org/"
 target "http://www.sqlite.org/"
 
@@ -337,7 +342,7 @@ REQUIRED (if mysql is not available)
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -349,7 +354,8 @@ status open
 
 \begin_layout Standard
 mysql client library (version > 4.0.x) 
-\begin_inset LatexCommand url
+\begin_inset CommandInset href
+LatexCommand href
 name "http://mysql.org/"
 target "http://mysql.org/"
 
@@ -364,7 +370,7 @@ REQUIRED (if sqlite is not available)
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -376,7 +382,8 @@ status open
 
 \begin_layout Standard
 expat 
-\begin_inset LatexCommand url
+\begin_inset CommandInset href
+LatexCommand href
 name "http://expat.sourceforge.net/"
 target "http://expat.sourceforge.net/"
 
@@ -396,7 +403,7 @@ Expat is a very good and robust XML parser, since most of UPnP is based
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -408,7 +415,8 @@ status open
 
 \begin_layout Standard
 zlib 
-\begin_inset LatexCommand url
+\begin_inset CommandInset href
+LatexCommand href
 name "http://www.zlib.net/"
 target "http://www.zlib.net/"
 
@@ -431,7 +439,7 @@ Zlib is a compression library that is available on most systems, we need
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -458,7 +466,7 @@ This is the 'file' package, it is used to determine the mime type of the
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -470,7 +478,8 @@ status open
 
 \begin_layout Standard
 js - SpiderMonkey JavaScript Engine 
-\begin_inset LatexCommand url
+\begin_inset CommandInset href
+LatexCommand href
 name "http://www.mozilla.org/js/spidermonkey/"
 target "http://www.mozilla.org/js/spidermonkey/"
 
@@ -499,7 +508,7 @@ This package is necessary to allow the user defined creation of virtual
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -511,7 +520,8 @@ status open
 
 \begin_layout Standard
 taglib 
-\begin_inset LatexCommand url
+\begin_inset CommandInset href
+LatexCommand href
 name "http://developer.kde.org/~wheeler/taglib.html"
 target "http://developer.kde.org/~wheeler/taglib.html"
 
@@ -545,7 +555,7 @@ It makes no sense to use taglib and id3lib at the same time, the configure
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -557,7 +567,8 @@ status open
 
 \begin_layout Standard
 id3lib 
-\begin_inset LatexCommand url
+\begin_inset CommandInset href
+LatexCommand href
 name "http://id3lib.sourceforge.net/"
 target "http://id3lib.sourceforge.net/"
 
@@ -579,7 +590,7 @@ This library retrieves id3 tags from mp3 files.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -591,7 +602,8 @@ status open
 
 \begin_layout Standard
 libexif 
-\begin_inset LatexCommand url
+\begin_inset CommandInset href
+LatexCommand href
 name "http://libexif.sourceforge.net/"
 target "http://libexif.sourceforge.net/"
 
@@ -614,7 +626,7 @@ You will need this library if you want to extract metadata from images,
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -626,7 +638,8 @@ status open
 
 \begin_layout Standard
 curl 
-\begin_inset LatexCommand url
+\begin_inset CommandInset href
+LatexCommand href
 name "http://curl.haxx.se/"
 target "http://curl.haxx.se/"
 
@@ -647,7 +660,7 @@ curl is a library that allows to easily fetch content from the web, if you
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -659,7 +672,8 @@ status open
 
 \begin_layout Standard
 libextractor 
-\begin_inset LatexCommand url
+\begin_inset CommandInset href
+LatexCommand href
 name "http://gnunet.org/libextractor/"
 target "http://gnunet.org/libextractor/"
 
@@ -688,7 +702,7 @@ This library tries to gather metadata from all kinds of files (also .avi
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -700,7 +714,8 @@ status open
 
 \begin_layout Standard
 ffmpeg 
-\begin_inset LatexCommand url
+\begin_inset CommandInset href
+LatexCommand href
 name "http://ffmpeg.mplayerhq.hu/"
 target "http://ffmpeg.mplayerhq.hu/"
 
@@ -720,7 +735,7 @@ Currently ffmpeg is used to gather additional metadata from audio and video
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -732,7 +747,8 @@ status open
 
 \begin_layout Standard
 libffmpegthumbnailer 
-\begin_inset LatexCommand url
+\begin_inset CommandInset href
+LatexCommand href
 name "http://code.google.com/p/ffmpegthumbnailer/"
 target "http://code.google.com/p/ffmpegthumbnailer/"
 
@@ -758,7 +774,7 @@ Note: ffmpegthumbnailer support is only provided if MediaTomb is compiled
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -2136,7 +2152,8 @@ This option is useful in two cases: when the home directory can not be retrieved
  in a non standard location (for example, when setting up daemon mode).
  In the latter case you can combine this parameter with the parameter described
  in 
-\begin_inset LatexCommand ref
+\begin_inset CommandInset ref
+LatexCommand ref
 reference "sec:Config-Directory"
 
 \end_inset
@@ -2145,7 +2162,8 @@ reference "sec:Config-Directory"
 \end_layout
 
 \begin_layout Subsection
-\begin_inset LatexCommand label
+\begin_inset CommandInset label
+LatexCommand label
 name "sec:Config-Directory"
 
 \end_inset
@@ -2360,7 +2378,7 @@ Child tags:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -2402,7 +2420,7 @@ Specifies the port where the server will be listening for HTTP requests.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2441,7 +2459,7 @@ Specifies the IP address to bind to, by default one of the available interfaces
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2480,7 +2498,7 @@ Specifies the interface to bind to, by default one of the available interfaces
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2519,7 +2537,7 @@ Server friendly name, you will see this on your devices that you use to
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2559,7 +2577,7 @@ This tag sets the manufacturer URL of a UPnP device, a custom setting may
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2595,7 +2613,7 @@ This tag sets the model name of a UPnP device, a custom setting may be necessary
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2631,7 +2649,7 @@ This tag sets the model number of a UPnP device, a custom setting may be
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2665,7 +2683,7 @@ This tag sets the serial number of a UPnP device.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2718,7 +2736,7 @@ Attributes:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -2795,7 +2813,7 @@ Append the string specified in the presentationURL tag to the server ip
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -2809,7 +2827,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2851,7 +2869,7 @@ Unique Device Name, according to the UPnP spec it must be consistent throughout
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2887,7 +2905,7 @@ Server home - the server will search for the data that it needs relative
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2924,7 +2942,7 @@ Root directory for the web server, this is the location where device description
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2970,7 +2988,7 @@ hing.jar
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -3008,7 +3026,7 @@ Interval for broadcasting SSDP:alive messages
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -3047,7 +3065,7 @@ Adds specific tags to the protocolInfo attribute, this is required to enable
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -3088,7 +3106,7 @@ Note: independent of the above setting the container will be always visible
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -3123,7 +3141,7 @@ Selects the temporary directory that will be used by the server.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -3163,7 +3181,7 @@ The bookmark file offers an easy way to access the user interface, it is
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -3196,7 +3214,7 @@ Child tags:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -3234,7 +3252,7 @@ Specify a header to be added to the response.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -3248,7 +3266,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -3291,7 +3309,7 @@ This will limit title and description length of containers and items in
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -3305,7 +3323,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -3356,7 +3374,7 @@ Attributes:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -3406,7 +3424,7 @@ no
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -3440,7 +3458,7 @@ This setting specifies if icon tooltips should be shown in the web UI.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -3477,7 +3495,7 @@ The poll-interval is an integer value which specifies how often the UI will
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -3541,7 +3559,7 @@ automatic rescans
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -3559,7 +3577,7 @@ Child tags:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -3591,7 +3609,7 @@ Attributes:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -3641,7 +3659,7 @@ no
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -3678,7 +3696,7 @@ The session-timeout attribute specifies the timeout interval in minutes.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -3696,7 +3714,7 @@ Accounts can be defined as shown below:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -3733,7 +3751,7 @@ There can be multiple users, however this is mainly a feature for the future.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -3747,7 +3765,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -3787,7 +3805,7 @@ The values for the items per page drop down menu can be defined in the following
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -3830,7 +3848,7 @@ Note: this list must contain the default value, i.e.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -3844,7 +3862,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -3858,7 +3876,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -3888,7 +3906,7 @@ Defines the storage section - database selection is done here.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -3922,7 +3940,7 @@ Enables caching, this feature should improve the overall import speed.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -3936,7 +3954,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -3980,7 +3998,7 @@ mysql
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -4010,7 +4028,7 @@ Default: yes
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -4028,7 +4046,7 @@ Below are the sqlite driver options:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -4067,7 +4085,7 @@ The database location is relative to the server's home, if the sqlite database
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -4133,7 +4151,8 @@ synchronous
 .
  This setting will affect the performance of the database write operations.
  For more information about this option see the SQLite documentation: 
-\begin_inset LatexCommand url
+\begin_inset CommandInset href
+LatexCommand href
 name "http://www.sqlite.org/pragma.html#pragma_synchronous"
 target "http://www.sqlite.org/pragma.html#pragma_synchronous"
 
@@ -4146,7 +4165,7 @@ target "http://www.sqlite.org/pragma.html#pragma_synchronous"
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -4223,7 +4242,7 @@ fail
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -4251,7 +4270,7 @@ Backup parameters:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -4285,7 +4304,7 @@ Enables or disables database backup.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -4319,7 +4338,7 @@ Defines the backup interval in seconds.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -4333,7 +4352,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -4347,7 +4366,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -4369,7 +4388,7 @@ Defines the MySQL storage driver section.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -4403,7 +4422,7 @@ Enables or disables the MySQL driver.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -4414,7 +4433,8 @@ status open
 \end_layout
 
 \begin_layout Standard
-\begin_inset LatexCommand label
+\begin_inset CommandInset label
+LatexCommand label
 name "config-mysql"
 
 \end_inset
@@ -4426,7 +4446,7 @@ Below are the child tags for MySQL:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -4460,7 +4480,7 @@ This specifies the host where your MySQL database is running.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -4494,7 +4514,7 @@ This specifies the port where your MySQL database is running.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -4528,7 +4548,7 @@ This option sets the user name that will be used to connect to the database.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -4565,7 +4585,7 @@ Defines the password for the MySQL user.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -4599,7 +4619,7 @@ Name of the database that will be used by MediaTomb.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -4613,7 +4633,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -4627,7 +4647,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -4665,7 +4685,7 @@ Import options are only triggered when data is being imported into the database,
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -4721,7 +4741,7 @@ The following options allow to control the ffmpegthumbnailer library (these
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -4757,7 +4777,7 @@ The thumbnail size should not exceed 160x160 pixels, higher values can be
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -4792,7 +4812,7 @@ Time to seek to in the movie (percentage), values less than zero are not
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -4827,7 +4847,41 @@ Creates a filmstrip like border around the image, turn this option off if
 \begin_inset ERT
 status open
 
+\begin_layout Plain Layout
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<image-quality>8<image-quality>
+\end_layout
+
 \begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: 8
+\end_layout
+
+\begin_layout Standard
+Sets the image quality of the generated thumbnails.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -4864,7 +4918,7 @@ s for bugs in older ffmpeg versions.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -4878,7 +4932,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -4906,7 +4960,7 @@ The attributes of the tag have the following meaning:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -4941,7 +4995,7 @@ Enables or disables the marking of played items, seto to "yes" to enable
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -4996,7 +5050,7 @@ Note: some players (i.e.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -5014,7 +5068,7 @@ The following tag defines how played items should be marked:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -5049,7 +5103,7 @@ Specifies what string should be appended or prepended to the title of the
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -5084,7 +5138,7 @@ Specifies how a string should be added to the object's title, allowed values
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -5098,7 +5152,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -5112,7 +5166,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -5152,7 +5206,7 @@ Attributes:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -5196,7 +5250,7 @@ yes
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -5214,7 +5268,7 @@ Child tags:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -5257,7 +5311,7 @@ Defines the charset of the filesystem.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -5297,7 +5351,7 @@ Same as above, but defines the charset of the metadata (i.e.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -5325,7 +5379,7 @@ Defines the scripting section.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -5355,7 +5409,7 @@ Default: UTF-8
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -5373,7 +5427,7 @@ Below are the available scripting options:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -5412,7 +5466,7 @@ virtual container layout
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -5461,7 +5515,7 @@ disabled: only PC-Directory structure will be created, i.e.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -5480,7 +5534,7 @@ The virtual layout can be adjusted using an import script which is defined
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -5530,7 +5584,7 @@ Points to the script invoked upon media import.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -5582,7 +5636,7 @@ Points to the script invoked upon import of DVD iso images.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -5596,7 +5650,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -5638,7 +5692,7 @@ Points to the so called common script - think of it as a custom library
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -5681,7 +5735,7 @@ Points to the script that is parsing various playlists, by default parsing
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -5718,7 +5772,7 @@ Links the playlist to the virtual container which contains the expanded
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -5732,7 +5786,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -5746,7 +5800,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -5780,7 +5834,7 @@ Specifies an alternative file for filemagic, containing mime type information.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -5818,7 +5872,7 @@ This section defines persistent autoscan directories.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -5856,7 +5910,7 @@ Specifies if the inotify autoscan feature should be enabled.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -5874,7 +5928,7 @@ Child tags:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -5922,7 +5976,7 @@ The attributes specify various autoscan options:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -5950,7 +6004,7 @@ Absolute path to the directory that shall be monitored.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -5980,7 +6034,7 @@ Scan mode, currently "inotify" and "timed" are supported.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -6016,7 +6070,7 @@ Scan interval in seconds.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -6057,7 +6111,7 @@ Either "full" or "basic".
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -6086,7 +6140,7 @@ Values of "yes" or "no" are allowed, specifies if autoscan shall monitor
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -6133,7 +6187,7 @@ Allowed values: "yes" or "no", process hidden files, overrides the hidden-files
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -6147,7 +6201,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -6161,7 +6215,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -6198,7 +6252,7 @@ This section defines mime type and upnp:class mappings, it is vital if filemagic
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -6230,7 +6284,7 @@ Attributes:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -6270,7 +6324,7 @@ If ignore-unknown is set to "yes", then only the extensions that are listed
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -6305,7 +6359,7 @@ Specifies if extensions listed in this section are case sensitive, allowed
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -6323,7 +6377,7 @@ Child tags:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -6363,7 +6417,7 @@ Note: extension is case sensitive, this will probably need to be fixed.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -6377,7 +6431,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -6410,7 +6464,7 @@ Child tags:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -6442,7 +6496,7 @@ Specifies a mapping from a certain mime type to upnp:class in the Content
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -6456,7 +6510,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -6497,7 +6551,7 @@ Note: if this section is not present in your config file, the defaults will
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -6535,7 +6589,7 @@ The 'as' attribute can have following values:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -6564,7 +6618,7 @@ The content is an mp3 file and should be processed by either id3lib or taglib
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -6592,7 +6646,7 @@ The content is an ogg file and should be processed by taglib (if available).
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -6620,7 +6674,7 @@ The content is a flac file and should be processed by taglib (if available).
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -6648,7 +6702,7 @@ The content is a jpeg image and should be processed by libexif (if available).
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -6677,7 +6731,7 @@ The content is a playlist and should be processed by the playlist parser
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -6705,7 +6759,7 @@ The content is a PCM file.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -6733,7 +6787,7 @@ The content is an AVI container, FourCC extraction will be attempted.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -6747,7 +6801,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -6761,7 +6815,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -6775,7 +6829,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -6855,7 +6909,7 @@ Child tags:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -6887,7 +6941,7 @@ Child tags:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -6922,7 +6976,7 @@ Child tags:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -6960,7 +7014,7 @@ If the library was able to extract the data according to the given keyword,
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -6974,7 +7028,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -7012,7 +7066,7 @@ A sample configuration for the example described above would be:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -7044,7 +7098,7 @@ Child tags:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -7091,7 +7145,7 @@ Child tags:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -7129,7 +7183,7 @@ If the library was able to extract the data according to the given keyword,
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -7143,7 +7197,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -7181,7 +7235,7 @@ A sample configuration for the example described above would be:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -7213,7 +7267,7 @@ Child tags:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -7246,7 +7300,7 @@ Child tags:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -7284,7 +7338,7 @@ If the library was able to extract the data according to the given keyword,
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -7298,7 +7352,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -7312,7 +7366,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -7326,7 +7380,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -7367,7 +7421,7 @@ Attributes:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -7407,7 +7461,7 @@ Often, online content can be directly accessed by the player - we will just
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -7446,7 +7500,7 @@ This setting allows to prebuffer a certain amount of data, given in bytes,
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -7475,7 +7529,8 @@ MediaTomb allows you to watch YouTube videos using your UPnP device, you
 \begin_layout Description
 WANING: by using this feature you may be violating the YouTube service terms
  and conditions: 
-\begin_inset LatexCommand url
+\begin_inset CommandInset href
+LatexCommand href
 target "http://www.youtube.com/t/terms"
 
 \end_inset
@@ -7524,7 +7579,7 @@ Options and setting for YouTube service support, the attributes are:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -7574,7 +7629,7 @@ no
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -7614,7 +7669,7 @@ Refresh interval in seconds, each time the interval elapses we will contact
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -7658,7 +7713,7 @@ Time amount in seconds when data that has not been updated is considered
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -7713,7 +7768,7 @@ no
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -7749,7 +7804,7 @@ Specifies if restricted content should be inclueded in the search results.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -7772,7 +7827,7 @@ Note: all tags are optional and can occur more then once.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -7803,7 +7858,7 @@ This tag tells us to retrieve one of the standard video feeds.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -7832,7 +7887,7 @@ Definition of the standard feed that you are interested in, the allowed
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -7850,7 +7905,7 @@ top_rated
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -7868,7 +7923,7 @@ top_favorites
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -7886,7 +7941,7 @@ most_viewed
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -7904,7 +7959,7 @@ most_recent
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -7922,7 +7977,7 @@ most_discussed
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -7940,7 +7995,7 @@ most_linked
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -7958,7 +8013,7 @@ most_responded
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -7976,7 +8031,7 @@ recently_featured
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -7994,7 +8049,7 @@ watch_on_mobile
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -8008,7 +8063,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -8041,7 +8096,7 @@ Currently, the following region id's are supported:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -8063,7 +8118,7 @@ Australia
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -8085,7 +8140,7 @@ Brazil
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -8107,7 +8162,7 @@ Canada
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -8129,7 +8184,7 @@ France
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -8151,7 +8206,7 @@ Germany
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -8173,7 +8228,7 @@ Great Britain
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -8195,7 +8250,7 @@ The Netherlands
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -8217,7 +8272,7 @@ Hong Kong
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -8239,7 +8294,7 @@ Ireland
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -8261,7 +8316,7 @@ Italy
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -8283,7 +8338,7 @@ Japan
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -8305,7 +8360,7 @@ Mexico
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -8327,7 +8382,7 @@ New Zealand
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -8349,7 +8404,7 @@ Poland
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -8371,7 +8426,7 @@ Russia
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -8393,7 +8448,7 @@ South Korea
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -8415,7 +8470,7 @@ Spain
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -8437,7 +8492,7 @@ Taiwan
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -8459,7 +8514,7 @@ United States
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -8473,7 +8528,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -8508,7 +8563,7 @@ Following values are supported:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -8526,7 +8581,7 @@ all_time
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -8544,7 +8599,7 @@ today
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -8562,7 +8617,7 @@ this_week
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -8580,7 +8635,7 @@ this_month
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -8594,7 +8649,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -8623,7 +8678,7 @@ Starting index of the item in the list, useful if you want to skip the first
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -8646,7 +8701,7 @@ Amount of items to fetch, can be either an integer value or the keyword
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -8660,7 +8715,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -8688,7 +8743,7 @@ Retrieves all favorites of the given user.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -8716,7 +8771,7 @@ Name of the YouTube user whose favorites should be fetched.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -8730,7 +8785,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -8758,7 +8813,7 @@ Retrieves all subscriptions of the given user.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -8786,7 +8841,7 @@ Name of the YouTube user whose subscriptions should be fetched.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -8800,7 +8855,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -8828,7 +8883,7 @@ Retrieve all playlists of the given user.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -8856,7 +8911,7 @@ Name of the YouTube user whose playlists should be fetched.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -8870,7 +8925,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -8898,7 +8953,7 @@ Retrieves videos that were uploaded by a specified user.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -8926,7 +8981,7 @@ Name of the YouTube user whose playlists should be fetched.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -8955,7 +9010,7 @@ Starting index of the item in the list, useful if you want to skip the first
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -8978,7 +9033,7 @@ Amount of items to fetch, can be either an integer value or the keyword
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -8992,7 +9047,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -9036,7 +9091,7 @@ Options and settings for Weborama service support:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -9070,7 +9125,7 @@ Enables or disables the service, allowed values are "yes" or "no".
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -9109,7 +9164,7 @@ Refresh interval in seconds, each time the interval elapses we will contact
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -9148,7 +9203,7 @@ This option defines if we will contact the service right after MediaTomb
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -9175,7 +9230,7 @@ The attributes have the following meaning:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -9204,7 +9259,7 @@ g the content.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -9233,7 +9288,7 @@ Defines the mood of the user, the returned content is filtered accordingly.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -9251,7 +9306,7 @@ calm-positive
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -9269,7 +9324,7 @@ positive
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -9287,7 +9342,7 @@ energetic-positive
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -9305,7 +9360,7 @@ calm
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -9323,7 +9378,7 @@ neutral
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -9341,7 +9396,7 @@ energetic
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -9359,7 +9414,7 @@ calm-dark
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -9377,7 +9432,7 @@ dark
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -9395,7 +9450,7 @@ energetic-dark
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -9409,7 +9464,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -9444,7 +9499,7 @@ Integer value, defining the number of songs that should be fetched for this
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -9472,7 +9527,7 @@ Type of the generated content.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -9514,7 +9569,7 @@ type
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -9536,7 +9591,7 @@ Id value of zero generates a random playlist.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -9563,7 +9618,7 @@ id
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -9590,7 +9645,7 @@ id
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -9617,7 +9672,7 @@ id
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -9631,7 +9686,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -9649,7 +9704,7 @@ The allowed type values are:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -9675,7 +9730,7 @@ id
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -9715,7 +9770,7 @@ parameters
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -9741,7 +9796,7 @@ id
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -9755,7 +9810,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -9785,7 +9840,7 @@ Allows to filter the returned content, this is especially useful when generating
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -9815,7 +9870,7 @@ Allows to filter by one or more genres, multiple genres are separated by
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -9833,7 +9888,7 @@ electronic
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -9851,7 +9906,7 @@ alternative
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -9869,7 +9924,7 @@ jazz
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -9887,7 +9942,7 @@ metal
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -9905,7 +9960,7 @@ pop
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -9923,7 +9978,7 @@ punk
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -9941,7 +9996,7 @@ rhytm-and-blues
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -9959,7 +10014,7 @@ rap
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -9977,7 +10032,7 @@ reggae
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -9995,7 +10050,7 @@ rock
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -10013,7 +10068,7 @@ classic
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -10031,7 +10086,7 @@ soundtrack
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -10049,7 +10104,7 @@ retro
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -10067,7 +10122,7 @@ russian-rock
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -10085,7 +10140,7 @@ russian-pop
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -10103,7 +10158,7 @@ chanson
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -10121,7 +10176,7 @@ folk
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -10135,7 +10190,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -10164,7 +10219,7 @@ Additional criteria for content selection which is valued for a given user
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -10186,7 +10241,7 @@ Weborama user id.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -10204,7 +10259,7 @@ The allowed sort parameters are:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -10222,7 +10277,7 @@ all
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -10240,7 +10295,7 @@ favorite
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -10258,7 +10313,7 @@ friends
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -10276,7 +10331,7 @@ uploaded
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -10294,7 +10349,7 @@ used_last
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -10308,7 +10363,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -10322,7 +10377,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -10368,7 +10423,7 @@ Options and settings for Apple Trailers support:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -10402,7 +10457,7 @@ Enables or disables the service, allowed values are "yes" or "no".
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -10440,7 +10495,7 @@ Refresh interval in seconds, each time the interval elapses we will contact
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -10479,7 +10534,7 @@ This option defines if we will contact the service right after MediaTomb
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -10520,7 +10575,7 @@ Attributes:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -10571,7 +10626,7 @@ no
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -10611,7 +10666,7 @@ In case you have transcoders that can not handle online content directly
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -10651,7 +10706,7 @@ This setting allows to prebuffer a certain amount of data before sending
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -10669,7 +10724,7 @@ Child tags:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -10705,7 +10760,7 @@ The mappings under mimetype-profile are defined in the following manner:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -10742,7 +10797,7 @@ oggflac-pcm
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -10764,7 +10819,7 @@ Selects the mime type of the source media that should be transcoded.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -10787,7 +10842,7 @@ Selects the transcoding profile that will handle the mime type above.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -10801,7 +10856,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -10815,7 +10870,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -10838,7 +10893,7 @@ This section defines the various transcoding profiles.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -10866,7 +10921,7 @@ Definition of a transcoding profile.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -10895,7 +10950,7 @@ Name of the transcoding profile, this is the name that is specified in the
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -10939,7 +10994,7 @@ no
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -10975,7 +11030,7 @@ external
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -11005,7 +11060,7 @@ Defines the mime type of the transcoding result (i.e.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -11050,7 +11105,7 @@ no
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -11098,7 +11153,7 @@ Note: if more than one transcoding profile is applied on one source media
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -11135,7 +11190,7 @@ This parameter will hide the resource of the original media when sending
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -11181,7 +11236,7 @@ application/ogg
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -11227,7 +11282,7 @@ This option allows to setup a transcoding profile that will only transcode
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -11266,7 +11321,7 @@ Note: this option has no effect on non AVI content.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -11295,7 +11350,7 @@ Specifies how the list should be handled by the transcoding engine, possible
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -11317,7 +11372,7 @@ The option is completely disabled, fourcc list is not being processed.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -11342,7 +11397,7 @@ Only the fourcc strings that are listed will be processed by the transcoding
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -11370,7 +11425,7 @@ The fourcc strings listed will not be transcoded, all other codecs will
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -11384,7 +11439,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -11402,7 +11457,7 @@ The list of fourcc strings is enclosed in the avi-fourcc-list section:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -11428,7 +11483,7 @@ etc...
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -11442,7 +11497,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -11471,7 +11526,7 @@ Defines the transcoding agent and the parameters, in the example above we
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -11503,7 +11558,7 @@ Defines the transcoder binary that will be executed by MediaTomb upon a
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -11546,7 +11601,7 @@ Those tokens get substituted by the input file name and the output FIFO
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -11560,7 +11615,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -11594,7 +11649,7 @@ These settings help you to achieve a smooth playback of transcoded media.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -11622,7 +11677,7 @@ Size of the buffer in bytes.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -11652,7 +11707,7 @@ Size of chunks in bytes, that are read by the buffer from the transcoder.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -11683,7 +11738,7 @@ Initial fill size - number of bytes that have to be in the buffer before
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -11697,7 +11752,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -11736,7 +11791,7 @@ Allows you to tell the resolution of the transcoded media to your player.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -11772,7 +11827,7 @@ Specifies that the content should be sent out using chunked HTTP encoding,
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -11826,7 +11881,7 @@ frequency
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -11879,7 +11934,7 @@ number
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -11928,7 +11983,7 @@ Use the option with caution, no extra checking is being done if the resulting
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -11942,7 +11997,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -11956,7 +12011,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -11970,7 +12025,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -12492,7 +12547,8 @@ Note: Internet Explorer support is limited and not yet finished.
  It is very difficult to support this browser because of a huge number of
  bugs in its javascript implementation.
  If you don't believe us - just visit 
-\begin_inset LatexCommand url
+\begin_inset CommandInset href
+LatexCommand href
 name "http://selfhtml.org/"
 target "http://selfhtml.org/"
 
