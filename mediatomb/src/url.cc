@@ -112,7 +112,7 @@ Ref<StringBuffer> URL::download(String URL, long *HTTP_retcode,
         log_error("%s\n", error_buffer);
         if (cleanup)
             curl_easy_cleanup(curl_handle);
-        throw _Exception(String(error_buffer));
+        throw _Exception(error_buffer);
     }
 
     res = curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, HTTP_retcode);
@@ -121,7 +121,7 @@ Ref<StringBuffer> URL::download(String URL, long *HTTP_retcode,
         log_error("%s\n", error_buffer);
         if (cleanup)
             curl_easy_cleanup(curl_handle);
-        throw _Exception(String(error_buffer));
+        throw _Exception(error_buffer);
     }
 
     if (cleanup)
@@ -210,7 +210,7 @@ Ref<URL::Stat> URL::getInfo(String URL, CURL *curl_handle)
         log_error("%s\n", error_buffer);
         if (cleanup)
             curl_easy_cleanup(curl_handle);
-        throw _Exception(String(error_buffer));
+        throw _Exception(error_buffer);
     }
  
     res = curl_easy_getinfo(curl_handle, CURLINFO_CONTENT_TYPE, &ct);
@@ -219,13 +219,13 @@ Ref<URL::Stat> URL::getInfo(String URL, CURL *curl_handle)
         log_error("%s\n", error_buffer);
         if (cleanup)
             curl_easy_cleanup(curl_handle);
-        throw _Exception(String(error_buffer));
+        throw _Exception(error_buffer);
     }
 
     if (ct == NULL)
         mt = _(MIMETYPE_DEFAULT);
     else
-        mt = String(ct);
+        mt = ct;
     
     log_debug("Extracted content length: %lld\n", (long long)cl);
 
@@ -235,13 +235,13 @@ Ref<URL::Stat> URL::getInfo(String URL, CURL *curl_handle)
         log_error("%s\n", error_buffer);
         if (cleanup)
             curl_easy_cleanup(curl_handle);
-        throw _Exception(String(error_buffer));
+        throw _Exception(error_buffer);
     }
 
     if (c_url == NULL)
         used_url = URL;
     else
-        used_url = String(c_url);
+        used_url = c_url;
 
     Ref<Stat> st(new Stat(used_url, (off_t)cl, mt));
 

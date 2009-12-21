@@ -175,7 +175,7 @@ Ref<Array<FsObject> > Filesystem::readDirectory(String path, int mask,
                 continue; // special file
             
             Ref<FsObject> obj(new FsObject());
-            obj->filename = String(name);
+            obj->filename = name;
             obj->isDirectory = isDirectory;
             obj->hasContent = hasContent;
             files->append(obj);

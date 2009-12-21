@@ -73,7 +73,7 @@ Ref<Array<StringBase> > split_string(String str, char sep, bool empty)
         char *pos = strchr(data, sep);
         if (pos == NULL)
         {
-            String part(data);
+            String part = data;
             ret->append(part);
             data = end;
         }
@@ -81,7 +81,7 @@ Ref<Array<StringBase> > split_string(String str, char sep, bool empty)
         {
             data++;
             if ((data < end) && empty)
-                ret->append(String(""));
+                ret->append(_(""));
         }
         else
         {
@@ -108,14 +108,14 @@ Ref<Array<StringBase> > split_path(String str)
     {
         /* there is only one separator at the beginning "/..." or "/" */
         ret->append(_(_DIR_SEPARATOR));
-        String filename(data+1);
+        String filename = data + 1;
         ret->append(filename);
     }
     else
     {
         String path(data, pos);
         ret->append(path);
-        String filename(data + pos + 1);
+        String filename = data + pos + 1;
         ret->append(filename);
     }
     return ret;
@@ -211,7 +211,7 @@ bool is_executable(String path, int *err)
 
 String find_in_path(String exec)
 {
-    String PATH = String(getenv("PATH"));
+    String PATH = getenv("PATH");
     if (!string_ok(PATH))
         return nil;
 
@@ -459,7 +459,7 @@ String mt_strerror(int mt_errno)
     FREE(buffer);
     return errStr;
 #else
-    return String(strerror(errno));
+    return strerror(errno);
 #endif
 }
 
@@ -682,7 +682,7 @@ String get_mime_type(magic_set *ms, Ref<RExp> reMimetype, String file)
         return nil;
     }
 
-    String mime_type(mt);
+    String mime_type = mt;
 
     Ref<Matcher> matcher = reMimetype->matcher(mime_type, 2);
     if (matcher->next())
@@ -706,7 +706,7 @@ String get_mime_type_from_buffer(magic_set *ms, Ref<RExp> reMimetype,
         return nil;
     }
 
-    String mime_type(mt);
+    String mime_type = mt;
 
     Ref<Matcher> matcher = reMimetype->matcher(mime_type, 2);
     if (matcher->next())
@@ -752,8 +752,8 @@ bool check_resolution(String resolution, int *x, int *y)
     if (string_ok(parts->get(0)) && 
         string_ok(parts->get(1)))
         {
-            int _x = String(parts->get(0)->data).toInt();
-            int _y = String(parts->get(1)->data).toInt();
+            int _x = _(parts->get(0)->data).toInt();
+            int _y = _(parts->get(1)->data).toInt();
 
             if ((_x > 0) && (_y > 0))
             {
@@ -824,7 +824,7 @@ String escape(String string, char escape_char, char to_escape)
     *str = '\0';
     
     stringBase->len = strlen(stringBase->data);
-    return String(stringBase->data);
+    return stringBase->data;
 }
 
 String unescape(String string, char escape)
@@ -1170,7 +1170,7 @@ String interfaceToIP(String interface)
             }
 
             memcpy(&local_address, &if_request.ifr_addr, sizeof(if_request.ifr_addr));
-            String ip = String(inet_ntoa(local_address.sin_addr));
+            String ip = inet_ntoa(local_address.sin_addr);
             if_freenameindex(iflist_free);
             close(local_socket);
             return ip;

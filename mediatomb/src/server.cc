@@ -171,7 +171,7 @@ void Server::upnp_init(String iface, String ip_address, int port)
 
     if (!string_ok(ip))
     {
-        ip = String(UpnpGetServerIpAddress());
+        ip = UpnpGetServerIpAddress();
     }
 
     log_info("Server bound to: %s\n", ip.c_str());
@@ -423,7 +423,7 @@ UpnpDevice_Handle Server::getDeviceHandle()
 
 zmm::String Server::getIP()
 {
-    return String(UpnpGetServerIpAddress());
+    return UpnpGetServerIpAddress();
 }
 
 zmm::String Server::getPort()

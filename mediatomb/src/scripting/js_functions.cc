@@ -156,12 +156,12 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         if (!str)
             path = _("/");
         else
-            path = String(JS_GetStringBytes(str));
+            path = JS_GetStringBytes(str);
 
         JSString *cont = JS_ValueToString(cx, argv[2]);
         if (cont)
         {
-            containerclass = String(JS_GetStringBytes(cont));
+            containerclass = JS_GetStringBytes(cont);
             if (!string_ok(containerclass) || containerclass == "undefined")
                 containerclass = nil;
         }
@@ -321,7 +321,7 @@ static JSBool convert_charset_generic(JSContext *cx, JSObject *obj, uintN argc, 
         {
             str = JS_ValueToString(cx, argv[0]);
             if (str)
-                result = String(JS_GetStringBytes(str));
+                result = JS_GetStringBytes(str);
         }
 
         if (result != nil)

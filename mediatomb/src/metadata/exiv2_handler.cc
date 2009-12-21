@@ -70,7 +70,7 @@ void Exiv2Handler::fillMetadata(Ref<CdsItem> item)
     if (md != exifData.end()) 
     {
         /// \todo convert date to ISO 8601 as required in the UPnP spec
-        item->setMetadata(String(MT_KEYS[M_DATE].upnp), sc->convert(String((char *)md->toString().c_str())));
+        item->setMetadata(MT_KEYS[M_DATE].upnp, sc->convert((char *)md->toString().c_str()));
     }
 
     // if there was no jpeg coment, look if there is an exiv2 comment
@@ -130,7 +130,7 @@ void Exiv2Handler::fillMetadata(Ref<CdsItem> item)
     }
 
     if (string_ok(comment))
-        item->setMetadata(String(MT_KEYS[M_DESCRIPTION].upnp), sc->convert(comment));
+        item->setMetadata(MT_KEYS[M_DESCRIPTION].upnp, sc->convert(comment));
 
 }
 

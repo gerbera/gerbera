@@ -110,7 +110,7 @@ static JSBool js_addDVDObject(JSContext *cx, JSObject *obj, uintN argc,
             return JS_TRUE;
         }
 
-        chain = String(JS_GetStringBytes(str));
+        chain = JS_GetStringBytes(str);
         if (!string_ok(chain) || chain == "undefined")
         {
             log_error("addDVDObject: Invalid DVD container chain given!\n");
@@ -120,7 +120,7 @@ static JSBool js_addDVDObject(JSContext *cx, JSObject *obj, uintN argc,
         JSString *cont = JS_ValueToString(cx, argv[5]);
         if (cont)
         {
-            containerclass = String(JS_GetStringBytes(cont));
+            containerclass = JS_GetStringBytes(cont);
             if (!string_ok(containerclass) || containerclass == "undefined")
                 containerclass = nil;
         }

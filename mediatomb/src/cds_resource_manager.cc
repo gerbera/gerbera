@@ -50,8 +50,8 @@ CdsResourceManager::CdsResourceManager() : Object()
 
 String CdsResourceManager::renderExtension(String contentType, String location)
 {
-    String ext = String(_URL_PARAM_SEPARATOR) + _(URL_FILE_EXTENSION) + 
-                _(_URL_PARAM_SEPARATOR) + _("file");
+    String ext = _(_URL_PARAM_SEPARATOR) + URL_FILE_EXTENSION + 
+                _URL_PARAM_SEPARATOR + "file";
 
     if (string_ok(contentType) && (contentType != CONTENT_TYPE_PLAYLIST))
     {

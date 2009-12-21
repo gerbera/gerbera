@@ -73,7 +73,7 @@ void URLRequestHandler::get_info(IN const char *filename, OUT struct File_Info *
 #endif
 
     String url, parameters;
-    parameters = String(filename + strlen(LINK_URL_REQUEST_HANDLER));
+    parameters = (filename + strlen(LINK_URL_REQUEST_HANDLER));
     
     Ref<Dictionary> dict(new Dictionary());
     dict->decodeSimple(parameters);
@@ -187,7 +187,7 @@ Ref<IOHandler> URLRequestHandler::open(IN const char *filename, OUT struct File_
         throw _Exception(_("UPNP_WRITE unsupported"));
 
     String url, parameters;
-    parameters = String(filename + strlen(LINK_URL_REQUEST_HANDLER));
+    parameters = (filename + strlen(LINK_URL_REQUEST_HANDLER));
 
     Ref<Dictionary> dict(new Dictionary());
     dict->decodeSimple(parameters);

@@ -89,9 +89,9 @@ bool Inotify::supported()
         Ref<Array<StringBase> > kversion = split_string(_(info.release), '.');
         if (kversion->size() >= 3)
         {
-            int major = String(kversion->get(0)->data).toInt();
-            int minor = String(kversion->get(1)->data).toInt();
-            int patch = String(kversion->get(2)->data).toInt();
+            int major = _(kversion->get(0)->data).toInt();
+            int minor = _(kversion->get(1)->data).toInt();
+            int patch = _(kversion->get(2)->data).toInt();
 
             if ((major < 2) && (minor < 6) && (patch < 13))
                 return false;
@@ -115,6 +115,11 @@ int Inotify::addWatch(String path, int events)
     {
         if (errno == ENOSPC)
             throw _Exception(_("The user limit on the total number of inotify watches was reached or the kernel failed to allocate a needed resource."));
+        else if (errno == EACCES)
+        {
+            log_warning("Cannot add inotify watch for %s: %s\n", path.c_str(), strerror(errno));
+            return -1;
+        }
         else
             throw _Exception(mt_strerror(errno));
     }

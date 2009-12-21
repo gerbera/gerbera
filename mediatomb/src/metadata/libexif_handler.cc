@@ -289,7 +289,7 @@ void LibExifHandler::process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<S
         switch (e->tag)
         {
             case EXIF_TAG_DATE_TIME_ORIGINAL:
-                value = String((char *)exif_egv(e));
+                value = (char *)exif_egv(e);
                 value = trim_string(value);
                 if (string_ok(value))
                 {
@@ -308,7 +308,7 @@ void LibExifHandler::process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<S
                 break;
 
             case EXIF_TAG_USER_COMMENT:
-                value = String((char *)exif_egv(e));
+                value = (char *)exif_egv(e);
                 value = trim_string(value);
                 if (string_ok(value))
                 {
@@ -318,7 +318,7 @@ void LibExifHandler::process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<S
                 break;
 
             case EXIF_TAG_PIXEL_X_DIMENSION:
-                value = String((char *)exif_egv(e));
+                value = (char *)exif_egv(e);
                 value = trim_string(value);
                 if (string_ok(value))
                 {
@@ -328,7 +328,7 @@ void LibExifHandler::process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<S
                 break;
 
             case EXIF_TAG_PIXEL_Y_DIMENSION:
-                value = String((char *)exif_egv(e));
+                value = (char *)exif_egv(e);
                 value = trim_string(value);
                 if (string_ok(value))
                 {
@@ -351,7 +351,7 @@ void LibExifHandler::process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<S
                 {
                     if (e->tag == getTagFromString(tmp))
                     {
-                        value = String((char *)exif_egv(e));
+                        value = (char *)exif_egv(e);
                         value = trim_string(value);
                         if (string_ok(value))
                         {

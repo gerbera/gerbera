@@ -223,7 +223,7 @@ void AutoscanInotify::threadProc()
             {
                 int wd = event->wd;
                 int mask = event->mask;
-                String name(event->name);
+                String name = event->name;
                 log_debug("inotify event: %d %x %s\n", wd, mask, name.c_str());
                 
                 Ref<Wd> wdObj = watches->get(wd);

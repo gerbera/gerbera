@@ -41,6 +41,7 @@
 #include "ref.h"
 
 #define _(str) zmm::String::refer(str)
+//#define _(str) str
 
 #define MAX_INT_STRING_LENGTH 12
 
@@ -83,7 +84,7 @@ protected:
     StringBase *base;
 public:
     String();
-    explicit String(const char *str);
+    String(const char *str);
     explicit String(char ch);
     String(const char *str, int len);
     String(const String &other);
@@ -101,6 +102,8 @@ public:
     }
     
     ~String();
+    
+    String &operator=(const char *str);
     
     String &operator=(String other);
     
@@ -210,8 +213,8 @@ public:
     static String take(const char *data);
     static String refer(const char *str);
     static String refer(const char *str, int len);
-protected:
-    String(int capacity);
+    static String copy(const char *str);
+    
     friend class StringBuffer;
 };
 

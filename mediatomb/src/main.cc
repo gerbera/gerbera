@@ -166,12 +166,12 @@ int main(int argc, char **argv, char **envp)
         {
             case 'i':
                 log_debug("Option ip with param %s\n", optarg);
-                ip = String(optarg);
+                ip = optarg;
                 break;
 
             case 'e':
                 log_debug("Option interface with param %s\n", optarg);
-                interface = String(optarg);
+                interface = optarg;
                 break;
 
             case 'p':
@@ -193,7 +193,7 @@ int main(int argc, char **argv, char **envp)
 
             case 'c':
                 log_debug("Option config with param %s\n", optarg);
-                config_file = String(optarg);
+                config_file = optarg;
                 break;
 
             case 'd':
@@ -203,22 +203,22 @@ int main(int argc, char **argv, char **envp)
 
             case 'u':
                 log_debug("Running as user: %s\n", optarg);
-                user = String(optarg);
+                user = optarg;
                 break;
 
             case 'g':
                 log_debug("Running as group: %s\n", optarg);
-                group = String(optarg);
+                group = optarg;
                 break;
                 
             case 'a':
                 log_debug("Adding file/directory:: %s\n", optarg);
-                addFile->append(String(optarg));
+                addFile->append(String::copy(optarg));
                 break;
 
             case 'P':
                 log_debug("Pid file: %s\n", optarg);
-                pid_file = String(optarg);
+                pid_file = optarg;
                 break;
                 
             case 'l':
@@ -228,12 +228,12 @@ int main(int argc, char **argv, char **envp)
 
             case 'm':
                 log_debug("Home setting: %s\n", optarg);
-                home = String(optarg);
+                home = optarg;
                 break;
               
             case 'f':
                 log_debug("Confdir setting: %s\n", optarg);
-                confdir = String(optarg);
+                confdir = optarg;
                 break;
                 
             case 'D':
@@ -372,13 +372,13 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
 #ifndef __CYGWIN__
             char *h = getenv("HOME");
             if (h != NULL)
-                home = String(h);
+                home = h;
 
 #else
             char *h = getenv("HOMEPATH");
             char *d = getenv("HOMEDRIVE");
             if ((h != NULL)  && (d != NULL))
-                home = String(d) + h;
+                home = d + h;
 
 #endif  // __CYGWIN__
         }
@@ -394,14 +394,14 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
 
         char *pref = getenv("MEDIATOMB_DATADIR");
         if (pref != NULL)
-            prefix = String(pref);
+            prefix = pref;
 
         if (!string_ok(prefix))
             prefix = _(PACKAGE_DATADIR);
 
         char *mgc = getenv("MEDIATOMB_MAGIC_FILE");
         if (mgc != NULL)
-            magic = String(mgc);
+            magic = mgc;
 
         if (!string_ok(magic))
             magic = nil;

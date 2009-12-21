@@ -46,8 +46,8 @@ using namespace zmm;
 Exception::Exception(String message, const char* file, int line, const char* function)
 {
     this->message = message;
-    this->file = String(file);
-    this->function = String(function);
+    this->file = file;
+    this->function = function;
     this->line = line;
 #if defined HAVE_BACKTRACE && defined HAVE_BACKTRACE_SYMBOLS
     void *b[100];

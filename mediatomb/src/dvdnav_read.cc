@@ -181,7 +181,7 @@ int DVDNavReader::titleCount()
    int32_t t;
     if (dvdnav_get_number_of_titles(dvd, &t) != DVDNAV_STATUS_OK)
         throw _Exception(_("Failed to get title count for DVD ") + dvd_path + 
-                         " : " + String(dvdnav_err_to_string(dvd)));
+                " : " + dvdnav_err_to_string(dvd));
 
     return t;
 }
@@ -219,7 +219,7 @@ void DVDNavReader::selectPGC(int title_idx, int chapter_idx)
    if (dvdnav_part_play(dvd, title_idx, chapter_idx) != DVDNAV_STATUS_OK)
    {
        throw _Exception(_("Failed to select PGC for DVD ") + dvd_path + " : " +
-                         String(dvdnav_err_to_string(dvd)));
+                         dvdnav_err_to_string(dvd));
    }
 
    EOT = false;
@@ -243,7 +243,7 @@ size_t DVDNavReader::readSector(unsigned char *buffer, size_t length)
         if (result == DVDNAV_STATUS_ERR)
         {
             throw _Exception(_("Error getting next block for DVD ") + dvd_path +
-                               " : " + String(dvdnav_err_to_string(dvd)));
+                               " : " + dvdnav_err_to_string(dvd));
         }
 
         switch (event)
@@ -340,7 +340,7 @@ String DVDNavReader::audioLanguage(int stream_idx)
     if (dvdnav_get_audio_attr(dvd, stream_idx, &audio_attr) != DVDNAV_STATUS_OK)
         throw _Exception(_("Error error retrieving audio language from DVD ") +
                            dvd_path + " : " + 
-                           String(dvdnav_err_to_string(dvd)));
+                           dvdnav_err_to_string(dvd));
 
     sprintf(code, "%c%c", audio_attr.lang_code >> 8, 
                           audio_attr.lang_code & 0xff);
@@ -363,7 +363,7 @@ int DVDNavReader::audioSampleFrequency(int stream_idx)
     if (dvdnav_get_audio_attr(dvd, stream_idx, &audio_attr) != DVDNAV_STATUS_OK)
         throw _Exception(_("Error error retrieving audio language from DVD ") +
                            dvd_path + " : " + 
-                           String(dvdnav_err_to_string(dvd)));
+                           dvdnav_err_to_string(dvd));
 
     if (audio_attr.sample_frequency == 0)
         return 48000;
@@ -380,7 +380,7 @@ int DVDNavReader::audioChannels(int stream_idx)
     if (dvdnav_get_audio_attr(dvd, stream_idx, &audio_attr) != DVDNAV_STATUS_OK)
         throw _Exception(_("Error error retrieving audio language from DVD ") +
                            dvd_path + " : " + 
-                           String(dvdnav_err_to_string(dvd)));
+                           dvdnav_err_to_string(dvd));
 
     return audio_attr.channels + 1;
 }
@@ -394,7 +394,7 @@ String DVDNavReader::audioFormat(int stream_idx)
     if (dvdnav_get_audio_attr(dvd, stream_idx, &audio_attr) != DVDNAV_STATUS_OK)
         throw _Exception(_("Error error retrieving audio language from DVD ") +
                            dvd_path + " : " +
-                           String(dvdnav_err_to_string(dvd)));
+                           dvdnav_err_to_string(dvd));
     return _(audio_format[audio_attr.audio_format]);
 }
 
@@ -407,7 +407,7 @@ int DVDNavReader::audioStreamID(int stream_idx)
     if (dvdnav_get_audio_attr(dvd, stream_idx, &audio_attr) != DVDNAV_STATUS_OK)
         throw _Exception(_("Error error retrieving audio language from DVD ") +
                            dvd_path + " : " +
-                           String(dvdnav_err_to_string(dvd)));
+                           dvdnav_err_to_string(dvd));
 
     return audio_id[audio_attr.audio_format]+stream_idx;
 }

@@ -43,12 +43,12 @@ ActionRequest::ActionRequest(Upnp_Action_Request *upnp_request) : Object()
     this->upnp_request = upnp_request;
 
     errCode = UPNP_E_SUCCESS;
-    actionName = String(upnp_request->ActionName);
-    UDN = String(upnp_request->DevUDN);
-    serviceID = String(upnp_request->ServiceID);
+    actionName = upnp_request->ActionName;
+    UDN = upnp_request->DevUDN;
+    serviceID = upnp_request->ServiceID;
 
     DOMString cxml = ixmlPrintDocument(upnp_request->ActionRequest);
-    String xml(cxml);
+    String xml = cxml;
     ixmlFreeDOMString(cxml);
    
     Ref<Parser> parser(new Parser());

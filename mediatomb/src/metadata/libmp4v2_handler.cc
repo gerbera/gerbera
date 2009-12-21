@@ -86,7 +86,7 @@ static void addMetaField(metadata_fields_t field, MP4FileHandle mp4, Ref<CdsItem
             MP4GetMetadataYear(mp4, &mp4_retval);
             if (mp4_retval)
             {
-                value = String(mp4_retval);
+                value = mp4_retval;
                 free(mp4_retval);
                 if (string_ok(value))
                     value = value + "-01-01";
@@ -117,7 +117,7 @@ static void addMetaField(metadata_fields_t field, MP4FileHandle mp4, Ref<CdsItem
     if ((field != M_DATE) && (field != M_TRACKNUMBER) && 
         (mp4_retval))
     {
-        value = String(mp4_retval);
+        value = mp4_retval;
         free(mp4_retval);
     }
     
@@ -125,7 +125,7 @@ static void addMetaField(metadata_fields_t field, MP4FileHandle mp4, Ref<CdsItem
     
     if (string_ok(value))
     {
-        item->setMetadata(String(MT_KEYS[field].upnp), sc->convert(value));
+        item->setMetadata(MT_KEYS[field].upnp, sc->convert(value));
         log_debug("mp4 handler: setting metadata on item: %d, %s\n", field, sc->convert(value).c_str());
     }
 }

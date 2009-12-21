@@ -46,10 +46,10 @@ using namespace mxml;
 void XMLCALL Parser::element_start(void *userdata, const char *name, const char **attrs)
 {
     Parser *parser = (Parser *)userdata;
-    Ref<Element> el(new Element(String(name)));
+    Ref<Element> el(new Element(name));
     for (int i = 0; attrs[i]; i += 2) 
     {
-        el->addAttribute(String(attrs[i]), String(attrs[i + 1]));
+        el->addAttribute(attrs[i], attrs[i + 1]);
     }
 
     if (parser->root == nil)
@@ -82,7 +82,7 @@ void XMLCALL Parser::character_data(void *userdata, const XML_Char *s, int len)
 void XMLCALL Parser::comment_callback(void *userdata, const XML_Char *s)
 {
     Parser *parser = (Parser *)userdata;
-    String text = String(s);
+    String text = s;
     if (text != nil)
     {
         Ref<Comment> cm(new Comment(text));
@@ -124,7 +124,7 @@ Ref<Element> Parser::parse(Ref<Context> ctx, String input)
     {
         ctx->line = XML_GetCurrentLineNumber(parser);
         ctx->col = XML_GetCurrentColumnNumber(parser);
-        String message = String(XML_ErrorString(XML_GetErrorCode(parser)));
+        String message = XML_ErrorString(XML_GetErrorCode(parser));
         XML_ParserFree(parser);
         throw ParseException(message, ctx);
     }

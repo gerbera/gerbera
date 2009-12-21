@@ -269,7 +269,7 @@ void Element::indent(int level)
             }
             if (newlineBefore)
             {
-                Ref<Text> indentText(new Text(_("\n")+String(ptr)));
+                Ref<Text> indentText(new Text(_("\n")+ptr));
                 insertChild(i++,RefCast(indentText, Node));
                 numChildren++;
             }
@@ -277,7 +277,7 @@ void Element::indent(int level)
         
         ptr += 2;
         
-        Ref<Text> indentTextAfter(new Text(_("\n")+String(ptr)));
+        Ref<Text> indentTextAfter(new Text(_("\n")+ptr));
         appendChild(RefCast(indentTextAfter, Node));
     }
 }

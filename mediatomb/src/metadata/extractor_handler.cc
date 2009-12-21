@@ -276,13 +276,13 @@ static void addMetaField(metadata_fields_t field, EXTRACTOR_KeywordList *keyword
     }
 
     if (temp != NULL)
-        value = String(temp);
+        value = temp;
 
     value = trim_string(value);
     
     if (string_ok(value))
     {
-        item->setMetadata(String(MT_KEYS[field].upnp), sc->convert(value));
+        item->setMetadata(MT_KEYS[field].upnp, sc->convert(value));
 //        log_debug("Setting metadata on item: %d, %s\n", field, sc->convert(value).c_str());
     }
 }
@@ -306,7 +306,7 @@ static void addResourceField(resource_attributes_t attr, EXTRACTOR_KeywordList *
     }
 
     if (temp != NULL)
-        value = String(temp);
+        value = temp;
 
     if (string_ok(value))
     {
@@ -360,7 +360,7 @@ void ExtractorHandler::fillMetadata(Ref<CdsItem> item)
                 temp = EXTRACTOR_extractLast(getTagFromString(tmp), keywords);
                 if (temp != NULL)
                 {
-                    value = String(temp); 
+                    value = temp; 
                     if (string_ok(value))
                     {
                         value = sc->convert(value);

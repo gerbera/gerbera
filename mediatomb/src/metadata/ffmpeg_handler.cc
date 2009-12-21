@@ -92,43 +92,43 @@ static void addFfmpegMetadataFields(Ref<CdsItem> item, AVFormatContext *pFormatC
 	if (strlen(pFormatCtx->title) > 0) 
     {
 	    log_debug("Added metadata title: %s\n", pFormatCtx->title);
-        item->setMetadata(String(MT_KEYS[M_TITLE].upnp), 
-                          sc->convert(String(pFormatCtx->title)));
+        item->setMetadata(MT_KEYS[M_TITLE].upnp, 
+                          sc->convert(pFormatCtx->title));
 	}
 	if (strlen(pFormatCtx->author) > 0) 
     {
 	    log_debug("Added metadata author: %s\n", pFormatCtx->author);
-        item->setMetadata(String(MT_KEYS[M_ARTIST].upnp), 
-                          sc->convert(String(pFormatCtx->author)));
+        item->setMetadata(MT_KEYS[M_ARTIST].upnp, 
+                          sc->convert(pFormatCtx->author));
 	}
 	if (strlen(pFormatCtx->album) > 0) 
     {
 	    log_debug("Added metadata album: %s\n", pFormatCtx->album);
-        item->setMetadata(String(MT_KEYS[M_ALBUM].upnp), 
-                          sc->convert(String(pFormatCtx->album)));
+        item->setMetadata(MT_KEYS[M_ALBUM].upnp, 
+                          sc->convert(pFormatCtx->album));
 	}
 	if (pFormatCtx->year > 0) 
     {
 	    log_debug("Added metadata year: %d\n", pFormatCtx->year);
-        item->setMetadata(String(MT_KEYS[M_DATE].upnp), 
+        item->setMetadata(MT_KEYS[M_DATE].upnp, 
                           sc->convert(String::from(pFormatCtx->year)));
 	}
 	if (strlen(pFormatCtx->genre) > 0) 
     {
 	    log_debug("Added metadata genre: %s\n", pFormatCtx->genre);
-        item->setMetadata(String(MT_KEYS[M_GENRE].upnp), 
-                          sc->convert(String(pFormatCtx->genre)));
+        item->setMetadata(MT_KEYS[M_GENRE].upnp, 
+                          sc->convert(pFormatCtx->genre));
 	}
 	if (strlen(pFormatCtx->comment) > 0) 
     {
 	    log_debug("Added metadata comment: %s\n", pFormatCtx->comment);
-        item->setMetadata(String(MT_KEYS[M_DESCRIPTION].upnp), 
-                          sc->convert(String(pFormatCtx->comment)));
+        item->setMetadata(MT_KEYS[M_DESCRIPTION].upnp, 
+                          sc->convert(pFormatCtx->comment));
 	}
 	if (pFormatCtx->track > 0) 
     {
 	    log_debug("Added metadata track: %d\n", pFormatCtx->track);
-        item->setMetadata(String(MT_KEYS[M_TRACKNUMBER].upnp), 
+        item->setMetadata(MT_KEYS[M_TRACKNUMBER].upnp, 
                           sc->convert(String::from(pFormatCtx->track)));
 	}
 }
@@ -161,7 +161,7 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext *pFormatC
     	sprintf(duration, "%02d:%02d:%02d.%01d", hours, mins,
                 secs, (10 * us) / AV_TIME_BASE);
         log_debug("Added duration: %s\n", duration);
-        item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_DURATION), String(duration));
+        item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_DURATION), duration);
     }
 
 	// bitrate
@@ -191,7 +191,7 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext *pFormatC
 
                 log_debug("FourCC: %x = %s\n", 
                                         st->codec->codec_tag, fourcc);
-                String fcc = String(fourcc);
+                String fcc = fourcc;
                 if (string_ok(fcc))
                     item->getResource(0)->addOption(_(RESOURCE_OPTION_FOURCC), 
                                                     fcc);

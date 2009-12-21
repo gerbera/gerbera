@@ -1229,7 +1229,7 @@ void ConfigManager::validate(String serverhome)
 #if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
     if (setlocale(LC_ALL, "") != NULL)
     {
-        temp = String(nl_langinfo(CODESET));
+        temp = nl_langinfo(CODESET);
         log_debug("received %s from nl_langinfo\n", temp.c_str());
     }
 
@@ -2091,7 +2091,7 @@ void ConfigManager::prepare_udn()
 
         log_info("UUID generated: %s\n", uuid_str);
        
-        getOption(_("/server/udn"), String("uuid:") + uuid_str);
+        getOption(_("/server/udn"), _("uuid:") + uuid_str);
 
         need_to_save = true;
     }

@@ -243,7 +243,7 @@ String Sqlite3Storage::quote(String value)
 {
     char *q = sqlite3_mprintf("'%q'",
         (value == nil ? "" : value.c_str()));
-    String ret(q);
+    String ret = q;
     sqlite3_free(q);
     return ret;
 }
@@ -470,7 +470,7 @@ void SLInitTask::run(sqlite3 **db, Sqlite3Storage *sl)
     char *err = NULL;
     ret = sqlite3_exec(
         *db,
-        (char *)buf,
+        (const char *)buf,
         NULL,
         NULL,
         &err
@@ -478,12 +478,12 @@ void SLInitTask::run(sqlite3 **db, Sqlite3Storage *sl)
     String error = nil;
     if (err != NULL)
     {
-        error = String(err);
+        error = err;
         sqlite3_free(err);
     }
     if(ret != SQLITE_OK)
     {
-        throw _StorageException(nil, sl->getError(String((char *)buf), error, *db));
+        throw _StorageException(nil, sl->getError((const char*)buf, error, *db));
     }
     contamination = true;
 }
@@ -514,12 +514,12 @@ void SLSelectTask::run(sqlite3 **db, Sqlite3Storage *sl)
     String error = nil;
     if (err != NULL)
     {
-        error = String(err);
+        error = err;
         sqlite3_free(err);
     }
     if(ret != SQLITE_OK)
     {
-        throw _StorageException(nil, sl->getError(String(query), error, *db));
+        throw _StorageException(nil, sl->getError(query, error, *db));
     }
     
     pres->row = pres->table;
@@ -548,12 +548,12 @@ void SLExecTask::run(sqlite3 **db, Sqlite3Storage *sl)
     String error = nil;
     if (err != NULL)
     {
-        error = String(err);
+        error = err;
         sqlite3_free(err);
     }
     if(res != SQLITE_OK)
     {
-        throw _StorageException(nil, sl->getError(String(query), error, *db));
+        throw _StorageException(nil, sl->getError(query, error, *db));
     }
     if (getLastInsertIdFlag)
         lastInsertId = sqlite3_last_insert_rowid(*db);

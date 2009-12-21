@@ -87,8 +87,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     int ret = 0;
     bool is_srt = false;
 
-    String parameters;
-    parameters = String(filename + strlen(LINK_FILE_REQUEST_HANDLER));
+    String parameters = (filename + strlen(LINK_FILE_REQUEST_HANDLER));
 
     Ref<Dictionary> dict(new Dictionary());
     dict->decodeSimple(parameters);
@@ -348,7 +347,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
 
     String url_path, parameters;
 
-    parameters = String(filename + strlen(LINK_FILE_REQUEST_HANDLER));
+    parameters = (filename + strlen(LINK_FILE_REQUEST_HANDLER));
 
     Ref<Dictionary> dict(new Dictionary());
     dict->decodeSimple(parameters);

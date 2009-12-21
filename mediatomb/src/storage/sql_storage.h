@@ -55,7 +55,7 @@ class SQLRow : public zmm::Object
 public:
     SQLRow(zmm::Ref<SQLResult> sqlResult) { this->sqlResult = sqlResult; }
     //virtual ~SQLRow();
-    zmm::String col(int index) { return zmm::String(col_c_str(index)); }
+    zmm::String col(int index) { return col_c_str(index); }
     virtual char* col_c_str(int index) = 0;
 protected:
     zmm::Ref<SQLResult> sqlResult;

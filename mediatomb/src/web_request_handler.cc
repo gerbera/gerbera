@@ -245,7 +245,7 @@ Ref<IOHandler> WebRequestHandler::open(IN const char *filename,
                                        IN enum UpnpOpenFileMode mode)
 {
     log_debug("request: %s\n", filename);
-    this->filename = String((char *)filename);
+    this->filename = filename;
     this->mode = mode;
 
     String path, parameters;

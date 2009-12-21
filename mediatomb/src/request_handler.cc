@@ -42,7 +42,7 @@ void RequestHandler::split_url(const char *url, char separator, String &path, St
 {
     int i1;
 
-    String url_s = String(url);
+    String url_s = url;
 
     if (separator == '/')
         i1 = url_s.rindex(separator);

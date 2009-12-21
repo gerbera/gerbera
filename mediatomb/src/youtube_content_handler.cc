@@ -234,7 +234,7 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
                     if (strlen(datebuf) > 0)
                     {
                         item->setMetadata(MetadataHandler::getMetaFieldName(M_DATE),
-                            String(datebuf));
+                            datebuf);
                     }
                 }
             }

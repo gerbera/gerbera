@@ -119,13 +119,13 @@ static void addField(metadata_fields_t field, TagLib::Tag *tag, Ref<CdsItem> ite
     }
 
     if ((field != M_DATE) && (field != M_TRACKNUMBER))
-        value = String((char *)val.toCString(true));
+        value = val.toCString(true);
 
     value = trim_string(value);
     
     if (string_ok(value))
     {
-        item->setMetadata(String(MT_KEYS[field].upnp), sc->convert(value));
+        item->setMetadata(MT_KEYS[field].upnp, sc->convert(value));
 //        log_debug("Setting metadata on item: %d, %s\n", field, sc->convert(value).c_str());
     }
 }
@@ -248,7 +248,7 @@ void TagHandler::fillMetadata(Ref<CdsItem> item)
         if (art->picture().size() < 1)
             return;
 
-        String art_mimetype = sc->convert(String(art->mimeType().toCString(true)));
+        String art_mimetype = sc->convert(art->mimeType().toCString(true));
         // saw that simply "PNG" was used with some mp3's, so mimetype setting
         // was probably invalid
         if (!string_ok(art_mimetype) || (art_mimetype.index('/') == -1))

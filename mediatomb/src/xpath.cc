@@ -72,7 +72,7 @@ String XPath::getText(String xpath)
 
     if (axis != "attribute")
     {
-        throw _Exception(String("XPath::getText: unexpected axis: ") + axis);
+        throw _Exception(_("XPath::getText: unexpected axis: ") + axis);
     }
    
     return el->getAttribute(spec);
@@ -126,5 +126,5 @@ String XPath::getAxis(String axisPart)
 String XPath::getSpec(String axisPart)
 {
     char *pos = strstr(axisPart.c_str(), "::");
-    return String(pos + 2);
+    return pos + 2;
 }

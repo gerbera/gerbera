@@ -43,9 +43,9 @@ SubscriptionRequest::SubscriptionRequest(Upnp_Subscription_Request *upnp_request
 {
     this->upnp_request = upnp_request;
 
-    serviceID = String(upnp_request->ServiceId);
-    UDN = String(upnp_request->UDN);
-    sID = String(upnp_request->Sid);
+    serviceID = upnp_request->ServiceId;
+    UDN = upnp_request->UDN;
+    sID = upnp_request->Sid;
 }
 
 String SubscriptionRequest::getServiceID()

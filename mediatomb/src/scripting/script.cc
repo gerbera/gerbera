@@ -87,7 +87,7 @@ String Script::getProperty(JSObject *obj, String name)
     str = JS_ValueToString(cx, val);
     if (! str)
         return nil;
-    return String(JS_GetStringBytes(str));
+    return JS_GetStringBytes(str);
 }
 
 int Script::getBoolProperty(JSObject *obj, String name)
@@ -558,7 +558,7 @@ JSScript *Script::_load(zmm::String scriptPath)
     }
     catch (Exception e)
     {
-        throw _Exception(String("Failed to convert import script:") + e.getMessage().c_str());
+        throw _Exception(_("Failed to convert import script:") + e.getMessage().c_str());
     }
 
     scr = JS_CompileScript(cx, glob, scriptText.c_str(), scriptText.length(),
@@ -674,7 +674,7 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
                     int j = val.toInt();
                     if (j > 0)
                     {
-                        obj->setMetadata(String(MT_KEYS[i].upnp), val);
+                        obj->setMetadata(MT_KEYS[i].upnp, val);
                         RefCast(obj, CdsItem)->setTrackNumber(j);
                     }
                     else
@@ -683,7 +683,7 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
                 else
                 {
                     val = sc->convert(val);
-                    obj->setMetadata(String(MT_KEYS[i].upnp), val);
+                    obj->setMetadata(MT_KEYS[i].upnp, val);
                 }
             }
         }

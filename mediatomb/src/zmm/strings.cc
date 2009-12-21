@@ -77,14 +77,9 @@ String::String()
 {
     base = NULL;
 }
-String::String(int capacity)
-{
-    base = new StringBase(capacity);
-    base->retain();
-}
 String::String(const char *str)
 {
-    if (str)
+    if(str)
     {
         base = new StringBase(str);
         base->retain();
@@ -92,7 +87,6 @@ String::String(const char *str)
     else
         base = NULL;
 }
-                
 String::String(const char *str, int len)
 {
     if(str)
@@ -166,7 +160,7 @@ String String::operator+(const char *other)
     if(! other)
         return *this;
     if(! base)
-        return String(other);
+        return String::copy(other);
     int len = base->len;
     int otherLen = (int)strlen(other);
     String res(len + otherLen);
@@ -275,6 +269,16 @@ String String::refer(const char *data, int len)
     base->store = false;
     return String(base);
 }
+String String::copy(const char *data)
+{
+    if (data)
+    {
+        StringBase *base = new StringBase(data);
+        return String(base);
+    }
+    else
+        return String();
+}
 int String::operator==(String other)
 {
     if(! base && ! other.base)
@@ -297,7 +301,19 @@ int String::operator==(char c)
         return 0;
     return (c == *(base->data));
 }
-
+String& String::operator=(const char *str)
+{
+    if (base)
+        base->release();
+    if (str)
+    {
+        base = new StringBase(str);
+        base->retain();
+    }
+    else
+        base = NULL;
+    return *this;
+}
 String& String::operator=(String other)
 {
     if (this == &other)

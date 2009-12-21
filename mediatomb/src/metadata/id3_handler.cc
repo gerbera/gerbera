@@ -98,7 +98,7 @@ static void addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsItem> item
             break;
         case M_DATE:
             ID3_retval = ID3_GetYear(tag);
-            value = String(ID3_retval);
+            value = ID3_retval;
             if (string_ok(value))
                 value = value + "-01-01";
             else
@@ -107,12 +107,12 @@ static void addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsItem> item
         case M_GENRE:
             genre = ID3_GetGenreNum(tag);
             if (ID3_V1GENRE2DESCRIPTION(genre))
-                value = String((char *)(ID3_V1GENRE2DESCRIPTION(genre)));
+                value = (char *)(ID3_V1GENRE2DESCRIPTION(genre));
 
             if (!string_ok(value))
             {
                 ID3_retval = ID3_GetGenre(tag); 
-                value = String(ID3_retval);
+                value = ID3_retval;
             }
             break;
         case M_DESCRIPTION:
@@ -142,7 +142,7 @@ static void addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsItem> item
     }
 
     if ((field != M_GENRE) && (field != M_DATE) && (field != M_TRACKNUMBER))
-        value = String(ID3_retval);
+        value = ID3_retval;
     
     if (ID3_retval)
         delete [] ID3_retval;
@@ -151,7 +151,7 @@ static void addID3Field(metadata_fields_t field, ID3_Tag *tag, Ref<CdsItem> item
     
     if (string_ok(value))
     {
-        item->setMetadata(String(MT_KEYS[field].upnp), sc->convert(value));
+        item->setMetadata(MT_KEYS[field].upnp, sc->convert(value));
 //        log_debug("Setting metadata on item: %d, %s\n", field, sc->convert(value).c_str());
     }
 }
@@ -290,7 +290,7 @@ void Id3Handler::fillMetadata(Ref<CdsItem> item)
             if (art != NULL)
             {
                 Ref<StringConverter> sc = StringConverter::m2i(); 
-                String art_mimetype = sc->convert(String(ID3_GetPictureMimeType(&tag)));
+                String art_mimetype = sc->convert(ID3_GetPictureMimeType(&tag));
                 if (!string_ok(art_mimetype) || (art_mimetype.index('/') == -1))
                 {
 #ifdef HAVE_MAGIC

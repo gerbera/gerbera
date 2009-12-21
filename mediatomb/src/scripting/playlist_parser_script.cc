@@ -125,7 +125,7 @@ String PlaylistParserScript::readln()
         if(fgets(currentLine, ONE_TEXTLINE_BYTES, currentHandle) == NULL)
             return nil;
 
-        ret = trim_string(String(currentLine));
+        ret = trim_string(currentLine);
         if (string_ok(ret))
             return ret;
     }
