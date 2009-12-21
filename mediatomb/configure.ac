@@ -1218,7 +1218,13 @@ elif ((test "x$TAGLIB_OPTION_ENABLED" = xyes) && (test "x$ID3LIB_OPTION_ENABLED"
     ID3LIB_OPTION_ENABLED=no
     AC_MSG_WARN([id3lib disabled])
 elif ((test "x$TAGLIB_OPTION_ENABLED" = xyes) && (test "x$ID3LIB_OPTION_ENABLED" = xyes)) ; then
-    AC_MSG_ERROR([Please select either taglib or id3lib, but not both.])
+    if ((test "x$TAGLIB_OPTION_REQUESTED" = xyes) && (test "x$ID3LIB_OPTION_REQUESTED" = xyes)); then
+        AC_MSG_ERROR([Please select either taglib or id3lib, but not both.])
+    elif ((test "x$TAGLIB_OPTION_REQUESTED" = xyes) && (test "x$ID3LIB_OPTION_REQUESTED" != xyes)); then
+        ID3LIB_OPTION_ENABLED=no
+    elif ((test "x$TAGLIB_OPTION_REQUESTED" != xyes) && (test "x$ID3LIB_OPTION_REQUESTED" = xyes)); then
+        TAGLIB_OPTION_ENABLED=no
+    fi
 fi
 
 if test "x$TAGLIB_OPTION_ENABLED" = xyes; then
@@ -1304,7 +1310,7 @@ if test "x$ID3LIB_STATUS" = xyes; then
    AC_LANG_RESTORE
 else
     if (test "x$ID3LIB_OPTION_REQUESTED" = xyes) &&
-       (test "x$ID3LIB_OPEION_ENABLED" = xyes); then
+       (test "x$ID3LIB_OPTION_ENABLED" = xyes); then
         if test "x$TAGLIB_STATUS" = xyes; then
             AC_MSG_ERROR([Please select either taglib or id3lib, but not both.])
         else
