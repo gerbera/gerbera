@@ -1507,8 +1507,11 @@ fi
 ######## ffmpeg
 
 if test "x$FFMPEG_OPTION_ENABLED" = xyes; then
-       AC_LANG_SAVE
-       AC_LANG_C
+    AC_LANG_SAVE
+    AC_LANG_C
+
+
+    FFMPEG_EXTRA_CFLAGS=""
 
     # the header location of the older and newer ffmpeg version is different
     MT_CHECK_HEADER([avformat], [ffmpeg/avformat], [pass])
@@ -1517,9 +1520,22 @@ if test "x$FFMPEG_OPTION_ENABLED" = xyes; then
         if test "x$AVFORMAT_STATUS" = xyes; then
             AC_DEFINE_UNQUOTED([AVFORMAT_INCLUDE], [<libavformat/avformat.h>], [libavformat/avformat.h])
         else
-            MT_CHECK_HEADER([avformat], [ffmpeg/libavformat/avformat])
+            CFLAGS="$CFLAGS -I/usr/include/ffmpeg"
+            CPPFLAGS="$CPPFLAGS -I/usr/include/ffmpeg"
+            MT_CHECK_HEADER([avformat], [libavformat/avformat], [pass])
             if test "x$AVFORMAT_STATUS" = xyes; then
-              AC_DEFINE_UNQUOTED([AVFORMAT_INCLUDE], [<ffmpeg/libavformat/avformat.h>], [ffmpeg/libavformat/avformat.h])
+              AC_DEFINE_UNQUOTED([AVFORMAT_INCLUDE], [<libavformat/avformat.h>], [libavformat/avformat.h])
+              FFMPEG_EXTRA_CFLAGS="$FFMPEG_CFLAGS -I/usr/include/ffmpeg"
+            else
+                CFLAGS="$CFLAGS_SAVE"
+                CPPFLAGS="$CPPFLAGS_SAVE"
+                CFLAGS="$CFLAGS -I/usr/local/include/ffmpeg"
+                CPPFLAGS="$CPPFLAGS -I/usr/local/include/ffmpeg"
+                MT_CHECK_HEADER([avformat], [libavformat/avformat])
+                if test "x$AVFORMAT_STATUS" = xyes; then
+                    FFMPEG_EXTRA_CFLAGS="$FFMPEG_CFLAGS -I/usr/include/ffmpeg"
+                    AC_DEFINE_UNQUOTED([AVFORMAT_INCLUDE], [<libavformat/avformat.h>], [libavformat/avformat.h])
+                fi
             fi
         fi
     else
@@ -1541,7 +1557,7 @@ fi
 
 if test "x$FFMPEG_STATUS" = xyes; then
     AC_DEFINE([HAVE_FFMPEG], [1], [FFMPEG library presence])
-    FFMPEG_CFLAGS="$AVFORMAT_CFLAGS $AVUTIL_CFLAGS"
+    FFMPEG_CFLAGS="$FFMPEG_EXTRA_CFLAGS $AVFORMAT_CFLAGS $AVUTIL_CFLAGS"
     FFMPEG_LDFLAGS="$AVFORMAT_LDFLAGS $AVUTIL_LDFLAGS"
     FFMPEG_LIBS="$AVFORMAT_LIBS $AVUTIL_LIBS"
     AC_SUBST(FFMPEG_CFLAGS)
