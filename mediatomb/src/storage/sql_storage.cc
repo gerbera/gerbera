@@ -2348,6 +2348,7 @@ void SQLStorage::addToInsertBuffer(Ref<StringBuffer> query)
     
     _addToInsertBuffer(query);
     
+    AUTOLOCK(mutex);
     insertBufferEmpty = false;
     insertBufferStatementCount++;
     insertBufferByteCount += query->length();

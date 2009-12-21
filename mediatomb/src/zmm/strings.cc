@@ -77,6 +77,11 @@ String::String()
 {
     base = NULL;
 }
+String::String(int capacity)
+{
+    base = new StringBase(capacity);
+    base->retain();
+}
 String::String(const char *str)
 {
     if(str)

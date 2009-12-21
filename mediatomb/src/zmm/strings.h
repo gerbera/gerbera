@@ -214,7 +214,8 @@ public:
     static String refer(const char *str);
     static String refer(const char *str, int len);
     static String copy(const char *str);
-    
+protected:
+    String(int capacity);
     friend class StringBuffer;
 };
 
