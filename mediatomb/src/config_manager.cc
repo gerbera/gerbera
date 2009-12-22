@@ -884,8 +884,6 @@ void ConfigManager::validate(String serverhome)
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
     SET_BOOL_OPTION(CFG_SERVER_STORAGE_CACHING_ENABLED);
 
-
-#ifdef HAVE_MYSQL
     tmpEl = getElement(_("/server/storage/mysql"));
     if (tmpEl != nil)
     {
@@ -895,6 +893,25 @@ void ConfigManager::validate(String serverhome)
             throw _Exception(_("Invalid <mysql enabled=\"\"> value"));
     }
 
+    tmpEl = getElement(_("/server/storage/sqlite3"));
+    if (tmpEl != nil)
+    {
+        sqlite3_en = getOption(_("/server/storage/sqlite3/attribute::enabled"),
+                _(DEFAULT_SQLITE_ENABLED));
+        if (!validateYesNo(sqlite3_en))
+            throw _Exception(_("Invalid <sqlite3 enabled=\"\"> value"));
+    }
+
+    if ((sqlite3_en == "yes") && (mysql_en == "yes"))
+        throw _Exception(_("You enabled both, sqlite3 and mysql but "
+                           "only one database driver may be active at "
+                           "a time!"));
+
+    if ((sqlite3_en == "no") && (mysql_en == "no"))
+        throw _Exception(_("You disabled both, sqlite3 and mysql but "
+                           "one database driver must be active!"));
+
+#ifdef HAVE_MYSQL
     if (mysql_en == "yes")
     {
         NEW_OPTION(getOption(_("/server/storage/mysql/host"), 
@@ -933,18 +950,16 @@ void ConfigManager::validate(String serverhome)
         }
         SET_OPTION(CFG_SERVER_STORAGE_MYSQL_PASSWORD);
     }
-
-#endif
+#else
+    if (mysql_en == "yes")
+    {
+        throw _Exception(_("You enabled MySQL storage in configuration, "
+                           "however this version of MediaTomb was compiled "
+                           "without MySQL support!"));
+    }
+#endif // HAVE_MYSQL
 
 #ifdef HAVE_SQLITE3
-    tmpEl = getElement(_("/server/storage/sqlite3"));
-    if (tmpEl != nil)
-    {
-        sqlite3_en = getOption(_("/server/storage/sqlite3/attribute::enabled"),
-                _(DEFAULT_SQLITE_ENABLED));
-        if (!validateYesNo(sqlite3_en))
-            throw _Exception(_("Invalid <sqlite3 enabled=\"\"> value"));
-    }
     
     if (sqlite3_en == "yes")
     {
@@ -1006,15 +1021,15 @@ void ConfigManager::validate(String serverhome)
         NEW_INT_OPTION(temp_int);
         SET_INT_OPTION(CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL);
     }
-#endif
-    if ((sqlite3_en == "yes") && (mysql_en == "yes"))
-        throw _Exception(_("You enabled both, sqlite3 and mysql but "
-                           "only one database driver may be active at "
-                           "a time!"));
+#else
+    if (sqlite3_en == "yes")
+    {
+        throw _Exception(_("You enabled sqlite3 storage in configuration, "
+                           "however this version of MediaTomb was compiled "
+                           "without sqlite3 support!"));
+    }
 
-    if ((sqlite3_en == "no") && (mysql_en == "no"))
-        throw _Exception(_("You disabled both, sqlite3 and mysql but "
-                           "one database driver must be active!"));
+#endif // SQLITE3
 
     String dbDriver;
     if (sqlite3_en == "yes")

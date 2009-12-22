@@ -307,13 +307,21 @@
     #define DEFAULT_STORAGE_DRIVER      "sqlite3"
 #else
     #define DEFAULT_STORAGE_DRIVER      "mysql"
+    #define DEFAULT_SQLITE_ENABLED      NO
 #endif
 
 #ifdef HAVE_MYSQL
     #define DEFAULT_MYSQL_HOST          "localhost"
     #define DEFAULT_MYSQL_DB            "mediatomb"
     #define DEFAULT_MYSQL_USER          "mediatomb"
+#ifdef HAVE_SQLITE3
+    #define DEFAULT_MYSQL_ENABLED       NO
+#else
     #define DEFAULT_MYSQL_ENABLED       YES
+#endif//HAVE_SQLITE3
+
+#else//HAVE_MYSQL
+    #define DEFAULT_MYSQL_ENABLED       NO
 #endif
 
 #define DEFAULT_SQLITE3_DB_FILENAME     "mediatomb.db"
