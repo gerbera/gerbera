@@ -64,7 +64,7 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions, in
 
     if ((stringLimit > 0) && (tmp.length() > stringLimit))
     {
-        tmp = tmp.substring(0, stringLimit-3);
+        tmp = tmp.substring(0, getValidUTF8CutPosition(tmp, stringLimit-3));
         tmp = tmp + _("...");
     }
    
@@ -93,7 +93,8 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions, in
                 tmp = el->getValue();
                 if ((stringLimit > 0) && (tmp.length() > stringLimit))
                 {
-                    tmp = tmp.substring(0, stringLimit-3);
+                    tmp = tmp.substring(0, 
+                            getValidUTF8CutPosition(tmp, stringLimit-3));
                     tmp = tmp + _("...");
                 }
                 result->appendTextChild(key, tmp);

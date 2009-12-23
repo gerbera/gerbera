@@ -1356,6 +1356,44 @@ String get_last_path(String location)
     return path;
 }
 
+
+ssize_t getValidUTF8CutPosition(zmm::String str, size_t cutpos)
+{
+    ssize_t pos = -1;
+    size_t len = str.length();
+
+    if ((len == 0) || (cutpos > len))
+        return pos;
+
+    printf("Character at cut position: %0x\n", (char)str.charAt(cutpos));
+    printf("Character at cut-1 position: %0x\n", (char)str.charAt(cutpos-1));
+    printf("Character at cut-2 position: %0x\n", (char)str.charAt(cutpos-2));
+    printf("Character at cut-3 position: %0x\n", (char)str.charAt(cutpos-3));
+
+    // > 0x7f, we are dealing with a non-ascii character
+    if (str.charAt(cutpos) & 0x80)
+    {
+        // check if we are at byte 2
+        if (((cutpos-1) >= 0) && 
+             (((str.charAt(cutpos-1) & 0xc2) == 0xc2) ||
+              ((str.charAt(cutpos-1) & 0xe2) == 0xe2) ||
+              ((str.charAt(cutpos-1) & 0xf0) == 0xf0)))
+            pos = cutpos - 1;
+        // check if we are at byte 3
+        else if (((cutpos - 2) >= 0) && 
+                (((str.charAt(cutpos-2) & 0xe2) == 0xe2) ||
+                 ((str.charAt(cutpos-2) & 0xf0) == 0xf0)))
+            pos = cutpos - 2;
+        // we must be at byte 4 then...
+        else if ((cutpos - 3) >= 0)
+            pos = cutpos - 3;
+    }
+    else
+        pos = cutpos;
+
+    return pos;
+}
+
 #ifndef HAVE_FFMPEG
 String getAVIFourCC(zmm::String avi_filename)
 {
