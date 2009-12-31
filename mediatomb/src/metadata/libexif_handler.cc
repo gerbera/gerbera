@@ -268,7 +268,7 @@ static int getTagFromString(String tag)
 #endif
 
 #ifdef EXIF_EGV_3
-    #define BUFLEN  512
+    #define BUFLEN  4096
     char exif_entry_buffer[BUFLEN];
     #define exif_egv(arg) exif_entry_get_value(arg, exif_entry_buffer, BUFLEN)
 #endif
