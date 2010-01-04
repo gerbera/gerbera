@@ -155,6 +155,7 @@ void ArrayBase::clear()
         Object *obj = arr[i];
         obj->release();
     }
-    siz = 0;
+
     memset(arr, 0, siz * sizeof(Object *));
+    siz = 0;
 }
