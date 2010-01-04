@@ -37,6 +37,10 @@
     #include <curl/curl.h>
 #endif
 
+#ifdef HAVE_LASTFMLIB
+    #include "lastfm_scrobbler.h"
+#endif
+
 #include "server.h"
 #include "web_callbacks.h"
 #include "content_manager.h"
@@ -99,6 +103,10 @@ void Server::init()
 
 #ifdef HAVE_CURL
     curl_global_init(CURL_GLOBAL_ALL);
+#endif
+
+#ifdef HAVE_LASTFMLIB
+    LastFm::getInstance();
 #endif
 }
 

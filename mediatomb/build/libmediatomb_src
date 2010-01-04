@@ -11,8 +11,8 @@ libmediatomb_a_SOURCES = \
 ../src/autoscan_inotify.h \
 ../src/buffered_io_handler.cc \
 ../src/buffered_io_handler.h \
-../src/cached_url.h \
 ../src/cached_url.cc \
+../src/cached_url.h \
 ../src/cds_objects.cc \
 ../src/cds_objects.h \
 ../src/cds_resource.cc \
@@ -67,6 +67,8 @@ libmediatomb_a_SOURCES = \
 ../src/layout/js_layout.cc \
 ../src/layout/js_layout.h \
 ../src/layout/layout.h \
+../src/lastfm_scrobbler.cc \
+../src/lastfm_scrobbler.h \
 ../src/logger.cc \
 ../src/logger.h \
 ../src/main.cc \

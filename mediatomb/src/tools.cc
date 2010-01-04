@@ -669,6 +669,22 @@ String secondsToHMS(int seconds)
     return String::take(str);
 }
 
+int HMSToSeconds(String time)
+{
+    if (!string_ok(time))
+    {
+        log_warning("Could not convert time representation to seconds!\n");
+        return 0;
+    }
+
+    int hours = 0;
+    int minutes = 0;
+    int seconds = 0;
+    sscanf(time.c_str(), "%d:%d:%d", &hours, &minutes, &seconds);
+
+    return (hours * 3600) + (minutes * 60) + seconds;
+}
+
 #ifdef HAVE_MAGIC
 String get_mime_type(magic_set *ms, Ref<RExp> reMimetype, String file)
 {

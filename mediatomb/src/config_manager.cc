@@ -498,6 +498,14 @@ String ConfigManager::createDefaultConfig(String userhome)
     mark->appendElementChild(mark_string);
     extended->appendElementChild(mark);
 
+#ifdef HAVE_LASTFMLIB
+    Ref<Element> lastfm(new Element(_("lastfm")));
+    lastfm->setAttribute(_("enabled"), _(DEFAULT_LASTFM_ENABLED));
+    lastfm->appendTextChild(_("username"), _(DEFAULT_LASTFM_USERNAME));
+    lastfm->appendTextChild(_("password"), _(DEFAULT_LASTFM_PASSWORD));
+    extended->appendElementChild(lastfm);
+#endif
+ 
     server->appendElementChild(extended);
 
     config->appendElementChild(server);
@@ -630,7 +638,7 @@ String ConfigManager::createDefaultConfig(String userhome)
 #ifdef EXTERNAL_TRANSCODING
     config->appendElementChild(renderTranscodingSection());
 #endif
-    
+   
     config->indent();
     save_text(config_filename, config->print());
     log_info("MediaTomb configuration was created in: %s\n", 
@@ -1819,6 +1827,44 @@ void ConfigManager::validate(String serverhome)
         NEW_OPTION(temp);
         SET_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING);
     }
+
+#if defined(HAVE_LASTFMLIB)
+    temp = getOption(_("/server/extended-runtime-options/lastfm/attribute::enabled"), _(DEFAULT_LASTFM_ENABLED));
+
+    if (!validateYesNo(temp))
+        throw _Exception(_("Error in config file: "
+                           "invalid \"enabled\" attribute value in "
+                           "<lastfm> tag"));
+
+    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_LASTFM_ENABLED);
+
+    if (temp == YES)
+    {
+        temp = getOption(_("/server/extended-runtime-options/lastfm/username"),
+                         _(DEFAULT_LASTFM_USERNAME));
+
+        if (!string_ok(temp))
+            throw _Exception(_("Error in config file: lastfm - "
+                               "invalid username value in "
+                               "<username> tag"));
+
+        NEW_OPTION(temp);
+        SET_OPTION(CFG_SERVER_EXTOPTS_LASTFM_USERNAME);
+
+        temp = getOption(_("/server/extended-runtime-options/lastfm/password"),
+                         _(DEFAULT_LASTFM_PASSWORD));
+
+        if (!string_ok(temp))
+            throw _Exception(_("Error in config file: lastfm - "
+                               "invalid password value in "
+                               "<password> tag"));
+
+        NEW_OPTION(temp);
+        SET_OPTION(CFG_SERVER_EXTOPTS_LASTFM_PASSWORD);
+    }
+#endif
+
 
 #ifdef HAVE_MAGIC
     String magic_file;

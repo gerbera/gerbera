@@ -40,6 +40,10 @@
 #include "config_manager.h"
 #include "content_manager.h"
 
+#ifdef HAVE_LASTFMLIB
+    #include "lastfm_scrobbler.h"
+#endif
+
 using namespace zmm;
 
 SINGLETON_MUTEX(PlayHook, false);
@@ -57,6 +61,13 @@ void PlayHook::trigger(zmm::Ref<CdsObject> obj)
         Ref<ContentManager> cm = ContentManager::getInstance();
         cm->updateObject(obj, !supress);
     }
+
+#ifdef HAVE_LASTFMLIB
+    if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_LASTFM_ENABLED) &&
+        (RefCast(obj, CdsItem)->getMimeType().startsWith("audio")))
+        LastFm::getInstance()->startedPlaying(RefCast(obj, CdsItem));
+#endif
+    
 }
 
 

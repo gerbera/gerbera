@@ -1596,6 +1596,12 @@ CXXFLAGS="$CXXFLAGS_SAVE"
 LDFLAGS="$LDFLAGS_SAVE"
 CPPFLAGS="$CPPFLAGS_SAVE"
 
+######## lastfm
+MT_CHECK_OPTIONAL_PACKAGE([lastfmlib], [disable],
+        [compile with lastfmlib support for Last.fm scrobbling],
+        [lastfmlib/lastfmscrobbler],
+        [lastfmlib], [create_scrobbler])
+
 ######## extractor
 
 if test "x$LIBEXTRACTOR_OPTION_ENABLED" = xyes; then
@@ -1611,6 +1617,14 @@ else
         AC_MSG_ERROR([unable to configure libextractor support])
     fi
 fi
+
+######## ImageMagick
+#
+#MT_CHECK_OPTIONAL_PACKAGE_CFG([ImageMagick], [enable],
+#         [compile with ImageMagick support for image transcoding],
+#         [MagickWand-config],
+#         [wand/magick-wand.h], [], [MagickReadImage], [])
+
 
 ######## libexif
 
@@ -1900,7 +1914,7 @@ if (test "x$SOPCAST_OPTION_ENABLED" = xyes); then
     AC_DEFINE([SOPCAST], [1], [Enable support for the SopCast service])
 fi
 
-AC_DEFINE_UNQUOTED([COMPILE_INFO], "\thost:\t\t\t$host\n\tsqlite3:\t\t$SQLITE3_STATUS\n\tmysql:\t\t\t$MYSQL_STATUS\n\tlibjs:\t\t\t$JS_OK\n\tlibmagic:\t\t$LIBMAGIC_STATUS\n\tinotify:\t\t$INOTIFY_STATUS\n\tlibexif:\t\t$LIBEXIF_STATUS\n\tid3lib:\t\t\t$ID3LIB_STATUS\n\ttaglib:\t\t\t$TAGLIB_STATUS\n\tffmpeg\t\t\t$FFMPEG_STATUS\n\tlibmp4v2:\t\t$LIBMP4V2_STATUS\n\texternal transcoding:\t$EXTERNAL_TRANSCODING_OPTION_ENABLED\n\tcurl:\t\t\t$CURL_OK\n\tYouTube:\t\t$YOUTUBE_OPTION_ENABLED\n\tSopCast:\t\t$SOPCAST_OPTION_ENABLED\n\tWeborama:\t\t$WEBORAMA_OPTION_ENABLED\n\tApple Trailers\t\t$ATRAILERS_OPTION_ENABLED\n\tlibdvdnav\t\t$LIBDVDNAV_STATUS\n\tlibextractor\t\t$LIBEXTRACTOR_STATUS\n\tdb-autocreate:\t\t$DB_AUTOCREATE_OPTION_ENABLED\n\tdebug log:\t\t$DEBUG_LOG_OPTION_ENABLED\n\tprotocol info extension:$PROTOCOLINFO_EXTENSION_OPTION_ENABLED\n\tffmpegthumbnailer:\t$FFMPEGTHUMBNAILER_STATUS\n\tdata directory:\t\t$PACKAGE_DATADIR", [compile option summary])
+AC_DEFINE_UNQUOTED([COMPILE_INFO], "\thost:\t\t\t$host\n\tsqlite3:\t\t$SQLITE3_STATUS\n\tmysql:\t\t\t$MYSQL_STATUS\n\tlibjs:\t\t\t$JS_OK\n\tlibmagic:\t\t$LIBMAGIC_STATUS\n\tinotify:\t\t$INOTIFY_STATUS\n\tlibexif:\t\t$LIBEXIF_STATUS\n\tid3lib:\t\t\t$ID3LIB_STATUS\n\ttaglib:\t\t\t$TAGLIB_STATUS\n\tffmpeg\t\t\t$FFMPEG_STATUS\n\tlibmp4v2:\t\t$LIBMP4V2_STATUS\n\texternal transcoding:\t$EXTERNAL_TRANSCODING_OPTION_ENABLED\n\tcurl:\t\t\t$CURL_OK\n\tYouTube:\t\t$YOUTUBE_OPTION_ENABLED\n\tSopCast:\t\t$SOPCAST_OPTION_ENABLED\n\tWeborama:\t\t$WEBORAMA_OPTION_ENABLED\n\tApple Trailers\t\t$ATRAILERS_OPTION_ENABLED\n\tlibdvdnav\t\t$LIBDVDNAV_STATUS\n\tlibextractor\t\t$LIBEXTRACTOR_STATUS\n\tdb-autocreate:\t\t$DB_AUTOCREATE_OPTION_ENABLED\n\tdebug log:\t\t$DEBUG_LOG_OPTION_ENABLED\n\tprotocol info extension:$PROTOCOLINFO_EXTENSION_OPTION_ENABLED\n\tffmpegthumbnailer:\t$FFMPEGTHUMBNAILER_STATUS\n\tlastfmlib:\t\t$LASTFMLIB_STATUS\n\tdata directory:\t\t$PACKAGE_DATADIR", [compile option summary])
 
 ###############
 AC_CONFIG_FILES([
@@ -1935,9 +1949,11 @@ echo "libexif               : $LIBEXIF_STATUS"
 echo "id3lib                : $ID3LIB_STATUS"
 echo "taglib                : $TAGLIB_STATUS"
 echo "libmp4v2              : $LIBMP4V2_STATUS"
+# echo "ImageMagick           : $IMAGEMAGICK_STATUS"
 echo "libdvdnav             : $LIBDVDNAV_STATUS"
 echo "ffmpeg                : $FFMPEG_STATUS"
 echo "ffmpegthumbnailer     : $FFMPEGTHUMBNAILER_STATUS"
+echo "lastfmlib             : $LASTFMLIB_STATUS"
 echo "external transcoding  : $EXTERNAL_TRANSCODING_OPTION_ENABLED"
 echo "curl                  : $CURL_OK"
 echo "YouTube               : $YOUTUBE_OPTION_ENABLED"

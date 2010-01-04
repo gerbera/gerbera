@@ -361,6 +361,12 @@
     #define DEFAULT_FFMPEGTHUMBNAILER_IMAGE_QUALITY     8
 #endif
 
+#if defined(HAVE_LASTFMLIB)
+    #define DEFAULT_LASTFM_ENABLED  NO
+    #define DEFAULT_LASTFM_USERNAME "lastfmuser"
+    #define DEFAULT_LASTFM_PASSWORD "lastfmpass"
+#endif
+
 #define DEFAULT_MARK_PLAYED_ITEMS_ENABLED               NO
 #define DEFAULT_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES   YES
 #define DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE           "prepend"

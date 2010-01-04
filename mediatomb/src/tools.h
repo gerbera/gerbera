@@ -198,6 +198,9 @@ zmm::String getProtocol(zmm::String protocolInfo);
 /// the UPnP spec
 zmm::String secondsToHMS(int seconds);
 
+/// \brief converts a "H:MM:SS:" representation to seconds
+int HMSToSeconds(zmm::String time);
+
 #ifdef HAVE_MAGIC
 /// \brief Extracts mimetype from a file using filemagic
 zmm::String get_mime_type(magic_set *ms, zmm::Ref<RExp> reMimetype, zmm::String file);
