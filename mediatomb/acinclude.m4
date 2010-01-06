@@ -266,6 +266,7 @@ AC_DEFUN([MT_SET_SEARCHPATH],
 # $1 with parameter/package name
 # $2 library name
 # $3 function name
+# $4 "pass" if requested option failed
 # 
 # returns:
 #   mt_$1_library_status
@@ -300,7 +301,12 @@ AC_DEFUN([MT_CHECK_LIBRARY_INTERNAL],
                 mt_$1_ldflags="-L$mt_$1_search_libs"
             ],
             [
-                AC_MSG_ERROR([$1 library not found in requested location $mt_$1_search_libs])
+                mt_$1_library_status=missing
+                if test "$4" = "pass"; then
+                    AC_MSG_NOTICE([$1 library not found in requested location $mt_$1_search_libs])
+                else
+                    AC_MSG_ERROR([$1 library not found in requested location $mt_$1_search_libs])
+                fi
             ]
         )
     else
@@ -418,6 +424,7 @@ AC_DEFUN([MT_CHECK_HEADER_INTERNAL],
 # $2 header name (without .h extension)
 # $3 library name
 # $4 function name
+# $5 "pass" if requestd options failed
 #
 # returns:
 #   mt_$1_package_status
@@ -427,11 +434,11 @@ AC_DEFUN([MT_CHECK_HEADER_INTERNAL],
    
 AC_DEFUN([MT_CHECK_PACKAGE_INTERNAL],
 [
-    MT_CHECK_HEADER_INTERNAL([$1], [$2])
+    MT_CHECK_HEADER_INTERNAL([$1], [$2], [$5])
     mt_$1_package_status=${mt_$1_header_status}
   
     if test "x$mt_$1_package_status" = xyes; then 
-        MT_CHECK_LIBRARY_INTERNAL([$1], [$3], [$4])
+        MT_CHECK_LIBRARY_INTERNAL([$1], [$3], [$4], [$5])
         mt_$1_package_status=${mt_$1_library_status}
     fi
     
@@ -486,6 +493,7 @@ AC_DEFUN([MT_OPTION],
 # $4 header name (without .h)
 # $5 library name
 # $6 function name
+# $7 "pass" on requested options
 # returns substed:
 #   $1_STATUS
 #   $1_LDFLAGS
@@ -499,7 +507,7 @@ AC_DEFUN([MT_CHECK_OPTIONAL_PACKAGE],
     MT_OPTION([$1], [$2], [$3],[],[])
 
     if test "x${translit($1, `a-z/.-', `A-Z___')_OPTION_ENABLED}" = xyes; then
-        MT_CHECK_PACKAGE_INTERNAL([$1], [$4], [$5], [$6])
+        MT_CHECK_PACKAGE_INTERNAL([$1], [$4], [$5], [$6], [$7])
         mt_$1_status=${mt_$1_package_status}
     else
         mt_$1_status=disabled

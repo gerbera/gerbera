@@ -1570,7 +1570,7 @@ if test "x$FFMPEG_STATUS" = xyes; then
     AC_SUBST(FFMPEG_LDFLAGS)
     AC_SUBST(FFMPEG_LIBS)
 else
-    if test "x$FFMPEG_OPTIEON_REQUESTED" = xyes; then
+    if test "x$FFMPEG_OPTION_REQUESTED" = xyes; then
         AC_MSG_ERROR(unable to configure ffmpeg support)
     fi
 fi
@@ -1578,7 +1578,18 @@ fi
 MT_CHECK_OPTIONAL_PACKAGE([ffmpegthumbnailer], [disable], 
         [compile with ffmpegthumbnailer support for video thumbnail generation],
         [libffmpegthumbnailer/videothumbnailerc], 
+        [ffmpegthumbnailer], [video_thumbnailer_create])
+
+if (test "x$FFMPEGTHUMBNAILER_STATUS" != xyes); then
+    MT_CHECK_OPTIONAL_PACKAGE([ffmpegthumbnailer], [disable], 
+        [compile with ffmpegthumbnailer support for video thumbnail generation],
+        [libffmpegthumbnailer/videothumbnailerc], 
         [ffmpegthumbnailer], [create_thumbnailer])
+
+    if (test "x$FFMPEGTHUMBNAILER_STATUS" = xyes); then
+        AC_DEFINE([FFMPEGTHUMBNAILER_OLD_API], [1], [use ffmpegthumbnailer API])
+    fi
+fi
 
 if ((test "x$FFMPEG_STATUS" != xyes) && (test "x$FFMPEGTHUMBNAILER_STATUS" = xyes)); then
     if test "x$FFMPEGTHUMBNAILER_OPTION_REQUESTED" = xyes; then

@@ -288,8 +288,14 @@ Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum, off_t 
     if (!cfg->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED))
         return nil;
 
+#ifdef FFMPEGTHUMBNAILER_OLD_API
     video_thumbnailer *th = create_thumbnailer();
     image_data *img = create_image_data();
+#else
+    video_thumbnailer *th = video_thumbnailer_create();
+    image_data *img = video_thumbnailer_create_image_data();
+#endif // old api
+
 
     th->seek_percentage        = cfg->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE);
 
@@ -303,14 +309,26 @@ Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum, off_t 
     th->thumbnail_image_type   = Jpeg;
 
     log_debug("Generating thumbnail for file: %s\n", item->getLocation().c_str());
+
+#ifdef FFMPEGTHUMBNAILER_OLD_API
     if (generate_thumbnail_to_buffer(th, item->getLocation().c_str(), img) != 0)
-        throw _Exception(_("Could not generate thumbnail for ") + item->getLocation());
+#else
+    if (video_thumbnailer_generate_thumbnail_to_buffer(th, 
+                                         item->getLocation().c_str(), img) != 0)
+#endif // old api
+        throw _Exception(_("Could not generate thumbnail for ") + 
+                item->getLocation());
 
     *data_size = (off_t)img->image_data_size;
     Ref<IOHandler> h(new MemIOHandler((void *)img->image_data_ptr, 
                                               img->image_data_size));
+#ifdef FFMPEGTHUMBNAILER_OLD_API
     destroy_image_data(img);
     destroy_thumbnailer(th);
+#else
+    video_thumbnailer_destroy_image_data(img);
+    video_thumbnailer_destroy(th);
+#endif// old api
     return h;
 #else
     return nil;
