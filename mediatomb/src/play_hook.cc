@@ -54,12 +54,22 @@ void PlayHook::trigger(zmm::Ref<CdsObject> obj)
 
     if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && !obj->getFlag(OBJECT_FLAG_PLAYED))
     {
-        obj->setFlag(OBJECT_FLAG_PLAYED);
+        Ref<Array<StringBase> > mark_list = cfg->getStringArrayOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST);
 
-        bool supress = cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES);
+        for (int i = 0; i < mark_list->size(); i++)
+        {
+            if (RefCast(obj, CdsItem)->getMimeType().startsWith(mark_list->get(i)))
+            {
+                obj->setFlag(OBJECT_FLAG_PLAYED);
+        
+                bool supress = cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES);
 
-        Ref<ContentManager> cm = ContentManager::getInstance();
-        cm->updateObject(obj, !supress);
+                Ref<ContentManager> cm = ContentManager::getInstance();
+                log_debug("Marking object %s as played\n", obj->getTitle().c_str());
+                cm->updateObject(obj, !supress);
+                break;
+            }
+        }
     }
 
 #ifdef HAVE_LASTFMLIB

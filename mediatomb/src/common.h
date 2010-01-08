@@ -368,9 +368,12 @@
 #endif
 
 #define DEFAULT_MARK_PLAYED_ITEMS_ENABLED               NO
-#define DEFAULT_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES   YES
+#define DEFAULT_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES  YES
 #define DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE           "prepend"
 #define DEFAULT_MARK_PLAYED_ITEMS_STRING                "* "
+#define DEFAULT_MARK_PLAYED_CONTENT_AUDIO               "audio"
+#define DEFAULT_MARK_PLAYED_CONTENT_VIDEO               "video"
+#define DEFAULT_MARK_PLAYED_CONTENT_IMAGE               "image"
 
 #define LINK_FILE_REQUEST_HANDLER         "/" SERVER_VIRTUAL_DIR "/" \
                                           CONTENT_MEDIA_HANDLER  "/"

@@ -496,6 +496,12 @@ String ConfigManager::createDefaultConfig(String userhome)
                               _(DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE));
     mark_string->setText(_(DEFAULT_MARK_PLAYED_ITEMS_STRING));
     mark->appendElementChild(mark_string);
+
+    Ref<Element> mark_content_section(new Element(_("mark")));
+    Ref<Element> content_video(new Element(_("content")));
+    content_video->setText(_(DEFAULT_MARK_PLAYED_CONTENT_VIDEO));
+    mark_content_section->appendElementChild(content_video);
+    mark->appendElementChild(mark_content_section);
     extended->appendElementChild(mark);
 
 #ifdef HAVE_LASTFMLIB
@@ -1826,6 +1832,32 @@ void ConfigManager::validate(String serverhome)
                                "<mark-played-items> section"));
         NEW_OPTION(temp);
         SET_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING);
+
+        Ref<Array<StringBase> > mark_content_list(new Array<StringBase>());
+        tmpEl = getElement(_("/server/extended-runtime-options/mark-played-items/mark"));
+
+        if (tmpEl != nil)
+        {
+            for (int m = 0; m < tmpEl->elementChildCount(); m++)
+            {
+                Ref<Element> content = tmpEl->getElementChild(m);
+                if (content->getName() != "content")
+                    continue;
+
+                String mark_content = content->getText();
+                if (!string_ok(mark_content))
+                    throw _Exception(_("error in configuration, <mark-played-items>, empty <content> parameter!"));
+
+                if ((mark_content != DEFAULT_MARK_PLAYED_CONTENT_VIDEO) && 
+                    (mark_content != DEFAULT_MARK_PLAYED_CONTENT_AUDIO) &&
+                    (mark_content != DEFAULT_MARK_PLAYED_CONTENT_IMAGE))
+                        throw _Exception(_("error in configuration, <mark-played-items>, invalid <content> parameter! Allowed values are \"video\", \"audio\", \"image\""));
+
+                mark_content_list->append(mark_content);
+                NEW_STRARR_OPTION(mark_content_list);
+                SET_STRARR_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST);
+            }
+        }
     }
 
 #if defined(HAVE_LASTFMLIB)
