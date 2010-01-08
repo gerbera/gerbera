@@ -260,7 +260,7 @@ MT_OPTION([youtube], [disable],
           [YouTube service support],
           [],[YOUTUBE_OPTION_ENABLED=disabled])
 
-MT_OPTION([weborama], [enable],
+MT_OPTION([weborama], [disable],
           [Weborama service support],
           [],[WEBORAMA_OPTION_ENABLED=disabled])
 
