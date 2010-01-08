@@ -515,7 +515,7 @@ AC_DEFUN([MT_CHECK_OPTIONAL_PACKAGE],
     
     if ((test "x${translit($1, `a-z/.-', `A-Z___')_OPTION_ENABLED}" = xyes) &&
         (test "x${translit($1, `a-z/.-', `A-Z___')_OPTION_REQUESTED}" = xyes) &&
-        (test "x$mt_$1_status" != xyes)); then
+        (test "x$mt_$1_status" != xyes) && (test "$7" != "pass")); then
         AC_MSG_ERROR([unable to configure $1 support])
     fi
 

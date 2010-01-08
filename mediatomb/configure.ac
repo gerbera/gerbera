@@ -1578,7 +1578,7 @@ fi
 MT_CHECK_OPTIONAL_PACKAGE([ffmpegthumbnailer], [disable], 
         [compile with ffmpegthumbnailer support for video thumbnail generation],
         [libffmpegthumbnailer/videothumbnailerc], 
-        [ffmpegthumbnailer], [video_thumbnailer_create])
+        [ffmpegthumbnailer], [video_thumbnailer_create], [pass])
 
 if (test "x$FFMPEGTHUMBNAILER_STATUS" != xyes); then
     MT_CHECK_OPTIONAL_PACKAGE([ffmpegthumbnailer], [disable], 
