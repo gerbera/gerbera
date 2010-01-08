@@ -47,7 +47,7 @@
 using namespace zmm;
 using namespace mxml;
 
-#define WEBORAMA_SERVICE_URL            "beta.weborama.ru/modules/player/index_xspf.php"
+#define WEBORAMA_SERVICE_URL            "www.weborama.ru/modules/player/index_xspf.php"
 
 /// \todo ask Nick if this value makes sense
 #define DEFAULT_PER_TASK_AMOUNT         (1000)

@@ -1575,6 +1575,8 @@ else
     fi
 fi
 
+FFMPEGTHUMBNAILER_USES_OLD_API=
+
 MT_CHECK_OPTIONAL_PACKAGE([ffmpegthumbnailer], [disable], 
         [compile with ffmpegthumbnailer support for video thumbnail generation],
         [libffmpegthumbnailer/videothumbnailerc], 
@@ -1588,6 +1590,7 @@ if (test "x$FFMPEGTHUMBNAILER_STATUS" != xyes); then
 
     if (test "x$FFMPEGTHUMBNAILER_STATUS" = xyes); then
         AC_DEFINE([FFMPEGTHUMBNAILER_OLD_API], [1], [use ffmpegthumbnailer API])
+        FFMPEGTHUMBNAILER_USES_OLD_API=yes
     fi
 fi
 
@@ -1630,12 +1633,15 @@ else
 fi
 
 ######## ImageMagick
-#
-#MT_CHECK_OPTIONAL_PACKAGE_CFG([ImageMagick], [enable],
-#         [compile with ImageMagick support for image transcoding],
-#         [MagickWand-config],
-#         [wand/magick-wand.h], [], [MagickReadImage], [])
 
+MT_CHECK_OPTIONAL_PACKAGE_CFG([ImageMagick], [enable],
+         [compile with ImageMagick support for image transcoding],
+         [MagickWand-config],
+         [wand/magick-wand.h], [], [MagickReadImage], [])
+
+if (test "x$FFMPEGTHUMBNAILER_USES_OLD_API" = xyes) && ("x$IMAGEMAGICK_STATUS" = xyes); then
+        AC_MSG_ERROR("Your version of libffmpegthumbnailer uses the old API which can not be used together with ImageMagick. Please either disable libffmpegthumbnailer, update your libffmpegthumbnailer library to version >= 2.0.0, or disable ImageMagick via the appropriate configure parameters.")
+fi
 
 ######## libexif
 
@@ -1960,7 +1966,7 @@ echo "libexif               : $LIBEXIF_STATUS"
 echo "id3lib                : $ID3LIB_STATUS"
 echo "taglib                : $TAGLIB_STATUS"
 echo "libmp4v2              : $LIBMP4V2_STATUS"
-# echo "ImageMagick           : $IMAGEMAGICK_STATUS"
+#echo "ImageMagick           : $IMAGEMAGICK_STATUS"
 echo "libdvdnav             : $LIBDVDNAV_STATUS"
 echo "ffmpeg                : $FFMPEG_STATUS"
 echo "ffmpegthumbnailer     : $FFMPEGTHUMBNAILER_STATUS"

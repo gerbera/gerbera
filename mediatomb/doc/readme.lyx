@@ -1,4 +1,4 @@
-#LyX 1.6.4 created this file. For more info see http://www.lyx.org/
+#LyX 1.6.5 created this file. For more info see http://www.lyx.org/
 \lyxformat 345
 \begin_document
 \begin_header
@@ -5230,6 +5230,84 @@ Default: prepend
 \begin_layout Standard
 Specifies how a string should be added to the object's title, allowed values
  are "append" and "prepend".
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+</listitem></itemizedlist>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<mark>
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+This subsection allows to list which type of content should get marked.
+ We figured, that marking played items is mostly useful for videos, mainly
+ for watching series.
+ It could also be used with audio and image content, but otherwise it's
+ probably useless.
+ Thefore we decided to specify only three supported types that can get marked:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+<content>audio</content>
+\end_layout
+
+\begin_layout Code
+<content>video</content>
+\end_layout
+
+\begin_layout Code
+<content>image</content>
+\end_layout
+
+\begin_layout Standard
+You can specify any combination of the above tags to mark the items you
+ want.
 \end_layout
 
 \begin_layout Standard
