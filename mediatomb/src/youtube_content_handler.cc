@@ -212,10 +212,13 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
             
         item->setURL(temp);
 
+        int amp = temp.index('&');
+        if (amp > 0 )
+            temp = temp.substring( 0, amp );
+
         int eq = temp.rindex('=');
         if (eq > 0)
             temp = temp.substring(eq + 1);
-
 
         item->setClass(_("object.item.videoItem"));
         temp = String(OnlineService::getStoragePrefix(OS_YouTube)) + temp;

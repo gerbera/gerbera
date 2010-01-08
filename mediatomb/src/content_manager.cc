@@ -255,11 +255,13 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
             log_error("Could not setup YouTube: %s\n", 
                     ex.getMessage().c_str());
         }
-     
-        cached_urls = Ref<ReentrantArray<CachedURL> >
-                              (new ReentrantArray<CachedURL>(MAX_CACHED_URLS));
-        urlcache_mutex = Ref<Mutex>(new Mutex(false));
     }
+    // if YT is disabled in the configuration it is still possible that the DB
+    // is populated with YT objects, so we need to allow playing them
+    cached_urls = Ref<ReentrantArray<CachedURL> >
+        (new ReentrantArray<CachedURL>(MAX_CACHED_URLS));
+    urlcache_mutex = Ref<Mutex>(new Mutex(false));
+
 #endif //YOUTUBE
 
 #ifdef SOPCAST

@@ -64,6 +64,7 @@ protected:
     pthread_t pid;
     zmm::Ref<RExp> reVideoURLParams;
     zmm::Ref<RExp> redirectLocation;
+    zmm::Ref<RExp> param_t;
     zmm::Ref<RExp> HD;
 };
 

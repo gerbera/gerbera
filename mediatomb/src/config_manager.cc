@@ -1913,8 +1913,12 @@ void ConfigManager::validate(String serverhome)
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
     SET_BOOL_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_ENABLED);
 
+    /// \todo well, tough scenario: YT service is disabled, but the database 
+    /// is populated with YT items from some time before. We still need to 
+    /// support playing them, but that requires a valid YT section and thus
+    /// forces us to check the options eventhough the service is disabled.
     // check other options only if the service is enabled
-    if (temp == "yes")
+//    if (temp == "yes")
     {
         temp = getOption(_("/import/online-content/YouTube/attribute::racy-content"),
                          _(DEFAULT_YOUTUBE_RACY_CONTENT));

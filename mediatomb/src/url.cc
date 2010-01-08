@@ -80,7 +80,10 @@ Ref<StringBuffer> URL::download(String URL, long *HTTP_retcode,
         if (logEnabled)
             curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1);
     }
-
+    // some web sites send unexpected stuff, seems they need a user agent
+    // that they know...
+    curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, 
+                     "Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.1.6) Gecko/20091216 Fedora/3.5.6-1.fc12 Firefox/3.5.6");
     curl_easy_setopt(curl_handle, CURLOPT_URL, URL.c_str());
     curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, error_buffer);
 
