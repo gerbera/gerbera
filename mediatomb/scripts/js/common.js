@@ -67,3 +67,30 @@ function getLastPath(location)
         return '';
 }
 
+function getRootPath(rootpath, location)
+{
+    var path = new Array();
+
+    if (rootpath.length != '')
+    {
+        rootpath = rootpath.substring(0, rootpath.lastIndexOf('/'));
+
+        var dir = location.substring(rootpath.length,location.lastIndexOf('/'));
+
+        if (dir.charAt(0) == '/')
+            dir = dir.substring(1);
+
+        path = dir.split('/');
+    }
+    else
+    {
+        dir = getLastPath(location);
+        if (dir != '')
+        {
+            dir = escapeSlash(dir);
+            path.push(dir);
+        }
+    }
+
+    return path;
+}

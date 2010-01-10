@@ -42,15 +42,15 @@ class FallbackLayout : public Layout
 {
 public:
     FallbackLayout();
-    virtual void processCdsObject(zmm::Ref<CdsObject> obj);
+    virtual void processCdsObject(zmm::Ref<CdsObject> obj, zmm::String rootpath);
 #ifdef ENABLE_PROFILING
     virtual ~FallbackLayout();
 #endif
 protected:
     void add(zmm::Ref<CdsObject> obj, int parentID, bool use_ref = true);
     zmm::String esc(zmm::String str);
-    void addVideo(zmm::Ref<CdsObject> obj);
-    void addImage(zmm::Ref<CdsObject> obj);
+    void addVideo(zmm::Ref<CdsObject> obj, zmm::String rootpath);
+    void addImage(zmm::Ref<CdsObject> obj, zmm::String rootpath);
     void addAudio(zmm::Ref<CdsObject> obj);
 #ifdef HAVE_LIBDVDNAV
     zmm::Ref<CdsObject> prepareChapter(zmm::Ref<CdsObject> obj, int title_idx,

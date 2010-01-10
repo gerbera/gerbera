@@ -618,7 +618,7 @@ void ContentManager::addVirtualItem(Ref<CdsObject> obj, bool allow_fifo)
 
 }
 
-int ContentManager::_addFile(String path, bool recursive, bool hidden, Ref<CMTask> task)
+int ContentManager::_addFile(String path, String rootpath, bool recursive, bool hidden, Ref<CMTask> task)
 {
     if (hidden == false)
     {
@@ -656,7 +656,10 @@ int ContentManager::_addFile(String path, bool recursive, bool hidden, Ref<CMTas
             {
                 try
                 {
-                    layout->processCdsObject(obj);
+                    if (!string_ok(rootpath) && (task != nil))
+                        rootpath = RefCast(task, CMAddFileTask)->getRootPath();
+
+                    layout->processCdsObject(obj, rootpath);
                     
                     String mimetype = RefCast(obj, CdsItem)->getMimeType();
                     String content_type = mimetype_contenttype_map->get(mimetype);
@@ -896,7 +899,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
                         // readd object - we have to do this in order to trigger
                         // layout
                         removeObject(objectID, false);
-                        addFileInternal(path, false, false, adir->getHidden());
+                        addFileInternal(path, location, false, false, adir->getHidden());
                         // update time variable
                         last_modified_current_max = statbuf.st_mtime;
                     }
@@ -913,7 +916,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
                 // make sure not to add the current config.xml
                 if (ConfigManager::getInstance()->getConfigFilename() != path)
                 {
-                    addFileInternal(path, false, false, adir->getHidden());
+                    addFileInternal(path, location, false, false, adir->getHidden());
                     if (last_modified_current_max < statbuf.st_mtime)
                         last_modified_current_max = statbuf.st_mtime;
                 }
@@ -947,7 +950,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
                 }
                 
                 // add directory, recursive, async, hidden flag, low priority
-                addFileInternal(path, true, true, adir->getHidden(), true, thisTaskID, task->isCancellable());
+                addFileInternal(path, location, true, true, adir->getHidden(), true, thisTaskID, task->isCancellable());
             }
         }
     } // while
@@ -1052,7 +1055,10 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<CMTask> task)
                     {
                         try
                         {
-                            layout->processCdsObject(obj);
+                            String rootpath = nil;
+                            if (task != nil)
+                                rootpath = RefCast(task, CMAddFileTask)->getRootPath();
+                            layout->processCdsObject(obj, rootpath);
 #ifdef HAVE_JS
                             Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
                             String mimetype = RefCast(obj, CdsItem)->getMimeType();
@@ -1601,17 +1607,21 @@ void ContentManager::loadAccounting(bool async)
 int ContentManager::addFile(zmm::String path, bool recursive, bool async, 
                             bool hidden, bool lowPriority, bool cancellable)
 {
-    return addFileInternal(path, recursive, async, hidden, lowPriority, 0, cancellable);
+    String rootpath;
+    if (check_path(path, true))
+        rootpath = path;
+    return addFileInternal(path, rootpath, recursive, async, hidden, lowPriority, 0, cancellable);
 }
 
-int ContentManager::addFileInternal(zmm::String path, bool recursive, 
+int ContentManager::addFileInternal(String path, String rootpath,
+                                    bool recursive, 
                                     bool async, bool hidden, bool lowPriority, 
                                     unsigned int parentTaskID, 
                                     bool cancellable)
 {
     if (async)
     {
-        Ref<CMTask> task(new CMAddFileTask(path, recursive, hidden, cancellable));
+        Ref<CMTask> task(new CMAddFileTask(path, rootpath, recursive, hidden, cancellable));
         task->setDescription(_("Adding: ") + path);
         task->setParentID(parentTaskID);
         addTask(task, lowPriority);
@@ -1619,7 +1629,7 @@ int ContentManager::addFileInternal(zmm::String path, bool recursive,
     }
     else
     {
-        return _addFile(path, recursive, hidden);
+        return _addFile(path, rootpath, recursive, hidden);
     }
 }
 
@@ -2321,9 +2331,10 @@ CMTask::CMTask() : Object()
     parentTaskID = 0;
 }
 
-CMAddFileTask::CMAddFileTask(String path, bool recursive, bool hidden, bool cancellable) : CMTask()
+CMAddFileTask::CMAddFileTask(String path, String rootpath, bool recursive, bool hidden, bool cancellable) : CMTask()
 {
     this->path = path;
+    this->rootpath = rootpath;
     this->recursive = recursive;
     this->hidden = hidden;
     this->taskType = AddFile;
@@ -2335,10 +2346,14 @@ String CMAddFileTask::getPath()
     return path;
 }
 
+String CMAddFileTask::getRootPath()
+{
+    return rootpath;
+}
 void CMAddFileTask::run(Ref<ContentManager> cm)
 {
     log_debug("running add file task with path %s recursive: %d\n", path.c_str(), recursive);
-    cm->_addFile(path, recursive, hidden, Ref<CMTask> (this));
+    cm->_addFile(path, nil, recursive, hidden, Ref<CMTask> (this));
 }
 
 CMRemoveObjectTask::CMRemoveObjectTask(int objectID, bool all) : CMTask()

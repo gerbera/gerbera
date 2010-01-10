@@ -172,7 +172,7 @@ bool SopCastService::refreshServiceData(Ref<Layout> layout)
             log_debug("Adding new SopCast object\n");
             
             if (layout != nil)
-                layout->processCdsObject(obj);
+                layout->processCdsObject(obj, nil);
         }
         else
         {

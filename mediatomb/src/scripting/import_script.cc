@@ -70,7 +70,7 @@ ImportScript::ImportScript(Ref<Runtime> runtime) : Script(runtime)
 #endif
 }
 
-void ImportScript::processCdsObject(Ref<CdsObject> obj)
+void ImportScript::processCdsObject(Ref<CdsObject> obj, String rootpath)
 {
 #ifdef JS_THREADSAFE
     JS_SetContextThread(cx);
@@ -82,6 +82,7 @@ void ImportScript::processCdsObject(Ref<CdsObject> obj)
         JSObject *orig = JS_NewObject(cx, NULL, NULL, glob);
         setObjectProperty(glob, _("orig"), orig);
         cdsObject2jsObject(obj, orig);
+        setProperty(glob, _("object_root_path"), rootpath);
         execute();
     }
     catch (Exception ex)

@@ -151,10 +151,13 @@ function addVideo(obj)
     var chain = new Array('Video', 'All Video');
     addCdsObject(obj, createContainerChain(chain));
 
-    var last_path = getLastPath(obj.location);
-    if (last_path)
+    var dir = getRootPath(object_root_path, obj.location);
+
+    if (dir.length > 0)
     {
-        chain = new Array('Video', 'Directories', last_path);
+        chain = new Array('Video', 'Directories');
+        chain = chain.concat(dir);
+
         addCdsObject(obj, createContainerChain(chain));
     }
 }
@@ -181,10 +184,13 @@ function addImage(obj)
         addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER);
     }
 
-    var last_path = getLastPath(obj.location);
-    if (last_path)
+    var dir = getRootPath(object_root_path, obj.location);
+
+    if (dir.length > 0)
     {
-        chain = new Array('Photos', 'Directories', last_path);
+        chain = new Array('Photos', 'Directories');
+        chain = chain.concat(dir);
+
         addCdsObject(obj, createContainerChain(chain));
     }
 }

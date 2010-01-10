@@ -82,8 +82,9 @@ zmm::String FallbackLayout::esc(zmm::String str)
     return escape(str, VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR);
 }
 
-void FallbackLayout::addVideo(zmm::Ref<CdsObject> obj)
+void FallbackLayout::addVideo(zmm::Ref<CdsObject> obj, String rootpath)
 {
+    Ref<StringConverter> f2i = StringConverter::f2i();
     int id = ContentManager::getInstance()->addContainerChain(_("/Video/All Video"));
 
     if (obj->getID() != INVALID_OBJECT_ID)
@@ -97,10 +98,25 @@ void FallbackLayout::addVideo(zmm::Ref<CdsObject> obj)
         obj->setRefID(obj->getID());
     }
 
-    String dir = get_last_path(obj->getLocation());
+    String dir;
+
+    if (string_ok(rootpath))
+    {
+        rootpath = rootpath.substring(0, rootpath.rindex(DIR_SEPARATOR));
+
+        dir = obj->getLocation().substring(rootpath.length(), obj->getLocation().rindex(DIR_SEPARATOR)-rootpath.length());
+
+        if (dir.startsWith(_DIR_SEPARATOR))
+            dir = dir.substring(1);
+
+        dir = f2i->convert(dir);
+    }
+    else
+        dir = esc(f2i->convert(get_last_path(obj->getLocation())));
+
     if (string_ok(dir))
     {
-        id = ContentManager::getInstance()->addContainerChain(_("/Video/Directories/") + esc(dir));
+        id = ContentManager::getInstance()->addContainerChain(_("/Video/Directories/") + dir);
         add(obj, id);
     }
 }
@@ -270,9 +286,11 @@ void FallbackLayout::addDVD(Ref<CdsObject> obj)
 }
 #endif
 
-void FallbackLayout::addImage(Ref<CdsObject> obj)
+void FallbackLayout::addImage(Ref<CdsObject> obj, String rootpath)
 {
     int id;
+    Ref<StringConverter> f2i = StringConverter::f2i();
+
     
     id = ContentManager::getInstance()->addContainerChain(_("/Photos/All Photos"));
     if (obj->getID() != INVALID_OBJECT_ID)
@@ -297,13 +315,27 @@ void FallbackLayout::addImage(Ref<CdsObject> obj)
         add(obj, id);
     }
 
-    String dir = get_last_path(obj->getLocation());
+    String dir;
+
+    if (string_ok(rootpath))
+    {
+        rootpath = rootpath.substring(0, rootpath.rindex(DIR_SEPARATOR));
+
+        dir = obj->getLocation().substring(rootpath.length(), obj->getLocation().rindex(DIR_SEPARATOR)-rootpath.length());
+
+        if (dir.startsWith(_DIR_SEPARATOR))
+            dir = dir.substring(1);
+
+        dir = f2i->convert(dir);
+    }
+    else
+        dir = esc(f2i->convert(get_last_path(obj->getLocation())));
+
     if (string_ok(dir))
     {
-        id = ContentManager::getInstance()->addContainerChain(_("/Photos/Directories/") + esc(dir));
+        id = ContentManager::getInstance()->addContainerChain(_("/Photos/Directories/") + dir);
         add(obj, id);
     }
-    
 }
 
 void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
@@ -651,7 +683,7 @@ FallbackLayout::FallbackLayout() : Layout()
 #endif
 }
 
-void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj)
+void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj, String rootpath)
 {
     log_debug("Process CDS Object: %s\n", obj->getTitle().c_str());
 #ifdef ENABLE_PROFILING
@@ -705,16 +737,16 @@ void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj)
         String content_type = mappings->get(mimetype);
 
         if (mimetype.startsWith(_("video")))
-            addVideo(clone);
+            addVideo(clone, rootpath);
         else if (mimetype.startsWith(_("image")))
-            addImage(clone);
+            addImage(clone, rootpath);
         else if ((mimetype.startsWith(_("audio")) && 
                     (content_type != CONTENT_TYPE_PLAYLIST)))
             addAudio(clone);
         else if (content_type == CONTENT_TYPE_OGG)
         {
             if (obj->getFlag(OBJECT_FLAG_OGG_THEORA))
-                addVideo(clone);
+                addVideo(clone, rootpath);
             else
                 addAudio(clone);
         }

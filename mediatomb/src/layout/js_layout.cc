@@ -49,12 +49,12 @@ JSLayout::~JSLayout()
 {
 }
 
-void JSLayout::processCdsObject(Ref<CdsObject> obj)
+void JSLayout::processCdsObject(Ref<CdsObject> obj, String rootpath)
 {
     if (import_script == nil)
         return;
 
-    import_script->processCdsObject(obj);
+    import_script->processCdsObject(obj, rootpath);
 }
 
 

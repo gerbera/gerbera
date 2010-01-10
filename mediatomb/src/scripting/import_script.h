@@ -42,7 +42,7 @@ class ImportScript : public Script
 public:
     ImportScript(zmm::Ref<Runtime> runtime);
     ~ImportScript();
-    void processCdsObject(zmm::Ref<CdsObject> obj);
+    void processCdsObject(zmm::Ref<CdsObject> obj, zmm::String rootpath);
     virtual script_class_t whoami() { return S_IMPORT; }
 private:
     JSObject *root;

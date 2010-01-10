@@ -825,7 +825,7 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
             }
             
             if (layout != nil)
-                layout->processCdsObject(obj);
+                layout->processCdsObject(obj, nil);
             else
             {
                 log_warning("Your virtual layout is disabled, YouTube objects will not be added\n");

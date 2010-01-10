@@ -119,12 +119,14 @@ class CMAddFileTask : public CMTask
 {
 protected:
     zmm::String path;
+    zmm::String rootpath;
     bool recursive;
     bool hidden;
 public:
-    CMAddFileTask(zmm::String path, bool recursive=false, bool hidden=false,
-                  bool cancellable = true);
+    CMAddFileTask(zmm::String path, zmm::String rootpath, bool recursive=false,
+                  bool hidden=false, bool cancellable = true);
     zmm::String getPath();
+    zmm::String getRootPath();
     virtual void run(zmm::Ref<ContentManager> cm);
 };
 
@@ -439,12 +441,13 @@ protected:
 
     void _loadAccounting();
 
-    int addFileInternal(zmm::String path, bool recursive=true,
+    int addFileInternal(zmm::String path, zmm::String rootpath, 
+                        bool recursive=true,
                         bool async=true, bool hidden=false,
                         bool lowPriority=false, 
                         unsigned int parentTaskID = 0,
                         bool cancellable = true);
-    int _addFile(zmm::String path, bool recursive=false, bool hidden=false, zmm::Ref<CMTask> task=nil);
+    int _addFile(zmm::String path, zmm::String rootpath, bool recursive=false, bool hidden=false, zmm::Ref<CMTask> task=nil);
     //void _addFile2(zmm::String path, bool recursive=0);
     void _removeObject(int objectID, bool all);
     

@@ -544,7 +544,7 @@ bool WeboramaService::refreshServiceData(Ref<Layout> layout)
             log_debug("Adding new Weborama object\n");
             
             if (layout != nil)
-                layout->processCdsObject(obj);
+                layout->processCdsObject(obj, nil);
         }
         else
         {
