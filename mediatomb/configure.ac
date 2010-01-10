@@ -1570,7 +1570,13 @@ if test "x$FFMPEG_STATUS" = xyes; then
     AC_SUBST(FFMPEG_LDFLAGS)
     AC_SUBST(FFMPEG_LIBS)
 else
-    if test "x$FFMPEG_OPTION_REQUESTED" = xyes; then
+    if (test "x$FFMPEG_OPTION_ENABLED" != xyes); then
+        AC_MSG_NOTICE("SETTING FFMPEG TO DISABLED!\n");
+        FFMPEG_STATUS=disabled
+    fi
+
+    if (test "x$FFMPEG_OPTION_REQUESTED" = xyes) && 
+       (test "x$FFMPEG_OPTION_ENABLED" = xyes); then
         AC_MSG_ERROR(unable to configure ffmpeg support)
     fi
 fi
