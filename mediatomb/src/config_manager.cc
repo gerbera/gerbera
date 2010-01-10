@@ -1984,7 +1984,7 @@ void ConfigManager::validate(String serverhome)
                                "invalid hd value in <YouTube> tag"));
 
         if ((temp == "yes") && (!mp4))
-            log_warning("HD preference for YouTube content is only available for mp4 format selection!");
+            log_warning("HD preference for YouTube content is only available for mp4 format selection!\n");
 
         NEW_BOOL_OPTION(temp == "yes" ? true : false);
         SET_BOOL_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_PREFER_HD);
@@ -2030,7 +2030,11 @@ void ConfigManager::validate(String serverhome)
         NEW_OBJARR_OPTION(yt_opts);
         SET_OBJARR_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_TASK_LIST);
 
-        log_warning("You enabled the YouTube feature, which allows you to watch YouTube videos on your UPnP device!\nPlease check http://www.youtube.com/t/terms\nBy using this feature you may be violating YouTube service terms and conditions!");
+        log_warning("You enabled the YouTube feature, which allows you\n"
+"                             to watch YouTube videos on your UPnP device!\n"
+"                             Please check http://www.youtube.com/t/terms\n"
+"                             By using this feature you may be violating YouTube\n"
+"                             service terms and conditions!\n\n");
     }
 #endif
 
