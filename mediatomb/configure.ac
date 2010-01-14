@@ -1875,11 +1875,11 @@ CXXFLAGS="$CXXFLAGS_SAVE"
 AC_DEFINE([__STDC_CONSTANT_MACROS], [1], [needed for stdint.h])
 AC_DEFINE([__STDC_LIMIT_MACROS], [1], [needed for stdint.h])
 
-MT_CHECK_OPTIONAL_PACKAGE_CFG([libdvdnav], [enable],
-             [compile with libdvdnav support for extended DVD image parsing],
-             [dvdnav-config],
-             [dvdnav/dvdnav.h], [dvdnav], [dvdnav_get_audio_attr], [])
-
+#MT_CHECK_OPTIONAL_PACKAGE_CFG([libdvdnav], [enable],
+#             [compile with libdvdnav support for extended DVD image parsing],
+#             [dvdnav-config],
+#             [dvdnav/dvdnav.h], [dvdnav], [dvdnav_get_audio_attr], [])
+#
 
 MT_OPTION([tombdebug], [enable], [enable debug code for MediaTomb],
           [
@@ -1972,7 +1972,7 @@ echo "id3lib                : $ID3LIB_STATUS"
 echo "taglib                : $TAGLIB_STATUS"
 echo "libmp4v2              : $LIBMP4V2_STATUS"
 #echo "ImageMagick           : $IMAGEMAGICK_STATUS"
-echo "libdvdnav             : $LIBDVDNAV_STATUS"
+#echo "libdvdnav             : $LIBDVDNAV_STATUS"
 echo "ffmpeg                : $FFMPEG_STATUS"
 echo "ffmpegthumbnailer     : $FFMPEGTHUMBNAILER_STATUS"
 echo "lastfmlib             : $LASTFMLIB_STATUS"
