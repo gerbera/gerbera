@@ -51,7 +51,7 @@ using namespace zmm;
 #define YOUTUBE_URL_PARAM_VIDEO_ID  "video_id"
 #define YOUTUBE_URL_PARAM_T_REGEXP  ".*\"t\": \"([^\"]+)\""
 #define YOUTUBE_URL_PARAM_T         "t"
-#define YOUTUBE_IS_HD_AVAILABLE_REGEXP  "IS_HD_AVAILABLE[^:]*: *([^\,]*)"
+#define YOUTUBE_IS_HD_AVAILABLE_REGEXP  "IS_HD_AVAILABLE[^:]*: *([^,]*)"
 YouTubeVideoURL::YouTubeVideoURL()
 {
     curl_handle = curl_easy_init();
