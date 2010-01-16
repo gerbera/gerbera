@@ -132,7 +132,17 @@ Ref<CdsObject> ATrailersContentHandler::getNextObject()
 
         temp = preview->getChildText(_("large")); 
         if (string_ok(temp))
+        {
+            // thanks for the bullshit...I don't get why people still like them?
+            // either we have to request the movie with a faked used agent
+            // or use a different URL (seems they forgot to configure that
+            // crap on the other server?)
+            //
+            // If the user agent is not set to something Quicktime'ish they
+            // do not give you the movie.
+            temp = temp.replace(_("movies"), _("www"));
             item->setURL(temp);
+        }
         else
         {
             log_error("Could not get location for Trailers item %s, "
