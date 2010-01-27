@@ -209,9 +209,21 @@ Ref<Element> UpnpXML_RenderDeviceDescription(String presentationURL)
 
     root->appendElementChild(specVersion);
 
-//    root->appendTextChild("URLBase", "");
-
     Ref<Element> device(new Element(_("device")));
+    
+#ifdef EXTEND_PROTOCOLINFO 
+    if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO))
+    {
+        //we do not do DLNA yet but this is needed for bravia tv (v5500)
+        Ref<Element> DLNADOC(new Element(_("dlna:X_DLNADOC")));
+        DLNADOC->setText(_("DMS-1.50"));
+//      DLNADOC->setText(_("M-DMS-1.50"));
+        DLNADOC->setAttribute(_("xmlns:dlna"), 
+                                        _("urn:schemas-dlna-org:device-1-0"));
+        device->appendElementChild(DLNADOC);
+    }
+#endif
+
     device->appendTextChild(_("deviceType"), _(DESC_DEVICE_TYPE));
     if (!string_ok(presentationURL))
         device->appendTextChild(_("presentationURL"), _("/"));
