@@ -180,6 +180,16 @@ function addImage(obj)
     var date = obj.meta[M_DATE];
     if (date)
     {
+        var dateParts = date.split('-');
+        if (dateParts.length > 1)
+        {
+            var year = dateParts[0];
+            var month = dateParts[1];
+
+            chain = new Array('Photos', 'Year', year, month);
+            addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER);
+        }
+
         chain = new Array('Photos', 'Date', date);
         addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER);
     }

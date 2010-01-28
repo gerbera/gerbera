@@ -310,8 +310,27 @@ void FallbackLayout::addImage(Ref<CdsObject> obj, String rootpath)
     String date = meta->get(MetadataHandler::getMetaFieldName(M_DATE));
     if (string_ok(date))
     {
-        String chain = _("/Photos/Date/") + esc(date);
+        String year, month;
+        int m = -1;
+        int y = date.index('-');
+        if (y > 0)
+        {
+            year = date.substring(0, y);
+            month = date.substring(y + 1);
+            m = month.index('-');
+            if (m > 0)
+              month = month.substring(0, m);
+        }
 
+        String chain;
+        if ((y > 0) && (m > 0))
+        {
+            chain = _("/Photos/Year/") + esc(year) + "/" + esc(month);
+            id = ContentManager::getInstance()->addContainerChain(chain);
+            add(obj, id);
+        }
+
+        chain = _("/Photos/Date/") + esc(date);
         id = ContentManager::getInstance()->addContainerChain(chain);
         add(obj, id);
     }
