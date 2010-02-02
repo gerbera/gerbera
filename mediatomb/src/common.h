@@ -62,11 +62,18 @@
 #define UPNP_DEFAULT_CLASS_VIDEO_BROADCAST "object.item.videoItem.videoBroadcast"
 
 #ifdef EXTEND_PROTOCOLINFO
+    #define D_HTTP_TRANSFER_MODE_HEADER         "transferMode.dlna.org: "
+    #define D_HTTP_TRANSFER_MODE_STREAMING      "Streaming"
+    #define D_HTTP_TRANSFER_MODE_INTERACTIVE    "Interactive"
+
     #define D_PROFILE                   "DLNA.ORG_PN"
     #define D_CONVERSION_INDICATOR      "DLNA.ORG_CI"
     #define D_OP                        "DLNA.ORG_OP"
+    #define D_FLAGS                     "DLNA.ORG_FLAGS"
     #define D_NO_CONVERSION             "0"
     #define D_CONVERSION                "1"
+    #define D_TR_FLAGS_AV               "012000000000000000000000000000000"
+    #define D_TR_FLAGS_IMAGE            "008000000000000000000000000000000"
     #define D_MP3                       "MP3"
     #define D_LPCM                      "LPCM"
     #define D_JPEG_SM                   "JPEG_SM"

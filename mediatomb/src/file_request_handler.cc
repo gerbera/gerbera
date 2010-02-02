@@ -312,9 +312,14 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
 
         //log_debug("sizeof off_t %d, statbuf.st_size %d\n", sizeof(off_t), sizeof(statbuf.st_size));
         //log_debug("get_info: file_length: " OFF_T_SPRINTF "\n", statbuf.st_size);
-        if (string_ok(header))
-            info->http_header = ixmlCloneDOMString(header.c_str());
     }
+   
+#ifdef EXTEND_PROTOCOLINFO
+    header = getDLNAtransferHeader(mimeType, header);
+#endif
+
+    if (string_ok(header))
+        info->http_header = ixmlCloneDOMString(header.c_str());
 
     info->last_modified = statbuf.st_mtime;
     info->is_directory = S_ISDIR(statbuf.st_mode);
@@ -559,6 +564,13 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
         if (!string_ok(mimeType))
             mimeType = h->getMimeType();
 
+#ifdef EXTEND_PROTOCOLINFO
+        header = getDLNAtransferHeader(mimeType, header);
+#endif
+
+        if (string_ok(header))
+                info->http_header = ixmlCloneDOMString(header.c_str());
+
         info->content_type = ixmlCloneDOMString(mimeType.c_str());
         Ref<IOHandler> io_handler = h->serveContent(item, res_id, &(info->file_length));
         io_handler->open(mode);
@@ -668,6 +680,9 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
                 header = header + _("Accept-Ranges: bytes");
             }
 
+#ifdef EXTEND_PROTOCOLINFO
+            header = getDLNAtransferHeader(mimeType, header);
+#endif
             if (string_ok(header))
                 info->http_header = ixmlCloneDOMString(header.c_str());
 

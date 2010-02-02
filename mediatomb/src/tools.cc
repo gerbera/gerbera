@@ -44,6 +44,7 @@
 #include <limits.h>
 #include <netdb.h>
 #include <string.h>
+#include "config_manager.h"
 
 #ifndef SOLARIS
     #include <net/if.h>
@@ -1409,6 +1410,32 @@ ssize_t getValidUTF8CutPosition(zmm::String str, size_t cutpos)
 
     return pos;
 }
+
+#ifdef EXTEND_PROTOCOLINFO
+String getDLNAtransferHeader(String mimeType, String header)
+{
+        if (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO))
+        {
+            String transfer_parameter;
+            if (mimeType.startsWith(_("image")))
+                transfer_parameter = _(D_HTTP_TRANSFER_MODE_INTERACTIVE);
+            else if (mimeType.startsWith(_("audio")) ||
+                     mimeType.startsWith(_("video")))
+                transfer_parameter = _(D_HTTP_TRANSFER_MODE_STREAMING);
+
+            if (string_ok(transfer_parameter))
+            {
+                if (string_ok(header))
+                    header = header + _("\r\n");
+
+                header = header + D_HTTP_TRANSFER_MODE_HEADER +
+                         transfer_parameter;
+            }
+        }
+
+    return header;
+}
+#endif
 
 #ifndef HAVE_FFMPEG
 String getAVIFourCC(zmm::String avi_filename)

@@ -464,8 +464,14 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         // we do not support seeking at all, so 00
         // and the media is converted, so set CI to 1
         if (!isExtThumbnail && transcoded)
+        {
             extend = extend + D_OP + "=00;" + 
                      D_CONVERSION_INDICATOR + "=" D_CONVERSION;
+
+            if (mimeType.startsWith(_("audio")) || 
+                mimeType.startsWith(_("video")))
+                extend = extend + ";" D_FLAGS "=" D_TR_FLAGS_AV;
+        }
         else
 #endif
         extend = extend + D_OP + "=01;" + 

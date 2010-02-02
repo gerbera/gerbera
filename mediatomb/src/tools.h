@@ -321,6 +321,10 @@ zmm::String get_last_path(zmm::String location);
 /// \return Caclulated position or -1 in case of an error.
 ssize_t getValidUTF8CutPosition(zmm::String str, size_t cutpos);
 
+#ifdef EXTEND_PROTOCOLINFO
+zmm::String getDLNAtransferHeader(zmm::String mimeType, zmm::String header);
+#endif
+
 #ifndef HAVE_FFMPEG
 /// \brief Fallback code to retrieve the used fourcc from an AVI file.
 ///
