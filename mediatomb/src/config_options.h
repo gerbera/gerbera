@@ -36,6 +36,7 @@
 #include "zmmf/zmmf.h"
 #include "exceptions.h"
 #include "autoscan.h"
+#include "object_dictionary.h"
 
 #ifdef EXTERNAL_TRANSCODING
     #include "transcoding/transcoding.h"
@@ -94,6 +95,11 @@ public:
         throw _Exception(_("Wrong option type"));
     }
 #endif
+    virtual zmm::Ref<ObjectDictionary<zmm::Object> > getObjectDictionaryOption()
+    {
+        assert(0);
+        throw _Exception(_("Wrong option type"));
+    }
 };
 
 class Option : public ConfigOption
@@ -209,6 +215,22 @@ protected:
     zmm::Ref<zmm::Array<zmm::Object> > option;
 };
 
+#endif//ONLINE_SERVICES
 
-#endif
+class ObjectDictionaryOption : public ConfigOption
+{
+public:
+    ObjectDictionaryOption(zmm::Ref<ObjectDictionary<zmm::Object> > option)
+    {
+        this->option = option;
+    };
+
+    virtual zmm::Ref<ObjectDictionary<zmm::Object> > getObjectDictionaryOption()
+    {
+        return option;
+    };
+protected:
+    zmm::Ref<ObjectDictionary<zmm::Object> > option;
+};
+
 #endif // __CONFIG_MANAGER_H__

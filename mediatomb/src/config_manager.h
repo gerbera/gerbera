@@ -37,6 +37,7 @@
 #include "mxml/mxml.h"
 #include "singleton.h"
 #include "dictionary.h"
+#include "object_dictionary.h"
 #include "xpath.h"
 #include "autoscan.h"
 #include "config_options.h"
@@ -229,6 +230,7 @@ public:
     /// \param option option to retrieve.
     zmm::Ref<zmm::Array<zmm::StringBase> > getStringArrayOption(config_option_t option);
 
+    zmm::Ref<ObjectDictionary<zmm::Object> > getObjectDictionaryOption(config_option_t option);
 #ifdef ONLINE_SERVICES
     /// \brief returns a config option of type Array of Object
     /// \param option option to retrieve.

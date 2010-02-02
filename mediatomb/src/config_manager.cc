@@ -569,7 +569,11 @@ String ConfigManager::createDefaultConfig(String userhome)
     Ref<Element> ext2mt(new Element(_("extension-mimetype")));
     ext2mt->setAttribute(_("ignore-unknown"), _(DEFAULT_IGNORE_UNKNOWN_EXTENSIONS));
     ext2mt->appendElementChild(map_from_to(_("mp3"), _("audio/mpeg")));
-    ext2mt->appendElementChild(map_from_to(_("ogg"), _("application/ogg")));
+    ext2mt->appendElementChild(map_from_to(_("ogx"), _("application/ogg")));
+    ext2mt->appendElementChild(map_from_to(_("ogv"), _("video/ogg")));
+    ext2mt->appendElementChild(map_from_to(_("oga"), _("audio/ogg")));
+    ext2mt->appendElementChild(map_from_to(_("ogg"), _("audio/ogg")));
+    ext2mt->appendElementChild(map_from_to(_("ogm"), _("video/ogg")));
     ext2mt->appendElementChild(map_from_to(_("asf"), _("video/x-ms-asf")));
     ext2mt->appendElementChild(map_from_to(_("asx"), _("video/x-ms-asf")));
     ext2mt->appendElementChild(map_from_to(_("wma"), _("audio/x-ms-wma")));
@@ -581,6 +585,8 @@ String ConfigManager::createDefaultConfig(String userhome)
     ext2mt->appendElementChild(map_from_to(_("m3u"), _("audio/x-mpegurl")));
     ext2mt->appendElementChild(map_from_to(_("pls"), _("audio/x-scpls")));
     ext2mt->appendElementChild(map_from_to(_("flv"), _("video/x-flv")));
+    ext2mt->appendElementChild(map_from_to(_("mkv"), _("video/x-matroska")));
+    ext2mt->appendElementChild(map_from_to(_("mka"), _("audio/x-matroska")));
     
     Ref<Comment> ps3info(new Comment(_(" Uncomment the line below for PS3 divx support "), true));
     Ref<Comment> ps3avi(new Comment(_(" <map from=\"avi\" to=\"video/divx\"/> "), true));
@@ -806,7 +812,14 @@ void ConfigManager::migrate()
     Ref<ObjectArrayOption> (new ObjectArrayOption(optval));
 #define SET_OBJARR_OPTION(opttype) \
                    options->set(RefCast(obj_array_opt, ConfigOption), opttype);
-#endif
+#endif//ONLINE_SERVICES
+
+#define NEW_OBJDICT_OPTION(optval) obj_dict_opt = \
+    Ref<ObjectDictionaryOption> (new ObjectDictionaryOption(optval));
+#define SET_OBJDICT_OPTION(opttype) \
+                   options->set(RefCast(obj_dict_opt, ConfigOption), opttype);
+
+
 void ConfigManager::validate(String serverhome)
 {
     String temp;
@@ -3064,6 +3077,11 @@ Ref<Dictionary> ConfigManager::getDictionaryOption(config_option_t option)
 Ref<Array<StringBase> > ConfigManager::getStringArrayOption(config_option_t option)
 {
     return options->get(option)->getStringArrayOption();
+}
+
+Ref<ObjectDictionary<zmm::Object> > ConfigManager::getObjectDictionaryOption(config_option_t option)
+{
+    return options->get(option)->getObjectDictionaryOption();
 }
 
 #ifdef ONLINE_SERVICES
