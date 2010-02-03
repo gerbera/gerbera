@@ -64,6 +64,7 @@ protected:
     zmm::Ref<zmm::ObjectStack<Element> > elements;
     zmm::Ref<Document> document;
     zmm::Ref<Element> curEl;
+    bool ignoreNextDefaultNewline;
 
     static void XMLCALL element_start(void *userdata, const char *name, const char **attrs);
     static void XMLCALL element_end(void *userdata, const char *name);

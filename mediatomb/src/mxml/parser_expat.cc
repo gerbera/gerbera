@@ -107,16 +107,29 @@ void XMLCALL Parser::comment_callback(void *userdata, const XML_Char *s)
 
 void XMLCALL Parser::default_callback(void *userdata, const XML_Char *s, int len)
 {
+    Parser *parser = (Parser *)userdata;
     String text = String(s, len);
-    printf("DEF: [%s]", text.c_str());
     
-    if (text.charAt(0) != '<')
-        character_data(userdata, s, len);
+    if (text.charAt(0) == '<')
+        parser->ignoreNextDefaultNewline = true;
+    else
+    {
+        bool add_as_character_data = true;
+        if (parser->ignoreNextDefaultNewline)
+        {
+            parser->ignoreNextDefaultNewline = false;
+            if (text == _("\n"))
+                add_as_character_data = false;
+        }
+        if (add_as_character_data)
+            character_data(userdata, s, len);
+    }
+    
 }
 
 Parser::Parser()
 {
-
+    ignoreNextDefaultNewline = false;
 }
 
 Ref<Document> Parser::parseFile(String filename)
