@@ -53,7 +53,7 @@ ActionRequest::ActionRequest(Upnp_Action_Request *upnp_request) : Object()
    
     Ref<Parser> parser(new Parser());
 
-    request = parser->parseString(xml);
+    request = parser->parseString(xml)->getRoot();
 }
 
 String ActionRequest::getActionName()

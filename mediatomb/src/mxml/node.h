@@ -45,7 +45,8 @@ enum mxml_node_types
     mxml_node_all,
     mxml_node_element,
     mxml_node_text,
-    mxml_node_comment
+    mxml_node_comment,
+    mxml_node_document
 };
 
 class Node : public zmm::Object

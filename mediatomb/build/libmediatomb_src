@@ -62,13 +62,13 @@ libmediatomb_a_SOURCES = \
 ../src/io_handler_chainer.h \
 ../src/io_handler.h \
 ../src/jpeg_resolution.cc \
+../src/lastfm_scrobbler.cc \
+../src/lastfm_scrobbler.h \
 ../src/layout/fallback_layout.cc \
 ../src/layout/fallback_layout.h \
 ../src/layout/js_layout.cc \
 ../src/layout/js_layout.h \
 ../src/layout/layout.h \
-../src/lastfm_scrobbler.cc \
-../src/lastfm_scrobbler.h \
 ../src/logger.cc \
 ../src/logger.h \
 ../src/main.cc \
@@ -115,6 +115,8 @@ libmediatomb_a_SOURCES = \
 ../src/mxml/comment.h \
 ../src/mxml/context.cc \
 ../src/mxml/context.h \
+../src/mxml/document.cc \
+../src/mxml/document.h \
 ../src/mxml/element.cc \
 ../src/mxml/element.h \
 ../src/mxml/mxml.h \

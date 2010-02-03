@@ -145,7 +145,7 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions, in
 void UpnpXML_DIDLUpdateObject(Ref<CdsObject> obj, String text)
 {
     Ref<Parser> parser(new Parser());
-    Ref<Element> root = parser->parseString(text);
+    Ref<Element> root = parser->parseString(text)->getRoot();
     int objectType = obj->getObjectType();
     
     if (IS_CDS_ACTIVE_ITEM(objectType))

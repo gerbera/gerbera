@@ -52,14 +52,22 @@ void XMLCALL Parser::element_start(void *userdata, const char *name, const char 
         el->addAttribute(attrs[i], attrs[i + 1]);
     }
 
-    if (parser->root == nil)
-        parser->root = el;
-    else
+    if (parser->document->getRoot() == nil)
+    {
+        parser->document->setRoot(el);
+        parser->curEl = el;
+    }
+    else if (parser->curEl != nil)
     {
         parser->curEl->appendElementChild(el);
         parser->elements->push(parser->curEl);
+        parser->curEl = el;
     }
-    parser->curEl = el;
+    else
+    {
+        // second root? - should not happen...
+        print_backtrace();
+    }
 }
 
 void XMLCALL Parser::element_end(void *userdata, const char *name)
@@ -72,10 +80,14 @@ void XMLCALL Parser::character_data(void *userdata, const XML_Char *s, int len)
 {
     Parser *parser = (Parser *)userdata;
     String text = String(s, len);
+    
     if (text != nil)
     {
         Ref<Text> textEl(new Text(text));
-        parser->curEl->appendChild(RefCast(textEl, Node));
+        if (parser->curEl == nil)
+            parser->document->appendChild(RefCast(textEl, Node));
+        else
+            parser->curEl->appendChild(RefCast(textEl, Node));
     }
 }
 
@@ -86,8 +98,16 @@ void XMLCALL Parser::comment_callback(void *userdata, const XML_Char *s)
     if (text != nil)
     {
         Ref<Comment> cm(new Comment(text));
-        parser->curEl->appendChild(RefCast(cm, Node));
+        if (parser->curEl == nil)
+            parser->document->appendChild(RefCast(cm, Node));
+        else
+            parser->curEl->appendChild(RefCast(cm, Node));
     }
+}
+
+void XMLCALL Parser::default_callback(void *userdata, const XML_Char *s, int len)
+{
+    character_data(userdata, s, len);
 }
 
 Parser::Parser()
@@ -95,19 +115,19 @@ Parser::Parser()
 
 }
 
-Ref<Element> Parser::parseFile(String filename)
+Ref<Document> Parser::parseFile(String filename)
 {
     Ref<Context> ctx(new Context(filename));
     return parse(ctx, read_text_file(filename));
 }
 
-Ref<Element> Parser::parseString(String str)
+Ref<Document> Parser::parseString(String str)
 {
     Ref<Context> ctx(new Context(_("")));
     return parse(ctx, str);
 }
 
-Ref<Element> Parser::parse(Ref<Context> ctx, String input)
+Ref<Document> Parser::parse(Ref<Context> ctx, String input)
 {
     XML_Parser parser = XML_ParserCreate(NULL);
     if (!parser)
@@ -117,7 +137,9 @@ Ref<Element> Parser::parse(Ref<Context> ctx, String input)
     XML_SetElementHandler(parser, Parser::element_start, Parser::element_end);
     XML_SetCharacterDataHandler(parser, Parser::character_data);
     XML_SetCommentHandler(parser, Parser::comment_callback);
+    XML_SetDefaultHandler(parser, Parser::default_callback);
 
+    document = Ref<Document>(new Document());
     elements = Ref<ObjectStack<Element> >(new ObjectStack<Element>(8));
 
     if (XML_Parse(parser, input.c_str(), input.length(), 1) != XML_STATUS_OK)
@@ -130,7 +152,7 @@ Ref<Element> Parser::parse(Ref<Context> ctx, String input)
     }
 
     XML_ParserFree(parser);
-    return root;
+    return document;
 }
 
 #endif

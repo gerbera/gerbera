@@ -48,25 +48,28 @@ class Element;
 
 class Context;
 
+class Document;
+
 class Parser : public zmm::Object
 {
 public:
     Parser();
-    zmm::Ref<Element> parseFile(zmm::String);
-    zmm::Ref<Element> parseString(zmm::String);
+    zmm::Ref<Document> parseFile(zmm::String);
+    zmm::Ref<Document> parseString(zmm::String);
 
 protected:
 
-    zmm::Ref<Element> parse(zmm::Ref<Context> ctx, zmm::String input);
+    zmm::Ref<Document> parse(zmm::Ref<Context> ctx, zmm::String input);
 
     zmm::Ref<zmm::ObjectStack<Element> > elements;
-    zmm::Ref<Element> root;
+    zmm::Ref<Document> document;
     zmm::Ref<Element> curEl;
 
     static void XMLCALL element_start(void *userdata, const char *name, const char **attrs);
     static void XMLCALL element_end(void *userdata, const char *name);
     static void XMLCALL character_data(void *userdata, const XML_Char *s, int len);
     static void XMLCALL comment_callback(void *userdata, const XML_Char *s);
+    static void XMLCALL default_callback(void *userdata, const XML_Char *s, int len);
 
 };
 

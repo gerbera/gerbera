@@ -2180,7 +2180,7 @@ void ConfigManager::validate(String serverhome)
 
     //root->indent();
     
-    log_debug("Config file dump after validation: \n%s\n", root->print().c_str());
+    log_debug("Config file dump after validation: \n%s\n", rootDoc->print().c_str());
 }
 
 void ConfigManager::prepare_udn()
@@ -2231,7 +2231,7 @@ void ConfigManager::prepare_path(String xpath, bool needDir, bool existenceUnnee
 
 void ConfigManager::save()
 {
-    save_text(filename, root->print());
+    save_text(filename, rootDoc->print());
 }
 
 void ConfigManager::save_text(String filename, String content)
@@ -2261,9 +2261,10 @@ void ConfigManager::load(String filename)
 {
     this->filename = filename;
     Ref<Parser> parser(new Parser());
-    root = parser->parseFile(filename);
+    rootDoc = parser->parseFile(filename);
+    root = rootDoc->getRoot();
     
-    if (root == nil)
+    if (rootDoc == nil)
     {
         throw _Exception(_("Unable to parse server configuration!"));
     }

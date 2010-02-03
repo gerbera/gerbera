@@ -427,7 +427,7 @@ Ref<Element> WeboramaService::getData(Ref<Dictionary> params)
     Ref<Parser> parser(new Parser());
     try
     {
-        return parser->parseString(sc->convert(buffer->toString()));
+        return parser->parseString(sc->convert(buffer->toString()))->getRoot();
     }
     catch (ParseException pe)
     {

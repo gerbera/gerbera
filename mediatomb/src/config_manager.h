@@ -286,6 +286,7 @@ protected:
     static zmm::String magic;
     static bool debug_logging;
 
+    zmm::Ref<mxml::Document> rootDoc;
     zmm::Ref<mxml::Element> root;
 
     zmm::Ref<Dictionary> mime_content;

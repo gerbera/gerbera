@@ -49,6 +49,7 @@ enum mxml_value_type
 #include "context.h"
 #include "node.h"
 #include "element.h"
+#include "document.h"
 #include "xml_text.h"
 #include "comment.h"
 #include "parseexception.h"

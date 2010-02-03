@@ -618,7 +618,7 @@ Ref<Element> YouTubeService::getData(String url_part, Ref<Dictionary> params, bo
     Ref<Parser> parser(new Parser());
     try
     {
-        return parser->parseString(sc->convert(buffer->toString()));
+        return parser->parseString(sc->convert(buffer->toString()))->getRoot();
     }
     catch (ParseException pe)
     {
