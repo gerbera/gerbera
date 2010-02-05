@@ -7955,6 +7955,143 @@ status open
 \end_layout
 
 \begin_layout Code
+format=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: mp4
+\end_layout
+
+\begin_layout Standard
+Selects the format in which the videos should be retrieved from YouTube.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+mp4
+\end_layout
+
+\begin_layout Standard
+A while ago YouTube also offers the videos in the mp4 format which is playable
+ by most players, it will also allow you to seek/pause.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+flv
+\end_layout
+
+\begin_layout Standard
+Flash video, obviously not a good choice if you want to play it on your
+ UPnP device, only useful in combination with a properly set up transcoding
+ profile.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<itemizedlist><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
+hd=...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Default: no
+\end_layout
+
+\begin_layout Standard
+If set to 
+\begin_inset Quotes sld
+\end_inset
+
+yes
+\begin_inset Quotes srd
+\end_inset
+
+, then a HD video will be retrieved if available.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Code
 racy-content=...
 \end_layout
 
@@ -7982,7 +8119,7 @@ status open
 
 \begin_layout Plain Layout
 
-</listitem></itemizedlist>
+<itemizedlist><listitem>
 \end_layout
 
 \end_inset
