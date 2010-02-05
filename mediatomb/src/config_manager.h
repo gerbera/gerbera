@@ -267,6 +267,7 @@ protected:
     zmm::Ref<mxml::Element> map_from_to(zmm::String from, zmm::String to);
     zmm::Ref<mxml::Element> treat_as(zmm::String mimetype, zmm::String as);
     zmm::Ref<mxml::Element> renderTranscodingSection();
+    zmm::Ref<mxml::Element> renderExtendedRuntimeSection();
     zmm::Ref<mxml::Element> renderOnlineSection();
 
     // creates a default config.xml file with the most necessary entries and returns the path

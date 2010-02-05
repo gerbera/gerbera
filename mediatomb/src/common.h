@@ -38,7 +38,8 @@
 #include "zmmf/zmmf.h"
 #include "exceptions.h"
 
-#define CONFIG_XML_VERSION              1
+#define CONFIG_XML_VERSION_0_11_0       1
+#define CONFIG_XML_VERSION              2
 
 // ERROR CODES                                                                                 
 /// \brief UPnP specific error code.
@@ -261,7 +262,7 @@
     #define DEFAULT_YOUTUBE_TAG_START_PAGE      1
     #define DEFAULT_YOUTUBE_TAG_AMOUNT          "all"
     #define DEFAULT_YOUTUBE_RACY_CONTENT        "exclude" 
-    #define DEFAULT_YOUTUBE_FORMAT              "flv" // mp4
+    #define DEFAULT_YOUTUBE_FORMAT              "mp4"
     #define DEFAULT_YOUTUBE_HD                  "no"
 
     #define UI_ACTION_REFRESH_YOUTUBE           "refresh_yt"

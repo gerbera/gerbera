@@ -272,13 +272,62 @@ Ref<Element> ConfigManager::renderTranscodingSection()
 }
 #endif
 
+Ref<Element> ConfigManager::renderExtendedRuntimeSection()
+{
+    Ref<Element> extended(new Element(_("extended-runtime-options")));
+#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
+    Ref<Element> ffth(new Element(_("ffmpegthumbnailer")));
+    ffth->setAttribute(_("enabled"), _(DEFAULT_FFMPEGTHUMBNAILER_ENABLED));
+    
+    ffth->appendTextChild(_("thumbnail-size"), 
+                          String::from(DEFAULT_FFMPEGTHUMBNAILER_THUMBSIZE));
+    ffth->appendTextChild(_("seek-percentage"),
+                       String::from(DEFAULT_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE));
+    ffth->appendTextChild(_("filmstrip-overlay"),
+                          _(DEFAULT_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY));
+    ffth->appendTextChild(_("workaround-bugs"),
+                          _(DEFAULT_FFMPEGTHUMBNAILER_WORKAROUND_BUGS));
+    ffth->appendTextChild(_("image-quality"),
+                         String::from(DEFAULT_FFMPEGTHUMBNAILER_IMAGE_QUALITY));
+
+    extended->appendElementChild(ffth);
+#endif
+
+    Ref<Element> mark(new Element(_("mark-played-items")));
+    mark->setAttribute(_("enabled"), _(DEFAULT_MARK_PLAYED_ITEMS_ENABLED));
+    mark->setAttribute(_("suppress-cds-updates"), 
+                        _(DEFAULT_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES));
+    Ref<Element> mark_string(new Element(_("string")));
+    mark_string->setAttribute(_("mode"), 
+                              _(DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE));
+    mark_string->setText(_(DEFAULT_MARK_PLAYED_ITEMS_STRING));
+    mark->appendElementChild(mark_string);
+
+    Ref<Element> mark_content_section(new Element(_("mark")));
+    Ref<Element> content_video(new Element(_("content")));
+    content_video->setText(_(DEFAULT_MARK_PLAYED_CONTENT_VIDEO));
+    mark_content_section->appendElementChild(content_video);
+    mark->appendElementChild(mark_content_section);
+    extended->appendElementChild(mark);
+
+#ifdef HAVE_LASTFMLIB
+    Ref<Element> lastfm(new Element(_("lastfm")));
+    lastfm->setAttribute(_("enabled"), _(DEFAULT_LASTFM_ENABLED));
+    lastfm->appendTextChild(_("username"), _(DEFAULT_LASTFM_USERNAME));
+    lastfm->appendTextChild(_("password"), _(DEFAULT_LASTFM_PASSWORD));
+    extended->appendElementChild(lastfm);
+#endif
+
+    return extended;
+}
+
 #ifdef ONLINE_SERVICES
 Ref<Element> ConfigManager::renderOnlineSection()
 {
     Ref<Element> onlinecontent(new Element(_("online-content")));
 #ifdef YOUTUBE
-    Ref<Comment> ytinfo(new Comment(_(" Make sure to setup a transcoding profile for flv "), true));
-    onlinecontent->appendChild(RefCast(ytinfo, Node));
+//    Ref<Comment> ytinfo(new Comment(_(" Make sure to setup a transcoding profile for flv "), true));
+//    onlinecontent->appendChild(RefCast(ytinfo, Node));
 
     Ref<Element> yt(new Element(_("YouTube")));
     yt->setAttribute(_("enabled"), _(DEFAULT_YOUTUBE_ENABLED));
@@ -468,51 +517,8 @@ String ConfigManager::createDefaultConfig(String userhome)
     server->appendChild(RefCast(tg100info, Node));
     server->appendChild(RefCast(tg100, Node));
 
-    Ref<Element> extended(new Element(_("extended-runtime-options")));
-#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
-    Ref<Element> ffth(new Element(_("ffmpegthumbnailer")));
-    ffth->setAttribute(_("enabled"), _(DEFAULT_FFMPEGTHUMBNAILER_ENABLED));
-    
-    ffth->appendTextChild(_("thumbnail-size"), 
-                          String::from(DEFAULT_FFMPEGTHUMBNAILER_THUMBSIZE));
-    ffth->appendTextChild(_("seek-percentage"),
-                       String::from(DEFAULT_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE));
-    ffth->appendTextChild(_("filmstrip-overlay"),
-                          _(DEFAULT_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY));
-    ffth->appendTextChild(_("workaround-bugs"),
-                          _(DEFAULT_FFMPEGTHUMBNAILER_WORKAROUND_BUGS));
-    ffth->appendTextChild(_("image-quality"),
-                         String::from(DEFAULT_FFMPEGTHUMBNAILER_IMAGE_QUALITY));
 
-    extended->appendElementChild(ffth);
-#endif
-
-    Ref<Element> mark(new Element(_("mark-played-items")));
-    mark->setAttribute(_("enabled"), _(DEFAULT_MARK_PLAYED_ITEMS_ENABLED));
-    mark->setAttribute(_("suppress-cds-updates"), 
-                        _(DEFAULT_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES));
-    Ref<Element> mark_string(new Element(_("string")));
-    mark_string->setAttribute(_("mode"), 
-                              _(DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE));
-    mark_string->setText(_(DEFAULT_MARK_PLAYED_ITEMS_STRING));
-    mark->appendElementChild(mark_string);
-
-    Ref<Element> mark_content_section(new Element(_("mark")));
-    Ref<Element> content_video(new Element(_("content")));
-    content_video->setText(_(DEFAULT_MARK_PLAYED_CONTENT_VIDEO));
-    mark_content_section->appendElementChild(content_video);
-    mark->appendElementChild(mark_content_section);
-    extended->appendElementChild(mark);
-
-#ifdef HAVE_LASTFMLIB
-    Ref<Element> lastfm(new Element(_("lastfm")));
-    lastfm->setAttribute(_("enabled"), _(DEFAULT_LASTFM_ENABLED));
-    lastfm->appendTextChild(_("username"), _(DEFAULT_LASTFM_USERNAME));
-    lastfm->appendTextChild(_("password"), _(DEFAULT_LASTFM_PASSWORD));
-    extended->appendElementChild(lastfm);
-#endif
- 
-    server->appendElementChild(extended);
+    server->appendElementChild(renderExtendedRuntimeSection());
 
     config->appendElementChild(server);
 
@@ -667,14 +673,21 @@ String ConfigManager::createDefaultConfig(String userhome)
 
 void ConfigManager::migrate()
 {
+    bool migrated_flag = false;
+    String version = root->getAttribute(_("version"));
+
     // pre 0.10.* to 0.11.0 -> storage layout has changed
-    if (root->getAttribute(_("version")) == nil)
+    if (!string_ok(version))
     {
-        log_info("Migrating server configuration\n");
-        root->setAttribute(_("version"), String::from(CONFIG_XML_VERSION));
-        root->setAttribute(_("xmlns"), _(XML_XMLNS) + CONFIG_XML_VERSION);
+        log_info("Migrating server configuration to config version 1\n");
+        root->setAttribute(_("version"), 
+                String::from(CONFIG_XML_VERSION_0_11_0));
+        root->setAttribute(_("xmlns"), 
+                _(XML_XMLNS) + CONFIG_XML_VERSION_0_11_0);
         root->setAttribute(_("xmlns:xsi"), _(XML_XMLNS_XSI));
-        root->setAttribute(_("xsi:schemaLocation"), _(XML_XMLNS) + CONFIG_XML_VERSION + " " + XML_XMLNS + CONFIG_XML_VERSION + ".xsd");
+        root->setAttribute(_("xsi:schemaLocation"), 
+                _(XML_XMLNS) + CONFIG_XML_VERSION_0_11_0 + " " + XML_XMLNS + 
+                CONFIG_XML_VERSION + ".xsd");
         
         Ref<Element> server = root->getChildByName(_("server"));
         if (server == nil)
@@ -767,11 +780,74 @@ void ConfigManager::migrate()
                 }
             }
         }
+
+        version = String::from(CONFIG_XML_VERSION_0_11_0);
+        migrated_flag = true;
+    }
+
+    // from 0.11 to 0.12
+    if (string_ok(version) && version.toInt() == 1)
+    {
+        log_info("Migrating server configuration to config version 2\n");
+        root->setAttribute(_("version"), String::from(CONFIG_XML_VERSION));
+        root->setAttribute(_("xmlns"), _(XML_XMLNS) + CONFIG_XML_VERSION);
+        root->setAttribute(_("xsi:schemaLocation"), 
+                _(XML_XMLNS) + CONFIG_XML_VERSION + " " + XML_XMLNS + 
+                CONFIG_XML_VERSION + ".xsd");
+
+        Ref<Element> server = root->getChildByName(_("server"));
+        if (server == nil)
+            throw _Exception(_("Migration failed! Could not find <server> tag!"));
+
+        String temp;
+        try 
+        {
+            temp = getOption(_("/server/ui/attribute::show-tooltips"));
+        }
+        catch (Exception e)
+        {
+            Ref<Element> ui = server->getChildByName(_("ui"));
+            if (ui != nil)
+                ui->setAttribute(_("show-tooltips"), 
+                                           _(DEFAULT_UI_SHOW_TOOLTIPS_VALUE));
+        }
+       
+        try
+        {
+            temp = getOption(_("/server/storage/attribute::caching"));
+        }
+        catch (Exception e)
+        {
+            Ref<Element> storage = server->getChildByName(_("storage"));
+            if (storage != nil)
+                storage->setAttribute(_("caching"), 
+                                        _(DEFAULT_STORAGE_CACHING_ENABLED));
+        }
+       
+        if (server->getChildByName(_("extended-runtime-options")) == nil)
+            server->appendElementChild(renderExtendedRuntimeSection());
+
+        Ref<Element> import = root->getChildByName(_("import"));
+        if (import != nil)
+        {
+            // add ext 2 mimetype stuff
+            Ref<Element> mappings = import->getChildByName(_("mappings"));
+
+#ifdef ONLINE_SERVICES
+            Ref<Element> online =  import->getChildByName(_("online-content"));
+            if (online == nil)
+                import->appendElementChild(renderOnlineSection());
+#endif
+        }
+        migrated_flag = true;            
+    }
+
+    if (migrated_flag)
+    {
         root->indent();
         save();
         log_info("Migration of configuration successfull\n");
     }
-
 }
 
 #define NEW_OPTION(optval) opt =  Ref<Option> (new Option(optval));
@@ -852,7 +928,7 @@ void ConfigManager::validate(String serverhome)
     String version = root->getAttribute(_("version"));
     // unfortunately we did not introduce a version attr before, so we assume
     // that a config without a version is older
-    if (!string_ok(version))
+    if (!string_ok(version) || version.toInt() != CONFIG_XML_VERSION)
         migrate();
 
     if (version.toInt() > CONFIG_XML_VERSION)
