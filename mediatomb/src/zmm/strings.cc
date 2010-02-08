@@ -352,12 +352,12 @@ String String::toLower()
     if (!base)
         return nil;
 
-    for (int i = 0; i < base->len; i++)
+    String result = String(base->data, base->len);
+    for (int i = 0; i < result.base->len; i++)
     {
-        base->data[i] = tolower(base->data[i]);
+        result.base->data[i] = tolower(result.base->data[i]);
     }
-
-    return String(base);
+    return result;
 }
 
 String String::toUpper()
@@ -365,12 +365,13 @@ String String::toUpper()
     if (!base)
         return nil;
 
+    String result = String(base->data, base->len);
     for (int i = 0; i < base->len; i++)
     {
-        base->data[i] = toupper(base->data[i]);
+        result.base->data[i] = toupper(result.base->data[i]);
     }
 
-    return String(base);
+    return result;
 }
 
 long String::toLong()
