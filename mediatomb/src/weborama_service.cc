@@ -64,7 +64,8 @@ using namespace mxml;
 #define FILTER_OPTION_GENREID           "genreId"
 #define FILTER_OPTION_SORT              "sort"
 #define FILTER_SEPARATOR                ";"
-#define FILTER_VALUE_SEPARATOR          ":"
+#define FILTER_VALUE_SEPARATOR          "="
+
 
 #define PARAM_LIMIT                     "limit"
 #define PARAM_OFFSET                    "offset"
