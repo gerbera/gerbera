@@ -16,7 +16,6 @@ libmediatomb_a_CXXFLAGS = \
                      $(TAGLIB_CFLAGS) \
                      $(LIBEXTRACTOR_CFLAGS) \
                      $(ICONV_CXXFLAGS) \
-                     $(LIBMAGIC_CFLAGS) \
                      $(ID3LIB_CFLAGS) \
                      $(LIBEXIF_CFLAGS) \
                      $(ZLIB_CFLAGS) \
@@ -27,8 +26,7 @@ libmediatomb_a_CXXFLAGS = \
                      $(CURL_CFLAGS) \
                      $(EXPAT_CFLAGS) \
                      $(LIBMP4V2_CFLAGS) \
-                     $(LASTFMLIB_CFLAGS) \
-                     $(LIBDVDNAV_CFLAGS)
+                     $(LASTFMLIB_CFLAGS)
 
 bin_PROGRAMS = mediatomb
 mediatomb_SOURCES = $(top_srcdir)/src/main.cc
@@ -43,7 +41,6 @@ mediatomb_CXXFLAGS = -I$(top_srcdir)/src \
                      $(TAGLIB_CFLAGS) \
                      $(LIBEXTRACTOR_CFLAGS) \
                      $(ICONV_CXXFLAGS) \
-                     $(LIBMAGIC_CFLAGS) \
                      $(ID3LIB_CFLAGS) \
                      $(LIBEXIF_CFLAGS) \
                      $(ZLIB_CFLAGS) \
@@ -54,8 +51,7 @@ mediatomb_CXXFLAGS = -I$(top_srcdir)/src \
                      $(CURL_CFLAGS) \
                      $(EXPAT_CFLAGS) \
                      $(LIBMP4V2_CFLAGS) \
-                     $(LASTFMLIB_CFLAGS) \
-                     $(LIBDVDNAV_CFLAGS)
+                     $(LASTFMLIB_CFLAGS)
 
 mediatomb_LDADD = \
     libmediatomb.a \
@@ -66,9 +62,7 @@ mediatomb_LDADD = \
     $(RT_LDFLAGS) \
     $(SQLITE3_LDFLAGS) \
     $(LIBMP4V2_LDFLAGS) \
-    $(LIBMAGIC_LDFLAGS) \
     $(PTHREAD_LDFLAGS) \
-    $(LIBDVDNAV_LDFLAGS) \
     $(LIBEXTRACTOR_LDFLAGS) \
     $(FFMPEG_LDFLAGS) \
     $(FFMPEGTHUMBNAILER_LDFLAGS) \
@@ -79,7 +73,6 @@ mediatomb_LDADD = \
     $(TAGLIB_LIBS) \
     $(LIBEXTRACTOR_LIBS) \
     $(JS_LIBS) \
-    $(LIBMAGIC_LIBS) \
     $(ID3LIB_LIBS) \
     $(LIBEXIF_LIBS) \
     $(Z_LIBS) \
@@ -92,7 +85,6 @@ mediatomb_LDADD = \
     $(LIBMP4V2_LIBS) \
     $(NSL_LIBS) \
     $(LWRES_LIBS) \
-    $(LIBDVDNAV_LIBS) \
     $(LASTFMLIB_LIBS) \
     $(CURL_LIBS)
     
