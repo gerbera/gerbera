@@ -79,7 +79,7 @@ mediatomb_LDADD = \
 	$(LIBMAGIC_LIBS) \
     $(ID3LIB_LIBS) \
     $(LIBEXIF_LIBS) \
-    $(Z_LIBS) \
+    $(ZLIB_LIBS) \
     $(RT_LIBS) \
     $(PTHREAD_CFLAGS) \
     $(PTHREAD_LIBS) \
