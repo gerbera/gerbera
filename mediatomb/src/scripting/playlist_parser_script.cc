@@ -131,7 +131,7 @@ String PlaylistParserScript::readln()
     }
 }
 
-void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<CMTask> task)
+void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<GenericTask> task)
 {
 #ifdef JS_THREADSAFE
     JS_SetContextThread(cx);

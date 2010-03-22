@@ -86,6 +86,7 @@ Ref<StringBuffer> URL::download(String URL, long *HTTP_retcode,
                      "Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.1.6) Gecko/20091216 Fedora/3.5.6-1.fc12 Firefox/3.5.6");
     curl_easy_setopt(curl_handle, CURLOPT_URL, URL.c_str());
     curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, error_buffer);
+    curl_easy_setopt(curl_handle, CURLOPT_CONNECTTIMEOUT, 20); // seconds
 
     /// \todo it would be a good idea to allow both variants, i.e. retrieve
     /// the headers and data in one go when needed

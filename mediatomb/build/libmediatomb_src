@@ -46,6 +46,8 @@ libmediatomb_a_SOURCES = \
 ../src/file_request_handler.h \
 ../src/filesystem.cc \
 ../src/filesystem.h \
+../src/generic_task.cc \
+../src/generic_task.h \
 ../src/hash/dbb_hash.h \
 ../src/hash/db_hash.h \
 ../src/hash/dbo_hash.h \
@@ -192,6 +194,8 @@ libmediatomb_a_SOURCES = \
 ../src/subscription_request.h \
 ../src/sync.cc \
 ../src/sync.h \
+../src/task_processor.cc \
+../src/task_processor.h \
 ../src/thread_executor.cc \
 ../src/thread_executor.h \
 ../src/timer.cc \

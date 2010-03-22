@@ -38,10 +38,10 @@
 #include "sync.h"
 #include "autoscan.h"
 #include "timer.h"
+#include "generic_task.h"
 #ifdef HAVE_JS
     // this is somewhat not nice, the playlist header needs the cm header and
     // vice versa
-    class CMTask;
     class PlaylistParserScript;
     #include "scripting/playlist_parser_script.h"
 #ifdef HAVE_LIBDVDNAV
@@ -76,46 +76,7 @@
     #include "executor.h"
 #endif
 
-class ContentManager;
-
-enum task_type_t
-{
-    Invalid,
-    AddFile,
-    RemoveObject,
-    LoadAccounting,
-    RescanDirectory,
-#ifdef ONLINE_SERVICES
-    FetchOnlineContent
-#endif
-};
-
-class CMTask : public zmm::Object
-{
-protected:
-    zmm::String description;
-    task_type_t taskType;
-    unsigned int parentTaskID;
-    unsigned int taskID;
-    bool valid;
-    bool cancellable;
-    
-public:
-    CMTask();
-    virtual void run(zmm::Ref<ContentManager> cm) = 0;
-    inline void setDescription(zmm::String description) { this->description = description; };
-    inline zmm::String getDescription() { return description; };
-    inline task_type_t getType() { return taskType; };
-    inline unsigned int getID() { return taskID; };
-    inline unsigned int getParentID() { return parentTaskID; };
-    inline void setID(unsigned int taskID) { this->taskID = taskID; };
-    inline void setParentID(unsigned int parentTaskID = 0) { this->parentTaskID = parentTaskID; };
-    inline bool isValid() { return valid; };
-    inline bool isCancellable() { return cancellable; };
-    inline void invalidate() { valid = false; };
-};
-
-class CMAddFileTask : public CMTask
+class CMAddFileTask : public GenericTask
 {
 protected:
     zmm::String path;
@@ -127,27 +88,27 @@ public:
                   bool hidden=false, bool cancellable = true);
     zmm::String getPath();
     zmm::String getRootPath();
-    virtual void run(zmm::Ref<ContentManager> cm);
+    virtual void run();
 };
 
-class CMRemoveObjectTask : public CMTask
+class CMRemoveObjectTask : public GenericTask
 {
 protected:
     int objectID;
     bool all;
 public:
     CMRemoveObjectTask(int objectID, bool all);
-    virtual void run(zmm::Ref<ContentManager> cm);
+    virtual void run();
 };
 
-class CMLoadAccountingTask : public CMTask
+class CMLoadAccountingTask : public GenericTask
 {
 public:
     CMLoadAccountingTask();
-    virtual void run(zmm::Ref<ContentManager> cm);
+    virtual void run();
 };
 
-class CMRescanDirectoryTask : public CMTask
+class CMRescanDirectoryTask : public GenericTask
 {
 protected: 
     int objectID;
@@ -156,7 +117,7 @@ protected:
 public:
     CMRescanDirectoryTask(int objectID, int scanID, scan_mode_t scanMode,
                           bool cancellable);
-    virtual void run(zmm::Ref<ContentManager> cm);
+    virtual void run();
 };
 
 class CMAccounting : public zmm::Object
@@ -168,16 +129,18 @@ public:
 };
 
 #ifdef ONLINE_SERVICES
-class CMFetchOnlineContentTask : public CMTask
+class CMFetchOnlineContentTask : public GenericTask
 {
 protected:
     zmm::Ref<OnlineService> service;
+    zmm::Ref<Layout> layout;
     bool unscheduled_refresh;
 
 public:
     CMFetchOnlineContentTask(zmm::Ref<OnlineService> service, 
+                             zmm::Ref<Layout> layout,
                              bool cancellable, bool unscheduled_refresh);
-    virtual void run(zmm::Ref<ContentManager> cm);
+    virtual void run();
 };
 #endif
 
@@ -256,13 +219,13 @@ public:
     zmm::Ref<CMAccounting> getAccounting();
 
     /// \brief Returns the task that is currently being executed.
-    zmm::Ref<CMTask> getCurrentTask();
+    zmm::Ref<GenericTask> getCurrentTask();
 
     /// \brief Returns the list of all enqueued tasks, including the current or nil if no tasks are present.
-    zmm::Ref<zmm::Array<CMTask> > getTasklist();
+    zmm::Ref<zmm::Array<GenericTask> > getTasklist();
 
     /// \brief Find a task identified by the task ID and invalidate it.
-    void invalidateTask(unsigned int taskID);
+    void invalidateTask(unsigned int taskID, task_owner_t taskOwner = ContentManagerTask);
 
     
     /* the functions below return true if the task has been enqueued */
@@ -301,6 +264,9 @@ public:
     void fetchOnlineContent(service_type_t service, bool lowPriority=true, 
                             bool cancellable=true, 
                             bool unscheduled_refresh = false);
+
+    void cleanupOnlineServiceObjects(zmm::Ref<OnlineService> service);
+
 #ifdef YOUTUBE
     /// \brief Adds a URL to the cache.
     void cacheURL(zmm::Ref<CachedURL> url);
@@ -447,19 +413,19 @@ protected:
                         bool lowPriority=false, 
                         unsigned int parentTaskID = 0,
                         bool cancellable = true);
-    int _addFile(zmm::String path, zmm::String rootpath, bool recursive=false, bool hidden=false, zmm::Ref<CMTask> task=nil);
+    int _addFile(zmm::String path, zmm::String rootpath, bool recursive=false, bool hidden=false, zmm::Ref<GenericTask> task=nil);
     //void _addFile2(zmm::String path, bool recursive=0);
     void _removeObject(int objectID, bool all);
     
-    void _rescanDirectory(int containerID, int scanID, scan_mode_t scanMode, scan_level_t scanLevel, zmm::Ref<CMTask> task=nil);
+    void _rescanDirectory(int containerID, int scanID, scan_mode_t scanMode, scan_level_t scanLevel, zmm::Ref<GenericTask> task=nil);
     /* for recursive addition */
-    void addRecursive(zmm::String path, bool hidden, zmm::Ref<CMTask> task);
+    void addRecursive(zmm::String path, bool hidden, zmm::Ref<GenericTask> task);
     //void addRecursive2(zmm::Ref<DirCache> dirCache, zmm::String filename, bool recursive);
     
     zmm::String extension2mimetype(zmm::String extension);
     zmm::String mimetype2upnpclass(zmm::String mimeType);
 
-    void invalidateAddTask(zmm::Ref<CMTask> t, zmm::String path);
+    void invalidateAddTask(zmm::Ref<GenericTask> t, zmm::String path);
     
     zmm::Ref<Layout> layout;
 
@@ -500,7 +466,7 @@ protected:
     static void *staticThreadProc(void *arg);
     void threadProc();
     
-    void addTask(zmm::Ref<CMTask> task, bool lowPriority = false);
+    void addTask(zmm::Ref<GenericTask> task, bool lowPriority = false);
     
     zmm::Ref<CMAccounting> acct;
     
@@ -511,19 +477,19 @@ protected:
     
     bool shutdownFlag;
     
-    zmm::Ref<zmm::ObjectQueue<CMTask> > taskQueue1; // priority 1
-    zmm::Ref<zmm::ObjectQueue<CMTask> > taskQueue2; // priority 2
-    zmm::Ref<CMTask> currentTask;
+    zmm::Ref<zmm::ObjectQueue<GenericTask> > taskQueue1; // priority 1
+    zmm::Ref<zmm::ObjectQueue<GenericTask> > taskQueue2; // priority 2
+    zmm::Ref<GenericTask> currentTask;
 
     unsigned int taskID;
 
-    friend void CMAddFileTask::run(zmm::Ref<ContentManager> cm);
-    friend void CMRemoveObjectTask::run(zmm::Ref<ContentManager> cm);
-    friend void CMRescanDirectoryTask::run(zmm::Ref<ContentManager> cm);
+    friend void CMAddFileTask::run();
+    friend void CMRemoveObjectTask::run();
+    friend void CMRescanDirectoryTask::run();
 #ifdef ONLINE_SERVICES
-    friend void CMFetchOnlineContentTask::run(zmm::Ref<ContentManager> cm);
+    friend void CMFetchOnlineContentTask::run();
 #endif
-    friend void CMLoadAccountingTask::run(zmm::Ref<ContentManager> cm);
+    friend void CMLoadAccountingTask::run();
 };
 
 #endif // __CONTENT_MANAGER_H__

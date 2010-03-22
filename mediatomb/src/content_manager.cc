@@ -77,6 +77,10 @@
     #include "atrailers_service.h"
 #endif
 
+#ifdef ONLINE_SERVICES
+    #include "task_processor.h"
+#endif
+
 #define DEFAULT_DIR_CACHE_CAPACITY  10
 #define CM_INITIAL_QUEUE_SIZE       20
 
@@ -120,8 +124,8 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
     layout_enabled = false;
     
     acct = Ref<CMAccounting>(new CMAccounting());
-    taskQueue1 = Ref<ObjectQueue<CMTask> >(new ObjectQueue<CMTask>(CM_INITIAL_QUEUE_SIZE));
-    taskQueue2 = Ref<ObjectQueue<CMTask> >(new ObjectQueue<CMTask>(CM_INITIAL_QUEUE_SIZE));    
+    taskQueue1 = Ref<ObjectQueue<GenericTask> >(new ObjectQueue<GenericTask>(CM_INITIAL_QUEUE_SIZE));
+    taskQueue2 = Ref<ObjectQueue<GenericTask> >(new ObjectQueue<GenericTask>(CM_INITIAL_QUEUE_SIZE));    
     
     Ref<ConfigManager> cm = ConfigManager::getInstance();
     Ref<Element> tmpEl;  
@@ -542,35 +546,39 @@ Ref<CMAccounting> ContentManager::getAccounting()
 {
     return acct;
 }
-Ref<CMTask> ContentManager::getCurrentTask()
+Ref<GenericTask> ContentManager::getCurrentTask()
 {
-    Ref<CMTask> task;
+    Ref<GenericTask> task;
     AUTOLOCK(mutex);
     task = currentTask;
     return task;
 }
 
-Ref<Array<CMTask> > ContentManager::getTasklist()
+Ref<Array<GenericTask> > ContentManager::getTasklist()
 {
     int i;
-    Ref<Array<CMTask> > taskList = nil;
 
     AUTOLOCK(mutex);
-    Ref<CMTask> t = getCurrentTask();
+    
+    Ref<Array<GenericTask> > taskList = TaskProcessor::getInstance()->getTasklist();
+    Ref<GenericTask> t = getCurrentTask();
 
     // if there is no current task, then the queues are empty
     // and we do not have to allocate the array
-    if (t == nil)
+    if ((t == nil) && (taskList == nil))
         return nil;
 
-    taskList = Ref<Array<CMTask> >(new Array<CMTask>());
-    taskList->append(t); 
+    if (taskList == nil)
+        taskList = Ref<Array<GenericTask> >(new Array<GenericTask>());
+
+    if (t != nil)
+        taskList->append(t); 
 
     int qsize = taskQueue1->size();
 
     for (i = 0; i < qsize; i++)
     {
-        Ref<CMTask> t = taskQueue1->get(i);
+        Ref<GenericTask> t = taskQueue1->get(i);
         if (t->isValid())
             taskList->append(t);
     }
@@ -578,9 +586,9 @@ Ref<Array<CMTask> > ContentManager::getTasklist()
     qsize = taskQueue2->size();
     for (i = 0; i < qsize; i++)
     {
-        Ref<CMTask> t = taskQueue2->get(i);
+        Ref<GenericTask> t = taskQueue2->get(i);
         if (t->isValid())
-            taskList = Ref<Array<CMTask> >(new Array<CMTask>()); 
+            taskList = Ref<Array<GenericTask> >(new Array<GenericTask>()); 
     }
 
     return taskList;
@@ -618,7 +626,7 @@ void ContentManager::addVirtualItem(Ref<CdsObject> obj, bool allow_fifo)
 
 }
 
-int ContentManager::_addFile(String path, String rootpath, bool recursive, bool hidden, Ref<CMTask> task)
+int ContentManager::_addFile(String path, String rootpath, bool recursive, bool hidden, Ref<GenericTask> task)
 {
     if (hidden == false)
     {
@@ -730,7 +738,7 @@ int ContentManager::ensurePathExistence(zmm::String path)
     return containerID;
 }
 
-void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t scanMode, scan_level_t scanLevel, Ref<CMTask> task)
+void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t scanMode, scan_level_t scanLevel, Ref<GenericTask> task)
 {
     log_debug("start\n");
     int ret;
@@ -975,7 +983,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
 }
 
 /* scans the given directory and adds everything recursively */
-void ContentManager::addRecursive(String path, bool hidden, Ref<CMTask> task)
+void ContentManager::addRecursive(String path, bool hidden, Ref<GenericTask> task)
 {
     if (hidden == false)
     {
@@ -1525,8 +1533,7 @@ void ContentManager::reloadLayout()
 
 void ContentManager::threadProc()
 {
-    Ref<CMTask> task;
-    Ref<ContentManager> this_ref(this);
+    Ref<GenericTask> task;
     AUTOLOCK(mutex);
     working = true;
     while(! shutdownFlag)
@@ -1550,7 +1557,7 @@ void ContentManager::threadProc()
         try
         {
             if (task->isValid())
-                task->run(this_ref);
+                task->run();
         }
         catch (ServerShutdownException se)
         {
@@ -1558,6 +1565,7 @@ void ContentManager::threadProc()
         }
         catch (Exception e)
         {
+            log_error("Exception caught: %s\n", e.getMessage().c_str());
             e.printStackTrace();
         }
 //        log_debug(("ASYNC STOP  %s\n", task->getDescription().c_str()));
@@ -1576,7 +1584,7 @@ void *ContentManager::staticThreadProc(void *arg)
     return NULL;
 }
 
-void ContentManager::addTask(zmm::Ref<CMTask> task, bool lowPriority)
+void ContentManager::addTask(zmm::Ref<GenericTask> task, bool lowPriority)
 {
     AUTOLOCK(mutex);
 
@@ -1594,7 +1602,7 @@ void ContentManager::loadAccounting(bool async)
 {
     if (async)
     {
-        Ref<CMTask> task(new CMLoadAccountingTask());
+        Ref<GenericTask> task(new CMLoadAccountingTask());
         task->setDescription(_("Initializing statistics"));
         addTask(task);
     }
@@ -1621,7 +1629,7 @@ int ContentManager::addFileInternal(String path, String rootpath,
 {
     if (async)
     {
-        Ref<CMTask> task(new CMAddFileTask(path, rootpath, recursive, hidden, cancellable));
+        Ref<GenericTask> task(new CMAddFileTask(path, rootpath, recursive, hidden, cancellable));
         task->setDescription(_("Adding: ") + path);
         task->setParentID(parentTaskID);
         addTask(task, lowPriority);
@@ -1653,7 +1661,10 @@ void ContentManager::fetchOnlineContentInternal(Ref<OnlineService> service,
                                         unsigned int parentTaskID, 
                                         bool unscheduled_refresh)
 {
-    Ref<CMTask> task(new CMFetchOnlineContentTask(service, cancellable, 
+    if (layout_enabled)
+        initLayout();
+
+    Ref<GenericTask> task(new CMFetchOnlineContentTask(service, layout, cancellable, 
                                                   unscheduled_refresh));
     task->setDescription(_("Updating content from ") + 
                          service->getServiceName());
@@ -1666,6 +1677,7 @@ void ContentManager::_fetchOnlineContent(Ref<OnlineService> service,
                                          unsigned int parentTaskID, 
                                          bool unscheduled_refresh)
 {
+    throw _Exception(_("Should not be called anymore!"));
     log_debug("Fetching online content!\n");
     if (layout_enabled)
         initLayout();
@@ -1718,9 +1730,49 @@ void ContentManager::_fetchOnlineContent(Ref<OnlineService> service,
         }
     }
 }
+
+void ContentManager::cleanupOnlineServiceObjects(zmm::Ref<OnlineService> service)
+{
+    log_debug("Finished fetch cycle for service: %s\n",
+            service->getServiceName().c_str());
+
+    if (service->getItemPurgeInterval() > 0)
+    {
+        Ref<Storage> storage = Storage::getInstance();
+        Ref<IntArray> ids = storage->getServiceObjectIDs(service->getStoragePrefix());
+
+        struct timespec current, last;
+        getTimespecNow(&current);
+        last.tv_nsec = 0;
+        String temp;
+
+        for (int i = 0; i < ids->size(); i++)
+        {
+            int object_id = ids->get(i);
+            Ref<CdsObject> obj = storage->loadObject(object_id);
+            if (obj == nil)
+                continue;
+
+            temp = obj->getAuxData(_(ONLINE_SERVICE_LAST_UPDATE));
+            if (!string_ok(temp))
+                continue;
+
+            last.tv_sec = temp.toLong();
+
+            if ((service->getItemPurgeInterval() > 0) &&
+                    ((current.tv_sec - last.tv_sec) > service->getItemPurgeInterval()))
+            {
+                log_debug("Purging old online service object %s\n",
+                        obj->getTitle().c_str());
+                removeObject(object_id, false);
+            }
+        }
+    }
+}
+
 #endif
 
-void ContentManager::invalidateAddTask(Ref<CMTask> t, String path)
+void ContentManager::invalidateAddTask(Ref<GenericTask> t, String path)
 {
     if (t->getType() == AddFile)
     {
@@ -1733,40 +1785,45 @@ void ContentManager::invalidateAddTask(Ref<CMTask> t, String path)
     }
 }
 
-void ContentManager::invalidateTask(unsigned int taskID)
+void ContentManager::invalidateTask(unsigned int taskID, task_owner_t taskOwner)
 {
     int i;
 
-    AUTOLOCK(mutex);
-    Ref<CMTask> t = getCurrentTask();
-    if (t != nil)
+    if (taskOwner == ContentManagerTask)
     {
-        if ((t->getID() == taskID) || (t->getParentID() == taskID))
+        AUTOLOCK(mutex);
+        Ref<GenericTask> t = getCurrentTask();
+        if (t != nil)
         {
-            t->invalidate();
+            if ((t->getID() == taskID) || (t->getParentID() == taskID))
+            {
+                t->invalidate();
+            }
+        }
+
+        int qsize = taskQueue1->size();
+
+        for (i = 0; i < qsize; i++)
+        {
+            Ref<GenericTask> t = taskQueue1->get(i);
+            if ((t->getID() == taskID) || (t->getParentID() == taskID))
+            {
+                t->invalidate();
+            }
+        }
+
+        qsize = taskQueue2->size();
+        for (i = 0; i < qsize; i++)
+        {
+            Ref<GenericTask> t = taskQueue2->get(i);
+            if ((t->getID() == taskID) || (t->getParentID() == taskID))
+            {
+                t->invalidate();
+            }
         }
     }
-
-    int qsize = taskQueue1->size();
-
-    for (i = 0; i < qsize; i++)
-    {
-        Ref<CMTask> t = taskQueue1->get(i);
-        if ((t->getID() == taskID) || (t->getParentID() == taskID))
-        {
-            t->invalidate();
-        }
-    }
-
-    qsize = taskQueue2->size();
-    for (i = 0; i < qsize; i++)
-    {
-        Ref<CMTask> t = taskQueue2->get(i);
-        if ((t->getID() == taskID) || (t->getParentID() == taskID))
-        {
-            t->invalidate();
-        }
-    }
+    else if (taskOwner == TaskProcessorTask)
+        TaskProcessor::getInstance()->invalidateTask(taskID);
 }
 
 void ContentManager::removeObject(int objectID, bool async, bool all)
@@ -1783,7 +1840,7 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
         for (int i = 1; i < objectPath->size(); i++)
             *desc << '/' << objectPath->get(i)->getTitle();
         */
-        Ref<CMTask> task(new CMRemoveObjectTask(objectID, all));
+        Ref<GenericTask> task(new CMRemoveObjectTask(objectID, all));
         Ref<Storage> storage = Storage::getInstance();
         String path;
         Ref<CdsObject> obj;
@@ -1832,18 +1889,18 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
             // launch add tasks for directories that anyway are going to be deleted
             for (i = 0; i < qsize; i++)
             {
-                Ref<CMTask> t = taskQueue1->get(i);
+                Ref<GenericTask> t = taskQueue1->get(i);
                 invalidateAddTask(t, path);
             }
 
             qsize = taskQueue2->size();
             for (i = 0; i < qsize; i++)
             {
-                Ref<CMTask> t = taskQueue2->get(i);
+                Ref<GenericTask> t = taskQueue2->get(i);
                 invalidateAddTask(t, path);
             }
 
-            Ref<CMTask> t = getCurrentTask();
+            Ref<GenericTask> t = getCurrentTask();
             if (t != nil)
             {
                 invalidateAddTask(t, path);
@@ -1861,7 +1918,7 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
 void ContentManager::rescanDirectory(int objectID, int scanID, scan_mode_t scanMode, String descPath, bool cancellable)
 {
     // building container path for the description
-    Ref<CMTask> task(new CMRescanDirectoryTask(objectID, scanID, scanMode, cancellable));
+    Ref<GenericTask> task(new CMRescanDirectoryTask(objectID, scanID, scanMode, cancellable));
     Ref<AutoscanDirectory> dir = getAutoscanDirectory(scanID, scanMode);
     if (dir == nil)
         return;
@@ -2322,16 +2379,7 @@ String ContentManager::getCachedURL(int objectID)
 }
 #endif
 
-CMTask::CMTask() : Object()
-{
-    valid = true;
-    cancellable = true;
-    taskType = Invalid;
-    taskID = 0;
-    parentTaskID = 0;
-}
-
-CMAddFileTask::CMAddFileTask(String path, String rootpath, bool recursive, bool hidden, bool cancellable) : CMTask()
+CMAddFileTask::CMAddFileTask(String path, String rootpath, bool recursive, bool hidden, bool cancellable) : GenericTask(ContentManagerTask)
 {
     this->path = path;
     this->rootpath = rootpath;
@@ -2350,13 +2398,14 @@ String CMAddFileTask::getRootPath()
 {
     return rootpath;
 }
-void CMAddFileTask::run(Ref<ContentManager> cm)
+void CMAddFileTask::run()
 {
     log_debug("running add file task with path %s recursive: %d\n", path.c_str(), recursive);
-    cm->_addFile(path, nil, recursive, hidden, Ref<CMTask> (this));
+    Ref<ContentManager> cm = ContentManager::getInstance();
+    cm->_addFile(path, nil, recursive, hidden, Ref<GenericTask> (this));
 }
 
-CMRemoveObjectTask::CMRemoveObjectTask(int objectID, bool all) : CMTask()
+CMRemoveObjectTask::CMRemoveObjectTask(int objectID, bool all) : GenericTask(ContentManagerTask)
 {
     this->objectID = objectID;
     this->all = all;
@@ -2364,12 +2413,13 @@ CMRemoveObjectTask::CMRemoveObjectTask(int objectID, bool all) : CMTask()
     cancellable = false;
 }
 
-void CMRemoveObjectTask::run(Ref<ContentManager> cm)
+void CMRemoveObjectTask::run()
 {
+    Ref<ContentManager> cm = ContentManager::getInstance();
     cm->_removeObject(objectID, all);
 }
 
-CMRescanDirectoryTask::CMRescanDirectoryTask(int objectID, int scanID, scan_mode_t scanMode, bool cancellable) : CMTask()
+CMRescanDirectoryTask::CMRescanDirectoryTask(int objectID, int scanID, scan_mode_t scanMode, bool cancellable) : GenericTask(ContentManagerTask)
 {
     this->scanID = scanID;
     this->scanMode = scanMode;
@@ -2378,13 +2428,14 @@ CMRescanDirectoryTask::CMRescanDirectoryTask(int objectID, int scanID, scan_mode
     this->cancellable = cancellable;
 }
 
-void CMRescanDirectoryTask::run(Ref<ContentManager> cm)
+void CMRescanDirectoryTask::run()
 {
+    Ref<ContentManager> cm = ContentManager::getInstance();
     Ref<AutoscanDirectory> dir = cm->getAutoscanDirectory(scanID, scanMode);
     if (dir == nil)
         return;
 
-    cm->_rescanDirectory(objectID, dir->getScanID(), dir->getScanMode(), dir->getScanLevel(), Ref<CMTask> (this));
+    cm->_rescanDirectory(objectID, dir->getScanID(), dir->getScanMode(), dir->getScanLevel(), Ref<GenericTask> (this));
     dir->decTaskCount();
     
     if (dir->getTaskCount() == 0)
@@ -2397,16 +2448,18 @@ void CMRescanDirectoryTask::run(Ref<ContentManager> cm)
 
 #ifdef ONLINE_SERVICES
 CMFetchOnlineContentTask::CMFetchOnlineContentTask(Ref<OnlineService> service,
+                                                   Ref<Layout> layout,
                                                    bool cancellable,
-                                                   bool unscheduled_refresh)
+                                                   bool unscheduled_refresh) : GenericTask(ContentManagerTask)
 {
+    this->layout = layout;
     this->service = service;
     this->taskType = FetchOnlineContent;
     this->cancellable = cancellable;
     this->unscheduled_refresh = unscheduled_refresh;
 }
 
-void CMFetchOnlineContentTask::run(Ref<ContentManager> cm)
+void CMFetchOnlineContentTask::run()
 {
     if (this->service == nil)
     {
@@ -2415,32 +2468,26 @@ void CMFetchOnlineContentTask::run(Ref<ContentManager> cm)
     }
     try
     {
-        cm->_fetchOnlineContent(service, getParentID(), unscheduled_refresh);
+        Ref<GenericTask> t(new TPFetchOnlineContentTask(service, layout, 
+                                                   cancellable, 
+                                                   unscheduled_refresh));
+        TaskProcessor::getInstance()->addTask(t);
     }
     catch (Exception ex)
     {
         log_error("%s\n", ex.getMessage().c_str());
     }
-    service->decTaskCount();
-    if (service->getTaskCount() == 0)
-    {
-        if ((service->getRefreshInterval() > 0) && !unscheduled_refresh)
-        {
-            Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON_FROM_REF(cm), 
-                    service->getRefreshInterval(), 
-                    service->getTimerParameter(), true);
-        }
-    }
 }
 #endif
 
-CMLoadAccountingTask::CMLoadAccountingTask() : CMTask()
+CMLoadAccountingTask::CMLoadAccountingTask() : GenericTask(ContentManagerTask)
 {
     this->taskType = LoadAccounting;
 }
 
-void CMLoadAccountingTask::run(Ref<ContentManager> cm)
+void CMLoadAccountingTask::run()
 {
+    Ref<ContentManager> cm = ContentManager::getInstance();
     cm->_loadAccounting();
 }
 

@@ -289,7 +289,7 @@ void WebRequestHandler::addUpdateIDs(Ref<Element> updateIDsEl, Ref<Session> sess
     }
 }
 
-void WebRequestHandler::appendTask(Ref<Element> el, Ref<CMTask> task)
+void WebRequestHandler::appendTask(Ref<Element> el, Ref<GenericTask> task)
 {
     if (task == nil || el == nil)
         return;
