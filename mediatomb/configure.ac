@@ -249,13 +249,6 @@ MT_OPTION([external-transcoding], [disable],
           [external transcoding support],
           [],[EXTERNAL_TRANSCODING_OPTION_ENABLED=disabled])
 
-MT_OPTION([sopcast], [enable],
-          [SopCast service support],
-          [
-            AC_DEFINE([SOPCAST], [1], [SopCast service support])
-          ],[SOPCAST_OPTION_ENABLED=disabled])
-
-
 MT_OPTION([youtube], [disable],
           [YouTube service support],
           [],[YOUTUBE_OPTION_ENABLED=disabled])
@@ -263,10 +256,6 @@ MT_OPTION([youtube], [disable],
 MT_OPTION([weborama], [disable],
           [Weborama service support],
           [],[WEBORAMA_OPTION_ENABLED=disabled])
-
-MT_OPTION([atrailers], [disable],
-          [Apple Trailers service support],
-          [],[ATRAILERS_OPTION_ENABLED=disabled])
 
 MT_OPTION([sqlite-backup-defaults], [enable],
           [enable sqlite database backup settings in config.xml by default],
@@ -1356,7 +1345,7 @@ if ((test "x$YOUTUBE_OPTION_ENABLED" != xyes) && (test "x$SOPCAST_OPTION_ENABLED
 fi
 
 if (((test "x$YOUTUBE_OPTION_ENABLED" = xyes) || (test "x$SOPCAST_OPTION_ENABLED" = xyes) || (test "x$ATRAILERS_OPTION_ENABLED" = xyes) || (test "x$WEBORAMA_OPTION_ENABLED" = xyes) || (test "x$EXTERNAL_TRANSCODING_OPTION" = xyes)) && (test $USE_CURL -eq 1)); then
-    AC_MSG_NOTICE([Checking for curl (needed for extended external transcoding/YouTube/SopCast support)])
+    AC_MSG_NOTICE([Checking for curl (needed for extended external transcoding/YouTube support)])
     CURL_OK=yes
     if test -n "$CURL_SEARCH_CONFIG"; then
         AC_MSG_NOTICE([You specified $CURL_SEARCH_CONFIG for curl-config])
@@ -1635,17 +1624,6 @@ else
        (test "x$LIBEXTRACTOR_OPTION_ENABLED" = xyes); then
         AC_MSG_ERROR([unable to configure libextractor support])
     fi
-fi
-
-######## ImageMagick
-
-MT_CHECK_OPTIONAL_PACKAGE_CFG([ImageMagick], [enable],
-         [compile with ImageMagick support for image transcoding],
-         [MagickWand-config],
-         [wand/magick-wand.h], [], [MagickReadImage], [])
-
-if (test "x$FFMPEGTHUMBNAILER_USES_OLD_API" = xyes) && ("x$IMAGEMAGICK_STATUS" = xyes); then
-        AC_MSG_ERROR("Your version of libffmpegthumbnailer uses the old API which can not be used together with ImageMagick. Please either disable libffmpegthumbnailer, update your libffmpegthumbnailer library to version >= 2.0.0, or disable ImageMagick via the appropriate configure parameters.")
 fi
 
 ######## libexif
@@ -1936,7 +1914,7 @@ if (test "x$SOPCAST_OPTION_ENABLED" = xyes); then
     AC_DEFINE([SOPCAST], [1], [Enable support for the SopCast service])
 fi
 
-AC_DEFINE_UNQUOTED([COMPILE_INFO], "\thost:\t\t\t$host\n\tsqlite3:\t\t$SQLITE3_STATUS\n\tmysql:\t\t\t$MYSQL_STATUS\n\tlibjs:\t\t\t$JS_OK\n\tlibmagic:\t\t$LIBMAGIC_STATUS\n\tinotify:\t\t$INOTIFY_STATUS\n\tlibexif:\t\t$LIBEXIF_STATUS\n\tid3lib:\t\t\t$ID3LIB_STATUS\n\ttaglib:\t\t\t$TAGLIB_STATUS\n\tffmpeg\t\t\t$FFMPEG_STATUS\n\tlibmp4v2:\t\t$LIBMP4V2_STATUS\n\texternal transcoding:\t$EXTERNAL_TRANSCODING_OPTION_ENABLED\n\tcurl:\t\t\t$CURL_OK\n\tYouTube:\t\t$YOUTUBE_OPTION_ENABLED\n\tSopCast:\t\t$SOPCAST_OPTION_ENABLED\n\tWeborama:\t\t$WEBORAMA_OPTION_ENABLED\n\tApple Trailers\t\t$ATRAILERS_OPTION_ENABLED\n\tlibextractor\t\t$LIBEXTRACTOR_STATUS\n\tdb-autocreate:\t\t$DB_AUTOCREATE_OPTION_ENABLED\n\tdebug log:\t\t$DEBUG_LOG_OPTION_ENABLED\n\tprotocol info extension:$PROTOCOLINFO_EXTENSION_OPTION_ENABLED\n\tffmpegthumbnailer:\t$FFMPEGTHUMBNAILER_STATUS\n\tlastfmlib:\t\t$LASTFMLIB_STATUS\n\tdata directory:\t\t$PACKAGE_DATADIR", [compile option summary])
+AC_DEFINE_UNQUOTED([COMPILE_INFO], "\thost:\t\t\t$host\n\tsqlite3:\t\t$SQLITE3_STATUS\n\tmysql:\t\t\t$MYSQL_STATUS\n\tlibjs:\t\t\t$JS_OK\n\tlibmagic:\t\t$LIBMAGIC_STATUS\n\tinotify:\t\t$INOTIFY_STATUS\n\tlibexif:\t\t$LIBEXIF_STATUS\n\tid3lib:\t\t\t$ID3LIB_STATUS\n\ttaglib:\t\t\t$TAGLIB_STATUS\n\tffmpeg\t\t\t$FFMPEG_STATUS\n\tlibmp4v2:\t\t$LIBMP4V2_STATUS\n\texternal transcoding:\t$EXTERNAL_TRANSCODING_OPTION_ENABLED\n\tcurl:\t\t\t$CURL_OK\n\tYouTube:\t\t$YOUTUBE_OPTION_ENABLED\n\tWeborama:\t\t$WEBORAMA_OPTION_ENABLED\n\tlibextractor\t\t$LIBEXTRACTOR_STATUS\n\tdb-autocreate:\t\t$DB_AUTOCREATE_OPTION_ENABLED\n\tdebug log:\t\t$DEBUG_LOG_OPTION_ENABLED\n\tprotocol info extension:$PROTOCOLINFO_EXTENSION_OPTION_ENABLED\n\tffmpegthumbnailer:\t$FFMPEGTHUMBNAILER_STATUS\n\tlastfmlib:\t\t$LASTFMLIB_STATUS\n\tdata directory:\t\t$PACKAGE_DATADIR", [compile option summary])
 
 ###############
 AC_CONFIG_FILES([
@@ -1962,17 +1940,13 @@ echo "CONFIGURATION SUMMARY ----"
 echo
 echo "sqlite3               : $SQLITE3_STATUS"
 echo "mysql                 : $MYSQL_STATUS"
-##echo "postgresql          : $PGSQL_OK"
 echo "libjs                 : $JS_OK"
 echo "libmagic              : $LIBMAGIC_STATUS"
 echo "inotify               : $INOTIFY_STATUS"
 echo "libexif               : $LIBEXIF_STATUS"
-#echo "expat                 : $EXPAT_STATUS"
 echo "id3lib                : $ID3LIB_STATUS"
 echo "taglib                : $TAGLIB_STATUS"
 echo "libmp4v2              : $LIBMP4V2_STATUS"
-#echo "ImageMagick           : $IMAGEMAGICK_STATUS"
-#echo "libdvdnav             : $LIBDVDNAV_STATUS"
 echo "ffmpeg                : $FFMPEG_STATUS"
 echo "ffmpegthumbnailer     : $FFMPEGTHUMBNAILER_STATUS"
 echo "lastfmlib             : $LASTFMLIB_STATUS"
@@ -1980,8 +1954,6 @@ echo "external transcoding  : $EXTERNAL_TRANSCODING_OPTION_ENABLED"
 echo "curl                  : $CURL_OK"
 echo "YouTube               : $YOUTUBE_OPTION_ENABLED"
 echo "Weborama              : $WEBORAMA_OPTION_ENABLED"
-echo "Apple Trailers        : $ATRAILERS_OPTION_ENABLED"
-echo "SopCast               : $SOPCAST_OPTION_ENABLED"
 echo "libextractor          : $LIBEXTRACTOR_STATUS"
 echo "db-autocreate         : $DB_AUTOCREATE_OPTION_ENABLED"
         
