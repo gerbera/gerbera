@@ -1,6 +1,5 @@
 _DIST_FILES_JS = \
     import.js \
-    import-dvd.js \
     playlists.js \
     common.js
 

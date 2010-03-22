@@ -546,12 +546,13 @@ String ConfigManager::createDefaultConfig(String userhome)
                                                 _(DEFAULT_JS_DIR) +
                                                 DIR_SEPARATOR +
                                                 _(DEFAULT_IMPORT_SCRIPT));
+#ifdef HAVE_LIBDVDNAV
     layout->appendTextChild(_("dvd-script"), prefix_dir +
                                                 DIR_SEPARATOR + 
                                                 _(DEFAULT_JS_DIR) +
                                                 DIR_SEPARATOR +
                                                 _(DEFAULT_DVD_SCRIPT));
-
+#endif
     scripting->appendTextChild(_("common-script"), 
                 prefix_dir + 
                 DIR_SEPARATOR + 
