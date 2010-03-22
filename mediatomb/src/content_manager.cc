@@ -559,8 +559,12 @@ Ref<Array<GenericTask> > ContentManager::getTasklist()
     int i;
 
     AUTOLOCK(mutex);
-    
-    Ref<Array<GenericTask> > taskList = TaskProcessor::getInstance()->getTasklist();
+   
+
+    Ref<Array<GenericTask> > taskList = nil;
+#ifdef ONLINE_SERVICES
+    taskList = TaskProcessor::getInstance()->getTasklist();
+#endif
     Ref<GenericTask> t = getCurrentTask();
 
     // if there is no current task, then the queues are empty
@@ -1822,8 +1826,10 @@ void ContentManager::invalidateTask(unsigned int taskID, task_owner_t taskOwner)
             }
         }
     }
+#ifdef ONLINE_SERVICES
     else if (taskOwner == TaskProcessorTask)
         TaskProcessor::getInstance()->invalidateTask(taskID);
+#endif
 }
 
 void ContentManager::removeObject(int objectID, bool async, bool all)
@@ -2478,7 +2484,7 @@ void CMFetchOnlineContentTask::run()
         log_error("%s\n", ex.getMessage().c_str());
     }
 }
-#endif
+#endif//ONLINE_SERVICES
 
 CMLoadAccountingTask::CMLoadAccountingTask() : GenericTask(ContentManagerTask)
 {
