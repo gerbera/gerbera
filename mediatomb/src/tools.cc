@@ -7,7 +7,7 @@
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
     
-    Copyright (C) 2006-2009 Gena Batyan <bgeradz@mediatomb.cc>,
+    Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
     
@@ -1624,4 +1624,3 @@ int find_local_port(unsigned short range_min, unsigned short range_max)
     return -1;
 }
 #endif
-

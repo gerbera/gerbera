@@ -7,7 +7,7 @@
     
     import-dvd.js - this file is part of MediaTomb.
     
-    Copyright (C) 2006-2009 Gena Batyan <bgeradz@mediatomb.cc>,
+    Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
     
@@ -110,4 +110,3 @@ for (var t = 0; t < title_count; t++)
         } 
     }
 }
-

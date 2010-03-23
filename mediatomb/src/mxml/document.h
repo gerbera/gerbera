@@ -2,12 +2,12 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    node.h - this file is part of MediaTomb.
+    document.h - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
     
-    Copyright (C) 2006-2009 Gena Batyan <bgeradz@mediatomb.cc>,
+    Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
     

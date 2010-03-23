@@ -7,7 +7,7 @@
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
     
-    Copyright (C) 2006-2009 Gena Batyan <bgeradz@mediatomb.cc>,
+    Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
     
@@ -24,8 +24,10 @@
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
     
-    $Id: cached_url.cc 2010 2009-01-11 19:10:43Z lww $
+    $Id$
 */
+
+/// \file cached_url.cc
 
 #ifdef HAVE_CONFIG_H
     #include "autoconfig.h"

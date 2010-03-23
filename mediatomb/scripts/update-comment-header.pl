@@ -11,7 +11,7 @@ foreach (@ARGV)
     my $id_keyword = '$'.'Id'.'$';
     
     $filename =~ s/\.sql\.tmpl\.h/_create_sql\.h/;
-    my $current = '2009';
+    my $current = '2010';
     
     my $new_header_main = 
 '    MediaTomb - http://www.mediatomb.cc/
@@ -84,7 +84,7 @@ foreach (@ARGV)
     
     '.$filename.' - this file is part of MediaTomb.
     
-    Copyright (C) 2007-'.$current.' Jan Habermann <jan.habermann@gmail.com>
+    Copyright (C) 2007-2008 Jan Habermann <jan.habermann@gmail.com>
     
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2

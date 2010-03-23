@@ -7,7 +7,7 @@
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
     
-    Copyright (C) 2006-2009 Gena Batyan <bgeradz@mediatomb.cc>,
+    Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
     
@@ -465,4 +465,3 @@ ProcessIOHandler::~ProcessIOHandler()
 }
 
 #endif // EXTERNAL_TRANSCODING
-
