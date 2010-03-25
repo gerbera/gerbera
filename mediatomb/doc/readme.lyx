@@ -252,6 +252,14 @@ allows to watch YouTube(tm) videos on your UPnP player device
 \end_layout
 
 \begin_layout Itemize
+supports last fm scrobbing using lastfmlib
+\end_layout
+
+\begin_layout Itemize
+on the fly video thumbnail generation with libffmpegthumbnailer
+\end_layout
+
+\begin_layout Itemize
 support for external URLs (create links to internet content and serve them
  via UPnP to your renderer)
 \end_layout
@@ -271,7 +279,7 @@ highly flexible configuration, allowing you to control the behavior of various
 \end_layout
 
 \begin_layout Itemize
-support for Linux, FreeBSD, Mac OS X
+support for Linux, FreeBSD, NetBSD, Mac OS X
 \end_layout
 
 \begin_layout Itemize
@@ -768,6 +776,38 @@ ffmpegthumbnailer is used to generate video thumbnails on the fly.
 \begin_layout Description
 Note: ffmpegthumbnailer support is only provided if MediaTomb is compiled
  with ffmpeg support.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+</listitem><listitem>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+lastfmlib 
+\begin_inset CommandInset href
+LatexCommand href
+name "http://code.google.com/p/lastfmlib/"
+target "http://code.google.com/p/lastfmlib/"
+
+\end_inset
+
+ 
+\emph on
+OPTIONAL
+\end_layout
+
+\begin_layout Standard
+last.fm scrobbing
 \end_layout
 
 \begin_layout Standard
@@ -1727,12 +1767,20 @@ You can specify the exact location of particular headers and libraries.
 \end_layout
 
 \begin_layout Code
---with-ffmpeg-h=DIR                search for ffmpeg headers in DIR
+--with-avformat-h=DIR              search for avformat headers in DIR
 \end_layout
 
 \begin_layout Code
---with-ffmpeg-libs=DIR             search for ffmpeg libraries in DIR  --with-ff
-mpegthumbnailer-h=DIR     search for ffmpegthumbnailer headers in DIR
+--with-avformat-libs=DIR           search for avformat libraries in DIR
+\end_layout
+
+\begin_layout Code
+--with-avutil-libs=DIR             search for avutil libraries in DIR 
+\end_layout
+
+\begin_layout Code
+--with-ffmpegthumbnailer-h=DIR     search for ffmpegthumbnailer headers
+ in DIR
 \end_layout
 
 \begin_layout Code
@@ -1757,11 +1805,16 @@ mpegthumbnailer-h=DIR     search for ffmpegthumbnailer headers in DIR
 \end_layout
 
 \begin_layout Code
---with-pthread-libs=DIR            search for pthread libraries in DIR 
+--with-pthread-libs=DIR            search for pthread libraries in DIR
 \end_layout
 
 \begin_layout Code
+--with-lastfmlib-h=DIR             search for lastfmlib headers in DIR
+\end_layout
 
+\begin_layout Code
+--with-lastfmlib-libs=DIR          search for lastfmlib libraries in DIR
+ 
 \end_layout
 
 \begin_layout Subsubsection

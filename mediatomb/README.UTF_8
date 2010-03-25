@@ -116,6 +116,9 @@ WARNING!
        scripts
      * allows to watch YouTube(tm) videos on your UPnP player
        device
+     * supports last fm scrobbing using lastfmlib
+     * on the fly video thumbnail generation with
+       libffmpegthumbnailer
      * support for external URLs (create links to internet content
        and serve them via UPnP to your renderer)
      * support for ContentDirectoryService container updates
@@ -123,7 +126,7 @@ WARNING!
        server side scripts upon HTTP GET requests to certain items
      * highly flexible configuration, allowing you to control the
        behavior of various features of the server
-     * support for Linux, FreeBSD, Mac OS X
+     * support for Linux, FreeBSD, NetBSD, Mac OS X
      * runs on x86, Alpha, ARM, MIPS, Sparc, PowerPC
 
 2. Requirements
@@ -228,6 +231,9 @@ WARNING!
         Note:
                 ffmpegthumbnailer support is only provided if
                 MediaTomb is compiled with ffmpeg support.
+
+     * lastfmlib http://code.google.com/p/lastfmlib/ OPTIONAL
+       last.fm scrobbing
 
    In order to use the web UI you will need to have javascript
    enabled in your web browser.
@@ -808,8 +814,9 @@ es in DIR
 --with-libextractor-h=DIR          search for extractor headers in DIR
 --with-libextractor-libs=DIR       search for extractor libraries in DI
 R
---with-ffmpeg-h=DIR                search for ffmpeg headers in DIR
---with-ffmpeg-libs=DIR             search for ffmpeg libraries in DIR
+--with-avformat-h=DIR              search for avformat headers in DIR
+--with-avformat-libs=DIR           search for avformat libraries in DIR
+--with-avutil-libs=DIR             search for avutil libraries in DIR
 --with-ffmpegthumbnailer-h=DIR     search for ffmpegthumbnailer headers
  in DIR
 --with-ffmpegthumbnailer-libs=DIR  search for ffmpegthumbnailer librari
@@ -820,7 +827,9 @@ ript
 --with-libmp4v2-libs=DIR           search for libmp4v2 libraries in DIR
 --with-rt-libs=DIR                 search for rt libraries in DIR
 --with-pthread-libs=DIR            search for pthread libraries in DIR
-
+--with-lastfmlib-h=DIR             search for lastfmlib headers in DIR
+--with-lastfmlib-libs=DIR          search for lastfmlib libraries in DI
+R
 
 3.2.36. The devconf Script
 
