@@ -1953,7 +1953,7 @@ echo "lastfmlib             : $LASTFMLIB_STATUS"
 echo "external transcoding  : $EXTERNAL_TRANSCODING_OPTION_ENABLED"
 echo "curl                  : $CURL_OK"
 echo "YouTube               : $YOUTUBE_OPTION_ENABLED"
-echo "Weborama              : $WEBORAMA_OPTION_ENABLED"
+#echo "Weborama              : $WEBORAMA_OPTION_ENABLED"
 echo "libextractor          : $LIBEXTRACTOR_STATUS"
 echo "db-autocreate         : $DB_AUTOCREATE_OPTION_ENABLED"
         

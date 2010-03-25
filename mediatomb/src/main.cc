@@ -83,7 +83,7 @@ void print_copyright()
     printf("\nMediaTomb UPnP Server version %s - %s\n\n", VERSION, 
             DESC_MANUFACTURER_URL);
     printf("===============================================================================\n");
-    printf("Copyright 2005-2008 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer.\n");
+    printf("Copyright 2005-2010 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer.\n");
     printf("MediaTomb is free software, covered by the GNU General Public License version 2\n\n");
 }
 void signal_handler(int signum);

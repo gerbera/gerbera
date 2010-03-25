@@ -1,6 +1,6 @@
 %define name mediatomb 
 %define version @VERSION@
-%define release 8%{?dist}
+%define release 1%{?dist}
 
 Version: %{version}
 Summary: MediaTomb - UPnP AV Mediaserver for Linux
