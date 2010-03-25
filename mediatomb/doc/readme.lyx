@@ -86,7 +86,7 @@ status open
 
 \begin_layout Plain Layout
 
-  <year>2006-2008</year>
+  <year>2006-2010</year>
 \end_layout
 
 \begin_layout Plain Layout
@@ -11512,6 +11512,21 @@ ID3 keyword extraction patch was contributed by Gabriel Burca <gburca-mediatomb
 \begin_layout Itemize
 tombupnp is kept in sync with the latest pupnp (http://pupnp.sf.net/) patches,
  see documentation in the tombupnp directory
+\end_layout
+
+\begin_layout Itemize
+Photo layout by year/month was contributed by Aleix Conchillo Flaqué <aleix
+ at member dot fsf dot org>
+\end_layout
+
+\begin_layout Itemize
+lastfmlib patch was contributed by Dirk Vanden Boer <dirk dot vdb at gmail
+ dot com>
+\end_layout
+
+\begin_layout Itemize
+NetBSD patches were contributed by Jared D.
+ McNeill <jmcneill at NetBSD dot org>
 \end_layout
 
 \end_body

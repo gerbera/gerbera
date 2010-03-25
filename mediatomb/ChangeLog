@@ -31,13 +31,31 @@ v0.12.0
         * fixed bug #1934649 - typo in --help text
         * fixed bugs #1986709 and #1996046 - cannot rename item with & in name
         * fixed bug #2122696 - build error with MySQL 5.1
-        * fixed bug #1978210 - compile error with newer libcurl
         * fixed bug #1973930 - Incorrect UPnP class assigned to Vorbis and
           Theora items
-        * added a "Directories" view in the default layout for Photos and Video 
+		* fixed bug #1934659 - unspecific error message when db is not available
+		* fixed bug #2904448 - memset with number of bytes set to 0 in
+		  array.cc
+        * added a "Directories" view in the default layout for Photos and
+		  Video, the feature is still somewhat experimental
         * added a feature that allows to mark played items
-        * added support for online Apple trailers
 		* improved inotify check which was failing with 2.4 kernels
+		* added support for lastfmlib, thanks to Dirk Vanden Boer vor the
+		  patch
+		* increased buffer length for the exif field following the request
+		  from one of our users
+		* fixed a problem where the upnp-string-limit function was not
+		  correctly truncating UTF-8 strings
+		* fixed a bug where --enable-id3lib did not turn off the automatic
+		  enabling of taglib, which then resulted in an error message saying, 
+		  that both libraries are enabled
+		* implemented feature request #2833402 - ability to change
+		  ffmpegthumbnailer param "image quallity"
+		* fixed bug #2783557 - Mediatomb always flags file as chunked output,
+		  thanks to Michael Guntsche
+		* fixed bug #2804342 - wrong namespace in <serviceId>
+		* added a fix for glibc 2.10, thanks to Honoome for the patch
+		* added patches for NetBSD, thanks to Jared D. McNeill
 
 v0.11.0 01.03.2008  External transcoding support
         * implemented transcoding support that allows to plug in an arbitrary

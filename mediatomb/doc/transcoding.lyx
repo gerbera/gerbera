@@ -1,8 +1,9 @@
-#LyX 1.5.4 created this file. For more info see http://www.lyx.org/
-\lyxformat 276
+#LyX 1.6.5 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
 \begin_document
 \begin_header
 \textclass docbook
+\use_default_options false
 \language english
 \inputencoding auto
 \font_roman default
@@ -13,9 +14,11 @@
 \font_osf false
 \font_sf_scale 100
 \font_tt_scale 100
+
 \graphics default
 \paperfontsize default
 \spacing single
+\use_hyperref false
 \papersize a4paper
 \use_geometry true
 \use_amsmath 0
@@ -51,57 +54,57 @@ Transcoding Content With MediaTomb
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <copyright>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
   <year>2005</year>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
   <holder>Gena Batsyan</holder>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
   <holder>Sergey Bostandzhyan</holder>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </copyright>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <copyright>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
-  <year>2006-2008</year>
+  <year>2006-2010</year>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
   <holder>Gena Batsyan</holder>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
   <holder>Sergey Bostandzhyan</holder>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
   <holder>Leonhard Wimmer</holder>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </copyright>
 \end_layout
@@ -115,7 +118,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <releaseinfo>This documentation is valid for MediaTomb version 0.12.0.</releaseinfo
 >
@@ -130,7 +133,7 @@ status open
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <legalnotice>
 \end_layout
@@ -148,7 +151,7 @@ THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY! USE AT YOUR OWN RISK!
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </legalnotice>
 \end_layout
@@ -856,7 +859,7 @@ Most common cases are:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -878,7 +881,7 @@ wrong mime type mapping: are you sure that you specified the source mime
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -897,7 +900,7 @@ wrong output mime type: make sure that the mime type specified in the profile
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -917,7 +920,7 @@ no permissions to execute the transcoding application: check that the user
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -937,7 +940,7 @@ transcoding script is not executable or is not in $PATH: if you use a wrapper
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout

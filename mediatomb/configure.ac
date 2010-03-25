@@ -253,9 +253,9 @@ MT_OPTION([youtube], [disable],
           [YouTube service support],
           [],[YOUTUBE_OPTION_ENABLED=disabled])
 
-MT_OPTION([weborama], [disable],
-          [Weborama service support],
-          [],[WEBORAMA_OPTION_ENABLED=disabled])
+#MT_OPTION([weborama], [disable],
+#          [Weborama service support],
+#          [],[WEBORAMA_OPTION_ENABLED=disabled])
 
 MT_OPTION([sqlite-backup-defaults], [enable],
           [enable sqlite database backup settings in config.xml by default],
@@ -1914,7 +1914,7 @@ if (test "x$SOPCAST_OPTION_ENABLED" = xyes); then
     AC_DEFINE([SOPCAST], [1], [Enable support for the SopCast service])
 fi
 
-AC_DEFINE_UNQUOTED([COMPILE_INFO], "\thost:\t\t\t$host\n\tsqlite3:\t\t$SQLITE3_STATUS\n\tmysql:\t\t\t$MYSQL_STATUS\n\tlibjs:\t\t\t$JS_OK\n\tlibmagic:\t\t$LIBMAGIC_STATUS\n\tinotify:\t\t$INOTIFY_STATUS\n\tlibexif:\t\t$LIBEXIF_STATUS\n\tid3lib:\t\t\t$ID3LIB_STATUS\n\ttaglib:\t\t\t$TAGLIB_STATUS\n\tffmpeg\t\t\t$FFMPEG_STATUS\n\tlibmp4v2:\t\t$LIBMP4V2_STATUS\n\texternal transcoding:\t$EXTERNAL_TRANSCODING_OPTION_ENABLED\n\tcurl:\t\t\t$CURL_OK\n\tYouTube:\t\t$YOUTUBE_OPTION_ENABLED\n\tWeborama:\t\t$WEBORAMA_OPTION_ENABLED\n\tlibextractor\t\t$LIBEXTRACTOR_STATUS\n\tdb-autocreate:\t\t$DB_AUTOCREATE_OPTION_ENABLED\n\tdebug log:\t\t$DEBUG_LOG_OPTION_ENABLED\n\tprotocol info extension:$PROTOCOLINFO_EXTENSION_OPTION_ENABLED\n\tffmpegthumbnailer:\t$FFMPEGTHUMBNAILER_STATUS\n\tlastfmlib:\t\t$LASTFMLIB_STATUS\n\tdata directory:\t\t$PACKAGE_DATADIR", [compile option summary])
+AC_DEFINE_UNQUOTED([COMPILE_INFO], "\thost:\t\t\t$host\n\tsqlite3:\t\t$SQLITE3_STATUS\n\tmysql:\t\t\t$MYSQL_STATUS\n\tlibjs:\t\t\t$JS_OK\n\tlibmagic:\t\t$LIBMAGIC_STATUS\n\tinotify:\t\t$INOTIFY_STATUS\n\tlibexif:\t\t$LIBEXIF_STATUS\n\tid3lib:\t\t\t$ID3LIB_STATUS\n\ttaglib:\t\t\t$TAGLIB_STATUS\n\tffmpeg\t\t\t$FFMPEG_STATUS\n\tlibmp4v2:\t\t$LIBMP4V2_STATUS\n\texternal transcoding:\t$EXTERNAL_TRANSCODING_OPTION_ENABLED\n\tcurl:\t\t\t$CURL_OK\n\tYouTube:\t\t$YOUTUBE_OPTION_ENABLED\n\tlibextractor\t\t$LIBEXTRACTOR_STATUS\n\tdb-autocreate:\t\t$DB_AUTOCREATE_OPTION_ENABLED\n\tdebug log:\t\t$DEBUG_LOG_OPTION_ENABLED\n\tprotocol info extension:$PROTOCOLINFO_EXTENSION_OPTION_ENABLED\n\tffmpegthumbnailer:\t$FFMPEGTHUMBNAILER_STATUS\n\tlastfmlib:\t\t$LASTFMLIB_STATUS\n\tdata directory:\t\t$PACKAGE_DATADIR", [compile option summary])
 
 ###############
 AC_CONFIG_FILES([

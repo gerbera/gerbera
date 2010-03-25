@@ -1,8 +1,9 @@
-#LyX 1.5.5 created this file. For more info see http://www.lyx.org/
-\lyxformat 276
+#LyX 1.6.5 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
 \begin_document
 \begin_header
 \textclass docbook
+\use_default_options false
 \language english
 \inputencoding auto
 \font_roman default
@@ -13,9 +14,11 @@
 \font_osf false
 \font_sf_scale 100
 \font_tt_scale 100
+
 \graphics default
 \paperfontsize default
 \spacing single
+\use_hyperref false
 \papersize a4paper
 \use_geometry true
 \use_amsmath 0
@@ -51,57 +54,57 @@ MediaTomb - User Interface
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <copyright>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
   <year>2005</year>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
   <holder>Gena Batsyan</holder>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
   <holder>Sergey Bostandzhyan</holder>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </copyright>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <copyright>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
-  <year>2006-2008</year>
+  <year>2006-2010</year>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
   <holder>Gena Batsyan</holder>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
   <holder>Sergey Bostandzhyan</holder>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
   <holder>Leonhard Wimmer</holder>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </copyright>
 \end_layout
@@ -115,9 +118,9 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
-<releaseinfo>This documentation is valid for MediaTomb version 0.11.0.</releaseinfo
+<releaseinfo>This documentation is valid for MediaTomb version 0.12.0.</releaseinfo
 >
 \end_layout
 
@@ -130,7 +133,7 @@ status open
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <legalnotice>
 \end_layout
@@ -148,7 +151,7 @@ THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY! USE AT YOUR OWN RISK!
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </legalnotice>
 \end_layout
@@ -215,7 +218,7 @@ An object type can be selected from the drop down list and is one of the
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -242,7 +245,7 @@ Allowed settings:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -266,7 +269,7 @@ Title of the container as it will appear in the UI or as it will be presented
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -288,7 +291,7 @@ UPnP class of the container, leave the default setting if you are unsure.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -302,7 +305,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -329,7 +332,7 @@ Allowed settings:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -353,7 +356,7 @@ Title of the item as it will appear in the UI or as it will be presented
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -375,7 +378,7 @@ The location of the file on disk, must be given by an absolute path.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -397,7 +400,7 @@ UPnP class of the container, leave the default setting if you are unsure.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -420,7 +423,7 @@ Free text describing the item, it may be shown on the UPnP device depending
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -463,7 +466,7 @@ For the example above you would have to enter image/jpeg in the Mimetype
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -477,7 +480,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -509,7 +512,7 @@ triggered
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -533,7 +536,7 @@ Title of the item as it will appear in the UI or as it will be presented
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -555,7 +558,7 @@ The location of the file on disk, must be given by an absolute path.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -577,7 +580,7 @@ UPnP class of the container, leave the default setting if you are unsure.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -600,7 +603,7 @@ Free text describing the item, it may be shown on the UPnP device depending
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -624,7 +627,7 @@ This identifies the mime type of the media and is probably one of the most
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -647,7 +650,7 @@ Location of the Action Script, take a look at an example script demo_toggle.py
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -687,7 +690,7 @@ OFF
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -701,7 +704,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -727,7 +730,7 @@ Allowed settings:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -751,7 +754,7 @@ Title of the item as it will appear in the UI or as it will be presented
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -774,7 +777,7 @@ The URL to the stream, for example http://www.deadlock.dhs.org/192/Deadlock_Vete
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -797,7 +800,7 @@ Usually http-get will be fine, but you can specify settings for rtsp and
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -819,7 +822,7 @@ UPnP class of the container, leave the default setting if you are unsure.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -842,7 +845,7 @@ Free text describing the item, it may be shown on the UPnP device depending
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -867,7 +870,7 @@ This identifies the mime type of the media and is probably one of the most
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -881,7 +884,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -909,7 +912,7 @@ Allowed settings:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -933,7 +936,7 @@ Title of the item as it will appear in the UI or as it will be presented
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -955,7 +958,7 @@ The location of the file on disk, relative to the servedir entry.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -977,7 +980,7 @@ UPnP class of the container, leave the default setting if you are unsure.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1000,7 +1003,7 @@ Free text describing the item, it may be shown on the UPnP device depending
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1024,7 +1027,7 @@ This identifies the mime type of the media and is probably one of the most
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -1038,7 +1041,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -1129,7 +1132,8 @@ Note: the remove feature does not touch the files on your drive, the remove
 \end_inset
 
  
-\begin_inset LatexCommand label
+\begin_inset CommandInset label
+LatexCommand label
 name "sec:Set-Autoscan-Properties"
 
 \end_inset
@@ -1152,7 +1156,7 @@ ory.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -1174,7 +1178,7 @@ Defines the autoscan mode, can be one of the following:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -1196,7 +1200,7 @@ The directory is not being autoscanned.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1219,7 +1223,7 @@ Enable timed rescans.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1242,7 +1246,7 @@ Enable filesystem event based rescans - this is only available when MediaTomb
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -1256,7 +1260,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1278,7 +1282,7 @@ Defines the autoscan type, can be one of the following:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -1312,7 +1316,7 @@ Basic
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1346,7 +1350,7 @@ Full
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -1360,7 +1364,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1382,7 +1386,7 @@ Operate recursively, also monitoring files in subdirectories.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1405,7 +1409,7 @@ Process or ignore hidden files and directories, i.e.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1432,7 +1436,7 @@ Note: the countdown for the next rescan starts only after the current scan
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -1532,7 +1536,8 @@ Set Autoscan Properties
 
 \begin_layout Standard
 Same as 
-\begin_inset LatexCommand ref
+\begin_inset CommandInset ref
+LatexCommand ref
 reference "sec:Set-Autoscan-Properties"
 
 \end_inset

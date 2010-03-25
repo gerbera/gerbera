@@ -64,7 +64,7 @@ using namespace mxml;
 #define FILTER_OPTION_GENREID           "genreId"
 #define FILTER_OPTION_SORT              "sort"
 #define FILTER_SEPARATOR                ";"
-#define FILTER_VALUE_SEPARATOR          "="
+#define FILTER_VALUE_SEPARATOR          ":"
 
 
 #define PARAM_LIMIT                     "limit"
@@ -134,6 +134,7 @@ using namespace mxml;
 #define CFG_GENRE_ALT            "alternative"
 #define CFG_GENRE_JAZZ           "jazz"
 #define CFG_GENRE_METAL          "metal"
+#define CFG_GENRE_DMETAL         "death-metal"
 #define CFG_GENRE_POP            "pop"
 #define CFG_GENRE_PUNK           "punk"
 #define CFG_GENRE_RNB            "rhytm-and-blues"
@@ -184,7 +185,8 @@ wr_genre WR_genre[] =
     { WR_genre_electronic,      67,  CFG_GENRE_ELECT,   "Electronic"      },
     { WR_genre_alternative,     60,  CFG_GENRE_ALT,     "Alternative"     },
     { WR_genre_jazz,            65,  CFG_GENRE_JAZZ,    "Jazz"            }, 
-    { WR_genre_metal,           272, CFG_GENRE_METAL,   "Metal"           },
+    { WR_genre_metal,           181, CFG_GENRE_METAL,   "Metal"           },
+    { WR_genre_death_metal,     549, CFG_GENRE_DMETAL,  "Death Metal"     }, 
     { WR_genre_pop,             69,  CFG_GENRE_POP,     "Pop"             },
     { WR_genre_punk,            388, CFG_GENRE_PUNK,    "Punk"            },
     { WR_genre_rhytm_and_blues, 738, CFG_GENRE_RNB,     "Rhytm And Blues" },

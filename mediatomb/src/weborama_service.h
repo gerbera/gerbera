@@ -63,6 +63,7 @@ typedef enum
     WR_genre_alternative,
     WR_genre_jazz,
     WR_genre_metal,
+    WR_genre_death_metal,
     WR_genre_pop,
     WR_genre_punk,
     WR_genre_rhytm_and_blues,

@@ -1,8 +1,9 @@
-#LyX 1.5.5 created this file. For more info see http://www.lyx.org/
-\lyxformat 276
+#LyX 1.6.5 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
 \begin_document
 \begin_header
 \textclass docbook
+\use_default_options false
 \language english
 \inputencoding auto
 \font_roman default
@@ -13,8 +14,10 @@
 \font_osf false
 \font_sf_scale 100
 \font_tt_scale 100
+
 \graphics default
 \paperfontsize default
+\use_hyperref false
 \papersize default
 \use_geometry false
 \use_amsmath 0
@@ -46,57 +49,57 @@ MediaTomb Scripting
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <copyright>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
   <year>2005</year>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
   <holder>Gena Batsyan</holder>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
   <holder>Sergey Bostandzhyan</holder>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </copyright>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <copyright>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
-  <year>2006-2008</year>
+  <year>2006-2010</year>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
   <holder>Gena Batsyan</holder>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
   <holder>Sergey Bostandzhyan</holder>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
   <holder>Leonhard Wimmer</holder>
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </copyright>
 \end_layout
@@ -110,7 +113,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <releaseinfo>This documentation is valid for MediaTomb version 0.12.0.</releaseinfo
 >
@@ -125,7 +128,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <legalnotice>
 \end_layout
@@ -143,7 +146,7 @@ THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY! USE AT YOUR OWN RISK!
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </legalnotice>
 \end_layout
@@ -223,6 +226,18 @@ builtin
 js
 \emph default
  in config.xml !
+\end_layout
+
+\begin_layout Description
+NOTE: The sorting of Video and Photo items using the 
+\begin_inset Quotes eld
+\end_inset
+
+rootpath
+\begin_inset Quotes erd
+\end_inset
+
+ object is still somewhat experimental and not described here.
 \end_layout
 
 \begin_layout Subsection
@@ -391,7 +406,7 @@ RO
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -419,7 +434,7 @@ This defines the object type, following types are available:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -441,7 +456,7 @@ Object is a container.
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -463,7 +478,7 @@ Object is an item.
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -485,7 +500,7 @@ Object is an active item.
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -507,7 +522,7 @@ Object is a link to a resource on the Internet.
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -529,7 +544,7 @@ Object is an internal link.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -543,7 +558,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -574,7 +589,7 @@ This is the title of the original object, since the object represents an
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -604,7 +619,7 @@ The object ID, make sure to set all refID's (reference IDs) of your virtual
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -633,7 +648,7 @@ The object ID of the parent container.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -663,7 +678,7 @@ The UPnP class of the item, this corresponds to upnp:class in the DIDL-Lite
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -692,7 +707,7 @@ Location on disk, given by the absolute path and file name.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -724,7 +739,7 @@ This property is a boolean value, it is non zero if the particular item
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -755,7 +770,7 @@ Identifies if the item belongs to an online service and thus has extended
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -778,7 +793,7 @@ The item does not belong to an online service and does not have extended
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -800,7 +815,7 @@ The item belongs to the YouTube service and has extended properties.
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -822,7 +837,7 @@ The item belongs to the Weborama service and has extended properties.
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -844,7 +859,7 @@ The item belongs to the Apple Trailers service and has extended properties.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -858,7 +873,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -887,7 +902,7 @@ Mimetype of the object.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -918,7 +933,7 @@ Array holding the metadata that was extracted from the object (i.e.
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -949,7 +964,7 @@ Extracted title (for example the id3 title if the object is an mp3 file),
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -977,7 +992,7 @@ Artist information, this corresponds to upnp:artist in the DIDL-Lite XML.
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1006,7 +1021,7 @@ Album information, this corresponds to upnp:album in the DIDL-Lite XML.
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1035,7 +1050,7 @@ Date, must be in the format of YYYY-MM-DD (required by the UPnP spec), this
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1064,7 +1079,7 @@ Genre of the item, this corresponds to upnp:genre in the DIDL-Lite XML.
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1093,7 +1108,7 @@ Description of the item, this corresponds to dc:description in the DIDL-Lite
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1122,7 +1137,7 @@ Region description of the item, this corresponds to upnp:region in the DIDL-Lite
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1151,7 +1166,7 @@ Track number of the item, this corresponds to upnp:originalTrackNumber in
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1179,7 +1194,7 @@ Author of the media, this corresponds to upnp:author in the DIDL-Lite XML.
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1208,7 +1223,7 @@ Director of the media, this corresponds to upnp:director in the DIDL-Lite
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1237,7 +1252,7 @@ Director of the media, this corresponds to dc:publisher in the DIDL-Lite
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1266,7 +1281,7 @@ Director of the media, this corresponds to upnp:rating in the DIDL-Lite
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1294,7 +1309,7 @@ Director of the media, this corresponds to upnp:actor in the DIDL-Lite XML.
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1323,7 +1338,7 @@ Director of the media, this corresponds to upnp:producer in the DIDL-Lite
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -1337,7 +1352,7 @@ status collapsed
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1372,7 +1387,7 @@ Array holding the so called auxiliary data.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1406,7 +1421,7 @@ This property is only available if the object is being created by the playlist
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -1429,7 +1444,7 @@ When the obj.onlineservice variable equals ONLINE_SERVICE_YOUTUBE the item
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -1457,7 +1472,7 @@ Identifies the YouTube request type, following types are available:
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -1479,7 +1494,7 @@ No request/invalid.
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1501,7 +1516,7 @@ The item was created as a result of a favorites request.
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1523,7 +1538,7 @@ The item was created as a result of a search request.
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1546,7 +1561,7 @@ The item was created as a result of a request for videos that were uploaded
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1568,7 +1583,7 @@ The item was created as a result of a request for one of the standard feeds.
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1590,7 +1605,7 @@ The item was created as a result of a request for users playlists.
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1612,7 +1627,7 @@ The item was created as a result of for users subscriptions.
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -1626,7 +1641,7 @@ status collapsed
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -1647,7 +1662,7 @@ The following aux keys can be used to retrieve additional information about
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -1675,7 +1690,7 @@ Contains a space separated list of keywords for the particular item.
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1703,7 +1718,7 @@ Contains the average rating value.
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1731,7 +1746,7 @@ Contains the author name.
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1759,7 +1774,7 @@ Contains the name of the feed.
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1787,7 +1802,7 @@ Contains the view count of the video on the YouTube website.
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1815,7 +1830,7 @@ Contains the name of the region.
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1843,7 +1858,7 @@ Contains the rating count of the video on the YouTube website.
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1873,7 +1888,7 @@ Contains the name of the request that produced this item (i.e.
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1902,7 +1917,7 @@ Contains the additional name that accompanies the request, it is only set
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -1930,7 +1945,7 @@ Contains the name of the category of the item.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -2007,7 +2022,7 @@ dvd.aux[DVD]
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -2046,7 +2061,7 @@ Further, being a normal JavaScript array it supports all associated JS functions
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2081,7 +2096,7 @@ dvd.aux[DVD].titles.length > t_index >= 0
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2116,7 +2131,7 @@ dvd.aux[DVD].titles[t_index].audio_tracks.length > a_index >= 0
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2144,7 +2159,7 @@ A string, containing the name of the language of the audio track.
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2173,7 +2188,7 @@ This property is an array which contains chapter information for the particular
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2208,7 +2223,7 @@ dvd.aux[DVD].titles[t_index].chapters.length > c_index >= 0
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -2233,7 +2248,7 @@ Actually there are no such things as constants in JS, so those are actually
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -2263,7 +2278,7 @@ Value: object.container
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2293,7 +2308,7 @@ Value: object.container.person.musicArtist
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2323,7 +2338,7 @@ Value: object.container.genre.musicGenre
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2358,7 +2373,7 @@ Note: this container class will be treated by the server in a special way,
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2395,7 +2410,7 @@ Note: this container class will be treated by the server in a special way,
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2425,7 +2440,7 @@ Value: object.item
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2455,7 +2470,7 @@ Value: object.item.audioItem.musicTrack
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2485,7 +2500,7 @@ Value: object.item.videoItem
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2515,7 +2530,7 @@ Value: object.item.imageItem
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2545,7 +2560,7 @@ Value: 1
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2575,7 +2590,7 @@ Value: 2
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2605,7 +2620,7 @@ Value: 4
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2635,7 +2650,7 @@ Value: 8
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2665,7 +2680,7 @@ Value: 16
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -2706,7 +2721,7 @@ The server offers three functions which can be called from within the import
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -2735,7 +2750,7 @@ Parameters:
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -2758,7 +2773,7 @@ A virtual object that is either a copy of or a reference to 'orig', see
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2786,7 +2801,7 @@ A string, defining where the object will be added in the database hierarchy.
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2815,7 +2830,7 @@ ner.album.musicAlbum'.
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -2829,7 +2844,7 @@ status collapsed
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2851,7 +2866,7 @@ This function returns a copy of the virtual object.
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2874,7 +2889,7 @@ This function is useful for debugging scripts, it simply prints to the standard
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2892,7 +2907,7 @@ f2i(string)
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2910,7 +2925,7 @@ m2i(string)
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2928,7 +2943,7 @@ p2i(string)
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -2967,7 +2982,7 @@ p2i: playlist charset to internal
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -2989,7 +3004,7 @@ The following function is only available to the playlist script.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -3020,7 +3035,7 @@ The idea is, that you can process your playlist line by line and gather
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -3042,7 +3057,7 @@ The following function is only available to the DVD import script.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -3071,7 +3086,7 @@ Parameters:
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -3094,7 +3109,7 @@ A virtual object that is either a copy of or a reference to 'orig', see
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -3122,7 +3137,7 @@ A string, defining where the object will be added in the database hierarchy.
 \begin_inset ERT
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -3151,7 +3166,7 @@ ner.album.musicAlbum'.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -3165,7 +3180,7 @@ status open
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -3196,7 +3211,7 @@ The idea is, that you can process your playlist line by line and gather
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
@@ -3220,7 +3235,7 @@ There is a set of helper JavaScript functions which reside in the common.js
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 <itemizedlist><listitem>
 \end_layout
@@ -3250,7 +3265,7 @@ The first function escapes slash '/' characters in a string.
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -3312,7 +3327,7 @@ function createContainerChain(arr)
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -3362,7 +3377,7 @@ function getYear(date)
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem><listitem>
 \end_layout
@@ -3413,7 +3428,7 @@ function getPlaylistType(mimetype)
 \begin_inset ERT
 status open
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 </listitem></itemizedlist>
 \end_layout
