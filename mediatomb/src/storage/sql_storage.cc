@@ -416,7 +416,6 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
     }
     
     
-    #warning check for problem with caching
     // check for a duplicate (virtual) object
     if (hasReference && ! isUpdate)
     {
