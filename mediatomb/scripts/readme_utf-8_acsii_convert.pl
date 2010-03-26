@@ -17,6 +17,7 @@ while (<>)
     s/ü/ue/g;
     s/ö/oe/g;
     s/ß/ss/g;
+    s/é/e/g;
     
     my $converted = $converter->convert($_);
     if ($converted)

@@ -3,9 +3,9 @@
 use XML::DOM;
 use XML::XQL;
 use XML::XQL::DOM;
+use utf8;
 
-
-#binmode STDOUT, ":utf8";
+binmode STDOUT, ":utf8";
 
 sub my_tag_compression
 {
@@ -30,7 +30,7 @@ if (! @res)
     @res = $doc->xql('//div[h1/@class="title"]');
 }
 
-$res[0]->getParentNode()->removeChild($res[0]);
+#$res[0]->getParentNode()->removeChild($res[0]);
 
 @res = $doc->xql("/html/body/div/*");
 
