@@ -44,12 +44,12 @@
 
 using namespace zmm;
 
-#define YOUTUBE_URL_PARAMS_REGEXP   "SWF_ARGS.*\\}"
+#define YOUTUBE_URL_PARAMS_REGEXP   "var swfHTML.*\\;"
 #define YOUTUBE_URL_LOCATION_REGEXP "\nLocation: (http://[^\n]+)\n"
 #define YOUTUBE_URL_WATCH           "http://www.youtube.com/watch?v="
 #define YOUTUBE_URL_GET             "http://www.youtube.com/get_video?" 
 #define YOUTUBE_URL_PARAM_VIDEO_ID  "video_id"
-#define YOUTUBE_URL_PARAM_T_REGEXP  ".*\"t\": \"([^\"]+)\""
+#define YOUTUBE_URL_PARAM_T_REGEXP  ".*\&t=([^\&]+)\&"
 #define YOUTUBE_URL_PARAM_T         "t"
 #define YOUTUBE_IS_HD_AVAILABLE_REGEXP  "IS_HD_AVAILABLE[^:]*: *([^,]*)"
 YouTubeVideoURL::YouTubeVideoURL()
