@@ -678,7 +678,7 @@ SoapSendAction( IN char *action_url,
 
     // make request msg
     request.size_inc = 50;
-    if( http_MakeMessage( &request, 1, 1, "q" "N" "s" "sssbs" "U" "c" "bbb", 
+    if( http_MakeMessage( &request, 1, 1, "q" "N" "s" "sssbs" "UC" "c" "bbb", 
                           SOAPMETHOD_POST, 
                           &url, (off_t)(xml_start_len + action_str_len + xml_end_len),   // content-length
                           ContentTypeHeader,
@@ -836,7 +836,7 @@ SoapSendActionEx( IN char *action_url,
 
     // make request msg
     request.size_inc = 50;
-    if( http_MakeMessage( &request, 1, 1, "q" "N" "s" "sssbs" "U" "c" "bbbbbbb", 
+    if( http_MakeMessage( &request, 1, 1, "q" "N" "s" "sssbs" "UC" "c" "bbbbbbb", 
                           SOAPMETHOD_POST, 
                           &url, (off_t)(xml_start_len + 
                                         xml_header_start_len + 
@@ -949,7 +949,7 @@ SoapGetServiceVarStatus( IN char *action_url,
     }
     // make headers
     request.size_inc = 50;
-    if( http_MakeMessage( &request, 1, 1, "Q" "sbc" "N" "s" "s" "U" "c" "sss", 
+    if( http_MakeMessage( &request, 1, 1, "Q" "sbc" "N" "s" "s" "UC" "c" "sss", 
                           SOAPMETHOD_POST, 
                           path.buf, 
                           (size_t)path.length, 
