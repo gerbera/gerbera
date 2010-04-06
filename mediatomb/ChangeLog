@@ -1,4 +1,12 @@
 MediaTomb - UPnP AV Mediaserver.
+v0.12.1
+        * fixed YouTube service support (got broken after they updated their
+          website)
+        * fixed a problem in soap response http headers (solves "access error" 
+          on Yamaha RX-V2065)
+        * turned out the change log for 0.12.0 was not complete (various 
+          closed bugs were not mentioned)
+
 v0.12.0 25.03.2010
         * added video thumbnail generation using libffmpegthumbnailer
         * added configure settings which allow to enable sqlite backups by 
@@ -34,28 +42,44 @@ v0.12.0 25.03.2010
         * fixed bug #1973930 - Incorrect UPnP class assigned to Vorbis and
           Theora items
 		* fixed bug #1934659 - unspecific error message when db is not available
-		* fixed bug #2904448 - memset with number of bytes set to 0 in
-		  array.cc
+        * fixed bug #2904448 - memset with number of bytes set to 0 in
+          array.cc
         * added a "Directories" view in the default layout for Photos and
-		  Video, the feature is still somewhat experimental
+          Video, the feature is still somewhat experimental
         * added a feature that allows to mark played items
-		* improved inotify check which was failing with 2.4 kernels
-		* added support for lastfmlib, thanks to Dirk Vanden Boer vor the
-		  patch
-		* increased buffer length for the exif field following the request
-		  from one of our users
-		* fixed a problem where the upnp-string-limit function was not
-		  correctly truncating UTF-8 strings
-		* fixed a bug where --enable-id3lib did not turn off the automatic
-		  enabling of taglib, which then resulted in an error message saying, 
-		  that both libraries are enabled
-		* implemented feature request #2833402 - ability to change
-		  ffmpegthumbnailer param "image quallity"
-		* fixed bug #2783557 - Mediatomb always flags file as chunked output,
-		  thanks to Michael Guntsche
-		* fixed bug #2804342 - wrong namespace in <serviceId>
-		* added a fix for glibc 2.10, thanks to Honoome for the patch
-		* added patches for NetBSD, thanks to Jared D. McNeill
+        * improved inotify check which was failing with 2.4 kernels
+        * added support for lastfmlib, thanks to Dirk Vanden Boer vor the
+          patch
+        * increased buffer length for the exif field following the request
+          from one of our users
+        * fixed a problem where the upnp-string-limit function was not
+          correctly truncating UTF-8 strings
+        * fixed a bug where --enable-id3lib did not turn off the automatic
+          enabling of taglib, which then resulted in an error message saying, 
+          that both libraries are enabled
+        * implemented feature request #2833402 - ability to change
+          ffmpegthumbnailer param "image quallity"
+        * fixed bug #2783557 - Mediatomb always flags file as chunked output,
+          thanks to Michael Guntsche
+        * fixed bug #2804342 - wrong namespace in <serviceId>
+        * added a fix for glibc 2.10, thanks to Honoome for the patch
+        * added patches for NetBSD, thanks to Jared D. McNeill
+        * fixed bug #2944701 Adding comment in config as last line yields
+          segfault
+        * fixed bug #2779907 SQLITE3: (1) cannot start a transaction within a
+          transaction
+        * fixed bug #2820213 build broken with libmp4v2-1.9.0
+        * fixed bug #2161155 inotify thread aborts 
+        * fixed bug #2011296 SVN rev 1844 doesn't show more than 10 files on
+          PS3
+        * fixed bug #1988738 web ui docs miss note how to access web ui
+        * fixed bug #1929230 invalid XML in UPNP messages
+        * fixed bug #1865386 autoscan dir already exists error 
+		* implemented feature request #2313953 support for forked libmp4v2
+          project
+        * implemented feature request #1955192 flag/mark watched video files
+        * implemented feature request #1928580 better logging/tracing support
+        * implemented feature request #1754010 m4a metadata extraction
 
 v0.11.0 01.03.2008  External transcoding support
         * implemented transcoding support that allows to plug in an arbitrary
