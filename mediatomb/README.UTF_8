@@ -1,6 +1,6 @@
 MediaTomb - UPnP MediaServer
 
-   This documentation is valid for MediaTomb version 0.12.0.
+   This documentation is valid for MediaTomb version 0.12.1.
 
    Copyright © 2005 Gena Batsyan, Sergey Bostandzhyan
 
@@ -126,7 +126,7 @@ WARNING!
        server side scripts upon HTTP GET requests to certain items
      * highly flexible configuration, allowing you to control the
        behavior of various features of the server
-     * support for Linux, FreeBSD, NetBSD, Mac OS X
+     * runs on Linux, FreeBSD, NetBSD, Mac OS X, eCS
      * runs on x86, Alpha, ARM, MIPS, Sparc, PowerPC
 
 2. Requirements
@@ -1660,7 +1660,7 @@ enabled=...
             Creates a filmstrip like border around the image, turn
             this option off if you want pure images.
           +
-<image-quality>8<image-quality>
+<image-quality>8</image-quality>
 
             Optional
             Default: 8
@@ -3058,15 +3058,27 @@ Attention Hardware Manufacturers:
 
      * AT3705-MGW
 
-7.1.2. Conceptronic
+7.1.2. Asus
+
+     * O!Play
+
+7.1.3. Conceptronic
 
      * C54WMP
 
-7.1.3. Denon
+7.1.4. Currys UK
 
-     * AVR 4306
+     * Logik IR100
 
-7.1.4. D-Link
+7.1.5. Denon
+
+     * AVR-3808
+     * AVR-4306
+     * AVR-4308
+     * S-52
+     * ASD-3N
+
+7.1.6. D-Link
 
      * DSM-320
      * DSM-320RD
@@ -3099,15 +3111,15 @@ Attention Hardware Manufacturers:
    section in your config.xml:
 <map from="avi" to="video/avi"/>
 
-7.1.5. Freecom
+7.1.7. Freecom
 
      * MusicPal
 
-7.1.6. Häger
+7.1.8. Häger
 
      * OnAir (also known as BT Internet Radio)
 
-7.1.7. HP
+7.1.9. HP
 
      * MediaSmart TV
 
@@ -3116,42 +3128,91 @@ Attention Hardware Manufacturers:
    action anymore, but now uses the optional Search action which
    is not implemented in MediaTomb.
 
-7.1.8. I-O Data
+7.1.10. Hifidelio
+
+     * Hifidelio Pro-S
+
+7.1.11. I-O Data
 
      * AVeL LinkPlayer2 AVLP2/DVDLA
 
-7.1.9. Linksys
+7.1.12. JVC
+
+     * DD-3
+     * DD-8
+
+7.1.13. Kathrein
+
+     * UFS922
+
+7.1.14. Kodak
+
+     * EasyShare EX-1011
+
+7.1.15. Linn
+
+     * Sneaky DS
+
+7.1.16. Linksys
 
      * WMLS11B (Wireless-B Music System)
      * KiSS 1600
 
-7.1.10. NeoDigits
+7.1.17. Medion
+
+     * MD 85651
+
+7.1.18. NeoDigits
 
      * HELIOS X3000
 
-7.1.11. Netgear
+7.1.19. Netgear
 
      * EVA700
+     * MP101
 
-7.1.12. Philips
+7.1.20. Nokia
+
+     * N-95
+     * N-800
+
+7.1.21. Odys
+
+     * i-net MusicBox
+
+7.1.22. Philips
 
      * Streamium SL-300i
      * Streamium SL-400i
      * Streamium MX-6000i
+     * Streamium NP1100
+     * Streamium MCi900
+     * WAS7500
+     * WAK3300
+     * WAC3500D
      * SLA-5500
      * SLA-5520
+     * 37PFL9603D
 
-7.1.13. Pinnacle
+7.1.23. Pinnacle
 
      * ShowCenter 200
      * SoundBridge
 
-7.1.14. Pioneer
+7.1.24. Pioneer
 
      * BDP-HD50-K
      * BDP-94HD
 
-7.1.15. Roberts
+7.1.25. Raidsonic
+
+     * IB-MP308HW-B
+
+7.1.26. Revo
+
+     * Pico RadioStation
+
+7.1.27. Roberts
 
      * WM201 WiFi Radio
 
@@ -3163,16 +3224,28 @@ Attention Hardware Manufacturers:
    Also, add this to the <mimetype-contenttype> section:
 <treat mimetype="audio/ogg" as="ogg"/>
 
-7.1.16. Roku
+7.1.28. Roku
 
      * SoundBridge M1001
      * SoundBridge M2000
 
-7.1.17. Siemens
+7.1.29. Sagem
+
+     * My Dual Radio 700
+
+7.1.30. Siemens
 
      * Gigaset M740AV
 
-7.1.18. Sony
+7.1.31. SMC
+
+     * EZ Stream SMCWAA-G
+
+7.1.32. Snazio
+
+     * Snazio* Net DVD Cinema HD SZ1350
+
+7.1.33. Sony
 
      * Playstation 3
 
@@ -3181,11 +3254,19 @@ Attention Hardware Manufacturers:
    MediaTomb PS3 compatibility:
 <protocolInfo extend="yes"/>
 
-7.1.19. T+A
+7.1.34. Syabas
+
+     * Popcorn Hour A110
+
+7.1.35. T+A
 
      * T+A Music Player
 
-7.1.20. Telegent
+7.1.36. Tangent
+
+     * Quattro MkII
+
+7.1.37. Telegent
 
      * TG100
 
@@ -3196,14 +3277,31 @@ Attention Hardware Manufacturers:
    section of your configuration file:
 <upnp-string-limit>101</upnp-string-limit>
 
-7.1.21. TerraTec
+7.1.38. TerraTec
 
      * NOXON iRadio
      * NOXON 2 Audio
 
-7.1.22. ZyXEL
+7.1.39. Western Digital
+
+     * WD TV Live
+
+7.1.40. Vistron
+
+     * MX-200I
+
+7.1.41. Xtreamer
+
+     * Xtreamer
+
+7.1.42. Yamaha
+
+     * RX-V2065
+
+7.1.43. ZyXEL
 
      * DMA-1000
+     * DMA-2500
 
    Some users reported problems where the DMA will show an error
    “Failed to retrieve list” and the DMA disconnecting from the
@@ -3273,7 +3371,11 @@ Attention Hardware Manufacturers:
    Use the statically linked binary armv4 package that is provided
    on our download site.
 
-7.2.8. Western Digital
+7.2.8. Xtreamer
+
+     * Xtreamer eTRAYz
+
+7.2.9. Western Digital
 
      * MyBook
 
