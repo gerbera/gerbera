@@ -120,7 +120,7 @@ status open
 
 \begin_layout Plain Layout
 
-<releaseinfo>This documentation is valid for MediaTomb version 0.12.0.</releaseinfo
+<releaseinfo>This documentation is valid for MediaTomb version 0.12.1.</releaseinfo
 >
 \end_layout
 
@@ -279,7 +279,7 @@ highly flexible configuration, allowing you to control the behavior of various
 \end_layout
 
 \begin_layout Itemize
-support for Linux, FreeBSD, NetBSD, Mac OS X
+runs on Linux, FreeBSD, NetBSD, Mac OS X, eCS
 \end_layout
 
 \begin_layout Itemize
@@ -10910,6 +10910,14 @@ AT3705-MGW
 \end_layout
 
 \begin_layout Subsubsection
+Asus
+\end_layout
+
+\begin_layout Itemize
+O!Play
+\end_layout
+
+\begin_layout Subsubsection
 Conceptronic
 \end_layout
 
@@ -10918,11 +10926,35 @@ C54WMP
 \end_layout
 
 \begin_layout Subsubsection
+Currys UK
+\end_layout
+
+\begin_layout Itemize
+Logik IR100
+\end_layout
+
+\begin_layout Subsubsection
 Denon
 \end_layout
 
 \begin_layout Itemize
-AVR 4306
+AVR-3808
+\end_layout
+
+\begin_layout Itemize
+AVR-4306
+\end_layout
+
+\begin_layout Itemize
+AVR-4308
+\end_layout
+
+\begin_layout Itemize
+S-52
+\end_layout
+
+\begin_layout Itemize
+ASD-3N
 \end_layout
 
 \begin_layout Subsubsection
@@ -11026,11 +11058,55 @@ Users reported that after a firmwre upgrade the device stopped working properly.
 \end_layout
 
 \begin_layout Subsubsection
+Hifidelio
+\end_layout
+
+\begin_layout Itemize
+Hifidelio Pro-S
+\end_layout
+
+\begin_layout Subsubsection
 I-O Data
 \end_layout
 
 \begin_layout Itemize
 AVeL LinkPlayer2 AVLP2/DVDLA
+\end_layout
+
+\begin_layout Subsubsection
+JVC
+\end_layout
+
+\begin_layout Itemize
+DD-3
+\end_layout
+
+\begin_layout Itemize
+DD-8
+\end_layout
+
+\begin_layout Subsubsection
+Kathrein
+\end_layout
+
+\begin_layout Itemize
+UFS922
+\end_layout
+
+\begin_layout Subsubsection
+Kodak
+\end_layout
+
+\begin_layout Itemize
+EasyShare EX-1011
+\end_layout
+
+\begin_layout Subsubsection
+Linn
+\end_layout
+
+\begin_layout Itemize
+Sneaky DS
 \end_layout
 
 \begin_layout Subsubsection
@@ -11043,6 +11119,14 @@ WMLS11B (Wireless-B Music System)
 
 \begin_layout Itemize
 KiSS 1600
+\end_layout
+
+\begin_layout Subsubsection
+Medion
+\end_layout
+
+\begin_layout Itemize
+MD 85651
 \end_layout
 
 \begin_layout Subsubsection
@@ -11059,6 +11143,30 @@ Netgear
 
 \begin_layout Itemize
 EVA700
+\end_layout
+
+\begin_layout Itemize
+MP101
+\end_layout
+
+\begin_layout Subsubsection
+Nokia
+\end_layout
+
+\begin_layout Itemize
+N-95
+\end_layout
+
+\begin_layout Itemize
+N-800
+\end_layout
+
+\begin_layout Subsubsection
+Odys
+\end_layout
+
+\begin_layout Itemize
+i-net MusicBox
 \end_layout
 
 \begin_layout Subsubsection
@@ -11078,11 +11186,35 @@ Streamium MX-6000i
 \end_layout
 
 \begin_layout Itemize
+Streamium NP1100
+\end_layout
+
+\begin_layout Itemize
+Streamium MCi900
+\end_layout
+
+\begin_layout Itemize
+WAS7500
+\end_layout
+
+\begin_layout Itemize
+WAK3300
+\end_layout
+
+\begin_layout Itemize
+WAC3500D
+\end_layout
+
+\begin_layout Itemize
 SLA-5500
 \end_layout
 
 \begin_layout Itemize
 SLA-5520
+\end_layout
+
+\begin_layout Itemize
+37PFL9603D
 \end_layout
 
 \begin_layout Subsubsection
@@ -11107,6 +11239,22 @@ BDP-HD50-K
 
 \begin_layout Itemize
 BDP-94HD
+\end_layout
+
+\begin_layout Subsubsection
+Raidsonic
+\end_layout
+
+\begin_layout Itemize
+IB-MP308HW-B
+\end_layout
+
+\begin_layout Subsubsection
+Revo
+\end_layout
+
+\begin_layout Itemize
+Pico RadioStation
 \end_layout
 
 \begin_layout Subsubsection
@@ -11147,11 +11295,35 @@ SoundBridge M2000
 \end_layout
 
 \begin_layout Subsubsection
+Sagem
+\end_layout
+
+\begin_layout Itemize
+My Dual Radio 700
+\end_layout
+
+\begin_layout Subsubsection
 Siemens
 \end_layout
 
 \begin_layout Itemize
 Gigaset M740AV
+\end_layout
+
+\begin_layout Subsubsection
+SMC
+\end_layout
+
+\begin_layout Itemize
+EZ Stream SMCWAA-G
+\end_layout
+
+\begin_layout Subsubsection
+Snazio
+\end_layout
+
+\begin_layout Itemize
+Snazio* Net DVD Cinema HD SZ1350
 \end_layout
 
 \begin_layout Subsubsection
@@ -11172,11 +11344,27 @@ Firmware 1.80 introduces UPnP/DLNA support, add the following to the <server>
 \end_layout
 
 \begin_layout Subsubsection
+Syabas
+\end_layout
+
+\begin_layout Itemize
+Popcorn Hour A110
+\end_layout
+
+\begin_layout Subsubsection
 T+A
 \end_layout
 
 \begin_layout Itemize
 T+A Music Player
+\end_layout
+
+\begin_layout Subsubsection
+Tangent
+\end_layout
+
+\begin_layout Itemize
+Quattro MkII
 \end_layout
 
 \begin_layout Subsubsection
@@ -11213,11 +11401,47 @@ NOXON 2 Audio
 \end_layout
 
 \begin_layout Subsubsection
+Western Digital
+\end_layout
+
+\begin_layout Itemize
+WD TV Live
+\end_layout
+
+\begin_layout Subsubsection
+Vistron
+\end_layout
+
+\begin_layout Itemize
+MX-200I
+\end_layout
+
+\begin_layout Subsubsection
+Xtreamer
+\end_layout
+
+\begin_layout Itemize
+Xtreamer
+\end_layout
+
+\begin_layout Subsubsection
+Yamaha
+\end_layout
+
+\begin_layout Itemize
+RX-V2065
+\end_layout
+
+\begin_layout Subsubsection
 ZyXEL
 \end_layout
 
 \begin_layout Itemize
 DMA-1000
+\end_layout
+
+\begin_layout Itemize
+DMA-2500
 \end_layout
 
 \begin_layout Standard
@@ -11350,6 +11574,14 @@ IB-NAS4200-B
 \begin_layout Standard
 Use the statically linked binary armv4 package that is provided on our download
  site.
+\end_layout
+
+\begin_layout Subsubsection
+Xtreamer
+\end_layout
+
+\begin_layout Itemize
+Xtreamer eTRAYz
 \end_layout
 
 \begin_layout Subsubsection
