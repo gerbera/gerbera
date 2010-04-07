@@ -17,6 +17,7 @@ while (<>)
     s/ü/ue/g;
     s/ö/oe/g;
     s/ß/ss/g;
+    s/©/(c)/g;
     s/é/e/g;
     
     my $converted = $converter->convert($_);
@@ -26,7 +27,7 @@ while (<>)
     }
     else
     {
-        print STDERR  "$0: cannot convert (line $.)\n";
+        print STDERR  "$0: cannot convert (line $.): $_\n";
         exit 1;
     }
     #print;
