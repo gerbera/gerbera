@@ -1,11 +1,12 @@
 MediaTomb - UPnP AV Mediaserver.
-v0.12.1
+v0.12.1 08.04.2010
         * fixed YouTube service support (got broken after they updated their
           website)
         * fixed a problem in soap response http headers (solves "access error" 
           on Yamaha RX-V2065)
         * turned out the change log for 0.12.0 was not complete (various 
           closed bugs were not mentioned)
+        * fixed automatic id3lib detection when taglib is not available
 
 v0.12.0 25.03.2010
         * added video thumbnail generation using libffmpegthumbnailer
