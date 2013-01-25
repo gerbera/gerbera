@@ -66,8 +66,8 @@ public:
     JSRuntime *rt;
     JSContext *cx;
     JSObject  *glob;
-    JSScript *script;
-    JSScript *common_script;
+    JSObject *script;
+    JSObject *common_script;
     
 public:
     Script(zmm::Ref<Runtime> runtime);
@@ -115,8 +115,8 @@ private:
     JSObject *common_root;
 
     void initGlobalObject();
-    JSScript *_load(zmm::String scriptPath);
-    void _execute(JSScript *scr);
+    JSObject *_load(zmm::String scriptPath);
+    void _execute(JSObject *scr);
     zmm::Ref<StringConverter> _p2i;
     zmm::Ref<StringConverter> _j2i;
     zmm::Ref<StringConverter> _f2i;

@@ -51,16 +51,13 @@
 // macro defines included via autoconfig.h
 #include <stdint.h>
 
-//#ifdef FFMPEG_NEEDS_EXTERN_C
 extern "C" 
 {
-//#endif
 
-#include AVFORMAT_INCLUDE
+#include <libavformat/avformat.h>
+#include <libavutil/avutil.h>
 
-//#ifdef FFMPEG_NEEDS_EXTERN_C
 } // extern "C"
-//#endif
 
 #ifdef HAVE_FFMPEGTHUMBNAILER
     #include <libffmpegthumbnailer/videothumbnailerc.h>
@@ -86,51 +83,62 @@ FfmpegHandler::FfmpegHandler() : MetadataHandler()
 
 static void addFfmpegMetadataFields(Ref<CdsItem> item, AVFormatContext *pFormatCtx) 
 {
-
+    AVDictionaryEntry *e = NULL;
 	Ref<StringConverter> sc = StringConverter::m2i();
-    
-	if (strlen(pFormatCtx->title) > 0) 
+    metadata_fields_t field;
+    String value;
+
+    while ((e = av_dict_get(pFormatCtx->metadata, "", e,AV_DICT_IGNORE_SUFFIX)))
     {
-	    log_debug("Added metadata title: %s\n", pFormatCtx->title);
-        item->setMetadata(MT_KEYS[M_TITLE].upnp, 
-                          sc->convert(pFormatCtx->title));
-	}
-	if (strlen(pFormatCtx->author) > 0) 
-    {
-	    log_debug("Added metadata author: %s\n", pFormatCtx->author);
-        item->setMetadata(MT_KEYS[M_ARTIST].upnp, 
-                          sc->convert(pFormatCtx->author));
-	}
-	if (strlen(pFormatCtx->album) > 0) 
-    {
-	    log_debug("Added metadata album: %s\n", pFormatCtx->album);
-        item->setMetadata(MT_KEYS[M_ALBUM].upnp, 
-                          sc->convert(pFormatCtx->album));
-	}
-	if (pFormatCtx->year > 0) 
-    {
-	    log_debug("Added metadata year: %d\n", pFormatCtx->year);
-        item->setMetadata(MT_KEYS[M_DATE].upnp, 
-                          sc->convert(String::from(pFormatCtx->year)));
-	}
-	if (strlen(pFormatCtx->genre) > 0) 
-    {
-	    log_debug("Added metadata genre: %s\n", pFormatCtx->genre);
-        item->setMetadata(MT_KEYS[M_GENRE].upnp, 
-                          sc->convert(pFormatCtx->genre));
-	}
-	if (strlen(pFormatCtx->comment) > 0) 
-    {
-	    log_debug("Added metadata comment: %s\n", pFormatCtx->comment);
-        item->setMetadata(MT_KEYS[M_DESCRIPTION].upnp, 
-                          sc->convert(pFormatCtx->comment));
-	}
-	if (pFormatCtx->track > 0) 
-    {
-	    log_debug("Added metadata track: %d\n", pFormatCtx->track);
-        item->setMetadata(MT_KEYS[M_TRACKNUMBER].upnp, 
-                          sc->convert(String::from(pFormatCtx->track)));
-	}
+        value = e->value;
+
+    	if (strcmp(e->key, "title") == 0) 
+        {
+    	    log_debug("Identified metadata title: %s\n", e->value);
+            field = M_TITLE;
+    	}
+        else if (strcmp(e->key, "artist") == 0) 
+        {
+    	    log_debug("Identified metadata artist: %s\n", e->value);
+            field = M_ARTIST;
+    	}
+        else if (strcmp(e->key, "album") == 0) 
+        {
+    	    log_debug("Identified metadata album: %s\n", e->value);
+            field = M_ALBUM;
+    	}
+        else if (strcmp(e->key, "date") == 0) 
+        {
+            if ((value.length() == 4) && (value.toInt() > 0))
+            {
+                value = value + _("-01-01");
+    	        log_debug("Identified metadata date: %s\n", value.c_str());
+            }
+            /// \toto parse possible ISO8601 timestamp
+            field = M_DATE;
+    	}
+        else if (strcmp(e->key, "genre") == 0) 
+        {
+    	    log_debug("Identified metadata genre: %s\n", e->value);
+            field = M_GENRE;
+    	}
+        else if (strcmp(e->key, "comment") == 0) 
+        {
+	        log_debug("Identified metadata comment: %s\n", e->value);
+            field = M_DESCRIPTION;
+    	}
+        else if (strcmp(e->key, "track") == 0) 
+        {
+	        log_debug("Identified metadata track: %d\n", e->value);
+            field = M_TRACKNUMBER;
+	    }
+        else
+        {
+            continue;
+        }
+
+        item->setMetadata(MT_KEYS[field].upnp, sc->convert(trim_string(value)));
+    }
 }
 
 // ffmpeg library calls
@@ -178,7 +186,7 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext *pFormatC
 	for(i=0; i<pFormatCtx->nb_streams; i++) 
     {
 		AVStream *st = pFormatCtx->streams[i];
-		if((st != NULL) && (videoset == false) && (st->codec->codec_type == CODEC_TYPE_VIDEO))
+		if((st != NULL) && (videoset == false) && (st->codec->codec_type == AVMEDIA_TYPE_VIDEO))
         {
             if (st->codec->codec_tag > 0)
             {
@@ -209,7 +217,7 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext *pFormatC
                 *y = st->codec->height;
 			}
 		} 
-		if(st->codec->codec_type == CODEC_TYPE_AUDIO) 
+		if(st->codec->codec_type == AVMEDIA_TYPE_AUDIO) 
         {
 			// Increase number of audiochannels
 			audioch++;
@@ -260,14 +268,14 @@ void FfmpegHandler::fillMetadata(Ref<CdsItem> item)
     av_register_all();
 
     // Open video file
-    if (av_open_input_file(&pFormatCtx, 
-                          item->getLocation().c_str(), NULL, 0, NULL) != 0)
+    if (avformat_open_input(&pFormatCtx, 
+                          item->getLocation().c_str(), NULL, NULL) != 0)
         return; // Couldn't open file
 
     // Retrieve stream information
-    if (av_find_stream_info(pFormatCtx) < 0)
+    if (avformat_find_stream_info(pFormatCtx, NULL) < 0)
     {
-        av_close_input_file(pFormatCtx);
+        avformat_close_input(&pFormatCtx);
         return; // Couldn't find stream information
     }   
 	// Add metadata using ffmpeg library calls
@@ -276,7 +284,7 @@ void FfmpegHandler::fillMetadata(Ref<CdsItem> item)
 	addFfmpegResourceFields(item, pFormatCtx, &x, &y);
 	
     // Close the video file
-    av_close_input_file(pFormatCtx);
+    avformat_close_input(&pFormatCtx);
 }
 
 Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum, off_t *data_size)

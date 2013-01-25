@@ -12,7 +12,7 @@ libmediatomb_a_CXXFLAGS = \
                      -I$(top_srcdir) \
                      $(SQLITE3_CFLAGS) \
                      $(MYSQL_CFLAGS) \
-                     $(JS_CXXFLAGS) \
+                     $(LIBJS_CFLAGS) \
                      $(TAGLIB_CFLAGS) \
                      $(LIBEXTRACTOR_CFLAGS) \
                      $(ICONV_CXXFLAGS) \
@@ -22,7 +22,8 @@ libmediatomb_a_CXXFLAGS = \
                      $(ZLIB_CFLAGS) \
                      $(PTHREAD_CFLAGS) \
                      $(INOTIFY_CFLAGS) \
-                     $(FFMPEG_CFLAGS) \
+                     $(AVFORMAT_CFLAGS) \
+                     $(AVUTIL_CFLAGS) \
                      $(FFMPEGTHUMBNAILER_CFLAGS) \
                      $(CURL_CFLAGS) \
                      $(EXPAT_CFLAGS) \
@@ -38,7 +39,7 @@ mediatomb_CXXFLAGS = -I$(top_srcdir)/src \
                      -I$(top_srcdir) \
                      $(SQLITE3_CFLAGS) \
                      $(MYSQL_CFLAGS) \
-                     $(JS_CXXFLAGS) \
+                     $(LIBJS_CFLAGS) \
                      $(TAGLIB_CFLAGS) \
                      $(LIBEXTRACTOR_CFLAGS) \
                      $(ICONV_CXXFLAGS) \
@@ -48,7 +49,8 @@ mediatomb_CXXFLAGS = -I$(top_srcdir)/src \
                      $(ZLIB_CFLAGS) \
                      $(PTHREAD_CFLAGS) \
                      $(INOTIFY_CFLAGS) \
-                     $(FFMPEG_CFLAGS) \
+                     $(AVFORMAT_CFLAGS) \
+                     $(AVUTIL_CFLAGS) \
                      $(FFMPEGTHUMBNAILER_CFLAGS) \
                      $(CURL_CFLAGS) \
                      $(EXPAT_CFLAGS) \
@@ -67,7 +69,8 @@ mediatomb_LDADD = \
 	$(LIBMAGIC_LDFLAGS) \
     $(PTHREAD_LDFLAGS) \
     $(LIBEXTRACTOR_LDFLAGS) \
-    $(FFMPEG_LDFLAGS) \
+    $(AVFORMAT_LDFLAGS) \
+    $(AVUTIL_LDFLAGS) \
     $(FFMPEGTHUMBNAILER_LDFLAGS) \
     $(LASTFMLIB_LDFLAGS) \
     $(ICONV_LIBS) \
@@ -75,7 +78,7 @@ mediatomb_LDADD = \
     $(MYSQL_LIBS) \
     $(TAGLIB_LIBS) \
     $(LIBEXTRACTOR_LIBS) \
-    $(JS_LIBS) \
+    $(LIBJS_LIBS) \
 	$(LIBMAGIC_LIBS) \
     $(ID3LIB_LIBS) \
     $(LIBEXIF_LIBS) \
@@ -83,7 +86,8 @@ mediatomb_LDADD = \
     $(RT_LIBS) \
     $(PTHREAD_CFLAGS) \
     $(PTHREAD_LIBS) \
-    $(FFMPEG_LIBS) \
+    $(AVFORMAT_LIBS) \
+    $(AVUTIL_LIBS) \
     $(FFMPEGTHUMBNAILER_LIBS) \
     $(EXPAT_LIBS) \
     $(LIBMP4V2_LIBS) \

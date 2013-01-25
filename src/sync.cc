@@ -45,19 +45,17 @@ Mutex::Mutex(bool recursive) : Object()
     this->recursive = recursive;
     lock_level = 0;
     
-    int res;
     pthread_mutexattr_t mutex_attr;
-    res = pthread_mutexattr_init(&mutex_attr);
-    res = pthread_mutexattr_settype(&mutex_attr, (recursive ? PTHREAD_MUTEX_RECURSIVE : PTHREAD_MUTEX_ERRORCHECK));
+    pthread_mutexattr_init(&mutex_attr);
+    pthread_mutexattr_settype(&mutex_attr, (recursive ? PTHREAD_MUTEX_RECURSIVE : PTHREAD_MUTEX_ERRORCHECK));
     pthread_mutex_init(&mutex_struct, &mutex_attr);
     pthread_mutexattr_destroy(&mutex_attr);
 #else
     if (recursive)
     {
-        int res;
         pthread_mutexattr_t mutex_attr;
-        res = pthread_mutexattr_init(&mutex_attr);
-        res = pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_RECURSIVE);
+        pthread_mutexattr_init(&mutex_attr);
+        pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_RECURSIVE);
         pthread_mutex_init(&mutex_struct, &mutex_attr);
         pthread_mutexattr_destroy(&mutex_attr);
     }

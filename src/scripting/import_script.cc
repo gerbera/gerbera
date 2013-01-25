@@ -53,8 +53,7 @@ ImportScript::ImportScript(Ref<Runtime> runtime) : Script(runtime)
     try 
     {
         load(scriptPath);
-        root = JS_NewScriptObject(cx, script);
-        JS_AddNamedRoot(cx, &root, "ImportScript");
+        JS_AddNamedObjectRoot(cx, &script, "ImportScript");
     }
     catch (Exception ex)
     {
@@ -70,7 +69,7 @@ ImportScript::ImportScript(Ref<Runtime> runtime) : Script(runtime)
 #endif
 }
 
-void ImportScript::processCdsObject(Ref<CdsObject> obj, String rootpath)
+void ImportScript::processCdsObject(Ref<CdsObject> obj, String scriptpath)
 {
 #ifdef JS_THREADSAFE
     JS_SetContextThread(cx);
@@ -82,7 +81,7 @@ void ImportScript::processCdsObject(Ref<CdsObject> obj, String rootpath)
         JSObject *orig = JS_NewObject(cx, NULL, NULL, glob);
         setObjectProperty(glob, _("orig"), orig);
         cdsObject2jsObject(obj, orig);
-        setProperty(glob, _("object_root_path"), rootpath);
+        setProperty(glob, _("object_script_path"), scriptpath);
         execute();
     }
     catch (Exception ex)
@@ -116,8 +115,8 @@ ImportScript::~ImportScript()
     JS_BeginRequest(cx);
 #endif
     
-    if (root)
-        JS_RemoveRoot(cx, &root);
+    if (script)
+        JS_RemoveObjectRoot(cx, &script);
 
 #ifdef JS_THREADSAFE
     JS_EndRequest(cx);

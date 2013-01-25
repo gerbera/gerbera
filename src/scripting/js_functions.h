@@ -33,25 +33,23 @@
 #ifndef __SCRIPTING_JS_FUNCTIONS_H__
 #define __SCRIPTING_JS_FUNCTIONS_H__
 
-#define XP_UNIX 1
-
 #include <jsapi.h>
 
 extern "C" {
 
 /// \brief Log output.
-JSBool js_print(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval);
+JSBool js_print(JSContext *cx, uintN argc, jsval *argv);
 
 /// \brief Adds an object to the database.
-JSBool js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval);
+JSBool js_addCdsObject(JSContext *cx, uintN argc, jsval *argv);
 
 /// \brief Makes a copy of an CDS object.
-JSBool js_copyObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval);
+JSBool js_copyObject(JSContext *cx, uintN argc, jsval *argv);
 
-JSBool js_f2i(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval);
-JSBool js_m2i(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval);
-JSBool js_p2i(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval);
-JSBool js_j2i(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval);
+JSBool js_f2i(JSContext *cx, uintN argc, jsval *argv);
+JSBool js_m2i(JSContext *cx, uintN argc, jsval *argv);
+JSBool js_p2i(JSContext *cx, uintN argc, jsval *argv);
+JSBool js_j2i(JSContext *cx, uintN argc, jsval *argv);
 
 } // extern "C"
 

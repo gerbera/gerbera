@@ -214,7 +214,6 @@ config_description_doc( INOUT IXML_Document * doc,
                         IN const char *ip_str,
                         OUT char **root_path_str )
 {
-    xboolean addNew = FALSE;
     IXML_NodeList *baseList;
     IXML_Element *element = NULL;
     IXML_Element *newElement = NULL;
@@ -237,7 +236,6 @@ config_description_doc( INOUT IXML_Document * doc,
     baseList = ixmlDocument_getElementsByTagName( doc, urlBaseStr );
     if( baseList == NULL ) {
         // urlbase not found -- create new one
-        addNew = TRUE;
         element = ixmlDocument_createElement( doc, urlBaseStr );
         if( element == NULL ) {
             goto error_handler;

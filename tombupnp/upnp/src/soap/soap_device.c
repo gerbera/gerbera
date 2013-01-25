@@ -756,11 +756,11 @@ send_action_response( IN SOCKINFO * info,
                                  xml_response, strlen( xml_response ),
                                  end_body, strlen( end_body ) );
 
-    DBGONLY( if( ret_code != 0 ) {
-             UpnpPrintf( UPNP_INFO, SOAP, __FILE__, __LINE__,
+    if( ret_code != 0 ) {
+        DBGONLY( UpnpPrintf( UPNP_INFO, SOAP, __FILE__, __LINE__,
                          "Failed to send response: err code = %d\n",
-                         ret_code );}
-     )
+                         ret_code );)
+    }
 
         err_code = 0;
 

@@ -53,6 +53,7 @@ Runtime::~Runtime()
     if (rt)
         JS_DestroyRuntime(rt);
     rt = NULL;
+    JS_ShutDown();
 }
 
 #endif // HAVE_JS

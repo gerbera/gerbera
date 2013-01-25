@@ -46,9 +46,9 @@ using namespace zmm;
 extern "C" {
 
 static JSBool
-js_readln(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
+js_readln(JSContext *cx, uintN argc, jsval *vp)
 {
-    PlaylistParserScript *self = (PlaylistParserScript *)JS_GetPrivate(cx, obj);
+    PlaylistParserScript *self = (PlaylistParserScript *)JS_GetContextPrivate(cx);
 
     String line;
     
@@ -69,7 +69,7 @@ js_readln(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
 
     JSString *jsline = JS_NewStringCopyZ(cx, line.c_str());
 
-    *rval = STRING_TO_JSVAL(jsline);
+    JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(jsline));
   
     return JS_TRUE;
 }
@@ -93,8 +93,7 @@ PlaylistParserScript::PlaylistParserScript(Ref<Runtime> runtime) : Script(runtim
 
         String scriptPath = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT); 
         load(scriptPath);
-        root = JS_NewScriptObject(cx, script);
-        JS_AddNamedRoot(cx, &root, "PlaylistScript");
+        JS_AddNamedObjectRoot(cx, &script, "PlaylistScript");
     }
     catch (Exception ex)
     {
@@ -244,8 +243,8 @@ PlaylistParserScript::~PlaylistParserScript()
     JS_BeginRequest(cx);
 #endif
 
-    if (root)
-        JS_RemoveRoot(cx, &root);
+    if (script)
+        JS_RemoveObjectRoot(cx, &script);
 
 #ifdef JS_THREADSAFE
     JS_EndRequest(cx);

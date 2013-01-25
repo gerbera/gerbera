@@ -245,7 +245,7 @@ AC_DEFUN([MT_SET_SEARCHPATH],
     esac
 
     AC_ARG_WITH(search,
-        AC_HELP_STRING([--with-search=DIR], [Additionally search for packages in DIR]),
+        AC_HELP_STRING([--with-search=DIR], [additionally search for packages in DIR]),
         [
             MT_SEARCHPATH=$withval
             AC_MSG_NOTICE([Will also search for packages in ${MT_SEARCHPATH}])
@@ -267,6 +267,7 @@ AC_DEFUN([MT_SET_SEARCHPATH],
 # $2 library name
 # $3 function name
 # $4 "pass" if requested option failed
+# $5 other libraries
 # 
 # returns:
 #   mt_$1_library_status
@@ -275,8 +276,8 @@ AC_DEFUN([MT_SET_SEARCHPATH],
 
 AC_DEFUN([MT_CHECK_LIBRARY_INTERNAL],
 [
-    mt_$1_arg_default=yes
-    mt_$1_library_status=yes
+    mt_[]translit($1, `/.-', `___')_arg_default=yes
+    mt_[]translit($1, `/.-', `___')_library_status=yes
 
     LIBS_SAVE=$LIBS
     LDFLAGS_SAVE=$LDFLAGS
@@ -287,53 +288,62 @@ AC_DEFUN([MT_CHECK_LIBRARY_INTERNAL],
     AC_ARG_WITH($1-libs,
         AC_HELP_STRING([--with-$1-libs=DIR], [search for $1 libraries in DIR]),
         [
-            mt_$1_search_libs="$withval"
+            mt_[]translit($1, `/.-', `___')_search_libs="$withval"
             AC_MSG_NOTICE([Will search for $1 libs in $withval])
         ]
     )
 
-    if test "$mt_$1_search_libs" ; then
-        unset ac_cv_lib_$2_$3
-        LDFLAGS="$LDFLAGS -L$mt_$1_search_libs"
+    if test "$mt_[]translit($1, `/.-', `___')_search_libs" ; then
+        unset ac_cv_lib_[]translit($2, `/.-', `___')_$3
+        LDFLAGS="$LDFLAGS -L$mt_[]translit($1, `/.-', `___')_search_libs"
         AC_CHECK_LIB($2, $3,
             [
-                mt_$1_libs="-l$2"
-                mt_$1_ldflags="-L$mt_$1_search_libs"
+                mt_[]translit($1, `/.-', `___')_libs="-l$2 $5"
+                mt_[]translit($1, `/.-', `___')_ldflags="-L$mt_[]translit($1, `/.-', `___')_search_libs"
             ],
             [
-                mt_$1_library_status=missing
+                mt_[]translit($1, `/.-', `___')_library_status=missing
                 if test "$4" = "pass"; then
                     AC_MSG_NOTICE([$1 library not found in requested location $mt_$1_search_libs])
                 else
-                    AC_MSG_ERROR([$1 library not found in requested location $mt_$1_search_libs])
+                AC_MSG_ERROR([$1 library not found in requested location $mt_$1_search_libs])
                 fi
+            ],
+            [
+                $5
             ]
         )
     else
-        unset ac_cv_lib_$2_$3
+        unset ac_cv_lib_[]translit($2, `/.-', `___')_$3
         AC_CHECK_LIB($2, $3,
             [
-                mt_$1_libs="-l$2"
+                mt_[]translit($1, `/.-', `___')_libs="-l$2 $5"
             ],
             [
                 LDFLAGS="$LDFLAGS -L$MT_SEARCHPATH_LIBS"
-                unset ac_cv_lib_$2_$3
+                unset ac_cv_lib_[]translit($2, `/.-', `___')_$3
                 AC_CHECK_LIB($2, $3,
                     [
-                        mt_$1_libs="-l$2"
-                        mt_$1_ldflags="-L$MT_SEARCHPATH_LIBS" 
+                        mt_[]translit($1, `/.-', `___')_libs="-l$2 $5"
+                        mt_[]translit($1, `/.-', `___')_ldflags="-L$MT_SEARCHPATH_LIBS" 
                     ],
                     [
-                        mt_$1_library_status=missing
+                        mt_[]translit($1, `/.-', `___')_library_status=missing
+                    ],
+                    [
+                        $5
                     ]
                 )
+            ],
+            [
+                $5
             ]
         )
     fi
 
-    if test "x$mt_$1_library_status" != xyes; then
-        mt_$1_libs=""
-        mt_$1_ldflags=""
+    if test "x$mt_[]translit($1, `/.-', `___')_library_status" != xyes; then
+        mt_[]translit($1, `/.-', `___')_libs=""
+        mt_[]translit($1, `/.-', `___')_ldflags=""
     fi
 
     LIBS=$LIBS_SAVE
@@ -359,27 +369,27 @@ AC_DEFUN([MT_CHECK_HEADER_INTERNAL],
     CXXFLAGS_SAVE=$CXXFLAGS
     CPPFLAGS_SAVE=$CPPFLAGS
 
-    mt_$1_header_status=yes
+    mt_[]translit($1, `/.-', `___')_header_status=yes
 
     AC_ARG_WITH($1-h,
         AC_HELP_STRING([--with-$1-h=DIR], [search for $1 headers in DIR]),
         [
-            mt_$1_search_headers="$withval"
+            mt_[]translit($1, `/.-', `___')_search_headers="$withval"
             AC_MSG_NOTICE([Will search for $1 headers in $withval])
         ]
     )
 
-    if test "$mt_$1_search_headers" ; then
+    if test "$mt_[]translit($1, `/.-', `___')_search_headers" ; then
         unset translit(ac_cv_header_$2_h, `/.-', `___')
-        CFLAGS="$CFLAGS -I${mt_$1_search_headers}"
-        CXXFLAGS="$CXXFLAGS -I${mt_$1_search_headers}"
-        CPPFLAGS="$CPPFLAGS -I${mt_$1_search_headers}"
-        AC_CHECK_HEADER($mt_$1_search_headers/$2.h,
+        CFLAGS="$CFLAGS -I${mt_[]translit($1, `/.-', `___')_search_headers}"
+        CXXFLAGS="$CXXFLAGS -I${mt_[]translit($1, `/.-', `___')_search_headers}"
+        CPPFLAGS="$CPPFLAGS -I${mt_[]translit($1, `/.-', `___')_search_headers}"
+        AC_CHECK_HEADER($mt_[]translit($1, `/.-', `___')_search_headers/$2.h,
             [
-                mt_$1_cxxflags="-I${mt_$1_search_headers}"
+                mt_[]translit($1, `/.-', `___')_cxxflags="-I${mt_[]translit($1, `/.-', `___')_search_headers}"
             ],
             [
-                mt_$1_header_status=missing
+                mt_[]translit($1, `/.-', `___')_header_status=missing
                 if test "$3" = "pass"; then
                     AC_MSG_NOTICE([$1 headers not found in requested location $mt_$1_search_headers])
                 else
@@ -398,18 +408,18 @@ AC_DEFUN([MT_CHECK_HEADER_INTERNAL],
                 unset translit(ac_cv_header_$2_h, `/.-', `___')
                 AC_CHECK_HEADER($MT_SEARCHPATH_HEADERS/$2.h,
                     [
-                        mt_$1_cxxflags="-I${MT_SEARCHPATH_HEADERS}"
+                        mt_[]translit($1, `/.-', `___')_cxxflags="-I${MT_SEARCHPATH_HEADERS}"
                     ],
                     [
-                        mt_$1_header_status=missing
+                        mt_[]translit($1, `/.-', `___')_header_status=missing
                     ]
                 )
             ]
         )
     fi
 
-    if test "x$mt_$1_header_status" != xyes; then
-        mt_$1_cxxflags=""
+    if test "x$mt_[]translit($1, `/.-', `___')_header_status" != xyes; then
+        mt_[]translit($1, `/.-', `___')_cxxflags=""
     fi
 
     LIBS=$LIBS_SAVE
@@ -424,7 +434,8 @@ AC_DEFUN([MT_CHECK_HEADER_INTERNAL],
 # $2 header name (without .h extension)
 # $3 library name
 # $4 function name
-# $5 "pass" if requestd options failed
+# $5 "pass" if requested options failed
+# $6 additional LDFLAGS
 #
 # returns:
 #   mt_$1_package_status
@@ -435,17 +446,17 @@ AC_DEFUN([MT_CHECK_HEADER_INTERNAL],
 AC_DEFUN([MT_CHECK_PACKAGE_INTERNAL],
 [
     MT_CHECK_HEADER_INTERNAL([$1], [$2], [$5])
-    mt_$1_package_status=${mt_$1_header_status}
+    mt_[]translit($1, `/.-', `___')_package_status=${mt_[]translit($1, `/.-', `___')_header_status}
   
-    if test "x$mt_$1_package_status" = xyes; then 
-        MT_CHECK_LIBRARY_INTERNAL([$1], [$3], [$4], [$5])
-        mt_$1_package_status=${mt_$1_library_status}
+    if test "x$mt_[]translit($1, `/.-', `___')_package_status" = xyes; then 
+        MT_CHECK_LIBRARY_INTERNAL([$1], [$3], [$4], [$5], [$6])
+        mt_[]translit($1, `/.-', `___')_package_status=${mt_[]translit($1, `/.-', `___')_library_status}
     fi
     
-    if test "x$mt_$1_package_status" = xyes; then
-        translit($1, `a-z/.-', `A-Z___')_CFLAGS=${mt_$1_cxxflags}
-        translit($1, `a-z/.-', `A-Z___')_LIBS=${mt_$1_libs}
-        translit($1, `a-z/.-', `A-Z___')_LDFLAGS=${mt_$1_ldflags}
+    if test "x$mt_[]translit($1, `/.-', `___')_package_status" = xyes; then
+        translit($1, `a-z/.-', `A-Z___')_CFLAGS=${mt_[]translit($1, `/.-', `___')_cxxflags}
+        translit($1, `a-z/.-', `A-Z___')_LIBS=${mt_[]translit($1, `/.-', `___')_libs}
+        translit($1, `a-z/.-', `A-Z___')_LDFLAGS=${mt_[]translit($1, `/.-', `___')_ldflags}
     fi 
 ])
 
@@ -494,6 +505,7 @@ AC_DEFUN([MT_OPTION],
 # $5 library name
 # $6 function name
 # $7 "pass" on requested options
+# $8 additional LDFLAGS
 # returns substed:
 #   $1_STATUS
 #   $1_LDFLAGS
@@ -502,28 +514,28 @@ AC_DEFUN([MT_OPTION],
 
 AC_DEFUN([MT_CHECK_OPTIONAL_PACKAGE], 
 [
-    mt_$1_status=yes
+    mt_[]translit($1, `/.-', `___')_status=yes
 
     MT_OPTION([$1], [$2], [$3],[],[])
 
     if test "x${translit($1, `a-z/.-', `A-Z___')_OPTION_ENABLED}" = xyes; then
-        MT_CHECK_PACKAGE_INTERNAL([$1], [$4], [$5], [$6], [$7])
-        mt_$1_status=${mt_$1_package_status}
+        MT_CHECK_PACKAGE_INTERNAL([$1], [$4], [$5], [$6], [$7], [$8])
+        mt_[]translit($1, `/.-', `___')_status=${mt_[]translit($1, `/.-', `___')_package_status}
     else
-        mt_$1_status=disabled
+        mt_[]translit($1, `/.-', `___')_status=disabled
     fi
     
     if ((test "x${translit($1, `a-z/.-', `A-Z___')_OPTION_ENABLED}" = xyes) &&
         (test "x${translit($1, `a-z/.-', `A-Z___')_OPTION_REQUESTED}" = xyes) &&
-        (test "x$mt_$1_status" != xyes) && (test "$7" != "pass")); then
+        (test "x$mt_[]translit($1, `/.-', `___')_status" != xyes) && (test "$7" != "pass")); then
         AC_MSG_ERROR([unable to configure $1 support])
     fi
 
-    if test "x$mt_$1_status" = xyes; then
+    if test "x$mt_[]translit($1, `/.-', `___')_status" = xyes; then
         AC_DEFINE(translit(HAVE_$1, `a-z/.-', `A-Z___'), [1], [$1 library presence])
     fi
     
-    translit($1, `a-z/.-', `A-Z___')_STATUS=${mt_$1_status}
+    translit($1, `a-z/.-', `A-Z___')_STATUS=${mt_[]translit($1, `/.-', `___')_status}
 
     AC_SUBST(translit($1, `a-z/.-', `A-Z___')_LIBS)
     AC_SUBST(translit($1, `a-z/.-', `A-Z___')_LDFLAGS)
@@ -535,6 +547,7 @@ AC_DEFUN([MT_CHECK_OPTIONAL_PACKAGE],
 # $2 header name (without .h)
 # $3 library name
 # $4 function name
+# $5 additional ldflags
 #
 # returns substed:
 #   $1_STATUS
@@ -545,14 +558,14 @@ AC_DEFUN([MT_CHECK_OPTIONAL_PACKAGE],
 
 AC_DEFUN([MT_CHECK_REQUIRED_PACKAGE],
 [
-    MT_CHECK_PACKAGE_INTERNAL($1, $2, $3, $4)
-    if test "x$mt_$1_package_status" != xyes; then
+    MT_CHECK_PACKAGE_INTERNAL([$1], [$2], [$3], [$4], [], [$5])
+    if test "x$mt_[]translit($1, `/.-', `___')_package_status" != xyes; then
         AC_MSG_ERROR([unable to configure required package $1])
     fi
 
     AC_DEFINE(translit(HAVE_$1, `a-z/.-', `A-Z___'), [1], [$1 library presence])
     
-    translit($1, `a-z/.-', `A-Z___')_STATUS=${mt_$1_package_status}
+    translit($1, `a-z/.-', `A-Z___')_STATUS=${mt_[]translit($1, `/.-', `___')_package_status}
 
     AC_SUBST(translit($1, `a-z/.-', `A-Z___')_CFLAGS)
     AC_SUBST(translit($1, `a-z/.-', `A-Z___')_LIBS)
@@ -819,6 +832,7 @@ AC_DEFUN([MT_CHECK_PACKAGE_CFG],
 # $2 headers
 # $3 library name
 # $4 function name
+# $5 additional LDFLAGS
 #
 #  returns substed:
 #    $mt_$1_package_status
@@ -829,18 +843,18 @@ AC_DEFUN([MT_CHECK_PACKAGE_CFG],
 
 AC_DEFUN([MT_CHECK_PACKAGE],
 [
-    mt_$1_status=yes
+    mt_[]translit($1, `/.-', `___')_status=yes
 
-    if test "x$mt_$1_status" = xyes; then
-        MT_CHECK_PACKAGE_INTERNAL($1, $2, $3, $4)
-        mt_$1_status=${mt_$1_package_status}
+    if test "x$mt_[]translit($1, `/.-', `___')_status" = xyes; then
+        MT_CHECK_PACKAGE_INTERNAL([$1], [$2], [$3], [$4], [], [$5])
+        mt_[]translit($1, `/.-', `___')_status=${mt_[]translit($1, `/.-', `___')_package_status}
     fi
 
-    if test "x$mt_$1_status" = xyes; then
+    if test "x$mt_[]translit($1, `/.-', `___')_status" = xyes; then
         AC_DEFINE(translit(HAVE_$1, `a-z/.-', `A-Z___'), [1], [$1 library presence])
     fi
 
-    translit($1, `a-z/.-', `A-Z___')_STATUS=${mt_$1_status}
+    translit($1, `a-z/.-', `A-Z___')_STATUS=${mt_[]translit($1, `/.-', `___')_status}
 
     AC_SUBST(translit($1, `a-z/.-', `A-Z___')_CFLAGS)
     AC_SUBST(translit($1, `a-z/.-', `A-Z___')_LIBS)
