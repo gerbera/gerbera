@@ -28,12 +28,13 @@
 #
 #*MT*
 
-AC_PREREQ(2.61)
-AC_INIT([MediaTomb], [0.12.1], [jin@mediatomb.cc])
+AC_PREREQ(2.65)
+AC_INIT([MediaTomb], [0.12.2], [jin@mediatomb.cc])
 AM_CONFIG_HEADER([autoconfig.h tombupnp/upnp/inc/upnpconfig.h])
 AC_CONFIG_AUX_DIR(configure_aux)
 AC_CONFIG_SRCDIR([src/common.h])
-AM_INIT_AUTOMAKE([1.9 -Wall])
+AM_INIT_AUTOMAKE([1.10 -Wall])
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 if test "x${prefix}" = "xNONE"; then
     prefix="${ac_default_prefix}"
@@ -71,33 +72,20 @@ esac
 
 MT_SET_SEARCHPATH
 
-#AC_ARG_WITH(search, 
-#        AC_HELP_STRING([--with-search=DIR], [Additionally search for packages in DIR]),
-#        [
-#            SEARCH_DIR=$withval
-#            AC_MSG_NOTICE([Will also search for packages in $SEARCH_DIR])
-#        ]
-#)
-
 SEARCH_DIR_HEADERS="$SEARCH_DIR/include"
 SEARCH_DIR_LIBS="$SEARCH_DIR/lib"
 SEARCH_DIR_PROGS="$SEARCH_DIR/bin"
-    
-# per package header and library search paths
 
-AC_ARG_WITH(js-h,
-        AC_HELP_STRING([--with-js-h=DIR], [search for js (spidermonkey) headers in DIR]),
-        [
-            JS_SEARCH_HEADERS="$withval"
-        ]
-)
+PKG_PROG_PKG_CONFIG
 
-AC_ARG_WITH(js-libs,
-        AC_HELP_STRING([--with-js-libs=DIR], [search for js (spidermonkey) libraries in DIR]),
-        [
-            JS_SEARCH_LIBS="$withval"
-        ]
-)
+AC_ARG_WITH(js-pkgconfig,
+    AC_HELP_STRING([--with-js-pkgconfig=DIR], [search for libjs.pc or mozjs185.c in DIR]),
+    [
+        if test "x$withval" != "x"; then
+            AC_MSG_NOTICE([Will also search for packages in $withval])
+            export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$withval
+        fi
+    ])
 
 AC_ARG_WITH(iconv-h,
         AC_HELP_STRING([--with-iconv-h=DIR], [search for iconv headers in DIR]),
@@ -134,7 +122,6 @@ MT_OPTION([debug-malloc0], [enable],
                       [debug: abort on malloc/realloc of zero bytes])
           ],
           [])
-
 
 MT_OPTION([pthread-lib], [enable],
           [if this option is set we will try to link with -lpthread, else the flag for pthread will be autodetected], [], [])
@@ -211,7 +198,7 @@ fi
 if test $ATOMIC_X86_SMP -eq 1; then
     AC_DEFINE([ATOMIC_X86_SMP], [1], [use x86 assembler code for atomic arithmetic operations - default for SMP and UP systems])
 elif test $ATOMIC_X86 -eq 1; then
-    AC_DEFINE([ATOMIC_X86], [1], [use x86 assembler code for atomic arithmetic operations that will only work oni singleprocessor systems - compiled binary will be buggy on SMP])
+    AC_DEFINE([ATOMIC_X86], [1], [use x86 assembler code for atomic arithmetic operations that will only work on singleprocessor systems - compiled binary will be buggy on SMP])
     AC_MSG_WARN(You specified to use atomic arithmetics code for x86 single processor systems! The resulting binary must not be used on SMP machines!)
 fi
 
@@ -267,23 +254,9 @@ MT_OPTION([protocolinfo-extension], [disable],
             AC_DEFINE([EXTEND_PROTOCOLINFO], [1], [This is required for Playstation 3 support, it adds certain tags to the protocolInfo attribute])
           ],[])
 
-USE_CURL=1
-CURL_REQUESTED=0
-AC_ARG_ENABLE([curl],
-              [
-AC_HELP_STRING([--enable-curl],
-[Enable curl support (required for YouTube support, provides additional functionality for the external transcoding feature (default: auto)])
-              ],
-              [
-                if test "x$enableval" = xno; then
-                    USE_CURL=0
-                    CURL_REQUESTED=1
-                else
-                    CURL_REQUESTED=1
-                    USE_CURL=1
-                fi 
-              ]
-)
+MT_OPTION([curl], [disable],
+          [Enable curl, required for YouTube support, provides additional functionality for the external transcoding feature],
+          [],[])
 
 AC_ARG_WITH([curl-cfg],
             [
@@ -300,20 +273,22 @@ MT_OPTION([fseeko-check], [disable],
           [This is a workaround for a bug on some Debian distros, use this if configure fails complaining about off_t],
           [],[])
 
-###############################################################################
-# The following block is derived from the configure.ac script from the 
-# libupnp-1.3.1 package
-# (C) Copyright 2005-2006 Remi Turboult <r3mi@users.sourceforge.net>
-upnpmaj=0
-upnpmin=4
-upnppatch=1
-AC_DEFINE_UNQUOTED([UPNP_VERSION_STRING], "$PACKAGE_VERSION",
-    [see upnpconfig.h])
-AC_DEFINE_UNQUOTED([UPNP_VERSION_MAJOR], $upnpmaj, [see upnpconfig.h])
-AC_DEFINE_UNQUOTED([UPNP_VERSION_MINOR], $upnpmin, [see upnpconfig.h])
-AC_DEFINE_UNQUOTED([UPNP_VERSION_PATCH], $upnppatch, [see upnpconfig.h])
-###############################################################################
- 
+MT_OPTION([lastfm], [disable],
+          [Enable lastfmlib support],[],[])
+
+dnl some libupnp / tombupnp definitions
+UPNP_V_MAJOR=0
+UPNP_V_MINOR=4
+UPNP_V_PATCH=1
+AC_DEFINE_UNQUOTED([UPNP_VERSION_STRING],"$PACKAGE_VERSION", [see upnpconfig.h])
+AC_DEFINE_UNQUOTED([UPNP_VERSION_MAJOR], $UPNP_V_MAJOR, [see upnpconfig.h])
+AC_DEFINE_UNQUOTED([UPNP_VERSION_MINOR], $UPNP_V_MINOR, [see upnpconfig.h])
+AC_DEFINE_UNQUOTED([UPNP_VERSION_PATCH], $UPNP_V_PATCH, [see upnpconfig.h])
+dnl this is not optional, we need the device and the internal webserver
+AC_DEFINE([UPNP_HAVE_DEVICE], [1], [Compile device API])
+AC_DEFINE([UPNP_HAVE_WEBSERVER], [1], [Compile internal web server])    
+
+
 AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_RANLIB
@@ -326,6 +301,28 @@ AC_HEADER_TIME
 AC_HEADER_STAT
 AC_LANG_C
 AM_PROG_CC_C_O
+AM_PROG_AR
+
+AC_CHECK_SIZEOF(off_t, 4)
+AC_CHECK_SIZEOF(size_t, 4)
+AC_CHECK_SIZEOF(time_t, 4)
+AC_CHECK_SIZEOF(unsigned int)
+AC_CHECK_SIZEOF(unsigned long)
+AC_CHECK_FUNCS(strtoll nl_langinfo setlocale,[],[])
+AC_CHECK_FUNCS(backtrace backtrace_symbols,[],[])
+AC_C_CONST
+AC_C_INLINE
+AC_C_VOLATILE
+AC_SYS_LARGEFILE
+AC_TYPE_OFF_T
+AC_TYPE_SIGNAL
+AC_TYPE_PID_T
+AC_TYPE_UINT32_T
+AC_TYPE_INT64_T
+AC_TYPE_SIZE_T
+AC_TYPE_SSIZE_T
+AC_STRUCT_TM
+AC_C_BIGENDIAN
 
 AC_CHECK_HEADERS([time.h syslog.h stddef.h unistd.h arpa/inet.h fcntl.h], [],
                  [AC_MSG_ERROR(required header not found)]) 
@@ -360,8 +357,6 @@ AC_CHECK_HEADERS([getopt.h],
         ])
 
 AC_CACHE_SAVE
-
-
 
 CPPFLAGS_SAVE="$CPPFLAGS"
 CFLAGS_SAVE="$CFLAGS"
@@ -471,23 +466,7 @@ else
                 ICONV_LIBS="$LDFLAGS"
             ],
             [
-        
-                LDFLAGS="$LDFLAGS -liconv"
-                AC_CHECK_LIB(iconv, iconv, 
-                    [
-                        ICONV_LIBS="$LDFLAGS"
-                        LIBICONV=1
-                    ], 
-                    [
-                        AC_CHECK_LIB(iconv, libiconv,
-                            [
-                                ICONV_LIBS="$LDFLAGS"
-                                LIBICONV=1
-                            ],
-                            [AC_MSG_ERROR(required library iconv not found on your system)]
-                        )
-                    ]
-                )
+                AC_MSG_ERROR(You specified to use libiconv but the library was not found)
             ]
         )
     else
@@ -536,7 +515,6 @@ AC_COMPILE_IFELSE(
          AC_MSG_RESULT([yes])
      ])
 
-
 CFLAGS="$CFLAGS_SAVE"
 CXXFLAGS="$CXXFLAGS_SAVE"
 LDFLAGS="$LDFLAGS_SAVE"
@@ -546,11 +524,6 @@ AC_CHECK_HEADERS(execinfo.h,[],[])
 AC_CHECK_TYPES([time_t], [], [], [#include <sys/types.h>])
 
 AC_CACHE_SAVE
-
-AC_SYS_LARGEFILE
-AC_TYPE_OFF_T
-AC_TYPE_SIZE_T
-#AC_CHECK_TYPES([ssize_t], [], [], [#include <sys/types.h>])
 
 if test "x$FSEEKO_CHECK_OPTION_ENABLED" = xyes; then
     AC_FUNC_FSEEKO
@@ -563,26 +536,6 @@ if test "x$FSEEKO_CHECK_OPTION_ENABLED" = xyes; then
 else
     AC_MSG_WARN([Skipping fseeko test! (requested by user)])
 fi
-
-AC_CHECK_SIZEOF(off_t, 4)
-AC_CHECK_SIZEOF(size_t, 4)
-AC_CHECK_SIZEOF(time_t, 4)
-AC_CHECK_SIZEOF(unsigned int)
-AC_CHECK_SIZEOF(unsigned long)
-AC_CHECK_FUNCS(strtoll nl_langinfo setlocale,[],[])
-AC_CHECK_FUNCS(backtrace backtrace_symbols,[],[])
-# Checks for typedefs, structures, and compiler characteristics.
-AC_C_CONST
-AC_C_INLINE
-AC_C_VOLATILE
-AC_TYPE_SIGNAL
-AC_TYPE_PID_T
-AC_TYPE_SIZE_T
-AC_TYPE_INT64_T
-AC_TYPE_SSIZE_T
-AC_TYPE_UINT32_T
-AC_STRUCT_TM
-AC_C_BIGENDIAN
 
 dnl This needs improvement!
 AC_CHECK_DECL(LONG_MAX,
@@ -740,12 +693,6 @@ AC_CHECK_FUNCS([if_freenameindex],[],
             )
         ]
 )
-
-
-# this is not optional, we need the device and the internal webserver
-AC_DEFINE([UPNP_HAVE_DEVICE], [1], [Compile device API])
-AC_DEFINE([UPNP_HAVE_WEBSERVER], [1], [Compile internal web server])    
-
     
 ADD_PTHREAD_CFLAGS=
 
@@ -784,12 +731,17 @@ fi
 
 ############ zlib
 
-MT_CHECK_OPTIONAL_PACKAGE([zlib], [disable],
-                 [zlib support required for automated database creation],
-                 [zlib], [z], [uncompress])
-    
+ZLIB_STATUS="no"
+PKG_CHECK_MODULES([ZLIB], [zlib],
+    [
+        AC_DEFINE([HAVE_ZLIB], [1], [zlib is available])
+        ZLIB_STATUS="yes"
+    ],
+    [
+        AC_MSG_WARN([$ZLIB_PKG_ERRORS])
+    ])
 
-if test "x$ZLIB_STATUS" = xyes; then
+if test "x$ZLIB_STATUS" = "xyes"; then
     if test "x$DB_AUTOCREATE_OPTION_ENABLED" = xyes; then
         AC_DEFINE([AUTO_CREATE_DATABASE], [1], [create database automatically if it does not exist])
     fi
@@ -812,11 +764,18 @@ if test "x$RT_STATUS" = xyes; then
     LDFLAGS="$LDFLAGS $RT_LDFLAGS $RT_LIBS"
 fi
 
-MT_CHECK_OPTIONAL_PACKAGE([sqlite3], [disable], [sqlite3 database supprot],
-                          [sqlite3], [sqlite3], [sqlite3_open])
+SQLITE3_STATUS="no"
+PKG_CHECK_MODULES([SQLITE3], [sqlite3],
+    [
+        AC_DEFINE([HAVE_SQLITE3], [1], [sqlite is available])
+        SQLITE3_STATUS="yes"
+    ],
+    [
+        AC_MSG_WARN([$SQLITE3_PKG_ERRORS])
+    ])
 
-if test "x$SQLITE3_STATUS" = xyes; then
-    if test "x$RT_STATUS" = xyes; then
+if test "x$SQLITE3_STATUS" = "xyes"; then
+    if test "x$RT_STATUS" = "xyes"; then
         SQLITE_LDFLAGS="$SQLITE_LDFLAGS $RT_LDFLAGS"
         SQLITE_LIBS="$SQLITE_LIBS $RT_LIBS"
     fi
@@ -911,194 +870,25 @@ fi
 
 ######### javascript
 
-AC_ARG_ENABLE(libjs,
-              AC_HELP_STRING([--enable-libjs], [compile with spidermonkey support (default: yes)]),
-              [
-                JS_EN=$enableval 
-                if test "x$enableval" = xno; then
-                    JS_OK=disabled
-                else
-                    JS_OK=yes
-                fi
-              ],
-              [
-                JS_OK=yes
-              ]
-)
+JS_STATUS="disabled"
+MT_OPTION([libjs], [disable],
+          [compile with spidermonkey support],[],[])
 
-XP_ADD=""
-
-if test "x$JS_OK" = xyes; then
-dnl    if test $DARWIN_OS -eq 1 ; then
-dnl        XP_ADD="-DXP_MAC"
-dnl    else
-        XP_ADD="-DXP_UNIX"
-dnl    fi
-
-    CXXFLAGS="$CXXFLAGS $XP_ADD"
-    CPPFLAGS="$CPPFLAGS $XP_ADD"
-
-    if test -n "$JS_SEARCH_HEADERS" ; then
-        AC_MSG_NOTICE([Will search for js (spidermonkey) headers in $JS_SEARCH_HEADERS])
-        AC_CHECK_HEADER($JS_SEARCH_HEADERS/jsapi.h,
-                [
-                    JS_CXXFLAGS="-I$JS_SEARCH_HEADERS"
-                ],
-                [
-                    AC_MSG_ERROR([jsapi.h not found in requested location $JS_SEARCH_HEADERS])
-                ]
-        )
-    
-    else
-    AC_CHECK_HEADER(jsapi.h,
-        [],
+if test "x$LIBJS_OPTION_ENABLED" = "xyes"; then
+    PKG_CHECK_MODULES([LIBJS], [libjs >= 1.8.5],
         [
-            for sm_path in $SEARCH_DIR_HEADERS \
-                           /usr/include/js \
-                           /usr/include/smjs \
-                           /usr/include/mozjs \
-                           /usr/local/include/js \
-                           /usr/local/include/smjs \
-                           /usr/local/include/mozjs \
-                           /usr/include/spidermonkey \
-                           /usr/local/include/spidermonkey \
-                           $SEARCH_DIR_HEADERS/js \
-                           $SEARCH_DIR_HEADERS/smjs \
-                           $SEARCH_DIR_HEADERS/mozjs \
-                           $SEARCH_DIR_HEADERS/spidermonkey; do 
-                if test "x$ac_cv_header_jsapi_h" != xyes ; then
-                    AC_MSG_CHECKING([checking alternative libjs header location: $sm_path])
-                    CXXFLAGS="$XP_ADD -I$sm_path"
-                    CPPFLAGS="$XP_ADD -I$sm_path"
-                    unset ac_cv_header_jsapi_h
-                    AC_CHECK_HEADER(jsapi.h,
-                                    [
-                                        JS_CXXFLAGS="-I$sm_path"
-                                        AC_MSG_RESULT([jsapi.h found in $sm_path])
-                                    ],
-                                    [])
-               fi
-            done
-        ])
-   
-        if test "x$ac_cv_header_jsapi_h" != xyes ; then
-                JS_OK=missing
-                AC_MSG_RESULT([not found, giving up])
-        fi
-    fi
-fi
-
-MOZLIB=
-if test "x$JS_OK" = xyes; then
-    if test -n "$JS_SEARCH_LIBS" ; then
-        AC_MSG_NOTICE([Will search for js (spidermonkey) libraries in $JS_SEARCH_LIBS])
-        LDFLAGS="-L$JS_SEARCH_LIBS $LDFLAGS_SAVE -ljs $ADD_PTHREAD_CFLAGS"
-        AC_CHECK_LIB(js, JS_NewObject,
-                [
-                    JS_LIBS="-L$JS_SEARCH_LIBS -ljs"
-                    MOZLIB=js
-                ],
-                [
-                    LDFLAGS="-L$JS_SEARCH_LIBS $LDFLAGS_SAVE -lsmjs $ADD_PTHREAD_CFLAGS"
-                    AC_CHECK_LIB(smjs, JS_NewObject,
-                        [
-                            JS_LIBS="-L$JS_SEARCH_LIBS $LDFLAGS_SAVE -lsmjs $ADD_PTHREAD_CFLAGS"
-                            MOZLIB=smjs
-                        ],
-                        [
-                            LDFLAGS="-L$JS_SEARCH_LIBS $LDFLAGS_SAVE -lmozjs $ADD_PTHREAD_CFLAGS"
-                            AC_CHECK_LIB(mozjs, JS_NewObject,
-                                [
-                                    JS_LIBS="-L$JS_SEARCH_LIBS -lmozjs"
-                                    MOZLIB=mozjs
-                                ],
-                                [
-                                    AC_MSG_ERROR([Spidermonkey not found in requested location $JS_SEARCH_LIBS])
-                                ]
-                            )
-                        ]
-                    )
-                ]
-        )
-    else
-    LDFLAGS="$LDFLAGS_SAVE $ADD_PTHREAD_CFLAGS"
-    AC_CHECK_LIB(js, JS_NewObject,
-        [
-            MOZLIB=js
-            JS_LIBS="-ljs"
+            JS_STATUS="yes"
+            AC_DEFINE([HAVE_JS], [1], [libjs presence])
         ],
         [
-            unset ac_cv_lib_js_JS_NewObject
-            AC_CHECK_LIB(smjs, JS_NewObject,
-                [
-                    JS_LIBS="-lsmjs"
-                    MOZLIB=smjs
-                ],
-                [
-                    unset ac_cv_lib_smjs_JS_NewObject
-                    AC_CHECK_LIB(mozjs, JS_NewObject,
-                        [
-                            MOZLIB=mozjs
-                            JS_LIBS="-lmozjs"
-                        ],
-                        [
-                            LDFLAGS="-L$SEARCH_DIR_LIBS $LDFLAGS_SAVE $ADD_PTHREAD_CFLAGS"
-                            unset ac_cv_lib_js_JS_NewObject
-                            AC_CHECK_LIB(js, JS_NewObject,
-                                [
-                                    JS_LIBS="-L$SEARCH_DIR_LIBS -ljs"
-                                    MOZLIB=js
-                                ],
-                                [
-                                    unset ac_cv_lib_smjs_JS_NewObject
-                                    AC_CHECK_LIB(smjs, JS_NewObject,
-                                        [
-                                            JS_LIBS="-L$SEARCH_DIR_LIBS -lsmjs"
-                                            MOZLIB=smjs
-                                        ],
-                                        [
-                                            LDFLAGS="-L$SEARCH_DIR_LIBS $LDFLAGS_SAVE -lmozjs"
-                                            unset ac_cv_lib_mozjs_JS_NewObject
-                                            AC_CHECK_LIB(mozjs, JS_NewObject,
-                                                [
-                                                    JS_LIBS="-L$SEARCH_DIR_LIBS -lmozjs"
-                                                    MOZLIB=mozjs
-                                                ],
-                                                [
-                                                    JS_OK=missing
-                                                    AC_MSG_RESULT(libjs/libsmjs link failed, giving up)
-                                                ]
-                                            )
-                                        ]
-                                    )
-                                ]
-                            )
-                        ]
-                    )
-                ]
-            )
-       ]
-    )
-    fi
-fi
-if test "x$JS_OK" = xyes; then
-    AC_DEFINE([HAVE_JS], [1], [libjs presence])
-    AC_SUBST(JS_CXXFLAGS)
-    AC_SUBST(JS_LIBS)
+            if test "x$LIBJS_OPTION_REQUESTED" = "xyes"; then
+                AC_MSG_ERROR([$LIBJS_PKG_ERRORS])
+            else
+                AC_MSG_WARN([$LIBJS_PKG_ERRORS])
+            fi
+            JS_STATUS="missing"
+        ])
 
-    LDFLAGS="$LDFLAGS $JS_LIBS"
-    CFLAGS="$CFLAGS $JS_CXXFLAGS"
-    CXXFLAGS="$CXXFLAGS $JS_CXXFLAGS"
-
-    AC_CHECK_LIB($MOZLIB, JS_ClearContextThread,
-            [
-                AC_DEFINE([JS_THREADSAFE], [1],
-                          [this version of spidermonkey is threadsafe])
-            ])
-else
-    if test "x$JS_EN" = xyes; then
-        AC_MSG_ERROR(unable to configure libjs support)
-    fi
 fi
 
 CXXFLAGS="$CXXFLAGS_SAVE"
@@ -1147,7 +937,9 @@ if test "x$LIBMAGIC_STATUS" = xyes; then
     AC_LANG_SAVE
     AC_LANG_C
     AC_RUN_IFELSE(
-        AC_LANG_PROGRAM([[ #include <magic.h> ]],
+    [
+        AC_LANG_PROGRAM(
+         [[ #include <magic.h> ]],
          [[
             struct magic_set *ms;
             ms = magic_open(MAGIC_MIME);
@@ -1156,19 +948,19 @@ if test "x$LIBMAGIC_STATUS" = xyes; then
             magic_load(ms, 0);
             magic_close(ms);
             return 0;
-         ]]
-        ),
-        [
-            AC_MSG_RESULT([no]);
-        ],
-        [
-            AC_MSG_RESULT([yes])
-            MAGIC_OK=broken
-            AC_MSG_WARN([your magic library is broken, if you are using Slackware install the 'file' package manually])
-        ],
-        [
-            AC_MSG_RESULT([passing for cross compiling])
-        ])
+         ]])
+    ],
+    [
+        AC_MSG_RESULT([no]);
+    ],
+    [
+        AC_MSG_RESULT([yes])
+        MAGIC_OK=broken
+        AC_MSG_WARN([your magic library is broken, if you are using Slackware install the 'file' package manually])
+    ],
+    [
+        AC_MSG_RESULT([passing for cross compiling])
+    ])
 
    AC_LANG_RESTORE
 fi
@@ -1316,103 +1108,43 @@ CXXFLAGS="$CXXFLAGS_SAVE"
 CPPFLAGS="$CPPFLAGS_SAVE"
 ######## curl
 
-CURL_PROG_FOUND=0
-CURL_LIBS=
-CURL_CFLAGS=
-CURL_OK=no
-
-if ((test "x$YOUTUBE_OPTION_ENABLED" = xyes) && (test "x$YOUTUBE_OPTION_REQUESTED" = xyes) && (test $USE_CURL -eq 0) && (test $CURL_REQUESTED -eq 1)); then
+if ((test "x$YOUTUBE_OPTION_ENABLED" = xyes) && (test "x$YOUTUBE_OPTION_REQUESTED" = xyes) && (test "x$CURL_OPTION_ENABLED" = "xno") && (test "x$CURL_OPTION_REQUESTED" = "xyes")); then
     AC_MSG_ERROR([You enabled YouTube but disabled curl, however curl is required by the YouTube feature])
 fi
 
-if ((test "x$WEBORAMA_OPTION_ENABLED" = xyes) && (test "x$WEBORAMA_OPTION_REQUESTED" = xyes) && (test $USE_CURL -eq 0) && (test $CURL_REQUESTED -eq 1)); then
+if ((test "x$WEBORAMA_OPTION_ENABLED" = xyes) && (test "x$WEBORAMA_OPTION_REQUESTED" = xyes) && (test "x$CURL_OPTION_ENABLED" = "xno") && (test "x$CURL_OPTION_REQUESTED" = "xyes")); then
     AC_MSG_ERROR([You enabled Weborama but disabled curl, however curl is required by the Weborama feature])
 fi
 
-if ((test "x$ATRAILERS_OPTION_ENABLED" = xyes) && (test "x$ATRAILERS_OPTION_REQUESTED" = xyes) && (test $USE_CURL -eq 0) && (test $CURL_REQUESTED -eq 1)); then
+if ((test "x$ATRAILERS_OPTION_ENABLED" = xyes) && (test "x$ATRAILERS_OPTION_REQUESTED" = xyes) && (test "x$CURL_OPTION_ENABLED" = "xno") && (test "x$CURL_OPTION_REQUESTED" = "xyes")); then
     AC_MSG_ERROR([You enabled Apple Trailers but disabled curl, however curl is required by the Apple Trailers feature])
 fi
 
 if ((test "x$YOUTUBE_OPTION_ENABLED" != xyes) && (test "x$SOPCAST_OPTION_ENABLED" != xyes) && (test "x$EXTERNAL_TRANSCODING_OPTION" != xyes) && (test "x$ATRAILERS_OPTION_ENABLED" != xyes) && (test "x$WEBORAMA_OPTION_ENABLED" != xyes)); then
-    if test $USE_CURL -eq 1; then
-        if test $CURL_REQUESTED -eq 1; then
+    if test "x$CURL_OPTION_ENABLED" = "xyes"; then
+        if test "x$CURL_OPTION_REQUESTED" = "xyes"; then
             AC_MSG_ERROR([You enabled curl support but the external transcoding, YouTube and SopCast features are disabled - curl is not needed without it])
         else
-            CURL_OK=no
-            USE_CURL=0
+            CURL_OPTION_ENABLED="xno"
         fi
     fi
 fi
 
-if (((test "x$YOUTUBE_OPTION_ENABLED" = xyes) || (test "x$SOPCAST_OPTION_ENABLED" = xyes) || (test "x$ATRAILERS_OPTION_ENABLED" = xyes) || (test "x$WEBORAMA_OPTION_ENABLED" = xyes) || (test "x$EXTERNAL_TRANSCODING_OPTION" = xyes)) && (test $USE_CURL -eq 1)); then
+CURL_FOUND="no"
+if (((test "x$YOUTUBE_OPTION_ENABLED" = xyes) || (test "x$SOPCAST_OPTION_ENABLED" = xyes) || (test "x$ATRAILERS_OPTION_ENABLED" = xyes) || (test "x$WEBORAMA_OPTION_ENABLED" = xyes) || (test "x$EXTERNAL_TRANSCODING_OPTION" = xyes)) && (test "x$CURL_OPTION_ENABLED" = "xyes")); then
     AC_MSG_NOTICE([Checking for curl (needed for extended external transcoding/YouTube support)])
-    CURL_OK=yes
-    if test -n "$CURL_SEARCH_CONFIG"; then
-        AC_MSG_NOTICE([You specified $CURL_SEARCH_CONFIG for curl-config])
-        
-        if test -f "$CURL_SEARCH_CONFIG"; then 
-            curlconfig="$CURL_SEARCH_CONFIG"
-        else
-            curlconfig="no"
-        fi
-        
-        if test "x$curlconfig" = xno; then
-            AC_MSG_ERROR([$CURL_SEARCH_CONFIG not found])
-        else
-            CURL_TEST=`${curlconfig} --version 2>/dev/null`
-            if test -z "$CURL_TEST"; then
-                AC_MSG_ERROR([${curlconfig} could not be executed or returned invalid values])
-            fi
-            CURL_PROG_FOUND=1
-        fi
-    else
-        AC_PATH_PROG(curlconfig, curl-config, no)
-        if test "x$curlconfig" = xno; then
-            unset ac_cv_path_curlconfig
-            AC_PATH_PROG(curlconfig, curl-config, no, $SEARCH_DIR_PROGS)
-            if test "x$curlconfig" = xno; then
-                CURL_OK=missing
-                AC_MSG_RESULT([curl-config not found, please install the curl-devel package])
-            else
-                CURL_PROG_FOUND=1
-            fi
-        else
-            CURL_PROG_FOUND=1
-        fi
-   fi 
 
-   if test $CURL_PROG_FOUND -eq 1 ; then
-        AC_MSG_CHECKING(curl cflags)
-        CURL_CFLAGS=`${curlconfig} --cflags`
-        AC_MSG_RESULT($CURL_CFLAGS)
-
-        AC_MSG_CHECKING(curl libraries)
-        CURL_LIBS=`${curlconfig} --libs`
-        AC_MSG_RESULT($CURL_LIBS)
-    fi
+    PKG_CHECK_MODULES([CURL], [libcurl],
+        [
+            AC_DEFINE([HAVE_CURL], [1], [libcurl is available])
+            CURL_FOUND="yes"
+        ],
+        [
+            AC_MSG_WARN([$CURL_PKG_ERRORS])
+        ])
 fi
 
-if test "x$CURL_OK" = xyes; then
-    CPPFLAGS="$CPPFLAGS $CURL_CFLAGS"
-    CXXFLAGS="$CXXFLAGS $CURL_CFLAGS"
-    AC_CHECK_HEADERS([curl/curl.h],
-        [],
-        [CURL_OK=missing]
-    )
-fi
-
-if test "x$CURL_OK" = xyes; then
-    LDFLAGS="$CURL_LIBS"
-    AC_CHECK_LIB(curl, curl_easy_init, [],
-        [CURL_OK=missing]
-    )
-fi
-
-if test "x$CURL_OK" = xyes; then
-    AC_DEFINE([HAVE_CURL], [1], [curl library presence])
-    AC_SUBST(CURL_CFLAGS)
-    AC_SUBST(CURL_LIBS)
-else
+if test "x$CURL_FOUND" = "xno"; then
     if (test "x$YOUTUBE_OPTION_ENABLED" = xyes) && (test "x$YOUTUBE_OPTION_REQUESTED" = xyes); then
         AC_MSG_ERROR([unable to configure curl which is required for YouTube support!])
     fi
@@ -1450,11 +1182,11 @@ else
     fi
 
     if test "x$EXTERNAL_TRANSCODING_OPTION" = xyes; then
-        if ((test $USE_CURL -eq 1) && (test $CURL_REQUESTED -eq 0)); then
+        if ((test "x$CURL_OPTION_ENABLED" = "xyes") && (test "x$CURL_OPTION_REQUESTED" = "xno")); then
             AC_MSG_WARN([unable to configure curl, external transcoding will have limited functionality!])
         fi
 
-        if ((test $USE_CURL -eq 1) && (test $CURL_REQUESTED -eq 1)); then
+        if ((test "x$CURL_OPTION_ENABLED" = "xyes") && (test "x$CURL_OPTION_REQUESTED" = "xyes")); then
             AC_MSG_ERROR([You enabled curl support but the curl library could not be configured])
         fi
     fi
@@ -1462,6 +1194,10 @@ else
     if (test "x$YOUTUBE_OPTION_ENABLED" != xyes) && (test "x$WEBORAMA_OPTION_ENABLED" != xyes) && (test "x$ATRAILERS_OPTION_ENABLED" != xyes) && (test "x$EXTERNAL_TRANSCODING_OPTION" = !xyes) && (test "x$SOPCAST_OPTION_ENABLED" != xyes); then
         CURL_CFLAGS=
         CURL_LIBS=
+        CURL_LDFLAGS=
+        AC_SUBST(CURL_CFLAGS)
+        AC_SUBST(CURL_LIBS)
+        AC_SUBST(CURL_LDFLAGS)
     fi
 fi
 CPPFLAGS="$CPPFLAGS_SAVE"
@@ -1501,71 +1237,38 @@ fi
 
 ######## ffmpeg
 
-if test "x$FFMPEG_OPTION_ENABLED" = xyes; then
-    AC_LANG_SAVE
-    AC_LANG_C
-
-
-    FFMPEG_EXTRA_CFLAGS=""
-
-    # the header location of the older and newer ffmpeg version is different
-    MT_CHECK_HEADER([avformat], [ffmpeg/avformat], [pass])
-    if test "x$AVFORMAT_STATUS" != xyes; then
-        MT_CHECK_HEADER([avformat], [libavformat/avformat], [pass])
-        if test "x$AVFORMAT_STATUS" = xyes; then
-            AC_DEFINE_UNQUOTED([AVFORMAT_INCLUDE], [<libavformat/avformat.h>], [libavformat/avformat.h])
-        else
-            CFLAGS="$CFLAGS -I/usr/include/ffmpeg"
-            CPPFLAGS="$CPPFLAGS -I/usr/include/ffmpeg"
-            MT_CHECK_HEADER([avformat], [libavformat/avformat], [pass])
-            if test "x$AVFORMAT_STATUS" = xyes; then
-              AC_DEFINE_UNQUOTED([AVFORMAT_INCLUDE], [<libavformat/avformat.h>], [libavformat/avformat.h])
-              FFMPEG_EXTRA_CFLAGS="$FFMPEG_CFLAGS -I/usr/include/ffmpeg"
+if test "x$FFMPEG_OPTION_ENABLED" = "xyes"; then
+    AVFORMAT_STATUS="no"
+    PKG_CHECK_MODULES([AVFORMAT], [libavformat],
+        [
+            AVFORMAT_STATUS="yes"
+        ],
+        [
+            if test "x$FFMPEG_OPTION_REQUESTED" = "xyes"; then
+                AC_MSG_ERROR([$AVFORMAT_PKG_ERRORS])
             else
-                CFLAGS="$CFLAGS_SAVE"
-                CPPFLAGS="$CPPFLAGS_SAVE"
-                CFLAGS="$CFLAGS -I/usr/local/include/ffmpeg"
-                CPPFLAGS="$CPPFLAGS -I/usr/local/include/ffmpeg"
-                MT_CHECK_HEADER([avformat], [libavformat/avformat])
-                if test "x$AVFORMAT_STATUS" = xyes; then
-                    FFMPEG_EXTRA_CFLAGS="$FFMPEG_CFLAGS -I/usr/include/ffmpeg"
-                    AC_DEFINE_UNQUOTED([AVFORMAT_INCLUDE], [<libavformat/avformat.h>], [libavformat/avformat.h])
-                fi
+                AC_MSG_WARN([$AVFORMAT_PKG_ERRORS])
             fi
-        fi
+        ])
+    AVUTIL_STATUS="no"
+    PKG_CHECK_MODULES([AVUTIL], [libavutil],
+        [
+            AVUTIL_STATUS="yes"
+        ],
+        [
+            if test "x$FFMPEG_OPTION_REQUESTED" = "xyes"; then
+                AC_MSG_ERROR([$AVUTIL_PKG_ERRORS])
+            else
+                AC_MSG_WARN([$AVUTIL_PKG_ERRORS])
+            fi
+        ])
+
+    if (test "x$AVFORMAT_STATUS" == "xyes") &&
+       (test "x$AVUTIL_STATUS" == "xyes"); then
+            AC_DEFINE([HAVE_FFMPEG], [1], [ffmpeg libavformat is available])
+            FFMPEG_STATUS="yes"
     else
-       AC_DEFINE_UNQUOTED([AVFORMAT_INCLUDE], [<ffmpeg/avformat.h>], [ffmpeg/avformat.h])
-    fi
-
-    if test "x$AVFORMAT_STATUS" = xyes; then
-        MT_CHECK_LIBRARY([avformat], [avformat], [av_register_all])
-        MT_CHECK_LIBRARY([avutil], [avutil], [av_log_set_callback])
-    fi
-    AC_LANG_RESTORE
-
-    if ((test "x$AVFORMAT_STATUS" = xyes) && (test "x$AVUTIL_STATUS" = xyes)); then
-        FFMPEG_STATUS=yes
-    else
-        FFMPEG_STATUS=missing
-    fi
-fi
-
-if test "x$FFMPEG_STATUS" = xyes; then
-    AC_DEFINE([HAVE_FFMPEG], [1], [FFMPEG library presence])
-    FFMPEG_CFLAGS="$FFMPEG_EXTRA_CFLAGS $AVFORMAT_CFLAGS $AVUTIL_CFLAGS"
-    FFMPEG_LDFLAGS="$AVFORMAT_LDFLAGS $AVUTIL_LDFLAGS"
-    FFMPEG_LIBS="$AVFORMAT_LIBS $AVUTIL_LIBS"
-    AC_SUBST(FFMPEG_CFLAGS)
-    AC_SUBST(FFMPEG_LDFLAGS)
-    AC_SUBST(FFMPEG_LIBS)
-else
-    if (test "x$FFMPEG_OPTION_ENABLED" != xyes); then
-        FFMPEG_STATUS=disabled
-    fi
-
-    if (test "x$FFMPEG_OPTION_REQUESTED" = xyes) && 
-       (test "x$FFMPEG_OPTION_ENABLED" = xyes); then
-        AC_MSG_ERROR(unable to configure ffmpeg support)
+            FFMPEG_STATUS="missing"
     fi
 fi
 
@@ -1605,12 +1308,23 @@ LDFLAGS="$LDFLAGS_SAVE"
 CPPFLAGS="$CPPFLAGS_SAVE"
 
 ######## lastfm
-MT_CHECK_OPTIONAL_PACKAGE([lastfmlib], [disable],
-        [compile with lastfmlib support for Last.fm scrobbling],
-        [lastfmlib/lastfmscrobbler],
-        [lastfmlib], [create_scrobbler])
+LASTFMLIB_STATUS="no"
+if test "x$LASTFM_OPTION_ENABLED" = "xyes"; then
+    PKG_CHECK_MODULES([LASTFMLIB], [liblastfmlib],
+        [
+            AC_DEFINE([HAVE_LASTFMLIB], [1], [liblastfmlib is available])
+            LASTFMLIB_STATUS="yes"
+        ],
+        [
+            if test "x$LASTFM_OPTION_REQUESTED" = "xyes"; then
+                AC_MSG_ERROR([$LASTFMLIB_PKG_ERRORS])
+            else
+                AC_MSG_WARN([$LASTFMLIB_PKG_ERRORS])
+            fi
+        ])
+fi
 
-######## extractor
+# extractor
 
 if test "x$LIBEXTRACTOR_OPTION_ENABLED" = xyes; then
     MT_CHECK_PACKAGE([libextractor], [extractor], [extractor], [EXTRACTOR_getKeywords])
@@ -1779,54 +1493,59 @@ dnl information.
     CFLAGS="$CFLAGS $INOTIFY_CFLAGS"
     AC_MSG_CHECKING([whether sys/inotify.h works])
     AC_RUN_IFELSE(
-        AC_LANG_PROGRAM([[#include <sys/inotify.h>]],
-                         [[return (-1 == inotify_init());]]
-                       ),
-                [
-                    AC_MSG_RESULT([yes]); 
-                    AC_DEFINE([SYS_INOTIFY_H_OK],[1],[sys/inotify.h exists and works on this system])],
-                [
-                    AC_MSG_RESULT([no, using own inotify headers])
-                    AC_MSG_CHECKING([whether inotify-nosys.h works on this system])
-                    AC_RUN_IFELSE(
-                        AC_LANG_PROGRAM([[#include "src/inotify-nosys.h"]],
-                         [[return (-1 == inotify_init());]]
-                        ),
-                        [
-                            AC_MSG_RESULT([yes]);
-                        ],
-                        [
-                            if ((test "x$INOTIFY_OPTION_REQUESTED" != xyes) &&
-                                (test "x$INOTIFY_OPTION_ENABLED" = xyes)); then
-                                AC_MSG_RESULT([no, disabling inotify support])
-                            elif ((test "x$INOTIFY_OPTION_REQUESTED" != xyes) &&
-                               (test "x$INOTIFY_OPTION_ENABLED" != xyes)); then
-                                AC_MSG_RESULT([no])
-                            fi
-                                INOTIFY_STATUS=no
-                        ],
-                        [
-                            if ((test "x$INOTIFY_OPTION_REQUESTED" = xyes) &&
-                                (test "x$INOTIFY_OPTION_ENABLED" = xyes)); then
-                                AC_MSG_RESULT([selecting yes for cross compiling]) 
-                                INOTIFY_STATUS=yes
-                            else
-                                AC_MSG_RESULT([selecting no for cross compiling]) 
-                                INOTIFY_STATUS=no
-                            fi
-                        ])
-
-                ],
-                [
-                    if ((test "x$INOTIFY_OPTION_REQUESTED" = xyes) &&
-                        (test "x$INOTIFY_OPTION_ENABLED" = xyes)); then
-                       AC_MSG_RESULT([selecting yes for cross compiling]) 
-                       INOTIFY_STATUS=yes
-                    else
-                       AC_MSG_RESULT([selecting no for cross compiling]) 
-                       INOTIFY_STATUS=no
-                    fi
-                ])
+    [
+        AC_LANG_PROGRAM(
+            [[ #include <sys/inotify.h> ]],
+            [[ return (-1 == inotify_init()); ]]
+        )
+    ],
+    [
+        AC_MSG_RESULT([yes]); 
+        AC_DEFINE([SYS_INOTIFY_H_OK],[1],[sys/inotify.h exists and works on this system])],
+    [
+        AC_MSG_RESULT([no, using own inotify headers])
+        AC_MSG_CHECKING([whether inotify-nosys.h works on this system])
+        AC_RUN_IFELSE(
+        [
+            AC_LANG_PROGRAM(
+                [[ #include "src/inotify-nosys.h" ]],
+                [[ return (-1 == inotify_init()); ]]
+            )
+        ],
+        [
+            AC_MSG_RESULT([yes]);
+        ],
+        [
+            if ((test "x$INOTIFY_OPTION_REQUESTED" != xyes) &&
+                (test "x$INOTIFY_OPTION_ENABLED" = xyes)); then
+                AC_MSG_RESULT([no, disabling inotify support])
+            elif ((test "x$INOTIFY_OPTION_REQUESTED" != xyes) &&
+               (test "x$INOTIFY_OPTION_ENABLED" != xyes)); then
+                AC_MSG_RESULT([no])
+            fi
+                INOTIFY_STATUS=no
+        ],
+        [
+            if ((test "x$INOTIFY_OPTION_REQUESTED" = xyes) &&
+                (test "x$INOTIFY_OPTION_ENABLED" = xyes)); then
+                AC_MSG_RESULT([selecting yes for cross compiling]) 
+                INOTIFY_STATUS=yes
+            else
+                AC_MSG_RESULT([selecting no for cross compiling]) 
+                INOTIFY_STATUS=no
+            fi
+        ])
+    ],
+    [
+        if ((test "x$INOTIFY_OPTION_REQUESTED" = xyes) &&
+            (test "x$INOTIFY_OPTION_ENABLED" = xyes)); then
+           AC_MSG_RESULT([selecting yes for cross compiling]) 
+           INOTIFY_STATUS=yes
+        else
+           AC_MSG_RESULT([selecting no for cross compiling]) 
+           INOTIFY_STATUS=no
+        fi
+    ])
 fi
 
 if test "x$INOTIFY_STATUS" = xyes; then
@@ -1914,7 +1633,7 @@ if (test "x$SOPCAST_OPTION_ENABLED" = xyes); then
     AC_DEFINE([SOPCAST], [1], [Enable support for the SopCast service])
 fi
 
-AC_DEFINE_UNQUOTED([COMPILE_INFO], "\thost:\t\t\t$host\n\tsqlite3:\t\t$SQLITE3_STATUS\n\tmysql:\t\t\t$MYSQL_STATUS\n\tlibjs:\t\t\t$JS_OK\n\tlibmagic:\t\t$LIBMAGIC_STATUS\n\tinotify:\t\t$INOTIFY_STATUS\n\tlibexif:\t\t$LIBEXIF_STATUS\n\tid3lib:\t\t\t$ID3LIB_STATUS\n\ttaglib:\t\t\t$TAGLIB_STATUS\n\tffmpeg\t\t\t$FFMPEG_STATUS\n\tlibmp4v2:\t\t$LIBMP4V2_STATUS\n\texternal transcoding:\t$EXTERNAL_TRANSCODING_OPTION_ENABLED\n\tcurl:\t\t\t$CURL_OK\n\tYouTube:\t\t$YOUTUBE_OPTION_ENABLED\n\tlibextractor\t\t$LIBEXTRACTOR_STATUS\n\tdb-autocreate:\t\t$DB_AUTOCREATE_OPTION_ENABLED\n\tdebug log:\t\t$DEBUG_LOG_OPTION_ENABLED\n\tprotocol info extension:$PROTOCOLINFO_EXTENSION_OPTION_ENABLED\n\tffmpegthumbnailer:\t$FFMPEGTHUMBNAILER_STATUS\n\tlastfmlib:\t\t$LASTFMLIB_STATUS\n\tdata directory:\t\t$PACKAGE_DATADIR", [compile option summary])
+AC_DEFINE_UNQUOTED([COMPILE_INFO], "\thost:\t\t\t$host\n\tsqlite3:\t\t$SQLITE3_STATUS\n\tmysql:\t\t\t$MYSQL_STATUS\n\tlibjs:\t\t\t$JS_STATUS\n\tlibmagic:\t\t$LIBMAGIC_STATUS\n\tinotify:\t\t$INOTIFY_STATUS\n\tlibexif:\t\t$LIBEXIF_STATUS\n\tid3lib:\t\t\t$ID3LIB_STATUS\n\ttaglib:\t\t\t$TAGLIB_STATUS\n\tffmpeg\t\t\t$FFMPEG_STATUS\n\tlibmp4v2:\t\t$LIBMP4V2_STATUS\n\texternal transcoding:\t$EXTERNAL_TRANSCODING_OPTION_ENABLED\n\tcurl:\t\t\t$CURL_OK\n\tYouTube:\t\t$YOUTUBE_OPTION_ENABLED\n\tlibextractor\t\t$LIBEXTRACTOR_STATUS\n\tdb-autocreate:\t\t$DB_AUTOCREATE_OPTION_ENABLED\n\tdebug log:\t\t$DEBUG_LOG_OPTION_ENABLED\n\tprotocol info extension:$PROTOCOLINFO_EXTENSION_OPTION_ENABLED\n\tffmpegthumbnailer:\t$FFMPEGTHUMBNAILER_STATUS\n\tlastfmlib:\t\t$LASTFMLIB_STATUS\n\tdata directory:\t\t$PACKAGE_DATADIR", [compile option summary])
 
 ###############
 AC_CONFIG_FILES([
@@ -1940,10 +1659,11 @@ echo "CONFIGURATION SUMMARY ----"
 echo
 echo "sqlite3               : $SQLITE3_STATUS"
 echo "mysql                 : $MYSQL_STATUS"
-echo "libjs                 : $JS_OK"
+echo "libjs                 : $JS_STATUS"
 echo "libmagic              : $LIBMAGIC_STATUS"
 echo "inotify               : $INOTIFY_STATUS"
 echo "libexif               : $LIBEXIF_STATUS"
+echo "expat                 : $EXPAT_STATUS"
 echo "id3lib                : $ID3LIB_STATUS"
 echo "taglib                : $TAGLIB_STATUS"
 echo "libmp4v2              : $LIBMP4V2_STATUS"
@@ -1951,7 +1671,7 @@ echo "ffmpeg                : $FFMPEG_STATUS"
 echo "ffmpegthumbnailer     : $FFMPEGTHUMBNAILER_STATUS"
 echo "lastfmlib             : $LASTFMLIB_STATUS"
 echo "external transcoding  : $EXTERNAL_TRANSCODING_OPTION_ENABLED"
-echo "curl                  : $CURL_OK"
+echo "curl                  : $CURL_FOUND"
 echo "YouTube               : $YOUTUBE_OPTION_ENABLED"
 #echo "Weborama              : $WEBORAMA_OPTION_ENABLED"
 echo "libextractor          : $LIBEXTRACTOR_STATUS"
