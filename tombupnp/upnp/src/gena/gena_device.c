@@ -131,14 +131,13 @@ GeneratePropertySet( IN char **names,
     char *buffer;
     int counter = 0;
     int size = 0;
-    int temp_counter = 0;
 
     //size+=strlen(XML_VERSION);  the XML_VERSION is not interopeable with 
     //other vendors
     size += strlen( XML_PROPERTYSET_HEADER );
     size += strlen( "</e:propertyset>\n\n" );
 
-    for( temp_counter = 0, counter = 0; counter < count; counter++ ) {
+    for( counter = 0; counter < count; counter++ ) {
         size += strlen( "<e:property>\n</e:property>\n" );
         size +=
             ( 2 * strlen( names[counter] ) + strlen( values[counter] ) +
@@ -312,15 +311,12 @@ genaNotify( IN char *headers,
 {
     int i;
     membuffer mid_msg;
-    membuffer endmsg;
     uri_type *url;
     http_parser_t response;
     int return_code = -1;
 
     membuffer_init( &mid_msg );
 
-    // make 'end' msg (the part that won't vary with the destination)
-    endmsg.size_inc = 30;
     if( http_MakeMessage( &mid_msg, 1, 1,
                           "s" "ssc" "sdcc",
                           headers,

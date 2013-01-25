@@ -3768,9 +3768,11 @@ FreeHandle( int Upnp_Handle )
  *	UPNP_E_SUCCESS if successful else return appropriate error
  ***************************************************************************/
             int PrintHandleInfo( IN UpnpClient_Handle Hnd ) {
-            struct Handle_Info * HndInfo; if( HandleTable[Hnd] != NULL ) {
-            HndInfo = HandleTable[Hnd];
-            DBGONLY( UpnpPrintf( UPNP_ALL, API, __FILE__, __LINE__,
+            if( HandleTable[Hnd] != NULL ) {
+            DBGONLY(
+                struct Handle_Info * HndInfo;
+                HndInfo = HandleTable[Hnd];
+                     UpnpPrintf( UPNP_ALL, API, __FILE__, __LINE__,
                                  "Printing information for Handle_%d\n",
                                  Hnd );
                      UpnpPrintf( UPNP_ALL, API, __FILE__, __LINE__,
@@ -3793,9 +3795,6 @@ FreeHandle( int Upnp_Handle )
             int i;
             IXML_NodeList * NodeList1;
             IXML_Node * ChildNode1;
-            unsigned short NodeType;
-            const DOMString NodeValue;
-            const DOMString NodeName;
             NodeList1 = ixmlNode_getChildNodes( tmpRoot );
             for( i = 0; i < 100; i++ ) {
             ChildNode1 = ixmlNodeList_item( NodeList1, i );
@@ -3803,10 +3802,15 @@ FreeHandle( int Upnp_Handle )
             break;}
 
             printNodes( ChildNode1, depth + 1 );
-            NodeType = ixmlNode_getNodeType( ChildNode1 );
-            NodeValue = ixmlNode_getNodeValue( ChildNode1 );
-            NodeName = ixmlNode_getNodeName( ChildNode1 );
-            DBGONLY( UpnpPrintf( UPNP_ALL, API, __FILE__, __LINE__,
+            DBGONLY(
+                const DOMString NodeName;
+                unsigned short NodeType;
+                const DOMString NodeValue;
+
+                NodeType = ixmlNode_getNodeType( ChildNode1 );
+                NodeValue = ixmlNode_getNodeValue( ChildNode1 );
+                NodeName = ixmlNode_getNodeName( ChildNode1 );
+                UpnpPrintf( UPNP_ALL, API, __FILE__, __LINE__,
                                  "DEPTH-%2d-IXML_Node Type %d, "
                                  "IXML_Node Name: %s, IXML_Node Value: %s\n",
                                  depth, NodeType, NodeName, NodeValue ); )

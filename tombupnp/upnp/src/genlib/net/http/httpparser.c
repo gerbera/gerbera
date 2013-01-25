@@ -2524,7 +2524,7 @@ print_http_headers( http_message_t * hmsg )
     ListNode *node;
 
     //NNS:  dlist_node *node;
-    http_header_t *header;
+    //http_header_t *header;
 
     // print start line
     if( hmsg->is_request ) {
@@ -2543,7 +2543,7 @@ print_http_headers( http_message_t * hmsg )
     //NNS: node = dlist_first_node( &hmsg->headers );
     while( node != NULL ) {
 
-        header = ( http_header_t * ) node->item;
+        //header = ( http_header_t * ) node->item;
         //NNS: header = (http_header_t *)node->data;
         //printf( "hdr name: %.*s, value: %.*s\n", 
         //  (int)header->name.length, header->name.buf,

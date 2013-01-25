@@ -280,6 +280,10 @@ NewRequestHandler( IN struct sockaddr_in *DestAddr,
                 rc = sendto( ReplySock, *( RqPacket + Index ),
                              strlen( *( RqPacket + Index ) ),
                              0, ( struct sockaddr * )DestAddr, socklen );
+                if (rc == -1) {
+                    DBGONLY( UpnpPrintf( UPNP_INFO, SSDP, __FILE__, __LINE__,
+                                "SSDP_LIB: sendto failed!\n") );
+                }
             imillisleep( SSDP_PAUSE );
             ++NumCopy;
         }
