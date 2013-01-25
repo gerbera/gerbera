@@ -1773,18 +1773,6 @@ void ConfigManager::validate(String serverhome)
 
 #endif // HAVE_LIBEXIF
 
-#ifdef HAVE_LIBEXTRACTOR
-
-    el = getElement(_("/import/library-options/libextractor/auxdata"));
-    if (el == nil)
-    {
-        getOption(_("/import/library-options/libextractor/auxdata"),
-                  _(""));
-    }
-    NEW_STRARR_OPTION(createArrayFromNodeset(el, _("add-data"), _("tag")));
-    SET_STRARR_OPTION(CFG_IMPORT_LIBOPTS_EXTRACTOR_AUXDATA_TAGS_LIST);
-#endif // HAVE_LIBEXTRACTOR
-
 #if defined(HAVE_ID3LIB) || defined(HAVE_TAGLIB)
     el = getElement(_("/import/library-options/id3/auxdata"));
     if (el == nil)

@@ -1,21 +1,29 @@
-#LyX 1.6.5 created this file. For more info see http://www.lyx.org/
-\lyxformat 345
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
 \begin_document
 \begin_header
 \textclass docbook
 \use_default_options false
+\maintain_unincluded_children false
 \language english
+\language_package default
 \inputencoding auto
+\fontencoding global
 \font_roman default
 \font_sans default
 \font_typewriter default
 \font_default_family default
+\use_non_tex_fonts false
 \font_sc false
 \font_osf false
 \font_sf_scale 100
 \font_tt_scale 100
 
 \graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
 \paperfontsize default
 \spacing single
 \use_hyperref false
@@ -23,9 +31,18 @@
 \use_geometry true
 \use_amsmath 0
 \use_esint 0
+\use_mhchem 1
+\use_mathdots 1
 \cite_engine basic
 \use_bibtopic false
+\use_indices false
 \paperorientation portrait
+\suppress_date false
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
 \leftmargin 1cm
 \topmargin 1cm
 \rightmargin 1cm
@@ -40,8 +57,9 @@
 \paperpagestyle plain
 \tracking_changes false
 \output_changes false
-\author "" 
-\author "" 
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
 \end_header
 
 \begin_body
@@ -86,7 +104,7 @@ status open
 
 \begin_layout Plain Layout
 
-  <year>2006-2010</year>
+  <year>2006-2010, 2013</year>
 \end_layout
 
 \begin_layout Plain Layout
@@ -662,48 +680,6 @@ OPTIONAL, REQUIRED FOR YOUTUBE AND SOPCAST SUPPORT
 curl is a library that allows to easily fetch content from the web, if you
  want to compile MediaTomb with YouTube and/or SopCast support then curl
  is required.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-libextractor 
-\begin_inset CommandInset href
-LatexCommand href
-name "http://gnunet.org/libextractor/"
-target "http://gnunet.org/libextractor/"
-
-\end_inset
-
- 
-\emph on
-OPTIONAL
-\end_layout
-
-\begin_layout Standard
-This library tries to gather metadata from all kinds of files (also .avi
- and .asf).
- The drawback is, that it can be very slow at scanning video files.
- We also noticed that it uses a lot of memory when reading files, the result
- is, that media import becomes extremely slow.
- It is up to you if you want to use it or not, you may try the 'extract'
- utility that is provided with the library to check if there is any metadata
- that can be extracted from your media prior to enabling this feature in
- MediaTomb.
- By default libextractor is disabled, use ./configure --enable-libextractor
- to activate it.
 \end_layout
 
 \begin_layout Standard
@@ -1424,28 +1400,6 @@ The exif library will gather metadata from your photos, it will also find
 \end_layout
 
 \begin_layout Subsubsection
-Libextractor Support
-\end_layout
-
-\begin_layout Code
---enable-libextractor
-\end_layout
-
-\begin_layout Description
-Default: disabled
-\end_layout
-
-\begin_layout Standard
-Libextractor is a library that attempts to parse all sorts of files, this
- includes exif data, id3 tags and much more.
- It can also deal with .AVI and .ASF files which is useful when your video
- files have the appropriate metadata.
- The drawback is - it is slow, especially slow on scanning big video files,
- so it slows down the import process considerably.
- For this reason this library is disabled by default.
-\end_layout
-
-\begin_layout Subsubsection
 Inotify Support
 \end_layout
 
@@ -1756,14 +1710,6 @@ You can specify the exact location of particular headers and libraries.
 
 \begin_layout Code
 --with-iconv-libs=DIR              search for iconv libraries in DIR
-\end_layout
-
-\begin_layout Code
---with-libextractor-h=DIR          search for extractor headers in DIR
-\end_layout
-
-\begin_layout Code
---with-libextractor-libs=DIR       search for extractor libraries in DIR
 \end_layout
 
 \begin_layout Code
@@ -7098,8 +7044,8 @@ Here is some information on the auxdata: UPnP defines certain tags to pass
  allows the user to create a more complex container structure using a customized
  import script.
  The metadata that can be extracted depends on the library, currently we
- support libebexif and libextractor, the libraries provide a default set
- of keys that can be passed in the options below.
+ support libebexif which provides a default set of keys that can be passed
+ in the options below.
  The data according to those keys will the be extracted from the media and
  imported into the database along with the item.
  When processing the item, the import script will have full access to the
@@ -7458,137 +7404,6 @@ A sample configuration for the example described above would be:
 
 \begin_layout Code
 </id3> 
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-</listitem><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-<libextractor>
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Optional
-\end_layout
-
-\begin_layout Standard
-Options for the extractor library.
-\end_layout
-
-\begin_layout Standard
-Child tags:
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-<itemizedlist><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-<auxdata>
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Optional
-\end_layout
-
-\begin_layout Standard
-Currently only adding keywords to auxdata is supported.
- For a list of keywords/tags see the libextractor documentation.
-\end_layout
-
-\begin_layout Standard
-Child tags:
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-<itemizedlist><listitem>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Code
-<add-data tag="keyword1"/>
-\end_layout
-
-\begin_layout Code
-<add-data tag="keyword2"/>
-\end_layout
-
-\begin_layout Code
-...
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Optional
-\end_layout
-
-\begin_layout Standard
-If the library was able to extract the data according to the given keyword,
- it will be added to auxdata.
- You can then use that data in your import scripts.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-</listitem></itemizedlist>
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-</listitem></itemizedlist>
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard

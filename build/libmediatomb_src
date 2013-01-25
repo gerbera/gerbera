@@ -84,8 +84,6 @@ libmediatomb_a_SOURCES = \
 ../src/metadata/dvd_handler.h \
 ../src/metadata/exiv2_handler.cc \
 ../src/metadata/exiv2_handler.h \
-../src/metadata/extractor_handler.cc \
-../src/metadata/extractor_handler.h \
 ../src/metadata/ffmpeg_handler.cc \
 ../src/metadata/ffmpeg_handler.h \
 ../src/metadata_handler.cc \

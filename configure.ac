@@ -1207,33 +1207,9 @@ LDFLAGS="$LDFLAGS_SAVE"
 ######## ffmpeg or extractor?
 
 FFMPEG_STATUS=
-LIBEXTRACTOR_STATUS=
-
-MT_OPTION([libextractor], [enable],
-          [metadata extraction with the help of libextractor],[],[])
 
 MT_OPTION([ffmpeg], [disable],
           [metadata extraction with the help of ffmpeg],[],[])
-
-if ((test "x$FFMPEG_OPTION_ENABLED" = xno) && (test "x$LIBEXTRACTOR_OPTION_ENABLED" = xyes)) ; then
-    FFMPEG_STATUS=disabled
-    FFMPEG_OPTION_ENABLED=no
-    AC_MSG_WARN([ffmpeg disabled])
-elif ((test "x$FFMPEG_OPTION_ENABLED" = xyes) && (test "x$LIBEXTRACTOR_OPTION_ENABLED" = xno)) ; then
-    LIBEXTRACTOR_STATUS=disabled
-    LIBEXTRACTOR_OPTION_ENABLED=no
-elif ((test "x$FFMPEG_OPTION_ENABLED" = xyes) && (test "x$LIBEXTRACTOR_OPTION_ENABLED" = xyes)) ; then
-    if ((test "x$FFMPEG_OPTION_REQUESTED" = xyes) && (test "x$LIBEXTRACTOR_OPTION_REQUESTED" = xyes)); then
-    AC_MSG_ERROR([Please select either ffmpeg or libextractor, but not both.])
-    elif ((test "x$FFMPEG_OPTION_REQUESTED" = xyes) && (test "x$LIBEXTRACTOR_OPTION_REQUESTED" = xno)); then
-       LIBEXTRACTOR_STATUS=disabled
-       LIBEXTRACTOR_OPTION_ENABLED=no
-    elif ((test "x$FFMPEG_OPTION_REQUESTED" = xno) && (test "x$LIBEXTRACTOR_OPTION_REQUESTED" = xyes)); then
-       FFMPEG_STATUS=disabled
-       FFMPEG_OPTION_ENABLED=no
-       AC_MSG_WARN([ffmpeg disabled])
-    fi
-fi
 
 ######## ffmpeg
 
@@ -1322,22 +1298,6 @@ if test "x$LASTFM_OPTION_ENABLED" = "xyes"; then
                 AC_MSG_WARN([$LASTFMLIB_PKG_ERRORS])
             fi
         ])
-fi
-
-# extractor
-
-if test "x$LIBEXTRACTOR_OPTION_ENABLED" = xyes; then
-    MT_CHECK_PACKAGE([libextractor], [extractor], [extractor], [EXTRACTOR_getKeywords])
-fi
-
-if test "x$LIBEXTRACTOR_STATUS" = xyes; then
-    FFMPEG_STATUS=disabled
-    FFMPEG_OPTION_ENABLED=no
-else
-    if (test "x$LIBEXTRACTOR_OPTION_REQUESTED" = xyes) &&
-       (test "x$LIBEXTRACTOR_OPTION_ENABLED" = xyes); then
-        AC_MSG_ERROR([unable to configure libextractor support])
-    fi
 fi
 
 ######## libexif
@@ -1633,7 +1593,7 @@ if (test "x$SOPCAST_OPTION_ENABLED" = xyes); then
     AC_DEFINE([SOPCAST], [1], [Enable support for the SopCast service])
 fi
 
-AC_DEFINE_UNQUOTED([COMPILE_INFO], "\thost:\t\t\t$host\n\tsqlite3:\t\t$SQLITE3_STATUS\n\tmysql:\t\t\t$MYSQL_STATUS\n\tlibjs:\t\t\t$JS_STATUS\n\tlibmagic:\t\t$LIBMAGIC_STATUS\n\tinotify:\t\t$INOTIFY_STATUS\n\tlibexif:\t\t$LIBEXIF_STATUS\n\tid3lib:\t\t\t$ID3LIB_STATUS\n\ttaglib:\t\t\t$TAGLIB_STATUS\n\tffmpeg\t\t\t$FFMPEG_STATUS\n\tlibmp4v2:\t\t$LIBMP4V2_STATUS\n\texternal transcoding:\t$EXTERNAL_TRANSCODING_OPTION_ENABLED\n\tcurl:\t\t\t$CURL_OK\n\tYouTube:\t\t$YOUTUBE_OPTION_ENABLED\n\tlibextractor\t\t$LIBEXTRACTOR_STATUS\n\tdb-autocreate:\t\t$DB_AUTOCREATE_OPTION_ENABLED\n\tdebug log:\t\t$DEBUG_LOG_OPTION_ENABLED\n\tprotocol info extension:$PROTOCOLINFO_EXTENSION_OPTION_ENABLED\n\tffmpegthumbnailer:\t$FFMPEGTHUMBNAILER_STATUS\n\tlastfmlib:\t\t$LASTFMLIB_STATUS\n\tdata directory:\t\t$PACKAGE_DATADIR", [compile option summary])
+AC_DEFINE_UNQUOTED([COMPILE_INFO], "\thost:\t\t\t$host\n\tsqlite3:\t\t$SQLITE3_STATUS\n\tmysql:\t\t\t$MYSQL_STATUS\n\tlibjs:\t\t\t$JS_STATUS\n\tlibmagic:\t\t$LIBMAGIC_STATUS\n\tinotify:\t\t$INOTIFY_STATUS\n\tlibexif:\t\t$LIBEXIF_STATUS\n\tid3lib:\t\t\t$ID3LIB_STATUS\n\ttaglib:\t\t\t$TAGLIB_STATUS\n\tffmpeg\t\t\t$FFMPEG_STATUS\n\tlibmp4v2:\t\t$LIBMP4V2_STATUS\n\texternal transcoding:\t$EXTERNAL_TRANSCODING_OPTION_ENABLED\n\tcurl:\t\t\t$CURL_OK\n\tYouTube:\t\t$YOUTUBE_OPTION_ENABLED\n\tdb-autocreate:\t\t$DB_AUTOCREATE_OPTION_ENABLED\n\tdebug log:\t\t$DEBUG_LOG_OPTION_ENABLED\n\tprotocol info extension:$PROTOCOLINFO_EXTENSION_OPTION_ENABLED\n\tffmpegthumbnailer:\t$FFMPEGTHUMBNAILER_STATUS\n\tlastfmlib:\t\t$LASTFMLIB_STATUS\n\tdata directory:\t\t$PACKAGE_DATADIR", [compile option summary])
 
 ###############
 AC_CONFIG_FILES([
@@ -1674,7 +1634,6 @@ echo "external transcoding  : $EXTERNAL_TRANSCODING_OPTION_ENABLED"
 echo "curl                  : $CURL_FOUND"
 echo "YouTube               : $YOUTUBE_OPTION_ENABLED"
 #echo "Weborama              : $WEBORAMA_OPTION_ENABLED"
-echo "libextractor          : $LIBEXTRACTOR_STATUS"
 echo "db-autocreate         : $DB_AUTOCREATE_OPTION_ENABLED"
         
 if test "x$TOMBDEBUG_OPTION_ENABLED" = xyes; then

@@ -4,7 +4,7 @@ MediaTomb - UPnP MediaServer
 
    Copyright (c) 2005 Gena Batsyan, Sergey Bostandzhyan
 
-   Copyright (c) 2006-2010 Gena Batsyan, Sergey Bostandzhyan,
+   Copyright (c) 2006-2010, 2013 Gena Batsyan, Sergey Bostandzhyan,
    Leonhard Wimmer
 
    THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY! USE AT YOUR
@@ -206,18 +206,6 @@ WARNING!
        curl is a library that allows to easily fetch content from
        the web, if you want to compile MediaTomb with YouTube
        and/or SopCast support then curl is required.
-     * libextractor http://gnunet.org/libextractor/ OPTIONAL
-       This library tries to gather metadata from all kinds of
-       files (also .avi and .asf). The drawback is, that it can be
-       very slow at scanning video files. We also noticed that it
-       uses a lot of memory when reading files, the result is,
-       that media import becomes extremely slow. It is up to you
-       if you want to use it or not, you may try the 'extract'
-       utility that is provided with the library to check if there
-       is any metadata that can be extracted from your media prior
-       to enabling this feature in MediaTomb. By default
-       libextractor is disabled, use ./configure
-       --enable-libextractor to activate it.
      * ffmpeg http://ffmpeg.mplayerhq.hu/ OPTIONAL
        Currently ffmpeg is used to gather additional metadata from
        audio and video files.
@@ -622,22 +610,7 @@ $ file -i somefile.avi
    the import script, the thumbnails will be offered as additional
    resources via UPnP.
 
-3.2.22. Libextractor Support
-
---enable-libextractor
-
-   Default:
-          disabled
-
-   Libextractor is a library that attempts to parse all sorts of
-   files, this includes exif data, id3 tags and much more. It can
-   also deal with .AVI and .ASF files which is useful when your
-   video files have the appropriate metadata. The drawback is - it
-   is slow, especially slow on scanning big video files, so it
-   slows down the import process considerably. For this reason
-   this library is disabled by default.
-
-3.2.23. Inotify Support
+3.2.22. Inotify Support
 
 --enable-inotify
 
@@ -658,7 +631,7 @@ $ file -i somefile.avi
    inotify - the availability of inotify will then be checked at
    server runtime.
 
-3.2.24. YouTube Service Support
+3.2.23. YouTube Service Support
 
 --enable-youtube
 
@@ -672,14 +645,14 @@ $ file -i somefile.avi
    only makes sense in combination with transcoding, since most
    devices do not support playback of flv files natively.
 
-3.2.25. External Transcoding
+3.2.24. External Transcoding
 
 --enable-external-transcoding
 
    Default:
           enabled
 
-3.2.26. Sqlite Backup Defaults
+3.2.25. Sqlite Backup Defaults
 
 --enable-sqlite-backup-defaults
 
@@ -689,7 +662,7 @@ $ file -i somefile.avi
    Enables backup option for sqlite as the default setting, might
    be useful for NAS builds.
 
-3.2.27. Curl
+3.2.26. Curl
 
 --enable-curl
 
@@ -701,7 +674,7 @@ $ file -i somefile.avi
    External Transcoding are turned on. YouTube requires curl, but
    it's optional for External Transcoding.
 
-3.2.28. Ffmpeg Support
+3.2.27. Ffmpeg Support
 
 --enable-ffmpeg
 
@@ -714,7 +687,7 @@ $ file -i somefile.avi
    yet used for transcoding, so this feature only gathers
    additional metadata.
 
-3.2.29. Ffmpeg Thumbnailer Support
+3.2.28. Ffmpeg Thumbnailer Support
 
 --enable-ffmpegthumbnailer
 
@@ -725,7 +698,7 @@ $ file -i somefile.avi
    you also compile with ffmpeg support. The library allows to
    generate thumbnails for the videos on the fly.
 
-3.2.30. MediaTomb Debug Output
+3.2.29. MediaTomb Debug Output
 
 --enable-tombdebug
 
@@ -737,7 +710,7 @@ $ file -i somefile.avi
    Use this if you are trying to trace down a bug or a problem,
    the additional output may give you some clues.
 
-3.2.31. UPnP Library Debug Output
+3.2.30. UPnP Library Debug Output
 
 --enable-upnpdebug
 
@@ -747,7 +720,7 @@ $ file -i somefile.avi
    This option enables debug output of the UPnP SDK. You should
    not need it under normal circumstances.
 
-3.2.32. Log Output
+3.2.31. Log Output
 
 --disable-log
 
@@ -757,7 +730,7 @@ $ file -i somefile.avi
    This option allows you to suppress all log output from the
    server.
 
-3.2.33. Debug Log Output
+3.2.32. Debug Log Output
 
    Default:
           enabled
@@ -766,7 +739,7 @@ $ file -i somefile.avi
    messages. If enabled, switching between verbose and normal
    output during runtime becomes possible.
 
-3.2.34. Package Search Directory
+3.2.33. Package Search Directory
 
 --with-search=DIR
 
@@ -779,7 +752,7 @@ $ file -i somefile.avi
    script to additionally search for headers and libraries of
    various packages in DIR/include and DIR/lib.
 
-3.2.35. Specifying Header And Library Locations Of Various Packages
+3.2.34. Specifying Header And Library Locations Of Various Packages
 
    You can specify the exact location of particular headers and
    libraries. Some packages use extra programs that tell us the
@@ -788,15 +761,15 @@ $ file -i somefile.avi
    programs. The parameters are self explanatory, in case of
    headers and libraries the DIR parameter is the directory where
    those headers and libraries are located.
---with-sqlite3-h=DIR               search for sqlite3 headers only in D
-IR
+--with-sqlite3-h=DIR               search for sqlite3 headers only in DI
+R
 --with-sqlite3-libs=DIR            search for sqlite3 libraries only in
- DIR
+DIR
 --with-mysql-cfg=mysql_config      absolute path/name of mysql_config
 --with-js-h=DIR                    search for js (spidermonkey) headers
- in DIR
---with-js-libs=DIR                 search for js (spidermonkey) librari
-es in DIR
+in DIR
+--with-js-libs=DIR                 search for js (spidermonkey) librarie
+s in DIR
 --with-libmagic-h=DIR              search for filemagic headers in DIR
 --with-libmagic-libs=DIR           search for filemagic headers in DIR
 --with-libexif-h=DIR               search for libexif headers in DIR
@@ -811,27 +784,24 @@ es in DIR
 --with-inotify-h=DIR               search for inotify header in DIR
 --with-iconv-h=DIR                 search for iconv headers in DIR/sys
 --with-iconv-libs=DIR              search for iconv libraries in DIR
---with-libextractor-h=DIR          search for extractor headers in DIR
---with-libextractor-libs=DIR       search for extractor libraries in DI
-R
 --with-avformat-h=DIR              search for avformat headers in DIR
 --with-avformat-libs=DIR           search for avformat libraries in DIR
 --with-avutil-libs=DIR             search for avutil libraries in DIR
 --with-ffmpegthumbnailer-h=DIR     search for ffmpegthumbnailer headers
- in DIR
---with-ffmpegthumbnailer-libs=DIR  search for ffmpegthumbnailer librari
-es in DIR
---with-curl-cfg=curl-config        absolute path/name of curl-config sc
-ript
+in DIR
+--with-ffmpegthumbnailer-libs=DIR  search for ffmpegthumbnailer librarie
+s in DIR
+--with-curl-cfg=curl-config        absolute path/name of curl-config scr
+ipt
 --with-libmp4v2-h=DIR              search for libmp4v2 headers in DIR
 --with-libmp4v2-libs=DIR           search for libmp4v2 libraries in DIR
 --with-rt-libs=DIR                 search for rt libraries in DIR
 --with-pthread-libs=DIR            search for pthread libraries in DIR
 --with-lastfmlib-h=DIR             search for lastfmlib headers in DIR
---with-lastfmlib-libs=DIR          search for lastfmlib libraries in DI
-R
+--with-lastfmlib-libs=DIR          search for lastfmlib libraries in DIR
 
-3.2.36. The devconf Script
+
+3.2.35. The devconf Script
 
    If you are doing some development work and some debugging, you
    will probably want to compile with the -g flag and also disable
@@ -1882,8 +1852,8 @@ type=...
             playlist scripts. For more details read
             doc/scripting.txt
           +
-<playlist-script create-link="yes">/path/to/my/playlist-script.js</play
-list-script>
+<playlist-script create-link="yes">/path/to/my/playlist-script.js</playl
+ist-script>
 
             Optional
             Default: ${prefix}/share/mediatomb/js/playlists.js,
@@ -2164,18 +2134,17 @@ avi
        layout, it allows the user to create a more complex
        container structure using a customized import script. The
        metadata that can be extracted depends on the library,
-       currently we support libebexif and libextractor, the
-       libraries provide a default set of keys that can be passed
-       in the options below. The data according to those keys will
-       the be extracted from the media and imported into the
-       database along with the item. When processing the item, the
-       import script will have full access to the gathered
-       metadata, thus allowing the user to organize the data with
-       the use of the extracted information. A practical example
-       would be: if have more than one digital camera in your
-       family you could extract the camera model from the Exif
-       tags and sort your photos in a structure of your choice,
-       like:
+       currently we support libebexif which provides a default set
+       of keys that can be passed in the options below. The data
+       according to those keys will the be extracted from the
+       media and imported into the database along with the item.
+       When processing the item, the import script will have full
+       access to the gathered metadata, thus allowing the user to
+       organize the data with the use of the extracted
+       information. A practical example would be: if have more
+       than one digital camera in your family you could extract
+       the camera model from the Exif tags and sort your photos in
+       a structure of your choice, like:
        Photos/MyCamera1/All Photos
        Photos/MyCamera1/Date
        Photos/MyCamera2/All Photos
@@ -2257,31 +2226,6 @@ avi
     </auxdata>
 </id3>
 
-          +
-<libextractor>
-
-            Optional
-            Options for the extractor library.
-            Child tags:
-               o
-<auxdata>
-
-                 Optional
-                 Currently only adding keywords to auxdata is
-                 supported. For a list of keywords/tags see the
-                 libextractor documentation.
-                 Child tags:
-                    #
-<add-data tag="keyword1"/>
-<add-data tag="keyword2"/>
-...
-
-                      Optional
-                      If the library was able to extract the data
-                      according to the given keyword, it will be
-                      added to auxdata. You can then use that data
-                      in your import scripts.
-
 6.2.1. Online Content Settings
 
    This section resides under import and defines options for
@@ -2348,8 +2292,8 @@ fetch-buffer-fill-size=...
           appropriate transcoding profiles to make use of the
           YouTube feature.
 
-<YouTube enabled="no" refresh="12600" update-at-start="yes" purge-after
-="1200000" racy-content="exclude">
+<YouTube enabled="no" refresh="12600" update-at-start="yes" purge-after=
+"1200000" racy-content="exclude">
 
    Optional
 
@@ -2447,8 +2391,8 @@ racy-content=...
           all tags are optional and can occur more then once.
 
      *
-<standardfeed feed="top_rated" region-id="ru" time-range="today" start-
-index="1" amount="all"/>
+<standardfeed feed="top_rated" region-id="ru" time-range="today" start-i
+ndex="1" amount="all"/>
 
        Optional
        This tag tells us to retrieve one of the standard video
@@ -2666,8 +2610,8 @@ amount=...
 
    The transcoding section allows to define ways on how to
    transcode content.
-<transcoding enabled="yes" fetch-buffer-size="262144" fetch-buffer-fill
--size="0">
+<transcoding enabled="yes" fetch-buffer-size="262144" fetch-buffer-fill-
+size="0">
 
    Optional
 

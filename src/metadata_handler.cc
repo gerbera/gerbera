@@ -59,10 +59,6 @@
 #include "metadata/ffmpeg_handler.h"
 #endif
 
-#ifdef HAVE_LIBEXTRACTOR
-#include "metadata/extractor_handler.h"
-#endif
-
 #ifdef HAVE_LIBEXIF
 #include "metadata/libexif_handler.h"
 #endif
@@ -173,15 +169,6 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
             handler = Ref<MetadataHandler>(new LibExifHandler());
             break;
         }
-#else
-        
-#ifndef HAVE_LIBEXTRACTOR
-        if (content_type == CONTENT_TYPE_JPG)
-        {
-            set_jpeg_resolution_resource(item, 0);
-        }
-#endif // LIBEXTRACTOR
-        
 #endif // HAVE_LIBEXIF
 
 #if defined(HAVE_LIBMP4V2)
@@ -227,15 +214,6 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
             break;
         }
 #endif
-
-#ifdef HAVE_LIBEXTRACTOR
-        {
-            handler = Ref<MetadataHandler>(new ExtractorHandler());
-            break;
-        }
-#endif // HAVE_LIBEXTRACTOR
-
-
     }
     while (false);
 
