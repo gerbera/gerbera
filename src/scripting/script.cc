@@ -63,31 +63,39 @@
 
 using namespace zmm;
 
-/*
-static JSFunctionSpec js_global_functions[] = {
-    {"print",           js_print,          0, 0, 0},
-    {"addCdsObject",    js_addCdsObject,   3, 0, 0},
-    {"copyObject",      js_copyObject,     2, 0, 0},
-    {"f2i",             js_f2i,            1, 0, 0},
-    {"m2i",             js_m2i,            1, 0, 0},
-    {"p2i",             js_m2i,            1, 0, 0},
-    {"j2i",             js_m2i,            1, 0, 0},
-    {0,0,0,0,0}
+static JSFunctionSpec js_global_functions[] =
+{
+    JS_FS("print",          js_print,          1, 0),
+    JS_FS("addCdsObject",   js_addCdsObject,   3, 0),
+    JS_FS("copyObject",     js_copyObject,     2, 0),
+    JS_FS("f2i",            js_f2i,            1, 0),
+    JS_FS("m2i",            js_m2i,            1, 0),
+    JS_FS("p2i",            js_m2i,            1, 0),
+    JS_FS("j2i",            js_m2i,            1, 0),
+    JS_FS_END 
 };
-*/
 
 String Script::getProperty(JSObject *obj, String name)
 {
     jsval val;
     JSString *str;
+    String ret;
     if (!JS_GetProperty(cx, obj, name.c_str(), &val))
         return nil;
     if (val == JSVAL_VOID)
         return nil;
     str = JS_ValueToString(cx, val);
-    if (! str)
+    if (!str)
         return nil;
-    return JS_GetStringBytes(str);
+
+    char *ts = JS_EncodeString(cx, str);
+    if (!ts)
+    {
+        return nil;
+    }
+    ret = ts;
+    JS_free(cx, ts);
+    return ret;
 }
 
 int Script::getBoolProperty(JSObject *obj, String name)
@@ -156,8 +164,9 @@ void Script::setObjectProperty(JSObject *parent, String name, JSObject *obj)
 {
     jsval val;
     val = OBJECT_TO_JSVAL(obj);
-    if (!JS_SetProperty(cx, parent, name.c_str(), &val))
-        return;
+    if (!JS_SetProperty(cx, parent, name.c_str(), &val)) {
+        log_error("Failed to set object property %s\n", name.c_str());
+    }
 }
 
 void Script::deleteProperty(JSObject *obj, String name)
@@ -286,7 +295,7 @@ Script::Script(Ref<Runtime> runtime) : Object()
     JS_SetErrorReporter(cx, js_error_reporter);
     initGlobalObject();
 
-    JS_SetPrivate(cx, glob, this);
+    JS_SetContextPrivate(cx, this);
 
     /* initialize contstants */
     setIntProperty(glob, _("OBJECT_TYPE_CONTAINER"),
@@ -397,26 +406,7 @@ Script::Script(Ref<Runtime> runtime) : Object()
     setProperty(glob, _("UPNP_CLASS_PLAYLIST_CONTAINER"),
             _(UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER));
 
-//    defineFunctions(js_global_functions);
-/* JS_DefineFunctions does not work with the js packge shipped by Ubuntu
-static JSFunctionSpec js_global_functions[] = {
-    {"print",           js_print,          0, 0, 0},
-    {"addCdsObject",    js_addCdsObject,   3, 0, 0},
-    {"copyObject",      js_copyObject,     2, 0, 0},
-    {"f2i",             js_f2i,            1, 0, 0},
-    {"m2i",             js_m2i,            1, 0, 0},
-    {"p2i",             js_m2i,            1, 0, 0},
-    {"j2i",             js_m2i,            1, 0, 0},
-    {0,0,0,0,0}
-};
-*/
-    defineFunction(_("print"),          js_print,           0);
-    defineFunction(_("addCdsObject"),   js_addCdsObject,    3);
-    defineFunction(_("copyObject"),     js_copyObject,      2);
-    defineFunction(_("f2i"),            js_f2i,             1);
-    defineFunction(_("m2i"),            js_m2i,             1);
-    defineFunction(_("p2i"),            js_p2i,             1);
-    defineFunction(_("j2i"),            js_j2i,             1);
+    defineFunctions(js_global_functions);
 
     String common_scr_path = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT);
 
@@ -427,14 +417,15 @@ static JSFunctionSpec js_global_functions[] = {
         try
         {
             common_script = _load(common_scr_path);
-            common_root = JS_NewScriptObject(cx, common_script);
-            JS_AddNamedRoot(cx, &common_root, "common-script");
+            JS_AddNamedObjectRoot(cx, &common_script, "common-script");
             _execute(common_script);
         }
         catch (Exception e)
         {
-            if (common_root)
-                JS_RemoveRoot(cx, &common_root);
+            if (common_script)
+            {
+                JS_RemoveObjectRoot(cx, &common_script);
+            }
 
             log_js("Unable to load %s: %s\n", common_scr_path.c_str(), 
                     e.getMessage().c_str());
@@ -459,8 +450,8 @@ Script::~Script()
     JS_SetContextThread(cx);
     JS_BeginRequest(cx);
 #endif
-    if (common_root)
-        JS_RemoveRoot(cx, &common_root);
+    if (common_script)
+        JS_RemoveObjectRoot(cx, &common_script);
 
 /*
  * scripts are unrooted and will be cleaned up by GC
@@ -504,11 +495,11 @@ void Script::initGlobalObject()
     static JSClass global_class =
     {
         "global",                                   /* name */
-        JSCLASS_HAS_PRIVATE,                        /* flags */
+        JSCLASS_HAS_PRIVATE | JSCLASS_GLOBAL_FLAGS, /* flags */
         JS_PropertyStub,                            /* add property */
         JS_PropertyStub,                            /* del property */
         JS_PropertyStub,                            /* get property */
-        JS_PropertyStub,                            /* set property */
+        JS_StrictPropertyStub,                      /* set property */
         JS_EnumerateStandardClasses,                /* enumerate */
         JS_ResolveStub,                             /* resolve */
         JS_ConvertStub,                             /* convert */
@@ -517,7 +508,7 @@ void Script::initGlobalObject()
     };
 
     /* create the global object here */
-    glob = JS_NewObject(cx, &global_class, NULL, NULL);
+    glob = JS_NewCompartmentAndGlobalObject(cx, &global_class, NULL);
     if (! glob)
         throw _Exception(_("Scripting: could not initialize glboal class"));
 
@@ -539,12 +530,12 @@ void Script::defineFunctions(JSFunctionSpec *functions)
         throw _Exception(_("Scripting: JS_DefineFunctions failed"));
 }
 
-JSScript *Script::_load(zmm::String scriptPath)
+JSObject *Script::_load(zmm::String scriptPath)
 {
     if (glob == NULL)
         initGlobalObject();
 
-    JSScript *scr;
+    JSObject *scr;
 
     String scriptText = read_text_file(scriptPath);
 
@@ -571,14 +562,11 @@ JSScript *Script::_load(zmm::String scriptPath)
 
 void Script::load(zmm::String scriptPath)
 {
-    if (script)
-        JS_DestroyScript(cx, script);
-
     script = _load((scriptPath));
 }
 
 
-void Script::_execute(JSScript *scr)
+void Script::_execute(JSObject *scr)
 {
     jsval ret_val;
 
@@ -662,7 +650,7 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
     JSObject *js_meta = getObjectProperty(js, _("meta"));
     if (js_meta)
     {
-        JS_AddNamedRoot(cx, &js_meta, "meta");
+        JS_AddNamedObjectRoot(cx, &js_meta, "meta");
         /// \todo: only metadata enumerated in MT_KEYS is taken
         for (int i = 0; i < M_MAX; i++)
         {
@@ -687,7 +675,7 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
                 }
             }
         }
-        JS_RemoveRoot(cx, &js_meta);
+        JS_RemoveObjectRoot(cx, &js_meta);
     }
     
     // stuff that has not been exported to js

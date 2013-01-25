@@ -46,59 +46,74 @@
 
 using namespace zmm;
 
-extern "C" {
+//extern "C" {
 
 JSBool 
-js_print(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
+js_print(JSContext *cx, uintN argc, jsval *argv)
 {
     uintN i;
     JSString *str;
 
+    if (!JS_ConvertArguments(cx, argc, JS_ARGV(cx, argv), "*"))
+    {
+        return JS_FALSE;
+    }
+
+    Ref<StringBuffer> buf(new StringBuffer());
     for (i = 0; i < argc; i++) 
     {
-        str = JS_ValueToString(cx, argv[i]);
+        str = JS_ValueToString(cx, JS_ARGV(cx, argv)[i]);
         if (!str)
-            return JS_TRUE;
-        argv[i] = STRING_TO_JSVAL(str);
-        log_js("%s\n", JS_GetStringBytes(str));
+        {
+            return JS_FALSE;
+        }
+        JS_ARGV(cx, argv)[i] = STRING_TO_JSVAL(str);
+        char *temp = JS_EncodeString(cx, str);
+        if (temp)
+        {
+            *buf << temp;
+            free(temp);
+        }
     }
+    log_js("%s\n", buf->toString().c_str());
+    JS_SET_RVAL(cx, argv, JSVAL_VOID);
     return JS_TRUE;
 }
 
 JSBool
-js_copyObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
+js_copyObject(JSContext *cx, uintN argc, jsval *argv)
 {
     jsval arg;
     JSObject *js_cds_obj;
     JSObject *js_cds_clone_obj;
 
-    Script *self = (Script *)JS_GetPrivate(cx, obj);
+    Script *self = (Script *)JS_GetContextPrivate(cx);
 
     try
     {
-        arg = argv[0];
+        arg = JS_ARGV(cx, argv)[0];
         if (!JSVAL_IS_OBJECT(arg))
             return JS_TRUE;
 
         if (!JS_ValueToObject(cx, arg, &js_cds_obj))
             return JS_TRUE;
 
-        argv[0] = OBJECT_TO_JSVAL(js_cds_obj);
+        JS_ARGV(cx, argv)[0] = OBJECT_TO_JSVAL(js_cds_obj);
 
         Ref<CdsObject> cds_obj = self->jsObject2cdsObject(js_cds_obj, nil);
         js_cds_clone_obj = JS_NewObject(cx, NULL, NULL, NULL);
-        argv[1] = OBJECT_TO_JSVAL(js_cds_clone_obj);
+        JS_ARGV(cx, argv)[1] = OBJECT_TO_JSVAL(js_cds_clone_obj);
 
         self->cdsObject2jsObject(cds_obj, js_cds_clone_obj);
 
-        *rval = OBJECT_TO_JSVAL(js_cds_clone_obj);
-
+        JS_SET_RVAL(cx, argv, OBJECT_TO_JSVAL(js_cds_clone_obj));
         return JS_TRUE;
 
     }
     catch (ServerShutdownException se)
     {
         log_warning("Aborting script execution due to server shutdown.\n");
+        JS_SET_RVAL(cx, argv, JSVAL_VOID);
         return JS_FALSE;
     }
     catch (Exception e)
@@ -106,11 +121,12 @@ js_copyObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval
         log_error("%s\n", e.getMessage().c_str());
         e.printStackTrace();
     }
+    JS_SET_RVAL(cx, argv, JSVAL_VOID);
     return JS_TRUE;
 }
 
 JSBool
-js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
+js_addCdsObject(JSContext *cx, uintN argc, jsval *argv)
 {
     try
     {
@@ -118,6 +134,7 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         JSString *str;
         String path;
         String containerclass;
+        char *ts;
 
         JSObject *js_cds_obj;
         JSObject *js_orig_obj = NULL;
@@ -126,7 +143,7 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         Ref<StringConverter> p2i;
         Ref<StringConverter> i2i;
 
-        Script *self = (Script *)JS_GetPrivate(cx, obj);
+        Script *self = (Script *)JS_GetContextPrivate(cx);
 
         if (self == NULL)
         {
@@ -143,29 +160,51 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
             i2i = StringConverter::i2i();
         }
  
-        arg = argv[0];
+        arg = JS_ARGV(cx, argv)[0];
         if (!JSVAL_IS_OBJECT(arg))
+        {
+            JS_SET_RVAL(cx, argv, JSVAL_VOID);
             return JS_TRUE;
+        }
         if (!JS_ValueToObject(cx, arg, &js_cds_obj))
+        {
+            JS_SET_RVAL(cx, argv, JSVAL_VOID);
             return JS_TRUE;
+        }
 
         // root it
-        argv[0] = OBJECT_TO_JSVAL(js_cds_obj);
+        JS_ARGV(cx, argv)[0] = OBJECT_TO_JSVAL(js_cds_obj);
 
-        str = JS_ValueToString(cx, argv[1]);
+        str = JS_ValueToString(cx, JS_ARGV(cx, argv)[1]);
         if (!str)
+        {
             path = _("/");
+        }
         else
-            path = JS_GetStringBytes(str);
+        {
+            ts = JS_EncodeString(cx, str);
+            if (ts)
+            {
+                path = ts;
+                JS_free(cx, ts);
+            }
+        }
 
-        JSString *cont = JS_ValueToString(cx, argv[2]);
+        JSString *cont = JS_ValueToString(cx, JS_ARGV(cx, argv)[2]);
         if (cont)
         {
-            containerclass = JS_GetStringBytes(cont);
+            ts = JS_EncodeString(cx, cont);
+            if (ts)
+            {
+                containerclass = ts;
+                JS_free(cx, ts);
+            }
+            containerclass = ts;
             if (!string_ok(containerclass) || containerclass == "undefined")
                 containerclass = nil;
         }
 
+        JSObject *obj = JS_THIS_OBJECT(cx, argv);
         if (self->whoami() == S_PLAYLIST)
             js_orig_obj = self->getObjectProperty(obj, _("playlist"));
         else if (self->whoami() == S_IMPORT)
@@ -174,15 +213,19 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         if (js_orig_obj == NULL)
         {
             log_debug("Could not retrieve orig/playlist object\n");
+            JS_SET_RVAL(cx, argv, JSVAL_VOID);
             return JS_TRUE;
         }
 
         // root it
-        argv[1] = OBJECT_TO_JSVAL(js_orig_obj);
+        JS_ARGV(cx, argv)[1] = OBJECT_TO_JSVAL(js_orig_obj);
 
         orig_object = self->jsObject2cdsObject(js_orig_obj, self->getProcessedObject());
         if (orig_object == nil)
+        {
+            JS_SET_RVAL(cx, argv, JSVAL_VOID);
             return JS_TRUE;
+        }
 
         Ref<CdsObject> cds_obj;
         Ref<ContentManager> cm = ContentManager::getInstance();
@@ -194,6 +237,7 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
             if (otype == -1)
             {
                 log_error("missing objectType property\n");
+                JS_SET_RVAL(cx, argv, JSVAL_VOID);
                 return JS_TRUE;
             }
 
@@ -207,7 +251,10 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
 
                 pcd_id = cm->addFile(loc, false, false, true);
                 if (pcd_id == INVALID_OBJECT_ID)
+                {
+                    JS_SET_RVAL(cx, argv, JSVAL_VOID);
                     return JS_TRUE;
+                }
 
                 Ref<CdsObject> mainObj = Storage::getInstance()->loadObject(pcd_id);
                 cds_obj = self->jsObject2cdsObject(js_cds_obj, mainObj);
@@ -219,7 +266,10 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
             cds_obj = self->jsObject2cdsObject(js_cds_obj, orig_object);
         
         if (cds_obj == nil)
+        {
+            JS_SET_RVAL(cx, argv, JSVAL_VOID);
             return JS_TRUE;
+        }
 
         int id;
 
@@ -252,7 +302,10 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
             if (self->whoami() == S_PLAYLIST)
             {
                 if (pcd_id == INVALID_OBJECT_ID)
+                {
+                    JS_SET_RVAL(cx, argv, JSVAL_VOID);
                     return JS_TRUE;
+                }
 
                 /// \todo check why this if is needed?
                 if (IS_CDS_ACTIVE_ITEM(cds_obj->getObjectType()))
@@ -284,14 +337,18 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
 
         JSString *str2 = JS_NewStringCopyN(cx, tmp.c_str(), tmp.length());
         if (!str2)
+        {
+            JS_SET_RVAL(cx, argv, JSVAL_VOID);
             return JS_TRUE;
-        *rval = STRING_TO_JSVAL(str2);
-
+        }
+        
+        JS_SET_RVAL(cx, argv, STRING_TO_JSVAL(str2));
         return JS_TRUE;
     }
     catch (ServerShutdownException se)
     {
         log_warning("Aborting script execution due to server shutdown.\n");
+        JS_SET_RVAL(cx, argv, JSVAL_VOID);
         return JS_FALSE;
     }
     catch (Exception e)
@@ -299,29 +356,39 @@ js_addCdsObject(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rv
         log_error("%s\n", e.getMessage().c_str());
         e.printStackTrace();
     }
+    JS_SET_RVAL(cx, argv, JSVAL_VOID);
     return JS_TRUE;
 }
 
-static JSBool convert_charset_generic(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval, charset_convert_t chr)
+static JSBool convert_charset_generic(JSContext *cx, uintN argc, jsval *argv, charset_convert_t chr)
 {
     try
     {
         JSString *str;
         String result;
 
-        Script *self = (Script *)JS_GetPrivate(cx, obj);
+        Script *self = (Script *)JS_GetContextPrivate(cx);
 
         if (self == NULL)
         {
             log_debug("Could not retrieve class instance from global object\n");
+            JS_SET_RVAL(cx, argv, JSVAL_VOID);
             return JS_FALSE;
         }
 
-        if (JSVAL_IS_STRING(argv[0]))
+        if (JSVAL_IS_STRING(JS_ARGV(cx, argv)[0]))
         {
-            str = JS_ValueToString(cx, argv[0]);
+            str = JS_ValueToString(cx, JS_ARGV(cx, argv)[0]);
             if (str)
-                result = JS_GetStringBytes(str);
+            {
+                 
+                char *ts = JS_EncodeString(cx, str);
+                if (ts)
+                {
+                    result = ts;
+                    JS_free(cx, ts);
+                }
+            }
         }
 
         if (result != nil)
@@ -329,13 +396,17 @@ static JSBool convert_charset_generic(JSContext *cx, JSObject *obj, uintN argc, 
             result = self->convertToCharset(result, chr);
             JSString *str2 = JS_NewStringCopyN(cx, result.c_str(), result.length());
             if (!str2)
+            {
+                JS_SET_RVAL(cx, argv, JSVAL_VOID);
                 return JS_TRUE;
-            *rval = STRING_TO_JSVAL(str2);
+            }
+            JS_SET_RVAL(cx, argv, STRING_TO_JSVAL(str2));
         }
     }
     catch (ServerShutdownException se)
     {
         log_warning("Aborting script execution due to server shutdown.\n");
+        JS_SET_RVAL(cx, argv, JSVAL_VOID);
         return JS_FALSE;
     }
     catch (Exception e)
@@ -343,30 +414,31 @@ static JSBool convert_charset_generic(JSContext *cx, JSObject *obj, uintN argc, 
         log_error("%s\n", e.getMessage().c_str());
         e.printStackTrace();
     }
+    JS_SET_RVAL(cx, argv, JSVAL_VOID);
     return JS_TRUE;
 }
 
 
-JSBool js_f2i(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
+JSBool js_f2i(JSContext *cx, uintN argc, jsval *argv)
 {
-     return convert_charset_generic(cx, obj, argc, argv, rval, F2I);
+     return convert_charset_generic(cx, argc, argv, F2I);
 }
 
-JSBool js_m2i(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
+JSBool js_m2i(JSContext *cx, uintN argc, jsval *argv)
 {
-     return convert_charset_generic(cx, obj, argc, argv, rval, M2I);
+     return convert_charset_generic(cx, argc, argv, M2I);
 }
 
-JSBool js_p2i(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
+JSBool js_p2i(JSContext *cx, uintN argc, jsval *argv)
 {
-     return convert_charset_generic(cx, obj, argc, argv, rval, P2I);
+     return convert_charset_generic(cx, argc, argv, P2I);
 }
 
-JSBool js_j2i(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
+JSBool js_j2i(JSContext *cx, uintN argc, jsval *argv)
 {
-     return convert_charset_generic(cx, obj, argc, argv, rval, J2I);
+     return convert_charset_generic(cx, argc, argv, J2I);
 }
 
-} // extern "C"
+//} // extern "C"
 
 #endif //HAVE_JS

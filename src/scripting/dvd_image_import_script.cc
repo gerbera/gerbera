@@ -69,7 +69,7 @@ static JSBool js_addDVDObject(JSContext *cx, JSObject *obj, uintN argc,
             return JS_TRUE;
         }
 
-        arg = argv[0];
+        arg = JS_ARGV(cx, argv)[0];
         if (!JSVAL_IS_OBJECT(arg))
         {
             log_error("Invalid argument!");
@@ -83,27 +83,27 @@ static JSBool js_addDVDObject(JSContext *cx, JSObject *obj, uintN argc,
         }
 
         // root it
-        argv[0] = OBJECT_TO_JSVAL(js_cds_obj);
+        JS_ARGV(cx, argv)[0] = OBJECT_TO_JSVAL(js_cds_obj);
 
-        if (!JS_ValueToInt32(cx, argv[1], &title))
+        if (!JS_ValueToInt32(cx, JS_ARGV(cx, argv)[1], &title))
         {
             log_error("addDVDObject: Invalid DVD title number given!\n");
             return JS_TRUE;
         }
 
-        if (!JS_ValueToInt32(cx, argv[2], &chapter))
+        if (!JS_ValueToInt32(cx, JS_ARGV(cx, argv)[2], &chapter))
         {
             log_error("addDVDObject: Invalid DVD chapter number given!\n");
             return JS_TRUE;
         }
 
-        if (!JS_ValueToInt32(cx, argv[3], &audio_track))
+        if (!JS_ValueToInt32(cx, JS_ARGV(cx, argv)[3], &audio_track))
         {
             log_error("addDVDObject: Invalid DVD audio track number given!\n");
             return JS_TRUE;
         }
 
-        str = JS_ValueToString(cx, argv[4]);
+        str = JS_ValueToString(cx, JS_ARGV(cx, argv)[4]);
         if (!str)
         {
             log_error("addDVDObject: Invalid DVD container chain given!\n");
@@ -117,7 +117,7 @@ static JSBool js_addDVDObject(JSContext *cx, JSObject *obj, uintN argc,
             return JS_TRUE;
         }
 
-        JSString *cont = JS_ValueToString(cx, argv[5]);
+        JSString *cont = JS_ValueToString(cx, JS_ARGV(cx, argv)[5]);
         if (cont)
         {
             containerclass = JS_GetStringBytes(cont);

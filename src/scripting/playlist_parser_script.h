@@ -52,7 +52,6 @@ private:
     int currentObjectID;
     char *currentLine;
     zmm::Ref<GenericTask> currentTask;
-    JSObject *root;
 };
 
 #endif // __SCRIPTING_PLAYLIST_PARSER_SCRIPT_H__
