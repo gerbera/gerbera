@@ -208,7 +208,11 @@ struct inotify_event *Inotify::nextEvent()
     if (FD_ISSET(stop_fd_read, &read_fds))
     {
         char buf;
-        read(stop_fd_read, &buf, 1);
+        if (read(stop_fd_read, &buf, 1) == -1)
+        {
+            log_error("Inotify: could not read stop: %s\n",
+                      mt_strerror(errno).c_str());
+        }
     }
 
     if (FD_ISSET(inotify_fd, &read_fds))
@@ -254,7 +258,11 @@ struct inotify_event *Inotify::nextEvent()
 void Inotify::stop()
 {
     char stop = 's';
-    write(stop_fd_write, &stop, 1);
+    if (write(stop_fd_write, &stop, 1) == -1)
+    {
+        log_error("Inotify: could not send stop: %s\n",
+                  mt_strerror(errno).c_str());
+    }
 }
 
 #endif//HAVE_INOTIFY
