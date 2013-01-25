@@ -836,11 +836,14 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
             log_debug("Updating existing YouTube object\n");
             obj->setID(old->getID());
             obj->setParentID(old->getParentID());
+            /// \todo check what this was originally meant for
+            /* 
             struct timespec oldt, newt;
             oldt.tv_nsec = 0;
             oldt.tv_sec = old->getAuxData(_(ONLINE_SERVICE_LAST_UPDATE)).toLong();
             newt.tv_nsec = 0;
             newt.tv_sec = obj->getAuxData(_(ONLINE_SERVICE_LAST_UPDATE)).toLong();
+            */
             ContentManager::getInstance()->updateObject(obj);
         }
 

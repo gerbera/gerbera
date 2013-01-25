@@ -103,6 +103,12 @@ void Sqlite3Storage::init()
         Sqlite3Storage::staticThreadProc,
         this
     );
+
+    if (ret != 0)
+    {
+        throw _StorageException(nil, _("Could not start sqlite thread: ") +
+                    mt_strerror(errno));
+    }
     
     // wait for sqlite3 thread to become ready
     cond->wait();

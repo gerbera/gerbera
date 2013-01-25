@@ -2107,7 +2107,6 @@ void ContentManager::handlePersistentAutoscanRecreate(int scanID, scan_mode_t sc
 
 void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
 {
-    int scanID = INVALID_SCAN_ID;
     Ref<Storage> storage = Storage::getInstance();
     Ref<AutoscanDirectory> original;
 
@@ -2151,7 +2150,7 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
         storage->addAutoscanDirectory(dir);
         if (dir->getScanMode() == TimedScanMode)
         {
-            scanID = autoscan_timed->add(dir);
+            autoscan_timed->add(dir);
             timerNotify(dir->getTimerParameter());
         }
 #ifdef HAVE_INOTIFY
@@ -2219,7 +2218,7 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
 
     if (dir->getScanMode() == TimedScanMode)
     {
-        scanID = autoscan_timed->add(copy);
+        autoscan_timed->add(copy);
         timerNotify(copy->getTimerParameter());
     }
 #ifdef HAVE_INOTIFY
