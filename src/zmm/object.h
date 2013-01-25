@@ -34,6 +34,7 @@
 
 #include <new> // for size_t
 #include "atomic.h"
+#include <stddef.h>
 
 namespace zmm
 {
