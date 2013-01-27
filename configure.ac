@@ -882,26 +882,18 @@ if test "x$LIBJS_OPTION_ENABLED" = "xyes"; then
         ],
         [
             AC_MSG_WARN([$LIBJS_PKG_ERRORS])
-            PKG_CHECK_MODULES([LIBJS], [mozilla-js >= 1.8.5],
+            PKG_CHECK_MODULES([LIBJS], [mozjs185],
                 [
                     JS_STATUS="yes"
                     AC_DEFINE([HAVE_JS], [1], [libjs presence])
                 ],
                 [
-                    AC_MSG_WARN([$LIBJS_PKG_ERRORS])
-                    PKG_CHECK_MODULES([LIBJS], [mozjs185],
-                        [
-                            JS_STATUS="yes"
-                            AC_DEFINE([HAVE_JS], [1], [libjs presence])
-                        ],
-                        [
-                            if test "x$LIBJS_OPTION_REQUESTED" = "xyes"; then
-                                AC_MSG_ERROR([$LIBJS_PKG_ERRORS])
-                            else
-                                AC_MSG_WARN([$LIBJS_PKG_ERRORS])
-                            fi
-                            JS_STATUS="missing"
-                        ])
+                    if test "x$LIBJS_OPTION_REQUESTED" = "xyes"; then
+                        AC_MSG_ERROR([$LIBJS_PKG_ERRORS])
+                    else
+                        AC_MSG_WARN([$LIBJS_PKG_ERRORS])
+                    fi
+                    JS_STATUS="missing"
                 ])
         ])
 
