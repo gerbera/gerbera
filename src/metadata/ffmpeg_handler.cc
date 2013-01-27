@@ -259,7 +259,7 @@ void FfmpegHandler::fillMetadata(Ref<CdsItem> item)
     int x = 0;
     int y = 0;
 
-	AVFormatContext *pFormatCtx;
+	AVFormatContext *pFormatCtx = NULL;
 	
 	// Suppress all log messages
 	av_log_set_callback(FfmpegNoOutputStub);
