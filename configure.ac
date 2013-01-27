@@ -1390,7 +1390,7 @@ LIBMP4V2_STATUS=
 
 MT_CHECK_OPTIONAL_PACKAGE([libmp4v2], [disable],
                  [libmp4v2 support for mp4 metadata extraction],
-                 [$MP4_HEADER], [mp4v2], [MP4Read]) 
+                 [$MP4_HEADER], [mp4v2], [MP4Read], [], [], [undef]) 
 
 if test "x$LIBMP4V2_STATUS" = xyes; then
    CFLAGS="$CFLAGS $LIBMP4V2_CFLAGS"
@@ -1399,6 +1399,37 @@ if test "x$LIBMP4V2_STATUS" = xyes; then
    AC_DEFINE_UNQUOTED([LIBMP4V2_INCLUDE], [<$MP4_HEADER.h>], [$MP4_HEADER.h])
    AC_LANG_SAVE
    AC_LANG_CPLUSPLUS
+   AC_MSG_CHECKING([for libmp4v2 compatibility])
+   AC_COMPILE_IFELSE(
+        [AC_LANG_PROGRAM(
+            [
+                #include <$MP4_HEADER.h>
+            ],
+            [
+                (void)MP4GetMetadataName(0, 0);
+            ]
+        )],
+        [
+            AC_MSG_RESULT([yes])
+            AC_DEFINE([HAVE_LIBMP4V2], [1], [libmp4v2 library presence])
+        ],
+        [
+            AC_MSG_RESULT([not compatible])
+            if test "x$LIBMP4V2_OPTION_REQUESTED" = "xyes"; then
+                AC_MSG_ERROR([Unable to configure libmp4v2 support])
+            else
+                LIBMP4V2_STATUS="not compatible"
+            fi
+        ])
+    LDFLAGS="$LDFLAGS_SAVE"
+    CFLAGS="$CFLAGS_SAVE"
+    CXXFLAGS="$CXXFLAGS_SAVE"
+fi
+
+if test "x$LIBMP4V2_STATUS" = "xyes"; then
+   CFLAGS="$CFLAGS $LIBMP4V2_CFLAGS"
+   CXXFLAGS="$CXXFLAGS $LIBMP4V2_CFLAGS"
+   LDFLAGS="$LDFLAGS $LIBMP4V2_LDFLAGS $LIBMP4V2_LIBS"
    AC_MSG_CHECKING([for MP4GetMetadataCoverArtCount() in libmp4v2])
    AC_COMPILE_IFELSE(
         [AC_LANG_PROGRAM(
@@ -1437,7 +1468,10 @@ if test "x$LIBMP4V2_STATUS" = xyes; then
             AC_MSG_RESULT([no])
         ])
 
-   AC_LANG_RESTORE
+    AC_LANG_RESTORE
+    LDFLAGS="$LDFLAGS_SAVE"
+    CFLAGS="$CFLAGS_SAVE"
+    CXXFLAGS="$CXXFLAGS_SAVE"
 fi
 
 ########## INOTIFY TOOLS
