@@ -764,25 +764,32 @@ if test "x$RT_STATUS" = xyes; then
     LDFLAGS="$LDFLAGS $RT_LDFLAGS $RT_LIBS"
 fi
 
+MT_OPTION([sqlite3], [disable],
+          [compile with sqlite3 support],[],[])
+
 SQLITE3_STATUS="no"
-PKG_CHECK_MODULES([SQLITE3], [sqlite3],
-    [
-        AC_DEFINE([HAVE_SQLITE3], [1], [sqlite is available])
-        SQLITE3_STATUS="yes"
-    ],
-    [
-        AC_MSG_WARN([$SQLITE3_PKG_ERRORS])
-    ])
+if test "x$SQLITE3_OPTION_ENABLED" = "xyes"; then
+    PKG_CHECK_MODULES([SQLITE3], [sqlite3],
+        [
+            SQLITE3_STATUS="yes"
+            AC_DEFINE([HAVE_SQLITE3], [1], [sqlite is available])
+        ],
+        [
+            if test "x$SQLITE3_OPTION_REQUESTED" = "xyes"; then
+                AC_MSG_ERROR([$SQLITE3_PKG_ERRORS])
+            else
+                AC_MSG_WARN([$SQLITE3_PKG_ERRORS])
+                SQLITE3_STATUS="missing"
+            fi
+        ])
+fi
+
+if ((test "x$SQLITE3_OPTION_ENABLED" != "xyes") &&
+    (test "x$SQLITE3_OPTION_REQUESTED" = "xyes")); then
+    SQLITE3_STATUS="disabled"
+fi
 
 if test "x$SQLITE3_STATUS" = "xyes"; then
-    if test "x$RT_STATUS" = "xyes"; then
-        SQLITE_LDFLAGS="$SQLITE_LDFLAGS $RT_LDFLAGS"
-        SQLITE_LIBS="$SQLITE_LIBS $RT_LIBS"
-    fi
-
-    AC_SUBST(SQLITE3_LDFLAGS)
-    AC_SUBST(SQLITE3_LIBS)
-
     if test "x$SQLITE_BACKUP_OPTION_ENABLED" = xyes; then
         AC_DEFINE([SQLITE_BACKUP_ENABLED], [1], [enable sqlite db backup settings in config.xml by default])
     fi
