@@ -1230,7 +1230,7 @@ MT_OPTION([ffmpeg], [disable],
 
 if test "x$FFMPEG_OPTION_ENABLED" = "xyes"; then
     AVFORMAT_STATUS="no"
-    PKG_CHECK_MODULES([AVFORMAT], [libavformat >= 0.27],
+    PKG_CHECK_MODULES([AVFORMAT], [libavformat >= 54.29.104 ],
         [
             AVFORMAT_STATUS="yes"
         ],
@@ -1242,7 +1242,7 @@ if test "x$FFMPEG_OPTION_ENABLED" = "xyes"; then
             fi
         ])
     AVUTIL_STATUS="no"
-    PKG_CHECK_MODULES([AVUTIL], [libavutil >= 0.27],
+    PKG_CHECK_MODULES([AVUTIL], [libavutil >= 51.73.101 ],
         [
             AVUTIL_STATUS="yes"
         ],
