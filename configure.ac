@@ -732,6 +732,8 @@ fi
 ############ zlib
 
 ZLIB_STATUS="no"
+
+if  test "x$DB_AUTOCREATE_OPTION_ENABLED" = xyes; then
 PKG_CHECK_MODULES([ZLIB], [zlib],
     [
         AC_DEFINE([HAVE_ZLIB], [1], [zlib is available])
@@ -740,6 +742,7 @@ PKG_CHECK_MODULES([ZLIB], [zlib],
     [
         AC_MSG_WARN([$ZLIB_PKG_ERRORS])
     ])
+fi
 
 if test "x$ZLIB_STATUS" = "xyes"; then
     if test "x$DB_AUTOCREATE_OPTION_ENABLED" = xyes; then
