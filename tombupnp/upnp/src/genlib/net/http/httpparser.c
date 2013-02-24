@@ -2000,13 +2000,13 @@ parser_parse_chunky_headers( INOUT http_parser_t * parser )
         // finally, done with the whole msg
         parser->position = POS_COMPLETE;
 
-        // save entity start ptr as the very last thing to do
-        parser->msg.entity.buf = parser->msg.msg.buf +
-            parser->entity_start_position;
-
         membuffer_delete( &parser->msg.msg, save_pos,
                           ( parser->scanner.cursor - save_pos ) );
         parser->scanner.cursor = save_pos;
+
+        // save entity start ptr as the very last thing to do
+        parser->msg.entity.buf = parser->msg.msg.buf +
+            parser->entity_start_position;
 
         return PARSE_SUCCESS;
     } else {
