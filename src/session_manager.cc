@@ -33,7 +33,6 @@
     #include "autoconfig.h"
 #endif
 
-#include "uuid/uuid.h"
 #include "session_manager.h"
 #include "config_manager.h"
 #include "tools.h"
