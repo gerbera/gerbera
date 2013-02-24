@@ -1714,7 +1714,7 @@ http_RecvPostMessage( http_parser_t * parser,
                 Data_Buf_Size );
         entity_offset += Data_Buf_Size;
 
-        if( Instr->IsVirtualFile ) {
+        if( Instr && Instr->IsVirtualFile ) {
             Num_Write = virtualDirCallback.write( Fp, Buf, Data_Buf_Size );
             if( Num_Write < 0 ) {
                 virtualDirCallback.close( Fp );
@@ -1731,7 +1731,7 @@ http_RecvPostMessage( http_parser_t * parser,
     } while( ( parser->position != POS_COMPLETE )
              || ( entity_offset != parser->msg.entity.length ) );
 
-    if( Instr->IsVirtualFile ) {
+    if( Instr && Instr->IsVirtualFile ) {
         virtualDirCallback.close( Fp );
     } else {
         fclose( Fp );
