@@ -622,6 +622,8 @@ String ConfigManager::createDefaultConfig(String userhome)
                                            _(CONTENT_TYPE_MP3)));
     mtcontent->appendElementChild(treat_as(_("application/ogg"), 
                                            _(CONTENT_TYPE_OGG)));
+    mtcontent->appendElementChild(treat_as(_("audio/ogg"),
+                                           _(CONTENT_TYPE_OGG)));
     mtcontent->appendElementChild(treat_as(_("audio/x-flac"), 
                                            _(CONTENT_TYPE_FLAC)));
     mtcontent->appendElementChild(treat_as(_("image/jpeg"), 
