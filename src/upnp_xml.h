@@ -76,4 +76,8 @@ zmm::Ref<mxml::Element> UpnpXML_RenderDeviceDescription(zmm::String presentation
 /// \param URL download location of the item (will be child element of the <res> tag)
 /// \param attributes Dictionary containing the <res> tag attributes (like resolution, etc.)
 zmm::Ref<mxml::Element> UpnpXML_DIDLRenderResource(zmm::String URL, zmm::Ref<Dictionary> attributes);
+
+/// \brief Renders a subtitle resource tag (Samsung proprietary extension)
+/// \param URL download location of the video item
+zmm::Ref<mxml::Element> UpnpXML_DIDLRenderCaptionInfo(zmm::String URL);
 #endif // __UPNP_XML_H__

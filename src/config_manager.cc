@@ -1440,6 +1440,14 @@ void ConfigManager::validate(String serverhome)
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
     SET_BOOL_OPTION(CFG_SERVER_EXTEND_PROTOCOLINFO_CL_HACK);
 */
+    temp = getOption(_("/server/protocolInfo/attribute::samsung-hack"),
+                     _(DEFAULT_EXTEND_PROTOCOLINFO_SM_HACK));
+    if (!validateYesNo(temp))
+        throw _Exception(_("Error in config file: samsung-hack attribute of the "
+                          "protocolInfo tag must be either \"yes\" or \"no\""));
+
+    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    SET_BOOL_OPTION(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK);
 #endif
 
     temp = getOption(_("/server/pc-directory/attribute::upnp-hide"),

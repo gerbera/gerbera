@@ -381,3 +381,20 @@ Ref<Element> UpnpXML_DIDLRenderResource(String URL, Ref<Dictionary> attributes)
 
     return res;
 }
+
+Ref<Element> UpnpXML_DIDLRenderCaptionInfo(String URL) {
+    Ref<Element> cap(new Element(_("sec:CaptionInfoEx")));
+
+    // Samsung DLNA clients don't follow this URL and
+    // obtain subtitle location from video HTTP headers.
+    // We don't need to know here what the subtitle type
+    // is and even if there is a subtitle.
+    // This tag seems to be only a hint for Samsung devices,
+    // though it's necessary.
+
+    int endp = URL.rindex('.');
+    cap->setText(URL.substring(0, endp) + ".srt");
+    cap->setAttribute(_("sec:type"), _("srt"));
+
+    return cap;
+}

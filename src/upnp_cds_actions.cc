@@ -106,6 +106,14 @@ void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
 
     Ref<ConfigManager> cfg = ConfigManager::getInstance();
 
+#ifdef EXTEND_PROTOCOLINFO
+    if (cfg->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK))
+    {
+        didl_lite->setAttribute(_(XML_SEC_NAMESPACE_ATTR),
+                                _(XML_SEC_NAMESPACE));
+    }
+#endif
+
     for(int i = 0; i < arr->size(); i++)
     {
         Ref<CdsObject> obj = arr->get(i);

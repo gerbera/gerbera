@@ -483,6 +483,14 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         res_attrs->put(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
                        protocolInfo);
 
+        if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK))
+        {
+            if (mimeType.startsWith(_("video")))
+            {
+                element->appendElementChild(UpnpXML_DIDLRenderCaptionInfo(url));
+            }
+        }
+
         log_debug("extended protocolInfo: %s\n", protocolInfo.c_str());
         }
 #endif

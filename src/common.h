@@ -196,6 +196,8 @@
 #define XML_DC_NAMESPACE                "http://purl.org/dc/elements/1.1/"
 #define XML_UPNP_NAMESPACE_ATTR         "xmlns:upnp"
 #define XML_UPNP_NAMESPACE              "urn:schemas-upnp-org:metadata-1-0/upnp/"
+#define XML_SEC_NAMESPACE_ATTR          "xmlns:sec"
+#define XML_SEC_NAMESPACE               "http://www.sec.co.kr/"
 
 // default values
 #define DEFAULT_INTERNAL_CHARSET        "UTF-8"
@@ -243,6 +245,7 @@
 #define DEFAULT_LAYOUT_TYPE             "builtin" 
 #define DEFAULT_EXTEND_PROTOCOLINFO     NO
 //#define DEFAULT_EXTEND_PROTOCOLINFO_CL_HACK     NO
+#define DEFAULT_EXTEND_PROTOCOLINFO_SM_HACK     NO
 #define DEFAULT_HIDE_PC_DIRECTORY       NO
 #ifdef YOUTUBE
     #define YOUTUBE_PAGESIZE            106496

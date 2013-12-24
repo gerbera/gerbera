@@ -305,6 +305,53 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
                     /// header, since chunked encoding may be active and we do not
                     /// know that here
                 }
+
+#ifdef EXTEND_PROTOCOLINFO
+                    Ref<ConfigManager> cfg = ConfigManager::getInstance();
+                    if (cfg->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK))
+                    {
+                        if (item->getMimeType().startsWith(_("video"))) {
+                            // Look for subtitle file and returns it's URL
+                            // in CaptionInfo.sec response header.
+                            // To be more compliant with original Samsung
+                            // server we should check for getCaptionInfo.sec: 1
+                            // request header.
+                            Ref<Array<StringBase> > subexts(new Array<StringBase>());
+                            subexts->append(_(".srt"));
+                            subexts->append(_(".ssa"));
+                            subexts->append(_(".smi"));
+                            subexts->append(_(".sub"));
+
+                            String bfilepath = path.substring(0, path.rindex('.'));
+                            String validext;
+                            for (int i=0; i<subexts->size(); i++) {
+                                String ext = subexts->get(i);
+
+                                String fpath = bfilepath + ext;
+                                if (access(fpath.c_str(), R_OK) == 0)
+                                {
+                                    validext = ext;
+                                    break;
+                                }
+                            }
+
+
+                            if (validext.length() > 0)
+                            {
+                                String burlpath = _(filename);
+                                burlpath = burlpath.substring(0, burlpath.rindex('.'));
+                                Ref<Server> server = Server::getInstance();
+                                String url = _("http://")
+                                    + server->getIP() + ":" + server->getPort() 
+                                    + burlpath + validext;
+
+                                if (string_ok(header))
+                                    header = header + _("\r\n");
+                                header = header + "CaptionInfo.sec: " + url;
+                            }
+                        }
+#endif
+                    }
             }
 
         if (!string_ok(mimeType))
