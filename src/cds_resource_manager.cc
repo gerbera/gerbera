@@ -465,7 +465,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         // and the media is converted, so set CI to 1
         if (!isExtThumbnail && transcoded)
         {
-            extend = extend + D_OP + "=00;" + 
+            extend = extend + D_OP + "=10;" +
                      D_CONVERSION_INDICATOR + "=" D_CONVERSION;
 
             if (mimeType.startsWith(_("audio")) || 
@@ -477,7 +477,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         extend = extend + D_OP + "=01;" + 
                  D_CONVERSION_INDICATOR + "=" + D_NO_CONVERSION;
 
-        protocolInfo = protocolInfo.substring(0, protocolInfo.rindex(':')+1) + 
+        protocolInfo = protocolInfo.substring(0, protocolInfo.rindex(':')+1) +
                        extend;
         res_attrs->put(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
                        protocolInfo);

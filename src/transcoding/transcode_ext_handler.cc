@@ -82,7 +82,8 @@ TranscodeExternalHandler::TranscodeExternalHandler() : TranscodeHandler()
 Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile, 
                                               String location, 
                                               Ref<CdsObject> obj, 
-                                              struct File_Info *info)
+                                              struct File_Info *info,
+                                              String range)
 {
     bool isURL = false;
 //    bool is_srt = false;
@@ -118,9 +119,11 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     }
 
     info->content_type = ixmlCloneDOMString(mimeType.c_str());
-
 #ifdef EXTEND_PROTOCOLINFO
     String header;
+    header = header + _("TimeSeekRange.dlna.org: npt=") + range;
+
+    log_debug("Adding TimeSeekRange response HEADERS: %s\n", header.c_str());
     header = getDLNAtransferHeader(mimeType, header);
     if (string_ok(header))
         info->http_header = ixmlCloneDOMString(header.c_str());
@@ -328,7 +331,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
         
     chmod(fifo_name.c_str(), S_IWUSR | S_IRUSR);
    
-    arglist = parseCommandLine(profile->getArguments(), location, fifo_name);
+    arglist = parseCommandLine(profile->getArguments(), location, fifo_name, range);
 
     log_info("Arguments: %s\n", profile->getArguments().c_str());
     Ref<TranscodingProcessExecutor> main_proc(new TranscodingProcessExecutor(profile->getCommand(), arglist));

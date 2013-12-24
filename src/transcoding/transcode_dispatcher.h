@@ -42,7 +42,8 @@ public:
     virtual zmm::Ref<IOHandler> open(zmm::Ref<TranscodingProfile> profile, 
                                      zmm::String location,
                                      zmm::Ref<CdsObject> obj, 
-                                     struct File_Info *info);
+                                     struct File_Info *info,
+                                     zmm::String range);
 };
 
 

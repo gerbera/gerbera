@@ -1337,7 +1337,7 @@ process_request( IN http_message_t * req,
             {
                 // use urlbuf instead of filename, because the filename 
                 // is already unescaped, but we want the escaped version
-                *Fp = pVirtualDirCallback->open( req->urlbuf, &finfo, UPNP_READ );
+                *Fp = pVirtualDirCallback->open( req->urlbuf, req->msg.buf, &finfo, UPNP_READ );
                 if( *Fp == NULL )
                 {
                     err_code = HTTP_NOT_FOUND;
@@ -1349,7 +1349,7 @@ process_request( IN http_message_t * req,
                 // use urlbuf instead of filename, because the filename 
                 // is already unescaped, but we want the escaped version
 
-                if( pVirtualDirCallback->get_info( req->urlbuf, &finfo ) !=
+                if( pVirtualDirCallback->get_info( req->urlbuf, req->msg.buf, &finfo ) !=
                         0 ) {
                     err_code = HTTP_NOT_FOUND;
                     goto error_handler;
@@ -1370,7 +1370,7 @@ process_request( IN http_message_t * req,
                     goto error_handler;
                 }
                 // get info
-                *Fp = pVirtualDirCallback->open( filename->buf, &finfo, UPNP_READ );
+                *Fp = pVirtualDirCallback->open( req->urlbuf, req->msg.buf, &finfo, UPNP_READ );
                 if( (*Fp == NULL) || finfo.is_directory ) {
                     err_code = HTTP_NOT_FOUND;
                     goto error_handler;
@@ -1629,7 +1629,7 @@ http_RecvPostMessage( http_parser_t * parser,
 
     if( Instr && Instr->IsVirtualFile ) {
 
-        Fp = virtualDirCallback.open( filename, finfo, UPNP_WRITE );
+        Fp = virtualDirCallback.open( filename, parser->msg.msg.buf, finfo, UPNP_WRITE );
         if( Fp == NULL ) {
             return HTTP_INTERNAL_SERVER_ERROR;
         }

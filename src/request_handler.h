@@ -43,7 +43,8 @@ public:
                           OUT struct File_Info *info) = 0;
     virtual zmm::Ref<IOHandler> open(IN const char *filename, 
                                      OUT struct File_Info *info, 
-                                     IN enum UpnpOpenFileMode mode) = 0;
+                                     IN enum UpnpOpenFileMode mode,
+                                     IN zmm::String range) = 0;
 
     /// \brief Splits the url into a path and parameters string. 
     /// Only '?' and '/' separators are allowed, otherwise an exception will

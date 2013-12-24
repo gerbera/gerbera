@@ -300,7 +300,10 @@ bool validateYesNo(zmm::String value);
 /// separator. In addition special %in and %out tokens are replaced by given
 /// strings.
 /// \todo add escaping
-zmm::Ref<zmm::Array<zmm::StringBase> > parseCommandLine(zmm::String line, zmm::String in, zmm::String out);
+zmm::Ref<zmm::Array<zmm::StringBase> > parseCommandLine(zmm::String line,
+                                                        zmm::String in,
+                                                        zmm::String out,
+                                                        zmm::String range);
 
 /// \brief this is the mkstemp routine from glibc, the only difference is that
 /// it does not return an fd but just the name that we could use.

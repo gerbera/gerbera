@@ -63,7 +63,8 @@
 using namespace zmm;
 using namespace mxml;
 
-static Ref<RequestHandler> create_request_handler(const char *filename)
+static Ref<RequestHandler> create_request_handler(const char *filename,
+                                                  const char *headers)
 {
     String path, parameters;
 
@@ -150,11 +151,11 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
 ///
 /// \return 0 Success.
 /// \return -1 Error.
-static int web_get_info(IN const char *filename, OUT struct File_Info *info)
+static int web_get_info(IN const char *filename, IN const char *headers, OUT struct File_Info *info)
 {
     try
     {
-        Ref<RequestHandler> reqHandler = create_request_handler(filename);
+        Ref<RequestHandler> reqHandler = create_request_handler(filename, headers);
         reqHandler->get_info(filename, info);
     }
     catch (ServerShutdownException se)
@@ -189,13 +190,39 @@ static int web_get_info(IN const char *filename, OUT struct File_Info *info)
 ///
 /// \return UpnpWebFileHandle A valid file handle.
 /// \return NULL Error.
-static UpnpWebFileHandle web_open(IN const char *filename, OUT struct File_Info *info,
+static UpnpWebFileHandle web_open(IN const char *filename,
+                                  IN const char *headers,
+                                  OUT struct File_Info *info,
                                   IN enum UpnpOpenFileMode mode)
 {
+    log_debug("web_open(): %s", headers);
+
+    String link = url_unescape((char *) filename);
+
+    char *line = strstr((char *)headers, "TimeSeekRange.dlna.org: npt=");
+    char *timeseek;
+    if (line != NULL)
+    {
+         char *lineend = strstr(line, "\n");
+         int chars = lineend - (line + 28);
+         // limit to some value that makes sense to prevent allocating too much
+         // memory due to some maliciously prepared headers
+         if (chars < 1024)
+         {
+             timeseek = (char *)malloc(chars);
+             if (timeseek)
+             {
+                 strncpy(timeseek, line + 28, chars);
+                 log_debug("timeseek range found: %s\n",timeseek);
+                 link = link + "/range/" + timeseek;
+             }
+         }
+    }
+
     try
     {
-        Ref<RequestHandler> reqHandler = create_request_handler(filename);
-        Ref<IOHandler> ioHandler = reqHandler->open(filename, info, mode);
+        Ref<RequestHandler> reqHandler = create_request_handler(filename, headers);
+        Ref<IOHandler> ioHandler = reqHandler->open(link.c_str(), info, mode, nil);
         ioHandler->retain();
         return (UpnpWebFileHandle) ioHandler.getPtr();
     }

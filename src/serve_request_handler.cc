@@ -142,8 +142,10 @@ void ServeRequestHandler::get_info(IN const char *filename, OUT struct File_Info
     }
 }
 
-Ref<IOHandler> ServeRequestHandler::open(IN const char *filename, OUT struct File_Info *info,
-                                         IN enum UpnpOpenFileMode mode)
+Ref<IOHandler> ServeRequestHandler::open(IN const char *filename,
+                                         OUT struct File_Info *info,
+                                         IN enum UpnpOpenFileMode mode,
+                                         IN zmm::String range)
 {
     struct stat statbuf;
     int ret = 0;

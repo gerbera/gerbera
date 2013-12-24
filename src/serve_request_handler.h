@@ -41,8 +41,10 @@ class ServeRequestHandler : public RequestHandler
 public:
     ServeRequestHandler();
     virtual void get_info(IN const char *filename, OUT struct File_Info *info);
-    virtual zmm::Ref<IOHandler> open(IN const char *filename,  OUT struct File_Info *info,
-                                     IN enum UpnpOpenFileMode mode);
+    virtual zmm::Ref<IOHandler> open(IN const char *filename,
+                                     OUT struct File_Info *info,
+                                     IN enum UpnpOpenFileMode mode,
+                                     IN zmm::String range);
 };
 
 

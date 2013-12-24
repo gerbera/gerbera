@@ -942,6 +942,7 @@ struct UpnpVirtualDirCallbacks
    *  should return 0 on success or -1 on an error. */
   int (*get_info) (
     IN  const char *filename,     /** The name of the file to query. */
+    IN  const char *headers,      /** Request headers */
     OUT struct File_Info *info    /** Pointer to a structure to store the 
                                       information on the file. */
     );
@@ -951,6 +952,7 @@ struct UpnpVirtualDirCallbacks
    *  {\tt NULL} to signify an error. */
   UpnpWebFileHandle (*open)(
     IN const char *filename,       /** The name of the file to open. */ 
+    IN  const char *headers,       /** Request headers */
     OUT struct File_Info *info,    /** Pointer to a structure to store the 
                                        information on the file. */
     IN enum UpnpOpenFileMode Mode  /** The mode in which to open the file. 

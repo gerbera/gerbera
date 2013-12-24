@@ -332,7 +332,10 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     log_debug("web_get_info(): end\n");
 }
 
-Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File_Info *info, IN enum UpnpOpenFileMode mode)
+Ref<IOHandler> FileRequestHandler::open(IN const char *filename,
+                                        OUT struct File_Info *info,
+                                        IN enum UpnpOpenFileMode mode,
+                                        IN zmm::String range)
 {
     int objectID;
     String mimeType;
@@ -581,9 +584,11 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename, OUT struct File
 #ifdef EXTERNAL_TRANSCODING
         if (!is_srt && string_ok(tr_profile))
         {
+            String range = dict->get(_("range"));
+
             Ref<TranscodeDispatcher> tr_d(new TranscodeDispatcher());
             Ref<TranscodingProfile> tp = ConfigManager::getInstance()->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
-            return tr_d->open(tp, path, RefCast(item, CdsObject), info);
+            return tr_d->open(tp, path, RefCast(item, CdsObject), info, range);
         }
         else
 #endif

@@ -242,7 +242,8 @@ Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
 
 Ref<IOHandler> WebRequestHandler::open(IN const char *filename,
                                        OUT struct File_Info *info,
-                                       IN enum UpnpOpenFileMode mode)
+                                       IN enum UpnpOpenFileMode mode,
+                                       IN String range)
 {
     log_debug("request: %s\n", filename);
     this->filename = filename;

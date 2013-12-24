@@ -170,7 +170,10 @@ void URLRequestHandler::get_info(IN const char *filename, OUT struct File_Info *
     /// \todo transcoding for get_info
 }
 
-Ref<IOHandler> URLRequestHandler::open(IN const char *filename, OUT struct File_Info *info, IN enum UpnpOpenFileMode mode)
+Ref<IOHandler> URLRequestHandler::open(IN const char *filename,
+                                       OUT struct File_Info *info,
+                                       IN enum UpnpOpenFileMode mode,
+                                       IN String range)
 {
     int objectID;
     String mimeType;
@@ -248,7 +251,7 @@ Ref<IOHandler> URLRequestHandler::open(IN const char *filename, OUT struct File_
                     tr_profile + " found");
 
         Ref<TranscodeDispatcher> tr_d(new TranscodeDispatcher());
-        return tr_d->open(tp, url, RefCast(item, CdsObject), info);
+        return tr_d->open(tp, url, RefCast(item, CdsObject), info, range);
     }
     else
 #endif

@@ -1213,7 +1213,8 @@ bool validateYesNo(String value)
         return true;
 }
 
-Ref<Array<StringBase> > parseCommandLine(String line, String in, String out)
+Ref<Array<StringBase> > parseCommandLine(String line, String in, String out,
+                                         String range)
 {
     Ref<Array<StringBase> > params = split_string(line, ' ');
     if ((in == nil) && (out == nil))
@@ -1224,6 +1225,7 @@ Ref<Array<StringBase> > parseCommandLine(String line, String in, String out)
         String param = params->get(i);
         String newParam = param.replace(_("%in"), in);
         newParam = newParam.replace(_("%out"), out);
+        newParam = newParam.replace(_("%range"), range);
         if (param != newParam)
             params->set(newParam, i);
     }
