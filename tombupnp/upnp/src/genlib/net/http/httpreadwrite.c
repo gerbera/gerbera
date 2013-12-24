@@ -663,8 +663,7 @@ http_Download( IN const char *url_str,
      *hoststr,
      *temp;
     http_parser_t response;
-    size_t msg_length,
-      hostlen;
+    size_t hostlen;
     memptr ctype;
     size_t copy_len;
     membuffer request;
@@ -762,7 +761,6 @@ http_Download( IN const char *url_str,
     {
         // copy entity
         entity_start = response.msg.entity.buf; // what we want
-        msg_length = response.msg.msg.length;   // save for posterity   
         msg_start = membuffer_detach( &response.msg.msg );  // whole msg
 
         // move entity to the start; copy null-terminator too
@@ -770,10 +768,8 @@ http_Download( IN const char *url_str,
 
         // save mem for body only
         *document = realloc( msg_start, *doc_length + 1 );  //LEAK_FIX_MK
-        //*document = Realloc( msg_start,msg_length, *doc_length + 1 );//LEAK_FIX_MK
 
         // shrink can't fail
-        assert( ( int )msg_length > *doc_length );
         assert( *document != NULL );
     }
 

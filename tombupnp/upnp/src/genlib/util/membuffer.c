@@ -489,7 +489,6 @@ membuffer_delete( INOUT membuffer * m,
                   IN int index,
                   IN size_t num_bytes )
 {
-    int return_value;
     int new_length;
     size_t copy_len;
 
@@ -513,8 +512,7 @@ membuffer_delete( INOUT membuffer * m,
     memmove( m->buf + index, m->buf + index + num_bytes, copy_len );
 
     new_length = m->length - num_bytes;
-    return_value = membuffer_set_size( m, new_length ); // trim buffer
-    assert( return_value == 0 );    // shrinking should always work
+    membuffer_set_size( m, new_length ); // trim buffer
 
     // don't modify until buffer is set
     m->length = new_length;
