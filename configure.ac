@@ -1124,6 +1124,33 @@ LDFLAGS="$LDFLAGS_SAVE"
 LIBS="$LIBS_SAVE"
 CXXFLAGS="$CXXFLAGS_SAVE"
 CPPFLAGS="$CPPFLAGS_SAVE"
+
+######### FLAC
+
+FLAC_STATUS=
+
+MT_OPTION([flac], [disable],
+          [FLAC metadata extraction with the help of FLAC library],[],[])
+
+if test "x$FLAC_OPTION_ENABLED" = xyes; then
+    MT_CHECK_PACKAGE([FLAC], [FLAC/metadata], [FLAC], [main])
+else
+    FLAC_STATUS=disabled
+fi
+
+if test "x$FLAC_STATUS" != xyes; then
+    if (test "x$FLAC_OPTION_REQUESTED" = xyes) &&
+       (test "x$FLAC_OPTION_ENABLED" = xyes); then
+        AC_MSG_ERROR([unable to configure FLAC support])
+    fi
+else
+    CFLAGS="$CFLAGS $FLAC_CFLAGS"
+    CXXFLAGS="$CXXFLAGS $FLAC_CFLAGS"
+    LDFLAGS="$LDFLAGS $FLAC_LDFLAGS $FLAC_LIBS"
+    AC_LANG_SAVE
+    AC_LANG_CPLUSPLUS
+fi
+
 ######## curl
 
 if ((test "x$YOUTUBE_OPTION_ENABLED" = xyes) && (test "x$YOUTUBE_OPTION_REQUESTED" = xyes) && (test "x$CURL_OPTION_ENABLED" = "xno") && (test "x$CURL_OPTION_REQUESTED" = "xyes")); then
@@ -1645,7 +1672,7 @@ if (test "x$SOPCAST_OPTION_ENABLED" = xyes); then
     AC_DEFINE([SOPCAST], [1], [Enable support for the SopCast service])
 fi
 
-AC_DEFINE_UNQUOTED([COMPILE_INFO], "\thost:\t\t\t$host\n\tsqlite3:\t\t$SQLITE3_STATUS\n\tmysql:\t\t\t$MYSQL_STATUS\n\tlibjs:\t\t\t$JS_STATUS\n\tlibmagic:\t\t$LIBMAGIC_STATUS\n\tinotify:\t\t$INOTIFY_STATUS\n\tlibexif:\t\t$LIBEXIF_STATUS\n\tid3lib:\t\t\t$ID3LIB_STATUS\n\ttaglib:\t\t\t$TAGLIB_STATUS\n\tffmpeg\t\t\t$FFMPEG_STATUS\n\tlibmp4v2:\t\t$LIBMP4V2_STATUS\n\texternal transcoding:\t$EXTERNAL_TRANSCODING_OPTION_ENABLED\n\tcurl:\t\t\t$CURL_OK\n\tYouTube:\t\t$YOUTUBE_OPTION_ENABLED\n\tdb-autocreate:\t\t$DB_AUTOCREATE_OPTION_ENABLED\n\tdebug log:\t\t$DEBUG_LOG_OPTION_ENABLED\n\tprotocol info extension:$PROTOCOLINFO_EXTENSION_OPTION_ENABLED\n\tffmpegthumbnailer:\t$FFMPEGTHUMBNAILER_STATUS\n\tlastfmlib:\t\t$LASTFMLIB_STATUS\n\tdata directory:\t\t$PACKAGE_DATADIR", [compile option summary])
+AC_DEFINE_UNQUOTED([COMPILE_INFO], "\thost:\t\t\t$host\n\tsqlite3:\t\t$SQLITE3_STATUS\n\tmysql:\t\t\t$MYSQL_STATUS\n\tlibjs:\t\t\t$JS_OK\n\tlibmagic:\t\t$LIBMAGIC_STATUS\n\tinotify:\t\t$INOTIFY_STATUS\n\tlibexif:\t\t$LIBEXIF_STATUS\n\tid3lib:\t\t\t$ID3LIB_STATUS\n\ttaglib:\t\t\t$TAGLIB_STATUS\n\tFLAC:\t\t\t$FLAC_STATUS\n\tffmpeg\t\t\t$FFMPEG_STATUS\n\tlibmp4v2:\t\t$LIBMP4V2_STATUS\n\texternal transcoding:\t$EXTERNAL_TRANSCODING_OPTION_ENABLED\n\tcurl:\t\t\t$CURL_OK\n\tYouTube:\t\t$YOUTUBE_OPTION_ENABLED\n\tlibextractor\t\t$LIBEXTRACTOR_STATUS\n\tdb-autocreate:\t\t$DB_AUTOCREATE_OPTION_ENABLED\n\tdebug log:\t\t$DEBUG_LOG_OPTION_ENABLED\n\tprotocol info extension:$PROTOCOLINFO_EXTENSION_OPTION_ENABLED\n\tffmpegthumbnailer:\t$FFMPEGTHUMBNAILER_STATUS\n\tlastfmlib:\t\t$LASTFMLIB_STATUS\n\tdata directory:\t\t$PACKAGE_DATADIR", [compile option summary])
 
 ###############
 AC_CONFIG_FILES([
@@ -1678,6 +1705,7 @@ echo "libexif               : $LIBEXIF_STATUS"
 echo "expat                 : $EXPAT_STATUS"
 echo "id3lib                : $ID3LIB_STATUS"
 echo "taglib                : $TAGLIB_STATUS"
+echo "FLAC                  : $FLAC_STATUS"
 echo "libmp4v2              : $LIBMP4V2_STATUS"
 echo "ffmpeg                : $FFMPEG_STATUS"
 echo "ffmpegthumbnailer     : $FFMPEGTHUMBNAILER_STATUS"

@@ -45,10 +45,13 @@
 #define CH_EXTURL    4
 #define CH_MP4       5
 #define CH_FFTH      6
+#define CH_FLAC      7
 
 #define CONTENT_TYPE_MP3        "mp3"
 #define CONTENT_TYPE_OGG        "ogg"
 #define CONTENT_TYPE_FLAC       "flac"
+#define CONTENT_TYPE_WMA        "wma"
+#define CONTENT_TYPE_WAVPACK    "wv"
 #define CONTENT_TYPE_JPG        "jpg"
 #define CONTENT_TYPE_PLAYLIST   "playlist"
 #define CONTENT_TYPE_MP4        "mp4"

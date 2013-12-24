@@ -16,8 +16,9 @@ libmediatomb_a_CXXFLAGS = \
                      $(TAGLIB_CFLAGS) \
                      $(LIBEXTRACTOR_CFLAGS) \
                      $(ICONV_CXXFLAGS) \
-					 $(LIBMAGIC_CFLAGS) \
+                     $(LIBMAGIC_CFLAGS) \
                      $(ID3LIB_CFLAGS) \
+                     $(FLAC_CFLAGS) \
                      $(LIBEXIF_CFLAGS) \
                      $(ZLIB_CFLAGS) \
                      $(PTHREAD_CFLAGS) \
@@ -43,8 +44,9 @@ mediatomb_CXXFLAGS = -I$(top_srcdir)/src \
                      $(TAGLIB_CFLAGS) \
                      $(LIBEXTRACTOR_CFLAGS) \
                      $(ICONV_CXXFLAGS) \
-					 $(LIBMAGIC_CFLAGS) \
+                     $(LIBMAGIC_CFLAGS) \
                      $(ID3LIB_CFLAGS) \
+                     $(FLAC_CFLAGS) \
                      $(LIBEXIF_CFLAGS) \
                      $(ZLIB_CFLAGS) \
                      $(PTHREAD_CFLAGS) \
@@ -81,6 +83,7 @@ mediatomb_LDADD = \
     $(LIBJS_LIBS) \
 	$(LIBMAGIC_LIBS) \
     $(ID3LIB_LIBS) \
+    $(FLAC_LIBS) \
     $(LIBEXIF_LIBS) \
     $(ZLIB_LIBS) \
     $(RT_LIBS) \

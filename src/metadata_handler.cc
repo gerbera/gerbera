@@ -51,6 +51,10 @@
 #endif // HAVE_ID3LIB
 #endif // HAVE_TAGLIB
 
+#ifdef HAVE_FLAC
+#include "metadata/flac_handler.h"
+#endif
+
 #ifdef HAVE_LIBMP4V2
 #include "metadata/libmp4v2_handler.h"
 #endif
@@ -136,7 +140,8 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
         if ((content_type == CONTENT_TYPE_MP3) || 
            ((content_type == CONTENT_TYPE_OGG) && 
             (!item->getFlag(OBJECT_FLAG_OGG_THEORA))) ||
-            (content_type == CONTENT_TYPE_FLAC))
+            (content_type == CONTENT_TYPE_WMA) ||
+            (content_type == CONTENT_TYPE_WAVPACK))
         {
             handler = Ref<MetadataHandler>(new TagHandler());
             break;
@@ -151,7 +156,14 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
 #endif // HAVE_ID3LIB
 #endif // HAVE_TAGLIB
 
+#ifdef HAVE_FLAC
+        if (content_type == CONTENT_TYPE_FLAC)
+        {
+            handler = Ref<MetadataHandler>(new FlacHandler());
+            break;
+        }
 
+#endif
 
 #ifdef HAVE_EXIV2
 /*        
@@ -254,6 +266,10 @@ Ref<MetadataHandler> MetadataHandler::createHandler(int handlerType)
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
         case CH_FFTH:
             return Ref<MetadataHandler>(new FfmpegHandler());
+#endif
+#ifdef HAVE_FLAC
+        case CH_FLAC:
+            return Ref<MetadataHandler>(new FlacHandler());
 #endif
         default:
             throw _Exception(_("unknown content handler ID: ") + handlerType);

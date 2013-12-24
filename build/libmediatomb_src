@@ -96,6 +96,8 @@ libmediatomb_a_SOURCES = \
 ../src/metadata/libmp4v2_handler.h \
 ../src/metadata/taglib_handler.cc \
 ../src/metadata/taglib_handler.h \
+../src/metadata/flac_handler.cc \
+../src/metadata/flac_handler.h \
 ../src/mpegdemux/buffer.c \
 ../src/mpegdemux/buffer.h \
 ../src/mpegdemux/mpegdemux.c \

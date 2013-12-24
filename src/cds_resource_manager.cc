@@ -372,6 +372,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         // only add upnp:AlbumArtURI if we have an AA, skip the resource
         if ((i > 0) && ((item->getResource(i)->getHandlerType() == CH_ID3) ||
                         (item->getResource(i)->getHandlerType() == CH_MP4) ||
+                        (item->getResource(i)->getHandlerType() == CH_FLAC) ||
                         (item->getResource(i)->getHandlerType() == CH_EXTURL)))
         {
             String rct;
