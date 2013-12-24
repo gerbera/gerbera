@@ -665,6 +665,10 @@ String secondsToHMS(int seconds)
     h = seconds / 60;
 
     // XXX:XX:XX
+	// This fails if h goes over 999
+    if (h > 999)
+        h = 999;
+
     char *str = (char *)malloc(10);
     sprintf(str, "%02d:%02d:%02d", h, m, s);
     return String::take(str);
