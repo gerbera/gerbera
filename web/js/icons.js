@@ -29,7 +29,7 @@
 
 /* icons for items.js */
 
-var iconPath = '/icons/';
+var iconPath = 'icons/';
 
 var iconNewItem = {src: iconPath + 'document-new.png', width: 30, height: 20};
 var iconAdd = {src: iconPath + 'stock-add.png', width: 30, height: 20};
@@ -56,7 +56,7 @@ var iconContainerAutoscanInotifyConfig = {src: iconPath + 'autoscan_inotify_conf
 
 /* icons for tree.js */
 
-var treeImagePath = '/icons/nanotree/images/';
+var treeImagePath = 'icons/nanotree/images/';
 var iconTreeClosed = treeImagePath + 'folder_closed.png';
 var iconTreeOpen = treeImagePath + 'folder_open.png';
 var iconTreeAutoscanTimedClosed = treeImagePath + 'autoscan_timed_folder_closed.png';

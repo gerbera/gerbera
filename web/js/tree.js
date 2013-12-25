@@ -152,7 +152,7 @@ function treeChangeType()
             writeStates('f0','open');
             //refreshNode(getTreeNode('f0'));
         }
-        showTree('/icons/nanotree/');
+        showTree('icons/nanotree/');
         type.treeShown = true;
     }
     while (type.refreshQueue.length > 0)
