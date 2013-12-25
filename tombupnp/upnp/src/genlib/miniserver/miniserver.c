@@ -883,7 +883,7 @@ StartMiniServer( unsigned short listen_port )
         UpnpCloseSocket( miniSocket->ssdpSock );
 
         CLIENTONLY( UpnpCloseSocket( miniSocket->ssdpReqSock ) );
-
+        free(miniSocket);
         return UPNP_E_OUTOF_MEMORY;
     }
     // wait for miniserver to start
@@ -905,7 +905,7 @@ StartMiniServer( unsigned short listen_port )
         UpnpCloseSocket( miniSocket->miniServerStopSock );
         UpnpCloseSocket( miniSocket->ssdpSock );
         CLIENTONLY( UpnpCloseSocket( miniSocket->ssdpReqSock ) );
-
+        free(miniSocket);
         return UPNP_E_INTERNAL_ERROR;
     }
 

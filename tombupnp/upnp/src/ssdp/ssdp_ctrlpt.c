@@ -342,7 +342,9 @@ ssdp_handle_ctrlpt_msg( IN http_message_t * hmsg,
                                threadData );
                     TPJobSetPriority( &job, MED_PRIORITY );
                     TPJobSetFreeFunction( &job, ( free_routine ) free );
-                    ThreadPoolAdd( &gRecvThreadPool, &job, NULL );
+                    if (ThreadPoolAdd( &gRecvThreadPool, &job, NULL ) != 0) {a
+                        SSDPResultData_delete(threadData);
+                    }
                 }
             }
             node = ListNext( &ctrlpt_info->SsdpSearchList, node );
