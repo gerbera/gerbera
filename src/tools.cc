@@ -1225,9 +1225,14 @@ Ref<Array<StringBase> > parseCommandLine(String line, String in, String out,
         String param = params->get(i);
         String newParam = param.replace(_("%in"), in);
         newParam = newParam.replace(_("%out"), out);
-        newParam = newParam.replace(_("%range"), range);
+        if (range != nil)
+        {
+            newParam = newParam.replace(_("%range"), range);
+        }
         if (param != newParam)
+        {
             params->set(newParam, i);
+        }
     }
 
     return params;
