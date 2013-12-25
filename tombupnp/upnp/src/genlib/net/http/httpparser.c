@@ -286,7 +286,7 @@ scanner_get_token( INOUT scanner_t * scanner,
         token->buf = cursor++;
         token_type = TT_IDENTIFIER;
 
-        while( is_identifier_char( *cursor ) ) {
+        while (cursor < null_terminator && is_identifier_char(*cursor)) {
             cursor++;
         }
 
@@ -300,7 +300,7 @@ scanner_get_token( INOUT scanner_t * scanner,
         token->buf = cursor++;
         token_type = TT_WHITESPACE;
 
-        while( *cursor == ' ' || *cursor == '\t' ) {
+        while (cursor < null_terminator && (*cursor == ' ' || *cursor == '\t')){
             cursor++;
         }
 
