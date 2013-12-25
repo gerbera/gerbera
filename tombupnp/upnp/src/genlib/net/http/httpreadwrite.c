@@ -260,7 +260,7 @@ http_RecvMessage( IN SOCKINFO * info,
                 }
 
                 return 0;
-            } else if( status == PARSE_FAILURE ) {
+            } else if((status == PARSE_FAILURE ) || (status == PARSE_NO_MATCH)){
                 *http_error_code = parser->http_error_code;
                 return UPNP_E_BAD_HTTPMSG;
             } else if( status == PARSE_INCOMPLETE_ENTITY ) {
