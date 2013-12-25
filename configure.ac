@@ -310,6 +310,7 @@ AC_CHECK_SIZEOF(unsigned int)
 AC_CHECK_SIZEOF(unsigned long)
 AC_CHECK_FUNCS(strtoll nl_langinfo setlocale,[],[])
 AC_CHECK_FUNCS(backtrace backtrace_symbols,[],[])
+AC_CHECK_FUNCS(arc4random,[],[])
 AC_C_CONST
 AC_C_INLINE
 AC_C_VOLATILE
