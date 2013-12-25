@@ -1533,11 +1533,7 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
                assert( stats != NULL ); if( stats == NULL ) {
                return;}
 
-	       #ifdef __FreeBSD__
-               printf( "ThreadPoolStats at Time: %d\n", time( NULL ) );
-	       #else
                printf( "ThreadPoolStats at Time: %ld\n", time( NULL ) );
-	       #endif
                printf
                ( "Average Wait in High Priority Q in milliseconds: %f\n",
                  stats->avgWaitHQ );
