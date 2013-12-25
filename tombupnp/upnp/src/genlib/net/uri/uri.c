@@ -1042,7 +1042,8 @@ parse_uri( const char *in,
         out->path_type = REL_PATH;
     }
 
-    if( ( ( begin_hostport + 1 ) < max ) && ( in[begin_hostport] == '/' )
+    //parse hostport only if scheme was found
+    if( ( begin_hostport > 0 ) && ( ( begin_hostport + 1 ) < max ) && ( in[begin_hostport] == '/' )
         && ( in[begin_hostport + 1] == '/' ) ) {
         begin_hostport += 2;
 
@@ -1059,6 +1060,12 @@ parse_uri( const char *in,
         out->hostport.text.size = 0;
         out->hostport.text.buff = 0;
         begin_path = begin_hostport;
+
+        //remove excessive leading slashes (fix for Samsung Smart TV 2012)
+        while( ( ( begin_path + 1 ) < max ) && ( in[begin_path] == '/' ) && ( in[begin_path + 1] == '/') ) {
+            begin_path++;
+        }
+
     }
 
     begin_fragment =
