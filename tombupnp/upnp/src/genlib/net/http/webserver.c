@@ -1055,8 +1055,8 @@ CreateHTTPRangeResponseHeader( char *ByteRangeSpecifier,
                          "%"PRId64 "-"
                          "%"PRId64 "/"
                          "%"PRId64 "\r\n",
-                         (int64_t)(FileLength - LastByte + 1), 
-                         (int64_t)FileLength,
+                         (int64_t)(FileLength - LastByte), 
+                         (int64_t)FileLength - 1,
                          (int64_t)FileLength );
             }
         } else {
