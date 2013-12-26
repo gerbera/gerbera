@@ -299,6 +299,13 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         Ref<Dictionary> res_params = item->getResource(i)->getParameters();
         String protocolInfo = res_attrs->get(MetadataHandler::getResAttrName(R_PROTOCOLINFO));
         String mimeType = getMTFromProtocolInfo(protocolInfo);
+
+        int pos = mimeType.find(";");
+        if (pos != -1)
+        {
+            mimeType = mimeType.substring(0, pos);
+        }
+
         assert(string_ok(mimeType));
         String contentType = mappings->get(mimeType);
         String url;
