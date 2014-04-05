@@ -847,6 +847,8 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
     if (val != nil)
         setProperty(js, _("location"), val);
 
+    setIntProperty(js, _("mtime"), (int)obj->getMTime());
+    setIntProperty(js, _("sizeOnDisk"), (int)obj->getSizeOnDisk());
 
     // TODO: boolean type
     i = obj->isRestricted();

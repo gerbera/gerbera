@@ -32,6 +32,8 @@
 #ifndef __CDS_OBJECTS_H__
 #define __CDS_OBJECTS_H__
 
+#include <sys/types.h>
+
 #include "common.h"
 #include "dictionary.h"
 #include "cds_resource.h"
@@ -94,6 +96,13 @@ protected:
 
     /// \brief Physical location of the media.
     zmm::String location;
+
+    /// \brief Last modification time in the file system.
+    /// In seconds since UNIX epoch.
+    time_t mtime;
+
+    /// \brief File size on disk (in bytes).
+    off_t sizeOnDisk;
 
     /// \brief virtual object flag
     int virt;
@@ -167,6 +176,18 @@ public:
 
     /// \brief Retrieve media location.
     inline zmm::String getLocation() { return location; }
+
+    /// \brief Set modification time of the media file.
+    inline void setMTime(time_t mtime) { this->mtime = mtime; }
+
+    /// \brief Retrieve the file modification time (in seconds since UNIX epoch).
+    inline time_t getMTime() { return mtime; }
+
+    /// \brief Set file size.
+    inline void setSizeOnDisk(off_t sizeOnDisk) { this->sizeOnDisk = sizeOnDisk; }
+
+    /// \brief Retrieve the file size (in bytes).
+    inline off_t getSizeOnDisk() { return sizeOnDisk; }
 
     /// \brief Set the virtual flag.
     inline void setVirtual(bool virt) { this->virt = virt; }
