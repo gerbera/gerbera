@@ -49,6 +49,8 @@ CdsObject::CdsObject() : Object()
     id = INVALID_OBJECT_ID;
     parentID = INVALID_OBJECT_ID;
     refID = INVALID_OBJECT_ID;
+    mtime = 0;
+    sizeOnDisk = 0;
     virt = 0;
     sortPriority = 0;
     objectFlags = OBJECT_FLAG_RESTRICTED;
@@ -62,6 +64,8 @@ void CdsObject::copyTo(Ref<CdsObject> obj)
     obj->setTitle(title);
     obj->setClass(upnpClass);
     obj->setLocation(location);
+    obj->setMTime(mtime);
+    obj->setSizeOnDisk(sizeOnDisk);
     obj->setVirtual(virt);
     obj->setMetadata(metadata->clone());
     obj->setAuxData(auxdata->clone());
@@ -90,6 +94,8 @@ int CdsObject::equals(Ref<CdsObject> obj, bool exactly)
     
     if (exactly && !
         (location == obj->getLocation() &&
+         mtime == obj->getMTime() &&
+         sizeOnDisk == obj->getSizeOnDisk() &&
          virt == obj->isVirtual() &&
          auxdata->equals(obj->auxdata) &&
          objectFlags == obj->getFlags()
