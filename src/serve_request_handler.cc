@@ -79,6 +79,8 @@ void ServeRequestHandler::get_info(IN const char *filename, OUT struct File_Info
         throw _Exception(_("There is something wrong with the link ") + url_path);
     }
 
+    url_path = url_unescape(url_path);
+
     String path = ConfigManager::getInstance()->getOption(CFG_SERVER_SERVEDIR) 
                     + url_path.substring(len, url_path.length()) + 
                     _("/") + parameters;
