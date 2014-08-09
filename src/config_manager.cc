@@ -426,6 +426,13 @@ String ConfigManager::createDefaultConfig(String userhome)
     config->setAttribute(_("xmlns"), _(XML_XMLNS) + CONFIG_XML_VERSION);
     config->setAttribute(_("xmlns:xsi"), _(XML_XMLNS_XSI));
     config->setAttribute(_("xsi:schemaLocation"), _(XML_XMLNS) + CONFIG_XML_VERSION + " " + XML_XMLNS + CONFIG_XML_VERSION + ".xsd");
+
+    Ref<Comment> docinfo(new Comment(_("\n\
+     Read /usr/share/doc/mediatomb-common/README.gz section 6 for more\n\
+     information on creating and using config.xml configration files.\n\
+    "), true));
+    config->appendChild(RefCast(docinfo, Node));
+
     Ref<Element> server(new Element(_("server")));
    
     Ref<Element> ui(new Element(_("ui")));
@@ -614,6 +621,8 @@ String ConfigManager::createDefaultConfig(String userhome)
                                _(UPNP_DEFAULT_CLASS_VIDEO_ITEM)));
     mtupnp->appendElementChild(map_from_to(_("image/*"), 
                                _("object.item.imageItem")));
+    mtupnp->appendElementChild(map_from_to(_("application/ogg"),
+                               _(UPNP_DEFAULT_CLASS_MUSIC_TRACK)));
 
     mappings->appendElementChild(mtupnp);
 
@@ -650,6 +659,10 @@ String ConfigManager::createDefaultConfig(String userhome)
                                            _(CONTENT_TYPE_DVD)));
     mtcontent->appendElementChild(treat_as(_("application/x-iso9660-image"),
                                            _(CONTENT_TYPE_DVD)));
+    mtcontent->appendElementChild(treat_as(_("video/x-matroska"),
+                                           _(CONTENT_TYPE_MKV)));
+    mtcontent->appendElementChild(treat_as(_("audio/x-matroska"),
+                                           _(CONTENT_TYPE_MKA)));
 
     mappings->appendElementChild(mtcontent);
     import->appendElementChild(mappings);
