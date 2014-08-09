@@ -50,6 +50,9 @@
 // INT64_C is not defined in ffmpeg/avformat.h but is needed
 // macro defines included via autoconfig.h
 #include <stdint.h>
+#include <sys/stat.h>
+#include <errno.h>
+#include <string.h>
 
 extern "C" 
 {
@@ -287,6 +290,122 @@ void FfmpegHandler::fillMetadata(Ref<CdsItem> item)
     avformat_close_input(&pFormatCtx);
 }
 
+#ifdef HAVE_FFMPEGTHUMBNAILER
+
+static int _mkdir(const char *path)
+{
+    int ret = mkdir(path, 0777);
+
+    if (ret == 0) {
+        // Make sure we are +x in case of restrictive umask that strips +x.
+        struct stat st;
+        if (stat(path, &st)) {
+            log_warning("could not stat(%s): %s\n", path, strerror(errno));
+            return -1;
+        }
+        mode_t xbits = S_IXUSR | S_IXGRP | S_IXOTH;
+        if (!(st.st_mode & xbits)) {
+            if (chmod(path, st.st_mode | xbits)) {
+                log_warning("could not chmod(%s, +x): %s\n", path, strerror(errno));
+                return -1;
+            }
+        }
+    }
+
+    return ret;
+}
+
+static bool makeThumbnailCacheDir(String& path)
+{
+    char *path_temp = strdup(path.c_str());
+    char *last_slash = strrchr(path_temp, '/');
+    char *slash = last_slash;
+    bool ret = false;
+
+    if (!last_slash)
+        return ret;
+
+    // Assume most dirs exist, so scan backwards first.
+    // Avoid stat/access checks due to TOCTOU races.
+    errno = 0;
+    for (slash = last_slash; slash > path_temp; --slash) {
+        if (*slash != '/')
+            continue;
+        *slash = '\0';
+        if (_mkdir(path_temp) == 0) {
+            // Now we can forward scan.
+            while (slash < last_slash) {
+                *slash = DIR_SEPARATOR;
+                if (_mkdir(path_temp) < 0)
+                    // Allow EEXIST in case of someone else doing `mkdir`.
+                    if (errno != EEXIST)
+                        goto done;
+                slash += strlen(slash);
+            }
+            if (slash == last_slash)
+                ret = true;
+            break;
+        } else if (errno == EEXIST) {
+            ret = true;
+            break;
+        } else if (errno != ENOENT) {
+            break;
+        }
+    }
+
+ done:
+    free(path_temp);
+    return ret;
+}
+
+static String getThumbnailCacheFilePath(String& movie_filename, bool create)
+{
+    Ref<ConfigManager> cfg = ConfigManager::getInstance();
+    String cache_dir = cfg->getOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR);
+
+    if (cache_dir.length() == 0) {
+        String home_dir = cfg->getOption(CFG_SERVER_HOME);
+        cache_dir = home_dir + "/cache-dir";
+    }
+
+    cache_dir = cache_dir + movie_filename + "-thumb.jpg";
+    if (create && !makeThumbnailCacheDir(cache_dir))
+        cache_dir = "";
+    return cache_dir;
+}
+
+static bool readThumbnailCacheFile(String movie_filename, uint8_t **ptr_img, size_t *size_img)
+{
+    String path = getThumbnailCacheFilePath(movie_filename, false);
+    FILE *fp = fopen(path.c_str(), "rb");
+    if (!fp)
+        return false;
+
+    size_t bytesRead;
+    uint8_t buffer[1024];
+    *ptr_img = NULL;
+    *size_img = 0;
+    while ((bytesRead = fread(buffer, 1, sizeof(buffer), fp)) > 0) {
+        *ptr_img = (uint8_t *)realloc(*ptr_img, *size_img + bytesRead);
+        memcpy(*ptr_img + *size_img, buffer, bytesRead);
+        *size_img += bytesRead;
+    }
+    fclose(fp);
+    return true;
+}
+
+static void writeThumbnailCacheFile(String movie_filename, uint8_t *ptr_img, int size_img)
+{
+    String path = getThumbnailCacheFilePath(movie_filename, true);
+    FILE *fp = fopen(path.c_str(), "wb");
+    if (!fp)
+        return;
+    fwrite(ptr_img, sizeof(uint8_t), size_img, fp);
+    fclose(fp);
+}
+
+#endif
+
 Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum, off_t *data_size)
 {
     *data_size = -1;
@@ -296,6 +415,18 @@ Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum, off_t 
     if (!cfg->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED))
         return nil;
 
+    if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED)) {
+        uint8_t *ptr_image;
+        size_t size_image;
+        if (readThumbnailCacheFile(item->getLocation(),
+                                   &ptr_image, &size_image)) {
+            *data_size = (off_t)size_image;
+            Ref<IOHandler> h(new MemIOHandler(ptr_image, size_image));
+            free(ptr_image);
+            log_debug("Returning cached thumbnail for file: %s\n", item->getLocation().c_str());
+            return h;
+        }
+    }
 #ifdef FFMPEGTHUMBNAILER_OLD_API
     video_thumbnailer *th = create_thumbnailer();
     image_data *img = create_image_data();
@@ -326,6 +457,10 @@ Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum, off_t 
 #endif // old api
         throw _Exception(_("Could not generate thumbnail for ") + 
                 item->getLocation());
+    if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED)) {
+        writeThumbnailCacheFile(item->getLocation(),
+                                img->image_data_ptr, img->image_data_size);
+    }
 
     *data_size = (off_t)img->image_data_size;
     Ref<IOHandler> h(new MemIOHandler((void *)img->image_data_ptr, 

@@ -1888,6 +1888,24 @@ void ConfigManager::validate(String serverhome)
 
         NEW_INT_OPTION(temp_int);
         SET_INT_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_QUALITY);
+
+        temp = getOption("/server/extended-runtime-options/ffmpegthumbnailer/"
+                         "cache-dir", DEFAULT_FFMPEGTHUMBNAILER_CACHE_DIR);
+
+        NEW_OPTION(temp);
+        SET_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR);
+
+        temp = getOption("/server/extended-runtime-options/ffmpegthumbnailer/"
+                         "cache-dir/attribute::enabled",
+                         DEFAULT_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED);
+
+        if (!validateYesNo(temp))
+            throw _Exception(_("Error in config file: "
+                              "invalid \"enabled\" attribute value in "
+                              "ffmpegthumbnailer <cache-dir> tag"));
+
+        NEW_BOOL_OPTION(temp == YES ? true : false);
+        SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED);
     }
 #endif
 
