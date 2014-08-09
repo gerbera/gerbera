@@ -98,7 +98,7 @@ String OnlineService::getCheckAttr(Ref<Element> xml, String attrname)
         return temp;
     else
         throw _Exception(getServiceName() + _(": Tag <") + xml->getName() +
-                _("> is missing the requred \"") + attrname +
+                _("> is missing the required \"") + attrname +
                 _("\" attribute!"));
     return nil;
 }
@@ -111,7 +111,7 @@ int OnlineService::getCheckPosIntAttr(Ref<Element> xml, String attrname)
         itmp = temp.toInt();
     else
         throw _Exception(getServiceName() + _(": Tag <") + xml->getName() +
-                _("> is missing the requred \"") + attrname +
+                _("> is missing the required \"") + attrname +
                 _("\" attribute!"));
 
     if (itmp < 1)

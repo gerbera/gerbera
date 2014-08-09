@@ -136,7 +136,7 @@ SQLStorage::SQLStorage() : Storage()
 void SQLStorage::init()
 {
     if (table_quote_begin == '\0' || table_quote_end == '\0')
-        throw _Exception(_("quote vars need to be overriden!"));
+        throw _Exception(_("quote vars need to be overridden!"));
     
     Ref<StringBuffer> buf(new StringBuffer());
     *buf << SQL_QUERY_FOR_STRINGBUFFER;
