@@ -66,25 +66,24 @@ static void addMetaField(metadata_fields_t field, MP4FileHandle mp4, Ref<CdsItem
 {
     String value;
     char*  mp4_retval = NULL;
+    u_int16_t track;
+    u_int16_t total_tracks;
  
     Ref<StringConverter> sc = StringConverter::i2i();
     
-    const MP4Tags* tags = MP4TagsAlloc();
-    MP4TagsFetch( tags, mp4 );
-
     switch (field)
     {
         case M_TITLE:
-            mp4_retval = const_cast<char*>( tags->name );
+            MP4GetMetadataName(mp4, &mp4_retval);
             break;
         case M_ARTIST:
-            mp4_retval = const_cast<char*> ( tags->artist );
+            MP4GetMetadataArtist(mp4, &mp4_retval);
             break;
         case M_ALBUM:
-            mp4_retval = const_cast<char*> ( tags->album );
+            MP4GetMetadataAlbum(mp4, &mp4_retval);
             break;
         case M_DATE:
-            mp4_retval = const_cast<char*> ( tags->releaseDate );
+            MP4GetMetadataYear(mp4, &mp4_retval);
             if (mp4_retval)
             {
                 value = mp4_retval;
@@ -96,16 +95,17 @@ static void addMetaField(metadata_fields_t field, MP4FileHandle mp4, Ref<CdsItem
             }
             break;
         case M_GENRE:
-            mp4_retval = const_cast<char*> ( tags->genre );
+            MP4GetMetadataGenre(mp4, &mp4_retval);
             break;
         case M_DESCRIPTION:
-            mp4_retval = const_cast<char*> ( tags->description );
+            MP4GetMetadataComment(mp4, &mp4_retval);
             break;
         case M_TRACKNUMBER:
-            if (tags->track->index > 0)
+            MP4GetMetadataTrack(mp4, &track, &total_tracks);
+            if (track > 0)
             {
-                value = String::from(tags->track->index);
-                item->setTrackNumber((int)tags->track->index);
+                value = String::from(track);
+                item->setTrackNumber((int)track);
             }
             else
                 return;
@@ -190,20 +190,21 @@ void LibMP4V2Handler::fillMetadata(Ref<CdsItem> item)
         }
 
 #if defined(HAVE_MAGIC)
-        const MP4Tags* tags = MP4TagsAlloc();
-        MP4TagsFetch( tags, mp4 );
-        void *art_data = tags->artwork->data;
-        u_int32_t art_data_len = tags->artwork->size;
+        u_int8_t *art_data;
+        u_int32_t art_data_len;
         String art_mimetype;
 #ifdef HAVE_MP4_GET_METADATA_COVER_ART_COUNT
-        if (tags->artworkCount && art_data_len > 0)
+        if (MP4GetMetadataCoverArtCount(mp4) && 
+            MP4GetMetadataCoverArt(mp4, &art_data, &art_data_len))
+#else
+            MP4GetMetadataCoverArt(mp4, &art_data, &art_data_len);
 #endif
         {
             if (art_data)
             {
                 try
                 {
-                    art_mimetype = ContentManager::getInstance()->getMimeTypeFromBuffer(art_data, art_data_len);
+                    art_mimetype = ContentManager::getInstance()->getMimeTypeFromBuffer((void *)art_data, art_data_len);
                     if (!string_ok(art_mimetype))
                         art_mimetype = _(MIMETYPE_DEFAULT);
 
@@ -248,21 +249,18 @@ Ref<IOHandler> LibMP4V2Handler::serveContent(Ref<CdsItem> item, int resNum, off_
 
     if (ctype != ID3_ALBUM_ART)
         throw _Exception(_("LibMP4V2Handler: got unknown content type: ") + ctype);
-
-    const MP4Tags* tags = MP4TagsAlloc();
-    MP4TagsFetch( tags, mp4 );
 #ifdef HAVE_MP4_GET_METADATA_COVER_ART_COUNT
-    if (tags->artworkCount<1)
+    if (!MP4GetMetadataCoverArtCount(mp4))
         throw _Exception(_("LibMP4V2Handler: resource has no album art information"));
 #endif
-    void *art_data = tags->artwork->data;
-    u_int32_t art_data_len = tags->artwork->size;
-    if (art_data_len > 0)
+    u_int8_t *art_data;
+    u_int32_t art_data_len;
+    if (MP4GetMetadataCoverArt(mp4, &art_data, &art_data_len))
     {
         if (art_data)
         {
             *data_size = (off_t)art_data_len;
-            Ref<IOHandler> h(new MemIOHandler(art_data, art_data_len));
+            Ref<IOHandler> h(new MemIOHandler((void *)art_data, art_data_len));
             free(art_data);
             return h;
         }
