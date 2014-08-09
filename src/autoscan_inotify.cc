@@ -281,7 +281,7 @@ void AutoscanInotify::threadProc()
                     }
                 }
                 
-                if (adir != nil && mask & (IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF | IN_CLOSE_WRITE | IN_MOVED_FROM | IN_MOVED_TO | IN_UNMOUNT))
+                if (adir != nil && mask & (IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF | IN_CLOSE_WRITE | IN_MOVED_FROM | IN_MOVED_TO | IN_UNMOUNT | IN_CREATE))
                 {
                     String fullPath;
                     if (mask & IN_ISDIR)
@@ -289,7 +289,7 @@ void AutoscanInotify::threadProc()
                     else
                         fullPath = path;
                     
-                    if (! (mask & IN_MOVED_TO))
+                    if (! (mask & (IN_MOVED_TO | IN_CREATE)))
                     {
                         log_debug("deleting %s\n", fullPath.c_str());
                         
@@ -312,7 +312,7 @@ void AutoscanInotify::threadProc()
                         if (objectID != INVALID_OBJECT_ID)
                             cm->removeObject(objectID);
                     }
-                    if (mask & (IN_CLOSE_WRITE | IN_MOVED_TO))
+                    if (mask & (IN_CLOSE_WRITE | IN_MOVED_TO | IN_CREATE))
                     {
                         log_debug("adding %s\n", path.c_str());
                         // path, recursive, async, hidden, low priority, cancellable
