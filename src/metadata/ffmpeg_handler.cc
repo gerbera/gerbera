@@ -178,9 +178,11 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext *pFormatC
 	// bitrate
     if (pFormatCtx->bit_rate > 0)  
     {
+        // ffmpeg's bit_rate is in bits/sec, upnp wants it in bytes/sec
+        // See http://www.upnp.org/schemas/av/didl-lite-v3.xsd
         log_debug("Added overall bitrate: %d kb/s\n", 
-                  pFormatCtx->bit_rate/1000);
-        item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_BITRATE), String::from(pFormatCtx->bit_rate/1000));
+                  pFormatCtx->bit_rate/8);
+        item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_BITRATE), String::from(pFormatCtx->bit_rate/8));
     }
 
 	// video resolution, audio sampling rate, nr of audio channels
@@ -219,30 +221,27 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext *pFormatC
                 *x = st->codec->width;
                 *y = st->codec->height;
 			}
-		} 
-		if(st->codec->codec_type == AVMEDIA_TYPE_AUDIO) 
+		}
+		if((st != NULL) && (audioset == false) && (st->codec->codec_type == AVMEDIA_TYPE_AUDIO))
         {
-			// Increase number of audiochannels
-			audioch++;
-			// Get the sample rate
-			if ((audioset == false) && (st->codec->sample_rate > 0)) 
+			// find the first stream that has a valid sample rate
+			if (st->codec->sample_rate > 0)
             {
 				samplefreq = st->codec->sample_rate;
-			    if (samplefreq > 0) 
-                {
-		    	    log_debug("Added sample frequency: %d Hz\n", samplefreq);
-		        	item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), String::from(samplefreq));
-					audioset = true;
-    			}
+	    	    log_debug("Added sample frequency: %d Hz\n", samplefreq);
+	        	item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), String::from(samplefreq));
+				audioset = true;
+
+				audioch = st->codec->channels;
+			    if (audioch > 0) 
+			    {
+			        log_debug("Added number of audio channels: %d\n", audioch);
+			        item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), String::from(audioch));
+			    }
 			}
 		}
 	}
 
-    if (audioch > 0) 
-    {
-        log_debug("Added number of audio channels: %d\n", audioch);
-        item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), String::from(audioch));
-    }
 } // addFfmpegResourceFields
 
 /*double time_to_double(struct timeval time) {
