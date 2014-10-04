@@ -2,9 +2,9 @@ MediaTomb - UPnP MediaServer
 
    This documentation is valid for MediaTomb version 0.12.1.
 
-   Copyright (c) 2005 Gena Batsyan, Sergey Bostandzhyan
+   Copyright © 2005 Gena Batsyan, Sergey Bostandzhyan
 
-   Copyright (c) 2006-2010, 2013 Gena Batsyan, Sergey Bostandzhyan,
+   Copyright © 2006-2010, 2013 Gena Batsyan, Sergey Bostandzhyan,
    Leonhard Wimmer
 
    THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY! USE AT YOUR
@@ -328,7 +328,7 @@ autoreconf -i
           section, for sqlite the database file has to point to a
           writable location, for MySQL the user has to be setup
           with a valid password and permissions and the database
-          "mediatomb" has to exist.
+          “mediatomb” has to exist.
 
 3.2.4. Debug Malloc/Realloc Of Zero bytes
 
@@ -862,42 +862,42 @@ ipt
    server you need to have the appropriate permissions. Note that
    user names and passwords in MySQL have nothing to do with UNIX
    accounts, MySQL has it's own user names/passwords. Connect to
-   the MySQL database as "root" or any other user with the
+   the MySQL database as “root” or any other user with the
    appropriate permissions:
 $ mysql [-u <username>] [-p]
 
-   (You'll probably need to use "-u" to specify a different MySQL
-   user and "-p" to specify a password.)
+   (You'll probably need to use “-u” to specify a different MySQL
+   user and “-p” to specify a password.)
 
-   Create a new database for MediaTomb: (substitute "<database
-   name>" with the name of the database)
+   Create a new database for MediaTomb: (substitute “<database
+   name>” with the name of the database)
 mysql> CREATE DATABASE <database name>;
 
-   (You can also use "mysqladmin" instead.)
+   (You can also use “mysqladmin” instead.)
 
    Give MediaTomb the permissions to access the database:
 mysql> GRANT ALL ON <database name>.*
        TO '<user name>'@'<hostname>'
        IDENTIFIED BY '<password>';
 
-   If you don't want to set a password, omit "IDENTIFIED BY .."
-   completely. You could also use the MySQL "root" user with
+   If you don't want to set a password, omit “IDENTIFIED BY ..”
+   completely. You could also use the MySQL “root” user with
    MediaTomb directly, but this is not recommended.
 
-   To create a database and a user named "mediatomb" (who is only
-   able to connect via "localhost") without a password (the
+   To create a database and a user named “mediatomb” (who is only
+   able to connect via “localhost”) without a password (the
    defaults) use:
 mysql> CREATE DATABASE mediatomb;
 mysql> GRANT ALL ON mediatomb.* TO 'mediatomb'@'localhost';
 
    If MediaTomb was compiled with database auto creation the
    tables will be created automatically during the first startup.
-   All table names have a "mt_" prefix, so you can theoretically
+   All table names have a “mt_” prefix, so you can theoretically
    share the database with a different application. However, this
    is not recommended.
 
    If database auto creation wasn't compiled in (configure was run
-   with the "--disable-db-autocreate" or zlib.h was not available)
+   with the “--disable-db-autocreate” or zlib.h was not available)
    you have to create the tables manually:
 $ mysql [-u <username>] [-p] \
   <database name> < \
@@ -947,7 +947,7 @@ $ mediatomb --help
 
  --config or -c
 
-   By default MediaTomb will search for a file named "config.xml"
+   By default MediaTomb will search for a file named “config.xml”
    in the ~/.mediatomb directory. This option allows you to
    specify a config file by the name and location of your choice.
    The file name must be absolute.
@@ -977,7 +977,7 @@ $ mediatomb --help
    when you want to create a new configuration in a non standard
    location (for example, when setting up daemon mode). In the
    latter case you can combine this parameter with the parameter
-   described in Section 5.7, "Config Directory"
+   described in Section 5.7, “Config Directory”
 
 5.7. Config Directory
 
@@ -1153,7 +1153,7 @@ $ mediatomb --help
 <presentationURL append-to="ip">80/index.html</presentationURL>
 
        Optional
-       Default: "/"
+       Default: “/”
        The presentation URL defines the location of the servers
        user interface, usually you do not need to change this
        however, vendors who want to ship our server along with
@@ -1164,7 +1164,7 @@ $ mediatomb --help
 append-to=...
 
             Optional
-            Default: "none"
+            Default: “none”
             The append-to attribute defines how the text in the
             presentationURL tag should be treated.
             The allowed values are:
@@ -1334,7 +1334,7 @@ enabled=...
 
             Optional
             Default: yes
-            Enables ("yes") or disables ("no") the web user
+            Enables (“yes”) or disables (“no”) the web user
             interface.
           +
 show-tooltips=...
@@ -1389,8 +1389,8 @@ enabled=...
 
                  Optional
                  Default: yes
-                 Specifies if accounts are enabled ("yes") or
-                 disabled ("no").
+                 Specifies if accounts are enabled (“yes”) or
+                 disabled (“no”).
                o
 session-timeout=...
 
@@ -1453,7 +1453,7 @@ caching="yes"
 <sqlite enabled="yes>
 
             Required if MySQL is not defined
-            Allowed values are "sqlite3" or "mysql", the available
+            Allowed values are “sqlite3” or “mysql”, the available
             options depend on the selected driver.
                o
 enabled="yes"
@@ -1474,8 +1474,8 @@ enabled="yes"
 
                  Optional
                  Default: off
-                 Possible values are "off", "normal" and "full".
-                 This option sets the SQLite pragma "synchronous".
+                 Possible values are “off”, “normal” and ”full”.
+                 This option sets the SQLite pragma “synchronous”.
                  This setting will affect the performance of the
                  database write operations. For more information
                  about this option see the SQLite documentation:
@@ -1486,14 +1486,14 @@ enabled="yes"
 
                  Optional
                  Default: restore
-                 Possible values are "restore" and "fail".
+                 Possible values are “restore” and “fail”.
                  This option tells MediaTomb what to do if an
                  SQLite error occurs (no database or a corrupt
-                 database). If it is set to "restore" it will try
+                 database). If it is set to “restore” it will try
                  to restore the database from a backup file (if
                  one exists) or try to recreate a new database
                  from scratch.
-                 If the option is set to "fail", MediaTomb will
+                 If the option is set to “fail”, MediaTomb will
                  abort on an SQLite error.
                o
 <backup enabled="no" interval="6000"/>
@@ -1758,7 +1758,7 @@ hidden-files=...
        Optional
        Default: no
        This attribute defines if files starting with a dot will be
-       imported into the database ("yes"). Autoscan can override
+       imported into the database (“yes”). Autoscan can override
        this attribute on a per directory basis.
 
    Child tags:
@@ -1799,7 +1799,7 @@ script-charset=...
 
             Optional
             Defines options for the virtual container layout; the
-            so called "virtual container layout" is the way how
+            so called “virtual container layout” is the way how
             the server organizes the media according to the
             extracted metadata. For example, it allows sorting
             audio files by Album, Artist, Year and so on.
@@ -1822,7 +1822,7 @@ type=...
                o
 <import-script>/path/to/my/import-script.js</import-script>
 
-                 Required if virtual layout type is "js"
+                 Required if virtual layout type is “js”
                  Default: ${prefix}/share/mediatomb/js/import.js,
                  where ${prefix} is your installation prefix
                  directory.
@@ -1832,7 +1832,7 @@ type=...
 <dvd-script>/path/to/my/import-dvd.js</dvd-script>
 
                  Optional, only has effect when layout type is
-                 "js" and if MediaTomb was compiled with
+                 “js” and if MediaTomb was compiled with
                  libdvdread support.
                  Default:
                  ${prefix}/share/mediatomb/js/import-dvd.js, where
@@ -1933,12 +1933,12 @@ mode=...
                o
 interval=...
 
-                 Required for "timed" mode
+                 Required for “timed” mode
                  Scan interval in seconds.
                o
 level=...
 
-                 Required for "timed" mode
+                 Required for “timed” mode
                  Either "full" or "basic". Basic mode will only
                  check if any files have been added or were
                  deleted from the monitored directory, full mode
@@ -1958,7 +1958,7 @@ hidden-files=...
 
                  Optional
                  Default: value specified in <import
-                 hidden-files=""/>
+                 hidden-files=””/>
                  Allowed values: "yes" or "no", process hidden
                  files, overrides the hidden-files value in the
                  <import/> tag.
@@ -2282,7 +2282,7 @@ fetch-buffer-fill-size=...
           description of the content and present it in the
           database. The actual video is only streamed when you
           press play on your device. So, when we use the term
-          "retrieve videos" we actually mean retrieving the video
+          “retrieve videos” we actually mean retrieving the video
           name, description and associated meta data, not the
           actual flv file.
 
@@ -2304,8 +2304,8 @@ enabled=...
 
        Optional
        Default: no
-       Enables or disables the service, allowed values are "yes"
-       or "no".
+       Enables or disables the service, allowed values are “yes”
+       or “no”.
      *
 refresh=...
 
@@ -2346,7 +2346,7 @@ update-at-start=...
        up) or if data should be fetched when the first refresh
        cycle kicks in. It may be useful if you frequently restart
        the server and do not want the content to be updated each
-       time. Allowed values are "yes" or "no".
+       time. Allowed values are “yes” or “no”.
      *
 format=...
 
@@ -2372,7 +2372,7 @@ hd=...
 
        Optional
        Default: no
-       If set to "yes", then a HD video will be retrieved if
+       If set to “yes”, then a HD video will be retrieved if
        available.
      *
 racy-content=...
@@ -2624,7 +2624,7 @@ enabled=...
        Optional
        Default: yes
        This attribute defines if transcoding is enabled as a
-       whole, possible values are "yes" or "no".
+       whole, possible values are “yes” or “no”.
      *
 fetch-buffer-size=...
 
@@ -2671,7 +2671,7 @@ fetch-buffer-fill-size=...
             Optional
             In this example we want to transcode our flac audio
             files (they have the mimetype audio/x-flac) using the
-            "oggflac-pcm" profile which is defined below.
+            “oggflac-pcm” profile which is defined below.
                o
 mimetype=...
 
@@ -2704,13 +2704,13 @@ enabled=...
 
                  Required
                  Enables or disables the profile, allowed values
-                 are "yes" or "no".
+                 are “yes” or “no”.
                o
 type=...
 
                  Required
                  Defines the profile type, currently only
-                 "external" is supported, this will change in the
+                 “external” is supported, this will change in the
                  future.
                o
 <mimetype>audio/x-wav</mimetype>
@@ -2728,7 +2728,7 @@ type=...
                  content, i.e. instead giving a local file name
                  you can pass an URL to the transcoder. However,
                  some transcoders can only deal with local files,
-                 for this case set the value to "no".
+                 for this case set the value to “no”.
                o
 <first-resource>no</first-resource>
 
@@ -2772,7 +2772,7 @@ type=...
                  Default: no
                  As you may know, OGG is just a container, the
                  content could be Vorbis or Theora while the mime
-                 type is "application/ogg". For transcoding we
+                 type is “application/ogg”. For transcoding we
                  need to identify if we are dealing with audio or
                  video content, specifying yes in this tag in the
                  profile will make sure that only OGG files
@@ -3059,7 +3059,7 @@ Attention Hardware Manufacturers:
 
      * MusicPal
 
-7.1.8. Haeger
+7.1.8. Häger
 
      * OnAir (also known as BT Internet Radio)
 
@@ -3248,7 +3248,7 @@ Attention Hardware Manufacturers:
      * DMA-2500
 
    Some users reported problems where the DMA will show an error
-   "Failed to retrieve list" and the DMA disconnecting from the
+   “Failed to retrieve list” and the DMA disconnecting from the
    server. Incresing the alive interval seems to solve the problem
    - add the following option to the <server> section of your
    configuration file:
@@ -3443,7 +3443,7 @@ Copyright (C) 2006-2008
        (http://pupnp.sf.net/) patches, see documentation in the
        tombupnp directory
      * Photo layout by year/month was contributed by Aleix
-       Conchillo Flaque <aleix at member dot fsf dot org>
+       Conchillo Flaqué <aleix at member dot fsf dot org>
      * lastfmlib patch was contributed by Dirk Vanden Boer <dirk
        dot vdb at gmail dot com>
      * NetBSD patches were contributed by Jared D. McNeill
