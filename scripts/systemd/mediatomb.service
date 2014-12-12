@@ -1,0 +1,13 @@
+[Unit]
+Description=MediaTomb Daemon
+After=network.target
+
+[Service]
+EnvironmentFile=/etc/conf.d/mediatomb
+ExecStart=/usr/bin/mediatomb -p $MT_PORT -u $MT_USER -g $MT_GROUP \
+  -P $MT_PIDFILE -l $MT_LOGFILE -m $MT_HOME -f $MT_CFGDIR $MT_OPTIONS
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
