@@ -199,7 +199,6 @@ js_addCdsObject(JSContext *cx, uintN argc, jsval *argv)
                 containerclass = ts;
                 JS_free(cx, ts);
             }
-            containerclass = ts;
             if (!string_ok(containerclass) || containerclass == "undefined")
                 containerclass = nil;
         }
