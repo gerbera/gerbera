@@ -46,6 +46,7 @@
 #define CH_MP4       5
 #define CH_FFTH      6
 #define CH_FLAC      7
+#define CH_FANART    8
 
 #define CONTENT_TYPE_MP3        "mp3"
 #define CONTENT_TYPE_OGG        "ogg"

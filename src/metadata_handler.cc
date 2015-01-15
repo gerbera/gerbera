@@ -71,6 +71,8 @@
 #include "metadata/dvd_handler.h"
 #endif
 
+#include "metadata/fanart_handler.h"
+
 using namespace zmm;
 
 mt_key MT_KEYS[] = {
@@ -134,104 +136,102 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
     if ((content_type == CONTENT_TYPE_OGG) && (isTheora(item->getLocation())))
             item->setFlag(OBJECT_FLAG_OGG_THEORA);
 
-    do
-    {
+
+    Ref<Array<MetadataHandler> > handlers = Ref<Array<MetadataHandler> >(new Array<MetadataHandler>());
+
 #ifdef HAVE_TAGLIB
-        if ((content_type == CONTENT_TYPE_MP3) || 
-           ((content_type == CONTENT_TYPE_OGG) && 
-            (!item->getFlag(OBJECT_FLAG_OGG_THEORA))) ||
-            (content_type == CONTENT_TYPE_WMA) ||
-            (content_type == CONTENT_TYPE_WAVPACK))
-        {
-            handler = Ref<MetadataHandler>(new TagHandler());
-            break;
-        }
+    if ((content_type == CONTENT_TYPE_MP3) || 
+       ((content_type == CONTENT_TYPE_OGG) && 
+        (!item->getFlag(OBJECT_FLAG_OGG_THEORA))) ||
+        (content_type == CONTENT_TYPE_WMA) ||
+        (content_type == CONTENT_TYPE_WAVPACK))
+    {
+        handlers->append(Ref<MetadataHandler>(new TagHandler()));
+    }
 #else
 #ifdef HAVE_ID3LIB
-        if (content_type == CONTENT_TYPE_MP3)
-        {
-            handler = Ref<MetadataHandler>(new Id3Handler());
-            break;
-        }
+    if (content_type == CONTENT_TYPE_MP3)
+    {
+        handlers->append(Ref<MetadataHandler>(new Id3Handler()));
+    }
 #endif // HAVE_ID3LIB
 #endif // HAVE_TAGLIB
 
 #ifdef HAVE_FLAC
-        if (content_type == CONTENT_TYPE_FLAC)
-        {
-            handler = Ref<MetadataHandler>(new FlacHandler());
-            break;
-        }
+    if (content_type == CONTENT_TYPE_FLAC)
+    {
+        handlers->append(Ref<MetadataHandler>(new FlacHandler()));
+    }
 
 #endif
 
 #ifdef HAVE_EXIV2
 /*        
-          if (content_type == CONTENT_TYPE_JPG)
-          {
-          handler = Ref<MetadataHandler>(new Exiv2Handler());
-          break;
-          } 
+    if (content_type == CONTENT_TYPE_JPG)
+    {
+        handlers->append(Ref<MetadataHandler>(new Exiv2Handler()));
+    } 
 */
 #endif
 
 #ifdef HAVE_LIBEXIF
-        if (content_type == CONTENT_TYPE_JPG)
-        {
-            handler = Ref<MetadataHandler>(new LibExifHandler());
-            break;
-        }
+    if (content_type == CONTENT_TYPE_JPG)
+    {
+        handlers->append(Ref<MetadataHandler>(new LibExifHandler()));
+    }
 #endif // HAVE_LIBEXIF
 
 #if defined(HAVE_LIBMP4V2)
 #if !defined(HAVE_FFMPEG)
-        if (content_type == CONTENT_TYPE_MP4)
+    if (content_type == CONTENT_TYPE_MP4)
 #else // FFMPEG available 
-        if ((content_type == CONTENT_TYPE_MP4) && 
-            (!item->getMimeType().startsWith(_("video"))))
+    if ((content_type == CONTENT_TYPE_MP4) && 
+        (!item->getMimeType().startsWith(_("video"))))
 #endif // !defined(HAVE_FFMPEG)            
-        {
-            handler = Ref<MetadataHandler>(new LibMP4V2Handler());
-            break;
-        }
+    {
+        handlers->append(Ref<MetadataHandler>(new LibMP4V2Handler()));
+    }
 #endif // defined(HAVE_LIBMP4V2)
 
 #ifdef HAVE_FFMPEG
-        if (content_type != CONTENT_TYPE_PLAYLIST &&
-            ((content_type == CONTENT_TYPE_OGG &&
-             item->getFlag(OBJECT_FLAG_OGG_THEORA)) ||
-            item->getMimeType().startsWith(_("video")) ||
-            item->getMimeType().startsWith(_("audio"))))
-        {
-            handler = Ref<MetadataHandler>(new FfmpegHandler());
-            break;
-        }
+    if (content_type != CONTENT_TYPE_PLAYLIST &&
+        ((content_type == CONTENT_TYPE_OGG &&
+         item->getFlag(OBJECT_FLAG_OGG_THEORA)) ||
+        item->getMimeType().startsWith(_("video")) ||
+        item->getMimeType().startsWith(_("audio"))))
+    {
+        handlers->append(Ref<MetadataHandler>(new FfmpegHandler()));
+    }
 #else
-        if (content_type == CONTENT_TYPE_AVI)
+    if (content_type == CONTENT_TYPE_AVI)
+    {
+        String fourcc = getAVIFourCC(item->getLocation());
+        if (string_ok(fourcc))
         {
-            String fourcc = getAVIFourCC(item->getLocation());
-            if (string_ok(fourcc))
-            {
-                item->getResource(0)->addOption(_(RESOURCE_OPTION_FOURCC),
-                                                fourcc);
-            }
+            item->getResource(0)->addOption(_(RESOURCE_OPTION_FOURCC),
+                                            fourcc);
         }
+    }
 
 #endif // HAVE_FFMPEG
 
 #ifdef HAVE_LIBDVDNAV
-        if (content_type == CONTENT_TYPE_DVD)
-        {
-            handler = Ref<MetadataHandler>(new DVDHandler());
-            break;
-        }
-#endif
+    if (content_type == CONTENT_TYPE_DVD)
+    {
+        handlers->append(Ref<MetadataHandler>(new DVDHandler()));
     }
-    while (false);
+#endif
 
-    if (handler == nil)
-        return;
-    handler->fillMetadata(item);
+    // Fanart for all things!
+    handlers->append(Ref<MetadataHandler>(new FanArtHandler()));
+
+    int size = handlers->size();
+    for (int i = 0; i < size; i++)
+    {
+        Ref<MetadataHandler> mh = handlers->get(i);
+        mh->fillMetadata(item);
+    }
+
 }
 
 String MetadataHandler::getMetaFieldName(metadata_fields_t field)
@@ -271,6 +271,8 @@ Ref<MetadataHandler> MetadataHandler::createHandler(int handlerType)
         case CH_FLAC:
             return Ref<MetadataHandler>(new FlacHandler());
 #endif
+        case CH_FANART:
+            return Ref<MetadataHandler>(new FanArtHandler());
         default:
             throw _Exception(_("unknown content handler ID: ") + handlerType);
     }
