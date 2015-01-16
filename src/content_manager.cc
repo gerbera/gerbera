@@ -1410,6 +1410,8 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic, boo
         Ref<CdsItem> item(new CdsItem());
         obj = RefCast(item, CdsObject);
         item->setLocation(path);
+        item->setMTime(statbuf.st_mtime);
+        item->setSizeOnDisk(statbuf.st_size);
         if (mimetype != nil)
             item->setMimeType(mimetype);
         if (upnp_class != nil)

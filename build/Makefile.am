@@ -62,6 +62,7 @@ mediatomb_CXXFLAGS = -I$(top_srcdir)/src \
 mediatomb_LDADD = \
     libmediatomb.a \
     $(top_srcdir)/tombupnp/build/libtombupnp.a \
+    -luuid \
     $(LIBEXIF_LDFLAGS) \
     $(ZLIB_LDFLAGS) \
     $(EXPAT_LDFLAGS) \

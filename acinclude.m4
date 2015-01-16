@@ -533,8 +533,7 @@ AC_DEFUN([MT_CHECK_OPTIONAL_PACKAGE],
         AC_MSG_ERROR([unable to configure $1 support])
     fi
 
-    if ((test "x$mt_[]translit($1, `/.-', `___')_status" = xyes) &&
-        (test "x$9" != "xundef")); then
+    if test "x$mt_[]translit($1, `/.-', `___')_status" = xyes; then
         AC_DEFINE(translit(HAVE_$1, `a-z/.-', `A-Z___'), [1], [$1 library presence])
     fi
     

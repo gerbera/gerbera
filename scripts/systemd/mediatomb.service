@@ -1,0 +1,14 @@
+[Unit]
+Description=MediaTomb Daemon
+After=network.target
+
+[Service]
+Type=simple
+User=mediatomb
+Group=mediatomb
+ExecStart=/usr/bin/mediatomb -c /etc/mediatomb/config.xml
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

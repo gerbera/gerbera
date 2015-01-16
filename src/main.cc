@@ -197,7 +197,7 @@ int main(int argc, char **argv, char **envp)
                 break;
 
             case 'd':
-                log_debug("Starting in deamon mode...");
+                log_debug("Starting in daemon mode...");
                 daemon = true;
                 break;
 

@@ -50,6 +50,9 @@
 // INT64_C is not defined in ffmpeg/avformat.h but is needed
 // macro defines included via autoconfig.h
 #include <stdint.h>
+#include <sys/stat.h>
+#include <errno.h>
+#include <string.h>
 
 extern "C" 
 {
@@ -175,9 +178,11 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext *pFormatC
 	// bitrate
     if (pFormatCtx->bit_rate > 0)  
     {
+        // ffmpeg's bit_rate is in bits/sec, upnp wants it in bytes/sec
+        // See http://www.upnp.org/schemas/av/didl-lite-v3.xsd
         log_debug("Added overall bitrate: %d kb/s\n", 
-                  pFormatCtx->bit_rate/1000);
-        item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_BITRATE), String::from(pFormatCtx->bit_rate/1000));
+                  pFormatCtx->bit_rate/8);
+        item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_BITRATE), String::from(pFormatCtx->bit_rate/8));
     }
 
 	// video resolution, audio sampling rate, nr of audio channels
@@ -216,30 +221,27 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext *pFormatC
                 *x = st->codec->width;
                 *y = st->codec->height;
 			}
-		} 
-		if(st->codec->codec_type == AVMEDIA_TYPE_AUDIO) 
+		}
+		if((st != NULL) && (audioset == false) && (st->codec->codec_type == AVMEDIA_TYPE_AUDIO))
         {
-			// Increase number of audiochannels
-			audioch++;
-			// Get the sample rate
-			if ((audioset == false) && (st->codec->sample_rate > 0)) 
+			// find the first stream that has a valid sample rate
+			if (st->codec->sample_rate > 0)
             {
 				samplefreq = st->codec->sample_rate;
-			    if (samplefreq > 0) 
-                {
-		    	    log_debug("Added sample frequency: %d Hz\n", samplefreq);
-		        	item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), String::from(samplefreq));
-					audioset = true;
-    			}
+	    	    log_debug("Added sample frequency: %d Hz\n", samplefreq);
+	        	item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), String::from(samplefreq));
+				audioset = true;
+
+				audioch = st->codec->channels;
+			    if (audioch > 0) 
+			    {
+			        log_debug("Added number of audio channels: %d\n", audioch);
+			        item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), String::from(audioch));
+			    }
 			}
 		}
 	}
 
-    if (audioch > 0) 
-    {
-        log_debug("Added number of audio channels: %d\n", audioch);
-        item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), String::from(audioch));
-    }
 } // addFfmpegResourceFields
 
 /*double time_to_double(struct timeval time) {
@@ -287,6 +289,126 @@ void FfmpegHandler::fillMetadata(Ref<CdsItem> item)
     avformat_close_input(&pFormatCtx);
 }
 
+#ifdef HAVE_FFMPEGTHUMBNAILER
+
+// The ffmpegthumbnailer code (ffmpeg?) is not threading safe.
+// Add a lock around the usage to avoid crashing randomly.
+static pthread_mutex_t thumb_lock;
+
+static int _mkdir(const char *path)
+{
+    int ret = mkdir(path, 0777);
+
+    if (ret == 0) {
+        // Make sure we are +x in case of restrictive umask that strips +x.
+        struct stat st;
+        if (stat(path, &st)) {
+            log_warning("could not stat(%s): %s\n", path, strerror(errno));
+            return -1;
+        }
+        mode_t xbits = S_IXUSR | S_IXGRP | S_IXOTH;
+        if (!(st.st_mode & xbits)) {
+            if (chmod(path, st.st_mode | xbits)) {
+                log_warning("could not chmod(%s, +x): %s\n", path, strerror(errno));
+                return -1;
+            }
+        }
+    }
+
+    return ret;
+}
+
+static bool makeThumbnailCacheDir(String& path)
+{
+    char *path_temp = strdup(path.c_str());
+    char *last_slash = strrchr(path_temp, '/');
+    char *slash = last_slash;
+    bool ret = false;
+
+    if (!last_slash)
+        return ret;
+
+    // Assume most dirs exist, so scan backwards first.
+    // Avoid stat/access checks due to TOCTOU races.
+    errno = 0;
+    for (slash = last_slash; slash > path_temp; --slash) {
+        if (*slash != '/')
+            continue;
+        *slash = '\0';
+        if (_mkdir(path_temp) == 0) {
+            // Now we can forward scan.
+            while (slash < last_slash) {
+                *slash = DIR_SEPARATOR;
+                if (_mkdir(path_temp) < 0)
+                    // Allow EEXIST in case of someone else doing `mkdir`.
+                    if (errno != EEXIST)
+                        goto done;
+                slash += strlen(slash);
+            }
+            if (slash == last_slash)
+                ret = true;
+            break;
+        } else if (errno == EEXIST) {
+            ret = true;
+            break;
+        } else if (errno != ENOENT) {
+            break;
+        }
+    }
+
+ done:
+    free(path_temp);
+    return ret;
+}
+
+static String getThumbnailCacheFilePath(String& movie_filename, bool create)
+{
+    Ref<ConfigManager> cfg = ConfigManager::getInstance();
+    String cache_dir = cfg->getOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR);
+
+    if (cache_dir.length() == 0) {
+        String home_dir = cfg->getOption(CFG_SERVER_HOME);
+        cache_dir = home_dir + "/cache-dir";
+    }
+
+    cache_dir = cache_dir + movie_filename + "-thumb.jpg";
+    if (create && !makeThumbnailCacheDir(cache_dir))
+        cache_dir = "";
+    return cache_dir;
+}
+
+static bool readThumbnailCacheFile(String movie_filename, uint8_t **ptr_img, size_t *size_img)
+{
+    String path = getThumbnailCacheFilePath(movie_filename, false);
+    FILE *fp = fopen(path.c_str(), "rb");
+    if (!fp)
+        return false;
+
+    size_t bytesRead;
+    uint8_t buffer[1024];
+    *ptr_img = NULL;
+    *size_img = 0;
+    while ((bytesRead = fread(buffer, 1, sizeof(buffer), fp)) > 0) {
+        *ptr_img = (uint8_t *)realloc(*ptr_img, *size_img + bytesRead);
+        memcpy(*ptr_img + *size_img, buffer, bytesRead);
+        *size_img += bytesRead;
+    }
+    fclose(fp);
+    return true;
+}
+
+static void writeThumbnailCacheFile(String movie_filename, uint8_t *ptr_img, int size_img)
+{
+    String path = getThumbnailCacheFilePath(movie_filename, true);
+    FILE *fp = fopen(path.c_str(), "wb");
+    if (!fp)
+        return;
+    fwrite(ptr_img, sizeof(uint8_t), size_img, fp);
+    fclose(fp);
+}
+
+#endif
+
 Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum, off_t *data_size)
 {
     *data_size = -1;
@@ -295,6 +417,21 @@ Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum, off_t 
 
     if (!cfg->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED))
         return nil;
+
+    if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED)) {
+        uint8_t *ptr_image;
+        size_t size_image;
+        if (readThumbnailCacheFile(item->getLocation(),
+                                   &ptr_image, &size_image)) {
+            *data_size = (off_t)size_image;
+            Ref<IOHandler> h(new MemIOHandler(ptr_image, size_image));
+            free(ptr_image);
+            log_debug("Returning cached thumbnail for file: %s\n", item->getLocation().c_str());
+            return h;
+        }
+    }
+
+    pthread_mutex_lock(&thumb_lock);
 
 #ifdef FFMPEGTHUMBNAILER_OLD_API
     video_thumbnailer *th = create_thumbnailer();
@@ -324,8 +461,15 @@ Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum, off_t 
     if (video_thumbnailer_generate_thumbnail_to_buffer(th, 
                                          item->getLocation().c_str(), img) != 0)
 #endif // old api
+    {
+        pthread_mutex_unlock(&thumb_lock);
         throw _Exception(_("Could not generate thumbnail for ") + 
                 item->getLocation());
+    }
+    if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED)) {
+        writeThumbnailCacheFile(item->getLocation(),
+                                img->image_data_ptr, img->image_data_size);
+    }
 
     *data_size = (off_t)img->image_data_size;
     Ref<IOHandler> h(new MemIOHandler((void *)img->image_data_ptr, 
@@ -337,6 +481,7 @@ Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum, off_t 
     video_thumbnailer_destroy_image_data(img);
     video_thumbnailer_destroy(th);
 #endif// old api
+    pthread_mutex_unlock(&thumb_lock);
     return h;
 #else
     return nil;

@@ -242,7 +242,7 @@ private:
     void addToInsertBuffer(zmm::Ref<zmm::StringBuffer> query);
     void flushInsertBuffer(bool dontLock = false);
     
-    /* insert buffer functions to be overriden by implementing classes */
+    /* insert buffer functions to be overridden by implementing classes */
     virtual void _addToInsertBuffer(zmm::Ref<zmm::StringBuffer> query) = 0;
     virtual void _flushInsertBuffer() = 0;
     

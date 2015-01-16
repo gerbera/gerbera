@@ -337,7 +337,7 @@ String YouTubeService::getCheckAttr(Ref<Element> xml, String attrname)
         return temp;
     else
         throw _Exception(_("Tag <") + xml->getName() +
-                _("> is missing the requred \"") + attrname + 
+                _("> is missing the required \"") + attrname + 
                 _("\" attribute!"));
     return nil;
 }
@@ -350,7 +350,7 @@ int YouTubeService::getCheckPosIntAttr(Ref<Element> xml, String attrname)
         itmp = temp.toInt();
     else
         throw _Exception(_("Tag <") + xml->getName() +
-                _("> is missing the requred \"") + attrname + 
+                _("> is missing the required \"") + attrname + 
                 _("\" attribute!"));
 
     if (itmp < 1)

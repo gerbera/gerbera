@@ -1,4 +1,7 @@
 MediaTomb - UPnP AV Mediaserver.
+v0.12.2
+        * Added mtime and sizeOnDisk to JS objects
+
 v0.12.1 08.04.2010
         * fixed YouTube service support (got broken after they updated their
           website)

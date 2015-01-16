@@ -298,14 +298,14 @@ String hex_encode(void *data, int len)
 
 String hex_decode_string(String encoded)
 {
-    char *ptr = encoded.c_str();
+    char *ptr = const_cast<char *>(encoded.c_str());
     int len = encoded.length();
     
     Ref<StringBuffer> buf(new StringBuffer(len / 2));
     for (int i = 0; i < len; i += 2)
     {
-        const char *chi = strchr(HEX_CHARS, ptr[i]);
-        const char *clo = strchr(HEX_CHARS, ptr[i + 1]);
+        const char *chi = strchr(const_cast<char *>(HEX_CHARS), ptr[i]);
+        const char *clo = strchr(const_cast<char *>(HEX_CHARS), ptr[i + 1]);
         int hi, lo;
         
         if (chi)
@@ -382,7 +382,7 @@ String url_escape(String str)
 
 String url_unescape(String str)
 {
-    char *data = str.c_str();
+    char *data = const_cast<char *>(str.c_str());
     int len = str.length();
     Ref<StringBuffer> buf(new StringBuffer(len));
 
@@ -400,13 +400,13 @@ String url_unescape(String str)
 
             const char *pos;
 
-            pos = strchr(hex, chi);
+            pos = strchr(const_cast<char *>(hex), chi);
             if (!pos)
                 hi = 0;
             else
                 hi = pos - hex;
 
-            pos = strchr(hex, clo);
+            pos = strchr(const_cast<char *>(hex), clo);
             if (!pos)
                 lo = 0;
             else
