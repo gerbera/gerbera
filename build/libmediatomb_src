@@ -98,6 +98,8 @@ libmediatomb_a_SOURCES = \
 ../src/metadata/taglib_handler.h \
 ../src/metadata/flac_handler.cc \
 ../src/metadata/flac_handler.h \
+../src/metadata/fanart_handler.cc \
+../src/metadata/fanart_handler.h \
 ../src/mpegdemux/buffer.c \
 ../src/mpegdemux/buffer.h \
 ../src/mpegdemux/mpegdemux.c \

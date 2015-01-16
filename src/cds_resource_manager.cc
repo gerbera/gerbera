@@ -380,6 +380,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         if ((i > 0) && ((item->getResource(i)->getHandlerType() == CH_ID3) ||
                         (item->getResource(i)->getHandlerType() == CH_MP4) ||
                         (item->getResource(i)->getHandlerType() == CH_FLAC) ||
+                        (item->getResource(i)->getHandlerType() == CH_FANART) ||
                         (item->getResource(i)->getHandlerType() == CH_EXTURL)))
         {
             String rct;
