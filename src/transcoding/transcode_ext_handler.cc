@@ -88,7 +88,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     bool isURL = false;
 //    bool is_srt = false;
 
-    log_debug("start\n");
+    log_debug("start transcoding file: %s\n", location.c_str());
     char fifo_template[]="mt_transcode_XXXXXX";
 
     if (profile == nil)
@@ -333,7 +333,8 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
    
     arglist = parseCommandLine(profile->getArguments(), location, fifo_name, range);
 
-    log_info("Arguments: %s\n", profile->getArguments().c_str());
+    log_debug("Command: %s\n", profile->getCommand().c_str());
+    log_debug("Arguments: %s\n", profile->getArguments().c_str());
     Ref<TranscodingProcessExecutor> main_proc(new TranscodingProcessExecutor(profile->getCommand(), arglist));
     main_proc->removeFile(fifo_name);
     if (isURL && (!profile->acceptURL()))
