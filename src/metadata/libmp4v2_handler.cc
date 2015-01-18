@@ -66,7 +66,7 @@ static void addMetaField(metadata_fields_t field, MP4FileHandle mp4, Ref<CdsItem
 {
     String value;
     Ref<StringConverter> sc = StringConverter::i2i();
-    
+
     const MP4Tags* new_tags = MP4TagsAlloc();
 
     if (!MP4TagsFetch(new_tags, mp4))
@@ -126,6 +126,93 @@ static void addMetaField(metadata_fields_t field, MP4FileHandle mp4, Ref<CdsItem
     }
 }
 
+static void addAuxField(String desiredFrame, MP4FileHandle mp4, Ref<CdsItem> item) {
+
+  const MP4Tags* new_tags = MP4TagsAlloc();
+  String value;
+  Ref<StringConverter> sc = StringConverter::i2i();
+
+  if (!MP4TagsFetch(new_tags, mp4))
+      return;
+
+  if (desiredFrame == "TCOM")
+  {
+    if (new_tags->composer != NULL)
+      value = new_tags->composer;
+  }
+  else if (desiredFrame == "TENC")
+  {
+    if (new_tags->encodingTool != NULL)
+      value = new_tags->encodingTool;
+  }
+  else if (desiredFrame == "TRCK")
+  {
+    if (new_tags->track != NULL)
+    {
+      value = String::from(new_tags->track->index);
+      if (new_tags->track->total > 0)
+        value = value + "/" + String::from(new_tags->track->total);
+    }
+  }
+  else if (desiredFrame == "TPOS")
+  {
+    if (new_tags->disk != NULL)
+    {
+      value = String::from(new_tags->disk->index);
+      if (new_tags->disk->total > 0)
+        value = value + "/" + String::from(new_tags->disk->total);
+    }
+  }
+  else if (desiredFrame == "TIT1")
+  {
+    if (new_tags->grouping != NULL)
+      value = new_tags->grouping;
+  }
+  else if (desiredFrame == "TBPM")
+  {
+    if (new_tags->tempo != NULL)
+      value = String::from(*new_tags->tempo);
+  }
+  else if (desiredFrame == "TCMP")
+  {
+    if (new_tags->compilation != NULL)
+      value = strdup(new_tags->compilation ? "yes" : "no");
+  }
+  else if (desiredFrame == "STIK")
+  {
+    if (new_tags->mediaType != NULL)
+      value = String::from(*new_tags->mediaType);
+  }
+  else if (desiredFrame == "TVSH")
+  {
+    if (new_tags->tvShow != NULL)
+      value = new_tags->tvShow;
+  }
+  else if (desiredFrame == "TVES")
+  {
+    if (new_tags->tvEpisode != NULL)
+      value = String::from(*new_tags->tvEpisode);
+  }
+  else if (desiredFrame == "TVSN")
+  {
+    if (new_tags->tvSeason != NULL)
+      value = String::from(*new_tags->tvSeason);
+  }
+  else if (desiredFrame == "TPE2" || desiredFrame == "TPE4")
+  {
+    if (new_tags->albumArtist != NULL)
+      value = new_tags->albumArtist;
+  }
+
+  MP4TagsFree(new_tags);
+  value = trim_string(value);
+  if (string_ok(value))
+  {
+    item->setAuxData(desiredFrame, sc->convert(value));
+    log_debug("Adding frame: %s with value %s\n", desiredFrame.c_str(), sc->convert(value).c_str());
+  }
+}
+
 void LibMP4V2Handler::fillMetadata(Ref<CdsItem> item)
 {
     MP4FileHandle mp4;
@@ -143,8 +230,18 @@ void LibMP4V2Handler::fillMetadata(Ref<CdsItem> item)
     {
         for (int i = 0; i < M_MAX; i++)
             addMetaField((metadata_fields_t) i, mp4, item);
-
+        Ref<StringConverter> sc = StringConverter::m2i();
         Ref<ConfigManager> cm = ConfigManager::getInstance();
+        Ref<Array<StringBase> > aux = cm->getStringArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
+        if (aux != nil)
+        {
+            for (int j = 0; j < aux->size(); j++)
+            {
+                String desiredFrame(aux->get(j));
+                if (string_ok(desiredFrame))
+                    addAuxField(desiredFrame, mp4, item);
+            }
+        }
 
         //  MP4GetTimeScale returns the time scale in units of ticks per 
         //  second for the mp4 file. Caveat: tracks may use the same time 
