@@ -81,6 +81,7 @@ public:
     virtual zmm::String quote(unsigned long val) = 0;
     virtual zmm::String quote(bool val) = 0;
     virtual zmm::String quote(char val) = 0;
+    virtual zmm::String quote(long long val) = 0;
     virtual zmm::Ref<SQLResult> select(const char *query, int length) = 0;
     virtual int exec(const char *query, int length, bool getLastInsertId = false) = 0;
     
