@@ -11,7 +11,7 @@ Group: Applications/Multimedia
 Source: http://downloads.sourceforge.net/mediatomb/%{name}-%{version}.tar.gz
 URL: http://mediatomb.cc
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n) 
-BuildRequires: sqlite-devel, mysql-devel, libexif-devel, taglib-devel, file-devel, js-devel, zlib-devel
+BuildRequires: libuuid-devel, sqlite-devel, mysql-devel, libexif-devel, taglib-devel, file-devel, js-devel, zlib-devel
 Requires: mysql
 Requires(pre): shadow-utils
 Requires(post): /sbin/chkconfig
