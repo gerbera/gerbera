@@ -337,6 +337,13 @@ if (SQLITE3_FOUND)
     add_definitions(-DHAVE_SQLITE3)
 endif (SQLITE3_FOUND)
 
+find_package (CURL REQUIRED)
+if (CURL_FOUND)
+    include_directories(${CURL_INCLUDE_DIRS})
+    target_link_libraries (mediatomb ${CURL_LIBRARIES})
+    add_definitions(-DHAVE_CURL)
+endif (CURL_FOUND)
+
 
 
 

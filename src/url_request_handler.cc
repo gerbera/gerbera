@@ -35,10 +35,12 @@
 
 #ifdef HAVE_CURL
 
+#include <upnp/ixml.h>
+
 #include "server.h"
 #include "common.h"
 #include "storage.h"
-#include "ixml.h"
+
 #include "buffered_io_handler.h"
 #include "dictionary.h"
 #include "url_request_handler.h"
@@ -159,10 +161,12 @@ void URLRequestHandler::get_info(IN const char *filename, OUT struct File_Info *
     info->last_modified = 0;
     info->is_directory = 0;
 
+    /* FIXME headers
     if (string_ok(header))
         info->http_header = ixmlCloneDOMString(header.c_str());
     else
         info->http_header = NULL;
+    */
 
     info->content_type = ixmlCloneDOMString(mimeType.c_str());
     log_debug("web_get_info(): end\n");
@@ -171,7 +175,6 @@ void URLRequestHandler::get_info(IN const char *filename, OUT struct File_Info *
 }
 
 Ref<IOHandler> URLRequestHandler::open(IN const char *filename,
-                                       OUT struct File_Info *info,
                                        IN enum UpnpOpenFileMode mode,
                                        IN String range)
 {
@@ -233,10 +236,10 @@ Ref<IOHandler> URLRequestHandler::open(IN const char *filename,
 
     log_debug("Online content url: %s\n", url.c_str());
 
-    info->is_readable = 1;
-    info->last_modified = 0;
-    info->is_directory = 0;
-    info->http_header = NULL;
+    //info->is_readable = 1;
+    //info->last_modified = 0;
+    //info->is_directory = 0;
+    //info->http_header = NULL;
 
 #ifdef EXTERNAL_TRANSCODING
     tr_profile = dict->get(_(URL_PARAM_TRANSCODE_PROFILE_NAME));
@@ -261,21 +264,23 @@ Ref<IOHandler> URLRequestHandler::open(IN const char *filename,
         try
         {
             st = u->getInfo(url);
-            info->file_length = st->getSize();
+           // info->file_length = st->getSize();
             header = _("Accept-Ranges: bytes");
             log_debug("URL used for request: %s\n", st->getURL().c_str());
         }
         catch (Exception ex)
         {
             log_warning("%s\n", ex.getMessage().c_str());
-            info->file_length = -1;
+            //info->file_length = -1;
         }
         mimeType = item->getMimeType();
-        info->content_type = ixmlCloneDOMString(mimeType.c_str());
+       // info->content_type = ixmlCloneDOMString(mimeType.c_str());
     }
 
+    /* FIXME headers
     if (string_ok(header))
         info->http_header = ixmlCloneDOMString(header.c_str());
+    */
 
     ///\todo make curl io handler configurable for url request handler
     Ref<IOHandler> io_handler(new CurlIOHandler(url, NULL, 1024*1024, 0));

@@ -36,7 +36,8 @@
 #define __URL_H__
 
 #include <curl/curl.h>
-#include "zmmf/zmmf.h"
+
+#include "zmm/zmmf.h"
 #include "zmm/zmm.h"
 
 class URL : public zmm::Object
