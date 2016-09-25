@@ -33,7 +33,7 @@
 #define __SINGLETON_H__
 
 #include "sync.h"
-#include "zmmf/zmmf.h"
+#include "zmm/zmmf.h"
 
 #define SINGLETON_CUR_MAX 15
 

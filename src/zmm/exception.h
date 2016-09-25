@@ -34,9 +34,10 @@
 
 #include <stdio.h>
 
-#include "zmm/zmm.h"
+#include "zmm.h"
 #include "array.h"
-#include "logger.h"
+
+#include "../logger.h"
 
 #define _Exception(format) zmm::Exception(format, __FILE__, __LINE__, __func__)
 

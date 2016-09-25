@@ -32,7 +32,7 @@
 #ifndef __OBJECT_DICTIONARY_H__
 #define __OBJECT_DICTIONARY_H__
 
-#include "zmmf/zmmf.h"
+#include "zmm/zmmf.h"
 
 
 template <class T>

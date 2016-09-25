@@ -34,7 +34,7 @@
 #define __CONFIG_OPTIONS_H__
 
 #include <assert.h>
-#include "zmmf/zmmf.h"
+#include "zmm/zmmf.h"
 #include "exceptions.h"
 #include "autoscan.h"
 #include "object_dictionary.h"

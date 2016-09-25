@@ -32,7 +32,7 @@
 #ifndef __REENTRANT_ARRAY_H__
 #define __REENTRANT_ARRAY_H__
 
-#include "zmmf/zmmf.h"
+#include "zmm/zmmf.h"
 #include "sync.h"
 
 /// \brief Reentrant version of the object array

@@ -33,7 +33,7 @@
 #define __TIMER_H__
 
 #include "zmm/zmm.h"
-#include "zmmf/zmmf.h"
+#include "zmm/zmmf.h"
 #include "singleton.h"
 #include "sync.h"
 #include "tools.h"

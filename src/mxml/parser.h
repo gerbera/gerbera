@@ -32,14 +32,14 @@
 #ifndef __MXML_PARSER_H__
 #define __MXML_PARSER_H__
 
-#include "zmmf/zmmf.h"
+#include "zmm/zmmf.h"
 
 #ifndef HAVE_EXPAT
     #error Expat is needed to compile MediaTomb!
 #endif
 
 #include <expat.h>
-#include "zmmf/object_stack.h"
+#include "zmm/object_stack.h"
 
 namespace mxml
 {

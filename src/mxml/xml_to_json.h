@@ -32,7 +32,7 @@
 #ifndef __MXML_XML_TO_JSON_H__
 #define __MXML_XML_TO_JSON_H__
 
-#include "zmmf/zmmf.h"
+#include "zmm/zmmf.h"
 
 #include "mxml.h"
 

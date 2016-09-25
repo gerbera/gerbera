@@ -32,7 +32,7 @@
 #ifndef __XPATH_H__
 #define __XPATH_H__
 
-#include "zmmf/zmmf.h"
+#include "zmm/zmmf.h"
 #include "mxml/mxml.h"
 
 class XPath : public zmm::Object

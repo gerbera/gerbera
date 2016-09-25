@@ -32,7 +32,7 @@
 #ifndef __EXECUTOR_H__
 #define __EXECUTOR_H__
 
-#include "zmmf/zmmf.h"
+#include "zmm/zmmf.h"
 
 /// \brief wraps something executable e.g. a thread or a process
 class Executor : public zmm::Object

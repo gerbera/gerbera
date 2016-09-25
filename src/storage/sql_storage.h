@@ -32,7 +32,7 @@
 #ifndef __SQL_STORAGE_H__
 #define __SQL_STORAGE_H__
 
-#include "zmmf/zmmf.h"
+#include "zmm/zmmf.h"
 #include "cds_objects.h"
 #include "dictionary.h"
 #include "storage.h"

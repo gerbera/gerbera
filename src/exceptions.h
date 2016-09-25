@@ -32,7 +32,7 @@
 #ifndef __EXCEPTIONS_H__
 #define __EXCEPTIONS_H__
 
-#include "zmmf/zmmf.h"
+#include "zmm/zmmf.h"
 
 #define EXCEPTION_DATA __FILE__, __LINE__, __func__
 #define _UpnpException(code, msg) UpnpException(code, msg, EXCEPTION_DATA)

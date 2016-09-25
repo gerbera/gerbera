@@ -32,7 +32,7 @@
 #ifndef __DICTIONARY_H__
 #define __DICTIONARY_H__
 
-#include "zmmf/zmmf.h"
+#include "zmm/zmmf.h"
 #include "sync.h"
 
 /// \brief This class should never be used directly, it is being used by the Dictionary class.

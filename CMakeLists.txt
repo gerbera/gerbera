@@ -271,18 +271,18 @@ add_library(libmediatomb OBJECT
         src/youtube_video_url.cc
         src/youtube_video_url.h
         src/zmm/atomic.h
-        src/zmmf/array.cc
-        src/zmmf/array.h
-        src/zmmf/base_array.h
-        src/zmmf/base_queue.h
-        src/zmmf/base_stack.h
-        src/zmmf/exception.cc
-        src/zmmf/exception.h
-        src/zmmf/object_queue.h
-        src/zmmf/object_stack.h
-        src/zmmf/stringtokenizer.cc
-        src/zmmf/stringtokenizer.h
-        src/zmmf/zmmf.h
+        src/zmm/array.cc
+        src/zmm/array.h
+        src/zmm/base_array.h
+        src/zmm/base_queue.h
+        src/zmm/base_stack.h
+        src/zmm/exception.cc
+        src/zmm/exception.h
+        src/zmm/object_queue.h
+        src/zmm/object_stack.h
+        src/zmm/stringtokenizer.cc
+        src/zmm/stringtokenizer.h
+        src/zmm/zmmf.h
         src/zmm/nil.cc
         src/zmm/nil.h
         src/zmm/null.h
@@ -296,10 +296,12 @@ add_library(libmediatomb OBJECT
         src/zmm/zmm.h
         )
 
-
+target_include_directories(libmediatomb PRIVATE "${CMAKE_SOURCE_DIR}/src/zmm")
 target_include_directories(libmediatomb PRIVATE "${CMAKE_SOURCE_DIR}/src")
 
 add_executable(mediatomb src/main.cc $<TARGET_OBJECTS:libmediatomb>)
+target_include_directories(mediatomb PRIVATE "${CMAKE_SOURCE_DIR}/src/zmm")
+target_include_directories(mediatomb PRIVATE "${CMAKE_SOURCE_DIR}/src")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 

@@ -33,7 +33,7 @@
 #ifndef __CACHED_URL_H__
 #define __CACHED_URL_H__
 
-#include "zmmf/zmmf.h"
+#include "zmm/zmmf.h"
 #include "zmm/zmm.h"
 #include "sync.h"
 

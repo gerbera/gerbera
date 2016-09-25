@@ -33,6 +33,8 @@
     #include "autoconfig.h"
 #endif
 
+#include <assert.h>
+
 #include "xml_to_json.h"
 #include "tools.h"
 

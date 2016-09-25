@@ -32,7 +32,7 @@
 #ifndef __ZMMF_ARRAY_H__
 #define __ZMMF_ARRAY_H__
 
-#include "zmm/zmm.h"
+#include "zmm.h"
 
 #define DEFAULT_ARRAY_CAPACITY 16
 

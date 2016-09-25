@@ -32,7 +32,7 @@
 #ifndef __ZMMF_OBJECT_QUEUE_H__
 #define __ZMMF_OBJECT_QUEUE_H__
 
-#include "zmm/zmm.h"
+#include "zmm.h"
 #include "base_queue.h"
 
 namespace zmm

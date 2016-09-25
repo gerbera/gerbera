@@ -32,7 +32,7 @@
 #ifndef __STORAGE_CACHE_H__
 #define __STORAGE_CACHE_H__
 
-#include "zmmf/zmmf.h"
+#include "zmm/zmmf.h"
 #include "common.h"
 #include "hash.h"
 #include "sync.h"

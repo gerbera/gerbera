@@ -32,7 +32,7 @@
 #ifndef __PROCESS_H__
 #define __PROCESS_H__
 
-#include "zmmf/zmmf.h"
+#include "zmm/zmmf.h"
 
 void init_process();
 zmm::String run_simple_process(zmm::String prog, zmm::String param, zmm::String input);

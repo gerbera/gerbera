@@ -32,7 +32,7 @@
 #ifndef __ZMMF_OBJECT_STACK_H__
 #define __ZMMF_OBJECT_STACK_H__
 
-#include "zmm/zmm.h"
+#include "zmm.h"
 #include "memory.h"
 #include "base_stack.h"
 

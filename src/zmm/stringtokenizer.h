@@ -32,7 +32,7 @@
 #ifndef __ZMMF_STRINGTOKENIZER_H__
 #define __ZMMF_STRINGTOKENIZER_H__
 
-#include "zmm/zmm.h"
+#include "zmm.h"
 
 namespace zmm
 {

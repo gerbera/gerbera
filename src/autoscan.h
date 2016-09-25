@@ -33,7 +33,7 @@
 #ifndef __AUTOSCAN_H__
 #define __AUTOSCAN_H__
 
-#include "zmmf/zmmf.h"
+#include "zmm/zmmf.h"
 #include "sync.h"
 #include "timer.h"
 

@@ -35,7 +35,7 @@
 
 #include "memory.h"
 #include "logger.h"
-#include "zmmf/zmmf.h"
+#include "zmm/zmmf.h"
 #include "exceptions.h"
 
 #define CONFIG_XML_VERSION_0_11_0       1

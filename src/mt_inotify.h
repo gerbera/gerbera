@@ -32,7 +32,7 @@
 #ifndef __MT_INOTIFY_H__
 #define __MT_INOTIFY_H__
 
-#include "zmmf/zmmf.h"
+#include "zmm/zmmf.h"
 
 #ifdef SYS_INOTIFY_H_OK
     #include <sys/inotify.h>

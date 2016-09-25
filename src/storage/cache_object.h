@@ -32,7 +32,7 @@
 #ifndef __CACHE_OBJECT_H__
 #define __CACHE_OBJECT_H__
 
-#include "zmmf/zmmf.h"
+#include "zmm/zmmf.h"
 #include "common.h"
 #include "cds_objects.h"
 
