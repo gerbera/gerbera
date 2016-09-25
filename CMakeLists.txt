@@ -317,6 +317,10 @@ add_definitions(-DDEBUG_LOG_ENABLED=1)
 find_package(Threads REQUIRED)
 target_link_libraries (mediatomb ${CMAKE_THREAD_LIBS_INIT})
 
+find_package(INotify REQUIRED)
+target_link_libraries (mediatomb ${INOTIFY_LIBRARY})
+add_definitions(-DHAVE_INOTIFY)
+
 find_package(LibUUID REQUIRED)
 include_directories(${LIBUUID_INCLUDE_DIRS})
 target_link_libraries (mediatomb ${LIBUUID_LIBRARIES})
@@ -344,9 +348,32 @@ if (CURL_FOUND)
     add_definitions(-DHAVE_CURL)
 endif (CURL_FOUND)
 
+find_package (SpiderMonkey)
+if (JS_FOUND)
+    include_directories(${JS_INCLUDE_DIRS})
+    target_link_libraries (mediatomb ${JS_LIBRARIES})
+    add_definitions(-DHAVE_JS)
+endif (JS_FOUND)
 
+find_package (Taglib)
+if (TAGLIB_FOUND)
+    include_directories(${TAGLIB_INCLUDE_DIRS})
+    target_link_libraries (mediatomb ${TAGLIB_LIBRARIES})
+    add_definitions(-DHAVE_TAGLIB)
+endif (TAGLIB_FOUND)
 
+find_package (LibMagic)
+if (LIBMAGIC_FOUND)
+    include_directories(${LIBMAGIC_INCLUDE_DIRS})
+    target_link_libraries (mediatomb ${LIBMAGIC_LIBRARIES})
+    add_definitions(-DHAVE_MAGIC)
+endif (LIBMAGIC_FOUND)
 
-
+find_package (LibAV)
+if (LIBAV_FOUND)
+    include_directories(${LIBAV_INCLUDE_DIRS})
+    target_link_libraries (mediatomb ${LIBAV_LIBRARIES})
+    add_definitions(-DHAVE_FFMPEG)
+endif (LIBAV_FOUND)
 
 

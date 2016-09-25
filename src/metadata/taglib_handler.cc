@@ -36,21 +36,16 @@
 
 #ifdef HAVE_TAGLIB
 
-#include <taglib.h>
-#include <fileref.h>
-#include <tag.h>
-#include <id3v2tag.h>
-#include <mpegfile.h>
-#include <audioproperties.h>
-#include <attachedpictureframe.h>
-#include <textidentificationframe.h>
-#include <tstring.h>
+#include <taglib/taglib.h>
+#include <taglib/fileref.h>
+#include <taglib/id3v2tag.h>
+#include <taglib/mpegfile.h>
+#include <taglib/attachedpictureframe.h>
+#include <taglib/textidentificationframe.h>
 
 #include "taglib_handler.h"
 #include "string_converter.h"
 #include "config_manager.h"
-#include "common.h"
-#include "tools.h"
 #include "mem_io_handler.h"
 
 #include "content_manager.h"
