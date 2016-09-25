@@ -32,10 +32,10 @@
 #ifndef __ZMMF_EXCEPTION_H__
 #define __ZMMF_EXCEPTION_H__
 
-#include "zmm/zmm.h"
-
-#include "array.h"
 #include <stdio.h>
+
+#include "zmm/zmm.h"
+#include "array.h"
 #include "logger.h"
 
 #define _Exception(format) zmm::Exception(format, __FILE__, __LINE__, __func__)

@@ -32,7 +32,7 @@
 #ifndef __ZMMF_H__
 #define __ZMMF_H__
 
-#include "zmm/zmm.h"
+#include "../zmm/zmm.h"
 #include "exception.h"
 #include "array.h"
 #include "base_array.h"
