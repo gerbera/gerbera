@@ -16,3 +16,4 @@ mediatomb-service-optware
 upnpconfig.h
 config.status
 build/mediatomb
+.idea

@@ -33,8 +33,10 @@
 #ifndef __SUBSCRIPTION_REQUEST_H__
 #define __SUBSCRIPTION_REQUEST_H__
 
+#include <upnp/upnp.h>
+
 #include "common.h"
-#include "upnp.h"
+
 
 /// \brief This class represents the Upnp_Subscription_Request type from the SDK.
 ///

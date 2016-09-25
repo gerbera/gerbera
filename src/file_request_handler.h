@@ -42,7 +42,7 @@ public:
     FileRequestHandler();
     virtual void get_info(IN const char *filename, OUT struct File_Info *info);
     virtual zmm::Ref<IOHandler> open(
-            IN const char *filename, OUT struct File_Info *info,
+            IN const char *filename,
             IN enum UpnpOpenFileMode mode,
             IN zmm::String range);
 };

@@ -33,9 +33,9 @@
 #define __IO_HANDLER_BUFFER_HELPER_H__
 
 #include <pthread.h>
+#include <upnp/upnp.h>
 
 #include "common.h"
-#include "upnp.h"
 #include "io_handler.h"
 #include "sync.h"
 

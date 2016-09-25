@@ -33,10 +33,10 @@
     #include "autoconfig.h"
 #endif
 
+#include <assert.h>
+
 #include "element.h"
 #include "tools.h"
-
-#include <string.h>
 
 using namespace zmm;
 using namespace mxml;

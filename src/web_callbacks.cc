@@ -34,19 +34,12 @@
     #include "autoconfig.h"
 #endif
 
+#include <sys/types.h>
+
 #include "common.h"
 #include "tools.h"
 #include "web_callbacks.h"
 #include "server.h"
-#include <unistd.h>
-#include <string.h>
-#include <stdio.h>
-#include "storage.h"
-#include "cds_objects.h"
-#include "process.h"
-#include "update_manager.h"
-#include "ixml.h"
-#include "io_handler.h"
 #include "request_handler.h"
 #include "file_request_handler.h"
 #ifdef HAVE_CURL
@@ -55,16 +48,12 @@
 #include "web_request_handler.h"
 #include "serve_request_handler.h"
 #include "web/pages.h"
-#include "dictionary.h"
-
-#include <sys/types.h>
-#include <sys/stat.h>
 
 using namespace zmm;
 using namespace mxml;
 
-static Ref<RequestHandler> create_request_handler(const char *filename,
-                                                  const char *headers)
+// FIXME Headers
+static Ref<RequestHandler> create_request_handler(const char *filename)
 {
     String path, parameters;
 
@@ -151,11 +140,13 @@ static Ref<RequestHandler> create_request_handler(const char *filename,
 ///
 /// \return 0 Success.
 /// \return -1 Error.
-static int web_get_info(IN const char *filename, IN const char *headers, OUT struct File_Info *info)
+
+// FIXME headers
+static int web_get_info(IN const char *filename, OUT struct File_Info *info)
 {
     try
     {
-        Ref<RequestHandler> reqHandler = create_request_handler(filename, headers);
+        Ref<RequestHandler> reqHandler = create_request_handler(filename);
         reqHandler->get_info(filename, info);
     }
     catch (ServerShutdownException se)
@@ -190,16 +181,17 @@ static int web_get_info(IN const char *filename, IN const char *headers, OUT str
 ///
 /// \return UpnpWebFileHandle A valid file handle.
 /// \return NULL Error.
+
+// FIXME Headers
 static UpnpWebFileHandle web_open(IN const char *filename,
-                                  IN const char *headers,
-                                  OUT struct File_Info *info,
                                   IN enum UpnpOpenFileMode mode)
 {
     log_debug("web_open(): %s", headers);
 
     String link = url_unescape((char *) filename);
 
-    char *line = strstr((char *)headers, "TimeSeekRange.dlna.org: npt=");
+    //char *line = strstr((char *)headers, "TimeSeekRange.dlna.org: npt=");
+    char *line = NULL;
     char *timeseek;
     if (line != NULL)
     {
@@ -221,8 +213,8 @@ static UpnpWebFileHandle web_open(IN const char *filename,
 
     try
     {
-        Ref<RequestHandler> reqHandler = create_request_handler(filename, headers);
-        Ref<IOHandler> ioHandler = reqHandler->open(link.c_str(), info, mode, nil);
+        Ref<RequestHandler> reqHandler = create_request_handler(filename);
+        Ref<IOHandler> ioHandler = reqHandler->open(link.c_str(), mode, nil);
         ioHandler->retain();
         return (UpnpWebFileHandle) ioHandler.getPtr();
     }

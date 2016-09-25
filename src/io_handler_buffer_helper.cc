@@ -35,7 +35,6 @@
 
 #include "io_handler_buffer_helper.h"
 #include "config_manager.h"
-#include "tools.h"
 
 using namespace zmm;
 

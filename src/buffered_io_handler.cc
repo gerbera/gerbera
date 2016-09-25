@@ -33,8 +33,10 @@
     #include "autoconfig.h"
 #endif
 
+#include <assert.h>
+
 #include "buffered_io_handler.h"
-#include "tools.h"
+
 
 using namespace zmm;
 

@@ -33,22 +33,11 @@
     #include "autoconfig.h"
 #endif
 
-#include "server.h"
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
-#include <string.h>
-#include <stdio.h>
-#include "common.h"
-#include "storage.h"
-#include "cds_objects.h"
-#include "process.h"
-#include "update_manager.h"
-#include "ixml.h"
+
+#include "server.h"
 #include "file_io_handler.h"
-#include "dictionary.h"
 #include "serve_request_handler.h"
-#include "tools.h"
 
 
 using namespace zmm;
@@ -145,7 +134,6 @@ void ServeRequestHandler::get_info(IN const char *filename, OUT struct File_Info
 }
 
 Ref<IOHandler> ServeRequestHandler::open(IN const char *filename,
-                                         OUT struct File_Info *info,
                                          IN enum UpnpOpenFileMode mode,
                                          IN zmm::String range)
 {
@@ -213,6 +201,8 @@ Ref<IOHandler> ServeRequestHandler::open(IN const char *filename,
         }
 #endif // HAVE_MAGIC
 
+		// FIXME upstream headers
+		/*
         info->file_length = statbuf.st_size;
         info->last_modified = statbuf.st_mtime;
         info->is_directory = S_ISDIR(statbuf.st_mode);
@@ -226,7 +216,9 @@ Ref<IOHandler> ServeRequestHandler::open(IN const char *filename,
             info->is_readable = 0;
         }
 
+
         info->content_type = ixmlCloneDOMString(mimetype.c_str());
+        */
     }
     else
     {

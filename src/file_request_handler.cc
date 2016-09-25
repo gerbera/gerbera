@@ -33,24 +33,15 @@
     #include "autoconfig.h"
 #endif
 
-#include "server.h"
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
-#include <string.h>
-#include <stdio.h>
-#include "common.h"
-#include "storage.h"
-#include "cds_objects.h"
+
+#include "server.h"
 #include "process.h"
 #include "update_manager.h"
 #include "session_manager.h"
-#include "ixml.h"
 #include "file_io_handler.h"
-#include "dictionary.h"
 #include "file_request_handler.h"
 #include "metadata_handler.h"
-#include "tools.h"
 #include "play_hook.h"
 
 #ifdef HAVE_LIBDVDNAV
@@ -184,7 +175,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
             slash_pos++;
 
 
-            header = _("Content-Disposition: attachment; filename=\"") + 
+            header = _("Content-Disposition: attachment; filename=\"") +
                 path.substring(slash_pos) + _("\"");
         }
     }
@@ -193,7 +184,8 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
     tr_profile = dict->get(_(URL_PARAM_TRANSCODE_PROFILE_NAME));
 #endif
 
-    info->http_header = NULL;
+    // FIXME - upstream upnp
+    //info->http_header = NULL;
     // for transcoded resourecs res_id will always be negative
     log_debug("fetching resource id %d\n", res_id);
     String rh = dict->get(_(RESOURCE_HANDLER));
@@ -228,145 +220,146 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
         /*        Ref<IOHandler> io_handler = */ h->serveContent(item, res_id, &(info->file_length));
 
     }
-    else
-    {
+    else {
 #ifdef EXTERNAL_TRANSCODING
-        if (!is_srt && string_ok(tr_profile))
-        {
+		if (!is_srt && string_ok(tr_profile))
+		{
 
-            Ref<TranscodingProfile> tp = ConfigManager::getInstance()->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
+			Ref<TranscodingProfile> tp = ConfigManager::getInstance()->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
 
-            if (tp == nil)
-                throw _Exception(_("Transcoding of file ") + path +
-                        " but no profile matching the name " +
-                        tr_profile + " found");
+			if (tp == nil)
+				throw _Exception(_("Transcoding of file ") + path +
+						" but no profile matching the name " +
+						tr_profile + " found");
 
-            mimeType = tp->getTargetMimeType();
-            
-            Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-            if (mappings->get(mimeType) == CONTENT_TYPE_PCM)
-            {
-                String freq = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY));
-                String nrch = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS));
+			mimeType = tp->getTargetMimeType();
 
-                if (string_ok(freq))
-                    mimeType = mimeType + _(";rate=") + freq;
-                if (string_ok(nrch))
-                    mimeType = mimeType + _(";channels=") + nrch;
-            }
+			Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+			if (mappings->get(mimeType) == CONTENT_TYPE_PCM)
+			{
+				String freq = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY));
+				String nrch = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS));
 
-            info->file_length = -1;
-        }
-        else
+				if (string_ok(freq))
+					mimeType = mimeType + _(";rate=") + freq;
+				if (string_ok(nrch))
+					mimeType = mimeType + _(";channels=") + nrch;
+			}
+
+			info->file_length = -1;
+		}
+		else
 #endif
 #ifdef HAVE_LIBDVDNAV
-            if (!is_srt && item->getFlag(OBJECT_FLAG_DVD_IMAGE))
-            {
-                String tmp = dict->get(DVDHandler::renderKey(DVD_Title));
-                if (!string_ok(tmp))
-                    throw _Exception(_("DVD Image requested but title parameter is missing!"));
-                int title = tmp.toInt();
-                if (title < 0)
-                    throw _Exception(_("DVD Image - requested invalid title!"));
+		if (!is_srt && item->getFlag(OBJECT_FLAG_DVD_IMAGE))
+		{
+			String tmp = dict->get(DVDHandler::renderKey(DVD_Title));
+			if (!string_ok(tmp))
+				throw _Exception(_("DVD Image requested but title parameter is missing!"));
+			int title = tmp.toInt();
+			if (title < 0)
+				throw _Exception(_("DVD Image - requested invalid title!"));
 
-                tmp = dict->get(DVDHandler::renderKey(DVD_Chapter));
-                if (!string_ok(tmp))
-                    throw _Exception(_("DVD Image requested but chapter parameter is missing!"));
-                int chapter = tmp.toInt();
-                if (chapter < 0)
-                    throw _Exception(_("DVD Image - requested invalid chapter!"));
+			tmp = dict->get(DVDHandler::renderKey(DVD_Chapter));
+			if (!string_ok(tmp))
+				throw _Exception(_("DVD Image requested but chapter parameter is missing!"));
+			int chapter = tmp.toInt();
+			if (chapter < 0)
+				throw _Exception(_("DVD Image - requested invalid chapter!"));
 
-                // actually we are retrieving the stream id here
-                tmp = dict->get(DVDHandler::renderKey(DVD_AudioStreamID));
-                if (!string_ok(tmp))
-                    throw _Exception(_("DVD Image requested but audio track parameter is missing!"));
-                int audio_track = tmp.toInt();
-                if (audio_track < 0)
-                    throw _Exception(_("DVD Image - requested invalid audio stream ID!"));
+			// actually we are retrieving the stream id here
+			tmp = dict->get(DVDHandler::renderKey(DVD_AudioStreamID));
+			if (!string_ok(tmp))
+				throw _Exception(_("DVD Image requested but audio track parameter is missing!"));
+			int audio_track = tmp.toInt();
+			if (audio_track < 0)
+				throw _Exception(_("DVD Image - requested invalid audio stream ID!"));
 
-                /// \todo make sure we can seek in the streams
-                info->file_length = -1;
-                header = nil;
-            }
-            else
+			/// \todo make sure we can seek in the streams
+			info->file_length = -1;
+			header = nil;
+		}
+		else
 #endif
-            {
-                info->file_length = statbuf.st_size;
-                // if we are dealing with a regular file we should add the
-                // Accept-Ranges: bytes header, in order to indicate that we support
-                // seeking
-                if (S_ISREG(statbuf.st_mode))
-                {
-                    if (string_ok(header))
-                        header = header + _("\r\n");
+        {
+            info->file_length = statbuf.st_size;
+            // if we are dealing with a regular file we should add the
+            // Accept-Ranges: bytes header, in order to indicate that we support
+            // seeking
+            if (S_ISREG(statbuf.st_mode)) {
+                if (string_ok(header))
+                    header = header + _("\r\n");
 
-                    header = header + _("Accept-Ranges: bytes");
-                    /// \todo turned out that we are not always allowed to add this
-                    /// header, since chunked encoding may be active and we do not
-                    /// know that here
-                }
+                header = header + _("Accept-Ranges: bytes");
+                /// \todo turned out that we are not always allowed to add this
+                /// header, since chunked encoding may be active and we do not
+                /// know that here
+            }
 
 #ifdef EXTEND_PROTOCOLINFO
-                    Ref<ConfigManager> cfg = ConfigManager::getInstance();
-                    if (cfg->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK))
-                    {
-                        if (item->getMimeType().startsWith(_("video"))) {
-                            // Look for subtitle file and returns it's URL
-                            // in CaptionInfo.sec response header.
-                            // To be more compliant with original Samsung
-                            // server we should check for getCaptionInfo.sec: 1
-                            // request header.
-                            Ref<Array<StringBase> > subexts(new Array<StringBase>());
-                            subexts->append(_(".srt"));
-                            subexts->append(_(".ssa"));
-                            subexts->append(_(".smi"));
-                            subexts->append(_(".sub"));
+			Ref<ConfigManager> cfg = ConfigManager::getInstance();
+			if (cfg->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK))
+			{
+				if (item->getMimeType().startsWith(_("video"))) {
+					// Look for subtitle file and returns it's URL
+					// in CaptionInfo.sec response header.
+					// To be more compliant with original Samsung
+					// server we should check for getCaptionInfo.sec: 1
+					// request header.
+					Ref<Array<StringBase> > subexts(new Array<StringBase>());
+					subexts->append(_(".srt"));
+					subexts->append(_(".ssa"));
+					subexts->append(_(".smi"));
+					subexts->append(_(".sub"));
 
-                            String bfilepath = path.substring(0, path.rindex('.'));
-                            String validext;
-                            for (int i=0; i<subexts->size(); i++) {
-                                String ext = subexts->get(i);
+					String bfilepath = path.substring(0, path.rindex('.'));
+					String validext;
+					for (int i=0; i<subexts->size(); i++) {
+						String ext = subexts->get(i);
 
-                                String fpath = bfilepath + ext;
-                                if (access(fpath.c_str(), R_OK) == 0)
-                                {
-                                    validext = ext;
-                                    break;
-                                }
-                            }
+						String fpath = bfilepath + ext;
+						if (access(fpath.c_str(), R_OK) == 0)
+						{
+							validext = ext;
+							break;
+						}
+					}
 
 
-                            if (validext.length() > 0)
-                            {
-                                String burlpath = _(filename);
-                                burlpath = burlpath.substring(0, burlpath.rindex('.'));
-                                Ref<Server> server = Server::getInstance();
-                                String url = _("http://")
-                                    + server->getIP() + ":" + server->getPort() 
-                                    + burlpath + validext;
+					if (validext.length() > 0)
+					{
+						String burlpath = _(filename);
+						burlpath = burlpath.substring(0, burlpath.rindex('.'));
+						Ref<Server> server = Server::getInstance();
+						String url = _("http://")
+							+ server->getIP() + ":" + server->getPort()
+							+ burlpath + validext;
 
-                                if (string_ok(header))
-                                    header = header + _("\r\n");
-                                header = header + "CaptionInfo.sec: " + url;
-                            }
-                        }
+						if (string_ok(header))
+							header = header + _("\r\n");
+						header = header + "CaptionInfo.sec: " + url;
+					}
+				}
 #endif
-                    }
-            }
-
-        if (!string_ok(mimeType))
-            mimeType = item->getMimeType();
-
-        //log_debug("sizeof off_t %d, statbuf.st_size %d\n", sizeof(off_t), sizeof(statbuf.st_size));
-        //log_debug("get_info: file_length: " OFF_T_SPRINTF "\n", statbuf.st_size);
+        }
     }
-   
+
+    if (!string_ok(mimeType))
+        mimeType = item->getMimeType();
+
+    //log_debug("sizeof off_t %d, statbuf.st_size %d\n", sizeof(off_t), sizeof(statbuf.st_size));
+    //log_debug("get_info: file_length: " OFF_T_SPRINTF "\n", statbuf.st_size);
+
 #ifdef EXTEND_PROTOCOLINFO
     header = getDLNAtransferHeader(mimeType, header);
 #endif
 
+
+
+    /*  FIXME - upstream upnp
     if (string_ok(header))
         info->http_header = ixmlCloneDOMString(header.c_str());
+*/
 
     info->last_modified = statbuf.st_mtime;
     info->is_directory = S_ISDIR(statbuf.st_mode);
@@ -380,7 +373,6 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
 }
 
 Ref<IOHandler> FileRequestHandler::open(IN const char *filename,
-                                        OUT struct File_Info *info,
                                         IN enum UpnpOpenFileMode mode,
                                         IN zmm::String range)
 {
@@ -538,6 +530,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename,
             throw _Exception(_("Failed to open ") + path + " - " + strerror(errno));
     }
 
+    /* TODO Upstream upnp
     if (access(path.c_str(), R_OK) == 0)
     {
         info->is_readable = 1;
@@ -551,7 +544,6 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename,
 
     info->last_modified = statbuf.st_mtime;
     info->is_directory = S_ISDIR(statbuf.st_mode);
-
 
     log_debug("path: %s\n", path.c_str());
     int slash_pos = path.rindex(DIR_SEPARATOR);
@@ -567,6 +559,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename,
         }
     }
     log_debug("fetching resource id %d\n", res_id);
+    */
 #ifdef EXTERNAL_TRANSCODING
     tr_profile = dict->get(_(URL_PARAM_TRANSCODE_PROFILE_NAME));
     if (string_ok(tr_profile))
@@ -581,7 +574,8 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename,
     }
 #endif
 
-    info->http_header = NULL;
+    // FIXME upstream upnp
+    //info->http_header = NULL;
     // Per default and in case of a bad resource ID, serve the file
     // itself
 
@@ -592,7 +586,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename,
     if (((res_id > 0) && (res_id < item->getResourceCount())) ||
         ((res_id > 0) && string_ok(rh)))
     {
-        info->file_length = -1;
+        //info->file_length = -1;
 
         int res_handler;
         if (string_ok(rh))
@@ -618,11 +612,15 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename,
         header = getDLNAtransferHeader(mimeType, header);
 #endif
 
+        /* FIXME Upstream upnp
         if (string_ok(header))
                 info->http_header = ixmlCloneDOMString(header.c_str());
+        */
 
-        info->content_type = ixmlCloneDOMString(mimeType.c_str());
-        Ref<IOHandler> io_handler = h->serveContent(item, res_id, &(info->file_length));
+        //info->content_type = ixmlCloneDOMString(mimeType.c_str());
+        //Ref<IOHandler> io_handler = h->serveContent(item, res_id, &(info->file_length));
+        off_t filelength = -1;
+        Ref<IOHandler> io_handler = h->serveContent(item, res_id, &filelength);
         io_handler->open(mode);
         return io_handler;
     }
@@ -716,6 +714,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename,
             if (mimeType == nil)
                 mimeType = item->getMimeType();
 
+            /* FIXME Upstream
             info->file_length = statbuf.st_size;
             info->content_type = ixmlCloneDOMString(mimeType.c_str());
 
@@ -731,13 +730,15 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename,
 
                 header = header + _("Accept-Ranges: bytes");
             }
+             */
 
 #ifdef EXTEND_PROTOCOLINFO
             header = getDLNAtransferHeader(mimeType, header);
 #endif
+            /* FIXME Upstream upnp
             if (string_ok(header))
                 info->http_header = ixmlCloneDOMString(header.c_str());
-
+            */
 
             Ref<IOHandler> io_handler(new FileIOHandler(path));
             io_handler->open(mode);

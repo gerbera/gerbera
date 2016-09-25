@@ -33,6 +33,7 @@
 #ifndef __CONFIG_OPTIONS_H__
 #define __CONFIG_OPTIONS_H__
 
+#include <assert.h>
 #include "zmmf/zmmf.h"
 #include "exceptions.h"
 #include "autoscan.h"

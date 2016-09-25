@@ -166,7 +166,7 @@ void Server::upnp_init(String iface, String ip_address, int port)
     if (storage->threadCleanupRequired())
         cb = (void *)static_cleanup_callback;
 
-    ret = UpnpInit(ip.c_str(), port, 0, cb);
+    ret = UpnpInit(ip.c_str(), port);
 
     if (ret != UPNP_E_SUCCESS)
     {
@@ -212,12 +212,13 @@ void Server::upnp_init(String iface, String ip_address, int port)
                 tmp = arr->get(i);
                 if (string_ok(tmp))
                 {
-                    log_info("Adding HTTP header \"%s\"\n", tmp.c_str());
-                    ret = UpnpAddCustomHTTPHeader(tmp.c_str());
-                    if (ret != UPNP_E_SUCCESS)
-                    {
-                        throw _UpnpException(ret, _("upnp_init: UpnpAddCustomHTTPHeader failed"));
-                    }
+                    log_info("(NOT) Adding HTTP header \"%s\"\n", tmp.c_str());
+                    // FIXME upstream upnp
+                    //ret = UpnpAddCustomHTTPHeader(tmp.c_str());
+                    //if (ret != UPNP_E_SUCCESS)
+                    //{
+                    //    throw _UpnpException(ret, _("upnp_init: UpnpAddCustomHTTPHeader failed"));
+                    //}
                 }
             }
         }

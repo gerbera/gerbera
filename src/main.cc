@@ -43,9 +43,7 @@
 #include "server.h"
 #include "process.h"
 
-#ifdef HAVE_GETOPT_H
-    #include <getopt.h>
-#endif
+#include <getopt.h>
 
 #include "config_manager.h"
 #include "content_manager.h"
@@ -67,9 +65,7 @@
 #include <grp.h>
 #include <limits.h>
 
-#ifdef HAVE_GETOPT_LONG
-    #define OPTSTR "i:e:p:c:m:f:u:g:a:l:P:dhD"
-#endif
+#define OPTSTR "i:e:p:c:m:f:u:g:a:l:P:dhD"
 
 using namespace zmm;
 
@@ -101,7 +97,7 @@ int main(int argc, char **argv, char **envp)
     int      redirect2 = -1;
     struct   passwd *pwd;
     struct   group  *grp;
-#ifdef HAVE_GETOPT_LONG
+
     int      opt_index = 0;
     int      o;
     static struct option long_options[] = {
@@ -123,7 +119,6 @@ int main(int argc, char **argv, char **envp)
         {"help", 0, 0, 'h'},        // 15
         {0, 0, 0, 0}                
     };
-#endif
 
     String config_file;
     String home;
@@ -156,7 +151,6 @@ int main(int argc, char **argv, char **envp)
     }
 #endif
 
-#ifdef HAVE_GETOPT_LONG   
     while (1)
     {
         o = getopt_long(argc, argv, OPTSTR, long_options, &opt_index);
@@ -292,9 +286,6 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
                 break;
          }
     }
-#else
-    log_warning("No getopt_long() support, all command line options disabled");
-#endif
 
     if (print_version || ! daemon)
     {

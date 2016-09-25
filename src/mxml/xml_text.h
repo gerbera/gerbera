@@ -32,7 +32,7 @@
 #ifndef __MXML_XML_TEXT_H__
 #define __MXML_XML_TEXT_H__
 
-#include "zmmf/zmmf.h"
+#include "../zmmf/zmmf.h"
 
 #include "mxml.h"
 

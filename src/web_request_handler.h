@@ -146,7 +146,6 @@ public:
     /// \param mode either UPNP_READ or UPNP_WRITE
     /// \return the appropriate IOHandler for the request.
     virtual zmm::Ref<IOHandler> open(IN const char *filename,
-                                     OUT struct File_Info *info,
                                      IN enum UpnpOpenFileMode mode,
                                      IN zmm::String range);
     

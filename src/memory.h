@@ -34,28 +34,6 @@
 
 #include <stdlib.h>
 
-#if (!defined(HAVE_MALLOC)) || (!defined(HAVE_REALLOC)) 
-    #include <sys/types.h>
-#else
-    #define HAVE_CALLOC
-#endif
-
-#ifndef HAVE_MALLOC
-    #undef malloc
-    #define malloc rpl_malloc
-#endif
-
-#ifndef HAVE_REALLOC
-    #undef realloc
-    #define realloc rpl_realloc
-#endif
-
-#ifndef HAVE_CALLOC
-    #undef calloc
-    #define calloc rpl_calloc
-#endif
-
-
 #ifndef MEMPROF
 
 #ifdef TOMBDEBUG

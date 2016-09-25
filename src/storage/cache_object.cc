@@ -33,7 +33,7 @@
     #include "autoconfig.h"
 #endif
 
-#include "common.h"
+#include "../common.h"
 #include "cache_object.h"
 
 using namespace zmm;

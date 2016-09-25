@@ -39,7 +39,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
-#include "ixml.h"
+#include "upnp/ixml.h"
 #include <time.h>
 #include "common.h"
 #include "storage.h"
