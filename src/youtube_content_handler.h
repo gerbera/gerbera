@@ -50,7 +50,7 @@
 #define YOUTUBE_AUXDATA_CATEGORY            YOUTUBE_SERVICE_ID "10"
 #define YOUTUBE_AUXDATA_REGION              YOUTUBE_SERVICE_ID "11"
 
-#include "zmmf/zmmf.h"
+#include "zmm/zmmf.h"
 #include "mxml/mxml.h"
 #include "cds_objects.h"
 

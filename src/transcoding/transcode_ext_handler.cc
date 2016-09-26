@@ -40,6 +40,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <upnp/ixml.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
@@ -51,7 +52,6 @@
 #include "process.h"
 #include "update_manager.h"
 #include "session_manager.h"
-#include "ixml.h"
 #include "process_io_handler.h"
 #include "buffered_io_handler.h"
 #include "dictionary.h"
@@ -81,8 +81,7 @@ TranscodeExternalHandler::TranscodeExternalHandler() : TranscodeHandler()
 
 Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile, 
                                               String location, 
-                                              Ref<CdsObject> obj, 
-                                              struct File_Info *info,
+                                              Ref<CdsObject> obj,
                                               String range)
 {
     bool isURL = false;
@@ -118,7 +117,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
         }
     }
 
-    info->content_type = ixmlCloneDOMString(mimeType.c_str());
+    //info->content_type = ixmlCloneDOMString(mimeType.c_str());
 #ifdef EXTEND_PROTOCOLINFO
     String header;
     header = header + _("TimeSeekRange.dlna.org: npt=") + range;
@@ -129,8 +128,8 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
         info->http_header = ixmlCloneDOMString(header.c_str());
 #endif
    
-    info->file_length = UNKNOWN_CONTENT_LENGTH;
-    info->force_chunked = (int)profile->getChunked();
+    //info->file_length = UNKNOWN_CONTENT_LENGTH;
+    //info->force_chunked = (int)profile->getChunked();
 
     Ref<ConfigManager> cfg = ConfigManager::getInstance();
    

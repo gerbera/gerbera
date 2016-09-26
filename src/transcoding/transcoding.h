@@ -35,7 +35,7 @@
 #ifndef __TRANSCODING_H__
 #define __TRANSCODING_H__
 
-#include "zmmf/zmmf.h"
+#include "zmm/zmmf.h"
 #include "dictionary.h"
 #include "object_dictionary.h"
 

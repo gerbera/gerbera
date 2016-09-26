@@ -36,7 +36,7 @@
 #define __ONLINE_SERVICE_H__
 
 #include "zmm/zmm.h"
-#include "zmmf/zmmf.h"
+#include "zmm/zmmf.h"
 #include "mxml/mxml.h"
 #include "layout/layout.h"
 

@@ -37,7 +37,7 @@
 #ifdef ONLINE_SERVICES
 
 #include "zmm/zmm.h"
-#include "zmmf/zmmf.h"
+#include "zmm/zmmf.h"
 #include "mxml/mxml.h"
 #include "online_service.h"
 #include "online_service_helper.h"

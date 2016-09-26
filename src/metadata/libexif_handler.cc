@@ -261,17 +261,9 @@ static int getTagFromString(String tag)
     return -1;
 }
 
-
-
-#ifdef EXIF_EGV_1
-    #define exif_egv(arg) exif_entry_get_value(arg)
-#endif
-
-#ifdef EXIF_EGV_3
-    #define BUFLEN  4096
-    char exif_entry_buffer[BUFLEN];
-    #define exif_egv(arg) exif_entry_get_value(arg, exif_entry_buffer, BUFLEN)
-#endif
+#define BUFLEN  4096
+char exif_entry_buffer[BUFLEN];
+#define exif_egv(arg) exif_entry_get_value(arg, exif_entry_buffer, BUFLEN)
 
 void LibExifHandler::process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<StringConverter> sc, Ref<Array<StringBase> > auxtags)
 {

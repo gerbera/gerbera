@@ -633,7 +633,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename,
 
             Ref<TranscodeDispatcher> tr_d(new TranscodeDispatcher());
             Ref<TranscodingProfile> tp = ConfigManager::getInstance()->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
-            return tr_d->open(tp, path, RefCast(item, CdsObject), info, range);
+            return tr_d->open(tp, path, RefCast(item, CdsObject), range);
         }
         else
 #endif
@@ -663,13 +663,13 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename,
                 throw _Exception(_("DVD Image - requested invalid audio stream ID!"));
 
             /// \todo make sure we can seek in the streams
-            info->file_length = -1;
-            info->force_chunked = 1;
-            header = nil;
+            //info->file_length = -1;
+            //info->force_chunked = 1;
+            //header = nil;
             if (mimeType == nil)
                 mimeType = item->getMimeType();
 
-            info->content_type = ixmlCloneDOMString(mimeType.c_str());
+            //info->content_type = ixmlCloneDOMString(mimeType.c_str());
             log_debug("Serving dvd image %s Title: %d Chapter: %d\n",
                     path.c_str(), title, chapter);
             /// \todo add angle support

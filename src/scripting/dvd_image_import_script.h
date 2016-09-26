@@ -55,7 +55,7 @@ public:
 
 private:
     int currentObjectID;
-    zmm::Ref<CMTask> currentTask;
+    zmm::Ref<GenericTask> currentTask;
     JSObject *root;
     zmm::String mimetype;
 

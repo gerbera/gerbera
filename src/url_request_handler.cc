@@ -254,7 +254,7 @@ Ref<IOHandler> URLRequestHandler::open(IN const char *filename,
                     tr_profile + " found");
 
         Ref<TranscodeDispatcher> tr_d(new TranscodeDispatcher());
-        return tr_d->open(tp, url, RefCast(item, CdsObject), info, range);
+        return tr_d->open(tp, url, RefCast(item, CdsObject), range);
     }
     else
 #endif

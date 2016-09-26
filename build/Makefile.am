@@ -87,6 +87,7 @@ mediatomb_LDADD = \
     $(FLAC_LIBS) \
     $(LIBEXIF_LIBS) \
     $(ZLIB_LIBS) \
+    $(ZLIB_LIBS) \
     $(RT_LIBS) \
     $(PTHREAD_CFLAGS) \
     $(PTHREAD_LIBS) \

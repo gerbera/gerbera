@@ -32,10 +32,12 @@
 #ifndef __TRANSCODE_HANDLER_H__
 #define __TRANSCODE_HANDLER_H__
 
+#include <upnp/upnp.h>
+
 #include "common.h"
 #include "io_handler.h"
 #include "transcoding.h"
-#include "upnp.h"
+
 #include "cds_objects.h"
 
 class TranscodeHandler : public zmm::Object
@@ -44,8 +46,7 @@ public:
 //    TranscodeHandler();
     virtual zmm::Ref<IOHandler> open(zmm::Ref<TranscodingProfile> profile, 
                                      zmm::String location,
-                                     zmm::Ref<CdsObject> obj, 
-                                     struct File_Info *info,
+                                     zmm::Ref<CdsObject> obj,
                                      zmm::String range) = 0;
 protected:
     enum { UNKNOWN_CONTENT_LENGTH = -1 };

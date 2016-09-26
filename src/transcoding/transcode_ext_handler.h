@@ -32,9 +32,11 @@
 #ifndef __TRANSCODE_EXTERNAL_HANDLER_H__
 #define __TRANSCODE_EXTERNAL_HANDLER_H__
 
+#include <upnp/upnp.h>
+
 #include "common.h"
 #include "transcode_handler.h"
-#include "upnp.h"
+
 
 class TranscodeExternalHandler : public TranscodeHandler 
 {
@@ -42,8 +44,7 @@ public:
     TranscodeExternalHandler();
     virtual zmm::Ref<IOHandler> open(zmm::Ref<TranscodingProfile> profile, 
                                      zmm::String location,
-                                     zmm::Ref<CdsObject> obj, 
-                                     struct File_Info *info,
+                                     zmm::Ref<CdsObject> obj,
                                      zmm::String range);
 };
 

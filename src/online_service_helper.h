@@ -36,7 +36,7 @@
 #define __ONLINE_SERVICE_HELPER_H__
 
 #include "zmm/zmm.h"
-#include "zmmf/zmmf.h"
+#include "zmm/zmmf.h"
 #include "cds_objects.h"
 
 /// \brief This class will handle things that are specific to various services

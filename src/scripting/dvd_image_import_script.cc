@@ -35,6 +35,8 @@
 
 #if defined(HAVE_JS) && defined(HAVE_LIBDVDNAV)
 
+#include <js/jsscript.h>
+
 #include "dvd_image_import_script.h"
 #include "config_manager.h"
 #include "js_functions.h"
@@ -44,7 +46,7 @@ using namespace zmm;
 extern "C" {
  
 // object, dvd title, chapter, audio track, container chain, container class
-static JSBool js_addDVDObject(JSContext *cx, JSObject *obj, uintN argc, 
+static JSBool js_addDVDObject(JSContext *cx, JSObject *obj, uintN argc,
                             jsval *argv, jsval *rval)
 {
     try

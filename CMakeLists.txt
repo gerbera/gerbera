@@ -93,29 +93,12 @@ add_library(libmediatomb OBJECT
         src/metadata/ffmpeg_handler.h
         src/metadata_handler.cc
         src/metadata_handler.h
-        src/metadata/id3_handler.cc
-        src/metadata/id3_handler.h
         src/metadata/libexif_handler.cc
         src/metadata/libexif_handler.h
-        src/metadata/libmp4v2_handler.cc
-        src/metadata/libmp4v2_handler.h
         src/metadata/taglib_handler.cc
         src/metadata/taglib_handler.h
-        src/metadata/flac_handler.cc
-        src/metadata/flac_handler.h
         src/metadata/fanart_handler.cc
         src/metadata/fanart_handler.h
-        src/mpegdemux/buffer.c
-        src/mpegdemux/buffer.h
-        src/mpegdemux/mpegdemux.c
-        src/mpegdemux/mpegdemux.h
-        src/mpegdemux/mpegdemux_internal.h
-        src/mpegdemux/mpeg_parse.c
-        src/mpegdemux/mpeg_parse.h
-        src/mpegdemux/mpeg_remux.c
-        src/mpegdemux/mpeg_remux.h
-        src/mpegremux_processor.cc
-        src/mpegremux_processor.h
         src/mt_inotify.cc
         src/mt_inotify.h
         src/mxml/attribute.cc
@@ -310,8 +293,13 @@ add_definitions(-DVERSION="0.13.0_alpha")
 add_definitions(-DPACKAGE_DATADIR="/tmp")
 add_definitions(-DCOMPILE_INFO="")
 
+add_definitions(-DEXTERNAL_TRANSCODING)
+
+add_definitions(-DONLINE_SERVICES)
+add_definitions(-DYOUTUBE)
+
 # This only compiles them in
-add_definitions(-DDEBUG_LOG_ENABLED=1)
+add_definitions(-DDEBUG_LOG_ENABLED)
 
 
 find_package(Threads REQUIRED)
@@ -363,11 +351,11 @@ if (TAGLIB_FOUND)
 endif (TAGLIB_FOUND)
 
 find_package (LibMagic)
-if (LIBMAGIC_FOUND)
+if (MAGIC_FOUND)
     include_directories(${LIBMAGIC_INCLUDE_DIRS})
     target_link_libraries (mediatomb ${LIBMAGIC_LIBRARIES})
     add_definitions(-DHAVE_MAGIC)
-endif (LIBMAGIC_FOUND)
+endif (MAGIC_FOUND)
 
 find_package (LibAV)
 if (LIBAV_FOUND)
@@ -376,4 +364,18 @@ if (LIBAV_FOUND)
     add_definitions(-DHAVE_FFMPEG)
 endif (LIBAV_FOUND)
 
+find_package (DvdNav)
+if (DVDNAV_FOUND)
+    include_directories(${DVDNAV_INCLUDE_DIRS})
+    target_link_libraries (mediatomb ${DVDNAV_LIBRARIES})
+    add_definitions(-DHAVE_LIBDVDNAV)
+else (DVDNAV_FOUND)
+    add_definitions(-DHAVE_LIBDVDNAV=0)
+endif (DVDNAV_FOUND)
 
+find_package (EXIF)
+if (EXIF_FOUND)
+    include_directories(${EXIF_INCLUDE_DIRS})
+    target_link_libraries (mediatomb ${EXIF_LIBRARIES})
+    add_definitions(-DHAVE_LIBEXIF)
+endif (EXIF_FOUND)
