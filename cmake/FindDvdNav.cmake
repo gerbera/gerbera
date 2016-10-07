@@ -1,9 +1,8 @@
-FIND_PATH(DVDNAV_INCLUDE_DIR dvdnav.h)
+INCLUDE (FindPackageHandleStandardArgs)
 
-FIND_LIBRARY(DVDNAV_LIBRARIES NAMES dvdnav)
+find_package( PkgConfig REQUIRED )
+PKG_CHECK_MODULES( DVDNAV REQUIRED dvdnav )
 
-# handle the QUIETLY and REQUIRED arguments and set DVDNAV_FOUND to TRUE
-include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(DVDNAV DEFAULT_MSG DVDNAV_INCLUDE_DIR)
+find_package_handle_standard_args(DVDNAV DEFAULT_MSG DVDNAV_FOUND)
 
 MARK_AS_ADVANCED( DVDNAV_LIBRARIES DVDNAV_INCLUDE_DIRS )

@@ -1,3 +1,5 @@
+INCLUDE (FindPackageHandleStandardArgs)
+
 FIND_PATH(MAGIC_INCLUDE_DIR magic.h)
 
 FIND_LIBRARY(MAGIC_LIBRARIES NAMES magic)
