@@ -44,10 +44,8 @@
 using namespace zmm;
 
 extern "C" {
- 
-// object, dvd title, chapter, audio track, container chain, container class
-static JSBool js_addDVDObject(JSContext *cx, JSObject *obj, uintN argc,
-                            jsval *argv, jsval *rval)
+
+static JSBool js_addDVDObject(JSContext *cx, uint32_t argc, jsval *vp)
 {
     try
     {
@@ -63,7 +61,7 @@ static JSBool js_addDVDObject(JSContext *cx, JSObject *obj, uintN argc,
         JSString *str;
 
 
-        DVDImportScript *self = (DVDImportScript *)JS_GetPrivate(cx, obj);
+        DVDImportScript *self = (DVDImportScript *)JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp));
 
         if (self->whoami() != S_DVD)
         {
@@ -71,7 +69,7 @@ static JSBool js_addDVDObject(JSContext *cx, JSObject *obj, uintN argc,
             return JS_TRUE;
         }
 
-        arg = JS_ARGV(cx, argv)[0];
+        arg = JS_ARGV(cx, vp)[0];
         if (!JSVAL_IS_OBJECT(arg))
         {
             log_error("Invalid argument!");
@@ -85,48 +83,57 @@ static JSBool js_addDVDObject(JSContext *cx, JSObject *obj, uintN argc,
         }
 
         // root it
-        JS_ARGV(cx, argv)[0] = OBJECT_TO_JSVAL(js_cds_obj);
+        JS_ARGV(cx, vp)[0] = OBJECT_TO_JSVAL(js_cds_obj);
 
-        if (!JS_ValueToInt32(cx, JS_ARGV(cx, argv)[1], &title))
+        if (!JS_ValueToInt32(cx, JS_ARGV(cx, vp)[1], &title))
         {
             log_error("addDVDObject: Invalid DVD title number given!\n");
             return JS_TRUE;
         }
 
-        if (!JS_ValueToInt32(cx, JS_ARGV(cx, argv)[2], &chapter))
+        if (!JS_ValueToInt32(cx, JS_ARGV(cx, vp)[2], &chapter))
         {
             log_error("addDVDObject: Invalid DVD chapter number given!\n");
             return JS_TRUE;
         }
 
-        if (!JS_ValueToInt32(cx, JS_ARGV(cx, argv)[3], &audio_track))
+        if (!JS_ValueToInt32(cx, JS_ARGV(cx, vp)[3], &audio_track))
         {
             log_error("addDVDObject: Invalid DVD audio track number given!\n");
             return JS_TRUE;
         }
 
-        str = JS_ValueToString(cx, JS_ARGV(cx, argv)[4]);
+        str = JS_ValueToString(cx, JS_ARGV(cx, vp)[4]);
         if (!str)
         {
             log_error("addDVDObject: Invalid DVD container chain given!\n");
             return JS_TRUE;
         }
 
-        chain = JS_GetStringBytes(str);
+        char *ts = JS_EncodeString(cx, str);
+        if (ts) {
+            chain = ts;
+            JS_free(cx, ts);
+        }
+
         if (!string_ok(chain) || chain == "undefined")
         {
             log_error("addDVDObject: Invalid DVD container chain given!\n");
             return JS_TRUE;
         }
 
-        JSString *cont = JS_ValueToString(cx, JS_ARGV(cx, argv)[5]);
-        if (cont)
-        {
-            containerclass = JS_GetStringBytes(cont);
+        JSString *cont = JS_ValueToString(cx, JS_ARGV(cx, vp)[5]);
+        if (cont) {
+            char *ts = JS_EncodeString(cx, cont);
+            if (ts) {
+                containerclass = ts;
+                JS_free(cx, ts);
+            }
+
             if (!string_ok(containerclass) || containerclass == "undefined")
                 containerclass = nil;
         }
-       
+
         processed = self->getProcessedObject();
         if (processed == nil)
         {
@@ -143,7 +150,7 @@ static JSBool js_addDVDObject(JSContext *cx, JSObject *obj, uintN argc,
             return JS_TRUE;
         }
 
-        self->addDVDObject(cds_obj, title, chapter, audio_track, chain, 
+        self->addDVDObject(cds_obj, title, chapter, audio_track, chain,
                            containerclass);
 
     }
@@ -163,8 +170,8 @@ static JSBool js_addDVDObject(JSContext *cx, JSObject *obj, uintN argc,
 
 } // extern "C" 
 
-void DVDImportScript::addDVDObject(Ref<CdsObject> obj, int title, 
-                                  int chapter, int audio_track, String chain, 
+void DVDImportScript::addDVDObject(Ref<CdsObject> obj, int title,
+                                  int chapter, int audio_track, String chain,
                                   String containerclass)
 {
 
@@ -186,10 +193,10 @@ void DVDImportScript::addDVDObject(Ref<CdsObject> obj, int title,
 
     RefCast(obj, CdsItem)->setMimeType(mimetype);
     obj->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(mimetype));
-    
+
     /// \todo this has to be changed once we add seeking
     obj->getResource(0)->removeAttribute(MetadataHandler::getResAttrName(R_SIZE));
-    obj->getResource(0)->addParameter(DVDHandler::renderKey(DVD_AudioStreamID), processed->getAuxData(DVDHandler::renderKey(DVD_AudioTrackStreamID, title, 0, 
+    obj->getResource(0)->addParameter(DVDHandler::renderKey(DVD_AudioStreamID), processed->getAuxData(DVDHandler::renderKey(DVD_AudioTrackStreamID, title, 0,
                     audio_track)));
 
     String tmp = processed->getAuxData(DVDHandler::renderKey(DVD_AudioTrackChannels, title, 0, audio_track));
@@ -226,16 +233,15 @@ DVDImportScript::DVDImportScript(Ref<Runtime> runtime) : Script(runtime)
     JS_BeginRequest(cx);
 #endif
 
-    try 
+    try
     {
         defineFunction(_("addDVDObject"), js_addDVDObject, 7);
-    
+
         setProperty(glob, _("DVD"), _("DVD"));
 
-        String scriptPath = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_DVD_SCRIPT); 
+        String scriptPath = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_DVD_SCRIPT);
         load(scriptPath);
-        root = JS_NewScriptObject(cx, script);
-        JS_AddNamedRoot(cx, &root, "DVDImportScript");
+        JS_AddNamedObjectRoot(cx, &root, "DVDImportScript");
         log_info("Loaded %s\n", scriptPath.c_str());
 
          Ref<Dictionary> mappings =
@@ -267,7 +273,7 @@ void DVDImportScript::processDVDObject(Ref<CdsObject> obj)
     JS_BeginRequest(cx);
 #endif
     processed = obj;
-    try 
+    try
     {
         JSObject *orig = JS_NewObject(cx, NULL, NULL, glob);
         setObjectProperty(glob, _("dvd"), orig);
@@ -304,9 +310,9 @@ DVDImportScript::~DVDImportScript()
     JS_SetContextThread(cx);
     JS_BeginRequest(cx);
 #endif
-    
+
     if (root)
-        JS_RemoveRoot(cx, &root);
+        JS_RemoveObjectRoot(cx, &script);
 
 #ifdef JS_THREADSAFE
     JS_EndRequest(cx);

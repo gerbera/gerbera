@@ -89,7 +89,7 @@ public:
     
     JSContext *getContext();
     
-    void defineFunction(zmm::String name, JSNative function, int numParams);
+    void defineFunction(zmm::String name, JSNative function, uint32_t numParams);
     void defineFunctions(JSFunctionSpec *functions);
     void load(zmm::String scriptPath);
     void load(zmm::String scriptText, zmm::String scriptPath);

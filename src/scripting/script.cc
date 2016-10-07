@@ -518,7 +518,7 @@ void Script::initGlobalObject()
 
 }
 
-void Script::defineFunction(String name, JSNative function, int numParams)
+void Script::defineFunction(String name, JSNative function, uint32_t numParams)
 {
     if (! JS_DefineFunction(cx, glob, name.c_str(), function, numParams, 0))
         throw _Exception(_("Scripting: JS_DefineFunction failed"));
