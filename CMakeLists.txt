@@ -99,6 +99,16 @@ add_library(libmediatomb OBJECT
         src/metadata/taglib_handler.h
         src/metadata/fanart_handler.cc
         src/metadata/fanart_handler.h
+        src/mpegdemux/buffer.h
+        src/mpegdemux/buffer.c
+        src/mpegdemux/mpeg_parse.c
+        src/mpegdemux/mpeg_parse.h
+        src/mpegdemux/mpeg_remux.c
+        src/mpegdemux/mpeg_remux.h
+        src/mpegdemux/mpegdemux.c
+        src/mpegdemux/mpegdemux_internal.h
+        src/mpegremux_processor.cc
+        src/mpegremux_processor.h
         src/mt_inotify.cc
         src/mt_inotify.h
         src/mxml/attribute.cc
