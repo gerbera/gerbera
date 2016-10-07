@@ -289,11 +289,9 @@ add_library(libmediatomb OBJECT
         src/zmm/zmm.h
         )
 
-target_include_directories(libmediatomb PRIVATE "${CMAKE_SOURCE_DIR}/src/zmm")
 target_include_directories(libmediatomb PRIVATE "${CMAKE_SOURCE_DIR}/src")
 
 add_executable(mediatomb src/main.cc $<TARGET_OBJECTS:libmediatomb>)
-target_include_directories(mediatomb PRIVATE "${CMAKE_SOURCE_DIR}/src/zmm")
 target_include_directories(mediatomb PRIVATE "${CMAKE_SOURCE_DIR}/src")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
