@@ -1,1 +1,0 @@
-./configure CFLAGS="-g -O0 -Wall" CXXFLAGS="-g -O0 -Wall" --enable-tombdebug $@
