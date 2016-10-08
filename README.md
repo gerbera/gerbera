@@ -3,6 +3,10 @@
 MediaTomb is an open source (GPL) UPnP MediaServer which allows you to stream your digital media
 through your home network and listen to/watch it on a variety of UPnP compatible devices.
 
+It is pretty much dead upstream, so this is my attempt to get kick it back into life.
+
+Patches are very welcome as are issue reports.
+
 ##Features
 
 * Browse and playback your media via UPnP
@@ -22,7 +26,21 @@ through your home network and listen to/watch it on a variety of UPnP compatible
 * runs on Linux, FreeBSD, NetBSD, Mac OS X, eCS
 * runs on x86, Alpha, ARM, MIPS, Sparc, PowerPC
 
-##Building
+## Branches
+master: Where the action happens
+
+vanilla: Sourceforge mediatomb with patches to build in 2016
+
+gentoo: Pretty much as vanilla (shipped as net-misc/mediatomb).
+
+
+## Differences to Vanilla
+- Removed bundled libupnp
+- Removed bundled libuuid
+- Port to CMake removal of autotools
+- Fix dvd_image_import_script with spidermonkey 1.8.5
+
+## Building
 
 The project has been ported to [CMake](https://cmake.org/).
 
@@ -34,12 +52,33 @@ make install
 
 ```
 
+### Dependencies
+
+| Lib          	| Version 	| Required? 	| Note                 	|
+|--------------	|---------	|-----------	|----------------------	|
+| libupnp      	|         	| Required  	|                      	|
+| libuuid      	|         	| Required  	|                      	|
+| expat        	|         	| Required  	|                      	|
+| sqlite3      	|         	| Required  	|                      	|
+| mysql        	|         	| Optional  	| Client Libs          	|
+| curl         	|         	| Optional  	| Enables web services 	|
+| spidermonkey 	| 1.8.5   	| Optional  	| Enables scripting    	|
+| taglib       	|         	| Optional  	| Audio tag support    	|
+| libmagic     	|         	| Optional  	| File type detection  	|
+| ffmpeg/libav 	|         	| Optional  	| File metadata        	|
+| libdvdnav    	|         	| Optional  	| DVD import script    	|
+| libexif      	|         	| Optional  	| JPEG Exif metadata   	|
+| lastfmlib    	|         	| Optional  	| Enables scrobbling   	|
+|              	|         	|           	|                      	|
+
 ##Licence
+
+    GPLv2
 
     Copyright (C) 2005
        Gena Batyan <bgeradz at mediatomb dot cc>
        Sergey Bostandzhyan <jin at mediatomb dot cc>
-    
+
     Copyright (C) 2006-2008
        Gena Batyan <bgeradz at mediatomb dot cc>
        Sergey Bostandzhyan <jin at mediatomb dot cc>
