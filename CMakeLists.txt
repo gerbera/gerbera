@@ -392,3 +392,12 @@ if (LASTFMLIB_FOUND)
     target_link_libraries (mediatomb ${LASTFMLIB_LIBRARIES})
     add_definitions(-DHAVE_LASTFMLIB)
 endif (LASTFMLIB_FOUND)
+
+INSTALL(TARGETS mediatomb DESTINATION bin)
+INSTALL(FILES ${PROJECT_SOURCE_DIR}/README.md DESTINATION share/doc)
+INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/web DESTINATION share/mediatomb)
+INSTALL(FILES
+        ${PROJECT_SOURCE_DIR}/config/mappings.xml
+        ${PROJECT_SOURCE_DIR}/config/mysql.sql
+        ${PROJECT_SOURCE_DIR}/config/cmake.sql
+        DESTINATION share/mediatomb)
