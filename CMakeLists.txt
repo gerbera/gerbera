@@ -399,5 +399,5 @@ INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/web DESTINATION share/mediatomb)
 INSTALL(FILES
         ${PROJECT_SOURCE_DIR}/config/mappings.xml
         ${PROJECT_SOURCE_DIR}/config/mysql.sql
-        ${PROJECT_SOURCE_DIR}/config/cmake.sql
+        ${PROJECT_SOURCE_DIR}/config/sqlite3.sql
         DESTINATION share/mediatomb)
