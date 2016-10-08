@@ -298,12 +298,11 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
 add_definitions(-DPACKAGE_NAME="MediaTomb-v00d00")
 add_definitions(-DVERSION="0.13.0_alpha-v00d00")
-add_definitions(-DPACKAGE_DATADIR="/tmp")
-add_definitions(-DCOMPILE_INFO="")
+add_definitions(-DPACKAGE_DATADIR="${CMAKE_INSTALL_PREFIX}/share/mediatomb")
+MESSAGE( STATUS "CMAKE_INSTALL_PREFIX: " ${CMAKE_INSTALL_PREFIX} )
 
+add_definitions(-DCOMPILE_INFO="")
 add_definitions(-DEXTERNAL_TRANSCODING)
-add_definitions(-DONLINE_SERVICES)
-add_definitions(-DYOUTUBE)
 
 # This only compiles them in
 add_definitions(-DDEBUG_LOG_ENABLED)
@@ -328,6 +327,11 @@ include_directories(${EXPAT_INCLUDE_DIRS})
 target_link_libraries (mediatomb ${EXPAT_LIBRARIES})
 add_definitions(-DHAVE_EXPAT)
 
+find_package (SQLite3 REQUIRED)
+include_directories(${SQLITE3_INCLUDE_DIRS})
+target_link_libraries (mediatomb ${SQLITE3_LIBRARIES})
+add_definitions(-DHAVE_SQLITE3)
+
 if(WITH_MYSQL)
     find_package(MySQL REQUIRED)
     if (MYSQL_FOUND)
@@ -337,21 +341,15 @@ if(WITH_MYSQL)
     endif (MYSQL_FOUND)
 endif(WITH_MYSQL)
 
-if(WITH_SQLITE)
-    find_package (SQLite3 REQUIRED)
-    if (SQLITE3_FOUND)
-        include_directories(${SQLITE3_INCLUDE_DIRS})
-        target_link_libraries (mediatomb ${SQLITE3_LIBRARIES})
-        add_definitions(-DHAVE_SQLITE3)
-    endif (SQLITE3_FOUND)
-endif(WITH_SQLITE)
-
 if(WITH_CURL)
     find_package (CURL REQUIRED)
     if (CURL_FOUND)
         include_directories(${CURL_INCLUDE_DIRS})
         target_link_libraries (mediatomb ${CURL_LIBRARIES})
+
         add_definitions(-DHAVE_CURL)
+        add_definitions(-DONLINE_SERVICES)
+        add_definitions(-DYOUTUBE)
     endif (CURL_FOUND)
 endif(WITH_CURL)
     
