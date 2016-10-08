@@ -297,7 +297,7 @@ target_include_directories(mediatomb PRIVATE "${CMAKE_SOURCE_DIR}/src")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
 add_definitions(-DPACKAGE_NAME="MediaTomb-v00d00")
-add_definitions(-DVERSION="0.13.0_alpha")
+add_definitions(-DVERSION="0.13.0_alpha-v00d00")
 add_definitions(-DPACKAGE_DATADIR="/tmp")
 add_definitions(-DCOMPILE_INFO="")
 
