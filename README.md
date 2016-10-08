@@ -1,4 +1,4 @@
-#MediaTomb - UPnP MediaServer
+#MediaTomb-v00d00 - UPnP MediaServer
 
 MediaTomb is an open source (GPL) UPnP MediaServer which allows you to stream your digital media
 through your home network and listen to/watch it on a variety of UPnP compatible devices.
@@ -24,15 +24,15 @@ through your home network and listen to/watch it on a variety of UPnP compatible
 
 ##Building
 
-The usual:
+The project has been ported to [CMake](https://cmake.org/).
 
-    $ ./configure
-    $ make
-    $ make install
+```
+cmake CMakeLists.txt -DWITH_MAGIC=1 -DWITH_MYSQL=1 -DWITH_CURL=1 -DWITH_JS=1 \
+-DWITH_TAGLIB=1 -DWITH_AVCODEC=1 -DWITH_DVDNAV=1 -DWITH_EXIF=1 -DWITH_LASTFM=1
+make -j4
+make install
 
-If you have a recently cloned source tree remember to
-
-    $ autoreconf -i
+```
 
 ##Licence
 
