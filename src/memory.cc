@@ -34,6 +34,7 @@
 #endif
 
 #if defined(TOMBDEBUG) && ! defined (MEMPROF)
+#include <malloc.h>
 #include "logger.h"
 #endif
 

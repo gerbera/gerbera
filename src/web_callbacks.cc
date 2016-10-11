@@ -186,7 +186,7 @@ static int web_get_info(IN const char *filename, OUT struct File_Info *info)
 static UpnpWebFileHandle web_open(IN const char *filename,
                                   IN enum UpnpOpenFileMode mode)
 {
-    log_debug("web_open(): %s", headers);
+    log_debug("web_open():");
 
     String link = url_unescape((char *) filename);
 
