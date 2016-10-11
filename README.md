@@ -37,8 +37,8 @@ gentoo: Pretty much as vanilla (shipped as net-misc/mediatomb).
 ## Differences to Vanilla
 - Removed bundled libupnp
 - Removed bundled libuuid
-- Port to CMake removal of autotools
-- Fix dvd_image_import_script with spidermonkey 1.8.5
+- Ported to CMake removal of autotools
+- Fixed dvd_image_import_script with spidermonkey 1.8.5
 
 ## Building
 
