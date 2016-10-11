@@ -306,6 +306,8 @@ add_definitions(-DEXTERNAL_TRANSCODING)
 
 # This only compiles them in
 add_definitions(-DDEBUG_LOG_ENABLED)
+add_definitions(-DTOMBDEBUG)
+add_definitions(-DLOG_ENABLED)
 
 find_package(Threads REQUIRED)
 target_link_libraries (mediatomb ${CMAKE_THREAD_LIBS_INIT})
