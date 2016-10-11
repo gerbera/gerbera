@@ -48,57 +48,48 @@ class ConfigOption : public zmm::Object
 public:
     virtual zmm::String getOption()
     {
-        assert(0);
         throw _Exception(_("Wrong option type"));
     };
 
     virtual int getIntOption()
     {
-        assert(0);
         throw _Exception(_("Wrong option type"));
     };
 
     virtual bool getBoolOption()
     {
-        assert(0);
         throw _Exception(_("Wrong option type"));
     };
 
 
     virtual zmm::Ref<Dictionary> getDictionaryOption()
     {
-        assert(0);
         throw _Exception(_("Wrong option type"));
     };
 
     virtual zmm::Ref<AutoscanList> getAutoscanListOption()
     {
-        assert(0);
         throw _Exception(_("Wrong option type"));
     };
 
     virtual zmm::Ref<zmm::Array<zmm::StringBase> > getStringArrayOption()
     {
-        assert(0);
         throw _Exception(_("Wrong option type"));
     };
 #ifdef EXTERNAL_TRANSCODING
     virtual zmm::Ref<TranscodingProfileList> getTranscodingProfileListOption()
     {
-        assert(0);
         throw _Exception(_("Wrong option type"));
     };
 #endif
 #ifdef ONLINE_SERVICES
     virtual zmm::Ref<zmm::Array<zmm::Object> > getObjectArrayOption()
     {
-        assert(0);
         throw _Exception(_("Wrong option type"));
     }
 #endif
     virtual zmm::Ref<ObjectDictionary<zmm::Object> > getObjectDictionaryOption()
     {
-        assert(0);
         throw _Exception(_("Wrong option type"));
     }
 };

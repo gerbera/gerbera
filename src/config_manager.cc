@@ -139,7 +139,7 @@ ConfigManager::ConfigManager() : Singleton<ConfigManager>()
     prepare_udn();
     validate(home);
 #ifdef TOMBDEBUG
-//    dumpOptions();
+    dumpOptions();
 #endif
     // now the XML is no longer needed we can destroy it
     root = nil;
@@ -1921,65 +1921,63 @@ void ConfigManager::validate(String serverhome)
     NEW_BOOL_OPTION(temp == YES ? true : false);
     SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED);
 
-    if (temp == YES)
+
+    temp = getOption(_("/server/extended-runtime-options/mark-played-items/"
+                       "attribute::suppress-cds-updates"),
+                       _(DEFAULT_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES));
+    if (!validateYesNo(temp))
+        throw _Exception(_("Error in config file: "
+                           "invalid \":suppress-cds-updates\" attribute "
+                           "value in <mark-played-items> tag"));
+
+    NEW_BOOL_OPTION(temp == YES ? true : false);
+    SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES);
+
+    temp = getOption(_("/server/extended-runtime-options/mark-played-items/"
+                       "string/attribute::mode"),
+                     _(DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE));
+
+    if ((temp != "prepend") && (temp != "append"))
+        throw _Exception(_("Error in config file: "
+                           "invalid \"mode\" attribute value in "
+                           "<string> tag in the <mark-played-items> section"));
+
+    NEW_BOOL_OPTION(temp == DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE ? true : false);
+    SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND);
+
+    temp = getOption(_("/server/extended-runtime-options/mark-played-items/"
+                       "string"),
+                     _(DEFAULT_MARK_PLAYED_ITEMS_STRING));
+    if (!string_ok(temp))
+        throw _Exception(_("Error in config file: "
+                           "empty string given for the <string> tag in the "
+                           "<mark-played-items> section"));
+    NEW_OPTION(temp);
+    SET_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING);
+
+    Ref<Array<StringBase> > mark_content_list(new Array<StringBase>());
+    tmpEl = getElement(_("/server/extended-runtime-options/mark-played-items/mark"));
+
+    if (tmpEl != nil)
     {
-        temp = getOption(_("/server/extended-runtime-options/mark-played-items/"
-                           "attribute::suppress-cds-updates"),
-                           _(DEFAULT_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES));
-        if (!validateYesNo(temp))
-            throw _Exception(_("Error in config file: "
-                               "invalid \":suppress-cds-updates\" attribute "
-                               "value in <mark-played-items> tag"));
-
-        NEW_BOOL_OPTION(temp == YES ? true : false);
-        SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES);
-
-        temp = getOption(_("/server/extended-runtime-options/mark-played-items/"
-                           "string/attribute::mode"),
-                         _(DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE));
-
-        if ((temp != "prepend") && (temp != "append"))
-            throw _Exception(_("Error in config file: "
-                               "invalid \"mode\" attribute value in "
-                               "<string> tag in the <mark-played-items> section"));
-
-        NEW_BOOL_OPTION(temp == DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE ? true : false);
-        SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND);
-
-        temp = getOption(_("/server/extended-runtime-options/mark-played-items/"
-                           "string"), 
-                         _(DEFAULT_MARK_PLAYED_ITEMS_STRING));
-        if (!string_ok(temp))
-            throw _Exception(_("Error in config file: "
-                               "empty string given for the <string> tag in the "
-                               "<mark-played-items> section"));
-        NEW_OPTION(temp);
-        SET_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING);
-
-        Ref<Array<StringBase> > mark_content_list(new Array<StringBase>());
-        tmpEl = getElement(_("/server/extended-runtime-options/mark-played-items/mark"));
-
-        if (tmpEl != nil)
+        for (int m = 0; m < tmpEl->elementChildCount(); m++)
         {
-            for (int m = 0; m < tmpEl->elementChildCount(); m++)
-            {
-                Ref<Element> content = tmpEl->getElementChild(m);
-                if (content->getName() != "content")
-                    continue;
+            Ref<Element> content = tmpEl->getElementChild(m);
+            if (content->getName() != "content")
+                continue;
 
-                String mark_content = content->getText();
-                if (!string_ok(mark_content))
-                    throw _Exception(_("error in configuration, <mark-played-items>, empty <content> parameter!"));
+            String mark_content = content->getText();
+            if (!string_ok(mark_content))
+                throw _Exception(_("error in configuration, <mark-played-items>, empty <content> parameter!"));
 
-                if ((mark_content != DEFAULT_MARK_PLAYED_CONTENT_VIDEO) && 
-                    (mark_content != DEFAULT_MARK_PLAYED_CONTENT_AUDIO) &&
-                    (mark_content != DEFAULT_MARK_PLAYED_CONTENT_IMAGE))
-                        throw _Exception(_("error in configuration, <mark-played-items>, invalid <content> parameter! Allowed values are \"video\", \"audio\", \"image\""));
+            if ((mark_content != DEFAULT_MARK_PLAYED_CONTENT_VIDEO) &&
+                (mark_content != DEFAULT_MARK_PLAYED_CONTENT_AUDIO) &&
+                (mark_content != DEFAULT_MARK_PLAYED_CONTENT_IMAGE))
+                    throw _Exception(_("error in configuration, <mark-played-items>, invalid <content> parameter! Allowed values are \"video\", \"audio\", \"image\""));
 
-                mark_content_list->append(mark_content);
-                NEW_STRARR_OPTION(mark_content_list);
-                SET_STRARR_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST);
-            }
+            mark_content_list->append(mark_content);
+            NEW_STRARR_OPTION(mark_content_list);
+            SET_STRARR_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST);
         }
     }
 
@@ -3167,7 +3165,9 @@ Ref<Array<StringBase> > ConfigManager::createArrayFromNodeset(Ref<mxml::Element>
 // None of the options->get() calls will ever return nil!
 String ConfigManager::getOption(config_option_t option)
 {
-    return options->get(option)->getOption();
+    Ref<ConfigOption> r = options->get(option);
+    assert(r.getPtr() != NULL);
+    return r->getOption();
 }
 
 int ConfigManager::getIntOption(config_option_t option)
