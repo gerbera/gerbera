@@ -80,4 +80,6 @@ zmm::Ref<mxml::Element> UpnpXML_DIDLRenderResource(zmm::String URL, zmm::Ref<Dic
 /// \brief Renders a subtitle resource tag (Samsung proprietary extension)
 /// \param URL download location of the video item
 zmm::Ref<mxml::Element> UpnpXML_DIDLRenderCaptionInfo(zmm::String URL);
+
+zmm::Ref<mxml::Element> UpnpXML_DIDLRenderCreator(zmm::String creator);
 #endif // __UPNP_XML_H__
