@@ -3166,18 +3166,31 @@ Ref<Array<StringBase> > ConfigManager::createArrayFromNodeset(Ref<mxml::Element>
 String ConfigManager::getOption(config_option_t option)
 {
     Ref<ConfigOption> r = options->get(option);
-    assert(r.getPtr() != NULL);
+    if (r.getPtr() == NULL)
+    {
+        throw _Exception(_("option not set"));
+    }
     return r->getOption();
 }
 
 int ConfigManager::getIntOption(config_option_t option)
 {
-    return options->get(option)->getIntOption();
+    Ref<ConfigOption> o = options->get(option);
+    if (o.getPtr() == NULL)
+    {
+        throw _Exception(_("option not set"));
+    }
+    return o->getIntOption();
 }
 
 bool ConfigManager::getBoolOption(config_option_t option)
 {
-    return options->get(option)->getBoolOption();
+    Ref<ConfigOption> o = options->get(option);
+    if (o.getPtr() == NULL)
+    {
+        throw _Exception(_("option not set"));
+    }
+    return o->getBoolOption();
 }
 
 Ref<Dictionary> ConfigManager::getDictionaryOption(config_option_t option)
