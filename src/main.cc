@@ -554,7 +554,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         {
             log_error("Could not bind to socket.\n");
             log_info("Please check if another instance of MediaTomb or\n");
-            log_info("another application is running on the same port.\n");
+            log_info("another application is running on port %d.\n", port);
         }
         else if (upnp_e.getErrorCode() == UPNP_E_SOCKET_ERROR)
         {
