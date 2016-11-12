@@ -263,7 +263,7 @@ void Server::upnp_init(String iface, String ip_address, int port)
     //log_debug("DEVICE DESCRIPTION: \n%s\n", device_description.c_str());
 
     // register root device with the library
-    ret = UpnpRegisterRootDevice2(UPNPREG_BUF_DESC, device_description.c_str(), 
+    ret = UpnpRegisterRootDevice2(UPNPREG_BUF_DESC, device_description.c_str(),
                                   device_description.length() + 1, true,
                                   static_upnp_callback,
                                   &device_handle,
@@ -382,7 +382,9 @@ int Server::upnp_callback(Upnp_EventType eventtype, void *event, void *cookie)
 //            log_info("UPNP_CONTROL_ACTION_REQUEST\n");
             try
             {
-                Ref<ActionRequest> request(new ActionRequest((struct Upnp_Action_Request *)event));
+                // https://github.com/mrjimenez/pupnp/blob/master/upnp/sample/common/tv_device.c
+
+                Ref<ActionRequest> request(new ActionRequest((UpnpActionRequest *)event));
                 upnp_actions(request);
                 request->update();
                // set in update() ((struct Upnp_Action_Request *)event)->ErrCode = ret;

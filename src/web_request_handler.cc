@@ -79,8 +79,8 @@ void WebRequestHandler::check_request(bool checkLogin)
     if (sid == nil)
         throw SessionException(_("no session id given"));
     
-    if ((session = SessionManager::getInstance()->getSession(sid)) == nil)
-        throw SessionException(_("invalid session id"));
+    //if ((session = SessionManager::getInstance()->getSession(sid)) == nil)
+    //    throw SessionException(_("invalid session id"));
     
     if (checkLogin && ! session->isLoggedIn())
         throw LoginException(_("not logged in"));
@@ -112,6 +112,8 @@ void WebRequestHandler::get_info(IN const char *filename, OUT struct File_Info *
     contentType = mimetype + "; charset=" + DEFAULT_INTERNAL_CHARSET;
     
     info->content_type = ixmlCloneDOMString(contentType.c_str());
+
+    info
 
     // FIXME Header
     //info->http_header = ixmlCloneDOMString("Cache-Control: no-cache, must-revalidate");

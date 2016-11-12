@@ -64,7 +64,7 @@ FileRequestHandler::FileRequestHandler() : RequestHandler()
 {
 }
 
-void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info *info)
+void FileRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *info)
 {
     log_debug("start\n");
 
@@ -158,11 +158,11 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
 
     if (access(path.c_str(), R_OK) == 0)
     {
-        info->is_readable = 1;
+        UpnpFileInfo_set_IsReadable(info, 1);
     }
     else
     {
-        info->is_readable = 0;
+        UpnpFileInfo_set_IsReadable(info, 0);
     }
 
     String header;
@@ -196,7 +196,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
 
         log_debug("setting content length to unknown\n");
         /// \todo we could figure out the content length...
-        info->file_length = -1;
+        UpnpFileInfo_set_FileLength(info, -1);
 
         int res_handler;
         if (string_ok(rh))
@@ -217,7 +217,9 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
         if (!string_ok(mimeType))
             mimeType = h->getMimeType();
 
-        /*        Ref<IOHandler> io_handler = */ h->serveContent(item, res_id, &(info->file_length));
+        /*        Ref<IOHandler> io_handler = */
+        UpnpFileInfo_get_FileLength(info)
+        h->serveContent(item, res_id, &());
 
     }
     else {

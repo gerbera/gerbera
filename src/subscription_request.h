@@ -47,7 +47,7 @@ class SubscriptionRequest : public zmm::Object
 {
 protected:
     /// \brief Upnp_Subscription_Request that comes from the SDK.
-    Upnp_Subscription_Request *upnp_request;
+    UpnpSubscriptionRequest *upnp_request;
 
     /// \brief ID of the service.
     ///
@@ -67,7 +67,7 @@ protected:
 public:
     /// \brief The Constructor takes the values from the upnp_request and fills in internal variables.
     /// \param *upnp_request Pointer to the Upnp_Subscription_Request structure.
-    SubscriptionRequest(Upnp_Subscription_Request *upnp_request);
+    SubscriptionRequest(UpnpSubscriptionRequest *upnp_request);
 
     /// \brief Returns the service ID (should be one of the services that we support).
     zmm::String getServiceID();
