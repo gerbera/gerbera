@@ -96,8 +96,13 @@
 #define YES                             "yes"
 #define NO                              "no"
 
+#ifndef TRUE
 #define TRUE                            "1"
+#endif
+
+#ifndef FALSE
 #define FALSE                           "0"
+#endif
 
 // URL FORMATTING CONSTANTS
 #define URL_OBJECT_ID                   "object_id"
