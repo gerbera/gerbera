@@ -217,9 +217,8 @@ void FileRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *inf
         if (!string_ok(mimeType))
             mimeType = h->getMimeType();
 
-        /*        Ref<IOHandler> io_handler = */
-        UpnpFileInfo_get_FileLength(info)
-        h->serveContent(item, res_id, &());
+        off_t size = UpnpFileInfo_get_FileLength(info);
+        /*        Ref<IOHandler> io_handler = */ h->serveContent(item, res_id, &(size));
 
     }
     else {
@@ -248,7 +247,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *inf
 					mimeType = mimeType + _(";channels=") + nrch;
 			}
 
-			info->file_length = -1;
+            UpnpFileInfo_set_FileLength(info, -1);
 		}
 		else
 #endif
@@ -284,7 +283,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *inf
 		else
 #endif
         {
-            info->file_length = statbuf.st_size;
+            UpnpFileInfo_set_FileLength(info,  statbuf.st_size);
             // if we are dealing with a regular file we should add the
             // Accept-Ranges: bytes header, in order to indicate that we support
             // seeking
@@ -363,10 +362,10 @@ void FileRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *inf
         info->http_header = ixmlCloneDOMString(header.c_str());
 */
 
-    info->last_modified = statbuf.st_mtime;
-    info->is_directory = S_ISDIR(statbuf.st_mode);
+    UpnpFileInfo_set_LastModified(info, statbuf.st_mtime);
+    UpnpFileInfo_set_IsDirectory(info, S_ISDIR(statbuf.st_mode));
 
-    info->content_type = ixmlCloneDOMString(mimeType.c_str());
+    UpnpFileInfo_set_ContentType(info, ixmlCloneDOMString(mimeType.c_str()));
 
     //    log_debug("get_info: Requested %s, ObjectID: %s, Location: %s\n, MimeType: %s\n",
     //          filename, object_id.c_str(), path.c_str(), info->content_type);
