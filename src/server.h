@@ -94,7 +94,7 @@ public:
     /// data structures (ActionRequest or SubscriptionRequest) and is then
     /// passed on to the appropriate request handler - to upnp_actions() or
     /// upnp_subscriptions()
-    int upnp_callback(Upnp_EventType eventtype, void *event, void *cookie);
+    int upnp_callback(Upnp_EventType eventtype, const void *event, void *cookie);
   
     /// \brief Returns the device handle.
     ///

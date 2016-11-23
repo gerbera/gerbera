@@ -48,7 +48,7 @@ ServeRequestHandler::ServeRequestHandler() : RequestHandler()
 }
 
 /// \todo clean up the fix for internal items
-void ServeRequestHandler::get_info(IN const char *filename, OUT struct File_Info *info)
+void ServeRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *info)
 {
     struct stat statbuf;
     int ret = 0;
@@ -113,8 +113,9 @@ void ServeRequestHandler::get_info(IN const char *filename, OUT struct File_Info
 #endif // HAVE_MAGIC
 
         info->file_length = statbuf.st_size;
-        info->last_modified = statbuf.st_mtime;
-        info->is_directory = S_ISDIR(statbuf.st_mode);
+        UpnpFileInfo_set_FileLength(info, statbuf.st_size);
+        UpnpFileInfo_set_LastModified(info, statbuf.st_mtime);
+        UpnpFileInfo_set_IsDirectory(info, S_ISDIR(statbuf.st_mode););
 
         if (access(path.c_str(), R_OK) == 0)
         {
