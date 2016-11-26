@@ -35,7 +35,7 @@ gentoo: Pretty much as vanilla (shipped as net-misc/mediatomb).
 
 
 ## Differences to Vanilla
-- Removed bundled libupnp
+- Removed bundled libupnp - Now requires upstream 1.8 version.
 - Removed bundled libuuid
 - Ported to CMake removal of autotools
 - Fixed dvd_image_import_script with spidermonkey 1.8.5
@@ -56,7 +56,7 @@ make install
 
 | Lib          	| Version 	| Required? 	| Note                 	|
 |--------------	|---------	|-----------	|----------------------	|
-| libupnp      	|         	| Required  	|                      	|
+| libupnp      	| 1.8     	| Required  	|                      	|
 | libuuid      	|         	| Required  	|                      	|
 | expat        	|         	| Required  	|                      	|
 | sqlite3      	|         	| Required  	|                      	|
