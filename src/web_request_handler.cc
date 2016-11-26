@@ -79,8 +79,8 @@ void WebRequestHandler::check_request(bool checkLogin)
     if (sid == nil)
         throw SessionException(_("no session id given"));
     
-    //if ((session = SessionManager::getInstance()->getSession(sid)) == nil)
-    //    throw SessionException(_("invalid session id"));
+    if ((session = SessionManager::getInstance()->getSession(sid)) == nil)
+        throw SessionException(_("invalid session id"));
     
     if (checkLogin && ! session->isLoggedIn())
         throw LoginException(_("not logged in"));
@@ -95,6 +95,14 @@ String WebRequestHandler::renderXMLHeader()
 
 void WebRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *info)
 {
+    this->filename = filename;
+    this->mode = mode;
+
+    String path, parameters;
+    split_url(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
+
+    params->decode(parameters);
+
     UpnpFileInfo_set_FileLength(info, -1); // length is unknown
     UpnpFileInfo_set_LastModified(info, time(NULL));
     UpnpFileInfo_set_IsDirectory(info, 0);
@@ -104,6 +112,7 @@ void WebRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *info
     
     String mimetype;
     String returnType = param(_("return_type"));
+
     if (string_ok(returnType) && returnType == "xml")
         mimetype = _(MIMETYPE_XML);
     else
@@ -112,7 +121,7 @@ void WebRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *info
     contentType = mimetype + "; charset=" + DEFAULT_INTERNAL_CHARSET;
 
     UpnpFileInfo_set_ContentType(info, ixmlCloneDOMString(contentType.c_str()));
-    UpnpFileInfo_set_ExtraHeaders(info, ixmlCloneDOMString("Cache-Control: no-cache, must-revalidate"));
+    UpnpFileInfo_set_ExtraHeaders(info, ixmlCloneDOMString("Cache-Control: no-cache, must-revalidate\n"));
 }
 
 Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
@@ -244,7 +253,6 @@ Ref<IOHandler> WebRequestHandler::open(IN const char *filename,
                                        IN enum UpnpOpenFileMode mode,
                                        IN String range)
 {
-    log_debug("request: %s\n", filename);
     this->filename = filename;
     this->mode = mode;
 
@@ -252,8 +260,7 @@ Ref<IOHandler> WebRequestHandler::open(IN const char *filename,
     split_url(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
 
     params->decode(parameters);
-    
-    //get_info(NULL, info);
+
     return open(mode);
 }
 
