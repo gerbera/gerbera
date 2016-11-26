@@ -64,7 +64,7 @@ FileRequestHandler::FileRequestHandler() : RequestHandler()
 {
 }
 
-void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info *info)
+void FileRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *info)
 {
     log_debug("start\n");
 
@@ -158,11 +158,11 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
 
     if (access(path.c_str(), R_OK) == 0)
     {
-        info->is_readable = 1;
+        UpnpFileInfo_set_IsReadable(info, 1);
     }
     else
     {
-        info->is_readable = 0;
+        UpnpFileInfo_set_IsReadable(info, 0);
     }
 
     String header;
@@ -196,7 +196,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
 
         log_debug("setting content length to unknown\n");
         /// \todo we could figure out the content length...
-        info->file_length = -1;
+        UpnpFileInfo_set_FileLength(info, -1);
 
         int res_handler;
         if (string_ok(rh))
@@ -217,7 +217,8 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
         if (!string_ok(mimeType))
             mimeType = h->getMimeType();
 
-        /*        Ref<IOHandler> io_handler = */ h->serveContent(item, res_id, &(info->file_length));
+        off_t size = UpnpFileInfo_get_FileLength(info);
+        /*        Ref<IOHandler> io_handler = */ h->serveContent(item, res_id, &(size));
 
     }
     else {
@@ -246,7 +247,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
 					mimeType = mimeType + _(";channels=") + nrch;
 			}
 
-			info->file_length = -1;
+            UpnpFileInfo_set_FileLength(info, -1);
 		}
 		else
 #endif
@@ -282,7 +283,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
 		else
 #endif
         {
-            info->file_length = statbuf.st_size;
+            UpnpFileInfo_set_FileLength(info,  statbuf.st_size);
             // if we are dealing with a regular file we should add the
             // Accept-Ranges: bytes header, in order to indicate that we support
             // seeking
@@ -361,10 +362,10 @@ void FileRequestHandler::get_info(IN const char *filename, OUT struct File_Info 
         info->http_header = ixmlCloneDOMString(header.c_str());
 */
 
-    info->last_modified = statbuf.st_mtime;
-    info->is_directory = S_ISDIR(statbuf.st_mode);
+    UpnpFileInfo_set_LastModified(info, statbuf.st_mtime);
+    UpnpFileInfo_set_IsDirectory(info, S_ISDIR(statbuf.st_mode));
 
-    info->content_type = ixmlCloneDOMString(mimeType.c_str());
+    UpnpFileInfo_set_ContentType(info, ixmlCloneDOMString(mimeType.c_str()));
 
     //    log_debug("get_info: Requested %s, ObjectID: %s, Location: %s\n, MimeType: %s\n",
     //          filename, object_id.c_str(), path.c_str(), info->content_type);

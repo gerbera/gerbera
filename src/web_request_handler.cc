@@ -93,28 +93,35 @@ String WebRequestHandler::renderXMLHeader()
             DEFAULT_INTERNAL_CHARSET +"\"?>\n";
 }
 
-void WebRequestHandler::get_info(IN const char *filename, OUT struct File_Info *info)
+void WebRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *info)
 {
-    info->file_length = -1; // length is unknown
-    info->last_modified = time(NULL);
-    info->is_directory = 0;
-    info->is_readable = 1;
-    
+    this->filename = filename;
+    this->mode = mode;
+
+    String path, parameters;
+    split_url(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
+
+    params->decode(parameters);
+
+    UpnpFileInfo_set_FileLength(info, -1); // length is unknown
+    UpnpFileInfo_set_LastModified(info, time(NULL));
+    UpnpFileInfo_set_IsDirectory(info, 0);
+    UpnpFileInfo_set_IsReadable(info, 1);
+
     String contentType;
     
     String mimetype;
     String returnType = param(_("return_type"));
+
     if (string_ok(returnType) && returnType == "xml")
         mimetype = _(MIMETYPE_XML);
     else
         mimetype = _(MIMETYPE_JSON);
     
     contentType = mimetype + "; charset=" + DEFAULT_INTERNAL_CHARSET;
-    
-    info->content_type = ixmlCloneDOMString(contentType.c_str());
 
-    // FIXME Header
-    //info->http_header = ixmlCloneDOMString("Cache-Control: no-cache, must-revalidate");
+    UpnpFileInfo_set_ContentType(info, ixmlCloneDOMString(contentType.c_str()));
+    UpnpFileInfo_set_ExtraHeaders(info, ixmlCloneDOMString("Cache-Control: no-cache, must-revalidate\n"));
 }
 
 Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
@@ -246,7 +253,6 @@ Ref<IOHandler> WebRequestHandler::open(IN const char *filename,
                                        IN enum UpnpOpenFileMode mode,
                                        IN String range)
 {
-    log_debug("request: %s\n", filename);
     this->filename = filename;
     this->mode = mode;
 
@@ -254,8 +260,7 @@ Ref<IOHandler> WebRequestHandler::open(IN const char *filename,
     split_url(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
 
     params->decode(parameters);
-    
-    //get_info(NULL, info);
+
     return open(mode);
 }
 

@@ -40,7 +40,7 @@ class RequestHandler : public zmm::Object
 {
 public:
     virtual void get_info(IN const char *filename, 
-                          OUT struct File_Info *info) = 0;
+                          OUT UpnpFileInfo *info) = 0;
     virtual zmm::Ref<IOHandler> open(IN const char *filename,
                                      IN enum UpnpOpenFileMode mode,
                                      IN zmm::String range) = 0;

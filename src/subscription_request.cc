@@ -39,13 +39,13 @@
 using namespace zmm;
 using namespace mxml;
 
-SubscriptionRequest::SubscriptionRequest(Upnp_Subscription_Request *upnp_request) : Object()
+SubscriptionRequest::SubscriptionRequest(UpnpSubscriptionRequest *upnp_request) : Object()
 {
     this->upnp_request = upnp_request;
 
-    serviceID = upnp_request->ServiceId;
-    UDN = upnp_request->UDN;
-    sID = upnp_request->Sid;
+    serviceID = UpnpSubscriptionRequest_get_ServiceId_cstr(upnp_request);
+    UDN = UpnpSubscriptionRequest_get_ServiceId_cstr(upnp_request);
+    sID = UpnpSubscriptionRequest_get_SID_cstr(upnp_request);
 }
 
 String SubscriptionRequest::getServiceID()

@@ -56,7 +56,7 @@ Ref<Storage> Server::storage = nil;
 
 SINGLETON_MUTEX(Server, false);
 
-static int static_upnp_callback(Upnp_EventType eventtype, void *event, void *cookie)
+static int static_upnp_callback(Upnp_EventType eventtype, void const *event, void *cookie)
 {
     return Server::getInstance()->upnp_callback(eventtype, event, cookie);
 }
@@ -263,8 +263,10 @@ void Server::upnp_init(String iface, String ip_address, int port)
     //log_debug("DEVICE DESCRIPTION: \n%s\n", device_description.c_str());
 
     // register root device with the library
-    ret = UpnpRegisterRootDevice2(UPNPREG_BUF_DESC, device_description.c_str(), 
-                                  device_description.length() + 1, true,
+    ret = UpnpRegisterRootDevice2(UPNPREG_BUF_DESC,
+                                  device_description.c_str(),
+                                  device_description.length() + 1,
+                                  true,
                                   static_upnp_callback,
                                   &device_handle,
                                   &device_handle);
@@ -281,8 +283,10 @@ void Server::upnp_init(String iface, String ip_address, int port)
     }
     
     // and register again, we should be clean now
-    ret = UpnpRegisterRootDevice2(UPNPREG_BUF_DESC, device_description.c_str(), 
-                                  device_description.length() + 1, true,
+    ret = UpnpRegisterRootDevice2(UPNPREG_BUF_DESC,
+                                  device_description.c_str(),
+                                  device_description.length() + 1,
+                                  true,
                                   static_upnp_callback,
                                   &device_handle,
                                   &device_handle);
@@ -356,7 +360,7 @@ String Server::getVirtualURL()
 }
 
 
-int Server::upnp_callback(Upnp_EventType eventtype, void *event, void *cookie)
+int Server::upnp_callback(Upnp_EventType eventtype, const void *event, void *cookie)
 {
     int ret = UPNP_E_SUCCESS; // general purpose return code
 
@@ -382,7 +386,9 @@ int Server::upnp_callback(Upnp_EventType eventtype, void *event, void *cookie)
 //            log_info("UPNP_CONTROL_ACTION_REQUEST\n");
             try
             {
-                Ref<ActionRequest> request(new ActionRequest((struct Upnp_Action_Request *)event));
+                // https://github.com/mrjimenez/pupnp/blob/master/upnp/sample/common/tv_device.c
+
+                Ref<ActionRequest> request(new ActionRequest((UpnpActionRequest *)event));
                 upnp_actions(request);
                 request->update();
                // set in update() ((struct Upnp_Action_Request *)event)->ErrCode = ret;
@@ -390,7 +396,7 @@ int Server::upnp_callback(Upnp_EventType eventtype, void *event, void *cookie)
             catch(UpnpException upnp_e)
             {
                 ret = upnp_e.getErrorCode();
-                ((struct Upnp_Action_Request *)event)->ErrCode = ret;
+                UpnpActionRequest_set_ErrCode((UpnpActionRequest *)event, ret);
             }
             catch(Exception e)
             {
@@ -404,7 +410,7 @@ int Server::upnp_callback(Upnp_EventType eventtype, void *event, void *cookie)
 //            log_info("UPNP_EVENT_SUBSCRIPTION_REQUEST\n");
             try
             {
-                Ref<SubscriptionRequest> request(new SubscriptionRequest((struct Upnp_Subscription_Request *)event));
+                Ref<SubscriptionRequest> request(new SubscriptionRequest((UpnpSubscriptionRequest *)event));
                 upnp_subscriptions(request);
             }
             catch(UpnpException upnp_e)

@@ -48,13 +48,13 @@ class ActionRequest : public zmm::Object
 {
 protected:
     /// \brief Upnp_Action_Request that comes from the SDK.
-    Upnp_Action_Request *upnp_request;
+    UpnpActionRequest *upnp_request;
 
     /// \brief Error code that is returned to the SDK.
     int errCode;
 
     /// \brief Name of the action.
-    ///
+    ////request///
     /// Returned by getActionName()
     zmm::String actionName;
 
@@ -81,7 +81,7 @@ protected:
 public:
     /// \brief The Constructor takes the values from the upnp_request and fills in internal variables.
     /// \param *upnp_request Pointer to the Upnp_Action_Request structure.
-    ActionRequest(Upnp_Action_Request *upnp_request);
+    ActionRequest(UpnpActionRequest *upnp_request);
 
     /// \brief Returns the name of the action. 
     zmm::String getActionName();

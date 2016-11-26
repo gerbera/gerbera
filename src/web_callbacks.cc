@@ -142,7 +142,7 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
 /// \return -1 Error.
 
 // FIXME headers
-static int web_get_info(IN const char *filename, OUT struct File_Info *info)
+static int web_get_info(IN const char *filename, OUT UpnpFileInfo *info)
 {
     try
     {
@@ -345,16 +345,14 @@ static int web_close( IN UpnpWebFileHandle f)
 /// \return UPNP_E_SUCCESS Callbacks registered successfully, else eror code.
 int register_web_callbacks()
 {
-    int ret = UPNP_E_SUCCESS;
+    int ret = 0;
 
-    struct UpnpVirtualDirCallbacks cb;
-    cb.get_info = web_get_info;
-    cb.open = web_open;
-    cb.read = web_read;
-    cb.write = web_write;
-    cb.seek = web_seek;
-    cb.close = web_close;
+    ret = UpnpVirtualDir_set_GetInfoCallback(web_get_info) == UPNP_E_SUCCESS
+        && UpnpVirtualDir_set_OpenCallback(web_open) == UPNP_E_SUCCESS
+        && UpnpVirtualDir_set_ReadCallback(web_read) == UPNP_E_SUCCESS
+        && UpnpVirtualDir_set_WriteCallback(web_write) == UPNP_E_SUCCESS
+        && UpnpVirtualDir_set_SeekCallback(web_seek) == UPNP_E_SUCCESS
+        && UpnpVirtualDir_set_CloseCallback(web_close) == UPNP_E_SUCCESS;
 
-    ret = UpnpSetVirtualDirCallbacks(&cb);
-    return ret;
+    return ret ? UPNP_E_SUCCESS : UPNP_E_INVALID_PARAM;
 }   
