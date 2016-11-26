@@ -91,18 +91,20 @@ void ActionRequest::update()
 
         log_debug("ActionRequest::update(): \n%s\n\n", xml.c_str());
 
-        IXML_Document *result = UpnpActionRequest_get_ActionResult(upnp_request);
+        IXML_Document *result = ixmlDocument_createDocument();
         ret = ixmlParseBufferEx(xml.c_str(), &result);
 
         if (ret != IXML_SUCCESS)
         {
             log_error("ActionRequest::update(): could not convert to iXML\n");
             log_debug("Dump:\n%s\n", xml.c_str());
+
             UpnpActionRequest_set_ErrCode(upnp_request, UPNP_E_ACTION_FAILED);
         } 
         else
         {
-//            log_debug("ActionRequest::update(): converted to iXML, code %d\n", errCode);
+            log_debug("ActionRequest::update(): converted to iXML, code %d\n", errCode);
+            UpnpActionRequest_set_ActionResult(upnp_request, result);
             UpnpActionRequest_set_ErrCode(upnp_request, errCode);
         }
     }
