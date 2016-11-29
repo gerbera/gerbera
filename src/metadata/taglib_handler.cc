@@ -30,10 +30,6 @@
 /// \file taglib_handler.cc
 /// \brief Implementeation of the TagHandler class.
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #ifdef HAVE_TAGLIB
 
 #include <taglib/taglib.h>

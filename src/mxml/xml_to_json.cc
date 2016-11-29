@@ -29,10 +29,6 @@
 
 /// \file xml_to_json.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include <assert.h>
 
 #include "xml_to_json.h"

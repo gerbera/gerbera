@@ -29,10 +29,6 @@
 
 /// \file exception.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "exception.h"
 
 #ifdef HAVE_EXECINFO_H

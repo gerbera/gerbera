@@ -29,10 +29,6 @@
 
 /// \file comment.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "mxml.h"
 #include "comment.h"
 

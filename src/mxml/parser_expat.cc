@@ -29,10 +29,6 @@
 
 /// \file parser_expat.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #ifdef HAVE_EXPAT
 
 #include "parser.h"

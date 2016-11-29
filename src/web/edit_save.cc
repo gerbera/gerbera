@@ -29,10 +29,6 @@
 
 /// \file edit_save.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "pages.h"
 #include <stdio.h>
 #include "content_manager.h"

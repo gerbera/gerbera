@@ -29,10 +29,6 @@
 
 /// \file dvd_image_import_script.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #if defined(HAVE_JS) && defined(HAVE_LIBDVDNAV)
 
 #include <js/jsscript.h>

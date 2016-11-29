@@ -29,10 +29,6 @@
 
 /// \file cache_object.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "../common.h"
 #include "cache_object.h"
 

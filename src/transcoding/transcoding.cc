@@ -30,10 +30,6 @@
 /// \file transcoding.cc
 /// \brief Definitions of the Transcoding classes. 
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #ifdef EXTERNAL_TRANSCODING
 
 #include "transcoding.h"

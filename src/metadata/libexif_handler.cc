@@ -30,10 +30,6 @@
 /// \file libexif_handler.cc
 /// \brief Implementeation of the LibExifHandler class.
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #ifdef HAVE_LIBEXIF
 
 #include "libexif_handler.h"

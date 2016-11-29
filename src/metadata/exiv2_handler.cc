@@ -30,10 +30,6 @@
 /// \file exiv2_handler.cc
 /// \brief Implementeation of the Exiv2Handler class.
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #ifdef HAVE_EXIV2
 #include <exiv2/image.hpp>
 #include <exiv2/exif.hpp>

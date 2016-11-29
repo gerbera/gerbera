@@ -29,10 +29,6 @@
 
 /// \file stringtokenizer.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "stringtokenizer.h"
 
 #include <string.h>

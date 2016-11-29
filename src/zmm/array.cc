@@ -29,10 +29,6 @@
 
 /// \file array.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "array.h"
 
 //#include <string.h>

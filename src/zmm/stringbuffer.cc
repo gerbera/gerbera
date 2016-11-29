@@ -29,10 +29,6 @@
 
 /// \file stringbuffer.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "stringbuffer.h"
 
 #include <string.h>

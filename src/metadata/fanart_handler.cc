@@ -30,10 +30,6 @@
 /// \file fanart_handler.cc
 /// \brief Implementeation of the FanArtHelper class.
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "fanart_handler.h"
 #include <sys/stat.h>
 

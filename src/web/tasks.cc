@@ -29,10 +29,6 @@
 
 /// \file tasks.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "pages.h"
 #include "common.h"
 #include "content_manager.h"

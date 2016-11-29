@@ -29,10 +29,6 @@
 
 /// \file auth.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include <sys/time.h>
 #include "pages.h"
 #include "tools.h"

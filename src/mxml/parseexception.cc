@@ -29,10 +29,6 @@
 
 /// \file parseexception.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "parseexception.h"
 
 #include "context.h"

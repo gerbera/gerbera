@@ -29,10 +29,6 @@
 
 /// \file storage_cache.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "storage_cache.h"
 
 using namespace zmm;

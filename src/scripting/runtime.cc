@@ -29,10 +29,6 @@
 
 /// \file runtime.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #ifdef HAVE_JS
 
 #include "runtime.h"

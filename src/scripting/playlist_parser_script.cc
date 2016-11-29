@@ -29,10 +29,6 @@
 
 /// \file playlist_parser_script.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #ifdef HAVE_JS
 
 #include "playlist_parser_script.h"

@@ -28,9 +28,6 @@
 */
 
 /// \file fallback_layout.cc
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
 
 #include "fallback_layout.h"
 #include "content_manager.h"

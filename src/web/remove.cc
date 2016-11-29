@@ -29,10 +29,6 @@
 
 /// \file remove.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "server.h"
 #include <stdio.h>
 #include "common.h"

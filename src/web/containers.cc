@@ -29,10 +29,6 @@
 
 /// \file containers.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "common.h"
 #include "pages.h"
 #include "storage.h"

@@ -29,10 +29,6 @@
 
 /// \file transcode_ext_handler.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #ifdef EXTERNAL_TRANSCODING
 
 #include "transcode_ext_handler.h"

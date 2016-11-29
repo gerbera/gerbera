@@ -29,10 +29,6 @@
 
 /// \file nil.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "nil.h"
 
 struct nil_struct_t *nil_inst;

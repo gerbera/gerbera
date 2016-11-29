@@ -40,10 +40,6 @@
 // AVCodecContext, defined in libavcodec/avcodec.h:722
 // in the ffmpeg sources
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #ifdef HAVE_FFMPEG
 
 // ffmpeg needs the following sources

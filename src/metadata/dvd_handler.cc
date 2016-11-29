@@ -30,10 +30,6 @@
 /// \file dvd_handler.cc
 /// \brief Implementeation of the DVDHandler class.
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #ifdef HAVE_LIBDVDNAV
 
 #include "dvd_handler.h"

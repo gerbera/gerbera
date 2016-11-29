@@ -29,10 +29,6 @@
 
 /// \file sql_storage.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include <limits.h>
 #include "sql_storage.h"
 #include "tools.h"

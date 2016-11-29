@@ -29,10 +29,6 @@
 
 /// \file transcoding_process_executor.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #ifdef EXTERNAL_TRANSCODING
 
 #include <unistd.h>
