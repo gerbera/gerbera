@@ -32,8 +32,6 @@
 #ifndef __SCRIPTING_RUNTIME_H__
 #define __SCRIPTING_RUNTIME_H__
 
-#define XP_UNIX 1
-
 #include <jsapi.h>
 #include <pthread.h>
 #include "common.h"
