@@ -29,10 +29,6 @@
 
 /// \file subscription_request.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "mxml/mxml.h"
 #include "subscription_request.h"
 

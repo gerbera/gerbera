@@ -29,10 +29,6 @@
 
 /// \file upnp_cm_subscriptions.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "tools.h"
 #include "upnp_cm.h"
 #include "server.h"

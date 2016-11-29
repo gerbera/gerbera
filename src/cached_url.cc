@@ -29,10 +29,6 @@
 
 /// \file cached_url.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include <time.h>
 
 #include "cached_url.h"

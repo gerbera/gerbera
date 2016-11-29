@@ -29,10 +29,6 @@
 
 /// \file jpeg_resolution.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "common.h"
 
 #include <stdio.h>

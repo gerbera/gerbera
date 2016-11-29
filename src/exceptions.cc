@@ -29,10 +29,6 @@
 
 /// \file exceptions.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "exceptions.h"
 
 using namespace zmm;

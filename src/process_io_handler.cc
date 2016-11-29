@@ -29,10 +29,6 @@
 
 /// \file process_io_handler.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #ifdef EXTERNAL_TRANSCODING
 
 #include <sys/types.h>

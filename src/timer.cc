@@ -29,10 +29,6 @@
 
 /// \file timer.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "timer.h"
 
 using namespace zmm;

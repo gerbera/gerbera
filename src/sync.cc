@@ -29,10 +29,6 @@
 
 /// \file sync.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "sync.h"
 
 using namespace zmm;

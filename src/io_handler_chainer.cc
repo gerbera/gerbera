@@ -29,10 +29,6 @@
 
 /// \file io_handler_chainer.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "io_handler_chainer.h"
 #include "exceptions.h"
 

@@ -29,10 +29,6 @@
 
 /// \file process_executor.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "process_executor.h"
 #include "process.h"
 #include <pthread.h>

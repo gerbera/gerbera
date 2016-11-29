@@ -29,10 +29,6 @@
 
 /// \file upnp_cds.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "upnp_cds.h"
 #include "config_manager.h"
 

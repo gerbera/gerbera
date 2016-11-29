@@ -29,10 +29,6 @@
 
 /// \file upnp_cm_actions.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "tools.h"
 #include "upnp_cm.h"
 #include "storage.h"

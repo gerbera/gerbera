@@ -29,10 +29,6 @@
 
 /// \file cds_resource_manager.cc
 
-#ifdef HAVE_CONFIG_H
-#include "autoconfig.h"
-#endif
-
 #include "cds_resource_manager.h"
 #include "dictionary.h"
 #include "object_dictionary.h"

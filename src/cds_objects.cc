@@ -29,10 +29,6 @@
 
 /// \file cds_objects.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "cds_objects.h"
 #include "tools.h"
 #include "storage.h"

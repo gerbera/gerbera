@@ -29,10 +29,6 @@
 
 /// \file process.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "process.h"
 
 #include <stdio.h>

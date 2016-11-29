@@ -29,10 +29,6 @@
 
 /// \file request_handler.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "request_handler.h"
 #include "tools.h"
 

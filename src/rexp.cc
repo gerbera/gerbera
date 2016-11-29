@@ -29,10 +29,6 @@
 
 /// \file rexp.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "rexp.h"
 
 using namespace zmm;

@@ -29,10 +29,6 @@
 
 /// \file xpath.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "common.h"
 #include "tools.h"
 #include "xpath.h"

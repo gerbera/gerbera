@@ -30,10 +30,6 @@
 /// \file sopcast_content_handler.cc
 /// \brief Implementation of the SopCastContentHandler class.
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #if defined(SOPCAST)
 
 #include "sopcast_content_handler.h"

@@ -30,10 +30,6 @@
 /// \file atrailers_content_handler.cc
 /// \brief Implementation of the ATrailersContentHandler class.
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #if defined(ATRAILERS)
 
 #include "atrailers_content_handler.h"

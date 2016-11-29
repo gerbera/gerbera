@@ -29,10 +29,6 @@
 
 /// \file storage.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "config_manager.h"
 
 #if ! defined(HAVE_MYSQL) && ! defined(HAVE_SQLITE3)

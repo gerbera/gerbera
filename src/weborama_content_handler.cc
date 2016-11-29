@@ -30,10 +30,6 @@
 /// \file weborama_content_handler.cc
 /// \brief Implementation of the WeboramaContentHandler class.
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #if defined(WEBORAMA)
 
 #include "weborama_content_handler.h"

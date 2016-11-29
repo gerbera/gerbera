@@ -29,10 +29,6 @@
 
 /// \file content_manager.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>

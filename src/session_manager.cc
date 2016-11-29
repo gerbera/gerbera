@@ -29,10 +29,6 @@
 
 /// \file session_manager.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "session_manager.h"
 #include "config_manager.h"
 #include "tools.h"

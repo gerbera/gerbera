@@ -41,10 +41,6 @@
 /// \file dvdnav_read.cc
 
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #ifdef HAVE_LIBDVDNAV
 
 #include "dvdnav_read.h"

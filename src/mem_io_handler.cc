@@ -28,9 +28,6 @@
 */
 
 /// \file mem_io_handler.cc
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
 
 
 #include "server.h"

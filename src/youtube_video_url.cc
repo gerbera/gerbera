@@ -30,10 +30,6 @@
 /// \file youtube_video_url.cc
 /// \brief Definitions of the Transcoding classes. 
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #ifdef YOUTUBE
 
 #include <pthread.h>

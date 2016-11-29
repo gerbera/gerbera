@@ -29,10 +29,6 @@
 
 /// \file upnp_mrreg_subscriptions.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #if defined(ENABLE_MRREG)
 
 #include "tools.h"

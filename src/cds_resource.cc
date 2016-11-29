@@ -29,10 +29,6 @@
 
 /// \file cds_resource.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "tools.h"
 #include "cds_resource.h"
 

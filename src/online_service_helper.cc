@@ -30,10 +30,6 @@
 /// \file online_service_helper.cc
 /// \brief Definition of the OnlineServiceHelper class.
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #ifdef ONLINE_SERVICES
 
 #include "zmm/zmm.h"

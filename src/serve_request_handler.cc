@@ -29,10 +29,6 @@
 
 /// \file serve_request_handler.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include <sys/stat.h>
 
 #include "server.h"

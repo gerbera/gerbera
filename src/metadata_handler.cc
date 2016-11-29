@@ -30,10 +30,6 @@
 /// \file metadata_handler.cc
 /// \brief Implementeation of the MetadataHandler class.
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "metadata_handler.h"
 #include "string_converter.h"
 #include "tools.h"
@@ -46,18 +42,7 @@
 #ifdef HAVE_TAGLIB
 #include "metadata/taglib_handler.h"
 #else
-#ifdef HAVE_ID3LIB // we only want ID3 if taglib was not found
-#include "metadata/id3_handler.h"
-#endif // HAVE_ID3LIB
 #endif // HAVE_TAGLIB
-
-#ifdef HAVE_FLAC
-#include "metadata/flac_handler.h"
-#endif
-
-#ifdef HAVE_LIBMP4V2
-#include "metadata/libmp4v2_handler.h"
-#endif
 
 #ifdef HAVE_FFMPEG
 #include "metadata/ffmpeg_handler.h"
@@ -149,21 +134,7 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
         handlers->append(Ref<MetadataHandler>(new TagHandler()));
     }
 #else
-#ifdef HAVE_ID3LIB
-    if (content_type == CONTENT_TYPE_MP3)
-    {
-        handlers->append(Ref<MetadataHandler>(new Id3Handler()));
-    }
-#endif // HAVE_ID3LIB
 #endif // HAVE_TAGLIB
-
-#ifdef HAVE_FLAC
-    if (content_type == CONTENT_TYPE_FLAC)
-    {
-        handlers->append(Ref<MetadataHandler>(new FlacHandler()));
-    }
-
-#endif
 
 #ifdef HAVE_EXIV2
 /*        
@@ -180,18 +151,6 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
         handlers->append(Ref<MetadataHandler>(new LibExifHandler()));
     }
 #endif // HAVE_LIBEXIF
-
-#if defined(HAVE_LIBMP4V2)
-#if !defined(HAVE_FFMPEG)
-    if (content_type == CONTENT_TYPE_MP4)
-#else // FFMPEG available 
-    if ((content_type == CONTENT_TYPE_MP4) && 
-        (!item->getMimeType().startsWith(_("video"))))
-#endif // !defined(HAVE_FFMPEG)            
-    {
-        handlers->append(Ref<MetadataHandler>(new LibMP4V2Handler()));
-    }
-#endif // defined(HAVE_LIBMP4V2)
 
 #ifdef HAVE_FFMPEG
     if (content_type != CONTENT_TYPE_PLAYLIST &&
@@ -252,24 +211,13 @@ Ref<MetadataHandler> MetadataHandler::createHandler(int handlerType)
         case CH_LIBEXIF:
             return Ref<MetadataHandler>(new LibExifHandler());
 #endif
-#ifdef HAVE_ID3LIB
-        case CH_ID3:
-            return Ref<MetadataHandler>(new Id3Handler());
-#elif HAVE_TAGLIB
+#if   HAVE_TAGLIB
         case CH_ID3:
             return Ref<MetadataHandler>(new TagHandler());
-#endif
-#ifdef HAVE_LIBMP4V2
-        case CH_MP4:
-            return Ref<MetadataHandler>(new LibMP4V2Handler());
 #endif
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
         case CH_FFTH:
             return Ref<MetadataHandler>(new FfmpegHandler());
-#endif
-#ifdef HAVE_FLAC
-        case CH_FLAC:
-            return Ref<MetadataHandler>(new FlacHandler());
 #endif
         case CH_FANART:
             return Ref<MetadataHandler>(new FanArtHandler());

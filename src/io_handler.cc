@@ -30,10 +30,6 @@
 /// \file io_handler.cc
 /// This handles the VirtualDirCallbacks that come from the web server.
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include <unistd.h>
 #include <upnp/ixml.h>
 

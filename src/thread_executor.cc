@@ -29,10 +29,6 @@
 
 /// \file thread_executor.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "thread_executor.h"
 
 using namespace zmm;

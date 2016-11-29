@@ -29,10 +29,6 @@
 
 /// \file autoscan.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "autoscan.h"
 #include "storage.h"
 #include "content_manager.h"

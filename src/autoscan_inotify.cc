@@ -29,10 +29,6 @@
 
 /// \file autoscan_inotify.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #ifdef HAVE_INOTIFY
 
 #include "autoscan_inotify.h"

@@ -29,10 +29,6 @@
 
 /// \file memory.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #if defined(TOMBDEBUG) && ! defined (MEMPROF)
 #include <malloc.h>
 #include "logger.h"

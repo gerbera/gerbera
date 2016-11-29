@@ -30,10 +30,6 @@
 /// \file web_callbacks.cc
 /// This handles the VirtualDirCallbacks that come from the web server.
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include <sys/types.h>
 
 #include "common.h"

@@ -29,10 +29,6 @@
 
 /// \file curl_io_handler.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #ifdef HAVE_CURL
 
 #include "config_manager.h"

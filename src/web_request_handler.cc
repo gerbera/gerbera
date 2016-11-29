@@ -29,10 +29,6 @@
 
 /// \file web_request_handler.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include <time.h>
 #include "mem_io_handler.h"
 #include "web_request_handler.h"

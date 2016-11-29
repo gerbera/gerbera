@@ -29,10 +29,6 @@
 
 /// \file upnp_cm.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "upnp_cm.h"
 
 using namespace zmm;

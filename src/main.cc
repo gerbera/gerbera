@@ -34,10 +34,6 @@
 /// This documentation was generated using doxygen, you can reproduce it by 
 /// running "doxygen doxygen.conf" from the mediatomb/doc/ directory.
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "common.h"
 #include "singleton.h"
 #include "server.h"

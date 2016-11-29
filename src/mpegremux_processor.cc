@@ -29,10 +29,6 @@
 
 /// \file mpegremux_processor.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #ifdef HAVE_LIBDVDNAV
 
 #include "mpegremux_processor.h"

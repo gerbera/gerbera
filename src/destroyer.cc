@@ -29,10 +29,6 @@
 
 /// \file destroyer.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "destroyer.h"
 
 using namespace zmm;

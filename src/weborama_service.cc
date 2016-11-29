@@ -29,10 +29,6 @@
 
 /// \file weborama_service.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #ifdef WEBORAMA 
 
 #include "zmm/zmm.h"

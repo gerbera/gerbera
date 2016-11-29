@@ -29,10 +29,6 @@
 
 /// \file dvd_io_handler.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #ifdef HAVE_LIBDVDNAV
 
 #include <stdint.h>

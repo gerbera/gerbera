@@ -29,10 +29,6 @@
 
 /// \file string_converter.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "string_converter.h"
 #include "config_manager.h"
 

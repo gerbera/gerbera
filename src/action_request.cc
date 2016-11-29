@@ -29,10 +29,6 @@
 
 /// \file action_request.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "action_request.h"
 
 using namespace zmm;

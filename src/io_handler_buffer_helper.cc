@@ -29,10 +29,6 @@
 
 /// \file io_handler_buffer_helper.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "io_handler_buffer_helper.h"
 #include "config_manager.h"
 

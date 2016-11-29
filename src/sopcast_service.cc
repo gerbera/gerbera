@@ -29,10 +29,6 @@
 
 /// \file sopcast_service.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #ifdef SOPCAST 
 
 #include "zmm/zmm.h"

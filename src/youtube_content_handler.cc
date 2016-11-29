@@ -30,10 +30,6 @@
 /// \file youtube_content_handler.cc
 /// \brief Implementation of the YouTubeContentHandler class.
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #if defined(YOUTUBE)
 
 #include "youtube_content_handler.h"

@@ -29,10 +29,6 @@
 
 /// \file update_manager.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "update_manager.h"
 
 #include "upnp_cds.h"

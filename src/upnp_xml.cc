@@ -29,10 +29,6 @@
 
 /// \file upnp_xml.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "upnp_xml.h"
 #include "server.h"
 #include "cds_resource_manager.h"

@@ -29,10 +29,6 @@
 
 /// \file buffered_io_handler.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include <assert.h>
 
 #include "buffered_io_handler.h"

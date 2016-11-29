@@ -32,10 +32,6 @@
 //
 // \todo this should be solved via an observer model 
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "play_hook.h"
 #include "config_manager.h"
 #include "content_manager.h"

@@ -29,10 +29,6 @@
 
 /// \file dictionary.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "dictionary.h"
 
 #include <string.h>

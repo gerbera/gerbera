@@ -29,10 +29,6 @@
 
 /// \file upnp_cds_subscriptions.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #include "upnp_cds.h"
 #include "upnp_xml.h"
 #include "server.h"

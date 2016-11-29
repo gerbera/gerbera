@@ -36,10 +36,6 @@
 
 /// \file mt_inotify.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #ifdef HAVE_INOTIFY
 
 #include <sys/ioctl.h>
