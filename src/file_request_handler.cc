@@ -118,11 +118,11 @@ void FileRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *inf
 #ifdef EXTERNAL_TRANSCODING
     if (string_ok(s_res_id) && (s_res_id != _(URL_VALUE_TRANSCODE_NO_RES_ID)))
 #else
-        if (string_ok(s_res_id))
+    if (string_ok(s_res_id))
 #endif
-            res_id = s_res_id.toInt();
-        else
-            res_id = -1;
+        res_id = s_res_id.toInt();
+    else
+        res_id = -1;
 
     String ext = dict->get(_("ext"));
     int edot = ext.rindex('.');
@@ -184,8 +184,6 @@ void FileRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *inf
     tr_profile = dict->get(_(URL_PARAM_TRANSCODE_PROFILE_NAME));
 #endif
 
-    // FIXME - upstream upnp
-    //info->http_header = NULL;
     // for transcoded resourecs res_id will always be negative
     log_debug("fetching resource id %d\n", res_id);
     String rh = dict->get(_(RESOURCE_HANDLER));
@@ -277,7 +275,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *inf
 				throw _Exception(_("DVD Image - requested invalid audio stream ID!"));
 
 			/// \todo make sure we can seek in the streams
-			info->file_length = -1;
+			UpnpFileInfo_set_FileLength(info, -1);
 			header = nil;
 		}
 		else
@@ -355,12 +353,8 @@ void FileRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *inf
     header = getDLNAtransferHeader(mimeType, header);
 #endif
 
-
-
-    /*  FIXME - upstream upnp
     if (string_ok(header))
-        info->http_header = ixmlCloneDOMString(header.c_str());
-*/
+        UpnpFileInfo_set_ExtraHeaders(info, ixmlCloneDOMString(header.c_str()));
 
     UpnpFileInfo_set_LastModified(info, statbuf.st_mtime);
     UpnpFileInfo_set_IsDirectory(info, S_ISDIR(statbuf.st_mode));
@@ -531,7 +525,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename,
             throw _Exception(_("Failed to open ") + path + " - " + strerror(errno));
     }
 
-    /* TODO Upstream upnp
+    /* TODO Is this needed? Info should be gotten by get_info()?
     if (access(path.c_str(), R_OK) == 0)
     {
         info->is_readable = 1;
