@@ -1350,7 +1350,12 @@ void ConfigManager::validate(String serverhome)
         mime_content->put(_("audio/x-mpegurl"), _(CONTENT_TYPE_PLAYLIST));
         mime_content->put(_("audio/x-scpls"), _(CONTENT_TYPE_PLAYLIST));
         mime_content->put(_("audio/x-wav"), _(CONTENT_TYPE_PCM));
+        mime_content->put(_("audio/wave"), _(CONTENT_TYPE_PCM));
+        mime_content->put(_("audio/wav"), _(CONTENT_TYPE_PCM));
+        mime_content->put(_("audio/vnd.wave"), _(CONTENT_TYPE_PCM));
         mime_content->put(_("audio/L16"), _(CONTENT_TYPE_PCM));
+        mime_content->put(_("audio/x-aiff"), _(CONTENT_TYPE_AIFF));
+        mime_content->put(_("audio/aiff"), _(CONTENT_TYPE_AIFF));
         mime_content->put(_("video/x-msvideo"), _(CONTENT_TYPE_AVI));
         mime_content->put(_("video/mpeg"), _(CONTENT_TYPE_MPEG));
         mime_content->put(_("application/x-iso9660"), _(CONTENT_TYPE_DVD));

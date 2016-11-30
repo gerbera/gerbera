@@ -63,6 +63,7 @@
 #define CONTENT_TYPE_QUICKTIME  "quicktime"
 #define CONTENT_TYPE_MKV        "mkv"
 #define CONTENT_TYPE_MKA        "mka"
+#define CONTENT_TYPE_AIFF       "aiff"
 
 #define OGG_THEORA              "t"
 

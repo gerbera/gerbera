@@ -31,7 +31,6 @@
 /// \brief Implementeation of the MetadataHandler class.
 
 #include "metadata_handler.h"
-#include "string_converter.h"
 #include "tools.h"
 #include "config_manager.h"
 
@@ -41,7 +40,6 @@
 
 #ifdef HAVE_TAGLIB
 #include "metadata/taglib_handler.h"
-#else
 #endif // HAVE_TAGLIB
 
 #ifdef HAVE_FFMPEG
@@ -126,14 +124,16 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
 
 #ifdef HAVE_TAGLIB
     if ((content_type == CONTENT_TYPE_MP3) || 
-       ((content_type == CONTENT_TYPE_OGG) && 
-        (!item->getFlag(OBJECT_FLAG_OGG_THEORA))) ||
+        ((content_type == CONTENT_TYPE_OGG) && (!item->getFlag(OBJECT_FLAG_OGG_THEORA))) ||
         (content_type == CONTENT_TYPE_WMA) ||
-        (content_type == CONTENT_TYPE_WAVPACK))
+        (content_type == CONTENT_TYPE_WAVPACK) ||
+        (content_type == CONTENT_TYPE_FLAC) ||
+        (content_type == CONTENT_TYPE_PCM) ||
+        (content_type == CONTENT_TYPE_AIFF) ||
+        (content_type == CONTENT_TYPE_MP4))
     {
         handlers->append(Ref<MetadataHandler>(new TagHandler()));
     }
-#else
 #endif // HAVE_TAGLIB
 
 #ifdef HAVE_EXIV2
