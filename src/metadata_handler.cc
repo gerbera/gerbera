@@ -111,14 +111,11 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
     
     item->addResource(resource);
 
-    Ref<MetadataHandler> handler;
     Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-
     String content_type = mappings->get(mimetype);
    
     if ((content_type == CONTENT_TYPE_OGG) && (isTheora(item->getLocation())))
             item->setFlag(OBJECT_FLAG_OGG_THEORA);
-
 
     Ref<Array<MetadataHandler> > handlers = Ref<Array<MetadataHandler> >(new Array<MetadataHandler>());
 
