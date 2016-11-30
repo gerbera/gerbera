@@ -17,3 +17,4 @@ upnpconfig.h
 config.status
 build/mediatomb
 .idea
+cmake-build-debug
