@@ -253,13 +253,13 @@ void TagHandler::fillMetadata(Ref<CdsItem> item)
         TagLib::FLAC::File f(item->getLocation().c_str());
 
         if (!f.isValid()) {
-            log_debug("TagHandler: could not open flac file: %s",
+            log_debug("TagHandler: could not open flac file: %s\n",
                       item->getLocation().c_str());
             return;
         }
 
         if (!f.pictureList().isEmpty()) {
-            log_debug("TagHandler: flac resource has no picture information");
+            log_debug("TagHandler: flac resource has no picture information\n");
             return;
         }
 
@@ -276,13 +276,13 @@ void TagHandler::fillMetadata(Ref<CdsItem> item)
         TagLib::MP4::File f(item->getLocation().c_str());
 
         if (!f.isValid()) {
-            log_debug("TagHandler: could not open mp4 file: %s",
+            log_debug("TagHandler: could not open mp4 file: %s\n",
                       item->getLocation().c_str());
             return;
         }
 
         if (!f.hasMP4Tag()) {
-            log_debug("TagHandler: mp4 file has no tag information");
+            log_debug("TagHandler: mp4 file has no tag information\n");
             return;
         }
 
