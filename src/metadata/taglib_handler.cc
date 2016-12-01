@@ -258,7 +258,7 @@ void TagHandler::fillMetadata(Ref<CdsItem> item)
             return;
         }
 
-        if (!f.pictureList().isEmpty()) {
+        if (f.pictureList().isEmpty()) {
             log_debug("TagHandler: flac resource has no picture information\n");
             return;
         }
@@ -323,6 +323,8 @@ String TagHandler::getContentTypeFromByteVector(TagLib::ByteVector *data) {
 void TagHandler::addArtworkResource(Ref<CdsItem> item, String art_mimetype) {
     // if we could not determine the mimetype, then there is no
     // point to add the resource - it's probably garbage
+    log_debug("Found artwork of type %s in file %s\n", art_mimetype.c_str(), item->getLocation().c_str());
+
     if (art_mimetype != _(MIMETYPE_DEFAULT)) {
         Ref<CdsResource> resource(new CdsResource(CH_ID3));
         resource->addAttribute(MetadataHandler::getResAttrName(
@@ -366,7 +368,7 @@ Ref<IOHandler> TagHandler::serveContent(Ref<CdsItem> item, int resNum, off_t *da
         if (!f.isValid())
             throw _Exception(_("TagHandler: could not open flac file: ") + item->getLocation());
 
-        if (!f.pictureList().isEmpty())
+        if (f.pictureList().isEmpty())
             throw _Exception(_("TagHandler: flac resource has no picture information"));
 
         TagLib::FLAC::Picture *pic = f.pictureList().front();
@@ -376,6 +378,7 @@ Ref<IOHandler> TagHandler::serveContent(Ref<CdsItem> item, int resNum, off_t *da
 
         *data_size = data.size();
         return h;
+
     } else if (content_type == CONTENT_TYPE_MP4) {
         TagLib::MP4::File f(item->getLocation().c_str());
 
