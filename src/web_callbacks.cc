@@ -71,13 +71,11 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
                 (String(SERVER_VIRTUAL_DIR) + "/" + CONTENT_SERVE_HANDLER).c_str(), 
                 link.startsWith(String(SERVER_VIRTUAL_DIR) + "/" + CONTENT_SERVE_HANDLER));
 */  
-    if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" +
-                        CONTENT_MEDIA_HANDLER))
+    if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_MEDIA_HANDLER))
     {
             ret = new FileRequestHandler();
     }
-    else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" +
-                             CONTENT_UI_HANDLER))
+    else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_UI_HANDLER))
     {  
         RequestHandler::split_url(filename, URL_UI_PARAM_SEPARATOR, path, 
                 parameters);
@@ -182,7 +180,7 @@ static int web_get_info(IN const char *filename, OUT UpnpFileInfo *info)
 static UpnpWebFileHandle web_open(IN const char *filename,
                                   IN enum UpnpOpenFileMode mode)
 {
-    log_debug("web_open():");
+    log_debug("web_open(): %s\n", filename);
 
     String link = url_unescape((char *) filename);
 
