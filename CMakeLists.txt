@@ -353,8 +353,9 @@ if(WITH_CURL)
         add_definitions(-DONLINE_SERVICES)
         add_definitions(-DYOUTUBE)
     endif (CURL_FOUND)
+
 endif(WITH_CURL)
-    
+
 if(WITH_JS)
     find_package (SpiderMonkey)
     if (JS_FOUND)
@@ -417,6 +418,11 @@ if(WITH_LASTFM)
         add_definitions(-DHAVE_LASTFMLIB)
     endif (LASTFMLIB_FOUND)
 endif(WITH_LASTFM)
+
+# Needs to be towards the end (after CURL, TagLib, etc...)
+find_package (ZLIB REQUIRED)
+include_directories(${ZLIB_INCLUDE_DIRS})
+target_link_libraries (mediatomb ${ZLIB_LIBRARIES})
 
 INSTALL(TARGETS mediatomb DESTINATION bin)
 INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/web DESTINATION share/mediatomb)

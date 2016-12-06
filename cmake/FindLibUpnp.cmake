@@ -8,15 +8,18 @@ find_path(UPNP_INCLUDE_DIR upnp/upnp.h
     ${PC_UPNP_INCLUDEDIR}
     ${PC_UPNP_INCLUDE_DIRS}
     PATH_SUFFIXES upnp)
-find_library(UPNP_UPNP_LIBRARY upnp
+find_library(UPNP_UPNP_LIBRARY
+    NAMES upnp upnp4
     HINTS
     ${PC_UPNP_LIBDIR}
     ${PC_UPNP_LIBRARY_DIRS})
-find_library(UPNP_IXML_LIBRARY ixml
+find_library(UPNP_IXML_LIBRARY
+    NAMES ixml ixml4
     HINTS
     ${PC_UPNP_LIBDIR}
     ${PC_UPNP_LIBRARY_DIRS})
-find_library(UPNP_THREADUTIL_LIBRARY threadutil
+find_library(UPNP_THREADUTIL_LIBRARY
+    NAMES threadutil threadutil4
     HINTS
     ${PC_UPNP_LIBDIR}
     ${PC_UPNP_LIBRARY_DIRS})

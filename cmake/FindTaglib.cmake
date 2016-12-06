@@ -15,7 +15,7 @@ IF(TAGLIB_FOUND)
 ELSE()
 
 	if(NOT TAGLIB_MIN_VERSION)
-	  set(TAGLIB_MIN_VERSION "1.6")
+	  set(TAGLIB_MIN_VERSION "1.11")
 	endif(NOT TAGLIB_MIN_VERSION)
 
 	if(NOT WIN32)
@@ -35,7 +35,7 @@ ELSE()
 	  exec_program(${TAGLIBCONFIG_EXECUTABLE} ARGS --version RETURN_VALUE _return_VALUE OUTPUT_VARIABLE TAGLIB_VERSION)
 
 	  if(TAGLIB_VERSION VERSION_LESS "${TAGLIB_MIN_VERSION}")
-		 message(STATUS "TagLib version not found: version searched :${TAGLIB_MIN_VERSION}, found ${TAGLIB_VERSION}")
+		 message(STATUS "TagLib version not found: version searched: ${TAGLIB_MIN_VERSION}, found: ${TAGLIB_VERSION}")
 		 set(TAGLIB_FOUND FALSE)
 	  else(TAGLIB_VERSION VERSION_LESS "${TAGLIB_MIN_VERSION}")
 

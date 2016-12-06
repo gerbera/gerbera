@@ -109,7 +109,7 @@ void ServeRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *in
 #endif // HAVE_MAGIC
 
         UpnpFileInfo_set_FileLength(info, statbuf.st_size);
-        UpnpFileInfo_set_LastModified(info, statbuf.st_mtime);
+        UpnpFileInfo_set_LastModified(info, &(statbuf.st_mtime));
         UpnpFileInfo_set_IsDirectory(info, S_ISDIR(statbuf.st_mode));
 
         if (access(path.c_str(), R_OK) == 0)

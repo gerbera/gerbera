@@ -63,7 +63,7 @@ make install
 | mysql        	|         	| Optional  	| Client Libs          	|
 | curl         	|         	| Optional  	| Enables web services 	|
 | spidermonkey 	| 1.8.5   	| Optional  	| Enables scripting    	|
-| taglib       	|         	| Optional  	| Audio tag support    	|
+| taglib       	| 1.11    	| Optional  	| Audio tag support    	|
 | libmagic     	|         	| Optional  	| File type detection  	|
 | ffmpeg/libav 	|         	| Optional  	| File metadata        	|
 | libdvdnav    	|         	| Optional  	| DVD import script    	|
