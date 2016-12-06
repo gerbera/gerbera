@@ -351,8 +351,12 @@ void FileRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *inf
 
     if (string_ok(header))
         UpnpFileInfo_set_ExtraHeaders(info, ixmlCloneDOMString(header.c_str()));
-
-    UpnpFileInfo_set_LastModified(info, &(statbuf.st_mtime));
+#ifdef UPNP_OLD_SNAPSHOT
+    time_t *mtime = &(statbuf.st_mtime);
+    UpnpFileInfo_set_LastModified(info, *mtime);
+#else
+    UpnpFileInfo_set_LastModified(info, statbuf.st_mtime);
+#endif
     UpnpFileInfo_set_IsDirectory(info, S_ISDIR(statbuf.st_mode));
 
     UpnpFileInfo_set_ContentType(info, ixmlCloneDOMString(mimeType.c_str()));
