@@ -38,12 +38,6 @@ if (UPNP_FOUND)
         message (STATUS "Found libupnp version: ${UPNP_VERSION_STRING}")
     endif()
 
-    if(UPNP_INCLUDE_DIR AND EXISTS "${UPNP_INCLUDE_DIR}/upnp/TemplateInclude.h")
-        message (WARNING "\n!! You are using a very old 1.8 snapshot. Please upgrade to a newer snapshot from upstream (https://github.com/mrjimenez/pupnp) !!\n")
-        message (STATUS "libupnp: Enabling old snapshot compat.")
-        set (UPNP_OLD_SNAPSHOT 1)
-    endif()
-
     message (STATUS "Found the libupnp libraries: ${UPNP_LIBRARIES}")
     message (STATUS "Found the libupnp headers: ${UPNP_INCLUDE_DIR}")
 else (UPNP_FOUND)

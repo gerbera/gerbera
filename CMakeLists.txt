@@ -329,7 +329,9 @@ endif()
 
 # Debian ships a snapshot from 2010: libupnp4 (1.8.0~svn20100507-1.2)
 # This is missing templated types so we need to ifdef
-if (UPNP_OLD_SNAPSHOT)
+if(UPNP_INCLUDE_DIR AND EXISTS "${UPNP_INCLUDE_DIR}/upnp/TemplateInclude.h")
+    message (WARNING "\n!! You are using a very old 1.8 snapshot. Please upgrade to a newer snapshot from upstream (https://github.com/mrjimenez/pupnp) !!\n")
+    message (STATUS "MediaTomb: Enabling old libupnp snapshot compat.")
     add_definitions(-DUPNP_OLD_SNAPSHOT)
 endif()
 
