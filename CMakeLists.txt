@@ -286,8 +286,7 @@ add_library(libmediatomb OBJECT
         src/zmm/stringbuffer.h
         src/zmm/strings.cc
         src/zmm/strings.h
-        src/zmm/zmm.h
-        )
+        src/zmm/zmm.h)
 
 target_include_directories(libmediatomb PRIVATE "${CMAKE_SOURCE_DIR}/src")
 
@@ -323,6 +322,16 @@ target_link_libraries (mediatomb ${LIBUUID_LIBRARIES})
 find_package (LibUpnp REQUIRED)
 include_directories(${UPNP_INCLUDE_DIRS})
 target_link_libraries (mediatomb ${UPNP_LIBRARIES})
+
+if (UPNP_VERSION_STRING VERSION_LESS "1.8.0")
+    message(FATAL_ERROR "MediaTomb requires libupnp 1.8.0 or above.")
+endif()
+
+# Debian ships a snapshot from 2010: libupnp4 (1.8.0~svn20100507-1.2)
+# This is missing templated types so we need to ifdef
+if (UPNP_OLD_SNAPSHOT)
+    add_definitions(-DUPNP_OLD_SNAPSHOT)
+endif()
 
 find_package (EXPAT REQUIRED)
 include_directories(${EXPAT_INCLUDE_DIRS})
