@@ -100,7 +100,7 @@ void WebRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *info
     params->decode(parameters);
 
     UpnpFileInfo_set_FileLength(info, -1); // length is unknown
-    UpnpFileInfo_set_LastModified(info, time(NULL));
+    UpnpFileInfo_set_LastModified(info, NULL);
     UpnpFileInfo_set_IsDirectory(info, 0);
     UpnpFileInfo_set_IsReadable(info, 1);
 
