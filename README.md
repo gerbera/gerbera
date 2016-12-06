@@ -3,9 +3,9 @@
 MediaTomb is an open source (GPL) UPnP MediaServer which allows you to stream your digital media
 through your home network and listen to/watch it on a variety of UPnP compatible devices.
 
-It is pretty much dead upstream, so this is my attempt to get kick it back into life.
+_MediaTomb is pretty much dead upstream, so this is my attempt to get kick it back into life._
 
-Patches are very welcome as are issue reports.
+**Pull requests are very welcome and reporting issues is encouraged.**
 
 ##Features
 
@@ -26,19 +26,15 @@ Patches are very welcome as are issue reports.
 * runs on Linux, FreeBSD, NetBSD, Mac OS X, eCS
 * runs on x86, Alpha, ARM, MIPS, Sparc, PowerPC
 
-## Branches
-master: Where the action happens
-
-vanilla: Sourceforge mediatomb with patches to build in 2016
-
-gentoo: Pretty much as vanilla (shipped as net-misc/mediatomb).
-
-
-## Differences to Vanilla
+## Differences to Vanilla (So far)
+- Active maintainer
 - Removed bundled libupnp - Now requires upstream 1.8 version.
-- Removed bundled libuuid
-- Ported to CMake removal of autotools
-- Fixed dvd_image_import_script with spidermonkey 1.8.5
+- Removed bundled libuuid.
+- Ported to CMake.
+- Fixed `dvd_image_import_script` with spidermonkey 1.8.5.
+- Removed libflac use/dep.
+- Remove libmp4v2 use/dep.
+- Enhanced TagLib handler to support MP4 and FLAC files (including artwork).
 
 ## Building
 
@@ -52,7 +48,7 @@ make install
 
 ```
 
-### Dependencies
+## Dependencies
 
 | Lib          	| Version 	| Required? 	| Note                 	|
 |--------------	|---------	|-----------	|----------------------	|
@@ -70,6 +66,13 @@ make install
 | libexif      	|         	| Optional  	| JPEG Exif metadata   	|
 | lastfmlib    	|         	| Optional  	| Enables scrobbling   	|
 |              	|         	|           	|                      	|
+
+## Branches
+**master**: Where the action happens
+
+**vanilla**: Sourceforge mediatomb with patches to build in 2016
+
+**gentoo**: Pretty much as vanilla (shipped as net-misc/mediatomb).
 
 ##Licence
 
