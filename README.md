@@ -52,7 +52,7 @@ make install
 
 | Lib          	| Version 	| Required? 	| Note                 	|
 |--------------	|---------	|-----------	|----------------------	|
-| libupnp      	| 1.8     	| Required  	|                      	|
+| libupnp      	| 1.8     	| Required  	| Must use: [pupnp](https://github.com/mrjimenez/pupnp.git)	|
 | libuuid      	|         	| Required  	|                      	|
 | expat        	|         	| Required  	|                      	|
 | sqlite3      	|         	| Required  	|                      	|
