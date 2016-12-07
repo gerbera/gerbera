@@ -156,14 +156,9 @@ void Server::upnp_init(String iface, String ip_address, int port)
     if (port < 0)
         port = 0;
 
-
-    void *cb = NULL;
     // this is important, so the storage lives a little longer when
     // shutdown is initiated
     storage = Storage::getInstance();
-
-    if (storage->threadCleanupRequired())
-        cb = (void *)static_cleanup_callback;
 
     ret = UpnpInit(ip.c_str(), port);
 
@@ -348,6 +343,9 @@ void Server::shutdown()
 
     log_debug("now calling upnp finish\n");
     UpnpFinish();
+    if (storage != nil && storage->threadCleanupRequired()) {
+        static_cleanup_callback();
+    }
     storage = nil;
 
     log_debug("end\n");

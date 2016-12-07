@@ -78,14 +78,8 @@ YouTubeVideoURL::~YouTubeVideoURL()
 
 String YouTubeVideoURL::getVideoURL(String video_id, bool mp4, bool hd)
 {
-    long retcode; 
     String flv_location;
     String watch;
-#ifdef TOMBDEBUG
-    bool verbose = true;
-#else
-    bool verbose = false;
-#endif
 
    /*
 // ###########################################################
@@ -152,6 +146,7 @@ String YouTubeVideoURL::getVideoURL(String video_id, bool mp4, bool hd)
 
         // This code assumes youtube-dl is available for usage.
         execl("/usr/bin/youtube-dl", "/usr/bin/youtube-dl","-g",watch.c_str(),NULL);
+        return String();
     }
     else
     {

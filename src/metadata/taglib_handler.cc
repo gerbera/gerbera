@@ -316,8 +316,9 @@ String TagHandler::getContentTypeFromByteVector(TagLib::ByteVector *data) {
 #ifdef HAVE_MAGIC
     art_mimetype = ContentManager::getInstance()->getMimeTypeFromBuffer((void *) data->data(), data->size());
     if (!string_ok(art_mimetype))
+        return _(MIMETYPE_DEFAULT);
 #endif
-        return art_mimetype;
+    return art_mimetype;
 }
 
 void TagHandler::addArtworkResource(Ref<CdsItem> item, String art_mimetype) {
