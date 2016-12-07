@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.6)
 
-set(CMAKE_VERBOSE_MAKEFILE on)
+set(CMAKE_VERBOSE_MAKEFILE off)
 
 project("MediaTomb")
 
@@ -294,6 +294,7 @@ add_executable(mediatomb src/main.cc $<TARGET_OBJECTS:libmediatomb>)
 target_include_directories(mediatomb PRIVATE "${CMAKE_SOURCE_DIR}/src")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
+set(CMAKE_CXX_FLAGS "-Wall")
 
 add_definitions(-DPACKAGE_NAME="MediaTomb-v00d00")
 add_definitions(-DVERSION="0.13.0_alpha-v00d00")
@@ -331,7 +332,7 @@ endif()
 # This is missing templated types so we need to ifdef
 if(UPNP_INCLUDE_DIR AND NOT EXISTS "${UPNP_INCLUDE_DIR}/upnp/TemplateInclude.h")
     message (WARNING "\n!! You are using a very old 1.8 snapshot. Please upgrade to a newer snapshot from upstream (https://github.com/mrjimenez/pupnp) !!\n")
-    message (STATUS "MediaTomb: Enabling old libupnp snapshot compat.")
+    message (STATUS "MediaTomb: Enabling old libupnp snapshot compat. Web interface will probably not work.")
     add_definitions(-DUPNP_OLD_SNAPSHOT)
 endif()
 

@@ -352,8 +352,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *inf
     if (string_ok(header))
         UpnpFileInfo_set_ExtraHeaders(info, ixmlCloneDOMString(header.c_str()));
 #ifdef UPNP_OLD_SNAPSHOT
-    time_t *mtime = &(statbuf.st_mtime);
-    UpnpFileInfo_set_LastModified(info, *mtime);
+    UpnpFileInfo_set_LastModified(info, &(statbuf.st_mtime));
 #else
     UpnpFileInfo_set_LastModified(info, statbuf.st_mtime);
 #endif

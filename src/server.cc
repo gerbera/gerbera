@@ -156,14 +156,9 @@ void Server::upnp_init(String iface, String ip_address, int port)
     if (port < 0)
         port = 0;
 
-
-    void *cb = NULL;
     // this is important, so the storage lives a little longer when
     // shutdown is initiated
     storage = Storage::getInstance();
-
-    if (storage->threadCleanupRequired())
-        cb = (void *)static_cleanup_callback;
 
     ret = UpnpInit(ip.c_str(), port);
 
@@ -348,6 +343,9 @@ void Server::shutdown()
 
     log_debug("now calling upnp finish\n");
     UpnpFinish();
+    if (storage != nil && storage->threadCleanupRequired()) {
+        static_cleanup_callback();
+    }
     storage = nil;
 
     log_debug("end\n");
@@ -382,7 +380,7 @@ int Server::upnp_callback(Upnp_EventType eventtype, const void *event, void *coo
 
         case UPNP_CONTROL_ACTION_REQUEST:
             // a CP is invoking an action
-//            log_info("UPNP_CONTROL_ACTION_REQUEST\n");
+            //log_info("UPNP_CONTROL_ACTION_REQUEST\n");
             try
             {
                 // https://github.com/mrjimenez/pupnp/blob/master/upnp/sample/common/tv_device.c
@@ -392,12 +390,12 @@ int Server::upnp_callback(Upnp_EventType eventtype, const void *event, void *coo
                 request->update();
                // set in update() ((struct Upnp_Action_Request *)event)->ErrCode = ret;
             }
-            catch(UpnpException upnp_e)
+            catch(UpnpException & upnp_e)
             {
                 ret = upnp_e.getErrorCode();
                 UpnpActionRequest_set_ErrCode((UpnpActionRequest *)event, ret);
             }
-            catch(Exception e)
+            catch(Exception & e)
             {
                 log_info("Exception: %s\n", e.getMessage().c_str());
             }
@@ -406,14 +404,15 @@ int Server::upnp_callback(Upnp_EventType eventtype, const void *event, void *coo
             
         case UPNP_EVENT_SUBSCRIPTION_REQUEST:
             // a cp wants a subscription
-//            log_info("UPNP_EVENT_SUBSCRIPTION_REQUEST\n");
+            //log_info("UPNP_EVENT_SUBSCRIPTION_REQUEST\n");
             try
             {
                 Ref<SubscriptionRequest> request(new SubscriptionRequest((UpnpSubscriptionRequest *)event));
                 upnp_subscriptions(request);
             }
-            catch(UpnpException upnp_e)
+            catch(UpnpException & upnp_e)
             {
+                log_warning("Subscription exception: %s\n", upnp_e.getMessage().c_str());
                 ret = upnp_e.getErrorCode();
             }
             
@@ -492,7 +491,8 @@ void Server::upnp_subscriptions(Ref<SubscriptionRequest> request)
     if (request->getUDN() != serverUDN)
     {
         // not for us
-//        log_debug("upnp_subscriptions: request not for this device\n");
+        log_debug("upnp_subscriptions: request not for this device: %s vs %s\n",
+                request->getUDN().c_str(), serverUDN.c_str());
         throw _UpnpException(UPNP_E_BAD_REQUEST,
                             _("upnp_actions: request not for this device"));
     }
