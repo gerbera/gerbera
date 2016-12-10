@@ -84,7 +84,7 @@ Exception::Exception(String message)
 #endif
 }
 
-String Exception::getMessage()
+String Exception::getMessage() const
 {
     return message;
 }
@@ -95,7 +95,7 @@ Ref<Array<StringBase> > Exception::getStackTrace()
 }
 
 #ifdef TOMBDEBUG
-void Exception::printStackTrace(FILE *file)
+void Exception::printStackTrace(FILE *file) const
 {
     if (line >= 0)
     {

@@ -43,8 +43,8 @@ StringTokenizer::StringTokenizer(String str)
 }
 String StringTokenizer::nextToken(String seps)
 {
-    char *cstr = str.c_str();
-    char *cseps = seps.c_str();
+    const char *cstr = str.c_str();
+    const char *cseps = seps.c_str();
     while(pos < len && strchr(cseps, cstr[pos]))
         pos++;
     if(pos < len)

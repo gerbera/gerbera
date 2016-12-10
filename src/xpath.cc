@@ -115,12 +115,12 @@ String XPath::getAxisPart(String xpath)
 
 String XPath::getAxis(String axisPart)
 {
-    char *pos = strstr(axisPart.c_str(), "::");
+    const char *pos = strstr(axisPart.c_str(), "::");
     return axisPart.substring(0, pos - axisPart.c_str());
 }
 
 String XPath::getSpec(String axisPart)
 {
-    char *pos = strstr(axisPart.c_str(), "::");
+    const char *pos = strstr(axisPart.c_str(), "::");
     return pos + 2;
 }

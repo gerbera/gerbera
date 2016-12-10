@@ -142,16 +142,16 @@ String Dictionary::encodeSimple()
 
 void Dictionary::decode(String url)
 {
-    char *data = url.c_str();
-    char *dataEnd = data + url.length();
+    const char *data = url.c_str();
+    const char *dataEnd = data + url.length();
     while (data < dataEnd)
     {
-        char *ampPos = strchr(data, '&');
+        const char *ampPos = strchr(data, '&');
         if (!ampPos)
         {
             ampPos = dataEnd;
         }
-        char *eqPos = strchr(data, '=');
+        const char *eqPos = strchr(data, '=');
         if(eqPos && eqPos < ampPos)
         {
             String key(data, eqPos - data);

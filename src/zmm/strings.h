@@ -122,28 +122,28 @@ public:
     String operator+(unsigned int x);
     String operator+(double x);
 
-    int operator==(String other);
-    int operator==(const char *str);
-    int operator==(char c);
+    int operator==(String other) const;
+    int operator==(const char *str) const;
+    int operator==(char c) const;
     
-    inline int operator!=(String other)
+    inline int operator!=(String other) const
     {
         return ! operator==(other);
     }
-    inline int operator!=(const char *str)
+    inline int operator!=(const char *str) const
     {
         return ! operator==(str);
     }
-    inline int operator!=(char c)
+    inline int operator!=(char c) const
     {
         return ! operator==(c);
     }
 
-    inline int operator==(NIL_VAR)
+    inline int operator==(NIL_VAR) const
     {
         return (base == NULL);
     }
-    inline int operator!=(NIL_VAR)
+    inline int operator!=(NIL_VAR) const
     {
         return (base != NULL);
     }
@@ -154,7 +154,7 @@ public:
         return Ref<StringBase>(base);
     }
 
-    int equals(String other, bool ignoreCase = false);
+    int equals(String other, bool ignoreCase = false) const;
     String toLower();
     String toUpper();
 
@@ -185,7 +185,7 @@ public:
     {
         base->len = length;
     }
-    char *c_str();
+    const char *c_str() const;
     inline void updateLength()
     {
         base->len = strlen(base->data);
