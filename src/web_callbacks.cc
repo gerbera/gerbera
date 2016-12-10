@@ -143,16 +143,16 @@ static int web_get_info(IN const char *filename, OUT UpnpFileInfo *info)
         Ref<RequestHandler> reqHandler = create_request_handler(filename);
         reqHandler->get_info(filename, info);
     }
-    catch (ServerShutdownException se)
+    catch (const ServerShutdownException & se)
     {
         return -1;
     }
-    catch (SubtitlesNotFoundException sex)
+    catch (const SubtitlesNotFoundException & sex)
     {
         log_info("%s\n", sex.getMessage().c_str());
         return -1;
     }
-    catch (Exception e)
+    catch (const Exception & e)
     {
         log_error("%s\n", e.getMessage().c_str());
         return -1;
@@ -212,16 +212,16 @@ static UpnpWebFileHandle web_open(IN const char *filename,
         ioHandler->retain();
         return (UpnpWebFileHandle) ioHandler.getPtr();
     }
-    catch (ServerShutdownException se)
+    catch (const ServerShutdownException & se)
     {
         return NULL;
     }
-    catch (SubtitlesNotFoundException sex)
+    catch (const SubtitlesNotFoundException & sex)
     {
         log_info("%s\n", sex.getMessage().c_str());
         return NULL;
     }
-    catch (Exception ex)
+    catch (const Exception & ex)
     {
         log_error("%s\n", ex.getMessage().c_str());
         return NULL;
@@ -291,7 +291,7 @@ static int web_seek(IN UpnpWebFileHandle f, IN off_t offset, IN int whence)
         IOHandler *handler = (IOHandler *)f;
         handler->seek(offset, whence);
     }
-    catch(Exception e)
+    catch(const Exception & e)
     {
         log_error("web_seek(): Exception during seek: %s\n", e.getMessage().c_str());
         e.printStackTrace();
@@ -316,7 +316,7 @@ static int web_close( IN UpnpWebFileHandle f)
     {
         handler->close();
     }
-    catch(Exception e)
+    catch(const Exception & e)
     {
         log_error("web_seek(): Exception during seek: %s\n", e.getMessage().c_str());
         e.printStackTrace();

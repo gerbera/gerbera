@@ -405,7 +405,7 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
             resource->addParameter(_(RESOURCE_CONTENT_TYPE), _(EXIF_THUMBNAIL));
             item->addResource(resource);
         }
-        catch (Exception e)
+        catch (const Exception & e)
         {
             e.printStackTrace();
         }

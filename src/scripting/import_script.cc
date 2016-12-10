@@ -51,7 +51,7 @@ ImportScript::ImportScript(Ref<Runtime> runtime) : Script(runtime)
         load(scriptPath);
         JS_AddNamedObjectRoot(cx, &script, "ImportScript");
     }
-    catch (Exception ex)
+    catch (const Exception & ex)
     {
 #ifdef JS_THREADSAFE
         JS_EndRequest(cx);
@@ -80,7 +80,7 @@ void ImportScript::processCdsObject(Ref<CdsObject> obj, String scriptpath)
         setProperty(glob, _("object_script_path"), scriptpath);
         execute();
     }
-    catch (Exception ex)
+    catch (const Exception & ex)
     {
         processed = nil;
 #ifdef JS_THREADSAFE

@@ -597,7 +597,7 @@ Ref<Element> YouTubeService::getData(String url_part, Ref<Dictionary> params, bo
     {
         buffer = url->download(URL, &retcode, curl_handle, false, true);
     }
-    catch (Exception ex)
+    catch (const Exception & ex)
     {
         log_error("Failed to download YouTube XML data: %s\n", 
                   ex.getMessage().c_str());
@@ -616,7 +616,7 @@ Ref<Element> YouTubeService::getData(String url_part, Ref<Dictionary> params, bo
     {
         return parser->parseString(sc->convert(buffer->toString()))->getRoot();
     }
-    catch (ParseException pe)
+    catch (const ParseException & pe)
     {
         log_error("Error parsing YouTube XML %s line %d:\n%s\n",
                pe.context->location.c_str(),
@@ -624,7 +624,7 @@ Ref<Element> YouTubeService::getData(String url_part, Ref<Dictionary> params, bo
                pe.getMessage().c_str());
         return nil;
     }
-    catch (Exception ex)
+    catch (const Exception & ex)
     {
         log_error("Error parsing YouTube XML %s\n", ex.getMessage().c_str());
         return nil;

@@ -87,7 +87,7 @@ void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
     {
         arr = storage->browse(param);
     }
-    catch (Exception e)
+    catch (const Exception & e)
     {
         throw UpnpException(UPNP_E_NO_SUCH_ID, _("no such object"));
     }

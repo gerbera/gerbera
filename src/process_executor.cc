@@ -39,7 +39,7 @@ using namespace zmm;
 ProcessExecutor::ProcessExecutor(String command, Ref<Array<StringBase> > arglist)
 {
 #define MAX_ARGS 255
-    char *argv[MAX_ARGS];
+    const char *argv[MAX_ARGS];
     
     argv[0] = command.c_str();
     int apos = 0;
@@ -65,7 +65,7 @@ ProcessExecutor::ProcessExecutor(String command, Ref<Array<StringBase> > arglist
             sigset_t mask_set;
             pthread_sigmask(SIG_SETMASK, &mask_set, NULL);
             log_debug("Launching process: %s\n", command.c_str());
-            execvp(command.c_str(), argv);
+            execvp(command.c_str(), const_cast<char **const>(argv));
         default:
             break;
     }

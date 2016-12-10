@@ -57,13 +57,13 @@ protected:
 public:
     Exception(String message, const char* file, int line, const char* function);
     Exception(String message);
-    String getMessage();
+    String getMessage() const;
 
     Ref<Array<StringBase> > getStackTrace();
 #ifdef TOMBDEBUG
-    void printStackTrace(FILE *file = LOG_FILE);
+    void printStackTrace(FILE *file = LOG_FILE) const;
 #else
-    inline void printStackTrace(FILE *file = LOG_FILE) {}; 
+    inline void printStackTrace(FILE *file = LOG_FILE) const {};
 #endif
 
 };

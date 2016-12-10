@@ -121,7 +121,7 @@ zmm::String http_redirect_to(zmm::String ip, zmm::String port, zmm::String page 
 /// \param data Buffer that is holding the data
 /// \param len Length of the buffer.
 /// \return string of the data in hex representation.
-zmm::String hex_encode(void *data, int len);
+zmm::String hex_encode(const void *data, int len);
 
 /// \brief Decodes hex encoded string.
 /// \param encoded hex-encoded string.
@@ -134,7 +134,7 @@ zmm::String hex_decode_string(zmm::String encoded);
 zmm::String generate_random_id();
 
 /// \brief Generates hex md5 sum of the given data.
-zmm::String hex_md5(void *data, int length);
+zmm::String hex_md5(const void *data, int length);
 
 /// \brief Generates hex md5 sum of the given string.
 zmm::String hex_string_md5(zmm::String str);

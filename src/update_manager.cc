@@ -244,7 +244,7 @@ void UpdateManager::threadProc()
                     updateString = Storage::getInstance()->incrementUpdateIDs(hash_data_array.data,hash_data_array.size);
                     objectIDHash->clear(); // hash_data_array will be invalid after clear()
                 }
-                catch (Exception e)
+                catch (const Exception & e)
                 {
                     e.printStackTrace();
                     log_error("Fatal error when sending updates: %s\n", e.getMessage().c_str());
@@ -260,7 +260,7 @@ void UpdateManager::threadProc()
                     log_debug("updates sent.\n");
                     getTimespecNow(&lastUpdate);
                     }
-                    catch (Exception e)
+                    catch (const Exception & e)
                     {
                         log_error("Fatal error when sending updates: %s\n", e.getMessage().c_str());
                         log_error("Forcing MediaTomb shutdown.\n");

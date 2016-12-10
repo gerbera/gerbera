@@ -37,7 +37,7 @@ static String error_string(int code, regex_t *regex)
 {
     int size = regerror(code, regex, NULL, 0);
     String buf = String::allocate(size);
-    regerror(code, regex, buf.c_str(), size);
+    regerror(code, regex, const_cast<char *>(buf.c_str()), size);
     buf.setLength(size - 1);
     return buf;
 }
@@ -135,7 +135,7 @@ bool Matcher::next()
 
     if (ptr == NULL) // first match
     {
-        ptr = text.c_str();
+        ptr = const_cast<char *>(text.c_str());
     }
     else
     {

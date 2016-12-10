@@ -61,7 +61,7 @@ void IOHandlerChainer::threadProc()
                 writeTo->open(UPNP_WRITE);
                 again = false;
             }
-            catch (TryAgainException e)
+            catch (const TryAgainException & e)
             {
                 again = true;
                 sleep(1);
@@ -98,7 +98,7 @@ void IOHandlerChainer::threadProc()
             }
         }
     }
-    catch (Exception e)
+    catch (const Exception & e)
     {
         log_debug("%s", e.getMessage().c_str());
         status = IOHC_EXCEPTION;
@@ -110,7 +110,7 @@ void IOHandlerChainer::threadProc()
         readFrom->close();
         writeTo->close();
     }
-    catch (Exception e)
+    catch (const Exception & e)
     {
         log_debug("%s", e.getMessage().c_str());
         status = IOHC_EXCEPTION;

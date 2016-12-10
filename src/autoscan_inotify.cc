@@ -60,7 +60,7 @@ AutoscanInotify::AutoscanInotify()
             max_watches = trim_string(read_text_file(_(INOTIFY_MAX_USER_WATCHES_FILE))).toInt();
             log_debug("Max watches on the system: %d\n", max_watches);
         }
-        catch (Exception ex)
+        catch (const Exception & ex)
         {
             log_error("Could not determine maximum number of inotify user watches: %s\n", ex.getMessage().c_str());
         }
@@ -144,7 +144,7 @@ void AutoscanInotify::threadProc()
         cm = ContentManager::getInstance();
         st = Storage::getInstance();
     }
-    catch (Exception e)
+    catch (const Exception & e)
     {
         log_error("Inotify thread caught: %s\n", e.getMessage().c_str());
         e.printStackTrace();
@@ -326,7 +326,7 @@ void AutoscanInotify::threadProc()
                 }
             }
         }
-        catch (Exception e)
+        catch (const Exception & e)
         {
             log_error("Inotify thread caught exception: %s\n", e.getMessage().c_str());
             e.printStackTrace();
@@ -912,7 +912,7 @@ String AutoscanInotify::normalizePathNoEx(String path)
     {
         return normalizePath(path);
     }
-    catch (Exception e)
+    catch (const Exception & e)
     {
         log_error("%s\n", e.getMessage().c_str());
         return nil;

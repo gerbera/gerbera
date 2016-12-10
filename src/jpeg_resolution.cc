@@ -174,7 +174,7 @@ String get_jpeg_resolution(Ref<IOHandler> ioh)
     {
         get_jpeg_resolution(ioh, &w, &h);
     }
-    catch (Exception e)
+    catch (const Exception & e)
     {
         ioh->close();
         throw e;

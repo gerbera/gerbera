@@ -184,7 +184,7 @@ void DVDHandler::fillMetadata(Ref<CdsItem> item)
         log_debug("DVD image %s has %d titles\n", item->getLocation().c_str(), 
                 titles);
     }
-    catch (Exception ex)
+    catch (const Exception & ex)
     {
         log_warning("Parsing ISO image failed (not a DVD?): %s\n", ex.getMessage().c_str());
     }

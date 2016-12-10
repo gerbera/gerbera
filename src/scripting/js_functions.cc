@@ -106,13 +106,13 @@ js_copyObject(JSContext *cx, uintN argc, jsval *argv)
         return JS_TRUE;
 
     }
-    catch (ServerShutdownException se)
+    catch (const ServerShutdownException & se)
     {
         log_warning("Aborting script execution due to server shutdown.\n");
         JS_SET_RVAL(cx, argv, JSVAL_VOID);
         return JS_FALSE;
     }
-    catch (Exception e)
+    catch (const Exception & e)
     {
         log_error("%s\n", e.getMessage().c_str());
         e.printStackTrace();
@@ -340,13 +340,13 @@ js_addCdsObject(JSContext *cx, uintN argc, jsval *argv)
         JS_SET_RVAL(cx, argv, STRING_TO_JSVAL(str2));
         return JS_TRUE;
     }
-    catch (ServerShutdownException se)
+    catch (const ServerShutdownException & se)
     {
         log_warning("Aborting script execution due to server shutdown.\n");
         JS_SET_RVAL(cx, argv, JSVAL_VOID);
         return JS_FALSE;
     }
-    catch (Exception e)
+    catch (const Exception & e)
     {
         log_error("%s\n", e.getMessage().c_str());
         e.printStackTrace();
@@ -398,13 +398,13 @@ static JSBool convert_charset_generic(JSContext *cx, uintN argc, jsval *argv, ch
             JS_SET_RVAL(cx, argv, STRING_TO_JSVAL(str2));
         }
     }
-    catch (ServerShutdownException se)
+    catch (const ServerShutdownException & se)
     {
         log_warning("Aborting script execution due to server shutdown.\n");
         JS_SET_RVAL(cx, argv, JSVAL_VOID);
         return JS_FALSE;
     }
-    catch (Exception e)
+    catch (const Exception & e)
     {
         log_error("%s\n", e.getMessage().c_str());
         e.printStackTrace();

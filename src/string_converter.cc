@@ -85,7 +85,7 @@ bool StringConverter::validate(String str)
         _convert(str, true);
         return true;
     }
-    catch (Exception e)
+    catch (const Exception & e)
     {
         return false;
     }
@@ -98,7 +98,7 @@ zmm::String StringConverter::_convert(String str, bool validate,
 
     int buf_size = str.length() * 4;
 
-    char *input = str.c_str();
+    const char *input = str.c_str();
     char *output = (char *)MALLOC(buf_size);
     if (!output)
     {
@@ -106,10 +106,10 @@ zmm::String StringConverter::_convert(String str, bool validate,
         throw _Exception(_("Could not allocate memory for string conversion!"));
     }
 
-    char *input_copy = input;
+    const char *input_copy = input;
     char *output_copy = output;
     
-    char **input_ptr = &input_copy;
+    const char **input_ptr = &input_copy;
     char **output_ptr = &output_copy;
    
     size_t input_bytes = (size_t)str.length();
@@ -127,10 +127,10 @@ zmm::String StringConverter::_convert(String str, bool validate,
     //log_debug(("iconv: BEFORE: input bytes left: %d  output bytes left: %d\n",
     //       input_bytes, output_bytes));
 #if defined(ICONV_CONST) || defined(SOLARIS)
-    ret = iconv(cd, (const char**)input_ptr, &input_bytes,
+    ret = iconv(cd, input_ptr, &input_bytes,
             output_ptr, &output_bytes);
 #else
-    ret = iconv(cd, input_ptr, &input_bytes,
+    ret = iconv(cd, (char**)input_ptr, &input_bytes,
             output_ptr, &output_bytes);
 #endif
 

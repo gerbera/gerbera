@@ -63,11 +63,11 @@ static const char *HEX_CHARS = "0123456789abcdef";
 Ref<Array<StringBase> > split_string(String str, char sep, bool empty)
 {
     Ref<Array<StringBase> > ret(new Array<StringBase>());
-    char *data = str.c_str();
-    char *end = data + str.length();
+    const char *data = str.c_str();
+    const char *end = data + str.length();
     while (data < end)
     {
-        char *pos = strchr(data, sep);
+        const char *pos = strchr(data, sep);
         if (pos == NULL)
         {
             String part = data;
@@ -127,7 +127,7 @@ String trim_string(String str)
     int end = 0;
     int len = str.length();
 
-    char *buf = str.c_str();
+    const char *buf = str.c_str();
 
     for (i = 0; i < len; i++)
     {
@@ -272,9 +272,9 @@ String http_redirect_to(String ip, String port, String page)
     return _("<html><head><meta http-equiv=\"Refresh\" content=\"0;URL=http://") + ip + ":" + port + "/" + page + "\"></head><body bgcolor=\"#dddddd\"></body></html>";
 }
 
-String hex_encode(void *data, int len)
+String hex_encode(const void *data, int len)
 {
-    unsigned char *chars;
+    const unsigned char *chars;
     int i;
     unsigned char hi, lo;
 
@@ -324,7 +324,7 @@ struct randomizer
     struct timeval tv;
     int salt;
 };
-String hex_md5(void *data, int length)
+String hex_md5(const void *data, int length)
 {
     char md5buf[16];
 
@@ -352,7 +352,7 @@ static const char *hex = "0123456789ABCDEF";
 
 String url_escape(String str)
 {
-    char *data = str.c_str();
+    const char *data = str.c_str();
     int len = str.length();
     Ref<StringBuffer> buf(new StringBuffer(len));
     for (int i = 0; i < len; i++)
@@ -748,7 +748,7 @@ void set_jpeg_resolution_resource(Ref<CdsItem> item, int res_num)
             
         item->getResource(res_num)->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), resolution);
     }
-    catch (Exception e)
+    catch (const Exception & e)
     {
         e.printStackTrace();
     }

@@ -396,7 +396,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         ConfigManager::setStaticArgs(config_file, home, confdir, prefix, magic, debug_logging);
         ConfigManager::getInstance();
     }
-    catch (mxml::ParseException pe)
+    catch (const mxml::ParseException & pe)
     {
         log_error("Error parsing config file: %s line %d:\n%s\n",
                pe.context->location.c_str(),
@@ -404,7 +404,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
                pe.getMessage().c_str());
         exit(EXIT_FAILURE);
     }
-    catch (Exception e)
+    catch (const Exception & e)
     {
         log_error("%s\n", e.getMessage().c_str());
         exit(EXIT_FAILURE);
@@ -538,7 +538,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         server = Server::getInstance();
         server->upnp_init(interface, ip, port);
     }
-    catch(UpnpException upnp_e)
+    catch(const UpnpException & upnp_e)
     {
 
         sigemptyset(&mask_set);
@@ -563,7 +563,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         {
             singletonManager->shutdown(true);
         }
-        catch (Exception e)
+        catch (const Exception & e)
         {
             log_error("%s\n", e.getMessage().c_str());
             e.printStackTrace();
@@ -576,7 +576,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         }
         exit(EXIT_FAILURE);
     }
-    catch (Exception e)
+    catch (const Exception & e)
     {
         log_error("%s\n", e.getMessage().c_str());
         e.printStackTrace();
@@ -597,7 +597,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
                     true, true, 
                     ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_HIDDEN_FILES));
             }
-            catch (Exception e)
+            catch (const Exception & e)
             {
                 e.printStackTrace();
                 if (daemon)
@@ -643,7 +643,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
                                                  prefix, magic);
                     ConfigManager::getInstance();
                 }
-                catch (mxml::ParseException pe)
+                catch (const mxml::ParseException & pe)
                 {
                     log_error("Error parsing config file: %s line %d:\n%s\n",
                             pe.context->location.c_str(),
@@ -654,7 +654,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
                     // so it is safe to exit
                     exit(EXIT_FAILURE);
                 }
-                catch (Exception e)
+                catch (const Exception & e)
                 {
                     log_error("Error reloading configuration: %s\n", 
                               e.getMessage().c_str());
@@ -674,7 +674,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
                 
                 restart_flag = 0;
             }
-           catch(Exception e)
+            catch(const Exception & e)
             {
                 restart_flag = 0;
                 shutdown_flag = 1;
@@ -691,12 +691,12 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
     {
         singletonManager->shutdown(true);
     }
-    catch(UpnpException upnp_e)
+    catch(const UpnpException & upnp_e)
     {
         log_error("main: upnp error %d\n", upnp_e.getErrorCode());
         ret = EXIT_FAILURE;
     }
-    catch (Exception e)
+    catch (const Exception e)
     {
         e.printStackTrace();
         ret = EXIT_FAILURE;

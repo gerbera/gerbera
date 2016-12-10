@@ -409,7 +409,7 @@ Ref<Element> WeboramaService::getData(Ref<Dictionary> params)
         buffer = url->download(URL, &retcode, 
                                curl_handle, false, true, true);
     }
-    catch (Exception ex)
+    catch (const Exception & ex)
     {
         log_error("Failed to download Weborama XML data: %s\n", 
                   ex.getMessage().c_str());
@@ -428,7 +428,7 @@ Ref<Element> WeboramaService::getData(Ref<Dictionary> params)
     {
         return parser->parseString(sc->convert(buffer->toString()))->getRoot();
     }
-    catch (ParseException pe)
+    catch (const ParseException & pe)
     {
         log_error("Error parsing Weborama XML %s line %d:\n%s\n",
                pe.context->location.c_str(),
@@ -436,7 +436,7 @@ Ref<Element> WeboramaService::getData(Ref<Dictionary> params)
                pe.getMessage().c_str());
         return nil;
     }
-    catch (Exception ex)
+    catch (const Exception & ex)
     {
         log_error("Error parsing Weborama XML %s\n", ex.getMessage().c_str());
         return nil;

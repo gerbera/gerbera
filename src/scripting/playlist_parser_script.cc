@@ -52,12 +52,12 @@ js_readln(JSContext *cx, uintN argc, jsval *vp)
     {
         line = self->readln();
     }
-    catch (ServerShutdownException se)
+    catch (const ServerShutdownException & se)
     {
         log_warning("Aborting script execution due to server shutdown.\n");
         return JS_FALSE;
     }
-    catch (Exception e)
+    catch (const Exception & e)
     {
         e.printStackTrace();
         return JS_TRUE;
@@ -91,7 +91,7 @@ PlaylistParserScript::PlaylistParserScript(Ref<Runtime> runtime) : Script(runtim
         load(scriptPath);
         JS_AddNamedObjectRoot(cx, &script, "PlaylistScript");
     }
-    catch (Exception ex)
+    catch (const Exception & ex)
     {
 #ifdef JS_THREADSAFE
         JS_EndRequest(cx);
@@ -190,7 +190,7 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<Ge
         execute();
     }
 
-    catch (Exception e)
+    catch (const Exception & e)
     {
         fclose(currentHandle);
         currentHandle = NULL;

@@ -456,6 +456,19 @@ String ConfigManager::createDefaultConfig(String userhome)
     server->appendTextChild(_("webroot"), prefix_dir + 
                                                  DIR_SEPARATOR +  
                                                  _(DEFAULT_WEB_DIR));
+    Ref<Comment> aliveinfo(new Comment(
+        _("\n\
+        How frequently (in seconds) to send ssdp:alive advertisements.\n\
+        Minimum alive value accepted is: ")
+                + String::from(ALIVE_INTERVAL_MIN) +
+        _("\n\n\
+        The advertisement will be sent every (A/2)-30 seconds,\n\
+        and will have a cache-control max-age of A where A is\n\
+        the value configured here. Ex: A value of 62 will result\n\
+        in an SSDP advertisement being sent every second.\n\
+    "), true));
+    server->appendChild(RefCast(aliveinfo, Node));
+    server->appendTextChild(_("alive"), String::from(DEFAULT_ALIVE_INTERVAL));
     
     Ref<Element> storage(new Element(_("storage")));
 #ifdef HAVE_SQLITE3
@@ -820,7 +833,7 @@ void ConfigManager::migrate()
         {
             temp = getOption(_("/server/ui/attribute::show-tooltips"));
         }
-        catch (Exception e)
+        catch (const Exception & e)
         {
             Ref<Element> ui = server->getChildByName(_("ui"));
             if (ui != nil)
@@ -832,7 +845,7 @@ void ConfigManager::migrate()
         {
             temp = getOption(_("/server/storage/attribute::caching"));
         }
-        catch (Exception e)
+        catch (const Exception & e)
         {
             Ref<Element> storage = server->getChildByName(_("storage"));
             if (storage != nil)
@@ -1383,7 +1396,7 @@ void ConfigManager::validate(String serverhome)
         Ref<StringConverter> conv(new StringConverter(temp,
                                                  _(DEFAULT_INTERNAL_CHARSET)));
     }
-    catch (Exception e)
+    catch (const Exception & e)
     {
         temp = _(DEFAULT_FALLBACK_CHARSET);
     }
@@ -1393,7 +1406,7 @@ void ConfigManager::validate(String serverhome)
         Ref<StringConverter> conv(new StringConverter(charset, 
                                                 _(DEFAULT_INTERNAL_CHARSET)));
     }
-    catch (Exception e)
+    catch (const Exception & e)
     {
         throw _Exception(_("Error in config file: unsupported "
                            "filesystem-charset specified: ") + charset);
@@ -1409,7 +1422,7 @@ void ConfigManager::validate(String serverhome)
         Ref<StringConverter> conv(new StringConverter(charset, 
                                                 _(DEFAULT_INTERNAL_CHARSET)));
     }
-    catch (Exception e)
+    catch (const Exception & e)
     {
         throw _Exception(_("Error in config file: unsupported "
                            "metadata-charset specified: ") + charset);
@@ -1425,7 +1438,7 @@ void ConfigManager::validate(String serverhome)
         Ref<StringConverter> conv(new StringConverter(charset, 
                                                 _(DEFAULT_INTERNAL_CHARSET)));
     }
-    catch (Exception e)
+    catch (const Exception & e)
     {
         throw _Exception(_("Error in config file: unsupported playlist-charset specified: ") + charset);
     }
@@ -1609,7 +1622,7 @@ void ConfigManager::validate(String serverhome)
             Ref<StringConverter> conv(new StringConverter(charset, 
                                                 _(DEFAULT_INTERNAL_CHARSET)));
         }
-        catch (Exception e)
+        catch (const Exception & e)
         {
             throw _Exception(_("Error in config file: unsupported import script charset specified: ") + charset);
         }
@@ -1670,6 +1683,9 @@ void ConfigManager::validate(String serverhome)
     SET_INT_OPTION(CFG_SERVER_PORT);
 
     temp_int = getIntOption(_("/server/alive"), DEFAULT_ALIVE_INTERVAL);
+    if (temp_int < ALIVE_INTERVAL_MIN)
+        throw _Exception(_("Error in config file: incorrect parameter "
+                    "for /server/alive, must be at least ") + ALIVE_INTERVAL_MIN);
     NEW_INT_OPTION(temp_int);
     SET_INT_OPTION(CFG_SERVER_ALIVE_INTERVAL);
 
@@ -2966,7 +2982,7 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
             {
                 location = normalizePath(location);
             }
-            catch (Exception e)
+            catch (const Exception & e)
             {
                 throw _Exception(_("autoscan directory \"") + 
                         location + "\": " +  e.getMessage());
@@ -3100,7 +3116,7 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
             {
                 list->add(dir); 
             }
-            catch (Exception e)
+            catch (const Exception & e)
             {
                 throw _Exception(_("Could not add ") + location + ": "
                         + e.getMessage());
@@ -3122,19 +3138,19 @@ void ConfigManager::dumpOptions()
             log_debug("    Option %02d - %s\n", i,
                     getOption((config_option_t)i).c_str());
         }
-        catch (Exception e) {}
+        catch (const Exception & e) {}
         try
         {
             log_debug(" IntOption %02d - %d\n", i,
                     getIntOption((config_option_t)i));
         }
-        catch (Exception e) {}
+        catch (const Exception & e) {}
         try
         {
             log_debug("BoolOption %02d - %s\n", i,
                     (getBoolOption((config_option_t)i) ? "true" : "false"));
         }
-        catch (Exception e) {}
+        catch (const Exception & e) {}
     }
 #endif
 }

@@ -251,7 +251,7 @@ Ref<CdsObject> ATrailersContentHandler::getNextObject()
             item->validate();
             return RefCast(item, CdsObject);
         }
-        catch (Exception ex)
+        catch (const Exception & ex)
         {
             log_warning("Failed to validate newly created Trailer item: %s\n",
                         ex.getMessage().c_str());

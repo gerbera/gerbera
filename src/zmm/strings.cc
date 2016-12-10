@@ -135,7 +135,7 @@ int String::length()
     else
         return 0;
 }
-char *String::c_str()
+const char *String::c_str() const
 {
     if(base)
         return base->data;
@@ -280,7 +280,7 @@ String String::copy(const char *data)
     else
         return String();
 }
-int String::operator==(String other)
+int String::operator==(String other) const
 {
     if(! base && ! other.base)
         return 1;
@@ -288,7 +288,7 @@ int String::operator==(String other)
         return ( ! strcmp(base->data, other.base->data) );
     return 0;
 }
-int String::operator==(const char *other)
+int String::operator==(const char *other) const
 {
     if(! base && ! other)
         return 1;
@@ -296,7 +296,7 @@ int String::operator==(const char *other)
         return ( ! strcmp(base->data, other ) );
     return 0;
 }
-int String::operator==(char c)
+int String::operator==(char c) const
 {
     if(! base || base->len != 1)
         return 0;
@@ -327,7 +327,7 @@ String& String::operator=(String other)
     return *this;
 }
 
-int String::equals(String other, bool ignoreCase)
+int String::equals(String other, bool ignoreCase) const
 {
     if(! base && ! other.base)
         return 1;

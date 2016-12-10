@@ -140,7 +140,7 @@ void FDIOHandler::close()
         if (other != nil)
             other->close();
     }
-    catch (Exception ex)
+    catch (const Exception & ex)
     {
         log_debug("Error closing \"other\" handler: %s\n", ex.getMessage().c_str());
     }

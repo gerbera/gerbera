@@ -48,7 +48,7 @@ protected:
 public:
     UpnpException(int errCode, zmm::String message);
     UpnpException(int errCode, zmm::String message, const char *file, int line, const char *function);
-    inline int getErrorCode() { return errCode; }
+    inline int getErrorCode() const { return errCode; }
 };
 
 class StorageException : public zmm::Exception
@@ -59,7 +59,7 @@ public:
     inline StorageException(zmm::String _userMessage, zmm::String message) : zmm::Exception(message) { userMessage = _userMessage; }
     inline StorageException(zmm::String _userMessage, zmm::String message, const char *file, int line, const char* function) : 
         zmm::Exception(message, file, line, function) { userMessage = _userMessage;  }
-    zmm::String getUserMessage() { return (userMessage != nil ? userMessage : message); } 
+    zmm::String getUserMessage() const { return (userMessage != nil ? userMessage : message); }
 };
 
 class ObjectNotFoundException : public StorageException

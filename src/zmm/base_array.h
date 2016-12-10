@@ -174,8 +174,8 @@ public:
     
     void addCSV(String csv, char sep = ',')
     {
-        char *data = csv.c_str();
-        char *dataEnd = data + csv.length();
+        const char *data = csv.c_str();
+        const char *dataEnd = data + csv.length();
         while (data < dataEnd)
         {
             char *endptr;

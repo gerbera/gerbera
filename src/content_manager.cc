@@ -250,7 +250,7 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
                 Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), i, yt->getTimerParameter(), true);
             }
         }
-        catch (Exception ex)
+        catch (const Exception & ex)
         {
             log_error("Could not setup YouTube: %s\n", 
                     ex.getMessage().c_str());
@@ -288,7 +288,7 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
                 Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), i, sc->getTimerParameter(), true);
             }
         }
-        catch (Exception ex)
+        catch (const Exception & ex)
         {
             log_error("Could not setup SopCast: %s\n",
                     ex.getMessage().c_str());
@@ -319,7 +319,7 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
                 Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), i, wb->getTimerParameter(), true);
             }
         }
-        catch (Exception ex)
+        catch (const Exception & ex)
         {
             log_error("Could not setup Weborama: %s\n",
                     ex.getMessage().c_str());
@@ -349,7 +349,7 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
                 Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), i, at->getTimerParameter(), true);
             }
         }
-        catch (Exception ex)
+        catch (const Exception & ex)
         {
             log_error("Could not setup Apple Trailers: %s\n",
                     ex.getMessage().c_str());
@@ -498,7 +498,7 @@ void ContentManager::shutdown()
                 dir->setCurrentLMT(check_path_ex(dir->getLocation(), true));
                 dir->updateLMT();
             }
-            catch (Exception ex)
+            catch (const Exception & ex)
             {
                 continue;
             }
@@ -688,7 +688,7 @@ int ContentManager::_addFile(String path, String rootpath, bool recursive, bool 
                         log_warning("Playlist %s will not be parsed: MediaTomb was compiled without JS support!\n", obj->getLocation().c_str());
 #endif // JS
                 }
-                catch (Exception e)
+                catch (const Exception & e)
                 {
                     throw e;
                 }
@@ -771,7 +771,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
             else
                 location = obj->getLocation();
         }
-        catch (Exception e)
+        catch (const Exception & e)
         {
             if (adir->persistent())
             {
@@ -1083,7 +1083,7 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<GenericTask> tas
 
 #endif // JS
                         }
-                        catch (Exception e)
+                        catch (const Exception & e)
                         {
                             throw e;
                         }
@@ -1099,7 +1099,7 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<GenericTask> tas
                 }
             }
         }
-        catch(Exception e)
+        catch(const Exception & e)
         {
             log_warning("skipping %s : %s\n", newPath.c_str(), e.getMessage().c_str());
         }
@@ -1490,7 +1490,7 @@ void ContentManager::initLayout()
                     layout = Ref<Layout>((FallbackLayout *)new FallbackLayout());
                 }
             }
-        catch (Exception e)
+        catch (const Exception & e)
         {
             layout = nil;
             log_error("ContentManager virtual container layout: %s\n", e.getMessage().c_str());
@@ -1561,11 +1561,11 @@ void ContentManager::threadProc()
             if (task->isValid())
                 task->run();
         }
-        catch (ServerShutdownException se)
+        catch (const ServerShutdownException & se)
         {
             shutdownFlag = true;
         }
-        catch (Exception e)
+        catch (const Exception & e)
         {
             log_error("Exception caught: %s\n", e.getMessage().c_str());
             e.printStackTrace();
@@ -1858,7 +1858,7 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
             if (string_ok(vpath))
                 task->setDescription(_("Removing: ") + obj->getVirtualPath());
         }
-        catch (Exception e)
+        catch (const Exception & e)
         {
             log_debug("trying to remove an object ID which is no longer in the database! %d\n", objectID);
             return;
@@ -2476,7 +2476,7 @@ void CMFetchOnlineContentTask::run()
                                                    unscheduled_refresh));
         TaskProcessor::getInstance()->addTask(t);
     }
-    catch (Exception ex)
+    catch (const Exception & ex)
     {
         log_error("%s\n", ex.getMessage().c_str());
     }

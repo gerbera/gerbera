@@ -88,7 +88,7 @@ Ref<Element> SopCastService::getData()
                                curl_handle, false, true, true);
     
     }
-    catch (Exception ex)
+    catch (const Exception & ex)
     {
         log_error("Failed to download SopCast XML data: %s\n", 
                   ex.getMessage().c_str());
@@ -107,7 +107,7 @@ Ref<Element> SopCastService::getData()
     {
         return parser->parseString(sc->convert(buffer->toString()))->getRoot();
     }
-    catch (ParseException pe)
+    catch (const ParseException & pe)
     {
         log_error("Error parsing SopCast XML %s line %d:\n%s\n",
                pe.context->location.c_str(),
@@ -115,7 +115,7 @@ Ref<Element> SopCastService::getData()
                pe.getMessage().c_str());
         return nil;
     }
-    catch (Exception ex)
+    catch (const Exception & ex)
     {
         log_error("Error parsing SopCast XML %s\n", ex.getMessage().c_str());
         return nil;
