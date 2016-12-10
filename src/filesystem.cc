@@ -83,7 +83,7 @@ Filesystem::Filesystem() : Object()
             pattern->compile(pat);
             includeRules->append(pattern);
         }
-        catch (Exception e)
+        catch (const Exception & e)
         {
             e.printStackTrace();
         }
@@ -161,7 +161,7 @@ Ref<Array<FsObject> > Filesystem::readDirectory(String path, int mask,
                     {
                         hasContent = have(childPath, childMask);
                     }
-                    catch (Exception e)
+                    catch (const Exception & e)
                     {
                         //continue;
                     }

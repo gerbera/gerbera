@@ -82,11 +82,11 @@ void TaskProcessor::threadProc()
             if (task->isValid())
                 task->run();
         }
-        catch (ServerShutdownException se)
+        catch (const ServerShutdownException & se)
         {
             shutdownFlag = true;
         }
-        catch (Exception e)
+        catch (const Exception & e)
         {
             log_error("Exception caught: %s\n", e.getMessage().c_str());
             e.printStackTrace();
@@ -213,7 +213,7 @@ void TPFetchOnlineContentTask::run()
             ContentManager::getInstance()->cleanupOnlineServiceObjects(service);
         }
     }
-    catch (Exception ex)
+    catch (const Exception & ex)
     {
         log_error("%s\n", ex.getMessage().c_str());
     }

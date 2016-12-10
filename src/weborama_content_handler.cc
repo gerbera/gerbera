@@ -223,7 +223,7 @@ Ref<CdsObject> WeboramaContentHandler::getNextObject()
             item->validate();
             return RefCast(item, CdsObject);
         }
-        catch (Exception ex)
+        catch (const Exception & ex)
         {
             log_warning("Failed to validate newly created Weborama item: %s\n",
                         ex.getMessage().c_str());

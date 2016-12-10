@@ -157,28 +157,28 @@ Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
             }
         }
     }
-    catch (LoginException e)
+    catch (const LoginException e)
     {
         error = e.getMessage();
         error_code = 300;
     }
-    catch (ObjectNotFoundException e)
+    catch (const ObjectNotFoundException e)
     {
         error = e.getMessage();;
         error_code = 200;
     }
-    catch (SessionException e)
+    catch (const SessionException e)
     {
         error = e.getMessage();
         error_code = 400;
     }
-    catch (StorageException e)
+    catch (const StorageException e)
     {
         error = e.getUserMessage();
         error_code = 500;
         e.printStackTrace();
     }
-    catch (Exception e)
+    catch (const Exception e)
     {
         error = _("Error: ") + e.getMessage();
         error_code = 800;
@@ -212,7 +212,7 @@ Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
             XML2JSON::getJSON(root);
             //log_debug("JSON-----------------------\n\n\n%s\n\n\n\n", XML2JSON::getJSON(root).c_str());
         }
-        catch(Exception e)
+        catch(const Exception e)
         {
             e.printStackTrace();
         }
@@ -225,7 +225,7 @@ Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
         {
             output = XML2JSON::getJSON(root);
         }
-        catch(Exception e)
+        catch(const Exception e)
         {
             e.printStackTrace();
         }
@@ -238,7 +238,7 @@ Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
         String json = XML2JSON::getJSON(root);
         printf("%s\n",json.c_str());
     }
-    catch (Exception e)
+    catch (const Exception e)
     {
         e.printStackTrace();
     }

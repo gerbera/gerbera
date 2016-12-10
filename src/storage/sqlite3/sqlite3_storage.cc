@@ -158,7 +158,7 @@ void Sqlite3Storage::init()
                     ptask->waitForTask();
                     dbVersion = getInternalSetting(_("db_version"));
                 }
-                catch (Exception e)
+                catch (const Exception & e)
                 {
                     shutdown();
                     throw _Exception(_("error while creating database: ") + e.getMessage());
@@ -327,7 +327,7 @@ void Sqlite3Storage::threadProc()
                 dirty = false;
             task->sendSignal();
         }
-        catch (Exception e)
+        catch (const Exception & e)
         {
             task->sendSignal(e.getMessage());
         }
@@ -584,7 +584,7 @@ void SLBackupTask::run(sqlite3 **db, Sqlite3Storage *sl)
             log_debug("sqlite3 backup successful\n");
             decontamination = true;
         }
-        catch (Exception e)
+        catch (const Exception & e)
         {
             log_error("error while making sqlite3 backup: %s\n", e.getMessage().c_str());
         }
@@ -601,7 +601,7 @@ void SLBackupTask::run(sqlite3 **db, Sqlite3Storage *sl)
             );
             
         }
-        catch (Exception e)
+        catch (const Exception & e)
         {
             throw _StorageException(nil, _("error while restoring sqlite3 backup: ") + e.getMessage());
         }

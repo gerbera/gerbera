@@ -143,7 +143,7 @@ void BufferedIOHandler::threadProc()
                 empty = true;
                 a = b = 0;
             }
-            catch (Exception e)
+            catch (const Exception & e)
             {
                 log_error("Error while seeking in buffer: %s\n", e.getMessage().c_str());
                 e.printStackTrace();

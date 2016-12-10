@@ -212,7 +212,7 @@ Ref<CdsObject> SQLStorage::checkRefID(Ref<CdsObject> obj)
             if (refObj != nil && refObj->getLocation() == location)
                 return refObj;
         }
-        catch (Exception e)
+        catch (const Exception & e)
         {
             // this should never happen - but fail softly if compiled without debugging
             assert(0);

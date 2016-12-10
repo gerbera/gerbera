@@ -105,7 +105,7 @@ void web::autoscan::process()
                 else
                     cm->removeAutoscanDirectory(intParam(_("object_id")));
             }
-            catch (Exception e)
+            catch (const Exception & e)
             {
                 // didn't work, well we don't care in this case
             }

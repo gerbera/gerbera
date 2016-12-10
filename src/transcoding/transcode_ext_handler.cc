@@ -192,7 +192,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
                 Ref<ProcListItem> pr_item(new ProcListItem(ch));
                 proc_list->append(pr_item);
             }
-            catch (Exception ex)
+            catch (const Exception & ex)
             {
                 unlink(location.c_str());
                 throw ex;
@@ -285,7 +285,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
             Ref<ProcListItem> pr2_item(new ProcListItem(from_dvd));
             proc_list->append(pr2_item);
         }
-        catch (Exception ex)
+        catch (const Exception & ex)
         {
             unlink(location.c_str());
             throw ex;

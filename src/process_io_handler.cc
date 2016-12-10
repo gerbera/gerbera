@@ -457,7 +457,7 @@ ProcessIOHandler::~ProcessIOHandler()
     {
         close();
     }
-    catch (Exception ex) {}
+    catch (const Exception & ex) {}
 }
 
 #endif // EXTERNAL_TRANSCODING

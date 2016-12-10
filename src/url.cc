@@ -166,7 +166,7 @@ Ref<URL::Stat> URL::getInfo(String URL, CURL *curl_handle)
     {
         getMT->compile(_("\nContent-Type: ([^\n]+)\n"), REG_ICASE);
     }
-    catch (Exception ex)
+    catch (const Exception & ex)
     {
         if (cleanup)
             curl_easy_cleanup(curl_handle);
@@ -189,7 +189,7 @@ Ref<URL::Stat> URL::getInfo(String URL, CURL *curl_handle)
     {
         getCL->compile(_("\nContent-Length: ([^\n]+)\n"), REG_ICASE);
     }
-    catch (Exception ex)
+    catch (const Exception & ex)
     {
         if (cleanup)
             curl_easy_cleanup(curl_handle);

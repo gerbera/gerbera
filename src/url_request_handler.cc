@@ -144,7 +144,7 @@ void URLRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *info
             header = _("Accept-Ranges: bytes");
             log_debug("URL used for request: %s\n", st->getURL().c_str());
         }
-        catch (Exception ex)
+        catch (const Exception & ex)
         {
             log_warning("%s\n", ex.getMessage().c_str());
             UpnpFileInfo_set_FileLength(info, -1);
@@ -262,7 +262,7 @@ Ref<IOHandler> URLRequestHandler::open(IN const char *filename,
             header = _("Accept-Ranges: bytes");
             log_debug("URL used for request: %s\n", st->getURL().c_str());
         }
-        catch (Exception ex)
+        catch (const Exception & ex)
         {
             log_warning("%s\n", ex.getMessage().c_str());
             //info->file_length = -1;

@@ -96,7 +96,7 @@ Ref<Element> ATrailersService::getData()
         buffer = url->download(service_url, &retcode, 
                                curl_handle, false, true, true);
     }
-    catch (Exception ex)
+    catch (const Exception & ex)
     {
         log_error("Failed to download Apple Trailers XML data: %s\n", 
                   ex.getMessage().c_str());
@@ -115,7 +115,7 @@ Ref<Element> ATrailersService::getData()
     {
         return parser->parseString(sc->convert(buffer->toString()))->getRoot();
     }
-    catch (ParseException pe)
+    catch (const ParseException & pe)
     {
         log_error("Error parsing Apple Trailers XML %s line %d:\n%s\n",
                pe.context->location.c_str(),
@@ -123,7 +123,7 @@ Ref<Element> ATrailersService::getData()
                pe.getMessage().c_str());
         return nil;
     }
-    catch (Exception ex)
+    catch (const Exception & ex)
     {
         log_error("Error parsing Apple Trailers XML %s\n", 
                   ex.getMessage().c_str());

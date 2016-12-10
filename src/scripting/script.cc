@@ -416,7 +416,7 @@ Script::Script(Ref<Runtime> runtime) : Object()
             JS_AddNamedObjectRoot(cx, &common_script, "common-script");
             _execute(common_script);
         }
-        catch (Exception e)
+        catch (const Exception & e)
         {
             if (common_script)
             {
@@ -543,7 +543,7 @@ JSObject *Script::_load(zmm::String scriptPath)
     {
         scriptText = j2i->convert(scriptText, true);
     }
-    catch (Exception e)
+    catch (const Exception & e)
     {
         throw _Exception(_("Failed to convert import script:") + e.getMessage().c_str());
     }

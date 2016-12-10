@@ -85,7 +85,7 @@ bool StringConverter::validate(String str)
         _convert(str, true);
         return true;
     }
-    catch (Exception e)
+    catch (const Exception & e)
     {
         return false;
     }

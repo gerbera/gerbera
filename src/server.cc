@@ -68,7 +68,7 @@ void Server::static_cleanup_callback()
         {
             storage->threadCleanup();
         }
-        catch (Exception ex) {}
+        catch (const Exception & ex) {}
     }
 }
 
@@ -388,12 +388,12 @@ int Server::upnp_callback(Upnp_EventType eventtype, const void *event, void *coo
                 request->update();
                // set in update() ((struct Upnp_Action_Request *)event)->ErrCode = ret;
             }
-            catch(UpnpException & upnp_e)
+            catch(const UpnpException & upnp_e)
             {
                 ret = upnp_e.getErrorCode();
                 UpnpActionRequest_set_ErrCode((UpnpActionRequest *)event, ret);
             }
-            catch(Exception & e)
+            catch(const Exception & e)
             {
                 log_info("Exception: %s\n", e.getMessage().c_str());
             }
@@ -408,7 +408,7 @@ int Server::upnp_callback(Upnp_EventType eventtype, const void *event, void *coo
                 Ref<SubscriptionRequest> request(new SubscriptionRequest((UpnpSubscriptionRequest *)event));
                 upnp_subscriptions(request);
             }
-            catch(UpnpException & upnp_e)
+            catch(const UpnpException & upnp_e)
             {
                 log_warning("Subscription exception: %s\n", upnp_e.getMessage().c_str());
                 ret = upnp_e.getErrorCode();

@@ -748,7 +748,7 @@ void set_jpeg_resolution_resource(Ref<CdsItem> item, int res_num)
             
         item->getResource(res_num)->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), resolution);
     }
-    catch (Exception e)
+    catch (const Exception & e)
     {
         e.printStackTrace();
     }

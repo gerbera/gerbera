@@ -176,7 +176,7 @@ protected:
                 {
                     subscriber->timerNotify(element->getParameter());
                 }
-                catch (zmm::Exception e)
+                catch (const zmm::Exception & e)
                 {
                     log_debug("timer caught exception!\n");
                     e.printStackTrace();

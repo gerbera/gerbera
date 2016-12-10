@@ -833,7 +833,7 @@ void ConfigManager::migrate()
         {
             temp = getOption(_("/server/ui/attribute::show-tooltips"));
         }
-        catch (Exception e)
+        catch (const Exception & e)
         {
             Ref<Element> ui = server->getChildByName(_("ui"));
             if (ui != nil)
@@ -845,7 +845,7 @@ void ConfigManager::migrate()
         {
             temp = getOption(_("/server/storage/attribute::caching"));
         }
-        catch (Exception e)
+        catch (const Exception & e)
         {
             Ref<Element> storage = server->getChildByName(_("storage"));
             if (storage != nil)
@@ -1396,7 +1396,7 @@ void ConfigManager::validate(String serverhome)
         Ref<StringConverter> conv(new StringConverter(temp,
                                                  _(DEFAULT_INTERNAL_CHARSET)));
     }
-    catch (Exception e)
+    catch (const Exception & e)
     {
         temp = _(DEFAULT_FALLBACK_CHARSET);
     }
@@ -1406,7 +1406,7 @@ void ConfigManager::validate(String serverhome)
         Ref<StringConverter> conv(new StringConverter(charset, 
                                                 _(DEFAULT_INTERNAL_CHARSET)));
     }
-    catch (Exception e)
+    catch (const Exception & e)
     {
         throw _Exception(_("Error in config file: unsupported "
                            "filesystem-charset specified: ") + charset);
@@ -1422,7 +1422,7 @@ void ConfigManager::validate(String serverhome)
         Ref<StringConverter> conv(new StringConverter(charset, 
                                                 _(DEFAULT_INTERNAL_CHARSET)));
     }
-    catch (Exception e)
+    catch (const Exception & e)
     {
         throw _Exception(_("Error in config file: unsupported "
                            "metadata-charset specified: ") + charset);
@@ -1438,7 +1438,7 @@ void ConfigManager::validate(String serverhome)
         Ref<StringConverter> conv(new StringConverter(charset, 
                                                 _(DEFAULT_INTERNAL_CHARSET)));
     }
-    catch (Exception e)
+    catch (const Exception & e)
     {
         throw _Exception(_("Error in config file: unsupported playlist-charset specified: ") + charset);
     }
@@ -1622,7 +1622,7 @@ void ConfigManager::validate(String serverhome)
             Ref<StringConverter> conv(new StringConverter(charset, 
                                                 _(DEFAULT_INTERNAL_CHARSET)));
         }
-        catch (Exception e)
+        catch (const Exception & e)
         {
             throw _Exception(_("Error in config file: unsupported import script charset specified: ") + charset);
         }
@@ -2982,7 +2982,7 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
             {
                 location = normalizePath(location);
             }
-            catch (Exception e)
+            catch (const Exception & e)
             {
                 throw _Exception(_("autoscan directory \"") + 
                         location + "\": " +  e.getMessage());
@@ -3116,7 +3116,7 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
             {
                 list->add(dir); 
             }
-            catch (Exception e)
+            catch (const Exception & e)
             {
                 throw _Exception(_("Could not add ") + location + ": "
                         + e.getMessage());
@@ -3138,19 +3138,19 @@ void ConfigManager::dumpOptions()
             log_debug("    Option %02d - %s\n", i,
                     getOption((config_option_t)i).c_str());
         }
-        catch (Exception e) {}
+        catch (const Exception & e) {}
         try
         {
             log_debug(" IntOption %02d - %d\n", i,
                     getIntOption((config_option_t)i));
         }
-        catch (Exception e) {}
+        catch (const Exception & e) {}
         try
         {
             log_debug("BoolOption %02d - %s\n", i,
                     (getBoolOption((config_option_t)i) ? "true" : "false"));
         }
-        catch (Exception e) {}
+        catch (const Exception & e) {}
     }
 #endif
 }

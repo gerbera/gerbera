@@ -150,12 +150,12 @@ static JSBool js_addDVDObject(JSContext *cx, uint32_t argc, jsval *vp)
                            containerclass);
 
     }
-    catch (ServerShutdownException se)
+    catch (const ServerShutdownException & se)
     {
         log_warning("Aborting script execution due to server shutdown.\n");
         return JS_FALSE;
     }
-    catch (Exception ex)
+    catch (const Exception & ex)
     {
         log_error("%s\n", ex.getMessage().c_str());
         ex.printStackTrace();
@@ -248,7 +248,7 @@ DVDImportScript::DVDImportScript(Ref<Runtime> runtime) : Script(runtime)
          if (!string_ok(mimetype))
              mimetype = _("video/mpeg");
     }
-    catch (Exception ex)
+    catch (const Exception & ex)
     {
 #ifdef JS_THREADSAFE
         JS_EndRequest(cx);
@@ -276,7 +276,7 @@ void DVDImportScript::processDVDObject(Ref<CdsObject> obj)
         cdsObject2jsObject(obj, orig);
         execute();
     }
-    catch (Exception ex)
+    catch (const Exception & ex)
     {
         processed = nil;
 #ifdef JS_THREADSAFE
