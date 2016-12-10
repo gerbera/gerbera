@@ -289,8 +289,6 @@ void Server::upnp_init(String iface, String ip_address, int port)
         throw _UpnpException(ret, _("upnp_init: UpnpRegisterRootDevice failed"));
     }
 
-
-    // send advertisements every 180secs
     ret = UpnpSendAdvertisement(device_handle, alive_advertisement);
     if (ret != UPNP_E_SUCCESS)
     {

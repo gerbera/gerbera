@@ -456,6 +456,19 @@ String ConfigManager::createDefaultConfig(String userhome)
     server->appendTextChild(_("webroot"), prefix_dir + 
                                                  DIR_SEPARATOR +  
                                                  _(DEFAULT_WEB_DIR));
+    Ref<Comment> aliveinfo(new Comment(
+        _("\n\
+        How frequently (in seconds) to send ssdp:alive advertisements.\n\
+        Minimum alive value accepted is: ")
+                + String::from(ALIVE_INTERVAL_MIN) +
+        _("\n\n\
+        The advertisement will be sent every (A/2)-30 seconds,\n\
+        and will have a cache-control max-age of A where A is\n\
+        the value configured here. Ex: A value of 62 will result\n\
+        in an SSDP advertisement being sent every second.\n\
+    "), true));
+    server->appendChild(RefCast(aliveinfo, Node));
+    server->appendTextChild(_("alive"), String::from(DEFAULT_ALIVE_INTERVAL));
     
     Ref<Element> storage(new Element(_("storage")));
 #ifdef HAVE_SQLITE3
@@ -1670,6 +1683,9 @@ void ConfigManager::validate(String serverhome)
     SET_INT_OPTION(CFG_SERVER_PORT);
 
     temp_int = getIntOption(_("/server/alive"), DEFAULT_ALIVE_INTERVAL);
+    if (temp_int < ALIVE_INTERVAL_MIN)
+        throw _Exception(_("Error in config file: incorrect parameter "
+                    "for /server/alive, must be at least ") + ALIVE_INTERVAL_MIN);
     NEW_INT_OPTION(temp_int);
     SET_INT_OPTION(CFG_SERVER_ALIVE_INTERVAL);
 
