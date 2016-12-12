@@ -40,21 +40,23 @@ _MediaTomb is pretty much dead upstream, so this is my attempt to get kick it ba
 
 The project has been ported to [CMake](https://cmake.org/).
 
-```
-cmake CMakeLists.txt -DWITH_MAGIC=1 -DWITH_MYSQL=1 -DWITH_CURL=1 -DWITH_JS=1 \
--DWITH_TAGLIB=1 -DWITH_AVCODEC=1 -DWITH_DVDNAV=1 -DWITH_EXIF=1 -DWITH_LASTFM=1
-make -j4
-make install
-```
+Quick start build instructions:
 
-Alternatively, the build can be made outside the source tree, and the options
-can be set using a GUI (make sure to press "c" to configure after toggling
-settings in the GUI):
 ```
-cd mediatomb
+git clone https://github.com/v00d00/mediatomb.git
 mkdir build
 cd build
-cmake ..
+cmake ../mediatomb -DWITH_MAGIC=1 -DWITH_MYSQL=1 -DWITH_CURL=1 -DWITH_JS=1 \
+-DWITH_TAGLIB=1 -DWITH_AVCODEC=1 -DWITH_DVDNAV=1 -DWITH_EXIF=1 -DWITH_LASTFM=1
+make -j4 VERBOSE=1
+make install
+```
+Alternatively, the options can be set using a GUI (make sure to press "c" to configure after toggling settings in the GUI):
+```
+git clone https://github.com/v00d00/mediatomb.git
+mkdir build
+cd build
+cmake ../mediatomb
 make edit_cache
 # Enable some of the WITH... options
 make -j4 VERBOSE=1
