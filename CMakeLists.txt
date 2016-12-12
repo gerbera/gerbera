@@ -10,6 +10,8 @@ set(WITH_AVCODEC        0 CACHE BOOL "Enable libav")
 set(WITH_DVDNAV         0 CACHE BOOL "Enable DVD-Nav")
 set(WITH_EXIF           1 CACHE BOOL "Use libexif to extract image metadata")
 set(WITH_LASTFM         0 CACHE BOOL "Enable LastFM")
+set(WITH_LOGGING        1 CACHE BOOL "Enable file logging")
+set(WITH_DEBUG_LOGGING  1 CACHE BOOL "Enables debug logging")
 
 project("MediaTomb")
 
@@ -340,10 +342,12 @@ MESSAGE( STATUS "CMAKE_INSTALL_PREFIX: " ${CMAKE_INSTALL_PREFIX} )
 add_definitions(-DCOMPILE_INFO="")
 add_definitions(-DEXTERNAL_TRANSCODING)
 
-# This only compiles them in
-add_definitions(-DDEBUG_LOG_ENABLED)
-#add_definitions(-DTOMBDEBUG)           # this defaults to extra-verbose, and swaps sense of -D
-add_definitions(-DLOG_ENABLED)
+if (WITH_LOGGING OR WITH_DEBUG_LOGGING)
+    add_definitions(-DLOG_ENABLED)
+endif()
+if (WITH_DEBUG_LOGGING)
+    add_definitions(-DTOMBDEBUG)
+endif()
 
 find_package(Threads REQUIRED)
 target_link_libraries (mediatomb ${CMAKE_THREAD_LIBS_INIT})

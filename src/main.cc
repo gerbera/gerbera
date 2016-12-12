@@ -228,7 +228,7 @@ int main(int argc, char **argv, char **envp)
                 
             case 'D':
                 
-#ifndef DEBUG_LOG_ENABLED
+#ifndef TOMBDEBUG
                 print_copyright();
                 printf("ERROR: MediaTomb wasn't compiled with debug output, but was run with -D/--debug.\n");
                 exit(EXIT_FAILURE);
