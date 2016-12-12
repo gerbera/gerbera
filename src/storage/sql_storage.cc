@@ -1297,6 +1297,46 @@ String SQLStorage::incrementUpdateIDs(int *ids, int size)
     return buf->toString(1);
 }
 
+// id is the parent_id for cover media to find, and if set, trackArtBase is the case-folded 
+// name of the track to try as artwork
+String SQLStorage::findFolderImage(int id, String trackArtBase)
+{
+    Ref<StringBuffer> q(new StringBuffer());
+    // folder.jpg or cover.jpg [and variants]
+    // note - "_" is regexp "." and "%" is regexp ".*" in sql LIKE land
+    *q << "SELECT " << TQ("id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";
+    *q << "( ";
+    if (trackArtBase.length()>0) {
+        *q << "lower(" << TQ("dc_title") << ") " << "LIKE" << TQ(trackArtBase + ".jp%") << " OR ";
+    }
+    *q << "lower(" << TQ("dc_title") << ") " << "LIKE" << TQ("cover.jp%") << " OR ";
+    *q << "lower(" << TQ("dc_title") << ") " << "LIKE" << TQ("albumart%.jp%") << " OR ";
+    *q << "lower(" << TQ("dc_title") << ") " << "LIKE" << TQ("album.jp%") << " OR ";
+    *q << "lower(" << TQ("dc_title") << ") " << "LIKE" << TQ("front.jp%") << " OR ";
+    *q << "lower(" << TQ("dc_title") << ") " << "LIKE" << TQ("folder.jp%");
+    *q << " ) AND ";
+    *q << TQ("upnp_class") << '=' << TQ(UPNP_DEFAULT_CLASS_IMAGE_ITEM) << " AND ";
+    *q << TQ("parent_id") << " IN ";
+    *q << "(";
+    *q << "SELECT " << TQ("parent_id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";
+    *q << TQ("parent_id") << '=' << TQ(String::from(id)) << " AND ";
+    *q << TQ("object_type") << '=' << TQ(OBJECT_TYPE_ITEM);
+    *q << ")";
+    *q << " ORDER BY " << TQ("dc_title") << " DESC";
+
+    log_debug("findFolderImage %d, %s\n", id, q->c_str());
+    Ref<SQLResult> res = select(q);
+    if (res == nil)
+        throw _Exception(_("db error"));
+    Ref<SQLRow> row;
+    if ((row = res->nextRow()) != nil)  // we only care about the first result
+    {
+        log_debug("findFolderImage result: %s\n", row->col(0).c_str());
+        return row->col(0);
+    }
+    return nil;
+}
+
 /*
 Ref<Array<CdsObject> > SQLStorage::selectObjects(Ref<SelectParam> param)
 {
@@ -2341,9 +2381,9 @@ void SQLStorage::addToInsertBuffer(Ref<StringBuffer> query)
 {
     assert(doInsertBuffering());
     
+    AUTOLOCK(mutex);
     _addToInsertBuffer(query);
     
-    AUTOLOCK(mutex);
     insertBufferEmpty = false;
     insertBufferStatementCount++;
     insertBufferByteCount += query->length();
