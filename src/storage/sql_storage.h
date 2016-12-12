@@ -108,6 +108,8 @@ public:
     
     virtual zmm::Ref<CdsObject> loadObjectByServiceID(zmm::String serviceID);
     virtual zmm::Ref<zmm::IntArray> getServiceObjectIDs(char servicePrefix);
+
+    virtual zmm::String findFolderImage(int id, zmm::String trackArtBase);
     
     /* accounting methods */
     virtual int getTotalFiles();

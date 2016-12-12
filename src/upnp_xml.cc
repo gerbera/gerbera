@@ -110,6 +110,33 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions, in
         
         CdsResourceManager::addResources(item, result);
         
+        if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_TRACK) {
+            Ref<Storage> storage = Storage::getInstance();
+            // extract extension-less, lowercase track name to search for corresponding
+            // image as cover alternative
+            String dctl = item->getTitle().toLower();
+            String trackArtBase = String();
+            int doti = dctl.rindex('.');
+            if (doti>=0) {
+                trackArtBase = dctl.substring(0, doti);
+            } 
+            String aa_id = storage->findFolderImage(item->getParentID(), trackArtBase);
+            if (aa_id != nil) {
+                String url;
+                Ref<Dictionary> dict(new Dictionary());
+                dict->put(_(URL_OBJECT_ID), aa_id);
+
+                url = Server::getInstance()->getVirtualURL() +
+                        _(_URL_PARAM_SEPARATOR) +
+                        CONTENT_MEDIA_HANDLER + _(_URL_PARAM_SEPARATOR) +
+                        dict->encodeSimple() + _(_URL_PARAM_SEPARATOR) +
+                        _(URL_RESOURCE_ID) + _(_URL_PARAM_SEPARATOR) + "0";
+                log_debug("UpnpXML_DIDLRenderObject: url: %s\n", url.c_str());
+                Ref<Element> aa(new Element(MetadataHandler::getMetaFieldName(M_ALBUMARTURI)));
+                aa->setText(url);
+                result->appendElementChild(aa);
+            }
+        }
         result->setName(_("item"));
     }
     else if (IS_CDS_CONTAINER(objectType))
@@ -140,8 +167,25 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions, in
                     result->appendElementChild(UpnpXML_DIDLRenderCreator(el->getValue()));
                 }
             }
+        }
+        if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_ALBUM || upnp_class == UPNP_DEFAULT_CLASS_CONTAINER) {
+            Ref<Storage> storage = Storage::getInstance();
+            String aa_id = storage->findFolderImage(cont->getID(), String());
+            if (aa_id != nil) {
+                String url;
+                Ref<Dictionary> dict(new Dictionary());
+                dict->put(_(URL_OBJECT_ID), aa_id);
 
-
+                url = Server::getInstance()->getVirtualURL() +
+                    _(_URL_PARAM_SEPARATOR) +
+                    CONTENT_MEDIA_HANDLER + _(_URL_PARAM_SEPARATOR) +
+                    dict->encodeSimple() + _(_URL_PARAM_SEPARATOR) +
+                    _(URL_RESOURCE_ID) + _(_URL_PARAM_SEPARATOR) + "0";
+                log_debug("UpnpXML_DIDLRenderObject: url: %s\n", url.c_str());
+                Ref<Element> aa(new Element(MetadataHandler::getMetaFieldName(M_ALBUMARTURI)));
+                aa->setText(url);
+                result->appendElementChild(aa);
+            }
         }
         
     }
