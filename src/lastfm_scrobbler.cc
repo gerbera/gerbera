@@ -103,12 +103,12 @@ void LastFm::startedPlaying(Ref<CdsItem> item)
     }
 
     submission_info* info = create_submission_info();
-    info->artist = artist.c_str();
-    info->track = title.c_str();
+    info->artist = const_cast<char *>(artist.c_str());
+    info->track = const_cast<char *>(title.c_str());
 
     String album = item->getMetadata(MetadataHandler::getMetaFieldName(M_ALBUM));
     if (string_ok(album))
-        info->album = album.c_str();
+        info->album = const_cast<char *>(album.c_str());
 
     String trackNr = 
         item->getMetadata(MetadataHandler::getMetaFieldName(M_TRACKNUMBER));

@@ -305,7 +305,6 @@ target_include_directories(mediatomb PRIVATE "${CMAKE_SOURCE_DIR}/src")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
-
 # Host OS Check
 set(HOST_OS "")
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
@@ -326,7 +325,6 @@ if(NOT HOST_OS)
     message(FATAL_ERROR 
                 "mediatomb was unable to deterimine the host OS. Please report this. Value of CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
 endif(NOT HOST_OS)
-
 
 if (SOLARIS)
     add_definitions(-DSOLARIS)
