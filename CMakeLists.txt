@@ -1,6 +1,15 @@
 cmake_minimum_required(VERSION 3.6)
 
-set(CMAKE_VERBOSE_MAKEFILE off)
+set(CMAKE_VERBOSE_MAKEFILE off CACHE BOOL "Show verbose build commands")
+set(WITH_MAGIC          0 CACHE BOOL "Enable Magic")
+set(WITH_MYSQL          0 CACHE BOOL "Enable MySQL")
+set(WITH_CURL           0 CACHE BOOL "Enable CURL")
+set(WITH_JS             0 CACHE BOOL "Enable JavaScript")
+set(WITH_TAGLIB         0 CACHE BOOL "Use TagLib to extract file metadata")
+set(WITH_AVCODEC        0 CACHE BOOL "Use AV Codec")
+set(WITH_DVDNAV         0 CACHE BOOL "Enable DVD-Nav")
+set(WITH_EXIF           0 CACHE BOOL "Enable EXIF")
+set(WITH_LASTFM         0 CACHE BOOL "Enable LastFM")
 
 project("MediaTomb")
 

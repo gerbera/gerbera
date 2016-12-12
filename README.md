@@ -45,7 +45,20 @@ cmake CMakeLists.txt -DWITH_MAGIC=1 -DWITH_MYSQL=1 -DWITH_CURL=1 -DWITH_JS=1 \
 -DWITH_TAGLIB=1 -DWITH_AVCODEC=1 -DWITH_DVDNAV=1 -DWITH_EXIF=1 -DWITH_LASTFM=1
 make -j4
 make install
+```
 
+Alternatively, the build can be made outside the source tree, and the options
+can be set using a GUI (make sure to press "c" to configure after toggling
+settings in the GUI):
+```
+cd mediatomb
+mkdir build
+cd build
+cmake ..
+make edit_cache
+# Enable some of the WITH... options
+make -j4 VERBOSE=1
+make install
 ```
 
 ## Dependencies
