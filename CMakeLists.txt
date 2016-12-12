@@ -294,7 +294,36 @@ add_executable(mediatomb src/main.cc $<TARGET_OBJECTS:libmediatomb>)
 target_include_directories(mediatomb PRIVATE "${CMAKE_SOURCE_DIR}/src")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
-set(CMAKE_CXX_FLAGS "-Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+
+
+# Host OS Check
+set(HOST_OS "")
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    set(HOST_OS "linux")
+endif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+if(${CMAKE_SYSTEM_NAME} MATCHES ".*(SunOS|Solaris).*")
+    set(HOST_OS "solaris")
+    set(SOLARIS 1)
+endif(${CMAKE_SYSTEM_NAME} MATCHES ".*(SunOS|Solaris).*")
+if(${CMAKE_SYSTEM_NAME} MATCHES ".*BSD.*")
+    set(HOST_OS "BSD")
+    set(BSD 1)
+endif(${CMAKE_SYSTEM_NAME} MATCHES ".*BSD.*")
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+    set(HOST_OS "darwin")
+endif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+if(NOT HOST_OS)
+    message(FATAL_ERROR 
+                "mediatomb was unable to deterimine the host OS. Please report this. Value of CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
+endif(NOT HOST_OS)
+
+
+if (SOLARIS)
+    add_definitions(-DSOLARIS)
+    # we need these specially called out as not in packages [OmniOS/joyent]
+    target_link_libraries (mediatomb "-luuid -lsocket -lnsl -liconv")
+endif(SOLARIS)
 
 add_definitions(-DPACKAGE_NAME="MediaTomb-v00d00")
 add_definitions(-DVERSION="0.13.0_alpha-v00d00")
@@ -306,15 +335,18 @@ add_definitions(-DEXTERNAL_TRANSCODING)
 
 # This only compiles them in
 add_definitions(-DDEBUG_LOG_ENABLED)
-add_definitions(-DTOMBDEBUG)
+#add_definitions(-DTOMBDEBUG)           # this defaults to extra-verbose, and swaps sense of -D
 add_definitions(-DLOG_ENABLED)
 
 find_package(Threads REQUIRED)
 target_link_libraries (mediatomb ${CMAKE_THREAD_LIBS_INIT})
 
-find_package(INotify REQUIRED)
-target_link_libraries (mediatomb ${INOTIFY_LIBRARY})
-add_definitions(-DHAVE_INOTIFY)
+if (NOT SOLARIS)
+    # not supported on solaris
+    find_package(INotify REQUIRED)
+    target_link_libraries (mediatomb ${INOTIFY_LIBRARY})
+    add_definitions(-DHAVE_INOTIFY)
+endif (NOT SOLARIS)
 
 find_package(LibUUID REQUIRED)
 include_directories(${LIBUUID_INCLUDE_DIRS})
