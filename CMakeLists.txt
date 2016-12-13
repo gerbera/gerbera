@@ -305,6 +305,12 @@ add_executable(mediatomb src/main.cc $<TARGET_OBJECTS:libmediatomb>)
 target_include_directories(mediatomb PRIVATE "${CMAKE_SOURCE_DIR}/src")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
+
+# It is nearly 2017 so lets leverage a modern C++
+set_property(TARGET mediatomb PROPERTY CXX_STANDARD 14)
+set_property(TARGET mediatomb PROPERTY CXX_STANDARD_REQUIRED ON)
+set_property(TARGET libmediatomb PROPERTY CXX_STANDARD 14)
+set_property(TARGET libmediatomb PROPERTY CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
 # Host OS Check
@@ -337,7 +343,6 @@ endif(SOLARIS)
 add_definitions(-DPACKAGE_NAME="MediaTomb-v00d00")
 add_definitions(-DVERSION="0.13.0_alpha-v00d00")
 add_definitions(-DPACKAGE_DATADIR="${CMAKE_INSTALL_PREFIX}/share/mediatomb")
-MESSAGE( STATUS "CMAKE_INSTALL_PREFIX: " ${CMAKE_INSTALL_PREFIX} )
 
 add_definitions(-DCOMPILE_INFO="")
 add_definitions(-DEXTERNAL_TRANSCODING)
