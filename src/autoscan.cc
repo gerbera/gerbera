@@ -34,6 +34,7 @@
 #include "content_manager.h"
 
 using namespace zmm;
+using namespace std;
 
 AutoscanDirectory::AutoscanDirectory()
 {
@@ -73,13 +74,12 @@ void AutoscanDirectory::setCurrentLMT(time_t lmt)
 
 AutoscanList::AutoscanList()
 {
-    mutex = Ref<Mutex>(new Mutex(true));
     list = Ref<Array<AutoscanDirectory> > (new Array<AutoscanDirectory>());
 }
 
 void AutoscanList::updateLMinDB()
 {
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     for (int i = 0; i < list->size(); i++)
     {
         log_debug("i: %d\n", i);
@@ -91,7 +91,7 @@ void AutoscanList::updateLMinDB()
 
 int AutoscanList::add(Ref<AutoscanDirectory> dir)
 {
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     return _add(dir);
 }
 
@@ -131,7 +131,7 @@ int AutoscanList::_add(Ref<AutoscanDirectory> dir)
 
 void AutoscanList::addList(zmm::Ref<AutoscanList> list)
 {
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     
     for (int i = 0; i < list->list->size(); i++)
     {
@@ -144,7 +144,7 @@ void AutoscanList::addList(zmm::Ref<AutoscanList> list)
 
 Ref<Array<AutoscanDirectory> > AutoscanList::getArrayCopy()
 {
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     Ref<Array<AutoscanDirectory> > copy(new Array<AutoscanDirectory>(list->size()));
     for (int i = 0; i < list->size(); i++)
         copy->append(list->get(i));
@@ -154,7 +154,7 @@ Ref<Array<AutoscanDirectory> > AutoscanList::getArrayCopy()
 
 Ref<AutoscanDirectory> AutoscanList::get(int id)
 {
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
 
     if ((id < 0) || (id >= list->size()))
         return nil;
@@ -164,7 +164,7 @@ Ref<AutoscanDirectory> AutoscanList::get(int id)
 
 Ref<AutoscanDirectory> AutoscanList::getByObjectID(int objectID)
 {
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
 
     for (int i = 0; i < list->size(); i++)
     {
@@ -176,7 +176,7 @@ Ref<AutoscanDirectory> AutoscanList::getByObjectID(int objectID)
 
 Ref<AutoscanDirectory> AutoscanList::get(String location)
 {
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     for (int i = 0; i < list->size(); i++)
     {
         if (list->get(i) != nil && (location == list->get(i)->getLocation()))
@@ -188,7 +188,7 @@ Ref<AutoscanDirectory> AutoscanList::get(String location)
 
 void AutoscanList::remove(int id)
 {
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     
     if ((id < 0) || (id >= list->size()))
     {
@@ -213,7 +213,7 @@ void AutoscanList::remove(int id)
 
 int AutoscanList::removeByObjectID(int objectID)
 {
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
 
     for (int i = 0; i < list->size(); i++)
     {
@@ -237,7 +237,7 @@ int AutoscanList::removeByObjectID(int objectID)
 
 int AutoscanList::remove(String location)
 {
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     
     for (int i = 0; i < list->size(); i++)
     {
@@ -261,7 +261,7 @@ int AutoscanList::remove(String location)
 
 Ref<AutoscanList> AutoscanList::removeIfSubdir(String parent, bool persistent)
 {
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
 
     Ref<AutoscanList> rm_id_list(new AutoscanList());
 
@@ -299,7 +299,7 @@ Ref<AutoscanList> AutoscanList::removeIfSubdir(String parent, bool persistent)
 /*
 void AutoscanList::subscribeAll(Ref<TimerSubscriber> obj)
 {
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     
     Ref<Timer> timer = Timer::getInstance();
     for (int i = 0; i < list->size(); i++)
@@ -314,7 +314,7 @@ void AutoscanList::subscribeAll(Ref<TimerSubscriber> obj)
 
 void AutoscanList::notifyAll(Ref<TimerSubscriberSingleton<Object> > cm)
 {
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     
     Ref<Timer> timer = Timer::getInstance();
     for (int i = 0; i < list->size(); i++)
@@ -328,7 +328,7 @@ void AutoscanList::notifyAll(Ref<TimerSubscriberSingleton<Object> > cm)
 /*
 void AutoscanList::subscribeDir(zmm::Ref<TimerSubscriber> obj, int id, bool once)
 {
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
 
     if ((id < 0) || (id >= list->size()))
         return;

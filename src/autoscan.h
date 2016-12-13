@@ -33,6 +33,7 @@
 #ifndef __AUTOSCAN_H__
 #define __AUTOSCAN_H__
 
+#include <mutex>
 #include "zmm/zmmf.h"
 #include "sync.h"
 #include "timer.h"
@@ -124,7 +125,9 @@ public:
 */
 
 protected:
-    zmm::Ref<Mutex> mutex;
+    std::recursive_mutex mutex;
+    using AutoLock = std::lock_guard<std::recursive_mutex>;
+
     zmm::Ref<zmm::Array<AutoscanDirectory> > list;
     int _add(zmm::Ref<AutoscanDirectory> dir);
 };
