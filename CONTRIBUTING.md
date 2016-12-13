@@ -20,5 +20,5 @@ For new code please use modern C++ (up to 14) constructs where possible, and avo
 
 Some things that will increase the chance that your pull request is accepted:
 
-* Stick to [Webkit style](ttps://webkit.org/code-style-guidelines/).
+* Stick to [Webkit style](https://webkit.org/code-style-guidelines/).
 * Write a [good commit message](http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html).
