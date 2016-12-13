@@ -32,6 +32,7 @@
 #define __AUTOSCAN_INOTIFY_H__
 
 
+#include <mutex>
 
 #include "zmm/zmmf.h"
 #include "sync.h"
@@ -73,10 +74,10 @@ private:
     pthread_t thread;
     
     zmm::Ref<Inotify> inotify;
-    
-    zmm::Ref<Cond> cond;
-    zmm::Ref<Mutex> mutex;
-    
+
+    std::mutex mutex;
+    using AutoLock = std::lock_guard<std::mutex>;
+
     zmm::Ref<zmm::ObjectQueue<AutoscanDirectory> > monitorQueue;
     zmm::Ref<zmm::ObjectQueue<AutoscanDirectory> > unmonitorQueue;
     
