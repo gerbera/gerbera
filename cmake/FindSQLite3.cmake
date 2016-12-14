@@ -13,7 +13,6 @@
 #  For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 #
 
-
 if (SQLITE3_LIBRARIES AND SQLITE3_INCLUDE_DIRS)
   # in cache already
   set(SQLITE3_FOUND TRUE)
