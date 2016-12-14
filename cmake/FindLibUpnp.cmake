@@ -1,5 +1,13 @@
-find_package(PkgConfig)
-pkg_check_modules (PC_UPNP REQUIRED libupnp)
+# - Try to find LibUPnP (pupnp)
+# Once done this will define
+#  UPNP_FOUND - System has LibUPnP
+#  UPNP_INCLUDE_DIRS - The LibUPnP include directories
+#  UPNP_LIBRARIES - The libraries needed to use LibUPnP
+#  UPNP_VERSION_STRING - The version of LinUPnP found
+#
+
+find_package(PkgConfig QUIET)
+pkg_check_modules (PC_UPNP QUIET libupnp)
 
 find_path(UPNP_INCLUDE_DIR upnp/upnp.h
     HINTS
@@ -22,27 +30,23 @@ find_library(UPNP_THREADUTIL_LIBRARY
     ${PC_UPNP_LIBDIR}
     ${PC_UPNP_LIBRARY_DIRS})
 
-if (UPNP_INCLUDE_DIR AND UPNP_UPNP_LIBRARY)
-    set (UPNP_FOUND TRUE)
-endif (UPNP_INCLUDE_DIR AND UPNP_UPNP_LIBRARY)
+if(EXISTS "${UPNP_INCLUDE_DIR}/upnp/upnpconfig.h")
+    file (STRINGS ${UPNP_INCLUDE_DIR}/upnp/upnpconfig.h _UPNP_DEFS REGEX "^[ \t]*#define[ \t]+UPNP_VERSION_(MAJOR|MINOR|PATCH)")
+    string (REGEX REPLACE ".*UPNP_VERSION_MAJOR ([0-9]+).*" "\\1" UPNP_MAJOR_VERSION "${_UPNP_DEFS}")
+    string (REGEX REPLACE ".*UPNP_VERSION_MINOR ([0-9]+).*" "\\1" UPNP_MINOR_VERSION "${_UPNP_DEFS}")
+    string (REGEX REPLACE ".*UPNP_VERSION_PATCH ([0-9]+).*" "\\1" UPNP_PATCH_VERSION "${_UPNP_DEFS}")
+    set (UPNP_VERSION_STRING "${UPNP_MAJOR_VERSION}.${UPNP_MINOR_VERSION}.${UPNP_PATCH_VERSION}")
+endif()
+
+include(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(UPnP
+    REQUIRED_VARS UPNP_UPNP_LIBRARY UPNP_INCLUDE_DIR
+    VERSION_VAR UPNP_VERSION_STRING)
 
 if (UPNP_FOUND)
     set (UPNP_LIBRARIES ${UPNP_UPNP_LIBRARY} ${UPNP_IXML_LIBRARY} ${UPNP_THREADUTIL_LIBRARY} )
-
-    if(UPNP_INCLUDE_DIR AND EXISTS "${UPNP_INCLUDE_DIR}/upnp/upnpconfig.h")
-        file (STRINGS ${UPNP_INCLUDE_DIR}/upnp/upnpconfig.h _UPNP_DEFS REGEX "^[ \t]*#define[ \t]+UPNP_VERSION_(MAJOR|MINOR|PATCH)")
-        string (REGEX REPLACE ".*UPNP_VERSION_MAJOR ([0-9]+).*" "\\1" UPNP_MAJOR_VERSION "${_UPNP_DEFS}")
-        string (REGEX REPLACE ".*UPNP_VERSION_MINOR ([0-9]+).*" "\\1" UPNP_MINOR_VERSION "${_UPNP_DEFS}")
-        string (REGEX REPLACE ".*UPNP_VERSION_PATCH ([0-9]+).*" "\\1" UPNP_PATCH_VERSION "${_UPNP_DEFS}")
-        set (UPNP_VERSION_STRING "${UPNP_MAJOR_VERSION}.${UPNP_MINOR_VERSION}.${UPNP_PATCH_VERSION}")
-        message (STATUS "Found libupnp version: ${UPNP_VERSION_STRING}")
-    endif()
-
-    message (STATUS "Found the libupnp libraries: ${UPNP_LIBRARIES}")
-    message (STATUS "Found the libupnp headers: ${UPNP_INCLUDE_DIR}")
-else (UPNP_FOUND)
-    message (STATUS "Could not find libupnp")
-endif (UPNP_FOUND)
+    set (UPNP_INCLUDE_DIRS ${UPNP_INCLUDE_DIR} )
+endif ()
 
 MARK_AS_ADVANCED(
     UPNP_INCLUDE_DIR
