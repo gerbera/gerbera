@@ -355,9 +355,10 @@ endif()
 find_package(Threads REQUIRED)
 target_link_libraries (mediatomb ${CMAKE_THREAD_LIBS_INIT})
 
-if (NOT SOLARIS)
-    # not supported on solaris
+# INotify is only available on Linux
+if (LINUX)
     find_package(INotify REQUIRED)
+    include_directories(${INOTIFY_INCLUDE_DIRS})
     target_link_libraries (mediatomb ${INOTIFY_LIBRARY})
     add_definitions(-DHAVE_INOTIFY)
 endif ()
