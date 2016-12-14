@@ -36,6 +36,7 @@
 
 
 using namespace zmm;
+using namespace std;
 
 BufferedIOHandler::BufferedIOHandler(Ref<IOHandler> underlyingHandler, size_t bufSize, size_t maxChunkSize, size_t initialFillSize) : IOHandlerBufferHelper(bufSize, initialFillSize)
 {
@@ -74,7 +75,7 @@ void BufferedIOHandler::threadProc()
     bool first_log = true;
 #endif
     
-    AUTOLOCK(mutex);
+    unique_lock<std::mutex> lock(mutex);
     do
     {
         
@@ -128,7 +129,7 @@ void BufferedIOHandler::threadProc()
                 /// \todo do we need to wait for initialFillSize again?
                 
                 doSeek = false;
-                cond->signal();
+                cond.notify_one();
             }
         }
         
@@ -153,20 +154,20 @@ void BufferedIOHandler::threadProc()
             waitForInitialFillSize = (initialFillSize > 0);
             
             doSeek = false;
-            cond->signal();
+            cond.notify_one();
         }
         
         maxWrite = (empty ? bufSize : (a < b ? bufSize - b : a - b));
         if (maxWrite == 0)
         {
-            cond->wait();
+            cond.wait(lock);
         }
         else
         {
-            AUTOUNLOCK();
+            lock.unlock();
             size_t chunkSize = (maxChunkSize > maxWrite ? maxWrite : maxChunkSize);
             readBytes = underlyingHandler->read(buffer + b, chunkSize);
-            AUTORELOCK();
+            lock.lock();
             if (readBytes > 0)
             {
                 b += readBytes;
@@ -176,7 +177,7 @@ void BufferedIOHandler::threadProc()
                 if (empty)
                 {
                     empty = false;
-                    cond->signal();
+                    cond.notify_one();
                 }
                 if (waitForInitialFillSize)
                 {
@@ -187,14 +188,14 @@ void BufferedIOHandler::threadProc()
                     {
                         log_debug("buffer: initial fillsize reached\n");
                         waitForInitialFillSize = false;
-                        cond->signal();
+                        cond.notify_one();
                     }
                 }
             }
             else if (readBytes == CHECK_SOCKET)
             {
                 checkSocket = true;
-                cond->signal();
+                cond.notify_one();
             }
         }
     }
@@ -207,5 +208,5 @@ void BufferedIOHandler::threadProc()
             readError = true;
     }
     // ensure that read() doesn't wait for me to fill the buffer
-    cond->signal();
+    cond.notify_one();
 }
