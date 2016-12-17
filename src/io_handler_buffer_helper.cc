@@ -38,8 +38,8 @@ IOHandlerBufferHelper::IOHandlerBufferHelper(size_t bufSize, size_t initialFillS
 {
     if (bufSize <=0)
         throw _Exception(_("bufSize must be positive"));
-    if (initialFillSize < 0 || initialFillSize > bufSize)
-        throw _Exception(_("initialFillSize must be non-negative and must be lesser than or equal to the size of the buffer"));
+    if (initialFillSize > bufSize)
+        throw _Exception(_("initialFillSize must be lesser than or equal to the size of the buffer"));
     
     mutex = Ref<Mutex>(new Mutex());
     cond = Ref<Cond>(new Cond(mutex));
