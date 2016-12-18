@@ -985,13 +985,14 @@ unsigned int stringHash(String str)
     return hash;
 }
 
-String intArrayToCSV(int *array, int size)
+String intArrayToCSV(std::shared_ptr<std::unordered_set<int> > array)
 {
-    if (size <= 0)
+    if (array->empty())
         return nil;
     Ref<StringBuffer> buf(new StringBuffer());
-    for (int i = 0; i < size; i++)
-        *buf << ',' << array[i];
+    for (const auto &i: *array) {
+        *buf << ',' << i;
+    }
     return buf->toString(1);
 }
 

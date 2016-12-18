@@ -51,7 +51,7 @@ SINGLETON_MUTEX(UpdateManager, false);
 
 UpdateManager::UpdateManager() : Singleton<UpdateManager>()
 {
-    objectIDHash = Ref<DBRHash<int> >(new DBRHash<int>(OBJECT_ID_HASH_CAPACITY, MAX_OBJECT_IDS + 2 * MAX_OBJECT_IDS_OVERLOAD, INVALID_OBJECT_ID, INVALID_OBJECT_ID_2));
+    objectIDHash = std::make_shared<std::unordered_set<int>>();
     shutdownFlag = false;
     flushPolicy = FLUSH_SPEC;
     lastContainerChanged = INVALID_OBJECT_ID;
@@ -116,7 +116,7 @@ void UpdateManager::containersChanged(Ref<IntArray> objectIDs, int flushPolicy)
         if (objectID != lastContainerChanged)
         {
             //log_debug("containerChanged. id: %d, signal: %d\n", objectID, signal);
-            objectIDHash->put(objectID);
+            objectIDHash->insert(objectID);
             if (split && objectIDHash->size() > MAX_OBJECT_IDS)
             {
                 while(objectIDHash->size() > MAX_OBJECT_IDS)
@@ -149,7 +149,7 @@ void UpdateManager::containerChanged(int objectID, int flushPolicy)
         // there were no unprocessed updates
         bool signal = (! haveUpdates());
         log_debug("containerChanged. id: %d, signal: %d\n", objectID, signal);
-        objectIDHash->put(objectID);
+        objectIDHash->insert(objectID);
         
         // signalling if the hash gets too full
         if (objectIDHash->size() >= MAX_OBJECT_IDS)
@@ -237,11 +237,7 @@ void UpdateManager::threadProc()
 
                 try
                 {
-                    hash_data_array_t<int> hash_data_array;
-                    // hash_data_array points to the array inside objectIDHash, so
-                    // we may only call clear() after we don't need the array anymore
-                    objectIDHash->getAll(&hash_data_array);
-                    updateString = Storage::getInstance()->incrementUpdateIDs(hash_data_array.data,hash_data_array.size);
+                    updateString = Storage::getInstance()->incrementUpdateIDs(objectIDHash);
                     objectIDHash->clear(); // hash_data_array will be invalid after clear()
                 }
                 catch (const Exception & e)

@@ -29,6 +29,8 @@
 
 /// \file sql_storage.cc
 
+#include <algorithm>
+
 #include <limits.h>
 #include "sql_storage.h"
 #include "tools.h"
@@ -1267,14 +1269,21 @@ int SQLStorage::getTotalFiles()
     return 0;
 }
 
-String SQLStorage::incrementUpdateIDs(int *ids, int size)
+String SQLStorage::incrementUpdateIDs(std::shared_ptr<std::unordered_set<int> > ids)
 {
-    if (size <= 0)
+    if (ids->empty())
         return nil;
     Ref<StringBuffer> inBuf(new StringBuffer()); // ??? what was that: size * sizeof(int)));
-    *inBuf << "IN (" << ids[0];
-    for (int i = 1; i < size; i++)
-        *inBuf << ',' << ids[i];
+
+    bool first = true;
+    for (const auto& id : *ids) {
+        if (first) {
+            *inBuf << "IN (" << id;
+            first = false;
+        } else {
+            *inBuf << ',' << id;
+        }
+    }
     *inBuf << ')';
     
     Ref<StringBuffer> buf(new StringBuffer());
@@ -1376,7 +1385,7 @@ Ref<Array<CdsObject> > SQLStorage::selectObjects(Ref<SelectParam> param)
 }
 */
 
-Ref<DBRHash<int> > SQLStorage::getObjects(int parentID, bool withoutContainer)
+std::shared_ptr<std::unordered_set<int> > SQLStorage::getObjects(int parentID, bool withoutContainer)
 {
     flushInsertBuffer();
     
@@ -1392,28 +1401,25 @@ Ref<DBRHash<int> > SQLStorage::getObjects(int parentID, bool withoutContainer)
     Ref<SQLRow> row;
     
     if (res->getNumRows() <= 0)
-        return nil;
+        return nullptr;
     int capacity = res->getNumRows() * 5 + 1;
     if (capacity < 521)
         capacity = 521;
     
-    Ref<DBRHash<int> > ret(new DBRHash<int>(capacity, res->getNumRows(), INVALID_OBJECT_ID, INVALID_OBJECT_ID_2));
+    std::shared_ptr<std::unordered_set<int> > ret = std::make_shared<std::unordered_set<int>>();
     
     while ((row = res->nextRow()) != nil)
     {
-        ret->put(row->col(0).toInt());
+        ret->insert(row->col(0).toInt());
     }
     return ret;
 }
 
-Ref<Storage::ChangedContainers> SQLStorage::removeObjects(zmm::Ref<DBRHash<int> > list, bool all)
+Ref<Storage::ChangedContainers> SQLStorage::removeObjects(std::shared_ptr<std::unordered_set<int> > list, bool all)
 {
     flushInsertBuffer();
-    
-    hash_data_array_t<int> hash_data_array;
-    list->getAll(&hash_data_array);
-    int count = hash_data_array.size;
-    int *array = hash_data_array.data;
+
+    int count = list->size();
     if (count <= 0)
         return nil;
     
@@ -1422,9 +1428,10 @@ Ref<Storage::ChangedContainers> SQLStorage::removeObjects(zmm::Ref<DBRHash<int> 
         << " FROM " << TQ(CDS_OBJECT_TABLE)
         << " WHERE " << TQ("id") << " IN (";
     int firstComma = idsBuf->length();
-    for (int i = 0; i < count; i++)
-    {
-        int id = array[i];
+
+
+
+    for(const auto &id : *list) {
         if (IS_FORBIDDEN_CDS_ID(id))
             throw _Exception(_("tried to delete a forbidden ID (") + id + ")!");
         *idsBuf << ',' << id;

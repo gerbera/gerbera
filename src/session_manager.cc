@@ -29,6 +29,9 @@
 
 /// \file session_manager.cc
 
+#include <memory>
+#include <unordered_set>
+
 #include "session_manager.h"
 #include "config_manager.h"
 #include "tools.h"
@@ -48,7 +51,8 @@ Session::Session(long timeout) : Dictionary_r()
     this->timeout = timeout;
     loggedIn = false;
     sessionID = nil;
-    uiUpdateIDs = Ref<DBRHash<int> >(new DBRHash<int>(UI_UPDATE_ID_HASH_SIZE, MAX_UI_UPDATE_IDS + 5, INVALID_OBJECT_ID, INVALID_OBJECT_ID_2));
+    uiUpdateIDs = std::make_shared<std::unordered_set<int>>();
+        //(new DBRHash<int>(UI_UPDATE_ID_HASH_SIZE, MAX_UI_UPDATE_IDS + 5, INVALID_OBJECT_ID, INVALID_OBJECT_ID_2));
     updateAll = false;
     access();
 }
@@ -68,7 +72,7 @@ void Session::containerChangedUI(int objectID)
                 uiUpdateIDs->clear();
             }
             else
-                uiUpdateIDs->put(objectID);
+                uiUpdateIDs->insert(objectID);
         }
     }
 }
@@ -91,7 +95,7 @@ void Session::containerChangedUI(Ref<IntArray> objectIDs)
     }
     for (int i = 0; i < arSize; i++)
     {
-        uiUpdateIDs->put(objectIDs->get(i));
+        uiUpdateIDs->insert(objectIDs->get(i));
     }
 }
 
@@ -105,9 +109,7 @@ String Session::getUIUpdateIDs()
         updateAll = false;
         return _("all");
     }
-    hash_data_array_t<int> hash_data_array;
-    uiUpdateIDs->getAll(&hash_data_array);
-    String ret = intArrayToCSV(hash_data_array.data, hash_data_array.size);
+    String ret = intArrayToCSV(uiUpdateIDs);
     if (ret != nil)
         uiUpdateIDs->clear();
     return ret;

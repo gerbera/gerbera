@@ -32,6 +32,9 @@
 #ifndef __SESSION_MANAGER_H__
 #define __SESSION_MANAGER_H__
 
+#include <memory>
+#include <unordered_set>
+
 #include "singleton.h"
 #include "dictionary.h"
 #include "sync.h"
@@ -95,7 +98,7 @@ protected:
     /// the UI shall update every container
     bool updateAll;
     
-    zmm::Ref<DBRHash<int> > uiUpdateIDs;
+    std::shared_ptr<std::unordered_set<int> > uiUpdateIDs;
     
     /// \brief maximum time the session can be idle (starting from last_access)
     long timeout;

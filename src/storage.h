@@ -32,6 +32,9 @@
 #ifndef __STORAGE_H__
 #define __STORAGE_H__
 
+#include <memory>
+#include <unordered_set>
+
 #include "zmm/zmmf.h"
 #include "singleton.h"
 #include "cds_objects.h"
@@ -160,7 +163,7 @@ public:
     /// \param size number of entries in the given array
     /// \return a String for UPnP: a CSV list; for every existing object:
     ///  "id,update_id"
-    virtual zmm::String incrementUpdateIDs(int *ids, int size) = 0;
+    virtual zmm::String incrementUpdateIDs(std::shared_ptr<std::unordered_set<int> > ids) = 0;
     
     /* utility methods */
     virtual zmm::Ref<CdsObject> loadObject(int objectID) = 0;
@@ -197,13 +200,13 @@ public:
     /// \param parentID parent container
     /// \param withoutContainer if false: all children are returned; if true: only items are returned
     /// \return DBHash containing the objectID's - nil if there are none! 
-    virtual zmm::Ref<DBRHash<int> > getObjects(int parentID, bool withoutContainer) = 0;
+    virtual std::shared_ptr<std::unordered_set<int> > getObjects(int parentID, bool withoutContainer) = 0;
     
     /// \brief Remove all objects found in list
     /// \param list a DBHash containing objectIDs that have to be removed
     /// \param all if true and the object to be removed is a reference
     /// \return changed container ids
-    virtual zmm::Ref<ChangedContainers> removeObjects(zmm::Ref<DBRHash<int> > list, bool all = false) = 0;
+    virtual zmm::Ref<ChangedContainers> removeObjects(std::shared_ptr<std::unordered_set<int> > list, bool all = false) = 0;
     
     /// \brief Loads an object given by the online service ID.
     virtual zmm::Ref<CdsObject> loadObjectByServiceID(zmm::String serviceID) = 0;

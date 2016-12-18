@@ -55,7 +55,7 @@ protected:
     pthread_t updateThread;
     zmm::Ref<Cond> cond;
     
-    zmm::Ref<DBRHash<int> > objectIDHash;
+    std::shared_ptr<std::unordered_set<int> > objectIDHash;
     
     bool shutdownFlag;
     int flushPolicy;
