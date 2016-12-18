@@ -32,13 +32,11 @@
 #ifndef __MT_INOTIFY_H__
 #define __MT_INOTIFY_H__
 
-#include "zmm/zmmf.h"
+#ifdef HAVE_INOTIFY
 
-#ifdef SYS_INOTIFY_H_OK
-    #include <sys/inotify.h>
-#else
-    #include "inotify-nosys.h"
-#endif
+#include <sys/inotify.h>
+
+#include "zmm/zmmf.h"
 
 /// \brief Inotify interface.
 class Inotify : public zmm::Object
@@ -76,5 +74,7 @@ private:
     int stop_fd_read;
     int stop_fd_write;
 };
+
+#endif
 
 #endif // __INOTIFY_H__

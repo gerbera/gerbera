@@ -78,7 +78,6 @@ add_library(libmediatomb OBJECT
         src/hash/dsb_hash.h
         src/hash/dso_hash.h
         src/hash.h
-        src/inotify-nosys.h
         src/io_handler_buffer_helper.cc
         src/io_handler_buffer_helper.h
         src/io_handler.cc
