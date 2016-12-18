@@ -40,7 +40,6 @@
 #include "cds_objects.h"
 #include "dictionary.h"
 #include "sync.h"
-#include "hash.h"
 #include "autoscan.h"
 
 #define BROWSE_DIRECT_CHILDREN      0x00000001

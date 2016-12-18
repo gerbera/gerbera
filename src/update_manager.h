@@ -32,9 +32,11 @@
 #ifndef __UPDATE_MANAGER_H__
 #define __UPDATE_MANAGER_H__
 
+#include <memory>
+#include <unordered_set>
+
 #include "common.h"
 #include "singleton.h"
-#include "hash.h"
 #include "sync.h"
 
 #define FLUSH_ASAP 2

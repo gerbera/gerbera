@@ -31,11 +31,11 @@
 #ifndef __AUTOSCAN_INOTIFY_H__
 #define __AUTOSCAN_INOTIFY_H__
 
-
+#include <memory>
+#include <unordered_map>
 
 #include "zmm/zmmf.h"
 #include "sync.h"
-#include "hash.h"
 #include "autoscan.h"
 #include "mt_inotify.h"
 
@@ -167,8 +167,8 @@ private:
         int parentWd;
         int wd;
     };
-    
-    zmm::Ref<DBOHash<int, Wd> > watches;
+
+    std::shared_ptr<std::unordered_map<int, zmm::Ref<Wd>> > watches;
     
     zmm::String normalizePathNoEx(zmm::String path);
     

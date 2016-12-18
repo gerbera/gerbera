@@ -36,7 +36,6 @@
 #include "cds_objects.h"
 #include "dictionary.h"
 #include "storage.h"
-#include "hash.h"
 #include "sync.h"
 #include "storage_cache.h"
 

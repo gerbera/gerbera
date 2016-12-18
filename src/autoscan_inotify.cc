@@ -31,6 +31,8 @@
 
 #ifdef HAVE_INOTIFY
 
+#include <cassert>
+
 #include "autoscan_inotify.h"
 #include "content_manager.h"
 
@@ -39,9 +41,6 @@
 
 #define AUTOSCAN_INOTIFY_INITIAL_QUEUE_SIZE 20
 
-// always use a prime!
-#define AUTOSCAN_INOTIFY_HASH_SIZE 30851
-
 #define INOTIFY_MAX_USER_WATCHES_FILE "/proc/sys/fs/inotify/max_user_watches"
 using namespace zmm;
 
@@ -49,8 +48,6 @@ AutoscanInotify::AutoscanInotify()
 {
     mutex = Ref<Mutex>(new Mutex());
     cond = Ref<Cond>(new Cond(mutex));
-
-    int hash_size = AUTOSCAN_INOTIFY_HASH_SIZE;
 
     if (check_path(_(INOTIFY_MAX_USER_WATCHES_FILE)))
     {
@@ -64,12 +61,9 @@ AutoscanInotify::AutoscanInotify()
         {
             log_error("Could not determine maximum number of inotify user watches: %s\n", ex.getMessage().c_str());
         }
-
-        if (max_watches > 0)
-            hash_size = max_watches * 5;
     }
 
-    watches = Ref<DBOHash<int, Wd> >(new DBOHash<int, Wd>(hash_size, -1, -2));
+    watches = std::make_shared<std::unordered_map<int, Ref<Wd>> >();
     shutdownFlag = true;
     monitorQueue = Ref<ObjectQueue<AutoscanDirectory> >(new ObjectQueue<AutoscanDirectory>(AUTOSCAN_INOTIFY_INITIAL_QUEUE_SIZE));
     unmonitorQueue = Ref<ObjectQueue<AutoscanDirectory> >(new ObjectQueue<AutoscanDirectory>(AUTOSCAN_INOTIFY_INITIAL_QUEUE_SIZE));
@@ -222,14 +216,14 @@ void AutoscanInotify::threadProc()
                 String name = event->name;
                 log_debug("inotify event: %d %x %s\n", wd, mask, name.c_str());
                 
-                Ref<Wd> wdObj = watches->get(wd);
-                if (wdObj == nil)
-                {
+                Ref<Wd> wdObj = nil;
+                try {
+                    wdObj = watches->at(wd);
+                } catch (const std::out_of_range& ex) {
                     inotify->removeWatch(wd);
                     continue;
                 }
-                
-                
+
                 pathBuf->clear();
                 *pathBuf << wdObj->getPath();
                 if (! (mask & (IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT)))
@@ -322,7 +316,7 @@ void AutoscanInotify::threadProc()
                 {
                     removeWatchMoves(wd);
                     removeDescendants(wd);
-                    watches->remove(wd);
+                    watches->erase(wd);
                 }
             }
         }
@@ -381,14 +375,11 @@ int AutoscanInotify::addMoveWatch(String path, int removeWd, int parentWd)
     if (wd >= 0)
     {
         bool alreadyThere = false;
-        Ref<Wd> wdObj = watches->get(wd);
-        if (wdObj == nil)
-        {
-            wdObj = Ref<Wd>(new Wd(path, wd, parentWd));
-            watches->put(wd, wdObj);
-        }
-        else
-        {
+
+        Ref<Wd> wdObj = nil;
+        try {
+            wdObj = watches->at(wd);
+
             int parentWdSet = wdObj->getParentWd();
             if (parentWdSet >= 0)
             {
@@ -400,10 +391,16 @@ int AutoscanInotify::addMoveWatch(String path, int removeWd, int parentWd)
             }
             else
                 wdObj->setParentWd(parentWd);
-                
+
             //find
-            //alreadyThere =... 
+            //alreadyThere =...
+            //FIXME: not finished?
+
+        } catch (const std::out_of_range& ex) {
+            wdObj = Ref<Wd>(new Wd(path, wd, parentWd));
+            watches->emplace(wd, wdObj);
         }
+
         if (! alreadyThere)
         {
             Ref<WatchMove> watch(new WatchMove(removeWd));
@@ -442,7 +439,7 @@ void AutoscanInotify::recheckNonexistingMonitor(int curWd, Ref<Array<StringBase>
         if (pathExists)
         {
             if (curWd != -1)
-                removeNonexistingMonitor(curWd, watches->get(curWd), pathAr);
+                removeNonexistingMonitor(curWd, watches->at(curWd), pathAr);
             
             String path = buf->toString() + DIR_SEPARATOR;
             if (first)
@@ -482,14 +479,14 @@ void AutoscanInotify::checkMoveWatches(int wd, Ref<Wd> wdObj)
             
             watchMv = RefCast(watch, WatchMove);
             int removeWd = watchMv->getRemoveWd();
-            Ref<Wd> wdToRemove = watches->get(removeWd);
-            if (wdToRemove != nil)
-            {
+            try {
+                Ref<Wd> wdToRemove = watches->at(removeWd);
+
                 recheckNonexistingMonitors(removeWd, wdToRemove);
-                
+
                 String path = wdToRemove->getPath();
                 log_debug("found wd to remove because of move event: %d %s\n", removeWd, path.c_str());
-                
+
                 inotify->removeWatch(removeWd);
                 Ref<ContentManager> cm = ContentManager::getInstance();
                 Ref<WatchAutoscan> watch = getStartPoint(wdToRemove);
@@ -501,12 +498,12 @@ void AutoscanInotify::checkMoveWatches(int wd, Ref<Wd> wdObj)
                         monitorNonexisting(path, adir, watch->getNormalizedAutoscanPath());
                         cm->handlePeristentAutoscanRemove(adir->getScanID(), InotifyScanMode);
                     }
-                    
+
                     int objectID = Storage::getInstance()->findObjectIDByPath(path);
                     if (objectID != INVALID_OBJECT_ID)
                         cm->removeObject(objectID);
                 }
-            }
+            } catch (const std::out_of_range& ex) {} // Not found in map
         }
     }
 }
@@ -623,28 +620,28 @@ int AutoscanInotify::monitorDirectory(String pathOri, Ref<AutoscanDirectory> adi
     else
     {
         bool alreadyWatching = false;
-        Ref<Wd> wdObj = watches->get(wd);
         int parentWd = INOTIFY_UNKNOWN_PARENT_WD;
         if (startPoint)
                 parentWd = watchPathForMoves(pathOri, wd);
-        if (wdObj == nil)
-        {
-            wdObj = Ref<Wd>(new Wd(path, wd, parentWd));
-            watches->put(wd, wdObj);
-        }
-        else
-        {
+
+        Ref<Wd> wdObj = nil;
+        try {
+            wdObj = watches->at(wd);
             if (parentWd >= 0 && wdObj->getParentWd() < 0)
             {
                 wdObj->setParentWd(parentWd);
             }
-            
+
             if (pathArray == nil)
                 alreadyWatching = (getAppropriateAutoscan(wdObj, adir) != nil);
-            
+
             // should we check for already existing "nonexisting" watches?
             // ...
+        } catch (const std::out_of_range& ex) {
+            wdObj = Ref<Wd>(new Wd(path, wd, parentWd));
+            watches->emplace(wd, wdObj);
         }
+
         if (! alreadyWatching)
         {
             Ref<WatchAutoscan> watch(new WatchAutoscan(startPoint, adir, normalizedAutoscanPath));
@@ -682,7 +679,7 @@ void AutoscanInotify::unmonitorDirectory(String path, Ref<AutoscanDirectory> adi
         return;
     }
     
-    Ref<Wd> wdObj = watches->get(wd);
+    Ref<Wd> wdObj = watches->at(wd);
     if (wdObj == nil)
     {
         log_error("wd not found in watches!? (%d, %s)\n", wd, path.c_str());
@@ -781,15 +778,20 @@ void AutoscanInotify::removeWatchMoves(int wd)
     int checkWd = wd;
     do
     {
-        wdObj = watches->get(checkWd);
-        if (wdObj == nil)
+        wdObj = nil;
+        try {
+            wdObj = watches->at(checkWd);
+        } catch (const std::out_of_range& ex) {
             break;
+        }
+
         wdWatches = wdObj->getWdWatches();
         if (wdWatches == nil)
             break;
         
-        if (first)
+        if (first) {
             first = false;
+        }
         else
         {
             for (int i = 0; i < wdWatches->size(); i++)
@@ -864,7 +866,7 @@ Ref<AutoscanInotify::WatchAutoscan> AutoscanInotify::getStartPoint(Ref<Wd> wdObj
 void AutoscanInotify::addDescendant(int startPointWd, int addWd, Ref<AutoscanDirectory> adir)
 {
 //    log_debug("called for %d, (adir->path=%s); adding %d\n", startPointWd, adir->getLocation().c_str(), addWd);
-    Ref<Wd> wdObj = watches->get(startPointWd);
+    Ref<Wd> wdObj = watches->at(startPointWd);
     if (wdObj == nil)
         return;
 //   log_debug("found wdObj\n");
@@ -878,9 +880,13 @@ void AutoscanInotify::addDescendant(int startPointWd, int addWd, Ref<AutoscanDir
 
 void AutoscanInotify::removeDescendants(int wd)
 {
-    Ref<Wd> wdObj = watches->get(wd);
-    if (wdObj == nil)
+    Ref<Wd> wdObj = nil;
+    try {
+        wdObj = watches->at(wd);
+    } catch (const std::out_of_range& ex) {
         return;
+    }
+
     Ref<Array<Watch> > wdWatches = wdObj->getWdWatches();
     if (wdWatches == nil)
         return;
