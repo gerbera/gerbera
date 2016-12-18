@@ -33,7 +33,6 @@
 #ifdef HAVE_TAGLIB
 
 #include <taglib/taglib.h>
-#include <taglib/fileref.h>
 #include <taglib/id3v2tag.h>
 #include <taglib/mpegfile.h>
 #include <taglib/flacfile.h>
@@ -50,11 +49,11 @@
 
 using namespace zmm;
 
-TagHandler::TagHandler() : MetadataHandler()
+TagLibHandler::TagLibHandler() : MetadataHandler()
 {
 }
        
-static void addField(metadata_fields_t field, TagLib::Tag *tag, Ref<CdsItem> item)
+static void addField(metadata_fields_t field, const TagLib::Tag *tag, Ref<CdsItem> item)
 {
     TagLib::String val;
     String value;
@@ -123,35 +122,30 @@ static void addField(metadata_fields_t field, TagLib::Tag *tag, Ref<CdsItem> ite
     }
 }
 
-void TagHandler::fillMetadata(Ref<CdsItem> item)
-{
-    Ref<Array<StringBase> > aux_tags_list;
-    Ref<StringConverter> sc = StringConverter::i2i();
+void TagLibHandler::populateGenericTags(Ref<CdsItem> item, TagLib::File& file) {
 
-    TagLib::FileRef f(item->getLocation().c_str());
-
-    if (f.isNull() || (!f.tag()))
+    if (!file.tag())
         return;
 
-    TagLib::Tag *tag = f.tag();
+    const TagLib::Tag *tag = file.tag();
 
     for (int i = 0; i < M_MAX; i++)
         addField((metadata_fields_t) i, tag, item);
 
     int temp;
-    
-    TagLib::AudioProperties *audioProps = f.audioProperties();
-    
-    if (audioProps == NULL) 
+
+    const TagLib::AudioProperties *audioProps = file.audioProperties();
+
+    if (!audioProps)
         return;
-    
+
     // note: UPnP requres bytes/second
     temp = audioProps->bitrate() * 1024 / 8;
 
     if (temp > 0)
     {
         item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_BITRATE),
-                                           String::from(temp)); 
+                                           String::from(temp));
     }
 
     temp = audioProps->length();
@@ -164,7 +158,7 @@ void TagHandler::fillMetadata(Ref<CdsItem> item)
     temp = audioProps->sampleRate();
     if (temp > 0)
     {
-        item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), 
+        item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY),
                                            String::from(temp));
     }
 
@@ -176,16 +170,23 @@ void TagHandler::fillMetadata(Ref<CdsItem> item)
                                            String::from(temp));
     }
 
+}
+
+void TagLibHandler::fillMetadata(Ref<CdsItem> item)
+{
+    Ref<Array<StringBase> > aux_tags_list;
+    Ref<StringConverter> sc = StringConverter::i2i();
+
     Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     String content_type = mappings->get(item->getMimeType());
 
     if (content_type == CONTENT_TYPE_MP3) {
-        // did not yet found a way on how to get to the picture from the file
-        // reference that we already have
         TagLib::MPEG::File mp(item->getLocation().c_str());
+        populateGenericTags(item, mp);
 
-        if (!mp.isValid() || !mp.hasID3v2Tag())
+        if (!mp.isValid() || !mp.hasID3v2Tag()) {
             return;
+        }
 
         //log_debug("Tag contains %i frame(s)\n", mp.ID3v2Tag()->frameListMap().size());
         Ref<ConfigManager> cm = ConfigManager::getInstance();
@@ -244,22 +245,23 @@ void TagHandler::fillMetadata(Ref<CdsItem> item)
 
             String art_mimetype = sc->convert(art->mimeType().toCString(true));
             if (!isValidArtworkContentType(art_mimetype)) {
-                art_mimetype = getContentTypeFromByteVector(&pic);
+                art_mimetype = getContentTypeFromByteVector(pic);
             }
 
             addArtworkResource(item, art_mimetype);
         }
     } else if (content_type == CONTENT_TYPE_FLAC) {
         TagLib::FLAC::File f(item->getLocation().c_str());
+        populateGenericTags(item, f);
 
         if (!f.isValid()) {
-            log_debug("TagHandler: could not open flac file: %s\n",
+            log_debug("TagLibHandler: could not open flac file: %s\n",
                       item->getLocation().c_str());
             return;
         }
 
         if (f.pictureList().isEmpty()) {
-            log_debug("TagHandler: flac resource has no picture information\n");
+            log_debug("TagLibHandler: flac resource has no picture information\n");
             return;
         }
 
@@ -268,21 +270,22 @@ void TagHandler::fillMetadata(Ref<CdsItem> item)
 
         String art_mimetype = sc->convert(pic->mimeType().toCString(true));
         if (!isValidArtworkContentType(art_mimetype)) {
-            art_mimetype = getContentTypeFromByteVector(&data);
+            art_mimetype = getContentTypeFromByteVector(data);
         }
         addArtworkResource(item, art_mimetype);
 
     } else if (content_type == CONTENT_TYPE_MP4) {
         TagLib::MP4::File f(item->getLocation().c_str());
+        populateGenericTags(item, f);
 
         if (!f.isValid()) {
-            log_debug("TagHandler: could not open mp4 file: %s\n",
+            log_debug("TagLibHandler: could not open mp4 file: %s\n",
                       item->getLocation().c_str());
             return;
         }
 
         if (!f.hasMP4Tag()) {
-            log_debug("TagHandler: mp4 file has no tag information\n");
+            log_debug("TagLibHandler: mp4 file has no tag information\n");
             return;
         }
 
@@ -292,36 +295,37 @@ void TagHandler::fillMetadata(Ref<CdsItem> item)
         TagLib::MP4::Item coverItem = itemsListMap["covr"];
         TagLib::MP4::CoverArtList coverArtList = coverItem.toCoverArtList();
         if (coverArtList.isEmpty()) {
-            log_debug("TagHandler: mp4 file has no coverart");
+            log_debug("TagLibHandler: mp4 file has no coverart");
             return;
         }
 
         TagLib::MP4::CoverArt coverArt = coverArtList.front();
         TagLib::ByteVector data = coverArt.data();
-        art_mimetype = getContentTypeFromByteVector(&data);
+        art_mimetype = getContentTypeFromByteVector(data);
 
         if (string_ok(art_mimetype))
             addArtworkResource(item, art_mimetype);
     }
+    log_debug("TagLib handler done.\n");
 }
 
-bool TagHandler::isValidArtworkContentType(zmm::String art_mimetype) {
+bool TagLibHandler::isValidArtworkContentType(zmm::String art_mimetype) {
     // saw that simply "PNG" was used with some mp3's, so mimetype setting
     // was probably invalid
     return (string_ok(art_mimetype) && (art_mimetype.index('/') != -1));
 }
 
-String TagHandler::getContentTypeFromByteVector(TagLib::ByteVector *data) {
+String TagLibHandler::getContentTypeFromByteVector(TagLib::ByteVector& data) {
     String art_mimetype = _(MIMETYPE_DEFAULT);
 #ifdef HAVE_MAGIC
-    art_mimetype = ContentManager::getInstance()->getMimeTypeFromBuffer((void *) data->data(), data->size());
+    art_mimetype = ContentManager::getInstance()->getMimeTypeFromBuffer(data.data(), data.size());
     if (!string_ok(art_mimetype))
         return _(MIMETYPE_DEFAULT);
 #endif
     return art_mimetype;
 }
 
-void TagHandler::addArtworkResource(Ref<CdsItem> item, String art_mimetype) {
+void TagLibHandler::addArtworkResource(Ref<CdsItem> item, String art_mimetype) {
     // if we could not determine the mimetype, then there is no
     // point to add the resource - it's probably garbage
     log_debug("Found artwork of type %s in file %s\n", art_mimetype.c_str(), item->getLocation().c_str());
@@ -336,7 +340,7 @@ void TagHandler::addArtworkResource(Ref<CdsItem> item, String art_mimetype) {
     }
 }
 
-Ref<IOHandler> TagHandler::serveContent(Ref<CdsItem> item, int resNum, off_t *data_size)
+Ref<IOHandler> TagLibHandler::serveContent(Ref<CdsItem> item, int resNum, off_t *data_size)
 {
     Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     String content_type = mappings->get(item->getMimeType());
@@ -345,14 +349,14 @@ Ref<IOHandler> TagHandler::serveContent(Ref<CdsItem> item, int resNum, off_t *da
         TagLib::MPEG::File f(item->getLocation().c_str());
 
         if (!f.isValid())
-            throw _Exception(_("TagHandler: could not open file: ") + item->getLocation());
+            throw _Exception(_("TagLibHandler: could not open file: ") + item->getLocation());
 
         if (!f.ID3v2Tag())
-            throw _Exception(_("TagHandler: resource has no album information"));
+            throw _Exception(_("TagLibHandler: resource has no album information"));
 
         TagLib::ID3v2::FrameList list = f.ID3v2Tag()->frameList("APIC");
         if (list.isEmpty())
-            throw _Exception(_("TagHandler: resource has no album information"));
+            throw _Exception(_("TagLibHandler: resource has no album information"));
 
         TagLib::ID3v2::AttachedPictureFrame *art =
             static_cast<TagLib::ID3v2::AttachedPictureFrame *>(list.front());
@@ -367,10 +371,10 @@ Ref<IOHandler> TagHandler::serveContent(Ref<CdsItem> item, int resNum, off_t *da
         TagLib::FLAC::File f(item->getLocation().c_str());
 
         if (!f.isValid())
-            throw _Exception(_("TagHandler: could not open flac file: ") + item->getLocation());
+            throw _Exception(_("TagLibHandler: could not open flac file: ") + item->getLocation());
 
         if (f.pictureList().isEmpty())
-            throw _Exception(_("TagHandler: flac resource has no picture information"));
+            throw _Exception(_("TagLibHandler: flac resource has no picture information"));
 
         TagLib::FLAC::Picture *pic = f.pictureList().front();
         TagLib::ByteVector data = pic->data();
@@ -384,11 +388,11 @@ Ref<IOHandler> TagHandler::serveContent(Ref<CdsItem> item, int resNum, off_t *da
         TagLib::MP4::File f(item->getLocation().c_str());
 
         if (!f.isValid()) {
-            throw _Exception(_("TagHandler: could not open mp4 file: ") + item->getLocation());
+            throw _Exception(_("TagLibHandler: could not open mp4 file: ") + item->getLocation());
         }
 
         if (!f.hasMP4Tag()) {
-            throw _Exception(_("TagHandler: mp4 resource has no tag information"));
+            throw _Exception(_("TagLibHandler: mp4 resource has no tag information"));
         }
 
         String art_mimetype;
@@ -397,7 +401,7 @@ Ref<IOHandler> TagHandler::serveContent(Ref<CdsItem> item, int resNum, off_t *da
         TagLib::MP4::Item coverItem = itemsListMap["covr"];
         TagLib::MP4::CoverArtList coverArtList = coverItem.toCoverArtList();
         if (coverArtList.isEmpty()) {
-            throw _Exception(_("TagHandler: mp4 resource has no picture information"));
+            throw _Exception(_("TagLibHandler: mp4 resource has no picture information"));
         }
 
         TagLib::MP4::CoverArt coverArt = coverArtList.front();
@@ -409,7 +413,7 @@ Ref<IOHandler> TagHandler::serveContent(Ref<CdsItem> item, int resNum, off_t *da
         return h;
     }
 
-    throw _Exception(_("TagHandler: Unsupported content_type: ") + content_type);
+    throw _Exception(_("TagLibHandler: Unsupported content_type: ") + content_type);
 }
 
 #endif // HAVE_TAGLIB

@@ -35,19 +35,22 @@
 
 #ifdef HAVE_TAGLIB
 
-#include "metadata_handler.h"
+#include <taglib/tfile.h>
 #include <taglib/tbytevector.h>
 
+#include "metadata_handler.h"
+
 /// \brief This class is responsible for reading id3 or ogg tags metadata
-class TagHandler : public MetadataHandler
+class TagLibHandler : public MetadataHandler
 {
 public:
-    TagHandler();
+    TagLibHandler();
     virtual void fillMetadata(zmm::Ref<CdsItem> item);
     virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum, off_t *data_size);
 private:
+    void populateGenericTags(zmm::Ref<CdsItem> item, TagLib::File& file);
     bool isValidArtworkContentType(zmm::String content_type);
-    zmm::String getContentTypeFromByteVector(TagLib::ByteVector* data);
+    zmm::String getContentTypeFromByteVector(TagLib::ByteVector& data);
     void addArtworkResource(zmm::Ref<CdsItem> item, zmm::String content_type);
 };
 

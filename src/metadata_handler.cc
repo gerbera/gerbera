@@ -104,10 +104,8 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
     String mimetype = item->getMimeType();
 
     Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
-    resource->addAttribute(getResAttrName(R_PROTOCOLINFO),
-                           renderProtocolInfo(mimetype));
-    resource->addAttribute(getResAttrName(R_SIZE),
-            String::from(filesize));
+    resource->addAttribute(getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(mimetype));
+    resource->addAttribute(getResAttrName(R_SIZE), String::from(filesize));
     
     item->addResource(resource);
 
@@ -116,8 +114,6 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
    
     if ((content_type == CONTENT_TYPE_OGG) && (isTheora(item->getLocation())))
             item->setFlag(OBJECT_FLAG_OGG_THEORA);
-
-    Ref<Array<MetadataHandler> > handlers = Ref<Array<MetadataHandler> >(new Array<MetadataHandler>());
 
 #ifdef HAVE_TAGLIB
     if ((content_type == CONTENT_TYPE_MP3) || 
@@ -129,7 +125,7 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
         (content_type == CONTENT_TYPE_AIFF) ||
         (content_type == CONTENT_TYPE_MP4))
     {
-        handlers->append(Ref<MetadataHandler>(new TagHandler()));
+        TagLibHandler().fillMetadata(item);
     }
 #endif // HAVE_TAGLIB
 
@@ -145,7 +141,7 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
 #ifdef HAVE_LIBEXIF
     if (content_type == CONTENT_TYPE_JPG)
     {
-        handlers->append(Ref<MetadataHandler>(new LibExifHandler()));
+        LibExifHandler().fillMetadata(item);
     }
 #endif // HAVE_LIBEXIF
 
@@ -156,7 +152,7 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
         item->getMimeType().startsWith(_("video")) ||
         item->getMimeType().startsWith(_("audio"))))
     {
-        handlers->append(Ref<MetadataHandler>(new FfmpegHandler()));
+        FfmpegHandler().fillMetadata(item);
     }
 #else
     if (content_type == CONTENT_TYPE_AVI)
@@ -174,20 +170,12 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
 #ifdef HAVE_LIBDVDNAV
     if (content_type == CONTENT_TYPE_DVD)
     {
-        handlers->append(Ref<MetadataHandler>(new DVDHandler()));
+        DVDHandler().fillMetadata(item);
     }
 #endif
 
     // Fanart for all things!
-    handlers->append(Ref<MetadataHandler>(new FanArtHandler()));
-
-    int size = handlers->size();
-    for (int i = 0; i < size; i++)
-    {
-        Ref<MetadataHandler> mh = handlers->get(i);
-        mh->fillMetadata(item);
-    }
-
+    FanArtHandler().fillMetadata(item);
 }
 
 String MetadataHandler::getMetaFieldName(metadata_fields_t field)
@@ -208,9 +196,9 @@ Ref<MetadataHandler> MetadataHandler::createHandler(int handlerType)
         case CH_LIBEXIF:
             return Ref<MetadataHandler>(new LibExifHandler());
 #endif
-#if   HAVE_TAGLIB
+#ifdef HAVE_TAGLIB
         case CH_ID3:
-            return Ref<MetadataHandler>(new TagHandler());
+            return Ref<MetadataHandler>(new TagLibHandler());
 #endif
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
         case CH_FFTH:
