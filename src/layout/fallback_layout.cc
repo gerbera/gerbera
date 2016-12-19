@@ -541,7 +541,7 @@ void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
             if (reg != YT_region_none)
             {
                 region = YouTubeService::getRegionName(reg);
-                if (string_ok(region));
+                if (string_ok(region))
                     chain = chain + '/' + esc(region);
             }
         }

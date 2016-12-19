@@ -29,11 +29,16 @@
 
 /// \file timer.cc
 
+#include "singleton.h"
+
+// Singleton::mutex is used in the Timer ctor(), so it must be instantiated
+// before the code that uses it (clang throws an error otherwise).
+class Timer;
+SINGLETON_MUTEX(Timer, true);
+
 #include "timer.h"
 
 using namespace zmm;
-
-SINGLETON_MUTEX(Timer, true);
 
 template <>
 Ref<Array<Timer::TimerSubscriberElement<TimerSubscriberSingleton<Object> > > > Timer::getAppropriateSubscribers<TimerSubscriberSingleton<Object> >()

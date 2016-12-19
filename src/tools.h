@@ -325,7 +325,7 @@ zmm::String get_last_path(zmm::String location);
 
 /// \brief Calculates a position where it is safe to cut an UTF-8 string.
 /// \return Caclulated position or -1 in case of an error.
-ssize_t getValidUTF8CutPosition(zmm::String str, size_t cutpos);
+ssize_t getValidUTF8CutPosition(zmm::String str, ssize_t cutpos);
 
 #ifdef EXTEND_PROTOCOLINFO
 zmm::String getDLNAtransferHeader(zmm::String mimeType, zmm::String header);

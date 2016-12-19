@@ -33,9 +33,9 @@
 #ifndef __CACHED_URL_H__
 #define __CACHED_URL_H__
 
+#include <mutex>
 #include "zmm/zmmf.h"
 #include "zmm/zmm.h"
-#include "sync.h"
 
 /// \brief Stores information about cached URLs
 class CachedURL : public zmm::Object
@@ -62,7 +62,8 @@ protected:
     time_t creation_time;
     time_t last_access_time;
 
-    zmm::Ref<Mutex> mutex;
+    std::mutex mutex;
+    using AutoLock = std::lock_guard<std::mutex>;
 };
 
 #endif//__CACHED_URL_H__

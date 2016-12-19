@@ -33,6 +33,8 @@
 #define __THREAD_EXECUTOR_H__
 
 #include <pthread.h>
+#include <mutex>
+#include <condition_variable>
 
 #include "common.h"
 #include "executor.h"
@@ -59,8 +61,8 @@ protected:
     /// \brief if the thread is currently running
     bool threadRunning;
 
-    zmm::Ref<Cond> cond;
-    zmm::Ref<Mutex> mutex;
+    std::condition_variable cond;
+    std::mutex mutex;
     
     /// \brief abstract thread method, which needs to be overridden
     virtual void threadProc() = 0;
