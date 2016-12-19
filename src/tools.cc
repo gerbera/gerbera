@@ -1382,7 +1382,7 @@ String get_last_path(String location)
 }
 
 
-ssize_t getValidUTF8CutPosition(zmm::String str, size_t cutpos)
+ssize_t getValidUTF8CutPosition(zmm::String str, ssize_t cutpos)
 {
     ssize_t pos = -1;
     size_t len = str.length();

@@ -47,7 +47,6 @@ CachedURL::CachedURL(int object_id, zmm::String url)
                          mt_strerror(errno));
     }
     this->last_access_time = creation_time;
-    mutex = Ref<Mutex>(new Mutex(false)); // non recursive mutex
 }
 
 int CachedURL::getObjectID()
@@ -57,7 +56,7 @@ int CachedURL::getObjectID()
     
 String CachedURL::getURL()
 {
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     last_access_time = time(NULL);
     if (last_access_time == -1)
     {
@@ -75,6 +74,6 @@ time_t CachedURL::getCreationTime()
     /// \brief Retrieves the time when the last access time of the data.
 time_t CachedURL::getLastAccessTime()
 {
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     return last_access_time;
 }

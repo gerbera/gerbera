@@ -33,16 +33,14 @@
 #include "config_manager.h"
 
 using namespace zmm;
+using namespace std;
 
 IOHandlerBufferHelper::IOHandlerBufferHelper(size_t bufSize, size_t initialFillSize) : IOHandler()
 {
     if (bufSize <=0)
         throw _Exception(_("bufSize must be positive"));
-    if (initialFillSize < 0 || initialFillSize > bufSize)
-        throw _Exception(_("initialFillSize must be non-negative and must be lesser than or equal to the size of the buffer"));
-    
-    mutex = Ref<Mutex>(new Mutex());
-    cond = Ref<Cond>(new Cond(mutex));
+    if (initialFillSize > bufSize)
+        throw _Exception(_("initialFillSize must be lesser than or equal to the size of the buffer"));
     
     this->bufSize = bufSize;
     this->initialFillSize = initialFillSize;
@@ -86,7 +84,7 @@ int IOHandlerBufferHelper::read(OUT char *buf, IN size_t length)
     // length must be positive
     assert(length > 0);
     
-    AUTOLOCK(mutex);
+    unique_lock<std::mutex> lock(mutex);
     
     while ((empty || waitForInitialFillSize) && ! (threadShutdown || eof || readError))
     {
@@ -96,7 +94,7 @@ int IOHandlerBufferHelper::read(OUT char *buf, IN size_t length)
             return CHECK_SOCKET;
         }
         else
-            cond->wait();
+            cond.wait(lock);
     }
     
     if (readError || threadShutdown)
@@ -105,7 +103,7 @@ int IOHandlerBufferHelper::read(OUT char *buf, IN size_t length)
         return 0;
     
     size_t bLocal = b;
-    AUTOUNLOCK();
+    lock.unlock();
     
     // we ensured with the while above that the buffer isn't empty
     int currentFillSize = bLocal - a;
@@ -124,13 +122,13 @@ int IOHandlerBufferHelper::read(OUT char *buf, IN size_t length)
     
     size_t didRead = read1+read2;
     
-    AUTORELOCK();
+    lock.lock();
     
     bool signalled = false;
     // was the buffer full or became it "full" while we read?
     if (signalAfterEveryRead || a == b)
     {
-        cond->signal();
+        cond.notify_one();
         signalled = true;
     }
     
@@ -141,7 +139,7 @@ int IOHandlerBufferHelper::read(OUT char *buf, IN size_t length)
     {
         empty = true;
         if (! signalled)
-            cond->signal();
+            cond.notify_one();
     }
     
     posRead += didRead;
@@ -165,7 +163,7 @@ void IOHandlerBufferHelper::seek(IN off_t offset, IN int whence)
     if (whence == SEEK_CUR && offset == 0)
         return;
     
-    AUTOLOCK(mutex);
+    unique_lock<std::mutex> lock(mutex);
     
     // if another seek isn't processed yet - well we don't care as this new seek
     // will change the position anyway
@@ -174,11 +172,12 @@ void IOHandlerBufferHelper::seek(IN off_t offset, IN int whence)
     seekWhence = whence;
     
     // tell the probably sleeping thread to process our seek
-    cond->signal();
+    cond.notify_one();
     
     // wait until the seek has been processed
-    while(doSeek && ! (threadShutdown || eof || readError))
-        cond->wait();
+    cond.wait(lock, [&](){
+            return !doSeek || threadShutdown || eof || readError;
+    });
 }
 
 void IOHandlerBufferHelper::close()
@@ -205,10 +204,11 @@ void IOHandlerBufferHelper::startBufferThread()
 
 void IOHandlerBufferHelper::stopBufferThread()
 {
-    AUTOLOCK(mutex);
+    unique_lock<std::mutex> lock(mutex);
     threadShutdown = true;
-    cond->signal();
-    AUTOUNLOCK();
+    cond.notify_one();
+    lock.unlock();
+
     if (bufferThread)
         pthread_join(bufferThread, NULL);
     bufferThread = 0;

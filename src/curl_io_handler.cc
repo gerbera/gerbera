@@ -36,6 +36,7 @@
 #include "curl_io_handler.h"
 
 using namespace zmm;
+using namespace std;
 
 CurlIOHandler::CurlIOHandler(String URL, CURL *curl_handle, size_t bufSize, size_t initialFillSize) : IOHandlerBufferHelper(bufSize, initialFillSize)
 {
@@ -107,10 +108,10 @@ void CurlIOHandler::threadProc()
     curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, CurlIOHandler::curlCallback);
     curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)this);
     
-    AUTOLOCK_NOLOCK(mutex);
+    unique_lock<std::mutex> lock(mutex, std::defer_lock);
     do
     {
-        AUTORELOCK();
+        lock.lock();
         if (doSeek)
         {
             log_debug("SEEK: %lld %d\n", seekOffset, seekWhence);
@@ -135,9 +136,9 @@ void CurlIOHandler::threadProc()
             waitForInitialFillSize = (initialFillSize > 0);
             
             doSeek = false;
-            cond->signal();
+            cond.notify_one();
         }
-        AUTOUNLOCK();
+        lock.unlock();
         res = curl_easy_perform(curl_handle);
     }
     while (doSeek);
@@ -147,7 +148,7 @@ void CurlIOHandler::threadProc()
     else
         eof = true;
     
-    cond->signal();
+    cond.notify_one();
 }
 
 
@@ -161,7 +162,7 @@ size_t CurlIOHandler::curlCallback(void *ptr, size_t size, size_t nmemb, void *d
     
     //log_debug("URL: %s; size: %d; nmemb: %d; wantWrite: %d\n", ego->URL.c_str(), size, nmemb, wantWrite);
     
-    AUTOLOCK(ego->mutex);
+    unique_lock<std::mutex> lock(ego->mutex);
     
     bool first = true;
     
@@ -197,7 +198,7 @@ size_t CurlIOHandler::curlCallback(void *ptr, size_t size, size_t nmemb, void *d
                 /// \todo do we need to wait for initialFillSize again?
             
                 ego->doSeek = false;
-                ego->cond->signal();
+                ego->cond.notify_one();
             }
         }
         
@@ -216,7 +217,7 @@ size_t CurlIOHandler::curlCallback(void *ptr, size_t size, size_t nmemb, void *d
         
         if (! first)
         {
-            ego->cond->wait();
+            ego->cond.wait(lock);
         }
         else
             first = false;
@@ -245,13 +246,13 @@ size_t CurlIOHandler::curlCallback(void *ptr, size_t size, size_t nmemb, void *d
     
     size_t bLocal = ego->b;
     
-    AUTOUNLOCK();
+    lock.unlock();
     
     memcpy(ego->buffer + bLocal, ptr, write1);
     if (write2)
         memcpy(ego->buffer, (char *)ptr + maxWrite, write2);
     
-    AUTORELOCK();
+    lock.lock();
     
     //ego->bytesCurl += wantWrite;
     ego->b += wantWrite;
@@ -260,7 +261,7 @@ size_t CurlIOHandler::curlCallback(void *ptr, size_t size, size_t nmemb, void *d
     if (ego->empty)
     {
         ego->empty = false;
-        ego->cond->signal();
+        ego->cond.notify_one();
     }
     if (ego->waitForInitialFillSize)
     {
@@ -271,7 +272,7 @@ size_t CurlIOHandler::curlCallback(void *ptr, size_t size, size_t nmemb, void *d
         {
             log_debug("buffer: initial fillsize reached\n");
             ego->waitForInitialFillSize = false;
-            ego->cond->signal();
+            ego->cond.notify_one();
         }
     }
     

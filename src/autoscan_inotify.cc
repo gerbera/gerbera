@@ -48,9 +48,6 @@ using namespace std;
 
 AutoscanInotify::AutoscanInotify()
 {
-    mutex = Ref<Mutex>(new Mutex());
-    cond = Ref<Cond>(new Cond(mutex));
-
     if (check_path(_(INOTIFY_MAX_USER_WATCHES_FILE)))
     {
         int max_watches = -1;
@@ -74,7 +71,7 @@ AutoscanInotify::AutoscanInotify()
 
 void AutoscanInotify::init()
 {
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     if (shutdownFlag)
     {
         shutdownFlag = false;
@@ -99,13 +96,13 @@ AutoscanInotify::~AutoscanInotify()
 
 void AutoscanInotify::shutdown()
 {
-    AUTOLOCK(mutex);
+    unique_lock<std::mutex> lock(mutex);
     if (! shutdownFlag)
     {
         log_debug("start\n");
         shutdownFlag = true;
         inotify->stop();
-        AUTOUNLOCK();
+        lock.unlock();
         if (thread)
             pthread_join(thread, NULL);
         thread = 0;
@@ -153,15 +150,15 @@ void AutoscanInotify::threadProc()
         {
             Ref<AutoscanDirectory> adir;
             
-            AUTOLOCK(mutex);
+            unique_lock<std::mutex> lock(mutex);
             while ((adir = unmonitorQueue->dequeue()) != nil)
             {
-                AUTOUNLOCK();
+                lock.unlock();
                 
                 String location = normalizePathNoEx(adir->getLocation());
                 if (! string_ok(location))
                 {
-                    AUTORELOCK();
+                    lock.lock();
                     continue;
                 }
                 
@@ -176,17 +173,17 @@ void AutoscanInotify::threadProc()
                     unmonitorDirectory(location, adir);
                 }
                 
-                AUTORELOCK();
+                lock.lock();
             }
             
             while ((adir = monitorQueue->dequeue()) != nil)
             {
-                AUTOUNLOCK();
+                lock.unlock();
                 
                 String location = normalizePathNoEx(adir->getLocation());
                 if (! string_ok(location))
                 {
-                    AUTORELOCK();
+                    lock.lock();
                     continue;
                 }
                 
@@ -202,10 +199,10 @@ void AutoscanInotify::threadProc()
                 }
                 cm->rescanDirectory(adir->getObjectID(), adir->getScanID(), adir->getScanMode(), nil, false);
                 
-                AUTORELOCK();
+                lock.lock();
             }
             
-            AUTOUNLOCK();
+            lock.unlock();
             
             /* --- get event --- (blocking) */
             event = inotify->nextEvent();
@@ -337,7 +334,7 @@ void AutoscanInotify::monitor(zmm::Ref<AutoscanDirectory> dir)
     assert(dir->getScanMode() == InotifyScanMode);
     log_debug("---> INCOMING REQUEST TO MONITOR [%s]\n", 
             dir->getLocation().c_str());
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     monitorQueue->enqueue(dir);
     inotify->stop();
 }
@@ -349,7 +346,7 @@ void AutoscanInotify::unmonitor(zmm::Ref<AutoscanDirectory> dir)
     
     log_debug("---> INCOMING REQUEST TO UNMONITOR [%s]\n", 
             dir->getLocation().c_str());
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     unmonitorQueue->enqueue(dir);
     inotify->stop();
 }
