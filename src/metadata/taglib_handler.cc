@@ -298,6 +298,29 @@ Ref<IOHandler> TagLibHandler::serveContent(IN Ref<CdsItem> item, IN int resNum, 
 
         *data_size = data.size();
         return h;
+    } else if (content_type == CONTENT_TYPE_WMA) {
+        TagLib::ASF::File f(item->getLocation().c_str());
+
+        if (!f.isValid())
+            throw _Exception(_("TagLibHandler: could not open flac file: ") + item->getLocation());
+
+        const TagLib::ASF::AttributeListMap& attrListMap = f.tag()->attributeListMap();
+        if (!attrListMap.contains("WM/Picture"))
+            throw _Exception(_("TagLibHandler: wma file has no picture information"));
+
+        const TagLib::ASF::AttributeList& attrList = attrListMap["WM/Picture"];
+        if (attrList.isEmpty())
+            throw _Exception(_("TagLibHandler: wma list has no picture information"));
+
+        const TagLib::ASF::Picture& wmpic = attrList[0].toPicture();
+        if (!wmpic.isValid())
+            throw _Exception(_("TagLibHandler: wma pic not valid"));
+
+        const TagLib::ByteVector& data = wmpic.picture();
+
+        Ref<IOHandler> h(new MemIOHandler(data.data(), data.size()));
+        *data_size = data.size();
+        return h;
     }
 
     throw _Exception(_("TagLibHandler: Unsupported content_type: ") + content_type);
@@ -379,6 +402,24 @@ void TagLibHandler::extractASF(zmm::Ref<CdsItem> item) {
         return;
     }
     populateGenericTags(item, f);
+
+    const TagLib::ASF::AttributeListMap& attrListMap = f.tag()->attributeListMap();
+    if (attrListMap.contains("WM/Picture")) {
+        const TagLib::ASF::AttributeList& attrList = attrListMap["WM/Picture"];
+        if (attrList.isEmpty())
+            return;
+
+        const TagLib::ASF::Picture& wmpic = attrList[0].toPicture();
+        if (!wmpic.isValid())
+            return;
+
+        Ref<StringConverter> sc = StringConverter::i2i();
+        String art_mimetype = sc->convert(wmpic.mimeType().toCString(true));
+        if (!isValidArtworkContentType(art_mimetype)) {
+            art_mimetype = getContentTypeFromByteVector(wmpic.picture());
+        }
+        addArtworkResource(item, art_mimetype);
+    }
 }
 
 void TagLibHandler::extractFLAC(zmm::Ref<CdsItem> item) {
@@ -391,16 +432,15 @@ void TagLibHandler::extractFLAC(zmm::Ref<CdsItem> item) {
     }
     populateGenericTags(item, f);
 
-    Ref<StringConverter> sc = StringConverter::i2i();
-
     if (f.pictureList().isEmpty()) {
         log_debug("TagLibHandler: flac resource has no picture information\n");
         return;
     }
 
-    TagLib::FLAC::Picture* pic = f.pictureList().front();
-    TagLib::ByteVector data = pic->data();
+    const TagLib::FLAC::Picture *pic = f.pictureList().front();
+    const TagLib::ByteVector& data = pic->data();
 
+    Ref<StringConverter> sc = StringConverter::i2i();
     String art_mimetype = sc->convert(pic->mimeType().toCString(true));
     if (!isValidArtworkContentType(art_mimetype)) {
         art_mimetype = getContentTypeFromByteVector(data);
