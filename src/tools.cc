@@ -57,6 +57,7 @@
 #define WHITE_SPACE " \t\r\n"
 
 using namespace zmm;
+using namespace std;
 
 static const char *HEX_CHARS = "0123456789abcdef";
 
@@ -985,7 +986,7 @@ unsigned int stringHash(String str)
     return hash;
 }
 
-String intArrayToCSV(std::shared_ptr<std::unordered_set<int> > array)
+String toCSV(shared_ptr<unordered_set<int> > array)
 {
     if (array->empty())
         return nil;

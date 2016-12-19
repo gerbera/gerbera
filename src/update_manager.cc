@@ -46,12 +46,13 @@
 #define OBJECT_ID_HASH_CAPACITY 3109
 
 using namespace zmm;
+using namespace std;
 
 SINGLETON_MUTEX(UpdateManager, false);
 
 UpdateManager::UpdateManager() : Singleton<UpdateManager>()
 {
-    objectIDHash = std::make_shared<std::unordered_set<int>>();
+    objectIDHash = make_shared<unordered_set<int>>();
     shutdownFlag = false;
     flushPolicy = FLUSH_SPEC;
     lastContainerChanged = INVALID_OBJECT_ID;

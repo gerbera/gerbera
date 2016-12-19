@@ -34,13 +34,14 @@
 #include "storage_cache.h"
 
 using namespace zmm;
+using namespace std;
 
 StorageCache::StorageCache()
 {
     capacity = STORAGE_CACHE_CAPACITY;
     maxfill = STORAGE_CACHE_MAXFILL;
-    idHash = std::make_shared<std::unordered_map<int,Ref<CacheObject> > >();
-    locationHash = std::make_shared<std::unordered_map<zmm::String, Ref<Array<CacheObject> > > >();
+    idHash = make_shared<unordered_map<int,Ref<CacheObject> > >();
+    locationHash = make_shared<unordered_map<zmm::String, Ref<Array<CacheObject> > > >();
     hasBeenFlushed = false;
     mutex = Ref<Mutex> (new Mutex());
 }
@@ -59,7 +60,7 @@ Ref<CacheObject> StorageCache::getObject(int id)
 #endif
     try {
         return idHash->at(id);
-    } catch(std::out_of_range& nope) {
+    } catch(out_of_range& nope) {
         return nil;
     }
 }
@@ -72,7 +73,7 @@ Ref<CacheObject> StorageCache::getObjectDefinitely(int id)
     Ref<CacheObject> obj = nil;
     try {
         obj = idHash->at(id);
-    } catch (const std::out_of_range& ex) {
+    } catch (const out_of_range& ex) {
         ensureFillLevelOk();
         obj = Ref<CacheObject>(new CacheObject());
         idHash->emplace(id, obj);
@@ -90,7 +91,7 @@ void StorageCache::addChild(int id)
         obj = idHash->at(id);
         if (obj->knowsNumChildren())
             obj->setNumChildren(obj->getNumChildren() + 1);
-    } catch(const std::out_of_range& ex) {} // id not found
+    } catch(const out_of_range& ex) {} // id not found
 }
 
 bool StorageCache::removeObject(int id)
@@ -111,7 +112,7 @@ Ref<Array<CacheObject> > StorageCache::getObjects(String location)
 #endif
     try {
         return locationHash->at(location);
-    } catch (const std::out_of_range& ex) {
+    } catch (const out_of_range& ex) {
         return nil;
     }
 }
@@ -132,7 +133,7 @@ void StorageCache::checkLocation(Ref<CacheObject> obj)
             if (objects->get(i) == obj)
                 return;
         }
-    } catch (const std::out_of_range& ex) {
+    } catch (const out_of_range& ex) {
         objects = Ref<Array<CacheObject> >(new Array<CacheObject>());
         locationHash->emplace(location, objects);
     }

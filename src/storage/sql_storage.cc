@@ -29,8 +29,6 @@
 
 /// \file sql_storage.cc
 
-#include <algorithm>
-
 #include <limits.h>
 #include "sql_storage.h"
 #include "tools.h"
@@ -40,6 +38,7 @@
 #include "filesystem.h"
 
 using namespace zmm;
+using namespace std;
 
 #define MAX_REMOVE_SIZE     10000
 #define MAX_REMOVE_RECURSION 500
@@ -1269,7 +1268,7 @@ int SQLStorage::getTotalFiles()
     return 0;
 }
 
-String SQLStorage::incrementUpdateIDs(std::shared_ptr<std::unordered_set<int> > ids)
+String SQLStorage::incrementUpdateIDs(shared_ptr<unordered_set<int> > ids)
 {
     if (ids->empty())
         return nil;
@@ -1385,7 +1384,7 @@ Ref<Array<CdsObject> > SQLStorage::selectObjects(Ref<SelectParam> param)
 }
 */
 
-std::shared_ptr<std::unordered_set<int> > SQLStorage::getObjects(int parentID, bool withoutContainer)
+shared_ptr<unordered_set<int> > SQLStorage::getObjects(int parentID, bool withoutContainer)
 {
     flushInsertBuffer();
     
@@ -1406,7 +1405,7 @@ std::shared_ptr<std::unordered_set<int> > SQLStorage::getObjects(int parentID, b
     if (capacity < 521)
         capacity = 521;
     
-    std::shared_ptr<std::unordered_set<int> > ret = std::make_shared<std::unordered_set<int>>();
+    shared_ptr<unordered_set<int> > ret = make_shared<unordered_set<int>>();
     
     while ((row = res->nextRow()) != nil)
     {
@@ -1415,7 +1414,7 @@ std::shared_ptr<std::unordered_set<int> > SQLStorage::getObjects(int parentID, b
     return ret;
 }
 
-Ref<Storage::ChangedContainers> SQLStorage::removeObjects(std::shared_ptr<std::unordered_set<int> > list, bool all)
+Ref<Storage::ChangedContainers> SQLStorage::removeObjects(shared_ptr<unordered_set<int> > list, bool all)
 {
     flushInsertBuffer();
 
@@ -1428,8 +1427,6 @@ Ref<Storage::ChangedContainers> SQLStorage::removeObjects(std::shared_ptr<std::u
         << " FROM " << TQ(CDS_OBJECT_TABLE)
         << " WHERE " << TQ("id") << " IN (";
     int firstComma = idsBuf->length();
-
-
 
     for(const auto &id : *list) {
         if (IS_FORBIDDEN_CDS_ID(id))

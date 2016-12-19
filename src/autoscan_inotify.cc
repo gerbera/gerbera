@@ -42,7 +42,9 @@
 #define AUTOSCAN_INOTIFY_INITIAL_QUEUE_SIZE 20
 
 #define INOTIFY_MAX_USER_WATCHES_FILE "/proc/sys/fs/inotify/max_user_watches"
+
 using namespace zmm;
+using namespace std;
 
 AutoscanInotify::AutoscanInotify()
 {
@@ -63,7 +65,7 @@ AutoscanInotify::AutoscanInotify()
         }
     }
 
-    watches = std::make_shared<std::unordered_map<int, Ref<Wd>> >();
+    watches = make_shared<unordered_map<int, Ref<Wd>> >();
     shutdownFlag = true;
     monitorQueue = Ref<ObjectQueue<AutoscanDirectory> >(new ObjectQueue<AutoscanDirectory>(AUTOSCAN_INOTIFY_INITIAL_QUEUE_SIZE));
     unmonitorQueue = Ref<ObjectQueue<AutoscanDirectory> >(new ObjectQueue<AutoscanDirectory>(AUTOSCAN_INOTIFY_INITIAL_QUEUE_SIZE));
@@ -219,7 +221,7 @@ void AutoscanInotify::threadProc()
                 Ref<Wd> wdObj = nil;
                 try {
                     wdObj = watches->at(wd);
-                } catch (const std::out_of_range& ex) {
+                } catch (const out_of_range& ex) {
                     inotify->removeWatch(wd);
                     continue;
                 }
@@ -396,7 +398,7 @@ int AutoscanInotify::addMoveWatch(String path, int removeWd, int parentWd)
             //alreadyThere =...
             //FIXME: not finished?
 
-        } catch (const std::out_of_range& ex) {
+        } catch (const out_of_range& ex) {
             wdObj = Ref<Wd>(new Wd(path, wd, parentWd));
             watches->emplace(wd, wdObj);
         }
@@ -503,7 +505,7 @@ void AutoscanInotify::checkMoveWatches(int wd, Ref<Wd> wdObj)
                     if (objectID != INVALID_OBJECT_ID)
                         cm->removeObject(objectID);
                 }
-            } catch (const std::out_of_range& ex) {} // Not found in map
+            } catch (const out_of_range& ex) {} // Not found in map
         }
     }
 }
@@ -637,7 +639,7 @@ int AutoscanInotify::monitorDirectory(String pathOri, Ref<AutoscanDirectory> adi
 
             // should we check for already existing "nonexisting" watches?
             // ...
-        } catch (const std::out_of_range& ex) {
+        } catch (const out_of_range& ex) {
             wdObj = Ref<Wd>(new Wd(path, wd, parentWd));
             watches->emplace(wd, wdObj);
         }
@@ -781,7 +783,7 @@ void AutoscanInotify::removeWatchMoves(int wd)
         wdObj = nil;
         try {
             wdObj = watches->at(checkWd);
-        } catch (const std::out_of_range& ex) {
+        } catch (const out_of_range& ex) {
             break;
         }
 
@@ -883,7 +885,7 @@ void AutoscanInotify::removeDescendants(int wd)
     Ref<Wd> wdObj = nil;
     try {
         wdObj = watches->at(wd);
-    } catch (const std::out_of_range& ex) {
+    } catch (const out_of_range& ex) {
         return;
     }
 

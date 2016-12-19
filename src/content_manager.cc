@@ -91,6 +91,7 @@ struct magic_set *ms = NULL;
 
 using namespace zmm;
 using namespace mxml;
+using namespace std;
 
 #define MIMETYPE_REGEXP "^([a-z0-9_-]+/[a-z0-9_-]+)"
 
@@ -846,7 +847,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
     }
 
     // request only items if non-recursive scan is wanted
-    std::shared_ptr<std::unordered_set<int> > list = storage->getObjects(containerID, !adir->getRecursive());
+    shared_ptr<unordered_set<int> > list = storage->getObjects(containerID, !adir->getRecursive());
 
     unsigned int thisTaskID;
     if (task != nil)

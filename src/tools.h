@@ -263,7 +263,7 @@ zmm::String fallbackString(zmm::String first, zmm::String fallback);
 /// \return return the (unsigned int) hash value
 unsigned int stringHash(zmm::String str);
 
-zmm::String intArrayToCSV(std::shared_ptr<std::unordered_set<int> > array);
+zmm::String toCSV(std::shared_ptr<std::unordered_set<int> > array);
 
 //inline void getTimeval(struct timeval *now) { gettimeofday(now, NULL); }
 
