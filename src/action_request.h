@@ -42,7 +42,7 @@
 ///
 /// When we get a Upnp_Action_Request from the SDK we convert it to our
 /// structure. The idea is to get the XML of the request, process it outside
-/// of the class, create a response XML and put it back in. Before pasing
+/// of the class, create a response XML and put it back in. Before passing
 /// *upnp_request back to the SDK the update() function MUST be called.
 class ActionRequest : public zmm::Object
 {
@@ -58,7 +58,7 @@ protected:
     /// Returned by getActionName()
     zmm::String actionName;
 
-    /// \brief UDN of the recepient device (it should be our UDN)
+    /// \brief UDN of the recipient device (it should be our UDN)
     ///
     /// Returned by getUDN()
     zmm::String UDN;
@@ -86,7 +86,7 @@ public:
     /// \brief Returns the name of the action. 
     zmm::String getActionName();
 
-    /// \brief Returns the UDN of the recepient device (should be ours)
+    /// \brief Returns the UDN of the recipient device (should be ours)
     zmm::String getUDN();
 
     /// \brief Returns the ID of the service (the action is for this service id)

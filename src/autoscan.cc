@@ -272,7 +272,7 @@ Ref<AutoscanList> AutoscanList::removeIfSubdir(String parent, bool persistent)
             Ref<AutoscanDirectory> dir = list->get(i);
             if (dir == nil)
                 continue;
-            if (dir->persistent() && (persistent == false))
+            if (dir->persistent() && !persistent)
             {
                 continue;
             }

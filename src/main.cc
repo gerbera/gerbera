@@ -272,7 +272,6 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
                     printf("-------------\n");
                     printf("%s\n\n", COMPILE_INFO);
                     exit(EXIT_SUCCESS);
-                    break;
                 case 14: // --version
                     print_version = true;
                     break;
