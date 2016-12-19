@@ -3,3 +3,9 @@ mediatomb.spec
 mediatomb-service-optware
 .idea
 cmake-build-debug
+*.orig
+CMakeCache.txt
+CMakeFiles
+cmake_install.cmake
+Makefile
+mediatomb
