@@ -31,6 +31,9 @@
 #ifndef __TOOLS_H__
 #define __TOOLS_H__
 
+#include <memory>
+#include <unordered_set>
+
 #include "common.h"
 #include "rexp.h"
 #include "io_handler.h"
@@ -260,7 +263,7 @@ zmm::String fallbackString(zmm::String first, zmm::String fallback);
 /// \return return the (unsigned int) hash value
 unsigned int stringHash(zmm::String str);
 
-zmm::String intArrayToCSV(int *array, int size);
+zmm::String toCSV(std::shared_ptr<std::unordered_set<int> > array);
 
 //inline void getTimeval(struct timeval *now) { gettimeofday(now, NULL); }
 

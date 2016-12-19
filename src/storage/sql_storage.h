@@ -36,9 +36,10 @@
 #include "cds_objects.h"
 #include "dictionary.h"
 #include "storage.h"
-#include "hash.h"
 #include "sync.h"
 #include "storage_cache.h"
+
+#include <unordered_set>
 
 #define QTB                 table_quote_begin
 #define QTE                 table_quote_end
@@ -101,10 +102,10 @@ public:
     
     //virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param);
     
-    virtual zmm::Ref<DBRHash<int> > getObjects(int parentID, bool withoutContainer);
+    virtual std::shared_ptr<std::unordered_set<int> > getObjects(int parentID, bool withoutContainer);
     
     virtual zmm::Ref<ChangedContainers> removeObject(int objectID, bool all);
-    virtual zmm::Ref<ChangedContainers> removeObjects(zmm::Ref<DBRHash<int> > list, bool all = false);
+    virtual zmm::Ref<ChangedContainers> removeObjects(std::shared_ptr<std::unordered_set<int> > list, bool all = false);
     
     virtual zmm::Ref<CdsObject> loadObjectByServiceID(zmm::String serviceID);
     virtual zmm::Ref<zmm::IntArray> getServiceObjectIDs(char servicePrefix);
@@ -120,7 +121,7 @@ public:
     //virtual zmm::Ref<CdsObject> findObjectByTitle(zmm::String title, int parentID);
     virtual zmm::Ref<CdsObject> findObjectByPath(zmm::String fullpath);
     virtual int findObjectIDByPath(zmm::String fullpath);
-    virtual zmm::String incrementUpdateIDs(int *ids, int size);
+    virtual zmm::String incrementUpdateIDs(std::shared_ptr<std::unordered_set<int> > ids);
     
     virtual zmm::String buildContainerPath(int parentID, zmm::String title);
     virtual void addContainerChain(zmm::String path, zmm::String lastClass,

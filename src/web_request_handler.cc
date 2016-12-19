@@ -36,7 +36,6 @@
 #include "content_manager.h"
 #include "web/pages.h"
 #include "tools.h"
-#include "hash.h"
 
 using namespace zmm;
 using namespace mxml;

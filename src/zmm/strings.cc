@@ -29,6 +29,7 @@
 
 /// \file strings.cc
 
+#include <string>
 #include <ctype.h>
 
 #include "memory.h"
