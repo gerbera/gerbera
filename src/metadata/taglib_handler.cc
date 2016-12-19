@@ -321,6 +321,22 @@ Ref<IOHandler> TagLibHandler::serveContent(IN Ref<CdsItem> item, IN int resNum, 
         Ref<IOHandler> h(new MemIOHandler(data.data(), data.size()));
         *data_size = data.size();
         return h;
+    } else if (content_type == CONTENT_TYPE_OGG) {
+        TagLib::Ogg::Vorbis::File f(item->getLocation().c_str());
+
+        if (!f.isValid() || !f.tag())
+            throw _Exception(_("TagLibHandler: could not open vorbis file: ") + item->getLocation());
+
+        const TagLib::List<TagLib::FLAC::Picture *> picList = f.tag()->pictureList();
+        if (picList.isEmpty())
+            throw _Exception(_("TagLibHandler: vorbis file has no picture information"));
+
+        const TagLib::FLAC::Picture *pic = picList.front();
+        const TagLib::ByteVector& data = pic->data();
+
+        Ref<IOHandler> h(new MemIOHandler(data.data(), data.size()));
+        *data_size = data.size();
+        return h;
     }
 
     throw _Exception(_("TagLibHandler: Unsupported content_type: ") + content_type);
@@ -391,6 +407,26 @@ void TagLibHandler::extractOgg(zmm::Ref<CdsItem> item) {
         return;
     }
     populateGenericTags(item, f);
+
+    if (!f.tag())
+        return;
+
+    // Vorbis uses the FLAC binary picture structure...
+    // https://wiki.xiph.org/VorbisComment#Cover_art
+    // The unofficial COVERART field is not supported.
+    const TagLib::List<TagLib::FLAC::Picture *> picList = f.tag()->pictureList();
+    if (picList.isEmpty())
+        return;
+
+    const TagLib::FLAC::Picture *pic = picList.front();
+    const TagLib::ByteVector& data = pic->data();
+
+    Ref<StringConverter> sc = StringConverter::i2i();
+    String art_mimetype = sc->convert(pic->mimeType().toCString(true));
+    if (!isValidArtworkContentType(art_mimetype)) {
+        art_mimetype = getContentTypeFromByteVector(data);
+    }
+    addArtworkResource(item, art_mimetype);
 }
 
 void TagLibHandler::extractASF(zmm::Ref<CdsItem> item) {
@@ -436,7 +472,6 @@ void TagLibHandler::extractFLAC(zmm::Ref<CdsItem> item) {
         log_debug("TagLibHandler: flac resource has no picture information\n");
         return;
     }
-
     const TagLib::FLAC::Picture *pic = f.pictureList().front();
     const TagLib::ByteVector& data = pic->data();
 
