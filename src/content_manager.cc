@@ -2236,7 +2236,7 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
 }
 
 #ifdef HAVE_MAGIC
-zmm::String ContentManager::getMimeTypeFromBuffer(void *buffer, size_t length)
+zmm::String ContentManager::getMimeTypeFromBuffer(const void *buffer, size_t length)
 {
     return get_mime_type_from_buffer(ms, reMimetype, buffer, length); 
 }

@@ -53,6 +53,7 @@
 #define CONTENT_TYPE_FLAC       "flac"
 #define CONTENT_TYPE_WMA        "wma"
 #define CONTENT_TYPE_WAVPACK    "wv"
+#define CONTENT_TYPE_APE        "ape"
 #define CONTENT_TYPE_JPG        "jpg"
 #define CONTENT_TYPE_PLAYLIST   "playlist"
 #define CONTENT_TYPE_MP4        "mp4"

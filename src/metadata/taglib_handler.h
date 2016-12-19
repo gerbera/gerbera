@@ -48,10 +48,18 @@ public:
     virtual void fillMetadata(zmm::Ref<CdsItem> item);
     virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum, off_t *data_size);
 private:
-    void populateGenericTags(zmm::Ref<CdsItem> item, TagLib::File& file);
+    void populateGenericTags(zmm::Ref<CdsItem> item, const TagLib::File& file) const;
     bool isValidArtworkContentType(zmm::String content_type);
-    zmm::String getContentTypeFromByteVector(TagLib::ByteVector& data);
+    zmm::String getContentTypeFromByteVector(const TagLib::ByteVector& data) const;
     void addArtworkResource(zmm::Ref<CdsItem> item, zmm::String content_type);
+    void extractMP3(zmm::Ref<CdsItem> item);
+    void extractOgg(zmm::Ref<CdsItem> item);
+    void extractASF(zmm::Ref<CdsItem> item);
+    void extractFLAC(zmm::Ref<CdsItem> item);
+    void extractAPE(zmm::Ref<CdsItem> item);
+    void extractWavPack(zmm::Ref<CdsItem> item);
+    void extractMP4(zmm::Ref<CdsItem> item);
+    void extractAiff(zmm::Ref<CdsItem> item);
 };
 
 #endif

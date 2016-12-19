@@ -49,7 +49,7 @@ protected:
 public:
     /// \brief Initializes the internal buffer.
     /// \param buffer all operations will be done on this buffer.
-    MemIOHandler(void *buffer, int length);
+    MemIOHandler(const void *buffer, int length);
     MemIOHandler(zmm::String str);
     virtual ~MemIOHandler();
 

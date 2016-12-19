@@ -206,7 +206,7 @@ int HMSToSeconds(zmm::String time);
 zmm::String get_mime_type(magic_set *ms, zmm::Ref<RExp> reMimetype, zmm::String file);
 /// \brief Extracts mimetype from a buffer using filemagic
 zmm::String get_mime_type_from_buffer(magic_set *ms, zmm::Ref<RExp> reMimetype,
-                                         void *buffer, size_t length);
+                                         const void *buffer, size_t length);
 
 #endif // HAVE_MAGIC
 

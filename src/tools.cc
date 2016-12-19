@@ -711,7 +711,7 @@ String get_mime_type(magic_set *ms, Ref<RExp> reMimetype, String file)
 }
 
 String get_mime_type_from_buffer(magic_set *ms, Ref<RExp> reMimetype, 
-                                 void *buffer, size_t length)
+                                 const void *buffer, size_t length)
 {
     if (ms == NULL)
         return nil;
@@ -729,8 +729,7 @@ String get_mime_type_from_buffer(magic_set *ms, Ref<RExp> reMimetype,
     if (matcher->next())
         return matcher->group(1);
 
-    log_warning("filemagic returned invalid mimetype for the given buffer%s\n",
-                mt);
+    log_warning("filemagic returned invalid mimetype for the given buffer%s\n", mt);
     return nil;
 }
 #endif 

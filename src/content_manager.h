@@ -374,7 +374,7 @@ public:
 #endif
 
 #ifdef HAVE_MAGIC
-    zmm::String getMimeTypeFromBuffer(void *buffer, size_t length);
+    zmm::String getMimeTypeFromBuffer(const void *buffer, size_t length);
 #endif
 protected:
     void initLayout();
