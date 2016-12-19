@@ -328,13 +328,6 @@ if(NOT HOST_OS)
                 "mediatomb was unable to deterimine the host OS. Please report this. Value of CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
 endif()
 
-# X86 Check
-if (CMAKE_SYSTEM_PROCESSOR MATCHES "(i386)|(x86)|(X86)|(amd64)|(AMD64)")
-    set (X86 TRUE)
-else ()
-    set (X86 FALSE)
-endif ()
-
 if (SOLARIS)
     add_definitions(-DSOLARIS)
     # we need these specially called out as not in packages [OmniOS/joyent]
