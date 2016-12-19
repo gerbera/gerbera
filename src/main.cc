@@ -97,23 +97,23 @@ int main(int argc, char **argv, char **envp)
     int      opt_index = 0;
     int      o;
     static struct option long_options[] = {
-        {"ip", 1, 0, 'i'},          // 0
-        {"interface", 1, 0, 'e'},   // 1
-        {"port", 1, 0, 'p'},        // 2
-        {"config", 1, 0, 'c'},      // 3
-        {"home", 1, 0, 'm'},        // 4
-        {"cfgdir", 1, 0, 'f'},      // 5
-        {"user", 1, 0, 'u'},        // 6
-        {"group", 1, 0, 'g'},       // 7
-        {"daemon", 0, 0, 'd'},      // 8
-        {"pidfile", 1, 0, 'P'},     // 9
-        {"add", 1, 0, 'a'},         // 10
-        {"logfile", 1, 0, 'l'},     // 11
-        {"debug", 0, 0, 'D'},       // 12
-        {"compile-info", 0, 0, 0},  // 13
-        {"version", 0, 0, 0},       // 14
-        {"help", 0, 0, 'h'},        // 15
-        {0, 0, 0, 0}                
+        {(char *)"ip", 1, 0, 'i'},          // 0
+        {(char *)"interface", 1, 0, 'e'},   // 1
+        {(char *)"port", 1, 0, 'p'},        // 2
+        {(char *)"config", 1, 0, 'c'},      // 3
+        {(char *)"home", 1, 0, 'm'},        // 4
+        {(char *)"cfgdir", 1, 0, 'f'},      // 5
+        {(char *)"user", 1, 0, 'u'},        // 6
+        {(char *)"group", 1, 0, 'g'},       // 7
+        {(char *)"daemon", 0, 0, 'd'},      // 8
+        {(char *)"pidfile", 1, 0, 'P'},     // 9
+        {(char *)"add", 1, 0, 'a'},         // 10
+        {(char *)"logfile", 1, 0, 'l'},     // 11
+        {(char *)"debug", 0, 0, 'D'},       // 12
+        {(char *)"compile-info", 0, 0, 0},  // 13
+        {(char *)"version", 0, 0, 0},       // 14
+        {(char *)"help", 0, 0, 'h'},        // 15
+        {(char *)0, 0, 0, 0}                
     };
 
     String config_file;
