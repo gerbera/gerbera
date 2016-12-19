@@ -356,12 +356,6 @@ add_definitions(-DPACKAGE_DATADIR="${CMAKE_INSTALL_PREFIX}/share/mediatomb")
 add_definitions(-DCOMPILE_INFO="")
 add_definitions(-DEXTERNAL_TRANSCODING)
 
-# this got removed/ignored in CmakeLists transition
-# story so far is that this can be enabled on X86
-if (X86)
-    add_definitions(-DENABLE_SIGHUP)
-endif(X86)
-
 if (WITH_LOGGING OR WITH_DEBUG_LOGGING)
     add_definitions(-DLOG_ENABLED)
 endif()
