@@ -382,7 +382,6 @@ endif()
 find_package (EXPAT REQUIRED)
 include_directories(${EXPAT_INCLUDE_DIRS})
 target_link_libraries (mediatomb ${EXPAT_LIBRARIES})
-add_definitions(-DHAVE_EXPAT)
 
 find_package (SQLite3 REQUIRED)
 include_directories(${SQLITE3_INCLUDE_DIRS})
