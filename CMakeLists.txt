@@ -345,8 +345,32 @@ endif ()
 
 if (SOLARIS)
     add_definitions(-DSOLARIS)
-    # we need these specially called out as not in packages [OmniOS/joyent]
-    target_link_libraries (mediatomb "-luuid -lsocket -lnsl -liconv")
+endif()
+
+# find socket, nsl, iconv and uuid for solaris, and maybe others
+find_library(SOCKET_LIBRARY socket)
+if(SOCKET_LIBRARY)
+    set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${SOCKET_LIBRARY})
+    target_link_libraries(mediatomb ${SOCKET_LIBRARY})
+endif()
+
+find_library(NSL_LIBRARY nsl)
+if(NSL_LIBRARY)
+    set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${NSL_LIBRARY})
+    target_link_libraries(mediatomb ${NSL_LIBRARY})
+endif()
+
+find_library(ICONV_LIBRARY iconv)
+if(ICONV_LIBRARY)
+    set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${ICONV_LIBRARY})
+    target_link_libraries(mediatomb ${ICONV_LIBRARY})
+endif()
+
+# FindLibUUID.cmake doesn't work when libuuid has no pkg_config but PKG_CONFIG exists
+find_library(UUID_LIBRARY uuid)
+if(UUID_LIBRARY)
+    set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${UUID_LIBRARY})
+    target_link_libraries(mediatomb ${UUID_LIBRARY})
 endif()
 
 add_definitions(-DPACKAGE_NAME="MediaTomb-${MEDIATOMB_SUFFIX}")
