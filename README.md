@@ -34,7 +34,10 @@ _MediaTomb is pretty much dead upstream, so this is my attempt to get kick it ba
 - Fixed `dvd_image_import_script` with spidermonkey 1.8.5.
 - Removed libflac use/dep.
 - Remove libmp4v2 use/dep.
-- Enhanced TagLib handler to support MP4 and FLAC files (including artwork).
+- Enhanced TagLib handler to support MP4,FLAC,Vorbis & WMA files (including artwork).
+- Support for folder/cover.jpg external images for music.
+- Started port to "Modern C++".
+- Lots of other stuff.
 
 ## Building
 
