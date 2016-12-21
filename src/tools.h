@@ -31,6 +31,9 @@
 #ifndef __TOOLS_H__
 #define __TOOLS_H__
 
+#include <memory>
+#include <unordered_set>
+
 #include "common.h"
 #include "rexp.h"
 #include "io_handler.h"
@@ -206,7 +209,7 @@ int HMSToSeconds(zmm::String time);
 zmm::String get_mime_type(magic_set *ms, zmm::Ref<RExp> reMimetype, zmm::String file);
 /// \brief Extracts mimetype from a buffer using filemagic
 zmm::String get_mime_type_from_buffer(magic_set *ms, zmm::Ref<RExp> reMimetype,
-                                         void *buffer, size_t length);
+                                         const void *buffer, size_t length);
 
 #endif // HAVE_MAGIC
 
@@ -260,7 +263,7 @@ zmm::String fallbackString(zmm::String first, zmm::String fallback);
 /// \return return the (unsigned int) hash value
 unsigned int stringHash(zmm::String str);
 
-zmm::String intArrayToCSV(int *array, int size);
+zmm::String toCSV(std::shared_ptr<std::unordered_set<int> > array);
 
 //inline void getTimeval(struct timeval *now) { gettimeofday(now, NULL); }
 
@@ -322,7 +325,7 @@ zmm::String get_last_path(zmm::String location);
 
 /// \brief Calculates a position where it is safe to cut an UTF-8 string.
 /// \return Caclulated position or -1 in case of an error.
-ssize_t getValidUTF8CutPosition(zmm::String str, size_t cutpos);
+ssize_t getValidUTF8CutPosition(zmm::String str, ssize_t cutpos);
 
 #ifdef EXTEND_PROTOCOLINFO
 zmm::String getDLNAtransferHeader(zmm::String mimeType, zmm::String header);

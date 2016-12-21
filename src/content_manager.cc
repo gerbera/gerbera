@@ -91,6 +91,7 @@ struct magic_set *ms = NULL;
 
 using namespace zmm;
 using namespace mxml;
+using namespace std;
 
 #define MIMETYPE_REGEXP "^([a-z0-9_-]+/[a-z0-9_-]+)"
 
@@ -846,7 +847,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
     }
 
     // request only items if non-recursive scan is wanted
-    Ref<DBRHash<int> > list = storage->getObjects(containerID, !adir->getRecursive());
+    shared_ptr<unordered_set<int> > list = storage->getObjects(containerID, !adir->getRecursive());
 
     unsigned int thisTaskID;
     if (task != nil)
@@ -896,8 +897,8 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
             int objectID = storage->findObjectIDByPath(String(path));
             if (objectID > 0)
             {
-                if (list != nil)
-                    list->remove(objectID);
+                if (list != nullptr)
+                    list->erase(objectID);
 
                 if (scanLevel == FullScanLevel)
                 {
@@ -935,8 +936,8 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
             int objectID = storage->findObjectIDByPath(path + DIR_SEPARATOR);
             if (objectID > 0)
             {
-                if (list != nil)
-                    list->remove(objectID);
+                if (list != nullptr)
+                    list->erase(objectID);
                 // add a task to rescan the directory that was found
                 rescanDirectory(objectID, scanID, scanMode, path + DIR_SEPARATOR, task->isCancellable());
             }
@@ -968,7 +969,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
     if ((shutdownFlag) || ((task != nil) && !task->isValid()))
         return;
 
-    if (list != nil && list->size() > 0)
+    if (list != nullptr && list->size() > 0)
     {
         Ref<Storage::ChangedContainers> changedContainers = storage->removeObjects(list);
         if (changedContainers != nil)
@@ -2236,7 +2237,7 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
 }
 
 #ifdef HAVE_MAGIC
-zmm::String ContentManager::getMimeTypeFromBuffer(void *buffer, size_t length)
+zmm::String ContentManager::getMimeTypeFromBuffer(const void *buffer, size_t length)
 {
     return get_mime_type_from_buffer(ms, reMimetype, buffer, length); 
 }

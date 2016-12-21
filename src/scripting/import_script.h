@@ -44,8 +44,6 @@ public:
     ~ImportScript();
     void processCdsObject(zmm::Ref<CdsObject> obj, zmm::String rootpath);
     virtual script_class_t whoami() { return S_IMPORT; }
-private:
-    JSObject *root;
 };
 
 #endif // __SCRIPTING_IMPORT_SCRIPT_H__

@@ -32,14 +32,16 @@
 #ifndef __STORAGE_CACHE_H__
 #define __STORAGE_CACHE_H__
 
+#include <memory>
+#include <unordered_map>
+
 #include "zmm/zmmf.h"
 #include "common.h"
-#include "hash.h"
 #include "sync.h"
 #include "cache_object.h"
 
-#define STORAGE_CACHE_CAPACITY 29989
-#define STORAGE_CACHE_MAXFILL 9973
+#define STORAGE_CACHE_CAPACITY 29989u
+#define STORAGE_CACHE_MAXFILL 9973u
 
 class StorageCache : public zmm::Object
 {
@@ -65,13 +67,13 @@ public:
 private:
     
     int capacity;
-    int maxfill;
+    unsigned int maxfill;
     bool hasBeenFlushed;
     
     void ensureFillLevelOk();
     
-    zmm::Ref<DBOHash<int,CacheObject> > idHash;
-    zmm::Ref<DSOHash<zmm::Array<CacheObject> > > locationHash;
+    std::shared_ptr<std::unordered_map<int,zmm::Ref<CacheObject> > > idHash;
+    std::shared_ptr<std::unordered_map<zmm::String, zmm::Ref<zmm::Array<CacheObject> > > > locationHash;
     zmm::Ref<Mutex> mutex;
 };
 

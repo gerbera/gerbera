@@ -31,11 +31,12 @@
 #ifndef __AUTOSCAN_INOTIFY_H__
 #define __AUTOSCAN_INOTIFY_H__
 
-
+#include <memory>
+#include <mutex>
+#include <unordered_map>
 
 #include "zmm/zmmf.h"
 #include "sync.h"
-#include "hash.h"
 #include "autoscan.h"
 #include "mt_inotify.h"
 
@@ -73,10 +74,10 @@ private:
     pthread_t thread;
     
     zmm::Ref<Inotify> inotify;
-    
-    zmm::Ref<Cond> cond;
-    zmm::Ref<Mutex> mutex;
-    
+
+    std::mutex mutex;
+    using AutoLock = std::lock_guard<std::mutex>;
+
     zmm::Ref<zmm::ObjectQueue<AutoscanDirectory> > monitorQueue;
     zmm::Ref<zmm::ObjectQueue<AutoscanDirectory> > unmonitorQueue;
     
@@ -167,8 +168,8 @@ private:
         int parentWd;
         int wd;
     };
-    
-    zmm::Ref<DBOHash<int, Wd> > watches;
+
+    std::shared_ptr<std::unordered_map<int, zmm::Ref<Wd>> > watches;
     
     zmm::String normalizePathNoEx(zmm::String path);
     

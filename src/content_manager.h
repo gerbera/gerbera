@@ -31,6 +31,9 @@
 #ifndef __CONTENT_MANAGER_H__
 #define __CONTENT_MANAGER_H__
 
+#include <memory>
+#include <unordered_set>
+
 #include "common.h"
 #include "cds_objects.h"
 #include "storage.h"
@@ -39,6 +42,7 @@
 #include "autoscan.h"
 #include "timer.h"
 #include "generic_task.h"
+
 #ifdef HAVE_JS
     // this is somewhat not nice, the playlist header needs the cm header and
     // vice versa
@@ -374,7 +378,7 @@ public:
 #endif
 
 #ifdef HAVE_MAGIC
-    zmm::String getMimeTypeFromBuffer(void *buffer, size_t length);
+    zmm::String getMimeTypeFromBuffer(const void *buffer, size_t length);
 #endif
 protected:
     void initLayout();

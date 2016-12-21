@@ -34,10 +34,11 @@
 
 #include <pthread.h>
 #include <upnp/upnp.h>
+#include <mutex>
+#include <condition_variable>
 
 #include "common.h"
 #include "io_handler.h"
-#include "sync.h"
 
 /// \brief a IOHandler with buffer support
 /// the buffer is only for read(). write() is not supported
@@ -92,8 +93,9 @@ protected:
     
     pthread_t bufferThread;
     bool threadShutdown;
-    zmm::Ref<Cond> cond;
-    zmm::Ref<Mutex> mutex;
+
+    std::condition_variable cond;
+    std::mutex mutex;
 };
 
 #endif // __IO_HANDLER_BUFFER_HELPER_H__

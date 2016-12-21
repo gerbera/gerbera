@@ -123,6 +123,7 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
         (content_type == CONTENT_TYPE_FLAC) ||
         (content_type == CONTENT_TYPE_PCM) ||
         (content_type == CONTENT_TYPE_AIFF) ||
+        (content_type == CONTENT_TYPE_APE) ||
         (content_type == CONTENT_TYPE_MP4))
     {
         TagLibHandler().fillMetadata(item);

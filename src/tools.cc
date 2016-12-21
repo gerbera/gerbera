@@ -57,6 +57,7 @@
 #define WHITE_SPACE " \t\r\n"
 
 using namespace zmm;
+using namespace std;
 
 static const char *HEX_CHARS = "0123456789abcdef";
 
@@ -711,7 +712,7 @@ String get_mime_type(magic_set *ms, Ref<RExp> reMimetype, String file)
 }
 
 String get_mime_type_from_buffer(magic_set *ms, Ref<RExp> reMimetype, 
-                                 void *buffer, size_t length)
+                                 const void *buffer, size_t length)
 {
     if (ms == NULL)
         return nil;
@@ -729,8 +730,7 @@ String get_mime_type_from_buffer(magic_set *ms, Ref<RExp> reMimetype,
     if (matcher->next())
         return matcher->group(1);
 
-    log_warning("filemagic returned invalid mimetype for the given buffer%s\n",
-                mt);
+    log_warning("filemagic returned invalid mimetype for the given buffer%s\n", mt);
     return nil;
 }
 #endif 
@@ -986,13 +986,14 @@ unsigned int stringHash(String str)
     return hash;
 }
 
-String intArrayToCSV(int *array, int size)
+String toCSV(shared_ptr<unordered_set<int> > array)
 {
-    if (size <= 0)
+    if (array->empty())
         return nil;
     Ref<StringBuffer> buf(new StringBuffer());
-    for (int i = 0; i < size; i++)
-        *buf << ',' << array[i];
+    for (const auto &i: *array) {
+        *buf << ',' << i;
+    }
     return buf->toString(1);
 }
 
@@ -1381,7 +1382,7 @@ String get_last_path(String location)
 }
 
 
-ssize_t getValidUTF8CutPosition(zmm::String str, size_t cutpos)
+ssize_t getValidUTF8CutPosition(zmm::String str, ssize_t cutpos)
 {
     ssize_t pos = -1;
     size_t len = str.length();

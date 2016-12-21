@@ -29,16 +29,19 @@
 
 /// \file storage_cache.cc
 
+#include <cassert>
+
 #include "storage_cache.h"
 
 using namespace zmm;
+using namespace std;
 
 StorageCache::StorageCache()
 {
     capacity = STORAGE_CACHE_CAPACITY;
     maxfill = STORAGE_CACHE_MAXFILL;
-    idHash = Ref<DBOHash<int,CacheObject> >(new DBOHash<int,CacheObject>(capacity, INVALID_OBJECT_ID, INVALID_OBJECT_ID_2));
-    locationHash = Ref<DSOHash<Array<CacheObject> > >(new DSOHash<Array<CacheObject> >(capacity));
+    idHash = make_shared<unordered_map<int,Ref<CacheObject> > >();
+    locationHash = make_shared<unordered_map<zmm::String, Ref<Array<CacheObject> > > >();
     hasBeenFlushed = false;
     mutex = Ref<Mutex> (new Mutex());
 }
@@ -55,7 +58,11 @@ Ref<CacheObject> StorageCache::getObject(int id)
 #ifdef TOMBDEBUG
     assert(mutex->isLocked());
 #endif
-    return idHash->get(id);
+    try {
+        return idHash->at(id);
+    } catch(out_of_range& nope) {
+        return nil;
+    }
 }
 
 Ref<CacheObject> StorageCache::getObjectDefinitely(int id)
@@ -63,12 +70,13 @@ Ref<CacheObject> StorageCache::getObjectDefinitely(int id)
 #ifdef TOMBDEBUG
     assert(mutex->isLocked());
 #endif
-    Ref<CacheObject> obj = idHash->get(id);
-    if (obj == nil)
-    {
+    Ref<CacheObject> obj = nil;
+    try {
+        obj = idHash->at(id);
+    } catch (const out_of_range& ex) {
         ensureFillLevelOk();
         obj = Ref<CacheObject>(new CacheObject());
-        idHash->put(id, obj);
+        idHash->emplace(id, obj);
     }
     return obj;
 }
@@ -78,11 +86,12 @@ void StorageCache::addChild(int id)
 #ifdef TOMBDEBUG
     assert(mutex->isLocked());
 #endif
-    Ref<CacheObject> obj = idHash->get(id);
-    if (obj != nil && obj->knowsNumChildren())
-    {
-        obj->setNumChildren(obj->getNumChildren() + 1);
-    }
+    Ref<CacheObject> obj = nil;
+    try {
+        obj = idHash->at(id);
+        if (obj->knowsNumChildren())
+            obj->setNumChildren(obj->getNumChildren() + 1);
+    } catch(const out_of_range& ex) {} // id not found
 }
 
 bool StorageCache::removeObject(int id)
@@ -92,8 +101,8 @@ bool StorageCache::removeObject(int id)
     if (obj == nil)
         return false;
     if (obj->knowsLocation())
-        locationHash->remove(obj->getLocation());
-    return idHash->remove(id);
+        locationHash->erase(obj->getLocation());
+    return idHash->erase(id);
 }
 
 Ref<Array<CacheObject> > StorageCache::getObjects(String location)
@@ -101,7 +110,11 @@ Ref<Array<CacheObject> > StorageCache::getObjects(String location)
 #ifdef TOMBDEBUG
     assert(mutex->isLocked());
 #endif
-    return locationHash->get(location);
+    try {
+        return locationHash->at(location);
+    } catch (const out_of_range& ex) {
+        return nil;
+    }
 }
 
 void StorageCache::checkLocation(Ref<CacheObject> obj)
@@ -112,19 +125,17 @@ void StorageCache::checkLocation(Ref<CacheObject> obj)
     if (! obj->knowsLocation())
         return;
     String location = obj->getLocation();
-    Ref<Array<CacheObject> > objects = locationHash->get(location);
-    if (objects == nil)
-    {
-        objects = Ref<Array<CacheObject> >(new Array<CacheObject>());
-        locationHash->put(location, objects);
-    }
-    else
-    {
+    Ref<Array<CacheObject> > objects = nil;
+    try {
+        objects = locationHash->at(location);
         for (int i=0;i<objects->size();i++)
         {
             if (objects->get(i) == obj)
                 return;
         }
+    } catch (const out_of_range& ex) {
+        objects = Ref<Array<CacheObject> >(new Array<CacheObject>());
+        locationHash->emplace(location, objects);
     }
     objects->append(obj);
 }

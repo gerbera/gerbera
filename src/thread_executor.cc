@@ -32,12 +32,10 @@
 #include "thread_executor.h"
 
 using namespace zmm;
+using namespace std;
 
 ThreadExecutor::ThreadExecutor()
 {
-    mutex = Ref<Mutex>(new Mutex());
-    cond = Ref<Cond>(new Cond(mutex));
-    
     threadShutdown = false;
 }
 
@@ -61,10 +59,12 @@ bool ThreadExecutor::kill()
 {
     if (! threadRunning)
         return true;
-    AUTOLOCK(mutex);
+
+    unique_lock<std::mutex> lock(mutex);
     threadShutdown = true;
-    cond->signal();
-    AUTOUNLOCK();
+    cond.notify_one();
+    lock.unlock();
+
     if (thread)
     {
         threadRunning = false;

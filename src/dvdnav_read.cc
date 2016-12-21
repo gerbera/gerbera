@@ -50,8 +50,6 @@
 
 using namespace zmm;
 
-static double frames_per_s[4] = {-1.0, 25.00, -1.0, 29.97};
-
 static struct { char code[3]; char name[20]; }
 // from lsdvd, ISO-639
 language[] = {

@@ -49,7 +49,7 @@
 using namespace zmm;
 using namespace mxml;
 
-MemIOHandler::MemIOHandler(void *buffer, int length) : IOHandler()
+MemIOHandler::MemIOHandler(const void *buffer, int length) : IOHandler()
 {
     this->buffer = (char *)MALLOC(length);
     this->length = length;

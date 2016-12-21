@@ -32,6 +32,8 @@
 #ifndef __ZMM_STRINGS_H__
 #define __ZMM_STRINGS_H__
 
+#include <string>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -220,5 +222,21 @@ protected:
 };
 
 }; // namespace
+
+// custom specialization of std::hash so we can be used in std::hash'd maps/sets
+namespace std
+{
+template<>
+struct hash<zmm::String>
+{
+    typedef zmm::String argument_type;
+    typedef std::size_t value_type;
+
+    value_type operator()(argument_type const& s) const
+    {
+        return std::hash<std::string>{}(s.c_str());
+    }
+};
+}
 
 #endif // __STRINGS_H__

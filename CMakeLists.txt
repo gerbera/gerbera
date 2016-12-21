@@ -70,14 +70,6 @@ add_library(libmediatomb OBJECT
         src/filesystem.h
         src/generic_task.cc
         src/generic_task.h
-        src/hash/dbb_hash.h
-        src/hash/db_hash.h
-        src/hash/dbo_hash.h
-        src/hash/dbr_hash.h
-        src/hash/direct_hash_base.h
-        src/hash/dsb_hash.h
-        src/hash/dso_hash.h
-        src/hash.h
         src/io_handler_buffer_helper.cc
         src/io_handler_buffer_helper.h
         src/io_handler.cc
@@ -421,7 +413,6 @@ endif()
 find_package (EXPAT REQUIRED)
 include_directories(${EXPAT_INCLUDE_DIRS})
 target_link_libraries (mediatomb ${EXPAT_LIBRARIES})
-add_definitions(-DHAVE_EXPAT)
 
 find_package (SQLite3 REQUIRED)
 include_directories(${SQLITE3_INCLUDE_DIRS})
