@@ -33,90 +33,64 @@
 #include <sys/types.h>
 
 #include "common.h"
+#include "file_request_handler.h"
+#include "request_handler.h"
+#include "server.h"
 #include "tools.h"
 #include "web_callbacks.h"
-#include "server.h"
-#include "request_handler.h"
-#include "file_request_handler.h"
 #ifdef HAVE_CURL
-    #include "url_request_handler.h"
+#include "url_request_handler.h"
 #endif
-#include "web_request_handler.h"
 #include "serve_request_handler.h"
 #include "web/pages.h"
+#include "web_request_handler.h"
 
 using namespace zmm;
 using namespace mxml;
 
-// FIXME Headers
-static Ref<RequestHandler> create_request_handler(const char *filename)
+static Ref<RequestHandler> create_request_handler(const char* filename)
 {
-    String path, parameters;
-
-    String link = url_unescape((char *) filename);
+    String path;
+    String parameters;
+    String link = url_unescape((char*)filename);
 
     log_debug("Filename: %s, Path: %s\n", filename, path.c_str());
-//    log_debug("create_handler: got url parameters: [%s]\n", parameters.c_str());
-    
-    RequestHandler *ret = NULL;
-/*
-    log_debug("Link is: %s, checking against: %s, starts with? %d\n", link.c_str(), 
-                (String(SERVER_VIRTUAL_DIR) + "/" + CONTENT_UI_HANDLER).c_str(), 
-                link.startsWith(String(SERVER_VIRTUAL_DIR) + "/" + CONTENT_UI_HANDLER));
-    log_debug("Link is: %s, checking against: %s, starts with? %d\n", link.c_str(), 
-                (String(SERVER_VIRTUAL_DIR) + "/" + CONTENT_MEDIA_HANDLER).c_str(), 
-                link.startsWith(String(SERVER_VIRTUAL_DIR) + "/" + CONTENT_MEDIA_HANDLER));
-  
-    log_debug("Link is: %s, checking against: %s, starts with? %d\n", link.c_str(), 
-                (String(SERVER_VIRTUAL_DIR) + "/" + CONTENT_SERVE_HANDLER).c_str(), 
-                link.startsWith(String(SERVER_VIRTUAL_DIR) + "/" + CONTENT_SERVE_HANDLER));
-*/  
-    if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_MEDIA_HANDLER))
-    {
-            ret = new FileRequestHandler();
-    }
-    else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_UI_HANDLER))
-    {  
-        RequestHandler::split_url(filename, URL_UI_PARAM_SEPARATOR, path, 
-                parameters);
+    // log_debug("create_handler: got url parameters: [%s]\n", parameters.c_str());
+
+    RequestHandler* ret = NULL;
+
+    if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_MEDIA_HANDLER)) {
+        ret = new FileRequestHandler();
+    } else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_UI_HANDLER)) {
+        RequestHandler::split_url(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
+
         Ref<Dictionary> dict(new Dictionary());
         dict->decode(parameters);
-        
+
         String r_type = dict->get(_(URL_REQUEST_TYPE));
-        if (r_type != nil)
-        {
+        if (r_type != nil) {
             ret = create_web_request_handler(r_type);
-        }
-        else
-        {
+        } else {
             ret = create_web_request_handler(_("index"));
         }
-    } 
-    else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" +
-                             CONTENT_SERVE_HANDLER))
-    {
+    } else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER)) {
         if (string_ok(ConfigManager::getInstance()->getOption(CFG_SERVER_SERVEDIR)))
             ret = new ServeRequestHandler();
         else
             throw _Exception(_("Serving directories is not enabled in configuration"));
     }
-    /// \todo add enable/disable curl to configure.ac, currently this is automatically triggered depending on youtube and external transcoding definitions
+
 #if defined(HAVE_CURL)
-    else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" +
-                             CONTENT_ONLINE_HANDLER))
-    {
+    else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_ONLINE_HANDLER)) {
         ret = new URLRequestHandler();
     }
 #endif
 #if defined(HAVE_LIBDVDREAD_DISABLED)
-    else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + 
-                CONTENT_DVD_HANDLER))
-    {
+    else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_DVD_HANDLER)) {
         ret = new DVDRequestHandler();
     }
 #endif
-    else
-    {
+    else {
         throw _Exception(_("no valid handler type in ") + filename);
     }
     return Ref<RequestHandler>(ret);
@@ -127,33 +101,25 @@ static Ref<RequestHandler> create_request_handler(const char *filename)
 /// \param File_Info Pointer to the struction that stores information about
 /// the file.
 ///
-/// This function corresponds to get_info from the UpnpVirtualDirCallbacks 
+/// This function corresponds to get_info from the UpnpVirtualDirCallbacks
 /// structure. It is called by the web server to query information about a
-/// file. To perform the operation an appropriate request handler is 
+/// file. To perform the operation an appropriate request handler is
 /// created, it then takes care of filling in the data.
 ///
 /// \return 0 Success.
 /// \return -1 Error.
 
-// FIXME headers
-static int web_get_info(IN const char *filename, OUT UpnpFileInfo *info)
+static int web_get_info(IN const char* filename, OUT UpnpFileInfo* info)
 {
-    try
-    {
+    try {
         Ref<RequestHandler> reqHandler = create_request_handler(filename);
         reqHandler->get_info(filename, info);
-    }
-    catch (const ServerShutdownException & se)
-    {
+    } catch (const ServerShutdownException& se) {
         return -1;
-    }
-    catch (const SubtitlesNotFoundException & sex)
-    {
+    } catch (const SubtitlesNotFoundException& sex) {
         log_info("%s\n", sex.getMessage().c_str());
         return -1;
-    }
-    catch (const Exception & e)
-    {
+    } catch (const Exception& e) {
         log_error("%s\n", e.getMessage().c_str());
         return -1;
     }
@@ -176,58 +142,27 @@ static int web_get_info(IN const char *filename, OUT UpnpFileInfo *info)
 /// \return UpnpWebFileHandle A valid file handle.
 /// \return NULL Error.
 
-// FIXME Headers
-static UpnpWebFileHandle web_open(IN const char *filename,
-                                  IN enum UpnpOpenFileMode mode)
+static UpnpWebFileHandle web_open(IN const char* filename,
+    IN enum UpnpOpenFileMode mode)
 {
     log_debug("web_open(): %s\n", filename);
+    String link = url_unescape((char*)filename);
 
-    String link = url_unescape((char *) filename);
-
-    //char *line = strstr((char *)headers, "TimeSeekRange.dlna.org: npt=");
-    char *line = NULL;
-    char *timeseek;
-    if (line != NULL)
-    {
-         char *lineend = strstr(line, "\n");
-         int chars = lineend - (line + 28);
-         // limit to some value that makes sense to prevent allocating too much
-         // memory due to some maliciously prepared headers
-         if (chars < 1024)
-         {
-             timeseek = (char *)malloc(chars);
-             if (timeseek)
-             {
-                 strncpy(timeseek, line + 28, chars);
-                 log_debug("timeseek range found: %s\n",timeseek);
-                 link = link + "/range/" + timeseek;
-             }
-         }
-    }
-
-    try
-    {
+    try {
         Ref<RequestHandler> reqHandler = create_request_handler(filename);
         Ref<IOHandler> ioHandler = reqHandler->open(link.c_str(), mode, nil);
         ioHandler->retain();
-        return (UpnpWebFileHandle) ioHandler.getPtr();
-    }
-    catch (const ServerShutdownException & se)
-    {
+        return (UpnpWebFileHandle)ioHandler.getPtr();
+    } catch (const ServerShutdownException& se) {
         return NULL;
-    }
-    catch (const SubtitlesNotFoundException & sex)
-    {
+    } catch (const SubtitlesNotFoundException& sex) {
         log_info("%s\n", sex.getMessage().c_str());
         return NULL;
-    }
-    catch (const Exception & ex)
-    {
+    } catch (const Exception& ex) {
         log_error("%s\n", ex.getMessage().c_str());
         return NULL;
     }
 }
-
 
 /// \brief Reads a previously opened file sequentially.
 /// \param f IOHandler that takes care of this request.
@@ -235,22 +170,21 @@ static UpnpWebFileHandle web_open(IN const char *filename,
 /// \param length Number of bytes to read.
 ///
 /// This function is called by the web server to perform a sequential
-/// read from an open file. It calls the read function of the 
+/// read from an open file. It calls the read function of the
 /// appropriate IOHandler, which copies \b length bytes from the file
 /// or memory into the output buffer.
 ///
 /// \return 0   EOF encountered.
 /// \return -1  Error.
-static int web_read(IN UpnpWebFileHandle f, OUT char *buf, 
-                    IN size_t length)
+static int web_read(IN UpnpWebFileHandle f, OUT char* buf, IN size_t length)
 {
     if (Server::getInstance()->getShutdownStatus())
         return -1;
 
-    IOHandler *handler = (IOHandler *)f;
+    IOHandler* handler = (IOHandler*)f;
     return handler->read(buf, length);
 }
-                                                                                                                                                                         
+
 /// \brief Writes to a previously opened file sequentially.
 /// \param f Handle of the file.
 /// \param buf This buffer will be filled by fwrite.
@@ -265,12 +199,11 @@ static int web_read(IN UpnpWebFileHandle f, OUT char *buf,
 /// \return Actual number of bytes written.
 ///
 /// \warning Currently this function is not supported.
-static int web_write(IN UpnpWebFileHandle f, IN char *buf,
-                      IN size_t length)
+static int web_write(IN UpnpWebFileHandle f, IN char* buf, IN size_t length)
 {
     return 0;
 }
-                                                                                                                                                                         
+
 /// \brief Performs a seek on an open file.
 /// \param f Handle of the file.
 /// \param offset Number of bytes to move in the file. For seeking forwards
@@ -286,13 +219,10 @@ static int web_write(IN UpnpWebFileHandle f, IN char *buf,
 /// \return 0 On success, non-zero value on error.
 static int web_seek(IN UpnpWebFileHandle f, IN off_t offset, IN int whence)
 {
-    try 
-    {
-        IOHandler *handler = (IOHandler *)f;
+    try {
+        IOHandler* handler = (IOHandler*)f;
         handler->seek(offset, whence);
-    }
-    catch(const Exception & e)
-    {
+    } catch (const Exception& e) {
         log_error("web_seek(): Exception during seek: %s\n", e.getMessage().c_str());
         e.printStackTrace();
         return -1;
@@ -303,21 +233,18 @@ static int web_seek(IN UpnpWebFileHandle f, IN off_t offset, IN int whence)
 
 /// \brief Closes a previously opened file.
 /// \param f IOHandler for that file.
-/// 
+///
 /// Same as fclose()
 ///
 /// \return 0 On success, non-zero on error.
-static int web_close( IN UpnpWebFileHandle f)
+static int web_close(IN UpnpWebFileHandle f)
 {
 
-    Ref<IOHandler> handler((IOHandler *)f);
+    Ref<IOHandler> handler((IOHandler*)f);
     handler->release();
-    try
-    {
+    try {
         handler->close();
-    }
-    catch(const Exception & e)
-    {
+    } catch (const Exception& e) {
         log_error("web_seek(): Exception during seek: %s\n", e.getMessage().c_str());
         e.printStackTrace();
         return -1;
@@ -335,7 +262,7 @@ static int web_close( IN UpnpWebFileHandle f)
 /// \b web_write Sequentially write to a file (not supported).
 /// \b web_seek Perform a seek on a file.
 /// \b web_close Close file.
-/// 
+///
 /// \return UPNP_E_SUCCESS Callbacks registered successfully, else eror code.
 int register_web_callbacks()
 {
@@ -349,4 +276,4 @@ int register_web_callbacks()
         && UpnpVirtualDir_set_CloseCallback(web_close) == UPNP_E_SUCCESS;
 
     return ret ? UPNP_E_SUCCESS : UPNP_E_INVALID_PARAM;
-}   
+}

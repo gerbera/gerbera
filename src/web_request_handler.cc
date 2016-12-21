@@ -29,18 +29,19 @@
 
 /// \file web_request_handler.cc
 
-#include <time.h>
-#include "mem_io_handler.h"
 #include "web_request_handler.h"
 #include "config_manager.h"
 #include "content_manager.h"
-#include "web/pages.h"
+#include "mem_io_handler.h"
 #include "tools.h"
+#include "web/pages.h"
+#include <time.h>
 
 using namespace zmm;
 using namespace mxml;
 
-WebRequestHandler::WebRequestHandler() : RequestHandler()
+WebRequestHandler::WebRequestHandler()
+    : RequestHandler()
 {
     checkRequestCalled = false;
     params = Ref<Dictionary>(new Dictionary());
@@ -64,31 +65,30 @@ bool WebRequestHandler::boolParam(zmm::String name)
 void WebRequestHandler::check_request(bool checkLogin)
 {
     // we have a minimum set of parameters that are "must have"
-    
+
     // check if the session parameter was supplied and if we have
     // a session with that id
-    
+
     checkRequestCalled = true;
-    
+
     String sid = param(_("sid"));
     if (sid == nil)
         throw SessionException(_("no session id given"));
-    
+
     if ((session = SessionManager::getInstance()->getSession(sid)) == nil)
         throw SessionException(_("invalid session id"));
-    
-    if (checkLogin && ! session->isLoggedIn())
+
+    if (checkLogin && !session->isLoggedIn())
         throw LoginException(_("not logged in"));
     session->access();
 }
 
 String WebRequestHandler::renderXMLHeader()
 {
-    return _("<?xml version=\"1.0\" encoding=\"") +
-            DEFAULT_INTERNAL_CHARSET +"\"?>\n";
+    return _("<?xml version=\"1.0\" encoding=\"") + DEFAULT_INTERNAL_CHARSET + "\"?>\n";
 }
 
-void WebRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *info)
+void WebRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* info)
 {
     this->filename = filename;
     this->mode = mode;
@@ -110,7 +110,7 @@ void WebRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *info
     UpnpFileInfo_set_IsReadable(info, 1);
 
     String contentType;
-    
+
     String mimetype;
     String returnType = param(_("return_type"));
 
@@ -118,7 +118,7 @@ void WebRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *info
         mimetype = _(MIMETYPE_XML);
     else
         mimetype = _(MIMETYPE_JSON);
-    
+
     contentType = mimetype + "; charset=" + DEFAULT_INTERNAL_CHARSET;
 
     UpnpFileInfo_set_ContentType(info, ixmlCloneDOMString(contentType.c_str()));
@@ -129,107 +129,81 @@ Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
 {
     root = Ref<Element>(new Element(_("root")));
     out = Ref<StringBuffer>(new StringBuffer());
-    
+
     String error = nil;
     int error_code = 0;
-    
+
     String output;
     // processing page, creating output
-    try
-    {
-        if(!ConfigManager::getInstance()->getBoolOption(CFG_SERVER_UI_ENABLED))
-        {
+    try {
+        if (!ConfigManager::getInstance()->getBoolOption(CFG_SERVER_UI_ENABLED)) {
             log_warning("The UI is disabled in the configuration file. See README.\n");
             error = _("The UI is disabled in the configuration file. See README.");
             error_code = 900;
-        }
-        else
-        {
+        } else {
             process();
-            
-            if (checkRequestCalled)
-            {
+
+            if (checkRequestCalled) {
                 // add current task
                 appendTask(root, ContentManager::getInstance()->getCurrentTask());
-                
+
                 handleUpdateIDs();
             }
         }
-    }
-    catch (const LoginException e)
-    {
+    } catch (const LoginException& e) {
         error = e.getMessage();
         error_code = 300;
-    }
-    catch (const ObjectNotFoundException e)
-    {
-        error = e.getMessage();;
+    } catch (const ObjectNotFoundException& e) {
+        error = e.getMessage();
+        ;
         error_code = 200;
-    }
-    catch (const SessionException e)
-    {
+    } catch (const SessionException& e) {
         error = e.getMessage();
         error_code = 400;
-    }
-    catch (const StorageException e)
-    {
+    } catch (const StorageException& e) {
         error = e.getUserMessage();
         error_code = 500;
         e.printStackTrace();
-    }
-    catch (const Exception e)
-    {
+    } catch (const Exception& e) {
         error = _("Error: ") + e.getMessage();
         error_code = 800;
         e.printStackTrace();
     }
-    
-    if (! string_ok(error))
-    {
+
+    if (!string_ok(error)) {
         root->setAttribute(_("success"), _("1"), mxml_bool_type);
-    }
-    else
-    {
+    } else {
         root->setAttribute(_("success"), _("0"), mxml_bool_type);
         Ref<Element> errorEl(new Element(_("error")));
         errorEl->setTextKey(_("text"));
         errorEl->setText(error);
-        
+
         if (error_code == 0)
             error_code = 899;
         errorEl->setAttribute(_("code"), String::from(error_code));
         root->appendElementChild(errorEl);
     }
-    
+
     String returnType = param(_("return_type"));
-    if (string_ok(returnType) && returnType == "xml")
-    {
+    if (string_ok(returnType) && returnType == "xml") {
 #ifdef TOMBDEBUG
-        try
-        {
+        try {
             // make sure we can generate JSON w/o exceptions
             XML2JSON::getJSON(root);
             //log_debug("JSON-----------------------\n\n\n%s\n\n\n\n", XML2JSON::getJSON(root).c_str());
-        }
-        catch(const Exception e)
-        {
+        } catch (const Exception e) {
             e.printStackTrace();
         }
 #endif
-            output = renderXMLHeader() + root->print();
-    }
-    else
-    {
-        try
-        {
+        output = renderXMLHeader() + root->print();
+    } else {
+        try {
             output = XML2JSON::getJSON(root);
-        }
-        catch(const Exception e)
-        {
+        } catch (const Exception e) {
             e.printStackTrace();
         }
     }
-    
+
     /*
     try
     {
@@ -242,17 +216,17 @@ Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
         e.printStackTrace();
     }
     */
-    
+
     //root = nil;
-    
+
     Ref<MemIOHandler> io_handler(new MemIOHandler(output));
     io_handler->open(mode);
     return RefCast(io_handler, IOHandler);
 }
 
-Ref<IOHandler> WebRequestHandler::open(IN const char *filename,
-                                       IN enum UpnpOpenFileMode mode,
-                                       IN String range)
+Ref<IOHandler> WebRequestHandler::open(IN const char* filename,
+    IN enum UpnpOpenFileMode mode,
+    IN String range)
 {
     this->filename = filename;
     this->mode = mode;
@@ -268,18 +242,14 @@ Ref<IOHandler> WebRequestHandler::open(IN const char *filename,
 void WebRequestHandler::handleUpdateIDs()
 {
     // session will be filled by check_request
-    
+
     String updates = param(_("updates"));
-    if (string_ok(updates))
-    {
+    if (string_ok(updates)) {
         Ref<Element> updateIDs(new Element(_("update_ids")));
         root->appendElementChild(updateIDs);
-        if (updates == "check")
-        {
+        if (updates == "check") {
             updateIDs->setAttribute(_("pending"), session->hasUIUpdateIDs() ? _("1") : _("0"), mxml_bool_type);
-        }
-        else if (updates == "get")
-        {
+        } else if (updates == "get") {
             addUpdateIDs(updateIDs, session);
         }
     }
@@ -288,8 +258,7 @@ void WebRequestHandler::handleUpdateIDs()
 void WebRequestHandler::addUpdateIDs(Ref<Element> updateIDsEl, Ref<Session> session)
 {
     String updateIDs = session->getUIUpdateIDs();
-    if (string_ok(updateIDs))
-    {
+    if (string_ok(updateIDs)) {
         log_debug("UI: sending update ids: %s\n", updateIDs.c_str());
         updateIDsEl->setTextKey(_("ids"));
         updateIDsEl->setText(updateIDs);
@@ -301,7 +270,7 @@ void WebRequestHandler::appendTask(Ref<Element> el, Ref<GenericTask> task)
 {
     if (task == nil || el == nil)
         return;
-    Ref<Element> taskEl (new Element(_("task")));
+    Ref<Element> taskEl(new Element(_("task")));
     taskEl->setAttribute(_("id"), String::from(task->getID()), mxml_int_type);
     taskEl->setAttribute(_("cancellable"), task->isCancellable() ? _("1") : _("0"), mxml_bool_type);
     taskEl->setTextKey(_("text"));
