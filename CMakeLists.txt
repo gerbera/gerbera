@@ -328,10 +328,34 @@ if(NOT HOST_OS)
                 "mediatomb was unable to deterimine the host OS. Please report this. Value of CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
 endif()
 
+# X86 Check
+if (CMAKE_SYSTEM_PROCESSOR MATCHES "(i386)|(x86)|(X86)|(amd64)|(AMD64)")
+    set (X86 TRUE)
+else ()
+    set (X86 FALSE)
+endif ()
+
 if (SOLARIS)
     add_definitions(-DSOLARIS)
-    # we need these specially called out as not in packages [OmniOS/joyent]
-    target_link_libraries (mediatomb "-luuid -lsocket -lnsl -liconv")
+endif()
+
+# find socket, nsl, iconv and uuid for solaris, and maybe others
+find_library(SOCKET_LIBRARY socket)
+if(SOCKET_LIBRARY)
+    set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${SOCKET_LIBRARY})
+    target_link_libraries(mediatomb ${SOCKET_LIBRARY})
+endif()
+
+find_library(NSL_LIBRARY nsl)
+if(NSL_LIBRARY)
+    set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${NSL_LIBRARY})
+    target_link_libraries(mediatomb ${NSL_LIBRARY})
+endif()
+
+find_library(ICONV_LIBRARY iconv)
+if(ICONV_LIBRARY)
+    set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${ICONV_LIBRARY})
+    target_link_libraries(mediatomb ${ICONV_LIBRARY})
 endif()
 
 add_definitions(-DPACKAGE_NAME="MediaTomb-${MEDIATOMB_SUFFIX}")
