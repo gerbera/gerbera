@@ -9,26 +9,23 @@
 find_package(PkgConfig QUIET)
 pkg_check_modules (PC_UPNP QUIET libupnp)
 
-find_path(UPNP_INCLUDE_DIR upnp/upnp.h
-    HINTS
-    ${PC_UPNP_INCLUDEDIR}
-    ${PC_UPNP_INCLUDE_DIRS}
+find_package(PkgConfig QUIET)
+pkg_check_modules (PC_UPNP QUIET libupnp-1.8)
+
+message(STATUS ${PC_UPNP_LIBDIR})
+
+find_path(UPNP_INCLUDE_DIR upnp-1.8/upnp.h
+    HINTS ${PC_UPNP_INCLUDEDIR} ${PC_UPNP_INCLUDE_DIRS}
     PATH_SUFFIXES upnp)
 find_library(UPNP_UPNP_LIBRARY
-    NAMES libupnp upnp upnp4
-    HINTS
-    ${PC_UPNP_LIBDIR}
-    ${PC_UPNP_LIBRARY_DIRS})
+    NAMES libupnp-1.8 upnp-1.8 upnp4
+    HINTS ${PC_UPNP_LIBDIR} ${PC_UPNP_LIBRARY_DIRS})
 find_library(UPNP_IXML_LIBRARY
-    NAMES libixml ixml ixml4
-    HINTS
-    ${PC_UPNP_LIBDIR}
-    ${PC_UPNP_LIBRARY_DIRS})
+    NAMES libixml-1.8 ixml-1.8 ixml4
+    HINTS ${PC_UPNP_LIBDIR} ${PC_UPNP_LIBRARY_DIRS})
 find_library(UPNP_THREADUTIL_LIBRARY
-    NAMES libthreadutil threadutil threadutil4
-    HINTS
-    ${PC_UPNP_LIBDIR}
-    ${PC_UPNP_LIBRARY_DIRS})
+    NAMES libthreadutil-1.8 threadutil-1.8 threadutil4
+    HINTS ${PC_UPNP_LIBDIR} ${PC_UPNP_LIBRARY_DIRS})
 
 if(EXISTS "${UPNP_INCLUDE_DIR}/upnp/upnpconfig.h")
     file (STRINGS ${UPNP_INCLUDE_DIR}/upnp/upnpconfig.h _UPNP_DEFS REGEX "^[ \t]*#define[ \t]+UPNP_VERSION_(MAJOR|MINOR|PATCH)")
