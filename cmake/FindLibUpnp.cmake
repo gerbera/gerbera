@@ -1,4 +1,4 @@
-# - Try to find LibUPnP (pupnp)
+# - Try to find LibUPnP (pupnp) 1.8
 # Once done this will define
 #  UPNP_FOUND - System has LibUPnP
 #  UPNP_INCLUDE_DIRS - The LibUPnP include directories
@@ -7,12 +7,7 @@
 #
 
 find_package(PkgConfig QUIET)
-pkg_check_modules (PC_UPNP QUIET libupnp)
-
-find_package(PkgConfig QUIET)
 pkg_check_modules (PC_UPNP QUIET libupnp-1.8)
-
-message(STATUS ${PC_UPNP_LIBDIR})
 
 find_path(UPNP_INCLUDE_DIR upnp-1.8/upnp.h
     HINTS ${PC_UPNP_INCLUDEDIR} ${PC_UPNP_INCLUDE_DIRS}
@@ -27,8 +22,8 @@ find_library(UPNP_THREADUTIL_LIBRARY
     NAMES libthreadutil-1.8 threadutil-1.8 threadutil4
     HINTS ${PC_UPNP_LIBDIR} ${PC_UPNP_LIBRARY_DIRS})
 
-if(EXISTS "${UPNP_INCLUDE_DIR}/upnp/upnpconfig.h")
-    file (STRINGS ${UPNP_INCLUDE_DIR}/upnp/upnpconfig.h _UPNP_DEFS REGEX "^[ \t]*#define[ \t]+UPNP_VERSION_(MAJOR|MINOR|PATCH)")
+if(EXISTS "${UPNP_INCLUDE_DIR}/upnp-1.8/upnpconfig.h")
+    file (STRINGS ${UPNP_INCLUDE_DIR}/upnp-1.8/upnpconfig.h _UPNP_DEFS REGEX "^[ \t]*#define[ \t]+UPNP_VERSION_(MAJOR|MINOR|PATCH)")
     string (REGEX REPLACE ".*UPNP_VERSION_MAJOR ([0-9]+).*" "\\1" UPNP_MAJOR_VERSION "${_UPNP_DEFS}")
     string (REGEX REPLACE ".*UPNP_VERSION_MINOR ([0-9]+).*" "\\1" UPNP_MINOR_VERSION "${_UPNP_DEFS}")
     string (REGEX REPLACE ".*UPNP_VERSION_PATCH ([0-9]+).*" "\\1" UPNP_PATCH_VERSION "${_UPNP_DEFS}")
