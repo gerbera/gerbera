@@ -29,18 +29,19 @@
 
 /// \file file_io_handler.cc
 
-#include "server.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
+#include <upnp-1.8/ixml.h>
+
+#include "server.h"
 #include "common.h"
 #include "storage.h"
 #include "cds_objects.h"
 #include "process.h"
 #include "update_manager.h"
-#include "upnp/ixml.h"
 #include "file_io_handler.h"
 #include "dictionary.h"
 

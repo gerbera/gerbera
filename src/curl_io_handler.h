@@ -35,7 +35,7 @@
 #define __CURL_IO_HANDLER_H__
 
 #include <curl/curl.h>
-#include <upnp/upnp.h>
+#include <upnp-1.8/upnp.h>
 
 #include "common.h"
 #include "io_handler_buffer_helper.h"

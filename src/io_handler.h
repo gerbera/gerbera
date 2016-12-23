@@ -32,7 +32,7 @@
 #ifndef __IO_HANDLER_H__
 #define __IO_HANDLER_H__
 
-#include <upnp/upnp.h>
+#include <upnp-1.8/upnp.h>
 
 #include "common.h"
 

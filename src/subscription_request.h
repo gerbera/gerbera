@@ -33,7 +33,7 @@
 #ifndef __SUBSCRIPTION_REQUEST_H__
 #define __SUBSCRIPTION_REQUEST_H__
 
-#include <upnp/upnp.h>
+#include <upnp-1.8/upnp.h>
 
 #include "common.h"
 

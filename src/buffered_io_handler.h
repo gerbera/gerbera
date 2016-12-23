@@ -32,7 +32,7 @@
 #ifndef __BUFFERED_IO_HANDLER_H__
 #define __BUFFERED_IO_HANDLER_H__
 
-#include <upnp/upnp.h>
+#include <upnp-1.8/upnp.h>
 
 #include "common.h"
 #include "io_handler_buffer_helper.h"
