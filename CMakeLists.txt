@@ -341,7 +341,7 @@ add_definitions(-DVERSION="${MEDIATOMB_MAJOR_VERSION}.${MEDIATOMB_MINOR_VERSION}
 add_definitions(-DPACKAGE_DATADIR="${CMAKE_INSTALL_PREFIX}/share/mediatomb")
 
 add_definitions(-DCOMPILE_INFO="")
-add_definitions(-DEXTERNAL_TRANSCODING)
+add_definitions(-DEXTERNAL_TRANSCODING -DAUTO_CREATE_DATABASE)
 
 if (WITH_LOGGING OR WITH_DEBUG_LOGGING)
     add_definitions(-DLOG_ENABLED)
@@ -362,7 +362,6 @@ CHECK_FUNCTION_EXISTS(setlocale HAVE_SETLOCALE)
 if (HAVE_SETLOCALE)
     add_definitions("-DHAVE_SETLOCALE")
 endif()
-
 
 # INotify is only available on Linux
 if (LINUX)
