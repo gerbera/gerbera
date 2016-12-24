@@ -124,8 +124,7 @@ public:
     virtual zmm::String incrementUpdateIDs(std::shared_ptr<std::unordered_set<int> > ids);
     
     virtual zmm::String buildContainerPath(int parentID, zmm::String title);
-    virtual void addContainerChain(zmm::String path, zmm::String lastClass,
-            int lastRefID, int *containerID, int *updateID);
+    virtual void addContainerChain(zmm::String path, zmm::String lastClass, int lastRefID, int *containerID, int *updateID, zmm::Ref<Dictionary> lastMetadata);
     virtual zmm::String getInternalSetting(zmm::String key);
     virtual void storeInternalSetting(zmm::String key, zmm::String value) = 0;
     
@@ -223,8 +222,8 @@ private:
     zmm::String stripLocationPrefix(zmm::String path);
     
     zmm::Ref<CdsObject> checkRefID(zmm::Ref<CdsObject> obj);
-    int createContainer(int parentID, zmm::String name, zmm::String path, bool isVirtual, zmm::String upnpClass, int refID);
-    
+    int createContainer(int parentID, zmm::String name, zmm::String path, bool isVirtual, zmm::String upnpClass, int refID, zmm::Ref<Dictionary> lastMetadata);
+
     zmm::String mapBool(bool val) { return quote((val ? 1 : 0)); }
     bool remapBool(zmm::String field) { return (string_ok(field) && field == "1"); }
     

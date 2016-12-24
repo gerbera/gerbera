@@ -1288,7 +1288,7 @@ void ContentManager::addContainer(int parentID, String title, String upnpClass)
 }
 
 
-int ContentManager::addContainerChain(String chain, String lastClass, int lastRefID)
+int ContentManager::addContainerChain(String chain, String lastClass, int lastRefID, Ref<Dictionary> lastMetadata)
 {
     Ref<Storage> storage = Storage::getInstance();
     int updateID = INVALID_OBJECT_ID;
@@ -1298,8 +1298,8 @@ int ContentManager::addContainerChain(String chain, String lastClass, int lastRe
         throw _Exception(_("addContainerChain() called with empty chain parameter"));
     
     log_debug("received chain: %s\n", chain.c_str());
-    storage->addContainerChain(chain, lastClass, lastRefID,
-                              &containerID, &updateID);
+    storage->addContainerChain(chain, lastClass, lastRefID, &containerID, &updateID, lastMetadata);
+
     // if (updateID != INVALID_OBJECT_ID)
     // an invalid updateID is checked by containerChanged()
     UpdateManager::getInstance()->containerChanged(updateID);

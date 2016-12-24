@@ -963,8 +963,10 @@ int SQLStorage::ensurePathExistence(String path, int *changedContainer)
     String cleanPath = path.reduce(DIR_SEPARATOR);
     if (cleanPath == DIR_SEPARATOR)
         return CDS_ID_FS_ROOT;
+
     if (cleanPath.charAt(cleanPath.length() - 1) == DIR_SEPARATOR) // cut off trailing slash
         cleanPath = cleanPath.substring(0, cleanPath.length() - 1);
+
     return _ensurePathExistence(cleanPath, changedContainer);
 }
 
@@ -972,25 +974,27 @@ int SQLStorage::_ensurePathExistence(String path, int *changedContainer)
 {
     if (path == DIR_SEPARATOR)
         return CDS_ID_FS_ROOT;
+
     Ref<CdsObject> obj = findObjectByPath(path + DIR_SEPARATOR);
     if (obj != nil)
         return obj->getID();
+
     Ref<Array<StringBase> > pathAr = split_path(path);
     String parent = pathAr->get(0);
     String folder = pathAr->get(1);
-    int parentID;
-    parentID = ensurePathExistence(parent, changedContainer);
+
+    int parentID = ensurePathExistence(parent, changedContainer);
     
     Ref<StringConverter> f2i = StringConverter::f2i();
     if (changedContainer != NULL && *changedContainer == INVALID_OBJECT_ID)
         *changedContainer = parentID;
-    return createContainer(parentID, f2i->convert(folder), path, false, nil, INVALID_OBJECT_ID);
+
+    return createContainer(parentID, f2i->convert(folder), path, false, nil, INVALID_OBJECT_ID, nil);
 }
 
-int SQLStorage::createContainer(int parentID, String name, String path, bool isVirtual, String upnpClass, int refID)
+int SQLStorage::createContainer(int parentID, String name, String path, bool isVirtual, String upnpClass, int refID, Ref<Dictionary> lastMetadata)
 {
-    if (refID > 0)
-    {
+    if (refID > 0) {
         Ref<CdsObject> refObj = loadObject(refID);
         if (refObj == nil)
             throw _Exception(_("tried to create container with refID set, but refID doesn't point to an existing object"));
@@ -1010,6 +1014,7 @@ int SQLStorage::createContainer(int parentID, String name, String path, bool isV
         << TQ("dc_title") << ','
         << TQ("location") << ','
         << TQ("location_hash") << ','
+        << TQ("metadata") << ','
         << TQ("ref_id") << ") VALUES ("
         << newID << ','
         << parentID << ','
@@ -1018,6 +1023,7 @@ int SQLStorage::createContainer(int parentID, String name, String path, bool isV
         << quote(name) << ','
         << quote(dbLocation) << ','
         << quote(stringHash(dbLocation)) << ','
+        << (lastMetadata == nil ? _(SQL_NULL) : lastMetadata->encode()) << ','
         << (refID > 0 ? quote(refID) : _(SQL_NULL))
         << ')';
         
@@ -1051,23 +1057,28 @@ String SQLStorage::buildContainerPath(int parentID, String title)
     //title = escape(title, xxx);
     if (parentID == CDS_ID_ROOT)
         return String(VIRTUAL_CONTAINER_SEPARATOR) + title;
+
     Ref<StringBuffer> qb(new StringBuffer());
     *qb << "SELECT " << TQ("location") << " FROM " << TQ(CDS_OBJECT_TABLE) <<
         " WHERE " << TQ("id") << '=' << parentID << " LIMIT 1";
-     Ref<SQLResult> res = select(qb);
+
+    Ref<SQLResult> res = select(qb);
     if (res == nil)
         return nil;
+
     Ref<SQLRow> row = res->nextRow();
     if (row == nil)
         return nil;
+
     char prefix;
     String path = stripLocationPrefix(&prefix, row->col(0)) + VIRTUAL_CONTAINER_SEPARATOR + title;
     if (prefix != LOC_VIRT_PREFIX)
         throw _Exception(_("tried to build a virtual container path with an non-virtual parentID"));
+
     return path;
 }
 
-void SQLStorage::addContainerChain(String path, String lastClass, int lastRefID, int *containerID, int *updateID)
+void SQLStorage::addContainerChain(String path, String lastClass, int lastRefID, int *containerID, int *updateID, Ref<Dictionary> lastMetadata)
 {
     path = path.reduce(VIRTUAL_CONTAINER_SEPARATOR);
     if (path == VIRTUAL_CONTAINER_SEPARATOR)
@@ -1081,6 +1092,7 @@ void SQLStorage::addContainerChain(String path, String lastClass, int lastRefID,
             << " WHERE " << TQ("location_hash") << '=' << quote(stringHash(dbLocation))
             << " AND " << TQ("location") << '=' << quote(dbLocation)
             << " LIMIT 1";
+
     Ref<SQLResult> res = select(qb);
     if (res != nil)
     {
@@ -1092,13 +1104,15 @@ void SQLStorage::addContainerChain(String path, String lastClass, int lastRefID,
             return;
         }
     }
+
     int parentContainerID;
     String newpath, container;
     stripAndUnescapeVirtualContainerFromPath(path, newpath, container);
-    addContainerChain(newpath, nil, INVALID_OBJECT_ID, &parentContainerID, updateID);
+
+    addContainerChain(newpath, nil, INVALID_OBJECT_ID, &parentContainerID, updateID, nil);
     if (updateID != NULL && *updateID == INVALID_OBJECT_ID)
         *updateID = parentContainerID;
-    *containerID = createContainer(parentContainerID, container, path, true, lastClass, lastRefID);
+    *containerID = createContainer(parentContainerID, container, path, true, lastClass, lastRefID, lastMetadata);
 }
 
 String SQLStorage::addLocationPrefix(char prefix, String path)
@@ -1161,7 +1175,7 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
             obj->addResource(CdsResource::decode(resources->get(i)));
         }
     }
-    
+
     if ( (obj->getRefID() && IS_CDS_PURE_ITEM(objectType)) ||
         (IS_CDS_ITEM(objectType) && ! IS_CDS_PURE_ITEM(objectType)) )
         obj->setVirtual(true);
@@ -1401,14 +1415,14 @@ shared_ptr<unordered_set<int> > SQLStorage::getObjects(int parentID, bool withou
     
     if (res->getNumRows() <= 0)
         return nullptr;
-    int capacity = res->getNumRows() * 5 + 1;
+
+    unsigned long long capacity = res->getNumRows() * 5 + 1;
     if (capacity < 521)
         capacity = 521;
     
     shared_ptr<unordered_set<int> > ret = make_shared<unordered_set<int>>();
     
-    while ((row = res->nextRow()) != nil)
-    {
+    while ((row = res->nextRow()) != nil) {
         ret->insert(row->col(0).toInt());
     }
     return ret;
@@ -1971,10 +1985,9 @@ Ref<AutoscanDirectory> SQLStorage::_fillAutoscanDirectory(Ref<SQLRow> row)
     int storageID = row->col(0).toInt();
     
     String location;
-    if (objectID == INVALID_OBJECT_ID)
+    if (objectID == INVALID_OBJECT_ID) {
         location = row->col(9);
-    else
-    {
+    } else {
         char prefix;
         location = stripLocationPrefix(&prefix, row->col(10));
         if (prefix != LOC_DIR_PREFIX)
