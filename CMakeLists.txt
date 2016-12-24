@@ -491,6 +491,7 @@ include_directories(${ZLIB_INCLUDE_DIRS})
 target_link_libraries (mediatomb ${ZLIB_LIBRARIES})
 
 INSTALL(TARGETS mediatomb DESTINATION bin)
+INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/js DESTINATION share/mediatomb)
 INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/web DESTINATION share/mediatomb)
 INSTALL(FILES
         ${PROJECT_SOURCE_DIR}/config/mappings.xml
