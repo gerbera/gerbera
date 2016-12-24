@@ -143,8 +143,7 @@ static void addFfmpegMetadataFields(Ref<CdsItem> item, AVFormatContext *pFormatC
 // ffmpeg library calls
 static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext *pFormatCtx, int *x, int *y) 
 {
-    unsigned int i;
-    int hours, mins, secs, us;
+    int64_t hours, mins, secs, us;
     int audioch = 0, samplefreq = 0;
     bool audioset, videoset;
     String resolution;
@@ -164,9 +163,8 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext *pFormatC
     hours = mins / 60;
     mins %= 60;
     if ((hours + mins + secs) > 0) 
-    { 
-    	sprintf(duration, "%02d:%02d:%02d.%01d", hours, mins,
-                secs, (10 * us) / AV_TIME_BASE);
+    {
+        sprintf(duration, "%02ld:%02ld:%02ld.%01ld", hours, mins, secs, (10 * us) / AV_TIME_BASE);
         log_debug("Added duration: %s\n", duration);
         item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_DURATION), duration);
     }
@@ -176,59 +174,58 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext *pFormatC
     {
         // ffmpeg's bit_rate is in bits/sec, upnp wants it in bytes/sec
         // See http://www.upnp.org/schemas/av/didl-lite-v3.xsd
-        log_debug("Added overall bitrate: %d kb/s\n", 
-                  pFormatCtx->bit_rate/8);
+        log_debug("Added overall bitrate: %d kb/s\n", pFormatCtx->bit_rate/8);
         item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_BITRATE), String::from(pFormatCtx->bit_rate/8));
     }
 
 	// video resolution, audio sampling rate, nr of audio channels
 	audioset = false;
 	videoset = false;
-	for(i=0; i<pFormatCtx->nb_streams; i++) 
+	for(unsigned int i=0; i<pFormatCtx->nb_streams; i++)
     {
 		AVStream *st = pFormatCtx->streams[i];
-		if((st != NULL) && (videoset == false) && (st->codec->codec_type == AVMEDIA_TYPE_VIDEO))
+		if((st != NULL) && (videoset == false) && (st->codecpar->codec_type == AVMEDIA_TYPE_VIDEO))
         {
-            if (st->codec->codec_tag > 0)
+            if (st->codecpar->codec_tag > 0)
             {
                 char fourcc[5];
-                fourcc[0] = st->codec->codec_tag;
-                fourcc[1] = st->codec->codec_tag >> 8;
-                fourcc[2] = st->codec->codec_tag >> 16;
-                fourcc[3] = st->codec->codec_tag >> 24;
+                fourcc[0] = st->codecpar->codec_tag;
+                fourcc[1] = st->codecpar->codec_tag >> 8;
+                fourcc[2] = st->codecpar->codec_tag >> 16;
+                fourcc[3] = st->codecpar->codec_tag >> 24;
                 fourcc[4] = '\0';
 
                 log_debug("FourCC: %x = %s\n", 
-                                        st->codec->codec_tag, fourcc);
+                                        st->codecpar->codec_tag, fourcc);
                 String fcc = fourcc;
                 if (string_ok(fcc))
                     item->getResource(0)->addOption(_(RESOURCE_OPTION_FOURCC), 
                                                     fcc);
             }
 
-			if ((st->codec->width > 0) && (st->codec->height > 0)) 
+			if ((st->codecpar->width > 0) && (st->codecpar->height > 0))
             {
-                resolution = String::from(st->codec->width) + "x" + 
-                                    String::from(st->codec->height);
+                resolution = String::from(st->codecpar->width) + "x" +
+                                    String::from(st->codecpar->height);
 
 				log_debug("Added resolution: %s pixel\n", resolution.c_str());
 		        item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), resolution);
 				videoset = true;
-                *x = st->codec->width;
-                *y = st->codec->height;
+                *x = st->codecpar->width;
+                *y = st->codecpar->height;
 			}
 		}
-		if((st != NULL) && (audioset == false) && (st->codec->codec_type == AVMEDIA_TYPE_AUDIO))
+		if((st != NULL) && (audioset == false) && (st->codecpar->codec_type == AVMEDIA_TYPE_AUDIO))
         {
 			// find the first stream that has a valid sample rate
-			if (st->codec->sample_rate > 0)
+			if (st->codecpar->sample_rate > 0)
             {
-				samplefreq = st->codec->sample_rate;
+				samplefreq = st->codecpar->sample_rate;
 	    	    log_debug("Added sample frequency: %d Hz\n", samplefreq);
 	        	item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), String::from(samplefreq));
 				audioset = true;
 
-				audioch = st->codec->channels;
+				audioch = st->codecpar->channels;
 			    if (audioch > 0) 
 			    {
 			        log_debug("Added number of audio channels: %d\n", audioch);
