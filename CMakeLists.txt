@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.6)
 
+INCLUDE (CheckFunctionExists)
+
 set(CMAKE_VERBOSE_MAKEFILE off CACHE BOOL "Show verbose build commands")
 set(WITH_MAGIC          1 CACHE BOOL "Use libmagic to identify file mime types")
 set(WITH_MYSQL          1 CACHE BOOL "MySQL is required if sqlite is not available")
@@ -350,6 +352,17 @@ endif()
 
 find_package(Threads REQUIRED)
 target_link_libraries (mediatomb ${CMAKE_THREAD_LIBS_INIT})
+
+CHECK_FUNCTION_EXISTS(nl_langinfo HAVE_NL_LANGINFO)
+if (HAVE_NL_LANGINFO)
+    add_definitions("-DHAVE_NL_LANGINFO")
+endif()
+
+CHECK_FUNCTION_EXISTS(setlocale HAVE_SETLOCALE)
+if (HAVE_SETLOCALE)
+    add_definitions("-DHAVE_SETLOCALE")
+endif()
+
 
 # INotify is only available on Linux
 if (LINUX)

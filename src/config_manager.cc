@@ -52,7 +52,7 @@
     #include "weborama_service.h"
 #endif
 
-#if defined(HAVE_LANGINFO_H) && defined(HAVE_LOCALE_H)
+#if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
     #include <langinfo.h>
     #include <locale.h>
 #endif
