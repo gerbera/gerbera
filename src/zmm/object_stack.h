@@ -67,7 +67,7 @@ namespace zmm
         {
             Object *obj = BaseStack<Object *>::pop();
             if (obj == NULL)
-                return nil;
+                return nullptr;
             Ref<T> ret((T *)obj);
             obj->release();
             return ret;

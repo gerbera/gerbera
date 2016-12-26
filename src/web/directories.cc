@@ -49,7 +49,7 @@ void web::directories::process()
 
     String path;
     String parentID = param(_("parent_id"));
-    if (parentID == nil || parentID == "0")
+    if (parentID == nullptr || parentID == "0")
         path = _(FS_ROOT_DIRECTORY);
     else
         path = hex_decode_string(parentID);

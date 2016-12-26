@@ -127,11 +127,11 @@ static JSBool js_addDVDObject(JSContext *cx, uint32_t argc, jsval *vp)
             }
 
             if (!string_ok(containerclass) || containerclass == "undefined")
-                containerclass = nil;
+                containerclass = nullptr;
         }
 
         processed = self->getProcessedObject();
-        if (processed == nil)
+        if (processed == nullptr)
         {
             log_error("addDVDObject: could not retrieve original object!\n");
             return JS_TRUE;
@@ -140,7 +140,7 @@ static JSBool js_addDVDObject(JSContext *cx, uint32_t argc, jsval *vp)
 
         // convert incoming object
         cds_obj = self->jsObject2cdsObject(js_cds_obj, processed);
-        if (cds_obj == nil)
+        if (cds_obj == nullptr)
         {
             log_error("addDVDObject: could not convert js object!\n");
             return JS_TRUE;
@@ -171,7 +171,7 @@ void DVDImportScript::addDVDObject(Ref<CdsObject> obj, int title,
                                   String containerclass)
 {
 
-    if (processed == nil)
+    if (processed == nullptr)
         throw _Exception(_("Invalid original object!"));
 
     if (processed->getID() == INVALID_OBJECT_ID)
@@ -278,7 +278,7 @@ void DVDImportScript::processDVDObject(Ref<CdsObject> obj)
     }
     catch (const Exception & ex)
     {
-        processed = nil;
+        processed = nullptr;
 #ifdef JS_THREADSAFE
         JS_EndRequest(cx);
         JS_ClearContextThread(cx);
@@ -286,7 +286,7 @@ void DVDImportScript::processDVDObject(Ref<CdsObject> obj)
         throw ex;
     }
 
-    processed = nil;
+    processed = nullptr;
 
     gc_counter++;
     if (gc_counter > JS_CALL_GC_AFTER_NUM)

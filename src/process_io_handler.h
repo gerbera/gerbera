@@ -60,7 +60,7 @@ public:
     /// \param proclist associated processes that will be terminated once
     /// they are no longer needed
     ProcessIOHandler(zmm::String filename, zmm::Ref<Executor> main_proc,
-                     zmm::Ref<zmm::Array<ProcListItem> > proclist = nil, 
+                     zmm::Ref<zmm::Array<ProcListItem> > proclist = nullptr,
                      bool ignoreSeek = false);
     
     /// \brief Opens file for reading (writing is not supported)

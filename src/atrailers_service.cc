@@ -80,7 +80,7 @@ String ATrailersService::getServiceName()
 Ref<Object> ATrailersService::defineServiceTask(Ref<Element> xmlopt, Ref<Object> params)
 {
     // there are no configurable tasks here, we fetch an XML and parse it
-    return nil;
+    return nullptr;
 }
 
 Ref<Element> ATrailersService::getData()
@@ -100,14 +100,14 @@ Ref<Element> ATrailersService::getData()
     {
         log_error("Failed to download Apple Trailers XML data: %s\n", 
                   ex.getMessage().c_str());
-        return nil;
+        return nullptr;
     }
 
-    if (buffer == nil)
-        return nil;
+    if (buffer == nullptr)
+        return nullptr;
 
     if (retcode != 200)
-        return nil;
+        return nullptr;
 
     log_debug("GOT BUFFER\n%s\n", buffer->toString().c_str()); 
     Ref<Parser> parser(new Parser());
@@ -121,16 +121,16 @@ Ref<Element> ATrailersService::getData()
                pe.context->location.c_str(),
                pe.context->line,
                pe.getMessage().c_str());
-        return nil;
+        return nullptr;
     }
     catch (const Exception & ex)
     {
         log_error("Error parsing Apple Trailers XML %s\n", 
                   ex.getMessage().c_str());
-        return nil;
+        return nullptr;
     }
     
-    return nil;
+    return nullptr;
 }
 
 bool ATrailersService::refreshServiceData(Ref<Layout> layout)
@@ -152,7 +152,7 @@ bool ATrailersService::refreshServiceData(Ref<Layout> layout)
     Ref<Element> reply = getData();
 
     Ref<ATrailersContentHandler> sc(new ATrailersContentHandler());
-    if (reply != nil)
+    if (reply != nullptr)
         sc->setServiceContent(reply);
     else
     {
@@ -164,18 +164,18 @@ bool ATrailersService::refreshServiceData(Ref<Layout> layout)
     do
     {
         obj = sc->getNextObject();
-        if (obj == nil)
+        if (obj == nullptr)
             break;
 
         obj->setVirtual(true);
 
         Ref<CdsObject> old = Storage::getInstance()->loadObjectByServiceID(RefCast(obj, CdsItem)->getServiceID());
-        if (old == nil)
+        if (old == nullptr)
         {
             log_debug("Adding new Trailers object\n");
             
-            if (layout != nil)
-                layout->processCdsObject(obj, nil);
+            if (layout != nullptr)
+                layout->processCdsObject(obj, nullptr);
         }
         else
         {
@@ -194,7 +194,7 @@ bool ATrailersService::refreshServiceData(Ref<Layout> layout)
             return false;
 
     }
-    while (obj != nil);
+    while (obj != nullptr);
 
     return false;
 }

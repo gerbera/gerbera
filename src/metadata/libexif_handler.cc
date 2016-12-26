@@ -329,7 +329,7 @@ void LibExifHandler::process_ifd (ExifContent *content, Ref<CdsItem> item, Ref<S
         }
 
         // if there are any auxilary tags that the user wants - add them
-        if (auxtags != nil)
+        if (auxtags != nullptr)
         {
             for (int j = 0; j < auxtags->size(); j++)
             {

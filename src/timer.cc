@@ -43,7 +43,7 @@ using namespace zmm;
 template <>
 Ref<Array<Timer::TimerSubscriberElement<TimerSubscriberSingleton<Object> > > > Timer::getAppropriateSubscribers<TimerSubscriberSingleton<Object> >()
 {
-    if (subscribersSingleton == nil)
+    if (subscribersSingleton == nullptr)
         throw _Exception(_("timer already inactive!"));
     return subscribersSingleton;
 }
@@ -51,7 +51,7 @@ Ref<Array<Timer::TimerSubscriberElement<TimerSubscriberSingleton<Object> > > > T
 template <>
 Ref<Array<Timer::TimerSubscriberElement<TimerSubscriberObject> > > Timer::getAppropriateSubscribers<TimerSubscriberObject>()
 {
-    if (subscribersObject == nil)
+    if (subscribersObject == nullptr)
         throw _Exception(_("timer already inactive!"));
     return subscribersObject;
 }
@@ -125,7 +125,7 @@ struct timespec * Timer::getNextNotifyTime()
 
 void Timer::shutdown()
 {
-    subscribersSingleton = nil;
-    subscribersObject = nil;
+    subscribersSingleton = nullptr;
+    subscribersObject = nullptr;
     log_debug("finished.\n");
 }

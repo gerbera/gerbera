@@ -77,17 +77,17 @@ String Script::getProperty(JSObject *obj, String name)
     JSString *str;
     String ret;
     if (!JS_GetProperty(cx, obj, name.c_str(), &val))
-        return nil;
+        return nullptr;
     if (val == JSVAL_VOID)
-        return nil;
+        return nullptr;
     str = JS_ValueToString(cx, val);
     if (!str)
-        return nil;
+        return nullptr;
 
     char *ts = JS_EncodeString(cx, str);
     if (!ts)
     {
-        return nil;
+        return nullptr;
     }
     ret = ts;
     JS_free(cx, ts);
@@ -594,7 +594,7 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
     if (objectType == -1)
     {
         log_error("missing objectType property\n");
-        return nil;
+        return nullptr;
     }
 
     Ref<CdsObject> obj = CdsObject::createObject(objectType);
@@ -616,26 +616,26 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
         obj->setParentID(i);
 
     val = getProperty(js, _("title"));
-    if (val != nil)
+    if (val != nullptr)
     {
         val = sc->convert(val);
         obj->setTitle(val);
     }
     else
     {
-        if (pcd != nil)
+        if (pcd != nullptr)
             obj->setTitle(pcd->getTitle());
     }
 
     val = getProperty(js, _("upnpclass"));
-    if (val != nil)
+    if (val != nullptr)
     {
         val = sc->convert(val);
         obj->setClass(val);
     }
     else
     {
-        if (pcd != nil)
+        if (pcd != nullptr)
             obj->setClass(pcd->getClass());
     }
 
@@ -651,7 +651,7 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
         for (int i = 0; i < M_MAX; i++)
         {
             val = getProperty(js_meta, _(MT_KEYS[i].upnp));
-            if (val != nil)
+            if (val != nullptr)
             {
                 if (i == M_TRACKNUMBER)
                 {
@@ -675,7 +675,7 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
     }
     
     // stuff that has not been exported to js
-    if (pcd != nil)
+    if (pcd != nullptr)
     {
         obj->setFlags(pcd->getFlags());
         obj->setResources(pcd->getResources());
@@ -688,23 +688,23 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
         Ref<CdsItem> item = RefCast(obj, CdsItem);
         Ref<CdsItem> pcd_item;
 
-        if (pcd != nil)
+        if (pcd != nullptr)
             pcd_item = RefCast(pcd, CdsItem);
 
         val = getProperty(js, _("mimetype"));
-        if (val != nil)
+        if (val != nullptr)
         {
             val = sc->convert(val);
             item->setMimeType(val);
         }
         else
         {
-            if (pcd != nil)
+            if (pcd != nullptr)
                 item->setMimeType(pcd_item->getMimeType());
         }
 
         val = getProperty(js, _("serviceID"));
-        if (val != nil)
+        if (val != nullptr)
         {
             val = sc->convert(val);
             item->setServiceID(val);
@@ -713,14 +713,14 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
         /// \todo check what this is doing here, wasn't it already handled
         /// in the MT_KEYS loop?
         val = getProperty(js, _("description"));
-        if (val != nil)
+        if (val != nullptr)
         {
             val = sc->convert(val);
             item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), val);
         }
         else
         {
-            if (pcd != nil)
+            if (pcd != nullptr)
                 item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION),
                     pcd_item->getMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION)));
         }
@@ -731,14 +731,14 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
 
         // location must not be touched by character conversion!
         val = getProperty(js, _("location"));
-        if ((val != nil) && (IS_CDS_PURE_ITEM(objectType) || IS_CDS_ACTIVE_ITEM(objectType)))
+        if ((val != nullptr) && (IS_CDS_PURE_ITEM(objectType) || IS_CDS_ACTIVE_ITEM(objectType)))
             val = normalizePath(val);
         
         if (string_ok(val))
             obj->setLocation(val);
         else
         {
-            if (pcd != nil)
+            if (pcd != nullptr)
                 obj->setLocation(pcd->getLocation());
         }
 
@@ -746,24 +746,24 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
         {
             Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
             Ref<CdsActiveItem> pcd_aitem;
-            if (pcd != nil)
+            if (pcd != nullptr)
                 pcd_aitem = RefCast(pcd, CdsActiveItem);
           /// \todo what about character conversion for action and state fields?
             val = getProperty(js, _("action"));
-            if (val != nil)
+            if (val != nullptr)
                 aitem->setAction(val);
             else
             {
-                if (pcd != nil)
+                if (pcd != nullptr)
                     aitem->setAction(pcd_aitem->getAction());
             }
 
             val = getProperty(js, _("state"));
-            if (val != nil)
+            if (val != nullptr)
                 aitem->setState(val);
             else
             {
-                if (pcd != nil)
+                if (pcd != nullptr)
                     aitem->setState(pcd_aitem->getState());
             }
         }
@@ -775,7 +775,7 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
             obj->setRestricted(true);
             Ref<CdsItemExternalURL> item = RefCast(obj, CdsItemExternalURL);
             val = getProperty(js, _("protocol"));
-            if (val != nil)
+            if (val != nullptr)
             {
                 val = sc->convert(val);
                 protocolInfo = renderProtocolInfo(item->getMimeType(), val);
@@ -832,15 +832,15 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
         setIntProperty(js, _("parentID"), i);
 
     val = obj->getTitle();
-    if (val != nil)
+    if (val != nullptr)
         setProperty(js, _("title"), val);
 
     val = obj->getClass();
-    if (val != nil)
+    if (val != nullptr)
         setProperty(js, _("upnpclass"), val);
 
     val = obj->getLocation();
-    if (val != nil)
+    if (val != nullptr)
         setProperty(js, _("location"), val);
 
     setIntProperty(js, _("mtime"), (int)obj->getMTime());
@@ -1041,21 +1041,21 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
     {
         Ref<CdsItem> item = RefCast(obj, CdsItem);
         val = item->getMimeType();
-        if (val != nil)
+        if (val != nullptr)
             setProperty(js, _("mimetype"), val);
 
         val = item->getServiceID();
-        if (val != nil)
+        if (val != nullptr)
             setProperty(js, _("serviceID"), val);
 
         if (IS_CDS_ACTIVE_ITEM(objectType))
         {
             Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
             val = aitem->getAction();
-            if (val != nil)
+            if (val != nullptr)
                 setProperty(js, _("action"), val);
             val = aitem->getState();
-            if (val != nil)
+            if (val != nullptr)
                 setProperty(js, _("state"), val);
         }
     }
@@ -1089,7 +1089,7 @@ String Script::convertToCharset(String str, charset_convert_t chr)
             return _i2i->convert(str);
     }
 
-    return nil;
+    return nullptr;
 }
 
 Ref<CdsObject> Script::getProcessedObject()

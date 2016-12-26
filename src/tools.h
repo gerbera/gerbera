@@ -94,15 +94,15 @@ bool is_executable(zmm::String path, int *err = NULL);
 
 /// \brief Checks if the given executable exists in $PATH
 /// \param exec filename of the executable that needs to be checked
-/// \return aboslute path to the given executable or nil of it was not found
+/// \return aboslute path to the given executable or nullptr of it was not found
 zmm::String find_in_path(zmm::String exec);
 
 /// \brief Checks if the string contains any data.
 /// \param str String to be checked.
 /// \return true if ok
-/// \return false if string was either nil or empty
+/// \return false if string was either nullptr or empty
 /// 
-/// Checks if str is nil or ""
+/// Checks if str is nullptr or ""
 bool string_ok(zmm::String str);
 
 bool string_ok(zmm::Ref<zmm::StringBuffer> str);
@@ -110,7 +110,7 @@ bool string_ok(zmm::Ref<zmm::StringBuffer> str);
 /// \brief Checks if the string contains any data.
 /// \param str String to be checked.
 /// 
-/// Checks if str is nil or "" and throws an exception if that is the case.
+/// Checks if str is nullptr or "" and throws an exception if that is the case.
 void string_ok_ex(zmm::String str);
 
 /// \brief Render HTML that is doing a redirect to the given ip, port and html page.
@@ -184,7 +184,7 @@ void quicksort(COMPARABLE *arr, int size, COMPARATOR comparator);
 /// \param mimetype the mimetype that should be inserted
 /// \param protocol the protocol which should be inserted (default: "http-get")
 /// \return The rendered protocolInfo String
-zmm::String renderProtocolInfo(zmm::String mimetype, zmm::String protocol = _(PROTOCOL), zmm::String extend = nil);
+zmm::String renderProtocolInfo(zmm::String mimetype, zmm::String protocol = _(PROTOCOL), zmm::String extend = nullptr);
 
 /// \brief Extracts mimetype from the protocol info string.
 /// \param protocol info string as used in the protocolInfo attribute
@@ -252,10 +252,10 @@ zmm::String xml_unescape(zmm::String string);
 /// \return the unescaped string
 zmm::String unescape_amp(zmm::String string);
 
-/// \brief Returns the first string if it isn't "nil", otherwise the fallback string.
-/// \param first the string to return if it isn't nil
-/// \param fallback fallback string to return if first is nil
-/// \return return first if it isn't nil, otherwise fallback
+/// \brief Returns the first string if it isn't "nullptr", otherwise the fallback string.
+/// \param first the string to return if it isn't nullptr
+/// \param fallback fallback string to return if first is nullptr
+/// \return return first if it isn't nullptr, otherwise fallback
 zmm::String fallbackString(zmm::String first, zmm::String fallback);
 
 /// \brief computes an (unsigned int) hash for the given string
@@ -288,7 +288,7 @@ zmm::String normalizePath(zmm::String path);
 
 /// \brief Finds the IP address of the specified network interface.
 /// \param interface i.e. eth0, lo, etc.
-/// \return IP address or nil if interface was not found.
+/// \return IP address or nullptr if interface was not found.
 zmm::String interfaceToIP(zmm::String interface);
 
 /// \brief Returns true if the given string is eitehr "yes" or "no", otherwise

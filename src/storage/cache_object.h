@@ -53,7 +53,7 @@ public:
     
     void setObject(zmm::Ref<CdsObject> obj);
     zmm::Ref<CdsObject> getObject() { return obj; }
-    bool knowsObject() { return obj != nil; }
+    bool knowsObject() { return obj != nullptr; }
     
     void setNumChildren(int numChildren) { this->numChildren = numChildren; knowNumChildren = true; }
     int getNumChildren() { return numChildren; }
@@ -65,7 +65,7 @@ public:
     
     void setLocation(zmm::String location) { this->location = location; }
     zmm::String getLocation() { return location; }
-    bool knowsLocation() { return location != nil; }
+    bool knowsLocation() { return location != nullptr; }
     
     void setVirtual(bool virtualObj) { this->virtualObj = virtualObj; knowVirtualObj = true; }
     bool getVirtual() { return virtualObj; }

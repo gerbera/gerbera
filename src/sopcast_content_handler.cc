@@ -58,7 +58,7 @@ bool SopCastContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
     current_group_node_index = 0;
     current_channel_index = 0;
     channel_count = 0;
-    current_group = nil;
+    current_group = nullptr;
 
     extension_mimetype_map =
         ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
@@ -74,12 +74,12 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
 
     while (current_group_node_index < group_count)
     {
-        if (current_group == nil)
+        if (current_group == nullptr)
         {
             Ref<Node> n = channels->getChild(current_group_node_index);
             current_group_node_index++;
 
-            if (n == nil)
+            if (n == nullptr)
                 continue;
 
             if (n->getType() != mxml_node_element)
@@ -91,8 +91,8 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
             if ((current_group->getName() != "group") ||
                 (channel_count < 1))
             {
-                current_group = nil;
-                current_group_name = nil;
+                current_group = nullptr;
+                current_group_name = nullptr;
                 continue;
             }
             else
@@ -111,7 +111,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
 
         if (current_channel_index >= channel_count)
         {
-            current_group = nil;
+            current_group = nullptr;
             continue;
         }
 
@@ -120,7 +120,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
             Ref<Node> n = current_group->getChild(current_channel_index);
             current_channel_index++;
 
-            if ((n == nil) || (n->getType() != mxml_node_element))
+            if ((n == nullptr) || (n->getType() != mxml_node_element))
                 continue;
 
             Ref<Element> channel = RefCast(n, Element);
@@ -177,7 +177,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
             item->setMimeType(mt);
            
             Ref<Element> tmp_el = channel->getChildByName(_("sop_address"));
-            if (tmp_el == nil)
+            if (tmp_el == nullptr)
             {
                 log_warning("Failed to retrieve SopCast channel URL\n");
                 continue;
@@ -192,7 +192,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
             item->setURL(temp);
 
             tmp_el = channel->getChildByName(_("name"));
-            if (tmp_el == nil)
+            if (tmp_el == nullptr)
             {
                 log_warning("Failed to retrieve SopCast channel name\n");
                 continue;
@@ -205,7 +205,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
                 item->setTitle(_("Unknown"));
 
             tmp_el = channel->getChildByName(_("region"));
-            if (tmp_el != nil)
+            if (tmp_el != nullptr)
             {
                 temp = tmp_el->getAttribute(_("en"));
                 if (string_ok(temp))
@@ -241,7 +241,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
         }
     }
 
-    return nil;
+    return nullptr;
 }
 
 #endif//SOPCAST

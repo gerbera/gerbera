@@ -65,7 +65,7 @@ void XML2JSON::handleElement(Ref<StringBuffer> buf, Ref<Element> el)
     }
     
     bool array = el->isArrayType();
-    String nodeName = nil;
+    String nodeName = nullptr;
     
     if (array)
     {
@@ -190,5 +190,5 @@ String XML2JSON::getValue(String text, enum mxml_value_type type)
         /// \todo should we check if really int?
         return text;
     }
-    return nil;
+    return nullptr;
 }

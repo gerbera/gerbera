@@ -82,7 +82,7 @@ void ImportScript::processCdsObject(Ref<CdsObject> obj, String scriptpath)
     }
     catch (const Exception & ex)
     {
-        processed = nil;
+        processed = nullptr;
 #ifdef JS_THREADSAFE
         JS_EndRequest(cx);
         JS_ClearContextThread(cx);
@@ -90,7 +90,7 @@ void ImportScript::processCdsObject(Ref<CdsObject> obj, String scriptpath)
         throw ex;
     }
 
-    processed = nil;
+    processed = nullptr;
 
     gc_counter++;
     if (gc_counter > JS_CALL_GC_AFTER_NUM)

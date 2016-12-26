@@ -72,10 +72,10 @@ void WebRequestHandler::check_request(bool checkLogin)
     checkRequestCalled = true;
 
     String sid = param(_("sid"));
-    if (sid == nil)
+    if (sid == nullptr)
         throw SessionException(_("no session id given"));
 
-    if ((session = SessionManager::getInstance()->getSession(sid)) == nil)
+    if ((session = SessionManager::getInstance()->getSession(sid)) == nullptr)
         throw SessionException(_("invalid session id"));
 
     if (checkLogin && !session->isLoggedIn())
@@ -130,7 +130,7 @@ Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
     root = Ref<Element>(new Element(_("root")));
     out = Ref<StringBuffer>(new StringBuffer());
 
-    String error = nil;
+    String error = nullptr;
     int error_code = 0;
 
     String output;
@@ -217,7 +217,7 @@ Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
     }
     */
 
-    //root = nil;
+    //root = nullptr;
 
     Ref<MemIOHandler> io_handler(new MemIOHandler(output));
     io_handler->open(mode);
@@ -268,7 +268,7 @@ void WebRequestHandler::addUpdateIDs(Ref<Element> updateIDsEl, Ref<Session> sess
 
 void WebRequestHandler::appendTask(Ref<Element> el, Ref<GenericTask> task)
 {
-    if (task == nil || el == nil)
+    if (task == nullptr || el == nullptr)
         return;
     Ref<Element> taskEl(new Element(_("task")));
     taskEl->setAttribute(_("id"), String::from(task->getID()), mxml_int_type);

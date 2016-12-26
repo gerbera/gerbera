@@ -80,9 +80,9 @@ public:
     ///
     /// Each invokation of this funtion will return a new object,
     /// when the whole service XML is parsed and no more objects are left,
-    /// this function will return nil.
+    /// this function will return nullptr.
     ///
-    /// \return CdsObject or nil if there are no more objects to parse.
+    /// \return CdsObject or nullptr if there are no more objects to parse.
     zmm::Ref<CdsObject> getNextObject();
 
     /// \brief Retrieves a list of feed URLs from a subscription request along

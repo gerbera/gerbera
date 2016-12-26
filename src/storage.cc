@@ -48,12 +48,12 @@ Ref<Storage> Storage::getInstance()
 {
     if (! instance->singletonActive)
             throw _Exception(_("singleton is currently inactive!"));
-    if(instance == nil)
+    if(instance == nullptr)
     {
         AUTOLOCK(mutex);
         if (! instance->singletonActive)
                 throw _Exception(_("singleton is currently inactive!"));
-        if (instance == nil)
+        if (instance == nullptr)
         {
             Ref<Storage> tmpInstance = createInstance();
             tmpInstance->init();

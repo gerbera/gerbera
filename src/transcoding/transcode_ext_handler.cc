@@ -86,7 +86,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     log_debug("start transcoding file: %s\n", location.c_str());
     char fifo_template[]="mt_transcode_XXXXXX";
 
-    if (profile == nil)
+    if (profile == nullptr)
         throw _Exception(_("Transcoding of file ") + location +
                            "requested but no profile given");
     
@@ -135,7 +135,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     String temp;
     String command;
     Ref<Array<StringBase> > arglist;
-    Ref<Array<ProcListItem> > proc_list = nil; 
+    Ref<Array<ProcListItem> > proc_list = nullptr;
 
 #ifdef SOPCAST
     service_type_t service = OS_None;
@@ -150,7 +150,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
         int p1 = find_local_port(45000,65500);
         int p2 = find_local_port(45000,65500);
         sop_args = parseCommandLine(location + " " + String::from(p1) + " " +
-                   String::from(p2), nil, nil);
+                   String::from(p2), nullptr, nullptr);
         Ref<ProcessExecutor> spsc(new ProcessExecutor(_("sp-sc-auth"), 
                                                       sop_args));
         proc_list = Ref<Array<ProcListItem> >(new Array<ProcListItem>(1));
@@ -186,7 +186,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
                    cfg->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE),
                    cfg->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE)));
 
-                Ref<IOHandler> p_ioh(new ProcessIOHandler(location, nil));
+                Ref<IOHandler> p_ioh(new ProcessIOHandler(location, nullptr));
                 Ref<Executor> ch(new IOHandlerChainer(c_ioh, p_ioh, 16384));
                 proc_list = Ref<Array<ProcListItem> >(new Array<ProcListItem>(1));
                 Ref<ProcListItem> pr_item(new ProcListItem(ch));
@@ -277,7 +277,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
             RefCast(fd_reader, FDIOHandler)->closeOther(fd_writer);
             
 
-            Ref<IOHandler> p_ioh(new ProcessIOHandler(location, nil));
+            Ref<IOHandler> p_ioh(new ProcessIOHandler(location, nullptr));
             Ref<Executor> ch(new IOHandlerChainer(fd_reader, p_ioh, 16384));
             proc_list = Ref<Array<ProcListItem> >(new Array<ProcListItem>(2));
             Ref<ProcListItem> pr_item(new ProcListItem(ch));

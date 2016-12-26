@@ -198,7 +198,7 @@ public:
     /// \brief Get all objects under the given parentID.
     /// \param parentID parent container
     /// \param withoutContainer if false: all children are returned; if true: only items are returned
-    /// \return DBHash containing the objectID's - nil if there are none! 
+    /// \return DBHash containing the objectID's - nullptr if there are none!
     virtual std::shared_ptr<std::unordered_set<int> > getObjects(int parentID, bool withoutContainer) = 0;
     
     /// \brief Remove all objects found in list
@@ -246,10 +246,10 @@ public:
     /// \return 0 if the given id is no autoscan start point, 1 if it is a non-recursive one, 2 if it is a recursive on
     virtual int isAutoscanDirectoryRecursive(int objectId) = 0;
     
-    /// \brief returns the AutoscanDirectory for the given objectID or nil if
+    /// \brief returns the AutoscanDirectory for the given objectID or nullptr if
     /// it's not an autoscan start point - scan id will be invalid
     /// \param objectID the object id to get the AutoscanDirectory for
-    /// \return nil if the given id is no autoscan start point,
+    /// \return nullptr if the given id is no autoscan start point,
     /// or the matching AutoscanDirectory
     virtual zmm::Ref<AutoscanDirectory> getAutoscanDirectory(int objectID) = 0;
     

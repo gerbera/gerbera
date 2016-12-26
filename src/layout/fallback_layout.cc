@@ -159,7 +159,7 @@ void FallbackLayout::addDVD(Ref<CdsObject> obj)
     String dvd_container = _(DVD_VPATH) + esc(dvd_name);
     Ref<ContentManager> cm = ContentManager::getInstance();
 
-    int id = cm->addContainerChain(dvd_container, nil, pcd_id);
+    int id = cm->addContainerChain(dvd_container, nullptr, pcd_id);
 
     // we get the main object here, so the object that we will add below
     // will be a reference of the main object, that's why we set the ref
@@ -232,7 +232,7 @@ void FallbackLayout::addDVD(Ref<CdsObject> obj)
                 title_container = title_container + _(" - ") + esc(language);
 
             title_container = dvd_container + title_container;
-            id = cm->addContainerChain(title_container, nil, pcd_id);
+            id = cm->addContainerChain(title_container, nullptr, pcd_id);
             int chapter_count = obj->getAuxData(DVDHandler::renderKey(DVD_ChapterCount, t)).toInt();
 
             for (int c = 0; c < chapter_count; c++)
@@ -252,7 +252,7 @@ void FallbackLayout::addDVD(Ref<CdsObject> obj)
                 if (string_ok(format))
                         chain = chain + _(" - ") + esc(format);
 
-                id = cm->addContainerChain(chain, nil, pcd_id);
+                id = cm->addContainerChain(chain, nullptr, pcd_id);
                 
                 for (int c = 0; c < chapter_count; c++)
                 {
@@ -272,7 +272,7 @@ void FallbackLayout::addDVD(Ref<CdsObject> obj)
                 if (string_ok(language))
                     chain = chain + _(" - ") + esc(language);
 
-                id = cm->addContainerChain(chain, nil, pcd_id);
+                id = cm->addContainerChain(chain, nullptr, pcd_id);
                 for (int c = 0; c < chapter_count; c++)
                 {
                     prepareChapter(obj, t, c);
@@ -663,9 +663,9 @@ void FallbackLayout::addATrailers(zmm::Ref<CdsObject> obj)
             if (string_ok(next))
                 genre = next;
             else
-                genre = nil;
+                genre = nullptr;
                     
-        } while (genre != nil);
+        } while (genre != nullptr);
     }
 
     temp = meta->get(MetadataHandler::getMetaFieldName(M_DATE));

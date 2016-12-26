@@ -195,7 +195,7 @@ void DVDHandler::fillMetadata(Ref<CdsItem> item)
 Ref<IOHandler> DVDHandler::serveContent(Ref<CdsItem> item, int resNum, off_t *data_size)
 {
     *data_size = -1;
-    return nil;
+    return nullptr;
 }
 
 #endif // HAVE_DVD

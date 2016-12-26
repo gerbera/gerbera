@@ -55,7 +55,7 @@ void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
 //            ObjectID.c_str(), BrowseFlag.c_str(), StartingIndex.c_str(), RequestedCount.c_str());
    
 
-    if (objID == nil)
+    if (objID == nullptr)
         throw UpnpException(UPNP_E_NO_SUCH_ID, _("empty object id"));
     else
         objectID = objID.toInt();

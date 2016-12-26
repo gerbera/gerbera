@@ -74,7 +74,7 @@ public:
     virtual void shutdown();
     
     template <class T>
-    void addTimerSubscriber(zmm::Ref<T> timerSubscriber, unsigned int notifyInterval, zmm::Ref<zmm::Object> parameter = nil, bool once = false)
+    void addTimerSubscriber(zmm::Ref<T> timerSubscriber, unsigned int notifyInterval, zmm::Ref<zmm::Object> parameter = nullptr, bool once = false)
     {
         log_debug("adding subscriber...\n");
         if (notifyInterval <= 0)
@@ -94,7 +94,7 @@ public:
     }
     
     template <class T>
-    void removeTimerSubscriber(zmm::Ref<T> timerSubscriber, zmm::Ref<zmm::Object> parameter = nil, bool dontFail = false)
+    void removeTimerSubscriber(zmm::Ref<T> timerSubscriber, zmm::Ref<zmm::Object> parameter = nullptr, bool dontFail = false)
     {
         log_debug("removing subscriber...\n");
         AUTOLOCK(mutex);

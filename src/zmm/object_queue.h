@@ -66,7 +66,7 @@ namespace zmm
         {
             Object *obj = BaseQueue<Object *>::dequeue();
             if (obj == NULL)
-                return nil;
+                return nullptr;
             Ref<T> ret((T *)obj);
             obj->release();
             return ret;
@@ -76,7 +76,7 @@ namespace zmm
         {
             Object *obj = BaseQueue<Object *>::get(index);
             if (obj == NULL)
-                return nil;
+                return nullptr;
             return Ref<T>((T *)obj);
         }
     };

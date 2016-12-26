@@ -36,12 +36,12 @@ using namespace zmm;
 
 SINGLETON_MUTEX(ContentDirectoryService, false);
 
-String ContentDirectoryService::serviceType = nil;
-String ContentDirectoryService::serviceID = nil;
+String ContentDirectoryService::serviceType = nullptr;
+String ContentDirectoryService::serviceID = nullptr;
 
 ContentDirectoryService::ContentDirectoryService() : Singleton<ContentDirectoryService>()
 {
-    if (serviceType == nil || serviceID == nil)
+    if (serviceType == nullptr || serviceID == nullptr)
         throw _Exception(_("serviceType or serviceID not set!"));
     systemUpdateID = 0;
 
@@ -50,8 +50,8 @@ ContentDirectoryService::ContentDirectoryService() : Singleton<ContentDirectoryS
 
 ContentDirectoryService::~ContentDirectoryService()
 {
-    serviceType = nil;
-    serviceID = nil;
+    serviceType = nullptr;
+    serviceID = nullptr;
 }
 
 void ContentDirectoryService::setStaticArgs(String _serviceType, String _serviceID)

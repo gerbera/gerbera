@@ -38,7 +38,7 @@ using namespace mxml;
 Document::Document() : Node()
 {
     type = mxml_node_document;
-    root = nil;
+    root = nullptr;
 }
 
 void Document::setRoot(Ref<Element> root)
@@ -54,14 +54,14 @@ Ref<Element> Document::getRoot()
 
 void Document::appendChild(Ref<Node> child)
 {
-    if(children == nil)
+    if(children == nullptr)
         children = Ref<Array<Node> >(new Array<Node>());
     children->append(child);
 }
 
 void Document::print_internal(Ref<StringBuffer> buf, int indent)
 {
-    if (children != nil && children->size())
+    if (children != nullptr && children->size())
     {
         for(int i = 0; i < children->size(); i++)
         {

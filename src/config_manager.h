@@ -252,7 +252,7 @@ public:
     static void setStaticArgs(zmm::String _filename, zmm::String _userhome, 
                               zmm::String _config_dir = _(DEFAULT_CONFIG_HOME),
                               zmm::String _prefix_dir = _(PACKAGE_DATADIR), 
-                              zmm::String _magic = nil,
+                              zmm::String _magic = nullptr,
                               bool _debug_logging = false);
     
     static bool isDebugLogging() { return debug_logging; };
