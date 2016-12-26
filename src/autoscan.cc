@@ -84,7 +84,7 @@ void AutoscanList::updateLMinDB()
     {
         log_debug("i: %d\n", i);
         Ref<AutoscanDirectory> ad = list->get(i);
-        if (ad != nil)
+        if (ad != nullptr)
             Storage::getInstance()->autoscanUpdateLM(ad);
     }
 }
@@ -99,13 +99,13 @@ int AutoscanList::_add(Ref<AutoscanDirectory> dir)
 {
 
     String loc = dir->getLocation();
-    int nil_index = -1;
+    int nullptr_index = -1;
     
     for (int i = 0; i < list->size(); i++)
     {
-        if (list->get(i) == nil)
+        if (list->get(i) == nullptr)
         {
-            nil_index = i;
+            nullptr_index = i;
             continue;
         }
         
@@ -115,10 +115,10 @@ int AutoscanList::_add(Ref<AutoscanDirectory> dir)
         }
     }
     
-    if (nil_index != -1)
+    if (nullptr_index != -1)
     {
-        dir->setScanID(nil_index);
-        list->set(dir, nil_index);
+        dir->setScanID(nullptr_index);
+        list->set(dir, nullptr_index);
     }
     else
     {
@@ -135,7 +135,7 @@ void AutoscanList::addList(zmm::Ref<AutoscanList> list)
     
     for (int i = 0; i < list->list->size(); i++)
     {
-        if (list->list->get(i) == nil)
+        if (list->list->get(i) == nullptr)
             continue;
 
         _add(list->list->get(i));
@@ -157,7 +157,7 @@ Ref<AutoscanDirectory> AutoscanList::get(int id)
     AutoLock lock(mutex);
 
     if ((id < 0) || (id >= list->size()))
-        return nil;
+        return nullptr;
 
     return list->get(id);
 }
@@ -168,10 +168,10 @@ Ref<AutoscanDirectory> AutoscanList::getByObjectID(int objectID)
 
     for (int i = 0; i < list->size(); i++)
     {
-        if (list->get(i) != nil && objectID == list->get(i)->getObjectID())
+        if (list->get(i) != nullptr && objectID == list->get(i)->getObjectID())
             return list->get(i);
     }
-    return nil;
+    return nullptr;
 }
 
 Ref<AutoscanDirectory> AutoscanList::get(String location)
@@ -179,10 +179,10 @@ Ref<AutoscanDirectory> AutoscanList::get(String location)
     AutoLock lock(mutex);
     for (int i = 0; i < list->size(); i++)
     {
-        if (list->get(i) != nil && (location == list->get(i)->getLocation()))
+        if (list->get(i) != nullptr && (location == list->get(i)->getLocation()))
             return list->get(i);
     }
-    return nil;
+    return nullptr;
 
 }
 
@@ -205,7 +205,7 @@ void AutoscanList::remove(int id)
     }
     else
     {
-        list->set(nil, id);
+        list->set(nullptr, id);
     }
 
     log_debug("ID %d removed!\n", id);
@@ -217,7 +217,7 @@ int AutoscanList::removeByObjectID(int objectID)
 
     for (int i = 0; i < list->size(); i++)
     {
-        if (list->get(i) != nil && objectID == list->get(i)->getObjectID())
+        if (list->get(i) != nullptr && objectID == list->get(i)->getObjectID())
         {
             Ref<AutoscanDirectory> dir = list->get(i);
             dir->setScanID(INVALID_SCAN_ID);
@@ -227,7 +227,7 @@ int AutoscanList::removeByObjectID(int objectID)
             }
             else
             {
-                list->set(nil, i);
+                list->set(nullptr, i);
             }
             return i;
         }
@@ -241,7 +241,7 @@ int AutoscanList::remove(String location)
     
     for (int i = 0; i < list->size(); i++)
     {
-        if (list->get(i) != nil && location == list->get(i)->getLocation())
+        if (list->get(i) != nullptr && location == list->get(i)->getLocation())
         {
             Ref<AutoscanDirectory> dir = list->get(i);
             dir->setScanID(INVALID_SCAN_ID);
@@ -251,7 +251,7 @@ int AutoscanList::remove(String location)
             }
             else
             {
-                list->set(nil, i);
+                list->set(nullptr, i);
             }
             return i;
         }
@@ -267,10 +267,10 @@ Ref<AutoscanList> AutoscanList::removeIfSubdir(String parent, bool persistent)
 
     for (int i = 0; i < list->size(); i++)
     {
-        if (list->get(i) != nil && (list->get(i)->getLocation().startsWith(parent)))
+        if (list->get(i) != nullptr && (list->get(i)->getLocation().startsWith(parent)))
         {
             Ref<AutoscanDirectory> dir = list->get(i);
-            if (dir == nil)
+            if (dir == nullptr)
                 continue;
             if (dir->persistent() && !persistent)
             {
@@ -287,7 +287,7 @@ Ref<AutoscanList> AutoscanList::removeIfSubdir(String parent, bool persistent)
             }
             else
             {
-                list->set(nil, i);
+                list->set(nullptr, i);
             }
         }
     }
@@ -305,7 +305,7 @@ void AutoscanList::subscribeAll(Ref<TimerSubscriber> obj)
     for (int i = 0; i < list->size(); i++)
     {
         Ref<AutoscanDirectory> dir = list->get(i);
-        if (dir == nil)
+        if (dir == nullptr)
             continue;
         timer->addTimerSubscriber(obj, dir->getInterval(), dir->getScanID(), true);
     }
@@ -319,7 +319,7 @@ void AutoscanList::notifyAll(Ref<TimerSubscriberSingleton<Object> > cm)
     Ref<Timer> timer = Timer::getInstance();
     for (int i = 0; i < list->size(); i++)
     {
-        if (list->get(i) == nil)
+        if (list->get(i) == nullptr)
             continue;
        cm->timerNotify(list->get(i)->getTimerParameter());
     }
@@ -347,8 +347,8 @@ void AutoscanList::dump()
     {
         Ref<AutoscanDirectory> dir = list->get(i);
         log_debug("Position: %d", i);
-        if (dir == nil)
-            printf("[nil]\n");
+        if (dir == nullptr)
+            printf("[nullptr]\n");
         else
             printf("[scanid=%d objectid=%d location=%s]\n",
                     dir->getScanID(), dir->getObjectID(),
@@ -359,7 +359,7 @@ void AutoscanList::dump()
 
 void AutoscanDirectory::setLocation(String location)
 {
-    if (this->location == nil)
+    if (this->location == nullptr)
         this->location = location;
     else
         throw _Exception(_("UNALLOWED LOCATION CHANGE!"));
@@ -375,13 +375,13 @@ void AutoscanDirectory::setScanID(int id)
 
 String AutoscanDirectory::mapScanmode(scan_mode_t scanmode)
 {
-    String scanmode_str = nil;
+    String scanmode_str = nullptr;
     switch (scanmode)
     {
         case TimedScanMode: scanmode_str = _("timed"); break;
         case InotifyScanMode: scanmode_str = _("inotify"); break;
     }
-    if (scanmode_str == nil)
+    if (scanmode_str == nullptr)
         throw Exception(_("illegal scanmode given to mapScanmode(): ") + scanmode);
     return scanmode_str;
 }
@@ -398,13 +398,13 @@ scan_mode_t AutoscanDirectory::remapScanmode(String scanmode)
 
 String AutoscanDirectory::mapScanlevel(scan_level_t scanlevel)
 {
-    String scanlevel_str = nil;
+    String scanlevel_str = nullptr;
     switch (scanlevel)
     {
         case BasicScanLevel: scanlevel_str = _("basic"); break;
         case FullScanLevel: scanlevel_str = _("full"); break;
     }
-    if (scanlevel_str == nil)
+    if (scanlevel_str == nullptr)
         throw Exception(_("illegal scanlevel given to mapScanlevel(): ") + scanlevel);
     return scanlevel_str;
 }

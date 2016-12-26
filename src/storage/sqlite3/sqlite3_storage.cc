@@ -66,10 +66,10 @@ Sqlite3Storage::Sqlite3Storage() : SQLStorage()
     shutdownFlag = false;
     table_quote_begin = '"';
     table_quote_end = '"';
-    startupError = nil;
+    startupError = nullptr;
     sqliteMutex = Ref<Mutex>(new Mutex());
     cond = Ref<Cond>(new Cond(sqliteMutex));
-    insertBuffer = nil;
+    insertBuffer = nullptr;
     dirty = false;
 }
 
@@ -90,7 +90,7 @@ void Sqlite3Storage::init()
     
     // check for db-file
     if (access(dbFilePath.c_str(), R_OK | W_OK) != 0 && errno != ENOENT)
-        throw _StorageException(nil, _("Error while accessing sqlite database file (") + dbFilePath +"): " + mt_strerror(errno));
+        throw _StorageException(nullptr, _("Error while accessing sqlite database file (") + dbFilePath +"): " + mt_strerror(errno));
     
     
     
@@ -106,18 +106,18 @@ void Sqlite3Storage::init()
 
     if (ret != 0)
     {
-        throw _StorageException(nil, _("Could not start sqlite thread: ") +
+        throw _StorageException(nullptr, _("Could not start sqlite thread: ") +
                     mt_strerror(errno));
     }
     
     // wait for sqlite3 thread to become ready
     cond->wait();
     AUTOUNLOCK();
-    if (startupError != nil)
-        throw _StorageException(nil, startupError);
+    if (startupError != nullptr)
+        throw _StorageException(nullptr, startupError);
     
     
-    String dbVersion = nil;
+    String dbVersion = nullptr;
     try
     {
         dbVersion = getInternalSetting(_("db_version"));
@@ -147,7 +147,7 @@ void Sqlite3Storage::init()
                 }
             }
             
-            if (dbVersion == nil)
+            if (dbVersion == nullptr)
             {
 #ifdef AUTO_CREATE_DATABASE
                 log_info("no sqlite3 backup is available or backup is corrupt. automatically creating database...\n");
@@ -178,7 +178,7 @@ void Sqlite3Storage::init()
         }
     }
     
-    if (dbVersion == nil)
+    if (dbVersion == nullptr)
     {
         shutdown();
         throw _Exception(_("sqlite3 database seems to be corrupt and restoring from backup failed"));
@@ -248,7 +248,7 @@ void Sqlite3Storage::_exec(const char *query)
 String Sqlite3Storage::quote(String value)
 {
     char *q = sqlite3_mprintf("'%q'",
-        (value == nil ? "" : value.c_str()));
+        (value == nullptr ? "" : value.c_str()));
     String ret = q;
     sqlite3_free(q);
     return ret;
@@ -257,7 +257,7 @@ String Sqlite3Storage::quote(String value)
 String Sqlite3Storage::getError(String query, String error, sqlite3 *db)
 {
     return _("SQLITE3: (") + sqlite3_errcode(db) + ") " 
-        + sqlite3_errmsg(db) +"\nQuery:" + (query == nil ? _("unknown") : query) + "\nerror: " + (error == nil ? _("unknown") : error);
+        + sqlite3_errmsg(db) +"\nQuery:" + (query == nullptr ? _("unknown") : query) + "\nerror: " + (error == nullptr ? _("unknown") : error);
 }
 
 Ref<SQLResult> Sqlite3Storage::select(const char *query, int length)
@@ -311,7 +311,7 @@ void Sqlite3Storage::threadProc()
     
     while(! shutdownFlag)
     {
-        if((task = taskQueue->dequeue()) == nil)
+        if((task = taskQueue->dequeue()) == nullptr)
         {
             /* if nothing to do, sleep until awakened */
             cond->wait();
@@ -335,7 +335,7 @@ void Sqlite3Storage::threadProc()
     }
     
     taskQueueOpen = false;
-    while((task = taskQueue->dequeue()) != nil)
+    while((task = taskQueue->dequeue()) != nullptr)
     {
         task->sendSignal(_("Sorry, sqlite3 thread is shutting down"));
     }
@@ -384,7 +384,7 @@ void Sqlite3Storage::storeInternalSetting(String key, String value)
 
 void Sqlite3Storage::_addToInsertBuffer(Ref<StringBuffer> query)
 {
-    if (insertBuffer == nil)
+    if (insertBuffer == nullptr)
     {
         insertBuffer = Ref<StringBuffer>(new StringBuffer());
         *insertBuffer << "BEGIN TRANSACTION;";
@@ -395,7 +395,7 @@ void Sqlite3Storage::_addToInsertBuffer(Ref<StringBuffer> query)
 
 void Sqlite3Storage::_flushInsertBuffer()
 {
-    if (insertBuffer == nil)
+    if (insertBuffer == nullptr)
         return;
     *insertBuffer << "COMMIT;";
     SQLStorage::exec(insertBuffer);
@@ -410,7 +410,7 @@ SLTask::SLTask() : Object()
     running = true;
     mutex = Ref<Mutex>(new Mutex());
     cond = Ref<Cond>(new Cond(mutex));
-    error = nil;
+    error = nullptr;
     contamination = false;
     decontamination = false;
 }
@@ -443,7 +443,7 @@ void SLTask::waitForTask()
         }
     }
     
-    if (getError() != nil)
+    if (getError() != nullptr)
     {
         log_debug("%s\n", getError().c_str());
         throw _Exception(getError());
@@ -460,17 +460,17 @@ void SLInitTask::run(sqlite3 **db, Sqlite3Storage *sl)
     sqlite3_close(*db);
     
     if (unlink(dbFilePath.c_str()) != 0)
-        throw _StorageException(nil, _("error while autocreating sqlite3 database: could not unlink old database file: ") + mt_strerror(errno));
+        throw _StorageException(nullptr, _("error while autocreating sqlite3 database: could not unlink old database file: ") + mt_strerror(errno));
     
     int res = sqlite3_open(dbFilePath.c_str(), db);
     if (res != SQLITE_OK)
-        throw _StorageException(nil, _("error while autocreating sqlite3 database: could not create new database"));
+        throw _StorageException(nullptr, _("error while autocreating sqlite3 database: could not create new database"));
     
     unsigned char buf[SL3_CREATE_SQL_INFLATED_SIZE + 1]; // +1 for '\0' at the end of the string
     unsigned long uncompressed_size = SL3_CREATE_SQL_INFLATED_SIZE;
     int ret = uncompress(buf, &uncompressed_size, sqlite3_create_sql, SL3_CREATE_SQL_DEFLATED_SIZE);
     if (ret != Z_OK || uncompressed_size != SL3_CREATE_SQL_INFLATED_SIZE)
-        throw _StorageException(nil, _("Error while uncompressing sqlite3 create sql. returned: ") + ret);
+        throw _StorageException(nullptr, _("Error while uncompressing sqlite3 create sql. returned: ") + ret);
     buf[SL3_CREATE_SQL_INFLATED_SIZE] = '\0';
     
     char *err = nullptr;
@@ -481,7 +481,7 @@ void SLInitTask::run(sqlite3 **db, Sqlite3Storage *sl)
         nullptr,
         &err
     );
-    String error = nil;
+    String error = nullptr;
     if (err != nullptr)
     {
         error = err;
@@ -489,7 +489,7 @@ void SLInitTask::run(sqlite3 **db, Sqlite3Storage *sl)
     }
     if(ret != SQLITE_OK)
     {
-        throw _StorageException(nil, sl->getError((const char*)buf, error, *db));
+        throw _StorageException(nullptr, sl->getError((const char*)buf, error, *db));
     }
     contamination = true;
 }
@@ -517,7 +517,7 @@ void SLSelectTask::run(sqlite3 **db, Sqlite3Storage *sl)
         &pres->ncolumn,
         &err
     );
-    String error = nil;
+    String error = nullptr;
     if (err != nullptr)
     {
         error = err;
@@ -525,7 +525,7 @@ void SLSelectTask::run(sqlite3 **db, Sqlite3Storage *sl)
     }
     if(ret != SQLITE_OK)
     {
-        throw _StorageException(nil, sl->getError(query, error, *db));
+        throw _StorageException(nullptr, sl->getError(query, error, *db));
     }
     
     pres->row = pres->table;
@@ -551,7 +551,7 @@ void SLExecTask::run(sqlite3 **db, Sqlite3Storage *sl)
         nullptr,
         &err
     );
-    String error = nil;
+    String error = nullptr;
     if (err != nullptr)
     {
         error = err;
@@ -559,7 +559,7 @@ void SLExecTask::run(sqlite3 **db, Sqlite3Storage *sl)
     }
     if(res != SQLITE_OK)
     {
-        throw _StorageException(nil, sl->getError(query, error, *db));
+        throw _StorageException(nullptr, sl->getError(query, error, *db));
     }
     if (getLastInsertIdFlag)
         lastInsertId = sqlite3_last_insert_rowid(*db);
@@ -603,12 +603,12 @@ void SLBackupTask::run(sqlite3 **db, Sqlite3Storage *sl)
         }
         catch (const Exception & e)
         {
-            throw _StorageException(nil, _("error while restoring sqlite3 backup: ") + e.getMessage());
+            throw _StorageException(nullptr, _("error while restoring sqlite3 backup: ") + e.getMessage());
         }
         int res = sqlite3_open(dbFilePath.c_str(), db);
         if (res != SQLITE_OK)
         {
-            throw _StorageException(nil, _("error while restoring sqlite3 backup: could not reopen sqlite3 database after restore"));
+            throw _StorageException(nullptr, _("error while restoring sqlite3 backup: could not reopen sqlite3 database after restore"));
         }
         log_info("sqlite3 database successfully restored from backup.\n");   
     }
@@ -643,9 +643,9 @@ Ref<SQLRow> Sqlite3Result::nextRow()
             return RefCast(p, SQLRow);
         }
         else
-            return nil;
+            return nullptr;
     }
-    return nil;
+    return nullptr;
 
 }
 

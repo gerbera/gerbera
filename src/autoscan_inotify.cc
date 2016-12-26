@@ -107,7 +107,7 @@ void AutoscanInotify::shutdown()
             pthread_join(thread, nullptr);
         thread = 0;
         log_debug("inotify thread died.\n");
-        inotify = nil;
+        inotify = nullptr;
         watches->clear();
     }
 }
@@ -142,7 +142,7 @@ void AutoscanInotify::threadProc()
         log_error("Inotify thread caught: %s\n", e.getMessage().c_str());
         e.printStackTrace();
         shutdownFlag = true;
-        inotify = nil;
+        inotify = nullptr;
     }
     while(! shutdownFlag)
     {
@@ -151,7 +151,7 @@ void AutoscanInotify::threadProc()
             Ref<AutoscanDirectory> adir;
             
             unique_lock<std::mutex> lock(mutex);
-            while ((adir = unmonitorQueue->dequeue()) != nil)
+            while ((adir = unmonitorQueue->dequeue()) != nullptr)
             {
                 lock.unlock();
                 
@@ -176,7 +176,7 @@ void AutoscanInotify::threadProc()
                 lock.lock();
             }
             
-            while ((adir = monitorQueue->dequeue()) != nil)
+            while ((adir = monitorQueue->dequeue()) != nullptr)
             {
                 lock.unlock();
                 
@@ -197,7 +197,7 @@ void AutoscanInotify::threadProc()
                     log_debug("adding non-recursive watch: %s\n", location.c_str());
                     monitorDirectory(location, adir, location, true);
                 }
-                cm->rescanDirectory(adir->getObjectID(), adir->getScanID(), adir->getScanMode(), nil, false);
+                cm->rescanDirectory(adir->getObjectID(), adir->getScanID(), adir->getScanMode(), nullptr, false);
                 
                 lock.lock();
             }
@@ -215,7 +215,7 @@ void AutoscanInotify::threadProc()
                 String name = event->name;
                 log_debug("inotify event: %d %x %s\n", wd, mask, name.c_str());
                 
-                Ref<Wd> wdObj = nil;
+                Ref<Wd> wdObj = nullptr;
                 try {
                     wdObj = watches->at(wd);
                 } catch (const out_of_range& ex) {
@@ -231,10 +231,10 @@ void AutoscanInotify::threadProc()
                 
                 Ref<AutoscanDirectory> adir;
                 Ref<WatchAutoscan> watchAs = getAppropriateAutoscan(wdObj, path);
-                if (watchAs != nil)
+                if (watchAs != nullptr)
                     adir = watchAs->getAutoscanDirectory();
                 else
-                    adir = nil;
+                    adir = nullptr;
                 
                 if (mask & IN_MOVE_SELF)
                 {
@@ -253,7 +253,7 @@ void AutoscanInotify::threadProc()
                         recheckNonexistingMonitors(wd, wdObj);
                     }
                     
-                    if (adir != nil && adir->getRecursive())
+                    if (adir != nullptr && adir->getRecursive())
                     {
                         if (mask & IN_CREATE)
                         {
@@ -270,7 +270,7 @@ void AutoscanInotify::threadProc()
                     }
                 }
                 
-                if (adir != nil && mask & (IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF | IN_CLOSE_WRITE | IN_MOVED_FROM | IN_MOVED_TO | IN_UNMOUNT | IN_CREATE))
+                if (adir != nullptr && mask & (IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF | IN_CLOSE_WRITE | IN_MOVED_FROM | IN_MOVED_TO | IN_UNMOUNT | IN_CREATE))
                 {
                     String fullPath;
                     if (mask & IN_ISDIR)
@@ -287,7 +287,7 @@ void AutoscanInotify::threadProc()
                             if (IN_MOVE_SELF)
                                 inotify->removeWatch(wd);
                             Ref<WatchAutoscan> watch = getStartPoint(wdObj);
-                            if (watch != nil)
+                            if (watch != nullptr)
                             {
                                 if (adir->persistent())
                                 {
@@ -375,7 +375,7 @@ int AutoscanInotify::addMoveWatch(String path, int removeWd, int parentWd)
     {
         bool alreadyThere = false;
 
-        Ref<Wd> wdObj = nil;
+        Ref<Wd> wdObj = nullptr;
         try {
             wdObj = watches->at(wd);
 
@@ -489,7 +489,7 @@ void AutoscanInotify::checkMoveWatches(int wd, Ref<Wd> wdObj)
                 inotify->removeWatch(removeWd);
                 Ref<ContentManager> cm = ContentManager::getInstance();
                 Ref<WatchAutoscan> watch = getStartPoint(wdToRemove);
-                if (watch != nil)
+                if (watch != nullptr)
                 {
                     Ref<AutoscanDirectory> adir = watch->getAutoscanDirectory();
                     if (adir->persistent())
@@ -519,7 +519,7 @@ void AutoscanInotify::recheckNonexistingMonitors(int wd, Ref<Wd> wdObj)
         {
             watchAs = RefCast(watch, WatchAutoscan);
             Ref<Array<StringBase> > pathAr = watchAs->getNonexistingPathArray();
-            if (pathAr != nil)
+            if (pathAr != nullptr)
             {
                 recheckNonexistingMonitor(wd, pathAr, watchAs->getAutoscanDirectory(), watchAs->getNormalizedAutoscanPath());
             }
@@ -623,7 +623,7 @@ int AutoscanInotify::monitorDirectory(String pathOri, Ref<AutoscanDirectory> adi
         if (startPoint)
                 parentWd = watchPathForMoves(pathOri, wd);
 
-        Ref<Wd> wdObj = nil;
+        Ref<Wd> wdObj = nullptr;
         try {
             wdObj = watches->at(wd);
             if (parentWd >= 0 && wdObj->getParentWd() < 0)
@@ -631,8 +631,8 @@ int AutoscanInotify::monitorDirectory(String pathOri, Ref<AutoscanDirectory> adi
                 wdObj->setParentWd(parentWd);
             }
 
-            if (pathArray == nil)
-                alreadyWatching = (getAppropriateAutoscan(wdObj, adir) != nil);
+            if (pathArray == nullptr)
+                alreadyWatching = (getAppropriateAutoscan(wdObj, adir) != nullptr);
 
             // should we check for already existing "nonexisting" watches?
             // ...
@@ -644,7 +644,7 @@ int AutoscanInotify::monitorDirectory(String pathOri, Ref<AutoscanDirectory> adi
         if (! alreadyWatching)
         {
             Ref<WatchAutoscan> watch(new WatchAutoscan(startPoint, adir, normalizedAutoscanPath));
-            if (pathArray != nil)
+            if (pathArray != nullptr)
             {
                watch->setNonexistingPathArray(pathArray);
             }
@@ -679,14 +679,14 @@ void AutoscanInotify::unmonitorDirectory(String path, Ref<AutoscanDirectory> adi
     }
     
     Ref<Wd> wdObj = watches->at(wd);
-    if (wdObj == nil)
+    if (wdObj == nullptr)
     {
         log_error("wd not found in watches!? (%d, %s)\n", wd, path.c_str());
         return;
     }
     
     Ref<WatchAutoscan> watchAs = getAppropriateAutoscan(wdObj, adir);
-    if (watchAs == nil)
+    if (watchAs == nullptr)
     {
         log_debug("autoscan not found in watches? (%d, %s)\n", wd, path.c_str());
     }
@@ -717,7 +717,7 @@ Ref<AutoscanInotify::WatchAutoscan> AutoscanInotify::getAppropriateAutoscan(Ref<
         if (watch->getType() == WatchAutoscanType)
         {
             watchAs = RefCast(watch, WatchAutoscan);
-            if (watchAs->getNonexistingPathArray() == nil)
+            if (watchAs->getNonexistingPathArray() == nullptr)
             {
                 if (watchAs->getAutoscanDirectory()->getLocation() == adir->getLocation())
                 {
@@ -726,13 +726,13 @@ Ref<AutoscanInotify::WatchAutoscan> AutoscanInotify::getAppropriateAutoscan(Ref<
             }
         }
     }
-    return nil;
+    return nullptr;
 }
 
 Ref<AutoscanInotify::WatchAutoscan> AutoscanInotify::getAppropriateAutoscan(Ref<Wd> wdObj, String path)
 {
     String pathBestMatch;
-    Ref<WatchAutoscan> bestMatch = nil;
+    Ref<WatchAutoscan> bestMatch = nullptr;
     Ref<Watch> watch;
     Ref<WatchAutoscan> watchAs;
     Ref<Array<Watch> > wdWatches = wdObj->getWdWatches();
@@ -742,7 +742,7 @@ Ref<AutoscanInotify::WatchAutoscan> AutoscanInotify::getAppropriateAutoscan(Ref<
         if (watch->getType() == WatchAutoscanType)
         {
             watchAs = RefCast(watch, WatchAutoscan);
-            if (watchAs->getNonexistingPathArray() == nil)
+            if (watchAs->getNonexistingPathArray() == nullptr)
             {
                 String testLocation = watchAs->getNormalizedAutoscanPath();
                 if (path.startsWith(testLocation))
@@ -777,7 +777,7 @@ void AutoscanInotify::removeWatchMoves(int wd)
     int checkWd = wd;
     do
     {
-        wdObj = nil;
+        wdObj = nullptr;
         try {
             wdObj = watches->at(checkWd);
         } catch (const out_of_range& ex) {
@@ -785,7 +785,7 @@ void AutoscanInotify::removeWatchMoves(int wd)
         }
 
         wdWatches = wdObj->getWdWatches();
-        if (wdWatches == nil)
+        if (wdWatches == nullptr)
             break;
         
         if (first) {
@@ -859,18 +859,18 @@ Ref<AutoscanInotify::WatchAutoscan> AutoscanInotify::getStartPoint(Ref<Wd> wdObj
                 return watchAs;
         }
     }
-    return nil;
+    return nullptr;
 }
 
 void AutoscanInotify::addDescendant(int startPointWd, int addWd, Ref<AutoscanDirectory> adir)
 {
 //    log_debug("called for %d, (adir->path=%s); adding %d\n", startPointWd, adir->getLocation().c_str(), addWd);
     Ref<Wd> wdObj = watches->at(startPointWd);
-    if (wdObj == nil)
+    if (wdObj == nullptr)
         return;
 //   log_debug("found wdObj\n");
     Ref<WatchAutoscan> watch = getAppropriateAutoscan(wdObj, adir);
-    if (watch == nil)
+    if (watch == nullptr)
         return;
 //    log_debug("adding descendant\n");
     watch->addDescendant(addWd);
@@ -879,7 +879,7 @@ void AutoscanInotify::addDescendant(int startPointWd, int addWd, Ref<AutoscanDir
 
 void AutoscanInotify::removeDescendants(int wd)
 {
-    Ref<Wd> wdObj = nil;
+    Ref<Wd> wdObj = nullptr;
     try {
         wdObj = watches->at(wd);
     } catch (const out_of_range& ex) {
@@ -887,7 +887,7 @@ void AutoscanInotify::removeDescendants(int wd)
     }
 
     Ref<Array<Watch> > wdWatches = wdObj->getWdWatches();
-    if (wdWatches == nil)
+    if (wdWatches == nullptr)
         return;
     
     Ref<Watch> watch;
@@ -899,7 +899,7 @@ void AutoscanInotify::removeDescendants(int wd)
         {
             watchAs = RefCast(watch, WatchAutoscan);
             Ref<IntArray> descendants = watchAs->getDescendants();
-            if (descendants != nil)
+            if (descendants != nullptr)
             {
                 for (int i = 0; i < descendants->size(); i++)
                 {
@@ -920,7 +920,7 @@ String AutoscanInotify::normalizePathNoEx(String path)
     catch (const Exception & e)
     {
         log_error("%s\n", e.getMessage().c_str());
-        return nil;
+        return nullptr;
     }
 }
 

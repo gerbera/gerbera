@@ -409,7 +409,7 @@ Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum, off_t 
     Ref<ConfigManager> cfg = ConfigManager::getInstance();
 
     if (!cfg->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED))
-        return nil;
+        return nullptr;
 
     if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED)) {
         uint8_t *ptr_image;
@@ -477,7 +477,7 @@ Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum, off_t 
     pthread_mutex_unlock(&thumb_lock);
     return h;
 #else
-    return nil;
+    return nullptr;
 #endif
 }
 

@@ -109,9 +109,9 @@ private:
         {
             setAutoscanDirectory(adir);
             setNormalizedAutoscanPath(normalizedAutoscanPath);
-            setNonexistingPathArray(nil);
+            setNonexistingPathArray(nullptr);
             this->startPoint = startPoint;
-            this->descendants = nil;
+            this->descendants = nullptr;
         }
         zmm::Ref<AutoscanDirectory> getAutoscanDirectory() { return adir; }
         void setAutoscanDirectory(zmm::Ref<AutoscanDirectory> adir) { this->adir = adir; }
@@ -122,7 +122,7 @@ private:
         void setNonexistingPathArray(zmm::Ref<zmm::Array<zmm::StringBase> > nonexistingPathArray) { this->nonexistingPathArray = nonexistingPathArray; }
         void addDescendant(int wd)
         {
-            if (descendants == nil)
+            if (descendants == nullptr)
                 descendants = zmm::Ref<zmm::IntArray>(new zmm::IntArray());
             descendants->append(wd);
         }
@@ -174,7 +174,7 @@ private:
     zmm::String normalizePathNoEx(zmm::String path);
     
     void monitorUnmonitorRecursive(zmm::String startPath, bool unmonitor, zmm::Ref<AutoscanDirectory> adir, zmm::String normalizedAutoscanPath, bool startPoint);
-    int monitorDirectory(zmm::String path, zmm::Ref<AutoscanDirectory> adir, zmm::String normalizedAutoscanPath, bool startPoint, zmm::Ref<zmm::Array<zmm::StringBase> > pathArray = nil);
+    int monitorDirectory(zmm::String path, zmm::Ref<AutoscanDirectory> adir, zmm::String normalizedAutoscanPath, bool startPoint, zmm::Ref<zmm::Array<zmm::StringBase> > pathArray = nullptr);
     void unmonitorDirectory(zmm::String path, zmm::Ref<AutoscanDirectory> adir);
     
     zmm::Ref<WatchAutoscan> getAppropriateAutoscan(zmm::Ref<Wd> wdObj, zmm::Ref<AutoscanDirectory> adir);

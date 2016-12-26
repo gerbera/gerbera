@@ -310,7 +310,7 @@ String YouTubeService::getRequestName(yt_requests_t request)
             break;
         case YT_request_none:
         default:
-            temp = nil;
+            temp = nullptr;
             break;
     }
 
@@ -320,7 +320,7 @@ String YouTubeService::getRequestName(yt_requests_t request)
 String YouTubeService::getRegionName(yt_regions_t region_code)
 {
     if ((region_code < 0) || (region_code >= YT_region_none))
-        return nil;
+        return nullptr;
     else
         return _(YT_regions[region_code].country);
 }
@@ -335,7 +335,7 @@ String YouTubeService::getCheckAttr(Ref<Element> xml, String attrname)
         throw _Exception(_("Tag <") + xml->getName() +
                 _("> is missing the required \"") + attrname + 
                 _("\" attribute!"));
-    return nil;
+    return nullptr;
 }
 
 int YouTubeService::getCheckPosIntAttr(Ref<Element> xml, String attrname)
@@ -582,7 +582,7 @@ Ref<Element> YouTubeService::getData(String url_part, Ref<Dictionary> params, bo
     else
         URL = url_part;
     
-    if ((params != nil) && (params->size() > 0))
+    if ((params != nullptr) && (params->size() > 0))
     {
         if (URL.index('?') > 0)
             URL = URL + _("&") + params->encode();
@@ -601,14 +601,14 @@ Ref<Element> YouTubeService::getData(String url_part, Ref<Dictionary> params, bo
     {
         log_error("Failed to download YouTube XML data: %s\n", 
                   ex.getMessage().c_str());
-        return nil;
+        return nullptr;
     }
 
-    if (buffer == nil)
-        return nil;
+    if (buffer == nullptr)
+        return nullptr;
 
     if (retcode != 200)
-        return nil;
+        return nullptr;
 
 //    log_debug("GOT BUFFER\n%s\n", buffer->toString().c_str()); 
     Ref<Parser> parser(new Parser());
@@ -622,15 +622,15 @@ Ref<Element> YouTubeService::getData(String url_part, Ref<Dictionary> params, bo
                pe.context->location.c_str(),
                pe.context->line,
                pe.getMessage().c_str());
-        return nil;
+        return nullptr;
     }
     catch (const Exception & ex)
     {
         log_error("Error parsing YouTube XML %s\n", ex.getMessage().c_str());
-        return nil;
+        return nullptr;
     }
     
-    return nil;
+    return nullptr;
 }
 
 void YouTubeService::killOneTimeTasks(Ref<Array<Object> > tasklist)
@@ -644,7 +644,7 @@ void YouTubeService::killOneTimeTasks(Ref<Array<Object> > tasklist)
     while (true)
     {
         Ref<YouTubeTask> task = RefCast(tasklist->get(current), YouTubeTask);
-        if ((task != nil) && (task->kill))
+        if ((task != nullptr) && (task->kill))
             tasklist->removeUnordered(current);
         else
             current++;
@@ -681,7 +681,7 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
         throw _Exception(_("Not specified what content to fetch!"));
 
     Ref<YouTubeTask> task = RefCast(tasklist->get(current_task), YouTubeTask);
-    if (task == nil)
+    if (task == nullptr)
         throw _Exception(_("Encountered invalid task!"));
 
     if (task->amount_fetched < task->amount)
@@ -716,7 +716,7 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
         (task->request == YT_request_user_playlists)) 
     {
        reply = getData(task->url_part, task->parameters, true);
-       if (reply == nil)
+       if (reply == nullptr)
            throw _Exception(_("Failed to retrieve YouTube subfeed"));
 
        task->subfeed = yt->getSubFeed(reply);
@@ -760,7 +760,7 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
 
     reply = getData(task->url_part, task->parameters, construct_url);
 
-    if (reply != nil)
+    if (reply != nullptr)
         b = yt->setServiceContent(reply);
     else
     {
@@ -795,13 +795,13 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
         /// \todo add try/catch here and a possibility do find out if we
         /// may request more stuff or if we are at the end of the list
         obj = yt->getNextObject();
-        if (obj == nil)
+        if (obj == nullptr)
             break;
 
         obj->setVirtual(true);
 
         Ref<CdsObject> old = Storage::getInstance()->loadObjectByServiceID(RefCast(obj, CdsItem)->getServiceID());
-        if (old == nil)
+        if (old == nullptr)
         {
             log_debug("Adding new YouTube object\n");
             obj->setAuxData(_(YOUTUBE_AUXDATA_REQUEST), 
@@ -820,8 +820,8 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
                          String::from((int)task->region));
             }
             
-            if (layout != nil)
-                layout->processCdsObject(obj, nil);
+            if (layout != nullptr)
+                layout->processCdsObject(obj, nullptr);
             else
             {
                 log_warning("Your virtual layout is disabled, YouTube objects will not be added\n");
@@ -863,7 +863,7 @@ bool YouTubeService::refreshServiceData(Ref<Layout> layout)
             return false;
 
     }
-    while (obj != nil);
+    while (obj != nullptr);
 
     current_task++;
     if (current_task >= tasklist->size())

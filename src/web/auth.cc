@@ -135,10 +135,10 @@ void web::auth::process()
     else if (action == "get_sid")
     {
         log_debug("checking/getting sid...\n");
-        Ref<Session> session = nil;
+        Ref<Session> session = nullptr;
         String sid = param(_("sid"));
         
-        if (sid == nil || (session = sessionManager->getSession(sid)) == nil)
+        if (sid == nullptr || (session = sessionManager->getSession(sid)) == nullptr)
         {
             session = sessionManager->createSession(timeout);
             root->setAttribute(_("sid_was_valid"), _("0"), mxml_bool_type);
@@ -162,7 +162,7 @@ void web::auth::process()
         check_request();
         String sid = param(_("sid"));
         Ref<Session> session = SessionManager::getInstance()->getSession(sid);
-        if (session == nil)
+        if (session == nullptr)
             throw _Exception(_("illegal session id"));
         sessionManager->removeSession(sid);
     }
@@ -188,7 +188,7 @@ void web::auth::process()
             throw LoginException(_("Missing username or password"));
         
         Ref<Session> session = sessionManager->getSession(sid);
-        if (session == nil)
+        if (session == nullptr)
             throw _Exception(_("illegal session id"));
         
         String correctPassword = sessionManager->getUserPassword(username);

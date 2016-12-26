@@ -49,7 +49,7 @@ Ref<IOHandler> TranscodeDispatcher::open(Ref<TranscodingProfile> profile,
                                          Ref<CdsObject> obj,
                                          String range)
 {
-    if (profile == nil)
+    if (profile == nullptr)
         throw _Exception(_("Transcoding of file ") + location +
                            "requested but no profile given ");
    

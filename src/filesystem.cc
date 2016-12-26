@@ -69,7 +69,7 @@ Filesystem::Filesystem() : Object()
     Ref<ConfigManager> cm = ConfigManager::getInstance();
 /*    
     Ref<Element> rules = cm->getElement(_("filter"));
-    if (rules == nil)
+    if (rules == nullptr)
         return;
     for (int i = 0; i < rules->childCount(); i++)
     {

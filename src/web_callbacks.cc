@@ -68,7 +68,7 @@ static Ref<RequestHandler> create_request_handler(const char* filename)
         dict->decode(parameters);
 
         String r_type = dict->get(_(URL_REQUEST_TYPE));
-        if (r_type != nil) {
+        if (r_type != nullptr) {
             ret = create_web_request_handler(r_type);
         } else {
             ret = create_web_request_handler(_("index"));
@@ -150,7 +150,7 @@ static UpnpWebFileHandle web_open(IN const char* filename,
 
     try {
         Ref<RequestHandler> reqHandler = create_request_handler(filename);
-        Ref<IOHandler> ioHandler = reqHandler->open(link.c_str(), mode, nil);
+        Ref<IOHandler> ioHandler = reqHandler->open(link.c_str(), mode, nullptr);
         ioHandler->retain();
         return (UpnpWebFileHandle)ioHandler.getPtr();
     } catch (const ServerShutdownException& se) {

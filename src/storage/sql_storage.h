@@ -227,7 +227,7 @@ private:
     zmm::String mapBool(bool val) { return quote((val ? 1 : 0)); }
     bool remapBool(zmm::String field) { return (string_ok(field) && field == "1"); }
     
-    void setFsRootName(zmm::String rootName = nil);
+    void setFsRootName(zmm::String rootName = nullptr);
     
     zmm::String fsRootName;
     
@@ -238,7 +238,7 @@ private:
     zmm::Ref<Mutex> nextIDMutex;
     
     zmm::Ref<StorageCache> cache;
-    inline bool cacheOn() { return cache != nil; }
+    inline bool cacheOn() { return cache != nullptr; }
     void addObjectToCache(zmm::Ref<CdsObject> object, bool dontLock = false);
     
     inline bool doInsertBuffering() { return insertBufferOn; }

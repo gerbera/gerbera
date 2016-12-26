@@ -50,7 +50,7 @@ void web::tasks::process()
         tasksEl->setArrayName(_("task"));
         root->appendElementChild(tasksEl); // inherited from WebRequestHandler
         Ref<Array<GenericTask> > taskList = cm->getTasklist();
-        if (taskList == nil)
+        if (taskList == nullptr)
             return;
         int count = taskList->size();
         for (int i = 0; i < count; i++)

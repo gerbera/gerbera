@@ -284,7 +284,7 @@ Ref<Object> WeboramaService::defineServiceTask(Ref<Element> xmlopt, Ref<Object> 
         task->name = getCheckAttr(xmlopt, _(CFG_OPTION_PLAYLIST_NAME));
 
         Ref<Element> type = xmlopt->getChildByName(_(CFG_SECTION_TYPE));
-        if (type != nil)
+        if (type != nullptr)
         {
             String id = type->getAttribute(_("id"));
 
@@ -315,7 +315,7 @@ Ref<Object> WeboramaService::defineServiceTask(Ref<Element> xmlopt, Ref<Object> 
         
 
         Ref<Element> filter = xmlopt->getChildByName(_(CFG_SECTION_FILTER));
-        if (filter != nil)
+        if (filter != nullptr)
         {
             String filters;
             String genres = filter->getChildText(_(CFG_SECTION_GENRES));
@@ -339,7 +339,7 @@ Ref<Object> WeboramaService::defineServiceTask(Ref<Element> xmlopt, Ref<Object> 
             }
 
             Ref<Element> sort_tag = filter->getChildByName(_("sort"));
-            if (sort_tag != nil)
+            if (sort_tag != nullptr)
             {
                 String user_id = sort_tag->getAttribute(_("user-id"));
                 String sort = sort_tag->getText();
@@ -390,7 +390,7 @@ Ref<Object> WeboramaService::defineServiceTask(Ref<Element> xmlopt, Ref<Object> 
             task->amount = DEFAULT_PER_TASK_AMOUNT;
     } 
     else
-        return nil;
+        return nullptr;
 
     return RefCast(task, Object);
 }
@@ -413,14 +413,14 @@ Ref<Element> WeboramaService::getData(Ref<Dictionary> params)
     {
         log_error("Failed to download Weborama XML data: %s\n", 
                   ex.getMessage().c_str());
-        return nil;
+        return nullptr;
     }
 
-    if (buffer == nil)
-        return nil;
+    if (buffer == nullptr)
+        return nullptr;
 
     if (retcode != 200)
-        return nil;
+        return nullptr;
 
     log_debug("GOT BUFFER\n%s\n", buffer->toString().c_str()); 
     Ref<Parser> parser(new Parser());
@@ -434,15 +434,15 @@ Ref<Element> WeboramaService::getData(Ref<Dictionary> params)
                pe.context->location.c_str(),
                pe.context->line,
                pe.getMessage().c_str());
-        return nil;
+        return nullptr;
     }
     catch (const Exception & ex)
     {
         log_error("Error parsing Weborama XML %s\n", ex.getMessage().c_str());
-        return nil;
+        return nullptr;
     }
     
-    return nil;
+    return nullptr;
 }
 
 bool WeboramaService::refreshServiceData(Ref<Layout> layout)
@@ -468,7 +468,7 @@ bool WeboramaService::refreshServiceData(Ref<Layout> layout)
         throw _Exception(_("Not specified what content to fetch!"));
 
     Ref<WeboramaTask> task = RefCast(tasklist->get(current_task), WeboramaTask);
-    if (task ==  nil)
+    if (task ==  nullptr)
         throw _Exception(_("Encountered invalid task!"));
 
     if (task->amount_fetched < task->amount)
@@ -493,7 +493,7 @@ bool WeboramaService::refreshServiceData(Ref<Layout> layout)
     Ref<Element> reply = getData(task->parameters);
 
     Ref<WeboramaContentHandler> sc(new WeboramaContentHandler());
-    if (reply != nil)
+    if (reply != nullptr)
         b = sc->setServiceContent(reply);
     else
     {
@@ -524,7 +524,7 @@ bool WeboramaService::refreshServiceData(Ref<Layout> layout)
     do
     {
         obj = sc->getNextObject();
-        if (obj == nil)
+        if (obj == nullptr)
         {
             if (task->amount_fetched < task->amount)
                 return true;
@@ -538,12 +538,12 @@ bool WeboramaService::refreshServiceData(Ref<Layout> layout)
                 CdsItemExternalURL)->setTrackNumber(task->amount_fetched+1);
 
         Ref<CdsObject> old = Storage::getInstance()->loadObjectByServiceID(RefCast(obj, CdsItem)->getServiceID());
-        if (old == nil)
+        if (old == nullptr)
         {
             log_debug("Adding new Weborama object\n");
             
-            if (layout != nil)
-                layout->processCdsObject(obj, nil);
+            if (layout != nullptr)
+                layout->processCdsObject(obj, nullptr);
         }
         else
         {
@@ -576,7 +576,7 @@ bool WeboramaService::refreshServiceData(Ref<Layout> layout)
             return false;
 
     }
-    while (obj != nil);
+    while (obj != nullptr);
 
     current_task++;
     if (current_task >= tasklist->size())

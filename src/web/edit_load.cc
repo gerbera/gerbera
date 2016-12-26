@@ -55,7 +55,7 @@ void web::edit_load::process()
     
     String objID = param(_("object_id"));
     int objectID;
-    if (objID == nil)
+    if (objID == nullptr)
         throw _Exception(_("invalid object id"));
     else
         objectID = objID.toInt();

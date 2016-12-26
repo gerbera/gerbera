@@ -119,7 +119,7 @@ void TranscodingProfileList::add(zmm::String sourceMimeType, zmm::Ref<Transcodin
 {
     Ref<ObjectDictionary<TranscodingProfile> > inner = list->get(sourceMimeType);
 
-    if (inner == nil)
+    if (inner == nullptr)
         inner = Ref<ObjectDictionary<TranscodingProfile> >(new ObjectDictionary<TranscodingProfile>());
 
     inner->put(prof->getName(), prof);
@@ -138,14 +138,14 @@ Ref<TranscodingProfile> TranscodingProfileList::getByName(zmm::String name)
     for (int i = 0; i < mt_list->size(); i++)
     {
         Ref<ObjectDictionary<TranscodingProfile> > names = mt_list->get(i)->getValue();
-        if (names != nil)
+        if (names != nullptr)
         {
             Ref<TranscodingProfile> tp = names->get(name);
-            if (tp != nil)
+            if (tp != nullptr)
                 return tp;
         }
     }
-    return nil;
+    return nullptr;
 }
 
 #endif//EXTERNAL_TRANSCODING

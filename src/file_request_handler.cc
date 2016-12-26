@@ -83,7 +83,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *inf
             filename, parameters.c_str());
 
     String objID = dict->get(_("object_id"));
-    if (objID == nil)
+    if (objID == nullptr)
     {
         //log_error("object_id not found in url\n");
         throw _Exception(_("get_info: object_id not found"));
@@ -201,7 +201,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *inf
             res_handler = resource->getHandlerType();
             // http-get:*:image/jpeg:*
             String protocolInfo = item->getResource(res_id)->getAttributes()->get(_("protocolInfo"));
-            if (protocolInfo != nil)
+            if (protocolInfo != nullptr)
             {
                 mimeType = getMTFromProtocolInfo(protocolInfo);
             }
@@ -222,7 +222,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *inf
 
 			Ref<TranscodingProfile> tp = ConfigManager::getInstance()->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
 
-			if (tp == nil)
+			if (tp == nullptr)
 				throw _Exception(_("Transcoding of file ") + path +
 						" but no profile matching the name " +
 						tr_profile + " found");
@@ -272,7 +272,7 @@ void FileRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *inf
 
 			/// \todo make sure we can seek in the streams
 			UpnpFileInfo_set_FileLength(info, -1);
-			header = nil;
+			header = nullptr;
 		}
 		else
 #endif
@@ -396,7 +396,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename,
             filename, parameters.c_str());
 
     String objID = dict->get(_("object_id"));
-    if (objID == nil)
+    if (objID == nullptr)
     {
         throw _Exception(_("object_id not found"));
     }
@@ -591,7 +591,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename,
             res_handler = resource->getHandlerType();
             // http-get:*:image/jpeg:*
             String protocolInfo = item->getResource(res_id)->getAttributes()->get(_("protocolInfo"));
-            if (protocolInfo != nil)
+            if (protocolInfo != nullptr)
             {
                 mimeType = getMTFromProtocolInfo(protocolInfo);
             }
@@ -659,8 +659,8 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename,
             /// \todo make sure we can seek in the streams
             //info->file_length = -1;
             //info->force_chunked = 1;
-            //header = nil;
-            if (mimeType == nil)
+            //header = nullptr;
+            if (mimeType == nullptr)
                 mimeType = item->getMimeType();
 
             //info->content_type = ixmlCloneDOMString(mimeType.c_str());
@@ -705,7 +705,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename,
 #endif
 
         {
-            if (mimeType == nil)
+            if (mimeType == nullptr)
                 mimeType = item->getMimeType();
 
             /* FIXME Upstream

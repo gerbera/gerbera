@@ -355,7 +355,7 @@ void TagLibHandler::extractMP3(zmm::Ref<CdsItem> item) {
     Ref<StringConverter> sc = StringConverter::i2i();
 
     Ref<Array<StringBase> > aux_tags_list = ConfigManager::getInstance()->getStringArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
-    if (aux_tags_list != nil) {
+    if (aux_tags_list != nullptr) {
         for (int j = 0; j < aux_tags_list->size(); j++) {
 
             String desiredFrame = aux_tags_list->get(j);

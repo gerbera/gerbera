@@ -96,7 +96,7 @@ js_copyObject(JSContext *cx, uintN argc, jsval *argv)
 
         JS_ARGV(cx, argv)[0] = OBJECT_TO_JSVAL(js_cds_obj);
 
-        Ref<CdsObject> cds_obj = self->jsObject2cdsObject(js_cds_obj, nil);
+        Ref<CdsObject> cds_obj = self->jsObject2cdsObject(js_cds_obj, nullptr);
         js_cds_clone_obj = JS_NewObject(cx, nullptr, nullptr, nullptr);
         JS_ARGV(cx, argv)[1] = OBJECT_TO_JSVAL(js_cds_clone_obj);
 
@@ -196,7 +196,7 @@ js_addCdsObject(JSContext *cx, uintN argc, jsval *argv)
                 JS_free(cx, ts);
             }
             if (!string_ok(containerclass) || containerclass == "undefined")
-                containerclass = nil;
+                containerclass = nullptr;
         }
 
         JSObject *obj = JS_THIS_OBJECT(cx, argv);
@@ -216,7 +216,7 @@ js_addCdsObject(JSContext *cx, uintN argc, jsval *argv)
         JS_ARGV(cx, argv)[1] = OBJECT_TO_JSVAL(js_orig_obj);
 
         orig_object = self->jsObject2cdsObject(js_orig_obj, self->getProcessedObject());
-        if (orig_object == nil)
+        if (orig_object == nullptr)
         {
             JS_SET_RVAL(cx, argv, JSVAL_VOID);
             return JS_TRUE;
@@ -260,7 +260,7 @@ js_addCdsObject(JSContext *cx, uintN argc, jsval *argv)
         else
             cds_obj = self->jsObject2cdsObject(js_cds_obj, orig_object);
         
-        if (cds_obj == nil)
+        if (cds_obj == nullptr)
         {
             JS_SET_RVAL(cx, argv, JSVAL_VOID);
             return JS_TRUE;
@@ -386,7 +386,7 @@ static JSBool convert_charset_generic(JSContext *cx, uintN argc, jsval *argv, ch
             }
         }
 
-        if (result != nil)
+        if (result != nullptr)
         {
             result = self->convertToCharset(result, chr);
             JSString *str2 = JS_NewStringCopyN(cx, result.c_str(), result.length());

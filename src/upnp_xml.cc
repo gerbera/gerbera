@@ -121,7 +121,7 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions, in
                 trackArtBase = dctl.substring(0, doti);
             } 
             String aa_id = storage->findFolderImage(item->getParentID(), trackArtBase);
-            if (aa_id != nil) {
+            if (aa_id != nullptr) {
                 String url;
                 Ref<Dictionary> dict(new Dictionary());
                 dict->put(_(URL_OBJECT_ID), aa_id);
@@ -171,7 +171,7 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions, in
         if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_ALBUM || upnp_class == UPNP_DEFAULT_CLASS_CONTAINER) {
             Ref<Storage> storage = Storage::getInstance();
             String aa_id = storage->findFolderImage(cont->getID(), String());
-            if (aa_id != nil) {
+            if (aa_id != nullptr) {
                 String url;
                 Ref<Dictionary> dict(new Dictionary());
                 dict->put(_(URL_OBJECT_ID), aa_id);
@@ -215,30 +215,30 @@ void UpnpXML_DIDLUpdateObject(Ref<CdsObject> obj, String text)
         Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
 
         String title = root->getChildText(_("dc:title"));
-        if (title != nil && title != "")
+        if (title != nullptr && title != "")
             aitem->setTitle(title);
 
         /// \todo description should be taken from the dictionary      
         String description = root->getChildText(_("dc:description"));
-        if (description == nil)
+        if (description == nullptr)
             description = _("");
         aitem->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION),
                     description);
 
         String location = root->getChildText(_("location"));
-        if (location != nil && location != "")
+        if (location != nullptr && location != "")
             aitem->setLocation(location);
     
         String mimeType = root->getChildText(_("mime-type"));
-        if (mimeType != nil && mimeType != "")
+        if (mimeType != nullptr && mimeType != "")
             aitem->setMimeType(mimeType);
 
         String action = root->getChildText(_("action"));
-        if (action != nil && action != "")
+        if (action != nullptr && action != "")
             aitem->setAction(action);
 
         String state = root->getChildText(_("state"));
-        if (state == nil)
+        if (state == nullptr)
             state = _("");
         aitem->setState(state);
     }

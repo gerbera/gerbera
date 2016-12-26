@@ -33,15 +33,15 @@
 
 using namespace zmm;
 
-Ref<SingletonManager> SingletonManager::instance = nil;
+Ref<SingletonManager> SingletonManager::instance = nullptr;
 Ref<Mutex> SingletonManager::mutex = Ref<Mutex>(new Mutex());
 
 Ref<SingletonManager> SingletonManager::getInstance()
 {
-    if (instance == nil)
+    if (instance == nullptr)
     {
         AUTOLOCK(mutex);
-        if (instance == nil) // check again, because there is a very small chance
+        if (instance == nullptr) // check again, because there is a very small chance
                              // that 2 threads tried to lock() concurrently
         {
             instance = zmm::Ref<SingletonManager>(new SingletonManager());
@@ -78,7 +78,7 @@ void SingletonManager::shutdown(bool complete)
     Ref<ObjectStack<Singleton<Object> > > singletonStackReactivate(new ObjectStack<Singleton<Object> >(SINGLETON_CUR_MAX));
     
     Ref<Singleton<Object> > object;
-    while((object = singletonStack->pop()) != nil)
+    while((object = singletonStack->pop()) != nullptr)
     {
         //log_debug("destoying... \n");
         //_print_backtrace(stdout);
@@ -87,9 +87,9 @@ void SingletonManager::shutdown(bool complete)
         singletonStackReactivate->push(object);
         //object->destroyMutex();
     }
-    while((object = singletonStackReactivate->pop()) != nil)
+    while((object = singletonStackReactivate->pop()) != nullptr)
         object->reactivateSingleton();
-    if (complete && instance != nil)
-        instance = nil;
+    if (complete && instance != nullptr)
+        instance = nullptr;
     log_debug("end\n");
 }

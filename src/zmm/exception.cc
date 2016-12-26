@@ -65,8 +65,8 @@ Exception::Exception(String message, const char* file, int line, const char* fun
 Exception::Exception(String message)
 {
     this->message = message;
-    this->file = nil;
-    this->function = nil;
+    this->file = nullptr;
+    this->function = nullptr;
     this->line = -1;
 #if defined HAVE_BACKTRACE && defined HAVE_BACKTRACE_SYMBOLS
     void *b[100];

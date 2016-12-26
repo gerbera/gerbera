@@ -96,7 +96,7 @@ Ref<Matcher> RExp::match(String text, int nmatch)
     if (m->next())
         return m;
     else
-        return nil;
+        return nullptr;
 }
 
 bool RExp::matches(String text)
@@ -127,7 +127,7 @@ String Matcher::group(int i)
     if (m->rm_so >= 0)
         return String(ptr + m->rm_so, m->rm_eo - m->rm_so);
     else
-        return nil;
+        return nullptr;
 }
 bool Matcher::next()
 {
