@@ -79,7 +79,7 @@ void AutoscanInotify::init()
         log_debug("starting inotify thread...\n");
         int ret = pthread_create(
             &thread,
-            NULL,
+            nullptr,
             AutoscanInotify::staticThreadProc,
             this
         );
@@ -104,7 +104,7 @@ void AutoscanInotify::shutdown()
         inotify->stop();
         lock.unlock();
         if (thread)
-            pthread_join(thread, NULL);
+            pthread_join(thread, nullptr);
         thread = 0;
         log_debug("inotify thread died.\n");
         inotify = nil;
@@ -119,8 +119,8 @@ void *AutoscanInotify::staticThreadProc(void *arg)
     inst->threadProc();
     Storage::getInstance()->threadCleanup();
     log_debug("exiting inotify thread...\n");
-    pthread_exit(NULL);
-    return NULL;
+    pthread_exit(nullptr);
+    return nullptr;
 }
 
 void AutoscanInotify::threadProc()
@@ -579,7 +579,7 @@ void AutoscanInotify::monitorUnmonitorRecursive(String startPath, bool unmonitor
         return;
     }
     
-    while ((dent = readdir(dir)) != NULL && ! shutdownFlag)
+    while ((dent = readdir(dir)) != nullptr && ! shutdownFlag)
     {
         char *name = dent->d_name;
         if (name[0] == '.')

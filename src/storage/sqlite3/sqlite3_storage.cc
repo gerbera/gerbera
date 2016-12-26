@@ -99,7 +99,7 @@ void Sqlite3Storage::init()
     
     ret = pthread_create(
         &sqliteThread,
-        NULL, //&attr,
+        nullptr, //&attr,
         Sqlite3Storage::staticThreadProc,
         this
     );
@@ -286,8 +286,8 @@ void *Sqlite3Storage::staticThreadProc(void *arg)
     Sqlite3Storage *inst = (Sqlite3Storage *)arg;
     inst->threadProc();
     log_debug("Sqlite3Storage::staticThreadProc - exiting thread\n");
-    pthread_exit(NULL);
-    return NULL;
+    pthread_exit(nullptr);
+    return nullptr;
 }
 
 void Sqlite3Storage::threadProc()
@@ -369,7 +369,7 @@ void Sqlite3Storage::shutdownDriver()
     AUTOUNLOCK();
     log_debug("waiting for thread\n");
     if (sqliteThread)
-        pthread_join(sqliteThread, NULL);
+        pthread_join(sqliteThread, nullptr);
     sqliteThread = 0;
     log_debug("end\n");
 }
@@ -473,16 +473,16 @@ void SLInitTask::run(sqlite3 **db, Sqlite3Storage *sl)
         throw _StorageException(nil, _("Error while uncompressing sqlite3 create sql. returned: ") + ret);
     buf[SL3_CREATE_SQL_INFLATED_SIZE] = '\0';
     
-    char *err = NULL;
+    char *err = nullptr;
     ret = sqlite3_exec(
         *db,
         (const char *)buf,
-        NULL,
-        NULL,
+        nullptr,
+        nullptr,
         &err
     );
     String error = nil;
-    if (err != NULL)
+    if (err != nullptr)
     {
         error = err;
         sqlite3_free(err);
@@ -518,7 +518,7 @@ void SLSelectTask::run(sqlite3 **db, Sqlite3Storage *sl)
         &err
     );
     String error = nil;
-    if (err != NULL)
+    if (err != nullptr)
     {
         error = err;
         sqlite3_free(err);
@@ -547,12 +547,12 @@ void SLExecTask::run(sqlite3 **db, Sqlite3Storage *sl)
     int res = sqlite3_exec(
         *db,
         query,
-        NULL,
-        NULL,
+        nullptr,
+        nullptr,
         &err
     );
     String error = nil;
-    if (err != NULL)
+    if (err != nullptr)
     {
         error = err;
         sqlite3_free(err);
@@ -620,14 +620,14 @@ void SLBackupTask::run(sqlite3 **db, Sqlite3Storage *sl)
 
 Sqlite3Result::Sqlite3Result() : SQLResult()
 {
-    table = NULL;
+    table = nullptr;
 }
 Sqlite3Result::~Sqlite3Result()
 {
     if(table)
     {
         sqlite3_free_table(table);
-        table = NULL;
+        table = nullptr;
     }
 }
 Ref<SQLRow> Sqlite3Result::nextRow()

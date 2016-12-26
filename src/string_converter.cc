@@ -41,14 +41,14 @@ StringConverter::StringConverter(String from, String to) : Object()
     cd = iconv_open(to.c_str(), from.c_str());
     if (cd == (iconv_t)(-1))
     {
-        cd = (iconv_t)(0);
+        cd = (iconv_t)nullptr;
         throw _Exception(_("iconv: ") + strerror(errno));
     }
 }
 
 StringConverter::~StringConverter()
 {
-    if (cd != (iconv_t)(0))
+    if (cd != (iconv_t)nullptr)
         iconv_close(cd);
 }
 
@@ -120,7 +120,7 @@ zmm::String StringConverter::_convert(String str, bool validate,
     // reset to initial state
     if (dirty)
     {
-        iconv(cd, NULL, 0, NULL, 0);
+        iconv(cd, nullptr, nullptr, nullptr, nullptr);
         dirty = false;
     }
     

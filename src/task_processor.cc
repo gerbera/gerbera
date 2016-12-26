@@ -27,7 +27,7 @@ void TaskProcessor::init()
 {
     int ret;
 
-    ret = pthread_create(&taskThread, NULL, TaskProcessor::staticThreadProc,
+    ret = pthread_create(&taskThread, nullptr, TaskProcessor::staticThreadProc,
           this);
 
     if (ret != 0)
@@ -42,7 +42,7 @@ void TaskProcessor::shutdown()
     shutdownFlag = true;
     cond->signal();
     if (taskThread)
-        pthread_join(taskThread, NULL);
+        pthread_join(taskThread, nullptr);
     taskThread = 0;
 }
 
@@ -50,8 +50,8 @@ void *TaskProcessor::staticThreadProc(void *arg)
 {
     TaskProcessor *inst = (TaskProcessor *)arg;
     inst->threadProc();
-    pthread_exit(NULL);
-    return NULL;
+    pthread_exit(nullptr);
+    return nullptr;
 }
 
 void TaskProcessor::threadProc()

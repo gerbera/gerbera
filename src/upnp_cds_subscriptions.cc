@@ -39,7 +39,7 @@ using namespace mxml;
 void ContentDirectoryService::process_subscription_request(zmm::Ref<SubscriptionRequest> request)
 {
     int err;
-    IXML_Document *event = NULL;
+    IXML_Document *event = nullptr;
 
     Ref<Element> propset, property;
    
@@ -69,7 +69,7 @@ void ContentDirectoryService::process_subscription_request(zmm::Ref<Subscription
 void ContentDirectoryService::subscription_update(String containerUpdateIDs_CSV)
 {
     int err;
-    IXML_Document *event = NULL;
+    IXML_Document *event = nullptr;
 
     Ref<Element> propset, property;
     

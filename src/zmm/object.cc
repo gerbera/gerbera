@@ -41,7 +41,7 @@ Object::Object()
 {
     atomic_set(&_ref_count, 0);
 #ifdef ATOMIC_NEED_MUTEX
-    pthread_mutex_init(&mutex, NULL);
+    pthread_mutex_init(&mutex, nullptr);
 #endif
 }
 Object::~Object()

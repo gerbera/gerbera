@@ -47,6 +47,6 @@ void Destroyer::destroy()
     if (destroy_func)
     {
         destroy_func(data);
-        destroy_func = NULL;
+        destroy_func = nullptr;
     }
 }

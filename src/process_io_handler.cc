@@ -209,7 +209,7 @@ int ProcessIOHandler::read(OUT char *buf, IN size_t length)
         timeout.tv_sec = FIFO_READ_TIMEOUT;
         timeout.tv_usec = 0;
 
-        ret = select(fd + 1, &readSet, NULL, NULL, &timeout);
+        ret = select(fd + 1, &readSet, nullptr, nullptr, &timeout);
         if (ret == -1)
         {
             if (errno == EINTR)
@@ -326,7 +326,7 @@ int ProcessIOHandler::write(IN char *buf, IN size_t length)
         timeout.tv_sec = FIFO_WRITE_TIMEOUT;
         timeout.tv_usec = 0;
 
-        ret = select(fd + 1, NULL, &writeSet, NULL, &timeout);
+        ret = select(fd + 1, nullptr, &writeSet, nullptr, &timeout);
         if (ret == -1)
         {
             if (errno == EINTR)

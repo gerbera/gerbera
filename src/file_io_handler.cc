@@ -68,7 +68,7 @@ void FileIOHandler::open(IN enum UpnpOpenFileMode mode)
         throw _Exception(_("FileIOHandler::open: invdalid read/write mode"));
     }
 
-    if (f == NULL)
+    if (f == nullptr)
     {
         throw _Exception(_("FileIOHandler::open: failed to open: ") + filename.c_str());
     }
@@ -113,5 +113,5 @@ void FileIOHandler::close()
     {
         throw _Exception(_("fclose failed"));
     }
-    f = NULL;
+    f = nullptr;
 }

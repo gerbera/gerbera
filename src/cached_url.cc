@@ -40,7 +40,7 @@ CachedURL::CachedURL(int object_id, zmm::String url)
 {
     this->object_id = object_id;
     this->url = url;
-    this->creation_time = time(NULL);
+    this->creation_time = time(nullptr);
     if (this->creation_time == -1)
     {
         throw _Exception(_("Failed to get current time: ") + 
@@ -57,7 +57,7 @@ int CachedURL::getObjectID()
 String CachedURL::getURL()
 {
     AutoLock lock(mutex);
-    last_access_time = time(NULL);
+    last_access_time = time(nullptr);
     if (last_access_time == -1)
     {
         throw _Exception(_("Failed to get current time: ") + 

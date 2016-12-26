@@ -182,7 +182,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
             {
                 chmod(location.c_str(), S_IWUSR | S_IRUSR);
 
-                Ref<IOHandler> c_ioh(new CurlIOHandler(url, NULL, 
+                Ref<IOHandler> c_ioh(new CurlIOHandler(url, nullptr, 
                    cfg->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE),
                    cfg->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE)));
 

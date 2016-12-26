@@ -50,7 +50,7 @@ ProcessExecutor::ProcessExecutor(String command, Ref<Array<StringBase> > arglist
         if (apos >= MAX_ARGS-1)
             break;
     }
-    argv[++apos] = NULL;
+    argv[++apos] = nullptr;
 
     exit_status = 0;
 
@@ -63,7 +63,7 @@ ProcessExecutor::ProcessExecutor(String command, Ref<Array<StringBase> > arglist
         
         case 0:
             sigset_t mask_set;
-            pthread_sigmask(SIG_SETMASK, &mask_set, NULL);
+            pthread_sigmask(SIG_SETMASK, &mask_set, nullptr);
             log_debug("Launching process: %s\n", command.c_str());
             execvp(command.c_str(), const_cast<char **const>(argv));
         default:

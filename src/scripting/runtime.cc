@@ -48,7 +48,7 @@ Runtime::~Runtime()
 {
     if (rt)
         JS_DestroyRuntime(rt);
-    rt = NULL;
+    rt = nullptr;
     JS_ShutDown();
 }
 

@@ -140,7 +140,7 @@ Ref<Document> Parser::parseString(String str)
 
 Ref<Document> Parser::parse(Ref<Context> ctx, String input)
 {
-    XML_Parser parser = XML_ParserCreate(NULL);
+    XML_Parser parser = XML_ParserCreate(nullptr);
     if (!parser)
         throw Exception(_("Unable to allocate XML parser"));
 

@@ -57,7 +57,7 @@ static Ref<RequestHandler> create_request_handler(const char* filename)
     log_debug("Filename: %s, Path: %s\n", filename, path.c_str());
     // log_debug("create_handler: got url parameters: [%s]\n", parameters.c_str());
 
-    RequestHandler* ret = NULL;
+    RequestHandler* ret = nullptr;
 
     if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_MEDIA_HANDLER)) {
         ret = new FileRequestHandler();
@@ -154,13 +154,13 @@ static UpnpWebFileHandle web_open(IN const char* filename,
         ioHandler->retain();
         return (UpnpWebFileHandle)ioHandler.getPtr();
     } catch (const ServerShutdownException& se) {
-        return NULL;
+        return nullptr;
     } catch (const SubtitlesNotFoundException& sex) {
         log_info("%s\n", sex.getMessage().c_str());
-        return NULL;
+        return nullptr;
     } catch (const Exception& ex) {
         log_error("%s\n", ex.getMessage().c_str());
-        return NULL;
+        return nullptr;
     }
 }
 

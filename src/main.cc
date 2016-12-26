@@ -82,7 +82,7 @@ void signal_handler(int signum);
 
 int main(int argc, char **argv, char **envp)
 {
-    char     * err = NULL;
+    char     * err = nullptr;
     int      port = -1;
     bool     daemon = false;
     struct   sigaction action;
@@ -97,23 +97,23 @@ int main(int argc, char **argv, char **envp)
     int      opt_index = 0;
     int      o;
     static struct option long_options[] = {
-        {(char *)"ip", 1, 0, 'i'},          // 0
-        {(char *)"interface", 1, 0, 'e'},   // 1
-        {(char *)"port", 1, 0, 'p'},        // 2
-        {(char *)"config", 1, 0, 'c'},      // 3
-        {(char *)"home", 1, 0, 'm'},        // 4
-        {(char *)"cfgdir", 1, 0, 'f'},      // 5
-        {(char *)"user", 1, 0, 'u'},        // 6
-        {(char *)"group", 1, 0, 'g'},       // 7
-        {(char *)"daemon", 0, 0, 'd'},      // 8
-        {(char *)"pidfile", 1, 0, 'P'},     // 9
-        {(char *)"add", 1, 0, 'a'},         // 10
-        {(char *)"logfile", 1, 0, 'l'},     // 11
-        {(char *)"debug", 0, 0, 'D'},       // 12
-        {(char *)"compile-info", 0, 0, 0},  // 13
-        {(char *)"version", 0, 0, 0},       // 14
-        {(char *)"help", 0, 0, 'h'},        // 15
-        {(char *)0, 0, 0, 0}                
+        {(char *)"ip", 1, nullptr, 'i'},          // 0
+        {(char *)"interface", 1, nullptr, 'e'},   // 1
+        {(char *)"port", 1, nullptr, 'p'},        // 2
+        {(char *)"config", 1, nullptr, 'c'},      // 3
+        {(char *)"home", 1, nullptr, 'm'},        // 4
+        {(char *)"cfgdir", 1, nullptr, 'f'},      // 5
+        {(char *)"user", 1, nullptr, 'u'},        // 6
+        {(char *)"group", 1, nullptr, 'g'},       // 7
+        {(char *)"daemon", 0, nullptr, 'd'},      // 8
+        {(char *)"pidfile", 1, nullptr, 'P'},     // 9
+        {(char *)"add", 1, nullptr, 'a'},         // 10
+        {(char *)"logfile", 1, nullptr, 'l'},     // 11
+        {(char *)"debug", 0, nullptr, 'D'},       // 12
+        {(char *)"compile-info", 0, nullptr, 0},  // 13
+        {(char *)"version", 0, nullptr, 0},       // 14
+        {(char *)"help", 0, nullptr, 'h'},        // 15
+        {(char *)nullptr, 0, nullptr, 0}                
     };
 
     String config_file;
@@ -122,7 +122,7 @@ int main(int argc, char **argv, char **envp)
     String user;
     String group;
     String pid_file;
-    FILE* pid_fd = NULL;
+    FILE* pid_fd = nullptr;
     String interface;
     String ip;
     String prefix;
@@ -294,7 +294,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
     if (pid_file != nil)
     {
         pid_fd = fopen(pid_file.c_str(), "w");
-        if (pid_fd == NULL)
+        if (pid_fd == nullptr)
         {
             log_error("Could not write pid file %s : %s\n",
                        pid_file.c_str(), strerror(errno));
@@ -306,7 +306,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
     if (group != nil)
     {
         grp = getgrnam(group.c_str());
-        if (grp == NULL)
+        if (grp == nullptr)
         {
             log_error("Group %s not found!\n", group.c_str());
             exit(EXIT_FAILURE);
@@ -319,7 +319,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         }
         
         // remove supplementary groups
-        if (setgroups(0, NULL) < 0)
+        if (setgroups(0, nullptr) < 0)
         {
             log_error("setgroups failed %s\n", strerror(errno));
             exit(EXIT_FAILURE);
@@ -329,7 +329,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
     if (user != nil)
     {
         pwd = getpwnam(user.c_str());
-        if (pwd == NULL)
+        if (pwd == nullptr)
         {
             log_error("User %s not found!\n", user.c_str());
             exit(EXIT_FAILURE);
@@ -357,7 +357,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         {
 #ifndef __CYGWIN__
             char *h = getenv("HOME");
-            if (h != NULL)
+            if (h != nullptr)
                 home = h;
 
 #else
@@ -379,14 +379,14 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
             confdir = _(DEFAULT_CONFIG_HOME);
 
         char *pref = getenv("MEDIATOMB_DATADIR");
-        if (pref != NULL)
+        if (pref != nullptr)
             prefix = pref;
 
         if (!string_ok(prefix))
             prefix = _(PACKAGE_DATADIR);
 
         char *mgc = getenv("MEDIATOMB_MAGIC_FILE");
-        if (mgc != NULL)
+        if (mgc != nullptr)
             magic = mgc;
 
         if (!string_ok(magic))
@@ -485,7 +485,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
 
     }
 
-    if (pid_fd != NULL)
+    if (pid_fd != nullptr)
     {
         pid_t cur_pid;
         int     size;
@@ -504,28 +504,28 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
     main_thread_id = pthread_self();
     // install signal handlers
     sigfillset(&mask_set);
-    pthread_sigmask(SIG_SETMASK, &mask_set, NULL);
+    pthread_sigmask(SIG_SETMASK, &mask_set, nullptr);
 
     memset(&action, 0, sizeof(action));
     action.sa_handler = signal_handler;
     action.sa_flags = 0;
     sigfillset(&action.sa_mask);
-    if (sigaction(SIGINT, &action, NULL) < 0)
+    if (sigaction(SIGINT, &action, nullptr) < 0)
     {
         log_error("Could not register SIGINT handler!\n");
     }
 
-    if (sigaction(SIGTERM, &action, NULL) < 0)
+    if (sigaction(SIGTERM, &action, nullptr) < 0)
     {
         log_error("Could not register SIGTERM handler!\n");
     }
 
-    if (sigaction(SIGHUP, &action, NULL) < 0)
+    if (sigaction(SIGHUP, &action, nullptr) < 0)
     {
         log_error("Could not register SIGHUP handler!\n");
     }
 
-    if (sigaction(SIGPIPE, &action, NULL) < 0)
+    if (sigaction(SIGPIPE, &action, nullptr) < 0)
     {
         log_error("Could not register SIGPIPE handler!\n");
     }
@@ -541,7 +541,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
     {
 
         sigemptyset(&mask_set);
-        pthread_sigmask(SIG_SETMASK, &mask_set, NULL);
+        pthread_sigmask(SIG_SETMASK, &mask_set, nullptr);
 
         upnp_e.printStackTrace();
         log_error("main: upnp error %d\n", upnp_e.getErrorCode());
@@ -611,7 +611,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
     }
     
     sigemptyset(&mask_set);
-    pthread_sigmask(SIG_SETMASK, &mask_set, NULL);
+    pthread_sigmask(SIG_SETMASK, &mask_set, nullptr);
     
     // wait until signalled to terminate
     while (!shutdown_flag)
@@ -678,7 +678,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
                 restart_flag = 0;
                 shutdown_flag = 1;
                 sigemptyset(&mask_set);
-                pthread_sigmask(SIG_SETMASK, &mask_set, NULL);
+                pthread_sigmask(SIG_SETMASK, &mask_set, nullptr);
                 log_error("Could not restart MediaTomb\n");
             }
         }

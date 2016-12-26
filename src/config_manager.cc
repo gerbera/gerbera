@@ -1379,7 +1379,7 @@ void ConfigManager::validate(String serverhome)
     SET_DICT_OPTION(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
 #if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
-    if (setlocale(LC_ALL, "") != NULL)
+    if (setlocale(LC_ALL, "") != nullptr)
     {
         temp = nl_langinfo(CODESET);
         log_debug("received %s from nl_langinfo\n", temp.c_str());
@@ -2362,7 +2362,7 @@ void ConfigManager::save()
 void ConfigManager::save_text(String filename, String content)
 {
     FILE *file = fopen(filename.c_str(), "wb");
-    if (file == NULL)
+    if (file == nullptr)
     {
         throw _Exception(_("could not open file ") +
                         filename + " for writing : " + strerror(errno));
@@ -2507,7 +2507,7 @@ void ConfigManager::writeBookmark(String ip, String port)
     
         
     f = fopen(path.c_str(), "w");
-    if (f == NULL)
+    if (f == nullptr)
     {
         throw _Exception(_("writeBookmark: failed to open: ") + path);
     }
@@ -3183,7 +3183,7 @@ Ref<Array<StringBase> > ConfigManager::createArrayFromNodeset(Ref<mxml::Element>
 String ConfigManager::getOption(config_option_t option)
 {
     Ref<ConfigOption> r = options->get(option);
-    if (r.getPtr() == NULL)
+    if (r.getPtr() == nullptr)
     {
         throw _Exception(_("option not set"));
     }
@@ -3193,7 +3193,7 @@ String ConfigManager::getOption(config_option_t option)
 int ConfigManager::getIntOption(config_option_t option)
 {
     Ref<ConfigOption> o = options->get(option);
-    if (o.getPtr() == NULL)
+    if (o.getPtr() == nullptr)
     {
         throw _Exception(_("option not set"));
     }
@@ -3203,7 +3203,7 @@ int ConfigManager::getIntOption(config_option_t option)
 bool ConfigManager::getBoolOption(config_option_t option)
 {
     Ref<ConfigOption> o = options->get(option);
-    if (o.getPtr() == NULL)
+    if (o.getPtr() == nullptr)
     {
         throw _Exception(_("option not set"));
     }

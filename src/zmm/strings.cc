@@ -72,7 +72,7 @@ bool StringBase::startsWith(StringBase *other)
 
 String::String()
 {
-    base = NULL;
+    base = nullptr;
 }
 String::String(int capacity)
 {
@@ -87,7 +87,7 @@ String::String(const char *str)
         base->retain();
     }
     else
-        base = NULL;
+        base = nullptr;
 }
 String::String(const char *str, int len)
 {
@@ -97,7 +97,7 @@ String::String(const char *str, int len)
         base->retain();
     }
     else
-        base = NULL;
+        base = nullptr;
 }
 String::String(char ch)
 {
@@ -141,7 +141,7 @@ const char *String::c_str() const
     if(base)
         return base->data;
     else
-        return NULL;
+        return nullptr;
 }
 String String::operator+(String other)
 {
@@ -313,7 +313,7 @@ String& String::operator=(const char *str)
         base->retain();
     }
     else
-        base = NULL;
+        base = nullptr;
     return *this;
 }
 String& String::operator=(String other)

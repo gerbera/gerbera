@@ -362,7 +362,7 @@ int Server::upnp_callback(Upnp_EventType eventtype, const void *event, void *coo
     log_debug("start\n");
 
     // check parameters
-    if (event == NULL) {
+    if (event == nullptr) {
         log_debug("upnp_callback: NULL event structure\n");
         return UPNP_E_BAD_REQUEST;
     }

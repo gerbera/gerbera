@@ -45,7 +45,7 @@ IOHandlerBufferHelper::IOHandlerBufferHelper(size_t bufSize, size_t initialFillS
     this->bufSize = bufSize;
     this->initialFillSize = initialFillSize;
     waitForInitialFillSize = (initialFillSize > 0);
-    buffer = NULL;
+    buffer = nullptr;
     isOpen = false;
     threadShutdown = false;
     eof = false;
@@ -64,7 +64,7 @@ void IOHandlerBufferHelper::open(IN enum UpnpOpenFileMode mode)
     if (isOpen)
         throw _Exception(_("tried to reopen an open IOHandlerBufferHelper"));
     buffer = (char *)MALLOC(bufSize);
-    if (buffer == NULL)
+    if (buffer == nullptr)
         throw _Exception(_("Failed to allocate memory for transcoding buffer!"));
 
     startBufferThread();
@@ -187,7 +187,7 @@ void IOHandlerBufferHelper::close()
     isOpen = false;
     stopBufferThread();
     FREE(buffer);
-    buffer = NULL;
+    buffer = nullptr;
 }
 
 // thread stuff...
@@ -196,7 +196,7 @@ void IOHandlerBufferHelper::startBufferThread()
 {
     pthread_create(
         &bufferThread,
-        NULL, // attr
+        nullptr, // attr
         IOHandlerBufferHelper::staticThreadProc,
         this
     );
@@ -210,7 +210,7 @@ void IOHandlerBufferHelper::stopBufferThread()
     lock.unlock();
 
     if (bufferThread)
-        pthread_join(bufferThread, NULL);
+        pthread_join(bufferThread, nullptr);
     bufferThread = 0;
 }
 
@@ -220,6 +220,6 @@ void *IOHandlerBufferHelper::staticThreadProc(void *arg)
     IOHandlerBufferHelper *inst = (IOHandlerBufferHelper *)arg;
     inst->threadProc();
     log_debug("buffer thread shut down. thread: %d\n", pthread_self());
-    pthread_exit(NULL);
-    return NULL;
+    pthread_exit(nullptr);
+    return nullptr;
 }

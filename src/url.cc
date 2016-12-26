@@ -53,11 +53,11 @@ Ref<StringBuffer> URL::download(String URL, long *HTTP_retcode,
     bool cleanup = false;
     char error_buffer[CURL_ERROR_SIZE] = {'\0'};
 
-    if (curl_handle == NULL)
+    if (curl_handle == nullptr)
     {
         curl_handle = curl_easy_init();
         cleanup = true;
-        if (curl_handle == NULL)
+        if (curl_handle == nullptr)
             throw _Exception(_("Invalid curl handle!\n"));
     }
 
@@ -142,11 +142,11 @@ Ref<URL::Stat> URL::getInfo(String URL, CURL *curl_handle)
     String mt;
     String used_url;
 
-    if (curl_handle == NULL)
+    if (curl_handle == nullptr)
     {
         curl_handle = curl_easy_init();
         cleanup = true;
-        if (curl_handle == NULL)
+        if (curl_handle == nullptr)
             throw _Exception(_("Invalid curl handle!\n"));
     }
 
@@ -222,7 +222,7 @@ Ref<URL::Stat> URL::getInfo(String URL, CURL *curl_handle)
         throw _Exception(error_buffer);
     }
 
-    if (ct == NULL)
+    if (ct == nullptr)
         mt = _(MIMETYPE_DEFAULT);
     else
         mt = ct;
@@ -238,7 +238,7 @@ Ref<URL::Stat> URL::getInfo(String URL, CURL *curl_handle)
         throw _Exception(error_buffer);
     }
 
-    if (c_url == NULL)
+    if (c_url == nullptr)
         used_url = URL;
     else
         used_url = c_url;
@@ -255,7 +255,7 @@ Ref<URL::Stat> URL::getInfo(String URL, CURL *curl_handle)
 size_t URL::dl(void *buf, size_t size, size_t nmemb, void *data)
 {
     StringBuffer *buffer = (StringBuffer *)data;
-    if (buffer == NULL)
+    if (buffer == nullptr)
         return 0;
 
     size_t s = size * nmemb;

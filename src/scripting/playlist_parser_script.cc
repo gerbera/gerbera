@@ -74,9 +74,9 @@ js_readln(JSContext *cx, uintN argc, jsval *vp)
 
 PlaylistParserScript::PlaylistParserScript(Ref<Runtime> runtime) : Script(runtime)
 {
-    currentHandle = NULL;
+    currentHandle = nullptr;
     currentObjectID = INVALID_OBJECT_ID;
-    currentLine = NULL;
+    currentLine = nullptr;
  
 #ifdef JS_THREADSAFE
     JS_SetContextThread(cx);
@@ -117,7 +117,7 @@ String PlaylistParserScript::readln()
 
     while (true)
     {
-        if(fgets(currentLine, ONE_TEXTLINE_BYTES, currentHandle) == NULL)
+        if(fgets(currentLine, ONE_TEXTLINE_BYTES, currentHandle) == nullptr)
             return nil;
 
         ret = trim_string(currentLine);
@@ -132,8 +132,8 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<Ge
     JS_SetContextThread(cx);
     JS_BeginRequest(cx);
 #endif
-    if ((currentObjectID != INVALID_OBJECT_ID) || (currentHandle != NULL) ||
-            (currentLine != NULL))
+    if ((currentObjectID != INVALID_OBJECT_ID) || (currentHandle != nullptr) ||
+            (currentLine != nullptr))
     {
 #ifdef JS_THREADSAFE
         JS_EndRequest(cx);
@@ -180,7 +180,7 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<Ge
         throw _Exception(_("failed to open file: ") + obj->getLocation());
     }
 
-    JSObject *playlist = JS_NewObject(cx, NULL, NULL, glob);
+    JSObject *playlist = JS_NewObject(cx, nullptr, nullptr, glob);
 
     try
     {
@@ -193,10 +193,10 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<Ge
     catch (const Exception & e)
     {
         fclose(currentHandle);
-        currentHandle = NULL;
+        currentHandle = nullptr;
 
         FREE(currentLine);
-        currentLine = NULL;
+        currentLine = nullptr;
 
         currentObjectID = INVALID_OBJECT_ID;
         currentTask = nil;
@@ -209,10 +209,10 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<Ge
     }
 
     fclose(currentHandle);
-    currentHandle = NULL;
+    currentHandle = nullptr;
 
     FREE(currentLine);
-    currentLine = NULL;
+    currentLine = nullptr;
 
     currentObjectID = INVALID_OBJECT_ID;
     currentTask = nil;

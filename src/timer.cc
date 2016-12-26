@@ -103,11 +103,11 @@ void Timer::triggerWait()
 
 struct timespec * Timer::getNextNotifyTime()
 {
-    struct timespec *nextTime = NULL;
+    struct timespec *nextTime = nullptr;
     for(int i = 0; i < subscribersSingleton->size(); i++)
     {
         struct timespec *nextNotify = subscribersSingleton->get(i)->getNextNotify();
-        if (nextTime == NULL || compareTimespecs(nextNotify, nextTime) > 0)
+        if (nextTime == nullptr || compareTimespecs(nextNotify, nextTime) > 0)
         {
             nextTime = nextNotify;
         }
@@ -115,7 +115,7 @@ struct timespec * Timer::getNextNotifyTime()
     for(int i = 0; i < subscribersObject->size(); i++)
     {
         struct timespec *nextNotify = subscribersObject->get(i)->getNextNotify();
-        if (nextTime == NULL || compareTimespecs(nextNotify, nextTime) > 0)
+        if (nextTime == nullptr || compareTimespecs(nextNotify, nextTime) > 0)
         {
             nextTime = nextNotify;
         }

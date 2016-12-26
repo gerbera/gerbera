@@ -82,15 +82,15 @@ void ServeRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *in
     {
         String mimetype = _(MIMETYPE_DEFAULT);
 #ifdef HAVE_MAGIC
-        magic_set *ms = NULL;
+        magic_set *ms = nullptr;
         ms = magic_open(MAGIC_MIME);
-        if (ms != NULL)
+        if (ms != nullptr)
         {
-            if (magic_load(ms, NULL) == -1)
+            if (magic_load(ms, nullptr) == -1)
             {
                 log_warning("magic_load: %s\n", magic_error(ms));
                 magic_close(ms);
-                ms = NULL;
+                ms = nullptr;
             } 
             else
             {
@@ -175,15 +175,15 @@ Ref<IOHandler> ServeRequestHandler::open(IN const char *filename,
     {
         String mimetype = _(MIMETYPE_DEFAULT);
 #ifdef HAVE_MAGIC
-        magic_set *ms = NULL;
+        magic_set *ms = nullptr;
         ms = magic_open(MAGIC_MIME);
-        if (ms != NULL)
+        if (ms != nullptr)
         {
-            if (magic_load(ms, NULL) == -1)
+            if (magic_load(ms, nullptr) == -1)
             {
                 log_warning("magic_load: %s\n", magic_error(ms));
                 magic_close(ms);
-                ms = NULL;
+                ms = nullptr;
             }
             else
             {

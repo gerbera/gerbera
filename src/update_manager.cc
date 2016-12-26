@@ -69,7 +69,7 @@ void UpdateManager::init()
     
     pthread_create(
         &updateThread,
-        NULL, // &attr, // attr
+        nullptr, // &attr, // attr
         UpdateManager::staticThreadProc,
         this
     );
@@ -88,7 +88,7 @@ void UpdateManager::shutdown()
     AUTOUNLOCK();
     log_debug("waiting for thread\n");
     if (updateThread)
-        pthread_join(updateThread, NULL);
+        pthread_join(updateThread, nullptr);
     updateThread = 0;
     log_debug("end\n");
 }
@@ -287,6 +287,6 @@ void *UpdateManager::staticThreadProc(void *arg)
     Storage::getInstance()->threadCleanup();
     
     log_debug("update thread shut down. thread: %d\n", pthread_self());
-    pthread_exit(NULL);
-    return NULL;
+    pthread_exit(nullptr);
+    return nullptr;
 }

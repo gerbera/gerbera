@@ -79,7 +79,7 @@ static const char *YT_stdfeeds[] =
     GDATA_REQUEST_STDFEED_MOST_RESPONDED,   // has time
     GDATA_REQUEST_STDFEED_RECENTLY_FEATURED,
     GDATA_REQUEST_STDFEED_WATCH_ON_MOBILE,
-    NULL,
+    nullptr,
 };
 
 // gdata default parameters
@@ -239,7 +239,7 @@ static regions YT_regions[] =
     { YT_region_es, CFG_OPTION_SPAIN,                 "Spain"           },
     { YT_region_tw, CFG_OPTION_TAIWAN,                "Taiwan"          },
     { YT_region_us, CFG_OPTION_UNITED_STATES,         "United States"   },
-    { YT_region_none, NULL , NULL },
+    { YT_region_none, nullptr , nullptr },
 };
 
 YouTubeService::YouTubeService()
@@ -420,7 +420,7 @@ yt_regions_t YouTubeService::getRegion(Ref<Element> xml)
         return YT_region_none;
 
     int count = 0;
-    while (YT_regions[count].region_code != NULL)
+    while (YT_regions[count].region_code != nullptr)
     {
         if (region == YT_regions[count].region_code)
             return YT_regions[count].region;
@@ -438,7 +438,7 @@ String YouTubeService::getFeed(Ref<Element> xml)
         throw _Exception(_("<") + xml->getName() + _("> tag is missing the required feed setting!"));
 
     int count = 0;
-    while (YT_stdfeeds[count] != NULL)
+    while (YT_stdfeeds[count] != nullptr)
     {
         if (feed == YT_stdfeeds[count])
             return feed;

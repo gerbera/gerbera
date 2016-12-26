@@ -49,7 +49,7 @@ void ThreadExecutor::startThread()
     threadRunning = true;
     pthread_create(
         &thread,
-        NULL, // attr
+        nullptr, // attr
         ThreadExecutor::staticThreadProc,
         this
     );
@@ -68,7 +68,7 @@ bool ThreadExecutor::kill()
     if (thread)
     {
         threadRunning = false;
-        pthread_join(thread, NULL);
+        pthread_join(thread, nullptr);
     }
     return true;
 }
@@ -77,6 +77,6 @@ void *ThreadExecutor::staticThreadProc(void *arg)
 {
     ThreadExecutor *inst = (ThreadExecutor *)arg;
     inst->threadProc();
-    pthread_exit(NULL);
-    return NULL;
+    pthread_exit(nullptr);
+    return nullptr;
 }

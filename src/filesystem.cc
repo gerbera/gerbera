@@ -117,7 +117,7 @@ Ref<Array<FsObject> > Filesystem::readDirectory(String path, int mask,
                         path + " : " + strerror(errno));
     }
 
-    while ((dent = readdir(dir)) != NULL)
+    while ((dent = readdir(dir)) != nullptr)
     {
         char *name = dent->d_name;
         if (name[0] == '.')
@@ -213,7 +213,7 @@ bool Filesystem::have(String path, int mask)
     }
 
     bool result = false;
-    while ((dent = readdir(dir)) != NULL)
+    while ((dent = readdir(dir)) != nullptr)
     {
         char *name = dent->d_name;
         if (name[0] == '.')

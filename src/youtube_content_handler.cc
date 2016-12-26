@@ -225,7 +225,7 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
         {
             datebuf[0] = '\0';
             // Tue, 18 Jul 2006 17:43:47 +0000
-            if (strptime(temp.c_str(),  "%a, %d %b %Y %T +000", &t) != NULL)
+            if (strptime(temp.c_str(),  "%a, %d %b %Y %T +000", &t) != nullptr)
             {
                 if (strftime(datebuf, sizeof(datebuf), "%F", &t) != 0)
                 {

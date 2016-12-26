@@ -97,7 +97,7 @@ js_copyObject(JSContext *cx, uintN argc, jsval *argv)
         JS_ARGV(cx, argv)[0] = OBJECT_TO_JSVAL(js_cds_obj);
 
         Ref<CdsObject> cds_obj = self->jsObject2cdsObject(js_cds_obj, nil);
-        js_cds_clone_obj = JS_NewObject(cx, NULL, NULL, NULL);
+        js_cds_clone_obj = JS_NewObject(cx, nullptr, nullptr, nullptr);
         JS_ARGV(cx, argv)[1] = OBJECT_TO_JSVAL(js_cds_clone_obj);
 
         self->cdsObject2jsObject(cds_obj, js_cds_clone_obj);
@@ -133,7 +133,7 @@ js_addCdsObject(JSContext *cx, uintN argc, jsval *argv)
         char *ts;
 
         JSObject *js_cds_obj;
-        JSObject *js_orig_obj = NULL;
+        JSObject *js_orig_obj = nullptr;
         Ref<CdsObject> orig_object;
 
         Ref<StringConverter> p2i;
@@ -141,7 +141,7 @@ js_addCdsObject(JSContext *cx, uintN argc, jsval *argv)
 
         Script *self = (Script *)JS_GetContextPrivate(cx);
 
-        if (self == NULL)
+        if (self == nullptr)
         {
             log_debug("Could not retrieve class instance from global object\n");
             return JS_FALSE;
@@ -205,7 +205,7 @@ js_addCdsObject(JSContext *cx, uintN argc, jsval *argv)
         else if (self->whoami() == S_IMPORT)
             js_orig_obj = self->getObjectProperty(obj, _("orig"));
         
-        if (js_orig_obj == NULL)
+        if (js_orig_obj == nullptr)
         {
             log_debug("Could not retrieve orig/playlist object\n");
             JS_SET_RVAL(cx, argv, JSVAL_VOID);
@@ -364,7 +364,7 @@ static JSBool convert_charset_generic(JSContext *cx, uintN argc, jsval *argv, ch
 
         Script *self = (Script *)JS_GetContextPrivate(cx);
 
-        if (self == NULL)
+        if (self == nullptr)
         {
             log_debug("Could not retrieve class instance from global object\n");
             JS_SET_RVAL(cx, argv, JSVAL_VOID);

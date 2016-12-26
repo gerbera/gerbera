@@ -39,7 +39,7 @@ using namespace mxml;
 void ConnectionManagerService::process_subscription_request(zmm::Ref<SubscriptionRequest> request)
 {
     int err;
-    IXML_Document *event = NULL;
+    IXML_Document *event = nullptr;
 
     Ref<Element> propset, property;
 
@@ -70,7 +70,7 @@ void ConnectionManagerService::process_subscription_request(zmm::Ref<Subscriptio
 void ConnectionManagerService::subscription_update(String sourceProtocol_CSV)
 {
     int err;
-    IXML_Document *event = NULL;
+    IXML_Document *event = nullptr;
 
     Ref<Element> propset, property;
 

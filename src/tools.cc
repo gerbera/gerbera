@@ -69,7 +69,7 @@ Ref<Array<StringBase> > split_string(String str, char sep, bool empty)
     while (data < end)
     {
         const char *pos = strchr(data, sep);
-        if (pos == NULL)
+        if (pos == nullptr)
         {
             String part = data;
             ret->append(part);
@@ -171,7 +171,7 @@ time_t check_path_ex(String path, bool needDir, bool existenceUnneeded,
     int ret = 0;
     struct stat statbuf;
 
-    if (filesize != NULL)
+    if (filesize != nullptr)
         *filesize = 0;
 
     ret = stat(path.c_str(), &statbuf);
@@ -189,7 +189,7 @@ time_t check_path_ex(String path, bool needDir, bool existenceUnneeded,
     if (!needDir && (S_ISDIR(statbuf.st_mode)))
         throw _Exception(_("Not a file: ") + path);
 
-    if ((filesize != NULL) && S_ISREG(statbuf.st_mode))
+    if ((filesize != nullptr) && S_ISREG(statbuf.st_mode))
         *filesize = statbuf.st_size;
 
     return statbuf.st_mtime;
@@ -198,7 +198,7 @@ time_t check_path_ex(String path, bool needDir, bool existenceUnneeded,
 bool is_executable(String path, int *err)
 {
     int ret = access(path.c_str(), R_OK | X_OK);
-    if (err != NULL)
+    if (err != nullptr)
         *err = errno;
 
     if (ret == 0)
@@ -343,7 +343,7 @@ String hex_string_md5(String str)
 String generate_random_id()
 {
     struct randomizer st;
-    gettimeofday(&st.tv, NULL);
+    gettimeofday(&st.tv, nullptr);
     st.salt = rand();
     return hex_md5(&st, sizeof(st));
 }
@@ -690,11 +690,11 @@ int HMSToSeconds(String time)
 #ifdef HAVE_MAGIC
 String get_mime_type(magic_set *ms, Ref<RExp> reMimetype, String file)
 {
-    if (ms == NULL)
+    if (ms == nullptr)
         return nil;
 
     char *mt = (char *)magic_file(ms, file.c_str());
-    if (mt == NULL)
+    if (mt == nullptr)
     {
         log_error("magic_file: %s\n", magic_error(ms));
         return nil;
@@ -714,11 +714,11 @@ String get_mime_type(magic_set *ms, Ref<RExp> reMimetype, String file)
 String get_mime_type_from_buffer(magic_set *ms, Ref<RExp> reMimetype, 
                                  const void *buffer, size_t length)
 {
-    if (ms == NULL)
+    if (ms == nullptr)
         return nil;
 
     char *mt = (char *)magic_buffer(ms, buffer, length);
-    if (mt == NULL)
+    if (mt == nullptr)
     {
         log_error("magic_file: %s\n", magic_error(ms));
         return nil;
@@ -756,10 +756,10 @@ void set_jpeg_resolution_resource(Ref<CdsItem> item, int res_num)
 
 bool check_resolution(String resolution, int *x, int *y)
 {
-    if (x != NULL)
+    if (x != nullptr)
         *x = 0;
 
-    if (y != NULL)
+    if (y != nullptr)
         *y = 0;
 
     Ref<Array<StringBase> > parts = split_string(resolution, 'x');
@@ -774,10 +774,10 @@ bool check_resolution(String resolution, int *x, int *y)
 
             if ((_x > 0) && (_y > 0))
             {
-                if (x != NULL)
+                if (x != nullptr)
                     *x = _x;
 
-                if (y != NULL)
+                if (y != nullptr)
                     *y = _y;
 
                 return true;
@@ -1000,7 +1000,7 @@ String toCSV(shared_ptr<unordered_set<int> > array)
 void getTimespecNow(struct timespec *ts)
 {
     struct timeval tv;
-    int ret = gettimeofday(&tv, NULL);
+    int ret = gettimeofday(&tv, nullptr);
     if (ret != 0)
         throw _Exception(_("gettimeofday failed: ") + mt_strerror(errno));
     
@@ -1023,7 +1023,7 @@ long getDeltaMillis(struct timespec *first, struct timespec *second)
 void getTimespecAfterMillis(long delta, struct timespec *ret, struct timespec *start)
 {
     struct timespec now;
-    if (start == NULL)
+    if (start == nullptr)
     {
         getTimespecNow(&now);
         start = &now;
@@ -1147,8 +1147,8 @@ String interfaceToIP(String interface)
     return nil;
 #else
 
-    struct if_nameindex *iflist = NULL;
-    struct if_nameindex *iflist_free = NULL;
+    struct if_nameindex *iflist = nullptr;
+    struct if_nameindex *iflist_free = nullptr;
     struct ifreq if_request;
     struct sockaddr_in local_address;
     int local_socket;
@@ -1165,7 +1165,7 @@ String interfaceToIP(String interface)
     }
 
     iflist = iflist_free = if_nameindex();
-    if (iflist == NULL)
+    if (iflist == nullptr)
     {
         log_error("Could not get interface list: %s\n", 
                   mt_strerror(errno).c_str());
@@ -1283,7 +1283,7 @@ String tempName(String leadPath, char *tmpl)
     }
 
     /* Get some more or less random data.  */
-    gettimeofday(&tv, NULL);
+    gettimeofday(&tv, nullptr);
     value = (tv.tv_usec ^ tv.tv_sec) + counter++;
 
     for (count = 0; count < 100; value += 7777, ++count)
@@ -1456,7 +1456,7 @@ String getAVIFourCC(zmm::String avi_filename)
                           mt_strerror(errno));
 
     buffer = (char *)MALLOC(FCC_OFFSET+6);
-    if (buffer == NULL)
+    if (buffer == nullptr)
     {
         fclose(f);
         throw _Exception(_("Out of memory when allocating buffer for file ") +

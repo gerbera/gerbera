@@ -46,7 +46,7 @@ CurlIOHandler::CurlIOHandler(String URL, CURL *curl_handle, size_t bufSize, size
         throw _Exception(_("bufSize must be at least CURL_MAX_WRITE_SIZE(")+CURL_MAX_WRITE_SIZE+')');
     
     this->URL = URL;
-    this->external_curl_handle = (curl_handle != NULL);
+    this->external_curl_handle = (curl_handle != nullptr);
     this->curl_handle = curl_handle;
     //bytesCurl = 0;
     signalAfterEveryRead = true;
@@ -58,10 +58,10 @@ CurlIOHandler::CurlIOHandler(String URL, CURL *curl_handle, size_t bufSize, size
 
 void CurlIOHandler::open(IN enum UpnpOpenFileMode mode)
 {
-    if (curl_handle == NULL)
+    if (curl_handle == nullptr)
     {
         curl_handle = curl_easy_init();
-        if (curl_handle == NULL)
+        if (curl_handle == nullptr)
             throw _Exception(_("failed to init curl"));
     }
     else
@@ -74,14 +74,14 @@ void CurlIOHandler::close()
 {
     IOHandlerBufferHelper::close();
     
-    if (external_curl_handle && curl_handle != NULL)
+    if (external_curl_handle && curl_handle != nullptr)
         curl_easy_cleanup(curl_handle);
 }
 
 void CurlIOHandler::threadProc()
 {
     CURLcode res;
-    assert(curl_handle != NULL);
+    assert(curl_handle != nullptr);
     assert(string_ok(URL));
     
     //char error_buffer[CURL_ERROR_SIZE] = {'\0'};

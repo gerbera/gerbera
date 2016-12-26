@@ -86,7 +86,7 @@ extern "C" {
 #include <magic.h>
 }
 
-struct magic_set *ms = NULL;
+struct magic_set *ms = nullptr;
 #endif
 
 using namespace zmm;
@@ -200,7 +200,7 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
     if (! ignore_unknown_extensions)
     {
         ms = magic_open(MAGIC_MIME);
-        if (ms == NULL)
+        if (ms == nullptr)
         {
             log_error("magic_open failed\n");
         }
@@ -209,11 +209,11 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
             String magicFile = cm->getOption(CFG_IMPORT_MAGIC_FILE);
             if (! string_ok(magicFile))
                 magicFile = nil;
-            if (magic_load(ms, (magicFile == nil) ? NULL : magicFile.c_str()) == -1)
+            if (magic_load(ms, (magicFile == nil) ? nullptr : magicFile.c_str()) == -1)
             {
                 log_warning("magic_load: %s\n", magic_error(ms));
                 magic_close(ms);
-                ms = NULL;
+                ms = nullptr;
             }
         }
     }
@@ -386,7 +386,7 @@ void ContentManager::init()
     
     ret = pthread_create(
         &taskThread,
-        NULL, //&attr, // attr
+        nullptr, //&attr, // attr
         ContentManager::staticThreadProc,
         this
     );
@@ -526,14 +526,14 @@ void ContentManager::shutdown()
     log_debug("waiting for thread...\n");
 
     if (taskThread)
-        pthread_join(taskThread, NULL);
+        pthread_join(taskThread, nullptr);
     taskThread = 0;
 
 #ifdef HAVE_MAGIC
     if (ms)
     {
         magic_close(ms);
-        ms = NULL;
+        ms = nullptr;
     }
 #endif
     log_debug("end\n");
@@ -857,7 +857,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
     else
         thisTaskID = 0;
 
-    while (((dent = readdir(dir)) != NULL) && (!shutdownFlag) && (task == nil || ((task != nil) && task->isValid())))
+    while (((dent = readdir(dir)) != nullptr) && (!shutdownFlag) && (task == nil || ((task != nil) && task->isValid())))
     {
         char *name = dent->d_name;
         if (name[0] == '.')
@@ -1011,7 +1011,7 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<GenericTask> tas
     {
         log_debug("IS TASK VALID? [%d], taskoath: [%s]\n", task->isValid(), path.c_str());
     }
-    while (((dent = readdir(dir)) != NULL) && (!shutdownFlag) && (task == nil || ((task != nil) && task->isValid())))
+    while (((dent = readdir(dir)) != nullptr) && (!shutdownFlag) && (task == nil || ((task != nil) && task->isValid())))
     {
         char *name = dent->d_name;
         if (name[0] == '.')
@@ -1583,8 +1583,8 @@ void *ContentManager::staticThreadProc(void *arg)
 {
     ContentManager *inst = (ContentManager *)arg;
     inst->threadProc();
-    pthread_exit(NULL);
-    return NULL;
+    pthread_exit(nullptr);
+    return nullptr;
 }
 
 void ContentManager::addTask(zmm::Ref<GenericTask> task, bool lowPriority)
@@ -2248,7 +2248,7 @@ void ContentManager::checkCachedURLs()
 {
     AUTOLOCK(urlcache_mutex);
 
-    time_t now = time(NULL);
+    time_t now = time(nullptr);
 
     log_debug("Checking cached URLs..stored: %d\n", cached_urls->size());
     int count = 0;
@@ -2296,7 +2296,7 @@ void ContentManager::checkCachedURLs()
 void ContentManager::cacheURL(zmm::Ref<CachedURL> url)
 {
     AUTOLOCK(urlcache_mutex);
-    time_t oldest = time(NULL); 
+    time_t oldest = time(nullptr); 
     int oldest_index = -1;
     bool added = false;
     int old_size = cached_urls->size();

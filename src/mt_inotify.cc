@@ -170,13 +170,13 @@ struct inotify_event *Inotify::nextEvent()
         fd_max = stop_fd_read;
 
     rc = select(fd_max + 1, &read_fds,
-            NULL, NULL, NULL);
+            nullptr, nullptr, nullptr);
     if ( rc < 0 ) {
-        return NULL;
+        return nullptr;
     }
     else if ( rc == 0 ) {
         // timeout
-        return NULL;
+        return nullptr;
     }
 
     if (FD_ISSET(stop_fd_read, &read_fds))
@@ -199,18 +199,18 @@ struct inotify_event *Inotify::nextEvent()
                 bytes_to_read < sizeof(struct inotify_event));
 
         if ( rc == -1 ) {
-            return NULL;
+            return nullptr;
         }
 
         this_bytes = read(inotify_fd, &event[0] + bytes,
                 sizeof(struct inotify_event)*MAX_EVENTS - bytes);
         if ( this_bytes < 0 ) {
-            return NULL;
+            return nullptr;
         }
         if ( this_bytes == 0 ) {
             log_error("Inotify reported end-of-file.  Possibly too many "
                     "events occurred at once.\n");
-            return NULL;
+            return nullptr;
         }
         bytes += this_bytes;
 
@@ -225,7 +225,7 @@ struct inotify_event *Inotify::nextEvent()
         return ret;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 

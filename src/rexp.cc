@@ -35,7 +35,7 @@ using namespace zmm;
 
 static String error_string(int code, regex_t *regex)
 {
-    int size = regerror(code, regex, NULL, 0);
+    int size = regerror(code, regex, nullptr, 0);
     String buf = String::allocate(size);
     regerror(code, regex, const_cast<char *>(buf.c_str()), size);
     buf.setLength(size - 1);
@@ -109,12 +109,12 @@ Matcher::Matcher(zmm::Ref<RExp> rexp, String text, int nmatch)
 {
     this->rexp = rexp;
     this->text = text;
-    this->ptr = NULL;
+    this->ptr = nullptr;
     this->nmatch = nmatch++; 
     if (this->nmatch)
         this->pmatch = (regmatch_t *)MALLOC(this->nmatch * sizeof(regmatch_t));
     else
-        this->pmatch = NULL;
+        this->pmatch = nullptr;
 }
 Matcher::~Matcher()
 {
@@ -133,7 +133,7 @@ bool Matcher::next()
 {
     int ret;
 
-    if (ptr == NULL) // first match
+    if (ptr == nullptr) // first match
     {
         ptr = const_cast<char *>(text.c_str());
     }

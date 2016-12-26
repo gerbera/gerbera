@@ -100,7 +100,7 @@ void MysqlStorage::checkMysqlThreadInit()
     if (! mysql_connection)
         throw _Exception(_("mysql connection is not open or already closed"));
     //log_debug("checkMysqlThreadInit; thread_id=%d\n", pthread_self());
-    if (pthread_getspecific(mysql_init_key) == NULL)
+    if (pthread_getspecific(mysql_init_key) == nullptr)
     {
         log_debug("running mysql_thread_init(); thread_id=%d\n", pthread_self());
         if (mysql_thread_init()) throw _Exception(_("error while calling mysql_thread_init()"));
@@ -111,7 +111,7 @@ void MysqlStorage::checkMysqlThreadInit()
 void MysqlStorage::threadCleanup()
 {
     log_debug("thread cleanup; thread_id=%d\n", pthread_self());
-    if (pthread_getspecific(mysql_init_key) != NULL)
+    if (pthread_getspecific(mysql_init_key) != nullptr)
     {
         mysql_thread_end();
     }
@@ -131,12 +131,12 @@ void MysqlStorage::init()
     }
     
     /// \todo write destructor function
-    ret = pthread_key_create(&mysql_init_key, NULL);
+    ret = pthread_key_create(&mysql_init_key, nullptr);
     if (ret)
     {
         throw _Exception(_("could not create pthread_key"));
     }
-    mysql_server_init(0, NULL, NULL);
+    mysql_server_init(0, nullptr, nullptr);
     pthread_setspecific(mysql_init_key, (void *) 1);
     
     Ref<ConfigManager> config = ConfigManager::getInstance();
@@ -168,10 +168,10 @@ void MysqlStorage::init()
     res_mysql = mysql_real_connect(&db,
         dbHost.c_str(),
         dbUser.c_str(),
-        (dbPass == nil ? NULL : dbPass.c_str()),
+        (dbPass == nil ? nullptr : dbPass.c_str()),
         dbName.c_str(),
         dbPort, // port
-        (dbSock == nil ? NULL : dbSock.c_str()), // socket
+        (dbSock == nil ? nullptr : dbSock.c_str()), // socket
         0 // flags
     );
     if(! res_mysql)
@@ -213,7 +213,7 @@ void MysqlStorage::init()
         
         char *sql_start = (char *)buf;
         char *sql_end = strchr(sql_start, ';');
-        if (sql_end == NULL)
+        if (sql_end == nullptr)
         {
             throw _Exception(_("';' not found in mysql create sql"));
         }
@@ -231,7 +231,7 @@ void MysqlStorage::init()
             
             sql_end = strchr(sql_start, ';');
         }
-        while(sql_end != NULL);
+        while(sql_end != nullptr);
         dbVersion = getInternalSetting(_("db_version"));
         if (dbVersion == nil)
         {
@@ -437,10 +437,10 @@ MysqlResult::~MysqlResult()
         if (! nullRead)
         {
             MYSQL_ROW mysql_row;
-            while((mysql_row = mysql_fetch_row(mysql_res)) != NULL); // read out data
+            while((mysql_row = mysql_fetch_row(mysql_res)) != nullptr); // read out data
         }
         mysql_free_result(mysql_res);
-        mysql_res = NULL;
+        mysql_res = nullptr;
     }
 }
 
@@ -454,7 +454,7 @@ Ref<SQLRow> MysqlResult::nextRow()
     }
     nullRead = true;
     mysql_free_result(mysql_res);
-    mysql_res = NULL;
+    mysql_res = nullptr;
     return nil;
 }
 

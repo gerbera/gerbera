@@ -59,7 +59,7 @@ TagLibHandler::TagLibHandler() : MetadataHandler()
 
 static void addField(metadata_fields_t field, const TagLib::Tag* tag, Ref<CdsItem> item)
 {
-    if (tag == NULL)
+    if (tag == nullptr)
         return;
 
     if (tag->isEmpty())

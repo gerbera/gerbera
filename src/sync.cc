@@ -130,7 +130,7 @@ void Mutex::doUnlock(bool cond)
 Cond::Cond(Ref<Mutex> mutex) : Object()
 {
     this->mutex = mutex;
-    pthread_cond_init(&cond_struct, NULL);
+    pthread_cond_init(&cond_struct, nullptr);
 }
 
 Cond::~Cond()

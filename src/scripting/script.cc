@@ -128,11 +128,11 @@ JSObject *Script::getObjectProperty(JSObject *obj, String name)
     JSObject *js_obj;
 
     if (!JS_GetProperty(cx, obj, name.c_str(), &val))
-        return NULL;
+        return nullptr;
     if (val == JSVAL_VOID)
-        return NULL;
+        return nullptr;
     if (!JS_ValueToObject(cx, val, &js_obj))
-        return NULL;
+        return nullptr;
     return js_obj;
 }
 
@@ -213,7 +213,7 @@ js_error_reporter(JSContext *cx, const char *message, JSErrorReport *report)
         prefix = prefix_buf->toString();
 
         // embedded newlines
-        while ((ctmp = strchr(message, '\n')) != 0)
+        while ((ctmp = strchr(message, '\n')) != nullptr)
         {
             ctmp++;
             if (prefix.length())
@@ -279,8 +279,8 @@ Script::Script(Ref<Runtime> runtime) : Object()
 #endif
 //    JS_SetGCZeal(cx, 2);
 
-    glob = NULL;
-    script = NULL;
+    glob = nullptr;
+    script = nullptr;
 
     _p2i = StringConverter::p2i();
     _j2i = StringConverter::j2i();
@@ -465,7 +465,7 @@ Script::~Script()
     if (cx)
     {
         JS_DestroyContext(cx);
-        cx = NULL;
+        cx = nullptr;
     }
 }
 
@@ -504,7 +504,7 @@ void Script::initGlobalObject()
     };
 
     /* create the global object here */
-    glob = JS_NewCompartmentAndGlobalObject(cx, &global_class, NULL);
+    glob = JS_NewCompartmentAndGlobalObject(cx, &global_class, nullptr);
     if (! glob)
         throw _Exception(_("Scripting: could not initialize glboal class"));
 
@@ -528,7 +528,7 @@ void Script::defineFunctions(JSFunctionSpec *functions)
 
 JSObject *Script::_load(zmm::String scriptPath)
 {
-    if (glob == NULL)
+    if (glob == nullptr)
         initGlobalObject();
 
     JSObject *scr;
@@ -867,7 +867,7 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
 
     // setting metadata
     {
-        JSObject *meta_js = JS_NewObject(cx, NULL, NULL, js);
+        JSObject *meta_js = JS_NewObject(cx, nullptr, nullptr, js);
         setObjectProperty(js, _("meta"), meta_js);
         Ref<Dictionary> meta = obj->getMetadata();
         Ref<Array<DictionaryElement> > elements = meta->getElements();
@@ -884,7 +884,7 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
 
     // setting auxdata
     {
-        JSObject *aux_js = JS_NewObject(cx, NULL, NULL, js);
+        JSObject *aux_js = JS_NewObject(cx, nullptr, nullptr, js);
         setObjectProperty(js, _("aux"), aux_js);
         Ref<Dictionary> aux = obj->getAuxData();
 

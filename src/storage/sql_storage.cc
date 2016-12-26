@@ -986,7 +986,7 @@ int SQLStorage::_ensurePathExistence(String path, int *changedContainer)
     int parentID = ensurePathExistence(parent, changedContainer);
     
     Ref<StringConverter> f2i = StringConverter::f2i();
-    if (changedContainer != NULL && *changedContainer == INVALID_OBJECT_ID)
+    if (changedContainer != nullptr && *changedContainer == INVALID_OBJECT_ID)
         *changedContainer = parentID;
 
     return createContainer(parentID, f2i->convert(folder), path, false, nil, INVALID_OBJECT_ID, nil);
@@ -1099,7 +1099,7 @@ void SQLStorage::addContainerChain(String path, String lastClass, int lastRefID,
         Ref<SQLRow> row = res->nextRow();
         if (row != nil)
         {
-            if (containerID != NULL)
+            if (containerID != nullptr)
                 *containerID = row->col(0).toInt();
             return;
         }
@@ -1110,7 +1110,7 @@ void SQLStorage::addContainerChain(String path, String lastClass, int lastRefID,
     stripAndUnescapeVirtualContainerFromPath(path, newpath, container);
 
     addContainerChain(newpath, nil, INVALID_OBJECT_ID, &parentContainerID, updateID, nil);
-    if (updateID != NULL && *updateID == INVALID_OBJECT_ID)
+    if (updateID != nullptr && *updateID == INVALID_OBJECT_ID)
         *updateID = parentContainerID;
     *containerID = createContainer(parentContainerID, container, path, true, lastClass, lastRefID, lastMetadata);
 }

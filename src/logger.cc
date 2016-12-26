@@ -64,7 +64,7 @@ void log_close()
     if (LOG_FILE)
     {
         fclose(LOG_FILE);
-        LOG_FILE = NULL;
+        LOG_FILE = nullptr;
     }
 }
 
