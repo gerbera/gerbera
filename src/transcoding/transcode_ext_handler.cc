@@ -38,10 +38,10 @@
 #include <fcntl.h>
 #include <upnp-1.8/ixml.h>
 #include <unistd.h>
-#include <string.h>
-#include <stdio.h>
-#include <signal.h>
-#include <limits.h>
+#include <cstring>
+#include <cstdio>
+#include <csignal>
+#include <climits>
 #include "common.h"
 #include "storage.h"
 #include "cds_objects.h"

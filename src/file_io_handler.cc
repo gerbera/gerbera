@@ -32,8 +32,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <string.h>
-#include <stdio.h>
+#include <cstring>
+#include <cstdio>
 #include <upnp-1.8/ixml.h>
 
 #include "server.h"

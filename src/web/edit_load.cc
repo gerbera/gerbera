@@ -31,7 +31,7 @@
 
 #include "pages.h"
 
-#include <stdio.h>
+#include <cstdio>
 #include "common.h"
 #include "cds_objects.h"
 #include "tools.h"

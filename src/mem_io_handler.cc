@@ -34,10 +34,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <string.h>
-#include <stdio.h>
+#include <cstring>
+#include <cstdio>
 #include "upnp/ixml.h"
-#include <time.h>
+#include <ctime>
 #include "common.h"
 #include "storage.h"
 #include "cds_objects.h"

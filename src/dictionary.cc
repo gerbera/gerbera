@@ -31,7 +31,7 @@
 
 #include "dictionary.h"
 
-#include <string.h>
+#include <cstring>
 #include "tools.h"
 
 using namespace zmm;

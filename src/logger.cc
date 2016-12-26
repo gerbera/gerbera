@@ -29,12 +29,12 @@
 
 /// \file logger.cc
 
-#include <stdio.h>
-#include <errno.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <time.h>
+#include <cstdio>
+#include <cerrno>
+#include <cstring>
+#include <cstdlib>
+#include <cstdarg>
+#include <ctime>
 
 #ifdef HAVE_EXECINFO_H
     #include <execinfo.h>

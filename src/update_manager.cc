@@ -35,7 +35,7 @@
 #include "storage.h"
 #include "tools.h"
 #include <sys/types.h>
-#include <signal.h>
+#include <csignal>
 
 /* following constants in milliseconds */
 #define SPEC_INTERVAL 2000

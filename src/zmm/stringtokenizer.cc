@@ -31,7 +31,7 @@
 
 #include "stringtokenizer.h"
 
-#include <string.h>
+#include <cstring>
 
 using namespace zmm;
 

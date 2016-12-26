@@ -29,7 +29,7 @@
 
 /// \file buffered_io_handler.cc
 
-#include <assert.h>
+#include <cassert>
 
 #include "buffered_io_handler.h"
 #include "tools.h"

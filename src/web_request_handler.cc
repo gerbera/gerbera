@@ -35,7 +35,7 @@
 #include "mem_io_handler.h"
 #include "tools.h"
 #include "web/pages.h"
-#include <time.h>
+#include <ctime>
 
 using namespace zmm;
 using namespace mxml;

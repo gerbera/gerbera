@@ -31,7 +31,7 @@
 
 #include "mxml.h"
 
-#include <string.h>
+#include <cstring>
 
 using namespace zmm;
 using namespace mxml;

@@ -31,15 +31,15 @@
 
 #include "tools.h"
 #include <sys/stat.h>
-#include <errno.h>
+#include <cerrno>
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <limits.h>
+#include <climits>
 #include <netdb.h>
-#include <string.h>
+#include <cstring>
 #include "config_manager.h"
 
 #ifndef SOLARIS

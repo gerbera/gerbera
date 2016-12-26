@@ -29,7 +29,7 @@
 
 /// \file sql_storage.cc
 
-#include <limits.h>
+#include <climits>
 #include "sql_storage.h"
 #include "tools.h"
 #include "update_manager.h"

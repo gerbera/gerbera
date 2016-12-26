@@ -30,7 +30,7 @@
 /// \file edit_save.cc
 
 #include "pages.h"
-#include <stdio.h>
+#include <cstdio>
 #include "content_manager.h"
 #include "storage.h"
 #include "tools.h"

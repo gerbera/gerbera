@@ -29,8 +29,8 @@
 
 /// \file object.cc
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 
 #include "object.h"
 #include "memory.h"

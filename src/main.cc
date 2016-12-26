@@ -48,18 +48,18 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <fcntl.h>
-#include <errno.h>
+#include <cerrno>
 #include <unistd.h>
 #include <syslog.h>
-#include <string.h>
+#include <cstring>
 #include <pthread.h>
-#include <signal.h>
+#include <csignal>
 #include <pwd.h>
 #include <grp.h>
-#include <limits.h>
+#include <climits>
 
 #define OPTSTR "i:e:p:c:m:f:u:g:a:l:P:dhD"
 

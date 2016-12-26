@@ -30,7 +30,7 @@
 /// \file add.cc
 
 #include "server.h"
-#include <stdio.h>
+#include <cstdio>
 #include "common.h"
 #include "pages.h"
 #include "tools.h"

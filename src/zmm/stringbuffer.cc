@@ -31,7 +31,7 @@
 
 #include "stringbuffer.h"
 
-#include <string.h>
+#include <cstring>
 #include "memory.h"
 #include "strings.h"
 #include "exceptions.h"

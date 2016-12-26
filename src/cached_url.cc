@@ -29,7 +29,7 @@
 
 /// \file cached_url.cc
 
-#include <time.h>
+#include <ctime>
 
 #include "cached_url.h"
 #include "tools.h"

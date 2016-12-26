@@ -29,7 +29,7 @@
 
 /// \file element.cc
 
-#include <assert.h>
+#include <cassert>
 
 #include "element.h"
 #include "tools.h"

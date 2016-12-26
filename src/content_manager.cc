@@ -32,8 +32,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
-#include <errno.h>
-#include <string.h>
+#include <cerrno>
+#include <cstring>
 #include <unistd.h>
 
 #include "tools.h"
@@ -58,7 +58,7 @@
 
 #ifdef YOUTUBE
     #include "youtube_service.h"
-    #include <time.h>
+    #include <ctime>
 #endif
 
 #ifdef SOPCAST

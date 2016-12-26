@@ -30,7 +30,7 @@
 /// \file strings.cc
 
 #include <string>
-#include <ctype.h>
+#include <cctype>
 
 #include "memory.h"
 #include "strings.h"

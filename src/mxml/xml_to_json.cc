@@ -29,7 +29,7 @@
 
 /// \file xml_to_json.cc
 
-#include <assert.h>
+#include <cassert>
 
 #include "xml_to_json.h"
 #include "tools.h"

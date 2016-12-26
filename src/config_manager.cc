@@ -29,7 +29,7 @@
 
 /// \file config_manager.cc
 
-#include <stdio.h>
+#include <cstdio>
 #include "uuid/uuid.h"
 #include "common.h"
 #include "config_manager.h"
@@ -54,7 +54,7 @@
 
 #if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
     #include <langinfo.h>
-    #include <locale.h>
+    #include <clocale>
 #endif
 
 #ifdef HAVE_CURL

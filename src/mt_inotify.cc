@@ -40,8 +40,8 @@
 
 #include <sys/ioctl.h>
 #include <unistd.h>
-#include <errno.h>
-#include <assert.h>
+#include <cerrno>
+#include <cassert>
 
 #include "mt_inotify.h"
 #include "tools.h"
