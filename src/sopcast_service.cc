@@ -71,7 +71,7 @@ String SopCastService::getServiceName()
 
 Ref<Object> SopCastService::defineServiceTask(Ref<Element> xmlopt, Ref<Object> params)
 {
-    return nil;
+    return nullptr;
 }
 
 Ref<Element> SopCastService::getData()
@@ -92,14 +92,14 @@ Ref<Element> SopCastService::getData()
     {
         log_error("Failed to download SopCast XML data: %s\n", 
                   ex.getMessage().c_str());
-        return nil;
+        return nullptr;
     }
 
-    if (buffer == nil)
-        return nil;
+    if (buffer == nullptr)
+        return nullptr;
 
     if (retcode != 200)
-        return nil;
+        return nullptr;
 
     log_debug("GOT BUFFER\n%s\n", buffer->toString().c_str()); 
     Ref<Parser> parser(new Parser());
@@ -113,15 +113,15 @@ Ref<Element> SopCastService::getData()
                pe.context->location.c_str(),
                pe.context->line,
                pe.getMessage().c_str());
-        return nil;
+        return nullptr;
     }
     catch (const Exception & ex)
     {
         log_error("Error parsing SopCast XML %s\n", ex.getMessage().c_str());
-        return nil;
+        return nullptr;
     }
     
-    return nil;
+    return nullptr;
 }
 
 bool SopCastService::refreshServiceData(Ref<Layout> layout)
@@ -143,7 +143,7 @@ bool SopCastService::refreshServiceData(Ref<Layout> layout)
     Ref<Element> reply = getData();
 
     Ref<SopCastContentHandler> sc(new SopCastContentHandler());
-    if (reply != nil)
+    if (reply != nullptr)
         sc->setServiceContent(reply);
     else
     {
@@ -157,18 +157,18 @@ bool SopCastService::refreshServiceData(Ref<Layout> layout)
         /// \todo add try/catch here and a possibility do find out if we
         /// may request more stuff or if we are at the end of the list
         obj = sc->getNextObject();
-        if (obj == nil)
+        if (obj == nullptr)
             break;
 
        obj->setVirtual(true);
 
         Ref<CdsObject> old = Storage::getInstance()->loadObjectByServiceID(RefCast(obj, CdsItem)->getServiceID());
-        if (old == nil)
+        if (old == nullptr)
         {
             log_debug("Adding new SopCast object\n");
             
-            if (layout != nil)
-                layout->processCdsObject(obj, nil);
+            if (layout != nullptr)
+                layout->processCdsObject(obj, nullptr);
         }
         else
         {
@@ -187,7 +187,7 @@ bool SopCastService::refreshServiceData(Ref<Layout> layout)
             return false;
 
     }
-    while (obj != nil);
+    while (obj != nullptr);
 
     return false;
 }

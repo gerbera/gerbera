@@ -32,7 +32,6 @@
 #ifndef __ZMM_H__
 #define __ZMM_H__
 
-#include "nil.h"
 #include "null.h"
 #include "object.h"
 #include "ref.h"

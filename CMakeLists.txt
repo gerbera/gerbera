@@ -286,8 +286,6 @@ add_library(libmediatomb OBJECT
         src/zmm/stringtokenizer.cc
         src/zmm/stringtokenizer.h
         src/zmm/zmmf.h
-        src/zmm/nil.cc
-        src/zmm/nil.h
         src/zmm/null.h
         src/zmm/object.cc
         src/zmm/object.h

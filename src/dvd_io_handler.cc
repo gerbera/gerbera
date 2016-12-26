@@ -150,7 +150,7 @@ void DVDIOHandler::seek(IN off_t offset, IN int whence)
 
 void DVDIOHandler::close()
 {
-    dvd = nil;
+    dvd = nullptr;
     small_buffer_pos = NULL;
 }
 

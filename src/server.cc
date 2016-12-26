@@ -48,7 +48,7 @@
 using namespace zmm;
 using namespace mxml;
 
-Ref<Storage> Server::storage = nil;
+Ref<Storage> Server::storage = nullptr;
 
 SINGLETON_MUTEX(Server, false);
 #ifdef UPNP_OLD_SNAPSHOT
@@ -62,7 +62,7 @@ static int static_upnp_callback(Upnp_EventType eventtype, const void *event, voi
 
 void Server::static_cleanup_callback()
 {
-    if (storage != nil)
+    if (storage != nullptr)
     {
         try
         {
@@ -137,16 +137,16 @@ void Server::upnp_init(String iface, String ip_address, int port)
         throw _Exception(_("Could not find interface: ") + iface);
 /*
     // without this lod_debug coredumped on Solaris...
-    if (iface == nil)
+    if (iface == nullptr)
         iface = _("");
 
-    if (ip == nil)
+    if (ip == nullptr)
         ip = _("");
     
     log_debug("interface: %s ip: %s\n", iface.c_str(), ip.c_str());
 
     if (ip == "")
-        ip = nil;
+        ip = nullptr;
 */
     if (port < 0)
     {
@@ -198,7 +198,7 @@ void Server::upnp_init(String iface, String ip_address, int port)
 
         Ref<Array<StringBase> > arr = config->getStringArrayOption(CFG_SERVER_CUSTOM_HTTP_HEADERS);
 
-        if (arr != nil)
+        if (arr != nullptr)
         {
             String tmp;
             for (int i = 0; i < arr->size(); i++)
@@ -341,10 +341,10 @@ void Server::shutdown()
 
     log_debug("now calling upnp finish\n");
     UpnpFinish();
-    if (storage != nil && storage->threadCleanupRequired()) {
+    if (storage != nullptr && storage->threadCleanupRequired()) {
         static_cleanup_callback();
     }
-    storage = nil;
+    storage = nullptr;
 
     log_debug("end\n");
 }

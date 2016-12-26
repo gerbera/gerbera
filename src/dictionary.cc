@@ -94,7 +94,7 @@ String Dictionary::get(String key)
             return el->getValue();
         }
     }
-    return nil;
+    return nullptr;
 }
 
 int Dictionary::size()
@@ -212,7 +212,7 @@ Ref<Dictionary> Dictionary::clone()
 
 void Dictionary::merge(Ref<Dictionary> other)
 {
-    if (other == nil)
+    if (other == nullptr)
         return;
 
     Ref<Array<DictionaryElement> > other_el = other->getElements();

@@ -38,19 +38,19 @@ using namespace mxml;
 
 SINGLETON_MUTEX(MRRegistrarService, false);
 
-String MRRegistrarService::serviceType = nil;
-String MRRegistrarService::serviceID = nil;
+String MRRegistrarService::serviceType = nullptr;
+String MRRegistrarService::serviceID = nullptr;
 
 MRRegistrarService::MRRegistrarService() : Singleton<MRRegistrarService>()
 {
-    if (serviceType == nil || serviceID == nil)
+    if (serviceType == nullptr || serviceID == nullptr)
         throw _Exception(_("serviceType or serviceID not set!"));
 }
 
 MRRegistrarService::~MRRegistrarService()
 {
-    serviceType = nil;
-    serviceID = nil;
+    serviceType = nullptr;
+    serviceID = nullptr;
 }
 
 void MRRegistrarService::setStaticArgs(String _serviceType, String _serviceID)

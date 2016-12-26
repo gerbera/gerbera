@@ -44,7 +44,7 @@ XPath::XPath(Ref<Element> context) : Object()
 Ref<Element> XPath::getElement(String xpath)
 {
     String axisPart = getAxisPart(xpath);
-    if (axisPart != nil)
+    if (axisPart != nullptr)
     {
         throw _Exception(_("XPath::getElement: unexpected axis in ") + xpath);
     }
@@ -57,10 +57,10 @@ String XPath::getText(String xpath)
     String pathPart = getPathPart(xpath);
     
     Ref<Element> el = elementAtPath(pathPart);
-    if (el == nil)
-        return nil;
+    if (el == nullptr)
+        return nullptr;
     
-    if (axisPart == nil)
+    if (axisPart == nullptr)
         return el->getText();
     
     String axis = getAxis(axisPart);
@@ -95,7 +95,7 @@ Ref<Element> XPath::elementAtPath(String path)
     {
         String part = parts->get(i);
         cur = cur->getChildByName(part);
-        if (cur == nil)
+        if (cur == nullptr)
             break;
     }
     return cur;
@@ -110,7 +110,7 @@ String XPath::getAxisPart(String xpath)
     {
         return xpath.substring(slashPos + 1);
     }
-    return nil;
+    return nullptr;
 }
 
 String XPath::getAxis(String axisPart)

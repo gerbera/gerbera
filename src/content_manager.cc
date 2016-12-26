@@ -154,7 +154,7 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
     for (i = 0; i < config_timed_list->size(); i++)
     {
         Ref<AutoscanDirectory> dir = config_timed_list->get(i);
-        if (dir != nil)
+        if (dir != nullptr)
         {
             String path = dir->getLocation();
             if (check_path(path, true))
@@ -177,7 +177,7 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
         for (i = 0; i < config_inotify_list->size(); i++)
         {
             Ref<AutoscanDirectory> dir = config_inotify_list->get(i);
-            if (dir != nil)
+            if (dir != nullptr)
             {
                 String path = dir->getLocation();
                 if (check_path(path, true))
@@ -208,8 +208,8 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
         {
             String magicFile = cm->getOption(CFG_IMPORT_MAGIC_FILE);
             if (! string_ok(magicFile))
-                magicFile = nil;
-            if (magic_load(ms, (magicFile == nil) ? nullptr : magicFile.c_str()) == -1)
+                magicFile = nullptr;
+            if (magic_load(ms, (magicFile == nullptr) ? nullptr : magicFile.c_str()) == -1)
             {
                 log_warning("magic_load: %s\n", magic_error(ms));
                 magic_close(ms);
@@ -409,7 +409,7 @@ void ContentManager::init()
         for (int i = 0; i < autoscan_inotify->size(); i++)
         {
             Ref<AutoscanDirectory> dir = autoscan_inotify->get(i);
-            if (dir != nil)
+            if (dir != nullptr)
                 inotify->monitor(dir);
         }
     }
@@ -449,14 +449,14 @@ void ContentManager::unregisterExecutor(Ref<Executor> exec)
 
 void ContentManager::timerNotify(Ref<Object> parameter)
 {
-    if (parameter == nil)
+    if (parameter == nullptr)
         return;
     
     Ref<TimerParameter> tp = RefCast(parameter, TimerParameter);
     if (tp->whoami() == TimerParameter::IDAutoscan)
     {
         Ref<AutoscanDirectory> dir = autoscan_timed->get(tp->getID());
-        if (dir == nil)
+        if (dir == nullptr)
             return;
 
         int objectID = dir->getObjectID();
@@ -480,7 +480,7 @@ void ContentManager::timerNotify(Ref<Object> parameter)
 void ContentManager::shutdown()
 {
 #ifdef HAVE_INOTIFY
-    inotify = nil;
+    inotify = nullptr;
 #endif
     log_debug("start\n");
     AUTOLOCK(mutex);
@@ -491,7 +491,7 @@ void ContentManager::shutdown()
     for (int i = 0; i < autoscan_inotify->size(); i++)
     {
         Ref<AutoscanDirectory> dir = autoscan_inotify->get(i);
-        if (dir != nil)
+        if (dir != nullptr)
         {
             try
             {
@@ -515,7 +515,7 @@ void ContentManager::shutdown()
     for (int i = 0; i < process_list->size(); i++)
     {
         Ref<Executor> exec = process_list->get(i);
-        if (exec != nil)
+        if (exec != nullptr)
             exec->kill();
     }
 #endif
@@ -558,7 +558,7 @@ Ref<Array<GenericTask> > ContentManager::getTasklist()
     AUTOLOCK(mutex);
    
 
-    Ref<Array<GenericTask> > taskList = nil;
+    Ref<Array<GenericTask> > taskList = nullptr;
 #ifdef ONLINE_SERVICES
     taskList = TaskProcessor::getInstance()->getTasklist();
 #endif
@@ -566,13 +566,13 @@ Ref<Array<GenericTask> > ContentManager::getTasklist()
 
     // if there is no current task, then the queues are empty
     // and we do not have to allocate the array
-    if ((t == nil) && (taskList == nil))
-        return nil;
+    if ((t == nullptr) && (taskList == nullptr))
+        return nullptr;
 
-    if (taskList == nil)
+    if (taskList == nullptr)
         taskList = Ref<Array<GenericTask> >(new Array<GenericTask>());
 
-    if (t != nil)
+    if (t != nullptr)
         taskList->append(t); 
 
     int qsize = taskQueue1->size();
@@ -609,10 +609,10 @@ void ContentManager::addVirtualItem(Ref<CdsObject> obj, bool allow_fifo)
     check_path_ex(path, false, false);
     Ref<Storage> storage = Storage::getInstance();
     Ref<CdsObject> pcdir = storage->findObjectByPath(path);
-    if (pcdir == nil)
+    if (pcdir == nullptr)
     {
         pcdir = createObjectFromFile(path, true, allow_fifo);
-        if (pcdir == nil)
+        if (pcdir == nullptr)
         {
             throw _Exception(_("Could not add ") + path);
         }
@@ -653,19 +653,19 @@ int ContentManager::_addFile(String path, String rootpath, bool recursive, bool 
     //Ref<StringConverter> f2i = StringConverter::f2i();
  
     Ref<CdsObject> obj = storage->findObjectByPath(path);
-    if (obj == nil)
+    if (obj == nullptr)
     {
         obj = createObjectFromFile(path);
-        if (obj == nil) // object ignored
+        if (obj == nullptr) // object ignored
             return INVALID_OBJECT_ID;
         if (IS_CDS_ITEM(obj->getObjectType()))
         {
             addObject(obj);
-            if (layout != nil)
+            if (layout != nullptr)
             {
                 try
                 {
-                    if (!string_ok(rootpath) && (task != nil))
+                    if (!string_ok(rootpath) && (task != nullptr))
                         rootpath = RefCast(task, CMAddFileTask)->getRootPath();
 
                     layout->processCdsObject(obj, rootpath);
@@ -673,11 +673,11 @@ int ContentManager::_addFile(String path, String rootpath, bool recursive, bool 
                     String mimetype = RefCast(obj, CdsItem)->getMimeType();
                     String content_type = mimetype_contenttype_map->get(mimetype);
 #ifdef HAVE_JS
-                    if ((playlist_parser_script != nil) &&
+                    if ((playlist_parser_script != nullptr) &&
                         (content_type == CONTENT_TYPE_PLAYLIST))
                             playlist_parser_script->processPlaylistObject(obj, task);
 #ifdef HAVE_LIBDVDNAV
-                    if ((dvd_import_script != nil) &&
+                    if ((dvd_import_script != nullptr) &&
                         (content_type == CONTENT_TYPE_DVD))
                            dvd_import_script->processDVDObject(obj);
 #else
@@ -717,7 +717,7 @@ void ContentManager::_removeObject(int objectID, bool all)
     
     Ref<Storage::ChangedContainers> changedContainers = storage->removeObject(objectID, all);
     
-    if (changedContainers != nil)
+    if (changedContainers != nullptr)
     {
         SessionManager::getInstance()->containerChangedUI(changedContainers->ui);
         UpdateManager::getInstance()->containersChanged(changedContainers->upnp);
@@ -753,8 +753,8 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
         return; 
 
     Ref<AutoscanDirectory> adir = getAutoscanDirectory(scanID, scanMode);
-    if (adir == nil)
-        throw _Exception(_("ID valid but nil returned? this should never happen"));
+    if (adir == nullptr)
+        throw _Exception(_("ID valid but nullptr returned? this should never happen"));
 
     Ref<Storage> storage = Storage::getInstance();
    
@@ -850,14 +850,14 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
     shared_ptr<unordered_set<int> > list = storage->getObjects(containerID, !adir->getRecursive());
 
     unsigned int thisTaskID;
-    if (task != nil)
+    if (task != nullptr)
     {
         thisTaskID = task->getID();
     }
     else
         thisTaskID = 0;
 
-    while (((dent = readdir(dir)) != nullptr) && (!shutdownFlag) && (task == nil || ((task != nil) && task->isValid())))
+    while (((dent = readdir(dir)) != nullptr) && (!shutdownFlag) && (task == nullptr || ((task != nullptr) && task->isValid())))
     {
         char *name = dent->d_name;
         if (name[0] == '.')
@@ -966,13 +966,13 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
     
     closedir(dir);
 
-    if ((shutdownFlag) || ((task != nil) && !task->isValid()))
+    if ((shutdownFlag) || ((task != nullptr) && !task->isValid()))
         return;
 
     if (list != nullptr && list->size() > 0)
     {
         Ref<Storage::ChangedContainers> changedContainers = storage->removeObjects(list);
-        if (changedContainers != nil)
+        if (changedContainers != nullptr)
         {
             SessionManager::getInstance()->containerChangedUI(changedContainers->ui);
             UpdateManager::getInstance()->containersChanged(changedContainers->upnp);
@@ -1007,11 +1007,11 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<GenericTask> tas
     struct dirent *dent;
     // abort loop if either:
     // no valid directory returned, server is about to shutdown, the task is there and was invalidated
-    if (task != nil)
+    if (task != nullptr)
     {
         log_debug("IS TASK VALID? [%d], taskoath: [%s]\n", task->isValid(), path.c_str());
     }
-    while (((dent = readdir(dir)) != nullptr) && (!shutdownFlag) && (task == nil || ((task != nil) && task->isValid())))
+    while (((dent = readdir(dir)) != nullptr) && (!shutdownFlag) && (task == nullptr || ((task != nullptr) && task->isValid())))
     {
         char *name = dent->d_name;
         if (name[0] == '.')
@@ -1034,14 +1034,14 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<GenericTask> tas
 
         try
         {
-            Ref<CdsObject> obj = nil;
+            Ref<CdsObject> obj = nullptr;
             if (parentID > 0)
                 obj = storage->findObjectByPath(String(newPath));
-            if (obj == nil) // create object
+            if (obj == nullptr) // create object
             {
                 obj = createObjectFromFile(newPath);
                 
-                if (obj == nil) // object ignored
+                if (obj == nullptr) // object ignored
                 {
                     log_warning("file ignored: %s\n", newPath.c_str());
                 }
@@ -1055,17 +1055,17 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<GenericTask> tas
                     }
                 }
             }
-            if (obj != nil)
+            if (obj != nullptr)
             {
 //#ifdef HAVE_JS
                 if (IS_CDS_ITEM(obj->getObjectType()))
                 {
-                    if (layout != nil)
+                    if (layout != nullptr)
                     {
                         try
                         {
-                            String rootpath = nil;
-                            if (task != nil)
+                            String rootpath = nullptr;
+                            if (task != nullptr)
                                 rootpath = RefCast(task, CMAddFileTask)->getRootPath();
                             layout->processCdsObject(obj, rootpath);
 #ifdef HAVE_JS
@@ -1073,11 +1073,11 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<GenericTask> tas
                             String mimetype = RefCast(obj, CdsItem)->getMimeType();
                             String content_type = mappings->get(mimetype);
                            
-                            if ((playlist_parser_script != nil) &&
+                            if ((playlist_parser_script != nullptr) &&
                                 (content_type == CONTENT_TYPE_PLAYLIST))
                                 playlist_parser_script->processPlaylistObject(obj, task);
 #ifdef HAVE_LIBDVDNAV
-                            if ((dvd_import_script != nil) &&
+                            if ((dvd_import_script != nullptr) &&
                                 (content_type == CONTENT_TYPE_DVD))
                                     dvd_import_script->processDVDObject(obj);
 #endif // DVD
@@ -1206,7 +1206,7 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
             cloned_item->removeMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION));
         }
 
-        if (state != nil) cloned_item->setState(state);
+        if (state != nullptr) cloned_item->setState(state);
 
         if (string_ok(mimetype)) cloned_item->setMimeType(mimetype);
         if (string_ok(action)) cloned_item->setAction(action);
@@ -1348,7 +1348,7 @@ Ref<CdsObject> ContentManager::convertObject(Ref<CdsObject> oldObj, int newType)
     return newObj;
 }
 
-// returns nil if file ignored due to configuration
+// returns nullptr if file ignored due to configuration
 Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic, bool allow_fifo)
 {
     String filename = get_filename(path);
@@ -1379,15 +1379,15 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic, boo
         if (magic)
             mimetype = extension2mimetype(extension);
 
-        if (mimetype == nil && magic)
+        if (mimetype == nullptr && magic)
         {
             if (ignore_unknown_extensions)
-                return nil; // item should be ignored
+                return nullptr; // item should be ignored
 #ifdef HAVE_MAGIC        
             mimetype = get_mime_type(ms, reMimetype, path);
 #endif
         }
-        if (mimetype != nil)
+        if (mimetype != nullptr)
         {
             upnp_class = mimetype2upnpclass(mimetype);
         }
@@ -1409,9 +1409,9 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic, boo
         item->setLocation(path);
         item->setMTime(statbuf.st_mtime);
         item->setSizeOnDisk(statbuf.st_size);
-        if (mimetype != nil)
+        if (mimetype != nullptr)
             item->setMimeType(mimetype);
-        if (upnp_class != nil)
+        if (upnp_class != nullptr)
             item->setClass(upnp_class);
         Ref<StringConverter> f2i = StringConverter::f2i();
         obj->setTitle(f2i->convert(filename));
@@ -1444,8 +1444,8 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic, boo
 
 String ContentManager::extension2mimetype(String extension)
 {
-    if (extension_mimetype_map == nil)
-        return nil;
+    if (extension_mimetype_map == nullptr)
+        return nullptr;
 
     if (!extension_map_case_sensitive)
         extension = extension.toLower();
@@ -1455,25 +1455,25 @@ String ContentManager::extension2mimetype(String extension)
 
 String ContentManager::mimetype2upnpclass(String mimeType)
 {
-    if (mimetype_upnpclass_map == nil)
-        return nil;
+    if (mimetype_upnpclass_map == nullptr)
+        return nullptr;
     String upnpClass = mimetype_upnpclass_map->get(mimeType);
-    if (upnpClass != nil)
+    if (upnpClass != nullptr)
         return upnpClass;
     // try to match foo
     Ref<Array<StringBase> > parts = split_string(mimeType, '/');
     if (parts->size() != 2)
-        return nil;
+        return nullptr;
     return mimetype_upnpclass_map->get((String)parts->get(0) + "/*");
 }
 
 void ContentManager::initLayout()
 {
 
-    if (layout == nil)
+    if (layout == nullptr)
     {
         AUTOLOCK(mutex);
-        if (layout == nil)
+        if (layout == nullptr)
             try
             {
                 String layout_type = 
@@ -1493,7 +1493,7 @@ void ContentManager::initLayout()
             }
         catch (const Exception & e)
         {
-            layout = nil;
+            layout = nullptr;
             log_error("ContentManager virtual container layout: %s\n", e.getMessage().c_str());
         }
     }
@@ -1502,11 +1502,11 @@ void ContentManager::initLayout()
 #ifdef HAVE_JS
 void ContentManager::initJS()
 {
-    if (playlist_parser_script == nil)
+    if (playlist_parser_script == nullptr)
         playlist_parser_script = Ref<PlaylistParserScript>(new PlaylistParserScript(Runtime::getInstance()));
 
 #ifdef HAVE_LIBDVDNAV
-    if ((ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE) == "js") && (dvd_import_script == nil))
+    if ((ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE) == "js") && (dvd_import_script == nullptr))
     {
         dvd_import_script = Ref<DVDImportScript>(new DVDImportScript(Runtime::getInstance()));
     }
@@ -1515,9 +1515,9 @@ void ContentManager::initJS()
 
 void ContentManager::destroyJS()
 {
-    playlist_parser_script = nil;
+    playlist_parser_script = nullptr;
 #ifdef HAVE_LIBDVDNAV
-    dvd_import_script = nil;
+    dvd_import_script = nullptr;
 #endif
 }
 
@@ -1525,7 +1525,7 @@ void ContentManager::destroyJS()
 
 void ContentManager::destroyLayout()
 {
-    layout = nil;
+    layout = nullptr;
 }
 
 void ContentManager::reloadLayout()
@@ -1541,8 +1541,8 @@ void ContentManager::threadProc()
     working = true;
     while(! shutdownFlag)
     {
-        currentTask = nil;
-        if(((task = taskQueue1->dequeue()) == nil) && ((task = taskQueue2->dequeue()) == nil))
+        currentTask = nullptr;
+        if(((task = taskQueue1->dequeue()) == nullptr) && ((task = taskQueue2->dequeue()) == nullptr))
         {
             working = false;
             /* if nothing to do, sleep until awakened */
@@ -1650,7 +1650,7 @@ void ContentManager::fetchOnlineContent(service_type_t service,
                                         bool unscheduled_refresh)
 {
     Ref<OnlineService> os = online_services->getService(service);
-    if (os == nil)
+    if (os == nullptr)
     {
         log_debug("No surch service! %d\n", service);
         throw _Exception(_("Service not found!"));
@@ -1713,7 +1713,7 @@ void ContentManager::_fetchOnlineContent(Ref<OnlineService> service,
             {
                 int object_id = ids->get(i);
                 Ref<CdsObject> obj = storage->loadObject(object_id);
-                if (obj == nil)
+                if (obj == nullptr)
                     continue;
 
                 temp = obj->getAuxData(_(ONLINE_SERVICE_LAST_UPDATE));
@@ -1753,7 +1753,7 @@ void ContentManager::cleanupOnlineServiceObjects(zmm::Ref<OnlineService> service
         {
             int object_id = ids->get(i);
             Ref<CdsObject> obj = storage->loadObject(object_id);
-            if (obj == nil)
+            if (obj == nullptr)
                 continue;
 
             temp = obj->getAuxData(_(ONLINE_SERVICE_LAST_UPDATE));
@@ -1796,7 +1796,7 @@ void ContentManager::invalidateTask(unsigned int taskID, task_owner_t taskOwner)
     {
         AUTOLOCK(mutex);
         Ref<GenericTask> t = getCurrentTask();
-        if (t != nil)
+        if (t != nullptr)
         {
             if ((t->getID() == taskID) || (t->getParentID() == taskID))
             {
@@ -1906,7 +1906,7 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
             }
 
             Ref<GenericTask> t = getCurrentTask();
-            if (t != nil)
+            if (t != nullptr)
             {
                 invalidateAddTask(t, path);
             }
@@ -1925,7 +1925,7 @@ void ContentManager::rescanDirectory(int objectID, int scanID, scan_mode_t scanM
     // building container path for the description
     Ref<GenericTask> task(new CMRescanDirectoryTask(objectID, scanID, scanMode, cancellable));
     Ref<AutoscanDirectory> dir = getAutoscanDirectory(scanID, scanMode);
-    if (dir == nil)
+    if (dir == nullptr)
         return;
 
     dir->incTaskCount();
@@ -1956,7 +1956,7 @@ Ref<AutoscanDirectory> ContentManager::getAutoscanDirectory(int scanID, scan_mod
         return autoscan_inotify->get(scanID);
     }
 #endif
-    return nil;
+    return nullptr;
 }
 
 Ref<Array<AutoscanDirectory> > ContentManager::getAutoscanDirectories(scan_mode_t scanMode)
@@ -1972,7 +1972,7 @@ Ref<Array<AutoscanDirectory> > ContentManager::getAutoscanDirectories(scan_mode_
         return autoscan_inotify->getArrayCopy();
     }
 #endif
-    return nil;
+    return nullptr;
 }
 
 Ref<Array<AutoscanDirectory> > ContentManager::getAutoscanDirectories()
@@ -1981,7 +1981,7 @@ Ref<Array<AutoscanDirectory> > ContentManager::getAutoscanDirectories()
 
 #if HAVE_INOTIFY
     Ref<Array<AutoscanDirectory> > ino = autoscan_inotify->getArrayCopy();
-    if (ino != nil)
+    if (ino != nullptr)
         for (int i = 0; i < ino->size(); i ++)
             all->append(ino->get(i));
 #endif
@@ -1993,7 +1993,7 @@ Ref<AutoscanDirectory> ContentManager::getAutoscanDirectory(String location)
     // \todo change this when more scanmodes become available
     Ref<AutoscanDirectory> dir = autoscan_timed->get(location);
 #if HAVE_INOTIFY
-    if (dir == nil)
+    if (dir == nullptr)
         dir = autoscan_inotify->get(location);
 #endif
     return dir;
@@ -2005,7 +2005,7 @@ void ContentManager::removeAutoscanDirectory(int scanID, scan_mode_t scanMode)
     {
         Ref<Storage> storage = Storage::getInstance();
         Ref<AutoscanDirectory> adir = autoscan_timed->get(scanID);
-        if (adir == nil)
+        if (adir == nullptr)
             throw _Exception(_("can not remove autoscan directory - was not an autoscan"));
 
         autoscan_timed->remove(scanID);
@@ -2023,7 +2023,7 @@ void ContentManager::removeAutoscanDirectory(int scanID, scan_mode_t scanMode)
         {
             Ref<Storage> storage = Storage::getInstance();
             Ref<AutoscanDirectory> adir = autoscan_inotify->get(scanID);
-            if (adir == nil)
+            if (adir == nullptr)
                 throw _Exception(_("can not remove autoscan directory - was not an autoscan"));
             autoscan_inotify->remove(scanID);
             storage->removeAutoscanDirectory(adir->getStorageID());
@@ -2039,7 +2039,7 @@ void ContentManager::removeAutoscanDirectory(int objectID)
 {
     Ref<Storage> storage = Storage::getInstance();
     Ref<AutoscanDirectory> adir = storage->getAutoscanDirectory(objectID);
-    if (adir == nil)
+    if (adir == nullptr)
         throw _Exception(_("can not remove autoscan directory - was not an autoscan"));
 
     if (adir->getScanMode() == TimedScanMode)
@@ -2070,11 +2070,11 @@ void ContentManager::removeAutoscanDirectory(String location)
 #ifdef HAVE_INOTIFY
     if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
     {
-        if (adir == nil)
+        if (adir == nullptr)
             adir = autoscan_inotify->get(location);
     }
 #endif
-    if (adir == nil)
+    if (adir == nullptr)
         throw _Exception(_("can not remove autoscan directory - was not an autoscan"));
     
     removeAutoscanDirectory(adir->getObjectID());
@@ -2114,18 +2114,18 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
 #ifdef HAVE_INOTIFY
     if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
     {
-        if (original == nil)
+        if (original == nullptr)
             original = autoscan_inotify->getByObjectID(dir->getObjectID());
     }
 #endif
 
-    if (original != nil)
+    if (original != nullptr)
         dir->setStorageID(original->getStorageID());
 
     storage->checkOverlappingAutoscans(dir);
 
     // adding a new autoscan directory
-    if (original == nil)
+    if (original == nullptr)
     {
         if (dir->getObjectID() == CDS_ID_FS_ROOT)
             dir->setLocation(_(FS_ROOT_DIRECTORY));
@@ -2133,7 +2133,7 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
         {
             log_debug("objectID: %d\n", dir->getObjectID());
             Ref<CdsObject> obj = storage->loadObject(dir->getObjectID());
-            if (obj == nil
+            if (obj == nullptr
                     || ! IS_CDS_CONTAINER(obj->getObjectType())
                     || obj->isVirtual())
                 throw _Exception(_("tried to remove an illegal object (id) from the list of the autoscan directories"));
@@ -2257,7 +2257,7 @@ void ContentManager::checkCachedURLs()
     while (count < cached_urls->size())
     {
         Ref<CachedURL> cached = cached_urls->get(i);
-        if (cached != nil)
+        if (cached != nullptr)
         {
             // do not increment index because remove unordered places the
             // last array element into the removed slot
@@ -2306,7 +2306,7 @@ void ContentManager::cacheURL(zmm::Ref<CachedURL> url)
     for (int i = 0; i < cached_urls->size(); i++)
     {
         Ref<CachedURL> cached = cached_urls->get(i);
-        if (cached != nil)
+        if (cached != nullptr)
         {
             // get time of the first replacement candidate
             if (cached->getLastAccessTime() < oldest)
@@ -2369,7 +2369,7 @@ String ContentManager::getCachedURL(int objectID)
     for (int i = 0; i < cached_urls->size(); i++)
     {
         Ref<CachedURL> cached = cached_urls->get(i);
-        if (cached != nil)
+        if (cached != nullptr)
         {
             if (cached->getObjectID() == objectID)
             {
@@ -2379,7 +2379,7 @@ String ContentManager::getCachedURL(int objectID)
             }
         }
     }
-    return nil;
+    return nullptr;
 }
 #endif
 
@@ -2406,7 +2406,7 @@ void CMAddFileTask::run()
 {
     log_debug("running add file task with path %s recursive: %d\n", path.c_str(), recursive);
     Ref<ContentManager> cm = ContentManager::getInstance();
-    cm->_addFile(path, nil, recursive, hidden, Ref<GenericTask> (this));
+    cm->_addFile(path, nullptr, recursive, hidden, Ref<GenericTask> (this));
 }
 
 CMRemoveObjectTask::CMRemoveObjectTask(int objectID, bool all) : GenericTask(ContentManagerTask)
@@ -2436,7 +2436,7 @@ void CMRescanDirectoryTask::run()
 {
     Ref<ContentManager> cm = ContentManager::getInstance();
     Ref<AutoscanDirectory> dir = cm->getAutoscanDirectory(scanID, scanMode);
-    if (dir == nil)
+    if (dir == nullptr)
         return;
 
     cm->_rescanDirectory(objectID, dir->getScanID(), dir->getScanMode(), dir->getScanLevel(), Ref<GenericTask> (this));
@@ -2465,7 +2465,7 @@ CMFetchOnlineContentTask::CMFetchOnlineContentTask(Ref<OnlineService> service,
 
 void CMFetchOnlineContentTask::run()
 {
-    if (this->service == nil)
+    if (this->service == nullptr)
     {
         log_debug("Received invalid service!\n");
         return;

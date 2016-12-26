@@ -61,7 +61,7 @@ Ref<CacheObject> StorageCache::getObject(int id)
     try {
         return idHash->at(id);
     } catch(out_of_range& nope) {
-        return nil;
+        return nullptr;
     }
 }
 
@@ -70,7 +70,7 @@ Ref<CacheObject> StorageCache::getObjectDefinitely(int id)
 #ifdef TOMBDEBUG
     assert(mutex->isLocked());
 #endif
-    Ref<CacheObject> obj = nil;
+    Ref<CacheObject> obj = nullptr;
     try {
         obj = idHash->at(id);
     } catch (const out_of_range& ex) {
@@ -86,7 +86,7 @@ void StorageCache::addChild(int id)
 #ifdef TOMBDEBUG
     assert(mutex->isLocked());
 #endif
-    Ref<CacheObject> obj = nil;
+    Ref<CacheObject> obj = nullptr;
     try {
         obj = idHash->at(id);
         if (obj->knowsNumChildren())
@@ -98,7 +98,7 @@ bool StorageCache::removeObject(int id)
 {
     AUTOLOCK(mutex);
     Ref<CacheObject> obj = getObject(id);
-    if (obj == nil)
+    if (obj == nullptr)
         return false;
     if (obj->knowsLocation())
         locationHash->erase(obj->getLocation());
@@ -113,7 +113,7 @@ Ref<Array<CacheObject> > StorageCache::getObjects(String location)
     try {
         return locationHash->at(location);
     } catch (const out_of_range& ex) {
-        return nil;
+        return nullptr;
     }
 }
 
@@ -125,7 +125,7 @@ void StorageCache::checkLocation(Ref<CacheObject> obj)
     if (! obj->knowsLocation())
         return;
     String location = obj->getLocation();
-    Ref<Array<CacheObject> > objects = nil;
+    Ref<Array<CacheObject> > objects = nullptr;
     try {
         objects = locationHash->at(location);
         for (int i=0;i<objects->size();i++)

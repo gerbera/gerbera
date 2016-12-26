@@ -36,19 +36,19 @@ using namespace mxml;
 
 SINGLETON_MUTEX(ConnectionManagerService, false);
 
-String ConnectionManagerService::serviceType = nil;
-String ConnectionManagerService::serviceID = nil;
+String ConnectionManagerService::serviceType = nullptr;
+String ConnectionManagerService::serviceID = nullptr;
 
 ConnectionManagerService::ConnectionManagerService() : Singleton<ConnectionManagerService>()
 {
-    if (serviceType == nil || serviceID == nil)
+    if (serviceType == nullptr || serviceID == nullptr)
         throw _Exception(_("serviceType or serviceID not set!"));
 }
 
 ConnectionManagerService::~ConnectionManagerService()
 {
-    serviceType = nil;
-    serviceID = nil;
+    serviceType = nullptr;
+    serviceID = nullptr;
 }
 
 void ConnectionManagerService::setStaticArgs(String _serviceType, String _serviceID)

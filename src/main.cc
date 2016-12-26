@@ -68,7 +68,7 @@ using namespace zmm;
 int shutdown_flag = 0;
 int restart_flag = 0;
 pthread_t main_thread_id;
-Ref<Timer> timer = nil;
+Ref<Timer> timer = nullptr;
 
 void print_copyright()
 {
@@ -291,7 +291,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
     }
 
    // create pid file before dropping privileges
-    if (pid_file != nil)
+    if (pid_file != nullptr)
     {
         pid_fd = fopen(pid_file.c_str(), "w");
         if (pid_fd == nullptr)
@@ -303,7 +303,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
 
     // check if user and/or group parameter was specified and try to run the server
     // under the given user and/or group name
-    if (group != nil)
+    if (group != nullptr)
     {
         grp = getgrnam(group.c_str());
         if (grp == nullptr)
@@ -326,7 +326,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         }
     }
     
-    if (user != nil)
+    if (user != nullptr)
     {
         pwd = getpwnam(user.c_str());
         if (pwd == nullptr)
@@ -390,7 +390,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
             magic = mgc;
 
         if (!string_ok(magic))
-            magic = nil;
+            magic = nullptr;
 
         ConfigManager::setStaticArgs(config_file, home, confdir, prefix, magic, debug_logging);
         ConfigManager::getInstance();
@@ -619,7 +619,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         //pause();
         //sleep(timer->getNotifyInterval());
         
-        if (timer == nil)
+        if (timer == nullptr)
             timer = Timer::getInstance();
         
         timer->triggerWait();
@@ -629,11 +629,11 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
             log_info("Restarting MediaTomb!\n");
             try
             {
-                server = nil;
-                timer = nil;
+                server = nullptr;
+                timer = nullptr;
                 
                 singletonManager->shutdown(true);
-                singletonManager = nil;
+                singletonManager = nullptr;
                 singletonManager = SingletonManager::getInstance();
                 
                 try
@@ -734,13 +734,13 @@ void signal_handler(int signum)
             log_error("Clean shutdown failed, killing MediaTomb!\n");
             exit(1);
         }
-        if (timer != nil)
+        if (timer != nullptr)
             timer->signal();
     }
     else if (signum == SIGHUP)
     {
         restart_flag = 1;
-        if (timer != nil)
+        if (timer != nullptr)
             timer->signal();
     }
 

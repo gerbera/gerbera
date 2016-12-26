@@ -225,7 +225,7 @@ public:
     /// \brief Returns the task that is currently being executed.
     zmm::Ref<GenericTask> getCurrentTask();
 
-    /// \brief Returns the list of all enqueued tasks, including the current or nil if no tasks are present.
+    /// \brief Returns the list of all enqueued tasks, including the current or nullptr if no tasks are present.
     zmm::Ref<zmm::Array<GenericTask> > getTasklist();
 
     /// \brief Find a task identified by the task ID and invalidate it.
@@ -251,7 +251,7 @@ public:
     int ensurePathExistence(zmm::String path);
     void removeObject(int objectID, bool async=true, bool all=false);
     void rescanDirectory(int objectID, int scanID, scan_mode_t scanMode,
-                         zmm::String descPath = nil, bool cancellable = true);
+                         zmm::String descPath = nullptr, bool cancellable = true);
 
     /// \brief Updates an object in the database using the given parameters.
     /// \param objectID ID of the object to update
@@ -299,13 +299,13 @@ public:
     /// \brief Adds a virtual container chain specified by path.
     /// \param container path separated by '/'. Slashes in container
     /// titles must be escaped.
-    /// \param lastClass upnp:class of the last container in the chain, if nil
+    /// \param lastClass upnp:class of the last container in the chain, if nullptr
     /// then the default class will be taken
     /// \param lastRefID reference id of the last container in the chain,
     /// INVALID_OBJECT_ID indicates that the id will not be set. 
     /// \return ID of the last container in the chain.
-    int addContainerChain(zmm::String chain, zmm::String lastClass = nil,
-            int lastRefID = INVALID_OBJECT_ID, zmm::Ref<Dictionary> lastMetadata = nil);
+    int addContainerChain(zmm::String chain, zmm::String lastClass = nullptr,
+            int lastRefID = INVALID_OBJECT_ID, zmm::Ref<Dictionary> lastMetadata = nullptr);
     
     /// \brief Adds a virtual container specified by parentID and title
     /// \param parentID the id of the parent.
@@ -417,11 +417,11 @@ protected:
                         bool lowPriority=false, 
                         unsigned int parentTaskID = 0,
                         bool cancellable = true);
-    int _addFile(zmm::String path, zmm::String rootpath, bool recursive=false, bool hidden=false, zmm::Ref<GenericTask> task=nil);
+    int _addFile(zmm::String path, zmm::String rootpath, bool recursive=false, bool hidden=false, zmm::Ref<GenericTask> task=nullptr);
     //void _addFile2(zmm::String path, bool recursive=0);
     void _removeObject(int objectID, bool all);
     
-    void _rescanDirectory(int containerID, int scanID, scan_mode_t scanMode, scan_level_t scanLevel, zmm::Ref<GenericTask> task=nil);
+    void _rescanDirectory(int containerID, int scanID, scan_mode_t scanMode, scan_level_t scanLevel, zmm::Ref<GenericTask> task=nullptr);
     /* for recursive addition */
     void addRecursive(zmm::String path, bool hidden, zmm::Ref<GenericTask> task);
     //void addRecursive2(zmm::Ref<DirCache> dirCache, zmm::String filename, bool recursive);

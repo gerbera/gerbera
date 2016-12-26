@@ -78,7 +78,7 @@ MysqlStorage::MysqlStorage() : SQLStorage()
     mysqlMutex = Ref<Mutex> (new Mutex(true));
     table_quote_begin = '`';
     table_quote_end = '`';
-    insertBuffer = nil;
+    insertBuffer = nullptr;
 }
 MysqlStorage::~MysqlStorage()
 {
@@ -168,10 +168,10 @@ void MysqlStorage::init()
     res_mysql = mysql_real_connect(&db,
         dbHost.c_str(),
         dbUser.c_str(),
-        (dbPass == nil ? nullptr : dbPass.c_str()),
+        (dbPass == nullptr ? nullptr : dbPass.c_str()),
         dbName.c_str(),
         dbPort, // port
-        (dbSock == nil ? nullptr : dbSock.c_str()), // socket
+        (dbSock == nullptr ? nullptr : dbSock.c_str()), // socket
         0 // flags
     );
     if(! res_mysql)
@@ -184,14 +184,14 @@ void MysqlStorage::init()
     if(res)
     {
         String myError = getError(&db);
-        throw _StorageException(nil, _("MySQL query 'SET NAMES' failed!"));
+        throw _StorageException(nullptr, _("MySQL query 'SET NAMES' failed!"));
     }
     */
     
     
     mysql_connection = true;
     
-    String dbVersion = nil;
+    String dbVersion = nullptr;
     try
     {
         dbVersion = getInternalSetting(_("db_version"));
@@ -200,7 +200,7 @@ void MysqlStorage::init()
     {
     }
     
-    if (dbVersion == nil)
+    if (dbVersion == nullptr)
     {
 #ifdef AUTO_CREATE_DATABASE
         log_info("database doesn't seem to exist. automatically creating database...\n");
@@ -233,7 +233,7 @@ void MysqlStorage::init()
         }
         while(sql_end != nullptr);
         dbVersion = getInternalSetting(_("db_version"));
-        if (dbVersion == nil)
+        if (dbVersion == nullptr)
         {
             shutdown();
             throw _Exception(_("error while creating database"));
@@ -395,7 +395,7 @@ void MysqlStorage::_exec(const char *query, int length)
 
 void MysqlStorage::_addToInsertBuffer(Ref<StringBuffer> query)
 {
-    if (insertBuffer == nil)
+    if (insertBuffer == nullptr)
     {
         insertBuffer = Ref<Array<StringBase> >(new Array<StringBase>());
         insertBuffer->append(_("BEGIN"));
@@ -406,7 +406,7 @@ void MysqlStorage::_addToInsertBuffer(Ref<StringBuffer> query)
 
 void MysqlStorage::_flushInsertBuffer()
 {
-    if (insertBuffer == nil)
+    if (insertBuffer == nullptr)
         return;
     insertBuffer->append(_("COMMIT"));
     
@@ -455,7 +455,7 @@ Ref<SQLRow> MysqlResult::nextRow()
     nullRead = true;
     mysql_free_result(mysql_res);
     mysql_res = nullptr;
-    return nil;
+    return nullptr;
 }
 
 /* MysqlRow */

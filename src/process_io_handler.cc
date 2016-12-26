@@ -69,13 +69,13 @@ bool ProcessIOHandler::abort()
 {
     bool abort = false;
 
-    if (proclist == nil)
+    if (proclist == nullptr)
         return abort; 
 
     for (int i = 0; i < proclist->size(); i++)
     {
         Ref<Executor> exec = proclist->get(i)->getExecutor();
-        if ((exec != nil) && (!exec->isAlive()))
+        if ((exec != nullptr) && (!exec->isAlive()))
         {
             if (proclist->get(i)->abortOnDeath())
                 abort = true;
@@ -88,45 +88,45 @@ bool ProcessIOHandler::abort()
 
 void ProcessIOHandler::killall()
 {
-    if (proclist == nil)
+    if (proclist == nullptr)
         return;
 
     for (int i = 0; i < proclist->size(); i++)
     {
         Ref<Executor> exec = proclist->get(i)->getExecutor();
-        if (exec != nil)
+        if (exec != nullptr)
             exec->kill();
     }
 }
 
 void ProcessIOHandler::registerAll()
 {
-    if (main_proc != nil)
+    if (main_proc != nullptr)
         ContentManager::getInstance()->registerExecutor(main_proc);
 
-    if (proclist == nil)
+    if (proclist == nullptr)
         return;
 
     for (int i = 0; i < proclist->size(); i++)
     {
         Ref<Executor> exec = proclist->get(i)->getExecutor();
-        if (exec != nil)
+        if (exec != nullptr)
             ContentManager::getInstance()->registerExecutor(exec);
     }
 }
 
 void ProcessIOHandler::unregisterAll()
 {
-    if (main_proc != nil)
+    if (main_proc != nullptr)
         ContentManager::getInstance()->unregisterExecutor(main_proc);
 
-    if (proclist == nil)
+    if (proclist == nullptr)
         return;
 
     for (int i = 0; i < proclist->size(); i++)
     {
         Ref<Executor> exec = proclist->get(i)->getExecutor();
-        if (exec != nil)
+        if (exec != nullptr)
             ContentManager::getInstance()->unregisterExecutor(exec);
     }
 }
@@ -141,7 +141,7 @@ ProcessIOHandler::ProcessIOHandler(String filename,
     this->main_proc = main_proc;
     this->ignore_seek = ignoreSeek;
 
-    if ((main_proc != nil) && ((!main_proc->isAlive() || abort())))
+    if ((main_proc != nullptr) && ((!main_proc->isAlive() || abort())))
     {
         killall();
         throw _Exception(_("process terminated early"));
@@ -151,7 +151,7 @@ ProcessIOHandler::ProcessIOHandler(String filename,
     {
         log_error("Failed to create fifo: %s\n", strerror(errno));
         killall();
-        if (main_proc != nil)
+        if (main_proc != nullptr)
             main_proc->kill();
 
         throw _Exception(_("Could not create reader fifo!\n"));
@@ -162,7 +162,7 @@ ProcessIOHandler::ProcessIOHandler(String filename,
 
 void ProcessIOHandler::open(IN enum UpnpOpenFileMode mode)
 {
-    if ((main_proc != nil) && ((!main_proc->isAlive() || abort())))
+    if ((main_proc != nullptr) && ((!main_proc->isAlive() || abort())))
     {
         killall();
         throw _Exception(_("process terminated early"));
@@ -183,7 +183,7 @@ void ProcessIOHandler::open(IN enum UpnpOpenFileMode mode)
         }
 
         killall();
-        if (main_proc != nil)
+        if (main_proc != nullptr)
             main_proc->kill();
         unlink(filename.c_str());
         throw _Exception(_("open: failed to open: ") + filename.c_str());
@@ -219,7 +219,7 @@ int ProcessIOHandler::read(OUT char *buf, IN size_t length)
         // timeout
         if (ret == 0)
         {
-            if (main_proc != nil)
+            if (main_proc != nullptr)
             {
                 bool main_ok = main_proc->isAlive();
                 if (!main_ok || abort())
@@ -285,7 +285,7 @@ int ProcessIOHandler::read(OUT char *buf, IN size_t length)
         // actually that will depend on the ret code of the process
         ret = -1;
 
-        if (main_proc != nil)
+        if (main_proc != nullptr)
         {
             if (!main_proc->isAlive())
             {
@@ -338,7 +338,7 @@ int ProcessIOHandler::write(IN char *buf, IN size_t length)
         // timeout
         if (ret == 0)
         {
-            if (main_proc != nil)
+            if (main_proc != nullptr)
             {
                 bool main_ok = main_proc->isAlive();
                 if (!main_ok || abort())
@@ -395,7 +395,7 @@ int ProcessIOHandler::write(IN char *buf, IN size_t length)
         // actually that will depend on the ret code of the process
         ret = -1;
 
-        if (main_proc != nil)
+        if (main_proc != nullptr)
         {
             if (!main_proc->isAlive())
             {
@@ -434,7 +434,7 @@ void ProcessIOHandler::close()
     log_debug("terminating process, closing %s\n", this->filename.c_str());
     unregisterAll();
 
-    if (main_proc != nil)
+    if (main_proc != nullptr)
     {
         ret = main_proc->kill();
     }

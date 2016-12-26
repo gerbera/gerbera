@@ -51,7 +51,7 @@ Session::Session(long timeout) : Dictionary_r()
 {
     this->timeout = timeout;
     loggedIn = false;
-    sessionID = nil;
+    sessionID = nullptr;
     uiUpdateIDs = make_shared<unordered_set<int>>();
         //(new DBRHash<int>(UI_UPDATE_ID_HASH_SIZE, MAX_UI_UPDATE_IDS + 5, INVALID_OBJECT_ID, INVALID_OBJECT_ID_2));
     updateAll = false;
@@ -82,7 +82,7 @@ void Session::containerChangedUI(Ref<IntArray> objectIDs)
 {
     if (updateAll)
         return;
-    if (objectIDs == nil)
+    if (objectIDs == nullptr)
         return;
     int arSize = objectIDs->size();
     AUTOLOCK(mutex);
@@ -103,7 +103,7 @@ void Session::containerChangedUI(Ref<IntArray> objectIDs)
 String Session::getUIUpdateIDs()
 {
     if (! hasUIUpdateIDs())
-        return nil;
+        return nullptr;
     AUTOLOCK(mutex);
     if (updateAll)
     {
@@ -111,7 +111,7 @@ String Session::getUIUpdateIDs()
         return _("all");
     }
     String ret = toCSV(uiUpdateIDs);
-    if (ret != nil)
+    if (ret != nullptr)
         uiUpdateIDs->clear();
     return ret;
 }
@@ -154,7 +154,7 @@ Ref<Session> SessionManager::createSession(long timeout)
         if (count++ > 100)
             throw _Exception(_("There seems to be something wrong with the random numbers. I tried to get a unique id 100 times and failed. last sessionID: ") + sessionID);
     }
-    while(getSession(sessionID, false) != nil); // for the rare case, where we get a random id, that is already taken
+    while(getSession(sessionID, false) != nullptr); // for the rare case, where we get a random id, that is already taken
     
     newSession->setID(sessionID);
     sessions->append(newSession);
@@ -173,7 +173,7 @@ Ref<Session> SessionManager::getSession(String sessionID, bool doLock)
         if (s->getID() == sessionID)
             return s;
     }
-    return nil;
+    return nullptr;
 }
 
 void SessionManager::removeSession(String sessionID)
@@ -194,9 +194,9 @@ void SessionManager::removeSession(String sessionID)
 
 String SessionManager::getUserPassword(String user)
 {
-    if (accounts == nil)
+    if (accounts == nullptr)
     {
-        return nil;
+        return nullptr;
     }
     return accounts->get(user);
 }

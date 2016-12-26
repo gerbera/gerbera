@@ -46,12 +46,12 @@ void XMLCALL Parser::element_start(void *userdata, const char *name, const char 
         el->addAttribute(attrs[i], attrs[i + 1]);
     }
 
-    if (parser->document->getRoot() == nil)
+    if (parser->document->getRoot() == nullptr)
     {
         parser->document->setRoot(el);
         parser->curEl = el;
     }
-    else if (parser->curEl != nil)
+    else if (parser->curEl != nullptr)
     {
         parser->curEl->appendElementChild(el);
         parser->elements->push(parser->curEl);
@@ -75,10 +75,10 @@ void XMLCALL Parser::character_data(void *userdata, const XML_Char *s, int len)
     Parser *parser = (Parser *)userdata;
     String text = String(s, len);
     
-    if (text != nil)
+    if (text != nullptr)
     {
         Ref<Text> textEl(new Text(text));
-        if (parser->curEl == nil)
+        if (parser->curEl == nullptr)
             parser->document->appendChild(RefCast(textEl, Node));
         else
             parser->curEl->appendChild(RefCast(textEl, Node));
@@ -89,10 +89,10 @@ void XMLCALL Parser::comment_callback(void *userdata, const XML_Char *s)
 {
     Parser *parser = (Parser *)userdata;
     String text = s;
-    if (text != nil)
+    if (text != nullptr)
     {
         Ref<Comment> cm(new Comment(text));
-        if (parser->curEl == nil)
+        if (parser->curEl == nullptr)
             parser->document->appendChild(RefCast(cm, Node));
         else
             parser->curEl->appendChild(RefCast(cm, Node));

@@ -39,7 +39,7 @@ CacheObject::CacheObject()
     parentID = INVALID_OBJECT_ID;
     refID = INVALID_OBJECT_ID;
     knowRefID = false;
-    obj = nil;
+    obj = nullptr;
     numChildren = 0;
     knowNumChildren = false;
     objectType = 0;

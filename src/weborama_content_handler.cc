@@ -54,7 +54,7 @@ bool WeboramaContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
                            " service"));
 
     Ref<Element> trackList = service->getChildByName(_("trackList"));
-    if (trackList == nil)
+    if (trackList == nullptr)
         throw _Exception(_("Received invalid XML for Weborama service: "
                            "track list not found!"));
 
@@ -87,8 +87,8 @@ Ref<CdsObject> WeboramaContentHandler::getNextObject()
 
         current_track_index++;
       
-        if (n == nil)
-            return nil;
+        if (n == nullptr)
+            return nullptr;
 
         if (n->getType() != mxml_node_element)
             continue;
@@ -186,7 +186,7 @@ Ref<CdsObject> WeboramaContentHandler::getNextObject()
         /// \todo check about trackNum - what is it really?
         
         Ref<Element> image = track->getChildByName(_("image"));
-        if (image != nil)
+        if (image != nullptr)
         {
             temp = image->getAttribute(_("mimeType"));
             if (string_ok(temp))
@@ -230,7 +230,7 @@ Ref<CdsObject> WeboramaContentHandler::getNextObject()
             continue;
         }
     } // while
-    return nil;
+    return nullptr;
 }
 
 #endif//WEBORAMA

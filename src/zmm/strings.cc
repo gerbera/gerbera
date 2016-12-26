@@ -347,7 +347,7 @@ int String::equals(String other, bool ignoreCase) const
 String String::toLower()
 {
     if (!base)
-        return nil;
+        return nullptr;
 
     String result = String(base->data, base->len);
     for (int i = 0; i < result.base->len; i++)
@@ -360,7 +360,7 @@ String String::toLower()
 String String::toUpper()
 {
     if (!base)
-        return nil;
+        return nullptr;
 
     String result = String(base->data, base->len);
     for (int i = 0; i < base->len; i++)
@@ -418,14 +418,14 @@ off_t String::toOFF_T()
 String String::substring(int from)
 {
     if(! base)
-        return nil;
+        return nullptr;
     int count = base->len - from;
     return substring(from, count);
 }
 String String::substring(int from, int count)
 {
     if(! base || count < 0)
-        return nil;
+        return nullptr;
     if(count == 0)
         return _("");
     if(from + count > base->len)
@@ -473,7 +473,7 @@ int String::rindex(int end, char ch)
 String String::reduce(char ch)
 { 
     if (!base)
-        return nil;
+        return nullptr;
 
     char *pos = ::strchr(base->data, ch);
     if (!pos)
@@ -543,7 +543,7 @@ int String::find(String needle)
 String String::replace(String needle, String replacement)
 {
     if (! replacement.base || ! needle.base)
-        return nil;
+        return nullptr;
     int pos = find(needle);
     if (pos < 0)
         return *this; 

@@ -32,8 +32,6 @@
 #ifndef __ZMM_REF_H__
 #define __ZMM_REF_H__
 
-#include "nil.h"
-
 namespace zmm
 {
 
@@ -47,14 +45,14 @@ public:
         if(_ptr)
             _ptr->retain();
     }
-    explicit Ref(T* ptr = NULL) : _ptr(ptr)
+    explicit Ref(T* ptr = nullptr) : _ptr(ptr)
     {
         if(ptr)
             ptr->retain();
     }
-    Ref(NIL_VAR)
+    Ref(nullptr_t)
     {
-        _ptr = NULL;
+        _ptr = nullptr;
     }
     ~Ref()
     {
@@ -73,11 +71,11 @@ public:
             _ptr->retain();
         return *this;
     }
-    inline Ref& operator=(NIL_VAR)
+    inline Ref& operator=(nullptr_t)
     {
         if(_ptr)
             _ptr->release();
-        _ptr = NULL;
+        _ptr = nullptr;
         return *this;
     }
 
@@ -93,13 +91,13 @@ public:
     {
         return _ptr;
     }
-    inline int operator==(NIL_VAR)
+    inline int operator==(nullptr_t)
     {
-        return (_ptr == NULL);
+        return (_ptr == nullptr);
     }
-    inline int operator!=(NIL_VAR)
+    inline int operator!=(nullptr_t)
     {
-        return (_ptr != NULL);
+        return (_ptr != nullptr);
     }
     inline int operator==(const Ref& other)
     {

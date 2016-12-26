@@ -59,7 +59,7 @@ public:
     inline StorageException(zmm::String _userMessage, zmm::String message) : zmm::Exception(message) { userMessage = _userMessage; }
     inline StorageException(zmm::String _userMessage, zmm::String message, const char *file, int line, const char* function) : 
         zmm::Exception(message, file, line, function) { userMessage = _userMessage;  }
-    zmm::String getUserMessage() const { return (userMessage != nil ? userMessage : message); }
+    zmm::String getUserMessage() const { return (userMessage != nullptr ? userMessage : message); }
 };
 
 class ObjectNotFoundException : public StorageException

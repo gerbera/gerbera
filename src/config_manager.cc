@@ -66,20 +66,20 @@ using namespace mxml;
 
 SINGLETON_MUTEX(ConfigManager, false);
 
-String ConfigManager::filename = nil;
-String ConfigManager::userhome = nil;
+String ConfigManager::filename = nullptr;
+String ConfigManager::userhome = nullptr;
 String ConfigManager::config_dir = _(DEFAULT_CONFIG_HOME);
 String ConfigManager::prefix_dir = _(PACKAGE_DATADIR);
-String ConfigManager::magic = nil;
+String ConfigManager::magic = nullptr;
 bool ConfigManager::debug_logging = false;
 
 ConfigManager::~ConfigManager()
 {
-    filename = nil;
-    userhome = nil;
+    filename = nullptr;
+    userhome = nullptr;
     config_dir = _(DEFAULT_CONFIG_HOME);
     prefix_dir = _(PACKAGE_DATADIR);
-    magic = nil;
+    magic = nullptr;
 }
 
 void ConfigManager::setStaticArgs(String _filename, String _userhome, 
@@ -101,7 +101,7 @@ ConfigManager::ConfigManager() : Singleton<ConfigManager>()
     String home = userhome + DIR_SEPARATOR + config_dir;
     bool home_ok = true;
     
-    if (filename == nil)
+    if (filename == nullptr)
     {
         // we are looking for ~/.mediatomb
         if (home_ok && (!check_path(userhome + DIR_SEPARATOR + config_dir + DIR_SEPARATOR + DEFAULT_CONFIG_NAME)))
@@ -121,7 +121,7 @@ ConfigManager::ConfigManager() : Singleton<ConfigManager>()
         
     }
     
-    if (filename == nil)
+    if (filename == nullptr)
     {       
         throw _Exception(_("\nThe server configuration file could not be found in ~/.mediatomb\n") +
                 "MediaTomb could not determine your home directory - automatic setup failed.\n" + 
@@ -138,7 +138,7 @@ ConfigManager::ConfigManager() : Singleton<ConfigManager>()
     dumpOptions();
 #endif
     // now the XML is no longer needed we can destroy it
-    root = nil;
+    root = nullptr;
 }
 
 String ConfigManager::construct_path(String path)
@@ -719,7 +719,7 @@ void ConfigManager::migrate()
                 CONFIG_XML_VERSION + ".xsd");
         
         Ref<Element> server = root->getChildByName(_("server"));
-        if (server == nil)
+        if (server == nullptr)
             throw _Exception(_("Migration failed! Could not find <server> tag!"));
 
         checkOptionString(_("/server/storage/attribute::driver"));
@@ -745,15 +745,15 @@ void ConfigManager::migrate()
             String username = getOption(_("/server/storage/username"));
             int port = -1;
 
-            if (server->getChildByName(_("storage"))->getChildByName(_("port")) != nil)
+            if (server->getChildByName(_("storage"))->getChildByName(_("port")) != nullptr)
                 port = getIntOption(_("/server/storage/port"));
 
-            String socket = nil;;
-            if (server->getChildByName(_("storage"))->getChildByName(_("socket")) != nil)
+            String socket = nullptr;;
+            if (server->getChildByName(_("storage"))->getChildByName(_("socket")) != nullptr)
                 socket = getOption(_("/server/storage/socket"));
 
-            String password = nil;
-            if (server->getChildByName(_("storage"))->getChildByName(_("password")) != nil)
+            String password = nullptr;
+            if (server->getChildByName(_("storage"))->getChildByName(_("password")) != nullptr)
                 password = getOption(_("/server/storage/password"));
 
             Ref<Element>mysql(new Element(_("mysql")));
@@ -764,11 +764,11 @@ void ConfigManager::migrate()
             if (port != -1)
                 mysql->appendTextChild(_("port"), String::from(port));
 
-            if (socket != nil)
+            if (socket != nullptr)
                 storage->appendTextChild(_("socket"), socket);
 
             mysql->appendTextChild(_("username"), username);
-            if (password != nil)
+            if (password != nullptr)
                 storage->appendTextChild(_("password"), password);
 
             mysql->appendTextChild(_("database"), db);
@@ -779,22 +779,22 @@ void ConfigManager::migrate()
 
         server->appendElementChild(storage);
 #ifdef EXTERNAL_TRANSCODING
-        if (root->getChildByName(_("transcoding")) == nil)
+        if (root->getChildByName(_("transcoding")) == nullptr)
             root->appendElementChild(renderTranscodingSection());
 #endif
 
         Ref<Element> import = root->getChildByName(_("import"));
-        if (import != nil)
+        if (import != nullptr)
         {
 #ifdef ONLINE_SERVICES
-            if (import->getChildByName(_("online-content")) == nil)
+            if (import->getChildByName(_("online-content")) == nullptr)
                 import->appendElementChild(renderOnlineSection());
 #endif
             Ref<Element> map = import->getChildByName(_("mappings"));
-            if (map != nil)
+            if (map != nullptr)
             {
                 Ref<Element> mtct = map->getChildByName(_("mimetype-contenttype"));
-                if ((mtct != nil) && (mtct->elementChildCount() > 0))
+                if ((mtct != nullptr) && (mtct->elementChildCount() > 0))
                 {
                     bool add_avi = true;
                     for (int mc = 0; mc < mtct->elementChildCount(); mc++)
@@ -825,7 +825,7 @@ void ConfigManager::migrate()
                 CONFIG_XML_VERSION + ".xsd");
 
         Ref<Element> server = root->getChildByName(_("server"));
-        if (server == nil)
+        if (server == nullptr)
             throw _Exception(_("Migration failed! Could not find <server> tag!"));
 
         String temp;
@@ -836,7 +836,7 @@ void ConfigManager::migrate()
         catch (const Exception & e)
         {
             Ref<Element> ui = server->getChildByName(_("ui"));
-            if (ui != nil)
+            if (ui != nullptr)
                 ui->setAttribute(_("show-tooltips"), 
                                            _(DEFAULT_UI_SHOW_TOOLTIPS_VALUE));
         }
@@ -848,23 +848,23 @@ void ConfigManager::migrate()
         catch (const Exception & e)
         {
             Ref<Element> storage = server->getChildByName(_("storage"));
-            if (storage != nil)
+            if (storage != nullptr)
                 storage->setAttribute(_("caching"), 
                                         _(DEFAULT_STORAGE_CACHING_ENABLED));
         }
        
-        if (server->getChildByName(_("extended-runtime-options")) == nil)
+        if (server->getChildByName(_("extended-runtime-options")) == nullptr)
             server->appendElementChild(renderExtendedRuntimeSection());
 
         Ref<Element> import = root->getChildByName(_("import"));
-        if (import != nil)
+        if (import != nullptr)
         {
             // add ext 2 mimetype stuff
             Ref<Element> mappings = import->getChildByName(_("mappings"));
 
 #ifdef ONLINE_SERVICES
             Ref<Element> online =  import->getChildByName(_("online-content"));
-            if (online == nil)
+            if (online == nullptr)
                 import->appendElementChild(renderOnlineSection());
 #endif
         }
@@ -951,7 +951,7 @@ void ConfigManager::validate(String serverhome)
     if (root->getName() != "config")
         throw _Exception(_("Error in config file: <config> tag not found"));
 
-    if (root->getChildByName(_("server")) == nil)
+    if (root->getChildByName(_("server")) == nullptr)
         throw _Exception(_("Error in config file: <server> tag not found"));
 
     String version = root->getAttribute(_("version"));
@@ -1004,7 +1004,7 @@ void ConfigManager::validate(String serverhome)
     String sqlite3_en = _("no");
 
     tmpEl = getElement(_("/server/storage"));
-    if (tmpEl == nil)
+    if (tmpEl == nullptr)
         throw _Exception(_("Error in config file: <storage> tag not found"));
 
 
@@ -1017,7 +1017,7 @@ void ConfigManager::validate(String serverhome)
     SET_BOOL_OPTION(CFG_SERVER_STORAGE_CACHING_ENABLED);
 
     tmpEl = getElement(_("/server/storage/mysql"));
-    if (tmpEl != nil)
+    if (tmpEl != nullptr)
     {
         mysql_en = getOption(_("/server/storage/mysql/attribute::enabled"),
                 _(DEFAULT_MYSQL_ENABLED));
@@ -1026,7 +1026,7 @@ void ConfigManager::validate(String serverhome)
     }
 
     tmpEl = getElement(_("/server/storage/sqlite3"));
-    if (tmpEl != nil)
+    if (tmpEl != nullptr)
     {
         sqlite3_en = getOption(_("/server/storage/sqlite3/attribute::enabled"),
                 _(DEFAULT_SQLITE_ENABLED));
@@ -1061,9 +1061,9 @@ void ConfigManager::validate(String serverhome)
         NEW_INT_OPTION(getIntOption(_("/server/storage/mysql/port"), 0));
         SET_INT_OPTION(CFG_SERVER_STORAGE_MYSQL_PORT);
 
-        if (getElement(_("/server/storage/mysql/socket")) == nil)
+        if (getElement(_("/server/storage/mysql/socket")) == nullptr)
         {
-            NEW_OPTION(nil);
+            NEW_OPTION(nullptr);
         }
         else
         {
@@ -1072,9 +1072,9 @@ void ConfigManager::validate(String serverhome)
 
         SET_OPTION(CFG_SERVER_STORAGE_MYSQL_SOCKET);
 
-        if (getElement(_("/server/storage/mysql/password")) == nil)
+        if (getElement(_("/server/storage/mysql/password")) == nullptr)
         {
-            NEW_OPTION(nil);
+            NEW_OPTION(nullptr);
         }
         else
         {
@@ -1346,7 +1346,7 @@ void ConfigManager::validate(String serverhome)
     SET_DICT_OPTION(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
 
     tmpEl = getElement(_("/import/mappings/mimetype-contenttype"));
-    if (tmpEl != nil)
+    if (tmpEl != nullptr)
     {
         mime_content = createDictionaryFromNodeset(tmpEl, _("treat"), 
                        _("mimetype"), _("as"));
@@ -1690,7 +1690,7 @@ void ConfigManager::validate(String serverhome)
     SET_INT_OPTION(CFG_SERVER_ALIVE_INTERVAL);
 
     Ref<Element> el = getElement(_("/import/mappings/mimetype-upnpclass"));
-    if (el == nil)
+    if (el == nullptr)
     {
         getOption(_("/import/mappings/mimetype-upnpclass"), _(""));
     }
@@ -1767,7 +1767,7 @@ void ConfigManager::validate(String serverhome)
     if (temp == "yes")
         el = getElement(_("/transcoding"));
     else
-        el = nil;
+        el = nullptr;
 
     NEW_TRANSCODING_PROFILELIST_OPTION(createTranscodingProfileListFromNodeset(el));
     SET_TRANSCODING_PROFILELIST_OPTION(CFG_TRANSCODING_PROFILE_LIST);
@@ -1806,7 +1806,7 @@ void ConfigManager::validate(String serverhome)
 #ifdef HAVE_LIBEXIF    
 
     el = getElement(_("/import/library-options/libexif/auxdata"));
-    if (el == nil)
+    if (el == nullptr)
     {
         getOption(_("/import/library-options/libexif/auxdata"),
                   _(""));
@@ -1819,7 +1819,7 @@ void ConfigManager::validate(String serverhome)
 
 #if defined(HAVE_ID3LIB) || defined(HAVE_TAGLIB)
     el = getElement(_("/import/library-options/id3/auxdata"));
-    if (el == nil)
+    if (el == nullptr)
     {
         getOption(_("/import/library-options/id3/auxdata"), _(""));
     }
@@ -1975,7 +1975,7 @@ void ConfigManager::validate(String serverhome)
     Ref<Array<StringBase> > mark_content_list(new Array<StringBase>());
     tmpEl = getElement(_("/server/extended-runtime-options/mark-played-items/mark"));
 
-    if (tmpEl != nil)
+    if (tmpEl != nullptr)
     {
         for (int m = 0; m < tmpEl->elementChildCount(); m++)
         {
@@ -2153,7 +2153,7 @@ void ConfigManager::validate(String serverhome)
         SET_BOOL_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_UPDATE_AT_START);
 
         el = getElement(_("/import/online-content/YouTube"));
-        if (el == nil)
+        if (el == nullptr)
         {
             getOption(_("/import/online-content/YouTube"),
                     _(""));
@@ -2316,11 +2316,11 @@ void ConfigManager::prepare_udn()
         return;
 
     Ref<Element> server = root->getChildByName(_("server"));
-    if (server == nil)
+    if (server == nullptr)
         return;
 
     Ref<Element> element = server->getChildByName(_("udn"));
-    if (element == nil || element->getText() == nil || element->getText() == "")
+    if (element == nullptr || element->getText() == nullptr || element->getText() == "")
     {
         char   uuid_str[37];
         uuid_t uuid;
@@ -2350,7 +2350,7 @@ void ConfigManager::prepare_path(String xpath, bool needDir, bool existenceUnnee
     check_path_ex(temp, needDir, existenceUnneeded);
 
     Ref<Element> script = getElement(xpath);
-    if (script != nil)
+    if (script != nullptr)
         script->setText(temp);
 }
 
@@ -2389,7 +2389,7 @@ void ConfigManager::load(String filename)
     rootDoc = parser->parseFile(filename);
     root = rootDoc->getRoot();
     
-    if (rootDoc == nil)
+    if (rootDoc == nullptr)
     {
         throw _Exception(_("Unable to parse server configuration!"));
     }
@@ -2411,7 +2411,7 @@ String ConfigManager::getOption(String xpath, String def)
     Ref<Array<StringBase> >parts = split_string(pathPart, '/');
     
     Ref<Element> cur = root;
-    String attr = nil;
+    String attr = nullptr;
     
     int i;
     Ref<Element> child;
@@ -2419,7 +2419,7 @@ String ConfigManager::getOption(String xpath, String def)
     {
         String part = parts->get(i);
         child = cur->getChildByName(part);
-        if (child == nil)
+        if (child == nullptr)
             break;
         cur = child;
     }
@@ -2432,7 +2432,7 @@ String ConfigManager::getOption(String xpath, String def)
         cur = child;
     }
     
-    if (axisPart != nil)
+    if (axisPart != nullptr)
     {
         String axis = XPath::getAxis(axisPart);
         String spec = XPath::getSpec(axisPart);
@@ -2466,7 +2466,7 @@ String ConfigManager::getOption(String xpath)
     /// \todo is this ok?
 //    if (string_ok(value))
 //        return value;
-    if (value != nil)
+    if (value != nullptr)
         return trim_string(value);
     throw _Exception(_("Config: option not found: ") + xpath);
 }
@@ -2535,7 +2535,7 @@ Ref<Dictionary> ConfigManager::createDictionaryFromNodeset(Ref<Element> element,
     String key;
     String value;
 
-    if (element != nil)
+    if (element != nullptr)
     {
         for (int i = 0; i < element->elementChildCount(); i++)
         {
@@ -2573,7 +2573,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
     zmm::String param;
 
     Ref<TranscodingProfileList> list(new TranscodingProfileList());
-    if (element == nil)
+    if (element == nullptr)
         return list;     
 
     Ref<Array<DictionaryElement> > mt_mappings(new Array<DictionaryElement>());
@@ -2582,7 +2582,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
     String pname;
 
     mtype_profile = element->getChildByName(_("mimetype-profile-mappings"));
-    if (mtype_profile != nil)
+    if (mtype_profile != nullptr)
     {
         for (int e = 0; e < mtype_profile->elementChildCount(); e++)
         {
@@ -2606,7 +2606,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
     }
 
     Ref<Element> profiles = element->getChildByName(_("profiles"));
-    if (profiles == nil)
+    if (profiles == nullptr)
         return list;
 
     for (int i = 0; i < profiles->elementChildCount(); i++)
@@ -2647,7 +2647,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
             throw _Exception(_("error in configuration: invalid target mimetype in transcoding profile"));
         prof->setTargetMimeType(param);
 
-        if (child->getChildByName(_("resolution")) != nil)
+        if (child->getChildByName(_("resolution")) != nullptr)
         {
             param = child->getChildText(_("resolution"));
             if (string_ok(param))
@@ -2658,7 +2658,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
         }
 
         Ref<Element> avi_fcc = child->getChildByName(_("avi-fourcc-list"));
-        if (avi_fcc != nil)
+        if (avi_fcc != nullptr)
         {
             String mode = avi_fcc->getAttribute(_("mode"));
             if (!string_ok(mode))
@@ -2693,7 +2693,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
             }
         }
 
-        if (child->getChildByName(_("accept-url")) != nil)
+        if (child->getChildByName(_("accept-url")) != nullptr)
         {
             param = child->getChildText(_("accept-url"));
             if (!validateYesNo(param))
@@ -2705,7 +2705,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                 prof->setAcceptURL(false);
         }
 
-        if (child->getChildByName(_("sample-frequency")) != nil)
+        if (child->getChildByName(_("sample-frequency")) != nullptr)
         {
             param = child->getChildText(_("sample-frequency"));
             if (param == "source")
@@ -2724,7 +2724,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
             }
         }
 
-        if (child->getChildByName(_("audio-channels")) != nil)
+        if (child->getChildByName(_("audio-channels")) != nullptr)
         {
             param = child->getChildText(_("audio-channels"));
             if (param == "source")
@@ -2742,7 +2742,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
             }
         }
 
-        if (child->getChildByName(_("hide-original-resource")) != nil)
+        if (child->getChildByName(_("hide-original-resource")) != nullptr)
         {
             param = child->getChildText(_("hide-original-resource"));
             if (!validateYesNo(param))
@@ -2754,7 +2754,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                 prof->setHideOriginalResource(false);
         }
 
-        if (child->getChildByName(_("dvd-only")) != nil)
+        if (child->getChildByName(_("dvd-only")) != nullptr)
         {
             param = child->getChildText(_("dvd-only"));
             if (!validateYesNo(param))
@@ -2766,7 +2766,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                 prof->setOnlyDVD(false);
         }
 
-        if (child->getChildByName(_("accept-dvd-mpeg")) != nil)
+        if (child->getChildByName(_("accept-dvd-mpeg")) != nullptr)
         {
             param = child->getChildText(_("accept-dvd-mpeg"));
             if (!validateYesNo(param))
@@ -2779,7 +2779,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
  
         }
 
-        if (child->getChildByName(_("thumbnail")) != nil)
+        if (child->getChildByName(_("thumbnail")) != nullptr)
         {
             param = child->getChildText(_("thumbnail"));
             if (!validateYesNo(param))
@@ -2791,7 +2791,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                 prof->setThumbnail(false);
         }
 
-        if (child->getChildByName(_("first-resource")) != nil)
+        if (child->getChildByName(_("first-resource")) != nullptr)
         {
             param = child->getChildText(_("first-resource"));
             if (!validateYesNo(param))
@@ -2804,7 +2804,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                 prof->setFirstResource(false);
         }
 
-        if (child->getChildByName(_("use-chunked-encoding")) != nil)
+        if (child->getChildByName(_("use-chunked-encoding")) != nullptr)
         {
             param = child->getChildText(_("use-chunked-encoding"));
             if (!validateYesNo(param))
@@ -2818,7 +2818,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
         }
 
         Ref<Element> sub = child->getChildByName(_("agent"));
-        if (sub == nil)
+        if (sub == nullptr)
             throw _Exception(_("error in configuration: transcoding "
                                "profile \"") + prof->getName() + 
                                "\" is missing the <agent> option");
@@ -2864,7 +2864,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
         prof->setArguments(param);
 
         sub = child->getChildByName(_("buffer")); 
-        if (sub == nil)
+        if (sub == nullptr)
             throw _Exception(_("error in configuration: transcoding "
                                "profile \"") + prof->getName() + 
                                "\" is missing the <buffer> option");
@@ -2921,7 +2921,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
 
         prof->setBufferOptions(bs, cs, fs);
 
-        if (mtype_profile == nil)
+        if (mtype_profile == nullptr)
         {
             throw _Exception(_("error in configuration: transcoding "
                                "profiles exist, but no mimetype to profile "
@@ -2961,7 +2961,7 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
     bool hidden;
     unsigned int interval;
   
-    if (element == nil)
+    if (element == nullptr)
         return list;
 
     for (int i = 0; i < element->elementChildCount(); i++)
@@ -3160,7 +3160,7 @@ Ref<Array<StringBase> > ConfigManager::createArrayFromNodeset(Ref<mxml::Element>
     String attrValue;
     Ref<Array<StringBase> > arr(new Array<StringBase>());
 
-    if (element != nil)
+    if (element != nullptr)
     {
         for (int i = 0; i < element->elementChildCount(); i++)
         {
@@ -3179,7 +3179,7 @@ Ref<Array<StringBase> > ConfigManager::createArrayFromNodeset(Ref<mxml::Element>
 }
 
 // The validate function ensures that the array is completely filled!
-// None of the options->get() calls will ever return nil!
+// None of the options->get() calls will ever return nullptr!
 String ConfigManager::getOption(config_option_t option)
 {
     Ref<ConfigOption> r = options->get(option);
@@ -3250,7 +3250,7 @@ Ref<Array<Object> > ConfigManager::createServiceTaskList(service_type_t service,
 {
     Ref<Array<Object> > arr(new Array<Object>());
 
-    if (element == nil)
+    if (element == nullptr)
         return arr;
 #ifdef YOUTUBE
     if (service == OS_YouTube)

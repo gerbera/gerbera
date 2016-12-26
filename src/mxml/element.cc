@@ -42,8 +42,8 @@ Element::Element(String name) : Node()
     type = mxml_node_element;
     this->name = name;
     arrayType = false;
-    arrayName = nil;
-    textKey = nil;
+    arrayName = nullptr;
+    textKey = nullptr;
 }
 Element::Element(String name, Ref<Context> context) : Node()
 {
@@ -51,13 +51,13 @@ Element::Element(String name, Ref<Context> context) : Node()
     this->name = name;
     this->context = context;
     arrayType = false;
-    arrayName = nil;
-    textKey = nil;
+    arrayName = nullptr;
+    textKey = nullptr;
 }
 String Element::getAttribute(String name)
 {
-    if(attributes == nil)
-        return nil;
+    if(attributes == nullptr)
+        return nullptr;
     int len = attributes->size();
     for(int i = 0; i < len; i++)
     {
@@ -65,7 +65,7 @@ String Element::getAttribute(String name)
         if(attr->name == name)
             return attr->value;
     }
-    return nil;
+    return nullptr;
 }
 void Element::addAttribute(String name, String value, enum mxml_value_type type)
 {
@@ -75,14 +75,14 @@ void Element::addAttribute(String name, String value, enum mxml_value_type type)
 
 void Element::addAttribute(Ref<Attribute> attr)
 {
-    if (attributes == nil)
+    if (attributes == nullptr)
         attributes = Ref<Array<Attribute> >(new Array<Attribute>());
     attributes->append(attr);
 }
 
 void Element::setAttribute(String name, String value, enum mxml_value_type type)
 {
-    if (attributes == nil)
+    if (attributes == nullptr)
         attributes = Ref<Array<Attribute> >(new Array<Attribute>());
     int len = attributes->size();
     for(int i = 0; i < len; i++)
@@ -100,7 +100,7 @@ void Element::setAttribute(String name, String value, enum mxml_value_type type)
 
 int Element::childCount(enum mxml_node_types type)
 {
-    if (children == nil)
+    if (children == nullptr)
         return 0;
     
     if (type == mxml_node_all)
@@ -120,14 +120,14 @@ int Element::childCount(enum mxml_node_types type)
 
 Ref<Node> Element::getChild(int index, enum mxml_node_types type, bool remove)
 {
-    if (children == nil)
-        return nil;
+    if (children == nullptr)
+        return nullptr;
     int countElements = 0;
     
     if (type == mxml_node_all)
     {
         if (index >= children->size())
-            return nil;
+            return nullptr;
         else
         {
             Ref<Node> node = children->get(index);
@@ -150,7 +150,7 @@ Ref<Node> Element::getChild(int index, enum mxml_node_types type, bool remove)
             }
         }
     }
-    return nil;
+    return nullptr;
 }
 
 bool Element::removeElementChild(String name, bool removeAll)
@@ -159,7 +159,7 @@ bool Element::removeElementChild(String name, bool removeAll)
     if (id < 0)
         return false;
     Ref<Node> child = getChild(id, mxml_node_all, true);
-    if (child == nil)
+    if (child == nullptr)
         return false;
     if (! removeAll)
         return true;
@@ -169,14 +169,14 @@ bool Element::removeElementChild(String name, bool removeAll)
 
 void Element::appendChild(Ref<Node> child)
 {
-    if(children == nil)
+    if(children == nullptr)
         children = Ref<Array<Node> >(new Array<Node>());
     children->append(child);
 }
 
 void Element::insertChild(int index, Ref<Node> child)
 {
-    if (children == nil)
+    if (children == nullptr)
         children = Ref<Array<Node> >(new Array<Node>());
     children->insert(index, child);
 }
@@ -284,7 +284,7 @@ String Element::getText()
     Ref<Text> text;
     int i = 0;
     bool someText = false;
-    while ((text = RefCast(getChild(i++, mxml_node_text), Text)) != nil)
+    while ((text = RefCast(getChild(i++, mxml_node_text), Text)) != nullptr)
     {
         someText = true;
         *buf << text->getText();
@@ -292,7 +292,7 @@ String Element::getText()
     if (someText)
         return buf->toString();
     else
-        return nil;
+        return nullptr;
 }
 
 enum mxml_value_type Element::getVTypeText()
@@ -301,7 +301,7 @@ enum mxml_value_type Element::getVTypeText()
     int i = 0;
     bool someText = false;
     enum mxml_value_type vtype = mxml_string_type;
-    while ((text = RefCast(getChild(i++, mxml_node_text), Text)) != nil)
+    while ((text = RefCast(getChild(i++, mxml_node_text), Text)) != nullptr)
     {
         if (! someText)
         {
@@ -319,17 +319,17 @@ enum mxml_value_type Element::getVTypeText()
 
 int Element::attributeCount()
 {
-    if (attributes == nil)
+    if (attributes == nullptr)
         return 0;
     return attributes->size();
 }
 
 Ref<Attribute> Element::getAttribute(int index)
 {
-    if (attributes == nil)
-        return nil;
+    if (attributes == nullptr)
+        return nullptr;
     if (index >= attributes->size())
-        return nil;
+        return nullptr;
     return attributes->get(index);
 }
 
@@ -341,7 +341,7 @@ void Element::setText(String str, enum mxml_value_type type)
     if (childCount() == 1)
     {
         Ref<Node> child = getChild(0);
-        if (child == nil || child->getType() != mxml_node_text)
+        if (child == nullptr || child->getType() != mxml_node_text)
             throw _Exception(_("Element::setText() cannot be called on an element which has a non-text child"));
         Ref<Text> text = RefCast(child, Text);
         text->setText(str);
@@ -364,7 +364,7 @@ void Element::appendTextChild(String name, String text, enum mxml_value_type typ
 
 int Element::getChildIdByName(String name)
 {
-    if(children == nil)
+    if(children == nullptr)
         return -1;
     for(int i = 0; i < children->size(); i++)
     {
@@ -372,7 +372,7 @@ int Element::getChildIdByName(String name)
         if (nd->getType() == mxml_node_element)
         {
             Ref<Element> el = RefCast(nd, Element);
-            if (name == nil || el->name == name)
+            if (name == nullptr || el->name == name)
                 return i;
         }
     }
@@ -383,15 +383,15 @@ Ref<Element> Element::getChildByName(String name)
 {
     int id = getChildIdByName(name);
     if (id < 0)
-        return nil;
+        return nullptr;
     return RefCast(getChild(id), Element);
 }
 
 String Element::getChildText(String name)
 {
     Ref<Element> el = getChildByName(name);
-    if(el == nil)
-        return nil;
+    if(el == nullptr)
+        return nullptr;
     return el->getText();
 }
 
@@ -407,7 +407,7 @@ void Element::print_internal(Ref<StringBuffer> buf, int indent)
     int i;
     
     *buf << "<" << name;
-    if (attributes != nil)
+    if (attributes != nullptr)
     {
         for(i = 0; i < attributes->size(); i++)
         {
@@ -417,7 +417,7 @@ void Element::print_internal(Ref<StringBuffer> buf, int indent)
         }
     }
     
-    if (children != nil && children->size())
+    if (children != nullptr && children->size())
     {
         *buf << ">";
         
