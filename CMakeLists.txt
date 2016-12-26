@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.6)
 
-INCLUDE (CheckFunctionExists)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
+include(CheckFunctionExists)
 
 set(CMAKE_VERBOSE_MAKEFILE off CACHE BOOL "Show verbose build commands")
 set(WITH_MAGIC          1 CACHE BOOL "Use libmagic to identify file mime types")
@@ -302,39 +303,12 @@ target_include_directories(libmediatomb PRIVATE "${CMAKE_SOURCE_DIR}/src")
 add_executable(mediatomb src/main.cc $<TARGET_OBJECTS:libmediatomb>)
 target_include_directories(mediatomb PRIVATE "${CMAKE_SOURCE_DIR}/src")
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
-
 # It is nearly 2017 so lets leverage a modern C++
 set_property(TARGET mediatomb PROPERTY CXX_STANDARD 14)
 set_property(TARGET mediatomb PROPERTY CXX_STANDARD_REQUIRED ON)
 set_property(TARGET libmediatomb PROPERTY CXX_STANDARD 14)
 set_property(TARGET libmediatomb PROPERTY CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-
-# Host OS Check
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-    set(HOST_OS "linux")
-    set(LINUX 1)
-elseif(${CMAKE_SYSTEM_NAME} MATCHES ".*(SunOS|Solaris).*")
-    set(HOST_OS "solaris")
-    set(SOLARIS 1)
-elseif(${CMAKE_SYSTEM_NAME} MATCHES ".*BSD.*")
-    set(HOST_OS "bsd")
-    set(BSD 1)
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
-    set(HOST_OS "darwin")
-    set(DARWIN 1)
-endif()
-if(NOT HOST_OS)
-    message(FATAL_ERROR 
-                "mediatomb was unable to deterimine the host OS. Please report this. Value of CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
-endif()
-
-if (SOLARIS)
-    add_definitions(-DSOLARIS)
-    # we need these specially called out as not in packages [OmniOS/joyent]
-    target_link_libraries (mediatomb "-luuid -lsocket -lnsl -liconv")
-endif()
 
 add_definitions(-DPACKAGE_NAME="MediaTomb-${MEDIATOMB_SUFFIX}")
 add_definitions(-DVERSION="${MEDIATOMB_MAJOR_VERSION}.${MEDIATOMB_MINOR_VERSION}.${MEDIATOMB_PATCH_VERSION}_${MEDIATOMB_RELEASE}-${MEDIATOMB_SUFFIX}")
@@ -353,23 +327,40 @@ endif()
 find_package(Threads REQUIRED)
 target_link_libraries (mediatomb ${CMAKE_THREAD_LIBS_INIT})
 
-CHECK_FUNCTION_EXISTS(nl_langinfo HAVE_NL_LANGINFO)
+check_function_exists(nl_langinfo HAVE_NL_LANGINFO)
 if (HAVE_NL_LANGINFO)
     add_definitions("-DHAVE_NL_LANGINFO")
 endif()
 
-CHECK_FUNCTION_EXISTS(setlocale HAVE_SETLOCALE)
+check_function_exists(setlocale HAVE_SETLOCALE)
 if (HAVE_SETLOCALE)
     add_definitions("-DHAVE_SETLOCALE")
 endif()
 
-# INotify is only available on Linux
-if (LINUX)
-    find_package(INotify REQUIRED)
+# Link to the socket library if it exists. This is something you need on Solaris/OmniOS/Joyent
+find_library(SOCKET_LIBRARY socket)
+if(SOCKET_LIBRARY)
+    set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${SOCKET_LIBRARY})
+    target_link_libraries(mediatomb ${SOCKET_LIBRARY})
+endif()
+
+# Link to libnsl (Network services library) if it exists. This is something you need on Solaris/OmniOS/Joyent
+find_library(NSL_LIBRARY nsl)
+if(NSL_LIBRARY)
+    set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${NSL_LIBRARY})
+    target_link_libraries(mediatomb ${NSL_LIBRARY})
+endif()
+
+find_package(INotify)
+IF (INOTIFY_FOUND)
     include_directories(${INOTIFY_INCLUDE_DIRS})
     target_link_libraries (mediatomb ${INOTIFY_LIBRARY})
     add_definitions(-DHAVE_INOTIFY)
 endif ()
+
+find_package(Iconv REQUIRED)
+include_directories(${ICONV_INCLUDE_DIR})
+target_link_libraries (mediatomb ${ICONV_LIBRARIES})
 
 find_package(LibUUID REQUIRED)
 include_directories(${LIBUUID_INCLUDE_DIRS})
