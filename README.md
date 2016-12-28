@@ -36,6 +36,8 @@ _MediaTomb is pretty much dead upstream, so this is my attempt to get kick it ba
 - Remove libmp4v2 use/dep.
 - Enhanced TagLib handler to support MP4,FLAC,Vorbis & WMA files (including artwork).
 - Support for folder/cover.jpg external images for music.
+    - Folder/Cover art files are files named [case-folded and glob] cover.jp\*, albumart\*.jp\*, album.jp\*, front.jp\* or folder.jp\*
+    - Per-Track art files supported are files named [case-folded and glob] filename-of-track.jp\*, where "filename-of-track" is the filename of the track, minus the audio file extension
 - Started port to "Modern C++".
 - Lots of other stuff.
 
