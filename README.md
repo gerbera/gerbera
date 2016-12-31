@@ -54,7 +54,7 @@ apt-get install libmozjs185-dev libmagic-dev libexif-dev libcurl4-openssl-dev
 ```
 
 The following packages are too old in 16.04 and must be installed from source:
-`cmake`, `taglib`, and `libupnp`.
+`taglib` (1.11.x), and `libupnp` (1.8.x).
 
 ### Quick start build instructions:
 
