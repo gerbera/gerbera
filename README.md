@@ -45,7 +45,18 @@ _MediaTomb is pretty much dead upstream, so this is my attempt to get kick it ba
 
 The project has been ported to [CMake](https://cmake.org/).
 
-Quick start build instructions:
+### Install prerequisites.
+
+#### On Ubuntu 16.04
+```
+apt-get install uuid-dev libexpat1-dev libsqlite3-dev libmysqlclient-dev
+apt-get install libmozjs185-dev libmagic-dev libexif-dev libcurl4-openssl-dev
+```
+
+The following packages are too old in 16.04 and must be installed from source:
+`cmake`, `taglib`, and `libupnp`.
+
+### Quick start build instructions:
 
 ```
 git clone https://github.com/v00d00/mediatomb.git

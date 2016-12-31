@@ -1387,7 +1387,7 @@ ssize_t getValidUTF8CutPosition(zmm::String str, ssize_t cutpos)
     ssize_t pos = -1;
     size_t len = str.length();
 
-    if ((len == 0) || (cutpos > len))
+    if ((len == 0) || (cutpos > (ssize_t)len))
         return pos;
 
     printf("Character at cut position: %0x\n", (char)str.charAt(cutpos));

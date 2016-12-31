@@ -42,7 +42,7 @@ class FallbackLayout : public Layout
 {
 public:
     FallbackLayout();
-    virtual void processCdsObject(zmm::Ref<CdsObject> obj, zmm::String rootpath);
+    virtual void processCdsObject(zmm::Ref<CdsObject> obj, zmm::String rootpath) override;
 #ifdef ENABLE_PROFILING
     virtual ~FallbackLayout();
 #endif

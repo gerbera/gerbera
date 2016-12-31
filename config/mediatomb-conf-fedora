@@ -1,4 +1,4 @@
-## This is a sambel configuration file for the MediaTomb daemon script
+## This is a sample configuration file for the MediaTomb daemon script
 ## used on Fedora Core
 
 ## By default the configuration will be created in /etc/mediatomb

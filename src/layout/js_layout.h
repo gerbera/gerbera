@@ -43,7 +43,7 @@ protected:
 public:
     JSLayout();
     virtual ~JSLayout();
-    virtual void processCdsObject(zmm::Ref<CdsObject> obj, zmm::String rootpath);
+    virtual void processCdsObject(zmm::Ref<CdsObject> obj, zmm::String rootpath) override;
 };
 
 #endif // __JS_LAYOUT_H__
