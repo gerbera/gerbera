@@ -79,7 +79,7 @@ void FanArtHandler::fillMetadata(Ref<CdsItem> item)
 
     String found = getFanArtPath(getFolderName(item));
 
-    if (found != nil) {
+    if (found != nullptr) {
         Ref<CdsResource> resource(new CdsResource(CH_FANART));
         resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo("jpg"));
         resource->addParameter(_(RESOURCE_CONTENT_TYPE), _(ID3_ALBUM_ART));

@@ -32,6 +32,7 @@
 #ifndef __ZMMF_OBJECT_STACK_H__
 #define __ZMMF_OBJECT_STACK_H__
 
+#include <logger.h>
 #include "zmm.h"
 #include "memory.h"
 #include "base_stack.h"
@@ -67,7 +68,7 @@ namespace zmm
         {
             Object *obj = BaseStack<Object *>::pop();
             if (obj == NULL)
-                return nil;
+                return nullptr;
             Ref<T> ret((T *)obj);
             obj->release();
             return ret;

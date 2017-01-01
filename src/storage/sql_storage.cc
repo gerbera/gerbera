@@ -146,7 +146,7 @@ void SQLStorage::init()
     }
     else
     {
-        cache = nil;
+        cache = nullptr;
         insertBufferOn = false;
     }
     
@@ -168,7 +168,7 @@ void SQLStorage::init()
     log_debug(("PRELOADING OBJECTS...\n"));
     res = select(getSelectQuery(SELECT_FULL));
     Ref<Array<CdsObject> > arr(new Array<CdsObject>());
-    while((row = res->nextRow()) != nil)
+    while((row = res->nextRow()) != nullptr)
     {
         Ref<CdsObject> obj = createObjectFromRow(row, SELECT_FULL);
         obj->optimize();
@@ -210,7 +210,7 @@ Ref<CdsObject> SQLStorage::checkRefID(Ref<CdsObject> obj)
         {
             Ref<CdsObject> refObj;
             refObj = loadObject(refID);
-            if (refObj != nil && refObj->getLocation() == location)
+            if (refObj != nullptr && refObj->getLocation() == location)
                 return refObj;
         }
         catch (const Exception & e)
@@ -232,7 +232,7 @@ Ref<CdsObject> SQLStorage::checkRefID(Ref<CdsObject> obj)
 Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObject> obj, bool isUpdate, int *changedContainer)
 {
     int objectType = obj->getObjectType();
-    Ref<CdsObject> refObj = nil;
+    Ref<CdsObject> refObj = nullptr;
     bool hasReference = false;
     bool playlistRef = obj->getFlag(OBJECT_FLAG_PLAYLIST_REF);
     if (playlistRef)
@@ -242,14 +242,14 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
         if (obj->getRefID() <= 0)
             throw _Exception(_("PLAYLIST_REF flag set but refId is <=0"));
         refObj = loadObject(obj->getRefID());
-        if (refObj == nil)
+        if (refObj == nullptr)
             throw _Exception(_("PLAYLIST_REF flag set but refId doesn't point to an existing object"));
     }
     else if (obj->isVirtual() && IS_CDS_PURE_ITEM(objectType))
     {
         hasReference = true;
         refObj = checkRefID(obj);
-        if (refObj == nil)
+        if (refObj == nullptr)
             throw _Exception(_("tried to add or update a virtual object with illegal reference id and an illegal location"));
     }
     else if (obj->getRefID() > 0)
@@ -258,7 +258,7 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
         {
             hasReference = true;
             refObj = loadObject(obj->getRefID());
-            if (refObj == nil)
+            if (refObj == nullptr)
                 throw _Exception(_("OBJECT_FLAG_ONLINE_SERVICE and refID set but refID doesn't point to an existing object"));
         }
         else if (IS_CDS_CONTAINER(objectType))
@@ -428,8 +428,8 @@ Ref<Array<SQLStorage::AddUpdateTable> > SQLStorage::_addUpdateObject(Ref<CdsObje
             << " LIMIT 1";
         Ref<SQLResult> res = select(qb);
         // if duplicate items is found - ignore
-        if (res != nil && (res->nextRow() != nil))
-            return nil;
+        if (res != nullptr && (res->nextRow() != nullptr))
+            return nullptr;
     }
     
     if (obj->getParentID() == INVALID_OBJECT_ID)
@@ -445,7 +445,7 @@ void SQLStorage::addObject(Ref<CdsObject> obj, int *changedContainer)
         throw _Exception(_("tried to add an object with an object ID set"));
     //obj->setID(INVALID_OBJECT_ID);
     Ref<Array<AddUpdateTable> > data = _addUpdateObject(obj, false, changedContainer);
-    if (data == nil)
+    if (data == nullptr)
         return;
     int lastInsertID = INVALID_OBJECT_ID;
     for (int i = 0; i < data->size(); i++)
@@ -537,7 +537,7 @@ void SQLStorage::updateObject(zmm::Ref<CdsObject> obj, int *changedContainer)
         if (IS_FORBIDDEN_CDS_ID(obj->getID()))
             throw _Exception(_("tried to update an object with a forbidden ID (")+obj->getID()+")!");
         data = _addUpdateObject(obj, true, changedContainer);
-        if (data == nil)
+        if (data == nullptr)
             return;
     }
     for (int i = 0; i < data->size(); i++)
@@ -579,7 +579,7 @@ Ref<CdsObject> SQLStorage::loadObject(int objectID)
     {
         AUTOLOCK(cache->getMutex());
         Ref<CacheObject> cObj = cache->getObject(objectID);
-        if (cObj != nil)
+        if (cObj != nullptr)
         {
             if (cObj->knowsObject())
                 return cObj->getObject();
@@ -589,7 +589,7 @@ Ref<CdsObject> SQLStorage::loadObject(int objectID)
     
 /*
     Ref<CdsObject> obj = objectIDCache->get(objectID);
-    if (obj != nil)
+    if (obj != nullptr)
         return obj;
     throw _Exception(_("Object not found: ") + objectID);
 */
@@ -601,7 +601,7 @@ Ref<CdsObject> SQLStorage::loadObject(int objectID)
 
     Ref<SQLResult> res = select(qb);
     Ref<SQLRow> row;
-    if (res != nil && (row = res->nextRow()) != nil)
+    if (res != nullptr && (row = res->nextRow()) != nullptr)
     {
         return createObjectFromRow(row);
     }
@@ -616,12 +616,12 @@ Ref<CdsObject> SQLStorage::loadObjectByServiceID(String serviceID)
     *qb << SQL_QUERY << " WHERE " << TQD('f',"service_id") << '=' << quote(serviceID);
     Ref<SQLResult> res = select(qb);
     Ref<SQLRow> row;
-    if (res != nil && (row = res->nextRow()) != nil)
+    if (res != nullptr && (row = res->nextRow()) != nullptr)
     {
         return createObjectFromRow(row);
     }
     
-    return nil;
+    return nullptr;
 }
 
 Ref<IntArray> SQLStorage::getServiceObjectIDs(char servicePrefix)
@@ -636,11 +636,11 @@ Ref<IntArray> SQLStorage::getServiceObjectIDs(char servicePrefix)
         << " LIKE " << quote(String(servicePrefix)+'%');
 
     Ref<SQLResult> res = select(qb);
-    if (res == nil)
+    if (res == nullptr)
         throw _Exception(_("db error"));
     
     Ref<SQLRow> row;
-    while((row = res->nextRow()) != nil)
+    while((row = res->nextRow()) != nullptr)
     {
         objectIDs->append(row->col(0).toInt());
     }
@@ -670,7 +670,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     {
         AUTOLOCK(cache->getMutex());
         Ref<CacheObject> cObj = cache->getObject(objectID);
-        if (cObj != nil && cObj->knowsObjectType())
+        if (cObj != nullptr && cObj->knowsObjectType())
         {
             objectType = cObj->getObjectType();
             haveObjectType = true;
@@ -685,7 +685,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
             << " FROM " << TQ(CDS_OBJECT_TABLE)
             << " WHERE " << TQ("id") << '=' << objectID;
         res = select(qb);
-        if(res != nil && (row = res->nextRow()) != nil)
+        if(res != nullptr && (row = res->nextRow()) != nullptr)
         {
             objectType = row->col(0).toInt();
             haveObjectType = true;
@@ -705,8 +705,8 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
             throw _ObjectNotFoundException(_("Object not found: ") + objectID);
         }
         
-        row = nil;
-        res = nil;
+        row = nullptr;
+        res = nullptr;
     }
     
     
@@ -784,15 +784,15 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     
     Ref<Array<CdsObject> > arr(new Array<CdsObject>());
     
-    while((row = res->nextRow()) != nil)
+    while((row = res->nextRow()) != nullptr)
     {
         Ref<CdsObject> obj = createObjectFromRow(row);
         arr->append(obj);
-        row = nil;
+        row = nullptr;
     }
     
-    row = nil;
-    res = nil;
+    row = nullptr;
+    res = nullptr;
     
     // update childCount fields
     for (int i = 0; i < arr->size(); i++)
@@ -818,7 +818,7 @@ int SQLStorage::getChildCount(int contId, bool containers, bool items, bool hide
     {
         AUTOLOCK(cache->getMutex());
         Ref<CacheObject> cObj = cache->getObject(contId);
-        if (cObj != nil)
+        if (cObj != nullptr)
         {
             if (cObj->knowsNumChildren())
                 return cObj->getNumChildren();
@@ -844,7 +844,7 @@ int SQLStorage::getChildCount(int contId, bool containers, bool items, bool hide
         *qb << " AND " << TQ("id") << "!=" << quote (CDS_ID_FS_ROOT);
     }
     res = select(qb);
-    if (res != nil && (row = res->nextRow()) != nil)
+    if (res != nullptr && (row = res->nextRow()) != nullptr)
     {
         int childCount = row->col(0).toInt();
         
@@ -875,12 +875,12 @@ Ref<Array<StringBase> > SQLStorage::getMimeTypes()
         << " WHERE " << TQ("mime_type") << " IS NOT NULL ORDER BY "
         << TQ("mime_type");
     Ref<SQLResult> res = select(qb);
-    if (res == nil)
+    if (res == nullptr)
         throw _Exception(_("db error"));
     
     Ref<SQLRow> row;
     
-    while ((row = res->nextRow()) != nil)
+    while ((row = res->nextRow()) != nullptr)
     {
         arr->append(String(row->col(0)));
     }
@@ -914,7 +914,7 @@ Ref<CdsObject> SQLStorage::_findObjectByPath(String fullpath)
     {
         AUTOLOCK(cache->getMutex());
         Ref<Array<CacheObject> > objects = cache->getObjects(dbLocation);
-        if (objects != nil)
+        if (objects != nullptr)
         {
             for (int i = 0; i < objects->size(); i++)
             {
@@ -934,13 +934,13 @@ Ref<CdsObject> SQLStorage::_findObjectByPath(String fullpath)
             "LIMIT 1";
     
     Ref<SQLResult> res = select(qb);
-    if (res == nil)
+    if (res == nullptr)
         throw _Exception(_("error while doing select: ") + qb->toString());
     
     
     Ref<SQLRow> row = res->nextRow();
-    if (row == nil)
-        return nil;
+    if (row == nullptr)
+        return nullptr;
     return createObjectFromRow(row);
 }
 
@@ -952,7 +952,7 @@ Ref<CdsObject> SQLStorage::findObjectByPath(String fullpath)
 int SQLStorage::findObjectIDByPath(String fullpath)
 {
     Ref<CdsObject> obj = _findObjectByPath(fullpath);
-    if (obj == nil)
+    if (obj == nullptr)
         return INVALID_OBJECT_ID;
     return obj->getID();
 }
@@ -976,7 +976,7 @@ int SQLStorage::_ensurePathExistence(String path, int *changedContainer)
         return CDS_ID_FS_ROOT;
 
     Ref<CdsObject> obj = findObjectByPath(path + DIR_SEPARATOR);
-    if (obj != nil)
+    if (obj != nullptr)
         return obj->getID();
 
     Ref<Array<StringBase> > pathAr = split_path(path);
@@ -989,14 +989,14 @@ int SQLStorage::_ensurePathExistence(String path, int *changedContainer)
     if (changedContainer != nullptr && *changedContainer == INVALID_OBJECT_ID)
         *changedContainer = parentID;
 
-    return createContainer(parentID, f2i->convert(folder), path, false, nil, INVALID_OBJECT_ID, nil);
+    return createContainer(parentID, f2i->convert(folder), path, false, nullptr, INVALID_OBJECT_ID, nullptr);
 }
 
 int SQLStorage::createContainer(int parentID, String name, String path, bool isVirtual, String upnpClass, int refID, Ref<Dictionary> lastMetadata)
 {
     if (refID > 0) {
         Ref<CdsObject> refObj = loadObject(refID);
-        if (refObj == nil)
+        if (refObj == nullptr)
             throw _Exception(_("tried to create container with refID set, but refID doesn't point to an existing object"));
     }
     String dbLocation = addLocationPrefix((isVirtual ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX), path);
@@ -1023,7 +1023,7 @@ int SQLStorage::createContainer(int parentID, String name, String path, bool isV
         << quote(name) << ','
         << quote(dbLocation) << ','
         << quote(stringHash(dbLocation)) << ','
-        << (lastMetadata == nil ? _(SQL_NULL) : lastMetadata->encode()) << ','
+        << (lastMetadata == nullptr ? _(SQL_NULL) : lastMetadata->encode()) << ','
         << (refID > 0 ? quote(refID) : _(SQL_NULL))
         << ')';
         
@@ -1063,12 +1063,12 @@ String SQLStorage::buildContainerPath(int parentID, String title)
         " WHERE " << TQ("id") << '=' << parentID << " LIMIT 1";
 
     Ref<SQLResult> res = select(qb);
-    if (res == nil)
-        return nil;
+    if (res == nullptr)
+        return nullptr;
 
     Ref<SQLRow> row = res->nextRow();
-    if (row == nil)
-        return nil;
+    if (row == nullptr)
+        return nullptr;
 
     char prefix;
     String path = stripLocationPrefix(&prefix, row->col(0)) + VIRTUAL_CONTAINER_SEPARATOR + title;
@@ -1094,10 +1094,10 @@ void SQLStorage::addContainerChain(String path, String lastClass, int lastRefID,
             << " LIMIT 1";
 
     Ref<SQLResult> res = select(qb);
-    if (res != nil)
+    if (res != nullptr)
     {
         Ref<SQLRow> row = res->nextRow();
-        if (row != nil)
+        if (row != nullptr)
         {
             if (containerID != nullptr)
                 *containerID = row->col(0).toInt();
@@ -1109,7 +1109,7 @@ void SQLStorage::addContainerChain(String path, String lastClass, int lastRefID,
     String newpath, container;
     stripAndUnescapeVirtualContainerFromPath(path, newpath, container);
 
-    addContainerChain(newpath, nil, INVALID_OBJECT_ID, &parentContainerID, updateID, nil);
+    addContainerChain(newpath, nullptr, INVALID_OBJECT_ID, &parentContainerID, updateID, nullptr);
     if (updateID != nullptr && *updateID == INVALID_OBJECT_ID)
         *updateID = parentContainerID;
     *containerID = createContainer(parentContainerID, container, path, true, lastClass, lastRefID, lastMetadata);
@@ -1122,10 +1122,10 @@ String SQLStorage::addLocationPrefix(char prefix, String path)
 
 String SQLStorage::stripLocationPrefix(char* prefix, String path)
 {
-    if (path == nil)
+    if (path == nullptr)
     {
         *prefix = LOC_ILLEGAL_PREFIX;
-        return nil;
+        return nullptr;
     }
     *prefix = path.charAt(0);
     return path.substring(1);
@@ -1133,8 +1133,8 @@ String SQLStorage::stripLocationPrefix(char* prefix, String path)
 
 String SQLStorage::stripLocationPrefix(String path)
 {
-    if (path == nil)
-        return nil;
+    if (path == nullptr)
+        return nullptr;
     return path.substring(1);
 }
 
@@ -1245,7 +1245,7 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
             << " WHERE " << TQ("id") << '=' << quote(aitem->getID());
         Ref<SQLResult> resAI = select(query);
         Ref<SQLRow> rowAI;
-        if (resAI != nil && (rowAI = resAI->nextRow()) != nil)
+        if (resAI != nullptr && (rowAI = resAI->nextRow()) != nullptr)
         {
             aitem->setAction(rowAI->col(1));
             aitem->setState(rowAI->col(2));
@@ -1258,7 +1258,7 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
 
     if(! matched_types)
     {
-        throw _StorageException(nil, _("unknown object type: ")+ objectType);
+        throw _StorageException(nullptr, _("unknown object type: ")+ objectType);
     }
     
     addObjectToCache(obj);
@@ -1275,7 +1275,7 @@ int SQLStorage::getTotalFiles()
            //<< " AND is_virtual = 0";
     Ref<SQLResult> res = select(query);
     Ref<SQLRow> row;
-    if (res != nil && (row = res->nextRow()) != nil)
+    if (res != nullptr && (row = res->nextRow()) != nullptr)
     {
         return row->col(0).toInt();
     }
@@ -1285,7 +1285,7 @@ int SQLStorage::getTotalFiles()
 String SQLStorage::incrementUpdateIDs(shared_ptr<unordered_set<int> > ids)
 {
     if (ids->empty())
-        return nil;
+        return nullptr;
     Ref<StringBuffer> inBuf(new StringBuffer()); // ??? what was that: size * sizeof(int)));
 
     bool first = true;
@@ -1308,14 +1308,14 @@ String SQLStorage::incrementUpdateIDs(shared_ptr<unordered_set<int> > ids)
     *buf << "SELECT " << TQ("id") << ',' << TQ("update_id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE " << TQ("id") << ' ';
     *buf << inBuf;
     Ref<SQLResult> res = select(buf);
-    if (res == nil)
+    if (res == nullptr)
         throw _Exception(_("Error while fetching update ids"));
     Ref<SQLRow> row;
     buf->clear();
-    while((row = res->nextRow()) != nil)
+    while((row = res->nextRow()) != nullptr)
         *buf << ',' << row->col(0) << ',' << row->col(1);
     if (buf->length() <= 0)
-        return nil;
+        return nullptr;
     return buf->toString(1);
 }
 
@@ -1348,15 +1348,15 @@ String SQLStorage::findFolderImage(int id, String trackArtBase)
 
     log_debug("findFolderImage %d, %s\n", id, q->c_str());
     Ref<SQLResult> res = select(q);
-    if (res == nil)
+    if (res == nullptr)
         throw _Exception(_("db error"));
     Ref<SQLRow> row;
-    if ((row = res->nextRow()) != nil)  // we only care about the first result
+    if ((row = res->nextRow()) != nullptr)  // we only care about the first result
     {
         log_debug("findFolderImage result: %s\n", row->col(0).c_str());
         return row->col(0);
     }
-    return nil;
+    return nullptr;
 }
 
 /*
@@ -1389,7 +1389,7 @@ Ref<Array<CdsObject> > SQLStorage::selectObjects(Ref<SelectParam> param)
     Ref<SQLRow> row;
     Ref<Array<CdsObject> > arr(new Array<CdsObject>());
 
-    while((row = res->nextRow()) != nil)
+    while((row = res->nextRow()) != nullptr)
     {
         Ref<CdsObject> obj = createObjectFromRow(row);
         arr->append(obj);
@@ -1409,7 +1409,7 @@ shared_ptr<unordered_set<int> > SQLStorage::getObjects(int parentID, bool withou
     *q << TQ("parent_id") << '=';
     *q << parentID;
     Ref<SQLResult> res = select(q);
-    if (res == nil)
+    if (res == nullptr)
         throw _Exception(_("db error"));
     Ref<SQLRow> row;
     
@@ -1422,7 +1422,7 @@ shared_ptr<unordered_set<int> > SQLStorage::getObjects(int parentID, bool withou
     
     shared_ptr<unordered_set<int> > ret = make_shared<unordered_set<int>>();
     
-    while ((row = res->nextRow()) != nil) {
+    while ((row = res->nextRow()) != nullptr) {
         ret->insert(row->col(0).toInt());
     }
     return ret;
@@ -1434,7 +1434,7 @@ Ref<Storage::ChangedContainers> SQLStorage::removeObjects(shared_ptr<unordered_s
 
     int count = list->size();
     if (count <= 0)
-        return nil;
+        return nullptr;
     
     Ref<StringBuffer> idsBuf(new StringBuffer());
     *idsBuf << "SELECT " << TQ("id") << ',' << TQ("object_type")
@@ -1450,14 +1450,14 @@ Ref<Storage::ChangedContainers> SQLStorage::removeObjects(shared_ptr<unordered_s
     idsBuf->setCharAt(firstComma, ' ');
     *idsBuf << ')';
     Ref<SQLResult> res = select(idsBuf);
-    idsBuf = nil;
-    if (res == nil)
+    idsBuf = nullptr;
+    if (res == nullptr)
         throw _Exception(_("sql error"));
     
     Ref<StringBuffer> items(new StringBuffer());
     Ref<StringBuffer> containers(new StringBuffer());
     Ref<SQLRow> row;
-    while ((row = res->nextRow()) != nil)
+    while ((row = res->nextRow()) != nullptr)
     {
         int objectType = row->col(1).toInt();
         if (IS_CDS_CONTAINER(objectType))
@@ -1483,12 +1483,12 @@ void SQLStorage::_removeObjects(Ref<StringBuffer> objectIDs, int offset)
     log_debug("%s\n", q->c_str());
     
     Ref<SQLResult> res = select(q);
-    if (res != nil)
+    if (res != nullptr)
     {
         log_debug("relevant autoscans!\n");
         Ref<StringBuffer> delete_as(new StringBuffer());
         Ref<SQLRow> row;
-        while((row = res->nextRow()) != nil)
+        while((row = res->nextRow()) != nullptr)
         {
             bool persistent = remapBool(row->col(1));
             if (persistent)
@@ -1540,11 +1540,11 @@ Ref<Storage::ChangedContainers> SQLStorage::removeObject(int objectID, bool all)
         << " FROM " << TQ(CDS_OBJECT_TABLE)
         << " WHERE " << TQ("id") << '=' << quote(objectID) << " LIMIT 1";
     Ref<SQLResult> res = select(q);
-    if (res == nil)
-        return nil;
+    if (res == nullptr)
+        return nullptr;
     Ref<SQLRow> row = res->nextRow();
-    if (row == nil)
-        return nil;
+    if (row == nullptr)
+        return nullptr;
     
     int objectType = row->col(0).toInt();
     bool isContainer = IS_CDS_CONTAINER(objectType);
@@ -1563,11 +1563,11 @@ Ref<Storage::ChangedContainers> SQLStorage::removeObject(int objectID, bool all)
         throw _Exception(_("tried to delete a forbidden ID (") + objectID + ")!");
     Ref<StringBuffer> idsBuf(new StringBuffer());
     *idsBuf << ',' << objectID;
-    Ref<ChangedContainersStr> changedContainers = nil;
+    Ref<ChangedContainersStr> changedContainers = nullptr;
     if (isContainer)
-        changedContainers = _recursiveRemove(nil, idsBuf, all);
+        changedContainers = _recursiveRemove(nullptr, idsBuf, all);
     else
-        changedContainers = _recursiveRemove(idsBuf, nil, all);
+        changedContainers = _recursiveRemove(idsBuf, nullptr, all);
     return _purgeEmptyContainers(changedContainers);
 }
 
@@ -1601,13 +1601,13 @@ Ref<SQLStorage::ChangedContainersStr> SQLStorage::_recursiveRemove(Ref<StringBuf
     Ref<SQLResult> res;
     Ref<SQLRow> row;
     
-    if (items != nil && items->length() > 1)
+    if (items != nullptr && items->length() > 1)
     {
         *recurseItems << items;
         *removeAddParents << items;
     }
     
-    if (containers != nil && containers->length() > 1)
+    if (containers != nullptr && containers->length() > 1)
     {
         *recurseContainers << containers;
         
@@ -1616,10 +1616,10 @@ Ref<SQLStorage::ChangedContainersStr> SQLStorage::_recursiveRemove(Ref<StringBuf
         removeAddParents->setCharAt(removeAddParentsLen, ' ');
         *removeAddParents << ')';
         res = select(removeAddParents);
-        if (res == nil)
-            throw _StorageException(nil, _("sql error"));
+        if (res == nullptr)
+            throw _StorageException(nullptr, _("sql error"));
         removeAddParents->setLength(removeAddParentsLen);
-        while ((row = res->nextRow()) != nil)
+        while ((row = res->nextRow()) != nullptr)
             *changedContainers->ui << ',' << row->col_c_str(0);
     }
     
@@ -1636,11 +1636,11 @@ Ref<SQLStorage::ChangedContainersStr> SQLStorage::_recursiveRemove(Ref<StringBuf
             removeAddParents->setCharAt(removeAddParentsLen, ' ');
             *removeAddParents << ')';
             res = select(removeAddParents);
-            if (res == nil)
-                throw _StorageException(nil, _("sql error"));
+            if (res == nullptr)
+                throw _StorageException(nullptr, _("sql error"));
             // reset length
             removeAddParents->setLength(removeAddParentsLen);
-            while ((row = res->nextRow()) != nil)
+            while ((row = res->nextRow()) != nullptr)
                 *changedContainers->upnp << ',' << row->col_c_str(0);
         }
         
@@ -1649,10 +1649,10 @@ Ref<SQLStorage::ChangedContainersStr> SQLStorage::_recursiveRemove(Ref<StringBuf
             recurseItems->setCharAt(recurseItemsLen, ' ');
             *recurseItems << ')';
             res = select(recurseItems);
-            if (res == nil)
-                throw _StorageException(nil, _("sql error"));
+            if (res == nullptr)
+                throw _StorageException(nullptr, _("sql error"));
             recurseItems->setLength(recurseItemsLen);
-            while ((row = res->nextRow()) != nil)
+            while ((row = res->nextRow()) != nullptr)
             {
                 *remove << ',' << row->col_c_str(0);
                 *changedContainers->upnp << ',' << row->col_c_str(1);
@@ -1665,10 +1665,10 @@ Ref<SQLStorage::ChangedContainersStr> SQLStorage::_recursiveRemove(Ref<StringBuf
             recurseContainers->setCharAt(recurseContainersLen, ' ');
             *recurseContainers << ')';
             res = select(recurseContainers);
-            if (res == nil)
-                throw _StorageException(nil, _("sql error"));
+            if (res == nullptr)
+                throw _StorageException(nullptr, _("sql error"));
             recurseContainers->setLength(recurseContainersLen);
-            while ((row = res->nextRow()) != nil)
+            while ((row = res->nextRow()) != nullptr)
             {
                 //containers->append(row->col(1).toInt());
                 
@@ -1764,9 +1764,9 @@ Ref<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(Ref<ChangedCon
             log_debug("upnp-sql: %s\n", bufSelUpnp->c_str());
             res = select(bufSelUpnp);
             bufSelUpnp->setLength(bufSelLen);
-            if (res == nil)
+            if (res == nullptr)
                 throw _Exception(_("db error"));
-            while ((row = res->nextRow()) != nil)
+            while ((row = res->nextRow()) != nullptr)
             {
                 int flags = row->col(3).toInt();
                 if (flags & OBJECT_FLAG_PERSISTENT_CONTAINER)
@@ -1790,9 +1790,9 @@ Ref<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(Ref<ChangedCon
             log_debug("ui-sql: %s\n", bufSelUI->c_str());
             res = select(bufSelUI);
             bufSelUI->setLength(bufSelLen);
-            if (res == nil)
+            if (res == nullptr)
                 throw _Exception(_("db error"));
-            while ((row = res->nextRow()) != nil)
+            while ((row = res->nextRow()) != nullptr)
             {
                 int flags = row->col(3).toInt();
                 if (flags & OBJECT_FLAG_PERSISTENT_CONTAINER)
@@ -1851,11 +1851,11 @@ String SQLStorage::getInternalSetting(String key)
     *q << "SELECT " << TQ("value") << " FROM " << TQ(INTERNAL_SETTINGS_TABLE) << " WHERE " << TQ("key") << '='
         << quote(key) << " LIMIT 1";
     Ref<SQLResult> res = select(q);
-    if (res == nil)
-        return nil;
+    if (res == nullptr)
+        return nullptr;
     Ref<SQLRow> row = res->nextRow();
-    if (row == nil)
-        return nil;
+    if (row == nullptr)
+        return nullptr;
     return row->col(0);
 }
 /*
@@ -1882,7 +1882,7 @@ void SQLStorage::updateAutoscanPersistentList(scan_mode_t scanmode, Ref<Autoscan
     {
         log_debug("getting ad %d from list..\n", i);
         Ref<AutoscanDirectory> ad = list->get(i);
-        if (ad == nil)
+        if (ad == nullptr)
             continue;
         
         // only persistent asD should be given to getAutoscanList
@@ -1905,10 +1905,10 @@ void SQLStorage::updateAutoscanPersistentList(scan_mode_t scanmode, Ref<Autoscan
             *q << TQ("obj_id") << '=' << quote(objectID);
         *q << " LIMIT 1";
         Ref<SQLResult> res = select(q);
-        if (res == nil)
-            throw _StorageException(nil, _("query error while selecting from autoscan list"));
+        if (res == nullptr)
+            throw _StorageException(nullptr, _("query error while selecting from autoscan list"));
         Ref<SQLRow> row;
-        if ((row = res->nextRow()) != nil)
+        if ((row = res->nextRow()) != nullptr)
         {
             ad->setStorageID(row->col(0).toInt());
             updateAutoscanDirectory(ad);
@@ -1938,14 +1938,14 @@ Ref<AutoscanList> SQLStorage::getAutoscanList(scan_mode_t scanmode)
        << " ON " FLD("obj_id") '=' << TQD('t',"id")
        << " WHERE " FLD("scan_mode") '=' << quote(AutoscanDirectory::mapScanmode(scanmode));
     Ref<SQLResult> res = select(q);
-    if (res == nil)
-        throw _StorageException(nil, _("query error while fetching autoscan list"));
+    if (res == nullptr)
+        throw _StorageException(nullptr, _("query error while fetching autoscan list"));
     Ref<AutoscanList> ret(new AutoscanList());
     Ref<SQLRow> row;
-    while((row = res->nextRow()) != nil)
+    while((row = res->nextRow()) != nullptr)
     {
         Ref<AutoscanDirectory> dir = _fillAutoscanDirectory(row);
-        if (dir == nil)
+        if (dir == nullptr)
             removeAutoscanDirectory(row->col(0).toInt());
         else
             ret->add(dir);
@@ -1966,12 +1966,12 @@ Ref<AutoscanDirectory> SQLStorage::getAutoscanDirectory(int objectID)
        << " ON " FLD("obj_id") '=' << TQD('t',"id")
        << " WHERE " << TQD('t',"id") << '=' << quote(objectID);
     Ref<SQLResult> res = select(q);
-    if (res == nil)
-        throw _StorageException(nil, _("query error while fetching autoscan"));
+    if (res == nullptr)
+        throw _StorageException(nullptr, _("query error while fetching autoscan"));
     Ref<AutoscanList> ret(new AutoscanList());
     Ref<SQLRow> row = res->nextRow();
-    if (row == nil)
-        return nil;
+    if (row == nullptr)
+        return nullptr;
     else
         return _fillAutoscanDirectory(row);
 }
@@ -1991,7 +1991,7 @@ Ref<AutoscanDirectory> SQLStorage::_fillAutoscanDirectory(Ref<SQLRow> row)
         char prefix;
         location = stripLocationPrefix(&prefix, row->col(10));
         if (prefix != LOC_DIR_PREFIX)
-            return nil;
+            return nullptr;
     }
     
     scan_level_t level = AutoscanDirectory::remapScanlevel(row->col(2));
@@ -2016,8 +2016,8 @@ Ref<AutoscanDirectory> SQLStorage::_fillAutoscanDirectory(Ref<SQLRow> row)
 
 void SQLStorage::addAutoscanDirectory(Ref<AutoscanDirectory> adir)
 {
-    if (adir == nil)
-        throw _Exception(_("addAutoscanDirectory called with adir==nil"));
+    if (adir == nullptr)
+        throw _Exception(_("addAutoscanDirectory called with adir==nullptr"));
     if (adir->getStorageID() >= 0)
         throw _Exception(_("tried to add autoscan directory with a storage id set"));
     int objectID;
@@ -2054,7 +2054,7 @@ void SQLStorage::addAutoscanDirectory(Ref<AutoscanDirectory> adir)
         << quote(adir->getPreviousLMT()) << ','
         << mapBool(adir->persistent()) << ','
         << (objectID >= 0 ? _(SQL_NULL) : quote(adir->getLocation())) << ','
-        << (pathIds == nil ? _(SQL_NULL) : quote(_(",") + pathIds->toCSV() + ','))
+        << (pathIds == nullptr ? _(SQL_NULL) : quote(_(",") + pathIds->toCSV() + ','))
         << ')';
     adir->setStorageID(exec(q, true));
 }
@@ -2063,8 +2063,8 @@ void SQLStorage::updateAutoscanDirectory(Ref<AutoscanDirectory> adir)
 {
     log_debug("id: %d, obj_id: %d\n", adir->getStorageID(), adir->getObjectID());
     
-    if (adir == nil)
-        throw _Exception(_("updateAutoscanDirectory called with adir==nil"));
+    if (adir == nullptr)
+        throw _Exception(_("updateAutoscanDirectory called with adir==nullptr"));
     
     Ref<IntArray> pathIds = _checkOverlappingAutoscans(adir);
     
@@ -2089,7 +2089,7 @@ void SQLStorage::updateAutoscanDirectory(Ref<AutoscanDirectory> adir)
         *q << ',' << TQ("last_modified") << '=' << quote(adir->getPreviousLMT());
     *q << ',' << TQ("persistent") << '=' << mapBool(adir->persistent())
         << ',' << TQ("location") << '=' << (objectID >= 0 ? _(SQL_NULL) : quote(adir->getLocation()))
-        << ',' << TQ("path_ids") << '=' << (pathIds == nil ? _(SQL_NULL) : quote(_(",") + pathIds->toCSV() + ','))
+        << ',' << TQ("path_ids") << '=' << (pathIds == nullptr ? _(SQL_NULL) : quote(_(",") + pathIds->toCSV() + ','))
         << ',' << TQ("touched") << '=' << mapBool(true)
         << " WHERE " << TQ("id") << '=' << quote(adir->getStorageID());
     exec(q);
@@ -2139,7 +2139,7 @@ int SQLStorage::_getAutoscanDirectoryInfo(int objectID, String field)
         << " WHERE " << TQ("obj_id") << '=' << quote(objectID);
     Ref<SQLResult> res = select(q);
     Ref<SQLRow> row;
-    if (res == nil || (row = res->nextRow()) == nil)
+    if (res == nullptr || (row = res->nextRow()) == nullptr)
         return 0;
     if (! remapBool(row->col(0)))
         return 1;
@@ -2154,10 +2154,10 @@ int SQLStorage::_getAutoscanObjectID(int autoscanID)
         << " WHERE " << TQ("id") << '=' << quote(autoscanID)
         << " LIMIT 1";
     Ref<SQLResult> res = select(q);
-    if (res == nil)
-        throw _StorageException(nil, _("error while doing select on "));
+    if (res == nullptr)
+        throw _StorageException(nullptr, _("error while doing select on "));
     Ref<SQLRow> row;
-    if ((row = res->nextRow()) != nil && string_ok(row->col(0)))
+    if ((row = res->nextRow()) != nullptr && string_ok(row->col(0)))
         return row->col(0).toInt();
     return INVALID_OBJECT_ID;
 }
@@ -2197,7 +2197,7 @@ void SQLStorage::autoscanUpdateLM(Ref<AutoscanDirectory> adir)
 int SQLStorage::isAutoscanChild(int objectID)
 {
     Ref<IntArray> pathIDs = getPathIDs(objectID);
-    if (pathIDs == nil)
+    if (pathIDs == nullptr)
         return INVALID_OBJECT_ID;
     for (int i = 0; i < pathIDs->size(); i++)
     {
@@ -2215,11 +2215,11 @@ void SQLStorage::checkOverlappingAutoscans(Ref<AutoscanDirectory> adir)
 
 Ref<IntArray> SQLStorage::_checkOverlappingAutoscans(Ref<AutoscanDirectory> adir)
 {
-    if (adir == nil)
-        throw _Exception(_("_checkOverlappingAutoscans called with adir==nil"));
+    if (adir == nullptr)
+        throw _Exception(_("_checkOverlappingAutoscans called with adir==nullptr"));
     int checkObjectID = adir->getObjectID();
     if (checkObjectID == INVALID_OBJECT_ID)
-        return nil;
+        return nullptr;
     int storageID = adir->getStorageID();
     
     Ref<SQLResult> res;
@@ -2235,13 +2235,13 @@ Ref<IntArray> SQLStorage::_checkOverlappingAutoscans(Ref<AutoscanDirectory> adir
         *q << " AND " << TQ("id") << " != " << quote(storageID);
     
     res = select(q);
-    if (res == nil)
+    if (res == nullptr)
         throw _Exception(_("SQL error"));
     
-    if ((row = res->nextRow()) != nil)
+    if ((row = res->nextRow()) != nullptr)
     {
         Ref<CdsObject> obj = loadObject(checkObjectID);
-        if (obj == nil)
+        if (obj == nullptr)
             throw _Exception(_("Referenced object (by Autoscan) not found."));
         log_error("There is already an Autoscan set on %s\n", obj->getLocation().c_str());
         throw _Exception(_("There is already an Autoscan set on ") + obj->getLocation());
@@ -2261,14 +2261,14 @@ Ref<IntArray> SQLStorage::_checkOverlappingAutoscans(Ref<AutoscanDirectory> adir
         log_debug("------------ %s\n", q->c_str());
         
         res = select(q);
-        if (res == nil)
+        if (res == nullptr)
             throw _Exception(_("SQL error"));
-        if ((row = res->nextRow()) != nil)
+        if ((row = res->nextRow()) != nullptr)
         {
             int objectID = row->col(0).toInt();
             log_debug("-------------- %d\n", objectID);
             Ref<CdsObject> obj = loadObject(objectID);
-            if (obj == nil)
+            if (obj == nullptr)
                 throw _Exception(_("Referenced object (by Autoscan) not found."));
             log_error("Overlapping Autoscans are not allowed. There is already an Autoscan set on %s\n", obj->getLocation().c_str());
             throw _Exception(_("Overlapping Autoscans are not allowed. There is already an Autoscan set on ") + obj->getLocation());
@@ -2276,8 +2276,8 @@ Ref<IntArray> SQLStorage::_checkOverlappingAutoscans(Ref<AutoscanDirectory> adir
     }
     
     Ref<IntArray> pathIDs = getPathIDs(checkObjectID);
-    if (pathIDs == nil)
-        throw _Exception(_("getPathIDs returned nil"));
+    if (pathIDs == nullptr)
+        throw _Exception(_("getPathIDs returned nullptr"));
     q->clear();
     *q << "SELECT " << TQ("obj_id")
         << " FROM " << TQ(AUTOSCAN_TABLE)
@@ -2289,15 +2289,15 @@ Ref<IntArray> SQLStorage::_checkOverlappingAutoscans(Ref<AutoscanDirectory> adir
     *q << " LIMIT 1";
     
     res = select(q);
-    if (res == nil)
+    if (res == nullptr)
         throw _Exception(_("SQL error"));
-    if ((row = res->nextRow()) == nil)
+    if ((row = res->nextRow()) == nullptr)
         return pathIDs;
     else
     {
         int objectID = row->col(0).toInt();
         Ref<CdsObject> obj = loadObject(objectID);
-        if (obj == nil)
+        if (obj == nullptr)
             throw _Exception(_("Referenced object (by Autoscan) not found."));
         log_error("Overlapping Autoscans are not allowed. There is already a recursive Autoscan set on %s\n", obj->getLocation().c_str());
         throw _Exception(_("Overlapping Autoscans are not allowed. There is already a recursive Autoscan set on ") + obj->getLocation());
@@ -2309,7 +2309,7 @@ Ref<IntArray> SQLStorage::getPathIDs(int objectID)
     flushInsertBuffer();
     
     if (objectID == INVALID_OBJECT_ID)
-        return nil;
+        return nullptr;
     Ref<IntArray> pathIDs(new IntArray());
     Ref<StringBuffer> q(new StringBuffer());
     *q << "SELECT " << TQ("parent_id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";
@@ -2323,7 +2323,7 @@ Ref<IntArray> SQLStorage::getPathIDs(int objectID)
         q->setLength(selBufLen);
         *q << quote(objectID) << " LIMIT 1";
         res = select(q);
-        if (res == nil || (row = res->nextRow()) == nil)
+        if (res == nullptr || (row = res->nextRow()) == nullptr)
             break;
         objectID = row->col(0).toInt();
     }
@@ -2367,12 +2367,12 @@ void SQLStorage::loadLastID()
     *qb << "SELECT MAX(" << TQ("id") << ')'
         << " FROM " << TQ(CDS_OBJECT_TABLE);
     Ref<SQLResult> res = select(qb);
-    if (res == nil)
-        throw _Exception(_("could not load lastID (res==nil)"));
+    if (res == nullptr)
+        throw _Exception(_("could not load lastID (res==nullptr)"));
     
     Ref<SQLRow> row = res->nextRow();
-    if (row == nil)
-        throw _Exception(_("could not load lastID (row==nil)"));
+    if (row == nullptr)
+        throw _Exception(_("could not load lastID (row==nullptr)"));
     
     lastID = row->col(0).toInt();
     if (lastID < CDS_ID_FS_ROOT)
@@ -2381,7 +2381,7 @@ void SQLStorage::loadLastID()
 
 void SQLStorage::addObjectToCache(Ref<CdsObject> object, bool dontLock)
 {
-    if (cacheOn() && object != nil)
+    if (cacheOn() && object != nullptr)
     {
         AUTOLOCK_DEFINE_ONLY();
         if (! dontLock)

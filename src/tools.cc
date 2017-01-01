@@ -121,8 +121,8 @@ Ref<Array<StringBase> > split_path(String str)
 
 String trim_string(String str)
 {
-    if (str == nil)
-        return nil;
+    if (str == nullptr)
+        return nullptr;
     int i;
     int start = 0;
     int end = 0;
@@ -211,44 +211,44 @@ String find_in_path(String exec)
 {
     String PATH = getenv("PATH");
     if (!string_ok(PATH))
-        return nil;
+        return nullptr;
 
     Ref<StringTokenizer> st(new StringTokenizer(PATH));
-    String path = nil;
+    String path = nullptr;
     String next;
     do
     {
-        if (path == nil)
+        if (path == nullptr)
             path = st->nextToken(_(":"));
         next = st->nextToken(_(":"));
 
-        if (path == nil)
+        if (path == nullptr)
             break;
 
-        if ((next != nil) && !next.startsWith(_("/")))
+        if ((next != nullptr) && !next.startsWith(_("/")))
         {
             path = path + _(":") + next;
-            next = nil;
+            next = nullptr;
         }
 
         String check = path + _("/") + exec;
         if (check_path(check))
             return check;
 
-        if (next != nil)
+        if (next != nullptr)
             path = next;
         else
-            path = nil;
+            path = nullptr;
 
 
-    } while (path != nil);
+    } while (path != nullptr);
 
-    return nil;
+    return nullptr;
 }
 
 bool string_ok(String str)
 {
-    if ((str == nil) || (str == ""))
+    if ((str == nullptr) || (str == ""))
         return false;
     return true;
 }
@@ -256,7 +256,7 @@ bool string_ok(String str)
 bool string_ok(Ref<StringBuffer> str)
 {
     
-    if ((str == nil) || (str->length()<=0))
+    if ((str == nullptr) || (str->length()<=0))
         return false;
     else
         return true;
@@ -264,7 +264,7 @@ bool string_ok(Ref<StringBuffer> str)
 
 void string_ok_ex(String str)
 {
-    if ((str == nil) || (str == ""))
+    if ((str == nullptr) || (str == ""))
         throw _Exception(_("Empty string"));
 }
 
@@ -636,7 +636,7 @@ String getMTFromProtocolInfo(String protocol)
     if (parts->size() > 2)
         return parts->get(2);
     else
-        return nil;
+        return nullptr;
 }
 
 String getProtocol(String protocolInfo)
@@ -691,13 +691,13 @@ int HMSToSeconds(String time)
 String get_mime_type(magic_set *ms, Ref<RExp> reMimetype, String file)
 {
     if (ms == nullptr)
-        return nil;
+        return nullptr;
 
     char *mt = (char *)magic_file(ms, file.c_str());
     if (mt == nullptr)
     {
         log_error("magic_file: %s\n", magic_error(ms));
-        return nil;
+        return nullptr;
     }
 
     String mime_type = mt;
@@ -708,20 +708,20 @@ String get_mime_type(magic_set *ms, Ref<RExp> reMimetype, String file)
 
     log_warning("filemagic returned invalid mimetype for %s\n%s\n",
                 file.c_str(), mt);
-    return nil;
+    return nullptr;
 }
 
 String get_mime_type_from_buffer(magic_set *ms, Ref<RExp> reMimetype, 
                                  const void *buffer, size_t length)
 {
     if (ms == nullptr)
-        return nil;
+        return nullptr;
 
     char *mt = (char *)magic_buffer(ms, buffer, length);
     if (mt == nullptr)
     {
         log_error("magic_file: %s\n", magic_error(ms));
-        return nil;
+        return nullptr;
     }
 
     String mime_type = mt;
@@ -731,7 +731,7 @@ String get_mime_type_from_buffer(magic_set *ms, Ref<RExp> reMimetype,
         return matcher->group(1);
 
     log_warning("filemagic returned invalid mimetype for the given buffer%s\n", mt);
-    return nil;
+    return nullptr;
 }
 #endif 
 
@@ -930,8 +930,8 @@ String xml_unescape(String string)
 
 String unescape_amp(String string)
 {
-    if (string == nil)
-        return nil;
+    if (string == nullptr)
+        return nullptr;
     Ref<StringBase> stringBase(new StringBase(string.length()));
     char *str = stringBase->data;
     int len = string.length();
@@ -971,7 +971,7 @@ String unescape_amp(String string)
 
 String fallbackString(String first, String fallback)
 {
-    if (first==nil)
+    if (first==nullptr)
         return fallback;
     return first;
 }
@@ -989,7 +989,7 @@ unsigned int stringHash(String str)
 String toCSV(shared_ptr<unordered_set<int> > array)
 {
     if (array->empty())
-        return nil;
+        return nullptr;
     Ref<StringBuffer> buf(new StringBuffer());
     for (const auto &i: *array) {
         *buf << ',' << i;
@@ -1133,7 +1133,7 @@ String interfaceToIP(String interface)
     struct sockaddr_in LocalAddr;
     char *hostname = (char *)MALLOC(256);
     if (!hostname)
-        return nil;
+        return nullptr;
 
     gethostname(hostname, 255);
     hostname[255] = '\0';
@@ -1144,7 +1144,7 @@ String interfaceToIP(String interface)
         memcpy(&LocalAddr.sin_addr, h->h_addr_list[0],4);
         return String(inet_ntoa(LocalAddr.sin_addr));
     }
-    return nil;
+    return nullptr;
 #else
 
     struct if_nameindex *iflist = nullptr;
@@ -1154,14 +1154,14 @@ String interfaceToIP(String interface)
     int local_socket;
 
     if (!string_ok(interface))
-            return nil;
+            return nullptr;
 
     local_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (local_socket < 0)
     {
         log_error("Could not create local socket: %s\n", 
                   mt_strerror(errno).c_str());
-        return nil;
+        return nullptr;
     }
 
     iflist = iflist_free = if_nameindex();
@@ -1170,7 +1170,7 @@ String interfaceToIP(String interface)
         log_error("Could not get interface list: %s\n", 
                   mt_strerror(errno).c_str());
         close(local_socket);
-        return nil;
+        return nullptr;
     }
 
     while (iflist->if_index || iflist->if_name)
@@ -1184,7 +1184,7 @@ String interfaceToIP(String interface)
                           mt_strerror(errno).c_str());
                 close(local_socket);
                 if_freenameindex(iflist_free);
-                return nil;
+                return nullptr;
             }
 
             memcpy(&local_address, &if_request.ifr_addr, sizeof(if_request.ifr_addr));
@@ -1198,7 +1198,7 @@ String interfaceToIP(String interface)
 
     close(local_socket);
     if_freenameindex(iflist_free);
-    return nil;
+    return nullptr;
 #endif
 }
 
@@ -1214,7 +1214,7 @@ Ref<Array<StringBase> > parseCommandLine(String line, String in, String out,
                                          String range)
 {
     Ref<Array<StringBase> > params = split_string(line, ' ');
-    if ((in == nil) && (out == nil))
+    if ((in == nullptr) && (out == nullptr))
         return params;
 
     for (int i = 0; i < params->size(); i++)
@@ -1222,7 +1222,7 @@ Ref<Array<StringBase> > parseCommandLine(String line, String in, String out,
         String param = params->get(i);
         String newParam = param.replace(_("%in"), in);
         newParam = newParam.replace(_("%out"), out);
-        if (range != nil)
+        if (range != nullptr)
         {
             newParam = newParam.replace(_("%range"), range);
         }
@@ -1279,7 +1279,7 @@ String tempName(String leadPath, char *tmpl)
 
     if (!XXXXXX || strncmp (XXXXXX, "XXXXXX", 6))
     {
-        return nil;
+        return nullptr;
     }
 
     /* Get some more or less random data.  */
@@ -1311,12 +1311,12 @@ String tempName(String leadPath, char *tmpl)
                     (errno == ENOTDIR))
                 return check;
             else
-                return nil;
+                return nullptr;
         }
     }
 
     /* We got out of the loop because we ran out of combinations to try.  */
-    return nil;
+    return nullptr;
 }
 
 bool isTheora(String ogg_filename)
@@ -1477,13 +1477,13 @@ String getAVIFourCC(zmm::String avi_filename)
     if (strncmp(buffer, "RIFF", 4) != 0)
     {
         free(buffer);
-        return nil;
+        return nullptr;
     }
 
     if (strncmp(buffer+8, "AVI ", 4) != 0)
     {
         free(buffer);
-        return nil;
+        return nullptr;
     }
 
     String fourcc = String(buffer+FCC_OFFSET, 4);
@@ -1492,7 +1492,7 @@ String getAVIFourCC(zmm::String avi_filename)
     if (string_ok(fourcc))
         return fourcc;
     else
-        return nil;
+        return nullptr;
 }
 #endif
 

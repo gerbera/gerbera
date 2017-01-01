@@ -63,8 +63,8 @@ void TaskProcessor::threadProc()
 
     while (!shutdownFlag)
     {
-        currentTask = nil;
-        if ((task = taskQueue->dequeue()) == nil)
+        currentTask = nullptr;
+        if ((task = taskQueue->dequeue()) == nullptr)
         {
             working = false;
             cond->wait();
@@ -123,7 +123,7 @@ void TaskProcessor::invalidateTask(unsigned int taskID)
 
     AUTOLOCK(mutex);
     Ref<GenericTask> t = getCurrentTask();
-    if (t != nil)
+    if (t != nullptr)
     {
         if ((t->getID() == taskID) || (t->getParentID() == taskID))
         {
@@ -146,15 +146,15 @@ void TaskProcessor::invalidateTask(unsigned int taskID)
 Ref<Array<GenericTask> > TaskProcessor::getTasklist()
 {
     int i;
-    Ref<Array<GenericTask> > taskList = nil;
+    Ref<Array<GenericTask> > taskList = nullptr;
 
     AUTOLOCK(mutex);
     Ref<GenericTask> t = getCurrentTask();
 
     // if there is no current task, then the queues are empty
     // and we do not have to allocate the array
-    if (t == nil)
-        return nil;
+    if (t == nullptr)
+        return nullptr;
 
     taskList = Ref<Array<GenericTask> >(new Array<GenericTask>());
     taskList->append(t);
@@ -188,7 +188,7 @@ TPFetchOnlineContentTask::TPFetchOnlineContentTask(Ref<OnlineService> service,
 
 void TPFetchOnlineContentTask::run()
 {
-    if (this->service == nil)
+    if (this->service == nullptr)
     {
         log_debug("No service specified\n");
         return;

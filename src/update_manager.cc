@@ -95,7 +95,7 @@ void UpdateManager::shutdown()
 
 void UpdateManager::containersChanged(Ref<IntArray> objectIDs, int flushPolicy)
 {
-    if (objectIDs == nil)
+    if (objectIDs == nullptr)
         return;
     AUTOLOCK(mutex);
     // signalling thread if it could have been idle, because 

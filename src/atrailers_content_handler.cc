@@ -77,8 +77,8 @@ Ref<CdsObject> ATrailersContentHandler::getNextObject()
 
         current_trailer_index++;
       
-        if (n == nil)
-            return nil;
+        if (n == nullptr)
+            return nullptr;
 
         if (n->getType() != mxml_node_element)
             continue;
@@ -93,7 +93,7 @@ Ref<CdsObject> ATrailersContentHandler::getNextObject()
         item->addResource(resource);
 
         Ref<Element> info = trailer->getChildByName(_("info"));
-        if (info == nil)
+        if (info == nullptr)
             continue;
 
         temp = info->getChildText(_("title"));
@@ -119,7 +119,7 @@ Ref<CdsObject> ATrailersContentHandler::getNextObject()
         item->setServiceID(temp);
 
         Ref<Element> preview = trailer->getChildByName(_("preview"));
-        if (preview == nil)
+        if (preview == nullptr)
         {
             log_warning("Failed to retrieve Trailer location for \"%s\", "
                         "skipping...\n", item->getTitle().c_str());
@@ -172,7 +172,7 @@ Ref<CdsObject> ATrailersContentHandler::getNextObject()
         }
 
         Ref<Element> cast = trailer->getChildByName(_("cast"));
-        if (cast != nil)
+        if (cast != nullptr)
         {
             String actors;
             for (int i = 0; i < cast->childCount(); i++)
@@ -201,7 +201,7 @@ Ref<CdsObject> ATrailersContentHandler::getNextObject()
         }
 
         Ref<Element> genre = trailer->getChildByName(_("genre"));
-        if (genre != nil)
+        if (genre != nullptr)
         {
             String genres;
             for (int i = 0; i < genre->childCount(); i++)
@@ -236,7 +236,7 @@ Ref<CdsObject> ATrailersContentHandler::getNextObject()
             I add the fastscaler
 
         Ref<Element> poster = trailer->getChildByName(_("poster"));
-        if (poster != nil)
+        if (poster != nullptr)
         {
         }
         */
@@ -258,7 +258,7 @@ Ref<CdsObject> ATrailersContentHandler::getNextObject()
             continue;
         }
     } // while
-    return nil;
+    return nullptr;
 }
 
 #endif//ATRAILERS

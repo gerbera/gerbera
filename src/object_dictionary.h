@@ -103,7 +103,7 @@ public:
                 return el->getValue();
             }
         }
-        return nil;
+        return nullptr;
     }
     
     /// \brief Returns the number of elements in the dictinary.

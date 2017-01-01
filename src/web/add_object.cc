@@ -44,13 +44,13 @@ using namespace mxml;
 web::addObject::addObject() : WebRequestHandler()
 {}
 
-/*static Ref<Element> addOption(String option_name, String option_type, String default_value = nil)
+/*static Ref<Element> addOption(String option_name, String option_type, String default_value = nullptr)
 {
     Ref<Element> option (new Element(_("option")));
     option->addAttribute(_("name"), option_name);
     option->addAttribute(_("type"), option_type);
     
-    if (default_value != nil)
+    if (default_value != nullptr)
         option->addAttribute(_("default"), default_value);
     
     return option;
@@ -182,7 +182,7 @@ void web::addObject::process()
     
     int parentID = intParam(_("parent_id"), 0);
     
-    Ref<CdsObject> obj = nil;
+    Ref<CdsObject> obj = nullptr;
     
     Ref<Element> updateContainerEl;
    
@@ -227,7 +227,7 @@ void web::addObject::process()
         throw _Exception(_("unknown object type: ") + obj_type.c_str());
     }
     
-    if (obj != nil)
+    if (obj != nullptr)
     {
         obj->setVirtual(true);
         if (obj_type == STRING_OBJECT_TYPE_ITEM)

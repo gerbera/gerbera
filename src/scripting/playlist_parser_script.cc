@@ -112,13 +112,13 @@ String PlaylistParserScript::readln()
     if (!currentHandle)
         throw _Exception(_("Readline not yet setup for use"));
 
-    if ((currentTask != nil) && (!currentTask->isValid()))
-        return nil;
+    if ((currentTask != nullptr) && (!currentTask->isValid()))
+        return nullptr;
 
     while (true)
     {
         if(fgets(currentLine, ONE_TEXTLINE_BYTES, currentHandle) == nullptr)
-            return nil;
+            return nullptr;
 
         ret = trim_string(currentLine);
         if (string_ok(ret))
@@ -157,7 +157,7 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<Ge
     if (!currentLine)
     {
         currentObjectID = INVALID_OBJECT_ID;
-        currentTask = nil;
+        currentTask = nullptr;
 #ifdef JS_THREADSAFE
         JS_EndRequest(cx);
         JS_ClearContextThread(cx);
@@ -171,7 +171,7 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<Ge
     if (!currentHandle)
     {
         currentObjectID = INVALID_OBJECT_ID;
-        currentTask = nil;
+        currentTask = nullptr;
         FREE(currentLine);
 #ifdef JS_THREADSAFE
         JS_EndRequest(cx);
@@ -199,7 +199,7 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<Ge
         currentLine = nullptr;
 
         currentObjectID = INVALID_OBJECT_ID;
-        currentTask = nil;
+        currentTask = nullptr;
 
 #ifdef JS_THREADSAFE
         JS_EndRequest(cx);
@@ -215,7 +215,7 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<Ge
     currentLine = nullptr;
 
     currentObjectID = INVALID_OBJECT_ID;
-    currentTask = nil;
+    currentTask = nullptr;
 
     gc_counter++;
     if (gc_counter > JS_CALL_GC_AFTER_NUM)

@@ -43,7 +43,7 @@ TranscodingProcessExecutor::TranscodingProcessExecutor(String command, Ref<Array
 
 void TranscodingProcessExecutor::removeFile(String filename)
 {
-    if (file_list == nil)
+    if (file_list == nullptr)
         file_list = Ref<Array<StringBase> >(new Array<StringBase>(2));
 
     file_list->append(filename);
@@ -53,7 +53,7 @@ TranscodingProcessExecutor::~TranscodingProcessExecutor()
 {
     kill();
 
-    if (file_list != nil)
+    if (file_list != nullptr)
     {
         for (int i = 0; i < file_list->size(); i++)
         {

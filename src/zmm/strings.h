@@ -98,7 +98,7 @@ public:
         return base;
     }
     
-    inline String(NIL_VAR)
+    inline String(nullptr_t)
     {
         base = NULL;
     }
@@ -109,7 +109,7 @@ public:
     
     String &operator=(String other);
     
-    inline String &operator=(NIL_VAR)
+    inline String &operator=(nullptr_t)
     {
         if(base)
             base->release();
@@ -141,13 +141,13 @@ public:
         return ! operator==(c);
     }
 
-    inline int operator==(NIL_VAR) const
+    inline int operator==(nullptr_t) const
     {
-        return (base == NULL);
+        return (base == nullptr);
     }
-    inline int operator!=(NIL_VAR) const
+    inline int operator!=(nullptr_t) const
     {
-        return (base != NULL);
+        return (base != nullptr);
     }
 
 

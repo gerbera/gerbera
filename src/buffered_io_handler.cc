@@ -40,8 +40,8 @@ using namespace std;
 
 BufferedIOHandler::BufferedIOHandler(Ref<IOHandler> underlyingHandler, size_t bufSize, size_t maxChunkSize, size_t initialFillSize) : IOHandlerBufferHelper(bufSize, initialFillSize)
 {
-    if (underlyingHandler == nil)
-        throw _Exception(_("underlyingHandler must not be nil"));
+    if (underlyingHandler == nullptr)
+        throw _Exception(_("underlyingHandler must not be nullptr"));
     if (maxChunkSize <= 0)
         throw _Exception(_("maxChunkSize must be positive"));
     this->underlyingHandler = underlyingHandler;

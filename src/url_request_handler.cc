@@ -80,7 +80,7 @@ void URLRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *info
                filename, parameters.c_str());
     
     String objID = dict->get(_("object_id"));
-    if (objID == nil)
+    if (objID == nullptr)
     {
         //log_error("object_id not found in url\n");
         throw _Exception(_("get_info: object_id not found"));
@@ -108,7 +108,7 @@ void URLRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *info
     {
         Ref<TranscodingProfile> tp = ConfigManager::getInstance()->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
 
-        if (tp == nil)
+        if (tp == nullptr)
             throw _Exception(_("Transcoding requested but no profile "
                                "matching the name ") + tr_profile + " found");
 
@@ -195,7 +195,7 @@ Ref<IOHandler> URLRequestHandler::open(IN const char *filename,
                filename, parameters.c_str());
 
     String objID = dict->get(_("object_id"));
-    if (objID == nil)
+    if (objID == nullptr)
     {
         throw _Exception(_("object_id not found"));
     }
@@ -242,7 +242,7 @@ Ref<IOHandler> URLRequestHandler::open(IN const char *filename,
     {
         Ref<TranscodingProfile> tp = ConfigManager::getInstance()->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
 
-        if (tp == nil)
+        if (tp == nullptr)
             throw _Exception(_("Transcoding of file ") + url +
                     " but no profile matching the name " +
                     tr_profile + " found");

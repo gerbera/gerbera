@@ -53,7 +53,7 @@ bool YouTubeContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
         throw _Exception(_("Invalid XML for YouTube service received"));
 
     Ref<Element> channel = service->getChildByName(_("channel"));
-    if (channel == nil)
+    if (channel == nullptr)
         throw _Exception(_("Invalid XML for YouTube service received - channel not found!"));
 
     this->service_xml = channel;
@@ -79,7 +79,7 @@ bool YouTubeContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
     while (item_node_index < channel_child_count)
     {
         Ref<Node> n = service_xml->getChild(item_node_index);
-        if (n == nil)
+        if (n == nullptr)
             return false;
         
         item_node_index++;
@@ -128,7 +128,7 @@ Ref<YouTubeSubFeed> YouTubeContentHandler::getSubFeed(Ref<Element> feedxml)
         throw _Exception(_("Invalid XML for YouTube feed received"));
 
     Ref<Element> channel = feedxml->getChildByName(_("channel"));
-    if (channel == nil)
+    if (channel == nullptr)
         throw _Exception(_("Invalid XML for YouTube service received - channel not found!"));
    
     subfeed->title = channel->getChildText(_("title"));
@@ -152,7 +152,7 @@ Ref<YouTubeSubFeed> YouTubeContentHandler::getSubFeed(Ref<Element> feedxml)
             continue;
 
         Ref<Element> link = channel_item->getChildByName(_("gd:feedLink"));
-        if (link == nil)
+        if (link == nullptr)
             continue;
         temp = link->getAttribute(_("href"));
         if (!string_ok(temp))
@@ -178,8 +178,8 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
 
         current_node_index++;
       
-        if (n == nil)
-            return nil;
+        if (n == nullptr)
+            return nullptr;
 
         if (n->getType() != mxml_node_element)
             continue;
@@ -245,7 +245,7 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
             item->setAuxData(_(YOUTUBE_AUXDATA_AUTHOR), temp);
 
         Ref<Element> mediagroup = channel_item->getChildByName(_("media:group"));
-        if (mediagroup == nil)
+        if (mediagroup == nullptr)
             continue;
 
         // media:group uses a couple of elements with the same name, so
@@ -257,7 +257,7 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
         for (int mcc = 0; mcc < mediagroup_child_count; mcc++)
         {
             Ref<Element> el = mediagroup->getElementChild(mcc);
-            if (el == nil)
+            if (el == nullptr)
                 continue;
 
             if (el->getName() == "media:title")
@@ -348,7 +348,7 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
         }
       
         Ref<Element> stats = channel_item->getChildByName(_("yt:statistics"));
-        if (stats != nil)
+        if (stats != nullptr)
         {
             temp = stats->getAttribute(_("viewCount"));
             if (string_ok(temp))
@@ -360,7 +360,7 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
         }
 
         Ref<Element> rating = channel_item->getChildByName(_("gd:rating"));
-        if (rating != nil)
+        if (rating != nullptr)
         {
             temp = rating->getAttribute(_("average"));
             if (string_ok(temp))
@@ -390,13 +390,13 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
             continue;
         }
     } // while
-    return nil;
+    return nullptr;
 }
 
 YouTubeSubFeed::YouTubeSubFeed()
 {
     links = Ref<Array<StringBase> >(new Array<StringBase>());
-    title = nil;
+    title = nullptr;
 }
 
 #endif//YOUTUBE

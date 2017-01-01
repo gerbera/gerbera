@@ -46,16 +46,16 @@ FDIOHandler::FDIOHandler(String filename) : IOHandler()
 {
     this->filename = filename;
     this->fd = -1;
-    this->other = nil;
+    this->other = nullptr;
     this->reference_list = Ref<Array<Object> >(new Array<Object >(4));
     this->closed = false;
 }
 
 FDIOHandler::FDIOHandler(int fd) : IOHandler()
 {
-    this->filename = nil;
+    this->filename = nullptr;
     this->fd = fd;
-    this->other = nil;
+    this->other = nullptr;
     this->reference_list = Ref<Array<Object> >(new Array<Object >(4));
     this->closed = false;
 }
@@ -137,7 +137,7 @@ void FDIOHandler::close()
     log_debug("Closing...\n");
     try
     {
-        if (other != nil)
+        if (other != nullptr)
             other->close();
     }
     catch (const Exception & ex)

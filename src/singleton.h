@@ -63,12 +63,12 @@ public:
     {
         if (! singletonActive)
             throw _ServerShutdownException(_("singleton is currently inactive!"));
-        if (instance == nil)
+        if (instance == nullptr)
         {
             AUTOLOCK(mutex);
             if (! singletonActive)
                 throw _ServerShutdownException(_("singleton is currently inactive!"));
-            if (instance == nil) // check again, because there is a very small chance
+            if (instance == nullptr) // check again, because there is a very small chance
                                  // that 2 threads tried to lock() concurrently
             {
                 zmm::Ref<T> tmpInstance = zmm::Ref<T>(new T());
@@ -102,7 +102,7 @@ private:
     {
         //log_debug("%d %d\n", singletonActive, instance.getPtr());
         singletonActive = false;
-        instance = nil;
+        instance = nullptr;
     }
     virtual void reactivateSingleton() { singletonActive = true; }
     
@@ -111,7 +111,7 @@ private:
 
 #define SINGLETON_MUTEX(klass, recursive) template <> zmm::Ref<Mutex> Singleton<klass>::mutex = zmm::Ref<Mutex>(new Mutex(recursive))
 //template <class T> zmm::Ref<Mutex> Singleton<T>::mutex = zmm::Ref<Mutex>(new Mutex());
-template <class T> zmm::Ref<T> Singleton<T>::instance = nil;
+template <class T> zmm::Ref<T> Singleton<T>::instance = nullptr;
 template <class T> bool Singleton<T>::singletonActive = true;
 
 #endif // __SINGLETON_H__

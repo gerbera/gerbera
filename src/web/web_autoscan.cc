@@ -135,7 +135,7 @@ void web::autoscan::process()
             //    AutoscanDirectory::mapScanlevel(scan_level).c_str(), recursive, interval, hidden);
             
             Ref<AutoscanDirectory> autoscan(new AutoscanDirectory(
-                nil, //location
+                nullptr, //location
                 scan_mode,
                 scan_level,
                 recursive,
@@ -181,7 +181,7 @@ void web::autoscan::process()
 
 void web::autoscan::autoscan2XML(Ref<Element> element, Ref<AutoscanDirectory> adir)
 {
-    if (adir == nil)
+    if (adir == nullptr)
     {
         element->appendTextChild(_("scan_mode"), _("none"));
         element->appendTextChild(_("scan_level"), _("full"));

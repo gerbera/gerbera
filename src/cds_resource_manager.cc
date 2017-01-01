@@ -71,7 +71,7 @@ String CdsResourceManager::renderExtension(String contentType, String location)
             }
         }
     }
-    return nil;
+    return nullptr;
 }
 
 void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
@@ -137,14 +137,14 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
     Ref<TranscodingProfileList> tlist = config->getTranscodingProfileListOption(
             CFG_TRANSCODING_PROFILE_LIST);
     Ref<ObjectDictionary<TranscodingProfile> > tp_mt = tlist->get(item->getMimeType());
-    if (tp_mt != nil)
+    if (tp_mt != nullptr)
     {
         Ref<Array<ObjectDictionaryElement<TranscodingProfile> > > profiles = tp_mt->getElements();
         for (int p = 0; p < profiles->size(); p++)
         {
             Ref<TranscodingProfile> tp = profiles->get(p)->getValue();
 
-            if (tp == nil)
+            if (tp == nullptr)
                 throw _Exception(_("Invalid profile encountered!"));
 
             String ct = mappings->get(item->getMimeType());
@@ -340,7 +340,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                 url = urlBase->urlBase + _(URL_VALUE_TRANSCODE_NO_RES_ID);
             else
             {
-                assert(urlBase_tr != nil);
+                assert(urlBase_tr != nullptr);
                 url = urlBase_tr->urlBase + _(URL_VALUE_TRANSCODE_NO_RES_ID);
             }
         }
@@ -350,7 +350,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         else
             url = urlBase->urlBase;
 #endif
-        if ((res_params != nil) && (res_params->size() > 0))
+        if ((res_params != nullptr) && (res_params->size() > 0))
         {
             url = url + _(_URL_PARAM_SEPARATOR);
             url = url + res_params->encodeSimple();
@@ -412,7 +412,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
             if (!skipURL)
             {
                 if (transcoded)
-                    url = url + renderExtension(contentType, nil);
+                    url = url + renderExtension(contentType, nullptr);
                 else
                     url = url + renderExtension(contentType, item->getLocation()); 
             }

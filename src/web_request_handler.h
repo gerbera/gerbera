@@ -83,7 +83,7 @@ protected:
     /// \brief Little support function to access stuff from the dictionary in
     /// in an easier fashion.
     /// \param name of the parameter we are looking for.
-    /// \return Value of the parameter with the given name or nil if not found.
+    /// \return Value of the parameter with the given name or nullptr if not found.
     inline zmm::String param(zmm::String name) { return params->get(name); }
     
     int intParam(zmm::String name, int invalid = 0);
@@ -97,7 +97,7 @@ protected:
     void check_request(bool checkLogin = true);
     
     /// \brief Helper function to create a generic XML document header.
-    /// \param xsl_link If not nil, also adds header information that is required for the XSL processor.
+    /// \param xsl_link If not nullptr, also adds header information that is required for the XSL processor.
     /// \return The header as a string... because our parser does not yet understand <? ?> stuff :)
     zmm::String renderXMLHeader();
     

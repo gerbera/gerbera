@@ -48,7 +48,7 @@ OnlineServiceList::OnlineServiceList()
 
 void OnlineServiceList::registerService(Ref<OnlineService> service)
 {
-    if (service == nil)
+    if (service == nullptr)
         return;
 
     if (service->getServiceType() >= OS_Max)
@@ -62,7 +62,7 @@ void OnlineServiceList::registerService(Ref<OnlineService> service)
 Ref<OnlineService> OnlineServiceList::getService(service_type_t service)
 {
     if ((service > OS_Max) || (service < 0))
-        return nil;
+        return nullptr;
 
     return service_list->get(service);
 }
@@ -96,7 +96,7 @@ String OnlineService::getCheckAttr(Ref<Element> xml, String attrname)
         throw _Exception(getServiceName() + _(": Tag <") + xml->getName() +
                 _("> is missing the required \"") + attrname +
                 _("\" attribute!"));
-    return nil;
+    return nullptr;
 }
 
 int OnlineService::getCheckPosIntAttr(Ref<Element> xml, String attrname)

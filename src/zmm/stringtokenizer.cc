@@ -54,5 +54,5 @@ String StringTokenizer::nextToken(String seps)
             pos++;
         return str.substring(start, pos - start);
     }
-    return nil;
+    return nullptr;
 }

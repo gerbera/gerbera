@@ -104,7 +104,7 @@ void web::items::process()
         if (startpoint_id != INVALID_OBJECT_ID)
         {
             Ref<AutoscanDirectory> adir = storage->getAutoscanDirectory(startpoint_id);
-            if ((adir != nil) && (adir->getScanMode() == InotifyScanMode))
+            if ((adir != nullptr) && (adir->getScanMode() == InotifyScanMode))
             {
                 protectItems = 1;
                 if (autoscanType == 0 || adir->persistent())
