@@ -285,14 +285,15 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
 #endif // EXTERNAL_TRANSCODING
 
     int resCount = item->getResourceCount();
-    for (int i = 0; i < resCount; i++)
-    {
+    for (int i = 0; i < resCount; i++) {
+
         /// \todo what if the resource has a different mimetype than the item??
         /*        String mimeType = item->getMimeType();
                   if (!string_ok(mimeType)) mimeType = DEFAULT_MIMETYPE; */
 
-        Ref<Dictionary> res_attrs = item->getResource(i)->getAttributes();
-        Ref<Dictionary> res_params = item->getResource(i)->getParameters();
+        Ref<CdsResource> res = item->getResource(i);
+        Ref<Dictionary> res_attrs = res->getAttributes();
+        Ref<Dictionary> res_params = res->getParameters();
         String protocolInfo = res_attrs->get(MetadataHandler::getResAttrName(R_PROTOCOLINFO));
         String mimeType = getMTFromProtocolInfo(protocolInfo);
 
@@ -306,7 +307,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         String contentType = mappings->get(mimeType);
         String url;
 
-        /// \todo who will sync mimetype that is part of the protocl info and
+        /// \todo who will sync mimetype that is part of the protocol info and
         /// that is lying in the resources with the information that is in the
         /// resource tags?
 
@@ -357,52 +358,50 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
 
         // ok this really sucks, I guess another rewrite of the resource manager
         // is necessary
-        if ((i > 0) && (item->getResource(i)->getHandlerType() == CH_EXTURL) &&
-           ((item->getResource(i)->getOption(_(RESOURCE_CONTENT_TYPE)) == 
-            THUMBNAIL) || 
-            (item->getResource(i)->getOption(_(RESOURCE_CONTENT_TYPE)) ==
-                            ID3_ALBUM_ART)))
+        if ((i > 0) && (res->getHandlerType() == CH_EXTURL) &&
+           ((res->getOption(_(RESOURCE_CONTENT_TYPE)) == THUMBNAIL) ||
+            (res->getOption(_(RESOURCE_CONTENT_TYPE)) == ID3_ALBUM_ART)))
         {
-            url = item->getResource(i)->getOption(_(RESOURCE_OPTION_URL));
+            url = res->getOption(_(RESOURCE_OPTION_URL));
             if (!string_ok(url))
                 throw _Exception(_("missing thumbnail URL!"));
 
             isExtThumbnail = true;
         }
 
-        /// \todo currently resource is misused for album art
-#ifdef HAVE_ID3_ALBUMART
+        /// FIXME: currently resource is misused for album art
+
         // only add upnp:AlbumArtURI if we have an AA, skip the resource
-        if ((i > 0) && ((item->getResource(i)->getHandlerType() == CH_ID3) ||
-                        (item->getResource(i)->getHandlerType() == CH_MP4) ||
-                        (item->getResource(i)->getHandlerType() == CH_FLAC) ||
-                        (item->getResource(i)->getHandlerType() == CH_FANART) ||
-                        (item->getResource(i)->getHandlerType() == CH_EXTURL)))
-        {
-            String rct;
-            if (item->getResource(i)->getHandlerType() == CH_EXTURL)
-                rct = item->getResource(i)->getOption(_(RESOURCE_CONTENT_TYPE));
-            else    
-                rct = item->getResource(i)->getParameter(_(RESOURCE_CONTENT_TYPE));
-            if (rct == ID3_ALBUM_ART)
-            {
-                Ref<Element> aa(new Element(MetadataHandler::getMetaFieldName(M_ALBUMARTURI)));
-                aa->setText(url);
+        if (i > 0) {
+            int handlerType = res->getHandlerType();
+
+            if (handlerType == CH_ID3 || (handlerType == CH_MP4) ||
+                handlerType == CH_FLAC || handlerType == CH_FANART ||
+                handlerType == CH_EXTURL) {
+
+                String rct;
+                if (res->getHandlerType() == CH_EXTURL)
+                    rct = res->getOption(_(RESOURCE_CONTENT_TYPE));
+                else
+                    rct = res->getParameter(_(RESOURCE_CONTENT_TYPE));
+                if (rct == ID3_ALBUM_ART) {
+                    Ref<Element> aa(new Element(MetadataHandler::getMetaFieldName(M_ALBUMARTURI)));
+                    aa->setText(url);
 #ifdef EXTEND_PROTOCOLINFO
-                if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO))
-                {
-                    /// \todo clean this up, make sure to check the mimetype and
-                    /// provide the profile correctly
-                    aa->setAttribute(_("xmlns:dlna"), 
-                                     _("urn:schemas-dlna-org:metadata-1-0"));
-                    aa->setAttribute(_("dlna:profileID"), _("JPEG_TN"));
-                }
+                    if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
+                        /// \todo clean this up, make sure to check the mimetype and
+                        /// provide the profile correctly
+                        aa->setAttribute(_("xmlns:dlna"),
+                                         _("urn:schemas-dlna-org:metadata-1-0"));
+                        aa->setAttribute(_("dlna:profileID"), _("JPEG_TN"));
+                    }
 #endif
-                element->appendElementChild(aa);
-                continue;
+                    element->appendElementChild(aa);
+                    continue;
+                }
             }
         }
-#endif
+
         if (!isExtThumbnail)
         {
 #ifdef EXTERNAL_TRANSCODING
@@ -578,6 +577,18 @@ String CdsResourceManager::getFirstResource(Ref<CdsItem> item)
 
     if (urlBase->addResID)
         return urlBase->urlBase + 0;
+    else
+        return urlBase->urlBase;
+}
+
+String CdsResourceManager::getArtworkUrl(zmm::Ref<CdsItem> item) {
+    // FIXME: This is temporary until we do artwork properly.
+    log_debug("Building Art url for %d\n", item->getID());
+
+    Ref<UrlBase> urlBase = addResources_getUrlBase(item);
+
+    if (urlBase->addResID)
+        return urlBase->urlBase + 1 + "/rct/aa";
     else
         return urlBase->urlBase;
 }

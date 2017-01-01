@@ -82,4 +82,6 @@ zmm::Ref<mxml::Element> UpnpXML_DIDLRenderResource(zmm::String URL, zmm::Ref<Dic
 zmm::Ref<mxml::Element> UpnpXML_DIDLRenderCaptionInfo(zmm::String URL);
 
 zmm::Ref<mxml::Element> UpnpXML_DIDLRenderCreator(zmm::String creator);
+
+zmm::Ref<mxml::Element> UpnpXML_DIDLRenderAlbumArtURI(zmm::String uri);
 #endif // __UPNP_XML_H__

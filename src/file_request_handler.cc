@@ -392,8 +392,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename,
 
     Ref<Dictionary> dict(new Dictionary());
     dict->decodeSimple(parameters);
-    log_debug("full url (filename): %s, parameters: %s\n",
-            filename, parameters.c_str());
+    log_debug("full url (filename): %s, parameters: %s\n", filename, parameters.c_str());
 
     String objID = dict->get(_("object_id"));
     if (objID == nil)
@@ -552,8 +551,10 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename,
                 path.substring(slash_pos) + _("\"");
         }
     }
-    log_debug("fetching resource id %d\n", res_id);
     */
+
+    log_debug("fetching resource id %d\n", res_id);
+
 #ifdef EXTERNAL_TRANSCODING
     tr_profile = dict->get(_(URL_PARAM_TRANSCODE_PROFILE_NAME));
     if (string_ok(tr_profile))

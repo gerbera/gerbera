@@ -60,7 +60,12 @@ public:
     /// \param item Item for which the resources should be built.
     /// \return The URL
     static zmm::String getFirstResource(zmm::Ref<CdsItem> item);
-    
+
+    /// \brief Gets the URL of the artwork.
+    /// \param item Item for which the resources should be built.
+    /// \return The URL
+    static zmm::String getArtworkUrl(zmm::Ref<CdsItem> item);
+
 protected:
     class UrlBase : public zmm::Object
     {
@@ -68,7 +73,7 @@ protected:
         zmm::String urlBase;
         bool addResID;
     };
-    
+
     /// \brief Gets the baseUrl for a CdsItem.
     /// \param item Item for which the baseUrl should be built.
     ///

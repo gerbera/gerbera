@@ -105,9 +105,7 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions, in
                      (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_TRACK)))
                 result->appendTextChild(key, el->getValue());
         }
-        
-        log_debug("ITEM HAS FOLLOWING METADATA: %s\n", item->getMetadata()->encode().c_str());
-        
+
         CdsResourceManager::addResources(item, result);
         
         if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_TRACK) {
@@ -156,13 +154,14 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions, in
             int len = elements->size();
             String key;
 
-            log_debug("Album as %d metadata\n", len);
+            log_debug("Album has %d metadata(s)\n", len);
 
             for (int i = 0; i < len; i++)
             {
                 Ref<DictionaryElement> el = elements->get(i);
                 key = el->getKey();
-                log_debug("Container %s\n", key.c_str());
+                //log_debug("Container %s\n", key.c_str());
+
                 if (key == MetadataHandler::getMetaFieldName(M_ARTIST)) {
                     result->appendElementChild(UpnpXML_DIDLRenderCreator(el->getValue()));
                 }
@@ -172,6 +171,8 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions, in
             Ref<Storage> storage = Storage::getInstance();
             String aa_id = storage->findFolderImage(cont->getID(), String());
             if (aa_id != nil) {
+                log_debug("Using folder image as artwork for container\n");
+
                 String url;
                 Ref<Dictionary> dict(new Dictionary());
                 dict->put(_(URL_OBJECT_ID), aa_id);
@@ -181,12 +182,48 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions, in
                     CONTENT_MEDIA_HANDLER + _(_URL_PARAM_SEPARATOR) +
                     dict->encodeSimple() + _(_URL_PARAM_SEPARATOR) +
                     _(URL_RESOURCE_ID) + _(_URL_PARAM_SEPARATOR) + "0";
-                log_debug("UpnpXML_DIDLRenderObject: url: %s\n", url.c_str());
-                Ref<Element> aa(new Element(MetadataHandler::getMetaFieldName(M_ALBUMARTURI)));
-                aa->setText(url);
-                result->appendElementChild(aa);
+
+                result->appendElementChild(UpnpXML_DIDLRenderAlbumArtURI(url));
+
+            } else if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_ALBUM) {
+                // try to find the first track and use its artwork
+                auto items = storage->getObjects(cont->getID(), true);
+                if (items != nullptr) {
+
+                    bool artAdded = false;
+                    for (const auto &id : *items) {
+                        if (artAdded)
+                            break;
+
+                        Ref<CdsObject> obj = storage->loadObject(id);
+                        if (obj->getClass() != UPNP_DEFAULT_CLASS_MUSIC_TRACK)
+                            continue;
+
+                        Ref<CdsItem> item = RefCast(obj, CdsItem);
+
+                        auto resources = item->getResources();
+
+                        for (int i = 1; i < resources->size(); i++) {
+                            auto res = resources->get(i);
+                            // only add upnp:AlbumArtURI if we have an AA, skip the resource
+                            if ((res->getHandlerType() == CH_ID3) ||
+                                (res->getHandlerType() == CH_MP4) ||
+                                (res->getHandlerType() == CH_FLAC) ||
+                                (res->getHandlerType() == CH_FANART) ||
+                                (res->getHandlerType() == CH_EXTURL)) {
+
+                                String url = CdsResourceManager::getArtworkUrl(item);
+                                result->appendElementChild(UpnpXML_DIDLRenderAlbumArtURI(url));
+
+                                artAdded = true;
+                                break;
+                            }
+                        }
+                    }
+                }
             }
         }
+
         
     }
     
@@ -466,5 +503,11 @@ Ref<Element> UpnpXML_DIDLRenderCreator(String creator) {
 
     out->setText(creator);
 
+    return out;
+}
+
+Ref<Element> UpnpXML_DIDLRenderAlbumArtURI(String uri) {
+    Ref<Element> out(new Element(_("upnp:albumArtURI")));
+    out->setText(uri);
     return out;
 }
