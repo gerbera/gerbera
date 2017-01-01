@@ -253,10 +253,6 @@ add_library(libmediatomb OBJECT
         src/web/edit_save.cc
         src/web/files.cc
         src/web/items.cc
-        src/weborama_content_handler.cc
-        src/weborama_content_handler.h
-        src/weborama_service.cc
-        src/weborama_service.h
         src/web/pages.cc
         src/web/pages.h
         src/web/remove.cc

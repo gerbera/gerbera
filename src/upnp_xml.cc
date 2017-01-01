@@ -237,7 +237,7 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions, in
         result->appendTextChild(_("mime-type"), aitem->getMimeType());
     }
    
-//    log_debug("renderen DIDL: \n%s\n", result->print().c_str());
+    // log_debug("Rendered DIDL: \n%s\n", result->print().c_str());
 
     return result;
 }

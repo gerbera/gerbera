@@ -64,9 +64,6 @@ protected:
 #ifdef SOPCAST
     void addSopCast(zmm::Ref<CdsObject> obj);
 #endif
-#ifdef WEBORAMA
-    void addWeborama(zmm::Ref<CdsObject> obj);
-#endif
 #ifdef ATRAILERS
     void addATrailers(zmm::Ref<CdsObject> obj);
 #endif

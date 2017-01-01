@@ -45,10 +45,6 @@
     #include "youtube_content_handler.h"
 #endif
 
-#ifdef WEBORAMA
-    #include "weborama_content_handler.h"
-#endif
-
 #ifdef ATRAILERS
     #include "atrailers_content_handler.h"
 #endif
@@ -349,14 +345,6 @@ Script::Script(Ref<Runtime> runtime) : Object()
     setIntProperty(glob, _("ONLINE_SERVICE_YOUTUBE"), -1);
 #endif//YOUTUBE
 
-#ifdef WEBORAMA
-    setIntProperty(glob, _("ONLINE_SERVICE_WEBORAMA"), (int)OS_Weborama);
-    setProperty(glob, _("WEBORAMA_AUXDATA_REQUEST_NAME"),
-                      _(WEBORAMA_AUXDATA_REQUEST_NAME));
-#else
-    setIntProperty(glob, _("ONLINE_SERVICE_WEBORAMA"), -1);
-#endif//WEBORAMAa
-
 #ifdef ATRAILERS
     setIntProperty(glob, _("ONLINE_SERVICE_APPLE_TRAILERS"), (int)OS_ATrailers);
     setProperty(glob, _("APPLE_TRAILERS_AUXDATA_POST_DATE"),
@@ -374,7 +362,6 @@ Script::Script(Ref<Runtime> runtime) : Object()
 #else // ONLINE SERVICES
     setIntProperty(glob, _("ONLINE_SERVICE_NONE"), 0);
     setIntProperty(glob, _("ONLINE_SERVICE_YOUTUBE"), -1);
-    setIntProperty(glob, _("ONLINE_SERVICE_WEBORAMA"), -1);
     setIntProperty(glob, _("ONLINE_SERVICE_SOPCAST"), -1);
     setIntProperty(glob, _("ONLINE_SERVICE_APPLE_TRAILERS"), -1);
 #endif//ONLINE_SERVICES

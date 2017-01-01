@@ -49,10 +49,6 @@
     #include "youtube_service.h"
 #endif
 
-#ifdef WEBORAMA
-    #include "weborama_content_handler.h"
-#endif
-
 #ifdef SOPCAST
     #include "sopcast_content_handler.h"
 #endif
@@ -586,36 +582,6 @@ void FallbackLayout::addSopCast(zmm::Ref<CdsObject> obj)
 }
 #endif
 
-#ifdef WEBORAMA
-void FallbackLayout::addWeborama(zmm::Ref<CdsObject> obj)
-{
-    #define WB_VPATH "/Online Services/Weborama"
-    String chain;
-    String temp;
-    int id;
-    bool ref_set = false;
-
-    if (obj->getID() != INVALID_OBJECT_ID)
-    {
-        obj->setRefID(obj->getID());
-        ref_set = true;
-    }
-
-    temp = obj->getAuxData(_(WEBORAMA_AUXDATA_REQUEST_NAME));
-    if (!string_ok(temp))
-    {
-        log_warning("Skipping Weborama item %s: missing playlist name\n", 
-                    obj->getTitle().c_str());
-        return;
-    }
-
-    chain = _(WB_VPATH "/") + esc(temp);
-    id = ContentManager::getInstance()->addContainerChain(chain, 
-                                      _(UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER));
-    add(obj, id, ref_set);
-}
-#endif
-
 #ifdef ATRAILERS
 void FallbackLayout::addATrailers(zmm::Ref<CdsObject> obj)
 {
@@ -725,11 +691,6 @@ void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj, String rootpath)
 #ifdef SOPCAST
             case OS_SopCast:
                 addSopCast(clone);
-                break;
-#endif
-#ifdef WEBORAMA
-            case OS_Weborama:
-                addWeborama(clone);
                 break;
 #endif
 #ifdef ATRAILERS

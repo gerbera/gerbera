@@ -48,10 +48,6 @@
     #include "youtube_service.h"
 #endif
 
-#ifdef WEBORAMA
-    #include "weborama_service.h"
-#endif
-
 #if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
     #include <langinfo.h>
     #include <clocale>
@@ -360,31 +356,6 @@ Ref<Element> ConfigManager::renderOnlineSection()
     yt->appendElementChild(ytfeatured);
 
     onlinecontent->appendElementChild(yt);
-#endif
-#ifdef WEBORAMA
-    Ref<Element> wb(new Element(_("Weborama")));
-    wb->setAttribute(_("enabled"), _(DEFAULT_WEBORAMA_ENABLED));
-    wb->setAttribute(_("refresh"), String::from(DEFAULT_WEBORAMA_REFRESH));
-    wb->setAttribute(_("update-at-start"), _(DEFAULT_WEBORAMA_UPDATE_AT_START));
-
-    Ref<Element> play1(new Element(_("playlist")));
-    play1->setAttribute(_("name"), _("Active"));
-    play1->setAttribute(_("type"), _("playlist"));
-    play1->setAttribute(_("mood"), _("active"));
-    wb->appendElementChild(play1);
-
-    Ref<Element> play2(new Element(_("playlist")));
-    play2->setAttribute(_("name"), _("Metal"));
-    play2->setAttribute(_("type"), _("playlist"));
-
-    Ref<Element> filter(new Element(_("filter")));
-    Ref<Element> genres(new Element(_("genres")));
-    genres->setText(_("metal"));
-    filter->appendElementChild(genres);
-    play2->appendElementChild(filter);
-    wb->appendElementChild(play2);
-
-    onlinecontent->appendElementChild(wb);
 #endif
 
 #ifdef ATRAILERS
@@ -2214,49 +2185,6 @@ void ConfigManager::validate(String serverhome)
     SET_BOOL_OPTION(CFG_ONLINE_CONTENT_SOPCAST_UPDATE_AT_START);
 #endif
 
-#ifdef WEBORAMA 
-    temp = getOption(_("/import/online-content/Weborama/attribute::enabled"), 
-                     _(DEFAULT_WEBORAMA_ENABLED));
-
-    if (!validateYesNo(temp))
-        throw _Exception(_("Error in config file: "
-                           "invalid \"enabled\" attribute value in "
-                           "<Weborama> tag"));
-
-    NEW_BOOL_OPTION(temp == "yes" ? true : false);
-    SET_BOOL_OPTION(CFG_ONLINE_CONTENT_WEBORAMA_ENABLED);
-
-    if (temp == "yes")
-    {
-        el = getElement(_("/import/online-content/Weborama"));
-        Ref<Array<Object> > wb_opts = createServiceTaskList(OS_Weborama, el);
-        if (wb_opts->size() == 0)
-            throw _Exception(_("Error in config file: "
-                        "Weborama service enabled but no imports "
-                        "specified."));
-
-        NEW_OBJARR_OPTION(wb_opts);
-        SET_OBJARR_OPTION(CFG_ONLINE_CONTENT_WEBORAMA_TASK_LIST);
-    }
-
-
-    temp_int = getIntOption(_("/import/online-content/Weborama/attribute::refresh"), DEFAULT_WEBORAMA_REFRESH);
-    NEW_INT_OPTION(temp_int);
-    SET_INT_OPTION(CFG_ONLINE_CONTENT_WEBORAMA_REFRESH);
-    SET_INT_OPTION(CFG_ONLINE_CONTENT_WEBORAMA_PURGE_AFTER);
-
-    temp = getOption(_("/import/online-content/Weborama/attribute::update-at-start"),
-                     _(DEFAULT_WEBORAMA_UPDATE_AT_START));
-
-    if (!validateYesNo(temp))
-        throw _Exception(_("Error in config file: "
-                           "invalid \"update-at-start\" attribute value in "
-                           "<Weborama> tag"));
-
-    NEW_BOOL_OPTION(temp == "yes" ? true : false);
-    SET_BOOL_OPTION(CFG_ONLINE_CONTENT_WEBORAMA_UPDATE_AT_START);
-#endif
-
 #ifdef ATRAILERS
     temp = getOption(_("/import/online-content/AppleTrailers/attribute::enabled"), 
                      _(DEFAULT_ATRAILERS_ENABLED));
@@ -3259,20 +3187,6 @@ Ref<Array<Object> > ConfigManager::createServiceTaskList(service_type_t service,
         for (int i = 0; i < element->elementChildCount(); i++)
         {
             Ref<Object> option = yt->defineServiceTask(element->getElementChild(i), RefCast(options->get(CFG_ONLINE_CONTENT_YOUTUBE_RACY), Object));
-            arr->append(option);
-        }
-    }
-#endif
-#ifdef WEBORAMA
-    if (service == OS_Weborama)
-    {
-        Ref<WeboramaService> wb(new WeboramaService());
-        for (int i = 0; i < element->elementChildCount(); i++)
-        {
-            // existence is checked in validate
-            Ref<Option> stropt(new Option(element->getAttribute(_("userid"))));
-            
-            Ref<Object> option = wb->defineServiceTask(element->getElementChild(i), RefCast(stropt, Object));
             arr->append(option);
         }
     }

@@ -49,7 +49,7 @@ typedef enum
     OS_None         = 0,
     OS_YouTube      = 1,
     OS_SopCast      = 2,
-    OS_Weborama     = 3,
+
     OS_ATrailers    = 4,
     OS_Max
 } service_type_t;

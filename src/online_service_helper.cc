@@ -88,11 +88,6 @@ String OnlineServiceHelper::resolveURL(Ref<CdsItemExternalURL> item)
             url = item->getLocation();
             break;
 #endif
-#ifdef WEBORAMA
-        case OS_Weborama:
-            url = item->getLocation();
-            break;
-#endif
 #ifdef ATRAILERS
         case OS_ATrailers:
             url = item->getLocation();
