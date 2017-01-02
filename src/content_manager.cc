@@ -257,7 +257,6 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
     // is populated with YT objects, so we need to allow playing them
     cached_urls = Ref<ReentrantArray<CachedURL> >
         (new ReentrantArray<CachedURL>(MAX_CACHED_URLS));
-    urlcache_mutex = Ref<Mutex>(new Mutex(false));
 
 #endif //YOUTUBE
 
@@ -2211,7 +2210,7 @@ zmm::String ContentManager::getMimeTypeFromBuffer(const void *buffer, size_t len
 #ifdef YOUTUBE
 void ContentManager::checkCachedURLs()
 {
-    AUTOLOCK(urlcache_mutex);
+    AutoLock lock(urlcache_mutex);
 
     time_t now = time(nullptr);
 
@@ -2260,7 +2259,7 @@ void ContentManager::checkCachedURLs()
 
 void ContentManager::cacheURL(zmm::Ref<CachedURL> url)
 {
-    AUTOLOCK(urlcache_mutex);
+    AutoLock lock(urlcache_mutex);
     time_t oldest = time(nullptr); 
     int oldest_index = -1;
     bool added = false;
@@ -2329,7 +2328,7 @@ void ContentManager::cacheURL(zmm::Ref<CachedURL> url)
 
 String ContentManager::getCachedURL(int objectID)
 {
-    AUTOLOCK(urlcache_mutex);
+    AutoLock lock(urlcache_mutex);
     log_debug("Asked for an url from cache...\n");
     for (int i = 0; i < cached_urls->size(); i++)
     {

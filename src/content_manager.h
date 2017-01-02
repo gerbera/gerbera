@@ -33,6 +33,7 @@
 
 #include <memory>
 #include <unordered_set>
+#include <mutex>
 
 #include "common.h"
 #include "cds_objects.h"
@@ -405,7 +406,6 @@ protected:
 #endif
  
 #if defined(EXTERNAL_TRANSCODING) || defined(SOPCAST)
-    zmm::Ref<Mutex> pr_mutex;
     zmm::Ref<zmm::Array<Executor> > process_list;
 #endif
 
@@ -447,7 +447,8 @@ protected:
                              bool unscheduled_refresh);
 
 #ifdef YOUTUBE
-    zmm::Ref<Mutex> urlcache_mutex;
+    std::mutex urlcache_mutex;
+    using AutoLock = std::lock_guard<std::mutex>;
     zmm::Ref<ReentrantArray<CachedURL> > cached_urls;
     /// \brief Removes old URLs from the cache.
     void checkCachedURLs();
