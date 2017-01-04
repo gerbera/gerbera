@@ -32,7 +32,7 @@ _MediaTomb is pretty much dead upstream, so this is my attempt to get kick it ba
 - Removed bundled `libuuid`.
 - Ported to CMake.
 - Enhanced cover art support for MP4, FLAC, Vorbis & WMA files (via TagLib).
-- TagLib handler opens files read only (stops inotify rescanning the dir on access causing "Object not found" [see here][1].
+- TagLib handler opens files read only: stops inotify rescanning the dir on access causing "Object not found" [see here][1].
 - Album folders have "creator" metadata (artist).
 - Album folders have artwork: either from external files or the tracks embedded artwork.
 - Per-track external art support: `filename-of-track.jp\*` (minus the audio file extension).
