@@ -154,7 +154,7 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions, in
             int len = elements->size();
             String key;
 
-            log_debug("Album has %d metadata(s)\n", len);
+            //log_debug("Album has %d metadata(s)\n", len);
 
             for (int i = 0; i < len; i++)
             {
