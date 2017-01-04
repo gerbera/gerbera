@@ -40,6 +40,7 @@
 #include "storage_cache.h"
 
 #include <unordered_set>
+#include <mutex>
 
 #define QTB                 table_quote_begin
 #define QTE                 table_quote_end
@@ -235,7 +236,7 @@ private:
     
     int getNextID();
     void loadLastID();
-    zmm::Ref<Mutex> nextIDMutex;
+    std::mutex nextIDMutex;
     
     zmm::Ref<StorageCache> cache;
     inline bool cacheOn() { return cache != nullptr; }
@@ -253,7 +254,8 @@ private:
     bool insertBufferEmpty;
     int insertBufferStatementCount;
     int insertBufferByteCount;
-    zmm::Ref<Mutex> insertBufferMutex;
+    //std::mutex insertBufferMutex;
+    using AutoLock = std::lock_guard<std::mutex>;
 };
 
 #endif // __SQL_STORAGE_H__

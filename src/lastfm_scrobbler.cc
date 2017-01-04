@@ -38,10 +38,8 @@
 using namespace zmm;
 
 
-SINGLETON_MUTEX(LastFm, false);
-
 LastFm::LastFm()
-: Singleton<LastFm>()
+: Singleton<LastFm, std::mutex>()
 , scrobbler(NULL)
 , currentTrackId(-1)
 {

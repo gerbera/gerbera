@@ -34,6 +34,7 @@
 
 #include <memory>
 #include <unordered_set>
+#include <condition_variable>
 
 #include "common.h"
 #include "singleton.h"
@@ -55,7 +56,7 @@ public:
 protected:
     
     pthread_t updateThread;
-    zmm::Ref<Cond> cond;
+    std::condition_variable cond;
     
     std::shared_ptr<std::unordered_set<int> > objectIDHash;
     

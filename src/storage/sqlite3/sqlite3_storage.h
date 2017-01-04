@@ -144,11 +144,18 @@ protected:
     bool restore;
 };
 
+class Sqlite3BackupTimerSubscriber : public TimerSubscriber
+{
+    /// \brief for making backups in regulary intervals - see TimerSubscriber
+    virtual void timerNotify(zmm::Ref<zmm::Object> sqlite3storage);
+};
+
 /// \brief The Storage class for using SQLite3
 class Sqlite3Storage : private SQLStorage
 {
 private:
     Sqlite3Storage();
+    //virtual ~Sqlite3Storage();
     friend zmm::Ref<Storage> Storage::createInstance();
     virtual void init();
     virtual void shutdownDriver();
@@ -197,6 +204,8 @@ private:
     virtual void _flushInsertBuffer();
     
     bool dirty;
+
+    Sqlite3BackupTimerSubscriber backupTimerSubscriber;
     
     friend class SLSelectTask;
     friend class SLExecTask;
@@ -236,12 +245,6 @@ private:
     zmm::Ref<Sqlite3Result> res;
     
     friend class Sqlite3Result;
-};
-
-class Sqlite3BackupTimerSubscriber : public TimerSubscriberObject
-{
-    /// \brief for making backups in regulary intervals - see TimerSubscriber
-    virtual void timerNotify(zmm::Ref<zmm::Object> sqlite3storage);
 };
 
 #endif // __SQLITE3_STORAGE_H__

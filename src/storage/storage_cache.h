@@ -34,6 +34,7 @@
 
 #include <memory>
 #include <unordered_map>
+#include <mutex>
 
 #include "zmm/zmmf.h"
 #include "common.h"
@@ -62,7 +63,7 @@ public:
     
     bool flushed();
     
-    zmm::Ref<Mutex> getMutex() { return mutex; }
+    std::mutex & getMutex() { return mutex; }
     
 private:
     
@@ -74,7 +75,8 @@ private:
     
     std::shared_ptr<std::unordered_map<int,zmm::Ref<CacheObject> > > idHash;
     std::shared_ptr<std::unordered_map<zmm::String, zmm::Ref<zmm::Array<CacheObject> > > > locationHash;
-    zmm::Ref<Mutex> mutex;
+    std::mutex mutex;
+    using AutoLock = std::lock_guard<std::mutex>;
 };
 
 #endif // __STORAGE_CACHE_H__

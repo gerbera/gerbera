@@ -32,12 +32,13 @@
 #ifndef __SINGLETON_H__
 #define __SINGLETON_H__
 
+#include <mutex>
 #include "sync.h"
 #include "zmm/zmmf.h"
 
 #define SINGLETON_CUR_MAX 15
 
-template <class T> class Singleton;
+template <class T, class MutexT = std::mutex> class Singleton;
 
 class SingletonManager : public zmm::Object
 {
@@ -50,22 +51,25 @@ public:
     
 protected:
     static zmm::Ref<SingletonManager> instance;
-    static zmm::Ref<Mutex> mutex;
+    static std::mutex mutex;
+    using AutoLock = std::lock_guard<std::mutex>;
     
     zmm::Ref<zmm::ObjectStack<Singleton<zmm::Object> > > singletonStack;
 };
 
-template <class T>
+template <class T, class MutexT>
 class Singleton : public zmm::Object
 {
 public:
+    typedef MutexT mutex_type;
+
     static zmm::Ref<T> getInstance()
     {
         if (! singletonActive)
             throw _ServerShutdownException(_("singleton is currently inactive!"));
         if (instance == nullptr)
         {
-            AUTOLOCK(mutex);
+            AutoLock lock(mutex);
             if (! singletonActive)
                 throw _ServerShutdownException(_("singleton is currently inactive!"));
             if (instance == nullptr) // check again, because there is a very small chance
@@ -87,7 +91,9 @@ protected:
     virtual void init() { }
     virtual void shutdown() { }
     
-    static zmm::Ref<Mutex> mutex;
+    static MutexT mutex;
+    using AutoLock = std::lock_guard<MutexT>;
+
     static zmm::Ref<T> instance;
     static bool singletonActive;
     
@@ -109,9 +115,9 @@ private:
     friend class SingletonManager;
 };
 
-#define SINGLETON_MUTEX(klass, recursive) template <> zmm::Ref<Mutex> Singleton<klass>::mutex = zmm::Ref<Mutex>(new Mutex(recursive))
-//template <class T> zmm::Ref<Mutex> Singleton<T>::mutex = zmm::Ref<Mutex>(new Mutex());
-template <class T> zmm::Ref<T> Singleton<T>::instance = nullptr;
-template <class T> bool Singleton<T>::singletonActive = true;
+template <class T, class MutexT> zmm::Ref<T> Singleton<T, MutexT>::instance = nullptr;
+template <class T, class MutexT> bool Singleton<T, MutexT>::singletonActive = true;
+// Without the {} it's a declaration, not a definition.
+template <class T, class MutexT> MutexT Singleton<T, MutexT>::mutex{};
 
 #endif // __SINGLETON_H__

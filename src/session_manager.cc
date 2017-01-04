@@ -45,8 +45,6 @@ using namespace zmm;
 using namespace mxml;
 using namespace std;
 
-SINGLETON_MUTEX(SessionManager, false);
-
 Session::Session(long timeout) : Dictionary_r()
 {
     this->timeout = timeout;
@@ -64,7 +62,7 @@ void Session::containerChangedUI(int objectID)
         return;
     if (! updateAll)
     {
-        AUTOLOCK(mutex);
+        AutoLock lock(mutex);
         if (! updateAll)
         {
             if (uiUpdateIDs->size() >= MAX_UI_UPDATE_IDS)
@@ -85,7 +83,7 @@ void Session::containerChangedUI(Ref<IntArray> objectIDs)
     if (objectIDs == nullptr)
         return;
     int arSize = objectIDs->size();
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     if (updateAll)
         return;
     if (uiUpdateIDs->size() + arSize >= MAX_UI_UPDATE_IDS)
@@ -104,7 +102,7 @@ String Session::getUIUpdateIDs()
 {
     if (! hasUIUpdateIDs())
         return nullptr;
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     if (updateAll)
     {
         updateAll = false;
@@ -120,19 +118,19 @@ bool Session::hasUIUpdateIDs()
 {
     if (updateAll)
         return true;
-    // AUTOLOCK(mutex); only accessing an int - shouldn't be necessary
+    // AutoLock lock(mutex); only accessing an int - shouldn't be necessary
     return (uiUpdateIDs->size() > 0);
 }
 
 void Session::clearUpdateIDs()
 {
     log_debug("clearing UI updateIDs\n");
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     uiUpdateIDs->clear();
     updateAll = false;
 }
 
-SessionManager::SessionManager() : TimerSubscriberSingleton<SessionManager>()
+SessionManager::SessionManager()
 {
     Ref<ConfigManager> configManager = ConfigManager::getInstance();
 
@@ -144,7 +142,7 @@ SessionManager::SessionManager() : TimerSubscriberSingleton<SessionManager>()
 Ref<Session> SessionManager::createSession(long timeout)
 {
     Ref<Session> newSession(new Session(timeout));
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     
     int count=0;
     String sessionID;
@@ -164,9 +162,9 @@ Ref<Session> SessionManager::createSession(long timeout)
 
 Ref<Session> SessionManager::getSession(String sessionID, bool doLock)
 {
-    AUTOLOCK_NOLOCK(mutex)
+    unique_lock<decltype(mutex)> lock(mutex, std::defer_lock);
     if (doLock)
-        AUTORELOCK();
+        lock.lock();
     for (int i = 0; i < sessions->size(); i++)
     {
         Ref<Session> s = sessions->get(i);
@@ -178,7 +176,7 @@ Ref<Session> SessionManager::getSession(String sessionID, bool doLock)
 
 void SessionManager::removeSession(String sessionID)
 {
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     for (int i = 0; i < sessions->size(); i++)
     {
         Ref<Session> s = sessions->get(i);
@@ -205,7 +203,7 @@ void SessionManager::containerChangedUI(int objectID)
 {
     if (sessions->size() <= 0)
         return;
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     int sesSize = sessions->size();
     for (int i = 0; i < sesSize; i++)
     {
@@ -219,7 +217,7 @@ void SessionManager::containerChangedUI(Ref<IntArray> objectIDs)
 {
     if (sessions->size() <= 0)
         return;
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     int sesSize = sessions->size();
     for (int i = 0; i < sesSize; i++)
     {
@@ -233,12 +231,12 @@ void SessionManager::checkTimer()
 {
     if (sessions->size() > 0 && ! timerAdded)
     {
-        Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), SESSION_TIMEOUT_CHECK_INTERVAL);
+        Timer::getInstance()->addTimerSubscriber(this, SESSION_TIMEOUT_CHECK_INTERVAL);
         timerAdded = true;
     }
     else if (sessions->size() <= 0 && timerAdded)
     {
-        Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this));
+        Timer::getInstance()->removeTimerSubscriber(this);
         timerAdded = false;
     }
 }
@@ -246,7 +244,7 @@ void SessionManager::checkTimer()
 void SessionManager::timerNotify(Ref<Object> parameter)
 {
     log_debug("notified... %d sessions.\n", sessions->size());
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     struct timespec now;
     getTimespecNow(&now);
     for (int i = 0; i < sessions->size(); i++)

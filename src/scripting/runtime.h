@@ -39,7 +39,7 @@
 #include "singleton.h"
 
 /// \brief Runtime class definition.
-class Runtime : public Singleton<Runtime>
+class Runtime : public Singleton<Runtime, std::recursive_mutex>
 {
 protected:
     JSRuntime *rt;

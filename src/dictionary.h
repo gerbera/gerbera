@@ -32,6 +32,7 @@
 #ifndef __DICTIONARY_H__
 #define __DICTIONARY_H__
 
+#include <mutex>
 #include "zmm/zmmf.h"
 #include "sync.h"
 
@@ -126,96 +127,65 @@ public:
 class Dictionary_r : public Dictionary
 {
 public:
-    Dictionary_r() : Dictionary()
-    {
-        mutex = zmm::Ref<Mutex>(new Mutex(true));
-    }
-    
-    inline void put(zmm::String key, zmm::String value)
-    {
-        mutex->lock();
+    inline void put(zmm::String key, zmm::String value) {
+        AutoLock lock(mutex);
         Dictionary::put(key, value);
-        mutex->unlock();
     }
     
-    inline zmm::String get(zmm::String key)
-    {
-        mutex->lock();
-        zmm::String ret = Dictionary::get(key);
-        mutex->unlock();
-        return ret;
+    inline zmm::String get(zmm::String key) {
+        AutoLock lock(mutex);
+        return Dictionary::get(key);
     }
     
-    inline void remove(zmm::String key)
-    {
-        mutex->lock();
+    inline void remove(zmm::String key) {
+        AutoLock lock(mutex);
         Dictionary::remove(key);
-        mutex->unlock();
     }
     
-    inline zmm::String encode()
-    {
-        mutex->lock();
-        zmm::String ret = Dictionary::encode();
-        mutex->unlock();
-        return ret;
+    inline zmm::String encode() {
+        AutoLock lock(mutex);
+        return Dictionary::encode();
     }
     
-    inline void clear()
-    {
-        mutex->lock();
+    inline void clear() {
+        AutoLock lock(mutex);
         Dictionary::clear();
-        mutex->unlock();
     }
     
-    inline void decode(zmm::String url)
-    {
-        mutex->lock();
+    inline void decode(zmm::String url) {
+        AutoLock lock(mutex);
         Dictionary::decode(url);
-        mutex->unlock();
     }
     
-    inline zmm::Ref<Dictionary_r> clone()
-    {
-        mutex->lock();
+    inline zmm::Ref<Dictionary_r> clone() {
+        AutoLock lock(mutex);
         zmm::Ref<Dictionary_r> ret = RefCast(Dictionary::clone(), Dictionary_r);
-        mutex->unlock();
         return ret;
     }
     
-    inline bool isSubsetOf(zmm::Ref<Dictionary> other)
-    {
-        mutex->lock();
-        bool ret = Dictionary::isSubsetOf(other);
-        mutex->unlock();
-        return ret;
+    inline bool isSubsetOf(zmm::Ref<Dictionary> other) {
+        AutoLock lock(mutex);
+        return Dictionary::isSubsetOf(other);
     }
     
-    inline bool equals(zmm::Ref<Dictionary> other)
-    {
-        mutex->lock();
-        bool ret = Dictionary::equals(other);
-        mutex->unlock();
-        return ret;
-    }                                                                         
-    
-    inline zmm::Ref<zmm::Array<DictionaryElement> > getElements()
-    {
-        mutex->lock();
-        zmm::Ref<zmm::Array<DictionaryElement> > ret = Dictionary::getElements();
-        mutex->unlock();
-        return ret;
+    inline bool equals(zmm::Ref<Dictionary> other) {
+        AutoLock lock(mutex);
+        return Dictionary::equals(other);
     }
     
-    inline void optimize()
-    {
-        mutex->lock();
+    inline zmm::Ref<zmm::Array<DictionaryElement> > getElements() {
+        AutoLock lock(mutex);
+        return Dictionary::getElements();
+    }
+    
+    inline void optimize() {
+        AutoLock lock(mutex);
         Dictionary::optimize();
-        mutex->unlock();
     }
     
 protected:
-    zmm::Ref<Mutex> mutex;
+    std::recursive_mutex mutex;
+    using AutoLock = std::lock_guard<decltype(mutex)>;
 };
 
 #endif // __DICTIONARY_H__

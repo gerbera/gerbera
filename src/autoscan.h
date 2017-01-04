@@ -104,8 +104,8 @@ public:
 
     /// \brief Send notification for each directory that is stored in the list.
     /// 
-    /// \param obj instance of the class that will receive the notifications.
-    void notifyAll(zmm::Ref<TimerSubscriberSingleton<Object> > obj);
+    /// \param sub instance of the class that will receive the notifications.
+    void notifyAll(TimerSubscriber *sub);
         
     /*
     /// \brief Add timer for given directory.

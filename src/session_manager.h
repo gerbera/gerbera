@@ -114,7 +114,7 @@ protected:
 };
 
 /// \brief This class offers ways to create new sessoins, stores all available sessions and provides access to them.
-class SessionManager : public TimerSubscriberSingleton<SessionManager>
+class SessionManager : public TimerSubscriber, public Singleton<SessionManager>
 {
 protected:
     /// \brief This array is holding available sessions.

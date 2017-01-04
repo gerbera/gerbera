@@ -191,7 +191,7 @@ typedef enum
     CFG_MAX
 } config_option_t;
 
-class ConfigManager : public Singleton<ConfigManager>
+class ConfigManager : public Singleton<ConfigManager, std::mutex>
 {
 public:
     ConfigManager();

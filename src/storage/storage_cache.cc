@@ -43,12 +43,11 @@ StorageCache::StorageCache()
     idHash = make_shared<unordered_map<int,Ref<CacheObject> > >();
     locationHash = make_shared<unordered_map<zmm::String, Ref<Array<CacheObject> > > >();
     hasBeenFlushed = false;
-    mutex = Ref<Mutex> (new Mutex());
 }
 
 void StorageCache::clear()
 {
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     idHash->clear();
     locationHash->clear();
 }
@@ -56,7 +55,7 @@ void StorageCache::clear()
 Ref<CacheObject> StorageCache::getObject(int id)
 {
 #ifdef TOMBDEBUG
-    assert(mutex->isLocked());
+    //assert(mutex->isLocked());
 #endif
     try {
         return idHash->at(id);
@@ -68,7 +67,7 @@ Ref<CacheObject> StorageCache::getObject(int id)
 Ref<CacheObject> StorageCache::getObjectDefinitely(int id)
 {
 #ifdef TOMBDEBUG
-    assert(mutex->isLocked());
+    //assert(mutex->isLocked());
 #endif
     Ref<CacheObject> obj = nullptr;
     try {
@@ -84,7 +83,7 @@ Ref<CacheObject> StorageCache::getObjectDefinitely(int id)
 void StorageCache::addChild(int id)
 {
 #ifdef TOMBDEBUG
-    assert(mutex->isLocked());
+    //assert(mutex->isLocked());
 #endif
     Ref<CacheObject> obj = nullptr;
     try {
@@ -96,7 +95,7 @@ void StorageCache::addChild(int id)
 
 bool StorageCache::removeObject(int id)
 {
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     Ref<CacheObject> obj = getObject(id);
     if (obj == nullptr)
         return false;
@@ -108,7 +107,7 @@ bool StorageCache::removeObject(int id)
 Ref<Array<CacheObject> > StorageCache::getObjects(String location)
 {
 #ifdef TOMBDEBUG
-    assert(mutex->isLocked());
+    //assert(mutex->isLocked());
 #endif
     try {
         return locationHash->at(location);
@@ -120,7 +119,7 @@ Ref<Array<CacheObject> > StorageCache::getObjects(String location)
 void StorageCache::checkLocation(Ref<CacheObject> obj)
 {
 #ifdef TOMBDEBUG
-    assert(mutex->isLocked());
+    //assert(mutex->isLocked());
 #endif
     if (! obj->knowsLocation())
         return;
@@ -153,7 +152,7 @@ bool StorageCache::flushed()
 void StorageCache::ensureFillLevelOk()
 {
 #ifdef TOMBDEBUG
-    assert(mutex->isLocked());
+    //assert(mutex->isLocked());
 #endif
     // TODO - much better...
     // for now just clear cache if it gets too full

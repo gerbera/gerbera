@@ -60,7 +60,6 @@
 using namespace zmm;
 using namespace mxml;
 
-SINGLETON_MUTEX(ConfigManager, false);
 
 String ConfigManager::filename = nullptr;
 String ConfigManager::userhome = nullptr;
@@ -90,7 +89,7 @@ void ConfigManager::setStaticArgs(String _filename, String _userhome,
     debug_logging = _debug_logging;
 }
 
-ConfigManager::ConfigManager() : Singleton<ConfigManager>()
+ConfigManager::ConfigManager() : Singleton<ConfigManager, std::mutex>()
 {
     options = Ref<Array<ConfigOption> > (new Array<ConfigOption>(CFG_MAX));
 

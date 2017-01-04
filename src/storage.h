@@ -100,7 +100,7 @@ public:
     
 };
 
-class Storage : public Singleton<Storage>
+class Storage : public Singleton<Storage, std::mutex>
 {
 public:
     static zmm::Ref<Storage> getInstance();

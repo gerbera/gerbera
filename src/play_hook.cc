@@ -42,8 +42,6 @@
 
 using namespace zmm;
 
-SINGLETON_MUTEX(PlayHook, false);
-
 void PlayHook::trigger(zmm::Ref<CdsObject> obj)
 {
     Ref<ConfigManager> cfg = ConfigManager::getInstance();

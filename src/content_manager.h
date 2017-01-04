@@ -34,6 +34,7 @@
 #include <memory>
 #include <unordered_set>
 #include <mutex>
+#include <condition_variable>
 
 #include "common.h"
 #include "cds_objects.h"
@@ -177,7 +178,7 @@ public:
 };
 */
 
-class ContentManager : public TimerSubscriberSingleton<ContentManager>
+class ContentManager : public TimerSubscriber, public Singleton<ContentManager, std::recursive_mutex>
 {
 public:
     /// \brief This is the parameter class for timerNotify
@@ -448,7 +449,7 @@ protected:
 
 #ifdef YOUTUBE
     std::mutex urlcache_mutex;
-    using AutoLock = std::lock_guard<std::mutex>;
+    using AutoLockYT = std::lock_guard<std::mutex>;
     zmm::Ref<ReentrantArray<CachedURL> > cached_urls;
     /// \brief Removes old URLs from the cache.
     void checkCachedURLs();
@@ -467,7 +468,7 @@ protected:
     
     void setLastModifiedTime(time_t lm);
     
-    inline void signal() { cond->signal(); }
+    inline void signal() { cond.notify_one(); }
     static void *staticThreadProc(void *arg);
     void threadProc();
     
@@ -476,7 +477,7 @@ protected:
     zmm::Ref<CMAccounting> acct;
     
     pthread_t taskThread;
-    zmm::Ref<Cond> cond;
+    std::condition_variable_any cond;
     
     bool working;
     

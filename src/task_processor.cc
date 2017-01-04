@@ -10,12 +10,10 @@
 #define TP_INITIAL_QUEUE_SIZE 4
 
 using namespace zmm;
-
-SINGLETON_MUTEX(TaskProcessor, false);
+using namespace std;
 
 TaskProcessor::TaskProcessor() : Singleton<TaskProcessor>()
 {
-    cond = Ref<Cond>(new Cond(mutex));
     taskID = 1;
     working = false;
     shutdownFlag = false;
@@ -40,7 +38,7 @@ void TaskProcessor::shutdown()
 {
     log_debug("Shutting down TaskProcessor\n");
     shutdownFlag = true;
-    cond->signal();
+    cond.notify_one();
     if (taskThread)
         pthread_join(taskThread, nullptr);
     taskThread = 0;
@@ -58,7 +56,7 @@ void TaskProcessor::threadProc()
 {
     Ref<GenericTask> task;
     //Ref<TaskProcessor> this_ref(this);
-    AUTOLOCK(mutex);
+    unique_lock<mutex_type> lock(mutex);
     working = true;
 
     while (!shutdownFlag)
@@ -67,7 +65,7 @@ void TaskProcessor::threadProc()
         if ((task = taskQueue->dequeue()) == nullptr)
         {
             working = false;
-            cond->wait();
+            cond.wait(lock);
             working = true;
             continue;
         }
@@ -75,7 +73,7 @@ void TaskProcessor::threadProc()
         {
             currentTask = task;
         }
-        AUTOUNLOCK();
+        lock.unlock();
 
         try
         {
@@ -94,25 +92,25 @@ void TaskProcessor::threadProc()
 
         if (!shutdownFlag)
         {
-            AUTORELOCK();
+            lock.lock();
         }
     }
 }
 
 void TaskProcessor::addTask(Ref<GenericTask> task)
 {
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
 
     task->setID(taskID++);
 
     taskQueue->enqueue(task);
-    cond->signal();
+    cond.notify_one();
 }
 
 Ref<GenericTask> TaskProcessor::getCurrentTask()
 {
     Ref<GenericTask> task;
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     task = currentTask;
     return task;
 }
@@ -121,7 +119,7 @@ void TaskProcessor::invalidateTask(unsigned int taskID)
 {
     int i;
 
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     Ref<GenericTask> t = getCurrentTask();
     if (t != nullptr)
     {
@@ -148,7 +146,7 @@ Ref<Array<GenericTask> > TaskProcessor::getTasklist()
     int i;
     Ref<Array<GenericTask> > taskList = nullptr;
 
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     Ref<GenericTask> t = getCurrentTask();
 
     // if there is no current task, then the queues are empty
@@ -222,7 +220,9 @@ void TPFetchOnlineContentTask::run()
     {
         if ((service->getRefreshInterval() > 0) && !unscheduled_refresh)
         {
-            Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON_FROM_REF(ContentManager::getInstance()),
+            Timer::getInstance()->addTimerSubscriber(
+                    //AS_TIMER_SUBSCRIBER_SINGLETON_FROM_REF(ContentManager::getInstance()),
+                    ContentManager::getInstance().getPtr(),
                     service->getRefreshInterval(),
                     service->getTimerParameter(), true);
         }

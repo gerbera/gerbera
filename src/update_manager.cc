@@ -36,6 +36,7 @@
 #include "tools.h"
 #include <sys/types.h>
 #include <csignal>
+#include <chrono>
 
 /* following constants in milliseconds */
 #define SPEC_INTERVAL 2000
@@ -48,15 +49,12 @@
 using namespace zmm;
 using namespace std;
 
-SINGLETON_MUTEX(UpdateManager, false);
-
 UpdateManager::UpdateManager() : Singleton<UpdateManager>()
 {
     objectIDHash = make_shared<unordered_set<int>>();
     shutdownFlag = false;
     flushPolicy = FLUSH_SPEC;
     lastContainerChanged = INVALID_OBJECT_ID;
-    cond = Ref<Cond>(new Cond(mutex));
 }
 
 void UpdateManager::init()
@@ -81,11 +79,11 @@ void UpdateManager::init()
 void UpdateManager::shutdown()
 {
     log_debug("start\n");
-    AUTOLOCK(mutex);
+    unique_lock<mutex_type> lock(mutex);
     shutdownFlag = true;
     log_debug("signalling...\n");
-    cond->signal();
-    AUTOUNLOCK();
+    cond.notify_one();
+    lock.unlock();
     log_debug("waiting for thread\n");
     if (updateThread)
         pthread_join(updateThread, nullptr);
@@ -97,7 +95,7 @@ void UpdateManager::containersChanged(Ref<IntArray> objectIDs, int flushPolicy)
 {
     if (objectIDs == nullptr)
         return;
-    AUTOLOCK(mutex);
+    unique_lock<mutex_type> lock(mutex);
     // signalling thread if it could have been idle, because 
     // there were no unprocessed updates
     bool signal = (! haveUpdates());
@@ -123,9 +121,9 @@ void UpdateManager::containersChanged(Ref<IntArray> objectIDs, int flushPolicy)
                 while(objectIDHash->size() > MAX_OBJECT_IDS)
                 {
                     log_debug("in-between signalling...\n");
-                    cond->signal();
-                    AUTOUNLOCK();
-                    AUTORELOCK();
+                    cond.notify_one();
+                    lock.unlock();
+                    lock.lock();
                 }
             }
         }
@@ -135,7 +133,7 @@ void UpdateManager::containersChanged(Ref<IntArray> objectIDs, int flushPolicy)
     if (signal)
     {
         log_debug("signalling...\n");
-        cond->signal();
+        cond.notify_one();
     }
 }
 
@@ -143,7 +141,7 @@ void UpdateManager::containerChanged(int objectID, int flushPolicy)
 {
     if (objectID == INVALID_OBJECT_ID)
         return;
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     if (objectID != lastContainerChanged || flushPolicy > this->flushPolicy)
     {
         // signalling thread if it could have been idle, because 
@@ -169,7 +167,7 @@ void UpdateManager::containerChanged(int objectID, int flushPolicy)
         if (signal)
         {
             log_debug("signalling...\n");
-            cond->signal();
+            cond.notify_one();
         }
     }
     else
@@ -185,8 +183,8 @@ void UpdateManager::threadProc()
     struct timespec lastUpdate;
     getTimespecNow(&lastUpdate);
     
-    AUTOLOCK(mutex);
-    //cond->signal();
+    unique_lock<mutex_type> lock(mutex);
+    //cond.notify_one();
     while (! shutdownFlag)
     {
         if (haveUpdates())
@@ -211,18 +209,11 @@ void UpdateManager::threadProc()
                 getTimespecAfterMillis(sleepMillis, &timeout, &now);
                 log_debug("threadProc: sleeping for %ld millis\n", sleepMillis);
                 
-                int ret = cond->timedwait(&timeout);
+                cv_status ret = cond.wait_for(lock, chrono::milliseconds(sleepMillis));
                 
                 if (! shutdownFlag)
                 {
-                    if (ret != 0 && ret != ETIMEDOUT)
-                    {
-                        log_error("Fatal error: pthread_cond_timedwait returned errorcode %d\n", ret);
-                        log_error("Forcing MediaTomb shutdown.\n");
-                        print_backtrace();
-                        kill(0, SIGINT);
-                    }
-                    if (ret == ETIMEDOUT)
+                    if (ret == cv_status::timeout)
                         sendUpdates = false;
                 }
                 else
@@ -248,7 +239,7 @@ void UpdateManager::threadProc()
                     log_error("Forcing MediaTomb shutdown.\n");
                     kill(0, SIGINT);
                 }
-                AUTOUNLOCK(); // we don't need to hold the lock during the sending of the updates
+                lock.unlock(); // we don't need to hold the lock during the sending of the updates
                 if (string_ok(updateString))
                 {
                     try
@@ -268,13 +259,13 @@ void UpdateManager::threadProc()
                 {
                     log_debug("NOT sending updates (string empty or invalid).\n");
                 }
-                AUTORELOCK();
+                lock.lock();
             }
         }
         else
         {
             //nothing to do
-            cond->wait();
+            cond.wait(lock);
         }
     }
 }

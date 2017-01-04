@@ -311,9 +311,9 @@ void AutoscanList::subscribeAll(Ref<TimerSubscriber> obj)
     }
 }
 */
-
-void AutoscanList::notifyAll(Ref<TimerSubscriberSingleton<Object> > cm)
+void AutoscanList::notifyAll(TimerSubscriber *sub)
 {
+    if (sub == nullptr) return;
     AutoLock lock(mutex);
     
     Ref<Timer> timer = Timer::getInstance();
@@ -321,7 +321,7 @@ void AutoscanList::notifyAll(Ref<TimerSubscriberSingleton<Object> > cm)
     {
         if (list->get(i) == nullptr)
             continue;
-       cm->timerNotify(list->get(i)->getTimerParameter());
+        sub->timerNotify(list->get(i)->getTimerParameter());
     }
 }
 

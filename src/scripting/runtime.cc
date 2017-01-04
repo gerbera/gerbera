@@ -34,11 +34,9 @@
 #include "runtime.h"
 
 using namespace zmm;
+using namespace std;
 
-SINGLETON_MUTEX(Runtime, true);
-
-Runtime::Runtime() : Singleton<Runtime>()
-{
+Runtime::Runtime() {
     /* initialize the JS run time, and return result in rt */
     rt = JS_NewRuntime(8L * 1024L * 1024L);
     if (!rt)
