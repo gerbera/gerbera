@@ -32,6 +32,7 @@ _MediaTomb is pretty much dead upstream, so this is my attempt to get kick it ba
 - Removed bundled `libuuid`.
 - Ported to CMake.
 - Enhanced cover art support for MP4, FLAC, Vorbis & WMA files (via TagLib).
+- TagLib handler opens files read only (stops inotify rescanning the dir on access causing "Object not found" [see here][1].
 - Album folders have "creator" metadata (artist).
 - Album folders have artwork: either from external files or the tracks embedded artwork.
 - Per-track external art support: `filename-of-track.jp\*` (minus the audio file extension).
@@ -44,7 +45,7 @@ _MediaTomb is pretty much dead upstream, so this is my attempt to get kick it ba
 
 ## Building
 
-The project has been ported to [CMake](https://cmake.org/).
+The project has been ported to [CMake].
 
 ### Install prerequisites.
 
@@ -84,7 +85,7 @@ make install
 
 | Lib          	| Version 	| Required? 	| Note                 	|
 |--------------	|---------	|-----------	|----------------------	|
-| libupnp      	| 1.8     	| Required  	| Must use: [pupnp](https://github.com/mrjimenez/pupnp.git)	|
+| libupnp      	| 1.8     	| Required  	| Must use: [pupnp]	|
 | libuuid      	|         	| Required  	|                      	|
 | expat        	|         	| Required  	|                      	|
 | sqlite3      	|         	| Required  	|                      	|
@@ -118,3 +119,7 @@ make install
        Gena Batyan <bgeradz at mediatomb dot cc>
        Sergey Bostandzhyan <jin at mediatomb dot cc>
        Leonhard Wimmer <leo at mediatomb dot cc>
+
+[1]: https://sourceforge.net/p/mediatomb/discussion/440751/thread/258c3cf7/?limit=250
+[pupnp]: https://github.com/mrjimenez/pupnp.git
+[CMake]: https://cmake.org/
