@@ -1346,7 +1346,7 @@ String SQLStorage::findFolderImage(int id, String trackArtBase)
     *q << ")";
     *q << " ORDER BY " << TQ("dc_title") << " DESC";
 
-    log_debug("findFolderImage %d, %s\n", id, q->c_str());
+    //log_debug("findFolderImage %d, %s\n", id, q->c_str());
     Ref<SQLResult> res = select(q);
     if (res == nullptr)
         throw _Exception(_("db error"));
