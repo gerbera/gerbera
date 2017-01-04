@@ -51,7 +51,7 @@ Object::~Object()
 #endif
 }
 
-void Object::retain()
+void Object::retain() const
 {
 #ifdef ATOMIC_NEED_MUTEX
     atomic_inc(&_ref_count, &mutex);
@@ -59,7 +59,7 @@ void Object::retain()
     atomic_inc(&_ref_count);
 #endif
 }
-void Object::release()
+void Object::release() const
 {
 #ifdef ATOMIC_NEED_MUTEX
     if(atomic_dec(&_ref_count, &mutex))
@@ -71,7 +71,7 @@ void Object::release()
     }
 }
 
-int Object::getRefCount()
+int Object::getRefCount() const
 {
     return atomic_get(&_ref_count);
 }
