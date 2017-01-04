@@ -35,8 +35,9 @@
 
 #ifdef HAVE_TAGLIB
 
-#include <taglib/tfile.h>
 #include <taglib/tbytevector.h>
+#include <taglib/tfile.h>
+#include <taglib/tiostream.h>
 
 #include "metadata_handler.h"
 
@@ -52,14 +53,14 @@ private:
     bool isValidArtworkContentType(zmm::String content_type);
     zmm::String getContentTypeFromByteVector(const TagLib::ByteVector& data) const;
     void addArtworkResource(zmm::Ref<CdsItem> item, zmm::String content_type);
-    void extractMP3(zmm::Ref<CdsItem> item);
-    void extractOgg(zmm::Ref<CdsItem> item);
-    void extractASF(zmm::Ref<CdsItem> item);
-    void extractFLAC(zmm::Ref<CdsItem> item);
-    void extractAPE(zmm::Ref<CdsItem> item);
-    void extractWavPack(zmm::Ref<CdsItem> item);
-    void extractMP4(zmm::Ref<CdsItem> item);
-    void extractAiff(zmm::Ref<CdsItem> item);
+    void extractMP3(TagLib::IOStream *roStream, zmm::Ref<CdsItem> item);
+    void extractOgg(TagLib::IOStream *roStream, zmm::Ref<CdsItem> item);
+    void extractASF(TagLib::IOStream *roStream, zmm::Ref<CdsItem> item);
+    void extractFLAC(TagLib::IOStream *roStream, zmm::Ref<CdsItem> item);
+    void extractAPE(TagLib::IOStream *roStream, zmm::Ref<CdsItem> item);
+    void extractWavPack(TagLib::IOStream *roStream, zmm::Ref<CdsItem> item);
+    void extractMP4(TagLib::IOStream *roStream, zmm::Ref<CdsItem> item);
+    void extractAiff(TagLib::IOStream *roStream, zmm::Ref<CdsItem> item);
 };
 
 #endif
