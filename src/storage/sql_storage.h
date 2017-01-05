@@ -95,67 +95,67 @@ public:
         { return exec(buf->c_str(), buf->length(), getLastInsertId); }
     
     virtual void addObject(zmm::Ref<CdsObject> object, int *changedContainer);
-    virtual void updateObject(zmm::Ref<CdsObject> object, int *changedContainer);
+    virtual void updateObject(zmm::Ref<CdsObject> object, int *changedContainer) override;
     
-    virtual zmm::Ref<CdsObject> loadObject(int objectID);
-    virtual int getChildCount(int contId, bool containers, bool items, bool hideFsRoot);
+    virtual zmm::Ref<CdsObject> loadObject(int objectID) override;
+    virtual int getChildCount(int contId, bool containers, bool items, bool hideFsRoot) override;
     
     //virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param);
     
-    virtual std::shared_ptr<std::unordered_set<int> > getObjects(int parentID, bool withoutContainer);
+    virtual std::shared_ptr<std::unordered_set<int> > getObjects(int parentID, bool withoutContainer) override;
     
-    virtual zmm::Ref<ChangedContainers> removeObject(int objectID, bool all);
-    virtual zmm::Ref<ChangedContainers> removeObjects(std::shared_ptr<std::unordered_set<int> > list, bool all = false);
+    virtual zmm::Ref<ChangedContainers> removeObject(int objectID, bool all) override;
+    virtual zmm::Ref<ChangedContainers> removeObjects(std::shared_ptr<std::unordered_set<int> > list, bool all = false) override;
     
-    virtual zmm::Ref<CdsObject> loadObjectByServiceID(zmm::String serviceID);
-    virtual zmm::Ref<zmm::IntArray> getServiceObjectIDs(char servicePrefix);
+    virtual zmm::Ref<CdsObject> loadObjectByServiceID(zmm::String serviceID) override;
+    virtual zmm::Ref<zmm::IntArray> getServiceObjectIDs(char servicePrefix) override;
 
-    virtual zmm::String findFolderImage(int id, zmm::String trackArtBase);
+    virtual zmm::String findFolderImage(int id, zmm::String trackArtBase) override;
     
     /* accounting methods */
-    virtual int getTotalFiles();
+    virtual int getTotalFiles() override;
     
-    virtual zmm::Ref<zmm::Array<CdsObject> > browse(zmm::Ref<BrowseParam> param);
-    virtual zmm::Ref<zmm::Array<zmm::StringBase> > getMimeTypes();
+    virtual zmm::Ref<zmm::Array<CdsObject> > browse(zmm::Ref<BrowseParam> param) override;
+    virtual zmm::Ref<zmm::Array<zmm::StringBase> > getMimeTypes() override;
     
     //virtual zmm::Ref<CdsObject> findObjectByTitle(zmm::String title, int parentID);
-    virtual zmm::Ref<CdsObject> findObjectByPath(zmm::String fullpath);
-    virtual int findObjectIDByPath(zmm::String fullpath);
-    virtual zmm::String incrementUpdateIDs(std::shared_ptr<std::unordered_set<int> > ids);
+    virtual zmm::Ref<CdsObject> findObjectByPath(zmm::String fullpath) override;
+    virtual int findObjectIDByPath(zmm::String fullpath) override;
+    virtual zmm::String incrementUpdateIDs(std::shared_ptr<std::unordered_set<int> > ids) override;
     
-    virtual zmm::String buildContainerPath(int parentID, zmm::String title);
-    virtual void addContainerChain(zmm::String path, zmm::String lastClass, int lastRefID, int *containerID, int *updateID, zmm::Ref<Dictionary> lastMetadata);
-    virtual zmm::String getInternalSetting(zmm::String key);
-    virtual void storeInternalSetting(zmm::String key, zmm::String value) = 0;
+    virtual zmm::String buildContainerPath(int parentID, zmm::String title) override;
+    virtual void addContainerChain(zmm::String path, zmm::String lastClass, int lastRefID, int *containerID, int *updateID, zmm::Ref<Dictionary> lastMetadata) override;
+    virtual zmm::String getInternalSetting(zmm::String key) override;
+    virtual void storeInternalSetting(zmm::String key, zmm::String value) override = 0;
     
-    virtual void updateAutoscanPersistentList(scan_mode_t scanmode, zmm::Ref<AutoscanList> list);
-    virtual zmm::Ref<AutoscanList> getAutoscanList(scan_mode_t scanmode);
-    virtual void addAutoscanDirectory(zmm::Ref<AutoscanDirectory> adir);
-    virtual void updateAutoscanDirectory(zmm::Ref<AutoscanDirectory> adir);
-    virtual void removeAutoscanDirectoryByObjectID(int objectID);
-    virtual void removeAutoscanDirectory(int autoscanID);
-    virtual int getAutoscanDirectoryType(int objectId);
-    virtual int isAutoscanDirectoryRecursive(int objectId);
-    virtual void autoscanUpdateLM(zmm::Ref<AutoscanDirectory> adir);
-    virtual zmm::Ref<AutoscanDirectory> getAutoscanDirectory(int objectID);
-    virtual int isAutoscanChild(int objectID);
-    virtual void checkOverlappingAutoscans(zmm::Ref<AutoscanDirectory> adir);
+    virtual void updateAutoscanPersistentList(scan_mode_t scanmode, zmm::Ref<AutoscanList> list) override;
+    virtual zmm::Ref<AutoscanList> getAutoscanList(scan_mode_t scanmode) override;
+    virtual void addAutoscanDirectory(zmm::Ref<AutoscanDirectory> adir) override;
+    virtual void updateAutoscanDirectory(zmm::Ref<AutoscanDirectory> adir) override;
+    virtual void removeAutoscanDirectoryByObjectID(int objectID) override;
+    virtual void removeAutoscanDirectory(int autoscanID) override;
+    virtual int getAutoscanDirectoryType(int objectId) override;
+    virtual int isAutoscanDirectoryRecursive(int objectId) override;
+    virtual void autoscanUpdateLM(zmm::Ref<AutoscanDirectory> adir) override;
+    virtual zmm::Ref<AutoscanDirectory> getAutoscanDirectory(int objectID) override;
+    virtual int isAutoscanChild(int objectID) override;
+    virtual void checkOverlappingAutoscans(zmm::Ref<AutoscanDirectory> adir) override;
     
-    virtual zmm::Ref<zmm::IntArray> getPathIDs(int objectID);
+    virtual zmm::Ref<zmm::IntArray> getPathIDs(int objectID) override;
     
-    virtual void shutdown();
+    virtual void shutdown() override;
     virtual void shutdownDriver() = 0;
     
-    virtual int ensurePathExistence(zmm::String path, int *changedContainer);
+    virtual int ensurePathExistence(zmm::String path, int *changedContainer) override;
     
-    virtual zmm::String getFsRootName();
+    virtual zmm::String getFsRootName() override;
     
-    virtual void clearFlagInDB(int flag);
+    virtual void clearFlagInDB(int flag) override;
 
 protected:
     SQLStorage();
     //virtual ~SQLStorage();
-    virtual void init();
+    virtual void init() override;
     
     char table_quote_begin;
     char table_quote_end;

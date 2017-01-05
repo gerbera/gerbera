@@ -159,20 +159,20 @@ private:
     Sqlite3Storage();
     //virtual ~Sqlite3Storage();
     friend zmm::Ref<Storage> Storage::createInstance();
-    virtual void init();
-    virtual void shutdownDriver();
+    virtual void init() override;
+    virtual void shutdownDriver() override;
     
-    virtual zmm::String quote(zmm::String str);
-    virtual inline zmm::String quote(int val) { return zmm::String::from(val); }
-    virtual inline zmm::String quote(unsigned int val) { return zmm::String::from(val); }
-    virtual inline zmm::String quote(long val) { return zmm::String::from(val); }
-    virtual inline zmm::String quote(unsigned long val) { return zmm::String::from(val); }
-    virtual inline zmm::String quote(bool val) { return zmm::String(val ? '1' : '0'); }
-    virtual inline zmm::String quote(char val) { return quote(zmm::String(val)); }
-    virtual inline zmm::String quote(long long val) { return zmm::String::from(val); }
-    virtual zmm::Ref<SQLResult> select(const char *query, int length);
-    virtual int exec(const char *query, int length, bool getLastInsertId = false);
-    virtual void storeInternalSetting(zmm::String key, zmm::String value);
+    virtual zmm::String quote(zmm::String str) override;
+    virtual inline zmm::String quote(int val) override { return zmm::String::from(val); }
+    virtual inline zmm::String quote(unsigned int val) override { return zmm::String::from(val); }
+    virtual inline zmm::String quote(long val) override { return zmm::String::from(val); }
+    virtual inline zmm::String quote(unsigned long val) override { return zmm::String::from(val); }
+    virtual inline zmm::String quote(bool val) override { return zmm::String(val ? '1' : '0'); }
+    virtual inline zmm::String quote(char val) override { return quote(zmm::String(val)); }
+    virtual inline zmm::String quote(long long val) override { return zmm::String::from(val); }
+    virtual zmm::Ref<SQLResult> select(const char *query, int length) override;
+    virtual int exec(const char *query, int length, bool getLastInsertId = false) override;
+    virtual void storeInternalSetting(zmm::String key, zmm::String value) override;
     
     void _exec(const char *query);
     
@@ -221,8 +221,8 @@ class Sqlite3Result : public SQLResult
 private:
     Sqlite3Result();
     virtual ~Sqlite3Result();
-    virtual zmm::Ref<SQLRow> nextRow();
-    virtual unsigned long long getNumRows() { return nrow; }
+    virtual zmm::Ref<SQLRow> nextRow() override;
+    virtual unsigned long long getNumRows() override { return nrow; }
     
     char **table;
     char **row;
