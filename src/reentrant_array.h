@@ -32,8 +32,8 @@
 #ifndef __REENTRANT_ARRAY_H__
 #define __REENTRANT_ARRAY_H__
 
+#include <mutex>
 #include "zmm/zmmf.h"
-#include "sync.h"
 
 /// \brief Reentrant version of the object array
 template <class T>
@@ -41,73 +41,57 @@ class ReentrantArray : public zmm::Array<T>
 {
 public:
     ReentrantArray() : zmm::Array<T>()
-    {
-        mutex = zmm::Ref<Mutex>(new Mutex());
-    }
+    { }
     ReentrantArray(int capacity) : zmm::Array<T>(capacity)
-    {
-        mutex = zmm::Ref<Mutex>(new Mutex());
-    }
+    { }
     inline void append(zmm::Ref<T> el)
     {
-        mutex->lock();
+        AutoLock lock(mutex);
         zmm::Array<T>::append(el);
-        mutex->unlock();
     }
     inline void set(zmm::Ref<T> el, int index)
     {
-        mutex->lock();
+        AutoLock lock(mutex);
         zmm::Array<T>::set(el, index);
-        mutex->unlock();
     }
     inline zmm::Ref<T> get(int index)
     {
-        zmm::Ref<T> ret;
-        mutex->lock();
-        ret = zmm::Array<T>::get(index);
-        mutex->unlock();
-        return ret;
+        AutoLock lock(mutex);
+        return zmm::Array<T>::get(index);
     }
     inline void remove(int index, int count=1)
     {
-        mutex->lock();
+        AutoLock lock(mutex);
         zmm::Array<T>::set(index, count);
-        mutex->unlock();
     }
     inline void removeUnordered(int index)
     {
-        mutex->lock();
+        AutoLock lock(mutex);
         zmm::Array<T>::removeUnordered(index);
-        mutex->unlock();
     }
     inline void insert(int index, zmm::Ref<T> el)
     {
-        mutex->lock();
+        AutoLock lock(mutex);
         zmm::Array<T>::insert(index, el);
-        mutex->unlock();
     }
     inline int size()
     {
-        int size;
-        mutex->lock();
-        size = zmm::Array<T>::size();
-        mutex->unlock();
-        return size;
+        AutoLock lock(mutex);
+        return zmm::Array<T>::size();
     }
     inline void clear()
     {
-        mutex->lock();
+        AutoLock lock(mutex);
         zmm::Array<T>::clear();
-        mutex->unlock();
     }
     inline void optimize()
     {
-        mutex->lock();
+        AutoLock lock(mutex);
         zmm::Array<T>::optimize();
-        mutex->unlock();
     }
 protected:
-    zmm::Ref<Mutex> mutex;
+    std::mutex mutex;
+    using AutoLock = std::lock_guard<decltype(mutex)>;
 };
 
 
