@@ -40,7 +40,6 @@
 #include "cds_objects.h"
 #include "storage.h"
 #include "dictionary.h"
-#include "sync.h"
 #include "autoscan.h"
 #include "timer.h"
 #include "generic_task.h"

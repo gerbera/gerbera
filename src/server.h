@@ -40,7 +40,6 @@
 #include "upnp_cm.h"
 #include "upnp_mrreg.h"
 #include "config_manager.h"
-#include "sync.h"
 #include "storage.h"
 
 /// \brief Provides methods to initialize and shutdown

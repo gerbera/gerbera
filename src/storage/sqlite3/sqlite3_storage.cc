@@ -60,6 +60,7 @@
 
 using namespace zmm;
 using namespace mxml;
+using namespace std;
 
 Sqlite3Storage::Sqlite3Storage() : SQLStorage()
 {
@@ -67,8 +68,6 @@ Sqlite3Storage::Sqlite3Storage() : SQLStorage()
     table_quote_begin = '"';
     table_quote_end = '"';
     startupError = nullptr;
-    sqliteMutex = Ref<Mutex>(new Mutex());
-    cond = Ref<Cond>(new Cond(sqliteMutex));
     insertBuffer = nullptr;
     dirty = false;
 }
@@ -82,7 +81,7 @@ void Sqlite3Storage::init()
     
     int ret;
     
-    AUTOLOCK(sqliteMutex);
+    AutoLockU lock(sqliteMutex);
     /*
     pthread_attr_t attr;
     pthread_attr_init(&attr);
@@ -114,8 +113,8 @@ void Sqlite3Storage::init()
     }
     
     // wait for sqlite3 thread to become ready
-    cond->wait();
-    AUTOUNLOCK();
+    cond.wait(lock);
+    lock.unlock();
     if (startupError != nullptr)
         throw _StorageException(nullptr, startupError);
     
@@ -307,19 +306,19 @@ void Sqlite3Storage::threadProc()
             dbFilePath;
         return;
     }
-    AUTOLOCK(sqliteMutex);
+    AutoLockU lock(sqliteMutex);
     // tell init() that we are ready
-    cond->signal();
+    cond.notify_one();
     
     while(! shutdownFlag)
     {
         if((task = taskQueue->dequeue()) == nullptr)
         {
             /* if nothing to do, sleep until awakened */
-            cond->wait();
+            cond.wait(lock);
             continue;
         }
-        AUTOUNLOCK();
+        lock.unlock();
         try
         {
             task->run(&db, this);
@@ -333,7 +332,7 @@ void Sqlite3Storage::threadProc()
         {
             task->sendSignal(e.getMessage());
         }
-        AUTORELOCK();
+        lock.lock();
     }
     
     taskQueueOpen = false;
@@ -349,7 +348,7 @@ void Sqlite3Storage::addTask(zmm::Ref<SLTask> task, bool onlyIfDirty)
 {
     if (! taskQueueOpen)
         throw _Exception(_("sqlite3 task queue is already closed"));
-    AUTOLOCK(sqliteMutex);
+    AutoLock lock(sqliteMutex);
     if (! taskQueueOpen)
     {
         throw _Exception(_("sqlite3 task queue is already closed"));
@@ -357,21 +356,21 @@ void Sqlite3Storage::addTask(zmm::Ref<SLTask> task, bool onlyIfDirty)
     if (! onlyIfDirty || dirty)
     {
         taskQueue->enqueue(task);
-        signal();
+        cond.notify_one();
     }
 }
 
 void Sqlite3Storage::shutdownDriver()
 {
     log_debug("start\n");
-    AUTOLOCK(sqliteMutex);
+    AutoLockU lock(sqliteMutex);
     shutdownFlag = true;
     if (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED)) {
         Timer::getInstance()->removeTimerSubscriber(&backupTimerSubscriber, Ref<Object>(this));
     }
     log_debug("signalling...\n");
-    signal();
-    AUTOUNLOCK();
+    cond.notify_one();
+    lock.unlock();
     log_debug("waiting for thread\n");
     if (sqliteThread)
         pthread_join(sqliteThread, nullptr);
@@ -413,8 +412,6 @@ void Sqlite3Storage::_flushInsertBuffer()
 SLTask::SLTask() : Object()
 {
     running = true;
-    mutex = Ref<Mutex>(new Mutex());
-    cond = Ref<Cond>(new Cond(mutex));
     error = nullptr;
     contamination = false;
     decontamination = false;
@@ -426,9 +423,9 @@ bool SLTask::is_running()
 
 void SLTask::sendSignal()
 {
-    AUTOLOCK(mutex);
+    lock_guard<decltype(mutex)> lock(mutex);
     running=false;
-    cond->signal();
+    cond.notify_one();
 }
 
 void SLTask::sendSignal(String error)
@@ -441,10 +438,10 @@ void SLTask::waitForTask()
 {
     if (is_running())
     { // we check before we lock first, because there is no need to lock then
-        AUTOLOCK(mutex);
+        unique_lock<decltype(mutex)> lock(mutex);
         if (is_running())
         { // we check it a second time after locking to ensure we didn't miss the pthread_cond_signal 
-            cond->wait(); // waiting for the task to complete
+            cond.wait(lock); // waiting for the task to complete
         }
     }
     

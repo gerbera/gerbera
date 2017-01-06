@@ -6,7 +6,6 @@
 
 #include <condition_variable>
 #include "common.h"
-#include "sync.h"
 #include "online_service.h"
 #include "singleton.h"
 #include "generic_task.h"

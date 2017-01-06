@@ -32,12 +32,12 @@
 #ifndef __DVDNAV_READ_H__
 #define __DVDNAV_READ_H__
 
+#include <mutex>
 #include <stdint.h>
 
 #include <sys/types.h>
 #include <dvdnav/dvdnav.h>
 #include "common.h"
-#include "sync.h"
 
 /// \brief Allows to read selected streams from a DVD image.
 ///
@@ -119,7 +119,8 @@ protected:
     /// \brief end of title flag
     bool EOT;
 
-    zmm::Ref<Mutex> mutex;
+    std::recursive_mutex mutex;
+    using AutoLock = std::lock_guard<decltype(mutex)>;
 
     zmm::String getLanguage(char *code);
 };

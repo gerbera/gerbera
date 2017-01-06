@@ -35,7 +35,6 @@
 #include <jsapi.h>
 #include <pthread.h>
 #include "common.h"
-#include "sync.h"
 #include "singleton.h"
 
 /// \brief Runtime class definition.

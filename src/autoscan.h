@@ -35,7 +35,6 @@
 
 #include <mutex>
 #include "zmm/zmmf.h"
-#include "sync.h"
 #include "timer.h"
 
 #define INVALID_SCAN_ID -1

@@ -33,8 +33,8 @@
 #define __SINGLETON_H__
 
 #include <mutex>
-#include "sync.h"
 #include "zmm/zmmf.h"
+#include "exceptions.h"
 
 #define SINGLETON_CUR_MAX 15
 

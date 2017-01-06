@@ -37,7 +37,6 @@
 
 #include "singleton.h"
 #include "dictionary.h"
-#include "sync.h"
 #include "timer.h"
 
 /// \brief One UI session.

@@ -39,7 +39,6 @@
 #include "zmm/zmmf.h"
 #include "zmm/ref.h"
 #include "singleton.h"
-#include "sync.h"
 #include "tools.h"
 
 

@@ -34,9 +34,9 @@
 #ifndef __MYSQL_STORAGE_H__
 #define __MYSQL_STORAGE_H__
 
+#include <mutex>
 #include "common.h"
 #include "storage/sql_storage.h"
-#include "sync.h"
 #include <mysql.h>
 
 class MysqlStorage : private SQLStorage
@@ -68,7 +68,8 @@ private:
     
     zmm::String getError(MYSQL *db);
     
-    zmm::Ref<Mutex> mysqlMutex;
+    std::recursive_mutex mysqlMutex;
+    using AutoLock = std::lock_guard<decltype(mysqlMutex)>;
     
     virtual void threadCleanup();
     virtual bool threadCleanupRequired() { return true; }

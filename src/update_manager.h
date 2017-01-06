@@ -38,7 +38,6 @@
 
 #include "common.h"
 #include "singleton.h"
-#include "sync.h"
 
 #define FLUSH_ASAP 2
 #define FLUSH_SPEC 1

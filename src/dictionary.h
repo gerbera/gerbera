@@ -34,7 +34,6 @@
 
 #include <mutex>
 #include "zmm/zmmf.h"
-#include "sync.h"
 
 /// \brief This class should never be used directly, it is being used by the Dictionary class.
 class DictionaryElement : public zmm::Object

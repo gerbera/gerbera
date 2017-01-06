@@ -35,10 +35,11 @@
 #ifndef __SQLITE3_STORAGE_H__
 #define __SQLITE3_STORAGE_H__
 
+#include <mutex>
+#include <condition_variable>
 #include <sqlite3.h>
 
 #include "storage/sql_storage.h"
-#include "sync.h"
 #include "timer.h"
 
 class Sqlite3Storage;
@@ -83,8 +84,9 @@ protected:
     /// \brief true if this task has backuped the db
     bool decontamination;
     
-    zmm::Ref<Cond> cond;
-    zmm::Ref<Mutex> mutex;
+    std::condition_variable cond;
+    std::mutex mutex;
+
     zmm::String error;
 };
 
@@ -184,8 +186,10 @@ private:
     void addTask(zmm::Ref<SLTask> task, bool onlyIfDirty = false);
     
     pthread_t sqliteThread;
-    zmm::Ref<Cond> cond;
-    zmm::Ref<Mutex> sqliteMutex;
+    std::condition_variable cond;
+    std::mutex sqliteMutex;
+    using AutoLock = std::lock_guard<decltype(sqliteMutex)>;
+    using AutoLockU = std::unique_lock<decltype(sqliteMutex)>;
     
     /// \brief is set to true by shutdown() if the sqlite3 thread should terminate
     bool shutdownFlag;
@@ -196,8 +200,6 @@ private:
     
     virtual void threadCleanup() {}
     virtual bool threadCleanupRequired() { return false; }
-    
-    inline void signal() { cond->signal(); }
     
     zmm::Ref<zmm::StringBuffer> insertBuffer;
     virtual void _addToInsertBuffer(zmm::Ref<zmm::StringBuffer> query);

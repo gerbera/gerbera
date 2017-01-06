@@ -70,19 +70,19 @@
 
 using namespace zmm;
 using namespace mxml;
+using namespace std;
 
 MysqlStorage::MysqlStorage() : SQLStorage()
 {
     mysql_init_key_initialized = false;
     mysql_connection = false;
-    mysqlMutex = Ref<Mutex> (new Mutex(true));
     table_quote_begin = '`';
     table_quote_end = '`';
     insertBuffer = nullptr;
 }
 MysqlStorage::~MysqlStorage()
 {
-    AUTOLOCK(mysqlMutex);    // just to ensure, that we don't close while another thread 
+    AutoLock lock(mysqlMutex);    // just to ensure, that we don't close while another thread 
                     // is executing a query
     
     if(mysql_connection)
@@ -122,7 +122,7 @@ void MysqlStorage::init()
     log_debug("start\n");
     SQLStorage::init();
     
-    AUTOLOCK(mysqlMutex);
+    unique_lock<decltype(mysqlMutex)> lock(mysqlMutex);
     int ret;
     
     if (! mysql_thread_safe())
@@ -287,7 +287,7 @@ void MysqlStorage::init()
     if (! string_ok(dbVersion) || dbVersion != "4")
         throw _Exception(_("The database seems to be from a newer version (database version ") + dbVersion + ")!");
     
-    AUTOUNLOCK();
+    lock.unlock();
     
     log_debug("end\n");
     
@@ -329,7 +329,7 @@ Ref<SQLResult> MysqlStorage::select(const char *query, int length)
     int res;
     
     checkMysqlThreadInit();
-    AUTOLOCK(mysqlMutex);
+    AutoLock lock(mysqlMutex);
     res = mysql_real_query(&db, query, length);
     if (res)
     {
@@ -357,7 +357,7 @@ int MysqlStorage::exec(const char *query, int length, bool getLastInsertId)
     int res;
     
     checkMysqlThreadInit();
-    AUTOLOCK(mysqlMutex);
+    AutoLock lock(mysqlMutex);
     res = mysql_real_query(&db, query, length);
     if(res)
     {
@@ -411,12 +411,12 @@ void MysqlStorage::_flushInsertBuffer()
     insertBuffer->append(_("COMMIT"));
     
     checkMysqlThreadInit();
-    AUTOLOCK(mysqlMutex);
+    unique_lock<decltype(mysqlMutex)> lock(mysqlMutex);
     for (int i=0; i < insertBuffer->size(); i++)
     {
         _exec(insertBuffer->get(i)->data, insertBuffer->get(i)->len);
     }
-    AUTOUNLOCK();
+    lock.unlock();
     insertBuffer->clear();
     insertBuffer->append(_("BEGIN"));
 }

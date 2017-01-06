@@ -202,8 +202,6 @@ add_library(libmediatomb OBJECT
         src/string_converter.h
         src/subscription_request.cc
         src/subscription_request.h
-        src/sync.cc
-        src/sync.h
         src/task_processor.cc
         src/task_processor.h
         src/thread_executor.cc

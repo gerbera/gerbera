@@ -38,7 +38,6 @@
 
 #include "zmm/zmmf.h"
 #include "common.h"
-#include "sync.h"
 #include "cache_object.h"
 
 #define STORAGE_CACHE_CAPACITY 29989u
