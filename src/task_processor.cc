@@ -55,7 +55,6 @@ void *TaskProcessor::staticThreadProc(void *arg)
 void TaskProcessor::threadProc()
 {
     Ref<GenericTask> task;
-    //Ref<TaskProcessor> this_ref(this);
     unique_lock<mutex_type> lock(mutex);
     working = true;
 
@@ -221,7 +220,6 @@ void TPFetchOnlineContentTask::run()
         if ((service->getRefreshInterval() > 0) && !unscheduled_refresh)
         {
             Timer::getInstance()->addTimerSubscriber(
-                    //AS_TIMER_SUBSCRIBER_SINGLETON_FROM_REF(ContentManager::getInstance()),
                     ContentManager::getInstance().getPtr(),
                     service->getRefreshInterval(),
                     service->getTimerParameter(), true);

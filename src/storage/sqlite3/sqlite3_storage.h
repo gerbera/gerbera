@@ -157,7 +157,6 @@ class Sqlite3Storage : private SQLStorage
 {
 private:
     Sqlite3Storage();
-    //virtual ~Sqlite3Storage();
     friend zmm::Ref<Storage> Storage::createInstance();
     virtual void init() override;
     virtual void shutdownDriver() override;
