@@ -39,7 +39,7 @@
 #include "common.h"
 #include "cds_objects.h"
 
-class PlayHook : public Singleton<PlayHook>
+class PlayHook : public Singleton<PlayHook, std::mutex>
 {
 public:
     void trigger(zmm::Ref<CdsObject> obj);

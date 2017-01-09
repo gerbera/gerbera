@@ -36,7 +36,6 @@
 #include <unordered_map>
 
 #include "zmm/zmmf.h"
-#include "sync.h"
 #include "autoscan.h"
 #include "mt_inotify.h"
 

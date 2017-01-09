@@ -38,7 +38,6 @@
 
 #include "common.h"
 #include "executor.h"
-#include "sync.h"
 
 /// \brief an executor which runs a thread
 class ThreadExecutor : public Executor

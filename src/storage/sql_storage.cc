@@ -151,7 +151,6 @@ void SQLStorage::init()
     }
     
     insertBufferEmpty = true;
-    insertBufferMutex = Ref<Mutex>(new Mutex());
     insertBufferStatementCount = 0;
     insertBufferByteCount = 0;
     
@@ -181,7 +180,6 @@ void SQLStorage::init()
 
 void SQLStorage::dbReady()
 {
-    nextIDMutex = Ref<Mutex>(new Mutex());;
     loadLastID();
 }
 
@@ -509,7 +507,7 @@ void SQLStorage::addObject(Ref<CdsObject> obj, int *changedContainer)
     /* add to cache */
     if (cacheOn())
     {
-        AUTOLOCK(cache->getMutex());
+        AutoLock lock(cache->getMutex());
         cache->addChild(obj->getParentID());
         if (cache->flushed())
             flushInsertBuffer();
@@ -577,7 +575,7 @@ Ref<CdsObject> SQLStorage::loadObject(int objectID)
     /* check cache */
     if (cacheOn())
     {
-        AUTOLOCK(cache->getMutex());
+        AutoLock lock(cache->getMutex());
         Ref<CacheObject> cObj = cache->getObject(objectID);
         if (cObj != nullptr)
         {
@@ -668,7 +666,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
     /* check cache */
     if (cacheOn())
     {
-        AUTOLOCK(cache->getMutex());
+        AutoLock lock(cache->getMutex());
         Ref<CacheObject> cObj = cache->getObject(objectID);
         if (cObj != nullptr && cObj->knowsObjectType())
         {
@@ -693,7 +691,7 @@ Ref<Array<CdsObject> > SQLStorage::browse(Ref<BrowseParam> param)
             /* add to cache */
             if (cacheOn())
             {
-                AUTOLOCK(cache->getMutex());
+                AutoLock lock(cache->getMutex());
                 cache->getObjectDefinitely(objectID)->setObjectType(objectType);
                 if (cache->flushed())
                     flushInsertBuffer();
@@ -816,7 +814,7 @@ int SQLStorage::getChildCount(int contId, bool containers, bool items, bool hide
     /* check cache */
     if (cacheOn() && containers && items && ! (contId == CDS_ID_ROOT && hideFsRoot))
     {
-        AUTOLOCK(cache->getMutex());
+        AutoLock lock(cache->getMutex());
         Ref<CacheObject> cObj = cache->getObject(contId);
         if (cObj != nullptr)
         {
@@ -851,7 +849,7 @@ int SQLStorage::getChildCount(int contId, bool containers, bool items, bool hide
         /* add to cache */
         if (cacheOn() && containers && items && ! (contId == CDS_ID_ROOT && hideFsRoot))
         {
-            AUTOLOCK(cache->getMutex());
+            AutoLock lock(cache->getMutex());
             cache->getObjectDefinitely(contId)->setNumChildren(childCount);
             if (cache->flushed())
                 flushInsertBuffer();
@@ -912,7 +910,7 @@ Ref<CdsObject> SQLStorage::_findObjectByPath(String fullpath)
     /* check cache */
     if (cacheOn())
     {
-        AUTOLOCK(cache->getMutex());
+        AutoLock lock(cache->getMutex());
         Ref<Array<CacheObject> > objects = cache->getObjects(dbLocation);
         if (objects != nullptr)
         {
@@ -1032,7 +1030,7 @@ int SQLStorage::createContainer(int parentID, String name, String path, bool isV
     /* inform cache */
     if (cacheOn())
     {
-        AUTOLOCK(cache->getMutex());
+        AutoLock lock(cache->getMutex());
         cache->addChild(parentID);
         if (cache->flushed())
             flushInsertBuffer();
@@ -2355,7 +2353,7 @@ int SQLStorage::getNextID()
 {
     if (lastID < CDS_ID_FS_ROOT)
         throw _Exception(_("SQLStorage::getNextID() called, but lastID hasn't been loaded correctly yet"));
-    AUTOLOCK(nextIDMutex);
+    AutoLock lock(nextIDMutex);
     return ++lastID;
 }
 
@@ -2383,9 +2381,9 @@ void SQLStorage::addObjectToCache(Ref<CdsObject> object, bool dontLock)
 {
     if (cacheOn() && object != nullptr)
     {
-        AUTOLOCK_DEFINE_ONLY();
+        unique_lock<std::mutex> lock(cache->getMutex(), std::defer_lock);
         if (! dontLock)
-            AUTOLOCK_NO_DEFINE(cache->getMutex());
+            lock.lock();
         Ref<CacheObject> cObj = cache->getObjectDefinitely(object->getID());
         if (cache->flushed())
             flushInsertBuffer();
@@ -2398,7 +2396,7 @@ void SQLStorage::addToInsertBuffer(Ref<StringBuffer> query)
 {
     assert(doInsertBuffering());
     
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     _addToInsertBuffer(query);
     
     insertBufferEmpty = false;
@@ -2414,9 +2412,9 @@ void SQLStorage::flushInsertBuffer(bool dontLock)
     if (! doInsertBuffering())
         return;
     //print_backtrace();
-    AUTOLOCK_DEFINE_ONLY();
+    unique_lock<decltype(mutex)> lock(mutex, std::defer_lock);
     if (! dontLock)
-        AUTOLOCK_NO_DEFINE(mutex);
+        lock.lock();
     if (insertBufferEmpty)
         return;
     _flushInsertBuffer();

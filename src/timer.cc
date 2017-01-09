@@ -30,102 +30,48 @@
 /// \file timer.cc
 
 #include "singleton.h"
-
-// Singleton::mutex is used in the Timer ctor(), so it must be instantiated
-// before the code that uses it (clang throws an error otherwise).
-class Timer;
-SINGLETON_MUTEX(Timer, true);
-
 #include "timer.h"
 
 using namespace zmm;
-
-template <>
-Ref<Array<Timer::TimerSubscriberElement<TimerSubscriberSingleton<Object> > > > Timer::getAppropriateSubscribers<TimerSubscriberSingleton<Object> >()
-{
-    if (subscribersSingleton == nullptr)
-        throw _Exception(_("timer already inactive!"));
-    return subscribersSingleton;
-}
-
-template <>
-Ref<Array<Timer::TimerSubscriberElement<TimerSubscriberObject> > > Timer::getAppropriateSubscribers<TimerSubscriberObject>()
-{
-    if (subscribersObject == nullptr)
-        throw _Exception(_("timer already inactive!"));
-    return subscribersObject;
-}
-
-Timer::Timer() : Singleton<Timer>()
-{
-    subscribersSingleton = Ref<Array<TimerSubscriberElement<TimerSubscriberSingleton<Object> > > >(new Array<TimerSubscriberElement<TimerSubscriberSingleton<Object> > >);
-    subscribersObject = Ref<Array<TimerSubscriberElement<TimerSubscriberObject> > >(new Array<TimerSubscriberElement<TimerSubscriberObject> >);
-    cond = Ref<Cond>(new Cond(mutex));
-}
+using namespace std;
 
 void Timer::triggerWait()
 {
-    log_debug("triggerWait. - %d subscriber(s)\n", subscribersSingleton->size());
-    
-    AUTOLOCK(mutex);
-    if (subscribersSingleton->size() > 0 || subscribersObject->size() > 0)
-    {
+    log_debug("triggerWait. - %d subscriber(s)\n", subscribers.size());
+
+    unique_lock<decltype(mutex)> lock(mutex);
+    if (! subscribers.empty()) {
         struct timespec *timeout = getNextNotifyTime();
         struct timespec now;
         getTimespecNow(&now);
-        if (compareTimespecs(timeout, &now) < 0)
-        {
+        if (compareTimespecs(timeout, &now) < 0) {
             log_debug("sleeping...\n");
-            int ret = cond->timedwait(timeout);
-            if (ret != 0 && ret != ETIMEDOUT)
-            {
-                log_debug("pthread_cond_timedwait returned errorcode %d\n", ret);
-                throw _Exception(_("pthread_cond_timedwait returned errorcode ") + ret);
+            cv_status ret = cond.wait_for(lock,
+                    chrono::milliseconds(getDeltaMillis(timeout, &now)));
+            if (ret == cv_status::timeout) {
+                notify();
             }
-            if (ret == ETIMEDOUT)
-            {
-                notify<TimerSubscriberSingleton<Object> >();
-                notify<TimerSubscriberObject>();
-            }
+        } else {
+            notify();
         }
-        else
-        {
-            notify<TimerSubscriberSingleton<Object> >();
-            notify<TimerSubscriberObject>();
-        }
-    }
-    else
-    {
+    } else {
         log_debug("nothing to do, sleeping...\n");
-        cond->wait();
+        cond.wait(lock);
     }
 }
 
-struct timespec * Timer::getNextNotifyTime()
-{
+struct timespec * Timer::getNextNotifyTime() {
     struct timespec *nextTime = nullptr;
-    for(int i = 0; i < subscribersSingleton->size(); i++)
-    {
-        struct timespec *nextNotify = subscribersSingleton->get(i)->getNextNotify();
-        if (nextTime == nullptr || compareTimespecs(nextNotify, nextTime) > 0)
-        {
-            nextTime = nextNotify;
-        }
-    }
-    for(int i = 0; i < subscribersObject->size(); i++)
-    {
-        struct timespec *nextNotify = subscribersObject->get(i)->getNextNotify();
-        if (nextTime == nullptr || compareTimespecs(nextNotify, nextTime) > 0)
-        {
+    AutoLock lock(mutex);
+    for (auto & subscriber : subscribers) {
+        struct timespec *nextNotify = subscriber.getNextNotify();
+        if (nextTime == nullptr || compareTimespecs(nextNotify, nextTime) > 0) {
             nextTime = nextNotify;
         }
     }
     return nextTime;
 }
 
-void Timer::shutdown()
-{
-    subscribersSingleton = nullptr;
-    subscribersObject = nullptr;
+void Timer::shutdown() {
     log_debug("finished.\n");
 }

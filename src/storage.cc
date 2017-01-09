@@ -42,15 +42,13 @@
 
 using namespace zmm;
 
-SINGLETON_MUTEX(Storage, false);
-
 Ref<Storage> Storage::getInstance()
 {
     if (! instance->singletonActive)
             throw _Exception(_("singleton is currently inactive!"));
     if(instance == nullptr)
     {
-        AUTOLOCK(mutex);
+        AutoLock lock(mutex);
         if (! instance->singletonActive)
                 throw _Exception(_("singleton is currently inactive!"));
         if (instance == nullptr)

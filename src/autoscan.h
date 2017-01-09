@@ -35,7 +35,6 @@
 
 #include <mutex>
 #include "zmm/zmmf.h"
-#include "sync.h"
 #include "timer.h"
 
 #define INVALID_SCAN_ID -1
@@ -104,8 +103,8 @@ public:
 
     /// \brief Send notification for each directory that is stored in the list.
     /// 
-    /// \param obj instance of the class that will receive the notifications.
-    void notifyAll(zmm::Ref<TimerSubscriberSingleton<Object> > obj);
+    /// \param sub instance of the class that will receive the notifications.
+    void notifyAll(TimerSubscriber *sub);
         
     /*
     /// \brief Add timer for given directory.

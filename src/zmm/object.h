@@ -45,16 +45,16 @@ class Object
 public:
     Object();
     virtual ~Object();
-    void retain();
-    void release();
-    int getRefCount();
+    void retain() const;
+    void release() const;
+    int getRefCount() const;
 
     static void* operator new (size_t size); 
     static void operator delete (void *ptr);
 protected:
-    mt_atomic_t _ref_count;
+    mutable mt_atomic_t _ref_count;
 #ifdef ATOMIC_NEED_MUTEX
-    pthread_mutex_t mutex;
+    mutable pthread_mutex_t mutex;
 #endif
 };
 

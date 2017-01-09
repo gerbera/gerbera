@@ -34,13 +34,13 @@
 using namespace zmm;
 
 Ref<SingletonManager> SingletonManager::instance = nullptr;
-Ref<Mutex> SingletonManager::mutex = Ref<Mutex>(new Mutex());
+std::mutex SingletonManager::mutex{};
 
 Ref<SingletonManager> SingletonManager::getInstance()
 {
     if (instance == nullptr)
     {
-        AUTOLOCK(mutex);
+        AutoLock lock(mutex);
         if (instance == nullptr) // check again, because there is a very small chance
                              // that 2 threads tried to lock() concurrently
         {
@@ -57,7 +57,7 @@ SingletonManager::SingletonManager() : Object()
 
 void SingletonManager::registerSingleton(Ref<Singleton<Object> > object)
 {
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
 #ifdef TOMBDEBUG
     if (singletonStack->size() >= SINGLETON_CUR_MAX)
     {
@@ -73,7 +73,7 @@ void SingletonManager::registerSingleton(Ref<Singleton<Object> > object)
 void SingletonManager::shutdown(bool complete)
 {
     log_debug("start (%d objects)\n", singletonStack->size());
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     
     Ref<ObjectStack<Singleton<Object> > > singletonStackReactivate(new ObjectStack<Singleton<Object> >(SINGLETON_CUR_MAX));
     

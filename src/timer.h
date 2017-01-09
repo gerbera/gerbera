@@ -32,164 +32,132 @@
 #ifndef __TIMER_H__
 #define __TIMER_H__
 
+#include <vector>
+#include <algorithm>
+#include <condition_variable>
 #include "zmm/zmm.h"
 #include "zmm/zmmf.h"
+#include "zmm/ref.h"
 #include "singleton.h"
-#include "sync.h"
 #include "tools.h"
 
-//#define AS_TIMER_SUBSCRIBER(klass, object) RefCast(Ref<TimerSubscriber<Singleton<klass> > >(object), TimerSubscriber<Object>)
-#define AS_TIMER_SUBSCRIBER_SINGLETON(obj) zmm::Ref<TimerSubscriberSingleton<Object> >((TimerSubscriberSingleton<Object>*)obj)
-#define AS_TIMER_SUBSCRIBER_SINGLETON_FROM_REF(obj) RefCast(obj, TimerSubscriberSingleton<Object>)
-
-/// \todo Leo: please add doxygen documentation!
 
 class TimerSubscriber
 {
 public:
-    virtual ~TimerSubscriber() { log_debug("TS destroyed\n"); }
+    virtual ~TimerSubscriber() { log_debug("TimerSubscriber destroyed\n"); }
     virtual void timerNotify(zmm::Ref<zmm::Object> parameter) = 0;
-//    void addTimerSubscriber(unsigned int notifyInterval, int id = 0, bool once = false);
-//    void removeTimerSubscriber(int id = 0, bool dontFail = false);
 };
 
-
-template <class T>
-class TimerSubscriberSingleton : public TimerSubscriber, public Singleton<T>
-{
-};
-
-class TimerSubscriberObject : public TimerSubscriber, public zmm::Object
-{
-};
-
-
-class Timer : public Singleton<Timer>
+class Timer : public Singleton<Timer, std::recursive_mutex>
 {
 public:
-    Timer();
     virtual ~Timer() { log_debug("Timer destroyed!\n"); }
-    //static zmm::Ref<Timer> getInstance();
-    
+
     virtual void shutdown();
-    
-    template <class T>
-    void addTimerSubscriber(zmm::Ref<T> timerSubscriber, unsigned int notifyInterval, zmm::Ref<zmm::Object> parameter = nullptr, bool once = false)
-    {
+
+    /**
+     * @param timerSubscriber Caller must ensure that before this pointer is
+     * freed the subscriber is removed by calling removeTimerSubscriber() with
+     * the same parameter argument, unless the subscription is for a one-shot
+     * timer and the subscriber has already been notified (and removed from the
+     * subscribers list).
+     */
+    void addTimerSubscriber(TimerSubscriber *timerSubscriber, unsigned int notifyInterval, zmm::Ref<zmm::Object> parameter = nullptr, bool once = false) {
         log_debug("adding subscriber...\n");
         if (notifyInterval <= 0)
             throw zmm::Exception(_("tried to add timer with illegal notifyInterval: ") + notifyInterval);
-        AUTOLOCK(mutex);
-        //timerSubscriber->timerNotify(id);
-        zmm::Ref<TimerSubscriberElement<T> > element(new TimerSubscriberElement<T>(timerSubscriber, notifyInterval, parameter, once));
-        for(int i = 0; i < getAppropriateSubscribers<T>()->size(); i++)
-        {
-            if (getAppropriateSubscribers<T>()->get(i)->equals(element))
-            {
+        AutoLock lock(mutex);
+        TimerSubscriberElement element(timerSubscriber, notifyInterval, parameter, once);
+        for (auto & subscriber : subscribers) {
+            if (subscriber == element) {
                 throw zmm::Exception(_("tried to add same timer twice"));
             }
         }
-        getAppropriateSubscribers<T>()->append(element);
+        subscribers.push_back(element);
         signal();
     }
-    
-    template <class T>
-    void removeTimerSubscriber(zmm::Ref<T> timerSubscriber, zmm::Ref<zmm::Object> parameter = nullptr, bool dontFail = false)
-    {
+
+    void removeTimerSubscriber(TimerSubscriber *timerSubscriber, zmm::Ref<zmm::Object> parameter = nullptr, bool dontFail = false) {
         log_debug("removing subscriber...\n");
-        AUTOLOCK(mutex);
-        zmm::Ref<TimerSubscriberElement<T> > element(new TimerSubscriberElement<T>(timerSubscriber, 0, parameter));
-        bool removed = false;
-        for(int i = 0; i < getAppropriateSubscribers<T>()->size(); i++)
-        {
-            if (getAppropriateSubscribers<T>()->get(i)->equals(element))
-            {
-                getAppropriateSubscribers<T>()->removeUnordered(i);
-                removed = true;
-                break;
-            }
-        }
-        if (! removed && ! dontFail)
-        {
+        AutoLock lock(mutex);
+        TimerSubscriberElement element(timerSubscriber, 0, parameter);
+        auto it = std::find(subscribers.cbegin(), subscribers.cend(), element);
+        if (it != subscribers.cend()) {
+            subscribers.erase(it);
+            signal();
+        } else if (! dontFail) {
             throw zmm::Exception(_("tried to remove nonexistent timer"));
         }
-        signal();
     }
     
     void triggerWait();
     
-    inline void signal() { cond->signal(); }
+    inline void signal() { cond.notify_one(); }
     
 protected:
-    template <class T>
     class TimerSubscriberElement : public zmm::Object
     {
     public:
-        TimerSubscriberElement(zmm::Ref<T> subscriber, unsigned int notifyInterval, zmm::Ref<zmm::Object> parameter, bool once = false)
-        {
-            this->subscriber = subscriber;
-            this->notifyInterval = notifyInterval;
-            this->parameter = parameter;
-            this->once = once;
+        TimerSubscriberElement(TimerSubscriber *subscriber, unsigned int notifyInterval, zmm::Ref<zmm::Object> parameter, bool once = false)
+            : disabled(false), subscriber(subscriber), notifyInterval(notifyInterval), parameter(parameter),
+                once(once) {
             notified();
         }
-        inline unsigned int getNotifyInterval() { return notifyInterval; }
-        inline zmm::Ref<T> getSubscriber() { return subscriber; }
-        inline void notified() { getTimespecAfterMillis(notifyInterval * 1000, &nextNotify); }
+        void notify() {
+            try {
+                subscriber->timerNotify(parameter);
+            } catch (const zmm::Exception & e) {
+                log_debug("timer caught exception!\n");
+                e.printStackTrace();
+            }
+        }
+        inline unsigned int getNotifyInterval() const { return notifyInterval; }
+        inline TimerSubscriber * getSubscriber() { return subscriber; }
+        inline void notified() {
+            getTimespecAfterMillis(notifyInterval * 1000, &nextNotify);
+        }
         inline struct timespec *getNextNotify() { return &nextNotify; }
         inline zmm::Ref<zmm::Object> getParameter() { return parameter; }
-        bool equals(zmm::Ref<TimerSubscriberElement> other) { return (subscriber == other->subscriber && parameter == other->parameter); }
-        bool isOnce() { return once; }
+        bool operator==(const TimerSubscriberElement & other) const {
+            return subscriber == other.subscriber && parameter == other.parameter;
+        }
+        bool isOnce() const { return once; }
+        bool disabled;
     protected:
-        zmm::Ref<T> subscriber;
+        TimerSubscriber *subscriber;
         unsigned int notifyInterval;
         zmm::Ref<zmm::Object> parameter;
         struct timespec nextNotify;
         bool once;
     };
     
-    
-    //static zmm::Ref<Timer> instance;
-    //static zmm::Ref<Mutex> mutex;
-    zmm::Ref<Cond> cond;
-    
-    zmm::Ref<zmm::Array<TimerSubscriberElement<TimerSubscriberSingleton<Object> > > > subscribersSingleton;
-    zmm::Ref<zmm::Array<TimerSubscriberElement<TimerSubscriberObject> > > subscribersObject;
-    
-    template <class T>
-    zmm::Ref<zmm::Array<TimerSubscriberElement<T> > > getAppropriateSubscribers();
-    
-    template <class T>
+    std::condition_variable_any cond;
+
+    std::vector<TimerSubscriberElement> subscribers;
+
     void notify()
     {
         struct timespec now;
         getTimespecNow(&now);
-        log_debug("notifying. - %d subscribers\n", getAppropriateSubscribers<T>()->size());
-        for(int i = 0; i < getAppropriateSubscribers<T>()->size(); i++)
-        {
-            zmm::Ref<TimerSubscriberElement<T> > element = getAppropriateSubscribers<T>()->get(i);
-            if (compareTimespecs(element->getNextNotify(), &now) >= 0)
-            {
-                log_debug("notifying %d\n", i);
-                zmm::Ref<T> subscriber = element->getSubscriber();
-                try
-                {
-                    subscriber->timerNotify(element->getParameter());
-                }
-                catch (const zmm::Exception & e)
-                {
-                    log_debug("timer caught exception!\n");
-                    e.printStackTrace();
-                }
-                element->notified();
-                if (element->isOnce())
-                {
-                    getAppropriateSubscribers<T>()->removeUnordered(i--);
+        log_debug("notifying. - %d subscribers\n", subscribers.size());
+        int i = 0;
+        AutoLock lock(mutex);
+        for (auto & element : subscribers) {
+            if (compareTimespecs(element.getNextNotify(), &now) >= 0) {
+                log_debug("notifying %d\n", i++);
+                element.notify();
+                if (element.isOnce()) {
+                    element.disabled = true;
+                } else {
+                    element.notified();
                 }
             }
         }
+        subscribers.erase(std::remove_if(subscribers.begin(), subscribers.end(),
+                    [](const auto & e){ return e.disabled; }));
     }
-    
+
     struct timespec *getNextNotifyTime();
 };
 

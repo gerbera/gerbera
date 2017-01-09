@@ -36,7 +36,6 @@
 using namespace zmm;
 using namespace mxml;
 
-SINGLETON_MUTEX(MRRegistrarService, false);
 
 String MRRegistrarService::serviceType = nullptr;
 String MRRegistrarService::serviceID = nullptr;

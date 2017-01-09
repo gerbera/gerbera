@@ -35,10 +35,11 @@
 #ifndef __SQLITE3_STORAGE_H__
 #define __SQLITE3_STORAGE_H__
 
+#include <mutex>
+#include <condition_variable>
 #include <sqlite3.h>
 
 #include "storage/sql_storage.h"
-#include "sync.h"
 #include "timer.h"
 
 class Sqlite3Storage;
@@ -83,8 +84,9 @@ protected:
     /// \brief true if this task has backuped the db
     bool decontamination;
     
-    zmm::Ref<Cond> cond;
-    zmm::Ref<Mutex> mutex;
+    std::condition_variable cond;
+    std::mutex mutex;
+
     zmm::String error;
 };
 
@@ -144,26 +146,33 @@ protected:
     bool restore;
 };
 
+class Sqlite3BackupTimerSubscriber : public TimerSubscriber
+{
+    /// \brief for making backups in regulary intervals - see TimerSubscriber
+    virtual void timerNotify(zmm::Ref<zmm::Object> sqlite3storage);
+};
+
 /// \brief The Storage class for using SQLite3
 class Sqlite3Storage : private SQLStorage
 {
 private:
     Sqlite3Storage();
+    //virtual ~Sqlite3Storage();
     friend zmm::Ref<Storage> Storage::createInstance();
-    virtual void init();
-    virtual void shutdownDriver();
+    virtual void init() override;
+    virtual void shutdownDriver() override;
     
-    virtual zmm::String quote(zmm::String str);
-    virtual inline zmm::String quote(int val) { return zmm::String::from(val); }
-    virtual inline zmm::String quote(unsigned int val) { return zmm::String::from(val); }
-    virtual inline zmm::String quote(long val) { return zmm::String::from(val); }
-    virtual inline zmm::String quote(unsigned long val) { return zmm::String::from(val); }
-    virtual inline zmm::String quote(bool val) { return zmm::String(val ? '1' : '0'); }
-    virtual inline zmm::String quote(char val) { return quote(zmm::String(val)); }
-    virtual inline zmm::String quote(long long val) { return zmm::String::from(val); }
-    virtual zmm::Ref<SQLResult> select(const char *query, int length);
-    virtual int exec(const char *query, int length, bool getLastInsertId = false);
-    virtual void storeInternalSetting(zmm::String key, zmm::String value);
+    virtual zmm::String quote(zmm::String str) override;
+    virtual inline zmm::String quote(int val) override { return zmm::String::from(val); }
+    virtual inline zmm::String quote(unsigned int val) override { return zmm::String::from(val); }
+    virtual inline zmm::String quote(long val) override { return zmm::String::from(val); }
+    virtual inline zmm::String quote(unsigned long val) override { return zmm::String::from(val); }
+    virtual inline zmm::String quote(bool val) override { return zmm::String(val ? '1' : '0'); }
+    virtual inline zmm::String quote(char val) override { return quote(zmm::String(val)); }
+    virtual inline zmm::String quote(long long val) override { return zmm::String::from(val); }
+    virtual zmm::Ref<SQLResult> select(const char *query, int length) override;
+    virtual int exec(const char *query, int length, bool getLastInsertId = false) override;
+    virtual void storeInternalSetting(zmm::String key, zmm::String value) override;
     
     void _exec(const char *query);
     
@@ -177,8 +186,10 @@ private:
     void addTask(zmm::Ref<SLTask> task, bool onlyIfDirty = false);
     
     pthread_t sqliteThread;
-    zmm::Ref<Cond> cond;
-    zmm::Ref<Mutex> sqliteMutex;
+    std::condition_variable cond;
+    std::mutex sqliteMutex;
+    using AutoLock = std::lock_guard<decltype(sqliteMutex)>;
+    using AutoLockU = std::unique_lock<decltype(sqliteMutex)>;
     
     /// \brief is set to true by shutdown() if the sqlite3 thread should terminate
     bool shutdownFlag;
@@ -190,13 +201,13 @@ private:
     virtual void threadCleanup() {}
     virtual bool threadCleanupRequired() { return false; }
     
-    inline void signal() { cond->signal(); }
-    
     zmm::Ref<zmm::StringBuffer> insertBuffer;
     virtual void _addToInsertBuffer(zmm::Ref<zmm::StringBuffer> query);
     virtual void _flushInsertBuffer();
     
     bool dirty;
+
+    Sqlite3BackupTimerSubscriber backupTimerSubscriber;
     
     friend class SLSelectTask;
     friend class SLExecTask;
@@ -210,8 +221,8 @@ class Sqlite3Result : public SQLResult
 private:
     Sqlite3Result();
     virtual ~Sqlite3Result();
-    virtual zmm::Ref<SQLRow> nextRow();
-    virtual unsigned long long getNumRows() { return nrow; }
+    virtual zmm::Ref<SQLRow> nextRow() override;
+    virtual unsigned long long getNumRows() override { return nrow; }
     
     char **table;
     char **row;
@@ -236,12 +247,6 @@ private:
     zmm::Ref<Sqlite3Result> res;
     
     friend class Sqlite3Result;
-};
-
-class Sqlite3BackupTimerSubscriber : public TimerSubscriberObject
-{
-    /// \brief for making backups in regulary intervals - see TimerSubscriber
-    virtual void timerNotify(zmm::Ref<zmm::Object> sqlite3storage);
 };
 
 #endif // __SQLITE3_STORAGE_H__

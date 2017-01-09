@@ -158,8 +158,6 @@ DVDNavReader::DVDNavReader(String path)
 
     log_debug("Opened DVD %s\n", dvd_path.c_str());
 
-    mutex = Ref<Mutex>(new Mutex(true));
-
     EOT = true;
 }
 
@@ -208,7 +206,7 @@ void DVDNavReader::selectPGC(int title_idx, int chapter_idx)
     if ((chapter_idx < 1) || (chapter_idx > chapterCount(title_idx-1)))
         throw _Exception(_("Attempted to select invalid chapter!"));
 
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
 
    if (dvdnav_part_play(dvd, title_idx, chapter_idx) != DVDNAV_STATUS_OK)
    {
@@ -221,7 +219,7 @@ void DVDNavReader::selectPGC(int title_idx, int chapter_idx)
 
 size_t DVDNavReader::readSector(unsigned char *buffer, size_t length)
 {
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
 
     unsigned char *p = buffer;
     size_t consumed = 0;
@@ -297,7 +295,7 @@ size_t DVDNavReader::readSector(unsigned char *buffer, size_t length)
 
 int DVDNavReader::audioTrackCount()
 {
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
 
     uint8_t count = 0;
     while (true)
@@ -329,7 +327,7 @@ String DVDNavReader::audioLanguage(int stream_idx)
     char code[3];
     audio_attr_t audio_attr;
     
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
 
     if (dvdnav_get_audio_attr(dvd, stream_idx, &audio_attr) != DVDNAV_STATUS_OK)
         throw _Exception(_("Error error retrieving audio language from DVD ") +
@@ -352,7 +350,7 @@ int DVDNavReader::audioSampleFrequency(int stream_idx)
 {
     audio_attr_t audio_attr;
     
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     
     if (dvdnav_get_audio_attr(dvd, stream_idx, &audio_attr) != DVDNAV_STATUS_OK)
         throw _Exception(_("Error error retrieving audio language from DVD ") +
@@ -369,7 +367,7 @@ int DVDNavReader::audioChannels(int stream_idx)
 {
     audio_attr_t audio_attr;
    
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
 
     if (dvdnav_get_audio_attr(dvd, stream_idx, &audio_attr) != DVDNAV_STATUS_OK)
         throw _Exception(_("Error error retrieving audio language from DVD ") +
@@ -383,7 +381,7 @@ String DVDNavReader::audioFormat(int stream_idx)
 {
     audio_attr_t audio_attr;
     
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     
     if (dvdnav_get_audio_attr(dvd, stream_idx, &audio_attr) != DVDNAV_STATUS_OK)
         throw _Exception(_("Error error retrieving audio language from DVD ") +
@@ -396,7 +394,7 @@ int DVDNavReader::audioStreamID(int stream_idx)
 {
     audio_attr_t audio_attr;
 
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     
     if (dvdnav_get_audio_attr(dvd, stream_idx, &audio_attr) != DVDNAV_STATUS_OK)
         throw _Exception(_("Error error retrieving audio language from DVD ") +

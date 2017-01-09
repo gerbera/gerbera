@@ -34,12 +34,11 @@
 using namespace zmm;
 using namespace mxml;
 
-SINGLETON_MUTEX(ConnectionManagerService, false);
 
 String ConnectionManagerService::serviceType = nullptr;
 String ConnectionManagerService::serviceID = nullptr;
 
-ConnectionManagerService::ConnectionManagerService() : Singleton<ConnectionManagerService>()
+ConnectionManagerService::ConnectionManagerService()
 {
     if (serviceType == nullptr || serviceID == nullptr)
         throw _Exception(_("serviceType or serviceID not set!"));

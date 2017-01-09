@@ -91,7 +91,6 @@ using namespace std;
 
 #define MIMETYPE_REGEXP "^([a-z0-9_-]+/[a-z0-9_-]+)"
 
-SINGLETON_MUTEX(ContentManager, true);
 
 static String get_filename(String path)
 {
@@ -104,10 +103,9 @@ static String get_filename(String path)
         return path.substring(pos + 1);
 }
 
-ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
+ContentManager::ContentManager()
 {
     int i;
-    cond = Ref<Cond>(new Cond(mutex));
     ignore_unknown_extensions = false;
     extension_map_case_sensitive = false;
 
@@ -244,7 +242,7 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
             
             if (i > 0)
             {
-                Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), i, yt->getTimerParameter(), true);
+                Timer::getInstance()->addTimerSubscriber(this, i, yt->getTimerParameter(), true);
             }
         }
         catch (const Exception & ex)
@@ -257,7 +255,6 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
     // is populated with YT objects, so we need to allow playing them
     cached_urls = Ref<ReentrantArray<CachedURL> >
         (new ReentrantArray<CachedURL>(MAX_CACHED_URLS));
-    urlcache_mutex = Ref<Mutex>(new Mutex(false));
 
 #endif //YOUTUBE
 
@@ -282,7 +279,7 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
             online_services->registerService(sc);
             if (i > 0)
             {
-                Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), i, sc->getTimerParameter(), true);
+                Timer::getInstance()->addTimerSubscriber(this, i, sc->getTimerParameter(), true);
             }
         }
         catch (const Exception & ex)
@@ -312,7 +309,7 @@ ContentManager::ContentManager() : TimerSubscriberSingleton<ContentManager>()
             online_services->registerService(at);
             if (i > 0)
             {
-                Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), i, at->getTimerParameter(), true);
+                Timer::getInstance()->addTimerSubscriber(this, i, at->getTimerParameter(), true);
             }
         }
         catch (const Exception & ex)
@@ -364,7 +361,7 @@ void ContentManager::init()
     
     //loadAccounting(false);
     
-    autoscan_timed->notifyAll(AS_TIMER_SUBSCRIBER_SINGLETON(this));
+    autoscan_timed->notifyAll(this);
 
 #ifdef HAVE_INOTIFY
     if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
@@ -388,7 +385,7 @@ void ContentManager::init()
 #if defined(EXTERNAL_TRANSCODING) || defined(SOPCAST)
 void ContentManager::registerExecutor(Ref<Executor> exec)
 {
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     process_list->append(exec);
 }
 
@@ -403,7 +400,7 @@ void ContentManager::unregisterExecutor(Ref<Executor> exec)
     if (shutdownFlag)
         return;
 
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     for (int i = 0; i < process_list->size(); i++)
     {
         if (process_list->get(i) == exec)
@@ -448,7 +445,7 @@ void ContentManager::shutdown()
     inotify = nullptr;
 #endif
     log_debug("start\n");
-    AUTOLOCK(mutex);
+    std::unique_lock<mutex_type> lock(mutex);
     log_debug("updating last_modified data for autoscan in database...\n");
     autoscan_timed->updateLMinDB();
 
@@ -487,7 +484,7 @@ void ContentManager::shutdown()
 
     log_debug("signalling...\n");
     signal();
-    AUTOUNLOCK();
+    lock.unlock();
     log_debug("waiting for thread...\n");
 
     if (taskThread)
@@ -511,7 +508,7 @@ Ref<CMAccounting> ContentManager::getAccounting()
 Ref<GenericTask> ContentManager::getCurrentTask()
 {
     Ref<GenericTask> task;
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
     task = currentTask;
     return task;
 }
@@ -520,7 +517,7 @@ Ref<Array<GenericTask> > ContentManager::getTasklist()
 {
     int i;
 
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
    
 
     Ref<Array<GenericTask> > taskList = nullptr;
@@ -913,7 +910,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
                 // this lock will make sure that remove is not in the process of invalidating
                 // the AutocsanDirectories in the autoscan_timed list at the time when we
                 // are checking for validity.
-                AUTOLOCK(mutex);
+                AutoLock lock(mutex);
                 
                 // it is possible that someone hits remove while the container is being scanned
                 // in this case we will invalidate the autoscan entry
@@ -1437,7 +1434,7 @@ void ContentManager::initLayout()
 
     if (layout == nullptr)
     {
-        AUTOLOCK(mutex);
+        AutoLock lock(mutex);
         if (layout == nullptr)
             try
             {
@@ -1502,7 +1499,7 @@ void ContentManager::reloadLayout()
 void ContentManager::threadProc()
 {
     Ref<GenericTask> task;
-    AUTOLOCK(mutex);
+    std::unique_lock<mutex_type> lock(mutex);
     working = true;
     while(! shutdownFlag)
     {
@@ -1511,7 +1508,7 @@ void ContentManager::threadProc()
         {
             working = false;
             /* if nothing to do, sleep until awakened */
-            cond->wait();
+            cond.wait(lock);
             working = true;
             continue;
         }
@@ -1519,7 +1516,7 @@ void ContentManager::threadProc()
         {
             currentTask = task;
         }
-        AUTOUNLOCK();
+        lock.unlock();
 
 //        log_debug(("Async START %s\n", task->getDescription().c_str()));
         try
@@ -1538,7 +1535,7 @@ void ContentManager::threadProc()
         }
 //        log_debug(("ASYNC STOP  %s\n", task->getDescription().c_str()));
         if (! shutdownFlag)
-            AUTORELOCK();
+            lock.lock();
     }
 
     Storage::getInstance()->threadCleanup();
@@ -1554,7 +1551,7 @@ void *ContentManager::staticThreadProc(void *arg)
 
 void ContentManager::addTask(zmm::Ref<GenericTask> task, bool lowPriority)
 {
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
 
     task->setID(taskID++);
 
@@ -1759,7 +1756,7 @@ void ContentManager::invalidateTask(unsigned int taskID, task_owner_t taskOwner)
 
     if (taskOwner == ContentManagerTask)
     {
-        AUTOLOCK(mutex);
+        AutoLock lock(mutex);
         Ref<GenericTask> t = getCurrentTask();
         if (t != nullptr)
         {
@@ -1838,7 +1835,7 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
             Ref<AutoscanList> rm_list = autoscan_timed->removeIfSubdir(path);
             for (i = 0; i < rm_list->size(); i++)
             {
-                Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), rm_list->get(i)->getTimerParameter(), true);
+                Timer::getInstance()->removeTimerSubscriber(this, rm_list->get(i)->getTimerParameter(), true);
             }
 #ifdef HAVE_INOTIFY
             if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
@@ -1852,7 +1849,7 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
             }
 #endif
 
-            AUTOLOCK(mutex);
+            AutoLock lock(mutex);
             int qsize = taskQueue1->size();
 
             // we have to make sure that a currently running autoscan task will not
@@ -1978,7 +1975,7 @@ void ContentManager::removeAutoscanDirectory(int scanID, scan_mode_t scanMode)
         SessionManager::getInstance()->containerChangedUI(adir->getObjectID());
         
         // if 3rd parameter is true: won't fail if scanID doesn't exist
-        Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), adir->getTimerParameter(), true);
+        Timer::getInstance()->removeTimerSubscriber(this, adir->getTimerParameter(), true);
 
     }
 #ifdef HAVE_INOTIFY
@@ -2012,7 +2009,7 @@ void ContentManager::removeAutoscanDirectory(int objectID)
         autoscan_timed->remove(adir->getLocation());
         storage->removeAutoscanDirectoryByObjectID(objectID);
         SessionManager::getInstance()->containerChangedUI(objectID);
-        Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), adir->getTimerParameter(), true);
+        Timer::getInstance()->removeTimerSubscriber(this, adir->getTimerParameter(), true);
     }
 #ifdef HAVE_INOTIFY
     if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
@@ -2132,7 +2129,7 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
     }
 
     if (original->getScanMode() == TimedScanMode)
-        Timer::getInstance()->removeTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON(this), original->getTimerParameter(), true);
+        Timer::getInstance()->removeTimerSubscriber(this, original->getTimerParameter(), true);
 #ifdef HAVE_INOTIFY
     if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
     {
@@ -2211,7 +2208,7 @@ zmm::String ContentManager::getMimeTypeFromBuffer(const void *buffer, size_t len
 #ifdef YOUTUBE
 void ContentManager::checkCachedURLs()
 {
-    AUTOLOCK(urlcache_mutex);
+    AutoLockYT lock(urlcache_mutex);
 
     time_t now = time(nullptr);
 
@@ -2252,7 +2249,7 @@ void ContentManager::checkCachedURLs()
                 TimerParameter(TimerParameter::IDURLCache, -1));
 
         Timer::getInstance()->addTimerSubscriber(
-                AS_TIMER_SUBSCRIBER_SINGLETON(this), 
+                this,
                 URL_CACHE_CHECK_INTERVAL, 
                 RefCast(url_cache_check, Object), true);
     }
@@ -2260,7 +2257,7 @@ void ContentManager::checkCachedURLs()
 
 void ContentManager::cacheURL(zmm::Ref<CachedURL> url)
 {
-    AUTOLOCK(urlcache_mutex);
+    AutoLockYT lock(urlcache_mutex);
     time_t oldest = time(nullptr); 
     int oldest_index = -1;
     bool added = false;
@@ -2321,7 +2318,7 @@ void ContentManager::cacheURL(zmm::Ref<CachedURL> url)
                 TimerParameter(TimerParameter::IDURLCache, -1));
 
         Timer::getInstance()->addTimerSubscriber(
-                AS_TIMER_SUBSCRIBER_SINGLETON(this), 
+                this, 
                 URL_CACHE_CHECK_INTERVAL, 
                 RefCast(url_cache_check, Object), true);
     }
@@ -2329,7 +2326,7 @@ void ContentManager::cacheURL(zmm::Ref<CachedURL> url)
 
 String ContentManager::getCachedURL(int objectID)
 {
-    AUTOLOCK(urlcache_mutex);
+    AutoLockYT lock(urlcache_mutex);
     log_debug("Asked for an url from cache...\n");
     for (int i = 0; i < cached_urls->size(); i++)
     {
@@ -2410,8 +2407,10 @@ void CMRescanDirectoryTask::run()
     if (dir->getTaskCount() == 0)
     {
         dir->updateLMT();
-        if (dir->getScanMode() == TimedScanMode)
-            Timer::getInstance()->addTimerSubscriber(AS_TIMER_SUBSCRIBER_SINGLETON_FROM_REF(cm), dir->getInterval(), dir->getTimerParameter(), true);
+        if (dir->getScanMode() == TimedScanMode) {
+            Timer::getInstance()->addTimerSubscriber(
+                cm.getPtr(), dir->getInterval(), dir->getTimerParameter(), true);
+        }
     }
 }
 

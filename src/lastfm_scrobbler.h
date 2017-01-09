@@ -42,7 +42,7 @@
 #include "cds_objects.h"
 #include <lastfmlib/lastfmscrobblerc.h>
 
-class LastFm : public Singleton<LastFm>
+class LastFm : public Singleton<LastFm, std::mutex>
 {
 public:
     LastFm();

@@ -50,7 +50,6 @@ using namespace mxml;
 
 Ref<Storage> Server::storage = nullptr;
 
-SINGLETON_MUTEX(Server, false);
 #ifdef UPNP_OLD_SNAPSHOT
 static int static_upnp_callback(Upnp_EventType eventtype, void *event, void *cookie)
 #else
@@ -72,7 +71,7 @@ void Server::static_cleanup_callback()
     }
 }
 
-Server::Server() : Singleton<Server>()
+Server::Server()
 {
     server_shutdown_flag = false;
 }
@@ -369,7 +368,7 @@ int Server::upnp_callback(Upnp_EventType eventtype, const void *event, void *coo
 
 //    log_info("event is ok\n");
     // get device wide mutex (have to figure out what the hell that is)
-    AUTOLOCK(mutex);
+    AutoLock lock(mutex);
 
 //    log_info("got device mutex\n");
 

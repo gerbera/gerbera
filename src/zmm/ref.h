@@ -91,19 +91,19 @@ public:
     {
         return _ptr;
     }
-    inline int operator==(nullptr_t)
+    inline int operator==(nullptr_t) const
     {
         return (_ptr == nullptr);
     }
-    inline int operator!=(nullptr_t)
+    inline int operator!=(nullptr_t) const
     {
         return (_ptr != nullptr);
     }
-    inline int operator==(const Ref& other)
+    inline int operator==(const Ref& other) const
     {
         return (_ptr == other._ptr);
     }
-    inline int operator!=(const Ref& other)
+    inline int operator!=(const Ref& other) const
     {
         return (_ptr != other._ptr);
     }
@@ -113,6 +113,6 @@ protected:
 
 } // namespace
 
-#define RefCast(ref, klass) zmm::Ref<klass>((klass *)ref.getPtr())
+#define RefCast(ref, klass) zmm::Ref< klass >(( klass *)ref.getPtr())
 
 #endif // __ZMM_REF_H__
