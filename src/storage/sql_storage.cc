@@ -990,7 +990,7 @@ int SQLStorage::_ensurePathExistence(String path, int *changedContainer)
     return createContainer(parentID, f2i->convert(folder), path, false, nullptr, INVALID_OBJECT_ID, nullptr);
 }
 
-int SQLStorage::createContainer(int parentID, String name, String path, bool isVirtual, String upnpClass, int refID, Ref<Dictionary> lastMetadata)
+int SQLStorage::createContainer(int parentID, String name, String path, bool isVirtual, String upnpClass, int refID, Ref<Dictionary> itemMetadata)
 {
     if (refID > 0) {
         Ref<CdsObject> refObj = loadObject(refID);
@@ -998,7 +998,16 @@ int SQLStorage::createContainer(int parentID, String name, String path, bool isV
             throw _Exception(_("tried to create container with refID set, but refID doesn't point to an existing object"));
     }
     String dbLocation = addLocationPrefix((isVirtual ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX), path);
-    
+
+    Ref<Dictionary> metadata = NULL;
+    if (itemMetadata != nullptr) {
+        if (upnpClass == UPNP_DEFAULT_CLASS_MUSIC_ALBUM) {
+            Ref<Dictionary> metadata(new Dictionary());
+            metadata->put("artist", itemMetadata->get("artist"));
+            metadata->put("date", itemMetadata->get("date"));
+        }
+    }
+
     int newID = getNextID();
     
     Ref<StringBuffer> qb(new StringBuffer());
@@ -1021,7 +1030,7 @@ int SQLStorage::createContainer(int parentID, String name, String path, bool isV
         << quote(name) << ','
         << quote(dbLocation) << ','
         << quote(stringHash(dbLocation)) << ','
-        << (lastMetadata == nullptr ? _(SQL_NULL) : lastMetadata->encode()) << ','
+        << (metadata == nullptr ? _(SQL_NULL) : metadata->encode()) << ','
         << (refID > 0 ? quote(refID) : _(SQL_NULL))
         << ')';
         
