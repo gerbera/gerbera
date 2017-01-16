@@ -38,11 +38,8 @@
 #endif
 
 #include "content_manager.h"
-#include "dictionary.h"
 #include "server.h"
-#include "tools.h"
 #include "update_manager.h"
-#include "upnp_xml.h"
 #include "web_callbacks.h"
 
 using namespace zmm;
@@ -205,6 +202,7 @@ void Server::upnp_init(String iface, String ip_address, int port)
         }
     }
 
+    log_debug("Setting virtual dir to: %s\n", virtual_directory.c_str());
     ret = UpnpAddVirtualDir(virtual_directory.c_str());
     if (ret != UPNP_E_SUCCESS) {
         throw _UpnpException(ret, _("upnp_init: UpnpAddVirtualDir failed"));
@@ -230,9 +228,9 @@ void Server::upnp_init(String iface, String ip_address, int port)
     // register root device with the library
     String device_description = _("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") + UpnpXML_RenderDeviceDescription(presentationURL)->print();
 
-    //log_debug("DEVICE DESCRIPTION: \n%s\n", device_description.c_str());
+    //log_debug("Device Description: \n%s\n", device_description.c_str());
 
-    // register root device with the library
+    log_debug("Registering with UPnP...\n");
     ret = UpnpRegisterRootDevice2(UPNPREG_BUF_DESC,
         device_description.c_str(),
         device_description.length() + 1,
@@ -244,25 +242,7 @@ void Server::upnp_init(String iface, String ip_address, int port)
         throw _UpnpException(ret, _("upnp_init: UpnpRegisterRootDevice failed"));
     }
 
-    // now unregister in order to cleanup previous instances
-    // that might still be there due to crash/unclean shutdown/network interruptions
-    ret = UpnpUnRegisterRootDevice(device_handle);
-    if (ret != UPNP_E_SUCCESS) {
-        throw _UpnpException(ret, _("upnp_init: unregistering failed"));
-    }
-
-    // and register again, we should be clean now
-    ret = UpnpRegisterRootDevice2(UPNPREG_BUF_DESC,
-        device_description.c_str(),
-        device_description.length() + 1,
-        true,
-        static_upnp_callback,
-        &device_handle,
-        &device_handle);
-    if (ret != UPNP_E_SUCCESS) {
-        throw _UpnpException(ret, _("upnp_init: UpnpRegisterRootDevice failed"));
-    }
-
+    log_debug("Sending UPnP Alive advertisment\n");
     ret = UpnpSendAdvertisement(device_handle, alive_advertisement);
     if (ret != UPNP_E_SUCCESS) {
         throw _UpnpException(ret, _("upnp_init: UpnpSendAdvertisement failed"));
@@ -298,9 +278,7 @@ void Server::shutdown()
 
     server_shutdown_flag = true;
 
-    log_debug("start\n");
-
-    // unregister device
+    log_debug("Server shutting down\n");
 
     ret = UpnpUnRegisterRootDevice(device_handle);
     if (ret != UPNP_E_SUCCESS) {
@@ -318,7 +296,7 @@ void Server::shutdown()
     }
     storage = nullptr;
 
-    log_debug("end\n");
+    log_debug("Bye!! Have a nice day.\n");
 }
 
 String Server::getVirtualURL()
@@ -338,11 +316,9 @@ int Server::upnp_callback(Upnp_EventType eventtype, const void* event, void* coo
         return UPNP_E_BAD_REQUEST;
     }
 
-    //    log_info("event is ok\n");
+    log_info("event is ok\n");
     // get device wide mutex (have to figure out what the hell that is)
     AutoLock lock(mutex);
-
-    //    log_info("got device mutex\n");
 
     // dispatch event based on event type
     switch (eventtype) {
@@ -419,11 +395,11 @@ void Server::upnp_actions(Ref<ActionRequest> request)
     // we need to match the serviceID to one of our services
     if (request->getServiceID() == DESC_CM_SERVICE_ID) {
         // this call is for the lifetime stats service
-        //        log_debug("request for connection manager service\n");
+        // log_debug("request for connection manager service\n");
         cmgr->process_action_request(request);
     } else if (request->getServiceID() == DESC_CDS_SERVICE_ID) {
         // this call is for the toaster control service
-        //        log_debug("upnp_actions: request for content directory service\n");
+        //log_debug("upnp_actions: request for content directory service\n");
         cds->process_action_request(request);
     }
 #if defined(ENABLE_MRREG)
@@ -454,11 +430,11 @@ void Server::upnp_subscriptions(Ref<SubscriptionRequest> request)
 
     if (request->getServiceID() == DESC_CDS_SERVICE_ID) {
         // this call is for the content directory service
-        //        log_debug("upnp_subscriptions: request for content directory service\n");
+        //log_debug("upnp_subscriptions: request for content directory service\n");
         cds->process_subscription_request(request);
     } else if (request->getServiceID() == DESC_CM_SERVICE_ID) {
         // this call is for the connection manager service
-        //        log_debug("upnp_subscriptions: request for connection manager service\n");
+        //log_debug("upnp_subscriptions: request for connection manager service\n");
         cmgr->process_subscription_request(request);
     }
 #if defined(ENABLE_MRREG)
