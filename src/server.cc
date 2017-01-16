@@ -30,20 +30,20 @@
 /// \file server.cc
 
 #ifdef HAVE_CURL
-    #include <curl/curl.h>
+#include <curl/curl.h>
 #endif
 
 #ifdef HAVE_LASTFMLIB
-    #include "lastfm_scrobbler.h"
+#include "lastfm_scrobbler.h"
 #endif
 
-#include "server.h"
-#include "web_callbacks.h"
 #include "content_manager.h"
-#include "update_manager.h"
 #include "dictionary.h"
-#include "upnp_xml.h"
+#include "server.h"
 #include "tools.h"
+#include "update_manager.h"
+#include "upnp_xml.h"
+#include "web_callbacks.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -51,9 +51,9 @@ using namespace mxml;
 Ref<Storage> Server::storage = nullptr;
 
 #ifdef UPNP_OLD_SNAPSHOT
-static int static_upnp_callback(Upnp_EventType eventtype, void *event, void *cookie)
+static int static_upnp_callback(Upnp_EventType eventtype, void* event, void* cookie)
 #else
-static int static_upnp_callback(Upnp_EventType eventtype, const void *event, void *cookie)
+static int static_upnp_callback(Upnp_EventType eventtype, const void* event, void* cookie)
 #endif
 {
     return Server::getInstance()->upnp_callback(eventtype, event, cookie);
@@ -61,13 +61,11 @@ static int static_upnp_callback(Upnp_EventType eventtype, const void *event, voi
 
 void Server::static_cleanup_callback()
 {
-    if (storage != nullptr)
-    {
-        try
-        {
+    if (storage != nullptr) {
+        try {
             storage->threadCleanup();
+        } catch (const Exception& ex) {
         }
-        catch (const Exception & ex) {}
     }
 }
 
@@ -78,24 +76,24 @@ Server::Server()
 
 void Server::init()
 {
-    virtual_directory = _(SERVER_VIRTUAL_DIR); 
-    
+    virtual_directory = _(SERVER_VIRTUAL_DIR);
+
     ContentDirectoryService::setStaticArgs(_(DESC_CDS_SERVICE_TYPE),
-                                           _(DESC_CDS_SERVICE_ID));
+        _(DESC_CDS_SERVICE_ID));
     cds = ContentDirectoryService::getInstance();
-                                                 
+
     ConnectionManagerService::setStaticArgs(_(DESC_CM_SERVICE_TYPE),
-                                            _(DESC_CM_SERVICE_ID));
+        _(DESC_CM_SERVICE_ID));
     cmgr = ConnectionManagerService::getInstance();
 
-#if defined(ENABLE_MRREG)                                                    
+#if defined(ENABLE_MRREG)
     MRRegistrarService::setStaticArgs(_(DESC_MRREG_SERVICE_TYPE),
-                                      _(DESC_MRREG_SERVICE_ID));
+        _(DESC_MRREG_SERVICE_ID));
     mrreg = MRRegistrarService::getInstance();
 #endif
 
     Ref<ConfigManager> config = ConfigManager::getInstance();
-    
+
     serverUDN = config->getOption(CFG_SERVER_UDN);
     alive_advertisement = config->getIntOption(CFG_SERVER_ALIVE_INTERVAL);
 
@@ -110,7 +108,7 @@ void Server::init()
 
 void Server::upnp_init(String iface, String ip_address, int port)
 {
-    int ret = 0;        // general purpose error code
+    int ret = 0; // general purpose error code
     String ip;
 
     log_debug("start\n");
@@ -128,13 +126,12 @@ void Server::upnp_init(String iface, String ip_address, int port)
     if (string_ok(ip) && string_ok(iface))
         throw _Exception(_("You can not specify interface and IP at the same time!"));
 
-
     if (!string_ok(ip))
         ip = interfaceToIP(iface);
 
     if (string_ok(iface) && !string_ok(ip))
         throw _Exception(_("Could not find interface: ") + iface);
-/*
+    /*
     // without this lod_debug coredumped on Solaris...
     if (iface == nullptr)
         iface = _("");
@@ -147,8 +144,7 @@ void Server::upnp_init(String iface, String ip_address, int port)
     if (ip == "")
         ip = nullptr;
 */
-    if (port < 0)
-    {
+    if (port < 0) {
         port = config->getIntOption(CFG_SERVER_PORT);
     }
 
@@ -161,8 +157,7 @@ void Server::upnp_init(String iface, String ip_address, int port)
 
     ret = UpnpInit(ip.c_str(), port);
 
-    if (ret != UPNP_E_SUCCESS)
-    {
+    if (ret != UPNP_E_SUCCESS) {
         throw _UpnpException(ret, _("upnp_init: UpnpInit failed"));
     }
 
@@ -170,8 +165,7 @@ void Server::upnp_init(String iface, String ip_address, int port)
 
     log_info("Initialized port: %d\n", port);
 
-    if (!string_ok(ip))
-    {
+    if (!string_ok(ip)) {
         ip = UpnpGetServerIpAddress();
     }
 
@@ -182,128 +176,108 @@ void Server::upnp_init(String iface, String ip_address, int port)
     // next set webroot directory
     String web_root = config->getOption(CFG_SERVER_WEBROOT);
 
-    if (!string_ok(web_root))
-    {
+    if (!string_ok(web_root)) {
         throw _Exception(_("invalid web server root directory"));
     }
-    
+
     ret = UpnpSetWebServerRootDir(web_root.c_str());
-    if (ret != UPNP_E_SUCCESS)
-    {
+    if (ret != UPNP_E_SUCCESS) {
         throw _UpnpException(ret, _("upnp_init: UpnpSetWebServerRootDir failed"));
     }
 
-    log_debug("webroot: %s\n", web_root.c_str()); 
+    log_debug("webroot: %s\n", web_root.c_str());
 
-        Ref<Array<StringBase> > arr = config->getStringArrayOption(CFG_SERVER_CUSTOM_HTTP_HEADERS);
+    Ref<Array<StringBase> > arr = config->getStringArrayOption(CFG_SERVER_CUSTOM_HTTP_HEADERS);
 
-        if (arr != nullptr)
-        {
-            String tmp;
-            for (int i = 0; i < arr->size(); i++)
-            {
-                tmp = arr->get(i);
-                if (string_ok(tmp))
-                {
-                    log_info("(NOT) Adding HTTP header \"%s\"\n", tmp.c_str());
-                    // FIXME upstream upnp
-                    //ret = UpnpAddCustomHTTPHeader(tmp.c_str());
-                    //if (ret != UPNP_E_SUCCESS)
-                    //{
-                    //    throw _UpnpException(ret, _("upnp_init: UpnpAddCustomHTTPHeader failed"));
-                    //}
-                }
+    if (arr != nullptr) {
+        String tmp;
+        for (int i = 0; i < arr->size(); i++) {
+            tmp = arr->get(i);
+            if (string_ok(tmp)) {
+                log_info("(NOT) Adding HTTP header \"%s\"\n", tmp.c_str());
+                // FIXME upstream upnp
+                //ret = UpnpAddCustomHTTPHeader(tmp.c_str());
+                //if (ret != UPNP_E_SUCCESS)
+                //{
+                //    throw _UpnpException(ret, _("upnp_init: UpnpAddCustomHTTPHeader failed"));
+                //}
             }
         }
+    }
 
     ret = UpnpAddVirtualDir(virtual_directory.c_str());
-    if (ret != UPNP_E_SUCCESS)
-    {
+    if (ret != UPNP_E_SUCCESS) {
         throw _UpnpException(ret, _("upnp_init: UpnpAddVirtualDir failed"));
     }
 
     ret = register_web_callbacks();
-    if (ret != UPNP_E_SUCCESS)
-    {
+    if (ret != UPNP_E_SUCCESS) {
         throw _UpnpException(ret, _("upnp_init: UpnpSetVirtualDirCallbacks failed"));
     }
 
-    String presentationURL =  config->getOption(CFG_SERVER_PRESENTATION_URL);
-    if (!string_ok(presentationURL))
-    {
+    String presentationURL = config->getOption(CFG_SERVER_PRESENTATION_URL);
+    if (!string_ok(presentationURL)) {
         presentationURL = _("http://") + ip + ":" + port + "/";
-    }
-    else
-    {
-        String appendto = 
-           config->getOption(CFG_SERVER_APPEND_PRESENTATION_URL_TO);
-        if (appendto == "ip")
-        {
+    } else {
+        String appendto = config->getOption(CFG_SERVER_APPEND_PRESENTATION_URL_TO);
+        if (appendto == "ip") {
             presentationURL = _("http://") + ip + ":" + presentationURL;
-        }
-        else if (appendto == "port")
-        {
-            presentationURL = _("http://") + ip + ":" + port + "/" + 
-                              presentationURL;
+        } else if (appendto == "port") {
+            presentationURL = _("http://") + ip + ":" + port + "/" + presentationURL;
         } // else appendto is none and we take the URL as it entered by user
     }
 
     // register root device with the library
-    String device_description = 
-        _("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") +
-         UpnpXML_RenderDeviceDescription(presentationURL)->print();
-         
+    String device_description = _("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") + UpnpXML_RenderDeviceDescription(presentationURL)->print();
+
     //log_debug("DEVICE DESCRIPTION: \n%s\n", device_description.c_str());
 
     // register root device with the library
     ret = UpnpRegisterRootDevice2(UPNPREG_BUF_DESC,
-                                  device_description.c_str(),
-                                  device_description.length() + 1,
-                                  true,
-                                  static_upnp_callback,
-                                  &device_handle,
-                                  &device_handle);
-    if (ret != UPNP_E_SUCCESS)
-    {
+        device_description.c_str(),
+        device_description.length() + 1,
+        true,
+        static_upnp_callback,
+        &device_handle,
+        &device_handle);
+    if (ret != UPNP_E_SUCCESS) {
         throw _UpnpException(ret, _("upnp_init: UpnpRegisterRootDevice failed"));
     }
 
     // now unregister in order to cleanup previous instances
     // that might still be there due to crash/unclean shutdown/network interruptions
     ret = UpnpUnRegisterRootDevice(device_handle);
-    if (ret != UPNP_E_SUCCESS) {   
+    if (ret != UPNP_E_SUCCESS) {
         throw _UpnpException(ret, _("upnp_init: unregistering failed"));
     }
-    
+
     // and register again, we should be clean now
     ret = UpnpRegisterRootDevice2(UPNPREG_BUF_DESC,
-                                  device_description.c_str(),
-                                  device_description.length() + 1,
-                                  true,
-                                  static_upnp_callback,
-                                  &device_handle,
-                                  &device_handle);
-    if (ret != UPNP_E_SUCCESS)
-    {
+        device_description.c_str(),
+        device_description.length() + 1,
+        true,
+        static_upnp_callback,
+        &device_handle,
+        &device_handle);
+    if (ret != UPNP_E_SUCCESS) {
         throw _UpnpException(ret, _("upnp_init: UpnpRegisterRootDevice failed"));
     }
 
     ret = UpnpSendAdvertisement(device_handle, alive_advertisement);
-    if (ret != UPNP_E_SUCCESS)
-    {
+    if (ret != UPNP_E_SUCCESS) {
         throw _UpnpException(ret, _("upnp_init: UpnpSendAdvertisement failed"));
     }
-       
+
     // initializing UpdateManager
     UpdateManager::getInstance();
-    
+
     // initializing ContentManager
     ContentManager::getInstance();
-    
+
     config->writeBookmark(ip, String::from(port));
     log_info("MediaTomb Web UI can be reached by following this link:\n");
     log_info("http://%s:%d/\n", ip.c_str(), port);
-    
+
     log_debug("end\n");
 }
 
@@ -315,22 +289,21 @@ bool Server::getShutdownStatus()
 void Server::shutdown()
 {
     int ret = 0; // return code
-    
+
     /*
     ContentManager::getInstance()->shutdown();
     UpdateManager::getInstance()->shutdown();
     Storage::getInstance()->shutdown();
     */
-    
+
     server_shutdown_flag = true;
-    
+
     log_debug("start\n");
-    
+
     // unregister device
-    
+
     ret = UpnpUnRegisterRootDevice(device_handle);
-    if (ret != UPNP_E_SUCCESS) 
-    {   
+    if (ret != UPNP_E_SUCCESS) {
         throw _UpnpException(ret, _("upnp_cleanup: UpnpUnRegisterRootDevice failed"));
     }
 
@@ -353,8 +326,7 @@ String Server::getVirtualURL()
     return virtual_url;
 }
 
-
-int Server::upnp_callback(Upnp_EventType eventtype, const void *event, void *cookie)
+int Server::upnp_callback(Upnp_EventType eventtype, const void* event, void* cookie)
 {
     int ret = UPNP_E_SUCCESS; // general purpose return code
 
@@ -366,69 +338,61 @@ int Server::upnp_callback(Upnp_EventType eventtype, const void *event, void *coo
         return UPNP_E_BAD_REQUEST;
     }
 
-//    log_info("event is ok\n");
+    //    log_info("event is ok\n");
     // get device wide mutex (have to figure out what the hell that is)
     AutoLock lock(mutex);
 
-//    log_info("got device mutex\n");
+    //    log_info("got device mutex\n");
 
     // dispatch event based on event type
     switch (eventtype) {
 
-        case UPNP_CONTROL_ACTION_REQUEST:
-            // a CP is invoking an action
-            //log_info("UPNP_CONTROL_ACTION_REQUEST\n");
-            try
-            {
-                // https://github.com/mrjimenez/pupnp/blob/master/upnp/sample/common/tv_device.c
+    case UPNP_CONTROL_ACTION_REQUEST:
+        // a CP is invoking an action
+        //log_info("UPNP_CONTROL_ACTION_REQUEST\n");
+        try {
+            // https://github.com/mrjimenez/pupnp/blob/master/upnp/sample/common/tv_device.c
 
-                Ref<ActionRequest> request(new ActionRequest((UpnpActionRequest *)event));
-                upnp_actions(request);
-                request->update();
-               // set in update() ((struct Upnp_Action_Request *)event)->ErrCode = ret;
-            }
-            catch(const UpnpException & upnp_e)
-            {
-                ret = upnp_e.getErrorCode();
-                UpnpActionRequest_set_ErrCode((UpnpActionRequest *)event, ret);
-            }
-            catch(const Exception & e)
-            {
-                log_info("Exception: %s\n", e.getMessage().c_str());
-            }
-            
-            break;
-            
-        case UPNP_EVENT_SUBSCRIPTION_REQUEST:
-            // a cp wants a subscription
-            //log_info("UPNP_EVENT_SUBSCRIPTION_REQUEST\n");
-            try
-            {
-                Ref<SubscriptionRequest> request(new SubscriptionRequest((UpnpSubscriptionRequest *)event));
-                upnp_subscriptions(request);
-            }
-            catch(const UpnpException & upnp_e)
-            {
-                log_warning("Subscription exception: %s\n", upnp_e.getMessage().c_str());
-                ret = upnp_e.getErrorCode();
-            }
-            
-            break;
-            
-        default:
-            // unhandled event type
-            log_warning("unsupported event type: %d\n", eventtype);
-            ret = UPNP_E_BAD_REQUEST;
-            break;
+            Ref<ActionRequest> request(new ActionRequest((UpnpActionRequest*)event));
+            upnp_actions(request);
+            request->update();
+            // set in update() ((struct Upnp_Action_Request *)event)->ErrCode = ret;
+        } catch (const UpnpException& upnp_e) {
+            ret = upnp_e.getErrorCode();
+            UpnpActionRequest_set_ErrCode((UpnpActionRequest*)event, ret);
+        } catch (const Exception& e) {
+            log_info("Exception: %s\n", e.getMessage().c_str());
+        }
+
+        break;
+
+    case UPNP_EVENT_SUBSCRIPTION_REQUEST:
+        // a cp wants a subscription
+        //log_info("UPNP_EVENT_SUBSCRIPTION_REQUEST\n");
+        try {
+            Ref<SubscriptionRequest> request(new SubscriptionRequest((UpnpSubscriptionRequest*)event));
+            upnp_subscriptions(request);
+        } catch (const UpnpException& upnp_e) {
+            log_warning("Subscription exception: %s\n", upnp_e.getMessage().c_str());
+            ret = upnp_e.getErrorCode();
+        }
+
+        break;
+
+    default:
+        // unhandled event type
+        log_warning("unsupported event type: %d\n", eventtype);
+        ret = UPNP_E_BAD_REQUEST;
+        break;
     }
-    
+
     log_debug("returning %d\n", ret);
     return ret;
 }
 
 UpnpDevice_Handle Server::getDeviceHandle()
 {
-    return device_handle; 
+    return device_handle;
 }
 
 zmm::String Server::getIP()
@@ -446,79 +410,66 @@ void Server::upnp_actions(Ref<ActionRequest> request)
     log_debug("start\n");
 
     // make sure the request is for our device
-    if (request->getUDN() != serverUDN)
-    {
+    if (request->getUDN() != serverUDN) {
         // not for us
-        throw _UpnpException(UPNP_E_BAD_REQUEST, 
-                            _("upnp_actions: request not for this device"));
+        throw _UpnpException(UPNP_E_BAD_REQUEST,
+            _("upnp_actions: request not for this device"));
     }
 
     // we need to match the serviceID to one of our services
-    if (request->getServiceID() == DESC_CM_SERVICE_ID)
-    {
+    if (request->getServiceID() == DESC_CM_SERVICE_ID) {
         // this call is for the lifetime stats service
-//        log_debug("request for connection manager service\n");
+        //        log_debug("request for connection manager service\n");
         cmgr->process_action_request(request);
-    } 
-    else if (request->getServiceID() == DESC_CDS_SERVICE_ID) 
-    {
+    } else if (request->getServiceID() == DESC_CDS_SERVICE_ID) {
         // this call is for the toaster control service
-//        log_debug("upnp_actions: request for content directory service\n");
+        //        log_debug("upnp_actions: request for content directory service\n");
         cds->process_action_request(request);
-    } 
+    }
 #if defined(ENABLE_MRREG)
-    else if (request->getServiceID() == DESC_MRREG_SERVICE_ID)
-    {
+    else if (request->getServiceID() == DESC_MRREG_SERVICE_ID) {
         mrreg->process_action_request(request);
     }
 #endif
-    else 
-    {
+    else {
         // cp is asking for a nonexistent service, or for a service
         // that does not support any actions
-        throw _UpnpException(UPNP_E_BAD_REQUEST, 
-                            _("Service does not exist or action not supported"));
+        throw _UpnpException(UPNP_E_BAD_REQUEST,
+            _("Service does not exist or action not supported"));
     }
 }
-
 
 void Server::upnp_subscriptions(Ref<SubscriptionRequest> request)
 {
     // make sure that the request is for our device
-    if (request->getUDN() != serverUDN)
-    {
+    if (request->getUDN() != serverUDN) {
         // not for us
         log_debug("upnp_subscriptions: request not for this device: %s vs %s\n",
-                request->getUDN().c_str(), serverUDN.c_str());
+            request->getUDN().c_str(), serverUDN.c_str());
         throw _UpnpException(UPNP_E_BAD_REQUEST,
-                            _("upnp_actions: request not for this device"));
+            _("upnp_actions: request not for this device"));
     }
-                                                             
+
     // we need to match the serviceID to one of our services
 
-    if (request->getServiceID() == DESC_CDS_SERVICE_ID)
-    {
+    if (request->getServiceID() == DESC_CDS_SERVICE_ID) {
         // this call is for the content directory service
-//        log_debug("upnp_subscriptions: request for content directory service\n");
+        //        log_debug("upnp_subscriptions: request for content directory service\n");
         cds->process_subscription_request(request);
-    }
-    else if (request->getServiceID() == DESC_CM_SERVICE_ID)
-    {
+    } else if (request->getServiceID() == DESC_CM_SERVICE_ID) {
         // this call is for the connection manager service
-//        log_debug("upnp_subscriptions: request for connection manager service\n");
+        //        log_debug("upnp_subscriptions: request for connection manager service\n");
         cmgr->process_subscription_request(request);
     }
 #if defined(ENABLE_MRREG)
-    else if (request->getServiceID() == DESC_MRREG_SERVICE_ID)
-    {
+    else if (request->getServiceID() == DESC_MRREG_SERVICE_ID) {
         mrreg->process_subscription_request(request);
     }
 #endif
-    else 
-    {
+    else {
         // cp asks for a nonexistent service or for a service that
         // does not support subscriptions
-        throw _UpnpException(UPNP_E_BAD_REQUEST, 
-                            _("Service does not exist or subscriptions not supported"));
+        throw _UpnpException(UPNP_E_BAD_REQUEST,
+            _("Service does not exist or subscriptions not supported"));
     }
 }
