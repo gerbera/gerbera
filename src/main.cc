@@ -31,35 +31,35 @@
 
 /// \mainpage Sourcecode Documentation.
 ///
-/// This documentation was generated using doxygen, you can reproduce it by 
+/// This documentation was generated using doxygen, you can reproduce it by
 /// running "doxygen doxygen.conf" from the mediatomb/doc/ directory.
 
 #include "common.h"
-#include "singleton.h"
-#include "server.h"
 #include "process.h"
+#include "server.h"
+#include "singleton.h"
 
 #include <getopt.h>
 
+#include "common.h"
 #include "config_manager.h"
 #include "content_manager.h"
 #include "timer.h"
-#include "common.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <cerrno>
+#include <climits>
+#include <csignal>
 #include <cstdio>
 #include <cstdlib>
-#include <fcntl.h>
-#include <cerrno>
-#include <unistd.h>
-#include <syslog.h>
 #include <cstring>
-#include <pthread.h>
-#include <csignal>
-#include <pwd.h>
+#include <fcntl.h>
 #include <grp.h>
-#include <climits>
+#include <pthread.h>
+#include <pwd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <syslog.h>
+#include <unistd.h>
 
 #define OPTSTR "i:e:p:c:m:f:u:g:a:l:P:dhD"
 
@@ -72,48 +72,48 @@ Ref<Timer> timer = nullptr;
 
 void print_copyright()
 {
-    printf("\nMediaTomb UPnP Server version %s - %s\n\n", VERSION, 
-            DESC_MANUFACTURER_URL);
+    printf("\nMediaTomb UPnP Server version %s - %s\n\n", VERSION,
+        DESC_MANUFACTURER_URL);
     printf("===============================================================================\n");
     printf("Copyright 2005-2010 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer.\n");
     printf("MediaTomb is free software, covered by the GNU General Public License version 2\n\n");
 }
 void signal_handler(int signum);
 
-int main(int argc, char **argv, char **envp)
+int main(int argc, char** argv, char** envp)
 {
-    char     * err = nullptr;
-    int      port = -1;
-    bool     daemon = false;
-    struct   sigaction action;
+    char* err = nullptr;
+    int port = -1;
+    bool daemon = false;
+    struct sigaction action;
     sigset_t mask_set;
 
-    int      devnull = -1;
-    int      redirect1 = -1;
-    int      redirect2 = -1;
-    struct   passwd *pwd;
-    struct   group  *grp;
+    int devnull = -1;
+    int redirect1 = -1;
+    int redirect2 = -1;
+    struct passwd* pwd;
+    struct group* grp;
 
-    int      opt_index = 0;
-    int      o;
+    int opt_index = 0;
+    int o;
     static struct option long_options[] = {
-        {(char *)"ip", 1, nullptr, 'i'},          // 0
-        {(char *)"interface", 1, nullptr, 'e'},   // 1
-        {(char *)"port", 1, nullptr, 'p'},        // 2
-        {(char *)"config", 1, nullptr, 'c'},      // 3
-        {(char *)"home", 1, nullptr, 'm'},        // 4
-        {(char *)"cfgdir", 1, nullptr, 'f'},      // 5
-        {(char *)"user", 1, nullptr, 'u'},        // 6
-        {(char *)"group", 1, nullptr, 'g'},       // 7
-        {(char *)"daemon", 0, nullptr, 'd'},      // 8
-        {(char *)"pidfile", 1, nullptr, 'P'},     // 9
-        {(char *)"add", 1, nullptr, 'a'},         // 10
-        {(char *)"logfile", 1, nullptr, 'l'},     // 11
-        {(char *)"debug", 0, nullptr, 'D'},       // 12
-        {(char *)"compile-info", 0, nullptr, 0},  // 13
-        {(char *)"version", 0, nullptr, 0},       // 14
-        {(char *)"help", 0, nullptr, 'h'},        // 15
-        {(char *)nullptr, 0, nullptr, 0}                
+        { (char*)"ip", 1, nullptr, 'i' }, // 0
+        { (char*)"interface", 1, nullptr, 'e' }, // 1
+        { (char*)"port", 1, nullptr, 'p' }, // 2
+        { (char*)"config", 1, nullptr, 'c' }, // 3
+        { (char*)"home", 1, nullptr, 'm' }, // 4
+        { (char*)"cfgdir", 1, nullptr, 'f' }, // 5
+        { (char*)"user", 1, nullptr, 'u' }, // 6
+        { (char*)"group", 1, nullptr, 'g' }, // 7
+        { (char*)"daemon", 0, nullptr, 'd' }, // 8
+        { (char*)"pidfile", 1, nullptr, 'P' }, // 9
+        { (char*)"add", 1, nullptr, 'a' }, // 10
+        { (char*)"logfile", 1, nullptr, 'l' }, // 11
+        { (char*)"debug", 0, nullptr, 'D' }, // 12
+        { (char*)"compile-info", 0, nullptr, 0 }, // 13
+        { (char*)"version", 0, nullptr, 0 }, // 14
+        { (char*)"help", 0, nullptr, 'h' }, // 15
+        { (char*)nullptr, 0, nullptr, 0 }
     };
 
     String config_file;
@@ -134,12 +134,11 @@ int main(int argc, char **argv, char **envp)
 
 #ifdef SOLARIS
     String ld_preload;
-    char *preload = getenv("LD_PRELOAD");
+    char* preload = getenv("LD_PRELOAD");
     if (preload != NULL)
         ld_preload = String(preload);
 
-    if ((preload == NULL) || (ld_preload.find("0@0") == -1))
-    {
+    if ((preload == NULL) || (ld_preload.find("0@0") == -1)) {
         printf("MediaTomb: Solaris check failed!\n");
         printf("Please set the environment to match glibc behaviour!\n");
         printf("LD_PRELOAD=/usr/lib/0@0.so.1\n");
@@ -147,99 +146,96 @@ int main(int argc, char **argv, char **envp)
     }
 #endif
 
-    while (1)
-    {
+    while (1) {
         o = getopt_long(argc, argv, OPTSTR, long_options, &opt_index);
-        if (o == -1) break;
+        if (o == -1)
+            break;
 
-        switch (o)
-        {
-            case 'i':
-                log_debug("Option ip with param %s\n", optarg);
-                ip = optarg;
-                break;
+        switch (o) {
+        case 'i':
+            log_debug("Option ip with param %s\n", optarg);
+            ip = optarg;
+            break;
 
-            case 'e':
-                log_debug("Option interface with param %s\n", optarg);
-                interface = optarg;
-                break;
+        case 'e':
+            log_debug("Option interface with param %s\n", optarg);
+            interface = optarg;
+            break;
 
-            case 'p':
-                log_debug("Option port with param %s\n", optarg);
-                errno = 0;
-                port = strtol(optarg, &err, 10);
-                if ((port == 0) && (*err))
-                {
-                    log_error("Invalid port argument: %s\n", optarg);
-                    exit(EXIT_FAILURE);
-                }
-
-                if (port > USHRT_MAX)
-                {
-                    log_error("Invalid port value %d. Maximum allowed port value is %d\n", port, USHRT_MAX);
-                }
-                log_debug("port set to: %d\n", port);
-                break;
-
-            case 'c':
-                log_debug("Option config with param %s\n", optarg);
-                config_file = optarg;
-                break;
-
-            case 'd':
-                log_debug("Starting in daemon mode...");
-                daemon = true;
-                break;
-
-            case 'u':
-                log_debug("Running as user: %s\n", optarg);
-                user = optarg;
-                break;
-
-            case 'g':
-                log_debug("Running as group: %s\n", optarg);
-                group = optarg;
-                break;
-                
-            case 'a':
-                log_debug("Adding file/directory:: %s\n", optarg);
-                addFile->append(String::copy(optarg));
-                break;
-
-            case 'P':
-                log_debug("Pid file: %s\n", optarg);
-                pid_file = optarg;
-                break;
-                
-            case 'l':
-                log_debug("Log file: %s\n", optarg);
-                log_open(optarg);
-                break;
-
-            case 'm':
-                log_debug("Home setting: %s\n", optarg);
-                home = optarg;
-                break;
-              
-            case 'f':
-                log_debug("Confdir setting: %s\n", optarg);
-                confdir = optarg;
-                break;
-                
-            case 'D':
-                
-#ifndef TOMBDEBUG
-                print_copyright();
-                printf("ERROR: MediaTomb wasn't compiled with debug output, but was run with -D/--debug.\n");
+        case 'p':
+            log_debug("Option port with param %s\n", optarg);
+            errno = 0;
+            port = strtol(optarg, &err, 10);
+            if ((port == 0) && (*err)) {
+                log_error("Invalid port argument: %s\n", optarg);
                 exit(EXIT_FAILURE);
+            }
+
+            if (port > USHRT_MAX) {
+                log_error("Invalid port value %d. Maximum allowed port value is %d\n", port, USHRT_MAX);
+            }
+            log_debug("port set to: %d\n", port);
+            break;
+
+        case 'c':
+            log_debug("Option config with param %s\n", optarg);
+            config_file = optarg;
+            break;
+
+        case 'd':
+            log_debug("Starting in daemon mode...");
+            daemon = true;
+            break;
+
+        case 'u':
+            log_debug("Running as user: %s\n", optarg);
+            user = optarg;
+            break;
+
+        case 'g':
+            log_debug("Running as group: %s\n", optarg);
+            group = optarg;
+            break;
+
+        case 'a':
+            log_debug("Adding file/directory:: %s\n", optarg);
+            addFile->append(String::copy(optarg));
+            break;
+
+        case 'P':
+            log_debug("Pid file: %s\n", optarg);
+            pid_file = optarg;
+            break;
+
+        case 'l':
+            log_debug("Log file: %s\n", optarg);
+            log_open(optarg);
+            break;
+
+        case 'm':
+            log_debug("Home setting: %s\n", optarg);
+            home = optarg;
+            break;
+
+        case 'f':
+            log_debug("Confdir setting: %s\n", optarg);
+            confdir = optarg;
+            break;
+
+        case 'D':
+
+#ifndef TOMBDEBUG
+            print_copyright();
+            printf("ERROR: MediaTomb wasn't compiled with debug output, but was run with -D/--debug.\n");
+            exit(EXIT_FAILURE);
 #endif
-                log_debug("enabling debug output\n");
-                debug_logging = true;
-                break;
-            case '?':
-            case 'h':
-                print_copyright();
-                printf("Usage: mediatomb [options]\n\
+            log_debug("enabling debug output\n");
+            debug_logging = true;
+            break;
+        case '?':
+        case 'h':
+            print_copyright();
+            printf("Usage: mediatomb [options]\n\
                         \n\
 Supported options:\n\
     --ip or -i         ip address to bind to\n\
@@ -261,116 +257,100 @@ Supported options:\n\
 \n\
 For more information visit " DESC_MANUFACTURER_URL "\n\n");
 
-                exit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
+            break;
+        case 0:
+            switch (opt_index) {
+            case 13: // --compile-info
+                print_copyright();
+                printf("Compile info:\n");
+                printf("-------------\n");
+                printf("%s\n\n", COMPILE_INFO);
+                exit(EXIT_SUCCESS);
+            case 14: // --version
+                print_version = true;
                 break;
-            case 0:
-                switch (opt_index)
-                {
-                case 13: // --compile-info
-                    print_copyright();
-                    printf("Compile info:\n");
-                    printf("-------------\n");
-                    printf("%s\n\n", COMPILE_INFO);
-                    exit(EXIT_SUCCESS);
-                case 14: // --version
-                    print_version = true;
-                    break;
-                }
-                break;
-            default:
-                break;
-         }
+            }
+            break;
+        default:
+            break;
+        }
     }
 
-    if (print_version || ! daemon)
-    {
+    if (print_version || !daemon) {
         print_copyright();
-       
+
         if (print_version)
             exit(EXIT_FAILURE);
     }
 
-   // create pid file before dropping privileges
-    if (pid_file != nullptr)
-    {
+    // create pid file before dropping privileges
+    if (pid_file != nullptr) {
         pid_fd = fopen(pid_file.c_str(), "w");
-        if (pid_fd == nullptr)
-        {
+        if (pid_fd == nullptr) {
             log_error("Could not write pid file %s : %s\n",
-                       pid_file.c_str(), strerror(errno));
+                pid_file.c_str(), strerror(errno));
         }
     }
 
     // check if user and/or group parameter was specified and try to run the server
     // under the given user and/or group name
-    if (group != nullptr)
-    {
+    if (group != nullptr) {
         grp = getgrnam(group.c_str());
-        if (grp == nullptr)
-        {
+        if (grp == nullptr) {
             log_error("Group %s not found!\n", group.c_str());
             exit(EXIT_FAILURE);
         }
-        
-        if (setgid(grp->gr_gid) < 0)
-        {
+
+        if (setgid(grp->gr_gid) < 0) {
             log_error("setgid failed %s\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
-        
+
         // remove supplementary groups
-        if (setgroups(0, nullptr) < 0)
-        {
+        if (setgroups(0, nullptr) < 0) {
             log_error("setgroups failed %s\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
     }
-    
-    if (user != nullptr)
-    {
+
+    if (user != nullptr) {
         pwd = getpwnam(user.c_str());
-        if (pwd == nullptr)
-        {
+        if (pwd == nullptr) {
             log_error("User %s not found!\n", user.c_str());
             exit(EXIT_FAILURE);
         }
-        
+
         // set supplementary groups
-        if (initgroups(user.c_str(), getegid()) < 0)
-        {
+        if (initgroups(user.c_str(), getegid()) < 0) {
             log_error("initgroups failed %s\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
-        
-        if (setuid(pwd->pw_uid) < 0)
-        {
+
+        if (setuid(pwd->pw_uid) < 0) {
             log_error("setuid failed %s\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
-        
     }
 
-    try
-    {
+    try {
         // if home is not given by the user, get it from the environment
-        if (!string_ok(home) && (!string_ok(config_file)))
-        {
+        if (!string_ok(home) && (!string_ok(config_file))) {
 #ifndef __CYGWIN__
-            char *h = getenv("HOME");
+            char* h = getenv("HOME");
             if (h != nullptr)
                 home = h;
 
 #else
-            char *h = getenv("HOMEPATH");
-            char *d = getenv("HOMEDRIVE");
-            if ((h != NULL)  && (d != NULL))
+            char* h = getenv("HOMEPATH");
+            char* d = getenv("HOMEDRIVE");
+            if ((h != NULL) && (d != NULL))
                 home = d + h;
 
-#endif  // __CYGWIN__
+#endif // __CYGWIN__
         }
 
-        if (!string_ok(home) && (!string_ok(config_file)))
-        {
+        if (!string_ok(home) && (!string_ok(config_file))) {
             log_error("Could not determine users home directory\n");
             exit(EXIT_FAILURE);
         }
@@ -378,14 +358,14 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         if (!string_ok(confdir))
             confdir = _(DEFAULT_CONFIG_HOME);
 
-        char *pref = getenv("MEDIATOMB_DATADIR");
+        char* pref = getenv("MEDIATOMB_DATADIR");
         if (pref != nullptr)
             prefix = pref;
 
         if (!string_ok(prefix))
             prefix = _(PACKAGE_DATADIR);
 
-        char *mgc = getenv("MEDIATOMB_MAGIC_FILE");
+        char* mgc = getenv("MEDIATOMB_MAGIC_FILE");
         if (mgc != nullptr)
             magic = mgc;
 
@@ -394,101 +374,86 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
 
         ConfigManager::setStaticArgs(config_file, home, confdir, prefix, magic, debug_logging);
         ConfigManager::getInstance();
-    }
-    catch (const mxml::ParseException & pe)
-    {
+    } catch (const mxml::ParseException& pe) {
         log_error("Error parsing config file: %s line %d:\n%s\n",
-               pe.context->location.c_str(),
-               pe.context->line,
-               pe.getMessage().c_str());
+            pe.context->location.c_str(),
+            pe.context->line,
+            pe.getMessage().c_str());
         exit(EXIT_FAILURE);
-    }
-    catch (const Exception & e)
-    {
+    } catch (const Exception& e) {
         log_error("%s\n", e.getMessage().c_str());
         exit(EXIT_FAILURE);
-    }    
-    
+    }
+
     // starting as daemon if applicable
-    if (daemon)
-    {
+    if (daemon) {
         // The daemon startup code was taken from the Linux Daemon Writing HOWTO
         // written by Devin Watson <dmwatson@comcast.net>
         // The HOWTO is Copyright by Devin Watson, under the terms of the BSD License.
-        
+
         /* Our process ID and Session ID */
-        pid_t pid, sid; 
-        
+        pid_t pid, sid;
 
         /* Fork off the parent process */
         pid = fork();
-        if (pid < 0) 
-        {
+        if (pid < 0) {
             log_error("Failed to fork: %s\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
         /* If we got a good PID, then
            we can exit the parent process. */
-        if (pid > 0) 
-        {
+        if (pid > 0) {
             exit(EXIT_SUCCESS);
         }
 
         /* Change the file mode mask */
         umask(0133);
 
-        /* Open any logs here */        
+        /* Open any logs here */
 
         /* Create a new SID for the child process */
         sid = setsid();
-        if (sid < 0) 
-        {
+        if (sid < 0) {
             log_error("setsid failed: %s\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
 
         /* Change the current working directory */
-        if ((chdir("/")) < 0) 
-        {
+        if ((chdir("/")) < 0) {
             log_error("Failed to chdir to / : %s\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
 
-        /* Close out the standard file descriptors */        
+        /* Close out the standard file descriptors */
         close(STDIN_FILENO);
         close(STDOUT_FILENO);
         close(STDERR_FILENO);
 
         devnull = open("/dev/null", O_RDWR);
-        if (devnull == -1)
-        {
+        if (devnull == -1) {
             log_error("Failed to open /dev/null: %s\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
 
         redirect1 = dup(devnull);
-        if (redirect1 == -1)
-        {
+        if (redirect1 == -1) {
             log_error("Failed to redirect output: %s\n", strerror(errno));
             close(devnull);
             exit(EXIT_FAILURE);
         }
 
         redirect2 = dup(devnull);
-        if (redirect2 == -1)
-        {
+        if (redirect2 == -1) {
             log_error("Failed to redirect output: %s\n", strerror(errno));
             close(devnull);
             close(redirect1);
             exit(EXIT_FAILURE);
         }
-
     }
 
-    if (pid_fd != nullptr)
-    {
+    if (pid_fd != nullptr) {
         pid_t cur_pid;
-        int     size;
+        int size;
 
         cur_pid = getpid();
         String pid = String::from(cur_pid);
@@ -498,7 +463,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
 
         if (size < pid.length())
             log_error("Error when writing pid file %s : %s\n",
-                      pid_file.c_str(), strerror(errno));
+                pid_file.c_str(), strerror(errno));
     }
 
     main_thread_id = pthread_self();
@@ -510,73 +475,57 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
     action.sa_handler = signal_handler;
     action.sa_flags = 0;
     sigfillset(&action.sa_mask);
-    if (sigaction(SIGINT, &action, nullptr) < 0)
-    {
+    if (sigaction(SIGINT, &action, nullptr) < 0) {
         log_error("Could not register SIGINT handler!\n");
     }
 
-    if (sigaction(SIGTERM, &action, nullptr) < 0)
-    {
+    if (sigaction(SIGTERM, &action, nullptr) < 0) {
         log_error("Could not register SIGTERM handler!\n");
     }
 
-    if (sigaction(SIGHUP, &action, nullptr) < 0)
-    {
+    if (sigaction(SIGHUP, &action, nullptr) < 0) {
         log_error("Could not register SIGHUP handler!\n");
     }
 
-    if (sigaction(SIGPIPE, &action, nullptr) < 0)
-    {
+    if (sigaction(SIGPIPE, &action, nullptr) < 0) {
         log_error("Could not register SIGPIPE handler!\n");
     }
 
     Ref<SingletonManager> singletonManager = SingletonManager::getInstance();
     Ref<Server> server;
-    try
-    {
+    try {
         server = Server::getInstance();
         server->upnp_init(interface, ip, port);
-    }
-    catch(const UpnpException & upnp_e)
-    {
+    } catch (const UpnpException& upnp_e) {
 
         sigemptyset(&mask_set);
         pthread_sigmask(SIG_SETMASK, &mask_set, nullptr);
 
         upnp_e.printStackTrace();
         log_error("main: upnp error %d\n", upnp_e.getErrorCode());
-        if (upnp_e.getErrorCode() == UPNP_E_SOCKET_BIND)
-        {
+        if (upnp_e.getErrorCode() == UPNP_E_SOCKET_BIND) {
             log_error("Could not bind to socket.\n");
             log_info("Please check if another instance of MediaTomb or\n");
             log_info("another application is running on port %d.\n", port);
-        }
-        else if (upnp_e.getErrorCode() == UPNP_E_SOCKET_ERROR)
-        {
+        } else if (upnp_e.getErrorCode() == UPNP_E_SOCKET_ERROR) {
             log_error("Socket error.\n");
             log_info("Please check if your network interface was configured for multicast!\n");
             log_info("Refer to the README file for more information.\n");
         }
-        
-        try
-        {
+
+        try {
             singletonManager->shutdown(true);
-        }
-        catch (const Exception & e)
-        {
+        } catch (const Exception& e) {
             log_error("%s\n", e.getMessage().c_str());
             e.printStackTrace();
         }
-        if (daemon)
-        {
+        if (daemon) {
             close(devnull);
             close(redirect1);
             close(redirect2);
         }
         exit(EXIT_FAILURE);
-    }
-    catch (const Exception & e)
-    {
+    } catch (const Exception& e) {
         log_error("%s\n", e.getMessage().c_str());
         e.printStackTrace();
         if (daemon)
@@ -584,23 +533,17 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         exit(EXIT_FAILURE);
     }
 
-    if (addFile->size() > 0)
-    {
-        for (int i = 0; i < addFile->size(); i++)
-        {
-            try
-            {   
+    if (addFile->size() > 0) {
+        for (int i = 0; i < addFile->size(); i++) {
+            try {
                 // add file/directory recursively and asynchronously
                 log_info("Adding %s\n", String(addFile->get(i)).c_str());
                 ContentManager::getInstance()->addFile(String(addFile->get(i)),
-                    true, true, 
+                    true, true,
                     ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_HIDDEN_FILES));
-            }
-            catch (const Exception & e)
-            {
+            } catch (const Exception& e) {
                 e.printStackTrace();
-                if (daemon)
-                {
+                if (daemon) {
                     close(devnull);
                     close(redirect1);
                     close(redirect2);
@@ -609,72 +552,61 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
             }
         }
     }
-    
+
     sigemptyset(&mask_set);
     pthread_sigmask(SIG_SETMASK, &mask_set, nullptr);
-    
+
     // wait until signalled to terminate
-    while (!shutdown_flag)
-    {
+    while (!shutdown_flag) {
         //pause();
         //sleep(timer->getNotifyInterval());
-        
+
         if (timer == nullptr)
             timer = Timer::getInstance();
-        
+
         timer->triggerWait();
-        
-        if (restart_flag != 0)
-        {
+
+        if (restart_flag != 0) {
             log_info("Restarting MediaTomb!\n");
-            try
-            {
+            try {
                 server = nullptr;
                 timer = nullptr;
-                
+
                 singletonManager->shutdown(true);
                 singletonManager = nullptr;
                 singletonManager = SingletonManager::getInstance();
-                
-                try
-                {
-                    ConfigManager::setStaticArgs(config_file, home, confdir, 
-                                                 prefix, magic);
+
+                try {
+                    ConfigManager::setStaticArgs(config_file, home, confdir,
+                        prefix, magic);
                     ConfigManager::getInstance();
-                }
-                catch (const mxml::ParseException & pe)
-                {
+                } catch (const mxml::ParseException& pe) {
                     log_error("Error parsing config file: %s line %d:\n%s\n",
-                            pe.context->location.c_str(),
-                            pe.context->line,
-                            pe.getMessage().c_str());
+                        pe.context->location.c_str(),
+                        pe.context->line,
+                        pe.getMessage().c_str());
                     log_error("Could not restart MediaTomb\n");
                     // at this point upnp shutdown has already been called
                     // so it is safe to exit
                     exit(EXIT_FAILURE);
-                }
-                catch (const Exception & e)
-                {
-                    log_error("Error reloading configuration: %s\n", 
-                              e.getMessage().c_str());
+                } catch (const Exception& e) {
+                    log_error("Error reloading configuration: %s\n",
+                        e.getMessage().c_str());
                     e.printStackTrace();
-                    if (daemon)
-                    {
+                    if (daemon) {
                         close(devnull);
                         close(redirect1);
                         close(redirect2);
                     }
                     exit(EXIT_FAILURE);
                 }
-                
+
                 ///  \todo fix this for SIGHUP
                 server = Server::getInstance();
                 server->upnp_init(interface, ip, port);
-                
+
                 restart_flag = 0;
-            }
-            catch(const Exception & e)
-            {
+            } catch (const Exception& e) {
                 restart_flag = 0;
                 shutdown_flag = 1;
                 sigemptyset(&mask_set);
@@ -684,19 +616,14 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         }
     }
 
-    // shutting down 
+    // shutting down
     int ret = EXIT_SUCCESS;
-    try
-    {
+    try {
         singletonManager->shutdown(true);
-    }
-    catch(const UpnpException & upnp_e)
-    {
+    } catch (const UpnpException& upnp_e) {
         log_error("main: upnp error %d\n", upnp_e.getErrorCode());
         ret = EXIT_FAILURE;
-    }
-    catch (const Exception e)
-    {
+    } catch (const Exception e) {
         e.printStackTrace();
         ret = EXIT_FAILURE;
     }
@@ -704,8 +631,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
     log_info("Server terminating\n");
     log_close();
 
-    if (daemon)
-    {
+    if (daemon) {
         close(devnull);
         close(redirect1);
         close(redirect2);
@@ -716,29 +642,24 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
 
 void signal_handler(int signum)
 {
-    
-    if (main_thread_id != pthread_self())
-    {
+
+    if (main_thread_id != pthread_self()) {
         return;
     }
-    
-    if ((signum == SIGINT) || (signum == SIGTERM))
-    {
+
+    if ((signum == SIGINT) || (signum == SIGTERM)) {
         shutdown_flag++;
         if (shutdown_flag == 1)
             log_info("MediaTomb shutting down. Please wait...\n");
         else if (shutdown_flag == 2)
             log_info("Mediatomb still shutting down, signal again to kill.\n");
-        else if (shutdown_flag > 2)
-        {
+        else if (shutdown_flag > 2) {
             log_error("Clean shutdown failed, killing MediaTomb!\n");
             exit(1);
         }
         if (timer != nullptr)
             timer->signal();
-    }
-    else if (signum == SIGHUP)
-    {
+    } else if (signum == SIGHUP) {
         restart_flag = 1;
         if (timer != nullptr)
             timer->signal();
