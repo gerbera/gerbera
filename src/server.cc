@@ -316,7 +316,7 @@ int Server::upnp_callback(Upnp_EventType eventtype, const void* event, void* coo
         return UPNP_E_BAD_REQUEST;
     }
 
-    log_info("event is ok\n");
+    //log_info("event is ok\n");
     // get device wide mutex (have to figure out what the hell that is)
     AutoLock lock(mutex);
 
