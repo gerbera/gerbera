@@ -246,7 +246,8 @@ public:
                               zmm::String _config_dir = _(DEFAULT_CONFIG_HOME),
                               zmm::String _prefix_dir = _(PACKAGE_DATADIR), 
                               zmm::String _magic = nullptr,
-                              bool _debug_logging = false);
+                              bool _debug_logging = false,
+                              zmm::String _ip = nullptr, zmm::String _interface = nullptr, int _port = -1);
     
     static bool isDebugLogging() { return debug_logging; };
 
@@ -279,6 +280,9 @@ protected:
     static zmm::String prefix_dir;
     static zmm::String magic;
     static bool debug_logging;
+    static zmm::String ip;
+    static zmm::String interface;
+    static int port;
 
     zmm::Ref<mxml::Document> rootDoc;
     zmm::Ref<mxml::Element> root;

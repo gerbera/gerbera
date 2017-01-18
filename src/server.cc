@@ -103,22 +103,15 @@ void Server::init()
 #endif
 }
 
-void Server::upnp_init(String iface, String ip_address, int port)
+void Server::upnp_init()
 {
     int ret = 0; // general purpose error code
-    String ip;
-
     log_debug("start\n");
 
     Ref<ConfigManager> config = ConfigManager::getInstance();
 
-    if (!string_ok(iface))
-        iface = config->getOption(CFG_SERVER_NETWORK_INTERFACE);
-
-    if (!string_ok(ip_address))
-        ip = config->getOption(CFG_SERVER_IP);
-    else
-        ip = ip_address;
+    String iface = config->getOption(CFG_SERVER_NETWORK_INTERFACE);
+    String ip = config->getOption(CFG_SERVER_IP);
 
     if (string_ok(ip) && string_ok(iface))
         throw _Exception(_("You can not specify interface and IP at the same time!"));
@@ -128,38 +121,20 @@ void Server::upnp_init(String iface, String ip_address, int port)
 
     if (string_ok(iface) && !string_ok(ip))
         throw _Exception(_("Could not find interface: ") + iface);
-    /*
-    // without this lod_debug coredumped on Solaris...
-    if (iface == nullptr)
-        iface = _("");
 
-    if (ip == nullptr)
-        ip = _("");
-    
-    log_debug("interface: %s ip: %s\n", iface.c_str(), ip.c_str());
-
-    if (ip == "")
-        ip = nullptr;
-*/
-    if (port < 0) {
-        port = config->getIntOption(CFG_SERVER_PORT);
-    }
-
-    if (port < 0)
-        port = 0;
+    int port = config->getIntOption(CFG_SERVER_PORT);
 
     // this is important, so the storage lives a little longer when
     // shutdown is initiated
+    // FIMXE: why?
     storage = Storage::getInstance();
 
     ret = UpnpInit(ip.c_str(), port);
-
     if (ret != UPNP_E_SUCCESS) {
         throw _UpnpException(ret, _("upnp_init: UpnpInit failed"));
     }
 
     port = UpnpGetServerPort();
-
     log_info("Initialized port: %d\n", port);
 
     if (!string_ok(ip)) {

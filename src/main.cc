@@ -372,7 +372,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         if (!string_ok(magic))
             magic = nullptr;
 
-        ConfigManager::setStaticArgs(config_file, home, confdir, prefix, magic, debug_logging);
+        ConfigManager::setStaticArgs(config_file, home, confdir, prefix, magic, debug_logging, ip, interface, port);
         ConfigManager::getInstance();
     } catch (const mxml::ParseException& pe) {
         log_error("Error parsing config file: %s line %d:\n%s\n",
@@ -495,7 +495,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
     Ref<Server> server;
     try {
         server = Server::getInstance();
-        server->upnp_init(interface, ip, port);
+        server->upnp_init();
     } catch (const UpnpException& upnp_e) {
 
         sigemptyset(&mask_set);
@@ -603,7 +603,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
 
                 ///  \todo fix this for SIGHUP
                 server = Server::getInstance();
-                server->upnp_init(interface, ip, port);
+                server->upnp_init();
 
                 restart_flag = 0;
             } catch (const Exception& e) {

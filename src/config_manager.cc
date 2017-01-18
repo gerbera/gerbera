@@ -67,6 +67,9 @@ String ConfigManager::config_dir = _(DEFAULT_CONFIG_HOME);
 String ConfigManager::prefix_dir = _(PACKAGE_DATADIR);
 String ConfigManager::magic = nullptr;
 bool ConfigManager::debug_logging = false;
+String ConfigManager::ip = nullptr;
+String ConfigManager::interface = nullptr;
+int ConfigManager::port = -1;
 
 ConfigManager::~ConfigManager()
 {
@@ -75,11 +78,14 @@ ConfigManager::~ConfigManager()
     config_dir = _(DEFAULT_CONFIG_HOME);
     prefix_dir = _(PACKAGE_DATADIR);
     magic = nullptr;
+    ip = nullptr;
+    interface = nullptr;
 }
 
 void ConfigManager::setStaticArgs(String _filename, String _userhome, 
                                   String _config_dir, String _prefix_dir,
-                                  String _magic, bool _debug_logging)
+                                  String _magic, bool _debug_logging,
+                                  String _ip, String _interface, int _port)
 {
     filename = _filename;
     userhome = _userhome;
@@ -87,6 +93,9 @@ void ConfigManager::setStaticArgs(String _filename, String _userhome,
     prefix_dir = _prefix_dir;
     magic = _magic;
     debug_logging = _debug_logging;
+    ip = _ip;
+    interface = _interface;
+    port = _port;
 }
 
 ConfigManager::ConfigManager() : Singleton<ConfigManager, std::mutex>()
@@ -1016,15 +1025,15 @@ void ConfigManager::validate(String serverhome)
 #ifdef HAVE_MYSQL
     if (mysql_en == "yes")
     {
-        NEW_OPTION(getOption(_("/server/storage/mysql/host"), 
+        NEW_OPTION(getOption(_("/server/storage/mysql/host"),
                     _(DEFAULT_MYSQL_HOST)));
         SET_OPTION(CFG_SERVER_STORAGE_MYSQL_HOST);
 
-        NEW_OPTION(getOption(_("/server/storage/mysql/database"), 
+        NEW_OPTION(getOption(_("/server/storage/mysql/database"),
                     _(DEFAULT_MYSQL_DB)));
         SET_OPTION(CFG_SERVER_STORAGE_MYSQL_DATABASE);
 
-        NEW_OPTION(getOption(_("/server/storage/mysql/username"), 
+        NEW_OPTION(getOption(_("/server/storage/mysql/username"),
                     _(DEFAULT_MYSQL_USER)));
         SET_OPTION(CFG_SERVER_STORAGE_MYSQL_USERNAME);
 
@@ -1062,18 +1071,18 @@ void ConfigManager::validate(String serverhome)
 #endif // HAVE_MYSQL
 
 #ifdef HAVE_SQLITE3
-    
+
     if (sqlite3_en == "yes")
     {
         prepare_path(_("/server/storage/sqlite3/database-file"), false, true);
         NEW_OPTION(getOption(_("/server/storage/sqlite3/database-file")));
         SET_OPTION(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
-        
-        temp = getOption(_("/server/storage/sqlite3/synchronous"), 
+
+        temp = getOption(_("/server/storage/sqlite3/synchronous"),
                 _(DEFAULT_SQLITE_SYNC));
-                
+
         temp_int = 0;
-        
+
         if (temp == "off")
             temp_int = MT_SQLITE_SYNC_OFF;
         else if (temp == "normal")
@@ -1136,7 +1145,7 @@ void ConfigManager::validate(String serverhome)
     String dbDriver;
     if (sqlite3_en == "yes")
         dbDriver = _("sqlite3");
-    
+
     if (mysql_en == "yes")
         dbDriver = _("mysql");
 
@@ -1148,7 +1157,7 @@ void ConfigManager::validate(String serverhome)
 //    check_path_ex(construct_path(temp));
 
     // now go through the optional settings and fix them if anything is missing
-   
+
     temp = getOption(_("/server/ui/attribute::enabled"),
                      _(DEFAULT_UI_EN_VALUE));
     if (!validateYesNo(temp))
@@ -1173,7 +1182,7 @@ void ConfigManager::validate(String serverhome)
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
     SET_BOOL_OPTION(CFG_SERVER_UI_POLL_WHEN_IDLE);
 
-    temp_int = getIntOption(_("/server/ui/attribute::poll-interval"), 
+    temp_int = getIntOption(_("/server/ui/attribute::poll-interval"),
                        DEFAULT_POLL_INTERVAL);
     if (temp_int < 1)
         throw _Exception(_("Error in config file: incorrect parameter for "
@@ -1181,7 +1190,7 @@ void ConfigManager::validate(String serverhome)
     NEW_INT_OPTION(temp_int);
     SET_INT_OPTION(CFG_SERVER_UI_POLL_INTERVAL);
 
-    temp_int = getIntOption(_("/server/ui/items-per-page/attribute::default"), 
+    temp_int = getIntOption(_("/server/ui/items-per-page/attribute::default"),
                            DEFAULT_ITEMS_PER_PAGE_2);
     if (temp_int < 1)
         throw _Exception(_("Error in config file: incorrect parameter for "
@@ -1194,9 +1203,9 @@ void ConfigManager::validate(String serverhome)
     // create default structure
     if (element->elementChildCount() == 0)
     {
-        if ((temp_int != DEFAULT_ITEMS_PER_PAGE_1) && 
+        if ((temp_int != DEFAULT_ITEMS_PER_PAGE_1) &&
             (temp_int != DEFAULT_ITEMS_PER_PAGE_2) &&
-            (temp_int != DEFAULT_ITEMS_PER_PAGE_3) && 
+            (temp_int != DEFAULT_ITEMS_PER_PAGE_3) &&
             (temp_int != DEFAULT_ITEMS_PER_PAGE_4))
         {
             throw _Exception(_("Error in config file: you specified an "
@@ -1204,13 +1213,13 @@ void ConfigManager::validate(String serverhome)
                                "not listed in the options"));
         }
 
-        element->appendTextChild(_("option"), 
+        element->appendTextChild(_("option"),
                                    String::from(DEFAULT_ITEMS_PER_PAGE_1));
-        element->appendTextChild(_("option"), 
+        element->appendTextChild(_("option"),
                                    String::from(DEFAULT_ITEMS_PER_PAGE_2));
-        element->appendTextChild(_("option"), 
+        element->appendTextChild(_("option"),
                                    String::from(DEFAULT_ITEMS_PER_PAGE_3));
-        element->appendTextChild(_("option"), 
+        element->appendTextChild(_("option"),
                                    String::from(DEFAULT_ITEMS_PER_PAGE_4));
     }
     else // validate user settings
@@ -1250,8 +1259,8 @@ void ConfigManager::validate(String serverhome)
     NEW_STRARR_OPTION(menu_opts);
     SET_STRARR_OPTION(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
 
- 
-    temp = getOption(_("/server/ui/accounts/attribute::enabled"), 
+
+    temp = getOption(_("/server/ui/accounts/attribute::enabled"),
                      _(DEFAULT_ACCOUNTS_EN_VALUE));
     if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: incorrect parameter for "
@@ -1273,7 +1282,7 @@ void ConfigManager::validate(String serverhome)
     }
     NEW_INT_OPTION(temp_int);
     SET_INT_OPTION(CFG_SERVER_UI_SESSION_TIMEOUT);
-    
+
     temp = getOption(_("/import/attribute::hidden-files"),
                      _(DEFAULT_HIDDEN_FILES_VALUE));
     if (!validateYesNo(temp))
@@ -1289,7 +1298,7 @@ void ConfigManager::validate(String serverhome)
     if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: incorrect parameter for "
                        "<extension-mimetype ignore-unknown=\"\" /> attribute"));
- 
+
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
     SET_BOOL_OPTION(CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS);
 
@@ -1311,14 +1320,14 @@ void ConfigManager::validate(String serverhome)
     SET_BOOL_OPTION(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_CASE_SENSITIVE);
 
     tmpEl = getElement( _("/import/mappings/extension-mimetype"));
-    NEW_DICT_OPTION(createDictionaryFromNodeset(tmpEl, _("map"), 
+    NEW_DICT_OPTION(createDictionaryFromNodeset(tmpEl, _("map"),
                                        _("from"), _("to"), !csens));
     SET_DICT_OPTION(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
 
     tmpEl = getElement(_("/import/mappings/mimetype-contenttype"));
     if (tmpEl != nullptr)
     {
-        mime_content = createDictionaryFromNodeset(tmpEl, _("treat"), 
+        mime_content = createDictionaryFromNodeset(tmpEl, _("treat"),
                        _("mimetype"), _("as"));
     }
     else
@@ -1359,7 +1368,7 @@ void ConfigManager::validate(String serverhome)
         temp = _(DEFAULT_FILESYSTEM_CHARSET);
 #else
     temp = _(DEFAULT_FILESYSTEM_CHARSET);
-#endif      
+#endif
     // check if the one we take as default is actually available
     try
     {
@@ -1373,7 +1382,7 @@ void ConfigManager::validate(String serverhome)
     String charset = getOption(_("/import/filesystem-charset"), temp);
     try
     {
-        Ref<StringConverter> conv(new StringConverter(charset, 
+        Ref<StringConverter> conv(new StringConverter(charset,
                                                 _(DEFAULT_INTERNAL_CHARSET)));
     }
     catch (const Exception & e)
@@ -1389,7 +1398,7 @@ void ConfigManager::validate(String serverhome)
     charset = getOption(_("/import/metadata-charset"), temp);
     try
     {
-        Ref<StringConverter> conv(new StringConverter(charset, 
+        Ref<StringConverter> conv(new StringConverter(charset,
                                                 _(DEFAULT_INTERNAL_CHARSET)));
     }
     catch (const Exception & e)
@@ -1405,7 +1414,7 @@ void ConfigManager::validate(String serverhome)
     charset = getOption(_("/import/playlist-charset"), temp);
     try
     {
-        Ref<StringConverter> conv(new StringConverter(charset, 
+        Ref<StringConverter> conv(new StringConverter(charset,
                                                 _(DEFAULT_INTERNAL_CHARSET)));
     }
     catch (const Exception & e)
@@ -1456,15 +1465,22 @@ void ConfigManager::validate(String serverhome)
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
     SET_BOOL_OPTION(CFG_SERVER_HIDE_PC_DIRECTORY);
 
-    temp = getOption(_("/server/interface"), _(""));
-
+    if (!string_ok(interface)) {
+        temp = getOption(_("/server/interface"), _(""));
+    } else {
+        temp = interface;
+    }
     if (string_ok(temp) && string_ok(getOption(_("/server/ip"), _(""))))
         throw _Exception(_("Error in config file: you can not specify interface and ip at the same time!"));
 
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_NETWORK_INTERFACE);
 
-    temp = getOption(_("/server/ip"), _("")); // bind to any IP address
+    if (!string_ok(ip)) {
+        temp = getOption(_("/server/ip"), _("")); // bind to any IP address
+    } else {
+        temp = ip;
+    }
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_IP);
 
@@ -1491,7 +1507,7 @@ void ConfigManager::validate(String serverhome)
     temp = getOption(_("/server/serialNumber"), _(DESC_SERIAL_NUMBER));
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_SERIAL_NUMBER);
-    
+
     temp = getOption(_("/server/manufacturerURL"), _(DESC_MANUFACTURER_URL));
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_MANUFACTURER_URL);
@@ -1500,7 +1516,7 @@ void ConfigManager::validate(String serverhome)
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_PRESENTATION_URL);
 
-    temp = getOption(_("/server/presentationURL/attribute::append-to"), 
+    temp = getOption(_("/server/presentationURL/attribute::append-to"),
                      _(DEFAULT_PRES_URL_APPENDTO_ATTR));
 
     if ((temp != "none") && (temp != "ip") && (temp != "port"))
@@ -1510,17 +1526,17 @@ void ConfigManager::validate(String serverhome)
                            "<presentationURL> tag"));
     }
 
-    if (((temp == "ip") || (temp == "port")) && 
+    if (((temp == "ip") || (temp == "port")) &&
          !string_ok(getOption(_("/server/presentationURL"))))
     {
         throw _Exception(_("Error in config file: \"append-to\" attribute "
-                           "value in <presentationURL> tag is set to \"") + 
+                           "value in <presentationURL> tag is set to \"") +
                             temp + _("\" but no URL is specified"));
     }
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_APPEND_PRESENTATION_URL_TO);
 
-    temp_int = getIntOption(_("/server/upnp-string-limit"), 
+    temp_int = getIntOption(_("/server/upnp-string-limit"),
                               DEFAULT_UPNP_STRING_LIMIT);
     if ((temp_int != -1) && (temp_int < 4))
     {
@@ -1531,7 +1547,7 @@ void ConfigManager::validate(String serverhome)
     SET_INT_OPTION(CFG_SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT);
 
 #ifdef HAVE_JS
-    temp = getOption(_("/import/scripting/playlist-script"), 
+    temp = getOption(_("/import/scripting/playlist-script"),
             prefix_dir +
             DIR_SEPARATOR +
             _(DEFAULT_JS_DIR) +
@@ -1543,7 +1559,7 @@ void ConfigManager::validate(String serverhome)
     NEW_OPTION(getOption(_("/import/scripting/playlist-script")));
     SET_OPTION(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
 
-    temp = getOption(_("/import/scripting/common-script"), 
+    temp = getOption(_("/import/scripting/common-script"),
            prefix_dir +
             DIR_SEPARATOR +
             _(DEFAULT_JS_DIR) +
@@ -1556,7 +1572,7 @@ void ConfigManager::validate(String serverhome)
     SET_OPTION(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT);
 
     temp = getOption(
-            _("/import/scripting/playlist-script/attribute::create-link"), 
+            _("/import/scripting/playlist-script/attribute::create-link"),
             _(DEFAULT_PLAYLIST_CREATE_LINK));
 
     if (!validateYesNo(temp))
@@ -1568,7 +1584,7 @@ void ConfigManager::validate(String serverhome)
     SET_BOOL_OPTION(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS);
 #endif
 
-    temp = getOption(_("/import/scripting/virtual-layout/attribute::type"), 
+    temp = getOption(_("/import/scripting/virtual-layout/attribute::type"),
                      _(DEFAULT_LAYOUT_TYPE));
     if ((temp != "js") && (temp != "builtin") && (temp != "disabled"))
         throw _Exception(_("Error in config file: invalid virtual layout "
@@ -1583,13 +1599,13 @@ void ConfigManager::validate(String serverhome)
                            "however you specified \"js\" to be used for the "
                            "virtual-layout."));
 #else
-    charset = getOption(_("/import/scripting/attribute::script-charset"), 
+    charset = getOption(_("/import/scripting/attribute::script-charset"),
                         _(DEFAULT_JS_CHARSET));
-    if (temp == "js") 
+    if (temp == "js")
     {
         try
         {
-            Ref<StringConverter> conv(new StringConverter(charset, 
+            Ref<StringConverter> conv(new StringConverter(charset,
                                                 _(DEFAULT_INTERNAL_CHARSET)));
         }
         catch (const Exception & e)
@@ -1602,9 +1618,9 @@ void ConfigManager::validate(String serverhome)
     SET_OPTION(CFG_IMPORT_SCRIPTING_CHARSET);
 
     String script_path = getOption(
-                           _("/import/scripting/virtual-layout/import-script"), 
+                           _("/import/scripting/virtual-layout/import-script"),
                            prefix_dir +
-                             DIR_SEPARATOR + 
+                             DIR_SEPARATOR +
                            _(DEFAULT_JS_DIR) +
                              DIR_SEPARATOR +
                            _(DEFAULT_IMPORT_SCRIPT));
@@ -1638,7 +1654,7 @@ void ConfigManager::validate(String serverhome)
         prepare_path(_("/import/scripting/virtual-layout/dvd-script"));
         script_path = getOption(
                         _("/import/scripting/virtual-layout/dvd-script"));
- 
+
     }
 
     NEW_OPTION(script_path);
@@ -1648,7 +1664,11 @@ void ConfigManager::validate(String serverhome)
 #endif
 
     // 0 means, that the SDK will any free port itself
-    temp_int = getIntOption(_("/server/port"), 0);
+    if (port < 0) {
+        temp_int = getIntOption(_("/server/port"), 0);
+    } else {
+        temp_int = port;
+    }
     NEW_INT_OPTION(temp_int);
     SET_INT_OPTION(CFG_SERVER_PORT);
 
@@ -1664,7 +1684,7 @@ void ConfigManager::validate(String serverhome)
     {
         getOption(_("/import/mappings/mimetype-upnpclass"), _(""));
     }
-    NEW_DICT_OPTION(createDictionaryFromNodeset(el, _("map"), 
+    NEW_DICT_OPTION(createDictionaryFromNodeset(el, _("map"),
                                                     _("from"), _("to")));
     SET_DICT_OPTION(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
 
@@ -1688,9 +1708,9 @@ void ConfigManager::validate(String serverhome)
     {
 #ifdef HAVE_INOTIFY
         if (!inotify_supported)
-            throw _Exception(_("You specified " 
+            throw _Exception(_("You specified "
                                "\"yes\" in \"<autoscan use-inotify=\"\">"
-                               " however your system does not have " 
+                               " however your system does not have "
                                "inotify support"));
 #else
         throw _Exception(_("You specified"
@@ -1698,8 +1718,8 @@ void ConfigManager::validate(String serverhome)
                            " however this version of MediaTomb was compiled "
                            "without inotify support"));
 #endif
-    } 
-   
+    }
+
 #ifdef HAVE_INOTIFY
     if (temp == _("auto") || (temp == _(YES)))
     {
@@ -1726,7 +1746,7 @@ void ConfigManager::validate(String serverhome)
 
 #ifdef EXTERNAL_TRANSCODING
     temp = getOption(
-            _("/transcoding/attribute::enabled"), 
+            _("/transcoding/attribute::enabled"),
             _(DEFAULT_TRANSCODING_ENABLED));
 
     if (!validateYesNo(temp))
@@ -1773,14 +1793,14 @@ void ConfigManager::validate(String serverhome)
     NEW_STRARR_OPTION(createArrayFromNodeset(el, _("add"), _("header")));
     SET_STRARR_OPTION(CFG_SERVER_CUSTOM_HTTP_HEADERS);
 
-#ifdef HAVE_LIBEXIF    
+#ifdef HAVE_LIBEXIF
 
     el = getElement(_("/import/library-options/libexif/auxdata"));
     if (el == nullptr)
     {
         getOption(_("/import/library-options/libexif/auxdata"),
                   _(""));
-        
+
     }
     NEW_STRARR_OPTION(createArrayFromNodeset(el, _("add-data"), _("tag")));
     SET_STRARR_OPTION(CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST);
@@ -1813,7 +1833,7 @@ void ConfigManager::validate(String serverhome)
     if (temp == YES)
     {
         temp_int = getIntOption(_("/server/extended-runtime-options/ffmpegthumbnailer/"
-                                  "thumbnail-size"), 
+                                  "thumbnail-size"),
                                    DEFAULT_FFMPEGTHUMBNAILER_THUMBSIZE);
 
         if (temp_int <= 0)
@@ -1825,7 +1845,7 @@ void ConfigManager::validate(String serverhome)
         SET_INT_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
 
         temp_int = getIntOption(_("/server/extended-runtime-options/ffmpegthumbnailer/"
-                                  "seek-percentage"), 
+                                  "seek-percentage"),
                                    DEFAULT_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE);
 
         if (temp_int < 0)
@@ -1860,7 +1880,7 @@ void ConfigManager::validate(String serverhome)
         SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_WORKAROUND_BUGS);
 
         temp_int = getIntOption(_("/server/extended-runtime-options/"
-                                  "ffmpegthumbnailer/image-quality"), 
+                                  "ffmpegthumbnailer/image-quality"),
                                    DEFAULT_FFMPEGTHUMBNAILER_IMAGE_QUALITY);
 
         if (temp_int < 0)
@@ -2042,7 +2062,7 @@ void ConfigManager::validate(String serverhome)
 #endif
 
 #ifdef YOUTUBE
-    temp = getOption(_("/import/online-content/YouTube/attribute::enabled"), 
+    temp = getOption(_("/import/online-content/YouTube/attribute::enabled"),
                      _(DEFAULT_YOUTUBE_ENABLED));
 
     if (!validateYesNo(temp))
@@ -2053,8 +2073,8 @@ void ConfigManager::validate(String serverhome)
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
     SET_BOOL_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_ENABLED);
 
-    /// \todo well, tough scenario: YT service is disabled, but the database 
-    /// is populated with YT items from some time before. We still need to 
+    /// \todo well, tough scenario: YT service is disabled, but the database
+    /// is populated with YT items from some time before. We still need to
     /// support playing them, but that requires a valid YT section and thus
     /// forces us to check the options eventhough the service is disabled.
     // check other options only if the service is enabled
@@ -2071,7 +2091,7 @@ void ConfigManager::validate(String serverhome)
 
         NEW_OPTION(temp);
         SET_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_RACY);
-   
+
         temp = getOption(_("/import/online-content/YouTube/attribute::format"),
                          _(DEFAULT_YOUTUBE_FORMAT));
 
@@ -2104,7 +2124,7 @@ void ConfigManager::validate(String serverhome)
         temp_int = getIntOption(_("/import/online-content/YouTube/attribute::purge-after"), DEFAULT_YOUTUBE_PURGE_AFTER);
         if (getIntOption(_("/import/online-content/YouTube/attribute::refresh")) >= temp_int)
         {
-            if (temp_int != 0) 
+            if (temp_int != 0)
                 throw _Exception(_("Error in config file: YouTube purge-after value must be greater than refresh interval"));
         }
 
@@ -2129,7 +2149,7 @@ void ConfigManager::validate(String serverhome)
                     _(""));
         }
         Ref<Array<Object> > yt_opts = createServiceTaskList(OS_YouTube, el);
-        if (getBoolOption(CFG_ONLINE_CONTENT_YOUTUBE_ENABLED) && 
+        if (getBoolOption(CFG_ONLINE_CONTENT_YOUTUBE_ENABLED) &&
                 (yt_opts->size() == 0))
             throw _Exception(_("Error in config file: "
                         "YouTube service enabled but no imports "
@@ -2146,8 +2166,8 @@ void ConfigManager::validate(String serverhome)
     }
 #endif
 
-#ifdef SOPCAST 
-    temp = getOption(_("/import/online-content/SopCast/attribute::enabled"), 
+#ifdef SOPCAST
+    temp = getOption(_("/import/online-content/SopCast/attribute::enabled"),
                      _(DEFAULT_SOPCAST_ENABLED));
 
     if (!validateYesNo(temp))
@@ -2165,7 +2185,7 @@ void ConfigManager::validate(String serverhome)
     temp_int = getIntOption(_("/import/online-content/SopCast/attribute::purge-after"), 0);
     if (getIntOption(_("/import/online-content/SopCast/attribute::refresh")) >= temp_int)
     {
-        if (temp_int != 0) 
+        if (temp_int != 0)
             throw _Exception(_("Error in config file: SopCast purge-after value must be greater than refresh interval"));
     }
 
@@ -2185,7 +2205,7 @@ void ConfigManager::validate(String serverhome)
 #endif
 
 #ifdef ATRAILERS
-    temp = getOption(_("/import/online-content/AppleTrailers/attribute::enabled"), 
+    temp = getOption(_("/import/online-content/AppleTrailers/attribute::enabled"),
                      _(DEFAULT_ATRAILERS_ENABLED));
 
     if (!validateYesNo(temp))
