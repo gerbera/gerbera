@@ -84,13 +84,9 @@ int main(int argc, char** argv, char** envp)
 {
     char* err = nullptr;
     int port = -1;
-    bool daemon = false;
     struct sigaction action;
     sigset_t mask_set;
 
-    int devnull = -1;
-    int redirect1 = -1;
-    int redirect2 = -1;
     struct passwd* pwd;
     struct group* grp;
 
@@ -105,14 +101,13 @@ int main(int argc, char** argv, char** envp)
         { (char*)"cfgdir", 1, nullptr, 'f' }, // 5
         { (char*)"user", 1, nullptr, 'u' }, // 6
         { (char*)"group", 1, nullptr, 'g' }, // 7
-        { (char*)"daemon", 0, nullptr, 'd' }, // 8
-        { (char*)"pidfile", 1, nullptr, 'P' }, // 9
-        { (char*)"add", 1, nullptr, 'a' }, // 10
-        { (char*)"logfile", 1, nullptr, 'l' }, // 11
-        { (char*)"debug", 0, nullptr, 'D' }, // 12
-        { (char*)"compile-info", 0, nullptr, 0 }, // 13
-        { (char*)"version", 0, nullptr, 0 }, // 14
-        { (char*)"help", 0, nullptr, 'h' }, // 15
+        { (char*)"pidfile", 1, nullptr, 'P' }, // 8
+        { (char*)"add", 1, nullptr, 'a' }, // 9
+        { (char*)"logfile", 1, nullptr, 'l' }, // 10
+        { (char*)"debug", 0, nullptr, 'D' }, // 11
+        { (char*)"compile-info", 0, nullptr, 0 }, // 12
+        { (char*)"version", 0, nullptr, 0 }, // 13
+        { (char*)"help", 0, nullptr, 'h' }, // 14
         { (char*)nullptr, 0, nullptr, 0 }
     };
 
@@ -182,11 +177,6 @@ int main(int argc, char** argv, char** envp)
             config_file = optarg;
             break;
 
-        case 'd':
-            log_debug("Starting in daemon mode...");
-            daemon = true;
-            break;
-
         case 'u':
             log_debug("Running as user: %s\n", optarg);
             user = optarg;
@@ -242,7 +232,6 @@ Supported options:\n\
     --interface or -e  network interface to bind to\n\
     --port or -p       server port (the SDK only permits values >= 49152)\n\
     --config or -c     configuration file to use\n\
-    --daemon or -d     run server in background\n\
     --home or -m       define the home directory\n\
     --cfgdir or -f     name of the directory that is holding the configuration\n\
     --pidfile or -P    file to hold the process id\n\
@@ -277,11 +266,9 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         }
     }
 
-    if (print_version || !daemon) {
+    if (print_version) {
         print_copyright();
-
-        if (print_version)
-            exit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     // create pid file before dropping privileges
@@ -385,72 +372,6 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         exit(EXIT_FAILURE);
     }
 
-    // starting as daemon if applicable
-    if (daemon) {
-        // The daemon startup code was taken from the Linux Daemon Writing HOWTO
-        // written by Devin Watson <dmwatson@comcast.net>
-        // The HOWTO is Copyright by Devin Watson, under the terms of the BSD License.
-
-        /* Our process ID and Session ID */
-        pid_t pid, sid;
-
-        /* Fork off the parent process */
-        pid = fork();
-        if (pid < 0) {
-            log_error("Failed to fork: %s\n", strerror(errno));
-            exit(EXIT_FAILURE);
-        }
-        /* If we got a good PID, then
-           we can exit the parent process. */
-        if (pid > 0) {
-            exit(EXIT_SUCCESS);
-        }
-
-        /* Change the file mode mask */
-        umask(0133);
-
-        /* Open any logs here */
-
-        /* Create a new SID for the child process */
-        sid = setsid();
-        if (sid < 0) {
-            log_error("setsid failed: %s\n", strerror(errno));
-            exit(EXIT_FAILURE);
-        }
-
-        /* Change the current working directory */
-        if ((chdir("/")) < 0) {
-            log_error("Failed to chdir to / : %s\n", strerror(errno));
-            exit(EXIT_FAILURE);
-        }
-
-        /* Close out the standard file descriptors */
-        close(STDIN_FILENO);
-        close(STDOUT_FILENO);
-        close(STDERR_FILENO);
-
-        devnull = open("/dev/null", O_RDWR);
-        if (devnull == -1) {
-            log_error("Failed to open /dev/null: %s\n", strerror(errno));
-            exit(EXIT_FAILURE);
-        }
-
-        redirect1 = dup(devnull);
-        if (redirect1 == -1) {
-            log_error("Failed to redirect output: %s\n", strerror(errno));
-            close(devnull);
-            exit(EXIT_FAILURE);
-        }
-
-        redirect2 = dup(devnull);
-        if (redirect2 == -1) {
-            log_error("Failed to redirect output: %s\n", strerror(errno));
-            close(devnull);
-            close(redirect1);
-            exit(EXIT_FAILURE);
-        }
-    }
-
     if (pid_fd != nullptr) {
         pid_t cur_pid;
         int size;
@@ -519,17 +440,10 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
             log_error("%s\n", e.getMessage().c_str());
             e.printStackTrace();
         }
-        if (daemon) {
-            close(devnull);
-            close(redirect1);
-            close(redirect2);
-        }
         exit(EXIT_FAILURE);
     } catch (const Exception& e) {
         log_error("%s\n", e.getMessage().c_str());
         e.printStackTrace();
-        if (daemon)
-            close(devnull);
         exit(EXIT_FAILURE);
     }
 
@@ -543,11 +457,6 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
                     ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_HIDDEN_FILES));
             } catch (const Exception& e) {
                 e.printStackTrace();
-                if (daemon) {
-                    close(devnull);
-                    close(redirect1);
-                    close(redirect2);
-                }
                 exit(EXIT_FAILURE);
             }
         }
@@ -593,11 +502,6 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
                     log_error("Error reloading configuration: %s\n",
                         e.getMessage().c_str());
                     e.printStackTrace();
-                    if (daemon) {
-                        close(devnull);
-                        close(redirect1);
-                        close(redirect2);
-                    }
                     exit(EXIT_FAILURE);
                 }
 
@@ -630,13 +534,6 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
 
     log_info("Server terminating\n");
     log_close();
-
-    if (daemon) {
-        close(devnull);
-        close(redirect1);
-        close(redirect2);
-    }
-
     exit(ret);
 }
 
