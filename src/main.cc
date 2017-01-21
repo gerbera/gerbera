@@ -34,34 +34,13 @@
 /// This documentation was generated using doxygen, you can reproduce it by
 /// running "doxygen doxygen.conf" from the mediatomb/doc/ directory.
 
-#include "common.h"
-#include "process.h"
-#include "server.h"
-#include "singleton.h"
-
 #include <getopt.h>
 
 #include "common.h"
-#include "config_manager.h"
+#include "server.h"
 #include "content_manager.h"
-#include "timer.h"
 
-#include <cerrno>
-#include <climits>
-#include <csignal>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <fcntl.h>
-#include <grp.h>
-#include <pthread.h>
-#include <pwd.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <syslog.h>
-#include <unistd.h>
-
-#define OPTSTR "i:e:p:c:m:f:u:g:a:l:P:dhD"
+#define OPTSTR "i:e:p:c:m:f:a:l:P:dhD"
 
 using namespace zmm;
 
@@ -87,9 +66,6 @@ int main(int argc, char** argv, char** envp)
     struct sigaction action;
     sigset_t mask_set;
 
-    struct passwd* pwd;
-    struct group* grp;
-
     int opt_index = 0;
     int o;
     static struct option long_options[] = {
@@ -99,8 +75,6 @@ int main(int argc, char** argv, char** envp)
         { (char*)"config", 1, nullptr, 'c' }, // 3
         { (char*)"home", 1, nullptr, 'm' }, // 4
         { (char*)"cfgdir", 1, nullptr, 'f' }, // 5
-        { (char*)"user", 1, nullptr, 'u' }, // 6
-        { (char*)"group", 1, nullptr, 'g' }, // 7
         { (char*)"pidfile", 1, nullptr, 'P' }, // 8
         { (char*)"add", 1, nullptr, 'a' }, // 9
         { (char*)"logfile", 1, nullptr, 'l' }, // 10
@@ -114,8 +88,6 @@ int main(int argc, char** argv, char** envp)
     String config_file;
     String home;
     String confdir;
-    String user;
-    String group;
     String pid_file;
     FILE* pid_fd = nullptr;
     String interface;
@@ -177,16 +149,6 @@ int main(int argc, char** argv, char** envp)
             config_file = optarg;
             break;
 
-        case 'u':
-            log_debug("Running as user: %s\n", optarg);
-            user = optarg;
-            break;
-
-        case 'g':
-            log_debug("Running as group: %s\n", optarg);
-            group = optarg;
-            break;
-
         case 'a':
             log_debug("Adding file/directory:: %s\n", optarg);
             addFile->append(String::copy(optarg));
@@ -235,8 +197,6 @@ Supported options:\n\
     --home or -m       define the home directory\n\
     --cfgdir or -f     name of the directory that is holding the configuration\n\
     --pidfile or -P    file to hold the process id\n\
-    --user or -u       run server under specified username\n\
-    --group or -g      run server under specified group\n\
     --add or -a        add the given file/directory\n\
     --logfile or -l    log to specified file\n\
     --debug or -D      enable debug output\n\
@@ -271,52 +231,22 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         exit(EXIT_FAILURE);
     }
 
-    // create pid file before dropping privileges
+    // create pid file
     if (pid_file != nullptr) {
         pid_fd = fopen(pid_file.c_str(), "w");
         if (pid_fd == nullptr) {
-            log_error("Could not write pid file %s : %s\n",
-                pid_file.c_str(), strerror(errno));
-        }
-    }
+            log_error("Could not write pid file %s : %s\n", pid_file.c_str(),
+                      strerror(errno));
 
-    // check if user and/or group parameter was specified and try to run the server
-    // under the given user and/or group name
-    if (group != nullptr) {
-        grp = getgrnam(group.c_str());
-        if (grp == nullptr) {
-            log_error("Group %s not found!\n", group.c_str());
-            exit(EXIT_FAILURE);
-        }
+            pid_t cur_pid = getpid();
+            String pid = String::from(cur_pid);
 
-        if (setgid(grp->gr_gid) < 0) {
-            log_error("setgid failed %s\n", strerror(errno));
-            exit(EXIT_FAILURE);
-        }
+            int size = fwrite(pid.c_str(), sizeof(char), pid.length(), pid_fd);
+            fclose(pid_fd);
 
-        // remove supplementary groups
-        if (setgroups(0, nullptr) < 0) {
-            log_error("setgroups failed %s\n", strerror(errno));
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    if (user != nullptr) {
-        pwd = getpwnam(user.c_str());
-        if (pwd == nullptr) {
-            log_error("User %s not found!\n", user.c_str());
-            exit(EXIT_FAILURE);
-        }
-
-        // set supplementary groups
-        if (initgroups(user.c_str(), getegid()) < 0) {
-            log_error("initgroups failed %s\n", strerror(errno));
-            exit(EXIT_FAILURE);
-        }
-
-        if (setuid(pwd->pw_uid) < 0) {
-            log_error("setuid failed %s\n", strerror(errno));
-            exit(EXIT_FAILURE);
+            if (size < pid.length())
+                log_error("Error when writing pid file %s : %s\n",
+                          pid_file.c_str(), strerror(errno));
         }
     }
 
@@ -370,21 +300,6 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
     } catch (const Exception& e) {
         log_error("%s\n", e.getMessage().c_str());
         exit(EXIT_FAILURE);
-    }
-
-    if (pid_fd != nullptr) {
-        pid_t cur_pid;
-        int size;
-
-        cur_pid = getpid();
-        String pid = String::from(cur_pid);
-
-        size = fwrite(pid.c_str(), sizeof(char), pid.length(), pid_fd);
-        fclose(pid_fd);
-
-        if (size < pid.length())
-            log_error("Error when writing pid file %s : %s\n",
-                pid_file.c_str(), strerror(errno));
     }
 
     main_thread_id = pthread_self();
