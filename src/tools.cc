@@ -29,7 +29,7 @@
 
 /// \file tools.cc
 
-#include "tools.h"
+
 #include <sys/stat.h>
 #include <cerrno>
 #include <unistd.h>
@@ -40,7 +40,8 @@
 #include <climits>
 #include <netdb.h>
 #include <cstring>
-#include "config_manager.h"
+
+#include <ifaddrs.h>
 
 #ifndef SOLARIS
     #include <net/if.h>
@@ -53,6 +54,8 @@
 #include "md5/md5.h"
 #include "file_io_handler.h"
 #include "metadata_handler.h"
+#include "config_manager.h"
+#include "tools.h"
 
 #define WHITE_SPACE " \t\r\n"
 
@@ -1200,6 +1203,51 @@ String interfaceToIP(String interface)
     if_freenameindex(iflist_free);
     return nullptr;
 #endif
+}
+
+String ipToInterface(String ip) {
+    if (!string_ok(ip)) {
+        log_warning("IP is null\n");
+        return nullptr;
+    } else {
+        log_debug("Looking for '%s'\n", ip);
+    }
+
+    struct ifaddrs *ifaddr, *ifa;
+    int family, s, n;
+    char host[NI_MAXHOST];
+
+    if (getifaddrs(&ifaddr) == -1) {
+        log_error("Could not getifaddrs: %s\n", mt_strerror(errno).c_str());
+    }
+
+    for (ifa = ifaddr, n = 0; ifa != NULL; ifa = ifa->ifa_next, n++) {
+        if (ifa->ifa_addr == NULL)
+            continue;
+
+        family = ifa->ifa_addr->sa_family;
+        String name = String::copy(ifa->ifa_name);
+
+        if (family == AF_INET || family == AF_INET6) {
+            s = getnameinfo(ifa->ifa_addr,
+                    (family == AF_INET) ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6),
+                    host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+            if (s != 0) {
+                log_error("getnameinfo() failed: %s\n", gai_strerror(s));
+                return nullptr;
+            }
+
+            String ipaddr = String::copy(host);
+            // IPv6 link locals come back as fe80::351d:d7f4:6b17:3396%eth0
+            if (ipaddr.startsWith(ip)) {
+                return name;
+            }
+        }
+    }
+
+    freeifaddrs(ifaddr);
+    log_warning("Failed to find interface for IP: %s\n", ip.c_str());
+    return nullptr;
 }
 
 bool validateYesNo(String value)

@@ -34,11 +34,12 @@
 #include <memory>
 #include <unordered_set>
 
+#include <sys/time.h>
+
 #include "common.h"
 #include "rexp.h"
 #include "io_handler.h"
 #include "cds_objects.h"
-#include <sys/time.h>
 
 #ifdef HAVE_MAGIC
 // for older versions of filemagic
@@ -290,6 +291,12 @@ zmm::String normalizePath(zmm::String path);
 /// \param interface i.e. eth0, lo, etc.
 /// \return IP address or nullptr if interface was not found.
 zmm::String interfaceToIP(zmm::String interface);
+
+/// \brief Finds the Interface with the specified IP address.
+/// \param ip i.e. 192.168.4.56.
+/// \return Interface name or nullptr if IP was not found.
+zmm::String ipToInterface(zmm::String interface);
+
 
 /// \brief Returns true if the given string is eitehr "yes" or "no", otherwise
 /// returns false.

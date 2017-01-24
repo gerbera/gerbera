@@ -116,11 +116,11 @@ void Server::upnp_init()
     if (string_ok(ip) && string_ok(iface))
         throw _Exception(_("You can not specify interface and IP at the same time!"));
 
-    if (!string_ok(ip))
-        ip = interfaceToIP(iface);
+    if (!string_ok(iface))
+        iface = ipToInterface(ip);
 
-    if (string_ok(iface) && !string_ok(ip))
-        throw _Exception(_("Could not find interface: ") + iface);
+    if (string_ok(ip) && !string_ok(iface))
+        throw _Exception(_("Could not find ip: ") + ip);
 
     int port = config->getIntOption(CFG_SERVER_PORT);
 
@@ -129,7 +129,8 @@ void Server::upnp_init()
     // FIMXE: why?
     storage = Storage::getInstance();
 
-    ret = UpnpInit(ip.c_str(), port);
+    log_debug("Initialising libupnp with interface: %s, port: %d\n", iface.c_str(), port);
+    ret = UpnpInit2(iface.c_str(), port);
     if (ret != UPNP_E_SUCCESS) {
         throw _UpnpException(ret, _("upnp_init: UpnpInit failed"));
     }
