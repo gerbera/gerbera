@@ -606,7 +606,10 @@ void AutoscanInotify::monitorUnmonitorRecursive(String startPath, bool unmonitor
 
 int AutoscanInotify::monitorDirectory(String pathOri, Ref<AutoscanDirectory> adir, String normalizedAutoscanPath, bool startPoint, Ref<Array<StringBase> > pathArray)
 {
-    String path = pathOri + DIR_SEPARATOR;
+    String path = pathOri;
+    if (path.length() > 0 && path[path.length() - 1] != DIR_SEPARATOR) {
+        path = path + DIR_SEPARATOR;
+    }
     
     int wd = inotify->addWatch(path, events);
     if (wd < 0)
@@ -664,7 +667,9 @@ int AutoscanInotify::monitorDirectory(String pathOri, Ref<AutoscanDirectory> adi
 
 void AutoscanInotify::unmonitorDirectory(String path, Ref<AutoscanDirectory> adir)
 {
-    path = path + DIR_SEPARATOR;
+    if (path.length() > 0 && path[path.length() - 1] != DIR_SEPARATOR) {
+        path = path + DIR_SEPARATOR;
+    }
     
     // maybe there is a faster method...
     // we use addWatch, because it returns the wd to the filename
