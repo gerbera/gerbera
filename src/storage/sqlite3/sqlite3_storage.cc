@@ -72,9 +72,6 @@ Sqlite3Storage::Sqlite3Storage() : SQLStorage()
     dirty = false;
 }
 
-//Sqlite3Storage::~Sqlite3Storage() {
-//}
-
 void Sqlite3Storage::init()
 {
     SQLStorage::init();

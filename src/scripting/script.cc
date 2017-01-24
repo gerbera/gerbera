@@ -139,8 +139,9 @@ void Script::setProperty(JSObject *obj, String name, String value)
     if (!str)
         return;
     val = STRING_TO_JSVAL(str);
-    if (!JS_SetProperty(cx, obj, name.c_str(), &val))
-        return;
+    if (!JS_SetProperty(cx, obj, name.c_str(), &val)) {
+        log_error("Failed to set object property %s\n", name.c_str());
+    }
 }
 
 void Script::setIntProperty(JSObject *obj, String name, int value)
@@ -148,8 +149,9 @@ void Script::setIntProperty(JSObject *obj, String name, int value)
     jsval val;
     if (!JS_NewNumberValue(cx, (jsdouble)value, &val))
         return;
-    if (!JS_SetProperty(cx, obj, name.c_str(), &val))
-        return;
+    if (!JS_SetProperty(cx, obj, name.c_str(), &val)) {
+        log_error("Failed to set object property %s\n", name.c_str());
+    }
 }
 
 void Script::setObjectProperty(JSObject *parent, String name, JSObject *obj)

@@ -170,6 +170,7 @@ public:
     String reduce(char ch);
     
     inline char charAt(int index) {  return base->data[index]; }
+    inline char operator[](int index) { return base->data[index]; }
     inline char *charPtrAt(int index) { return base->data + index; }
     inline int index(char ch) { return index(0, ch); }
     int index(int start, char ch);

@@ -253,7 +253,6 @@ private:
     bool insertBufferEmpty;
     int insertBufferStatementCount;
     int insertBufferByteCount;
-    //std::mutex insertBufferMutex;
     using AutoLock = std::lock_guard<std::mutex>;
 };
 
