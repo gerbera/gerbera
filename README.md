@@ -41,6 +41,7 @@ _MediaTomb is pretty much dead upstream, so this is my attempt to get kick it ba
 - Remove `libmp4v2` use/dep.
 - Remove `id3lib` use/dep.
 - Fixed `dvd_image_import_script` with spidermonkey 1.8.5.
+- IPv6 Support
 - Lots of other stuff.
 
 ## Building
