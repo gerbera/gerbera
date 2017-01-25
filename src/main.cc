@@ -36,6 +36,12 @@
 
 #include <getopt.h>
 
+// first do no harm; may be safe for others
+#ifdef SOLARIS
+#include <signal.h>
+#include <iso/limits_iso.h>
+#endif
+
 #include "common.h"
 #include "server.h"
 #include "content_manager.h"
