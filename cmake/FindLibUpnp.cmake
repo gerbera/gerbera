@@ -4,7 +4,7 @@
 #  UPNP_INCLUDE_DIRS - The LibUPnP include directories
 #  UPNP_LIBRARIES - The libraries needed to use LibUPnP
 #  UPNP_VERSION_STRING - The version of LinUPnP found
-#
+#  UPNP_HAS_IPV6 - If LinUPnP was built with IPv6 support
 
 find_package(PkgConfig QUIET)
 pkg_check_modules (PC_UPNP QUIET libupnp-1.8)
@@ -28,6 +28,15 @@ if(EXISTS "${UPNP_INCLUDE_DIR}/upnp-1.8/upnpconfig.h")
     string (REGEX REPLACE ".*UPNP_VERSION_MINOR ([0-9]+).*" "\\1" UPNP_MINOR_VERSION "${_UPNP_DEFS}")
     string (REGEX REPLACE ".*UPNP_VERSION_PATCH ([0-9]+).*" "\\1" UPNP_PATCH_VERSION "${_UPNP_DEFS}")
     set (UPNP_VERSION_STRING "${UPNP_MAJOR_VERSION}.${UPNP_MINOR_VERSION}.${UPNP_PATCH_VERSION}")
+
+    file (STRINGS ${UPNP_INCLUDE_DIR}/upnp-1.8/upnpconfig.h _UPNP_V6 REGEX "^[ \t]*#define[ \t]+UPNP_ENABLE_IPV6[ \t]+(1)$")
+    MESSAGE(${_UPNP_V6})
+    if(_UPNP_V6)
+        set (UPNP_HAS_IPV6 1)
+    else()
+        set (UPNP_HAS_IPV6 0)
+    endif()
+
 endif()
 
 include(FindPackageHandleStandardArgs)
