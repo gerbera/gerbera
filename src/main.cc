@@ -36,9 +36,8 @@
 
 #include <getopt.h>
 
-// first do no harm; may be safe for others
+#include <csignal>
 #ifdef SOLARIS
-#include <signal.h>
 #include <iso/limits_iso.h>
 #endif
 
