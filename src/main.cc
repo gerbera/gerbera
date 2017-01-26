@@ -36,6 +36,11 @@
 
 #include <getopt.h>
 
+#include <csignal>
+#ifdef SOLARIS
+#include <iso/limits_iso.h>
+#endif
+
 #include "common.h"
 #include "server.h"
 #include "content_manager.h"
