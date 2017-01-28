@@ -297,14 +297,12 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
 
                 String mt;
                 if (ConfigManager::getInstance()->getBoolOption(CFG_ONLINE_CONTENT_YOUTUBE_FORMAT_MP4))
-                {
                     mt = mp4_mimetype;
-                }
                 else
                     mt = _("video/x-flv");
 
-                    item->setMimeType(mt);
-                    resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(mt));
+                item->setMimeType(mt);
+                resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(mt));
 
                 content_set = true;
  
