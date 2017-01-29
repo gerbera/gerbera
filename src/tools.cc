@@ -1210,7 +1210,7 @@ String ipToInterface(String ip) {
         log_warning("IP is null\n");
         return nullptr;
     } else {
-        log_debug("Looking for '%s'\n", ip);
+        log_debug("Looking for '%s'\n", ip.c_str());
     }
 
     struct ifaddrs *ifaddr, *ifa;
