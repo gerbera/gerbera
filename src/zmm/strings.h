@@ -58,14 +58,14 @@
 
 namespace zmm
 {
-        
+
 class StringBase : public Object
 {
 public:
     char *data;
     int len;
     bool store; // if true, the object is responsible for freeing data
-    
+
     StringBase(int capacity);
     StringBase(const char *str);
     StringBase(const char *str, int len);
@@ -92,24 +92,24 @@ public:
     String(const String &other);
     String(StringBase *other);
     String(Ref<StringBase> other);
-    
+
     inline StringBase *getBase()
     {
         return base;
     }
-    
-    inline String(nullptr_t)
+
+    inline String(std::nullptr_t)
     {
         base = NULL;
     }
-    
+
     ~String();
-    
+
     String &operator=(const char *str);
-    
+
     String &operator=(String other);
-    
-    inline String &operator=(nullptr_t)
+
+    inline String &operator=(std::nullptr_t)
     {
         if(base)
             base->release();
@@ -127,7 +127,7 @@ public:
     int operator==(String other) const;
     int operator==(const char *str) const;
     int operator==(char c) const;
-    
+
     inline int operator!=(String other) const
     {
         return ! operator==(other);
@@ -141,11 +141,11 @@ public:
         return ! operator==(c);
     }
 
-    inline int operator==(nullptr_t) const
+    inline int operator==(std::nullptr_t) const
     {
         return (base == nullptr);
     }
-    inline int operator!=(nullptr_t) const
+    inline int operator!=(std::nullptr_t) const
     {
         return (base != nullptr);
     }
@@ -162,13 +162,13 @@ public:
 
     String substring(int from);
     String substring(int from, int count);
-    
+
     /// \brief reduces multiple consecutive occurences of the character ch
     /// to one occurence
     /// \param ch the character to reduce
     /// \return the new string, with ch reduced
     String reduce(char ch);
-    
+
     inline char charAt(int index) {  return base->data[index]; }
     inline char operator[](int index) { return base->data[index]; }
     inline char *charPtrAt(int index) { return base->data + index; }
@@ -193,12 +193,12 @@ public:
     {
         base->len = strlen(base->data);
     }
-    
+
     bool startsWith(String str)
     {
         return base->startsWith(str.base);
     }
-    
+
     int find(const char *needle);
     int find(String needle);
     String replace(String needle, String replacement);
@@ -210,7 +210,7 @@ public:
     static String from(unsigned long x);
     static String from(double x);
     static String from(long long x);
-    
+
     static String allocate(int size);
     static String take(const char *data, int length);
     static String take(const char *data);
