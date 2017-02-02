@@ -28,8 +28,7 @@ matrix:
           packages:
             - g++-4.9
       env:
-        - CXX=g++-4.9
-        - CC=gcc-4.9
+        - CXX=g++-4.9 CC=gcc-4.9
     - compiler: gcc
       addons:
         apt:
@@ -38,8 +37,7 @@ matrix:
           packages:
             - g++-5
       env:
-        - CXX=g++-5
-		    - CC=gcc-5
+        - CXX=g++-5 CC=gcc-5
     - compiler: gcc
       addons:
         apt:
@@ -48,8 +46,7 @@ matrix:
           packages:
             - g++-6
       env:
-        - CXX=g++-6
-        - CC=gcc-6
+        - CXX=g++-6 CC=gcc-6
     - compiler: clang
       addons:
         apt:
@@ -59,5 +56,4 @@ matrix:
           packages:
             - clang-4.0
       env:
-        - CXX=clang++-4.0
-        - CC=clang-4.0
+        - CXX=clang++-4.0 CC=clang-4.0
