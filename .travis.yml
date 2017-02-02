@@ -6,7 +6,6 @@ sudo: required
 dist: trusty
 
 before_install:
-  - sudo add-apt-repository ppa:george-edison55/cmake-3.x -y
   - sudo apt-get update -qq
   - sudo apt-get install -y uuid-dev libexpat1-dev libsqlite3-dev libmysqlclient-dev libmozjs185-dev libmagic-dev libexif-dev libcurl4-openssl-dev
   - ./scripts/install-pupnp18.sh
@@ -14,7 +13,6 @@ before_install:
 
 # Build
 script:
-  - cmake -version
   - mkdir build
   - cd build
   - cmake -DCMAKE_VERBOSE_MAKEFILE=ON .. && make
