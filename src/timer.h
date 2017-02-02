@@ -82,7 +82,7 @@ public:
         log_debug("removing subscriber...\n");
         AutoLock lock(mutex);
         TimerSubscriberElement element(timerSubscriber, 0, parameter);
-        auto it = std::find(subscribers.cbegin(), subscribers.cend(), element);
+        std::vector<TimerSubscriberElement>::const_iterator it = std::find(subscribers.cbegin(), subscribers.cend(), element);
         if (it != subscribers.cend()) {
             subscribers.erase(it);
             signal();
