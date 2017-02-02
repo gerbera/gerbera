@@ -5,6 +5,10 @@ language: cpp
 sudo: required
 dist: trusty
 
+# before_install:
+  - ./scripts/install-pupnp18.sh
+
+# Build
 script:
   - mkdir build
   - cd build
