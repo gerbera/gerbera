@@ -1,7 +1,9 @@
-#MediaTomb-v00d00 - UPnP MediaServer
+#MediaTomb-v00d00 - UPnP Media Server
 
-MediaTomb is an open source (GPL) UPnP MediaServer which allows you to stream your digital media
-through your home network and listen to/watch it on a variety of UPnP compatible devices.
+
+[![Build Status](https://travis-ci.org/v00d00/mediatomb.svg?branch=master)](https://travis-ci.org/v00d00/mediatomb)
+
+MediaTomb is a UPnP media server which allows you to stream your digital media through your home network and consume it on a variety of UPnP compatible devices.
 
 _MediaTomb is pretty much dead upstream, so this is my attempt to get kick it back into life._
 
