@@ -14,9 +14,10 @@ before_install:
 
 # Build
 script:
+  - cmake -version
   - mkdir build
   - cd build
-  - cmake .. && make
+  - cmake -DCMAKE_VERBOSE_MAKEFILE=ON .. && make
 
 matrix:
   include:
