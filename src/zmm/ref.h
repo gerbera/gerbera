@@ -50,7 +50,7 @@ public:
         if(ptr)
             ptr->retain();
     }
-    Ref(nullptr_t)
+    Ref(std::nullptr_t)
     {
         _ptr = nullptr;
     }
@@ -71,7 +71,7 @@ public:
             _ptr->retain();
         return *this;
     }
-    inline Ref& operator=(nullptr_t)
+    inline Ref& operator=(std::nullptr_t)
     {
         if(_ptr)
             _ptr->release();
@@ -91,11 +91,11 @@ public:
     {
         return _ptr;
     }
-    inline int operator==(nullptr_t) const
+    inline int operator==(std::nullptr_t) const
     {
         return (_ptr == nullptr);
     }
-    inline int operator!=(nullptr_t) const
+    inline int operator!=(std::nullptr_t) const
     {
         return (_ptr != nullptr);
     }
