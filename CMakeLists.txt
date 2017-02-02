@@ -1,4 +1,9 @@
-cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
+
+# It is 2017 so lets leverage a modern C++
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_EXTENSIONS False)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 include(CheckFunctionExists)
@@ -294,11 +299,7 @@ target_include_directories(libmediatomb PRIVATE "${CMAKE_SOURCE_DIR}/src")
 add_executable(mediatomb src/main.cc $<TARGET_OBJECTS:libmediatomb>)
 target_include_directories(mediatomb PRIVATE "${CMAKE_SOURCE_DIR}/src")
 
-# It is nearly 2017 so lets leverage a modern C++
-set_property(TARGET mediatomb PROPERTY CXX_STANDARD 14)
-set_property(TARGET mediatomb PROPERTY CXX_STANDARD_REQUIRED ON)
-set_property(TARGET libmediatomb PROPERTY CXX_STANDARD 14)
-set_property(TARGET libmediatomb PROPERTY CXX_STANDARD_REQUIRED ON)
+# Warnings are nice
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
 # Host OS Check
