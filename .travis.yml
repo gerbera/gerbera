@@ -20,34 +20,28 @@ script:
 
 matrix:
   include:
-    - compiler: gcc
+    - env: CXX=g++-4.9 CC=gcc-4.9
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
             - g++-4.9
-      env:
-        - CXX=g++-4.9 CC=gcc-4.9
-    - compiler: gcc
+    - env: CXX=g++-5 CC=gcc-5
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
             - g++-5
-      env:
-        - CXX=g++-5 CC=gcc-5
-    - compiler: gcc
+    - env: CXX=g++-6 CC=gcc-6
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
             - g++-6
-      env:
-        - CXX=g++-6 CC=gcc-6
-    - compiler: clang
+    - env: CXX=clang++-4.0 CC=clang-4.0
       addons:
         apt:
           sources:
@@ -55,5 +49,3 @@ matrix:
             - llvm-toolchain-precise-4.0
           packages:
             - clang-4.0
-      env:
-        - CXX=clang++-4.0 CC=clang-4.0
