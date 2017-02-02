@@ -30,7 +30,6 @@ if(EXISTS "${UPNP_INCLUDE_DIR}/upnp-1.8/upnpconfig.h")
     set (UPNP_VERSION_STRING "${UPNP_MAJOR_VERSION}.${UPNP_MINOR_VERSION}.${UPNP_PATCH_VERSION}")
 
     file (STRINGS ${UPNP_INCLUDE_DIR}/upnp-1.8/upnpconfig.h _UPNP_V6 REGEX "^[ \t]*#define[ \t]+UPNP_ENABLE_IPV6[ \t]+(1)$")
-    MESSAGE(${_UPNP_V6})
     if(_UPNP_V6)
         set (UPNP_HAS_IPV6 1)
     else()
