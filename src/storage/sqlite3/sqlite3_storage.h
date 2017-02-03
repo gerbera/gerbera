@@ -197,12 +197,12 @@ private:
     zmm::Ref<zmm::ObjectQueue<SLTask> > taskQueue;
     bool taskQueueOpen;
     
-    virtual void threadCleanup() {}
-    virtual bool threadCleanupRequired() { return false; }
+    virtual void threadCleanup() override {}
+    virtual bool threadCleanupRequired() override { return false; }
     
     zmm::Ref<zmm::StringBuffer> insertBuffer;
-    virtual void _addToInsertBuffer(zmm::Ref<zmm::StringBuffer> query);
-    virtual void _flushInsertBuffer();
+    virtual void _addToInsertBuffer(zmm::Ref<zmm::StringBuffer> query) override;
+    virtual void _flushInsertBuffer() override;
     
     bool dirty;
 

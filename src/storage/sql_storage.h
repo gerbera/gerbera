@@ -94,7 +94,7 @@ public:
     int exec(zmm::Ref<zmm::StringBuffer> buf, bool getLastInsertId = false)
         { return exec(buf->c_str(), buf->length(), getLastInsertId); }
     
-    virtual void addObject(zmm::Ref<CdsObject> object, int *changedContainer);
+    virtual void addObject(zmm::Ref<CdsObject> object, int *changedContainer) override;
     virtual void updateObject(zmm::Ref<CdsObject> object, int *changedContainer) override;
     
     virtual zmm::Ref<CdsObject> loadObject(int objectID) override;
