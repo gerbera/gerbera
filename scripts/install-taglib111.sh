@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -ex
 wget http://taglib.github.io/releases/taglib-1.11.1.tar.gz
 tar -xzvf taglib-1.11.1.tar.gz

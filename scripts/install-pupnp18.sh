@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -ex
 wget https://github.com/mrjimenez/pupnp/archive/release-1.8.0.tar.gz -O pupnp-1.8.0.tgz
 tar -xzvf pupnp-1.8.0.tgz
