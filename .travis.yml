@@ -47,6 +47,5 @@ matrix:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-4.0
           packages:
-            - libstdc++6
-            - libstdc++6-dev
+            - libc++-dev
             - clang-4.0
