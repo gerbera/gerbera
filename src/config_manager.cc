@@ -2789,21 +2789,6 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
                 throw _Exception(_("autoscan directory ") + location + ": hidden attribute " + temp + " is invalid");
             }
 
-            temp = child->getAttribute(_("interval"));
-            interval = 0;
-            if (mode == TimedScanMode) {
-                if (!string_ok(temp)) {
-                    throw _Exception(_("autoscan directory ")
-                        + location + ": interval attribute is required for timed mode");
-                }
-
-                interval = temp.toUInt();
-
-                if (interval == 0) {
-                    throw _Exception(_("autoscan directory ") + location + ": invalid interval attribute");
-                }
-            }
-
             Ref<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, true, -1, interval, hidden));
             try {
                 list->add(dir);
