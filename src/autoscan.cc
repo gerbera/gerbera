@@ -295,22 +295,6 @@ Ref<AutoscanList> AutoscanList::removeIfSubdir(String parent, bool persistent)
     return rm_id_list;
 }
 
-
-/*
-void AutoscanList::subscribeAll(Ref<TimerSubscriber> obj)
-{
-    AutoLock lock(mutex);
-    
-    Ref<Timer> timer = Timer::getInstance();
-    for (int i = 0; i < list->size(); i++)
-    {
-        Ref<AutoscanDirectory> dir = list->get(i);
-        if (dir == nullptr)
-            continue;
-        timer->addTimerSubscriber(obj, dir->getInterval(), dir->getScanID(), true);
-    }
-}
-*/
 void AutoscanList::notifyAll(TimerSubscriber *sub)
 {
     if (sub == nullptr) return;
@@ -324,38 +308,6 @@ void AutoscanList::notifyAll(TimerSubscriber *sub)
         sub->timerNotify(list->get(i)->getTimerParameter());
     }
 }
-
-/*
-void AutoscanList::subscribeDir(zmm::Ref<TimerSubscriber> obj, int id, bool once)
-{
-    AutoLock lock(mutex);
-
-    if ((id < 0) || (id >= list->size()))
-        return;
-  
-    Ref<Timer> timer = Timer::getInstance();
-    Ref<AutoscanDirectory> dir = list->get(id);
-    timer->addTimerSubscriber(obj, dir->getInterval(), dir->getScanID(), once);
-}
-*/
-
-/*
-void AutoscanList::dump()
-{
-    log_debug("Dumping autoscan list: %d elements\n", list->size());
-    for (int i = 0; i < list->size();i++)
-    {
-        Ref<AutoscanDirectory> dir = list->get(i);
-        log_debug("Position: %d", i);
-        if (dir == nullptr)
-            printf("[nullptr]\n");
-        else
-            printf("[scanid=%d objectid=%d location=%s]\n",
-                    dir->getScanID(), dir->getObjectID(),
-                    dir->getLocation().c_str());
-    }
-}
-*/
 
 void AutoscanDirectory::setLocation(String location)
 {
@@ -437,38 +389,7 @@ void AutoscanDirectory::copyTo(Ref<AutoscanDirectory> copy)
     copy->timer_parameter = timer_parameter;
 }
 
-/*
-void AutoscanDirectory::setTimerParamter(Ref<Object> parameter)
-{
-    timer_parameter = parameter;
-}
-*/
-
 Ref<Object> AutoscanDirectory::getTimerParameter()
 {
     return timer_parameter; 
 }
-
-
-/*
-bool AutoscanDirectory::equals(Ref<AutoscanDirectory> dir)
-{
-    if ((dir->location == location) &&
-         (dir->mode == mode) &&
-         (dir->level == level) &&
-         (dir->recursive == recursive) &&
-         (dir->hidden == hidden) &&
-         (dir->persistent_flag == persistent_flag) &&
-         (dir->interval == interval) &&
-         (dir->taskCount == taskCount) &&
-         (dir->scanID == scanID) &&
-         (dir->objectID == objectID) &&
-         (dir->storageID == storageID) &&
-         (dir->last_mod_previous_scan == last_mod_previous_scan) &&
-         (dir->last_mod_current_scan == last_mod_current_scan))
-        return true;
-    else
-        return false;
-
-}
-*/
