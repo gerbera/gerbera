@@ -2685,117 +2685,116 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
 Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::Element> element, scan_mode_t scanmode)
 {
     Ref<AutoscanList> list(new AutoscanList());
-    String location;
-    String temp;
-    scan_level_t level;
-    scan_mode_t mode;
-    bool recursive;
-    bool hidden;
-    unsigned int interval;
 
     if (element == nullptr)
         return list;
 
     for (int i = 0; i < element->elementChildCount(); i++) {
-        hidden = false;
-        recursive = false;
 
         Ref<Element> child = element->getElementChild(i);
-        if (child->getName() == "directory") {
-            location = child->getAttribute(_("location"));
-            if (!string_ok(location)) {
-                throw _Exception(_("autoscan directory with invalid location!\n"));
-            }
 
-            try {
-                location = normalizePath(location);
-            } catch (const Exception& e) {
-                throw _Exception(_("autoscan directory \"") + location + "\": " + e.getMessage());
-            }
+        // We only want directories
+        if (child->getName() != "directory")
+            continue;
 
-            if (check_path(location, false)) {
-                throw _Exception(_("autoscan ") + location + " - not a directory!");
-            }
+        String location = child->getAttribute(_("location"));
+        if (!string_ok(location)) {
+            throw _Exception(_("autoscan directory with invalid location!\n"));
+        }
 
-            temp = child->getAttribute(_("mode"));
-            if (!string_ok(temp) || ((temp != "timed") && (temp != "inotify"))) {
-                throw _Exception(_("autoscan directory ") + location + ": mode attribute is missing or invalid");
-            } else if (temp == "timed") {
-                mode = TimedScanMode;
-            } else
-                mode = InotifyScanMode;
+        try {
+            location = normalizePath(location);
+        } catch (const Exception& e) {
+            throw _Exception(_("autoscan directory \"") + location + "\": " + e.getMessage());
+        }
 
-            if (mode != scanmode)
-                continue; // skip scan modes that we are not interested in (content manager needs one mode type per array)
+        if (check_path(location, false)) {
+            throw _Exception(_("autoscan ") + location + " - not a directory!");
+        }
 
-            interval = 0;
-            if (mode == TimedScanMode) {
-                temp = child->getAttribute(_("level"));
-                if (!string_ok(temp)) {
-                    throw _Exception(_("autoscan directory ") + location + ": level attribute is missing or invalid");
-                } else {
-                    if (temp == "basic")
-                        level = BasicScanLevel;
-                    else if (temp == "full")
-                        level = FullScanLevel;
-                    else {
-                        throw _Exception(_("autoscan directory ")
-                            + location + ": level attribute " + temp + "is invalid");
-                    }
-                }
+        scan_mode_t mode;
+        String temp = child->getAttribute(_("mode"));
+        if (!string_ok(temp) || ((temp != "timed") && (temp != "inotify"))) {
+            throw _Exception(_("autoscan directory ") + location + ": mode attribute is missing or invalid");
+        } else if (temp == "timed") {
+            mode = TimedScanMode;
+        } else {
+            mode = InotifyScanMode;
+        }
 
-                temp = child->getAttribute(_("interval"));
-                if (!string_ok(temp)) {
-                    throw _Exception(_("autoscan directory ")
-                        + location + ": interval attribute is required for timed mode");
-                }
+        if (mode != scanmode) {
+            continue; // skip scan modes that we are not interested in (content manager needs one mode type per array)
+        }
 
-                interval = temp.toUInt();
+        unsigned int interval = 0;
+        scan_level_t level;
 
-                if (interval == 0) {
-                    throw _Exception(_("autoscan directory ") + location + ": invalid interval attribute");
-                    continue;
-                }
-            } else {
-                // level is irrelevant for inotify scan, nevertheless we will set
-                // it to somthing valid
-                level = FullScanLevel;
-            }
 
-            temp = child->getAttribute(_("recursive"));
+        if (mode == TimedScanMode) {
+            temp = child->getAttribute(_("level"));
             if (!string_ok(temp)) {
-                throw _Exception(_("autoscan directory ") + location + ": recursive attribute is missing or invalid");
+                throw _Exception(_("autoscan directory ") + location + ": level attribute is missing or invalid");
             } else {
-                if (temp == "yes")
-                    recursive = true;
-                else if (temp == "no")
-                    recursive = false;
+                if (temp == "basic")
+                    level = BasicScanLevel;
+                else if (temp == "full")
+                    level = FullScanLevel;
                 else {
-                    throw _Exception(_("autoscan directory ") + location
-                        + ": recusrive attribute " + temp + " is invalid");
+                    throw _Exception(_("autoscan directory ")
+                        + location + ": level attribute " + temp + "is invalid");
                 }
             }
 
-            temp = child->getAttribute(_("hidden-files"));
+            temp = child->getAttribute(_("interval"));
             if (!string_ok(temp)) {
-                temp = getOption(_("/import/attribute::hidden-files"));
+                throw _Exception(_("autoscan directory ")
+                    + location + ": interval attribute is required for timed mode");
             }
 
-            if (temp == "yes")
-                hidden = true;
-            else if (temp == "no")
-                hidden = false;
-            else {
-                throw _Exception(_("autoscan directory ") + location + ": hidden attribute " + temp + " is invalid");
-            }
+            interval = temp.toUInt();
 
-            Ref<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, true, -1, interval, hidden));
-            try {
-                list->add(dir);
-            } catch (const Exception& e) {
-                throw _Exception(_("Could not add ") + location + ": "
-                    + e.getMessage());
+            if (interval == 0) {
+                throw _Exception(_("autoscan directory ") + location + ": invalid interval attribute");
+                continue;
             }
+        } else {
+            // level is irrelevant for inotify scan, nevertheless we will set
+            // it to something valid
+            level = FullScanLevel;
+        }
+
+        temp = child->getAttribute(_("recursive"));
+        if (!string_ok(temp))
+            throw _Exception(_("autoscan directory ") + location + ": recursive attribute is missing or invalid");
+
+        bool recursive;
+        if (temp == "yes")
+            recursive = true;
+        else if (temp == "no")
+            recursive = false;
+        else {
+            throw _Exception(_("autoscan directory ") + location
+                + ": recusrive attribute " + temp + " is invalid");
+        }
+
+        bool hidden;
+        temp = child->getAttribute(_("hidden-files"));
+        if (!string_ok(temp))
+            temp = getOption(_("/import/attribute::hidden-files"));
+
+        if (temp == "yes")
+            hidden = true;
+        else if (temp == "no")
+            hidden = false;
+        else
+            throw _Exception(_("autoscan directory ") + location + ": hidden attribute " + temp + " is invalid");
+
+        Ref<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, true, -1, interval, hidden));
+        try {
+            list->add(dir);
+        } catch (const Exception& e) {
+            throw _Exception(_("Could not add ") + location + ": "
+                + e.getMessage());
         }
     }
 
