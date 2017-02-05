@@ -29,37 +29,36 @@
 
 /// \file config_manager.cc
 
-#include <cstdio>
-#include "uuid/uuid.h"
-#include "common.h"
 #include "config_manager.h"
-#include "storage.h"
-#include <sys/types.h>
-#include <sys/stat.h>
-#include "tools.h"
-#include "string_converter.h"
+#include "common.h"
 #include "metadata_handler.h"
+#include "storage.h"
+#include "string_converter.h"
+#include "tools.h"
+#include "uuid/uuid.h"
+#include <cstdio>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #ifdef HAVE_INOTIFY
-    #include "mt_inotify.h"
+#include "mt_inotify.h"
 #endif
 
 #ifdef YOUTUBE
-    #include "youtube_service.h"
+#include "youtube_service.h"
 #endif
 
 #if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
-    #include <langinfo.h>
-    #include <clocale>
+#include <clocale>
+#include <langinfo.h>
 #endif
 
 #ifdef HAVE_CURL
-    #include <curl/curl.h>
+#include <curl/curl.h>
 #endif
 
 using namespace zmm;
 using namespace mxml;
-
 
 String ConfigManager::filename = nullptr;
 String ConfigManager::userhome = nullptr;
@@ -82,10 +81,10 @@ ConfigManager::~ConfigManager()
     interface = nullptr;
 }
 
-void ConfigManager::setStaticArgs(String _filename, String _userhome, 
-                                  String _config_dir, String _prefix_dir,
-                                  String _magic, bool _debug_logging,
-                                  String _ip, String _interface, int _port)
+void ConfigManager::setStaticArgs(String _filename, String _userhome,
+    String _config_dir, String _prefix_dir,
+    String _magic, bool _debug_logging,
+    String _ip, String _interface, int _port)
 {
     filename = _filename;
     userhome = _userhome;
@@ -98,44 +97,35 @@ void ConfigManager::setStaticArgs(String _filename, String _userhome,
     port = _port;
 }
 
-ConfigManager::ConfigManager() : Singleton<ConfigManager, std::mutex>()
+ConfigManager::ConfigManager()
+    : Singleton<ConfigManager, std::mutex>()
 {
-    options = Ref<Array<ConfigOption> > (new Array<ConfigOption>(CFG_MAX));
+    options = Ref<Array<ConfigOption> >(new Array<ConfigOption>(CFG_MAX));
 
     String home = userhome + DIR_SEPARATOR + config_dir;
     bool home_ok = true;
-    
-    if (filename == nullptr)
-    {
+
+    if (filename == nullptr) {
         // we are looking for ~/.mediatomb
-        if (home_ok && (!check_path(userhome + DIR_SEPARATOR + config_dir + DIR_SEPARATOR + DEFAULT_CONFIG_NAME)))
-        {
+        if (home_ok && (!check_path(userhome + DIR_SEPARATOR + config_dir + DIR_SEPARATOR + DEFAULT_CONFIG_NAME))) {
             home_ok = false;
-        }
-        else
-        {
+        } else {
             filename = home + DIR_SEPARATOR + DEFAULT_CONFIG_NAME;
         }
-        
-        if ((!home_ok) && (string_ok(userhome)))
-        {
+
+        if ((!home_ok) && (string_ok(userhome))) {
             userhome = normalizePath(userhome);
             filename = createDefaultConfig(userhome);
         }
-        
     }
-    
-    if (filename == nullptr)
-    {       
-        throw _Exception(_("\nThe server configuration file could not be found in ~/.mediatomb\n") +
-                "MediaTomb could not determine your home directory - automatic setup failed.\n" + 
-                "Try specifying an alternative configuration file on the command line.\n" + 
-                "For a list of options run: mediatomb -h\n");
+
+    if (filename == nullptr) {
+        throw _Exception(_("\nThe server configuration file could not be found in ~/.mediatomb\n") + "MediaTomb could not determine your home directory - automatic setup failed.\n" + "Try specifying an alternative configuration file on the command line.\n" + "For a list of options run: mediatomb -h\n");
     }
-    
+
     log_info("Loading configuration from: %s\n", filename.c_str());
     load(filename);
-    
+
     prepare_udn();
     validate(home);
 #ifdef TOMBDEBUG
@@ -155,10 +145,10 @@ String ConfigManager::construct_path(String path)
 
     if ((path.length() > 1) && (path.charAt(1) == ':'))
         return path;
-#endif  
+#endif
     if (home == "." && path.charAt(0) == '.')
         return path;
-    
+
     if (home == "")
         return _(".") + DIR_SEPARATOR + path;
     else
@@ -186,7 +176,7 @@ Ref<Element> ConfigManager::renderTranscodingSection()
 {
     Ref<Element> transcoding(new Element(_("transcoding")));
     transcoding->setAttribute(_("enabled"), _(DEFAULT_TRANSCODING_ENABLED));
-    
+
     Ref<Element> mt_prof_map(new Element(_("mimetype-profile-mappings")));
 
     Ref<Element> prof_flv(new Element(_("transcode")));
@@ -230,12 +220,12 @@ Ref<Element> ConfigManager::renderTranscodingSection()
     oggflac->appendElementChild(oggflac_agent);
 
     Ref<Element> oggflac_buffer(new Element(_("buffer")));
-    oggflac_buffer->setAttribute(_("size"), 
-            String::from(DEFAULT_AUDIO_BUFFER_SIZE));
-    oggflac_buffer->setAttribute(_("chunk-size"), 
-            String::from(DEFAULT_AUDIO_CHUNK_SIZE));
-    oggflac_buffer->setAttribute(_("fill-size"), 
-            String::from(DEFAULT_AUDIO_FILL_SIZE));
+    oggflac_buffer->setAttribute(_("size"),
+        String::from(DEFAULT_AUDIO_BUFFER_SIZE));
+    oggflac_buffer->setAttribute(_("chunk-size"),
+        String::from(DEFAULT_AUDIO_CHUNK_SIZE));
+    oggflac_buffer->setAttribute(_("fill-size"),
+        String::from(DEFAULT_AUDIO_FILL_SIZE));
     oggflac->appendElementChild(oggflac_buffer);
 
     profiles->appendElementChild(oggflac);
@@ -256,12 +246,12 @@ Ref<Element> ConfigManager::renderTranscodingSection()
     vlcmpeg->appendElementChild(vlcmpeg_agent);
 
     Ref<Element> vlcmpeg_buffer(new Element(_("buffer")));
-    vlcmpeg_buffer->setAttribute(_("size"), 
-            String::from(DEFAULT_VIDEO_BUFFER_SIZE));
-    vlcmpeg_buffer->setAttribute(_("chunk-size"), 
-            String::from(DEFAULT_VIDEO_CHUNK_SIZE));
+    vlcmpeg_buffer->setAttribute(_("size"),
+        String::from(DEFAULT_VIDEO_BUFFER_SIZE));
+    vlcmpeg_buffer->setAttribute(_("chunk-size"),
+        String::from(DEFAULT_VIDEO_CHUNK_SIZE));
     vlcmpeg_buffer->setAttribute(_("fill-size"),
-            String::from(DEFAULT_VIDEO_FILL_SIZE));
+        String::from(DEFAULT_VIDEO_FILL_SIZE));
     vlcmpeg->appendElementChild(vlcmpeg_buffer);
 
     profiles->appendElementChild(vlcmpeg);
@@ -278,28 +268,28 @@ Ref<Element> ConfigManager::renderExtendedRuntimeSection()
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
     Ref<Element> ffth(new Element(_("ffmpegthumbnailer")));
     ffth->setAttribute(_("enabled"), _(DEFAULT_FFMPEGTHUMBNAILER_ENABLED));
-    
-    ffth->appendTextChild(_("thumbnail-size"), 
-                          String::from(DEFAULT_FFMPEGTHUMBNAILER_THUMBSIZE));
+
+    ffth->appendTextChild(_("thumbnail-size"),
+        String::from(DEFAULT_FFMPEGTHUMBNAILER_THUMBSIZE));
     ffth->appendTextChild(_("seek-percentage"),
-                       String::from(DEFAULT_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE));
+        String::from(DEFAULT_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE));
     ffth->appendTextChild(_("filmstrip-overlay"),
-                          _(DEFAULT_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY));
+        _(DEFAULT_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY));
     ffth->appendTextChild(_("workaround-bugs"),
-                          _(DEFAULT_FFMPEGTHUMBNAILER_WORKAROUND_BUGS));
+        _(DEFAULT_FFMPEGTHUMBNAILER_WORKAROUND_BUGS));
     ffth->appendTextChild(_("image-quality"),
-                         String::from(DEFAULT_FFMPEGTHUMBNAILER_IMAGE_QUALITY));
+        String::from(DEFAULT_FFMPEGTHUMBNAILER_IMAGE_QUALITY));
 
     extended->appendElementChild(ffth);
 #endif
 
     Ref<Element> mark(new Element(_("mark-played-items")));
     mark->setAttribute(_("enabled"), _(DEFAULT_MARK_PLAYED_ITEMS_ENABLED));
-    mark->setAttribute(_("suppress-cds-updates"), 
-                        _(DEFAULT_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES));
+    mark->setAttribute(_("suppress-cds-updates"),
+        _(DEFAULT_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES));
     Ref<Element> mark_string(new Element(_("string")));
-    mark_string->setAttribute(_("mode"), 
-                              _(DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE));
+    mark_string->setAttribute(_("mode"),
+        _(DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE));
     mark_string->setText(_(DEFAULT_MARK_PLAYED_ITEMS_STRING));
     mark->appendElementChild(mark_string);
 
@@ -326,25 +316,25 @@ Ref<Element> ConfigManager::renderOnlineSection()
 {
     Ref<Element> onlinecontent(new Element(_("online-content")));
 #ifdef YOUTUBE
-//    Ref<Comment> ytinfo(new Comment(_(" Make sure to setup a transcoding profile for flv "), true));
-//    onlinecontent->appendChild(RefCast(ytinfo, Node));
+    //    Ref<Comment> ytinfo(new Comment(_(" Make sure to setup a transcoding profile for flv "), true));
+    //    onlinecontent->appendChild(RefCast(ytinfo, Node));
 
     Ref<Element> yt(new Element(_("YouTube")));
     yt->setAttribute(_("enabled"), _(DEFAULT_YOUTUBE_ENABLED));
     // 8 hours refresh cycle
-    yt->setAttribute(_("refresh"), String::from(DEFAULT_YOUTUBE_REFRESH)); 
+    yt->setAttribute(_("refresh"), String::from(DEFAULT_YOUTUBE_REFRESH));
     yt->setAttribute(_("update-at-start"), _(DEFAULT_YOUTUBE_UPDATE_AT_START));
     // items that were not updated for 4 days will be purged
-    yt->setAttribute(_("purge-after"), 
-            String::from(DEFAULT_YOUTUBE_PURGE_AFTER));
+    yt->setAttribute(_("purge-after"),
+        String::from(DEFAULT_YOUTUBE_PURGE_AFTER));
     yt->setAttribute(_("racy-content"), _(DEFAULT_YOUTUBE_RACY_CONTENT));
     yt->setAttribute(_("format"), _(DEFAULT_YOUTUBE_FORMAT));
     yt->setAttribute(_("hd"), _(DEFAULT_YOUTUBE_HD));
-   
+
     Ref<Element> favs(new Element(_("favorites")));
     favs->setAttribute(_("user"), _("mediatomb"));
     yt->appendElementChild(favs);
-    
+
     Ref<Element> most_viewed(new Element(_("standardfeed")));
     most_viewed->setAttribute(_("feed"), _("most_viewed"));
     most_viewed->setAttribute(_("time-range"), _("today"));
@@ -385,12 +375,9 @@ String ConfigManager::createDefaultConfig(String userhome)
 
     String homepath = userhome + DIR_SEPARATOR + config_dir;
 
-    if (!check_path(homepath, true))
-    {
-        if (mkdir(homepath.c_str(), 0777) < 0)
-        {
-            throw _Exception(_("Could not create directory ") + homepath + 
-                    " : " + strerror(errno));
+    if (!check_path(homepath, true)) {
+        if (mkdir(homepath.c_str(), 0777) < 0) {
+            throw _Exception(_("Could not create directory ") + homepath + " : " + strerror(errno));
         }
     }
 
@@ -405,16 +392,17 @@ String ConfigManager::createDefaultConfig(String userhome)
     Ref<Comment> docinfo(new Comment(_("\n\
      Read /usr/share/doc/mediatomb-common/README.gz section 6 for more\n\
      information on creating and using config.xml configration files.\n\
-    "), true));
+    "),
+        true));
     config->appendChild(RefCast(docinfo, Node));
 
     Ref<Element> server(new Element(_("server")));
-   
+
     Ref<Element> ui(new Element(_("ui")));
     ui->setAttribute(_("enabled"), _(DEFAULT_UI_EN_VALUE));
     ui->setAttribute(_("show-tooltips"), _(DEFAULT_UI_SHOW_TOOLTIPS_VALUE));
 
-    Ref<Element>accounts(new Element(_("accounts")));
+    Ref<Element> accounts(new Element(_("accounts")));
     accounts->setAttribute(_("enabled"), _(DEFAULT_ACCOUNTS_EN_VALUE));
     accounts->setAttribute(_("session-timeout"), String::from(DEFAULT_SESSION_TIMEOUT));
 
@@ -424,38 +412,36 @@ String ConfigManager::createDefaultConfig(String userhome)
     accounts->appendElementChild(account);
 
     ui->appendElementChild(accounts);
-    
+
     server->appendElementChild(ui);
     server->appendTextChild(_("name"), _(PACKAGE_NAME));
-    
+
     Ref<Element> udn(new Element(_("udn")));
     server->appendElementChild(udn);
 
     server->appendTextChild(_("home"), homepath);
-    server->appendTextChild(_("webroot"), prefix_dir + 
-                                                 DIR_SEPARATOR +  
-                                                 _(DEFAULT_WEB_DIR));
+    server->appendTextChild(_("webroot"), prefix_dir + DIR_SEPARATOR + _(DEFAULT_WEB_DIR));
     Ref<Comment> aliveinfo(new Comment(
         _("\n\
         How frequently (in seconds) to send ssdp:alive advertisements.\n\
         Minimum alive value accepted is: ")
-                + String::from(ALIVE_INTERVAL_MIN) +
-        _("\n\n\
+            + String::from(ALIVE_INTERVAL_MIN) + _("\n\n\
         The advertisement will be sent every (A/2)-30 seconds,\n\
         and will have a cache-control max-age of A where A is\n\
         the value configured here. Ex: A value of 62 will result\n\
         in an SSDP advertisement being sent every second.\n\
-    "), true));
+    "),
+        true));
     server->appendChild(RefCast(aliveinfo, Node));
     server->appendTextChild(_("alive"), String::from(DEFAULT_ALIVE_INTERVAL));
-    
+
     Ref<Element> storage(new Element(_("storage")));
 #ifdef HAVE_SQLITE3
     Ref<Element> sqlite3(new Element(_("sqlite3")));
     sqlite3->setAttribute(_("enabled"), _(DEFAULT_SQLITE_ENABLED));
     sqlite3->appendTextChild(_("database-file"), _(DEFAULT_SQLITE3_DB_FILENAME));
 #ifdef SQLITE_BACKUP_ENABLED
-//    <backup enabled="no" interval="6000"/>
+    //    <backup enabled="no" interval="6000"/>
     Ref<Element> backup(new Element(_("backup")));
     backup->setAttribute(_("enabled"), _(YES));
     backup->setAttribute(_("interval"), String::from(DEFAULT_SQLITE_BACKUP_INTERVAL));
@@ -464,7 +450,7 @@ String ConfigManager::createDefaultConfig(String userhome)
     storage->appendElementChild(sqlite3);
 #endif
 #ifdef HAVE_MYSQL
-    Ref<Element>mysql(new Element(_("mysql")));
+    Ref<Element> mysql(new Element(_("mysql")));
 #ifndef HAVE_SQLITE3
     mysql->setAttribute(_("enabled"), _(DEFAULT_MYSQL_ENABLED));
     mysql_flag = true;
@@ -473,7 +459,7 @@ String ConfigManager::createDefaultConfig(String userhome)
 #endif
     mysql->appendTextChild(_("host"), _(DEFAULT_MYSQL_HOST));
     mysql->appendTextChild(_("username"), _(DEFAULT_MYSQL_USER));
-//    storage->appendTextChild(_("password"), _(DEFAULT_MYSQL_PASSWORD));
+    //    storage->appendTextChild(_("password"), _(DEFAULT_MYSQL_PASSWORD));
     mysql->appendTextChild(_("database"), _(DEFAULT_MYSQL_DB));
 
     storage->appendElementChild(mysql);
@@ -484,14 +470,15 @@ String ConfigManager::createDefaultConfig(String userhome)
     protocolinfo->setAttribute(_("extend"), _(DEFAULT_EXTEND_PROTOCOLINFO));
 
     server->appendElementChild(protocolinfo);
-   
+
     Ref<Comment> ps3protinfo(new Comment(_(" For PS3 support change to \"yes\" ")));
     server->appendChild(RefCast(ps3protinfo, Node));
-    
+
     Ref<Comment> redinfo(new Comment(_("\n\
        Uncomment the lines below to get rid of jerky avi playback on the\n\
        DSM320 or to enable subtitles support on the DSM units\n\
-    "), true));
+    "),
+        true));
 
     Ref<Comment> redsonic(new Comment(_("\n\
     <custom-http-headers>\n\
@@ -500,18 +487,19 @@ String ConfigManager::createDefaultConfig(String userhome)
 \n\
     <manufacturerURL>redsonic.com</manufacturerURL>\n\
     <modelNumber>105</modelNumber>\n\
-    "), true));
+    "),
+        true));
 
     Ref<Comment> tg100info(new Comment(_(" Uncomment the line below if you have a Telegent TG100 "), true));
     Ref<Comment> tg100(new Comment(_("\n\
        <upnp-string-limit>101</upnp-string-limit>\n\
-    "), true));
+    "),
+        true));
 
     server->appendChild(RefCast(redinfo, Node));
     server->appendChild(RefCast(redsonic, Node));
     server->appendChild(RefCast(tg100info, Node));
     server->appendChild(RefCast(tg100, Node));
-
 
     server->appendElementChild(renderExtendedRuntimeSection());
 
@@ -521,8 +509,7 @@ String ConfigManager::createDefaultConfig(String userhome)
     import->setAttribute(_("hidden-files"), _(DEFAULT_HIDDEN_FILES_VALUE));
 
 #ifdef HAVE_MAGIC
-    if (string_ok(magic))
-    {
+    if (string_ok(magic)) {
         Ref<Element> magicfile(new Element(_("magic-file")));
         magicfile->setText(magic);
         import->appendElementChild(magicfile);
@@ -536,31 +523,15 @@ String ConfigManager::createDefaultConfig(String userhome)
     Ref<Element> layout(new Element(_("virtual-layout")));
     layout->setAttribute(_("type"), _(DEFAULT_LAYOUT_TYPE));
 #ifdef HAVE_JS
-    layout->appendTextChild(_("import-script"), prefix_dir +
-                                                DIR_SEPARATOR + 
-                                                _(DEFAULT_JS_DIR) +
-                                                DIR_SEPARATOR +
-                                                _(DEFAULT_IMPORT_SCRIPT));
+    layout->appendTextChild(_("import-script"), prefix_dir + DIR_SEPARATOR + _(DEFAULT_JS_DIR) + DIR_SEPARATOR + _(DEFAULT_IMPORT_SCRIPT));
 #ifdef HAVE_LIBDVDNAV
-    layout->appendTextChild(_("dvd-script"), prefix_dir +
-                                                DIR_SEPARATOR + 
-                                                _(DEFAULT_JS_DIR) +
-                                                DIR_SEPARATOR +
-                                                _(DEFAULT_DVD_SCRIPT));
+    layout->appendTextChild(_("dvd-script"), prefix_dir + DIR_SEPARATOR + _(DEFAULT_JS_DIR) + DIR_SEPARATOR + _(DEFAULT_DVD_SCRIPT));
 #endif
-    scripting->appendTextChild(_("common-script"), 
-                prefix_dir + 
-                DIR_SEPARATOR + 
-                _(DEFAULT_JS_DIR) + 
-                DIR_SEPARATOR +
-                _(DEFAULT_COMMON_SCRIPT));
+    scripting->appendTextChild(_("common-script"),
+        prefix_dir + DIR_SEPARATOR + _(DEFAULT_JS_DIR) + DIR_SEPARATOR + _(DEFAULT_COMMON_SCRIPT));
 
     scripting->appendTextChild(_("playlist-script"),
-                prefix_dir +
-                DIR_SEPARATOR +
-                _(DEFAULT_JS_DIR) +
-                DIR_SEPARATOR +
-                _(DEFAULT_PLAYLISTS_SCRIPT));
+        prefix_dir + DIR_SEPARATOR + _(DEFAULT_JS_DIR) + DIR_SEPARATOR + _(DEFAULT_PLAYLISTS_SCRIPT));
 
 #endif
     scripting->appendElementChild(layout);
@@ -582,14 +553,14 @@ String ConfigManager::createDefaultConfig(String userhome)
     ext2mt->appendElementChild(map_from_to(_("wax"), _("audio/x-ms-wax")));
     ext2mt->appendElementChild(map_from_to(_("wmv"), _("video/x-ms-wmv")));
     ext2mt->appendElementChild(map_from_to(_("wvx"), _("video/x-ms-wvx")));
-    ext2mt->appendElementChild(map_from_to(_("wm"),  _("video/x-ms-wm")));
+    ext2mt->appendElementChild(map_from_to(_("wm"), _("video/x-ms-wm")));
     ext2mt->appendElementChild(map_from_to(_("wmx"), _("video/x-ms-wmx")));
     ext2mt->appendElementChild(map_from_to(_("m3u"), _("audio/x-mpegurl")));
     ext2mt->appendElementChild(map_from_to(_("pls"), _("audio/x-scpls")));
     ext2mt->appendElementChild(map_from_to(_("flv"), _("video/x-flv")));
     ext2mt->appendElementChild(map_from_to(_("mkv"), _("video/x-matroska")));
     ext2mt->appendElementChild(map_from_to(_("mka"), _("audio/x-matroska")));
-    
+
     Ref<Comment> ps3info(new Comment(_(" Uncomment the line below for PS3 divx support "), true));
     Ref<Comment> ps3avi(new Comment(_(" <map from=\"avi\" to=\"video/divx\"/> "), true));
     ext2mt->appendChild(RefCast(ps3info, Node));
@@ -599,58 +570,58 @@ String ConfigManager::createDefaultConfig(String userhome)
     Ref<Comment> dsmzavi(new Comment(_(" <map from=\"avi\" to=\"video/avi\"/> "), true));
     ext2mt->appendChild(RefCast(dsmzinfo, Node));
     ext2mt->appendChild(RefCast(dsmzavi, Node));
-        
+
     mappings->appendElementChild(ext2mt);
 
     Ref<Element> mtupnp(new Element(_("mimetype-upnpclass")));
-    mtupnp->appendElementChild(map_from_to(_("audio/*"), 
-                               _(UPNP_DEFAULT_CLASS_MUSIC_TRACK)));
-    mtupnp->appendElementChild(map_from_to(_("video/*"), 
-                               _(UPNP_DEFAULT_CLASS_VIDEO_ITEM)));
-    mtupnp->appendElementChild(map_from_to(_("image/*"), 
-                               _("object.item.imageItem")));
+    mtupnp->appendElementChild(map_from_to(_("audio/*"),
+        _(UPNP_DEFAULT_CLASS_MUSIC_TRACK)));
+    mtupnp->appendElementChild(map_from_to(_("video/*"),
+        _(UPNP_DEFAULT_CLASS_VIDEO_ITEM)));
+    mtupnp->appendElementChild(map_from_to(_("image/*"),
+        _("object.item.imageItem")));
     mtupnp->appendElementChild(map_from_to(_("application/ogg"),
-                               _(UPNP_DEFAULT_CLASS_MUSIC_TRACK)));
+        _(UPNP_DEFAULT_CLASS_MUSIC_TRACK)));
 
     mappings->appendElementChild(mtupnp);
 
     Ref<Element> mtcontent(new Element(_("mimetype-contenttype")));
     mtcontent->appendElementChild(treat_as(_("audio/mpeg"),
-                                           _(CONTENT_TYPE_MP3)));
+        _(CONTENT_TYPE_MP3)));
     mtcontent->appendElementChild(treat_as(_("application/ogg"),
-                                           _(CONTENT_TYPE_OGG)));
+        _(CONTENT_TYPE_OGG)));
     mtcontent->appendElementChild(treat_as(_("audio/ogg"),
-                                           _(CONTENT_TYPE_OGG)));
+        _(CONTENT_TYPE_OGG)));
     mtcontent->appendElementChild(treat_as(_("audio/x-flac"),
-                                           _(CONTENT_TYPE_FLAC)));
+        _(CONTENT_TYPE_FLAC)));
     mtcontent->appendElementChild(treat_as(_("audio/x-ms-wma"),
-                                           _(CONTENT_TYPE_WMA)));
+        _(CONTENT_TYPE_WMA)));
     mtcontent->appendElementChild(treat_as(_("audio/x-wavpack"),
-                                           _(CONTENT_TYPE_WAVPACK)));
+        _(CONTENT_TYPE_WAVPACK)));
     mtcontent->appendElementChild(treat_as(_("image/jpeg"),
-                                           _(CONTENT_TYPE_JPG)));
+        _(CONTENT_TYPE_JPG)));
     mtcontent->appendElementChild(treat_as(_("audio/x-mpegurl"),
-                                           _(CONTENT_TYPE_PLAYLIST)));
+        _(CONTENT_TYPE_PLAYLIST)));
     mtcontent->appendElementChild(treat_as(_("audio/x-scpls"),
-                                           _(CONTENT_TYPE_PLAYLIST)));
+        _(CONTENT_TYPE_PLAYLIST)));
     mtcontent->appendElementChild(treat_as(_("audio/x-wav"),
-                                           _(CONTENT_TYPE_PCM)));
+        _(CONTENT_TYPE_PCM)));
     mtcontent->appendElementChild(treat_as(_("audio/L16"),
-                                           _(CONTENT_TYPE_PCM)));
+        _(CONTENT_TYPE_PCM)));
     mtcontent->appendElementChild(treat_as(_("video/x-msvideo"),
-                                           _(CONTENT_TYPE_AVI)));
+        _(CONTENT_TYPE_AVI)));
     mtcontent->appendElementChild(treat_as(_("video/mp4"),
-                                           _(CONTENT_TYPE_MP4)));
+        _(CONTENT_TYPE_MP4)));
     mtcontent->appendElementChild(treat_as(_("audio/mp4"),
-                                           _(CONTENT_TYPE_MP4)));
+        _(CONTENT_TYPE_MP4)));
     mtcontent->appendElementChild(treat_as(_("application/x-iso9660"),
-                                           _(CONTENT_TYPE_DVD)));
+        _(CONTENT_TYPE_DVD)));
     mtcontent->appendElementChild(treat_as(_("application/x-iso9660-image"),
-                                           _(CONTENT_TYPE_DVD)));
+        _(CONTENT_TYPE_DVD)));
     mtcontent->appendElementChild(treat_as(_("video/x-matroska"),
-                                           _(CONTENT_TYPE_MKV)));
+        _(CONTENT_TYPE_MKV)));
     mtcontent->appendElementChild(treat_as(_("audio/x-matroska"),
-                                           _(CONTENT_TYPE_MKA)));
+        _(CONTENT_TYPE_MKA)));
 
     mappings->appendElementChild(mtcontent);
     import->appendElementChild(mappings);
@@ -664,16 +635,14 @@ String ConfigManager::createDefaultConfig(String userhome)
 #ifdef EXTERNAL_TRANSCODING
     config->appendElementChild(renderTranscodingSection());
 #endif
-   
+
     config->indent();
     save_text(config_filename, config->print());
-    log_info("MediaTomb configuration was created in: %s\n", 
-            config_filename.c_str());
+    log_info("MediaTomb configuration was created in: %s\n",
+        config_filename.c_str());
 
-    if (mysql_flag)
-    {
-        throw _Exception(_("You are using MySQL! Please edit ") + config_filename +
-                " and enter your MySQL host/username/password!");
+    if (mysql_flag) {
+        throw _Exception(_("You are using MySQL! Please edit ") + config_filename + " and enter your MySQL host/username/password!");
     }
 
     return config_filename;
@@ -685,18 +654,16 @@ void ConfigManager::migrate()
     String version = root->getAttribute(_("version"));
 
     // pre 0.10.* to 0.11.0 -> storage layout has changed
-    if (!string_ok(version))
-    {
+    if (!string_ok(version)) {
         log_info("Migrating server configuration to config version 1\n");
-        root->setAttribute(_("version"), 
-                String::from(CONFIG_XML_VERSION_0_11_0));
-        root->setAttribute(_("xmlns"), 
-                _(XML_XMLNS) + CONFIG_XML_VERSION_0_11_0);
+        root->setAttribute(_("version"),
+            String::from(CONFIG_XML_VERSION_0_11_0));
+        root->setAttribute(_("xmlns"),
+            _(XML_XMLNS) + CONFIG_XML_VERSION_0_11_0);
         root->setAttribute(_("xmlns:xsi"), _(XML_XMLNS_XSI));
-        root->setAttribute(_("xsi:schemaLocation"), 
-                _(XML_XMLNS) + CONFIG_XML_VERSION_0_11_0 + " " + XML_XMLNS + 
-                CONFIG_XML_VERSION + ".xsd");
-        
+        root->setAttribute(_("xsi:schemaLocation"),
+            _(XML_XMLNS) + CONFIG_XML_VERSION_0_11_0 + " " + XML_XMLNS + CONFIG_XML_VERSION + ".xsd");
+
         Ref<Element> server = root->getChildByName(_("server"));
         if (server == nullptr)
             throw _Exception(_("Migration failed! Could not find <server> tag!"));
@@ -705,8 +672,7 @@ void ConfigManager::migrate()
         String dbDriver = getOption(_("/server/storage/attribute::driver"));
         Ref<Element> storage(new Element(_("storage")));
 #ifdef HAVE_SQLITE3
-        if (dbDriver == "sqlite3")
-        {
+        if (dbDriver == "sqlite3") {
             String dbFile = getOption(_("/server/storage/database-file"));
 
             Ref<Element> sqlite3(new Element(_("sqlite3")));
@@ -717,8 +683,7 @@ void ConfigManager::migrate()
 #endif // HAVE_SQLITE3
 
 #ifdef HAVE_MYSQL
-        if (dbDriver == "mysql")
-        {
+        if (dbDriver == "mysql") {
             String host = getOption(_("/server/storage/host"));
             String db = getOption(_("/server/storage/database"));
             String username = getOption(_("/server/storage/username"));
@@ -727,7 +692,8 @@ void ConfigManager::migrate()
             if (server->getChildByName(_("storage"))->getChildByName(_("port")) != nullptr)
                 port = getIntOption(_("/server/storage/port"));
 
-            String socket = nullptr;;
+            String socket = nullptr;
+            ;
             if (server->getChildByName(_("storage"))->getChildByName(_("socket")) != nullptr)
                 socket = getOption(_("/server/storage/socket"));
 
@@ -735,7 +701,7 @@ void ConfigManager::migrate()
             if (server->getChildByName(_("storage"))->getChildByName(_("password")) != nullptr)
                 password = getOption(_("/server/storage/password"));
 
-            Ref<Element>mysql(new Element(_("mysql")));
+            Ref<Element> mysql(new Element(_("mysql")));
             mysql->setAttribute(_("enabled"), _(YES));
 
             mysql->appendTextChild(_("host"), host);
@@ -763,28 +729,24 @@ void ConfigManager::migrate()
 #endif
 
         Ref<Element> import = root->getChildByName(_("import"));
-        if (import != nullptr)
-        {
+        if (import != nullptr) {
 #ifdef ONLINE_SERVICES
             if (import->getChildByName(_("online-content")) == nullptr)
                 import->appendElementChild(renderOnlineSection());
 #endif
             Ref<Element> map = import->getChildByName(_("mappings"));
-            if (map != nullptr)
-            {
+            if (map != nullptr) {
                 Ref<Element> mtct = map->getChildByName(_("mimetype-contenttype"));
-                if ((mtct != nullptr) && (mtct->elementChildCount() > 0))
-                {
+                if ((mtct != nullptr) && (mtct->elementChildCount() > 0)) {
                     bool add_avi = true;
-                    for (int mc = 0; mc < mtct->elementChildCount(); mc++)
-                    {
+                    for (int mc = 0; mc < mtct->elementChildCount(); mc++) {
                         Ref<Element> treat = mtct->getElementChild(mc);
                         if (treat->getAttribute(_("as")) == "avi")
                             add_avi = false;
                     }
                     if (add_avi)
                         mtct->appendElementChild(treat_as(_("video/x-msvideo"),
-                                                          _("avi")));
+                            _("avi")));
                 }
             }
         }
@@ -794,115 +756,96 @@ void ConfigManager::migrate()
     }
 
     // from 0.11 to 0.12
-    if (string_ok(version) && version.toInt() == 1)
-    {
+    if (string_ok(version) && version.toInt() == 1) {
         log_info("Migrating server configuration to config version 2\n");
         root->setAttribute(_("version"), String::from(CONFIG_XML_VERSION));
         root->setAttribute(_("xmlns"), _(XML_XMLNS) + CONFIG_XML_VERSION);
-        root->setAttribute(_("xsi:schemaLocation"), 
-                _(XML_XMLNS) + CONFIG_XML_VERSION + " " + XML_XMLNS + 
-                CONFIG_XML_VERSION + ".xsd");
+        root->setAttribute(_("xsi:schemaLocation"),
+            _(XML_XMLNS) + CONFIG_XML_VERSION + " " + XML_XMLNS + CONFIG_XML_VERSION + ".xsd");
 
         Ref<Element> server = root->getChildByName(_("server"));
         if (server == nullptr)
             throw _Exception(_("Migration failed! Could not find <server> tag!"));
 
         String temp;
-        try 
-        {
+        try {
             temp = getOption(_("/server/ui/attribute::show-tooltips"));
-        }
-        catch (const Exception & e)
-        {
+        } catch (const Exception& e) {
             Ref<Element> ui = server->getChildByName(_("ui"));
             if (ui != nullptr)
-                ui->setAttribute(_("show-tooltips"), 
-                                           _(DEFAULT_UI_SHOW_TOOLTIPS_VALUE));
+                ui->setAttribute(_("show-tooltips"),
+                    _(DEFAULT_UI_SHOW_TOOLTIPS_VALUE));
         }
-       
-        try
-        {
+
+        try {
             temp = getOption(_("/server/storage/attribute::caching"));
-        }
-        catch (const Exception & e)
-        {
+        } catch (const Exception& e) {
             Ref<Element> storage = server->getChildByName(_("storage"));
             if (storage != nullptr)
-                storage->setAttribute(_("caching"), 
-                                        _(DEFAULT_STORAGE_CACHING_ENABLED));
+                storage->setAttribute(_("caching"),
+                    _(DEFAULT_STORAGE_CACHING_ENABLED));
         }
-       
+
         if (server->getChildByName(_("extended-runtime-options")) == nullptr)
             server->appendElementChild(renderExtendedRuntimeSection());
 
         Ref<Element> import = root->getChildByName(_("import"));
-        if (import != nullptr)
-        {
+        if (import != nullptr) {
             // add ext 2 mimetype stuff
             Ref<Element> mappings = import->getChildByName(_("mappings"));
 
 #ifdef ONLINE_SERVICES
-            Ref<Element> online =  import->getChildByName(_("online-content"));
+            Ref<Element> online = import->getChildByName(_("online-content"));
             if (online == nullptr)
                 import->appendElementChild(renderOnlineSection());
 #endif
         }
-        migrated_flag = true;            
+        migrated_flag = true;
     }
 
-    if (migrated_flag)
-    {
+    if (migrated_flag) {
         root->indent();
         save();
         log_info("Migration of configuration successfull\n");
     }
 }
 
-#define NEW_OPTION(optval) opt =  Ref<Option> (new Option(optval));
+#define NEW_OPTION(optval) opt = Ref<Option>(new Option(optval));
 #define SET_OPTION(opttype) options->set(RefCast(opt, ConfigOption), opttype);
 
-#define NEW_INT_OPTION(optval) int_opt = \
-                         Ref<IntOption> (new IntOption(optval));
+#define NEW_INT_OPTION(optval) int_opt = Ref<IntOption>(new IntOption(optval));
 #define SET_INT_OPTION(opttype) \
-                       options->set(RefCast(int_opt, ConfigOption), opttype);
+    options->set(RefCast(int_opt, ConfigOption), opttype);
 
-#define NEW_BOOL_OPTION(optval) bool_opt = \
-                         Ref<BoolOption> (new BoolOption(optval));
+#define NEW_BOOL_OPTION(optval) bool_opt = Ref<BoolOption>(new BoolOption(optval));
 #define SET_BOOL_OPTION(opttype) \
-                        options->set(RefCast(bool_opt, ConfigOption), opttype);
+    options->set(RefCast(bool_opt, ConfigOption), opttype);
 
-#define NEW_DICT_OPTION(optval) dict_opt =  \
-                         Ref<DictionaryOption> (new DictionaryOption(optval));
+#define NEW_DICT_OPTION(optval) dict_opt = Ref<DictionaryOption>(new DictionaryOption(optval));
 #define SET_DICT_OPTION(opttype) \
-                        options->set(RefCast(dict_opt, ConfigOption), opttype);
+    options->set(RefCast(dict_opt, ConfigOption), opttype);
 
-#define NEW_STRARR_OPTION(optval) str_array_opt = \
-                         Ref<StringArrayOption> (new StringArrayOption(optval));
+#define NEW_STRARR_OPTION(optval) str_array_opt = Ref<StringArrayOption>(new StringArrayOption(optval));
 #define SET_STRARR_OPTION(opttype) \
-                    options->set(RefCast(str_array_opt, ConfigOption), opttype);
+    options->set(RefCast(str_array_opt, ConfigOption), opttype);
 
-#define NEW_AUTOSCANLIST_OPTION(optval) alist_opt = \
-                       Ref<AutoscanListOption> (new AutoscanListOption(optval));
+#define NEW_AUTOSCANLIST_OPTION(optval) alist_opt = Ref<AutoscanListOption>(new AutoscanListOption(optval));
 #define SET_AUTOSCANLIST_OPTION(opttype) \
-                    options->set(RefCast(alist_opt, ConfigOption), opttype);
+    options->set(RefCast(alist_opt, ConfigOption), opttype);
 #ifdef EXTERNAL_TRANSCODING
-#define NEW_TRANSCODING_PROFILELIST_OPTION(optval) trlist_opt = \
-   Ref<TranscodingProfileListOption> (new TranscodingProfileListOption(optval));
+#define NEW_TRANSCODING_PROFILELIST_OPTION(optval) trlist_opt = Ref<TranscodingProfileListOption>(new TranscodingProfileListOption(optval));
 #define SET_TRANSCODING_PROFILELIST_OPTION(opttype) \
-                    options->set(RefCast(trlist_opt, ConfigOption), opttype);
-#endif//TRANSCODING
+    options->set(RefCast(trlist_opt, ConfigOption), opttype);
+#endif //TRANSCODING
 #ifdef ONLINE_SERVICES
-#define NEW_OBJARR_OPTION(optval) obj_array_opt = \
-    Ref<ObjectArrayOption> (new ObjectArrayOption(optval));
+#define NEW_OBJARR_OPTION(optval) obj_array_opt = Ref<ObjectArrayOption>(new ObjectArrayOption(optval));
 #define SET_OBJARR_OPTION(opttype) \
-                   options->set(RefCast(obj_array_opt, ConfigOption), opttype);
-#endif//ONLINE_SERVICES
+    options->set(RefCast(obj_array_opt, ConfigOption), opttype);
+#endif //ONLINE_SERVICES
 
-#define NEW_OBJDICT_OPTION(optval) obj_dict_opt = \
-    Ref<ObjectDictionaryOption> (new ObjectDictionaryOption(optval));
+#define NEW_OBJDICT_OPTION(optval) obj_dict_opt = Ref<ObjectDictionaryOption>(new ObjectDictionaryOption(optval));
 #define SET_OBJDICT_OPTION(opttype) \
-                   options->set(RefCast(obj_dict_opt, ConfigOption), opttype);
-
+    options->set(RefCast(obj_dict_opt, ConfigOption), opttype);
 
 void ConfigManager::validate(String serverhome)
 {
@@ -924,7 +867,7 @@ void ConfigManager::validate(String serverhome)
 #endif
 
     log_info("Checking configuration...\n");
-   
+
     // first check if the config file itself looks ok, it must have a config
     // and a server tag
     if (root->getName() != "config")
@@ -958,19 +901,17 @@ void ConfigManager::validate(String serverhome)
     SET_OPTION(CFG_SERVER_WEBROOT);
 
     temp = getOption(_("/server/tmpdir"), _(DEFAULT_TMPDIR));
-    if (!check_path(temp, true))
-    {
+    if (!check_path(temp, true)) {
         throw _Exception(_("Temporary directory ") + temp + " does not exist!");
     }
     temp = temp + _("/");
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_TMPDIR);
 
-    
     if (string_ok(getOption(_("/server/servedir"), _(""))))
         prepare_path(_("/server/servedir"), true);
 
-    NEW_OPTION(getOption(_("/server/servedir"))); 
+    NEW_OPTION(getOption(_("/server/servedir")));
     SET_OPTION(CFG_SERVER_SERVEDIR);
 
     // udn should be already prepared
@@ -986,29 +927,26 @@ void ConfigManager::validate(String serverhome)
     if (tmpEl == nullptr)
         throw _Exception(_("Error in config file: <storage> tag not found"));
 
-
     temp = getOption(_("/server/storage/attribute::caching"),
-            _(DEFAULT_STORAGE_CACHING_ENABLED));
+        _(DEFAULT_STORAGE_CACHING_ENABLED));
     if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: incorrect parameter "
-                    "for <storage caching=\"\" /> attribute"));
+                           "for <storage caching=\"\" /> attribute"));
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
     SET_BOOL_OPTION(CFG_SERVER_STORAGE_CACHING_ENABLED);
 
     tmpEl = getElement(_("/server/storage/mysql"));
-    if (tmpEl != nullptr)
-    {
+    if (tmpEl != nullptr) {
         mysql_en = getOption(_("/server/storage/mysql/attribute::enabled"),
-                _(DEFAULT_MYSQL_ENABLED));
+            _(DEFAULT_MYSQL_ENABLED));
         if (!validateYesNo(mysql_en))
             throw _Exception(_("Invalid <mysql enabled=\"\"> value"));
     }
 
     tmpEl = getElement(_("/server/storage/sqlite3"));
-    if (tmpEl != nullptr)
-    {
+    if (tmpEl != nullptr) {
         sqlite3_en = getOption(_("/server/storage/sqlite3/attribute::enabled"),
-                _(DEFAULT_SQLITE_ENABLED));
+            _(DEFAULT_SQLITE_ENABLED));
         if (!validateYesNo(sqlite3_en))
             throw _Exception(_("Invalid <sqlite3 enabled=\"\"> value"));
     }
@@ -1023,47 +961,39 @@ void ConfigManager::validate(String serverhome)
                            "one database driver must be active!"));
 
 #ifdef HAVE_MYSQL
-    if (mysql_en == "yes")
-    {
+    if (mysql_en == "yes") {
         NEW_OPTION(getOption(_("/server/storage/mysql/host"),
-                    _(DEFAULT_MYSQL_HOST)));
+            _(DEFAULT_MYSQL_HOST)));
         SET_OPTION(CFG_SERVER_STORAGE_MYSQL_HOST);
 
         NEW_OPTION(getOption(_("/server/storage/mysql/database"),
-                    _(DEFAULT_MYSQL_DB)));
+            _(DEFAULT_MYSQL_DB)));
         SET_OPTION(CFG_SERVER_STORAGE_MYSQL_DATABASE);
 
         NEW_OPTION(getOption(_("/server/storage/mysql/username"),
-                    _(DEFAULT_MYSQL_USER)));
+            _(DEFAULT_MYSQL_USER)));
         SET_OPTION(CFG_SERVER_STORAGE_MYSQL_USERNAME);
 
         NEW_INT_OPTION(getIntOption(_("/server/storage/mysql/port"), 0));
         SET_INT_OPTION(CFG_SERVER_STORAGE_MYSQL_PORT);
 
-        if (getElement(_("/server/storage/mysql/socket")) == nullptr)
-        {
+        if (getElement(_("/server/storage/mysql/socket")) == nullptr) {
             NEW_OPTION(nullptr);
-        }
-        else
-        {
+        } else {
             NEW_OPTION(getOption(_("/server/storage/mysql/socket")));
         }
 
         SET_OPTION(CFG_SERVER_STORAGE_MYSQL_SOCKET);
 
-        if (getElement(_("/server/storage/mysql/password")) == nullptr)
-        {
+        if (getElement(_("/server/storage/mysql/password")) == nullptr) {
             NEW_OPTION(nullptr);
-        }
-        else
-        {
+        } else {
             NEW_OPTION(getOption(_("/server/storage/mysql/password")));
         }
         SET_OPTION(CFG_SERVER_STORAGE_MYSQL_PASSWORD);
     }
 #else
-    if (mysql_en == "yes")
-    {
+    if (mysql_en == "yes") {
         throw _Exception(_("You enabled MySQL storage in configuration, "
                            "however this version of MediaTomb was compiled "
                            "without MySQL support!"));
@@ -1072,14 +1002,13 @@ void ConfigManager::validate(String serverhome)
 
 #ifdef HAVE_SQLITE3
 
-    if (sqlite3_en == "yes")
-    {
+    if (sqlite3_en == "yes") {
         prepare_path(_("/server/storage/sqlite3/database-file"), false, true);
         NEW_OPTION(getOption(_("/server/storage/sqlite3/database-file")));
         SET_OPTION(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
 
         temp = getOption(_("/server/storage/sqlite3/synchronous"),
-                _(DEFAULT_SQLITE_SYNC));
+            _(DEFAULT_SQLITE_SYNC));
 
         temp_int = 0;
 
@@ -1097,7 +1026,7 @@ void ConfigManager::validate(String serverhome)
         SET_INT_OPTION(CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS);
 
         temp = getOption(_("/server/storage/sqlite3/on-error"),
-                _(DEFAULT_SQLITE_RESTORE));
+            _(DEFAULT_SQLITE_RESTORE));
 
         bool tmp_bool = true;
 
@@ -1113,28 +1042,27 @@ void ConfigManager::validate(String serverhome)
         SET_BOOL_OPTION(CFG_SERVER_STORAGE_SQLITE_RESTORE);
 #ifdef SQLITE_BACKUP_ENABLED
         temp = getOption(_("/server/storage/sqlite3/backup/attribute::enabled"),
-                _(YES));
+            _(YES));
 #else
         temp = getOption(_("/server/storage/sqlite3/backup/attribute::enabled"),
-                _(DEFAULT_SQLITE_BACKUP_ENABLED));
+            _(DEFAULT_SQLITE_BACKUP_ENABLED));
 #endif
         if (!validateYesNo(temp))
             throw _Exception(_("Error in config file: incorrect parameter "
-                        "for <backup enabled=\"\" /> attribute"));
+                               "for <backup enabled=\"\" /> attribute"));
         NEW_BOOL_OPTION(temp == "yes" ? true : false);
         SET_BOOL_OPTION(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED);
 
         temp_int = getIntOption(_("/server/storage/sqlite3/backup/attribute::interval"),
-                DEFAULT_SQLITE_BACKUP_INTERVAL);
+            DEFAULT_SQLITE_BACKUP_INTERVAL);
         if (temp_int < 1)
             throw _Exception(_("Error in config file: incorrect parameter for "
-                        "<backup interval=\"\" /> attribute"));
+                               "<backup interval=\"\" /> attribute"));
         NEW_INT_OPTION(temp_int);
         SET_INT_OPTION(CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL);
     }
 #else
-    if (sqlite3_en == "yes")
-    {
+    if (sqlite3_en == "yes") {
         throw _Exception(_("You enabled sqlite3 storage in configuration, "
                            "however this version of MediaTomb was compiled "
                            "without sqlite3 support!"));
@@ -1152,14 +1080,13 @@ void ConfigManager::validate(String serverhome)
     NEW_OPTION(dbDriver);
     SET_OPTION(CFG_SERVER_STORAGE_DRIVER);
 
-
-//    temp = checkOption_("/server/storage/database-file");
-//    check_path_ex(construct_path(temp));
+    //    temp = checkOption_("/server/storage/database-file");
+    //    check_path_ex(construct_path(temp));
 
     // now go through the optional settings and fix them if anything is missing
 
     temp = getOption(_("/server/ui/attribute::enabled"),
-                     _(DEFAULT_UI_EN_VALUE));
+        _(DEFAULT_UI_EN_VALUE));
     if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: incorrect parameter "
                            "for <ui enabled=\"\" /> attribute"));
@@ -1167,7 +1094,7 @@ void ConfigManager::validate(String serverhome)
     SET_BOOL_OPTION(CFG_SERVER_UI_ENABLED);
 
     temp = getOption(_("/server/ui/attribute::show-tooltips"),
-                     _(DEFAULT_UI_SHOW_TOOLTIPS_VALUE));
+        _(DEFAULT_UI_SHOW_TOOLTIPS_VALUE));
     if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: incorrect parameter "
                            "for <ui show-tooltips=\"\" /> attribute"));
@@ -1175,7 +1102,7 @@ void ConfigManager::validate(String serverhome)
     SET_BOOL_OPTION(CFG_SERVER_UI_SHOW_TOOLTIPS);
 
     temp = getOption(_("/server/ui/attribute::poll-when-idle"),
-                     _(DEFAULT_POLL_WHEN_IDLE_VALUE));
+        _(DEFAULT_POLL_WHEN_IDLE_VALUE));
     if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: incorrect parameter "
                            "for <ui poll-when-idle=\"\" /> attribute"));
@@ -1183,7 +1110,7 @@ void ConfigManager::validate(String serverhome)
     SET_BOOL_OPTION(CFG_SERVER_UI_POLL_WHEN_IDLE);
 
     temp_int = getIntOption(_("/server/ui/attribute::poll-interval"),
-                       DEFAULT_POLL_INTERVAL);
+        DEFAULT_POLL_INTERVAL);
     if (temp_int < 1)
         throw _Exception(_("Error in config file: incorrect parameter for "
                            "<ui poll-interval=\"\" /> attribute"));
@@ -1191,7 +1118,7 @@ void ConfigManager::validate(String serverhome)
     SET_INT_OPTION(CFG_SERVER_UI_POLL_INTERVAL);
 
     temp_int = getIntOption(_("/server/ui/items-per-page/attribute::default"),
-                           DEFAULT_ITEMS_PER_PAGE_2);
+        DEFAULT_ITEMS_PER_PAGE_2);
     if (temp_int < 1)
         throw _Exception(_("Error in config file: incorrect parameter for "
                            "<items-per-page default=\"\" /> attribute"));
@@ -1201,36 +1128,28 @@ void ConfigManager::validate(String serverhome)
     // now get the option list for the drop down menu
     Ref<Element> element = getElement(_("/server/ui/items-per-page"));
     // create default structure
-    if (element->elementChildCount() == 0)
-    {
-        if ((temp_int != DEFAULT_ITEMS_PER_PAGE_1) &&
-            (temp_int != DEFAULT_ITEMS_PER_PAGE_2) &&
-            (temp_int != DEFAULT_ITEMS_PER_PAGE_3) &&
-            (temp_int != DEFAULT_ITEMS_PER_PAGE_4))
-        {
+    if (element->elementChildCount() == 0) {
+        if ((temp_int != DEFAULT_ITEMS_PER_PAGE_1) && (temp_int != DEFAULT_ITEMS_PER_PAGE_2) && (temp_int != DEFAULT_ITEMS_PER_PAGE_3) && (temp_int != DEFAULT_ITEMS_PER_PAGE_4)) {
             throw _Exception(_("Error in config file: you specified an "
                                "<items-per-page default=\"\"> value that is "
                                "not listed in the options"));
         }
 
         element->appendTextChild(_("option"),
-                                   String::from(DEFAULT_ITEMS_PER_PAGE_1));
+            String::from(DEFAULT_ITEMS_PER_PAGE_1));
         element->appendTextChild(_("option"),
-                                   String::from(DEFAULT_ITEMS_PER_PAGE_2));
+            String::from(DEFAULT_ITEMS_PER_PAGE_2));
         element->appendTextChild(_("option"),
-                                   String::from(DEFAULT_ITEMS_PER_PAGE_3));
+            String::from(DEFAULT_ITEMS_PER_PAGE_3));
         element->appendTextChild(_("option"),
-                                   String::from(DEFAULT_ITEMS_PER_PAGE_4));
-    }
-    else // validate user settings
+            String::from(DEFAULT_ITEMS_PER_PAGE_4));
+    } else // validate user settings
     {
         int i;
         bool default_found = false;
-        for (int j = 0; j < element->elementChildCount(); j++)
-        {
+        for (int j = 0; j < element->elementChildCount(); j++) {
             Ref<Element> child = element->getElementChild(j);
-            if (child->getName() == "option")
-            {
+            if (child->getName() == "option") {
                 i = child->getText().toInt();
                 if (i < 1)
                     throw _Exception(_("Error in config file: incorrect "
@@ -1245,13 +1164,11 @@ void ConfigManager::validate(String serverhome)
             throw _Exception(_("Error in config file: at least one <option> "
                                "under <items-per-page> must match the "
                                "<items-per-page default=\"\" /> attribute"));
-
     }
 
     // create the array from either user or default settings
-    Ref<Array<StringBase> > menu_opts (new Array<StringBase>());
-    for (int j = 0; j < element->elementChildCount(); j++)
-    {
+    Ref<Array<StringBase> > menu_opts(new Array<StringBase>());
+    for (int j = 0; j < element->elementChildCount(); j++) {
         Ref<Element> child = element->getElementChild(j);
         if (child->getName() == "option")
             menu_opts->append(child->getText());
@@ -1259,9 +1176,8 @@ void ConfigManager::validate(String serverhome)
     NEW_STRARR_OPTION(menu_opts);
     SET_STRARR_OPTION(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
 
-
     temp = getOption(_("/server/ui/accounts/attribute::enabled"),
-                     _(DEFAULT_ACCOUNTS_EN_VALUE));
+        _(DEFAULT_ACCOUNTS_EN_VALUE));
     if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: incorrect parameter for "
                            "<accounts enabled=\"\" /> attribute"));
@@ -1274,9 +1190,8 @@ void ConfigManager::validate(String serverhome)
     SET_DICT_OPTION(CFG_SERVER_UI_ACCOUNT_LIST);
 
     temp_int = getIntOption(_("/server/ui/accounts/attribute::session-timeout"),
-                              DEFAULT_SESSION_TIMEOUT);
-    if (temp_int < 1)
-    {
+        DEFAULT_SESSION_TIMEOUT);
+    if (temp_int < 1) {
         throw _Exception(_("Error in config file: invalid session-timeout "
                            "(must be > 0)\n"));
     }
@@ -1284,7 +1199,7 @@ void ConfigManager::validate(String serverhome)
     SET_INT_OPTION(CFG_SERVER_UI_SESSION_TIMEOUT);
 
     temp = getOption(_("/import/attribute::hidden-files"),
-                     _(DEFAULT_HIDDEN_FILES_VALUE));
+        _(DEFAULT_HIDDEN_FILES_VALUE));
     if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: incorrect parameter for "
                            "<import hidden-files=\"\" /> attribute"));
@@ -1292,46 +1207,42 @@ void ConfigManager::validate(String serverhome)
     SET_BOOL_OPTION(CFG_IMPORT_HIDDEN_FILES);
 
     temp = getOption(
-            _("/import/mappings/extension-mimetype/attribute::ignore-unknown"),
-            _(DEFAULT_IGNORE_UNKNOWN_EXTENSIONS));
+        _("/import/mappings/extension-mimetype/attribute::ignore-unknown"),
+        _(DEFAULT_IGNORE_UNKNOWN_EXTENSIONS));
 
     if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: incorrect parameter for "
-                       "<extension-mimetype ignore-unknown=\"\" /> attribute"));
+                           "<extension-mimetype ignore-unknown=\"\" /> attribute"));
 
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
     SET_BOOL_OPTION(CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS);
 
     temp = getOption(
-            _("/import/mappings/extension-mimetype/attribute::case-sensitive"),
-            _(DEFAULT_CASE_SENSITIVE_EXTENSION_MAPPINGS));
+        _("/import/mappings/extension-mimetype/attribute::case-sensitive"),
+        _(DEFAULT_CASE_SENSITIVE_EXTENSION_MAPPINGS));
 
     if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: incorrect parameter for "
-                       "<extension-mimetype case-sensitive=\"\" /> attribute"));
+                           "<extension-mimetype case-sensitive=\"\" /> attribute"));
 
     bool csens = false;
 
     if (temp == "yes")
         csens = true;
 
-
     NEW_BOOL_OPTION(csens);
     SET_BOOL_OPTION(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_CASE_SENSITIVE);
 
-    tmpEl = getElement( _("/import/mappings/extension-mimetype"));
+    tmpEl = getElement(_("/import/mappings/extension-mimetype"));
     NEW_DICT_OPTION(createDictionaryFromNodeset(tmpEl, _("map"),
-                                       _("from"), _("to"), !csens));
+        _("from"), _("to"), !csens));
     SET_DICT_OPTION(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
 
     tmpEl = getElement(_("/import/mappings/mimetype-contenttype"));
-    if (tmpEl != nullptr)
-    {
+    if (tmpEl != nullptr) {
         mime_content = createDictionaryFromNodeset(tmpEl, _("treat"),
-                       _("mimetype"), _("as"));
-    }
-    else
-    {
+            _("mimetype"), _("as"));
+    } else {
         mime_content = Ref<Dictionary>(new Dictionary());
         mime_content->put(_("audio/mpeg"), _(CONTENT_TYPE_MP3));
         mime_content->put(_("audio/mp4"), _(CONTENT_TYPE_MP4));
@@ -1358,8 +1269,7 @@ void ConfigManager::validate(String serverhome)
     SET_DICT_OPTION(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
 #if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
-    if (setlocale(LC_ALL, "") != nullptr)
-    {
+    if (setlocale(LC_ALL, "") != nullptr) {
         temp = nl_langinfo(CODESET);
         log_debug("received %s from nl_langinfo\n", temp.c_str());
     }
@@ -1370,25 +1280,20 @@ void ConfigManager::validate(String serverhome)
     temp = _(DEFAULT_FILESYSTEM_CHARSET);
 #endif
     // check if the one we take as default is actually available
-    try
-    {
+    try {
         Ref<StringConverter> conv(new StringConverter(temp,
-                                                 _(DEFAULT_INTERNAL_CHARSET)));
-    }
-    catch (const Exception & e)
-    {
+            _(DEFAULT_INTERNAL_CHARSET)));
+    } catch (const Exception& e) {
         temp = _(DEFAULT_FALLBACK_CHARSET);
     }
     String charset = getOption(_("/import/filesystem-charset"), temp);
-    try
-    {
+    try {
         Ref<StringConverter> conv(new StringConverter(charset,
-                                                _(DEFAULT_INTERNAL_CHARSET)));
-    }
-    catch (const Exception & e)
-    {
+            _(DEFAULT_INTERNAL_CHARSET)));
+    } catch (const Exception& e) {
         throw _Exception(_("Error in config file: unsupported "
-                           "filesystem-charset specified: ") + charset);
+                           "filesystem-charset specified: ")
+            + charset);
     }
 
     log_info("Setting filesystem import charset to %s\n", charset.c_str());
@@ -1396,15 +1301,13 @@ void ConfigManager::validate(String serverhome)
     SET_OPTION(CFG_IMPORT_FILESYSTEM_CHARSET);
 
     charset = getOption(_("/import/metadata-charset"), temp);
-    try
-    {
+    try {
         Ref<StringConverter> conv(new StringConverter(charset,
-                                                _(DEFAULT_INTERNAL_CHARSET)));
-    }
-    catch (const Exception & e)
-    {
+            _(DEFAULT_INTERNAL_CHARSET)));
+    } catch (const Exception& e) {
         throw _Exception(_("Error in config file: unsupported "
-                           "metadata-charset specified: ") + charset);
+                           "metadata-charset specified: ")
+            + charset);
     }
 
     log_info("Setting metadata import charset to %s\n", charset.c_str());
@@ -1412,13 +1315,10 @@ void ConfigManager::validate(String serverhome)
     SET_OPTION(CFG_IMPORT_METADATA_CHARSET);
 
     charset = getOption(_("/import/playlist-charset"), temp);
-    try
-    {
+    try {
         Ref<StringConverter> conv(new StringConverter(charset,
-                                                _(DEFAULT_INTERNAL_CHARSET)));
-    }
-    catch (const Exception & e)
-    {
+            _(DEFAULT_INTERNAL_CHARSET)));
+    } catch (const Exception& e) {
         throw _Exception(_("Error in config file: unsupported playlist-charset specified: ") + charset);
     }
 
@@ -1428,15 +1328,15 @@ void ConfigManager::validate(String serverhome)
 
 #ifdef EXTEND_PROTOCOLINFO
     temp = getOption(_("/server/protocolInfo/attribute::extend"),
-                     _(DEFAULT_EXTEND_PROTOCOLINFO));
+        _(DEFAULT_EXTEND_PROTOCOLINFO));
     if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: extend attribute of the "
-                          "protocolInfo tag must be either \"yes\" or \"no\""));
+                           "protocolInfo tag must be either \"yes\" or \"no\""));
 
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
     SET_BOOL_OPTION(CFG_SERVER_EXTEND_PROTOCOLINFO);
 
-/*
+    /*
     temp = getOption(_("/server/protocolInfo/attribute::ps3-hack"),
                      _(DEFAULT_EXTEND_PROTOCOLINFO_CL_HACK));
     if (!validateYesNo(temp))
@@ -1447,20 +1347,20 @@ void ConfigManager::validate(String serverhome)
     SET_BOOL_OPTION(CFG_SERVER_EXTEND_PROTOCOLINFO_CL_HACK);
 */
     temp = getOption(_("/server/protocolInfo/attribute::samsung-hack"),
-                     _(DEFAULT_EXTEND_PROTOCOLINFO_SM_HACK));
+        _(DEFAULT_EXTEND_PROTOCOLINFO_SM_HACK));
     if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: samsung-hack attribute of the "
-                          "protocolInfo tag must be either \"yes\" or \"no\""));
+                           "protocolInfo tag must be either \"yes\" or \"no\""));
 
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
     SET_BOOL_OPTION(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK);
 #endif
 
     temp = getOption(_("/server/pc-directory/attribute::upnp-hide"),
-                     _(DEFAULT_HIDE_PC_DIRECTORY));
+        _(DEFAULT_HIDE_PC_DIRECTORY));
     if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: hide attribute of the "
-                          "pc-directory tag must be either \"yes\" or \"no\""));
+                           "pc-directory tag must be either \"yes\" or \"no\""));
 
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
     SET_BOOL_OPTION(CFG_SERVER_HIDE_PC_DIRECTORY);
@@ -1517,29 +1417,25 @@ void ConfigManager::validate(String serverhome)
     SET_OPTION(CFG_SERVER_PRESENTATION_URL);
 
     temp = getOption(_("/server/presentationURL/attribute::append-to"),
-                     _(DEFAULT_PRES_URL_APPENDTO_ATTR));
+        _(DEFAULT_PRES_URL_APPENDTO_ATTR));
 
-    if ((temp != "none") && (temp != "ip") && (temp != "port"))
-    {
+    if ((temp != "none") && (temp != "ip") && (temp != "port")) {
         throw _Exception(_("Error in config file: "
                            "invalid \"append-to\" attribute value in "
                            "<presentationURL> tag"));
     }
 
-    if (((temp == "ip") || (temp == "port")) &&
-         !string_ok(getOption(_("/server/presentationURL"))))
-    {
+    if (((temp == "ip") || (temp == "port")) && !string_ok(getOption(_("/server/presentationURL")))) {
         throw _Exception(_("Error in config file: \"append-to\" attribute "
-                           "value in <presentationURL> tag is set to \"") +
-                            temp + _("\" but no URL is specified"));
+                           "value in <presentationURL> tag is set to \"")
+            + temp + _("\" but no URL is specified"));
     }
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_APPEND_PRESENTATION_URL_TO);
 
     temp_int = getIntOption(_("/server/upnp-string-limit"),
-                              DEFAULT_UPNP_STRING_LIMIT);
-    if ((temp_int != -1) && (temp_int < 4))
-    {
+        DEFAULT_UPNP_STRING_LIMIT);
+    if ((temp_int != -1) && (temp_int < 4)) {
         throw _Exception(_("Error in config file: invalid value for "
                            "<upnp-string-limit>"));
     }
@@ -1548,11 +1444,7 @@ void ConfigManager::validate(String serverhome)
 
 #ifdef HAVE_JS
     temp = getOption(_("/import/scripting/playlist-script"),
-            prefix_dir +
-            DIR_SEPARATOR +
-            _(DEFAULT_JS_DIR) +
-            DIR_SEPARATOR +
-            _(DEFAULT_PLAYLISTS_SCRIPT));
+        prefix_dir + DIR_SEPARATOR + _(DEFAULT_JS_DIR) + DIR_SEPARATOR + _(DEFAULT_PLAYLISTS_SCRIPT));
     if (!string_ok(temp))
         throw _Exception(_("playlist script location invalid"));
     prepare_path(_("/import/scripting/playlist-script"));
@@ -1560,11 +1452,7 @@ void ConfigManager::validate(String serverhome)
     SET_OPTION(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
 
     temp = getOption(_("/import/scripting/common-script"),
-           prefix_dir +
-            DIR_SEPARATOR +
-            _(DEFAULT_JS_DIR) +
-            DIR_SEPARATOR +
-            _(DEFAULT_COMMON_SCRIPT));
+        prefix_dir + DIR_SEPARATOR + _(DEFAULT_JS_DIR) + DIR_SEPARATOR + _(DEFAULT_COMMON_SCRIPT));
     if (!string_ok(temp))
         throw _Exception(_("common script location invalid"));
     prepare_path(_("/import/scripting/common-script"));
@@ -1572,8 +1460,8 @@ void ConfigManager::validate(String serverhome)
     SET_OPTION(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT);
 
     temp = getOption(
-            _("/import/scripting/playlist-script/attribute::create-link"),
-            _(DEFAULT_PLAYLIST_CREATE_LINK));
+        _("/import/scripting/playlist-script/attribute::create-link"),
+        _(DEFAULT_PLAYLIST_CREATE_LINK));
 
     if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: "
@@ -1585,13 +1473,12 @@ void ConfigManager::validate(String serverhome)
 #endif
 
     temp = getOption(_("/import/scripting/virtual-layout/attribute::type"),
-                     _(DEFAULT_LAYOUT_TYPE));
+        _(DEFAULT_LAYOUT_TYPE));
     if ((temp != "js") && (temp != "builtin") && (temp != "disabled"))
         throw _Exception(_("Error in config file: invalid virtual layout "
                            "type specified!"));
     NEW_OPTION(temp);
     SET_OPTION(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
-
 
 #ifndef HAVE_JS
     if (temp == "js")
@@ -1600,16 +1487,12 @@ void ConfigManager::validate(String serverhome)
                            "virtual-layout."));
 #else
     charset = getOption(_("/import/scripting/attribute::script-charset"),
-                        _(DEFAULT_JS_CHARSET));
-    if (temp == "js")
-    {
-        try
-        {
+        _(DEFAULT_JS_CHARSET));
+    if (temp == "js") {
+        try {
             Ref<StringConverter> conv(new StringConverter(charset,
-                                                _(DEFAULT_INTERNAL_CHARSET)));
-        }
-        catch (const Exception & e)
-        {
+                _(DEFAULT_INTERNAL_CHARSET)));
+        } catch (const Exception& e) {
             throw _Exception(_("Error in config file: unsupported import script charset specified: ") + charset);
         }
     }
@@ -1618,14 +1501,9 @@ void ConfigManager::validate(String serverhome)
     SET_OPTION(CFG_IMPORT_SCRIPTING_CHARSET);
 
     String script_path = getOption(
-                           _("/import/scripting/virtual-layout/import-script"),
-                           prefix_dir +
-                             DIR_SEPARATOR +
-                           _(DEFAULT_JS_DIR) +
-                             DIR_SEPARATOR +
-                           _(DEFAULT_IMPORT_SCRIPT));
-    if (temp == "js")
-    {
+        _("/import/scripting/virtual-layout/import-script"),
+        prefix_dir + DIR_SEPARATOR + _(DEFAULT_JS_DIR) + DIR_SEPARATOR + _(DEFAULT_IMPORT_SCRIPT));
+    if (temp == "js") {
         if (!string_ok(script_path))
             throw _Exception(_("Error in config file: you specified \"js\" to "
                                "be used for virtual layout, but script "
@@ -1633,7 +1511,7 @@ void ConfigManager::validate(String serverhome)
 
         prepare_path(_("/import/scripting/virtual-layout/import-script"));
         script_path = getOption(
-                        _("/import/scripting/virtual-layout/import-script"));
+            _("/import/scripting/virtual-layout/import-script"));
     }
 
     NEW_OPTION(script_path);
@@ -1641,11 +1519,9 @@ void ConfigManager::validate(String serverhome)
 #ifdef HAVE_LIBDVDNAV
     // add dvd script and make sure scripts can be enabled and disabled
     script_path = getOption(_("/import/scripting/virtual-layout/dvd-script"),
-                            prefix_dir + DIR_SEPARATOR + _(DEFAULT_JS_DIR) +
-                            DIR_SEPARATOR + _(DEFAULT_DVD_SCRIPT));
+        prefix_dir + DIR_SEPARATOR + _(DEFAULT_JS_DIR) + DIR_SEPARATOR + _(DEFAULT_DVD_SCRIPT));
 
-    if (temp == "js")
-    {
+    if (temp == "js") {
         if (!string_ok(script_path))
             throw _Exception(_("Error in config file: you specified \"js\" to "
                                "be used for virtual layout, but dvd script "
@@ -1653,8 +1529,7 @@ void ConfigManager::validate(String serverhome)
 
         prepare_path(_("/import/scripting/virtual-layout/dvd-script"));
         script_path = getOption(
-                        _("/import/scripting/virtual-layout/dvd-script"));
-
+            _("/import/scripting/virtual-layout/dvd-script"));
     }
 
     NEW_OPTION(script_path);
@@ -1675,17 +1550,17 @@ void ConfigManager::validate(String serverhome)
     temp_int = getIntOption(_("/server/alive"), DEFAULT_ALIVE_INTERVAL);
     if (temp_int < ALIVE_INTERVAL_MIN)
         throw _Exception(_("Error in config file: incorrect parameter "
-                    "for /server/alive, must be at least ") + ALIVE_INTERVAL_MIN);
+                           "for /server/alive, must be at least ")
+            + ALIVE_INTERVAL_MIN);
     NEW_INT_OPTION(temp_int);
     SET_INT_OPTION(CFG_SERVER_ALIVE_INTERVAL);
 
     Ref<Element> el = getElement(_("/import/mappings/mimetype-upnpclass"));
-    if (el == nullptr)
-    {
+    if (el == nullptr) {
         getOption(_("/import/mappings/mimetype-upnpclass"), _(""));
     }
     NEW_DICT_OPTION(createDictionaryFromNodeset(el, _("map"),
-                                                    _("from"), _("to")));
+        _("from"), _("to")));
     SET_DICT_OPTION(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
 
     temp = getOption(_("/import/autoscan/attribute::use-inotify"), _("auto"));
@@ -1698,14 +1573,12 @@ void ConfigManager::validate(String serverhome)
     NEW_AUTOSCANLIST_OPTION(createAutoscanListFromNodeset(el, TimedScanMode));
     SET_AUTOSCANLIST_OPTION(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
 
-
 #ifdef HAVE_INOTIFY
     bool inotify_supported = false;
     inotify_supported = Inotify::supported();
 #endif
 
-    if (temp == _(YES))
-    {
+    if (temp == _(YES)) {
 #ifdef HAVE_INOTIFY
         if (!inotify_supported)
             throw _Exception(_("You specified "
@@ -1721,24 +1594,18 @@ void ConfigManager::validate(String serverhome)
     }
 
 #ifdef HAVE_INOTIFY
-    if (temp == _("auto") || (temp == _(YES)))
-    {
-        if (inotify_supported)
-        {
+    if (temp == _("auto") || (temp == _(YES))) {
+        if (inotify_supported) {
             NEW_AUTOSCANLIST_OPTION(createAutoscanListFromNodeset(el, InotifyScanMode));
             SET_AUTOSCANLIST_OPTION(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
 
             NEW_BOOL_OPTION(true);
             SET_BOOL_OPTION(CFG_IMPORT_AUTOSCAN_USE_INOTIFY);
-        }
-        else
-        {
+        } else {
             NEW_BOOL_OPTION(false);
             SET_BOOL_OPTION(CFG_IMPORT_AUTOSCAN_USE_INOTIFY);
         }
-    }
-    else
-    {
+    } else {
         NEW_BOOL_OPTION(false);
         SET_BOOL_OPTION(CFG_IMPORT_AUTOSCAN_USE_INOTIFY);
     }
@@ -1746,13 +1613,12 @@ void ConfigManager::validate(String serverhome)
 
 #ifdef EXTERNAL_TRANSCODING
     temp = getOption(
-            _("/transcoding/attribute::enabled"),
-            _(DEFAULT_TRANSCODING_ENABLED));
+        _("/transcoding/attribute::enabled"),
+        _(DEFAULT_TRANSCODING_ENABLED));
 
     if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: incorrect parameter "
-                    "for <transcoding enabled=\"\"> attribute"));
-
+                           "for <transcoding enabled=\"\"> attribute"));
 
     if (temp == "yes")
         el = getElement(_("/transcoding"));
@@ -1763,31 +1629,31 @@ void ConfigManager::validate(String serverhome)
     SET_TRANSCODING_PROFILELIST_OPTION(CFG_TRANSCODING_PROFILE_LIST);
 
 #ifdef HAVE_CURL
-    if (temp == "yes")
-    {
+    if (temp == "yes") {
         temp_int = getIntOption(
-                _("/transcoding/attribute::fetch-buffer-size"),
-                DEFAULT_CURL_BUFFER_SIZE);
+            _("/transcoding/attribute::fetch-buffer-size"),
+            DEFAULT_CURL_BUFFER_SIZE);
         if (temp_int < CURL_MAX_WRITE_SIZE)
             throw _Exception(_("Error in config file: incorrect parameter "
-                        "for <transcoding fetch-buffer-size=\"\"> attribute, "
-                        "must be at least ") + CURL_MAX_WRITE_SIZE);
+                               "for <transcoding fetch-buffer-size=\"\"> attribute, "
+                               "must be at least ")
+                + CURL_MAX_WRITE_SIZE);
         NEW_INT_OPTION(temp_int);
         SET_INT_OPTION(CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE);
 
         temp_int = getIntOption(
-                _("/transcoding/attribute::fetch-buffer-fill-size"),
-                DEFAULT_CURL_INITIAL_FILL_SIZE);
+            _("/transcoding/attribute::fetch-buffer-fill-size"),
+            DEFAULT_CURL_INITIAL_FILL_SIZE);
         if (temp_int < 0)
             throw _Exception(_("Error in config file: incorrect parameter "
-                    "for <transcoding fetch-buffer-fill-size=\"\"> attribute"));
+                               "for <transcoding fetch-buffer-fill-size=\"\"> attribute"));
 
         NEW_INT_OPTION(temp_int);
         SET_INT_OPTION(CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE);
     }
 
-#endif//HAVE_CURL
-#endif//EXTERNAL_TRANSCODING
+#endif //HAVE_CURL
+#endif //EXTERNAL_TRANSCODING
 
     el = getElement(_("/server/custom-http-headers"));
     NEW_STRARR_OPTION(createArrayFromNodeset(el, _("add"), _("header")));
@@ -1796,11 +1662,9 @@ void ConfigManager::validate(String serverhome)
 #ifdef HAVE_LIBEXIF
 
     el = getElement(_("/import/library-options/libexif/auxdata"));
-    if (el == nullptr)
-    {
+    if (el == nullptr) {
         getOption(_("/import/library-options/libexif/auxdata"),
-                  _(""));
-
+            _(""));
     }
     NEW_STRARR_OPTION(createArrayFromNodeset(el, _("add-data"), _("tag")));
     SET_STRARR_OPTION(CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST);
@@ -1809,8 +1673,7 @@ void ConfigManager::validate(String serverhome)
 
 #if defined(HAVE_ID3LIB) || defined(HAVE_TAGLIB)
     el = getElement(_("/import/library-options/id3/auxdata"));
-    if (el == nullptr)
-    {
+    if (el == nullptr) {
         getOption(_("/import/library-options/id3/auxdata"), _(""));
     }
     NEW_STRARR_OPTION(createArrayFromNodeset(el, _("add-data"), _("tag")));
@@ -1820,7 +1683,7 @@ void ConfigManager::validate(String serverhome)
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
     temp = getOption(_("/server/extended-runtime-options/ffmpegthumbnailer/"
                        "attribute::enabled"),
-                     _(DEFAULT_FFMPEGTHUMBNAILER_ENABLED));
+        _(DEFAULT_FFMPEGTHUMBNAILER_ENABLED));
 
     if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: "
@@ -1830,11 +1693,10 @@ void ConfigManager::validate(String serverhome)
     NEW_BOOL_OPTION(temp == YES ? true : false);
     SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED);
 
-    if (temp == YES)
-    {
+    if (temp == YES) {
         temp_int = getIntOption(_("/server/extended-runtime-options/ffmpegthumbnailer/"
                                   "thumbnail-size"),
-                                   DEFAULT_FFMPEGTHUMBNAILER_THUMBSIZE);
+            DEFAULT_FFMPEGTHUMBNAILER_THUMBSIZE);
 
         if (temp_int <= 0)
             throw _Exception(_("Error in config file: ffmpegthumbnailer - "
@@ -1846,7 +1708,7 @@ void ConfigManager::validate(String serverhome)
 
         temp_int = getIntOption(_("/server/extended-runtime-options/ffmpegthumbnailer/"
                                   "seek-percentage"),
-                                   DEFAULT_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE);
+            DEFAULT_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE);
 
         if (temp_int < 0)
             throw _Exception(_("Error in config file: ffmpegthumbnailer - "
@@ -1857,20 +1719,19 @@ void ConfigManager::validate(String serverhome)
         SET_INT_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE);
 
         temp = getOption(_("/server/extended-runtime-options/ffmpegthumbnailer/"
-                              "filmstrip-overlay"),
-                             _(DEFAULT_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY));
+                           "filmstrip-overlay"),
+            _(DEFAULT_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY));
 
         if (!validateYesNo(temp))
             throw _Exception(_("Error in config file: ffmpegthumbnailer - "
                                "invalid value in <filmstrip-overlay> tag"));
 
-
         NEW_BOOL_OPTION(temp == YES ? true : false);
         SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY);
 
         temp = getOption(_("/server/extended-runtime-options/ffmpegthumbnailer/"
-                              "workaround-bugs"),
-                             _(DEFAULT_FFMPEGTHUMBNAILER_WORKAROUND_BUGS));
+                           "workaround-bugs"),
+            _(DEFAULT_FFMPEGTHUMBNAILER_WORKAROUND_BUGS));
 
         if (!validateYesNo(temp))
             throw _Exception(_("Error in config file: ffmpegthumbnailer - "
@@ -1881,7 +1742,7 @@ void ConfigManager::validate(String serverhome)
 
         temp_int = getIntOption(_("/server/extended-runtime-options/"
                                   "ffmpegthumbnailer/image-quality"),
-                                   DEFAULT_FFMPEGTHUMBNAILER_IMAGE_QUALITY);
+            DEFAULT_FFMPEGTHUMBNAILER_IMAGE_QUALITY);
 
         if (temp_int < 0)
             throw _Exception(_("Error in config file: ffmpegthumbnailer - "
@@ -1897,19 +1758,20 @@ void ConfigManager::validate(String serverhome)
         SET_INT_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_QUALITY);
 
         temp = getOption("/server/extended-runtime-options/ffmpegthumbnailer/"
-                         "cache-dir", DEFAULT_FFMPEGTHUMBNAILER_CACHE_DIR);
+                         "cache-dir",
+            DEFAULT_FFMPEGTHUMBNAILER_CACHE_DIR);
 
         NEW_OPTION(temp);
         SET_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR);
 
         temp = getOption("/server/extended-runtime-options/ffmpegthumbnailer/"
                          "cache-dir/attribute::enabled",
-                         DEFAULT_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED);
+            DEFAULT_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED);
 
         if (!validateYesNo(temp))
             throw _Exception(_("Error in config file: "
-                              "invalid \"enabled\" attribute value in "
-                              "ffmpegthumbnailer <cache-dir> tag"));
+                               "invalid \"enabled\" attribute value in "
+                               "ffmpegthumbnailer <cache-dir> tag"));
 
         NEW_BOOL_OPTION(temp == YES ? true : false);
         SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED);
@@ -1918,7 +1780,7 @@ void ConfigManager::validate(String serverhome)
 
     temp = getOption(_("/server/extended-runtime-options/mark-played-items/"
                        "attribute::enabled"),
-                     _(DEFAULT_MARK_PLAYED_ITEMS_ENABLED));
+        _(DEFAULT_MARK_PLAYED_ITEMS_ENABLED));
 
     if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: "
@@ -1928,10 +1790,9 @@ void ConfigManager::validate(String serverhome)
     NEW_BOOL_OPTION(temp == YES ? true : false);
     SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED);
 
-
     temp = getOption(_("/server/extended-runtime-options/mark-played-items/"
                        "attribute::suppress-cds-updates"),
-                       _(DEFAULT_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES));
+        _(DEFAULT_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES));
     if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: "
                            "invalid \":suppress-cds-updates\" attribute "
@@ -1942,7 +1803,7 @@ void ConfigManager::validate(String serverhome)
 
     temp = getOption(_("/server/extended-runtime-options/mark-played-items/"
                        "string/attribute::mode"),
-                     _(DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE));
+        _(DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE));
 
     if ((temp != "prepend") && (temp != "append"))
         throw _Exception(_("Error in config file: "
@@ -1954,7 +1815,7 @@ void ConfigManager::validate(String serverhome)
 
     temp = getOption(_("/server/extended-runtime-options/mark-played-items/"
                        "string"),
-                     _(DEFAULT_MARK_PLAYED_ITEMS_STRING));
+        _(DEFAULT_MARK_PLAYED_ITEMS_STRING));
     if (!string_ok(temp))
         throw _Exception(_("Error in config file: "
                            "empty string given for the <string> tag in the "
@@ -1965,10 +1826,8 @@ void ConfigManager::validate(String serverhome)
     Ref<Array<StringBase> > mark_content_list(new Array<StringBase>());
     tmpEl = getElement(_("/server/extended-runtime-options/mark-played-items/mark"));
 
-    if (tmpEl != nullptr)
-    {
-        for (int m = 0; m < tmpEl->elementChildCount(); m++)
-        {
+    if (tmpEl != nullptr) {
+        for (int m = 0; m < tmpEl->elementChildCount(); m++) {
             Ref<Element> content = tmpEl->getElementChild(m);
             if (content->getName() != "content")
                 continue;
@@ -1977,10 +1836,8 @@ void ConfigManager::validate(String serverhome)
             if (!string_ok(mark_content))
                 throw _Exception(_("error in configuration, <mark-played-items>, empty <content> parameter!"));
 
-            if ((mark_content != DEFAULT_MARK_PLAYED_CONTENT_VIDEO) &&
-                (mark_content != DEFAULT_MARK_PLAYED_CONTENT_AUDIO) &&
-                (mark_content != DEFAULT_MARK_PLAYED_CONTENT_IMAGE))
-                    throw _Exception(_("error in configuration, <mark-played-items>, invalid <content> parameter! Allowed values are \"video\", \"audio\", \"image\""));
+            if ((mark_content != DEFAULT_MARK_PLAYED_CONTENT_VIDEO) && (mark_content != DEFAULT_MARK_PLAYED_CONTENT_AUDIO) && (mark_content != DEFAULT_MARK_PLAYED_CONTENT_IMAGE))
+                throw _Exception(_("error in configuration, <mark-played-items>, invalid <content> parameter! Allowed values are \"video\", \"audio\", \"image\""));
 
             mark_content_list->append(mark_content);
             NEW_STRARR_OPTION(mark_content_list);
@@ -1999,10 +1856,9 @@ void ConfigManager::validate(String serverhome)
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
     SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_LASTFM_ENABLED);
 
-    if (temp == YES)
-    {
+    if (temp == YES) {
         temp = getOption(_("/server/extended-runtime-options/lastfm/username"),
-                         _(DEFAULT_LASTFM_USERNAME));
+            _(DEFAULT_LASTFM_USERNAME));
 
         if (!string_ok(temp))
             throw _Exception(_("Error in config file: lastfm - "
@@ -2013,7 +1869,7 @@ void ConfigManager::validate(String serverhome)
         SET_OPTION(CFG_SERVER_EXTOPTS_LASTFM_USERNAME);
 
         temp = getOption(_("/server/extended-runtime-options/lastfm/password"),
-                         _(DEFAULT_LASTFM_PASSWORD));
+            _(DEFAULT_LASTFM_PASSWORD));
 
         if (!string_ok(temp))
             throw _Exception(_("Error in config file: lastfm - "
@@ -2025,19 +1881,15 @@ void ConfigManager::validate(String serverhome)
     }
 #endif
 
-
 #ifdef HAVE_MAGIC
     String magic_file;
-    if (!string_ok(magic))
-    {
-        if (string_ok(getOption(_("/import/magic-file"), _(""))))
-        {
+    if (!string_ok(magic)) {
+        if (string_ok(getOption(_("/import/magic-file"), _("")))) {
             prepare_path(_("/import/magic-file"));
         }
 
         magic_file = getOption(_("/import/magic-file"));
-    }
-    else
+    } else
         magic_file = magic;
 
     NEW_OPTION(magic_file);
@@ -2049,11 +1901,9 @@ void ConfigManager::validate(String serverhome)
     Ref<AutoscanList> config_timed_list = createAutoscanListFromNodeset(tmpEl, TimedScanMode);
     Ref<AutoscanList> config_inotify_list = createAutoscanListFromNodeset(tmpEl, InotifyScanMode);
 
-    for (int i = 0; i < config_inotify_list->size(); i++)
-    {
+    for (int i = 0; i < config_inotify_list->size(); i++) {
         Ref<AutoscanDirectory> i_dir = config_inotify_list->get(i);
-        for (int j = 0; j < config_timed_list->size(); j++)
-        {
+        for (int j = 0; j < config_timed_list->size(); j++) {
             Ref<AutoscanDirectory> t_dir = config_timed_list->get(j);
             if (i_dir->getLocation() == t_dir->getLocation())
                 throw _Exception(_("Error in config file: same path used in both inotify and timed scan modes"));
@@ -2063,7 +1913,7 @@ void ConfigManager::validate(String serverhome)
 
 #ifdef YOUTUBE
     temp = getOption(_("/import/online-content/YouTube/attribute::enabled"),
-                     _(DEFAULT_YOUTUBE_ENABLED));
+        _(DEFAULT_YOUTUBE_ENABLED));
 
     if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: "
@@ -2078,13 +1928,12 @@ void ConfigManager::validate(String serverhome)
     /// support playing them, but that requires a valid YT section and thus
     /// forces us to check the options eventhough the service is disabled.
     // check other options only if the service is enabled
-//    if (temp == "yes")
+    //    if (temp == "yes")
     {
         temp = getOption(_("/import/online-content/YouTube/attribute::racy-content"),
-                         _(DEFAULT_YOUTUBE_RACY_CONTENT));
+            _(DEFAULT_YOUTUBE_RACY_CONTENT));
 
-        if ((temp != "include") && (temp != "exclude"))
-        {
+        if ((temp != "include") && (temp != "exclude")) {
             throw _Exception(_("Error in config file: "
                                "invalid racy-content value in <YouTube> tag"));
         }
@@ -2093,10 +1942,9 @@ void ConfigManager::validate(String serverhome)
         SET_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_RACY);
 
         temp = getOption(_("/import/online-content/YouTube/attribute::format"),
-                         _(DEFAULT_YOUTUBE_FORMAT));
+            _(DEFAULT_YOUTUBE_FORMAT));
 
-        if ((temp != "mp4") && (temp != "flv"))
-        {
+        if ((temp != "mp4") && (temp != "flv")) {
             throw _Exception(_("Error in config file: "
                                "invalid format value in <YouTube> tag"));
         }
@@ -2105,7 +1953,7 @@ void ConfigManager::validate(String serverhome)
         SET_BOOL_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_FORMAT_MP4);
 
         temp = getOption(_("/import/online-content/YouTube/attribute::hd"),
-                         _(DEFAULT_YOUTUBE_HD));
+            _(DEFAULT_YOUTUBE_HD));
 
         if (!validateYesNo(temp))
             throw _Exception(_("Error in config file: "
@@ -2122,8 +1970,7 @@ void ConfigManager::validate(String serverhome)
         SET_INT_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_REFRESH);
 
         temp_int = getIntOption(_("/import/online-content/YouTube/attribute::purge-after"), DEFAULT_YOUTUBE_PURGE_AFTER);
-        if (getIntOption(_("/import/online-content/YouTube/attribute::refresh")) >= temp_int)
-        {
+        if (getIntOption(_("/import/online-content/YouTube/attribute::refresh")) >= temp_int) {
             if (temp_int != 0)
                 throw _Exception(_("Error in config file: YouTube purge-after value must be greater than refresh interval"));
         }
@@ -2132,43 +1979,41 @@ void ConfigManager::validate(String serverhome)
         SET_INT_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_PURGE_AFTER);
 
         temp = getOption(_("/import/online-content/YouTube/attribute::update-at-start"),
-                _(DEFAULT_YOUTUBE_UPDATE_AT_START));
+            _(DEFAULT_YOUTUBE_UPDATE_AT_START));
 
         if (!validateYesNo(temp))
             throw _Exception(_("Error in config file: "
-                        "invalid \"update-at-start\" attribute value in "
-                        "<YouTube> tag"));
+                               "invalid \"update-at-start\" attribute value in "
+                               "<YouTube> tag"));
 
         NEW_BOOL_OPTION(temp == "yes" ? true : false);
         SET_BOOL_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_UPDATE_AT_START);
 
         el = getElement(_("/import/online-content/YouTube"));
-        if (el == nullptr)
-        {
+        if (el == nullptr) {
             getOption(_("/import/online-content/YouTube"),
-                    _(""));
+                _(""));
         }
         Ref<Array<Object> > yt_opts = createServiceTaskList(OS_YouTube, el);
-        if (getBoolOption(CFG_ONLINE_CONTENT_YOUTUBE_ENABLED) &&
-                (yt_opts->size() == 0))
+        if (getBoolOption(CFG_ONLINE_CONTENT_YOUTUBE_ENABLED) && (yt_opts->size() == 0))
             throw _Exception(_("Error in config file: "
-                        "YouTube service enabled but no imports "
-                        "specified."));
+                               "YouTube service enabled but no imports "
+                               "specified."));
 
         NEW_OBJARR_OPTION(yt_opts);
         SET_OBJARR_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_TASK_LIST);
 
         log_warning("You enabled the YouTube feature, which allows you\n"
-"                             to watch YouTube videos on your UPnP device!\n"
-"                             Please check http://www.youtube.com/t/terms\n"
-"                             By using this feature you may be violating YouTube\n"
-"                             service terms and conditions!\n\n");
+                    "                             to watch YouTube videos on your UPnP device!\n"
+                    "                             Please check http://www.youtube.com/t/terms\n"
+                    "                             By using this feature you may be violating YouTube\n"
+                    "                             service terms and conditions!\n\n");
     }
 #endif
 
 #ifdef SOPCAST
     temp = getOption(_("/import/online-content/SopCast/attribute::enabled"),
-                     _(DEFAULT_SOPCAST_ENABLED));
+        _(DEFAULT_SOPCAST_ENABLED));
 
     if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: "
@@ -2183,8 +2028,7 @@ void ConfigManager::validate(String serverhome)
     SET_INT_OPTION(CFG_ONLINE_CONTENT_SOPCAST_REFRESH);
 
     temp_int = getIntOption(_("/import/online-content/SopCast/attribute::purge-after"), 0);
-    if (getIntOption(_("/import/online-content/SopCast/attribute::refresh")) >= temp_int)
-    {
+    if (getIntOption(_("/import/online-content/SopCast/attribute::refresh")) >= temp_int) {
         if (temp_int != 0)
             throw _Exception(_("Error in config file: SopCast purge-after value must be greater than refresh interval"));
     }
@@ -2193,7 +2037,7 @@ void ConfigManager::validate(String serverhome)
     SET_INT_OPTION(CFG_ONLINE_CONTENT_SOPCAST_PURGE_AFTER);
 
     temp = getOption(_("/import/online-content/SopCast/attribute::update-at-start"),
-                     _(DEFAULT_SOPCAST_UPDATE_AT_START));
+        _(DEFAULT_SOPCAST_UPDATE_AT_START));
 
     if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: "
@@ -2206,7 +2050,7 @@ void ConfigManager::validate(String serverhome)
 
 #ifdef ATRAILERS
     temp = getOption(_("/import/online-content/AppleTrailers/attribute::enabled"),
-                     _(DEFAULT_ATRAILERS_ENABLED));
+        _(DEFAULT_ATRAILERS_ENABLED));
 
     if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: "
@@ -2222,7 +2066,7 @@ void ConfigManager::validate(String serverhome)
     SET_INT_OPTION(CFG_ONLINE_CONTENT_ATRAILERS_PURGE_AFTER);
 
     temp = getOption(_("/import/online-content/AppleTrailers/attribute::update-at-start"),
-                     _(DEFAULT_ATRAILERS_UPDATE_AT_START));
+        _(DEFAULT_ATRAILERS_UPDATE_AT_START));
 
     if (!validateYesNo(temp))
         throw _Exception(_("Error in config file: "
@@ -2233,9 +2077,8 @@ void ConfigManager::validate(String serverhome)
     SET_BOOL_OPTION(CFG_ONLINE_CONTENT_ATRAILERS_UPDATE_AT_START);
 
     temp = getOption(_("/import/online-content/AppleTrailers/attribute::resolution"),
-                                 String::from(DEFAULT_ATRAILERS_RESOLUTION));
-    if ((temp != "640") && (temp != "720p"))
-    {
+        String::from(DEFAULT_ATRAILERS_RESOLUTION));
+    if ((temp != "640") && (temp != "720p")) {
         throw _Exception(_("Error in config file: "
                            "invalid \"resolution\" attribute value in "
                            "<AppleTrailers> tag, only \"640\" and \"720p\" is "
@@ -2246,19 +2089,17 @@ void ConfigManager::validate(String serverhome)
     SET_OPTION(CFG_ONLINE_CONTENT_ATRAILERS_RESOLUTION);
 #endif
 
-
-
     log_info("Configuration check succeeded.\n");
 
     //root->indent();
-    
+
     log_debug("Config file dump after validation: \n%s\n", rootDoc->print().c_str());
 }
 
 void ConfigManager::prepare_udn()
 {
     bool need_to_save = false;
- 
+
     if (root->getName() != "config")
         return;
 
@@ -2267,21 +2108,20 @@ void ConfigManager::prepare_udn()
         return;
 
     Ref<Element> element = server->getChildByName(_("udn"));
-    if (element == nullptr || element->getText() == nullptr || element->getText() == "")
-    {
-        char   uuid_str[37];
+    if (element == nullptr || element->getText() == nullptr || element->getText() == "") {
+        char uuid_str[37];
         uuid_t uuid;
-                
+
         uuid_generate(uuid);
         uuid_unparse(uuid, uuid_str);
 
         log_info("UUID generated: %s\n", uuid_str);
-       
+
         getOption(_("/server/udn"), _("uuid:") + uuid_str);
 
         need_to_save = true;
     }
-    
+
     if (need_to_save)
         save();
 }
@@ -2308,24 +2148,20 @@ void ConfigManager::save()
 
 void ConfigManager::save_text(String filename, String content)
 {
-    FILE *file = fopen(filename.c_str(), "wb");
-    if (file == nullptr)
-    {
-        throw _Exception(_("could not open file ") +
-                        filename + " for writing : " + strerror(errno));
+    FILE* file = fopen(filename.c_str(), "wb");
+    if (file == nullptr) {
+        throw _Exception(_("could not open file ") + filename + " for writing : " + strerror(errno));
     }
-    
+
     size_t bytesWritten = fwrite(XML_HEADER, sizeof(char),
-                              strlen(XML_HEADER), file);
-    
+        strlen(XML_HEADER), file);
+
     bytesWritten = fwrite(content.c_str(), sizeof(char),
-                              content.length(), file);
-    if (bytesWritten < (size_t)content.length())
-    {
-        throw _Exception(_("could not write to config file ") +
-                        filename + " : " + strerror(errno));
+        content.length(), file);
+    if (bytesWritten < (size_t)content.length()) {
+        throw _Exception(_("could not write to config file ") + filename + " : " + strerror(errno));
     }
-    
+
     fclose(file);
 }
 
@@ -2335,35 +2171,33 @@ void ConfigManager::load(String filename)
     Ref<Parser> parser(new Parser());
     rootDoc = parser->parseFile(filename);
     root = rootDoc->getRoot();
-    
-    if (rootDoc == nullptr)
-    {
+
+    if (rootDoc == nullptr) {
         throw _Exception(_("Unable to parse server configuration!"));
     }
 }
 
 String ConfigManager::getOption(String xpath, String def)
-{      
+{
     Ref<XPath> rootXPath(new XPath(root));
     String value = rootXPath->getText(xpath);
     if (string_ok(value))
         return trim_string(value);
 
     log_debug("Config: option not found: %s using default value: %s\n",
-           xpath.c_str(), def.c_str());
-    
+        xpath.c_str(), def.c_str());
+
     String pathPart = XPath::getPathPart(xpath);
     String axisPart = XPath::getAxisPart(xpath);
 
-    Ref<Array<StringBase> >parts = split_string(pathPart, '/');
-    
+    Ref<Array<StringBase> > parts = split_string(pathPart, '/');
+
     Ref<Element> cur = root;
     String attr = nullptr;
-    
+
     int i;
     Ref<Element> child;
-    for (i = 0; i < parts->size(); i++)
-    {
+    for (i = 0; i < parts->size(); i++) {
         String part = parts->get(i);
         child = cur->getChildByName(part);
         if (child == nullptr)
@@ -2371,25 +2205,21 @@ String ConfigManager::getOption(String xpath, String def)
         cur = child;
     }
     // here cur is the last existing element in the path
-    for (; i < parts->size(); i++)
-    {
+    for (; i < parts->size(); i++) {
         String part = parts->get(i);
         child = Ref<Element>(new Element(part));
         cur->appendElementChild(child);
         cur = child;
     }
-    
-    if (axisPart != nullptr)
-    {
+
+    if (axisPart != nullptr) {
         String axis = XPath::getAxis(axisPart);
         String spec = XPath::getSpec(axisPart);
-        if (axis != "attribute")
-        {
+        if (axis != "attribute") {
             throw _Exception(_("ConfigManager::getOption: only attribute:: axis supported"));
         }
         cur->setAttribute(spec, def);
-    } 
-    else
+    } else
         cur->setText(def);
 
     return def;
@@ -2400,19 +2230,19 @@ int ConfigManager::getIntOption(String xpath, int def)
     String sDef;
 
     sDef = String::from(def);
-    
+
     String sVal = getOption(xpath, sDef);
     return sVal.toInt();
 }
 
 String ConfigManager::getOption(String xpath)
-{      
+{
     Ref<XPath> rootXPath(new XPath(root));
     String value = rootXPath->getText(xpath);
 
     /// \todo is this ok?
-//    if (string_ok(value))
-//        return value;
+    //    if (string_ok(value))
+    //        return value;
     if (value != nullptr)
         return trim_string(value);
     throw _Exception(_("Config: option not found: ") + xpath);
@@ -2425,37 +2255,31 @@ int ConfigManager::getIntOption(String xpath)
     return val;
 }
 
-
 Ref<Element> ConfigManager::getElement(String xpath)
-{      
+{
     Ref<XPath> rootXPath(new XPath(root));
     return rootXPath->getElement(xpath);
 }
 
 void ConfigManager::writeBookmark(String ip, String port)
 {
-    FILE    *f;
-    String  filename;
-    String  path;
-    String  data; 
-    int     size; 
-  
-    if (!getBoolOption(CFG_SERVER_UI_ENABLED))
-    {
+    FILE* f;
+    String filename;
+    String path;
+    String data;
+    int size;
+
+    if (!getBoolOption(CFG_SERVER_UI_ENABLED)) {
         data = http_redirect_to(ip, port, _("disabled.html"));
-    }
-    else
-    {
+    } else {
         data = http_redirect_to(ip, port);
     }
 
     filename = getOption(CFG_SERVER_BOOKMARK_FILE);
     path = construct_path(filename);
-    
-        
+
     f = fopen(path.c_str(), "w");
-    if (f == nullptr)
-    {
+    if (f == nullptr) {
         throw _Exception(_("writeBookmark: failed to open: ") + path);
     }
 
@@ -2464,7 +2288,6 @@ void ConfigManager::writeBookmark(String ip, String port)
 
     if (size < data.length())
         throw _Exception(_("write_Bookmark: failed to write to: ") + path);
-
 }
 
 String ConfigManager::checkOptionString(String xpath)
@@ -2482,20 +2305,15 @@ Ref<Dictionary> ConfigManager::createDictionaryFromNodeset(Ref<Element> element,
     String key;
     String value;
 
-    if (element != nullptr)
-    {
-        for (int i = 0; i < element->elementChildCount(); i++)
-        {
+    if (element != nullptr) {
+        for (int i = 0; i < element->elementChildCount(); i++) {
             Ref<Element> child = element->getElementChild(i);
-            if (child->getName() == nodeName)
-            {
+            if (child->getName() == nodeName) {
                 key = child->getAttribute(keyAttr);
                 value = child->getAttribute(valAttr);
 
-                if (string_ok(key) && string_ok(value))
-                {
-                    if (tolower)
-                    {
+                if (string_ok(key) && string_ok(value)) {
+                    if (tolower) {
                         key = key.toLower();
                     }
                     dict->put(key, value);
@@ -2521,7 +2339,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
 
     Ref<TranscodingProfileList> list(new TranscodingProfileList());
     if (element == nullptr)
-        return list;     
+        return list;
 
     Ref<Array<DictionaryElement> > mt_mappings(new Array<DictionaryElement>());
 
@@ -2529,23 +2347,17 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
     String pname;
 
     mtype_profile = element->getChildByName(_("mimetype-profile-mappings"));
-    if (mtype_profile != nullptr)
-    {
-        for (int e = 0; e < mtype_profile->elementChildCount(); e++)
-        {
+    if (mtype_profile != nullptr) {
+        for (int e = 0; e < mtype_profile->elementChildCount(); e++) {
             Ref<Element> child = mtype_profile->getElementChild(e);
-            if (child->getName() == "transcode")
-            {
+            if (child->getName() == "transcode") {
                 mt = child->getAttribute(_("mimetype"));
                 pname = child->getAttribute(_("using"));
 
-                if (string_ok(mt) && string_ok(pname))
-                {
+                if (string_ok(mt) && string_ok(pname)) {
                     Ref<DictionaryElement> del(new DictionaryElement(mt, pname));
                     mt_mappings->append(del);
-                }
-                else
-                {
+                } else {
                     throw _Exception(_("error in configuration: invalid or missing mimetype to profile mapping"));
                 }
             }
@@ -2556,8 +2368,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
     if (profiles == nullptr)
         return list;
 
-    for (int i = 0; i < profiles->elementChildCount(); i++)
-    {
+    for (int i = 0; i < profiles->elementChildCount(); i++) {
         Ref<Element> child = profiles->getElementChild(i);
         if (child->getName() != "profile")
             continue;
@@ -2565,14 +2376,14 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
         param = child->getAttribute(_("enabled"));
         if (!validateYesNo(param))
             throw _Exception(_("Error in config file: incorrect parameter "
-                           "for <profile enabled=\"\" /> attribute"));
+                               "for <profile enabled=\"\" /> attribute"));
 
         if (param == "no")
             continue;
 
         param = child->getAttribute(_("type"));
         if (!string_ok(param))
-             throw _Exception(_("error in configuration: missing transcoding type in profile"));
+            throw _Exception(_("error in configuration: missing transcoding type in profile"));
 
         if (param == "external")
             tr_type = TR_External;
@@ -2594,24 +2405,21 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
             throw _Exception(_("error in configuration: invalid target mimetype in transcoding profile"));
         prof->setTargetMimeType(param);
 
-        if (child->getChildByName(_("resolution")) != nullptr)
-        {
+        if (child->getChildByName(_("resolution")) != nullptr) {
             param = child->getChildText(_("resolution"));
-            if (string_ok(param))
-            {
+            if (string_ok(param)) {
                 if (check_resolution(param))
                     prof->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), param);
             }
         }
 
         Ref<Element> avi_fcc = child->getChildByName(_("avi-fourcc-list"));
-        if (avi_fcc != nullptr)
-        {
+        if (avi_fcc != nullptr) {
             String mode = avi_fcc->getAttribute(_("mode"));
             if (!string_ok(mode))
                 throw _Exception(_("error in configuration: avi-fourcc-list requires a valid \"mode\" attribute"));
 
-            avi_fourcc_listmode_t fcc_mode; 
+            avi_fourcc_listmode_t fcc_mode;
             if (mode == "ignore")
                 fcc_mode = FCC_Ignore;
             else if (mode == "process")
@@ -2621,11 +2429,9 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
             else
                 throw _Exception(_("error in configuration: invalid mode given for avi-fourcc-list: \"") + mode + _("\""));
 
-            if (fcc_mode != FCC_None)
-            {
+            if (fcc_mode != FCC_None) {
                 Ref<Array<StringBase> > fcc_list(new Array<StringBase>());
-                for (int f = 0; f < avi_fcc->elementChildCount(); f++)
-                {
+                for (int f = 0; f < avi_fcc->elementChildCount(); f++) {
                     Ref<Element> fourcc = avi_fcc->getElementChild(f);
                     if (fourcc->getName() != "fourcc")
                         continue;
@@ -2640,8 +2446,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
             }
         }
 
-        if (child->getChildByName(_("accept-url")) != nullptr)
-        {
+        if (child->getChildByName(_("accept-url")) != nullptr) {
             param = child->getChildText(_("accept-url"));
             if (!validateYesNo(param))
                 throw _Exception(_("Error in config file: incorrect parameter "
@@ -2652,15 +2457,13 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                 prof->setAcceptURL(false);
         }
 
-        if (child->getChildByName(_("sample-frequency")) != nullptr)
-        {
+        if (child->getChildByName(_("sample-frequency")) != nullptr) {
             param = child->getChildText(_("sample-frequency"));
             if (param == "source")
                 prof->setSampleFreq(SOURCE);
             else if (param == "off")
                 prof->setSampleFreq(OFF);
-            else
-            {
+            else {
                 int freq = param.toInt();
                 if (freq <= 0)
                     throw _Exception(_("Error in config file: incorrect "
@@ -2671,15 +2474,13 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
             }
         }
 
-        if (child->getChildByName(_("audio-channels")) != nullptr)
-        {
+        if (child->getChildByName(_("audio-channels")) != nullptr) {
             param = child->getChildText(_("audio-channels"));
             if (param == "source")
                 prof->setNumChannels(SOURCE);
             else if (param == "off")
                 prof->setNumChannels(OFF);
-            else
-            {
+            else {
                 int chan = param.toInt();
                 if (chan <= 0)
                     throw _Exception(_("Error in config file: incorrect "
@@ -2689,8 +2490,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
             }
         }
 
-        if (child->getChildByName(_("hide-original-resource")) != nullptr)
-        {
+        if (child->getChildByName(_("hide-original-resource")) != nullptr) {
             param = child->getChildText(_("hide-original-resource"));
             if (!validateYesNo(param))
                 throw _Exception(_("Error in config file: incorrect parameter "
@@ -2701,8 +2501,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                 prof->setHideOriginalResource(false);
         }
 
-        if (child->getChildByName(_("dvd-only")) != nullptr)
-        {
+        if (child->getChildByName(_("dvd-only")) != nullptr) {
             param = child->getChildText(_("dvd-only"));
             if (!validateYesNo(param))
                 throw _Exception(_("Error in config file: incorrect parameter "
@@ -2713,8 +2512,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                 prof->setOnlyDVD(false);
         }
 
-        if (child->getChildByName(_("accept-dvd-mpeg")) != nullptr)
-        {
+        if (child->getChildByName(_("accept-dvd-mpeg")) != nullptr) {
             param = child->getChildText(_("accept-dvd-mpeg"));
             if (!validateYesNo(param))
                 throw _Exception(_("Error in config file: incorrect parameter "
@@ -2723,11 +2521,9 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                 prof->setTheora(true);
             else
                 prof->setTheora(false);
- 
         }
 
-        if (child->getChildByName(_("thumbnail")) != nullptr)
-        {
+        if (child->getChildByName(_("thumbnail")) != nullptr) {
             param = child->getChildText(_("thumbnail"));
             if (!validateYesNo(param))
                 throw _Exception(_("Error in config file: incorrect parameter "
@@ -2738,12 +2534,11 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                 prof->setThumbnail(false);
         }
 
-        if (child->getChildByName(_("first-resource")) != nullptr)
-        {
+        if (child->getChildByName(_("first-resource")) != nullptr) {
             param = child->getChildText(_("first-resource"));
             if (!validateYesNo(param))
                 throw _Exception(_("Error in config file: incorrect parameter "
-                            "for <profile first-resource=\"\" /> attribute"));
+                                   "for <profile first-resource=\"\" /> attribute"));
 
             if (param == "yes")
                 prof->setFirstResource(true);
@@ -2751,12 +2546,11 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                 prof->setFirstResource(false);
         }
 
-        if (child->getChildByName(_("use-chunked-encoding")) != nullptr)
-        {
+        if (child->getChildByName(_("use-chunked-encoding")) != nullptr) {
             param = child->getChildText(_("use-chunked-encoding"));
             if (!validateYesNo(param))
                 throw _Exception(_("Error in config file: incorrect parameter "
-                            "for use-chunked-encoding tag"));
+                                   "for use-chunked-encoding tag"));
 
             if (param == "yes")
                 prof->setChunked(true);
@@ -2767,135 +2561,126 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
         Ref<Element> sub = child->getChildByName(_("agent"));
         if (sub == nullptr)
             throw _Exception(_("error in configuration: transcoding "
-                               "profile \"") + prof->getName() + 
-                               "\" is missing the <agent> option");
+                               "profile \"")
+                + prof->getName() + "\" is missing the <agent> option");
 
         param = sub->getAttribute(_("command"));
         if (!string_ok(param))
-            throw _Exception(_("error in configuration: transcoding " 
-                               "profile \"") + prof->getName() + 
-                               "\" has an invalid command setting");
+            throw _Exception(_("error in configuration: transcoding "
+                               "profile \"")
+                + prof->getName() + "\" has an invalid command setting");
         prof->setCommand(param);
 
         String tmp_path;
-        if (param.startsWith(_(_DIR_SEPARATOR)))
-        {
+        if (param.startsWith(_(_DIR_SEPARATOR))) {
             if (!check_path(param))
                 throw _Exception(_("error in configuration, transcoding "
-                                   "profile \"") + prof->getName() +
-                              "\" could not find transcoding command " + param);
+                                   "profile \"")
+                    + prof->getName() + "\" could not find transcoding command " + param);
             tmp_path = param;
-        }
-        else
-        {
+        } else {
             tmp_path = find_in_path(param);
             if (!string_ok(tmp_path))
                 throw _Exception(_("error in configuration, transcoding "
-                                   "profile \"") + prof->getName() + 
-                      "\" could not find transcoding command " + param +
-                      " in $PATH");
+                                   "profile \"")
+                    + prof->getName() + "\" could not find transcoding command " + param + " in $PATH");
         }
 
         int err = 0;
         if (!is_executable(tmp_path, &err))
             throw _Exception(_("error in configuration, transcoding "
-                               "profile ") + prof->getName() + 
-                               ": transcoder " + param + 
-                               "is not executable - " + strerror(err));
+                               "profile ")
+                + prof->getName() + ": transcoder " + param + "is not executable - " + strerror(err));
 
         param = sub->getAttribute(_("arguments"));
         if (!string_ok(param))
-            throw _Exception(_("error in configuration: transcoding profile ") +
-                    prof->getName() + " has an empty argument string");
+            throw _Exception(_("error in configuration: transcoding profile ") + prof->getName() + " has an empty argument string");
 
         prof->setArguments(param);
 
-        sub = child->getChildByName(_("buffer")); 
+        sub = child->getChildByName(_("buffer"));
         if (sub == nullptr)
             throw _Exception(_("error in configuration: transcoding "
-                               "profile \"") + prof->getName() + 
-                               "\" is missing the <buffer> option");
+                               "profile \"")
+                + prof->getName() + "\" is missing the <buffer> option");
 
         param = sub->getAttribute(_("size"));
         if (!string_ok(param))
             throw _Exception(_("error in configuration: transcoding "
-                               "profile \"") + prof->getName() + 
-                               "\" <buffer> tag is missing the size attribute");
+                               "profile \"")
+                + prof->getName() + "\" <buffer> tag is missing the size attribute");
         itmp = param.toInt();
         if (itmp < 0)
             throw _Exception(_("error in configuration: transcoding "
-                               "profile \"") + prof->getName() + 
-                               "\" buffer size can not be negative");
+                               "profile \"")
+                + prof->getName() + "\" buffer size can not be negative");
         bs = itmp;
 
         param = sub->getAttribute(_("chunk-size"));
         if (!string_ok(param))
             throw _Exception(_("error in configuration: transcoding "
-                               "profile \"") + prof->getName() + 
-                               "\" <buffer> tag is missing the chunk-size " 
-                               "attribute");
+                               "profile \"")
+                + prof->getName() + "\" <buffer> tag is missing the chunk-size "
+                                    "attribute");
         itmp = param.toInt();
         if (itmp < 0)
             throw _Exception(_("error in configuration: transcoding "
-                               "profile \"") + prof->getName() + 
-                               "\" chunk size can not be negative");
+                               "profile \"")
+                + prof->getName() + "\" chunk size can not be negative");
         cs = itmp;
 
         if (cs > bs)
             throw _Exception(_("error in configuration: transcoding "
-                               "profile \"") + prof->getName() + 
-                               "\" chunk size can not be greater than "
-                               "buffer size");
+                               "profile \"")
+                + prof->getName() + "\" chunk size can not be greater than "
+                                    "buffer size");
 
         param = sub->getAttribute(_("fill-size"));
         if (!string_ok(param))
             throw _Exception(_("error in configuration: transcoding "
-                               "profile \"") + prof->getName() + 
-                               "\" <buffer> tag is missing the fill-size "
-                               "attribute");
+                               "profile \"")
+                + prof->getName() + "\" <buffer> tag is missing the fill-size "
+                                    "attribute");
         itmp = param.toInt();
         if (i < 0)
             throw _Exception(_("error in configuration: transcoding "
-                               "profile \"") + prof->getName() + 
-                               "\" fill size can not be negative");
+                               "profile \"")
+                + prof->getName() + "\" fill size can not be negative");
         fs = itmp;
 
         if (fs > bs)
             throw _Exception(_("error in configuration: transcoding "
-                               "profile \"") + prof->getName() + 
-                               "\" fill size can not be greater than "
-                               "buffer size");
+                               "profile \"")
+                + prof->getName() + "\" fill size can not be greater than "
+                                    "buffer size");
 
         prof->setBufferOptions(bs, cs, fs);
 
-        if (mtype_profile == nullptr)
-        {
+        if (mtype_profile == nullptr) {
             throw _Exception(_("error in configuration: transcoding "
                                "profiles exist, but no mimetype to profile "
                                "mappings specified"));
         }
 
-        for (int k = 0; k < mt_mappings->size(); k++)
-        {
-            if (mt_mappings->get(k)->getValue() == prof->getName())
-            {
+        for (int k = 0; k < mt_mappings->size(); k++) {
+            if (mt_mappings->get(k)->getValue() == prof->getName()) {
                 list->add(mt_mappings->get(k)->getKey(), prof);
                 set = true;
             }
         }
 
         if (!set)
-             throw _Exception(_("error in configuration: you specified" 
-                                "a mimetype to transcoding profile mapping, "
-                                "but no match for profile \"") + 
-                                prof->getName() + "\" exists");
+            throw _Exception(_("error in configuration: you specified"
+                               "a mimetype to transcoding profile mapping, "
+                               "but no match for profile \"")
+                + prof->getName() + "\" exists");
         else
             set = false;
     }
 
     return list;
 }
-#endif//TRANSCODING
+#endif //TRANSCODING
 
 Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::Element> element, scan_mode_t scanmode)
 {
@@ -2907,124 +2692,92 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
     bool recursive;
     bool hidden;
     unsigned int interval;
-  
+
     if (element == nullptr)
         return list;
 
-    for (int i = 0; i < element->elementChildCount(); i++)
-    {
+    for (int i = 0; i < element->elementChildCount(); i++) {
         hidden = false;
         recursive = false;
 
         Ref<Element> child = element->getElementChild(i);
-        if (child->getName() == "directory")
-        {
+        if (child->getName() == "directory") {
             location = child->getAttribute(_("location"));
-            if (!string_ok(location))
-            {
+            if (!string_ok(location)) {
                 throw _Exception(_("autoscan directory with invalid location!\n"));
             }
 
-            try
-            {
+            try {
                 location = normalizePath(location);
-            }
-            catch (const Exception & e)
-            {
-                throw _Exception(_("autoscan directory \"") + 
-                        location + "\": " +  e.getMessage());
+            } catch (const Exception& e) {
+                throw _Exception(_("autoscan directory \"") + location + "\": " + e.getMessage());
             }
 
-            if (check_path(location, false))
-            {
-                throw _Exception(_("autoscan ") + location + 
-                                  " - not a directory!");
+            if (check_path(location, false)) {
+                throw _Exception(_("autoscan ") + location + " - not a directory!");
             }
-            
+
             temp = child->getAttribute(_("mode"));
-            if (!string_ok(temp) || ((temp != "timed") && (temp != "inotify")))
-            {
-                throw _Exception(_("autoscan directory ") + location + 
-                        ": mode attribute is missing or invalid");
-            }
-            else if (temp == "timed")
-            {
+            if (!string_ok(temp) || ((temp != "timed") && (temp != "inotify"))) {
+                throw _Exception(_("autoscan directory ") + location + ": mode attribute is missing or invalid");
+            } else if (temp == "timed") {
                 mode = TimedScanMode;
-            }
-            else
+            } else
                 mode = InotifyScanMode;
 
             if (mode != scanmode)
                 continue; // skip scan modes that we are not interested in (content manager needs one mode type per array)
 
             interval = 0;
-            if (mode == TimedScanMode)
-            {
-                temp =  child->getAttribute(_("level"));
-                if (!string_ok(temp))
-                {
-                    throw _Exception(_("autoscan directory ") + 
-                            location + 
-                            ": level attribute is missing or invalid");
-                }
-                else
-                {
+            if (mode == TimedScanMode) {
+                temp = child->getAttribute(_("level"));
+                if (!string_ok(temp)) {
+                    throw _Exception(_("autoscan directory ") + location + ": level attribute is missing or invalid");
+                } else {
                     if (temp == "basic")
                         level = BasicScanLevel;
                     else if (temp == "full")
                         level = FullScanLevel;
-                    else
-                    {
+                    else {
                         throw _Exception(_("autoscan directory ")
-                                         + location + ": level attribute " +
-                                         temp + "is invalid");
+                            + location + ": level attribute " + temp + "is invalid");
                     }
                 }
 
                 temp = child->getAttribute(_("interval"));
-                if (!string_ok(temp))
-                {
-                    throw _Exception(_("autoscan directory ") 
-                            + location +
-                           ": interval attribute is required for timed mode");
+                if (!string_ok(temp)) {
+                    throw _Exception(_("autoscan directory ")
+                        + location + ": interval attribute is required for timed mode");
                 }
 
                 interval = temp.toUInt();
 
-                if (interval == 0)
-                {
-                    throw _Exception(_("autoscan directory ") + 
-                            location + ": invalid interval attribute");
+                if (interval == 0) {
+                    throw _Exception(_("autoscan directory ") + location + ": invalid interval attribute");
                     continue;
                 }
-            }
-            // level is irrelevant for inotify scan, nevertheless we will set
-            // it to somthing valid
-            else
+            } else {
+                // level is irrelevant for inotify scan, nevertheless we will set
+                // it to somthing valid
                 level = FullScanLevel;
+            }
 
             temp = child->getAttribute(_("recursive"));
-            if (!string_ok(temp))
-            {
-                throw _Exception(_("autoscan directory ") + location +
-                        ": recursive attribute is missing or invalid");
-            }
-            else
-            {
-               if (temp == "yes")
-                   recursive = true;
-               else if (temp == "no")
-                   recursive = false;
-               else
-               {
-                   throw _Exception(_("autoscan directory ") + location
-                          + ": recusrive attribute " + temp + " is invalid");
-               }
+            if (!string_ok(temp)) {
+                throw _Exception(_("autoscan directory ") + location + ": recursive attribute is missing or invalid");
+            } else {
+                if (temp == "yes")
+                    recursive = true;
+                else if (temp == "no")
+                    recursive = false;
+                else {
+                    throw _Exception(_("autoscan directory ") + location
+                        + ": recusrive attribute " + temp + " is invalid");
+                }
             }
 
             temp = child->getAttribute(_("hidden-files"));
-            if (!string_ok(temp))
-            {
+            if (!string_ok(temp)) {
                 temp = getOption(_("/import/attribute::hidden-files"));
             }
 
@@ -3032,41 +2785,31 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
                 hidden = true;
             else if (temp == "no")
                 hidden = false;
-            else
-            {
-                throw _Exception(_("autoscan directory ") + location +
-                            ": hidden attribute " + temp + " is invalid");
+            else {
+                throw _Exception(_("autoscan directory ") + location + ": hidden attribute " + temp + " is invalid");
             }
 
             temp = child->getAttribute(_("interval"));
             interval = 0;
-            if (mode == TimedScanMode)
-            {
-                if (!string_ok(temp))
-                {
-                    throw _Exception(_("autoscan directory ") 
-                            + location +
-                           ": interval attribute is required for timed mode");
+            if (mode == TimedScanMode) {
+                if (!string_ok(temp)) {
+                    throw _Exception(_("autoscan directory ")
+                        + location + ": interval attribute is required for timed mode");
                 }
 
                 interval = temp.toUInt();
 
-                if (interval == 0)
-                {
-                    throw _Exception(_("autoscan directory ") + 
-                            location + ": invalid interval attribute");
+                if (interval == 0) {
+                    throw _Exception(_("autoscan directory ") + location + ": invalid interval attribute");
                 }
             }
-            
+
             Ref<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, true, -1, interval, hidden));
-            try
-            {
-                list->add(dir); 
-            }
-            catch (const Exception & e)
-            {
+            try {
+                list->add(dir);
+            } catch (const Exception& e) {
                 throw _Exception(_("Could not add ") + location + ": "
-                        + e.getMessage());
+                    + e.getMessage());
             }
         }
     }
@@ -3078,26 +2821,22 @@ void ConfigManager::dumpOptions()
 {
 #ifdef TOMBDEBUG
     log_debug("Dumping options!\n");
-    for (int i = 0; i < (int)CFG_MAX; i++)
-    {
-        try
-        {
+    for (int i = 0; i < (int)CFG_MAX; i++) {
+        try {
             log_debug("    Option %02d - %s\n", i,
-                    getOption((config_option_t)i).c_str());
+                getOption((config_option_t)i).c_str());
+        } catch (const Exception& e) {
         }
-        catch (const Exception & e) {}
-        try
-        {
+        try {
             log_debug(" IntOption %02d - %d\n", i,
-                    getIntOption((config_option_t)i));
+                getIntOption((config_option_t)i));
+        } catch (const Exception& e) {
         }
-        catch (const Exception & e) {}
-        try
-        {
+        try {
             log_debug("BoolOption %02d - %s\n", i,
-                    (getBoolOption((config_option_t)i) ? "true" : "false"));
+                (getBoolOption((config_option_t)i) ? "true" : "false"));
+        } catch (const Exception& e) {
         }
-        catch (const Exception & e) {}
     }
 #endif
 }
@@ -3107,13 +2846,10 @@ Ref<Array<StringBase> > ConfigManager::createArrayFromNodeset(Ref<mxml::Element>
     String attrValue;
     Ref<Array<StringBase> > arr(new Array<StringBase>());
 
-    if (element != nullptr)
-    {
-        for (int i = 0; i < element->elementChildCount(); i++)
-        {
+    if (element != nullptr) {
+        for (int i = 0; i < element->elementChildCount(); i++) {
             Ref<Element> child = element->getElementChild(i);
-            if (child->getName() == nodeName)
-            {
+            if (child->getName() == nodeName) {
                 attrValue = child->getAttribute(attrName);
 
                 if (string_ok(attrValue))
@@ -3130,8 +2866,7 @@ Ref<Array<StringBase> > ConfigManager::createArrayFromNodeset(Ref<mxml::Element>
 String ConfigManager::getOption(config_option_t option)
 {
     Ref<ConfigOption> r = options->get(option);
-    if (r.getPtr() == nullptr)
-    {
+    if (r.getPtr() == nullptr) {
         throw _Exception(_("option not set"));
     }
     return r->getOption();
@@ -3140,8 +2875,7 @@ String ConfigManager::getOption(config_option_t option)
 int ConfigManager::getIntOption(config_option_t option)
 {
     Ref<ConfigOption> o = options->get(option);
-    if (o.getPtr() == nullptr)
-    {
+    if (o.getPtr() == nullptr) {
         throw _Exception(_("option not set"));
     }
     return o->getIntOption();
@@ -3150,8 +2884,7 @@ int ConfigManager::getIntOption(config_option_t option)
 bool ConfigManager::getBoolOption(config_option_t option)
 {
     Ref<ConfigOption> o = options->get(option);
-    if (o.getPtr() == nullptr)
-    {
+    if (o.getPtr() == nullptr) {
         throw _Exception(_("option not set"));
     }
     return o->getBoolOption();
@@ -3193,18 +2926,16 @@ Ref<TranscodingProfileList> ConfigManager::getTranscodingProfileListOption(confi
 
 #ifdef ONLINE_SERVICES
 Ref<Array<Object> > ConfigManager::createServiceTaskList(service_type_t service,
-                                                         Ref<Element> element)
+    Ref<Element> element)
 {
     Ref<Array<Object> > arr(new Array<Object>());
 
     if (element == nullptr)
         return arr;
 #ifdef YOUTUBE
-    if (service == OS_YouTube)
-    {
+    if (service == OS_YouTube) {
         Ref<YouTubeService> yt(new YouTubeService());
-        for (int i = 0; i < element->elementChildCount(); i++)
-        {
+        for (int i = 0; i < element->elementChildCount(); i++) {
             Ref<Object> option = yt->defineServiceTask(element->getElementChild(i), RefCast(options->get(CFG_ONLINE_CONTENT_YOUTUBE_RACY), Object));
             arr->append(option);
         }
