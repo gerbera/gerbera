@@ -393,6 +393,9 @@ target_link_libraries (mediatomb ${UPNP_LIBRARIES})
 if (UPNP_VERSION_STRING VERSION_LESS "1.8.0")
     message(FATAL_ERROR "MediaTomb requires libupnp 1.8.0 or above.")
 endif()
+if (NOT UPNP_HAS_IPV6)
+    message(FATAL_ERROR "MediaTomb requires libupnp with IPv6 support.")
+endif()
 
 # Debian ships a snapshot from 2010: libupnp4 (1.8.0~svn20100507-1.2)
 # This is missing templated types so we need to ifdef
