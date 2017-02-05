@@ -344,9 +344,8 @@ protected:
     /// key:value paris: "1":"2", "3":"4"
     zmm::Ref<Dictionary> createDictionaryFromNodeset(zmm::Ref<mxml::Element> element, zmm::String nodeName, zmm::String keyAttr, zmm::String valAttr, bool tolower = false);
  
-    /// \brief Creates an aray of AutoscanDirectory objects from
-    /// an XML nodeset.
-    /// \param element starting element of the ndoeset.
+    /// \brief Creates an array of AutoscanDirectory objects from a XML nodeset.
+    /// \param element starting element of the nodeset.
     /// \param scanmode add only directories with the specified scanmode to the array
     zmm::Ref<AutoscanList> createAutoscanListFromNodeset(zmm::Ref<mxml::Element> element, scan_mode_t scanmode);
   
