@@ -442,10 +442,6 @@ protected:
                                     unsigned int parentTaskID = 0,
                                     bool unscheduled_refresh = false);
 
-    void _fetchOnlineContent(zmm::Ref<OnlineService>, 
-                             unsigned int parentTaskID, 
-                             bool unscheduled_refresh);
-
 #ifdef YOUTUBE
     std::mutex urlcache_mutex;
     using AutoLockYT = std::lock_guard<std::mutex>;

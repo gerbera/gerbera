@@ -1635,65 +1635,7 @@ void ContentManager::fetchOnlineContentInternal(Ref<OnlineService> service,
                          service->getServiceName());
     task->setParentID(parentTaskID);
     service->incTaskCount();
-    addTask(task, lowPriority);    
-}
-
-void ContentManager::_fetchOnlineContent(Ref<OnlineService> service, 
-                                         unsigned int parentTaskID, 
-                                         bool unscheduled_refresh)
-{
-    throw _Exception(_("Should not be called anymore!"));
-    log_debug("Fetching online content!\n");
-    if (layout_enabled)
-        initLayout();
-
-    if (service->refreshServiceData(layout) && (!shutdownFlag))
-    {
-        log_debug("Scheduling another task for online service: %s\n",
-                  service->getServiceName().c_str());
-
-        if ((service->getRefreshInterval() > 0) || unscheduled_refresh)
-            fetchOnlineContentInternal(service, true, true, parentTaskID, 
-                                       unscheduled_refresh);
-    }
-    else
-    {
-        log_debug("Finished fetch cycle for service: %s\n",
-                  service->getServiceName().c_str());
-
-        if (service->getItemPurgeInterval() > 0)
-        {
-            Ref<Storage> storage = Storage::getInstance();
-            Ref<IntArray> ids = storage->getServiceObjectIDs(service->getStoragePrefix());
-
-            struct timespec current, last;
-            getTimespecNow(&current);
-            last.tv_nsec = 0;
-            String temp;
-
-            for (int i = 0; i < ids->size(); i++)
-            {
-                int object_id = ids->get(i);
-                Ref<CdsObject> obj = storage->loadObject(object_id);
-                if (obj == nullptr)
-                    continue;
-
-                temp = obj->getAuxData(_(ONLINE_SERVICE_LAST_UPDATE));
-                if (!string_ok(temp))
-                    continue;
-
-                last.tv_sec = temp.toLong();
-
-                if ((service->getItemPurgeInterval() > 0) && 
-                    ((current.tv_sec - last.tv_sec) > service->getItemPurgeInterval()))
-                {
-                    log_debug("Purging old online service object %s\n", 
-                            obj->getTitle().c_str());
-                    removeObject(object_id, false);
-                }
-            } 
-        }
-    }
+    addTask(task, lowPriority);
 }
 
 void ContentManager::cleanupOnlineServiceObjects(zmm::Ref<OnlineService> service)
