@@ -51,6 +51,7 @@ using namespace mxml;
 FileIOHandler::FileIOHandler(String filename) : IOHandler()
 {
     this->filename = filename;
+    this->f = nullptr;
 }
 
 void FileIOHandler::open(IN enum UpnpOpenFileMode mode)

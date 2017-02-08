@@ -17,6 +17,7 @@ TaskProcessor::TaskProcessor() : Singleton<TaskProcessor>()
     taskID = 1;
     working = false;
     shutdownFlag = false;
+    taskThread = 0;
 
     taskQueue = Ref<ObjectQueue<GenericTask> >(new ObjectQueue<GenericTask>(TP_INITIAL_QUEUE_SIZE));
 }

@@ -54,6 +54,7 @@ MemIOHandler::MemIOHandler(const void *buffer, int length) : IOHandler()
     this->buffer = (char *)MALLOC(length);
     this->length = length;
     memcpy(this->buffer, buffer, length);
+    pos = -1;
 }
 
 MemIOHandler::MemIOHandler(String str) : IOHandler()
@@ -61,6 +62,7 @@ MemIOHandler::MemIOHandler(String str) : IOHandler()
     this->length = str.length();
     this->buffer = (char *)MALLOC(length);
     memcpy(this->buffer, str.c_str(), length);
+    pos = -1;
 }
 
 MemIOHandler::~MemIOHandler()

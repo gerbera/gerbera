@@ -37,6 +37,7 @@ using namespace std;
 ThreadExecutor::ThreadExecutor()
 {
     threadShutdown = false;
+    thread = 0;
 }
 
 ThreadExecutor::~ThreadExecutor()

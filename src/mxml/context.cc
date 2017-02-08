@@ -42,6 +42,8 @@ Context::Context(String location) : Object()
 }
 Context::Context()
 {
+    line = 1;
+    col = 1;
 }
 
 Ref<Context> Context::clone()
