@@ -2171,8 +2171,9 @@ int SQLStorage::_getAutoscanObjectID(int autoscanID)
 
 void SQLStorage::_autoscanChangePersistentFlag(int objectID, bool persistent)
 {
-    if (objectID == INVALID_OBJECT_ID && objectID == INVALID_OBJECT_ID_2)
+    if (objectID == INVALID_OBJECT_ID || objectID == INVALID_OBJECT_ID_2)
         return;
+
     Ref<StringBuffer> q(new StringBuffer());
     *q << "UPDATE " << TQ(CDS_OBJECT_TABLE)
         << " SET " << TQ("flags") << " = (" << TQ("flags")
