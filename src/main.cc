@@ -239,19 +239,22 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
     // create pid file
     if (pid_file != nullptr) {
         pid_fd = fopen(pid_file.c_str(), "w");
+
         if (pid_fd == nullptr) {
             log_error("Could not write pid file %s : %s\n", pid_file.c_str(),
                       strerror(errno));
-
+        } else {
             pid_t cur_pid = getpid();
             String pid = String::from(cur_pid);
 
-            int size = fwrite(pid.c_str(), sizeof(char), pid.length(), pid_fd);
+            size_t size =
+                fwrite(pid.c_str(), sizeof(char), pid.length(), pid_fd);
             fclose(pid_fd);
 
-            if (size < pid.length())
+            if (size < pid.length()) {
                 log_error("Error when writing pid file %s : %s\n",
                           pid_file.c_str(), strerror(errno));
+            }
         }
     }
 
