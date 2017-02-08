@@ -2369,9 +2369,10 @@ int SQLStorage::getNextID()
 
 void SQLStorage::loadLastID()
 {
+    AutoLock lock(nextIDMutex);
+
     // we don't rely on automatic db generated ids, because of our caching
-    
-    Ref<StringBuffer> qb(new StringBuffer());
+        Ref<StringBuffer> qb(new StringBuffer());
     *qb << "SELECT MAX(" << TQ("id") << ')'
         << " FROM " << TQ(CDS_OBJECT_TABLE);
     Ref<SQLResult> res = select(qb);
@@ -2381,7 +2382,7 @@ void SQLStorage::loadLastID()
     Ref<SQLRow> row = res->nextRow();
     if (row == nullptr)
         throw _Exception(_("could not load lastID (row==nullptr)"));
-    
+
     lastID = row->col(0).toInt();
     if (lastID < CDS_ID_FS_ROOT)
         throw _Exception(_("could not load correct lastID (db not initialized?)"));
