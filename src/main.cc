@@ -251,7 +251,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
                 fwrite(pid.c_str(), sizeof(char), pid.length(), pid_fd);
             fclose(pid_fd);
 
-            if (size < pid.length()) {
+            if (static_cast<int>(size) < pid.length()) {
                 log_error("Error when writing pid file %s : %s\n",
                           pid_file.c_str(), strerror(errno));
             }
