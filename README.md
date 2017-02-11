@@ -89,7 +89,7 @@ make install
 
 | Lib          	| Version 	| Required? 	| Note                 	|
 |--------------	|---------	|-----------	|----------------------	|
-| libupnp      	| 1.8     	| Required  	| [pupnp] (with IPv6)   |
+| libupnp      	| 1.8     	| Required  	| [pupnp] with IPv6     |
 | libuuid      	|         	| Required  	|                      	|
 | expat        	|         	| Required  	|                      	|
 | sqlite3      	|         	| Required  	|                      	|
