@@ -87,22 +87,22 @@ make install
 
 ## Dependencies
 
-| Lib          	| Version 	| Required? 	| Note                 	|
-|--------------	|---------	|-----------	|----------------------	|
-| libupnp      	| 1.8     	| Required  	| [pupnp] with IPv6     |
-| libuuid      	|         	| Required  	|                      	|
-| expat        	|         	| Required  	|                      	|
-| sqlite3      	|         	| Required  	|                      	|
-| mysql        	|         	| Optional  	| Client Libs          	|
-| curl         	|         	| Optional  	| Enables web services 	|
-| spidermonkey 	| 1.8.5   	| Optional  	| Enables scripting    	|
-| taglib       	| 1.11    	| Optional  	| Audio tag support    	|
-| libmagic     	|         	| Optional  	| File type detection  	|
-| ffmpeg/libav 	|         	| Optional  	| File metadata        	|
-| libdvdnav    	|         	| Optional  	| DVD import script    	|
-| libexif      	|         	| Optional  	| JPEG Exif metadata   	|
-| lastfmlib    	|         	| Optional  	| Enables scrobbling   	|
-|              	|         	|           	|                      	|
+| Lib          	| Version 	| Required? 	| Note                 	    |
+|--------------	|---------	|-----------	|-------------------------- |
+| libupnp      	| 1.8     	| Required  	| [pupnp] with IPv6 support |
+| libuuid      	|         	| Required  	|                      	    |
+| expat        	|         	| Required  	|                      	    |
+| sqlite3      	|         	| Required  	|                      	    |
+| mysql        	|         	| Optional  	| Client Libs          	    |
+| curl         	|         	| Optional  	| Enables web services 	    |
+| spidermonkey 	| 1.8.5   	| Optional  	| Enables scripting         |
+| taglib       	| 1.11    	| Optional  	| Audio tag support         |
+| libmagic     	|         	| Optional  	| File type detection  	    |
+| ffmpeg/libav 	|         	| Optional  	| File metadata             |
+| libdvdnav    	|         	| Optional  	| DVD import script         |
+| libexif      	|         	| Optional  	| JPEG Exif metadata        |
+| lastfmlib    	|         	| Optional  	| Enables scrobbling   	    |
+|              	|         	|           	|                      	    |
 
 ## Branches
 **master**: Where the action happens
