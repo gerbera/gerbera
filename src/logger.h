@@ -50,7 +50,7 @@ void log_close();
 #define log_js(format, ...) _log_js(format, ## __VA_ARGS__)
 
 #ifdef TOMBDEBUG
-    #define log_debug(format, ...) _log_debug(format, __FILE__, __LINE__, __func__, ## __VA_ARGS__)
+    #define log_debug(format, ...) _log_debug(format, __FILENAME__, __LINE__, __func__, ## __VA_ARGS__)
     #define print_backtrace() _print_backtrace()
 #else
     #define log_debug(format, ...)
