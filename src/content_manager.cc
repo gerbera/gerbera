@@ -29,52 +29,52 @@
 
 /// \file content_manager.cc
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <dirent.h>
 #include <cerrno>
 #include <cstring>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 
-#include "tools.h"
-#include "rexp.h"
-#include "content_manager.h"
 #include "config_manager.h"
-#include "update_manager.h"
-#include "string_converter.h"
-#include "metadata_handler.h"
-#include "session_manager.h"
-#include "timer.h"
-#include "layout/fallback_layout.h"
+#include "content_manager.h"
 #include "filesystem.h"
+#include "layout/fallback_layout.h"
+#include "metadata_handler.h"
+#include "rexp.h"
+#include "session_manager.h"
+#include "string_converter.h"
+#include "timer.h"
+#include "tools.h"
+#include "update_manager.h"
 
 #ifdef HAVE_JS
-    #include "layout/js_layout.h"
+#include "layout/js_layout.h"
 #endif
 
 #ifdef EXTERNAL_TRANSCODING
-    #include "process.h"
+#include "process.h"
 #endif
 
 #ifdef YOUTUBE
-    #include "youtube_service.h"
-    #include <ctime>
+#include "youtube_service.h"
+#include <ctime>
 #endif
 
 #ifdef SOPCAST
-    #include "sopcast_service.h"
+#include "sopcast_service.h"
 #endif
 
 #ifdef ATRAILERS
-    #include "atrailers_service.h"
+#include "atrailers_service.h"
 #endif
 
 #ifdef ONLINE_SERVICES
-    #include "task_processor.h"
+#include "task_processor.h"
 #endif
 
-#define DEFAULT_DIR_CACHE_CAPACITY  10
-#define CM_INITIAL_QUEUE_SIZE       20
+#define DEFAULT_DIR_CACHE_CAPACITY 10
+#define CM_INITIAL_QUEUE_SIZE 20
 
 #ifdef HAVE_MAGIC
 // for older versions of filemagic
@@ -82,7 +82,7 @@ extern "C" {
 #include <magic.h>
 }
 
-struct magic_set *ms = nullptr;
+struct magic_set* ms = nullptr;
 #endif
 
 using namespace zmm;
@@ -90,7 +90,6 @@ using namespace mxml;
 using namespace std;
 
 #define MIMETYPE_REGEXP "^([a-z0-9_-]+/[a-z0-9_-]+)"
-
 
 static String get_filename(String path)
 {
@@ -113,46 +112,38 @@ ContentManager::ContentManager()
     working = false;
     shutdownFlag = false;
     layout_enabled = false;
-    
+
     acct = Ref<CMAccounting>(new CMAccounting());
     taskQueue1 = Ref<ObjectQueue<GenericTask> >(new ObjectQueue<GenericTask>(CM_INITIAL_QUEUE_SIZE));
-    taskQueue2 = Ref<ObjectQueue<GenericTask> >(new ObjectQueue<GenericTask>(CM_INITIAL_QUEUE_SIZE));    
-    
+    taskQueue2 = Ref<ObjectQueue<GenericTask> >(new ObjectQueue<GenericTask>(CM_INITIAL_QUEUE_SIZE));
+
     Ref<ConfigManager> cm = ConfigManager::getInstance();
-    Ref<Element> tmpEl;  
-    
-    // loading extension - mimetype map  
+    Ref<Element> tmpEl;
+
+    // loading extension - mimetype map
     // we can always be sure to get a valid element because everything was prepared by the config manager
-    extension_mimetype_map = 
-        cm->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
+    extension_mimetype_map = cm->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
 
     ignore_unknown_extensions = cm->getBoolOption(CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS);
 
-    if (ignore_unknown_extensions && (extension_mimetype_map->size() == 0))
-    {
+    if (ignore_unknown_extensions && (extension_mimetype_map->size() == 0)) {
         log_warning("Ignore unknown extensions set, but no mappings specified\n");
         log_warning("Please review your configuration!\n");
         ignore_unknown_extensions = false;
     }
-  
+
     extension_map_case_sensitive = cm->getBoolOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_CASE_SENSITIVE);
 
-    mimetype_upnpclass_map = 
-       cm->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
-  
-    mimetype_contenttype_map = 
-      cm->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-    Ref<AutoscanList> config_timed_list = 
-        cm->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
+    mimetype_upnpclass_map = cm->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
 
-    for (i = 0; i < config_timed_list->size(); i++)
-    {
+    mimetype_contenttype_map = cm->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    Ref<AutoscanList> config_timed_list = cm->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
+
+    for (i = 0; i < config_timed_list->size(); i++) {
         Ref<AutoscanDirectory> dir = config_timed_list->get(i);
-        if (dir != nullptr)
-        {
+        if (dir != nullptr) {
             String path = dir->getLocation();
-            if (check_path(path, true))
-            {
+            if (check_path(path, true)) {
                 dir->setObjectID(ensurePathExistence(path));
             }
         }
@@ -163,48 +154,37 @@ ContentManager::ContentManager()
     autoscan_timed = storage->getAutoscanList(TimedScanMode);
 
 #ifdef HAVE_INOTIFY
-    if (cm->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
-    {
-        Ref<AutoscanList> config_inotify_list = 
-            cm->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
+    if (cm->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
+        Ref<AutoscanList> config_inotify_list = cm->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
 
-        for (i = 0; i < config_inotify_list->size(); i++)
-        {
+        for (i = 0; i < config_inotify_list->size(); i++) {
             Ref<AutoscanDirectory> dir = config_inotify_list->get(i);
-            if (dir != nullptr)
-            {
+            if (dir != nullptr) {
                 String path = dir->getLocation();
-                if (check_path(path, true))
-                {
+                if (check_path(path, true)) {
                     dir->setObjectID(ensurePathExistence(path));
                 }
             }
         }
 
-        storage->updateAutoscanPersistentList(InotifyScanMode, 
-                                              config_inotify_list);
+        storage->updateAutoscanPersistentList(InotifyScanMode,
+            config_inotify_list);
         autoscan_inotify = storage->getAutoscanList(InotifyScanMode);
-    }
-    else
-        // make an empty list so we do not have to do extra checks on shutdown 
+    } else
+        // make an empty list so we do not have to do extra checks on shutdown
         autoscan_inotify = Ref<AutoscanList>(new AutoscanList());
 #endif
-    /* init filemagic */
+/* init filemagic */
 #ifdef HAVE_MAGIC
-    if (! ignore_unknown_extensions)
-    {
+    if (!ignore_unknown_extensions) {
         ms = magic_open(MAGIC_MIME);
-        if (ms == nullptr)
-        {
+        if (ms == nullptr) {
             log_error("magic_open failed\n");
-        }
-        else
-        {
+        } else {
             String magicFile = cm->getOption(CFG_IMPORT_MAGIC_FILE);
-            if (! string_ok(magicFile))
+            if (!string_ok(magicFile))
                 magicFile = nullptr;
-            if (magic_load(ms, (magicFile == nullptr) ? nullptr : magicFile.c_str()) == -1)
-            {
+            if (magic_load(ms, (magicFile == nullptr) ? nullptr : magicFile.c_str()) == -1) {
                 log_warning("magic_load: %s\n", magic_error(ms));
                 magic_close(ms);
                 ms = nullptr;
@@ -213,19 +193,16 @@ ContentManager::ContentManager()
     }
 #endif // HAVE_MAGIC
 
-    String layout_type = 
-                       cm->getOption(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
+    String layout_type = cm->getOption(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
     if ((layout_type == "builtin") || (layout_type == "js"))
         layout_enabled = true;
 
 #ifdef ONLINE_SERVICES
     online_services = Ref<OnlineServiceList>(new OnlineServiceList());
 #ifdef YOUTUBE
-    if (cm->getBoolOption(CFG_ONLINE_CONTENT_YOUTUBE_ENABLED))
-    {
-        try 
-        {
-            Ref<OnlineService> yt((OnlineService *)new YouTubeService());
+    if (cm->getBoolOption(CFG_ONLINE_CONTENT_YOUTUBE_ENABLED)) {
+        try {
+            Ref<OnlineService> yt((OnlineService*)new YouTubeService());
 
             i = cm->getIntOption(CFG_ONLINE_CONTENT_YOUTUBE_REFRESH);
             yt->setRefreshInterval(i);
@@ -239,31 +216,25 @@ ContentManager::ContentManager()
             Ref<TimerParameter> yt_param(new TimerParameter(TimerParameter::IDOnlineContent, OS_YouTube));
             yt->setTimerParameter(RefCast(yt_param, Object));
             online_services->registerService(yt);
-            
-            if (i > 0)
-            {
+
+            if (i > 0) {
                 Timer::getInstance()->addTimerSubscriber(this, i, yt->getTimerParameter(), true);
             }
-        }
-        catch (const Exception & ex)
-        {
-            log_error("Could not setup YouTube: %s\n", 
-                    ex.getMessage().c_str());
+        } catch (const Exception& ex) {
+            log_error("Could not setup YouTube: %s\n",
+                ex.getMessage().c_str());
         }
     }
     // if YT is disabled in the configuration it is still possible that the DB
     // is populated with YT objects, so we need to allow playing them
-    cached_urls = Ref<ReentrantArray<CachedURL> >
-        (new ReentrantArray<CachedURL>(MAX_CACHED_URLS));
+    cached_urls = Ref<ReentrantArray<CachedURL> >(new ReentrantArray<CachedURL>(MAX_CACHED_URLS));
 
 #endif //YOUTUBE
 
 #ifdef SOPCAST
-    if (cm->getBoolOption(CFG_ONLINE_CONTENT_SOPCAST_ENABLED))
-    {
-        try
-        {
-            Ref<OnlineService> sc((OnlineService *)new SopCastService());
+    if (cm->getBoolOption(CFG_ONLINE_CONTENT_SOPCAST_ENABLED)) {
+        try {
+            Ref<OnlineService> sc((OnlineService*)new SopCastService());
 
             i = cm->getIntOption(CFG_ONLINE_CONTENT_SOPCAST_REFRESH);
             sc->setRefreshInterval(i);
@@ -277,25 +248,20 @@ ContentManager::ContentManager()
             Ref<TimerParameter> sc_param(new TimerParameter(TimerParameter::IDOnlineContent, OS_SopCast));
             sc->setTimerParameter(RefCast(sc_param, Object));
             online_services->registerService(sc);
-            if (i > 0)
-            {
+            if (i > 0) {
                 Timer::getInstance()->addTimerSubscriber(this, i, sc->getTimerParameter(), true);
             }
-        }
-        catch (const Exception & ex)
-        {
+        } catch (const Exception& ex) {
             log_error("Could not setup SopCast: %s\n",
-                    ex.getMessage().c_str());
+                ex.getMessage().c_str());
         }
     }
 #endif //SOPCAST
 
 #ifdef ATRAILERS
-    if (cm->getBoolOption(CFG_ONLINE_CONTENT_ATRAILERS_ENABLED))
-    {
-        try
-        {
-            Ref<OnlineService> at((OnlineService *)new ATrailersService());
+    if (cm->getBoolOption(CFG_ONLINE_CONTENT_ATRAILERS_ENABLED)) {
+        try {
+            Ref<OnlineService> at((OnlineService*)new ATrailersService());
             i = cm->getIntOption(CFG_ONLINE_CONTENT_ATRAILERS_REFRESH);
             at->setRefreshInterval(i);
 
@@ -307,18 +273,15 @@ ContentManager::ContentManager()
             Ref<TimerParameter> at_param(new TimerParameter(TimerParameter::IDOnlineContent, OS_ATrailers));
             at->setTimerParameter(RefCast(at_param, Object));
             online_services->registerService(at);
-            if (i > 0)
-            {
+            if (i > 0) {
                 Timer::getInstance()->addTimerSubscriber(this, i, at->getTimerParameter(), true);
             }
-        }
-        catch (const Exception & ex)
-        {
+        } catch (const Exception& ex) {
             log_error("Could not setup Apple Trailers: %s\n",
-                    ex.getMessage().c_str());
+                ex.getMessage().c_str());
         }
     }
-#endif//ATRAILERS
+#endif //ATRAILERS
 
 #endif //ONLINE_SERVICES
 }
@@ -329,12 +292,12 @@ ContentManager::~ContentManager()
 }
 
 void ContentManager::init()
-{   
+{
     int ret;
 
     reMimetype = Ref<RExp>(new RExp());
     reMimetype->compile(_(MIMETYPE_REGEXP));
-    
+
     /*
     pthread_attr_t attr;
     ret = pthread_attr_init(&attr);
@@ -345,31 +308,27 @@ void ContentManager::init()
    
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
     */
-    
+
     ret = pthread_create(
         &taskThread,
         nullptr, //&attr, // attr
         ContentManager::staticThreadProc,
-        this
-    );
-    if (ret != 0)
-    {
+        this);
+    if (ret != 0) {
         throw _Exception(_("Could not start task thread"));
     }
-    
+
     //pthread_attr_destroy(&attr);
-    
+
     //loadAccounting(false);
-    
+
     autoscan_timed->notifyAll(this);
 
 #ifdef HAVE_INOTIFY
-    if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
-    {
+    if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
         inotify = Ref<AutoscanInotify>(new AutoscanInotify());
         /// \todo change this (we need a new autoscan architecture)
-        for (int i = 0; i < autoscan_inotify->size(); i++)
-        {
+        for (int i = 0; i < autoscan_inotify->size(); i++) {
             Ref<AutoscanDirectory> dir = autoscan_inotify->get(i);
             if (dir != nullptr)
                 inotify->monitor(dir);
@@ -401,8 +360,7 @@ void ContentManager::unregisterExecutor(Ref<Executor> exec)
         return;
 
     AutoLock lock(mutex);
-    for (int i = 0; i < process_list->size(); i++)
-    {
+    for (int i = 0; i < process_list->size(); i++) {
         if (process_list->get(i) == exec)
             process_list->remove(i);
     }
@@ -413,10 +371,9 @@ void ContentManager::timerNotify(Ref<Object> parameter)
 {
     if (parameter == nullptr)
         return;
-    
+
     Ref<TimerParameter> tp = RefCast(parameter, TimerParameter);
-    if (tp->whoami() == TimerParameter::IDAutoscan)
-    {
+    if (tp->whoami() == TimerParameter::IDAutoscan) {
         Ref<AutoscanDirectory> dir = autoscan_timed->get(tp->getID());
         if (dir == nullptr)
             return;
@@ -425,18 +382,15 @@ void ContentManager::timerNotify(Ref<Object> parameter)
         rescanDirectory(objectID, dir->getScanID(), dir->getScanMode());
     }
 #ifdef ONLINE_SERVICES
-    else if (tp->whoami() == TimerParameter::IDOnlineContent)
-    {
+    else if (tp->whoami() == TimerParameter::IDOnlineContent) {
         fetchOnlineContent((service_type_t)(tp->getID()));
     }
 #ifdef YOUTUBE
-    else if (tp->whoami() == TimerParameter::IDURLCache)
-    {
+    else if (tp->whoami() == TimerParameter::IDURLCache) {
         checkCachedURLs();
     }
 #endif
-#endif//ONLINE_SERVICES
-
+#endif //ONLINE_SERVICES
 }
 
 void ContentManager::shutdown()
@@ -450,32 +404,26 @@ void ContentManager::shutdown()
     autoscan_timed->updateLMinDB();
 
 #ifdef HAVE_INOTIFY
-    for (int i = 0; i < autoscan_inotify->size(); i++)
-    {
+    for (int i = 0; i < autoscan_inotify->size(); i++) {
         Ref<AutoscanDirectory> dir = autoscan_inotify->get(i);
-        if (dir != nullptr)
-        {
-            try
-            {
+        if (dir != nullptr) {
+            try {
                 dir->resetLMT();
                 dir->setCurrentLMT(check_path_ex(dir->getLocation(), true));
                 dir->updateLMT();
-            }
-            catch (const Exception & ex)
-            {
+            } catch (const Exception& ex) {
                 continue;
             }
         }
     }
-    
+
     autoscan_inotify->updateLMinDB();
 #endif
 
     shutdownFlag = true;
 
-#ifdef EXTERNAL_TRANSCODING 
-    for (int i = 0; i < process_list->size(); i++)
-    {
+#ifdef EXTERNAL_TRANSCODING
+    for (int i = 0; i < process_list->size(); i++) {
         Ref<Executor> exec = process_list->get(i);
         if (exec != nullptr)
             exec->kill();
@@ -492,8 +440,7 @@ void ContentManager::shutdown()
     taskThread = 0;
 
 #ifdef HAVE_MAGIC
-    if (ms)
-    {
+    if (ms) {
         magic_close(ms);
         ms = nullptr;
     }
@@ -518,7 +465,6 @@ Ref<Array<GenericTask> > ContentManager::getTasklist()
     int i;
 
     AutoLock lock(mutex);
-   
 
     Ref<Array<GenericTask> > taskList = nullptr;
 #ifdef ONLINE_SERVICES
@@ -535,28 +481,25 @@ Ref<Array<GenericTask> > ContentManager::getTasklist()
         taskList = Ref<Array<GenericTask> >(new Array<GenericTask>());
 
     if (t != nullptr)
-        taskList->append(t); 
+        taskList->append(t);
 
     int qsize = taskQueue1->size();
 
-    for (i = 0; i < qsize; i++)
-    {
+    for (i = 0; i < qsize; i++) {
         Ref<GenericTask> t = taskQueue1->get(i);
         if (t->isValid())
             taskList->append(t);
     }
 
     qsize = taskQueue2->size();
-    for (i = 0; i < qsize; i++)
-    {
+    for (i = 0; i < qsize; i++) {
         Ref<GenericTask> t = taskQueue2->get(i);
         if (t->isValid())
-            taskList = Ref<Array<GenericTask> >(new Array<GenericTask>()); 
+            taskList = Ref<Array<GenericTask> >(new Array<GenericTask>());
     }
 
     return taskList;
 }
-
 
 void ContentManager::_loadAccounting()
 {
@@ -571,33 +514,28 @@ void ContentManager::addVirtualItem(Ref<CdsObject> obj, bool allow_fifo)
     check_path_ex(path, false, false);
     Ref<Storage> storage = Storage::getInstance();
     Ref<CdsObject> pcdir = storage->findObjectByPath(path);
-    if (pcdir == nullptr)
-    {
+    if (pcdir == nullptr) {
         pcdir = createObjectFromFile(path, true, allow_fifo);
-        if (pcdir == nullptr)
-        {
+        if (pcdir == nullptr) {
             throw _Exception(_("Could not add ") + path);
         }
-        if (IS_CDS_ITEM(pcdir->getObjectType()))
-        {
+        if (IS_CDS_ITEM(pcdir->getObjectType())) {
             this->addObject(pcdir);
             obj->setRefID(pcdir->getID());
         }
     }
 
     addObject(obj);
-
 }
 
 int ContentManager::_addFile(String path, String rootpath, bool recursive, bool hidden, Ref<GenericTask> task)
 {
-    if (hidden == false)
-    {
+    if (hidden == false) {
         String filename = get_filename(path);
         if (string_ok(filename) && filename.charAt(0) == '.')
             return INVALID_OBJECT_ID;
     }
-    
+
     // never add the server configuration file
     if (ConfigManager::getInstance()->getConfigFilename() == path)
         return INVALID_OBJECT_ID;
@@ -608,40 +546,34 @@ int ContentManager::_addFile(String path, String rootpath, bool recursive, bool 
 #ifdef HAVE_JS
     initJS();
 #endif
-    
+
     Ref<Storage> storage = Storage::getInstance();
-    
+
     Ref<UpdateManager> um = UpdateManager::getInstance();
     //Ref<StringConverter> f2i = StringConverter::f2i();
- 
+
     Ref<CdsObject> obj = storage->findObjectByPath(path);
-    if (obj == nullptr)
-    {
+    if (obj == nullptr) {
         obj = createObjectFromFile(path);
         if (obj == nullptr) // object ignored
             return INVALID_OBJECT_ID;
-        if (IS_CDS_ITEM(obj->getObjectType()))
-        {
+        if (IS_CDS_ITEM(obj->getObjectType())) {
             addObject(obj);
-            if (layout != nullptr)
-            {
-                try
-                {
+            if (layout != nullptr) {
+                try {
                     if (!string_ok(rootpath) && (task != nullptr))
                         rootpath = RefCast(task, CMAddFileTask)->getRootPath();
 
                     layout->processCdsObject(obj, rootpath);
-                    
+
                     String mimetype = RefCast(obj, CdsItem)->getMimeType();
                     String content_type = mimetype_contenttype_map->get(mimetype);
 #ifdef HAVE_JS
-                    if ((playlist_parser_script != nullptr) &&
-                        (content_type == CONTENT_TYPE_PLAYLIST))
-                            playlist_parser_script->processPlaylistObject(obj, task);
+                    if ((playlist_parser_script != nullptr) && (content_type == CONTENT_TYPE_PLAYLIST))
+                        playlist_parser_script->processPlaylistObject(obj, task);
 #ifdef HAVE_LIBDVDNAV
-                    if ((dvd_import_script != nullptr) &&
-                        (content_type == CONTENT_TYPE_DVD))
-                           dvd_import_script->processDVDObject(obj);
+                    if ((dvd_import_script != nullptr) && (content_type == CONTENT_TYPE_DVD))
+                        dvd_import_script->processDVDObject(obj);
 #else
                     if (content_type == CONTENT_TYPE_DVD)
                         log_warning("DVD Image %s will not be parsed: MediaTomb was compiled without libdvdnav  support!\n", obj->getLocation().c_str());
@@ -650,17 +582,14 @@ int ContentManager::_addFile(String path, String rootpath, bool recursive, bool 
                     if (content_type == CONTENT_TYPE_PLAYLIST)
                         log_warning("Playlist %s will not be parsed: MediaTomb was compiled without JS support!\n", obj->getLocation().c_str());
 #endif // JS
-                }
-                catch (const Exception & e)
-                {
+                } catch (const Exception& e) {
                     throw e;
                 }
             }
         }
     }
-        
-    if (recursive && IS_CDS_CONTAINER(obj->getObjectType()))
-    {
+
+    if (recursive && IS_CDS_CONTAINER(obj->getObjectType())) {
         addRecursive(path, hidden, task);
     }
     return obj->getID();
@@ -674,17 +603,16 @@ void ContentManager::_removeObject(int objectID, bool all)
         throw _Exception(_("cannot remove PC-Directory container"));
     if (IS_FORBIDDEN_CDS_ID(objectID))
         throw _Exception(_("tried to remove illegal object id"));
-    
+
     Ref<Storage> storage = Storage::getInstance();
-    
+
     Ref<Storage::ChangedContainers> changedContainers = storage->removeObject(objectID, all);
-    
-    if (changedContainers != nullptr)
-    {
+
+    if (changedContainers != nullptr) {
         SessionManager::getInstance()->containerChangedUI(changedContainers->ui);
         UpdateManager::getInstance()->containersChanged(changedContainers->upnp);
     }
-    
+
     // reload accounting
     //loadAccounting();
 }
@@ -693,8 +621,7 @@ int ContentManager::ensurePathExistence(zmm::String path)
 {
     int updateID;
     int containerID = Storage::getInstance()->ensurePathExistence(path, &updateID);
-    if (updateID != INVALID_OBJECT_ID)
-    {
+    if (updateID != INVALID_OBJECT_ID) {
         UpdateManager::getInstance()->containerChanged(updateID);
         SessionManager::getInstance()->containerChangedUI(updateID);
     }
@@ -705,43 +632,35 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
 {
     log_debug("start\n");
     int ret;
-    struct dirent *dent;
+    struct dirent* dent;
     struct stat statbuf;
     String location;
     String path;
     Ref<CdsObject> obj;
 
     if (scanID == INVALID_SCAN_ID)
-        return; 
+        return;
 
     Ref<AutoscanDirectory> adir = getAutoscanDirectory(scanID, scanMode);
     if (adir == nullptr)
         throw _Exception(_("ID valid but nullptr returned? this should never happen"));
 
     Ref<Storage> storage = Storage::getInstance();
-   
-    if (containerID != INVALID_OBJECT_ID)
-    {
-        try
-        {
+
+    if (containerID != INVALID_OBJECT_ID) {
+        try {
             obj = storage->loadObject(containerID);
-            if (!IS_CDS_CONTAINER(obj->getObjectType()))
-            {
+            if (!IS_CDS_CONTAINER(obj->getObjectType())) {
                 throw _Exception(_("Not a container"));
             }
             if (containerID == CDS_ID_FS_ROOT)
                 location = _(FS_ROOT_DIRECTORY);
             else
                 location = obj->getLocation();
-        }
-        catch (const Exception & e)
-        {
-            if (adir->persistent())
-            {
+        } catch (const Exception& e) {
+            if (adir->persistent()) {
                 containerID = INVALID_OBJECT_ID;
-            }
-            else
-            {
+            } else {
                 adir->setTaskCount(-1);
                 removeAutoscanDirectory(scanID, scanMode);
                 storage->removeAutoscanDirectory(adir->getStorageID());
@@ -750,18 +669,13 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
         }
     }
 
-    if (containerID == INVALID_OBJECT_ID)
-    {
-        if (!check_path(adir->getLocation(), true))
-        {
+    if (containerID == INVALID_OBJECT_ID) {
+        if (!check_path(adir->getLocation(), true)) {
             adir->setObjectID(INVALID_OBJECT_ID);
             storage->updateAutoscanDirectory(adir);
-            if (adir->persistent())
-            {
+            if (adir->persistent()) {
                 return;
-            }
-            else
-            {
+            } else {
                 adir->setTaskCount(-1);
                 removeAutoscanDirectory(scanID, scanMode);
                 storage->removeAutoscanDirectory(adir->getStorageID());
@@ -775,31 +689,26 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
         location = adir->getLocation();
     }
 
-    time_t last_modified_current_max = adir->getPreviousLMT(); 
-       
+    time_t last_modified_current_max = adir->getPreviousLMT();
+
     log_debug("Rescanning location: %s\n", location.c_str());
 
-    if (!string_ok(location))
-    {
+    if (!string_ok(location)) {
         log_error("Container with ID %d has no location information\n", containerID);
         return;
         //        continue;
         //throw _Exception(_("Container has no location information!\n"));
     }
 
-    DIR *dir = opendir(location.c_str());
-    if (!dir)
-    {
+    DIR* dir = opendir(location.c_str());
+    if (!dir) {
         log_warning("Could not open %s: %s\n", location.c_str(), strerror(errno));
-        if (adir->persistent())
-        {
+        if (adir->persistent()) {
             removeObject(containerID, false);
             adir->setObjectID(INVALID_OBJECT_ID);
             storage->updateAutoscanDirectory(adir);
             return;
-        }
-        else
-        {
+        } else {
             adir->setTaskCount(-1);
             removeObject(containerID, false);
             removeAutoscanDirectory(scanID, scanMode);
@@ -812,61 +721,46 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
     shared_ptr<unordered_set<int> > list = storage->getObjects(containerID, !adir->getRecursive());
 
     unsigned int thisTaskID;
-    if (task != nullptr)
-    {
+    if (task != nullptr) {
         thisTaskID = task->getID();
-    }
-    else
+    } else
         thisTaskID = 0;
 
-    while (((dent = readdir(dir)) != nullptr) && (!shutdownFlag) && (task == nullptr || ((task != nullptr) && task->isValid())))
-    {
-        char *name = dent->d_name;
-        if (name[0] == '.')
-        {
-            if (name[1] == 0)
-            {
+    while (((dent = readdir(dir)) != nullptr) && (!shutdownFlag) && (task == nullptr || ((task != nullptr) && task->isValid()))) {
+        char* name = dent->d_name;
+        if (name[0] == '.') {
+            if (name[1] == 0) {
                 continue;
-            }
-            else if (name[1] == '.' && name[2] == 0)
-            {
+            } else if (name[1] == '.' && name[2] == 0) {
                 continue;
-            }
-            else if (!adir->getHidden())
-            {
-                continue;    
+            } else if (!adir->getHidden()) {
+                continue;
             }
         }
 
-        path = location + DIR_SEPARATOR + name; 
+        path = location + DIR_SEPARATOR + name;
         ret = stat(path.c_str(), &statbuf);
-        if (ret != 0)
-        {
+        if (ret != 0) {
             log_error("Failed to stat %s, %s\n", path.c_str(), mt_strerror(errno).c_str());
             continue;
         }
 
         // it is possible that someone hits remove while the container is being scanned
         // in this case we will invalidate the autoscan entry
-        if (adir->getScanID() == INVALID_SCAN_ID)
-        {
+        if (adir->getScanID() == INVALID_SCAN_ID) {
             closedir(dir);
             return;
         }
 
-        if (S_ISREG(statbuf.st_mode))
-        {
+        if (S_ISREG(statbuf.st_mode)) {
             int objectID = storage->findObjectIDByPath(String(path));
-            if (objectID > 0)
-            {
+            if (objectID > 0) {
                 if (list != nullptr)
                     list->erase(objectID);
 
-                if (scanLevel == FullScanLevel)
-                {
+                if (scanLevel == FullScanLevel) {
                     // check modification time and update file if chagned
-                    if (last_modified_current_max < statbuf.st_mtime)
-                    {
+                    if (last_modified_current_max < statbuf.st_mtime) {
                         // readd object - we have to do this in order to trigger
                         // layout
                         removeObject(objectID, false);
@@ -874,73 +768,60 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
                         // update time variable
                         last_modified_current_max = statbuf.st_mtime;
                     }
-                }
-                else if (scanLevel == BasicScanLevel)
+                } else if (scanLevel == BasicScanLevel)
                     continue;
                 else
                     throw _Exception(_("Unsupported scan level!"));
 
-            }
-            else
-            {
+            } else {
                 // add file, not recursive, not async
                 // make sure not to add the current config.xml
-                if (ConfigManager::getInstance()->getConfigFilename() != path)
-                {
+                if (ConfigManager::getInstance()->getConfigFilename() != path) {
                     addFileInternal(path, location, false, false, adir->getHidden());
                     if (last_modified_current_max < statbuf.st_mtime)
                         last_modified_current_max = statbuf.st_mtime;
                 }
             }
-        }
-        else if (S_ISDIR(statbuf.st_mode) && (adir->getRecursive()))
-        {
+        } else if (S_ISDIR(statbuf.st_mode) && (adir->getRecursive())) {
             int objectID = storage->findObjectIDByPath(path + DIR_SEPARATOR);
-            if (objectID > 0)
-            {
+            if (objectID > 0) {
                 if (list != nullptr)
                     list->erase(objectID);
                 // add a task to rescan the directory that was found
                 rescanDirectory(objectID, scanID, scanMode, path + DIR_SEPARATOR, task->isCancellable());
-            }
-            else
-            {
+            } else {
                 // we have to make sure that we will never add a path to the task list
                 // if it is going to be removed by a pending remove task.
                 // this lock will make sure that remove is not in the process of invalidating
                 // the AutocsanDirectories in the autoscan_timed list at the time when we
                 // are checking for validity.
                 AutoLock lock(mutex);
-                
+
                 // it is possible that someone hits remove while the container is being scanned
                 // in this case we will invalidate the autoscan entry
-                if (adir->getScanID() == INVALID_SCAN_ID)
-                {
+                if (adir->getScanID() == INVALID_SCAN_ID) {
                     closedir(dir);
                     return;
                 }
-                
+
                 // add directory, recursive, async, hidden flag, low priority
                 addFileInternal(path, location, true, true, adir->getHidden(), true, thisTaskID, task->isCancellable());
             }
         }
     } // while
-    
+
     closedir(dir);
 
     if ((shutdownFlag) || ((task != nullptr) && !task->isValid()))
         return;
 
-    if (list != nullptr && list->size() > 0)
-    {
+    if (list != nullptr && list->size() > 0) {
         Ref<Storage::ChangedContainers> changedContainers = storage->removeObjects(list);
-        if (changedContainers != nullptr)
-        {
+        if (changedContainers != nullptr) {
             SessionManager::getInstance()->containerChangedUI(changedContainers->ui);
             UpdateManager::getInstance()->containersChanged(changedContainers->upnp);
         }
     }
-
 
     adir->setCurrentLMT(last_modified_current_max);
 }
@@ -948,8 +829,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
 /* scans the given directory and adds everything recursively */
 void ContentManager::addRecursive(String path, bool hidden, Ref<GenericTask> task)
 {
-    if (hidden == false)
-    {
+    if (hidden == false) {
         log_debug("Checking path %s\n", path.c_str());
         if (path.charAt(0) == '.')
             return;
@@ -959,34 +839,25 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<GenericTask> tas
 
     Ref<UpdateManager> um = UpdateManager::getInstance();
     Ref<Storage> storage = Storage::getInstance();
-    DIR *dir = opendir(path.c_str());
-    if (!dir)
-    {
-        throw _Exception(_("could not list directory ")+
-                        path + " : " + strerror(errno));
+    DIR* dir = opendir(path.c_str());
+    if (!dir) {
+        throw _Exception(_("could not list directory ") + path + " : " + strerror(errno));
     }
     int parentID = storage->findObjectIDByPath(path + DIR_SEPARATOR);
-    struct dirent *dent;
+    struct dirent* dent;
     // abort loop if either:
     // no valid directory returned, server is about to shutdown, the task is there and was invalidated
-    if (task != nullptr)
-    {
+    if (task != nullptr) {
         log_debug("IS TASK VALID? [%d], taskoath: [%s]\n", task->isValid(), path.c_str());
     }
-    while (((dent = readdir(dir)) != nullptr) && (!shutdownFlag) && (task == nullptr || ((task != nullptr) && task->isValid())))
-    {
-        char *name = dent->d_name;
-        if (name[0] == '.')
-        {
-            if (name[1] == 0)
-            {
+    while (((dent = readdir(dir)) != nullptr) && (!shutdownFlag) && (task == nullptr || ((task != nullptr) && task->isValid()))) {
+        char* name = dent->d_name;
+        if (name[0] == '.') {
+            if (name[1] == 0) {
                 continue;
-            }
-            else if (name[1] == '.' && name[2] == 0)
-            {
+            } else if (name[1] == '.' && name[2] == 0) {
                 continue;
-            }
-            else if (hidden == false)
+            } else if (hidden == false)
                 continue;
         }
         String newPath = path + DIR_SEPARATOR + name;
@@ -994,38 +865,30 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<GenericTask> tas
         if (ConfigManager::getInstance()->getConfigFilename() == newPath)
             continue;
 
-        try
-        {
+        try {
             Ref<CdsObject> obj = nullptr;
             if (parentID > 0)
                 obj = storage->findObjectByPath(String(newPath));
             if (obj == nullptr) // create object
             {
                 obj = createObjectFromFile(newPath);
-                
+
                 if (obj == nullptr) // object ignored
                 {
                     log_warning("file ignored: %s\n", newPath.c_str());
-                }
-                else
-                {
+                } else {
                     //obj->setParentID(parentID);
-                    if (IS_CDS_ITEM(obj->getObjectType()))
-                    {
+                    if (IS_CDS_ITEM(obj->getObjectType())) {
                         addObject(obj);
                         parentID = obj->getParentID();
                     }
                 }
             }
-            if (obj != nullptr)
-            {
-//#ifdef HAVE_JS
-                if (IS_CDS_ITEM(obj->getObjectType()))
-                {
-                    if (layout != nullptr)
-                    {
-                        try
-                        {
+            if (obj != nullptr) {
+                //#ifdef HAVE_JS
+                if (IS_CDS_ITEM(obj->getObjectType())) {
+                    if (layout != nullptr) {
+                        try {
                             String rootpath = nullptr;
                             if (task != nullptr)
                                 rootpath = RefCast(task, CMAddFileTask)->getRootPath();
@@ -1034,36 +897,29 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<GenericTask> tas
                             Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
                             String mimetype = RefCast(obj, CdsItem)->getMimeType();
                             String content_type = mappings->get(mimetype);
-                           
-                            if ((playlist_parser_script != nullptr) &&
-                                (content_type == CONTENT_TYPE_PLAYLIST))
+
+                            if ((playlist_parser_script != nullptr) && (content_type == CONTENT_TYPE_PLAYLIST))
                                 playlist_parser_script->processPlaylistObject(obj, task);
 #ifdef HAVE_LIBDVDNAV
-                            if ((dvd_import_script != nullptr) &&
-                                (content_type == CONTENT_TYPE_DVD))
-                                    dvd_import_script->processDVDObject(obj);
+                            if ((dvd_import_script != nullptr) && (content_type == CONTENT_TYPE_DVD))
+                                dvd_import_script->processDVDObject(obj);
 #endif // DVD
 
 #endif // JS
-                        }
-                        catch (const Exception & e)
-                        {
+                        } catch (const Exception& e) {
                             throw e;
                         }
                     }
-                    
+
                     /// \todo Why was this statement here??? - It seems to be unnecessary
                     //obj = createObjectFromFile(newPath);
                 }
-//#endif
-                if (IS_CDS_CONTAINER(obj->getObjectType()))
-                {
+                //#endif
+                if (IS_CDS_CONTAINER(obj->getObjectType())) {
                     addRecursive(newPath, hidden, task);
                 }
             }
-        }
-        catch(const Exception & e)
-        {
+        } catch (const Exception& e) {
             log_warning("skipping %s : %s\n", newPath.c_str(), e.getMessage().c_str());
         }
     }
@@ -1088,31 +944,28 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
     int objectType = obj->getObjectType();
 
     /// \todo if we have an active item, does it mean we first go through IS_ITEM and then thorugh IS_ACTIVE item? ask Gena
-    if (IS_CDS_ITEM(objectType))
-    {
+    if (IS_CDS_ITEM(objectType)) {
         Ref<CdsItem> item = RefCast(obj, CdsItem);
         Ref<CdsObject> clone = CdsObject::createObject(objectType);
         item->copyTo(clone);
 
-        if (string_ok(title)) clone->setTitle(title);
-        if (string_ok(upnp_class)) clone->setClass(upnp_class);
-        if (string_ok(location)) clone->setLocation(location);
+        if (string_ok(title))
+            clone->setTitle(title);
+        if (string_ok(upnp_class))
+            clone->setClass(upnp_class);
+        if (string_ok(location))
+            clone->setLocation(location);
 
         Ref<CdsItem> cloned_item = RefCast(clone, CdsItem);
- 
-        if (string_ok(mimetype) && (string_ok(protocol)))
-        {
+
+        if (string_ok(mimetype) && (string_ok(protocol))) {
             cloned_item->setMimeType(mimetype);
             Ref<CdsResource> resource = cloned_item->getResource(0);
             resource->addAttribute(_("protocolInfo"), renderProtocolInfo(mimetype, protocol));
-        }
-        else if (!string_ok(mimetype) && (string_ok(protocol)))
-        {
+        } else if (!string_ok(mimetype) && (string_ok(protocol))) {
             Ref<CdsResource> resource = cloned_item->getResource(0);
             resource->addAttribute(_("protocolInfo"), renderProtocolInfo(cloned_item->getMimeType(), protocol));
-        }
-        else if (string_ok(mimetype) && (!string_ok(protocol)))
-        {
+        } else if (string_ok(mimetype) && (!string_ok(protocol))) {
             cloned_item->setMimeType(mimetype);
             Ref<CdsResource> resource = cloned_item->getResource(0);
             Ref<Array<StringBase> > parts = split_string(resource->getAttribute(_("protocolInfo")), ':');
@@ -1120,20 +973,15 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
             resource->addAttribute(_("protocolInfo"), renderProtocolInfo(mimetype, protocol));
         }
 
-        if (string_ok(description)) 
-        {
+        if (string_ok(description)) {
             cloned_item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION),
-                                     description);
-        }
-        else
-        {
+                description);
+        } else {
             cloned_item->removeMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION));
         }
 
-
         log_debug("updateObject: checking equality of item %s\n", item->getTitle().c_str());
-        if (!item->equals(clone, true))
-        {
+        if (!item->equals(clone, true)) {
             cloned_item->validate();
             int containerChanged = INVALID_OBJECT_ID;
             storage->updateObject(clone, &containerChanged);
@@ -1143,8 +991,7 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
             um->containerChanged(item->getParentID());
         }
     }
-    if (IS_CDS_ACTIVE_ITEM(objectType))
-    {
+    if (IS_CDS_ACTIVE_ITEM(objectType)) {
         String action = parameters->get(_("action"));
         String state = parameters->get(_("state"));
 
@@ -1152,29 +999,30 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
         Ref<CdsObject> clone = CdsObject::createObject(objectType);
         item->copyTo(clone);
 
-        if (string_ok(title)) clone->setTitle(title);
-        if (string_ok(upnp_class)) clone->setClass(upnp_class);
+        if (string_ok(title))
+            clone->setTitle(title);
+        if (string_ok(upnp_class))
+            clone->setClass(upnp_class);
 
         Ref<CdsActiveItem> cloned_item = RefCast(clone, CdsActiveItem);
 
         // state and description can be an empty strings - if you want to clear it
-        if (string_ok(description)) 
-        {
+        if (string_ok(description)) {
             cloned_item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION),
-                                     description);
-        }
-        else
-        {
+                description);
+        } else {
             cloned_item->removeMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION));
         }
 
-        if (state != nullptr) cloned_item->setState(state);
+        if (state != nullptr)
+            cloned_item->setState(state);
 
-        if (string_ok(mimetype)) cloned_item->setMimeType(mimetype);
-        if (string_ok(action)) cloned_item->setAction(action);
+        if (string_ok(mimetype))
+            cloned_item->setMimeType(mimetype);
+        if (string_ok(action))
+            cloned_item->setAction(action);
 
-        if (!item->equals(clone, true))
-        {
+        if (!item->equals(clone, true)) {
             cloned_item->validate();
             int containerChanged = INVALID_OBJECT_ID;
             storage->updateObject(clone, &containerChanged);
@@ -1182,18 +1030,17 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
             sm->containerChangedUI(containerChanged);
             um->containerChanged(item->getParentID());
         }
-    }
-    else if (IS_CDS_CONTAINER(objectType))
-    {
+    } else if (IS_CDS_CONTAINER(objectType)) {
         Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
         Ref<CdsObject> clone = CdsObject::createObject(objectType);
         cont->copyTo(clone);
 
-        if (string_ok(title)) clone->setTitle(title);
-        if (string_ok(upnp_class)) clone->setClass(upnp_class);
+        if (string_ok(title))
+            clone->setTitle(title);
+        if (string_ok(upnp_class))
+            clone->setClass(upnp_class);
 
-        if (!cont->equals(clone, true))
-        {
+        if (!cont->equals(clone, true)) {
             clone->validate();
             int containerChanged = INVALID_OBJECT_ID;
             storage->updateObject(clone, &containerChanged);
@@ -1203,7 +1050,6 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
             sm->containerChangedUI(cont->getParentID());
         }
     }
-
 }
 
 void ContentManager::addObject(zmm::Ref<CdsObject> obj)
@@ -1215,40 +1061,36 @@ void ContentManager::addObject(zmm::Ref<CdsObject> obj)
     Ref<SessionManager> sm = SessionManager::getInstance();
     int containerChanged = INVALID_OBJECT_ID;
     log_debug("Adding: parent ID is %d\n", obj->getParentID());
-    if (!IS_CDS_ITEM_EXTERNAL_URL(obj->getObjectType()))
-    {
+    if (!IS_CDS_ITEM_EXTERNAL_URL(obj->getObjectType())) {
         obj->setLocation(obj->getLocation().reduce(DIR_SEPARATOR));
     }
     storage->addObject(obj, &containerChanged);
     log_debug("After adding: parent ID is %d\n", obj->getParentID());
-    
+
     um->containerChanged(containerChanged);
     sm->containerChangedUI(containerChanged);
-    
+
     parent_id = obj->getParentID();
-    if ((parent_id != -1) && (storage->getChildCount(parent_id) == 1))
-    {
+    if ((parent_id != -1) && (storage->getChildCount(parent_id) == 1)) {
         Ref<CdsObject> parent; //(new CdsObject());
         parent = storage->loadObject(parent_id);
         log_debug("Will update ID %d\n", parent->getParentID());
         um->containerChanged(parent->getParentID());
     }
-    
+
     um->containerChanged(obj->getParentID());
     if (IS_CDS_CONTAINER(obj->getObjectType()))
         sm->containerChangedUI(obj->getParentID());
-    
-    if (! obj->isVirtual() && IS_CDS_ITEM(obj->getObjectType()))
+
+    if (!obj->isVirtual() && IS_CDS_ITEM(obj->getObjectType()))
         ContentManager::getInstance()->getAccounting()->totalFiles++;
 }
-
 
 void ContentManager::addContainer(int parentID, String title, String upnpClass)
 {
     Ref<Storage> storage = Storage::getInstance();
     addContainerChain(storage->buildContainerPath(parentID, escape(title, VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR)), upnpClass);
 }
-
 
 int ContentManager::addContainerChain(String chain, String lastClass, int lastRefID, Ref<Dictionary> lastMetadata)
 {
@@ -1258,7 +1100,7 @@ int ContentManager::addContainerChain(String chain, String lastClass, int lastRe
 
     if (!string_ok(chain))
         throw _Exception(_("addContainerChain() called with empty chain parameter"));
-    
+
     log_debug("received chain: %s\n", chain.c_str());
     storage->addContainerChain(chain, lastClass, lastRefID, &containerID, &updateID, lastMetadata);
 
@@ -1274,12 +1116,11 @@ void ContentManager::updateObject(Ref<CdsObject> obj, bool send_updates)
 {
     obj->validate();
     Ref<Storage> storage = Storage::getInstance();
-   
+
     int containerChanged = INVALID_OBJECT_ID;
     storage->updateObject(obj, &containerChanged);
 
-    if (send_updates)
-    {
+    if (send_updates) {
         Ref<UpdateManager> um = UpdateManager::getInstance();
         Ref<SessionManager> sm = SessionManager::getInstance();
 
@@ -1297,10 +1138,8 @@ Ref<CdsObject> ContentManager::convertObject(Ref<CdsObject> oldObj, int newType)
     int oldType = oldObj->getObjectType();
     if (oldType == newType)
         return oldObj;
-    if (! IS_CDS_ITEM(oldType) || ! IS_CDS_ITEM(newType))
-    {
-        throw _Exception(_("Cannot convert object type ") + oldType +
-                        " to " + newType);
+    if (!IS_CDS_ITEM(oldType) || !IS_CDS_ITEM(newType)) {
+        throw _Exception(_("Cannot convert object type ") + oldType + " to " + newType);
     }
 
     Ref<CdsObject> newObj = CdsObject::createObject(newType);
@@ -1319,8 +1158,7 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic, boo
     int ret;
 
     ret = stat(path.c_str(), &statbuf);
-    if (ret != 0)
-    {
+    if (ret != 0) {
         throw _Exception(_("Failed to stat ") + path + _(" , ") + mt_strerror(errno));
     }
 
@@ -1341,24 +1179,20 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic, boo
         if (magic)
             mimetype = extension2mimetype(extension);
 
-        if (mimetype == nullptr && magic)
-        {
+        if (mimetype == nullptr && magic) {
             if (ignore_unknown_extensions)
                 return nullptr; // item should be ignored
-#ifdef HAVE_MAGIC        
+#ifdef HAVE_MAGIC
             mimetype = get_mime_type(ms, reMimetype, path);
 #endif
         }
-        if (mimetype != nullptr)
-        {
+        if (mimetype != nullptr) {
             upnp_class = mimetype2upnpclass(mimetype);
         }
 
-        if (!string_ok(upnp_class))
-        {
+        if (!string_ok(upnp_class)) {
             String content_type = mimetype_contenttype_map->get(mimetype);
-            if (content_type == CONTENT_TYPE_OGG)
-            {
+            if (content_type == CONTENT_TYPE_OGG) {
                 if (isTheora(path))
                     upnp_class = _(UPNP_DEFAULT_CLASS_VIDEO_ITEM);
                 else
@@ -1379,9 +1213,7 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic, boo
         obj->setTitle(f2i->convert(filename));
         if (magic)
             MetadataHandler::setMetadata(item);
-    }
-    else if (S_ISDIR(statbuf.st_mode))
-    {
+    } else if (S_ISDIR(statbuf.st_mode)) {
         Ref<CdsContainer> cont(new CdsContainer());
         obj = RefCast(cont, CdsObject);
         /* adding containers is done by Storage now
@@ -1393,14 +1225,12 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic, boo
         Ref<StringConverter> f2i = StringConverter::f2i();
         obj->setTitle(f2i->convert(filename));
         */
-    }
-    else
-    {
+    } else {
         // only regular files and directories are supported
         throw _Exception(_("ContentManager: skipping file ") + path.c_str());
     }
-//    Ref<StringConverter> f2i = StringConverter::f2i();
-//    obj->setTitle(f2i->convert(filename));
+    //    Ref<StringConverter> f2i = StringConverter::f2i();
+    //    obj->setTitle(f2i->convert(filename));
     return obj;
 }
 
@@ -1432,32 +1262,24 @@ String ContentManager::mimetype2upnpclass(String mimeType)
 void ContentManager::initLayout()
 {
 
-    if (layout == nullptr)
-    {
+    if (layout == nullptr) {
         AutoLock lock(mutex);
         if (layout == nullptr)
-            try
-            {
-                String layout_type = 
-                    ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
-                if (layout_type == "js")
-                {
+            try {
+                String layout_type = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
+                if (layout_type == "js") {
 #ifdef HAVE_JS
-                    layout = Ref<Layout>((Layout *)new JSLayout());
+                    layout = Ref<Layout>((Layout*)new JSLayout());
 #else
                     log_error("Cannot init layout: MediaTomb compiled without js support but js script was requested.");
 #endif
+                } else if (layout_type == "builtin") {
+                    layout = Ref<Layout>((FallbackLayout*)new FallbackLayout());
                 }
-                else if (layout_type == "builtin")
-                {
-                    layout = Ref<Layout>((FallbackLayout *)new FallbackLayout());
-                }
+            } catch (const Exception& e) {
+                layout = nullptr;
+                log_error("ContentManager virtual container layout: %s\n", e.getMessage().c_str());
             }
-        catch (const Exception & e)
-        {
-            layout = nullptr;
-            log_error("ContentManager virtual container layout: %s\n", e.getMessage().c_str());
-        }
     }
 }
 
@@ -1468,8 +1290,7 @@ void ContentManager::initJS()
         playlist_parser_script = Ref<PlaylistParserScript>(new PlaylistParserScript(Runtime::getInstance()));
 
 #ifdef HAVE_LIBDVDNAV
-    if ((ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE) == "js") && (dvd_import_script == nullptr))
-    {
+    if ((ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE) == "js") && (dvd_import_script == nullptr)) {
         dvd_import_script = Ref<DVDImportScript>(new DVDImportScript(Runtime::getInstance()));
     }
 #endif
@@ -1501,49 +1322,40 @@ void ContentManager::threadProc()
     Ref<GenericTask> task;
     std::unique_lock<mutex_type> lock(mutex);
     working = true;
-    while(! shutdownFlag)
-    {
+    while (!shutdownFlag) {
         currentTask = nullptr;
-        if(((task = taskQueue1->dequeue()) == nullptr) && ((task = taskQueue2->dequeue()) == nullptr))
-        {
+        if (((task = taskQueue1->dequeue()) == nullptr) && ((task = taskQueue2->dequeue()) == nullptr)) {
             working = false;
             /* if nothing to do, sleep until awakened */
             cond.wait(lock);
             working = true;
             continue;
-        }
-        else
-        {
+        } else {
             currentTask = task;
         }
         lock.unlock();
 
-//        log_debug(("Async START %s\n", task->getDescription().c_str()));
-        try
-        {
+        //        log_debug(("Async START %s\n", task->getDescription().c_str()));
+        try {
             if (task->isValid())
                 task->run();
-        }
-        catch (const ServerShutdownException & se)
-        {
+        } catch (const ServerShutdownException& se) {
             shutdownFlag = true;
-        }
-        catch (const Exception & e)
-        {
+        } catch (const Exception& e) {
             log_error("Exception caught: %s\n", e.getMessage().c_str());
             e.printStackTrace();
         }
-//        log_debug(("ASYNC STOP  %s\n", task->getDescription().c_str()));
-        if (! shutdownFlag)
+        //        log_debug(("ASYNC STOP  %s\n", task->getDescription().c_str()));
+        if (!shutdownFlag)
             lock.lock();
     }
 
     Storage::getInstance()->threadCleanup();
 }
 
-void *ContentManager::staticThreadProc(void *arg)
+void* ContentManager::staticThreadProc(void* arg)
 {
-    ContentManager *inst = (ContentManager *)arg;
+    ContentManager* inst = (ContentManager*)arg;
     inst->threadProc();
     pthread_exit(nullptr);
     return nullptr;
@@ -1555,7 +1367,7 @@ void ContentManager::addTask(zmm::Ref<GenericTask> task, bool lowPriority)
 
     task->setID(taskID++);
 
-    if (! lowPriority)
+    if (!lowPriority)
         taskQueue1->enqueue(task);
     else
         taskQueue2->enqueue(task);
@@ -1565,20 +1377,17 @@ void ContentManager::addTask(zmm::Ref<GenericTask> task, bool lowPriority)
 /* sync / async methods */
 void ContentManager::loadAccounting(bool async)
 {
-    if (async)
-    {
+    if (async) {
         Ref<GenericTask> task(new CMLoadAccountingTask());
         task->setDescription(_("Initializing statistics"));
         addTask(task);
-    }
-    else
-    {
+    } else {
         _loadAccounting();
     }
 }
 
-int ContentManager::addFile(zmm::String path, bool recursive, bool async, 
-                            bool hidden, bool lowPriority, bool cancellable)
+int ContentManager::addFile(zmm::String path, bool recursive, bool async,
+    bool hidden, bool lowPriority, bool cancellable)
 {
     String rootpath;
     if (check_path(path, true))
@@ -1587,52 +1396,47 @@ int ContentManager::addFile(zmm::String path, bool recursive, bool async,
 }
 
 int ContentManager::addFileInternal(String path, String rootpath,
-                                    bool recursive, 
-                                    bool async, bool hidden, bool lowPriority, 
-                                    unsigned int parentTaskID, 
-                                    bool cancellable)
+    bool recursive,
+    bool async, bool hidden, bool lowPriority,
+    unsigned int parentTaskID,
+    bool cancellable)
 {
-    if (async)
-    {
+    if (async) {
         Ref<GenericTask> task(new CMAddFileTask(path, rootpath, recursive, hidden, cancellable));
         task->setDescription(_("Adding: ") + path);
         task->setParentID(parentTaskID);
         addTask(task, lowPriority);
         return INVALID_OBJECT_ID;
-    }
-    else
-    {
+    } else {
         return _addFile(path, rootpath, recursive, hidden);
     }
 }
 
 #ifdef ONLINE_SERVICES
 void ContentManager::fetchOnlineContent(service_type_t service,
-                                        bool lowPriority, bool cancellable,
-                                        bool unscheduled_refresh)
+    bool lowPriority, bool cancellable,
+    bool unscheduled_refresh)
 {
     Ref<OnlineService> os = online_services->getService(service);
-    if (os == nullptr)
-    {
+    if (os == nullptr) {
         log_debug("No surch service! %d\n", service);
         throw _Exception(_("Service not found!"));
     }
     fetchOnlineContentInternal(os, lowPriority, cancellable, 0,
-                               unscheduled_refresh);
+        unscheduled_refresh);
 }
 
-void ContentManager::fetchOnlineContentInternal(Ref<OnlineService> service, 
-                                        bool lowPriority, bool cancellable,
-                                        unsigned int parentTaskID, 
-                                        bool unscheduled_refresh)
+void ContentManager::fetchOnlineContentInternal(Ref<OnlineService> service,
+    bool lowPriority, bool cancellable,
+    unsigned int parentTaskID,
+    bool unscheduled_refresh)
 {
     if (layout_enabled)
         initLayout();
 
-    Ref<GenericTask> task(new CMFetchOnlineContentTask(service, layout, cancellable, 
-                                                  unscheduled_refresh));
-    task->setDescription(_("Updating content from ") + 
-                         service->getServiceName());
+    Ref<GenericTask> task(new CMFetchOnlineContentTask(service, layout, cancellable,
+        unscheduled_refresh));
+    task->setDescription(_("Updating content from ") + service->getServiceName());
     task->setParentID(parentTaskID);
     service->incTaskCount();
     addTask(task, lowPriority);
@@ -1641,10 +1445,9 @@ void ContentManager::fetchOnlineContentInternal(Ref<OnlineService> service,
 void ContentManager::cleanupOnlineServiceObjects(zmm::Ref<OnlineService> service)
 {
     log_debug("Finished fetch cycle for service: %s\n",
-            service->getServiceName().c_str());
+        service->getServiceName().c_str());
 
-    if (service->getItemPurgeInterval() > 0)
-    {
+    if (service->getItemPurgeInterval() > 0) {
         Ref<Storage> storage = Storage::getInstance();
         Ref<IntArray> ids = storage->getServiceObjectIDs(service->getStoragePrefix());
 
@@ -1653,8 +1456,7 @@ void ContentManager::cleanupOnlineServiceObjects(zmm::Ref<OnlineService> service
         last.tv_nsec = 0;
         String temp;
 
-        for (int i = 0; i < ids->size(); i++)
-        {
+        for (int i = 0; i < ids->size(); i++) {
             int object_id = ids->get(i);
             Ref<CdsObject> obj = storage->loadObject(object_id);
             if (obj == nullptr)
@@ -1666,11 +1468,9 @@ void ContentManager::cleanupOnlineServiceObjects(zmm::Ref<OnlineService> service
 
             last.tv_sec = temp.toLong();
 
-            if ((service->getItemPurgeInterval() > 0) &&
-                    ((current.tv_sec - last.tv_sec) > service->getItemPurgeInterval()))
-            {
+            if ((service->getItemPurgeInterval() > 0) && ((current.tv_sec - last.tv_sec) > service->getItemPurgeInterval())) {
                 log_debug("Purging old online service object %s\n",
-                        obj->getTitle().c_str());
+                    obj->getTitle().c_str());
                 removeObject(object_id, false);
             }
         }
@@ -1681,11 +1481,9 @@ void ContentManager::cleanupOnlineServiceObjects(zmm::Ref<OnlineService> service
 
 void ContentManager::invalidateAddTask(Ref<GenericTask> t, String path)
 {
-    if (t->getType() == AddFile)
-    {
+    if (t->getType() == AddFile) {
         log_debug("comparing, task path: %s, remove path: %s\n", RefCast(t, CMAddFileTask)->getPath().c_str(), path.c_str());
-        if ((RefCast(t, CMAddFileTask)->getPath().startsWith(path)))
-        {
+        if ((RefCast(t, CMAddFileTask)->getPath().startsWith(path))) {
             log_debug("Invalidating task with path %s\n", RefCast(t, CMAddFileTask)->getPath().c_str());
             t->invalidate();
         }
@@ -1696,35 +1494,28 @@ void ContentManager::invalidateTask(unsigned int taskID, task_owner_t taskOwner)
 {
     int i;
 
-    if (taskOwner == ContentManagerTask)
-    {
+    if (taskOwner == ContentManagerTask) {
         AutoLock lock(mutex);
         Ref<GenericTask> t = getCurrentTask();
-        if (t != nullptr)
-        {
-            if ((t->getID() == taskID) || (t->getParentID() == taskID))
-            {
+        if (t != nullptr) {
+            if ((t->getID() == taskID) || (t->getParentID() == taskID)) {
                 t->invalidate();
             }
         }
 
         int qsize = taskQueue1->size();
 
-        for (i = 0; i < qsize; i++)
-        {
+        for (i = 0; i < qsize; i++) {
             Ref<GenericTask> t = taskQueue1->get(i);
-            if ((t->getID() == taskID) || (t->getParentID() == taskID))
-            {
+            if ((t->getID() == taskID) || (t->getParentID() == taskID)) {
                 t->invalidate();
             }
         }
 
         qsize = taskQueue2->size();
-        for (i = 0; i < qsize; i++)
-        {
+        for (i = 0; i < qsize; i++) {
             Ref<GenericTask> t = taskQueue2->get(i);
-            if ((t->getID() == taskID) || (t->getParentID() == taskID))
-            {
+            if ((t->getID() == taskID) || (t->getParentID() == taskID)) {
                 t->invalidate();
             }
         }
@@ -1737,8 +1528,7 @@ void ContentManager::invalidateTask(unsigned int taskID, task_owner_t taskOwner)
 
 void ContentManager::removeObject(int objectID, bool async, bool all)
 {
-    if (async)
-    {
+    if (async) {
         /*
         // building container path for the description
         Ref<Storage> storage = Storage::getInstance();
@@ -1754,37 +1544,30 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
         String path;
         Ref<CdsObject> obj;
 
-        try
-        {
+        try {
             obj = storage->loadObject(objectID);
             path = obj->getLocation();
 
             String vpath = obj->getVirtualPath();
             if (string_ok(vpath))
                 task->setDescription(_("Removing: ") + obj->getVirtualPath());
-        }
-        catch (const Exception & e)
-        {
+        } catch (const Exception& e) {
             log_debug("trying to remove an object ID which is no longer in the database! %d\n", objectID);
             return;
         }
 
-        if (IS_CDS_CONTAINER(obj->getObjectType()))
-        {
+        if (IS_CDS_CONTAINER(obj->getObjectType())) {
             int i;
 
-            // make sure to remove possible child autoscan directories from the scanlist 
+            // make sure to remove possible child autoscan directories from the scanlist
             Ref<AutoscanList> rm_list = autoscan_timed->removeIfSubdir(path);
-            for (i = 0; i < rm_list->size(); i++)
-            {
+            for (i = 0; i < rm_list->size(); i++) {
                 Timer::getInstance()->removeTimerSubscriber(this, rm_list->get(i)->getTimerParameter(), true);
             }
 #ifdef HAVE_INOTIFY
-            if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
-            {
+            if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
                 rm_list = autoscan_inotify->removeIfSubdir(path);
-                for (i = 0; i < rm_list->size(); i++)
-                {
+                for (i = 0; i < rm_list->size(); i++) {
                     Ref<AutoscanDirectory> dir = rm_list->get(i);
                     inotify->unmonitor(dir);
                 }
@@ -1796,30 +1579,25 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
 
             // we have to make sure that a currently running autoscan task will not
             // launch add tasks for directories that anyway are going to be deleted
-            for (i = 0; i < qsize; i++)
-            {
+            for (i = 0; i < qsize; i++) {
                 Ref<GenericTask> t = taskQueue1->get(i);
                 invalidateAddTask(t, path);
             }
 
             qsize = taskQueue2->size();
-            for (i = 0; i < qsize; i++)
-            {
+            for (i = 0; i < qsize; i++) {
                 Ref<GenericTask> t = taskQueue2->get(i);
                 invalidateAddTask(t, path);
             }
 
             Ref<GenericTask> t = getCurrentTask();
-            if (t != nullptr)
-            {
+            if (t != nullptr) {
                 invalidateAddTask(t, path);
             }
-        } 
+        }
 
         addTask(task);
-    }
-    else
-    {
+    } else {
         _removeObject(objectID, all);
     }
 }
@@ -1846,17 +1624,14 @@ void ContentManager::rescanDirectory(int objectID, int scanID, scan_mode_t scanM
     addTask(task, true); // adding with low priority
 }
 
-
 Ref<AutoscanDirectory> ContentManager::getAutoscanDirectory(int scanID, scan_mode_t scanMode)
 {
-    if (scanMode == TimedScanMode)
-    {
+    if (scanMode == TimedScanMode) {
         return autoscan_timed->get(scanID);
     }
 
 #if HAVE_INOTIFY
-    else if (scanMode == InotifyScanMode)
-    {
+    else if (scanMode == InotifyScanMode) {
         return autoscan_inotify->get(scanID);
     }
 #endif
@@ -1865,14 +1640,12 @@ Ref<AutoscanDirectory> ContentManager::getAutoscanDirectory(int scanID, scan_mod
 
 Ref<Array<AutoscanDirectory> > ContentManager::getAutoscanDirectories(scan_mode_t scanMode)
 {
-    if (scanMode == TimedScanMode)
-    {
+    if (scanMode == TimedScanMode) {
         return autoscan_timed->getArrayCopy();
     }
 
 #if HAVE_INOTIFY
-    else if (scanMode == InotifyScanMode)
-    {
+    else if (scanMode == InotifyScanMode) {
         return autoscan_inotify->getArrayCopy();
     }
 #endif
@@ -1886,7 +1659,7 @@ Ref<Array<AutoscanDirectory> > ContentManager::getAutoscanDirectories()
 #if HAVE_INOTIFY
     Ref<Array<AutoscanDirectory> > ino = autoscan_inotify->getArrayCopy();
     if (ino != nullptr)
-        for (int i = 0; i < ino->size(); i ++)
+        for (int i = 0; i < ino->size(); i++)
             all->append(ino->get(i));
 #endif
     return all;
@@ -1905,8 +1678,7 @@ Ref<AutoscanDirectory> ContentManager::getAutoscanDirectory(String location)
 
 void ContentManager::removeAutoscanDirectory(int scanID, scan_mode_t scanMode)
 {
-    if (scanMode == TimedScanMode)
-    {
+    if (scanMode == TimedScanMode) {
         Ref<Storage> storage = Storage::getInstance();
         Ref<AutoscanDirectory> adir = autoscan_timed->get(scanID);
         if (adir == nullptr)
@@ -1915,16 +1687,13 @@ void ContentManager::removeAutoscanDirectory(int scanID, scan_mode_t scanMode)
         autoscan_timed->remove(scanID);
         storage->removeAutoscanDirectory(adir->getStorageID());
         SessionManager::getInstance()->containerChangedUI(adir->getObjectID());
-        
+
         // if 3rd parameter is true: won't fail if scanID doesn't exist
         Timer::getInstance()->removeTimerSubscriber(this, adir->getTimerParameter(), true);
-
     }
 #ifdef HAVE_INOTIFY
-    if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
-    {
-        if (scanMode == InotifyScanMode)
-        {
+    if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
+        if (scanMode == InotifyScanMode) {
             Ref<Storage> storage = Storage::getInstance();
             Ref<AutoscanDirectory> adir = autoscan_inotify->get(scanID);
             if (adir == nullptr)
@@ -1936,7 +1705,6 @@ void ContentManager::removeAutoscanDirectory(int scanID, scan_mode_t scanMode)
         }
     }
 #endif
-    
 }
 
 void ContentManager::removeAutoscanDirectory(int objectID)
@@ -1946,18 +1714,15 @@ void ContentManager::removeAutoscanDirectory(int objectID)
     if (adir == nullptr)
         throw _Exception(_("can not remove autoscan directory - was not an autoscan"));
 
-    if (adir->getScanMode() == TimedScanMode)
-    {
+    if (adir->getScanMode() == TimedScanMode) {
         autoscan_timed->remove(adir->getLocation());
         storage->removeAutoscanDirectoryByObjectID(objectID);
         SessionManager::getInstance()->containerChangedUI(objectID);
         Timer::getInstance()->removeTimerSubscriber(this, adir->getTimerParameter(), true);
     }
 #ifdef HAVE_INOTIFY
-    if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
-    {
-        if (adir->getScanMode() == InotifyScanMode)
-        {
+    if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
+        if (adir->getScanMode() == InotifyScanMode) {
             autoscan_inotify->remove(adir->getLocation());
             storage->removeAutoscanDirectoryByObjectID(objectID);
             SessionManager::getInstance()->containerChangedUI(objectID);
@@ -1972,15 +1737,14 @@ void ContentManager::removeAutoscanDirectory(String location)
     /// \todo change this when more scanmodes become avaiable
     Ref<AutoscanDirectory> adir = autoscan_timed->get(location);
 #ifdef HAVE_INOTIFY
-    if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
-    {
+    if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
         if (adir == nullptr)
             adir = autoscan_inotify->get(location);
     }
 #endif
     if (adir == nullptr)
         throw _Exception(_("can not remove autoscan directory - was not an autoscan"));
-    
+
     removeAutoscanDirectory(adir->getObjectID());
 }
 
@@ -1988,13 +1752,10 @@ void ContentManager::handlePeristentAutoscanRemove(int scanID, scan_mode_t scanM
 {
     Ref<AutoscanDirectory> adir = getAutoscanDirectory(scanID, scanMode);
     Ref<Storage> st = Storage::getInstance();
-    if (adir->persistent())
-    {
+    if (adir->persistent()) {
         adir->setObjectID(INVALID_OBJECT_ID);
         st->updateAutoscanDirectory(adir);
-    }
-    else
-    {
+    } else {
         removeAutoscanDirectory(adir->getScanID(), adir->getScanMode());
         st->removeAutoscanDirectory(adir->getStorageID());
     }
@@ -2016,8 +1777,7 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
     // We will have to change this for other scan modes
     original = autoscan_timed->getByObjectID(dir->getObjectID());
 #ifdef HAVE_INOTIFY
-    if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
-    {
+    if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
         if (original == nullptr)
             original = autoscan_inotify->getByObjectID(dir->getObjectID());
     }
@@ -2029,38 +1789,33 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
     storage->checkOverlappingAutoscans(dir);
 
     // adding a new autoscan directory
-    if (original == nullptr)
-    {
+    if (original == nullptr) {
         if (dir->getObjectID() == CDS_ID_FS_ROOT)
             dir->setLocation(_(FS_ROOT_DIRECTORY));
-        else
-        {
+        else {
             log_debug("objectID: %d\n", dir->getObjectID());
             Ref<CdsObject> obj = storage->loadObject(dir->getObjectID());
             if (obj == nullptr
-                    || ! IS_CDS_CONTAINER(obj->getObjectType())
-                    || obj->isVirtual())
+                || !IS_CDS_CONTAINER(obj->getObjectType())
+                || obj->isVirtual())
                 throw _Exception(_("tried to remove an illegal object (id) from the list of the autoscan directories"));
-            
+
             log_debug("location: %s\n", obj->getLocation().c_str());
-            
+
             if (!string_ok(obj->getLocation()))
                 throw _Exception(_("tried to add an illegal object as autoscan - no location information available!"));
-    
+
             dir->setLocation(obj->getLocation());
         }
         dir->resetLMT();
         storage->addAutoscanDirectory(dir);
-        if (dir->getScanMode() == TimedScanMode)
-        {
+        if (dir->getScanMode() == TimedScanMode) {
             autoscan_timed->add(dir);
             timerNotify(dir->getTimerParameter());
         }
 #ifdef HAVE_INOTIFY
-        if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
-        {
-            if (dir->getScanMode() == InotifyScanMode)
-            {
+        if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
+            if (dir->getScanMode() == InotifyScanMode) {
                 autoscan_inotify->add(dir);
                 inotify->monitor(dir);
             }
@@ -2073,10 +1828,8 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
     if (original->getScanMode() == TimedScanMode)
         Timer::getInstance()->removeTimerSubscriber(this, original->getTimerParameter(), true);
 #ifdef HAVE_INOTIFY
-    if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
-    {
-        if (original->getScanMode() == InotifyScanMode)
-        {
+    if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
+        if (original->getScanMode() == InotifyScanMode) {
             inotify->unmonitor(original);
         }
     }
@@ -2086,15 +1839,10 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
     original->copyTo(copy);
 
     // changing from full scan to basic scan need to reset last modification time
-    if ((copy->getScanLevel() == FullScanLevel) && (dir->getScanLevel() == BasicScanLevel))
-    {
+    if ((copy->getScanLevel() == FullScanLevel) && (dir->getScanLevel() == BasicScanLevel)) {
         copy->setScanLevel(BasicScanLevel);
         copy->resetLMT();
-    } 
-    else if (((copy->getScanLevel() == FullScanLevel) &&
-             (dir->getScanLevel() == FullScanLevel)) && 
-             (!copy->getRecursive() && dir->getRecursive()))
-    {
+    } else if (((copy->getScanLevel() == FullScanLevel) && (dir->getScanLevel() == FullScanLevel)) && (!copy->getRecursive() && dir->getRecursive())) {
         copy->resetLMT();
     }
 
@@ -2103,15 +1851,12 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
     copy->setRecursive(dir->getRecursive());
     copy->setInterval(dir->getInterval());
 
-    if (copy->getScanMode() == TimedScanMode)
-    {
+    if (copy->getScanMode() == TimedScanMode) {
         autoscan_timed->remove(copy->getScanID());
     }
 #ifdef HAVE_INOTIFY
-    if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
-    {
-        if (copy->getScanMode() == InotifyScanMode)
-        {
+    if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
+        if (copy->getScanMode() == InotifyScanMode) {
             autoscan_inotify->remove(copy->getScanID());
         }
     }
@@ -2119,16 +1864,13 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
 
     copy->setScanMode(dir->getScanMode());
 
-    if (dir->getScanMode() == TimedScanMode)
-    {
+    if (dir->getScanMode() == TimedScanMode) {
         autoscan_timed->add(copy);
         timerNotify(copy->getTimerParameter());
     }
 #ifdef HAVE_INOTIFY
-    if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
-    {
-        if (dir->getScanMode() == InotifyScanMode)
-        {
+    if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
+        if (dir->getScanMode() == InotifyScanMode) {
             autoscan_inotify->add(copy);
             inotify->monitor(copy);
         }
@@ -2141,9 +1883,9 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
 }
 
 #ifdef HAVE_MAGIC
-zmm::String ContentManager::getMimeTypeFromBuffer(const void *buffer, size_t length)
+zmm::String ContentManager::getMimeTypeFromBuffer(const void* buffer, size_t length)
 {
-    return get_mime_type_from_buffer(ms, reMimetype, buffer, length); 
+    return get_mime_type_from_buffer(ms, reMimetype, buffer, length);
 }
 #endif
 
@@ -2158,70 +1900,59 @@ void ContentManager::checkCachedURLs()
     int count = 0;
     int i = 0;
 
-    while (count < cached_urls->size())
-    {
+    while (count < cached_urls->size()) {
         Ref<CachedURL> cached = cached_urls->get(i);
-        if (cached != nullptr)
-        {
+        if (cached != nullptr) {
             // do not increment index because remove unordered places the
             // last array element into the removed slot
-            if ((cached->getLastAccessTime() + URL_CACHE_LIFETIME) < now)
-            {
+            if ((cached->getLastAccessTime() + URL_CACHE_LIFETIME) < now) {
                 log_debug("URL of object: %d, url: %s exceeds "
-                          "lifetime (%lld < %lld), purging...\n", 
-                          cached_urls->get(i)->getObjectID(), 
-                          cached_urls->get(i)->getURL().c_str(), 
-                        (long long)(cached->getLastAccessTime() + 
-                            URL_CACHE_LIFETIME), 
-                        (long long)now);
+                          "lifetime (%lld < %lld), purging...\n",
+                    cached_urls->get(i)->getObjectID(),
+                    cached_urls->get(i)->getURL().c_str(),
+                    (long long)(cached->getLastAccessTime() + URL_CACHE_LIFETIME),
+                    (long long)now);
                 cached_urls->removeUnordered(i);
-            }
-            else
+            } else
                 i++;
         }
-        count++; 
+        count++;
     }
 
     log_debug("URL Cache check complete, remaining items: %d\n",
-            cached_urls->size());
+        cached_urls->size());
 
-    if (cached_urls->size() > 0)
-    {
-        Ref<TimerParameter> url_cache_check(new 
-                TimerParameter(TimerParameter::IDURLCache, -1));
+    if (cached_urls->size() > 0) {
+        Ref<TimerParameter> url_cache_check(new TimerParameter(TimerParameter::IDURLCache, -1));
 
         Timer::getInstance()->addTimerSubscriber(
-                this,
-                URL_CACHE_CHECK_INTERVAL, 
-                RefCast(url_cache_check, Object), true);
+            this,
+            URL_CACHE_CHECK_INTERVAL,
+            RefCast(url_cache_check, Object), true);
     }
 }
 
 void ContentManager::cacheURL(zmm::Ref<CachedURL> url)
 {
     AutoLockYT lock(urlcache_mutex);
-    time_t oldest = time(nullptr); 
+    time_t oldest = time(nullptr);
     int oldest_index = -1;
     bool added = false;
     int old_size = cached_urls->size();
 
     log_debug("Request to cache id %d, URL %s\n", url->getObjectID(),
-              url->getURL().c_str());
-    for (int i = 0; i < cached_urls->size(); i++)
-    {
+        url->getURL().c_str());
+    for (int i = 0; i < cached_urls->size(); i++) {
         Ref<CachedURL> cached = cached_urls->get(i);
-        if (cached != nullptr)
-        {
+        if (cached != nullptr) {
             // get time of the first replacement candidate
-            if (cached->getLastAccessTime() < oldest)
-            {
+            if (cached->getLastAccessTime() < oldest) {
                 oldest = cached->getLastAccessTime();
                 oldest_index = i;
             }
 
-            // this is an update for the same object 
-            if (url->getObjectID() == cached->getObjectID())
-            {
+            // this is an update for the same object
+            if (url->getObjectID() == cached->getObjectID()) {
                 log_debug("Updating cache for object %d\n", url->getObjectID());
                 cached_urls->set(url, i);
                 added = true;
@@ -2230,39 +1961,31 @@ void ContentManager::cacheURL(zmm::Ref<CachedURL> url)
         }
     }
 
-    if (!added)
-    {
+    if (!added) {
         // if our storage capacity is exceeded, we will purge an existing item
-        if (cached_urls->size() >= MAX_CACHED_URLS)
-        {
+        if (cached_urls->size() >= MAX_CACHED_URLS) {
             log_debug("Checking if we need to remove something old...");
-            if ((oldest_index > -1) && (oldest_index <= MAX_CACHED_URLS))
-            {
-                log_debug("Removing old url from cache of object %d\n", 
-                        cached_urls->get(oldest_index)->getObjectID());
+            if ((oldest_index > -1) && (oldest_index <= MAX_CACHED_URLS)) {
+                log_debug("Removing old url from cache of object %d\n",
+                    cached_urls->get(oldest_index)->getObjectID());
                 cached_urls->removeUnordered(oldest_index);
-            }
-            else
-            {
-                throw _Exception(_("Index exceeds URL cache size: ") +
-                                 String::from(oldest_index));
+            } else {
+                throw _Exception(_("Index exceeds URL cache size: ") + String::from(oldest_index));
             }
         }
-           
+
         log_debug("Appeinding url to the cache: %d\n", url->getObjectID());
         cached_urls->append(url);
     }
 
-    if ((cached_urls->size() > 0) && (old_size == 0)) 
-    {
+    if ((cached_urls->size() > 0) && (old_size == 0)) {
         log_debug("URL Cache is not empty, adding invalidation timer!\n");
-        Ref<TimerParameter> url_cache_check(new 
-                TimerParameter(TimerParameter::IDURLCache, -1));
+        Ref<TimerParameter> url_cache_check(new TimerParameter(TimerParameter::IDURLCache, -1));
 
         Timer::getInstance()->addTimerSubscriber(
-                this, 
-                URL_CACHE_CHECK_INTERVAL, 
-                RefCast(url_cache_check, Object), true);
+            this,
+            URL_CACHE_CHECK_INTERVAL,
+            RefCast(url_cache_check, Object), true);
     }
 }
 
@@ -2270,15 +1993,12 @@ String ContentManager::getCachedURL(int objectID)
 {
     AutoLockYT lock(urlcache_mutex);
     log_debug("Asked for an url from cache...\n");
-    for (int i = 0; i < cached_urls->size(); i++)
-    {
+    for (int i = 0; i < cached_urls->size(); i++) {
         Ref<CachedURL> cached = cached_urls->get(i);
-        if (cached != nullptr)
-        {
-            if (cached->getObjectID() == objectID)
-            {
+        if (cached != nullptr) {
+            if (cached->getObjectID() == objectID) {
                 log_debug("Found URL in cache for object ID %d, URL: %s\n",
-                        objectID, cached->getURL().c_str());
+                    objectID, cached->getURL().c_str());
                 return cached->getURL();
             }
         }
@@ -2287,7 +2007,8 @@ String ContentManager::getCachedURL(int objectID)
 }
 #endif
 
-CMAddFileTask::CMAddFileTask(String path, String rootpath, bool recursive, bool hidden, bool cancellable) : GenericTask(ContentManagerTask)
+CMAddFileTask::CMAddFileTask(String path, String rootpath, bool recursive, bool hidden, bool cancellable)
+    : GenericTask(ContentManagerTask)
 {
     this->path = path;
     this->rootpath = rootpath;
@@ -2310,10 +2031,11 @@ void CMAddFileTask::run()
 {
     log_debug("running add file task with path %s recursive: %d\n", path.c_str(), recursive);
     Ref<ContentManager> cm = ContentManager::getInstance();
-    cm->_addFile(path, nullptr, recursive, hidden, Ref<GenericTask> (this));
+    cm->_addFile(path, nullptr, recursive, hidden, Ref<GenericTask>(this));
 }
 
-CMRemoveObjectTask::CMRemoveObjectTask(int objectID, bool all) : GenericTask(ContentManagerTask)
+CMRemoveObjectTask::CMRemoveObjectTask(int objectID, bool all)
+    : GenericTask(ContentManagerTask)
 {
     this->objectID = objectID;
     this->all = all;
@@ -2327,7 +2049,8 @@ void CMRemoveObjectTask::run()
     cm->_removeObject(objectID, all);
 }
 
-CMRescanDirectoryTask::CMRescanDirectoryTask(int objectID, int scanID, scan_mode_t scanMode, bool cancellable) : GenericTask(ContentManagerTask)
+CMRescanDirectoryTask::CMRescanDirectoryTask(int objectID, int scanID, scan_mode_t scanMode, bool cancellable)
+    : GenericTask(ContentManagerTask)
 {
     this->scanID = scanID;
     this->scanMode = scanMode;
@@ -2343,11 +2066,10 @@ void CMRescanDirectoryTask::run()
     if (dir == nullptr)
         return;
 
-    cm->_rescanDirectory(objectID, dir->getScanID(), dir->getScanMode(), dir->getScanLevel(), Ref<GenericTask> (this));
+    cm->_rescanDirectory(objectID, dir->getScanID(), dir->getScanMode(), dir->getScanLevel(), Ref<GenericTask>(this));
     dir->decTaskCount();
-    
-    if (dir->getTaskCount() == 0)
-    {
+
+    if (dir->getTaskCount() == 0) {
         dir->updateLMT();
         if (dir->getScanMode() == TimedScanMode) {
             Timer::getInstance()->addTimerSubscriber(
@@ -2358,9 +2080,10 @@ void CMRescanDirectoryTask::run()
 
 #ifdef ONLINE_SERVICES
 CMFetchOnlineContentTask::CMFetchOnlineContentTask(Ref<OnlineService> service,
-                                                   Ref<Layout> layout,
-                                                   bool cancellable,
-                                                   bool unscheduled_refresh) : GenericTask(ContentManagerTask)
+    Ref<Layout> layout,
+    bool cancellable,
+    bool unscheduled_refresh)
+    : GenericTask(ContentManagerTask)
 {
     this->layout = layout;
     this->service = service;
@@ -2371,26 +2094,23 @@ CMFetchOnlineContentTask::CMFetchOnlineContentTask(Ref<OnlineService> service,
 
 void CMFetchOnlineContentTask::run()
 {
-    if (this->service == nullptr)
-    {
+    if (this->service == nullptr) {
         log_debug("Received invalid service!\n");
         return;
     }
-    try
-    {
-        Ref<GenericTask> t(new TPFetchOnlineContentTask(service, layout, 
-                                                   cancellable, 
-                                                   unscheduled_refresh));
+    try {
+        Ref<GenericTask> t(new TPFetchOnlineContentTask(service, layout,
+            cancellable,
+            unscheduled_refresh));
         TaskProcessor::getInstance()->addTask(t);
-    }
-    catch (const Exception & ex)
-    {
+    } catch (const Exception& ex) {
         log_error("%s\n", ex.getMessage().c_str());
     }
 }
-#endif//ONLINE_SERVICES
+#endif //ONLINE_SERVICES
 
-CMLoadAccountingTask::CMLoadAccountingTask() : GenericTask(ContentManagerTask)
+CMLoadAccountingTask::CMLoadAccountingTask()
+    : GenericTask(ContentManagerTask)
 {
     this->taskType = LoadAccounting;
 }
@@ -2401,7 +2121,8 @@ void CMLoadAccountingTask::run()
     cm->_loadAccounting();
 }
 
-CMAccounting::CMAccounting() : Object()
+CMAccounting::CMAccounting()
+    : Object()
 {
     totalFiles = 0;
 }
