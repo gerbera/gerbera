@@ -1,5 +1,6 @@
-#MediaTomb-v00d00 - UPnP Media Server
+<img src="https://raw.githubusercontent.com/v00d00/mediatomb/master/web/icons/mt-icon48.png" align="right" />
 
+#MediaTomb-v00d00 - UPnP Media Server
 
 [![Build Status](https://travis-ci.org/v00d00/mediatomb.svg?branch=master)](https://travis-ci.org/v00d00/mediatomb)
 
@@ -88,7 +89,7 @@ make install
 
 | Lib          	| Version 	| Required? 	| Note                 	|
 |--------------	|---------	|-----------	|----------------------	|
-| libupnp      	| 1.8     	| Required  	| Must use: [pupnp]	|
+| libupnp      	| 1.8     	| Required  	| [pupnp] (with IPv6)   |
 | libuuid      	|         	| Required  	|                      	|
 | expat        	|         	| Required  	|                      	|
 | sqlite3      	|         	| Required  	|                      	|
