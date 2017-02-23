@@ -33,12 +33,13 @@
 
 using namespace zmm;
 
-UpnpException::UpnpException(int errCode, String message) : Exception(message)
+UpnpException::UpnpException(int errCode, String message)
+    : Exception(message)
 {
     this->errCode = errCode;
 }
-UpnpException::UpnpException(int errCode, String message, const char *file, int line, const char *function) : 
-    Exception(message, file, line, function)
+UpnpException::UpnpException(int errCode, String message, const char* file, int line, const char* function)
+    : Exception(message, file, line, function)
 {
     this->errCode = errCode;
 }

@@ -36,7 +36,8 @@
 using namespace zmm;
 using namespace mxml;
 
-ParseException::ParseException(String msg, Ref<Context> context) : Exception(msg)
+ParseException::ParseException(String msg, Ref<Context> context)
+    : Exception(msg)
 {
     this->context = context;
 }

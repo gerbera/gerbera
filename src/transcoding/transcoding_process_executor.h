@@ -36,11 +36,10 @@
 
 #include "process_executor.h"
 
-class TranscodingProcessExecutor : public ProcessExecutor
-{
+class TranscodingProcessExecutor : public ProcessExecutor {
 public:
     TranscodingProcessExecutor(zmm::String command,
-                               zmm::Ref<zmm::Array<zmm::StringBase> > arglist);
+        zmm::Ref<zmm::Array<zmm::StringBase> > arglist);
     /// \brief This function adds a filename to a list, files in that list
     /// will be removed once the class is destroyed.
     void removeFile(zmm::String filename);
@@ -55,4 +54,4 @@ protected:
 
 #endif // __TRANSCODING_PROCESS_EXECUTOR_H__
 
-#endif//EXTERNAL_TRANSCODING
+#endif //EXTERNAL_TRANSCODING

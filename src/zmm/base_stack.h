@@ -32,80 +32,79 @@
 #ifndef __ZMMF_BASE_STACK_H__
 #define __ZMMF_BASE_STACK_H__
 
-#include "zmm.h"
 #include "memory.h"
+#include "zmm.h"
 
-namespace zmm
-{
-    
-    template <typename T>
-    class BaseStack : public Object
+namespace zmm {
+
+template <typename T>
+class BaseStack : public Object {
+public:
+    BaseStack(int initialCapacity, T emptyType)
+        : Object()
     {
-    public:
-        BaseStack(int initialCapacity, T emptyType) : Object()
-        {
-            capacity = initialCapacity;
-            this->emptyType = emptyType;
-            count = 0;
-            data = (T *)MALLOC(capacity * sizeof(T));
-        }
-        
-        ~BaseStack()
-        {
-            FREE(this->data);
-        }
-        
-        inline int getCapacity()
-        {
-            return capacity;
-        }
-        
-        inline int size()
-        {
-            return count;
-        }
-        
-        inline bool isEmpty()
-        {
-            return (count == 0);
-        }
-        
-        inline void push(T element)
-        {
-            if (count == capacity)
-                resize(count + 1);
-            data[count++] = element;
-        }
-        
-        void resize(int requiredSize)
-        {
-            if(requiredSize > capacity)
-            {
+        capacity = initialCapacity;
+        this->emptyType = emptyType;
+        count = 0;
+        data = (T*)MALLOC(capacity * sizeof(T));
+    }
+
+    ~BaseStack()
+    {
+        FREE(this->data);
+    }
+
+    inline int getCapacity()
+    {
+        return capacity;
+    }
+
+    inline int size()
+    {
+        return count;
+    }
+
+    inline bool isEmpty()
+    {
+        return (count == 0);
+    }
+
+    inline void push(T element)
+    {
+        if (count == capacity)
+            resize(count + 1);
+        data[count++] = element;
+    }
+
+    void resize(int requiredSize)
+    {
+        if (requiredSize > capacity) {
 #ifdef TOMBDEBUG
-                int oldCapacity = capacity;
+            int oldCapacity = capacity;
 #endif
-                capacity = count + (count / 2);
-                if(requiredSize > capacity)
-                    capacity = requiredSize;
-                data = (T *)REALLOC(data, capacity * sizeof(T));
+            capacity = count + (count / 2);
+            if (requiredSize > capacity)
+                capacity = requiredSize;
+            data = (T*)REALLOC(data, capacity * sizeof(T));
 #ifdef TOMBDEBUG
-                log_debug("resizing %d -> %d\n", oldCapacity, capacity);
+            log_debug("resizing %d -> %d\n", oldCapacity, capacity);
 #endif
-            }
         }
-        
-        inline T pop()
-        {
-            if (this->count < 1)
-                return emptyType;
-            return this->data[--this->count];
-        }
-    protected:
-        T *data;
-        T emptyType;
-        int capacity;
-        int count;
-    };
+    }
+
+    inline T pop()
+    {
+        if (this->count < 1)
+            return emptyType;
+        return this->data[--this->count];
+    }
+
+protected:
+    T* data;
+    T emptyType;
+    int capacity;
+    int count;
+};
 }
 
 #endif // __ZMMF_BASE_STACK_H__

@@ -36,11 +36,11 @@
 using namespace zmm;
 using namespace mxml;
 
-
 String MRRegistrarService::serviceType = nullptr;
 String MRRegistrarService::serviceID = nullptr;
 
-MRRegistrarService::MRRegistrarService() : Singleton<MRRegistrarService>()
+MRRegistrarService::MRRegistrarService()
+    : Singleton<MRRegistrarService>()
 {
     if (serviceType == nullptr || serviceID == nullptr)
         throw _Exception(_("serviceType or serviceID not set!"));

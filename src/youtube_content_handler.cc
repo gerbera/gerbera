@@ -33,11 +33,11 @@
 #if defined(YOUTUBE)
 
 #include "youtube_content_handler.h"
-#include "online_service.h"
-#include "tools.h"
-#include "metadata_handler.h"
 #include "cds_objects.h"
 #include "config_manager.h"
+#include "metadata_handler.h"
+#include "online_service.h"
+#include "tools.h"
 
 #define YT_SWF_TYPE "application/x-shockwave-flash"
 #define YT_MP4_TYPE "video/mp4"
@@ -63,12 +63,12 @@ bool YouTubeContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
     if (!string_ok(feed_name))
         throw _Exception(_("Invalid XML for YouTube service, received - missing feed title!"));
 
-    temp = service_xml->getChildText(_("openSearch:totalResults")); 
+    temp = service_xml->getChildText(_("openSearch:totalResults"));
     if (temp.toInt() == 0)
         return false;
 
     channel_child_count = service_xml->childCount();
-    
+
     if (channel_child_count == 0)
         return false;
 
@@ -76,20 +76,18 @@ bool YouTubeContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
     // to figure out when to stop fetching stuff
     bool has_items = false;
     int item_node_index = 0;
-    while (item_node_index < channel_child_count)
-    {
+    while (item_node_index < channel_child_count) {
         Ref<Node> n = service_xml->getChild(item_node_index);
         if (n == nullptr)
             return false;
-        
+
         item_node_index++;
 
         if (n->getType() != mxml_node_element)
             continue;
 
         Ref<Element> channel_item = RefCast(n, Element);
-        if (channel_item->getName() == "item")
-        {
+        if (channel_item->getName() == "item") {
             has_items = true;
             break;
         }
@@ -122,7 +120,7 @@ bool YouTubeContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
 Ref<YouTubeSubFeed> YouTubeContentHandler::getSubFeed(Ref<Element> feedxml)
 {
     String temp;
-     Ref<YouTubeSubFeed> subfeed(new YouTubeSubFeed());
+    Ref<YouTubeSubFeed> subfeed(new YouTubeSubFeed());
 
     if (feedxml->getName() != "rss")
         throw _Exception(_("Invalid XML for YouTube feed received"));
@@ -130,7 +128,7 @@ Ref<YouTubeSubFeed> YouTubeContentHandler::getSubFeed(Ref<Element> feedxml)
     Ref<Element> channel = feedxml->getChildByName(_("channel"));
     if (channel == nullptr)
         throw _Exception(_("Invalid XML for YouTube service received - channel not found!"));
-   
+
     subfeed->title = channel->getChildText(_("title"));
     if (!string_ok(subfeed->title))
         throw _Exception(_("Invalid XML for YouTube service, received - missing feed title!"));
@@ -139,10 +137,8 @@ Ref<YouTubeSubFeed> YouTubeContentHandler::getSubFeed(Ref<Element> feedxml)
     if (temp.toInt() == 0)
         return subfeed;
 
-
     // now cycle through all items and put the links into the array
-    for (int i = 0; i < channel->childCount(); i++)
-    {
+    for (int i = 0; i < channel->childCount(); i++) {
         Ref<Node> n = channel->getChild(i);
         if (n->getType() != mxml_node_element)
             continue;
@@ -172,12 +168,11 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
     char datebuf[DATE_BUF_LEN];
     struct timespec ts;
 
-    while (current_node_index < channel_child_count)
-    {
+    while (current_node_index < channel_child_count) {
         Ref<Node> n = service_xml->getChild(current_node_index);
 
         current_node_index++;
-      
+
         if (n == nullptr)
             return nullptr;
 
@@ -192,25 +187,24 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
         Ref<CdsItemExternalURL> item(new CdsItemExternalURL());
         Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
         item->addResource(resource);
-        resource->addParameter(_(ONLINE_SERVICE_AUX_ID), 
-                String::from(OS_YouTube));
+        resource->addParameter(_(ONLINE_SERVICE_AUX_ID),
+            String::from(OS_YouTube));
 
         item->setAuxData(_(ONLINE_SERVICE_AUX_ID), String::from(OS_YouTube));
 
-        temp = channel_item->getChildText(_("link")); 
+        temp = channel_item->getChildText(_("link"));
         /// \todo create an own class for items that fetch the URL on request
         /// and to not store it permanently
-        if (!string_ok(temp))
-        {
+        if (!string_ok(temp)) {
             log_warning("Failed to retrieve YouTube video ID\n");
             continue;
         }
-            
+
         item->setURL(temp);
 
         int amp = temp.index('&');
-        if (amp > 0 )
-            temp = temp.substring( 0, amp );
+        if (amp > 0)
+            temp = temp.substring(0, amp);
 
         int eq = temp.rindex('=');
         if (eq > 0)
@@ -221,24 +215,19 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
         item->setServiceID(temp);
 
         temp = channel_item->getChildText(_("pubDate"));
-        if (string_ok(temp))
-        {
+        if (string_ok(temp)) {
             datebuf[0] = '\0';
             // Tue, 18 Jul 2006 17:43:47 +0000
-            if (strptime(temp.c_str(),  "%a, %d %b %Y %T +000", &t) != nullptr)
-            {
-                if (strftime(datebuf, sizeof(datebuf), "%F", &t) != 0)
-                {
-                    datebuf[DATE_BUF_LEN-1] = '\0';
-                    if (strlen(datebuf) > 0)
-                    {
+            if (strptime(temp.c_str(), "%a, %d %b %Y %T +000", &t) != nullptr) {
+                if (strftime(datebuf, sizeof(datebuf), "%F", &t) != 0) {
+                    datebuf[DATE_BUF_LEN - 1] = '\0';
+                    if (strlen(datebuf) > 0) {
                         item->setMetadata(MetadataHandler::getMetaFieldName(M_DATE),
                             datebuf);
                     }
                 }
             }
         }
-
 
         temp = channel_item->getChildText(_("author"));
         if (string_ok(temp))
@@ -250,44 +239,34 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
 
         // media:group uses a couple of elements with the same name, so
         // we will cycle through adn fill it that way
-        
+
         bool content_set = false;
 
         int mediagroup_child_count = mediagroup->elementChildCount();
-        for (int mcc = 0; mcc < mediagroup_child_count; mcc++)
-        {
+        for (int mcc = 0; mcc < mediagroup_child_count; mcc++) {
             Ref<Element> el = mediagroup->getElementChild(mcc);
             if (el == nullptr)
                 continue;
 
-            if (el->getName() == "media:title")
-            {
+            if (el->getName() == "media:title") {
                 temp = el->getText();
                 if (string_ok(temp))
                     item->setTitle(temp);
                 else
                     item->setTitle(_("Unknown"));
-            }
-            else if (el->getName() == "media:description")
-            {
+            } else if (el->getName() == "media:description") {
                 temp = el->getText();
                 if (string_ok(temp))
                     item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), temp);
-            }
-            else if (el->getName() == "media:keywords")
-            {
+            } else if (el->getName() == "media:keywords") {
                 temp = el->getText();
                 if (string_ok(temp))
                     item->setAuxData(_(YOUTUBE_AUXDATA_KEYWORDS), temp);
-            }
-            else if (el->getName() == "media:category")
-            {
+            } else if (el->getName() == "media:category") {
                 temp = el->getText();
                 if (string_ok(temp))
                     item->setAuxData(_(YOUTUBE_AUXDATA_CATEGORY), temp);
-            }
-            else if (el->getName() == "media:content")
-            {
+            } else if (el->getName() == "media:content") {
                 if (content_set)
                     continue;
 
@@ -305,21 +284,17 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
                 resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(mt));
 
                 content_set = true;
- 
+
                 temp = el->getAttribute(_("duration"));
-                if (string_ok(temp))
-                {
+                if (string_ok(temp)) {
                     resource->addAttribute(MetadataHandler::getResAttrName(R_DURATION), secondsToHMS(temp.toInt()));
                 }
-            }
-            else if (el->getName() == "media:thumbnail")
-            {
+            } else if (el->getName() == "media:thumbnail") {
                 temp = el->getAttribute(_("url"));
                 if (!string_ok(temp))
                     continue;
 
-                if (temp.substring(temp.length()-3) != "jpg")
-                {
+                if (temp.substring(temp.length() - 3) != "jpg") {
                     log_warning("Found new YouTube thumbnail image type, please report this to contact at mediatomb dot cc! [%s]\n", temp.c_str());
                     continue;
                 }
@@ -328,26 +303,22 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
                 thumbnail->addOption(_(RESOURCE_CONTENT_TYPE), _(THUMBNAIL));
                 thumbnail->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(thumb_mimetype));
                 thumbnail->addOption(_(RESOURCE_OPTION_URL), temp);
-            
+
                 String temp2 = el->getAttribute(_("width"));
                 temp = el->getAttribute(_("height"));
 
-                if (string_ok(temp) && string_ok(temp2))
-                {
+                if (string_ok(temp) && string_ok(temp2)) {
                     thumbnail->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), temp2 + "x" + temp);
-                }
-                else
+                } else
                     continue;
 
                 thumbnail->addOption(_(RESOURCE_OPTION_PROXY_URL), _(FALSE));
                 item->addResource(thumbnail);
             }
-
         }
-      
+
         Ref<Element> stats = channel_item->getChildByName(_("yt:statistics"));
-        if (stats != nullptr)
-        {
+        if (stats != nullptr) {
             temp = stats->getAttribute(_("viewCount"));
             if (string_ok(temp))
                 item->setAuxData(_(YOUTUBE_AUXDATA_VIEW_COUNT), temp);
@@ -358,8 +329,7 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
         }
 
         Ref<Element> rating = channel_item->getChildByName(_("gd:rating"));
-        if (rating != nullptr)
-        {
+        if (rating != nullptr) {
             temp = rating->getAttribute(_("average"));
             if (string_ok(temp))
                 item->setAuxData(_(YOUTUBE_AUXDATA_AVG_RATING), temp);
@@ -376,15 +346,12 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
 
         item->setFlag(OBJECT_FLAG_PROXY_URL);
         item->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
-        try
-        {
+        try {
             item->validate();
             return RefCast(item, CdsObject);
-        }
-        catch (const Exception & ex)
-        {
+        } catch (const Exception& ex) {
             log_warning("Failed to validate newly created YouTube item: %s\n",
-                        ex.getMessage().c_str());
+                ex.getMessage().c_str());
             continue;
         }
     } // while
@@ -397,4 +364,4 @@ YouTubeSubFeed::YouTubeSubFeed()
     title = nullptr;
 }
 
-#endif//YOUTUBE
+#endif //YOUTUBE

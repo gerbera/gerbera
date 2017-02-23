@@ -29,30 +29,32 @@
 
 /// \file remove.cc
 
-#include "server.h"
-#include <cstdio>
 #include "common.h"
 #include "content_manager.h"
 #include "pages.h"
-#include "tools.h"
+#include "server.h"
 #include "storage.h"
+#include "tools.h"
+#include <cstdio>
 
 using namespace zmm;
 using namespace mxml;
 
-web::remove::remove() : WebRequestHandler()
-{}
+web::remove::remove()
+    : WebRequestHandler()
+{
+}
 
 void web::remove::process()
 {
     log_debug("remove: start\n");
-    
+
     check_request();
-    
+
     int objectID = intParam(_("object_id"));
     bool all = intParam(_("all"));
-    
+
     ContentManager::getInstance()->removeObject(objectID, true, all);
-    
+
     log_debug("remove: returning\n");
 }

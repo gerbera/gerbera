@@ -3,7 +3,6 @@
  * 
  * */
 
-
 #ifndef __MPEGDEMUX_H__
 #define __MPEGDEMUX_H__
 
@@ -20,13 +19,12 @@ extern "C" {
 /// \param keep_audio_id id of the audio stream taht should be kept.
 /// \return 0 on success.
 
-int remux_mpeg(int fd_in, int fd_out, 
-               unsigned char keep_video_id, 
-               unsigned char keep_audio_id);
+int remux_mpeg(int fd_in, int fd_out,
+    unsigned char keep_video_id,
+    unsigned char keep_audio_id);
 
 #ifdef __cplusplus
-}  // extern "C"
+} // extern "C"
 #endif
-
 
 #endif

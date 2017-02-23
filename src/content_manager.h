@@ -31,120 +31,118 @@
 #ifndef __CONTENT_MANAGER_H__
 #define __CONTENT_MANAGER_H__
 
-#include <memory>
-#include <unordered_set>
-#include <mutex>
 #include <condition_variable>
+#include <memory>
+#include <mutex>
+#include <unordered_set>
 
-#include "common.h"
-#include "cds_objects.h"
-#include "storage.h"
-#include "dictionary.h"
 #include "autoscan.h"
-#include "timer.h"
+#include "cds_objects.h"
+#include "common.h"
+#include "dictionary.h"
 #include "generic_task.h"
+#include "storage.h"
+#include "timer.h"
 
 #ifdef HAVE_JS
-    // this is somewhat not nice, the playlist header needs the cm header and
-    // vice versa
-    class PlaylistParserScript;
-    #include "scripting/playlist_parser_script.h"
+// this is somewhat not nice, the playlist header needs the cm header and
+// vice versa
+class PlaylistParserScript;
+#include "scripting/playlist_parser_script.h"
 #ifdef HAVE_LIBDVDNAV
-    class DVDImportScript;
-    #include "scripting/dvd_image_import_script.h"
+class DVDImportScript;
+#include "scripting/dvd_image_import_script.h"
 #endif
 
 #endif
 #include "layout/layout.h"
 #ifdef HAVE_INOTIFY
-    #include "autoscan_inotify.h"
+#include "autoscan_inotify.h"
 #endif
 
 #ifdef EXTERNAL_TRANSCODING
-    #include "transcoding/transcoding.h"
+#include "transcoding/transcoding.h"
 #endif
 
-#ifdef ONLINE_SERVICES 
-    #include "online_service.h"
+#ifdef ONLINE_SERVICES
+#include "online_service.h"
 #ifdef YOUTUBE
-    #include "cached_url.h"
-    #include "reentrant_array.h"
-    #define  MAX_CACHED_URLS            20
-    #define URL_CACHE_CHECK_INTERVAL    300
-    //#define URL_CACHE_CHECK_INTERVAL 30
-    //#define URL_CACHE_LIFETIME          60
-    #define URL_CACHE_LIFETIME          600
+#include "cached_url.h"
+#include "reentrant_array.h"
+#define MAX_CACHED_URLS 20
+#define URL_CACHE_CHECK_INTERVAL 300
+//#define URL_CACHE_CHECK_INTERVAL 30
+//#define URL_CACHE_LIFETIME          60
+#define URL_CACHE_LIFETIME 600
 #endif
-#endif//ONLINE_SERVICES
+#endif //ONLINE_SERVICES
 
-#if defined (EXTERNAL_TRANSCODING) || defined(SOPCAST)
-    #include "executor.h"
+#if defined(EXTERNAL_TRANSCODING) || defined(SOPCAST)
+#include "executor.h"
 #endif
 
-class CMAddFileTask : public GenericTask
-{
+class CMAddFileTask : public GenericTask {
 protected:
     zmm::String path;
     zmm::String rootpath;
     bool recursive;
     bool hidden;
+
 public:
-    CMAddFileTask(zmm::String path, zmm::String rootpath, bool recursive=false,
-                  bool hidden=false, bool cancellable = true);
+    CMAddFileTask(zmm::String path, zmm::String rootpath, bool recursive = false,
+        bool hidden = false, bool cancellable = true);
     zmm::String getPath();
     zmm::String getRootPath();
     virtual void run();
 };
 
-class CMRemoveObjectTask : public GenericTask
-{
+class CMRemoveObjectTask : public GenericTask {
 protected:
     int objectID;
     bool all;
+
 public:
     CMRemoveObjectTask(int objectID, bool all);
     virtual void run();
 };
 
-class CMLoadAccountingTask : public GenericTask
-{
+class CMLoadAccountingTask : public GenericTask {
 public:
     CMLoadAccountingTask();
     virtual void run();
 };
 
-class CMRescanDirectoryTask : public GenericTask
-{
-protected: 
+class CMRescanDirectoryTask : public GenericTask {
+protected:
     int objectID;
     int scanID;
     scan_mode_t scanMode;
+
 public:
     CMRescanDirectoryTask(int objectID, int scanID, scan_mode_t scanMode,
-                          bool cancellable);
+        bool cancellable);
     virtual void run();
 };
 
-class CMAccounting : public zmm::Object
-{
+class CMAccounting : public zmm::Object {
 public:
     CMAccounting();
+
 public:
     int totalFiles;
 };
 
 #ifdef ONLINE_SERVICES
-class CMFetchOnlineContentTask : public GenericTask
-{
+class CMFetchOnlineContentTask : public GenericTask {
 protected:
     zmm::Ref<OnlineService> service;
     zmm::Ref<Layout> layout;
     bool unscheduled_refresh;
 
 public:
-    CMFetchOnlineContentTask(zmm::Ref<OnlineService> service, 
-                             zmm::Ref<Layout> layout,
-                             bool cancellable, bool unscheduled_refresh);
+    CMFetchOnlineContentTask(zmm::Ref<OnlineService> service,
+        zmm::Ref<Layout> layout,
+        bool cancellable, bool unscheduled_refresh);
     virtual void run();
 };
 #endif
@@ -177,15 +175,12 @@ public:
 };
 */
 
-class ContentManager : public TimerSubscriber, public Singleton<ContentManager, std::recursive_mutex>
-{
+class ContentManager : public TimerSubscriber, public Singleton<ContentManager, std::recursive_mutex> {
 public:
     /// \brief This is the parameter class for timerNotify
-    class TimerParameter : public zmm::Object
-    {
+    class TimerParameter : public zmm::Object {
     public:
-        enum timer_param_t
-        {
+        enum timer_param_t {
             IDAutoscan,
 #ifdef ONLINE_SERVICES
             IDOnlineContent,
@@ -196,31 +191,30 @@ public:
 #endif
         };
 
-        TimerParameter(timer_param_t param, int id) 
-        { 
-            this->param = param; 
+        TimerParameter(timer_param_t param, int id)
+        {
+            this->param = param;
             this->id = id;
         }
 
-        timer_param_t whoami()  { return param;  }
-        void setID(int id)       { this->id = id; }
-        int getID()             { return id;     }
+        timer_param_t whoami() { return param; }
+        void setID(int id) { this->id = id; }
+        int getID() { return id; }
 
     protected:
         timer_param_t param;
         int id;
     };
 
-
     ContentManager();
     virtual void init();
     virtual ~ContentManager();
     void shutdown();
-    
+
     virtual void timerNotify(zmm::Ref<zmm::Object> parameter);
-    
+
     bool isBusy() { return working; }
-    
+
     zmm::Ref<CMAccounting> getAccounting();
 
     /// \brief Returns the task that is currently being executed.
@@ -232,11 +226,10 @@ public:
     /// \brief Find a task identified by the task ID and invalidate it.
     void invalidateTask(unsigned int taskID, task_owner_t taskOwner = ContentManagerTask);
 
-    
     /* the functions below return true if the task has been enqueued */
-    
+
     /* sync/async methods */
-    void loadAccounting(bool async=true);
+    void loadAccounting(bool async = true);
 
     /// \brief Adds a file or directory to the database.
     /// \param path absolute path to the file
@@ -245,30 +238,30 @@ public:
     /// \param hidden true allows to import hidden files, false ignores them
     /// \param queue for immediate processing or in normal order
     /// \return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
-    int addFile(zmm::String path, bool recursive=true, bool async=true, 
-                bool hidden=false, bool lowPriority=false, 
-                bool cancellable=true);
+    int addFile(zmm::String path, bool recursive = true, bool async = true,
+        bool hidden = false, bool lowPriority = false,
+        bool cancellable = true);
 
     int ensurePathExistence(zmm::String path);
-    void removeObject(int objectID, bool async=true, bool all=false);
+    void removeObject(int objectID, bool async = true, bool all = false);
     void rescanDirectory(int objectID, int scanID, scan_mode_t scanMode,
-                         zmm::String descPath = nullptr, bool cancellable = true);
+        zmm::String descPath = nullptr, bool cancellable = true);
 
     /// \brief Updates an object in the database using the given parameters.
     /// \param objectID ID of the object to update
     /// \param parameters key value pairs of fields to be updated
     void updateObject(int objectID, zmm::Ref<Dictionary> parameters);
 
-    zmm::Ref<CdsObject> createObjectFromFile(zmm::String path, 
-                                             bool magic=true, 
-                                             bool allow_fifo=false);
+    zmm::Ref<CdsObject> createObjectFromFile(zmm::String path,
+        bool magic = true,
+        bool allow_fifo = false);
 
 #ifdef ONLINE_SERVICES
     /// \brief Creates a layout based from data that is obtained from an
     /// online service (like YouTube, SopCast, etc.)
-    void fetchOnlineContent(service_type_t service, bool lowPriority=true, 
-                            bool cancellable=true, 
-                            bool unscheduled_refresh = false);
+    void fetchOnlineContent(service_type_t service, bool lowPriority = true,
+        bool cancellable = true,
+        bool unscheduled_refresh = false);
 
     void cleanupOnlineServiceObjects(zmm::Ref<OnlineService> service);
 
@@ -278,7 +271,7 @@ public:
     /// \brief Retrieves an URL from the cache.
     zmm::String getCachedURL(int objectID);
 #endif
-#endif//ONLINE_SERVICES
+#endif //ONLINE_SERVICES
 
     /// \brief Adds a virtual item.
     /// \param obj item to add
@@ -288,13 +281,13 @@ public:
     /// This function makes sure that the file is first added to
     /// PC-Directory, however without the scripting execution.
     /// It then adds the user defined virtual item to the database.
-    void addVirtualItem(zmm::Ref<CdsObject> obj, bool allow_fifo=false);
+    void addVirtualItem(zmm::Ref<CdsObject> obj, bool allow_fifo = false);
 
     /// \brief Adds an object to the database.
     /// \param obj object to add
     ///
     /// parentID of the object must be set before this method.
-    /// The ID of the object provided is ignored and generated by this method    
+    /// The ID of the object provided is ignored and generated by this method
     void addObject(zmm::Ref<CdsObject> obj);
 
     /// \brief Adds a virtual container chain specified by path.
@@ -303,17 +296,17 @@ public:
     /// \param lastClass upnp:class of the last container in the chain, if nullptr
     /// then the default class will be taken
     /// \param lastRefID reference id of the last container in the chain,
-    /// INVALID_OBJECT_ID indicates that the id will not be set. 
+    /// INVALID_OBJECT_ID indicates that the id will not be set.
     /// \return ID of the last container in the chain.
     int addContainerChain(zmm::String chain, zmm::String lastClass = nullptr,
-            int lastRefID = INVALID_OBJECT_ID, zmm::Ref<Dictionary> lastMetadata = nullptr);
-    
+        int lastRefID = INVALID_OBJECT_ID, zmm::Ref<Dictionary> lastMetadata = nullptr);
+
     /// \brief Adds a virtual container specified by parentID and title
     /// \param parentID the id of the parent.
     /// \param title the title of the container.
     /// \param upnpClass the upnp class of the container.
     void addContainer(int parentID, zmm::String title, zmm::String upnpClass);
-    
+
     /// \brief Updates an object in the database.
     /// \param obj the object to update
     void updateObject(zmm::Ref<CdsObject> obj, bool send_updates = true);
@@ -336,11 +329,11 @@ public:
 
     /// \brief Removes an AutoscanDirectrory (found by location) from the watch list.
     void removeAutoscanDirectory(zmm::String location);
-    
+
     /// \brief Removes an AutoscanDirectory (by objectID) from the watch list.
     void removeAutoscanDirectory(int objectID);
- 
-    /// \brief Update autoscan parameters for an existing autoscan directory 
+
+    /// \brief Update autoscan parameters for an existing autoscan directory
     /// or add a new autoscan directory
     void setAutoscanDirectory(zmm::Ref<AutoscanDirectory> dir);
 
@@ -353,9 +346,8 @@ public:
     /// \brief returns an array of autoscan directories for the given scan mode
     zmm::Ref<zmm::Array<AutoscanDirectory> > getAutoscanDirectories(scan_mode_t scanMode);
 
-    /// \brief returns an array of all autoscan directories 
+    /// \brief returns an array of all autoscan directories
     zmm::Ref<zmm::Array<AutoscanDirectory> > getAutoscanDirectories();
-
 
     /// \brief instructs ContentManager to reload scripting environment
     void reloadLayout();
@@ -366,12 +358,12 @@ public:
     /// When an external process is launched we will register the executor
     /// the content manager. This will ensure that we can kill all processes
     /// when we shutdown the server.
-    /// 
+    ///
     /// \param exec the Executor object of the process
     void registerExecutor(zmm::Ref<Executor> exec);
 
     /// \brief unregister process
-    /// 
+    ///
     /// When the the process io handler receives a close on a stream that is
     /// currently being processed by an external process, it will kill it.
     /// The handler will then remove the executor from the list.
@@ -379,7 +371,7 @@ public:
 #endif
 
 #ifdef HAVE_MAGIC
-    zmm::String getMimeTypeFromBuffer(const void *buffer, size_t length);
+    zmm::String getMimeTypeFromBuffer(const void* buffer, size_t length);
 #endif
 protected:
     void initLayout();
@@ -389,7 +381,7 @@ protected:
     void initJS();
     void destroyJS();
 #endif
-    
+
     zmm::Ref<RExp> reMimetype;
 
     bool ignore_unknown_extensions;
@@ -404,43 +396,43 @@ protected:
     zmm::Ref<AutoscanList> autoscan_inotify;
     zmm::Ref<AutoscanInotify> inotify;
 #endif
- 
+
 #if defined(EXTERNAL_TRANSCODING) || defined(SOPCAST)
     zmm::Ref<zmm::Array<Executor> > process_list;
 #endif
 
     void _loadAccounting();
 
-    int addFileInternal(zmm::String path, zmm::String rootpath, 
-                        bool recursive=true,
-                        bool async=true, bool hidden=false,
-                        bool lowPriority=false, 
-                        unsigned int parentTaskID = 0,
-                        bool cancellable = true);
-    int _addFile(zmm::String path, zmm::String rootpath, bool recursive=false, bool hidden=false, zmm::Ref<GenericTask> task=nullptr);
+    int addFileInternal(zmm::String path, zmm::String rootpath,
+        bool recursive = true,
+        bool async = true, bool hidden = false,
+        bool lowPriority = false,
+        unsigned int parentTaskID = 0,
+        bool cancellable = true);
+    int _addFile(zmm::String path, zmm::String rootpath, bool recursive = false, bool hidden = false, zmm::Ref<GenericTask> task = nullptr);
     //void _addFile2(zmm::String path, bool recursive=0);
     void _removeObject(int objectID, bool all);
-    
-    void _rescanDirectory(int containerID, int scanID, scan_mode_t scanMode, scan_level_t scanLevel, zmm::Ref<GenericTask> task=nullptr);
+
+    void _rescanDirectory(int containerID, int scanID, scan_mode_t scanMode, scan_level_t scanLevel, zmm::Ref<GenericTask> task = nullptr);
     /* for recursive addition */
     void addRecursive(zmm::String path, bool hidden, zmm::Ref<GenericTask> task);
     //void addRecursive2(zmm::Ref<DirCache> dirCache, zmm::String filename, bool recursive);
-    
+
     zmm::String extension2mimetype(zmm::String extension);
     zmm::String mimetype2upnpclass(zmm::String mimeType);
 
     void invalidateAddTask(zmm::Ref<GenericTask> t, zmm::String path);
-    
+
     zmm::Ref<Layout> layout;
 
-#ifdef ONLINE_SERVICES 
+#ifdef ONLINE_SERVICES
     zmm::Ref<OnlineServiceList> online_services;
 
     void fetchOnlineContentInternal(zmm::Ref<OnlineService> service,
-                                    bool lowPriority=true,
-                                    bool cancellable=true,
-                                    unsigned int parentTaskID = 0,
-                                    bool unscheduled_refresh = false);
+        bool lowPriority = true,
+        bool cancellable = true,
+        unsigned int parentTaskID = 0,
+        bool unscheduled_refresh = false);
 
 #ifdef YOUTUBE
     std::mutex urlcache_mutex;
@@ -450,7 +442,7 @@ protected:
     void checkCachedURLs();
 #endif
 
-#endif //ONLINE_SERVICES 
+#endif //ONLINE_SERVICES
 
 #ifdef HAVE_JS
     zmm::Ref<PlaylistParserScript> playlist_parser_script;
@@ -460,24 +452,24 @@ protected:
 #endif
 
     bool layout_enabled;
-    
+
     void setLastModifiedTime(time_t lm);
-    
+
     inline void signal() { cond.notify_one(); }
-    static void *staticThreadProc(void *arg);
+    static void* staticThreadProc(void* arg);
     void threadProc();
-    
+
     void addTask(zmm::Ref<GenericTask> task, bool lowPriority = false);
-    
+
     zmm::Ref<CMAccounting> acct;
-    
+
     pthread_t taskThread;
     std::condition_variable_any cond;
-    
+
     bool working;
-    
+
     bool shutdownFlag;
-    
+
     zmm::Ref<zmm::ObjectQueue<GenericTask> > taskQueue1; // priority 1
     zmm::Ref<zmm::ObjectQueue<GenericTask> > taskQueue2; // priority 2
     zmm::Ref<GenericTask> currentTask;

@@ -41,10 +41,8 @@ CachedURL::CachedURL(int object_id, zmm::String url)
     this->object_id = object_id;
     this->url = url;
     this->creation_time = time(nullptr);
-    if (this->creation_time == -1)
-    {
-        throw _Exception(_("Failed to get current time: ") + 
-                         mt_strerror(errno));
+    if (this->creation_time == -1) {
+        throw _Exception(_("Failed to get current time: ") + mt_strerror(errno));
     }
     this->last_access_time = creation_time;
 }
@@ -53,25 +51,23 @@ int CachedURL::getObjectID()
 {
     return object_id;
 }
-    
+
 String CachedURL::getURL()
 {
     AutoLock lock(mutex);
     last_access_time = time(nullptr);
-    if (last_access_time == -1)
-    {
-        throw _Exception(_("Failed to get current time: ") + 
-                         mt_strerror(errno));
+    if (last_access_time == -1) {
+        throw _Exception(_("Failed to get current time: ") + mt_strerror(errno));
     }
     return url;
 }
-    
+
 time_t CachedURL::getCreationTime()
 {
     return creation_time;
 }
 
-    /// \brief Retrieves the time when the last access time of the data.
+/// \brief Retrieves the time when the last access time of the data.
 time_t CachedURL::getLastAccessTime()
 {
     AutoLock lock(mutex);

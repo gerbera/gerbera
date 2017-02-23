@@ -29,9 +29,9 @@
 
 /// \file upnp_cds_actions.cc
 
-#include "upnp_cds.h"
 #include "server.h"
 #include "storage.h"
+#include "upnp_cds.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -40,9 +40,9 @@ void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
 {
     log_debug("start\n");
     Ref<Storage> storage = Storage::getInstance();
-   
+
     Ref<Element> req = request->getRequest();
-   
+
     String objID = req->getChildText(_("ObjectID"));
     int objectID;
     String BrowseFlag = req->getChildText(_("BrowseFlag"));
@@ -52,70 +52,61 @@ void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
     // String SortCriteria; // not yet supported
 
     //log_debug("Browse received parameters: ObjectID [%s] BrowseFlag [%s] StartingIndex [%s] RequestedCount [%s]\n",
-//            ObjectID.c_str(), BrowseFlag.c_str(), StartingIndex.c_str(), RequestedCount.c_str());
-   
+    //            ObjectID.c_str(), BrowseFlag.c_str(), StartingIndex.c_str(), RequestedCount.c_str());
 
     if (objID == nullptr)
         throw UpnpException(UPNP_E_NO_SUCH_ID, _("empty object id"));
     else
         objectID = objID.toInt();
-    
+
     unsigned int flag = BROWSE_ITEMS | BROWSE_CONTAINERS | BROWSE_EXACT_CHILDCOUNT;
-    
-    if(BrowseFlag == "BrowseDirectChildren")
+
+    if (BrowseFlag == "BrowseDirectChildren")
         flag |= BROWSE_DIRECT_CHILDREN;
     else if (BrowseFlag != "BrowseMetadata")
         throw UpnpException(UPNP_SOAP_E_INVALID_ARGS,
-                            _("invalid browse flag: ") + BrowseFlag);
+            _("invalid browse flag: ") + BrowseFlag);
 
     Ref<CdsObject> parent = storage->loadObject(objectID);
-    if ((parent->getClass() == UPNP_DEFAULT_CLASS_MUSIC_ALBUM) ||
-        (parent->getClass() == UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER))
+    if ((parent->getClass() == UPNP_DEFAULT_CLASS_MUSIC_ALBUM) || (parent->getClass() == UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER))
         flag |= BROWSE_TRACK_SORT;
 
     if (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_HIDE_PC_DIRECTORY))
-         flag |= BROWSE_HIDE_FS_ROOT;
+        flag |= BROWSE_HIDE_FS_ROOT;
 
     Ref<BrowseParam> param(new BrowseParam(objectID, flag));
 
     param->setStartingIndex(StartingIndex.toInt());
     param->setRequestedCount(RequestedCount.toInt());
-    
+
     Ref<Array<CdsObject> > arr;
-   
-    try
-    {
+
+    try {
         arr = storage->browse(param);
-    }
-    catch (const Exception & e)
-    {
+    } catch (const Exception& e) {
         throw UpnpException(UPNP_E_NO_SUCH_ID, _("no such object"));
     }
 
-    Ref<Element> didl_lite (new Element(_("DIDL-Lite")));
-    didl_lite->setAttribute(_(XML_NAMESPACE_ATTR), 
-                            _(XML_DIDL_LITE_NAMESPACE));
-    didl_lite->setAttribute(_(XML_DC_NAMESPACE_ATTR), 
-                            _(XML_DC_NAMESPACE));
-    didl_lite->setAttribute(_(XML_UPNP_NAMESPACE_ATTR), 
-                            _(XML_UPNP_NAMESPACE));
+    Ref<Element> didl_lite(new Element(_("DIDL-Lite")));
+    didl_lite->setAttribute(_(XML_NAMESPACE_ATTR),
+        _(XML_DIDL_LITE_NAMESPACE));
+    didl_lite->setAttribute(_(XML_DC_NAMESPACE_ATTR),
+        _(XML_DC_NAMESPACE));
+    didl_lite->setAttribute(_(XML_UPNP_NAMESPACE_ATTR),
+        _(XML_UPNP_NAMESPACE));
 
     Ref<ConfigManager> cfg = ConfigManager::getInstance();
 
 #ifdef EXTEND_PROTOCOLINFO
-    if (cfg->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK))
-    {
+    if (cfg->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK)) {
         didl_lite->setAttribute(_(XML_SEC_NAMESPACE_ATTR),
-                                _(XML_SEC_NAMESPACE));
+            _(XML_SEC_NAMESPACE));
     }
 #endif
 
-    for(int i = 0; i < arr->size(); i++)
-    {
+    for (int i = 0; i < arr->size(); i++) {
         Ref<CdsObject> obj = arr->get(i);
-        if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) &&
-            obj->getFlag(OBJECT_FLAG_PLAYED))
-        {
+        if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && obj->getFlag(OBJECT_FLAG_PLAYED)) {
             String title = obj->getTitle();
             if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
                 title = cfg->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING) + title;
@@ -149,7 +140,7 @@ void ContentDirectoryService::upnp_action_GetSearchCapabilities(Ref<ActionReques
     Ref<Element> response;
     response = UpnpXML_CreateResponse(request->getActionName(), serviceType);
     response->appendTextChild(_("SearchCaps"), _(""));
-            
+
     request->setResponse(response);
 
     log_debug("end\n");
@@ -162,7 +153,7 @@ void ContentDirectoryService::upnp_action_GetSortCapabilities(Ref<ActionRequest>
     Ref<Element> response;
     response = UpnpXML_CreateResponse(request->getActionName(), serviceType);
     response->appendTextChild(_("SortCaps"), _(""));
-            
+
     request->setResponse(response);
 
     log_debug("end\n");
@@ -177,7 +168,7 @@ void ContentDirectoryService::upnp_action_GetSystemUpdateID(Ref<ActionRequest> r
     response->appendTextChild(_("Id"), String::from(systemUpdateID));
 
     request->setResponse(response);
-    
+
     log_debug("end\n");
 }
 
@@ -185,29 +176,20 @@ void ContentDirectoryService::process_action_request(Ref<ActionRequest> request)
 {
     log_debug("start\n");
 
-    if (request->getActionName() == "Browse")
-    {
+    if (request->getActionName() == "Browse") {
         upnp_action_Browse(request);
-    }
-    else if (request->getActionName() == "GetSearchCapabilities")
-    {
+    } else if (request->getActionName() == "GetSearchCapabilities") {
         upnp_action_GetSearchCapabilities(request);
-    }
-    else if (request->getActionName() == "GetSortCapabilities")
-    {
+    } else if (request->getActionName() == "GetSortCapabilities") {
         upnp_action_GetSortCapabilities(request);
-    }
-    else if (request->getActionName() == "GetSystemUpdateID")
-    {
+    } else if (request->getActionName() == "GetSystemUpdateID") {
         upnp_action_GetSystemUpdateID(request);
-    }
-    else
-    {
+    } else {
         // invalid or unsupported action
         log_debug("unrecognized action %s\n",
-                request->getActionName().c_str());
+            request->getActionName().c_str());
         request->setErrorCode(UPNP_E_INVALID_ACTION);
-    //    throw UpnpException(UPNP_E_INVALID_ACTION, _("unrecognized action"));
+        //    throw UpnpException(UPNP_E_INVALID_ACTION, _("unrecognized action"));
     }
 
     log_debug("ContentDirectoryService::process_action_request: end\n");

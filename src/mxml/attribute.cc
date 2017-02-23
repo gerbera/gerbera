@@ -29,25 +29,28 @@
 
 /// \file attribute.cc
 
-#include "mxml.h"
 #include "attribute.h"
+#include "mxml.h"
 
 using namespace mxml;
 using namespace zmm;
 
 /* XmlAttr methods */
-Attribute::Attribute(String name, String value) : Object()
+Attribute::Attribute(String name, String value)
+    : Object()
 {
     this->name = name;
     this->value = value;
     vtype = mxml_string_type;
 }
-Attribute::Attribute(String name) : Object()
+Attribute::Attribute(String name)
+    : Object()
 {
     this->name = name;
     vtype = mxml_string_type;
 }
-Attribute::Attribute(String name, String value, enum mxml_value_type vtype) : Object()
+Attribute::Attribute(String name, String value, enum mxml_value_type vtype)
+    : Object()
 {
     this->name = name;
     this->value = value;

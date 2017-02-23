@@ -42,25 +42,25 @@
 #include "metadata_handler.h"
 
 /// \brief This class is responsible for reading id3 or ogg tags metadata
-class TagLibHandler : public MetadataHandler
-{
+class TagLibHandler : public MetadataHandler {
 public:
     TagLibHandler();
     virtual void fillMetadata(zmm::Ref<CdsItem> item);
-    virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum, off_t *data_size);
+    virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum, off_t* data_size);
+
 private:
     void populateGenericTags(zmm::Ref<CdsItem> item, const TagLib::File& file) const;
     bool isValidArtworkContentType(zmm::String content_type);
     zmm::String getContentTypeFromByteVector(const TagLib::ByteVector& data) const;
     void addArtworkResource(zmm::Ref<CdsItem> item, zmm::String content_type);
-    void extractMP3(TagLib::IOStream *roStream, zmm::Ref<CdsItem> item);
-    void extractOgg(TagLib::IOStream *roStream, zmm::Ref<CdsItem> item);
-    void extractASF(TagLib::IOStream *roStream, zmm::Ref<CdsItem> item);
-    void extractFLAC(TagLib::IOStream *roStream, zmm::Ref<CdsItem> item);
-    void extractAPE(TagLib::IOStream *roStream, zmm::Ref<CdsItem> item);
-    void extractWavPack(TagLib::IOStream *roStream, zmm::Ref<CdsItem> item);
-    void extractMP4(TagLib::IOStream *roStream, zmm::Ref<CdsItem> item);
-    void extractAiff(TagLib::IOStream *roStream, zmm::Ref<CdsItem> item);
+    void extractMP3(TagLib::IOStream* roStream, zmm::Ref<CdsItem> item);
+    void extractOgg(TagLib::IOStream* roStream, zmm::Ref<CdsItem> item);
+    void extractASF(TagLib::IOStream* roStream, zmm::Ref<CdsItem> item);
+    void extractFLAC(TagLib::IOStream* roStream, zmm::Ref<CdsItem> item);
+    void extractAPE(TagLib::IOStream* roStream, zmm::Ref<CdsItem> item);
+    void extractWavPack(TagLib::IOStream* roStream, zmm::Ref<CdsItem> item);
+    void extractMP4(TagLib::IOStream* roStream, zmm::Ref<CdsItem> item);
+    void extractAiff(TagLib::IOStream* roStream, zmm::Ref<CdsItem> item);
 };
 
 #endif

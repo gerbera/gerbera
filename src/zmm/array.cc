@@ -37,43 +37,43 @@
 using namespace zmm;
 
 ArrayBase::ArrayBase()
-{}
+{
+}
 
 void ArrayBase::init(int capacity)
 {
     this->capacity = capacity;
     siz = 0;
-    arr = (Object **)MALLOC(capacity * sizeof(Object *));
-    memset(arr, 0, capacity * sizeof(Object *));
+    arr = (Object**)MALLOC(capacity * sizeof(Object*));
+    memset(arr, 0, capacity * sizeof(Object*));
 }
 ArrayBase::~ArrayBase()
 {
-    for(int i = 0; i < siz; i++)
-    {
-        Object *obj = arr[i];
-        if(obj)
+    for (int i = 0; i < siz; i++) {
+        Object* obj = arr[i];
+        if (obj)
             obj->release();
     }
     FREE(arr);
 }
 
-void ArrayBase::append(Object *obj)
+void ArrayBase::append(Object* obj)
 {
     obj->retain();
     resize(siz + 1);
     arr[siz++] = obj;
 }
 
-void ArrayBase::set(Object *obj, int index)
+void ArrayBase::set(Object* obj, int index)
 {
-    Object *old = arr[index];
-    if(old)
+    Object* old = arr[index];
+    if (old)
         old->release();
-    if(obj)
+    if (obj)
         obj->retain();
     arr[index] = obj;
 }
-Object *ArrayBase::get(int index)
+Object* ArrayBase::get(int index)
 {
     return arr[index];
 }
@@ -86,10 +86,9 @@ void ArrayBase::remove(int index, int count)
         max = siz;
     if (max <= index) // if nothing to remove
         return;
-    for(int i = index; i < max; i++)
-    {
-        Object *obj = arr[i];
-        if(obj)
+    for (int i = index; i < max; i++) {
+        Object* obj = arr[i];
+        if (obj)
             obj->release();
         arr[i] = nullptr;
     }
@@ -97,10 +96,9 @@ void ArrayBase::remove(int index, int count)
     if (move) // if there is anything to shift
     {
         memmove(
-            (void *)(arr + index),
-            (void *)(arr + index + count),
-            move * sizeof(Object *)
-        );
+            (void*)(arr + index),
+            (void*)(arr + index + count),
+            move * sizeof(Object*));
     }
     siz -= count;
 }
@@ -108,19 +106,18 @@ void ArrayBase::removeUnordered(int index)
 {
     if (index < 0 || index >= siz) // index beyond size
         return;
-    Object *obj = arr[index];
+    Object* obj = arr[index];
     obj->release();
     arr[index] = arr[--siz];
     arr[siz] = nullptr;
 }
-void ArrayBase::insert(int index, Object *obj)
+void ArrayBase::insert(int index, Object* obj)
 {
     resize(siz + 1);
     memmove(
-        (void *)(arr + (index + 1)),
-        (void *)(arr + index),
-        (siz - index) * sizeof(Object *)
-    );
+        (void*)(arr + (index + 1)),
+        (void*)(arr + index),
+        (siz - index) * sizeof(Object*));
     obj->retain();
     arr[index] = obj;
     siz++;
@@ -129,29 +126,27 @@ void ArrayBase::insert(int index, Object *obj)
 void ArrayBase::optimize()
 {
     capacity = siz;
-    arr = (Object **)REALLOC(arr, capacity * sizeof(Object *));
+    arr = (Object**)REALLOC(arr, capacity * sizeof(Object*));
 }
 
 void ArrayBase::resize(int requiredSize)
 {
-    if(requiredSize > capacity)
-    {
+    if (requiredSize > capacity) {
         int newCapacity = siz + (siz / 2);
-        if(requiredSize > newCapacity)
+        if (requiredSize > newCapacity)
             newCapacity = requiredSize;
         capacity = newCapacity;
-        arr = (Object **)REALLOC(arr, capacity * sizeof(Object *));
+        arr = (Object**)REALLOC(arr, capacity * sizeof(Object*));
     }
 }
 
 void ArrayBase::clear()
 {
-    for(int i=0; i<siz; i++)
-    {
-        Object *obj = arr[i];
+    for (int i = 0; i < siz; i++) {
+        Object* obj = arr[i];
         obj->release();
     }
 
-    memset(arr, 0, siz * sizeof(Object *));
+    memset(arr, 0, siz * sizeof(Object*));
     siz = 0;
 }

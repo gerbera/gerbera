@@ -28,28 +28,27 @@
 */
 
 /// \file config_manager.h
-///\brief Definitions of the ConfigManager class. 
+///\brief Definitions of the ConfigManager class.
 
 #ifndef __CONFIG_MANAGER_H__
 #define __CONFIG_MANAGER_H__
 
-#include "common.h"
-#include "mxml/mxml.h"
-#include "singleton.h"
-#include "dictionary.h"
-#include "object_dictionary.h"
-#include "xpath.h"
 #include "autoscan.h"
+#include "common.h"
 #include "config_options.h"
+#include "dictionary.h"
+#include "mxml/mxml.h"
+#include "object_dictionary.h"
+#include "singleton.h"
+#include "xpath.h"
 
 #ifdef EXTERNAL_TRANSCODING
-    #include "transcoding/transcoding.h"
+#include "transcoding/transcoding.h"
 #endif
 #ifdef ONLINE_SERVICES
-    #include "online_service.h"
+#include "online_service.h"
 #endif
-typedef enum
-{
+typedef enum {
     CFG_SERVER_PORT = 0,
     CFG_SERVER_IP,
     CFG_SERVER_NETWORK_INTERFACE,
@@ -67,13 +66,13 @@ typedef enum
     CFG_SERVER_WEBROOT,
     CFG_SERVER_SERVEDIR,
     CFG_SERVER_ALIVE_INTERVAL,
-#ifdef EXTEND_PROTOCOLINFO 
+#ifdef EXTEND_PROTOCOLINFO
     CFG_SERVER_EXTEND_PROTOCOLINFO,
 #ifdef EXTERNAL_TRANSCODING
     CFG_SERVER_EXTEND_PROTOCOLINFO_CL_HACK,
 #endif
     CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK,
-#endif//EXTEND_PROTOCOLINFO
+#endif //EXTEND_PROTOCOLINFO
     CFG_SERVER_HIDE_PC_DIRECTORY,
     CFG_SERVER_BOOKMARK_FILE,
     CFG_SERVER_CUSTOM_HTTP_HEADERS,
@@ -163,8 +162,8 @@ typedef enum
 #ifdef HAVE_CURL
     CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE,
     CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE,
-#endif//HAVE_CURL
-#endif//EXTERNAL_TRANSCODING
+#endif //HAVE_CURL
+#endif //EXTERNAL_TRANSCODING
 #ifdef YOUTUBE
     CFG_ONLINE_CONTENT_YOUTUBE_ENABLED,
     CFG_ONLINE_CONTENT_YOUTUBE_FORMAT_MP4,
@@ -191,34 +190,33 @@ typedef enum
     CFG_MAX
 } config_option_t;
 
-class ConfigManager : public Singleton<ConfigManager, std::mutex>
-{
+class ConfigManager : public Singleton<ConfigManager, std::mutex> {
 public:
     ConfigManager();
-    
+
     virtual ~ConfigManager();
-    
+
     /// \brief Returns the name of the config file that was used to launch the server.
     inline zmm::String getConfigFilename() { return filename; }
-    
+
     void load(zmm::String filename);
-  
+
     /// \brief returns a config option of type String
     /// \param option option to retrieve.
     zmm::String getOption(config_option_t option);
 
-    /// \brief returns a config option of type int 
+    /// \brief returns a config option of type int
     /// \param option option to retrieve.
     int getIntOption(config_option_t option);
 
     /// \brief returns a config option of type bool
     /// \param option option to retrieve.
     bool getBoolOption(config_option_t option);
-    
+
     /// \brief returns a config option of type Dictionary
     /// \param option option to retrieve.
     zmm::Ref<Dictionary> getDictionaryOption(config_option_t option);
-    
+
     /// \brief returns a config option of type Array of StringBase
     /// \param option option to retrieve.
     zmm::Ref<zmm::Array<zmm::StringBase> > getStringArrayOption(config_option_t option);
@@ -242,19 +240,18 @@ public:
 
     /// \brief sets static configuration parameters that will be used by
     /// when the ConfigManager class initializes
-    static void setStaticArgs(zmm::String _filename, zmm::String _userhome, 
-                              zmm::String _config_dir = _(DEFAULT_CONFIG_HOME),
-                              zmm::String _prefix_dir = _(PACKAGE_DATADIR), 
-                              zmm::String _magic = nullptr,
-                              bool _debug_logging = false,
-                              zmm::String _ip = nullptr, zmm::String _interface = nullptr, int _port = -1);
-    
+    static void setStaticArgs(zmm::String _filename, zmm::String _userhome,
+        zmm::String _config_dir = _(DEFAULT_CONFIG_HOME),
+        zmm::String _prefix_dir = _(PACKAGE_DATADIR),
+        zmm::String _magic = nullptr,
+        bool _debug_logging = false,
+        zmm::String _ip = nullptr, zmm::String _interface = nullptr, int _port = -1);
+
     static bool isDebugLogging() { return debug_logging; };
 
     /// \brief Creates a html file that is a redirector to the current server i
     /// instance
     void writeBookmark(zmm::String ip, zmm::String port);
-
 
 protected:
     // helper for extension to mimetype kind of mappings
@@ -273,7 +270,7 @@ protected:
     void prepare_udn();
     zmm::String construct_path(zmm::String path);
     void prepare_path(zmm::String path, bool needDir = false, bool existenceUnneeded = false);
-    
+
     static zmm::String filename;
     static zmm::String userhome;
     static zmm::String config_dir;
@@ -299,11 +296,11 @@ protected:
     /// Currently only two xpath constructs are supported:
     /// "/path/to/option" will return the text value of the given "option" element
     /// "/path/to/option/attribute::attr" will return the value of the attribute "attr"
-    zmm::String getOption(zmm::String xpath, zmm::String def);    
-    
+    zmm::String getOption(zmm::String xpath, zmm::String def);
+
     /// \brief same as getOption but returns an integer value of the option
     int getIntOption(zmm::String xpath, int def);
-    
+
     /// \brief Returns a config option with the given path, an exception is raised if option does not exist.
     /// \param xpath option xpath.
     ///
@@ -312,7 +309,7 @@ protected:
     /// "/path/to/option" will return the text value of the given "option" element
     /// "/path/to/option/attribute::attr" will return the value of the attribute "attr"
     zmm::String getOption(zmm::String xpath);
-    
+
     /// \brief same as getOption but returns an integer value of the option
     int getIntOption(zmm::String xpath);
 
@@ -322,7 +319,7 @@ protected:
     /// The xpath parameter has XPath syntax.
     /// "/path/to/element" will return the text value of the given "element" element
     zmm::Ref<mxml::Element> getElement(zmm::String xpath);
-            
+
     /// \brief Checks if the string returned by getOption is valid.
     /// \param xpath xpath expression to the XML node
     zmm::String checkOptionString(zmm::String xpath);
@@ -339,18 +336,18 @@ protected:
     ///    <map from="1" to="2"/>
     ///    <map from="3" to="4"/>
     /// </some-section>
-    /// 
+    ///
     /// This function will create a dictionary with the following
     /// key:value paris: "1":"2", "3":"4"
     zmm::Ref<Dictionary> createDictionaryFromNodeset(zmm::Ref<mxml::Element> element, zmm::String nodeName, zmm::String keyAttr, zmm::String valAttr, bool tolower = false);
- 
+
     /// \brief Creates an array of AutoscanDirectory objects from a XML nodeset.
     /// \param element starting element of the nodeset.
     /// \param scanmode add only directories with the specified scanmode to the array
     zmm::Ref<AutoscanList> createAutoscanListFromNodeset(zmm::Ref<mxml::Element> element, scan_mode_t scanmode);
-  
+
 #ifdef EXTERNAL_TRANSCODING
-    /// \brief Creates ab aray of TranscodingProfile objects from an XML 
+    /// \brief Creates ab aray of TranscodingProfile objects from an XML
     /// nodeset.
     /// \param element starting element of the nodeset.
     zmm::Ref<TranscodingProfileList> createTranscodingProfileListFromNodeset(zmm::Ref<mxml::Element> element);
@@ -369,24 +366,23 @@ protected:
     /// <some-section>
     ///
     /// This function will create an array like that: ["data", "otherdata"]
-    zmm::Ref<zmm::Array<zmm::StringBase> > createArrayFromNodeset(zmm::Ref<mxml::Element> element, zmm::String nodeName, zmm::String attrName); 
-   
+    zmm::Ref<zmm::Array<zmm::StringBase> > createArrayFromNodeset(zmm::Ref<mxml::Element> element, zmm::String nodeName, zmm::String attrName);
+
     void dumpOptions();
 
 #ifdef ONLINE_SERVICES
     /// \brief This functions activates the YouTube class and retrieves
-    /// lets it parse the options. 
+    /// lets it parse the options.
     ///
     /// Note that usually the config manager does all the parsing, however
     /// in the case of online services the tasklist is something very generic
-    /// and only the service class knows how to organize it. Since an 
+    /// and only the service class knows how to organize it. Since an
     /// online service is controlled by an external authority, the API and
     /// thus the options can change, for that reason we prefer keeping
     /// absolutely all functionality related to the service inside the
     /// service class.
     zmm::Ref<zmm::Array<zmm::Object> > createServiceTaskList(service_type_t service, zmm::Ref<mxml::Element> element);
 #endif
-
 };
 
 #endif // __CONFIG_MANAGER_H__

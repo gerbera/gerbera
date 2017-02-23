@@ -37,7 +37,8 @@
 using namespace zmm;
 using namespace mxml;
 
-Element::Element(String name) : Node()
+Element::Element(String name)
+    : Node()
 {
     type = mxml_node_element;
     this->name = name;
@@ -45,7 +46,8 @@ Element::Element(String name) : Node()
     arrayName = nullptr;
     textKey = nullptr;
 }
-Element::Element(String name, Ref<Context> context) : Node()
+Element::Element(String name, Ref<Context> context)
+    : Node()
 {
     type = mxml_node_element;
     this->name = name;
@@ -56,13 +58,12 @@ Element::Element(String name, Ref<Context> context) : Node()
 }
 String Element::getAttribute(String name)
 {
-    if(attributes == nullptr)
+    if (attributes == nullptr)
         return nullptr;
     int len = attributes->size();
-    for(int i = 0; i < len; i++)
-    {
+    for (int i = 0; i < len; i++) {
         Ref<Attribute> attr = attributes->get(i);
-        if(attr->name == name)
+        if (attr->name == name)
             return attr->value;
     }
     return nullptr;
@@ -85,11 +86,9 @@ void Element::setAttribute(String name, String value, enum mxml_value_type type)
     if (attributes == nullptr)
         attributes = Ref<Array<Attribute> >(new Array<Attribute>());
     int len = attributes->size();
-    for(int i = 0; i < len; i++)
-    {
+    for (int i = 0; i < len; i++) {
         Ref<Attribute> attr = attributes->get(i);
-        if(attr->name == name)
-        {
+        if (attr->name == name) {
             attr->setValue(value);
             attr->setVType(type);
             return;
@@ -102,16 +101,14 @@ int Element::childCount(enum mxml_node_types type)
 {
     if (children == nullptr)
         return 0;
-    
+
     if (type == mxml_node_all)
         return children->size();
-    
+
     int countElements = 0;
-    for(int i = 0; i < children->size(); i++)
-    {
+    for (int i = 0; i < children->size(); i++) {
         Ref<Node> nd = children->get(i);
-        if (nd->getType() == type)
-        {
+        if (nd->getType() == type) {
             countElements++;
         }
     }
@@ -123,27 +120,22 @@ Ref<Node> Element::getChild(int index, enum mxml_node_types type, bool remove)
     if (children == nullptr)
         return nullptr;
     int countElements = 0;
-    
-    if (type == mxml_node_all)
-    {
+
+    if (type == mxml_node_all) {
         if (index >= children->size())
             return nullptr;
-        else
-        {
+        else {
             Ref<Node> node = children->get(index);
             if (remove)
                 children->remove(index);
             return node;
         }
     }
-    
-    for(int i = 0; i < children->size(); i++)
-    {
+
+    for (int i = 0; i < children->size(); i++) {
         Ref<Node> nd = children->get(i);
-        if (nd->getType() == type)
-        {
-            if (countElements++ == index)
-            {
+        if (nd->getType() == type) {
+            if (countElements++ == index) {
                 if (remove)
                     children->remove(i);
                 return nd;
@@ -161,7 +153,7 @@ bool Element::removeElementChild(String name, bool removeAll)
     Ref<Node> child = getChild(id, mxml_node_all, true);
     if (child == nullptr)
         return false;
-    if (! removeAll)
+    if (!removeAll)
         return true;
     removeElementChild(name, true);
     return true;
@@ -169,7 +161,7 @@ bool Element::removeElementChild(String name, bool removeAll)
 
 void Element::appendChild(Ref<Node> child)
 {
-    if(children == nullptr)
+    if (children == nullptr)
         children = Ref<Array<Node> >(new Array<Node>());
     children->append(child);
 }
@@ -185,8 +177,7 @@ void Element::removeChild(int index, enum mxml_node_types type)
 {
     if (type == mxml_node_all)
         children->remove(index);
-    else
-    {
+    else {
         getChild(index, type, true);
     }
 }
@@ -194,28 +185,20 @@ void Element::removeChild(int index, enum mxml_node_types type)
 void Element::removeWhitespace()
 {
     int numChildren = childCount();
-    for (int i = 0; i < numChildren; i++)
-    {
+    for (int i = 0; i < numChildren; i++) {
         Ref<Node> node = getChild(i);
-        if (node->getType() == mxml_node_text)
-        {
+        if (node->getType() == mxml_node_text) {
             Ref<Text> text = RefCast(node, Text);
             String trimmed = trim_string(text->getText());
-            if (string_ok(trimmed))
-            {
+            if (string_ok(trimmed)) {
                 text->setText(trimmed);
-            }
-            else
-            {
-                if (numChildren != 1)
-                {
+            } else {
+                if (numChildren != 1) {
                     removeChild(i--);
                     --numChildren;
                 }
             }
-        }
-        else if (node->getType() == mxml_node_element)
-        {
+        } else if (node->getType() == mxml_node_element) {
             Ref<Element> el = RefCast(node, Element);
             el->removeWhitespace();
         }
@@ -225,55 +208,47 @@ void Element::removeWhitespace()
 void Element::indent(int level)
 {
     assert(level >= 0);
-    
+
     removeWhitespace();
-    
+
     int numChildren = childCount();
-    if (! numChildren)
+    if (!numChildren)
         return;
-    
+
     bool noTextChildren = true;
-    for (int i = 0; i < numChildren; i++)
-    {
+    for (int i = 0; i < numChildren; i++) {
         Ref<Node> node = getChild(i);
-        if (node->getType() == mxml_node_element)
-        {
+        if (node->getType() == mxml_node_element) {
             Ref<Element> el = RefCast(node, Element);
-            el->indent(level+1);
-        }
-        else if (node->getType() == mxml_node_text)
-        {
+            el->indent(level + 1);
+        } else if (node->getType() == mxml_node_text) {
             noTextChildren = false;
         }
     }
-    
-    if (noTextChildren)
-    {
-        static const char *ind_str = "                                                               ";
-        static const char *ind = ind_str + strlen(ind_str);
-        const char *ptr = ind - (level + 1) * 2;
+
+    if (noTextChildren) {
+        static const char* ind_str = "                                                               ";
+        static const char* ind = ind_str + strlen(ind_str);
+        const char* ptr = ind - (level + 1) * 2;
         if (ptr < ind_str)
             ptr = ind_str;
-        
-        for (int i = 0; i < numChildren; i++)
-        {
+
+        for (int i = 0; i < numChildren; i++) {
             bool newlineBefore = true;
-            if (getChild(i)->getType() == mxml_node_comment)
-            {
+            if (getChild(i)->getType() == mxml_node_comment) {
                 Ref<Comment> comment = RefCast(getChild(i), Comment);
                 newlineBefore = comment->getIndentWithLFbefore();
             }
-            if (newlineBefore)
-            {
-                Ref<Text> indentText(new Text(_("\n")+ptr));
-                insertChild(i++,RefCast(indentText, Node));
+            if (newlineBefore) {
+                Ref<Text> indentText(new Text(_("\n") + ptr));
+                insertChild(i++, RefCast(indentText, Node));
                 numChildren++;
             }
         }
-        
+
         ptr += 2;
-        
-        Ref<Text> indentTextAfter(new Text(_("\n")+ptr));
+
+        Ref<Text> indentTextAfter(new Text(_("\n") + ptr));
         appendChild(RefCast(indentTextAfter, Node));
     }
 }
@@ -284,8 +259,7 @@ String Element::getText()
     Ref<Text> text;
     int i = 0;
     bool someText = false;
-    while ((text = RefCast(getChild(i++, mxml_node_text), Text)) != nullptr)
-    {
+    while ((text = RefCast(getChild(i++, mxml_node_text), Text)) != nullptr) {
         someText = true;
         *buf << text->getText();
     }
@@ -301,15 +275,11 @@ enum mxml_value_type Element::getVTypeText()
     int i = 0;
     bool someText = false;
     enum mxml_value_type vtype = mxml_string_type;
-    while ((text = RefCast(getChild(i++, mxml_node_text), Text)) != nullptr)
-    {
-        if (! someText)
-        {
+    while ((text = RefCast(getChild(i++, mxml_node_text), Text)) != nullptr) {
+        if (!someText) {
             someText = true;
             vtype = text->getVType();
-        }
-        else
-        {
+        } else {
             if (vtype != text->getVType())
                 vtype = mxml_string_type;
         }
@@ -337,17 +307,14 @@ void Element::setText(String str, enum mxml_value_type type)
 {
     if (childCount() > 1)
         throw _Exception(_("Element::setText() cannot be called on an element which has more than one child"));
-    
-    if (childCount() == 1)
-    {
+
+    if (childCount() == 1) {
         Ref<Node> child = getChild(0);
         if (child == nullptr || child->getType() != mxml_node_text)
             throw _Exception(_("Element::setText() cannot be called on an element which has a non-text child"));
         Ref<Text> text = RefCast(child, Text);
         text->setText(str);
-    }
-    else
-    {
+    } else {
         Ref<Text> text(new Text(str, type));
         appendChild(RefCast(text, Node));
     }
@@ -360,17 +327,13 @@ void Element::appendTextChild(String name, String text, enum mxml_value_type typ
     appendElementChild(el);
 }
 
-
-
 int Element::getChildIdByName(String name)
 {
-    if(children == nullptr)
+    if (children == nullptr)
         return -1;
-    for(int i = 0; i < children->size(); i++)
-    {
+    for (int i = 0; i < children->size(); i++) {
         Ref<Node> nd = children->get(i);
-        if (nd->getType() == mxml_node_element)
-        {
+        if (nd->getType() == mxml_node_element) {
             Ref<Element> el = RefCast(nd, Element);
             if (name == nullptr || el->name == name)
                 return i;
@@ -390,7 +353,7 @@ Ref<Element> Element::getChildByName(String name)
 String Element::getChildText(String name)
 {
     Ref<Element> el = getChildByName(name);
-    if(el == nullptr)
+    if (el == nullptr)
         return nullptr;
     return el->getText();
 }
@@ -403,33 +366,27 @@ void Element::print_internal(Ref<StringBuffer> buf, int indent)
     char *ptr = ind - indent * 2;
     *buf << ptr;
     */
-    
+
     int i;
-    
+
     *buf << "<" << name;
-    if (attributes != nullptr)
-    {
-        for(i = 0; i < attributes->size(); i++)
-        {
+    if (attributes != nullptr) {
+        for (i = 0; i < attributes->size(); i++) {
             *buf << ' ';
             Ref<Attribute> attr = attributes->get(i);
             *buf << attr->name << "=\"" << escape(attr->value) << '"';
         }
     }
-    
-    if (children != nullptr && children->size())
-    {
+
+    if (children != nullptr && children->size()) {
         *buf << ">";
-        
-        for(i = 0; i < children->size(); i++)
-        {
+
+        for (i = 0; i < children->size(); i++) {
             children->get(i)->print_internal(buf, indent + 1);
         }
-        
+
         *buf << "</" << name << ">";
-    }
-    else
-    {
+    } else {
         *buf << "/>";
     }
 }

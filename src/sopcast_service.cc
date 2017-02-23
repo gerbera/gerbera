@@ -29,20 +29,20 @@
 
 /// \file sopcast_service.cc
 
-#ifdef SOPCAST 
+#ifdef SOPCAST
 
-#include "zmm/zmm.h"
 #include "sopcast_service.h"
-#include "sopcast_content_handler.h"
-#include "content_manager.h"
-#include "string_converter.h"
 #include "config_manager.h"
+#include "content_manager.h"
 #include "server.h"
+#include "sopcast_content_handler.h"
+#include "string_converter.h"
+#include "zmm/zmm.h"
 
 using namespace zmm;
 using namespace mxml;
 
-#define SOPCAST_CHANNEL_URL             "http://www.sopcast.com/gchlxml"
+#define SOPCAST_CHANNEL_URL "http://www.sopcast.com/gchlxml"
 
 SopCastService::SopCastService()
 {
@@ -80,18 +80,15 @@ Ref<Element> SopCastService::getData()
     Ref<StringConverter> sc = StringConverter::i2i();
 
     Ref<StringBuffer> buffer;
-    
-    try 
-    {
+
+    try {
         log_debug("DOWNLOADING URL: %s\n", SOPCAST_CHANNEL_URL);
-        buffer = url->download(_(SOPCAST_CHANNEL_URL), &retcode, 
-                               curl_handle, false, true, true);
-    
-    }
-    catch (const Exception & ex)
-    {
-        log_error("Failed to download SopCast XML data: %s\n", 
-                  ex.getMessage().c_str());
+        buffer = url->download(_(SOPCAST_CHANNEL_URL), &retcode,
+            curl_handle, false, true, true);
+
+    } catch (const Exception& ex) {
+        log_error("Failed to download SopCast XML data: %s\n",
+            ex.getMessage().c_str());
         return nullptr;
     }
 
@@ -101,26 +98,21 @@ Ref<Element> SopCastService::getData()
     if (retcode != 200)
         return nullptr;
 
-    log_debug("GOT BUFFER\n%s\n", buffer->toString().c_str()); 
+    log_debug("GOT BUFFER\n%s\n", buffer->toString().c_str());
     Ref<Parser> parser(new Parser());
-    try
-    {
+    try {
         return parser->parseString(sc->convert(buffer->toString()))->getRoot();
-    }
-    catch (const ParseException & pe)
-    {
+    } catch (const ParseException& pe) {
         log_error("Error parsing SopCast XML %s line %d:\n%s\n",
-               pe.context->location.c_str(),
-               pe.context->line,
-               pe.getMessage().c_str());
+            pe.context->location.c_str(),
+            pe.context->line,
+            pe.getMessage().c_str());
         return nullptr;
-    }
-    catch (const Exception & ex)
-    {
+    } catch (const Exception& ex) {
         log_error("Error parsing SopCast XML %s\n", ex.getMessage().c_str());
         return nullptr;
     }
-    
+
     return nullptr;
 }
 
@@ -128,7 +120,7 @@ bool SopCastService::refreshServiceData(Ref<Layout> layout)
 {
     log_debug("Refreshing SopCast service\n");
     // the layout is in full control of the service items
-    
+
     // this is a safeguard to ensure that this class is not called from
     // multiple threads - it is not allowed to use the same curl handle
     // from multiple threads
@@ -145,33 +137,28 @@ bool SopCastService::refreshServiceData(Ref<Layout> layout)
     Ref<SopCastContentHandler> sc(new SopCastContentHandler());
     if (reply != nullptr)
         sc->setServiceContent(reply);
-    else
-    {
+    else {
         log_debug("Failed to get XML content from SopCast service\n");
         throw _Exception(_("Failed to get XML content from SopCast service"));
     }
 
     Ref<CdsObject> obj;
-    do
-    {
+    do {
         /// \todo add try/catch here and a possibility do find out if we
         /// may request more stuff or if we are at the end of the list
         obj = sc->getNextObject();
         if (obj == nullptr)
             break;
 
-       obj->setVirtual(true);
+        obj->setVirtual(true);
 
         Ref<CdsObject> old = Storage::getInstance()->loadObjectByServiceID(RefCast(obj, CdsItem)->getServiceID());
-        if (old == nullptr)
-        {
+        if (old == nullptr) {
             log_debug("Adding new SopCast object\n");
-            
+
             if (layout != nullptr)
                 layout->processCdsObject(obj, nullptr);
-        }
-        else
-        {
+        } else {
             log_debug("Updating existing SopCast object\n");
             obj->setID(old->getID());
             obj->setParentID(old->getParentID());
@@ -186,10 +173,9 @@ bool SopCastService::refreshServiceData(Ref<Layout> layout)
         if (Server::getInstance()->getShutdownStatus())
             return false;
 
-    }
-    while (obj != nullptr);
+    } while (obj != nullptr);
 
     return false;
 }
 
-#endif//SOPCAST
+#endif //SOPCAST

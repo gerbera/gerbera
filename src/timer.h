@@ -32,25 +32,22 @@
 #ifndef __TIMER_H__
 #define __TIMER_H__
 
-#include <vector>
-#include <algorithm>
-#include <condition_variable>
-#include "zmm/zmm.h"
-#include "zmm/zmmf.h"
-#include "zmm/ref.h"
 #include "singleton.h"
 #include "tools.h"
+#include "zmm/ref.h"
+#include "zmm/zmm.h"
+#include "zmm/zmmf.h"
+#include <algorithm>
+#include <condition_variable>
+#include <vector>
 
-
-class TimerSubscriber
-{
+class TimerSubscriber {
 public:
     virtual ~TimerSubscriber() { log_debug("TimerSubscriber destroyed\n"); }
     virtual void timerNotify(zmm::Ref<zmm::Object> parameter) = 0;
 };
 
-class Timer : public Singleton<Timer, std::recursive_mutex>
-{
+class Timer : public Singleton<Timer, std::recursive_mutex> {
 public:
     virtual ~Timer() { log_debug("Timer destroyed!\n"); }
 
@@ -63,13 +60,14 @@ public:
      * timer and the subscriber has already been notified (and removed from the
      * subscribers list).
      */
-    void addTimerSubscriber(TimerSubscriber *timerSubscriber, unsigned int notifyInterval, zmm::Ref<zmm::Object> parameter = nullptr, bool once = false) {
+    void addTimerSubscriber(TimerSubscriber* timerSubscriber, unsigned int notifyInterval, zmm::Ref<zmm::Object> parameter = nullptr, bool once = false)
+    {
         log_debug("adding subscriber...\n");
         if (notifyInterval <= 0)
             throw zmm::Exception(_("tried to add timer with illegal notifyInterval: ") + notifyInterval);
         AutoLock lock(mutex);
         TimerSubscriberElement element(timerSubscriber, notifyInterval, parameter, once);
-        for (auto & subscriber : subscribers) {
+        for (auto& subscriber : subscribers) {
             if (subscriber == element) {
                 throw zmm::Exception(_("tried to add same timer twice"));
             }
@@ -78,7 +76,8 @@ public:
         signal();
     }
 
-    void removeTimerSubscriber(TimerSubscriber *timerSubscriber, zmm::Ref<zmm::Object> parameter = nullptr, bool dontFail = false) {
+    void removeTimerSubscriber(TimerSubscriber* timerSubscriber, zmm::Ref<zmm::Object> parameter = nullptr, bool dontFail = false)
+    {
         log_debug("removing subscriber...\n");
         AutoLock lock(mutex);
         TimerSubscriberElement element(timerSubscriber, 0, parameter);
@@ -86,67 +85,80 @@ public:
         if (it != subscribers.cend()) {
             subscribers.erase(it);
             signal();
-        } else if (! dontFail) {
+        } else if (!dontFail) {
             throw zmm::Exception(_("tried to remove nonexistent timer"));
         }
     }
-    
+
     void triggerWait();
-    
+
     inline void signal() { cond.notify_one(); }
-    
+
 protected:
-    class TimerSubscriberElement : public zmm::Object
-    {
+    class TimerSubscriberElement : public zmm::Object {
     public:
-        TimerSubscriberElement(TimerSubscriber *subscriber, unsigned int notifyInterval, zmm::Ref<zmm::Object> parameter, bool once = false)
-            : disabled(false), subscriber(subscriber), notifyInterval(notifyInterval), parameter(parameter),
-                once(once) {
+        TimerSubscriberElement(TimerSubscriber* subscriber, unsigned int notifyInterval, zmm::Ref<zmm::Object> parameter, bool once = false)
+            : disabled(false)
+            , subscriber(subscriber)
+            , notifyInterval(notifyInterval)
+            , parameter(parameter)
+            , once(once)
+        {
             notified();
         }
-        void notify() {
+        void notify()
+        {
             try {
                 subscriber->timerNotify(parameter);
-            } catch (const zmm::Exception & e) {
+            } catch (const zmm::Exception& e) {
                 log_debug("timer caught exception!\n");
                 e.printStackTrace();
             }
         }
         inline unsigned int getNotifyInterval() const { return notifyInterval; }
-        inline TimerSubscriber * getSubscriber() { return subscriber; }
-        inline void notified() {
+        inline TimerSubscriber* getSubscriber() { return subscriber; }
+        inline void notified()
+        {
+            log_debug("notify interval: %d\n", notifyInterval);
             getTimespecAfterMillis(notifyInterval * 1000, &nextNotify);
         }
-        inline struct timespec *getNextNotify() { return &nextNotify; }
+        inline struct timespec* getNextNotify() { return &nextNotify; }
         inline zmm::Ref<zmm::Object> getParameter() { return parameter; }
-        bool operator==(const TimerSubscriberElement & other) const {
+        bool operator==(const TimerSubscriberElement& other) const
+        {
             return subscriber == other.subscriber && parameter == other.parameter;
         }
         bool isOnce() const { return once; }
-        bool disabled;
+        bool disabled = false;
+
     protected:
-        TimerSubscriber *subscriber;
+        TimerSubscriber* subscriber;
         unsigned int notifyInterval;
         zmm::Ref<zmm::Object> parameter;
         struct timespec nextNotify;
-        bool once;
+        bool once = false;
     };
-    
+
     std::condition_variable_any cond;
 
     std::vector<TimerSubscriberElement> subscribers;
 
     void notify()
     {
+        log_debug("notifying. - %d subscribers\n", subscribers.size());
+        log_debug("waiting for lock\n");
+        AutoLock lock(mutex);
+        log_debug("got lock\n");
+        int i = 0;
         struct timespec now;
         getTimespecNow(&now);
-        log_debug("notifying. - %d subscribers\n", subscribers.size());
-        int i = 0;
-        AutoLock lock(mutex);
-        for (auto & element : subscribers) {
-            if (compareTimespecs(element.getNextNotify(), &now) >= 0) {
+        for (auto& element : subscribers) {
+            log_debug("in loop!\n");
+            //log_debug("compare: %d\n", compareTimespecs(element.getNextNotify(), &now));
+            if (!isBefore(element.getNextNotify(), &now)) {
                 log_debug("notifying %d\n", i++);
                 element.notify();
+                log_debug("is once? %d\n", element.isOnce());
                 if (element.isOnce()) {
                     element.disabled = true;
                 } else {
@@ -154,11 +166,11 @@ protected:
                 }
             }
         }
-        subscribers.erase(std::remove_if(subscribers.begin(), subscribers.end(),
-                    [](const auto & e){ return e.disabled; }));
+        //subscribers.erase(std::remove_if(subscribers.begin(), subscribers.end(),
+        //            [](const auto & e){ return e.disabled; }));
     }
 
-    struct timespec *getNextNotifyTime();
+    struct timespec* getNextNotifyTime();
 };
 
 #endif // __TIMER_H__

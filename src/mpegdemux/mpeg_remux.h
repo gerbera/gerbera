@@ -26,12 +26,9 @@
 // Only functionality needed in MediaTomb remains, all extra features are
 // stripped out.
 
-
 #ifndef MPEGDEMUX_MPEG_REMUX_H
 #define MPEGDEMUX_MPEG_REMUX_H 1
 
-
-int mpeg_remux (int inp, int out);
-
+int mpeg_remux(int inp, int out);
 
 #endif

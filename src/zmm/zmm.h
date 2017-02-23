@@ -34,7 +34,7 @@
 
 #include "object.h"
 #include "ref.h"
-#include "strings.h"
 #include "stringbuffer.h"
+#include "strings.h"
 
 #endif // __ZMM_H__

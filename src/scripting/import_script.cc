@@ -37,22 +37,20 @@
 
 using namespace zmm;
 
-ImportScript::ImportScript(Ref<Runtime> runtime) : Script(runtime)
+ImportScript::ImportScript(Ref<Runtime> runtime)
+    : Script(runtime)
 {
-    String scriptPath = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT); 
+    String scriptPath = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT);
 
 #ifdef JS_THREADSAFE
     JS_SetContextThread(cx);
     JS_BeginRequest(cx);
 #endif
 
-    try 
-    {
+    try {
         load(scriptPath);
         JS_AddNamedObjectRoot(cx, &script, "ImportScript");
-    }
-    catch (const Exception & ex)
-    {
+    } catch (const Exception& ex) {
 #ifdef JS_THREADSAFE
         JS_EndRequest(cx);
         JS_ClearContextThread(cx);
@@ -60,8 +58,8 @@ ImportScript::ImportScript(Ref<Runtime> runtime) : Script(runtime)
         throw ex;
     }
 #ifdef JS_THREADSAFE
-        JS_EndRequest(cx);
-        JS_ClearContextThread(cx);
+    JS_EndRequest(cx);
+    JS_ClearContextThread(cx);
 #endif
 }
 
@@ -72,16 +70,13 @@ void ImportScript::processCdsObject(Ref<CdsObject> obj, String scriptpath)
     JS_BeginRequest(cx);
 #endif
     processed = obj;
-    try 
-    {
-        JSObject *orig = JS_NewObject(cx, nullptr, nullptr, glob);
+    try {
+        JSObject* orig = JS_NewObject(cx, nullptr, nullptr, glob);
         setObjectProperty(glob, _("orig"), orig);
         cdsObject2jsObject(obj, orig);
         setProperty(glob, _("object_script_path"), scriptpath);
         execute();
-    }
-    catch (const Exception & ex)
-    {
+    } catch (const Exception& ex) {
         processed = nullptr;
 #ifdef JS_THREADSAFE
         JS_EndRequest(cx);
@@ -93,8 +88,7 @@ void ImportScript::processCdsObject(Ref<CdsObject> obj, String scriptpath)
     processed = nullptr;
 
     gc_counter++;
-    if (gc_counter > JS_CALL_GC_AFTER_NUM)
-    {
+    if (gc_counter > JS_CALL_GC_AFTER_NUM) {
         JS_MaybeGC(cx);
         gc_counter = 0;
     }
@@ -110,7 +104,7 @@ ImportScript::~ImportScript()
     JS_SetContextThread(cx);
     JS_BeginRequest(cx);
 #endif
-    
+
     if (script)
         JS_RemoveObjectRoot(cx, &script);
 
@@ -118,7 +112,6 @@ ImportScript::~ImportScript()
     JS_EndRequest(cx);
     JS_ClearContextThread(cx);
 #endif
-
 }
 
 #endif // HAVE_JS

@@ -35,16 +35,15 @@
 #ifndef __YOUTUBE_SERVICE_H__
 #define __YOUTUBE_SERVICE_H__
 
-#include "zmm/zmm.h"
+#include "dictionary.h"
 #include "mxml/mxml.h"
 #include "online_service.h"
 #include "url.h"
-#include "dictionary.h"
 #include "youtube_content_handler.h"
+#include "zmm/zmm.h"
 #include <curl/curl.h>
 
-typedef enum 
-{
+typedef enum {
     YT_request_none = 0,
     YT_request_video_search,
     YT_request_stdfeed,
@@ -56,8 +55,7 @@ typedef enum
     YT_subrequest_subscriptions,
 } yt_requests_t;
 
-typedef enum
-{
+typedef enum {
     YT_region_au = 0,
     YT_region_br,
     YT_region_ca,
@@ -82,8 +80,7 @@ typedef enum
 
 /// \brief This is an interface for all online services, the function
 /// handles adding/refreshing content in the database.
-class YouTubeService : public OnlineService
-{
+class YouTubeService : public OnlineService {
 public:
     YouTubeService();
     ~YouTubeService();
@@ -110,7 +107,7 @@ public:
 
 protected:
     // the handle *must never be used from multiple threads*
-    CURL *curl_handle;
+    CURL* curl_handle;
     // safeguard to ensure the above
     pthread_t pid;
 
@@ -124,25 +121,24 @@ protected:
     /// holds various parameters that are needed to perform. A task means
     /// the process of downloading, parsing service data and creating
     /// CdsObjects.
-    class YouTubeTask : public zmm::Object
-    {
+    class YouTubeTask : public zmm::Object {
     public:
         YouTubeTask();
 
         /// \brief Request identifier
         yt_requests_t request;
 
-        /// \brief Region setting 
+        /// \brief Region setting
         yt_regions_t region;
 
         /// \brief Constructed URL that will be prepended with the base and
         /// appended with parameters.
         zmm::String url_part;
-        
-        /// \brief It was so nice when using with the REST API, now we will 
+
+        /// \brief It was so nice when using with the REST API, now we will
         /// have to convert the parameters to a specific string.
         zmm::Ref<Dictionary> parameters;
-        
+
         /// \brief Amount of items that we are allowed to get.
         int amount;
 
@@ -171,21 +167,20 @@ protected:
     /// called.
     int current_task;
 
-
     // helper functions for parsing config.xml
-//    zmm::String getCheckAttr(zmm::Ref<mxml::Element> xml, zmm::String attrname);
-//    int getCheckPosIntAttr(zmm::Ref<mxml::Element> xml, zmm::String attrname);
-    void getPagingParams(zmm::Ref<mxml::Element> xml, 
-                         zmm::Ref<YouTubeTask> task);
+    //    zmm::String getCheckAttr(zmm::Ref<mxml::Element> xml, zmm::String attrname);
+    //    int getCheckPosIntAttr(zmm::Ref<mxml::Element> xml, zmm::String attrname);
+    void getPagingParams(zmm::Ref<mxml::Element> xml,
+        zmm::Ref<YouTubeTask> task);
     void addTimeParams(zmm::Ref<mxml::Element> xml, zmm::Ref<YouTubeTask> task);
     yt_regions_t getRegion(zmm::Ref<mxml::Element> xml);
     zmm::String getFeed(zmm::Ref<mxml::Element> xml);
 
-    // subrequests are spawned as one time tasks, they are removed from the 
+    // subrequests are spawned as one time tasks, they are removed from the
     // task list after one time execution - this function takes care of it
     void killOneTimeTasks(zmm::Ref<zmm::Array<zmm::Object> > tasklist);
 };
 
-#endif//__ONLINE_SERVICE_H__
+#endif //__ONLINE_SERVICE_H__
 
-#endif//YOUTUBE
+#endif //YOUTUBE

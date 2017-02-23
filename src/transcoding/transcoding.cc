@@ -28,7 +28,7 @@
 */
 
 /// \file transcoding.cc
-/// \brief Definitions of the Transcoding classes. 
+/// \brief Definitions of the Transcoding classes.
 
 #ifdef EXTERNAL_TRANSCODING
 
@@ -57,7 +57,7 @@ TranscodingProfile::TranscodingProfile()
     fourcc_mode = FCC_None;
 }
 
-TranscodingProfile::TranscodingProfile(transcoding_type_t tr_type, String name) 
+TranscodingProfile::TranscodingProfile(transcoding_type_t tr_type, String name)
 {
     this->name = name;
     this->tr_type = tr_type;
@@ -92,13 +92,12 @@ void TranscodingProfile::addAttribute(zmm::String name, zmm::String value)
 }
 
 Ref<Dictionary> TranscodingProfile::getAttributes()
-{   
+{
     return attributes;
-}   
-
+}
 
 void TranscodingProfile::setAVIFourCCList(Ref<Array<StringBase> > list,
-                                          avi_fourcc_listmode_t mode)
+    avi_fourcc_listmode_t mode)
 {
     fourcc_list = list;
     fourcc_mode = mode;
@@ -108,7 +107,6 @@ Ref<Array<StringBase> > TranscodingProfile::getAVIFourCCList()
 {
     return fourcc_list;
 }
-
 
 TranscodingProfileList::TranscodingProfileList()
 {
@@ -135,11 +133,9 @@ Ref<TranscodingProfile> TranscodingProfileList::getByName(zmm::String name)
 {
     Ref<Array<ObjectDictionaryElement<ObjectDictionary<TranscodingProfile> > > > mt_list = list->getElements();
 
-    for (int i = 0; i < mt_list->size(); i++)
-    {
+    for (int i = 0; i < mt_list->size(); i++) {
         Ref<ObjectDictionary<TranscodingProfile> > names = mt_list->get(i)->getValue();
-        if (names != nullptr)
-        {
+        if (names != nullptr) {
             Ref<TranscodingProfile> tp = names->get(name);
             if (tp != nullptr)
                 return tp;
@@ -148,4 +144,4 @@ Ref<TranscodingProfile> TranscodingProfileList::getByName(zmm::String name)
     return nullptr;
 }
 
-#endif//EXTERNAL_TRANSCODING
+#endif //EXTERNAL_TRANSCODING

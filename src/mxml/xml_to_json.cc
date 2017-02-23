@@ -31,8 +31,8 @@
 
 #include <cassert>
 
-#include "xml_to_json.h"
 #include "tools.h"
+#include "xml_to_json.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -46,71 +46,61 @@ String XML2JSON::getJSON(Ref<Element> root)
     return buf->toString();
 }
 
-
 void XML2JSON::handleElement(Ref<StringBuffer> buf, Ref<Element> el)
 {
     bool firstChild = true;
     int attributeCount = el->attributeCount();
-    if (attributeCount > 0)
-    {
-        for (int i = 0; i < attributeCount; i++)
-        {
+    if (attributeCount > 0) {
+        for (int i = 0; i < attributeCount; i++) {
             Ref<Attribute> at = el->getAttribute(i);
-            if (! firstChild)
+            if (!firstChild)
                 *buf << ',';
             else
                 firstChild = false;
             *buf << '"' << escape(at->name, '\\', '"') << "\":" << getValue(at->value, at->getVType());
         }
     }
-    
+
     bool array = el->isArrayType();
     String nodeName = nullptr;
-    
-    if (array)
-    {
+
+    if (array) {
         nodeName = el->getArrayName();
-        if (! string_ok(nodeName))
+        if (!string_ok(nodeName))
             throw _Exception(_("XML2JSON: Element ") + el->getName() + " was of arrayType, but had no arrayName set");
-        
-        if (! firstChild)
+
+        if (!firstChild)
             *buf << ',';
         *buf << '"' << escape(nodeName, '\\', '"') << "\":";
         *buf << '[';
         firstChild = true;
     }
-    
+
     int childCount = el->childCount();
-    
-    for (int i = 0; i < childCount; i++)
-    {
+
+    for (int i = 0; i < childCount; i++) {
         Ref<Node> node = el->getChild(i);
         mxml_node_types type = node->getType();
-        if (type != mxml_node_element)
-        {
-            if (childCount == 1 && type == mxml_node_text)
-            {
-                if (! firstChild)
+        if (type != mxml_node_element) {
+            if (childCount == 1 && type == mxml_node_text) {
+                if (!firstChild)
                     *buf << ',';
                 else
                     firstChild = false;
                 String key = el->getTextKey();
-                if (! string_ok(key))
+                if (!string_ok(key))
                     throw _Exception(_("XML2JSON: Element ") + el->getName() + " had a text child, but had no textKey set");
-                    //key = _("value");
-                
+                //key = _("value");
+
                 *buf << '"' << key << "\":" << getValue(el->getText(), el->getVTypeText());
-            }
-            else
+            } else
                 throw _Exception(_("XML2JSON cannot handle an element which consists of text AND element children - element: ") + el->getName() + "; has type: " + type);
-        }
-        else
-        {
-            if (! firstChild)
+        } else {
+            if (!firstChild)
                 *buf << ',';
             else
                 firstChild = false;
-            
+
             /*
             if (i == 0)
             {
@@ -125,7 +115,7 @@ void XML2JSON::handleElement(Ref<StringBuffer> buf, Ref<Element> el)
                 }
             }
             */
-            
+
             /*
             if (array)
             {
@@ -136,57 +126,46 @@ void XML2JSON::handleElement(Ref<StringBuffer> buf, Ref<Element> el)
                 }
             }
             */
-            
-            
-            
+
             Ref<Element> childEl = RefCast(node, Element);
             int childAttributeCount = childEl->attributeCount();
             int childElementCount = childEl->elementChildCount();
-            
-            if (array)
-            {
+
+            if (array) {
                 if (nodeName != childEl->getName())
                     throw _Exception(_("XML2JSON: if an element is of arrayType, all children have to have the same name"));
-            }
-            else
+            } else
                 *buf << '"' << escape(childEl->getName(), '\\', '"') << "\":";
-            
-            if (childAttributeCount > 0 || childElementCount > 0 || childEl->isArrayType())
-            {
+
+            if (childAttributeCount > 0 || childElementCount > 0 || childEl->isArrayType()) {
                 *buf << '{';
                 handleElement(buf, childEl);
                 *buf << '}';
-            }
-            else
-            {
+            } else {
                 *buf << getValue(childEl->getText(), childEl->getVTypeText());
             }
         }
     }
-    
+
     if (array)
         *buf << ']';
-    
 }
 
 String XML2JSON::getValue(String text, enum mxml_value_type type)
 {
     if (type == mxml_string_type)
         return _("\"") + escape(text, '\\', '"') + '"';
-    if (type == mxml_bool_type)
-    {
+    if (type == mxml_bool_type) {
         assert(string_ok(text)); // must be real string
-        assert(text == "0" || text == "1");  // must be bool type
+        assert(text == "0" || text == "1"); // must be bool type
         return text == "0" ? _("false") : _("true");
     }
-    if (type == mxml_null_type)
-    {
-        assert(! string_ok(text)); // must not contain text
+    if (type == mxml_null_type) {
+        assert(!string_ok(text)); // must not contain text
         return _("null");
     }
-    
-    if (type == mxml_int_type)
-    {
+
+    if (type == mxml_int_type) {
         /// \todo should we check if really int?
         return text;
     }

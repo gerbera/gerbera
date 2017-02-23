@@ -33,11 +33,11 @@
 #if defined(SOPCAST)
 
 #include "sopcast_content_handler.h"
-#include "online_service.h"
-#include "tools.h"
-#include "metadata_handler.h"
 #include "cds_objects.h"
 #include "config_manager.h"
+#include "metadata_handler.h"
+#include "online_service.h"
+#include "tools.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -60,8 +60,7 @@ bool SopCastContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
     channel_count = 0;
     current_group = nullptr;
 
-    extension_mimetype_map =
-        ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
+    extension_mimetype_map = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
 
     return true;
 }
@@ -72,10 +71,8 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
     String temp;
     struct timespec ts;
 
-    while (current_group_node_index < group_count)
-    {
-        if (current_group == nullptr)
-        {
+    while (current_group_node_index < group_count) {
+        if (current_group == nullptr) {
             Ref<Node> n = channels->getChild(current_group_node_index);
             current_group_node_index++;
 
@@ -88,18 +85,13 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
             current_group = RefCast(n, Element);
             channel_count = current_group->childCount();
 
-            if ((current_group->getName() != "group") ||
-                (channel_count < 1))
-            {
+            if ((current_group->getName() != "group") || (channel_count < 1)) {
                 current_group = nullptr;
                 current_group_name = nullptr;
                 continue;
-            }
-            else
-            {
+            } else {
                 current_group_name = current_group->getText();
-                if (!string_ok(current_group_name))
-                {
+                if (!string_ok(current_group_name)) {
                     current_group_name = current_group->getAttribute(_("en"));
                     if (!string_ok(current_group_name))
                         current_group_name = _("Unknown");
@@ -109,14 +101,12 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
             current_channel_index = 0;
         }
 
-        if (current_channel_index >= channel_count)
-        {
+        if (current_channel_index >= channel_count) {
             current_group = nullptr;
             continue;
         }
 
-        while (current_channel_index < channel_count)
-        {
+        while (current_channel_index < channel_count) {
             Ref<Node> n = current_group->getChild(current_channel_index);
             current_channel_index++;
 
@@ -133,13 +123,12 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
             item->addResource(resource);
 
             item->setAuxData(_(ONLINE_SERVICE_AUX_ID),
-                    String::from(OS_SopCast));
+                String::from(OS_SopCast));
 
             item->setAuxData(_(SOPCAST_AUXDATA_GROUP), current_group_name);
 
             temp = channel->getAttribute(_("id"));
-            if (!string_ok(temp))
-            {
+            if (!string_ok(temp)) {
                 log_warning("Failed to retrieve SopCast channel ID\n");
                 continue;
             }
@@ -148,52 +137,46 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
             item->setServiceID(temp);
 
             temp = channel->getChildText(_("stream_type"));
-            if (!string_ok(temp))
-            {
+            if (!string_ok(temp)) {
                 log_warning("Failed to retrieve SopCast channel mimetype\n");
                 continue;
             }
-            
+
             // I wish they had a mimetype setting
             //String mt = extension_mimetype_map->get(temp);
             String mt;
             // map was empty, we have to do construct the mimetype ourselves
-            if (!string_ok(mt))
-            {
+            if (!string_ok(mt)) {
                 if (temp == "wmv")
                     mt = _("video/sopcast-x-ms-wmv");
                 else if (temp == "mp3")
                     mt = _("audio/sopcast-mpeg");
                 else if (temp == "wma")
                     mt = _("audio/sopcast-x-ms-wma");
-                else
-                {
+                else {
                     log_warning("Could not determine mimetype for SopCast channel (stream_type: %s)\n", temp.c_str());
                     mt = _("application/sopcast-stream");
                 }
             }
             resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
-                    renderProtocolInfo(mt, _(SOPCAST_PROTOCOL)));
+                renderProtocolInfo(mt, _(SOPCAST_PROTOCOL)));
             item->setMimeType(mt);
-           
+
             Ref<Element> tmp_el = channel->getChildByName(_("sop_address"));
-            if (tmp_el == nullptr)
-            {
+            if (tmp_el == nullptr) {
                 log_warning("Failed to retrieve SopCast channel URL\n");
                 continue;
             }
-           
+
             temp = tmp_el->getChildText(_("item"));
-            if (!string_ok(temp))
-            {
+            if (!string_ok(temp)) {
                 log_warning("Failed to retrieve SopCast channel URL\n");
                 continue;
             }
             item->setURL(temp);
 
             tmp_el = channel->getChildByName(_("name"));
-            if (tmp_el == nullptr)
-            {
+            if (tmp_el == nullptr) {
                 log_warning("Failed to retrieve SopCast channel name\n");
                 continue;
             }
@@ -205,8 +188,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
                 item->setTitle(_("Unknown"));
 
             tmp_el = channel->getChildByName(_("region"));
-            if (tmp_el != nullptr)
-            {
+            if (tmp_el != nullptr) {
                 temp = tmp_el->getAttribute(_("en"));
                 if (string_ok(temp))
                     item->setMetadata(MetadataHandler::getMetaFieldName(M_REGION), temp);
@@ -227,15 +209,12 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
             item->setFlag(OBJECT_FLAG_PROXY_URL);
             item->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
 
-            try
-            {
+            try {
                 item->validate();
                 return RefCast(item, CdsObject);
-            }
-            catch (const Exception & ex)
-            {
+            } catch (const Exception& ex) {
                 log_warning("Failed to validate newly created SopCast item: %s\n",
-                        ex.getMessage().c_str());
+                    ex.getMessage().c_str());
                 continue;
             }
         }
@@ -244,4 +223,4 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
     return nullptr;
 }
 
-#endif//SOPCAST
+#endif //SOPCAST

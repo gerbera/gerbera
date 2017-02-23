@@ -26,30 +26,26 @@
 // Only functionality needed in MediaTomb remains, all extra features are
 // stripped out.
 
-
 #ifndef MPEGDEMUX_INTERNAL_H
 #define MPEGDEMUX_INTERNAL_H 1
 
-
 #define PAR_STREAM_EXCLUDE 1
 
-#define PAR_MODE_SCAN  0
-#define PAR_MODE_LIST  1
+#define PAR_MODE_SCAN 0
+#define PAR_MODE_LIST 1
 #define PAR_MODE_REMUX 2
 #define PAR_MODE_DEMUX 3
-
 
 extern unsigned char par_stream[256];
 extern unsigned char par_substream[256];
 extern unsigned char par_invalid[256];
-extern int           par_empty_pack;
-extern int           par_drop;
-extern int           par_dvdac3;
+extern int par_empty_pack;
+extern int par_drop;
+extern int par_dvdac3;
 
-char *mpeg_get_name (const char *base, unsigned sid);
-int mpeg_stream_excl (unsigned char sid, unsigned char ssid);
-int mpeg_packet_check (mpeg_demux_t *mpeg);
-int mpeg_copy (mpeg_demux_t *mpeg, int fd, unsigned n);
-
+char* mpeg_get_name(const char* base, unsigned sid);
+int mpeg_stream_excl(unsigned char sid, unsigned char ssid);
+int mpeg_packet_check(mpeg_demux_t* mpeg);
+int mpeg_copy(mpeg_demux_t* mpeg, int fd, unsigned n);
 
 #endif

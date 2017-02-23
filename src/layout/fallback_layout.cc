@@ -30,14 +30,14 @@
 /// \file fallback_layout.cc
 
 #include "fallback_layout.h"
-#include "content_manager.h"
 #include "config_manager.h"
+#include "content_manager.h"
 #include "metadata_handler.h"
 #include "string_converter.h"
 #include "tools.h"
 
 #ifdef HAVE_LIBDVDNAV
-    #include "metadata/dvd_handler.h"
+#include "metadata/dvd_handler.h"
 #endif
 
 #ifdef ONLINE_SERVICES
@@ -45,19 +45,19 @@
 #include "online_service.h"
 
 #ifdef YOUTUBE
-    #include "youtube_content_handler.h"
-    #include "youtube_service.h"
+#include "youtube_content_handler.h"
+#include "youtube_service.h"
 #endif
 
 #ifdef SOPCAST
-    #include "sopcast_content_handler.h"
+#include "sopcast_content_handler.h"
 #endif
 
 #ifdef ATRAILERS
-    #include "atrailers_content_handler.h"
+#include "atrailers_content_handler.h"
 #endif
 
-#endif//ONLINE_SERVICES
+#endif //ONLINE_SERVICES
 
 using namespace zmm;
 
@@ -81,35 +81,29 @@ void FallbackLayout::addVideo(zmm::Ref<CdsObject> obj, String rootpath)
     Ref<StringConverter> f2i = StringConverter::f2i();
     int id = ContentManager::getInstance()->addContainerChain(_("/Video/All Video"));
 
-    if (obj->getID() != INVALID_OBJECT_ID)
-    {
+    if (obj->getID() != INVALID_OBJECT_ID) {
         obj->setRefID(obj->getID());
         add(obj, id);
-    }
-    else
-    {
+    } else {
         add(obj, id);
         obj->setRefID(obj->getID());
     }
 
     String dir;
 
-    if (string_ok(rootpath))
-    {
+    if (string_ok(rootpath)) {
         rootpath = rootpath.substring(0, rootpath.rindex(DIR_SEPARATOR));
 
-        dir = obj->getLocation().substring(rootpath.length(), obj->getLocation().rindex(DIR_SEPARATOR)-rootpath.length());
+        dir = obj->getLocation().substring(rootpath.length(), obj->getLocation().rindex(DIR_SEPARATOR) - rootpath.length());
 
         if (dir.startsWith(_DIR_SEPARATOR))
             dir = dir.substring(1);
 
         dir = f2i->convert(dir);
-    }
-    else
+    } else
         dir = esc(f2i->convert(get_last_path(obj->getLocation())));
 
-    if (string_ok(dir))
-    {
+    if (string_ok(dir)) {
         id = ContentManager::getInstance()->addContainerChain(_("/Video/Directories/") + dir);
         add(obj, id);
     }
@@ -118,12 +112,12 @@ void FallbackLayout::addVideo(zmm::Ref<CdsObject> obj, String rootpath)
 #ifdef HAVE_LIBDVDNAV
 
 Ref<CdsObject> FallbackLayout::prepareChapter(Ref<CdsObject> obj, int title_idx,
-                                              int chapter_idx)
+    int chapter_idx)
 {
     String chapter_name = _("Chapter ");
-            
-    obj->getResource(0)->addParameter(DVDHandler::renderKey(DVD_Chapter), 
-            String::from(chapter_idx));
+
+    obj->getResource(0)->addParameter(DVDHandler::renderKey(DVD_Chapter),
+        String::from(chapter_idx));
 
     if (chapter_idx < 9)
         chapter_name = chapter_name + _("0") + (chapter_idx + 1); // remap
@@ -131,17 +125,17 @@ Ref<CdsObject> FallbackLayout::prepareChapter(Ref<CdsObject> obj, int title_idx,
         chapter_name = chapter_name + (chapter_idx + 1);
 
     obj->setTitle(chapter_name);
-//    String tmp = obj->getAuxData(DVDHandler::renderKey(DVD_ChapterRestDuration,
-//                                 title_idx, chapter_idx));
-//    if (string_ok(tmp))
-//        obj->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_DURATION), tmp);
+    //    String tmp = obj->getAuxData(DVDHandler::renderKey(DVD_ChapterRestDuration,
+    //                                 title_idx, chapter_idx));
+    //    if (string_ok(tmp))
+    //        obj->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_DURATION), tmp);
 
     return obj;
 }
 
 void FallbackLayout::addDVD(Ref<CdsObject> obj)
 {
-    #define DVD_VPATH "/Video/DVD/"
+#define DVD_VPATH "/Video/DVD/"
 
     int dot = obj->getTitle().rindex('.');
     int pcd_id = obj->getID();
@@ -161,16 +155,14 @@ void FallbackLayout::addDVD(Ref<CdsObject> obj)
     // will be a reference of the main object, that's why we set the ref
     // id to the object id - the add function will clear out the object
     // id
-    if (obj->getID() != INVALID_OBJECT_ID)
-    {
+    if (obj->getID() != INVALID_OBJECT_ID) {
         obj->setRefID(obj->getID());
         add(obj, id);
     }
     // the object is not yet in the database (probably we got it from a
     // playlist script, so we set the ref id after adding - it will be used
     // for all consequent virtual objects
-    else
-    {
+    else {
         add(obj, id);
         obj->setRefID(obj->getID());
     }
@@ -178,29 +170,26 @@ void FallbackLayout::addDVD(Ref<CdsObject> obj)
     dvd_container = dvd_container + _("/");
 
     int title_count = obj->getAuxData(DVDHandler::renderKey(DVD_TitleCount)).toInt();
-    // set common item attributes 
+    // set common item attributes
     RefCast(obj, CdsItem)->setMimeType(mpeg_mimetype);
     obj->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(RefCast(obj, CdsItem)->getMimeType()));
     obj->setClass(_(UPNP_DEFAULT_CLASS_VIDEO_ITEM));
     /// \todo this has to be changed once we add seeking
     obj->getResource(0)->removeAttribute(MetadataHandler::getResAttrName(R_SIZE));
 
-    for (int t = 0; t < title_count; t++)
-    {
+    for (int t = 0; t < title_count; t++) {
         int audio_track_count = obj->getAuxData(DVDHandler::renderKey(DVD_AudioTrackCount, t)).toInt();
-        obj->getResource(0)->addParameter(DVDHandler::renderKey(DVD_Title), 
-                                          String::from(t));
-        for (int a = 0; a < audio_track_count; a++)
-        {
+        obj->getResource(0)->addParameter(DVDHandler::renderKey(DVD_Title),
+            String::from(t));
+        for (int a = 0; a < audio_track_count; a++) {
             // set common audio track resource attributes
             obj->getResource(0)->addParameter(DVDHandler::renderKey(DVD_AudioStreamID), obj->getAuxData(DVDHandler::renderKey(DVD_AudioTrackStreamID, t, 0, a)));
 
             String tmp = obj->getAuxData(DVDHandler::renderKey(DVD_AudioTrackChannels, t, 0, a));
-            if (string_ok(tmp))
-            {
+            if (string_ok(tmp)) {
                 obj->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), tmp);
                 log_debug("Setting Audio Channels, object %s -  num: %s\n",
-                          obj->getLocation().c_str(), tmp.c_str());
+                    obj->getLocation().c_str(), tmp.c_str());
             }
 
             tmp = obj->getAuxData(DVDHandler::renderKey(DVD_AudioTrackSampleFreq, t, 0, a));
@@ -214,7 +203,7 @@ void FallbackLayout::addDVD(Ref<CdsObject> obj)
                 title_name = _("Title 0") + (t + 1); // remap
             else
                 title_name = _("Title ") + (t + 1); // remap
-            
+
             String format = obj->getAuxData(DVDHandler::renderKey(DVD_AudioTrackFormat, t, 0, a));
             String language = obj->getAuxData(DVDHandler::renderKey(DVD_AudioTrackLanguage, t, 0, a));
 
@@ -231,46 +220,39 @@ void FallbackLayout::addDVD(Ref<CdsObject> obj)
             id = cm->addContainerChain(title_container, nullptr, pcd_id);
             int chapter_count = obj->getAuxData(DVDHandler::renderKey(DVD_ChapterCount, t)).toInt();
 
-            for (int c = 0; c < chapter_count; c++)
-            {
+            for (int c = 0; c < chapter_count; c++) {
                 prepareChapter(obj, t, c);
                 add(obj, id, false);
             }
 
-            if (string_ok(language))
-            {
+            if (string_ok(language)) {
                 String language_container = _("Languages/");
-                String chain = dvd_container + language_container +
-                               esc(language) + _("/") + title_name;
+                String chain = dvd_container + language_container + esc(language) + _("/") + title_name;
 
-                chain = chain + _(" - Audio Track ") + (a + 1); 
+                chain = chain + _(" - Audio Track ") + (a + 1);
 
                 if (string_ok(format))
-                        chain = chain + _(" - ") + esc(format);
+                    chain = chain + _(" - ") + esc(format);
 
                 id = cm->addContainerChain(chain, nullptr, pcd_id);
-                
-                for (int c = 0; c < chapter_count; c++)
-                {
+
+                for (int c = 0; c < chapter_count; c++) {
                     prepareChapter(obj, t, c);
                     add(obj, id, false);
                 }
             }
 
-            if (string_ok(format))
-            {
+            if (string_ok(format)) {
                 String format_container = _("Audio Formats/");
-                String chain = dvd_container + format_container + esc(format) + 
-                               _("/") + title_name;
+                String chain = dvd_container + format_container + esc(format) + _("/") + title_name;
 
-                chain = chain + _(" - Audio Track ") + (a + 1); 
-                
+                chain = chain + _(" - Audio Track ") + (a + 1);
+
                 if (string_ok(language))
                     chain = chain + _(" - ") + esc(language);
 
                 id = cm->addContainerChain(chain, nullptr, pcd_id);
-                for (int c = 0; c < chapter_count; c++)
-                {
+                for (int c = 0; c < chapter_count; c++) {
                     prepareChapter(obj, t, c);
                     add(obj, id, false);
                 }
@@ -285,15 +267,11 @@ void FallbackLayout::addImage(Ref<CdsObject> obj, String rootpath)
     int id;
     Ref<StringConverter> f2i = StringConverter::f2i();
 
-    
     id = ContentManager::getInstance()->addContainerChain(_("/Photos/All Photos"));
-    if (obj->getID() != INVALID_OBJECT_ID)
-    {
+    if (obj->getID() != INVALID_OBJECT_ID) {
         obj->setRefID(obj->getID());
         add(obj, id);
-    }
-    else
-    {
+    } else {
         add(obj, id);
         obj->setRefID(obj->getID());
     }
@@ -301,23 +279,20 @@ void FallbackLayout::addImage(Ref<CdsObject> obj, String rootpath)
     Ref<Dictionary> meta = obj->getMetadata();
 
     String date = meta->get(MetadataHandler::getMetaFieldName(M_DATE));
-    if (string_ok(date))
-    {
+    if (string_ok(date)) {
         String year, month;
         int m = -1;
         int y = date.index('-');
-        if (y > 0)
-        {
+        if (y > 0) {
             year = date.substring(0, y);
             month = date.substring(y + 1);
             m = month.index('-');
             if (m > 0)
-              month = month.substring(0, m);
+                month = month.substring(0, m);
         }
 
         String chain;
-        if ((y > 0) && (m > 0))
-        {
+        if ((y > 0) && (m > 0)) {
             chain = _("/Photos/Year/") + esc(year) + "/" + esc(month);
             id = ContentManager::getInstance()->addContainerChain(chain);
             add(obj, id);
@@ -330,22 +305,19 @@ void FallbackLayout::addImage(Ref<CdsObject> obj, String rootpath)
 
     String dir;
 
-    if (string_ok(rootpath))
-    {
+    if (string_ok(rootpath)) {
         rootpath = rootpath.substring(0, rootpath.rindex(DIR_SEPARATOR));
 
-        dir = obj->getLocation().substring(rootpath.length(), obj->getLocation().rindex(DIR_SEPARATOR)-rootpath.length());
+        dir = obj->getLocation().substring(rootpath.length(), obj->getLocation().rindex(DIR_SEPARATOR) - rootpath.length());
 
         if (dir.startsWith(_DIR_SEPARATOR))
             dir = dir.substring(1);
 
         dir = f2i->convert(dir);
-    }
-    else
+    } else
         dir = esc(f2i->convert(get_last_path(obj->getLocation())));
 
-    if (string_ok(dir))
-    {
+    if (string_ok(dir)) {
         id = ContentManager::getInstance()->addContainerChain(_("/Photos/Directories/") + dir);
         add(obj, id);
     }
@@ -367,22 +339,17 @@ void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
         title = obj->getTitle();
 
     String artist = meta->get(MetadataHandler::getMetaFieldName(M_ARTIST));
-    if (string_ok(artist))
-    {
+    if (string_ok(artist)) {
         artist_full = artist;
         desc = artist;
-    }
-    else
+    } else
         artist = _("Unknown");
 
     String album = meta->get(MetadataHandler::getMetaFieldName(M_ALBUM));
-    if (string_ok(album))
-    {
+    if (string_ok(album)) {
         desc = desc + _(", ") + album;
         album_full = album;
-    }
-    else
-    {
+    } else {
         album = _("Unknown");
     }
 
@@ -392,15 +359,13 @@ void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
     desc = desc + title;
 
     String date = meta->get(MetadataHandler::getMetaFieldName(M_DATE));
-    if (string_ok(date))
-    {
+    if (string_ok(date)) {
         int i = date.index('-');
         if (i > 0)
             date = date.substring(0, i);
 
         desc = desc + _(", ") + date;
-    }
-    else
+    } else
         date = _("Unknown");
 
     String genre = meta->get(MetadataHandler::getMetaFieldName(M_GENRE));
@@ -409,10 +374,8 @@ void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
     else
         genre = _("Unknown");
 
-
     String description = meta->get(MetadataHandler::getMetaFieldName(M_DESCRIPTION));
-    if (!string_ok(description))
-    {
+    if (!string_ok(description)) {
         meta->put(MetadataHandler::getMetaFieldName(M_DESCRIPTION), desc);
         obj->setMetadata(meta);
     }
@@ -424,16 +387,14 @@ void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
     // will be a reference of the main object, that's why we set the ref
     // id to the object id - the add function will clear out the object
     // id
-    if (obj->getID() != INVALID_OBJECT_ID)
-    {
+    if (obj->getID() != INVALID_OBJECT_ID) {
         obj->setRefID(obj->getID());
         add(obj, id);
     }
     // the object is not yet in the database (probably we got it from a
     // playlist script, so we set the ref id after adding - it will be used
     // for all consequent virtual objects
-    else
-    {
+    else {
         add(obj, id);
         obj->setRefID(obj->getID());
     }
@@ -455,7 +416,7 @@ void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
         temp = temp + " - ";
 
     album = esc(album);
-    chain = _("/Audio/Artists/") +  artist + _("/") + album;
+    chain = _("/Audio/Artists/") + artist + _("/") + album;
     id = ContentManager::getInstance()->addContainerChain(chain, _(UPNP_DEFAULT_CLASS_MUSIC_ALBUM), obj->getID());
     add(obj, id);
 
@@ -479,35 +440,29 @@ void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
     chain = _("/Audio/Artists/") + artist + "/All - full name";
     id = ContentManager::getInstance()->addContainerChain(chain);
     add(obj, id);
-
-
 }
 #ifdef YOUTUBE
 void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
 {
-    #define YT_VPATH "/Online Services/YouTube"
+#define YT_VPATH "/Online Services/YouTube"
     String chain;
     String temp;
     int id;
     bool ref_set = false;
 
-    if (obj->getID() != INVALID_OBJECT_ID)
-    {
+    if (obj->getID() != INVALID_OBJECT_ID) {
         obj->setRefID(obj->getID());
         ref_set = true;
     }
 
     temp = obj->getAuxData(_(YOUTUBE_AUXDATA_AVG_RATING));
-    if (string_ok(temp))
-    {
+    if (string_ok(temp)) {
         int rating = (int)temp.toDouble();
-        if (rating > 3)
-        {
+        if (rating > 3) {
             chain = _(YT_VPATH "/Rating/") + esc(String::from(rating));
             id = ContentManager::getInstance()->addContainerChain(chain);
             add(obj, id, ref_set);
-            if (!ref_set)
-            {
+            if (!ref_set) {
                 obj->setRefID(obj->getID());
                 ref_set = true;
             }
@@ -515,8 +470,7 @@ void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
     }
 
     temp = obj->getAuxData(_(YOUTUBE_AUXDATA_REQUEST));
-    if (string_ok(temp))
-    {
+    if (string_ok(temp)) {
         yt_requests_t req = (yt_requests_t)temp.toInt();
         temp = YouTubeService::getRequestName(req);
 
@@ -532,10 +486,9 @@ void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
         if (string_ok(feedName))
             chain = chain + '/' + esc(feedName);
 
-        if (string_ok(region))
-        {   yt_regions_t reg = (yt_regions_t)region.toInt();
-            if (reg != YT_region_none)
-            {
+        if (string_ok(region)) {
+            yt_regions_t reg = (yt_regions_t)region.toInt();
+            if (reg != YT_region_none) {
                 region = YouTubeService::getRegionName(reg);
                 if (string_ok(region))
                     chain = chain + '/' + esc(region);
@@ -551,32 +504,33 @@ void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
 #ifdef SOPCAST
 void FallbackLayout::addSopCast(zmm::Ref<CdsObject> obj)
 {
-    #define SP_VPATH "/Online Services/SopCast"
+#define SP_VPATH "/Online Services/SopCast"
     String chain;
     String temp;
     int id;
     bool ref_set = false;
 
-    if (obj->getID() != INVALID_OBJECT_ID)
-    {
+    if (obj->getID() != INVALID_OBJECT_ID) {
         obj->setRefID(obj->getID());
         ref_set = true;
     }
 
-    chain = _(SP_VPATH "/" "All Channels");
-    id =  ContentManager::getInstance()->addContainerChain(chain);
+    chain = _(SP_VPATH "/"
+                       "All Channels");
+    id = ContentManager::getInstance()->addContainerChain(chain);
     add(obj, id, ref_set);
-    if (!ref_set)
-    {
+    if (!ref_set) {
         obj->setRefID(obj->getID());
         ref_set = true;
     }
 
     temp = obj->getAuxData(_(SOPCAST_AUXDATA_GROUP));
-    if (string_ok(temp))
-    {
-        chain = _(SP_VPATH "/" "Groups" "/") + esc(temp);
-        id =  ContentManager::getInstance()->addContainerChain(chain);
+    if (string_ok(temp)) {
+        chain = _(SP_VPATH "/"
+                           "Groups"
+                           "/")
+            + esc(temp);
+        id = ContentManager::getInstance()->addContainerChain(chain);
         add(obj, id, ref_set);
     }
 }
@@ -585,20 +539,17 @@ void FallbackLayout::addSopCast(zmm::Ref<CdsObject> obj)
 #ifdef ATRAILERS
 void FallbackLayout::addATrailers(zmm::Ref<CdsObject> obj)
 {
-    #define AT_VPATH "/Online Services/Apple Trailers"
+#define AT_VPATH "/Online Services/Apple Trailers"
     String chain;
     String temp;
 
-    int id = ContentManager::getInstance()->addContainerChain(_(AT_VPATH 
-                                                              "/All Trailers"));
+    int id = ContentManager::getInstance()->addContainerChain(_(AT_VPATH
+        "/All Trailers"));
 
-    if (obj->getID() != INVALID_OBJECT_ID)
-    {
+    if (obj->getID() != INVALID_OBJECT_ID) {
         obj->setRefID(obj->getID());
         add(obj, id);
-    }
-    else
-    {
+    } else {
         add(obj, id);
         obj->setRefID(obj->getID());
     }
@@ -606,13 +557,11 @@ void FallbackLayout::addATrailers(zmm::Ref<CdsObject> obj)
     Ref<Dictionary> meta = obj->getMetadata();
 
     temp = meta->get(MetadataHandler::getMetaFieldName(M_GENRE));
-    if (string_ok(temp))
-    {
+    if (string_ok(temp)) {
         Ref<StringTokenizer> st(new StringTokenizer(temp));
         String genre;
         String next;
-        do
-        {
+        do {
             if (!string_ok(genre))
                 genre = st->nextToken(_(","));
             next = st->nextToken(_(","));
@@ -623,36 +572,38 @@ void FallbackLayout::addATrailers(zmm::Ref<CdsObject> obj)
                 break;
 
             id = ContentManager::getInstance()->addContainerChain(_(AT_VPATH
-                        "/Genres/") + esc(genre));
+                                                                      "/Genres/")
+                + esc(genre));
             add(obj, id);
 
             if (string_ok(next))
                 genre = next;
             else
                 genre = nullptr;
-                    
+
         } while (genre != nullptr);
     }
 
     temp = meta->get(MetadataHandler::getMetaFieldName(M_DATE));
-    if (string_ok(temp) && temp.length() >= 7)
-    {
+    if (string_ok(temp) && temp.length() >= 7) {
         id = ContentManager::getInstance()->addContainerChain(_(AT_VPATH
-                    "/Release Date/") + esc(temp.substring(0, 7)));
+                                                                  "/Release Date/")
+            + esc(temp.substring(0, 7)));
         add(obj, id);
     }
 
     temp = obj->getAuxData(_(ATRAILERS_AUXDATA_POST_DATE));
-    if (string_ok(temp) && temp.length() >= 7)
-    {
+    if (string_ok(temp) && temp.length() >= 7) {
         id = ContentManager::getInstance()->addContainerChain(_(AT_VPATH
-                    "/Post Date/") + esc(temp.substring(0, 7)));
+                                                                  "/Post Date/")
+            + esc(temp.substring(0, 7)));
         add(obj, id);
     }
 }
 #endif
 
-FallbackLayout::FallbackLayout() : Layout()
+FallbackLayout::FallbackLayout()
+    : Layout()
 {
 #ifdef ENABLE_PROFILING
     PROF_INIT_GLOBAL(layout_profiling, "fallback layout");
@@ -677,52 +628,45 @@ void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj, String rootpath)
     clone->setVirtual(1);
 
 #ifdef ONLINE_SERVICES
-    if (clone->getFlag(OBJECT_FLAG_ONLINE_SERVICE))
-    {
+    if (clone->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
         service_type_t service = (service_type_t)(clone->getAuxData(_(ONLINE_SERVICE_AUX_ID)).toInt());
 
-        switch (service)
-        {
+        switch (service) {
 #ifdef YOUTUBE
-            case OS_YouTube:
-                addYouTube(clone);
-                break;
+        case OS_YouTube:
+            addYouTube(clone);
+            break;
 #endif
 #ifdef SOPCAST
-            case OS_SopCast:
-                addSopCast(clone);
-                break;
+        case OS_SopCast:
+            addSopCast(clone);
+            break;
 #endif
 #ifdef ATRAILERS
-            case OS_ATrailers:
-                addATrailers(clone);
-                break;
+        case OS_ATrailers:
+            addATrailers(clone);
+            break;
 #endif
-            case OS_Max:
-            default:
-                log_warning("No handler for service type\n");
-                break;
+        case OS_Max:
+        default:
+            log_warning("No handler for service type\n");
+            break;
         }
-    }
-    else
-    {
+    } else {
 #endif
 
         String mimetype = RefCast(obj, CdsItem)->getMimeType();
-        Ref<Dictionary> mappings = 
-            ConfigManager::getInstance()->getDictionaryOption(
-                    CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+        Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(
+            CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
         String content_type = mappings->get(mimetype);
 
         if (mimetype.startsWith(_("video")))
             addVideo(clone, rootpath);
         else if (mimetype.startsWith(_("image")))
             addImage(clone, rootpath);
-        else if ((mimetype.startsWith(_("audio")) && 
-                    (content_type != CONTENT_TYPE_PLAYLIST)))
+        else if ((mimetype.startsWith(_("audio")) && (content_type != CONTENT_TYPE_PLAYLIST)))
             addAudio(clone);
-        else if (content_type == CONTENT_TYPE_OGG)
-        {
+        else if (content_type == CONTENT_TYPE_OGG) {
             if (obj->getFlag(OBJECT_FLAG_OGG_THEORA))
                 addVideo(clone, rootpath);
             else

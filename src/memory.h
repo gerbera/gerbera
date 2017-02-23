@@ -37,33 +37,33 @@
 #ifndef MEMPROF
 
 #ifdef TOMBDEBUG
-    void *MALLOC(size_t size);
-    void *REALLOC(void *ptr, size_t size);
+void* MALLOC(size_t size);
+void* REALLOC(void* ptr, size_t size);
 #else
-    #define MALLOC malloc
-    #define REALLOC realloc
+#define MALLOC malloc
+#define REALLOC realloc
 #endif
 #define CALLOC calloc
 #define FREE free
 
 #else
 
-void *MALLOC(size_t size);
-void *CALLOC(size_t nmemb, size_t size);
-void *REALLOC(void *ptr, size_t size);
-void FREE(void *ptr);
+void* MALLOC(size_t size);
+void* CALLOC(size_t nmemb, size_t size);
+void* REALLOC(void* ptr, size_t size);
+void FREE(void* ptr);
 
 #endif
 
 #ifndef HAVE_MALLOC
-void *rpl_malloc(size_t size);
+void* rpl_malloc(size_t size);
 #endif
 
 #ifndef HAVE_REALLOC
-void *rpl_realloc(void *p, size_t size);
+void* rpl_realloc(void* p, size_t size);
 #endif
 
 #ifndef HAVE_CALLOC
-void *rpl_calloc(size_t n, size_t s);
+void* rpl_calloc(size_t n, size_t s);
 #endif
 #endif // __MEMORY_H__

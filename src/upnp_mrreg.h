@@ -34,9 +34,9 @@
 #ifndef __UPNP_MRREG_H__
 #define __UPNP_MRREG_H__
 
+#include "action_request.h"
 #include "common.h"
 #include "singleton.h"
-#include "action_request.h"
 #include "subscription_request.h"
 #include "upnp_xml.h"
 
@@ -47,16 +47,15 @@
 /// functions will always return true.
 /// These functions were only implemented to enable Xbox360 support.
 /// \todo the whole service class should be rewritten with the use of inheritance
-class MRRegistrarService : public Singleton<MRRegistrarService>
-{
+class MRRegistrarService : public Singleton<MRRegistrarService> {
 
 protected:
     /// \brief UPnP standard defined service type
     /// \todo Check if it makes sense to use it as it is done now...why not define constants here?
     static zmm::String serviceType;
-    
+
     /// \brief ID of the service.
-    static zmm::String serviceID;    
+    static zmm::String serviceID;
 
     /// \brief Media Receiver Registrar service action: IsAuthorized()
     /// \param request Incoming ActionRequest.
@@ -66,7 +65,7 @@ protected:
     /// This is currently unsupported (always returns 1)
     void upnp_action_IsAuthorized(zmm::Ref<ActionRequest> request);
 
-    /// \brief Media Receiver Registrar service action: RegisterDevice() 
+    /// \brief Media Receiver Registrar service action: RegisterDevice()
     /// \param request Incoming ActionRequest.
     ///
     /// RegisterDevice(bin.base64 RegistrationReqMsg, bin.base64 RegistrationRespMsg)
@@ -79,16 +78,16 @@ protected:
     ///
     /// IsValidated(string DeviceID, i4 Result)
     void upnp_action_IsValidated(zmm::Ref<ActionRequest> request);
-    
+
 public:
     /// \brief Constructor for the CMS, saves the service type and service id
     /// in internal variables.
     /// \todo Check if it makes sense to use it as it is done now...why not define them as constants?
     MRRegistrarService();
     virtual ~MRRegistrarService();
-    
+
     static void setStaticArgs(zmm::String serviceType, zmm::String serviceID);
-    
+
     /// \brief Dispatches the ActionRequest between the available actions.
     /// \param request Incoming ActionRequest.
     ///
@@ -109,8 +108,7 @@ public:
     /// \param sourceProtocol_CSV Comma Separated Value list of protocol information
     ///
     /// Sends out an update with protocol information to all subscribed devices
-//    void subscription_update(zmm::String sourceProtocol_CSV);
-        
+    //    void subscription_update(zmm::String sourceProtocol_CSV);
 };
 
 #endif // __UPNP_CM_H__

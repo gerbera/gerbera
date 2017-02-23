@@ -35,19 +35,18 @@
 #include "common.h"
 #include <iconv.h>
 
-class StringConverter : public zmm::Object
-{
+class StringConverter : public zmm::Object {
 public:
     StringConverter(zmm::String from, zmm::String to);
     virtual ~StringConverter();
-    /// \brief Converts uses the from and to values that were passed 
-    /// to the constructor to convert the string str to a specific character 
+    /// \brief Converts uses the from and to values that were passed
+    /// to the constructor to convert the string str to a specific character
     /// set.
     /// \param str String to be converted.
-    /// \param validate if this parameter is true then an exception will be 
+    /// \param validate if this parameter is true then an exception will be
     /// thrown if illegal input is encountered. If false, illegal characters
     /// will be padded with '?' and the function will return the string.
-    zmm::String convert(zmm::String str, bool validate=false);
+    zmm::String convert(zmm::String str, bool validate = false);
     bool validate(zmm::String str);
 
     /// \brief internal (UTF-8) to filesystem
@@ -77,8 +76,8 @@ protected:
     iconv_t cd;
     bool dirty;
 
-    zmm::String _convert(zmm::String str, bool validate, 
-                         size_t *stoppedAt = NULL);
+    zmm::String _convert(zmm::String str, bool validate,
+        size_t* stoppedAt = NULL);
 };
 
 #endif // __STRING_CONVERTER_H__

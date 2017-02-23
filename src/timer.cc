@@ -29,8 +29,8 @@
 
 /// \file timer.cc
 
-#include "singleton.h"
 #include "timer.h"
+#include "singleton.h"
 
 using namespace zmm;
 using namespace std;
@@ -40,14 +40,14 @@ void Timer::triggerWait()
     log_debug("triggerWait. - %d subscriber(s)\n", subscribers.size());
 
     unique_lock<decltype(mutex)> lock(mutex);
-    if (! subscribers.empty()) {
-        struct timespec *timeout = getNextNotifyTime();
+    if (!subscribers.empty()) {
+        struct timespec* timeout = getNextNotifyTime();
         struct timespec now;
         getTimespecNow(&now);
-        if (compareTimespecs(timeout, &now) < 0) {
+        if (isBefore(timeout, &now)) {
             log_debug("sleeping...\n");
             cv_status ret = cond.wait_for(lock,
-                    chrono::milliseconds(getDeltaMillis(timeout, &now)));
+                chrono::milliseconds(getDeltaMillis(timeout, &now)));
             if (ret == cv_status::timeout) {
                 notify();
             }
@@ -60,18 +60,21 @@ void Timer::triggerWait()
     }
 }
 
-struct timespec * Timer::getNextNotifyTime() {
-    struct timespec *nextTime = nullptr;
+struct timespec* Timer::getNextNotifyTime()
+{
+    struct timespec* nextTime = nullptr;
     AutoLock lock(mutex);
-    for (auto & subscriber : subscribers) {
-        struct timespec *nextNotify = subscriber.getNextNotify();
-        if (nextTime == nullptr || compareTimespecs(nextNotify, nextTime) > 0) {
+    for (auto& subscriber : subscribers) {
+        struct timespec* nextNotify = subscriber.getNextNotify();
+        if (nextTime == nullptr || isBefore(nextNotify, nextTime) > 0) {
             nextTime = nextNotify;
         }
     }
+    log_debug("next time: %d\n", nextTime->tv_sec);
     return nextTime;
 }
 
-void Timer::shutdown() {
+void Timer::shutdown()
+{
     log_debug("finished.\n");
 }

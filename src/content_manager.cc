@@ -369,16 +369,23 @@ void ContentManager::unregisterExecutor(Ref<Executor> exec)
 
 void ContentManager::timerNotify(Ref<Object> parameter)
 {
+    log_debug("start\n");
     if (parameter == nullptr)
         return;
 
     Ref<TimerParameter> tp = RefCast(parameter, TimerParameter);
     if (tp->whoami() == TimerParameter::IDAutoscan) {
+        log_debug("Im autoscan!\n");
+
         Ref<AutoscanDirectory> dir = autoscan_timed->get(tp->getID());
-        if (dir == nullptr)
+
+        if (dir == nullptr) {
+            log_debug("dir is null\n");
             return;
+        }
 
         int objectID = dir->getObjectID();
+        log_debug("objectId: %d\n", objectID);
         rescanDirectory(objectID, dir->getScanID(), dir->getScanMode());
     }
 #ifdef ONLINE_SERVICES
@@ -391,6 +398,10 @@ void ContentManager::timerNotify(Ref<Object> parameter)
     }
 #endif
 #endif //ONLINE_SERVICES
+
+    //Timer::getInstance()->addTimerSubscriber(
+
+    log_debug("end\n");
 }
 
 void ContentManager::shutdown()
@@ -1396,10 +1407,8 @@ int ContentManager::addFile(zmm::String path, bool recursive, bool async,
 }
 
 int ContentManager::addFileInternal(String path, String rootpath,
-    bool recursive,
-    bool async, bool hidden, bool lowPriority,
-    unsigned int parentTaskID,
-    bool cancellable)
+    bool recursive, bool async, bool hidden, bool lowPriority,
+    unsigned int parentTaskID, bool cancellable)
 {
     if (async) {
         Ref<GenericTask> task(new CMAddFileTask(path, rootpath, recursive, hidden, cancellable));
@@ -2061,6 +2070,7 @@ CMRescanDirectoryTask::CMRescanDirectoryTask(int objectID, int scanID, scan_mode
 
 void CMRescanDirectoryTask::run()
 {
+    log_debug("start\n");
     Ref<ContentManager> cm = ContentManager::getInstance();
     Ref<AutoscanDirectory> dir = cm->getAutoscanDirectory(scanID, scanMode);
     if (dir == nullptr)
@@ -2072,10 +2082,12 @@ void CMRescanDirectoryTask::run()
     if (dir->getTaskCount() == 0) {
         dir->updateLMT();
         if (dir->getScanMode() == TimedScanMode) {
+            log_debug("adding single subscriber....\n");
             Timer::getInstance()->addTimerSubscriber(
-                cm.getPtr(), dir->getInterval(), dir->getTimerParameter(), true);
+                cm.getPtr(), dir->getInterval(), dir->getTimerParameter(), false);
         }
     }
+    log_debug("end\n");
 }
 
 #ifdef ONLINE_SERVICES

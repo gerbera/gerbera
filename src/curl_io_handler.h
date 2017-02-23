@@ -40,25 +40,23 @@
 #include "common.h"
 #include "io_handler_buffer_helper.h"
 
-class CurlIOHandler : public IOHandlerBufferHelper
-{
+class CurlIOHandler : public IOHandlerBufferHelper {
 public:
-    
-    CurlIOHandler(zmm::String URL, CURL *curl_handle, size_t bufSize, size_t initialFillSize);
-    
+    CurlIOHandler(zmm::String URL, CURL* curl_handle, size_t bufSize, size_t initialFillSize);
+
     virtual void open(enum UpnpOpenFileMode mode);
     virtual void close();
-    
+
 private:
-    CURL *curl_handle;
+    CURL* curl_handle;
     bool external_curl_handle;
     zmm::String URL;
     //off_t bytesCurl;
-    
-    static size_t curlCallback(void *ptr, size_t size, size_t nmemb, void *stream);
+
+    static size_t curlCallback(void* ptr, size_t size, size_t nmemb, void* stream);
     virtual void threadProc();
 };
 
 #endif // __CURL_IO_HANDLER_H__
 
-#endif//HAVE_CURL
+#endif //HAVE_CURL

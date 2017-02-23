@@ -2729,7 +2729,6 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
         unsigned int interval = 0;
         scan_level_t level;
 
-
         if (mode == TimedScanMode) {
             temp = child->getAttribute(_("level"));
             if (!string_ok(temp)) {

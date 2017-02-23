@@ -37,46 +37,39 @@ using namespace mxml;
 #include "mxml.h"
 #include "tools.h"
 
-void XMLCALL Parser::element_start(void *userdata, const char *name, const char **attrs)
+void XMLCALL Parser::element_start(void* userdata, const char* name, const char** attrs)
 {
-    Parser *parser = (Parser *)userdata;
+    Parser* parser = (Parser*)userdata;
     Ref<Element> el(new Element(name));
-    for (int i = 0; attrs[i]; i += 2) 
-    {
+    for (int i = 0; attrs[i]; i += 2) {
         el->addAttribute(attrs[i], attrs[i + 1]);
     }
 
-    if (parser->document->getRoot() == nullptr)
-    {
+    if (parser->document->getRoot() == nullptr) {
         parser->document->setRoot(el);
         parser->curEl = el;
-    }
-    else if (parser->curEl != nullptr)
-    {
+    } else if (parser->curEl != nullptr) {
         parser->curEl->appendElementChild(el);
         parser->elements->push(parser->curEl);
         parser->curEl = el;
-    }
-    else
-    {
+    } else {
         // second root? - should not happen...
         print_backtrace();
     }
 }
 
-void XMLCALL Parser::element_end(void *userdata, const char *name)
+void XMLCALL Parser::element_end(void* userdata, const char* name)
 {
-    Parser *parser = (Parser *)userdata;
+    Parser* parser = (Parser*)userdata;
     parser->curEl = parser->elements->pop();
 }
 
-void XMLCALL Parser::character_data(void *userdata, const XML_Char *s, int len)
+void XMLCALL Parser::character_data(void* userdata, const XML_Char* s, int len)
 {
-    Parser *parser = (Parser *)userdata;
+    Parser* parser = (Parser*)userdata;
     String text = String(s, len);
-    
-    if (text != nullptr)
-    {
+
+    if (text != nullptr) {
         Ref<Text> textEl(new Text(text));
         if (parser->curEl == nullptr)
             parser->document->appendChild(RefCast(textEl, Node));
@@ -85,12 +78,11 @@ void XMLCALL Parser::character_data(void *userdata, const XML_Char *s, int len)
     }
 }
 
-void XMLCALL Parser::comment_callback(void *userdata, const XML_Char *s)
+void XMLCALL Parser::comment_callback(void* userdata, const XML_Char* s)
 {
-    Parser *parser = (Parser *)userdata;
+    Parser* parser = (Parser*)userdata;
     String text = s;
-    if (text != nullptr)
-    {
+    if (text != nullptr) {
         Ref<Comment> cm(new Comment(text));
         if (parser->curEl == nullptr)
             parser->document->appendChild(RefCast(cm, Node));
@@ -99,18 +91,16 @@ void XMLCALL Parser::comment_callback(void *userdata, const XML_Char *s)
     }
 }
 
-void XMLCALL Parser::default_callback(void *userdata, const XML_Char *s, int len)
+void XMLCALL Parser::default_callback(void* userdata, const XML_Char* s, int len)
 {
-    Parser *parser = (Parser *)userdata;
+    Parser* parser = (Parser*)userdata;
     String text = String(s, len);
-    
+
     if (text.charAt(0) == '<')
         parser->ignoreNextDefaultNewline = true;
-    else
-    {
+    else {
         bool add_as_character_data = true;
-        if (parser->ignoreNextDefaultNewline)
-        {
+        if (parser->ignoreNextDefaultNewline) {
             parser->ignoreNextDefaultNewline = false;
             if (text == _("\n"))
                 add_as_character_data = false;
@@ -118,7 +108,6 @@ void XMLCALL Parser::default_callback(void *userdata, const XML_Char *s, int len
         if (add_as_character_data)
             character_data(userdata, s, len);
     }
-    
 }
 
 Parser::Parser()
@@ -153,8 +142,7 @@ Ref<Document> Parser::parse(Ref<Context> ctx, String input)
     document = Ref<Document>(new Document());
     elements = Ref<ObjectStack<Element> >(new ObjectStack<Element>(8));
 
-    if (XML_Parse(parser, input.c_str(), input.length(), 1) != XML_STATUS_OK)
-    {
+    if (XML_Parse(parser, input.c_str(), input.length(), 1) != XML_STATUS_OK) {
         ctx->line = XML_GetCurrentLineNumber(parser);
         ctx->col = XML_GetCurrentColumnNumber(parser);
         String message = XML_ErrorString(XML_GetErrorCode(parser));

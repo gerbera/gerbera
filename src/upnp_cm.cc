@@ -34,7 +34,6 @@
 using namespace zmm;
 using namespace mxml;
 
-
 String ConnectionManagerService::serviceType = nullptr;
 String ConnectionManagerService::serviceID = nullptr;
 

@@ -32,14 +32,13 @@
 #ifndef __SCRIPTING_PLAYLIST_PARSER_SCRIPT_H__
 #define __SCRIPTING_PLAYLIST_PARSER_SCRIPT_H__
 
-#include "common.h"
-#include "script.h"
 #include "cds_objects.h"
-#include "generic_task.h"
+#include "common.h"
 #include "content_manager.h"
+#include "generic_task.h"
+#include "script.h"
 
-class PlaylistParserScript : public Script
-{
+class PlaylistParserScript : public Script {
 public:
     PlaylistParserScript(zmm::Ref<Runtime> runtime);
     ~PlaylistParserScript();
@@ -48,9 +47,9 @@ public:
     virtual script_class_t whoami() { return S_PLAYLIST; }
 
 private:
-    FILE *currentHandle;
+    FILE* currentHandle;
     int currentObjectID;
-    char *currentLine;
+    char* currentLine;
     zmm::Ref<GenericTask> currentTask;
 };
 

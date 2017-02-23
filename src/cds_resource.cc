@@ -29,14 +29,15 @@
 
 /// \file cds_resource.cc
 
-#include "tools.h"
 #include "cds_resource.h"
+#include "tools.h"
 
 #define RESOURCE_PART_SEP '~'
 
 using namespace zmm;
 
-CdsResource::CdsResource(int handlerType) : Object()
+CdsResource::CdsResource(int handlerType)
+    : Object()
 {
     this->handlerType = handlerType;
     this->attributes = Ref<Dictionary>(new Dictionary());
@@ -44,9 +45,9 @@ CdsResource::CdsResource(int handlerType) : Object()
     this->options = Ref<Dictionary>(new Dictionary());
 }
 CdsResource::CdsResource(int handlerType,
-                         Ref<Dictionary> attributes,
-                         Ref<Dictionary> parameters,
-                         Ref<Dictionary> options)
+    Ref<Dictionary> attributes,
+    Ref<Dictionary> parameters,
+    Ref<Dictionary> options)
 {
     this->handlerType = handlerType;
     this->attributes = attributes;
@@ -69,7 +70,6 @@ void CdsResource::mergeAttributes(Ref<Dictionary> additional)
     attributes->merge(additional);
 }
 
-
 void CdsResource::addParameter(String name, String value)
 {
     parameters->put(name, value);
@@ -80,7 +80,7 @@ void CdsResource::addOption(String name, String value)
     options->put(name, value);
 }
 
-int CdsResource::getHandlerType() 
+int CdsResource::getHandlerType()
 {
     return handlerType;
 }
@@ -118,19 +118,15 @@ String CdsResource::getOption(String name)
 bool CdsResource::equals(Ref<CdsResource> other)
 {
     return (
-        handlerType == other->handlerType &&
-        attributes->equals(other->attributes) &&
-        parameters->equals(other->parameters) &&
-        options->equals(other->options)
-    );
+        handlerType == other->handlerType && attributes->equals(other->attributes) && parameters->equals(other->parameters) && options->equals(other->options));
 }
 
 Ref<CdsResource> CdsResource::clone()
 {
     return Ref<CdsResource>(new CdsResource(handlerType,
-                                            attributes->clone(),
-                                            parameters->clone(),
-                                            options->clone()));
+        attributes->clone(),
+        parameters->clone(),
+        options->clone()));
 }
 
 String CdsResource::encode()
@@ -168,9 +164,9 @@ Ref<CdsResource> CdsResource::decode(String serial)
 
     if (size >= 4)
         opt->decode(parts->get(3));
-    
+
     Ref<CdsResource> resource(new CdsResource(handlerType, attr, par, opt));
-    
+
     return resource;
 }
 

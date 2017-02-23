@@ -33,96 +33,88 @@
 #ifdef HAVE_LIBDVDNAV
 
 #include "dvd_handler.h"
-#include "string_converter.h"
 #include "common.h"
-#include "tools.h"
-#include "content_manager.h"
 #include "config_manager.h"
+#include "content_manager.h"
+#include "string_converter.h"
+#include "tools.h"
 
 #include "dvdnav_read.h"
 
 using namespace zmm;
 
-#define DVD                         "dvd"
-#define DVD_TITLE                   DVD "t"
-#define DVD_CHAPTER                 "ch"
-#define DVD_AUDIO_TRACK             "at"
-#define DVD_DURATION                "d"
-#define DVD_REST_DURATION           "r"
-#define DVD_FORMAT                  "f"
-#define DVD_STREAM_ID               "i"
-#define DVD_COUNT                   "c"
-#define DVD_CHANNELS                "l"
-#define DVD_SAMPLE_FREQUENCY        "q"
-#define DVD_LANGUAGE                "g"
+#define DVD "dvd"
+#define DVD_TITLE DVD "t"
+#define DVD_CHAPTER "ch"
+#define DVD_AUDIO_TRACK "at"
+#define DVD_DURATION "d"
+#define DVD_REST_DURATION "r"
+#define DVD_FORMAT "f"
+#define DVD_STREAM_ID "i"
+#define DVD_COUNT "c"
+#define DVD_CHANNELS "l"
+#define DVD_SAMPLE_FREQUENCY "q"
+#define DVD_LANGUAGE "g"
 
-#define DVD_MIMETYPE                DVD "m"
+#define DVD_MIMETYPE DVD "m"
 
-DVDHandler::DVDHandler() : MetadataHandler()
+DVDHandler::DVDHandler()
+    : MetadataHandler()
 {
 }
 
-String DVDHandler::renderKey(dvd_aux_key_names_t name, int title_idx, 
-                             int chapter_idx, int audio_track_idx)
+String DVDHandler::renderKey(dvd_aux_key_names_t name, int title_idx,
+    int chapter_idx, int audio_track_idx)
 {
     String key;
 
-    switch (name)
-    {
-        case DVD_Title:
-            key = _(DVD_TITLE);
-            break;
-        case DVD_Chapter:
-            key = _(DVD DVD_CHAPTER);
-            break;
-        case DVD_AudioTrack:
-            key = _(DVD DVD_AUDIO_TRACK);
-            break;
-        case DVD_AudioStreamID:
-            key = _(DVD DVD_STREAM_ID);
-            break;
-        case DVD_TitleCount:
-            key = _(DVD_TITLE) + _(DVD_COUNT);
-            break;
-        case DVD_TitleDuration:
-            key = _(DVD_TITLE) + title_idx + _(DVD_DURATION);
-            break;
-        case DVD_ChapterCount:
-            key = _(DVD_TITLE) + title_idx + _(DVD_CHAPTER) + chapter_idx + 
-                  _(DVD_COUNT);
-            break;
-        case DVD_ChapterDuration:
-            key = _(DVD_TITLE) + title_idx + _(DVD_CHAPTER) + chapter_idx + 
-                  _(DVD_DURATION);
-        case DVD_ChapterRestDuration:
-            key = _(DVD_TITLE) + title_idx + _(DVD_CHAPTER) + chapter_idx +
-                  _(DVD_REST_DURATION);
-            break;
-        case DVD_AudioTrackCount:
-            key = _(DVD_TITLE) + title_idx + _(DVD_AUDIO_TRACK) + _(DVD_COUNT);
-            break;
-        case DVD_AudioTrackFormat:
-            key = _(DVD_TITLE) + title_idx + _(DVD_AUDIO_TRACK) + 
-                   audio_track_idx + _(DVD_FORMAT);
-            break;
-        case DVD_AudioTrackStreamID:
-            key = _(DVD_TITLE) + title_idx + _(DVD_AUDIO_TRACK) + 
-                   audio_track_idx + _(DVD_STREAM_ID);
-            break;
-        case DVD_AudioTrackChannels:
-            key = _(DVD_TITLE) + title_idx + _(DVD_AUDIO_TRACK) +
-                  audio_track_idx + _(DVD_CHANNELS);
-            break;
-        case DVD_AudioTrackSampleFreq:
-            key = _(DVD_TITLE) + title_idx + _(DVD_AUDIO_TRACK) +
-                  audio_track_idx + _(DVD_SAMPLE_FREQUENCY);
-            break;
-        case DVD_AudioTrackLanguage:
-            key = _(DVD_TITLE) + title_idx + _(DVD_AUDIO_TRACK) +
-                  audio_track_idx + _(DVD_LANGUAGE);
-            break;
-        default:
-            throw _Exception(_("Invalid dvd aux key name!"));
+    switch (name) {
+    case DVD_Title:
+        key = _(DVD_TITLE);
+        break;
+    case DVD_Chapter:
+        key = _(DVD DVD_CHAPTER);
+        break;
+    case DVD_AudioTrack:
+        key = _(DVD DVD_AUDIO_TRACK);
+        break;
+    case DVD_AudioStreamID:
+        key = _(DVD DVD_STREAM_ID);
+        break;
+    case DVD_TitleCount:
+        key = _(DVD_TITLE) + _(DVD_COUNT);
+        break;
+    case DVD_TitleDuration:
+        key = _(DVD_TITLE) + title_idx + _(DVD_DURATION);
+        break;
+    case DVD_ChapterCount:
+        key = _(DVD_TITLE) + title_idx + _(DVD_CHAPTER) + chapter_idx + _(DVD_COUNT);
+        break;
+    case DVD_ChapterDuration:
+        key = _(DVD_TITLE) + title_idx + _(DVD_CHAPTER) + chapter_idx + _(DVD_DURATION);
+    case DVD_ChapterRestDuration:
+        key = _(DVD_TITLE) + title_idx + _(DVD_CHAPTER) + chapter_idx + _(DVD_REST_DURATION);
+        break;
+    case DVD_AudioTrackCount:
+        key = _(DVD_TITLE) + title_idx + _(DVD_AUDIO_TRACK) + _(DVD_COUNT);
+        break;
+    case DVD_AudioTrackFormat:
+        key = _(DVD_TITLE) + title_idx + _(DVD_AUDIO_TRACK) + audio_track_idx + _(DVD_FORMAT);
+        break;
+    case DVD_AudioTrackStreamID:
+        key = _(DVD_TITLE) + title_idx + _(DVD_AUDIO_TRACK) + audio_track_idx + _(DVD_STREAM_ID);
+        break;
+    case DVD_AudioTrackChannels:
+        key = _(DVD_TITLE) + title_idx + _(DVD_AUDIO_TRACK) + audio_track_idx + _(DVD_CHANNELS);
+        break;
+    case DVD_AudioTrackSampleFreq:
+        key = _(DVD_TITLE) + title_idx + _(DVD_AUDIO_TRACK) + audio_track_idx + _(DVD_SAMPLE_FREQUENCY);
+        break;
+    case DVD_AudioTrackLanguage:
+        key = _(DVD_TITLE) + title_idx + _(DVD_AUDIO_TRACK) + audio_track_idx + _(DVD_LANGUAGE);
+        break;
+    default:
+        throw _Exception(_("Invalid dvd aux key name!"));
     }
 
     return key;
@@ -130,8 +122,7 @@ String DVDHandler::renderKey(dvd_aux_key_names_t name, int title_idx,
 
 void DVDHandler::fillMetadata(Ref<CdsItem> item)
 {
-    try
-    {
+    try {
         Ref<DVDNavReader> dvd(new DVDNavReader(item->getLocation()));
 
         item->setFlag(OBJECT_FLAG_DVD_IMAGE);
@@ -139,29 +130,27 @@ void DVDHandler::fillMetadata(Ref<CdsItem> item)
         int titles = dvd->titleCount();
         item->setAuxData(renderKey(DVD_TitleCount), String::from(titles));
 
-        for (int i = 0; i < titles; i++)
-        {
+        for (int i = 0; i < titles; i++) {
             dvd->selectPGC(i, 0);
-            item->setAuxData(renderKey(DVD_ChapterCount, i), 
-                    String::from(dvd->chapterCount(i)));
-//            if (dvd->titleDuration() > 0)
-//                item->setAuxData(renderKey(DVD_TitleDuration, i), 
-//                        secondsToHMS(dvd->titleDuration()));
-            item->setAuxData(renderKey(DVD_AudioTrackCount, i), 
-                    String::from(dvd->audioTrackCount()));
+            item->setAuxData(renderKey(DVD_ChapterCount, i),
+                String::from(dvd->chapterCount(i)));
+            //            if (dvd->titleDuration() > 0)
+            //                item->setAuxData(renderKey(DVD_TitleDuration, i),
+            //                        secondsToHMS(dvd->titleDuration()));
+            item->setAuxData(renderKey(DVD_AudioTrackCount, i),
+                String::from(dvd->audioTrackCount()));
 
-            for (int a = 0; a < dvd->audioTrackCount(); a++)
-            {
+            for (int a = 0; a < dvd->audioTrackCount(); a++) {
                 item->setAuxData(renderKey(DVD_AudioTrackFormat, i, 0, a),
-                        dvd->audioFormat(a));
+                    dvd->audioFormat(a));
                 item->setAuxData(renderKey(DVD_AudioTrackStreamID, i, 0, a),
-                        String::from(dvd->audioStreamID(a)));
+                    String::from(dvd->audioStreamID(a)));
                 item->setAuxData(renderKey(DVD_AudioTrackChannels, i, 0, a),
-                        String::from(dvd->audioChannels(a)));
+                    String::from(dvd->audioChannels(a)));
                 item->setAuxData(renderKey(DVD_AudioTrackSampleFreq, i, 0, a),
-                        String::from(dvd->audioSampleFrequency(a)));
+                    String::from(dvd->audioSampleFrequency(a)));
                 item->setAuxData(renderKey(DVD_AudioTrackLanguage, i, 0, a),
-                        dvd->audioLanguage(a));
+                    dvd->audioLanguage(a));
             }
 #if 0
             int secs = 0;
@@ -181,18 +170,14 @@ void DVDHandler::fillMetadata(Ref<CdsItem> item)
 #endif
         } // for titles
 
-        log_debug("DVD image %s has %d titles\n", item->getLocation().c_str(), 
-                titles);
-    }
-    catch (const Exception & ex)
-    {
+        log_debug("DVD image %s has %d titles\n", item->getLocation().c_str(),
+            titles);
+    } catch (const Exception& ex) {
         log_warning("Parsing ISO image failed (not a DVD?): %s\n", ex.getMessage().c_str());
     }
 }
 
-
-
-Ref<IOHandler> DVDHandler::serveContent(Ref<CdsItem> item, int resNum, off_t *data_size)
+Ref<IOHandler> DVDHandler::serveContent(Ref<CdsItem> item, int resNum, off_t* data_size)
 {
     *data_size = -1;
     return nullptr;

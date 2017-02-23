@@ -34,13 +34,12 @@
 
 #include "zmm/zmmf.h"
 
-
 template <class T>
-class ObjectDictionaryElement : public zmm::Object
-{
+class ObjectDictionaryElement : public zmm::Object {
 public:
     /// \brief Constructor, stores the key and the value.
-    ObjectDictionaryElement(zmm::String key, zmm::Ref<T> value) : zmm::Object()
+    ObjectDictionaryElement(zmm::String key, zmm::Ref<T> value)
+        : zmm::Object()
     {
         this->key = key;
         this->value = value;
@@ -65,13 +64,12 @@ protected:
     zmm::Ref<T> value;
 };
 
-
 template <class T>
-class ObjectDictionary : public zmm::Object
-{
+class ObjectDictionary : public zmm::Object {
 public:
     /// \brief Constructor, initializes the dictionary.
-    ObjectDictionary() : zmm::Object()
+    ObjectDictionary()
+        : zmm::Object()
     {
         elements = zmm::Ref<zmm::Array<ObjectDictionaryElement<T> > >(new zmm::Array<ObjectDictionaryElement<T> >());
     }
@@ -79,11 +77,9 @@ public:
     /// \brief Adds a new key:value pair to the dictionary.
     void put(zmm::String key, zmm::Ref<T> value)
     {
-        for (int i = 0; i < elements->size(); i++)
-        {
+        for (int i = 0; i < elements->size(); i++) {
             zmm::Ref<ObjectDictionaryElement<T> > el = elements->get(i);
-            if(el->getKey() == key)
-            {
+            if (el->getKey() == key) {
                 el->setValue(value);
                 return;
             }
@@ -91,32 +87,28 @@ public:
         zmm::Ref<ObjectDictionaryElement<T> > newEl(new ObjectDictionaryElement<T>(key, value));
         elements->append(newEl);
     }
-    
+
     /// \brief Returns the value for a given key.
     zmm::Ref<T> get(zmm::String key)
     {
-        for (int i = 0; i < elements->size(); i++)
-        {
+        for (int i = 0; i < elements->size(); i++) {
             zmm::Ref<ObjectDictionaryElement<T> > el = elements->get(i);
-            if (el->getKey() == key)
-            {
+            if (el->getKey() == key) {
                 return el->getValue();
             }
         }
         return nullptr;
     }
-    
+
     /// \brief Returns the number of elements in the dictinary.
     int size() { return elements->size(); }
 
     /// \brief Deletes a key value pair
     void remove(zmm::String key)
     {
-        for (int i = 0; i < elements->size(); i++)
-        {
+        for (int i = 0; i < elements->size(); i++) {
             zmm::Ref<ObjectDictionaryElement<T> > el = elements->get(i);
-            if (el->getKey() == key)
-            {
+            if (el->getKey() == key) {
                 elements->remove(i, 1);
                 return;
             }
@@ -126,7 +118,7 @@ public:
     /// \brief Removes all elements from the dictionary.
     void clear()
     {
-        elements->remove(0, elements->size());        
+        elements->remove(0, elements->size());
     }
 
     /// \brief Makes a shallow copy of the dictionary
@@ -134,8 +126,7 @@ public:
     {
         zmm::Ref<ObjectDictionary> ret(new ObjectDictionary());
         int len = elements->size();
-        for (int i = 0; i < len; i++)
-        {
+        for (int i = 0; i < len; i++) {
             zmm::Ref<ObjectDictionaryElement<T> > el = elements->get(i);
             ret->put(el->getKey(), el->getValue());
         }
@@ -146,7 +137,7 @@ public:
     {
         return elements;
     }
-    
+
     /// \brief Frees unnecessary memory
     inline void optimize() { elements->optimize(); }
 

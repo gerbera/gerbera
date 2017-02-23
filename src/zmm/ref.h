@@ -32,22 +32,21 @@
 #ifndef __ZMM_REF_H__
 #define __ZMM_REF_H__
 
-namespace zmm
-{
+namespace zmm {
 
 template <class T>
-class Ref
-{
+class Ref {
 public:
     Ref(const Ref& other)
     {
         _ptr = other._ptr;
-        if(_ptr)
+        if (_ptr)
             _ptr->retain();
     }
-    explicit Ref(T* ptr = nullptr) : _ptr(ptr)
+    explicit Ref(T* ptr = nullptr)
+        : _ptr(ptr)
     {
-        if(ptr)
+        if (ptr)
             ptr->retain();
     }
     Ref(std::nullptr_t)
@@ -56,7 +55,7 @@ public:
     }
     ~Ref()
     {
-        if(_ptr)
+        if (_ptr)
             _ptr->release();
     }
 
@@ -64,16 +63,16 @@ public:
     {
         if (this == &other)
             return *this;
-        if(_ptr)
+        if (_ptr)
             _ptr->release();
         _ptr = other._ptr;
-        if(_ptr)
+        if (_ptr)
             _ptr->retain();
         return *this;
     }
     inline Ref& operator=(std::nullptr_t)
     {
-        if(_ptr)
+        if (_ptr)
             _ptr->release();
         _ptr = nullptr;
         return *this;
@@ -107,12 +106,13 @@ public:
     {
         return (_ptr != other._ptr);
     }
+
 protected:
     T* _ptr;
 };
 
 } // namespace
 
-#define RefCast(ref, klass) zmm::Ref< klass >(( klass *)ref.getPtr())
+#define RefCast(ref, klass) zmm::Ref<klass>((klass*)ref.getPtr())
 
 #endif // __ZMM_REF_H__

@@ -28,23 +28,22 @@
 */
 
 /// \file config_options.h
-///\brief Definitions of the ConfigManager class. 
+///\brief Definitions of the ConfigManager class.
 
 #ifndef __CONFIG_OPTIONS_H__
 #define __CONFIG_OPTIONS_H__
 
-#include <assert.h>
-#include "zmm/zmmf.h"
-#include "exceptions.h"
 #include "autoscan.h"
+#include "exceptions.h"
 #include "object_dictionary.h"
+#include "zmm/zmmf.h"
+#include <assert.h>
 
 #ifdef EXTERNAL_TRANSCODING
-    #include "transcoding/transcoding.h"
+#include "transcoding/transcoding.h"
 #endif
 
-class ConfigOption : public zmm::Object
-{
+class ConfigOption : public zmm::Object {
 public:
     virtual zmm::String getOption()
     {
@@ -60,7 +59,6 @@ public:
     {
         throw _Exception(_("Wrong option type"));
     };
-
 
     virtual zmm::Ref<Dictionary> getDictionaryOption()
     {
@@ -94,8 +92,7 @@ public:
     }
 };
 
-class Option : public ConfigOption
-{
+class Option : public ConfigOption {
 public:
     Option(zmm::String option) { this->option = option; };
 
@@ -105,8 +102,7 @@ protected:
     zmm::String option;
 };
 
-class IntOption : public ConfigOption
-{
+class IntOption : public ConfigOption {
 public:
     IntOption(int option) { this->option = option; };
 
@@ -116,21 +112,18 @@ protected:
     int option;
 };
 
-class BoolOption : public ConfigOption
-{
+class BoolOption : public ConfigOption {
 public:
     BoolOption(bool option) { this->option = option; };
 
     virtual bool getBoolOption() { return option; };
 
 protected:
-    BoolOption() {};
+    BoolOption(){};
     bool option;
 };
 
-
-class DictionaryOption : public ConfigOption
-{
+class DictionaryOption : public ConfigOption {
 public:
     DictionaryOption(zmm::Ref<Dictionary> option) { this->option = option; };
 
@@ -140,29 +133,27 @@ protected:
     zmm::Ref<Dictionary> option;
 };
 
-class StringArrayOption : public ConfigOption
-{
+class StringArrayOption : public ConfigOption {
 public:
-    StringArrayOption(zmm::Ref<zmm::Array<zmm::StringBase> > option) 
-    { 
-        this->option = option; 
+    StringArrayOption(zmm::Ref<zmm::Array<zmm::StringBase> > option)
+    {
+        this->option = option;
     };
 
-    virtual zmm::Ref<zmm::Array<zmm::StringBase> > getStringArrayOption() 
-    { 
-        return option; 
+    virtual zmm::Ref<zmm::Array<zmm::StringBase> > getStringArrayOption()
+    {
+        return option;
     };
 
 protected:
     zmm::Ref<zmm::Array<zmm::StringBase> > option;
 };
 
-class AutoscanListOption : public ConfigOption
-{
+class AutoscanListOption : public ConfigOption {
 public:
-    AutoscanListOption(zmm::Ref<AutoscanList> option) 
-    { 
-        this->option = option; 
+    AutoscanListOption(zmm::Ref<AutoscanList> option)
+    {
+        this->option = option;
     };
 
     virtual zmm::Ref<AutoscanList> getAutoscanListOption() { return option; };
@@ -172,8 +163,7 @@ protected:
 };
 
 #ifdef EXTERNAL_TRANSCODING
-class TranscodingProfileListOption : public ConfigOption
-{
+class TranscodingProfileListOption : public ConfigOption {
 public:
     TranscodingProfileListOption(zmm::Ref<TranscodingProfileList> option)
     {
@@ -184,33 +174,32 @@ public:
     {
         return option;
     };
+
 protected:
     zmm::Ref<TranscodingProfileList> option;
 };
-#endif//EXTERNAL_TRANSCODING
+#endif //EXTERNAL_TRANSCODING
 
 #ifdef ONLINE_SERVICES
-class ObjectArrayOption : public ConfigOption
-{
+class ObjectArrayOption : public ConfigOption {
 public:
-    ObjectArrayOption(zmm::Ref<zmm::Array<zmm::Object> > option) 
-    { 
-        this->option = option; 
+    ObjectArrayOption(zmm::Ref<zmm::Array<zmm::Object> > option)
+    {
+        this->option = option;
     };
 
-    virtual zmm::Ref<zmm::Array<zmm::Object> > getObjectArrayOption() 
-    { 
-        return option; 
+    virtual zmm::Ref<zmm::Array<zmm::Object> > getObjectArrayOption()
+    {
+        return option;
     };
 
 protected:
     zmm::Ref<zmm::Array<zmm::Object> > option;
 };
 
-#endif//ONLINE_SERVICES
+#endif //ONLINE_SERVICES
 
-class ObjectDictionaryOption : public ConfigOption
-{
+class ObjectDictionaryOption : public ConfigOption {
 public:
     ObjectDictionaryOption(zmm::Ref<ObjectDictionary<zmm::Object> > option)
     {
@@ -221,6 +210,7 @@ public:
     {
         return option;
     };
+
 protected:
     zmm::Ref<ObjectDictionary<zmm::Object> > option;
 };

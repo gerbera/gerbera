@@ -38,23 +38,23 @@
 extern "C" {
 
 /// \brief Log output.
-JSBool js_print(JSContext *cx, uintN argc, jsval *argv);
+JSBool js_print(JSContext* cx, uintN argc, jsval* argv);
 
 /// \brief Adds an object to the database.
-JSBool js_addCdsObject(JSContext *cx, uintN argc, jsval *argv);
+JSBool js_addCdsObject(JSContext* cx, uintN argc, jsval* argv);
 
 /// \brief Makes a copy of an CDS object.
-JSBool js_copyObject(JSContext *cx, uintN argc, jsval *argv);
+JSBool js_copyObject(JSContext* cx, uintN argc, jsval* argv);
 
 /// filesystem charset to internal
-JSBool js_f2i(JSContext *cx, uintN argc, jsval *argv);
+JSBool js_f2i(JSContext* cx, uintN argc, jsval* argv);
 /// metadata charset to internal
-JSBool js_m2i(JSContext *cx, uintN argc, jsval *argv);
+JSBool js_m2i(JSContext* cx, uintN argc, jsval* argv);
 /// playlist charset to internal
-JSBool js_p2i(JSContext *cx, uintN argc, jsval *argv);
+JSBool js_p2i(JSContext* cx, uintN argc, jsval* argv);
 /// js charset to internal
-JSBool js_j2i(JSContext *cx, uintN argc, jsval *argv);
+JSBool js_j2i(JSContext* cx, uintN argc, jsval* argv);
 
 } // extern "C"
 
-#endif//__SCRIPTING_JS_FUNCTIONS_H__
+#endif //__SCRIPTING_JS_FUNCTIONS_H__

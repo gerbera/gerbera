@@ -3,7 +3,8 @@
 
 #include "generic_task.h"
 
-GenericTask::GenericTask(task_owner_t taskOwner) : Object()
+GenericTask::GenericTask(task_owner_t taskOwner)
+    : Object()
 {
     valid = true;
     cancellable = true;
@@ -12,4 +13,3 @@ GenericTask::GenericTask(task_owner_t taskOwner) : Object()
     parentTaskID = 0;
     this->taskOwner = taskOwner;
 }
-

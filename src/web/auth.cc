@@ -29,10 +29,10 @@
 
 /// \file auth.cc
 
-#include <sys/time.h>
 #include "pages.h"
-#include "tools.h"
 #include "session_manager.h"
+#include "tools.h"
+#include <sys/time.h>
 
 using namespace zmm;
 using namespace mxml;
@@ -65,7 +65,8 @@ static bool check_token(String token, String password, String encPassword)
     return (checksum == encPassword);
 }
 
-web::auth::auth() : WebRequestHandler()
+web::auth::auth()
+    : WebRequestHandler()
 {
     timeout = 60 * ConfigManager::getInstance()->getIntOption(CFG_SERVER_UI_SESSION_TIMEOUT);
 }
@@ -73,38 +74,40 @@ void web::auth::process()
 {
     String action = param(_("action"));
     Ref<SessionManager> sessionManager = SessionManager::getInstance();
-    
-    if (! string_ok(action))
-    {
+
+    if (!string_ok(action)) {
         root->appendTextChild(_("error"), _("req_type auth: no action given"));
         return;
     }
-    
-    if (action == "get_config")
-    {
+
+    if (action == "get_config") {
         Ref<ConfigManager> cm = ConfigManager::getInstance();
-        Ref<Element> config (new Element(_("config")));
+        Ref<Element> config(new Element(_("config")));
         root->appendElementChild(config);
         config->setAttribute(_("accounts"), accountsEnabled() ? _("1") : _("0"), mxml_bool_type);
         config->setAttribute(_("show-tooltips"),
-                (cm->getBoolOption(
-                          CFG_SERVER_UI_SHOW_TOOLTIPS) ? _("1") : _("0")), mxml_bool_type);
-        config->setAttribute(_("poll-when-idle"), 
             (cm->getBoolOption(
-                          CFG_SERVER_UI_POLL_WHEN_IDLE) ? _("1") : _("0")), mxml_bool_type);
-        config->setAttribute(_("poll-interval"), 
+                 CFG_SERVER_UI_SHOW_TOOLTIPS)
+                    ? _("1")
+                    : _("0")),
+            mxml_bool_type);
+        config->setAttribute(_("poll-when-idle"),
+            (cm->getBoolOption(
+                 CFG_SERVER_UI_POLL_WHEN_IDLE)
+                    ? _("1")
+                    : _("0")),
+            mxml_bool_type);
+        config->setAttribute(_("poll-interval"),
             String::from(cm->getIntOption(CFG_SERVER_UI_POLL_INTERVAL)), mxml_int_type);
-/// CREATE XML FRAGMENT FOR ITEMS PER PAGE
-        Ref<Element> ipp (new Element(_("items-per-page")));
+        /// CREATE XML FRAGMENT FOR ITEMS PER PAGE
+        Ref<Element> ipp(new Element(_("items-per-page")));
         ipp->setArrayName(_("option"));
-        ipp->setAttribute(_("default"), 
-          String::from(cm->getIntOption(CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE)), mxml_int_type);
-    
-        Ref<Array<StringBase> > menu_opts = 
-            cm->getStringArrayOption(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
+        ipp->setAttribute(_("default"),
+            String::from(cm->getIntOption(CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE)), mxml_int_type);
 
-        for (int i = 0; i < menu_opts->size(); i++)
-        {
+        Ref<Array<StringBase> > menu_opts = cm->getStringArrayOption(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
+
+        for (int i = 0; i < menu_opts->size(); i++) {
             ipp->appendTextChild(_("option"), menu_opts->get(i), mxml_int_type);
         }
 
@@ -117,87 +120,72 @@ void web::auth::process()
 #else
         config->setAttribute(_("have-inotify"), _("0"), mxml_bool_type);
 #endif
-        
-        
-        Ref<Element> actions (new Element(_("actions")));
+
+        Ref<Element> actions(new Element(_("actions")));
         actions->setArrayName(_("action"));
 #ifdef YOUTUBE
-        if (cm->getBoolOption(CFG_ONLINE_CONTENT_YOUTUBE_ENABLED))
-        {
+        if (cm->getBoolOption(CFG_ONLINE_CONTENT_YOUTUBE_ENABLED)) {
             actions->appendTextChild(_("action"), _(UI_ACTION_REFRESH_YOUTUBE));
         }
 #endif
         //actions->appendTextChild(_("action"), _("fokel1"));
         //actions->appendTextChild(_("action"), _("fokel2"));
-        
+
         config->appendElementChild(actions);
-    }
-    else if (action == "get_sid")
-    {
+    } else if (action == "get_sid") {
         log_debug("checking/getting sid...\n");
         Ref<Session> session = nullptr;
         String sid = param(_("sid"));
-        
-        if (sid == nullptr || (session = sessionManager->getSession(sid)) == nullptr)
-        {
+
+        if (sid == nullptr || (session = sessionManager->getSession(sid)) == nullptr) {
             session = sessionManager->createSession(timeout);
             root->setAttribute(_("sid_was_valid"), _("0"), mxml_bool_type);
-        }
-        else
-        {
+        } else {
             session->clearUpdateIDs();
             root->setAttribute(_("sid_was_valid"), _("1"), mxml_bool_type);
         }
         root->setAttribute(_("sid"), session->getID());
-        
-        if (! session->isLoggedIn() && ! accountsEnabled())
-        {
+
+        if (!session->isLoggedIn() && !accountsEnabled()) {
             session->logIn();
             //throw SessionException(_("not logged in"));
         }
         root->setAttribute(_("logged_in"), session->isLoggedIn() ? _("1") : _("0"), mxml_bool_type);
-    }
-    else if (action == "logout")
-    {
+    } else if (action == "logout") {
         check_request();
         String sid = param(_("sid"));
         Ref<Session> session = SessionManager::getInstance()->getSession(sid);
         if (session == nullptr)
             throw _Exception(_("illegal session id"));
         sessionManager->removeSession(sid);
-    }
-    else if (action == "get_token")
-    {
+    } else if (action == "get_token") {
         check_request(false);
-        
+
         // sending token
         String token = generate_token();
         session->put(_("token"), token);
         root->appendTextChild(_("token"), token);
-    }
-    else if (action == "login")
-    {
+    } else if (action == "login") {
         check_request(false);
-        
+
         // authentication
         String username = param(_("username"));
         String encPassword = param(_("password"));
         String sid = param(_("sid"));
-        
-        if (! string_ok(username) || ! string_ok(encPassword))
+
+        if (!string_ok(username) || !string_ok(encPassword))
             throw LoginException(_("Missing username or password"));
-        
+
         Ref<Session> session = sessionManager->getSession(sid);
         if (session == nullptr)
             throw _Exception(_("illegal session id"));
-        
+
         String correctPassword = sessionManager->getUserPassword(username);
-        
-        if (! string_ok(correctPassword) || ! check_token(session->get(_("token")), correctPassword, encPassword))
+
+        if (!string_ok(correctPassword) || !check_token(session->get(_("token")), correctPassword, encPassword))
             throw LoginException(_("Invalid username or password"));
-        
+
         session->logIn();
-    }
-    else
+    } else
         throw _Exception(_("illegal action given to req_type auth"));
 }

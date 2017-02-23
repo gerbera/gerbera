@@ -34,8 +34,8 @@
 #include <sys/stat.h>
 
 #include "common.h"
-#include "tools.h"
 #include "file_io_handler.h"
+#include "tools.h"
 
 using namespace zmm;
 
@@ -45,22 +45,26 @@ const char* names[] = {
     "/poster.jpg"
 };
 
-FanArtHandler::FanArtHandler() : MetadataHandler()
+FanArtHandler::FanArtHandler()
+    : MetadataHandler()
 {
 }
 
-inline bool path_exists(String name) {
-  struct stat buffer;   
-  return (stat (name.c_str(), &buffer) == 0); 
+inline bool path_exists(String name)
+{
+    struct stat buffer;
+    return (stat(name.c_str(), &buffer) == 0);
 }
 
-String getFolderName(Ref<CdsItem> item) {
+String getFolderName(Ref<CdsItem> item)
+{
     String folder = item->getLocation().substring(0, item->getLocation().rindex('/'));
     log_debug("Folder name: %s\n", folder.c_str());
     return folder;
 }
 
-String getFanArtPath(String folder) {
+String getFanArtPath(String folder)
+{
     String found;
     for (int i = 0; i < num_names; i++) {
         bool exists = path_exists(folder + names[i]);
@@ -87,7 +91,7 @@ void FanArtHandler::fillMetadata(Ref<CdsItem> item)
     }
 }
 
-Ref<IOHandler> FanArtHandler::serveContent(Ref<CdsItem> item, int resNum, off_t *data_size)
+Ref<IOHandler> FanArtHandler::serveContent(Ref<CdsItem> item, int resNum, off_t* data_size)
 {
     String path = getFanArtPath(getFolderName(item));
 
@@ -97,4 +101,3 @@ Ref<IOHandler> FanArtHandler::serveContent(Ref<CdsItem> item, int resNum, off_t 
     Ref<IOHandler> io_handler(new FileIOHandler(path));
     return io_handler;
 }
-

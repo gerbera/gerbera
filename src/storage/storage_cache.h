@@ -33,46 +33,44 @@
 #define __STORAGE_CACHE_H__
 
 #include <memory>
-#include <unordered_map>
 #include <mutex>
+#include <unordered_map>
 
-#include "zmm/zmmf.h"
-#include "common.h"
 #include "cache_object.h"
+#include "common.h"
+#include "zmm/zmmf.h"
 
 #define STORAGE_CACHE_CAPACITY 29989u
 #define STORAGE_CACHE_MAXFILL 9973u
 
-class StorageCache : public zmm::Object
-{
+class StorageCache : public zmm::Object {
 public:
     StorageCache();
-    
+
     zmm::Ref<CacheObject> getObject(int id);
     zmm::Ref<CacheObject> getObjectDefinitely(int id);
     bool removeObject(int id);
     void clear();
-    
+
     zmm::Ref<zmm::Array<CacheObject> > getObjects(zmm::String location);
     void checkLocation(zmm::Ref<CacheObject> obj);
-    
+
     // a child was added to the specified object - update numChildren accordingly,
     // if the object has cached information
     void addChild(int id);
-    
+
     bool flushed();
-    
-    std::mutex & getMutex() { return mutex; }
-    
+
+    std::mutex& getMutex() { return mutex; }
+
 private:
-    
     int capacity;
     unsigned int maxfill;
     bool hasBeenFlushed;
-    
+
     void ensureFillLevelOk();
-    
-    std::shared_ptr<std::unordered_map<int,zmm::Ref<CacheObject> > > idHash;
+
+    std::shared_ptr<std::unordered_map<int, zmm::Ref<CacheObject> > > idHash;
     std::shared_ptr<std::unordered_map<zmm::String, zmm::Ref<zmm::Array<CacheObject> > > > locationHash;
     std::mutex mutex;
     using AutoLock = std::lock_guard<std::mutex>;

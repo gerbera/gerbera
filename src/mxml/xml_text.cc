@@ -29,20 +29,22 @@
 
 /// \file xml_text.cc
 
-#include "mxml.h"
 #include "xml_text.h"
+#include "mxml.h"
 
 using namespace zmm;
 using namespace mxml;
 
-Text::Text(String text) : Node()
+Text::Text(String text)
+    : Node()
 {
     type = mxml_node_text;
     this->text = text;
     vtype = mxml_string_type;
 }
 
-Text::Text(String text, enum mxml_value_type vtype) : Node()
+Text::Text(String text, enum mxml_value_type vtype)
+    : Node()
 {
     type = mxml_node_text;
     this->text = text;

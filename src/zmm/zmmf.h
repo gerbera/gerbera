@@ -32,14 +32,14 @@
 #ifndef __ZMMF_H__
 #define __ZMMF_H__
 
-#include "zmm.h"
-#include "exception.h"
 #include "array.h"
 #include "base_array.h"
-#include "stringtokenizer.h"
-#include "base_stack.h"
-#include "object_stack.h"
 #include "base_queue.h"
+#include "base_stack.h"
+#include "exception.h"
 #include "object_queue.h"
+#include "object_stack.h"
+#include "stringtokenizer.h"
+#include "zmm.h"
 
 #endif // __ZMMF_H__

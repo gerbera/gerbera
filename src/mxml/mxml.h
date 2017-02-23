@@ -34,10 +34,8 @@
 
 #include "zmm/zmmf.h"
 
-namespace mxml
-{
-enum mxml_value_type
-{
+namespace mxml {
+enum mxml_value_type {
     mxml_string_type,
     mxml_bool_type,
     mxml_null_type,
@@ -46,14 +44,14 @@ enum mxml_value_type
 }
 
 #include "attribute.h"
-#include "context.h"
-#include "node.h"
-#include "element.h"
-#include "document.h"
-#include "xml_text.h"
 #include "comment.h"
+#include "context.h"
+#include "document.h"
+#include "element.h"
+#include "node.h"
 #include "parseexception.h"
 #include "parser.h"
+#include "xml_text.h"
 #include "xml_to_json.h"
 
 #endif // __MXML_H__

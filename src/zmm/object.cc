@@ -32,8 +32,8 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "object.h"
 #include "memory.h"
+#include "object.h"
 
 using namespace zmm;
 
@@ -62,9 +62,9 @@ void Object::retain() const
 void Object::release() const
 {
 #ifdef ATOMIC_NEED_MUTEX
-    if(atomic_dec(&_ref_count, &mutex))
+    if (atomic_dec(&_ref_count, &mutex))
 #else
-    if(atomic_dec(&_ref_count))
+    if (atomic_dec(&_ref_count))
 #endif
     {
         delete this;
@@ -76,11 +76,11 @@ int Object::getRefCount() const
     return atomic_get(&_ref_count);
 }
 
-void* Object::operator new (size_t size)
+void* Object::operator new(size_t size)
 {
     return MALLOC(size);
 }
-void Object::operator delete (void *ptr)
+void Object::operator delete(void* ptr)
 {
     FREE(ptr);
 }

@@ -36,29 +36,27 @@
 #include "io_handler.h"
 
 /// \brief Allows the web server to read from a memory buffer instead of a file.
-class MemIOHandler : public IOHandler
-{
+class MemIOHandler : public IOHandler {
 protected:
     /// \brief buffer that is holding our data.
-    char *buffer;
+    char* buffer;
     off_t length;
 
     /// \brief current offset in the buffer
-    off_t   pos;
-    
+    off_t pos;
+
 public:
     /// \brief Initializes the internal buffer.
     /// \param buffer all operations will be done on this buffer.
-    MemIOHandler(const void *buffer, int length);
+    MemIOHandler(const void* buffer, int length);
     MemIOHandler(zmm::String str);
     virtual ~MemIOHandler();
 
-    /// 
+    ///
     virtual void open(IN enum UpnpOpenFileMode mode);
-    virtual int read(OUT char *buf, IN size_t length);
-                      
+    virtual int read(OUT char* buf, IN size_t length);
+
     virtual void seek(IN off_t offset, IN int whence);
 };
-
 
 #endif // __MEM_IO_HANDLER_H__

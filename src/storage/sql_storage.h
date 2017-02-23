@@ -32,38 +32,37 @@
 #ifndef __SQL_STORAGE_H__
 #define __SQL_STORAGE_H__
 
-#include "zmm/zmmf.h"
 #include "cds_objects.h"
 #include "dictionary.h"
 #include "storage.h"
 #include "storage_cache.h"
+#include "zmm/zmmf.h"
 
-#include <unordered_set>
 #include <mutex>
+#include <unordered_set>
 
-#define QTB                 table_quote_begin
-#define QTE                 table_quote_end
+#define QTB table_quote_begin
+#define QTE table_quote_end
 
-#define CDS_OBJECT_TABLE            "mt_cds_object"
-#define CDS_ACTIVE_ITEM_TABLE       "mt_cds_active_item"
-#define INTERNAL_SETTINGS_TABLE     "mt_internal_setting"
-#define AUTOSCAN_TABLE              "mt_autoscan"
+#define CDS_OBJECT_TABLE "mt_cds_object"
+#define CDS_ACTIVE_ITEM_TABLE "mt_cds_active_item"
+#define INTERNAL_SETTINGS_TABLE "mt_internal_setting"
+#define AUTOSCAN_TABLE "mt_autoscan"
 
 class SQLResult;
 
-class SQLRow : public zmm::Object
-{
+class SQLRow : public zmm::Object {
 public:
     SQLRow(zmm::Ref<SQLResult> sqlResult) { this->sqlResult = sqlResult; }
     //virtual ~SQLRow();
     zmm::String col(int index) { return col_c_str(index); }
     virtual char* col_c_str(int index) = 0;
+
 protected:
     zmm::Ref<SQLResult> sqlResult;
 };
 
-class SQLResult : public zmm::Object
-{
+class SQLResult : public zmm::Object {
 public:
     //SQLResult();
     //virtual ~SQLResult();
@@ -71,8 +70,7 @@ public:
     virtual unsigned long long getNumRows() = 0;
 };
 
-class SQLStorage : protected Storage
-{
+class SQLStorage : protected Storage {
 public:
     /* methods to override in subclasses */
     virtual zmm::String quote(zmm::String str) = 0;
@@ -83,51 +81,55 @@ public:
     virtual zmm::String quote(bool val) = 0;
     virtual zmm::String quote(char val) = 0;
     virtual zmm::String quote(long long val) = 0;
-    virtual zmm::Ref<SQLResult> select(const char *query, int length) = 0;
-    virtual int exec(const char *query, int length, bool getLastInsertId = false) = 0;
-    
+    virtual zmm::Ref<SQLResult> select(const char* query, int length) = 0;
+    virtual int exec(const char* query, int length, bool getLastInsertId = false) = 0;
+
     void dbReady();
-    
+
     /* wrapper functions for select and exec */
     zmm::Ref<SQLResult> select(zmm::Ref<zmm::StringBuffer> buf)
-        { return select(buf->c_str(), buf->length()); }
+    {
+        return select(buf->c_str(), buf->length());
+    }
     int exec(zmm::Ref<zmm::StringBuffer> buf, bool getLastInsertId = false)
-        { return exec(buf->c_str(), buf->length(), getLastInsertId); }
-    
-    virtual void addObject(zmm::Ref<CdsObject> object, int *changedContainer) override;
-    virtual void updateObject(zmm::Ref<CdsObject> object, int *changedContainer) override;
-    
+    {
+        return exec(buf->c_str(), buf->length(), getLastInsertId);
+    }
+
+    virtual void addObject(zmm::Ref<CdsObject> object, int* changedContainer) override;
+    virtual void updateObject(zmm::Ref<CdsObject> object, int* changedContainer) override;
+
     virtual zmm::Ref<CdsObject> loadObject(int objectID) override;
     virtual int getChildCount(int contId, bool containers, bool items, bool hideFsRoot) override;
-    
+
     //virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param);
-    
+
     virtual std::shared_ptr<std::unordered_set<int> > getObjects(int parentID, bool withoutContainer) override;
-    
+
     virtual zmm::Ref<ChangedContainers> removeObject(int objectID, bool all) override;
     virtual zmm::Ref<ChangedContainers> removeObjects(std::shared_ptr<std::unordered_set<int> > list, bool all = false) override;
-    
+
     virtual zmm::Ref<CdsObject> loadObjectByServiceID(zmm::String serviceID) override;
     virtual zmm::Ref<zmm::IntArray> getServiceObjectIDs(char servicePrefix) override;
 
     virtual zmm::String findFolderImage(int id, zmm::String trackArtBase) override;
-    
+
     /* accounting methods */
     virtual int getTotalFiles() override;
-    
+
     virtual zmm::Ref<zmm::Array<CdsObject> > browse(zmm::Ref<BrowseParam> param) override;
     virtual zmm::Ref<zmm::Array<zmm::StringBase> > getMimeTypes() override;
-    
+
     //virtual zmm::Ref<CdsObject> findObjectByTitle(zmm::String title, int parentID);
     virtual zmm::Ref<CdsObject> findObjectByPath(zmm::String fullpath) override;
     virtual int findObjectIDByPath(zmm::String fullpath) override;
     virtual zmm::String incrementUpdateIDs(std::shared_ptr<std::unordered_set<int> > ids) override;
-    
+
     virtual zmm::String buildContainerPath(int parentID, zmm::String title) override;
-    virtual void addContainerChain(zmm::String path, zmm::String lastClass, int lastRefID, int *containerID, int *updateID, zmm::Ref<Dictionary> lastMetadata) override;
+    virtual void addContainerChain(zmm::String path, zmm::String lastClass, int lastRefID, int* containerID, int* updateID, zmm::Ref<Dictionary> lastMetadata) override;
     virtual zmm::String getInternalSetting(zmm::String key) override;
     virtual void storeInternalSetting(zmm::String key, zmm::String value) override = 0;
-    
+
     virtual void updateAutoscanPersistentList(scan_mode_t scanmode, zmm::Ref<AutoscanList> list) override;
     virtual zmm::Ref<AutoscanList> getAutoscanList(scan_mode_t scanmode) override;
     virtual void addAutoscanDirectory(zmm::Ref<AutoscanDirectory> adir) override;
@@ -140,30 +142,28 @@ public:
     virtual zmm::Ref<AutoscanDirectory> getAutoscanDirectory(int objectID) override;
     virtual int isAutoscanChild(int objectID) override;
     virtual void checkOverlappingAutoscans(zmm::Ref<AutoscanDirectory> adir) override;
-    
+
     virtual zmm::Ref<zmm::IntArray> getPathIDs(int objectID) override;
-    
+
     virtual void shutdown() override;
     virtual void shutdownDriver() = 0;
-    
-    virtual int ensurePathExistence(zmm::String path, int *changedContainer) override;
-    
+
+    virtual int ensurePathExistence(zmm::String path, int* changedContainer) override;
+
     virtual zmm::String getFsRootName() override;
-    
+
     virtual void clearFlagInDB(int flag) override;
 
 protected:
     SQLStorage();
     //virtual ~SQLStorage();
     virtual void init() override;
-    
+
     char table_quote_begin;
     char table_quote_end;
-    
+
 private:
-    
-    class ChangedContainersStr : public Object
-    {
+    class ChangedContainersStr : public Object {
     public:
         ChangedContainersStr()
         {
@@ -173,22 +173,21 @@ private:
         zmm::Ref<zmm::StringBuffer> upnp;
         zmm::Ref<zmm::StringBuffer> ui;
     };
-    
+
     zmm::String sql_query;
-    
+
     /* helper for createObjectFromRow() */
     zmm::String getRealLocation(int parentID, zmm::String location);
-    
+
     zmm::Ref<CdsObject> createObjectFromRow(zmm::Ref<SQLRow> row);
-    
-    /* helper for findObjectByPath and findObjectIDByPath */ 
+
+    /* helper for findObjectByPath and findObjectIDByPath */
     zmm::Ref<CdsObject> _findObjectByPath(zmm::String fullpath);
-    
-    int _ensurePathExistence(zmm::String path, int *changedContainer);
-    
+
+    int _ensurePathExistence(zmm::String path, int* changedContainer);
+
     /* helper class and helper function for addObject and updateObject */
-    class AddUpdateTable : public Object
-    {
+    class AddUpdateTable : public Object {
     public:
         AddUpdateTable(zmm::String table, zmm::Ref<Dictionary> dict)
         {
@@ -201,54 +200,54 @@ private:
         zmm::String table;
         zmm::Ref<Dictionary> dict;
     };
-    zmm::Ref<zmm::Array<AddUpdateTable> > _addUpdateObject(zmm::Ref<CdsObject> obj, bool isUpdate, int *changedContainer);
-    
+    zmm::Ref<zmm::Array<AddUpdateTable> > _addUpdateObject(zmm::Ref<CdsObject> obj, bool isUpdate, int* changedContainer);
+
     /* helper for removeObject(s) */
     void _removeObjects(zmm::Ref<zmm::StringBuffer> objectIDs, int offset);
     zmm::Ref<ChangedContainersStr> _recursiveRemove(zmm::Ref<zmm::StringBuffer> items, zmm::Ref<zmm::StringBuffer> containers, bool all);
-    
+
     virtual zmm::Ref<ChangedContainers> _purgeEmptyContainers(zmm::Ref<ChangedContainersStr> changedContainersStr);
-    
+
     /* helpers for autoscan */
     int _getAutoscanObjectID(int autoscanID);
     void _autoscanChangePersistentFlag(int objectID, bool persistent);
     zmm::Ref<AutoscanDirectory> _fillAutoscanDirectory(zmm::Ref<SQLRow> row);
     int _getAutoscanDirectoryInfo(int objectID, zmm::String field);
     zmm::Ref<zmm::IntArray> _checkOverlappingAutoscans(zmm::Ref<AutoscanDirectory> adir);
-    
+
     /* location hash helpers */
     zmm::String addLocationPrefix(char prefix, zmm::String path);
     zmm::String stripLocationPrefix(char* prefix, zmm::String path);
     zmm::String stripLocationPrefix(zmm::String path);
-    
+
     zmm::Ref<CdsObject> checkRefID(zmm::Ref<CdsObject> obj);
     int createContainer(int parentID, zmm::String name, zmm::String path, bool isVirtual, zmm::String upnpClass, int refID, zmm::Ref<Dictionary> lastMetadata);
 
     zmm::String mapBool(bool val) { return quote((val ? 1 : 0)); }
     bool remapBool(zmm::String field) { return (string_ok(field) && field == "1"); }
-    
+
     void setFsRootName(zmm::String rootName = nullptr);
-    
+
     zmm::String fsRootName;
-    
+
     int lastID;
-    
+
     int getNextID();
     void loadLastID();
     std::mutex nextIDMutex;
-    
+
     zmm::Ref<StorageCache> cache;
     inline bool cacheOn() { return cache != nullptr; }
     void addObjectToCache(zmm::Ref<CdsObject> object, bool dontLock = false);
-    
+
     inline bool doInsertBuffering() { return insertBufferOn; }
     void addToInsertBuffer(zmm::Ref<zmm::StringBuffer> query);
     void flushInsertBuffer(bool dontLock = false);
-    
+
     /* insert buffer functions to be overridden by implementing classes */
     virtual void _addToInsertBuffer(zmm::Ref<zmm::StringBuffer> query) = 0;
     virtual void _flushInsertBuffer() = 0;
-    
+
     bool insertBufferOn;
     bool insertBufferEmpty;
     int insertBufferStatementCount;

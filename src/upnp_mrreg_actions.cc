@@ -31,9 +31,9 @@
 
 #if defined(ENABLE_MRREG)
 
+#include "storage.h"
 #include "tools.h"
 #include "upnp_mrreg.h"
-#include "storage.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -46,9 +46,9 @@ void MRRegistrarService::upnp_action_IsAuthorized(Ref<ActionRequest> request)
     response = UpnpXML_CreateResponse(request->getActionName(), serviceType);
     response->appendTextChild(_("Result"), _("1"));
 
-    request->setResponse(response); 
-    request->setErrorCode(UPNP_E_SUCCESS);    
-   
+    request->setResponse(response);
+    request->setErrorCode(UPNP_E_SUCCESS);
+
     log_debug("end\n");
 }
 
@@ -64,14 +64,14 @@ void MRRegistrarService::upnp_action_RegisterDevice(Ref<ActionRequest> request)
 void MRRegistrarService::upnp_action_IsValidated(Ref<ActionRequest> request)
 {
     log_debug("start\n");
- 
+
     Ref<Element> response;
     response = UpnpXML_CreateResponse(request->getActionName(), serviceType);
     response->appendTextChild(_("Result"), _("1"));
 
-    request->setResponse(response); 
-    request->setErrorCode(UPNP_E_SUCCESS);    
-    
+    request->setResponse(response);
+    request->setErrorCode(UPNP_E_SUCCESS);
+
     log_debug("end\n");
 }
 
@@ -79,28 +79,20 @@ void MRRegistrarService::process_action_request(Ref<ActionRequest> request)
 {
     log_debug("start\n");
 
-    if (request->getActionName() == "IsAuthorized")
-    {
+    if (request->getActionName() == "IsAuthorized") {
         upnp_action_IsAuthorized(request);
-    }
-    else if (request->getActionName() == "RegisterDevice")
-    {
+    } else if (request->getActionName() == "RegisterDevice") {
         upnp_action_RegisterDevice(request);
-    }
-    else if (request->getActionName() == "IsValidated")
-    {
+    } else if (request->getActionName() == "IsValidated") {
         upnp_action_IsValidated(request);
-    }
-    else
-    {
+    } else {
         // invalid or unsupported action
         log_debug("unrecognized action %s\n", request->getActionName().c_str());
         request->setErrorCode(UPNP_E_INVALID_ACTION);
         //throw UpnpException(UPNP_E_INVALID_ACTION, _("unrecognized action"));
     }
-    
-    log_debug("end\n");
 
+    log_debug("end\n");
 }
 
 #endif // ENABLE_MRREG

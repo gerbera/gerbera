@@ -35,15 +35,13 @@
 #include "common.h"
 #include "transcode_handler.h"
 
-class TranscodeDispatcher : public TranscodeHandler
-{
+class TranscodeDispatcher : public TranscodeHandler {
 public:
     TranscodeDispatcher();
-    virtual zmm::Ref<IOHandler> open(zmm::Ref<TranscodingProfile> profile, 
-                                     zmm::String location,
-                                     zmm::Ref<CdsObject> obj,
-                                     zmm::String range);
+    virtual zmm::Ref<IOHandler> open(zmm::Ref<TranscodingProfile> profile,
+        zmm::String location,
+        zmm::Ref<CdsObject> obj,
+        zmm::String range);
 };
-
 
 #endif // __TRANSCODE_DISPATCHER_H__

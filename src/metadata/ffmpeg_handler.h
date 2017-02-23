@@ -32,7 +32,7 @@
 */
 
 /// \file ffmpeg_handler.h
-/// \brief Definition of the FfmpegHandler class - getting metadata via 
+/// \brief Definition of the FfmpegHandler class - getting metadata via
 /// ffmpeg library calls.
 
 #ifndef __FFMPEG_HANDLER_H__
@@ -41,13 +41,12 @@
 #include "metadata_handler.h"
 
 /// \brief This class is responsible for reading id3 tags metadata
-class FfmpegHandler : public MetadataHandler
-{
+class FfmpegHandler : public MetadataHandler {
 public:
     FfmpegHandler();
     virtual void fillMetadata(zmm::Ref<CdsItem> item);
-    virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum, off_t *data_size);
+    virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum, off_t* data_size);
     virtual zmm::String getMimeType();
 };
 
-#endif//__FFMPEG_HANDLER_H__
+#endif //__FFMPEG_HANDLER_H__

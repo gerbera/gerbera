@@ -37,7 +37,8 @@ using namespace zmm;
 String ContentDirectoryService::serviceType = nullptr;
 String ContentDirectoryService::serviceID = nullptr;
 
-ContentDirectoryService::ContentDirectoryService() : Singleton<ContentDirectoryService>()
+ContentDirectoryService::ContentDirectoryService()
+    : Singleton<ContentDirectoryService>()
 {
     if (serviceType == nullptr || serviceID == nullptr)
         throw _Exception(_("serviceType or serviceID not set!"));

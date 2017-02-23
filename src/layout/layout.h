@@ -34,8 +34,7 @@
 
 #include "cds_objects.h"
 
-class Layout : public zmm::Object
-{
+class Layout : public zmm::Object {
 public:
     virtual void processCdsObject(zmm::Ref<CdsObject> obj, zmm::String rootpath) = 0;
 };

@@ -38,20 +38,19 @@
 #define IOHC_WRITE_ERROR 4
 #define IOHC_EXCEPTION 5
 
-
 #include "thread_executor.h"
 
 /// \brief gets a reader and writer fd, where input is assumed to be an
 /// an MPEG PS stream, strips out unwanted streams and writes the remuxed
 /// result to the output fd. Uses blocking read/write operations.
 
-class MPEGRemuxProcessor : public ThreadExecutor
-{
+class MPEGRemuxProcessor : public ThreadExecutor {
 public:
     MPEGRemuxProcessor(int in_fd, int out_fd, unsigned char keep_audio_id);
     virtual int getStatus() { return status; }
 protected:
     virtual void threadProc();
+
 private:
     int status;
     int in_fd;

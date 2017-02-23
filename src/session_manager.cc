@@ -32,26 +32,27 @@
 #include <memory>
 #include <unordered_set>
 
-#include "session_manager.h"
 #include "config_manager.h"
-#include "tools.h"
-#include "tools.h"
+#include "session_manager.h"
 #include "timer.h"
+#include "tools.h"
+#include "tools.h"
 
-#define UI_UPDATE_ID_HASH_SIZE  61
-#define MAX_UI_UPDATE_IDS       10
+#define UI_UPDATE_ID_HASH_SIZE 61
+#define MAX_UI_UPDATE_IDS 10
 
 using namespace zmm;
 using namespace mxml;
 using namespace std;
 
-Session::Session(long timeout) : Dictionary_r()
+Session::Session(long timeout)
+    : Dictionary_r()
 {
     this->timeout = timeout;
     loggedIn = false;
     sessionID = nullptr;
-    uiUpdateIDs = make_shared<unordered_set<int>>();
-        //(new DBRHash<int>(UI_UPDATE_ID_HASH_SIZE, MAX_UI_UPDATE_IDS + 5, INVALID_OBJECT_ID, INVALID_OBJECT_ID_2));
+    uiUpdateIDs = make_shared<unordered_set<int> >();
+    //(new DBRHash<int>(UI_UPDATE_ID_HASH_SIZE, MAX_UI_UPDATE_IDS + 5, INVALID_OBJECT_ID, INVALID_OBJECT_ID_2));
     updateAll = false;
     access();
 }
@@ -60,17 +61,13 @@ void Session::containerChangedUI(int objectID)
 {
     if (objectID == INVALID_OBJECT_ID)
         return;
-    if (! updateAll)
-    {
+    if (!updateAll) {
         AutoLock lock(mutex);
-        if (! updateAll)
-        {
-            if (uiUpdateIDs->size() >= MAX_UI_UPDATE_IDS)
-            {
+        if (!updateAll) {
+            if (uiUpdateIDs->size() >= MAX_UI_UPDATE_IDS) {
                 updateAll = true;
                 uiUpdateIDs->clear();
-            }
-            else
+            } else
                 uiUpdateIDs->insert(objectID);
         }
     }
@@ -86,25 +83,22 @@ void Session::containerChangedUI(Ref<IntArray> objectIDs)
     AutoLock lock(mutex);
     if (updateAll)
         return;
-    if (uiUpdateIDs->size() + arSize >= MAX_UI_UPDATE_IDS)
-    {
+    if (uiUpdateIDs->size() + arSize >= MAX_UI_UPDATE_IDS) {
         updateAll = true;
         uiUpdateIDs->clear();
         return;
     }
-    for (int i = 0; i < arSize; i++)
-    {
+    for (int i = 0; i < arSize; i++) {
         uiUpdateIDs->insert(objectIDs->get(i));
     }
 }
 
 String Session::getUIUpdateIDs()
 {
-    if (! hasUIUpdateIDs())
+    if (!hasUIUpdateIDs())
         return nullptr;
     AutoLock lock(mutex);
-    if (updateAll)
-    {
+    if (updateAll) {
         updateAll = false;
         return _("all");
     }
@@ -143,17 +137,15 @@ Ref<Session> SessionManager::createSession(long timeout)
 {
     Ref<Session> newSession(new Session(timeout));
     AutoLock lock(mutex);
-    
-    int count=0;
+
+    int count = 0;
     String sessionID;
-    do
-    {
+    do {
         sessionID = generate_random_id();
         if (count++ > 100)
             throw _Exception(_("There seems to be something wrong with the random numbers. I tried to get a unique id 100 times and failed. last sessionID: ") + sessionID);
-    }
-    while(getSession(sessionID, false) != nullptr); // for the rare case, where we get a random id, that is already taken
-    
+    } while (getSession(sessionID, false) != nullptr); // for the rare case, where we get a random id, that is already taken
+
     newSession->setID(sessionID);
     sessions->append(newSession);
     checkTimer();
@@ -165,8 +157,7 @@ Ref<Session> SessionManager::getSession(String sessionID, bool doLock)
     unique_lock<decltype(mutex)> lock(mutex, std::defer_lock);
     if (doLock)
         lock.lock();
-    for (int i = 0; i < sessions->size(); i++)
-    {
+    for (int i = 0; i < sessions->size(); i++) {
         Ref<Session> s = sessions->get(i);
         if (s->getID() == sessionID)
             return s;
@@ -177,11 +168,9 @@ Ref<Session> SessionManager::getSession(String sessionID, bool doLock)
 void SessionManager::removeSession(String sessionID)
 {
     AutoLock lock(mutex);
-    for (int i = 0; i < sessions->size(); i++)
-    {
+    for (int i = 0; i < sessions->size(); i++) {
         Ref<Session> s = sessions->get(i);
-        if (s->getID() == sessionID)
-        {
+        if (s->getID() == sessionID) {
             sessions->remove(i);
             checkTimer();
             i--; // to not skip a session. the removed id is now taken by another session
@@ -192,8 +181,7 @@ void SessionManager::removeSession(String sessionID)
 
 String SessionManager::getUserPassword(String user)
 {
-    if (accounts == nullptr)
-    {
+    if (accounts == nullptr) {
         return nullptr;
     }
     return accounts->get(user);
@@ -205,8 +193,7 @@ void SessionManager::containerChangedUI(int objectID)
         return;
     AutoLock lock(mutex);
     int sesSize = sessions->size();
-    for (int i = 0; i < sesSize; i++)
-    {
+    for (int i = 0; i < sesSize; i++) {
         Ref<Session> session = sessions->get(i);
         if (session->isLoggedIn())
             session->containerChangedUI(objectID);
@@ -219,8 +206,7 @@ void SessionManager::containerChangedUI(Ref<IntArray> objectIDs)
         return;
     AutoLock lock(mutex);
     int sesSize = sessions->size();
-    for (int i = 0; i < sesSize; i++)
-    {
+    for (int i = 0; i < sesSize; i++) {
         Ref<Session> session = sessions->get(i);
         if (session->isLoggedIn())
             session->containerChangedUI(objectIDs);
@@ -229,13 +215,10 @@ void SessionManager::containerChangedUI(Ref<IntArray> objectIDs)
 
 void SessionManager::checkTimer()
 {
-    if (sessions->size() > 0 && ! timerAdded)
-    {
+    if (sessions->size() > 0 && !timerAdded) {
         Timer::getInstance()->addTimerSubscriber(this, SESSION_TIMEOUT_CHECK_INTERVAL);
         timerAdded = true;
-    }
-    else if (sessions->size() <= 0 && timerAdded)
-    {
+    } else if (sessions->size() <= 0 && timerAdded) {
         Timer::getInstance()->removeTimerSubscriber(this);
         timerAdded = false;
     }
@@ -247,11 +230,9 @@ void SessionManager::timerNotify(Ref<Object> parameter)
     AutoLock lock(mutex);
     struct timespec now;
     getTimespecNow(&now);
-    for (int i = 0; i < sessions->size(); i++)
-    {
+    for (int i = 0; i < sessions->size(); i++) {
         Ref<Session> session = sessions->get(i);
-        if (getDeltaMillis(session->getLastAccessTime(), &now) > 1000 * session->getTimeout())
-        {
+        if (getDeltaMillis(session->getLastAccessTime(), &now) > 1000 * session->getTimeout()) {
             log_debug("session timeout: %s - diff: %ld\n", session->getID().c_str(), getDeltaMillis(session->getLastAccessTime(), &now));
             sessions->remove(i);
             checkTimer();

@@ -34,16 +34,15 @@
 
 #include "zmm/zmmf.h"
 
-namespace mxml
-{
+namespace mxml {
 
-class Context : public zmm::Object
-{
+class Context : public zmm::Object {
 public:
     zmm::Ref<Context> parent;
     zmm::String location;
     int line;
     int col;
+
 public:
     Context(zmm::String location);
     Context();

@@ -33,14 +33,13 @@
 #define __PROCESS_IO_HANDLER_H__
 
 #include "common.h"
-#include "io_handler.h"
 #include "executor.h"
+#include "io_handler.h"
 
 #define FIFO_READ_TIMEOUT 2
 #define FIFO_WRITE_TIMEOUT 2
 
-class ProcListItem : public zmm::Object
-{
+class ProcListItem : public zmm::Object {
 public:
     ProcListItem(zmm::Ref<Executor> exec, bool abortOnDeath = false);
     zmm::Ref<Executor> getExecutor();
@@ -52,30 +51,29 @@ protected:
 };
 
 /// \brief Allows the web server to read from a fifo.
-class ProcessIOHandler : public IOHandler
-{
+class ProcessIOHandler : public IOHandler {
 public:
     /// \brief Sets the filename to work with.
     /// \param filename to read the data from
     /// \param proclist associated processes that will be terminated once
     /// they are no longer needed
     ProcessIOHandler(zmm::String filename, zmm::Ref<Executor> main_proc,
-                     zmm::Ref<zmm::Array<ProcListItem> > proclist = nullptr,
-                     bool ignoreSeek = false);
-    
+        zmm::Ref<zmm::Array<ProcListItem> > proclist = nullptr,
+        bool ignoreSeek = false);
+
     /// \brief Opens file for reading (writing is not supported)
     virtual void open(IN enum UpnpOpenFileMode mode);
 
     /// \brief Reads a previously opened file sequentially.
     /// \param buf Data from the file will be copied into this buffer.
     /// \param length Number of bytes to be copied into the buffer.
-    virtual int read(OUT char *buf, IN size_t length);
+    virtual int read(OUT char* buf, IN size_t length);
 
     /// \brief Writes to a previously opened file.
     /// \param buf Data from the buffer will be written to the file.
     /// \param length Number of bytes to be written from the buffer.
     /// \return number of bytes written.
-    virtual int write(OUT char *buf, IN size_t length);
+    virtual int write(OUT char* buf, IN size_t length);
 
     /// \brief Performs seek on an open file.
     /// \param offset Number of bytes to move in the file. For seeking forwards
@@ -85,7 +83,6 @@ public:
     /// to current position, SEEK_END to move relative to the end of file,
     /// SEEK_SET to specify an absolute offset.
     virtual void seek(IN off_t offset, IN int whence);
-
 
     /// \brief Close a previously opened file and kills the kill_pid process
     virtual void close();
@@ -108,12 +105,10 @@ protected:
     /// \brief if this flag is set seek on a fifo will not return an error
     bool ignore_seek;
 
-
     bool abort();
     void killall();
     void registerAll();
     void unregisterAll();
 };
-
 
 #endif // __PROCESS_IO_HANDLER_H__

@@ -38,10 +38,10 @@
 
 #ifdef HAVE_INOTIFY
 
+#include <cassert>
+#include <cerrno>
 #include <sys/ioctl.h>
 #include <unistd.h>
-#include <cerrno>
-#include <cassert>
 
 #include "mt_inotify.h"
 #include "tools.h"
@@ -58,7 +58,7 @@ Inotify::Inotify()
         throw _Exception(_("Unable to initialize inotify!\n"));
 
     if (pipe(stop_fds_pipe) < 0)
-        throw _Exception(_("Unable to create pipe!\n")); 
+        throw _Exception(_("Unable to create pipe!\n"));
 
     stop_fd_read = stop_fds_pipe[0];
     stop_fd_write = stop_fds_pipe[1];
@@ -75,8 +75,7 @@ bool Inotify::supported()
     int test_fd = inotify_init();
     if (test_fd < 0)
         return false;
-    else
-    {
+    else {
         close(test_fd);
         return true;
     }
@@ -85,16 +84,13 @@ bool Inotify::supported()
 int Inotify::addWatch(String path, int events)
 {
     int wd = inotify_add_watch(inotify_fd, path.c_str(), events);
-    if (wd < 0 && errno != ENOENT)
-    {
+    if (wd < 0 && errno != ENOENT) {
         if (errno == ENOSPC)
             throw _Exception(_("The user limit on the total number of inotify watches was reached or the kernel failed to allocate a needed resource."));
-        else if (errno == EACCES)
-        {
+        else if (errno == EACCES) {
             log_warning("Cannot add inotify watch for %s: %s\n", path.c_str(), strerror(errno));
             return -1;
-        }
-        else
+        } else
             throw _Exception(mt_strerror(errno));
     }
     return wd;
@@ -102,54 +98,50 @@ int Inotify::addWatch(String path, int events)
 
 void Inotify::removeWatch(int wd)
 {
-    if (inotify_rm_watch(inotify_fd, wd) < 0)
-    {
+    if (inotify_rm_watch(inotify_fd, wd) < 0) {
         log_debug("Error removing watch: %s\n", strerror(errno));
     }
 }
 
-struct inotify_event *Inotify::nextEvent()
+struct inotify_event* Inotify::nextEvent()
 {
     static struct inotify_event event[MAX_EVENTS];
-    static struct inotify_event * ret;
+    static struct inotify_event* ret;
     static int first_byte = 0;
-    static ssize_t bytes; 
+    static ssize_t bytes;
 
     int fd_max;
 
     // first_byte is index into event buffer
-    if ( first_byte != 0
-            && first_byte <= (int)(bytes - sizeof(struct inotify_event)) ) {
+    if (first_byte != 0
+        && first_byte <= (int)(bytes - sizeof(struct inotify_event))) {
 
-        ret = (struct inotify_event *)((char *)&event[0] + first_byte);
+        ret = (struct inotify_event*)((char*)&event[0] + first_byte);
         first_byte += sizeof(struct inotify_event) + ret->len;
 
         // if the pointer to the next event exactly hits end of bytes read,
         // that's good.  next time we're called, we'll read.
-        if ( first_byte == bytes ) {
+        if (first_byte == bytes) {
             first_byte = 0;
-        }
-        else if ( first_byte > bytes ) {
+        } else if (first_byte > bytes) {
             // oh... no.  this can't be happening.  An incomplete event.
             // Copy what we currently have into first element, call self to
             // read remainder.
             // oh, and they BETTER NOT overlap.
             // Boy I hope this code works.
             // But I think this can never happen due to how inotify is written.
-            assert( (long)((char *)&event[0] +
-                        sizeof(struct inotify_event) +
-                        event[0].len) <= (long)ret);
+            assert((long)((char*)&event[0] + sizeof(struct inotify_event) + event[0].len) <= (long)ret);
 
             // how much of the event do we have?
-            bytes = (char *)&event[0] + bytes - (char *)ret;
-            memcpy( &event[0], ret, bytes );
+            bytes = (char*)&event[0] + bytes - (char*)ret;
+            memcpy(&event[0], ret, bytes);
             return nextEvent();
         }
         return ret;
 
     }
 
-    else if ( first_byte == 0 ) {
+    else if (first_byte == 0) {
         bytes = 0;
     }
 
@@ -159,84 +151,77 @@ struct inotify_event *Inotify::nextEvent()
     static fd_set read_fds;
 
     FD_ZERO(&read_fds);
- 
+
     FD_SET(inotify_fd, &read_fds);
 
     fd_max = inotify_fd;
 
     FD_SET(stop_fd_read, &read_fds);
 
-    if (stop_fd_read >fd_max)
+    if (stop_fd_read > fd_max)
         fd_max = stop_fd_read;
 
     rc = select(fd_max + 1, &read_fds,
-            nullptr, nullptr, nullptr);
-    if ( rc < 0 ) {
+        nullptr, nullptr, nullptr);
+    if (rc < 0) {
         return nullptr;
-    }
-    else if ( rc == 0 ) {
+    } else if (rc == 0) {
         // timeout
         return nullptr;
     }
 
-    if (FD_ISSET(stop_fd_read, &read_fds))
-    {
+    if (FD_ISSET(stop_fd_read, &read_fds)) {
         char buf;
-        if (read(stop_fd_read, &buf, 1) == -1)
-        {
+        if (read(stop_fd_read, &buf, 1) == -1) {
             log_error("Inotify: could not read stop: %s\n",
-                      mt_strerror(errno).c_str());
+                mt_strerror(errno).c_str());
         }
     }
 
-    if (FD_ISSET(inotify_fd, &read_fds))
-    {
+    if (FD_ISSET(inotify_fd, &read_fds)) {
 
         // wait until we have enough bytes to read
         do {
-            rc = ioctl( inotify_fd, FIONREAD, &bytes_to_read );
-        } while ( !rc &&
-                bytes_to_read < sizeof(struct inotify_event));
+            rc = ioctl(inotify_fd, FIONREAD, &bytes_to_read);
+        } while (!rc && bytes_to_read < sizeof(struct inotify_event));
 
-        if ( rc == -1 ) {
+        if (rc == -1) {
             return nullptr;
         }
 
         this_bytes = read(inotify_fd, &event[0] + bytes,
-                sizeof(struct inotify_event)*MAX_EVENTS - bytes);
-        if ( this_bytes < 0 ) {
+            sizeof(struct inotify_event) * MAX_EVENTS - bytes);
+        if (this_bytes < 0) {
             return nullptr;
         }
-        if ( this_bytes == 0 ) {
+        if (this_bytes == 0) {
             log_error("Inotify reported end-of-file.  Possibly too many "
-                    "events occurred at once.\n");
+                      "events occurred at once.\n");
             return nullptr;
         }
         bytes += this_bytes;
 
         ret = &event[0];
         first_byte = sizeof(struct inotify_event) + ret->len;
-        assert( first_byte <= bytes);
+        assert(first_byte <= bytes);
 
-        if ( first_byte == bytes ) {
+        if (first_byte == bytes) {
             first_byte = 0;
         }
-        
+
         return ret;
     }
 
     return nullptr;
 }
 
-
 void Inotify::stop()
 {
     char stop = 's';
-    if (write(stop_fd_write, &stop, 1) == -1)
-    {
+    if (write(stop_fd_write, &stop, 1) == -1) {
         log_error("Inotify: could not send stop: %s\n",
-                  mt_strerror(errno).c_str());
+            mt_strerror(errno).c_str());
     }
 }
 
-#endif//HAVE_INOTIFY
+#endif //HAVE_INOTIFY

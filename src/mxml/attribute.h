@@ -32,18 +32,17 @@
 #ifndef __MXML_ATTRIBUTE_H__
 #define __MXML_ATTRIBUTE_H__
 
-#include "zmm/zmmf.h"
 #include "mxml.h"
+#include "zmm/zmmf.h"
 
-namespace mxml
-{
+namespace mxml {
 
-class Attribute : public zmm::Object
-{
+class Attribute : public zmm::Object {
 public:
     zmm::String name;
     zmm::String value;
     enum mxml_value_type vtype;
+
 public:
     Attribute(zmm::String name);
     Attribute(zmm::String name, zmm::String value);
@@ -52,7 +51,6 @@ public:
     inline enum mxml_value_type getVType() { return this->vtype; };
     inline void setVType(enum mxml_value_type vtype) { this->vtype = vtype; };
 };
-
 }
 
 #endif // __MXML_ATTRIBUTE_H__

@@ -34,11 +34,11 @@
 #include "buffered_io_handler.h"
 #include "tools.h"
 
-
 using namespace zmm;
 using namespace std;
 
-BufferedIOHandler::BufferedIOHandler(Ref<IOHandler> underlyingHandler, size_t bufSize, size_t maxChunkSize, size_t initialFillSize) : IOHandlerBufferHelper(bufSize, initialFillSize)
+BufferedIOHandler::BufferedIOHandler(Ref<IOHandler> underlyingHandler, size_t bufSize, size_t maxChunkSize, size_t initialFillSize)
+    : IOHandlerBufferHelper(bufSize, initialFillSize)
 {
     if (underlyingHandler == nullptr)
         throw _Exception(_("underlyingHandler must not be nullptr"));
@@ -46,7 +46,7 @@ BufferedIOHandler::BufferedIOHandler(Ref<IOHandler> underlyingHandler, size_t bu
         throw _Exception(_("maxChunkSize must be positive"));
     this->underlyingHandler = underlyingHandler;
     this->maxChunkSize = maxChunkSize;
-    
+
     // test it first!
     //seekEnabled = true;
 }
@@ -69,25 +69,22 @@ void BufferedIOHandler::threadProc()
 {
     int readBytes;
     size_t maxWrite;
-    
+
 #ifdef TOMBDEBUG
     struct timespec last_log;
     bool first_log = true;
 #endif
-    
+
     unique_lock<std::mutex> lock(mutex);
-    do
-    {
-        
+    do {
+
 #ifdef TOMBDEBUG
-        if (first_log || getDeltaMillis(&last_log) > 1000)
-        {
+        if (first_log || getDeltaMillis(&last_log) > 1000) {
             if (first_log)
                 first_log = false;
             getTimespecNow(&last_log);
             float percentFillLevel = 0;
-            if (! empty)
-            {
+            if (!empty) {
                 int currentFillSize = b - a;
                 if (currentFillSize <= 0)
                     currentFillSize += bufSize;
@@ -98,110 +95,87 @@ void BufferedIOHandler::threadProc()
 #endif
         if (empty)
             a = b = 0;
-        
-        if (doSeek && ! empty && 
-                (
-                    seekWhence == SEEK_SET ||
-                    (seekWhence == SEEK_CUR && seekOffset > 0)
-                )
-            )
-        {
+
+        if (doSeek && !empty && (seekWhence == SEEK_SET || (seekWhence == SEEK_CUR && seekOffset > 0))) {
             int currentFillSize = b - a;
             if (currentFillSize <= 0)
                 currentFillSize += bufSize;
-            
+
             int relSeek = seekOffset;
             if (seekWhence == SEEK_SET)
                 relSeek -= posRead;
-            
-            if (relSeek <= currentFillSize)
-            { // we have everything we need in the buffer already
+
+            if (relSeek <= currentFillSize) { // we have everything we need in the buffer already
                 a += relSeek;
                 posRead += relSeek;
                 if (a >= bufSize)
                     a -= bufSize;
-                if (a == b)
-                {
+                if (a == b) {
                     empty = true;
                     a = b = 0;
                 }
-                
+
                 /// \todo do we need to wait for initialFillSize again?
-                
+
                 doSeek = false;
                 cond.notify_one();
             }
         }
-        
+
         // note: seeking could be optimized some more (backward seeking)
         // but this should suffice for now
-        
-        if (doSeek)
-        { // seek not been processed yet
-            try
-            {
+
+        if (doSeek) { // seek not been processed yet
+            try {
                 underlyingHandler->seek(seekOffset, seekWhence);
                 empty = true;
                 a = b = 0;
-            }
-            catch (const Exception & e)
-            {
+            } catch (const Exception& e) {
                 log_error("Error while seeking in buffer: %s\n", e.getMessage().c_str());
                 e.printStackTrace();
             }
-            
+
             /// \todo should we do that?
             waitForInitialFillSize = (initialFillSize > 0);
-            
+
             doSeek = false;
             cond.notify_one();
         }
-        
+
         maxWrite = (empty ? bufSize : (a < b ? bufSize - b : a - b));
-        if (maxWrite == 0)
-        {
+        if (maxWrite == 0) {
             cond.wait(lock);
-        }
-        else
-        {
+        } else {
             lock.unlock();
             size_t chunkSize = (maxChunkSize > maxWrite ? maxWrite : maxChunkSize);
             readBytes = underlyingHandler->read(buffer + b, chunkSize);
             lock.lock();
-            if (readBytes > 0)
-            {
+            if (readBytes > 0) {
                 b += readBytes;
                 assert(b <= bufSize);
                 if (b == bufSize)
                     b = 0;
-                if (empty)
-                {
+                if (empty) {
                     empty = false;
                     cond.notify_one();
                 }
-                if (waitForInitialFillSize)
-                {
+                if (waitForInitialFillSize) {
                     int currentFillSize = b - a;
                     if (currentFillSize <= 0)
                         currentFillSize += bufSize;
-                    if ((size_t)currentFillSize >= initialFillSize)
-                    {
+                    if ((size_t)currentFillSize >= initialFillSize) {
                         log_debug("buffer: initial fillsize reached\n");
                         waitForInitialFillSize = false;
                         cond.notify_one();
                     }
                 }
-            }
-            else if (readBytes == CHECK_SOCKET)
-            {
+            } else if (readBytes == CHECK_SOCKET) {
                 checkSocket = true;
                 cond.notify_one();
             }
         }
-    }
-    while((maxWrite == 0 || readBytes > 0 || readBytes == CHECK_SOCKET) && ! threadShutdown);
-    if (! threadShutdown)
-    {
+    } while ((maxWrite == 0 || readBytes > 0 || readBytes == CHECK_SOCKET) && !threadShutdown);
+    if (!threadShutdown) {
         if (readBytes == 0)
             eof = true;
         if (readBytes < 0)

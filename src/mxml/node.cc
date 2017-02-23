@@ -46,26 +46,31 @@ String Node::print()
 String Node::escape(String str)
 {
     Ref<StringBuffer> buf(new StringBuffer(str.length()));
-    signed char *ptr = (signed char *)str.c_str();
-    while (ptr && *ptr)
-    {
-        switch (*ptr)
-        {
-            case '<' : *buf << "&lt;"; break;
-            case '>' : *buf << "&gt;"; break;
-            case '&' : *buf << "&amp;"; break;
-            case '"' : *buf << "&quot;"; break;
-            case '\'' : *buf << "&apos;"; break;
-                       // handle control codes
-            default  : if (((*ptr >= 0x00) && (*ptr <= 0x1f) && 
-                            (*ptr != 0x09) && (*ptr != 0x0d) && 
-                            (*ptr != 0x0a)) || (*ptr == 0x7f))
-                       {
-                           *buf << '.';
-                       }
-                       else
-                           *buf << *ptr;
-                       break;
+    signed char* ptr = (signed char*)str.c_str();
+    while (ptr && *ptr) {
+        switch (*ptr) {
+        case '<':
+            *buf << "&lt;";
+            break;
+        case '>':
+            *buf << "&gt;";
+            break;
+        case '&':
+            *buf << "&amp;";
+            break;
+        case '"':
+            *buf << "&quot;";
+            break;
+        case '\'':
+            *buf << "&apos;";
+            break;
+        // handle control codes
+        default:
+            if (((*ptr >= 0x00) && (*ptr <= 0x1f) && (*ptr != 0x09) && (*ptr != 0x0d) && (*ptr != 0x0a)) || (*ptr == 0x7f)) {
+                *buf << '.';
+            } else
+                *buf << *ptr;
+            break;
         }
         ptr++;
     }

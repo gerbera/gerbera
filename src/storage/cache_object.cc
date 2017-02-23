@@ -29,8 +29,8 @@
 
 /// \file cache_object.cc
 
-#include "../common.h"
 #include "cache_object.h"
+#include "../common.h"
 
 using namespace zmm;
 
@@ -48,7 +48,6 @@ CacheObject::CacheObject()
     knowVirtualObj = false;
 }
 
-
 void CacheObject::setObject(Ref<CdsObject> obj)
 {
     Ref<CdsObject> nObj = CdsObject::createObject(obj->getObjectType());
@@ -57,16 +56,13 @@ void CacheObject::setObject(Ref<CdsObject> obj)
     setParentID(nObj->getParentID());
     setRefID(nObj->getRefID());
     setObjectType(nObj->getObjectType());
-    
+
     knowVirtualObj = true;
     setVirtual(nObj->isVirtual());
-    
-    if (IS_CDS_CONTAINER(objectType))
-    {
+
+    if (IS_CDS_CONTAINER(objectType)) {
         location = String(nObj->isVirtual() ? LOC_VIRT_PREFIX : LOC_FILE_PREFIX) + nObj->getLocation();
-    }
-    else if (IS_CDS_ITEM(objectType))
-    {
+    } else if (IS_CDS_ITEM(objectType)) {
         if (IS_CDS_PURE_ITEM(objectType))
             location = String(LOC_FILE_PREFIX) + nObj->getLocation();
     }

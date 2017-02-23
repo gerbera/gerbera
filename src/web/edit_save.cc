@@ -29,29 +29,31 @@
 
 /// \file edit_save.cc
 
-#include "pages.h"
-#include <cstdio>
 #include "content_manager.h"
+#include "dictionary.h"
+#include "pages.h"
 #include "storage.h"
 #include "tools.h"
-#include "dictionary.h"
+#include <cstdio>
 
 using namespace zmm;
 using namespace mxml;
 
-web::edit_save::edit_save() : WebRequestHandler()
-{}
+web::edit_save::edit_save()
+    : WebRequestHandler()
+{
+}
 
 void web::edit_save::process()
 {
     check_request();
-    
+
     String objID = param(_("object_id"));
     int objectID;
     if (!string_ok(objID))
         throw _Exception(_("invalid object id"));
     else
         objectID = objID.toInt();
-    
+
     ContentManager::getInstance()->updateObject(objectID, params);
 }

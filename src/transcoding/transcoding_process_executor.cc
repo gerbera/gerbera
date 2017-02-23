@@ -31,15 +31,13 @@
 
 #ifdef EXTERNAL_TRANSCODING
 
-#include <unistd.h>
 #include "transcoding_process_executor.h"
+#include <unistd.h>
 
 using namespace zmm;
 
-TranscodingProcessExecutor::TranscodingProcessExecutor(String command, Ref<Array<StringBase> > arglist) : ProcessExecutor(command, arglist)
-{
-};
-
+TranscodingProcessExecutor::TranscodingProcessExecutor(String command, Ref<Array<StringBase> > arglist)
+    : ProcessExecutor(command, arglist){};
 
 void TranscodingProcessExecutor::removeFile(String filename)
 {
@@ -53,14 +51,12 @@ TranscodingProcessExecutor::~TranscodingProcessExecutor()
 {
     kill();
 
-    if (file_list != nullptr)
-    {
-        for (int i = 0; i < file_list->size(); i++)
-        {
+    if (file_list != nullptr) {
+        for (int i = 0; i < file_list->size(); i++) {
             String name = file_list->get(i);
             unlink(name.c_str());
         }
     }
 }
 
-#endif//EXTERNAL TRANSCODING
+#endif //EXTERNAL TRANSCODING

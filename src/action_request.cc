@@ -34,7 +34,8 @@
 using namespace zmm;
 using namespace mxml;
 
-ActionRequest::ActionRequest(UpnpActionRequest *upnp_request) : Object()
+ActionRequest::ActionRequest(UpnpActionRequest* upnp_request)
+    : Object()
 {
     this->upnp_request = upnp_request;
 
@@ -46,7 +47,7 @@ ActionRequest::ActionRequest(UpnpActionRequest *upnp_request) : Object()
     DOMString cxml = ixmlPrintDocument(UpnpActionRequest_get_ActionRequest(upnp_request));
     String xml = cxml;
     ixmlFreeDOMString(cxml);
-   
+
     Ref<Parser> parser(new Parser());
 
     request = parser->parseString(xml)->getRoot();
@@ -80,41 +81,34 @@ void ActionRequest::setErrorCode(int errCode)
 
 void ActionRequest::update()
 {
-    if(response != nullptr)
-    {
+    if (response != nullptr) {
         String xml = response->print();
         int ret;
 
         log_debug("ActionRequest::update(): \n%s\n\n", xml.c_str());
 
-        IXML_Document *result = ixmlDocument_createDocument();
+        IXML_Document* result = ixmlDocument_createDocument();
         ret = ixmlParseBufferEx(xml.c_str(), &result);
 
-        if (ret != IXML_SUCCESS)
-        {
+        if (ret != IXML_SUCCESS) {
             log_error("ActionRequest::update(): could not convert to iXML\n");
             log_debug("Dump:\n%s\n", xml.c_str());
 
             UpnpActionRequest_set_ErrCode(upnp_request, UPNP_E_ACTION_FAILED);
-        } 
-        else
-        {
+        } else {
             log_debug("ActionRequest::update(): converted to iXML, code %d\n", errCode);
             UpnpActionRequest_set_ActionResult(upnp_request, result);
             UpnpActionRequest_set_ErrCode(upnp_request, errCode);
         }
-    }
-    else
-    {
+    } else {
         // ok, here there can be two cases
         // either the function below already did set an error code,
         // then we keep it
         // if it did not do so - we set an error code of our own
-        if (errCode == UPNP_E_SUCCESS) 
-        {
+        if (errCode == UPNP_E_SUCCESS) {
             UpnpActionRequest_set_ErrCode(upnp_request, UPNP_E_ACTION_FAILED);
         }
-        
+
         log_error("ActionRequest::update(): response is nullptr, code %d\n", errCode);
     }
 }

@@ -35,18 +35,16 @@
 #ifndef __SOPCAST_SERVICE_H__
 #define __SOPCAST_SERVICE_H__
 
-#include "zmm/zmm.h"
+#include "dictionary.h"
 #include "mxml/mxml.h"
 #include "online_service.h"
 #include "url.h"
-#include "dictionary.h"
+#include "zmm/zmm.h"
 #include <curl/curl.h>
-
 
 /// \brief This is an interface for all online services, the function
 /// handles adding/refreshing content in the database.
-class SopCastService : public OnlineService
-{
+class SopCastService : public OnlineService {
 public:
     SopCastService();
     ~SopCastService();
@@ -66,7 +64,7 @@ public:
 
 protected:
     // the handle *must never be used from multiple threads*
-    CURL *curl_handle;
+    CURL* curl_handle;
     // safeguard to ensure the above
     pthread_t pid;
 
@@ -77,6 +75,6 @@ protected:
     zmm::Ref<mxml::Element> getData();
 };
 
-#endif//__ONLINE_SERVICE_H__
+#endif //__ONLINE_SERVICE_H__
 
-#endif//SOPCAST
+#endif //SOPCAST

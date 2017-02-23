@@ -32,14 +32,13 @@
 #ifndef __FALLBACK_LAYOUT_H__
 #define __FALLBACK_LAYOUT_H__
 
-#include "layout.h"
 #include "../cds_objects.h"
+#include "layout.h"
 
 #ifdef ENABLE_PROFILING
-    #include "tools.h"
+#include "tools.h"
 #endif
-class FallbackLayout : public Layout
-{
+class FallbackLayout : public Layout {
 public:
     FallbackLayout();
     virtual void processCdsObject(zmm::Ref<CdsObject> obj, zmm::String rootpath) override;
@@ -54,7 +53,7 @@ protected:
     void addAudio(zmm::Ref<CdsObject> obj);
 #ifdef HAVE_LIBDVDNAV
     zmm::Ref<CdsObject> prepareChapter(zmm::Ref<CdsObject> obj, int title_idx,
-                                       int chapter_idx);
+        int chapter_idx);
     void addDVD(zmm::Ref<CdsObject> obj);
     zmm::String mpeg_mimetype;
 #endif

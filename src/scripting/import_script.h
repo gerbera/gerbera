@@ -32,13 +32,12 @@
 #ifndef __SCRIPTING_IMPORT_SCRIPT_H__
 #define __SCRIPTING_IMPORT_SCRIPT_H__
 
-#include "common.h"
-#include "script.h"
 #include "cds_objects.h"
+#include "common.h"
 #include "layout/layout.h"
+#include "script.h"
 
-class ImportScript : public Script
-{
+class ImportScript : public Script {
 public:
     ImportScript(zmm::Ref<Runtime> runtime);
     ~ImportScript();

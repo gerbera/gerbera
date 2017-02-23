@@ -32,48 +32,46 @@
 #ifndef __ZMMF_OBJECT_STACK_H__
 #define __ZMMF_OBJECT_STACK_H__
 
-#include <logger.h>
-#include "zmm.h"
-#include "memory.h"
 #include "base_stack.h"
+#include "memory.h"
+#include "zmm.h"
+#include <logger.h>
 
-namespace zmm
-{
-    template <class T>
-    class ObjectStack : public BaseStack<Object *>
+namespace zmm {
+template <class T>
+class ObjectStack : public BaseStack<Object*> {
+public:
+    ObjectStack(int initialCapacity)
+        : BaseStack<Object*>(initialCapacity, NULL)
     {
-    public:
-        ObjectStack(int initialCapacity) : BaseStack<Object *>(initialCapacity, NULL)
-        {
-        }
-        
-        ~ObjectStack()
-        {
-            Object *obj;
-            while(NULL != (obj = BaseStack<Object *>::pop()))
-            {
-                log_debug("releasing!\n");
-                obj->release();
-            }
-        }
-        
-        inline void push(Ref<T> element)
-        {
-            Object *obj = element.getPtr();
-            obj->retain();
-            BaseStack<Object *>::push(obj);
-        }
-        
-        inline Ref<T> pop()
-        {
-            Object *obj = BaseStack<Object *>::pop();
-            if (obj == NULL)
-                return nullptr;
-            Ref<T> ret((T *)obj);
+    }
+
+    ~ObjectStack()
+    {
+        Object* obj;
+        while (NULL != (obj = BaseStack<Object*>::pop())) {
+            log_debug("releasing!\n");
             obj->release();
-            return ret;
         }
-    };
+    }
+
+    inline void push(Ref<T> element)
+    {
+        Object* obj = element.getPtr();
+        obj->retain();
+        BaseStack<Object*>::push(obj);
+    }
+
+    inline Ref<T> pop()
+    {
+        Object* obj = BaseStack<Object*>::pop();
+        if (obj == NULL)
+            return nullptr;
+        Ref<T> ret((T*)obj);
+        obj->release();
+        return ret;
+    }
+};
 }
 
 #endif // __ZMMF_OBJECT_STACK_H__

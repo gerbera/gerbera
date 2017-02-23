@@ -34,11 +34,10 @@
 
 #include <expat.h>
 
-#include "zmm/zmmf.h"
 #include "zmm/object_stack.h"
+#include "zmm/zmmf.h"
 
-namespace mxml
-{
+namespace mxml {
 
 class Element;
 
@@ -46,15 +45,13 @@ class Context;
 
 class Document;
 
-class Parser : public zmm::Object
-{
+class Parser : public zmm::Object {
 public:
     Parser();
     zmm::Ref<Document> parseFile(zmm::String);
     zmm::Ref<Document> parseString(zmm::String);
 
 protected:
-
     zmm::Ref<Document> parse(zmm::Ref<Context> ctx, zmm::String input);
 
     zmm::Ref<zmm::ObjectStack<Element> > elements;
@@ -62,14 +59,12 @@ protected:
     zmm::Ref<Element> curEl;
     bool ignoreNextDefaultNewline;
 
-    static void XMLCALL element_start(void *userdata, const char *name, const char **attrs);
-    static void XMLCALL element_end(void *userdata, const char *name);
-    static void XMLCALL character_data(void *userdata, const XML_Char *s, int len);
-    static void XMLCALL comment_callback(void *userdata, const XML_Char *s);
-    static void XMLCALL default_callback(void *userdata, const XML_Char *s, int len);
-
+    static void XMLCALL element_start(void* userdata, const char* name, const char** attrs);
+    static void XMLCALL element_end(void* userdata, const char* name);
+    static void XMLCALL character_data(void* userdata, const XML_Char* s, int len);
+    static void XMLCALL comment_callback(void* userdata, const XML_Char* s);
+    static void XMLCALL default_callback(void* userdata, const XML_Char* s, int len);
 };
-
 }
 
 #endif // __MXML_PARSER_H__

@@ -29,9 +29,9 @@
 
 /// \file upnp_cm_subscriptions.cc
 
+#include "server.h"
 #include "tools.h"
 #include "upnp_cm.h"
-#include "server.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -39,13 +39,12 @@ using namespace mxml;
 void ConnectionManagerService::process_subscription_request(zmm::Ref<SubscriptionRequest> request)
 {
     int err;
-    IXML_Document *event = nullptr;
+    IXML_Document* event = nullptr;
 
     Ref<Element> propset, property;
 
     Ref<Array<StringBase> > mimeTypes = Storage::getInstance()->getMimeTypes();
     String CSV = mime_types_to_CSV(mimeTypes);
-
 
     propset = UpnpXML_CreateEventPropertySet();
     property = propset->getFirstElementChild();
@@ -55,14 +54,13 @@ void ConnectionManagerService::process_subscription_request(zmm::Ref<Subscriptio
 
     String xml = propset->print();
     err = ixmlParseBufferEx(xml.c_str(), &event);
-    if (err != IXML_SUCCESS)
-    {
+    if (err != IXML_SUCCESS) {
         throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, _("Could not convert property set to ixml"));
     }
 
     UpnpAcceptSubscriptionExt(Server::getInstance()->getDeviceHandle(),
-            ConfigManager::getInstance()->getOption(CFG_SERVER_UDN).c_str(),
-            serviceID.c_str(), event, request->getSubscriptionID().c_str());
+        ConfigManager::getInstance()->getOption(CFG_SERVER_UDN).c_str(),
+        serviceID.c_str(), event, request->getSubscriptionID().c_str());
 
     ixmlDocument_free(event);
 }
@@ -70,7 +68,7 @@ void ConnectionManagerService::process_subscription_request(zmm::Ref<Subscriptio
 void ConnectionManagerService::subscription_update(String sourceProtocol_CSV)
 {
     int err;
-    IXML_Document *event = nullptr;
+    IXML_Document* event = nullptr;
 
     Ref<Element> propset, property;
 
@@ -81,16 +79,14 @@ void ConnectionManagerService::subscription_update(String sourceProtocol_CSV)
     String xml = propset->print();
 
     err = ixmlParseBufferEx(xml.c_str(), &event);
-    if (err != IXML_SUCCESS)
-    {
+    if (err != IXML_SUCCESS) {
         /// \todo add another error code
         throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, _("Could not convert property set to ixml"));
-
     }
 
     UpnpNotifyExt(Server::getInstance()->getDeviceHandle(),
-            ConfigManager::getInstance()->getOption(CFG_SERVER_UDN).c_str(),
-            serviceID.c_str(), event);
+        ConfigManager::getInstance()->getOption(CFG_SERVER_UDN).c_str(),
+        serviceID.c_str(), event);
 
     ixmlDocument_free(event);
 }
